@@ -342,15 +342,20 @@ table_helper_handler(netsnmp_mib_handler *handler,
          */
 
         incomplete = 0;
-        tbl_req_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_request_info);
-        tbl_req_info->reg_info = tbl_info;
-        tbl_req_info->indexes = snmp_clone_varbind(tbl_info->indexes);
-        tbl_req_info->number_indexes = 0;       /* none yet */
-        netsnmp_request_add_list_data(request,
-                                      netsnmp_create_data_list
-                                      (TABLE_HANDLER_NAME,
-                                       (void *) tbl_req_info,
-                                       table_data_free_func));
+        tbl_req_info = netsnmp_extract_table_info(request);
+        if (NULL == tbl_req_info) {
+            tbl_req_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_request_info);
+            tbl_req_info->reg_info = tbl_info;
+            tbl_req_info->indexes = snmp_clone_varbind(tbl_info->indexes);
+            tbl_req_info->number_indexes = 0;       /* none yet */
+            netsnmp_request_add_list_data(request,
+                                          netsnmp_create_data_list
+                                          (TABLE_HANDLER_NAME,
+                                           (void *) tbl_req_info,
+                                           table_data_free_func));
+        } else {
+            DEBUGMSGTL(("helper:table", "  using existing tbl_req_info\n "));
+        }
 
         if (var->name_length > oid_column_pos) {
             /*
@@ -559,11 +564,22 @@ table_helper_handler(netsnmp_mib_handler *handler,
     }
 
     /*
-     * * call our child access function 
+     * bail if there is nothing for our child handlers
      */
-    if (need_processing)
-        status =
-            netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
+    if (0 == need_processing)
+        return status;
+
+    /*
+     * call our child access function 
+     */
+    status =
+        netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
+
+    /*
+     * check for sparse tables
+     */
+    if (reqinfo->mode == MODE_GETNEXT)
+        sparse_table_helper_handler( handler, reginfo, reqinfo, requests );
 
     return status;
 }
@@ -685,6 +701,9 @@ netsnmp_table_build_oid(netsnmp_handler_registration *reginfo,
      * xxx-rks: inefficent. we do a copy here, then build_oid does it
      *          again. either come up with a new utility routine, or
      *          do some hijinks here to eliminate extra copy.
+     *          Probably could make sure all callers have the
+     *          index & variable list updated, and use
+     *          netsnmp_table_build_oid_from_index() instead of all this.
      */
     memcpy(tmpoid, reginfo->rootoid, reginfo->rootoid_len * sizeof(oid));
     tmpoid[reginfo->rootoid_len] = 1;   /** .Entry */
@@ -830,24 +849,36 @@ table_helper_cleanup(netsnmp_agent_request_info *reqinfo,
 }
 
 
+/*
+ * find the closest column to current (which may be current).
+ *
+ * called when a table runs out of rows for column X. This
+ * function is called with current = X + 1, to verify that
+ * X + 1 is a valid column, or find the next closest column if not.
+ *
+ * All list types should be sorted, lowest to highest.
+ */
 unsigned int
 netsnmp_closest_column(unsigned int current,
                        netsnmp_column_info *valid_columns)
 {
     unsigned int    closest = 0;
-    char            done = 0;
     int             idx;
 
     if (valid_columns == NULL)
         return 0;
 
-    for( ; (!done && valid_columns); valid_columns = valid_columns->next) {
+    for( ; valid_columns; valid_columns = valid_columns->next) {
 
         if (valid_columns->isRange) {
-
+            /*
+             * if current < low range, it might be closest.
+             * otherwise, if it's < high range, current is in
+             * the range, and thus is an exact match.
+             */
             if (current < valid_columns->details.range[0]) {
-                if ( (0 == closest) ||
-                     (valid_columns->details.range[0] < closest)) {
+                if ( (valid_columns->details.range[0] < closest) ||
+                     (0 == closest)) {
                     closest = valid_columns->details.range[0];
                 }
             } else if (current <= valid_columns->details.range[1]) {
@@ -857,30 +888,39 @@ netsnmp_closest_column(unsigned int current,
 
         } /* range */
         else {                  /* list */
-
+            /*
+             * if current < first item, no need to iterate over list.
+             * that item is either closest, or not.
+             */
             if (current < valid_columns->details.list[0]) {
-                if (valid_columns->details.list[0] < closest)
+                if ((valid_columns->details.list[0] < closest) ||
+                    (0 == closest))
                     closest = valid_columns->details.list[0];
                 continue;
             }
 
+            /** if current > last item in list, no need to iterate */
             if (current >
-                valid_columns->details.list[(int)valid_columns->list_count])
+                valid_columns->details.list[(int)valid_columns->list_count - 1])
                 continue;       /* not in list range. */
 
-            for (idx = 0; idx < (int)valid_columns->list_count; ++idx) {
-                if (current == valid_columns->details.list[idx]) {
-                    closest = current;
-                    done = 1;   /* can not get any closer! */
-                    break;      /* inner for */
-                } else if (current < valid_columns->details.list[idx]) {
-                    if (valid_columns->details.list[idx] < closest)
-                        closest = valid_columns->details.list[idx];
-                    break;      /* list should be sorted */
-                }
-            }                   /* inner for */
+            /** skip anything less than current*/
+            for (idx = 0; valid_columns->details.list[idx] < current; ++idx)
+                ;
+            
+            /** check for exact match */
+            if (current == valid_columns->details.list[idx]) {
+                closest = current;
+                break;      /* can not get any closer! */
+            }
+            
+            /** list[idx] > current; is it < closest? */
+            if ((valid_columns->details.list[idx] < closest) ||
+                (0 == closest))
+                closest = valid_columns->details.list[idx];
+
         }                       /* list */
-    }                           /* outer for */
+    }                           /* for */
 
     return closest;
 }
@@ -987,42 +1027,4 @@ netsnmp_table_next_column(netsnmp_table_request_info *table_info)
         return table_info->colnum + 1;
     
     return 0; /* out of range */
-}
-
-netsnmp_index *
-netsnmp_table_index_find_next_row(netsnmp_container *c,
-                                  netsnmp_table_request_info *tblreq)
-{
-    netsnmp_index *row = NULL;
-
-    if (!c || !tblreq || !tblreq->reg_info) {
-        snmp_log(LOG_ERR,"netsnmp_table_index_find_next_row param error\n");
-        return NULL;
-    }
-
-    /*
-     * no indexes, or below our minimum column? then use first row.
-     */
-    if((tblreq->number_indexes == 0) ||
-       (tblreq->colnum < tblreq->reg_info->min_column)) {
-        tblreq->colnum = tblreq->reg_info->min_column;
-        row = CONTAINER_FIRST(c);
-    } else {
-        netsnmp_index index;
-        index.oids = tblreq->index_oid;
-        index.len = tblreq->index_oid_len;
-
-        row = CONTAINER_NEXT(c, &index);
-
-        /*
-         * we don't have a row, but we might be at the end of a
-         * column, so try the next column.
-         */
-        if ((NULL == row) &&
-            (0 != (tblreq->colnum = netsnmp_table_next_column(tblreq))))
-            row = CONTAINER_FIRST(c);
-        
-    }
-
-    return row;
 }
