@@ -73,7 +73,7 @@ handle_agentx_response( int operation,
 		    void *magic)
 {
     struct ax_variable_list *ax_vlist = (struct ax_variable_list *)magic;
-    struct variable_list *vbp;
+    struct variable_list *vbp, *next;
     struct agent_snmp_session *asp  =  ax_vlist->asp;
     int i;
     struct ax_variable_list *retry_vlist;
@@ -111,7 +111,9 @@ handle_agentx_response( int operation,
 	     */
 	    retry_sub = find_subtree_next( vbp->name, vbp->name_length, NULL );
 	    if ( retry_sub == NULL ) {
+		next = ax_vlist->variables[i]->next_variable;
 	        snmp_clone_var( vbp, ax_vlist->variables[i] );
+		ax_vlist->variables[i]->next_variable = next;
 			/* XXX - handle SNMPv1 */
 		ax_vlist->variables[i]->type = SNMP_ENDOFMIBVIEW;
 		continue;
@@ -135,16 +137,20 @@ handle_agentx_response( int operation,
 	    retry_vlist->num_vars++;
 	    memcpy(vbp->name, retry_sub->name, retry_sub->namelen * sizeof(oid));
 	    vbp->name_length = retry_sub->namelen;
+	    next = vbp2->next_variable;
 	    snmp_clone_var( vbp, vbp2 );
+	    vbp2->next_variable = next;
 	}
 	else
 		/* Got an answer, so use it */
 	if ( pdu->errstat != AGENTX_ERR_NOERROR ) {
 	    asp->status = pdu->errstat;
 	}
-	else
+	else {
+	    next = ax_vlist->variables[i]->next_variable;
 	    snmp_clone_var( vbp, ax_vlist->variables[i] );
-	
+	    ax_vlist->variables[i]->next_variable = next;
+	}	
     }
 
 
@@ -167,7 +173,9 @@ handle_agentx_response( int operation,
 			 * XXX - assumes success second time around
 			 *	Needs to handle deferrals / failures
 			 */
+	    		next = retry_vlist->variables[i]->next_variable;
 	 		snmp_clone_var( vbp2, retry_vlist->variables[i] );
+	    		retry_vlist->variables[i]->next_variable = next;
 	}
 	return j;
     }
@@ -195,7 +203,7 @@ get_agentx_request(struct agent_snmp_session *asp,
     DEBUGMSGTL(("agentx/master","processing request...\n"));
 
     for (req = asp->outstanding_requests ; req != NULL ; req = req->next_request ) {
-	if ( req->request_id == transID)		/* ??? */
+	if ( req->message_id == transID)
 	    return req;
     }
 
