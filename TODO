@@ -9,7 +9,6 @@ V3.2
     (it might all ready, just needs configuration)
 
 Ideas:
-  Make mib parsing load from a directory of files rather than a single file.
   Make the mib parser figure out which of the above files it needs to
     load rather than loading them all -- Tom Georges & Joe Marzot
     (tom.georges@antec.com & gmarzot@BayNetworks.com)
@@ -18,5 +17,5 @@ Ideas:
 
 Want something done?  Have ideas?  Have code to submit?  Need
 something earlier than it is listed above?  Please!  
-                                            Write me!
-                                            Wesley.Hardaker@sphys.unil.ch
+                                            Write us!
+                                            ucd-snmp-coders@ece.ucdavis.edu
