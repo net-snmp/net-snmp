@@ -413,13 +413,15 @@ int
 sh_count_procs(char *procname)
 {
     DIR *dir;
-    char cmdline[512];
+    char cmdline[512], *tmpc;
     struct dirent *ent;
     int fd,len,plen=strlen(procname),total = 0;
+    FILE *status;
 
     if ((dir = opendir("/proc")) == NULL) return -1;
     while (NULL != (ent = readdir(dir))) {
       if(!(ent->d_name[0] >= '0' && ent->d_name[0] <= '9')) continue;
+#ifdef USE_PROC_CMDLINE  /* old method */
       /* read /proc/XX/cmdline */
       sprintf(cmdline,"/proc/%s/cmdline",ent->d_name);
       if((fd = open(cmdline, O_RDONLY)) < 0) break;
@@ -430,6 +432,30 @@ sh_count_procs(char *procname)
       while(--len && !cmdline[len]);
       while(--len) if(!cmdline[len]) cmdline[len] = ' ';
       if(!strncmp(cmdline,procname,plen)) total++;
+#else
+      /* read /proc/XX/status */
+      sprintf(cmdline,"/proc/%s/status",ent->d_name);
+      if ((status = fopen(cmdline, "r")) == NULL)
+          break;
+      if (fgets(cmdline, sizeof(cmdline), status) == NULL) {
+          fclose(status);
+          break;
+      }
+      fclose(status);
+      cmdline[sizeof(cmdline)-1] = '\0';
+      /* XXX: assumes Name: is first */
+      if (strncmp("Name:",cmdline, 5) != 0)
+          break;
+      tmpc = skip_token(cmdline);
+      if (!tmpc)
+          break;
+      DEBUGMSGTL(("proc","Comparing wanted %s against %s\n",
+                  procname, tmpc));
+      if(!strncmp(tmpc,procname,plen)) {
+          total++;
+          DEBUGMSGTL(("proc", " Matched.  total count now=%d\n", total));
+      }
+#endif      
     }
     closedir(dir);
     return total;
