@@ -23,7 +23,9 @@ MAN3 = snmp_api.3
 MAN5 = variables.5 snmpd.conf.5
 MAN8 = snmptrapd.8
 
-all: snmpd.conf.5 snmpd.1
+TARGETS = snmpd.conf.5 snmpd.1
+
+all: $(TARGETS)
 
 snmpd.conf.5: snmpd.conf.5.def ../sedscript
 	cat snmpd.conf.5.def | $(SED) -f ../sedscript | $(SED) -e "s#PREFIX#$(prefix)#g" > snmpd.conf.5
@@ -39,3 +41,6 @@ install:  installdirs $(MAN1) $(MAN3) $(MAN5) $(MAN8)
 	
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(man1dir) $(man3dir) $(man5dir) $(man8dir)
+
+clean:
+	rm -f $(TARGETS)
