@@ -22,7 +22,7 @@
 #
 if [ "x$EVAL_TOOLS_SH_EVALED" != "xyes" ]; then
     EVAL_TOOLS_SH_EVALED=yes
-    . ../TESTCONF.sh
+    . TESTCONF.sh
 
 #
 # Variables used in global environment of calling script.
@@ -196,8 +196,8 @@ STARTAGENT() {
 	echo "agent config: "
 	cat $SNMP_CONFIG_FILE
     fi
-    COMMANDARGS="$SNMP_FLAGS $SNMP_SNMPD_PORT -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE -C -c $SNMP_CONFIG_FILE $AGENT_FLAGS"
-#    VERBOSE_OUT 2 "starting agent: snmpd $SNMP_SNMPD_PORT -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE -C -c $SNMP_CONFIG_FILE"
+    COMMANDARGS="$SNMP_FLAGS -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE -C -c $SNMP_CONFIG_FILE $AGENT_FLAGS"
+#    VERBOSE_OUT 2 "starting agent: snmpd $SNMP_FLAGS -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE -C -c $SNMP_CONFIG_FILE"
    if [ $SNMP_VERBOSE -gt 0 ]; then
 	echo "running: snmpd $COMMANDARGS"
    fi

@@ -21,9 +21,14 @@ if [ "x$SNMP_VERBOSE" = "x" ]; then
     export SNMP_VERBOSE
 fi
 
+if [ "x$MIBDIRS" = "x" ]; then
+    MIBDIRS=../../mibs:../../../mibs:
+    export MIBDIRS
+fi
+
 # Set up the path to the programs we want to use.
 if [ "x$SNMP_PATH" != "xyes" ]; then
-    PATH=../../agent:../../apps:../agent:../apps:$PATH
+    PATH=../agent:../apps:../../agent:../../apps:$PATH
     export PATH
     SNMP_PATH=yes
     export SNMP_PATH
@@ -46,7 +51,7 @@ if [ "x$SNMP_SAVE_TMPDIR" = "x" ]; then
     export SNMP_VERBOSE
 fi
 
-SNMP_TESTDIR="tests"
+SNMP_TESTDIR="$SNMP_BASEDIR/tests"
 SNMP_CONFIG_FILE="$SNMP_TMPDIR/snmpd.conf"
 SNMP_SNMPD_PID_FILE="$SNMP_TMPDIR/snmpd.pid"
 SNMP_SNMPD_LOG_FILE="$SNMP_TMPDIR/snmpd.log"

@@ -10,9 +10,9 @@
 # directly instead.
 #
 
-. ../TESTCONF.sh
+. TESTCONF.sh
 
-. ../eval_tools.sh
+. eval_tools.sh
 
 . $1
 
