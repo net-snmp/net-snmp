@@ -1,6 +1,10 @@
 /*
  * SNMPv3 View-based Access Control Model
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /*
  * Portions of this file are copyrighted by:
  * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
@@ -1917,6 +1921,11 @@ write_vacmAccessStatus(int action,
                 free(newContextPrefix);
                 return SNMP_ERR_INCONSISTENTVALUE;
             }
+            if (long_ret == RS_DESTROY && aptr->storageType == ST_PERMANENT) {
+                free(newGroupName);
+                free(newContextPrefix);
+                return SNMP_ERR_WRONGVALUE;
+            }
         } else {
             if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
                 free(newGroupName);
@@ -2403,6 +2412,11 @@ write_vacmViewStatus(int action,
                 free(newViewSubtree);
                 long_ret = RS_NOTREADY;
                 return SNMP_ERR_INCONSISTENTVALUE;
+            }
+            if (long_ret == RS_DESTROY && vptr->viewStorageType == ST_PERMANENT) {
+                free(newViewName);
+                free(newViewSubtree);
+                return SNMP_ERR_WRONGVALUE;
             }
         } else {
             if (long_ret == RS_ACTIVE || long_ret == RS_NOTINSERVICE) {
