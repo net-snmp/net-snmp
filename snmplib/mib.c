@@ -4306,6 +4306,9 @@ sprint_realloc_description(u_char ** buf, size_t * buf_len,
     char            tmpbuf[128];
     const char     *cp;
 
+    if (NULL == tp)
+        return 0;
+
     if (tp->type <= TYPE_SIMPLE_LAST)
         cp = " OBJECT-TYPE";
     else
