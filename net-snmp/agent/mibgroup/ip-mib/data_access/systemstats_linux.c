@@ -75,7 +75,11 @@ netsnmp_access_systemstats_container_arch_load(netsnmp_container* container,
      */
     fgets(line, sizeof(line), devin);
     len = strlen(line);
-    snmp_log(LOG_ERR, "first line = %d\n", strlen(line));
+    if (224 != len) {
+        snmp_log(LOG_ERR, "unexpected header length. int /proc/net/snmp. "
+                 "%d != 224\n", len);
+        return -4;
+    }
 
     /*
      * This file provides the statistics for each systemstats.
