@@ -27,6 +27,8 @@
 #else
 #include <utmp.h>
 #endif
+#include <sys/signal.h>
+#include <errno.h>
 
 #ifdef linux
 #ifdef HAVE_LINUX_TASKS_H
@@ -106,7 +108,7 @@ init_hr_system(void)
 
     REGISTER_MIB("host/hr_system", hrsystem_variables, variable2,
                  hrsystem_variables_oid);
-}
+} /* end init_hr_system */
 
 /*
  * header_hrsys(...
@@ -145,7 +147,7 @@ header_hrsys(struct variable *vp,
     *write_method = 0;
     *var_len = sizeof(long);    /* default to 'long' results */
     return (MATCH_SUCCEEDED);
-}
+} /* end header_hrsys */
 
 
         /*********************
@@ -242,7 +244,7 @@ var_hrsys(struct variable * vp,
                     vp->magic));
     }
     return NULL;
-}
+} /* end var_hrsys */
 
 
         /*********************
@@ -259,7 +261,7 @@ static int
 get_load_dev(void)
 {
     return (HRDEV_DISK << HRDEV_TYPE_SHIFT);    /* XXX */
-}
+} /* end get_load_dev */
 
 static int
 count_users(void)
@@ -277,9 +279,18 @@ count_users(void)
     setutent();
     while ((utmp_p = getutent()) != NULL) {
 #ifndef UTMP_HAS_NO_TYPE
-        if (utmp_p->ut_type == USER_PROCESS)
+        if (utmp_p->ut_type == USER_PROCESS) {
 #endif
+            /* This block of code fixes zombie user PIDs in the
+               utmp/utmpx file that would otherwise be counted as a
+               current user */
+            if (kill(utmp_p->ut_pid, 0) == -1 && errno == ESRCH) {
+                utmp_p->ut_type = DEAD_PROCESS;
+                pututxline(utmp_p);
+                continue;
+            }
             ++total;
+        }
     }
     endutent();
     return total;
