@@ -6224,7 +6224,12 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
     case ASN_IPADDRESS:
     case ASN_COUNTER:
         if (value) {
-            if (vars->val_len == sizeof(int)) {
+            if (largeval) {
+                snmp_log(LOG_ERR,"bad size for integer-like type (%d)\n",
+                         vars->val_len);
+                snmp_free_var(vars);
+                return (0);
+            } else if (vars->val_len == sizeof(int)) {
                 val_int = (const int *) value;
                 *(vars->val.integer) = (long) *val_int;
             } else {
@@ -6281,17 +6286,35 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
     case ASN_OPAQUE_I64:
 #endif                          /* OPAQUE_SPECIAL_TYPES */
     case ASN_COUNTER64:
+        if (largeval) {
+            snmp_log(LOG_ERR,"bad size for counter 64 (%d)\n",
+                     vars->val_len);
+            snmp_free_var(vars);
+            return (0);
+        }
         vars->val_len = sizeof(struct counter64);
         memmove(vars->val.counter64, value, vars->val_len);
         break;
 
 #ifdef OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_FLOAT:
+        if (largeval) {
+            snmp_log(LOG_ERR,"bad size for opaque float (%d)\n",
+                     vars->val_len);
+            snmp_free_var(vars);
+            return (0);
+        }
         vars->val_len = sizeof(float);
         memmove(vars->val.floatVal, value, vars->val_len);
         break;
 
     case ASN_OPAQUE_DOUBLE:
+        if (largeval) {
+            snmp_log(LOG_ERR,"bad size for opaque double (%d)\n",
+                     vars->val_len);
+            snmp_free_var(vars);
+            return (0);
+        }
         vars->val_len = sizeof(double);
         memmove(vars->val.doubleVal, value, vars->val_len);
         break;
