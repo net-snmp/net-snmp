@@ -12,6 +12,9 @@
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -178,9 +181,8 @@ var_ipAddrEntry(struct variable *vp,
 #ifdef hpux11
     static mib_ipAdEnt in_ifaddr, lowin_ifaddr;
 #else
-    static struct in_ifaddr in_ifaddr;
 #if !defined(linux) && !defined(sunV3)
-    static struct in_ifaddr lowin_ifaddr;
+    static struct in_ifaddr in_ifaddr, lowin_ifaddr;
 #else
     static struct ifnet lowin_ifnet;
 #endif

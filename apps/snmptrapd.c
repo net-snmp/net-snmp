@@ -130,7 +130,7 @@ int             dropauth = 0;
 int             running = 1;
 int             reconfig = 0;
 u_long          num_received = 0;
-static char    *default_port = "udp:162";
+const char     *default_port = "udp:162";
 
 const char     *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a]): %N\n\t%W Trap (%q) Uptime: %#T\n%v\n";
 const char     *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
