@@ -95,13 +95,8 @@ _load_ipv4(netsnmp_container* container, u_long *index )
          *   strcat(name, "0");
          */
 
-        entry->if_index = se_find_value_in_slist("interfaces", name);
-        if(SE_DNE == entry->if_index) {
-            snmp_log(LOG_ERR,"unknown interface in /proc/net/route ('%s')\n",
-                     name);
-            netsnmp_access_route_entry_free(entry);
-            continue;
-        }
+        entry->if_index = netsnmp_access_interface_index_find(name);
+
         /*
          * arbitrary index
          */
