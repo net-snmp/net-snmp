@@ -1729,15 +1729,15 @@ snmp_read(fdset)
     struct session_list *slp;
 
     for(slp = Sessions; slp; slp = slp->next){
-        if (FD_ISSET(slp->internal->sd, fdset))
-	    snmp_sess_read((void *)slp);
+	    snmp_sess_read((void *)slp, fdset);
     }
 }
 
 /* Same as snmp_read, but works just one session. */
 void
-snmp_sess_read(sessp)
+snmp_sess_read(sessp, fdset)
     void *sessp;
+    fd_set  *fdset;
 {
     struct session_list *slp = (struct session_list*)sessp;
     struct snmp_session *sp;
@@ -1749,6 +1749,9 @@ snmp_sess_read(sessp)
     struct request_list *rp, *orp = NULL;
     snmp_callback callback;
     void *magic;
+
+    if (!(FD_ISSET(slp->internal->sd, fdset)))
+        return;
 
     sp = slp->session; isp = slp->internal;
     sp->s_snmp_errno = 0;
