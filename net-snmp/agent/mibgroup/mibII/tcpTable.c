@@ -115,10 +115,6 @@
 #include <sys/tcpipstats.h>
 #endif
 
-#if HAVE_DMALLOC_H
-#include <dmalloc.h>
-#endif
-
 #include "auto_nlist.h"
 #include "mibincl.h"
 
@@ -129,6 +125,10 @@
 
 #include "tcp.h"
 #include "tcpTable.h"
+
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
 
 	/*********************
 	 *

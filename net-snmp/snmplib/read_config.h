@@ -84,6 +84,7 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len);
 char *read_config_read_objid(char *readfrom, oid **objid, size_t *len);
 char *read_config_save_objid(char *saveto, oid *objid, size_t len);
 char *read_config_read_data(int type, char *readfrom, void *dataptr, size_t *len);
+char *read_config_read_memory(int type, char *readfrom, char *dataptr, size_t *len);
 char *read_config_store_data(int type, char *storeto, void *dataptr, size_t *len);
 void  read_config_store(const char *type, const char *line);
 void  read_app_config_store(const char *line);

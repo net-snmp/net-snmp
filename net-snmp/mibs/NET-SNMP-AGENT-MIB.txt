@@ -1,0 +1,71 @@
+NET-SNMP-AGENT-MIB DEFINITIONS ::= BEGIN
+
+--
+-- defines control and monitoring structures for the net-snmp agent.
+--
+
+IMPORTS
+    OBJECT-TYPE, NOTIFICATION-TYPE, MODULE-IDENTITY,
+    Integer32, Opaque, enterprises
+        FROM SNMPv2-SMI
+
+    TEXTUAL-CONVENTION, DisplayString, TruthValue
+	FROM SNMPv2-TC;
+
+netSnmpAgentMib MODULE-IDENTITY
+    LAST-UPDATED "200101170000Z"
+    ORGANIZATION "www.net-snmp.org"
+    CONTACT-INFO    
+	 "Defines control and monitoring structures for the net-snmp agent.
+
+         postal:    Wes Hardaker
+                    P.O. Box 382
+                    Davis CA  95617
+
+         email:     net-snmp-coders@lists.sourceforge.net"
+    DESCRIPTION
+	"Defines control and monitoring structures for the net-snmp agent."
+    REVISION	 "200111030000Z"
+    DESCRIPTION
+	"First revision."
+    ::= { enterprises 8072 999 1 }
+
+nsTransactionTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF NsTransactionEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+	"lists currently outstanding transactions in the net-snmp agent."
+    ::= { netSnmpAgentMib 1 }
+
+nsTransactionEntry OBJECT-TYPE
+    SYNTAX      NsTransactionEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+	"A row describing a given transaction."
+    INDEX   { nsTransactionID }
+    ::= {nsTransactionTable 1 }
+
+NsTransactionEntry ::= SEQUENCE {
+  nsTransactionID   INTEGER,
+  nsTransactionMode INTEGER
+}
+
+nsTransactionID OBJECT-TYPE
+    SYNTAX      INTEGER
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+	"The internal identifier for a given transaction."
+    ::= { nsTransactionEntry 1 }
+
+nsTransactionMode OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"The mode number for the current operation being performed."
+    ::= { nsTransactionEntry 2 }
+
+END

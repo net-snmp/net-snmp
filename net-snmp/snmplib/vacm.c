@@ -537,7 +537,13 @@ vacm_getAccessEntry(const char *groupName,
         if ((securityModel == vp->securityModel || vp->securityModel == SNMP_SEC_MODEL_ANY)
 	    && securityLevel >= vp->securityLevel
 	    && !memcmp(vp->groupName, group, glen+1)
-	    && !memcmp(vp->contextPrefix, context, clen+1))
+            && ((vp->contextMatch == CONTEXT_MATCH_EXACT
+                 && clen == vp->contextPrefix[0]
+                 && (memcmp(vp->contextPrefix, context, clen+1) == 0))
+                || (vp->contextMatch == CONTEXT_MATCH_PREFIX
+                    && clen >= vp->contextPrefix[0]
+                    && (memcmp(vp->contextPrefix + 1, context + 1,
+                               vp->contextPrefix[0]) == 0))))
 	  return vp;
     }
     return NULL;

@@ -81,6 +81,8 @@ SOFTWARE.
 #include "snmp_debug.h"
 #include "default_store.h"
 #include "snmp_logging.h"
+#include "tools.h"
+#include "snmp_client.h"
 
 static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
 
@@ -3158,6 +3160,273 @@ dump_oid_to_string(oid *objid,
   return buf;
 }
 
+/* takes the value in VAR and turns it into an OID segment in VAR->NAME */
+/* returns SNMPERR_SUCCESS or SNMPERR_GENERR */
+int
+build_oid_segment(struct variable_list *var) {
+  int i;
+  
+  switch(var->type) {
+      case ASN_INTEGER:
+      case ASN_COUNTER:
+      case ASN_GAUGE:
+      case ASN_TIMETICKS:
+          var->name_length = 1;
+          var->name = (oid *) malloc(sizeof(oid));
+          if (var->name == NULL)
+              return SNMPERR_GENERR;
+          var->name[0] = *(var->val.integer);
+          break;
+
+      case ASN_PRIV_IMPLIED_OBJECT_ID:
+          var->name_length = var->val_len/sizeof(oid);
+          var->name = (oid *) malloc(sizeof(oid) * (var->name_length));
+          if (var->name == NULL)
+              return SNMPERR_GENERR;
+
+          for(i = 0; i < (int)var->name_length; i++)
+              var->name[i] = var->val.objid[i];
+          break;
+
+      case ASN_OBJECT_ID:
+          var->name_length = var->val_len/sizeof(oid) + 1;
+          var->name = (oid *) malloc(sizeof(oid) * (var->name_length));
+          if (var->name == NULL)
+              return SNMPERR_GENERR;
+
+          var->name[0] = var->name_length-1;
+          for(i = 0; i < (int)var->name_length-1; i++)
+              var->name[i+1] = var->val.objid[i];
+          break;
+        
+      case ASN_PRIV_IMPLIED_OCTET_STR:
+          var->name_length = var->val_len;
+          var->name = (oid *) malloc(sizeof(oid) * (var->name_length));
+          if (var->name == NULL)
+              return SNMPERR_GENERR;
+
+          for(i = 0; i < (int)var->val_len; i++)
+              var->name[i] = (oid) var->val.string[i];
+          break;
+
+      case ASN_OPAQUE:
+      case ASN_OCTET_STR:
+          var->name_length = var->val_len + 1;
+          var->name = (oid *) malloc(sizeof(oid) * (var->name_length));
+          if (var->name == NULL)
+              return SNMPERR_GENERR;
+
+          var->name[0] = (oid) var->val_len;
+          for(i = 0; i < (int)var->val_len; i++)
+              var->name[i+1] = (oid) var->val.string[i];
+          break;
+      
+      default:
+          DEBUGMSGTL(("build_oid_segment",
+                      "invalid asn type: %d\n", var->type));
+          return SNMPERR_GENERR;
+  }
+  
+  if (var->name_length > MAX_OID_LEN) {
+      DEBUGMSGTL(("build_oid_segment",
+                  "Something terribly wrong, namelen = %d\n", var->name_length));
+      return SNMPERR_GENERR;
+  }
+
+  return SNMPERR_SUCCESS;
+}
+
+      
+int build_oid_noalloc(oid *in, size_t in_len, size_t *out_len,
+											oid *prefix, size_t prefix_len,
+											struct variable_list *indexes)
+{
+	struct variable_list *var;
+  
+	if (prefix) {
+		if (in_len < prefix_len)
+			return SNMPERR_GENERR;
+		memcpy(in, prefix, prefix_len * sizeof(oid));
+		*out_len = prefix_len;
+	} else {
+		*out_len = 0;
+	}
+    
+	for(var = indexes; var != NULL; var = var->next_variable) {
+		if (build_oid_segment(var) != SNMPERR_SUCCESS)
+			return SNMPERR_GENERR;
+		if (var->name_length + *out_len < in_len) {
+			memcpy(&(in[*out_len]), var->name, sizeof(oid) * var->name_length);
+			*out_len += var->name_length;
+		} else {
+			return SNMPERR_GENERR;
+		}
+	}
+    
+	DEBUGMSGTL(("build_oid_noalloc", "generated: "));
+	DEBUGMSGOID(("build_oid_noalloc", in, *out_len));
+	DEBUGMSG(("build_oid_noalloc", "\n"));
+	return SNMPERR_SUCCESS;
+}
+
+int build_oid(oid **out, size_t *out_len,
+              oid *prefix, size_t prefix_len,
+              struct variable_list *indexes)
+{
+	oid tmpout[MAX_OID_LEN];
+  
+	if (build_oid_noalloc(tmpout,sizeof(tmpout), out_len,
+												prefix, prefix_len, indexes) != SNMPERR_SUCCESS)
+		return SNMPERR_GENERR;
+	
+	snmp_clone_mem((void **) out, (void *) tmpout, *out_len*sizeof(oid));
+
+	return SNMPERR_SUCCESS;
+}
+
+/* vblist_out must contain a pre-allocated string of variables into
+   which indexes can be extracted based on the previously existing
+   types in the variable chain
+   returns:
+      SNMPERR_GENERR  on error
+      SNMPERR_SUCCESS on success
+*/
+
+int parse_oid_indexes(oid *oidIndex, size_t oidLen,
+                      struct variable_list *data)
+{
+  struct variable_list *var = data;
+  
+  while(var && oidLen > 0) {
+
+	if(parse_one_oid_index(&oidIndex, &oidLen, var, 0) != SNMPERR_SUCCESS)
+	  break;
+
+	var = var->next_variable;
+  }
+  
+  if (var != NULL || oidLen != 0)
+      return SNMPERR_GENERR;
+  return SNMPERR_SUCCESS;
+}
+
+
+int parse_one_oid_index(oid **oidStart, size_t *oidLen,
+                      struct variable_list *data, int complete)
+{
+  struct variable_list *var = data;
+  oid tmpout[MAX_OID_LEN];
+  int i, itmp;
+
+  oid *oidIndex = *oidStart;
+
+  if (var == NULL || ( (*oidLen == 0) && (complete==0) ) )
+      return SNMPERR_GENERR;
+  else {
+    switch(var->type) {
+      case ASN_INTEGER:
+      case ASN_COUNTER:
+      case ASN_GAUGE:
+      case ASN_TIMETICKS:
+          if (*oidLen) {
+          snmp_set_var_value(var, (u_char *) oidIndex++, sizeof(long));
+			--(*oidLen);
+		  } else {
+			snmp_set_var_value(var, (u_char *) oidLen, sizeof(long));
+		  }
+          DEBUGMSGTL(("parse_oid_indexes",
+                      "Parsed int(%d): %d\n", var->type, *var->val.integer));
+          break;
+
+        case ASN_OBJECT_ID:
+        case ASN_PRIV_IMPLIED_OBJECT_ID:
+            if (var->type == ASN_PRIV_IMPLIED_OBJECT_ID) {
+                itmp = *oidLen;
+            } else {
+							if (*oidLen) {
+                itmp = (long) *oidIndex++;
+                --(*oidLen);
+							} else {
+								itmp = 0;
+							}
+                if ( (itmp > (int)*oidLen) && (complete==0) )
+                    return SNMPERR_GENERR;
+            }
+
+			if (itmp > (int)*oidLen) {
+			  memcpy( tmpout, oidIndex, sizeof(oid)*(*oidLen) );
+			  memset( &tmpout[ *oidLen ], 0x00, sizeof(oid)*(itmp-*oidLen) );
+			  snmp_set_var_value(var, (u_char *) tmpout, sizeof(oid)*itmp);
+				oidIndex += *oidLen;
+				(*oidLen) = 0;
+			} else {
+            snmp_set_var_value(var, (u_char *) oidIndex, sizeof(oid)*itmp);
+						oidIndex += itmp;
+						(*oidLen) -= itmp;
+			}
+
+            DEBUGMSGTL(("parse_oid_indexes", "Parsed oid: "));
+            DEBUGMSGOID(("parse_oid_indexes",
+                         var->val.objid, var->val_len/sizeof(oid)));
+            DEBUGMSG(("parse_oid_indexes", "\n"));
+            break;
+
+        case ASN_OPAQUE:
+        case ASN_OCTET_STR:
+        case ASN_PRIV_IMPLIED_OCTET_STR:
+            if (var->type == ASN_PRIV_IMPLIED_OCTET_STR) {
+                itmp = *oidLen;
+            } else {
+							if (*oidLen) {
+                itmp = (long) *oidIndex++;
+                --(*oidLen);
+							} else {
+								itmp = 0;
+							}
+                if ( (itmp > (int)*oidLen) && (complete==0) )
+                    return SNMPERR_GENERR;
+            }
+
+            /* we handle this one ourselves since we don't have
+               pre-allocated memory to copy from using
+               snmp_set_var_value() */
+
+            if (itmp == 0)
+                break;        /* zero length strings shouldn't malloc */
+        
+            /* malloc by size+1 to allow a null to be appended. */
+            var->val_len = itmp;
+            var->val.string = (u_char *) calloc(1,itmp+1);
+            if (var->val.string == NULL)
+                return SNMPERR_GENERR;
+
+						if (itmp > (int)(*oidLen) ) {
+            for(i = 0; i < *oidLen; ++i)
+                var->val.string[i] = (u_char) *oidIndex++;
+            for(i = 0; i < itmp; ++i)
+			  var->val.string[i] = '\0';
+						(*oidLen) = 0;
+						} else {
+							for(i = 0; i < itmp; ++i)
+                var->val.string[i] = (u_char) *oidIndex++;
+							(*oidLen) -= itmp;
+						}
+            var->val.string[itmp] = '\0';
+
+            DEBUGMSGTL(("parse_oid_indexes",
+                        "Parsed str(%d): %s\n", var->type, var->val.string));
+            break;
+
+        default:
+            DEBUGMSGTL(("parse_oid_indexes",
+                        "invalid asn type: %d\n", var->type));
+            return SNMPERR_GENERR;
+    }
+  }
+  (*oidStart) = oidIndex;
+  return SNMPERR_SUCCESS;
+}
+
 int
 dump_realloc_oid_to_string(oid *objid, size_t objidlen,
 			   u_char **buf, size_t *buf_len, size_t *out_len,
@@ -4677,6 +4946,58 @@ snmp_parse_oid(const char *argv,
   }
   return NULL;
 }
+
+int
+mib_to_asn_type(int mib_type) 
+{
+    switch(mib_type) {
+        case TYPE_OBJID:
+            return ASN_OBJECT_ID;
+            
+        case TYPE_OCTETSTR:
+        case TYPE_IPADDR:
+            return ASN_OCTET_STR;
+            
+        case TYPE_NETADDR:
+            return ASN_IPADDRESS;
+
+        case TYPE_INTEGER32:
+        case TYPE_INTEGER:
+            return ASN_INTEGER;
+            
+        case TYPE_COUNTER:
+            return ASN_COUNTER;
+            
+        case TYPE_GAUGE:
+            return ASN_COUNTER;
+            
+        case TYPE_TIMETICKS:
+            return ASN_TIMETICKS;
+            
+        case TYPE_OPAQUE:
+            return ASN_OPAQUE;
+            
+        case TYPE_NULL:
+            return ASN_NULL;
+
+        case TYPE_COUNTER64:
+            return ASN_COUNTER64;
+
+        case TYPE_BITSTRING:
+            return ASN_BIT_STR;
+
+        case TYPE_UINTEGER:
+        case TYPE_UNSIGNED32:
+            return ASN_UINTEGER;
+
+        case TYPE_NSAPADDRESS:
+            return ASN_NSAP;
+            
+    }
+    return -1;
+}
+
+    
 
 #ifdef CMU_COMPATIBLE
 
