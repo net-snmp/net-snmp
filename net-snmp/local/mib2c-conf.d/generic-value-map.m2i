@@ -21,10 +21,6 @@ $example_start
     switch($m2c_node_lh) {
 @    foreach $e $v enum@
 @        include m2c_setup_enum.m2i@
-@        eval $m2c_iname = "${m2c_const_pfx}${node}_${e}"@
-@        if $m2c_const_lc == 0@
-@            eval $m2c_iname = uc($m2c_iname)@
-@        end@
         case INTERNAL_$m2c_iname:
              $m2c_node_lh = $m2c_ename;
              break;

@@ -64,12 +64,7 @@ $m2c_const_dcl $m2c_enum_mask $m2c_const_del ($m2c_mask)
      * value mapping (set notes at top of file)
      */
 @         foreach $e $v enum@
-##           # this enum should be unique per column, so always use 
-##           # node name (i.e. do not use m2c_setup_enum here)
-@            eval $m2c_iname = "${m2c_const_pfx}${node}_${e}"@
-@            if $m2c_const_lc == 0@
-@               eval $m2c_iname = uc($m2c_iname)@
-@            end@
+@            include m2c_setup_enum.m2i@
 $m2c_const_dcl INTERNAL_$m2c_iname $m2c_const_del $v $m2c_const_sfx
 @         end@
 @      end@

@@ -8,9 +8,13 @@
 @end@
 ########################################################################
 ##
+##  the iname enum should be unique per column, so always use node name
+##
 @        eval $m2c_ename = "${m2c_de_pfx}_${e}"@
+@        eval $m2c_iname = "${m2c_const_pfx}${node}_${e}"@
 @        if $m2c_const_lc == 0@
-@            eval $m2c_ename = uc($m2c_ename)@
+@            eval $m2c_ename = "uc($m2c_ename)"@
+@            eval $m2c_iname = "uc($m2c_iname)"@
 @        end@
 ##
 ########################################################################

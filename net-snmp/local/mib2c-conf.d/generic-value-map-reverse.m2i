@@ -19,18 +19,8 @@
 @    if ("$node.perltype" eq "INTEGER") && ($node.enums == 1)@
 $example_start
     switch($m2c_node_srh) {
-@    if $node.syntax ne $node.perltype@
-@        eval $m2c_de_pfx = "${m2c_const_pfx}$node.syntax"@
-@    else@
-@        eval $m2c_de_pfx = "${m2c_const_pfx}$node"@
-@    end@
 @    foreach $e $v enum@
-@        eval $m2c_iname = "${m2c_const_pfx}${node}_${e}"@
-@        eval $m2c_ename = "${m2c_de_pfx}_${e}"@
-@        if $m2c_const_lc == 0@
-@            eval $m2c_ename = uc($m2c_ename)@
-@            eval $m2c_iname = uc($m2c_iname)@
-@        end@
+@        include m2c_setup_enum.m2i@
         case $m2c_ename:
              $m2c_node_srh = INTERNAL_$m2c_iname;
              break;
