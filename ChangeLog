@@ -81,6 +81,8 @@ hardaker 28 Dec 95 10:24:37
     - Added a sedscript which is built from config.h and agent/extensible/mibdefs.h
       - used to dynamically build mib.txt and local/snmpcheck.
 
+hardaker 28 Dec 95 12:06:49
+    - Created a EXAMPLE.conf file for example usage.
 
 -------------------------------------------------------------------------------
 
