@@ -791,7 +791,7 @@
 /* Watch out for compilers that don't handle void properly. */
 #undef void
 
-#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE)
+#if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(linux)
 #define CAN_USE_NLIST
 #endif
 
