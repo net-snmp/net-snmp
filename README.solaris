@@ -1253,7 +1253,7 @@ patches.  You should make sure the following patches are up to date:
 107733 (Solaris 2.6)
 106950 (Solaris 2.7)
 109147 (Solaris 8)
-115838 (Trusted Solaris 8)
+115833 (Trusted Solaris 8)
 112693 (Solaris 9)
 
 Then type the following:
@@ -1291,6 +1291,24 @@ Configuration file [3]: /var/ld/ld.config
 
 Command line:
   crle -c /var/ld/ld.config -l /usr/lib:/usr/local/ssl/lib
+
+If this fails, usually by displaying:
+
+crle: /var/ld/ld.config: open failed: No such file or directory
+
+you will need to create this directory by hand by doing the following:
+
+mkdir /var/ld
+cd /var/ld
+ln -s . 32
+mkdir sparcv9
+chgrp bin sparcv9
+ln -s sparcv9 64
+touch ld.config
+
+then do:
+
+crle -c /var/ld/ld.config -l /usr/lib:/usr/local/ssl/lib
 
 Thanks to Dave Shield and Johannes Schmidt-Fischer
 -- Bruce Shaw <Bruce.Shaw at shaw.ca>
