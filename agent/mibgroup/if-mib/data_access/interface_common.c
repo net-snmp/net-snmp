@@ -10,8 +10,15 @@
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/interface.h>
+#include "if-mib/data_access/interface.h"
 
 /**---------------------------------------------------------------------*/
+/*
+ * local static vars
+ */
+static netsnmp_conf_if_list *conf_list = NULL;
+static int need_wrap_check = -1;
+
 /*
  * local static prototypes
  */
@@ -21,6 +28,10 @@ static void _access_interface_entry_release(netsnmp_interface_entry * entry,
                                             void *unused);
 static void _access_interface_entry_set_index(netsnmp_interface_entry *entry,
                                               const char *name);
+static void _parse_interface_config(const char *token, char *cptr);
+static void _free_interface_config(void);
+static void _update_32bit(struct counter64 *prev_val, struct counter64 *new_val,
+                          struct counter64 *old_prev_val);
 
 /**---------------------------------------------------------------------*/
 /*
@@ -35,9 +46,24 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
 
 /**---------------------------------------------------------------------*/
 /*
+ * initialization
+ */
+void
+interface_common_init(void)
+{
+    snmpd_register_config_handler("interface", _parse_interface_config,
+                                  _free_interface_config,
+                                  "name type speed");
+
+    netsnmp_access_interface_arch_init();
+}
+
+/**---------------------------------------------------------------------*/
+/*
  * container functions
  */
 /**
+ * initialize interface container
  */
 netsnmp_container *
 netsnmp_access_interface_container_init(u_int flags)
@@ -135,6 +161,8 @@ netsnmp_access_interface_entry_get_by_index(netsnmp_container *container, oid in
 {
     netsnmp_index   tmp;
 
+    DEBUGMSGTL(("access:interface:entry", "by_index\n"));
+
     if (NULL == container) {
         snmp_log(LOG_ERR,
                  "invalid container for netsnmp_access_interface_entry_get_by_index\n");
@@ -154,6 +182,8 @@ netsnmp_access_interface_entry_get_by_name(netsnmp_container *container,
                                 const char *name)
 {
     netsnmp_interface_entry tmp;
+
+    DEBUGMSGTL(("access:interface:entry", "by_name\n"));
 
     if (NULL == container) {
         snmp_log(LOG_ERR,
@@ -192,6 +222,8 @@ netsnmp_access_interface_entry_create(const char *name)
     netsnmp_interface_entry *entry =
         SNMP_MALLOC_TYPEDEF(netsnmp_interface_entry);
 
+    DEBUGMSGTL(("access:interface:entry", "create\n"));
+
     if(NULL == entry)
         return NULL;
 
@@ -212,12 +244,6 @@ netsnmp_access_interface_entry_create(const char *name)
     entry->oid_index.len = 1;
     entry->oid_index.oids = (oid *) & entry->index;
 
-    // xxx-rks: do this stuff.. ifspeed, etc..
-    /*
-     * XXX - initialise the "static" information
-     *  a) Using the configure overrides
-     *  b) Via (architecture-specific) utility routines
-     */
     snmp_log(LOG_ERR, "netsnmp_access_interface_entry_create(entry);\n");
 
     return entry;
@@ -228,8 +254,18 @@ netsnmp_access_interface_entry_create(const char *name)
 void
 netsnmp_access_interface_entry_free(netsnmp_interface_entry * entry)
 {
+    DEBUGMSGTL(("access:interface:entry", "free\n"));
+
     if (NULL == entry)
         return;
+
+    /*
+     * SNMP_FREE not needed, for any of these, 
+     * since the whole entry is about to be freed
+     */
+
+    if (NULL != entry->old_stats)
+        free(entry->old_stats);
 
     if (NULL != entry->if_name)
         free(entry->if_name);
@@ -241,6 +277,33 @@ netsnmp_access_interface_entry_free(netsnmp_interface_entry * entry)
         free(entry->if_paddr);
 
     free(entry);
+}
+
+/**
+ *
+ * @retval 0   : success
+ * @retval < 0 : error
+ */
+int
+netsnmp_access_interface_entry_set_admin_status(netsnmp_interface_entry * entry,
+                                                int ifAdminStatus)
+{
+    int rc;
+
+    DEBUGMSGTL(("access:interface:entry", "set_admin_status\n"));
+
+    if (NULL == entry)
+        return -1;
+
+    if ((ifAdminStatus < IFADMINSTATUS_UP) ||
+         (ifAdminStatus > IFADMINSTATUS_TESTING))
+        return -2;
+
+    rc = netsnmp_arch_set_admin_status(entry, ifAdminStatus);
+    if (0 == rc) /* success */
+        entry->if_admin_status = ifAdminStatus;
+
+    return rc;
 }
 
 /**---------------------------------------------------------------------*/
@@ -286,7 +349,79 @@ _access_interface_entry_set_index(netsnmp_interface_entry *entry, const char *na
 }
 
 /**
- * copy interface entry data
+ * update stats
+ *
+ * @retval  0 : success
+ * @retval -1 : error
+ */
+int
+netsnmp_access_interface_entry_update_stats(netsnmp_interface_entry * prev_vals,
+                                            netsnmp_interface_entry * new_vals)
+{
+    DEBUGMSGTL(("access:interface", "check_wrap\n"));
+    
+    /*
+     * sanity checks
+     */
+    if ((NULL == prev_vals) || (NULL == new_vals) ||
+        (NULL == prev_vals->if_name) || (NULL == new_vals->if_name) ||
+        (0 != strncmp(prev_vals->if_name, new_vals->if_name, strlen(prev_vals->if_name))))
+        return -1;
+
+    /*
+     * if we've determined that we have 64 bit counters, just copy them.
+     */
+    if (0 == need_wrap_check) {
+        memcpy(&prev_vals->stats, &new_vals->stats, sizeof(new_vals->stats));
+        return 0;
+    }
+
+    if (NULL == prev_vals->old_stats) {
+        /*
+         * if we don't have old stats, they can't have wrapped, so just copy
+         */
+        prev_vals->old_stats = SNMP_MALLOC_TYPEDEF(netsnmp_interface_stats);
+        if (NULL == prev_vals->old_stats) {
+            return -2;
+        }
+    }
+    else {
+        _update_32bit(&prev_vals->if_ibytes,
+                      &new_vals->if_ibytes, &prev_vals->old_ibytes);
+        _update_32bit(&prev_vals->if_iucast,
+                      &new_vals->if_iucast, &prev_vals->old_iucast);
+        _update_32bit(&prev_vals->if_imcast,
+                      &new_vals->if_imcast, &prev_vals->old_imcast);
+        _update_32bit(&prev_vals->if_ibcast,
+                      &new_vals->if_ibcast, &prev_vals->old_ibcast);
+        _update_32bit(&prev_vals->if_obytes,
+                      &new_vals->if_obytes, &prev_vals->old_obytes);
+        _update_32bit(&prev_vals->if_oucast,
+                      &new_vals->if_oucast, &prev_vals->old_oucast);
+        _update_32bit(&prev_vals->if_omcast,
+                      &new_vals->if_omcast, &prev_vals->old_omcast);
+        _update_32bit(&prev_vals->if_obcast,
+                      &new_vals->if_obcast, &prev_vals->old_obcast);
+    }
+    
+    /*
+     * if we've decided we no longer need to check wraps, free old stats
+     */
+    if (0 == need_wrap_check) {
+        SNMP_FREE(prev_vals->old_stats);
+    }
+    
+    /*
+     * update old stats from new stats.
+     * careful - old_stats is a pointer to stats...
+     */
+    memcpy(prev_vals->old_stats, &new_vals->stats, sizeof(new_vals->stats));
+    
+    return 0;
+}
+
+/**
+ * copy interface entry data (after checking for counter wraps)
  *
  * @retval -2 : malloc failed
  * @retval -1 : interfaces not the same
@@ -299,23 +434,19 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
     DEBUGMSGTL(("access:interface", "copy\n"));
     
     if ((NULL == lhs) || (NULL == rhs) ||
+        (NULL == lhs->if_name) || (NULL == rhs->if_name) ||
         (0 != strncmp(lhs->if_name, rhs->if_name, strlen(rhs->if_name))))
         return -1;
 
     /*
-     * code doesn't take the possibility of dynamically changing
-     * flags into account.
+     * update stats
      */
-    netsnmp_assert(lhs->flags == rhs->flags);
+    netsnmp_access_interface_entry_update_stats(lhs, rhs);
 
-    /*
-     * copy stats
-     */
-    memcpy(&lhs->stats, &rhs->stats, sizeof(rhs->stats));
-    
     /*
      * update data
      */
+    lhs->flags = rhs->flags;
     if((NULL != lhs->if_descr) && (NULL != rhs->if_descr) &&
        (0 == strcmp(lhs->if_descr, rhs->if_descr)))
         ;
@@ -336,6 +467,7 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
     lhs->if_oper_status = rhs->if_oper_status;
     lhs->if_promiscuous = rhs->if_promiscuous;
     lhs->if_connector_present = rhs->if_connector_present;
+    lhs->if_flags = rhs->if_flags;
     if(lhs->if_paddr_len == rhs->if_paddr_len) {
         if(rhs->if_paddr_len)
             memcpy(lhs->if_paddr,rhs->if_paddr,rhs->if_paddr_len);
@@ -367,22 +499,160 @@ netsnmp_access_interface_entry_guess_speed(netsnmp_interface_entry *entry)
         entry->if_speed = 0;
 }
 
+netsnmp_conf_if_list *
+netsnmp_access_interface_entry_overrides_get(const char * name)
+{
+    netsnmp_conf_if_list * if_ptr;
+
+    if(NULL == name)
+        return NULL;
+
+    for (if_ptr = conf_list; if_ptr; if_ptr = if_ptr->next)
+        if (!strcmp(if_ptr->name, name))
+            break;
+
+    return if_ptr;
+}
+
 void
 netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *entry)
 {
+    netsnmp_conf_if_list * if_ptr;
+
+    if (NULL == entry)
+        return;
+
+    /*
+     * enforce mib size limit
+     */
     if(entry->if_descr && (strlen(entry->if_descr) > 255))
         entry->if_descr[255] = 0;
 
-#if 1
-#warning "xxx-rks: interface overrides"
-#else
-    for (if_ptr = conf_list; if_ptr; if_ptr = if_ptr->next)
-        if (!strcmp(if_ptr->name, ifname))
-            break;
-    
+    if_ptr =
+        netsnmp_access_interface_entry_overrides_get(entry->if_name);
     if (if_ptr) {
-        ifentry->if_type = if_ptr->type;
-        ifentry->if_speed = if_ptr->speed;
+        entry->if_type = if_ptr->type;
+        entry->if_speed = if_ptr->speed;
     }
-#endif
+}
+
+/**---------------------------------------------------------------------*/
+/*
+ * interface config token
+ */
+/**
+ */
+static void
+_parse_interface_config(const char *token, char *cptr)
+{
+    netsnmp_conf_if_list   *if_ptr, *if_new;
+    char                   *name, *type, *speed, *ecp;
+
+    name = strtok(cptr, " \t");
+    if (!name) {
+        config_perror("Missing NAME parameter");
+        return;
+    }
+    type = strtok(NULL, " \t");
+    if (!type) {
+        config_perror("Missing TYPE parameter");
+        return;
+    }
+    speed = strtok(NULL, " \t");
+    if (!speed) {
+        config_perror("Missing SPEED parameter");
+        return;
+    }
+    if_ptr = conf_list;
+    while (if_ptr)
+        if (strcmp(if_ptr->name, name))
+            if_ptr = if_ptr->next;
+        else
+            break;
+    if (if_ptr)
+        config_pwarn("Duplicate interface specification");
+    if_new = SNMP_MALLOC_TYPEDEF(netsnmp_conf_if_list);
+    if (!if_new) {
+        config_perror("Out of memory");
+        return;
+    }
+    if_new->speed = strtoul(speed, &ecp, 0);
+    if (*ecp) {
+        config_perror("Bad SPEED value");
+        free(if_new);
+        return;
+    }
+    if_new->type = strtol(type, &ecp, 0);
+    if (*ecp || if_new->type < 0) {
+        config_perror("Bad TYPE");
+        free(if_new);
+        return;
+    }
+    if_new->name = strdup(name);
+    if (!if_new->name) {
+        config_perror("Out of memory");
+        free(if_new);
+        return;
+    }
+    if_new->next = conf_list;
+    conf_list = if_new;
+}
+
+static void
+_free_interface_config(void)
+{
+    netsnmp_conf_if_list   *if_ptr = conf_list, *if_next;
+    while (if_ptr) {
+        if_next = if_ptr->next;
+        free(if_ptr->name);
+        free(if_ptr);
+        if_ptr = if_next;
+    }
+    conf_list = NULL;
+}
+
+static void
+_update_32bit(struct counter64 *prev_val, struct counter64 *new_val,
+              struct counter64 *old_prev_val)
+{
+    int rc;
+
+    /*
+     * counters are 32bit or unknown (which we'll treat as 32bit).
+     * update the prev values with the difference between the
+     * new stats and the prev old_stats:
+     *    prev->stats += (new->stats - prev->old_stats)
+     */
+    rc = netsnmp_c64_check_for_32bit_wrap(old_prev_val,new_val, 1);
+    if (rc < 0)
+        snmp_log(LOG_ERR,"c64 32 bit check failed\n");
+    else {
+        /*
+         * update previous values
+         */
+        (void) u64UpdateCounter(prev_val, new_val, old_prev_val);
+
+        /*
+         * if wrap check was 32 bit, undo adjust, now that prev is updated
+         */
+        if (32 == rc) {
+            /*
+             * check wrap incremented high, so reset it. (Because
+             * new is going to be copied to old later on.)
+             */
+            netsnmp_assert(1 == new_val->high);
+            new_val->high = 0;
+        }
+        else if (64 == rc) {
+            /*
+             * if we really have 64 bit counters, the summing we've been
+             * doing for prev values should be equal to the new values.
+             */
+            if ((prev_val->low != new_val->low) ||
+                (prev_val->high != new_val->high))
+                snmp_log(LOG_ERR, "looks like a 64bit wrap, but prev!=new\n");
+            else
+                need_wrap_check = 0;
+        }
+    }
 }
