@@ -17271,7 +17271,7 @@ echo "${ECHO_T}Internal MD5 Support" >&6
         authmodes="MD5 SHA1"
         if test "x$enable_privacy" != "xno" ; then
 	    if test $ac_cv_header_openssl_aes_h = "yes" ; then
-	        encrmodes="DES AES128 AES192 AES256"
+	        encrmodes="DES AES"
 	    else
 	        encrmodes="DES"
 	    fi
