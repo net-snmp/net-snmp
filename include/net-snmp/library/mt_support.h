@@ -1,4 +1,3 @@
-
 /*
  * mt_support.h - multi-thread resource locking support declarations 
  */
@@ -16,10 +15,10 @@
 #ifdef __cplusplus
 extern          "C" {
 #endif
-
-    /*
-     * Lock group identifiers 
-     */
+  
+/*
+ * Lock group identifiers 
+ */
 
 #define MT_LIBRARY_ID      0
 #define MT_APPLICATION_ID  1
@@ -29,9 +28,9 @@ extern          "C" {
 #define MT_MAX_SUBIDS      10
 
 
-    /*
-     * Lock resource identifiers for library resources 
-     */
+/*
+ * Lock resource identifiers for library resources 
+ */
 
 #define MT_LIB_NONE        0
 #define MT_LIB_SESSION     1
@@ -46,9 +45,8 @@ extern          "C" {
 #ifdef NS_REENTRANT
 
 #if HAVE_PTHREAD_H
-
 #include <pthread.h>
-    typedef pthread_mutex_t mutex_type;
+typedef pthread_mutex_t mutex_type;
 #ifdef pthread_mutexattr_default
 #define MT_MUTEX_INIT_DEFAULT pthread_mutexattr_default
 #else
@@ -58,26 +56,30 @@ extern          "C" {
 #elif defined(WIN32) || defined(cygwin)
 
 #include <windows.h>
-    typedef CRITICAL_SECTION mutex_type;
+typedef CRITICAL_SECTION mutex_type;
 
-#else
-                    error "There is no re-entrant support as defined."
-#endif
-    int             snmp_res_init(void);
-    int             snmp_res_lock(int groupID, int resourceID);
-    int             snmp_res_unlock(int groupID, int resourceID);
-    int             snmp_res_destroy_mutex(int groupID, int resourceID);
+#else  /*  HAVE_PTHREAD_H  */
+error "There is no re-entrant support as defined."
+#endif /*  HAVE_PTHREAD_H  */
 
-#else                           /* !NS_REENTRANT */
 
+int             snmp_res_init(void);
+int             snmp_res_lock(int groupID, int resourceID);
+int             snmp_res_unlock(int groupID, int resourceID);
+int             snmp_res_destroy_mutex(int groupID, int resourceID);
+
+#else /*  NS_REENTRANT  */
+
+#ifndef WIN32
 #define snmp_res_init() do {} while (0)
 #define snmp_res_lock(x,y) do {} while (0)
 #define snmp_res_unlock(x,y) do {} while (0)
 #define snmp_res_destroy_mutex(x,y) do {} while (0)
+#endif /*  WIN32  */
 
-#endif                          /* !NS_REENTRANT */
+#endif /*  NS_REENTRANT  */
 
 #ifdef __cplusplus
 }
 #endif
-#endif                          /* MT_SUPPORT_H */
+#endif /*  MT_SUPPORT_H  */
