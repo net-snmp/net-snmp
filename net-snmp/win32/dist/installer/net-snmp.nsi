@@ -5,6 +5,7 @@
 !define PRODUCT_MAJ_VERSION "5"
 !define PRODUCT_MIN_VERSION "1"
 !define PRODUCT_REVISION "1"
+!define PRODUCT_EXE_VERSION "rc1"
 !define PRODUCT_WEB_SITE "http://www.net-snmp.com"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\encode_keychange.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -57,13 +58,17 @@ var ICONS_GROUP
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_MAJ_VERSION}.${PRODUCT_MIN_VERSION}.${PRODUCT_REVISION}"
-OutFile "net-snmp-${PRODUCT_MAJ_VERSION}.${PRODUCT_MIN_VERSION}.${PRODUCT_REVISION}-2.win32.exe"
+OutFile "..\\net-snmp-${PRODUCT_MAJ_VERSION}.\
+                  ${PRODUCT_MIN_VERSION}.\
+                  ${PRODUCT_REVISION}\
+                  -${PRODUCT_EXE_VERSION}\
+                  .win32.exe"
 InstallDir "C:\usr"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
 
-Section "Main (Applications, Documentation, and MIBs)" SEC01
+Section "Base Components" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
   File "README.txt"
@@ -87,6 +92,18 @@ Section "Main (Applications, Documentation, and MIBs)" SEC01
   File "bin\snmpbulkwalk.exe"
   File "bin\snmpbulkget.exe"
   File "bin\snmpwalk.exe"
+  File "bin\mib2c"
+  File "bin\mib2c.bat"
+  Call CreateMib2cBat
+  
+  File "bin\snmpconf"
+  File "bin\snmpconf.bat"
+  Call CreateSnmpconfBat
+  
+  File "bin\traptoemail"
+  File "bin\traptoemail.bat"
+  Call CreatTraptoemailBat
+  
   SetOutPath "$INSTDIR\share\snmp\mibs"
   File "share\snmp\mibs\AGENTX-MIB.txt"
   File "share\snmp\mibs\DISMAN-EVENT-MIB.txt"
@@ -173,7 +190,7 @@ Section "Main (Applications, Documentation, and MIBs)" SEC01
   Call CreateSnmpConf
 SectionEnd
 
-Section "Agent" SEC02
+Section "Net-SNMP Agent" SEC02
   SetOutPath "$INSTDIR\bin"
   File "bin\snmpd.exe"
   SetOutPath "$INSTDIR\share\snmp\snmpconf-data\snmpd-data"
@@ -185,13 +202,21 @@ Section "Agent" SEC02
   File "share\snmp\snmpconf-data\snmpd-data\snmpconf-config"
   File "share\snmp\snmpconf-data\snmpd-data\system"
   File "share\snmp\snmpconf-data\snmpd-data\trapsinks"
+  
+  ; If we are on an NT system then install the service batch files.
+  Call IsNT
+  Pop $1
+  StrCmp $1 0 NoService
+  
   SetOutPath "$INSTDIR\"
   File "registeragent.bat"
   File "unregisteragent.bat"
   Call CreateAgentBats
+  
+  NoService:
 SectionEnd
 
-Section "snmptrapd" SEC03
+Section "Net-SNMP Trap Handler" SEC03
   SetOutPath "$INSTDIR\bin"
   File "bin\snmptrapd.exe"
   SetOutPath "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data"
@@ -200,7 +225,7 @@ Section "snmptrapd" SEC03
   File "share\snmp\snmpconf-data\snmptrapd-data\traphandle"
 SectionEnd
 
-Section "Copy Perl Modules" SEC04
+Section "Perl SNMP Modules" SEC04
   SetOutPath "$INSTDIR\perl\x86"
   File "perl\x86\Net-SNMP.tar.gz"
   SetOutPath "$INSTDIR\perl"
@@ -213,10 +238,17 @@ Section -AdditionalIcons
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk" "$INSTDIR\uninst.exe"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk" "$INSTDIR\docs\Net-SNMP.chm"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\README.lnk" "$INSTDIR\README.txt"
+
+  ; If we are on an NT system then install the service batch files.
+  Call IsNT
+  Pop $1
+  StrCmp $1 0 NoServiceBats
+  
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Service"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk" "$INSTDIR\registeragent.bat"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk" "$INSTDIR\unregisteragent.bat"
-  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\README.lnk" "$INSTDIR\README.txt"
+  NoServiceBats:
 SectionEnd
 
 Section -Post
@@ -232,10 +264,20 @@ SectionEnd
 
 ; Section descriptions
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} "A few SNMP applications (snmpwalk, snmpget, etc...), documentation, and MIBs"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} "The snmpd agent"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "snmptrad daemon"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "See Start Here - Installation in the Net-SNMP Help file for instructions on installing the Perl PPD package"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} \
+               "The Base Components provide basic means for interrogating SNMP devices. These \
+               include the command generator applications, a short list of Management \
+               Information Base MIB files, and a user-friendly Help subsystem"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} \
+               "Install the Agent Services if this computer provides information to a remote \
+               management system."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} \
+               "Install the Notification/Trap Services if this computer should receives solicited \
+               or unsolicited SNMP messages."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} \
+               "Install the Perl SNMP Modules if this computer will run Perl programs that need to \
+               use the SNMP protocol. See Start Here - Installation in the Net-SNMP Help file for \
+               instructions on installing the Perl PPD package"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function CreateSnmpConf
@@ -288,6 +330,84 @@ Function CreateAgentBats
   FileClose $1
 FunctionEnd
 
+Function CreateSnmpconfBat
+  SetOutPath "$INSTDIR\bin\"
+  ClearErrors
+  FileOpen $0 "snmpconf.bat" "r"
+  GetTempFileName $R0
+  FileOpen $1 $R0 "w"
+  snmpconfloop:
+    FileRead $0 $2
+    IfErrors done
+    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\snmpconf$\r$\n" 0 +3
+      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\bin\snmpconf$\r$\n"
+      Goto snmpconfloop
+    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\snmpconf" 0 +3
+      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\bin\snmpconf"
+      Goto snmpconfloop
+    FileWrite $1 $2
+    Goto snmpconfloop
+
+  done:
+    FileClose $0
+    FileClose $1
+    Delete "snmpconf.bat"
+    CopyFiles /SILENT $R0 "snmpconf.bat"
+    Delete $R0
+FunctionEnd
+
+Function CreateMib2cBat
+  SetOutPath "$INSTDIR\bin\"
+  ClearErrors
+  FileOpen $0 "mib2c.bat" "r"
+  GetTempFileName $R0
+  FileOpen $1 $R0 "w"
+  mib2cloop:
+    FileRead $0 $2
+    IfErrors done
+    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\mib2c$\r$\n" 0 +3
+      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\bin\mib2c$\r$\n"
+      Goto mib2cloop
+    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\mib2c" 0 +3
+      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\bin\mib2c"
+      Goto mib2cloop
+    FileWrite $1 $2
+    Goto mib2cloop
+
+  done:
+    FileClose $0
+    FileClose $1
+    Delete "mib2c.bat"
+    CopyFiles /SILENT $R0 "mib2c.bat"
+    Delete $R0
+FunctionEnd
+
+Function CreatTraptoemailBat
+  SetOutPath "$INSTDIR\bin\"
+  ClearErrors
+  FileOpen $0 "traptoemail.bat" "r"
+  GetTempFileName $R0
+  FileOpen $1 $R0 "w"
+  traptoemailloop:
+    FileRead $0 $2
+    IfErrors done
+    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\traptoemail$\r$\n" 0 +3
+      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\traptoemail$\r$\n"
+      Goto traptoemailloop
+    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\traptoemail" 0 +3
+      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\traptoemail"
+      Goto traptoemailloop
+    FileWrite $1 $2
+    Goto traptoemailloop
+
+  done:
+    FileClose $0
+    FileClose $1
+    Delete "traptoemail.bat"
+    CopyFiles /SILENT $R0 "traptoemail.bat"
+    Delete $R0
+FunctionEnd
+
 Function StrRep
   Exch $R4 ; $R4 = Replacement String
   Exch
@@ -336,15 +456,16 @@ FunctionEnd
 Section Uninstall
   ReadRegStr $ICONS_GROUP ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "${PRODUCT_STARTMENU_REGVAL}"
   Delete "$INSTDIR\uninst.exe"
-  Delete "$INSTDIR\bin\net-snmp-perl-test.pl"
+  Delete "$INSTDIR\README.txt"
   Delete "$INSTDIR\perl\Net-SNMP.ppd"
   Delete "$INSTDIR\perl\x86\Net-SNMP.tar.gz"
-  Delete "$INSTDIR\bin\snmptrapd.exe"
-  Delete "$INSTDIR\bin\snmpd.exe"
   Delete "$INSTDIR\include\net-snmp\net-snmp-config.h"
   Delete "$INSTDIR\include\net-snmp\agent\mib_module_config.h"
   Delete "$INSTDIR\docs\COPYING"
   Delete "$INSTDIR\docs\Net-SNMP.chm"
+  Delete "$INSTDIR\bin\net-snmp-perl-test.pl"
+  Delete "$INSTDIR\bin\snmptrapd.exe"
+  Delete "$INSTDIR\bin\snmpd.exe"
   Delete "$INSTDIR\bin\snmpwalk.exe"
   Delete "$INSTDIR\bin\snmpbulkget.exe"
   Delete "$INSTDIR\bin\snmpbulkwalk.exe"
@@ -364,6 +485,12 @@ Section Uninstall
   Delete "$INSTDIR\bin\snmpvacm.exe"
   Delete "$INSTDIR\bin\encode_keychange.exe"
   Delete "$INSTDIR\bin\netsnmp.dll"
+  Delete "$INSTDIR\bin\mib2c"
+  Delete "$INSTDIR\bin\mib2c.bat"
+  Delete "$INSTDIR\bin\snmpconf"
+  Delete "$INSTDIR\bin\snmpconf.bat"
+  Delete "$INSTDIR\bin\traptoemail"
+  Delete "$INSTDIR\bin\traptoemail.bat"
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmp-data\authopts"
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmp-data\debugging"
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmp-data\mibs"
@@ -380,7 +507,6 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\formatting"
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\snmpconf-config"
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\traphandle"
-  Delete "$INSTDIR\README.txt"
   Delete "$INSTDIR\share\snmp\snmp.conf"
   Delete "$INSTDIR\share\snmp\mibs\AGENTX-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\DISMAN-EVENT-MIB.txt"
@@ -444,6 +570,8 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mibs\.index"
   Delete "$INSTDIR\share\snmp\snmpd.conf"
   Delete "$INSTDIR\etc\snmp\snmp.conf"
+  Delete "$INSTDIR\etc\snmp\snmpd.conf"
+  Delete "$INSTDIR\etc\snmp\snmptrapd.conf"
   Delete "$INSTDIR\registeragent.bat"
   Delete "$INSTDIR\unregisteragent.bat"
   Delete "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk"
@@ -478,7 +606,7 @@ Section Uninstall
   RMDir "$INSTDIR\include\net-snmp"
   RMDir "$INSTDIR\include"
   RMDir "$INSTDIR"
-  ; Delete the environment variable
+  ; Delete the environment variables
   Push "SNMPCONFPATH"
   Call un.DeleteEnvStr
   
