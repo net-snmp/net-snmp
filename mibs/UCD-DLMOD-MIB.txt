@@ -16,7 +16,7 @@ ucdDlmodMIB MODULE-IDENTITY
     CONTACT-INFO    
         "The ucd-snmp-coders mailing list is the best place 
 	 to write for public questions about the ucd-snmp
-	 project: ucd-snmp-coders@ece.ucdavis.edu
+	 project: ucd-snmp-coders@ucd-snmp.ucdavis.edu
 
          Primary Author: Wes Hardaker
 
