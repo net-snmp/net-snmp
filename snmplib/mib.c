@@ -784,6 +784,9 @@ sprint_by_type(buf, var, enums, hint, units)
 	case ASN_UINTEGER:
 	    sprint_uinteger(buf, var, enums, hint, units);
 	    break;
+	case ASN_COUNTER64:
+	    sprint_counter64(buf, var, enums, hint, units);
+	    break;
 	default:
 	    sprint_badtype(buf, var, enums, hint, units);
 	    break;
