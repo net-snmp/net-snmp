@@ -787,6 +787,7 @@ init_snmp(const char *type)
     register_default_handlers();
     init_snmpv3(type);
     init_snmp_alarm();
+    init_snmp_enum(type);
     init_snmp_enums();
 
     read_premib_configs();
