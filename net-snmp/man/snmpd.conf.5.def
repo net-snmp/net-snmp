@@ -230,6 +230,10 @@ This directive specifies the mapping from a source/community pair to
 a security name. SOURCE can be a hostname, a subnet, or the word
 \fI"default"\fR.
 A subnet can be specified as IP/MASK or IP/BITS.
+For example, given a directive
+"com2sec myLocal 10.10.10.0/24 public"
+then this would match requests from IP addresses 10.10.10.0 through
+to 10.10.10.255, but not one from 10.10.11.1 or similar.
 The first source/community combination that matches the incoming packet
 is selected.
 .IP "com2sec6 NAME SOURCE COMMUNITY"
