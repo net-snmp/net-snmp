@@ -482,6 +482,9 @@
 #undef HAVE_LIBDB
 #undef HAVE_LIBRPM
 
+/* define if you have pkginfo */
+#undef HAVE_PKGINFO
+
 /* define if you have gethostbyname */
 #undef HAVE_GETHOSTBYNAME
 
