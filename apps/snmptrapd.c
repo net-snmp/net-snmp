@@ -133,12 +133,6 @@ int             reconfig = 0;
 u_long          num_received = 0;
 char            default_port[] = "udp:162";
 
-const char     *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a]): %N\n\t%W Trap (%q) Uptime: %#T\n%v\n";
-const char     *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
-
-/* how to format logging to stderr */
-char           *trap1_fmt_str = NULL, *trap2_fmt_str = NULL;
-
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
  */
@@ -437,339 +431,126 @@ do_external(char *cmd, struct hostent *host,
     snmp_set_quick_print(oldquick);
 }
 
+/*-----------------------------
+ *
+ * Main driving code, to process an incoming trap
+ *
+ *-----------------------------*/
+
+
+
 int
-snmp_input(int op,
-           netsnmp_session * session,
+snmp_input(int op, netsnmp_session *session,
            int reqid, netsnmp_pdu *pdu, void *magic)
 {
-    netsnmp_variable_list *vars = NULL;
+    oid stdTrapOidRoot[] = { 1, 3, 6, 1, 6, 3, 1, 1, 5 };
+    oid snmpTrapOid[]    = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
+    oid trapOid[MAX_OID_LEN+2] = {0};
+    int trapOidLen;
+    netsnmp_variable_list *vars;
+    netsnmp_trapd_handler *traph;
     netsnmp_transport *transport = (netsnmp_transport *) magic;
-    char            buf[64], *cp;
-    netsnmp_pdu    *reply;
-    struct hostent *host = NULL;
-    static oid      trapoids[10] = { 1, 3, 6, 1, 6, 3, 1, 1, 5 };
-    static oid      snmptrapoid2[11] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };
-    netsnmp_variable_list tmpvar;
-    char           *Command = NULL, *tstr = NULL;
-    u_char         *rbuf = NULL;
-    size_t          r_len = 64, o_len = 0;
-    int             trunc = 0;
+    extern netsnmp_trapd_handler *netsnmp_global_traphandlers;
 
-    tmpvar.type = ASN_OBJECT_ID;
 
-    if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
-        if ((rbuf = (u_char *) calloc(r_len, 1)) == NULL) {
-            snmp_log(LOG_ERR, "couldn't display trap -- malloc failed\n");
-            return 1;
-        }
-
-        if (pdu->command == SNMP_MSG_TRAP) {
-            oid trapOid[MAX_OID_LEN + 2] = { 0 };
-            int trapOidLen = pdu->enterprise_length;
-
-            num_received++;
-
-            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					NETSNMP_DS_APP_NUMERIC_IP)) {
-                host = gethostbyaddr((char *) pdu->agent_addr, 4, AF_INET);
-            }
-
+    switch (op) {
+    case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
+        /*
+	 * Determine the OID that identifies the trap being handled
+	 */
+        DEBUGMSGTL(("snmptrapd", "input: %x\n", pdu->command));
+        switch (pdu->command) {
+        case SNMP_MSG_TRAP:
+            /*
+	     * Convert v1 traps into a v2-style trap OID
+	     *    (following RFC 2576)
+	     */
             if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+                trapOidLen = pdu->enterprise_length;
                 memcpy(trapOid, pdu->enterprise, sizeof(oid) * trapOidLen);
                 if (trapOid[trapOidLen - 1] != 0) {
                     trapOid[trapOidLen++] = 0;
                 }
                 trapOid[trapOidLen++] = pdu->specific_type;
-            }
-
-            if (Print && (pdu->trap_type != SNMP_TRAP_AUTHFAIL ||
-			  dropauth == 0)) {
-                if ((trap1_fmt_str == NULL) || (trap1_fmt_str[0] == '\0')) {
-                    trunc = !realloc_format_plain_trap(&rbuf, &r_len, &o_len,
-						       1, pdu, transport);
-                } else {
-                    trunc = !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
-                                                 trap1_fmt_str, pdu,
-                                                 transport);
-                }
-                snmp_log(LOG_INFO, "%s%s", rbuf, (trunc?" [TRUNCATED]\n":""));
-            }
-
-            if (Syslog && (pdu->trap_type != SNMP_TRAP_AUTHFAIL ||
-			   dropauth == 0)) {
-                memset(rbuf, 0, o_len);
-                o_len = 0;
-                rbuf[o_len++] = ',';
-                rbuf[o_len++] = ' ';
-
-                for (vars = pdu->variables; vars;
-                     vars = vars->next_variable) {
-                    trunc = !sprint_realloc_variable(&rbuf, &r_len, &o_len, 1,
-						     vars->name,
-						     vars->name_length, vars);
-                    if (!trunc) {
-                        /*
-                         * Add a trailing , ...  
-                         */
-                        trunc = !snmp_strcat(&rbuf, &r_len, &o_len, 1, ", ");
-                    }
-                    if (trunc) {
-                        break;
-                    }
-                }
-
-                if (o_len > 0 && !trunc) {
-                    o_len -= 2;
-                    rbuf[o_len] = '\0';
-                }
-
-                if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-                    u_char *oidbuf = NULL;
-                    size_t ob_len = 64, oo_len = 0;
-                    int otrunc = 0;
-
-                    if ((oidbuf = (u_char *) calloc(ob_len, 1)) == NULL) {
-                        snmp_log(LOG_ERR,
-                                 "couldn't display trap -- malloc failed\n");
-                        free(rbuf);
-                        return 1;
-                    }
-
-                    otrunc = !sprint_realloc_objid(&oidbuf, &ob_len, &oo_len,
-						   1, trapOid, trapOidLen);
-                    if (!otrunc) {
-                        cp = strrchr((char *) oidbuf, '.');
-                        if (cp != NULL) {
-                            cp++;
-                        } else {
-                            cp = (char *) oidbuf;
-                        }
-                    } else {
-                        cp = (char *) oidbuf;
-                    }
-                    if (! SyslogTrap) {
-						snmp_log(LOG_WARNING, "%s: %s Trap (%s%s) Uptime: %s%s%s",
-                             inet_ntoa(*((struct in_addr *) pdu-> agent_addr)),
-                             trap_description(pdu->trap_type), cp,
-                             (otrunc ? " [TRUNCATED]" : ""),
-                             uptime_string(pdu->time, buf), rbuf,
-                             (trunc ? " [TRUNCATED]\n" : ""));
-					}
-                    free(oidbuf);
-                } else {
-                    if (! SyslogTrap) {
-						snmp_log(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s%s",
-                             inet_ntoa(*((struct in_addr *) pdu->agent_addr)),
-                             trap_description(pdu->trap_type),
-                             pdu->specific_type, uptime_string(pdu->time, buf), rbuf,
-                             (trunc ? " [TRUNCATED]\n" : ""));
-					}
-                }
-            }
-            if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-                Command = snmptrapd_get_traphandler(trapOid, trapOidLen);
             } else {
-                trapoids[9] = pdu->trap_type + 1;
-                Command = snmptrapd_get_traphandler(trapoids, 10);
+                memcpy(trapOid, stdTrapOidRoot, sizeof(stdTrapOidRoot));
+                trapOidLen = OID_LENGTH(stdTrapOidRoot);  /* 9 */
+                trapOid[trapOidLen++] = pdu->trap_type+1;
             }
-            if (Command) {
-                do_external(Command, host, pdu, transport);
-            }
-            log_notification(host, pdu, transport);
-        } else if (pdu->command == SNMP_MSG_TRAP2 ||
-                   pdu->command == SNMP_MSG_INFORM) {
-            num_received++;
-            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					NETSNMP_DS_APP_NUMERIC_IP)) {
-                /*
-                 * Right, apparently a name lookup is wanted.  This is only
-                 * reasonable for the UDP and TCP transport domains (we
-                 * don't want to try to be too clever here).  
-                 */
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
-                if (transport != NULL
-                    && (transport->domain == netsnmpUDPDomain
-                        || transport->domain == netsnmp_snmpTCPDomain)) {
-#else
-                if (transport != NULL
-                    && transport->domain == netsnmpUDPDomain) {
-#endif
-                    /*
-                     * This is kind of bletcherous -- it breaks the opacity of
-                     * transport_data but never mind -- the alternative is a
-                     * lot of munging strings from f_fmtaddr.
-                     */
-                    struct sockaddr_in *addr =
-                        (struct sockaddr_in *) pdu->transport_data;
-                    if (addr != NULL && 
-		    pdu->transport_data_length == sizeof(struct sockaddr_in)) {
-                        host = gethostbyaddr((char *) &(addr->sin_addr),
-					     sizeof(struct in_addr), AF_INET);
-                    }
-                }
-            }
+            break;
 
-            if (Print) {
-                if (trap2_fmt_str == NULL || trap2_fmt_str[0] == '\0') {
-                    trunc = !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
-                                                 trap2_std_str, pdu,
-                                                 transport);
-                } else {
-                    trunc = !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
-                                                 trap2_fmt_str, pdu,
-                                                 transport);
-                }
-                snmp_log(LOG_INFO, "%s%s", rbuf, (trunc?" [TRUNCATED]":""));
-            }
-
-            if (Syslog) {
-                memset(rbuf, 0, o_len);
-                o_len = 0;
-                for (vars = pdu->variables; vars;
-                     vars = vars->next_variable) {
-                    trunc =  !sprint_realloc_variable(&rbuf, &r_len, &o_len, 1,
-						      vars->name,
-						      vars->name_length, vars);
-                    if (!trunc) {
-                        trunc = !snmp_strcat(&rbuf, &r_len, &o_len, 1, ", ");
-                    }
-                    if (trunc) {
+        case SNMP_MSG_TRAP2:
+        case SNMP_MSG_INFORM:
+            /*
+	     * v2c/v3 notifications *should* have snmpTrapOID as the
+	     *    second varbind, so we can go straight there.
+	     *    But check, just to make sure
+	     */
+            vars = pdu->variables;
+            if (vars)
+                vars = vars->next_variable;
+            if (!vars || snmp_oid_compare(vars->name, vars->name_length,
+                                          snmpTrapOid, OID_LENGTH(snmpTrapOid))) {
+	        /*
+		 * Didn't find it!
+		 * Let's look through the full list....
+		 */
+		for ( vars = pdu->variables; vars; vars=vars->next_variable) {
+                    if (!snmp_oid_compare(vars->name, vars->name_length,
+                                          snmpTrapOid, OID_LENGTH(snmpTrapOid)))
                         break;
-                    }
                 }
+                if (!vars) {
+	            /*
+		     * Still can't find it!  Give up.
+		     */
+		    return 1;		/* ??? */
+		}
+	    }
+            memcpy(trapOid, vars->val.objid, vars->val_len);
+            trapOidLen = vars->val_len /sizeof(oid);
+            break;
 
-                if (o_len > 0 && !trunc) {
-                    o_len -= 2;
-                    rbuf[o_len] = '\0';
-                }
+        default:
+            /* SHOULDN'T HAPPEN! */
+            return 1;	/* ??? */
+	}
+        DEBUGMSGTL(( "snmptrapd", "Trap OID: "));
+        DEBUGMSGOID(("snmptrapd", trapOid, trapOidLen));
+        DEBUGMSG(( "snmptrapd", "\n"));
 
-                if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-					    NETSNMP_DS_APP_NUMERIC_IP)) {
-                    /*
-                     * Right, apparently a name lookup is wanted.  This is only
-                     * reasonable for the UDP and TCP transport domains (we
-                     * don't want to try to be too clever here).  
-                     */
-#ifdef SNMP_TRANSPORT_TCP_DOMAIN
-                    if (transport != NULL
-                        && (transport->domain == netsnmpUDPDomain
-                            || transport->domain ==
-                            netsnmp_snmpTCPDomain)) {
-#else
-                    if (transport != NULL
-                        && transport->domain == netsnmpUDPDomain) {
-#endif
-                        /*
-                         * This is kind of bletcherous -- it breaks the
-                         * opacity of transport_data but never mind -- the
-                         * alternative is a lot of munging strings from
-                         * f_fmtaddr.
-                         */
-                        struct sockaddr_in *addr =
-                            (struct sockaddr_in *) pdu->transport_data;
-                        if (addr != NULL && pdu->transport_data_length ==
-                            sizeof(struct sockaddr_in)) {
-                            host = gethostbyaddr((char *)&(addr->sin_addr),
-					      sizeof(struct in_addr), AF_INET);
-                        }
-                    }
-                }
 
-                if (transport != NULL && transport->f_fmtaddr != NULL) {
-                    tstr = transport->f_fmtaddr(transport,
-                                             pdu->transport_data,
-                                             pdu->transport_data_length);
-                    if (! SyslogTrap) {
-						snmp_log(LOG_WARNING, "%s [%s]: Trap %s%s\n",
-                             host ? host->h_name : tstr, tstr, rbuf,
-                             (trunc ? "[TRUNCATED]" : ""));
-					}
-                    free(tstr);
-                } else {
-                    if (! SyslogTrap) {
-						snmp_log(LOG_WARNING, "<UNKNOWN>: Trap %s%s", rbuf,
-                             (trunc ? "[TRUNCATED]\n" : ""));
-					}
-                }
-            }
+        /*
+	 *  OK - We've found the Trap OID used to identify this trap,
+	 *  so locate the handler (or list of handlers) specific to it,
+	 *  and call each of them in turn.....
+	 */
+        traph = netsnmp_get_traphandler(trapOid, trapOidLen);
+	while (traph) {
+            /* XXX - maybe allow a handler to abort further processing ??? */
+	    (*(traph->handler))(pdu, transport, traph);
+	    traph = traph->nexth;
+	}
 
-            if (Event) {
-                event_input(pdu->variables);
-            }
+        /*
+	 *  ... followed by the handlers to be applied to *all* traps
+	 */
+        traph = netsnmp_global_traphandlers;
+	while (traph) {
+	    (*(traph->handler))(pdu, transport, traph);
+	    traph = traph->nexth;
+	}
+        break;
 
-            for (vars = pdu->variables; (vars != NULL) &&
-                 snmp_oid_compare(vars->name, vars->name_length,
-                                  snmptrapoid2, 
-				  sizeof(snmptrapoid2)/sizeof(oid));
-                 vars = vars->next_variable);
-
-            if (vars && vars->type == ASN_OBJECT_ID) {
-                Command = snmptrapd_get_traphandler(vars->val.objid,
-                                                    vars->val_len/sizeof(oid));
-                if (Command) {
-                    do_external(Command, host, pdu, transport);
-                }
-            }
-
-            log_notification(host, pdu, transport);
-
-            if (pdu->command == SNMP_MSG_INFORM) {
-                if ((reply = snmp_clone_pdu2(pdu, SNMP_MSG_RESPONSE)) == NULL){
-                    snmp_log(LOG_ERR,
-			     "couldn't clone PDU for INFORM response\n");
-                } else {
-                    reply->errstat = 0;
-                    reply->errindex = 0;
-                    if (!snmp_send(session, reply)) {
-                        snmp_sess_perror("snmptrapd: Couldn't respond to inform pdu",
-					 session);
-                        snmp_free_pdu(reply);
-                    }
-                }
-            }
-        }
-
-        if (rbuf != NULL) {
-            free(rbuf);
-        }
-    } else if (op == NETSNMP_CALLBACK_OP_TIMED_OUT) {
+    case NETSNMP_CALLBACK_OP_TIMED_OUT:
         fprintf(stderr, "Timeout: This shouldn't happen!\n");
+        break;
+    default:
+        fprintf(stderr, "Unknown operation (%d): This shouldn't happen!\n", op);
+        break;
     }
-    return 1;
+    return 0;
 }
-
-
-static void
-parse_trap1_fmt(const char *token, char *line)
-{
-    trap1_fmt_str = strdup(line);
-}
-
-
-static void
-free_trap1_fmt(void)
-{
-    if (trap1_fmt_str && trap1_fmt_str != trap1_std_str)
-        free((char *) trap1_fmt_str);
-    trap1_fmt_str = NULL;
-}
-
-
-static void
-parse_trap2_fmt(const char *token, char *line)
-{
-    trap2_fmt_str = strdup(line);
-}
-
-
-static void
-free_trap2_fmt(void)
-{
-    if (trap2_fmt_str && trap2_fmt_str != trap2_std_str)
-        free((char *) trap2_fmt_str);
-    trap2_fmt_str = NULL;
-}
-
 
 void
 usage(void)
@@ -929,18 +710,12 @@ main(int argc, char *argv[])
     /*
      * register our configuration handlers now so -H properly displays them 
      */
-    register_config_handler("snmptrapd", "traphandle",
-                            snmptrapd_traphandle, NULL,
-                            "oid|\"default\" program [args ...] ");
+    snmptrapd_register_configs( );
     register_config_handler("snmptrapd", "createUser",
                             usm_parse_create_usmUser, NULL,
                            "username (MD5|SHA) passphrase [DES [passphrase]]");
     register_config_handler("snmptrapd", "usmUser",
                             usm_parse_config_usmUser, NULL, NULL);
-    register_config_handler("snmptrapd", "format1",
-                            parse_trap1_fmt, free_trap1_fmt, "format");
-    register_config_handler("snmptrapd", "format2",
-                            parse_trap2_fmt, free_trap2_fmt, "format");
 
     /*
      * we need to be called back later 
@@ -1197,9 +972,31 @@ main(int argc, char *argv[])
         listen_ports = default_port;
     }
 
+    /*
+     * I'm being lazy here, and not checking the
+     * return value from these registration calls.
+     * Don't try this at home, children!
+     */
     if (!Print) {
         Syslog = 1;
+        netsnmp_add_global_traphandler(syslog_handler);
+    } else {
+        netsnmp_add_global_traphandler(print_handler);
     }
+    netsnmp_add_global_traphandler(notification_handler);
+    if (Event) {
+        netsnmp_add_traphandler(event_handler, risingAlarm,
+                                    OID_LENGTH(risingAlarm));
+        netsnmp_add_traphandler(event_handler, fallingAlarm,
+                                    OID_LENGTH(fallingAlarm));
+        netsnmp_add_traphandler(event_handler, unavailableAlarm,
+                                    OID_LENGTH(unavailableAlarm));
+	/* XXX - might be worth setting some "magic data"
+	 * in the traphandler structure that 'event_handler'
+	 * can use to avoid checking the trap OID values.
+	 */
+    }
+
 #ifdef USING_AGENTX_SUBAGENT_MODULE
     /*
      * we're an agentx subagent? 
@@ -1246,8 +1043,8 @@ main(int argc, char *argv[])
     if (trap1_fmt_str_remember) {
         free_trap1_fmt();
         free_trap2_fmt();
-        trap1_fmt_str = strdup(trap1_fmt_str_remember);
-        trap2_fmt_str = strdup(trap1_fmt_str_remember);
+        print_format1 = strdup(trap1_fmt_str_remember);
+        print_format2 = strdup(trap1_fmt_str_remember);
     }
 
     if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
@@ -1407,7 +1204,7 @@ main(int argc, char *argv[])
             trapd_update_config();
             if (trap1_fmt_str_remember) {
                 free_trap1_fmt();
-                trap1_fmt_str = strdup(trap1_fmt_str_remember);
+                print_format1 = strdup(trap1_fmt_str_remember);
             }
             reconfig = 0;
         }
