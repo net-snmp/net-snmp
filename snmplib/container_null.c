@@ -115,8 +115,15 @@ _null_for_each(netsnmp_container *container, netsnmp_container_obj_func *f,
 static netsnmp_void_array *
 _null_get_subset(netsnmp_container *container, void *data)
 {
-    DEBUGMSGTL(("container:null:","in\n"));
+    DEBUGMSGTL(("container:null:get_subset","in\n"));
     return NULL;
+}
+
+static void
+_null_clear(netsnmp_container *container, netsnmp_container_obj_func *f,
+                 void *context)
+{
+    DEBUGMSGTL(("container:null:clear","in\n"));
 }
 
 /**********************************************************************
@@ -151,6 +158,7 @@ netsnmp_container_get_null(void)
     c->get_subset = _null_get_subset;
     c->get_iterator = 0; /* _null_iterator; */
     c->for_each = _null_for_each;
+    c->clear = _null_clear;
        
     return c;
 }

@@ -421,6 +421,13 @@ _iterator_for_each(iterator_info *ii, netsnmp_container_obj_func *f,
         ii->cleanup_loop_ctx(ii->user_ctx,&loop_ctx);
 }
 
+static void
+_iterator_clear(netsnmp_container *container, netsnmp_container_obj_func *f,
+                 void *context)
+{
+    snmp_log(LOG_WARNING,"clear is meaningless for iterator container.\n");
+}
+
 /**********************************************************************
  *
  */
@@ -464,12 +471,13 @@ netsnmp_container_iterator_get(void *iterator_user_ctx,
     ii->c.init = NULL;
     ii->c.insert = (netsnmp_container_op*)_iterator_insert;
     ii->c.remove = (netsnmp_container_op*)_iterator_remove;
-/*     ii->c.release = (netsnmp_container_op*)_iterator_release; */
+    ii->c.release = (netsnmp_container_op*)_iterator_release;
     ii->c.find = (netsnmp_container_rtn*)_iterator_find;
     ii->c.find_next = (netsnmp_container_rtn*)_iterator_find_next;
     ii->c.get_subset = NULL;
     ii->c.get_iterator = NULL;
     ii->c.for_each = (netsnmp_container_func*)_iterator_for_each;
+    ii->c.clear = _iterator_clear;
 
     /*
      * init iterator structure with user functions
