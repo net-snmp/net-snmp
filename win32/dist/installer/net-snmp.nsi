@@ -229,6 +229,21 @@ Section "Net-SNMP Trap Service" SEC03
   File "share\snmp\snmpconf-data\snmptrapd-data\authentication"
   File "share\snmp\snmpconf-data\snmptrapd-data\logging"
   File "share\snmp\snmpconf-data\snmptrapd-data\runtime"
+
+  ; If we are on an NT system then install the service batch files.
+  Call IsNT
+  Pop $1
+  StrCmp $1 0 NoTrapService
+
+  SetOutPath "$INSTDIR\"
+  File "registertrapd.bat"
+  File "unregistertrapd.bat"
+  Call CreateTrapdBats
+  
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Register Trap Service.lnk" "$INSTDIR\registertrapd.bat"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Trap Service.lnk" "$INSTDIR\unregistertrapd.bat"
+  
+  NoTrapService:
 SectionEnd
 
 Section "Perl SNMP Modules" SEC04
@@ -474,6 +489,10 @@ Section Uninstall
   ReadRegStr $ICONS_GROUP ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "${PRODUCT_STARTMENU_REGVAL}"
   Delete "$INSTDIR\uninst.exe"
   Delete "$INSTDIR\README.txt"
+  Delete "$INSTDIR\registeragent.bat"
+  Delete "$INSTDIR\unregisteragent.bat"
+  Delete "$INSTDIR\registertrapd.bat"
+  Delete "$INSTDIR\unregistertrapd.bat"
   Delete "$INSTDIR\perl\Net-SNMP.ppd"
   Delete "$INSTDIR\perl\x86\Net-SNMP.tar.gz"
   Delete "$INSTDIR\include\net-snmp\net-snmp-config.h"
@@ -524,6 +543,9 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\formatting"
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\snmpconf-config"
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\traphandle"
+  Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\authentication"
+  Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\logging"
+  Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\runtime"
   Delete "$INSTDIR\share\snmp\snmp.conf"
   Delete "$INSTDIR\share\snmp\mibs\AGENTX-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\DISMAN-EVENT-MIB.txt"
@@ -589,13 +611,13 @@ Section Uninstall
   Delete "$INSTDIR\etc\snmp\snmp.conf"
   Delete "$INSTDIR\etc\snmp\snmpd.conf"
   Delete "$INSTDIR\etc\snmp\snmptrapd.conf"
-  Delete "$INSTDIR\registeragent.bat"
-  Delete "$INSTDIR\unregisteragent.bat"
   Delete "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk"
   Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
   Delete "$SMPROGRAMS\$ICONS_GROUP\README.lnk"
   Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk"
   Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Register Trap Service.lnk"
+  Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Trap Service.lnk"
 
   RMDir "$SMPROGRAMS\$ICONS_GROUP\Service"
   RMDir "$SMPROGRAMS\$ICONS_GROUP"
