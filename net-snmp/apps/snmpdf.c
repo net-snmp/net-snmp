@@ -352,7 +352,7 @@ main(int argc, char *argv[])
     }
 
     if (count == 0) {
-        fprintf(stderr, "Failed to locate any partions.\n");
+        fprintf(stderr, "Failed to locate any partitions.\n");
         exit(1);
     }
 
