@@ -139,30 +139,32 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
 
   memcpy(&myvp,vp,sizeof(struct variable));
 
-/*  printf("-");
-  print_mib_oid(name,*length);
-  printf("  / %d\n",vp->magic); */
-  
+  long_ret = *length;
   for(i=1; i<= numrelocs; i++) {
     exten = get_exten_instance(relocs,i);
-    if (exten->miblen != 0){
+    if (exten->miblen == vp->namelen-1){
       memcpy(myvp.name,exten->miboid,exten->miblen*sizeof(int));
-      memcpy(tname,name,*length*sizeof(int));
-      myvp.name[vp->namelen-1] = vp->name[vp->namelen-1]; 
-      myvp.namelen = exten->miblen+1;
-      if (checkmib(&myvp,name,length,exact,var_len,write_method,newname,
-                   ((vp->magic == ERRORMSG) ? MAXMSGLINES : 1)))
+      myvp.namelen = exten->miblen;
+      *length = vp->namelen;
+      memcpy(tname,vp->name,vp->namelen*sizeof(int));
+      if (checkmib(&myvp,tname,length,-1,var_len,write_method,newname,
+                   -1))
         break;
       else
         exten = NULL;
     }
   }
-  if (i > numrelocs || exten == NULL)
+  if (i > numrelocs || exten == NULL) {
+    *length = long_ret;
+    *var_len = NULL;
+    *write_method = NULL;
     return(NULL);
+  }
 
-/*  printf("+");
-  print_mib_oid(name,*length);
-  printf("  / %d\n",vp->magic); */
+  *length = long_ret;
+  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,
+               ((vp->magic == ERRORMSG) ? MAXMSGLINES : 1)))
+    return(NULL);
   
   switch (vp->magic) {
     case MIBINDEX:
