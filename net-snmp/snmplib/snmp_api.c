@@ -552,6 +552,7 @@ _init_snmp (void)
 
     if (have_done_init) return;
     have_done_init = 1;
+    Reqid = 1;
 
     snmp_res_init();	/* initialize the mt locking structures */
     init_mib_internals();
