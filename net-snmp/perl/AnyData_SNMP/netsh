@@ -519,3 +519,210 @@ manual page for details on what they mean:
 ";
     exit;
 }
+
+__END__
+
+=head1 NAME
+
+netsh - A shell environment for interacting with networking devices
+
+=head1 SYNOPSIS
+
+netsh [snmpcmd arguments] hostname[,hostname...] [command]
+
+=head1 OPTIONAL PERL MODULES
+
+There are some optional perl modules which make using the shell nicer
+in general.  These modules are:
+
+  Text::FormatTable
+  Term::ReadLine::Gnu or Term::ReadLine::Perl
+  Term::ANSIColor
+
+You can install these by running [as root]:
+
+  perl -MCPAN -e shell
+  cpan> install Text::FormatTable
+  ...
+
+It is B<strongly> recommend you at least install the Text::FormatTable
+module, and if you like command line editing one of the two extra
+Term::ReadLine modules (Gnu being the better of the two).
+
+=head1 DESCRIPTION
+
+The netsh script provides an interactive, console-like environment
+suitable for monitoring and manipulating data within networking
+devices.  The environment is highly extensible through command
+aliases and easy-to-use SQL-like queries.
+
+It is implemented on top of the SNMP protocol using the net-snmp
+package and perl.  See the snmpcmd and snmp.conf manual pages for
+details on configuring net-snmp for authentication information for
+the networking devices you wish to access.
+
+=head1 ABOUT THE EXAMLPES IN THIS DOCUMENT
+
+All the examples in this document are exact cut-n-pastes from the
+inside of the netsh shell.  This includes the "netsh> " prompt and
+possibly other prompts as well.
+
+=head1 COMMANDS
+
+The following is a list of the basic core commands supported by
+netsh.  Many default aliases are also supplied, some of which are
+listed in the next section.  At the command prompt type "alias" for
+a full list of all the aliases and their definitions.
+
+=over
+
+=item show columns from TABLE
+
+=item select ... 
+
+=item update ...
+
+=item insert ...
+
+=item delete ...
+
+netsh supports the standard sql-like language queries of snmp tables.
+These are implemented via the SQL::Statement parser, so any form of
+expression it accepts netsh will accept as well.
+
+Examples:
+
+  netsh> show columns from ifTable
+  +-----------------+
+  |           Column|
+  +-----------------+
+  |          ifIndex|
+  ...
+  netsh> select * from ifTable
+  ... [output not shown]
+  netsh> select tcpConnState, tcpConnRemotelAddress from tcpConnTable where tcpConnState = established
+  ... [output not shown]
+  netsh> update ifTable set ifAdminStatus = up where ifOperStatus = down
+  ... [output not shown]
+
+=item SNMPOBJECT
+
+Simple lists of objects may be given which will directly request or
+operate on those objects.  See printf below for controlling the
+formatting of results
+
+Examples:
+
+  netsh> sysContact.0, sysLocation.0
+  hardaker@somewhere.net my location
+  netsh> sysContact.0 = my new contact information
+
+=item alias my_command some other command
+
+or
+
+=back
+
+alias my_many_commands {
+  command1
+  command2
+  prompt NUMBER question
+
+}
+
+=over
+
+=item
+
+You can create aliases of your frequently used commands by aliasing
+them to an easy to remember name.  \N parameters in the defined
+command will be replaced by the positional argument of options passed
+to the alias name.
+
+For multi-line defined aliases, optional prompts may be given to
+request information from the user when the NUMBERth argument is not
+given to the alias.  If it is not given, the prompt will be printed
+and the user will be asked to input a value for it.  This allows the
+easy definition of interactive commands.  The value will be inserted
+in alias parts containing \N substitution requests.
+
+  netsh> alias interfaces select ifDescr from ifTable
+  netsh> interfaces
+  +-------+
+  |ifDescr|
+  +-------+
+  |     lo|
+  |   eth0|
+  +-------+
+  netsh> alias interface select ifDescr, ifSpeed from ifTable where ifDescr = '\1'
+  netsh> interface eth0
+  +-------+--------+
+  |ifDescr| ifSpeed|
+  +-------+--------+
+  |   eth0|10000000|
+  +-------+--------+
+
+=item printf FORMATSTRING COMMAND
+
+Allows B<careful> formatting of results returned by the commands.
+
+Example:
+
+  netsh> alias interface {
+  define interface> printf "interface %s is running at %d Mb/s\n" select ifDescr, ifSpeed from ifTable where ifDescr = '\1'
+  define interface> prompt 1 Enter the interface to describe:
+  define interface> }
+  netsh> interface
+  Enter the interface to describe: eth0
+  interface eth0 is running at 10000000 Mb/s
+
+To list the definition of an already defined command, simply exclude
+the definition and netsh will report the definition to you:
+
+  netsh> alias interface
+  alias interface {
+    printf "interface %s is running at %d Mb/s\n" select ifDescr, ifSpeed from ifTable where ifDescr = '\1'
+    prompt 1 Enter the interface to describe:
+  }
+
+To list all the aliases defined in the system, just type "alias" by itself.
+
+=item watch [TIME] COMMAND
+
+Continually watches the results of the COMMAND being run, which is run
+every TIME seconds.  For select statements, it will attempt to mark
+the changing values from one screen to the next by surrounding them
+with "*"s for easy picking out on the screen.
+
+=item rehash
+
+Re-load the alias definitions files in the common directory, as
+well as those files found in $HOME/.snmp/netsh.
+
+=item source FILE
+
+loads definitons and commands from FILE into the running environment.
+
+=back
+
+=head1 FILES
+
+By default, netsh will source all the definition files it can find.
+It does this by first reading everything in
+/usr/local/share/snmp/netsh/* and then reading everything in
+$HOME/.snmp/netsh/*.  Everything contained in these files are
+commands, but most frequently they entirely consist of aliases
+definitions.
+
+=head1 AUTHOR
+
+bugs, comments, questions to net-snmp-users@lists.sourceforge.net
+
+=head1 Copyright
+
+     Copyright (c) 2002 Networks Associates Technology, Inc. All
+     rights reserved.  This program is free software; you can
+     redistribute it and/or modify it under the same terms as Perl
+     itself.
+
+=cut
