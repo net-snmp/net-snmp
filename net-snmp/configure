@@ -1604,7 +1604,7 @@ if test "x$with_shared" = "xyes"; then
 
     esac
 else
-    LIB_EXTENSION="a"
+    SHLIB_EXTENSION="a"
     SHLIB_LD_CMD="ar cr"
     SHLIB_LDCONFIG_CMD='$(RANLIB)'
 fi
