@@ -153,12 +153,13 @@ u_char *var_simple_proxy(struct variable *vp,
     oid newname[MAX_OID_LEN];
     int i, j, rtest=0, fd, newlen, last;
     static long long_ret;
+    static char nullstr_ret[] = "";
     static char buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
     static oid  objid[MAX_OID_LEN];
     struct extensible *passthru;
     FILE *file;
     struct simple_proxy *sp;
-    u_char *ret;
+    u_char *ret = NULL;
     struct snmp_pdu *pdu, *response;
     int status;
     int ourlength;
@@ -224,8 +225,7 @@ u_char *var_simple_proxy(struct variable *vp,
                 status = snmp_synch_response(sp->sess, pdu, &response);
 
                 /* copy the information out of it. */
-                if (status == STAT_SUCCESS && response &&
-                    response->variables->val.integer) {
+                if (status == STAT_SUCCESS && response) {
                     /* "there can be only one" */
                     struct variable_list *var = response->variables;
 
@@ -271,7 +271,12 @@ u_char *var_simple_proxy(struct variable *vp,
                     }
 
                     /* copy the value */
-                    memdup(&ret, (void *) var->val.integer, var->val_len);
+                    if ((var->type == ASN_OCTET_STR || var->type == ASN_BIT_STR)
+                        && var->val.integer == 0) {
+                        ret = nullstr_ret;
+                    } else {
+                        memdup(&ret, (void *) var->val.integer, var->val_len);
+                    }
                     *var_len = var->val_len;
                     vp->type = var->type;
 
