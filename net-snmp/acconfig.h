@@ -323,8 +323,6 @@
 /* configure options specified */
 #define CONFIGURE_OPTIONS ""
 
-/* debugging macros */
-
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
 # define strchr index
