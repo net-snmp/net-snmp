@@ -355,10 +355,10 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
     case ERRORMSG:
       if (iserror)
 	if (disks[disknum].minimumspace >= 0)
-	  sprintf(errmsg,"%s: under %d left (= %d)",disks[disknum].path,
+	  sprintf(errmsg,"%s: less than %d free (= %d)",disks[disknum].path,
                   disks[disknum].minimumspace, (int) vfs.f_bavail);
 	else
-	  sprintf(errmsg,"%s: under %d%% left (= %d%%)",disks[disknum].path,
+	  sprintf(errmsg,"%s: less than %d%% free (= %d%%)",disks[disknum].path,
 		  disks[disknum].minpercent, percent);
       else
         errmsg[0] = 0;
@@ -409,10 +409,10 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
     case ERRORMSG:
       if (iserror)
 	if (disks[disknum].minimumspace >= 0)
-          sprintf(errmsg,"%s: under %d left (= %d)",disks[disknum].path,
+          sprintf(errmsg,"%s: less than %d free (= %d)",disks[disknum].path,
                   disks[disknum].minimumspace, avail * filesys.fs_fsize/1024);
 	else
-	  sprintf(errmsg,"%s: under %d%% left (= %d%%)",disks[disknum].path,
+	  sprintf(errmsg,"%s: less than %d%% free (= %d%%)",disks[disknum].path,
 		  disks[disknum].minpercent, percent);
       else
         errmsg[0] = 0;
