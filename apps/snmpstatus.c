@@ -180,7 +180,11 @@ retry:
             fprint_objid(stderr, vars->name, vars->name_length);
           fprintf(stderr, "\n");
         }
-        if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL)
+
+        /* retry if the errored variable was successfully removed */
+        pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
+        snmp_free_pdu(response);
+        if (pdu != NULL)
           goto retry;
       }
     } else if (status == STAT_TIMEOUT){
