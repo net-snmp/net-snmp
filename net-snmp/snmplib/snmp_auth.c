@@ -70,8 +70,6 @@ SOFTWARE.
 #include "md5.h"
 #include "acl.h"
 
-void md5Digest();
-
 /* this should be set to TRUE for machines that use network byte ordering,
 ** and FALSE for machines that byte swap.
 */
