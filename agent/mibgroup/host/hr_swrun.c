@@ -788,13 +788,23 @@ var_hrswrun(struct variable *vp,
 	    		long_return = 3;	/* notRunnable */
 			break;
 		case 0:
+#ifdef SSWAP
+		case SSWAP:
+#endif
+#ifdef SSLEEP
 		case SSLEEP:
+#endif
 #ifdef SWAIT
 		case SWAIT:
 #endif
 	    		long_return = 2;	/* runnable */
 			break;
+#ifdef SACTIVE
+		case SACTIVE:
+#endif
+#ifdef SRUN
 		case SRUN:
+#endif
 #ifdef SONPROC
 		case SONPROC:
 #endif
@@ -899,6 +909,11 @@ var_hrswrun(struct variable *vp,
 		    long_return = 0;
 		}
 	    }
+#elif defined(aix4)
+	    long_return = proc_table[LowProcIndex].p_ru.ru_utime.tv_sec*100 +
+			  proc_table[LowProcIndex].p_ru.ru_utime.tv_usec/10000 +
+	    		  proc_table[LowProcIndex].p_ru.ru_stime.tv_sec*100 +
+			  proc_table[LowProcIndex].p_ru.ru_stime.tv_usec/10000;
 #else
 	    long_return = proc_table[LowProcIndex].p_utime.tv_sec*100 +
 			  proc_table[LowProcIndex].p_utime.tv_usec/10000 +
