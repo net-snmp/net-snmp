@@ -1703,7 +1703,7 @@ AC_HEADER_TIME
 # so we do it by hand.
 AC_MSG_CHECKING([for socklen_t])
 AC_CACHE_VAL(ac_cv_type_$1,
-[AC_EGREP_CPP([socklen_t@<:@^a-zA-Z_0-9@:>@>>],
+[AC_EGREP_CPP([socklen_t@<:@^a-zA-Z_0-9@:>@],
 [#include <sys/types.h>
 #if STDC_HEADERS
 #include <stdlib.h>
