@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 /*
@@ -231,16 +242,16 @@ var_diskio(struct variable * vp,
         *var_len = strlen(ksp->ks_name);
         return (u_char *) ksp->ks_name;
     case DISKIO_NREAD:
-        long_ret = (signed long) kio.nread;
+        long_ret = (uint32_t) kio.nread;
         return (u_char *) & long_ret;
     case DISKIO_NWRITTEN:
-        long_ret = (signed long) kio.nwritten;
+        long_ret = (uint32_t) kio.nwritten;
         return (u_char *) & long_ret;
     case DISKIO_READS:
-        long_ret = (signed long) kio.reads;
+        long_ret = (uint32_t) kio.reads;
         return (u_char *) & long_ret;
     case DISKIO_WRITES:
-        long_ret = (signed long) kio.writes;
+        long_ret = (uint32_t) kio.writes;
         return (u_char *) & long_ret;
 
     default:
@@ -824,4 +835,5 @@ var_diskio(struct variable * vp,
     return NULL;
 }
 #endif                          /* darwin */
+
 
