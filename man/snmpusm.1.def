@@ -22,6 +22,10 @@ USER CLONEFROM-USER
 [COMMON OPTIONS] [-Co] [-Ca] [-Cx]
 .B passwd
 OLD-PASSPHRASE NEW-PASSPHRASE
+.br
+.B snmpusm
+[COMMON OPTIONS] [-Co] [-Ca] [-Cx]
+.B changekey
 
 .SH DESCRIPTION
 .B snmpusm
@@ -116,6 +120,24 @@ you should immediately change the new user's passphrase.
 This command will only change the passphrase of the (SNMPv3) user
 issuing the command.  It is not possible to change the passphrases
 for other user entries, even given suitable write access.
+
+.IP
+.B snmpusm
+changekey
+
+.PP
+This command changes the key in a perfect-forward-secrecy compliant
+way through a diffie-helman exchange.  The remote agent must support
+the SNMP-USM-DH-OBJECTS-MIB for this command to work.  The resulting
+keys are printed to the console and may be then set in future command
+invocations using the --defAuthLocalizedKey and --defPrivLocalizedKey
+or in your snmp.conf file using the defAuthLocalizedKey and
+defPrivLocalizedKey keywords.
+
+.PP
+Note that since these keys are randomly generated based on a
+diffie helman exchange, they are no longer derived from a more easily
+typed password.  They are, however, much more secure.
 
 .SH EXAMPLES
 .PP
