@@ -649,15 +649,7 @@ sub gettable {
 
 		if($row_oid =~ m/($table_root_oid)/) {
 
-			if(($row_type eq "OCTETSTR") && ($row_value =~ m/^\W/)) {
-
-				# If the value returned is an octet string and
-				# includes non-word or non-digit values, unpack
-				# them to produce cleartext
-
-				$row_value = unpack("H*", $row_value);
-
-			} elsif($row_type eq "OBJECTID") {
+  		        if ($row_type eq "OBJECTID") {
 
 				# If the value returned is an OID, translate this
 				# back in to a textual OID
