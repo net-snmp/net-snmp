@@ -250,8 +250,14 @@ var_hrfilesys(vp, name, length, exact, var_len, write_method)
 	        long_return = 1;	/* Read-Write */
 	    return (u_char *)&long_return;
 	case HRFSYS_BOOT:
-	    if ( HRFS_entry->mnt_dir[0] == '/' && HRFS_entry->mnt_dir[1] == 0  )
-		long_return = 1;		/* root is probably bootable! */
+          if (
+#ifdef solaris2
+            HRFS_entry->mnt_mountp[0] == '/' && HRFS_entry->mnt_mountp[1] == 0
+#else
+	    HRFS_entry->mnt_dir[0] == '/' && HRFS_entry->mnt_dir[1] == 0
+#endif
+            )
+              long_return = 1;		/* root is probably bootable! */
 	    else
 		long_return = 2;		/* others probably aren't */
 	    return (u_char *)&long_return;
