@@ -19,12 +19,12 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAPD 8 "15 May 2000"
+.TH SNMPTRAPD 8 "15 Jun 2001"
 .UC 4
 .SH NAME
 snmptrapd - Receive and log snmp trap messages.
 .SH SYNOPSIS
-snmptrapd [-h] [-P] [-s] [-p port] [-d] [-e] [-D tokens] [-l [d0-7]] [-f] [-H] [-a] [-O oidopts] [-C] [-c confFile] [-F FORMAT]
+snmptrapd [-h] [-P] [-s] [-p port] [-d] [-e] [-D tokens] [-l [d0-7]] [-f] [-H] [-a] [-n] [-O oidopts] [-C] [-c confFile] [-F FORMAT]
 .SH DESCRIPTION
 Snmptrapd
 is an SNMP application that receives and logs snmp trap messages
@@ -51,6 +51,8 @@ the level of LOG_WARNING, and to the LOG_LOCAL0 facility (by
 default).  The demon will also fork away from its caller when
 the syslog facilities are used.
 This is the default unless the '-P' flag is used.
+.IP "-n"
+Don't do reverse translation from IP address to host name.
 .IP "-l [d0-7]"
 Specifies the syslog facility to use, demon or local[0-7].
 .IP "-a"
