@@ -1,7 +1,20 @@
-TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bin/snmpbulkwalk bin/snmptest bin/snmptrapd bin/snmpnetstat bin/snmpd
+#
+# Makefile.in (at the root of ucd-snmp)
+#
 
-SUBDIRS = snmplib agent apps local ov man
-INSTALLDIRS = snmplib agent apps local man mibs
+TARG		=	bin/snmpget bin/snmpgetnext bin/snmpset 	\
+			bin/snmptranslate bin/snmpwalk bin/snmpbulkwalk \
+			bin/snmptest bin/snmptrapd bin/snmpnetstat bin/snmpd
+
+SUBDIRS		= snmplib agent apps local ov man
+INSTALLDIRS	= snmplib agent apps local man mibs
+TESTDIRS	= testing
+
+CPP		= @CPP@ 						\
+			-I$(srcdir)/agent/mibgroup -I. -I$(srcdir)	\
+			-DDONT_INC_STRUCTS -DBINDIR=$(bindir) 		\
+			$(EXTRACPPFLAGS)
+
 
 CPP = @CPP@ -I$(srcdir)/agent/mibgroup -I. -I$(srcdir) -DDONT_INC_STRUCTS -DBINDIR=$(bindir) $(EXTRACPPFLAGS)
 
@@ -10,21 +23,35 @@ INSTALLHEADERS=ucd-snmp-config.h $(srcdir)/version.h
 all:	sedscript EXAMPLE.conf subdirs ucd-snmp-config.h
 
 sedscript: sedscript.in config.h agent/mibgroup/mibdefs.h
-	$(CPP) -DPREFIX=$(prefix) -DLIBDIR=$(libdir) -DDATADIR=$(datadir) $(srcdir)/sedscript.in | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;' | egrep '^s[/#]' > sedscript
+	$(CPP) -DPREFIX=$(prefix) -DLIBDIR=$(libdir) -DDATADIR=$(datadir)    \
+		$(srcdir)/sedscript.in |				     \
+		sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;' |         \
+		egrep '^s[/#]' > sedscript
+
 
 ucd-snmp-config.h:
 	@egrep -v "SYSTEM_INCLUDE|MACHINE_INCLUDE|mib_module" config.h > ucd-snmp-config.h
 
 subdirs:
-	for i in $(SUBDIRS) ; do \
-        ( cd $$i ; $(MAKE) ) ; \
+	for i in $(SUBDIRS) ; do	\
+        ( cd $$i ; $(MAKE) ) ;		\
 	done
+
+
+test: all testdirs
+
+testdirs:
+	for i in $(TESTDIRS) ; do	\
+        ( cd $$i ; $(MAKE) ) ;		\
+	done
+
 
 distall: ${srcdir}/configure ${srcdir}/config.h 
 
+
 install:    all installdirs
-	for i in $(INSTALLDIRS) ; do \
-        ( cd $$i ; $(MAKE) install ) ; \
+	for i in $(INSTALLDIRS) ; do	\
+        ( cd $$i ; $(MAKE) install ) ;	\
 	done
 	@for i in $(INSTALLHEADERS) ; do \
 		$(INSTALL) $$i $(includedir) ; \
@@ -37,23 +64,28 @@ installdirs:
 
 apps/snmpget apps/snmpgetnext apps/snmpset apps/snmptranslate apps/snmpwalk apps/snmpbulkwalk apps/snmptest apps/snmptrapd apps/snmpnetstat/snmpnetstat agent/snmpd: makeall
 
+
 depend:
 	cd snmplib; make depend
 	cd apps; make depend
 	cd agent; make depend
+	cd testing; make depend
 
 nosysdepend:
 	cd snmplib; make nosysdepend
 	cd apps; make nosysdepend
 	cd agent; make nosysdepend
+	cd testing; make nosysdepend
 
 makefileindepend:
 	cd snmplib; make makefileindepend
 	cd apps; make makefileindepend
 	cd agent; make makefileindepend
+	cd testing; make makefileindepend
+
 
 clean:
-	for i in $(SUBDIRS) ; do \
+	for i in $(SUBDIRS) $(TESTDIRS); do \
         ( cd $$i ; $(MAKE) clean ) ; \
 	done
 	rm -f EXAMPLE.conf sedscript ucd-snmp.txt
@@ -62,16 +94,27 @@ distclean: clean configclean
 
 configclean:
 	rm -f config.cache config.status config.log config.h
-	rm -f snmplib/Makefile Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/mibgroup/Makefile local/Makefile
+	rm -f Makefile snmplib/Makefile				\
+		agent/Makefile agent/mibgroup/Makefile		\
+		apps/Makefile  apps/snmpnetstat/Makefile	\
+		local/Makefile testing/Makefile
 	rm -r agent/dlmods/Makefile
-	rm -f mib_module_config.h agent/mibgroup/mib_module_includes.h agent/mibgroup/mib_module_inits.h agent/mibgroup/mib_module_loads.h agent/mibgroup/mib_module_dot_conf.h
+	rm -f mib_module_config.h			\
+		agent/mibgroup/mib_module_includes.h 	\
+		agent/mibgroup/mib_module_inits.h 	\
+		agent/mibgroup/mib_module_loads.h 	\
+		agent/mibgroup/mib_module_dot_conf.h
+	rm -f *.core
+
 
 configure: configure.in aclocal.m4
 	cd ${srcdir} && autoconf
 	echo "Please run configure now."
 	sh -c exit 2
 
+
 # autoheader might not change config.h.in, so touch a stamp file.
+#
 config.h.in: stamp-h.in
 stamp-h.in: configure.in acconfig.h
 	cd ${srcdir} && autoheader

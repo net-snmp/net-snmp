@@ -54,7 +54,6 @@ int writeVersion __P((int, u_char *,u_char, int, u_char *,oid*, int));
 int writeSystem __P((int, u_char *,u_char, int, u_char *,oid*, int));
 int header_system __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
-
 /* snmpd.conf config parsing */
 
 void system_parse_config_sysloc(word, cptr)
@@ -84,7 +83,6 @@ void system_parse_config_syscon(word, cptr)
     config_perror(tmpbuf);
   }
 }
-
 
 	/*********************
 	 *
@@ -203,15 +201,7 @@ var_system(vp, name, length, exact, var_len, write_method)
             return (u_char *)version_id;
         case UPTIME:
             gettimeofday(&now, NULL);
-            now.tv_sec--;
-            now.tv_usec += 1000000L;
-            diff.tv_sec = now.tv_sec - starttime.tv_sec;
-            diff.tv_usec = now.tv_usec - starttime.tv_usec;
-            if (diff.tv_usec > 1000000L){
-                diff.tv_usec -= 1000000L;
-                diff.tv_sec++;
-            }
-            long_return = ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
+            long_return = calculate_time_diff(&now, &starttime);
             return ((u_char *) &long_return);
         case SYSCONTACT:
             *var_len = strlen(sysContact);
@@ -274,8 +264,8 @@ writeVersion(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 	printf("bad length\n");
 	return SNMP_ERR_WRONGLENGTH;
     }
-    size = sizeof(buf);
-    asn_parse_string(var_val, &bigsize, &var_val_type, buf, &size);
+    memcpy(buf, var_val, var_val_len);
+    buf[var_val_len] = 0;
     for(cp = buf, count = 0; count < size; count++, cp++){
 	if (!isprint(*cp)){
 	    printf("not print %x\n", *cp);
@@ -313,28 +303,26 @@ writeSystem(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 	printf("bad length\n");
 	return SNMP_ERR_WRONGLENGTH;
     }
-    size = sizeof(buf);
-    asn_parse_string(var_val, &bigsize, &var_val_type, buf, &size);
-    for(cp = buf, count = 0; count < size; count++, cp++){
+    cp = (u_char *) var_val;
+    for(cp = cp, count = 0; count < size; count++, cp++){
 	if (!isprint(*cp)){
 	    printf("not print %x\n", *cp);
 	    return SNMP_ERR_WRONGVALUE;
 	}
     }
-    buf[size] = 0;
     if (action == COMMIT){
 	switch((char)name[7]){
 	  case 1:
-	    strcpy(version_descr, (char *) buf);
+	    strcpy(version_descr, (char *) cp);
 	    break;
 	  case 4:
-	    strcpy(sysContact, (char *) buf);
+	    strcpy(sysContact, (char *) cp);
 	    break;
 	  case 5:
-	    strcpy(sysName, (char *) buf);
+	    strcpy(sysName, (char *) cp);
 	    break;
 	  case 6:
-	    strcpy(sysLocation, (char *) buf);
+	    strcpy(sysLocation, (char *) cp);
 	    break;
 	}
     }

@@ -313,8 +313,7 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
         case ASN_COUNTER:
         case ASN_GAUGE:
         case ASN_TIMETICKS:
-          asn_parse_int(var_val,&tmplen,&var_val_type, &tmp,
-                        sizeof(tmp));
+          tmp = *((long *) var_val);
           switch (var_val_type) {
             case ASN_INTEGER:
               sprintf(buf,"integer %d",(int) tmp);
@@ -331,8 +330,7 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
           }
           break;
         case ASN_IPADDRESS:
-          asn_parse_unsigned_int(var_val,&tmplen,&var_val_type, &utmp,
-                                 sizeof(utmp));
+          utmp = *((u_long *) var_val);
           sprintf(buf,"ipaddress %d.%d.%d.%d",
                   (int) ((utmp & 0xff000000) >> (8*3)),
                   (int) ((utmp & 0xff0000) >> (8*2)),
@@ -342,12 +340,13 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
         case ASN_OCTET_STR:
           itmp = sizeof(buf);
           memset(buf2,(0),itmp);
-          asn_parse_string(var_val,&tmplen,&var_val_type,buf2,&itmp);
+          memcpy(buf2, var_val, var_val_len);
+          buf2[var_val_len] = 0;
           sprintf(buf,"string %s",buf2);
           break;
         case ASN_OBJECT_ID:
-          itmp = sizeof(objid);
-          asn_parse_objid(var_val,&tmplen,&var_val_type,objid,&itmp);
+          itmp = var_val_len/sizeof(oid);
+          memcpy(objid, var_val, var_val_len);
           sprint_mib_oid(buf2, objid, itmp);
           sprintf(buf,"objectid \"%s\"",buf2);
           break;

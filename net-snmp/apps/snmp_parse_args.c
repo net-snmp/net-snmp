@@ -52,6 +52,8 @@
 #include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
+#include "scapi.h"
+#include "keytools.h"
 
 #ifdef USE_V2PARTY_PROTOCOL
 #include "party.h"
@@ -67,6 +69,13 @@
 
 int random_access = 0;
 
+#define USM_AUTH_PROTO_MD5_LEN 10
+static oid usmHMACMD5AuthProtocol[]  = { 1,3,6,1,6,3,10,1,1,2 };
+#define USM_AUTH_PROTO_SHA_LEN 10
+static oid usmHMACSHA1AuthProtocol[] = { 1,3,6,1,6,3,10,1,1,3 };
+#define USM_PRIV_PROTO_DES_LEN 10
+static oid usmDESPrivProtocol[]      = { 1,3,6,1,6,3,10,1,2,2 };
+
 void usage __P((void));
 
 void
@@ -74,15 +83,14 @@ snmp_parse_args_usage(outf)
   FILE *outf;
 {
   fprintf(outf,
-        "[-v 1|2c|2p] [-h] [-H] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
+        "[-v 1|2c|2p|3] [-h] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] [-T <B> <T>] [-e <E>] [-E <E>] [-n <N>] [-u <U>] [-l <L>] [-a <A>] [-A <P>] [-x <X>] [-X <P>] hostname> <community>|{<srcParty> <dstParty> <context>}");
 }
 
 void
 snmp_parse_args_descriptions(outf)
   FILE *outf;
 {
-  fprintf(outf, "  -v 1|2c|2p\tspecifies snmp version to use.\n");
-  fprintf(outf, "            \twhere 1 is SNMPv1, 2c is SNMPv2c, and 2p is SNMPv2-party\n");
+  fprintf(outf, "  -v 1|2c|2p|3\tspecifies snmp version to use.\n");
   fprintf(outf, "  -h\t\tthis help message.\n");
   fprintf(outf, "  -H\t\tDisplay configuration file directives understood.\n");
   fprintf(outf, "  -V\t\tdisplay version number.\n");
@@ -100,18 +108,33 @@ snmp_parse_args_descriptions(outf)
   fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
   fprintf(outf,
           "  -c <S> <D>\tset the source/destination clocks for v2p requests.\n");
+  fprintf(outf,
+          "  -T <B> <T>\tset the destination engine boots/time for v3 requests.\n");
+  fprintf(outf, "  -e <E>\tsecurity engine ID (e.g., 800000020109840301).\n");
+  fprintf(outf, "  -E <E>\tcontext engine ID (e.g., 800000020109840301).\n");
+  fprintf(outf, "  -n <N>\tcontext name (e.g., bridge1).\n");
+  fprintf(outf, "  -u <U>\tsecurity name (e.g., bert).\n");
+  fprintf(outf, "  -l <L>\tsecurity level (noAuthNoPriv|authNoPriv|authPriv).\n");
+  fprintf(outf, "  -a <A>\tauthentication protocol (MD5|SHA)\n");
+  fprintf(outf, "  -A <P>\tauthentication protocol pass phrase.\n");
+  fprintf(outf, "  -x <X>\tprivacy protocol (DES).\n");
+  fprintf(outf, "  -X <P>\tprivacy protocol pass phrase\n");
   fprintf(outf, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
   snmp_mib_toggle_options_usage("\t\t  ", outf);
 }
-
+#define BUF_SIZE 512
 int
 snmp_parse_args(argc, argv, session)
   int argc;
-  char *argv[];
+  char **argv;
   struct snmp_session *session;
 {
   int arg;
   char *psz, *cp;
+  char *Apsz = NULL;
+  char *Xpsz = NULL;
+  u_char buf[BUF_SIZE];
+  int bsize;
 #ifdef USE_V2PARTY_PROTOCOL
   static oid src[MAX_NAME_LEN];
   static oid dst[MAX_NAME_LEN];
@@ -150,9 +173,9 @@ snmp_parse_args(argc, argv, session)
         break;
 
       case 'D':
-        snmp_set_do_debugging(1);
+        snmp_set_do_debugging(!snmp_get_do_debugging());
         break;
-        
+
       case 'm':
         if (argv[arg][2] != 0)
           setenv("MIBS",&argv[arg][2], 1);
@@ -176,7 +199,7 @@ snmp_parse_args(argc, argv, session)
           exit(1);
         }
         break;
-        
+
       case 'f':
 	snmp_set_full_objid(1);
 	break;
@@ -247,6 +270,25 @@ snmp_parse_args(argc, argv, session)
         break;
 #endif /* USE_V2PARTY_PROTOCOL */
 
+      case 'T':
+        if (isdigit(argv[arg][2]))
+          session->engineBoots = (u_long)(atol(&(argv[arg][2])));
+        else if ((++arg<argc) && isdigit(argv[arg][0]))
+          session->engineBoots = (u_long)(atol(argv[arg]));
+        else {
+          fprintf(stderr,"Need engine boots value after -c flag.\n");
+          usage();
+          exit(1);
+        }
+        if ((++arg<argc) && isdigit(argv[arg][0]))
+          session->engineTime = (u_long)(atol(argv[arg]));
+        else {
+          fprintf(stderr,"Need engine time value after -c flag.\n");
+          usage();
+          exit(1);
+        }
+        break;
+
       case 'V':
         fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
         exit(0);
@@ -267,6 +309,8 @@ snmp_parse_args(argc, argv, session)
           session->version = SNMP_VERSION_2c;
         } else if (!strcasecmp(psz,"2p")) {
           session->version = SNMP_VERSION_2p;
+        } else if (!strcasecmp(psz,"3")) {
+          session->version = SNMP_VERSION_3;
         } else {
           fprintf(stderr,"Invalid version specified after -v flag: %s\n", psz);
           usage();
@@ -274,16 +318,168 @@ snmp_parse_args(argc, argv, session)
         }
         break;
 
-      case 'h':
-        usage();
-        exit(0);
+      case 'e':
+        if (argv[arg][2] != 0)
+          psz = &(argv[arg][2]);
+        else
+          psz = argv[++arg];
+        if( psz == NULL) {
+          fprintf(stderr,"Need engine ID value after -e flag. \n");
+          usage();
+          exit(1);
+        }
+	if ((bsize = hex_to_binary(psz,buf)) <= 0) {
+          fprintf(stderr,"Need engine ID value after -e flag. \n");
+          usage();
+          exit(1);
+	}
+	session->securityEngineID = malloc(bsize);
+	memcpy(session->securityEngineID, buf, bsize);
+	session->securityEngineIDLen = bsize;
         break;
 
-      case 'H':
-        init_snmp();
-        fprintf(stderr, "Configuration directives understood:\n");
-        read_config_print_usage("  ");
-        exit(0);
+      case 'E':
+        if (argv[arg][2] != 0)
+          psz = &(argv[arg][2]);
+        else
+          psz = argv[++arg];
+        if( psz == NULL) {
+          fprintf(stderr,"Need engine ID value after -E flag. \n");
+          usage();
+          exit(1);
+        }
+	if ((bsize = hex_to_binary(psz,buf)) <= 0) {
+          fprintf(stderr,"Need engine ID value after -E flag. \n");
+          usage();
+          exit(1);
+	}
+	session->contextEngineID = malloc(bsize);
+	memcpy(session->contextEngineID, buf, bsize);
+	session->contextEngineIDLen = bsize;
+        break;
+
+      case 'n':
+        if (argv[arg][2] != 0)
+          psz = &(argv[arg][2]);
+        else
+          psz = argv[++arg];
+        if( psz == NULL) {
+          fprintf(stderr,"Need context name value after -n flag. \n");
+          usage();
+          exit(1);
+        }
+	session->contextName = strdup(psz);
+	session->contextNameLen = strlen(psz);
+        break;
+
+      case 'u':
+        if (argv[arg][2] != 0)
+          psz = &(argv[arg][2]);
+        else
+          psz = argv[++arg];
+        if( psz == NULL) {
+          fprintf(stderr,"Need security user name value after -u flag. \n");
+          usage();
+          exit(1);
+        }
+	session->securityName = strdup(psz);
+	session->securityNameLen = strlen(psz);
+        break;
+
+      case 'l':
+        if (argv[arg][2] != 0)
+          psz = &(argv[arg][2]);
+        else
+          psz = argv[++arg];
+        if( psz == NULL) {
+          fprintf(stderr,"Need security level value after -l flag. \n");
+          usage();
+          exit(1);
+        }
+        if (!strcmp(psz,"noAuthNoPriv") || !strcmp(psz,"1") ||
+            !strcmp(psz,"nanp")) {
+          session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
+        } else if (!strcmp(psz,"authNoPriv") || !strcmp(psz,"2") ||
+            !strcmp(psz,"anp")) {
+          session->securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
+        } else if (!strcmp(psz,"authPriv") || !strcmp(psz,"3") ||
+            !strcmp(psz,"ap")) {
+          session->securityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
+        } else {
+          fprintf(stderr,"Invalid security level specified after -l flag: %s\n", psz);
+          usage();
+          exit(1);
+        }
+
+        break;
+
+      case 'a':
+        if (argv[arg][2] != 0)
+          psz = &(argv[arg][2]);
+        else
+          psz = argv[++arg];
+        if( psz == NULL) {
+          fprintf(stderr,"Need authentication protocol value after -a flag. \n");
+          usage();
+          exit(1);
+        }
+        if (!strcmp(psz,"MD5")) {
+          session->securityAuthProto = usmHMACMD5AuthProtocol;
+          session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
+        } else if (!strcmp(psz,"SHA")) {
+          session->securityAuthProto = usmHMACSHA1AuthProtocol;
+          session->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
+        } else {
+          fprintf(stderr,"Invalid authentication protocol specified after -a flag: %s\n", psz);
+          usage();
+          exit(1);
+        }
+        break;
+
+      case 'x':
+        if (argv[arg][2] != 0)
+          psz = &(argv[arg][2]);
+        else
+          psz = argv[++arg];
+        if( psz == NULL) {
+          fprintf(stderr,"Need privacy protocol value after -x flag. \n");
+          usage();
+          exit(1);
+        }
+        if (!strcmp(psz,"DES")) {
+          session->securityPrivProto = usmDESPrivProtocol;
+          session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+        } else {
+          fprintf(stderr,"Invalid privacy protocol specified after -x flag: %s\n", psz);
+          usage();
+          exit(1);
+        }
+        break;
+
+      case 'A':
+        if (argv[arg][2] != 0)
+          Apsz = &(argv[arg][2]);
+        else
+          Apsz = argv[++arg];
+        if( Apsz == NULL) {
+          fprintf(stderr,"Need authentication pass phrase value after -A flag. \n");
+          usage();
+          exit(1);
+        }
+        break;
+
+      case 'X':
+        if (argv[arg][2] != 0)
+          Xpsz = &(argv[arg][2]);
+        else
+          Xpsz = argv[++arg];
+        if( Xpsz == NULL) {
+          fprintf(stderr,"Need privacy pass phrase value after -X flag. \n");
+          usage();
+          exit(1);
+        }
+
+        break;
 
       case 'P':
         if (argv[arg][2] != 0)
@@ -303,6 +499,17 @@ snmp_parse_args(argc, argv, session)
         }
         break;
 
+      case 'h':
+        usage();
+        exit(0);
+        break;
+
+      case 'H':
+        init_snmp("snmpapp");
+        fprintf(stderr, "Configuration directives understood:\n");
+        read_config_print_usage("  ");
+        exit(0);
+
       default:
         /* This should be removed to support options in clients that
            have more parameters than the defaults above! */
@@ -314,8 +521,33 @@ snmp_parse_args(argc, argv, session)
   }
 
   /* read in MIB database and initialize the snmp library*/
-  init_snmp();
+  init_snmp("snmpapp");
 
+  /* make master key from pass phrases */
+  if (Apsz) {
+      session->securityAuthKeyLen = USM_AUTH_KU_LEN;
+      if (generate_Ku(session->securityAuthProto,
+                      session->securityAuthProtoLen,
+                      Apsz, strlen(Apsz),
+                      session->securityAuthKey,
+                      &session->securityAuthKeyLen) != SNMPERR_SUCCESS) {
+          fprintf(stderr,"Error generating Ku from authentication pass phrase. \n");
+          usage();
+          exit(1);
+      }
+  }
+  if (Xpsz) {
+      session->securityPrivKeyLen = USM_PRIV_KU_LEN;
+      if (generate_Ku(session->securityAuthProto,
+                      session->securityAuthProtoLen,
+                      Xpsz, strlen(Xpsz),
+                      session->securityPrivKey,
+                      &session->securityPrivKeyLen) != SNMPERR_SUCCESS) {
+          fprintf(stderr,"Error generating Ku from privacy pass phrase. \n");
+          usage();
+          exit(1);
+      }
+  }
   /* get the hostname */
   if (arg == argc) {
     fprintf(stderr,"No hostname specified.\n");
@@ -337,7 +569,7 @@ snmp_parse_args(argc, argv, session)
     session->community_len = strlen((char *)argv[arg]);
     arg++;
 #ifdef USE_V2PARTY_PROTOCOL
-  } else {
+  } else if (session->version == SNMP_VERSION_2p) {
     /* v2p - so get party info */
     if (arg == argc) {
       fprintf(stderr,"Neither a source party nor noAuth was specified.\n");
@@ -383,7 +615,7 @@ snmp_parse_args(argc, argv, session)
       }
 
       /* source party */
-      
+
       party_scanInit();
       session->srcPartyLen = MAX_NAME_LEN;
       for(pp = party_scanNext(); pp; pp = party_scanNext()){
@@ -412,7 +644,7 @@ snmp_parse_args(argc, argv, session)
       }
 
       /* destination party */
-      
+
       session->dstPartyLen = MAX_NAME_LEN;
       party_scanInit();
       for(pp = party_scanNext(); pp; pp = party_scanNext()){
@@ -482,7 +714,7 @@ snmp_parse_args(argc, argv, session)
 }
 
 oid
-*snmp_parse_oid(argv,root,rootlen) 
+*snmp_parse_oid(argv,root,rootlen)
   char *argv;
   oid *root;
   int *rootlen;

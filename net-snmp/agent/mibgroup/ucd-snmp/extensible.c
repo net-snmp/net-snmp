@@ -292,7 +292,7 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
       printf("Wrong type != int\n");
       return SNMP_ERR_WRONGTYPE;
     }
-    asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+    tmp = *((long *) var_val);
 #ifdef EXECFIXCMD
     if (tmp == 1 && action == COMMIT) {
       sprintf(ex.command,EXECFIXCMD,exten->name);

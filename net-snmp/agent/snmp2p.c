@@ -386,39 +386,3 @@ init_snmp2p( dest_port )
 	}
     }
 }
-
-void
-open_ports_snmp2p __P((void))
-{
-    struct partyEntry *pp;
-    in_addr_t myaddr;
-    u_short dest_port;
-    int ret;
-    
-    party_scanInit();
-    myaddr = get_myaddr();
-    for(pp = party_scanNext(); pp; pp = party_scanNext()){
-#if WORDS_BIGENDIAN
-        if ((pp->partyTDomain != DOMAINSNMPUDP)
-	    || memcmp(&myaddr, pp->partyTAddress, 4))
-          continue;	/* don't listen for non-local parties */
-#else
-	if ((pp->partyTDomain != DOMAINSNMPUDP)
-	    || memcmp(reverse_bytes((char *) &myaddr,sizeof(myaddr)),
-                    pp->partyTAddress, 4))
-          continue;	/* don't listen for non-local parties */
-#endif
-	
-	dest_port = 0;
-#if WORDS_BIGENDIAN
-	memcpy(&dest_port, pp->partyTAddress + 4, 2);
-#else
-	memcpy(&dest_port, reverse_bytes(pp->partyTAddress + 4,2), 2);
-#endif
-        if (( ret = open_port( dest_port )) > 0 )
-            sd_handlers[ret-1] = snmp_read_packet;
-        else if ( ret < 0 )
-            return;
-        /* ret == 0 implies we're already listening on this port */
-    }
-}    

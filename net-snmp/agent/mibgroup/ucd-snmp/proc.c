@@ -201,7 +201,7 @@ fixProcError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
       printf("Wrong type != int\n");
       return SNMP_ERR_WRONGTYPE;
     }
-    asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
+    tmp = *((long *) var_val);
     if (tmp == 1 && action == COMMIT) {
 #ifdef PROCFIXCMD
       sprintf(fixproc.command,PROCFIXCMD,proc->name);

@@ -658,6 +658,11 @@ main(argc, argv)
 		           break;
 		    }
 		    break;
+                 case 'H':
+                   init_snmp("snmptrapd");
+                   fprintf(stderr, "Configuration directives understood:\n");
+                   read_config_print_usage("  ");
+                   exit(0);
 		default:
 		    fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
 		    usage();
@@ -673,8 +678,7 @@ main(argc, argv)
     }
 
     register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"script");
-    init_mib();
-    read_configs();
+    init_snmp("snmptrapd");
     if (!Print) Syslog = 1;
 
     myaddr = get_myaddr();

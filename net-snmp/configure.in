@@ -10,7 +10,18 @@ AC_ARG_ENABLE(eol-terminated-comments,
                                   by an end of line condition.],
     AC_DEFINE(MIB_COMMENT_IS_EOL_TERMINATED))
 AC_ARG_ENABLE(debugging,[  --enable-debugging              Outputs extra debugging information.],AC_DEFINE(DODEBUG))
+AC_ARG_ENABLE(testing-code,
+[  --enable-testing-code           Enables some code sections that should 
+                                  only be used for testing of certain
+                                  SNMP functionalities.  This should *not* 
+                                  be turned on for production use.  Ever.],
+    AC_DEFINE(SNMP_TESTING_CODE))
 AC_ARG_ENABLE(shared,[  --enable-shared                 Compile and install shared libraries.],with_shared="yes",with_shared="no")
+AC_ARG_ENABLE(privacy,[  --disable-privacy               Don't compile in support for privacy.])
+if test "x$enable_privacy" != "xno"; then
+  AC_DEFINE(SCAPI_AUTHPRIV)
+fi
+AC_ARG_ENABLE(internal-md5, [  --enable-internal-md5           Use the old MD5 code from the v2party code.], AC_DEFINE(USE_INTERNAL_MD5))
 AC_ARG_WITH(defaults,[  --with-defaults                 Use defaults for prompted values.],defaults="yes",defaults="no")
 AC_ARG_WITH(root-access,[  --without-root-access           Agent won't require root access.])
 AC_ARG_WITH(opaque-special-types,[  --without-opaque-special-types  Don't use special opaque encodings.])
@@ -19,6 +30,9 @@ AC_ARG_WITH(sys_contact,[  --with-sys-contact=\"who@where\"  Default system cont
 AC_ARG_WITH(sys_location,[  --with-sys-location=\"location\"  Default system location.
                                     (Default: Unknown)],ac_cv_user_prompt_SYS_LOC="$with_sys_location")
 AC_ARG_WITH(logfile,[  --with-logfile=\"location\"       Default log file location.],ac_cv_user_prompt_LOGFILE="$with_logfile")
+AC_ARG_WITH(persistent-directory,
+[  --with-persistent-directory=\"directory\"
+                                  Default directory for persistent data storage.],ac_cv_user_prompt_PERSISTENT_DIRECTORY="$with_persistent_directory")
 AC_ARG_WITH(mibdirs,[  --with-mibdirs=\"dir1:dir2:\"     Default directories to look for mibs.
                                     (Default: LIBDIR/snmp/mibs)],[DEFAULT_MIBDIRS="$with_mibdirs"
   AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$with_mibdirs")
@@ -41,6 +55,17 @@ AC_ARG_WITH(libwrap,
         LIBS="$withval $LIBS"
     fi
     AC_DEFINE(USE_LIBWRAP)
+    AC_ADD_SEARCH_PATH($withval)
+)
+
+AC_ARG_WITH(KMT,
+[  --with-KMT=PATH                 Look for libkmt in PATH/lib.],
+    AC_ADD_SEARCH_PATH($withval)
+)
+
+AC_ARG_WITH(SSLeay,
+[  --with-SSLeay=PATH              Look for SSLeay installation in PATH.],
+    AC_ADD_SEARCH_PATH($withval)
 )
 
 dnl Only define if specifically chosen as --without (ie, default to true). 
@@ -319,7 +344,7 @@ AC_MSG_CHECKING(for and configuring mib modules to use)
 mibdir="agent/mibgroup"
 module_list=""
 module_list_code=""
-new_module_list="mibII ucd_snmp v2party $with_mib_modules"
+new_module_list="mibII ucd_snmp v2party snmpv3mibs $with_mib_modules"
 trap_list_o=""
 
 case $target_os in
@@ -562,6 +587,9 @@ dnl Replace `main' with a function in -lkvm:
 AC_CHECK_LIB(kvm, kvm_read)
 dnl Check for nlist in mld (irix)
 AC_CHECK_LIB(mld, nlist)
+dnl Check for security related functions
+AC_CHECK_LIB(crypto, SSLeay_version)
+AC_CHECK_LIB(kmt, kmt_init)
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -590,6 +618,13 @@ dnl for HostRes (HP-UX at least)
 AC_CHECK_HEADERS(sys/dkio.h sys/diskio.h sys/pstat.h linux/hdreg.h pkglocs.h)
 dnl WIN32
 AC_CHECK_HEADERS(winsock.h io.h)
+dnl KMT
+AC_CHECK_HEADERS(kmt.h kmt_algs.h)
+
+if test "x$ac_cv_lib_kmt_kmt_init" != "xyes"; then
+dnl if KMT is not found, default to using internal md5 support.
+    AC_DEFINE(USE_INTERNAL_MD5)
+fi
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
@@ -665,6 +700,29 @@ AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol)
 AC_CHECK_FUNCS(strchr strdup memcpy memmove index bcopy)
 AC_CHECK_FUNCS(signal sigset sigblock sighold strerror setenv)
 AC_CHECK_FUNCS(random lrand48 rand)
+
+dnl
+dnl Check for /dev/random as well
+dnl
+
+AC_CACHE_CHECK(if /dev/random exists,ac_cv_HAVE_DEV_RANDOM,
+[ac_cv_HAVE_DEV_RANDOM="no"
+dnl First determine if test expects a -f or a -c (character device (SYSV))
+
+if test -c /dev/null; then
+  CFLAG="-c"
+elif test -f /dev/null; then
+  CFLAG="-f"
+else
+  dnl fall back
+  CFLAG="-f"
+fi
+if test -f $i -o $CFLAG /dev/random; then
+  ac_cv_HAVE_DEV_RANDOM="yes"
+  AC_DEFINE(HAVE_DEV_RANDOM)
+fi
+])
+
 AC_CHECK_FUNCS(getloadavg)
 AC_CHECK_FUNCS(kvm_openfiles nlist)
 dnl BSDi2 functions differ
@@ -674,7 +732,8 @@ dnl freebsd2 checks
 AC_CHECK_FUNCS(getfsstat kvm_getprocs)
 AC_CHECK_FUNCS(usleep)
 AC_CHECK_FUNCS(setlocale)
-#
+AC_CHECK_FUNCS(tcgetattr)
+
 AC_MSG_CHECKING([for SIOCGIFADDR in sys/ioctl.h])
 AC_CACHE_VAL(cv_sys_ioctl_h_has_SIOCGIFADDR,
 [ AC_EGREP_CPP(xxxyesxxx,
@@ -956,6 +1015,9 @@ AC_CHECK_STRUCT_FOR([
 ], ifaddr, ifa_next)
 
 dnl Check ifnet entries using macro defined in aclocal.m4.
+dnl
+dnl XXX  Broken on FreeBSD wehre these are #define'd in <net/if.h>
+dnl
 AC_CHECK_IFNET_FOR(if_baudrate)
 AC_CHECK_IFNET_FOR(if_speed)
 AC_CHECK_IFNET_FOR(if_type)
@@ -1058,6 +1120,17 @@ if test "x$ac_cv_CAN_USE_SYSCTL" = "xyes"; then
   AC_DEFINE(CAN_USE_SYSCTL)
 fi
 
+dnl
+dnl KMT is not very portable and we need to handle problems it creates.
+dnl
+AC_CHECK_TYPE(u_int8_t,  unsigned char)
+AC_CHECK_TYPE(u_int16_t, unsigned short)
+AC_CHECK_TYPE(u_int32_t, unsigned int)
+
+dnl
+dnl Prompt for various bits of user information
+dnl
+
 if test "x$ac_cv_user_prompt_LOGFILE" = "x" -o "x$ac_cv_user_prompt_SYS_LOC" = "x" -o "x$ac_cv_user_prompt_SYS_CONTACT" = "x"; then
 AC_CACHE_CHECK(if you have run configure before, ac_cv_have_warned,
 [
@@ -1135,16 +1208,16 @@ at the prompt below) the agent will use stdout and stderr instead.
 Location to write logfile],$defaultlog,1)
 
 if test -d /var; then
-  defaultstore="/var/snmp/snmpd.persistent.conf"
+  defaultstore="/var/snmp"
 else
-  defaultstore="/etc/snmp/snmpd.persistent.conf"
+  defaultstore="/etc/snmp"
 fi
   
-AC_PROMPT_USER(PERSISTENTFILE,[
+AC_PROMPT_USER(PERSISTENT_DIRECTORY,[
 
 *** snmpd persistent storage location:
 
-	Enter the location for the snmpd agent to store persistent
+	Enter a directory for the snmp library to store persistent
 data in the form of a configuration file.
 
 Location to write persistent information],$defaultstore,1)
@@ -1158,6 +1231,7 @@ AC_OUTPUT([
  agent/mibgroup/Makefile:Makefile.top:agent/mibgroup/Makefile.in
  agent/dlmods/Makefile:Makefile.top:agent/dlmods/Makefile.in
  local/Makefile:Makefile.top:local/Makefile.in
+ testing/Makefile:Makefile.top:testing/Makefile.in
  man/Makefile:Makefile.top:man/Makefile.in
  ov/Makefile:Makefile.top:ov/Makefile.in
  mibs/Makefile:Makefile.top:mibs/Makefile.in
