@@ -70,7 +70,7 @@ SOFTWARE.
 
 #include "version.h"
 
-int show_all_matched_objects (FILE *, const char *, oid *, size_t *, int);
+int show_all_matched_objects (FILE *, const char *, oid *, size_t *, int, int);
 
 void usage(void)
 {
@@ -86,7 +86,7 @@ void usage(void)
   fprintf(stderr,
           "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
   fprintf(stderr,
-	  "  -w <width>\twidth of tree print output\n");
+	  "  -w <width>\twidth of tree and detail print output\n");
   fprintf(stderr,
           "  -T <TRANSOPTS> Print one or more MIB symbol reports.\n");
   fprintf(stderr,
@@ -318,7 +318,8 @@ int main(int argc, char *argv[])
             }
         } else if (find_all) {
             if (0 == show_all_matched_objects(stdout, current_name,
-                                              name, &name_length, description)) {
+                                              name, &name_length,
+					      description, width)) {
                 fprintf(stderr, "Unable to find a matching object identifier for \"%s\"\n",
                         current_name);
                 exit(1);
@@ -345,7 +346,7 @@ int main(int argc, char *argv[])
         } else {
             print_objid(name, name_length);
             if (description){
-                print_description(name, name_length);
+                print_description(name, name_length, width);
             }
         }
 	current_name = argv[++optind];
@@ -364,7 +365,8 @@ int show_all_matched_objects( FILE *fp,
 	const char *patmatch,
 	oid *name,
 	size_t *name_length,
-	int f_desc) /* non-zero if descriptions should be shown */
+	int f_desc, /* non-zero if descriptions should be shown */
+	int width)
 {
     int result, count = 0;
 	size_t savlen = *name_length;
@@ -378,7 +380,7 @@ int show_all_matched_objects( FILE *fp,
 
 		fprint_objid(fp, name, *name_length);
 		if (f_desc)
-			fprint_description(fp, name, *name_length);
+			fprint_description(fp, name, *name_length, width);
 	}
 
 	return (count);
