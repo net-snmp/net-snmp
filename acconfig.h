@@ -611,8 +611,49 @@
 #define ENV_SEPARATOR_CHAR ':'
 #endif
 
+/*
+ * this must be before the system/machine includes, to allow them to
+ * override and turn off inlining. To do so, they should do the
+ * following:
+ *
+ *    #undef NETSNMP_ENABLE_INLINE
+ *    #define NETSNMP_ENABLE_INLINE 0
+ *
+ * A user having problems with their compiler can also turn off
+ * the use of inline by defining NETSNMP_NO_INLINE via their cflags:
+ *
+ *    -DNETSNMP_NO_INLINE
+ *
+ * Header and source files should only test against NETSNMP_USE_INLINE:
+ *
+ *   #ifdef NETSNMP_USE_INLINE
+ *   NETSNMP_INLINE function(int parm) { return parm -1; }
+ *   #endif
+ *
+ * Functions which should be static, regardless of whether or not inline
+ * is available or enabled should use the NETSNMP_STATIC_INLINE macro,
+ * like so:
+ *
+ *    NETSNMP_STATIC_INLINE function(int parm) { return parm -1; }
+ *
+ * NOT like this:
+ *
+ *    static NETSNMP_INLINE function(int parm) { return parm -1; } // WRONG!
+ *
+ */
+#define NETSNMP_INLINE inline
+#define NETSNMP_STATIC_INLINE static inline
+#define NETSNMP_ENABLE_INLINE 1
+
 #include SYSTEM_INCLUDE_FILE
 #include MACHINE_INCLUDE_FILE
+
+#if NETSNMP_ENABLE_INLINE && !defined(NETSNMP_NO_INLINE)
+#   define NETSNMP_USE_INLINE
+#else
+#   define NETSNMP_INLINE 
+#   define NETSNMP_STATIC_INLINE static
+#endif
 
 #if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST) && !defined(NO_KMEM_USAGE)
 #define CAN_USE_NLIST
