@@ -28,8 +28,14 @@
 #include <utmp.h>
 #endif
 
-#if defined(LINUX) && __GNU_LIBRARY__ < 6
-#include "linux/tasks.h"
+#ifdef linux
+#ifdef HAVE_LINUX_TASKS_H
+#include <linux/tasks.h>
+#else
+/*  If this file doesn't exist, then there is no hard limit on the number
+    of processes, so return 0 for hrSystemMaxProcesses.  */
+#define NR_TASKS	0
+#endif
 #endif
 
 #ifdef HAVE_SYS_SYSCTL_H
@@ -151,13 +157,13 @@ var_hrsys(struct variable *vp,
 {
     static char string[100];
     time_t	now;
+#ifndef NR_TASKS
+    int		nproc = 0;
+#endif
 #ifdef linux
     FILE       *fp;
 #endif
-#if (defined(NPROC_SYMBOL) && !defined(NR_TASKS)) || defined(bsdi2)
-    int		nproc = 0;
-#endif
-#ifdef bsdi2
+#if CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
     static int maxproc_mib[] = { CTL_KERN, KERN_MAXPROC };
     int buf_size;
 #endif
@@ -202,16 +208,14 @@ var_hrsys(struct variable *vp,
 #endif
 	    return (u_char *)&long_return;
 	case HRSYS_MAXPROCS:
-#ifdef NR_TASKS
+#if defined(NR_TASKS)
 	    long_return = NR_TASKS;	/* <linux/tasks.h> */
-#else
-#ifdef bsdi2
+#elif CAN_USE_SYSCTL && defined(CTL_KERN) && defined(KERN_MAXPROC)
 	    buf_size = sizeof(nproc);
 	    if (sysctl(maxproc_mib, 2, &nproc, &buf_size, NULL, 0) < 0)
 		    return NULL;
 	    long_return = nproc;
-#endif
-#ifdef NPROC_SYMBOL
+#elif defined(NPROC_SYMBOL)
 	    auto_nlist(NPROC_SYMBOL, (char *)&nproc, sizeof (int));
 	    long_return = nproc;
 #else
@@ -219,7 +223,6 @@ var_hrsys(struct variable *vp,
 	    return NULL;
 #endif
 	    long_return = 0;
-#endif
 #endif
 	    return (u_char *)&long_return;
 	default:
