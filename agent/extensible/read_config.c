@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <strings.h>
-#include "struct.h"
+#include <sys/stat.h>
+#include <fstab.h>
+#include "wes.h"
 
 #define ofile stderr
 #define debug 0
@@ -9,25 +11,28 @@ char *skip_white();
 char *skip_not_white();
 void copy_word();
 
-int read_config(filename, procp, numps, ppexten, numexs)
+int read_config(filename, procp, numps, ppexten, numexs,minimumswap,disk,numdisks)
      char *filename;
      struct myproc **procp;
      struct extensible **ppexten;
      int *numexs, *numps;
+     int *minimumswap;
+     struct diskpart disk[];
+     int *numdisks;
 {
 
   FILE *ifile;
   char line[STRMAX], word[STRMAX];
   char *cptr, *tcptr;
   int linecount=0,i;
+  struct stat stat1, stat2;
+  struct fstab *fstab;
   
   if ((ifile = fopen(filename,"r")) == NULL) {
     fprintf(ofile, "couldn't open %s for reading\n",filename);
-    Exit(21);
+    return(1);
   }
 
-  (*procp) = NULL;
-  (*ppexten) = NULL;
   while (fgets(line,STRMAX,ifile) != NULL) 
     {
       linecount++;
@@ -59,7 +64,7 @@ int read_config(filename, procp, numps, ppexten, numexs)
                 if (*cptr == '.') cptr++;
               }
               (*ppexten)->miboid[i] = -1;
-                }
+            }
             else {
               (*ppexten)->miboid[0] = -1;
             }
@@ -73,6 +78,39 @@ int read_config(filename, procp, numps, ppexten, numexs)
             strncpy((*ppexten)->command,cptr,tcptr-cptr);
             (*ppexten)->command[tcptr-cptr-1]=NULL;
             ppexten = &((*ppexten)->next);
+          }
+          else if (!strncmp(word,"disk",4)) {
+            if (*numdisks == MAXDISKS) {
+              fprintf(stderr,"Too many disks specified in %s\n",filename);
+              fprintf(stderr,"\tignoring:  %s\n",cptr);
+            }
+            else {
+              /* read disk path (eg, /1 or /usr) */
+              copy_word(cptr,disk[*numdisks].path);
+              cptr = skip_not_white(cptr);
+              cptr = skip_white(cptr);
+              /* read optional minimum disk usage spec */
+              if (*cptr != NULL) {
+                disk[*numdisks].minimumspace = atoi(cptr);
+              }
+              else {
+                disk[*numdisks].minimumspace = DEFDISKMINIMUMSPACE;
+              }
+              /* find the device associated with the directory */
+              stat(disk[*numdisks].path,&stat1);
+              setfsent();
+              if (fstab = getfsfile(disk[*numdisks].path)) {
+                copy_word(fstab->fs_spec,disk[*numdisks].device);
+                *numdisks += 1;
+              }
+              else {
+                fprintf(stderr,"Error:  couldn't find device for disk %s",
+                        disk[*numdisks].path);
+                disk[*numdisks].minimumspace = -1;
+                disk[*numdisks].path[0] = NULL;
+              }
+              endfsent();
+            }
           }
           else if (!strncmp(word,"proc",4)) {
             (*procp) = (struct myproc *) malloc(sizeof(struct myproc));
@@ -99,6 +137,9 @@ int read_config(filename, procp, numps, ppexten, numexs)
                                 (*procp)->name, (*procp)->max, (*procp)->min);
             procp = &((*procp)->next);
           }
+          else if (!strncmp(word,"swap",4)) {
+            *minimumswap = atoi(cptr);
+          }
           else {
             fprintf(stderr,"snmpd: Unknown command in %s:%d  %s",
                     filename,linecount,word);
@@ -106,6 +147,7 @@ int read_config(filename, procp, numps, ppexten, numexs)
 	}
     }
   close(ifile);
+  return(0);
 }
 
 free_config(procp,ppexten)
