@@ -262,6 +262,7 @@ sub process_vars {
     $it =~ s/\$(\w+)\.(uc)/uc($vars{$1})/eg; # make something uppercase
     $it =~ s/\$(\w+)\.(commaoid)/tocommas($SNMP::MIB{$vars{$1}}{objectID})/eg;
     $it =~ s/\$(\w+)\.(oidlength)/oidlength($SNMP::MIB{$vars{$1}}{objectID})/eg;
+    $it =~ s/\$(\w+)\.(description)/$SNMP::MIB{$vars{$1}}{description}/g;
     $it =~ s/\$(\w+)\.(perltype)/$SNMP::MIB{$vars{$1}}{type}/g;
     $it =~ s/\$(\w+)\.(type)/$perltoctypes{$SNMP::MIB{$vars{$1}}{$2}}/g;
     $it =~ s/\$(\w+)\.(subid)/$SNMP::MIB{$vars{$1}}{subID}/g;
@@ -576,12 +577,21 @@ sub process {
               warn "$currentfile:$currentline [$_]\n";
             }
 	} elsif (/\@\s*perleval\s*(.*)\@/) { #                        PERLEVAL
-	    print STDERR "perleval: $1\n";
+#	    print STDERR "perleval: $1\n";
 	    my $res = eval($1);
             if ($res) {
               warn "$@";
               warn "$currentfile:$currentline [$_]\n";
             }
+	} elsif (/\@\s*printf\s+(\"[^\"]+\")\s*,?(.*)\@/) {
+	    my ($f, $rest) = ($1, $2);
+	    $rest = process_vars($rest);
+	    my @args = split(/\s*,\s*/,$rest);
+	    $f = eval $f;
+#	    print STDERR "printf: $f, ", join(", ",@args),"\n";
+	    foreach $file (values(%outputs)) {
+		printf $file (eval {$f}, @args);
+	    }
 	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+scalars*\s*\@/) { #      SCALARS
 	    my $var = $1;
 	    my $startpos = $fh->tell();
