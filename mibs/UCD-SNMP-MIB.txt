@@ -868,7 +868,7 @@ mrEntry OBJECT-TYPE
     STATUS     current
     DESCRIPTION
         "An entry containing a registered mib oid."
-    INDEX      { mrIndex }
+    INDEX      { IMPLIED mrIndex }
     ::= { mibRegistryTable  1 }
 
 MrEntry ::=
