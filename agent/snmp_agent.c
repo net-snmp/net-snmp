@@ -804,6 +804,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
 #ifdef  USE_LIBWRAP
     if (addr_string != NULL) {
       if( addr_string[0] == '[' ) {
+          int i;
           for( i = 1; addr_string[i] != ']'; i++ ) {
               addr_string[i-1] =  addr_string[i];
           }
