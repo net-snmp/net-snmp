@@ -1126,11 +1126,18 @@ main(int argc, char *argv[])
         }
     }
 
+#ifdef SIGTERM
     signal(SIGTERM, term_handler);
+#endif
 #ifdef SIGHUP
     signal(SIGHUP, hup_handler);
 #endif
+#ifdef SIGINT
     signal(SIGINT, term_handler);
+#endif
+#ifdef SIGPIPE
+    signal(SIGPIPE, SIG_IGN);   /* 'Inline' failure of wayward readers */
+#endif
 
 #ifdef WIN32SERVICE
     trapd_status = SNMPTRAPD_RUNNING;
