@@ -332,7 +332,7 @@ void do_external(cmd, host, pdu)
   char varbuf[2048];
   int oldquick;
   
-  DEBUGP("Running: %s\n", cmd);
+  DEBUGMSGTL(("snmptrapd", "Running: %s\n", cmd));
   oldquick = snmp_get_quick_print();
   snmp_set_quick_print(1);
   if (cmd) {
@@ -586,8 +586,9 @@ main(argc, argv)
 		    snmp_set_quick_print(1);
 		    break;
 		case 'D':
-		    snmp_set_do_debugging(1);
-		    break;
+                    debug_register_tokens(&argv[arg][2]);
+                    snmp_set_do_debugging(1);
+                    break;
                 case 'p':
 		    if (++arg == argc) {
 			usage();

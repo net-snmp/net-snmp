@@ -59,17 +59,17 @@ snmptrapd_get_traphandler(name, namelen)
   int namelen;
 {
   struct traphandle **ttmp;
-  DEBUGP("looking for trap handler for ");
-  DEBUGPOID(name,namelen);
-  DEBUGP("...\n");
+  DEBUGMSGTL(("snmptrapd:traphandler", "looking for trap handler for "));
+  DEBUGMSGOID(("snmptrapd:traphandler", name, namelen));
+  DEBUGMSG(("snmptrapd:traphandler", "...\n"));
   for(ttmp = &traphandlers;
       *ttmp != NULL && snmp_oid_compare((*ttmp)->trap, (*ttmp)->traplen, name, namelen);
       ttmp = &((*ttmp)->next));
   if (*ttmp == NULL) {
-    DEBUGP("  Didn't find it.\n");
+    DEBUGMSGTL(("snmptrapd:traphandler", "  Didn't find it.\n"));
     return NULL;
   }
-  DEBUGP("  Found it!\n");
+  DEBUGMSGTL(("snmptrapd:traphandler", "  Found it!\n"));
   return (*ttmp)->exec;
 }
 
@@ -103,8 +103,8 @@ snmptrapd_traphandle(word, line)
   }
   cptr = skip_not_white(line);
   (*ttmp)->exec = strdup(cptr);
-  DEBUGP("registered handler for: ");
-  DEBUGPOID((*ttmp)->trap, (*ttmp)->traplen);
-  DEBUGP("\n");
+  DEBUGMSGTL(("read_config:traphandler", "registered handler for: "));
+  DEBUGMSGOID(("read_config:traphandler", (*ttmp)->trap, (*ttmp)->traplen));
+  DEBUGMSG(("read_config:traphandler", "\n"));
 }
 
