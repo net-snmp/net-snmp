@@ -111,7 +111,7 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
 	    alarm->magic = state;
 	    bzero((char *)&session, sizeof(struct snmp_session));
 	    session.peername = SNMP_DEFAULT_PEERNAME;
-	    session.version = SNMP_VERSION_2_HISTORIC;
+	    session.version = SNMP_VERSION_2p;
 	    session.srcParty = srcParty;
 	    session.srcPartyLen = srcPartyLen;
 	    session.dstParty = dstParty;
@@ -124,7 +124,7 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
 	    session.callback_magic = (void *)state;
 	    alarm->ss = snmp_open(&session);
 	    if (!alarm->ss) {
-		ERROR("");
+		ERROR_MSG("");
 		return 3;
 	    }
 	}
@@ -165,7 +165,7 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
     pi->dstp = dstp;
     pi->cxp = cxp;
     
-    pi->version = SNMP_VERSION_2_HISTORIC;
+    pi->version = SNMP_VERSION_2p;
     pi->pdutype = GET_REQ_MSG;
     /* rest of pi is not needed */
     
@@ -1083,7 +1083,7 @@ var_alarmnextindex(vp, name, length, exact, var_len, write_method)
       case ALARMNEXTINDEX:
 	return (u_char *)&alarmNextIndex;
       default:
-	ERROR("");
+	ERROR_MSG("");
     }
 
     return NULL;
@@ -1173,7 +1173,7 @@ var_alarmtab(vp, name, length, exact, var_len, write_method)
 	}
 	return (u_char *)&alarm->status;
       default:
-	ERROR("");
+	ERROR_MSG("");
     }
     
     return NULL;

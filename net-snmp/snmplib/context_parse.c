@@ -1,14 +1,20 @@
 #include <config.h>
 #if STDC_HEADERS
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -20,22 +26,23 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #if HAVE_NETINET_IN_H
-#include <netinet/in.h>
+# include <netinet/in.h>
 #endif
-#include <sys/socket.h>
-#include <net/if.h>
+#if HAVE_WINSOCK_H
+# include <winsock.h>
+#else
+# include <sys/socket.h>
+# include <net/if.h>
+#endif
 #if HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
+# include <sys/ioctl.h>
 #endif
 
 #include "asn1.h"
-#include "mib.h"
 #include "context.h"
 #include "system.h"
+#include "mib.h"
 
 #define TRUE 1
 #define FALSE 0

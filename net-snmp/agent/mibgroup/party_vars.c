@@ -600,7 +600,7 @@ var_party(vp, name, length, exact, var_len, write_method)
 	    *var_len = sizeof(snmpUdpDomain);
 	    return (u_char *)snmpUdpDomain;
 	} else {
-	    ERROR("");
+	    ERROR_MSG("");
 	    return NULL;
 	}
       case PARTYTADDRESS:
@@ -618,7 +618,7 @@ var_party(vp, name, length, exact, var_len, write_method)
 	    *var_len = sizeof(noAuth);
 	    return (u_char *)noAuth;
 	} else {
-	    ERROR("");
+	    ERROR_MSG("");
 	    return NULL;
 	}
       case PARTYAUTHCLOCK:
@@ -662,7 +662,7 @@ var_party(vp, name, length, exact, var_len, write_method)
 	}
 	return (u_char *)&pp->partyStatus;
       default:
-            ERROR("");
+            ERROR_MSG("");
     }
     return NULL;
 }

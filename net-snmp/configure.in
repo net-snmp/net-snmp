@@ -310,6 +310,8 @@ dnl from smux stuff
 AC_CHECK_HEADERS(err.h sys/filio.h sgtty.h)
 dnl AIX needs this for statfs func
 AC_CHECK_HEADERS(sys/statfs.h)
+dnl WIN32
+AC_CHECK_HEADERS(winsock.h io.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T

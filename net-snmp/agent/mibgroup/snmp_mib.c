@@ -201,7 +201,7 @@ var_snmp(vp, name, length, exact, var_len, write_method)
 	    long_return = snmp_enableauthentraps;
       	    break;
 	default:
-	    ERROR("unknown snmp var");
+	    ERROR_MSG("unknown snmp var");
 	    return NULL;
     }
 
@@ -229,7 +229,7 @@ write_snmp (action, var_val, var_val_type, var_val_len, statP, name, name_len)
     long intval;
 
     if (var_val_type != INTEGER){
-	ERROR("not integer");
+	ERROR_MSG("not integer");
 	return SNMP_ERR_WRONGTYPE;
     }
 

@@ -261,7 +261,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	    long_return = 0;
 	    return (u_char *) &long_return;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
 }
 
@@ -310,7 +310,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
 	case IPFRAGFAILS: return (u_char *) &ipstat.IpFragFails;
 	case IPFRAGCREATES: return (u_char *) &ipstat.IpFragCreates;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }
@@ -441,7 +441,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = -1;
 	    return(u_char *) &long_return;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }
@@ -529,7 +529,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
       	    break;
 	default:
 	    ret = NULL;		/* Failure */
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return (ret);
 }
@@ -635,7 +635,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = Lowentry.ipAdEntBcastAddr;
 	    return(u_char *) &long_return;	   
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }

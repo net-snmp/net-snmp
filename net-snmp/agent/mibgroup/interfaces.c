@@ -191,7 +191,7 @@ var_interfaces(vp, name, length, exact, var_len, write_method)
 	    long_return = Interface_Scan_Get_Count();
 	    return (u_char *)&long_return;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }
@@ -402,7 +402,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    *var_len = nullOidLen;
 	    return (u_char *) nullOid;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }
@@ -568,7 +568,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    *var_len = nullOidLen;
 	    return (u_char *) nullOid;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }
@@ -679,7 +679,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
       long_return = (u_long)ifstat.ifOutQLen;
       return (u_char *) &long_return;
     default:
-      ERROR("");
+      ERROR_MSG("");
     }
     return NULL;
 }
@@ -1073,9 +1073,11 @@ u_char *EtherAddr;
 	struct arpcom {
 	  char ac_enaddr[6];
 	} arpcom;
+#if defined(netbsd1) || defined(bsdi2)
         struct sockaddr_dl sadl;
-      struct ifaddr ifaddr;
-      u_long ifaddraddr;
+        struct ifaddr ifaddr;
+        u_long ifaddraddr;
+#endif
 #endif
 
         bzero(arpcom.ac_enaddr, sizeof(arpcom.ac_enaddr));

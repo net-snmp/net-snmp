@@ -2,14 +2,20 @@
 
 #if STDC_HEADERS
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -21,16 +27,20 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 /* needed for htonl funcs */
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#ifdef HAVE_IO_H
+#include <io.h>
+#endif
+
 
 #include "asn1.h"
 #include "mib.h"
@@ -203,7 +213,7 @@ read_party_database(filename)
 	    for(cp = buf1; *cp; cp += 2, ucp++){
 		if (sscanf(cp, "%2lx", &byte) != 1)
 		    error_exit("Bad parse", linenumber, filename);
-		*ucp = byte;
+		*ucp = (u_char)byte;
 	    }
 
 	    if (strlen(buf2) % 2)
@@ -223,7 +233,7 @@ read_party_database(filename)
 		for(cp = buf2; *cp; cp += 2, ucp++){
 		    if (sscanf(cp, "%2lx", &byte) != 1)
 			error_exit("Bad parse", linenumber, filename);
-		    *ucp = byte;
+		    *ucp = (u_char)byte;
 		}
 		authPublicLength = ucp - authPublic;
 	    }
@@ -244,7 +254,7 @@ read_party_database(filename)
 	    for(cp = buf1; *cp; cp += 2, ucp++){
 		if (sscanf(cp, "%2lx", &byte) != 1)
 		    error_exit("Bad parse", linenumber, filename);
-		*ucp = byte;
+		*ucp = (u_char)byte;
 	    }
 
 	    if (strlen(buf2) % 2)
@@ -264,7 +274,7 @@ read_party_database(filename)
 		for(cp = buf2; *cp; cp += 2, ucp++){
 		    if (sscanf(cp, "%2lx", &byte) != 1)
 			error_exit("Bad parse", linenumber, filename);
-		    *ucp = byte;
+		    *ucp = (u_char)byte;
 		}
 		privPublicLength = ucp - privPublic;
 	    }

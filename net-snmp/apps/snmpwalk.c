@@ -42,7 +42,11 @@ SOFTWARE.
 # include <netinet/in.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -55,7 +59,11 @@ SOFTWARE.
 #include <sys/select.h>
 #endif
 #include <stdio.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
 #include <netdb.h>
+#endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -70,9 +78,10 @@ SOFTWARE.
 #include "context.h"
 #include "view.h"
 #include "acl.h"
+#include "system.h"
 #include "snmp_parse_args.h"
 
-int main __P((int, char **));
+void main __P((int, char **));
 int failures;
 
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
@@ -82,132 +91,128 @@ usage __P((void))
 {
   fprintf(stderr,"Usage:\n  snmpwalk ");
   snmp_parse_args_usage(stderr);
-  fprintf(stderr," [objectID]\n\n");
+  fprintf(stderr," [<objectID>]\n\n");
   snmp_parse_args_descriptions(stderr);
 }
 
-int
+void
 main(argc, argv)
-    int	    argc;
-    char    *argv[];
+    int   argc;
+    char  *argv[];
 {
-    struct snmp_session	session, *ss;
+    struct snmp_session  session, *ss;
     struct snmp_pdu *pdu, *response;
     struct variable_list *vars;
-    int	arg;
-    char *hostname = NULL;
-    char *community = NULL;
-    int gotroot = 0, version = 2;
-    oid	name[MAX_NAME_LEN];
-    int name_length;
-    oid root[MAX_NAME_LEN];
-    int	rootlen, count;
-    int running;
-    int status;
-    int dest_port = SNMP_PORT;
-    oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
-    int srclen = 0, dstlen = 0, contextlen = 0;
-    u_long	srcclock = 0, dstclock = 0;
-    int clock_flag = 0;
-    struct partyEntry *pp;
-    struct contextEntry *cxp;
-    int trivialSNMPv2 = FALSE;
-    struct hostent *hp;
-    in_addr_t destAddr;
-    char ctmp[300];
+    int   arg;
+    int   gotroot = 0;
+    oid   name[MAX_NAME_LEN];
+    int   name_length;
+    oid   root[MAX_NAME_LEN];
+    int   rootlen;
+    int   count;
+    int   running;
+    int   status;
 #ifdef _DEBUG_MALLOC_INC
     unsigned long histid1, histid2, orig_size, current_size;
 #endif
 
+    /* read in MIB database */
     init_mib();
-    /*
-     * Usage: snmpwalk -v 1 [-q] hostname community [objectID]      or:
-     * Usage: snmpwalk [-v 2] [-q] hostname noAuth [objectID]       or:
-     * Usage: snmpwalk [-v 2] [-q] hostname srcParty dstParty context [objectID]
-     */
 
+    /* get the common command line arguments */
     arg = snmp_parse_args(argc, argv, &session);
 
-    rootlen = MAX_NAME_LEN;
-    if (read_objid(argv[arg], root, &rootlen)){
-      gotroot = 1;
+    /* get the initial object and subtree */
+    if (arg < argc) {
+      /* specified on the command line */
+      rootlen = MAX_NAME_LEN;
+      if (!read_objid(argv[arg], root, &rootlen)){
+        printf("Invalid object identifier: %s\n", argv[arg]);
+        exit(1);
+      }
     } else {
-      printf("Invalid object identifier: %s\n", argv[arg]);
-      exit(1);
+      /* use default value */
+      memmove(root, objid_mib, sizeof(objid_mib));
+      rootlen = sizeof(objid_mib) / sizeof(oid);
     }
-
-    if (gotroot == 0){
-	memmove((char *)root, (char *)objid_mib, sizeof(objid_mib));
-	rootlen = sizeof(objid_mib) / sizeof(oid);
-	gotroot = 1;
-    }
-
 #ifdef _DEBUG_MALLOC_INC
     orig_size = malloc_inuse(&histid1);
 #endif
 
+
+    SOCK_STARTUP;
+
+    /* open an SNMP session */
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-	printf("Couldn't open snmp\n");
-	exit(1);
+      printf("Couldn't open snmp\n");
+      SOCK_CLEANUP;
+      exit(1);
     }
 
+    /* get first object to start walk */
     memmove(name, root, rootlen * sizeof(oid));
     name_length = rootlen;
 
     running = 1;
     while(running){
-	running = 0;
-	pdu = snmp_pdu_create(GETNEXT_REQ_MSG);
+      /* create PDU for GETNEXT request and add object name to request */
+      pdu = snmp_pdu_create(GETNEXT_REQ_MSG);
+      snmp_add_null_var(pdu, name, name_length);
 
-	snmp_add_null_var(pdu, name, name_length);
+      /* do the request */
+      status = snmp_synch_response(ss, pdu, &response);
+      if (status == STAT_SUCCESS){
+        if (response->errstat == SNMP_ERR_NOERROR){
+          /* check resulting variables */
+          for(vars = response->variables; vars; vars = vars->next_variable){
+            if ((vars->name_length < rootlen) ||
+                (memcmp(root, vars->name, rootlen * sizeof(oid))!=0)) {
+              /* not part of this subtree */
+              running = 0;
+              continue;
+            }
+            print_variable(vars->name, vars->name_length, vars);
+            if ((vars->type != SNMP_ENDOFMIBVIEW) &&
+                (vars->type != SNMP_NOSUCHOBJECT) &&
+                (vars->type != SNMP_NOSUCHINSTANCE)){
+              /* not an exception value */
+              memmove((char *)name, (char *)vars->name,
+              vars->name_length * sizeof(oid));
+              name_length = vars->name_length;
+            } else
+              /* an exception value, so stop */
+              running = 0;
+          }
+        } else {
+          /* error in response, print it */
+          running = 0;
+          if (response->errstat == SNMP_ERR_NOSUCHNAME){
+            printf("End of MIB\n");
+          } else {
+            printf("Error in packet.\nReason: %s\n",
+            snmp_errstring(response->errstat));
+            if (response->errstat == SNMP_ERR_NOSUCHNAME){
+              printf("The request for this object identifier failed: ");
+              for(count = 1, vars = response->variables;
+                    vars && count != response->errindex;
+                    vars = vars->next_variable, count++)
+                /*EMPTY*/;
+              if (vars)
+                print_objid(vars->name, vars->name_length);
+              printf("\n");
+            }
+          }
+        }
+      } else if (status == STAT_TIMEOUT){
+        printf("No Response from %s\n", session.peername);
+      } else {    /* status == STAT_ERROR */
+        printf("An error occurred, Quitting\n");
+      }
 
-	status = snmp_synch_response(ss, pdu, &response);
-	if (status == STAT_SUCCESS){
-	    if (response->errstat == SNMP_ERR_NOERROR){
-		for(vars = response->variables; vars;
-		    vars = vars->next_variable){
-		    if (vars->name_length < rootlen
-			|| memcmp(root, vars->name, rootlen * sizeof(oid)))
-			continue;	/* not part of this subtree */
-		    print_variable(vars->name, vars->name_length, vars);
-		    if (vars->type != SNMP_ENDOFMIBVIEW
-			&& vars->type != SNMP_NOSUCHOBJECT /* for robustness */
-			&& vars->type != SNMP_NOSUCHINSTANCE){
-			memmove((char *)name, (char *)vars->name,
-			      vars->name_length * sizeof(oid));
-			name_length = vars->name_length;
-			running = 1; /* restart so we can get next variable */
-		    }
-		}
-	    } else {
-		if (response->errstat == SNMP_ERR_NOSUCHNAME){
-		    printf("End of MIB.\n");
-		} else {
-		    printf("Error in packet.\nReason: %s\n",
-			   snmp_errstring(response->errstat));
-		    if (response->errstat == SNMP_ERR_NOSUCHNAME){
-			printf("The request for this object identifier failed: ");
-			for(count = 1, vars = response->variables; vars
-			    && count != response->errindex;
-			    vars = vars->next_variable, count++)
-				/*EMPTY*/;
-			if (vars)
-			    print_objid(vars->name, vars->name_length);
-			printf("\n");
-		    }
-		}
-	    }
-
-	} else if (status == STAT_TIMEOUT){
-	    printf("No Response from %s\n", hostname);
-	} else {    /* status == STAT_ERROR */
-	    printf("An error occurred, Quitting\n");
-	}
-
-	if (response)
-	    snmp_free_pdu(response);
+      if (response)
+        snmp_free_pdu(response);
     }
     snmp_close(ss);
 
@@ -216,9 +221,9 @@ main(argc, argv)
     if (current_size != orig_size) malloc_list(2, histid1, histid2);
 #endif
 
+    SOCK_CLEANUP;
     exit (0);
 }
-
 
 #if 0
 /*

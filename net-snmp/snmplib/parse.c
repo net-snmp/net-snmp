@@ -47,7 +47,11 @@ SOFTWARE.
 #  include <ndir.h>
 # endif
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 
+#include "system.h"
 #include "parse.h"
 
 /* A quoted string value-- too long for a general "token" */
@@ -98,7 +102,7 @@ static int anonymous = 0;
 #define COUNTER     (9 | SYNTAX_MASK)
 #define GAUGE       (10 | SYNTAX_MASK)
 #define TIMETICKS   (11 | SYNTAX_MASK)
-#define OPAQUE      (12 | SYNTAX_MASK)
+#define KW_OPAQUE   (12 | SYNTAX_MASK)
 #define NUL         (13 | SYNTAX_MASK)
 #define SEQUENCE    14
 #define OF          15  /* SEQUENCE OF */
@@ -110,7 +114,7 @@ static int anonymous = 0;
 #define NOACCESS    21
 #define STATUS      22
 #define MANDATORY   23
-#define OPTIONAL    24
+#define KW_OPTIONAL    24
 #define OBSOLETE    25
 /* #define RECOMMENDED 26 */
 #define PUNCT       27
@@ -171,8 +175,8 @@ struct tok {
 
 struct tok tokens[] = {
     { "obsolete", sizeof ("obsolete")-1, OBSOLETE },
-    { "Opaque", sizeof ("Opaque")-1, OPAQUE },
-    { "optional", sizeof ("optional")-1, OPTIONAL },
+    { "Opaque", sizeof ("Opaque")-1, KW_OPAQUE },
+    { "optional", sizeof ("optional")-1, KW_OPTIONAL },
     { "LAST-UPDATED", sizeof ("LAST-UPDATED")-1, LASTUPDATED },
     { "ORGANIZATION", sizeof ("ORGANIZATION")-1, ORGANIZATION },
     { "CONTACT-INFO", sizeof ("CONTACT-INFO")-1, CONTACTINFO },
@@ -336,6 +340,7 @@ static struct node *parse_moduleIdentity __P((FILE *, char *));
 static        void  parse_imports __P((FILE *));
 static struct node *parse __P((FILE *, struct node *));
 struct tree *find_node __P((char *, struct tree*)); /* backwards compatability */
+static int read_module_internal __P((char *));
 static void read_module_replacements __P((char *));
 static void read_import_replacements __P((char *, char *));
 
@@ -595,7 +600,6 @@ print_ascii_dump_tree(f, tree, count)
     int count;
 {
     struct tree *tp;
-    int i;
 
 /*    fprintf(f, "Children of %s(%ld):\n", tree->label, tree->subid); */
     count++;
@@ -648,7 +652,7 @@ build_translation_table(){
             case TIMETICKS:
                 translation_table[count] = TYPE_TIMETICKS;
                 break;
-            case OPAQUE:
+            case KW_OPAQUE:
                 translation_table[count] = TYPE_OPAQUE;
                 break;
             case NUL:
@@ -958,6 +962,8 @@ do_subtree(root, nodes)
 	np->units = NULL;
         tp->description = np->description; /* steals memory from np */
         np->description = NULL; /* so we don't free it later */
+	tp->access = np->access;
+	tp->status = np->status;
         set_function(tp);	/* from mib.c */
         tp->next_peer = root->child_list;
         root->child_list = tp;
@@ -1111,7 +1117,7 @@ parse_objectid(fp, name)
 	 */
         if ( !oid->label )
            for ( tp = tree_head ; tp ; tp=tp->next_peer )
-               if ( tp->subid == oid->subid ) {
+               if ( (int)tp->subid == oid->subid ) {
                    oid->label = Strdup(tp->label);
                    break;
                }
@@ -1543,7 +1549,7 @@ parse_objecttype(fp, name)
         case NETADDR:
         case IPADDR:
         case TIMETICKS:
-        case OPAQUE:
+        case KW_OPAQUE:
         case NUL:
         case NSAPADDRESS:
         case COUNTER64:
@@ -1575,6 +1581,7 @@ parse_objecttype(fp, name)
         free_node(np);
         return NULL;
     }
+    np->access = type;
     type = get_token(fp, token,MAXTOKEN);
     if (type != STATUS){
         print_error("Should be STATUS", token, type);
@@ -1582,12 +1589,13 @@ parse_objecttype(fp, name)
         return NULL;
     }
     type = get_token(fp, token,MAXTOKEN);
-    if (type != MANDATORY && type != CURRENT && type != OPTIONAL &&
+    if (type != MANDATORY && type != CURRENT && type != KW_OPTIONAL &&
         type != OBSOLETE && type != DEPRECATED){
         print_error("Bad STATUS", token, type);
         free_node(np);
         return NULL;
     }
+    np->status = type;
     /*
      * Optional parts of the OBJECT-TYPE macro
      */
@@ -2130,7 +2138,7 @@ read_import_replacements( module_name, node_identifier )
  *	Returns the root of the whole tree
  *	(by analogy with 'read_mib')
  */
-int
+static int
 read_module_internal (name )
     char *name;
 {

@@ -349,14 +349,14 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 		    if (access &&
                         (
 #ifdef USING_VIEW_VARS_MODULE
-                          ((pi->version == SNMP_VERSION_2_HISTORIC) &&
+                          ((pi->version == SNMP_VERSION_2p) &&
                            !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
 #endif
                          ((pi->version == SNMP_VERSION_1 ||
-                           pi->version == SNMP_VERSION_2) &&
+                           pi->version == SNMP_VERSION_2c) &&
                           (((cvp->acl & 0xAFFC) == SNMPV2ANY) ||
                             (cvp->acl & 0xAFFC) == SNMPV2AUTH)) ||
-                          ((pi->version == SNMP_VERSION_2_HISTORIC) &&
+                          ((pi->version == SNMP_VERSION_2p) &&
                           ((cvp->acl & 0xAFFC) == SNMPV2AUTH) &&
                           (pi->srcp->partyAuthProtocol == NOAUTH ||
                            pi->dstp->partyAuthProtocol == NOAUTH)))) {

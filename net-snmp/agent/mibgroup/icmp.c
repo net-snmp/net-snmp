@@ -176,7 +176,7 @@ var_icmp(vp, name, length, exact, var_len, write_method)
 	case ICMPOUTADDRMASKREPS:
 	    return (u_char *) &icmpstat.icps_outhist[ICMP_MASKREPLY];
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
 
     return NULL;
@@ -230,7 +230,7 @@ var_icmp(vp, name, length, exact, var_len, write_method)
     case ICMPOUTADDRMASKREPS: return (u_char *) &icmpstat.IcmpOutAddrMaskReps;
 
     default:
-      ERROR("");
+      ERROR_MSG("");
     }
     return NULL;
 
@@ -339,7 +339,7 @@ var_icmp(vp, name, length, exact, var_len, write_method)
       		long_return = icmpstat.icmpOutAddrMaskReps;
       		break;
 	default:
-		ERROR("");
+		ERROR_MSG("");
                 return(NULL);
     }
     return ((u_char *) &long_return);

@@ -183,7 +183,7 @@ var_system(vp, name, length, exact, var_len, write_method)
             long_return = 72;
             return (u_char *)&long_return;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }

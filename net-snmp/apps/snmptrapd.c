@@ -457,7 +457,7 @@ main(argc, argv)
     if (version == 1){
         session.version = SNMP_VERSION_1;
     } else if (version == 2){
-        session.version = SNMP_VERSION_2_HISTORIC;
+        session.version = SNMP_VERSION_2p;
 	session.srcPartyLen = 0;
 	session.dstPartyLen = 0;
     }

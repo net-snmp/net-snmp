@@ -43,7 +43,11 @@ SOFTWARE.
 #include <stdio.h>
 #include <ctype.h>
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -55,7 +59,11 @@ SOFTWARE.
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
 #include <netdb.h>
+#endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -70,9 +78,10 @@ SOFTWARE.
 #include "context.h"
 #include "view.h"
 #include "acl.h"
+#include "system.h"
 #include "snmp_parse_args.h"
 
-int main __P((int, char **));
+void main __P((int, char **));
 int failures;
 
 void
@@ -80,99 +89,95 @@ usage __P((void))
 {
   fprintf(stderr,"Usage:\n  snmpget ");
   snmp_parse_args_usage(stderr);
-  fprintf(stderr," [objectID ...]\n\n");
+  fprintf(stderr," [<objectID> ...]\n\n");
   snmp_parse_args_descriptions(stderr);
 }
 
-int
-main(argc, argv)
-    int	    argc;
-    char    *argv[];
+void
+main (argc, argv)
+    int  argc;
+    char *argv[];
 {
     struct snmp_session session, *ss;
-    struct snmp_pdu *pdu, *response;
+    struct snmp_pdu *pdu;
+    struct snmp_pdu *response;
     struct variable_list *vars;
-    int	arg;
-    char *hostname = NULL;
-    char *community = NULL;
-    int timeout = SNMP_DEFAULT_TIMEOUT, retransmission = SNMP_DEFAULT_RETRIES;
-    int	count, current_name = 0;
+    int arg;
+    int count;
+    int current_name = 0;
     char *names[128];
     oid name[MAX_NAME_LEN];
     int name_length;
     int status;
-    int version = 2;
-    int dest_port = SNMP_PORT;
-    u_long      srcclock = 0, dstclock = 0;
-    int clock_flag = 0;
-    oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
-    int srclen = 0, dstlen = 0, contextlen = 0;
-    struct partyEntry *pp;
-    struct contextEntry *cxp;
-    int trivialSNMPv2 = FALSE;
-    struct hostent *hp;
-    in_addr_t destAddr;
-    char ctmp[300];
 
-
-
+    /* read in MIB database */
     init_mib();
 
+    /* get the common command line arguments */
     arg = snmp_parse_args(argc, argv, &session);
+
+    /* get the object names */
     for(; arg < argc; arg++)
       names[current_name++] = argv[arg];
     
+    SOCK_STARTUP;
+
+    /* open an SNMP session */
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-	printf("Couldn't open snmp\n");
-	exit(1);
+      printf("Couldn't open snmp\n");
+      SOCK_CLEANUP;
+      exit(1);
     }
 
+    /* create PDU for GET request and add object names to request */
     pdu = snmp_pdu_create(GET_REQ_MSG);
-
     for(count = 0; count < current_name; count++){
-	name_length = MAX_NAME_LEN;
-	if (!read_objid(names[count], name, &name_length)){
-	    printf("Invalid object identifier: %s\n", names[count]);
-	    failures++;
-	}
-	else	
-	    snmp_add_null_var(pdu, name, name_length);
+      name_length = MAX_NAME_LEN;
+      if (!read_objid(names[count], name, &name_length)){
+        printf("Invalid object identifier: %s\n", names[count]);
+        failures++;
+      } else
+        snmp_add_null_var(pdu, name, name_length);
+    }
+    if (failures) {
+      SOCK_CLEANUP;
+      exit(1);
     }
 
-    if (failures)
-	exit(1);
-
+    /* do the request */
 retry:
     status = snmp_synch_response(ss, pdu, &response);
     if (status == STAT_SUCCESS){
-	if (response->errstat == SNMP_ERR_NOERROR){
-	    for(vars = response->variables; vars; vars = vars->next_variable)
-		print_variable(vars->name, vars->name_length, vars);
-	} else {
-	    printf("Error in packet.\nReason: %s\n", snmp_errstring(response->errstat));
-	    if (response->errstat == SNMP_ERR_NOSUCHNAME){
-		printf("This name doesn't exist: ");
-		for(count = 1, vars = response->variables; vars && count != response->errindex;
-		    vars = vars->next_variable, count++)
-			;
-		if (vars)
-		    print_objid(vars->name, vars->name_length);
-		printf("\n");
-	    }
-	    if ((pdu = snmp_fix_pdu(response, GET_REQ_MSG)) != NULL)
-		goto retry;
-	}
-
+      if (response->errstat == SNMP_ERR_NOERROR){
+        for(vars = response->variables; vars; vars = vars->next_variable)
+          print_variable(vars->name, vars->name_length, vars);
+      } else {
+        printf("Error in packet\nReason: %s\n",
+                snmp_errstring(response->errstat));
+        if (response->errstat == SNMP_ERR_NOSUCHNAME){
+          printf("This name doesn't exist: ");
+          for(count = 1, vars = response->variables; 
+                vars && count != response->errindex;
+                vars = vars->next_variable, count++)
+            ;
+          if (vars)
+            print_objid(vars->name, vars->name_length);
+          printf("\n");
+        }
+        if ((pdu = snmp_fix_pdu(response, GET_REQ_MSG)) != NULL)
+          goto retry;
+      }
     } else if (status == STAT_TIMEOUT){
-	printf("No Response from %s\n", hostname);
-    } else {    /* status == STAT_ERROR */
-	printf("An error occurred, Quitting\n");
+      printf("No Response from %s\n", session.peername);
+    } else { /* status == STAT_ERROR */
+      printf("An error occurred, Quitting\n");
     }
 
     if (response)
-	snmp_free_pdu(response);
+      snmp_free_pdu(response);
     snmp_close(ss);
+    SOCK_CLEANUP;
     exit (0);
 }

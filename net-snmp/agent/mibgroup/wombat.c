@@ -106,7 +106,7 @@ var_wombat(vp, name, length, exact, var_len, write_method)
 	    long_return = 1;
 	    return (u_char *)&long_return;
 	default:
-	    ERROR("");
+	    ERROR_MSG("");
     }
     return NULL;
 }

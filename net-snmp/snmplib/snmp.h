@@ -25,39 +25,110 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
-#define SNMP_PORT	    161
-#define SNMP_TRAP_PORT	    162
 
-#define SNMP_MAX_LEN	    1500
+#define SNMP_PORT	    161         /* standard UDP port for SNMP agents
+                                           to receive requests messages */
+#define SNMP_TRAP_PORT	    162         /* standard UDP port for SNMP
+                                           managers to receive notificaion
+                                          (trap and inform) messages */
 
-/* SNMP version numbers */
-#define SNMP_VERSION_1	    0
-#define SNMP_VERSION_2	    1
-/* Outdated snmpv2 historic numbers, but never transmitted as is */
-#define SNMP_SECURITY_1     128
-#define SNMP_VERSION_2_HISTORIC	    129
+#define SNMP_MAX_LEN	    1500        /* typical maximum message size */
+#define SNMP_MIN_MAX_LEN    484         /* minimum maximum message size */
 
+/* SNMP versions */
+/* There currently exists the following SNMP versions.
+ * (Note that only SNMPv1 is in widespread usage, and this code supports
+ *  only SNMPv1, SNMPv2p, and SNMPv2c. Placeholders have been added to
+ *  support SNMPv3, when it is published.
+ *
+ *  SNMPv1 - (full) the original version, defined by RFC 1157
+ *  SNMPsec - (historic) the first attempt to add strong security
+ *             to SNMPv1, defined by RFCs 1351, 1352, and 1353.
+ *  SNMPv2p - (historic) party-based SNMP, which was another
+ *             attempt to add strong security to SNMP, defined
+ *             by RFCs 1441, 1445, 1446, 1448, and 1449.
+ *  SNMPv2c - (experimental) community string-based SNMPv2,
+ *             which was an attempt to combine the protocol
+ *             operations of SNMPv2 with the security of
+ *             SNMPv1, defined by RFCs 1901, 1905, and 1906.
+ *  SNMPv2u - (experimental) user-based SNMPv2, which provided
+ *             security based on user names and protocol
+ *             operations of SNMPv2, defined by RFCs 1905,
+ *             1909, and 1910.
+ *  SNMPv2* (or SNMPv2star) - (experimental) an attempt to add the
+ *             best features of SNMPv2p and SNMPv2u, defined
+ *             by unpublished documents found at WEB site
+ *             owned by SNMP Research (a leading SNMP vendor)
+ *  SNMPv3 - the current attempt by the IETF working group to merge
+ *             the SNMPv2u and SNMPv2* proposals into a more widly
+ *             accepted SNMPv3.  It is defined by not yet published
+ *             documents of the IETF SNMPv3 WG.
+ *
+ * SNMPv1, SNMPv2c, SNMPv2u, and SNMPv3 messages have a common
+ * form, which is an ASN.1 sequence containing a message version 
+ * field, followed by version dependent fields.
+ * SNMPsec, SNMPv2p, and SNMPv2* messages have a common form,
+ * which is a tagged ASN.1 context specific sequence containing
+ * message dependent fields.
+ *
+ * In the #defines for the message versions below, the value
+ * for SNMPv1, SNMPv2c, SNMPv2u, and SNMPv3 messages is the
+ * value of the message version field. Since SNMPsec, SNMPv2p,
+ * and SNMPv2* messages do not have a message version field,
+ * the value in the defines for them is choosen to be a large
+ * arbitrary number.
+ *
+ * Note that many of the version ID's are defined below purely for
+ * documentational purposes.  At this point the only protocol planned
+ * for future implementations is SNMP3, as the other v2 protocols will
+ * not be supported by the IETF (ie, v2u, v2sec, v2star) or used by
+ * the snmp community at large (at the time of this writing).  */
+
+/* versions based on version field */
+#define SNMP_VERSION_1	   0
+#define SNMP_VERSION_2c    1
+#define SNMP_VERSION_2u    2   /* not (will never be) supported by this code */
+#define SNMP_VERSION_3     3   /* not yet supported by this code */
+
+/* versions not based on a version field */
+#define SNMP_VERSION_sec   128 /* not (will never be) supported by this code */
+#define SNMP_VERSION_2p	   129
+#define SNMP_VERSION_2star 130 /* not (will never be) supported by this code */
+
+/* PDU types in SNMPv1, SNMPsec, SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 */
 #define GET_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x0)
 #define GETNEXT_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x1)
 #define GET_RSP_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x2)
 #define SET_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x3)
+
+/* PDU types in SNMPv1 and SNMPsec */
 #define TRP_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x4)
+
+/* PDU types in SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 */
 #define BULK_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x5)
 #define INFORM_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x6)
 #define TRP2_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x7)
 
+/* PDU types in SNMPv2u, SNMPv2*, and SNMPv3 */
+#define REPORT_RSP_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x8)
+
+
+/* Exception values for SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 */
 #define SNMP_NOSUCHOBJECT    (ASN_CONTEXT | ASN_PRIMITIVE | 0x0)
 #define SNMP_NOSUCHINSTANCE  (ASN_CONTEXT | ASN_PRIMITIVE | 0x1)
 #define SNMP_ENDOFMIBVIEW    (ASN_CONTEXT | ASN_PRIMITIVE | 0x2)
 
-#define SNMP_ERR_NOERROR    (0x0)
-#define SNMP_ERR_TOOBIG	    (0x1)
-#define SNMP_ERR_NOSUCHNAME (0x2)
-#define SNMP_ERR_BADVALUE   (0x3)
-#define SNMP_ERR_READONLY   (0x4)
-#define SNMP_ERR_GENERR	    (0x5)
+/* Error codes (the value of the field error-status in PDUs) */
 
-/* v2historic and v2c */
+/* in SNMPv1, SNMPsec, SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 PDUs */
+#define SNMP_ERR_NOERROR                (0)
+#define SNMP_ERR_TOOBIG	                (1)
+#define SNMP_ERR_NOSUCHNAME             (2)
+#define SNMP_ERR_BADVALUE               (3)
+#define SNMP_ERR_READONLY               (4)
+#define SNMP_ERR_GENERR	                (5)
+
+/* in SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 PDUs */
 #define SNMP_ERR_NOACCESS		(6)
 #define SNMP_ERR_WRONGTYPE		(7)
 #define SNMP_ERR_WRONGLENGTH		(8)
@@ -71,16 +142,17 @@ SOFTWARE.
 #define SNMP_ERR_AUTHORIZATIONERROR	(16)
 #define SNMP_ERR_NOTWRITABLE		(17)
 
-/* v2c */
+/* in SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 PDUs */
 #define SNMP_ERR_INCONSISTENTNAME	(18)
 
-#define SNMP_TRAP_COLDSTART		(0x0)
-#define SNMP_TRAP_WARMSTART		(0x1)
-#define SNMP_TRAP_LINKDOWN		(0x2)
-#define SNMP_TRAP_LINKUP		(0x3)
-#define SNMP_TRAP_AUTHFAIL		(0x4)
-#define SNMP_TRAP_EGPNEIGHBORLOSS	(0x5)
-#define SNMP_TRAP_ENTERPRISESPECIFIC	(0x6)
+/* values of the generic-trap field in trap PDUs */
+#define SNMP_TRAP_COLDSTART		(0)
+#define SNMP_TRAP_WARMSTART		(1)
+#define SNMP_TRAP_LINKDOWN		(2)
+#define SNMP_TRAP_LINKUP		(3)
+#define SNMP_TRAP_AUTHFAIL		(4)
+#define SNMP_TRAP_EGPNEIGHBORLOSS	(5)
+#define SNMP_TRAP_ENTERPRISESPECIFIC	(6)
 
 void xdump __P((u_char *, int, char *));
 u_char *snmp_parse_var_op __P((u_char *, oid *, int *, u_char *, int *,

@@ -1025,7 +1025,7 @@ eventNotifyUpdateSession(np)
     np->magic = state;
     bzero((char *)&session, sizeof(struct snmp_session));
     session.peername = SNMP_DEFAULT_PEERNAME;
-    session.version = SNMP_VERSION_2_HISTORIC;
+    session.version = SNMP_VERSION_2p;
     session.srcParty = np->srcParty;
     session.srcPartyLen = np->srcPartyLen;
     session.dstParty = np->dstParty;
@@ -1039,7 +1039,7 @@ eventNotifyUpdateSession(np)
     np->ss = snmp_open(&session);
     /* no need to check for error, there nothing to do about it anyway */
     if (!np->ss)
-	ERROR("");
+	ERROR_MSG("");
 }
 
 /*
@@ -1253,7 +1253,7 @@ var_eventnextindex(vp, name, length, exact, var_len, write_method)
       case EVENTNEXTINDEX:
 	return (u_char *)&eventNextIndex;
       default:
-	ERROR("");
+	ERROR_MSG("");
     }
 
     return NULL;
@@ -1325,7 +1325,7 @@ var_eventtab(vp, name, length, exact, var_len, write_method)
 	}
 	return (u_char *)&event->status;
       default:
-	ERROR("");
+	ERROR_MSG("");
     }
     
     return NULL;
@@ -1365,7 +1365,7 @@ var_eventnotifyvars(vp, name, length, exact, var_len, write_method)
 	long_return = MAX_RETRANSMISSIONS;
 	return (u_char *)&long_return;
       default:
-	ERROR("");
+	ERROR_MSG("");
     }
 
     return NULL;
@@ -1435,7 +1435,7 @@ var_eventnotifytab(vp, name, length, exact, var_len, write_method)
 	}
 	return (u_char *)&event->status;
       default:
-	ERROR("");
+	ERROR_MSG("");
     }
     
     return NULL;

@@ -287,7 +287,7 @@ var_view(vp, name, length, exact, var_len, write_method)
       case VIEWSTATUS:
 	return (u_char *)&vwp->viewStatus;
       default:
-            ERROR("");
+            ERROR_MSG("");
     }
     return NULL;
 }

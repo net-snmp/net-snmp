@@ -1,15 +1,21 @@
 #include <config.h>
 
 #if STDC_HEADERS
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
+# include <stdlib.h>
+# include <string.h>
+#endif
+#if HAVE_UNISTD_H
+# include <unistd.h>
 #endif
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -21,15 +27,15 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 
 #include "asn1.h"
-#include "mib.h"
 #include "acl.h"
 #include "party.h"
 #include "context.h"
+#include "mib.h"
 
 #define TRUE 1
 #define FALSE 0

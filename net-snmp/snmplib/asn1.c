@@ -44,6 +44,9 @@ SOFTWARE.
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 
 #ifdef vms
 #include <in.h>
@@ -55,8 +58,8 @@ SOFTWARE.
 #ifndef NULL
 #define NULL	0
 #endif
-#define ERROR(string)
 
+#include "snmp_impl.h" /* to define ERROR_MSG */
 
 /*
  * asn_parse_int - pulls a long out of an ASN int type.
@@ -84,21 +87,21 @@ asn_parse_int(data, datalength, type, intp, intsize)
     register long   value = 0;
 
     if (intsize != sizeof (long)){
-	ERROR("not long");
+	ERROR_MSG("not long");
 	return NULL;
     }
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
     if (bufp == NULL){
-	ERROR("bad length");
+	ERROR_MSG("bad length");
 	return NULL;
     }
-    if (asn_length + (bufp - data) > *datalength){
-	ERROR("overflow of message");
+    if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
+	ERROR_MSG("overflow of message");
 	return NULL;
     }
-    if (asn_length > intsize){
-	ERROR("I don't support such large integers");
+    if ((int)asn_length > intsize){
+	ERROR_MSG("I don't support such large integers");
 	return NULL;
     }
     *datalength -= (int)asn_length + (bufp - data);
@@ -137,27 +140,27 @@ asn_parse_unsigned_int(data, datalength, type, intp, intsize)
     register u_long value = 0;
 
     if (intsize != sizeof (long)){
-	ERROR("not long");
+	ERROR_MSG("not long");
 	return NULL;
     }
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
     if (bufp == NULL){
-	ERROR("bad length");
+	ERROR_MSG("bad length");
 	return NULL;
     }
-    if (asn_length + (bufp - data) > *datalength){
-	ERROR("overflow of message");
+    if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
+	ERROR_MSG("overflow of message");
 	return NULL;
     }
-    if ((asn_length > (intsize + 1)) ||
-	((asn_length == intsize + 1) && *bufp != 0x00)){
-	ERROR("I don't support such large integers");
+    if (((int)asn_length > (intsize + 1)) ||
+	(((int)asn_length == intsize + 1) && *bufp != 0x00)){
+	ERROR_MSG("I don't support such large integers");
 	return NULL;
     }
     *datalength -= (int)asn_length + (bufp - data);
     if (*bufp & 0x80)
-	value = -1; /* integer is negative */
+	value = ~value; /* integer is negative */
     while(asn_length--)
 	value = (value << 8) | *bufp++;
     *intp = value;
@@ -265,7 +268,7 @@ asn_build_unsigned_int(data, datalength, type, intp, intsize)
 	 */
 	mask = ((u_long) 0x1FF) << ((8 * (sizeof(long) - 1)) - 1);
 	/* mask is 0xFF800000 on a big-endian machine */
-	while(((integer & mask) == 0) && intsize > 1){
+	while((((integer & mask) == 0) || ((integer & mask) == mask)) && intsize > 1){
 	    intsize--;
 	    integer <<= 8;
 	}
@@ -322,12 +325,12 @@ asn_parse_string(data, datalength, type, string, strlength)
     bufp = asn_parse_length(bufp, &asn_length);
     if (bufp == NULL)
 	return NULL;
-    if (asn_length + (bufp - data) > *datalength){
-	ERROR("overflow of message");
+    if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
+	ERROR_MSG("overflow of message");
 	return NULL;
     }
-    if (asn_length > *strlength){
-	ERROR("I don't support such long strings");
+    if ((int)asn_length > *strlength){
+	ERROR_MSG("I don't support such long strings");
 	return NULL;
     }
     memmove(string, bufp, (int)asn_length);
@@ -393,7 +396,7 @@ asn_parse_header(data, datalength, type)
 
     /* this only works on data types < 30, i.e. no extension octets */
     if (IS_EXTENSION_ID(*bufp)){
-	ERROR("can't process ID >= 30");
+	ERROR_MSG("can't process ID >= 30");
 	return NULL;
     }
     *type = *bufp;
@@ -401,8 +404,8 @@ asn_parse_header(data, datalength, type)
     if (bufp == NULL)
 	return NULL;
     header_len = bufp - data;
-    if (header_len + asn_length > *datalength){
-	ERROR("asn length too long");
+    if ((header_len + asn_length) > (u_long)(*datalength)){
+	ERROR_MSG("asn length too long");
 	return NULL;
     }
     *datalength = (int)asn_length;
@@ -487,11 +490,11 @@ asn_parse_length(data, length)
     if (lengthbyte & ASN_LONG_LEN){
 	lengthbyte &= ~ASN_LONG_LEN;	/* turn MSb off */
 	if (lengthbyte == 0){
-	    ERROR("We don't support indefinite lengths");
+	    ERROR_MSG("We don't support indefinite lengths");
 	    return NULL;
 	}
 	if (lengthbyte > sizeof(long)){
-	    ERROR("we can't support data lengths that long");
+	    ERROR_MSG("we can't support data lengths that long");
 	    return NULL;
 	}
 	memmove(length, data + 1, (int)lengthbyte);
@@ -515,20 +518,20 @@ asn_build_length(data, datalength, length)
     /* no indefinite lengths sent */
     if (length < 0x80){
 	if (*datalength < 1){
-	    ERROR("build_length");
+	    ERROR_MSG("build_length");
 	    return NULL;
 	}	    
 	*data++ = (u_char)length;
     } else if (length <= 0xFF){
 	if (*datalength < 2){
-	    ERROR("build_length");
+	    ERROR_MSG("build_length");
 	    return NULL;
 	}	    
 	*data++ = (u_char)(0x01 | ASN_LONG_LEN);
 	*data++ = (u_char)length;
     } else { /* 0xFF < length <= 0xFFFF */
 	if (*datalength < 3){
-	    ERROR("build_length");
+	    ERROR_MSG("build_length");
 	    return NULL;
 	}	    
 	*data++ = (u_char)(0x02 | ASN_LONG_LEN);
@@ -576,8 +579,8 @@ asn_parse_objid(data, datalength, type, objid, objidlength)
     bufp = asn_parse_length(bufp, &asn_length);
     if (bufp == NULL)
 	return NULL;
-    if (asn_length + (bufp - data) > *datalength){
-	ERROR("overflow of message");
+    if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
+	ERROR_MSG("overflow of message");
 	return NULL;
     }
     *datalength -= (int)asn_length + (bufp - data);
@@ -594,8 +597,10 @@ asn_parse_objid(data, datalength, type, objid, objidlength)
 	    subidentifier = (subidentifier << 7) + (*(u_char *)bufp & ~ASN_BIT8);
 	    length--;
 	} while (*(u_char *)bufp++ & ASN_BIT8);	/* last byte has high bit clear */
+/*?? note, this test will never be true, since the largest value
+     of subidentifier is the value of MAX_SUBID! */
 	if (subidentifier > (u_long)MAX_SUBID){
-	    ERROR("subidentifier too long");
+	    ERROR_MSG("subidentifier too long");
 	    return NULL;
 	}
 	*oidp++ = (oid)subidentifier;
@@ -612,8 +617,16 @@ asn_parse_objid(data, datalength, type, objid, objidlength)
 	objid[0] = 1;
 	objid[1] = 3;
     } else {
-	objid[1] = (u_char)(subidentifier % 40);
-	objid[0] = (u_char)((subidentifier - objid[1]) / 40);
+        if (subidentifier < 40) {
+            objid[0] = 0;
+	    objid[1] = subidentifier;
+        } else if (subidentifier < 80) {
+            objid[0] = 1;
+            objid[1] = subidentifier - 40;
+        } else {
+            objid[0] = 2;
+            objid[1] = subidentifier - 80;
+        }
     }
 
     *objidlength = (int)(oidp - objid);
@@ -645,56 +658,95 @@ asn_build_objid(data, datalength, type, objid, objidlength)
  * leadingbyte ::= 1 7bitvalue
  * lastbyte ::= 0 7bitvalue
  */
-    u_char buf[MAX_OID_LEN];
-    register u_char *bp = buf;
+    int asnlength;
     register oid *op = objid;
-    int    asnlength;
-    register u_long subid, mask, testmask;
-    register int bits, testbits;
+    u_char objid_size[MAX_OID_LEN];
+    register u_long objid_val;
+    u_long first_objid_val;
+    register int i;
 
+    /* check if there are at least 2 sub-identifiers */
     if (objidlength < 2){
-	*bp++ = 0;
-	objidlength = 0;
+        /* there are not, so make OID have two with value of zero */
+        objid_val = 0;
+	objidlength = 2;
     } else {
-	*bp++ = op[1] + (op[0] * 40);
-	objidlength -= 2;
+        /* combine the first two values */
+	objid_val = (op[0] * 40) + op[1];
 	op += 2;
     }
+    first_objid_val = objid_val;
 
-    while(objidlength-- > 0){
-	subid = *op++;
-	if (subid < 127){ /* off by one? */
-	    *bp++ = subid;
-	} else {
-	    mask = ((u_long) 0x7F); /* handle subid == 0 case */
-	    bits = 0;
-	    /* testmask *MUST* !!!! be of an unsigned type */
-	    for(testmask = 0x7F, testbits = 0; testmask != 0;
-		testmask <<= 7, testbits += 7){
-		if (subid & testmask){	/* if any bits set */
-		    mask = testmask;
-		    bits = testbits;
-		}
-	    }
-	    /* mask can't be zero here */
-	    for(;mask != 0x7F; mask >>= 7, bits -= 7){
-		/* fix a mask that got truncated above */
-		if (mask == 0x1E00000)  
-		    mask = 0xFE00000;
-		*bp++ = (u_char)(((subid & mask) >> bits) | ASN_BIT8);
-	    }
-	    *bp++ = (u_char)(subid & mask);
-	}
-    }
-    asnlength = bp - buf;
+    /* calculate the number of bytes needed to store the encoded value */
+    for (i = 1, asnlength = 0;;) {
+        if (objid_val < 0x80U) {
+            objid_size[i] = 1;
+            asnlength += 1;
+        } else if (objid_val < 0x4000U) {
+            objid_size[i] = 2;
+            asnlength += 2;
+        } else if (objid_val < 0x200000U) {
+            objid_size[i] = 3;
+            asnlength += 3;
+        } else if (objid_val < 0x10000000U) {
+            objid_size[i] = 4;
+            asnlength += 4;
+        } else {
+            objid_size[i] = 5;
+            asnlength += 5;
+        }
+        i++;
+        if (i >= objidlength)
+            break;
+        objid_val = *op++;
+    } 
+
+    /* store the ASN.1 tag and length */
     data = asn_build_header(data, datalength, type, asnlength);
     if (data == NULL)
 	return NULL;
     if (*datalength < asnlength)
 	return NULL;
-    memmove(data, buf, asnlength);
+
+    /* store the encoded OID value */
+    for (i = 1, objid_val = first_objid_val, op = objid+2; i < objidlength;
+                i++, objid_val = *op++) {
+        switch (objid_size[i]) {
+        case 1:
+            *data++ = (u_char)objid_val;
+            break;
+
+        case 2:
+            *data++ = (u_char)((objid_val>>7) | 0x80);
+            *data++ = (u_char)(objid_val & 0x07f);
+            break;
+
+        case 3:
+            *data++ = (u_char)((objid_val>>14) | 0x80);
+            *data++ = (u_char)((objid_val>>7 & 0x7f) | 0x80);
+            *data++ = (u_char)(objid_val & 0x07f);
+            break;
+
+        case 4:
+            *data++ = (u_char)((objid_val>>21) | 0x80);
+            *data++ = (u_char)((objid_val>>14 & 0x7f) | 0x80);
+            *data++ = (u_char)((objid_val>>7 & 0x7f) | 0x80);
+            *data++ = (u_char)(objid_val & 0x07f);
+            break;
+
+        case 5:
+            *data++ = (u_char)((objid_val>>28) | 0x80);
+            *data++ = (u_char)((objid_val>>21 & 0x7f) | 0x80);
+            *data++ = (u_char)((objid_val>>14 & 0x7f) | 0x80);
+            *data++ = (u_char)((objid_val>>7 & 0x7f) | 0x80);
+            *data++ = (u_char)(objid_val & 0x07f);
+            break;
+        }
+    }    
+
+    /* return the length and data ptr */
     *datalength -= asnlength;
-    return data + asnlength;
+    return data;
 }
 
 /*
@@ -724,7 +776,7 @@ asn_parse_null(data, datalength, type)
     if (bufp == NULL)
 	return NULL;
     if (asn_length != 0){
-	ERROR("Malformed NULL");
+	ERROR_MSG("Malformed NULL");
 	return NULL;
     }
     *datalength -= (bufp - data);
@@ -784,20 +836,20 @@ asn_parse_bitstring(data, datalength, type, string, strlength)
     bufp = asn_parse_length(bufp, &asn_length);
     if (bufp == NULL)
 	return NULL;
-    if (asn_length + (bufp - data) > *datalength){
-	ERROR("overflow of message");
+    if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
+	ERROR_MSG("overflow of message");
 	return NULL;
     }
-    if (asn_length > *strlength){
-	ERROR("I don't support such long bitstrings");
+    if ((int)asn_length > *strlength){
+	ERROR_MSG("I don't support such long bitstrings");
 	return NULL;
     }
     if (asn_length < 1){
-	ERROR("Invalid bitstring");
+	ERROR_MSG("Invalid bitstring");
 	return NULL;
     }
     if (*bufp > 7){
-	ERROR("Invalid bitstring");
+	ERROR_MSG("Invalid bitstring");
 	return NULL;
     }
     memmove(string, bufp, (int)asn_length);
@@ -830,7 +882,7 @@ asn_build_bitstring(data, datalength, type, string, strlength)
  * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
  */
     if (strlength < 1 || *string > 7){
-	ERROR("Building invalid bitstring");
+	ERROR_MSG("Building invalid bitstring");
 	return NULL;
     }
     data = asn_build_header(data, datalength, type, strlength);
@@ -872,28 +924,28 @@ asn_parse_unsigned_int64(data, datalength, type, cp, countersize)
     int intsize = 4;
     
     if (countersize != sizeof(struct counter64)){
-	ERROR("not right size");
+	ERROR_MSG("not right size");
 	return NULL;
     }
     *type = *bufp++;
     bufp = asn_parse_length(bufp, &asn_length);
     if (bufp == NULL){
-	ERROR("bad length");
+	ERROR_MSG("bad length");
 	return NULL;
     }
-    if (asn_length + (bufp - data) > *datalength){
-	ERROR("overflow of message");
+    if ((asn_length + (bufp - data)) > (u_long)(*datalength)){
+	ERROR_MSG("overflow of message");
 	return NULL;
     }
-    if ((asn_length > (intsize * 2 + 1)) ||
-	((asn_length == (intsize * 2) + 1) && *bufp != 0x00)){
-	ERROR("I don't support such large integers");
+    if (((int)asn_length > (intsize * 2 + 1)) ||
+	(((int)asn_length == (intsize * 2 + 1)) && *bufp != 0x00)){
+	ERROR_MSG("I don't support such large integers");
 	return NULL;
     }
     *datalength -= (int)asn_length + (bufp - data);
     if (*bufp & 0x80){
-	low = -1; /* integer is negative */
-	high = -1;
+	low = ~low; /* integer is negative */
+	high = ~high;
     }
     while(asn_length--){
 	high = (high << 8) | ((low & 0xFF000000) >> 24);
@@ -952,7 +1004,7 @@ asn_build_unsigned_int64(data, datalength, type, cp, countersize)
 	 */
 	mask2 = ((u_long) 0x1FF) << ((8 * (sizeof(long) - 1)) - 1);
 	/* mask2 is 0xFF800000 on a big-endian machine */
-	while(((high & mask2) == 0) && intsize > 1){
+	while((((high & mask2) == 0) || ((high & mask2) == mask2)) && intsize > 1){
 	    intsize--;
 	    high = (high << 8)
 		| ((low & mask) >> (8 * (sizeof(long) - 1)));

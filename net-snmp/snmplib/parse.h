@@ -49,6 +49,8 @@ struct node {
     char *parent;               /* The parent's textual name */
     int tc_index;               /* index into tclist (-1 if NA) */
     int type;                   /* The type of object this represents */
+    int access;
+    int status;
     struct enum_list *enums;    /* (optional) list of enumerated integers */
     char *hint;
     char *units;
@@ -70,6 +72,8 @@ struct tree {
     int    *module_list;        /* To handle multiple modules */
     int tc_index;               /* index into tclist (-1 if NA) */
     int type;                   /* This node's object type */
+    int access;			/* This nodes access */
+    int status;			/* This nodes status */
     struct enum_list *enums;    /* (optional) list of enumerated integers */
     char *hint;
     char *units;
@@ -121,6 +125,16 @@ struct module_compatability {
 #define TYPE_BITSTRING      12
 #define TYPE_NSAPADDRESS    13
 #define TYPE_UINTEGER       14
+
+#define ACCESS_READONLY    18
+#define ACCESS_READWRITE   19
+#define	ACCESS_WRITEONLY   20
+#define ACCESS_NOACCESS    21
+
+#define STATUS_MANDATORY   23
+#define STATUS_KW_OPTIONAL 24
+#define STATUS_OBSOLETE    25
+
 
 #define	ANON	"anonymous#"
 #define	ANON_LEN  strlen(ANON)

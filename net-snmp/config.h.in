@@ -231,6 +231,9 @@
 /* Define if you have the <inet/mib2.h> header file.  */
 #undef HAVE_INET_MIB2_H
 
+/* Define if you have the <io.h> header file.  */
+#undef HAVE_IO_H
+
 /* Define if you have the <kstat.h> header file.  */
 #undef HAVE_KSTAT_H
 
@@ -446,6 +449,9 @@
 
 /* Define if you have the <vm/vm.h> header file.  */
 #undef HAVE_VM_VM_H
+
+/* Define if you have the <winsock.h> header file.  */
+#undef HAVE_WINSOCK_H
 
 /* Define if you have the <xti.h> header file.  */
 #undef HAVE_XTI_H

@@ -25,20 +25,16 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
-#ifdef STDC_HEADERS
+#if HAVE_STDLIB_H
 #include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#ifdef ultrix4
-extern char *optarg;
-extern int optind;
 #endif
-#else
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if HAVE_STRINGS_H
 #include <strings.h>
-extern char getopt();
-extern char *optarg;
-extern int optind;
-extern void *malloc();
+#else
+#include <string.h>
 #endif
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
@@ -47,7 +43,11 @@ extern void *malloc();
 #include <stdio.h>
 #include <ctype.h>
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -59,7 +59,11 @@ extern void *malloc();
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
 #include <netdb.h>
+#endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -68,15 +72,14 @@ extern void *malloc();
 #include "snmp_impl.h"
 #include "snmp_api.h"
 #include "snmp_client.h"
+#include "mib.h"
+#include "snmp.h"
 #include "party.h"
 #include "context.h"
 #include "view.h"
 #include "acl.h"
-#include "mib.h"
-#include "snmp.h"
+#include "system.h"
 #include "snmp_parse_args.h"
-
-extern int  errno;
 
 oid	objid_sysDescr[] = {1, 3, 6, 1, 2, 1, 1, 1, 0};
 int	length_sysDescr = sizeof(objid_sysDescr)/sizeof(oid);
@@ -97,10 +100,8 @@ int	length_ipInReceives = sizeof(objid_ipInReceives)/sizeof(oid);
 oid	objid_ipOutRequests[] = {1, 3, 6, 1, 2, 1, 4, 10, 0};
 int	length_ipOutRequests = sizeof(objid_ipOutRequests)/sizeof(oid);
 
-int main __P((int, char **));
+void main __P((int, char **));
 char *uptime_string __P((u_long, char *));
-void snmp_v1_setup __P((struct snmp_session*, char *, char *));
-void snmp_v2_setup __P((struct snmp_session*, char *, char *, char *, char *, u_long, u_long));
 
 void
 usage __P((void))
@@ -115,7 +116,7 @@ char *uptime_string(timeticks, buf)
     register u_long timeticks;
     char *buf;
 {
-    int	seconds, minutes, hours, days;
+    int  seconds, minutes, hours, days;
 
     timeticks /= 100;
     days = timeticks / (60 * 60 * 24);
@@ -128,187 +129,201 @@ char *uptime_string(timeticks, buf)
     seconds = timeticks % 60;
 
     if (days == 0){
-	sprintf(buf, "%d:%02d:%02d", hours, minutes, seconds);
+      sprintf(buf, "%d:%02d:%02d", hours, minutes, seconds);
     } else if (days == 1) {
-	sprintf(buf, "%d day, %d:%02d:%02d", days, hours, minutes, seconds);
+      sprintf(buf, "%d day, %d:%02d:%02d", days, hours, minutes, seconds);
     } else {
-	sprintf(buf, "%d days, %d:%02d:%02d", days, hours, minutes, seconds);
+      sprintf(buf, "%d days, %d:%02d:%02d", days, hours, minutes, seconds);
     }
     return buf;
 }
 
-int
+void
 main(argc, argv)
-    int	    argc;
-    char    *argv[];
+    int   argc;
+    char  *argv[];
 {
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu, *response;
     struct variable_list *vars;
-    char *hostname = NULL;
-    char *community = NULL;
-    char *srcparty = NULL, *dstparty = NULL, *context = NULL;
-    int timeout = SNMP_DEFAULT_TIMEOUT, retransmission = SNMP_DEFAULT_RETRIES;
     char name[MAX_NAME_LEN];
     char *sysdescr = NULL;
     int status;
-    int version = 2;
-    int dest_port = 0;
-    u_long      srcclock = 0, dstclock = 0;
-    int clock_flag = 0;
     u_long uptime = 0;
     int ipin = 0, ipout = 0, ipackets = 0, opackets = 0;
     int good_var;
     int down_interfaces = 0;
     char buf[40];
-    int index, count;
-    int c;
+    int interfaces;
+    int count;
 
+    /* read in MIB database */
     init_mib();
+
+    /* get the common command line arguments */
     snmp_parse_args(argc, argv, &session);
+
+    SOCK_STARTUP;
+
+    /* open an SNMP session */
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-	fprintf(stderr,"Couldn't open snmp\n");
-	exit(1);
+      fprintf(stderr,"Couldn't open snmp\n");
+      SOCK_CLEANUP;
+      exit(1);
     }
 
     strcpy(name, "No System Description Available");
-    pdu = snmp_pdu_create(GET_REQ_MSG);
 
+    /* create PDU for GET request and add object names to request */
+    pdu = snmp_pdu_create(GET_REQ_MSG);
     snmp_add_null_var(pdu, objid_sysDescr, length_sysDescr);
     snmp_add_null_var(pdu, objid_sysUpTime, length_sysUpTime);
     snmp_add_null_var(pdu, objid_ipInReceives, length_ipInReceives);
     snmp_add_null_var(pdu, objid_ipOutRequests, length_ipOutRequests);
 
+    /* do the request */
 retry:
     status = snmp_synch_response(ss, pdu, &response);
     if (status == STAT_SUCCESS){
-	if (response->errstat == SNMP_ERR_NOERROR){
-	    for(vars = response->variables; vars; vars = vars->next_variable){
-		if (vars->name_length == length_sysDescr &&
-		    !memcmp(objid_sysDescr, vars->name, sizeof(objid_sysDescr))){
-			sysdescr = malloc(vars->val_len+1);
-			memcpy(sysdescr, vars->val.string, vars->val_len);
-			sysdescr[vars->val_len] = '\0';
-		}
-		if (vars->name_length == length_sysUpTime &&
-		    !memcmp(objid_sysUpTime, vars->name, sizeof(objid_sysUpTime))){
-			uptime = *vars->val.integer;
-		}
-		if (vars->name_length == length_ipInReceives &&
-		    !memcmp(objid_ipInReceives, vars->name, sizeof(objid_ipInReceives))){
-			ipin = *vars->val.integer;
-		}
-		if (vars->name_length == length_ipOutRequests &&
-		    !memcmp(objid_ipOutRequests, vars->name, sizeof(objid_ipOutRequests))){
-			ipout = *vars->val.integer;
-		}
-	    }
-	} else {
-	    printf("Error in packet.\nReason: %s\n", snmp_errstring(response->errstat));
-	    if (response->errstat == SNMP_ERR_NOSUCHNAME){
-		printf("This name doesn't exist: ");
-		for(count = 1, vars = response->variables; vars && count != response->errindex;
-		    vars = vars->next_variable, count++)
-			;
-		if (vars)
-		    print_objid(vars->name, vars->name_length);
-		printf("\n");
-	    }
-	    if ((pdu = snmp_fix_pdu(response, GET_REQ_MSG)) != NULL)
-		goto retry;
-	}
-
+      if (response->errstat == SNMP_ERR_NOERROR){
+        for(vars = response->variables; vars; vars = vars->next_variable){
+          if (vars->name_length == length_sysDescr &&
+              !memcmp(objid_sysDescr, vars->name, sizeof(objid_sysDescr))){
+            sysdescr = malloc(vars->val_len+1);
+            memcpy(sysdescr, vars->val.string, vars->val_len);
+            sysdescr[vars->val_len] = '\0';
+          }
+          if (vars->name_length == length_sysUpTime &&
+              !memcmp(objid_sysUpTime, vars->name, sizeof(objid_sysUpTime))){
+            uptime = *vars->val.integer;
+          }
+          if (vars->name_length == length_ipInReceives &&
+              !memcmp(objid_ipInReceives, vars->name, sizeof(objid_ipInReceives))){
+            ipin = *vars->val.integer;
+          }
+          if (vars->name_length == length_ipOutRequests &&
+              !memcmp(objid_ipOutRequests, vars->name, sizeof(objid_ipOutRequests))){
+            ipout = *vars->val.integer;
+          }
+        }
+      } else {
+        printf("Error in packet.\nReason: %s\n",
+                snmp_errstring(response->errstat));
+        if (response->errstat == SNMP_ERR_NOSUCHNAME){
+          printf("This name doesn't exist: ");
+          for(count = 1, vars = response->variables;
+                vars && count != response->errindex;
+                vars = vars->next_variable, count++)
+            ;
+          if (vars)
+            print_objid(vars->name, vars->name_length);
+          printf("\n");
+        }
+        if ((pdu = snmp_fix_pdu(response, GET_REQ_MSG)) != NULL)
+          goto retry;
+      }
     } else if (status == STAT_TIMEOUT){
-	fprintf(stderr,"No Response from %s\n", hostname);
-	exit(1);
+      fprintf(stderr,"No Response from %s\n", session.peername);
+      SOCK_CLEANUP;
+      exit(1);
     } else {    /* status == STAT_ERROR */
-	fprintf(stderr,"An error occurred, Quitting\n");
-	exit(2);
+      fprintf(stderr,"An error occurred, Quitting\n");
+      SOCK_CLEANUP;
+      exit(2);
     }
 
     printf("[%s]=>[%s] Up: %s\n", inet_ntoa(response->address.sin_addr),
-	sysdescr, uptime_string(uptime, buf));
+            sysdescr, uptime_string(uptime, buf));
 
     if (response)
-	snmp_free_pdu(response);
+      snmp_free_pdu(response);
 
+    /* create PDU for GET request and add object names to request */
     pdu = snmp_pdu_create(GETNEXT_REQ_MSG);
-
     snmp_add_null_var(pdu, objid_ifOperStatus, length_ifOperStatus);
     snmp_add_null_var(pdu, objid_ifInUCastPkts, length_ifInUCastPkts);
     snmp_add_null_var(pdu, objid_ifInNUCastPkts, length_ifInNUCastPkts);
     snmp_add_null_var(pdu, objid_ifOutUCastPkts, length_ifOutUCastPkts);
     snmp_add_null_var(pdu, objid_ifOutNUCastPkts, length_ifOutNUCastPkts);
 
+/*?? note: this code is not quite complete */
     good_var = 5;
+    interfaces = 0;
     while(good_var == 5){
-	good_var = 0;
-	status = snmp_synch_response(ss, pdu, &response);
-	if (status == STAT_SUCCESS){
-	    if (response->errstat == SNMP_ERR_NOERROR){
-		pdu = snmp_pdu_create(GETNEXT_REQ_MSG);
+      good_var = 0;
+      status = snmp_synch_response(ss, pdu, &response);
+      if (status == STAT_SUCCESS){
+        if (response->errstat == SNMP_ERR_NOERROR){
+          pdu = snmp_pdu_create(GETNEXT_REQ_MSG);
+          for(vars = response->variables; vars; vars = vars->next_variable){
+            if (vars->name_length >= length_ifOperStatus &&
+                !memcmp(objid_ifOperStatus, vars->name,
+                        sizeof(objid_ifOperStatus))){
+              if (*vars->val.integer != MIB_IFSTATUS_UP)
+                down_interfaces++;
+              snmp_add_null_var(pdu, vars->name, vars->name_length);
+              good_var++;
+            } else if (vars->name_length >= length_ifInUCastPkts &&
+                !memcmp(objid_ifInUCastPkts, vars->name,
+                        sizeof(objid_ifInUCastPkts))){
+              ipackets += *vars->val.integer;
+              snmp_add_null_var(pdu, vars->name, vars->name_length);
+              good_var++;
+            } else if (vars->name_length >= length_ifInNUCastPkts &&
+                !memcmp(objid_ifInNUCastPkts, vars->name,
+                        sizeof(objid_ifInNUCastPkts))){
+              ipackets += *vars->val.integer;
+              snmp_add_null_var(pdu, vars->name, vars->name_length);
+              good_var++;
+            } else if (vars->name_length >= length_ifOutUCastPkts &&
+                !memcmp(objid_ifOutUCastPkts, vars->name,
+                        sizeof(objid_ifOutUCastPkts))){
+              opackets += *vars->val.integer;
+              snmp_add_null_var(pdu, vars->name, vars->name_length);
+              good_var++;
+            } else if (vars->name_length >= length_ifOutNUCastPkts &&
+                !memcmp(objid_ifOutNUCastPkts, vars->name,
+                        sizeof(objid_ifOutNUCastPkts))){
+              opackets += *vars->val.integer;
+              snmp_add_null_var(pdu, vars->name, vars->name_length);
+              good_var++;
+            }
+          }
+          if (good_var == 5)
+            interfaces++;
+        } else {
+          printf("Error in packet.\nReason: %s\n",
+                  snmp_errstring(response->errstat));
+          if (response->errstat == SNMP_ERR_NOSUCHNAME){
+            printf("This name doesn't exist: ");
+            for(count = 1, vars = response->variables;
+                  vars && count != response->errindex;
+                  vars = vars->next_variable, count++)
+              ;
+            if (vars)
+              print_objid(vars->name, vars->name_length);
+            printf("\n");
+          }
+        }
+      } else if (status == STAT_TIMEOUT){
+        fprintf(stderr,"No Response from %s\n", session.peername);
+      } else {    /* status == STAT_ERROR */
+        fprintf(stderr,"An error occurred, Quitting\n");
+      }
 
-		index = 0;
-		for(vars = response->variables; vars; vars = vars->next_variable){
-		    if (vars->name_length >= length_ifOperStatus &&
-			!memcmp(objid_ifOperStatus, vars->name, sizeof(objid_ifOperStatus))){
-			    if (*vars->val.integer != MIB_IFSTATUS_UP)
-				down_interfaces++;
-			    snmp_add_null_var(pdu, vars->name, vars->name_length);
-			    good_var++;
-		    } else if (vars->name_length >= length_ifInUCastPkts &&
-			!memcmp(objid_ifInUCastPkts, vars->name, sizeof(objid_ifInUCastPkts))){
-			    ipackets += *vars->val.integer;
-			    snmp_add_null_var(pdu, vars->name, vars->name_length);
-			    good_var++;
-		    } else if (vars->name_length >= length_ifInNUCastPkts &&
-			!memcmp(objid_ifInNUCastPkts, vars->name,
-				sizeof(objid_ifInNUCastPkts))){
-			    ipackets += *vars->val.integer;
-			    snmp_add_null_var(pdu, vars->name, vars->name_length);
-			    good_var++;
-		    } else if (vars->name_length >= length_ifOutUCastPkts &&
-			!memcmp(objid_ifOutUCastPkts, vars->name,
-				sizeof(objid_ifOutUCastPkts))){
-			    opackets += *vars->val.integer;
-			    snmp_add_null_var(pdu, vars->name, vars->name_length);
-			    good_var++;
-		    } else if (vars->name_length >= length_ifOutNUCastPkts &&
-			!memcmp(objid_ifOutNUCastPkts, vars->name,
-				sizeof(objid_ifOutNUCastPkts))){
-			    opackets += *vars->val.integer;
-			    snmp_add_null_var(pdu, vars->name, vars->name_length);
-			    good_var++;
-		    }
-		    index++;
-		}
-	    } else {
-		printf("Error in packet.\nReason: %s\n", snmp_errstring(response->errstat));
-		if (response->errstat == SNMP_ERR_NOSUCHNAME){
-		    printf("This name doesn't exist: ");
-		    for(count = 1, vars = response->variables; vars && count != response->errindex;
-			vars = vars->next_variable, count++)
-			    ;
-		    if (vars)
-			print_objid(vars->name, vars->name_length);
-		    printf("\n");
-		}
-	    }
-
-	} else if (status == STAT_TIMEOUT){
-	    fprintf(stderr,"No Response from %s\n", hostname);
-	} else {    /* status == STAT_ERROR */
-	    fprintf(stderr,"An error occurred, Quitting\n");
-	}
-
-	if (response)
-	    snmp_free_pdu(response);
+      if (response)
+        snmp_free_pdu(response);
     }
-    printf("Recv/Trans packets: Interfaces: %d/%d | IP: %d/%d\n", ipackets, opackets, ipin, ipout);
+    printf("Interfaces: %d, Recv/Trans packets: %d/%d | IP: %d/%d\n",
+            interfaces, ipackets, opackets, ipin, ipout);
     if (down_interfaces > 0){
-	printf("%d interface%s down!\n", down_interfaces, down_interfaces > 1 ? "s are": " is" );
+      printf("%d interface%s down!\n",
+            down_interfaces, down_interfaces > 1 ? "s are": " is" );
     }
+
+    snmp_close(ss);
+    SOCK_CLEANUP;
     exit (0);
 }

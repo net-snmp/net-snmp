@@ -2,13 +2,23 @@
 
 #if STDC_HEADERS
 #include <stdlib.h>
-#include <unistd.h>
+#endif
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
 #include <string.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #endif
 #include <sys/types.h>
 #include <stdio.h>
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -17,6 +27,11 @@
 #  include <time.h>
 # endif
 #endif
+
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+
 #include "asn1.h"
 #include "view.h"
 

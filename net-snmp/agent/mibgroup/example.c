@@ -212,7 +212,7 @@ var_example(vp, name, length, exact, var_len, write_method)
       return (u_char *) &long_ret;
 
     default:
-      ERROR("example.c: don't know how to handle this request.");
+      ERROR_MSG("example.c: don't know how to handle this request.");
   }
   /* if we fall to here, fail by returning NULL */
   return NULL;

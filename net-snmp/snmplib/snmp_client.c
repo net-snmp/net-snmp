@@ -25,6 +25,8 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
+#include <stdio.h>
+#include <errno.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -33,9 +35,16 @@ SOFTWARE.
 #else
 #include <string.h>
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -44,26 +53,35 @@ SOFTWARE.
 #  include <time.h>
 # endif
 #endif
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 #include <stdio.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#include <errno.h>
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
 
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+
 #include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_client.h"
-#include "mib.h"
 #include "snmp.h"
 #include "snmp_impl.h"
+#include "snmp_api.h"
+#include "snmp_client.h"
 #include "party.h"
 #include "context.h"
 #include "view.h"
 #include "acl.h"
+#include "mib.h"
+
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -334,7 +352,6 @@ snmp_synch_response(ss, pdu, response)
 	FD_ZERO(&fdset);
 	block = SNMPBLOCK;
 	tvp = &timeout;
-        tvp->tv_sec = 120;               /* wait max 10 secs */
 	timerclear(tvp);
 	snmp_select_info(&numfds, &fdset, tvp, &block);
 	if (block == 1)
