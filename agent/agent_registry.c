@@ -121,6 +121,13 @@ split_subtree(struct subtree *current, oid name[], int name_len )
 	new_sub->variables = (struct variable *)(cp + new_sub->variables_width);
     }
 
+	/* Delegated trees should retain their variables regardless */
+    if ( current->variables_len > 0 &&
+		IS_DELEGATED((u_char)current->variables[0].type)) {
+	new_sub->variables_len = 1;
+	new_sub->variables     = current->variables;
+    }
+
 	/* Propogate this split down through any children */
     if ( current->children )
 	new_sub->children = split_subtree(current->children, name, name_len);
