@@ -5,7 +5,7 @@
        TEXTUAL-CONVENTION          FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "200009010000Z"  -- Sept 01, 2000
+       LAST-UPDATED "200010170000Z"  -- Oct 17, 2000
        ORGANIZATION "IANA"
        CONTACT-INFO "        Internet Assigned Numbers Authority
 
@@ -18,6 +18,13 @@
        DESCRIPTION  "This MIB module defines the IANAifType Textual
                      Convention, and thus the enumerated values of
                      the ifType object defined in MIB-II's ifTable."
+
+       REVISION     "200010170000Z"  -- Oct 17, 2000
+       DESCRIPTION  "Registration of new IANAifTypes
+                    188 and 189."  
+
+       REVISION     "200010020000Z"  -- Oct 02, 2000
+       DESCRIPTION  "Registration of new IANAifType 187." 
 
        REVISION     "200009010000Z"  -- Sept 01, 2000
        DESCRIPTION  "Registration of new IANAifTypes
@@ -270,7 +277,10 @@
                    hiperlan2 (183), -- HIPERLAN Type 2 Radio Interface
                    propBWAp2Mp (184), -- PropBroadbandWirelessAccesspt2multipt
                    sonetOverheadChannel (185), -- SONET Overhead Channel
-                   digitalWrapperOverheadChannel (186) -- Digital Wrapper
+                   digitalWrapperOverheadChannel (186), -- Digital Wrapper
+                   aal2 (187), -- ATM adaptation layer 2
+                   radioMAC (188), -- MAC layer over radio links
+                   atmRadio (189) -- ATM over radio links   
 }
 
    END
