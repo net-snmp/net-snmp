@@ -77,9 +77,7 @@ cmu_snmp_parse (netsnmp_session *session,
 {
     u_char *bufp = NULL;
 
-    if (Reqid == 0) {
-	snmp_sess_init(session); /* gimme a break! */
-    }
+    snmp_sess_init(session); /* gimme a break! */
 
     switch(pdu->version) {
     case SNMP_VERSION_1:
