@@ -124,6 +124,8 @@ int current_proc_entry;
 #define	HRSWRUNPERF_CPU		9
 #define	HRSWRUNPERF_MEM		10
 
+#define HRSWRUN_PARAMS_MAX	128
+
 struct variable4 hrswrun_variables[] = {
     { HRSWRUN_OSINDEX,   ASN_INTEGER, RONLY, var_hrswrun, 1, {1}},
     { HRSWRUN_INDEX,     ASN_INTEGER, RONLY, var_hrswrun, 3, {2,1,1}},
@@ -694,7 +696,7 @@ var_hrswrun(struct variable *vp,
 	    cp = strchr( proc_buf.pst_cmd, ' ');
 	    if ( cp != NULL ) {
 		cp++;
-		sprintf(string, "%s", cp);
+		snprintf(string, HRSWRUN_PARAMS_MAX, "%s", cp);
 	    }
 	    else
 		string[0] = '\0';
@@ -702,7 +704,7 @@ var_hrswrun(struct variable *vp,
 	    cp = strchr( lowpsinfo.pr_psargs, ' ');
 	    if ( cp != NULL ) {
 		cp++;
-		sprintf(string, "%s", cp);
+		snprintf(string, HRSWRUN_PARAMS_MAX, "%s", cp);
 	    }
 	    else
 		string[0] = '\0';
@@ -710,7 +712,7 @@ var_hrswrun(struct variable *vp,
 #ifdef _SLASH_PROC_METHOD_
 	    if (proc_buf) {
 	        cp = strchr(proc_buf->pr_psargs, ' ');
-	        if (cp) strcpy(string, cp+1);
+	        if (cp) strncpy(string, cp+1, HRSWRUN_PARAMS_MAX);
 	        else string[0] = 0;
 	    } else
 		string[0] = 0;
@@ -718,15 +720,17 @@ var_hrswrun(struct variable *vp,
 	    cp = proc_buf->p_user.u_psargs;
 	    while (*cp && *cp != ' ') cp++;
 	    if (*cp == ' ') cp++;
-	    strcpy (string, cp);
+	    strncpy (string, cp, HRSWRUN_PARAMS_MAX);
 #endif
 #elif HAVE_KVM_GETPROCS
 	    string[0] = 0;
 	    argv = kvm_getargv(kd, proc_table+LowProcIndex, sizeof(string));
 	    if (argv) argv++;
 	    while (argv && *argv) {
+		int len = strlen(string);
 		if (string[0] != 0) strcat(string, " ");
-		strcat(string, *argv);
+		strncpy(string+len, *argv, HRSWRUN_PARAMS_MAX-len);
+		string[127] = 0;
 		argv++;
 	    }
 #elif defined(linux)
@@ -761,7 +765,7 @@ var_hrswrun(struct variable *vp,
 	    while ( *cp )
 		++cp;
 	    ++cp;
-	    strcpy( string, cp );
+	    strncpy( string, cp, HRSWRUN_PARAMS_MAX );
             fclose(fp);
 #elif defined(cygwin)
 	    string[0] = 0;
@@ -771,6 +775,7 @@ var_hrswrun(struct variable *vp,
 #endif
 	    sprintf(string, "-h -q -v");
 #endif
+	    string[HRSWRUN_PARAMS_MAX] = 0;
 	    *var_len = strlen(string);
 	    return (u_char *) string;
 	case HRSWRUN_TYPE:
