@@ -1048,7 +1048,7 @@ _sess_open(struct snmp_session *in_session)
 
 			/* Interpret the peername as an IP port ... */
                 for(cp = session->peername; cp && (isdigit(*cp)); cp++);
-                if (!cp)
+                if (!cp || !*cp )
                     cp = strchr( session->peername, '.' );
 		if ( !cp && (( i = atoi( session->peername )) != 0 )) {
 		    session->remote_port = i;
