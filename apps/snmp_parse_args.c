@@ -535,12 +535,17 @@ oid
 		oid *root,
 		size_t *rootlen)
 {
+  size_t savlen = *rootlen;
   if (random_access) {
     if (get_node(argv,root,rootlen)) {
       return root;
     }
   } else {
     if (read_objid(argv,root,rootlen)) {
+      return root;
+    }
+    *rootlen = savlen;
+    if (get_node(argv,root,rootlen)) {
       return root;
     }
   }
