@@ -80,7 +80,7 @@ _asn_size_err(const char *str, size_t wrongsize, size_t rightsize)
     char            ebuf[128];
 
     snprintf(ebuf, sizeof(ebuf),
-            "%s size %d: s/b %d", str, wrongsize, rightsize);
+            "%s size %u: s/b %u", str, (unsigned)wrongsize, (unsigned)rightsize);
     ebuf[ sizeof(ebuf)-1 ] = 0;
     ERROR_MSG(ebuf);
 }
@@ -92,8 +92,8 @@ _asn_length_err(const char *str, size_t wrongsize, size_t rightsize)
     char            ebuf[128];
 
     snprintf(ebuf, sizeof(ebuf),
-            "%s length %d too large: exceeds %d", str, wrongsize,
-            rightsize);
+            "%s length %d too large: exceeds %d", str, (int)wrongsize,
+            (int)rightsize);
     ebuf[ sizeof(ebuf)-1 ] = 0;
     ERROR_MSG(ebuf);
 }
@@ -147,8 +147,8 @@ _asn_build_header_check(const char *str, u_char * data,
     }
     if (datalen < typedlen) {
         snprintf(ebuf, sizeof(ebuf),
-                "%s: bad header, length too short: %d < %d", str,
-                datalen, typedlen);
+                "%s: bad header, length too short: %lu < %lu", str,
+                (unsigned long)datalen, (unsigned long)typedlen);
         ebuf[ sizeof(ebuf)-1 ] = 0;
         ERROR_MSG(ebuf);
         return 1;
@@ -173,8 +173,8 @@ _asn_realloc_build_header_check(const char *str,
 
     if (*pkt_len < typedlen) {
         snprintf(ebuf, sizeof(ebuf),
-                "%s: bad header, length too short: %d < %d", str,
-                *pkt_len, typedlen);
+                "%s: bad header, length too short: %lu < %lu", str,
+                (unsigned long)*pkt_len, (unsigned long)typedlen);
         ebuf[ sizeof(ebuf)-1 ] = 0;
         ERROR_MSG(ebuf);
         return 1;
@@ -798,8 +798,8 @@ asn_build_header(u_char * data,
 
     if (*datalength < 1) {
         snprintf(ebuf, sizeof(ebuf),
-                "bad header length < 1 :%d, %d", *datalength,
-                length);
+                "bad header length < 1 :%lu, %lu",
+		(unsigned long)*datalength, (unsigned long)length);
         ebuf[ sizeof(ebuf)-1 ] = 0;
         ERROR_MSG(ebuf);
         return NULL;
@@ -887,8 +887,8 @@ asn_parse_length(u_char * data, u_long * length)
         }
         if (lengthbyte > sizeof(long)) {
             snprintf(ebuf, sizeof(ebuf),
-                    "%s: data length %d > %d not supported", errpre,
-                    lengthbyte, sizeof(long));
+                    "%s: data length %d > %lu not supported", errpre,
+                    lengthbyte, (unsigned long)sizeof(long));
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return NULL;
@@ -935,8 +935,8 @@ asn_build_length(u_char * data, size_t * datalength, size_t length)
     if (length < 0x80) {
         if (*datalength < 1) {
             snprintf(ebuf, sizeof(ebuf),
-                    "%s: bad length < 1 :%d, %d", errpre,
-                    *datalength, length);
+                    "%s: bad length < 1 :%lu, %lu", errpre,
+                    (unsigned long)*datalength, (unsigned long)length);
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return NULL;
@@ -945,8 +945,8 @@ asn_build_length(u_char * data, size_t * datalength, size_t length)
     } else if (length <= 0xFF) {
         if (*datalength < 2) {
             snprintf(ebuf, sizeof(ebuf),
-                    "%s: bad length < 2 :%d, %d", errpre,
-                    *datalength, length);
+                    "%s: bad length < 2 :%lu, %lu", errpre,
+                    (unsigned long)*datalength, (unsigned long)length);
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return NULL;
@@ -956,8 +956,8 @@ asn_build_length(u_char * data, size_t * datalength, size_t length)
     } else {                    /* 0xFF < length <= 0xFFFF */
         if (*datalength < 3) {
             snprintf(ebuf, sizeof(ebuf),
-                    "%s: bad length < 3 :%d, %d", errpre,
-                    *datalength, length);
+                    "%s: bad length < 3 :%lu, %lu", errpre,
+                    (unsigned long)*datalength, (unsigned long)length);
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return NULL;
@@ -2194,8 +2194,8 @@ asn_realloc_rbuild_length(u_char ** pkt, size_t * pkt_len,
         if (((*pkt_len - *offset) < 1)
             && !(r && asn_realloc(pkt, pkt_len))) {
             snprintf(ebuf, sizeof(ebuf),
-                    "%s: bad length < 1 :%d, %d", errpre,
-                    *pkt_len - *offset, length);
+                    "%s: bad length < 1 :%ld, %lu", errpre,
+                    (long)(*pkt_len - *offset), (unsigned long)length);
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return 0;
@@ -2206,8 +2206,8 @@ asn_realloc_rbuild_length(u_char ** pkt, size_t * pkt_len,
             if (((*pkt_len - *offset) < 1)
                 && !(r && asn_realloc(pkt, pkt_len))) {
                 snprintf(ebuf, sizeof(ebuf),
-                        "%s: bad length < 1 :%d, %d", errpre,
-                        *pkt_len - *offset, length);
+                        "%s: bad length < 1 :%ld, %lu", errpre,
+                        (long)(*pkt_len - *offset), (unsigned long)length);
                 ebuf[ sizeof(ebuf)-1 ] = 0;
                 ERROR_MSG(ebuf);
                 return 0;
@@ -2219,8 +2219,8 @@ asn_realloc_rbuild_length(u_char ** pkt, size_t * pkt_len,
         while ((*pkt_len - *offset) < 2) {
             if (!(r && asn_realloc(pkt, pkt_len))) {
                 snprintf(ebuf, sizeof(ebuf),
-                        "%s: bad length < 1 :%d, %d", errpre,
-                        *pkt_len - *offset, length);
+                        "%s: bad length < 1 :%ld, %lu", errpre,
+                        (long)(*pkt_len - *offset), (unsigned long)length);
                 ebuf[ sizeof(ebuf)-1 ] = 0;
                 ERROR_MSG(ebuf);
                 return 0;
@@ -2246,8 +2246,8 @@ asn_realloc_rbuild_header(u_char ** pkt, size_t * pkt_len,
         if (((*pkt_len - *offset) < 1)
             && !(r && asn_realloc(pkt, pkt_len))) {
             snprintf(ebuf, sizeof(ebuf),
-                    "bad header length < 1 :%d, %d",
-                    *pkt_len - *offset, length);
+                    "bad header length < 1 :%ld, %lu",
+                    (long)(*pkt_len - *offset), (unsigned long)length);
             ebuf[ sizeof(ebuf)-1 ] = 0;
             ERROR_MSG(ebuf);
             return 0;
