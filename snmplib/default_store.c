@@ -166,6 +166,7 @@ void
 ds_handle_config(const char *token, char *line) {
   struct ds_read_config *drsp;
   char buf[SNMP_MAXBUF];
+  char *value, *endptr;
   int itmp;
 
   DEBUGMSGTL(("ds_handle_config", "handling %s\n", token));
@@ -177,23 +178,26 @@ ds_handle_config(const char *token, char *line) {
                 drsp->token, drsp->type, drsp->storeid, drsp->which));
     switch (drsp->type) {
       case ASN_BOOLEAN:
-        if (strncasecmp(line,"yes",3) == 0 || strncasecmp(line,"true",4) == 0) {
+	value = strtok(line, " \t\n");
+        if (strcasecmp(value,"yes") == 0 || strcasecmp(value,"true") == 0) {
           itmp = 1;
-        } else if (strncasecmp(line,"no",3) == 0 ||
-                strncasecmp(line,"false",5) == 0) {
+        } else if (strcasecmp(value,"no") == 0 || strcasecmp(value,"false") == 0) {
           itmp = 0;
-        } else if (atoi(line) > 0) {
-          itmp = 1;
         } else {
-          itmp = 0;
+	  itmp = strtol(value, &endptr, 10);
+	  if (*endptr != 0 || itmp < 0 || itmp > 1)
+	    config_perror("Should be yes|no|true|false|0|1");
         }
         ds_set_boolean(drsp->storeid, drsp->which, itmp);
         DEBUGMSGTL(("ds_handle_config", "bool: %d\n", itmp));
         break;
 
       case ASN_INTEGER:
-        ds_set_int(drsp->storeid, drsp->which, atoi(line));
-        DEBUGMSGTL(("ds_handle_config", "int: %d\n", atoi(line)));
+	value = strtok(line, " \t\n");
+	itmp = strtol(value, &endptr, 10);
+	if (*endptr != 0) config_perror("Bad integer value");
+	else ds_set_int(drsp->storeid, drsp->which, itmp);
+        DEBUGMSGTL(("ds_handle_config", "int: %d\n", itmp));
         break;
 
       case ASN_OCTET_STR:
