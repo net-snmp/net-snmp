@@ -358,8 +358,10 @@ netsnmp_call_next_handler_one_request(netsnmp_mib_handler *current,
     netsnmp_request_info *request;
     int ret;
     
-    if (!requests)
-        return NULL;
+    if (!requests) {
+        snmp_log(LOG_ERR, "netsnmp_call_next_handler_ONE_REQUEST() called illegally\n");
+        return SNMP_ERR_GENERR;
+    }
 
     request = requests->next;
     requests->next = NULL;

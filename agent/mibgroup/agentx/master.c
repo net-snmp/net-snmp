@@ -29,6 +29,7 @@
 #include <dmalloc.h>
 #endif
 
+#define SNMP_NEED_REQUEST_LIST
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "snmpd.h"
