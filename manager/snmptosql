@@ -219,8 +219,6 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 		$dbh->do("$cmd")
 		    or warn "\nnot ok: $cmd -> $DBI::errstr\n" if ($doit);
 		
-		# delete the data beyond the number of days requested.
-		$dbh->do("delete from $tablelist->{'tablename'}hist where (unix_timestamp()-unix_timestamp(updated)) > $tablelist->{'keephistory'}*24*60*60 and host = '$host'") or warn "\nnot ok: $DBI::errstr\n" if ($doit);
 	    }
 
 	    my $newerr = 
@@ -230,6 +228,12 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 			  $newerr->{errvalue});
 	     }
 	} # snmp loop
+
+	# delete the data beyond the number of days requested.
+	if ($tablelist->{'keephistory'} > 0) {
+	    $dbh->do("delete from $tablelist->{'tablename'}hist where (unix_timestamp()-unix_timestamp(updated)) > $tablelist->{'keephistory'}*24*60*60 and host = '$host'") or warn "\nnot ok: $DBI::errstr\n" if ($doit);
+	}
+
 	my $curs = getcursor("select oidindex from $tablelist->{tablename} where host = '$host'");
 	my $row;
 	while ($row = $curs->fetchrow_hashref) {
