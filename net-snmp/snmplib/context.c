@@ -21,20 +21,35 @@ context_getEntry(contextID, contextIDLen)
     /* do I need a cache of two contexts??? */
     cp = cache[0];
     if (cp && contextIDLen == cp->contextIdentityLen
+#ifdef SVR4
+	&& !memcmp((char *)cp->contextIdentity, (char *)contextID,
+		     contextIDLen * sizeof(oid))){
+#else
 	&& !bcmp((char *)cp->contextIdentity, (char *)contextID,
 		     contextIDLen * sizeof(oid))){
+#endif
 	return cp;
     }
     cp = cache[1];
     if (cp && contextIDLen == cp->contextIdentityLen
+#ifdef SVR4
+	&& !memcmp((char *)cp->contextIdentity, (char *)contextID,
+		     contextIDLen * sizeof(oid))){
+#else
 	&& !bcmp((char *)cp->contextIdentity, (char *)contextID,
 		     contextIDLen * sizeof(oid))){
+#endif
 	return cp;
     }
     for(cp = List; cp; cp = cp->next){
         if (contextIDLen == cp->contextIdentityLen
+#ifdef SVR4
+	    && !memcmp((char *)cp->contextIdentity, (char *)contextID,
+		     contextIDLen * sizeof(oid))){
+#else
 	    && !bcmp((char *)cp->contextIdentity, (char *)contextID,
 		     contextIDLen * sizeof(oid))){
+#endif
 	    cachePtr ^= 1;
 	    cache[cachePtr] = cp;
 	    return cp;
@@ -43,6 +58,7 @@ context_getEntry(contextID, contextIDLen)
     return NULL;
 }
 
+int
 context_scanInit()
 {
   ScanPtr = List;
@@ -67,14 +83,27 @@ context_createEntry(contextID, contextIDLen)
     struct contextEntry *cp;
 
     cp = (struct contextEntry *)malloc(sizeof(struct contextEntry));
+#ifdef SVR4
+    memset((char *)cp, NULL, sizeof(struct contextEntry));
+#else
     bzero((char *)cp, sizeof(struct contextEntry));
+#endif
 
+#ifdef SVR4
+    memmove((char *)cp->contextIdentity, (char *)contextID,
+	  contextIDLen * sizeof(oid));
+#else
     bcopy((char *)contextID, (char *)cp->contextIdentity,
 	  contextIDLen * sizeof(oid));
+#endif
     cp->contextIdentityLen = contextIDLen;
     cp->contextIndex = NextIndex++;
     cp->reserved = (struct contextEntry *)malloc(sizeof(struct contextEntry));
+#ifdef SVR4
+    memset((char *)cp->reserved, NULL, sizeof(struct contextEntry));
+#else
     bzero((char *)cp->reserved, sizeof(struct contextEntry));
+#endif
 
     cp->next = List;
     List = cp;
@@ -88,15 +117,25 @@ context_destroyEntry(contextID, contextIDLen)
     struct contextEntry *cp, *lastcp;
 
     if (List->contextIdentityLen == contextIDLen
+#ifdef SVR4
+	&& !memcmp((char *)List->contextIdentity, (char *)contextID,
+		 contextIDLen * sizeof(oid))){
+#else
 	&& !bcmp((char *)List->contextIdentity, (char *)contextID,
 		 contextIDLen * sizeof(oid))){
+#endif
 	cp = List;
 	List = List->next;
     } else {
 	for(cp = List; cp; cp = cp->next){
 	    if (cp->contextIdentityLen == contextIDLen
+#ifdef SVR4
+		&& !memcmp((char *)cp->contextIdentity, (char *)contextID,
+			 contextIDLen * sizeof(oid)))
+#else
 		&& !bcmp((char *)cp->contextIdentity, (char *)contextID,
 			 contextIDLen * sizeof(oid)))
+#endif
 		break;
 	    lastcp = cp;
 	}

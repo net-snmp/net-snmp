@@ -107,7 +107,7 @@ struct packet_info {
 #define TIMETICKS   (ASN_APPLICATION | 3)
 #define OPAQUE	    (ASN_APPLICATION | 4)
 
-/* defined types (from the SMI, RFC ????) */
+/* defined types (from the SMI, RFC xxxx) */
 #define NSAP	    (ASN_APPLICATION | 5)
 #define COUNTER64   (ASN_APPLICATION | 6)
 #define UINTEGER    (ASN_APPLICATION | 7)

@@ -75,7 +75,7 @@ main(argc, argv)
     }
     
     if (current_name == NULL){
-	printf("usage: snmptranslate [-n] [-d] [-r] object-identifier\n");
+	printf("usage: snmptranslate [-n] [-d] [-r] objectID\n");
 	exit(1);
     }
     name_length = MAX_NAME_LEN;

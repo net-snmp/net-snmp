@@ -45,11 +45,10 @@ extern int  errno;
 int command = GET_REQ_MSG;
 int	snmp_dump_packet = 0;
 
-
 usage(){
-    fprintf(stderr, "Usage: snmptest -v 1 hostname community      or:\n");
-    fprintf(stderr, "Usage: snmptest [-v 2 ] hostname noAuth      or:\n");
-    fprintf(stderr, "Usage: snmptest [-v 2 ] hostname srcParty dstParty context\n");
+    fprintf(stderr, "Usage: snmptest -v 1 [-q] hostname community      or:\n");
+    fprintf(stderr, "Usage: snmptest [-v 2] [-q] hostname noAuth       or:\n");
+    fprintf(stderr, "Usage: snmptest [-v 2] [-q] hostname srcParty dstParty context\n");
 }
 
 main(argc, argv)
@@ -79,15 +78,18 @@ main(argc, argv)
     u_long destAddr;
 
     init_mib();
-    /* Usage: snmptest -v 1 hostname community [objectID]      or:
-     * Usage: snmptest [-v 2 ] hostname noAuth [objectID]      or:
-     * Usage: snmptest [-v 2 ] hostname srcParty dstParty context [objectID]
+    /* Usage: snmptest -v 1 [-q] hostname community [objectID]      or:
+     * Usage: snmptest [-v 2] [-q] hostname noAuth [objectID]       or:
+     * Usage: snmptest [-v 2] [-q] hostname srcParty dstParty context [objectID]
      */
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
 		case 'd':
 		    snmp_dump_packet++;
+		    break;
+		case 'q':
+		    quick_print++;
 		    break;
                 case 'p':
                     port_flag++;
@@ -147,7 +149,11 @@ main(argc, argv)
 		for(pp = party_scanNext(); pp; pp = party_scanNext()){
 		    if (!strcasecmp(pp->partyName, argv[arg])){
 			srclen = pp->partyIdentityLen;
+#ifdef SVR4
+			memmove(src, pp->partyIdentity, srclen * sizeof(oid));
+#else
 			bcopy(pp->partyIdentity, src, srclen * sizeof(oid));
+#endif
 			break;
 		    }
 		}
@@ -167,7 +173,11 @@ main(argc, argv)
             for(pp = party_scanNext(); pp; pp = party_scanNext()){
                 if (!strcasecmp(pp->partyName, argv[arg])){
                     dstlen = pp->partyIdentityLen;
+#ifdef SVR4
+                    memmove(dst, pp->partyIdentity, dstlen * sizeof(oid));
+#else
                     bcopy(pp->partyIdentity, dst, dstlen * sizeof(oid));
+#endif
                     break;
                 }
             }
@@ -185,8 +195,13 @@ main(argc, argv)
 	    for(cxp = context_scanNext(); cxp; cxp = context_scanNext()){
 		if (!strcasecmp(cxp->contextName, argv[arg])){
 		    contextlen = cxp->contextIdentityLen;
+#ifdef SVR4
+		    memmove(context, cxp->contextIdentity,
+			  contextlen * sizeof(oid));
+#else
 		    bcopy(cxp->contextIdentity, context,
 			  contextlen * sizeof(oid));
+#endif
 		    break;
 		}
 	    }
@@ -221,8 +236,13 @@ main(argc, argv)
               fprintf(stderr, "unknown host: %s\n", hostname);
               exit(1);
           } else {
+#ifdef SVR4
+              memmove((char *)&destAddr, (char *)hp->h_addr,
+                    hp->h_length);
+#else
               bcopy((char *)hp->h_addr, (char *)&destAddr,
                     hp->h_length);
+#endif
           }
       }
       srclen = dstlen = contextlen = MAX_NAME_LEN;
@@ -245,7 +265,11 @@ main(argc, argv)
         }
     }
 
+#ifdef SVR4
+    memset((char *)&session, NULL, sizeof(struct snmp_session));
+#else
     bzero((char *)&session, sizeof(struct snmp_session));
+#endif
     session.peername = hostname;
     if (port_flag)
         session.remote_port = dest_port;
@@ -456,7 +480,7 @@ hex_to_binary(cp, bufp)
 	    fprintf(stderr, "Input error\n");
 	    return -1;
 	}
-	sscanf(cp, "%x", &subidentifier);
+	sscanf((char *)cp, "%x", &subidentifier);
 	if (subidentifier > 255){
 	    fprintf(stderr, "subidentifier %d is too large ( > 255)\n",
 		    subidentifier);
@@ -526,8 +550,21 @@ input_variable(vp)
 		}
 		break;
 	    case 'Q':
-		printf("Quitting,  Goodbye\n");
-		exit(0);
+		switch(buf[2]){
+		    case NULL:
+		        printf("Quitting,  Goodbye\n");
+			exit(0);
+			break;
+		    case 'P':
+			if (quick_print){
+			   quick_print = 0;
+			   printf("Turned quick printing off\n");
+			} else {
+			   quick_print = 1;
+			   printf("Turned quick printing on\n");
+			}
+			break;
+		}
 		break;
 	    default:
 		fprintf(stderr, "Bad command\n");
@@ -538,7 +575,11 @@ input_variable(vp)
     if (!read_objid(buf, name, &vp->name_length))
 	return -1;
     vp->name = (oid *)malloc(vp->name_length * sizeof(oid));
+#ifdef SVR4
+    memmove((char *)vp->name, (char *)name, vp->name_length * sizeof(oid));
+#else
     bcopy((char *)name, (char *)vp->name, vp->name_length * sizeof(oid));
+#endif
 
     if (command == SET_REQ_MSG || command == INFORM_REQ_MSG
 	|| command == TRP2_REQ_MSG){
@@ -593,7 +634,11 @@ input_variable(vp)
 		    vp->val_len = hex_to_binary((u_char *)buf, value);
 		}
 		vp->val.string = (u_char *)malloc(vp->val_len);
+#ifdef SVR4
+		memmove((char *)vp->val.string, (char *)value, vp->val_len);
+#else
 		bcopy((char *)value, (char *)vp->val.string, vp->val_len);
+#endif
 		break;
 	    case NULLOBJ:
 		vp->val_len = 0;
@@ -604,7 +649,11 @@ input_variable(vp)
 		read_objid(buf, (oid *)value, &vp->val_len);
 		vp->val_len *= sizeof(oid);
 		vp->val.objid = (oid *)malloc(vp->val_len);
+#ifdef SVR4
+		memmove((char *)vp->val.objid, (char *)value, vp->val_len);
+#else
 		bcopy((char *)value, (char *)vp->val.objid, vp->val_len);
+#endif
 		break;
 	    case TIMETICKS:
 		vp->val.integer = (long *)malloc(sizeof(long));

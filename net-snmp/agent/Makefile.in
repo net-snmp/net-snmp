@@ -3,12 +3,14 @@
 #
 TARG=	snmpd
 LIBS=	../lib/libsnmp.a
-CFLAGS=-g -I../snmplib ${INCLUDES} -DDEBUG
+LDFLAGS=
+OSFLAGS=
+CFLAGS=-g -I../snmplib ${INCLUDES} -DDEBUG ${OSFLAGS}
 CC =cc
 all: $(TARG)
 
 snmpd:	snmpd.o kernel.o ${LIBS} snmp_agent.o snmp_vars.o snmp_var_route.o party_vars.o context_vars.o acl_vars.o view_vars.o view_parse.o alarm.o event.o route_write.o
-	${CC} -o $@ snmpd.o kernel.o snmp_agent.o snmp_vars.o snmp_var_route.o party_vars.o context_vars.o acl_vars.o view_vars.o view_parse.o alarm.o event.o route_write.o  ${LIBS}
+	${CC} -o $@ snmpd.o kernel.o snmp_agent.o snmp_vars.o snmp_var_route.o party_vars.o context_vars.o acl_vars.o view_vars.o view_parse.o alarm.o event.o route_write.o ${LIBS} ${LDFLAGS}
 
 sabersnmpd:	snmpd.c kernel.o snmp_agent.c snmp_vars.o snmp_var_route.o party_vars.c context_vars.c acl_vars.c view_vars.c view_parse.c ../snmplib/acl.c ../snmplib/acl_parse.o ../snmplib/asn1.c ../snmplib/md5.o ../snmplib/mib.o ../snmplib/parse.o ../snmplib/party.c ../snmplib/context.c ../snmplib/party_parse.o ../snmplib/context_parse.o ../snmplib/snmp.c ../snmplib/snmp_api.c ../snmplib/snmp_auth.c ../snmplib/snmp_client.o ../snmplib/view.c alarm.c event.c route_write.c ../snmplib/system.o ../lib/libdes.a /lib/libc.a
 	#load $(CFLAGS) snmpd.c kernel.o snmp_agent.c snmp_vars.o snmp_var_route.o party_vars.c context_vars.c acl_vars.c view_vars.c view_parse.c ../snmplib/acl.c ../snmplib/acl_parse.o ../snmplib/asn1.c ../snmplib/md5.o ../snmplib/mib.o ../snmplib/parse.o ../snmplib/party.c ../snmplib/context.c ../snmplib/party_parse.o ../snmplib/context_parse.o ../snmplib/snmp.c ../snmplib/snmp_api.c ../snmplib/snmp_auth.c ../snmplib/snmp_client.o ../snmplib/view.c alarm.c event.c route_write.c ../snmplib/system.o ../lib/libdes.a /lib/libc.a

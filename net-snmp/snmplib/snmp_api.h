@@ -258,3 +258,4 @@ void snmp_timeout();
 
 
 extern int snmp_dump_packet;
+extern int quick_print;

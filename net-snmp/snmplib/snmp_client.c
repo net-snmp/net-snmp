@@ -52,7 +52,11 @@ typedef long	fd_mask;
 #define	FD_SET(n, p)	((p)->fds_bits[(n)/NFDBITS] |= (1 << ((n) % NFDBITS)))
 #define	FD_CLR(n, p)	((p)->fds_bits[(n)/NFDBITS] &= ~(1 << ((n) % NFDBITS)))
 #define	FD_ISSET(n, p)	((p)->fds_bits[(n)/NFDBITS] & (1 << ((n) % NFDBITS)))
+#ifdef SVR4
+#define FD_ZERO(p)	memset((char *)(p), NULL, sizeof(*(p)))
+#else
 #define FD_ZERO(p)	bzero((char *)(p), sizeof(*(p)))
+#endif
 #endif
 
 
@@ -66,7 +70,11 @@ snmp_pdu_create(command)
     struct snmp_pdu *pdu;
 
     pdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
+#ifdef SVR4
+    memset((char *)pdu, NULL, sizeof(struct snmp_pdu));
+#else
     bzero((char *)pdu, sizeof(struct snmp_pdu));
+#endif
     pdu->version = SNMP_DEFAULT_VERSION;
     pdu->srcPartyLen = 0;
     pdu->dstPartyLen = 0;
@@ -103,7 +111,11 @@ snmp_add_null_var(pdu, name, name_length)
 
     vars->next_variable = NULL;
     vars->name = (oid *)malloc(name_length * sizeof(oid));
+#ifdef SVR4
+    memmove((char *)vars->name, (char *)name, name_length * sizeof(oid));
+#else
     bcopy((char *)name, (char *)vars->name, name_length * sizeof(oid));
+#endif
     vars->name_length = name_length;
     vars->type = ASN_NULL;
     vars->val.string = NULL;
@@ -127,33 +139,61 @@ snmp_synch_input(op, session, reqid, pdu, magic)
     if (op == RECEIVED_MESSAGE && pdu->command == GET_RSP_MSG){
 	/* clone the pdu */
 	state->pdu = newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
+#ifdef SVR4
+	memmove((char *)newpdu, (char *)pdu, sizeof(struct snmp_pdu));
+#else
 	bcopy((char *)pdu, (char *)newpdu, sizeof(struct snmp_pdu));
+#endif
 	newpdu->variables = 0;
 	var = pdu->variables;
 	if (var != NULL){
 	    newpdu->variables = newvar = (struct variable_list *)malloc(sizeof(struct variable_list));
+#ifdef SVR4
+	    memmove((char *)newvar, (char *)var, sizeof(struct variable_list));
+#else
 	    bcopy((char *)var, (char *)newvar, sizeof(struct variable_list));
+#endif
 	    if (var->name != NULL){
 		newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
+#ifdef SVR4
+		memmove((char *)newvar->name, (char *)var->name, var->name_length * sizeof(oid));
+#else
 		bcopy((char *)var->name, (char *)newvar->name, var->name_length * sizeof(oid));
+#endif
 	    }
 	    if (var->val.string != NULL){
 		newvar->val.string = (u_char *)malloc(var->val_len);
+#ifdef SVR4
+		memmove((char *)newvar->val.string, (char *)var->val.string, var->val_len);
+#else
 		bcopy((char *)var->val.string, (char *)newvar->val.string, var->val_len);
+#endif
 	    }
 	    newvar->next_variable = 0;
 	    while(var->next_variable){
 		newvar->next_variable = (struct variable_list *)malloc(sizeof(struct variable_list));
 		var = var->next_variable;
 		newvar = newvar->next_variable;
+#ifdef SVR4
+		memmove((char *)newvar, (char *)var, sizeof(struct variable_list));
+#else
 		bcopy((char *)var, (char *)newvar, sizeof(struct variable_list));
+#endif
 		if (var->name != NULL){
 		    newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
+#ifdef SVR4
+		    memmove((char *)newvar->name, (char *)var->name, var->name_length * sizeof(oid));
+#else
 		    bcopy((char *)var->name, (char *)newvar->name, var->name_length * sizeof(oid));
+#endif
 		}
 		if (var->val.string != NULL){
 		    newvar->val.string = (u_char *)malloc(var->val_len);
+#ifdef SVR4
+		    memmove((char *)newvar->val.string, (char *)var->val.string, var->val_len);
+#else
 		    bcopy((char *)var->val.string, (char *)newvar->val.string, var->val_len);
+#endif
 		}
 		newvar->next_variable = 0;
 	    }
@@ -191,7 +231,11 @@ snmp_fix_pdu(pdu, command)
 	return NULL;
     /* clone the pdu */
     newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
+#ifdef SVR4
+    memmove((char *)newpdu, (char *)pdu, sizeof(struct snmp_pdu));
+#else
     bcopy((char *)pdu, (char *)newpdu, sizeof(struct snmp_pdu));
+#endif
     newpdu->variables = 0;
     newpdu->command = command;
     newpdu->reqid = SNMP_DEFAULT_REQID;
@@ -205,14 +249,26 @@ snmp_fix_pdu(pdu, command)
     }
     if (var != NULL){
 	newpdu->variables = newvar = (struct variable_list *)malloc(sizeof(struct variable_list));
+#ifdef SVR4
+	memmove((char *)newvar, (char *)var, sizeof(struct variable_list));
+#else
 	bcopy((char *)var, (char *)newvar, sizeof(struct variable_list));
+#endif
 	if (var->name != NULL){
 	    newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
+#ifdef SVR4
+	    memmove((char *)newvar->name, (char *)var->name, var->name_length * sizeof(oid));
+#else
 	    bcopy((char *)var->name, (char *)newvar->name, var->name_length * sizeof(oid));
+#endif
 	}
 	if (var->val.string != NULL){
 	    newvar->val.string = (u_char *)malloc(var->val_len);
+#ifdef SVR4
+	    memmove((char *)newvar->val.string, (char *)var->val.string, var->val_len);
+#else
 	    bcopy((char *)var->val.string, (char *)newvar->val.string, var->val_len);
+#endif
 	}
 	newvar->next_variable = 0;
 	copied++;
@@ -223,14 +279,26 @@ snmp_fix_pdu(pdu, command)
 		continue;
 	    newvar->next_variable = (struct variable_list *)malloc(sizeof(struct variable_list));
 	    newvar = newvar->next_variable;
+#ifdef SVR4
+	    memmove((char *)newvar, (char *)var, sizeof(struct variable_list));
+#else
 	    bcopy((char *)var, (char *)newvar, sizeof(struct variable_list));
+#endif
 	    if (var->name != NULL){
 		newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
+#ifdef SVR4
+		memmove((char *)newvar->name, (char *)var->name, var->name_length * sizeof(oid));
+#else
 		bcopy((char *)var->name, (char *)newvar->name, var->name_length * sizeof(oid));
+#endif
 	    }
 	    if (var->val.string != NULL){
 		newvar->val.string = (u_char *)malloc(var->val_len);
+#ifdef SVR4
+		memmove((char *)newvar->val.string, (char *)var->val.string, var->val_len);
+#else
 		bcopy((char *)var->val.string, (char *)newvar->val.string, var->val_len);
+#endif
 	    }
 	    newvar->next_variable = 0;
 	    copied++;
@@ -257,23 +325,41 @@ snmp_clone_pdu(pdu)
 
     /* clone the pdu */
     newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
+#ifdef SVR4
+    memmove((char *)newpdu, (char *)pdu, sizeof(struct snmp_pdu));
+#else
     bcopy((char *)pdu, (char *)newpdu, sizeof(struct snmp_pdu));
+#endif
     newpdu->variables = 0;
     var = pdu->variables;
     index = 1;
     if (var != NULL){
 	newpdu->variables = newvar =
 	    (struct variable_list *)malloc(sizeof(struct variable_list));
+#ifdef SVR4
+	memmove((char *)newvar, (char *)var, sizeof(struct variable_list));
+#else
 	bcopy((char *)var, (char *)newvar, sizeof(struct variable_list));
+#endif
 	if (var->name != NULL){
 	    newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
+#ifdef SVR4
+	    memmove((char *)newvar->name, (char *)var->name,
+		  var->name_length * sizeof(oid));
+#else
 	    bcopy((char *)var->name, (char *)newvar->name,
 		  var->name_length * sizeof(oid));
+#endif
 	}
 	if (var->val.string != NULL){
 	    newvar->val.string = (u_char *)malloc(var->val_len);
+#ifdef SVR4
+	    memmove((char *)newvar->val.string, (char *)var->val.string,
+		  var->val_len);
+#else
 	    bcopy((char *)var->val.string, (char *)newvar->val.string,
 		  var->val_len);
+#endif
 	}
 	newvar->next_variable = 0;
 
@@ -282,16 +368,30 @@ snmp_clone_pdu(pdu)
 	    newvar->next_variable =
 		(struct variable_list *)malloc(sizeof(struct variable_list));
 	    newvar = newvar->next_variable;
+#ifdef SVR4
+	    memmove((char *)newvar, (char *)var, sizeof(struct variable_list));
+#else
 	    bcopy((char *)var, (char *)newvar, sizeof(struct variable_list));
+#endif
 	    if (var->name != NULL){
 		newvar->name = (oid *)malloc(var->name_length * sizeof(oid));
+#ifdef SVR4
+		memmove((char *)newvar->name, (char *)var->name,
+		      var->name_length * sizeof(oid));
+#else
 		bcopy((char *)var->name, (char *)newvar->name,
 		      var->name_length * sizeof(oid));
+#endif
 	    }
 	    if (var->val.string != NULL){
 		newvar->val.string = (u_char *)malloc(var->val_len);
+#ifdef SVR4
+		memmove((char *)newvar->val.string, (char *)var->val.string,
+		      var->val_len);
+#else
 		bcopy((char *)var->val.string, (char *)newvar->val.string,
 		      var->val_len);
+#endif
 	    }
 	    newvar->next_variable = 0;
 	}
@@ -434,9 +534,15 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
 	pp1->partyTDomain = rp->partyTDomain = DOMAINSNMPUDP;
 	addr = htonl(destaddr);
 	port = htons(161);
+#ifdef SVR4
+	memmove(pp1->partyTAddress, (char *)&addr, sizeof(addr));
+	memmove(pp1->partyTAddress + 4, (char *)&port, sizeof(port));
+	memmove(rp->partyTAddress, pp1->partyTAddress, 6);
+#else
 	bcopy((char *)&addr, pp1->partyTAddress, sizeof(addr));
 	bcopy((char *)&port, pp1->partyTAddress + 4, sizeof(port));
 	bcopy(pp1->partyTAddress, rp->partyTAddress, 6);
+#endif
 	pp1->partyTAddressLen = rp->partyTAddressLen = 6;
 	pp1->partyAuthProtocol = rp->partyAuthProtocol = NOAUTH;
 	pp1->partyAuthClock = rp->partyAuthClock = 0;
@@ -474,8 +580,13 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
 	rp = pp2->reserved;
 	strcpy(pp2->partyName, "noAuthMS");
 	pp2->partyTDomain = rp->partyTDomain = DOMAINSNMPUDP;
+#ifdef SVR4
+	memset(pp2->partyTAddress, NULL, 6);
+	memmove(rp->partyTAddress, pp2->partyTAddress, 6);
+#else
 	bzero(pp2->partyTAddress, 6);
 	bcopy(pp2->partyTAddress, rp->partyTAddress, 6);
+#endif
 	pp2->partyTAddressLen = rp->partyTAddressLen = 6;
 	pp2->partyAuthProtocol = rp->partyAuthProtocol = NOAUTH;
 	pp2->partyAuthClock = rp->partyAuthClock = 0;
