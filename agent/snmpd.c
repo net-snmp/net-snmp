@@ -584,7 +584,7 @@ main(int argc, char *argv[])
 
 #ifndef WIN32
 	/* move to safe, known dir */
-	(void) chdir("/");
+	(void) chdir(PERSISTENT_DIRECTORY);
 #endif
 
     /* send coldstart trap via snmptrap(1) if possible */
