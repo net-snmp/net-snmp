@@ -106,11 +106,9 @@ _iterator_get(iterator_info *ii, const void *key)
              */
             cmp = ii->c.compare(tmp.val, key);
             if(0 == cmp) {
+                best.val = tmp.val;
                 if(ii->get_data)
                     ii->get_data(ii->user_ctx, &loop_ctx, &best);
-                else
-                    best.val = tmp.val;
-                break;
             }
             
             /*
@@ -158,7 +156,8 @@ _iterator_get_next(iterator_info *ii, const void *key)
              */
             best_val.val = tmp.val;
             best_ctx.val = loop_ctx.val;
-            tmp.val = NULL; /* so we skip for loop */
+            if(ii->sorted)
+                tmp.val = NULL; /* so we skip for loop */
         }
         for( ;
              (NULL != tmp.val) && (rc == SNMP_ERR_NOERROR);
@@ -185,14 +184,14 @@ _iterator_get_next(iterator_info *ii, const void *key)
                     DEBUGMSGT(("container_iterator:results"," best match\n"));
                     best_val.val = tmp.val;
                     if(ii->get_data)
-                        ii->save_pos(ii->user_ctx, &loop_ctx, &best_ctx);
+                        ii->save_pos(ii->user_ctx, &loop_ctx, &best_ctx, 1);
                 }
             }
             else if((cmp == 0) && (ii->sorted)) {
                 /*
                  * if keys are equal and container is sorted, then we know
                  * the next key will be the one we want.
-                 * NOTE: if no vars, treat a generr, since we
+                 * NOTE: if no vars, treat as generr, since we
                  *    went past the end of the container when we know
                  *    the next item is the one we want. (IGN-A)
                  */
@@ -200,7 +199,7 @@ _iterator_get_next(iterator_info *ii, const void *key)
                 if(SNMP_ERR_NOERROR == rc) {
                     best_val.val = tmp.val;
                     if(ii->get_data)
-                        ii->save_pos(ii->user_ctx, &loop_ctx, &best_ctx);
+                        ii->save_pos(ii->user_ctx, &loop_ctx, &best_ctx, 1);
                 }
                 else if(SNMPERR_NO_VARS == rc)
                     rc = SNMPERR_GENERR; /* not found */
@@ -408,7 +407,15 @@ netsnmp_container_iterator_get(void *iterator_user_ctx,
                                int sorted)
 {
     iterator_info *ii;
-    
+
+    /*
+     * sanity checks
+     */
+    if(get_data && ! save_pos) {
+        snmp_log(LOG_ERR, "save_pos required with get_data\n");
+        return NULL;
+    }
+
     /*
      * allocate memory
      */
