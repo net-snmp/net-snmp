@@ -9,6 +9,8 @@ HEADER SNMPv3 getnext using initial of system.sysUpTime.0
 #
 
 # configure the agent to accept user initial with noAuthNoPriv
+CONFIGAGENT rwUser initial
+CONFIGAGENT createUser initial MD5 initial_PASS DES final_pass
 CONFIGAGENT group   testinitialgroup  usm     initial
 CONFIGAGENT view    all     included .1 80
 CONFIGAGENT 'access  testinitialgroup  "" any noauth exact all all all'
