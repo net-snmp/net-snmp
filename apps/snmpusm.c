@@ -298,7 +298,7 @@ main(int argc, char *argv[])
       /* generate the two Kul's */
       rval = generate_kul(session.securityAuthProto,
                           session.securityAuthProtoLen,
-                          session.contextEngineID, session.contextEngineIDLen,
+                          ss->contextEngineID, ss->contextEngineIDLen,
                           oldKu, oldKu_len, oldkul, &oldkul_len);
 
       if (rval != SNMPERR_SUCCESS) {
@@ -308,7 +308,7 @@ main(int argc, char *argv[])
 
       rval = generate_kul(session.securityAuthProto,
                           session.securityAuthProtoLen,
-                          session.contextEngineID, session.contextEngineIDLen,
+                          ss->contextEngineID, ss->contextEngineIDLen,
                           newKu, newKu_len,
                           newkul, &newkul_len);
 
@@ -334,14 +334,14 @@ main(int argc, char *argv[])
       /* add the keychange string to the outgoing packet */
       if (doauthkey) {
         setup_oid(authKeyChange, &name_length,
-                  session.contextEngineID, session.contextEngineIDLen,
+                  ss->contextEngineID, ss->contextEngineIDLen,
                   session.securityName);
         snmp_pdu_add_variable(pdu, authKeyChange, name_length,
                               ASN_OCTET_STR, keychange, keychange_len);
       }
       if (doprivkey) {
         setup_oid(privKeyChange, &name_length,
-                  session.contextEngineID, session.contextEngineIDLen,
+                  ss->contextEngineID, ss->contextEngineIDLen,
                   session.securityName);
         snmp_pdu_add_variable(pdu, privKeyChange, name_length,
                               ASN_OCTET_STR, keychange, keychange_len);
@@ -361,7 +361,7 @@ main(int argc, char *argv[])
       
       command = CMD_CREATE;
       setup_oid(usmUserStatus, &name_length,
-                session.contextEngineID, session.contextEngineIDLen,
+                ss->contextEngineID, ss->contextEngineIDLen,
                 argv[arg]);
       longvar = RS_CREATEANDGO;
       snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
@@ -370,10 +370,10 @@ main(int argc, char *argv[])
       if (++arg < argc) {
         /* clone the new user from another user as well */
         setup_oid(usmUserCloneFrom, &name_length,
-                  session.contextEngineID, session.contextEngineIDLen,
+                  ss->contextEngineID, ss->contextEngineIDLen,
                   argv[arg-1]);
         setup_oid(usmUserSecurityName, &name_length2,
-                  session.contextEngineID, session.contextEngineIDLen,
+                  ss->contextEngineID, ss->contextEngineIDLen,
                   argv[arg]);
         snmp_pdu_add_variable(pdu, usmUserCloneFrom, name_length,
                               ASN_OBJECT_ID, (u_char *) usmUserSecurityName,
@@ -394,7 +394,7 @@ main(int argc, char *argv[])
       
       command = CMD_CLONEFROM;
       setup_oid(usmUserCloneFrom, &name_length,
-                session.contextEngineID, session.contextEngineIDLen,
+                ss->contextEngineID, ss->contextEngineIDLen,
                 argv[arg]);
 
       if (++arg >= argc) {
@@ -404,7 +404,7 @@ main(int argc, char *argv[])
       }
 
       setup_oid(usmUserSecurityName, &name_length2,
-                session.contextEngineID, session.contextEngineIDLen,
+                ss->contextEngineID, ss->contextEngineIDLen,
                 argv[arg]);
       snmp_pdu_add_variable(pdu, usmUserCloneFrom, name_length,
                             ASN_OBJECT_ID, (u_char *) usmUserSecurityName,
@@ -423,7 +423,7 @@ main(int argc, char *argv[])
       
       command = CMD_DELETE;
       setup_oid(usmUserStatus, &name_length,
-                session.contextEngineID, session.contextEngineIDLen,
+                ss->contextEngineID, ss->contextEngineIDLen,
                 argv[arg]);
       longvar = RS_DESTROY;
       snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
