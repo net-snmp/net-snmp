@@ -210,7 +210,7 @@ int asn_realloc				(u_char **, size_t *);
     NOTE WELL: after calling one of these functions with allow_realloc
                non-zero, buf might have moved, buf_len might have grown and
 	       offset will have increased by the size of the encoded data.
-	       You should **NEVER** do soemthing like this:
+	       You should **NEVER** do something like this:
 
     u_char *buf = (u_char *)malloc(100), *ptr;
     u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
