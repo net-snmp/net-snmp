@@ -2249,10 +2249,15 @@ snmp_out_toggle_options(char *options)
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
 	    break;
         case 'f':
+	    ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 0);
             ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID);
 	    break;
 	case 't':
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS);
+	    break;
+	case 'u':
+	    ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 0);
+	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_UCD_STYLE_OID);
 	    break;
 	case 'v':
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_BARE_VALUE);
@@ -2286,7 +2291,8 @@ void snmp_out_toggle_options_usage(const char *lead, FILE *outf)
   fprintf(outf, "%s    s: Print only last symbolic element of oid.\n", lead);
   fprintf(outf, "%s    S: Print MIB module-id plus last element.\n", lead);
   fprintf(outf, "%s    t: Print timeticks unparsed as numeric integers.\n", lead);
-  fprintf(outf, "%s    v: Print Print values only (not OID = value).\n", lead);
+  fprintf(outf, "%s    u: Print OIDs using UCD-style prefix suppression.\n", lead);
+  fprintf(outf, "%s    v: Print values only (not OID = value).\n", lead);
   fprintf(outf, "%s    T: Print human-readable text along with hex strings.\n", lead);
 }
 
@@ -2304,6 +2310,9 @@ snmp_in_toggle_options(char *options)
 	case 'r':
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
 	    break;
+	case 'u':
+	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_READ_UCD_STYLE_OID);
+	    break;
         default:
 	    return options-1;
 	}
@@ -2317,6 +2326,7 @@ void snmp_in_toggle_options_usage(const char *lead, FILE *outf)
   fprintf(outf, "%s    R: Do random access to oid labels.\n", lead);
   fprintf(outf, "%s    r: Don't check values for range/type legality.\n", lead);
   fprintf(outf, "%s    b: Do best/regex matching to find a MIB node.\n", lead);
+  fprintf(outf, "%s    u: Require top-level OIDs to be prefixed with '.' (UCD-style)\n", lead);
 }
 
 void
@@ -2512,8 +2522,8 @@ init_mib (void)
 	pp++;
     }
 
-    if (getenv("SUFFIX"))
-	ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
+    /* Default to MIB::node style output */
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 2);
 
     Mib = tree_head;          /* Backwards compatibility */
     tree_top = (struct tree *)calloc(1,sizeof(struct tree));
@@ -2661,7 +2671,7 @@ int read_objid(const char *input,
 
     if (*input == '.')
 	input++;
-    else {
+    else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_READ_UCD_STYLE_OID)) {
     /* get past leading '.', append '.' to Prefix. */
 	if (*Prefix == '.')
 	    strcpy(buf, Prefix+1);
@@ -2738,7 +2748,7 @@ _sprint_objid(char *buf,
 	    cp[len+1] = ':';
 	}
     }
-    else if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID)) {
+    else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_UCD_STYLE_OID)) {
 	PrefixListPtr pp = &mib_prefixes[0];
 	int ii;
 	size_t ilen, tlen;
@@ -2754,7 +2764,8 @@ _sprint_objid(char *buf,
 	    pp++;
 	}
     }
-    else cp = tempbuf;
+    else 	/* print the full OID */
+        cp = tempbuf;
     strcpy(buf, cp);
     return subtree;
 }
@@ -2825,7 +2836,7 @@ _sprint_realloc_objid(u_char **buf, size_t *buf_len,
 	}
       }
     }
-  } else if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID)) {
+  } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_UCD_STYLE_OID)) {
     PrefixListPtr pp = &mib_prefixes[0];
     size_t ilen, tlen;
     const char *testcp;
