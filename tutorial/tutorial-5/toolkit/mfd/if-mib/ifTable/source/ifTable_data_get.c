@@ -394,6 +394,9 @@ ifMtu_get(ifTable_rowreq_ctx * rowreq_ctx, long *ifMtu_val_ptr)
      * TODO:
      * update, replace or delete, if needed.
      */
+    if (rowreq_ctx->data.ifMtu == 0)
+       return MFD_SKIP;
+
     (*ifMtu_val_ptr) = rowreq_ctx->data.ifMtu;
 
     return MFD_SUCCESS;
