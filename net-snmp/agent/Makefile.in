@@ -33,7 +33,7 @@ getmibstat.o: mibgroup/kernel_sunos5.c
 
 AGENTOBJS=snmpd.o snmp2p.o kernel.o snmp_agent.o snmp_vars.o view_parse.o agent_read_config.o auto_nlist.o
 
-snmpd:	${MIBOBJS} ${AGENTOBJS} $(USELIB)
+snmpd:	${MIBOBJS} ${AGENTOBJS} $(USELIBS)
 	${CC} -o $@ ${AGENTOBJS} ${MIBOBJS} ${LDFLAGS} ${LIBS}  
 
 clean:
