@@ -58,6 +58,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_HAVE_READ_CONFIG    27   /* have the config tokens been processed */
 #define NETSNMP_DS_LIB_QUICKE_PRINT        28   
 #define NETSNMP_DS_LIB_DONT_PRINT_UNITS    29 /* don't print UNITS suffix */
+#define NETSNMP_DS_LIB_NO_DISPLAY_HINT     30 /* don't apply DISPLAY-HINTs */
 
     /*
      * library integers 
