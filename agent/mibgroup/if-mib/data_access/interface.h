@@ -38,5 +38,13 @@ config_require(if-mib/data_access/interface_bsd);
 config_require(if-mib/data_access/interface-unknown-arch);
 #endif
 
+/*
+ * since the configure script will pick up this header and include it in
+ * mib_module_includes.h, but actual interface structure definitions which
+ * are used in other headers are defined in net-snmp/data_access/interface.h,
+ * we need to ignore the normal convention of not including headers in
+ * a header, or we will not be able to compile.
+ */
+#include <net-snmp/data_access/interface.h>
 
 #endif /* NETSNMP_ACCESS_INTERFACE_CONFIG_H */
