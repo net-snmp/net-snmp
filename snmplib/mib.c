@@ -75,6 +75,7 @@ SOFTWARE.
 #include "snmp_impl.h"
 #include "parse.h"
 #include "int64.h"
+#include "tools.h"
 #include "system.h"
 #include "read_config.h"
 #include "snmp_debug.h"
@@ -82,9 +83,22 @@ SOFTWARE.
 #include "snmp_logging.h"
 
 static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
+
+static struct tree * _sprint_realloc_objid(u_char **buf, size_t *buf_len,
+					   size_t *out_len, int allow_realloc, 
+					   int *buf_overflow,
+					   oid *objid, size_t objidlen);
+
 static char *uptimeString (u_long, char *);
 static struct tree *_get_symbol(oid *objid, size_t objidlen, struct tree *subtree,
     			char *buf, struct index_list *in_dices, char **end_of_known);
+static struct tree *_get_realloc_symbol(oid *objid, size_t objidlen,
+					struct tree *subtree,
+					u_char **buf, size_t *buf_len,
+					size_t *out_len, int allow_realloc,
+					int *buf_overflow,
+					struct index_list *in_dices,
+					size_t *end_of_known);
   
 static void print_tree_node (FILE *, struct tree *, int);
 
@@ -171,14 +185,11 @@ uptimeString(u_long timeticks,
 	otherwise prints a blank space */
 static void sprint_char(char *buf, const u_char ch)
 {
-	if (isprint(ch))
-	{
-		sprintf(buf, "%c", (int)ch);
-	}
-	else
-	{
-		sprintf(buf, ".");
-	}
+    if (isprint(ch)) {
+	sprintf(buf, "%c", (int)ch);
+    } else {
+	sprintf(buf, ".");
+    }
 }
 
 
@@ -228,6 +239,85 @@ void sprint_hexstring(char *buf,
     *buf = '\0';
 }
 
+int
+sprint_realloc_hexstring(u_char **buf, size_t *buf_len, size_t *out_len,
+			 int allow_realloc,
+			 const u_char *cp, size_t len)
+{
+  const u_char *tp;
+  size_t lenleft;
+	
+  for(; len >= 16; len -= 16){
+    while ((*out_len + 50) >= *buf_len) {
+      if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	return 0;
+      }
+    }
+
+    sprintf((*buf + *out_len), "%02X %02X %02X %02X %02X %02X %02X %02X ",
+	    cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
+    *out_len += strlen((*buf + *out_len));
+    cp += 8;
+    sprintf((*buf + *out_len), "%02X %02X %02X %02X %02X %02X %02X %02X",
+	    cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
+    *out_len += strlen((*buf + *out_len));
+    cp += 8;
+
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT)) {
+      while ((*out_len + 21) >= *buf_len) {
+	if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	  return 0;
+	}
+      }
+      sprintf((*buf + *out_len), "  [");
+      *out_len += strlen((*buf + *out_len));
+      for (tp = cp - 16; tp < cp; tp ++) {
+	sprint_char((*buf + *out_len), *tp);
+	(*out_len)++;
+      }
+      sprintf((*buf + *out_len), "]");
+      *out_len += strlen((*buf + *out_len));
+    }
+    if (len > 16) {
+      while ((*out_len + 2) >= *buf_len) {
+	if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	  return 0;
+	}
+      }
+      *(*buf + (*out_len)++) = '\n';
+      *(*buf + *out_len)   = 0;
+    }
+  }
+
+  lenleft = len;
+  for(; len > 0; len--) {
+    while ((*out_len + 4) >= *buf_len) {
+      if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	return 0;
+      }
+    }
+    sprintf((*buf + *out_len), "%02X ", *cp++);
+    *out_len += strlen((*buf + *out_len));
+  }
+
+  if ((lenleft > 0) && ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT)) {
+    while ((*out_len + 5 + lenleft) >= *buf_len) {
+      if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	return 0;
+      }
+    }
+    sprintf((*buf + *out_len), "  [");
+    *out_len += strlen((*buf + *out_len));
+    for (tp = cp - lenleft; tp < cp; tp ++) {
+      sprint_char((*buf + *out_len), *tp);
+      (*out_len)++;
+    }
+    sprintf((*buf + *out_len), "]");
+    *out_len += strlen((*buf + *out_len));
+  }
+  return 1;
+}
+
 void sprint_asciistring(char *buf,
 		        const u_char  *cp,
 		        size_t	    len)
@@ -245,6 +335,44 @@ void sprint_asciistring(char *buf,
 	}
     }
     *buf = '\0';
+}
+
+int
+sprint_realloc_asciistring(u_char **buf, size_t *buf_len, size_t *out_len,
+			   int allow_realloc,
+			   const u_char *cp, size_t len)
+{
+  int i;
+
+  for(i = 0; i < (int)len; i++) {
+    if (isprint(*cp)) {
+      if (*cp == '\\' || *cp == '"') {
+	if ((*out_len >= *buf_len) &&
+	    !(allow_realloc && snmp_realloc(buf, buf_len))) {
+	  return 0;
+	}
+	*(*buf + (*out_len)++) = '\\';
+      }
+      if ((*out_len >= *buf_len) &&
+	  !(allow_realloc && snmp_realloc(buf, buf_len))) {
+	return 0;
+      }
+      *(*buf + (*out_len)++) = *cp++;
+    } else {
+      if ((*out_len >= *buf_len) &&
+	  !(allow_realloc && snmp_realloc(buf, buf_len))) {
+	return 0;
+      }
+      *(*buf + (*out_len)++) = '.';
+      cp++;
+    }
+  }
+  if ((*out_len >= *buf_len) &&
+      !(allow_realloc && snmp_realloc(buf, buf_len))) {
+    return 0;
+  }
+  *(*buf + *out_len) = '\0';
+  return 1;
 }
 
 
@@ -376,6 +504,207 @@ sprint_octet_string(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
+
+int
+sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
+			    int allow_realloc,
+			    struct variable_list *var,
+			    struct enum_list *enums,
+			    const char *hint,
+			    const char *units)
+{
+  size_t saved_out_len = *out_len;
+  const char *saved_hint = hint;
+  int hex = 0, x = 0;
+  u_char *cp;
+
+  DEBUGMSGTL(("output", "  sprint_octet_string, buf %p \"%s\" hint \"%s\"\n",
+	      buf, buf?(char *)*buf:"[NIL]", hint));
+
+  if (var->type != ASN_OCTET_STR) {
+    const char str[] = "Wrong Type (should be OCTET STRING): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+
+  if (hint) {
+    int repeat, width = 1;
+    long value;
+    char code = 'd', separ = 0, term = 0, ch, intbuf[16];
+    u_char *ecp;
+
+    cp = var->val.string;
+    ecp = cp + var->val_len;
+
+    while (cp < ecp) {
+      repeat = 1;
+      if (*hint) {
+	if (*hint == '*') {
+	  repeat = *cp++;
+	  hint++;
+	}
+	width = 0;
+	while ('0' <= *hint && *hint <= '9')
+	  width = (width * 10) + (*hint++ - '0');
+	code = *hint++;
+	if ((ch = *hint) && ch != '*' && (ch < '0' || ch > '9')
+	    && (width != 0 || (ch != 'x' && ch != 'd' && ch != 'o')))
+	  separ = *hint++;
+	else separ = 0;
+	if ((ch = *hint) && ch != '*' && (ch < '0' || ch > '9')
+	    && (width != 0 || (ch != 'x' && ch != 'd' && ch != 'o')))
+	  term = *hint++;
+	else term = 0;
+	if (width == 0) width = 1;
+      }
+
+      DEBUGMSGTL(("output",
+		  "  hint: code '%c', width %d, separ '%c', term '%c'\n",
+		  code, width, separ?separ:'X', term?term:'X'));
+
+      while (repeat && cp < ecp) {
+	value = 0;
+	if (code != 'a') {
+	  for (x = 0; x < width; x++) {
+	    value = value * 256 + *cp++;
+	  }
+	}
+	switch (code) {
+	case 'x':
+	  sprintf(intbuf, "%lx", value);
+	  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, intbuf)) {
+	    return 0;
+	  }
+	  break;
+	case 'd':
+	  sprintf (intbuf, "%ld", value);
+	  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, intbuf)) {
+	    return 0;
+	  }
+	  break;
+	case 'o':
+	  sprintf (intbuf, "%lo", value);
+	  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, intbuf)) {
+	    return 0;
+	  }
+	  break;
+	case 'a':
+	  DEBUGMSGTL(("output", "    a case, cp \"%s\"\n", cp));
+	  while ((*out_len + width + 1) >= *buf_len) {
+	    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	      return 0;
+	    }
+	  }
+	  for (x = 0; x < width && cp < ecp; x++) {
+	    *(*buf + *out_len) = *cp++;
+	    (*out_len)++;
+	  }
+	  *(*buf + *out_len) = '\0';
+	  break;
+	default:
+	  *out_len = saved_out_len;
+	  if (snmp_strcat(buf, buf_len, out_len, allow_realloc, 
+			  "(Bad hint ignored: ") &&
+	      snmp_strcat(buf, buf_len, out_len, allow_realloc, 
+			  saved_hint) &&
+	      snmp_strcat(buf, buf_len, out_len, allow_realloc, 
+			  ") ")) {
+	    return sprint_realloc_octet_string(buf, buf_len, out_len,
+					       allow_realloc, var,
+					       enums, NULL, NULL);
+	  } else {
+	    return 0;
+	  }
+	}
+
+	if (cp < ecp && separ) {
+	  while ((*out_len + 1) >= *buf_len) {
+	    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	      return 0;
+	    }
+	  }
+	  *(*buf + *out_len) = separ;
+	  (*out_len)++;
+	  *(*buf + *out_len) = '\0';
+	}
+	repeat--;
+      }
+
+      if (term && cp < ecp) {
+	while ((*out_len + 1) >= *buf_len) {
+	  if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	    return 0;
+	  }
+	}
+	*(*buf + *out_len) = term;
+	(*out_len)++;
+	*(*buf + *out_len) = '\0';
+      }
+    }
+
+    DEBUGMSGTL(("output", "  sprint_octet_string, buf \"%s\"\n", buf));
+
+    if (units) {
+      return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+    }
+    return 1;
+  }
+
+  hex = 0;
+  for(cp = var->val.string, x = 0; x < (int)var->val_len; x++, cp++) {
+    if (!(isprint(*cp) || isspace(*cp))) {
+      hex = 1;
+    }
+  }
+
+  if (var->val_len == 0) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"\"");
+  }
+
+  if (hex) {
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"")) {
+	return 0;
+      }
+    } else {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, " Hex: ")) {
+	return 0;
+      }
+    }
+
+    if (!sprint_realloc_hexstring(buf, buf_len, out_len, allow_realloc,
+				  var->val.string, var->val_len)) {
+      return 0;
+    }
+
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"")) {
+	return 0;
+      }
+    }
+  } else {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"")) {
+      return 0;
+    }
+    if (!sprint_realloc_asciistring(buf, buf_len, out_len, allow_realloc,
+				     var->val.string, var->val_len)) {
+      return 0;
+    }
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "\"")) {
+      return 0;
+    }
+  } 
+
+  if (units) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+  }
+  return 1;
+}
+
 #ifdef OPAQUE_SPECIAL_TYPES
 
 void
@@ -400,6 +729,48 @@ sprint_float(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
+int
+sprint_realloc_float(u_char **buf, size_t *buf_len,
+		      size_t *out_len, int allow_realloc,
+		     struct variable_list *var,
+		     struct enum_list *enums,
+		     const char *hint,
+		     const char *units)
+{
+  if (var->type != ASN_OPAQUE_FLOAT) {
+    const char str[] = "Wrong Type (should be Float): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+
+  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,"Opaque: Float: ")) {
+      return 0;
+    }
+  }
+
+
+  /*  How much space needed for max. length float?  128 is overkill.  */
+
+  while ((*out_len + 128 + 1) >= *buf_len) {
+    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      return 0;
+    }
+  }
+
+  sprintf((*buf + *out_len), "%f", *var->val.floatVal);
+  *out_len += strlen((*buf + *out_len));
+
+  if (units) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+  }
+  return 1;
+}
+
 void
 sprint_double(char *buf,
 	      struct variable_list *var,
@@ -420,6 +791,47 @@ sprint_double(char *buf,
     sprintf(buf, " %f", *var->val.doubleVal);
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
+}
+
+int
+sprint_realloc_double(u_char **buf, size_t *buf_len,
+		      size_t *out_len, int allow_realloc,
+		       struct variable_list *var,
+		       struct enum_list *enums,
+		       const char *hint,
+		       const char *units)
+{
+  if (var->type != ASN_OPAQUE_DOUBLE) {
+    const char str[] = "Wrong Type (should be Double): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+
+  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc,"Opaque: Float: ")) {
+      return 0;
+    }
+  }
+
+  /*  How much space needed for max. length double?  128 is overkill.  */
+
+  while ((*out_len + 128 + 1) >= *buf_len) {
+    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      return 0;
+    }
+  }
+
+  sprintf((*buf + *out_len), "%f", *var->val.doubleVal);
+  *out_len += strlen((*buf + *out_len));
+
+  if (units) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+  }
+  return 1;
 }
 
 #endif /* OPAQUE_SPECIAL_TYPES */
@@ -476,6 +888,151 @@ sprint_opaque(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
+int
+sprint_realloc_counter64(u_char **buf, size_t *buf_len, size_t *out_len,
+			 int allow_realloc,
+			 struct variable_list *var,
+			 struct enum_list *enums,
+			 const char *hint,
+			 const char *units)
+{
+  char a64buf[I64CHARSZ+1];
+
+  if (var->type != ASN_COUNTER64
+#ifdef OPAQUE_SPECIAL_TYPES
+      && var->type != ASN_OPAQUE_COUNTER64
+      && var->type != ASN_OPAQUE_I64
+      && var->type != ASN_OPAQUE_U64
+#endif
+      ) {
+    const char str[] = "Wrong Type (should be Counter64): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+  
+  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+#ifdef OPAQUE_SPECIAL_TYPES
+    if (var->type != ASN_COUNTER64) {
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "Opaque: ")) {
+	return 0;
+      }
+    }
+#endif
+#ifdef OPAQUE_SPECIAL_TYPES
+    switch(var->type) {
+    case ASN_OPAQUE_U64:
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "UInt64: ")) {
+	return 0;
+      }
+      break;
+    case ASN_OPAQUE_I64:
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "Int64: ")) {
+	return 0;
+      }
+      break;
+    case ASN_COUNTER64:
+    case ASN_OPAQUE_COUNTER64:
+#endif
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, "Counter64: ")) {
+	return 0;
+      }
+#ifdef OPAQUE_SPECIAL_TYPES
+    }
+#endif
+  }
+
+#ifdef OPAQUE_SPECIAL_TYPES
+  if (var->type == ASN_OPAQUE_I64) {
+    printI64(a64buf, var->val.counter64);
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, a64buf)) {
+      return 0;
+    }
+  } else {
+#endif
+    printU64(a64buf, var->val.counter64);
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, a64buf)) {
+      return 0;
+    }
+#ifdef OPAQUE_SPECIAL_TYPES
+  }
+#endif
+
+  if (units) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+  }
+  return 1;
+}
+
+int
+sprint_realloc_opaque(u_char **buf, size_t *buf_len,
+		      size_t *out_len, int allow_realloc,
+		      struct variable_list *var,
+		      struct enum_list *enums,
+		      const char *hint,
+		      const char *units)
+{
+  if (var->type != ASN_OPAQUE
+#ifdef OPAQUE_SPECIAL_TYPES
+      && var->type != ASN_OPAQUE_COUNTER64
+      && var->type != ASN_OPAQUE_U64
+      && var->type != ASN_OPAQUE_I64
+      && var->type != ASN_OPAQUE_FLOAT
+      && var->type != ASN_OPAQUE_DOUBLE
+#endif /* OPAQUE_SPECIAL_TYPES */
+      ) {
+    const char str[] = "Wrong Type (should be Opaque): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+
+#ifdef OPAQUE_SPECIAL_TYPES
+  switch(var->type) {
+  case ASN_OPAQUE_COUNTER64:
+  case ASN_OPAQUE_U64:
+  case ASN_OPAQUE_I64:
+    return sprint_realloc_counter64(buf, buf_len, out_len, allow_realloc,
+				    var, enums, hint, units);
+    break;
+
+  case ASN_OPAQUE_FLOAT:
+    return sprint_realloc_float(buf, buf_len, out_len, allow_realloc,
+				var, enums, hint, units);
+    break;
+
+  case ASN_OPAQUE_DOUBLE:
+    return sprint_realloc_double(buf, buf_len, out_len, allow_realloc,
+				 var, enums, hint, units);
+    break;
+
+  case ASN_OPAQUE:
+#endif
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+      const char str[] = "OPAQUE: ";
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+	return 0;
+      }
+    }
+    if (!sprint_realloc_hexstring(buf, buf_len, out_len, allow_realloc,
+				  var->val.string, var->val_len)) {
+      return 0;
+    }
+#ifdef OPAQUE_SPECIAL_TYPES
+  }
+#endif
+  if (units) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+  }
+  return 1;
+}
+
 void
 sprint_object_identifier(char *buf,
 			 struct variable_list *var,
@@ -496,6 +1053,46 @@ sprint_object_identifier(char *buf,
     _sprint_objid(buf, (oid *)(var->val.objid), var->val_len / sizeof(oid));
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
+}
+
+int
+sprint_realloc_object_identifier(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *var,
+				 struct enum_list *enums,
+				 const char *hint,
+				 const char *units)
+{
+  int buf_overflow = 0;
+
+  if (var->type != ASN_OBJECT_ID) {
+    const char str[] = "Wrong Type (should be OBJECT IDENTIFIER): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+
+  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    const char str[] = "OID: ";
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  }
+
+  _sprint_realloc_objid(buf, buf_len, out_len, allow_realloc, &buf_overflow,
+			(oid *)(var->val.objid), var->val_len/sizeof(oid));
+
+  if (buf_overflow) {
+    return 0;
+  }
+
+  if (units) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+  }
+  return 1;
 }
 
 void
@@ -524,6 +1121,50 @@ sprint_timeticks(char *buf,
     sprintf(buf, "%s", uptimeString(*(u_long *)(var->val.integer), timebuf));
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
+}
+
+int
+sprint_realloc_timeticks(u_char **buf, size_t *buf_len, size_t *out_len,
+			 int allow_realloc,
+			 struct variable_list *var,
+			 struct enum_list *enums,
+			 const char *hint,
+			 const char *units)
+{
+  char timebuf[32];
+
+  if (var->type != ASN_TIMETICKS) {
+    const char str[] = 	"Wrong Type (should be Timeticks): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+
+  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS)) {
+    char str[16];
+    sprintf(str, "%lu", *(u_long *)var->val.integer);
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  }
+  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    char str[32];
+    sprintf(str, "Timeticks: (%lu) ", *(u_long *)var->val.integer);
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  }
+  uptimeString(*(u_long *)(var->val.integer), timebuf);
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, timebuf)) {
+    return 0;
+  }
+  if (units) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+  }
+  return 1;
 }
 
 void
@@ -570,6 +1211,49 @@ sprint_hinted_integer (char *buf,
     strcpy (buf, tmp);
 }
 
+int
+sprint_realloc_hinted_integer (u_char **buf, size_t *buf_len, size_t *out_len,
+			       int allow_realloc,
+			       long val,
+			       const char *hint,
+			       const char *units)
+{
+  char code, fmt[10] = "%l@", tmp[256];
+  int shift, len;
+
+  code = hint[0];
+  if (hint[1] == '-') {
+    shift = atoi(hint+2);
+  } else {
+    shift = 0;
+  }
+  fmt[2] = code;
+  sprintf(tmp, fmt, val);
+  if (shift != 0) {
+    len = strlen(tmp);
+    if (shift <= len) {
+      tmp[len+1] = 0;
+      while (shift--) {
+	tmp[len] = tmp[len-1];
+	len--;
+      }
+      tmp[len] = '.';
+    } else {
+      tmp[shift+1] = 0;
+      while (shift) {
+	if (len-- > 0) {
+	  tmp[shift] = tmp[len];
+	} else {
+	  tmp[shift] = '0';
+	}
+	shift--;
+      }
+      tmp[0] = '.';
+    }
+  }
+  return snmp_strcat(buf, buf_len, out_len, allow_realloc, tmp);
+}
+
 void
 sprint_integer(char *buf,
 	       struct variable_list *var,
@@ -603,6 +1287,67 @@ sprint_integer(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
+
+int
+sprint_realloc_integer(u_char **buf, size_t *buf_len, size_t *out_len,
+		       int allow_realloc,
+		       struct variable_list *var,
+		       struct enum_list *enums,
+		       const char *hint,
+		       const char *units)
+{
+  char *enum_string = NULL;
+
+  if (var->type != ASN_INTEGER) {
+    const char str[] = "Wrong Type (should be INTEGER): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+  for (; enums; enums = enums->next) {
+    if (enums->value == *var->val.integer) {
+      enum_string = enums->label;
+      break;
+    }
+  }
+
+  if (enum_string == NULL ||
+      ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM)) {
+    if (hint) {
+      return sprint_realloc_hinted_integer(buf, buf_len, out_len,
+					   allow_realloc,
+					   *var->val.integer, hint, units);
+    } else {
+      char str[16];
+      sprintf(str, "%ld", *var->val.integer);
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+	return 0;
+      }
+    }
+  } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, enum_string)) {
+      return 0;
+    }
+  } else {
+    char str[16];
+    sprintf(str, "(%ld)", *var->val.integer);
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, enum_string)) {
+      return 0;
+    }
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  }
+  
+  if (units) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+  }
+  return 1;
+}
+
 void
 sprint_uinteger(char *buf,
 		struct variable_list *var,
@@ -634,6 +1379,61 @@ sprint_uinteger(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
+int
+sprint_realloc_uinteger(u_char **buf, size_t *buf_len, size_t *out_len,
+			int allow_realloc,
+			struct variable_list *var,
+			struct enum_list *enums,
+			const char *hint,
+			const char *units)
+{
+  char *enum_string = NULL;
+
+  if (var->type != ASN_UINTEGER){
+    const char str[] = "Wrong Type (should be UInteger32): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+
+  for (; enums; enums = enums->next) {
+    if (enums->value == *var->val.integer) {
+      enum_string = enums->label;
+      break;
+    }
+  }
+
+  if (enum_string == NULL ||
+      ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM)) {
+    char str[16];
+    sprintf(str, "%lu", *var->val.integer);
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, enum_string)) {
+      return 0;
+    }
+  } else {
+    char str[16];
+    sprintf(str, "(%lu)", *var->val.integer);
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, enum_string)) {
+      return 0;
+    }
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  }
+  
+  if (units) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+  }
+  return 1;
+}
+
 void
 sprint_gauge(char *buf,
 	     struct variable_list *var,
@@ -655,6 +1455,42 @@ sprint_gauge(char *buf,
     if (units) sprintf (buf, " %s", units);
 }
 
+int
+sprint_realloc_gauge(u_char **buf, size_t *buf_len, size_t *out_len,
+		     int allow_realloc,
+		     struct variable_list *var,
+		     struct enum_list *enums,
+		     const char *hint,
+		     const char *units)
+{
+  char tmp[32];
+    
+  if (var->type != ASN_GAUGE) {
+    const char str[] = "Wrong Type (should be Gauge32 or Unsigned32): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+
+  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    const char str[] = "Gauge32: ";
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  }
+  sprintf(tmp, "%lu", *var->val.integer);
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, tmp)) {
+      return 0;
+  }
+  if (units) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+  }
+  return 1;
+}
+
 void
 sprint_counter(char *buf,
 	       struct variable_list *var,
@@ -674,6 +1510,42 @@ sprint_counter(char *buf,
 	sprintf(buf, "Counter32: %lu", *var->val.integer);
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
+}
+
+int
+sprint_realloc_counter(u_char **buf, size_t *buf_len, size_t *out_len,
+		       int allow_realloc,
+		       struct variable_list *var,
+		       struct enum_list *enums,
+		       const char *hint,
+		       const char *units)
+{
+  char tmp[32];
+    
+  if (var->type != ASN_COUNTER) {
+    const char str[] = "Wrong Type (should be Counter32): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+
+  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    const char str[] = "Counter32: ";
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  }
+  sprintf(tmp, "%lu", *var->val.integer);
+  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, tmp)) {
+      return 0;
+  }
+  if (units) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+  }
+  return 1;
 }
 
 void
@@ -706,6 +1578,50 @@ sprint_networkaddress(char *buf,
     }
 }
 
+int
+sprint_realloc_networkaddress(u_char **buf, size_t *buf_len, size_t *out_len,
+			      int allow_realloc,
+			      struct variable_list *var,
+			      struct enum_list *enums,
+			      const char *hint,
+			      const char *units)
+{
+  size_t i;
+
+  if (var->type != ASN_IPADDRESS) {
+    const char str[] = "Wrong Type (should be NetworkAddress): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+
+  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    const char str[] = "Network Address: ";
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  }
+
+  while ((*out_len + (var->val_len * 3) + 2) >= *buf_len) {
+    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      return 0;
+    }
+  }
+
+  for (i = 0; i < var->val_len; i++) {
+    sprintf((*buf + *out_len), "%02X", var->val.string[i]);
+    *out_len += 2;
+    if (i < var->val_len - 1) {
+      *(*buf + *out_len) = ':';
+      (*out_len)++;
+    }
+  }
+  return 1;
+}
+
 void
 sprint_ipaddress(char *buf,
 		 struct variable_list *var,
@@ -728,6 +1644,42 @@ sprint_ipaddress(char *buf,
 	sprintf(buf, "IpAddress: %d.%d.%d.%d",ip[0], ip[1], ip[2], ip[3]);
 }
 
+int
+sprint_realloc_ipaddress(u_char **buf, size_t *buf_len, size_t *out_len,
+			 int allow_realloc,
+			 struct variable_list *var,
+			 struct enum_list *enums,
+			 const char *hint,
+			 const char *units)
+{
+  u_char *ip = var->val.string;
+
+  if (var->type != ASN_IPADDRESS) {
+    const char str[] = "Wrong Type (should be IpAddress): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+
+  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    const char str[] = "IpAddress: ";
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  }
+  while ((*out_len + 17) >= *buf_len) {
+    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+      return 0;
+    }
+  }
+  sprintf((*buf + *out_len), "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+  *out_len += strlen(*buf + *out_len);
+  return 1;
+}
+
 void
 sprint_null(char *buf,
 	    struct variable_list *var,
@@ -742,6 +1694,28 @@ sprint_null(char *buf,
 	return;
     }
     sprintf(buf, "NULL");
+}
+
+int
+sprint_realloc_null(u_char **buf, size_t *buf_len, size_t *out_len,
+		    int allow_realloc,
+		    struct variable_list *var,
+		    struct enum_list *enums,
+		    const char *hint,
+		    const char *units)
+{
+  if (var->type != ASN_NULL) {
+    const char str[] = "Wrong Type (should be NULL): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  } else {
+    const char str[] = "NULL";
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc, str);
+  }
 }
 
 void
@@ -799,6 +1773,86 @@ sprint_bitstring(char *buf,
     }
 }
 
+int
+sprint_realloc_bitstring(u_char **buf, size_t *buf_len, size_t *out_len,
+			   int allow_realloc,
+			  struct variable_list *var,
+			  struct enum_list *enums,
+			  const char *hint,
+			  const char *units)
+{
+  int len, bit;
+  u_char *cp;
+  char *enum_string;
+
+  if (var->type != ASN_BIT_STR && var->type != ASN_OCTET_STR) {
+    const char str[] = "Wrong Type (should be BITS): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+
+  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    const char str[] = "\"";
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  } else {
+    const char str[] = "BITS: ";
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  }
+  if (!sprint_realloc_hexstring(buf, buf_len, out_len, allow_realloc,
+				var->val.bitstring, var->val_len)) {
+    return 0;
+  }
+
+  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    const char str[] = "\"";
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  } else {
+    cp = var->val.bitstring;
+    for(len = 0; len < (int)var->val_len; len++) {
+      for(bit = 0; bit < 8; bit++) {
+	if (*cp & (0x80 >> bit)) {
+	  enum_string = NULL;
+	  for (; enums; enums = enums->next) {
+	    if (enums->value == (len * 8) + bit) {
+	      enum_string = enums->label;
+	      break;
+	    }
+	  }
+	  if (enum_string == NULL ||
+	      ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM)) {
+	    char str[16];
+	    sprintf(str, "%d ", (len * 8) + bit);
+	    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+	      return 0;
+	    }
+	  } else {
+	    char str[16];
+	    sprintf(str, "(%d) ", (len * 8) + bit);
+	    if (!snmp_strcat(buf, buf_len,out_len,allow_realloc,enum_string)) {
+	      return 0;
+	    }
+	    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+	      return 0;
+	    }
+	  }
+	}
+      }
+      cp++;
+    }
+  }
+  return 1;
+}
+
 void
 sprint_nsapaddress(char *buf,
 		   struct variable_list *var,
@@ -817,6 +1871,35 @@ sprint_nsapaddress(char *buf,
 	buf += strlen(buf);
     }
     sprint_hexstring(buf, var->val.string, var->val_len);
+}
+
+int
+sprint_realloc_nsapaddress(u_char **buf, size_t *buf_len, size_t *out_len,
+			   int allow_realloc,
+			   struct variable_list *var,
+			   struct enum_list *enums,
+			   const char *hint,
+			   const char *units)
+{
+  if (var->type != ASN_NSAP) {
+    const char str[] = "Wrong Type (should be NsapAddress): ";
+    if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    var, NULL, NULL, NULL);
+    } else {
+      return 0;
+    }
+  }
+
+  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+    const char str[] = "NsapAddress: ";
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+      return 0;
+    }
+  }
+
+  return sprint_realloc_hexstring(buf, buf_len, out_len, allow_realloc,
+				  var->val.string, var->val_len);
 }
 
 void
@@ -901,6 +1984,19 @@ sprint_badtype(char *buf,
     sprintf(buf, "Variable has bad type");
 }
 
+int
+sprint_realloc_badtype(u_char **buf, size_t *buf_len, size_t *out_len,
+		       int allow_realloc,
+		       struct variable_list *var,
+		       struct enum_list *enums,
+		       const char *hint,
+		       const char *units)
+{
+  const char str[] = "Variable has bad type";
+
+  return snmp_strcat(buf, buf_len, out_len, allow_realloc, str);
+}
+
 void
 sprint_by_type(char *buf,
 	       struct variable_list *var,
@@ -963,6 +2059,73 @@ sprint_by_type(char *buf,
 	    sprint_badtype(buf, var, enums, hint, units);
 	    break;
     }
+}
+
+int
+sprint_realloc_by_type(u_char **buf, size_t *buf_len, size_t *out_len,
+		       int allow_realloc,
+		       struct variable_list *var,
+		       struct enum_list *enums,
+		       const char *hint,
+		       const char *units)
+{
+  DEBUGMSGTL(("output", "sprint_by_type, type %d\n", var->type));
+
+  switch (var->type) {
+  case ASN_INTEGER:
+    return sprint_realloc_integer(buf, buf_len, out_len, allow_realloc,
+				  var, enums, hint, units);
+  case ASN_OCTET_STR:
+    return sprint_realloc_octet_string(buf, buf_len, out_len, allow_realloc,
+				       var, enums, hint, units);
+  case ASN_BIT_STR:
+    return sprint_realloc_bitstring(buf, buf_len, out_len, allow_realloc,
+				    var, enums, hint, units);
+  case ASN_OPAQUE:
+    return sprint_realloc_opaque(buf, buf_len, out_len, allow_realloc,
+				 var, enums, hint, units);
+  case ASN_OBJECT_ID:
+    return sprint_realloc_object_identifier(buf, buf_len, out_len,
+				       allow_realloc, var, enums, hint, units);
+  case ASN_TIMETICKS:
+    return sprint_realloc_timeticks(buf, buf_len, out_len, allow_realloc,
+				    var, enums, hint, units);
+  case ASN_GAUGE:
+    return sprint_realloc_gauge(buf, buf_len, out_len, allow_realloc,
+				var, enums, hint, units);
+  case ASN_COUNTER:
+    return sprint_realloc_counter(buf, buf_len, out_len, allow_realloc,
+				  var, enums, hint, units);
+  case ASN_IPADDRESS:
+    return sprint_realloc_ipaddress(buf, buf_len, out_len, allow_realloc,
+				    var, enums, hint, units);
+  case ASN_NULL:
+    return sprint_realloc_null(buf, buf_len, out_len, allow_realloc,
+			       var, enums, hint, units);
+  case ASN_UINTEGER:
+    return sprint_realloc_uinteger(buf, buf_len, out_len, allow_realloc,
+				   var, enums, hint, units);
+  case ASN_COUNTER64:
+#ifdef OPAQUE_SPECIAL_TYPES
+  case ASN_OPAQUE_U64:
+  case ASN_OPAQUE_I64:
+  case ASN_OPAQUE_COUNTER64:
+#endif /* OPAQUE_SPECIAL_TYPES */
+    return sprint_realloc_counter64(buf, buf_len, out_len, allow_realloc,
+				    var, enums, hint, units);
+#ifdef OPAQUE_SPECIAL_TYPES
+  case ASN_OPAQUE_FLOAT:
+    return sprint_realloc_float(buf, buf_len, out_len, allow_realloc,
+				var, enums, hint, units);
+  case ASN_OPAQUE_DOUBLE:
+    return sprint_realloc_double(buf, buf_len, out_len, allow_realloc,
+				 var, enums, hint, units);
+#endif /* OPAQUE_SPECIAL_TYPES */
+  default:
+    DEBUGMSGTL(("sprint_by_type", "bad type: %d\n", var->type));
+    return sprint_realloc_badtype(buf, buf_len, out_len, allow_realloc,
+				  var, enums, hint, units);
+  }
 }
 
 
@@ -1338,74 +2501,91 @@ shutdown_mib (void)
 void
 print_mib (FILE *fp)
 {
-    print_subtree (fp, tree_head, 0);
+    print_subtree(fp, tree_head, 0);
 }
 
 void
 print_ascii_dump (FILE *fp)
 {
   fprintf(fp, "dump DEFINITIONS ::= BEGIN\n");
-  print_ascii_dump_tree (fp, tree_head, 0);
+  print_ascii_dump_tree(fp, tree_head, 0);
   fprintf(fp, "END\n");
 }
 
 void
 set_function(struct tree *subtree)
 {
-    switch(subtree->type){
-	case TYPE_OBJID:
-	    subtree->printer = sprint_object_identifier;
-	    break;
-	    case TYPE_OCTETSTR:
-		subtree->printer = sprint_octet_string;
-		break;
-	    case TYPE_INTEGER:
-		subtree->printer = sprint_integer;
-		break;
-	    case TYPE_INTEGER32:
-		subtree->printer = sprint_integer;
-		break;
-	    case TYPE_NETADDR:
-		subtree->printer = sprint_networkaddress;
-		break;
-	    case TYPE_IPADDR:
-		subtree->printer = sprint_ipaddress;
-		break;
-	    case TYPE_COUNTER:
-		subtree->printer = sprint_counter;
-		break;
-	    case TYPE_GAUGE:
-		subtree->printer = sprint_gauge;
-		break;
-	    case TYPE_TIMETICKS:
-		subtree->printer = sprint_timeticks;
-		break;
-	    case TYPE_OPAQUE:
-		subtree->printer = sprint_opaque;
-		break;
-	    case TYPE_NULL:
-		subtree->printer = sprint_null;
-		break;
-	    case TYPE_BITSTRING:
-		subtree->printer = sprint_bitstring;
-		break;
-	    case TYPE_NSAPADDRESS:
-		subtree->printer = sprint_nsapaddress;
-		break;
-	    case TYPE_COUNTER64:
-		subtree->printer = sprint_counter64;
-		break;
-	    case TYPE_UINTEGER:
-		subtree->printer = sprint_uinteger;
-		break;
-	    case TYPE_UNSIGNED32:
-		subtree->printer = sprint_gauge;
-		break;
-	    case TYPE_OTHER:
-	    default:
-		subtree->printer = sprint_unknowntype;
-		break;
-	}
+    switch(subtree->type) {
+    case TYPE_OBJID:
+	subtree->printer = sprint_object_identifier;
+	subtree->printomat = sprint_realloc_object_identifier;
+	break;
+    case TYPE_OCTETSTR:
+	subtree->printer = sprint_octet_string;
+	subtree->printomat = sprint_realloc_octet_string;
+	break;
+    case TYPE_INTEGER:
+	subtree->printer = sprint_integer;
+	subtree->printomat = sprint_realloc_integer;
+	break;
+    case TYPE_INTEGER32:
+	subtree->printer = sprint_integer;
+	subtree->printomat = sprint_realloc_integer;
+	break;
+    case TYPE_NETADDR:
+	subtree->printer = sprint_networkaddress;
+	subtree->printomat = sprint_realloc_networkaddress;
+	break;
+    case TYPE_IPADDR:
+	subtree->printer = sprint_ipaddress;
+	subtree->printomat = sprint_realloc_ipaddress;
+	break;
+    case TYPE_COUNTER:
+	subtree->printer = sprint_counter;
+	subtree->printomat = sprint_realloc_counter;
+	break;
+    case TYPE_GAUGE:
+	subtree->printer = sprint_gauge;
+	subtree->printomat = sprint_realloc_gauge;
+	break;
+    case TYPE_TIMETICKS:
+	subtree->printer = sprint_timeticks;
+	subtree->printomat = sprint_realloc_timeticks;
+	break;
+    case TYPE_OPAQUE:
+	subtree->printer = sprint_opaque;
+	subtree->printomat = sprint_realloc_opaque;
+	break;
+    case TYPE_NULL:
+	subtree->printer = sprint_null;
+	subtree->printomat = sprint_realloc_null;
+	break;
+    case TYPE_BITSTRING:
+	subtree->printer = sprint_bitstring;
+	subtree->printomat = sprint_realloc_bitstring;
+	break;
+    case TYPE_NSAPADDRESS:
+	subtree->printer = sprint_nsapaddress;
+	subtree->printomat = sprint_realloc_nsapaddress;
+	break;
+    case TYPE_COUNTER64:
+	subtree->printer = sprint_counter64;
+	subtree->printomat = sprint_realloc_counter64;
+	break;
+    case TYPE_UINTEGER:
+	subtree->printer = sprint_uinteger;
+	subtree->printomat = sprint_realloc_uinteger;
+	break;
+    case TYPE_UNSIGNED32:
+	subtree->printer = sprint_gauge;
+	subtree->printomat = sprint_realloc_gauge;
+	break;
+    case TYPE_OTHER:
+    default:
+	subtree->printer = sprint_unknowntype;
+	subtree->printomat = sprint_realloc_by_type;
+	break;
+    }
 }
 
 /*
@@ -1537,6 +2717,112 @@ _sprint_objid(char *buf,
     return subtree;
 }
 
+static struct tree *
+_sprint_realloc_objid(u_char **buf, size_t *buf_len,
+		      size_t *out_len, int allow_realloc, int *buf_overflow,
+		      oid *objid, size_t objidlen)
+{
+  u_char *tbuf = NULL, *cp = NULL;
+  size_t tbuf_len = 256, tout_len = 0;
+  struct tree *subtree = tree_head;
+  size_t midpoint_offset = 0;
+  int tbuf_overflow = 0;
+
+  if ((tbuf = (u_char *)malloc(tbuf_len)) == NULL) {
+    tbuf_overflow = 1;
+  } else {
+    *tbuf = '.';
+    tout_len = 1;
+  }
+
+  subtree = _get_realloc_symbol(objid, objidlen, subtree,
+				&tbuf, &tbuf_len, &tout_len, allow_realloc,
+				&tbuf_overflow, NULL, &midpoint_offset);
+
+  DEBUGMSGTL(("output",
+	      "after _get_symbol: tbuf = \"%s\", t_over %d mid_off %d\n",
+	      tbuf, tbuf_overflow, midpoint_offset));
+
+  if (tbuf_overflow) {
+    if (!*buf_overflow) {
+      snmp_strcat(buf, buf_len, out_len, allow_realloc, tbuf);
+      *buf_overflow = 1;
+    }
+    free(tbuf);
+    return subtree;
+  }
+
+  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS)) {
+    cp = tbuf;
+    DEBUGMSGTL(("output", "  numeric; cp \"%s\"\n", cp));
+  } else if (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY)) {
+    for (cp = tbuf; *cp; cp++);
+
+    if (midpoint_offset != 0) {
+      cp = tbuf + midpoint_offset - 2;  /*  beyond the '.'  */
+    } else {
+      while (cp >= tbuf) {
+	if (isalpha(*cp)) {
+	  break;
+	}
+	cp--;
+      }
+    }
+
+    while(cp >= tbuf) {
+      if (*cp == '.') {
+	break;
+      }
+      cp--;
+    }
+
+    cp++;
+
+    DEBUGMSGTL(("output", "  suffix (a); cp \"%s\"\n", cp));
+
+    if (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY) == 2 && cp > tbuf){
+      char modbuf[256], *mod = module_name(subtree->modid, modbuf);
+
+      if (!*buf_overflow) {
+	if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, mod) ||
+	    !snmp_strcat(buf, buf_len, out_len, allow_realloc, "::")) {
+	  *buf_overflow = 1;
+	}
+      }
+    }
+  } else if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID)) {
+    PrefixListPtr pp = &mib_prefixes[0];
+    size_t ilen, tlen;
+    const char *testcp;
+
+    cp = tbuf;
+    tlen = strlen(tbuf);
+
+    DEBUGMSGTL(("output", "  full (a); cp \"%s\"\n", cp));
+    while (pp->str) {
+      ilen = pp->len;
+      testcp = pp->str;
+
+      if ((tlen > ilen) && memcmp(tbuf, testcp, ilen) == 0) {
+	cp += (ilen + 1);
+	break;
+      }
+      pp++;
+    }
+    DEBUGMSGTL(("output", "  full (b); cp \"%s\"\n", cp));
+  } else {
+    cp = tbuf;
+    DEBUGMSGTL(("output", "  other; cp \"%s\"\n", cp));
+  }
+
+  if (!*buf_overflow &&
+      !snmp_strcat(buf, buf_len, out_len, allow_realloc, cp)) {
+    *buf_overflow = 1;
+  }
+  free(tbuf);
+  return subtree;
+}
+
 char * sprint_objid(char *buf, oid *objid, size_t objidlen)
 {
     _sprint_objid(buf,objid,objidlen);
@@ -1555,10 +2841,24 @@ fprint_objid(FILE *f,
 	     oid *objid,
 	     size_t objidlen)	/* number of subidentifiers */
 {
-    char    buf[SPRINT_MAX_LEN];
+  u_char *buf = NULL;
+  size_t buf_len = 256, out_len = 0;
+  int buf_overflow = 0;
 
-    _sprint_objid(buf, objid, objidlen);
-    fprintf(f, "%s\n", buf);
+  if ((buf = (u_char *)malloc(buf_len)) == NULL) {
+    fprintf(f, "[TRUNCATED]\n");
+    return;
+  } else {
+    _sprint_realloc_objid(&buf, &buf_len, &out_len, 1, &buf_overflow,
+			  objid, objidlen);
+    if (buf_overflow) {
+      fprintf(f, "%s [TRUNCATED]\n", buf);
+    } else {
+      fprintf(f, "%s\n", buf);
+    }
+  }
+
+  free(buf);
 }
 
 void
@@ -1597,6 +2897,70 @@ sprint_variable(char *buf,
     }
 }
 
+int
+sprint_realloc_variable(u_char **buf, size_t *buf_len,
+			size_t *out_len, int allow_realloc,
+			oid *objid, size_t objidlen,
+			struct variable_list *variable)
+{
+    struct tree *subtree = tree_head;
+    int buf_overflow = 0;
+
+    subtree = _sprint_realloc_objid(buf, buf_len, out_len, allow_realloc,
+				    &buf_overflow, objid, objidlen); 
+    
+    DEBUGMSGTL(("output","after _sprint_objid: buf = \"%s\", over %d sub %p\n",
+		*buf, buf_overflow, subtree));
+
+    if (buf_overflow) {
+      return 0;
+    }
+
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_BARE_VALUE)) {
+	if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
+	    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, " ")) {
+		return 0;
+	    }
+	} else {
+	    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, " = ")) {
+		return 0;
+	    }
+	}
+    } else {
+	*out_len = 0;
+    }
+
+    DEBUGMSGTL(("output","before value output: buf = \"%s\", over %d sub %p\n",
+		*buf, buf_overflow, subtree));
+
+    if (variable->type == SNMP_NOSUCHOBJECT) {
+	return snmp_strcat(buf, buf_len, out_len, allow_realloc,
+			   "No Such Object available on this agent");
+    } else if (variable->type == SNMP_NOSUCHINSTANCE) {
+	return snmp_strcat(buf, buf_len, out_len, allow_realloc,
+			   "No Such Instance currently exists");
+    } else if (variable->type == SNMP_ENDOFMIBVIEW) {
+	return snmp_strcat(buf, buf_len, out_len, allow_realloc,
+			   "No more variables left in this MIB View");
+    } else if (subtree) {
+	if (subtree->printomat) {
+	    DEBUGMSGTL(("output", "  subtree->printomat %p ->type %d\n",
+			subtree->printomat, subtree->type));
+	    return (*subtree->printomat)(buf, buf_len, out_len, allow_realloc,
+					 variable, subtree->enums,
+					 subtree->hint, subtree->units);
+	} else {
+	    return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+					  variable, subtree->enums,
+					  subtree->hint, subtree->units);
+	}
+    } else {
+	/*  Handle rare case where tree is empty.  */
+	return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				      variable, 0, 0, 0);
+    }
+}
+
 void
 print_variable(oid *objid,
 	       size_t objidlen,
@@ -1611,10 +2975,22 @@ fprint_variable(FILE *f,
 		size_t objidlen,
 		struct variable_list *variable)
 {
-    char    buf[SPRINT_MAX_LEN];
+  u_char *buf = NULL;
+  size_t buf_len = 256, out_len = 0;
 
-    sprint_variable(buf, objid, objidlen, variable);
-    fprintf(f, "%s\n", buf);
+  if ((buf = (u_char *)malloc(buf_len)) == NULL) {
+    fprintf(f, "[TRUNCATED]\n");
+    return;
+  } else {
+    if (sprint_realloc_variable(&buf, &buf_len, &out_len, 1,
+				objid, objidlen, variable)) {
+      fprintf(f, "%s\n", buf);
+    } else {
+      fprintf(f, "%s [TRUNCATED]\n", buf);
+    }
+  }
+
+  free(buf);
 }
 
 void
@@ -1642,12 +3018,44 @@ sprint_value(char *buf,
     }
 }
 
+int
+sprint_realloc_value(u_char **buf, size_t *buf_len,
+		     size_t *out_len, int allow_realloc,
+		     oid *objid, size_t objidlen,
+		     struct variable_list *variable)
+{
+  char tempbuf[SPRINT_MAX_LEN];
+  struct tree *subtree = tree_head;
+
+  if (variable->type == SNMP_NOSUCHOBJECT) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc,
+		       "No Such Object available on this agent");
+  } else if (variable->type == SNMP_NOSUCHINSTANCE) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc,
+		       "No Such Instance currently exists");
+  } else if (variable->type == SNMP_ENDOFMIBVIEW) {
+    return snmp_strcat(buf, buf_len, out_len, allow_realloc,
+		       "No more variables left in this MIB View");
+  } else {
+    subtree = get_symbol(objid, objidlen, subtree, tempbuf);
+    if (subtree && subtree->printomat) {
+      return (*subtree->printomat)(buf, buf_len, out_len, allow_realloc,
+				   variable, subtree->enums,
+				   subtree->hint, subtree->units);
+    } else {
+      return sprint_realloc_by_type(buf, buf_len, out_len, allow_realloc,
+				    variable, subtree->enums,
+				    subtree->hint, subtree->units);
+    }
+  }
+}
+
 void
 print_value(oid *objid,
 	    size_t objidlen,
 	    struct variable_list *variable)
 {
-    fprint_value(stdout, objid, objidlen, variable);
+  fprint_value(stdout, objid, objidlen, variable);
 }
 
 void
@@ -1656,10 +3064,22 @@ fprint_value(FILE *f,
 	     size_t objidlen,
 	     struct variable_list *variable)
 {
-    char    tempbuf[SPRINT_MAX_LEN];
+  u_char *buf = NULL;
+  size_t buf_len = 256, out_len = 0;
 
-    sprint_value(tempbuf, objid, objidlen, variable);
-    fprintf(f, "%s\n", tempbuf);
+  if ((buf = (u_char *)malloc(buf_len)) == NULL) {
+    fprintf(f, "[TRUNCATED]\n");
+    return;
+  } else {
+    if (sprint_realloc_value(&buf, &buf_len, &out_len, 1,
+			     objid, objidlen, variable)) {
+      fprintf(f, "%s\n", buf);
+    } else {
+      fprintf(f, "%s [TRUNCATED]\n", buf);
+    }
+  }
+
+  free(buf);
 }
 
 
@@ -1705,6 +3125,74 @@ dump_oid_to_string(oid *objid,
   }
 
   return buf;
+}
+
+int
+dump_realloc_oid_to_string(oid *objid, size_t objidlen,
+			   u_char **buf, size_t *buf_len, size_t *out_len,
+			   int allow_realloc, char quotechar)
+{
+  if (buf) {
+    int i, alen;
+
+    for (i = 0, alen = 0; i < (int)objidlen; i++) {
+        oid tst = objid[i];
+        if ((tst > 254) || (!isprint(tst))) {
+            tst = (oid)'.';
+	}
+
+        if (alen == 0) {
+	  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES)) {
+	    while ((*out_len + 2) >= *buf_len) {
+	      if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+		return 0;
+	      }
+	    }
+	    *(*buf + *out_len) = '\\';
+	    (*out_len)++;
+	  }
+	  while ((*out_len + 2) >= *buf_len) {
+	    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	      return 0;
+	    }
+	  }
+	  *(*buf + *out_len) = quotechar;
+	  (*out_len)++;
+	}
+
+	while ((*out_len + 2) >= *buf_len) {
+	  if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	    return 0;
+	  }
+	}
+	*(*buf + *out_len) = (char)tst;
+	(*out_len)++;
+        alen++;
+    }
+
+    if (alen) {
+      if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES)) {
+	while ((*out_len + 2) >= *buf_len) {
+	  if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	    return 0;
+	  }
+	}
+	*(*buf + *out_len) = '\\';
+	(*out_len)++;
+      }
+      while ((*out_len + 2) >= *buf_len) {
+	if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
+	  return 0;
+	}
+      }
+      *(*buf + *out_len) = quotechar;
+      (*out_len)++;
+    }
+
+    *(*buf + *out_len) = '\0';
+  }
+
+  return 1;
 }
 
 static struct tree *
@@ -1912,6 +3400,343 @@ finish_it:
 	    buf++;
     }
     buf[-1] = '\0'; /* remove trailing dot */
+    return NULL;
+}
+
+static struct tree *
+_get_realloc_symbol(oid *objid, size_t objidlen,
+		    struct tree *subtree,
+		    u_char **buf, size_t *buf_len, size_t *out_len,
+		    int allow_realloc, int *buf_overflow,
+		    struct index_list *in_dices,
+		    size_t *end_of_known)
+{
+    struct tree *return_tree = NULL;
+    int extended_index = ds_get_boolean(DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
+    char intbuf[64];
+
+    DEBUGMSGTL(("output", "get_realloc_symbol called, oid %d, len = %d\n",
+		*objid, objidlen));
+
+    if (!objid || !buf) {
+        return NULL;
+    }
+
+    for(; subtree; subtree = subtree->next_peer) {
+      DEBUGMSGTL(("output", "  subtree->subid %d\n", subtree->subid));
+	if (*objid == subtree->subid) {
+	  if (subtree->indexes) {
+	    in_dices = subtree->indexes;
+	  } else if (subtree->augments) {
+	    struct tree *tp2 = find_tree_node(subtree->augments, -1);
+	    if (tp2) {
+	      in_dices = tp2->indexes;
+	    }
+	  }
+
+	  if (!strncmp(subtree->label, ANON, ANON_LEN) ||
+	      ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS)) {
+	    sprintf(intbuf, "%lu", subtree->subid);
+	    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+					       allow_realloc, intbuf)) {
+	      *buf_overflow = 1;
+	    }
+	  } else {
+	    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+					      allow_realloc, subtree->label)) {
+	      *buf_overflow = 1;
+	    }
+	  }
+
+	  if (objidlen > 1) {
+	    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+					       allow_realloc, ".")) {
+	      *buf_overflow = 1;
+	    }
+
+	    return_tree = _get_realloc_symbol(objid + 1, objidlen - 1,
+					      subtree->child_list,
+					      buf, buf_len, out_len,
+					      allow_realloc, buf_overflow,
+					      in_dices, end_of_known);
+	  }
+
+	  if (return_tree != NULL) {
+	    DEBUGMSGTL(("output", "get_realloc_symbol: return return_tree\n"));
+	    return return_tree;
+	  } else {
+	    DEBUGMSGTL(("output", "get_realloc_symbol: return subtree\n"));
+	    return subtree;
+	  }
+	}
+    }
+
+
+    if (end_of_known) {
+      *end_of_known = *out_len;
+    }
+
+    /*  Subtree not found.  */
+
+    DEBUGMSGTL(("output", "get_realloc_symbol: subtree not found\n"));
+
+    while (in_dices && (objidlen > 0) &&
+           !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS) &&
+           !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS)) {
+	size_t numids;
+	struct tree *tp;
+
+	tp = find_tree_node(in_dices->ilabel, -1);
+
+	if (!tp) {
+            /*  Can't find an index in the mib tree.  Bail.  */
+            goto finish_it;
+        }
+
+	if (extended_index) {
+	  if (*(*buf + *out_len - 1) == '.') {
+	    (*out_len)--;
+	  }
+	  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+					     allow_realloc, "[")) {
+	    *buf_overflow = 1;
+	  }
+	}
+	
+	switch(tp->type) {
+	case TYPE_OCTETSTR:
+	    if (extended_index && tp->hint) {
+	    	struct variable_list var;
+		u_char buffer[1024];
+		int i;
+
+		memset(&var, 0, sizeof var);
+		if (in_dices->isimplied) {
+		    numids = objidlen;
+		    if (numids > objidlen)
+			goto finish_it;
+		} else if (tp->ranges && !tp->ranges->next
+		  	 && tp->ranges->low == tp->ranges->high) {
+		    numids = tp->ranges->low;
+		    if (numids > objidlen)
+			goto finish_it;
+		} else {
+		    numids = *objid;
+		    if (numids >= objidlen)
+			goto finish_it;
+		    objid++;
+		    objidlen--;
+		}
+		if (numids > objidlen)
+		    goto finish_it;
+		for (i = 0; i < (int)numids; i++) buffer[i] = (u_char)objid[i];
+		var.type = ASN_OCTET_STR;
+		var.val.string = buffer;
+		var.val_len = numids;
+		if (!*buf_overflow) {
+		  if (!sprint_realloc_octet_string(buf, buf_len, out_len,
+				  allow_realloc, &var, NULL, tp->hint, NULL)) {
+		    *buf_overflow = 1;
+		  }
+		}
+	    } else if (in_dices->isimplied) {
+                numids = objidlen;
+                if (numids > objidlen)
+                    goto finish_it;
+
+		if (!*buf_overflow) {
+		  if (dump_realloc_oid_to_string(objid, numids, buf, buf_len,
+					       out_len, allow_realloc, '\'')) {
+		    *buf_overflow = 1;
+		  }
+		}
+	    } else if (tp->ranges && !tp->ranges->next
+	      	       && tp->ranges->low == tp->ranges->high) {
+		/* a fixed-length object string */
+	        numids = tp->ranges->low;
+                if (numids > objidlen)
+                    goto finish_it;
+
+		if (!*buf_overflow) {
+		  if (dump_realloc_oid_to_string(objid, numids, buf, buf_len,
+					       out_len, allow_realloc, '\'')) {
+		    *buf_overflow = 1;
+		  }
+		}
+            } else {
+                numids = (size_t)*objid+1;
+                if (numids > objidlen)
+                    goto finish_it;
+		if (numids == 1) {
+		  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES)) {
+		    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+						       allow_realloc, "\\")) {
+		      *buf_overflow = 1;
+		    }
+		  }
+		  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+						     allow_realloc, "\"")) {
+		    *buf_overflow = 1;
+		  }
+		  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES)) {
+		    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+						       allow_realloc, "\\")) {
+		      *buf_overflow = 1;
+		    }
+		  }
+		  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+						     allow_realloc, "\"")) {
+		    *buf_overflow = 1;
+		  }
+		} else {
+		  if (!*buf_overflow) {
+		    if (dump_realloc_oid_to_string(objid+1, numids-1, buf,
+				       buf_len, out_len, allow_realloc, '"')) {
+		      *buf_overflow = 1;
+		    }
+		  }
+		}
+            }
+            objid += numids;
+            objidlen -= numids;
+	    break;
+
+	case TYPE_INTEGER32:
+	case TYPE_UINTEGER:
+	case TYPE_UNSIGNED32:
+	case TYPE_GAUGE:
+	case TYPE_INTEGER:
+	    if (tp->enums) {
+		struct enum_list *ep = tp->enums;
+		while (ep && ep->value != (int)(*objid)) {
+		  ep = ep->next;
+		}
+		if (ep) {
+		  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+						  allow_realloc, ep->label)) {
+		    *buf_overflow = 1;
+		  }
+		} else {
+		  sprintf(intbuf, "%lu", *objid);
+		  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+						     allow_realloc, intbuf)) {
+		    *buf_overflow = 1;
+		  }
+		}
+	    } else {
+	      sprintf(intbuf, "%lu", *objid);
+	      if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+						 allow_realloc, intbuf)) {
+		*buf_overflow = 1;
+	      }
+	    }
+	    objid++;
+	    objidlen--;
+	    break;
+
+	case TYPE_OBJID:
+	    if (in_dices->isimplied) {
+                numids = objidlen;
+            } else {
+                numids = (size_t)*objid+1;
+            }
+	    if (numids > objidlen)
+		goto finish_it;
+	    if (extended_index) {
+	      if (in_dices->isimplied) {
+		if (!*buf_overflow && !_sprint_realloc_objid(buf, buf_len,
+			out_len, allow_realloc, buf_overflow, objid, numids)) {
+		  *buf_overflow = 1;
+		}
+	      } else {
+		if (!*buf_overflow && !_sprint_realloc_objid(buf, buf_len,
+		    out_len, allow_realloc, buf_overflow, objid+1, numids-1)) {
+		  *buf_overflow = 1;
+		}
+	      }
+	    } else {
+	      _get_realloc_symbol(objid, numids, NULL, buf, buf_len, out_len,
+				  allow_realloc, buf_overflow, NULL, NULL);
+	    }
+	    objid += (numids);
+	    objidlen -= (numids);
+	    break;
+
+	case TYPE_IPADDR:
+	    if (objidlen < 4)
+	        goto finish_it;
+	    sprintf(intbuf, "%lu.%lu.%lu.%lu",
+		    objid[0], objid[1], objid[2], objid[3]);
+	    objid += 4;
+	    objidlen -= 4;
+	    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+					       allow_realloc, intbuf)) {
+	      *buf_overflow = 1;
+	    }
+	    break;
+
+	case TYPE_NETADDR: {
+	    oid ntype = *objid++;
+
+	    objidlen--;
+	    sprintf(intbuf, "%lu.", ntype);
+	    if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+					       allow_realloc, intbuf)) {
+	      *buf_overflow = 1;
+	    }
+
+	    if (ntype == 1 && objidlen >= 4) {
+	      sprintf(intbuf, "%lu.%lu.%lu.%lu",
+		      objid[0], objid[1], objid[2], objid[3]);
+	      if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+						 allow_realloc, intbuf)) {
+		*buf_overflow = 1;
+	      }
+	      objid += 4;
+	      objidlen -= 4;
+	    } else {
+	      goto finish_it;
+	    }
+	}
+	break;
+
+	case TYPE_NSAPADDRESS:
+	default:
+	    goto finish_it;
+	    break;
+	}
+
+	if (extended_index) {
+	  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+					     allow_realloc, "]")) {
+	    *buf_overflow = 1;
+	  }
+	} else {
+	  if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+					     allow_realloc, ".")) {
+	    *buf_overflow = 1;
+	  }
+	}
+        in_dices = in_dices->next;
+    }
+
+finish_it:
+    if (*(*buf + *out_len - 1) != '.') {
+      if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+					 allow_realloc, ".")) {
+	*buf_overflow = 1;
+      }
+    }
+
+    while(objidlen-- > 0) {	/* output rest of name, uninterpreted */
+	sprintf(intbuf, "%lu.", *objid++);
+	if (!*buf_overflow && !snmp_strcat(buf, buf_len, out_len,
+					   allow_realloc, intbuf)) {
+	  *buf_overflow = 1;
+	}
+    }
+
+    *(*buf + *out_len - 1) = '\0'; /* remove trailing dot */
     return NULL;
 }
 
@@ -2440,13 +4265,13 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	    break;
 	case TYPE_OBJID:
 	    in_dices = NULL;
-		cp2 = cp;
+	    cp2 = cp;
 	    break;
 	default:
 	    snmp_log(LOG_ERR, "Unexpected index type: %d %s %s\n",
 	    	     tp->type, in_dices->ilabel, cp);
 	    in_dices = NULL;
-		cp2 = cp;
+	    cp2 = cp;
 	    break;
 	}
 	cp = cp2;
