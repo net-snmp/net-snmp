@@ -87,6 +87,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "snmpdf"=.\snmpdf\snmpdf.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "snmpdelta"=.\snmpdelta\snmpdelta.dsp - Package Owner=<4>
 
 Package=<5>
@@ -220,6 +232,18 @@ Package=<4>
 ###############################################################################
 
 Project: "snmpusm"=.\snmpusm\snmpusm.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "snmpvacm"=.\snmpvacm\snmpvacm.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
