@@ -190,6 +190,21 @@ netsnmp_extract_table_data_set(netsnmp_request_info *request)
         netsnmp_request_get_list_data(request, TABLE_DATA_SET_NAME);
 }
 
+/** returns the first row in the table */
+netsnmp_table_row *
+netsnmp_table_data_set_get_first_row(netsnmp_table_data_set *table)
+{
+    return netsnmp_table_data_get_first_row(table->table);
+}
+
+/** returns the next row in the table */
+netsnmp_table_row *
+netsnmp_table_data_set_get_next_row(netsnmp_table_data_set *table,
+                                    netsnmp_table_row  *row)
+{
+    return netsnmp_table_data_get_next_row(table->table, row);
+}
+
 /**
  * marks a given column in a row as writable or not.
  */
