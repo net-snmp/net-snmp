@@ -1,57 +1,5 @@
-.TH "instance: process scalars and other instances easily." 3 "10 Jan 2003" "net-snmp" \" -*- nroff -*-
+.TH "instance: process scalars and other instances easily." 3 "5 Sep 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 instance: process scalars and other instances easily. \- 
-.SS "Functions"
-
-.in +1c
-.ti -1c
-.RI "netsnmp_mib_handler * \fBnetsnmp_get_instance_handler\fP (void)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_register_instance\fP (netsnmp_handler_registration *reginfo)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_register_read_only_instance\fP (netsnmp_handler_registration *reginfo)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_register_read_only_ulong_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_register_ulong_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_register_read_only_counter32_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it, Netsnmp_Node_Handler *subhandler)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_register_read_only_long_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_register_long_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler *subhandler)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_register_read_only_int_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
-.br
-.ti -1c
-.RI "int \fBregister_read_only_int_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_register_int_instance\fP (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler *subhandler)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_instance_ulong_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_instance_counter32_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_instance_long_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_instance_int_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
-.br
-.ti -1c
-.RI "int \fBnetsnmp_instance_helper_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
-.br
-.in -1c
