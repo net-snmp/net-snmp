@@ -141,6 +141,18 @@ installucdheaders:
 	        done \
 	fi
 
+installsubdirheaders:
+	@if test "$(SUBDIRS)" != ""; then \
+		it="$(SUBDIRS)" ; \
+		for i in $$it ; do       \
+			echo "making installheaders in `pwd`/$$i"; \
+	                ( cd $$i ; $(MAKE) installheaders) ;   \
+                        if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
+	        done \
+	fi
+
 uninstallheaders:
 	@if test "$(INSTALLHEADERS)" != "" ; then \
 		it="$(INSTALLHEADERS)" ; \
