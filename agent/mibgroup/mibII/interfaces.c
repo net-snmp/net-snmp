@@ -1532,6 +1532,21 @@ int Interface_Scan_Next(short *Index,
 	return(0);	    /* EOF */
 }
 
+#ifdef linux
+int
+Interface_Index_By_Name(char *Name, 
+			int Len)
+{
+	short ifIndex = 0;
+	char ifName[20];
+
+	Interface_Scan_Init();
+	while(Interface_Scan_Next(&ifIndex, ifName, NULL, NULL) && strcmp(Name, ifName))
+		;
+	return ifIndex;
+}
+#endif
+
 
 #else
 

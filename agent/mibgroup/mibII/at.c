@@ -454,6 +454,7 @@ static void ARP_Scan_Init (void)
 	int i, n = 0;
         char line [128];
 	int za, zb, zc, zd, ze, zf, zg, zh, zi, zj;
+        char ifname[20];
 
 	if (!in) {
 	 snmp_log(LOG_ERR, "snmpd: Cannot open /proc/net/arp\n");
@@ -464,6 +465,7 @@ static void ARP_Scan_Init (void)
 		;
 	fclose (in);
 	in = fopen ("/proc/net/arp", "r");
+	fgets(line, sizeof(line), in);	/* skip header */
 	if (at) free (at);
 	arptab_current = 0; /* it was missing, bug??? */
 	arptab_size = n;
@@ -475,10 +477,12 @@ static void ARP_Scan_Init (void)
 	for (i = 0; i < arptab_size; i++) {
 		u_long tmp_a;
 		while (line == fgets (line, sizeof(line), in) &&
-			11 != sscanf (line, "%d.%d.%d.%d 0x%*x 0x%x %x:%x:%x:%x:%x:%x",
+			12 != sscanf (line, "%d.%d.%d.%d 0x%*x 0x%x %x:%x:%x:%x:%x:%x %*[^ ] %20s\n",
 			&za, &zb, &zc, &zd, &at[i].at_flags,
-			&ze, &zf, &zg, &zh, &zi, &zj))
+			&ze, &zf, &zg, &zh, &zi, &zj, ifname)) {
+			snmp_log(LOG_ERR, "Bad line in /proc/net/arp: %s", line);
 			continue;
+		    }
 		at [i].at_enaddr[0] = ze;
 		at [i].at_enaddr[1] = zf;
 		at [i].at_enaddr[2] = zg;
@@ -490,6 +494,7 @@ static void ARP_Scan_Init (void)
 			((u_long)zc <<  8) |
 			((u_long)zd      ) ;
 		at [i].at_iaddr.s_addr = htonl(tmp_a);
+		at [i].if_index = Interface_Index_By_Name(ifname, strlen(ifname));
 	}
 	fclose (in);
 #endif /* linux */
@@ -530,6 +535,7 @@ static int ARP_Scan_Next(u_long *IPAddr, char *PhysAddr, u_long *ifType)
 		/* copy values */
 		*IPAddr= at[arptab_current].at_iaddr.s_addr;
 		*ifType= (at[arptab_current].at_flags & ATF_PERM) ? 4/*static*/ : 3/*dynamic*/ ;
+		*ifIndex = at[arptab_current].if_index;
 		memcpy( PhysAddr, &at[arptab_current].at_enaddr,
 				sizeof(at[arptab_current].at_enaddr) );
 		
