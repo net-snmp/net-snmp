@@ -19,6 +19,10 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+
+/** @defgroup library The Net-SNMP library
+ *  @{
+ */
 /*
  * snmp_api.c - API for access to snmp.
  */
