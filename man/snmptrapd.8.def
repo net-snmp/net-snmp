@@ -19,7 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAPD 8 "07 Feb 2002" "" "Net-SNMP"
+.TH SNMPTRAPD 8 "07 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmptrapd - Receive and log SNMP trap messages.
@@ -126,12 +126,15 @@ takes the same output formatting
 .BR "" ( -O ) 
 options as the other Net-SNMP commands.  See the section
 .B OUTPUT OPTIONS
-in the snmpcmd(1) manual page.
+in the
+.I snmpcmd(1)
+manual page.
 .SH FORMAT SPECIFICATIONS
 .PP
 .B snmptrapd
-interprets format strings similarly to printf(3).  It understands the
-following formatting sequences:
+interprets format strings similarly to
+.IR printf(3) .
+It understands the following formatting sequences:
 .RS 4
 .TP 4
 .B %%
@@ -139,7 +142,8 @@ a literal %
 .TP
 .B %t
 decimal number of seconds since the operating system's epoch (as
-returned by time(2))
+returned by
+.IR time(2) )
 .TP
 .B %y
 current year on the local system
@@ -217,8 +221,9 @@ list of trap's variable-bindings
 .RE
 .PP
 In addition to these values, you may also specify an optional field
-width and precision, just as in printf(3), and a flag value. The
-following flags are legal:
+width and precision, just as in 
+.IR printf(3) ,
+and a flag value. The following flags are legal:
 .RS 4 
 .TP 4
 .B -
@@ -262,11 +267,13 @@ listens for incoming SNMP TRAP and INFORM packets on UDP port 162 on
 all IPv4 interfaces.  However, it is possible to modify this behaviour
 by specifying one or more listening addresses as arguments to
 .BR snmptrapd .
-See the snmpd(1) manual page for more information about the format of
-listening addresses.
-
+See the
+.I snmpd(1)
+manual page for more information about the format of listening
+addresses.
 .SH EXTENSIBILITY AND CONFIGURATION
-See the snmptrapd.conf(5) manual page.
-.PP
+See the
+.I snmptrapd.conf(5)
+manual page.
 .SH "SEE ALSO"
 snmpcmd(1), snmpd(1), printf(3), snmptrapd.conf(5), syslog(8), variables(5)

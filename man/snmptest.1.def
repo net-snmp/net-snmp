@@ -1,0 +1,93 @@
+.\" /***********************************************************
+.\" 	Copyright 1988, 1989 by Carnegie Mellon University
+.\" 
+.\"                       All Rights Reserved
+.\" 
+.\" Permission to use, copy, modify, and distribute this software and its 
+.\" documentation for any purpose and without fee is hereby granted, 
+.\" provided that the above copyright notice appear in all copies and that
+.\" both that copyright notice and this permission notice appear in 
+.\" supporting documentation, and that the name of CMU not be
+.\" used in advertising or publicity pertaining to distribution of the
+.\" software without specific, written prior permission.  
+.\" 
+.\" CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+.\" ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
+.\" CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+.\" ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+.\" WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+.\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+.\" SOFTWARE.
+.\" ******************************************************************/
+.TH SNMPTEST 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
+.UC 4
+.SH NAME
+snmptest - communicates with a network entity using SNMP requests
+.SH SYNOPSIS
+.B snmptest
+[COMMON OPTIONS]
+.SH DESCRIPTION
+.B snmptest
+is a flexible SNMP application that can monitor and manage information
+on a network entity.
+.PP
+After invoking the program, a command line interpreter proceeds to
+accept commands.  It will prompt with:
+.PP
+.B Variable:
+.PP
+At this point you can enter one or more variable names, one per line.
+A blank line is a command to send a request for each of the variables
+(in a single packet) to the remote entity. Each variable name is given
+in the format specified in 
+.IR variables(5) .
+For example:
+.PP
+snmptest zeus public
+.br
+.BR Variable: " system.sysDescr.0"
+.br
+.BR Variable: 
+.PP
+will return some information about the request and reply packets, as
+well as the information:
+.PP
+requestid 0x5992478A errstat 0x0 errindex 0x0
+.br
+system.sysDescr.0 = "Unix 4.3BSD"
+.PP
+Upon startup, the program defaults to sending a GET request packet.
+This can be changed to a GETNEXT request or a SET request by typing
+the commands "$N" or "$S" respectively.  Typing "$G" will go back to
+the GET request mode.
+.PP
+The command "$D" will toggle the dumping of each sent and received packet.
+.PP
+The command "$QP" will toggle a quicker, less verbose output form.
+.PP
+When in the "SET request" mode, more information is requested by the prompt for each variable.  The prompt:
+.PP
+.B Type [i|s|x|d|n|o|t|a]:
+.PP
+requests the type of the variable be entered.  Type "i" for an
+integer, "s" for an octet string in ASCII, "x" for an octet string as
+hex bytes separated by whitespace, "d" for an octet string as decimal
+bytes separated by whitespace, , "a" for an ip address in dotted IP
+notation, and "o" for an object identifier.  At this point a value
+will be prompted for:
+.PP
+.B Value: 
+.PP
+If this is an integer value, just type the integer (in decimal).  If
+it is a decimal string, type in white-space separated decimal numbers,
+one per byte of the string.  Again type a blank line at the prompt for
+the variable name to send the packet.
+.PP
+At the variable name line, typing "$Q" will quit the program.
+.SH OPTIONS
+.B snmptest
+takes the common options described in the 
+.I snmpcmd(1)
+manual page.
+.SH "SEE ALSO"
+snmpcmd(1), snmpget(1), snmpset(1), variables(5)

@@ -19,7 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPCMD 1 "07 Feb 2002" "" "Net-SNMP"
+.TH SNMPCMD 1 "07 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpcmd - commands to communicate with a network entity using SNMP Requests.
@@ -130,7 +130,7 @@ Specifies the protocol version to use: 1 (RFCs 1155-1157), 2c (RFCs 1901-1908),
 or 3 (RFCs 2571-2574).  The default is version 1.
 .TP
 .B -V
-Print version information for the application and then exit.
+Display version information for the application and then exit.
 .TP
 .BI -x " privProtocol"
 Set the privacy protocol (DES) used for encrypted SNMPv3 messages.
@@ -161,7 +161,6 @@ file specifies a
 this is not a positional parameter. The 
 .BI -c " COMMUNITY"
 form is preferred in any case.
-.PP
 .SH AGENT SPECIFICATION
 The
 .I AGENT
@@ -419,8 +418,9 @@ Output timeticks values as raw numbers:
 system.sysUpTime.0 = 14096763
 .PP
 Note that most of these options can be turned on or off by default by
-tuning the snmp.conf file.  See the snmp.conf(5) manual page for
-details.
+tuning the snmp.conf file.  See the
+.I snmp.conf(5)
+manual page for details.
 .SH "INPUT OPTIONS"
 The
 .B -I
@@ -513,10 +513,12 @@ If this variable is set, the applications acts as if the
 option is specified.
 .SH FILES
 .IP PREFIX/share/snmp/snmpd.conf
-Agent configuration file. See snmpd.conf(5)
+Agent configuration file. See
+.IR snmpd.conf(5) .
 .IP PREFIX/share/snmp/snmp.conf
 .IP ~/.snmp/snmp.conf
-Application configuration files. See snmp.conf(5)
+Application configuration files. See 
+.IR snmp.conf(5) .
 .SH "SEE ALSO"
 snmpget(1), snmpgetnext(1), snmpset(1),
 snmpbulkget(1), snmpbulkwalk(1), snmpwalk(1),
