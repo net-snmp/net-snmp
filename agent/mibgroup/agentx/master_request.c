@@ -138,7 +138,7 @@ remove_outstanding_request( struct agent_snmp_session *asp, int reqid )
 	 *   merging the answers back into the original query
 	 */
 int
-handle_agentx_response( int operation,
+handle_agentx_response(int op,
 		    struct snmp_session *session,
 		    int reqid,
 		    struct snmp_pdu *pdu,
@@ -147,16 +147,16 @@ handle_agentx_response( int operation,
     struct ax_variable_list *ax_vlist = (struct ax_variable_list *)magic;
     struct variable_list *vbp, *next;
     struct agent_snmp_session *asp  =  ax_vlist->asp;
-    struct request_list *req, *oldreq;
-    int  free_cback = 1;
+    struct request_list *req, *oldreq, *saved = NULL;
+    int free_cback = 1;
     int i, type, index, r = 0;
     int oldstatus;
-    struct subtree          *retry_sub;
+    struct subtree *retry_sub;
     char buf[SPRINT_MAX_LEN];
 
-    oldreq = remove_outstanding_request( asp, pdu->reqid );
+    oldreq = remove_outstanding_request(asp, pdu->reqid);
 
-    switch(operation) {
+    switch (op) {
     case SNMP_CALLBACK_OP_TIMED_OUT: {
 	void *s = snmp_sess_pointer(session);
 	DEBUGMSGTL(("agentx/master", "timeout on session %08p\n", session));
@@ -190,7 +190,7 @@ handle_agentx_response( int operation,
 
     case SNMP_CALLBACK_OP_DISCONNECT:
     case SNMP_CALLBACK_OP_SEND_FAILED:
-	if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
+	if (op == SNMP_CALLBACK_OP_DISCONNECT) {
 	    DEBUGMSGTL(("agentx/master", "disconnect on session %08p\n",
 			session));
 	} else {
@@ -204,46 +204,51 @@ handle_agentx_response( int operation,
 	    asp->mode = RESERVE2;
 	return 0;
 
-
     case SNMP_CALLBACK_OP_RECEIVED_MESSAGE:
 	/* This session is alive */
-		CLEAR_SNMP_STRIKE_FLAGS( session->flags );
-		break;
+	CLEAR_SNMP_STRIKE_FLAGS( session->flags );
+	break;
+
     default:
+	DEBUGMSGTL(("agentx/master", "unrecognised callback %d\n", op));
 	return 0;
     }
 
-
     oldstatus = asp->status;
     asp->status = pdu->errstat;
-    if ( pdu->errstat != AGENTX_ERR_NOERROR ) {
+
+    /*  Save the current outstanding_request queue here, because if we add new
+	delegated requests, we ONLY want to send those.  */
+
+    saved = asp->outstanding_requests;
+    asp->outstanding_requests = NULL;
+
+    if (pdu->errstat != AGENTX_ERR_NOERROR) {
 		/*
 		 *  If the request failed, locate the
 		 *    original index of the variable resonsible
 		 */
 	DEBUGMSGTL(("agentx/master","handle_agentx_response() FAILURE\n"));
-	if ( pdu->errindex != 0 && pdu->errindex < ax_vlist->num_vars )
+
+	if (pdu->errindex != 0 && pdu->errindex < ax_vlist->num_vars) {
 	    asp->index = ax_vlist->variables[pdu->errindex-1]->index;
-        else
+	} else {
 	    asp->index = 0;
-
+	}
     } else {
-		/*
-		 * Otherwise, process successful requests
-		 */
-	DEBUGMSGTL(("agentx/master","handle_agentx_response() beginning...\n"));
-	for ( i = 0, vbp = pdu->variables ;
-              vbp && i < ax_vlist->num_vars ;
-              i++, vbp = vbp->next_variable ) {
+	/*  Otherwise, process successful requests.  */
+	DEBUGMSGTL(("agentx/master","handle_agentx_response() beginning\n"));
 
-            if (vbp) {
-		DEBUGMSGTL(("agentx/master","  handle_agentx_response: processing: "));
-		DEBUGMSGOID(("agentx/master",vbp->name, vbp->name_length));
-		DEBUGMSG(("agentx/master","\n"));
-		if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) ) {
-		    sprint_variable (buf, vbp->name, vbp->name_length, vbp);
-		    DEBUGMSGTL(("snmp_agent", "    >> %s\n", buf));
-		}
+	for (i = 0, vbp = pdu->variables;
+	     (vbp != NULL) && (i < ax_vlist->num_vars);
+	     i++, vbp = vbp->next_variable) {
+
+	    DEBUGMSGTL(("agentx/master","handle_agentx_response: process: "));
+	    DEBUGMSGOID(("agentx/master",vbp->name, vbp->name_length));
+	    DEBUGMSG(("agentx/master","\n"));
+	    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE)) {
+		sprint_variable(buf, vbp->name, vbp->name_length, vbp);
+		DEBUGMSGTL(("snmp_agent", "    >> %s\n", buf));
 	    }
 
 	    retry_sub = find_subtree(vbp->name, vbp->name_length, NULL);
@@ -254,18 +259,17 @@ handle_agentx_response( int operation,
 	      DEBUGMSGTL(("agentx/master",
 			  "noSuchInstance doing getNext on FQI\n"));
 
-	      /*  This is *almost* like the case below, but we have to handle
-		  it slightly differenly because of the way inexact queries
-		  get stepped over FQIs for us.  */
+	      /*  This is *almost* like the case below, but we don't need to
+		  step on to the next variable here because of the way inexact
+		  queries get stepped over FQIs for us.  */
 	      
 	      asp->index = ax_vlist->variables[i]->index;
 	      asp->status = handle_one_var(asp, ax_vlist->variables[i]);
 	    } else if (!asp->exact && (vbp->type == SNMP_ENDOFMIBVIEW ||
-				       in_a_view(vbp->name, &vbp->name_length,
-						 asp->pdu, vbp->type))) {
-	        /*
-	         *   Retry unfulfilled requests
-	         */
+	       in_a_view(vbp->name, &vbp->name_length, asp->pdu, vbp->type))) {
+
+		/*  Retry unfulfilled requests.  */
+
 	        retry_sub = find_subtree_next(vbp->name,vbp->name_length,NULL);
 
 	        if (retry_sub) {
@@ -276,21 +280,22 @@ handle_agentx_response( int operation,
 	        } else {
 		    ax_vlist->variables[i]->type = SNMP_ENDOFMIBVIEW;
 		}
-	    }
-	    else {
+	    } else {
 		next  = ax_vlist->variables[i]->next_variable;
 		index = ax_vlist->variables[i]->index;
-        	snmp_clone_var( vbp, ax_vlist->variables[i] );
+        	snmp_clone_var(vbp, ax_vlist->variables[i]);
 		ax_vlist->variables[i]->next_variable = next;
 		ax_vlist->variables[i]->index         = index;
 	    }
 
 	    type = ax_vlist->variables[i]->type;
-	    if ((asp->pdu->version == SNMP_VERSION_1) &&
-	        ((type == SNMP_ENDOFMIBVIEW) || (type == SNMP_NOSUCHOBJECT) || (type == SNMP_NOSUCHINSTANCE))) {
-		    asp->index = ax_vlist->variables[i]->index;
-		    asp->status = SNMP_ERR_NOSUCHNAME;
-		    goto finish;
+	    if (asp->pdu->version == SNMP_VERSION_1 &&
+	        ((type == SNMP_ENDOFMIBVIEW) ||
+		 (type == SNMP_NOSUCHOBJECT) ||
+		 (type == SNMP_NOSUCHINSTANCE))) {
+		asp->index = ax_vlist->variables[i]->index;
+		asp->status = SNMP_ERR_NOSUCHNAME;
+		goto finish;
 	    }
 	}
     }
@@ -342,39 +347,65 @@ handle_agentx_response( int operation,
 	}
     }
 
+    if (asp->outstanding_requests) {
+	struct request_list **prevNext = &saved;
+	
+	/*  Send out any NEWLY delegated requests, which will have been added
+	    to the outstanding_requests queue by a call to handle_one_var
+	    above.  */
 
-    if ( asp->outstanding_requests ) {
-		/*
-		 * Send out any newly delegated requests
-		 * 	See 'handle_one_var' above
-		 */
-	for ( req=asp->outstanding_requests ; req ; req=req->next_request ) {
-	    if ( req->pdu ) {
-		snmp_async_send(req->session, req->pdu,
-				req->callback, req->cb_data);
+	DEBUGMSGTL(("agentx/master", "sending newly delegated requests\n"));
+	for (req = asp->outstanding_requests; req; req = req->next_request) {
+	    if (req->pdu != NULL) {
+		if (snmp_async_send(req->session, req->pdu,
+				    req->callback, req->cb_data) == 0) {
+
+		    DEBUGMSGTL(("agentx/master",
+				"send failed for session %p (this = %p)\n",
+				req->session, session));
+		    req->callback(SNMP_CALLBACK_OP_SEND_FAILED, req->session,
+				  req->pdu->reqid, req->pdu, req->cb_data);
+		    if (req->session == session) {
+			return 0;
+		    }
+		}
 		req->pdu = NULL;
+		r++;
 	    }
-	    r++;
 	}
+	DEBUGMSGTL(("agentx/master", "sent %d newly delegated requests\n", r));
+
+	/*  Now stick these new requests on the end of the previously saved
+	    outstanding_request queue.  */
+
+	for (req = saved; req != NULL; req = req->next_request) {
+	    prevNext = &(req->next_request);
+	}
+	*prevNext = asp->outstanding_requests;
     }
-    DEBUGMSGTL(("agentx/master","OUTSTANDING: %d\n", r));
 
 finish:
+
+    /*  Restore the saved outstanding_request queue here (which has had any
+	newly delegated stuff added to the end).  */
+
+    asp->outstanding_requests = saved;
+
 			 /*
 			  * Free the old request, but if we
 			  * haven't completed a multi-pass request,
 			  * then don't free the callback data
 			  */
-    if ( oldreq ) {
-	if ( oldreq->pdu && oldreq->pdu->command == SNMP_MSG_SET &&
-		(( asp->mode == ACTION ) ||
-		 ( asp->mode == COMMIT )))
+    if (oldreq) {
+	if (oldreq->pdu && oldreq->pdu->command == SNMP_MSG_SET &&
+	    (asp->mode == ACTION || asp->mode == COMMIT)) {
 	    free_cback = 0;
-	free_agentx_request( oldreq, free_cback );
+	}
+	free_agentx_request(oldreq, free_cback);
     }
 
     DEBUGMSGTL(("agentx/master","handle_agentx_response() finishing...\n"));
-    return handle_snmp_packet(operation, session, reqid, asp->pdu, (void*)asp);
+    return handle_snmp_packet(op, session, reqid, asp->pdu, (void*)asp);
 }
 
 
