@@ -72,6 +72,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "snmp_vars_m2m.h"
 #include "../snmplib/system.h"
 #include "kernel.h"
+#include "snmp_vars.h"
 
 /* #include "common_header.h" */
 #include "mibgroup/struct.h"
@@ -94,11 +95,11 @@ PERFORMANCE OF THIS SOFTWARE.
 static int compare_tree (oid *, int, oid *, int);
 extern struct subtree subtrees_old[];
 
-static u_char *search_subtree_vars (struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int), struct packet_info *, int *);
+static u_char *search_subtree_vars (struct subtree *, oid *, int *, u_char *, int *, u_short *, int, WriteMethod **write_method, struct packet_info *, int *);
 
 struct subtree *find_subtree_next (oid *, int, struct subtree *);
 
-static u_char	*search_subtree (struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int), struct packet_info *, int *);
+static u_char	*search_subtree (struct subtree *, oid *, int *, u_char *, int *, u_short *, int, WriteMethod **write_method, struct packet_info *, int *);
 
 static int in_a_view (oid *, int *, struct packet_info *, struct variable *);
 
@@ -430,7 +431,7 @@ search_subtree_vars(struct subtree *tp,
 		    int *len,
 		    u_short *acl,
 		    int exact,
-		    int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int),
+		    WriteMethod **write_method,
 		    struct packet_info *pi,
 		    int *noSuchObject)
 {
@@ -539,7 +540,7 @@ search_subtree(struct subtree *sub_tp,
 	       int *len,
 	       u_short *acl,
 	       int exact,
-	       int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int),
+	       WriteMethod **write_method,
 	       struct packet_info *pi,
 	       int *noSuchObject)
 {
@@ -553,9 +554,8 @@ search_subtree(struct subtree *sub_tp,
     int     this_len,     child_len,    compare_len;
     u_short this_acl,     child_acl;
     int     this_NoObj,   child_NoObj;
-    int     **this_write (int, u_char *, u_char, int, u_char *, oid *, int);
-    int     **child_write (int, u_char *, u_char, int, u_char *, oid *, int);
- 
+/*    WriteMethod  **this_write; */
+/*    WriteMethod  **child_write; */
 
     if ( sub_tp == NULL )
 	return NULL;
@@ -716,7 +716,7 @@ getStatPtr(oid *name,
 	   int *len,
 	   u_short *acl,
 	   int exact,
-	   int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int),
+	   WriteMethod **write_method,
 	   struct packet_info *pi,
 	   int *noSuchObject)
 {

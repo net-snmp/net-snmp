@@ -119,7 +119,7 @@ header_dummy(struct variable *vp,
 	     int *length,
 	     int exact,
 	     int *var_len,
-	     int (**write_method)()) 
+	     WriteMethod **write_method) 
 {
 #define DUMMY_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -156,7 +156,7 @@ var_dummy(struct variable *vp,
 	  int *length,
 	  int exact,
 	  int *var_len,
-	  int (**write_method)())
+	  WriteMethod **write_method) 
 {
 
   static long long_ret;

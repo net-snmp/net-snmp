@@ -7,7 +7,7 @@
 
 extern void	init_hrpartition (void);
 extern void	Init_HR_Partition (void);
-extern u_char	*var_hrpartition  (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
+extern FindVarMethod var_hrpartition;
 
 
 #define	HRPART_INDEX		1

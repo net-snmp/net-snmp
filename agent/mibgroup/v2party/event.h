@@ -8,10 +8,10 @@ struct timeval;
 
 extern int eventFreeSpace (void);
 extern int eventNotifyFreeSpace (void);
-extern u_char *var_eventnextindex (struct variable*, oid *, int *,int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
-extern u_char *var_eventtab (struct variable*, oid *, int *,int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
-extern u_char *var_eventnotifyvars (struct variable*, oid *, int *,int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
-extern u_char *var_eventnotifytab (struct variable*, oid *, int *,int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_eventnextindex;
+extern FindVarMethod var_eventtab;
+extern FindVarMethod var_eventnotifyvars;
+extern FindVarMethod var_eventnotifytab;
 extern void eventGenerate (int, int, void *);
 extern void eventTimer (struct timeval *);
 

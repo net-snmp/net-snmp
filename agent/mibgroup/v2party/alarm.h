@@ -14,8 +14,8 @@ struct snmp_session;
 struct snmp_pdu;
 struct variable;
 
-extern u_char *var_alarmtab (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
-extern u_char *var_alarmnextindex (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_alarmtab;
+extern FindVarMethod var_alarmnextindex;
 extern void alarmTimer (struct timeval *);
 extern int alarmGetResponse (struct snmp_pdu *, struct get_req_state *, int, struct snmp_session *);
 

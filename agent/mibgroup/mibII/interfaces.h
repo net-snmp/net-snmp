@@ -19,8 +19,8 @@ struct in_ifaddr { int dummy; };
 int Interface_Scan_Next (short *, char *, struct ifnet *, struct in_ifaddr *);
 
 void	init_interfaces (void);
-u_char	*var_interfaces (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char,int, u_char *, oid *, int) );
-u_char	*var_ifEntry (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern FindVarMethod var_interfaces;
+extern FindVarMethod var_ifEntry;
 
 #define IFNUMBER        0
 #define IFINDEX         1

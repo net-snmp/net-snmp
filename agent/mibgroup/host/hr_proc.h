@@ -6,7 +6,7 @@
 #define _MIBGROUP_HRPROC_H
 
 extern void	init_hr_proc (void);
-extern u_char	*var_hrproc  (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
+extern FindVarMethod var_hrproc;
 
 
 #define	HRPROC_ID		1

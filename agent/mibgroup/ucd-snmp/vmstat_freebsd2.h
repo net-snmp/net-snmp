@@ -7,9 +7,7 @@
 
 #include "mibdefs.h"
 
-unsigned char *var_extensible_vmstat(struct variable *, oid *, int *, int, int
-				     *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
-
+extern FindVarMethod var_extensible_vmstat;
 
 #define SWAPIN 3
 #define SWAPOUT 4

@@ -2,6 +2,10 @@
  * Definitions for SNMP (RFC 1067) agent variable finder.
  *
  */
+
+#ifndef _SNMP_VARS_H_
+#define _SNMP_VARS_H_
+
 /***********************************************************
 	Copyright 1988, 1989 by Carnegie Mellon University
 	Copyright 1989	TGV, Incorporated
@@ -25,6 +29,25 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 
+struct variable;
+
+/* Function pointer called by the master agent for writes. */
+typedef int (WriteMethod)(int action,
+        u_char  *var_val,
+        u_char   var_val_type,
+        int      var_val_len,
+        u_char  *statP,
+        oid     *name,
+        int      length);
+
+/* Function pointer called by the master agent for mib information retrieval */
+typedef u_char *(FindVarMethod)(struct variable *vp,
+        oid     *name,
+        int     *length,
+        int      exact,
+        int     *var_len,
+        WriteMethod   **write_method);
+
 struct nlist;
 
 extern long long_return;
@@ -40,7 +63,7 @@ struct variable {
     char	    type;	    /* type of variable */
 /* See important comment in snmp_vars.c relating to acl */
     u_short	    acl;	    /* access control list for variable */
-    u_char	    *(*findVar)(struct variable *, oid *, int *, int, int *, int (**write_proc) (int, u_char *, u_char, int, u_char *, oid *,int) );  /* function that finds variable */
+    FindVarMethod *findVar;  /* function that finds variable */
     u_char	    namelen;	    /* length of above */
     oid		    name[32];	    /* object identifier of variable */
 };
@@ -67,3 +90,7 @@ void init_agent(void);
   register_mib(descr, (struct variable *) var, sizeof(struct vartype), \
                sizeof(var)/sizeof(struct vartype),                     \
                theoid, sizeof(theoid)/sizeof(oid));
+
+
+#endif /* _SNMP_VARS_H_ */
+

@@ -25,7 +25,7 @@ void  Save_HR_Network_Info (void);
 char *describe_networkIF (int);
 int   network_status (int);
 int   network_errors (int);
-int header_hrnet (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
+int header_hrnet (struct variable *,oid *, int *, int, int *, WriteMethod **);
 
 #define HRN_MONOTONICALLY_INCREASING
 
@@ -71,7 +71,7 @@ header_hrnet(struct variable *vp,
 	     int *length,
 	     int exact,
 	     int *var_len,
-	     int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
+	     WriteMethod **write_method)
 {
 #define HRNET_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -140,7 +140,7 @@ var_hrnet(struct variable *vp,
 	  int *length,
 	  int exact,
 	  int *var_len,
-	  int (**write_method) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int))
+	  WriteMethod **write_method)
 {
     int  net_idx;
 

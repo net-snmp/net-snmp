@@ -8,7 +8,7 @@
 extern void	init_hr_disk (void);
 extern void	Init_HR_Disk (void);
 extern int	Get_Next_HR_Disk (void);
-extern u_char	*var_hrdisk  (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
+extern FindVarMethod var_hrdisk;
 
 
 #define	HRDISK_ACCESS		1

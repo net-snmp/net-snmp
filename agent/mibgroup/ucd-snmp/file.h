@@ -5,13 +5,12 @@
 #ifndef _MIBGROUP_FILE_H
 #define _MIBGROUP_FILE_H
 
-extern u_char *var_file_table();
+#include "mibdefs.h"
 
 /* config file parsing routines */
 void file_free_config (void);
 void file_parse_config (char *, char *);
-
-#include "mibdefs.h"
+extern FindVarMethod var_file_table;
 
 struct filestat
 {

@@ -18,6 +18,8 @@
 
 #include "../util_funcs.h"
 #include "file.h"
+#include "agent_read_config.h"
+#include "util_funcs.h"
 
 #define MAXFILE   20
 
@@ -76,12 +78,12 @@ void updateFile(int index)
 
 /* OID functions */
 
-unsigned char *var_file_table(struct variable *vp,
+u_char *var_file_table(struct variable *vp,
 		oid *name,
 		int *length,
 		int exact,
 		int *var_len,
-		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		WriteMethod **write_method)
 {
   static long long_ret;
   static char error[256];

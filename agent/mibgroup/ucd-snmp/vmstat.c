@@ -141,16 +141,16 @@ void init_vmstat(void)
 static char buff[BUFFSIZE];
 
 void getstat(unsigned *cuse, unsigned *cice, unsigned *csys,unsigned long *cide,
-             unsigned *pin, unsigned *pout, unsigned *sin, unsigned *sout,
+             unsigned *pin, unsigned *pout, unsigned *swpin, unsigned *swpout,
              unsigned *itot, unsigned *i1, unsigned *ct) 
 {
-  static int stat;
+  int statfd;
 
-  if ((stat=open(VMSTAT_FILE, O_RDONLY, 0)) != -1) {
+  if ((statfd=open(VMSTAT_FILE, O_RDONLY, 0)) != -1) {
     char* b;
     buff[BUFFSIZE-1] = 0;  /* ensure null termination in buffer */
-    read(stat,buff,BUFFSIZE-1);
-    close(stat);
+    read(statfd,buff,BUFFSIZE-1);
+    close(statfd);
     *itot = 0; 
     *i1 = 1;   /* ensure assert below will fail if the sscanf bombs */
     b = strstr(buff, "cpu ");
@@ -158,7 +158,7 @@ void getstat(unsigned *cuse, unsigned *cice, unsigned *csys,unsigned long *cide,
     b = strstr(buff, "page ");
     sscanf(b, "page %u %u", pin, pout);
     b = strstr(buff, "swap ");
-    sscanf(b, "swap %u %u", sin, sout);
+    sscanf(b, "swap %u %u", swpin, swpout);
     b = strstr(buff, "intr ");
     sscanf(b, "intr %u %u", itot, i1);
     b = strstr(buff, "ctxt ");
@@ -174,10 +174,10 @@ enum vmstat_index { swapin = 0,    swapout,
 		    sysinterrupts, syscontext,
 		    cpuuser,       cpusystem, cpuidle };
 
-unsigned vmstat (int index) 
+unsigned vmstat (int iindex) 
 {
   unsigned int cpu_use[2], cpu_nic[2], cpu_sys[2];
-  unsigned int duse,dsys,didl,div,divo2;
+  unsigned int duse,dsys,didl,ddiv,divo2;
   unsigned long cpu_idl[2];
   unsigned int pgpgin[2], pgpgout[2], pswpin[2], pswpout[2];
   unsigned int inter[2],ticks[2],ctxt[2];
@@ -189,28 +189,28 @@ unsigned vmstat (int index)
   duse= *(cpu_use)+ *(cpu_nic);
   dsys= *(cpu_sys);
   didl= (*(cpu_idl))%UINT_MAX;
-  div= (duse+dsys+didl);
+  ddiv= (duse+dsys+didl);
   hz=sysconf(_SC_CLK_TCK); /* get ticks/s from system */
-  divo2= div/2;
+  divo2= ddiv/2;
 
-  if (index == swapin) {
-    return (*(pswpin)*4*hz+divo2)/div;
-  } else if (index == swapout) {
-    return (*(pswpout)*4*hz+divo2)/div;
-  } else if (index == iosent) {
-    return (*(pgpgin)*hz+divo2)/div;
-  } else if (index == ioreceive) {
-    return (*(pgpgout)*hz+divo2)/div;
-  } else if (index == sysinterrupts) {
-    return (*(inter)*hz+divo2)/div;
-  } else if (index == syscontext) {
-    return (*(ctxt)*hz+divo2)/div;
-  } else if (index == cpuuser) {
-    return (100*duse+divo2)/div;
-  } else if (index == cpusystem) {
-    return (100*dsys+divo2)/div;
-  } else if (index == cpuidle) {
-    return (100*didl+divo2)/div;
+  if (iindex == swapin) {
+    return (*(pswpin)*4*hz+divo2)/ddiv;
+  } else if (iindex == swapout) {
+    return (*(pswpout)*4*hz+divo2)/ddiv;
+  } else if (iindex == iosent) {
+    return (*(pgpgin)*hz+divo2)/ddiv;
+  } else if (iindex == ioreceive) {
+    return (*(pgpgout)*hz+divo2)/ddiv;
+  } else if (iindex == sysinterrupts) {
+    return (*(inter)*hz+divo2)/ddiv;
+  } else if (iindex == syscontext) {
+    return (*(ctxt)*hz+divo2)/ddiv;
+  } else if (iindex == cpuuser) {
+    return (100*duse+divo2)/ddiv;
+  } else if (iindex == cpusystem) {
+    return (100*dsys+divo2)/ddiv;
+  } else if (iindex == cpuidle) {
+    return (100*didl+divo2)/ddiv;
   } else {
     return -1;
   }
@@ -221,7 +221,7 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 				     int *length,
 				     int exact,
 				     int *var_len,
-				     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+				     WriteMethod **write_method)
 {
 
   static long long_ret;

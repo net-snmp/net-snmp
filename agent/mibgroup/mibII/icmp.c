@@ -65,7 +65,10 @@
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #endif
+
 #include "../../../snmplib/system.h"
+#include "asn1.h"
+#include "snmp_debug.h"
 
 #include "mibincl.h"
 #include "auto_nlist.h"
@@ -166,7 +169,7 @@ header_icmp(struct variable *vp,
 	    int *length,
 	    int exact,
 	    int *var_len,
-	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	    WriteMethod **write_method)
 {
 #define ICMP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -207,7 +210,7 @@ var_icmp(struct variable *vp,
 	 int *length,
 	 int exact,
 	 int *var_len,
-	 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	 WriteMethod **write_method)
 {
     register int i;
     static struct icmpstat icmpstat;
@@ -323,7 +326,7 @@ var_icmp(struct variable *vp,
 	 int *length,
 	 int exact,
 	 int *var_len,
-	 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	 WriteMethod **write_method)
 {
     register int i;
     static struct icmpstat icmpstat;
@@ -449,7 +452,7 @@ var_icmp(struct variable *vp,
 	 int *length,
 	 int exact,
 	 int *var_len,
-	 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	 WriteMethod **write_method)
 {
     static struct icmp_mib icmpstat;
 
@@ -502,7 +505,7 @@ var_icmp(struct variable *vp,
 	 int *length,
 	 int exact,
 	 int *var_len,
-		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	 WriteMethod **write_method)
 {
     mib2_icmp_t icmpstat;
 

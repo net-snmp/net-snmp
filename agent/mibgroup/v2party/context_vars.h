@@ -5,8 +5,8 @@
 #ifndef _MIBGROUP_CONTEXT_VARS_H
 #define _MIBGROUP_CONTEXT_VARS_H
 
-extern u_char *var_context (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
-extern int write_context (int, u_char *, u_char, int, u_char *, oid *, int);
+extern FindVarMethod var_context;
+extern WriteMethod write_context;
 
 #include "context.h"
 

@@ -197,7 +197,7 @@ var_acl(struct variable *vp,
 	int *length,
 	int exact,
 	int *var_len,
-	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+	WriteMethod **write_method)
 {
     oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN], *np;
     int newnamelen, lownamelen=0;

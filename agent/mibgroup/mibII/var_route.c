@@ -159,6 +159,9 @@ PERFORMANCE OF THIS SOFTWARE.
 # endif
 #endif
 
+#include "asn1.h"
+#include "snmp_debug.h"
+
 #define CACHE_TIME (120)	    /* Seconds */
 
 #include "asn1.h"
@@ -178,7 +181,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 
-extern int write_rte (int, u_char *, u_char, int, u_char *, oid *, int);
+extern WriteMethod write_rte;
 
 #ifdef USE_SYSCTL_ROUTE_DUMP
 
@@ -207,7 +210,7 @@ var_ipRouteEntry(struct variable *vp,
 		 int *length,
 		 int exact,
 		 int *var_len,
-		 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		 WriteMethod **write_method)
 {
   /*
    * object identifier is of form:
@@ -483,7 +486,7 @@ var_ipRouteEntry(struct variable *vp,
 		int *length,
 		int exact,
 		int *var_len,
-		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		WriteMethod **write_method)
 {
     /*
      * object identifier is of form:
@@ -701,7 +704,7 @@ var_ipRouteEntry(struct variable *vp,
 		 int *length,
 		 int exact,
 		 int *var_len,
-		 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		 WriteMethod **write_method)
 {
   /*
    * object identifier is of form:
@@ -1437,7 +1440,7 @@ var_ipRouteEntry(struct variable *vp,
 		 int *length,
 		 int exact,
 		 int *var_len,
-		 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
+		 WriteMethod **write_method)
 {
 	/*
 	 * object identifier is of form:

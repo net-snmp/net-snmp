@@ -7,8 +7,8 @@
 
 struct variable;
 
-u_char	*var_snmp (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
-int	write_snmp (int, u_char *, u_char, int, u_char *, oid *, int);
+extern FindVarMethod var_snmp;
+extern WriteMethod write_snmp;
 
 extern int snmp_inpkts;			/*  1 - current */
 extern int snmp_outpkts;		/*  2 - obsolete */
