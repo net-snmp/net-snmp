@@ -90,7 +90,6 @@ file_free_config(void)
 void
 file_parse_config(const char *token, char *cptr)
 {
-    char space;
     char *cp;
 	
     if (fileCount < MAXFILE) {
