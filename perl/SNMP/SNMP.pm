@@ -807,10 +807,12 @@ sub inform {
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    }
 
-if (($this->{Version} eq '2') || ($this->{Version} eq '2c')) {
+## v2 and v3 informs are identical notifications...should I merge them?
+   if (($this->{Version} eq '2') || ($this->{Version} eq '2c')) {
        my $trap_oid = $param{trapoid};
        my $uptime = $param{uptime};
        @res = SNMP::_informV2($this, $uptime, $trap_oid, $varbind_list_ref);
+# informV2 not yet written....
    } else {
        my $trap_oid = $param{trapoid};
        my $uptime = $param{uptime};
