@@ -151,7 +151,13 @@ int a;
         i++, ptmp = ptmp->next)
       etmp[i] = ptmp;
     qsort(etmp, numpassthrus, sizeof(struct extensible *),
-	  pass_compare);
+#ifdef __STDC__
+         (int (*)(const void *, const void *))pass_compare
+#else
+	  pass_compare
+#endif
+          
+      );
     passthrus = (struct extensible *) etmp[0];
     ptmp = (struct extensible *) etmp[0];
     
