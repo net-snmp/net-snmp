@@ -90,11 +90,15 @@
  *      de_p                    swi->swi_dep
  */
 typedef struct {
+#if HAVE_LIBRPM
+    char           *swi_directory;
+#else
     const char     *swi_directory;
+#endif
     char            swi_name[SNMP_MAXPATH];     /* XXX longest file name */
     int             swi_index;
 
-#ifdef	HAVE_LIBRPM
+#if HAVE_LIBRPM
     const char     *swi_dbpath;
 
     time_t          swi_timestamp;      /* modify time on database */
@@ -205,7 +209,7 @@ init_hr_swinst(void)
         swi->swi_dbpath = rpmGetVar(RPMVAR_DBPATH);
 #endif
         if (swi->swi_directory != NULL)
-            free((void *) swi->swi_directory);
+            free(swi->swi_directory);
         sprintf(path, "%s/Packages", swi->swi_dbpath);
         if (stat(path, &stat_buf) == -1)
             sprintf(path, "%s/packages.rpm", swi->swi_dbpath);
