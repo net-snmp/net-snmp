@@ -24,11 +24,9 @@
 .SH NAME
 snmptrap - sends an SNMP trap to a manager
 .SH SYNOPSIS
-snmptrap\ -v\ 1 hostname community enterprise-oid agent generic-trap specific-trap uptime [objectID type value]...
+snmptrap -v 1 [common arguments] enterprise-oid agent generic-trap specific-trap uptime [objectID type value]...
 .PP
-snmptrap\ [-v\ 2] hostname noAuth uptime trap-oid [objectID type value]...
-.PP
-snmptrap\ [-v\ 2] hostname srcParty dstParty uptime trap-oid [objectID type value]...
+snmptrap -v [2c|2p] [common arguments] uptime trap-oid [objectID type value]...
 .SH DESCRIPTION
 Snmptrap is an SNMP application that uses the TRAP Request to send
 information to a network manager.  One or more fully qualified
@@ -37,32 +35,14 @@ and a value must accompany each object
 identifier.  Each variable name is given in the format specified in
 .IR variables (5).
 .PP
-The
-.I hostname
-specification may be either a host name or an internet address
-specified in "dot notation".
-.PP
-The version 1
-.I community
-specifies the community name for the transaction with the remote system.
-.PP
-The version 2
-.I srcParty
-and
-.I dstParty
-specify the party names for the transaction with the remote system, as
-they are defined in /etc/party.conf.  To forgo authentication, use the
-.B noAuth
-keyword instead of specifying party names.
-.PP
 If any of the required version 1 parameters, 
-.I enterprise-oid,
-.I agent,
+.IR enterprise-oid ,
+.IR agent ,
 and
 .I uptime
-are specified as empty, this default to
-.I 1.3.6.1.4.1.3.1.1 (enterprises.cmu.1.1),
-.I hostname,
+are specified as empty, it defaults to
+.IR "1.3.6.1.4.1.3.1.1 (enterprises.cmu.1.1)" ,
+.IR hostname ,
 and
 .I host-uptime
 respectively.
@@ -101,20 +81,13 @@ IPADDRESS
 .PP
 For example
 .PP
-.I snmptrap -v 1 manager public enterprises.spider. test-hub 3 0 "" interfaces.iftable.ifentry.ifindex.1 i 1
+.I "snmptrap -v 1 manager public enterprises.spider. test-hub 3 0 '' interfaces.iftable.ifentry.ifindex.1 i 1"
 .PP
-will send a generic link-up trap to manager, for interface 1 in the node test-hub build by 
-.PP
-.I system.sysContact.0 =
-"dpz@noc.rutgers.edu"
-.br
-.I ip.ipForwarding.0 = not-forwarding(2)
+will send a generic link-up trap to manager, for interface 1.
 .PP
 If the network entity has an error processing the request packet, an error
 packet will be returned and a message will be shown, helping to pinpoint in what
 way the request was malformed.  If there were other variables in the request,
 the request will be resent without the bad variable.
 .PP
-Adding a "-d" to the argument list will cause the application to dump input and output packets.
-.PP
-variables(5), RFC 1155, RFC 1156, RFC 1157, SNMP Security Internet Drafts
+snmpcmd(1), variables(5).

@@ -24,11 +24,7 @@
 .SH NAME
 snmpgetnext - communicates with a network entity using SNMP GET NEXT Requests.
 .SH SYNOPSIS
-snmpgetnext -v 1 hostname community objectID [objectID]...
-.PP
-snmpgetnext [-v 2] hostname noAuth objectID [objectID]...
-.PP
-snmpgetnext\ [-v\ 2] hostname srcParty dstParty objectID [objectID]...
+snmpgetnext [ common arguments ] objectID [objectID]...
 .SH DESCRIPTION
 Snmpget is an SNMP application that uses the GET NEXT Request to query for
 information on a network entity.  One or more object
@@ -38,27 +34,9 @@ Each variable name is given in the format specified in
 For each one, the variable that is lexicographicly "next" in the remote entity's
 MIB will be returned.
 .PP
-The
-.I hostname
-specification may be either a host name or an internet address
-specified in "dot notation".
-.PP
-The version 1
-.I community
-specifies the community name for the transaction with the remote system.
-.PP
-The version 2
-.I srcParty
-and
-.I dstParty
-specify the party names for the transaction with the remote system, as
-they are defined in /etc/party.conf.  To forgo authentication, use the
-.B noAuth
-keyword instead of specifying party names.
-.PP
 For example
 .PP
-.I snmpgetnext zeus zeusMS zeusAgent interfaces.ifTable.ifEntry.ifType.1
+.I snmpgetnext zeus public interfaces.ifTable.ifEntry.ifType.1
 .PP
 will retrieve the variable interfaces.ifTable.ifEntry.ifType.2:
 .PP
@@ -67,9 +45,5 @@ will retrieve the variable interfaces.ifTable.ifEntry.ifType.2:
 If the network entity has an error processing the request packet, an error
 message will be shown, helping to pinpoint in what way the request was malformed.
 .PP
-Adding a "-d" to the argument list will cause the application to dump input and output packets.
-.PP
-Adding a "-q" to the argument list will cause the application to use a quicker, less verbose output form.
-.PP
 .SH "SEE ALSO"
-variables(5), RFC 1155, RFC 1156, RFC 1157, SNMP Security Internet Drafts
+snmpcmd(1), variables(5).
