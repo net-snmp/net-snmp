@@ -1,6 +1,14 @@
 /* ucdDemoPublic.c */
 
 #include <config.h>
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
@@ -149,7 +157,7 @@ write_ucdDemoResetKeys(
   int bigsize=1000;
 #endif
   unsigned char *engineID;
-  int engineIDLen;
+  size_t engineIDLen;
   int i;
   struct usmUser *user;
 
