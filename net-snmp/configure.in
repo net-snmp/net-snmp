@@ -1229,21 +1229,6 @@ at the prompt below) the agent will use stdout and stderr instead.
 
 Location to write logfile],$defaultlog,1)
 
-if test -d /var; then
-  defaultstore="/var/snmp/snmpd.persistent.conf"
-else
-  defaultstore="/etc/snmp/snmpd.persistent.conf"
-fi
-  
-AC_PROMPT_USER(PERSISTENTFILE,[
-
-*** snmpd persistent storage location:
-
-	Enter the location for the snmpd agent to store persistent
-data in the form of a configuration file.
-
-Location to write persistent information],$defaultstore,1)
-
 AC_OUTPUT([
  Makefile:Makefile.top:Makefile.in
  snmplib/Makefile:Makefile.top:snmplib/Makefile.in 
