@@ -6,6 +6,7 @@
 
 
 #include <config.h>
+#include <unistd.h>
 #include "mib_module_config.h"
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32

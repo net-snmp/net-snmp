@@ -67,11 +67,8 @@ unsigned char *var_hp(struct variable *vp,
 {
 
   oid newname[30];
-  int count, result,i, rtest=0;
-  register int interface;
-  struct myproc *proc;
+  int result;
   static long long_ret;
-  char errmsg[300];
 
   memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
   newname[*length] = 0;

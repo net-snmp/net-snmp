@@ -80,7 +80,7 @@ void init_wombat(void)
   oid wombat_variables_oid[] = { 1,3,6,1,2,1,99 };
 
   /* register ourselves with the agent to handle our mib tree */
-  REGISTER_MIB("wombat", wobmat_variables, variable2, wombat_variables_oid);
+  REGISTER_MIB("wombat", wombat_variables, variable2, wombat_variables_oid);
 
   /* the auto_nlist routine automatically looks up an nlist symbol in
      the kernel and returns the value.  It does not have to be done in

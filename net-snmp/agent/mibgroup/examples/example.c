@@ -78,7 +78,7 @@ void init_example(void)
 
   /* Define the OID pointer to the top of the mib tree that we're
    registering underneath. */
-  oid exmample_variables_oid[] = { 1.3.6.1.4.1.2021.254 };
+  oid example_variables_oid[] = { 1,3,6,1,4,1,2021,254 };
 
   /* register ourselves with the agent to handle our mib tree
 
