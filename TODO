@@ -1,5 +1,6 @@
 TODO list for the ucd-snmp-coders:
 
+  create our own source rpm spec file, independent from RedHat
   possibly add WinSNMP wrappers around the ucd-snmp functions
   Continue to add and improve manual pages/documentation.
   More snmpset'able variables.
