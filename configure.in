@@ -1713,7 +1713,7 @@ case $target_os in
         ;;
 esac
 # WIN32
--AC_CHECK_HEADERS(winsock.h, AGENTLIBS="${AGENTLIBS} -liphlpapi")
+AC_CHECK_HEADERS(winsock.h, AGENTLIBS="${AGENTLIBS} -liphlpapi")
 # (mingw32 must link winsock explicitly)
 AC_CHECK_HEADERS(winsock.h,[
         AGENTLIBS="${AGENTLIBS} -liphlpapi"
