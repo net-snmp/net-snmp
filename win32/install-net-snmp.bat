@@ -11,6 +11,15 @@ REM The value for INSTALL_BASE below **MUST** match
 REM Use backslashes to delimit sub-directories in path.
 set INSTALL_BASE="c:\usr"
 
+set progVer=release
+if "%1" NEQ "-debug" goto nodebug
+set progVer=debug
+shift
+
+:nodebug
+
+echo Installing %progVer% versions
+
 echo Remember to run this script from the base of the source directory.
 
 echo Creating %INSTALL_BASE% sub-directories
@@ -36,7 +45,7 @@ echo Copying MIB files to %INSTALL_BASE%\share\snmp\mibs
 Copy mibs\*.txt %INSTALL_BASE%\share\snmp\mibs > NUL:
 
 echo Copying compiled programs to %INSTALL_BASE%\bin
-Copy win32\bin\*.exe %INSTALL_BASE%\bin > NUL:
+Copy win32\bin\%progVer%\*.exe %INSTALL_BASE%\bin > NUL:
 Copy local\snmpconf %INSTALL_BASE%\bin > NUL:
 
 echo Copying snmpconf files to %INSTALL_BASE%\share\snmp\snmpconf-data\snmp-data
@@ -49,26 +58,21 @@ REM Copy the remaining files used only to develop
 REM other software that uses Net-SNMP libraries.
 REM
 echo Copying link libraries to %INSTALL_BASE%\lib
-Copy win32\lib\*.*   %INSTALL_BASE%\lib > NUL:
+Copy win32\lib\%progVer%\*.*   %INSTALL_BASE%\lib > NUL:
 
 echo Copying header files to %INSTALL_BASE%\include
 xcopy /E /Y include\net-snmp\*.h %INSTALL_BASE%\include\net-snmp > NUL:
 xcopy /E /Y include\ucd-snmp\*.h %INSTALL_BASE%\include\ucd-snmp > NUL:
 xcopy /E /Y win32\net-snmp\*.h %INSTALL_BASE%\include\net-snmp > NUL:
 
-echo Deleting debugging files from %INSTALL_BASE%
-
-del %INSTALL_BASE%\bin\*_d.*
-del %INSTALL_BASE%\lib\*_d.*
-
 REM
 REM If built with OpenSSL, we need the DLL library, too.
 REM
 echo Copying DLL files to %INSTALL_BASE%
-Copy win32\bin\*.dll %INSTALL_BASE%\bin > NUL:
+Copy win32\bin\%progVer%\*.dll %INSTALL_BASE%\bin > NUL:
 
 echo Copying DLL files to %SYSTEMROOT%\System32
-Copy win32\bin\*.dll %SYSTEMROOT%\System32 > NUL:
+Copy win32\bin\%progVer%\*.dll %SYSTEMROOT%\System32 > NUL:
 
 echo Done copying files to %INSTALL_BASE%
 
