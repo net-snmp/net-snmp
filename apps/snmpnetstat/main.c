@@ -379,7 +379,7 @@ main(argc, argv)
     snmp_synch_setup(&session);
     Session = snmp_open(&session);
     if (Session == NULL){
-	fprintf(stderr, "Couldn't open snmp: %s\n", snmp_api_errstring(snmp_errno));
+        snmp_perror("snmpnetstat: Couldn't open snmp");
 	exit(1);
     }
 

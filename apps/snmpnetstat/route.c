@@ -498,7 +498,7 @@ getvarbyname(sp, name, len)
 	}
     }
     else if (status != STAT_TIMEOUT)
-	  fprintf (stderr, "%s\n", snmp_api_errstring(snmp_errno));
+        snmp_perror("snmpnetstat");
     if (response)
 	snmp_free_pdu(response);
     return var;

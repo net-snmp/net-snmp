@@ -54,7 +54,8 @@ static void error_exit(str, linenumber, filename)
     char *filename;
 {
     snmp_errno = SNMPERR_BAD_CONTEXT;
-    snmp_detail = malloc(128);
+    if (!snmp_detail)
+      snmp_detail = malloc(SNMP_DETAIL_SIZE);
     sprintf(snmp_detail, "%s on line %d of %s", str, linenumber, filename);
 }
 
