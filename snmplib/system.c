@@ -28,7 +28,11 @@ SOFTWARE.
 #include <unistd.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -41,15 +45,21 @@ SOFTWARE.
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
 #include <sys/socket.h>
+#include <net/if.h>
+#endif
 #if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
-#include <net/if.h>
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
+#ifndef WIN32
 #include <nlist.h>
+#endif
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
@@ -70,6 +80,245 @@ SOFTWARE.
 #define IFF_LOOPBACK 0
 #endif
 #define LOOPBACK    0x7f000001
+
+/* ********************************************* */
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN
+#define WIN32IO_IS_STDIO
+#include <tchar.h>
+#include <windows.h>
+#include <sys/stat.h>
+#define PATHLEN 1024
+/* The idea here is to read all the directory names into a string table
+ * (separated by nulls) and when one of the other dir functions is called
+ * return the pointer to the current file name.
+ */
+DIR *
+opendir(char *filename)
+{
+    DIR            *p;
+    long            len;
+    long            idx;
+    char            scannamespc[PATHLEN];
+    char       *scanname = scannamespc;
+    struct stat     sbuf;
+    WIN32_FIND_DATA FindData;
+    HANDLE          fh;
+
+    /* check to see if filename is a directory */
+    if (stat(filename, &sbuf) < 0 || sbuf.st_mode & S_IFDIR == 0) {
+	return NULL;
+    }
+
+    /* get the file system characteristics */
+/*  if(GetFullPathName(filename, MAX_PATH, root, &dummy)) {
+ *	if(dummy = strchr(root, '\\'))
+ *	    *++dummy = '\0';
+ *	if(GetVolumeInformation(root, volname, MAX_PATH, &serial,
+ *				&maxname, &flags, 0, 0)) {
+ *	    downcase = !(flags & FS_CASE_IS_PRESERVED);
+ *	}
+ *  }
+ *  else {
+ *	downcase = TRUE;
+ *  }
+ */
+    /* Get us a DIR structure */
+    p = (DIR*)malloc(sizeof(DIR));
+    /* Newz(1303, p, 1, DIR); */
+    if(p == NULL)
+	return NULL;
+
+    /* Create the search pattern */
+    strcpy(scanname, filename);
+
+    if(index("/\\", *(scanname + strlen(scanname) - 1)) == NULL)
+	strcat(scanname, "/*");
+    else
+	strcat(scanname, "*");
+
+    /* do the FindFirstFile call */
+    fh = FindFirstFile(scanname, &FindData);
+    if(fh == INVALID_HANDLE_VALUE) {
+	return NULL;
+    }
+
+    /* now allocate the first part of the string table for
+     * the filenames that we find.
+     */
+    idx = strlen(FindData.cFileName)+1;
+    p->start = (char*)malloc(idx * sizeof(char));
+    /* New(1304, p->start, idx, char);*/
+    if(p->start == NULL) {
+		fprintf(stderr,"opendir: malloc failed!\n");
+		exit(1);
+    }
+    strcpy(p->start, FindData.cFileName);
+/*  if(downcase)
+ *	strlwr(p->start);
+ */
+    p->nfiles++;
+
+    /* loop finding all the files that match the wildcard
+     * (which should be all of them in this directory!).
+     * the variable idx should point one past the null terminator
+     * of the previous string found.
+     */
+    while (FindNextFile(fh, &FindData)) {
+	len = strlen(FindData.cFileName);
+	/* bump the string table size by enough for the
+	 * new name and it's null terminator
+	 */
+	p->start = (char*)realloc((void*)p->start,
+			idx+len+1 * sizeof(char));
+	/* Renew(p->start, idx+len+1, char);*/
+	if(p->start == NULL) {
+	    fprintf(stderr,"opendir: malloc failed!\n");
+		exit(1);
+	}
+	strcpy(&p->start[idx], FindData.cFileName);
+/*	if (downcase) 
+ *	    strlwr(&p->start[idx]);
+ */
+		p->nfiles++;
+		idx += len+1;
+	}
+	FindClose(fh);
+	p->size = idx;
+	p->curr = p->start;
+	return p;
+}
+
+
+/* Readdir just returns the current string pointer and bumps the
+ * string pointer to the nDllExport entry.
+ */
+struct direct *
+readdir(DIR *dirp)
+{
+    int         len;
+    static int  dummy = 0;
+
+    if (dirp->curr) {
+	/* first set up the structure to return */
+	len = strlen(dirp->curr);
+	strcpy(dirp->dirstr.d_name, dirp->curr);
+	dirp->dirstr.d_namlen = len;
+
+	/* Fake an inode */
+	dirp->dirstr.d_ino = dummy++;
+
+	/* Now set up for the nDllExport call to readdir */
+	dirp->curr += len + 1;
+	if (dirp->curr >= (dirp->start + dirp->size)) {
+	    dirp->curr = NULL;
+	}
+
+	return &(dirp->dirstr);
+    } 
+    else
+	return NULL;
+}
+
+/* free the memory allocated by opendir */
+int
+closedir(DIR *dirp)
+{
+    free(dirp->start);
+    free(dirp);
+    return 1;
+}
+
+
+
+int gettimeofday(tv, tz)
+struct timeval *tv;
+struct timezone *tz;
+{
+    struct _timeb timebuffer;
+
+    _ftime(&timebuffer);
+    tv->tv_usec = timebuffer.millitm;
+    tv->tv_sec = timebuffer.time;
+    return(1);
+}
+
+
+in_addr_t get_myaddr()
+{
+  char local_host[130];
+  int result;
+  LPHOSTENT lpstHostent;
+  SOCKADDR_IN in_addr, remote_in_addr;
+  SOCKET hSock;
+  int nAddrSize = sizeof(SOCKADDR);
+
+  in_addr.sin_addr.s_addr = INADDR_ANY;
+
+  result = gethostname(local_host, 130);
+  if (result == 0)
+  {
+	lpstHostent = gethostbyname((LPSTR)local_host);
+	if (lpstHostent)
+	{
+	  in_addr.sin_addr.s_addr = *((u_long FAR *) (lpstHostent->h_addr));
+	  return((in_addr_t)in_addr.sin_addr.s_addr);
+	}
+  }
+
+  /* if we are here, than we don't have host addr */
+  hSock = socket(AF_INET, SOCK_DGRAM, 0);
+  if (hSock != INVALID_SOCKET)
+  {
+	  /* connect to any port and address */
+	  remote_in_addr.sin_family = AF_INET;
+	  remote_in_addr.sin_port = htons(IPPORT_ECHO);
+	  remote_in_addr.sin_addr.s_addr = inet_addr("128.22.33.11");
+	  result=connect(hSock,(LPSOCKADDR)&remote_in_addr,sizeof(SOCKADDR)); 
+	  if (result != SOCKET_ERROR)
+	  {
+	      /* get local ip address */
+	      getsockname(hSock, (LPSOCKADDR)&in_addr,(int FAR *)&nAddrSize);
+	  }
+	  closesocket(hSock);
+  }
+  return((in_addr_t)in_addr.sin_addr.s_addr);
+}
+
+long get_uptime __P((void))
+{
+    return (0); /* not implemented */
+}
+
+char *
+winsock_startup __P((void))
+{
+ WORD VersionRequested;
+ WSADATA stWSAData;
+ int i;
+ static char errmsg[100];
+
+ VersionRequested = MAKEWORD(1,1);
+ i = WSAStartup(VersionRequested, &stWSAData); 
+ if (i != 0)
+ {
+  if (i == WSAVERNOTSUPPORTED)
+    sprintf(errmsg,"Unable to init. socket lib, does not support 1.1");
+  else
+  {
+    sprintf(errmsg,"Socket Startup error %d", i);
+  }
+  return(errmsg);
+ }
+ return(NULL);
+}
+
+void winsock_cleanup __P((void))
+{
+   WSACleanup();
+}
+
+#else
 in_addr_t get_myaddr __P((void))
 {
     int sd;
@@ -153,7 +402,8 @@ long get_uptime __P((void))
     sysctl(mib, 2, &boottime, &len, NULL, NULL);
 #endif /* CAN_USE_SYSCTL */
 
-    gettimeofday(&now, 0);
+    gettimeofday(&now,(struct timezone *)0);
+
     now.tv_sec--;
     now.tv_usec += 1000000L;
     diff.tv_sec = now.tv_sec - boottime.tv_sec;
@@ -195,3 +445,4 @@ long get_uptime __P((void))
    return uptim;
 #endif /* linux */
 }
+#endif

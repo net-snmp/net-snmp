@@ -46,6 +46,10 @@ SOFTWARE.
 #include <stdio.h>
 #include <ctype.h>
 
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+
 #include "asn1.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"

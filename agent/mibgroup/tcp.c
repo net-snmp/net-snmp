@@ -226,7 +226,7 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 		return (u_char *) &long_return;
 #endif /* linux */
 	    default:
-		ERROR("");
+		ERROR_MSG("");
 	}
     return NULL;
 }
@@ -404,7 +404,7 @@ int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int))
       long_return = ipstat.tcpInErrs;
       return(u_char *) &long_return;
     default:
-      ERROR("");
+      ERROR_MSG("");
       return (NULL);
     }
 }
@@ -492,7 +492,7 @@ int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int))
       long_return = Lowentry.tcpConnRemPort;
       return(u_char *) &long_return;
     default:
-      ERROR("");
+      ERROR_MSG("");
       return (NULL);
     }
 }

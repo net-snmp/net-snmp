@@ -28,7 +28,11 @@ SOFTWARE.
 #include <netinet/in.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -47,6 +51,10 @@ SOFTWARE.
 #endif
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#endif
+
+#if HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 
 #include "asn1.h"
@@ -337,7 +345,7 @@ sprint_opaque(buf, var, enums, hint, units)
     char *units;
 {
 
-    if (var->type != OPAQUE){
+    if (var->type != ASNT_OPAQUE){
 	sprintf(buf, "Wrong Type (should be Opaque): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
@@ -758,7 +766,7 @@ sprint_by_type(buf, var, enums, hint, units)
 	case ASN_OCTET_STR:
 	    sprint_octet_string(buf, var, enums, hint, units);
 	    break;
-	case OPAQUE:
+	case ASNT_OPAQUE:
 	    sprint_opaque(buf, var, enums, hint, units);
 	    break;
 	case ASN_OBJECT_ID:

@@ -285,7 +285,7 @@ unsigned int count;
       for (i=0;i<=byte;i++)   XX[i] = X[i];
       for (i=byte+1;i<64;i++) XX[i] = 0;
       /* Add padding '1' bit and low-order zeros in last byte */
-      mask = ((u_long)1) << (7 - bit);
+      mask = ((unsigned long)1) << (7 - bit);
       XX[byte] = (XX[byte] | mask) & ~( mask - 1);
       /* If room for bit count, finish up with this block */
       if (byte <= 55)

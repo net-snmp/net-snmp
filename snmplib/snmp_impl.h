@@ -1,5 +1,9 @@
 /*
- * Definitions for SNMP (RFC 1067) implementation.
+* file: snmp_impl.h
+*/
+
+/*
+ * Definitions for SNMP implementation.
  *
  *
  */
@@ -92,19 +96,20 @@ struct packet_info {
 #define STRING	    ASN_OCTET_STR
 #define OBJID	    ASN_OBJECT_ID
 #define NULLOBJ	    ASN_NULL
-#define BITSTRING   ASN_BIT_STR
+#define BITSTRING   ASN_BIT_STR  /* HISTORIC - don't use */
 
 /* defined types (from the SMI, RFC 1157) */
 #define IPADDRESS   (ASN_APPLICATION | 0)
 #define COUNTER	    (ASN_APPLICATION | 1)
 #define GAUGE	    (ASN_APPLICATION | 2)
+#define UNSIGNED    (ASN_APPLICATION | 2)  /* RFC 1902 - same as GAUGE */
 #define TIMETICKS   (ASN_APPLICATION | 3)
-#define OPAQUE	    (ASN_APPLICATION | 4)
+#define ASNT_OPAQUE (ASN_APPLICATION | 4)  /* changed so no conflict with other includes */
 
-/* defined types (from the SMI, RFC xxxx) */
-#define NSAP	    (ASN_APPLICATION | 5)
+/* defined types (from the SMI, RFC 1442) */
+#define NSAP	    (ASN_APPLICATION | 5)  /* historic - don't use */
 #define COUNTER64   (ASN_APPLICATION | 6)
-#define UINTEGER    (ASN_APPLICATION | 7)
+#define UINTEGER    (ASN_APPLICATION | 7)  /* historic - don't use */
 
 struct trapVar {
     oid	    *varName;
@@ -116,9 +121,10 @@ struct trapVar {
 };
 
 #ifdef DODEBUG
-#define ERROR(string)	printf("%s(%d): %s\n",__FILE__, __LINE__, string);fflush(stdout);
+/* changed to ERROR_MSG to eliminate conflict with other includes */
+#define ERROR_MSG(string)	snmp_detail = string
 #else
-#define ERROR(string)	snmp_detail = string
+#define ERROR_MSG(string)
 #endif
 
 /* from snmp.c*/
@@ -137,12 +143,12 @@ extern char *snmp_detail;
  */
 #define FIRST_PASS	1
 #define	LAST_PASS	2
-u_char	*snmp_auth_parse __P((u_char *, int *, u_char *, int *, long *));
-u_char	*snmp_auth_build __P((u_char *, int *, u_char *, int *, int *, int));
+u_char	*snmp_comstr_parse __P((u_char *, int *, u_char *, int *, long *));
+u_char	*snmp_comstr_build __P((u_char *, int *, u_char *, int *, int *, int));
 
-u_char	*snmp_secauth_parse __P((u_char *, int *, struct packet_info *,
+u_char	*snmp_party_parse __P((u_char *, int *, struct packet_info *,
                                  oid *, int *, oid *, int *, oid *, int *, int));
-u_char	*snmp_secauth_build __P((u_char *, int *, struct packet_info *, int,
+u_char	*snmp_party_build __P((u_char *, int *, struct packet_info *, int,
                                  oid *, int, oid *, int, oid *, int, int *, int));
 
 

@@ -608,7 +608,7 @@ var_context(vp, name, length, exact, var_len, write_method)
 	    *var_len = sizeof(restartTime);
 	    return (u_char *)restartTime;
 	} else {
-	    ERROR("");
+	    ERROR_MSG("");
 	    return NULL;
 	}
       case CONTEXTDSTPARTYINDEX:
@@ -632,7 +632,7 @@ var_context(vp, name, length, exact, var_len, write_method)
 	}
 	return (u_char *)&cp->contextStatus;
       default:
-            ERROR("");
+            ERROR_MSG("");
     }
     return NULL;
 }
