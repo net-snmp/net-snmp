@@ -91,6 +91,7 @@ real_init_master(void)
 	}
     
         if (sess.peername[0] == '/') {
+#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
             /*
              *  If this is a Unix pathname,
              *  try and create the directory first.
@@ -104,6 +105,11 @@ real_init_master(void)
                          "Failed to create the directory for the agentX socket: %s\n",
                          sess.peername);
             }
+#else
+            netsnmp_sess_log_error(LOG_WARNING,
+                                   "unix domain support not available\n",
+                                   &sess);
+#endif
         }
     
         /*
@@ -140,7 +146,7 @@ real_init_master(void)
             }
         }
 
-
+#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
     /*
      * Apply any settings to the ownership/permissions of the AgentX socket
      */
@@ -164,6 +170,7 @@ real_init_master(void)
             agentx_sock_group = -1;
         chown(sess.peername, agentx_sock_user, agentx_sock_group);
     }
+#endif
 
         /*
          * If we've processed the last (or only) socket, then we're done.
