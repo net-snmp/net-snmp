@@ -118,12 +118,12 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
               (*pptmp)->miblen = 0;
             }
             /* name */
+            cptr = skip_white(cptr);
             if ((*pptmp)->type != PASSTHRU) {
               copy_word(cptr,(*pptmp)->name);
               cptr = skip_not_white(cptr);
+              cptr = skip_white(cptr);
             }
-            cptr = skip_white(cptr);
-            /* command */
             if (cptr == NULL) {
               fprintf(stderr,"No command specified on line:  %s\n",line);
               fflush(stderr);
