@@ -127,6 +127,7 @@ var_hrproc(vp, name, length, exact, var_len, write_method)
     int  proc_idx;
 #if defined(sun) || defined(__alpha)
   long   avenrun[3];
+#define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
 #else
   double avenrun[3];
 #endif
@@ -177,7 +178,11 @@ var_hrproc(vp, name, length, exact, var_len, write_method)
 			 *
 			 * I'm also assuming a single processor
 			 */
+#if defined(ultrix) || defined(sun) || defined(__alpha)
+            long_return = (long) (FIX_TO_DBL(avenrun[i])*100.0);
+#else
 	    long_return = avenrun[0] * 100;	/* 1 minute average */
+#endif
 	    if ( long_return > 100 )
 		long_return=100;
 	    return (u_char *)&long_return;
