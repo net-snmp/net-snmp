@@ -235,7 +235,7 @@ netSnmpHostsTable_commit_row(void **my_data_context, int new_or_del)
             line[strlen(line)-1] = '\0'; /* nuke the new line */
             fprintf(out, "%s %s\n", line, datactx->hostname);
         } else if (inet_addr(myaddr) == datactx->theoldaddr) {
-            /* find a remove the name from the current line */
+            /* find and remove the name from the current line */
             int count = 0;
             cp = copy_nword(line, line2, sizeof(line2)); /* pass the addr */
             if (strlen(line2) > sizeof(line2)-2) {
@@ -281,9 +281,12 @@ netSnmpHostsTable_commit_row(void **my_data_context, int new_or_del)
                 (0xff000000 & datactx->theaddr) >> 24,
                 datactx->hostname);
     }
+    fclose(out); /* close out first to minimize race condition */
     fclose(in);
-    fclose(out);
-
+    /*
+     * race condition here - someone else could open the file after
+     *  we close it but before we can rename it.
+     */
     if (!rename(HOSTS_FILE ".snmp", HOSTS_FILE))
         return SNMP_ERR_COMMITFAILED;
         
