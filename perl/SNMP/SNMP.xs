@@ -2782,12 +2782,11 @@ snmp_read_module(module)
 	CODE:
         {
         int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
-	/* if (Mib == NULL)     init_mib_internals(); */
 
         if (!strcmp(module,"ALL")) {
            Mib = read_all_mibs();
         } else {
-	   Mib = read_module(module);
+           Mib = read_module(module);
         }
         if (Mib) {
            if (verbose) warn("Read %s\n", module);
@@ -3074,7 +3073,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
                  } /* if var_ref is ok */
               } /* for all the vars */
 
-              if (SvTRUE(perl_callback)) {
+              if (perl_callback && SvTRUE(perl_callback)) {
                   xs_cb_data =
                       (snmp_xs_cb_data*)malloc(sizeof(snmp_xs_cb_data));
                  xs_cb_data->perl_cb = newSVsv(perl_callback);
@@ -3099,7 +3098,8 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
 
               last_vars = (response ? response->variables : NULL);
 
-	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
+	      if (SvIOK(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)) &&
+                  SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
 	         sv_timestamp = newSViv((IV)time(NULL));
 
               for(varlist_ind = 0; varlist_ind <= varlist_len; varlist_ind++) {
@@ -3277,7 +3277,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 		 netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
 	      }
 
-	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
+	      if (SvIOK(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)) &&
+                  SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
 	         sv_timestamp = newSViv((IV)time(NULL));
 
               for(vars = (response?response->variables:NULL), varlist_ind = 0;
