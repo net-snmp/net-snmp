@@ -227,9 +227,9 @@ unregister_config_handler(const char *type_param,
   while ((*ltmp)->next != NULL && strcmp((*ltmp)->next->config_token,token)) {
     ltmp = &((*ltmp)->next);
   }
-  if (*ltmp == NULL) {
-    free((*ltmp)->config_token);
-    SNMP_FREE((*ltmp)->help);
+  if ((*ltmp)->next != NULL) {
+    free((*ltmp)->next->config_token);
+    SNMP_FREE((*ltmp)->next->help);
     ltmp2 = (*ltmp)->next->next;
     free((*ltmp)->next);
     (*ltmp)->next = ltmp2;
