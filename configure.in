@@ -676,6 +676,7 @@ AC_CHECK_FUNCS(statvfs statfs)
 AC_CHECK_FUNCS(getdtablesize)
 dnl freebsd2 checks
 AC_CHECK_FUNCS(getfsstat kvm_getprocs)
+AC_CHECK_FUNCS(usleep)
 #
 AC_MSG_CHECKING([for SIOCGIFADDR in sys/ioctl.h])
 AC_CACHE_VAL(cv_sys_ioctl_h_has_SIOCGIFADDR,
