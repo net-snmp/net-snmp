@@ -317,7 +317,7 @@ foreach my $progName (@programs) {
       s/^#define INSTALL_BASE.*/#define INSTALL_BASE \"$prefix\"/;
     }
     if ($linktype eq "dynamic") {
-      s/^#undef NETSNMP_USE_DLL.*/#define NETSNMP_USE_DLL 1/;
+      s/^.*#undef NETSNMP_USE_DLL.*/#define NETSNMP_USE_DLL 1/;
     }
     if ($openssl == 1) {
       s/^.*#undef USE_OPENSSL.*/#define USE_OPENSSL 1/;
