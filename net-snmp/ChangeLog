@@ -2,6 +2,194 @@
 
 Changes: V5.0.4.pre2 -> V5.0.4
 
+2002-09-30 16:08  rstory
+
+   * agent/helpers/table.c:
+
+   make len a size_t to fix problem on 64 bit system, reported by sebnod` in IRC
+   
+2002-09-30 16:05  rstory
+
+   * agent/helpers/table.c:
+
+   don't use static local vars, as they are likely to cause problems with threads
+   
+2002-09-30 15:48  rstory
+
+   * dist/nsb-package:
+
+   make sure install dir is relative to build dir
+   
+2002-09-30 15:20  rstory
+
+   * snmplib/vacm.c:
+
+   add missing newline in debug
+   
+2002-09-30 15:19  rstory
+
+   * dist/: nsb-functions, nsb-package:
+
+   fix typos
+   
+2002-09-30 15:18  rstory
+
+   * agent/snmp_agent.c:
+
+   avoid infinite loop
+   
+2002-09-30 14:59  rstory
+
+   * dist/nsb-functions:
+
+   don't assume make is GNU make, and search for it. require user to set an
+   env var if no GNU make is found in PATH
+   
+2002-09-30 14:58  rstory
+
+   * dist/cvsup:
+
+   if CVS dir is ro, automagically make it rw before update and ro after update
+   
+2002-09-27 14:03  hardaker
+
+   * agent/snmp_agent.c:
+
+   make get_set_cache() return an error if no previous SET has been started.
+   
+2002-09-27 14:02  hardaker
+
+   * agent/agent_registry.c:
+
+   double check against some null pointers before using them in the cache code.
+   
+2002-09-27 13:36  hardaker
+
+   * agent/snmp_agent.c:
+
+   set treecache_num to -1 at init of memory, to be extra safe.
+   
+2002-09-26 14:58  hardaker
+
+   * agent/: snmp_agent.c, snmpd.c:
+
+   move libwrap variables
+   
+2002-09-26 14:57  hardaker
+
+   * perl/agent/agent.xs:
+
+   ok, remove tcpwrappers vars
+   
+2002-09-26 13:44  hardaker
+
+   * perl/agent/agent.xs:
+
+   define stupid variables needed by tcpwrappers because they don't get
+   concepts of encapsulation.  arg.
+   
+2002-09-26 11:26  hardaker
+
+   * perl/agent/agent.xs:
+
+   change call_pv to perl_call_pv for older versions of perl.
+   
+2002-09-26 11:10  hardaker
+
+   * snmplib/mib.c:
+
+   run strdup() on get_mib_dir() results to fix bug pointed out by Eugene Bruk.
+   
+2002-09-23 13:14  hardaker
+
+   * dist/RELEASE-INSTRUCTIONS:
+
+   mention freshmeat
+   
+2002-09-23 13:13  hardaker
+
+   * agent/mibgroup/ucd-snmp/versioninfo.c,
+   agent/mibgroup/ucd-snmp/versioninfo.h, mibs/UCD-SNMP-MIB.txt
+:
+
+   - implement a (long needed) settable variable to store the current
+     persistent information.
+   
+2002-09-23 12:47  hardaker
+
+   * snmplib/snmp_api.c:
+
+   - make not in time window reports trigger a resend of informs.
+     (suggestion from Erik Anggard)
+   
+2002-09-20 11:28  jbpn
+
+   * agent/mibgroup/mibII/vacm_vars.h:
+
+     - remove functions vacm_parse_security and vacm_free_security which
+       don't exist
+   
+2002-09-19 17:01  hardaker
+
+   * perl/agent/agent.xs:
+
+   - support agent shutdowns (well, ok it's just an api since it doesn't work).
+   - misc bug fixes.
+   
+2002-09-19 16:38  hardaker
+
+   * perl/agent/: agent.xs, netsnmp_request_infoPtr.pm:
+
+   fix agent request_infoPtr problems.
+   
+2002-09-19 12:04  dts12
+
+   * win32/snmptranslate/snmptranslate.dsp:
+
+   Compile and link with 'getopt.c' explicitly.
+   
+   This should not be necessary, but for some reason
+   (that completely escapes me!), using command-line options
+   (such as -IR) with the Release version of snmptranslate
+   causes a run-time DLL error.  (The Debug version is fine).
+   The other applications seem to be OK - this problem only
+   seems to hit snmptranslate.  So as a sticking-plaster,
+   compiliing getopt.c in as part of the project, keeps both
+   versions of the application happy.
+     Someone with better Windows knowledge than me needs to
+   look at this and fix it properly.
+   
+2002-09-19 06:14  jbpn
+
+   * include/net-snmp/library/snmp_api.h:
+
+     - undo worst of indent damage
+   
+2002-09-19 06:03  jbpn
+
+   * include/net-snmp/library/snmp_api.h:
+
+     - remove _dparse functions (which don't exist)
+   
+2002-09-18 10:55  hardaker
+
+   * testing/eval_tools.sh:
+
+   reset SNMP_SLEEP after loop
+   
+2002-09-18 10:41  jbpn
+
+   * snmplib/snmp_client.c:
+
+     - remove very obsolete (and not used anywhere) #definitions of
+       PARTY_MIB_BASE and CONTEXT_MIB_BASE
+   
+2002-09-18 02:59  rstory
+
+   * ChangeLog:
+
+   tweak for 5.0.4 last minute update
+   
 2002-09-18 02:48  rstory
 
    * testing/eval_tools.sh:
