@@ -17,5 +17,6 @@ struct register_parameters {
 };
 
 void setup_tree (void);
+int register_mib_priority (const char *, struct variable *, size_t , size_t , oid *, size_t, u_char);
 
 #endif /* AGENT_REGISTRY_H */
