@@ -15,8 +15,10 @@ extern "C" {
 
 #define TABLE_DATA_SET_NAME "netsnmp_table_data_set"
 
+/* return SNMP_ERR_NOERROR or some SNMP specific protocol error id */
 typedef int (Netsnmp_Value_Change_Ok)(char *old_value, size_t old_value_len,
-                              char *new_value, size_t new_value_len);
+                                      char *new_value, size_t new_value_len,
+                                      void *mydata);
 
 /* stored within a given row */
 typedef struct netsnmp_table_data_set_storage_s {
@@ -24,22 +26,23 @@ typedef struct netsnmp_table_data_set_storage_s {
 
    /* info about it? */
    char writable;
-   u_char type;
    Netsnmp_Value_Change_Ok *change_ok_fn;
+   void *my_change_data;
 
    /* data actually stored */
-    union { /* value of variable */
-       void    *voidp;
-       long    *integer;
-       u_char  *string;
-       oid     *objid;
-       u_char  *bitstring;
-       struct counter64 *counter64;
+   u_char type;
+   union { /* value of variable */
+      void    *voidp;
+      long    *integer;
+      u_char  *string;
+      oid     *objid;
+      u_char  *bitstring;
+      struct counter64 *counter64;
 #ifdef OPAQUE_SPECIAL_TYPES
-       float   *floatVal;
-       double  *doubleVal;
+      float   *floatVal;
+      double  *doubleVal;
 #endif /* OPAQUE_SPECIAL_TYPES */
-    } data;
+   } data;
    u_long  data_len;
    
    struct netsnmp_table_data_set_storage_s *next;
@@ -53,7 +56,11 @@ typedef struct netsnmp_table_data_set_s {
 Netsnmp_Node_Handler netsnmp_table_data_set_helper_handler;
 
 /* to set, add column, type, (writable) ? 1 : 0 */
-int netsnmp_table_set_add_default_row(netsnmp_table_data_set *, unsigned int, int, int);
+/* default value, if not NULL, is the default value used in row
+   creation.  It is copied into the storage template (free your
+   calling argument). */
+int netsnmp_table_set_add_default_row(netsnmp_table_data_set *, unsigned int, int, int, void *default_value, size_t default_value_len);
+
 /* to set, add column, type, (writable) ? 1 : 0, ... */
 #if HAVE_STDARG_H
 void netsnmp_table_set_multi_add_default_row(netsnmp_table_data_set *, ...);
@@ -66,7 +73,7 @@ netsnmp_table_data_set_storage *netsnmp_table_data_set_find_column(netsnmp_table
 int netsnmp_register_netsnmp_table_data_set(netsnmp_handler_registration *, netsnmp_table_data_set *,
                             netsnmp_table_registration_info *);
 netsnmp_mib_handler *get_netsnmp_table_data_set_handler(netsnmp_table_data_set *);
-netsnmp_table_data_set *netsnmp_create_netsnmp_table_data_set(const char *);
+netsnmp_table_data_set *netsnmp_create_table_data_set(const char *);
 int netsnmp_mark_row_column_writable(netsnmp_table_row *row, int column, int writable);
 inline netsnmp_table_data_set *extract_netsnmp_table_data_set(netsnmp_request_info *request);
 void netsnmp_config_parse_table_set(const char *token, char *line);
@@ -74,6 +81,11 @@ void netsnmp_config_parse_add_row(const char *token, char *line);
 inline void netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type);
 inline void netsnmp_table_dataset_add_row(netsnmp_table_data_set *table, netsnmp_table_row *row);
 inline void netsnmp_table_dataset_delete_row(netsnmp_table_data_set *table, netsnmp_table_row *row);
+inline void netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
+                                              netsnmp_table_row *origrow,
+                                              netsnmp_table_row *newrow);
+netsnmp_table_row *netsnmp_table_data_set_clone_row(netsnmp_table_row *row);
+    
     
 #ifdef __cplusplus
 };

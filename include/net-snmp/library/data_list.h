@@ -26,7 +26,7 @@ typedef struct netsnmp_data_list_s {
 } netsnmp_data_list;
 
 
-inline netsnmp_data_list *netsnmp_create_netsnmp_data_list(const char *, void *,
+inline netsnmp_data_list *netsnmp_create_data_list(const char *, void *,
                                    Netsnmp_Free_List_Data *);
 void netsnmp_add_list_data(netsnmp_data_list **head, netsnmp_data_list *node);
 void *netsnmp_get_list_data(netsnmp_data_list *head, const char *node);

@@ -2099,7 +2099,7 @@ netsnmp_get_agent_uptime( void ) {
 
 
 inline void
-netsnmp_agent_netsnmp_add_list_data(netsnmp_agent_request_info *ari, netsnmp_data_list *node) 
+netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari, netsnmp_data_list *node) 
 {
   if (ari) {
     if (ari->agent_data)
@@ -2110,7 +2110,7 @@ netsnmp_agent_netsnmp_add_list_data(netsnmp_agent_request_info *ari, netsnmp_dat
 }
 
 inline void *
-netsnmp_agent_netsnmp_get_list_data(netsnmp_agent_request_info *ari, const char *name)
+netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari, const char *name)
 {
   if (ari)
     return netsnmp_get_list_data(ari->agent_data,name);

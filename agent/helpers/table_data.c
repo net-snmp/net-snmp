@@ -139,6 +139,14 @@ netsnmp_table_data_delete_row(table_data *table, netsnmp_table_row *row)
     return data;
 }
 
+/** swaps out origrow with newrow.  This does *not* delete/free anything! */
+inline void
+netsnmp_table_data_replace_row(table_data *table, netsnmp_table_row *origrow,
+                               netsnmp_table_row *newrow) 
+{
+    netsnmp_table_data_remove_row(table, origrow);
+    netsnmp_table_data_add_row(table, newrow);
+}
 
 /** finds the data in "datalist" stored at "indexes" */
 netsnmp_table_row *
@@ -299,7 +307,7 @@ netsnmp_table_data_helper_handler(
                 }
                 if (row) {
                     valid_request = 1;
-                    netsnmp_request_netsnmp_add_list_data(request, netsnmp_create_netsnmp_data_list(TABLE_DATA_NAME, row, NULL));
+                    netsnmp_request_add_list_data(request, netsnmp_create_data_list(TABLE_DATA_NAME, row, NULL));
                 } else { /* no decent result found.  Give up. It's beyond us. */
                         request->processed = 1;
                 }
@@ -327,7 +335,7 @@ netsnmp_table_data_helper_handler(
                     break;
                 } else {
                     valid_request = 1;
-                    netsnmp_request_netsnmp_add_list_data(request, netsnmp_create_netsnmp_data_list(TABLE_DATA_NAME, row, NULL));
+                    netsnmp_request_add_list_data(request, netsnmp_create_data_list(TABLE_DATA_NAME, row, NULL));
                 }
                 break;
 
@@ -341,7 +349,7 @@ netsnmp_table_data_helper_handler(
                                              request->requestvb->name_length -
                                              reginfo->rootoid_len -
                                              2))) {
-                    netsnmp_request_netsnmp_add_list_data(request, netsnmp_create_netsnmp_data_list(TABLE_DATA_NAME, row, NULL));
+                    netsnmp_request_add_list_data(request, netsnmp_create_data_list(TABLE_DATA_NAME, row, NULL));
                 }
                 break;
 
@@ -380,14 +388,16 @@ netsnmp_create_table_data_row(void)
 }
 
 /** extracts the row being accessed passed from the table_data helper */
-netsnmp_table_row *netsnmp_extract_netsnmp_table_row(netsnmp_request_info *request) 
+netsnmp_table_row *
+netsnmp_extract_netsnmp_table_row(netsnmp_request_info *request) 
 {
-    return (netsnmp_table_row *) netsnmp_request_netsnmp_get_list_data(request, TABLE_DATA_NAME);
+    return (netsnmp_table_row *) netsnmp_request_get_list_data(request, TABLE_DATA_NAME);
 }
 
 /** extracts the data from the row being accessed passed from the
  * table_data helper */
-void *netsnmp_extract_netsnmp_table_row_data(netsnmp_request_info *request) 
+void *
+netsnmp_extract_netsnmp_table_row_data(netsnmp_request_info *request) 
 {
     return (netsnmp_extract_netsnmp_table_row(request))->data;
 }
@@ -421,4 +431,30 @@ netsnmp_table_data_build_result(netsnmp_handler_registration *reginfo,
     return SNMPERR_SUCCESS; /* WWWXXX: check for bounds */
 }
 
+/** clones a dataset row. */
+netsnmp_table_row *
+netsnmp_table_data_clone_row(netsnmp_table_row *row) 
+{
+    netsnmp_table_row *newrow = NULL;
+    memdup((u_char **) &newrow, (u_char *) row, sizeof(netsnmp_table_row));
+    if (!newrow)
+        return NULL;
+
+    if (row->indexes) {
+        newrow->indexes = snmp_clone_varbind(newrow->indexes);
+        if (!newrow->indexes)
+            return NULL;
+    }
+
+    if (row->index_oid) {
+        memdup((u_char **) &newrow->index_oid,
+               (u_char *) row->index_oid, row->index_oid_len * sizeof(oid));
+        if (!newrow->index_oid)
+            return NULL;
+    }
+
+    return newrow;
+}
     
+
+        

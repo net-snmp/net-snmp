@@ -135,13 +135,13 @@ init_testhandler(void) {
         column 2 = string = chair #1
         column 3 = string = chair #2  (most WGs have 2 chairs now)
     */
-    table_set = netsnmp_create_netsnmp_table_data_set("chairs");
+    table_set = netsnmp_create_table_data_set("chairs");
     
     /* set up what a row "should" look like */
     netsnmp_table_dataset_add_index(table_set, ASN_OCTET_STR);
     netsnmp_table_set_multi_add_default_row(table_set,
-                                    2, ASN_OCTET_STR, 1,
-                                    3, ASN_OCTET_STR, 1);
+                                            2, ASN_OCTET_STR, 1, NULL, 0,
+                                            3, ASN_OCTET_STR, 1, NULL, 0);
 
     /* register the table */
     netsnmp_register_netsnmp_table_data_set(netsnmp_create_handler_registration("chairs",
@@ -363,8 +363,8 @@ my_test_instance_handler(
                                   SNMP_ERR_RESOURCEUNAVAILABLE);
                 return SNMP_ERR_NOERROR;
             }
-            netsnmp_request_netsnmp_add_list_data(requests,
-                                  netsnmp_create_netsnmp_data_list(TESTHANDLER_SET_NAME,
+            netsnmp_request_add_list_data(requests,
+                                  netsnmp_create_data_list(TESTHANDLER_SET_NAME,
                                                    accesses_cache, free));
             break;
 
@@ -376,7 +376,7 @@ my_test_instance_handler(
             
         case MODE_SET_UNDO:
             accesses =
-                *((u_long *) netsnmp_request_netsnmp_get_list_data(requests,
+                *((u_long *) netsnmp_request_get_list_data(requests,
                                                    TESTHANDLER_SET_NAME));
             break;
 
