@@ -65,6 +65,11 @@ makefileindepend: nosysdepend
 
 T.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 T.o: ../s/generic.h ../m/generic.h 
+deftest.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+deftest.o: ../s/generic.h ../m/generic.h 
+deftest.o:  ./../snmplib/asn1.h
+deftest.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_debug.h
+deftest.o: ./../snmplib/default_store.h
 etimetest.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 etimetest.o: ../s/generic.h ../m/generic.h 
 etimetest.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h ./../snmplib/tools.h
@@ -72,10 +77,10 @@ etimetest.o: ./../snmplib/lcd_time.h ./../snmplib/snmp_debug.h
 etimetest.o: ./../snmplib/callback.h
 keymanagetest.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 keymanagetest.o: ../s/generic.h ../m/generic.h 
-keymanagetest.o:  ./../snmplib/asn1.h
-keymanagetest.o: ./../snmplib/snmp_api.h ./../snmplib/keytools.h
-keymanagetest.o: ./../snmplib/tools.h ./../snmplib/scapi.h
-keymanagetest.o: ./../snmplib/transform_oids.h ./../snmplib/callback.h
+keymanagetest.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
+keymanagetest.o: ./../snmplib/keytools.h ./../snmplib/tools.h
+keymanagetest.o: ./../snmplib/scapi.h ./../snmplib/transform_oids.h
+keymanagetest.o: ./../snmplib/callback.h 
 misctest.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
 misctest.o: ../s/generic.h ../m/generic.h 
 misctest.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h ./../snmplib/tools.h
