@@ -177,7 +177,7 @@ static oid default_enterprise[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
 struct snmp_internal_session {
     struct request_list *requests;/* Info about outstanding requests */
     struct request_list *requestsEnd; /* ptr to end of list */
-    int (*hook_pre)  (struct snmp_session *, struct _snmp_transport *,
+    int (*hook_pre)  (struct snmp_session *, netsnmp_transport *,
 		      void *, int);
     int (*hook_parse)(struct snmp_session *, struct snmp_pdu *,
 		      u_char *, size_t);
@@ -187,7 +187,7 @@ struct snmp_internal_session {
     int (*hook_realloc_build)(struct snmp_session *, struct snmp_pdu *,
 			      u_char **, size_t *, size_t *);
     int (*check_packet) (u_char *, size_t);
-   struct snmp_pdu * (*hook_create_pdu)  (snmp_transport *,
+   struct snmp_pdu * (*hook_create_pdu)  (netsnmp_transport *,
                              void *, size_t);
 
     u_char *packet;
@@ -200,7 +200,7 @@ struct snmp_internal_session {
 struct session_list {
   struct session_list *next;
   struct snmp_session *session;
-  snmp_transport *transport;
+  netsnmp_transport *transport;
   struct snmp_internal_session *internal;
 };
 
@@ -546,7 +546,7 @@ _init_snmp (void)
 
     snmp_res_init();	/* initialize the mt locking structures */
     init_mib_internals();
-    snmp_tdomain_init();
+    netsnmp_tdomain_init();
 
     gettimeofday(&tv,(struct timezone *)0);
     /*Now = tv;*/
@@ -724,7 +724,7 @@ snmp_open(struct snmp_session *session)
 /* extended open */
 struct snmp_session *snmp_open_ex (
   struct snmp_session *session,
-  int (*fpre_parse) (struct snmp_session *, snmp_transport *, void *, int),
+  int (*fpre_parse) (struct snmp_session *, netsnmp_transport *, void *, int),
   int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
   int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
   int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *),
@@ -1142,11 +1142,11 @@ _sess_open(struct snmp_session *in_session)
     slp->transport = NULL;
 
     if (session->flags & SNMP_FLAGS_STREAM_SOCKET) {
-      slp->transport = snmp_tdomain_transport(session->peername,
-					      session->local_port, "tcp");
+      slp->transport = netsnmp_tdomain_transport(session->peername,
+						 session->local_port, "tcp");
     } else {
-      slp->transport = snmp_tdomain_transport(session->peername,
-					      session->local_port, "udp");
+      slp->transport = netsnmp_tdomain_transport(session->peername,
+						 session->local_port, "udp");
     }
 
     if (slp->transport == NULL) {
@@ -1174,17 +1174,17 @@ _sess_open(struct snmp_session *in_session)
 
     snmp_sess_add_ex, snmp_sess_add, snmp_add 
 
-    Analogous to snmp_open family of functions, but taking an snmp_transport
+    Analogous to snmp_open family of functions, but taking a netsnmp_transport
     pointer as an extra argument.  Unlike snmp_open et al. it doesn't attempt
     to interpret the in_session->peername as a transport endpoint specifier,
-    but instead uses the supplied transport.				JBPN
+    but instead uses the supplied transport.  JBPN
 
 */
 
 struct snmp_session *snmp_add(
 struct snmp_session *in_session,
-snmp_transport *transport,
-int (*fpre_parse) (struct snmp_session *, snmp_transport *, void *, int),
+netsnmp_transport *transport,
+int (*fpre_parse) (struct snmp_session *, netsnmp_transport *, void *, int),
 int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int))
 {	
   struct session_list *slp;
@@ -1205,15 +1205,15 @@ int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int))
 
 struct snmp_session *snmp_add_full(
 struct snmp_session *in_session,
-snmp_transport *transport,
-int (*fpre_parse) (struct snmp_session *, snmp_transport *, void *, int),
+netsnmp_transport *transport,
+int (*fpre_parse) (struct snmp_session *, netsnmp_transport *, void *, int),
 int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
 int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
 int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *),
 int (*frbuild)(struct snmp_session *, struct snmp_pdu *, u_char **,
 	       size_t *, size_t *),
 int (*fcheck) (u_char *, size_t),
-struct snmp_pdu * (*fcreate_pdu) (snmp_transport *, void *, size_t))
+struct snmp_pdu * (*fcreate_pdu) (netsnmp_transport *, void *, size_t))
 {	
   struct session_list *slp;
   slp = (struct session_list *)snmp_sess_add_ex(in_session, transport,
@@ -1236,15 +1236,15 @@ struct snmp_pdu * (*fcreate_pdu) (snmp_transport *, void *, size_t))
 
 void	       *snmp_sess_add_ex(
 struct snmp_session *in_session,
-snmp_transport *transport,
-int (*fpre_parse) (struct snmp_session *, snmp_transport *, void *, int),
+netsnmp_transport *transport,
+int (*fpre_parse) (struct snmp_session *, netsnmp_transport *, void *, int),
 int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
 int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
 int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *),
 int (*frbuild)(struct snmp_session *, struct snmp_pdu *, u_char **,
 	       size_t *, size_t *),
 int (*fcheck) (u_char *, size_t),
-struct snmp_pdu * (*fcreate_pdu) (snmp_transport *, void *, size_t))
+struct snmp_pdu * (*fcreate_pdu) (netsnmp_transport *, void *, size_t))
 {	
   struct session_list *slp;
 
@@ -1289,8 +1289,8 @@ struct snmp_pdu * (*fcreate_pdu) (snmp_transport *, void *, size_t))
 
 void	       *snmp_sess_add	(
 struct snmp_session *in_session,
-snmp_transport *transport,
-int (*fpre_parse) (struct snmp_session *, snmp_transport *, void *, int),
+netsnmp_transport *transport,
+int (*fpre_parse) (struct snmp_session *, netsnmp_transport *, void *, int),
 int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int))
 {	
   return snmp_sess_add_ex(in_session, transport, fpre_parse, NULL,
@@ -1471,7 +1471,7 @@ int
 snmp_sess_close(void *sessp)
 {
     struct session_list *slp = (struct session_list *)sessp;
-    snmp_transport *transport;
+    netsnmp_transport *transport;
     struct snmp_internal_session *isp;
     struct snmp_session *sesp = NULL;
     struct snmp_secmod_def *sptr;
@@ -1508,7 +1508,7 @@ snmp_sess_close(void *sessp)
 
     if (transport) {
       transport->f_close(transport);
-      snmp_transport_free(transport);
+      netsnmp_transport_free(transport);
     }
 
     sesp = slp->session; slp->session = 0;
@@ -3890,7 +3890,7 @@ _sess_async_send(void *sessp,
   struct session_list *slp = (struct session_list *)sessp;
   struct snmp_session *session;
   struct snmp_internal_session *isp;
-  snmp_transport *transport = NULL;
+  netsnmp_transport *transport = NULL;
   u_char *pktbuf = NULL, *packet = NULL;
   size_t pktbuf_len = 0, offset = 0, length = 0;
   int result;
@@ -4193,7 +4193,7 @@ snmp_free_pdu(struct snmp_pdu *pdu)
 }
 
 struct snmp_pdu *
-snmp_create_sess_pdu(snmp_transport *transport, void *opaque, size_t olength) 
+snmp_create_sess_pdu(netsnmp_transport *transport, void *opaque, size_t olength) 
 {
     struct snmp_pdu *pdu;
     pdu = (struct snmp_pdu *)calloc(1,sizeof(struct snmp_pdu));
@@ -4221,7 +4221,7 @@ snmp_create_sess_pdu(snmp_transport *transport, void *opaque, size_t olength)
 static int
 _sess_process_packet(void *sessp, struct snmp_session *sp,
 		     struct snmp_internal_session *isp,
-		     snmp_transport *transport,
+		     netsnmp_transport *transport,
 		     void *opaque, int olength,
 		     u_char *packetptr, int length)
 		     
@@ -4481,7 +4481,7 @@ _sess_read(void *sessp, fd_set *fdset)
   struct session_list *slp = (struct session_list *)sessp;
   struct snmp_session *sp = slp?slp->session:NULL;
   struct snmp_internal_session *isp = slp?slp->internal:NULL;
-  snmp_transport *transport = slp?slp->transport:NULL;
+  netsnmp_transport *transport = slp?slp->transport:NULL;
   size_t length = 0, pdulen = 0, rxbuf_len = 65536;
   u_char *rxbuf = NULL;
   int olength = 0, rc = 0;
@@ -4502,7 +4502,7 @@ _sess_read(void *sessp, fd_set *fdset)
   sp->s_snmp_errno = 0;
   sp->s_errno = 0;
 
-  if (transport->flags & SNMP_TRANSPORT_FLAG_LISTEN) {
+  if (transport->flags & NETSNMP_TRANSPORT_FLAG_LISTEN) {
     int data_sock = transport->f_accept(transport);
       
     if (data_sock >= 0) {
@@ -4528,12 +4528,12 @@ _sess_read(void *sessp, fd_set *fdset)
 	  Perhaps there should be some kind of chaining in the transport
 	  structure so that they can all be closed.  Discuss.  ;-)  */
 
-      snmp_transport *new_transport = snmp_transport_copy(transport);
+      netsnmp_transport *new_transport = netsnmp_transport_copy(transport);
       if (new_transport != NULL) {
 	struct session_list *nslp = NULL;
 
 	new_transport->sock   = data_sock;
-	new_transport->flags &= ~SNMP_TRANSPORT_FLAG_LISTEN;
+	new_transport->flags &= ~NETSNMP_TRANSPORT_FLAG_LISTEN;
 
 	nslp = (struct session_list *)snmp_sess_add_ex(sp, new_transport,
 				isp->hook_pre, isp->hook_parse, 
@@ -4546,7 +4546,7 @@ _sess_read(void *sessp, fd_set *fdset)
 	  Sessions = nslp;
 	} else {
 	  new_transport->f_close(new_transport);
-	  snmp_transport_free(new_transport);
+	  netsnmp_transport_free(new_transport);
 	}
 	return 0;
       } else {
@@ -4565,7 +4565,7 @@ _sess_read(void *sessp, fd_set *fdset)
 
   /*  Work out where to receive the data to.  */
 
-  if (transport->flags & SNMP_TRANSPORT_FLAG_STREAM) {
+  if (transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM) {
     if (isp->packet == NULL) {
       /*  We have no saved packet.  Allocate one.  */
       if ((isp->packet = (u_char *)malloc(rxbuf_len)) == NULL) {
@@ -4607,7 +4607,7 @@ _sess_read(void *sessp, fd_set *fdset)
     
   length = transport->f_recv(transport, rxbuf, rxbuf_len, &opaque, &olength);
 
-  if (length == -1 && !(transport->flags & SNMP_TRANSPORT_FLAG_STREAM)) {
+  if (length == -1 && !(transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM)) {
     sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
     sp->s_errno = errno;
     snmp_set_detail(strerror(errno));
@@ -4620,7 +4620,7 @@ _sess_read(void *sessp, fd_set *fdset)
 
   /*  Remote end closed connection.  */
 
-  if (length <= 0 && transport->flags & SNMP_TRANSPORT_FLAG_STREAM) {
+  if (length <= 0 && transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM) {
     /*  Alert the application if possible.  */
     if (sp->callback != NULL) {
       DEBUGMSGTL(("sess_read", "perform callback with op=DISCONNECT\n"));
@@ -4638,7 +4638,7 @@ _sess_read(void *sessp, fd_set *fdset)
     return -1;
   }
   
-  if (transport->flags & SNMP_TRANSPORT_FLAG_STREAM) {
+  if (transport->flags & NETSNMP_TRANSPORT_FLAG_STREAM) {
     u_char *pptr = isp->packet;
 
     isp->packet_len += length;
@@ -4958,7 +4958,7 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
 {
   struct snmp_internal_session *isp;
   struct snmp_session *sp;
-  snmp_transport *transport;
+  netsnmp_transport *transport;
   u_char *pktbuf = NULL, *packet = NULL;
   size_t pktbuf_len = 0, offset = 0, length = 0;
   struct timeval tv, now;
@@ -5816,10 +5816,10 @@ snmp_sess_session(void *sessp)
 
 /*  snmp_sess_transport: takes an opaque pointer (as returned by
     snmp_sess_open or snmp_sess_pointer) and returns the corresponding
-    snmp_transport pointer (or NULL if the opaque pointer does not correspond
+    netsnmp_transport pointer (or NULL if the opaque pointer does not correspond
     to an active internal session).  */
 
-snmp_transport *
+struct netsnmp_transport_s *
 snmp_sess_transport	(void *sessp)
 {
   struct session_list *slp = (struct session_list *)sessp;
@@ -5836,7 +5836,7 @@ snmp_sess_transport	(void *sessp)
     session pointer sp.  */
 
 void
-snmp_sess_transport_set	(void *sp, snmp_transport *t)
+snmp_sess_transport_set	(void *sp, struct netsnmp_transport_s *t)
 {
   struct session_list *slp = (struct session_list *)sp;
   if (slp != NULL) {

@@ -13,7 +13,7 @@ extern "C" {
 /*  Some transport-type constants.  */
 
 #ifndef NETSNMP_STREAM_QUEUE_LEN
-#define		NETSNMP_STREAM_QUEUE_LEN		5
+#define	NETSNMP_STREAM_QUEUE_LEN	5
 #endif
 
 
@@ -106,9 +106,9 @@ typedef struct netsnmp_tdomain_s {
 /*  Some utility functions.  */
 
 int netsnmp_transport_add_to_list(netsnmp_transport_list **transport_list,
-                               netsnmp_transport *transport);
+				  netsnmp_transport *transport);
 int netsnmp_transport_remove_from_list(netsnmp_transport_list **transport_list,
-                                    netsnmp_transport *transport);
+				       netsnmp_transport *transport);
     
 
 /*  Return an exact (deep) copy of t, or NULL if there is a memory allocation
@@ -133,19 +133,20 @@ int			netsnmp_tdomain_support	(const oid *in_oid,
 						 const oid **out_oid,
 						 size_t *out_len);
 						 
-int			netsnmp_tdomain_register	(netsnmp_tdomain *domain);
+int			netsnmp_tdomain_register(netsnmp_tdomain *domain);
 
-int			netsnmp_tdomain_unregister	(netsnmp_tdomain *domain);
+int			netsnmp_tdomain_unregister(netsnmp_tdomain *domain);
 
-void			netsnmp_tdomain_init	(void);
+void			netsnmp_tdomain_init(void);
 
-netsnmp_transport	       *netsnmp_tdomain_transport	(const char *string, int local,
-						 const char *default_domain);
+netsnmp_transport       *netsnmp_tdomain_transport(const char *string,
+						   int local,
+						   const char *default_domain);
 
-netsnmp_transport	       *netsnmp_tdomain_transport_oid(const oid *dom, 
-						   size_t dom_len,
-						   const u_char *o,
-						   size_t o_len, int local);
+netsnmp_transport       *netsnmp_tdomain_transport_oid(const oid *dom, 
+						      size_t dom_len,
+						      const u_char *o,
+						      size_t o_len, int local);
 
 #ifdef __cplusplus
 }
