@@ -6,6 +6,9 @@ typedef struct netsnmp_extend_s {
     char    *command;
     char    *args;
     char    *input;
+    char    *old_command;
+    char    *old_args;
+    char    *old_input;
 
     int      out_len;
     char    *output;
@@ -14,7 +17,8 @@ typedef struct netsnmp_extend_s {
     int      result;
 
     int      flags;
-    netsnmp_cache *cache;
+    netsnmp_cache     *cache;
+    netsnmp_table_row *row;
     struct netsnmp_extend_s *next;
 } netsnmp_extend;
 
