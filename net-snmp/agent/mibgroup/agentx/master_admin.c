@@ -102,7 +102,7 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     if ( sp == NULL )
         return AGENTX_ERR_NOT_OPEN;
 
-    sprintf(buf, "AgentX subagent %d", sp->sessid );
+    sprintf(buf, "AgentX subagent %ld", sp->sessid );
     		 /*
 		* TODO: registration priority, timeout, etc
 		*	Range registration

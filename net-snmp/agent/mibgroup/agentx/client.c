@@ -198,7 +198,7 @@ agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen)
 
 int
 agentx_add_agentcaps( struct snmp_session *ss,
-		      oid* agent_cap, size_t agent_caplen, char* descr)
+		      oid* agent_cap, size_t agent_caplen, const char* descr)
 {
     struct snmp_pdu *pdu, *response;
 
