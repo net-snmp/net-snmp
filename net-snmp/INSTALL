@@ -13,7 +13,7 @@ TABLE OF CONTENTS
   Operation Controls
 
   * = required reading
-
+  
 QUICK INSTRUCTIONS
 ==================
 
@@ -45,12 +45,24 @@ undefined.
 
 Optional features to pass to configure for ucd-snmp:
 
-  --enable-debugging             Outputs *lots* of extra debugging information.
-  --with-defaults                Use defaults for prompted values.
-  --without-root-access          The agent does not exit if it is
-                                   unable to open /dev/kmem.
-  --with-mib-modules="list"      Compile with additional mib modules.
-  --with-out-mib-modules="list"  Compile without these mib modules.
+  --enable-debugging              Outputs extra debugging information.
+  --with-defaults                 Use defaults for prompted values.
+  --without-root-access           Agent won't require root access.
+  --with-sys-contact="who@where"  Default system contact.
+  --with-sys-location="location"  Default system location.
+  --with-logfile="location"       Default log file location.
+  --with-security="TYPE"          Default security type to enforce (SNMPV1).
+  --with-mib-modules="list"       Compile with additional mib modules.
+  --with-out-mib-modules="list"   Compile without these mib modules.
+
+Optional mib modules to include:
+
+  snmp_ospf snmp_rip2 snmp_bgp:   smux modules to talk with gated.
+
+Useful modules for C coders to look at:
+
+  example:                        example C code extension.
+  wombat:                         template file similar to example.
 
 LONG (but you should read these) INSTRUCTIONS
 =============================================
