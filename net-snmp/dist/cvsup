@@ -75,6 +75,10 @@ echo "Updating directory $DIR with $TAG $REP..."
 echo "$COMMAND"
 
 $COMMAND
+rc=$?
+if [ $rc -ne 0 ]; then
+    echo "cvs command returned $?"
+fi
 
 if [ $WO -eq 1 ]; then
     echo "Making $DIR read-only"
@@ -86,6 +90,9 @@ if [ ! -z $DEST ]; then
         TAG=MAIN
     fi
 
+  if [ $rc -ne 0 ]; then
+    echo "skipping upload"
+  else
     cd ..
 #    echo $PWD
     DATE=`date +%Y%m%d_%H%M`
@@ -94,4 +101,5 @@ if [ ! -z $DEST ]; then
     gzip -f --best /tmp/$SOURCE.tar
     scp /tmp/$SOURCE.tar.gz $DEST
     rm -f /tmp/$SOURCE.tar.gz
+  fi
 fi
