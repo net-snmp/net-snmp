@@ -9,6 +9,11 @@ void init_notification_log(void);
 NodeHandler     nlmLogTable_handler;
 NodeHandler     nlmLogVariableTable_handler;
 
+void
+log_notification(struct hostent *host, struct snmp_pdu *pdu,
+                 snmp_transport *transport);
+
+
 /*
  * column number definitions for table nlmLogTable 
  */

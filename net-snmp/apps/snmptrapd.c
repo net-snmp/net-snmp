@@ -136,6 +136,43 @@ const char *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a])
 char       *trap1_fmt_str = NULL,
            *trap2_fmt_str = NULL; /* how to format logging to stderr */
 
+/*
+ * These definitions handle 4.2 systems without additional syslog facilities.
+ */
+#ifndef LOG_CONS
+#define LOG_CONS	0	/* Don't bother if not defined... */
+#endif
+#ifndef LOG_PID
+#define LOG_PID		0	/* Don't bother if not defined... */
+#endif
+#ifndef LOG_LOCAL0
+#define LOG_LOCAL0	0
+#endif
+#ifndef LOG_LOCAL1
+#define LOG_LOCAL1	0
+#endif
+#ifndef LOG_LOCAL2
+#define LOG_LOCAL2	0
+#endif
+#ifndef LOG_LOCAL3
+#define LOG_LOCAL3	0
+#endif
+#ifndef LOG_LOCAL4
+#define LOG_LOCAL4	0
+#endif
+#ifndef LOG_LOCAL5
+#define LOG_LOCAL5	0
+#endif
+#ifndef LOG_LOCAL6
+#define LOG_LOCAL6	0
+#endif
+#ifndef LOG_LOCAL7
+#define LOG_LOCAL7	0
+#endif
+#ifndef LOG_DAEMON
+#define LOG_DAEMON	0
+#endif
+
 /* Include an extra Facility variable to allow command line adjustment of
    syslog destination */
 int Facility = LOG_INFO;
@@ -1045,17 +1082,21 @@ main(int argc, char *argv[])
 	Syslog = 1;
     }
 
+#ifdef USING_AGENTX_SUBAGENT_MODULE
     /* we're an agentx subagent? */
     if (agentx_subagent) {
         /* make us a agentx client. */
         ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, 1);
     }
+#endif
 
     /* initialize the agent library */
     init_agent("snmptrapd");
 
     /* initialize local modules */
+#ifdef USING_AGENTX_SUBAGENT_MODULE
     init_subagent();
+#endif
     init_notification_log();
 
     /* Initialize the world. Create initial user */
