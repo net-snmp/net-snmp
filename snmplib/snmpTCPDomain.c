@@ -210,6 +210,15 @@ netsnmp_tcp_accept(netsnmp_transport *t)
             DEBUGMSGTL(("netsnmp_tcp", "couldn't f_getfl of fd %d\n",newsock));
         }
 #endif
+
+        /*
+         * Allow user to override the send and receive buffers. Default is
+         * to use os default.  Don't worry too much about errors --
+         * just plough on regardless.  
+         */
+        netsnmp_sock_buffer_set(newsock, SO_SNDBUF, 1, 0);
+        netsnmp_sock_buffer_set(newsock, SO_RCVBUF, 1, 0);
+
         return newsock;
     } else {
         free(farend);
@@ -323,6 +332,11 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
             netsnmp_transport_free(t);
             return NULL;
         }
+        
+        /*
+         * no buffer size on listen socket - doesn't make sense
+         */
+
     } else {
         t->remote = malloc(6);
         if (t->remote == NULL) {
@@ -350,6 +364,14 @@ netsnmp_tcp_transport(struct sockaddr_in *addr, int local)
             netsnmp_transport_free(t);
             return NULL;
         }
+
+        /*
+         * Allow user to override the send and receive buffers. Default is
+         * to use os default.  Don't worry too much about errors --
+         * just plough on regardless.  
+         */
+        netsnmp_sock_buffer_set(t->sock, SO_SNDBUF, local, 0);
+        netsnmp_sock_buffer_set(t->sock, SO_RCVBUF, local, 0);
     }
 
     /*

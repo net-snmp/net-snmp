@@ -89,10 +89,10 @@ extern          "C" {
 #define NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY  NETSNMP_DS_LIB_OID_OUTPUT_FORMAT
 #define NETSNMP_DS_LIB_STRING_OUTPUT_FORMAT 5
 #define NETSNMP_DS_LIB_HEX_OUTPUT_LENGTH 6
-#define NETSNMP_DS_LIB_UDP_SERVERSENDBUF         7	/* send buffer for UDP server connections */
-#define NETSNMP_DS_LIB_UDP_SERVERRECVBUF         8	/* receive buffer for UDP server connections */
-#define NETSNMP_DS_LIB_UDP_CLIENTSENDBUF         9	/* send buffer for UDP client connections */
-#define NETSNMP_DS_LIB_UDP_CLIENTRECVBUF        10	/* receive buffer for UDP client connections */
+#define NETSNMP_DS_LIB_SERVERSENDBUF   7 /* send buffer (server) */
+#define NETSNMP_DS_LIB_SERVERRECVBUF   8 /* receive buffer (server) */
+#define NETSNMP_DS_LIB_CLIENTSENDBUF   9 /* send buffer (client) */
+#define NETSNMP_DS_LIB_CLIENTRECVBUF  10 /* receive buffer (client) */
 
     /*
      * special meanings for the default SNMP version slot (NETSNMP_DS_LIB_SNMPVERSION) 
