@@ -55,6 +55,8 @@
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 #undef WORDS_BIGENDIAN
 
+#undef SNMPLIBPATH
+
 #define EXTENSIBLEMIB 1,3,6,1,4,10 /* location of the extensible mib tree */
 #define EXTENSIBLENUM 6            /* count the above numbers */
 
@@ -71,12 +73,6 @@
 
 #define GLOBALSECURITY SNMPV2AUTH    /* only authenticated snmpv2 requests
                                         permited */
-
-/* default config file */
-#define CONFIGFILE "/etc/ece-snmpd.conf"
-
-/* optional second file */
-#define CONFIGFILETWO "/etc/ece-snmpd.local.conf" 
 
 /* default system contact */
 #undef SYS_CONTACT
