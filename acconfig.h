@@ -98,8 +98,14 @@
 /* define the machine (cpu) type include file here */
 #define MACHINE_INCLUDE_FILE <net-snmp/machine/generic.h>
 
-/* SNMPLIBDIR contains important files */
+/* define the UDP buffer defaults undefined means use the OS buffers
+ * by default */
+#undef DEFAULT_SERVER_SEND_BUF
+#undef DEFAULT_SERVER_RECV_BUF
+#undef DEFAULT_CLIENT_SEND_BUF
+#undef DEFAULT_CLIENT_RECV_BUF
 
+/* SNMPLIBDIR contains important files */
 #undef SNMPLIBPATH
 #undef SNMPSHAREPATH
 #undef SNMPCONFPATH

@@ -257,6 +257,9 @@ netsnmp_maximize_udp_buffer(int s, int optname, const char *buftype, int size)
 /* Get the requested buffersize, based on
  * - sockettype : client (local = 0) or server (local = 1) 
  * - buffertype : send (optname = SO_SNDBUF) or recv (SO_RCVBUF)
+ *
+ * In case a compile time buffer was specified, then use that one
+ * if there was no runtime configuration override
  */
 static int
 netsnmp_get_udpbuffersize(int optname, int local, const char **buftype)
@@ -268,28 +271,38 @@ netsnmp_get_udpbuffersize(int optname, int local, const char **buftype)
             *buftype = "server send buffer";
             size = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
                     NETSNMP_DS_LIB_UDP_SERVERSENDBUF);
+#ifdef DEFAULT_SERVER_SEND_BUF
+            if (size <= 0)
+               size = DEFAULT_SERVER_SEND_BUF;
+#endif
         } else {
             *buftype = "client send buffer";
             size = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
                     NETSNMP_DS_LIB_UDP_CLIENTSENDBUF);
+#ifdef DEFAULT_CLIENT_SEND_BUF
+            if (size <= 0)
+               size = DEFAULT_CLIENT_SEND_BUF;
+#endif
         }
     } else {
         if (local) {
             *buftype = "server receive buffer";
             size = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
                     NETSNMP_DS_LIB_UDP_SERVERRECVBUF);
+#ifdef DEFAULT_SERVER_RECV_BUF
+            if (size <= 0)
+               size = DEFAULT_SERVER_RECV_BUF;
+#endif
         } else {
             *buftype = "client receive buffer";
             size = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
                     NETSNMP_DS_LIB_UDP_CLIENTRECVBUF);
+#ifdef DEFAULT_CLIENT_RECV_BUF
+            if (size <= 0)
+               size = DEFAULT_CLIENT_RECV_BUF;
+#endif
         }
     }
-
-    /* If this variable was not specified, or the user tried to fool us
-     * by specifying a negative value just use a hardcoded default
-     */
-    if (size <= 0)
-        size = 1<<17;
 
     DEBUGMSGTL(("netsnmp_udp", 
                 "requested %s is %d\n", *buftype, size));
@@ -311,6 +324,16 @@ netsnmp_set_udp_buffer(int s, int optname, int local)
 
     /* What is the requested buffer size ? */
     size = netsnmp_get_udpbuffersize(optname, local, &buftype);
+
+    /* If the buffersize was not specified or it was a negative value
+     * then don't change the OS buffers at all
+     */
+    if (size <= 0) {
+       DEBUGMSG(("netsnmp_udp", 
+                "%s buffer was not valid or not specified ... using OS default\n", 
+                buftype));
+       return;
+    }
 
     /* Try to set the requested send buffer */
     if (setsockopt
