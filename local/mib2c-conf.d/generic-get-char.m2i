@@ -13,8 +13,10 @@
 @if ($node.enums == 1) && ("$node.perltype" eq "BITS")@
 $example_start
     /*
-     * TODO: update or replace IS_SET_* values. They are currently
-     *  defined in the header files, and default to true.
+     * TODO: update or replace IS_SET_* values.
+     * These macros can be used if there is a simple, direct way to determine
+     * if this bit defined for the MIB object is set for the data in your ctx.
+     * Return 1 if the bit should be set, or 0 if it should not be set.
      */
      $m2c_node_lh = 0;
 @    foreach $e $v enum@
@@ -23,8 +25,10 @@ $example_start
 @        else@
 @            eval $m2c_ename = "${m2c_const_pfx}${node}_${e}"@
 @        end@
+#define IS_SET_$m2c_ename(${node}_ctx_ptr) \
+        (${node}_ctx_ptr != NULL)
     if (IS_SET_$m2c_ename(ctx)) {
-        $m2c_node_lh |= $m2c_ename;
+        $m2c_node_lh |= INTERNAL_$m2c_ename;
     }
 @    end@ # for each
 $example_end
