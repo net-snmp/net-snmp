@@ -26,7 +26,13 @@
 #include <netinet/in.h>
 #endif
 #if HAVE_SYS_SYSCTL_H
+#ifdef _I_DEFINED_KERNEL
+#undef _KERNEL
+#endif
 #include <sys/sysctl.h>
+#ifdef _I_DEFINED_KERNEL
+#define _KERNEL 1
+#endif
 #endif
 #if HAVE_SYS_SYSMP_H
 #include <sys/sysmp.h>
