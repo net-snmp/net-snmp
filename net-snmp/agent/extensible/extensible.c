@@ -28,6 +28,8 @@
 #include "../../config.h"
 
 void update_config();
+struct extensible *get_exten_instance();
+unsigned char *var_extensible_relocatable();
 
 extern struct myproc *procwatch;  /* moved to proc.c */
 extern int numprocs;                     /* ditto */
@@ -83,7 +85,7 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
       newname[*length-1] = name[*length-1] + 1;
     else
       newname[*length-1] = name[*length-1];
-    if (newname[*length-1] > max) {
+    if (max >= 0 && newname[*length-1] > max) {
       if(var_len)
         *var_len = NULL;
       return NULL;
@@ -652,9 +654,64 @@ unsigned char *var_extensible_errors(vp, name, length, exact, var_len, write_met
 #endif
 
 
+extern char version_descr[];
+extern struct subtree *subtrees,subtrees_old[];
+extern struct variable2 extensible_relocatable_variables[];
+
+int tree_compare(a, b)
+  const void *a, *b;
+{
+  struct subtree *ap, *bp;
+  ap = (struct subtree *) a;
+  bp = (struct subtree *) b;
+
+  return compare(ap->name,ap->namelen,bp->name,bp->namelen);
+}
+
+void setup_tree()
+{
+  extern struct subtree *subtrees,subtrees_old[];
+  extern struct variable2 extensible_relocatable_variables[];
+  struct subtree *sb;
+  int i, old_treesz;
+  static struct subtree mysubtree[1];
+  struct extensible *exten;
+  
+  /* Malloc new space at the end of the mib tree for the new
+     extensible mibs and add them in. */
+
+  old_treesz = subtree_old_size();
+
+  subtrees = (struct subtree *) malloc ((numrelocs + old_treesz)
+                                        *sizeof(struct subtree));
+  bcopy(subtrees_old,subtrees,old_treesz *sizeof(struct subtree));
+  sb = subtrees;
+  sb += old_treesz;
+  for(i=1;i<=numrelocs;i++, sb++) {
+    exten = get_exten_instance(relocs,i);
+    memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(int));
+    mysubtree[0].namelen = exten->miblen;
+    mysubtree[0].variables = (struct variable *)extensible_relocatable_variables;
+    mysubtree[0].variables_len = 6;
+      /* sizeof(extensible_relocatable_variables)/sizeof(*extensible_relocatable_variables); */
+    mysubtree[0].variables_width = sizeof(*extensible_relocatable_variables);
+    memcpy(sb,mysubtree,sizeof(struct subtree));
+  }
+
+  /* Here we sort the mib tree so it can insert new extensible mibs
+     and also double check that our mibs were in the proper order in
+     the first place */
+
+  qsort(subtrees,numrelocs + old_treesz,
+        sizeof(struct subtree),tree_compare);
+
+}
+
 void update_config()
 {
+  extern struct subtree *subtrees;
   int i;
+  
   free_config(&procwatch,&extens,&relocs);
   numprocs = numextens = numrelocs = 0;
   /* restore defaults */
@@ -671,18 +728,21 @@ void update_config()
   read_config (CONFIGFILE,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
 #ifdef CONFIGFILETWO
   read_config (CONFIGFILETWO,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
-#endif  
+#endif
+
+  if (subtrees)
+    free(subtrees);
+  setup_tree();
+  
   signal(SIGHUP,update_config);
 }
 
-extern char version_descr[];
 
 init_extensible() {
   
   struct extensible extmp;
   int ret,pagesize,i;
 
-  
 #ifdef hpux
   strcpy(extmp.command,"/bin/uname -m -n -r -s -v -i");
 #else 
@@ -750,5 +810,7 @@ init_extensible() {
   }
   pageshift -= 10;
 #endif
+
+  setup_tree();
 }
 

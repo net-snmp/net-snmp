@@ -656,7 +656,9 @@ struct variable2 eventnotifytab_variables[] = {
 #include "extensible/mibdefs.h"
 #include "../config.h"
 #include "extensible/snmp_vars.h"
-struct subtree subtrees[] = {
+struct subtree *subtrees;   /* this is now malloced in
+                                      extensible/extensible.c */
+struct subtree subtrees_old[] = {
     {{MIB, 1}, 7, (struct variable *)system_variables,
 	 sizeof(system_variables)/sizeof(*system_variables),
 	 sizeof(*system_variables)},
@@ -772,6 +774,10 @@ struct subtree subtrees[] = {
 extern int in_view();
 extern struct subtree *find_extensible();
 
+int subtree_old_size() {
+  return (sizeof(subtrees_old)/ sizeof(struct subtree));
+}
+
 /*
  * getStatPtr - return a pointer to the named variable, as well as it's
  * type, length, and access control list.
@@ -807,15 +813,14 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     int 		found = FALSE;
     oid			save[MAX_NAME_LEN];
     int			savelen;
+    extern numrelocs;
 
     if (!exact){
 	bcopy(name, save, *namelen * sizeof(oid));
 	savelen = *namelen;
     }
     *write_method = NULL;
-    for (y = 0, tp = find_extensible(subtrees,name,*namelen,exact);
-         tp->namelen != 0 && y < sizeof(subtrees)/sizeof(struct subtree);
-         tp++, y++){
+    for (y = 0, tp = subtrees; y < (subtree_old_size() + numrelocs); tp++, y++){
 	treeresult = compare_tree(name, *namelen, tp->name, (int)tp->namelen);
 	/* if exact and treerresult == 0
 	   if next  and treeresult <= 0 */
@@ -896,7 +901,7 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 		break;
 	}
     }
-    if (y == sizeof(subtrees)/sizeof(struct subtree)){
+    if (y == (subtree_old_size() + numrelocs)) {
 	if (!access && !exact){
 	    bcopy(save, name, savelen * sizeof(oid));
 	    *namelen = savelen;
