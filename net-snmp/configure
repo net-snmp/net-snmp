@@ -612,7 +612,7 @@ done
 while test "x$new_module_list" != "x"; do
   for i in $new_module_list
     do
-    if echo $with_out_mib_modules | grep $i > /dev/null; then
+    if echo " $with_out_mib_modules " | grep " $i " > /dev/null; then
       :
     else
       if test -f $srcdir/$mibdir/$i.h -a -f $srcdir/$mibdir/$i.c; then
@@ -623,10 +623,10 @@ while test "x$new_module_list" != "x"; do
 	    if test ! -f $srcdir/$mibdir/$j.h -o ! -f $srcdir/$mibdir/$j.c; then
 	      { echo "configure: error: mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir" 1>&2; exit 1; }
 	    fi
-	    if echo $with_out_mib_modules | grep $j > /dev/null; then
+	    if echo " $with_out_mib_modules " | grep " $j " > /dev/null; then
 	      { echo "configure: error: mib module "$i" requires module "$j" but you told me to compile without it" 1>&2; exit 1; }
 	    fi
-	    if echo "$module_list $new_list_two $new_module_list" | grep $j > /dev/null; then
+	    if echo " $module_list $new_list_two $new_module_list " | grep " $j " > /dev/null; then
 	      :
 	    else
 	      new_list_two="$new_list_two $j"
