@@ -92,6 +92,10 @@ extern          "C" {
     int             netsnmp_inject_handler(netsnmp_handler_registration
                                            *reginfo,
                                            netsnmp_mib_handler *handler);
+    int
+        netsnmp_inject_handler_before(netsnmp_handler_registration *reginfo,
+                                      netsnmp_mib_handler *handler,
+                                      const char *before_what);
     netsnmp_mib_handler
         *netsnmp_find_handler_by_name(netsnmp_handler_registration
                                       *reginfo, const char *name);
