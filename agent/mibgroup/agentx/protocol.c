@@ -1037,7 +1037,7 @@ agentx_parse_oid( u_char *data, size_t *length, int *inc,
       buf_ptr += 4;
      *length -= 4;
 
-     if ( n_subid == 0 ) {
+     if (n_subid == 0 && prefix == 0) {
 		/* Null OID */
          *oid_ptr = 0;		oid_ptr++;
          *oid_ptr = 0;		oid_ptr++;
