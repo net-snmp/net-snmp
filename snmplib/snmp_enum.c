@@ -39,7 +39,7 @@ init_snmp_enum(const char *type)
 
     if (!snmp_enum_lists)
         snmp_enum_lists = (struct snmp_enum_list ***)
-            malloc(sizeof(struct snmp_enum_list **) * SE_MAX_IDS);
+            calloc(1, sizeof(struct snmp_enum_list **) * SE_MAX_IDS);
     if (!snmp_enum_lists)
         return SE_NOMEM;
     current_maj_num = SE_MAX_IDS;
