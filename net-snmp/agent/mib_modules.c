@@ -49,7 +49,6 @@
 #include <net-snmp/agent/mib_modules.h>
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_iterator.h>
-#include "agent_module_includes.h"
 #include "mib_module_includes.h"
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 #include "mibgroup/agentx/subagent.h"
@@ -136,6 +135,5 @@ should_init(const char *module_name)
 void
 init_mib_modules(void)
 {
-#  include "agent_module_inits.h"
 #  include "mib_module_inits.h"
 }
