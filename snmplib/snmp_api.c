@@ -1611,9 +1611,18 @@ create_user_from_session(netsnmp_session * session)
     }
 
     /*
-     * copy in the authentication Key, and convert to the localized version 
+     * copy in the authentication Key.  If not localized, localize it 
      */
-    if (session->securityAuthKey != NULL
+    if (session->securityAuthLocalKey != NULL
+        && session->securityAuthLocalKeyLen != 0) {
+        /* already localized key passed in.  use it */
+        if (memdup(&user->authKey, session->securityAuthLocalKey,
+                   session->securityAuthLocalKeyLen) != SNMPERR_SUCCESS) {
+            usm_free_user(user);
+            return SNMPERR_GENERR;
+        }
+        user->authKeyLen = session->securityAuthLocalKeyLen;
+    } else if (session->securityAuthKey != NULL
         && session->securityAuthKeyLen != 0) {
         SNMP_FREE(user->authKey);
         user->authKey = (u_char *) calloc(1, USM_LENGTH_KU_HASHBLOCK);
@@ -1634,9 +1643,18 @@ create_user_from_session(netsnmp_session * session)
     }
 
     /*
-     * copy in the privacy Key, and convert to the localized version 
+     * copy in the privacy Key.  If not localized, localize it 
      */
-    if (session->securityPrivKey != NULL
+    if (session->securityPrivLocalKey != NULL
+        && session->securityPrivLocalKeyLen != 0) {
+        /* already localized key passed in.  use it */
+        if (memdup(&user->privKey, session->securityPrivLocalKey,
+                   session->securityPrivLocalKeyLen) != SNMPERR_SUCCESS) {
+            usm_free_user(user);
+            return SNMPERR_GENERR;
+        }
+        user->privKeyLen = session->securityPrivLocalKeyLen;
+    } else if (session->securityPrivKey != NULL
         && session->securityPrivKeyLen != 0) {
         SNMP_FREE(user->privKey);
         user->privKey = (u_char *) calloc(1, USM_LENGTH_KU_HASHBLOCK);

@@ -349,6 +349,66 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
         *Xpsz = optarg;
         break;
 
+    case 'm': {
+        size_t bufSize = sizeof(session->securityAuthKey);
+        u_char *tmpp = session->securityAuthKey;
+        if (!snmp_hex_to_binary(&tmpp, &bufSize,
+                                &session->securityAuthKeyLen, 0, optarg)) {
+            fprintf(stderr, "Bad key value after -3k flag.\n");
+            return (-1);
+        }
+        break;
+    }
+
+    case 'M': {
+        size_t bufSize = sizeof(session->securityPrivKey);
+        u_char *tmpp = session->securityPrivKey;
+        if (!snmp_hex_to_binary(&tmpp, &bufSize,
+             &session->securityPrivKeyLen, 0, optarg)) {
+            fprintf(stderr, "Bad key value after -3k flag.\n");
+            return (-1);
+        }
+        break;
+    }
+
+    case 'k': {
+        size_t          kbuf_len = 32, kout_len = 0;
+        u_char         *kbuf = (u_char *) malloc(kbuf_len);
+
+        if (kbuf == NULL) {
+            fprintf(stderr, "malloc failure processing -3k flag.\n");
+            return (-1);
+        }
+        if (!snmp_hex_to_binary
+            (&kbuf, &kbuf_len, &kout_len, 1, optarg)) {
+            fprintf(stderr, "Bad key value after -3k flag.\n");
+            SNMP_FREE(kbuf);
+            return (-1);
+        }
+        session->securityAuthLocalKey = kbuf;
+        session->securityAuthLocalKeyLen = kout_len;
+        break;
+    }
+
+    case 'K': {
+        size_t          kbuf_len = 32, kout_len = 0;
+        u_char         *kbuf = (u_char *) malloc(kbuf_len);
+
+        if (kbuf == NULL) {
+            fprintf(stderr, "malloc failure processing -3K flag.\n");
+            return (-1);
+        }
+        if (!snmp_hex_to_binary
+            (&kbuf, &kbuf_len, &kout_len, 1, optarg)) {
+            fprintf(stderr, "Bad key value after -3K flag.\n");
+            SNMP_FREE(kbuf);
+            return (-1);
+        }
+        session->securityPrivLocalKey = kbuf;
+        session->securityPrivLocalKeyLen = kout_len;
+        break;
+    }
+        
     default:
         fprintf(stderr, "Unknown SNMPv3 option passed to -3: %c.\n", *cp);
         return -1;
