@@ -241,8 +241,9 @@ debugmsg_oidrange(const char *token, const oid * theoid, size_t len,
                                   len);
     } else {
         char            tmpbuf[128];
+        /* XXX - ? check for 0 == var_subid -1 ? */
         rc = sprint_realloc_objid(&buf, &buf_len, &out_len, 1, theoid,
-                                  var_subid);
+                                  var_subid-1); /* Adjust for C's 0-based array indexing */
         if (rc) {
             sprintf(tmpbuf, ".%lu--%lu", theoid[var_subid - 1],
                     range_ubound);
