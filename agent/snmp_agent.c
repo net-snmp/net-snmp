@@ -231,6 +231,7 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
     asp->next    = NULL;
     asp->mode    = RESERVE1;
     asp->status  = SNMP_ERR_NOERROR;
+    asp->index   = 0;
 
     asp->start = asp->pdu->variables;
     asp->end   = asp->pdu->variables;
@@ -538,7 +539,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 			case SNMP_ENDOFMIBVIEW:
 			case ASN_COUNTER64:
 				status = SNMP_ERR_NOSUCHNAME;
-				asp->pdu->errindex=i;
+				asp->index=i;
 				break;
 		    }
 	    }
@@ -554,13 +555,12 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		 * Use a copy of the original request
 		 *   to report failures.
 		 */
-	    i=asp->pdu->errindex;
 	    snmp_free_pdu( asp->pdu );
 	    asp->pdu = snmp_clone_pdu( pdu );
-	    asp->pdu->errindex=i;
 	}
-	asp->pdu->command = SNMP_MSG_RESPONSE;
-	asp->pdu->errstat = status;
+	asp->pdu->command  = SNMP_MSG_RESPONSE;
+	asp->pdu->errstat  = status;
+	asp->pdu->errindex = asp->index;
 	snmp_send( asp->session, asp->pdu );
 	snmp_increment_statistic(STAT_SNMPOUTPKTS);
 	snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
@@ -639,12 +639,10 @@ handle_var_list(struct agent_snmp_session  *asp)
 
     while (1) {
 	count++;
-
+	asp->index = count;
 	status = handle_one_var(asp, varbind_ptr);
 
 	if ( status != SNMP_ERR_NOERROR ) {
-	    asp->pdu->errstat  = status;
-	    asp->pdu->errindex = count;
 	    return status;
 	}
 
@@ -654,6 +652,7 @@ handle_var_list(struct agent_snmp_session  *asp)
 	if ( asp->mode == RESERVE1 )
 	    snmp_vars_inc++;
    }
+   asp->index = 0;
    return SNMP_ERR_NOERROR;
 }
 
