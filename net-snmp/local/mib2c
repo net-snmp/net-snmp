@@ -508,9 +508,34 @@ sub do_tell {
 
 sub do_seek {
     my $stash = shift;
+
+    # save current line number
     $currentline = $stash->{'startline'};
     $fh->seek($stash->{'startpos'}, 0); # go to top of section.
+
+    # save current process_lines state.
     @process_lines = @{$stash->{'lines'}};
+
+    # save state of a number of variables (references), and new assignments
+    for (my $i = 0; $i <= $#_; $i += 2) {
+	push @{$stash->{'vars'}}, $_[$i], ${$_[$i]};
+	${$_[$i]} = $_[$i+1];
+    }
+}
+
+sub do_unseek {
+    my $stash = shift;
+    for (my $i = 0; $i <= $#{$stash->{'vars'}}; $i += 2) {
+	${$stash->{'vars'}[$i]} = $stash->{'vars'}[$i+1];
+    }
+}
+
+sub do_a_loop {
+    my $stash = shift;
+    do_seek($stash, @_);
+    my $return = process();
+    do_unseek($stash);
+    return $return;
 }
 
 sub process {
@@ -718,16 +743,9 @@ sub process {
 				      new NetSNMP::OID($b) } @thekeys;
 	      }
 	      foreach $scalar (@thekeys) {
-		do_seek($stash);
-		my $oldvar = $vars{$var};
-		$vars{$var} = $scalar;
-		my $oldscalar = $currentscalar;
-		$currentscalar = $scalar;
-		$currentvar = $scalar;
-		$return = process();
-		$vars{$var} = $oldvar;
-		$currentscalar = $oldscalar;
-		$currentvar = $scalar;
+		  $return = do_a_loop($stash, \$vars{$var}, $scalar,
+				      \$currentscalar, $scalar,
+				      \$currentvar, $scalar);
 	      }
 	    }
             m2c_die("foreach did not end with \@end@") if($return ne "end");
@@ -745,14 +763,8 @@ sub process {
 				      new NetSNMP::OID($b) } @thekeys;
 	      }
 	      foreach $notify (@thekeys) {
-		do_seek($stash);
-		my $oldvar = $vars{$var};
-		$vars{$var} = $notify;
-		my $oldnotify = $currentnotify;
-		$currentnotify = $notify;
-		$return = process();
-		$vars{$var} = $oldvar;
-		$currentnotify = $oldnotify;
+		  $return = do_a_loop($stash, \$vars{$var}, $notify,
+				      \$currentnotify, $notify);
 	      }
 	    }
             m2c_die("foreach did not end with \@end@") if($return ne "end");
@@ -765,14 +777,8 @@ sub process {
 	    } else {
 	      foreach $varbind (@{$notifyvars{$currentnotify}}) {
 		#		print "looping on $var for $varbind\n";
-		do_seek($stash);
-		my $oldvar = $vars{$var};
-		$vars{$var} = $varbind;
-		my $oldvarbind = $currentvarbind;
-		$currentvarbind = $varbind;
-		$return = process();
-		$vars{$var} = $oldvar;
-		$currentvarbind = $oldvarbind;
+		  $return = do_a_loop($stash, \$vars{$var}, $varbind,
+				      \$currentvarbind, $varbind);
 	      }
 	    }
             m2c_die("foreach did not end with \@end@") if($return ne "end");
@@ -790,14 +796,8 @@ sub process {
 				      new NetSNMP::OID($b) } @thekeys;
 	      }
 	      foreach $table (@thekeys) {
-		do_seek($stash);
-		my $oldvar = $vars{$var};
-		$vars{$var} = $table;
-		my $oldtable = $currenttable;
-		$currenttable = $table;
-		$return = process();
-		$vars{$var} = $oldvar;
-		$currenttable = $oldtable;
+		  $return = do_a_loop($stash, \$vars{$var}, $table, 
+				      \$currenttable, $table);
 	      }
 	    }
             m2c_die("foreach did not end with \@end@ ($return)") if($return ne "end");
@@ -810,16 +810,9 @@ sub process {
 	    } else {
 	      foreach $column (@{$tables{$currenttable}{$type}}) {
 		#		print "looping on $var for $type -> $column\n";
-		do_seek($stash);
-		my $oldvar = $vars{$var};
-		$vars{$var} = $column;
-		my $oldcolumn = $currentcolumn;
-		$currentcolumn = $column;
-		$currentvar = $column;
-		$return = process();
-		$vars{$var} = $oldvar;
-		$currentcolumn = $oldcolumn;
-		$currentvar = $oldcolumn;
+		  $return = do_a_loop($stash, \$vars{$var}, $column,
+				      \$currentcolumn, $column,
+				      \$currentvar, $column);
 	      }
 	    }
             m2c_die("foreach did not end with \@end@") if($return ne "end");
@@ -833,15 +826,8 @@ sub process {
 	    my @ranges = @{$mibn->{'ranges'}};
 	    if ($#ranges > -1) {
 		foreach $range (@ranges) {
-		    #		print "looping on $var for $type -> $column\n";
-		    do_seek($stash);
-		    my $oldvars = $vars{$svar};
-		    my $oldvare = $vars{$evar};
-		    $vars{$svar} = $range->{'low'};
-		    $vars{$evar} = $range->{'high'};
-		    $return = process();
-		    $vars{$svar} = $oldvars;
-		    $vars{$evar} = $oldvare;
+		    $return = do_a_loop($stash, \$vars{$svar}, $range->{'low'},
+					\$vars{$evar}, $range->{'high'});
 		}
 	    } else {
 		$return = skippart();
@@ -856,14 +842,9 @@ sub process {
 				  $SNMP::MIB{$currentvar}{'enums'}{$b} } (keys(%{$SNMP::MIB{$currentvar}{'enums'}}));
 	    if ($#keys > -1) {
 		foreach $enum (@keys) {
-		    do_seek($stash);
-		    my $oldvarvar = $vars{$varvar};
-		    my $oldvarval = $vars{$varval};
-		    $vars{$varvar} = $enum;
-		    $vars{$varval} = $SNMP::MIB{$currentvar}{'enums'}{$enum};
-		    $return = process();
-		    $vars{$varvar} = $oldvarvar;
-		    $vars{$varval} = $oldvarval;
+		    $return = do_a_loop($stash, \$vars{$varvar}, $enum,
+					\$vars{$varval},
+					$SNMP::MIB{$currentvar}{'enums'}{$enum});
 		}
 	    } else {
 		$return = skippart();
