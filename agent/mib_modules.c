@@ -135,5 +135,8 @@ should_init(const char *module_name)
 void
 init_mib_modules(void)
 {
+#ifdef USING_IF_MIB_DATA_ACCESS_INTERFACE_MODULE
+    netsnmp_access_interface_init();
+#endif
 #  include "mib_module_inits.h"
 }
