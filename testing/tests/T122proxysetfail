@@ -55,7 +55,11 @@ STARTAGENT
     # test to see that the agent now supports the system mib
     CAPTURE "snmpset -On -Ir $SNMP_FLAGS -t 5 -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial $SNMP_TRANSPORT_SPEC:$SNMP_TEST_DEST$SNMP_SNMPD_PORT sysContact.0 i 42"
 
-    CHECK ".1.3.6.1.2.1.1.4.0 = Wrong Type"
+    # 5.0.x snmpset shows error on single line
+    #CHECK ".1.3.6.1.2.1.1.4.0 = Wrong Type"
+    # 5.1.x snmpset shows error on multiple lines
+    CHECK "Reason: wrongType"
+    CHECK "Failed object: .1.3.6.1.2.1.1.4.0"
 
   fi
 
