@@ -302,6 +302,9 @@ extern "C" {
         return x->remove(x,k);
     }
     
+    /* clears the top level node if this container is it */
+    void netsnmp_release_if_top(netsnmp_container *cont);
+
     /*------------------------------------------------------------------
      * These functions should EXACTLY match the function version in
      * container.c. If you change one, change them both.
@@ -325,9 +328,7 @@ extern "C" {
         }
 	rc = x->cfree(x);
 	if (rc != 0) {
-	    if (x == containers) {
-		containers = NULL;
-            }
+            netsnmp_release_if_top(x);
 	    SNMP_FREE(x);
         }
 
