@@ -333,7 +333,7 @@ int main(int argc, char *argv[])
             }
         } else {
             if (!read_objid(current_name, name, &name_length)){
-                perror(current_name);
+                snmp_perror(current_name);
                 exit(2);
             }
         }
