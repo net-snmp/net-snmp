@@ -42,6 +42,12 @@ main (int argc, char **argv) {
   /* mib code: init_nstAgentSubagentObject from nstAgentSubagentObject.C */
   init_nstAgentSubagentObject();  
 
+  /* initialize vacm/usm access control  */
+  if (!agentx_subagent) {
+      init_vacm_vars();
+      init_usmUser();
+  }
+
   /* example-demon will be used to read example-demon.conf files. */
   init_snmp("example-demon");
 
@@ -56,7 +62,7 @@ main (int argc, char **argv) {
 
   snmp_log(LOG_INFO,"example-demon is up and running.\n");
 
-  /* you're main loop here... */
+  /* your main loop here... */
   while(keep_running) {
     /* if you use select(), see snmp_select_info() in snmp_api(3) */
     /*     --- OR ---  */
