@@ -705,6 +705,10 @@ netsnmp_udp_getSecName(void *opaque, int olength,
     struct sockaddr_in *from = (struct sockaddr_in *) opaque;
     char           *ztcommunity = NULL;
 
+    if (secName != NULL) {
+        *secName = NULL;  /* Haven't found anything yet */
+    }
+
     /*
      * Special case if there are NO entries (as opposed to no MATCHING
      * entries).  
@@ -712,9 +716,6 @@ netsnmp_udp_getSecName(void *opaque, int olength,
 
     if (com2SecList == NULL) {
         DEBUGMSGTL(("netsnmp_udp_getSecName", "no com2sec entries\n"));
-        if (secName != NULL) {
-            *secName = NULL;
-        }
         return 0;
     }
 
@@ -727,9 +728,6 @@ netsnmp_udp_getSecName(void *opaque, int olength,
         from->sin_family != AF_INET) {
         DEBUGMSGTL(("netsnmp_udp_getSecName",
 		    "no IPv4 source address in PDU?\n"));
-        if (secName != NULL) {
-            *secName = NULL;
-        }
         return 1;
     }
 

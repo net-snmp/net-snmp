@@ -1212,6 +1212,10 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
     char           *ztcommunity = NULL;
     char            str6[INET6_ADDRSTRLEN];
 
+    if (secName != NULL) {
+        *secName = NULL;  /* Haven't found anything yet */
+    }
+
     /*
      * Special case if there are NO entries (as opposed to no MATCHING
      * entries).  
@@ -1219,9 +1223,6 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
 
     if (com2Sec6List == NULL) {
         DEBUGMSGTL(("netsnmp_udp6_getSecName", "no com2sec entries\n"));
-        if (secName != NULL) {
-            *secName = NULL;
-        }
         return 0;
     }
 
@@ -1234,9 +1235,6 @@ netsnmp_udp6_getSecName(void *opaque, int olength,
         || from->sin6_family != PF_INET6) {
         DEBUGMSGTL(("netsnmp_udp6_getSecName",
                     "no IPv6 source address in PDU?\n"));
-        if (secName != NULL) {
-            *secName = NULL;
-        }
         return 1;
     }
 
