@@ -9,24 +9,46 @@
 <hr>
     <h1>*** WARNING WARNING WARNING ***</h1>
     <p>
-      <b>You MUST use the <a
-      href="http://net-snmp.sourceforge.net/developer.html">current
-      development version</a> of the net-snmp toolkit for this to work
-      properly.  This will not work perfectly with 4.1.2 or earlier.</b>
-    <p>
       <b>The AgentX support in the net-snmp package is still beta
       level quality.  Although many people have used it successfully,
       we're not confident enough yet to say that its bug free (and in
       fact we know its not in areas).  Use at your own risk.</b>
     <h1>Sub-Agent Demon tutorial</h1>
     <p>
-      Finally, lets take the previous example and implement it in our
-      own process which attaches to the master agent using the AgentX
+      First off, you need to write a mib module first before you can
+      do this part of the tutorial.  We assume you have read and
+      completed the <a href="../mib_module/index.html">mib module
+      portion</a> of the toolkit tutorial and have code you now wish
+      to compile into a subagent.
+    <p>
+      There are two ways to compile a mib module into a subagent.
+      You can do it yourself, described in detail below, or you can
+      take your mib module and attempt to make a quick-and-dirty
+      subagent automatically using the net-snmp-config script (here we
+      assume that XXX.c contains your subagent code)x:
+    <ul>
+	% <b> net-snmp-config --compile-subagent mysubagent XXX.c
+    </ul>
+    <p>
+      If all goes well, this should have produced a <b>mysubagent</b>
+      binary file.  You can then start the snmpd master agent and then
+      start your subagent and hopefully get at the results using the
+      <a href="/tutorial-5/commands/">various snmp commands</a>.
+    <h2>Instrumenting your own code with agentx subagent support</h2>
+    <p>
+      It's probably more likely that you want to compile in your new
+      code into a previously existing application, and the
+      auto-building of the subagent using the net-snmp-config command
+      isn't appropriate.
+    <p>
+      Lets take the previous example and implement it in our own
+      process which attaches to the master agent using the AgentX
       protocol.  This is easier than you might think, as we provide
-      libraries to do the work for you and additionally the mib module 
-      code that we wrote in the last section does not have to change
-      at all.  We merely compile it ourselves this time, outside the
-      main net-snmp package and put a main() wrapper around it.
+      libraries to do the work for you and additionally the mib module
+      code that <a href="../mib_module/index.html">you previously
+      wrote</a> does not have to change at all.  We merely compile it
+      ourselves this time, outside the main net-snmp package and put a
+      main() wrapper around it.
     <p>
       First, the files you'll need:
       <center><table border=1>
@@ -34,78 +56,53 @@
 	<tr bgcolor="#d0d0ff"><td><a
 	href="../demoapp/Makefile">Makefile</a></td><td>A simple makefile 
 	used to build the projects</td>
-	<tr bgcolor="#d0d0ff"><td>
-	      <a href="../mib_module/Net-SNMP-TUTORIAL-MIB.txt">Net-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be serving</td></tr>
-	<tr bgcolor="#d0d0ff"><td><a
-	href="../mib_module/ustScalarSet.h">ustScalarSet.h</a></td><td>The mib module's header file (same)</td></tr>
-	<tr bgcolor="#d0d0ff"><td><a
-	href="../mib_module/ustScalarSet.c">ustScalarSet.c</a></td><td>The mib module's C source code  (same)</td></tr>
 	<tr bgcolor="#d0d0ff"><td><a
 	href="ustMain.c">ustMain.c</a></td><td>The
 	main() code for our demon</td></tr>
-	<tr bgcolor="#d0d0ff"><td><a
-	href="../mib_module/snmpd.conf">snmpd.conf</a></td><td>The example
-	configuration file for access control</td></tr>
       </table></center>
     <p>
-      Now, build and install the net-snmp package.  You'll need to
-      configure it for AgentX support by compiling in those mib
-      modules, so run configure like:
-      <pre>
-% <b>./configure --with-mib-modules="agentx"</b>
-    </pre>
-    <p>
-      This will actually compile the code for both the master and the
-      subagent support.  <b>Do not compile in the ustScalarSet code
-      like you did last time!</b> The demon that it builds when you
-      run make will by default be a master agent:
-    <pre>
-% <b>make</b>
-% <b>make install</b>
-    </pre>
-    <p>
-      Now, you can fire up the master agent using the configuration
-      file found above.  As root (of course):
-    <pre>
-% <b>/usr/local/sbin/snmpd -C -c snmpd.conf</b>
-    </pre>
+      First, fire up the master agent.  In your snmpd.conf file you
+      must put a line that says "master agentx" to turn on the master
+      agent support.
     <p>
       Once the agent is started, we can build and attach our own to
       it.
     <p>
       To do so, compile the ustMain program using the Makefile found
-      above.  Note that it links with the <i>libucdagent</i> and the
-      <i>libucdmibs</i> libraries in addition to the regular
-      <i>libsnmp</i> one.
+      above.  Note that to compile it, the Makefile uses the
+      net-snmp-config command to generate a list of needed
+      compilation flags and compilation libraries.  You might run the
+      following commands in a shell to see what type of output they
+      provide:
+    <p>
+    <ul>
+      <li> net-snmp-config --cflags
+      <li> net-snmp-config --agent-libs
+    </ul>
+    <p>
+      Type <b>make</b> to compile our test subagent:
     <p>
       <pre>
 % <b>make</b>
-cc -I/usr/local/include -g   -c ustMain.c -o ustMain.o
-cc -I/usr/local/include -g   -c ustScalarSet.c -o ustScalarSet.o
-cc -o ustMain ustMain.o ustScalarSet.o -L/usr/local/lib -lucdagent -lucdmibs -lsnmp
+cc `net-snmp-config --cflags` -c ustMain.c -o ustMain.o
+cc `net-snmp-config --cflags` -c XXX.c -o XXX.o
+cc -o ustMain ustMain.o XXX.o `net-snmp-config --agent-libs`
     </pre>
     <p>
-      Then run snmpwalk to ensure that the current running demon is
-      missing the code we've just built and that it doesn't exist:
-      <pre>
-% <b>snmpwalk localhost democommunity ucdavis.13</b>
-      </pre>
+      You should then be able to run your new program (<b>ustMain</b>)
+      and access the data housed within it.  A good test is to do is
+      to ensure that you can't access your data before starting it, and
+      that you can after starting it.
+    <h2>Debugging</h2>
     <p>
-      Then run the application we just built:
-      <pre>
-% <b>./ustMain</b>
-      </pre>
-    <p>
-      That should attach to the running agent and make it now respond
-      to our same query above, but with results this time:
-      <pre>
-% <b>snmpwalk localhost democommunity ucdavis.13</b>
-      </pre>
+      If you're having problems, it's helpful to pass -Dagentx on the
+      command line to the snmpd master agent to get it to spew out a
+      bunch of debugging information about it's agentx transactions.
     <hr>
     <address><a href="mailto:Wes Hardaker <hardaker@users.sourceforge.net>"></a></address>
 <!-- Created: Fri Nov  5 14:28:37 PST 1999 -->
 <!-- hhmts start -->
-Last modified: Tue Aug  1 16:56:50 PDT 2000
+Last modified: Tue Apr 23 17:43:39 PDT 2002
 <!-- hhmts end -->
   </body>
 </html>

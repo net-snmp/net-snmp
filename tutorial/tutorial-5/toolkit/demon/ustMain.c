@@ -1,10 +1,9 @@
-#include <ucd-snmp/ucd-snmp-config.h>
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#include <ucd-snmp/ucd-snmp-includes.h>
-#include <ucd-snmp/ucd-snmp-agent-includes.h>
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <signal.h>
+
+#include <XXX.h>
 
 static int keep_running;
 
@@ -13,7 +12,8 @@ stop_server(int a) {
     keep_running = 0;
 }
 
-main () {
+int
+main (int argc, char **argv) {
   int agentx_subagent=1; /* change this if you're a master agent */
 
   /* print log errors to stderr */
@@ -29,7 +29,7 @@ main () {
   init_agent("ustMain");
 
   /* initialize your mib code here */
-  init_ustScalarSet();  /* init_ustScalarSet from ustScalarSet.C */
+  init_XXX();  /* init_XXX from XXX.C */
 
   /* ustMain will be used to read ustMain.conf files. */
   init_snmp("ustMain");
@@ -51,6 +51,6 @@ main () {
   }
 
   /* at shutdown time */
-  snmp_shutdown("ustMain");
+/*  snmp_shutdown("ustMain"); */
 }
 

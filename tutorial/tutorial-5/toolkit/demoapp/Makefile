@@ -10,7 +10,7 @@
 CC=gcc
 
 OBJS1=snmpdemoapp.o
-OBJS2=ustMain.o ustScalarSet.o
+OBJS2=ustMain.o XXX.o
 OBJS3=asyncapp.o
 TARGETS=ustMain snmpdemoapp asyncapp
 
