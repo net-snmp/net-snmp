@@ -148,6 +148,7 @@ typedef struct _conf_if_list {
 /*
  * ACCESS function prototypes
  */
+void netsnmp_access_interface_init(void);
 
 /*
  * ifcontainer init
