@@ -106,7 +106,8 @@ int _asn_parse_length_check(const char *str,
 	return 1;
     }
     header_len = bufp - data;
-    if (((size_t)plen + header_len) > dlen){
+    if (plen > 0x7fffffff || header_len > 0x7fffffff ||
+        ((size_t)plen + header_len) > dlen){
 	sprintf(ebuf, "%s: message overflow: %d len + %d delta > %d len",
 		str, (int)plen, (int)header_len, (int)dlen);
 	ERROR_MSG(ebuf);
