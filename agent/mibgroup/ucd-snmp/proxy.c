@@ -308,12 +308,18 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
     size_t          myname_len = MAX_OID_LEN;
 
     cache = netsnmp_handler_check_cache(cache);
+
+    if (!cache) {
+        DEBUGMSGTL(("proxy", "a proxy request was no longer valid.\n"));
+        return SNMP_ERR_NOERROR;
+    }
+
     requests = cache->requests;
 
 
     sp = (struct simple_proxy *) cache->localinfo;
 
-    if (!cache || !sp) {
+    if (!sp) {
         DEBUGMSGTL(("proxy", "a proxy request was no longer valid.\n"));
         return SNMP_ERR_NOERROR;
     }
