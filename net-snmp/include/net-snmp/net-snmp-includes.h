@@ -1,23 +1,61 @@
+#ifndef NET_SNMP_INCLUDES_H
+#define NET_SNMP_INCLUDES_H
+
+    /**
+     *  Convenience header file to pull in the full
+     *     Net-SNMP library API in one go, together with
+     *     certain commonly-required system header files.
+     */
+
+#include <net-snmp/net-snmp-config.h>
+
+
+    /*
+     *  Common system header requirements
+     */
 #include <stdio.h>
 #include <sys/types.h>
 
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#include <sys/time.h>
+#endif
 
-/* uncomment if you don't have in_addr_t in netinet/in.h */
-/* typedef u_int in_addr_t; */
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/snmp-tc.h>
+  /* The check for missing 'in_addr_t' is handled
+     within the main net-snmp-config.h file */
 
-#include <net-snmp/default_store.h>
-#include <net-snmp/snmp_logging.h>
-#include <net-snmp/snmp_debug.h>
-#include <net-snmp/read_config.h>
-#include <net-snmp/tools.h>
-#include <net-snmp/system.h>
+
+    /*
+     *  The full Net-SNMP API
+     */
+#include <net-snmp/definitions.h>
+#include <net-snmp/types.h>
+
+#include <net-snmp/session_api.h>
+#include <net-snmp/pdu_api.h>
+#include <net-snmp/mib_api.h>
+#include <net-snmp/varbind_api.h>
+#include <net-snmp/config_api.h>
+#include <net-snmp/logging_api.h>
+#include <net-snmp/utilities.h>
+
+    /* This is essentially an "internal" API header
+         and is not expected to be used directly
+         in most applications.  */
+#include <net-snmp/snmpv3_api.h>
+
+#endif /* NET_SNMP_INCLUDES_H */
