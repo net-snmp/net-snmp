@@ -916,6 +916,7 @@ agentx_check_session(unsigned int clientreg, void *clientarg)
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_INDEX_STOP, (void *) ss);
         snmp_close(main_session);
+        register_mib_detach();
         main_session = NULL;
         agentx_reopen_session(0, NULL);
     } else {
