@@ -197,6 +197,11 @@ netsnmp_access_interface_entry_get_by_index(netsnmp_container *container,
 oid netsnmp_access_interface_index_find(const char *name);
 
 /*
+ * find name for given index
+ */
+const char *netsnmp_access_interface_name_find(oid index);
+
+/*
  * copy interface entry data
  */
 int netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
