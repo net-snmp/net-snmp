@@ -55,6 +55,7 @@
 
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPDomain.h>
+#include <net-snmp/library/system.h>
 
 #ifndef INADDR_NONE
 #define INADDR_NONE	-1
