@@ -93,6 +93,15 @@
 /* arphd.at_next */
 #undef STRUCT_ARPHD_HAS_AT_NEXT
 
+/* ifaddr.ifa_next */
+#undef STRUCT_IFADDR_HAS_IFA_NEXT
+
+/* ifnet.if_mtu */
+#undef STRUCT_IFNET_IF_MTU
+
+/* ifnet needs to have _KERNEL defined */
+#undef IFNET_NEEDS_KERNEL
+
 /* sysctl works to get boottime, etc... */
 #undef CAN_USE_SYSCTL
 
