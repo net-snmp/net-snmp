@@ -41,7 +41,7 @@ init_notification(void)
 {
     DEBUGMSGTL(("example_notification",
                 "initializing (setting callback alarm)\n"));
-    snmp_alarm_register(5, /* seconds */
+    snmp_alarm_register(30, /* seconds */
                         SA_REPEAT,  /* repeat (every 30 seconds). */
                         send_example_notification, /* our callback */
                         NULL /* no callback data needed */
