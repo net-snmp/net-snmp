@@ -497,9 +497,9 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     pdu->reqid = snmp_get_next_transid();
     pdu->transid = reqinfo->asp->pdu->transid;
     pdu->sessid = ax_session->subsession->sessid;
-    if (reqinfo->asp->pdu->contextName) {
-        pdu->community = strdup(reqinfo->asp->pdu->contextName);
-        pdu->community_len = strlen(reqinfo->asp->pdu->contextName);
+    if (reginfo->contextName) {
+        pdu->community = strdup(reginfo->contextName);
+        pdu->community_len = strlen(reginfo->contextName);
         pdu->flags |= AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT;
     }
     if (ax_session->subsession->flags & AGENTX_MSG_FLAG_NETWORK_BYTE_ORDER)
