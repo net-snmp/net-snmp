@@ -778,6 +778,7 @@ dnl freebsd2 checks
 AC_CHECK_FUNCS(getfsstat kvm_getprocs)
 AC_CHECK_FUNCS(usleep)
 AC_CHECK_FUNCS(setlocale)
+AC_CHECK_FUNCS(rpmGetPath)
 
 AC_MSG_CHECKING([for SIOCGIFADDR in sys/ioctl.h])
 AC_CACHE_VAL(cv_sys_ioctl_h_has_SIOCGIFADDR,
