@@ -419,7 +419,7 @@ subagent_pre_init( void )
 
     DEBUGMSGTL(("agentx/subagent","initializing....\n"));
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != SUB_AGENT )
-	return;
+	return 0;
 
     snmp_sess_init( &sess );
     sess.version = AGENTX_VERSION_1;
