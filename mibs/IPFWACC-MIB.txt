@@ -1,0 +1,297 @@
+IPFWADM-MIB DEFINITIONS ::= BEGIN
+
+-- This module defines MIB components for reading information from the
+-- accounting rules IP Firewall. This would typically let you read the rules
+-- and the counters. I did not include some flags and fields that I
+-- considered irrelevant for the accounting rules. Resetting the counters of
+-- the rules by SNMP would be simple, but I don't consider it so useful. I
+-- gave no consideration to implementing write access for allowing
+-- modification of the accounting rules.
+-- Cristian.Estan@net.utcluj.ro
+
+IMPORTS
+       	OBJECT-TYPE
+            FROM SNMPv2-SMI
+        DisplayString
+            FROM SNMPv2-TC
+	ucdavis
+	    FROM UCD-SNMP-MIB;
+
+
+ipFwAcc OBJECT-TYPE
+	SYNTAX IpFwAcc
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"The accounting rules of the IP firewall"
+	INDEX { ipFwAccIndex }
+	::= { ucdavis 27 }	-- whatever
+
+IpFwAcc ::= SEQUENCE {
+	ipFwAccIndex		INTEGER,
+	ipFwAccSrcAddr		IpAddress,
+	ipFwAccSrcNetMask	IpAddress,
+	ipFwAccDstAddr		IpAddress,
+	ipFwAccDstNetMask	IpAddress,
+	ipFwAccViaName		DisplayString,
+	ipFwAccViaAddr		IpAddress,
+	ipFwAccProto		INTEGER,
+	ipFwAccBidir		INTEGER,
+	ipFwAccDir		INTEGER,
+	ipFwAccBytes		INTEGER,
+	ipFwAccPackets		INTEGER,
+	ipFwAccNrSrcPorts	INTEGER,
+	ipFwAccNrDstPorts	INTEGER,
+	ipFwAccSrcIsRange	INTEGER,
+	ipFwAccDstIsRange	INTEGER,
+	ipFwAccPort1		INTEGER,
+	ipFwAccPort2		INTEGER,
+	ipFwAccPort3		INTEGER,
+	ipFwAccPort4		INTEGER,
+	ipFwAccPort5		INTEGER,
+	ipFwAccPort6		INTEGER,
+	ipFwAccPort7		INTEGER,
+	ipFwAccPort8		INTEGER,
+	ipFwAccPort9		INTEGER,
+	ipFwAccPort10		INTEGER
+	}
+
+ipFwAccIndex OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Reference index for each firewall rule."
+	::= { ipFwAcc 1 }
+
+ipFwAccSrcAddr OBJECT-TYPE
+	SYNTAX IpAddress
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The source address in the firewall rule."
+	::= { ipFwAcc 2 }
+
+ipFwAccSrcNetMask OBJECT-TYPE
+	SYNTAX IpAddress
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The netmask of the source address in the firewall rule."
+	::= { ipFwAcc 3 }
+
+ipFwAccDstAddr OBJECT-TYPE
+	SYNTAX IpAddress
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The destination address in the firewall rule."
+	::= { ipFwAcc 4 }
+
+ipFwAccDstNetMask OBJECT-TYPE
+	SYNTAX IpAddress
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The netmask of the destination address in the firewall rule."
+	::= { ipFwAcc 5 }
+
+ipFwAccViaName OBJECT-TYPE
+	SYNTAX DisplayString
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The name of the interface to which the rule applies. If no
+		interface is associated with the present rule, this should
+		contain a dash (-) ."
+	::= { ipFwAcc 6 }
+
+ipFwAccViaAddr OBJECT-TYPE
+	SYNTAX IpAddress
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The address of the interface to which the rule applies.
+		Using this parameter makes sense when multiple addresses are
+		associated to the same physical interface. If not defined
+		for the current rule this should be set to 0."
+	::= { ipFwAcc 7 }
+
+ipFwAccProto OBJECT-TYPE
+	SYNTAX INTEGER {
+		other(1),
+		all(2),
+		tcp(3),
+		udp(4),
+		icmp(5)
+		}
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The protocol(s) to which the rule applies."
+	::= { ipFwAcc 8 }
+
+ipFwAccBidir OBJECT-TYPE
+	SYNTAX INTEGER {
+		unidirectional(1),
+		bidirectional(2)
+		}
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Whether the rule works in both directions (i.e. with the
+		source and destination parts swapped) or not."
+	::= { ipFwAcc 9 }
+
+ipFwAccDir OBJECT-TYPE
+	SYNTAX INTEGER {
+		both(1),
+		in(2),
+		out(3)
+		}
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Whether the rule applies to packets entering or exiting the
+		kernel."
+	::= { ipFwAcc 10 }
+
+ipFwAccBytes OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The number of bytes that matched this rule since the last
+		reset of the counters."
+	::= { ipFwAcc 11 }
+
+ipFwAccPackets OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The number of packets that matched this rule since the last
+		reset of the counters."
+	::= { ipFwAcc 12 }
+
+ipFwAccNrSrcPorts OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The number of ports that refer to the source address."
+	::= { ipFwAcc 13 }
+
+ipFwAccNrDstPorts OBJECT-TYPE
+	SYNTAX INTEGER 
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The number of ports that refer to the destination address."
+	::= { ipFwAcc 14 }
+
+ipFwAccSrcIsRange OBJECT-TYPE
+	SYNTAX INTEGER {
+		srchasrange(1),
+		srchasnorange(2)
+		}
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Interpret the first two ports of the source part as
+		the upper and lower limit of an interval or not."
+	::= { ipFwAcc 15 }
+
+ipFwAccDstIsRange OBJECT-TYPE
+	SYNTAX INTEGER {
+		dsthasrange(1),
+		dsthasnorange(2)
+		}
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Interpret the first two ports of the destination part as
+		the upper and lower limit of an interval or not."
+	::= { ipFwAcc 16 }
+
+ipFwAccPort1 OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Port number 1."
+	::= { ipFwAcc 17 }
+
+ipFwAccPort2 OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Port number 2."
+	::= { ipFwAcc 18 }
+
+ipFwAccPort3 OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Port number 3."
+	::= { ipFwAcc 19 }
+
+ipFwAccPort4 OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Port number 4."
+	::= { ipFwAcc 20 }
+
+ipFwAccPort5 OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Port number 5."
+	::= { ipFwAcc 21 }
+
+ipFwAccPort6 OBJECT-TYPE
+	SYNTAX INTEGER 
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Port number 6."
+	::= { ipFwAcc 22 }
+
+ipFwAccPort7 OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Port number 7."
+	::= { ipFwAcc 23 }
+
+ipFwAccPort8 OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Port number 8."
+	::= { ipFwAcc 24 }
+
+ipFwAccPort9 OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Port number 9."
+	::= { ipFwAcc 25 }
+
+ipFwAccPort10 OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Port number 10."
+	::= { ipFwAcc 26 }
+
+END
