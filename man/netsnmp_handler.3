@@ -1,8 +1,8 @@
-.TH "Net-SNMP Agent handler and extensibility API" 3 "10 Jan 2003" "net-snmp" \" -*- nroff -*-
+.TH "Agent handler API" 3 "13 Jan 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-Net-SNMP Agent handler and extensibility API \- The basic theory goes something like this: In the past, with the original mib module api (which derived from the original CMU SNMP code) the underlying mib modules were passed very little information (only the truly most basic information about a request). 
+Agent handler API \- The basic theory goes something like this: In the past, with the original mib module api (which derived from the original CMU SNMP code) the underlying mib modules were passed very little information (only the truly most basic information about a request). 
 More...
 .SS "Modules"
 
@@ -59,13 +59,6 @@ More...
 .RI "\fBserialize: Calls sub handlers one request at a time.\fP"
 .br
 .RI "\fIThis functionally passes in one request at a time into lower handlers rather than a whole bunch of requests at once.\fP"
-.PP
-.in +1c
-
-.ti -1c
-.RI "\fBset_data: helps storing and retriving of data during set transactions\fP"
-.br
-.RI "\fIThe set_data helper.\fP"
 .PP
 .in +1c
 
