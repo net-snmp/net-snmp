@@ -32,7 +32,7 @@ installprogs: installbin installsbin
 # set INSTALLBUILTHEADERS to a list of things to install from builddir
 # set INSTALLSUBDIRHEADERS and INSTALLSUBDIR to subdirectory headers
 # set INSTALLSUBDIRHEADERS2 and INSTALLSUBDIR2 to more subdirectory headers
-# set INSTALLBUILTSUBDIRHEADERS and INSTALLBUILTSUBDIR2 to a list from builddir
+# set INSTALLBUILTSUBDIRHEADERS and INSTALLBUILTSUBDIR to a list from builddir
 #
 installheaders: installlocalheaders @installucdheaders@ installsubdirheaders
 
@@ -74,12 +74,12 @@ installlocalheaders:
 	        done \
 	fi
 	@if test "$(INSTALLBUILTSUBDIRHEADERS)" != "" ; then \
-		echo creating directory $(includedir)/$(INCLUDEBUILTSUBDIR) ; \
+		echo creating directory $(includedir)/$(INSTALLBUILTSUBDIR) ; \
 		it="$(INSTALLBUILTSUBDIRHEADERS)" ; \
-		$(SHELL) $(top_srcdir)/mkinstalldirs $(includedir)/$(INCLUDEBUILTSUBDIR) ; \
+		$(SHELL) $(top_srcdir)/mkinstalldirs $(includedir)/$(INSTALLBUILTSUBDIR) ; \
 	        for i in $$it ; do \
-			$(INSTALL) $$i $(includedir)/$(INCLUDEBUILTSUBDIR) ; \
-	                echo "installing $$i in $(includedir)/$(INCLUDEBUILTSUBDIR)" ; \
+			$(INSTALL) $$i $(includedir)/$(INSTALLBUILTSUBDIR) ; \
+	                echo "installing $$i in $(includedir)/$(INSTALLBUILTSUBDIR)" ; \
 	        done \
 	fi
 
