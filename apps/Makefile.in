@@ -62,7 +62,7 @@ snmptest$(EXEEXT):    snmptest.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptest.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptrapd$(EXEEXT):    $(TRAPD_OBJECTS) $(USETRAPLIBS) 
-	/bin/sh ../libtool --mode=link gcc -I/usr/include/rpm -g -Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-char-subscripts -Dlinux -o snmptrapd $(TRAPD_OBJECTS) -L/usr/local/lib ../agent/libucdagent.la ../agent/libucdmibs.la ../agent/helpers/libhelpers.la ../snmplib/libsnmp.la -lcrypto -ldl -ldb1 -lz -lpopt -lm -ldmalloc
+	/bin/sh ../libtool --mode=link gcc -I/usr/include/rpm -g -Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-char-subscripts -Dlinux -o snmptrapd $(TRAPD_OBJECTS) $(TRAPLIBS)
 #	$(LINK) -o $@ $(TRAPD_OBJECTS) $(LOCAL_LIBS) ${LDFLAGS} ${TRAPLIBS}
 
 snmptrap$(EXEEXT):    snmptrap.$(OSUFFIX) $(USELIBS)
