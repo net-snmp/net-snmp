@@ -17,7 +17,13 @@ extern          "C" {
 #include <netinet/in.h>
 #endif
 
-extern oid netsnmp_snmpTCPDomain[8];	/*  = { 1, 3, 6, 1, 3, 91, 1, 1 };  */
+/*
+ * The SNMP over TCP over IPv4 transport domain is identified by
+ * transportDomainTcpIpv4 as defined in RFC 3419.
+ */
+
+#define TRANSPORT_DOMAIN_TCP_IPV6	1,3,6,1,2,1,100,1,5
+extern oid netsnmp_snmpTCPDomain[];
 
 netsnmp_transport *netsnmp_tcp_transport(struct sockaddr_in *addr, int local);
 

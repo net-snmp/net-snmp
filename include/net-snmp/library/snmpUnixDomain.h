@@ -17,7 +17,13 @@ extern          "C" {
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
-extern oid netsnmp_UnixDomain[10];   /*  = { ENTERPRISE_MIB, 3, 3, 2 };  */
+/*
+ * The SNMP over local socket transport domain is identified by
+ * transportDomainLocal as defined in RFC 3419.
+ */
+
+#define TRANSPORT_DOMAIN_LOCAL	1,3,6,1,2,1,100,1,13
+extern oid netsnmp_UnixDomain[];
 
 netsnmp_transport *netsnmp_unix_transport(struct sockaddr_un *addr,
                                           int local);

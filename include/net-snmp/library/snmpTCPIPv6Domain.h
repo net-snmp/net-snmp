@@ -8,7 +8,13 @@ extern          "C" {
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/asn1.h>
 
-extern oid      netsnmp_TCPIPv6Domain[]; /* = { ENTERPRISE_MIB, 3, 3, 5 }; */
+/*
+ * The SNMP over TCP over IPv6 transport domain is identified by
+ * transportDomainTcpIpv4 as defined in RFC 3419.
+ */
+
+#define TRANSPORT_DOMAIN_TCP_IPV6	1,3,6,1,2,1,100,1,6
+extern oid      netsnmp_TCPIPv6Domain[];
 
 netsnmp_transport *netsnmp_tcp6_transport(struct sockaddr_in6 *addr, 
 					  int local);
