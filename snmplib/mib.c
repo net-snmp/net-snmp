@@ -1594,12 +1594,15 @@ sprint_variable(char *buf,
 	strcpy(buf, "No Such Instance currently exists");
     else if (variable->type == SNMP_ENDOFMIBVIEW)
 	strcpy(buf, "No more variables left in this MIB View");
-    else {
+    else if (subtree) {
 	if (subtree->printer)
 	    (*subtree->printer)(buf, variable, subtree->enums, subtree->hint, subtree->units);
-	else {
+	  else {
 	    sprint_by_type(buf, variable, subtree->enums, subtree->hint, subtree->units);
-	}
+	  }
+    }
+    else { /* handle rare case where tree is empty */
+        sprint_by_type(buf, variable, 0, 0, 0);
     }
 }
 
