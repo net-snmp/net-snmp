@@ -112,7 +112,7 @@ ${node}_check_value( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val)
 int
 ${node}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${context}:${node}_undo_setup","called\n"));
 
 @ifconf syntax-$node.syntax-undo-setup.m2i@
 @    include syntax-$node.syntax-undo-setup.m2i@

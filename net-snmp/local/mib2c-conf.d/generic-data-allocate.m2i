@@ -24,7 +24,7 @@ ${context}_allocate_data(void)
 @end@
     ${context}_data *rtn = SNMP_MALLOC_TYPEDEF($m2c_data_context);
 
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${context}_allocate_data","called\n"));
 
     if(NULL == rtn) {
         snmp_log(LOG_ERR, "unable to malloc memory for new "
@@ -42,7 +42,7 @@ ${context}_allocate_data(void)
 void
 ${context}_release_data(${table}_data *data)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${context}_release_data","called\n"));
 
     /*
      * release memory for the context

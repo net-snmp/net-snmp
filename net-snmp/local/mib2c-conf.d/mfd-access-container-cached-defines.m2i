@@ -75,7 +75,7 @@ void
 ${table}_container_init(netsnmp_container **container_ptr_ptr,
                         netsnmp_cache *cache)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${table}_container_init","called\n"));
     
     if((NULL == cache) || (NULL == container_ptr_ptr)) {
         snmp_log(LOG_ERR,"bad params to ${table}_container_init\n");
@@ -150,7 +150,7 @@ ${context}_cache_load(netsnmp_container *container)
 @end@ // foreach
 @end@ // examples
 
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${context}_cache_load","called\n"));
 
 @if $m2c_include_examples == 1@
 $example_start
@@ -274,7 +274,7 @@ $example_end
 void
 ${context}_cache_free(netsnmp_container *container)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("verbose:${context}_cache_free","called\n"));
 }
 
 @end@ // m2c_processing_type eq 'c'
@@ -289,14 +289,12 @@ ${context}_cache_free(netsnmp_container *container)
 static int
 _cache_load(netsnmp_cache *cache, void *vmagic)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:${context}:_cache_load","called\n"));
 
     if((NULL == cache) || (NULL == cache->magic)) {
         snmp_log(LOG_ERR, "invalid cache for ${table}_cache_load\n");
         return -1;
     }
-    DEBUGMSGTL(("ifTable/cache", "ifTable_load %p/%p\n",
-                cache, cache->magic));
 
     /** should only be called for an invalid or expired cache */
     netsnmp_assert((0 == cache->valid) || (1 == cache->expired));
@@ -313,7 +311,7 @@ _cache_load(netsnmp_cache *cache, void *vmagic)
 static void
 _cache_item_free(${context}_rowreq_ctx *rowreq_ctx, void *context)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:${context}:_cache_item_free","called\n"));
 
     if(NULL == rowreq_ctx)
         return;
@@ -329,7 +327,7 @@ _cache_free(netsnmp_cache *cache, void *magic)
 {
     netsnmp_container *container;
 
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:${context}:_cache_free","called\n"));
 
     if((NULL == cache) || (NULL == cache->magic)) {
         snmp_log(LOG_ERR, "invalid cache in ${context}_cache_free\n");
@@ -358,7 +356,7 @@ _cache_free(netsnmp_cache *cache, void *magic)
 void
 _${table}_container_init(${context}_interface_ctx *if_ctx)
 {
-    DEBUGTRACE;
+    DEBUGMSGTL(("internal:${context}:_${table}_container_init","called\n"));
     
 @    if 0@
     /*
