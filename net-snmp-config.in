@@ -12,6 +12,12 @@ else
   exec_prefix=@exec_prefix@
   prefix=@exec_prefix@
   case $1 in
+    --configure-options)
+      echo @CONFIGURE_OPTIONS@
+      ;;
+    --snmpd-module-list)
+      echo @MODULE_LIST@
+      ;;
     --cflags)
       echo @CFLAGS@
       ;;
@@ -258,5 +264,10 @@ if test "x$usage" = "xyes"; then
   echo ""
   echo "  Automatted subagent building (produces an outputname binary file):"
   echo "    --compile-subagent outputname mibmodule1.c [...]]"
+  echo ""
+  echo "  Details on how the net-nsmp package was compiled:"
+  echo ""
+  echo "    --configure-options   Display original configure arguments"
+  echo "    --snmpd-module-list   Display the modules compiled into the agent"
   echo ""
 fi  

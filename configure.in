@@ -7,6 +7,8 @@ dnl
 dnl save the configure arguments
 dnl
 AC_DEFINE_UNQUOTED(CONFIGURE_OPTIONS,"$ac_configure_args")
+CONFIGURE_OPTIONS="$ac_configure_args"
+AC_SUBST(CONFIGURE_OPTIONS)
 
 dnl
 dnl Compilation setup
@@ -1150,12 +1152,15 @@ module_list_c=`echo "$module_list_code " | sed 's/\([^ ]\) /\1.c /g'`
 mibgroup_list_o=`echo " $module_list_o " | sed 's@ \([^ ]*\)\.o@ mibgroup/\1.o @g'`
 mibgroup_list_lo=`echo " $module_list_lo " | sed 's@ \([^ ]*\)\.lo@ mibgroup/\1.lo @g'`
 changequote([, ])
+MODULE_LIST=$module_list_code
+AC_SUBST(MODULE_LIST)
 AC_SUBST(module_list_c)
 AC_SUBST(module_list_h)
 AC_SUBST(module_list_o)
 AC_SUBST(module_list_lo)
 AC_SUBST(mibgroup_list_o)
 AC_SUBST(mibgroup_list_lo)
+AC_SUBST(module_list)
 AC_SUBST(default_mibs_install)
 
 AC_MSG_RESULT(.)
