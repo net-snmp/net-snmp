@@ -321,6 +321,7 @@ agentx_add_request( struct agent_snmp_session *asp,
 
     ax_session = get_session_for_oid( vbp->name, vbp->name_length );
     sessid = ax_session->sessid;
+		/* WHat if this returns NULL ? */
     if ( ax_session->flags & SNMP_FLAGS_SUBSESSION )
 	ax_session = ax_session->subsession;
     request    = get_agentx_request( asp, ax_session, pdu->transid );
@@ -338,8 +339,8 @@ agentx_add_request( struct agent_snmp_session *asp,
     else {
 	sub = find_subtree_previous( vbp->name, vbp->name_length, NULL );
         snmp_pdu_add_variable( request->pdu,
-			   vbp->name, vbp->name_length, ASN_PRIV_INCL_RANGE,
-			   (u_char*)sub->name, sub->namelen);
+			   vbp->name, vbp->name_length, ASN_PRIV_EXCL_RANGE,
+			   (u_char*)sub->end, sub->end_len);
     }
 
     return AGENTX_ERR_NOERROR;
