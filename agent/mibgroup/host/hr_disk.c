@@ -150,6 +150,7 @@ void init_hr_disk(void)
 #endif
 #elif defined(solaris2)
     Add_HR_Disk_entry ( "/dev/rdsk/c0t%cd0s%c", '0', '6', '0', '0', '7' );
+    Add_HR_Disk_entry ( "/dev/rdsk/c0d%cs%c", '0', '3', '0', '0', '7' );
 #elif defined(freebsd3)
     Add_HR_Disk_entry ("/dev/wd0s%c%c", '1', '4', '\0', 'a', 'h');
     Add_HR_Disk_entry ("/dev/wd1s%c%c", '1', '4', '\0', 'a', 'h');
