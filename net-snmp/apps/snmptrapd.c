@@ -118,8 +118,11 @@ SOFTWARE.
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
 #include "snmpTCPDomain.h"
 #endif
+#include "ds_agent.h"
+#include "snmp_vars.h"
+#include "notification_log.h"
 
-#define DS_APP_NUMERIC_IP  1
+#define DS_APP_NUMERIC_IP  8 /* must not conflict with agent's booleans */
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -143,6 +146,7 @@ int Event = 0;
 int dropauth = 0;
 int running = 1;
 int reconfig = 0;
+u_long num_received = 0;
 
 const char *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a]): %N\n\t%W Trap (%q) Uptime: %#T\n%v\n",
 	   *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
@@ -194,7 +198,7 @@ struct timeval Now;
 
 void init_syslog(void);
 
-void update_config (void);
+void trapd_update_config (void);
 
 #ifdef WIN32
 void openlog(const char *app, int options, int fac) {
@@ -456,6 +460,8 @@ int snmp_input(int op,
 	    oid trapOid[MAX_OID_LEN];
 	    int trapOidLen = pdu->enterprise_length;
 
+            num_received++;
+            
 	    if (!ds_get_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP)) {
 	      host = gethostbyaddr((char *)pdu->agent_addr, 4, AF_INET);
 	    }
@@ -518,8 +524,10 @@ int snmp_input(int op,
             if (Command) {
 		do_external(Command, host, pdu, transport);
 	    }
+            log_notification(host, pdu, transport);
 	} else if (pdu->command == SNMP_MSG_TRAP2
 		   || pdu->command == SNMP_MSG_INFORM) {
+          num_received++;
 	  if(!ds_get_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP)) {
 	    /*  Right, apparently a name lookup is wanted.  This is only
 		reasonable for the UDP and TCP transport domains (we don't
@@ -617,6 +625,7 @@ int snmp_input(int op,
 		if (Command)
 		    do_external(Command, host, pdu, transport);
             }
+            log_notification(host, pdu, transport);
 	    if (pdu->command == SNMP_MSG_INFORM){
 		if (!(reply = snmp_clone_pdu2(pdu, SNMP_MSG_RESPONSE))){
 		    fprintf(stderr, "Couldn't clone PDU for response\n");
@@ -719,6 +728,7 @@ int main(int argc, char *argv[])
     char *cp;
     int tcp=0;
     char *trap1_fmt_str_remember = NULL;
+    int agentx_subagent = 1;
 #if HAVE_GETPID
 	FILE           *PID;
         char *pid_file = NULL;
@@ -899,6 +909,19 @@ int main(int argc, char *argv[])
 
     if (!Print) Syslog = 1;
 
+    /* we're an agentx subagent? */
+    if (agentx_subagent) {
+        /* make us a agentx client. */
+        ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, 1);
+    }
+
+    /* initialize the agent library */
+    init_agent("snmptrapd");
+
+    /* initialize local modules */
+    init_subagent();
+    init_notification_log();
+
     /* Initialize the world. Create initial user */
     init_snmp("snmptrapd");
     if (trap1_fmt_str_remember) {
@@ -1015,7 +1038,7 @@ int main(int argc, char *argv[])
 	    }
 	    if (Syslog)
 		syslog(LOG_INFO, "Snmptrapd reconfiguring");
-	    update_config();
+	    trapd_update_config();
             if (trap1_fmt_str_remember) {
                 free_trap1_fmt();
                 trap1_fmt_str = strdup(trap1_fmt_str_remember);
@@ -1088,7 +1111,7 @@ init_syslog(void)
  * trap deamon is running detatched from the console.
  *
  */
-void update_config(void)
+void trapd_update_config(void)
 {
     free_config();
     read_configs();

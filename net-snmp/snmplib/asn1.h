@@ -50,6 +50,9 @@ typedef u_char	oid;
 #define MAX_NAME_LEN	    MAX_OID_LEN   /* obsolete. use MAX_OID_LEN */
 #endif
 
+#define OID_LENGTH(x)  (sizeof(x)/sizeof(oid))
+
+
 #define ASN_BOOLEAN	    ((u_char)0x01)
 #define ASN_INTEGER	    ((u_char)0x02)
 #define ASN_BIT_STR	    ((u_char)0x03)
@@ -147,6 +150,7 @@ typedef struct counter64 unsigned64;
 #define ASN_PRIV_DELEGATED  (ASN_PRIVATE | 5)
 #define ASN_PRIV_IMPLIED_OCTET_STR  (ASN_PRIVATE | ASN_OCTET_STR)    /* 4 */
 #define ASN_PRIV_IMPLIED_OBJECT_ID  (ASN_PRIVATE | ASN_OBJECT_ID)    /* 6 */
+#define ASN_PRIV_RETRY      (ASN_PRIVATE | 7)
 #define IS_DELEGATED(x)   ((x) == ASN_PRIV_DELEGATED)
 
 

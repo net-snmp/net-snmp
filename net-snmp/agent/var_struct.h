@@ -15,6 +15,10 @@
 /* subtree flags */
 #define FULLY_QUALIFIED_INSTANCE    0x01 
 
+/* pre-defines for circular definitions */
+struct _handler_registration_data;
+typedef struct _handler_registration_data registration_data;
+
 struct subtree {
     oid			name[UCD_REGISTRY_OID_MAX_LEN];
 					/* objid prefix of registered subtree */
@@ -38,6 +42,8 @@ struct subtree {
     struct subtree      *children;	/* List of 'child' subtrees */
     int     range_subid;
     oid     range_ubound;
+    handler_registration *reginfo;       /* new API */
+    int                 cacheid;
 };
 
 /*

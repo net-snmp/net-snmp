@@ -1,6 +1,20 @@
 #ifndef AGENT_REGISTRY_H
 #define AGENT_REGISTRY_H
 
+/***********************************************************************/
+/* new version2 agent handler API structures */
+/***********************************************************************/
+
+#include "snmp_agent.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/***********************************************************************/
+/* requests api definitions */
+/***********************************************************************/
+
 /* the structure of parameters passed to registered ACM modules */
 struct view_parameters {
    struct snmp_pdu *pdu;
@@ -33,16 +47,20 @@ struct register_parameters {
 
 
 void setup_tree (void);
-struct subtree *find_subtree (oid *, size_t, struct subtree *);
-struct subtree *find_subtree_next (oid *, size_t, struct subtree *);
-struct subtree *find_subtree_previous (oid *, size_t, struct subtree *);
-struct snmp_session *get_session_for_oid( oid *, size_t);
+struct subtree *find_subtree (oid *, size_t, struct subtree *,
+                              const char *context_name);
+struct subtree *find_subtree_next (oid *, size_t, struct subtree *,
+                                   const char *context_name);
+struct subtree *find_subtree_previous (oid *, size_t, struct subtree *,
+                                       const char *context_name);
+struct snmp_session *get_session_for_oid( oid *, size_t,
+                                          const char *context_name);
 
 int register_mib(const char *, struct variable *, size_t, size_t, oid *, size_t);
 int register_mib_priority(const char *, struct variable *, size_t, size_t, oid *, size_t, int);
 int register_mib_range(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, struct snmp_session *);
 int register_mib_context(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, struct snmp_session *, const char*, int, int);
-
+/* int register_mib_context2(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, struct snmp_session *, const char*, int, int, handler_registration *); */
 int register_mib_table_row(const char *, struct variable *, size_t, size_t, oid *, size_t, int, int, struct snmp_session *, const char *, int, int);
 int unregister_mib (oid *, size_t);
 int unregister_mib_priority (oid *, size_t, int);
@@ -111,5 +129,20 @@ extern void (* external_signal_handler[NUM_EXTERNAL_SIGS])(int);
 
 int register_signal(int, void (*func)(int));
 int unregister_signal(int);
+
+/* translates a context name into a subtree structure pointer */
+
+typedef struct subtree_context_cache_s {
+   char *context_name;
+   struct subtree *first_subtree;
+   struct subtree_context_cache_s *next;
+} subtree_context_cache;
+
+struct subtree *find_first_subtree(const char *context_name);
+subtree_context_cache *get_top_context_cache(void);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif /* AGENT_REGISTRY_H */

@@ -200,6 +200,8 @@ struct snmp_internal_session {
     int (*hook_build)(struct snmp_session *, struct snmp_pdu *,
 		      u_char *, size_t *);
     int (*check_packet) (u_char *, size_t);
+   struct snmp_pdu * (*hook_create_pdu)  (snmp_transport *,
+                             void *, size_t);
 
     u_char *packet;
     size_t packet_len, packet_size;
@@ -1170,6 +1172,9 @@ _sess_open(struct snmp_session *in_session)
 	       "No support for requested IPX domain session (\"%s\")\n",
 	       session->peername);
 #endif
+    } else if (session->peername && session->peername[0] == ':') {
+        slp->transport =
+            snmp_callback_transport((struct snmp_session *)session->community);
     } else {
       struct sockaddr_in addr;
 
@@ -1236,7 +1241,33 @@ int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int))
   struct session_list *slp;
   slp = (struct session_list *)snmp_sess_add_ex(in_session, transport,
 						fpre_parse, NULL, fpost_parse,
-						NULL, NULL);
+						NULL, NULL, NULL);
+  if (slp == NULL) {
+    return NULL;
+  }
+
+  snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
+  slp->next = Sessions;
+  Sessions = slp;
+  snmp_res_unlock(MT_LIBRARY_ID, MT_LIB_SESSION);
+
+  return (slp->session);
+}
+
+struct snmp_session *snmp_add_full(
+struct snmp_session *in_session,
+snmp_transport *transport,
+int (*fpre_parse) (struct snmp_session *, snmp_transport *, void *, int),
+int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
+int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
+int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *),
+int (*fcheck) (u_char *, size_t),
+struct snmp_pdu * (*fcreate_pdu) (snmp_transport *, void *, size_t))
+{	
+  struct session_list *slp;
+  slp = (struct session_list *)snmp_sess_add_ex(in_session, transport,
+						fpre_parse, fparse, fpost_parse,
+						fbuild, fcheck, fcreate_pdu);
   if (slp == NULL) {
     return NULL;
   }
@@ -1258,7 +1289,8 @@ int (*fpre_parse) (struct snmp_session *, snmp_transport *, void *, int),
 int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
 int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
 int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *),
-int (*fcheck) (u_char *, size_t))
+int (*fcheck) (u_char *, size_t),
+struct snmp_pdu * (*fcreate_pdu) (snmp_transport *, void *, size_t))
 {	
   struct session_list *slp;
 
@@ -1282,6 +1314,7 @@ int (*fcheck) (u_char *, size_t))
   slp->internal->hook_post    = fpost_parse;
   slp->internal->hook_build   = fbuild;
   slp->internal->check_packet = fcheck;
+  slp->internal->hook_create_pdu = fcreate_pdu;
 
   slp->session->rcvMsgMaxSize = transport->msgMaxSize;
 
@@ -1306,7 +1339,7 @@ int (*fpre_parse) (struct snmp_session *, snmp_transport *, void *, int),
 int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int))
 {	
   return snmp_sess_add_ex(in_session, transport, fpre_parse, NULL,
-			  fpost_parse, NULL, NULL);
+			  fpost_parse, NULL, NULL, NULL);
 }
 
 
@@ -4144,6 +4177,27 @@ snmp_free_pdu(struct snmp_pdu *pdu)
     free((char *)pdu);
 }
 
+struct snmp_pdu *
+snmp_create_sess_pdu(snmp_transport *transport, void *opaque, size_t olength) 
+{
+    struct snmp_pdu *pdu;
+    pdu = (struct snmp_pdu *)calloc(1,sizeof(struct snmp_pdu));
+    if (pdu == NULL) {
+        DEBUGMSGTL(("sess_process_packet", "can't malloc space for PDU\n"));
+        return NULL;
+    }
+
+    /*  Save the transport-level data specific to this reception (e.g. UDP
+      source address).  */
+
+    pdu->transport_data        = opaque;
+    pdu->transport_data_length = olength;
+    pdu->tDomain		     = transport->domain;
+    pdu->tDomainLen	     = transport->domain_length;
+    return pdu;
+}
+
+
 /*  This function processes a complete (according to asn_check_packet or the
     AgentX equivalent) packet, parsing it into a PDU and calling the relevant
     callbacks.  On entry, packetptr points at the packet in the session's
@@ -4188,19 +4242,15 @@ _sess_process_packet(void *sessp, struct snmp_session *sp,
     }
   }
 
-  pdu = (struct snmp_pdu *)calloc(1,sizeof(struct snmp_pdu));
-  if (pdu == NULL) {
-    DEBUGMSGTL(("sess_process_packet", "can't malloc space for PDU\n"));
-    return -1;
+  if (isp->hook_create_pdu) {
+      pdu = isp->hook_create_pdu(transport, opaque, olength);
+  } else {
+      pdu = snmp_create_sess_pdu(transport, opaque, olength);
   }
-
-  /*  Save the transport-level data specific to this reception (e.g. UDP
-      source address).  */
-
-  pdu->transport_data        = opaque;
-  pdu->transport_data_length = olength;
-  pdu->tDomain		     = transport->domain;
-  pdu->tDomainLen	     = transport->domain_length;
+  if (!pdu) {
+      snmp_log(LOG_ERR, "pdu failed to be created\n");
+      return -1;
+  }
 
   if (isp->hook_parse) {
     ret = isp->hook_parse(sp, pdu, packetptr, length);
@@ -4451,7 +4501,8 @@ _sess_read(void *sessp, fd_set *fdset)
 	nslp = (struct session_list *)snmp_sess_add_ex(sp, new_transport,
 				isp->hook_pre,
 				isp->hook_parse, isp->hook_post,
-				isp->hook_build, isp->check_packet);
+				isp->hook_build, isp->check_packet,
+                                isp->hook_create_pdu);
 
 	if (nslp != NULL) {
 	  nslp->next = Sessions;
@@ -5050,6 +5101,12 @@ snmp_sess_timeout(void *sessp)
         free((char *)freeme);
         freeme = NULL;
     }
+}
+
+int
+snmp_oid_ncompare(const oid *in_name1, const oid*in_name2, int len)
+{
+    return snmp_oid_compare(in_name1, len, in_name2, len);
 }
 
 /* lexicographical compare two object identifiers.

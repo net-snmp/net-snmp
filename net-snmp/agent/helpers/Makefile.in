@@ -1,0 +1,93 @@
+top_builddir=../..
+
+CPPFLAGS=-I. -I.. -I../.. -I$(srcdir) -I$(srcdir)/.. -I$(srcdir)/../mibgroup \
+	-I$(srcdir)/../.. -I$(srcdir)/../../snmplib @CPPFLAGS@ $(LIB_CFLAGS)
+
+OBJS =  all_helpers.o \
+	multiplexer.o \
+	read_only.o \
+	instance.o \
+	null.o \
+	old_api.o \
+	serialize.o \
+	table_array.o \
+	table_iterator.o \
+	table_data.o \
+	table_dataset.o \
+	table.o
+
+LOBJS = all_helpers.lo \
+	multiplexer.lo \
+	read_only.lo \
+	instance.lo \
+	null.lo \
+	old_api.lo \
+	serialize.lo \
+	table_array.lo \
+	table_iterator.lo \
+	table_data.lo \
+	table_dataset.lo \
+	table.lo
+
+SRCS =  all_helpers.c \
+	multiplexer.c \
+	read_only.c \
+	instance.c \
+	null.c \
+	old_api.c \
+	serialize.c \
+	table_array.c \
+	table_iterator.c \
+	table_data.c \
+	table_dataset.c \
+	table.c
+
+INSTALLHEADERS=all_helpers.h \
+	instance.h \
+        multiplexer.h \
+        null.h \
+        old_api.h \
+        read_only.h \
+        serialize.h \
+        set_helper.h \
+        table_data.h \
+        table_dataset.h \
+		table_array.h \
+        table.h \
+        table_iterator.h
+
+LIBTARG=libhelpers.$(LIB_EXTENSION)$(LIB_VERSION)
+
+all: $(LIBTARG)
+
+libhelpers.$(LIB_EXTENSION)$(LIB_VERSION):    ${LOBJS}
+	$(LIB_LD_CMD) libhelpers.$(LIB_EXTENSION)$(LIB_VERSION) ${LOBJS}  $(LIB_LD_LIBS)
+	$(RANLIB) libhelpers.$(LIB_EXTENSION)$(LIB_VERSION)
+
+install: installdirs
+	@$(INSTALL) $(INSTALLHEADERS) $(includedir) 
+	@for i in $(INSTALLHEADERS) ; do echo "install:  installed $$i in $(includedir)" ; done
+	@$(INSTALL) $(LIBTARG) $(libdir)
+	@for i in $(LIBTARG) ; do $(RANLIB) $(libdir)/$$i ; echo "install:  installed $$i in $(libdir)" ; done
+	$(LIB_LDCONFIG_CMD)
+
+installdirs:
+	@$(SHELL) $(top_srcdir)/mkinstalldirs $(snmplibdir) $(includedir)
+
+clean:
+	rm -f ${LOBJS} ${OBJS}
+	rm -rf .libs */.libs
+
+depend: 
+	makedepend $(CPPFLAGS) -o.lo $(SRCS)
+
+nosysdepend:
+	makedepend $(CPPFLAGS) -o.lo $(SRCS)
+	perl -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile
+
+makefileindepend: nosysdepend
+	perl $(top_srcdir)/makefileindepend.pl
+
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

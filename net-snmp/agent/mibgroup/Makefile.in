@@ -34,865 +34,362 @@ makefileindepend: nosysdepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-ucd-snmp/proxy.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/proxy.lo: ../../s/generic.h ../../m/generic.h mibincl.h
-ucd-snmp/proxy.lo:  ../../mib_module_config.h
-ucd-snmp/proxy.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-ucd-snmp/proxy.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-ucd-snmp/proxy.lo: ./../agent_registry.h ./../agent_read_config.h
-ucd-snmp/proxy.lo: ./../var_struct.h ./../../snmplib/snmp.h
-ucd-snmp/proxy.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-ucd-snmp/proxy.lo: ./../../snmplib/snmp_logging.h 
-ucd-snmp/proxy.lo:  ./../../snmplib/read_config.h
-ucd-snmp/proxy.lo: ./../../snmplib/tools.h ./../agent_trap.h
-ucd-snmp/proxy.lo: ./../../snmplib/callback.h ucd-snmp/proxy.h
-ucd-snmp/proxy.lo: ./../../snmplib/snmp_client.h
-ucd-snmp/proxy.lo: ./../../snmplib/snmp_parse_args.h ./../../snmplib/system.h
-mibII/mta_sendmail.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-mibII/mta_sendmail.lo: ../../s/generic.h ../../m/generic.h mibincl.h
-mibII/mta_sendmail.lo:  ../../mib_module_config.h
-mibII/mta_sendmail.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-mibII/mta_sendmail.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-mibII/mta_sendmail.lo: ./../agent_registry.h ./../agent_read_config.h
-mibII/mta_sendmail.lo: ./../var_struct.h ./../../snmplib/snmp.h
-mibII/mta_sendmail.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-mibII/mta_sendmail.lo: ./../../snmplib/snmp_logging.h 
-mibII/mta_sendmail.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-mibII/mta_sendmail.lo: ./../agent_trap.h ./../../snmplib/callback.h
-mibII/mta_sendmail.lo: mibII/mta_sendmail.h 
-mibII/mta_sendmail.lo:  ./../../snmplib/getopt.h
-mibII/system_mib.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-mibII/system_mib.lo: ../../s/generic.h ../../m/generic.h
-mibII/system_mib.lo:  ./../../snmplib/getopt.h
-mibII/system_mib.lo:  mibincl.h
-mibII/system_mib.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-mibII/system_mib.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-mibII/system_mib.lo: ./../snmp_vars.h ./../agent_registry.h
-mibII/system_mib.lo: ./../agent_read_config.h ./../var_struct.h
-mibII/system_mib.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-mibII/system_mib.lo: ./../../snmplib/snmp_debug.h
-mibII/system_mib.lo: ./../../snmplib/snmp_logging.h 
-mibII/system_mib.lo:  ./../../snmplib/read_config.h
-mibII/system_mib.lo: ./../../snmplib/tools.h ./../agent_trap.h
-mibII/system_mib.lo: ./../../snmplib/callback.h util_funcs.h struct.h
-mibII/system_mib.lo: mibII/system_mib.h ./../../snmplib/system.h
-mibII/system_mib.lo: mibII/sysORTable.h
-mibII/sysORTable.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-mibII/sysORTable.lo: ../../s/generic.h ../../m/generic.h
-mibII/sysORTable.lo:  mibincl.h 
-mibII/sysORTable.lo:  ../../mib_module_config.h
-mibII/sysORTable.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-mibII/sysORTable.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-mibII/sysORTable.lo: ./../agent_registry.h ./../agent_read_config.h
-mibII/sysORTable.lo: ./../var_struct.h ./../../snmplib/snmp.h
-mibII/sysORTable.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-mibII/sysORTable.lo: ./../../snmplib/snmp_logging.h 
-mibII/sysORTable.lo:  ./../../snmplib/read_config.h
-mibII/sysORTable.lo: ./../../snmplib/tools.h ./../agent_trap.h
-mibII/sysORTable.lo: ./../../snmplib/callback.h ./../../snmplib/system.h
-mibII/sysORTable.lo: struct.h util_funcs.h struct.h mibII/sysORTable.h
-mibII/sysORTable.lo: ../snmpd.h ./../../snmplib/default_store.h
-mibII/sysORTable.lo: ./../ds_agent.h ./../agent_callbacks.h agentx/subagent.h
-mibII/sysORTable.lo: agentx/client.h
-mibII/at.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
-mibII/at.lo: ../../m/generic.h  
-mibII/at.lo:   mibincl.h
-mibII/at.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-mibII/at.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-mibII/at.lo: ./../snmp_vars.h ./../agent_registry.h ./../agent_read_config.h
-mibII/at.lo: ./../var_struct.h ./../../snmplib/snmp.h ./../../snmplib/mib.h
-mibII/at.lo: ./../../snmplib/snmp_debug.h ./../../snmplib/snmp_logging.h
-mibII/at.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-mibII/at.lo: ./../agent_trap.h ./../../snmplib/callback.h mibII/at.h
-mibII/at.lo: mibII/interfaces.h ./../auto_nlist.h ./../../snmplib/system.h
-mibII/interfaces.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-mibII/interfaces.lo: ../../s/generic.h ../../m/generic.h
-mibII/interfaces.lo:  ./../../snmplib/getopt.h
-mibII/interfaces.lo: mibincl.h 
-mibII/interfaces.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-mibII/interfaces.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-mibII/interfaces.lo: ./../snmp_vars.h ./../agent_registry.h
-mibII/interfaces.lo: ./../agent_read_config.h ./../var_struct.h
-mibII/interfaces.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-mibII/interfaces.lo: ./../../snmplib/snmp_debug.h
-mibII/interfaces.lo: ./../../snmplib/snmp_logging.h 
-mibII/interfaces.lo:  ./../../snmplib/read_config.h
-mibII/interfaces.lo: ./../../snmplib/tools.h ./../agent_trap.h
-mibII/interfaces.lo: ./../../snmplib/callback.h ./../kernel.h
-mibII/interfaces.lo:  ./../../snmplib/system.h
-mibII/interfaces.lo: mibII/interfaces.h struct.h util_funcs.h struct.h
-mibII/interfaces.lo: ./../auto_nlist.h mibII/sysORTable.h
-mibII/snmp_mib.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-mibII/snmp_mib.lo: ../../s/generic.h ../../m/generic.h
-mibII/snmp_mib.lo:  mibincl.h
-mibII/snmp_mib.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-mibII/snmp_mib.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-mibII/snmp_mib.lo: ./../snmp_vars.h ./../agent_registry.h
-mibII/snmp_mib.lo: ./../agent_read_config.h ./../var_struct.h
-mibII/snmp_mib.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-mibII/snmp_mib.lo: ./../../snmplib/snmp_debug.h
-mibII/snmp_mib.lo: ./../../snmplib/snmp_logging.h 
-mibII/snmp_mib.lo:  ./../../snmplib/read_config.h
-mibII/snmp_mib.lo: ./../../snmplib/tools.h ./../agent_trap.h
-mibII/snmp_mib.lo: ./../../snmplib/callback.h ./../../snmplib/system.h
-mibII/snmp_mib.lo: util_funcs.h struct.h mibII/snmp_mib.h mibII/sysORTable.h
-mibII/tcp.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
-mibII/tcp.lo: ../../m/generic.h mibincl.h 
-mibII/tcp.lo:  ../../mib_module_config.h
-mibII/tcp.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-mibII/tcp.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-mibII/tcp.lo: ./../agent_registry.h ./../agent_read_config.h
-mibII/tcp.lo: ./../var_struct.h ./../../snmplib/snmp.h ./../../snmplib/mib.h
-mibII/tcp.lo: ./../../snmplib/snmp_debug.h ./../../snmplib/snmp_logging.h
-mibII/tcp.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-mibII/tcp.lo: ./../agent_trap.h ./../../snmplib/callback.h util_funcs.h
-mibII/tcp.lo: struct.h  
-mibII/tcp.lo:  ./../../snmplib/getopt.h
-mibII/tcp.lo:  ./../kernel.h ./../../snmplib/system.h
-mibII/tcp.lo:  ./../auto_nlist.h mibII/tcp.h
-mibII/tcp.lo: mibII/tcpTable.h mibII/sysORTable.h
-mibII/icmp.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-mibII/icmp.lo: ../../s/generic.h ../../m/generic.h mibincl.h
-mibII/icmp.lo:  ../../mib_module_config.h
-mibII/icmp.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-mibII/icmp.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-mibII/icmp.lo: ./../agent_registry.h ./../agent_read_config.h
-mibII/icmp.lo: ./../var_struct.h ./../../snmplib/snmp.h ./../../snmplib/mib.h
-mibII/icmp.lo: ./../../snmplib/snmp_debug.h ./../../snmplib/snmp_logging.h
-mibII/icmp.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-mibII/icmp.lo: ./../agent_trap.h ./../../snmplib/callback.h util_funcs.h
-mibII/icmp.lo: struct.h  
-mibII/icmp.lo: ./../../snmplib/system.h ./../auto_nlist.h mibII/icmp.h
-mibII/icmp.lo: mibII/sysORTable.h
-mibII/ip.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
-mibII/ip.lo: ../../m/generic.h mibincl.h 
-mibII/ip.lo:  ../../mib_module_config.h
-mibII/ip.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-mibII/ip.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-mibII/ip.lo: ./../agent_registry.h ./../agent_read_config.h ./../var_struct.h
-mibII/ip.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-mibII/ip.lo: ./../../snmplib/snmp_debug.h ./../../snmplib/snmp_logging.h
-mibII/ip.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-mibII/ip.lo: ./../agent_trap.h ./../../snmplib/callback.h util_funcs.h
-mibII/ip.lo: struct.h  
-mibII/ip.lo:   ./../kernel.h
-mibII/ip.lo: ./../../snmplib/system.h ./../auto_nlist.h mibII/ip.h
-mibII/ip.lo: mibII/var_route.h mibII/route_write.h mibII/at.h mibII/ipAddr.h
-mibII/ip.lo: mibII/interfaces.h mibII/sysORTable.h
-mibII/udp.lo: ../../config.h ../../s/linux.h ../../s/sysv.h ../../s/generic.h
-mibII/udp.lo: ../../m/generic.h mibincl.h 
-mibII/udp.lo:  ../../mib_module_config.h
-mibII/udp.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-mibII/udp.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-mibII/udp.lo: ./../agent_registry.h ./../agent_read_config.h
-mibII/udp.lo: ./../var_struct.h ./../../snmplib/snmp.h ./../../snmplib/mib.h
-mibII/udp.lo: ./../../snmplib/snmp_debug.h ./../../snmplib/snmp_logging.h
-mibII/udp.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-mibII/udp.lo: ./../agent_trap.h ./../../snmplib/callback.h util_funcs.h
-mibII/udp.lo: struct.h  
-mibII/udp.lo: ./../kernel.h ./../../snmplib/system.h ./../auto_nlist.h
-mibII/udp.lo: mibII/udp.h mibII/udpTable.h mibII/sysORTable.h
-mibII/vacm_vars.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-mibII/vacm_vars.lo: ../../s/generic.h ../../m/generic.h 
-mibII/vacm_vars.lo:  ./../../snmplib/getopt.h
-mibII/vacm_vars.lo:  ./../../snmplib/snmp-tc.h
-mibII/vacm_vars.lo: mibincl.h 
-mibII/vacm_vars.lo:  ../../mib_module_config.h
-mibII/vacm_vars.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-mibII/vacm_vars.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-mibII/vacm_vars.lo: ./../agent_registry.h ./../agent_read_config.h
-mibII/vacm_vars.lo: ./../var_struct.h ./../../snmplib/snmp.h
-mibII/vacm_vars.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-mibII/vacm_vars.lo: ./../../snmplib/snmp_logging.h 
-mibII/vacm_vars.lo:  ./../../snmplib/read_config.h
-mibII/vacm_vars.lo: ./../../snmplib/tools.h ./../agent_trap.h
-mibII/vacm_vars.lo: ./../../snmplib/callback.h ./../../snmplib/system.h
-mibII/vacm_vars.lo: ./../../snmplib/vacm.h ./../agent_callbacks.h
-mibII/vacm_vars.lo: mibII/vacm_vars.h util_funcs.h struct.h
-mibII/vacm_vars.lo: mibII/sysORTable.h
-ucd-snmp/memory.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/memory.lo: ../../s/generic.h ../../m/generic.h 
-ucd-snmp/memory.lo:  ./../../snmplib/getopt.h
-ucd-snmp/memory.lo:  mibincl.h 
-ucd-snmp/memory.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-ucd-snmp/memory.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-ucd-snmp/memory.lo: ./../snmp_vars.h ./../agent_registry.h
-ucd-snmp/memory.lo: ./../agent_read_config.h ./../var_struct.h
-ucd-snmp/memory.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-ucd-snmp/memory.lo: ./../../snmplib/snmp_debug.h
-ucd-snmp/memory.lo: ./../../snmplib/snmp_logging.h 
-ucd-snmp/memory.lo:  ./../../snmplib/read_config.h
-ucd-snmp/memory.lo: ./../../snmplib/tools.h ./../agent_trap.h
-ucd-snmp/memory.lo: ./../../snmplib/callback.h mibdefs.h struct.h
-ucd-snmp/memory.lo: util_funcs.h ucd-snmp/memory.h ./../auto_nlist.h
-ucd-snmp/vmstat.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/vmstat.lo: ../../s/generic.h ../../m/generic.h 
-ucd-snmp/vmstat.lo:  ./../../snmplib/getopt.h
-ucd-snmp/vmstat.lo:  mibincl.h 
-ucd-snmp/vmstat.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-ucd-snmp/vmstat.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-ucd-snmp/vmstat.lo: ./../snmp_vars.h ./../agent_registry.h
-ucd-snmp/vmstat.lo: ./../agent_read_config.h ./../var_struct.h
-ucd-snmp/vmstat.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-ucd-snmp/vmstat.lo: ./../../snmplib/snmp_debug.h
-ucd-snmp/vmstat.lo: ./../../snmplib/snmp_logging.h 
-ucd-snmp/vmstat.lo:  ./../../snmplib/read_config.h
-ucd-snmp/vmstat.lo: ./../../snmplib/tools.h ./../agent_trap.h
-ucd-snmp/vmstat.lo: ./../../snmplib/callback.h mibdefs.h struct.h
-ucd-snmp/vmstat.lo: util_funcs.h ucd-snmp/vmstat.h ./../auto_nlist.h
-ucd-snmp/proc.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/proc.lo: ../../s/generic.h ../../m/generic.h 
-ucd-snmp/proc.lo:  ./../../snmplib/getopt.h
-ucd-snmp/proc.lo:  mibincl.h 
-ucd-snmp/proc.lo:  ../../mib_module_config.h
-ucd-snmp/proc.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-ucd-snmp/proc.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-ucd-snmp/proc.lo: ./../agent_registry.h ./../agent_read_config.h
-ucd-snmp/proc.lo: ./../var_struct.h ./../../snmplib/snmp.h
-ucd-snmp/proc.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-ucd-snmp/proc.lo: ./../../snmplib/snmp_logging.h 
-ucd-snmp/proc.lo:  ./../../snmplib/read_config.h
-ucd-snmp/proc.lo: ./../../snmplib/tools.h ./../agent_trap.h
-ucd-snmp/proc.lo: ./../../snmplib/callback.h struct.h ucd-snmp/proc.h
-ucd-snmp/proc.lo: mibdefs.h ucd-snmp/errormib.h util_funcs.h
-ucd-snmp/proc.lo: ./../../snmplib/system.h ./../kernel.h
-ucd-snmp/versioninfo.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/versioninfo.lo: ../../s/generic.h ../../m/generic.h
-ucd-snmp/versioninfo.lo: mibincl.h 
-ucd-snmp/versioninfo.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-ucd-snmp/versioninfo.lo: ./../../snmplib/snmp_api.h
-ucd-snmp/versioninfo.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-ucd-snmp/versioninfo.lo: ./../agent_registry.h ./../agent_read_config.h
-ucd-snmp/versioninfo.lo: ./../var_struct.h ./../../snmplib/snmp.h
-ucd-snmp/versioninfo.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-ucd-snmp/versioninfo.lo: ./../../snmplib/snmp_logging.h 
-ucd-snmp/versioninfo.lo: ./../../snmplib/read_config.h
-ucd-snmp/versioninfo.lo: ./../../snmplib/tools.h ./../agent_trap.h
-ucd-snmp/versioninfo.lo: ./../../snmplib/callback.h struct.h
-ucd-snmp/versioninfo.lo: ucd-snmp/versioninfo.h mibdefs.h util_funcs.h
-ucd-snmp/versioninfo.lo: ./../../snmplib/system.h ../../version.h
-ucd-snmp/pass.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/pass.lo: ../../s/generic.h ../../m/generic.h 
-ucd-snmp/pass.lo:  ./../../snmplib/getopt.h
-ucd-snmp/pass.lo: mibincl.h  
-ucd-snmp/pass.lo:  ../../mib_module_config.h
-ucd-snmp/pass.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-ucd-snmp/pass.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-ucd-snmp/pass.lo: ./../agent_registry.h ./../agent_read_config.h
-ucd-snmp/pass.lo: ./../var_struct.h ./../../snmplib/snmp.h
-ucd-snmp/pass.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-ucd-snmp/pass.lo: ./../../snmplib/snmp_logging.h 
-ucd-snmp/pass.lo:  ./../../snmplib/read_config.h
-ucd-snmp/pass.lo: ./../../snmplib/tools.h ./../agent_trap.h
-ucd-snmp/pass.lo: ./../../snmplib/callback.h struct.h ucd-snmp/pass.h
-ucd-snmp/pass.lo: mibdefs.h ucd-snmp/extensible.h util_funcs.h
-ucd-snmp/pass.lo: ./../../snmplib/system.h
-ucd-snmp/pass_persist.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/pass_persist.lo: ../../s/generic.h ../../m/generic.h
-ucd-snmp/pass_persist.lo: ./../../snmplib/getopt.h 
-ucd-snmp/pass_persist.lo: mibincl.h 
-ucd-snmp/pass_persist.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-ucd-snmp/pass_persist.lo: ./../../snmplib/snmp_api.h
-ucd-snmp/pass_persist.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-ucd-snmp/pass_persist.lo: ./../agent_registry.h ./../agent_read_config.h
-ucd-snmp/pass_persist.lo: ./../var_struct.h ./../../snmplib/snmp.h
-ucd-snmp/pass_persist.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-ucd-snmp/pass_persist.lo: ./../../snmplib/snmp_logging.h
-ucd-snmp/pass_persist.lo: ./../../snmplib/read_config.h
-ucd-snmp/pass_persist.lo: ./../../snmplib/tools.h ./../agent_trap.h
-ucd-snmp/pass_persist.lo: ./../../snmplib/callback.h struct.h
-ucd-snmp/pass_persist.lo: ucd-snmp/pass_persist.h mibdefs.h
-ucd-snmp/pass_persist.lo: ucd-snmp/extensible.h util_funcs.h
-ucd-snmp/pass_persist.lo: ./../../snmplib/system.h
-ucd-snmp/disk.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/disk.lo: ../../s/generic.h ../../m/generic.h 
-ucd-snmp/disk.lo:  ./../../snmplib/getopt.h
-ucd-snmp/disk.lo:   mibincl.h
-ucd-snmp/disk.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-ucd-snmp/disk.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-ucd-snmp/disk.lo: ./../snmp_vars.h ./../agent_registry.h
-ucd-snmp/disk.lo: ./../agent_read_config.h ./../var_struct.h
-ucd-snmp/disk.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-ucd-snmp/disk.lo: ./../../snmplib/snmp_debug.h ./../../snmplib/snmp_logging.h
-ucd-snmp/disk.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-ucd-snmp/disk.lo: ./../agent_trap.h ./../../snmplib/callback.h struct.h
-ucd-snmp/disk.lo: ucd-snmp/disk.h mibdefs.h util_funcs.h ./../auto_nlist.h
-ucd-snmp/disk.lo: ucd-snmp/errormib.h ./../../snmplib/system.h
-ucd-snmp/loadave.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/loadave.lo: ../../s/generic.h ../../m/generic.h
-ucd-snmp/loadave.lo:  ./../../snmplib/getopt.h
-ucd-snmp/loadave.lo: mibincl.h 
-ucd-snmp/loadave.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-ucd-snmp/loadave.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-ucd-snmp/loadave.lo: ./../snmp_vars.h ./../agent_registry.h
-ucd-snmp/loadave.lo: ./../agent_read_config.h ./../var_struct.h
-ucd-snmp/loadave.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-ucd-snmp/loadave.lo: ./../../snmplib/snmp_debug.h
-ucd-snmp/loadave.lo: ./../../snmplib/snmp_logging.h 
-ucd-snmp/loadave.lo:  ./../../snmplib/read_config.h
-ucd-snmp/loadave.lo: ./../../snmplib/tools.h ./../agent_trap.h
-ucd-snmp/loadave.lo: ./../../snmplib/callback.h struct.h ucd-snmp/loadave.h
-ucd-snmp/loadave.lo: mibdefs.h util_funcs.h ../kernel.h ./../auto_nlist.h
-ucd-snmp/extensible.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/extensible.lo: ../../s/generic.h ../../m/generic.h
-ucd-snmp/extensible.lo:  ./../../snmplib/getopt.h
-ucd-snmp/extensible.lo:  mibincl.h 
-ucd-snmp/extensible.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-ucd-snmp/extensible.lo: ./../../snmplib/snmp_api.h
-ucd-snmp/extensible.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-ucd-snmp/extensible.lo: ./../agent_registry.h ./../agent_read_config.h
-ucd-snmp/extensible.lo: ./../var_struct.h ./../../snmplib/snmp.h
-ucd-snmp/extensible.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-ucd-snmp/extensible.lo: ./../../snmplib/snmp_logging.h 
-ucd-snmp/extensible.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-ucd-snmp/extensible.lo: ./../agent_trap.h ./../../snmplib/callback.h struct.h
-ucd-snmp/extensible.lo: ucd-snmp/extensible.h mibdefs.h util_funcs.h
-ucd-snmp/extensible.lo: ./../auto_nlist.h
-ucd-snmp/errormib.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/errormib.lo: ../../s/generic.h ../../m/generic.h
-ucd-snmp/errormib.lo:  ./../../snmplib/getopt.h
-ucd-snmp/errormib.lo:   mibincl.h
-ucd-snmp/errormib.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-ucd-snmp/errormib.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-ucd-snmp/errormib.lo: ./../snmp_vars.h ./../agent_registry.h
-ucd-snmp/errormib.lo: ./../agent_read_config.h ./../var_struct.h
-ucd-snmp/errormib.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-ucd-snmp/errormib.lo: ./../../snmplib/snmp_debug.h
-ucd-snmp/errormib.lo: ./../../snmplib/snmp_logging.h 
-ucd-snmp/errormib.lo:  ./../../snmplib/read_config.h
-ucd-snmp/errormib.lo: ./../../snmplib/tools.h ./../agent_trap.h
-ucd-snmp/errormib.lo: ./../../snmplib/callback.h struct.h ucd-snmp/errormib.h
-ucd-snmp/errormib.lo: mibdefs.h util_funcs.h ./../auto_nlist.h
-ucd-snmp/registry.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/registry.lo: ../../s/generic.h ../../m/generic.h
-ucd-snmp/registry.lo:  mibincl.h
-ucd-snmp/registry.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-ucd-snmp/registry.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-ucd-snmp/registry.lo: ./../snmp_vars.h ./../agent_registry.h
-ucd-snmp/registry.lo: ./../agent_read_config.h ./../var_struct.h
-ucd-snmp/registry.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-ucd-snmp/registry.lo: ./../../snmplib/snmp_debug.h
-ucd-snmp/registry.lo: ./../../snmplib/snmp_logging.h 
-ucd-snmp/registry.lo:  ./../../snmplib/read_config.h
-ucd-snmp/registry.lo: ./../../snmplib/tools.h ./../agent_trap.h
-ucd-snmp/registry.lo: ./../../snmplib/callback.h ucd-snmp/registry.h
-ucd-snmp/registry.lo: ./../../snmplib/system.h
-ucd-snmp/file.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/file.lo: ../../s/generic.h ../../m/generic.h
-ucd-snmp/file.lo:  mibincl.h 
-ucd-snmp/file.lo:  ../../mib_module_config.h
-ucd-snmp/file.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-ucd-snmp/file.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-ucd-snmp/file.lo: ./../agent_registry.h ./../agent_read_config.h
-ucd-snmp/file.lo: ./../var_struct.h ./../../snmplib/snmp.h
-ucd-snmp/file.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-ucd-snmp/file.lo: ./../../snmplib/snmp_logging.h 
-ucd-snmp/file.lo:  ./../../snmplib/read_config.h
-ucd-snmp/file.lo: ./../../snmplib/tools.h ./../agent_trap.h
-ucd-snmp/file.lo: ./../../snmplib/callback.h struct.h util_funcs.h
-ucd-snmp/file.lo: ucd-snmp/file.h mibdefs.h util_funcs.h
-ucd-snmp/dlmod.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-ucd-snmp/dlmod.lo: ../../s/generic.h ../../m/generic.h 
-ucd-snmp/dlmod.lo:  ./../../snmplib/getopt.h
-ucd-snmp/dlmod.lo:  mibincl.h 
-ucd-snmp/dlmod.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-ucd-snmp/dlmod.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-ucd-snmp/dlmod.lo: ./../snmp_vars.h ./../agent_registry.h
-ucd-snmp/dlmod.lo: ./../agent_read_config.h ./../var_struct.h
-ucd-snmp/dlmod.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-ucd-snmp/dlmod.lo: ./../../snmplib/snmp_debug.h
-ucd-snmp/dlmod.lo: ./../../snmplib/snmp_logging.h 
-ucd-snmp/dlmod.lo:  ./../../snmplib/read_config.h
-ucd-snmp/dlmod.lo: ./../../snmplib/tools.h ./../agent_trap.h
-ucd-snmp/dlmod.lo: ./../../snmplib/callback.h struct.h util_funcs.h
-ucd-snmp/dlmod.lo: ucd-snmp/dlmod.h
-snmpv3/snmpEngine.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-snmpv3/snmpEngine.lo: ../../s/generic.h ../../m/generic.h mibincl.h
-snmpv3/snmpEngine.lo:  ../../mib_module_config.h
-snmpv3/snmpEngine.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-snmpv3/snmpEngine.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-snmpv3/snmpEngine.lo: ./../agent_registry.h ./../agent_read_config.h
-snmpv3/snmpEngine.lo: ./../var_struct.h ./../../snmplib/snmp.h
-snmpv3/snmpEngine.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-snmpv3/snmpEngine.lo: ./../../snmplib/snmp_logging.h 
-snmpv3/snmpEngine.lo:  ./../../snmplib/read_config.h
-snmpv3/snmpEngine.lo: ./../../snmplib/tools.h ./../agent_trap.h
-snmpv3/snmpEngine.lo: ./../../snmplib/callback.h ./../../snmplib/snmpv3.h
-snmpv3/snmpEngine.lo: util_funcs.h struct.h ./../../snmplib/lcd_time.h
-snmpv3/snmpEngine.lo: mibII/sysORTable.h snmpv3/snmpEngine.h
-snmpv3/snmpMPDStats.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-snmpv3/snmpMPDStats.lo: ../../s/generic.h ../../m/generic.h mibincl.h
-snmpv3/snmpMPDStats.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-snmpv3/snmpMPDStats.lo: ./../../snmplib/snmp_api.h
-snmpv3/snmpMPDStats.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-snmpv3/snmpMPDStats.lo: ./../agent_registry.h ./../agent_read_config.h
-snmpv3/snmpMPDStats.lo: ./../var_struct.h ./../../snmplib/snmp.h
-snmpv3/snmpMPDStats.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-snmpv3/snmpMPDStats.lo: ./../../snmplib/snmp_logging.h 
-snmpv3/snmpMPDStats.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-snmpv3/snmpMPDStats.lo: ./../agent_trap.h ./../../snmplib/callback.h
-snmpv3/snmpMPDStats.lo: mibII/sysORTable.h snmpv3/snmpMPDStats.h util_funcs.h
-snmpv3/snmpMPDStats.lo: struct.h
-snmpv3/usmStats.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-snmpv3/usmStats.lo: ../../s/generic.h ../../m/generic.h mibincl.h
-snmpv3/usmStats.lo:  ../../mib_module_config.h
-snmpv3/usmStats.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-snmpv3/usmStats.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-snmpv3/usmStats.lo: ./../agent_registry.h ./../agent_read_config.h
-snmpv3/usmStats.lo: ./../var_struct.h ./../../snmplib/snmp.h
-snmpv3/usmStats.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-snmpv3/usmStats.lo: ./../../snmplib/snmp_logging.h 
-snmpv3/usmStats.lo:  ./../../snmplib/read_config.h
-snmpv3/usmStats.lo: ./../../snmplib/tools.h ./../agent_trap.h
-snmpv3/usmStats.lo: ./../../snmplib/callback.h util_funcs.h struct.h
-snmpv3/usmStats.lo: mibII/sysORTable.h snmpv3/usmStats.h
-snmpv3/usmUser.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-snmpv3/usmUser.lo: ../../s/generic.h ../../m/generic.h 
-snmpv3/usmUser.lo:  mibincl.h 
-snmpv3/usmUser.lo:  ../../mib_module_config.h
-snmpv3/usmUser.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-snmpv3/usmUser.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-snmpv3/usmUser.lo: ./../agent_registry.h ./../agent_read_config.h
-snmpv3/usmUser.lo: ./../var_struct.h ./../../snmplib/snmp.h
-snmpv3/usmUser.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-snmpv3/usmUser.lo: ./../../snmplib/snmp_logging.h 
-snmpv3/usmUser.lo:  ./../../snmplib/read_config.h
-snmpv3/usmUser.lo: ./../../snmplib/tools.h ./../agent_trap.h
-snmpv3/usmUser.lo: ./../../snmplib/callback.h ./../../snmplib/snmpusm.h
-snmpv3/usmUser.lo: ./../../snmplib/snmpv3.h ./../../snmplib/snmp-tc.h
-snmpv3/usmUser.lo: util_funcs.h struct.h ./../../snmplib/keytools.h
-snmpv3/usmUser.lo: ./../../snmplib/scapi.h snmpv3/usmUser.h
-snmpv3/usmUser.lo: ./../../snmplib/transform_oids.h
-notification/snmpNotifyTable.lo: ../../config.h ../../s/linux.h
-notification/snmpNotifyTable.lo: ../../s/sysv.h ../../s/generic.h
-notification/snmpNotifyTable.lo: ../../m/generic.h 
-notification/snmpNotifyTable.lo: mibincl.h 
-notification/snmpNotifyTable.lo: ../../mib_module_config.h
-notification/snmpNotifyTable.lo: ./../../snmplib/asn1.h
-notification/snmpNotifyTable.lo: ./../../snmplib/snmp_api.h
-notification/snmpNotifyTable.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-notification/snmpNotifyTable.lo: ./../agent_registry.h
-notification/snmpNotifyTable.lo: ./../agent_read_config.h ./../var_struct.h
-notification/snmpNotifyTable.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-notification/snmpNotifyTable.lo: ./../../snmplib/snmp_debug.h
-notification/snmpNotifyTable.lo: ./../../snmplib/snmp_logging.h
-notification/snmpNotifyTable.lo: ./../../snmplib/read_config.h
-notification/snmpNotifyTable.lo: ./../../snmplib/tools.h ./../agent_trap.h
-notification/snmpNotifyTable.lo: ./../../snmplib/callback.h header_complex.h
-notification/snmpNotifyTable.lo: notification/snmpNotifyTable.h
-notification/snmpNotifyTable.lo: ./../../snmplib/snmp-tc.h
-notification/snmpNotifyTable.lo: target/snmpTargetParamsEntry.h
-notification/snmpNotifyTable.lo: target/snmpTargetAddrEntry.h target/target.h
-notification/snmpNotifyTable.lo: ./../agent_callbacks.h
-notification/snmpNotifyFilterTable.lo: ../../config.h ../../s/linux.h
-notification/snmpNotifyFilterTable.lo: ../../s/sysv.h ../../s/generic.h
-notification/snmpNotifyFilterTable.lo: ../../m/generic.h
-notification/snmpNotifyFilterTable.lo:  mibincl.h
-notification/snmpNotifyFilterTable.lo: ../../mib_module_config.h
-notification/snmpNotifyFilterTable.lo: ./../../snmplib/asn1.h
-notification/snmpNotifyFilterTable.lo: ./../../snmplib/snmp_api.h
-notification/snmpNotifyFilterTable.lo: ./../../snmplib/snmp_impl.h
-notification/snmpNotifyFilterTable.lo: ./../snmp_vars.h ./../agent_registry.h
-notification/snmpNotifyFilterTable.lo: ./../agent_read_config.h
-notification/snmpNotifyFilterTable.lo: ./../var_struct.h
-notification/snmpNotifyFilterTable.lo: ./../../snmplib/snmp.h
-notification/snmpNotifyFilterTable.lo: ./../../snmplib/mib.h
-notification/snmpNotifyFilterTable.lo: ./../../snmplib/snmp_debug.h
-notification/snmpNotifyFilterTable.lo: ./../../snmplib/snmp_logging.h
-notification/snmpNotifyFilterTable.lo: ./../../snmplib/read_config.h
-notification/snmpNotifyFilterTable.lo: ./../../snmplib/tools.h
-notification/snmpNotifyFilterTable.lo: ./../agent_trap.h
-notification/snmpNotifyFilterTable.lo: ./../../snmplib/callback.h
-notification/snmpNotifyFilterTable.lo: header_complex.h
-notification/snmpNotifyFilterTable.lo: notification/snmpNotifyFilterTable.h
-notification/snmpNotifyFilterTable.lo: ./../../snmplib/snmp-tc.h
-notification/snmpNotifyFilterProfileTable.lo: ../../config.h ../../s/linux.h
-notification/snmpNotifyFilterProfileTable.lo: ../../s/sysv.h
-notification/snmpNotifyFilterProfileTable.lo: ../../s/generic.h
-notification/snmpNotifyFilterProfileTable.lo: ../../m/generic.h
-notification/snmpNotifyFilterProfileTable.lo:  mibincl.h
-notification/snmpNotifyFilterProfileTable.lo: ../../mib_module_config.h
-notification/snmpNotifyFilterProfileTable.lo: ./../../snmplib/asn1.h
-notification/snmpNotifyFilterProfileTable.lo: ./../../snmplib/snmp_api.h
-notification/snmpNotifyFilterProfileTable.lo: ./../../snmplib/snmp_impl.h
-notification/snmpNotifyFilterProfileTable.lo: ./../snmp_vars.h
-notification/snmpNotifyFilterProfileTable.lo: ./../agent_registry.h
-notification/snmpNotifyFilterProfileTable.lo: ./../agent_read_config.h
-notification/snmpNotifyFilterProfileTable.lo: ./../var_struct.h
-notification/snmpNotifyFilterProfileTable.lo: ./../../snmplib/snmp.h
-notification/snmpNotifyFilterProfileTable.lo: ./../../snmplib/mib.h
-notification/snmpNotifyFilterProfileTable.lo: ./../../snmplib/snmp_debug.h
-notification/snmpNotifyFilterProfileTable.lo: ./../../snmplib/snmp_logging.h
-notification/snmpNotifyFilterProfileTable.lo: ./../../snmplib/read_config.h
-notification/snmpNotifyFilterProfileTable.lo: ./../../snmplib/tools.h
-notification/snmpNotifyFilterProfileTable.lo: ./../agent_trap.h
-notification/snmpNotifyFilterProfileTable.lo: ./../../snmplib/callback.h
-notification/snmpNotifyFilterProfileTable.lo: header_complex.h
-notification/snmpNotifyFilterProfileTable.lo: notification/snmpNotifyFilterProfileTable.h
-notification/snmpNotifyFilterProfileTable.lo: ./../../snmplib/snmp-tc.h
-host/hr_system.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-host/hr_system.lo: ../../s/generic.h ../../m/generic.h mibincl.h
-host/hr_system.lo:  ../../mib_module_config.h
-host/hr_system.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-host/hr_system.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-host/hr_system.lo: ./../agent_registry.h ./../agent_read_config.h
-host/hr_system.lo: ./../var_struct.h ./../../snmplib/snmp.h
-host/hr_system.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-host/hr_system.lo: ./../../snmplib/snmp_logging.h 
-host/hr_system.lo:  ./../../snmplib/read_config.h
-host/hr_system.lo: ./../../snmplib/tools.h ./../agent_trap.h
-host/hr_system.lo: ./../../snmplib/callback.h host.h host_res.h
-host/hr_system.lo: ../../snmplib/system.h 
-host/hr_system.lo:  host/hr_system.h host/hr_utils.h
-host/hr_system.lo: ./../auto_nlist.h ../../snmplib/system.h
-host/hr_storage.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-host/hr_storage.lo: ../../s/generic.h ../../m/generic.h
-host/hr_storage.lo:  ./../../snmplib/getopt.h
-host/hr_storage.lo:  host_res.h
-host/hr_storage.lo:  ./../../snmplib/asn1.h
-host/hr_storage.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
-host/hr_storage.lo: ./../../snmplib/snmp_impl.h 
-host/hr_storage.lo:  ./../../snmplib/mib.h
-host/hr_storage.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
-host/hr_storage.lo: ../../snmplib/system.h ./../../snmplib/snmp_debug.h
-host/hr_storage.lo: host/hr_storage.h host/hr_filesys.h ./../auto_nlist.h
-host/hr_storage.lo: ./../../snmplib/system.h ./../../snmplib/snmp_logging.h
-host/hr_device.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-host/hr_device.lo: ../../s/generic.h ../../m/generic.h 
-host/hr_device.lo: host_res.h  
-host/hr_device.lo:  ./../../snmplib/asn1.h
-host/hr_device.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
-host/hr_device.lo: ./../../snmplib/snmp_impl.h 
-host/hr_device.lo:  ./../../snmplib/mib.h
-host/hr_device.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
-host/hr_device.lo: ../../snmplib/system.h 
-host/hr_device.lo:  ./../../snmplib/snmp_debug.h
-host/hr_device.lo: host/hr_device.h
-host/hr_other.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-host/hr_other.lo: ../../s/generic.h ../../m/generic.h host_res.h
-host/hr_other.lo:  ./../../snmplib/asn1.h
-host/hr_other.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
-host/hr_other.lo: ./../../snmplib/snmp_impl.h 
-host/hr_other.lo:  ./../../snmplib/mib.h
-host/hr_other.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
-host/hr_other.lo: ../../snmplib/system.h 
-host/hr_other.lo:  ./../../snmplib/snmp_debug.h
-host/hr_other.lo: host/hr_other.h 
-host/hr_other.lo: ./../../snmplib/getopt.h
-host/hr_proc.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-host/hr_proc.lo: ../../s/generic.h ../../m/generic.h 
-host/hr_proc.lo: host_res.h  
-host/hr_proc.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp.h
-host/hr_proc.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-host/hr_proc.lo:  ./../../snmplib/mib.h
-host/hr_proc.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
-host/hr_proc.lo: ../../snmplib/system.h 
-host/hr_proc.lo:  ./../../snmplib/snmp_debug.h
-host/hr_proc.lo: host/hr_proc.h ./../auto_nlist.h ./../agent_read_config.h
-host/hr_proc.lo: ucd-snmp/loadave.h mibdefs.h
-host/hr_network.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-host/hr_network.lo: ../../s/generic.h ../../m/generic.h host_res.h
-host/hr_network.lo:  ./../../snmplib/asn1.h
-host/hr_network.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
-host/hr_network.lo: ./../../snmplib/snmp_impl.h 
-host/hr_network.lo:  ./../../snmplib/mib.h
-host/hr_network.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
-host/hr_network.lo: ../../snmplib/system.h 
-host/hr_network.lo:  ./../../snmplib/snmp_debug.h
-host/hr_network.lo: mibII/interfaces.h host/hr_network.h
-host/hr_print.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-host/hr_print.lo: ../../s/generic.h ../../m/generic.h 
-host/hr_print.lo: host_res.h  
-host/hr_print.lo:  ./../../snmplib/asn1.h
-host/hr_print.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
-host/hr_print.lo: ./../../snmplib/snmp_impl.h 
-host/hr_print.lo:  ./../../snmplib/mib.h
-host/hr_print.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
-host/hr_print.lo: ../../snmplib/system.h 
-host/hr_print.lo:  ./../../snmplib/snmp_debug.h
-host/hr_print.lo: host/hr_print.h
-host/hr_disk.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-host/hr_disk.lo: ../../s/generic.h ../../m/generic.h host_res.h
-host/hr_disk.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp.h
-host/hr_disk.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-host/hr_disk.lo:  ./../../snmplib/mib.h
-host/hr_disk.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
-host/hr_disk.lo: ../../snmplib/system.h 
-host/hr_disk.lo:  ./../../snmplib/snmp_debug.h
-host/hr_disk.lo: host/hr_disk.h 
-host/hr_disk.lo: ./../../snmplib/getopt.h 
-host/hr_partition.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-host/hr_partition.lo: ../../s/generic.h ../../m/generic.h
-host/hr_partition.lo:  ./../../snmplib/getopt.h
-host/hr_partition.lo: host_res.h  
-host/hr_partition.lo:  ./../../snmplib/asn1.h
-host/hr_partition.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
-host/hr_partition.lo: ./../../snmplib/snmp_impl.h 
-host/hr_partition.lo:  ./../../snmplib/mib.h
-host/hr_partition.lo: ./../snmp_vars.h ./../agent_registry.h
-host/hr_partition.lo: ./../var_struct.h ../../snmplib/system.h
-host/hr_partition.lo: ./../../snmplib/snmp_debug.h 
-host/hr_partition.lo:  host/hr_partition.h
-host/hr_partition.lo: host/hr_filesys.h host/hr_disk.h
-host/hr_filesys.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-host/hr_filesys.lo: ../../s/generic.h ../../m/generic.h host_res.h
-host/hr_filesys.lo:  ./../../snmplib/asn1.h
-host/hr_filesys.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
-host/hr_filesys.lo: ./../../snmplib/snmp_impl.h 
-host/hr_filesys.lo:  ./../../snmplib/mib.h
-host/hr_filesys.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
-host/hr_filesys.lo: ../../snmplib/system.h 
-host/hr_filesys.lo:  ./../../snmplib/snmp_debug.h
-host/hr_filesys.lo: host/hr_filesys.h host/hr_utils.h 
-host/hr_swrun.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-host/hr_swrun.lo: ../../s/generic.h ../../m/generic.h 
-host/hr_swrun.lo:  ./../../snmplib/getopt.h
-host/hr_swrun.lo:  host_res.h
-host/hr_swrun.lo:  ./../../snmplib/asn1.h
-host/hr_swrun.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
-host/hr_swrun.lo: ./../../snmplib/snmp_impl.h ./../../snmplib/mib.h
-host/hr_swrun.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
-host/hr_swrun.lo: ../../snmplib/system.h 
-host/hr_swrun.lo:  ./../../snmplib/snmp_debug.h
-host/hr_swrun.lo: host/hr_swrun.h ./../auto_nlist.h ./../kernel.h
-host/hr_swinst.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-host/hr_swinst.lo: ../../s/generic.h ../../m/generic.h
-host/hr_swinst.lo:  ./../../snmplib/getopt.h
-host/hr_swinst.lo: host_res.h  
-host/hr_swinst.lo:  ./../../snmplib/asn1.h
-host/hr_swinst.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
-host/hr_swinst.lo: ./../../snmplib/snmp_impl.h ./../../snmplib/mib.h
-host/hr_swinst.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
-host/hr_swinst.lo: ../../snmplib/system.h ./../../snmplib/snmp_debug.h
-host/hr_swinst.lo: host/hr_swinst.h host/hr_utils.h ./../../snmplib/tools.h
-host/hr_utils.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-host/hr_utils.lo: ../../s/generic.h ../../m/generic.h
-host/hr_utils.lo:  host_res.h ./../../snmplib/asn1.h
-host/hr_utils.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
-host/hr_utils.lo: ./../../snmplib/snmp_impl.h 
-host/hr_utils.lo:  ./../../snmplib/mib.h
-host/hr_utils.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
-host/hr_utils.lo: ../../snmplib/system.h 
-host/hr_utils.lo:  ./../../snmplib/snmp_debug.h
-host/hr_utils.lo: host/hr_utils.h
-agentx/master.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-agentx/master.lo: ../../s/generic.h ../../m/generic.h
-agentx/master.lo:  ./../../snmplib/asn1.h
-agentx/master.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-agentx/master.lo:  ./../../snmplib/snmp.h
-agentx/master.lo: ./../snmp_vars.h ./../agent_registry.h ./../var_struct.h
-agentx/master.lo: ./../snmpd.h agentx/protocol.h agentx/master_admin.h
-agentx/master.lo: agentx/master_request.h ./../../snmplib/snmp_debug.h
-agentx/master.lo: ./../../snmplib/default_store.h ./../ds_agent.h
-agentx/master.lo: ./../../snmplib/system.h 
-agentx/master.lo:  ./../../snmplib/snmp_logging.h
-agentx/subagent.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-agentx/subagent.lo: ../../s/generic.h ../../m/generic.h
-agentx/subagent.lo:  ./../../snmplib/asn1.h
-agentx/subagent.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-agentx/subagent.lo: ./../../snmplib/snmp_client.h ./../../snmplib/snmp.h
-agentx/subagent.lo: ./../snmp_vars.h ./../agent_registry.h ./../snmp_agent.h
-agentx/subagent.lo: ./../var_struct.h ./../snmpd.h agentx/protocol.h
-agentx/subagent.lo: agentx/client.h ./../../snmplib/default_store.h
-agentx/subagent.lo: ./../ds_agent.h ./../../snmplib/callback.h
-agentx/subagent.lo: ./../agent_callbacks.h ./../agent_trap.h
-agentx/subagent.lo: ./../../snmplib/snmp_debug.h ../../mib_module_config.h
-agentx/subagent.lo: mibII/sysORTable.h ./../../snmplib/system.h
-util_funcs.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-util_funcs.lo: ../../s/generic.h ../../m/generic.h 
-util_funcs.lo: ./../../snmplib/getopt.h 
-util_funcs.lo:  mibincl.h 
-util_funcs.lo:  ../../mib_module_config.h
-util_funcs.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-util_funcs.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-util_funcs.lo: ./../agent_registry.h ./../agent_read_config.h
-util_funcs.lo: ./../var_struct.h ./../../snmplib/snmp.h ./../../snmplib/mib.h
-util_funcs.lo: ./../../snmplib/snmp_debug.h ./../../snmplib/snmp_logging.h
-util_funcs.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-util_funcs.lo: ./../agent_trap.h ./../../snmplib/callback.h struct.h
-util_funcs.lo: util_funcs.h ../../snmplib/system.h ucd-snmp/errormib.h
-util_funcs.lo: mibdefs.h
-mibII/kernel_linux.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-mibII/kernel_linux.lo: ../../s/generic.h ../../m/generic.h mibincl.h
-mibII/kernel_linux.lo:  ../../mib_module_config.h
-mibII/kernel_linux.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-mibII/kernel_linux.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-mibII/kernel_linux.lo: ./../agent_registry.h ./../agent_read_config.h
-mibII/kernel_linux.lo: ./../var_struct.h ./../../snmplib/snmp.h
-mibII/kernel_linux.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-mibII/kernel_linux.lo: ./../../snmplib/snmp_logging.h 
-mibII/kernel_linux.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-mibII/kernel_linux.lo: ./../agent_trap.h ./../../snmplib/callback.h
-mibII/kernel_linux.lo: util_funcs.h struct.h 
-mibII/kernel_linux.lo:  mibII/kernel_linux.h
-mibII/tcpTable.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-mibII/tcpTable.lo: ../../s/generic.h ../../m/generic.h mibincl.h
-mibII/tcpTable.lo:  ../../mib_module_config.h
-mibII/tcpTable.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-mibII/tcpTable.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-mibII/tcpTable.lo: ./../agent_registry.h ./../agent_read_config.h
-mibII/tcpTable.lo: ./../var_struct.h ./../../snmplib/snmp.h
-mibII/tcpTable.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-mibII/tcpTable.lo: ./../../snmplib/snmp_logging.h 
-mibII/tcpTable.lo:  ./../../snmplib/read_config.h
-mibII/tcpTable.lo: ./../../snmplib/tools.h ./../agent_trap.h
-mibII/tcpTable.lo: ./../../snmplib/callback.h 
-mibII/tcpTable.lo: ./../../snmplib/getopt.h 
-mibII/tcpTable.lo: ./../kernel.h ./../../snmplib/system.h
-mibII/tcpTable.lo:  ./../auto_nlist.h mibII/tcp.h
-mibII/tcpTable.lo: mibII/tcpTable.h
-mibII/ipAddr.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-mibII/ipAddr.lo: ../../s/generic.h ../../m/generic.h mibincl.h
-mibII/ipAddr.lo:  ../../mib_module_config.h
-mibII/ipAddr.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-mibII/ipAddr.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-mibII/ipAddr.lo: ./../agent_registry.h ./../agent_read_config.h
-mibII/ipAddr.lo: ./../var_struct.h ./../../snmplib/snmp.h
-mibII/ipAddr.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-mibII/ipAddr.lo: ./../../snmplib/snmp_logging.h 
-mibII/ipAddr.lo:  ./../../snmplib/read_config.h
-mibII/ipAddr.lo: ./../../snmplib/tools.h ./../agent_trap.h
-mibII/ipAddr.lo: ./../../snmplib/callback.h 
-mibII/ipAddr.lo:  ./../kernel.h
-mibII/ipAddr.lo: ./../../snmplib/system.h ./../auto_nlist.h mibII/ip.h
-mibII/ipAddr.lo: mibII/var_route.h mibII/route_write.h mibII/at.h
-mibII/ipAddr.lo: mibII/interfaces.h mibII/sysORTable.h
-mibII/var_route.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-mibII/var_route.lo: ../../s/generic.h ../../m/generic.h 
-mibII/var_route.lo: ./../auto_nlist.h mibincl.h 
-mibII/var_route.lo: ../../mib_module_config.h ./../../snmplib/asn1.h
-mibII/var_route.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-mibII/var_route.lo: ./../snmp_vars.h ./../agent_registry.h
-mibII/var_route.lo: ./../agent_read_config.h ./../var_struct.h
-mibII/var_route.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-mibII/var_route.lo: ./../../snmplib/snmp_debug.h
-mibII/var_route.lo: ./../../snmplib/snmp_logging.h
-mibII/var_route.lo: ./../../snmplib/read_config.h ./../../snmplib/tools.h
-mibII/var_route.lo: ./../agent_trap.h ./../../snmplib/callback.h mibII/ip.h
-mibII/var_route.lo: mibII/var_route.h mibII/route_write.h mibII/at.h
-mibII/var_route.lo: ../kernel.h mibII/interfaces.h struct.h util_funcs.h
-mibII/route_write.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-mibII/route_write.lo: ../../s/generic.h ../../m/generic.h
-mibII/route_write.lo:  ./../../snmplib/getopt.h
-mibII/route_write.lo:  ./../../snmplib/asn1.h
-mibII/route_write.lo: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
-mibII/route_write.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-mibII/route_write.lo: ./../agent_registry.h ./../../snmplib/snmp_debug.h
-mibII/route_write.lo: mibII/ip.h mibII/var_route.h mibII/route_write.h
-mibII/route_write.lo: mibII/at.h ./../../snmplib/snmp_logging.h
-mibII/udpTable.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-mibII/udpTable.lo: ../../s/generic.h ../../m/generic.h mibincl.h
-mibII/udpTable.lo:  ../../mib_module_config.h
-mibII/udpTable.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-mibII/udpTable.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-mibII/udpTable.lo: ./../agent_registry.h ./../agent_read_config.h
-mibII/udpTable.lo: ./../var_struct.h ./../../snmplib/snmp.h
-mibII/udpTable.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-mibII/udpTable.lo: ./../../snmplib/snmp_logging.h 
-mibII/udpTable.lo:  ./../../snmplib/read_config.h
-mibII/udpTable.lo: ./../../snmplib/tools.h ./../agent_trap.h
-mibII/udpTable.lo: ./../../snmplib/callback.h 
-mibII/udpTable.lo:  ./../kernel.h
-mibII/udpTable.lo: ./../../snmplib/system.h ./../auto_nlist.h mibII/udp.h
-mibII/udpTable.lo: mibII/udpTable.h mibII/sysORTable.h
-header_complex.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-header_complex.lo: ../../s/generic.h ../../m/generic.h
-header_complex.lo:   mibincl.h
-header_complex.lo:  ../../mib_module_config.h
-header_complex.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-header_complex.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-header_complex.lo: ./../agent_registry.h ./../agent_read_config.h
-header_complex.lo: ./../var_struct.h ./../../snmplib/snmp.h
-header_complex.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-header_complex.lo: ./../../snmplib/snmp_logging.h 
-header_complex.lo:  ./../../snmplib/read_config.h
-header_complex.lo: ./../../snmplib/tools.h ./../agent_trap.h
-header_complex.lo: ./../../snmplib/callback.h header_complex.h
-agentx/protocol.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-agentx/protocol.lo: ../../s/generic.h ../../m/generic.h 
-agentx/protocol.lo:  ./../../snmplib/getopt.h
-agentx/protocol.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-agentx/protocol.lo: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp.h
-agentx/protocol.lo: ./../../snmplib/snmp_client.h
-agentx/protocol.lo: ./../../snmplib/snmp_debug.h ./../../snmplib/mib.h
-agentx/protocol.lo: agentx/protocol.h
-agentx/client.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-agentx/client.lo: ../../s/generic.h ../../m/generic.h 
-agentx/client.lo: ./../../snmplib/getopt.h 
-agentx/client.lo:  ./../../snmplib/asn1.h
-agentx/client.lo: ./../../snmplib/snmp_api.h ./../../snmplib/snmp_impl.h
-agentx/client.lo: ./../../snmplib/snmp_client.h ./../../snmplib/snmp.h
-agentx/client.lo: ./../../snmplib/snmp_debug.h ./../snmp_vars.h
-agentx/client.lo: ./../agent_registry.h ./../agent_index.h agentx/protocol.h
-agentx/client.lo: agentx/client.h
-agentx/master_admin.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-agentx/master_admin.lo: ../../s/generic.h ../../m/generic.h
-agentx/master_admin.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-agentx/master_admin.lo: ./../../snmplib/snmp_client.h
-agentx/master_admin.lo: ./../../snmplib/snmp_impl.h 
-agentx/master_admin.lo:  ./../../snmplib/snmp.h
-agentx/master_admin.lo: ./../../snmplib/system.h agentx/protocol.h
-agentx/master_admin.lo: agentx/client.h ./../snmp_agent.h ./../snmp_vars.h
-agentx/master_admin.lo: ./../agent_registry.h ./../var_struct.h
-agentx/master_admin.lo: ./../agent_index.h ./../agent_trap.h
-agentx/master_admin.lo: mibII/sysORTable.h ./../../snmplib/snmp_debug.h
-agentx/master_request.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-agentx/master_request.lo: ../../s/generic.h ../../m/generic.h
-agentx/master_request.lo: ./../../snmplib/asn1.h ./../../snmplib/mib.h
-agentx/master_request.lo: ./../../snmplib/snmp_api.h
-agentx/master_request.lo: ./../../snmplib/snmp_impl.h
-agentx/master_request.lo: ./../../snmplib/snmp_client.h
-agentx/master_request.lo: ./../../snmplib/snmp_debug.h ./../../snmplib/snmp.h
-agentx/master_request.lo: ./../ds_agent.h ./../../snmplib/default_store.h
-agentx/master_request.lo: agentx/protocol.h agentx/client.h agentx/master.h
-agentx/master_request.lo: ./../snmp_agent.h ./../snmp_vars.h
-agentx/master_request.lo: ./../agent_registry.h ./../var_struct.h
-agentx/master_request.lo: mibII/sysORTable.h
-target/snmpTargetAddrEntry.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-target/snmpTargetAddrEntry.lo: ../../s/generic.h ../../m/generic.h
-target/snmpTargetAddrEntry.lo: mibincl.h 
-target/snmpTargetAddrEntry.lo: ../../mib_module_config.h
-target/snmpTargetAddrEntry.lo: ./../../snmplib/asn1.h
-target/snmpTargetAddrEntry.lo: ./../../snmplib/snmp_api.h
-target/snmpTargetAddrEntry.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-target/snmpTargetAddrEntry.lo: ./../agent_registry.h ./../agent_read_config.h
-target/snmpTargetAddrEntry.lo: ./../var_struct.h ./../../snmplib/snmp.h
-target/snmpTargetAddrEntry.lo: ./../../snmplib/mib.h
-target/snmpTargetAddrEntry.lo: ./../../snmplib/snmp_debug.h
-target/snmpTargetAddrEntry.lo: ./../../snmplib/snmp_logging.h
-target/snmpTargetAddrEntry.lo: ./../../snmplib/read_config.h
-target/snmpTargetAddrEntry.lo: ./../../snmplib/tools.h ./../agent_trap.h
-target/snmpTargetAddrEntry.lo: ./../../snmplib/callback.h
-target/snmpTargetAddrEntry.lo: target/snmpTargetAddrEntry.h
-target/snmpTargetParamsEntry.lo: ../../config.h ../../s/linux.h
-target/snmpTargetParamsEntry.lo: ../../s/sysv.h ../../s/generic.h
-target/snmpTargetParamsEntry.lo: ../../m/generic.h 
-target/snmpTargetParamsEntry.lo: mibincl.h 
-target/snmpTargetParamsEntry.lo: ../../mib_module_config.h
-target/snmpTargetParamsEntry.lo: ./../../snmplib/asn1.h
-target/snmpTargetParamsEntry.lo: ./../../snmplib/snmp_api.h
-target/snmpTargetParamsEntry.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-target/snmpTargetParamsEntry.lo: ./../agent_registry.h
-target/snmpTargetParamsEntry.lo: ./../agent_read_config.h ./../var_struct.h
-target/snmpTargetParamsEntry.lo: ./../../snmplib/snmp.h ./../../snmplib/mib.h
-target/snmpTargetParamsEntry.lo: ./../../snmplib/snmp_debug.h
-target/snmpTargetParamsEntry.lo: ./../../snmplib/snmp_logging.h
-target/snmpTargetParamsEntry.lo: ./../../snmplib/read_config.h
-target/snmpTargetParamsEntry.lo: ./../../snmplib/tools.h ./../agent_trap.h
-target/snmpTargetParamsEntry.lo: ./../../snmplib/callback.h
-target/snmpTargetParamsEntry.lo: target/snmpTargetParamsEntry.h
-target/target.lo: ../../config.h ../../s/linux.h ../../s/sysv.h
-target/target.lo: ../../s/generic.h ../../m/generic.h 
-target/target.lo: mibincl.h 
-target/target.lo:  ../../mib_module_config.h
-target/target.lo: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-target/target.lo: ./../../snmplib/snmp_impl.h ./../snmp_vars.h
-target/target.lo: ./../agent_registry.h ./../agent_read_config.h
-target/target.lo: ./../var_struct.h ./../../snmplib/snmp.h
-target/target.lo: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-target/target.lo: ./../../snmplib/snmp_logging.h 
-target/target.lo:  ./../../snmplib/read_config.h
-target/target.lo: ./../../snmplib/tools.h ./../agent_trap.h
-target/target.lo: ./../../snmplib/callback.h target/snmpTargetAddrEntry.h
-target/target.lo: target/snmpTargetParamsEntry.h target.h
-target/target.lo: ./../../snmplib/snmp-tc.h
+
+agentx/client.o: ../agent_index.h ../agent_registry.h agentx/client.h
+agentx/client.o: agentx/protocol.h ../ds_agent.h ../snmp_agent.h
+agentx/client.o: ../snmp_vars.h  
+agentx/client.o: ../var_struct.h
+agentx/master_admin.o: ../agent_index.h ../agent_registry.h ../agent_trap.h
+agentx/master_admin.o: agentx/client.h agentx/protocol.h mibII/sysORTable.h
+agentx/master_admin.o: ../snmp_agent.h ../snmp_vars.h 
+agentx/master_admin.o: ../var_struct.h
+agentx/master.o: ../agent_read_config.h ../agent_registry.h
+agentx/master.o: agentx/master_admin.h agentx/master_request.h
+agentx/master.o: agentx/protocol.h ../ds_agent.h ../snmp_agent.h ../snmpd.h
+agentx/master.o: ../snmp_vars.h  
+agentx/master.o: ../var_struct.h
+agentx/master_request.o: ../agent_registry.h agentx/client.h
+agentx/master_request.o: agentx/master_admin.h agentx/master.h
+agentx/master_request.o: agentx/protocol.h ../ds_agent.h mibII/sysORTable.h
+agentx/master_request.o: ../snmp_agent.h ../snmp_vars.h 
+agentx/master_request.o: ../var_struct.h
+agentx/protocol.o: agentx/protocol.h 
+agentx/subagent.o: ../agent_callbacks.h ../agent_registry.h ../agent_trap.h
+agentx/subagent.o: agentx/client.h agentx/protocol.h agentx/subagent.h
+agentx/subagent.o: ../ds_agent.h mibII/sysORTable.h ../snmp_agent.h ../snmpd.h
+agentx/subagent.o: ../snmp_vars.h 
+agentx/subagent.o: ../var_struct.h
+disman/mteObjectsTable.o: ../agent_read_config.h ../agent_registry.h
+disman/mteObjectsTable.o: ../agent_trap.h disman/mteObjectsTable.h
+disman/mteObjectsTable.o: disman/mteTriggerTable.h header_complex.h mibincl.h
+disman/mteObjectsTable.o: ../snmp_agent.h ../snmp_vars.h 
+disman/mteObjectsTable.o: ../var_struct.h
+disman/mteTriggerBooleanTable.o: ../agent_read_config.h ../agent_registry.h
+disman/mteTriggerBooleanTable.o: ../agent_trap.h
+disman/mteTriggerBooleanTable.o: disman/mteTriggerBooleanTable.h
+disman/mteTriggerBooleanTable.o: disman/mteTriggerTable.h header_complex.h
+disman/mteTriggerBooleanTable.o: mibincl.h ../snmp_agent.h ../snmp_vars.h
+disman/mteTriggerBooleanTable.o: ../var_struct.h
+disman/mteTriggerDeltaTable.o: ../agent_read_config.h ../agent_registry.h
+disman/mteTriggerDeltaTable.o: ../agent_trap.h disman/mteTriggerDeltaTable.h
+disman/mteTriggerDeltaTable.o: disman/mteTriggerTable.h header_complex.h
+disman/mteTriggerDeltaTable.o: mibincl.h ../snmp_agent.h ../snmp_vars.h
+disman/mteTriggerDeltaTable.o: ../var_struct.h
+disman/mteTriggerExistenceTable.o: ../agent_read_config.h ../agent_registry.h
+disman/mteTriggerExistenceTable.o: ../agent_trap.h
+disman/mteTriggerExistenceTable.o: disman/mteTriggerExistenceTable.h
+disman/mteTriggerExistenceTable.o: disman/mteTriggerTable.h header_complex.h
+disman/mteTriggerExistenceTable.o: mibincl.h ../snmp_agent.h ../snmp_vars.h
+disman/mteTriggerExistenceTable.o: ../var_struct.h
+disman/mteTriggerTable.o: ../agent_read_config.h ../agent_registry.h
+disman/mteTriggerTable.o: ../agent_trap.h disman/mteObjectsTable.h
+disman/mteTriggerTable.o: disman/mteTriggerBooleanTable.h
+disman/mteTriggerTable.o: disman/mteTriggerDeltaTable.h
+disman/mteTriggerTable.o: disman/mteTriggerExistenceTable.h
+disman/mteTriggerTable.o: disman/mteTriggerTable.h
+disman/mteTriggerTable.o: disman/mteTriggerThresholdTable.h ../ds_agent.h
+disman/mteTriggerTable.o: header_complex.h mibincl.h ../snmp_agent.h
+disman/mteTriggerTable.o: ../snmp_vars.h 
+disman/mteTriggerTable.o: ../var_struct.h
+disman/mteTriggerThresholdTable.o: ../agent_read_config.h ../agent_registry.h
+disman/mteTriggerThresholdTable.o: ../agent_trap.h disman/mteTriggerTable.h
+disman/mteTriggerThresholdTable.o: disman/mteTriggerThresholdTable.h
+disman/mteTriggerThresholdTable.o: header_complex.h mibincl.h ../snmp_agent.h
+disman/mteTriggerThresholdTable.o: ../snmp_vars.h 
+disman/mteTriggerThresholdTable.o: ../var_struct.h
+examples/example.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+examples/example.o: examples/example.h mibincl.h ../snmp_agent.h
+examples/example.o: ../snmp_vars.h struct.h 
+examples/example.o: util_funcs.h ../var_struct.h
+header_complex.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+header_complex.o: ../../config.h header_complex.h ../../m/generic.h mibincl.h
+header_complex.o: ../../mib_module_config.h ../../s/generic.h ../../s/linux.h
+header_complex.o: ../snmp_agent.h ../../snmplib/asn1.h
+header_complex.o: ../../snmplib/callback.h ../../snmplib/mib.h
+header_complex.o: ../../snmplib/read_config.h ../../snmplib/snmp_alarm.h
+header_complex.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_client.h
+header_complex.o: ../../snmplib/snmp_debug.h ../../snmplib/snmp.h
+header_complex.o: ../../snmplib/snmp_impl.h ../../snmplib/snmp_logging.h
+header_complex.o: ../../snmplib/tools.h ../snmp_vars.h ../../s/sysv.h
+header_complex.o: ../var_struct.h
+host/hr_device.o: ../agent_registry.h host/hr_device.h host_res.h
+host/hr_device.o: ../snmp_agent.h ../snmp_vars.h 
+host/hr_device.o: ../var_struct.h
+host/hr_disk.o: ../agent_registry.h host/hr_disk.h host_res.h ../snmp_agent.h
+host/hr_disk.o: ../snmp_vars.h  
+host/hr_disk.o: ../var_struct.h
+host/hr_filesys.o: ../agent_registry.h host/hr_filesys.h host/hr_utils.h
+host/hr_filesys.o: host_res.h ../snmp_agent.h ../snmp_vars.h
+host/hr_filesys.o: ../var_struct.h
+host/hr_network.o: ../agent_registry.h host/hr_network.h host_res.h
+host/hr_network.o: mibII/interfaces.h ../snmp_agent.h ../snmp_vars.h
+host/hr_network.o: ../var_struct.h
+host/hr_other.o: ../agent_registry.h host/hr_other.h host_res.h
+host/hr_other.o: ../snmp_agent.h ../snmp_vars.h 
+host/hr_other.o: ../var_struct.h
+host/hr_partition.o: ../agent_registry.h host/hr_disk.h host/hr_filesys.h
+host/hr_partition.o: host/hr_partition.h host_res.h ../snmp_agent.h
+host/hr_partition.o: ../snmp_vars.h 
+host/hr_partition.o: ../var_struct.h
+host/hr_print.o: ../agent_registry.h host/hr_print.h host_res.h
+host/hr_print.o: ../snmp_agent.h ../snmp_vars.h 
+host/hr_print.o: ../var_struct.h
+host/hr_proc.o: ../agent_read_config.h ../agent_registry.h ../auto_nlist.h
+host/hr_proc.o: host/hr_proc.h host_res.h mibdefs.h ../snmp_agent.h
+host/hr_proc.o: ../snmp_vars.h ucd-snmp/loadave.h 
+host/hr_proc.o: ../var_struct.h
+host/hr_storage.o: ../agent_registry.h ../auto_nlist.h host/hr_filesys.h
+host/hr_storage.o: host/hr_storage.h host_res.h ../snmp_agent.h ../snmp_vars.h
+host/hr_storage.o: ../var_struct.h
+host/hr_swinst.o: ../agent_registry.h host/hr_swinst.h host/hr_utils.h
+host/hr_swinst.o: host_res.h ../snmp_agent.h ../snmp_vars.h
+host/hr_swinst.o: ../var_struct.h
+host/hr_swrun.o: ../agent_registry.h ../auto_nlist.h host/hr_swrun.h
+host/hr_swrun.o: host_res.h ../kernel.h ../snmp_agent.h ../snmp_vars.h
+host/hr_swrun.o: ../var_struct.h
+host/hr_system.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+host/hr_system.o: ../auto_nlist.h host.h host/hr_system.h host/hr_utils.h
+host/hr_system.o: host_res.h mibincl.h ../snmp_agent.h ../snmp_vars.h
+host/hr_system.o: ../var_struct.h
+host/hr_utils.o: ../agent_registry.h host/hr_utils.h host_res.h
+host/hr_utils.o: ../snmp_agent.h ../snmp_vars.h 
+host/hr_utils.o: ../var_struct.h
+mibII/at.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+mibII/at.o: ../auto_nlist.h mibII/at.h mibII/interfaces.h mibincl.h
+mibII/at.o: ../snmp_agent.h ../snmp_vars.h 
+mibII/at.o: ../var_struct.h
+mibII/icmp.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+mibII/icmp.o: ../auto_nlist.h mibII/icmp.h mibII/kernel_linux.h
+mibII/icmp.o: mibII/sysORTable.h mibincl.h ../snmp_agent.h ../snmp_vars.h
+mibII/icmp.o: struct.h  
+mibII/icmp.o: util_funcs.h ../var_struct.h
+mibII/interfaces.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+mibII/interfaces.o: ../auto_nlist.h ../kernel.h mibII/interfaces.h
+mibII/interfaces.o: mibII/sysORTable.h mibincl.h ../snmp_agent.h
+mibII/interfaces.o: ../snmp_vars.h struct.h 
+mibII/interfaces.o: util_funcs.h ../var_struct.h
+mibII/ipAddr.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+mibII/ipAddr.o: ../auto_nlist.h ../kernel.h mibII/at.h mibII/interfaces.h
+mibII/ipAddr.o: mibII/ip.h mibII/route_write.h mibII/sysORTable.h
+mibII/ipAddr.o: mibII/var_route.h mibincl.h ../snmp_agent.h ../snmp_vars.h
+mibII/ipAddr.o: ../var_struct.h
+mibII/ip.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+mibII/ip.o: ../auto_nlist.h ../kernel.h mibII/at.h mibII/interfaces.h
+mibII/ip.o: mibII/ipAddr.h mibII/ip.h mibII/kernel_linux.h mibII/route_write.h
+mibII/ip.o: mibII/sysORTable.h mibII/var_route.h mibincl.h ../snmp_agent.h
+mibII/ip.o: ../snmp_vars.h struct.h 
+mibII/ip.o: util_funcs.h ../var_struct.h
+mibII/kernel_linux.o: ../agent_read_config.h ../agent_registry.h
+mibII/kernel_linux.o: ../agent_trap.h mibII/kernel_linux.h mibincl.h
+mibII/kernel_linux.o: ../snmp_agent.h ../snmp_vars.h struct.h
+mibII/kernel_linux.o: util_funcs.h ../var_struct.h
+mibII/route_write.o: ../agent_registry.h mibII/ip.h mibII/route_write.h
+mibII/route_write.o: mibII/var_route.h ../snmp_agent.h ../snmp_vars.h
+mibII/snmp_mib.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+mibII/snmp_mib.o: mibII/snmp_mib.h mibII/sysORTable.h mibincl.h
+mibII/snmp_mib.o: ../snmp_agent.h ../snmp_vars.h struct.h
+mibII/snmp_mib.o: util_funcs.h ../var_struct.h
+mibII/sysORTable.o: ../agent_callbacks.h ../agent_read_config.h
+mibII/sysORTable.o: ../agent_registry.h ../agent_trap.h agentx/client.h
+mibII/sysORTable.o: agentx/subagent.h ../ds_agent.h mibII/sysORTable.h
+mibII/sysORTable.o: mibincl.h ../snmp_agent.h ../snmp_vars.h
+mibII/sysORTable.o: ../var_struct.h
+mibII/system_mib.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+mibII/system_mib.o: ../helpers/old_api.h mibII/sysORTable.h mibII/system_mib.h
+mibII/system_mib.o: mibincl.h ../snmp_agent.h ../snmp_vars.h struct.h
+mibII/system_mib.o: util_funcs.h ../var_struct.h
+mibII/tcp.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+mibII/tcp.o: ../auto_nlist.h ../kernel.h mibII/kernel_linux.h
+mibII/tcp.o: mibII/sysORTable.h mibII/tcp.h mibII/tcpTable.h mibincl.h
+mibII/tcp.o: ../snmp_agent.h ../snmp_vars.h struct.h 
+mibII/tcp.o: util_funcs.h ../var_struct.h
+mibII/tcpTable.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+mibII/tcpTable.o: ../auto_nlist.h ../kernel.h mibII/tcp.h mibII/tcpTable.h
+mibII/tcpTable.o: mibincl.h ../snmp_agent.h ../snmp_vars.h
+mibII/tcpTable.o: ../var_struct.h
+mibII/udp.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+mibII/udp.o: ../auto_nlist.h ../kernel.h mibII/kernel_linux.h
+mibII/udp.o: mibII/sysORTable.h mibII/tcp.h mibII/udp.h mibII/udpTable.h
+mibII/udp.o: mibincl.h ../snmp_agent.h ../snmp_vars.h struct.h
+mibII/udp.o: util_funcs.h ../var_struct.h
+mibII/udpTable.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+mibII/udpTable.o: ../auto_nlist.h ../kernel.h mibII/sysORTable.h
+mibII/udpTable.o: mibII/tcpTable.h mibII/udp.h mibII/udpTable.h mibincl.h
+mibII/udpTable.o: ../snmp_agent.h ../snmp_vars.h 
+mibII/udpTable.o: ../var_struct.h
+mibII/vacm_context.o: ../agent_read_config.h ../agent_registry.h
+mibII/vacm_context.o: ../agent_trap.h ../helpers/table.h
+mibII/vacm_context.o: ../helpers/table_iterator.h mibII/vacm_context.h
+mibII/vacm_context.o: mibincl.h ../snmp_agent.h ../snmp_vars.h
+mibII/vacm_context.o: ../var_struct.h
+mibII/vacm_vars.o: ../agent_callbacks.h ../agent_read_config.h
+mibII/vacm_vars.o: ../agent_registry.h ../agent_trap.h mibII/sysORTable.h
+mibII/vacm_vars.o: mibII/vacm_vars.h mibincl.h ../snmp_agent.h ../snmp_vars.h
+mibII/vacm_vars.o: struct.h  
+mibII/vacm_vars.o: util_funcs.h ../var_struct.h
+mibII/var_route.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+mibII/var_route.o: ../auto_nlist.h ../kernel.h mibII/at.h mibII/interfaces.h
+mibII/var_route.o: mibII/ip.h mibII/route_write.h mibII/var_route.h mibincl.h
+mibII/var_route.o: ../snmp_agent.h ../snmp_vars.h struct.h
+mibII/var_route.o: util_funcs.h ../var_struct.h
+notification/snmpNotifyFilterProfileTable.o: ../agent_read_config.h
+notification/snmpNotifyFilterProfileTable.o: ../agent_registry.h
+notification/snmpNotifyFilterProfileTable.o: ../agent_trap.h header_complex.h
+notification/snmpNotifyFilterProfileTable.o: mibincl.h
+notification/snmpNotifyFilterProfileTable.o: notification/snmpNotifyFilterProfileTable.h
+notification/snmpNotifyFilterProfileTable.o: ../snmp_agent.h ../snmp_vars.h
+notification/snmpNotifyFilterProfileTable.o: ../var_struct.h
+notification/snmpNotifyFilterTable.o: ../agent_read_config.h
+notification/snmpNotifyFilterTable.o: ../agent_registry.h ../agent_trap.h
+notification/snmpNotifyFilterTable.o: header_complex.h mibincl.h
+notification/snmpNotifyFilterTable.o: notification/snmpNotifyFilterTable.h
+notification/snmpNotifyFilterTable.o: ../snmp_agent.h ../snmp_vars.h
+notification/snmpNotifyFilterTable.o: ../var_struct.h
+notification/snmpNotifyTable.o: ../agent_callbacks.h ../agent_read_config.h
+notification/snmpNotifyTable.o: ../agent_registry.h ../agent_trap.h
+notification/snmpNotifyTable.o: header_complex.h mibincl.h
+notification/snmpNotifyTable.o: notification/snmpNotifyTable.h ../snmp_agent.h
+notification/snmpNotifyTable.o: ../snmp_vars.h target/snmpTargetAddrEntry.h
+notification/snmpNotifyTable.o: target/snmpTargetParamsEntry.h target/target.h
+notification/snmpNotifyTable.o: ../var_struct.h
+sitCtr.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+sitCtr.o: ../../config.h ../../m/generic.h mibincl.h ../../mib_module_config.h
+sitCtr.o: ../../s/generic.h sitCtr.h ../../s/linux.h ../snmp_agent.h
+sitCtr.o: ../../snmplib/asn1.h ../../snmplib/callback.h ../../snmplib/getopt.h
+sitCtr.o: ../../snmplib/int64.h ../../snmplib/mib.h
+sitCtr.o: ../../snmplib/read_config.h ../../snmplib/snmp_alarm.h
+sitCtr.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_client.h
+sitCtr.o: ../../snmplib/snmp_debug.h ../../snmplib/snmp.h
+sitCtr.o: ../../snmplib/snmp_impl.h ../../snmplib/snmp_logging.h
+sitCtr.o: ../../snmplib/system.h ../../snmplib/tools.h ../snmp_vars.h
+sitCtr.o: ../../s/sysv.h struct.h 
+sitCtr.o: util_funcs.h ../var_struct.h
+snmpv3/snmpEngine.o: ../agent_read_config.h ../agent_registry.h
+snmpv3/snmpEngine.o: ../agent_trap.h mibincl.h ../snmp_agent.h
+snmpv3/snmpEngine.o: snmpv3/snmpEngine.h ../snmp_vars.h struct.h
+snmpv3/snmpEngine.o: util_funcs.h ../var_struct.h
+snmpv3/snmpMPDStats.o: ../agent_read_config.h ../agent_registry.h
+snmpv3/snmpMPDStats.o: ../agent_trap.h mibincl.h ../snmp_agent.h
+snmpv3/snmpMPDStats.o: snmpv3/snmpMPDStats.h ../snmp_vars.h struct.h
+snmpv3/snmpMPDStats.o: util_funcs.h ../var_struct.h
+snmpv3/usmStats.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+snmpv3/usmStats.o: mibincl.h ../snmp_agent.h snmpv3/usmStats.h ../snmp_vars.h
+snmpv3/usmStats.o: struct.h  
+snmpv3/usmStats.o: util_funcs.h ../var_struct.h
+snmpv3/usmUser.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+snmpv3/usmUser.o: mibincl.h ../snmp_agent.h snmpv3/usmUser.h ../snmp_vars.h
+snmpv3/usmUser.o: struct.h  
+snmpv3/usmUser.o: util_funcs.h ../var_struct.h
+target/snmpTargetAddrEntry.o: ../agent_read_config.h ../agent_registry.h
+target/snmpTargetAddrEntry.o: ../agent_trap.h mibincl.h ../snmp_agent.h
+target/snmpTargetAddrEntry.o: ../snmp_vars.h target/snmpTargetAddrEntry.h
+target/snmpTargetAddrEntry.o: ../var_struct.h
+target/snmpTargetParamsEntry.o: ../agent_read_config.h ../agent_registry.h
+target/snmpTargetParamsEntry.o: ../agent_trap.h mibincl.h ../snmp_agent.h
+target/snmpTargetParamsEntry.o: ../snmp_vars.h target/snmpTargetParamsEntry.h
+target/snmpTargetParamsEntry.o: ../var_struct.h
+target/target_counters.o: ../agent_read_config.h ../agent_registry.h
+target/target_counters.o: ../agent_trap.h ../helpers/instance.h mibincl.h
+target/target_counters.o: ../snmp_agent.h ../snmp_vars.h
+target/target_counters.o: target/target_counters.h 
+target/target_counters.o: ../var_struct.h
+target/target.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+target/target.o: mibincl.h ../snmp_agent.h ../snmp_vars.h
+target/target.o: target/snmpTargetAddrEntry.h target/snmpTargetParamsEntry.h
+target/target.o: target/target.h 
+target/target.o: ../var_struct.h
+testdelayed.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+testdelayed.o: ../../config.h ../helpers/instance.h ../helpers/serialize.h
+testdelayed.o: ../helpers/table.h ../../m/generic.h mibincl.h
+testdelayed.o: ../../mib_module_config.h ../../s/generic.h ../../s/linux.h
+testdelayed.o: ../snmp_agent.h ../../snmplib/asn1.h ../../snmplib/callback.h
+testdelayed.o: ../../snmplib/getopt.h ../../snmplib/mib.h
+testdelayed.o: ../../snmplib/read_config.h ../../snmplib/snmp_alarm.h
+testdelayed.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_client.h
+testdelayed.o: ../../snmplib/snmp_debug.h ../../snmplib/snmp.h
+testdelayed.o: ../../snmplib/snmp_impl.h ../../snmplib/snmp_logging.h
+testdelayed.o: ../../snmplib/tools.h ../snmp_vars.h ../../s/sysv.h
+testdelayed.o: testdelayed.h  
+testdelayed.o: ../var_struct.h
+testhandler.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+testhandler.o: ../../config.h ../helpers/instance.h ../helpers/table.h
+testhandler.o: ../../m/generic.h mibincl.h ../../mib_module_config.h
+testhandler.o: ../../s/generic.h ../../s/linux.h ../snmp_agent.h
+testhandler.o: ../../snmplib/asn1.h ../../snmplib/callback.h
+testhandler.o: ../../snmplib/mib.h ../../snmplib/read_config.h
+testhandler.o: ../../snmplib/snmp_alarm.h ../../snmplib/snmp_api.h
+testhandler.o: ../../snmplib/snmp_client.h ../../snmplib/snmp_debug.h
+testhandler.o: ../../snmplib/snmp.h ../../snmplib/snmp_impl.h
+testhandler.o: ../../snmplib/snmp_logging.h ../../snmplib/tools.h
+testhandler.o: ../snmp_vars.h ../../s/sysv.h testhandler.h
+testhandler.o: ../var_struct.h
+ucd-snmp/disk.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+ucd-snmp/disk.o: ../auto_nlist.h mibdefs.h mibincl.h ../snmp_agent.h
+ucd-snmp/disk.o: ../snmp_vars.h struct.h ucd-snmp/disk.h ucd-snmp/errormib.h
+ucd-snmp/disk.o: util_funcs.h ../var_struct.h
+ucd-snmp/dlmod.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+ucd-snmp/dlmod.o: mibincl.h ../snmp_agent.h ../snmp_vars.h struct.h
+ucd-snmp/dlmod.o: ucd-snmp/dlmod.h 
+ucd-snmp/dlmod.o: util_funcs.h ../var_struct.h
+ucd-snmp/errormib.o: ../agent_read_config.h ../agent_registry.h
+ucd-snmp/errormib.o: ../agent_trap.h ../auto_nlist.h mibdefs.h mibincl.h
+ucd-snmp/errormib.o: ../snmp_agent.h ../snmp_vars.h struct.h
+ucd-snmp/errormib.o: ucd-snmp/errormib.h 
+ucd-snmp/errormib.o: util_funcs.h ../var_struct.h
+ucd-snmp/extensible.o: ../agent_read_config.h ../agent_registry.h
+ucd-snmp/extensible.o: ../agent_trap.h ../auto_nlist.h mibdefs.h mibincl.h
+ucd-snmp/extensible.o: ../snmp_agent.h ../snmp_vars.h struct.h
+ucd-snmp/extensible.o: ucd-snmp/extensible.h 
+ucd-snmp/extensible.o: util_funcs.h ../var_struct.h
+ucd-snmp/file.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+ucd-snmp/file.o: mibdefs.h mibincl.h ../snmp_agent.h ../snmp_vars.h struct.h
+ucd-snmp/file.o: ucd-snmp/file.h 
+ucd-snmp/file.o: ../var_struct.h
+ucd-snmp/loadave.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+ucd-snmp/loadave.o: ../auto_nlist.h ../kernel.h mibdefs.h mibincl.h
+ucd-snmp/loadave.o: ../snmp_agent.h ../snmp_vars.h struct.h ucd-snmp/loadave.h
+ucd-snmp/loadave.o: util_funcs.h ../var_struct.h
+ucd-snmp/memory.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+ucd-snmp/memory.o: ../auto_nlist.h mibdefs.h mibincl.h ../snmp_agent.h
+ucd-snmp/memory.o: ../snmp_vars.h struct.h ucd-snmp/memory.h
+ucd-snmp/memory.o: util_funcs.h ../var_struct.h
+ucd-snmp/pass.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+ucd-snmp/pass.o: mibdefs.h mibincl.h ../snmp_agent.h ../snmp_vars.h struct.h
+ucd-snmp/pass.o: ucd-snmp/extensible.h ucd-snmp/pass.h 
+ucd-snmp/pass.o: util_funcs.h ../var_struct.h
+ucd-snmp/pass_persist.o: ../agent_read_config.h ../agent_registry.h
+ucd-snmp/pass_persist.o: ../agent_trap.h mibdefs.h mibincl.h ../snmp_agent.h
+ucd-snmp/pass_persist.o: ../snmp_vars.h struct.h ucd-snmp/extensible.h
+ucd-snmp/pass_persist.o: ucd-snmp/pass_persist.h 
+ucd-snmp/pass_persist.o: util_funcs.h ../var_struct.h
+ucd-snmp/proc.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+ucd-snmp/proc.o: ../kernel.h mibdefs.h mibincl.h ../snmp_agent.h
+ucd-snmp/proc.o: ../snmp_vars.h struct.h ucd-snmp/errormib.h ucd-snmp/proc.h
+ucd-snmp/proc.o: util_funcs.h ../var_struct.h
+ucd-snmp/proxy.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+ucd-snmp/proxy.o: mibincl.h ../snmp_agent.h ../snmp_vars.h ucd-snmp/proxy.h
+ucd-snmp/proxy.o: ../var_struct.h
+ucd-snmp/registry.o: ../agent_read_config.h ../agent_registry.h
+ucd-snmp/registry.o: ../agent_trap.h mibincl.h ../snmp_agent.h ../snmp_vars.h
+ucd-snmp/registry.o: ucd-snmp/registry.h 
+ucd-snmp/registry.o: ../var_struct.h
+ucd-snmp/versioninfo.o: ../agent_read_config.h ../agent_registry.h
+ucd-snmp/versioninfo.o: ../agent_trap.h mibdefs.h mibincl.h ../snmp_agent.h
+ucd-snmp/versioninfo.o: ../snmp_vars.h struct.h ucd-snmp/versioninfo.h
+ucd-snmp/versioninfo.o: util_funcs.h ../var_struct.h
+ucd-snmp/vmstat.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+ucd-snmp/vmstat.o: ../auto_nlist.h mibdefs.h mibincl.h ../snmp_agent.h
+ucd-snmp/vmstat.o: ../snmp_vars.h struct.h ucd-snmp/vmstat.h
+ucd-snmp/vmstat.o: util_funcs.h ../var_struct.h
+util_funcs.o: ../agent_read_config.h ../agent_registry.h ../agent_trap.h
+util_funcs.o: ../../config.h ../../m/generic.h mibdefs.h mibincl.h
+util_funcs.o: ../../mib_module_config.h ../../s/generic.h ../../s/linux.h
+util_funcs.o: ../snmp_agent.h ../../snmplib/asn1.h ../../snmplib/callback.h
+util_funcs.o: ../../snmplib/getopt.h ../../snmplib/mib.h
+util_funcs.o: ../../snmplib/read_config.h ../../snmplib/snmp_alarm.h
+util_funcs.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_client.h
+util_funcs.o: ../../snmplib/snmp_debug.h ../../snmplib/snmp.h
+util_funcs.o: ../../snmplib/snmp_impl.h ../../snmplib/snmp_logging.h
+util_funcs.o: ../../snmplib/system.h ../../snmplib/tools.h ../snmp_vars.h
+util_funcs.o: ../../s/sysv.h struct.h ucd-snmp/errormib.h
+util_funcs.o: util_funcs.h ../var_struct.h

@@ -51,6 +51,7 @@
 
 #include "snmp_vars.h"
 #include "snmp_agent.h"
+#include "agent_handler.h"
 #include "var_struct.h"
 #include "snmpd.h"
 #include "agentx/protocol.h"
@@ -67,6 +68,7 @@
 #include "mibII/sysORTable.h"
 #endif
 #include "system.h"
+#include "snmpCallbackDomain.h"
 
 #include "subagent.h"
 
@@ -74,17 +76,35 @@ static SNMPCallback subagent_register_ping_alarm;
 static SNMPAlarmCallback agentx_reopen_session;
 void agentx_register_callbacks(struct snmp_session *s);
 void agentx_unregister_callbacks(struct snmp_session *ss);
+int handle_subagent_response(int op, struct snmp_session *session, int reqid,
+                             struct snmp_pdu *pdu, void *magic);
+int handle_subagent_set_response(int op, struct snmp_session *session,
+                                 int reqid, struct snmp_pdu *pdu, void *magic);
 
 struct agent_set_info {
     int			  transID;
     int			  mode;
+    int                   errstat;
     time_t		  uptime;
     struct snmp_session  *sess;
     struct variable_list *var_list;
+    
     struct agent_set_info *next;
 };
 
 static struct agent_set_info *Sets = NULL;
+
+struct snmp_session *agentx_callback_sess = NULL;
+extern int callback_master_num;
+
+void
+init_subagent(void) {
+    agentx_callback_sess =
+        snmp_callback_open(callback_master_num,
+                           handle_subagent_response,
+                           NULL, NULL);
+}
+
 
 struct agent_set_info *
 save_set_vars( struct snmp_session *ss, struct snmp_pdu *pdu )
@@ -102,7 +122,7 @@ save_set_vars( struct snmp_session *ss, struct snmp_pdu *pdu )
 	 */
     ptr->transID = pdu->transid;
     ptr->sess    = ss;
-    ptr->mode    = RESERVE1;
+    ptr->mode    = SNMP_MSG_INTERNAL_SET_RESERVE1;
     gettimeofday(&now, NULL);
     ptr->uptime = calculate_time_diff(&now, &starttime);
 
@@ -119,24 +139,21 @@ save_set_vars( struct snmp_session *ss, struct snmp_pdu *pdu )
 }
 
 struct agent_set_info *
-restore_set_vars( struct agent_snmp_session *asp )
+restore_set_vars( struct snmp_session *sess, struct snmp_pdu *pdu )
 {
     struct agent_set_info *ptr;
 
     for ( ptr=Sets ; ptr != NULL ; ptr=ptr->next )
-	if ( ptr->sess == asp->session && ptr->transID == asp->pdu->transid )
+	if ( ptr->sess == sess && ptr->transID == pdu->transid )
 	    break;
 
     if ( ptr == NULL || ptr->var_list == NULL )
 	return NULL;
 
-    asp->rw      	= WRITE;
-    asp->pdu->variables = ptr->var_list;
-    asp->start		= ptr->var_list;
-    asp->end		= ptr->var_list;
-    while ( asp->end->next_variable )
-	asp->end = asp->end->next_variable;
-    asp->mode		= ptr->mode;
+    pdu->variables = snmp_clone_varbind(ptr->var_list);
+    if (pdu->variables == NULL)
+        return NULL;
+    
     return ptr;
 }
 
@@ -170,6 +187,9 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
     struct agent_set_info      *asi;
     int status, allDone, i;
     struct variable_list *var_ptr, *var_ptr2;
+    int (*mycallback)(int operation, struct snmp_session *session, int reqid,
+                      struct snmp_pdu *pdu, void *magic);
+    void *retmagic;
 
     if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
       int period = ds_get_int(DS_APPLICATION_ID,DS_AGENT_AGENTX_PING_INTERVAL);
@@ -189,200 +209,154 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	snmp_alarm_register(period, SA_REPEAT, agentx_reopen_session, NULL);
       }
       return 0;
-    }else if (operation != SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    } else if (operation != SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
       DEBUGMSGTL(("agentx/subagent", "unexpected callback op %d\n",operation));
       return 1;
     }
 
-    asp = init_agent_snmp_session( session, pdu );
+    /* ok, we have a pdu from the net. Modify as needed */
 
-    DEBUGMSGTL(("agentx/subagent","handling agentx request....\n"));
+    pdu->version = agentx_callback_sess->version;
+    pdu->flags |= UCD_MSG_FLAG_ALWAYS_IN_VIEW;
 
-    switch (pdu->command) {
-    case AGENTX_MSG_GET:
-        DEBUGMSGTL(("agentx/subagent","  -> get\n"));
-	status = handle_next_pass( asp );
-	break;
+    switch(pdu->command) {
+        case AGENTX_MSG_GET:
+            DEBUGMSGTL(("agentx/subagent","  -> get\n"));
+            pdu->command = SNMP_MSG_GET;
+            mycallback = handle_subagent_response;
+            retmagic = session;
+            break;
 
-    case AGENTX_MSG_GETBULK:
-        DEBUGMSGTL(("agentx/subagent","  -> getbulk\n"));
-	    /*
-	     * GETBULKS require multiple passes. The first pass handles the
-	     * explicitly requested varbinds, and subsequent passes append
-	     * to the existing var_op_list.  Each pass (after the first)
-	     * uses the results of the preceeding pass as the input list
-	     * (delimited by the start & end pointers.
-	     * Processing is terminated if all entries in a pass are
-	     * EndOfMib, or the maximum number of repetitions are made.
-	     */
-	asp->exact   = FALSE;
-		/*
-		 * Limit max repetitions to something reasonable
-		 *	XXX: We should figure out what will fit somehow...
-		 */
-	if ( asp->pdu->errindex > 100 )
-	    asp->pdu->errindex = 100;
+        case AGENTX_MSG_GETNEXT:
+            DEBUGMSGTL(("agentx/subagent","  -> getnext\n"));
+            pdu->command = SNMP_MSG_GETNEXT;
+            mycallback = handle_subagent_response;
+            retmagic = session;
+            break;
 
-	status = handle_next_pass( asp );	/* First pass */
-	if ( status != SNMP_ERR_NOERROR )
-	    break;
+        case AGENTX_MSG_GETBULK:
+            /* WWWXXX */
+            DEBUGMSGTL(("agentx/subagent","  -> getbulk\n"));
+            pdu->command = SNMP_MSG_GETBULK;
+            mycallback = handle_subagent_response;
+            retmagic = session;
+            break;
+            
+        case AGENTX_MSG_RESPONSE:
+            DEBUGMSGTL(("agentx/subagent","  -> response\n"));
+            return 1;
 
-	while ( asp->pdu->errstat-- > 0 )	/* Skip non-repeaters */
-	    asp->start = asp->start->next_variable;
-	asp->pdu->errindex--;           /* First repetition was handled above */
+        case AGENTX_MSG_TESTSET:
+            /* XXXWWW we have to map this twice to both RESERVE1 and RESERVE2 */
+            DEBUGMSGTL(("agentx/subagent","  -> testset\n"));
+            asi = save_set_vars( session, pdu );
+            asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_RESERVE1;
+            mycallback = handle_subagent_set_response;
+            retmagic = asi;
+            break;
+            
+        case AGENTX_MSG_COMMITSET:
+            DEBUGMSGTL(("agentx/subagent","  -> commitset\n"));
+            asi = restore_set_vars( session, pdu );
+            asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_ACTION;
+            mycallback = handle_subagent_set_response;
+            retmagic = asi;
+            break;
 
-	while ( asp->pdu->errindex-- > 0 ) {	/* Process repeaters */
-		/*
-		 * Add new variable structures for the
-		 * repeating elements, ready for the next pass.
-		 * Also check that these are not all EndOfMib
-		 */
-	    allDone = TRUE;		/* Check for some content */
-	    for ( var_ptr = asp->start;
-		  var_ptr != asp->end->next_variable;
-		  var_ptr = var_ptr->next_variable ) {
-				/* XXX: we don't know the size of the next
-					OID, so assume the maximum length */
-		var_ptr2 = snmp_add_null_var(asp->pdu, var_ptr->name, MAX_OID_LEN);
-		for ( i=var_ptr->name_length ; i<MAX_OID_LEN ; i++)
-		    var_ptr2->name[i] = '\0';
-		var_ptr2->name_length = var_ptr->name_length;
+        case AGENTX_MSG_CLEANUPSET:
+            DEBUGMSGTL(("agentx/subagent","  -> cleanupset\n"));
+            asi = restore_set_vars( session, pdu );
+            if (asi->mode == AGENTX_MSG_TESTSET) {
+                asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_FREE;
+            } else {
+                asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_COMMIT;
+            }
+            mycallback = handle_subagent_set_response;
+            retmagic = asi;
+            break;
 
-		if ( var_ptr->type != SNMP_ENDOFMIBVIEW )
-		    allDone = FALSE;
-	    }
-	    if ( allDone )
-		break;
+        case AGENTX_MSG_UNDOSET:
+            DEBUGMSGTL(("agentx/subagent","  -> undoset\n"));
+            asi = restore_set_vars( session, pdu );
+            asi->mode = pdu->command = SNMP_MSG_INTERNAL_SET_UNDO;
+            mycallback = handle_subagent_set_response;
+            retmagic = asi;
+            break;
 
-	    asp->start = asp->end->next_variable;
-	    while ( asp->end->next_variable != NULL )
-		asp->end = asp->end->next_variable;
-	    
-	    status = handle_next_pass( asp );
-	    if ( status != SNMP_ERR_NOERROR )
-		break;
-	}
-	break;
-
-    case AGENTX_MSG_GETNEXT:
-        DEBUGMSGTL(("agentx/subagent","  -> getnext\n"));
-	asp->exact   = FALSE;
-	status = handle_next_pass( asp );
-	break;
-
-    case AGENTX_MSG_TESTSET:
-        DEBUGMSGTL(("agentx/subagent","  -> testset\n"));
-    	    /*
-	     * In the UCD architecture the first two passes through var_op_list
-	     * verify that all types, lengths, and values are valid
-	     * and may reserve resources.
-	     * These correspond to the first AgentX pass - TESTSET
-	     */
-	asp->rw      = WRITE;
-        asp->mode = RESERVE1;
-	asi = save_set_vars( session, pdu );
-	if ( asi ) {
-	    status = handle_next_pass( asp );
-	}
-	else
-	    status = AGENTX_ERR_PROCESSING_ERROR;
-
-	if ( status == SNMP_ERR_NOERROR ) {
-	    asp->mode = RESERVE2;
-	    status = handle_next_pass( asp );
-	}
-
-	if ( status == SNMP_ERR_NOERROR )
-	    asi->mode = ACTION;
-	else
-	    asi->mode = FREE;
-	
-	break;
-
-
-	    /*
-	     * The third and fourth passes in the UCD architecture
-	     *   correspond to distinct AgentX passes,
-	     *   as does the "undo" pass, in case of errors elsewhere
-	     */
-    case AGENTX_MSG_COMMITSET:
-        DEBUGMSGTL(("agentx/subagent","  -> commitset\n"));
-        asp->mode = ACTION;
-        asi = restore_set_vars( asp );
-	if ( asi ) {
-	    status = handle_next_pass( asp );
-	}
-	else
-	    status = AGENTX_ERR_PROCESSING_ERROR;
-
-	if ( status == SNMP_ERR_NOERROR )
-	    asi->mode = COMMIT;
-	else
-	    asi->mode = UNDO;
-	
-        asp->pdu->variables = NULL;
-	break;
-
-    case AGENTX_MSG_CLEANUPSET:
-        DEBUGMSGTL(("agentx/subagent","  -> cleanupset\n"));
-        asi = restore_set_vars( asp );
-	if ( asi ) {
-	    asp->mode = asi->mode;
-	    status = handle_next_pass( asp );
-	}
-	else
-	    status = AGENTX_ERR_PROCESSING_ERROR;
-
-	free_set_vars( session, pdu );
-        asp->pdu->variables = NULL;
-	break;
-
-    case AGENTX_MSG_UNDOSET:
-        DEBUGMSGTL(("agentx/subagent","  -> undoset\n"));
-        asp->mode = UNDO;
-        asi = restore_set_vars( asp );
-	if ( asi ) {
-	    status = handle_next_pass( asp );
-	}
-	else
-	    status = AGENTX_ERR_PROCESSING_ERROR;
-
-	free_set_vars( session, pdu );
-        asp->pdu->variables = NULL;
-	break;
-
-    case AGENTX_MSG_RESPONSE:
-        DEBUGMSGTL(("agentx/subagent","  -> response\n"));
-	free_agent_snmp_session( asp );
-	return 1;
-
-    default:
-        DEBUGMSGTL(("agentx/subagent","  -> unknown (%d)\n", pdu->command ));
-	free_agent_snmp_session( asp );
-	return 0;
+        default:
+            DEBUGMSGTL(("agentx/subagent","  -> unknown (%d)\n",
+                        pdu->command ));
+            return 0;
     }
-	
-    
-	
-    if ( asp->outstanding_requests == NULL ) {
-	if ( status != SNMP_ERR_NOERROR ) {
-	    snmp_free_pdu( asp->pdu );
-	    asp->pdu = asp->orig_pdu;
-	    asp->orig_pdu = NULL;
-	}
-	asp->pdu->command = AGENTX_MSG_RESPONSE;
-	asp->pdu->errstat  = status;
-	asp->pdu->errindex = asp->index;
-	if (!snmp_send(asp->session, asp->pdu)) {
-	    snmp_free_pdu(asp->pdu);
-	}
-	asp->pdu = NULL;
-	free_agent_snmp_session( asp );
-    }
-    DEBUGMSGTL(("agentx/subagent","  FINISHED\n"));
 
+    /* submit the pdu to the internal handler */
+    snmp_async_send(agentx_callback_sess, pdu, mycallback, retmagic);
     return 1;
 }
+
+int
+handle_subagent_response(int op, struct snmp_session *session, int reqid,
+                         struct snmp_pdu *pdu, void *magic) 
+{
+    struct snmp_session *retsess;
+    
+    if (op != SNMP_CALLBACK_OP_RECEIVED_MESSAGE || magic == NULL) {
+      return 1;
+    }
+
+    retsess = (struct snmp_session *) magic;
+    
+    pdu = snmp_clone_pdu(pdu);
+    DEBUGMSGTL(("agentx/subagent","handling agentx subagent response....\n"));
+
+    if (pdu->command == SNMP_MSG_INTERNAL_SET_FREE ||
+        pdu->command == SNMP_MSG_INTERNAL_SET_UNDO ||
+        pdu->command == SNMP_MSG_INTERNAL_SET_COMMIT)
+        free_set_vars(retsess, pdu);
+    
+    pdu->command = AGENTX_MSG_RESPONSE;
+    pdu->version = retsess->version;
+    
+    if (!snmp_send(retsess, pdu)) {
+        snmp_free_pdu(pdu);
+    }
+    DEBUGMSGTL(("agentx/subagent","  FINISHED\n"));
+    return 1;
+}
+
+int
+handle_subagent_set_response(int op, struct snmp_session *session, int reqid,
+                             struct snmp_pdu *pdu, void *magic) 
+{
+    struct snmp_session *retsess;
+    struct agent_set_info *asi;
+    
+    if (op != SNMP_CALLBACK_OP_RECEIVED_MESSAGE || magic == NULL) {
+        return 1;
+    }
+
+    DEBUGMSGTL(("agentx/subagent",
+                "handling agentx subagent set response....\n"));
+
+    asi = (struct snmp_session *) magic;
+    retsess = asi->sess;
+    asi->errstat = pdu->errstat;
+    
+    if (pdu->command == SNMP_MSG_INTERNAL_SET_FREE ||
+        pdu->command == SNMP_MSG_INTERNAL_SET_UNDO ||
+        pdu->command == SNMP_MSG_INTERNAL_SET_COMMIT)
+        free_set_vars(retsess, pdu);
+    
+    pdu->command = AGENTX_MSG_RESPONSE;
+    pdu->version = retsess->version;
+    
+    if (!snmp_send(retsess, pdu)) {
+        snmp_free_pdu(pdu);
+    }
+    DEBUGMSGTL(("agentx/subagent","  FINISHED\n"));
+    return 1;
+}
+
 
 
 int

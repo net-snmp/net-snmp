@@ -34,9 +34,12 @@
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
+#include "snmp_client.h"
 
 #include "snmp_vars.h"
 #include "agent_read_config.h"
+#include "agent_handler.h"
+#include "agent_registry.h"
 #include "var_struct.h"
 
 #include "snmp.h"

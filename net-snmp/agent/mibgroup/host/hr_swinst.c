@@ -170,7 +170,9 @@ oid hrswinst_variables_oid[] = { 1,3,6,1,2,1,25,6 };
 
 void init_hr_swinst(void)
 {
+#if defined(HAVE_LIBRPM) || defined(_PATH_HRSW_directory)
     SWI_t *swi = &_myswi;	/* XXX static for now */
+#endif
 
 	/* Read settings from config file,
 	    or take system-specific defaults */

@@ -2027,7 +2027,10 @@ write_mteTriggerEntryStatus(int      action,
               StorageTmp->mteTriggerEntryStatus == RS_ACTIVE &&
               !StorageTmp->have_copied_auth_info) {
               
+              struct agent_snmp_session *asp;
+/* XXXWWW: fix me for new api
               struct agent_snmp_session *asp = get_current_agent_session();
+*/
               struct snmp_pdu *pdu = NULL;
               
               if (!asp) {
@@ -2212,15 +2215,10 @@ mte_get_response(struct mteTriggerTable_data *item, struct snmp_pdu *pdu) {
             asp->mode = RESERVE2;
         }
         
+/* XXXWWW: fixme for new api
         status = handle_next_pass(asp);
-
-        if (asp->outstanding_requests != NULL) {
-            snmp_log(LOG_ERR, "ack: can't handle subagent reqouests in event mib");
-            free_agent_snmp_session(asp);
-            snmp_free_pdu(pdu);
-            return NULL;
-        }
-
+*/
+        
         if (status != SNMP_ERR_NOERROR) {
             /* xxx */
             DEBUGMSGTL(("mteTriggerTable","Error received\n"));

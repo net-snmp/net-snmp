@@ -1136,6 +1136,7 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
       }
     } else {
       readfrom = copy_nword(readfrom, (char *)*str, *len);
+      *len = strlen(*str);
     }
   }
 
@@ -1199,6 +1200,9 @@ char *read_config_read_objid(char *readfrom, oid **objid, size_t *len) {
    Returns: character pointer to the next token in the configuration line.
             NULL if none left.
             NULL if an unknown type.
+
+            dataptr is expected to match a pointer type being read
+            (int *, u_int *, char **, oid **)
 */
 char *read_config_read_data(int type, char *readfrom, void *dataptr, size_t *len) {
   int *intp;
@@ -1236,8 +1240,59 @@ char *read_config_read_data(int type, char *readfrom, void *dataptr, size_t *len
   return NULL;
 }
 
-/* read_config_read_data():
-   reads data of a given type from a token(s) on a configuration line.
+/* read_config_read_memory():
+
+   similar to read_config_read_data, but expects a generic memory
+   pointer rather than a specific type of pointer.  Len is expected to
+   be the amount of available memory.
+*/
+char *read_config_read_memory(int type, char *readfrom,
+                              char *dataptr, size_t *len) {
+  int *intp;
+  unsigned int *uintp;
+
+  if (!dataptr || !readfrom)
+      return NULL;
+  
+  switch(type) {
+    case ASN_INTEGER:
+      if (*len < sizeof(int))
+          return NULL;
+      intp = (int *) dataptr;
+      *intp = atoi(readfrom);
+      *len = sizeof(int);
+      readfrom = skip_token(readfrom);
+      return readfrom;
+      
+    case ASN_UNSIGNED:
+      if (*len < sizeof(unsigned int))
+          return NULL;
+      uintp = (unsigned int *) dataptr;
+      *uintp = strtoul(readfrom, NULL, 0);
+      *len = sizeof(unsigned int);
+      readfrom = skip_token(readfrom);
+      return readfrom;
+
+    case ASN_OCTET_STR:
+    case ASN_BIT_STR:
+    case ASN_PRIV_IMPLIED_OCTET_STR:
+      return read_config_read_octet_string(readfrom, (u_char **) &dataptr, len);
+
+    case ASN_PRIV_IMPLIED_OBJECT_ID:
+    case ASN_OBJECT_ID:
+        readfrom = read_config_read_objid(readfrom, (oid **) &dataptr, len);
+        *len *= sizeof(oid);
+        return readfrom;
+
+    default:
+      DEBUGMSGTL(("read_config_read_memory","Fail: Unknown type: %d", type));
+      return NULL;
+  }
+  return NULL;
+}
+
+/* read_config_store_data():
+   stores data of a given type to a configuration line.
 
    Returns: character pointer to the next token in the configuration line.
             NULL if none left.

@@ -52,6 +52,8 @@
 
 #include "snmpd.h"
 #include "mibgroup/struct.h"
+#include "helpers/table.h"
+#include "helpers/table_iterator.h"
 #include "mib_module_includes.h"
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE

@@ -206,7 +206,7 @@ void init_interfaces(void)
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/interfaces", interfaces_variables, variable4, \
                interfaces_variables_oid);
-  REGISTER_SYSOR_ENTRY(interfaces_module_oid,
+  REGISTER_SYSOR_ENTRY(interfaces_module_oid, \
 	"The MIB module to describe generic objects for network interface sub-layers");
   
   snmpd_register_config_handler("interface", parse_interface_config,

@@ -26,6 +26,7 @@
 #include "snmpAAL5PVCDomain.h"
 #endif
 #include "snmp_api.h"
+#include "tools.h"
 
 
 /*  The standard SNMP domains.  */
@@ -187,3 +188,49 @@ int		       snmp_transport_support	(const oid *in_oid,
 #endif
   return 0;
 }
+
+
+/** adds a transport to a linked list of transports.
+    Returns 1 on failure, 0 on success */
+int
+snmp_transport_add_to_list(snmp_transport_list **transport_list,
+                           snmp_transport *transport) {
+    snmp_transport_list *newptr = SNMP_MALLOC_TYPEDEF(snmp_transport_list);
+
+    if (!newptr)
+        return 1;
+
+    newptr->next = *transport_list;
+    newptr->transport = transport;
+    
+    *transport_list = newptr;
+
+    return 0;
+}
+
+
+/**  removes a transport from a linked list of transports.
+     Returns 1 on failure, 0 on success */
+int
+snmp_transport_remove_from_list(snmp_transport_list **transport_list,
+                                snmp_transport *transport) {
+    snmp_transport_list *ptr = *transport_list, *lastptr = NULL;
+
+    while(ptr && ptr->transport != transport) {
+        lastptr = ptr;
+        ptr = ptr->next;
+    }
+
+    if (!ptr)
+        return 1;
+
+    if (lastptr)
+        lastptr->next = ptr->next;
+    else
+        *transport_list = ptr->next;
+    
+    free(ptr);
+
+    return 0;
+}
+

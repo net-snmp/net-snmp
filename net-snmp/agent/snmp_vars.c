@@ -128,6 +128,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "callback.h"
 #include "snmp_alarm.h"
 #include "snmpd.h"
+#include "helpers/all_helpers.h"
 #include "mib_module_includes.h"
 
 #ifndef  MIN
@@ -208,6 +209,8 @@ u_char		return_buf[256]; /* nee 64 */
 #endif
 
 struct timeval	starttime;
+struct snmp_session *callback_master_sess;
+int callback_master_num;
 
 /* init_agent() returns non-zero on error */
 int
@@ -234,6 +237,17 @@ init_agent (const char *app)
 #ifdef TESTING
   auto_nlist_print_tree(-2, 0);
 #endif
+
+  /* always register a callback transport for internal use */
+  callback_master_sess = snmp_callback_open(0, handle_snmp_packet,
+                                            snmp_check_packet,
+                                            snmp_check_parse);
+  if (callback_master_sess)
+      callback_master_num = callback_master_sess->local_port;
+  else
+      callback_master_num = -1;
+
+  init_helpers();
 
   /* initialize agentx subagent if necessary. */
 #ifdef USING_AGENTX_SUBAGENT_MODULE
@@ -453,14 +467,14 @@ getStatPtr(
     DEBUGMSGOID(("snmp_vars", name, *namelen));
     DEBUGMSG(("snmp_vars"," ...\n"));
 
-    tp = find_subtree(name, *namelen, NULL);
+    tp = find_subtree(name, *namelen, NULL, ""); /* WWW delete this function */ 
 
     if ((tp != NULL) && (tp->flags & FULLY_QUALIFIED_INSTANCE) && (!exact)) {
 	/*  There is no point in trying to do a getNext operation at this
 	    node, because it covers exactly one instance.  Therfore, find the
 	    next node.  This arises in AgentX row registrations (only).  */
 	DEBUGMSGTL(("snmp_vars", "fully-qualified instance && !exact\n"));
-	tp = find_subtree_next(name, *namelen, tp);
+	tp = find_subtree_next(name, *namelen, tp, ""); /* WWW: delete this function */
     }
     
     while (search_return == NULL && tp != NULL) {

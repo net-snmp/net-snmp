@@ -75,8 +75,6 @@ struct trap_sink *sinks	  = NULL;
 
 extern struct timeval	starttime;
 
-#define OID_LENGTH(x)  (sizeof(x)/sizeof(x[0]))
-
 oid objid_enterprisetrap[] = { EXTENSIBLEMIB, 251 };
 oid version_id[]	   = { EXTENSIBLEMIB, AGENTID, OSTYPE };
 int enterprisetrap_len = OID_LENGTH( objid_enterprisetrap );

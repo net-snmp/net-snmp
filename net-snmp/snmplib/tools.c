@@ -719,3 +719,26 @@ int atime_ready( marker_t pm, int deltaT)
 
   return 1;
 }
+
+
+	/*
+	 * Time-related utility functions
+	 */
+
+		/* Return the number of timeTicks since the given marker */
+int
+marker_tticks( marker_t pm )
+{
+    int res;
+    marker_t now = atime_newMarker();
+
+    res = atime_diff( pm, now );
+    free( now );
+    return res/10;      /* atime_diff works in msec, not csec */
+}
+
+int timeval_tticks( struct timeval *tv )
+{
+    return marker_tticks((marker_t)tv);
+}
+

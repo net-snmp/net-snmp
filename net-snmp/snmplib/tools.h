@@ -148,6 +148,9 @@ void atime_setMarker(marker_t pm);
 long atime_diff( marker_t first, marker_t second );
 int atime_ready( marker_t pm, int deltaT);
 
+int marker_tticks( marker_t pm );
+int timeval_tticks( struct timeval *tv );
+
 #ifdef __cplusplus
 }
 #endif

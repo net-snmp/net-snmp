@@ -49,6 +49,7 @@
 #include "agent_read_config.h"
 #include "system.h"
 #include "sysORTable.h"
+#include "helpers/old_api.h"
 
 
 	/*********************
@@ -196,8 +197,8 @@ void init_system_mib(void)
                system_variables_oid);
 
   if ( ++system_module_count == 3 )
-	REGISTER_SYSOR_ENTRY( system_module_oid,
-		"The MIB module for SNMPv2 entities");
+	REGISTER_SYSOR_ENTRY( system_module_oid, \
+                              "The MIB module for SNMPv2 entities");
   
   /* register our config handlers */
   snmpd_register_config_handler("syslocation", system_parse_config_sysloc,
@@ -229,8 +230,6 @@ var_system(struct variable *vp,
 	   WriteMethod **write_method)
 {
 
-    struct timeval now;
-
     if (header_generic(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
 
@@ -243,8 +242,7 @@ var_system(struct variable *vp,
             *var_len = version_id_len*sizeof(version_id[0]);
             return (u_char *)version_id;
         case UPTIME:
-            gettimeofday(&now, NULL);
-	    long_return = timeval_uptime( &now );
+            long_return = get_agent_uptime();
             return ((u_char *) &long_return);
         case SYSCONTACT:
             *var_len = strlen(sysContact);

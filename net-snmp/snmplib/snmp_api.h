@@ -741,7 +741,8 @@ void	*snmp_sess_add_ex(struct snmp_session *, struct _snmp_transport *,
 					      snmp_pdu *, int), 
 			  int (*fbuild) (struct snmp_session *, struct
 					 snmp_pdu *, u_char *, size_t *), 
-			  int (*fcheck) (u_char *, size_t));
+			  int (*fcheck) (u_char *, size_t),
+                          struct snmp_pdu * (*fcreate_pdu) (struct _snmp_transport *, void *, size_t));
 
 void   *snmp_sess_add	(struct snmp_session *, struct _snmp_transport *,
 			 int (*fpre_parse) (struct snmp_session *,
@@ -756,6 +757,15 @@ struct snmp_session *snmp_add(struct snmp_session *, struct _snmp_transport *,
 						 void *, int),
 			      int (*fpost_parse) (struct snmp_session *,
 						  struct snmp_pdu *, int));
+struct snmp_session *snmp_add_full(struct snmp_session *in_session,
+                                   struct _snmp_transport *transport,
+                                   int (*fpre_parse) (struct snmp_session *, struct _snmp_transport *, void *, int),
+                                   int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
+                                   int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
+                                   int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *),
+                                   int (*fcheck) (u_char *, size_t),
+                                   struct snmp_pdu * (*fcreate_pdu) (struct _snmp_transport *, void *, size_t)
+);
 
 /* use return value from snmp_sess_open as void * parameter */
 
@@ -830,7 +840,13 @@ void   snmp_sess_perror     (const char *prog_string, struct snmp_session *ss);
 #define  STAT_SNMP_STATS_START               STAT_SNMPINPKTS
 #define  STAT_SNMP_STATS_END                 STAT_SNMPOUTTRAPS
 
-#define  MAX_STATS                           41
+/* target mib counters */
+#define  STAT_SNMPUNAVAILABLECONTEXTS	     41
+#define  STAT_SNMPUNKNOWNCONTEXTS	     42
+#define  STAT_TARGET_STATS_START             STAT_SNMPUNAVAILABLECONTEXTS
+#define  STAT_TARGET_STATS_END               STAT_SNMPUNKNOWNCONTEXTS
+
+#define  MAX_STATS                           43
 
 #ifdef __cplusplus
 }

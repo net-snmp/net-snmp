@@ -104,6 +104,10 @@
 #include "snmp_alarm.h"
 #include "default_store.h"
 #include "ds_agent.h"
+#include "helpers/table.h"
+#include "helpers/table_iterator.h"
+#include "helpers/table_data.h"
+#include "helpers/table_dataset.h"
 #include "mib_module_includes.h"
 
 char dontReadConfigFiles;
@@ -200,7 +204,12 @@ void init_agent_read_config (const char *app)
   register_app_config_handler("agentaddress",
                           snmpd_set_agent_address, NULL,
                           "SNMP bind address");
-
+  register_app_config_handler("table",
+                              config_parse_table_set, NULL, "tableoid");
+  register_app_config_handler("add_row",
+                              config_parse_add_row, NULL, "indexes... values...");
+  init_handler_conf();
+  
 #include "mib_module_dot_conf.h"
 #ifdef TESTING
   print_config_handlers();

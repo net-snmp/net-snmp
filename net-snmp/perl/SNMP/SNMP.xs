@@ -3078,7 +3078,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
                        tmp_sv=newSVpv((char*)str_buf, len);
                        av_store(varbind, VARBIND_VAL_F, tmp_sv);
 		       if (sv_timestamp)
-                          av_store(varbind, VARBIND_TIME_F, sv_timestamp);
+                          av_store(varbind, VARBIND_TYPE_F, sv_timestamp);
                        XPUSHs(sv_mortalcopy(tmp_sv));
                     } else {
                        av_store(varbind, VARBIND_VAL_F, &sv_undef);
@@ -3257,7 +3257,7 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                     tmp_sv = newSVpv((char*)str_buf, len);
                     av_store(varbind, VARBIND_VAL_F, tmp_sv);
 		    if (sv_timestamp)
-                       av_store(varbind, VARBIND_TIME_F, sv_timestamp);
+                       av_store(varbind, VARBIND_TYPE_F, sv_timestamp);
                     XPUSHs(sv_mortalcopy(tmp_sv));
                  } else {
 		    /* Return undef for this variable. */
@@ -3456,7 +3456,7 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                     tmp_sv = newSVpv((char*)str_buf, len);
 		    av_store(varbind, VARBIND_VAL_F, tmp_sv);
 		    if (sv_timestamp)
-		       av_store(varbind, VARBIND_TIME_F, SvREFCNT_inc(sv_timestamp));
+		       av_store(varbind, VARBIND_TYPE_F, SvREFCNT_inc(sv_timestamp));
 
 		    rv = newRV_noinc((SV *)varbind);
 		    sv_bless(rv, gv_stashpv("SNMP::Varbind",0));

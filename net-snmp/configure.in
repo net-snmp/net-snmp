@@ -228,6 +228,8 @@ AC_ARG_WITH(out_transports,
                                     protocols.  This transport is compiled in
                                     by default except on Win32 platforms, and
                                     may be omitted.
+        Callback                  support for SNMP over an internal locally
+                                    connected pair of snmp_sessions.
         AAL5PVC                   support for SNMP over AAL5 PVCs.  This
                                     transport is presently only available for
                                     Linux, is never compiled in by default
@@ -398,6 +400,7 @@ AC_PATH_PROG(UNAMEPROG,uname)
 AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG")
 
 AC_C_CONST
+AC_C_INLINE
 
 dnl get version number.
 AC_MSG_CHECKING(for ucd-snmp version number)
@@ -725,7 +728,7 @@ dnl
 if test "x$PARTIALTARGETOS" = "xcygwin"; then
   transport_default_list="UDP TCP"
 else
-  transport_default_list="UDP TCP Unix"
+  transport_default_list="UDP TCP Unix Callback"
 fi
 for i in $transport_default_list; do
   if echo " $new_with_transport_list " | grep " $i " >/dev/null; then
@@ -2092,6 +2095,7 @@ AC_OUTPUT([
  Makefile:Makefile.top:Makefile.in
  snmplib/Makefile:Makefile.top:snmplib/Makefile.in 
  agent/Makefile:Makefile.top:agent/Makefile.in
+ agent/helpers/Makefile:Makefile.top:agent/helpers/Makefile.in
  apps/Makefile:Makefile.top:apps/Makefile.in
  apps/snmpnetstat/Makefile:Makefile.top:apps/snmpnetstat/Makefile.in
  agent/mibgroup/Makefile:Makefile.top:agent/mibgroup/Makefile.in

@@ -497,8 +497,8 @@ void vacm_parse_simple(const char *token, char *confline) {
   vacm_parse_view("view",line);
 
   /* map everything together */
-  /* access  anonymousGroupNameNUM  "" MODEL AUTHTYPE exact anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] */
-  sprintf(line, "anonymousGroupName%03d  \"\" %s %s exact %s %s %s", num,
+  /* access  anonymousGroupNameNUM  "" MODEL AUTHTYPE prefix anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] */
+  sprintf(line, "anonymousGroupName%03d  \"\" %s %s prefix %s %s %s", num,
           model, authtype, viewname, rw, rw);
   DEBUGMSGTL((token,"passing: %s %s\n", "access", line));
   vacm_parse_access("access",line);
@@ -536,6 +536,7 @@ vacm_in_view_callback(int majorID, int minorID, void *serverarg,
  *	3	Missing access
  *	4	Missing view
  *	5	Not in view
+ *      6       No Such Context
  *
  * Debug output listed as follows:
  *	<securityName> <groupName> <viewName> <viewType>
@@ -549,6 +550,9 @@ int vacm_in_view (struct snmp_pdu *pdu,
     struct vacm_viewEntry *vp;
     char *vn;
     char *sn = NULL;
+    /* len defined by the vacmContextName object */
+#define CONTEXTNAMEINDEXLEN 32
+    char contextNameIndex[CONTEXTNAMEINDEXLEN+1];
 
     if (pdu->version == SNMP_VERSION_1 || pdu->version == SNMP_VERSION_2c) {
 	if (snmp_get_do_debugging()) {
@@ -602,6 +606,17 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	sn = NULL;
     }
 
+    if (pdu->contextNameLen > CONTEXTNAMEINDEXLEN)
+        return 6;
+    /* NULL termination of the pdu field is ugly here.  Do in PDU parsing? */
+    strncpy(contextNameIndex, pdu->contextName, pdu->contextNameLen);
+    contextNameIndex[pdu->contextNameLen] = '\0';
+    if (!find_first_subtree(contextNameIndex)) {
+        /* rfc2575 section 3.2, step 1
+           no such context here; return no such context error */
+        return 6;
+    }
+
     if (sn == NULL) return 1;
     DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: sn=%s", sn));
 
@@ -609,7 +624,8 @@ int vacm_in_view (struct snmp_pdu *pdu,
     if (gp == NULL) { DEBUGMSG(("mibII/vacm_vars", "\n")); return 2; }
     DEBUGMSG (("mibII/vacm_vars", ", gn=%s", gp->groupName));
 
-    ap = vacm_getAccessEntry(gp->groupName, "", pdu->securityModel,
+    ap = vacm_getAccessEntry(gp->groupName, contextNameIndex,
+                             pdu->securityModel,
                              pdu->securityLevel);
     if (ap == NULL) { DEBUGMSG(("mibII/vacm_vars", "\n")); return 3; }
 

@@ -189,7 +189,7 @@ void init_tcp(void)
 {
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/tcp", tcp_variables, variable13, tcp_variables_oid);
-  REGISTER_SYSOR_ENTRY( tcp_module_oid,
+  REGISTER_SYSOR_ENTRY( tcp_module_oid, \
 		"The MIB module for managing TCP implementations");
 
 #ifdef TCPSTAT_SYMBOL

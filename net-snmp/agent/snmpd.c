@@ -1,8 +1,10 @@
 /*
- * snmpd.c - rrespond to SNMP queries from management stations
- *
+ * snmpd.c
  */
-/***********************************************************
+/** @defgroup agent The snmp agent
+ * The snmp agent responds to SNMP queries from management stations
+ */
+/*
 	Copyright 1988, 1989 by Carnegie Mellon University
 
                       All Rights Reserved
@@ -124,6 +126,7 @@ typedef long    fd_mask;
 
 #include "snmp_client.h"
 #include "snmpd.h"
+#include "agent_handler.h"
 #include "var_struct.h"
 #include "mibgroup/struct.h"
 #include "snmp_debug.h"
@@ -144,6 +147,8 @@ typedef long    fd_mask;
 
 #include "version.h"
 
+#include <helpers/table.h>
+#include <helpers/table_iterator.h>
 #include "mib_module_includes.h"
 
 /*
@@ -507,6 +512,10 @@ main(int argc, char *argv[])
 	    }
 	}  /* end-for */
 
+	/* honor selection of standard error output */
+	if (!stderr_log)
+		snmp_disable_stderrlog();
+
 	/* 
 	 * Initialize a argv set to the current for restarting the agent.
 	 */
@@ -628,10 +637,6 @@ main(int argc, char *argv[])
 	}
 #endif
 #endif
-
-	/* honor selection of standard error output */
-	if (!stderr_log)
-		snmp_disable_stderrlog();
 
 	/* we're up, log our version number */
 	snmp_log(LOG_INFO, "UCD-SNMP version %s\n", VersionInfo);
@@ -847,6 +852,8 @@ receive(void)
         /* run requested alarms */
         run_alarms();
         
+        check_outstanding_agent_requests(SNMP_ERR_NOERROR);
+
     }  /* endwhile */
 
     snmp_log(LOG_INFO, "Received TERM or STOP signal...  shutting down...\n");

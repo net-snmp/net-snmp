@@ -263,6 +263,28 @@ snmp_clone_mem(void ** dstPtr, void * srcPtr, unsigned len)
 
 
 /*
+ * Walks through a list of varbinds and frees and allocated memory,
+ * restoring pointers to local buffers
+ */
+void
+snmp_reset_var_buffers( struct variable_list * var )
+{
+    while( var ) {
+        if(var->name != var->name_loc) {
+            free(var->name);
+            var->name = var->name_loc;
+            var->name_length = 0;
+        }
+        if(var->val.string != var->buf) {
+            free(var->val.string);
+            var->val.string = var->buf;
+            var->val_len = 0;
+        }
+        var = var->next_variable;
+    }
+}
+
+/*
  * Creates and allocates a clone of the input PDU,
  * but does NOT copy the variables.
  * This function should be used with another function,
@@ -563,7 +585,8 @@ snmp_set_var_objid (struct variable_list *vp,
         vp->name = (oid *)malloc(len);
         if (!vp->name) return 1;
     }
-    memmove(vp->name, objid, len);
+    if (objid)
+        memmove(vp->name, objid, len);
     vp->name_length = name_length;
     return 0;
 }
@@ -574,6 +597,38 @@ snmp_set_var_typed_value(struct variable_list *newvar, u_char type,
 {
     newvar->type = type;
     return snmp_set_var_value(newvar, val_str, val_len);
+}
+
+int
+count_varbinds( struct variable_list *var_ptr )
+{
+  int count = 0;
+
+  for (  ; var_ptr != NULL ; var_ptr = var_ptr->next_variable )
+	count++;
+
+  return count;
+}
+
+int
+count_varbinds_of_type( struct variable_list *var_ptr, int type )
+{
+  int count = 0;
+  
+  for (;  var_ptr != NULL ; var_ptr = var_ptr->next_variable )
+      if (var_ptr->type == type)
+          count++;
+
+  return count;
+}
+
+struct variable_list *
+find_varbind_of_type( struct variable_list *var_ptr, int type )
+{
+  for (;  var_ptr != NULL && var_ptr->type != type ;
+       var_ptr = var_ptr->next_variable );
+
+  return var_ptr;
 }
 
 /*
@@ -605,8 +660,12 @@ snmp_set_var_value(struct variable_list *newvar,
         }
         memmove(newvar->val.string, val_str, val_len);
         newvar->val_len = val_len;
+    } else if (val_str) {
+        /* NULL STRING != NULL ptr */
+        newvar->val.string = newvar->buf;
+        newvar->val.string[0] = '\0';
+        newvar->val_len = 0;
     }
-
     return 0;
 }
 
