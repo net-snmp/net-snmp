@@ -2137,20 +2137,25 @@ snmpv3_parse(
 
   /* message is an ASN.1 SEQUENCE
    */
+  DEBUGDUMPHEADER("dump_recv", "Parsing SNMPv3 Message\n");
   data = asn_parse_sequence(data, length, &type,
                         (ASN_SEQUENCE | ASN_CONSTRUCTOR), "message");
   if (data == NULL){
     /* error msg detail is set */
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+    DEBUGINDENTLESS();
     return SNMPERR_ASN_PARSE_ERR;
   }
 
   /* parse msgVersion
    */
+  DEBUGDUMPHEADER("dump_recv", "Parsing SNMPv3 Version Number\n");
   data = asn_parse_int(data, length, &type, &ver, sizeof(ver));
+  DEBUGINDENTLESS();
   if (data == NULL){
     ERROR_MSG("bad parse of version");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+    DEBUGINDENTLESS();
     return SNMPERR_ASN_PARSE_ERR;
   }
   pdu->version = ver;
@@ -2159,38 +2164,49 @@ snmpv3_parse(
    */
   cp	  = data;
   asn_len = *length;
+  DEBUGDUMPHEADER("dump_recv", "Parsing msgGlobalData\n");
   data = asn_parse_sequence(data, &asn_len, &type,
                         (ASN_SEQUENCE | ASN_CONSTRUCTOR), "msgGlobalData");
   if (data == NULL){
     /* error msg detail is set */
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+    DEBUGINDENTADD(-4);
     return SNMPERR_ASN_PARSE_ERR;
   }
   *length -= data - cp;  /* subtract off the length of the header */
 
   /* msgID */
+  DEBUGDUMPHEADER("dump_recv", "Parsing msgID\n");
   data = asn_parse_int(data, length, &type, &pdu->msgid, sizeof(pdu->msgid));
+  DEBUGINDENTLESS();
   if (data == NULL) {
     ERROR_MSG("error parsing msgID");
+    DEBUGINDENTADD(-4);
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     return SNMPERR_ASN_PARSE_ERR;
   }
 
   /* msgMaxSize */
+  DEBUGDUMPHEADER("dump_recv", "Parsing msgMaxSize\n");
   data = asn_parse_int(data, length, &type, &msg_max_size,
 		       sizeof(msg_max_size));
+  DEBUGINDENTLESS();
   if (data == NULL) {
     ERROR_MSG("error parsing msgMaxSize");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+    DEBUGINDENTADD(-4);
     return SNMPERR_ASN_PARSE_ERR;
   }
 
   /* msgFlags */
   tmp_buf_len = SNMP_MAX_MSG_SIZE;
+  DEBUGDUMPHEADER("dump_recv", "Parsing msgFlags\n");
   data = asn_parse_string(data, length, &type, tmp_buf, &tmp_buf_len);
+  DEBUGINDENTLESS();
   if (data == NULL || tmp_buf_len != 1) {
     ERROR_MSG("error parsing msgFlags");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+    DEBUGINDENTADD(-4);
     return SNMPERR_ASN_PARSE_ERR;
   }
   msg_flags = *tmp_buf;
@@ -2200,16 +2216,20 @@ snmpv3_parse(
     pdu->flags &= (~SNMP_MSG_FLAG_RPRT_BIT);
 
   /* msgSecurityModel */
+  DEBUGDUMPHEADER("dump_recv", "Parsing msgSecurityModel\n");
   data = asn_parse_int(data, length, &type, &msg_sec_model,
 		       sizeof(msg_sec_model));
+  DEBUGINDENTADD(-4); /* return from global data indent */
   if (data == NULL) {
     ERROR_MSG("error parsing msgSecurityModel");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+    DEBUGINDENTLESS();
     return SNMPERR_ASN_PARSE_ERR;
   }
   if (msg_sec_model != SNMP_SEC_MODEL_USM) {
     ERROR_MSG("unknown security model");
     snmp_increment_statistic(STAT_SNMPUNKNOWNSECURITYMODELS);
+    DEBUGINDENTLESS();
     return SNMPERR_UNKNOWN_SEC_MODEL;
   }
   pdu->securityModel = msg_sec_model;
@@ -2218,6 +2238,7 @@ snmpv3_parse(
       !(msg_flags & SNMP_MSG_FLAG_AUTH_BIT)) {
     ERROR_MSG("invalid message, illegal msgFlags");
     snmp_increment_statistic(STAT_SNMPINVALIDMSGS);
+    DEBUGINDENTLESS();
     return SNMPERR_INVALID_MSG;
   }
   pdu->securityLevel = ( (msg_flags & SNMP_MSG_FLAG_AUTH_BIT)
@@ -2239,6 +2260,7 @@ snmpv3_parse(
   memset(pdu_buf, 0, pdu_buf_len);
   cp = pdu_buf;
 
+  DEBUGDUMPHEADER("dump_recv", "Parsing USM msgSecurityParameters\n");
   ret_val = usm_process_in_msg(SNMP_VERSION_3, msg_max_size,
 			       sec_params, msg_sec_model, pdu->securityLevel,
 			       msg_data, msg_len,
@@ -2247,17 +2269,21 @@ snmpv3_parse(
 			       &cp,
 			       &pdu_buf_len, &max_size_response,
 			       &pdu->securityStateRef);
+  DEBUGINDENTLESS();
 
   if (ret_val != USM_ERR_NO_ERROR) {
     snmpv3_scopedPDU_parse(pdu, cp, &pdu_buf_len);
+    DEBUGINDENTLESS();
     return ret_val;
   }
   
   /* parse plaintext ScopedPDU sequence */
   *length = pdu_buf_len;
+  DEBUGDUMPHEADER("dump_recv", "Parsing ScopedPdu\n");
   data = snmpv3_scopedPDU_parse(pdu, cp, length);
   if (data == NULL) {
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+    DEBUGINDENTADD(-4);
     return SNMPERR_ASN_PARSE_ERR;
   }
 
@@ -2268,7 +2294,9 @@ snmpv3_parse(
     *after_header	 = data;
   }
 
+  DEBUGDUMPHEADER("dump_recv", "Parsing PDU\n");
   ret = snmp_pdu_parse(pdu, data, length);
+  DEBUGINDENTADD(-8); 
 
   if (after_header != NULL)
     *length = tmp_buf_len;
@@ -2809,8 +2837,10 @@ snmpv3_scopedPDU_parse(struct snmp_pdu *pdu,
   *length -= data - cp;
 
   /* contextEngineID from scopedPdu  */
+  DEBUGDUMPHEADER("dump_recv", "Parsing contextEngineID\n");
   data = asn_parse_string(data, length, &type, pdu->contextEngineID, 
 			  &pdu->contextEngineIDLen);
+  DEBUGINDENTLESS();
   if (data == NULL) {
     ERROR_MSG("error parsing contextEngineID from scopedPdu");
     return NULL;
@@ -2829,7 +2859,9 @@ snmpv3_scopedPDU_parse(struct snmp_pdu *pdu,
   /* parse contextName from scopedPdu
    */
   tmp_buf_len = SNMP_MAX_CONTEXT_SIZE;
+  DEBUGDUMPHEADER("dump_recv", "Parsing contextName\n");
   data = asn_parse_string(data, length, &type, tmp_buf, &tmp_buf_len);
+  DEBUGINDENTLESS();
   if (data == NULL) {
     ERROR_MSG("error parsing contextName from scopedPdu");
     return NULL;
@@ -2846,7 +2878,9 @@ snmpv3_scopedPDU_parse(struct snmp_pdu *pdu,
 
   /* Get the PDU type */
   asn_len = *length;
+  DEBUGDUMPHEADER("dump_recv", "Parsing PDU type\n");
   cp = asn_parse_header(data, &asn_len, &type);
+  DEBUGINDENTLESS();
   if (cp == NULL)
     return NULL;
 
