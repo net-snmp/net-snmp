@@ -365,9 +365,7 @@ Address_Scan_Init(void)
  * NB: Index is the number of the corresponding interface, not of the address 
  */
 static int
-Address_Scan_Next(Index, Retin_ifaddr)
-     short          *Index;
-     struct in_ifaddr *Retin_ifaddr;
+Address_Scan_Next(short *Index, struct in_ifaddr *Retin_ifaddr)
 {
     struct in_ifaddr in_ifaddr;
     struct ifnet    ifnet, *ifnetaddr;  /* NOTA: same name as another one */
@@ -456,9 +454,7 @@ Address_Scan_Init(void)
  * NB: Index is the number of the corresponding interface, not of the address 
  */
 static int
-Address_Scan_Next(Index, Retin_ifaddr)
-     short          *Index;
-     mib_ipAdEnt    *Retin_ifaddr;
+Address_Scan_Next(short *Index, mib_ipAdEnt *Retin_ifaddr)
 {
     if (iptab_current < iptab_size) {
         /*
@@ -528,10 +524,7 @@ Address_Scan_Init(void)
  * NB: Index is the number of the corresponding interface, not of the address 
  */
 static int
-Address_Scan_Next(Index, Retifnet)
-    short          *Index;
-    struct ifnet   *Retifnet;
-
+Address_Scan_Next(short *Index, struct ifnet *Retifnet)
 {
     struct ifnet   ifnet_store;
     int fd;
