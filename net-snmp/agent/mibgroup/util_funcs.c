@@ -202,7 +202,7 @@ int get_exec_output(ex)
         *(aptr++) = NULL;
         copy_word(ex->command,ctmp);
         execv(ctmp,argv);
-        perror("execv");
+        perror(ctmp);
         exit(1);
       }
     else
@@ -380,8 +380,9 @@ int checkmib(vp,name,length,exact,var_len,write_method,max)
         rtest = 1;
     }
   }
-  if (rtest > 0 || (rtest == 0 && (int) vp->namelen+1 < (int) *length) ||
-    (exact == -1 && rtest)) {
+  if (rtest > 0 ||
+      (rtest == 0 && !exact && (int) vp->namelen+1 < (int) *length) ||
+    (exact == 1 && (rtest || *length != vp->namelen+1))) {
     if (var_len)
 	*var_len = 0;
     return 0;

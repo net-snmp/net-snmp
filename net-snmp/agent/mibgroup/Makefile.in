@@ -1,6 +1,6 @@
 
-CPPFLAGS=@CPPFLAGS@ -I. -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib \
-	-I$(srcdir)/.. -I..
+CPPFLAGS=@CPPFLAGS@ -I. -I../.. -I$(srcdir) -I$(srcdir)/../.. \
+	-I$(srcdir)/../../snmplib -I$(srcdir)/.. -I..
 CC = @CC@
 
 # Need a special .c -> .o definition here to make sure we place the
@@ -142,9 +142,9 @@ mibII/interfaces.o:
 mibII/interfaces.o:  
 mibII/interfaces.o:  
 mibII/interfaces.o:  
+mibII/interfaces.o:  
+mibII/interfaces.o:  
 mibII/interfaces.o: 
-mibII/interfaces.o:  
-mibII/interfaces.o:  
 mibII/interfaces.o:  
 mibII/interfaces.o:  
 mibII/interfaces.o: ./../kernel.h mibincl.h 
@@ -472,12 +472,13 @@ ucd-snmp/pass.o:
 ucd-snmp/pass.o:  
 ucd-snmp/pass.o:  
 ucd-snmp/pass.o:  
-ucd-snmp/pass.o:  mibincl.h ../../snmplib/asn1.h
-ucd-snmp/pass.o: ../../snmplib/snmp_api.h ../../snmplib/snmp_impl.h
-ucd-snmp/pass.o: ../snmp_vars.h ../var_struct.h ../../snmplib/snmp.h
-ucd-snmp/pass.o: ../../snmplib/mib.h struct.h ucd-snmp/pass.h mibdefs.h
-ucd-snmp/pass.o: ucd-snmp/extensible.h util_funcs.h ./../read_config.h
-ucd-snmp/pass.o: ../../snmplib/system.h
+ucd-snmp/pass.o:  
+ucd-snmp/pass.o:   mibincl.h
+ucd-snmp/pass.o: ../../snmplib/asn1.h ../../snmplib/snmp_api.h
+ucd-snmp/pass.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
+ucd-snmp/pass.o: ../../snmplib/snmp.h ../../snmplib/mib.h struct.h
+ucd-snmp/pass.o: ucd-snmp/pass.h mibdefs.h ucd-snmp/extensible.h util_funcs.h
+ucd-snmp/pass.o: ./../read_config.h ../../snmplib/system.h
 ucd-snmp/disk.o: ../../config.h ../../mib_module_config.h
 ucd-snmp/disk.o:  
 ucd-snmp/disk.o:  ../../s/linux.h ../../s/sysv.h

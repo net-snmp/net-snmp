@@ -364,7 +364,6 @@ snmp_synch_response(ss, pdu, response)
     struct timeval timeout, *tvp;
     int block;
 
-
     if ((state->reqid = snmp_send(ss, pdu)) == 0){
 	*response = NULL;
 	snmp_free_pdu(pdu);

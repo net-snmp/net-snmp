@@ -7,13 +7,13 @@
 
                       All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its 
-documentation for any purpose and without fee is hereby granted, 
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in 
+both that copyright notice and this permission notice appear in
 supporting documentation, and that the name of CMU not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  
+software without specific, written prior permission.
 
 CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -40,8 +40,14 @@ SOFTWARE.
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#include <stdio.h>
+#include <ctype.h>
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -53,9 +59,11 @@ SOFTWARE.
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#include <stdio.h>
-#include <ctype.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
 #include <netdb.h>
+#endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -63,9 +71,10 @@ SOFTWARE.
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
+#include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
-#include "snmp_client.h"
+#include "system.h"
 #include "snmp_parse_args.h"
 
 int main __P((int, char **));
@@ -105,10 +114,13 @@ main(argc, argv)
 
     snmp_parse_args(argc, argv, &session);
 
+    SOCK_STARTUP;
+
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
         snmp_perror("snmptest");
+        SOCK_CLEANUP;
 	exit(1);
     }
 
@@ -236,13 +248,15 @@ main(argc, argv)
 	    } else {    /* status == STAT_ERROR */
               snmp_perror("snmptest");
 	    }
-	    
+
 	    if (response)
 		snmp_free_pdu(response);
 	}
 	varcount = 0;
 	nonRepeaters = -1;
     }
+    SOCK_CLEANUP;
+    return 0;
 }
 
 int
@@ -361,8 +375,9 @@ input_variable(vp)
 	    case 'Q':
 		switch((toupper(buf[2]))){
                     case '\n':
-		    case NULL:
+		    case 0:
 		        printf("Quitting,  Goodbye\n");
+                        SOCK_CLEANUP;
 			exit(0);
 			break;
 		    case 'P':

@@ -1,27 +1,19 @@
---------------------Configuration: snmpset - Win32 Debug--------------------
-Begining build with project "H:\builds\ucd-snmp-3.4.pre8\win32\snmpset\snmpset.dsp", at root.
+--------------------Configuration: snmpset - Win32 Release--------------------
+Begining build with project "C:\usr\local\builds\ucd-snmp-3.5.1.pre2\win32\snmpset\snmpset.dsp", at root.
 Active configuration is Win32 (x86) Console Application (based on Win32 (x86) Console Application)
 
 Project's tools are:
-			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/snmpset.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c "
-			"Win32 Resource Compiler" with flags "/l 0x409 /d "_DEBUG" "
-			"Browser Database Maker" with flags "/nologo /o"Debug/snmpset.bsc" "
-			"COFF Linker for 80x86" with flags "libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/snmpset.pdb" /debug /machine:I386 /nodefaultlib /out:"../bin/snmpset.exe" /pdbtype:sept /libpath:"../lib" "
+			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Release/snmpset.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c "
+			"Win32 Resource Compiler" with flags "/l 0x409 /d "NDEBUG" "
+			"Browser Database Maker" with flags "/nologo /o"Release/snmpset.bsc" "
+			"COFF Linker for 80x86" with flags "libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:no /pdb:"Release/snmpset.pdb" /machine:I386 /nodefaultlib /out:"../bin/snmpset.exe" /libpath:"..\lib" "
 			"Custom Build" with flags ""
 			"<Component 0xa>" with flags ""
 
-Creating temp file "C:\WINDOWS\TEMP\RSPF254.TMP" with contents </nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/snmpset.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
-"H:\builds\ucd-snmp-3.4.pre8\apps\snmp_parse_args.c"
-"H:\builds\ucd-snmp-3.4.pre8\apps\snmpset.c"
->
-Creating command line "cl.exe @C:\WINDOWS\TEMP\RSPF254.TMP" 
-Creating temp file "C:\WINDOWS\TEMP\RSPF255.TMP" with contents <libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/snmpset.pdb" /debug /machine:I386 /nodefaultlib /out:"../bin/snmpset.exe" /pdbtype:sept /libpath:"../lib" 
-".\Debug\snmp_parse_args.obj"
-".\Debug\snmpset.obj">
-Creating command line "link.exe @C:\WINDOWS\TEMP\RSPF255.TMP" 
-Compiling...
-snmp_parse_args.c
-snmpset.c
+Creating temp file "c:\windows\TEMP\RSP11A1.TMP" with contents <libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:no /pdb:"Release/snmpset.pdb" /machine:I386 /nodefaultlib /out:"../bin/snmpset.exe" /libpath:"..\lib" 
+".\Release\snmp_parse_args.obj"
+".\Release\snmpset.obj">
+Creating command line "link.exe @c:\windows\TEMP\RSP11A1.TMP" 
 Linking...
 
 

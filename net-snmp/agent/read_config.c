@@ -54,6 +54,7 @@ struct config_line config_handlers[] = {
 #include "mibgroup/mib_module_dot_conf.h"
   {"authtrapenable", snmpd_parse_config_authtrap, NULL},
   {"trapsink", snmpd_parse_config_trapsink, snmpd_free_trapsinks},
+  {"trap2sink", snmpd_parse_config_trap2sink, NULL},
   {"trapcommunity", snmpd_parse_config_trapcommunity, snmpd_free_trapcommunity}
 };
 
