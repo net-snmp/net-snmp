@@ -59,6 +59,7 @@ SOFTWARE.
 #endif
 #include <sys/socket.h>
 #include <netdb.h>
+#include <errno.h>
 
 #include "asn1.h"
 #include "snmp.h"
@@ -185,12 +186,32 @@ struct session_list *Sessions = NULL;
 
 long Reqid = 0;
 int snmp_errno = 0;
+char *snmp_detail;
 
-char *api_errors[4] = {
-    "Unknown session",
-    "Unknown host",
+static char *api_errors[-SNMPERR_MAX+1] = {
+    "No error",
+    "Generic error",
     "Invalid local port",
-    "Unknown Error"
+    "Unknown host",
+    "Unknown session",
+    "Too long",
+    "No socket",
+    "Cannot send V2 PDU on V1 session",
+    "Cannot send V1 PDU on V2 session",
+    "Bad value for non-repeaters",
+    "Bad value for max-repetitions",
+    "Error building ASN.1 representation",
+    "Failure in sendto",
+    "Bad parse of ASN.1 type",
+    "Bad version specified",
+    "Bad source party specified",
+    "Bad destination party specified",
+    "Bad context specified",
+    "Bad community specified",
+    "Cannot send noAuth/desPriv",
+    "Bad ACL definition",
+    "Bad Party definition",
+    "Session abort failure",
 };
 
 struct timeval Now;
@@ -199,12 +220,23 @@ struct internal_variable_list *SavedVars = NULL;
 
 static int snmp_dump_packet = 0;
 
-static char *api_errstring __P((int));
 static void free_request_list __P((struct request_list *));
 void shift_array __P((u_char *, int, int));
 static int snmp_build __P((struct snmp_session *, struct snmp_pdu *, u_char *, int *));
 static int snmp_parse __P((struct snmp_session *, struct internal_snmp_pdu *, u_char *, int));
 static void snmp_free_internal_pdu __P((struct snmp_pdu *));
+
+#ifndef HAVE_STRERROR
+char *strerror(err)
+int err;
+{
+  extern char *sys_errlist[];
+  extern int sys_nerr;
+
+  if (err < 0 || err >= sys_nerr) return "Unknown error";
+  return sys_errlist[err];
+}
+#endif
 
 void snmp_set_dump_packet(val)
     int val;
@@ -217,16 +249,22 @@ int snmp_get_dump_packet __P((void))
     return snmp_dump_packet;
 }
 
-static char *
-api_errstring(snmp_errnumber)
+char *
+snmp_api_errstring(snmp_errnumber)
     int	snmp_errnumber;
 {
-    if (snmp_errnumber <= SNMPERR_BAD_SESSION
-	&& snmp_errnumber >= SNMPERR_GENERR){
-	return api_errors[snmp_errnumber + 4];
+    char *msg;
+    static char msg_buf [256];
+    if (snmp_errnumber >= SNMPERR_MAX && snmp_errnumber <= SNMPERR_GENERR){
+	msg = api_errors[-snmp_errnumber];
     } else {
-	return "Unknown Error";
+	msg = "Unknown Error";
     }
+    if (snmp_detail) {
+	sprintf (msg_buf, "%s (%s)", msg, snmp_detail);
+	return msg_buf;
+    }
+    else return msg;
 }
 
 
@@ -344,12 +382,11 @@ snmp_open(session)
     /* Set up connections */
     sd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sd < 0){
-	perror("socket");
-	snmp_errno = SNMPERR_GENERR;
+	snmp_detail = strerror(errno);
+	snmp_errno = SNMPERR_NO_SOCKET;
 	if (!snmp_close(session)){
-	    fprintf(stderr, "Couldn't abort session: %s. Exiting\n",
-		    api_errstring(snmp_errno));
-	    exit(1);
+	    snmp_errno = SNMPERR_ABORT;
+	    snmp_detail = api_errors[-SNMPERR_NO_SOCKET];
 	}
 	return 0;
     }
@@ -360,12 +397,11 @@ snmp_open(session)
 	} else {
 	    hp = gethostbyname(session->peername);
 	    if (hp == NULL){
-		fprintf(stderr, "unknown host: %s\n", session->peername);
 		snmp_errno = SNMPERR_BAD_ADDRESS;
+		snmp_detail = session->peername;
 		if (!snmp_close(session)){
-		    fprintf(stderr, "Couldn't abort session: %s. Exiting\n",
-			    api_errstring(snmp_errno));
-		    exit(2);
+		    snmp_errno = SNMPERR_ABORT;
+		    snmp_detail = api_errors[-SNMPERR_BAD_ADDRESS];
 		}
 		return 0;
 	    } else {
@@ -390,12 +426,11 @@ snmp_open(session)
     me.sin_addr.s_addr = INADDR_ANY;
     me.sin_port = htons(session->local_port);
     if (bind(sd, (struct sockaddr *)&me, sizeof(me)) != 0){
-	perror("bind");
+	snmp_detail = strerror(errno);
 	snmp_errno = SNMPERR_BAD_LOCPORT;
 	if (!snmp_close(session)){
-	    fprintf(stderr, "Couldn't abort session: %s. Exiting\n",
-		    api_errstring(snmp_errno));
-	    exit(3);
+	    snmp_errno = SNMPERR_ABORT;
+	    snmp_detail = api_errors[-SNMPERR_BAD_LOCPORT];
 	}
 	return 0;
     }
@@ -512,6 +547,7 @@ snmp_build(session, pdu, packet, out_length)
     struct  packet_info pkt, *pi = &pkt;
     int length, packet_length, header_length;
 
+    snmp_errno = SNMPERR_BAD_ASN1_BUILD;
     if (session->version == SNMP_VERSION_1 ||
         session->version == SNMP_VERSION_2){
         cp = snmp_auth_build(packet, out_length, pdu->community,
@@ -647,6 +683,7 @@ snmp_build(session, pdu, packet, out_length)
 	/* DES encryption might bump length of packet */
     }
     *out_length = cp - packet;
+    snmp_errno = 0;
     return 0;
 }
 
@@ -872,7 +909,8 @@ snmp_parse(session, pdu, data, length)
 				    vp->val.bitstring, &vp->val_len);
 		break;
 	    default:
-		fprintf(stderr, "bad type returned (%x)\n", vp->type);
+		fprintf(stderr,"bad type returned (%x)\n", vp->type);
+		snmp_errno = SNMPERR_BAD_PARSE;
 		break;
 	}
     }
@@ -920,8 +958,7 @@ snmp_send(session, pdu)
 	    pdu->errindex = 0;
     } else if (pdu->command == INFORM_REQ_MSG || pdu->command == TRP2_REQ_MSG){
 	if (session->version != SNMP_VERSION_2_HISTORIC){
-	    fprintf(stderr, "Cant send SNMPv2 PDU's in SNMPv1 session.\n");
-	    snmp_errno = SNMPERR_GENERR;/* Fix this XXXXX */
+	    snmp_errno = SNMPERR_V2_IN_V1;
 	    return 0;
 	}
 	if (pdu->reqid == SNMP_DEFAULT_REQID)
@@ -933,16 +970,18 @@ snmp_send(session, pdu)
     } else if (pdu->command == BULK_REQ_MSG){
 	if (pdu->reqid == SNMP_DEFAULT_REQID)
 	    pdu->reqid = ++Reqid;
-	if (pdu->max_repetitions < 0 || pdu->non_repeaters < 0){
-	    fprintf(stderr, "Invalid parameters for max_repetitions or non_repeaters\n");
-	    snmp_errno = SNMPERR_GENERR;	/* Fix this XXXXX */
+	if (pdu->max_repetitions < 0){
+	    snmp_errno = SNMPERR_BAD_REPETITIONS;
+	    return 0;
+	}
+	if (pdu->non_repeaters < 0){
+	    snmp_errno = SNMPERR_BAD_REPEATERS;
 	    return 0;
 	}
 	    
     } else {
 	if (session->version == SNMP_VERSION_2_HISTORIC){
-	    fprintf(stderr, "Cant send old Trap PDU in SNMPv2 session.\n");
-	    snmp_errno = SNMPERR_GENERR;/* Fix this XXXXX */
+	    snmp_errno = SNMPERR_V1_IN_V2;
 	    return 0;
 	}
 	/* fill in trap defaults */
@@ -960,7 +999,6 @@ snmp_send(session, pdu)
 	if (isp->addr.sin_addr.s_addr != SNMP_DEFAULT_ADDRESS){
 	    memmove(&pdu->address, &isp->addr, sizeof(pdu->address));
 	} else {
-	    fprintf(stderr, "No remote IP address specified\n");
 	    snmp_errno = SNMPERR_BAD_ADDRESS;
 	    return 0;
 	}
@@ -975,22 +1013,19 @@ snmp_send(session, pdu)
      * !!!!!!!!!!!!!!!!!!!!!! MAJOR PROBLEM  !!!!!!!!!!!!!!!!!!!!!!!
      */
 
-    if ((pdu->version == SNMP_DEFAULT_VERSION) && 
-	(session->version == SNMP_DEFAULT_VERSION))
-    {
-	fprintf(stderr, "No version specified\n");
-	snmp_errno = SNMPERR_BAD_ADDRESS;
-	return 0;
-    }
-    else
-	if (pdu->version == SNMP_DEFAULT_VERSION)
+    if (pdu->version == SNMP_DEFAULT_VERSION) {
+	if (session->version == SNMP_DEFAULT_VERSION) {
+	    snmp_errno = SNMPERR_BAD_VERSION;
+	    return 0;
+	}
+	else
 	    pdu->version = session->version;
+    }
 
     if (pdu->version == SNMP_VERSION_2_HISTORIC){
 	if (pdu->srcPartyLen == 0){
 	    if (session->srcPartyLen == 0){
-		fprintf(stderr, "No source party specified\n");
-		snmp_errno = SNMPERR_BAD_ADDRESS;
+		snmp_errno = SNMPERR_BAD_SRC_PARTY;
 		return 0;
 	    }
 	    pdu->srcParty = (oid *)malloc(session->srcPartyLen * sizeof(oid));
@@ -1000,8 +1035,7 @@ snmp_send(session, pdu)
 	}
 	if (pdu->dstPartyLen == 0){
 	    if (session->dstPartyLen == 0){
-		fprintf(stderr, "No destination party specified\n");
-		snmp_errno = SNMPERR_BAD_ADDRESS;
+		snmp_errno = SNMPERR_BAD_DST_PARTY;
 		return 0;
 	    }
 	    pdu->dstParty = (oid *)malloc(session->dstPartyLen * sizeof(oid));
@@ -1011,8 +1045,7 @@ snmp_send(session, pdu)
 	}
 	if (pdu->contextLen == 0){
 	    if (session->contextLen == 0){
-		fprintf(stderr, "No context specified\n");
-		snmp_errno = SNMPERR_BAD_ADDRESS;
+		snmp_errno = SNMPERR_BAD_CONTEXT;
 		return 0;
 	    }
 	    pdu->context = (oid *)malloc(session->contextLen * sizeof(oid));
@@ -1024,8 +1057,7 @@ snmp_send(session, pdu)
                pdu->version == SNMP_VERSION_2){
 	if (pdu->community_len == 0){
 	    if (session->community_len == 0){
-		fprintf(stderr, "No community name specified\n");
-		snmp_errno = SNMPERR_BAD_ADDRESS;
+		snmp_errno = SNMPERR_BAD_COMMUNITY;
 		return 0;
 	    }
 	    pdu->community = (u_char *)malloc(session->community_len);
@@ -1035,22 +1067,19 @@ snmp_send(session, pdu)
     }
 
     if (snmp_build(session, pdu, packet, &length) < 0){
-	fprintf(stderr, "Error building packet\n");
-	snmp_errno = SNMPERR_GENERR;
 	return 0;
     }
     if (snmp_dump_packet){
-	printf("sending %d bytes to %s:\n", length,
+	printf("\nsending %d bytes to %s:\n", length,
 	       inet_ntoa(pdu->address.sin_addr));
 	xdump(packet, length, "");
-        printf("\n\n");
+        printf("\n");
     }
 
 
     if (sendto(isp->sd, (char *)packet, length, 0,
 	       (struct sockaddr *)&pdu->address, sizeof(pdu->address)) < 0){
-	perror("sendto");
-	snmp_errno = SNMPERR_GENERR;
+	snmp_errno = SNMPERR_BAD_SENDTO;
 	return 0;
     }
     gettimeofday(&tv, (struct timezone *)0);
@@ -1177,13 +1206,15 @@ snmp_read(fdset)
 	    fromlength = sizeof from;
 	    length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
 			      (struct sockaddr *)&from, &fromlength);
-	    if (length == -1)
-		perror("recvfrom");
+	    if (length == -1) {
+		snmp_detail = strerror(errno);
+		continue;
+	    }
 	    if (snmp_dump_packet){
-		printf("received %d bytes from %s:\n", length,
+		printf("\nreceived %d bytes from %s:\n", length,
 		       inet_ntoa(from.sin_addr));
 		xdump(packet, length, "");
-                printf("\n\n");
+                printf("\n");
 	    }
 
 	    if (SavedPdu){
@@ -1400,18 +1431,20 @@ snmp_timeout __P((void))
 		    if (rp->timeout > 30000000L)
 			rp->timeout = 30000000L;
 		    if (snmp_build(sp, rp->pdu, packet, &length) < 0){
-			fprintf(stderr, "Error building packet\n");
+			fprintf(stderr, "Error re-building packet\n");
+			/* this should never happen */
+			abort();
 		    }
 		    if (snmp_dump_packet){
-			printf("sending %d bytes to %s:\n", length,
+			printf("\nsending %d bytes to %s:\n", length,
 			       inet_ntoa(rp->pdu->address.sin_addr));
 			xdump(packet, length, "");
-			printf("\n\n");
+			printf("\n");
 		    }
 		    if (sendto(isp->sd, (char *)packet, length, 0,
 			       (struct sockaddr *)&rp->pdu->address,
 			       sizeof(rp->pdu->address)) < 0){
-			perror("sendto");
+			snmp_detail = strerror(errno);
 		    }
 		    tv = now;
 		    rp->time = tv;

@@ -93,28 +93,11 @@ main(argc, argv)
     struct snmp_pdu *pdu, *response;
     struct variable_list *vars;
     int	arg;
-    char *hostname = NULL;
-    char *community = NULL;
-    int timeout = SNMP_DEFAULT_TIMEOUT, retransmission = SNMP_DEFAULT_RETRIES;
     int	count, current_name = 0;
     char *names[128];
     oid name[MAX_NAME_LEN];
     int name_length;
     int status;
-    int version = 2;
-    int dest_port = SNMP_PORT;
-    u_long      srcclock = 0, dstclock = 0;
-    int clock_flag = 0;
-    oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
-    int srclen = 0, dstlen = 0, contextlen = 0;
-    struct partyEntry *pp;
-    struct contextEntry *cxp;
-    int trivialSNMPv2 = FALSE;
-    struct hostent *hp;
-    in_addr_t destAddr;
-    char ctmp[300];
-
-
 
     init_mib();
 
@@ -125,7 +108,7 @@ main(argc, argv)
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-	printf("Couldn't open snmp\n");
+	fprintf(stderr, "Couldn't open snmp: %s\n", snmp_api_errstring(snmp_errno));
 	exit(1);
     }
 
@@ -134,7 +117,7 @@ main(argc, argv)
     for(count = 0; count < current_name; count++){
 	name_length = MAX_NAME_LEN;
 	if (!read_objid(names[count], name, &name_length)){
-	    printf("Invalid object identifier: %s\n", names[count]);
+	    fprintf(stderr, "Invalid object identifier: %s\n", names[count]);
 	    failures++;
 	}
 	else	
@@ -166,9 +149,10 @@ retry:
 	}
 
     } else if (status == STAT_TIMEOUT){
-	printf("No Response from %s\n", hostname);
+	fprintf(stderr,"No Response from %s\n", session.peername);
     } else {    /* status == STAT_ERROR */
-	printf("An error occurred, Quitting\n");
+	fprintf(stderr,"An error occurred: %s\nQuitting\n",
+                snmp_api_errstring(snmp_errno));
     }
 
     if (response)

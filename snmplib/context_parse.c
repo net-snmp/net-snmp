@@ -36,6 +36,8 @@
 #include "mib.h"
 #include "context.h"
 #include "system.h"
+#include "snmp_impl.h"
+#include "snmp_api.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -51,8 +53,9 @@ static void error_exit(str, linenumber, filename)
     int linenumber;
     char *filename;
 {
-    fprintf(stderr, "%s on line %d of %s\n", str, linenumber, filename);
-    exit(1);
+    snmp_errno = SNMPERR_BAD_CONTEXT;
+    snmp_detail = malloc(128);
+    sprintf(snmp_detail, "%s on line %d of %s", str, linenumber, filename);
 }
 
 int
@@ -67,7 +70,7 @@ read_context_database(filename)
     int state = IDENTITY_STATE;
     oid contextid[64];
     int contextidlen;
-    int view, entityLen, time;
+    int view = 0, entityLen = 0, time = 0;
     u_char entity[64];
     int dstParty, srcParty, proxyIdLen;
     oid proxyId[64];
@@ -81,8 +84,11 @@ read_context_database(filename)
 	return -1;
     while (fgets(buf, 256, fp)){
 	linenumber++;
-	if (strlen(buf) > 250)
+	if (strlen(buf) > 250) {
 	    error_exit("Line longer than 250 bytes", linenumber, filename);
+	    fclose(fp);
+	    return -1;
+	}
 	chars += strlen(buf);
 	if (buf[0] == '#')
 	    continue;
@@ -96,47 +102,76 @@ read_context_database(filename)
 	    continue;
 	switch(state){
 	  case IDENTITY_STATE:
-	    if (sscanf(buf, "%s %s", name, buf1) != 2)
+	    if (sscanf(buf, "%s %s", name, buf1) != 2) {
 		error_exit("Bad parse", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    contextidlen = 64;
-	    if (!read_objid(buf1, contextid, &contextidlen))
+	    if (!read_objid(buf1, contextid, &contextidlen)) {
 		error_exit("Bad object identifier", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    state = VIEW_STATE;
 	    break;
 	  case VIEW_STATE:
-	    if (sscanf(buf, "%s %s %s", buf1, entity, buf3) != 3)
+	    if (sscanf(buf, "%s %s %s", buf1, entity, buf3) != 3) {
 		error_exit("Bad parse", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    for(cp = buf1; *cp; cp++)
-		if (!isdigit(*cp))
+		if (!isdigit(*cp)) {
 		    error_exit("Not a view index", linenumber, filename);
+		    fclose(fp);
+		    return -1;
+		}
 	    view = atoi(buf1);
 	    if (!strcasecmp(entity, "Null"))
 		entityLen = 0;
+	    else
+		entityLen = strlen(entity);
 	    if (!strcasecmp(buf3, "currentTime"))
 		time = CURRENTTIME;
 	    else if (!strcasecmp(buf3, "restartTime"))
 		time = RESTARTTIME;
-	    else
+	    else {
 		error_exit("Bad local time", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    state = PROXY_STATE;
 	    break;
 	  case PROXY_STATE:
-	    if (sscanf(buf, "%s %s %s", buf1, buf2, buf3) != 3)
+	    if (sscanf(buf, "%s %s %s", buf1, buf2, buf3) != 3) {
 		error_exit("Bad parse", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 	    for(cp = buf1; *cp; cp++)
-		if (!isdigit(*cp))
+		if (!isdigit(*cp)) {
 		    error_exit("Bad destination party index", linenumber,
 			       filename);
+		    fclose(fp);
+		    return -1;
+		}
 	    dstParty = atoi(buf1);
 
 	    for(cp = buf1; *cp; cp++)
-		if (!isdigit(*cp))
+		if (!isdigit(*cp)) {
 		    error_exit("Bad source party index", linenumber, filename);
+		    fclose(fp);
+		    return -1;
+		}
 	    srcParty = atoi(buf2);
 
 	    proxyIdLen = 64;
-	    if (!read_objid(buf3, proxyId, &proxyIdLen))
+	    if (!read_objid(buf3, proxyId, &proxyIdLen)) {
 		error_exit("Bad object identifier", linenumber, filename);
+		fclose(fp);
+		return -1;
+	    }
 
 	    state = IDENTITY_STATE;
 
@@ -174,10 +209,15 @@ read_context_database(filename)
 	    break;
 	  default:
 	    error_exit("unknown state", linenumber, filename);
+	    fclose(fp);
+	    return -1;
 	}
     }
-    if (state != IDENTITY_STATE)
+    if (state != IDENTITY_STATE) {
 	error_exit("Unfinished entry at EOF", linenumber, filename);
+	fclose(fp);
+	return -1;
+    }
     fclose(fp);
     return 0;
 }

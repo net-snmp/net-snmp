@@ -153,8 +153,7 @@ int		    	pass;
     }
     dstp = party_getEntry(dstParty, *dstPartyLength);
     if (!dstp){
-	printf("Unknown destination party: ");
-	print_objid(dstParty, *dstPartyLength);
+	snmp_errno = SNMPERR_BAD_DST_PARTY;
 	return NULL;
     }
     pi->dstp = dstp;
@@ -246,16 +245,14 @@ int		    	pass;
     
     srcp = party_getEntry(srcParty, *srcPartyLength);
     if (!srcp) {
-	printf("Unknown source party: ");
-	print_objid(srcParty, *srcPartyLength);
+	snmp_errno = SNMPERR_BAD_SRC_PARTY;
 	return NULL;
     }
     pi->srcp = srcp;
 
     cxp = context_getEntry(context, *contextLength);
     if (!cxp) {
-	printf("Unknown context: ");
-	print_objid(context, *contextLength);
+	snmp_errno = SNMPERR_BAD_CONTEXT;
 	return NULL;
     }
     pi->cxp = cxp;
@@ -410,11 +407,15 @@ snmp_secauth_build(data, length, pi, messagelen, srcParty, srcPartyLen,
     dstp = pi->dstp;
     if (!srcp || !dstp){
 	srcp = party_getEntry(srcParty, srcPartyLen);
-	if (!srcp)
+	if (!srcp) {
+	    snmp_errno = SNMPERR_BAD_SRC_PARTY;
 	    return NULL;
+	}
 	dstp = party_getEntry(dstParty, dstPartyLen);
-	if (!dstp)
+	if (!dstp) {
+	    snmp_errno = SNMPERR_BAD_SRC_PARTY;
 	    return NULL;
+	}
 	pi->srcp = srcp;
 	pi->dstp = dstp;
     }
@@ -436,8 +437,10 @@ snmp_secauth_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	/* Don't send noAuth/desPriv. User interface should check for
 	 * this so that it can give a reasonable error message
 	 */
-	if (dstp->partyPrivProtocol == DESPRIVPROT)
+	if (dstp->partyPrivProtocol == DESPRIVPROT) {
+	    snmp_errno = SNMPERR_NOAUTH_DESPRIV;
 	    return NULL;
+	}
     }
     h1 = data;
     data = asn_build_sequence(data, length,

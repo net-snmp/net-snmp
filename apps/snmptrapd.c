@@ -293,16 +293,30 @@ int snmp_input(op, session, reqid, pdu, magic)
                 host = gethostbyaddr ((char *)&pdu->agent_addr.sin_addr,
                                       sizeof (pdu->agent_addr.sin_addr),
                                       AF_INET);
-                printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s] %s:\n\t%s Trap (%d) Uptime: %s\n",
+                printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s] %s:\n",
 		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 		       tm->tm_hour, tm->tm_min, tm->tm_sec,
                        host ? host->h_name : inet_ntoa(pdu->agent_addr.sin_addr),
                        inet_ntoa(pdu->agent_addr.sin_addr),
- 		       sprint_objid (oid_buf, pdu->enterprise, pdu->enterprise_length),
-		       trap_description(pdu->trap_type), pdu->specific_type,
-		       uptime_string(pdu->time, buf));
+ 		       sprint_objid (oid_buf, pdu->enterprise, pdu->enterprise_length));
+		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
+		    oid trapOid[64];
+		    int trapOidLen = pdu->enterprise_length;
+		    memcpy(trapOid, pdu->enterprise, sizeof(oid)*trapOidLen);
+		    if (trapOid[trapOidLen-1] != 0) trapOid[trapOidLen++] = 0;
+		    trapOid[trapOidLen++] = pdu->specific_type;
+		    sprint_objid(oid_buf, trapOid, trapOidLen);
+		    printf("\t%s Trap (%s) Uptime: %s\n",
+			   trap_description(pdu->trap_type),
+			   strrchr(oid_buf, '.')+1,
+			   uptime_string(pdu->time, buf));
+		}
+		else
+		    printf("\t%s Trap (%d) Uptime: %s\n",
+			   trap_description(pdu->trap_type), pdu->specific_type,
+			   uptime_string(pdu->time, buf));
 		for(vars = pdu->variables; vars; vars = vars->next_variable) {
-		    printf ("                    ");
+		    printf ("\t");
 		    print_variable(vars->name, vars->name_length, vars);
 		}
 	    }
@@ -331,7 +345,8 @@ int snmp_input(op, session, reqid, pdu, magic)
 		reply->errindex = 0;
 		reply->address = pdu->address;
 		if (!snmp_send(session, reply)){
-		    printf("Couldn't respond to inform pdu\n");
+		    fprintf(stderr, "Couldn't respond to inform pdu: %s\n",
+			    snmp_api_errstring(snmp_errno));
 		}
 	    }
 	}
@@ -469,7 +484,7 @@ main(argc, argv)
     session.local_port = local_port;
     ss = snmp_open(&session);
     if (ss == NULL){
-	fprintf(stderr,"Couldn't open snmp\n");
+	fprintf(stderr,"Couldn't open snmp: %s\n", snmp_api_errstring(snmp_errno));
 	exit(1);
     }
 

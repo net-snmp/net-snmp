@@ -435,7 +435,7 @@ main(argc, argv)
     session.remote_port = dest_port;
     ss = snmp_open(&session);
     if (ss == NULL){
-	fprintf(stderr, "Couldn't open snmp\n");
+	fprintf(stderr, "Couldn't open snmp: %s\n", snmp_api_errstring(snmp_errno));
 	exit(1);
     }
 
@@ -528,7 +528,7 @@ main(argc, argv)
     }
 
     if (snmp_send(ss, pdu)== 0){
-	fprintf(stderr, "error: %d\n", snmp_errno);
+	fprintf(stderr, "snmp_send error: %s\n", snmp_api_errstring(snmp_errno));
     }
     snmp_close(ss);
     exit (0);

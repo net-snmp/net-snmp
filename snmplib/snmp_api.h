@@ -100,12 +100,31 @@ struct snmp_session {
 #define SNMP_DEFAULT_VERSION	    -1
 
 extern int snmp_errno;
+extern char *snmp_api_errstring __P((int));
 /* Error return values */
-#define SNMPERR_GENERR		-1
-#define SNMPERR_BAD_LOCPORT	-2  /* local port was already in use */
-#define SNMPERR_BAD_ADDRESS	-3
-#define SNMPERR_BAD_SESSION	-4
-#define SNMPERR_TOO_LONG	-5
+#define SNMPERR_GENERR		(-1)
+#define SNMPERR_BAD_LOCPORT	(-2)
+#define SNMPERR_BAD_ADDRESS	(-3)
+#define SNMPERR_BAD_SESSION	(-4)
+#define SNMPERR_TOO_LONG	(-5)
+#define SNMPERR_NO_SOCKET	(-6)
+#define SNMPERR_V2_IN_V1	(-7)
+#define SNMPERR_V1_IN_V2	(-8)
+#define SNMPERR_BAD_REPEATERS	(-9)
+#define SNMPERR_BAD_REPETITIONS	(-10)
+#define SNMPERR_BAD_ASN1_BUILD	(-11)
+#define SNMPERR_BAD_SENDTO	(-12)
+#define SNMPERR_BAD_PARSE	(-13)
+#define SNMPERR_BAD_VERSION	(-14)
+#define SNMPERR_BAD_SRC_PARTY	(-15)
+#define SNMPERR_BAD_DST_PARTY	(-16)
+#define SNMPERR_BAD_CONTEXT	(-17)
+#define SNMPERR_BAD_COMMUNITY	(-18)
+#define SNMPERR_NOAUTH_DESPRIV	(-19)
+#define SNMPERR_BAD_ACL		(-20)
+#define SNMPERR_BAD_PARTY	(-21)
+#define SNMPERR_ABORT		(-22)
+#define SNMPERR_MAX		(-22)
 
 #define non_repeaters	errstat
 #define max_repetitions errindex
