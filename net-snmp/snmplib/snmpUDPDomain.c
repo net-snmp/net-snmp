@@ -272,6 +272,7 @@ int			snmp_sockaddr_in	(struct sockaddr_in *addr,
   if (addr == NULL) {
     return 0;
   }
+  memset(addr, 0, sizeof(struct sockaddr_in));
 
   DEBUGMSGTL(("snmp_sockaddr_in", "addr %p, peername \"%s\"\n",
 	      addr, inpeername?inpeername:"[NIL]"));
