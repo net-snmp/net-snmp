@@ -638,7 +638,8 @@ sub gettable {
 
 	my $table_varbind = new SNMP::Varbind([$table_root_oid]);
 
-	while($this->getnext($table_varbind) && !$this->{ErrorNum}) {
+	my $res;
+	while(defined($this->getnext($table_varbind)) && !$this->{ErrorNum}) {
 
 		my $row_oid = SNMP::translateObj(@{$table_varbind}[0]);
 		my $row_text = @{$table_varbind}[0];
@@ -1186,7 +1187,7 @@ __END__
 
 =head1 NAME
 
-SNMP - The Perl5 'SNMP' Extension Module v3.1.0 for the UCD SNMPv3 Library
+SNMP - The Perl5 'SNMP' Extension Module for the Net-SNMP SNMP package.
 
 =head1 SYNOPSIS
 
