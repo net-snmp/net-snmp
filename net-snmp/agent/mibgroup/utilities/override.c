@@ -1,5 +1,16 @@
 /** allows overriding of a given oid with a new type and value */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -33,13 +44,14 @@ override_handler(netsnmp_mib_handler *handler,
         DEBUGMSGOID(("override", requests->requestvb->name,
                      requests->requestvb->name_length));
         DEBUGMSG(("override", "\n"));
-        snmp_set_var_typed_value(requests->requestvb, data->type,
+        snmp_set_var_typed_value(requests->requestvb, (u_char)data->type,
                                  (u_char *) data->value, data->value_len);
         break;
 
     default:
-        snmp_log(LOG_ERR, "unsupported mode in override handler");
-        break;
+        snmp_log(LOG_ERR, "unsupported mode in override handler\n");
+        netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
+        return SNMP_ERR_GENERR;
     }
     return SNMP_ERR_NOERROR;
 }

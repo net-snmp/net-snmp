@@ -187,6 +187,7 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
     char           *Xpsz = NULL;
     char           *Cpsz = NULL;
     char            Opts[BUF_SIZE];
+    int            logopt = 0;
 
     /*
      * initialize session to default values 
@@ -364,6 +365,7 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
             if (snmp_log_options(optarg, argc, argv) < 0) {
                 return (-1);
             }
+	    logopt = 1;
             break;
 
 #define SNMPV3_CMD_OPTIONS
@@ -548,6 +550,9 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
         }
     }
     DEBUGMSGTL(("snmp_parse_args", "finished: %d/%d\n", optind, argc));
+
+    if (!logopt)
+	snmp_enable_stderrlog();
 
     /*
      * read in MIB database and initialize the snmp library

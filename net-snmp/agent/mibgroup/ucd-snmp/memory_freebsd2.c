@@ -188,30 +188,16 @@ swapmode(void)
 
 #include <sys/conf.h>
 
-#define NSWDEV_SYMBOL     "nswdev"
-#define DMMAX_SYMBOL      "dmmax"
-#define SWDEVT_SYMBOL     "swdevt"
-
 void
 swapmode(void)
 {
-    int             nswdev, dmmax, pagesize;
+    int             pagesize;
     int             i, n;
-    struct swdevt  *sw;
     static kvm_t   *kd = NULL;
     struct kvm_swap kswap[16];
 
     if (kd == NULL)
         kd = kvm_openfiles(NULL, NULL, NULL, O_RDONLY, NULL);
-
-    auto_nlist(NSWDEV_SYMBOL, (char *) &nswdev, sizeof(nswdev));
-    auto_nlist(DMMAX_SYMBOL, (char *) &dmmax, sizeof(dmmax));
-
-    sw = (struct swdevt *) malloc(nswdev * sizeof(*sw));
-    if (sw == NULL)
-        return;
-
-    auto_nlist(SWDEVT_SYMBOL, (char *) sw, nswdev * sizeof(*sw));
 
     n = kvm_getswapinfo(kd, kswap, sizeof(kswap) / sizeof(kswap[0]), 0);
 
@@ -241,8 +227,6 @@ swapmode(void)
     swapTotal *= pagesize;
     swapUsed *= pagesize;
     swapFree *= pagesize;
-
-    free(sw);
 }
 #endif
 
@@ -267,14 +251,14 @@ var_extensible_mem(struct variable *vp,
                    size_t * var_len, WriteMethod ** write_method)
 {
     static long     long_ret;
-    static char     errmsg[300];
+    static char     errmsg[1024];
 
     static struct vmmeter mem;
     static struct vmtotal total;
     size_t          total_size = sizeof(total);
     int             total_mib[] = { CTL_VM, VM_METER };
 
-    long            phys_mem;
+    u_long          phys_mem;
     size_t          phys_mem_size = sizeof(phys_mem);
     int             phys_mem_mib[] = { CTL_HW, HW_USERMEM };
 

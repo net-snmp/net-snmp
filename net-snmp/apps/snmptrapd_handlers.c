@@ -31,7 +31,7 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include "agent/mibgroup/utilities/execute.h"
+#include "utilities/execute.h"
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
 
@@ -74,7 +74,7 @@ snmptrapd_parse_traphandle(const char *token, char *line)
 {
     char            buf[STRINGMAX];
     oid             obuf[MAX_OID_LEN];
-    int             olen = MAX_OID_LEN;
+    size_t          olen = MAX_OID_LEN;
     char           *cptr;
     netsnmp_trapd_handler *traph;
 
@@ -110,7 +110,7 @@ parse_forward(const char *token, char *line)
 {
     char            buf[STRINGMAX];
     oid             obuf[MAX_OID_LEN];
-    int             olen = MAX_OID_LEN;
+    size_t          olen = MAX_OID_LEN;
     char           *cptr;
     netsnmp_trapd_handler *traph;
 
@@ -124,7 +124,7 @@ parse_forward(const char *token, char *line)
         if (!read_objid(buf, obuf, &olen)) {
             char            buf1[STRINGMAX];
             snprintf(buf1,  sizeof(buf1),
-                    "Bad trap OID in traphandle directive: %s", buf);
+                    "Bad trap OID in forward directive: %s", buf);
             buf1[ sizeof(buf1)-1 ] = 0;
             config_perror(buf1);
             return;
@@ -481,6 +481,7 @@ int   syslog_handler(  netsnmp_pdu           *pdu,
             trunc = !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                      handler->format, pdu, transport);
         } else {
+            free(rbuf);
             return NETSNMPTRAPD_HANDLER_OK;    /* A 0-length format string means don't log */
         }
 
@@ -567,6 +568,7 @@ int   print_handler(   netsnmp_pdu           *pdu,
             trunc = !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                      handler->format, pdu, transport);
         } else {
+            free(rbuf);
             return NETSNMPTRAPD_HANDLER_OK;    /* A 0-length format string means don't log */
         }
 
@@ -592,7 +594,7 @@ int   print_handler(   netsnmp_pdu           *pdu,
 	    }
 	} else {
             if (print_format2) {
-                DEBUGMSGTL(( "snmptrapd", "print_format v1 = '%s'\n", print_format2));
+                DEBUGMSGTL(( "snmptrapd", "print_format v2 = '%s'\n", print_format2));
                 trunc = !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                              print_format2, pdu, transport);
 	    } else {
@@ -604,6 +606,7 @@ int   print_handler(   netsnmp_pdu           *pdu,
         }
     }
     snmp_log(LOG_INFO, "%s%s", rbuf, (trunc?" [TRUNCATED]\n":""));
+    free(rbuf);
     return NETSNMPTRAPD_HANDLER_OK;
 }
 
@@ -758,8 +761,7 @@ do_external(char *cmd, struct hostent *host,
     snmp_set_quick_print(oldquick);
 }
 
-
-#define EXECUTE_FORMAT	"%b\n%B\n%V\n%v\n"
+#define EXECUTE_FORMAT	"%B\n%b\n%V\n%v\n"
 
 int   command_handler( netsnmp_pdu           *pdu,
                        netsnmp_transport     *transport,
@@ -772,6 +774,11 @@ int   command_handler( netsnmp_pdu           *pdu,
     DEBUGMSGTL(( "snmptrapd", "command_handler\n"));
     DEBUGMSGTL(( "snmptrapd", "token = '%s'\n", handler->token));
     if (handler && handler->token && *handler->token) {
+	netsnmp_pdu    *v2_pdu = NULL;
+	if (pdu->command == SNMP_MSG_TRAP)
+	    v2_pdu = convert_v1pdu_to_v2(pdu);
+	else
+	    v2_pdu = pdu;
         oldquick = snmp_get_quick_print();
         snmp_set_quick_print(1);
 
@@ -789,14 +796,14 @@ int   command_handler( netsnmp_pdu           *pdu,
          */
         if (handler && handler->format && *handler->format) {
             DEBUGMSGTL(( "snmptrapd", "format = '%s'\n", handler->format));
-            !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+            realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                              handler->format,
-                                             pdu, transport);
+                                             v2_pdu, transport);
         } else {
             DEBUGMSGTL(( "snmptrapd", "execute format\n"));
-            !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+            realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                              EXECUTE_FORMAT,
-                                             pdu, transport);
+                                             v2_pdu, transport);
 	}
 
         /*
@@ -804,6 +811,9 @@ int   command_handler( netsnmp_pdu           *pdu,
          */
         run_exec_command(handler->token, rbuf, NULL, 0);   /* Not interested in output */
         snmp_set_quick_print(oldquick);
+        if (pdu->command == SNMP_MSG_TRAP)
+            snmp_free_pdu(v2_pdu);
+        free(rbuf);
     }
     return NETSNMPTRAPD_HANDLER_OK;
 }
@@ -837,11 +847,18 @@ int   forward_handler( netsnmp_pdu           *pdu,
 {
     netsnmp_session session, *ss;
     netsnmp_pdu *pdu2;
+    char buf[BUFSIZ], *cp;
 
     DEBUGMSGTL(( "snmptrapd", "forward_handler (%s)\n", handler->token));
 
     snmp_sess_init( &session );
-    session.peername = handler->token;
+    if (strchr( handler->token, ':') == NULL) {
+        snprintf( buf, BUFSIZ, "%s:%d", handler->token, SNMP_TRAP_PORT);
+        cp = buf;
+    } else {
+        cp = handler->token;
+    }
+    session.peername = cp;
     session.version  = pdu->version;
     ss = snmp_open( &session );
 
@@ -851,7 +868,10 @@ int   forward_handler( netsnmp_pdu           *pdu,
         pdu2->transport_data        = NULL;
         pdu2->transport_data_length = 0;
     }
-    snmp_send( ss, pdu2 );
+    if (!snmp_send( ss, pdu2 )) {
+	snmp_sess_perror("Forward failed", ss);
+	snmp_free_pdu(pdu2);
+    }
     snmp_close( ss );
     return NETSNMPTRAPD_HANDLER_OK;
 }
@@ -933,6 +953,7 @@ snmp_input(int op, netsnmp_session *session,
 	            /*
 		     * Still can't find it!  Give up.
 		     */
+		    snmp_log(LOG_ERR, "Cannot find TrapOID in TRAP2 PDU\n");
 		    return 1;		/* ??? */
 		}
 	    }
@@ -1039,10 +1060,10 @@ t        *     d) any other global handlers
         break;
 
     case NETSNMP_CALLBACK_OP_TIMED_OUT:
-        fprintf(stderr, "Timeout: This shouldn't happen!\n");
+        snmp_log(LOG_ERR, "Timeout: This shouldn't happen!\n");
         break;
     default:
-        fprintf(stderr, "Unknown operation (%d): This shouldn't happen!\n", op);
+        snmp_log(LOG_ERR, "Unknown operation (%d): This shouldn't happen!\n", op);
         break;
     }
     return 0;

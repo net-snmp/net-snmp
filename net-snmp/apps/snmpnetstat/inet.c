@@ -60,7 +60,8 @@ SOFTWARE.
 #include <arpa/inet.h>
 #endif
 #if HAVE_WINSOCK_H
-#include <winsock.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include "winstub.h"
 #endif
 #if HAVE_SYS_SOCKET_H

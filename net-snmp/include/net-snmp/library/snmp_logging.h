@@ -87,6 +87,7 @@ extern          "C" {
     NetsnmpLogHandler log_handler_file;
     NetsnmpLogHandler log_handler_syslog;
     NetsnmpLogHandler log_handler_callback;
+    NetsnmpLogHandler log_handler_null;
 
     struct netsnmp_log_handler_s {
         int	enabled;
@@ -103,6 +104,7 @@ extern          "C" {
 	netsnmp_log_handler	*next, *prev;
     };
 
+netsnmp_log_handler *get_logh_head( void );
 netsnmp_log_handler *netsnmp_register_loghandler( int type, int pri );
 netsnmp_log_handler *netsnmp_find_loghandler( const char *token );
 int netsnmp_add_loghandler(    netsnmp_log_handler *logh );

@@ -120,7 +120,8 @@ pass_persist_parse_config(const char *token, char *cptr)
         strncpy((*ppass)->command, cptr, tcptr - cptr);
         (*ppass)->command[tcptr - cptr] = 0;
     }
-    strcpy((*ppass)->name, (*ppass)->command);
+    strncpy((*ppass)->name, (*ppass)->command, sizeof((*ppass)->name));
+    (*ppass)->name[ sizeof((*ppass)->name)-1 ] = 0;
     (*ppass)->next = NULL;
 
     register_mib("pass_persist",
@@ -131,7 +132,7 @@ pass_persist_parse_config(const char *token, char *cptr)
     /*
      * argggg -- pasthrus must be sorted 
      */
-    if (numpersistpassthrus > 0) {
+    if (numpersistpassthrus > 1) {
         etmp = (struct extensible **)
             malloc(((sizeof(struct extensible *)) * numpersistpassthrus));
         if (etmp == NULL)
@@ -249,8 +250,11 @@ var_extensible_pass_persist(struct variable *vp,
                  * persistant scripts return "NONE\n" on invalid items 
                  */
                 if (!strncmp(buf, "NONE", 4)) {
-                    *var_len = 0;
-                    return (NULL);
+                    if (exact) {
+                        *var_len = 0;
+                        return (NULL);
+                    }
+                    continue;
                 }
                 newlen = parse_miboid(buf, newname);
 
@@ -286,7 +290,7 @@ var_extensible_pass_persist(struct variable *vp,
                     long_ret = strtol(buf2, NULL, 10);
                     vp->type = ASN_INTEGER;
                     return ((unsigned char *) &long_ret);
-                } else if (!strncasecmp(buf, "unsigned", 7)) {
+                } else if (!strncasecmp(buf, "unsigned", 8)) {
                     *var_len = sizeof(long_ret);
                     long_ret = strtoul(buf2, NULL, 10);
                     vp->type = ASN_UNSIGNED;
@@ -300,7 +304,7 @@ var_extensible_pass_persist(struct variable *vp,
                     *var_len = asc2bin(buf2);
                     vp->type = ASN_OCTET_STR;
                     return ((unsigned char *) buf2);
-                } else if (!strncasecmp(buf, "opaque", 5)) {
+                } else if (!strncasecmp(buf, "opaque", 6)) {
                     *var_len = asc2bin(buf2);
                     vp->type = ASN_OPAQUE;
                     return ((unsigned char *) buf2);
@@ -360,7 +364,6 @@ setPassPersist(int action,
     char            buf[SNMP_MAXBUF], buf2[SNMP_MAXBUF];
     long            tmp;
     unsigned long   utmp;
-    int             itmp;
 
     /*
      * Make sure that our basic pipe structure is malloced 
@@ -417,7 +420,6 @@ setPassPersist(int action,
                         (int) ((utmp & 0xff)));
                 break;
             case ASN_OCTET_STR:
-                itmp = sizeof(buf2);
                 memcpy(buf2, var_val, var_val_len);
                 if (var_val_len == 0)
                     sprintf(buf, "string \"\"\n");
@@ -456,9 +458,9 @@ setPassPersist(int action,
                 return SNMP_ERR_NOTWRITABLE;
             }
 
-            if (!strncasecmp(buf, "not-writable", 11)) {
+            if (!strncasecmp(buf, "not-writable", 12)) {
                 return SNMP_ERR_NOTWRITABLE;
-            } else if (!strncasecmp(buf, "wrong-type", 9)) {
+            } else if (!strncasecmp(buf, "wrong-type", 10)) {
                 return SNMP_ERR_WRONGTYPE;
             }
             return SNMP_ERR_NOERROR;

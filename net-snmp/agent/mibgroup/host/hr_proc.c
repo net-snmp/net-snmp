@@ -57,7 +57,7 @@ static char proc_description[96]; /* buffer to hold description of current cpu*/
 extern void kstat_CPU(void);
 int proc_status(int);
 #else
-#define MAX_NUM_HRPROC  10
+#define MAX_NUM_HRPROC  32
 char proc_descriptions[MAX_NUM_HRPROC][BUFSIZ];
 #endif  /*solaris 2*/
 
@@ -342,6 +342,10 @@ void detect_hrproc(void)
             strncat( proc_descriptions[i], cp,
                      BUFSIZ-strlen(proc_descriptions[i]));
             i++;
+            if (i >= MAX_NUM_HRPROC) {
+                i--;
+                break;
+            }
         }
     }
     HRP_max_index = i;

@@ -54,9 +54,11 @@ CC	        = @CC@
 # version number is prefixed by a 0 for a better shared library version number
 #
 # ok, use libtool proper versioning:
+# (This should sorta match releases, but current is off by 1.
+#   CURRENT.AGE.REVISION; eg release 5.1.2 = 6.1.2 )
 LIBCURRENT  = 6
-LIBREVISION = 0
 LIBAGE      = 1
+LIBREVISION = 2
 
 # generally, LIBCURRENT should stay the same unless major changes occur.
 # Increment REVISION every release.  

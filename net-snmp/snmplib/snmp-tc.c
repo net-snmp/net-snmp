@@ -125,6 +125,7 @@ date_n_time(time_t * when, size_t * length)
 {
     struct tm      *tm_p;
     static u_char   string[11];
+    unsigned short yauron;
 
     /*
      * Null time
@@ -147,7 +148,9 @@ date_n_time(time_t * when, size_t * length)
      * Basic 'local' time handling
      */
     tm_p = localtime(when);
-    *(short *) string = htons(tm_p->tm_year + 1900);
+    yauron = tm_p->tm_year + 1900;
+    string[0] = (u_char)(yauron >> 8);
+    string[1] = (u_char)yauron;
     string[2] = tm_p->tm_mon + 1;
     string[3] = tm_p->tm_mday;
     string[4] = tm_p->tm_hour;

@@ -35,13 +35,13 @@ MAN3  = snmp_close.3 snmp_free_pdu.3 snmp_open.3 snmp_read.3 \
 	netsnmp_multiplexer.3 netsnmp_old_api.3 netsnmp_read_only.3    \
 	netsnmp_serialize.3 netsnmp_table.3 netsnmp_table_array.3      \
 	netsnmp_table_data.3 netsnmp_table_dataset.3		       \
-	netsnmp_table_iterator.3 netsnmp_todo.3 netsnmp_scalar.3       \
+	netsnmp_table_iterator.3 netsnmp_scalar.3       \
 	netsnmp_watcher.3 netsnmp_mode_end_call.3 netsnmp_library.3    \
 	netsnmp_mib_utilities.3 netsnmp_Container_iterator.3	       \
 	netsnmp_baby_steps.3 netsnmp_cache_handler.3		       \
-	netsnmp_container.3 netsnmp_deprecated.3		       \
+	netsnmp_container.3 netsnmp_asn1_packet_parse.3 	       \
 	netsnmp_iterator_info_s.3 netsnmp_leaf.3		       \
-	netsnmp_mfd_pdu_context_s.3 netsnmp_row_merge.3		       \
+	netsnmp_row_merge.3		       \
 	netsnmp_scalar_group_group.3 netsnmp_stash_cache.3	       \
 	netsnmp_utilities.3
 
@@ -180,4 +180,12 @@ maninstalldirs:
 # internal administrative
 #
 html: $(MANALL)
-	for i in $(MANALL); do base=`echo $$i | sed 's/.[0-9]$$//;'` ; echo "<HTML><BODY bgcolor=\"#ffffff\" background=\"../ucd-snmp-bg3.gif\"><PRE>" > $$base.html; nroff -man $$i | man2html -bare -title "$$base manual page" >> $$base.html; done
+	for i in $(MANALL); do \
+	   if test `wc -l $$i | awk '{print $$1}'` != 1 ; then \
+		   base=`echo $$i | sed 's/.[0-9]$$//;'` ; \
+		   echo "<HTML><BODY bgcolor=\"#ffffff\" background=\"../ucd-snmp-bg3.gif\"><PRE>" > $$base.html; \
+		   man2html -r ./$$i | perl -p -e 's/HREF=\"..\/man.\//HREF=\"/g;s/\.[1-9]\.html/.html/g;' | grep -v 'Content-type:' >> $$base.html; \
+		   a="$$a $$i"; \
+	   fi ; \
+	done ;\
+	perl make_index.pl man_sections.txt $$a > index.html
