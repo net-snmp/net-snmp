@@ -5,7 +5,6 @@
 #ifndef __alpha
 #include <machine/param.h>
 #include <sys/vmmeter.h>
-#else
 #endif
 #include <sys/conf.h>
 #include <sys/param.h>
@@ -524,7 +523,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
 #ifdef ultrix
   fix favenrun[3];
 #endif
-#ifdef sun
+#if defined(sun) || defined(__alpha)
   long favenrun[3];
 #define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
 #endif
@@ -544,7 +543,7 @@ unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_me
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
   }
-#if defined(ultrix) || defined(sun)
+#if defined(ultrix) || defined(sun) || defined(__alpha)
   if (KNLookup(NL_AVENRUN,(int *) favenrun, sizeof(favenrun)) == NULL)
     return(0);
   for(i=0;i<3;i++)
@@ -699,7 +698,7 @@ void setup_tree()
   sb += old_treesz;
   for(i=1;i<=numrelocs;i++, sb++) {
     exten = get_exten_instance(relocs,i);
-    memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(int));
+    memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(long));
     mysubtree[0].namelen = exten->miblen;
     mysubtree[0].variables = (struct variable *)extensible_relocatable_variables;
     mysubtree[0].variables_len = 6;

@@ -84,8 +84,10 @@ sure to end it in -1.*/
 /* Command to generate ps output, the final column must be the process
    name withOUT arguments */
 
-#if defined(hpux) || defined(SYSV) || defined(alpha)
+#if defined(hpux) || defined(SYSV) 
 #define PSCMD "/bin/ps -e"
+#elif defined(__alpha)
+#define PSCMD "/bin/ps -el"
 #else
 #define PSCMD "/bin/ps -axc"
 #endif

@@ -165,7 +165,11 @@ static struct nlist nl[] = {
 	{ "_dmmin" },
 	{ "_dmmax" },
 	{ "_nswap" },
- 	{ "_Usrptmap" },
+#ifdef __alpha
+        { "_user_pt_map"},
+#else
+        { "_Usrptmap" },
+#endif
 	{ "_usrpt" },
 #else
 	{ "ipstat"},  
