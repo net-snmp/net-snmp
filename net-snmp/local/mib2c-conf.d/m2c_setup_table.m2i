@@ -13,9 +13,10 @@
 @    eval $m2c_context_name = $table@
 @    eval $context = $table@
 @    eval $m2c_context_item = "ctx->"@
-@    eval $m2c_table_writable = table_is_writable($table)@
-@    eval $m2c_table_dependencies = $m2c_table_writable@
-@    eval $m2c_table_row_creation = 1@
+@    eval $m2c_table_external_indexes = count_external_indexes($table)@
+@    eval $m2c_table_settable = table_is_writable($table)@
+@    eval $m2c_table_dependencies = $m2c_table_settable@
+@    eval $m2c_table_row_creation = table_has_create($table)@
 @    eval $m2c_context_reg = ""@
 @    eval $m2c_data_context = "generated"@ [generated|NAME]
 @    eval $m2c_data_allocate = 0@
