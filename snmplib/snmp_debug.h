@@ -25,6 +25,7 @@ void debugmsgtoken(va_alist);
 #endif
 void debugmsg_oid(const char *token, oid *theoid, size_t len);
 void debugmsg_hex(const char *token, u_char *thedata, size_t len);
+void debugmsg_hextli(const char *token, u_char *thedata, size_t len);
 void debug_indent_add(int amount);
 char *debug_indent(void);
 
@@ -91,10 +92,12 @@ To print multiple pieces to a single line in one call, use:
 #define DEBUGL(x)          DEBUGTRACE; debugmsg x
 #define DEBUGMSGOID(x)     debugmsg_oid x
 #define DEBUGMSGHEX(x)     debugmsg_hex x
+#define DEBUGMSGHEXTLI(x)  debugmsg_hextli x
 #define DEBUGIF(x)         if (debug_is_token_registered(x) == SNMPERR_SUCCESS)
 #define DEBUGINDENT()      debug_indent()
 #define DEBUGINDENTMORE()  debug_indent_add(2)
 #define DEBUGINDENTLESS()  debug_indent_add(-2)
+#define DEBUGINDENTADD(x)  debug_indent_add(x)
 #define DEBUGPRINTINDENT(token) DEBUGMSGTL((token, "%s", DEBUGINDENT()))
 
 #define DEBUGDUMPHEADER(token,x) \
@@ -103,8 +106,7 @@ To print multiple pieces to a single line in one call, use:
         DEBUGINDENTMORE()
 
 #define DEBUGDUMPSETUP(token, buf, len) \
-        DEBUGPRINTINDENT(token); \
-        DEBUGMSGHEX((token, buf, len)); \
+        DEBUGMSGHEXTLI((token, buf, len)); \
         DEBUGMSG   ((token, "\n")); \
         DEBUGPRINTINDENT(token)
 
@@ -121,6 +123,9 @@ To print multiple pieces to a single line in one call, use:
 #define DEBUGIF(x)        if(0)
 #define DEBUGDUMP(t, b, l, p)
 #define DEBUGINDENT()
+#define DEBUGINDENTMORE()
+#define DEBUGINDENTLESS()
+#define DEBUGINDENTADD(x)
 
 #endif
 

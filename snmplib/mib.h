@@ -300,6 +300,7 @@ void print_oid_report_disable_labeledoid (void);
 void print_oid_report_disable_oid (void);
 void print_oid_report_disable_suffix (void);
 void print_oid_report_disable_symbolic (void);
+void sprint_asciistring(char *buf, u_char *cp, size_t len);
 
 #ifdef __cplusplus
 }
