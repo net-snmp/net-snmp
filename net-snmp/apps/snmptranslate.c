@@ -71,14 +71,10 @@ SOFTWARE.
 void usage(void)
 {
   fprintf(stderr,
-	  "usage: snmptranslate [-V|-p|-a] [-R] [-D] [-m <MIBS>] [-M <MIBDIRS] [-n] [-d] [-f|-s|-S] [<objectID>]\n\n");
+	  "usage: snmptranslate [options] [<objectID>]\n\n");
   fprintf(stderr, "  -h\t\tPrint this help message.\n");
   fprintf(stderr,
           "  -V\t\tPrint snmptranslate version then exit.\n");
-  fprintf(stderr,
-          "  -p\t\tPrint MIB symbol table report.\n");
-  fprintf(stderr,
-          "  -a\t\tPrint MIB ascii symbol table.\n");
   fprintf(stderr,
           "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
   fprintf(stderr,
@@ -86,25 +82,23 @@ void usage(void)
   fprintf(stderr,
           "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
   fprintf(stderr,
-          "  -t\t\tPrint MIB symbol table report in alternate format. (Same as -Tt)\n");
+          "  -T <TRANSOPTS> Print one or more MIB symbol reports.\n");
   fprintf(stderr,
-          "  -T <lost>\tPrint one or more MIB symbol reports.\n");
+          "  \t\tTRANSOPTS values:\n");
   fprintf(stderr,
-          "  Where <lost> is one or more of the following:\n");
+          "  \t\t    d: Print full details of the given OID.\n");
   fprintf(stderr,
-          "  \tl\tEnable labeled OID report.\n");
+          "  \t\t    t: Print tree format symbol table.\n");
   fprintf(stderr,
-          "  \to\tEnable OID report.\n");
+          "  \t\t    a: Print ascii format symbol table.\n");
   fprintf(stderr,
-          "  \ts\tEnable dotted symbolic report.\n");
+          "  \t\t    l: Enable labeled OID report.\n");
   fprintf(stderr,
-          "  \tt\tEnable alternately formatted symbolic suffix report.\n");
+          "  \t\t    o: Enable OID report.\n");
   fprintf(stderr,
-          "  -R\t\tUse \"random access\" to access objectID.\n");
+          "  \t\t    s: Enable dotted symbolic report.\n");
   fprintf(stderr,
-          "  -n\t\tDisplay OID in symbolic form for objectID.\n");
-  fprintf(stderr,
-          "  -d\t\tDisplay detailed information for objectID.\n");
+          "  \t\t    t: Enable alternately formatted symbolic suffix report.\n");
   fprintf(stderr, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
   snmp_mib_toggle_options_usage("\t\t", stderr);
   fprintf(stderr, "  -O <OIDOPTS>\tToggle various defaults controlling oid printing:\n");
@@ -118,15 +112,15 @@ int main(int argc, char *argv[])
     char *current_name = NULL, *cp;
     oid name[MAX_OID_LEN];
     size_t name_length;
-    int tosymbolic = 0;
     int description = 0;
-    int random_access = 0;
     int print = 0;
     int find_best = 0;
+    char n_opt[] = "n";
     
     /*
      * usage: snmptranslate name
      */
+    snmp_oid_toggle_options(n_opt);
     while ((arg = getopt(argc, argv, "VhndRrwWbpafsSm:M:D:P:tT:O:")) != EOF){
 	switch(arg) {
 	case 'h':
@@ -136,38 +130,46 @@ int main(int argc, char *argv[])
             find_best = 1;
             break;
 	case 'n':
-	    tosymbolic = 1;
+	    fprintf(stderr, "Warning: -n option is deprecated - use -On\n");
+	    snmp_oid_toggle_options(n_opt);
 	    break;	     
 	case 'd':
+	    fprintf(stderr, "Warning: -d option is deprecated - use -Td\n");
 	    description = 1;
 	    snmp_set_save_descriptions(1);
 	    break;
 	case 'r':
 	case 'R':
-	    random_access = 1;
+	    fprintf(stderr, "Warning: -%c option is deprecated - use -OR\n", arg);
+	    snmp_set_random_access(1);
 	    break;
         case 'w':
+	    fprintf(stderr, "Warning: -w option is deprecated - use -Pw\n");
             snmp_set_mib_warnings(1);
             break;
         case 'W':
+	    fprintf(stderr, "Warning: -W option is deprecated - use -PW\n");
             snmp_set_mib_warnings(2);
             break;
         case 'p':
+	    fprintf(stderr, "Warning: -p option is deprecated - use -Tp\n");
             print = 1;
             break;
         case 'a':
+	    fprintf(stderr, "Warning: -a option is deprecated - use -Ta\n");
             print = 2;
             break;
 	case 'f':
+	    fprintf(stderr, "Warning: -f option is deprecated - use -Of\n");
 	    snmp_set_full_objid(1);
 	    break;
 	case 's':
+	    fprintf(stderr, "Warning: -s option is deprecated - use -Os\n");
 	    snmp_set_suffix_only(1);
-	    tosymbolic = 1;
 	    break;
 	case 'S':
+	    fprintf(stderr, "Warning: -S option is deprecated - use -OS\n");
 	    snmp_set_suffix_only(2);
-	    tosymbolic = 1;
 	    break;
         case 'm':
             setenv("MIBS", optarg, 1);
@@ -198,7 +200,9 @@ int main(int argc, char *argv[])
 		usage();
 		exit(1);
 	    }
+	    break;
 	case 't':
+	    fprintf(stderr, "Warning: this option is deprecated - use -Tt\n");
             print = 3;
             print_oid_report_enable_suffix();
             break;
@@ -208,19 +212,33 @@ int main(int argc, char *argv[])
                 switch(*cp)
                 {
                   case 'l':
+		    print = 3;
                     print_oid_report_enable_labeledoid();
                     break;
                   case 'o':
+		    print = 3;
                     print_oid_report_enable_oid();
                     break;
                   case 's':
+		    print = 3;
                     print_oid_report_enable_symbolic();
                     break;
                   case 't':
+		    print = 3;
                     print_oid_report_enable_suffix();
                     break;
+		  case 'd':
+		    description = 1;
+		    snmp_set_save_descriptions(1);
+		    break;
+		  case 'p':
+		    print = 1;
+		    break;
+		  case 'a':
+		    print = 2;
+		    break;
                   default:
-                    fprintf(stderr,"Invalid <lost> character: %c\n", *cp);
+                    fprintf(stderr,"Invalid -T<lostpad> character: %c\n", *cp);
                     usage();
                     exit(1);
                     break;
@@ -250,7 +268,7 @@ int main(int argc, char *argv[])
     if (!current_name) exit (0);
 
     name_length = MAX_OID_LEN;
-    if (random_access){
+    if (snmp_get_random_access()){
 	if (!get_node(current_name, name, &name_length)){
 	    fprintf(stderr, "Unknown object identifier: %s\n", current_name);
 	    exit(2);
@@ -279,13 +297,7 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
-    if (tosymbolic){
-	print_objid(name, name_length);
-    } else {
-	for(count = 0; count < (int)name_length; count++)
-	    printf(".%ld", name[count]);
-	printf("\n");
-    }
+    print_objid(name, name_length);
     if (description){
 	print_description(name, name_length);
     }

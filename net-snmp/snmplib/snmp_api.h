@@ -544,6 +544,8 @@ long snmp_get_next_transid(void);
 #define snmp_get_suffix_only() (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY))
 #define snmp_set_full_objid(x) ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID, x);
 #define snmp_get_full_objid() (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY));
+#define snmp_set_random_access(x) ds_set_boolean(DS_LIBRARY_ID, DS_LIB_RANDOM_ACCESS, x);
+#define snmp_get_random_access() (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_RANDOM_ACCESS))
 
 
 int snmp_oid_compare (const oid *, size_t, const oid *, size_t);
