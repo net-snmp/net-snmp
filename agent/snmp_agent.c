@@ -150,6 +150,18 @@ agent_check_and_process(int block) {
 }
 
 
+/*
+ * The session is created using the "traditional API" routine snmp_open()
+ * so is linked into the global library Sessions list.  It also opens a
+ * socket that listens for incoming requests.
+ * 
+ *   The agent runs in an infinite loop (in the 'receive()' routine),
+ * which calls snmp_read() when such a request is received on this socket.
+ * This routine then traverses the library 'Sessions' list to identify the
+ * relevant session and eventually invokes '_sess_read'.
+ *   This then processes the incoming packet, calling the pre_parse, parse,
+ * post_parse and callback routines in turn.
+ */
 void
 init_master_agent(int dest_port, 
                   int (*pre_parse) (struct snmp_session *, snmp_ipaddr),
@@ -161,8 +173,6 @@ init_master_agent(int dest_port,
 	return;
 
     DEBUGMSGTL(("snmpd","installing master agent on port %d", dest_port));
-    /* set up a fake session for incoming requests that opens a port
-     * that we listen to. */
 
     snmp_sess_init( &sess );
     
@@ -180,7 +190,6 @@ init_master_agent(int dest_port,
 	snmp_sess_perror("init_master_agent", &sess);
 	exit(1);
     }
-   /* Ok, what to do with session pointer ??? */
 }
 
 struct agent_snmp_session  *
