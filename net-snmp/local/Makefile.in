@@ -17,9 +17,6 @@ clean:
 
 snmpcheck.made: snmpcheck
 	touch snmpcheck.made
-	@if test ! -f snmpcheck; then\
-	  cp ${srcdir}/snmpcheck .; \
-	fi
 	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' snmpcheck
 
 tkmib.made: tkmib
