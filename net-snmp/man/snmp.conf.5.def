@@ -103,7 +103,7 @@ equivalent to -OS.
 Equivalent to -OX
 .IP "noRangeCheck (1|yes|true|0|no|false)"
 disables the validation of values that is done by snmpset before issuing
-the reuqest to the agent.
+the request to the agent.
 .IP "dumpPacket      (1|yes|true|0|no|false)"
 Whether the commands should dump packets by default.
 .IP "doDebugging (1|0)"

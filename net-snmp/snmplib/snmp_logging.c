@@ -52,7 +52,7 @@
 #include <dmalloc.h>
 #endif
 
-#ifdef WIN32
+#if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
 
@@ -69,6 +69,11 @@ static int do_stderrlogging=1;
 static int do_log_callback=0;
 static int newline = 1;
 static FILE *logfile;
+
+#ifndef HAVE_VSNPRINTF
+		/* Need to use the UCD-provided one */
+int vsnprintf (char *str, size_t count, const char *fmt, va_list arg);
+#endif
 
 void
 init_snmp_logging(void) {
@@ -187,7 +192,7 @@ snmp_log_string (int priority, const char *string)
 
 #if HAVE_SYSLOG_H
   if (do_syslogging) {
-    syslog(priority, string);
+    syslog(priority, "%s", string);
   }
 #endif
 

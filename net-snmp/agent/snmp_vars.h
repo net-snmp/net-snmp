@@ -6,6 +6,10 @@
 #ifndef _SNMP_VARS_H_
 #define _SNMP_VARS_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***********************************************************
 	Copyright 1988, 1989 by Carnegie Mellon University
 	Copyright 1989	TGV, Incorporated
@@ -87,5 +91,9 @@ void sort_tree (void);
 /* fail overloads non-negative integer value. it must be -1 ! */
 #define MATCH_FAILED	(-1)
 #define MATCH_SUCCEEDED	0
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _SNMP_VARS_H_ */

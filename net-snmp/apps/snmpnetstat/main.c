@@ -275,6 +275,10 @@ int main(int argc, char *argv[])
 	    continue;
 	}
 
+    init_snmp("snmpapp");
+    if (version == SNMP_DEFAULT_VERSION) {
+      version = ds_get_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION);
+    }
     if (hostname == NULL && optind < argc){
 	hostname = argv[optind++];
     }
@@ -296,10 +300,6 @@ int main(int argc, char *argv[])
 	exit(1);
     }
     
-    init_snmp("snmpapp");
-    if (version == SNMP_DEFAULT_VERSION) {
-      version = ds_get_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION);
-    }
     if (!hostname) {
 	fprintf(stderr, "Missing host name.\n");
 	exit(1);

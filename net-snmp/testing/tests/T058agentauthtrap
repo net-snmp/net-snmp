@@ -21,7 +21,7 @@ STARTAGENT
 
 # give the agent more time to start up.  We only want to fire one
 # request (retries = 0) to make sure only one trap is sent.
-sleep 1
+#DELAY
 CAPTURE "snmpget -r 0 -t 5 $SNMP_FLAGS -v 1 localhost wrongcommunity system.sysUpTime.0"
 
 STOPAGENT

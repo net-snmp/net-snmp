@@ -4,6 +4,13 @@
  */
 
 #include <config.h>
+
+#ifdef dynix
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#endif
+
 #include "host_res.h"
 #include "hr_filesys.h"
 #include "hr_utils.h"
@@ -38,7 +45,7 @@
 #include <stdlib.h>
 #endif
 
-#if defined(freebsd3) || defined(bsdi4)
+#if defined(bsdi4) || defined(freebsd3) || defined(freebsd4) || defined(freebsd5)
 #if HAVE_GETFSSTAT
 #if defined(MFSNAMELEN)
 #define MOUNT_NFS	"nfs"
@@ -97,6 +104,14 @@ struct statfs *HRFS_entry;
 #endif
 #define HRFS_mount	f_mntonname
 #define HRFS_name	f_mntfromname
+
+#elif defined(dynix)
+
+struct mntent *HRFS_entry;
+#define	HRFS_name	mnt_fsname
+#define	HRFS_mount	mnt_dir
+#define	HRFS_type	mnt_type
+#define	HRFS_statfs	statvfs
 
 #else
 
@@ -264,8 +279,10 @@ var_hrfilesys(struct variable *vp,
 #else
 	    if (HRFS_entry->HRFS_type == MOUNT_NFS)
 #endif
-#else
+#elif defined(MNTTYPE_NFS)
 	    if (!strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS))
+#else
+	    if (0)
 #endif
 	        sprintf(string, HRFS_entry->HRFS_name);
 	    else
@@ -385,6 +402,8 @@ var_hrfilesys(struct variable *vp,
 	case HRFSYS_ACCESS:
 #if HAVE_GETFSSTAT
 	    long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
+#elif defined(cygwin)
+	    long_return = 1;
 #else
 	    if ( hasmntopt( HRFS_entry, "ro" ) != NULL )
 	        long_return = 2;	/* Read Only */
@@ -435,7 +454,7 @@ Init_HR_FileSys (void)
       free((char *)fsstats);
     fsstats = NULL;
     fsstats = malloc(fscount*sizeof(*fsstats));
-    HRFS_index = getfsstat(fsstats, fscount*sizeof(*fsstats), MNT_NOWAIT);
+    getfsstat(fsstats, fscount*sizeof(*fsstats), MNT_NOWAIT);
     HRFS_index = 0;
 #else
    HRFS_index = 1;
@@ -465,7 +484,7 @@ Get_Next_HR_FileSys (void)
 #if HAVE_GETFSSTAT
     if (HRFS_index >= fscount) return -1;
     HRFS_entry = fsstats+HRFS_index;
-    return HRFS_index++;
+    return ++HRFS_index;
 #else
     const char **cpp;
 		/*

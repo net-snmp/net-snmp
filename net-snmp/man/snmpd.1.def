@@ -1,4 +1,4 @@
-.TH SNMPD 1 "09 Sep 1995"
+.TH SNMPD 1 "21 Jun 2001"
 .ds )H U.C. Davis
 .ds ]W VVERSIONINFO
 .UC 4
@@ -67,9 +67,16 @@ is given, then the agent will listen on the default AgentX port, 705.
 Don't fork() from the calling shell.
 .TP
 .B -l logfile
-Logss all output from the agent (including stdout/stderr) to 
+Logs all output from the agent (including stdout/stderr) to 
 .I logfile.
 Defaults to a compiled option.
+.TP
+.B -s
+Use syslog for logging.
+.TP
+.B -P pidfile
+Save the process ID of the daemon in
+.I pidfile.
 .TP
 .B -g groupid
 Change to this gid after opening port.

@@ -292,6 +292,9 @@
 /* Define if you have the setgid function.  */
 #undef HAVE_SETGID
 
+/* Define if you have the setgroups function.  */
+#undef HAVE_SETGROUPS
+
 /* Define if you have the setlocale function.  */
 #undef HAVE_SETLOCALE
 
@@ -415,6 +418,9 @@
 /* Define if you have the <linux/hdreg.h> header file.  */
 #undef HAVE_LINUX_HDREG_H
 
+/* Define if you have the <linux/tasks.h> header file.  */
+#undef HAVE_LINUX_TASKS_H
+
 /* Define if you have the <locale.h> header file.  */
 #undef HAVE_LOCALE_H
 
@@ -481,6 +487,9 @@
 /* Define if you have the <netinet/ip6.h> header file.  */
 #undef HAVE_NETINET_IP6_H
 
+/* Define if you have the <netinet/ip_icmp.h> header file.  */
+#undef HAVE_NETINET_IP_ICMP_H
+
 /* Define if you have the <netinet/ip_var.h> header file.  */
 #undef HAVE_NETINET_IP_VAR_H
 
@@ -540,6 +549,9 @@
 
 /* Define if you have the <osreldate.h> header file.  */
 #undef HAVE_OSRELDATE_H
+
+/* Define if you have the <pkginfo.h> header file.  */
+#undef HAVE_PKGINFO_H
 
 /* Define if you have the <pkglocs.h> header file.  */
 #undef HAVE_PKGLOCS_H
@@ -730,6 +742,9 @@
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
+/* Define if you have the <utmpx.h> header file.  */
+#undef HAVE_UTMPX_H
+
 /* Define if you have the <utsname.h> header file.  */
 #undef HAVE_UTSNAME_H
 
@@ -774,9 +789,6 @@
 
 /* Define if you have the nsl library (-lnsl).  */
 #undef HAVE_LIBNSL
-
-/* Define if you have the popt library (-lpopt).  */
-#undef HAVE_LIBPOPT
 
 /* Define if you have the rsaref library (-lrsaref).  */
 #undef HAVE_LIBRSAREF
@@ -858,6 +870,19 @@
 
 /* nlist.n_value */
 #undef STRUCT_NLIST_HAS_N_VALUE
+
+/* ipstat structure tests */
+#undef STRUCT_IPSTAT_HAS_IPS_CANTFORWARD
+#undef STRUCT_IPSTAT_HAS_IPS_CANTFRAG
+#undef STRUCT_IPSTAT_HAS_IPS_DELIVERED
+#undef STRUCT_IPSTAT_HAS_IPS_FRAGDROPPED
+#undef STRUCT_IPSTAT_HAS_IPS_FRAGTIMEOUT
+#undef STRUCT_IPSTAT_HAS_IPS_LOCALOUT
+#undef STRUCT_IPSTAT_HAS_IPS_NOPROTO
+#undef STRUCT_IPSTAT_HAS_IPS_NOROUTE
+#undef STRUCT_IPSTAT_HAS_IPS_ODROPPED
+#undef STRUCT_IPSTAT_HAS_IPS_OFRAGMENTS
+#undef STRUCT_IPSTAT_HAS_IPS_REASSEMBLED
 
 /* vfsstat.f_frsize */
 #undef STRUCT_STATVFS_HAS_F_FRSIZE
@@ -942,6 +967,8 @@
 #define LINUXID 10
 #define BSDIID 11
 #define OPENBSDID 12
+#define WIN32ID 13
+#define HPUX11ID 14
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -949,6 +976,9 @@
 #endif
 #ifdef hpux10
 #define OSTYPE HPUX10ID
+#endif
+#ifdef hpux11
+#define OSTYPE HPUX11ID
 #endif
 #ifdef sunos4
 #define OSTYPE SUNOS4ID
@@ -1044,6 +1074,9 @@
 /* configure options specified */
 #define CONFIGURE_OPTIONS ""
 
+/* have socklen_t */
+#undef socklen_t
+
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
 # define strchr index
@@ -1107,6 +1140,9 @@
 #undef HAVE_LIBDB
 #undef HAVE_LIBRPM
 
+/* define if you have pkginfo */
+#undef HAVE_PKGINFO
+
 /* define if you have gethostbyname */
 #undef HAVE_GETHOSTBYNAME
 
@@ -1117,6 +1153,9 @@
 #undef HAVE_LPSTAT
 #undef LPSTAT_PATH
 #undef HAVE_PRINTCAP
+
+/* define if you want to build with reentrant/threaded code */
+#undef NS_REENTRANT
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
@@ -1137,6 +1176,10 @@
 
 #if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST)
 #define CAN_USE_NLIST
+#endif
+
+#if HAVE_DMALLOC_H
+#define DMALLOC_FUNC_CHECK
 #endif
 
 #undef INET6

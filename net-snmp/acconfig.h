@@ -221,6 +221,19 @@
 /* nlist.n_value */
 #undef STRUCT_NLIST_HAS_N_VALUE
 
+/* ipstat structure tests */
+#undef STRUCT_IPSTAT_HAS_IPS_CANTFORWARD
+#undef STRUCT_IPSTAT_HAS_IPS_CANTFRAG
+#undef STRUCT_IPSTAT_HAS_IPS_DELIVERED
+#undef STRUCT_IPSTAT_HAS_IPS_FRAGDROPPED
+#undef STRUCT_IPSTAT_HAS_IPS_FRAGTIMEOUT
+#undef STRUCT_IPSTAT_HAS_IPS_LOCALOUT
+#undef STRUCT_IPSTAT_HAS_IPS_NOPROTO
+#undef STRUCT_IPSTAT_HAS_IPS_NOROUTE
+#undef STRUCT_IPSTAT_HAS_IPS_ODROPPED
+#undef STRUCT_IPSTAT_HAS_IPS_OFRAGMENTS
+#undef STRUCT_IPSTAT_HAS_IPS_REASSEMBLED
+
 /* vfsstat.f_frsize */
 #undef STRUCT_STATVFS_HAS_F_FRSIZE
 
@@ -304,6 +317,8 @@
 #define LINUXID 10
 #define BSDIID 11
 #define OPENBSDID 12
+#define WIN32ID 13
+#define HPUX11ID 14
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -311,6 +326,9 @@
 #endif
 #ifdef hpux10
 #define OSTYPE HPUX10ID
+#endif
+#ifdef hpux11
+#define OSTYPE HPUX11ID
 #endif
 #ifdef sunos4
 #define OSTYPE SUNOS4ID
@@ -406,6 +424,9 @@
 /* configure options specified */
 #define CONFIGURE_OPTIONS ""
 
+/* have socklen_t */
+#undef socklen_t
+
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
 # define strchr index
@@ -469,6 +490,9 @@
 #undef HAVE_LIBDB
 #undef HAVE_LIBRPM
 
+/* define if you have pkginfo */
+#undef HAVE_PKGINFO
+
 /* define if you have gethostbyname */
 #undef HAVE_GETHOSTBYNAME
 
@@ -479,6 +503,9 @@
 #undef HAVE_LPSTAT
 #undef LPSTAT_PATH
 #undef HAVE_PRINTCAP
+
+/* define if you want to build with reentrant/threaded code */
+#undef NS_REENTRANT
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
@@ -499,6 +526,10 @@
 
 #if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST)
 #define CAN_USE_NLIST
+#endif
+
+#if HAVE_DMALLOC_H
+#define DMALLOC_FUNC_CHECK
 #endif
 
 #undef INET6

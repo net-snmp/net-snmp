@@ -128,8 +128,6 @@ void
 setup_oid(oid *it, size_t *len, u_char *id, size_t idlen, const char *user)
 {
   int i;
-  char c_oid[SPRINT_MAX_LEN];
-
   int itIndex = 12;
 
   *len = itIndex + 1 + idlen + 1 + strlen(user);
@@ -141,9 +139,6 @@ setup_oid(oid *it, size_t *len, u_char *id, size_t idlen, const char *user)
   it[itIndex++] = strlen(user);
   for(i=0; i < (int)strlen(user); i++)
     it[itIndex++] = user[i];
-
-  sprint_objid(c_oid, it, *len);
-  /* fprintf(stdout, "setup_oid : %s\n", c_oid); */
 }
 
 static void optProc(int argc, char *const *argv, int opt)
@@ -167,8 +162,7 @@ static void optProc(int argc, char *const *argv, int opt)
 
                     default:
                         fprintf(stderr,
-                                "Unknown flag passed to -C: %c\n", *optarg);
-                        usage();
+                                "Unknown flag passed to -C: %c\n", optarg[-1]);
                         exit(1);
                 }
             }

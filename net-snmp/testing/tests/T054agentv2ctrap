@@ -13,14 +13,14 @@ SKIPIFNOT USING_EXAMPLES_EXAMPLE_MODULE
 # standard V1 configuration: testcomunnity
 . ./Sv3config
 REAL_TRAPD_PORT=`echo $SNMP_SNMPTRAPD_PORT | awk '{print $2}'`
-CONFIGAGENT trapsink localhost public $REAL_TRAPD_PORT
+CONFIGAGENT trap2sink localhost public $REAL_TRAPD_PORT
 
 STARTTRAPD
 
 AGENT_FLAGS="$AGENT_FLAGS"
 STARTAGENT
 
-sleep 1
+#DELAY
 CAPTURE "snmpset -t 3 -r 0 $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx localhost ucdavis.254.8.0 i 1"
 
 STOPAGENT
