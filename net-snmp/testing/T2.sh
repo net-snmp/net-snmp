@@ -14,7 +14,7 @@ HEADER a short description of your test
 #
 
 # Start the agent if needed (make sure it stop it below)
-#STARTAGENT
+STARTAGENT
 
 CAPTURE "<executable_with_arguments:_stores_stdout/stderr_for_use_later>"
 
@@ -27,6 +27,6 @@ FAILED $? "<diagnostic_label>"
 #
 
 # Stop the agent if necessary
-#STARTAGENT
+STOPAGENT
 
 FINISHED
