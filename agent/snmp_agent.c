@@ -275,7 +275,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
     if (asp->outstanding_requests != NULL)
 	return 1;
 
-    if ((status = check_access(pdu)) != 0) {
+    if ( check_access(pdu) != 0) {
         /* access control setup is incorrect */
 	send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
         if (asp->pdu->version != SNMP_VERSION_1 && asp->pdu->version != SNMP_VERSION_2c) {
