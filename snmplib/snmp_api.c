@@ -1288,14 +1288,18 @@ snmpv3_header_build(struct snmp_pdu *pdu, register u_char *packet,
 {
     u_char			*global_hdr, *global_hdr_e;
     register u_char 		*cp;
-    struct variable_list	*vp;
     u_char			 msg_flags;
     long			 max_size, sec_model;
+#ifdef notdef
+    struct variable_list	*vp;
     u_char			 pdu_buf[SNMP_MAX_MSG_SIZE];
     u_char			 msg_buf[SNMP_MAX_MSG_SIZE];
     u_char			 sec_param_buf[SNMP_SEC_PARAM_BUF_SIZE];
     int				 pdu_buf_len, msg_buf_len, sec_param_buf_len;
     u_char			*scopedPdu, *pb, *pb0e;
+#else
+    u_char			*pb, *pb0e;
+#endif
 
 EM(-1);
 
@@ -1381,10 +1385,15 @@ snmpv3_scopedPDU_header_build(struct snmp_pdu *pdu,
                               register u_char **spdu_e)
 
 {
+#ifdef notdef
   u_char	 msg_buf[SNMP_MAX_MSG_SIZE];
   u_char	 spdu_buf[SNMP_MAX_MSG_SIZE];
   int		 spdu_buf_len, msg_buf_len, init_length;
   u_char	*scopedPdu, *pb, *pb0e;
+#else
+  int		 init_length;
+  u_char	*scopedPdu, *pb;
+#endif
 
 EM(-1);
 
@@ -1533,7 +1542,7 @@ snmp_build(struct snmp_session *session,
 	   u_char *packet,
 	   int *out_length)
 {
-    u_char *h0, *h0e, *h1;
+    u_char *h0, *h0e = 0, *h1;
     register u_char  *cp;
     struct  packet_info pkt, *pi = &pkt;
     int length;
@@ -1798,7 +1807,7 @@ snmpv3_parse(pdu, data, length, after_header)
   u_char	*sec_params;
   u_char	*msg_data;
   u_char	*cp;
-  int		 asn_len, msg_len, sec_params_len, ret;
+  int		 asn_len, msg_len, ret;
   int		 ret_val;
 
 EM(-1);
@@ -2107,14 +2116,16 @@ snmp_parse(struct snmp_session *session,
 	   u_char *data,
 	   int length)
 {
-    u_char  type;
+    u_char  type = 0;
     struct packet_info pkt, *pi = &pkt;
     u_char community[COMMUNITY_MAX_LEN];
     int community_length = COMMUNITY_MAX_LEN;
+#ifdef notused
     struct internal_variable_list *vp = NULL;
     oid objid[MAX_OID_LEN];
     char err[256];
-    int result;
+#endif
+    int result = 0;
 
     snmp_errno = SNMPERR_BAD_PARSE;
     session->s_snmp_errno = SNMPERR_BAD_PARSE;
@@ -3772,7 +3783,7 @@ cmu_snmp_parse (struct snmp_session *session,
     default:
 	    return NULL;
     }
-#if NO_INTERNAL_VARLIST
+#ifndef NO_INTERNAL_VARLIST
     if (snmp_parse(session, pdu, data, length) != SNMP_ERR_NOERROR){
 	return NULL;
     }

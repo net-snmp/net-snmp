@@ -471,7 +471,7 @@ read_config_store(char *type, char *line)
 {
 #ifdef PERSISTENT_DIRECTORY
   char file[512], *filep;
-  FILE *OUT;
+  FILE *fout;
 
   /* store configuration directives in the following order of preference:
      1. ENV variable SNMP_PERSISTENT_FILE
@@ -482,12 +482,12 @@ read_config_store(char *type, char *line)
     filep = file;
   }
   
-  if ((OUT = fopen(filep, "a")) != NULL) {
-    fprintf(OUT,line);
+  if ((fout = fopen(filep, "a")) != NULL) {
+    fprintf(fout,line);
     if (line[strlen(line)] != '\n')
-      fprintf(OUT,"\n");
+      fprintf(fout,"\n");
     DEBUGP("storing: %s\n",line);
-    fclose(OUT);
+    fclose(fout);
     /* XXX Sync the disk? */
   } else {
     snmp_perror(type);

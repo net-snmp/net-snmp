@@ -1,5 +1,8 @@
 /* config.h:  a general config file */
 
+/* UC-Davis' IANA-assigned enterprise number is 2021 */
+#define ENTERPRISE_NUMBER 2021
+
 /* don't change these values! */
 #define SNMPV1      0xAAAA       /* readable by anyone */
 #define SNMPV2ANY   0xA000       /* V2 Any type (includes NoAuth) */
@@ -25,11 +28,18 @@
    and are not using the UC-Davis SNMP library. */
 #define UCD_SNMP_LIBRARY 1
 
+/* define if you want to compile support for both authentication and
+   privacy support. */
+#define SCAPI_AUTHPRIV 1 
+ 
+/* define if you are using the v2party MD5 code */
+#define USE_INTERNAL_MD5 1 
+ 
 /* comment the next line if you do not want SNMPv2 party-based auth. */
 #define USE_V2PARTY_PROTOCOL 1
 
 /* add in recent CMU library extensions (not complete) */
-#undef CMU_COMPATIBLE
+#define CMU_COMPATIBLE 1
 
 /* should "--" comments in mibs be a comment till the end of the line
    or also until another "--", the latter being the technically
@@ -107,6 +117,11 @@
 
 #undef LOGFILE
 
+/* PERSISTENT_DIRECTORY: If defined, the library is capabile of saving
+   persisant information to this directory in the form of configuration
+   lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */
+#define PERSISTENT_DIRECTORY "\\USR\\SNMP"
+
 /* default system contact */
 #undef SYS_CONTACT
 
@@ -114,7 +129,7 @@
 #undef SYS_LOC
 
 /* location of UNIX kernel */
-#define KERNEL_LOC "/vmunix"
+#define KERNEL_LOC "unknown"
 
 /* location of mount table list */
 #define ETC_MNTTAB "/etc/mnttab"
@@ -135,6 +150,9 @@
 
 /* Where is the uname command */
 #define UNAMEPROG "/bin/uname"
+
+/* testing code sections. */
+/* #undef SNMP_TESTING_CODE */ 
 
 /* If you don't have root access don't exit upon kmem errors */
 #undef NO_ROOT_ACCESS
@@ -216,6 +234,9 @@
 
 /* Define if you have the strtol function.  */
 #define HAVE_STRTOL 1
+
+/* Define if you have the tcgetattr function.  */
+/* #define HAVE_TCGETATTR 1 */
 
 /* Define if you have the uname function.  */
 #undef HAVE_UNAME
@@ -337,6 +358,9 @@
 /* Define if you have the <sys/fs.h> header file.  */
 #undef HAVE_SYS_FS_H
 
+/* Define if you have the <sys/stat.h> header file.  */
+#define HAVE_SYS_STAT_H 1
+
 /* Define if you have the <sys/hashing.h> header file.  */
 #undef HAVE_SYS_HASHING_H
 
@@ -433,6 +457,9 @@
 /* Define if you have the <xti.h> header file.  */
 #undef HAVE_XTI_H
 
+/* Define if you have the crypto library (-lcrypto).  */
+#undef HAVE_LIBCRYPTO
+
 /* Define if you have the elf library (-lelf).  */
 #undef HAVE_LIBELF
 
@@ -490,6 +517,21 @@
 
 /* type check for in_addr_t */
 #define in_addr_t u_long
+ 
+/* define if your compiler (processor) defines __FUNCTION__ for you */
+#undef HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
+ 
+/* define if you have /dev/random */
+/* #undef HAVE_DEV_RANDOM */
+ 
+/* KMT is not very portable and requires these typedefs to be in
+   existance to use their header files */
+/* #undef u_int8_t */
+/* #undef u_int16_t */
+/* #undef u_int32_t */
+typedef unsigned char  u_int8_t;
+typedef unsigned short u_int16_t;
+typedef unsigned int   u_int32_t;
 
 /* mib pointer to the top of the extensible tree.  This has been
  assigned to UCDavis by the iana group.  Optionally, point this to the

@@ -131,7 +131,7 @@ intpr(int interval)
 		return;
 	}
 	var = getvarbyname(Session, oid_cfg_nnets, sizeof(oid_cfg_nnets) / sizeof(oid));
-	if (var) {
+	if (var && var->val.integer) {
 	    cfg_nnets = *var->val.integer;
 	    snmp_free_var(var);
 	}
@@ -314,7 +314,7 @@ intpro(int interval)
 		return;
 	}
 	var = getvarbyname(Session, oid_cfg_nnets, sizeof(oid_cfg_nnets) / sizeof(oid));
-	if (var) {
+	if (var && var->val.integer) {
 	    cfg_nnets = *var->val.integer;
 	    snmp_free_var(var);
 	}

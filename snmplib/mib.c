@@ -1816,21 +1816,25 @@ print_oid_report_disable_symbolic (void)
      print_subtree_oid_report_disable_symbolic ();
 }
 
-#ifdef CMU_COMPATIBLE
 
 /*
  * Convert timeticks to hours, minutes, seconds string.
- * Don't show centiseconds.
+ * CMU compatible does not show centiseconds.
  */
 char *uptime_string(u_long timeticks, char *buf)
 {
     char tbuf[64];
     char * cp;
     uptimeString(timeticks, tbuf);
-    cp = strrchr(tbuf, '.'); if (cp) *cp = '\0';
+    cp = strrchr(tbuf, '.');
+#ifdef CMU_COMPATIBLE
+	if (cp) *cp = '\0';
+#endif
     strcpy(buf, tbuf);
     return buf; 
 }
+
+#ifdef CMU_COMPATIBLE
 
 int mib_TxtToOid(char *Buf, oid **OidP, int *LenP)
 {

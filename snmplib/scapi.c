@@ -211,7 +211,8 @@ EM(-1); /* */
         /* fill the buffer with random integers.  Note that random()
            is defined in config.h and may not be truly the random()
            system call if something better existed */
-        for(i = 0; i < *buflen - *buflen%sizeof(rndval); i += sizeof(rndval)) {
+		rval = *buflen - *buflen%sizeof(rndval);
+        for(i = 0; i < rval; i += sizeof(rndval)) {
           rndval = random();
           memcpy(ucp, &rndval, sizeof(rndval));
           ucp += sizeof(rndval);
@@ -314,7 +315,7 @@ EM(-1); /* */
         if (properlength == SNMPERR_GENERR)
           return properlength;
 
-	if ( (keylen < properlength) ) {
+	if ( ((int)keylen < properlength) ) {
 		QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
 	}
 
@@ -343,7 +344,7 @@ EM(-1); /* */
 
 #else /* ! HAVE_LIBKMT */
 
-        if (*maclen > properlength)
+        if ((int)*maclen > properlength)
           *maclen = properlength;
         MDsign(message, msglen, MAC, *maclen, key, keylen);
 

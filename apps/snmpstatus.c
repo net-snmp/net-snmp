@@ -105,32 +105,6 @@ void usage(void)
   snmp_parse_args_descriptions(stderr);
 }
 
-#ifndef CMU_COMPATIBLE
-char *uptime_string(u_long timeticks,
-		    char *buf)
-{
-    int  seconds, minutes, hours, days;
-
-    timeticks /= 100;
-    days = timeticks / (60 * 60 * 24);
-    timeticks %= (60 * 60 * 24);
-
-    hours = timeticks / (60 * 60);
-    timeticks %= (60 * 60);
-
-    minutes = timeticks / 60;
-    seconds = timeticks % 60;
-
-    if (days == 0){
-      sprintf(buf, "%d:%02d:%02d", hours, minutes, seconds);
-    } else if (days == 1) {
-      sprintf(buf, "%d day, %d:%02d:%02d", days, hours, minutes, seconds);
-    } else {
-      sprintf(buf, "%d days, %d:%02d:%02d", days, hours, minutes, seconds);
-    }
-    return buf;
-}
-#endif /* !CMU_COMPATIBLE */
 
 int main(int argc, char *argv[])
 {

@@ -185,32 +185,6 @@ trap_description(int trap)
     }
 }
 
-#ifndef CMU_COMPATIBLE
-char *
-uptime_string(u_long timeticks, char *buf)
-{
-    int	seconds, minutes, hours, days;
-
-    timeticks /= 100;
-    days = timeticks / (60 * 60 * 24);
-    timeticks %= (60 * 60 * 24);
-
-    hours = timeticks / (60 * 60);
-    timeticks %= (60 * 60);
-
-    minutes = timeticks / 60;
-    seconds = timeticks % 60;
-
-    if (days == 0){
-	sprintf(buf, "%d:%02d:%02d", hours, minutes, seconds);
-    } else if (days == 1) {
-	sprintf(buf, "%d day, %d:%02d:%02d", days, hours, minutes, seconds);
-    } else {
-	sprintf(buf, "%d days, %d:%02d:%02d", days, hours, minutes, seconds);
-    }
-    return buf;
-}
-#endif /* !CMU_COMPATIBLE */
 
 struct snmp_pdu *
 snmp_clone_pdu2(struct snmp_pdu *pdu,
@@ -556,12 +530,15 @@ int main(int argc, char *argv[])
     int count, numfds, block;
     fd_set fdset;
     struct timeval timeout, *tvp;
+    int local_port = SNMP_TRAP_PORT;
+    int dofork=1;
+
+#ifdef notused
     in_addr_t myaddr;
     oid src[MAX_OID_LEN], dst[MAX_OID_LEN], context[MAX_OID_LEN];
     int srclen, dstlen, contextlen;
-    int local_port = SNMP_TRAP_PORT;
     char ctmp[300];
-    int dofork=1;
+#endif
 
     /* register our configuration handlers now so -H properly displays them */
     register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"oid program [args ...] ");
@@ -808,7 +785,7 @@ int main(int argc, char *argv[])
     session->callback_magic = NULL; 
     session->authenticator = NULL;
 
-    session = snmp_open( session );
+    ss = snmp_open( session );
     if (ss == NULL){
         snmp_perror("snmptrapd");
         if (Syslog) {
