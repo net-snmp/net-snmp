@@ -11,8 +11,6 @@ AC_ARG_WITH(sys_contact,[  --with-sys-contact=\"who@where\"  Default system cont
 AC_ARG_WITH(sys_location,[  --with-sys-location=\"location\"  Default system location.
                                     (Default: Unknown)],ac_cv_user_prompt_SYS_LOC="$with_sys_location")
 AC_ARG_WITH(logfile,[  --with-logfile=\"location\"       Default log file location.],ac_cv_user_prompt_LOGFILE="$with_logfile")
-AC_ARG_WITH(security,[  --with-security=\"TYPE\"          Default security type to enforce.
-                                    (Default: SNMPV1).],ac_cv_user_prompt_GLOBALSECURITY="$with_security")
 AC_ARG_WITH(mibdirs,[  --with-mibdirs=\"dir1:dir2:\"     Default directories to look for mibs.
                                     (Default: LIBDIR/snmp/mibs)],[DEFAULT_MIBDIRS="$with_mibdirs"
   AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$with_mibdirs")
@@ -939,7 +937,7 @@ if test "x$ac_cv_CAN_USE_SYSCTL" = "xyes"; then
   AC_DEFINE(CAN_USE_SYSCTL)
 fi
 
-if test "x$ac_cv_user_prompt_GLOBALSECURITY" = "x" -o "x$ac_cv_user_prompt_LOGFILE" = "x" -o "x$ac_cv_user_prompt_SYS_LOC" = "x" -o "x$ac_cv_user_prompt_SYS_CONTACT" = "x"; then
+if test "x$ac_cv_user_prompt_LOGFILE" = "x" -o "x$ac_cv_user_prompt_SYS_LOC" = "x" -o "x$ac_cv_user_prompt_SYS_CONTACT" = "x"; then
 AC_CACHE_CHECK(if you have run configure before, ac_cv_have_warned,
 [
 if test "x$defaults" = "xno"; then
@@ -1014,26 +1012,6 @@ at the prompt below) the agent will use stdout and stderr instead.
 (Note: This value can be over-ridden using the command line options.)
 
 Location to write logfile],$defaultlog,1)
-
-AC_PROMPT_USER(GLOBALSECURITY,[
-
-*** SNMP Security/Authentication:
-
-	You may pick one of two types of SNMP authentication to use
-for this agent.  Only the extensible section is affected by the
-following choices.  This will be handled better in version 3.2 and
-above.  Note that to use anything other than SNMPV1 the configuration
-files must be set up properly for SNMPV2 usage.
-
-	(Encryption is not supported because of U.S. cryptography laws)
-
-SNMPV1       Any type of snmp transmission can access the extensible tree.
-SNMPV2ANY    Any type of snmpV2 transmissions can access the extensible tree.
-SNMPV2AUTH   Only authenticated V2 transmissions can access the extensible tree.
-
-	If you don't understand any of the above sentences: pick SNMPV1.
-
-What type of security to use],SNMPV1)
 
 AC_OUTPUT([
  Makefile:Makefile.top:Makefile.in
