@@ -92,7 +92,7 @@ unsigned char *var_file_table(vp, name, length, exact, var_len, write_method)
       return (u_char *)&long_ret;
       
   case FILE_ERROR:
-      if (file->size > file->max)
+      if (file->max >= 0 && file->size > file->max)
 	  long_ret = 1;
       else
 	  long_ret = 0;
@@ -100,7 +100,7 @@ unsigned char *var_file_table(vp, name, length, exact, var_len, write_method)
       return (u_char *)&long_ret;
       
   case FILE_MSG:
-      if (file-> size > file->max)
+      if (file->max >= 0 && file-> size > file->max)
 	  sprintf(error, FILE_ERROR_MSG, file->name, file->max, file->size);
       else
 	  strcpy(error, "");
