@@ -1466,18 +1466,19 @@ shutdown_tree(void) {
 void
 clear_subtree (netsnmp_subtree *sub) {
 
+    netsnmp_subtree *nxt;
+    
     if (sub == NULL)
 	return;
 
-    if (sub->children != NULL) {
-	clear_subtree(sub->children);
+    for(nxt = sub; nxt;) {
+        if (nxt->children != NULL) {
+            clear_subtree(nxt->children);
+        }
+        sub = nxt;
+        nxt = nxt->next;
+        netsnmp_subtree_free(sub);
     }
-
-    if (sub->next != NULL) {
-	clear_subtree(sub->next);
-    }
-
-    netsnmp_subtree_free(sub);
 
 }
 
