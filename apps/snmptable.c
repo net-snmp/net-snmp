@@ -127,21 +127,32 @@ optProc(int argc, char *const *argv, int opt)
         while (*optarg) {
             switch (*optarg++) {
             case 'w':
-                if (argv[optind])
-                    max_width = atoi(argv[optind]);
-                if (max_width == 0) {
-                    fprintf(stderr, "Bad -Cw option: %s\n", argv[optind]);
-                    usage();
-                }
-                optind++;
+		if (optind < argc) {
+		    if (argv[optind]) {
+			max_width = atoi(argv[optind]);
+			if (max_width == 0) {
+			    usage();
+			    fprintf(stderr, "Bad -Cw option: %s\n", 
+				    argv[optind]);
+			    exit(1);
+			}
+		    }
+		} else {
+		    usage();
+                    fprintf(stderr, "Bad -Cw option: no argument given\n");
+		    exit(1);
+		}
+		optind++;
                 break;
             case 'f':
-                field_separator = argv[optind];
-                if (!field_separator) {
-                    fprintf(stderr, "Bad -Cf option: %s\n", argv[optind]);
+		if (optind < argc) {
+		    field_separator = argv[optind];
+		} else {
                     usage();
-                }
-                optind++;
+		    fprintf(stderr, "Bad -Cf option: no argument given\n");
+		    exit(1);
+		}
+		optind++;
                 break;
             case 'h':
                 headers_only = 1;
@@ -178,16 +189,14 @@ usage(void)
     fprintf(stderr, " TABLE-OID\n\n");
     snmp_parse_args_descriptions(stderr);
     fprintf(stderr,
-            "  -C APPOPTS\t\tSet various application specific behaviours:\n");
+	    "  -C APPOPTS\t\tSet various application specific behaviours:\n");
     fprintf(stderr, "\t\t\t  b:       brief field names\n");
     fprintf(stderr, "\t\t\t  B:       do not use GETBULK requests\n");
-    fprintf(stderr,
-            "\t\t\t  f<STR>:  print table delimitied with <STR>\n");
+    fprintf(stderr, "\t\t\t  f<STR>:  print table delimitied with <STR>\n");
     fprintf(stderr, "\t\t\t  h:       print only the column headers\n");
     fprintf(stderr, "\t\t\t  H:       print no column headers\n");
     fprintf(stderr, "\t\t\t  i:       print index values\n");
-    fprintf(stderr,
-            "\t\t\t  w<NUM>:  print table in parts of <NUM> chars width\n");
+    fprintf(stderr, "\t\t\t  w<NUM>:  print table in parts of <NUM> chars width\n");
 }
 
 void
