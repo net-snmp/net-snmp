@@ -13,6 +13,12 @@ config_require(mibII/icmp)
 config_require(mibII/udp)
 config_require(mibII/vacm_vars)
 config_require(mibII/setSerialNo)
+/*
+ * these new module re-rewrites have only been implemented for
+ * linux.
+ */
+#ifdef linux
 config_require(ip-mib)
 config_require(if-mib)
 config_require(ip-forward-mib)
+#endif
