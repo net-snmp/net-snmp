@@ -136,6 +136,29 @@ int _asn_build_header_check(const char *str, u_char *data,
     return 0;
 }
 
+/* checks the incoming packet for validity and returns its size or 0 */
+int
+asn_check_packet (u_char *pkt, size_t len) {
+  long asn_length;
+  
+  if (len < 2)
+    return 0;      /* always too short */
+
+  if (*pkt != (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR))
+    return -1;     /* wrong type */
+
+  if (*(pkt+1) & 0x80) {
+    /* long length */
+    if (len < (*(pkt+1) & ~0x80)+2)
+      return 0;    /* still to short, incomplete length */
+    asn_parse_length(pkt+1, &asn_length);
+    return (asn_length + 2 + (*(pkt+1) & ~0x80));
+  } else {
+    /* short length */
+    return (*(pkt+1) + 2);
+  }
+}
+
 static
 int _asn_bitstring_check(const char * str, u_long asn_length, u_char datum)
 {

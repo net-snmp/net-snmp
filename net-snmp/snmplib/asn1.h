@@ -145,6 +145,7 @@ typedef struct counter64 unsigned64;
 
 #endif /* OPAQUE_SPECIAL_TYPES */
 
+int	 asn_check_packet (u_char *, size_t);
 u_char	*asn_parse_int (u_char *, size_t *, u_char *, long *, size_t);
 u_char	*asn_build_int (u_char *, size_t *, u_char, long *, size_t);
 u_char	*asn_parse_unsigned_int (u_char *, size_t *, u_char *, u_long *, size_t);
