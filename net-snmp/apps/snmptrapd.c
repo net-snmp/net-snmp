@@ -450,7 +450,10 @@ snmp_input(int op, netsnmp_session *session,
     netsnmp_variable_list *vars;
     netsnmp_trapd_handler *traph;
     netsnmp_transport *transport = (netsnmp_transport *) magic;
-    extern netsnmp_trapd_handler *netsnmp_global_traphandlers;
+    int ret;
+    extern netsnmp_trapd_handler *netsnmp_auth_global_traphandlers;
+    extern netsnmp_trapd_handler *netsnmp_pre_global_traphandlers;
+    extern netsnmp_trapd_handler *netsnmp_post_global_traphandlers;
 
 
     switch (op) {
@@ -521,23 +524,73 @@ snmp_input(int op, netsnmp_session *session,
 
 
         /*
-	 *  OK - We've found the Trap OID used to identify this trap,
-	 *  so locate the handler (or list of handlers) specific to it,
-	 *  and call each of them in turn.....
+	 *  OK - We've found the Trap OID used to identify this trap.
+         *  Call each of the various lists of handlers:
+         *     a) authentication-related handlers,
+         *     b) other handlers to be applied to all traps
+         *		(*before* trap-specific handlers)
+         *     c) the handler(s) specific to this trap
+t        *     d) any other global handlers
+         *
+	 *  In each case, a particular trap handler can abort further
+         *     processing - either just for that particular list,
+         *     or for the trap completely.
+         *
+	 *  This is particularly designed for authentication-related
+	 *     handlers, but can also be used elsewhere.
+         *
+         *  OK - Enough waffling, let's get to work.....
 	 */
-        traph = netsnmp_get_traphandler(trapOid, trapOidLen);
+
+        /*
+	 *  a) authentication handlers
+	 */
+        traph = netsnmp_auth_global_traphandlers;
 	while (traph) {
-            /* XXX - maybe allow a handler to abort further processing ??? */
-	    (*(traph->handler))(pdu, transport, traph);
+	    ret = (*(traph->handler))(pdu, transport, traph);
+            if (ret == NETSNMPTRAPD_HANDLER_FINISH)
+                return 1;
+            if (ret == NETSNMPTRAPD_HANDLER_BREAK)
+                break;
 	    traph = traph->nexth;
 	}
 
         /*
-	 *  ... followed by the handlers to be applied to *all* traps
+	 *  b) pre-specific global handlers
 	 */
-        traph = netsnmp_global_traphandlers;
+        traph = netsnmp_pre_global_traphandlers;
 	while (traph) {
-	    (*(traph->handler))(pdu, transport, traph);
+	    ret = (*(traph->handler))(pdu, transport, traph);
+            if (ret == NETSNMPTRAPD_HANDLER_FINISH)
+                return 1;
+            if (ret == NETSNMPTRAPD_HANDLER_BREAK)
+                break;
+	    traph = traph->nexth;
+	}
+
+        /*
+	 *  c) trap-specific handlers
+	 */
+        traph = netsnmp_get_traphandler(trapOid, trapOidLen);
+	while (traph) {
+	    ret = (*(traph->handler))(pdu, transport, traph);
+            if (ret == NETSNMPTRAPD_HANDLER_FINISH)
+                return 1;
+            if (ret == NETSNMPTRAPD_HANDLER_BREAK)
+                break;
+	    traph = traph->nexth;
+	}
+
+        /*
+	 *  d) other global handlers
+	 */
+        traph = netsnmp_post_global_traphandlers;
+	while (traph) {
+	    ret = (*(traph->handler))(pdu, transport, traph);
+            if (ret == NETSNMPTRAPD_HANDLER_FINISH)
+                return 1;
+            if (ret == NETSNMPTRAPD_HANDLER_BREAK)
+                break;
 	    traph = traph->nexth;
 	}
         break;
@@ -979,11 +1032,12 @@ main(int argc, char *argv[])
      */
     if (!Print) {
         Syslog = 1;
-        netsnmp_add_global_traphandler(syslog_handler);
+        netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER, syslog_handler);
     } else {
-        netsnmp_add_global_traphandler(print_handler);
+        netsnmp_add_global_traphandler(NETSNMPTRAPD_PRE_HANDLER, print_handler);
     }
-    netsnmp_add_global_traphandler(notification_handler);
+    netsnmp_add_global_traphandler(NETSNMPTRAPD_POST_HANDLER, notification_handler);
+
     if (Event) {
         netsnmp_add_traphandler(event_handler, risingAlarm,
                                     OID_LENGTH(risingAlarm));
