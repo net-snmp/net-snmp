@@ -68,6 +68,11 @@
 #define DISKUSED 7
 #define DISKPERCENT 8
 
+/* load average mib */
+#define LOADAVEMIBNUM 7
+#define LOADAVE 3
+#define LOADMAXVAL 4
+
 /* Version info mib */
 #define VERSIONMIBNUM 100
 #define VERTAG 2

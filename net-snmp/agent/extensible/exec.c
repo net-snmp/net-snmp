@@ -2,11 +2,14 @@
 #include "mibdefs.h"
 #include "wes.h"
 
+#define MAXMSGLINES 1000
+
 struct extensible *get_exten_instance();
 int fixExecError();
 
 struct exstensible *extens=NULL;  /* In exec.c */
-int numextens=0;                    /* ditto */
+struct exstensible *relocs=NULL;  /* In exec.c */
+int numextens=0,numrelocs=0;                    /* ditto */
 
 unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -33,7 +36,7 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numextens))
     return(NULL);
 
-  if (exten = get_exten_instance(extens,newname[8])) {
+  if (exten = get_exten_instance(extens,newname[8],numextens)) {
     switch (vp->magic) {
       case MIBINDEX:
         long_ret = newname[8];
@@ -78,10 +81,11 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 {
   
   struct extensible *exten;
-  int tmp=0, tmplen=1000;
+  int tmp=0, tmplen=1000, fd;
   static struct extensible ex;
+  FILE *file;
 
-  if (exten = get_exten_instance(extens,name[8])) {
+  if (exten = get_exten_instance(extens,name[8],numextens)) {
     if (var_val_type != INTEGER) {
       printf("Wrong type != int\n");
       return SNMP_ERR_WRONGTYPE;
@@ -89,10 +93,160 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
     asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
     if (tmp == 1 && action == COMMIT) {
       sprintf(ex.command,EXECFIXCMD,exten->name);
-      exec_command(&ex);
+      fd = get_exec_output(&ex);
+      file = fdopen(fd,"r");
+      while (fgets(ex.output,STRMAX,file) != NULL);
+      fclose(file);
+      close(fd);
     } 
     return SNMP_ERR_NOERROR;
   }
   return SNMP_ERR_WRONGTYPE;
+}
+
+
+unsigned char *var_wes_relocatable(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;
+/* IN - pointer to variable entry that points here */
+    register oid	*name;
+/* IN/OUT - input name requested, output name found */
+    register int	*length;
+/* IN/OUT - length of input and output oid's */
+    int			exact;
+/* IN - TRUE if an exact match was requested. */
+    int			*var_len;
+/* OUT - length of variable or 0 if function returned. */
+    int			(**write_method)();
+/* OUT - pointer to function to set variable, otherwise 0 */
+{
+
+  oid newname[30];
+  int count, result,i, rtest=0, fd;
+  FILE *file;
+  register int interface;
+  struct extensible *exten;
+  long long_ret;
+  char errmsg[STRMAX];
+  struct variable myvp;
+  oid tname[30];
+
+  memcpy(&myvp,vp,sizeof(struct variable));
+
+/*  printf("-");
+  print_mib_oid(name,*length);
+  printf("  / %d\n",vp->magic); */
+  
+  for(i=0; i<= numrelocs; i++) {
+    exten = get_exten_instance(relocs,i,numrelocs);
+    if (exten->miblen != 0){
+      memcpy(myvp.name,exten->miboid,exten->miblen*sizeof(int));
+      memcpy(tname,name,*length*sizeof(int));
+      myvp.name[vp->namelen-1] = vp->name[vp->namelen-1]; 
+      myvp.namelen = exten->miblen+1;
+      if (checkmib(&myvp,name,length,exact,var_len,write_method,newname,
+                   ((vp->magic == ERRORMSG) ? MAXMSGLINES : 1)))
+        break;
+      else
+        exten = NULL;
+    }
+  }
+  if (i > numrelocs || exten == NULL)
+    return(NULL);
+
+/*  printf("+");
+  print_mib_oid(name,*length);
+  printf("  / %d\n",vp->magic); */
+  
+  switch (vp->magic) {
+    case MIBINDEX:
+      long_ret = newname[*length-1];
+      return((u_char *) (&long_ret));
+    case ERRORNAME: /* name defined in config file */
+      *var_len = strlen(exten->name);
+      return((u_char *) (exten->name));
+    case SHELLCOMMAND:
+      *var_len = strlen(exten->command);
+      return((u_char *) (exten->command));
+    case ERRORFLAG:  /* return code from the process */
+      if (exten->type == EXECPROC)
+        exec_command(exten);
+      else
+        shell_command(exten);
+      return((u_char *) (&exten->result));
+    case ERRORMSG:   /* first line of text returned from the process */
+      if (exten->type == EXECPROC) {
+        fd = get_exec_output(exten);
+        file = fdopen(fd,"r");
+        for (i=0;i != name[*length-1];i++) {
+          if (fgets(errmsg,STRMAX,file) == NULL) {
+            *var_len = NULL;
+            return(NULL);
+          }
+        }
+        fclose(file);
+        close(fd);
+      }
+      else {
+        if (*length > 1) {
+          *var_len = NULL;
+          return(NULL);
+        }
+        shell_command(exten);
+        strcpy(errmsg,exten->output);
+      }
+      *var_len = strlen(errmsg);
+      return((u_char *) (errmsg));
+    case ERRORFIX:
+      *write_method = fixExecError;
+      long_return = 0;
+      return ((u_char *) &long_return);
+  }
+  return NULL;
+}
+
+/* the relocatable extensible commands variables */
+struct variable2 wes_relocatable_variables[] = {
+  {MIBINDEX, INTEGER, RONLY, var_wes_relocatable, 1, {MIBINDEX}},
+  {ERRORNAME, STRING, RONLY, var_wes_relocatable, 1, {ERRORNAME}}, 
+    {SHELLCOMMAND, STRING, RONLY, var_wes_relocatable, 1, {SHELLCOMMAND}}, 
+    {ERRORFLAG, INTEGER, RONLY, var_wes_relocatable, 1, {ERRORFLAG}},
+    {ERRORMSG, STRING, RONLY, var_wes_relocatable, 1, {ERRORMSG}},
+  {ERRORFIX, INTEGER, RWRITE, var_wes_relocatable, 1, {ERRORFIX }}
+};
+
+struct subtree *find_extensible(tp,tname,tnamelen,exact)
+  register struct subtree	*tp;
+  oid tname[];
+  int tnamelen,exact;
+{
+  int i,tmp;
+  struct extensible *exten;
+  struct variable myvp;
+  int var_len;
+  oid newname[30], name[30];
+  static struct subtree mysubtree[1];
+
+  for(i=0; i<= numrelocs; i++) {
+    exten = get_exten_instance(relocs,i,numrelocs);
+    if (exten->miblen != 0){
+      memcpy(myvp.name,exten->miboid,exten->miblen*sizeof(int));
+      memcpy(name,tname,tnamelen*sizeof(int));
+      myvp.name[exten->miblen] = name[exten->miblen];
+      myvp.namelen = exten->miblen+1;
+      tmp = exten->miblen+1;
+      if (checkmib(&myvp,name,&tmp,exact,NULL,NULL,newname,
+                   numrelocs))
+        break;
+    }
+  }
+  if (i > numrelocs || exten == NULL)
+    return(tp);
+  memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(int));
+  mysubtree[0].namelen = exten->miblen;
+  mysubtree[0].variables = (struct variable *)wes_relocatable_variables;
+  mysubtree[0].variables_len =
+    sizeof(wes_relocatable_variables)/sizeof(*wes_relocatable_variables);
+  mysubtree[0].variables_width = sizeof(*wes_relocatable_variables);
+  return(mysubtree);
 }
 

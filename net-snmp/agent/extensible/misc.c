@@ -45,14 +45,14 @@ struct myproc *get_proc_instance(proc,inst)
   return(proc);
 }
 
-struct extensible *get_exten_instance(exten,inst)
-     int inst;
+struct extensible *get_exten_instance(exten,inst,max)
+     int inst,max;
      struct extensible *exten;
 {
   int i;
   
   if (exten == NULL) return(NULL);
-  for (i=1;i != inst && i < numextens && exten != NULL; i++) exten = exten->next;
+  for (i=1;i != inst && i < max && exten != NULL; i++) exten = exten->next;
   return(exten);
 }
 
@@ -107,11 +107,13 @@ int shell_command(ex)
   return(ex->result);
 }
 
+#define MAXOUTPUT 300
+
 int exec_command(ex)
      struct extensible *ex;
 {
   char line[STRMAX], *cptr;
-  int ret=0, fd;
+  int ret=0, fd,i;
   FILE *file;
 #ifdef hpux
   int status;
@@ -211,8 +213,8 @@ int get_exec_output(ex)
           perror("open");
           return(NULL);
         }
-        cachebytes = read(fd[0],(void *) cache, MAXCACHESIZE);
-        write(cfd,(void *) cache, cachebytes);
+        while ((cachebytes = read(fd[0],(void *) cache, MAXCACHESIZE)) > 0)
+          write(cfd,(void *) cache, cachebytes);
         close(cfd);
         close(fd[0]);
         /* wait for the child to finish */
@@ -276,3 +278,13 @@ int get_ps_output(ex)
   return(fd);
 } 
 
+int print_mib_oid(name,len)
+  oid name[];
+  int len;
+{
+  int i;
+  printf("Mib:  ");
+  for(i=0; i < len; i++) {
+    printf(".%d",name[i]);
+  }
+}
