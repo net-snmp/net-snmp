@@ -117,6 +117,12 @@ by default).  This is the default unless the
 .BR -o " or " -P
 flag is used.
 .TP
+.BI -t
+Don't log traps to syslog.  This disables logging to syslog.  This is
+useful if you want the snmptrapd application to
+.B only
+run traphandle hooks and not to log any traps to any location.
+.TP
 .BI -u " FILE"
 Save the process ID of the trap daemon in
 .IR FILE "."
