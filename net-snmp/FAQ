@@ -712,7 +712,10 @@ How do I handle traps and notifications?
 	- the value of "uptime"		(*)
 
   The three parameters marked (*) can be left null (i.e. "") to use
-  sensible default values.
+  sensible default values.  An example command would look something like
+
+	snmptrap -v 1 127.0.0.1 public "" "" 1 0 ""
+
 
     An SNMPv2 or v3 trap or notification (aka "inform") is simpler and
   just needs three (or four) parameters:
@@ -723,6 +726,9 @@ How do I handle traps and notifications?
 
     Either of these can then be followed by one or more (objectID type value)
   triples, using the same syntax as for 'snmpset'.
+  An example command could look something like
+
+	snmptrap -v 2c 127.0.0.1 public "" .1.3.6.1.4.1.2021.251.1
 
 
     Handling received traps is done using the tool 'snmptrapd'.  This can
