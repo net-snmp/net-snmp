@@ -5,6 +5,7 @@ TABLE OF CONTENTS
   Quick Instructions
 * Ucd-Snmp Specific Information
   Long (but you should read these) Instructions
+  Installing the Perl/SNMP Module
 * Compilers and Options
   Compiling For Multiple Architectures
   Installation Names
@@ -13,7 +14,7 @@ TABLE OF CONTENTS
   Operation Controls
 
   * = required reading
-  
+
 QUICK INSTRUCTIONS
 ==================
 
@@ -42,7 +43,7 @@ to the --prefix argument of the configure script, or /usr/local if
 undefined.  In version 3.0.3 till 3.3, the files were kept in
 $(prefix)/lib/snmp
 
-Optional features to pass to configure for ucd-snmp can be obtained by 
+Optional features to pass to configure for ucd-snmp can be obtained by
 running configure --help.
 
 LONG (but you should read these) INSTRUCTIONS
@@ -92,7 +93,31 @@ The simplest way to compile this package is:
   5. You can remove the program binaries and object files from the
      source code directory by typing `make clean'.  To also remove the
      files that `configure' created (so you can compile the package for
-     a different kind of computer), type `make distclean'.  
+     a different kind of computer), type `make distclean'.
+
+
+Installing the Perl/SNMP Module
+===============================
+   The Perl/SNMP Module is now bundled with the ucd-snmp package and is
+located in the ucd-snmp/perl/SNMP directory. This module is an interface
+to the ucd-snmp SNMP client side management API. The Perl package
+provides a high level abstract interface to these functions for rapid
+application development. Following are the steps required to build and
+install this perl module.
+
+   1.) Be sure to read the ucd-snmp/perl/SNMP/README
+
+   2.) Be sure that ucd-snmp has been sucessfully tested and installed -
+       the headers and libraries will be required to build, the
+       applications and mibs will be required to test the perl module
+
+   3.) cd to ucd-snmp/perl/SNMP and run
+            perl Makefile.PL
+            make
+            make test
+            make install (as root)
+
+
 
 Compilers and Options
 =====================
