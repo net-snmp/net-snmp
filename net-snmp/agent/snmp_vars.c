@@ -648,29 +648,31 @@ struct variable2 eventnotifytab_variables[] = {
 #include "../config.h"
 #include "extensible/snmp_vars.h"
 struct subtree subtrees[] = {
-  {{EXTENSIBLEMIB, PROCMIBNUM}, 7, (struct variable *)extensible_proc_variables,
+  {{EXTENSIBLEMIB, PROCMIBNUM}, EXTENSIBLENUM+1,
+   (struct variable *)extensible_proc_variables,
    sizeof(extensible_proc_variables)/sizeof(*extensible_proc_variables),
    sizeof(*extensible_proc_variables)},
-  {{EXTENSIBLEMIB, SHELLMIBNUM}, 7, (struct variable *)extensible_extensible_variables,
+  {{EXTENSIBLEMIB, SHELLMIBNUM}, EXTENSIBLENUM+1,
+   (struct variable *)extensible_extensible_variables,
    sizeof(extensible_extensible_variables)/sizeof(*extensible_extensible_variables),
    sizeof(*extensible_extensible_variables)},
 #ifdef hpux
-  {{EXTENSIBLEMIB, MEMMIBNUM}, 7, (struct variable *)extensible_mem_variables,
+  {{EXTENSIBLEMIB, MEMMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_mem_variables,
    sizeof(extensible_mem_variables)/sizeof(*extensible_mem_variables),
    sizeof(*extensible_mem_variables)},
 #endif
-  {{EXTENSIBLEMIB, LOCKDMIBNUM}, 7, (struct variable *)extensible_lockd_variables,
+  {{EXTENSIBLEMIB, LOCKDMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_lockd_variables,
    sizeof(extensible_lockd_variables)/sizeof(*extensible_lockd_variables),
    sizeof(*extensible_lockd_variables)},
 #if defined(hpux) || defined(ultrix)
-  {{EXTENSIBLEMIB, DISKMIBNUM}, 7, (struct variable *)extensible_disk_variables,
+  {{EXTENSIBLEMIB, DISKMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_disk_variables,
    sizeof(extensible_disk_variables)/sizeof(*extensible_disk_variables),
    sizeof(*extensible_disk_variables)},
 #endif
-  {{EXTENSIBLEMIB, LOADAVEMIBNUM}, 7, (struct variable *)extensible_loadave_variables,
+  {{EXTENSIBLEMIB, LOADAVEMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_loadave_variables,
    sizeof(extensible_loadave_variables)/sizeof(*extensible_loadave_variables),
    sizeof(*extensible_loadave_variables)},
-  {{EXTENSIBLEMIB, VERSIONMIBNUM}, 7, (struct variable *)extensible_version_variables,
+  {{EXTENSIBLEMIB, VERSIONMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_version_variables,
    sizeof(extensible_version_variables)/sizeof(*extensible_version_variables),
    sizeof(*extensible_version_variables)},
     {{MIB, 1}, 7, (struct variable *)system_variables,
@@ -956,10 +958,10 @@ compare_tree(name1, len1, name2, len2)
 
 
 
-char version_descr[128] = "HP-UX A.09.05";
-char sysContact[128] = "support@ece.ucdavis.edu";
-char sysName[128] = "Unknown";
-char sysLocation[128] = "UCDavis Electrical Engineering Department";
+char version_descr[128] = VERS_DESC;
+char sysContact[128] = SYS_CONTACT;
+char sysName[128] = SYS_NAME;
+char sysLocation[128] = SYS_LOC;
 
 #ifdef hpux
 oid version_id[] = {1, 3, 6, 1, 4, 1, 11, 2, 3, 2, 5};
