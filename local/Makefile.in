@@ -1,3 +1,5 @@
+SCRIPTS=snmpcheck tkmib
+
 snmpcheck: snmpcheck.def ../sedscript
 	$(SED) -f ../sedscript $(srcdir)/snmpcheck.def > snmpcheck
 	chmod a+x snmpcheck
@@ -6,4 +8,4 @@ clean:
 	rm -f snmpcheck
 
 install:
-	@$(INSTALL) snmpcheck $(bindir) ; echo "install:  installed snmpcheck in $(bindir)"
+	@for i in $(SCRIPTS) ; do $(INSTALL) $$i $(bindir) ; echo "install:  installed $$i in $(bindir)" ; done
