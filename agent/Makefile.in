@@ -49,7 +49,7 @@ INSTALLHEADERS=$(top_srcdir)/include/net-snmp/agent/agent_read_config.h \
 	$(top_srcdir)/include/net-snmp/agent/snmp_vars.h \
 	$(top_srcdir)/include/net-snmp/agent/var_struct.h \
 	$(top_srcdir)/include/net-snmp/agent/agent_handler.h \
-	$(top_srcdir)/include/net-snmp/agent/ucd-snmp-agent-includes.h \
+	$(top_srcdir)/include/net-snmp/agent/net-snmp-agent-includes.h \
 	$(top_srcdir)/include/net-snmp/agent/agent_callbacks.h \
 	$(top_srcdir)/include/net-snmp/agent/mib_modules.h \
 	mibgroup/struct.h \
