@@ -139,6 +139,10 @@ close_agentx_session(struct snmp_session *session, int sessid)
 	        prev->next = sp->next;
 	    else
 	    	session->subsession = sp->next;
+	    if (sp->securityAuthProto)
+		free(sp->securityAuthProto);
+	    if (sp->securityName)
+		free(sp->securityName);
 	    free( sp );
 	    
 	    return AGENTX_ERR_NOERROR;

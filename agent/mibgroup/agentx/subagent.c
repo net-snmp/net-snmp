@@ -319,12 +319,12 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 
     case AGENTX_MSG_RESPONSE:
         DEBUGMSGTL(("agentx/subagent","  -> response\n"));
-	free( asp );
+	free_agent_snmp_session( asp );
 	return 1;
 
     default:
         DEBUGMSGTL(("agentx/subagent","  -> unknown (%d)\n", pdu->command ));
-	free( asp );
+	free_agent_snmp_session( asp );
 	return 0;
     }
 	
