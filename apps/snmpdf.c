@@ -2,6 +2,11 @@
  * snmpget.c - send snmp GET requests to a network entity.
  *
  */
+
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /***********************************************************************
 	Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University
 
@@ -23,6 +28,12 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_STDLIB_H
@@ -193,6 +204,13 @@ collect(netsnmp_session * ss, netsnmp_pdu *pdu,
     return saved;
 }
 
+/* Computes value*units/divisor in an overflow-proof way.
+ */
+unsigned long
+convert_units(unsigned long value, size_t units, size_t divisor)
+{
+    return (unsigned long)((double)value * units / (double)divisor);
+}
 
 
 int
@@ -254,6 +272,7 @@ main(int argc, char *argv[])
             size_t          units;
             unsigned long   hssize, hsused;
             char            descr[SPRINT_MAX_LEN];
+	    int             len;
 
             pdu = snmp_pdu_create(SNMP_MSG_GET);
 
@@ -273,8 +292,10 @@ main(int argc, char *argv[])
             }
 
             vlp2 = response->variables;
-            memcpy(descr, vlp2->val.string, vlp2->val_len);
-            descr[vlp2->val_len] = '\0';
+            len = vlp2->val_len;
+            if (len >= SPRINT_MAX_LEN) len = SPRINT_MAX_LEN-1;
+            memcpy(descr, vlp2->val.string, len);
+            descr[len] = '\0';
 
             vlp2 = vlp2->next_variable;
             units = vlp2->val.integer ? *(vlp2->val.integer) : 0;
@@ -286,10 +307,11 @@ main(int argc, char *argv[])
             hsused = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
             printf("%-18s %15lu %15lu %15lu %4lu%%\n", descr,
-                   units ? hssize * (units / 1024) : hssize,
-                   units ? hsused * (units / 1024) : hsused,
-                   units ? (hssize - hsused) * (units / 1024) : hssize -
-                   hsused, hssize ? 100 * hsused / hssize : hsused);
+                   units ? convert_units(hssize, units, 1024) : hssize,
+                   units ? convert_units(hsused, units, 1024) : hsused,
+                   units ? convert_units(hssize-hsused, units, 1024) : hssize -
+                   hsused, hssize ? convert_units(hsused, 100, hssize) :
+                   hsused);
 
             vlp = vlp->next_variable;
             snmp_free_pdu(response);
@@ -340,10 +362,11 @@ main(int argc, char *argv[])
             hsused = *(vlp2->val.integer);
 
             printf("%-18s %15lu %15lu %15lu %4lu%%\n", descr,
-                   units ? hssize * (units / 1024) : hssize,
-                   units ? hsused * (units / 1024) : hsused,
-                   units ? (hssize - hsused) * (units / 1024) : hssize -
-                   hsused, hssize ? 100 * hsused / hssize : hsused);
+                   units ? convert_units(hssize, units, 1024) : hssize,
+                   units ? convert_units(hsused, units, 1024) : hsused,
+                   units ? convert_units(hssize-hsused, units, 1024) : hssize -
+                   hsused, hssize ? convert_units(hsused, 100, hssize) :
+                   hsused);
 
             vlp = vlp->next_variable;
             snmp_free_pdu(response);

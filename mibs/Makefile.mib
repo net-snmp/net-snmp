@@ -1,10 +1,13 @@
-RFCHOST =	ftp://ftp.nordu.net	# ftp.ietf.org
+# RFCHOST =	ftp://ftp.nordu.net
+RFCHOST =	ftp://ftp.ietf.org
 RFCDIR =	rfc
 
 IANAHOST =	http://www.iana.org
 IANADIR =	assignments
 
-ALLDIR =	/usr/local/share/snmp/rfc.orig
+PREFIX =	/usr/local
+ALLDIR =	$(PREFIX)/share/snmp/rfc.orig
+INSTDIR =	$(PREFIX)/share/snmp/rfc
 
 MIBS =	SNMPv2-TC.txt SNMPv2-TM.txt SNMPv2-SMI.txt SNMPv2-MIB.txt \
 	SNMPv2-CONF.txt HCNUM-TC.txt INET-ADDRESS-MIB.txt \
@@ -29,6 +32,16 @@ MIBDEPS = Makefile.mib mibfetch smistrip
 all:	$(MIBS)
 
 allmibs:	ianamibs rfcmibs
+
+rfc:	allmibs
+	rm -fr $(INSTDIR)
+	mkdir $(INSTDIR)
+	cp $(ALLDIR)/* $(INSTDIR)
+	if test `uname` = SunOS ; \
+	then gpatch -d $(INSTDIR) < rfcmibs.diff; \
+	else patch -d $(INSTDIR) < rfcmibs.diff; \
+	fi
+	rm -f $(INSTDIR)/*orig
 
 clean:
 	rm $(MIBS)
@@ -91,7 +104,7 @@ INET-ADDRESS-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 3291
 
 EtherLike-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2665
+	./mibfetch $(RFCHOST) $(RFCDIR) 3635
 
 IANAifType-MIB.txt:	$(MIBDEPS)
 	./mibfetch -x $(IANAHOST) $(IANADIR) ianaiftype-mib

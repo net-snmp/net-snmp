@@ -165,7 +165,7 @@ icmp_handler(netsnmp_mib_handler          *handler,
      * But just to be safe, check this and load it manually if necessary
      */
 #ifndef hpux11
-    if (netsnmp_is_cache_valid(reqinfo)) {
+    if (!netsnmp_is_cache_valid(reqinfo)) {
         icmp_load( NULL, NULL );	/* XXX - check for failure */
     }
 #endif

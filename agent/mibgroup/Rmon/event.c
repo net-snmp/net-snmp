@@ -18,12 +18,30 @@
  * SOFTWARE.
  ******************************************************************/
 
+#include <net-snmp/net-snmp-config.h>
+
+#if HAVE_STDLIB_H
 #include <stdlib.h>
-#include <sys/time.h>
+#endif
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <ctype.h>
 
-#include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
@@ -218,7 +236,7 @@ event_Activate(RMON_ENTRY_T * eptr)
 
     ROWDATAAPI_set_size(&body->scrlr,
                         body->scrlr.data_requested,
-                        RMON1_ENTRY_VALID == eptr->status);
+                        (u_char)(RMON1_ENTRY_VALID == eptr->status) );
 
     return 0;
 }
@@ -638,6 +656,8 @@ event_save_log(CRTL_ENTRY_T * body, char *event_descr)
     }
 
     lptr->log_time = body->event_last_time_sent;
+    if (lptr->log_description)
+        AGFREE(lptr->log_description);
     lptr->log_description = AGSTRDUP(event_descr);
     lptr->data_index = ROWDATAAPI_get_total_number(&body->scrlr);
 

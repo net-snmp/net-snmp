@@ -2,6 +2,16 @@
  *  System MIB group implementation - system.c
  *
  */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -63,7 +73,7 @@ char            sysContact[SYS_STRING_LEN] = SYS_CONTACT;
 char            sysName[SYS_STRING_LEN] = SYS_NAME;
 char            sysLocation[SYS_STRING_LEN] = SYS_LOC;
 oid             sysObjectID[MAX_OID_LEN];
-int             sysObjectIDLength;
+size_t          sysObjectIDLength;
 oid             version_sysoid[] = { SYSTEM_MIB };
 
 char            oldversion_descr[SYS_STRING_LEN];
@@ -83,6 +93,10 @@ WriteMethod     writeSystem;
 int             header_system(struct variable *, oid *, size_t *, int,
                               size_t *, WriteMethod **);
 
+#if HAVE_WINSOCK_H
+static void     windowsOSVersionString(char [], size_t);
+#endif
+
         /*********************
 	 *
 	 *  snmpd.conf config parsing
@@ -97,8 +111,8 @@ system_parse_config_sysdescr(const char *token, char *cptr)
     if (strlen(cptr) >= sizeof(version_descr)) {
         snprintf(tmpbuf,
                  sizeof(tmpbuf),
-                 "sysdescr token too long (must be < %d):\n\t%s",
-                 sizeof(version_descr),
+                 "sysdescr token too long (must be < %lu):\n\t%s",
+                 (unsigned long)sizeof(version_descr),
                  cptr);
         config_perror(tmpbuf);
     } else if (strcmp(cptr, "\"\"") == 0) {
@@ -115,8 +129,8 @@ system_parse_config_sysloc(const char *token, char *cptr)
 
     if (strlen(cptr) >= sizeof(sysLocation)) {
         snprintf(tmpbuf, 1024,
-                 "syslocation token too long (must be < %d):\n\t%s",
-                 sizeof(sysLocation), cptr);
+                 "syslocation token too long (must be < %lu):\n\t%s",
+                 (unsigned long)sizeof(sysLocation), cptr);
         config_perror(tmpbuf);
     }
 
@@ -162,8 +176,8 @@ system_parse_config_syscon(const char *token, char *cptr)
 
     if (strlen(cptr) >= sizeof(sysContact)) {
         snprintf(tmpbuf, 1024,
-                 "syscontact token too long (must be < %d):\n\t%s",
-                 sizeof(sysContact), cptr);
+                 "syscontact token too long (must be < %lu):\n\t%s",
+                 (unsigned long)sizeof(sysContact), cptr);
         config_perror(tmpbuf);
     }
 
@@ -209,8 +223,8 @@ system_parse_config_sysname(const char *token, char *cptr)
 
     if (strlen(cptr) >= sizeof(sysName)) {
         snprintf(tmpbuf, 1024,
-                 "sysname token too long (must be < %d):\n\t%s",
-                 sizeof(sysName), cptr);
+                 "sysname token too long (must be < %lu):\n\t%s",
+                 (unsigned long)sizeof(sysName), cptr);
         config_perror(tmpbuf);
     }
 
@@ -355,7 +369,11 @@ init_system_mib(void)
     version_descr[sizeof(version_descr) - 1] = 0;
     version_descr[strlen(version_descr) - 1] = 0;       /* chomp new line */
 #else
+#if HAVE_WINSOCK_H
+    windowsOSVersionString(version_descr, sizeof(version_descr));
+#else
     strcpy(version_descr, "unknown");
+#endif
 #endif
 #endif
 
@@ -380,6 +398,21 @@ init_system_mib(void)
 #endif                          /* HAVE_EXECV */
 #endif                          /* HAVE_UNAME */
 #endif                          /* HAVE_GETHOSTNAME */
+
+#if HAVE_WINSOCK_H
+  {
+    HKEY hKey;
+    /* Default sysContact is the registered windows user */
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS) {
+       char registeredOwner[256] = "";
+       DWORD registeredOwnerSz = 256;
+       if (RegQueryValueEx(hKey, "RegisteredOwner", NULL, NULL, (LPBYTE)registeredOwner, &registeredOwnerSz) == ERROR_SUCCESS) {
+          strcpy(sysContact, registeredOwner);
+       }
+       RegCloseKey(hKey);
+    }
+  }
+#endif
 
     /* default sysObjectID */
     memcpy(sysObjectID, version_sysoid, sizeof(version_sysoid));
@@ -507,6 +540,11 @@ writeSystem(int action,
     int             count, *setvar = NULL;
 
     switch ((char) name[7]) {
+    case VERSION_DESCR:
+    case VERSIONID:
+    case UPTIME:
+        snmp_log(LOG_ERR, "Attempt to write to R/O OID\n");
+        return SNMP_ERR_NOTWRITABLE;
     case SYSCONTACT:
         buf = sysContact;
         oldbuf = oldsysContact;
@@ -522,6 +560,10 @@ writeSystem(int action,
         oldbuf = oldsysLocation;
         setvar = &sysLocationSet;
         break;
+    case SYSSERVICES:
+    case SYSORLASTCHANGE:
+        snmp_log(LOG_ERR, "Attempt to write to R/O OID\n");
+        return SNMP_ERR_NOTWRITABLE;
     default:
         return SNMP_ERR_GENERR; /* ??? */
     }
@@ -601,3 +643,125 @@ writeSystem(int action,
 	 *  Internal implementation functions - None
 	 *
 	 *********************/
+
+#if HAVE_WINSOCK_H
+static void
+windowsOSVersionString(char stringbuf[], size_t stringbuflen)
+{
+    /* copy OS version to string buffer in 'uname -a' format */
+    OSVERSIONINFOEX osVersionInfo;
+    BOOL gotOsVersionInfoEx;
+    char windowsVersion[256] = "";
+    char hostname[256] = "";
+    char identifier[256] = "";
+    DWORD identifierSz = 256;
+    HKEY hKey;
+
+    ZeroMemory(&osVersionInfo, sizeof(OSVERSIONINFOEX));
+    osVersionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+    gotOsVersionInfoEx = GetVersionEx((OSVERSIONINFO *)&osVersionInfo);
+    if (gotOsVersionInfoEx == FALSE) {
+       GetVersionEx((OSVERSIONINFO *)&osVersionInfo);
+    }
+
+    switch (osVersionInfo.dwPlatformId) {
+       case VER_PLATFORM_WIN32_NT:
+          if ((osVersionInfo.dwMajorVersion == 5) && (osVersionInfo.dwMinorVersion == 2)) {
+             strcat(windowsVersion, "Server 2003");
+          } else if ((osVersionInfo.dwMajorVersion == 5) && (osVersionInfo.dwMinorVersion == 1)) {
+             strcat(windowsVersion, "XP");
+          } else if ((osVersionInfo.dwMajorVersion == 5) && (osVersionInfo.dwMinorVersion == 0)) {
+             strcat(windowsVersion, "2000");
+          } else if (osVersionInfo.dwMajorVersion <= 4) {
+             strcat(windowsVersion, "NT");
+          }
+          if (gotOsVersionInfoEx == TRUE) {
+             if (osVersionInfo.wProductType == VER_NT_WORKSTATION) {
+                if (osVersionInfo.dwMajorVersion == 4) {
+                   strcat(windowsVersion, " Workstation 4.0");
+                } else if (osVersionInfo.wSuiteMask & VER_SUITE_PERSONAL) {
+                   strcat(windowsVersion, " Home Edition");
+                } else {
+                   strcat(windowsVersion, " Professional");
+                }
+             } else if (osVersionInfo.wProductType == VER_NT_SERVER) {
+                if ((osVersionInfo.dwMajorVersion == 5) && (osVersionInfo.dwMinorVersion == 2)) {
+                   if (osVersionInfo.wSuiteMask & VER_SUITE_DATACENTER) {
+                      strcat(windowsVersion, " Datacenter Edition");
+                   } else if (osVersionInfo.wSuiteMask & VER_SUITE_ENTERPRISE) {
+                      strcat(windowsVersion, " Enterprise Edition");
+                   } else if (osVersionInfo.wSuiteMask == VER_SUITE_BLADE) {
+                      strcat(windowsVersion, " Web Edition");
+                   } else {
+                      strcat(windowsVersion, " Standard Edition");
+                   }
+                } else if ((osVersionInfo.dwMajorVersion == 5) && (osVersionInfo.dwMinorVersion == 0)) {
+                   if (osVersionInfo.wSuiteMask & VER_SUITE_DATACENTER) {
+                      strcat(windowsVersion, " Datacenter Server");
+                   } else if (osVersionInfo.wSuiteMask & VER_SUITE_ENTERPRISE) {
+                      strcat(windowsVersion, " Advanced Server");
+                   } else {
+                      strcat(windowsVersion, " Server");
+                   }
+                } else {
+                   if (osVersionInfo.wSuiteMask & VER_SUITE_ENTERPRISE) {
+                      strcat(windowsVersion, " Server 4.0, Enterprise Edition");
+                   } else {
+                      strcat(windowsVersion, " Server 4.0");
+                   }
+                }
+             }
+          } else {
+             char productType[80];
+             DWORD productTypeSz = 80;
+
+             if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\ProductOptions", 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS) {
+                if (RegQueryValueEx(hKey, "ProductType", NULL, NULL, (LPBYTE) productType, &productTypeSz) == ERROR_SUCCESS) {
+                   char versionStr[10];
+                   if (strcmpi("WINNT", productType) == 0) {
+                      strcat(windowsVersion, " Workstation");
+                   } else if (strcmpi("LANMANNT", productType) == 0) {
+                      strcat(windowsVersion, " Server");
+                   } else if (strcmpi("SERVERNT", productType) == 0) {
+                      strcat(windowsVersion, " Advanced Server");
+                   }
+                   sprintf(versionStr, " %d.%d", osVersionInfo.dwMajorVersion, osVersionInfo.dwMinorVersion);
+                   strcat(windowsVersion, versionStr);
+                }
+                RegCloseKey(hKey);
+             }
+          }
+          break;
+       case VER_PLATFORM_WIN32_WINDOWS:
+          if ((osVersionInfo.dwMajorVersion == 4) && (osVersionInfo.dwMinorVersion == 90)) {
+             strcat(windowsVersion, "ME");
+          } else if ((osVersionInfo.dwMajorVersion == 4) && (osVersionInfo.dwMinorVersion == 10)) {
+             strcat(windowsVersion, "98");
+             if (osVersionInfo.szCSDVersion[1] == 'A') {
+                strcat(windowsVersion, " SE");
+             }
+          } else if ((osVersionInfo.dwMajorVersion == 4) && (osVersionInfo.dwMinorVersion == 0)) {
+             strcat(windowsVersion, "95");
+             if ((osVersionInfo.szCSDVersion[1] == 'C') || (osVersionInfo.szCSDVersion[1] == 'B')) {
+                strcat(windowsVersion, " OSR2");
+             }
+          }
+          break;
+    }
+
+    gethostname(hostname, sizeof(hostname));
+
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0, KEY_ALL_ACCESS, &hKey) == ERROR_SUCCESS) {
+       RegQueryValueEx(hKey, "Identifier", NULL, NULL, (LPBYTE)&identifier, &identifierSz);
+       RegCloseKey(hKey);
+    }
+
+    /* Output is made to look like results from uname -a */
+    snprintf(stringbuf, stringbuflen,
+            "Windows %s %d.%d.%d %s %s %s", hostname,
+             osVersionInfo.dwMajorVersion, osVersionInfo.dwMinorVersion,
+             osVersionInfo.dwBuildNumber, osVersionInfo.szCSDVersion,
+             windowsVersion, identifier);
+}
+#endif /* HAVE_WINSOCK_H */
+

@@ -39,7 +39,7 @@ netsnmp_mib_handler  *netsnmp_get_watched_spinlock_handler(void);
 Netsnmp_Node_Handler  netsnmp_watched_spinlock_handler;
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /** NETSNMP_WATCHER_H */

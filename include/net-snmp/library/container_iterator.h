@@ -55,7 +55,7 @@ extern          "C" {
                                            Netsnmp_Iterator_Op * get_size);
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif                          /* _CONTAINER_ITERATOR_HANDLER_H_ */

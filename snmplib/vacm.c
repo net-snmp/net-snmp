@@ -1,3 +1,14 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 /*
  * vacm.c
  *
@@ -101,8 +112,8 @@ vacm_save_view(struct vacm_viewEntry *view, const char *token,
                                       view->viewName[0] + 1);
     *cptr++ = ' ';
     cptr =
-        read_config_save_objid(cptr, view->viewSubtree,
-                               view->viewSubtreeLen);
+        read_config_save_objid(cptr, view->viewSubtree+1,
+                                     view->viewSubtreeLen-1);
     *cptr++ = ' ';
     cptr = read_config_save_octet_string(cptr, (u_char *) view->viewMask,
                                          view->viewMaskLen);
@@ -849,11 +860,11 @@ vacm_createAccessEntry(const char *groupName,
             break;
         if (cmp < 0)
             goto next;
-        if (lp->securityModel > securityModel)
-            break;
         if (lp->securityModel < securityModel)
+            break;
+        if (lp->securityModel > securityModel)
             goto next;
-        if (lp->securityLevel > securityLevel)
+        if (lp->securityLevel < securityLevel)
             break;
       next:
         op = lp;
@@ -875,7 +886,7 @@ vacm_destroyAccessEntry(const char *groupName,
     struct vacm_accessEntry *vp, *lastvp = NULL;
 
     if (accessList && accessList->securityModel == securityModel
-        && accessList->securityModel == securityModel
+        && accessList->securityLevel == securityLevel
         && !strcmp(accessList->groupName + 1, groupName)
         && !strcmp(accessList->contextPrefix + 1, contextPrefix)) {
         vp = accessList;

@@ -161,5 +161,5 @@ snmp_res_destroy_mutex(int groupID, int resourceID)
 #endif /*  NS_REENTRANT  */
 
 #ifdef __cplusplus
-};
+}
 #endif

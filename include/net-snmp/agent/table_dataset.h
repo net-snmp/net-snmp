@@ -150,6 +150,7 @@ extern          "C" {
                                                      *table_set,
                                                      char
                                                      *registration_name);
+    int netsnmp_table_set_num_rows(netsnmp_table_data_set *table);
 
 #if HAVE_STDARG_H
     void           
@@ -159,7 +160,7 @@ extern          "C" {
 #endif
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #define netsnmp_table_row_add_column(row, type, value, value_len) snmp_varlist_add_variable(&row->indexes, NULL, 0, type, (u_char *) value, value_len)

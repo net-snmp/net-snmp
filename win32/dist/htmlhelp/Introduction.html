@@ -1,0 +1,335 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="generator" content=
+"HTML Tidy for Windows (vers 1st October 2003), see www.w3.org" />
+<meta content="text/html; charset=us-ascii" http-equiv=
+"content-type" />
+<title>Introduction</title>
+</head>
+<body>
+<img style="width: 600px; height: 171px;" alt="Net-SNMP Logo" src=
+"net-snmp-4.2-800.jpg" /><br />
+<br />
+<h2>What Is It?</h2>
+Various tools relating to the Simple Network Management Protocol
+including:
+<ul>
+<li><a href="http://www.net-snmp.org/tutorial-5/toolkit/">An
+extensible agent</a></li>
+<li><a href="http://www.net-snmp.org/tutorial-5/toolkit/">An SNMP
+library</a></li>
+<li><a href="http://www.net-snmp.org/tutorial-5/commands/">tools to
+request or set information from SNMP agents</a></li>
+<li><a href=
+"http://www.net-snmp.org/tutorial-5/commands/snmptrap.html">tools
+to generate and handle SNMP traps</a></li>
+<li>A slew of SNMP related perl modules</li>
+<li>a version of the unix 'netstat' command using SNMP</li>
+<li><a href="http://www.net-snmp.org/tkmib.jpg">a Tk/perl mib
+browser</a></li>
+</ul>
+<p>Please see our <a href=
+"http://sourceforge.net/projects/net-snmp">project development
+pages</a> as well.</p>
+<p>Note:&nbsp; Some links in this document are external to this
+Windows help file.</p>
+<h2>History</h2>
+This package was originally based on the Carnegie Mellon University
+and Univerisity of California at Davis SNMP implementations, but
+has been greatly enhanced, ported, fixed, made easier to use and
+barely resembles the original package anymore.<br />
+<br />
+<h2>Distribution</h2>
+Be sure and check out the <a href=
+"http://www.net-snmp.org/#Related">other related software
+project</a> links as well.
+<ul>
+<li>Download:
+<ul>
+<li><a href=
+"http://www.net-snmp.org/download/">http://www.net-snmp.org/download/</a></li>
+<li><a href=
+"ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/">ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/</a></li>
+</ul>
+</li>
+<li>Web page:
+<ul>
+<li><a href=
+"http://www.net-snmp.org/">http://www.net-snmp.org/</a></li>
+</ul>
+</li>
+<li>Sourceforge Project page:
+<ul>
+<li><a href=
+"http://www.net-snmp.org/project/">http://www.net-snmp.org/project/</a></li>
+</ul>
+</li>
+<li>GPG Key for signed files (also available on pgp.net servers):
+<ul>
+<li><a href=
+"http://www.Net-SNMP.org/net-snmp-admin.asc">http://www.Net-SNMP.org/net-snmp-admin.asc</a></li>
+</ul>
+</li>
+<li>Mirrors (note that sourceforge download servers are mirrored
+themselves):
+<ul>
+<li><a href="ftp://ftp.freesnmp.com/mirrors/net-snmp/">US:
+ftp://ftp.freesnmp.com/mirrors/net-snmp/</a></li>
+<li><a href="http://rtfm.uni-svishtov.bg/net-snmp/">Bulgaria:
+http://rtfm.uni-svishtov.bg/net-snmp/</a></li>
+<li><a href="ftp://ftp.ayamura.org/pub/net-snmp/">Japan:
+ftp://ftp.ayamura.org/pub/net-snmp/</a></li>
+<li><a href=
+"ftp://ftp.mpg.goe.ni.schule.de/pub/internet/net-snmp/">Germany:
+ftp://ftp.mpg.goe.ni.schule.de/pub/internet/net-snmp/</a></li>
+</ul>
+</li>
+</ul>
+<h2>Documentation</h2>
+<div style="margin-left: 2em;">
+<h2>Introduction/Overview</h2>
+<ul>
+<li><a href="http://www.net-snmp.org/tutorial">The net-snmp
+Tutorial</a>,</li>
+<li><a href="readme-README.html">README</a>, <a href=
+"readme-README.snmpv3.html">README.SNMPv3</a>, and <a href=
+"readme-README.win32.html">README.WIN32</a></li>
+<li><a href="readme-INSTALL.html">INSTALL</a> file</li>
+<li><a href="readme-COPYING.html">The copyright</a></li>
+<li><a href="FAQ.html">Frequently Asked Questions</a></li>
+<li><a href="Developer_FAQ.html">Developer Frequently Asked
+Questions</a></li>
+<li><a href="readme-NEWS.html">News</a> and <a href=
+"http://www.net-snmp.org/ChangeLog.txt">ChangeLog files</a></li>
+<li><a href="http://www.net-snmp.org/projects.html">The Projects
+Page</a></li>
+<li><a href="http://www.net-snmp.org/mibs/">MIB files distributed
+with Net-SNMP</a></li>
+</ul>
+<h2>Manual Pages</h2>
+<p>A full list of manual pages can be found in the various sections
+listed in the table of contents; this is merely a summary of the
+most important.</p>
+<ul>
+<li style="list-style: none">
+<h3>General</h3>
+</li>
+<li><a href="man5-snmp_config.5.html">Configuring the software via
+.conf files.</a></li>
+<li><a href="http://www.net-snmp.org/tutorial-5/agent/">The doxygen
+generated API documentation</a></li>
+</ul>
+<ul>
+<li style=
+"list-style-type: none; list-style-image: none; list-style-position: outside;">
+<h3>The Agent</h3>
+</li>
+<li><a href="man8-snmpd.8.html">snmpd</a></li>
+<li><a href="man5-snmpd.conf.5.html">snmpd.conf</a></li>
+<li><a href="http://www.net-snmp.org/tutorial/agent/index.html">How
+to extend the agent</a><br />
+(plus a <a href=
+"http://www.net-snmp.org/tutorial/agent/CheckList.html">list of
+things to check</a> in case this doesn't seem to work)
+<h3>The Trap Demon</h3>
+</li>
+<li><a href="man8-snmptrapd.8.html">snmptrapd</a></li>
+<li><a href="man5-snmptrapd.conf.5.html">snmptrapd.conf</a>
+<h3>The Applications</h3>
+</li>
+<li><a href="man1-snmpcmd.1.html">snmpcmd: common command line
+arguments</a></li>
+<li><a href="man5-snmp.conf.5.html">snmp.conf</a></li>
+<li><a href="man1-snmpconf.1.html">snmpconf: a configuration file
+generator</a></li>
+<li><a href=
+"http://www.net-snmp.org/tutorial/commands">Applications
+Tutorial</a><br />
+<br /></li>
+<li><a href="man1-snmpget.1.html">snmpget</a></li>
+<li><a href="man1-snmpset.1.html">snmpset</a></li>
+<li><a href="man1-snmpwalk.1.html">snmpwalk</a></li>
+<li><a href="man1-snmptrap.1.html">snmptrap</a></li>
+<li><a href="man1-snmpbulkwalk.1.html">snmpbulkwalk</a></li>
+<li><a href="man1-snmpdelta.1.html">snmpdelta</a></li>
+<li><a href="man1-snmpgetnext.1.html">snmpgetnext</a></li>
+<li><a href="man1-snmpnetstat.1.html">snmpnetstat</a></li>
+<li><a href="man1-snmpstatus.1.html">snmpstatus</a></li>
+<li><a href="man1-snmptable.1.html">snmptable</a></li>
+<li><a href="man1-snmptest.1.html">snmptest</a></li>
+<li><a href="man1-snmptranslate.1.html">snmptranslate</a></li>
+<li><a href="man1-snmpusm.1.html">snmpusm</a></li>
+<li><a href="man1-snmpdf.1.html">snmpdf</a></li>
+<li><a href="man1-snmpbulkget.1.html">snmpbulkget</a>
+<h3>The Library API</h3>
+</li>
+<li><a href="http://www.net-snmp.org/tutorial/toolkit">Library
+Tutorial</a><br />
+<br /></li>
+<li><a href="man3-snmp_api.3.html">snmp_api</a></li>
+<li><a href="man3-snmp_sess_api.3.html">snmp_sess_api</a></li>
+<li><a href="man3-mib_api.3.html">mib_api</a></li>
+<li><a href="man5-variables.5.html">variables</a></li>
+<li><a href="man3-read_config.3.html">read_config</a></li>
+<li><a href="man3-default_store.3.html">default_store</a></li>
+<li><a href="man3-snmp_alarm.3.html">snmp_alarm</a></li>
+<li><a href="man3-snmp_trap_api.3.html">snmp_trap_api</a></li>
+<li><a href="man3-snmp_agent_api.3.html">snmp_agent_api</a></li>
+</ul>
+</div>
+<h2>Mailing Lists</h2>
+<div style="margin-left: 2em;">There is one announcement mailing
+list:
+<ul>
+<li><b><a href=
+"http://www.net-snmp.org/lists/announce/">net-snmp-announce</a></b></li>
+</ul>
+There are two main discussion lists:
+<ul>
+<li><b><a href=
+"http://www.net-snmp.org/lists/users/">net-snmp-users</a></b><br />
+for discussion on configuring and using the package, including
+coding issues for user-developed applications (clients, managers,
+MIB modules, etc).</li>
+<li><b><a href=
+"http://www.net-snmp.org/lists/coders/">net-snmp-coders</a></b><br />
+
+for discussion on development of code that will be shipped as part
+of the package.</li>
+</ul>
+<p>Please do <b>NOT</b> post messages to both lists. This just
+increases the support load, annoys the developers and makes it less
+likely that your query will be answered. If in doubt. post to the
+net-snmp-users list. None of the other project mailing lists are
+suitable for general posting - please regard these as "read-only"
+lists.</p>
+<p>See sourceforge.net's <a href=
+"http://sourceforge.net/mail/?group_id=12694">mailing list
+instructions</a> for further details, and to subscribe (or
+unsubscribe) to individual lists.<br />
+Note that messages for non-subscribers will be held for approval
+before appearing on the list. This is purely intended to stem the
+recent flood of spam email, and is not meant to deter requests for
+assistance or information.</p>
+</div>
+<div style="margin-left: 2em;">Also, stop by the #net-snmp IRC
+channel on the <a href="http://www.freenode.net/">freenode.net</a>
+IRC servers to gather, mingle, and chat. At least 3 of the core
+developers are known to hang out there regularily.</div>
+<a name="Contacting" id="Contacting"></a>
+<h2>Contacting the Authors and Submitting Bug Reports</h2>
+<div style="margin-left: 2em;">There are many authors from around
+the net working on the project. To report a bug, see the <a href=
+"http://sourceforge.net/bugs/?group_id=12694">net-snmp bugs
+database</a>. For support, please mail a note to our "users
+discussion mailing list" at <a href=
+"mailto:net-snmp-users@lists.sourceforge.net">net-snmp-users@lists.sourceforge.net</a>.</div>
+<a name="Helping" id="Helping"></a>
+<h2>Helping Out!</h2>
+<div style="margin-left: 2em;">Want to help? There are many
+<a href="http://www.net-snmp.org/projects.html">projects</a> that
+need to be tackled to make this software better. To help us out,
+<a href=
+"http://lists.sourceforge.net/lists/listinfo/net-snmp-coders">join
+the net-snmp-coders mailing list</a>, announce what you're wanting
+to work on (to make sure its not being done and won't conflict with
+someone elses work) and start writing! Submit your ideas,
+questions, patches etc. to the net-snmp-coders list as you come up
+with them.</div>
+<br />
+<div style="margin-left: 2em;">Contributions to the Net-SNMP source
+code in any form are greatly appreciated. We expect the parties
+providing such contributions to have the right to contribute them
+to the Net-SNMP project or that the parties that do have the right
+have directed the person submitting the contribution to do so. In
+addition, all contributors need to be aware that if the
+contribution is accepted and incorporated into the Net-SNMP
+project, it will be redistributed under the terms of the license
+agreement used for the entire body of work that comprises the
+Net-SNMP project (see the <a href=
+"http://www.net-snmp.org/COPYING.txt">COPYING</a> file for details;
+in summary BSD-like <em>not</em> GPL or LGPL). If this license
+agreement ever changes the contribution will continue to be
+released under any new licenses as well. Thank you, in advance, for
+your gracious contributions.</div>
+<a name="Related" id="Related"></a>
+<h2>Related Software and Information</h2>
+<div style="margin-left: 2em;">
+<h3>Software</h3>
+<ul>
+<li><a href=
+"http://sourceforge.net/projects/opensnmp/">OpenSNMP:</a> Our
+sister SNMPv3 reference release: A C++, threaded, modular snmpv3
+reference implementation.</li>
+<li><a href="http://net-policy.sourceforge.net/">Net-Policy</a>:
+Net-Policy is a highly-scalable, role-and-policy based network
+management system. It distrubutes configuration to a network
+primarily through the SNMP protocol. (Its initial configuration
+mechanisms are designed for IPsec VPN management.) Stop configuring
+your SNMP agents one host at a time!</li>
+<li><a href=
+"http://sourceforge.net/projects/snarl-snmp/">snarl-snmp</a>: snarl
+(Snmp based Network Application for Remote Logging and monitoring)
+is an active MIB module for net-snmp-5.0.3 and higher to actively
+monitor dynamic web applications. snmp traps are sent and escalated
+on alarms</li>
+<li><a href="http://netsnmpj.sourceforge.net/">netsnmpj</a>:
+NetSNMPJ is a open source java library that implements a java API
+around the Net-SNMP code base.</li>
+<li><a href=
+"http://www.ibr.cs.tu-bs.de/projects/jasmin/index.html">Jasmin:</a>
+A DISMAN-SCRIPT-MIB implementation. This is a third party MIB
+module that implements the DISMAN-SCRIPT-MIB for use with a the
+Net-SNMP agent. The implementation supports multiple languages and
+runtime systems and A script MIB extensibility protocol (SMX) to
+plugin additional runtime systems.</li>
+<li><a href="http://fetchlog.sourceforge.net/">Fetchlog</a>: The
+fetchlog utility fetches and converts the last new messages of a
+logfile similar to tail. Together with Net-SNMP it can be used to
+look in remote logfiles or to monitor logfiles, for example with
+<a href="http://www.nagios.org/">Nagios</a>.</li>
+<li><a href="http://snmptt.sourceforge.net/">SNMPTT</a>: SNMPTT is
+a SNMP trap handler written in Perl for use with the NET-SNMP
+snmptrapd program. Received traps are translated into friendly
+messages using variable substitution.</li>
+</ul>
+<h3>Other sources of information about SNMP in general</h3>
+<ul>
+<li>The <a href=
+"http://www.faqs.org/faqs/by-newsgroup/comp/comp.protocols.snmp.html">
+comp.protocols.snmp FAQ</a>.</li>
+<li><a href=
+"http://www.simple-times.org/pub/simple-times/issues/">The Simple
+Times</a> -- A quarterly to yearly journal about SNMP</li>
+<li><a href="http://www.mibdepot.com/">The MIB Depot</a>: A useful
+site for finding and downloading MIBs</li>
+<li>A <a href="http://www.net-snmp.org/c64test.html">Counter Test
+Mib</a> module to test 32 and 64 bit counters.</li>
+</ul>
+<h3>IETF and SNMP protocol standards related information</h3>
+<ul>
+<li>The <a href="http://www.ietf.org">main IETF web page.</a></li>
+<li>The <a href=
+"http://www.ibr.cs.tu-bs.de/projects/snmpv3/">SNMPv3 web
+page.</a></li>
+<li>The <a href="http://www.scguild.com/agentx/">agentx web
+page</a>. (AgentX is a subagent protocol which net-snmp
+supports)</li>
+<li><a href=
+"http://www.ietf.org/html.charters/eos-charter.html">The Evolution
+of SNMP (EoS) Working Group</a> information. This is where future
+extensions to SNMP are being designed.</li>
+<li><a href=
+"http://www.ietf.org/html.charters/sming-charter.html">The SMI Next
+Generation (sming) Working Group</a> information. This is where
+future changes to the SMI language are being defined. (SMI is the
+language in which MIBs are written).</li>
+</ul>
+</div>
+<br />
+<br />
+<br />
+</body>
+</html>

@@ -39,6 +39,6 @@ Netsnmp_Node_Handler netsnmp_baby_steps_helper;
 #define BABY_STEP_ALL                   (0xffffffff)
 
 #ifdef __cplusplus
-};
+}
 #endif
 #endif /* baby_steps */
