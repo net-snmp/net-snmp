@@ -2312,7 +2312,7 @@ snmpv3_parse(
 			       &pdu->securityStateRef);
   DEBUGINDENTLESS();
 
-  if (ret_val != USM_ERR_NO_ERROR) {
+  if (ret_val != SNMPERR_SUCCESS) {
     snmpv3_scopedPDU_parse(pdu, cp, &pdu_buf_len); /* DO ignore return code */
     DEBUGINDENTLESS();
     return ret_val;
@@ -2369,32 +2369,32 @@ snmpv3_make_report(struct snmp_pdu *pdu, int error)
   int stat_ind;
 
   switch (error) {
-  case USM_ERR_UNKNOWN_ENGINE_ID:
+  case SNMPERR_USM_UNKNOWNENGINEID:
     stat_ind = STAT_USMSTATSUNKNOWNENGINEIDS;
     err_var = unknownEngineID;
     err_var_len = ERROR_STAT_LENGTH;
     break;
-  case USM_ERR_UNKNOWN_SECURITY_NAME:
+  case SNMPERR_USM_UNKNOWNSECURITYNAME:
     stat_ind = STAT_USMSTATSUNKNOWNUSERNAMES;
     err_var = unknownUserName;
     err_var_len = ERROR_STAT_LENGTH;
     break;
-  case USM_ERR_UNSUPPORTED_SECURITY_LEVEL:
+  case SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL:
     stat_ind = STAT_USMSTATSUNSUPPORTEDSECLEVELS;
     err_var = unknownSecurityLevel;
     err_var_len = ERROR_STAT_LENGTH;
     break;
-  case USM_ERR_AUTHENTICATION_FAILURE:
+  case SNMPERR_USM_AUTHENTICATIONFAILURE:
     stat_ind = STAT_USMSTATSWRONGDIGESTS;
     err_var = wrongDigest;
     err_var_len = ERROR_STAT_LENGTH;
     break;
-  case USM_ERR_NOT_IN_TIME_WINDOW:
+  case SNMPERR_USM_NOTINTIMEWINDOW:
     stat_ind = STAT_USMSTATSNOTINTIMEWINDOWS;
     err_var = notInTimeWindow;
     err_var_len = ERROR_STAT_LENGTH;
     break;
-  case USM_ERR_DECRYPTION_ERROR:
+  case SNMPERR_USM_DECRYPTIONERROR:
     stat_ind = STAT_USMSTATSDECRYPTIONERRORS;
     err_var = decryptionError;
     err_var_len = ERROR_STAT_LENGTH;
@@ -2579,12 +2579,12 @@ _snmp_parse(struct snmp_session *session,
       if (result) {
 	/* handle reportable errors */
 	switch (result) {
-	case USM_ERR_UNKNOWN_ENGINE_ID:
-	case USM_ERR_UNKNOWN_SECURITY_NAME:
-	case USM_ERR_UNSUPPORTED_SECURITY_LEVEL:
-	case USM_ERR_AUTHENTICATION_FAILURE:
-	case USM_ERR_NOT_IN_TIME_WINDOW:
-	case USM_ERR_DECRYPTION_ERROR:
+	case SNMPERR_USM_UNKNOWNENGINEID:
+	case SNMPERR_USM_UNKNOWNSECURITYNAME:
+	case SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL:
+	case SNMPERR_USM_AUTHENTICATIONFAILURE:
+	case SNMPERR_USM_NOTINTIMEWINDOW:
+	case SNMPERR_USM_DECRYPTIONERROR:
           if (SNMP_CMD_CONFIRMED(pdu->command) ||
 	      (pdu->command == 0 && 
               (pdu->flags & SNMP_MSG_FLAG_RPRT_BIT ))) {
