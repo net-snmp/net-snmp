@@ -1,6 +1,21 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.2.1.rc1*
+ Fixes:
+   Building:
+     - bug 1049607: net-snmp-config --compile-subagent broken
+
+   agent library:
+     - disconnected AgentX subagents now reconnect with correct context
+
+   agent:
+     - don't override clientAddr setting for local trapsinks
+
+   snmptrapd:
+     - bug 1085981: snmptrapd complains about logging and access control
+
+
 *5.2.1.pre1*
  Fixes:
    Building:
