@@ -72,8 +72,8 @@ init_logmatch(void)
      * Define the OID pointer to the top of the mib tree that we're
      * registering underneath 
      */
-    oid             logmatch_info_oid[] = { EXTENSIBLEMIB, 16, 1 };
-    oid             logmatch_variables_oid[] = { EXTENSIBLEMIB, 16, 2, 1 };
+    oid             logmatch_info_oid[] = { UCDAVIS_MIB, 16, 1 };
+    oid             logmatch_variables_oid[] = { UCDAVIS_MIB, 16, 2, 1 };
 
     /*
      * register ourselves with the agent to handle our mib tree 
