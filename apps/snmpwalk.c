@@ -104,7 +104,7 @@ snmp_get_and_print(struct snmp_session *ss, oid *theoid, size_t theoid_len) {
     struct variable_list *vars;
     int status;
     
-    pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
     snmp_add_null_var(pdu, theoid, theoid_len);
 
     status = snmp_synch_response(ss, pdu, &response);
