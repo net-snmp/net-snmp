@@ -1073,9 +1073,11 @@ u_char *EtherAddr;
 	struct arpcom {
 	  char ac_enaddr[6];
 	} arpcom;
+#ifndef linux
         struct sockaddr_dl sadl;
       struct ifaddr ifaddr;
       u_long ifaddraddr;
+#endif
 #endif
 
         bzero(arpcom.ac_enaddr, sizeof(arpcom.ac_enaddr));
