@@ -152,7 +152,9 @@ struct snmp_internal_session {
     struct request_list *requests;/* Info about outstanding requests */
     struct request_list *requestsEnd; /* ptr to end of list */
     int (*hook_pre)  ( struct snmp_session*, snmp_ipaddr);
+    int (*hook_parse)( struct snmp_session *, struct snmp_pdu *, u_char *, size_t);
     int (*hook_post) ( struct snmp_session*, struct snmp_pdu*, int );
+    int (*hook_build)( struct snmp_session *, struct snmp_pdu *, u_char *, size_t *);
 };
 
 /*
@@ -1699,6 +1701,18 @@ set_pre_parse( struct snmp_session *sp, int (*hook) (struct snmp_session *, snmp
 }
 
 void
+set_parse( struct snmp_session *sp,
+		int (*hook) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t)) {
+    struct session_list *slp;
+    for(slp = Sessions; slp; slp = slp->next){
+	if  (slp->session == sp ) {
+	    slp->internal->hook_parse = hook;
+	    return;
+	}
+    }
+}
+
+void
 set_post_parse( struct snmp_session *sp,
                 int (*hook) ( struct snmp_session*, struct snmp_pdu *, int) ) {
     struct session_list *slp;
@@ -1709,6 +1723,19 @@ set_post_parse( struct snmp_session *sp,
 	}
     }
 }
+
+void
+set_build( struct snmp_session *sp,
+		int (*hook) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *)) {
+    struct session_list *slp;
+    for(slp = Sessions; slp; slp = slp->next){
+	if  (slp->session == sp ) {
+	    slp->internal->hook_build = hook;
+	    return;
+	}
+    }
+}
+
 
 /*
  * Takes a session and a pdu and serializes the ASN PDU into the area
@@ -2963,7 +2990,11 @@ snmp_sess_async_send(void *sessp,
     }
 
     /* build the message to send */
-    if (snmp_build(session, pdu, packet, &length) < 0){
+    if (isp->hook_build)
+	result = isp->hook_build(session, pdu, packet, &length);
+    else
+	result = snmp_build(session, pdu, packet, &length);
+    if (result < 0){
 	return 0;
     }
     if (snmp_dump_packet){
@@ -3193,7 +3224,10 @@ snmp_sess_read(void *sessp,
     memset (pdu, 0, sizeof(*pdu));
     pdu->address = from;
 
-    ret = snmp_parse(sp, pdu, packet, length);
+    if ( isp->hook_parse )
+        ret = isp->hook_parse(sp, pdu, packet, length);
+    else
+        ret = snmp_parse(sp, pdu, packet, length);
     if ( isp->hook_post ) {
       if ( isp->hook_post( sp, pdu, ret ) == 0 ) {
         snmp_free_pdu(pdu);
