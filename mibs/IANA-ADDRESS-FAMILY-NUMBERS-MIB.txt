@@ -6,7 +6,7 @@
       TEXTUAL-CONVENTION                  FROM SNMPv2-TC;
 
   ianaAddressFamilyNumbers MODULE-IDENTITY
-      LAST-UPDATED "200003010000Z"  -- March 1, 2000
+      LAST-UPDATED "200009080000Z"  -- September 8, 2000
       ORGANIZATION "IANA"
       CONTACT-INFO
           "Postal:    Internet Assigned Numbers Authority
@@ -24,6 +24,11 @@
 
       -- revision history
 
+      REVISION     "200009080000Z"  -- September 8, 2000
+      DESCRIPTION  "AddressFamilyNumbers assignments 19 to
+                   xtpoveripv4, 20 to xtpoveripv6, and 21 to
+                   xtpnativemodextp." 
+
       REVISION     "200003010000Z"  -- March 1, 2000
       DESCRIPTION  "AddressFamilyNumbers assignment 17 to distinguishedname. 
                    AddressFamilyNumbers assignment 18 to asnumber."
@@ -32,7 +37,7 @@
       DESCRIPTION  "AddressFamilyNumbers assignment 16 to dns."
 
       REVISION     "9908260000Z"  -- August 26, 1999
-      DESCRIPTION  "Initial version, published as RFC 2677."
+      DESCRIPTION  "Initial version, for more explanation, see RFC 2677."
       ::= { mib-2 72 }
 
   AddressFamilyNumbers ::= TEXTUAL-CONVENTION
@@ -92,7 +97,10 @@
                   e164withNsap(15),
                   dns(16),
                   distinguishedname(17), -- (Distinguished Name, per X.500)
-                  asnumber(18), -- (16-bit quantity, per the AS number space)
+                  asnumber(18), -- (16-bit quantity, per the AS numberspace)
+                  xtpoveripv4(19), -- XTP over version 4
+                  xtpoveripv6(20), -- XTP over version 6
+                  xtpnativemodextp(21), -- XTP native mode XTP 
                   reserved(65535)
               }
       END
