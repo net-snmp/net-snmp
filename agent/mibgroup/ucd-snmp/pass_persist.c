@@ -1,9 +1,11 @@
 #include <config.h>
 
+#if HAVE_IO_H
+#include <io.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#include <stdio.h>
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -534,6 +536,7 @@ void sigpipe_handler (int sig, siginfo_t *sip, void *uap)
 
 static int write_persist_pipe(int iindex, const char *data)
 {
+#if HAVE_SIGNAL
   struct sigaction sa, osa;
   int wret = 0, werrno = 0;
 
@@ -570,7 +573,7 @@ static int write_persist_pipe(int iindex, const char *data)
     close_persist_pipe(iindex);
     return 0;
   }
-
+#endif /* HAVE_SIGNAL */
   return 1;
 }
 
@@ -595,7 +598,9 @@ static void close_persist_pipe(int iindex)
     persist_pipes[iindex].fdIn = -1;
   }
   if( persist_pipes[iindex].pid != -1 ) {
+#if HAVE_SYS_WAIT_H
     waitpid(persist_pipes[iindex].pid,0,0);
+#endif
     persist_pipes[iindex].pid = -1;
   }
 

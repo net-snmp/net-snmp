@@ -331,7 +331,7 @@ FINISHED() {
 	ps -e | egrep "^[ ]*$pid" > /dev/null 2>&1
 	if [ $? = 0 ] ; then
 	    SNMP_SAVE_TMPDIR=yes
-	    COMMAND="kill -SIGKILL $pid"
+	    COMMAND="kill -9 $pid"
 	    echo $COMMAND "($pfile)" >> $SNMP_TMPDIR/invoked
 	    $COMMAND > /dev/null 2>&1
 	    return_value=1

@@ -52,7 +52,7 @@
 #include <dmalloc.h>
 #endif
 
-#ifdef WIN32
+#if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
 

@@ -490,34 +490,3 @@ snmp_parse_args(int argc,
   }
   return optind;
 }
-
-oid
-*snmp_parse_oid(const char *argv,
-		oid *root,
-		size_t *rootlen)
-{
-  size_t savlen = *rootlen;
-  if (snmp_get_random_access() || strchr(argv, ':')) {
-    if (get_node(argv,root,rootlen)) {
-      return root;
-    }
-  } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS)) {
-    if (get_wild_node(argv,root,rootlen)) {
-      return root;
-    }
-  } else {
-    if (read_objid(argv,root,rootlen)) {
-      return root;
-    }
-    *rootlen = savlen;
-    if (get_node(argv,root,rootlen)) {
-      return root;
-    }
-    *rootlen = savlen;
-    DEBUGMSGTL(("parse_oid","wildly parsing\n"));
-    if (get_wild_node(argv,root,rootlen)) {
-      return root;
-    }
-  }
-  return NULL;
-}

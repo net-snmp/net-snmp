@@ -435,7 +435,7 @@ Init_HR_FileSys (void)
       free((char *)fsstats);
     fsstats = NULL;
     fsstats = malloc(fscount*sizeof(*fsstats));
-    HRFS_index = getfsstat(fsstats, fscount*sizeof(*fsstats), MNT_NOWAIT);
+    getfsstat(fsstats, fscount*sizeof(*fsstats), MNT_NOWAIT);
     HRFS_index = 0;
 #else
    HRFS_index = 1;
@@ -465,7 +465,7 @@ Get_Next_HR_FileSys (void)
 #if HAVE_GETFSSTAT
     if (HRFS_index >= fscount) return -1;
     HRFS_entry = fsstats+HRFS_index;
-    return HRFS_index++;
+    return ++HRFS_index;
 #else
     const char **cpp;
 		/*
