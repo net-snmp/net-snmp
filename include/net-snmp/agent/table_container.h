@@ -26,9 +26,8 @@ extern          "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table.h>
     
-#define TABLE_CONTAINER_NAME "table_container"
-#define TABLE_CONTAINER_ROW  "table_container"
-#define TABLE_CONTAINER_TABLE "table_container2"
+#define TABLE_CONTAINER_ROW       "table_container:row"
+#define TABLE_CONTAINER_CONTAINER "table_container:container"
     
 #define TABLE_CONTAINER_KEY_NETSNMP_INDEX         1 /* default */
 #define TABLE_CONTAINER_KEY_VARBIND_INDEX         2
@@ -54,13 +53,13 @@ extern          "C" {
     /** find the context data used by the table_container helper */
 #ifdef NETSNMP_USE_INLINE
     NETSNMP_STATIC_INLINE void *
-    netsnmp_container_table_extract_context(netsnmp_request_info *request)
+    netsnmp_container_table_row_extract(netsnmp_request_info *request)
     {
         /*
          * NOTE: this function must match in table_container.c and table_container.h.
          *       if you change one, change them both!
          */
-        return netsnmp_request_get_list_data(request, TABLE_CONTAINER_NAME);
+        return netsnmp_request_get_list_data(request, TABLE_CONTAINER_ROW);
     }
 #else
     void *
@@ -72,7 +71,7 @@ extern          "C" {
 
     /** retrieve the container used by the table_container helper */
     netsnmp_container*
-    netsnmp_container_table_extract(netsnmp_request_info *request);
+    netsnmp_container_table_container_extract(netsnmp_request_info *request);
 
     void *
     netsnmp_container_table_find_next_row(netsnmp_request_info *request,
