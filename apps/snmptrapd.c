@@ -981,7 +981,10 @@ int main(int argc, char *argv[])
 		snmp_timeout();
 		break;
 	    case -1:
+		if (errno == EINTR)
+			continue;
 	        snmp_log_perror("select");
+		running = 0;
 		break;
 	    default:
 		fprintf(stderr, "select returned %d\n", count);
