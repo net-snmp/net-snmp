@@ -1253,8 +1253,8 @@ static int qsort_compare(RTENTRY **r1,
 #else
 	register u_long dst1 = ntohl(*(unsigned long *)&(*r1)->rt_dst.sa_data);
 	register u_long dst2 = ntohl(*(unsigned long *)&(*r2)->rt_dst.sa_data);
-#endif!
-#endif
+#endif /* defined(linux) */
+#endif /* NEED_KLGETSA */
 
 	/*
 	 *	Do the comparison

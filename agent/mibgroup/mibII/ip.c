@@ -1157,6 +1157,7 @@ var_ip(struct variable *vp,
 	default:
 		ERROR_MSG("");
 	}
+	return NULL;
 }
 
 /*
