@@ -30,6 +30,9 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -87,7 +90,10 @@
 #if HAVE_NETINET6_IN6_PCB_H
 # include <netinet6/in6_pcb.h>
 #endif
-#if (defined(__FreeBSD__) && __FreeBSD__ >= 3) || defined(__NetBSD__)
+#if HAVE_NETINET6_TCP6_H
+# define TCP6
+#endif
+#ifndef TCP6
 # if HAVE_NETINET_TCP_H
 #  include <netinet/tcp.h>
 # endif
@@ -102,7 +108,6 @@
 # endif
 #endif
 #if HAVE_NETINET6_TCP6_H
-# define TCP6
 # include <netinet6/tcp6.h>
 #endif
 #if HAVE_NETINET6_TCP6_TIMER_H
@@ -473,7 +478,7 @@ if_getifnet(int idx, struct ifnet *result)
 #if defined(__FreeBSD__) && 3 <= __FreeBSD__
 	q = (caddr_t)TAILQ_NEXT(&tmp, if_link);
 #else
-# ifdef NetBSD
+# if defined(__NetBSD__) || defined(__OpenBSD__)
 	q = (caddr_t)TAILQ_NEXT(&tmp, if_list);
 # else
 	q = (caddr_t)tmp.if_next;
@@ -641,7 +646,7 @@ var_ifv6Entry(vp, name, length, exact, var_len, write_method)
     }
     interface = name[*length - 1];
     DEBUGP("interface: %d(%s)\n", interface, if_getname(interface));
-    if (interface >= max)
+    if (interface > max)
 	return NULL;
 
     switch (vp->magic) {
@@ -658,7 +663,7 @@ var_ifv6Entry(vp, name, length, exact, var_len, write_method)
 	return (u_char *)nullOid;
     case IPV6IFEFFECTMTU:
       {
-#ifdef SIOCGIFMTU
+#if defined(SIOCGIFMTU) && !defined(__OpenBSD__)
 	struct ifreq ifr;
 	int s;
 
@@ -696,7 +701,7 @@ var_ifv6Entry(vp, name, length, exact, var_len, write_method)
 #if defined(__FreeBSD__) && 3 <= __FreeBSD__
 	ifa = (caddr_t)TAILQ_FIRST(&ifnet.if_addrhead);
 #else
-# ifdef NetBSD
+# if defined(__NetBSD__) || defined(__OpenBSD__)
 	ifa = (caddr_t)TAILQ_FIRST(&ifnet.if_addrlist);
 # else
 	ifa = (caddr_t)ifnet.if_addrlist;
@@ -716,7 +721,7 @@ var_ifv6Entry(vp, name, length, exact, var_len, write_method)
 #if defined(__FreeBSD__) && 3 <= __FreeBSD__
 	    ifa = (caddr_t)TAILQ_NEXT(&ifaddr, ifa_link);
 #else
-# ifdef NetBSD
+# if defined(__NetBSD__) || defined(__OpenBSD__)
 	    ifa = (caddr_t)TAILQ_NEXT(&ifaddr, ifa_list);
 # else
 	    ifa = (caddr_t)ifaddr.ifa_next;
@@ -791,7 +796,7 @@ var_ifv6Entry(vp, name, length, exact, var_len, write_method)
       }
 #endif /*0*/
 
-#if HAVE_STRUCT_IN6_IFSTAT
+#ifdef SIOCGIFSTAT_IN6
     case IPV6IFSTATSINRCVS:
     case IPV6IFSTATSINHDRERRS:
     case IPV6IFSTATSTOOBIGERRS:
@@ -814,29 +819,6 @@ var_ifv6Entry(vp, name, length, exact, var_len, write_method)
     case IPV6IFSTATSOUTMCASTPKTS:
       {
 	struct in6_ifstat *ifs6;
-#ifndef SIOCGIFSTAT_IN6
-	struct in6_ifstat s;
-	caddr_t p, q;
-	size_t lim;
-
-	if (!auto_nlist("in6_ifstatmax", (char *)&lim, sizeof(lim)))
-	    return NULL;
-	if (interface >= lim)
-	    return NULL;
-
-	if (!auto_nlist("in6_ifstat", (char *)&p, sizeof(p)))
-	    return NULL;
-	if (p == NULL)
-	    return NULL;
-	q = (caddr_t)(p + sizeof(void *) * interface);
-	if (klookup((u_long)q, (char *)&p, sizeof(p)) < 0)
-	    return NULL;
-	if (p == NULL)
-	    return NULL;
-	if (klookup((u_long)p, (char *)&s, sizeof(s)) < 0)
-	    return NULL;
-	ifs6 = &s;
-#else
 	struct in6_ifreq ifr;
 	int s;
 
@@ -851,7 +833,6 @@ var_ifv6Entry(vp, name, length, exact, var_len, write_method)
 	}
 	close(s);
 	ifs6 = &ifr.ifr_ifru.ifru_stat;
-#endif
 	switch (vp->magic) {
 	case IPV6IFSTATSINRCVS:
 	    long_return = ifs6->ifs6_in_receive;	break;
@@ -898,7 +879,7 @@ var_ifv6Entry(vp, name, length, exact, var_len, write_method)
 	}
 	return (u_char *)&long_return;
       }
-#endif	/* HAVE_STRUCT_IN6_IFSTAT */
+#endif
     default:
 	break;
     }
@@ -936,7 +917,7 @@ var_icmpv6Entry(vp, name, length, exact, var_len, write_method)
 	return NULL;
 
     switch (vp->magic) {
-#if HAVE_STRUCT_ICMP6_IFSTAT
+#ifdef SIOCGIFSTAT_ICMP6
     case IPV6IFICMPINMSG:
     case IPV6IFICMPINERRORS:
     case IPV6IFICMPINDSTUNRCHS:
@@ -973,29 +954,6 @@ var_icmpv6Entry(vp, name, length, exact, var_len, write_method)
     case IPV6IFICMPOUTGRPMEREDCS:
       {
 	struct icmp6_ifstat *ifs6;
-#ifndef SIOCGIFSTAT_IN6
-	struct icmp6_ifstat s;
-	caddr_t p, q;
-	size_t lim;
-
-	if (!auto_nlist("icmp6_ifstatmax", (char *)&lim, sizeof(lim)))
-	    return NULL;
-	if (interface >= lim)
-	    return NULL;
-
-	if (!auto_nlist("icmp6_ifstat", (char *)&p, sizeof(p)))
-	    return NULL;
-	if (p == NULL)
-	    return NULL;
-	q = (caddr_t)(p + sizeof(void *) * interface);
-	if (klookup((u_long)q, (char *)&p, sizeof(p)) < 0)
-	    return NULL;
-	if (p == NULL)
-	    return NULL;
-	if (klookup((u_long)p, (char *)&s, sizeof(s)) < 0)
-	    return NULL;
-	ifs6 = &s;
-#else
 	struct in6_ifreq ifr;
 	int s;
 
@@ -1010,7 +968,6 @@ var_icmpv6Entry(vp, name, length, exact, var_len, write_method)
 	}
 	close(s);
 	ifs6 = &ifr.ifr_ifru.ifru_icmp6stat;
-#endif
 	switch (vp->magic) {
 	case IPV6IFICMPINMSG:
 	    long_return = ifs6->ifs6_in_msg;		break;
@@ -1085,7 +1042,7 @@ var_icmpv6Entry(vp, name, length, exact, var_len, write_method)
 	}
 	return (u_char *)&long_return;
       }
-#endif	/* HAVE_STRUCT_ICMP6_IFSTAT */
+#endif
     default:
 	break;
     }
@@ -1163,7 +1120,7 @@ var_udp6(vp, name, length, exact, var_len, write_method)
 	    newname[j++] = in6pcb.in6p_laddr.s6_addr[i];
 	newname[j++] = ntohs(in6pcb.in6p_lport);
 	if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
-	    newname[j++] = ntohs(*(u_short *)&in6pcb.in6p_laddr.s6_addr[2]);
+	    newname[j++] = ntohs(*(u_int16_t *)&in6pcb.in6p_laddr.s6_addr[2]);
 	else
 	    newname[j++] = 0;	/*XXX*/
 
@@ -1233,7 +1190,7 @@ DEBUGP("var_udp6 new: %d %d %s %d\n", (int)vp->namelen, j, c_oid, exact);
 	return (u_char *)&long_return;
     case IPV6UDPIFINDEX:
 	if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
-	    long_return = ntohs(*(u_short *)&in6pcb.in6p_laddr.s6_addr[2]);
+	    long_return = ntohs(*(u_int16_t *)&in6pcb.in6p_laddr.s6_addr[2]);
 	else
 	    long_return = 0;	/*XXX*/
 	return (u_char *)&long_return;
@@ -1344,7 +1301,7 @@ var_tcp6(vp, name, length, exact, var_len, write_method)
 	    newname[j++] = in6pcb.in6p_faddr.s6_addr[i];
 	newname[j++] = ntohs(in6pcb.in6p_fport);
 	if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
-	    newname[j++] = ntohs(*(u_short *)&in6pcb.in6p_laddr.s6_addr[2]);
+	    newname[j++] = ntohs(*(u_int16_t *)&in6pcb.in6p_laddr.s6_addr[2]);
 	else
 	    newname[j++] = 0;	/*XXX*/
 	newname[j++] = tcp6statemap[tcp6cb.t_state];
@@ -1356,6 +1313,10 @@ var_tcp6(vp, name, length, exact, var_len, write_method)
 	    DEBUGP("var_tcp6 oldname: %s %d\n", c_oid, exact);
 	}
 
+#if 1	/* this is very odd but sometimes happen, and cause infinite loop */
+	if (ntohs(in6pcb.in6p_lport) == 0)
+		goto skip;
+#endif
 	if (exact) {
 	    result = snmp_oid_compare(name, *length, newname, j);
 	    if (result == 0) {
@@ -1393,6 +1354,7 @@ var_tcp6(vp, name, length, exact, var_len, write_method)
 	    }
 	}
 
+skip:
 #if !(defined(__FreeBSD__) && __FreeBSD__ >= 3)
 	p = (caddr_t)in6pcb.in6p_next;
 #else
@@ -1427,7 +1389,7 @@ var_tcp6(vp, name, length, exact, var_len, write_method)
 	return (u_char *)&long_return;
     case IPV6TCPIFINDEX:
 	if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
-	    long_return = ntohs(*(u_short *)&in6pcb.in6p_laddr.s6_addr[2]);
+	    long_return = ntohs(*(u_int16_t *)&in6pcb.in6p_laddr.s6_addr[2]);
 	else
 	    long_return = 0;	/*XXX*/
 	return (u_char *)&long_return;
@@ -1541,7 +1503,7 @@ var_tcp6(vp, name, length, exact, var_len, write_method)
 	    newname[j++] = in6pcb.in6p_faddr.s6_addr[i];
 	newname[j++] = ntohs(in6pcb.in6p_fport);
 	if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
-	    newname[j++] = ntohs(*(u_short *)&in6pcb.in6p_laddr.s6_addr[2]);
+	    newname[j++] = ntohs(*(u_int16_t *)&in6pcb.in6p_laddr.s6_addr[2]);
 	else
 	    newname[j++] = 0;	/*XXX*/
 	newname[j++] = tcpstatemap[tcpcb.t_state];
@@ -1553,6 +1515,10 @@ var_tcp6(vp, name, length, exact, var_len, write_method)
 	    DEBUGP("var_tcp6 oldname: %s %d\n", c_oid, exact);
 	}
 
+#if 1	/* this is very odd but sometimes happen, and cause infinite loop */
+	if (ntohs(in6pcb.in6p_lport) == 0)
+		goto skip;
+#endif
 	if (exact) {
 	    result = snmp_oid_compare(name, *length, newname, j);
 	    if (result == 0) {
@@ -1590,6 +1556,7 @@ var_tcp6(vp, name, length, exact, var_len, write_method)
 	    }
 	}
 
+skip:
 #if !(defined(__FreeBSD__) && __FreeBSD__ >= 3)
 	p = (caddr_t)in6pcb.in6p_next;
 #else
@@ -1621,7 +1588,7 @@ var_tcp6(vp, name, length, exact, var_len, write_method)
 	return (u_char *)&long_return;
     case IPV6TCPIFINDEX:
 	if (IN6_IS_ADDR_LINKLOCAL(&in6pcb.in6p_laddr))
-	    long_return = ntohs(*(u_short *)&in6pcb.in6p_laddr.s6_addr[2]);
+	    long_return = ntohs(*(u_int16_t *)&in6pcb.in6p_laddr.s6_addr[2]);
 	else
 	    long_return = 0;	/*XXX*/
 	return (u_char *)&long_return;
