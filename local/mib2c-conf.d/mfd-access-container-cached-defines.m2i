@@ -75,7 +75,7 @@ void
 ${context}_container_init(netsnmp_container **container_ptr_ptr,
                         netsnmp_cache *cache)
 {
-    DEBUGMSGTL(("verbose:${context}_container_init","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_container_init","called\n"));
     
     if((NULL == cache) || (NULL == container_ptr_ptr)) {
         snmp_log(LOG_ERR,"bad params to ${context}_container_init\n");
@@ -155,7 +155,7 @@ ${context}_cache_load(netsnmp_container *container)
 @  end@ // foreach
 @end@ // examples
 
-    DEBUGMSGTL(("verbose:${context}_cache_load","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_cache_load","called\n"));
 
 @if $m2c_include_examples == 1@
 $example_start
@@ -300,7 +300,7 @@ $example_end
 void
 ${context}_cache_free(netsnmp_container *container)
 {
-    DEBUGMSGTL(("verbose:${context}_cache_free","called\n"));
+    DEBUGMSGTL(("verbose:${context}:${context}_cache_free","called\n"));
 }
 
 @end@ // m2c_processing_type eq 'c'
