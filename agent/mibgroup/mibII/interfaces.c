@@ -1295,13 +1295,33 @@ Interface_Scan_Init (void)
 	strcpy (ifrq.ifr_name, ifname);
 	nnew->if_flags = ioctl (fd, SIOCGIFFLAGS, &ifrq) < 0 
 	  		? 0 : ifrq.ifr_flags;
-	
+
+	nnew->if_type = 0;
 	strcpy (ifrq.ifr_name, ifname);
 	if (ioctl(fd, SIOCGIFHWADDR, &ifrq) < 0)
 	  memset (nnew->if_hwaddr,(0), 6);
-	else
+	else {
 	  memcpy (nnew->if_hwaddr, ifrq.ifr_hwaddr.sa_data, 6);
-	    
+
+	  switch (ifrq.ifr_hwaddr.sa_family) {
+	  case ARPHRD_TUNNEL:
+	  case ARPHRD_TUNNEL6:
+	  case ARPHRD_IPGRE:
+	  case ARPHRD_SIT:
+	      nnew->if_type = 131; break; /* tunnel */
+	  case ARPHRD_SLIP:
+	  case ARPHRD_CSLIP:
+	  case ARPHRD_SLIP6:
+	  case ARPHRD_CSLIP6:
+	      nnew->if_type = 28; break; /* slip */
+	  case ARPHRD_PPP:
+	      nnew->if_type = 23; break; /* ppp */
+	  case ARPHRD_LOOPBACK:
+	      nnew->if_type = 24; break; /* softwareLoopback */
+          /* XXX: more if_arp.h:ARPHDR_xxx to IANAifType mappings... */
+	  }
+	}
+	
 	strcpy (ifrq.ifr_name, ifname);
 	nnew->if_metric = ioctl (fd, SIOCGIFMETRIC, &ifrq) < 0
 	  		? 0 : ifrq.ifr_metric;
@@ -1323,10 +1343,13 @@ Interface_Scan_Init (void)
 	    nnew->if_speed = if_ptr->speed;
 	}
 	else {
-	  nnew->if_type = if_type_from_name(nnew->if_name);
-	  nnew->if_speed = nnew->if_type == 6 ? 10000000 : 
-	    nnew->if_type == 24 ? 10000000 :
-	    nnew->if_type ==  9 ?  4000000 : 0;
+	    /* do only guess if_type from name, if we could not read
+	     * it before from SIOCGIFHWADDR */
+	    if (!nnew->if_type) 
+		nnew->if_type = if_type_from_name(nnew->if_name);
+	    nnew->if_speed = nnew->if_type == 6 ? 10000000 : 
+		nnew->if_type == 24 ? 10000000 :
+		nnew->if_type ==  9 ?  4000000 : 0;
 	}
 
       } /* while (fgets ... */
