@@ -250,7 +250,7 @@ protopr (const char *name)
     response = NULL;
 	status = snmp_synch_response(Session, request, &response);
 	if (status != STAT_SUCCESS || response->errstat != SNMP_ERR_NOERROR){
-	    snmp_perror("SNMP request failed");
+	    snmp_sess_perror("SNMP request failed", Session);
 	    break;
 	}
 	vp = response->variables;

@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 	session.remote_port = SNMP_TRAP_PORT;
     ss = snmp_open(&session);
     if (ss == NULL){
-        snmp_sess_perror("snmptrap", ss);
+        snmp_sess_perror("snmptrap", &session);
         SOCK_CLEANUP;
         exit(1);
     }
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 	else {
 	    name_length = MAX_OID_LEN;
 	    if (!snmp_parse_oid(argv[arg], name, &name_length)) {
-		snmp_sess_perror(argv[arg], ss);
+		snmp_perror(argv[arg]);
 		usage ();
                 SOCK_CLEANUP;
 		exit (1);
@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
 	if (arg > argc) break;
 	name_length = MAX_OID_LEN;
 	if (!snmp_parse_oid(argv [arg-3], name, &name_length)) {
-	    snmp_sess_perror(argv [arg-3], ss);
+	    snmp_perror(argv [arg-3]);
             SOCK_CLEANUP;
 	    exit(1);
 	}

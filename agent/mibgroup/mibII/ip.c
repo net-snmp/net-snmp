@@ -431,7 +431,7 @@ var_ip(struct variable *vp,
      *	Get the IP statistics from the kernel...
      */
     if (sysmp (MP_SAGET, MPSA_TCPIPSTATS, &tcpipstats, sizeof tcpipstats) == -1) {
-	perror ("sysmp(MP_SAGET)(MPSA_TCPIPSTATS)");
+	log_perror ("sysmp(MP_SAGET)(MPSA_TCPIPSTATS)");
     }
 #define ipstat tcpipstats.ipstat
 

@@ -314,13 +314,13 @@ void do_external(char *cmd,
   snmp_set_quick_print(1);
   if (cmd) {
     if (pipe(fd)) {
-      perror("pipe");
+      log_perror("pipe");
     }
     if ((pid = fork()) == 0) {
       /* child */
       close(0);
       if (dup(fd[0]) != 0) {
-        perror("dup");
+        log_perror("dup");
       }
       close(fd[1]);
       close(fd[0]);
@@ -372,10 +372,10 @@ void do_external(char *cmd,
       close(fd[0]);
       close(fd[1]);
       if (waitpid(pid, &result,0) < 0) {
-        perror("waitpid");
+        log_perror("waitpid");
       }
     } else {
-      perror("fork");
+      log_perror("fork");
     }
   }
   snmp_set_quick_print(oldquick);
@@ -791,7 +791,7 @@ int main(int argc, char *argv[])
 
     ss = snmp_open( session );
     if (ss == NULL){
-        snmp_sess_perror("snmptrapd", ss);
+        snmp_sess_perror("snmptrapd", session);
         if (Syslog) {
 	    syslog(LOG_ERR,"couldn't open snmp - %m");
 	}
@@ -821,7 +821,7 @@ int main(int argc, char *argv[])
 		snmp_timeout();
 		break;
 	    case -1:
-	        perror("select");
+	        log_perror("select");
 		running = 0;
 	    default:
 		fprintf(stderr, "select returned %d\n", count);

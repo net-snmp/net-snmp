@@ -279,7 +279,7 @@ void read_config(const char *filename,
   
   if ((ifile = fopen(filename, "r")) == NULL) {
     if (errno != ENOENT) {
-      perror(filename);
+      log_perror(filename);
     }
     else {
       DEBUGMSGTL(("read_config", "%s: %s\n", filename, strerror(errno)));

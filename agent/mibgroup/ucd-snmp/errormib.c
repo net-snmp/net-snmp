@@ -121,7 +121,7 @@ setPerrorstatus(const char *to)
   char buf[STRMAX];
   
   sprintf(buf,"%s:  %s",to,strerror(errno));
-  perror(to);
+  log_perror(to);
   seterrorstatus(buf,5);
 }
 

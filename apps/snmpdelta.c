@@ -267,7 +267,7 @@ void wait_for_period(int period)
     case -1:
       /* FALLTHRU */
     default:
-      perror("select");
+      log_perror("select");
       break;
     }
   }
@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
   SOCK_STARTUP;
   ss = snmp_open(&session);
   if (ss == NULL){
-    snmp_sess_perror("snmpdelta", ss);
+    snmp_sess_perror("snmpdelta", &session);
     SOCK_CLEANUP;
     exit(1);
   }
@@ -400,7 +400,7 @@ int main(int argc, char *argv[])
       vip->oidlen = MAX_OID_LEN;
       vip->info_oid = (oid *)malloc(sizeof(oid) * vip->oidlen);
       if (snmp_parse_oid(vip->name, vip->info_oid, &vip->oidlen) == NULL) {
-	snmp_sess_perror(vip->name, ss);
+	snmp_perror(vip->name);
 	SOCK_CLEANUP;
 	exit(1);
       }
