@@ -196,6 +196,9 @@
 /* vfsstat.f_frsize */
 #undef STRUCT_STATVFS_HAS_F_FRSIZE
 
+/* vfsstat.f_files */
+#undef STRUCT_STATVFS_HAS_F_FILES
+
 /* ifnet needs to have _KERNEL defined */
 #undef IFNET_NEEDS_KERNEL
 

@@ -159,6 +159,7 @@ struct variable2 extensible_disk_variables[] = {
   {DISKAVAIL, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKAVAIL}},
   {DISKUSED, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKUSED}},
   {DISKPERCENT, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKPERCENT}},
+  {DISKPERCENTNODE, ASN_INTEGER, RONLY, var_extensible_disk, 1, {DISKPERCENTNODE}},
   {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_disk, 1, {ERRORFLAG }},
   {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_disk, 1, {ERRORMSG }}
 };
@@ -321,6 +322,9 @@ u_char *var_extensible_disk(struct variable *vp,
   double totalblks, free, used, avail, availblks;
 #else
   static long avail;
+#ifdef STRUCT_STATVFS_HAS_F_FILES
+  int percent_inode;
+#endif
 #endif
   static long long_ret;
   static char errmsg[300];
@@ -396,6 +400,11 @@ u_char *var_extensible_disk(struct variable *vp,
   iserror = (disks[disknum].minimumspace >= 0 ?
              avail < disks[disknum].minimumspace :
              100-percent <= disks[disknum].minpercent) ? 1 : 0;
+#ifdef STRUCT_STATVFS_HAS_F_FILES
+  percent_inode = vfs.f_favail <= 0 ? 100 :
+    (int) ((double) (vfs.f_files - vfs.f_ffree) /
+           (double) (vfs.f_files - (vfs.f_ffree - vfs.f_favail)) * 100.0 + 0.5);
+#endif
   switch (vp->magic) {
     case DISKTOTAL:
       long_ret = vfs.f_blocks;
@@ -416,6 +425,11 @@ u_char *var_extensible_disk(struct variable *vp,
     case DISKPERCENT:
       long_ret = percent;
       return ((u_char *) (&long_ret));
+#ifdef STRUCT_STATVFS_HAS_F_FILES
+    case DISKPERCENTNODE:
+      long_ret = percent_inode;
+      return ((u_char *) (&long_ret));
+#endif
     case ERRORFLAG:
       long_ret = iserror;
       return((u_char *) (&long_ret));
