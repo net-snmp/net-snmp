@@ -82,8 +82,9 @@ stamp-h: config.h.in config.status
 
 touchit:
 	touch configure config.h.in
-	touch config.h
+	touch config.h config.status
 	touch stamp-h stamp-h.in
+	touch Makefile
 
 Makefile: Makefile.in config.status
 	$(SHELL) ./config.status
