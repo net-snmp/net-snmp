@@ -120,7 +120,7 @@ EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORFLAG flag and the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORMSG text-string description.
 .SH ACCESS CONTROL
 snmpd supports the View-Based Access Control Model (vacm)
-as defined in RFC 2265.
+as defined in RFC 2275.
 To this end, it recognizes the following keywords in the configuration
 file: \fIcom2sec\fR, \fIgroup\fR, \fIaccess\fR, and \fIview\fR.
 .IP "com2sec NAME SOURCE COMMUNITY"
@@ -141,9 +141,10 @@ LEVEL is one of \fInoauth\fR, \fIauth\fR, or \fIpriv\fR.
 READ, WRITE and NOTIFY specifies the view to be used for the corresponding 
 access.
 For v1 or v2c access, LEVEL will be noauth, and CONTEXT will be empty.
-.IP "view NAME TYPE SUBTREE MASK"
+.IP "view NAME TYPE SUBTREE [MASK]"
 The defines the named view. TYPE is either \fIincluded\fR or \fIexcluded\fR.
-MASK is a list of hex octets, separated by '.' or ':'.
+MASK is a list of hex octets, separated by '.' or ':'.  The MASK
+defaults to "ff" if not specified.
 .IP Examples:
 .nf
 #       sec.name  source          community
@@ -166,6 +167,14 @@ view mib2   included  .iso.org.dod.internet.mgmt.mib-2 fc
 access mygroup ""      any       noauth    0      mib2   none  none
 access public  ""      any       noauth    0      system none  none
 access local   ""      any       noauth    0      all    all   all
+.IP "Default VACM model"
+The default configuration of the agent, as shipped, is functionally
+equivalent to the following entries:
+.nf
+com2sec	public	default	public
+group	public	any	public
+view 	all	.1
+access	public	""	any	noauth	all	none	none
 .SH SETTING SYSTEM INFORMATION
 .IP "syslocation STRING"
 .IP "syscontact STRING"
@@ -177,8 +186,10 @@ Setting authtrapenable to 1 enables generation of authentification failure
 traps. The default value is 2 (disable).
 .IP "trapsink HOST"
 .IP "trapcommunity STRING"
-This sets the host to receive traps. The daemon sends a Cold Start trap when
-it starts up. If enabled, it also sends traps on authentification failures.
+This sets the host to receive traps. The daemon sends a Cold Start
+trap when it starts up. If enabled, it also sends traps on
+authentification failures.  Multiple "trapsink" lines may be specified
+to specify multiple destinations.
 .SH "PASS-THROUGH CONTROL"
 .IP "pass MIBOID EXEC"
 Passes entire control of MIBOID to the EXEC program.  The EXEC program
