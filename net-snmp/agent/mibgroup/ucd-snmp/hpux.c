@@ -60,9 +60,9 @@ int writeHP(int action,
 
 unsigned char *var_hp(struct variable *vp,
 		      oid *name,
-		      int *length,
+		      size_t *length,
 		      int exact,
-		      int *var_len,
+		      size_t *var_len,
 		      WriteMethod **write_method)
 {
 

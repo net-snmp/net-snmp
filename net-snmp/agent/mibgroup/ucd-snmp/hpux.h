@@ -5,8 +5,8 @@
 #ifndef _MIBGROUP_HPUX_H
 #define _MIBGROUP_HPUX_H
 
-extern FindVarMethod var_hp;
-extern WriteMethod writeHP;
+FindVarMethod var_hp;
+WriteMethod writeHP;
 
 
 #define TRAPAGENT 128.120.57.92
