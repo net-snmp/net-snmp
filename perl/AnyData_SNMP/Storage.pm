@@ -20,7 +20,7 @@ $AnyData::Storage::SNMP::debugre = undef;
 use Data::Dumper;
 use AnyData::Storage::File;
 use SNMP;
-SNMP::initMib();
+SNMP::init_snmp("AnyData::SNMP");
 
 sub new {
     DEBUG("calling AnyData::Storage::SNMP new\n");
@@ -163,12 +163,15 @@ sub truncate {
 sub make_session {
     DEBUG("calling AnyData::Storage::SNMP make_session\n");
     my $self = shift;
-    my @args;
-    foreach my $key (qw(DestHost SecName Version SecLevel AuthPass Community RemotePort Timeout Retries RetryNoSuch SecEngineId ContextEngineId Context AuthProto PrivProto PrivPass)) {
+    my @args = @_;
+    my @sessions;
+    foreach my $key (qw(SecName Version SecLevel AuthPass Community RemotePort Timeout Retries RetryNoSuch SecEngineId ContextEngineId Context AuthProto PrivProto PrivPass)) {
 	push @args, $key, $self->{$key} if ($self->{$key});
     }
-    push @args, @_;
-    return new SNMP::Session(@args);
+    foreach my $host (split(/,\s*/,$self->{DestHost})) {
+	push @sessions, new SNMP::Session(@args, 'DestHost' => $host);
+    }
+    return \@sessions;
 }
 
 sub file2str {
@@ -176,6 +179,7 @@ sub file2str {
     my ($self, $parser, $uccols) = @_;
     my ($cols, @retcols);
     DEBUG("file2str\n",Dumper(\@_),"\n");
+  restart:
     if (!$self->{lastnode}) {
 #	my @vbstuff = @{$parser->{'col_names'}};
 #	splice (@vbstuff,0,1+$#AnyData::Storage::SNMP::basecols);
@@ -205,12 +209,19 @@ sub file2str {
 	$self->{lastnode} = new SNMP::VarList(@retcols);
     }
 
-    $self->{'sess'} = $self->make_session() if (!$self->{'sess'});
+    if (!$self->{'sess'}) {
+	$self->{'sess'} = $self->make_session();
+	if ($#{$self->{'sess'}} == 0 && $self->{'silence_single_host'}) {
+	    $self->{'hostname'} = '';
+	} else {
+	    $self->{'hostname'} = $sess->{'sess'}[0]{'DestHost'};
+	}
+    }
 
     # perform SNMP operation
     my $lastnode = $self->{'lastnode'}[0][0];
     my $result;
-    $result = $self->{'sess'}->getnext($self->{lastnode});
+    $result = $self->{'sess'}[0]->getnext($self->{lastnode});
     if (!defined($result)) {
 	warn " getnext of $self->{lastnode}[0][0] returned undef\n";
     }
@@ -219,20 +230,52 @@ sub file2str {
     # XXX: check for holes!
 
     # need proper oid compare here for all nodes
-    return undef if ($self->{'lastnode'}[0][0] ne $lastnode);
+    if ($self->{'lastnode'}[0][0] ne $lastnode) {
+	if ($#{$self->{'sess'}} > 0) {
+	    shift @{$self->{'sess'}};
+	    delete($self->{'lastnode'});
+	    @$cols = ();
+	    $self->{'hostname'} = $sess->{'sess'}[0]{'DestHost'} if($self->{'hostname'})
+	    goto restart;
+	}
+	return undef;
+    }
     
     # add in basecols information:
-    my @ret = ('localhost',$self->{'lastnode'}[0][1]);
+    my @ret = ($self->{'hostname'}, $self->{'lastnode'}[0][1]);
     DEBUG("Dump row results: ",Dumper($self->{'lastnode'}),"\n");
 
     # build result array from result varbind contents
-    map { $ret[$self->{'col_nums'}{$_->[0]}] = $_->[2]; } @{$self->{'lastnode'}};
+    map { $ret[$self->{'col_nums'}{$_->[0]}] = map_data($_); } @{$self->{'lastnode'}};
 
     # store instance ID for later use if deletion is needed later.
     $self->{'existtest'}{$self->{'lastnode'}[0][1]} = 1;
 
     DEBUG("Dump row results2: ",Dumper(\@ret),"\n");
     return \@ret;
+}
+
+sub map_data {
+    if ($_->[3] eq "OBJECTID") {
+	$_->[2] = pretty_print_oid(@_);
+    }
+    return $_->[2];
+}
+
+sub pretty_print_oid {
+    use NetSNMP::default_store qw(:all);
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+			   NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS,0);
+    my $new = SNMP::translateObj($_->[2], 0);
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+			   NETSNMP_DS_LIB_DONT_BREAKDOWN_OIDS,1);
+    my $new2 = SNMP::translateObj($_->[2], 0);
+    if ($new) {
+	$_->[2] = $new2 . "$new";
+    } else {
+	$_->[2] = $_->[0] . $_->[1];
+    }
+    return $_->[2];
 }
 
 sub push_row {
@@ -296,18 +339,17 @@ sub push_row {
 
     # create the varbindlist
     my $vblist = new SNMP::VarList(@vars);
-
     
     DEBUG("set: ", Dumper($vblist));
     $self->{'sess'} = $self->make_session() if (!$self->{'sess'});
-    if (!$self->{'sess'}) {
+    if (!$self->{'sess'}[0]) {
 	warn "couldn't create SNMP session";
-    } elsif (!$self->{'sess'}->set($vblist)) {
-	my $err = "$self->{process_table}: " . $self->{'sess'}->{ErrorStr};
-	if ($self->{'sess'}->{ErrorInd}) {
+    } elsif (!$self->{'sess'}[0]->set($vblist)) {
+	my $err = "$self->{process_table}: " . $self->{'sess'}[0]->{ErrorStr};
+	if ($self->{'sess'}[0]->{ErrorInd}) {
 	    $err = $err . " (at varbind #" 
-		. $self->{'sess'}->{ErrorInd}  . " = " ;
-	    my $dump = Data::Dumper->new([$vblist->[$self->{'sess'}->{ErrorInd} -1]]);
+		. $self->{'sess'}[0]->{ErrorInd}  . " = " ;
+	    my $dump = Data::Dumper->new([$vblist->[$self->{'sess'}[0]->{ErrorInd} -1]]);
 	    $err .= $dump->Indent(0)->Terse(1)->Dump;
 	}
 	warn $err;
