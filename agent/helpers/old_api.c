@@ -93,8 +93,20 @@ register_old_api(const char *moduleName,
         reginfo->modes = HANDLER_CAN_RWRITE;
 
         /* register ourselves in the mib tree */
-        register_handler(reginfo);
+        if (register_handler(reginfo) != MIB_REGISTERED_OK) {
+	  /*  There SHOULD be a call snmp_handler_free() that I can
+	      call to do these first two for me.  */
+	  SNMP_FREE(reginfo->handler->handler_name);
+	  SNMP_FREE(reginfo->handler);
+
+	  SNMP_FREE(reginfo->rootoid);
+	  SNMP_FREE(reginfo->contextName);
+	  SNMP_FREE(reginfo->handlerName);
+	  SNMP_FREE(reginfo);
+	  SNMP_FREE(vp);
+	}
     }
+    SNMP_FREE(old_info);
     return SNMPERR_SUCCESS;
 }
 
