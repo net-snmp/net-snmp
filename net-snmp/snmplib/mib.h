@@ -385,7 +385,7 @@ int sprint_realloc_timeticks	(u_char **buf, size_t *buf_len,
 
 int sprint_realloc_hinted_integer(u_char **buf, size_t *buf_len,
 				  size_t *out_len, int allow_realloc,
-				  long, const char *, const char *);
+				  long, const char, const char *,const char *);
 
 int sprint_realloc_integer	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
