@@ -13,19 +13,19 @@ by selecting it and then doing a
 'Diagnose/Network Connectivity/Demand Poll' on it from ovw.
 
 oid_to_sym:      Translates sysObjectID results to OV icon types.
-  -  Append this to /usr/OV/conf/C/oid_to_sym
+  -  Append this to /etc/opt/OV/share/conf/C/oid_to_sym
   -  Optionally replace Computer:UCD with Computer:Workstation if you
      don't want to install the bitmaps.
 
 oid_to_type:      Translates sysObjectID results to OV description strings
-  -  Append this to /usr/OV/conf/oid_to_type
+  -  Append this to /etc/opt/OV/share/conf/oid_to_type
 
 UCD-fields:      Adds the UCD agent types to the "SNMPAgent" OpenView field.
-  -  Copy to /usr/OV/fields/C/
+  -  Copy to /etc/opt/OV/share/fields/C/
 
 UCD-Computer:         OV Computer Class additions
-  -  Copy to /usr/OV/symbols/C/
+  -  Copy to /etc/opt/OV/share/symbols/C/
 
 bitmaps/*:        Bitmaps/Icons for ovw
-  -  Copy the contents of the directory to /usr/OV/bitmaps/C/
+  -  Copy the contents of the directory to /etc/opt/OV/share/bitmaps/C/
 
