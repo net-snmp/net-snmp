@@ -364,6 +364,7 @@ static struct module_compatability module_map[] = {
 	{ "RFC1286-MIB",	"BRIDGE-MIB",	NULL,	0},
 	{ "RFC1315-MIB",	"FRAME-RELAY-DTE-MIB",	NULL,	0},
 	{ "RFC1316-MIB",	"CHARACTER-MIB", NULL,	0},
+	{ "RFC-1213",		"RFC1213-MIB", NULL,	0},
 };
 
 #define MODULE_NOT_FOUND	0
@@ -3408,34 +3409,34 @@ unload_module_by_ID( int modID, struct tree *tree_top )
          */
         int nmod = tp->number_modules;
         if (nmod > 0) {  /* in some module */
-        /*
-         * Remove all copies of this module ID
-         */
-        int cnt = 0, * pi1, * pi2 = tp->module_list;
-        for ( i=0, pi1=pi2 ; i<nmod ; i++, pi2++ ) {
-            if (*pi2 == modID) continue;
-            cnt++; *pi1++ = *pi2;
-        }
-        if (nmod != cnt) { /* in this module */
-            /*if ( (nmod - cnt) > 1)
-            printf("Dup modid %d,  %d times, '%s'\n", tp->modid, (nmod-cnt), tp->label); fflush(stdout); ?* XXDEBUG */
-            tp->number_modules = cnt;
-            switch (cnt) {
-                case 0:
-                tp->module_list[0] = -1; /* Mark unused, and FALL THROUGH */
+	    /*
+	     * Remove all copies of this module ID
+	     */
+	    int cnt = 0, * pi1, * pi2 = tp->module_list;
+	    for ( i=0, pi1=pi2 ; i<nmod ; i++, pi2++ ) {
+		if (*pi2 == modID) continue;
+		cnt++; *pi1++ = *pi2;
+	    }
+	    if (nmod != cnt) { /* in this module */
+		/*if ( (nmod - cnt) > 1)
+		printf("Dup modid %d,  %d times, '%s'\n", tp->modid, (nmod-cnt), tp->label); fflush(stdout); ?* XXDEBUG */
+		tp->number_modules = cnt;
+		switch (cnt) {
+		case 0:
+		    tp->module_list[0] = -1; /* Mark unused, and FALL THROUGH */
 
-                case 1:    /* save the remaining module */
-                if (&(tp->modid) != tp->module_list) {
-                    tp->modid = tp->module_list[0];
-                    free(tp->module_list);
-                    tp->module_list = &(tp->modid);
-                }
-                break;
+		case 1:    /* save the remaining module */
+		    if (&(tp->modid) != tp->module_list) {
+			tp->modid = tp->module_list[0];
+			free(tp->module_list);
+			tp->module_list = &(tp->modid);
+		    }
+		    break;
 
-                default:
-                break;
-            }
-        } /* if tree node is in this module */
+		default:
+		    break;
+		}
+	    } /* if tree node is in this module */
         } /* if tree node is in some module */
 
         next = tp->next_peer;
@@ -3446,21 +3447,21 @@ unload_module_by_ID( int modID, struct tree *tree_top )
          *    Now let's look at the children.
          *    (Isn't recursion wonderful!)
          */
-    if ( tp->child_list )
-        unload_module_by_ID( modID, tp->child_list );
+	if ( tp->child_list )
+	    unload_module_by_ID( modID, tp->child_list );
 
 
-    if ( tp->number_modules == 0 ) {
-        /* This node isn't needed any more (except perhaps
-            for the sake of the children) */
-        if ( tp->child_list == NULL ) {
-            unlink_tree( tp );
-            free_tree( tp );
-        }
-        else {
-            free_partial_tree( tp, TRUE );
-        }
-    }
+	if ( tp->number_modules == 0 ) {
+	    /* This node isn't needed any more (except perhaps
+		for the sake of the children) */
+	    if ( tp->child_list == NULL ) {
+		unlink_tree( tp );
+		free_tree( tp );
+	    }
+	    else {
+		free_partial_tree( tp, TRUE );
+	    }
+	}
     }
 }
 
@@ -4053,7 +4054,7 @@ add_mibdir(const char *dirname)
     char token[MAXTOKEN], token2[MAXTOKEN];
     char tmpstr[300];
     int count = 0;
-#ifndef WIN32
+#if !(defined(WIN32) || defined(cygwin))
     struct stat dir_stat, idx_stat;
     char tmpstr1[300];
 #endif
