@@ -117,6 +117,10 @@
 
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
+
+#if defined(freebsd3)
+#    define USE_SYSCTL_IFLIST
+#else
 # if defined(CTL_NET) && !defined(freebsd2)
 #  ifdef PF_ROUTE
 #   ifdef NET_RT_IFLIST
@@ -125,6 +129,7 @@
 #  endif
 # endif
 #endif
+#endif /* defined(freebsd3) */
 
 /* #include "../common_header.h" */
 
