@@ -384,7 +384,8 @@ char *prog;
 {
   printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-q] [-p NUM] [-L] [-l LOGFILE]\n",prog);
   printf("\n\tVersion:  %s\n",VersionInfo);
-  printf("\tAuthor:   hardaker@ece.ucdavis.edu\n");
+  printf("\tAuthor:   Wes Hardaker\n");
+  printf("\tEmail:    ucd-snmp-coders@ece.ucdavis.edu\n");
   printf("\n-h\t\tThis usage message.\n");
   printf("-v\t\tVersion information.\n");
   printf("-f\t\tDon't fork from the shell.\n");
@@ -392,10 +393,10 @@ char *prog;
   printf("-d\t\tDump sent and received UDP SNMP packets\n");
   printf("-q\t\tPrint information in a more parsable format (quick-print)\n");
   printf("-p NUM\t\tRun on port NUM instead of the default:  161\n");
-  printf("-L\t\tPrint warnings/messages to stdout/err rather than a logfile\n");
-  printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
   printf("-c CONFFILE\tRead CONFFILE as a configuration file.\n");
   printf("-C\t\tDon't read the default configuration files.\n");
+  printf("-L\t\tPrint warnings/messages to stdout/err rather than a logfile\n");
+  printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
   printf("\t\t(By default LOGFILE=%s)\n",
 #ifdef LOGFILE
          LOGFILE
@@ -469,14 +470,16 @@ main(argc, argv)
                     usage(argv[0]);
                     break;
                 case 'v':
-                    printf("\nUcd-snmp version:  %s\n",VersionInfo);
-                    printf("Author:            hardaker@ece.ucdavis.edu\n\n");
+                    printf("\nUCD-snmp version:  %s\n",VersionInfo);
+                    printf("Author:            Wes Hardaker\n");
+                    printf("Email:             ucd-snmp-coders@ece.ucdavis.edu\n\n");
                     exit (0);
                 case '-':
                   switch(argv[arg][2]){
                     case 'v': 
-                      printf("\nUcd-snmp version:  %s\n",VersionInfo);
-                      printf("Author:            hardaker@ece.ucdavis.edu\n\n");
+                      printf("\nUCD-snmp version:  %s\n",VersionInfo);
+                      printf("Author:            Wes Hardaker\n");
+                      printf("Email:             ucd-snmp-coders@ece.ucdavis.edu\n\n");
                       exit (0);
                     case 'h':
                       usage(argv[0]);
