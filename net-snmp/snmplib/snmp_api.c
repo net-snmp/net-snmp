@@ -4671,11 +4671,13 @@ snmp_oid_compare(const oid *in_name1,
     else
 	len = len2;
     /* find first non-matching OID */
-    while(len-- > 0){
-	res = *(name1++) - *(name2++);
-	if (res < 0)
+    while(len-- > 0) {
+        /* these must be done in seperate comparisons, since
+           subtracting them and using that result has problems with
+           subids > 2^31. */
+	if (*(name1) < *(name2))
 	    return -1;
-	if (res > 0)
+	if (*(name1++) > *(name2++))
 	    return 1;
     }
     /* both OIDs equal up to length of shorter OID */
