@@ -58,21 +58,12 @@
 #ifdef WIN32
 #define SOCK_STARTUP winsock_startup()
 #define SOCK_CLEANUP winsock_cleanup()
-  #if 0
-    /* XX disabled until netsnmp library is made thread-safe */
-    #define DLL_IMPORT   __declspec( dllimport )
-  #else
-    #define DLL_IMPORT
-  #endif
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #else
 #define SOCK_STARTUP
 #define SOCK_CLEANUP
-#define DLL_IMPORT
 #endif
-
-DLL_IMPORT extern struct tree *Mib;
 
 #include "perlsnmp.h"
 
@@ -869,7 +860,6 @@ int    best_guess;
 {
    struct tree *tp = NULL;
    struct tree *rtp = NULL;
-   DLL_IMPORT extern struct tree *tree_head;
    oid newname[MAX_OID_LEN], *op;
    int newname_len = 0;
    const char *cp = NULL;
@@ -945,7 +935,7 @@ int    best_guess;
    /* else best_guess is off and it is a single leaf */
    /* single symbolic                                */
    else { 
-      rtp = tp = find_node(tag, Mib);
+      rtp = tp = find_node(tag, get_tree_head());
       if (tp) {
          if (type) *type = tp->type;
          if ((oid_arr == NULL) || (oid_arr_len == NULL)) return rtp;
@@ -2577,10 +2567,6 @@ not_there:
 
 MODULE = SNMP		PACKAGE = SNMP		PREFIX = snmp
 
-BOOT:
-# first blank line terminates bootstrap code
-    Mib = 0;
-
 
 double
 constant(name,arg)
@@ -2839,10 +2825,11 @@ void
 snmp_init_mib_internals()
 	CODE:
         {
+	/*XYX REMOVE? snmp_init_mib_internals does nothing and is not called. *?
         int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
         /* should test better to see if it has been done already */
-	if (Mib == NULL) {
+	if (get_tree_head() == NULL) {
            if (verbose) warn("initializing MIB internals (empty)\n");
            /* init_mib_internals(); */
         }
@@ -2857,14 +2844,14 @@ snmp_read_mib(mib_file, force=0)
         {
         int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
-        /* if (Mib && force) __free_tree(Mib); needs more work to cleanup */
+        /*XYX if (get_tree_head() && force) __free_tree(get_tree_head()); needs more work to cleanup */
 
         if ((mib_file == NULL) || (*mib_file == '\0')) {
-           if (Mib == NULL) {
+           if (get_tree_head() == NULL) {
               if (verbose) warn("initializing MIB\n");
               /* init_mib_internals(); */
               init_mib();
-              if (Mib) {
+              if (get_tree_head()) {
                  if (verbose) warn("done\n");
               } else {
                  if (verbose) warn("failed\n");
@@ -2872,18 +2859,18 @@ snmp_read_mib(mib_file, force=0)
 	   }
         } else {
            if (verbose) warn("reading MIB: %s [%s:%s]\n", mib_file, DEFAULT_MIBDIRS, DEFAULT_MIBS);
-           /* if (Mib == NULL) init_mib_internals();*/
+           /*XYX if (get_tree_head() == NULL) init_mib_internals();*/
            if (strcmp("ALL",mib_file))
               read_mib(mib_file);
            else
              read_all_mibs();
-           if (Mib) {
+           if (get_tree_head()) {
               if (verbose) warn("done\n");
            } else {
               if (verbose) warn("failed\n");
            }
         }
-        RETVAL = (I32)Mib;
+        RETVAL = (I32)get_tree_head();
         }
         OUTPUT:
         RETVAL
@@ -2901,12 +2888,12 @@ snmp_read_module(module)
         } else {
            read_module(module);
         }
-        if (Mib) {
+        if (get_tree_head()) {
            if (verbose) warn("Read %s\n", module);
         } else {
            if (verbose) warn("Failed reading %s\n", module);
         }
-        RETVAL = (I32)Mib;
+        RETVAL = (I32)get_tree_head();
         }
         OUTPUT:
         RETVAL
@@ -4895,7 +4882,6 @@ snmp_mib_node_FETCH(tp_ref, key)
            HV *mib_hv, *enum_hv, *range_hv;
            AV *index_av, *varbind_av, *ranges_av;
            MAGIC *mg = NULL;
-           DLL_IMPORT extern struct tree *tree_head;
 
            if (SvROK(tp_ref)) tp = (SnmpMibNode*)SvIV((SV*)SvRV(tp_ref));
 
@@ -4984,7 +4970,7 @@ snmp_mib_node_FETCH(tp_ref, key)
                  if (strncmp("indexes", key, strlen(key))) break;
                  index_av = newAV();
                  if (tp->augments) {
-                     tptmp = find_best_tree_node(tp->augments, tree_head, NULL);
+                     tptmp = find_best_tree_node(tp->augments, get_tree_head(), NULL);
                  } else {
                      tptmp = tp;
                  }
