@@ -43,7 +43,7 @@ hc_createEntry(historyControlIndex)
     struct historyControlEntry *hcp;
 
     hcp = (struct historyControlEntry *)malloc(sizeof(struct historyControlEntry));
-    bzero((char *)hcp, sizeof(struct historyControlEntry));
+    memset(hcp, 0, sizeof(struct historyControlEntry));
 
     hcp->historyControlIndex = historyControlIndex;
 

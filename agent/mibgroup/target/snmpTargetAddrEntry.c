@@ -29,7 +29,7 @@ static struct targetAddrTable_struct *aAddrTable=0;
 /* TargetAddrTable_create creates and returns a pointer
    to a targetAddrTable_struct with default values set */
 struct targetAddrTable_struct 
-*snmpTargetAddrTable_create()
+*snmpTargetAddrTable_create(void)
 {
   struct targetAddrTable_struct *newEntry;
 
@@ -58,8 +58,7 @@ struct targetAddrTable_struct
 
 /* TargetAddrTable_dispose frees the space allocated to a
    targetAddrTable_struct */
-void snmpTargetAddrTable_dispose(reaped)
-     struct targetAddrTable_struct *reaped;
+void snmpTargetAddrTable_dispose(struct targetAddrTable_struct *reaped)
 {
   free(reaped->name);
   free(reaped->tAddress);
@@ -75,8 +74,9 @@ void snmpTargetAddrTable_dispose(reaped)
    low to high and this procedure inserts a new struct in the proper 
    location. Sorting uses OID values based on name. A new equal value 
    overwrites a current one. */
-void snmpTargetAddrTable_addToList(newEntry, listPtr)
-     struct targetAddrTable_struct *newEntry, **listPtr;
+void snmpTargetAddrTable_addToList(
+     struct targetAddrTable_struct *newEntry,
+     struct targetAddrTable_struct **listPtr)
 {
   static struct targetAddrTable_struct *curr_struct, *prev_struct;
   int    i, newOIDLen = 0, currOIDLen = 0;
@@ -128,8 +128,9 @@ void snmpTargetAddrTable_addToList(newEntry, listPtr)
 
 /* snmpTargetAddrTable_remFromList removes a targetAddrTable_struct 
    from the list passed in */
-void snmpTargetAddrTable_remFromList(oldEntry, listPtr)
-     struct targetAddrTable_struct *oldEntry, **listPtr;
+void snmpTargetAddrTable_remFromList(
+     struct targetAddrTable_struct *oldEntry,
+     struct targetAddrTable_struct **listPtr)
 {
   struct targetAddrTable_struct *tptr;
 
@@ -154,12 +155,12 @@ void snmpTargetAddrTable_remFromList(oldEntry, listPtr)
 
 /* lookup OID in the link list of Addr Table Entries */
 struct targetAddrTable_struct *
-search_snmpTargetAddrTable(baseName, baseNameLen, name, length, exact)
-     oid    *baseName;
-     int    baseNameLen;
-     oid    *name;
-     int    *length;
-     int    exact;
+search_snmpTargetAddrTable(
+     oid    *baseName,
+     int    baseNameLen,
+     oid    *name,
+     int    *length,
+     int    exact)
 {
    static struct targetAddrTable_struct *temp_struct;
    int    i, myOIDLen = 0;
@@ -190,8 +191,7 @@ search_snmpTargetAddrTable(baseName, baseNameLen, name, length, exact)
 /* snmpTargetAddr_rowStatusCheck is boolean funciton that  checks 
    the status of a row's values in order to determine whether
    the row should be notReady or notInService  */
-int snmpTargetAddr_rowStatusCheck(entry)
-     struct targetAddrTable_struct *entry;
+int snmpTargetAddr_rowStatusCheck(struct targetAddrTable_struct *entry)
 {
   if ( (entry->tDomainLen == 0) || (entry->tAddress == 0) ||
        (entry->params == 0)  )
@@ -211,9 +211,9 @@ void init_snmpTargetAddrEntry(void) {
 }  /* init_snmpTargetAddrEntry */
 
 
-int snmpTargetAddr_addName(entry, cptr)
-     struct targetAddrTable_struct *entry;
-     char   *cptr;
+int snmpTargetAddr_addName(
+     struct targetAddrTable_struct *entry,
+     char   *cptr)
 {
   int    len;
   if (cptr == 0) {
@@ -235,9 +235,9 @@ int snmpTargetAddr_addName(entry, cptr)
 } /* addName */
   
 
-int snmpTargetAddr_addTDomain(entry, cptr)
-     struct targetAddrTable_struct *entry;
-     char   *cptr;
+int snmpTargetAddr_addTDomain(
+     struct targetAddrTable_struct *entry,
+     char   *cptr)
 {
   int len=128;
   
@@ -262,9 +262,9 @@ int snmpTargetAddr_addTDomain(entry, cptr)
 } /* snmpTargetAddr_addTDomain */
 
 
-int snmpTargetAddr_addTAddress(entry, cptr)
-     struct targetAddrTable_struct *entry;
-     char   *cptr;
+int snmpTargetAddr_addTAddress(
+     struct targetAddrTable_struct *entry,
+     char   *cptr)
 {
   int    len;
   if (cptr == 0) {
@@ -287,9 +287,9 @@ int snmpTargetAddr_addTAddress(entry, cptr)
 } /* snmpTargetAddr_addTAddress */
   
   
-int snmpTargetAddr_addTimeout(entry, cptr)
-     struct targetAddrTable_struct *entry;
-     char   *cptr;
+int snmpTargetAddr_addTimeout(
+     struct targetAddrTable_struct *entry,
+     char   *cptr)
 {
   if (cptr == 0) {
     DEBUGP("ERROR snmpTargetParamsEntry: no Timeout in config string\n");
@@ -308,9 +308,9 @@ int snmpTargetAddr_addTimeout(entry, cptr)
 }  /* snmpTargetAddr_addTimeout  */
   
   
-int snmpTargetAddr_addRetryCount(entry, cptr)
-     struct targetAddrTable_struct *entry;
-     char   *cptr;
+int snmpTargetAddr_addRetryCount(
+     struct targetAddrTable_struct *entry,
+     char   *cptr)
 {
   if (cptr == 0) {
     DEBUGP("ERROR snmpTargetParamsEntry: no Retry Count in config string\n");
@@ -333,9 +333,9 @@ int snmpTargetAddr_addRetryCount(entry, cptr)
 }  /* snmpTargetAddr_addRetryCount  */
 
  
-int snmpTargetAddr_addTagList(entry, cptr)
-     struct targetAddrTable_struct *entry;
-     char   *cptr;
+int snmpTargetAddr_addTagList(
+     struct targetAddrTable_struct *entry,
+     char   *cptr)
 {
   int    len;
   if (cptr == 0) {
@@ -358,9 +358,9 @@ int snmpTargetAddr_addTagList(entry, cptr)
 } /* snmpTargetAddr_addTagList */
   
  
-int snmpTargetAddr_addParams(entry, cptr)
-     struct targetAddrTable_struct *entry;
-     char   *cptr;
+int snmpTargetAddr_addParams(
+     struct targetAddrTable_struct *entry,
+     char   *cptr)
 {
   int    len;
   if (cptr == 0) {
@@ -382,9 +382,9 @@ int snmpTargetAddr_addParams(entry, cptr)
 } /* snmpTargetAddr_addParams */
 
   
-int snmpTargetAddr_addStorageType(entry, cptr)
-     struct targetAddrTable_struct *entry;
-     char   *cptr;
+int snmpTargetAddr_addStorageType(
+     struct targetAddrTable_struct *entry,
+     char   *cptr)
 {
   char   buff[1024];
 
@@ -412,9 +412,9 @@ int snmpTargetAddr_addStorageType(entry, cptr)
 }  /* snmpTargetAddr_addStorageType */
   
   
-int snmpTargetAddr_addRowStatus(entry, cptr)
-     struct targetAddrTable_struct *entry;
-     char   *cptr;
+int snmpTargetAddr_addRowStatus(
+     struct targetAddrTable_struct *entry,
+     char   *cptr)
 {
   char buff[1024];
 
@@ -1058,9 +1058,9 @@ write_snmpTargetAddrStorageType(action, var_val, var_val_type, var_val_len,
    the index of the passed in 'name' (i.e. full index OID) and
    adds it to the linked list. 'name' should be the full OID of the new index. 
    It passes back 0 if unsuccessfull.*/
-int snmpTargetAddr_createNewRow(name, name_len)
-     oid  *name;
-     int  name_len;
+int snmpTargetAddr_createNewRow(
+     oid  *name,
+     int  name_len)
 {
   int    newNameLen, i;
   struct targetAddrTable_struct *temp_struct;

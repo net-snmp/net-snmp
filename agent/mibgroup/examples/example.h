@@ -18,7 +18,7 @@ config_require(util_funcs);
 /* Define all our functions using prototyping for ANSI compilers */
 /* These functions are then defined in the example.c file */
 
-void	init_example();
+void	init_example(void);
 FindVarMethod var_example;
 
 
