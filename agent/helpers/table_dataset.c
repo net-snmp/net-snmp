@@ -406,7 +406,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
         }
 
         type = mib_to_asn_type(indexnode->type);
-        if (type == -1) {
+        if (type ==(u_char) -1) {
             config_pwarn("unknown index type");
             return; /* xxx mem leak */
         }
@@ -422,7 +422,7 @@ netsnmp_config_parse_table_set(const char *token, char *line)
     for(tp = tp->child_list; tp; tp = tp->next_peer) {
         int canwrite = 0;
         type = mib_to_asn_type(tp->type);
-        if (type == -1) {
+        if (type == (u_char)-1) {
             config_pwarn("unknown column type");
             return; /* xxx mem leak */
         }
