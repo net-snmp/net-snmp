@@ -248,6 +248,8 @@ intpr(int interval)
 		    case OUTNUCASTPKTS:
 			cur_if->opkts += *var->val.integer; break;
 		    case IFNAME:
+			if (var->val_len >= sizeof(cur_if->name))
+			    var->val_len = sizeof(cur_if->name) - 1;
 			memmove (cur_if->name, var->val.string, var->val_len);
 			cur_if->name [var->val_len] = 0;
 			break;
@@ -410,6 +412,8 @@ intpro(int interval)
 		    case OUTOCTETS:
 			cur_if->ooctets += *var->val.integer; break;
 		    case IFNAME:
+			if (var->val_len >= sizeof(cur_if->name))
+			    var->val_len = sizeof(cur_if->name) - 1;
 			memmove (cur_if->name, var->val.string, var->val_len);
 			cur_if->name [var->val_len] = 0;
 			break;
@@ -565,6 +569,8 @@ sidewaysintpr(unsigned int interval)
 		varname[10] = ifnum;
 		var = getvarbyname(Session, varname, varname_len);
 		if (var){
+		    if (var->val_len >= (sizeof(ip->ift_name) - 3))
+		        var->val_len = (sizeof(ip->ift_name) - 4);
 		    memmove(ip->ift_name + 1, var->val.string, var->val_len);
 		    snmp_free_var(var);
 		}
