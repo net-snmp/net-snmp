@@ -55,8 +55,8 @@ LOBJS = *.lo
 
 all: standardall
 
-OTHERINSTALL=snmpinforminstall
-OTHERUNINSTALL=snmpinformuninstall
+OTHERINSTALL=snmpinforminstall snmptrapdperlinstall
+OTHERUNINSTALL=snmpinformuninstall snmptrapdperluninstall
 
 #
 # build rules
@@ -126,3 +126,11 @@ snmpinforminstall:
 
 snmpinformuninstall:
 	rm -f $(INSTALL_PREFIX)$(bindir)/snmpinform$(EXEEXT)
+
+snmptrapdperlinstall:
+	  @$(INSTALL) $(srcdir)/snmp_perl_trapd.pl $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl_trapd.pl
+	  @echo "install:  installed snmp_perl_trapd.pl in $(INSTALL_PREFIX)$(snmplibdir)"
+
+snmptrapdperluninstall:
+	  @rm -f $(INSTALL_PREFIX)$(snmplibdir)/snmp_perl_trapd.pl
+	  @echo "removed snmp_perl_trapd.pl from $(INSTALL_PREFIX)$(snmplibdir)"
