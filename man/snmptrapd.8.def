@@ -19,7 +19,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTRAPD 8 "07 Feb 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPTRAPD 8 "15 Jan 2004" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmptrapd - Receive and log SNMP trap messages.
@@ -89,7 +89,7 @@ This option is being deprecated, and '-Ls FACILITY' should be used instead.
 .TP
 .B -L[efos]
 Specify where logging output should be directed (standard error or output,
-to a file or via syslog).  See LOGGING OPTIONS in snmpcmd(5) for details.
+to a file or via syslog).  See LOGGING OPTIONS in snmpcmd(1) for details.
 .br
 This option deprecates the
 .B -l
@@ -264,7 +264,13 @@ security information from the PDU (community name for v1/v2c,
 user and context for v3)
 .TP
 .B %v
-list of trap's variable-bindings
+list of trap's variable-bindings. These will be separated by a tab,
+or by a comma and a blank if the alternate form is requested
+See also %V
+.TP
+.B %V
+specifies the variable-bindings separator. This takes a sequence of
+characters, up to the next % (to embed a % in the string, use \\%)
 .RE
 .PP
 In addition to these values, you may also specify an optional field
