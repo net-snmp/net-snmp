@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     for(count = 0; count < current_name; count++){
       name_length = MAX_OID_LEN;
       if (snmp_parse_oid(names[count], name, &name_length) == NULL) {
-        fprintf(stderr, "Invalid object identifier: %s\n", names[count]);
+        snmp_perror(names[count]);
         failures++;
       } else
         snmp_add_null_var(pdu, name, name_length);
@@ -158,6 +158,7 @@ retry:
         /* retry if the errored variable was successfully removed */
         pdu = snmp_fix_pdu(response, SNMP_MSG_GETNEXT);
         snmp_free_pdu(response);
+	response = NULL;
         if (pdu != NULL)
           goto retry;
       }

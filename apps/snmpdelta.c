@@ -82,7 +82,7 @@
 
 #define MAX_ARGS 256
     
-char *SumFile = (char*)"Sum";
+const char *SumFile = "Sum";
 char *Argv[MAX_ARGS];
 int Argc;
 
@@ -397,7 +397,7 @@ int main(int argc, char *argv[])
       vip->oidlen = MAX_OID_LEN;
       vip->info_oid = (oid *)malloc(sizeof(oid) * vip->oidlen);
       if (snmp_parse_oid(vip->name, vip->info_oid, &vip->oidlen) == NULL) {
-	fprintf(stderr, "Invalid object identifier: %s\n", vip->name);
+	snmp_perror(vip->name);
 	SOCK_CLEANUP;
 	exit(1);
       }
@@ -611,6 +611,7 @@ int main(int argc, char *argv[])
         /* retry if the errored variable was successfully removed */
         pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
         snmp_free_pdu(response);
+	response = NULL;
         if (pdu != NULL)
 	  goto retry;
       }

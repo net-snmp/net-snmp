@@ -184,6 +184,7 @@ retry:
         /* retry if the errored variable was successfully removed */
         pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
         snmp_free_pdu(response);
+	response = NULL;
         if (pdu != NULL)
           goto retry;
       }
