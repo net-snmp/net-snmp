@@ -27,6 +27,9 @@ SOFTWARE.
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
+#if HAVE_DIRENT_H
+#include <dirent.h>
+#endif
 #include "parse.h"
 
 /* A quoted string value-- too long for a general "token" */
@@ -1650,8 +1653,9 @@ int parse_mib_header(fp, name)
  * Returns NULL on error.
  */
 static struct node *
-parse(fp)
+parse(fp, root)
     FILE *fp;
+    struct node *root;
 {
     char token[MAXTOKEN];
     char name[MAXTOKEN];
@@ -1661,16 +1665,19 @@ parse(fp)
 #define BETWEEN_MIBS  	      1
 #define IN_MIB                2
     int state = BETWEEN_MIBS;
-    struct node *np, *root = NULL;
+    struct node *np;
 
-    hash_init();
-    quoted_string_buffer = (char *)malloc(MAXQUOTESTR);  /* free this later */
-#ifdef SVR4
-    memset(tclist, NULL, 64 * sizeof(struct tc));
-#else
-    bzero(tclist, 64 * sizeof(struct tc));
-#endif
-
+    np = root;
+    if (np != NULL) {
+      /* now find end of chain */
+      while(np->next)
+        np = np->next;
+    } else {
+      hash_init();
+      quoted_string_buffer = (char *)malloc(MAXQUOTESTR);  /* free this later */
+      memset(tclist, NULL, 64 * sizeof(struct tc));
+    }
+    
     while(type != ENDOFFILE){
 	type = lasttype = get_token(fp, token,MAXTOKEN);
 skipget:
@@ -1992,19 +1999,50 @@ read_mib(filename)
     char *filename;
 {
     FILE *fp;
-    struct node *nodes;
+    struct node *nodes = 0;
     struct tree *tree;
+    DIR *dir, *dir2;
+    struct dirent *file;
+    char tmpstr[300];
 
     fp = fopen(filename, "r");
     if (fp == NULL)
 	return NULL;
-    nodes = parse(fp);
+    nodes = parse(fp, nodes);
     if (!nodes){
 	fprintf(stderr, "Mib table is bad.  Exiting\n");
 	exit(1);
     }
-    tree = build_tree(nodes);
     fclose(fp);
+
+    sprintf(tmpstr,"%s/mibs",SNMPLIBPATH);
+    if (nodes != NULL && (dir = opendir(tmpstr))) {
+      while (nodes != NULL && (file = readdir(dir))) {
+        /* Only parse file names not beginning with a '.' */
+        if (file->d_name != NULL && file->d_name[0] != '.') {
+          sprintf(tmpstr,"%s/mibs/%s",SNMPLIBPATH,file->d_name);
+          if (dir2 = opendir(tmpstr)) {
+            /* file is a directory, don't read it */
+            closedir(dir2);
+          } else {
+            /* parse it */
+            DEBUGP1("Parsing mib file:  %s... ",tmpstr);
+            if ((fp = fopen(tmpstr, "r")) == NULL) {
+              perror("fopen");
+              exit(1);
+            }
+            nodes = parse(fp, nodes);
+            if (nodes == NULL) {
+              fprintf(stderr, "Mib table is bad.  Exiting\n");
+              exit(1);
+            }
+            DEBUGP("done\n");
+          }
+        }
+      }
+      closedir(dir);
+    }
+    tree = build_tree(nodes);
     return tree;
 }
 
