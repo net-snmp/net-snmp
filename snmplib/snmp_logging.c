@@ -71,12 +71,21 @@
 #include <net-snmp/library/callback.h>
 #define LOGLENGTH 1024
 
+/*
+ * logh_head:  A list of all log handlers, in increasing order of priority
+ * logh_priorities:  'Indexes' into this list, by priority
+ */
+netsnmp_log_handler *logh_head;
+netsnmp_log_handler *logh_priorities[LOG_DEBUG+1];
+
+/*
 static int      do_syslogging = 0;
 static int      do_filelogging = 0;
 static int      do_stderrlogging = 1;
 static int      do_log_callback = 0;
-static int      newline = 1;
 static FILE    *logfile;
+*/
+static int      newline = 1;
 #ifdef WIN32
 static HANDLE   eventlog_h;
 #endif
@@ -99,8 +108,11 @@ init_snmp_logging(void)
 int
 snmp_get_do_logging(void)
 {
-    return (do_syslogging || do_filelogging || do_stderrlogging ||
-            do_log_callback);
+    netsnmp_log_handler *logh;
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->enabled)
+            return 1;
+    return 0;
 }
 
 
@@ -121,94 +133,160 @@ sprintf_stamp(time_t * now, char *sbuf)
     return sbuf;
 }
 
+#ifdef WIN32
 void
 snmp_disable_syslog(void)
 {
-#if HAVE_SYSLOG_H
-    if (do_syslogging)
-        closelog();
-#endif
-#ifdef WIN32
-    if (eventlog_h != NULL) {
-        if (!CloseEventLog(eventlog_h)) {
-            fprintf(stderr, "Could not close event log. "
-                    "Last error: 0x%x\n", GetLastError());
-        } else {
-            eventlog_h = NULL;
-        }
-    }
-#endif                          /* WIN32 */
-    do_syslogging = 0;
-}
+    netsnmp_log_handler *logh;
+    HANDLE               eventlog_h;
 
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->enabled && logh->type == NETSNMP_LOGHANDLER_SYSLOG) {
+
+            eventlog_h = (HANDLE)logh->magic;
+            if (eventlog_h != NULL) {
+                if (!CloseEventLog(eventlog_h)) {
+	            /*
+	             * Hmmm.....
+	             * Maybe disable this handler, and log the error ?
+	             */
+                    fprintf(stderr, "Could not close event log. "
+                            "Last error: 0x%x\n", GetLastError());
+                } else {
+                    logh->magic = NULL;
+                }
+            }
+            logh->enabled = 0;
+	}
+}
+#else
+void
+snmp_disable_syslog(void)
+{
+    netsnmp_log_handler *logh;
+
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->enabled && logh->type == NETSNMP_LOGHANDLER_SYSLOG) {
+            /* closelog();	Ummm... probably not? */
+            logh->enabled = 0;
+	}
+}
+#endif
 
 void
 snmp_disable_filelog(void)
 {
-    if (do_filelogging) {
-        fputs("\n", logfile);
-        fclose(logfile);
-    }
-    do_filelogging = 0;
-}
+    netsnmp_log_handler *logh;
 
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->enabled && logh->type == NETSNMP_LOGHANDLER_FILE) {
+            fputs("\n", (FILE*)logh->magic);	/* XXX - why? */
+            fclose((FILE*)logh->magic);
+            logh->magic   = NULL;
+            logh->enabled = 0;
+	}
+}
 
 void
 snmp_disable_stderrlog(void)
 {
-    do_stderrlogging = 0;
+    netsnmp_log_handler *logh;
+
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->enabled && (logh->type == NETSNMP_LOGHANDLER_STDOUT ||
+                              logh->type == NETSNMP_LOGHANDLER_STDERR)) {
+            logh->enabled = 0;
+	}
 }
 
+void
+snmp_disable_calllog(void)
+{
+    netsnmp_log_handler *logh;
+
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->enabled && logh->type == NETSNMP_LOGHANDLER_CALLBACK) {
+            logh->enabled = 0;
+	}
+}
 
 void
 snmp_disable_log(void)
 {
-    snmp_disable_syslog();
-    snmp_disable_filelog();
-    snmp_disable_stderrlog();
-    snmp_disable_calllog();
+    netsnmp_log_handler *logh;
+
+    for (logh = logh_head; logh; logh = logh->next)
+        logh->enabled = 0;	/* XXX - any per-handler closedown? */
 }
+
+/* ================================================== */
 
 void
 snmp_enable_syslog(void)
 {
-    /*
-     * This default should probably be net-snmp at some point 
-     */
     snmp_enable_syslog_ident(DEFAULT_LOG_ID, LOG_DAEMON);
 }
 
 void
 snmp_enable_syslog_ident(const char *ident, const int facility)
 {
-    snmp_disable_syslog();
-    if (ident == NULL)
-        /*
-         * This default should probably be net-snmp at some point 
-         */
-        ident = DEFAULT_LOG_ID;
-#if HAVE_SYSLOG_H
-    openlog(ident, LOG_CONS | LOG_PID, facility);
-    do_syslogging = 1;
+    netsnmp_log_handler *logh;
+    int                  found = 0;
+    int                  enable = 1;
+#ifdef WIN32
+    HANDLE               eventlog_h;
+#else
+    void                *eventlog_h = NULL;
 #endif
+
+    snmp_disable_syslog();	/* ??? */
 #ifdef WIN32
     eventlog_h = OpenEventLog(NULL, ident);
     if (eventlog_h == NULL) {
+	    /*
+	     * Hmmm.....
+	     * Maybe disable this handler, and log the error ?
+	     */
         fprintf(stderr, "Could not open event log for %s. "
                 "Last error: 0x%x\n", ident, GetLastError());
-        do_syslogging = 0;
-    } else
-        do_syslogging = 1;
-#endif                          /* WIN32 */
+        enable = 0;
+    }
+#else
+    if (ident == NULL)
+        ident = DEFAULT_LOG_ID;
+    openlog(ident, LOG_CONS | LOG_PID, facility);
+#endif
+
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->type == NETSNMP_LOGHANDLER_SYSLOG) {
+            logh->magic   = (void*)eventlog_h;
+            logh->enabled = enable;
+            found         = 1;
+	}
+
+    if (!found) {
+        logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_SYSLOG,
+                                           LOG_DEBUG );
+        if (logh) {
+            logh->magic    = (void*)eventlog_h;
+            logh->token    = strdup("syslog");
+        }
+    }
 }
 
 void
-snmp_enable_filelog(const char *logfilename, int dont_zero_log)
+netsnmp_enable_filelog(netsnmp_log_handler *logh, int dont_zero_log)
 {
-    snmp_disable_filelog();
-    logfile = fopen(logfilename, dont_zero_log ? "a" : "w");
-    if (logfile) {
-        do_filelogging = 1;
+    FILE *logfile;
+
+    if (!logh)
+        return;
+
+    if (!logh->magic) {
+        logfile = fopen(logh->token, dont_zero_log ? "a" : "w");
+        if (!logfile)
+            return;
+        logh->magic = (void*)logfile;
 #ifdef WIN32
         /*
          * Apparently, "line buffering" under Windows is
@@ -219,50 +297,256 @@ snmp_enable_filelog(const char *logfilename, int dont_zero_log)
 #else
         setvbuf(logfile, NULL, _IOLBF, BUFSIZ);
 #endif
-    } else
-        do_filelogging = 0;
+    }
+    logh->enabled = 1;
+}
+
+void
+snmp_enable_filelog(const char *logfilename, int dont_zero_log)
+{
+    netsnmp_log_handler *logh;
+
+    snmp_disable_filelog();	/* XXX ??? */
+
+    if (logfilename) {
+        logh = netsnmp_find_loghandler( logfilename );
+        if (logh)
+            netsnmp_enable_filelog(logh, dont_zero_log);
+	else {
+            logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_FILE,
+                                               LOG_DEBUG );
+            if (logh) {
+                logh->token = strdup(logfilename);
+                logh->magic = (void*)fopen(logfilename,
+                                           (dont_zero_log ? "a" : "w" ));
+	    }
+        }
+    } else {
+        for (logh = logh_head; logh; logh = logh->next)
+            if (logh->type == NETSNMP_LOGHANDLER_FILE)
+                netsnmp_enable_filelog(logh, dont_zero_log);
+    }
 }
 
 
 void
 snmp_enable_stderrlog(void)
 {
-    do_stderrlogging = 1;
+    netsnmp_log_handler *logh;
+    int                  found = 0;
+
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->type == NETSNMP_LOGHANDLER_STDOUT ||
+            logh->type == NETSNMP_LOGHANDLER_STDERR) {
+            logh->enabled = 1;
+            found         = 1;
+        }
+
+    if (!found) {
+        logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_STDERR,
+                                           LOG_DEBUG );
+        if (logh)
+            logh->token    = strdup("stderr");
+    }
 }
 
 
 void
-snmp_enable_calllog(void)
+snmp_enable_calllog(void)	/* XXX - or take a callback routine ??? */
 {
-    do_log_callback = 1;
+    netsnmp_log_handler *logh;
+    int                  found = 0;
+
+    for (logh = logh_head; logh; logh = logh->next) {
+        if (logh->type == NETSNMP_LOGHANDLER_CALLBACK)
+            logh->enabled = 1;
+            found         = 1;
+	}
+
+    if (!found) {
+        logh = netsnmp_register_loghandler(NETSNMP_LOGHANDLER_CALLBACK,
+                                           LOG_DEBUG );
+        if (logh)
+            logh->token    = strdup("callback");
+    }
 }
 
 
-void
-snmp_disable_calllog(void)
+
+/* ==================================================== */
+
+
+netsnmp_log_handler *
+netsnmp_find_loghandler( char *token )
 {
-    do_log_callback = 0;
+    netsnmp_log_handler *logh;
+    for (logh = logh_head; logh; logh = logh->next)
+        if (!strcmp( token, logh->token ))
+            break;
+
+    return logh;
+}
+
+int
+netsnmp_add_loghandler( netsnmp_log_handler *logh )
+{
+    int i;
+    netsnmp_log_handler *logh2;
+
+    if (!logh)
+        return 0;
+
+    /*
+     * Find the appropriate point for the new entry...
+     *   (logh2 will point to the entry immediately following)
+     */
+    for (logh2 = logh_head; logh2; logh2 = logh2->next)
+        if ( logh2->priority >= logh->priority )
+            break;
+
+    /*
+     * ... and link it into the main list.
+     */
+    if (logh2) {
+        if (logh2->prev)
+            logh2->prev->next = logh;
+        else
+            logh_head = logh;
+        logh->next  = logh2;
+        logh2->prev = logh;
+    } else if (logh_head ) {
+        /*
+         * If logh2 is NULL, we're tagging on to the end
+         */
+        for (logh2 = logh_head; logh2->next; logh2 = logh2->next)
+            ;
+        logh2->next = logh;
+    } else {
+        logh_head = logh;
+    }
+
+    /*
+     * Also tweak the relevant priority-'index' array.
+     */
+    for (i=LOG_EMERG; i<=logh->priority; i++)
+        if (!logh_priorities[i] ||
+             logh_priorities[i]->priority > logh->priority)
+             logh_priorities[i] = logh;
+
+    return 1;
+}
+
+netsnmp_log_handler *
+netsnmp_register_loghandler( int type, int priority )
+{
+    netsnmp_log_handler *logh;
+
+    logh = SNMP_MALLOC_TYPEDEF(netsnmp_log_handler);
+    if (!logh)
+        return NULL;
+
+    logh->type     = type;
+    switch ( type ) {
+    case NETSNMP_LOGHANDLER_STDOUT:
+        logh->imagic  = 1;
+        /* fallthrough */
+    case NETSNMP_LOGHANDLER_STDERR:
+        logh->handler = log_handler_stdouterr;
+        break;
+
+    case NETSNMP_LOGHANDLER_FILE:
+        logh->handler = log_handler_file;
+        break;
+    case NETSNMP_LOGHANDLER_SYSLOG:
+        logh->handler = log_handler_syslog;
+        break;
+    case NETSNMP_LOGHANDLER_CALLBACK:
+        logh->handler = log_handler_callback;
+        break;
+    default:
+        free(logh->handler);
+        return NULL;
+    }
+    logh->priority = priority;
+    logh->enabled  = 1;
+    netsnmp_add_loghandler( logh );
+    return logh;
 }
 
 
-void
-snmp_log_string(int priority, const char *string)
+int
+netsnmp_enable_loghandler(  char *token )
+{
+    netsnmp_log_handler *logh;
+
+    logh = netsnmp_find_loghandler( token );
+    if (!logh)
+        return 0;
+    logh->enabled = 1;
+    return 1;
+}
+
+
+int
+netsnmp_disable_loghandler( char *token )
+{
+    netsnmp_log_handler *logh;
+
+    logh = netsnmp_find_loghandler( token );
+    if (!logh)
+        return 0;
+    logh->enabled = 0;
+    return 1;
+}
+
+int
+netsnmp_remove_loghandler( netsnmp_log_handler *logh )
+{
+    if (!logh)
+        return 0;
+
+    if (logh->prev)
+        logh->prev->next = logh->next;
+    else
+        logh_head = logh->next;
+
+    if (logh->next)
+        logh->next->prev = logh->prev;
+    return 1;
+}
+
+/* ==================================================== */
+
+int
+log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *string)
 {
     char            sbuf[40];
-    struct snmp_log_message slm;
+
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                               NETSNMP_DS_LIB_LOG_TIMESTAMP) && newline) {
+        sprintf_stamp(NULL, sbuf);
+    } else {
+        strcpy(sbuf, "");
+    }
+    newline = string[strlen(string) - 1] == '\n';	/* XXX - Eh ? */
+
+    if (logh->imagic)
+       printf(         "%s%s", sbuf, string);
+    else
+       fprintf(stderr, "%s%s", sbuf, string);
+
+    return 1;
+}
+
+
 #ifdef WIN32
+int
+log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
+{
+    char            sbuf[40];
     WORD            etype;
     LPCTSTR         event_msg[2];
-#endif                          /* WIN32 */
 
-#if HAVE_SYSLOG_H
-    if (do_syslogging) {
-        syslog(priority, "%s", string);
-    }
-#endif
-
-#ifdef WIN32
-    if (do_syslogging) {
         /*
          **  EVENT TYPES:
          **
@@ -279,7 +563,7 @@ snmp_log_string(int priority, const char *string)
          **      should know about. Error events usually indicate a loss of
          **      functionality or data.
          */
-        switch (priority) {
+    switch (pri) {
         case LOG_EMERG:
         case LOG_ALERT:
         case LOG_CRIT:
@@ -297,44 +581,106 @@ snmp_log_string(int priority, const char *string)
         default:
             etype = EVENTLOG_INFORMATION_TYPE;
             break;
-        }
-        event_msg[0] = string;
-        event_msg[1] = NULL;
-        if (!ReportEvent(eventlog_h, etype, 0, 0, NULL, 1, 0,
-                         event_msg, NULL))
-            fprintf(stderr, "Could not report event.  Last error: "
-                    "0x%x\n", GetLastError());
     }
-#endif                          /* WIN32 */
-
-    if (do_log_callback) {
-        int             dodebug = snmp_get_do_debugging();
-        slm.priority = priority;
-        slm.msg = string;
-        if (dodebug)            /* turn off debugging inside the callbacks else will loop */
-            snmp_set_do_debugging(0);
-        snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_LOGGING,
-                            &slm);
-        if (dodebug)
-            snmp_set_do_debugging(dodebug);
+    event_msg[0] = string;
+    event_msg[1] = NULL;
+    if (!ReportEvent(eventlog_h, etype, 0, 0, NULL, 1, 0, event_msg, NULL)) {
+	    /*
+	     * Hmmm.....
+	     * Maybe disable this handler, and log the error ?
+	     */
+        fprintf(stderr, "Could not report event.  Last error: 0x%x\n",
+			GetLastError());
+        return 0;
     }
+    return 1;
+}
+#else
+int
+log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
+{
+	/*
+	 * XXX - Possibly try to do something with log facilities?
+	 */
+    syslog( pri, "%s", string );
+    return 1;
+}
+#endif /* !WIN32 */
 
-    if (do_filelogging || do_stderrlogging) {
-        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-				   NETSNMP_DS_LIB_LOG_TIMESTAMP) && newline) {
-            sprintf_stamp(NULL, sbuf);
-        } else {
-            strcpy(sbuf, "");
-        }
-        newline = string[strlen(string) - 1] == '\n';
 
-        if (do_filelogging)
-            fprintf(logfile, "%s%s", sbuf, string);
+int
+log_handler_file(    netsnmp_log_handler* logh, int pri, const char *string)
+{
+    FILE           *fhandle;
+    char            sbuf[40];
 
-        if (do_stderrlogging)
-            fprintf(stderr, "%s%s", sbuf, string);
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+                               NETSNMP_DS_LIB_LOG_TIMESTAMP) && newline) {
+        sprintf_stamp(NULL, sbuf);
+    } else {
+        strcpy(sbuf, "");
+    }
+    newline = string[strlen(string) - 1] == '\n';	/* XXX - Eh ? */
+
+    /*
+     * If we haven't already opened the file, then do so.
+     * Save the filehandle pointer for next time.
+     *
+     * Note that this should still work, even if the file
+     * is closed in the meantime (e.g. a regular "cleanup" sweep)
+     */
+    fhandle = (FILE*)logh->magic;
+    if (!logh->magic) {
+        fhandle = fopen(logh->token, "a+");
+        if (!fhandle)
+            return 0;
+        logh->magic = (void*)fhandle;
+    }
+    fprintf(fhandle, "%s%s", sbuf, string);
+    return 1;
+}
+
+int
+log_handler_callback(netsnmp_log_handler* logh, int pri, const char *string)
+{
+	/*
+	 * XXX - perhaps replace 'snmp_call_callbacks' processing
+	 *       with individual callback log_handlers ??
+	 */
+    struct snmp_log_message slm;
+    int             dodebug = snmp_get_do_debugging();
+
+    slm.priority = pri;
+    slm.msg = string;
+    if (dodebug)            /* turn off debugging inside the callbacks else will loop */
+        snmp_set_do_debugging(0);
+    snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_LOGGING, &slm);
+    if (dodebug)
+        snmp_set_do_debugging(dodebug);
+    return 1;
+}
+
+void
+snmp_log_string(int priority, const char *string)
+{
+    netsnmp_log_handler *logh;
+
+    /*
+     * Start at the given priority, and work "upwards"....
+     */
+    logh = logh_priorities[priority];
+    for ( ; logh; logh = logh->next ) {
+        /*
+         * ... but skipping any handlers with a "maximum priority"
+	 *     that we have already exceeded.
+         */
+        if (priority >= logh->pri_max)
+            logh->handler( logh, priority, string );
     }
 }
+
+/* ==================================================== */
+
 
 int
 snmp_vlog(int priority, const char *format, va_list ap)

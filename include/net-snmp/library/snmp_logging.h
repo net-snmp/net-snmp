@@ -71,6 +71,42 @@ extern          "C" {
 
     void            snmp_log_perror(const char *s);
 
+
+#define NETSNMP_LOGHANDLER_STDOUT	1
+#define NETSNMP_LOGHANDLER_STDERR	2
+#define NETSNMP_LOGHANDLER_FILE		3
+#define NETSNMP_LOGHANDLER_SYSLOG	4
+#define NETSNMP_LOGHANDLER_CALLBACK	5
+
+    typedef struct netsnmp_log_handler_s netsnmp_log_handler; 
+    typedef int (NetsnmpLogHandler)(netsnmp_log_handler*, int, const char *);
+
+    NetsnmpLogHandler log_handler_stdouterr;
+    NetsnmpLogHandler log_handler_file;
+    NetsnmpLogHandler log_handler_syslog;
+    NetsnmpLogHandler log_handler_callback;
+
+    struct netsnmp_log_handler_s {
+        int	enabled;
+        int	priority;
+        int	pri_max;
+        int	type;
+	char   *token;		/* Also used for filename */
+
+	NetsnmpLogHandler	*handler;
+
+	int     imagic;		/* E.g. file descriptor, syslog facility */
+	void   *magic;		/* E.g. Callback function */
+
+	netsnmp_log_handler	*next, *prev;
+    };
+
+netsnmp_log_handler *netsnmp_register_loghandler( int type, int pri );
+netsnmp_log_handler *netsnmp_find_loghandler( char *token );
+int netsnmp_add_loghandler(    netsnmp_log_handler *logh );
+int netsnmp_remove_loghandler( netsnmp_log_handler *logh );
+int netsnmp_enable_loghandler( char *token );
+int netsnmp_disable_loghandler(char *token );
 #ifdef __cplusplus
 }
 #endif
