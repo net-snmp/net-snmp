@@ -9,29 +9,29 @@
 #ifdef linux
 struct ip_mib
 {
- 	unsigned long	IpForwarding;
- 	unsigned long	IpDefaultTTL;
- 	unsigned long	IpInReceives;
- 	unsigned long	IpInHdrErrors;
- 	unsigned long	IpInAddrErrors;
- 	unsigned long	IpForwDatagrams;
- 	unsigned long	IpInUnknownProtos;
- 	unsigned long	IpInDiscards;
- 	unsigned long	IpInDelivers;
- 	unsigned long	IpOutRequests;
- 	unsigned long	IpOutDiscards;
- 	unsigned long	IpOutNoRoutes;
- 	unsigned long	IpReasmTimeout;
- 	unsigned long	IpReasmReqds;
- 	unsigned long	IpReasmOKs;
- 	unsigned long	IpReasmFails;
- 	unsigned long	IpFragOKs;
- 	unsigned long	IpFragFails;
- 	unsigned long	IpFragCreates;
+ 	unsigned long	ipForwarding;
+ 	unsigned long	ipDefaultTTL;
+ 	unsigned long	ipInReceives;
+ 	unsigned long	ipInHdrErrors;
+ 	unsigned long	ipInAddrErrors;
+ 	unsigned long	ipForwDatagrams;
+ 	unsigned long	ipInUnknownProtos;
+ 	unsigned long	ipInDiscards;
+ 	unsigned long	ipInDelivers;
+ 	unsigned long	ipOutRequests;
+ 	unsigned long	ipOutDiscards;
+ 	unsigned long	ipOutNoRoutes;
+ 	unsigned long	ipReasmTimeout;
+ 	unsigned long	ipReasmReqds;
+ 	unsigned long	ipReasmOKs;
+ 	unsigned long	ipReasmFails;
+ 	unsigned long	ipFragOKs;
+ 	unsigned long	ipFragFails;
+ 	unsigned long	ipFragCreates;
 };
 #endif
 
-config_require(mibII/interfaces mibII/at mibII/var_route mibII/route_write)
+config_require(mibII/interfaces mibII/ipAddr mibII/at mibII/var_route mibII/route_write)
 config_arch_require(solaris2, kernel_sunos5)
 
 #include "var_route.h"
@@ -39,7 +39,6 @@ config_arch_require(solaris2, kernel_sunos5)
 
 extern void	init_ip (void);
 extern FindVarMethod var_ip;
-extern FindVarMethod var_ipAddrEntry;
 
 #include "at.h"		/* for var_atEntry() */
 
