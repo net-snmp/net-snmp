@@ -43,6 +43,7 @@
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp.h"
+#include "snmp_client.h"
 #include "agentx.h"
 
 

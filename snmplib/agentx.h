@@ -18,7 +18,7 @@ extern "C" {
 #define AGENTX_VERSION_BASE	192		/* Binary: 11xxxxxx */
 #define AGENTX_VERSION_1	(AGENTX_VERSION_BASE | 0x1)
 
-#define IS_AGENTX_VERSION(v)	(v&AGENTX_VERSION_BASE == AGENTX_VERSION_BASE)
+#define IS_AGENTX_VERSION(v)	(((v)&AGENTX_VERSION_BASE) == AGENTX_VERSION_BASE)
 
 
 /* PDU types in AgentX */
@@ -87,6 +87,7 @@ int agentx_register( struct snmp_session *, oid*, size_t);
 int agentx_unregister( struct snmp_session *, oid*, size_t);
 int agentx_add_agentcaps( struct snmp_session *, oid*, size_t, char*);
 int agentx_remove_agentcaps( struct snmp_session *, oid*, size_t);
+int agentx_dump(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, size_t len);
 
 
 #ifdef __cplusplus
