@@ -24,7 +24,7 @@
 .SH NAME
 snmpwalk - communicates with a network entity using SNMP GET Next Requests.
 .SH SYNOPSIS
-snmpwalk [common arguments] [objectID]
+snmpwalk [common arguments] [-C APPOPTS] [objectID]
 .SH DESCRIPTION
 Snmpwalk is an SNMP application that uses GET NEXT Requests to query for a tree
 of information about a network entity.
@@ -71,5 +71,18 @@ a message will be displayed:
 .PP
 .I End of MIB.
 .PP
+.SH "OPTIONS"
+In addition to the arguments defined in the snmpcmd(1) manual page,
+the following options are supported as well:
+.IP "-Ci"
+Includes the requseted oid in the search range.  Normally snmpwalk
+uses getnexts starting with the oid you request and returns all
+results in the MIB tree below the one you requested.  Sometimes, you
+may wish to include the OID specified on the command line in the
+printed results if it is a valid OID in the tree itself.  This option
+lets you do this.
+.IP "-Cp"
+Upon completion, snmpwalk will print the number of variables found
+during the walk.
 .SH "SEE ALSO"
 snmpcmd(1), variables(5).
