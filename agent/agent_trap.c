@@ -701,7 +701,7 @@ snmpd_parse_config_trapsess(const char *word, char *cptr) {
     ss = snmp_open (&session);
 
     if (!ss) {
-        config_perror("snmpd: failed to parse this line");
+        config_perror("snmpd: failed to parse this line or the remote trap receiver is down.  Pausible cause:");
         snmp_sess_perror("snmpd: snmpd_parse_config_trapsess()", &session);
         return;
     }
