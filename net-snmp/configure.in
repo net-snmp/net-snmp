@@ -365,8 +365,8 @@ AC_ARG_WITH(enterprise-sysoid,
 [
   --with-enterprise-sysoid           The base OID for the sysObjectID
                                      of the system group
-                                     (default .1.6.3.1.4.1.2021... = 
-                                      "enterprise.ucdavis...")],[
+                                     (default .1.6.3.1.4.1.8072.3.2... = 
+                                      "netSnmpAgentOIDs...")],[
   sys_oid=`echo "$withval" | sed 's/^\.//' | sed 's/\./\,/g'`
   AC_DEFINE_UNQUOTED(SYSTEM_MIB, $sys_oid)
   sys_dot_oid=`echo "$withval" | sed 's/^\.//'`
@@ -375,7 +375,7 @@ AC_ARG_WITH(enterprise-sysoid,
   AC_DEFINE_UNQUOTED(SYSTEM_DOT_MIB_LENGTH, $sysoid_len)
   AC_MSG_RESULT($withval)
 ],[
-  AC_MSG_RESULT(using default "enterprise.ucdavis...")
+  AC_MSG_RESULT(using default "NET-SNMP-MIB::netSnmpAgentOIDs...")
 ])
 
 AC_ARG_WITH(enterprise-notification-oid,
