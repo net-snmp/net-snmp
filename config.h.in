@@ -340,6 +340,9 @@
 /* Define if you have the <sys/diskio.h> header file.  */
 #undef HAVE_SYS_DISKIO_H
 
+/* Define if you have the <sys/dkio.h> header file.  */
+#undef HAVE_SYS_DKIO_H
+
 /* Define if you have the <sys/dmap.h> header file.  */
 #undef HAVE_SYS_DMAP_H
 
