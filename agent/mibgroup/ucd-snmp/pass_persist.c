@@ -251,6 +251,10 @@ u_char *var_extensible_pass_persist(struct variable *vp,
           *var_len = asc2bin(buf2);
           vp->type = ASN_OCTET_STR;
           return((unsigned char *) buf2);
+        } else if (!strncasecmp(buf,"opaque",5)) {
+          *var_len = asc2bin(buf2);
+          vp->type = ASN_OPAQUE;
+          return((unsigned char *) buf2);
         } else if (!strncasecmp(buf,"gauge",5)) {
           *var_len = sizeof(long_ret);
           long_ret = strtoul(buf2, NULL, 10);
