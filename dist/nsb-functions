@@ -160,6 +160,13 @@ nsb-config-all()
    esac
 
    #
+   # use libwrap if we can find the header
+   #
+   if [ -f /usr/include/tcpd.h ]; then
+      NSB_EXTRA_CONFIG="--with-libwrap"
+   fi
+
+   #
    # some modules might be release specific, so make sure they
    # exist before we send them off to configure
    #
@@ -181,12 +188,12 @@ nsb-config-all()
       --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
-       $NSB_PERL --enable-shared --with-libwrap
+       $NSB_PERL --enable-shared 
    $ngc_src/configure  --with-defaults \
       --disable-developer $NSB_EXTRA_CONFIG \
       "--with-mib-modules=$NSB_FINAL_MODULES" \
       "--with-transports=$NSB_DIST_TRANSPORTS $NSB_EXTRA_TRANSPORTS" \
-      $NSB_PERL --enable-shared --with-libwrap
+      $NSB_PERL --enable-shared
    # I'd like to add ' | tee nsb-config.$NSB_DATE' to save output, but then
    # I'd lose the rc from configure, which I need... sigh
    ngc_rc=$?
