@@ -272,6 +272,7 @@ main(argc, argv)
     char *srcparty = NULL, *dstparty = NULL, *context = NULL;
     int timeout_flag = 0, timeout, retransmission_flag = 0, retransmission;
     char name[MAX_NAME_LEN];
+    char* sysdescr;
     int status;
     int version = 2;
     int port_flag = 0;
@@ -378,8 +379,9 @@ retry:
 	    for(vars = response->variables; vars; vars = vars->next_variable){
 		if (vars->name_length == length_sysDescr &&
 		    !bcmp((char *)objid_sysDescr, (char*)vars->name, sizeof(objid_sysDescr))){
-			bcopy((char *)vars->val.string, name, vars->val_len);
-			name[vars->val_len] = '\0';
+			sysdescr = (char*)malloc(vars->val_len+1);
+			bcopy((char *)vars->val.string, sysdescr, vars->val_len);
+			sysdescr[vars->val_len] = '\0';
 		}
 		if (vars->name_length == length_sysUpTime &&
 		    !bcmp((char *)objid_sysUpTime, (char*)vars->name, sizeof(objid_sysUpTime))){
@@ -417,8 +419,8 @@ retry:
 	exit(2);
     }
 
-    printf("[%s]=>[%s] Up: %s\n", inet_ntoa(response->address.sin_addr), name,
-	uptime_string(uptime, buf));
+    printf("[%s]=>[%s] Up: %s\n", inet_ntoa(response->address.sin_addr),
+	sysdescr, uptime_string(uptime, buf));
 
     if (response)
 	snmp_free_pdu(response);
