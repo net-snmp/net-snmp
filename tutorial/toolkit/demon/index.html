@@ -79,7 +79,7 @@
 % <b>make</b>
 cc -I/usr/local/include -g   -c ustMain.c -o ustMain.o
 cc -I/usr/local/include -g   -c ustScalarSet.c -o ustScalarSet.o
-cc -o ustMain ustMain.o ustScalarSet.o -lsnmp -lucdagent -lucdmibs
+cc -o ustMain ustMain.o ustScalarSet.o -lucdagent -lucdmibs -lsnmp
     </pre>
     <p>
       Then run snmpwalk to ensure that the current running demon is
