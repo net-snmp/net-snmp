@@ -21,7 +21,7 @@ subdirs:
 	        done \
 	fi
 
-install: installheaders installlibs installprogs installsubdirs $(OTHERINSTALL)
+install: installlocalheaders installlocallibs installlocalbin installlocalsbin installsubdirs $(OTHERINSTALL)
 
 installprogs: installbin installsbin
 
