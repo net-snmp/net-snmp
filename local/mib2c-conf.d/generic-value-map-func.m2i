@@ -18,7 +18,7 @@
  *
  * @note generation and use of this function can be turned off by re-running
  * mib2c after adding the following line to the file
- * default-node-${node}.m2d :
+ * ${m2c_defaults_dir}node-${node}.m2d :
  *   @eval $@m2c_node_skip_mapping = 1@
  *
  * @remark
