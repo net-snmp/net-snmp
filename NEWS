@@ -1,6 +1,9 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.5.2*
+    - very small last minute bug fixes for win32 and freebsd mostly.
+
 *3.5.1*
 
  Fixes:
