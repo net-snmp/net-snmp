@@ -673,21 +673,6 @@ main(int argc, char *argv[])
     }
 #endif
 
-#if HAVE_GETPID
-    if (pid_file != NULL) {
-        if ((PID = fopen(pid_file, "w")) == NULL) {
-            snmp_log_perror("fopen");
-            if (!ds_get_boolean
-                (DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
-                exit(1);
-            }
-        } else {
-            fprintf(PID, "%d\n", (int) getpid());
-            fclose(PID);
-        }
-    }
-#endif
-
     SOCK_STARTUP;
     init_agent("snmpd");        /* do what we need to do first. */
     init_mib_modules();
@@ -728,6 +713,20 @@ main(int argc, char *argv[])
      * Send coldstart trap if possible.  
      */
     send_easy_trap(0, 0);
+
+#if HAVE_GETPID
+    if (pid_file != NULL) {
+        if ((PID = fopen(pid_file, "w")) == NULL) {
+            snmp_log_perror("fopen");
+            if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
+                exit(1);
+            }
+        } else {
+            fprintf(PID, "%d\n", (int) getpid());
+            fclose(PID);
+        }
+    }
+#endif
 
 #if HAVE_UNISTD_H
 #ifdef HAVE_SETGID
