@@ -75,9 +75,6 @@ generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
         MDstruct         MD;
 #endif
         
-EM(-1); /* */
-
-
 	/*
 	 * Sanity check.
 	 */
@@ -136,10 +133,10 @@ EM(-1); /* */
 
 
 #ifdef SNMP_TESTING_CODE
-        DEBUGP("generating Ku (from %s): ", P);
+        DEBUGMSGTL(("generate_Ku", "generating Ku (from %s): ", P));
         for(i=0; i < *kulen; i++)
-          DEBUGP("%02x",Ku[i]);
-        DEBUGP("\n");
+          DEBUGMSG(("generate_Ku", "%02x",Ku[i]));
+        DEBUGMSG(("keytools","\n"));
 #endif /* SNMP_TESTING_CODE */
 
 
@@ -214,7 +211,6 @@ generate_kul(	oid	*hashtype,	u_int  hashtype_len,
 #ifdef SNMP_TESTING_CODE
         int		 i;
 #endif
-EM(-1); /* */
 
 
 	/*
@@ -249,10 +245,10 @@ EM(-1); /* */
 	rval = sc_hash(hashtype, hashtype_len, buf, nbytes, Kul, kul_len);
 
 #ifdef SNMP_TESTING_CODE
-        DEBUGP("generating Kul (from Ku): ");
+        DEBUGMSGTL(("generate_kul", "generating Kul (from Ku): "));
         for(i=0; i < *kul_len; i++)
-          DEBUGP("%02x",Kul[i]);
-        DEBUGP("\n");
+          DEBUGMSG(("generate_kul", "%02x",Kul[i]));
+        DEBUGMSG(("generate_kul", "keytools\n"));
 #endif /* SNMP_TESTING_CODE */
 
 	QUITFUN(rval, generate_kul_quit);
@@ -324,7 +320,6 @@ encode_keychange(	oid	*hashtype,	u_int  hashtype_len,
         u_char          *tmpbuf = NULL;
 	void		*context = NULL;
 
-EM(-1); /* */
 
 
 	/*
@@ -365,8 +360,9 @@ EM(-1); /* */
 #ifdef SNMP_TESTING_CODE
 	if ( ISDF(RANDOMZEROS)) {
 		memset(kcstring, 0, nbytes);
-		DEBUGP(	"** Using all zero bits for \"random\" delta of "
-			"the keychange string! **\n");
+		DEBUGMSG(("encode_keychange",
+                          "** Using all zero bits for \"random\" delta of )"
+                          "the keychange string! **\n"));
 
 	} else {
 #endif /* SNMP_TESTING_CODE */
@@ -463,7 +459,6 @@ decode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 	void		*context = NULL;
         u_char          *tmpbuf = NULL;
 
-EM(-1); /* */
 
 
 	/*

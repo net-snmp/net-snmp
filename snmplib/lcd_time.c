@@ -56,7 +56,6 @@ get_enginetime(	u_char	*engineID,
 	time_t		timediff = 0;
 	Enginetime	e	 = NULL;
 
-EM(-1); /* */
 
 
 	/*
@@ -149,7 +148,6 @@ set_enginetime(	u_char	*engineID,
 			iindex;
 	Enginetime	e = NULL;
 
-EM(-1); /* */
 
 
 	/*
@@ -227,7 +225,6 @@ search_enginetime_list(u_char *engineID, u_int engineID_len)
 	int		rval = SNMPERR_SUCCESS;
 	Enginetime	e    = NULL;
 
-EM(-1); /* */
 
 	/*
 	 * Sanity check.
@@ -296,7 +293,6 @@ hash_engineID(u_char *engineID, u_int engineID_len)
 			 buf[SNMP_MAXBUF];
 	void		*context = NULL;
 
-EM(-1); /* */
 
 
 	/*
@@ -342,15 +338,14 @@ hash_engineID_quit:
 void
 dump_etimelist_entry(Enginetime e, int count)
 {
-#define pt	DEBUGP("%s", tabs); DEBUGP(
-#define p	);
+#define pt	DEBUGMSGTL(("dump_etimelist", "%s", tabs)); DEBUGMSG(("dump_etimelist",
+#define p	));
 
 	u_int	 buflen;
 	char	 tabs[SNMP_MAXBUF],
 		*t = tabs, 
 		*s;
 
-EM(-1); /* */
 
 
 	count += 1;
@@ -392,13 +387,12 @@ dump_etimelist(void)
 			count = 0;
 	Enginetime	e;
 
-EM(-1); /* */
 
 
-	DEBUGP("\n");
+	DEBUGMSGTL(("dump_etimelist", "\n"));
 
 	while (++iindex < ETIMELIST_SIZE) {
-		DEBUGP("[%d]", iindex);
+		DEBUGMSG(("dump_etimelist", "[%d]", index));
 
 		count = 0;
 		e = etimelist[iindex];
@@ -409,11 +403,11 @@ EM(-1); /* */
 		}
 
 		if (count > 0) {
-			DEBUGP("\n");
+			DEBUGMSG(("dump_etimelist", "\n"));
 		}
 	}  /* endwhile */
 
-	DEBUGP("\n");
+	DEBUGMSG(("dump_etimelist", "\n"));
 
 }  /* end dump_etimelist() */
 

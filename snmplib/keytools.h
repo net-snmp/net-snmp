@@ -36,6 +36,7 @@ int (*kmt_hash) (
 	u_int8_t	**digest,	int	  *digest_len);
 
 
+#ifdef HAVE_LIBKMT
 extern int (*kmt_s_md5) (
 		const int	  mode,		void  	 **context,
 		const u_int8_t	 *data,		const int  data_len,     
@@ -49,7 +50,7 @@ extern int (*kmt_s_ripemd) (
 		const u_int8_t	 *data,		const int  data_len,     
 		u_int8_t	**digest,	int	  *digest_len);
 
-
+#endif
 
 /*
  * Prototypes.h

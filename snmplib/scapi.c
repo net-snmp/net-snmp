@@ -196,7 +196,6 @@ sc_random(u_char *buf, u_int *buflen)
         u_char *ucp = buf;
 #endif
 
-EM(-1); /* */
 
 #ifdef	HAVE_LIBKMT
 	rval = kmt_random(buf, *buflen);
@@ -268,28 +267,26 @@ sc_generate_keyed_hash(	oid	*authtype,	int    authtypelen,
 			u_char	*MAC,		u_int *maclen)
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 {
-	int		 rval	 = SNMPERR_SUCCESS,
-			 buf_len = SNMP_MAXBUF_SMALL;
+	int		 rval	 = SNMPERR_SUCCESS;
 	int		 transform,
 			 properlength;
 
-	u_int8_t	 buf[SNMP_MAXBUF_SMALL],
-			*bufp = buf;
+	u_int8_t	 buf[SNMP_MAXBUF_SMALL];
 #ifdef HAVE_LIBKMT
+	int		 buf_len = SNMP_MAXBUF_SMALL;
+	u_int8_t	*bufp = buf;
 	KMT_KEY_LIST	*kmtkeylist	= NULL;
 #endif
 
-EM(-1); /* */
 
 
 #ifdef SNMP_TESTING_CODE
 {
 	int i;
-	DEBUGP("sc_generate_keyed_hash(): key=0x");
+	DEBUGMSG(("sc_generate_keyed_hash", "sc_generate_keyed_hash(): key=0x"));
         for(i=0; i< keylen; i++)
-          DEBUGP("%02x", key[i] & 0xff);
-	DEBUGP(" (%d)\n", keylen);
-        DEBUGP("\n");
+          DEBUGMSG(("sc_generate_keyed_hash", "%02x", key[i] & 0xff));
+	DEBUGMSG(("sc_generate_keyed_hash"," (%d)\n", keylen));
 }
 #endif /* SNMP_TESTING_CODE */
 
@@ -355,7 +352,7 @@ EM(-1); /* */
 	char    *s;
 	int      len = binary_to_hex(MAC, *maclen, &s);
 
-	DEBUGP("Full v3 message hash: %s\n", s);
+	DEBUGMSGTL(("scapi","Full v3 message hash: %s\n", s));
 	SNMP_ZERO(s, len);
 	SNMP_FREE(s);
 }
@@ -399,9 +396,9 @@ sc_hash(oid *hashtype, int hashtypelen, u_char *buf, int buf_len,
         u_char *MAC, u_int *MAC_len)
 {
 
-  int   rval       = SNMPERR_SUCCESS;
 
 #ifdef HAVE_LIBKMT
+  int   rval       = SNMPERR_SUCCESS;
   void *context    = NULL;
 #endif
 
@@ -474,17 +471,15 @@ sc_check_keyed_hash(	oid	*authtype,	int   authtypelen,
 
 	u_int8_t	 buf[SNMP_MAXBUF_SMALL];
 
-EM(-1); /* */
 
 
 #ifdef SNMP_TESTING_CODE
 {
  int i;
- DEBUGP("sc_check_keyed_hash():    key=0x");
+ DEBUGMSG(("scapi", "sc_check_keyed_hash():    key=0x"));
  for(i=0; i< keylen; i++)
-   DEBUGP("%02x", key[i] & 0xff);
- DEBUGP(" (%d)\n", keylen);
- DEBUGP("\n");
+   DEBUGMSG(("scapi", "%02x", key[i] & 0xff));
+ DEBUGMSG(("scapi"," (%d)\n", keylen));
 }
 #endif /* SNMP_TESTING_CODE */
 
@@ -571,7 +566,6 @@ sc_encrypt(	oid    *privtype,	int    privtypelen,
 
 	KMT_KEY_LIST	*kmtkeylist = NULL;
 
-EM(-1); /* */
 
 
 	/*
@@ -594,12 +588,12 @@ EM(-1); /* */
         char buf[SNMP_MAXBUF];
 
 	sprint_hexstring(buf, iv, ivlen);
-        DEBUGP("encrypt: IV: %s/ ", buf);
+        DEBUGMSGTL(("scapi", "encrypt: IV: %s/ ", buf));
 	sprint_hexstring(buf, key, keylen);
-        DEBUGP("%s\n", buf);
+        DEBUGMSG(("scapi","%s\n", buf));
 
 	sprint_hexstring(buf, plaintext, 16);
-        DEBUGP("encrypt: string: %s\n", buf);
+        DEBUGMSGTL(("scapi","encrypt: string: %s\n", buf));
 }
 #endif /* SNMP_TESTING_CODE */
 
@@ -647,7 +641,7 @@ sc_encrypt_quit:
 #else
 #	if USE_INTERNAL_MD5
 	{
-		DEBUGPL(("Encrypt function not defined.\n"));
+		DEBUGPMSGTL(("scapi","Encrypt function not defined.\n"));
 		return SNMPERR_SC_GENERAL_FAILURE;
 	}
 
@@ -699,7 +693,6 @@ sc_decrypt(	oid    *privtype,	int    privtypelen,
 
 	KMT_KEY_LIST	*kmtkeylist = NULL;
 
-EM(-1); /* */
 
 
 	/*
@@ -722,9 +715,9 @@ EM(-1); /* */
         char buf[SNMP_MAXBUF];
 
 	sprint_hexstring(buf, iv, ivlen);
-        DEBUGP("decrypt: IV: %s/ ", buf);
+        DEBUGMSGTL(("scapi", "decrypt: IV: %s/ ", buf));
 	sprint_hexstring(buf, key, keylen);
-        DEBUGP("%s\n", buf);
+        DEBUGMSG(("scapi","%s\n", buf));
 }
 #endif /* SNMP_TESTING_CODE */
 
@@ -773,7 +766,7 @@ sc_decrypt_quit:
 #else
 #	if USE_INTERNAL_MD5
 	{
-		DEBUGPL(("Decryption function not defined.\n"));
+		DEBUGPMSGTL(("scapi","Decryption function not defined.\n"));
 		return SNMPERR_SC_GENERAL_FAILURE;
 	}
 
@@ -824,7 +817,6 @@ sc_internal_kmtlookup(	u_int 	 transform,
 
 	KMT_ATTRIBUTE	kmt_attribute = { KMT_ATTR_ALG, transform };
 
-EM(-1); /* */
 
 
 	/*

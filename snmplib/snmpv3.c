@@ -52,7 +52,7 @@
 #include "lcd_time.h"
 #include "scapi.h"
 #include "tools.h"
-#include "debug.h"
+#include "lcd_time.h"
 
 #include "transform_oids.h"
 
@@ -94,7 +94,7 @@ snmpv3_secName_conf(char *word, char *cptr)
   if (defaultSecName)
     free(defaultSecName);
   defaultSecName = strdup(cptr);
-  DEBUGP("default security name set to: %s\n",defaultSecName);
+  DEBUGMSGTL(("snmpv3","default security name set to: %s\n",defaultSecName));
 }
 
 char *
@@ -117,7 +117,7 @@ snmpv3_passphrase_conf(char *word, char *cptr)
   if (*pass)
     free(*pass);
   *pass = strdup(cptr);
-  DEBUGP("set %s\n",word);
+  DEBUGMSGTL(("snmpv3","set %s\n",word));
 }
 
 char *
@@ -146,7 +146,7 @@ snmpv3_authtype_conf(char *word, char *cptr)
   else
     config_perror("unknown authentication type");
   defaultAuthTypeLen = USM_LENGTH_OID_TRANSFORM;
-  DEBUGP("set default authentication type: %s\n", cptr);
+  DEBUGMSGTL(("snmpv3","set default authentication type: %s\n", cptr));
 }
 
 oid *
@@ -165,7 +165,7 @@ snmpv3_privtype_conf(char *word, char *cptr)
   else
     config_perror("unknown privacy type");
   defaultPrivTypeLen = USM_LENGTH_OID_TRANSFORM;
-  DEBUGP("set default privacy type: %s\n", cptr);
+  DEBUGMSGTL(("snmpv3","set default privacy type: %s\n", cptr));
 }
 
 oid *
@@ -194,7 +194,7 @@ snmpv3_context_conf(char *word, char *cptr)
   if (defaultContext)
     free(defaultContext);
   defaultContext = strdup(cptr);
-  DEBUGP("default context set to: %s\n",defaultContext);
+  DEBUGMSGTL(("snmpv3","default context set to: %s\n",defaultContext));
 }
 
 char *
@@ -229,7 +229,7 @@ snmpv3_secLevel_conf(char *word, char *cptr)
     sprintf(buf,"unknown security level: cptr");
     config_perror(buf);
   }
-  DEBUGP("default secLevel set to: %s = %d\n", cptr, defaultSecurityLevel);
+  DEBUGMSGTL(("snmpv3","default secLevel set to: %s = %d\n", cptr, defaultSecurityLevel));
 }
 
 int
@@ -274,7 +274,6 @@ setup_engineID(u_char **eidp, char *text)
 		 *bufp = NULL;
   struct hostent *hent;
  
-EM(-1);
 
   /*
    * Determine length of the engineID string.
@@ -367,7 +366,7 @@ void
 engineBoots_conf(char *word, char *cptr)
 {
   engineBoots = atoi(cptr)+1;
-  DEBUGP("engineBoots: %d\n",engineBoots);
+  DEBUGMSGTL(("snmpv3","engineBoots: %d\n",engineBoots));
 }
 
 
@@ -386,7 +385,7 @@ void
 engineID_conf(char *word, char *cptr)
 {
   setup_engineID(NULL, cptr);
-  DEBUGP("initialized engineID with: %s\n",cptr);
+  DEBUGMSGTL(("snmpv3","initialized engineID with: %s\n",cptr));
 }
 
 /* engineID_old_conf(char *, char *):
