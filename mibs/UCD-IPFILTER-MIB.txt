@@ -6,7 +6,7 @@ IMPORTS
     ucdExperimental
 	FROM UCD-SNMP-MIB;
 
-ipFilter MODULE-IDENTITY
+ucdIpFilter MODULE-IDENTITY
     LAST-UPDATED "9912150000Z"
     ORGANIZATION "University of California, Davis"
     CONTACT-INFO    
@@ -43,7 +43,7 @@ ipfInTable OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	"A table with IP Filter incoming rules and statistics."
-    ::= { ipFilter 1 }
+    ::= { ucdIpFilter 1 }
 
 ipfInEntry OBJECT-TYPE
     SYNTAX	IpfInEntry
@@ -90,7 +90,7 @@ ipfOutTable OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	"A table with IP Filter outgoing rules and statistic."
-    ::= { ipFilter 2 }
+    ::= { ucdIpFilter 2 }
 
 ipfOutEntry OBJECT-TYPE  
     SYNTAX	IpfOutEntry
@@ -138,7 +138,7 @@ ipfAccInTable OBJECT-TYPE
     DESCRIPTION
 	"A table with IP Filter incoming accounting rules
 	 and statistics."
-    ::= { ipFilter 3 }
+    ::= { ucdIpFilter 3 }
 
 ipfAccInEntry OBJECT-TYPE
     SYNTAX	IpfAccInEntry
@@ -198,7 +198,7 @@ ipfAccOutTable OBJECT-TYPE
     DESCRIPTION
 	"A table with IP Filter outgoing accounting rules
 	 and statistic."
-    ::= { ipFilter 4 }
+    ::= { ucdIpFilter 4 }
 
 ipfAccOutEntry OBJECT-TYPE
     SYNTAX	IpfAccOutEntry
