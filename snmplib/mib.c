@@ -822,9 +822,11 @@ sprint_counter64(buf, var, enums, hint, units)
 #endif
 	buf += strlen(buf);
     }
+#ifdef OPAQUE_SPECIAL_TYPES
     if (var->type == ASN_OPAQUE_I64)
       sprintf(buf, printI64(var->val.counter64));
     else
+#endif
       sprintf(buf, printU64(var->val.counter64));
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
