@@ -36,7 +36,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 
-oid             ucdSnmpUDPIPv6Domain[9] = { UCDAVIS_MIB, 251, 4 };
+oid             netsnmp_UDPIPv6Domain[10] = { ENTERPRISE_MIB, 3, 3, 4 };
 static netsnmp_tdomain udp6Domain;
 
 /*
@@ -199,9 +199,9 @@ snmp_udp6_transport(struct sockaddr_in6 *addr, int local)
 
     memset(t, 0, sizeof(netsnmp_transport));
 
-    t->domain = ucdSnmpUDPIPv6Domain;
+    t->domain = netsnmp_UDPIPv6Domain;
     t->domain_length =
-        sizeof(ucdSnmpUDPIPv6Domain) / sizeof(ucdSnmpUDPIPv6Domain[0]);
+        sizeof(netsnmp_UDPIPv6Domain) / sizeof(netsnmp_UDPIPv6Domain[0]);
 
     t->sock = socket(PF_INET6, SOCK_DGRAM, 0);
     if (t->sock < 0) {
@@ -1205,8 +1205,8 @@ snmp_udp6_create_ostring(const u_char * o, size_t o_len, int local)
 void
 snmp_udp6_ctor(void)
 {
-    udp6Domain.name = ucdSnmpUDPIPv6Domain;
-    udp6Domain.name_length = sizeof(ucdSnmpUDPIPv6Domain) / sizeof(oid);
+    udp6Domain.name = netsnmp_UDPIPv6Domain;
+    udp6Domain.name_length = sizeof(netsnmp_UDPIPv6Domain) / sizeof(oid);
     udp6Domain.f_create_from_tstring = snmp_udp6_create_tstring;
     udp6Domain.f_create_from_ostring = snmp_udp6_create_ostring;
     udp6Domain.prefix = calloc(5, sizeof(char *));

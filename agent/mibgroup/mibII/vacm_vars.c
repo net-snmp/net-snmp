@@ -706,9 +706,9 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen)
                 sn = NULL;
             }
 #ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
-        } else if (pdu->tDomain == ucdSnmpUDPIPv6Domain
+        } else if (pdu->tDomain == netsnmp_UDPIPv6Domain
 #ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
-                   || pdu->tDomain == netsnmp_ucdSnmpTCPIPv6Domain
+                   || pdu->tDomain == netsnmp_TCPIPv6Domain
 #endif
             ) {
             if (!netsnmp_udp6_getSecName(pdu->transport_data,
