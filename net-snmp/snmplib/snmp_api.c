@@ -3029,8 +3029,10 @@ snmp_sess_read(void *sessp,
 	  }
 	  callback = sp->callback;
 	  magic = sp->callback_magic;
-	  if (rp->callback) callback = rp->callback;
-	  if (rp->cb_data) magic = rp->cb_data;
+	  if (rp->callback) {
+              callback = rp->callback;
+	      magic = rp->cb_data;
+	  }
 	  if (callback == NULL || 
 	      callback(RECEIVED_MESSAGE,sp,pdu->reqid,pdu,magic) == 1){
 	    if (pdu->command == SNMP_MSG_REPORT) {
