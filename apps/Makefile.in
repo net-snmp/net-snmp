@@ -17,7 +17,6 @@ INSTALLBINPROGS	= snmpget$(EXEEXT) 			\
 		snmpbulkwalk$(EXEEXT) 			\
 		snmptable$(EXEEXT)			\
 		snmptrap$(EXEEXT) 			\
-		snmpinform$(EXEEXT) 			\
 		snmpbulkget$(EXEEXT)			\
 		snmptranslate$(EXEEXT) 			\
 		snmpstatus$(EXEEXT) 			\
@@ -51,6 +50,8 @@ OBJS  = *.o
 LOBJS = *.lo
 
 all: standardall
+
+OTHERINSTALL=snmpinforminstall
 
 #
 # build rules
@@ -109,3 +110,7 @@ encode_keychange$(EXEEXT):    encode_keychange.$(OSUFFIX) $(USELIBS)
 
 snmpdf$(EXEEXT):    snmpdf.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmpdf.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+
+snmpinforminstall:
+	rm -f $(sbindir)/snmpinform$(EXEEXT)
+	$(LN_S) $(sbindir)/snmptrap$(EXEEXT) $(sbindir)/snmpinform$(EXEEXT)
