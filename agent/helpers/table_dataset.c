@@ -287,7 +287,7 @@ netsnmp_table_data_set_helper_handler(
                     }
                 }
           done:
-                if (data)
+                if (data && data->data.voidp)
                     netsnmp_table_data_build_result(reginfo, reqinfo, request, row,
                                             table_info->colnum,
                                             data->type,
@@ -522,10 +522,32 @@ inline void netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_cha
     netsnmp_table_data_add_index(table->table, type);
 }
 
+/** adds a new row to a dataset table */
 inline void netsnmp_table_dataset_add_row(netsnmp_table_data_set *table, netsnmp_table_row *row)
 {
     netsnmp_table_data_add_row(table->table, row);
 }
+
+/** deletes a row (and all it's data) from a dataset table */
+inline void
+netsnmp_table_dataset_delete_row(netsnmp_table_data_set *table,
+                                 netsnmp_table_row *row)
+{
+    
+    netsnmp_table_data_set_storage *datatmp;
+    netsnmp_table_data_set_storage *data =
+        (netsnmp_table_data_set_storage *)
+        netsnmp_table_data_delete_row(table->table, row);
+
+    while(data) {
+        SNMP_FREE(data->data.voidp);
+        datatmp = data->next;
+        free(data);
+        data = datatmp;
+    }
+}
+
+inline void netsnmp_table_dataset_delete_row(netsnmp_table_data_set *table, netsnmp_table_row *row);
 
 void
 #if HAVE_STDARG_H
