@@ -80,7 +80,7 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
     struct snmp_session *sp;
     struct timeval now;
 
-    DEBUGMSGTL(("agentx:open_agentx_session","open %p\n", session));
+    DEBUGMSGTL(("agentx/master", "open %08p\n", session));
     sp = (struct snmp_session *)malloc( sizeof( struct snmp_session ));
     if ( sp == NULL ) {
         session->s_snmp_errno = AGENTX_ERR_OPEN_FAILED;
@@ -121,7 +121,7 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
     sp->flags     |= SNMP_FLAGS_SUBSESSION;
     sp->next       = session->subsession;
     session->subsession = sp;
-    DEBUGMSGTL(("agentx:open_agentx_session","opened %p = %d\n", sp, sp->sessid));
+    DEBUGMSGTL(("agentx/master","opened %08p = %d\n", sp, sp->sessid));
 
     return sp->sessid;
 }
@@ -129,9 +129,9 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
 int
 close_agentx_session(struct snmp_session *session, int sessid)
 {
-    struct snmp_session *sp, *prev = NULL;
+    struct snmp_session *sp, **prevNext;
     
-    DEBUGMSGTL(("agentx:close_agentx_session","close %p, %d\n", session, sessid));
+    DEBUGMSGTL(("agentx/master", "close %08p, %d\n", session, sessid));
     if (session != NULL && sessid == -1) {
 	unregister_mibs_by_session( session );
 	unregister_index_by_session( session );
@@ -139,28 +139,35 @@ close_agentx_session(struct snmp_session *session, int sessid)
 	return AGENTX_ERR_NOERROR;
     }
 
-    for ( sp = session->subsession ; sp != NULL ; prev = sp, sp = sp->next ) {
-        if ( sp->sessid == sessid ) {
+    prevNext = &(session->subsession);
 
-	    unregister_mibs_by_session( sp );
-	    unregister_index_by_session( sp );
-	    unregister_sysORTable_by_session( sp );
-	    if ( prev )
-	        prev->next = sp->next;
-	    else
-	    	session->subsession = sp->next;
+    for (sp = session->subsession; sp != NULL; sp = sp->next) {
+
+        if (sp->sessid == sessid) {
+	    unregister_mibs_by_session(sp);
+	    unregister_index_by_session(sp);
+	    unregister_sysORTable_by_session(sp);
+
+	    *prevNext = sp->next;
+
 	    if (sp->securityAuthProto != NULL) {
 	      free(sp->securityAuthProto);
 	    } 
 	    if (sp->securityName != NULL) {
 	      free(sp->securityName);
 	    }
-	    free( sp );
+	    free(sp);
+	    sp = NULL;
 	    
+	    DEBUGMSGTL(("agentx/master", "closed %08p, %d okay\n",
+			session, sessid));
 	    return AGENTX_ERR_NOERROR;
 	}
+
+	prevNext = &(sp->next);
     }
     
+    DEBUGMSGTL(("agentx/master", "sessid %d not found\n", sessid));
     return AGENTX_ERR_NOT_OPEN;
 }
 
