@@ -324,6 +324,7 @@ inline int call_next_handler(mib_handler          *current,
     return call_handler(current->next, reginfo, reqinfo, requests);
 }
 
+/** free's the resourceses associated with a given handler */
 void
 snmp_handler_free(mib_handler *handler)
 {
@@ -338,6 +339,7 @@ snmp_handler_free(mib_handler *handler)
     }
 }
 
+/** dulpicates a handler */
 mib_handler *
 snmp_handler_dup(mib_handler *handler)
 {
@@ -378,6 +380,7 @@ snmp_handler_dup(mib_handler *handler)
     return NULL;
 }
 
+/** free the resources associated with a handler registration object */
 void
 snmp_handler_registration_free(handler_registration *reginfo)
 {
@@ -390,6 +393,7 @@ snmp_handler_registration_free(handler_registration *reginfo)
     }
 }
 
+/** duplicates the handler registration object */
 handler_registration *
 snmp_handler_registration_dup(handler_registration *reginfo)
 {
