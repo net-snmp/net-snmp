@@ -10,12 +10,14 @@ VPATH = @srcdir@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 bindir = @bindir@
+sbindir = @sbindir@
 libdir = @libdir@
 snmplibdir = $(datadir)/snmp
 
 INSTALL = @INSTALL@
 
-TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd snmpset snmpgetnext snmptrap snmpstatus snmpdelta
+TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmpset snmpgetnext snmptrap snmpstatus snmpdelta
+SBINTARG= snmptrapd
 SUBDIRS=  snmpnetstat
 USELIBS=  ../snmplib/libsnmp.a
 LIBS=	  $(USELIBS) @LIBS@
@@ -29,7 +31,7 @@ PARSEOBJS=snmp_parse_args.o
 
 CC = @CC@ $(CPPFLAGS)
 
-all: $(TARG) subdirs
+all: $(TARG) $(SBINTARG) subdirs
 
 subdirs:
 	for i in $(SUBDIRS) ; do \
@@ -80,6 +82,7 @@ install: installdirs subdirs $(TARG)
         ( cd $$i ; $(MAKE) install ) ; \
 	done
 	@for i in $(TARG) ; do $(INSTALL) $$i $(bindir) ; echo "install:  installed $$i in $(bindir)" ; done
+	@for i in $(SBINTARG) ; do $(INSTALL) $$i $(sbindir) ; echo "install:  installed $$i in $(sbindir)" ; done
 
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir) $(bindir)
