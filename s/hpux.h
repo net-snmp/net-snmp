@@ -16,3 +16,5 @@
 #define ARP_SCAN_FOUR_ARGUMENTS
 
 #define rt_pad1 rt_refcnt
+
+#define hpux 1
