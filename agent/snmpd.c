@@ -809,13 +809,13 @@ main(int argc, char *argv[])
      * Initialize the world.  Detach from the shell.  Create initial user.  
      */
     if(!dont_fork) {
-        int quit = netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
-                                          NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);
+        int quit = ! netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                                            NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);
         ret = netsnmp_daemonize(quit, stderr_log);
         /*
          * xxx-rks: do we care if fork fails? I think we should...
          */
-        if(ret)
+        if(ret != 0)
             Exit(1);                /*  Exit logs exit val for us  */
     }
 
