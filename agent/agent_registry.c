@@ -68,7 +68,7 @@ void
 netsnmp_subtree_free(netsnmp_subtree *a)
 {
   if (a != NULL) {
-    if (a->variables != NULL && snmp_oid_compare(a->name_a, a->namelen, 
+    if (a->variables != NULL && netsnmp_oid_equals(a->name_a, a->namelen, 
 					     a->start_a, a->start_len) == 0) {
       free(a->variables);
     }
@@ -420,7 +420,7 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
 	    (rather than at the same point as it), then split the existing
 	    subtree at this point.  */
 
-	if (snmp_oid_compare(new_sub->start_a, new_sub->start_len, 
+	if (netsnmp_oid_equals(new_sub->start_a, new_sub->start_len, 
 			     tree1->start_a,   tree1->start_len) != 0) {
 	    tree1 = netsnmp_subtree_split(tree1, new_sub->start_a, 
 					  new_sub->start_len);
@@ -839,7 +839,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
 
     for (child = list, prev = NULL; child != NULL;
          prev = child, child = child->children) {
-        if (snmp_oid_compare(child->name_a, child->namelen, name, len) == 0 &&
+        if (netsnmp_oid_equals(child->name_a, child->namelen, name, len) == 0 &&
             child->priority == priority) {
             break;              /* found it */
 	}
@@ -865,7 +865,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
     for (list = myptr->next; list != NULL; list = list->next) {
         for (child = list, prev = NULL; child != NULL;
              prev = child, child = child->children) {
-            if ((snmp_oid_compare(child->name_a, child->namelen,
+            if ((netsnmp_oid_equals(child->name_a, child->namelen,
 				  name, len) == 0) &&
 		(child->priority == priority)) {
                 netsnmp_subtree_unload(child, prev);
@@ -915,7 +915,7 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
         for (child = list, prev = NULL; child != NULL;
              prev = child, child = child->children) {
 
-            if (snmp_oid_compare(child->name_a, child->namelen, 
+            if (netsnmp_oid_equals(child->name_a, child->namelen, 
 				 name, len) == 0 && 
 		(child->priority == priority)) {
                 break;          /* found it */
@@ -933,7 +933,7 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
             for (child = list, prev = NULL; child != NULL;
                  prev = child, child = child->children) {
 
-                if (snmp_oid_compare(child->name_a, child->namelen, 
+                if (netsnmp_oid_equals(child->name_a, child->namelen, 
 				      name, len) == 0 &&
                     (child->priority == priority)) {
                     netsnmp_subtree_unload(child, prev);
