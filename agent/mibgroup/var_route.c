@@ -841,7 +841,13 @@ static void Route_Scan_Reload()
 	 *  Sort it!
 	 */
 	qsort((char *)rthead,rtsize,sizeof(rthead[0]),
-	      qsort_compare);
+
+#ifdef __STDC__
+              (int (*)(const void *, const void *)) qsort_compare
+#else
+              qsort_compare
+#endif
+          );
 }
 #else
 #ifdef linux
@@ -947,7 +953,13 @@ static void Route_Scan_Reload __P((void))
 	/*
 	 *  Sort it!
 	 */
-	qsort((char *)rthead,rtsize,sizeof(rthead[0]),qsort_compare);
+	qsort((char *)rthead,rtsize,sizeof(rthead[0]),
+#ifdef __STDC__
+              (int (*)(const void *, const void *)) qsort_compare
+#else
+              qsort_compare
+#endif
+          );
 }
 #endif
 #endif
