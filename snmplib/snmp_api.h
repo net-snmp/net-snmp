@@ -120,6 +120,7 @@ extern void snmp_set_detail __P((char *));
 #define SNMP_DETAIL_SIZE        512
 
 /* Error return values */
+#define SNMPERR_SUCCESS         (0)  /* XXX  Non-PDU "success" code. */
 #define SNMPERR_GENERR		(-1)
 #define SNMPERR_BAD_LOCPORT	(-2)
 #define SNMPERR_BAD_ADDRESS	(-3)
@@ -345,10 +346,22 @@ int ascii_to_binary __P((u_char *, u_char *));
 int snmp_add_var __P((struct snmp_pdu *, oid*, int, char, char *));
 #ifdef STDC_HEADERS
 void DEBUGP __P((const char *, ...));
+void debugmsg(const char *token, const char *format, ...);
+void debugmsgtoken(const char *token, const char *format, ...);
 #else
 void DEBUGP __P((va_alist));
+void debugmsg(va_alist);
+void debugmsgtoken(va_alist);
 #endif
 void DEBUGPOID __P((oid *, int));
+
+#define DEBUGMSG(x)    debugmsg x;
+#define DEBUGMSGT(x)   debugmsgtoken x; debugmsg x;
+#define DEBUGTRACE     DEBUGMSGT(("trace","%s(): %s, %d\n",__FUNCTION__,\
+                                 __FILE__,__LINE__));
+#define DEBUGMSGL(x)   DEBUGTRACE; debugmsg x;
+#define DEBUGMSGTL(x)  DEBUGTRACE; debugmsgtoken x; debugmsg x;
+#define DEBUGL(x)      DEBUGTRACE; debugmsg x;
 
 #ifdef CMU_COMPATIBLE
 extern int snmp_dump_packet;

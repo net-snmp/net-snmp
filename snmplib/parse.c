@@ -536,7 +536,7 @@ print_error(string, token, type)
     char *token;
     int type;
 {
-    DEBUGP("\n");
+    DEBUGMSGTL(("parse-mibs", "\n"));
     if (type == ENDOFFILE)
         fprintf(stderr, "%s(EOF): At line %d in %s\n", string, Line,
                 File);
@@ -1195,7 +1195,7 @@ static void do_linkup(mp, np)
 	 *   the roots of the tree
 	 */
     if (snmp_get_do_debugging() > 1) dump_module_list();
-    DEBUGP("Processing IMPORTS for module %s\n", mp->name);
+    DEBUGMSGTL(("parse-mibs", "Processing IMPORTS for module %s\n", mp->name));
     if ( mp->no_imports == 0 ) {
 	mp->no_imports = NUMBER_OF_ROOT_NODES;
 	mp->imports = root_imports;
@@ -1207,7 +1207,7 @@ static void do_linkup(mp, np)
     init_node_hash( np );
     for ( i=0, mip=mp->imports ; i < mp->no_imports ; ++i, ++mip ) {
 	char modbuf[256];
-	DEBUGP ("  Processing import: %s\n", mip->label);
+	DEBUGMSGTL(("parse-mibs", "  Processing import: %s\n", mip->label));
 	if (get_tc_index( mip->label, mip->modid ) != -1)
 	    continue;
 	tp = find_tree_node( mip->label, mip->modid );
@@ -2205,9 +2205,9 @@ static void dump_module_list __P((void))
 {
     struct module *mp = module_head;
 
-    DEBUGP("Module list:\n");
+    DEBUGMSGTL(("parse-mibs", "Module list:\n"));
     while (mp) {
-	DEBUGP("  %s %d %s %d\n", mp->name, mp->modid, mp->file, mp->no_imports);
+	DEBUGMSGTL(("parse-mibs", "  %s %d %s %d\n", mp->name, mp->modid, mp->file, mp->no_imports));
 	mp = mp->next;
     }
 }
@@ -2222,7 +2222,7 @@ which_module(name)
 	if ( !label_compare(mp->name, name))
 	    return(mp->modid);
 
-    DEBUGP("Module %s not found\n", name);
+    DEBUGMSGTL(("parse-mibs", "Module %s not found\n", name));
     return(-1);
 }
 
@@ -2243,7 +2243,7 @@ module_name ( modid, cp )
 	    return(cp);
 	}
 
-    DEBUGP("Module %d not found\n", modid);
+    DEBUGMSGTL(("parse-mibs", "Module %d not found\n", modid));
     sprintf(cp, "#%d", modid);
     return(cp);
 }
@@ -2350,7 +2350,7 @@ read_module_internal (name )
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( !label_compare(mp->name, name)) {
 	    if ( mp->no_imports != -1 ) {
-		DEBUGP("Module %s already loaded\n", name);
+		DEBUGMSGTL(("parse-mibs", "Module %s already loaded\n", name));
 		return MODULE_ALREADY_LOADED;
 	    }
 	    if ((fp = fopen(mp->file, "r")) == NULL) {
@@ -2441,7 +2441,7 @@ new_module (name , file)
 
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( !label_compare(mp->name, name)) {
-	    DEBUGP("Module %s already noted\n", name);
+	    DEBUGMSGTL(("parse-mibs", "Module %s already noted\n", name));
 			/* Not the same file */
 	    if (label_compare(mp->file, file)) {
                 fprintf(stderr, "Warning: Module %s in both %s and %s\n",
@@ -2455,7 +2455,7 @@ new_module (name , file)
 	}
 
 	/* Add this module to the list */
-    DEBUGP("  Module %s is in %s\n", name, file);
+    DEBUGMSGTL(("parse-mibs", "  Module %s is in %s\n", name, file));
     mp = (struct module *) xcalloc(1, sizeof(struct module));
     if (mp == NULL) return;
     mp->name = xstrdup(name);
@@ -2491,7 +2491,7 @@ parse(fp, root)
     int state = BETWEEN_MIBS;
     struct node *np, *nnp;
 
-    DEBUGP ("Parsing file:  %s...\n", File);
+    DEBUGMSGTL(("parse-mibs", "Parsing file:  %s...\n", File));
 
     np = root;
     if (np != NULL) {
@@ -2562,7 +2562,7 @@ parse(fp, root)
                 return NULL;
             }
             state = IN_MIB;
-            DEBUGP ("Parsing MIB: %s\n", name);
+            DEBUGMSGTL(("parse-mibs", "Parsing MIB: %s\n", name));
             current_module = which_module( name );
             if ( current_module == -1 ) {
                 new_module(name, File);
@@ -2854,12 +2854,12 @@ add_mibdir( dirname )
     int count = 0;
     struct stat dir_stat, idx_stat;
 
-    DEBUGP("Scanning directory %s\n", dirname);
+    DEBUGMSGTL(("parse-mibs", "Scanning directory %s\n", dirname));
     sprintf(token, "%s/%s", dirname, ".index");
     if ((stat(token, &idx_stat) == 0) &&
 	(stat(dirname, &dir_stat) == 0)) {
 	if (dir_stat.st_mtime < idx_stat.st_mtime) {
-	    DEBUGP("The index is good\n");
+	    DEBUGMSGTL(("parse-mibs", "The index is good\n"));
 	    if ((ip = fopen(token, "r")) != NULL) {
 		while (fscanf(ip, "%s %s\n", token, tmpstr) == 2) {
 		    sprintf(tmpstr1, "%s/%s", dirname, tmpstr);
@@ -2869,11 +2869,11 @@ add_mibdir( dirname )
 		fclose(ip);
 		return count;
 	    }
-	    else DEBUGP("Can't read index\n");
+	    else DEBUGMSGTL(("parse-mibs", "Can't read index\n"));
 	}
-	else DEBUGP("Index outdated\n");
+	else DEBUGMSGTL(("parse-mibs", "Index outdated\n"));
     }
-    else DEBUGP("No index\n");
+    else DEBUGMSGTL(("parse-mibs", "No index\n"));
 
     if ((dir = opendir(dirname))) {
 	sprintf(tmpstr, "%s/.index", dirname);
@@ -2891,7 +2891,7 @@ add_mibdir( dirname )
                         perror(tmpstr);
 			continue;
                     }
-                    DEBUGP("Checking file: %s...\n", tmpstr);
+                    DEBUGMSGTL(("parse-mibs", "Checking file: %s...\n", tmpstr));
                     Line = 1;
                     File = tmpstr;
                     get_token( fp, token, MAXTOKEN);
@@ -2928,7 +2928,7 @@ read_mib(filename)
     }
     Line = 1;
     File = filename;
-    DEBUGP("Parsing file: %s...\n", filename);
+    DEBUGMSGTL(("parse-mibs", "Parsing file: %s...\n", filename));
     get_token( fp, token, MAXTOKEN);
     fclose(fp);
     new_module(token, filename);
