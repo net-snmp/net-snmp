@@ -266,38 +266,46 @@ Skip the next five steps if you did not install the Platform SDK.
 ***************************************************************************
 
 OpenSSL is required to support the encryption capabilities in SNMPv3
-(and will also support MD5 authentication). The win32 version of OpenSSL
-can be built from the source at:
+(and will also support MD5 authentication).  The win32 version of OpenSSL
+can be built from the sources.  The sequence of actions are these:
 
-ftp://ftp.openssl.org/source/
+ 1. Install an assembler.  If you do not have the M$ assembler installed (MASM)
+    you can get a free one(NASM) from:
 
-Follow the instructions for building on win32 in that package. if you do
-not have the M$ assembler installed (MASM) you can get a free one(NASM)
-from:
+	http://www.kernel.org/pub/software/devel/nasm
 
-http://www.kernel.org/pub/software/devel/nasm
 
-You will also need to change the win32/net-snmp/net-snmp-config.h file from
+ 2. Obtain the OpenSSL source from the link below. Follow instructions in INSTALL.W32
 
----
-/* define if you are using the internal MD5 code */
-#define USE_INTERNAL_MD5 1
----
-to
----
-/* define if you are using the internal MD5 code */
-#undef USE_INTERNAL_MD5
+	ftp://ftp.openssl.org/source/
 
-/* define if you are using OpenSSL */
-#define USE_OPENSSL 1
----
 
-Now edit the VC++ Project settings for the applications only.
-Click Project->Settings.  Highlight only the names of the application projects.
-Add the next line to the 'Object/Library Modules' list for Debug and Release
-versions
+ 3. Once the OpenSSL libraries are built, you must copy them to the net-snmp
+    source tree:
 
-libeay32.lib
+     Copy libeay32.dll to net-snmp\win32\bin
+     Copy libeay32.exp to net-snmp\win32\lib
+     Copy libeay32.lib to net-snmp\win32\lib
+
+
+ 4. Edit the win32\net-snmp\net-snmp-config.h header file.  Change:
+	#define USE_INTERNAL_MD5 1
+    to:
+	#undef USE_INTERNAL_MD5
+	#define USE_OPENSSL 1
+
+
+ 5. Open Visual Studio, add the link line to the Project Settings.
+    Click Project->Settings.  Highlight the names of the application projects
+	(NOT the library projects). Select the Link section.  Add the next line
+    to the 'Object/Library Modules' list for Debug and Release versions
+
+	libeay32.lib
+
+
+ 6. Build the Net-SNMP programs to use OpenSSL.
+
+ 7. Install the programs using win32\install-net-snmp.bat.
 
 
 ***************************************************************************
