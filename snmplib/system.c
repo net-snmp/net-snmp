@@ -120,13 +120,17 @@ long get_uptime(){
 #ifndef CAN_USE_SYSCTL
     int kmem;
     static struct nlist nl[] = {
+#if !defined(hpux) && !defined(solaris2)
 	    { "_boottime" },
+#else
+	    { "boottime" },
+#endif
 	    { "" }
 	};
 
     if ((kmem = open("/dev/kmem", 0)) < 0)
 	return 0;
-    nlist("/vmunix", nl);
+    nlist(KERNEL_LOC, nl);
     if (nl[0].n_type == 0){
 	close(kmem);
 	return 0;
