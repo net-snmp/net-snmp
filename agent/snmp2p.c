@@ -62,19 +62,20 @@ SOFTWARE.
 #include "system.h"
 #include "snmp.h"
 
-
 #include "m2m.h"
 #include "party.h"
 #ifdef USING_V2PARTY_ALARM_MODULE
 #include "mibgroup/v2party/alarm.h"
 #endif
 #if USING_V2PARTY_EVENT_MODULE
-#include "v2party/event.h"
+#include "mibgroup/v2party/event.h"
 #endif
 #include "view.h"
 #include "context.h"
 #include "acl.h"
 #include "mib.h"
+
+#include "snmpd.h"
 
 extern int open_port __P(( u_short ));
 
