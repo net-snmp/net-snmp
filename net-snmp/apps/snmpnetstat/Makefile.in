@@ -22,7 +22,7 @@ LDFLAGS=@LDFLAGS@
 
 CC = @CC@ $(CPPFLAGS)
 
-LIBS=	-lsnmp
+LIBS=	-lsnmp @LIBS@
 LDFLAGS=@LDFLAGS@ -L../../lib
 SRCS=	inet.c if.c main.c route.c 
 OBJS=	inet.o if.o main.o route.o

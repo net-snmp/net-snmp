@@ -61,6 +61,14 @@ PERFORMANCE OF THIS SOFTWARE.
 #define NULL 0
 #endif
 
+#if HAVE_INET_MIB2_H
+#include <inet/mib2.h>
+#endif
+
+#if solaris2
+#include "kernel_sunos5.h"
+#endif
+
 #define CACHE_TIME (120)	    /* Seconds */
 
 #include "asn1.h"
@@ -98,6 +106,7 @@ static struct nlist nl[] = {
 
 extern write_rte();
 
+#ifndef solaris2
 u_char *
 var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;   /* IN - pointer to variable entry that points here */
@@ -222,6 +231,139 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
    }
    return NULL;
 }
+
+#else /* solaris2 */
+
+static int
+IP_Cmp_Route(void *addr, void *ep)
+{
+  mib2_ipRouteEntry_t *Ep = ep, *Addr = addr;
+
+  if (
+      (Ep->ipRouteDest == Addr->ipRouteDest) &&
+      (Ep->ipRouteNextHop == Addr->ipRouteNextHop) &&
+      (Ep->ipRouteType == Addr->ipRouteType) &&
+      (Ep->ipRouteProto == Addr->ipRouteProto) &&
+      (Ep->ipRouteMask == Addr->ipRouteMask) &&
+      (Ep->ipRouteInfo.re_max_frag == Addr->ipRouteInfo.re_max_frag) &&
+      (Ep->ipRouteInfo.re_rtt == Addr->ipRouteInfo.re_rtt) &&
+      (Ep->ipRouteInfo.re_ref == Addr->ipRouteInfo.re_ref) &&
+      (Ep->ipRouteInfo.re_frag_flag == Addr->ipRouteInfo.re_frag_flag) &&
+      (Ep->ipRouteInfo.re_src_addr == Addr->ipRouteInfo.re_src_addr) &&
+      (Ep->ipRouteInfo.re_ire_type == Addr->ipRouteInfo.re_ire_type) &&
+      (Ep->ipRouteInfo.re_obpkt == Addr->ipRouteInfo.re_obpkt) &&
+      (Ep->ipRouteInfo.re_ibpkt == Addr->ipRouteInfo.re_ibpkt)
+      )
+    return (0);
+  else
+    return (1);		/* Not found */
+}
+
+u_char *
+var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
+register struct variable *vp;   /* IN - pointer to variable entry that points here */
+register oid	*name;	    /* IN/OUT - input name requested, output name found */
+register int	*length;    /* IN/OUT - length of input and output strings */
+int		exact;	    /* IN - TRUE if an exact match was requested. */
+int		*var_len;   /* OUT - length of variable or 0 if function returned. */
+int		(**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+{
+  /*
+   * object identifier is of form:
+   * 1.3.6.1.2.1.4.21.1.1.A.B.C.D,  where A.B.C.D is IP address.
+   * IPADDR starts at offset 10.
+   */
+#define IP_ROUTENAME_LENGTH	14
+#define	IP_ROUTEADDR_OFF	10
+  oid 			current[IP_ROUTENAME_LENGTH], lowest[IP_ROUTENAME_LENGTH];
+  u_char 		*cp;
+  oid 			*op;
+  mib2_ipRouteEntry_t	Lowentry, Nextentry, entry;
+  int			Found = 0;
+  req_e 		req_type;
+
+  /* fill in object part of name for current (less sizeof instance part) */
+  
+  bcopy((char *)vp->name, (char *)current, (int)(vp->namelen) * sizeof(oid));
+  if (*length == IP_ROUTENAME_LENGTH) /* Assume that the input name is the lowest */
+    bcopy((char *)name, (char *)lowest, IP_ROUTENAME_LENGTH * sizeof(oid));
+  else
+    name[IP_ROUTEADDR_OFF] = -1; /* Grhhh: to prevent accidental comparison :-( */
+  for (Nextentry.ipRouteDest = (u_long)-2, req_type = GET_FIRST;
+       ;
+       Nextentry = entry, req_type = GET_NEXT) {
+    if (getMibstat(MIB_IP_ROUTE, &entry, sizeof(mib2_ipRouteEntry_t),
+		   req_type, &IP_Cmp_Route, &Nextentry) != 0)
+      break;
+    COPY_IPADDR(cp, (u_char *)&entry.ipRouteDest, op, current + IP_ROUTEADDR_OFF);
+    if (exact){
+      if (compare(current, IP_ROUTENAME_LENGTH, name, *length) == 0){
+	bcopy((char *)current, (char *)lowest, IP_ROUTENAME_LENGTH * sizeof(oid));
+	Lowentry = entry;
+	Found++;
+	break;  /* no need to search further */
+      }
+    } else {
+      if ((compare(current, IP_ROUTENAME_LENGTH, name, *length) > 0) &&
+	  ((Nextentry.ipRouteDest == (u_long)-2)
+	   || (compare(current, IP_ROUTENAME_LENGTH, lowest, IP_ROUTENAME_LENGTH) < 0)
+	   || (compare(name, IP_ROUTENAME_LENGTH, lowest, IP_ROUTENAME_LENGTH) == 0))){
+
+	/* if new one is greater than input and closer to input than
+	 * previous lowest, and is not equal to it, save this one as the "next" one.
+	 */
+	bcopy((char *)current, (char *)lowest, IP_ROUTENAME_LENGTH * sizeof(oid));
+	Lowentry = entry;
+	Found++;
+      }
+    }
+  }
+  if (Found == 0)
+    return(NULL);
+  bcopy((char *)lowest, (char *) name, IP_ROUTENAME_LENGTH * sizeof(oid));
+  *length = IP_ROUTENAME_LENGTH;
+  *write_method = write_rte;
+  *var_len = sizeof(long_return);
+
+  switch(vp->magic){
+  case IPROUTEDEST:
+    long_return = Lowentry.ipRouteDest;
+    return (u_char *)&long_return;
+  case IPROUTEIFINDEX:
+    long_return = Interface_Index_By_Name(Lowentry.ipRouteIfIndex.o_bytes,
+					  Lowentry.ipRouteIfIndex.o_length);
+    return (u_char *)&long_return;
+  case IPROUTEMETRIC1:
+    long_return = Lowentry.ipRouteMetric1;
+    return (u_char *)&long_return;
+  case IPROUTEMETRIC2:
+    long_return = Lowentry.ipRouteMetric2;
+    return (u_char *)&long_return;
+  case IPROUTEMETRIC3:
+    long_return = Lowentry.ipRouteMetric3;
+    return (u_char *)&long_return;
+  case IPROUTEMETRIC4:
+    long_return = Lowentry.ipRouteMetric4;
+    return (u_char *)&long_return;
+  case IPROUTENEXTHOP:
+    long_return = Lowentry.ipRouteNextHop;
+    return (u_char *)&long_return;
+  case IPROUTETYPE:
+    long_return = Lowentry.ipRouteType;
+    return (u_char *)&long_return;
+  case IPROUTEPROTO:
+    long_return = Lowentry.ipRouteProto;
+    return (u_char *)&long_return;
+  case IPROUTEAGE:
+    long_return = Lowentry.ipRouteAge;
+    return (u_char *)&long_return;
+  default:
+    ERROR("");
+  };
+  return NULL;
+}
+
+#endif /* solaris2 - var_IProute */
 
 init_routes(){
   int ret;
