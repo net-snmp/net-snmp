@@ -9,6 +9,10 @@
 #include <strings.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include <net-snmp/library/snmp_enum.h>
 
 struct snmp_enum_list_str {
