@@ -165,7 +165,7 @@ void init_mib_internals __P((void));
 int  add_mibdir __P((char *));
 void add_module_replacement __P(( char *, char *, char *, int));
 int  which_module __P((char *));
-char *module_name __P((int));
+char *module_name __P((int, char *));
 void print_subtree __P((FILE *, struct tree *, int));
 void print_ascii_dump_tree __P((FILE *, struct tree *, int));
 struct tree *find_tree_node __P((char *, int));

@@ -136,6 +136,7 @@ int             *version;   /* OUT - message version */
     return (u_char *)data;
 }
 
+#ifdef USE_V2PARTY_PROTOCOL
 /** snmp_party_parse - parse the header of a party-based message
 *                      such as that found in SNMPv2p
 */
@@ -368,6 +369,7 @@ int		pass;       /* IN - which pass */
     }
     return data;
 }
+#endif /* USE_V2PARTY_PROTOCOL */
 
 /** snmp_comstr_build - build the header of a community string-based message
 *                       such as that found in SNMPv1 and SNMPv2c.
@@ -428,6 +430,7 @@ snmp_comstr_build(data, length, sid, slen, version, messagelen)
     return data;
 }
 
+#ifdef USE_V2PARTY_PROTOCOL
 /** snmp_party_build - build the header for a party-based security message.
 *                      In the first pass allocate and store all the fields.
 *                      In the second pass, actually do the encryption and
@@ -651,6 +654,7 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
     }
     return (u_char *)endOfPacket;
 }
+#endif /* USE_V2PARTY_PROTOCOL */
 
 static void
 md5Digest(start, length, digest)
@@ -663,7 +667,7 @@ md5Digest(start, length, digest)
     int i, j;
 #if WORDS_BIGENDIAN
     u_char *buf;
-    static u_char buffer[SNMP_MAX_LEN];
+    u_char buffer[SNMP_MAX_LEN];
 #endif
 
 #if 0
@@ -676,7 +680,7 @@ md5Digest(start, length, digest)
 #endif
 
 #if WORDS_BIGENDIAN
-    /* do the computation in a static array */
+    /* do the computation in an array */
     cp = buf = buffer;
     memmove(buf, start, length);
 #else
@@ -697,6 +701,7 @@ md5Digest(start, length, digest)
 	 *digest++ = (MD.buffer[i]>>j) & 0xFF;
 }
 
+#ifdef USE_V2PARTY_PROTOCOL
 int
 has_access(msg_type, target, subject, resources)
     u_char msg_type;
@@ -711,4 +716,5 @@ has_access(msg_type, target, subject, resources)
 	return 1;
     return 0;
 }
+#endif
 

@@ -210,15 +210,15 @@ isZeroU64(pu64)
 
 } /* isZeroU64 */
 
-char *
-printU64(pu64)
+void
+printU64(buf, pu64)
+  char * buf; /* char [I64CHARSZ+1]; */
   U64 *pu64;
 {
   U64 u64a;
   U64 u64b;
 
-#define I64CHARSZ 21
-  static char aRes[I64CHARSZ+1];
+  char aRes [I64CHARSZ+1];
   unsigned int u;
   int j;
 
@@ -233,18 +233,18 @@ printU64(pu64)
     if (isZeroU64(&u64a))
       break;
   }
-  return &aRes[(I64CHARSZ-1)-j];
+  strcpy(buf, &aRes[(I64CHARSZ-1)-j]);
 }
 
-char *
-printI64(pu64)
+void
+printI64(buf, pu64)
+  char * buf; /* char [I64CHARSZ+1]; */
   U64 *pu64;
 {
   U64 u64a;
   U64 u64b;
 
-#define I64CHARSZ 21
-  static char aRes[I64CHARSZ+1];
+  char aRes [I64CHARSZ+1];
   unsigned int u;
   int j, sign=0;
 
@@ -269,9 +269,10 @@ printI64(pu64)
   }
   if (sign == 1) {
     aRes[(I64CHARSZ-1)-j-1] = '-';
-    return &aRes[(I64CHARSZ-1)-j-1];
+    strcpy(buf, &aRes[(I64CHARSZ-1)-j-1]);
+    return;
   }
-  return &aRes[(I64CHARSZ-1)-j];
+  strcpy(buf, &aRes[(I64CHARSZ-1)-j]);
 }
 
 void

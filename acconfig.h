@@ -24,6 +24,13 @@
 
 @TOP@
 
+/* comment the next line if you are compiling with libsnmp.h 
+   and are not using the UC-Davis SNMP library. */
+#define UCD_SNMP_LIBRARY 1
+
+/* comment the next line if you do not want SNMPv2 party-based auth. */
+#define USE_V2PARTY_PROTOCOL 1
+
 /* define the system type include file here */
 #define SYSTEM_INCLUDE_FILE "s/generic.h"
 
