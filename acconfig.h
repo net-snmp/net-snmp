@@ -1,13 +1,39 @@
 /* config.h:  a general config file */
 
+/* Mib-2 tree Info */
+
+#if defined(hpux)
+#define VERS_DESC   "HP-UX 9.0.5"
+#elif defined(ultrix)
+#define VERS_DESC   "Ultrix 4.2"
+#else
+#define VERS_DESC   "SunOS 4.1.4"
+#endif
+
+#define SYS_CONTACT "support@ece.ucdavis.edu"
+#define SYS_NAME    "unknown"
+#define SYS_LOC     "UCDavis Electrical Engineering Departement"
+
 /* mib pointer to my tree */
 
-#define EXTENSIBLEMIB 1,3,6,1,4,10 /* process watch section */
+#define EXTENSIBLEMIB 1,3,6,1,4,10 /* location of the extensible mib tree */
+#define EXTENSIBLENUM 6            /* count the above */
 
 /* Command to generate ps output, the final column must be the process
    name withOUT arguments */
 
-#ifdef hpux
+/* comment out to turn off functionality for any of these: */
+
+#define PROCMIBNUM 1              /*   proc PROCESSNAME [MAX] [MIN] */
+#define SHELLMIBNUM 3             /*   exec/shell NAME COMMAND      */
+#define MEMMIBNUM 4               /*   swap MIN                     */
+#define DISKMIBNUM 6              /*   disk DISK MINSIZE            */
+#define LOADAVEMIBNUM 7           /*   load 1 5 15                  */
+
+#define VERSIONMIBNUM 100  /* which version are you using?
+                              This mibloc will tell you */
+
+#ifdef SYSV
 #define PSCMD "/bin/ps -e"
 #else
 #define PSCMD "/bin/ps -axc"
@@ -23,7 +49,7 @@
 
 #define EXECFIXCMD "/usr/local/bin/perl /local/scripts/fixproc %s"
 
-/* Should process output Cashing be used, and if so,
+/* Should exec output Cashing be used, and if so,
    After how many seconds should the cache re-newed?
    Note:  Don't define CASHETIME to disable cashing completely */
 
@@ -37,7 +63,7 @@
 #define MAXDISKS 10                      /* can't scan more than this number */
 #define DEFDISKMINIMUMSPACE 100000       /* 100 meg minimum disk space */
 
-#define DEFMAXLOADAVE 12.0              /* maximum load average before error */
+#define DEFMAXLOADAVE 12.0      /* default maximum load average before error */
 
 #define LASTFIELD -1
 
