@@ -63,6 +63,7 @@ SOFTWARE.
 #include "snmp.h"
 #include "snmp_impl.h"
 #include "parse.h"
+#include "int64.h"
 
 char *sprint_objid __P((char *, oid *, int));
 
@@ -680,6 +681,7 @@ sprint_counter64(buf, var, enums, hint, units)
     char *hint;
     char *units;
 {
+    U64 u64a;
     if (var->type != ASN_COUNTER64){
 	sprintf(buf, "Wrong Type (should be Counter64): ");
 	buf += strlen(buf);
@@ -691,11 +693,9 @@ sprint_counter64(buf, var, enums, hint, units)
 	sprintf(buf, "Counter64: ");
 	buf += strlen(buf);
     }
-    sprint_hexstring(buf, (u_char *)&var->val.counter64->high,
-		     sizeof(var->val.counter64->high));
-    buf += strlen(buf);
-    sprint_hexstring(buf, (u_char *)&var->val.counter64->low,
-		     sizeof(var->val.counter64->low));
+    u64a.ulHi = var->val.counter64->high;
+    u64a.ulLo = var->val.counter64->low;
+    sprintf(buf, printU64(&u64a));
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
 }
