@@ -21,9 +21,9 @@
  *    be handled in the *_hpux.h header file.
  */
 config_require(if-mib/data_access/interface_common)
-config_require(if-mib/data_access/interface_ioctl);
 #if defined( linux )
 config_require(if-mib/data_access/interface_linux);
+config_require(if-mib/data_access/interface_ioctl);
 #else
 #   define NETSNMP_ACCESS_INTERFACE_NOARCH 1
 #endif

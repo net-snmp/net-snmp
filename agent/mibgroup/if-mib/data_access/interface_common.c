@@ -160,7 +160,6 @@ netsnmp_access_interface_container_load(netsnmp_container* container, u_int load
 
     return container;
 }
-#endif
 
 void
 netsnmp_access_interface_container_free(netsnmp_container *container, u_int free_flags)
@@ -183,6 +182,19 @@ netsnmp_access_interface_container_free(netsnmp_container *container, u_int free
 
     CONTAINER_FREE(container);
 }
+
+/**
+ * @retval 0  interface not found
+ */
+oid
+netsnmp_access_interface_index_find(const char *name)
+{
+    DEBUGMSGTL(("access:interface:find", "index\n"));
+    netsnmp_assert(1 == _access_interface_init);
+
+    return netsnmp_arch_interface_index_find(name);
+}
+#endif
 
 /**---------------------------------------------------------------------*/
 /*
@@ -238,22 +250,6 @@ netsnmp_access_interface_entry_get_by_name(netsnmp_container *container,
 }
 
 /**
- * @retval 0  interface not found
- */
-oid
-netsnmp_access_interface_index_find(const char *name)
-{
-    DEBUGMSGTL(("access:interface:find", "index\n"));
-    netsnmp_assert(1 == _access_interface_init);
-
-#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
-    return netsnmp_arch_interface_index_find(name);
-#else
-    return netsnmp_access_interface_ioctl_ifindex_get(-1, name);
-#endif
-}
-
-/**
  * @retval NULL  index not found
  */
 const char *
@@ -285,9 +281,11 @@ netsnmp_access_interface_entry_create(const char *name, oid if_index)
     /*
      * get if index, and save name for reverse lookup
      */
+#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
     if (0 == if_index)
         entry->index = netsnmp_access_interface_index_find(name);
     else
+#endif
         entry->index = if_index;
     _access_interface_entry_save_name(name, entry->index);
 
