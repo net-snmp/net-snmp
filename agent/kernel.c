@@ -22,14 +22,14 @@ init_kmem(file)
 {
   kmem = open(file, O_RDONLY);
   if (kmem < 0){
-    fprintf(stderr, "cannot open ");
+    fprintf(stderr, "cannot open %s",file);
     perror(file);
     exit(1);
   }
   fcntl(kmem,F_SETFD,1);
   mem = open("/dev/mem",O_RDONLY);    
   if (mem < 0){
-    fprintf(stderr, "cannot open ");
+    fprintf(stderr, "cannot open /dev/mem");
     perror("/dev/mem");
     exit(1);
   }
@@ -57,7 +57,7 @@ off_t
 klseek(base)
      off_t base;
 {
-  return (lseek(kmem, (off_t)base, 0));
+  return (lseek(kmem, (off_t)base, SEEK_SET));
 }
 
 
@@ -87,21 +87,30 @@ klread(buf, buflen)
 
 
 klookup(off, target, siz) 
-     int     off;
+     unsigned long off;
      char   *target;
      int     siz;
 {
 
-  klseek(off);
-  if (siz != klread(target, siz)) {
-    ERROR("klread\n");
+  long retsiz;
+  char buf[300];
+
+  if ((retsiz = klseek((off_t) off)) != off) {
+    perror("klseek");
+#ifdef EXIT_ON_BAD_KLREAD
+    exit(-1);
+#endif
+    return (NULL);
+  }
+  if (klread(target, siz) != siz ) { 
+    perror("klread");
+    ERROR("klread");
 #ifdef EXIT_ON_BAD_KLREAD
     exit(-1);
 #endif
     return(NULL);
   }
-
   return (1);
-
 }
+
 

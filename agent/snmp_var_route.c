@@ -65,7 +65,7 @@ static struct rtentry **rthead=0;
 #endif
 static int rtsize=0, rtalloc=0;
 
-#define  KNLookup(nl_which, buf, s)   (klookup( nl[nl_which].n_value, buf, s))
+#define  KNLookup(nl_which, buf, s)   (klookup(nl[nl_which].n_value, buf, s))
 
 static struct nlist nl[] = {
 #define N_RTHOST       0
