@@ -532,10 +532,21 @@ asn_parse_string(u_char *data,
     *datalength -= (int)asn_length + (bufp - data);
 
     DEBUGIF("dumpv_recv") {
-      char *buf = (char *)malloc(1+asn_length);
-      sprint_asciistring(buf, string, asn_length);
-      DEBUGMSG(("dumpv_recv", "  String:\t%s\n", buf));
-      free (buf);
+      u_char *buf = (u_char *)malloc(1 + asn_length);
+      size_t l = (buf != NULL)?(1 + asn_length):0, ol = 0;
+
+      if (sprint_realloc_asciistring(&buf, &l, &ol, 1, string, asn_length)) {
+	DEBUGMSG(("dumpv_recv", "  String:\t%s\n", buf));
+      } else {
+	if (buf == NULL) {
+	  DEBUGMSG(("dumpv_recv", "  String:\t[TRUNCATED]\n"));
+	} else {
+	  DEBUGMSG(("dumpv_recv", "  String:\t%s [TRUNCATED]\n", buf));
+	}
+      }
+      if (buf != NULL) {
+	free(buf);
+      }
     }
         
     return bufp + asn_length;
@@ -589,10 +600,21 @@ asn_build_string(u_char *data,
     *datalength -= strlength;
     DEBUGDUMPSETUP("send", initdatap, data - initdatap + strlength);
     DEBUGIF("dumpv_send") {
-      char *buf = (char *)malloc(1+strlength);
-      sprint_asciistring(buf, string, strlength);
-      DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
-      free (buf);
+      u_char *buf = (u_char *)malloc(1 + strlength);
+      size_t l = (buf != NULL)?(1 + strlength):0, ol = 0;
+
+      if (sprint_realloc_asciistring(&buf, &l, &ol, 1, string, strlength)) {
+	DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
+      } else {
+	if (buf == NULL) {
+	  DEBUGMSG(("dumpv_send", "  String:\t[TRUNCATED]\n"));
+	} else {
+	  DEBUGMSG(("dumpv_send", "  String:\t%s [TRUNCATED]\n", buf));
+	}
+      }
+      if (buf != NULL) {
+	free(buf);
+      }
     }
     return data + strlength;
 }
@@ -2161,10 +2183,21 @@ asn_realloc_rbuild_string (u_char **pkt, size_t *pkt_len,
         if (strlength == 0) {
 	  DEBUGMSG(("dumpv_send", "  String: [NULL]\n"));
         } else {
-	  char *buf = (char *)malloc(2*strlength);
-	  sprint_asciistring(buf, string, strlength);
-	  DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
-	  free(buf);
+	  u_char *buf = (u_char *)malloc(2 * strlength);
+	  size_t l = (buf != NULL)?(2 * strlength):0, ol = 0;
+
+	  if (sprint_realloc_asciistring(&buf, &l, &ol, 1, string, strlength)){
+	    DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
+	  } else {
+	    if (buf == NULL) {
+	      DEBUGMSG(("dumpv_send", "  String:\t[TRUNCATED]\n"));
+	    } else {
+	      DEBUGMSG(("dumpv_send", "  String:\t%s [TRUNCATED]\n", buf));
+	    }
+	  }
+	  if (buf != NULL) {
+	    free(buf);
+	  }
         }
       }
     }
@@ -2370,10 +2403,21 @@ asn_realloc_rbuild_bitstring(u_char **pkt, size_t *pkt_len,
         if (strlength == 0) {
 	  DEBUGMSG(("dumpv_send", "  Bitstring: [NULL]\n"));
         } else {
-	  char *buf = (char *)malloc(2*strlength);
-	  sprint_asciistring(buf, string, strlength);
-	  DEBUGMSG(("dumpv_send", "  Bitstring:\t%s\n", buf));
-	  free(buf);
+	  u_char *buf = (u_char *)malloc(2 * strlength);
+	  size_t l = (buf != NULL)?(2 * strlength):0, ol = 0;
+
+	  if (sprint_realloc_asciistring(&buf, &l, &ol, 1, string, strlength)){
+	    DEBUGMSG(("dumpv_send", "  Bitstring:\t%s\n", buf));
+	  } else {
+	    if (buf == NULL) {
+	      DEBUGMSG(("dumpv_send", "  Bitstring:\t[TRUNCATED]\n"));
+	    } else {
+	      DEBUGMSG(("dumpv_send", "  Bitstring:\t%s [TRUNCATED]\n", buf));
+	    }
+	  }
+	  if (buf != NULL) {
+	    free(buf);
+	  }
         }
       }
     }
