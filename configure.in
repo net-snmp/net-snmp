@@ -118,10 +118,11 @@ Configuring the agent:
 AC_ARG_WITH(dummy-values,
 [
 Configuring the agent:
-  --with-dummy-values             Provide 'placeholder' dummy values where
+  --without-dummy-values          Don't provide 'placeholder' dummy values where
                                   the necessary information is not available.
-                                  This is contrary to SNMP specifications but
-                                  is the traditional behaviour of this agent.])
+                                  This is experimental support to make us
+                                  compliant with the SNMP specifications but
+                                  has some known problems.])
 
 AC_ARG_WITH(persistent-directory,
 [  --with-persistent-directory=\"directory\"
@@ -210,7 +211,7 @@ if test "x$with_root_access" = "xno"; then
 fi
 
 dnl Define unless specifically suppressed (ie, option defaults to false). 
-if test "x$with_dummy_values" != "xyes"; then
+if test "x$with_dummy_values" != "xno"; then
   AC_DEFINE(NO_DUMMY_VALUES)
 fi
 
