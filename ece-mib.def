@@ -503,7 +503,7 @@ loadaveLoad OBJECT-TYPE
 	::= { Loadaves 3 }
 
 loadaveConfig OBJECT-TYPE
-	SYNTAX INTEGER
+	SYNTAX DisplayString
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -542,7 +542,8 @@ version ::= SEQUENCE {
    versionDate  DisplayString,
    versionCDate  DisplayString,
    versionIdent  DisplayString,
-   versionClearCache  INTEGER
+   versionClearCache  INTEGER,
+   versionUpdateConfig  INTEGER
 }
    
 versionIndex OBJECT-TYPE
@@ -587,11 +588,19 @@ versionIdent OBJECT-TYPE
 
 versionClearCache OBJECT-TYPE
      SYNTAX  INTEGER
-     ACCESS  read-only
+     ACCESS  read-write
      STATUS  mandatory
      DESCRIPTION  
           "Set to 1 to clear the exec cache, if enabled"
      ::= { Version 10 } 
+
+versionUpdateConfig OBJECT-TYPE
+     SYNTAX  INTEGER
+     ACCESS  read-write
+     STATUS  mandatory
+     DESCRIPTION  
+          "Set to 1 to read-read the config file(s)."
+     ::= { Version 11 } 
 
 Snmperrs OBJECT-TYPE
 	SYNTAX snmperrs
