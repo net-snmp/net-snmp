@@ -81,7 +81,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 int compare_tree __P((oid *, int, oid *, int));
-struct subtree *find_subtree __P((oid *, int, struct subtree *));
 extern struct subtree subtrees_old[];
 
 u_char *search_subtree_vars __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int *));
@@ -715,7 +714,6 @@ struct subtree *find_subtree_next(name, len, subtree)
 {
   struct subtree *myptr = NULL;
   int ret;
-  char c_oid[MAX_NAME_LEN];
 
   if ((ret = compare(name, len, subtree->name, subtree->namelen)) == 0) {
     if (subtree->children != NULL)
@@ -746,7 +744,6 @@ struct subtree *find_subtree(name, len, subtree)
   struct subtree *subtree;
 {
   struct subtree *myptr;
-  char c_oid[MAX_NAME_LEN];
 
   for(myptr = subtree; myptr != NULL; myptr = myptr->next) {
     if (compare(name, len, myptr->name, myptr->namelen) == 0)

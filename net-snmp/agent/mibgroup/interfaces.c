@@ -1111,7 +1111,9 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 
 #ifndef solaris2
 
+#if !defined(sunV3) && !defined(linux)
 static struct in_ifaddr savein_ifaddr;
+#endif
 static struct ifnet *ifnetaddr, saveifnet, *saveifnetaddr;
 static int saveIndex=0;
 static char saveName[16];

@@ -40,7 +40,6 @@ header_registry(vp, name, length, exact, var_len, write_method)
 {
 #define REGISTRY_NAME_LENGTH	10
     oid newname[MAX_NAME_LEN];
-    int result,i;
     char c_oid[MAX_NAME_LEN];
     struct subtree *mine = NULL;
     
