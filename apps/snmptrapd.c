@@ -614,7 +614,7 @@ void usage(void)
 {
     fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-n] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
     fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
-    fprintf(stderr, "\
+    fprintf(stderr, "\n\
   -h        Print this help message and exit\n\
   -H        Read what can show up in config file\n\
   -V        Print version and exit\n\
@@ -628,10 +628,10 @@ void usage(void)
   -f        Stay in foreground (don't fork)\n\
   -l [d0-7 ]  Set syslog Facility to log daemon[d], log local 0(default) [1-7]\n\
   -d        Dump input/output packets\n\
-  -n        Use numeric IP addresses instead of host names (no DNS)
+  -n        Use numeric IP addresses instead of host names (no DNS)\n\
   -a        Ignore Authentication Failture traps.\n\
-  -c CONFFILE Read CONFFILE as a configuration file.
-  -C        Don't read the default configuration files.
+  -c CONFFILE Read CONFFILE as a configuration file.\n\
+  -C        Don't read the default configuration files.\n\
   -m <MIBS>     Use MIBS list instead of the default mib list.\n\
   -M <MIBDIRS>  Use MIBDIRS as the location to look for mibs.\n\
   -O <OUTOPTS>  Toggle various options controlling output display\n");
