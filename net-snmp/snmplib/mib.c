@@ -518,9 +518,6 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
   int hex = 0, x = 0;
   u_char *cp;
 
-  DEBUGMSGTL(("output", "  sprint_octet_string, buf %p \"%s\" hint \"%s\"\n",
-	      buf, buf?(char *)*buf:"[NIL]", hint));
-
   if (var->type != ASN_OCTET_STR) {
     const char str[] = "Wrong Type (should be OCTET STRING): ";
     if (snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
@@ -562,10 +559,6 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
 	if (width == 0) width = 1;
       }
 
-      DEBUGMSGTL(("output",
-		  "  hint: code '%c', width %d, separ '%c', term '%c'\n",
-		  code, width, separ?separ:'X', term?term:'X'));
-
       while (repeat && cp < ecp) {
 	value = 0;
 	if (code != 'a') {
@@ -593,7 +586,6 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
 	  }
 	  break;
 	case 'a':
-	  DEBUGMSGTL(("output", "    a case, cp \"%s\"\n", cp));
 	  while ((*out_len + width + 1) >= *buf_len) {
 	    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
 	      return 0;
@@ -645,8 +637,6 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
 	*(*buf + *out_len) = '\0';
       }
     }
-
-    DEBUGMSGTL(("output", "  sprint_octet_string, buf \"%s\"\n", buf));
 
     if (units) {
       return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
@@ -2739,10 +2729,6 @@ _sprint_realloc_objid(u_char **buf, size_t *buf_len,
 				&tbuf, &tbuf_len, &tout_len, allow_realloc,
 				&tbuf_overflow, NULL, &midpoint_offset);
 
-  DEBUGMSGTL(("output",
-	      "after _get_symbol: tbuf = \"%s\", t_over %d mid_off %d\n",
-	      tbuf, tbuf_overflow, midpoint_offset));
-
   if (tbuf_overflow) {
     if (!*buf_overflow) {
       snmp_strcat(buf, buf_len, out_len, allow_realloc, tbuf);
@@ -2754,7 +2740,6 @@ _sprint_realloc_objid(u_char **buf, size_t *buf_len,
 
   if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS)) {
     cp = tbuf;
-    DEBUGMSGTL(("output", "  numeric; cp \"%s\"\n", cp));
   } else if (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY)) {
     for (cp = tbuf; *cp; cp++);
 
@@ -2778,8 +2763,6 @@ _sprint_realloc_objid(u_char **buf, size_t *buf_len,
 
     cp++;
 
-    DEBUGMSGTL(("output", "  suffix (a); cp \"%s\"\n", cp));
-
     if (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY) == 2 && cp > tbuf){
       char modbuf[256], *mod = module_name(subtree->modid, modbuf);
 
@@ -2798,7 +2781,6 @@ _sprint_realloc_objid(u_char **buf, size_t *buf_len,
     cp = tbuf;
     tlen = strlen(tbuf);
 
-    DEBUGMSGTL(("output", "  full (a); cp \"%s\"\n", cp));
     while (pp->str) {
       ilen = pp->len;
       testcp = pp->str;
@@ -2809,10 +2791,8 @@ _sprint_realloc_objid(u_char **buf, size_t *buf_len,
       }
       pp++;
     }
-    DEBUGMSGTL(("output", "  full (b); cp \"%s\"\n", cp));
   } else {
     cp = tbuf;
-    DEBUGMSGTL(("output", "  other; cp \"%s\"\n", cp));
   }
 
   if (!*buf_overflow &&
@@ -2821,6 +2801,18 @@ _sprint_realloc_objid(u_char **buf, size_t *buf_len,
   }
   free(tbuf);
   return subtree;
+}
+
+int
+sprint_realloc_objid(u_char **buf, size_t *buf_len,
+		     size_t *out_len, int allow_realloc, 
+		     oid *objid, size_t objidlen)
+{
+  int buf_overflow = 0;
+
+  _sprint_realloc_objid(buf, buf_len, out_len, allow_realloc, &buf_overflow,
+			objid, objidlen);
+  return !buf_overflow;
 }
 
 char * sprint_objid(char *buf, oid *objid, size_t objidlen)
@@ -2909,9 +2901,6 @@ sprint_realloc_variable(u_char **buf, size_t *buf_len,
     subtree = _sprint_realloc_objid(buf, buf_len, out_len, allow_realloc,
 				    &buf_overflow, objid, objidlen); 
     
-    DEBUGMSGTL(("output","after _sprint_objid: buf = \"%s\", over %d sub %p\n",
-		*buf, buf_overflow, subtree));
-
     if (buf_overflow) {
       return 0;
     }
@@ -2930,9 +2919,6 @@ sprint_realloc_variable(u_char **buf, size_t *buf_len,
 	*out_len = 0;
     }
 
-    DEBUGMSGTL(("output","before value output: buf = \"%s\", over %d sub %p\n",
-		*buf, buf_overflow, subtree));
-
     if (variable->type == SNMP_NOSUCHOBJECT) {
 	return snmp_strcat(buf, buf_len, out_len, allow_realloc,
 			   "No Such Object available on this agent");
@@ -2944,8 +2930,6 @@ sprint_realloc_variable(u_char **buf, size_t *buf_len,
 			   "No more variables left in this MIB View");
     } else if (subtree) {
 	if (subtree->printomat) {
-	    DEBUGMSGTL(("output", "  subtree->printomat %p ->type %d\n",
-			subtree->printomat, subtree->type));
 	    return (*subtree->printomat)(buf, buf_len, out_len, allow_realloc,
 					 variable, subtree->enums,
 					 subtree->hint, subtree->units);
@@ -3415,15 +3399,11 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
     int extended_index = ds_get_boolean(DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
     char intbuf[64];
 
-    DEBUGMSGTL(("output", "get_realloc_symbol called, oid %d, len = %d\n",
-		*objid, objidlen));
-
     if (!objid || !buf) {
         return NULL;
     }
 
     for(; subtree; subtree = subtree->next_peer) {
-      DEBUGMSGTL(("output", "  subtree->subid %d\n", subtree->subid));
 	if (*objid == subtree->subid) {
 	  if (subtree->indexes) {
 	    in_dices = subtree->indexes;
@@ -3462,10 +3442,8 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
 	  }
 
 	  if (return_tree != NULL) {
-	    DEBUGMSGTL(("output", "get_realloc_symbol: return return_tree\n"));
 	    return return_tree;
 	  } else {
-	    DEBUGMSGTL(("output", "get_realloc_symbol: return subtree\n"));
 	    return subtree;
 	  }
 	}
@@ -3477,8 +3455,6 @@ _get_realloc_symbol(oid *objid, size_t objidlen,
     }
 
     /*  Subtree not found.  */
-
-    DEBUGMSGTL(("output", "get_realloc_symbol: subtree not found\n"));
 
     while (in_dices && (objidlen > 0) &&
            !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS) &&
