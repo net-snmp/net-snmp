@@ -10,6 +10,7 @@
 #endif
 
 #include "mibincl.h"
+#include "../../snmplib/system.h"
 
 /* #include "../common_header.h" */
 #include "snmp_mib.h"

@@ -22,10 +22,14 @@
 #include <sys/vfs.h>
 #endif
 
-#if HAVE_STRINGS_H
-#include <strings.h>
-#else
+#include <ctype.h>
+#if STDC_HEADERS
 #include <string.h>
+#include <stdlib.h>
+#else
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #endif
 
 #define HRFS_MONOTONICALLY_INCREASING

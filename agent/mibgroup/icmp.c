@@ -13,6 +13,14 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#if STDC_HEADERS
+#include <string.h>
+#include <stdlib.h>
+#else
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -506,7 +514,7 @@ struct icmp_mib *icmpstat;
   FILE *in = fopen ("/proc/net/snmp", "r");
   char line [1024];
 
-  bzero ((char *) icmpstat, sizeof (*icmpstat));
+  memset ((char *) icmpstat,(0), sizeof (*icmpstat));
 
   if (! in)
     return;
