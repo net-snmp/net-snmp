@@ -401,6 +401,10 @@ init_notification_log(void)
     /* tables */
     initialize_table_nlmLogTable();
     initialize_table_nlmLogVariableTable();
+
+    /* disable flag */
+    ds_register_config(ASN_BOOLEAN, "snmptrapd", "dontRetainLogs",
+                       DS_APPLICATION_ID, DS_APP_DONT_LOG);
 }
 
 u_long default_num = 0;
@@ -424,6 +428,9 @@ log_notification(struct hostent *host, netsnmp_pdu *pdu,
     u_long tmpul;
     int col;
     
+    if (ds_get_boolean(DS_APPLICATION_ID, DS_APP_DONT_LOG))
+        return;
+
     DEBUGMSGTL(("log_notification","logging something\n"));
     row = netsnmp_create_table_data_row();
 
