@@ -91,6 +91,8 @@ SOFTWARE.
         char           *units;
         char           *description;    /* description (a quoted string) */
         char           *defaultValue;
+	char           *filename;
+        int             lineno;
     };
 
     /*

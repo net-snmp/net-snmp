@@ -774,6 +774,8 @@ alloc_node(int modid)
     if (np) {
         np->tc_index = -1;
         np->modid = modid;
+	np->filename = strdup(File);
+	np->lineno = mibLine;
     }
     return np;
 }
@@ -887,6 +889,8 @@ free_node(struct node *np)
         free(np->parent);
     if (np->augments)
         free(np->augments);
+    if (np->filename)
+	free(np->filename);
     free((char *) np);
 }
 
@@ -1757,6 +1761,10 @@ do_linkup(struct module *mp, struct node *np)
                          (onp->label ? onp->label : "<no label>"),
                          (onp->parent ? onp->parent : "<no parent>"),
                          onp->subid);
+		 snmp_log(LOG_WARNING,
+			  "Undefined identifier: %s near line %d of %s\n",
+			  (onp->parent ? onp->parent : "<no parent>"),
+			  onp->lineno, onp->filename);
                 np = onp;
                 onp = onp->next;
             }
