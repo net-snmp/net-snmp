@@ -78,7 +78,7 @@ void init_diskio(void)
 
   /* Define the OID pointer to the top of the mib tree that we're
    registering underneath. */
-  oid diskio_variables_oid[] = { 1,3,6,1,4,1,2021,13,15 };
+  oid diskio_variables_oid[] = { 1,3,6,1,4,1,2021,13,15,1,1 };
 
   /* register ourselves with the agent to handle our mib tree
 
