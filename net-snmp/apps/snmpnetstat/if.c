@@ -167,7 +167,7 @@ intpr(interval)
 #ifdef SVR4
 		cp = strchr(name, '\0');
 #else
-		cp = index(name, '\0');
+		cp = (char *) index(name, '\0');
 #endif
 		if (operstatus != MIB_IFSTATUS_UP)
 			*cp++ = '*';
@@ -247,7 +247,7 @@ sidewaysintpr(interval)
 #ifdef SVR4
 		cp = strchr(ip->ift_name, '\0');
 #else
-		cp = index(ip->ift_name, '\0');
+		cp = (char *) index(ip->ift_name, '\0');
 #endif
 		sprintf(cp, ")");
 		ip++;
