@@ -66,8 +66,12 @@ do
       b)  NSB_BUILD_DIR=$OPTARG;;
       i)  PARMS="-i $OPTARG $PARMS";;
       s)  NSB_SRC_DIR=$OPTARG;;
-      h)  PARMS="-h $OPTARG $PARMS";;
-      p)  PARMS="-p $OPTARG $PARMS";;
+      h)  NSB_SCP_HOST=$OPTARG
+          PARMS="-h $NSB_SCP_HOST $PARMS"
+          ;;
+      p)  NSB_SCP_DEST=$OPTARG
+          PARMS="-p $NSB_SCP_DEST $PARMS"
+          ;;
       x)  PARMS="-x $PARMS";;
       v)  NIGHTLY_VERBOSE=1;;
       \?)# unknown flag
@@ -99,9 +103,6 @@ else
     $EXE_PATH/nsb-package $PARMS $NSB_VERSION > /dev/null
 fi
 RC=$?
-if [ ! -z $NSB_SCP_HOST ]; then
-   nsb-upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/$NSB_SUFFIX
-fi
 echo "Finish: `date`"
 echo -n "Result: "
 case $RC in
@@ -112,7 +113,11 @@ case $RC in
             /bin/rm -fR $NSB_BUILD_DIR > /dev/null 2>&1
         fi
         ;;
-    *) echo "Error!";;
+    *) echo "Error!"
+       if [ ! -z $NSB_SCP_HOST ]; then
+          nsb-upload $NSB_BUILD_DIR $NSB_SCP_HOST:$NSB_SCP_DEST/$NSB_VERSION/$NSB_SUFFIX
+       fi
+        ;;
 esac
 
 exit $RC
