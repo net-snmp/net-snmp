@@ -160,6 +160,15 @@ extern          "C" {
 
     u_int           binary_to_hex(const u_char * input, size_t len,
                                   char **output);
+                    /* preferred */
+    int             netsnmp_hex_to_binary(u_char ** buf, size_t * buf_len,
+                                         size_t * out_len, int allow_realloc,
+                                         const char *hex, const char *delim);
+                    /* calls netsnmp_hex_to_binary w/delim of " " */
+    int             snmp_hex_to_binary(u_char ** buf, size_t * buf_len,
+                                       size_t * out_len, int allow_realloc,
+                                       const char *hex);
+                    /* handles odd lengths */
     int             hex_to_binary2(const u_char * input, size_t len,
                                    char **output);
 
@@ -167,9 +176,6 @@ extern          "C" {
                                            size_t * out_len,
                                            int allow_realloc,
                                            const char *decimal);
-    int             snmp_hex_to_binary(u_char ** buf, size_t * buf_len,
-                                       size_t * out_len, int allow_realloc,
-                                       const char *hex);
     int             snmp_strcat(u_char ** buf, size_t * buf_len,
                                 size_t * out_len, int allow_realloc,
                                 const u_char * s);

@@ -109,7 +109,10 @@ void netsnmp_free( void * ptr)
  * @param buf  pointer to a buffer pointer
  * @param buf_len      pointer to current size of buffer in bytes
  * 
- * 
+ * @note
+ * The current re-allocation algorithm is to increase the buffer size by
+ * whichever is the greater of 256 bytes or the current buffer size, up to
+ * a maximum increase of 8192 bytes.  
  */
 int
 snmp_realloc(u_char ** buf, size_t * buf_len)
@@ -120,12 +123,6 @@ snmp_realloc(u_char ** buf, size_t * buf_len)
     if (buf == NULL) {
         return 0;
     }
-
-    /*
-     * The current re-allocation algorithm is to increase the buffer size by
-     * whichever is the greater of 256 bytes or the current buffer size, up to
-     * a maximum increase of 8192 bytes.  
-     */
 
     if (*buf_len <= 255) {
         new_buf_len = *buf_len + 256;
@@ -394,9 +391,36 @@ snmp_decimal_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
     return 1;
 }
 
+/**
+ * convert an ASCII hex string (with specified delimiters) to binary
+ *
+ * @param buf     address of a pointer (pointer to pointer) for the output buffer.
+ *                If allow_realloc is set, the buffer may be grown via snmp_realloc
+ *                to accomodate the data.
+ *
+ * @param buf_len pointer to a size_t containing the initial size of buf.
+ *
+ * @param out_len On input, a pointer to a size_t indicating an offset into buf.
+ *                The  binary data will be stored at this offset.
+ *                On output, this pointer will have updated the offset to be
+ *                the first byte after the converted data.
+ *
+ * @param allow_realloc If true, the buffer can be reallocated. If false, and
+ *                      the buffer is not large enough to contain the string,
+ *                      an error will be returned.
+ *
+ * @param hex     pointer to hex string to be converted. May be prefixed by
+ *                "0x" or "0X".
+ *
+ * @param delim   point to a string of allowed delimiters between bytes.
+ *                If not specified, any non-hex characters will be an error.
+ *
+ * @retval 1  success
+ * @retval 0  error
+ */
 int
-snmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
-                   int allow_realloc, const char *hex)
+netsnmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
+                      int allow_realloc, const char *hex, const char *delim)
 {
     int             subid = 0;
     const char     *cp = hex;
@@ -410,16 +434,20 @@ snmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
     }
 
     while (*cp != '\0') {
-        if (isspace((int) *cp)) {
-            cp++;
-            continue;
-        }
         if (!isxdigit((int) *cp)) {
+            if ((NULL != delim) && (NULL != strchr(delim, *cp))) {
+                cp++;
+                continue;
+            }
             return 0;
         }
         if (sscanf(cp, "%2x", &subid) == 0) {
             return 0;
         }
+        /*
+         * if we dont' have enough space, realloc.
+         * (snmp_realloc will adjust buf_len to new size)
+         */
         if ((*out_len >= *buf_len) &&
             !(allow_realloc && snmp_realloc(buf, buf_len))) {
             return 0;
@@ -436,6 +464,24 @@ snmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
         }
     }
     return 1;
+}
+
+/**
+ * convert an ASCII hex string to binary
+ *
+ * @note This is a wrapper which calls netsnmp_hex_to_binary with a
+ * delimiter string of " ".
+ *
+ * See netsnmp_hex_to_binary for parameter descriptions.
+ *
+ * @retval 1  success
+ * @retval 0  error
+ */
+int
+snmp_hex_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
+                   int allow_realloc, const char *hex)
+{
+    return netsnmp_hex_to_binary(buf, buf_len, out_len, allow_realloc, hex, " ");
 }
 
 /*******************************************************************-o-******
