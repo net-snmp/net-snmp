@@ -208,43 +208,42 @@ int register_sysORTable(oid *oidin,
 
 
 
-int unregister_sysORTable_sess(oid *oidin,
-			 size_t oidlen,
-			 struct snmp_session *ss)
+int unregister_sysORTable_sess(oid *oidin, size_t oidlen,
+			       struct snmp_session *ss)
 {
-  struct sysORTable **ptr=&table, *prev=NULL;
-  int found = SYS_ORTABLE_NO_SUCH_REGISTRATION;
+  struct sysORTable *ptr = table, **prev_next = &table;
   struct register_sysOR_parameters reg_sysOR_parms;
+  int found = SYS_ORTABLE_NO_SUCH_REGISTRATION;
 
-    DEBUGMSGTL(("mibII/sysORTable", "sysORTable unregistering: "));
-    DEBUGMSGOID(("mibII/sysORTable", oidin, oidlen));
-    DEBUGMSG(("mibII/sysORTable","\n"));
+  DEBUGMSGTL(("mibII/sysORTable", "sysORTable unregistering: "));
+  DEBUGMSGOID(("mibII/sysORTable", oidin, oidlen));
+  DEBUGMSG(("mibII/sysORTable","\n"));
 
-  while(*ptr != NULL) {
-    if ( snmp_oid_compare( oidin, oidlen, (*ptr)->OR_oid, (*ptr)->OR_oidlen) == 0 ) {
-      if ( (*ptr)->OR_sess != ss )
-	continue;	/* different session */
-      if ( prev == NULL )
-        table      = (*ptr)->next;
-      else 
-        prev->next = (*ptr)->next;
-
-      free( (*ptr)->OR_descr );
-      free( (*ptr)->OR_oid );
-      free( (*ptr) );
-      numEntries--;
-      gettimeofday(&(sysOR_lastchange), NULL);
-      found = SYS_ORTABLE_UNREGISTERED_OK;
-      break;
-    }
-    prev = *ptr;
-    ptr = &((*ptr)->next);
+  while (ptr != NULL) {
+    if (snmp_oid_compare(oidin, oidlen, ptr->OR_oid, ptr->OR_oidlen) == 0) {
+      if (ptr->OR_sess == ss) {
+	if (ptr->OR_descr != NULL) {
+	  free(ptr->OR_descr);
+	}
+	if (ptr->OR_oid != NULL) {
+	  free(ptr->OR_oid);
+	}
+	*prev_next = ptr->next;
+	free(ptr);
+	numEntries--;
+	gettimeofday(&(sysOR_lastchange), NULL);
+	found = SYS_ORTABLE_UNREGISTERED_OK;
+	break;
+      }
+    } 
+    prev_next = &(ptr->next);
+    ptr = ptr->next;
   }
 
   reg_sysOR_parms.name    = oidin;
   reg_sysOR_parms.namelen = oidlen;
   snmp_call_callbacks(SNMP_CALLBACK_APPLICATION, SNMPD_CALLBACK_UNREG_SYSOR,
-                                       &reg_sysOR_parms);
+		      &reg_sysOR_parms);
 
   return found;
 }
@@ -258,26 +257,28 @@ int unregister_sysORTable(oid *oidin,
 
 void unregister_sysORTable_by_session(struct snmp_session *ss)
 {
-  struct sysORTable *ptr=table, *prev=NULL, *next;
+  struct sysORTable *ptr = table, **prev_next = &table;
 
-  while ( ptr != NULL  ) {
-    next = ptr->next;
-    if (( (ss->flags & SNMP_FLAGS_SUBSESSION) && ptr->OR_sess == ss ) ||
-        (!(ss->flags & SNMP_FLAGS_SUBSESSION) && ptr->OR_sess &&
-                              ptr->OR_sess->subsession == ss )) {
-      if ( prev == NULL )
-          table = next;
-      else
-          prev->next = next;
-        free( ptr->OR_descr );
-        free( ptr->OR_oid );
-        free( ptr );
-        numEntries--;
-        gettimeofday(&(sysOR_lastchange), NULL);
-    } 
-    else
-      prev = ptr;
-    ptr = next;
+  while (ptr != NULL) {
+    if (((ss->flags & SNMP_FLAGS_SUBSESSION) && ptr->OR_sess == ss) ||
+        (!(ss->flags & SNMP_FLAGS_SUBSESSION) && ptr->OR_sess != NULL &&
+	 ptr->OR_sess->subsession == ss)) {
+
+      if (ptr->OR_descr != NULL) {
+	free(ptr->OR_descr);
+      }
+      if (ptr->OR_oid != NULL) {
+	free(ptr->OR_oid);
+      }
+      *prev_next = ptr->next;
+      free(ptr);
+      ptr = *prev_next;
+      numEntries--;
+      gettimeofday(&(sysOR_lastchange), NULL);
+    } else {
+      prev_next = &(ptr->next);
+      ptr = ptr->next;
+    }
   }
 }
 
