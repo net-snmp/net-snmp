@@ -310,10 +310,21 @@ var_tcp(struct variable *vp,
 	case TCPINERRS:
 #ifdef solaris2
 				return (u_char *) &ret_value;
+#elif defined(linux)
+				if (tcpstat.tcpInErrsValid)
+				    return (u_char *) &tcpstat.tcpInErrs;
+				return NULL;
 #else
 				return NULL;
 #endif
-	case TCPOUTRSTS:	return NULL;
+	case TCPOUTRSTS:
+#ifdef linux
+				if (tcpstat.tcpOutRstsValid)
+				    return (u_char *) &tcpstat.tcpOutRsts;
+				return NULL;
+#else
+				return NULL;
+#endif
 #endif
 
 #ifdef USES_TRADITIONAL_TCPSTAT
