@@ -95,13 +95,7 @@ RELEASING:
 
      $ cvs update
 
-  1) First, create the appropriate NEWS file segments.  I usually do
-     this by making a preliminary ChangeLog addition file (see step 5
-     below for how to generate the ChangeLog).
-
-  2) update the README file, if needed.
-
-  3) [This step is currently only for the 5.x versions]
+  1) [This step is currently only for the 5.x versions]
 
      a) Check the sources for C++ style comments. 
 
@@ -122,6 +116,12 @@ RELEASING:
 
         $ make mancp
 
+  2) Create the appropriate NEWS file segments.  I usually do
+     this by making a preliminary ChangeLog addition file (see step 5
+     below for how to generate the ChangeLog).
+
+  3) update the README file, if needed.
+
   4) Update Makefile dependencies:
 
         a) First, run configure using an appropriate module set.
@@ -137,7 +137,7 @@ RELEASING:
 
            For 4.x:
 
-             $ make depend
+             $ make makefileindepend
 
            For 5.x:
 
@@ -156,9 +156,8 @@ RELEASING:
 
         c4) [This step is currently only for the 4.x versions]
 
-           The dependencies are appended to 'Makefile', rather than a
-           separate 'Makefile.depend' (and include the system header files
-           as well, which need to be weeded out manually!)
+           The dependencies are appended to 'Makefile.in', rather than a
+           separate 'Makefile.depend'
 
         c5) [This step is currently only for the 5.x versions]
 
@@ -168,7 +167,6 @@ RELEASING:
 
            Note: The Makefile.depend is loaded by configure into the real
            Makefile when configure is run.
-
 
   5) Make sure all changes are checked in:
 
@@ -292,12 +290,6 @@ RELEASING:
 
 ***************************************************************************
 CREATING BINARY DISTRIBUTIONS
-
-  0) Make SURE when building binary packages that you run configure using
-     --disable-privacy.  This removes encryption support, which can not be
-     present in binaries due to U.S. export restrictions (last I checked.
-     It's possible this has actually changed, but I haven't wanted to go
-     re-read that mess of documents).
 
   1) always build releases from a tarball, not from CVS.
 
