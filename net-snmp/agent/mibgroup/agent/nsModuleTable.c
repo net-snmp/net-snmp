@@ -13,7 +13,7 @@ void
 initialize_table_nsModuleTable(void)
 {
     static oid      nsModuleTable_oid[] =
-        { 1, 3, 6, 1, 4, 1, 8072, 3, 1, 2, 2 };
+        { 1, 3, 6, 1, 4, 1, 8072, 1, 2, 1 };
     netsnmp_table_registration_info *table_info;
     netsnmp_handler_registration *my_handler;
     netsnmp_iterator_info  *iinfo;
