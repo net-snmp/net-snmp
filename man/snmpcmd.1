@@ -175,7 +175,7 @@ random access to the identifiers in the MIBs. This is requested by the
 -R option to the SNMP applications.
 Using this, system.sysDescr.0 may also be entered as sysDescr.0.
 To search only a single MIB for the identifier (if it appears in more
-than one), specify it as SNMPv2-MIB:sysDescr.0. This notation will
+than one), specify it as SNMPv2-MIB::sysDescr.0. This notation will
 also make sure that the specified MIB is loaded, i.e. it need not
 be mentioned in the -m option (or MIBS environment variable).
 .PP
@@ -236,7 +236,7 @@ sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
 is a variant of this, adding the name of the MIB that defined this
 object
 .br
-SNMPv2-MIB:sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
+SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
 .IP -On
 prints the OID numerically
 .br
