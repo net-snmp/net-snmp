@@ -144,6 +144,9 @@
 /* Use BSD 4.4 routing table entries? */
 #undef RTENTRY_4_4
 
+/* Does struct sockaddr have a sa_len field? */
+#undef STRUCT_SOCKADDR_HAS_SA_LEN
+
 /* rtentry structure tests */
 #undef RTENTRY_RT_NEXT
 #undef STRUCT_RTENTRY_HAS_RT_DST
