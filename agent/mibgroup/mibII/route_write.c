@@ -17,6 +17,9 @@
 #endif
 
 
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
 #include <net/route.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>

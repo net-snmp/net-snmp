@@ -61,6 +61,9 @@
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
 #include <net/route.h>
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>

@@ -56,6 +56,9 @@
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
 #endif
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
 #ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
@@ -354,6 +357,8 @@ Interface_Scan_By_Index (int index,
 	    if (ifp->ifm_index == index)
 	      {
 		a = get_address (ifp+1, ifp->ifm_addrs, RTA_IFP);
+                if (a == NULL)
+                  return NULL;
 		strncpy (if_name,
 			 ((struct sockaddr_in *) a)->sin_zero,
 			 ((u_char *) a)[5]);
@@ -382,10 +387,16 @@ Interface_Scan_By_Index (int index,
 		ia = get_in_address ((char *) (ifap+1)+8,
 				     ifap->ifam_addrs &= ~RTA_NETMASK,
 				     RTA_IFA);
+                if (ia == NULL)
+                  return NULL;
+                
 		sifa->sifa_addr = *ia;
 		ia = get_in_address ((char *) (ifap+1)+8,
 				     ifap->ifam_addrs &= ~RTA_NETMASK,
 				     RTA_BRD);
+                if (ia == NULL)
+                  return NULL;
+
 		sifa->sifa_broadcast = *ia;
 		++have_addr;
 	      }
@@ -1233,7 +1244,7 @@ Interface_Scan_Init (void)
       {
 	struct ifnet *nnew;
 
-	if (6 != sscanf (line, "%[^:]: %d %d %*d %*d %*d %d %d %*d %*d %d",
+	if (6 != sscanf (line, LINUX_INTERFACE_SCAN_LINE,
 			 ifname_buf, &a, &b, &c, &d, &e))
 	  continue;
 	
