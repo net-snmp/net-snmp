@@ -641,9 +641,11 @@ fi
 AC_MSG_CHECKING(whether we have to build PIC code)
 echo "$with_mib_modules" | grep "ucd-snmp/dlmod" >/dev/null
 if test $? -eq 0 ; then
+	DLLIBS="-ldl"
         LIB_CFLAGS="$LIB_CFLAGS $SHLIB_CFLAGS"
 	AC_MSG_RESULT(yes)
 else
+	DLLIBS=""
 	AC_MSG_RESULT(no)
 fi
 
@@ -1867,6 +1869,8 @@ Location to write persistent information],$defaultstore,1)
 
 PERSISTENT_DIRECTORY=$ac_cv_user_prompt_PERSISTENT_DIRECTORY
 AC_SUBST(PERSISTENT_DIRECTORY)
+
+AC_SUBST(DLLIBS)
 
 AC_OUTPUT([
  Makefile:Makefile.top:Makefile.in
