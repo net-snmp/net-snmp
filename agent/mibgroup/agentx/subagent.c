@@ -115,7 +115,7 @@ restore_set_vars( struct agent_snmp_session *asp )
     asp->end		= ptr->var_list;
     while ( asp->end->next_variable )
 	asp->end = asp->end->next_variable;
-    ptr->mode		= asp->mode;
+    asp->mode		= ptr->mode;
     return ptr;
 }
 
