@@ -1579,8 +1579,17 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
             }
             *str = cptr;
         } else {
-            if (ilen >= *len)
-                ilen = *len-1;
+            /*
+             * don't require caller to have +1 for good measure, and 
+             * bail if not enough space.
+             */
+            if (ilen > *len) {
+                snmp_log(LOG_WARNING,"buffer too small\n");
+                DEBUGMSGTL(("read_config_read_octet_string",
+                            "buffer too small"));
+                cptr = skip_not_white(readfrom);
+                return skip_white(cptr);
+            }
             cptr = *str;
         }
         *len = ilen;
@@ -1599,7 +1608,13 @@ read_config_read_octet_string(char *readfrom, u_char ** str, size_t * len)
             }
             readfrom += 2;
         }
-        *cptr++ = '\0';
+        /*
+         * only null terminate if we have the space
+         */
+        if (ilen > *len) {
+            ilen = *len-1;
+            *cptr++ = '\0';
+        }
         readfrom = skip_white(readfrom);
     } else {
         /*
