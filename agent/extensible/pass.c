@@ -73,7 +73,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
       if (fd = get_exec_output(passthru)) {
         file = fdopen(fd,"r");
         if (fgets(buf,STRMAX,file) == NULL) {
-          *var_len = NULL;
+          *var_len = 0;
           fclose(file);
           close(fd);
           return(NULL);
@@ -89,7 +89,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
 
         if (newlen == 0 || fgets(buf,STRMAX,file) == NULL
             || fgets(buf2,STRMAX,file) == NULL) {
-          *var_len = NULL;
+          *var_len = 0;
           fclose(file);
           close(fd);
           return(NULL);
@@ -98,7 +98,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
         close(fd);
         /* buf contains the return type, and buf2 contains the data */
         if (!strncasecmp(buf,"string",6)) {
-          buf2[strlen(buf2)-1] = NULL;  /* zap the linefeed */
+          buf2[strlen(buf2)-1] = 0;  /* zap the linefeed */
           *var_len = strlen(buf2);
           vp->type = STRING;
           return((unsigned char *) buf2);
@@ -131,7 +131,7 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
           newlen = parse_miboid(buf2,objid);
           if (newlen != 4) {
             fprintf(stderr,"invalid ipaddress returned:  %s\n",buf2);
-            *var_len = NULL;
+            *var_len = 0;
             return(NULL);
           }
           long_ret = (objid[0] << (8*3)) + (objid[1] << (8*2)) +
@@ -141,12 +141,12 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
           return((unsigned char *) &long_ret);
         }
       }
-      *var_len = NULL;
+      *var_len = 0;
       return(NULL);
     }
   }
   if (var_len)
-    *var_len = NULL;
+    *var_len = 0;
   *write_method = NULL;
   return(NULL);
 }

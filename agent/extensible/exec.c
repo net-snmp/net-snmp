@@ -158,7 +158,7 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
   }
   if (i > numrelocs || exten == NULL) {
     *length = long_ret;
-    *var_len = NULL;
+    *var_len = 0;
     *write_method = NULL;
     return(NULL);
   }
@@ -191,7 +191,7 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
           file = fdopen(fd,"r");
           for (i=0;i != name[*length-1];i++) {
             if (fgets(errmsg,STRMAX,file) == NULL) {
-              *var_len = NULL;
+              *var_len = 0;
               fclose(file);
               close(fd);
               return(NULL);
@@ -200,11 +200,11 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
           fclose(file);
           close(fd);
         } else
-          errmsg[0] = NULL;
+          errmsg[0] = 0;
       }
       else {
         if (*length > 1) {
-          *var_len = NULL;
+          *var_len = 0;
           return(NULL);
         }
         shell_command(exten);
