@@ -113,6 +113,9 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
     case MEMAVAILSWAP:
       long_ret = getFreeSwap() * getpagesize() / 1024;
       return((u_char *) (&long_ret));
+    case MEMSWAPMINIMUM:
+      long_ret = minimumswap;
+      return((u_char *) (&long_ret));
     case MEMTOTALREAL:
       ksp1 = kstat_lookup(kc, "unix", 0, "system_pages");
       kstat_read(kc, ksp1, 0);
@@ -130,6 +133,21 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
     case MEMTOTALFREE:
       long_ret = getTotalFree() * getpagesize() / 1024;
       return((u_char *) (&long_ret));
+
+    case ERRORFLAG:
+      long_ret = getTotalFree() * getpagesize() / 1024;
+      long_ret = (long_ret > minimumswap)?0:1;
+      return((u_char *) (&long_ret));
+
+    case ERRORMSG:
+      long_ret = getTotalFree() * getpagesize() / 1024;
+      if ((long_ret > minimumswap)?0:1)
+        sprintf(errmsg,"Running out of swap space (%ld)",long_ret);
+      else
+        errmsg[0] = 0;
+      *var_len = strlen(errmsg);
+      return((u_char *) (errmsg));
+      
   }
 
   return(NULL);
