@@ -32,7 +32,7 @@ PERFORMANCE OF THIS SOFTWARE.
  * Ported to UCD by Jennifer Bray of Origin (jbray@origin-at.co.uk) 1997
  */
 
-#ifdef /* linux */
+#ifdef linux
 # include <time.h>
 # include <linux/tasks.h>
 # include <utmp.h>
