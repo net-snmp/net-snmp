@@ -179,13 +179,16 @@ agentx_var(struct variable *vp,
 		result));
 
     if (result < 0) {
+	/*  In this case, we will want an INCLUSIVE search range.  */
 	memcpy((char *)name, (char *)vp->name, vp->namelen*sizeof(oid));
 	*length = vp->namelen;
+	add_method  = agentx_add_inclusive;
+    } else {
+	/*  Otherwise we want an EXCLUSIVE search range.  */
+	add_method  = agentx_add_exclusive;
     }
 
-				/* Return a pointer to an appropriate method */
-    add_method  = agentx_add_request;
-    *var_len = sizeof( add_method );
+    *var_len = sizeof(add_method);
     return (u_char*)add_method;
 }
 
