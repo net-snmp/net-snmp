@@ -986,6 +986,8 @@ find_best_tree_node(const char *pattrn, struct tree *tree_top, u_int *match)
                 best_so_far = retptr;
                 old_match = new_match;
             }
+            if (new_match == 0)
+                break;  /* this is the best result we can get */
         }
     }
 
