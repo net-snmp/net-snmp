@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include "wes.h"
 #include "mibincl.h"
 
