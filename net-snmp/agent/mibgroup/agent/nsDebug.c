@@ -322,6 +322,8 @@ handle_nsDebugTable(netsnmp_mib_handler *handler,
         for (request=requests; request; request=request->next) {
             debug_entry = (netsnmp_token_descr*)
                            netsnmp_extract_iterator_context(request);
+            if (!debug_entry)
+                continue;
 	    status = (debug_entry->enabled ? RS_ACTIVE : RS_NOTINSERVICE);
 	    snmp_set_var_typed_value(request->requestvb, ASN_INTEGER,
                                      (u_char*)&status, sizeof(status));
