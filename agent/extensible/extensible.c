@@ -326,7 +326,7 @@ unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
     return(0);
   }
   switch (vp->magic) {
-    case MIBINBEX:
+    case MIBINDEX:
       long_ret = 1;
       return((u_char *) (&long_ret));
     case ERRORNAME:    /* dummy name */
@@ -336,10 +336,6 @@ unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
     case MEMTOTALSWAP:
       long_ret = getswap(SWAPGETTOTAL);
       return((u_char *) (&long_ret));
-    case MEMERRNAME:
-      sprintf(errmsg,"swap");
-      *var_len = strlen(errmsg);
-      return((u_char *) (errmsg));
     case MEMUSEDSWAP:
       long_ret = getswap(SWAPGETLEFT);
       return((u_char *) (&long_ret));
