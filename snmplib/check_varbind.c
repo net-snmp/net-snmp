@@ -58,8 +58,8 @@ netsnmp_check_vb_range(const netsnmp_variable_list *var,
     if (NULL == var)
         return SNMP_ERR_GENERR;
     
-    if ((var->val_len < low) || (var->val_len > high)) {
-        rc = SNMP_ERR_WRONGLENGTH;
+    if ((*var->val.integer < low) || (*var->val.integer > high)) {
+        rc = SNMP_ERR_BADVALUE;
     }
 
     return rc;
