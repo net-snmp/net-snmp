@@ -111,10 +111,12 @@ ifTable_rowreq_ctx_init(ifTable_rowreq_ctx * rowreq_ctx,
     /*
      * TODO:210:o: |-> Perform extra ifTable rowreq initialization.
      */
-    if(NULL == user_init_ctx)
-        rowreq_ctx->data.ifentry = netsnmp_access_interface_entry_create(NULL);
+    if (NULL == user_init_ctx)
+        rowreq_ctx->data.ifentry =
+            netsnmp_access_interface_entry_create(NULL);
     else
-        rowreq_ctx->data.ifentry = (netsnmp_interface_entry*)user_init_ctx;
+        rowreq_ctx->data.ifentry =
+            (netsnmp_interface_entry *) user_init_ctx;
 
     return MFD_SUCCESS;
 }                               /* ifTable_rowreq_ctx_init */
@@ -133,7 +135,7 @@ ifTable_rowreq_ctx_cleanup(ifTable_rowreq_ctx * rowreq_ctx)
     /*
      * TODO:211:o: |-> Perform extra ifTable rowreq cleanup.
      */
-    if(NULL != rowreq_ctx->data.ifentry) {
+    if (NULL != rowreq_ctx->data.ifentry) {
         netsnmp_access_interface_entry_free(rowreq_ctx->data.ifentry);
         rowreq_ctx->data.ifentry = NULL;
     }
@@ -311,8 +313,8 @@ int
 ifDescr_get(ifTable_rowreq_ctx * rowreq_ctx, char **ifDescr_val_ptr_ptr,
             size_t *ifDescr_val_ptr_len_ptr)
 {
-    char *tmp_descr;
-    u_char tmp_len;
+    char           *tmp_descr;
+    u_char          tmp_len;
 
    /** we should have a non-NULL pointer and enough storage */
     netsnmp_assert((NULL != ifDescr_val_ptr_ptr)
@@ -329,13 +331,13 @@ ifDescr_get(ifTable_rowreq_ctx * rowreq_ctx, char **ifDescr_val_ptr_ptr,
      */
     if (NULL == rowreq_ctx->data.ifDescr)
         tmp_descr = rowreq_ctx->data.ifName;
-    else 
+    else
         tmp_descr = rowreq_ctx->data.ifDescr;
     tmp_len = strlen(tmp_descr);
-    
+
     /*
      * TODO:231:o: |-> Extract the current value of the ifDescr data.
-     * set (* ifDescr_val_ptr_ptr ) and (* ifDescr_val_ptr_len_ptr ) from rowreq_ctx->data.
+     * set (* ifDescr_val_ptr_ptr ) and (* ifDescr_val_ptr_len_ptr ) from rowreq_ctx->data
      */
     /*
      * make sure there is enough space for ifDescr data
@@ -407,7 +409,7 @@ ifType_get(ifTable_rowreq_ctx * rowreq_ctx, u_long * ifType_val_ptr)
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifType data.
-     * set (* ifType_val_ptr ) from rowreq_ctx->data.
+     * set (* ifType_val_ptr ) from rowreq_ctx->data
      */
     (*ifType_val_ptr) = rowreq_ctx->data.ifType;
 
@@ -462,7 +464,7 @@ ifMtu_get(ifTable_rowreq_ctx * rowreq_ctx, long *ifMtu_val_ptr)
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifMtu data.
-     * set (* ifMtu_val_ptr ) from rowreq_ctx->data.
+     * set (* ifMtu_val_ptr ) from rowreq_ctx->data
      */
     (*ifMtu_val_ptr) = rowreq_ctx->data.ifMtu;
 
@@ -521,7 +523,7 @@ ifSpeed_get(ifTable_rowreq_ctx * rowreq_ctx, u_long * ifSpeed_val_ptr)
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifSpeed data.
-     * set (* ifSpeed_val_ptr ) from rowreq_ctx->data.
+     * set (* ifSpeed_val_ptr ) from rowreq_ctx->data
      */
     (*ifSpeed_val_ptr) = rowreq_ctx->data.ifSpeed;
 
@@ -611,7 +613,7 @@ ifPhysAddress_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifPhysAddress data.
-     * set (* ifPhysAddress_val_ptr_ptr ) and (* ifPhysAddress_val_ptr_len_ptr ) from rowreq_ctx->data.
+     * set (* ifPhysAddress_val_ptr_ptr ) and (* ifPhysAddress_val_ptr_len_ptr ) from rowreq_ctx->data
      */
     /*
      * make sure there is enough space for ifPhysAddress data
@@ -691,7 +693,7 @@ ifAdminStatus_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifAdminStatus data.
-     * set (* ifAdminStatus_val_ptr ) from rowreq_ctx->data.
+     * set (* ifAdminStatus_val_ptr ) from rowreq_ctx->data
      */
     (*ifAdminStatus_val_ptr) = rowreq_ctx->data.ifAdminStatus;
 
@@ -756,7 +758,7 @@ ifOperStatus_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifOperStatus data.
-     * set (* ifOperStatus_val_ptr ) from rowreq_ctx->data.
+     * set (* ifOperStatus_val_ptr ) from rowreq_ctx->data
      */
     (*ifOperStatus_val_ptr) = rowreq_ctx->data.ifOperStatus;
 
@@ -812,7 +814,7 @@ ifLastChange_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifLastChange data.
-     * set (* ifLastChange_val_ptr ) from rowreq_ctx->data.
+     * set (* ifLastChange_val_ptr ) from rowreq_ctx->data
      */
     (*ifLastChange_val_ptr) = rowreq_ctx->data.ifLastChange;
 
@@ -870,7 +872,7 @@ ifInOctets_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifInOctets data.
-     * set (* ifInOctets_val_ptr ) from rowreq_ctx->data.
+     * set (* ifInOctets_val_ptr ) from rowreq_ctx->data
      */
     (*ifInOctets_val_ptr) = rowreq_ctx->data.ifInOctets;
 
@@ -929,7 +931,7 @@ ifInUcastPkts_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifInUcastPkts data.
-     * set (* ifInUcastPkts_val_ptr ) from rowreq_ctx->data.
+     * set (* ifInUcastPkts_val_ptr ) from rowreq_ctx->data
      */
     (*ifInUcastPkts_val_ptr) = rowreq_ctx->data.ifInUcastPkts;
 
@@ -991,7 +993,7 @@ ifInNUcastPkts_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifInNUcastPkts data.
-     * set (* ifInNUcastPkts_val_ptr ) from rowreq_ctx->data.
+     * set (* ifInNUcastPkts_val_ptr ) from rowreq_ctx->data
      */
     (*ifInNUcastPkts_val_ptr) = rowreq_ctx->data.ifInNUcastPkts;
 
@@ -1053,7 +1055,7 @@ ifInDiscards_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifInDiscards data.
-     * set (* ifInDiscards_val_ptr ) from rowreq_ctx->data.
+     * set (* ifInDiscards_val_ptr ) from rowreq_ctx->data
      */
     (*ifInDiscards_val_ptr) = rowreq_ctx->data.ifInDiscards;
 
@@ -1115,7 +1117,7 @@ ifInErrors_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifInErrors data.
-     * set (* ifInErrors_val_ptr ) from rowreq_ctx->data.
+     * set (* ifInErrors_val_ptr ) from rowreq_ctx->data
      */
     (*ifInErrors_val_ptr) = rowreq_ctx->data.ifInErrors;
 
@@ -1180,7 +1182,7 @@ ifInUnknownProtos_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifInUnknownProtos data.
-     * set (* ifInUnknownProtos_val_ptr ) from rowreq_ctx->data.
+     * set (* ifInUnknownProtos_val_ptr ) from rowreq_ctx->data
      */
     (*ifInUnknownProtos_val_ptr) = rowreq_ctx->data.ifInUnknownProtos;
 
@@ -1238,7 +1240,7 @@ ifOutOctets_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifOutOctets data.
-     * set (* ifOutOctets_val_ptr ) from rowreq_ctx->data.
+     * set (* ifOutOctets_val_ptr ) from rowreq_ctx->data
      */
     (*ifOutOctets_val_ptr) = rowreq_ctx->data.ifOutOctets;
 
@@ -1298,7 +1300,7 @@ ifOutUcastPkts_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifOutUcastPkts data.
-     * set (* ifOutUcastPkts_val_ptr ) from rowreq_ctx->data.
+     * set (* ifOutUcastPkts_val_ptr ) from rowreq_ctx->data
      */
     (*ifOutUcastPkts_val_ptr) = rowreq_ctx->data.ifOutUcastPkts;
 
@@ -1361,7 +1363,7 @@ ifOutNUcastPkts_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifOutNUcastPkts data.
-     * set (* ifOutNUcastPkts_val_ptr ) from rowreq_ctx->data.
+     * set (* ifOutNUcastPkts_val_ptr ) from rowreq_ctx->data
      */
     (*ifOutNUcastPkts_val_ptr) = rowreq_ctx->data.ifentry->stats.onucast;
 
@@ -1421,7 +1423,7 @@ ifOutDiscards_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifOutDiscards data.
-     * set (* ifOutDiscards_val_ptr ) from rowreq_ctx->data.
+     * set (* ifOutDiscards_val_ptr ) from rowreq_ctx->data
      */
     (*ifOutDiscards_val_ptr) = rowreq_ctx->data.ifOutDiscards;
 
@@ -1482,7 +1484,7 @@ ifOutErrors_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifOutErrors data.
-     * set (* ifOutErrors_val_ptr ) from rowreq_ctx->data.
+     * set (* ifOutErrors_val_ptr ) from rowreq_ctx->data
      */
     (*ifOutErrors_val_ptr) = rowreq_ctx->data.ifOutErrors;
 
@@ -1533,7 +1535,7 @@ ifOutQLen_get(ifTable_rowreq_ctx * rowreq_ctx, u_long * ifOutQLen_val_ptr)
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifOutQLen data.
-     * set (* ifOutQLen_val_ptr ) from rowreq_ctx->data.
+     * set (* ifOutQLen_val_ptr ) from rowreq_ctx->data
      */
     (*ifOutQLen_val_ptr) = rowreq_ctx->data.ifOutQLen;
 
@@ -1613,7 +1615,7 @@ ifSpecific_get(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:231:o: |-> Extract the current value of the ifSpecific data.
-     * set (* ifSpecific_val_ptr_ptr ) and (* ifSpecific_val_ptr_len_ptr ) from rowreq_ctx->data.
+     * set (* ifSpecific_val_ptr_ptr ) and (* ifSpecific_val_ptr_len_ptr ) from rowreq_ctx->data
      */
 #ifdef IFTABLE_HAS_IFSPECIFIC
     /*
@@ -1641,7 +1643,7 @@ ifSpecific_get(ifTable_rowreq_ctx * rowreq_ctx,
     /*
      * hard coded
      */
-    netsnmp_assert( (*ifSpecific_val_ptr_len_ptr) > nullOidLen );
+    netsnmp_assert((*ifSpecific_val_ptr_len_ptr) > nullOidLen);
     (*ifSpecific_val_ptr_len_ptr) = nullOidLen;
     memcpy(*ifSpecific_val_ptr_ptr, &nullOid, nullOidLen);
 #endif
@@ -1770,8 +1772,9 @@ ifTable_undo_setup(ifTable_rowreq_ctx * rowreq_ctx)
      * set up ifTable undo information, in preparation for a set.
      */
     rowreq_ctx->undo->ifentry =
-        netsnmp_access_interface_entry_create(rowreq_ctx->data.ifentry->name);
-    if(NULL == rowreq_ctx->undo->ifentry)
+        netsnmp_access_interface_entry_create(rowreq_ctx->data.ifentry->
+                                              name);
+    if (NULL == rowreq_ctx->undo->ifentry)
         rc = MFD_ERROR;
     else
         netsnmp_access_interface_entry_copy(rowreq_ctx->undo->ifentry,
@@ -1861,8 +1864,11 @@ ifTable_commit(ifTable_rowreq_ctx * rowreq_ctx)
         /*
          * TODO:482:o: |-> commit column ifAdminStatus.
          */
-        rc = netsnmp_access_interface_entry_set_admin_status(rowreq_ctx->data.ifentry,
-                                                             rowreq_ctx->data.ifAdminStatus);
+        rc = netsnmp_access_interface_entry_set_admin_status(rowreq_ctx->
+                                                             data.ifentry,
+                                                             rowreq_ctx->
+                                                             data.
+                                                             ifAdminStatus);
         if (0 != rc) {
             snmp_log(LOG_ERR,
                      "ifTable column ifAdminStatus commit failed\n");
@@ -2009,7 +2015,7 @@ ifAdminStatus_check_value(ifTable_rowreq_ctx * rowreq_ctx,
     /*
      * we don't support test
      */
-    if(ifAdminStatus_val == IFADMINSTATUS_TESTING)
+    if (ifAdminStatus_val == IFADMINSTATUS_TESTING)
         return MFD_ERROR;
 
     return MFD_SUCCESS;         /* ifAdminStatus value not illegal */
@@ -2075,7 +2081,7 @@ ifAdminStatus_set(ifTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set ifAdminStatus value.
-     * set ifAdminStatus value in rowreq_ctx->data.
+     * set ifAdminStatus value in rowreq_ctx->data
      */
     rowreq_ctx->data.ifAdminStatus = ifAdminStatus_val;
 
