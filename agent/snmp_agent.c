@@ -3,6 +3,10 @@
  *
  * Simple Network Management Protocol (RFC 1067).
  */
+/* Portions of this file are subject to the following copyrights.  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /***********************************************************
 	Copyright 1988, 1989 by Carnegie Mellon University
 
@@ -24,7 +28,12 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
-
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights 
+ * reserved.  Use is subject to license terms specified in the 
+ * COPYING file distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
@@ -1398,6 +1407,15 @@ handle_snmp_packet(int op, netsnmp_session * session, int reqid,
         return 1;
     }
 
+    /*
+     * send snmpv3 authfail trap.
+     */
+    if (pdu->version  == SNMP_VERSION_3 && 
+        session->s_snmp_errno == SNMPERR_USM_AUTHENTICATIONFAILURE) {
+           send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
+           return 1;
+    } 
+	
     if (magic == NULL) {
         asp = init_agent_snmp_session(session, pdu);
         status = SNMP_ERR_NOERROR;
