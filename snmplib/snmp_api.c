@@ -3910,9 +3910,12 @@ snmp_sess_select_info(void *sessp,
     gettimeofday(&now,(struct timezone *)0);
     /*Now = now;*/
 
-    if (next_alarm != 0 && earliest.tv_sec > next_alarm) {
-      earliest.tv_sec = next_alarm;
-      earliest.tv_usec = 0;
+    if (next_alarm) {
+	next_alarm += now.tv_sec;
+	if (!timerisset(&earliest) || earliest.tv_sec > next_alarm) {
+	    earliest.tv_sec = next_alarm;
+	    earliest.tv_usec = 0;
+	}
     }
 
     if (timer_set || earliest.tv_sec < now.tv_sec) {
