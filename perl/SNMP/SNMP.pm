@@ -676,8 +676,12 @@ sub gettable {
     }
 
     while ($#$vbl > -1 && !$this->{ErrorNum}) {
-	print STDERR "ack: gettable results not appropriate\n" && return
-	  if ($#$vbl + 1 != ($#$stopconds + 1) * $repeatcount);
+	if ($#$vbl + 1 != ($#$stopconds + 1) * $repeatcount) {
+	    print STDERR "ack: gettable results not appropriate\n";
+	    my @k = keys(%result_hash);
+	    last if ($#k > -1);  # bail with what we have
+	    return;
+	}
 
 	$varbinds = [];
 	my $newstopconds;
