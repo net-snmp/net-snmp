@@ -126,6 +126,7 @@ struct trapVar {
 /* from snmp.c*/
 extern u_char	sid[];	/* size SID_MAX_LEN */
 extern char *snmp_detail;
+extern int snmp_errno;
 
 
 /*

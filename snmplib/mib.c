@@ -234,11 +234,11 @@ sprint_octet_string(buf, var, enums, hint, units)
 		    width = width * 10 + *hint++ - '0';
 		code = *hint++;
 		if ((ch = *hint) && ch != '*' && (ch < '0' || ch > '9')
-                    && (width != 0 || ch != 'x' && ch != 'd' && ch != 'o'))
+                    && (width != 0 || (ch != 'x' && ch != 'd' && ch != 'o')))
 		    separ = *hint++;
 		else separ = 0;
 		if ((ch = *hint) && ch != '*' && (ch < '0' || ch > '9')
-                    && (width != 0 || ch != 'x' && ch != 'd' && ch != 'o'))
+                    && (width != 0 || (ch != 'x' && ch != 'd' && ch != 'o')))
 		    term = *hint++;
 		else term = 0;
 		if (width == 0) width = 1;

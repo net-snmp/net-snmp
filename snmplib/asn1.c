@@ -743,7 +743,7 @@ asn_build_objid(data, datalength, type, objid, objidlength)
             *data++ = (u_char)(objid_val & 0x07f);
             break;
         }
-    }    
+    }
 
     /* return the length and data ptr */
     *datalength -= asnlength;

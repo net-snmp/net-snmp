@@ -66,7 +66,6 @@ void DEBUGP __P((const char *, ...));
 #else
 void DEBUGP __P((va_alist));
 #endif
-void set_do_debugging __P((int));
 
 #ifndef HAVE_STRDUP
 char *strdup __P((char *));
