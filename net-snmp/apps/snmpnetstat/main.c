@@ -140,7 +140,6 @@ usage(void)
     fprintf(stderr, "NET-SNMP version: %s\n", netsnmp_get_version());
     fprintf(stderr, "  -v [1 | 2c ]   SNMP version\n");
     fprintf(stderr, "  -V             display version number\n");
-    fprintf(stderr, "  -p port        specify agent port number\n");
     fprintf(stderr, "  -c community   specify community name\n");
     fprintf(stderr, "  -t timeout     SNMP packet timeout (seconds)\n");
     fprintf(stderr,
@@ -169,7 +168,6 @@ main(int argc, char *argv[])
     char           *community = NULL;
     char           *argp;
     netsnmp_session session;
-    int             dest_port = SNMP_PORT;
     int             timeout = SNMP_DEFAULT_TIMEOUT;
     int             version = SNMP_DEFAULT_VERSION;
     int             arg;
@@ -181,7 +179,7 @@ main(int argc, char *argv[])
      * Usage: snmpnetstatwalk -v 1 [-q] hostname community ...      or:
      * Usage: snmpnetstat [-v 2 ] [-q] hostname noAuth     ...
      */
-    while ((arg = getopt(argc, argv, "VhdqD:p:t:c:v:aionrsP:I:")) != EOF) {
+    while ((arg = getopt(argc, argv, "VhdqD:t:c:v:aionrsP:I:")) != EOF) {
         switch (arg) {
         case 'V':
             fprintf(stderr, "NET-SNMP version: %s\n",
@@ -204,9 +202,6 @@ main(int argc, char *argv[])
         case 'D':
             debug_register_tokens(optarg);
             snmp_set_do_debugging(1);
-            break;
-        case 'p':
-            dest_port = atoi(optarg);
             break;
 
         case 't':
@@ -310,7 +305,6 @@ main(int argc, char *argv[])
 
     snmp_sess_init(&session);
     session.peername = hostname;
-    session.remote_port = dest_port;
     session.timeout = timeout;
     if (version == SNMP_VERSION_1 || version == SNMP_VERSION_2c) {
         if (!community
