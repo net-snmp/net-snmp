@@ -116,6 +116,7 @@ void usage (void)
   fprintf(stderr, "  -f config\tload configuration from file\n");
   fprintf(stderr, "  -p period\tspecifies the poll period\n");
   fprintf(stderr, "  -P peaks\treporting period in poll periods\n");
+  fprintf(stderr, "  -v vars/pkt\tnumber of variables per packet\n");
   fprintf(stderr, "  -k\t\tkeep seconds in output time\n");
   fprintf(stderr, "  -m\t\tshow max values\n");
   fprintf(stderr, "  -S\t\tlog to a sum file\n");
