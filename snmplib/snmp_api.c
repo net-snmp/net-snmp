@@ -2095,12 +2095,11 @@ static int
 snmp_parse_version (u_char *data, size_t length)
 {
   u_char type;
-  long version;
+  long version = SNMPERR_BAD_VERSION;
 
-  data = asn_parse_header(data, &length, &type);
-  if (!data) return SNMPERR_BAD_VERSION;
-
-  if (type == (ASN_SEQUENCE | ASN_CONSTRUCTOR)) {
+  data = asn_parse_sequence(data, &length, &type,
+                        (ASN_SEQUENCE | ASN_CONSTRUCTOR), "version");
+  if (data) {
     data = asn_parse_int(data, &length, &type, &version, sizeof(version));
     if (!data) return SNMPERR_BAD_VERSION;
   }
@@ -2135,14 +2134,10 @@ snmpv3_parse(
 
   /* message is an ASN.1 SEQUENCE
    */
-  data = asn_parse_header(data, length, &type);
+  data = asn_parse_sequence(data, length, &type,
+                        (ASN_SEQUENCE | ASN_CONSTRUCTOR), "message");
   if (data == NULL){
-    ERROR_MSG("bad header");
-    snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
-    return SNMPERR_ASN_PARSE_ERR;
-  }
-  if (type != (ASN_SEQUENCE | ASN_CONSTRUCTOR)){
-    ERROR_MSG("wrong message header type");
+    /* error msg detail is set */
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     return SNMPERR_ASN_PARSE_ERR;
   }
@@ -2161,14 +2156,10 @@ snmpv3_parse(
    */
   cp	  = data;
   asn_len = *length;
-  data	  = asn_parse_header(data, &asn_len, &type);
+  data = asn_parse_sequence(data, &asn_len, &type,
+                        (ASN_SEQUENCE | ASN_CONSTRUCTOR), "msgGlobalData");
   if (data == NULL){
-    ERROR_MSG("bad header");
-    snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
-    return SNMPERR_ASN_PARSE_ERR;
-  }
-  if (type != (ASN_SEQUENCE | ASN_CONSTRUCTOR)){
-    ERROR_MSG("wrong msgGlobalData  header type");
+    /* error msg detail is set */
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     return SNMPERR_ASN_PARSE_ERR;
   }
@@ -2662,10 +2653,9 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
 
   /* get header for variable-bindings sequence */
   DEBUGDUMPHEADER("dump_recv", "VarBindList:\n");
-  data = asn_parse_header(data, length, &type);
+  data = asn_parse_sequence(data, length, &type,
+                        (ASN_SEQUENCE | ASN_CONSTRUCTOR), "varbinds");
   if (data == NULL)
-    return -1;
-  if (type != (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR))
     return -1;
 
     /* get each varBind sequence */
@@ -2808,13 +2798,9 @@ snmpv3_scopedPDU_parse(struct snmp_pdu *pdu,
 
   pdu->command = 0; /* initialize so we know if it got parsed */
   asn_len = *length;
-  data = asn_parse_header(cp, &asn_len, &type);
+  data = asn_parse_sequence(cp, &asn_len, &type,
+                        (ASN_SEQUENCE | ASN_CONSTRUCTOR), "plaintext scopedPDU");
   if (data == NULL){
-    ERROR_MSG("bad plaintext scopedPDU header");
-    return NULL;
-  }
-  if (type != (ASN_SEQUENCE | ASN_CONSTRUCTOR)){
-    ERROR_MSG("wrong plaintext scopedPDU header type");
     return NULL;
   }
   *length -= data - cp;
