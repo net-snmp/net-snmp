@@ -169,8 +169,6 @@ run_alarms(void) {
   unsigned int clientreg;
   struct timeval t_now;
 
-  DEBUGMSGTL(("snmp_alarm", "looking for alarms to run...\n"));
-
   /*  Loop through everything we have repeatedly looking for the next thing to
       call until all events are finally in the future again.  */
 
@@ -202,7 +200,6 @@ run_alarms(void) {
       done = 1;
     }
   }
-  DEBUGMSGTL(("snmp_alarm", "run_alarms done\n"));
 }
 
 
