@@ -64,6 +64,17 @@
  *  @{
  */
 
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+
 #include <net-snmp/net-snmp-config.h>
 
 #if HAVE_STRING_H
@@ -206,7 +217,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     size_t          coloid_len;
     int             ret;
     static oid      myname[MAX_OID_LEN];
-    static int      myname_len;
+    size_t          myname_len;
     int             oldmode = 0;
     netsnmp_iterator_info *iinfo;
     int notdone;
@@ -418,7 +429,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                                 netsnmp_oid_stash_add_data(cinfo, myname,
                                                            myname_len, vb);
                             } else {
-                                snmp_free_varbind(vb);
+                                snmp_free_var(vb);
                             }
                         }
                         reqinfo->mode = MODE_GET_STASH;
