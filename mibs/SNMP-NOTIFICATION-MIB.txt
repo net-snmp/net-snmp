@@ -65,7 +65,7 @@ snmpNotificationMIB MODULE-IDENTITY
    REVISION    "9707140000Z"
    DESCRIPTION
        "The initial revision."
-   ::= { snmpModules 16 }
+   ::= { snmpModules 13 }
 
 snmpNotifyObjects       OBJECT IDENTIFIER ::=
 					 { snmpNotificationMIB 1 }
