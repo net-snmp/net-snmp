@@ -202,6 +202,11 @@ STARTAGENT() {
 	echo "running: snmpd $COMMANDARGS"
    fi
    snmpd $COMMANDARGS
+
+    ## Give some agents time to settle ... A Better Way Will Be Found
+    if [ `uname -s` = "AIX" ]; then
+	sleep 4;
+    fi
 }
 
 STOPAGENT() {
