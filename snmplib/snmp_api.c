@@ -714,6 +714,8 @@ register_default_handlers(void)
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "persistentDir",
 	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PERSISTENT_DIR);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "tempFilePattern",
+	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_TEMP_FILE_PATTERN);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noDisplayHint",
 	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_DISPLAY_HINT);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "16bitIDs",

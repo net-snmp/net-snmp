@@ -799,6 +799,42 @@ get_persistent_directory()
 				  NETSNMP_DS_LIB_PERSISTENT_DIR));
 }
 
+/*******************************************************************-o-******
+ * set_temp_file_pattern
+ *
+ * Parameters:
+ *      char *pattern - value of the file pattern
+ * Sets the temp file pattern. 
+ * Multiple patterns may not be specified.
+ * (However, this is not checked)
+ */
+void
+set_temp_file_pattern(const char *pattern)
+{
+    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
+			  NETSNMP_DS_LIB_TEMP_FILE_PATTERN, pattern);
+}
+
+/*******************************************************************-o-******
+ * get_temp_file_pattern
+ *
+ * Parameters: -
+ * Function will retrieve the temp file pattern value.
+ * First check whether the value is set.
+ * If not set give it the default value.
+ * Return the value. 
+ * We always retrieve it new, since we have to do it anyway if it is just set.
+ */
+const char     *
+get_temp_file_pattern()
+{
+    if (NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				      NETSNMP_DS_LIB_TEMP_FILE_PATTERN)) {
+        set_temp_file_pattern(NETSNMP_TEMP_FILE_PATTERN);
+    }
+    return (netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				  NETSNMP_DS_LIB_TEMP_FILE_PATTERN));
+}
 
 /*******************************************************************-o-******
  * read_config_files
