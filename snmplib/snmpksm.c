@@ -363,6 +363,8 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 #ifdef MIT_NEW_CRYPTO
     krb5_data       input;
     krb5_enc_data   output;
+    unsigned int    numcksumtypes;
+    krb5_cksumtype  *cksumtype_array;
 #else                           /* MIT_NEW_CRYPTO */
     krb5_encrypt_block eblock;
 #endif                          /* MIT_NEW_CRYPTO */
@@ -370,7 +372,7 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     unsigned char  *encrypted_data = NULL;
     int             zero = 0, i;
     u_char         *cksum_pointer, *endp = *parms->wholeMsg;
-    krb5_cksumtype  cksumtype = CKSUMTYPE_RSA_MD5_DES;
+    krb5_cksumtype  cksumtype;
     krb5_checksum   pdu_checksum;
     u_char         **wholeMsg = parms->wholeMsg;
     size_t	   *offset = parms->wholeMsgOffset, seq_offset;
@@ -680,14 +682,60 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     }
 
     /*
-     * Hardcode checksum type FOR NOW! XXX (but make sure the response
-     * checksum type is the same as the request).
-     *
-     * Not sure what we're supposed to do about checksum negotiation.
+     * Now, we need to pick the "right" checksum algorithm.  For old
+     * crypto, just pick CKSUMTYPE_RSA_MD5_DES; for new crypto, pick
+     * one of the "approved" ones.
      */
 
+#ifdef MIT_NEW_CRYPTO
+    retcode = krb5_c_keyed_checksum_types(kcontext, subkey->enctype,
+                                          &numcksumtypes, &cksumtype_array);
+
+    if (retcode) {
+	DEBUGMSGTL(("ksm", "Unable to find appropriate keyed checksum: %s\n",
+		    error_message(retcode)));
+	snmp_set_detail(error_message(retcode));
+        retval = SNMPERR_KRB5;
+        goto error;
+    }
+
+    if (numcksumtypes <= 0) {
+	DEBUGMSGTL(("ksm", "We received a list of zero cksumtypes for this "
+		    "enctype (%d)\n", subkey->enctype));
+	snmp_set_detail("No valid checksum type for this encryption type");
+	retval = SNMPERR_KRB5;
+	goto error;
+    }
+
+    /*
+     * It's not clear to me from the API which checksum you're supposed
+     * to support, so I'm taking a guess at the first one
+     */
+
+    cksumtype = cksumtype_array[0];
+
+    krb5_free_cksumtypes(kcontext, cksumtype_array);
+
+    DEBUGMSGTL(("ksm", "KSM: Choosing checksum type of %d (subkey type "
+		"of %d)\n", cksumtype, subkey->enctype));
+
+    retcode = krb5_c_checksum_length(kcontext, cksumtype, &blocksize);
+
+    if (retcode) {
+        DEBUGMSGTL(("ksm", "Unable to determine checksum length: %s\n",
+                    error_message(retcode)));
+        snmp_set_detail(error_message(retcode));
+        retval = SNMPERR_KRB5;
+        goto error;
+    }
+
+    pdu_checksum.length = blocksize;
+
+#else /* MIT_NEW_CRYPTO */
     if (ksm_state)
         cksumtype = ksm_state->cksumtype;
+    else
+	cksumtype = CKSUMTYPE_RSA_MD5_DES;
 
     if (!is_keyed_cksum(cksumtype)) {
         DEBUGMSGTL(("ksm", "Checksum type %d is not a keyed checksum\n",
@@ -704,25 +752,11 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
         retval = SNMPERR_KRB5;
         goto error;
     }
-#ifdef MIT_NEW_CRYPTO
-    retcode = krb5_c_checksum_length(kcontext, cksumtype, &blocksize);
-
-    if (retcode) {
-        DEBUGMSGTL(("ksm", "Unable to determine checksum length: %s\n",
-                    error_message(retcode)));
-        snmp_set_detail(error_message(retcode));
-        retval = SNMPERR_KRB5;
-        goto error;
-    }
-
-    pdu_checksum.length = blocksize;
-
-#else                           /* MIT_NEW_CRYPTO */
 
     pdu_checksum.length = krb5_checksum_size(kcontext, cksumtype);
     pdu_checksum.checksum_type = cksumtype;
 
-#endif                          /* MIT_NEW_CRYPTO */
+#endif /* MIT_NEW_CRYPTO */
 
     /*
      * Note that here, we're just leaving blank space for the checksum;
@@ -1024,6 +1058,31 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
 
     cksumtype = temp;
 
+#ifdef MIT_NEW_CRYPTO
+    if (!krb5_c_valid_cksumtype(cksumtype)) {
+        DEBUGMSGTL(("ksm", "Invalid checksum type (%d)\n", cksumtype));
+
+        retval = SNMPERR_KRB5;
+        snmp_set_detail("Invalid checksum type");
+        goto error;
+    }
+
+    if (!krb5_c_is_keyed_cksum(cksumtype)) {
+        DEBUGMSGTL(("ksm", "Checksum type %d is not a keyed checksum\n",
+                    cksumtype));
+        snmp_set_detail("Checksum is not a keyed checksum");
+        retval = SNMPERR_KRB5;
+        goto error;
+    }
+
+    if (!krb5_c_is_coll_proof_cksum(cksumtype)) {
+        DEBUGMSGTL(("ksm", "Checksum type %d is not a collision-proof "
+                    "checksum\n", cksumtype));
+        snmp_set_detail("Checksum is not a collision-proof checksum");
+        retval = SNMPERR_KRB5;
+        goto error;
+    }
+#else /* ! MIT_NEW_CRYPTO */
     if (!valid_cksumtype(cksumtype)) {
         DEBUGMSGTL(("ksm", "Invalid checksum type (%d)\n", cksumtype));
 
@@ -1047,6 +1106,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
         retval = SNMPERR_KRB5;
         goto error;
     }
+#endif /* MIT_NEW_CRYPTO */
 
     checksum.checksum_type = cksumtype;
 
