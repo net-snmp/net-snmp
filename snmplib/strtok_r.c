@@ -33,7 +33,10 @@
 
 #if !HAVE_STRTOK_R
 
+#ifndef WIN32
 #include <sys/cdefs.h>
+#endif
+
 #include <string.h>
 
 /*
