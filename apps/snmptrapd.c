@@ -472,7 +472,7 @@ int snmp_input(int op,
 		  (void) format_trap(out_bfr, SPRINT_MAX_LEN, trap1_fmt_str,
 				     pdu, transport);
 		}
-                snmp_log(LOG_INFO, out_bfr);
+                snmp_log(LOG_INFO, "%s", out_bfr);
 	    }
 	    if (Syslog && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 	    	varbufidx=0;
@@ -549,7 +549,7 @@ int snmp_input(int op,
                 else
                     (void) format_trap (out_bfr, SPRINT_MAX_LEN,
                                         trap2_fmt_str, pdu, transport);
-                snmp_log(LOG_INFO, out_bfr);
+                snmp_log(LOG_INFO, "%s", out_bfr);
 	    }
 	    if (Syslog) {
 	    	varbufidx=0;
@@ -718,6 +718,7 @@ int main(int argc, char *argv[])
     int dofork=1;
     char *cp;
     int tcp=0;
+    char *trap1_fmt_str_remember = NULL;
 #if HAVE_GETPID
 	FILE           *PID;
         char *pid_file = NULL;
@@ -880,7 +881,7 @@ int main(int argc, char *argv[])
             break;
 
 	case 'F':
-	    trap1_fmt_str = optarg;
+	    trap1_fmt_str_remember = optarg;
 	    break;
 
 	default:
@@ -900,6 +901,10 @@ int main(int argc, char *argv[])
 
     /* Initialize the world. Create initial user */
     init_snmp("snmptrapd");
+    if (trap1_fmt_str_remember) {
+        free_trap1_fmt();
+        trap1_fmt_str = strdup(trap1_fmt_str_remember);
+    }
 
 #ifndef WIN32
     /* fork the process to the background if we are not printing to stdout */
@@ -1011,6 +1016,10 @@ int main(int argc, char *argv[])
 	    if (Syslog)
 		syslog(LOG_INFO, "Snmptrapd reconfiguring");
 	    update_config();
+            if (trap1_fmt_str_remember) {
+                free_trap1_fmt();
+                trap1_fmt_str = strdup(trap1_fmt_str_remember);
+            }
 	    reconfig = 0;
 	}
 	numfds = 0;
