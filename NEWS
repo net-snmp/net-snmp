@@ -18,6 +18,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
  Ports:
    - Many many significant Windows improvements.
+     - AgentX support is working again under windows.
+     - SCM support is built into the agent to allow the agent to be
+       started as a windows service.
+     - MSDOS names are supported in path names.
      - A win32 build script in win32/build.pl
      - Support for the MinGW compiler
      - (see the README.win32 file for details on new ports)
