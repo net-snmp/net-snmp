@@ -367,6 +367,27 @@ If you need to localize the user to a particular EngineID (this is
 useful mostly in the similar snmptrapd.conf file), you can use the -e
 argument to specify an EngineID as a hex value (EG, "0x01020304").
 .IP
+If you want to generate either your master or localized keys directly,
+replace the given password with a hexstring (preceeded by a "0x") and
+precede the hex string by a -m or -l token (respectively).  EGs:
+.IP
+.RS
+.nf
+[these keys are *not* secure but are easy to visually parse for
+counting purposes.  Please generate random keys instead of using
+these examples]
+
+createUser myuser SHA -l 0x0001020304050607080900010203040506070809 AES -l 0x00010203040506070809000102030405
+createUser myuser SHA -m 0x0001020304050607080900010203040506070809 AES -m 0x0001020304050607080900010203040506070809
+.fi
+.RE
+.IP
+Due to the way localization happens, localized privacy keys are
+expected to be the length needed by the algorithm (128 bits for all
+supported algorithms).  Master encryption keys, though, need to be the
+length required by the authentication algorithm not the length
+required by the encrypting algorithm (MD5: 16 bytes, SHA: 20 bytes).
+.IP
 .SH SETTING SYSTEM INFORMATION
 .IP "syslocation STRING"
 .IP "syscontact STRING"
