@@ -161,6 +161,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "ip.h"
 #include "../kernel.h"
 #include "interfaces.h"
+#include "struct.h"
 #include "util_funcs.h"
 
 #ifndef  MIN

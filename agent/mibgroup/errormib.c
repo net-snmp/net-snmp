@@ -104,6 +104,7 @@
 #endif
 
 #include "mibincl.h"
+#include "struct.h"
 #include "errormib.h"
 #include "util_funcs.h"
 
