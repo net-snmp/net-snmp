@@ -76,41 +76,33 @@ INSTALLATION
 
   See the INSTALL file distributed with this package.
 
-CODE UPDATE ANNOUNCEMENTS / MAILING LIST
+CODE UPDATE ANNOUNCEMENTS / MAILING LIST(s)
 
   I hate broadcasting announce messages, so there is a mailing list
   setup to handle release announcements.  Anytime I put new software
   out for ftp, I'll mail it to ucd-snmp-announce@ece.ucdavis.edu.  To
   subscribe/unsubscribe yourself to/from this list, mail a note to
-  ucd-snmp-announce-request@ece.ucdavis.edu with a subject line of
+  ucd-snmp-announce-request@ec.eucdavis.edu with a subject line of
   'subscribe' or 'unsubscribe'.  I will post new announcements on a
   very infrequent basis to the other channels (the snmp mailing lists
   and comp.protocols.snmp), but only for major code revisions and not
   for patches or small feature upgrades.
 
+  The above mailing list is not a general purpose discussion list.  A
+  seperate list has been created for that purpose.  To subscribe to
+  it, mail a note to ucd-snmp-request@ec.eucdavis.edu with a
+  subject line of 'subscribe' or 'unsubscribe'.  To use it, mail to 
+  ucd-snmp@ec.eucdavis.edu.
+
 EXAMPLE USAGE 
 
   See the 'EXAMPLE.conf' file in this directory (you must build the
-  package for this file to be generated).
+  package for this file to be generated).  Do NOT look at the
+  EXAMPLE.conf.def file.  It will only confuse you.
 
 CONFIGURATION
 
-  See man/snmpd.conf.5
-
-MISC
-
-  - snmpd now detaches from the shell unless -f (don't fork) is
-    specified on the command line.
-
-  - Mib table is now qsorted at run time and the extensible variables are
-    sorted in at this time.  This brings the agent up to correct
-    SNMPwalk/getnext protocols.  You can now walk the entire tree
-    including the extensible sections and it won't stop.
-
-    * This has an added bonus of checking the mib table
-      (agent/snmp_vars.c) for correct order.  I have added things to the
-      wrong location too many times and caused the agent to function
-      incorrectly.  Major win.
+  See man/snmpd.conf.5 and the EXAMPLE file mentioned above.
 
 SNMPv1 vs. SNMPv2
 
