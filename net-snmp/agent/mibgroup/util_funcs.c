@@ -224,9 +224,15 @@ int get_exec_output(ex)
           return 0;
         }
         fcntl(fd[0],F_SETFL,O_NONBLOCK);  /* don't block on reads */
+#ifdef HAVE_USLEEP
+        for (readcount = 0; readcount <= MAXREADCOUNT*100 &&
+               (cachebytes = read(fd[0],(void *)cache,MAXCACHESIZE));
+             readcount++) {
+#else
         for (readcount = 0; readcount <= MAXREADCOUNT &&
-                         (cachebytes = read(fd[0],(void *) cache,MAXCACHESIZE));
-                       readcount++) {
+               (cachebytes = read(fd[0],(void *)cache,MAXCACHESIZE));
+             readcount++) {
+#endif
           if (cachebytes > 0)
             write(cfd,(void *) cache, cachebytes);
           else if (cachebytes == -1 && errno != EAGAIN) {
@@ -234,7 +240,11 @@ int get_exec_output(ex)
             break;
           }
           else
-            sleep (1);
+#ifdef HAVE_USLEEP
+            usleep (10000);	/* sleeps for 0.01 sec */
+#else
+	    sleep (1);
+#endif
         }
         close(cfd);
         close(fd[0]);
