@@ -35,6 +35,7 @@ EXPORTS
 	init_mib_internals
 	print_variable
 	sprint_variable
+	sprint_asciistring
 	print_value
 	printI64
 	sprint_value
@@ -73,6 +74,7 @@ EXPORTS
 	readdir
 	closedir
 	gettimeofday
+	mkdirhier
 	winsock_startup
 	winsock_cleanup
 	get_myaddr
@@ -110,6 +112,8 @@ EXPORTS
 	snmp_synch_setup
 	snmp_synch_response
 	snmp_duplicate_objid
+	snmp_get_next_sessid
+	snmp_get_next_transid
 	snmp_increment_statistic
 	snmp_increment_statistic_by
 	snmp_get_statistic
@@ -143,6 +147,8 @@ EXPORTS
 	snmp_sess_synch_response
 	snmp_mib_toggle_options
 	snmp_mib_toggle_options_usage
+	read_config_read_data
+	read_config_store_data
 	read_config_print_usage
 	read_config_with_type
 	read_config_store
@@ -158,6 +164,7 @@ EXPORTS
 	snmp_set_do_debugging
 	snmp_get_do_debugging
 	debug_indent
+	debug_indent_add
 	debug_is_token_registered
 	debugmsg
 	debugmsg_hex
@@ -254,6 +261,8 @@ EXPORTS
 	vacm_scanAccessNext
 	vacm_scanViewInit
 	vacm_scanViewNext
+	snmp_synch_response_cb
+	snmp_clone_varbind
 	snmp_free_varbind
 	snmp_get_dump_packet
 	snmp_get_quick_print
