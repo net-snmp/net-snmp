@@ -58,9 +58,6 @@ SOFTWARE.
 #include "snmp_client.h"
 
 #include "snmp_vars.h"
-#if USING_MIBII_SNMP_MIB_MODULE
-#include "mibgroup/mibII/snmp_mib.h"
-#endif
 #include "snmpd.h"
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
@@ -69,9 +66,6 @@ SOFTWARE.
 #include "snmp_logging.h"
 #include "snmp_debug.h"
 #include "mib_module_config.h"
-#if USING_MIBII_VACM_VARS_MODULE
-#include "mibgroup/mibII/vacm_vars.h"
-#endif
 
 #include "default_store.h"
 #include "ds_agent.h"

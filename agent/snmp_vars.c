@@ -81,19 +81,16 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "snmp_vars.h"
 
 #include "mibgroup/struct.h"
-#include "mibgroup/mib_module_includes.h"
 #include "read_config.h"
 #include "snmp_vars.h"
 #include "agent_read_config.h"
 #include "mib_module_config.h"
 #include "agent_registry.h"
-#if USING_MIBII_VACM_VARS_MODULE
-#include "mibgroup/mibII/vacm_vars.h"
-#endif
 #include "agent_registry.h"
 #include "transform_oids.h"
 #include "callback.h"
 #include "snmpd.h"
+#include "mibgroup/mib_module_includes.h"
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b)) 

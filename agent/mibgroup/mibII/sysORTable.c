@@ -32,6 +32,7 @@
 #include "../../snmpd.h"
 #include "default_store.h"
 #include "ds_agent.h"
+#include "callback.h"
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 #include "agentx/subagent.h"
