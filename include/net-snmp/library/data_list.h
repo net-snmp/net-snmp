@@ -17,6 +17,8 @@ extern          "C" {
 #include <net-snmp/library/tools.h>
 
     typedef void    (Netsnmp_Free_List_Data) (void *);
+    typedef int     (Netsnmp_Save_List_Data) (char *buf, size_t buf_len, void *);
+    typedef void *  (Netsnmp_Read_List_Data) (char *buf, size_t buf_len);
 
     typedef struct netsnmp_data_list_s {
         struct netsnmp_data_list_s *next;
@@ -25,6 +27,14 @@ extern          "C" {
         Netsnmp_Free_List_Data *free_func;      /* must know how to free netsnmp_data_list->data */
     } netsnmp_data_list;
 
+    typedef struct netsnmp_data_list_saveinfo_s {
+       netsnmp_data_list **datalist;
+       const char *type;
+       const char *token;
+       Netsnmp_Save_List_Data *data_list_save_ptr;
+       Netsnmp_Read_List_Data *data_list_read_ptr;
+       Netsnmp_Free_List_Data *data_list_free_ptr;
+    } netsnmp_data_list_saveinfo;
 
     inline netsnmp_data_list *netsnmp_create_data_list(const char *,
                                                        void *,
@@ -38,10 +48,22 @@ extern          "C" {
     void            netsnmp_free_all_list_data(netsnmp_data_list *head);        /* multiple */
     int             netsnmp_remove_list_node(netsnmp_data_list **realhead,
                                              const char *name);
-    inline void    *netsnmp_get_list_node(netsnmp_data_list *head,
+    inline netsnmp_data_list *netsnmp_get_list_node(netsnmp_data_list *head,
                                           const char *name);
 
 
+    void
+    netsnmp_register_save_list(netsnmp_data_list **datalist,
+                               const char *type, const char *token,
+                               Netsnmp_Save_List_Data *data_list_save_ptr,
+                               Netsnmp_Read_List_Data *data_list_read_ptr,
+                               Netsnmp_Free_List_Data *data_list_free_ptr);
+    int
+    netsnmp_save_all_data(netsnmp_data_list *head,
+                          const char *type, const char *token,
+                          Netsnmp_Save_List_Data * data_list_save_ptr);
+    SNMPCallback netsnmp_save_all_data_callback;
+    void netsnmp_read_data_callback(const char *token, char *line);
 #ifdef __cplusplus
 }
 #endif
