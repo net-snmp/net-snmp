@@ -27,7 +27,6 @@
      */
 #include <winsock2.h>
 #include <ws2tcpip.h>
-typedef unsigned char uint8_t;
 #undef  HAVE_IF_NAMETOINDEX
 
 extern int         inet_pton(int, const char*, void*);
@@ -648,20 +647,20 @@ inet_make_mask_addr(int pf, void *dst, int masklength)
 
 
         for (i = 0; i < 16; i++) {
-            (*(uint8_t *) (&((struct in6_addr *) dst)->s6_addr[i])) = 0x00;
+            (*(u_char *) (&((struct in6_addr *) dst)->s6_addr[i])) = 0x00;
         }
 
         j = (int) masklength / 8;
         jj = masklength % 8;
 
         for (i = 0; i < j; i++) {
-            (*(uint8_t *) (&((struct in6_addr *) dst)->s6_addr[i])) = 0xff;
+            (*(u_char *) (&((struct in6_addr *) dst)->s6_addr[i])) = 0xff;
         }
         while (jj--) {
             mask |= maskbit;
             maskbit >>= 1;
         }
-        (*(uint8_t *) (&((struct in6_addr *) dst)->s6_addr[j])) = mask;
+        (*(u_char *) (&((struct in6_addr *) dst)->s6_addr[j])) = mask;
         break;
     default:
         return -1;              /* unsupported protocol family */
@@ -696,8 +695,8 @@ inet_addr_complement(int pf, void *src, void *dst)
         break;
     case PF_INET6:
         for (i = 0; i < 16; i++) {
-            (*(uint8_t *) (&((struct in6_addr *) dst)->s6_addr[i])) =
-                (~(*(uint8_t *) (&((struct in6_addr *) src)->s6_addr[i])))
+            (*(u_char *) (&((struct in6_addr *) dst)->s6_addr[i])) =
+                (~(*(u_char *) (&((struct in6_addr *) src)->s6_addr[i])))
                 & 0xff;
         }
         break;
@@ -734,9 +733,9 @@ inet_addr_and(int pf, void *src1, void *src2, void *dst)
 
     case PF_INET6:
         for (i = 0; i < 16; i++) {
-            (*(uint8_t *) (&((struct in6_addr *) dst)->s6_addr[i])) =
-                (*(uint8_t *) (&((struct in6_addr *) src1)->s6_addr[i])) &
-                (*(uint8_t *) (&((struct in6_addr *) src2)->s6_addr[i]));
+            (*(u_char *) (&((struct in6_addr *) dst)->s6_addr[i])) =
+                (*(u_char *) (&((struct in6_addr *) src1)->s6_addr[i])) &
+                (*(u_char *) (&((struct in6_addr *) src2)->s6_addr[i]));
         }
         break;
     default:
