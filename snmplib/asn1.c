@@ -1032,12 +1032,9 @@ asn_parse_objid(u_char * data,
         } else if (subidentifier < 80) {
             objid[0] = 1;
             objid[1] = subidentifier - 40;
-        } else if (subidentifier < 120) {
+        } else {
             objid[0] = 2;
             objid[1] = subidentifier - 80;
-        } else {
-            objid[1] = (subidentifier % 40);
-            objid[0] = ((subidentifier - objid[1]) / 40);
         }
     }
 
@@ -1097,6 +1094,9 @@ asn_build_objid(u_char * data,
          */
         objid_val = 0;
         objidlength = 2;
+    } else if (objid[0] > 2) {
+        ERROR_MSG("build objid: bad first subidentifier");
+        return NULL;
     } else if (objidlength == 1) {
         /*
          * encode the first value 
@@ -1108,7 +1108,8 @@ asn_build_objid(u_char * data,
         /*
          * combine the first two values 
          */
-        if (op[1] > 40) {
+        if ((op[1] > 40) &&
+            (op[0] < 2)) {
             ERROR_MSG("build objid: bad second subidentifier");
             return NULL;
         }
@@ -1146,7 +1147,7 @@ asn_build_objid(u_char * data,
         i++;
         if (i >= (int) objidlength)
             break;
-        objid_val = *op++;
+        objid_val = *op++;	/* XXX - doesn't handle 2.X (X > 40) */
     }
 
     /*
@@ -2435,6 +2436,9 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
 
         *(*pkt + *pkt_len - (++*offset)) = 0;
         *(*pkt + *pkt_len - (++*offset)) = 0;
+    } else if (objid[0] > 2) {
+        ERROR_MSG("build objid: bad first subidentifier");
+        return NULL;
     } else if (objidlength == 1) {
         /*
          * Encode the first value.  
@@ -2469,15 +2473,28 @@ asn_realloc_rbuild_objid(u_char ** pkt, size_t * pkt_len,
         /*
          * Combine the first two values.  
          */
-        if (op[1] > 40) {
+        if ((objid[1] > 40) &&
+            (objid[0] < 2)) {
             ERROR_MSG("build objid: bad second subidentifier");
             return 0;
         }
+        tmpint = ((objid[0] * 40) + objid[1]);
         if (((*pkt_len - *offset) < 1)
             && !(r && asn_realloc(pkt, pkt_len))) {
             return 0;
         }
-        *(*pkt + *pkt_len - (++*offset)) = (u_char) ((op[0] * 40) + op[1]);
+        *(*pkt + *pkt_len - (++*offset)) = (u_char) tmpint & 0x7f;
+        tmpint >>= 7;
+
+        while (tmpint > 0) {
+            if (((*pkt_len - *offset) < 1)
+                && !(r && asn_realloc(pkt, pkt_len))) {
+                return 0;
+            }
+            *(*pkt + *pkt_len - (++*offset)) =
+                (u_char) ((tmpint & 0x7f) | 0x80);
+            tmpint >>= 7;
+        }
     }
 
     tmpint = *offset - start_offset;
