@@ -34,6 +34,8 @@
 
 #include <net-snmp/library/snmp_api.h>
 
+static char * stores [NETSNMP_DS_MAX_IDS] = { "LIB", "APP", "TOK" };
+
 typedef struct netsnmp_ds_read_config_s {
   u_char          type;
   char           *token;
@@ -63,8 +65,8 @@ netsnmp_ds_set_boolean(int storeid, int which, int value)
         return SNMPERR_GENERR;
     }
 
-    DEBUGMSGTL(("netsnmp_ds_set_boolean", "Setting %d:%d = %d/%s\n", storeid,
-                which, value, ((value) ? "True" : "False")));
+    DEBUGMSGTL(("netsnmp_ds_set_boolean", "Setting %s:%d = %d/%s\n",
+                stores[storeid], which, value, ((value) ? "True" : "False")));
 
     if (value > 0) {
         netsnmp_ds_booleans[storeid][which/8] |= (1 << (which % 8));
@@ -89,8 +91,8 @@ netsnmp_ds_toggle_boolean(int storeid, int which)
         netsnmp_ds_booleans[storeid][which/8] &= (0xff7f >> (7 - (which % 8)));
     }
 
-    DEBUGMSGTL(("netsnmp_ds_toggle_boolean", "Setting %d:%d = %d/%s\n",storeid,
-                which, netsnmp_ds_booleans[storeid][which / 8],
+    DEBUGMSGTL(("netsnmp_ds_toggle_boolean", "Setting %s:%d = %d/%s\n",
+                stores[storeid], which, netsnmp_ds_booleans[storeid][which/8],
                 ((netsnmp_ds_booleans[storeid][which/8]) ? "True" : "False")));
 
     return SNMPERR_SUCCESS;
@@ -115,8 +117,8 @@ netsnmp_ds_set_int(int storeid, int which, int value)
         return SNMPERR_GENERR;
     }
 
-    DEBUGMSGTL(("netsnmp_ds_set_int", "Setting %d:%d = %d\n", storeid, which,
-                value));
+    DEBUGMSGTL(("netsnmp_ds_set_int", "Setting %s:%d = %d\n",
+                stores[storeid], which, value));
 
     netsnmp_ds_integers[storeid][which] = value;
     return SNMPERR_SUCCESS;
@@ -141,8 +143,8 @@ netsnmp_ds_set_string(int storeid, int which, const char *value)
         return SNMPERR_GENERR;
     }
 
-    DEBUGMSGTL(("netsnmp_ds_set_string", "Setting %d:%d = \"%s\"\n", storeid,
-		which, (value ? value : "(null)")));
+    DEBUGMSGTL(("netsnmp_ds_set_string", "Setting %s:%d = \"%s\"\n",
+                stores[storeid], which, (value ? value : "(null)")));
 
     /*
      * is some silly person is calling us with our own pointer?
@@ -183,8 +185,8 @@ netsnmp_ds_set_void(int storeid, int which, void *value)
         return SNMPERR_GENERR;
     }
 
-    DEBUGMSGTL(("netsnmp_ds_set_void", "Setting %d:%d = %x\n", storeid, which,
-                value));
+    DEBUGMSGTL(("netsnmp_ds_set_void", "Setting %s:%d = %x\n",
+                stores[storeid], which, value));
 
     netsnmp_ds_voids[storeid][which] = value;
 
@@ -218,8 +220,9 @@ netsnmp_ds_handle_config(const char *token, char *line)
 
     if (drsp != NULL) {
         DEBUGMSGTL(("netsnmp_ds_handle_config",
-                    "setting: token=%s, type=%d, id=%d, which=%d\n",
-                    drsp->token, drsp->type, drsp->storeid, drsp->which));
+                    "setting: token=%s, type=%d, id=%s, which=%d\n",
+                    drsp->token, drsp->type, stores[drsp->storeid],
+                    drsp->which));
 
         switch (drsp->type) {
         case ASN_BOOLEAN:
