@@ -18,8 +18,6 @@
                                         /*      configuration controls*/
 #include "auto_nlist.h"               /* if the module needs to read*/
                                        /*      kernel data structures*/
-#include "system.h"
-
 #include "memory.h"                     /* the module-specific header*/
 #include "memory_solaris2.h"                     /* the module-specific header*/
 
