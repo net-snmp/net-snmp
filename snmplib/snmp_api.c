@@ -800,42 +800,6 @@ _sess_copy( struct snmp_session *in_session)
       }
     }
 
-    if (session->srcPartyLen > 0){
-	op = (oid *)malloc((unsigned)session->srcPartyLen * sizeof(oid));
-	if (op == NULL) {
-	    snmp_sess_close(slp);
-	    return(NULL);
-	}
-	memmove(op, session->srcParty, session->srcPartyLen * sizeof(oid));
-	session->srcParty = op;
-    } else {
-	session->srcParty = 0;
-    }
-
-    if (session->dstPartyLen > 0){
-	op = (oid *)malloc((unsigned)session->dstPartyLen * sizeof(oid));
-	if (op == NULL) {
-	    snmp_sess_close(slp);
-	    return(NULL);
-	}
-	memmove(op, session->dstParty, session->dstPartyLen * sizeof(oid));
-	session->dstParty = op;
-    } else {
-	session->dstParty = 0;
-    }
-
-    if (session->contextLen > 0){
-	op = (oid *)malloc((unsigned)session->contextLen * sizeof(oid));
-	if (op == NULL) {
-	    snmp_sess_close(slp);
-	    return(NULL);
-	}
-	memmove(op, session->context, session->contextLen * sizeof(oid));
-	session->context = op;
-    } else {
-	session->context = 0;
-    }
-
     if (session->retries == SNMP_DEFAULT_RETRIES)
 	session->retries = DEFAULT_RETRIES;
     if (session->timeout == SNMP_DEFAULT_TIMEOUT)
@@ -1267,9 +1231,6 @@ snmp_sess_close(void *sessp)
 
     sesp = slp->session; slp->session = 0;
     if (sesp) {
-        SNMP_FREE(sesp->context);
-        SNMP_FREE(sesp->dstParty);
-        SNMP_FREE(sesp->srcParty);
         SNMP_FREE(sesp->peername);
         SNMP_FREE(sesp->community);
         SNMP_FREE(sesp->contextEngineID);
@@ -3139,12 +3100,6 @@ snmp_free_pdu(struct snmp_pdu *pdu)
     SNMP_FREE(pdu->securityEngineID);
     SNMP_FREE(pdu->contextName);
     SNMP_FREE(pdu->securityName);
-    if (pdu->srcParty != pdu->srcPartyBuf) 
-      SNMP_FREE(pdu->srcParty);
-    if (pdu->dstParty != pdu->dstPartyBuf) 
-      SNMP_FREE(pdu->dstParty);
-    if (pdu->context != pdu->contextBuf) 
-      SNMP_FREE(pdu->context);
     free((char *)pdu);
 }
 

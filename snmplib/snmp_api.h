@@ -114,21 +114,6 @@ struct snmp_pdu {
     long    specific_type;	/* specific type */
 
 	/*
-	 * SNMPv2party fields
-	 */
-    oid	    *srcParty;
-    size_t  srcPartyLen;
-    oid	    *dstParty;
-    size_t  dstPartyLen;
-    oid	    *context;
-    size_t  contextLen;
-    struct partyEntry *srcp, *dstp;
-    struct contextEntry *cxp;
-    oid srcPartyBuf[MAX_OID_LEN];
-    oid dstPartyBuf[MAX_OID_LEN];
-    oid contextBuf[MAX_OID_LEN];
-
-	/*
 	 * SNMPv3 fields
 	 */
     u_char  *contextEngineID;	/* context snmpEngineID */
@@ -182,16 +167,6 @@ struct snmp_session {
 	 */
     u_char  *community;	        /* community for outgoing requests. */
     size_t  community_len;      /* Length of community name. */
-
-	/*
-	 * SNMPv2party fields
-	 */
-    oid	    *srcParty;
-    size_t  srcPartyLen;
-    oid	    *dstParty;
-    size_t  dstPartyLen;
-    oid	    *context;
-    size_t  contextLen;
 
 	/*
 	 * SNMPv3 fields

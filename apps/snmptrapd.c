@@ -775,10 +775,6 @@ int main(int argc, char *argv[])
     session->peername = SNMP_DEFAULT_PEERNAME; /* Original code had NULL here */
     session->version = SNMP_DEFAULT_VERSION;
 
-    session->srcPartyLen = 0;
-    session->dstPartyLen = 0;
-    session->contextLen = 0; 
-
     session->community_len = SNMP_DEFAULT_COMMUNITY_LEN;
 
     session->retries = SNMP_DEFAULT_RETRIES;

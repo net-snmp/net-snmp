@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 #endif
 
     /*
-     * usage: snmptrap gateway-name srcParty dstParty trap-type specific-type device-description [ -a agent-addr ]
+     * usage: snmptrap gateway-name trap-type specific-type device-description [ -a agent-addr ]
      */
     arg = snmp_parse_args(argc, argv, &session);
 
