@@ -12,7 +12,7 @@ CONFINSTALLDIR=$(snmplibdir)/snmpconf
 CONFDATASRC=snmpconf.dir
 CONFDIRS=snmpd.conf snmp.conf
 CONFFILES=snmpd.conf/system snmpd.conf/acl snmpd.conf/trapsinks \
-	snmpd.conf/monitor \
+	snmpd.conf/monitor snmpd.conf/extending \
 	snmp.conf/authopts snmp.conf/debugging snmp.conf/output snmp.conf/mibs
 
 all: $(SCRIPTSMADEFORPERL)
