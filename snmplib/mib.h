@@ -287,6 +287,13 @@ int sprint_realloc_variable(u_char **buf, size_t *buf_len,
 int sprint_realloc_objid   (u_char **buf, size_t *buf_len,
 			    size_t *out_len, int allow_realloc, 
 			    oid *objid, size_t objidlen);
+int
+sprint_realloc_by_type(u_char **buf, size_t *buf_len, size_t *out_len,
+		       int allow_realloc,
+		       struct variable_list *var,
+		       struct enum_list *enums,
+		       const char *hint,
+		       const char *units);
 
 void print_value (oid *, size_t, struct variable_list *);
 void fprint_value (FILE *, oid *, size_t, struct variable_list *);
