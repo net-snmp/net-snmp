@@ -474,7 +474,9 @@ send_v1_trap (ss, trap, specific)
     if (snmp_send (ss, pdu) == 0) {
         fprintf (stderr, "snmpd: send_trap: %d\n", snmp_errno);
     }
+#ifdef USING_SNMP_MIB_MODULE       
     snmp_outtraps++;
+#endif
 }
 
 void
@@ -483,12 +485,14 @@ send_easy_trap (trap)
 {
     struct trap_sink *sink = sinks;
 
+#ifdef USING_READ_CONFIG_MODULE
     if ((snmp_enableauthentraps == 1 || trap != 4) && sink != NULL) {
 	while (sink) {
 	    send_v1_trap (sink->sesp, trap, 0);
 	    sink = sink->next;
 	}
     }
+#endif
 }
   
 char *reverse_bytes(buf,num)
@@ -507,9 +511,12 @@ char **argvrestartp;
 char *argvrestart;
 char *argvrestartname;
 
-extern char *VersionInfo;
+#include "version.h"
+
+#ifdef USING_READ_CONFIG_MODULE
 extern char *optconfigfile;
 extern char dontReadConfigFiles;
+#endif
 
 void usage(prog)
 char *prog;
@@ -557,8 +564,10 @@ main(argc, argv)
     char *cptr, **argvptr;
 
     logfile[0] = 0;
+#ifdef USING_READ_CONFIG_MODULE
     optconfigfile = NULL;
     dontReadConfigFiles = 0;
+#endif
     
 #ifdef LOGFILE
     strcpy(logfile,LOGFILE);
@@ -571,10 +580,16 @@ main(argc, argv)
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
                 case 'c':
+#ifdef USING_READ_CONFIG_MODULE
                     optconfigfile = strdup(argv[++arg]);
+#else
+                    arg++;
+#endif
                     break;
                 case 'C':
+#ifdef USING_READ_CONFIG_MODULE
                     dontReadConfigFiles = 1;
+#endif
                     break;
 		case 'd':
 		    snmp_dump_packet++;
@@ -820,8 +835,12 @@ receive(sdlist, sdlen)
         gettimeofday(nvp, (struct timezone *) NULL);
 	if (nvp->tv_sec > svp->tv_sec
 	    || (nvp->tv_sec == svp->tv_sec && nvp->tv_usec > svp->tv_usec)){
+#ifdef USING_ALARM_MODULE
 	    alarmTimer(nvp);
+#endif
+#ifdef USING_EVENT_MODULE
 	    eventTimer(nvp);
+#endif
 	    if (nvp->tv_usec < 500000L){
 		svp->tv_usec = nvp->tv_usec + 500000L;
 		svp->tv_sec = nvp->tv_sec;
@@ -858,7 +877,9 @@ snmp_read_packet(sd)
 		      &fromlength);
     if (length == -1)
 	perror("recvfrom");
+#ifdef USING_SNMP_MIB_MODULE       
     snmp_inpkts++;
+#endif
     if (snmp_dump_packet){
 	printf("\nrecieved %d bytes from %s:\n", length,
 	       inet_ntoa(from.sin_addr));
@@ -897,7 +918,9 @@ snmp_read_packet(sd)
 	    printf("\n");
             fflush(stdout);
 	}
+#ifdef USING_SNMP_MIB_MODULE       
 	snmp_outpkts++;
+#endif
 	if (sendto(sd, (char *)outpacket, out_length, 0,
 		   (struct sockaddr *)&from, sizeof(from)) < 0){
 	    perror("sendto");
@@ -925,12 +948,16 @@ snmp_input(op, session, reqid, pdu, magic)
 		/* this is just the ack to our inform pdu */
 		return 1;
 	    }
+#ifdef USING_ALARM_MODULE
 	    return alarmGetResponse(pdu, state, op, session);
+#endif
 	}
     }
     else if (op == TIMED_OUT) {
 	if (state->type == ALARM_GET_REQ) {
+#ifdef USING_ALARM_MODULE
 	    return alarmGetResponse(pdu, state, op, session);
+#endif
 	}
     }
     return 1;

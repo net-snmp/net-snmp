@@ -39,6 +39,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "mibgroup/mib_module_includes.h"
 
 #include "snmpd.h"
+#include "party.h"
+#include "context.h"
 
 int compare_tree __P((oid *, int, oid *, int));
 extern struct subtree subtrees_old[];
@@ -209,6 +211,7 @@ int KNLookup(nl, nl_which, buf, s)
 #define PARTYMIB 	SNMPV2, 3, 3
 
 /* various OIDs that are needed throughout the agent */
+#ifdef USING_ALARM_MODULE
 Export oid alarmVariableOid[] = {SNMPV2ALARMENTRY, ALARMTABVARIABLE};
 Export int alarmVariableOidLen = sizeof(alarmVariableOid) / sizeof(oid);
 Export oid alarmSampleTypeOid[] = {SNMPV2ALARMENTRY, ALARMTABSAMPLETYPE};
@@ -219,11 +222,13 @@ Export oid alarmFallingThreshOid[] = {SNMPV2ALARMENTRY, ALARMTABFALLINGTHRESH};
 Export int alarmFallingThreshOidLen = sizeof(alarmFallingThreshOid)/sizeof(oid);
 Export oid alarmRisingThreshOid[] = {SNMPV2ALARMENTRY, ALARMTABRISINGTHRESH};
 Export int alarmRisingThreshOidLen = sizeof(alarmRisingThreshOid)/sizeof(oid);
+#endif
 
 Export oid nullOid[] = {0,0};
 Export int nullOidLen = sizeof(nullOid)/sizeof(oid);
 Export oid sysUpTimeOid[] = {1,3,6,1,2,1,1,3,0};
 Export int sysUpTimeOidLen = sizeof(sysUpTimeOid)/sizeof(oid);
+#ifdef USING_EVENT_MODULE
 Export oid eventIdOid[] = {SNMPV2EVENTENTRY, EVENTTABID};
 Export int eventIdOidLen = sizeof(eventIdOid)/sizeof(oid);
 Export oid trapRisingAlarmOid[] = {SNMPV2ALARMEVENTS, 1};
@@ -232,7 +237,7 @@ Export oid trapFallingAlarmOid[] = {SNMPV2ALARMEVENTS, 2};
 Export int trapFallingAlarmOidLen = sizeof(trapFallingAlarmOidLen)/sizeof(oid);
 Export oid trapObjUnavailAlarmOid[] = {SNMPV2ALARMEVENTS, 3};
 Export int trapObjUnavailAlarmOidLen = sizeof(trapObjUnavailAlarmOidLen)/sizeof(oid);
-
+#endif
 
 
 struct subtree *subtrees;   /* this is now malloced in
@@ -242,7 +247,9 @@ struct subtree subtrees_old[] = {
 #include "mibgroup/mib_module_loads.h"
 };
 
+#ifdef USING_VIEW_VARS_MODULE
 extern int in_view __P((oid *, int, int));
+#endif
 
 int subtree_old_size() {
   return (sizeof(subtrees_old)/ sizeof(struct subtree));
@@ -283,14 +290,20 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     int 		found = FALSE;
     oid			save[MAX_NAME_LEN];
     int			savelen = 0;
+#ifdef USING_PASS_MODULE
     extern int numrelocs, numpassthrus;
+#endif
 
     if (!exact){
 	bcopy(name, save, *namelen * sizeof(oid));
 	savelen = *namelen;
     }
     *write_method = NULL;
-    for (y = 0, tp = subtrees; y < (subtree_old_size() + numrelocs + numpassthrus); tp++, y++){
+    for (y = 0, tp = subtrees; y < (subtree_old_size()
+#ifdef USING_PASS_MODULE
+                                    + numrelocs + numpassthrus
+#endif
+      ); tp++, y++){
 	treeresult = compare_tree(name, *namelen, tp->name, (int)tp->namelen);
 	/* if exact and treeresult == 0
 	   if next  and treeresult <= 0 */
@@ -334,8 +347,11 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 		    if (write_method)
 			*acl = cvp->acl;
 		    if (access &&
-                        (((pi->version == SNMP_VERSION_2_HISTORIC) &&
-                         !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
+                        (
+#ifdef USING_VIEW_VARS_MODULE
+                          ((pi->version == SNMP_VERSION_2_HISTORIC) &&
+                           !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
+#endif
                          ((pi->version == SNMP_VERSION_1 ||
                            pi->version == SNMP_VERSION_2) &&
                           (((cvp->acl & 0xAFFC) == SNMPV2ANY) ||
@@ -376,7 +392,11 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 		break;
 	}
     }
-    if (y == (subtree_old_size() + numrelocs + numpassthrus)) {
+    if (y == (subtree_old_size()
+#ifdef USING_PASS_MODULE
+              + numrelocs + numpassthrus
+#endif
+      )) {
 	if (!access && !exact){
 	    bcopy(save, name, savelen * sizeof(oid));
 	    *namelen = savelen;
