@@ -1,5 +1,15 @@
 -------------------------------------------------------------------------------
 
+Changes: V3.1.2 -> V3.1.2.1
+
+whardake  5 Dec 96 09:13:56
+    - (if.c): #ifndef -> #ifdef for sigset.
+ 
+whardake  5 Dec 96 09:14:59
+    - (md5.c): remove ansi specific C features (unsigned constants).
+ 
+-------------------------------------------------------------------------------
+
 Changes: V3.1.1 -> V3.1.2
 
 whardake 17 Oct 96 07:02:58
