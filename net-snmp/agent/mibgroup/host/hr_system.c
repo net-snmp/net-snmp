@@ -254,6 +254,8 @@ void endutent (void)
 
 struct utmp *getutent (void)
 {
+	if ( !utmp_file )
+	    return NULL;
 	while (fread(&utmp_rec, sizeof(utmp_rec), 1, utmp_file) == 1)
 	    if (*utmp_rec.ut_name && *utmp_rec.ut_line)
 		return &utmp_rec;
