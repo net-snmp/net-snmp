@@ -17,8 +17,10 @@ CFG=snmpstatus - Win32 Debug
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "snmpstatus - Win32 Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "snmpstatus - Win32 Debug" (based on "Win32 (x86) Console Application")
+!MESSAGE "snmpstatus - Win32 Release" (based on\
+ "Win32 (x86) Console Application")
+!MESSAGE "snmpstatus - Win32 Debug" (based on\
+ "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -81,6 +83,10 @@ LINK32=link.exe
 
 # Name "snmpstatus - Win32 Release"
 # Name "snmpstatus - Win32 Debug"
+# Begin Source File
+
+SOURCE=..\..\snmplib\getopt.c
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\apps\snmp_parse_args.c
