@@ -499,13 +499,8 @@ int sh_count_procs(procname)
     }
     fclose(file);
     close(fd);
-#ifndef EXCACHETIME
-    printf("waitpid:  %d\n",ex.pid);
-    if (ex.pid && waitpid(ex.pid,&ex.result,0) < 0) {
-      setPerrorstatus("waitpid");
-    }
+    wait_on_exec(&ex);
     ex.pid = 0;
-#endif
   } else {
     ret = -1;
   }

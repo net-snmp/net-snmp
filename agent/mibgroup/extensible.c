@@ -304,6 +304,7 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
         while (fgets(ex.output,STRMAX,file) != NULL);
         fclose(file);
         close(fd);
+        wait_on_exec(&ex);
       }
     } 
 #endif
@@ -401,11 +402,13 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
               *var_len = 0;
               fclose(file);
               close(fd);
+              wait_on_exec(exten);
               return(NULL);
             }
           }
           fclose(file);
           close(fd);
+          wait_on_exec(exten);
         } else
           errmsg[0] = 0;
       }

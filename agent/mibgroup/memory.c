@@ -284,6 +284,7 @@ int getswap(rettype)
     }
     fclose(file);
     close(fd);
+    wait_on_exec(&ex);
   } else {
     return(0);
   }
