@@ -131,9 +131,5 @@ time_t ctime_to_timet( string )
 
 	tm.tm_sec -= timezone;
 	
-#ifndef linux	/* CHECK THIS!! */
-    return( mktime( tm ));
-#else
     return( mktime( &tm ));
-#endif
 }

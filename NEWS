@@ -1,6 +1,17 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.3.1*
+
+ New:
+    - "make install" installs the library and header files.
+
+ Fixes:
+    - compilation on many architectures (sunos for example).
+    - snmptrapd doesn't exit if v2party files don't exist.
+    - host resources works a bit better (ie, it compiles) under solaris.
+    
+
 *3.3*
 
   Path changes:
