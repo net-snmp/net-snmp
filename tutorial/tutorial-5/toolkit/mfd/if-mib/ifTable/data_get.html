@@ -50,20 +50,20 @@
      * TODO:
      * value mapping (see notes at top of file)
      */<font color=blue>
-#define INTERNAL_IFTYPE_ETHERNETCSMACD  ARPHRD_ETHER
-#define INTERNAL_IFTYPE_FDDI  ARPHRD_FDDI
-#define INTERNAL_IFTYPE_PPP  ARPHRD_PPP
-#define INTERNAL_IFTYPE_SOFTWARELOOPBACK  ARPHRD_LOOPBACK
-#define INTERNAL_IFTYPE_SLIP  ARPHRD_SLIP
-#define INTERNAL_IFTYPE_ARCNET  ARPHRD_ARCNET
+#define INTERNAL_IANAIFTYPE_ETHERNETCSMACD  ARPHRD_ETHER
+#define INTERNAL_IANAIFTYPE_FDDI  ARPHRD_FDDI
+#define INTERNAL_IANAIFTYPE_PPP  ARPHRD_PPP
+#define INTERNAL_IANAIFTYPE_SOFTWARELOOPBACK  ARPHRD_LOOPBACK
+#define INTERNAL_IANAIFTYPE_SLIP  ARPHRD_SLIP
+#define INTERNAL_IANAIFTYPE_ARCNET  ARPHRD_ARCNET
 #ifdef ARPHRD_ATM
-#define INTERNAL_IFTYPE_ATM  ARPHRD_ATM
+#define INTERNAL_IANAIFTYPE_ATM  ARPHRD_ATM
 #endif
-#define INTERNAL_IFTYPE_LOCALTALK  ARPHRD_LOCALTLK
+#define INTERNAL_IANAIFTYPE_LOCALTALK  ARPHRD_LOCALTLK
 #ifdef ARPHRD_HIPPI
-#define INTERNAL_IFTYPE_HIPPI  ARPHRD_HIPPI
+#define INTERNAL_IANAIFTYPE_HIPPI  ARPHRD_HIPPI
 #endif
-#define INTERNAL_IFTYPE_TUNNEL  ARPHRD_TUNNEL</font>
+#define INTERNAL_IANAIFTYPE_TUNNEL  ARPHRD_TUNNEL</font>
             </pre></td></tr></table>
     <p>
       Then we update the implementation to remove all the extras,
@@ -71,72 +71,68 @@
     </p>
     <table><tr><td></td><td bgcolor=CCCCCC><pre>
 int
-ifType_map(u_long * mib_ifType_ptr, u_long raw_ifType)
+ifType_map(u_long * mib_ifType_val_ptr, u_long raw_ifType_val)
 {
-    netsnmp_assert(NULL != mib_ifType_ptr);
+    netsnmp_assert(NULL != mib_ifType_val_ptr);
 
-    DEBUGMSGTL(("verbose:ifType_map","called"));
+    DEBUGMSGTL(("verbose:ifType_map", "called\n"));
 
     /*
      * TODO:
      * value mapping
      */
     /** TODO: update INTERNAL_* macros defined in the header */
-    switch (raw_ifType) {
-
-    case INTERNAL_IFTYPE_ETHERNETCSMACD:
-        *mib_ifType_ptr = IANAifType_ETHERNETCSMACD;
-        break;
-
-    case INTERNAL_IFTYPE_FDDI:
-        *mib_ifType_ptr = IANAifType_FDDI;
-        break;
-
-    case INTERNAL_IFTYPE_PPP:
-        *mib_ifType_ptr = IANAifType_PPP;
-        break;
-
-    case INTERNAL_IFTYPE_SOFTWARELOOPBACK:
-        *mib_ifType_ptr = IANAifType_SOFTWARELOOPBACK;
-        break;
-<font color=blue>
-        case ARPHRD_CSLIP:
-        case ARPHRD_SLIP6:
-        case ARPHRD_CSLIP6:</font>
-    case INTERNAL_IFTYPE_SLIP:
-        *mib_ifType_ptr = IANAifType_SLIP;
-        break;
-
-    case INTERNAL_IFTYPE_ARCNET:
-        *mib_ifType_ptr = IANAifType_ARCNET;
-        break;
-
-    case INTERNAL_IFTYPE_ATM:
-        *mib_ifType_ptr = IANAifType_ATM;
-        break;
-
-    case INTERNAL_IFTYPE_LOCALTALK:
-        *mib_ifType_ptr = IANAifType_LOCALTALK;
-        break;
-
-    case INTERNAL_IFTYPE_HIPPI:
-        *mib_ifType_ptr = IANAifType_HIPPI;
-        break;
-<font color=blue>
+    switch (raw_ifType_val) {
+        case INTERNAL_IANAIFTYPE_ETHERNETCSMACD:
+            (*mib_ifType_val_ptr) = IANAIFTYPE_ETHERNETCSMACD;
+            break;
+        case INTERNAL_IANAIFTYPE_TUNNEL:<font color=blue>
+        case ARPHRD_TUNNEL6:
 #ifdef ARPHRD_IPGRE
         case ARPHRD_IPGRE:
 #endif
-        case ARPHRD_TUNNEL6:
         case ARPHRD_SIT:</font>
-    case INTERNAL_IFTYPE_TUNNEL:
-        *mib_ifType_ptr = IANAifType_TUNNEL;
-        break;
-<font color=blue>
-    default:
-        snmp_log(LOG_ERR, "couldn't map value %d for ifType, assuming other\n",
-                 raw_ifType);
-        *mib_ifType_ptr = IANAifType_OTHER;
-        break;</font>
+            (*mib_ifType_val_ptr) = IANAIFTYPE_TUNNEL;
+            break;          /* tunnel */<font color=blue>
+        case ARPHRD_CSLIP:
+        case ARPHRD_SLIP6:
+        case ARPHRD_CSLIP6:</font>
+        case INTERNAL_IANAIFTYPE_SLIP:
+            (*mib_ifType_val_ptr) = IANAIFTYPE_SLIP;
+            break;          /* slip */
+        case INTERNAL_IANAIFTYPE_PPP:
+            (*mib_ifType_val_ptr) = IANAIFTYPE_PPP;
+            break;          /* ppp */
+        case INTERNAL_IANAIFTYPE_SOFTWARELOOPBACK:
+            (*mib_ifType_val_ptr) = IANAIFTYPE_SOFTWARELOOPBACK;
+            break;          /* softwareLoopback */
+        case INTERNAL_IANAIFTYPE_FDDI:
+            (*mib_ifType_val_ptr) = IANAIFTYPE_FDDI;
+            break;
+        case INTERNAL_IANAIFTYPE_ARCNET:
+            (*mib_ifType_val_ptr) = IANAIFTYPE_ARCNET;
+            break;
+        case INTERNAL_IANAIFTYPE_LOCALTALK:
+            (*mib_ifType_val_ptr) = IANAIFTYPE_LOCALTALK;
+            break;<font color=blue>
+#ifdef INTERNAL_IANAIFTYPE_HIPPI</font>
+        case INTERNAL_IANAIFTYPE_HIPPI:
+            (*mib_ifType_val_ptr) = IANAIFTYPE_HIPPI;
+            break;<font color=blue>
+#endif
+#ifdef INTERNAL_IANAIFTYPE_ATM</font>
+        case INTERNAL_IANAIFTYPE_ATM:
+            (*mib_ifType_val_ptr) = IANAIFTYPE_ATM;
+            break;<font color=blue>
+#endif
+            /*
+             * XXX: more if_arp.h:ARPHDR_xxx to IANAifType mappings... 
+             */
+            
+        default:
+            snmp_log(LOG_ERR, "couldn't map value %d for ifType\n",
+                     raw_ifType_val);</font>
+            (*mib_ifType_val_ptr) = IANAIFTYPE_OTHER;
     }
 
     return MFD_SUCCESS;
@@ -148,22 +144,27 @@ ifType_map(u_long * mib_ifType_ptr, u_long raw_ifType)
       As mentioned before, we are leaving some colums unimplemented.
       There are several reasons a column might be left unimplemnted.
       The data may not be available, or a particular column might not
-      make sense for an implementation. You should consult the MIB
-      specification to see if a particular value should be returned
-      to represent this case. For example, the ifPhysAddress object
-      states: <i>For interfaces which do not have such
-        an address (e.g., a serial line), this object should contain
-        an octet string of zero length.</i>
-    <p><p>
-      If there is no such special value, and the object in question
-      is not required by the compliance/conformance specifications for
-      the MIB, simply return <var>MFD_SKIP</var> from the object's
+      make sense for an implementation.
+    </p><p>
+      We omitted some columns from the valid columns structure, because
+      we don't want to provide data for those columns, ever. If you have
+      columns that might have data, depending on the row, then those
+      columns should be in the valid columns structure. When the column
+      get routine is called for a row which had not data for the column,
+      simply return <var>MFD_SKIP</var> from the object's
       get routine, and the agent will move on to the next object.
-    </p>
+    </p><p>
+      You should also consult your MIB to see if, for a particular column
+      for which you don't have data, a special value is specified which
+      should be returned when the data isn't available. For example,
+      the ifPhysAddress object states:
+      <i>For interfaces which do not have such an address (e.g., a serial
+        line), this object should contain an octet string of zero length.</i>
+    <p>
     <h3>Skipping ifMtu</h3>
     <p>
-      For this tutorial, we've chosen to skip a few objects. For
-      simplicity, we'll just show one here:
+      Even thoug we've eliminated some columns from the valid columns, here
+      is a simple example if skipping a column:
     </p>
     <table><tr><td></td><td bgcolor=CCCCCC><pre>
 int
@@ -182,9 +183,12 @@ ifMtu_get(ifTable_rowreq_ctx * rowreq_ctx, long *ifMtu_ptr)
      * TODO:
      * update, replace or delete, if needed.
      */<font color=blue>
-    //(*ifMtu_ptr) = rowreq_ctx->data.ifMtu;
+    if (rowreq_ctx->data.ifMtu == 0)
+       return MFD_SKIP;
+</font>
+    (*ifMtu_ptr) = rowreq_ctx->data.ifMtu;
 
-    return MFD_SKIP;</font>
+    return MFD_SUCCESS;
 }
             </pre></td></tr></table>
     <!-- ========================================================= -->
@@ -201,7 +205,7 @@ ifMtu_get(ifTable_rowreq_ctx * rowreq_ctx, long *ifMtu_ptr)
 Version $Revision$
 <!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
 <!-- hhmts start -->
-Last modified: Thu Apr 22 22:29:39 EDT 2004
+Last modified: Tue Jun 22 17:38:04 EDT 2004
 <!-- hhmts end -->
 <!--#include virtual="/sfbutton.html" -->
   </body>
