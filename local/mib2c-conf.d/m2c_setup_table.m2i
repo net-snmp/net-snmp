@@ -53,18 +53,20 @@
 @    end@
 @    include default-table-${context}.m2d@
 ##
+@    eval $m2c_data_item_base = "${m2c_context_item}data"@
 @    if $m2c_data_allocate == 1@
-@        eval $m2c_data_item = "${m2c_context_item}data->"@
+@        eval $m2c_data_item = "${m2c_data_item_base}->"@
 @    else@
-@        eval $m2c_data_item = "${m2c_context_item}data."@
+@        eval $m2c_data_item = "${m2c_data_item_base}."@
 @    end@
 @    if $m2c_table_settable == 0@
 @        eval $m2c_undo_embed = 1@
 @    end@
+@    eval $m2c_undo_item_base = "${m2c_context_item}undo"@
 @    if $m2c_undo_embed == 1@
-@        eval $m2c_undo_item = "${m2c_context_item}undo."@
+@        eval $m2c_undo_item = "${m2c_undo_item_base}."@
 @    else@
-@        eval $m2c_undo_item = "${m2c_context_item}undo->"@
+@        eval $m2c_undo_item = "${m2c_undo_item_base}->"@
 @    end@
 @end@
 @eval $m2c_node_name = ""@

@@ -10,7 +10,7 @@
 ##
     /*
      * TODO:461:M: |-> Set $node value.
-     * set $node value in ${m2c_data_item}
+     * set $node value in $m2c_data_item_base
      */
 @if ($m2c_include_examples != 0) || ("$m2c_data_context" eq "generated")@
 @   if $m2c_node_needlength == 0@
