@@ -200,7 +200,7 @@ main(argc, argv)
   exit (0);
 }
 
-void print_table __P(())
+void print_table __P((void))
 {
   int entry, field, first_field, last_field = 0, width, part = 0;
   char **dp;
@@ -250,7 +250,7 @@ void print_table __P(())
   }
 }
 
-void get_field_names __P(())
+void get_field_names __P((void))
 {
   char string_buf[1024];
   char *name_p;
@@ -265,8 +265,8 @@ void get_field_names __P(())
     if (debug) printf("%s %c\n", string_buf, name_p[1]);
     if ('0' <= name_p[1] && name_p[1] <= '9')
       break;
-    if (fields == 1) column = malloc(sizeof (*column));
-    else column = realloc(column, fields*sizeof(*column));
+    if (fields == 1) column = (struct column *)malloc(sizeof (*column));
+    else column = (struct column *)realloc(column, fields*sizeof(*column));
     column[fields-1].label = strdup(name_p+1);
     column[fields-1].width = strlen(name_p+1);
   }
@@ -361,16 +361,16 @@ void get_table_entries __P((void))
 	if (entries >= allocated) {
 	  if (allocated == 0) {
 	    allocated = 10;
-	    data = malloc(allocated*fields*sizeof(char *));
+	    data = (char **)malloc(allocated*fields*sizeof(char *));
 	    memset (data, 0, allocated*fields*sizeof(char *));
-	    if (show_index) indices = malloc(allocated*sizeof(char *));
+	    if (show_index) indices = (char **)malloc(allocated*sizeof(char *));
 	  }
 	  else {
 	    allocated += 10;
-	    data = realloc(data, allocated*fields*sizeof(char *));
+	    data = (char **)realloc(data, allocated*fields*sizeof(char *));
 	    memset (data+entries*fields, 0,
 		    (allocated-entries)*fields*sizeof(char *));
-	    if (show_index) indices = realloc(indices, allocated*sizeof(char *));
+	    if (show_index) indices = (char **)realloc(indices, allocated*sizeof(char *));
 	  }
 	}
 	if (show_index) {
