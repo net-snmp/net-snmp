@@ -444,12 +444,15 @@ snmp_parse_args(int argc,
       (session->version == SNMP_VERSION_2c)) {
     /* v1 and v2c - so get community string */
     if (!Cpsz) {
-      if (optind == argc) {
+      if ((Cpsz = ds_get_string(DS_LIBRARY_ID, DS_LIB_COMMUNITY)) != NULL)
+	;
+      else if (optind == argc) {
         fprintf(stderr,"No community name specified.\n");
         usage();
         exit(1);
       }
-      Cpsz = argv[optind++];
+      else
+	Cpsz = argv[optind++];
     }
     session->community = (unsigned char *)Cpsz;
     session->community_len = strlen(Cpsz);

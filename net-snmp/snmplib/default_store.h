@@ -50,6 +50,7 @@ extern "C" {
 #define DS_LIB_PRIVPASSPHRASE  4
 #define DS_LIB_OPTIONALCONFIG  5
 #define DS_LIB_APPTYPE         6
+#define DS_LIB_COMMUNITY       7
 
 /* end storage definitions */
 
