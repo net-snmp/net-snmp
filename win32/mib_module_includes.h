@@ -26,7 +26,6 @@
 #include "mibgroup/ucd-snmp/loadave.h"
 #include "mibgroup/ucd-snmp/extensible.h"
 #include "mibgroup/ucd-snmp/errormib.h"
-#include "mibgroup/ucd-snmp/registry.h"
 #include "mibgroup/ucd-snmp/file.h"
 #include "mibgroup/ucd-snmp/dlmod.h"
 #include "mibgroup/ucd-snmp/proxy.h"
