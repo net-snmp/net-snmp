@@ -214,7 +214,7 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 			 pdu->variables->name, pdu->variables->name_length,
 			 pdu->priority, pdu->range_subid, ubound, sp,
 			 (char *)pdu->community, pdu->time,
-			 flags, reg)) {
+			 flags, reg, 1)) {
 
     case MIB_REGISTERED_OK:
 	DEBUGMSGTL(("agentx/master", "registered ok\n"));
@@ -230,11 +230,7 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 	rc = AGENTX_ERR_REQUEST_DENIED;
 	DEBUGMSGTL(("agentx/master", "failed registration\n"));
     }
-    /*  snmp_handler_free();  */
-    SNMP_FREE(reg->handler->handler_name);
-    SNMP_FREE(reg->handler);
-    SNMP_FREE(reg->rootoid);
-    SNMP_FREE(reg);
+    snmp_handler_registration_free(reg);
     return rc;
 }
 
