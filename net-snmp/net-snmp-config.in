@@ -79,21 +79,37 @@ else
 	case $1 in
 	    -A)
 		shift
+		if test "x$1" = "x" ; then
+		    echo "You must specify an authentication algorithm"
+		    exit 1
+		fi
 		Aalgorithm=$1
 		shift
 		;;
 	    -X)
 		shift
+		if test "x$1" = "x" ; then
+		    echo "You must specify an encryption algorithm"
+		    exit 1
+		fi
 		Xalgorithm=$1
 		shift
 		;;
 	    -a)
 		shift
+		if test "x$1" = "x" ; then
+		    echo "You must specify an authentication pass phrase"
+		    exit 1
+		fi
 		apassphrase=$1
 		shift
 		;;
 	    -x)
 		shift
+		if test "x$1" = "x" ; then
+		    echo "You must specify an encryption pass phrase"
+		    exit 1
+		fi
 		xpassphrase=$1
 		shift
 		;;
