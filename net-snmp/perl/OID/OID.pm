@@ -67,7 +67,9 @@ sub add {
     return $newoid;
 }
 
-our @ISA = qw(Exporter DynaLoader);
+use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION);
+
+@ISA = qw(Exporter DynaLoader);
 
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
@@ -76,18 +78,18 @@ our @ISA = qw(Exporter DynaLoader);
 # This allows declaration	use NetSNMP::OID ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(
+%EXPORT_TAGS = ( 'all' => [ qw(
 	snmp_oid_compare
         compare
 ) ] );
 
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+@EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-our @EXPORT = qw(
+@EXPORT = qw(
 	snmp_oid_compare
         compare
 );
-our $VERSION = '0.1';
+$VERSION = '0.1';
 
 sub new {
     my $type = shift;
