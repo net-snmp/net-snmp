@@ -601,7 +601,7 @@ snmp_set_var_objid (struct variable_list *vp,
 
 int
 snmp_set_var_typed_value(struct variable_list *newvar, u_char type,
-                         u_char *val_str, size_t val_len)
+                         const u_char *val_str, size_t val_len)
 {
     newvar->type = type;
     return snmp_set_var_value(newvar, val_str, val_len);
@@ -647,7 +647,7 @@ find_varbind_of_type( struct variable_list *var_ptr, int type )
 
 int
 snmp_set_var_value(struct variable_list *newvar,
-                    u_char *val_str, size_t val_len)
+                   const u_char *val_str, size_t val_len)
 {
     if (newvar->val.string &&
         newvar->val.string != newvar->buf)
