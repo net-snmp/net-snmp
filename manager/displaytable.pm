@@ -200,6 +200,9 @@ sub displaytable {
 	if ($doheader) {
 	    if (defined($sortfn) && ref($sortfn) eq "CODE") {
 		@keys = (sort $sortfn keys(%$data));
+	    } elsif ($config{'-selectorder'} && 
+		     ref($config{'-selectorder'}) eq "ARRAY") {
+		@keys = @{$config{'-selectorder'}};
 	    } elsif ($config{'-selectorder'}) {
 		$_ = $selectwhat;
 		@keys = split(/, */);
