@@ -210,7 +210,7 @@ sub file2str {
     my $result;
     $result = $self->{'sess'}->getnext($self->{lastnode});
     if (!defined($result)) {
-	warn " getnext of $self->{lastnode}[0][0] . $self->{lastnode}[0][0] returned undef\n";
+	warn " getnext of $self->{lastnode}[0][0] returned undef\n";
     }
     DEBUG(" result: ",Dumper($self->{lastnode}),"\n");
 
