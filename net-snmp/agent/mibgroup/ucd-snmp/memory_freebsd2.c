@@ -258,7 +258,7 @@ var_extensible_mem(struct variable *vp,
     size_t          total_size = sizeof(total);
     int             total_mib[] = { CTL_VM, VM_METER };
 
-    long            phys_mem;
+    u_long          phys_mem;
     size_t          phys_mem_size = sizeof(phys_mem);
     int             phys_mem_mib[] = { CTL_HW, HW_USERMEM };
 
