@@ -3,8 +3,6 @@
  *	Device index manipulation data
  */
 
-#include <config.h>
-
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
