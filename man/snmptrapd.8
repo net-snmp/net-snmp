@@ -22,7 +22,7 @@
 .TH SNMPTRAPD 8 "07 Feb 2002" "" "Net-SNMP"
 .UC 4
 .SH NAME
-snmptrapd - Receive and log snmp trap messages.
+snmptrapd - Receive and log SNMP trap messages.
 .SH SYNOPSIS
 .BR snmptrapd " [OPTIONS] [LISTENING ADDRESSES]"
 .SH DESCRIPTION
@@ -184,7 +184,7 @@ the seconds field from the sysUpTime.0 varbind
 the contents of the agent-addr field of the PDU (v1 TRAPs only)
 .TP
 .B %A
-the hostname correpsonding to the contents of the agent-addr field of
+the hostname corresponding to the contents of the agent-addr field of
 the PDU, if available, otherwise the contents of the agent-addr field
 of the PDU (v1 TRAPs only).
 .TP
