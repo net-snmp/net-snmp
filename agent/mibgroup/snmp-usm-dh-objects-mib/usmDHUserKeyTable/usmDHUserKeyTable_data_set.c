@@ -109,7 +109,7 @@ usmDHSetKey(struct usmUser *user, int for_auth_key,
  **********************************************************************/
 /*
  * usmDHUserKeyTable is subid 2 of usmDHPublicObjects.
- * It's status is Current.
+ * Its status is Current.
  * OID: .1.3.6.1.3.101.1.1.2, length: 9
  */
     /*
@@ -245,9 +245,10 @@ usmDHUserKeyTable_undo_cleanup(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
  * this commit will not fail.
  *
  * Should you need different behavior depending on which columns were
- * set, rowreq_ctx->set_flags will indicate which writeable columns were
+ * set, rowreq_ctx->column_set_flags will indicate which writeable columns were
  * set. The definitions for the FLAG_* bits can be found in
  * usmDHUserKeyTable_oids.h.
+ * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
  * @param usmDHUserKeyTable_rowreq_ctx
  *        Pointer to the users context.
@@ -267,64 +268,8 @@ usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * save flags, then clear until we actually do something
+     * nothing to do; we wait for the irreversible commit
      */
-    save_flags = rowreq_ctx->set_flags;
-    rowreq_ctx->set_flags = 0;
-
-    /*
-     * TODO:
-     * commit data
-     */
-    if (save_flags & FLAG_USMDHUSERAUTHKEYCHANGE) {
-        save_flags &= ~FLAG_USMDHUSERAUTHKEYCHANGE;     /* clear */
-/*         rc = TODO_commit_colum(...); */
-        if (rc == MFD_SUCCESS) {
-            /*
-             * set flag, in case we need to undo
-             */
-            rowreq_ctx->set_flags |= FLAG_USMDHUSERAUTHKEYCHANGE;
-        }
-    }
-
-    if (save_flags & FLAG_USMDHUSEROWNAUTHKEYCHANGE) {
-        save_flags &= ~FLAG_USMDHUSEROWNAUTHKEYCHANGE;  /* clear */
-/*         rc = TODO_commit_colum(...); */
-        if (rc == MFD_SUCCESS) {
-            /*
-             * set flag, in case we need to undo
-             */
-            rowreq_ctx->set_flags |= FLAG_USMDHUSEROWNAUTHKEYCHANGE;
-        }
-    }
-
-    if (save_flags & FLAG_USMDHUSERPRIVKEYCHANGE) {
-        save_flags &= ~FLAG_USMDHUSERPRIVKEYCHANGE;     /* clear */
-/*         rc = TODO_commit_colum(...); */
-        if (rc == MFD_SUCCESS) {
-            /*
-             * set flag, in case we need to undo
-             */
-            rowreq_ctx->set_flags |= FLAG_USMDHUSERPRIVKEYCHANGE;
-        }
-    }
-
-    if (save_flags & FLAG_USMDHUSEROWNPRIVKEYCHANGE) {
-        save_flags &= ~FLAG_USMDHUSEROWNPRIVKEYCHANGE;  /* clear */
-/*         rc = TODO_commit_colum(...); */
-        if (rc == MFD_SUCCESS) {
-            /*
-             * set flag, in case we need to undo
-             */
-            rowreq_ctx->set_flags |= FLAG_USMDHUSEROWNPRIVKEYCHANGE;
-        }
-    }
-
-    if (save_flags) {
-        snmp_log(LOG_ERR, "unhandled columns (0x%x) in commit\n",
-                 save_flags);
-        return MFD_ERROR;
-    }
 
     return rc;
 }
@@ -368,9 +313,10 @@ usmDHUserKeyTable_irreversable_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
  * undo commit new values.
  *
  * Should you need different behavior depending on which columns were
- * set, rowreq_ctx->set_flags will indicate which writeable columns were
+ * set, rowreq_ctx->column_set_flags will indicate which writeable columns were
  * set. The definitions for the FLAG_* bits can be found in
  * usmDHUserKeyTable_oids.h.
+ * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
  * @param usmDHUserKeyTable_rowreq_ctx
  *        Pointer to the users context.
@@ -396,10 +342,11 @@ usmDHUserKeyTable_undo_commit(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
     return rc;
 }
 
+
 /*---------------------------------------------------------------------
  * SNMP-USER-BASED-SM-MIB::usmUserEntry.usmUserEngineID
  * usmUserEngineID is subid 1 of usmUserEntry.
- * It's status is Current, and it's access level is NoAccess.
+ * Its status is Current, and its access level is NoAccess.
  * OID: .1.3.6.1.6.3.15.1.2.2.1.1
  * Description:
 An SNMP engine's administratively-unique identifier.
@@ -419,7 +366,7 @@ An SNMP engine's administratively-unique identifier.
  *
  * Ranges:  5 - 32;
  *
- * It's syntax is SnmpEngineID (based on perltype OCTETSTR)
+ * Its syntax is SnmpEngineID (based on perltype OCTETSTR)
  * The net-snmp type is ASN_OCTET_STR. The C type decl is char (char)
  * This data type requires a length.  (Max 32)
  *
@@ -477,10 +424,11 @@ usmUserEngineID_map(char **mib_usmUserEngineID_val_ptr_ptr,
 }
 
 
+
 /*---------------------------------------------------------------------
  * SNMP-USER-BASED-SM-MIB::usmUserEntry.usmUserName
  * usmUserName is subid 2 of usmUserEntry.
- * It's status is Current, and it's access level is NoAccess.
+ * Its status is Current, and its access level is NoAccess.
  * OID: .1.3.6.1.6.3.15.1.2.2.1.2
  * Description:
 A human readable string representing the name of
@@ -498,7 +446,7 @@ A human readable string representing the name of
  *
  * Ranges:  1 - 32;
  *
- * It's syntax is SnmpAdminString (based on perltype OCTETSTR)
+ * Its syntax is SnmpAdminString (based on perltype OCTETSTR)
  * The net-snmp type is ASN_OCTET_STR. The C type decl is char (char)
  * This data type requires a length.  (Max 32)
  *
@@ -555,10 +503,11 @@ usmUserName_map(char **mib_usmUserName_val_ptr_ptr,
 }
 
 
+
 /*---------------------------------------------------------------------
  * SNMP-USM-DH-OBJECTS-MIB::usmDHUserKeyEntry.usmDHUserAuthKeyChange
  * usmDHUserAuthKeyChange is subid 1 of usmDHUserKeyEntry.
- * It's status is Current, and it's access level is Create.
+ * Its status is Current, and its access level is Create.
  * OID: .1.3.6.1.3.101.1.1.2.1.1
  * Description:
 The object used to change any given user's Authentication Key
@@ -575,7 +524,7 @@ The object used to change any given user's Authentication Key
  *   settable   1
  *
  *
- * It's syntax is DHKeyChange (based on perltype OCTETSTR)
+ * Its syntax is DHKeyChange (based on perltype OCTETSTR)
  * The net-snmp type is ASN_OCTET_STR. The C type decl is char (char)
  * This data type requires a length.  (Max 32)
  */
@@ -604,7 +553,7 @@ The object used to change any given user's Authentication Key
  *@note
  * This check is only to determine if the new value
  * is \b potentially valid. This is the first check of many, and
- * is one of simplest ones.
+ * is one of the simplest ones.
  * 
  *@note
  * this is not the place to do any checks for values
@@ -735,7 +684,7 @@ usmDHUserAuthKeyChange_undo(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     undouser = *(rowreq_ctx->undo);
-
+  
     undouser->authKeyLen = rowreq_ctx->data->authKeyLen;
     SNMP_FREE(rowreq_ctx->data->authKey);
     rowreq_ctx->data->authKey = undouser->authKey;
@@ -744,10 +693,11 @@ usmDHUserAuthKeyChange_undo(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
     return MFD_SUCCESS;
 }
 
+
 /*---------------------------------------------------------------------
  * SNMP-USM-DH-OBJECTS-MIB::usmDHUserKeyEntry.usmDHUserOwnAuthKeyChange
  * usmDHUserOwnAuthKeyChange is subid 2 of usmDHUserKeyEntry.
- * It's status is Current, and it's access level is Create.
+ * Its status is Current, and its access level is Create.
  * OID: .1.3.6.1.3.101.1.1.2.1.2
  * Description:
 The object used to change the agents own Authentication Key
@@ -764,7 +714,7 @@ The object used to change the agents own Authentication Key
  *   settable   1
  *
  *
- * It's syntax is DHKeyChange (based on perltype OCTETSTR)
+ * Its syntax is DHKeyChange (based on perltype OCTETSTR)
  * The net-snmp type is ASN_OCTET_STR. The C type decl is char (char)
  * This data type requires a length.  (Max 32)
  */
@@ -793,7 +743,7 @@ The object used to change the agents own Authentication Key
  *@note
  * This check is only to determine if the new value
  * is \b potentially valid. This is the first check of many, and
- * is one of simplest ones.
+ * is one of the simplest ones.
  * 
  *@note
  * this is not the place to do any checks for values
@@ -826,7 +776,7 @@ usmDHUserOwnAuthKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx *
 {
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserOwnAuthKeyChange_check_value", "called\n"));
 
-    
+
     return
         usmDHUserAuthKeyChange_check_value(rowreq_ctx,
                                            usmDHUserOwnAuthKeyChange_val_ptr,
@@ -879,7 +829,7 @@ usmDHUserOwnAuthKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserOwnAuthKeyChange_set",
                 "called\n"));
     return usmDHUserAuthKeyChange_set(rowreq_ctx,
-                                         usmDHUserOwnAuthKeyChange_val_ptr,
+           usmDHUserOwnAuthKeyChange_val_ptr,
                                          usmDHUserOwnAuthKeyChange_val_ptr_len);
 }
 
@@ -897,10 +847,11 @@ usmDHUserOwnAuthKeyChange_undo(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
     return usmDHUserAuthKeyChange_undo(rowreq_ctx);
 }
 
+
 /*---------------------------------------------------------------------
  * SNMP-USM-DH-OBJECTS-MIB::usmDHUserKeyEntry.usmDHUserPrivKeyChange
  * usmDHUserPrivKeyChange is subid 3 of usmDHUserKeyEntry.
- * It's status is Current, and it's access level is Create.
+ * Its status is Current, and its access level is Create.
  * OID: .1.3.6.1.3.101.1.1.2.1.3
  * Description:
 The object used to change any given user's Privacy Key using
@@ -917,7 +868,7 @@ The object used to change any given user's Privacy Key using
  *   settable   1
  *
  *
- * It's syntax is DHKeyChange (based on perltype OCTETSTR)
+ * Its syntax is DHKeyChange (based on perltype OCTETSTR)
  * The net-snmp type is ASN_OCTET_STR. The C type decl is char (char)
  * This data type requires a length.  (Max 32)
  */
@@ -946,7 +897,7 @@ The object used to change any given user's Privacy Key using
  *@note
  * This check is only to determine if the new value
  * is \b potentially valid. This is the first check of many, and
- * is one of simplest ones.
+ * is one of the simplest ones.
  * 
  *@note
  * this is not the place to do any checks for values
@@ -1052,13 +1003,6 @@ usmDHUserPrivKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:
-     * reverse value mapping
-     *
-     * If the values for your data type don't exactly match the
-     * possible values defined by the mib, you should map them here.
-     */
-    /*
-     * TODO:
      * set usmDHUserPrivKeyChange value in rowreq_ctx->data.
      */
     usmDHSetKey(rowreq_ctx->data, 0,
@@ -1095,10 +1039,11 @@ usmDHUserPrivKeyChange_undo(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
     return MFD_SUCCESS;
 }
 
+
 /*---------------------------------------------------------------------
  * SNMP-USM-DH-OBJECTS-MIB::usmDHUserKeyEntry.usmDHUserOwnPrivKeyChange
  * usmDHUserOwnPrivKeyChange is subid 4 of usmDHUserKeyEntry.
- * It's status is Current, and it's access level is Create.
+ * Its status is Current, and its access level is Create.
  * OID: .1.3.6.1.3.101.1.1.2.1.4
  * Description:
 The object used to change the agent's own Privacy Key using a
@@ -1115,7 +1060,7 @@ The object used to change the agent's own Privacy Key using a
  *   settable   1
  *
  *
- * It's syntax is DHKeyChange (based on perltype OCTETSTR)
+ * Its syntax is DHKeyChange (based on perltype OCTETSTR)
  * The net-snmp type is ASN_OCTET_STR. The C type decl is char (char)
  * This data type requires a length.  (Max 32)
  */
@@ -1144,7 +1089,7 @@ The object used to change the agent's own Privacy Key using a
  *@note
  * This check is only to determine if the new value
  * is \b potentially valid. This is the first check of many, and
- * is one of simplest ones.
+ * is one of the simplest ones.
  * 
  *@note
  * this is not the place to do any checks for values
@@ -1231,7 +1176,7 @@ usmDHUserOwnPrivKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserOwnPrivKeyChange_set",
                 "called\n"));
     return usmDHUserPrivKeyChange_set(rowreq_ctx,
-                                      usmDHUserOwnPrivKeyChange_val_ptr,
+           usmDHUserOwnPrivKeyChange_val_ptr,
                                       usmDHUserOwnPrivKeyChange_val_ptr_len);
 }
 
@@ -1248,29 +1193,30 @@ usmDHUserOwnPrivKeyChange_undo(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserOwnPrivKeyChange_undo",
                 "called\n"));
 
-    return usmDHUserPrivKeyChange_undo(rowreq_ctx);
+    return usmDHUserPrivKeyChange_undo;
 }
 
 /**
  * check dependencies
  *
  * Should you need different behavior depending on which columns were
- * set, rowreq_ctx->set_flags will indicate which writeable columns were
+ * set, rowreq_ctx->column_set_flags will indicate which writeable columns were
  * set. The definitions for the FLAG_* bits can be found in
  * usmDHUserKeyTable_oids.h.
+ * A new row will have the MFD_ROW_CREATED bit set in rowreq_flags.
  *
  * @retval MFD_SUCCESS all the changes to the row are legal
  * @retval MFD_ERROR   one or more changes are not legal
  *
  * (see README-table-usmDHUserKeyTable if you don't have dependencies)
  */
+    int flags;
 int
 usmDHUserKeyTable_check_dependencies(usmDHUserKeyTable_rowreq_ctx *
                                      rowreq_ctx)
 {
-    int             rc = SNMP_ERR_NOERROR;
-    int flags;
-    
+    int             rc = MFD_SUCCESS;
+
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*

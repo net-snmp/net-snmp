@@ -29,10 +29,12 @@ extern          "C" {
  **********************************************************************/
     /*
      * usmDHUserKeyTable is subid 2 of usmDHPublicObjects.
-     * It's status is Current.
+     * Its status is Current.
      * OID: .1.3.6.1.3.101.1.1.2, length: 9
      */
+
     int             usmDHUserKeyTable_usmUserEngineID_check_index(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx);   /* external */
+
     int             usmDHUserKeyTable_usmUserName_check_index(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx);       /* external */
 
 
@@ -49,6 +51,7 @@ extern          "C" {
     int            
         usmDHUserKeyTable_undo_commit(usmDHUserKeyTable_rowreq_ctx *
                                       rowreq_ctx);
+
 
 
     int            
@@ -71,6 +74,7 @@ extern          "C" {
         usmDHUserAuthKeyChange_undo(usmDHUserKeyTable_rowreq_ctx *
                                     rowreq_ctx);
 
+
     int            
         usmDHUserOwnAuthKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx
                                               * rowreq_ctx,
@@ -92,6 +96,7 @@ extern          "C" {
         usmDHUserOwnAuthKeyChange_undo(usmDHUserKeyTable_rowreq_ctx *
                                        rowreq_ctx);
 
+
     int            
         usmDHUserPrivKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx *
                                            rowreq_ctx,
@@ -111,6 +116,7 @@ extern          "C" {
     int            
         usmDHUserPrivKeyChange_undo(usmDHUserKeyTable_rowreq_ctx *
                                     rowreq_ctx);
+
 
     int            
         usmDHUserOwnPrivKeyChange_check_value(usmDHUserKeyTable_rowreq_ctx
@@ -142,5 +148,4 @@ extern          "C" {
 #ifdef __cplusplus
 }
 #endif
-
 #endif                          /* USMDHUSERKEYTABLE_DATA_SET_H */

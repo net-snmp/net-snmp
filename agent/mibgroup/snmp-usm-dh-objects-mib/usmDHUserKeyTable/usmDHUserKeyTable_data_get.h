@@ -44,51 +44,23 @@ extern          "C" {
  **********************************************************************/
     /*
      * usmDHUserKeyTable is subid 2 of usmDHPublicObjects.
-     * It's status is Current.
+     * Its status is Current.
      * OID: .1.3.6.1.3.101.1.1.2, length: 9
      */
     /*
      * indexes
      */
-    int             usmUserEngineID_map(char
-                                        **mib_usmUserEngineID_val_ptr_ptr,
-                                        size_t
-                                        *mib_usmUserEngineID_val_ptr_len_ptr,
-                                        char *raw_usmUserEngineID_val_ptr,
-                                        size_t
-                                        raw_usmUserEngineID_val_ptr_len,
-                                        int allow_realloc);
-    int             usmUserName_map(char **mib_usmUserName_val_ptr_ptr,
-                                    size_t
-                                    *mib_usmUserName_val_ptr_len_ptr,
-                                    char *raw_usmUserName_val_ptr,
-                                    size_t raw_usmUserName_val_ptr_len,
-                                    int allow_realloc);
 
-    int             usmDHUserAuthKeyChange_map(char
-                                               **mib_usmDHUserAuthKeyChange_val_ptr_ptr,
-                                               size_t
-                                               *mib_usmDHUserAuthKeyChange_val_ptr_len_ptr,
-                                               char
-                                               *raw_usmDHUserAuthKeyChange_val_ptr,
-                                               size_t
-                                               raw_usmDHUserAuthKeyChange_val_ptr_len,
-                                               int allow_realloc);
+
+
+
     int             usmDHUserAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx
                                                * rowreq_ctx,
                                                char
                                                **usmDHUserAuthKeyChange_val_ptr_ptr,
                                                size_t
                                                *usmDHUserAuthKeyChange_val_ptr_len_ptr);
-    int             usmDHUserOwnAuthKeyChange_map(char
-                                                  **mib_usmDHUserOwnAuthKeyChange_val_ptr_ptr,
-                                                  size_t
-                                                  *mib_usmDHUserOwnAuthKeyChange_val_ptr_len_ptr,
-                                                  char
-                                                  *raw_usmDHUserOwnAuthKeyChange_val_ptr,
-                                                  size_t
-                                                  raw_usmDHUserOwnAuthKeyChange_val_ptr_len,
-                                                  int allow_realloc);
+
     int            
         usmDHUserOwnAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx *
                                       rowreq_ctx,
@@ -96,30 +68,14 @@ extern          "C" {
                                       **usmDHUserOwnAuthKeyChange_val_ptr_ptr,
                                       size_t
                                       *usmDHUserOwnAuthKeyChange_val_ptr_len_ptr);
-    int             usmDHUserPrivKeyChange_map(char
-                                               **mib_usmDHUserPrivKeyChange_val_ptr_ptr,
-                                               size_t
-                                               *mib_usmDHUserPrivKeyChange_val_ptr_len_ptr,
-                                               char
-                                               *raw_usmDHUserPrivKeyChange_val_ptr,
-                                               size_t
-                                               raw_usmDHUserPrivKeyChange_val_ptr_len,
-                                               int allow_realloc);
+
     int             usmDHUserPrivKeyChange_get(usmDHUserKeyTable_rowreq_ctx
                                                * rowreq_ctx,
                                                char
                                                **usmDHUserPrivKeyChange_val_ptr_ptr,
                                                size_t
                                                *usmDHUserPrivKeyChange_val_ptr_len_ptr);
-    int             usmDHUserOwnPrivKeyChange_map(char
-                                                  **mib_usmDHUserOwnPrivKeyChange_val_ptr_ptr,
-                                                  size_t
-                                                  *mib_usmDHUserOwnPrivKeyChange_val_ptr_len_ptr,
-                                                  char
-                                                  *raw_usmDHUserOwnPrivKeyChange_val_ptr,
-                                                  size_t
-                                                  raw_usmDHUserOwnPrivKeyChange_val_ptr_len,
-                                                  int allow_realloc);
+
     int            
         usmDHUserOwnPrivKeyChange_get(usmDHUserKeyTable_rowreq_ctx *
                                       rowreq_ctx,
@@ -127,6 +83,8 @@ extern          "C" {
                                       **usmDHUserOwnPrivKeyChange_val_ptr_ptr,
                                       size_t
                                       *usmDHUserOwnPrivKeyChange_val_ptr_len_ptr);
+
+
 
 
     int            
@@ -153,6 +111,5 @@ extern          "C" {
 #ifdef __cplusplus
 }
 #endif
-
 #endif                          /* USMDHUSERKEYTABLE_DATA_GET_H */
 /** @} */

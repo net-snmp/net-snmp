@@ -92,7 +92,7 @@ usmDHGetUserKeyChange(struct usmUser *user, int for_auth_key,
  **********************************************************************/
 /*
  * usmDHUserKeyTable is subid 2 of usmDHPublicObjects.
- * It's status is Current.
+ * Its status is Current.
  * OID: .1.3.6.1.3.101.1.1.2, length: 9
  */
 
@@ -126,7 +126,7 @@ usmDHUserKeyTable_allocate_data(void)
  * Purpose: release usmDHUserKeyTable data.
  */
 void
-usmDHUserKeyTable_release_data(usmDHUserKeyTable_data *data)
+usmDHUserKeyTable_release_data(usmDHUserKeyTable_data * data)
 {
     DEBUGMSGTL(("verbose:usmDHUserKeyTable_release_data", "called\n"));
 
@@ -144,6 +144,10 @@ usmDHUserKeyTable_release_data(usmDHUserKeyTable_data *data)
 }
 
 /* XXXWWW: BLAH_map for indexes at least is defined in both set.c and get.c */
+
+
+
+
 
 /**
  * set mib index(es)
@@ -169,6 +173,7 @@ usmDHUserKeyTable_indexes_set_tbl_idx(usmDHUserKeyTable_mib_index *
     DEBUGMSGTL(("verbose:usmDHUserKeyTable_indexes_set_tbl_idx",
                 "called\n"));
 
+
     /*
      * usmUserEngineID(1)/SnmpEngineID/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h 
      */
@@ -190,6 +195,7 @@ usmDHUserKeyTable_indexes_set_tbl_idx(usmDHUserKeyTable_mib_index *
     memcpy(tbl_idx->usmUserEngineID, usmUserEngineID_val_ptr,
            tbl_idx->usmUserEngineID_len *
            sizeof(tbl_idx->usmUserEngineID[0]));
+
 
     /*
      * usmUserName(2)/SnmpAdminString/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/H 
@@ -260,10 +266,11 @@ usmDHUserKeyTable_indexes_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
 }
 
 
+
 /*---------------------------------------------------------------------
  * SNMP-USM-DH-OBJECTS-MIB::usmDHUserKeyEntry.usmDHUserAuthKeyChange
  * usmDHUserAuthKeyChange is subid 1 of usmDHUserKeyEntry.
- * It's status is Current, and it's access level is Create.
+ * Its status is Current, and its access level is Create.
  * OID: .1.3.6.1.3.101.1.1.2.1.1
  * Description:
 The object used to change any given user's Authentication Key
@@ -280,38 +287,10 @@ The object used to change any given user's Authentication Key
  *   settable   1
  *
  *
- * It's syntax is DHKeyChange (based on perltype OCTETSTR)
+ * Its syntax is DHKeyChange (based on perltype OCTETSTR)
  * The net-snmp type is ASN_OCTET_STR. The C type decl is char (char)
- * This data type requires a length.  (Max 32)
+ * This data type requires a length.  (Max )
  */
-/**
- * map a value from it's original native format the the MIB format.
- *
- * @retval MFD_SUCCESS         : success
- * @retval MFD_ERROR           : Any other error
- *
- * @note parameters follow the memset convention (dest, src).
- *
- * @note generation and use of this function can be turned off by re-running
- * mib2c after adding the following line to the file
- * default-node-usmDHUserAuthKeyChange.m2d :
- *   @eval $m2c_node_skip_mapping = 1@
- *
- * @remark
- *  If the values for your data type don't exactly match the
- *  possible values defined by the mib, you should map them here.
- *  Otherwise, just do a direct copy.
- */
-int
-usmDHUserAuthKeyChange_map(char **mib_usmDHUserAuthKeyChange_val_ptr_ptr,
-                           size_t
-                           *mib_usmDHUserAuthKeyChange_val_ptr_len_ptr,
-                           char *raw_usmDHUserAuthKeyChange_val_ptr,
-                           size_t raw_usmDHUserAuthKeyChange_val_ptr_len,
-                           int allow_realloc)
-{
-    return MFD_SUCCESS;
-}
 
 /**
  * Extract the current value of the usmDHUserAuthKeyChange data.
@@ -364,10 +343,11 @@ usmDHUserAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
                                  usmDHUserAuthKeyChange_val_ptr_len_ptr);
 }
 
+
 /*---------------------------------------------------------------------
  * SNMP-USM-DH-OBJECTS-MIB::usmDHUserKeyEntry.usmDHUserOwnAuthKeyChange
  * usmDHUserOwnAuthKeyChange is subid 2 of usmDHUserKeyEntry.
- * It's status is Current, and it's access level is Create.
+ * Its status is Current, and its access level is Create.
  * OID: .1.3.6.1.3.101.1.1.2.1.2
  * Description:
 The object used to change the agents own Authentication Key
@@ -384,40 +364,10 @@ The object used to change the agents own Authentication Key
  *   settable   1
  *
  *
- * It's syntax is DHKeyChange (based on perltype OCTETSTR)
+ * Its syntax is DHKeyChange (based on perltype OCTETSTR)
  * The net-snmp type is ASN_OCTET_STR. The C type decl is char (char)
- * This data type requires a length.  (Max 32)
+ * This data type requires a length.  (Max )
  */
-/**
- * map a value from it's original native format the the MIB format.
- *
- * @retval MFD_SUCCESS         : success
- * @retval MFD_ERROR           : Any other error
- *
- * @note parameters follow the memset convention (dest, src).
- *
- * @note generation and use of this function can be turned off by re-running
- * mib2c after adding the following line to the file
- * default-node-usmDHUserOwnAuthKeyChange.m2d :
- *   @eval $m2c_node_skip_mapping = 1@
- *
- * @remark
- *  If the values for your data type don't exactly match the
- *  possible values defined by the mib, you should map them here.
- *  Otherwise, just do a direct copy.
- */
-int
-usmDHUserOwnAuthKeyChange_map(char
-                              **mib_usmDHUserOwnAuthKeyChange_val_ptr_ptr,
-                              size_t
-                              *mib_usmDHUserOwnAuthKeyChange_val_ptr_len_ptr,
-                              char *raw_usmDHUserOwnAuthKeyChange_val_ptr,
-                              size_t
-                              raw_usmDHUserOwnAuthKeyChange_val_ptr_len,
-                              int allow_realloc)
-{
-    return MFD_SUCCESS;
-}
 
 /**
  * Extract the current value of the usmDHUserOwnAuthKeyChange data.
@@ -471,10 +421,11 @@ usmDHUserOwnAuthKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
                                  usmDHUserOwnAuthKeyChange_val_ptr_len_ptr);
 }
 
+
 /*---------------------------------------------------------------------
  * SNMP-USM-DH-OBJECTS-MIB::usmDHUserKeyEntry.usmDHUserPrivKeyChange
  * usmDHUserPrivKeyChange is subid 3 of usmDHUserKeyEntry.
- * It's status is Current, and it's access level is Create.
+ * Its status is Current, and its access level is Create.
  * OID: .1.3.6.1.3.101.1.1.2.1.3
  * Description:
 The object used to change any given user's Privacy Key using
@@ -491,39 +442,10 @@ The object used to change any given user's Privacy Key using
  *   settable   1
  *
  *
- * It's syntax is DHKeyChange (based on perltype OCTETSTR)
+ * Its syntax is DHKeyChange (based on perltype OCTETSTR)
  * The net-snmp type is ASN_OCTET_STR. The C type decl is char (char)
  * This data type requires a length.  (Max 32)
  */
-/**
- * map a value from it's original native format the the MIB format.
- *
- * @retval MFD_SUCCESS         : success
- * @retval MFD_ERROR           : Any other error
- *
- * @note parameters follow the memset convention (dest, src).
- *
- * @note generation and use of this function can be turned off by re-running
- * mib2c after adding the following line to the file
- * default-node-usmDHUserPrivKeyChange.m2d :
- *   @eval $m2c_node_skip_mapping = 1@
- *
- * @remark
- *  If the values for your data type don't exactly match the
- *  possible values defined by the mib, you should map them here.
- *  Otherwise, just do a direct copy.
- */
-int
-usmDHUserPrivKeyChange_map(char **mib_usmDHUserPrivKeyChange_val_ptr_ptr,
-                           size_t
-                           *mib_usmDHUserPrivKeyChange_val_ptr_len_ptr,
-                           char *raw_usmDHUserPrivKeyChange_val_ptr,
-                           size_t raw_usmDHUserPrivKeyChange_val_ptr_len,
-                           int allow_realloc)
-{
-    return MFD_SUCCESS;
-}
-
 /**
  * Extract the current value of the usmDHUserPrivKeyChange data.
  *
@@ -575,10 +497,11 @@ usmDHUserPrivKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
                                  usmDHUserPrivKeyChange_val_ptr_len_ptr);
 }
 
+
 /*---------------------------------------------------------------------
  * SNMP-USM-DH-OBJECTS-MIB::usmDHUserKeyEntry.usmDHUserOwnPrivKeyChange
  * usmDHUserOwnPrivKeyChange is subid 4 of usmDHUserKeyEntry.
- * It's status is Current, and it's access level is Create.
+ * Its status is Current, and its access level is Create.
  * OID: .1.3.6.1.3.101.1.1.2.1.4
  * Description:
 The object used to change the agent's own Privacy Key using a
@@ -595,40 +518,10 @@ The object used to change the agent's own Privacy Key using a
  *   settable   1
  *
  *
- * It's syntax is DHKeyChange (based on perltype OCTETSTR)
+ * Its syntax is DHKeyChange (based on perltype OCTETSTR)
  * The net-snmp type is ASN_OCTET_STR. The C type decl is char (char)
- * This data type requires a length.  (Max 32)
+ * This data type requires a length.  (Max )
  */
-/**
- * map a value from it's original native format the the MIB format.
- *
- * @retval MFD_SUCCESS         : success
- * @retval MFD_ERROR           : Any other error
- *
- * @note parameters follow the memset convention (dest, src).
- *
- * @note generation and use of this function can be turned off by re-running
- * mib2c after adding the following line to the file
- * default-node-usmDHUserOwnPrivKeyChange.m2d :
- *   @eval $m2c_node_skip_mapping = 1@
- *
- * @remark
- *  If the values for your data type don't exactly match the
- *  possible values defined by the mib, you should map them here.
- *  Otherwise, just do a direct copy.
- */
-int
-usmDHUserOwnPrivKeyChange_map(char
-                              **mib_usmDHUserOwnPrivKeyChange_val_ptr_ptr,
-                              size_t
-                              *mib_usmDHUserOwnPrivKeyChange_val_ptr_len_ptr,
-                              char *raw_usmDHUserOwnPrivKeyChange_val_ptr,
-                              size_t
-                              raw_usmDHUserOwnPrivKeyChange_val_ptr_len,
-                              int allow_realloc)
-{
-    return MFD_SUCCESS;
-}
 
 /**
  * Extract the current value of the usmDHUserOwnPrivKeyChange data.
@@ -675,7 +568,7 @@ usmDHUserOwnPrivKeyChange_get(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
         !usmDHUserOwnPrivKeyChange_val_ptr_ptr ||
         !*usmDHUserOwnPrivKeyChange_val_ptr_ptr) {
         return MFD_ERROR;
-    }
+}
 
     return usmDHGetUserKeyChange(rowreq_ctx->data, 0,
                                  usmDHUserOwnPrivKeyChange_val_ptr_ptr,
