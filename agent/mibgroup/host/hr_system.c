@@ -96,7 +96,6 @@ static int set_solaris_bootcommand_parameter(int action, u_char * var_val, u_cha
 static int set_solaris_eeprom_parameter(char *key,char *value,size_t value_len);
 static int get_solaris_eeprom_parameter(char *parameter,char *output);
 static long     get_max_solaris_processes(void);
-static int set_solaris_time(int action, u_char * var_val, u_char var_val_type, size_t var_val_len, u_char * statP, oid * name, size_t name_len);
 #endif
 static int      get_load_dev(void);
 static int      count_users(void);
@@ -233,8 +232,8 @@ var_hrsys(struct variable * vp,
         long_return = get_uptime();
         return (u_char *) & long_return;
     case HRSYS_DATE:
-#if defined(solaris2)
-        *write_method=set_solaris_time;
+#if defined(HAVE_MKTIME) && defined(HAVE_STIME)
+        *write_method=ns_set_time;
 #endif
         (void *) time(&now);
         return (u_char *) date_n_time(&now, var_len);
@@ -477,8 +476,11 @@ static long get_max_solaris_processes(void) {
     return maxprocs;
 }
 
-static int
-set_solaris_time(int action,
+#endif
+
+#if defined(HAVE_MKTIME) && defined(HAVE_STIME)
+int
+ns_set_time(int action,
             u_char * var_val,
             u_char var_val_type,
             size_t var_val_len,
@@ -491,8 +493,12 @@ set_solaris_time(int action,
         case RESERVE1:
             /* check type */
             if (var_val_type != ASN_OCTET_STR) {
-                snmp_log(LOG_ERR,"write to set_solaris_time not ASN_OCTET_STR\n");
+                snmp_log(LOG_ERR,"write to ns_set_time not ASN_OCTET_STR\n");
                 return SNMP_ERR_WRONGTYPE;
+            }
+            if (var_val_len != 8 && var_val_len!=11) {
+                snmp_log(LOG_ERR,"write to ns_set_time not a proper length\n");
+                return SNMP_ERR_WRONGVALUE;
             }
             break;
 
@@ -506,8 +512,14 @@ set_solaris_time(int action,
             long status=0;
             time_t seconds=0;
             struct tm newtimetm;
-            int hours_from_utc=(int)var_val[9];
-            int minutes_from_utc=(int)var_val[10];
+            int hours_from_utc= 0;
+            int minutes_from_utc= 0;
+
+            if (var_val_len == 11) {
+                /* timezone inforamation was present */
+                hours_from_utc=(int)var_val[9];
+                minutes_from_utc=(int)var_val[10];
+            }
 
             newtimetm.tm_sec=(int)var_val[6];;
             newtimetm.tm_min=(int)var_val[5];
