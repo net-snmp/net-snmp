@@ -66,6 +66,8 @@ but this can be overridden by setting the environmental variable
 to a (colon-separated) list of directories to search.
 Note that this does not actually load the MIB modules located
 in that directory, but is an initialisation step to make them available.
+This function returns a count of files found in the directory, or a -1
+if there is an error.  
 
 .I init_mib_internals
 is called after all calls to
