@@ -1,7 +1,6 @@
-/* $Id$ */
-
 /*
  * Smux module authored by Rohit Dube.
+ * Rewritten by Nick Amato <naamato@merit.net>.
  */
 
 #define NOTINIT  0
@@ -10,17 +9,11 @@
 #define SMUXOK      0
 #define SMUXNOTOK   -1
 
-#define RTMIB    0
-#define FTMIB    1
-#define RIPMIB   2
-#define BGPMIB   3
-#define OSPFMIB  4
-#define SMUXMIBS 5 /* one greater */
-
-#define SMUXPORT 167
+#define SMUXPORT 199
 
 #define SMUXMAXPKTSIZE 1500
 #define SMUXMAXSTRLEN  256
+#define SMUXMAXPEERS   10
 
 #define SMUX_OPEN 	(ASN_APPLICATION | ASN_CONSTRUCTOR | 0)
 #define SMUX_CLOSE      (ASN_APPLICATION | ASN_PRIMITIVE | 1)
@@ -31,14 +24,47 @@
 #define SMUX_GET        (ASN_CONTEXT | ASN_CONSTRUCTOR | 0)
 #define SMUX_GETNEXT    (ASN_CONTEXT | ASN_CONSTRUCTOR | 1)
 #define SMUX_GETRSP     (ASN_CONTEXT | ASN_CONSTRUCTOR | 2)
+#define SMUX_SET	(ASN_CONTEXT | ASN_CONSTRUCTOR | 3)
 
-extern int init_smux (void);
-extern void smux_accept (int);
-extern u_char *smux_snmp_process (int, oid *, int *, int *);
-extern int smux_process (int);
+#define SMUXC_GOINGDOWN                    0
+#define SMUXC_UNSUPPORTEDVERSION           1
+#define SMUXC_PACKETFORMAT                 2
+#define SMUXC_PROTOCOLERROR                3
+#define SMUXC_INTERNALERROR                4
+#define SMUXC_AUTHENTICATIONFAILURE        5
 
-static u_int rt_mib[] = {1, 3, 6, 1, 2, 1, 4, 21};
-static u_int ft_mib[] = {1, 3, 6, 1, 2, 1, 4, 24};
-static u_int ospf_mib[] = {1, 3, 6, 1, 2, 1, 14};
-static u_int bgp_mib[] = {1, 3, 6, 1, 2, 1, 15};
-static u_int rip_mib[] = {1, 3, 6, 1, 2, 1, 23};
+#define SMUX_MAX_PEERS          10
+#define SMUX_MAX_PRIORITY       2147483647
+
+#define SMUX_REGOP_DELETE       0
+#define SMUX_REGOP_REGISTER     1
+
+/* 
+ * Authorized peers read from the config file
+ */
+typedef struct _smux_peer_auth {
+	oid sa_oid[MAX_OID_LEN];        /* name of peer         	*/
+	int sa_oid_len;                 /* length of peer name  	*/
+	char sa_passwd[SMUXMAXSTRLEN];  /* configured passwd    	*/
+	int sa_active_fd;		/* the peer using this auth 	*/
+} smux_peer_auth;
+
+/*
+ * Registrations
+ */
+typedef struct _smux_reg {
+	oid sr_name[MAX_OID_LEN];       /* name of subtree              */
+	int sr_name_len;                /* length of subtree name       */
+	int sr_priority;                /* priority of registration     */
+	int sr_fd;                      /* descriptor of owner          */
+	struct _smux_reg *sr_next;      /* next one                     */
+} smux_reg;
+
+extern int init_smux __P((void));
+extern int smux_accept __P((int));
+extern u_char *smux_snmp_process __P((int, oid *, int *, int *, u_char *, int));
+extern int smux_process __P((int));
+extern void smux_parse_peer_auth __P((char *, char *));
+extern void smux_free_peer_auth __P((void));
+
+config_parse_dot_conf("smuxpeer", smux_parse_peer_auth, smux_free_peer_auth);
