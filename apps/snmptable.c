@@ -656,7 +656,7 @@ void getbulk_table_entries( struct snmp_session *ss )
 	last_var = NULL;
 	while (vars) {
 	  str_len = 0;
-	  sprint_realloc_objid((u_char **)string_buf, &buf_len, &str_len, 1,
+	  sprint_realloc_objid((u_char **)&string_buf, &buf_len, &str_len, 1,
 		  vars->name, vars->name_length);
 	  if (vars->type == SNMP_ENDOFMIBVIEW || memcmp(vars->name, name, rootlen*sizeof(oid)) != 0) {
 	    if (localdebug)
