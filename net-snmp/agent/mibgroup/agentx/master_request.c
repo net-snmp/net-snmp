@@ -268,6 +268,7 @@ handle_agentx_response(int op,
 				      retry_sub->start, retry_sub->start_len);
 		asp->index = ax_vlist->variables[i]->index;
 		asp->status = handle_one_var(asp, ax_vlist->variables[i]);
+		asp->inclusive = 0;
 	      } else {
 		ax_vlist->variables[i]->type = SNMP_ENDOFMIBVIEW;
 	      }
@@ -607,7 +608,7 @@ agentx_add_request(struct agent_snmp_session *asp,
     struct request_list *request;
     struct ax_variable_list *ax_vlist;
     struct subtree      *sub, *retry_sub = NULL;
-    int			 sessid, order = 0;
+    int			 sessid, order = 0, rc = 0;
 
     sub = find_subtree_previous(vbp->name, vbp->name_length, NULL);
 
@@ -622,11 +623,14 @@ agentx_add_request(struct agent_snmp_session *asp,
 	retry_sub = find_subtree_next(vbp->name, vbp->name_length, NULL);
 
 	if (retry_sub != NULL) {
+	    asp->inclusive = 1;
 	    snmp_set_var_objid(vbp, retry_sub->start, retry_sub->start_len);
 	    DEBUGMSGTL(("agentx/master", "handle_one_var(%08p, ", asp));
 	    DEBUGMSGOID(("agentx/master", vbp->name, vbp->name_length));
 	    DEBUGMSG(("agentx/master", ")\n"));
-	    return handle_one_var(asp, vbp);
+	    rc = handle_one_var(asp, vbp);
+	    asp->inclusive = 0;
+	    return rc;
 	} else {
 	    vbp->type = SNMP_ENDOFMIBVIEW;
 	    return AGENTX_ERR_NOERROR;
