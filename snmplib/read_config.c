@@ -486,9 +486,8 @@ read_config_store(char *type, char *line)
     fprintf(fout,line);
     if (line[strlen(line)] != '\n')
       fprintf(fout,"\n");
-    DEBUGP("storing: %s\n",line);
+    DEBUGMSGTL(("read_config","storing: %s\n",line));
     fclose(fout);
-    /* XXX Sync the disk? */
   } else {
     snmp_perror(type);
   }
@@ -595,9 +594,9 @@ char *copy_word(char *from, char *to)
       }
       else  *to++ = *from++;
     }
-    if (*from == 0) 
-      DEBUGP("copy_word: no end quote found in config string\n");
-    else from++;
+    if (*from == 0) {
+      DEBUGMSGTL(("read_config","copy_word: no end quote found in config string\n"));
+    } else from++;
   }
   else {
     while (*from != 0 && !isspace(*from)) {

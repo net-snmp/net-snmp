@@ -358,7 +358,7 @@ MDsign(u_char *data, int len, u_char *mac, int maclen,
 
   if (secretlen != 16 || secret == NULL || mac == NULL || data == NULL ||
     len <= 0 || maclen <= 0) {
-/*    DEBUGPL(("MD5 signing not properly initialized")); */
+/*    DEBUGPMSGTL(("md5","MD5 signing not properly initialized")); */
     return -1;
   }
   

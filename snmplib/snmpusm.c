@@ -250,7 +250,6 @@ asn_predict_int_length (int type, long number, int len)
 {
 	register u_long mask;
 
-EM(-1);
 
 	if (len != sizeof (long)) return -1;
 
@@ -294,7 +293,6 @@ EM(-1);
 int
 asn_predict_length (int type, u_char *ptr, int u_char_len)
 {
-EM(-1);
 
 	if (type & ASN_SEQUENCE) return 1+3+u_char_len;
 
@@ -401,7 +399,6 @@ usm_calc_offsets (
 		namelen,	/*   SNMPv3Message.                        */
 		authlen,
 		privlen;
-EM(-1);
 
 	/* 
 	 * If doing authentication, msgAuthParmLen = 12 else msgAuthParmLen = 0.
@@ -554,7 +551,6 @@ usm_set_salt (	u_char		*iv,
 		 */
 	int iindex;
 
-EM(-1);
 
 	/*
 	 * Sanity check.
@@ -719,10 +715,9 @@ usm_generate_out_msg (msgProcModel, globalData, globalDataLen, maxMsgSize,
 	u_int   theSecLevel		= 0;	/* No defined const for bad
 						 * value (other then err).
 						 */
-EM(-1);
 
 
-	DEBUGPL (("USM processing has begun.\n"));
+	DEBUGMSGTL(("usm","USM processing has begun.\n"));
 
 	if (secStateRef != NULL)
 	{
@@ -765,7 +760,7 @@ EM(-1);
 				== NULL &&
                      			secLevel != SNMP_SEC_LEVEL_NOAUTH)
 		{
-			DEBUGPL (("Unknown User\n"));
+			DEBUGMSGTL(("usm","Unknown User\n"));
 			if (secStateRef)
 				usm_free_usmStateReference (secStateRef);
 			return USM_ERR_UNKNOWN_SECURITY_NAME;
@@ -813,7 +808,7 @@ EM(-1);
 		theAuthProtocol, theAuthProtocolLength,
 		theAuthProtocol, theAuthProtocolLength) == 1)
 	{
-		DEBUGPL (("Unsupported Security Level\n"));
+		DEBUGMSGTL(("usm","Unsupported Security Level\n"));
 		if (secStateRef) usm_free_usmStateReference (secStateRef);
 		return USM_ERR_UNSUPPORTED_SECURITY_LEVEL;
 	}
@@ -828,7 +823,7 @@ EM(-1);
 	if (get_enginetime (theEngineID, theEngineIDLength, 
 			    &boots_uint, &time_uint, FALSE) == -1)
 	{
-		DEBUGPL (("%s\n", "Failed to find engine data."));
+		DEBUGMSGTL(("usm","%s\n", "Failed to find engine data."));
 	}
 
 	boots_long = boots_uint;
@@ -845,7 +840,7 @@ EM(-1);
 		&msgAuthParmLen, &msgPrivParmLen,
 		&otstlen, &seq_len, &msgSecParmLen) == -1)
 	{
-		DEBUGPL (("Failed calculating offsets.\n"));
+		DEBUGMSGTL(("usm","Failed calculating offsets.\n"));
 		if (secStateRef) usm_free_usmStateReference (secStateRef);
 		return USM_ERR_GENERIC_ERROR;
 	}
@@ -868,7 +863,7 @@ EM(-1);
 	ptr = *wholeMsg = globalData;
 	if (theTotalLength > *wholeMsgLen)
 	{
-		DEBUGPL (("Message won't fit in buffer.\n"));
+		DEBUGMSGTL(("usm","Message won't fit in buffer.\n"));
 		if (secStateRef) usm_free_usmStateReference (secStateRef);
 		return USM_ERR_GENERIC_ERROR;
 	}
@@ -896,7 +891,7 @@ EM(-1);
                         		&ptr[privParamsOffset])
 						== -1 )
 		{
-			DEBUGPL (("Can't set DES-CBC salt.\n"));
+			DEBUGMSGTL(("usm","Can't set DES-CBC salt.\n"));
 			if (secStateRef)
 				usm_free_usmStateReference (secStateRef);
 			return USM_ERR_GENERIC_ERROR;
@@ -910,23 +905,25 @@ EM(-1);
 			&ptr[dataOffset],	&encrypted_length)
 							!= SNMP_ERR_NOERROR )
 		{
-			DEBUGPL (("DES-CBC error.\n"));
+			DEBUGMSGTL(("usm","DES-CBC error.\n"));
 			if (secStateRef)
 				usm_free_usmStateReference (secStateRef);
 			return USM_ERR_ENCRYPTION_ERROR;
 		}
 
 
-		if ( ISDF(CRYPTED_CHUNK) ) {
-			dump_chunk("This data was encrypted:",
+#ifdef SNMP_TESTING_CODE
+		if ( debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
+			dump_chunk("usm/dump", "This data was encrypted:",
 					scopedPdu, scopedPduLen);
-			dump_chunk("salt + Encrypted form:",
+			dump_chunk("usm/dump", "salt + Encrypted form:",
 					salt, salt_length);
-			dump_chunk(NULL,
+			dump_chunk("usm/dump", NULL,
 					&ptr[dataOffset], encrypted_length);
-			dump_chunk("*wholeMsg:",
+			dump_chunk("usm/dump", "*wholeMsg:",
 					*wholeMsg, theTotalLength);
 		}
+#endif
 
 
 		ptr 	= *wholeMsg;
@@ -940,13 +937,13 @@ EM(-1);
 		if ( (encrypted_length != (theTotalLength - dataOffset))
 				|| (salt_length != msgPrivParmLen) )
 		{
-			DEBUGPL (("DES-CBC length error.\n"));
+			DEBUGMSGTL(("usm","DES-CBC length error.\n"));
 			if (secStateRef)
 				usm_free_usmStateReference (secStateRef);
 			return USM_ERR_ENCRYPTION_ERROR;
 		}
 
-		DEBUGPL (("Encryption successful.\n"));
+		DEBUGMSGTL(("usm","Encryption successful.\n"));
 	}
 
 	/* 
@@ -1072,7 +1069,7 @@ EM(-1);
 
 		if (temp_sig == NULL)
 		{
-			DEBUGPL (("Out of memory.\n"));
+			DEBUGMSGTL(("usm","Out of memory.\n"));
 			if (secStateRef)
 				usm_free_usmStateReference (secStateRef);
 			return USM_ERR_GENERIC_ERROR;
@@ -1089,7 +1086,7 @@ EM(-1);
 			 */
 			SNMP_ZERO(temp_sig, temp_sig_len);
 			SNMP_FREE(temp_sig);
-			DEBUGPL (("Signing failed.\n"));
+			DEBUGMSGTL(("usm","Signing failed.\n"));
 			if (secStateRef)
 				usm_free_usmStateReference (secStateRef);
 			return USM_ERR_AUTHENTICATION_FAILURE;
@@ -1099,7 +1096,7 @@ EM(-1);
 		{
 			SNMP_ZERO(temp_sig, temp_sig_len);
 			SNMP_FREE(temp_sig);
-			DEBUGPL (("Signing lengths failed.\n"));
+			DEBUGMSGTL(("usm","Signing lengths failed.\n"));
 			if (secStateRef)
 				usm_free_usmStateReference (secStateRef);
 			return USM_ERR_AUTHENTICATION_FAILURE;
@@ -1119,7 +1116,7 @@ EM(-1);
 		usm_free_usmStateReference (secStateRef);
 	}
 
-	DEBUGPL (("USM processing completed.\n"));
+	DEBUGMSGTL(("usm","USM processing completed.\n"));
 	
 	return USM_ERR_NO_ERROR;
 
@@ -1173,7 +1170,6 @@ usm_parse_security_parameters (
 
 	u_int    origNameLen;
 
-EM(-1);
 
 	/* 
 	 * Eat the first octet header.
@@ -1367,13 +1363,12 @@ usm_check_and_update_timeliness(secEngineID, secEngineIDLen, boots_uint,
 	u_int	myBoots;
 	u_int	myTime;
 
-EM(-1);
 
 
 	if ( (myIDLength > USM_MAX_ID_LENGTH) || (myIDLength < 0) )
 	{
 		/* We're probably already screwed...buffer overwrite.  XXX? */
-		DEBUGPL (("Buffer overflow.\n"));
+		DEBUGMSGTL(("usm","Buffer overflow.\n"));
 		*error = USM_ERR_GENERIC_ERROR;
 		return -1;
 	}
@@ -1414,11 +1409,11 @@ EM(-1);
 			if ( snmp_increment_statistic(
 					STAT_USMSTATSNOTINTIMEWINDOWS) == 0 )
 			{
-				DEBUGPL (("%s\n",
+				DEBUGMSGTL(("usm","%s\n",
 					"Failed to increment statistic."));
 			}
 
-			DEBUGPL (("%s\n", "Not in local time window."));
+			DEBUGMSGTL(("usm","%s\n", "Not in local time window."));
 			*error = USM_ERR_NOT_IN_TIME_WINDOW;
 			return -1;
 		}
@@ -1441,7 +1436,7 @@ EM(-1);
 					TRUE)
 							!= SNMPERR_SUCCESS)
 		{
-			DEBUGPL (("%s\n",
+			DEBUGMSGTL(("usm","%s\n",
 				"Failed to get remote engine's times."));
 
 			*error = USM_ERR_GENERIC_ERROR;
@@ -1458,7 +1453,7 @@ EM(-1);
 		 */
 		if (theirBoots == ENGINEBOOT_MAX || theirBoots > boots_uint)
 		{
-			DEBUGPL (("%s\n", "Remote boot count invalid."));
+			DEBUGMSGTL(("usm","%s\n", "Remote boot count invalid."));
 
 			*error = USM_ERR_NOT_IN_TIME_WINDOW;
 			return -1;
@@ -1473,7 +1468,7 @@ EM(-1);
 		{
 			if(time_difference > USM_TIME_WINDOW)
 			{
-				DEBUGPL (("%s\n", "Message too old."));
+				DEBUGMSGTL(("usm","%s\n", "Message too old."));
 				*error = USM_ERR_NOT_IN_TIME_WINDOW;
 				return -1;
 			}
@@ -1496,7 +1491,7 @@ EM(-1);
 					TRUE)
 							!= SNMPERR_SUCCESS)
 		{
-			DEBUGPL (("%s\n", "Failed updating remote boot/time."));
+			DEBUGMSGTL(("usm","%s\n", "Failed updating remote boot/time."));
 			*error = USM_ERR_GENERIC_ERROR;
 			return -1;
 		}
@@ -1584,9 +1579,8 @@ usm_process_in_msg (msgProcModel, maxMsgSize, secParams, secModel, secLevel,
 
 	struct usmUser *user;
 
-EM(-1);
 
-	DEBUGPL (("USM processing begun...\n"));
+	DEBUGMSGTL(("usm","USM processing begun...\n"));
 
 
 	if (secStateRef)		/* FIX -- huh?  destroy it? */
@@ -1594,7 +1588,7 @@ EM(-1);
 		*secStateRef = usm_malloc_usmStateReference();
 		if (*secStateRef == NULL)
 		{
-			DEBUGP (("Out of memory.\n"));
+			DEBUGMSGTL(("usm", "Out of memory.\n"));
 			return USM_ERR_GENERIC_ERROR;
 		}
 	}
@@ -1614,10 +1608,10 @@ EM(-1);
 		 &data_ptr)
 			== -1 )
 	{
-		DEBUGPL (("Parsing failed.\n"));
+		DEBUGMSGTL(("usm","Parsing failed.\n"));
 		if (snmp_increment_statistic (STAT_SNMPINASNPARSEERRS)==0)
 		{
-			DEBUGPL (("%s\n", "Failed to increment statistic."));
+			DEBUGMSGTL(("usm","%s\n", "Failed to increment statistic."));
 		}
 		return USM_ERR_PARSE_ERROR;
 	}
@@ -1631,21 +1625,21 @@ EM(-1);
 		if ( usm_set_usmStateReference_name (
 				*secStateRef, secName, *secNameLen) == -1 )
 		{
-			DEBUGPL (("%s\n", "Couldn't cache name."));
+			DEBUGMSGTL(("usm","%s\n", "Couldn't cache name."));
 			return USM_ERR_GENERIC_ERROR;
 		}
 
 		if ( usm_set_usmStateReference_engine_id (
 			*secStateRef, secEngineID, *secEngineIDLen) == -1 )
 		{
-			DEBUGPL (("%s\n", "Couldn't cache engine id."));
+			DEBUGMSGTL(("usm","%s\n", "Couldn't cache engine id."));
 			return USM_ERR_GENERIC_ERROR;
 		}
 
 		if ( usm_set_usmStateReference_sec_level (
 					*secStateRef, secLevel) == -1 )
 		{
-			DEBUGPL (("%s\n", "Couldn't cache security level."));
+			DEBUGMSGTL(("usm","%s\n", "Couldn't cache security level."));
 			return USM_ERR_GENERIC_ERROR;
 		}
 	}
@@ -1659,11 +1653,11 @@ EM(-1);
 	{
 		if (ISENGINEKNOWN(secEngineID, *secEngineIDLen)==FALSE)
 		{
-			DEBUGPL (("Unknown Engine ID.\n"));
+			DEBUGMSGTL(("usm","Unknown Engine ID.\n"));
 			if (snmp_increment_statistic (
 					STAT_USMSTATSUNKNOWNENGINEIDS)==0)
 			{
-				DEBUGPL (("%s\n",
+				DEBUGMSGTL(("usm","%s\n",
 					"Failed to increment statistic."));
 			}
 			return USM_ERR_UNKNOWN_ENGINE_ID;
@@ -1674,7 +1668,7 @@ EM(-1);
 		if ( ENSURE_ENGINE_RECORD(secEngineID,*secEngineIDLen)
 							!= SNMPERR_SUCCESS )
 		{
-			DEBUGPL (("%s\n", "Couldn't ensure engine record."));
+			DEBUGMSGTL(("usm","%s\n", "Couldn't ensure engine record."));
 			return USM_ERR_GENERIC_ERROR;
 		}
 		
@@ -1689,10 +1683,10 @@ EM(-1);
 		usm_get_user(secEngineID, *secEngineIDLen, secName))
 			== NULL )
 	{
-		DEBUGPL (("Unknown User.\n"));
+		DEBUGMSGTL(("usm","Unknown User.\n"));
 		if (snmp_increment_statistic (STAT_USMSTATSUNKNOWNUSERNAMES)==0)
 		{
-			DEBUGPL (("%s\n", "Failed to increment statistic."));
+			DEBUGMSGTL(("usm","%s\n", "Failed to increment statistic."));
 		}
 		return USM_ERR_UNKNOWN_SECURITY_NAME;
 	}
@@ -1703,11 +1697,11 @@ EM(-1);
 	 */
 	if (usm_check_secLevel(secLevel, user) == 1)
 	{
-		DEBUGPL (("Unsupported Security Level.\n"));
+		DEBUGMSGTL(("usm","Unsupported Security Level.\n"));
 		if (snmp_increment_statistic
 					(STAT_USMSTATSUNSUPPORTEDSECLEVELS)==0)
 		{
-			DEBUGPL (("%s\n", "Failed to increment statistic."));
+			DEBUGMSGTL(("usm","%s\n", "Failed to increment statistic."));
 		}
 		return USM_ERR_UNSUPPORTED_SECURITY_LEVEL;
 	}
@@ -1726,17 +1720,17 @@ EM(-1);
 			signature,		signature_length)
 							!= SNMP_ERR_NOERROR )
 		{
-			DEBUGPL (("Verification failed.\n"));
+			DEBUGMSGTL(("usm","Verification failed.\n"));
 			if (snmp_increment_statistic
 					(STAT_USMSTATSWRONGDIGESTS)==0)
 			{
-				DEBUGPL (("%s\n",
+				DEBUGMSGTL(("usm","%s\n",
 				    "Failed to increment statistic."));
 			}
 			return USM_ERR_AUTHENTICATION_FAILURE;
 		}
 
-		DEBUGPL (("Verification succeeded.\n"));
+		DEBUGMSGTL(("usm","Verification succeeded.\n"));
 	}
 
 
@@ -1751,7 +1745,7 @@ EM(-1);
 		if (usm_set_usmStateReference_auth_protocol (*secStateRef,
 			user->authProtocol, user->authProtocolLen) ==-1)
 		{
-			DEBUGPL (("%s\n",
+			DEBUGMSGTL(("usm","%s\n",
 				"Couldn't cache authentication protocol."));
 			return USM_ERR_GENERIC_ERROR;
 		}
@@ -1759,21 +1753,21 @@ EM(-1);
 		if (usm_set_usmStateReference_auth_key (*secStateRef,
 			user->authKey, user->authKeyLen) == -1)
 		{
-			DEBUGPL (("%s\n", "Couldn't cache authentiation key."));
+			DEBUGMSGTL(("usm","%s\n", "Couldn't cache authentiation key."));
 			return USM_ERR_GENERIC_ERROR;
 		}
 
 		if (usm_set_usmStateReference_priv_protocol (*secStateRef,
 			user->privProtocol, user->privProtocolLen) ==-1)
 		{
-			DEBUGPL (("%s\n", "Couldn't cache privacy protocol."));
+			DEBUGMSGTL(("usm","%s\n", "Couldn't cache privacy protocol."));
 			return USM_ERR_GENERIC_ERROR;
 		}
 
 		if (usm_set_usmStateReference_priv_key (*secStateRef,
 			user->privKey, user->privKeyLen) == -1)
 		{
-			DEBUGPL (("%s\n", "Couldn't cache privacy key."));
+			DEBUGMSGTL(("usm","%s\n", "Couldn't cache privacy key."));
 			return USM_ERR_GENERIC_ERROR;
 		}
 	}
@@ -1817,12 +1811,12 @@ EM(-1);
 		if ((value_ptr = asn_parse_header (data_ptr, &remaining,
 			&type_value)) == NULL)
 		{
-			DEBUGPL (("%s\n",
+			DEBUGMSGTL(("usm","%s\n",
 				"Failed while parsing encrypted sPDU."));
 			if (snmp_increment_statistic
 						(STAT_SNMPINASNPARSEERRS)==0)
 			{
-				DEBUGPL (("%s\n",
+				DEBUGMSGTL(("usm","%s\n",
 					"Failed increment statistic."));
 			}
 			return USM_ERR_PARSE_ERROR;
@@ -1831,14 +1825,14 @@ EM(-1);
 		if ( type_value != (u_char)
 				(ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR) )
 		{
-			DEBUGPL (("%s\n",
+			DEBUGMSGTL(("usm","%s\n",
 				"Failed while parsing encrypted sPDU, "
 				"wrong type."));
 
 			if (snmp_increment_statistic
 						(STAT_SNMPINASNPARSEERRS)==0)
 			{
-				DEBUGPL (("%s\n",
+				DEBUGMSGTL(("usm","%s\n",
 					"Failed increment statistic."));
 			}
 			return USM_ERR_PARSE_ERROR;
@@ -1861,24 +1855,26 @@ EM(-1);
 			*scopedPdu,		scopedPduLen) 
 							!= SNMP_ERR_NOERROR)
 		{
-			DEBUGPL (("%s\n", "Failed decryption."));
+			DEBUGMSGTL(("usm","%s\n", "Failed decryption."));
 			if (snmp_increment_statistic
 					(STAT_USMSTATSDECRYPTIONERRORS)==0)
 			{
-				DEBUGPL (("%s\n",
+				DEBUGMSGTL(("usm","%s\n",
 					"Failed increment statistic."));
 			}
 			return USM_ERR_DECRYPTION_ERROR;
 		}
 
-		if ( ISDF(CRYPTED_CHUNK) ) {
-			dump_chunk("Decrypted chunk:",
+#ifdef SNMP_TESTING_CODE
+		if ( debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
+			dump_chunk("usm/dump", "Decrypted chunk:",
 						*scopedPdu, *scopedPduLen);
-			dump_chunk("IV + Encrypted form:",
+			dump_chunk("usm/dump", "IV + Encrypted form:",
 						salt, salt_length);
-			dump_chunk(NULL,
+			dump_chunk("usm/dump", NULL,
 						value_ptr, remaining);
 		}
+#endif
 	}
 
 	/* 
@@ -1902,7 +1898,7 @@ EM(-1);
 				((u_long)end_of_overhead - (u_long)wholeMsg);
 
 
-	DEBUGPL (("USM processing completed.\n"));
+	DEBUGMSGTL(("usm","USM processing completed.\n"));
 
 	return USM_ERR_NO_ERROR;
 
@@ -1933,7 +1929,7 @@ init_usm_post_config(void)
 
   if ( sc_random((char *) &salt_integer, &salt_integer_len) != SNMPERR_SUCCESS )
   {
-	DEBUGPL(("sc_random() failed: using time() as salt.\n"));
+	DEBUGMSGTL(("usm","sc_random() failed: using time() as salt.\n"));
 	salt_integer	 = (u_int) time(NULL);
 	salt_integer_len = sizeof(salt_integer);
   }
@@ -1979,7 +1975,6 @@ usm_get_userList(void)
 int
 usm_check_secLevel(int level, struct usmUser *user)
 {
-EM(-1); 
 
   if ( level == SNMP_SEC_LEVEL_AUTHPRIV
 	&& (snmp_oid_compare(user->privProtocol, user->privProtocolLen,
@@ -2023,7 +2018,6 @@ usm_check_secLevel_vs_protocols(int level,
 	oid *authProtocol, u_int authProtocolLen,
 	oid *privProtocol, u_int privProtocolLen)
 {
-EM(-1); 
 
   if ( level == SNMP_SEC_LEVEL_AUTHPRIV
 	&& (snmp_oid_compare(privProtocol, privProtocolLen, usmNoPrivProtocol,
@@ -2051,7 +2045,7 @@ EM(-1);
 struct usmUser *
 usm_get_user(char *engineID, int engineIDLen, char *name)
 {
-  DEBUGPL(("getting user %s\n", name));
+  DEBUGMSGTL(("usm","getting user %s\n", name));
   return usm_get_user_from_list(engineID, engineIDLen, name, userList, 1);
 }
 
@@ -2251,7 +2245,7 @@ usm_free_user(struct usmUser *user)
     user->next->prev = user->prev;
     if (user->prev != NULL) /* ack this is really bad, because it means
                               we'll loose the head of some structure tree */
-      DEBUGPL (("Severe: Asked to free the head of a usmUser tree somewhere."));
+      DEBUGMSGTL(("usm","Severe: Asked to free the head of a usmUser tree somewhere."));
   }
 
 
@@ -2561,7 +2555,7 @@ usm_set_password(char *token, char *line)
     return;
   }
     
-  DEBUGP("comparing: %s and %s\n", cp, WILDCARDSTRING);
+  DEBUGMSGTL(("usm", "comparing: %s and %s\n", cp, WILDCARDSTRING));
   if (strncmp(cp, WILDCARDSTRING, strlen(WILDCARDSTRING)) == 0) {
     /* match against all engineIDs we know about */
     cp = skip_token(cp);

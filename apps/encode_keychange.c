@@ -110,7 +110,6 @@ main(int argc, char **argv)
 
  	local_progname = argv[0];
 
-EM(-1);	/* */
 
  
 	/*
@@ -430,7 +429,6 @@ get_user_passphrases(void)
 	struct stat	 statbuf;
 	FILE		*fp;
 
-EM(-1); /* */
 
 
 	/*

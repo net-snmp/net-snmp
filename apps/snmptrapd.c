@@ -95,6 +95,7 @@ SOFTWARE.
 #include "tools.h"
 #include "lcd_time.h"
 #include "transform_oids.h"
+#include "snmpv3.h"
 
 #ifndef BSD4_3
 #define BSD4_2
