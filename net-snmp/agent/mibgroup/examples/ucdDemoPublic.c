@@ -13,8 +13,8 @@
 #define MAXUSERS 10
 
 int num=0;
-static char demoUsers[MAXUSERS][MYMAX];
-static char demopass[MYMAX];
+static char demoUsers[MAXUSERS][MYMAX+1];
+static char demopass[MYMAX+1];
 
 void ucdDemo_parse_user(char *word, char *line) {
   if (num == MAXUSERS)
@@ -58,7 +58,7 @@ void init_ucdDemoPublic(void) {
                                 ucdDemo_parse_userpass, NULL, "PASSPHASE");
 }
 
-unsigned char publicString[MYMAX];
+unsigned char publicString[MYMAX+1];
 
 unsigned char *
 var_ucdDemoPublic(
@@ -69,9 +69,8 @@ var_ucdDemoPublic(
     size_t  *var_len,
     WriteMethod **write_method)
 {
-
   static long long_ret;
-  static char string[MYMAX], *cp;
+  static char string[MYMAX+1], *cp;
   int i;
   
   *write_method = 0;           /* assume it isnt writable for the time being */
@@ -168,24 +167,15 @@ write_ucdDemoPublicString(
    oid      *name,
    size_t   name_len)
 {
-  /* variables we may use later */
-  static long long_ret;
-  static unsigned char string[1500];
-  static oid objid[MAX_OID_LEN];
-  static struct counter64 c64;
-  int size, bigsize=1000;
-
   if (var_val_type != ASN_OCTET_STR) {
       DEBUGMSGTL(("ucdDemoPublic","write to ucdDemoPublicString not ASN_OCTET_STR\n"));
       return SNMP_ERR_WRONGTYPE;
   }
-  if (var_val_len > sizeof(string)) {
+  if (var_val_len > MYMAX) {
       DEBUGMSGTL(("ucdDemoPublic","write to ucdDemoPublicString: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   if (action == COMMIT) {
-      if (size > MYMAX)
-        return SNMP_ERR_TOOBIG;
       strcpy(publicString, var_val);
   }
   return SNMP_ERR_NOERROR;
