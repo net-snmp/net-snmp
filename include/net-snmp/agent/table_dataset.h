@@ -52,6 +52,7 @@ typedef struct netsnmp_table_data_set_s {
    table_data *table;
    netsnmp_table_data_set_storage *default_row;
    int allow_creation; /* set to 1 to allow creation of new rows */
+   int rowstatus_column;
 } netsnmp_table_data_set;
 
 Netsnmp_Node_Handler netsnmp_table_data_set_helper_handler;
@@ -81,7 +82,11 @@ void netsnmp_config_parse_table_set(const char *token, char *line);
 void netsnmp_config_parse_add_row(const char *token, char *line);
 inline void netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type);
 inline void netsnmp_table_dataset_add_row(netsnmp_table_data_set *table, netsnmp_table_row *row);
-inline void netsnmp_table_dataset_delete_row(netsnmp_table_data_set *table, netsnmp_table_row *row);
+inline void netsnmp_table_dataset_remove_row(netsnmp_table_data_set *table,
+                                             netsnmp_table_row *row);
+inline void netsnmp_table_dataset_delete_row(netsnmp_table_row *row);
+inline void netsnmp_table_dataset_remove_and_delete_row(netsnmp_table_data_set *table, netsnmp_table_row *row);
+inline void netsnmp_table_dataset_delete_all_data(netsnmp_table_data_set_storage *data);
 inline void netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
                                               netsnmp_table_row *origrow,
                                               netsnmp_table_row *newrow);
