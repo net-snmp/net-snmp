@@ -725,18 +725,23 @@ main(int argc, char *argv[])
         Exit(1);                /*  Exit logs exit val for us  */
     }
 #ifdef SIGTERM
+    DEBUGMSGTL(("signal", "registering SIGTERM signal handler\n"));
     signal(SIGTERM, SnmpdShutDown);
 #endif
 #ifdef SIGINT
+    DEBUGMSGTL(("signal", "registering SIGINT signal handler\n"));
     signal(SIGINT, SnmpdShutDown);
 #endif
 #ifdef SIGHUP
+    DEBUGMSGTL(("signal", "registering SIGHUP signal handler\n"));
     signal(SIGHUP, SnmpdReconfig);
 #endif
 #ifdef SIGUSR1
+    DEBUGMSGTL(("signal", "registering SIGUSR1 signal handler\n"));
     signal(SIGUSR1, SnmpdDump);
 #endif
 #ifdef SIGPIPE
+    DEBUGMSGTL(("signal", "registering SIGPIPE signal handler\n"));
     signal(SIGPIPE, SIG_IGN);   /* 'Inline' failure of wayward readers */
 #endif
 
@@ -930,7 +935,9 @@ receive(void)
         }
 
     reselect:
-	count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
+        DEBUGMSGTL(("snmpd/select", "select( numfds=%d, ..., tvp=%p)\n",
+                    numfds, tvp));
+        count = select(numfds, &readfds, &writefds, &exceptfds, tvp);
         DEBUGMSGTL(("snmpd/select", "returned, count = %d\n", count));
 
         if (count > 0) {
@@ -965,6 +972,8 @@ receive(void)
 
             for (i = 0; count && (i < external_readfdlen); i++) {
                 if (FD_ISSET(external_readfd[i], &readfds)) {
+                    DEBUGMSGTL(("snmpd/select", "readfd[%d] = %d\n",
+                                i, external_readfd[i]));
                     external_readfdfunc[i] (external_readfd[i],
                                             external_readfd_data[i]);
                     FD_CLR(external_readfd[i], &readfds);
@@ -973,6 +982,8 @@ receive(void)
             }
             for (i = 0; count && (i < external_writefdlen); i++) {
                 if (FD_ISSET(external_writefd[i], &writefds)) {
+                    DEBUGMSGTL(("snmpd/select", "writefd[%d] = %d\n",
+                                i, external_writefd[i]));
                     external_writefdfunc[i] (external_writefd[i],
                                              external_writefd_data[i]);
                     FD_CLR(external_writefd[i], &writefds);
@@ -981,6 +992,8 @@ receive(void)
             }
             for (i = 0; count && (i < external_exceptfdlen); i++) {
                 if (FD_ISSET(external_exceptfd[i], &exceptfds)) {
+                    DEBUGMSGTL(("snmpd/select", "exceptfd[%d] = %d\n",
+                                i, external_exceptfd[i]));
                     external_exceptfdfunc[i] (external_exceptfd[i],
                                               external_exceptfd_data[i]);
                     FD_CLR(external_exceptfd[i], &exceptfds);
@@ -995,7 +1008,12 @@ receive(void)
                 break;
             case -1:
                 if (errno == EINTR) {
-		    goto reselect;
+                    /*
+                     * likely that we got a signal. Check our special signal
+                     * flags before retrying select.
+                     */
+                    if(running && ! reconfig)
+                        goto reselect;
                 } else {
                     snmp_log_perror("select");
                 }
