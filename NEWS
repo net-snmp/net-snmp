@@ -1,6 +1,20 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*4.2.3*
+ New:
+    - mibII write support for windows
+    - sysLocation, sysContact, sysName and snmpEnableAuthenTraps are
+      persistent after being set remotely.
+    - New "ignoredisk" directive to ignore disks in the host resources mib.
+
+ Bug Fixes:
+    - The ifTable on Linux no longer reports duplicate interfaces.
+    - perl scripts print better error messages if needed modules
+      aren't available.
+    - trap sinks aren't duplicated after a SIGHUP. 
+    - misc other fixes.
+
 *4.2.2*
  Security Bug Fixes:
     - A few security bugs have been found and fixed. No known exploits
