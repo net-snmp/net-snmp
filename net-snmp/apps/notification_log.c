@@ -1,5 +1,7 @@
 #include <config.h>
 
+#include <netinet/in.h>
+
 #include "mibincl.h"
 #include "snmp_transport.h"
 #include "helpers/instance.h"
