@@ -418,6 +418,7 @@
 #endif
 
 /* define if you have librpm and libdb */
+#undef HAVE_LIBDB
 #undef HAVE_LIBRPM
 
 /* define if you have gethostbyname */
