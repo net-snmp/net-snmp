@@ -80,6 +80,7 @@ SOFTWARE.
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_client.h"
+#include "snmp_secmod.h"
 #include "mib.h"
 
 
@@ -267,6 +268,7 @@ struct snmp_pdu *
 _clone_pdu_header(struct snmp_pdu *pdu)
 {
     struct snmp_pdu *newpdu;
+    struct snmp_secmod_def *sptr;
 
     newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
     if (!newpdu) return 0;
@@ -296,6 +298,12 @@ _clone_pdu_header(struct snmp_pdu *pdu)
       snmp_free_pdu(newpdu);
       return 0;
     }
+    if ((sptr = find_sec_mod(newpdu->securityModel)) != NULL &&
+        sptr->pdu_clone != NULL) {
+        /* call security model if it needs to know about this */
+        (*sptr->pdu_clone)(pdu, newpdu);
+    }
+  
     return newpdu;
 }
 

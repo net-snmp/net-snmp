@@ -64,6 +64,7 @@ struct snmp_secmod_incoming_params {
 /* free's a given security module's data; called at unregistration time */
 typedef int (SecmodSessionCallback)(struct snmp_session *);
 typedef int (SecmodPduCallback) (struct snmp_pdu *);
+typedef int (Secmod2PduCallback) (struct snmp_pdu *, struct snmp_pdu *);
 typedef int (SecmodOutMsg)(struct snmp_secmod_outgoing_params *);
 typedef int (SecmodInMsg)(struct snmp_secmod_incoming_params *);
 typedef void (SecmodFreeState) (void *);
@@ -71,20 +72,24 @@ typedef void (SecmodFreeState) (void *);
 /*
  * definition of a security module
  */
+
+/* all of these callback functions except the encoding and decoding
+   routines are optional.  The rest of them are available if need.  */
 struct snmp_secmod_def {
-   /* maniplation functions */
-   SecmodSessionCallback *init_sess_secmod;   /* called in snmp_sess_open() */
+   /* session maniplation functions */
+   SecmodSessionCallback *session_open;      /* called in snmp_sess_open()  */
+   SecmodSessionCallback *session_close;     /* called in snmp_sess_close() */
 
-   /* encoding routines */
-   SecmodOutMsg          *reverse_encode_out; /* encode packet back to front */
-   SecmodOutMsg          *forward_encode_out; /* encode packet forward */
-   SecmodInMsg           *decode_in;          /* decode & validate incoming */
-
-   /* clean up routines */
+   /* pdu manipulation routines */
+   SecmodPduCallback     *pdu_free;           /* called in free_pdu() */
+   Secmod2PduCallback    *pdu_clone;          /* called in snmp_clone_pdu() */
    SecmodPduCallback     *pdu_timeout;        /* called when request timesout */
-   SecmodFreeState       *free_state_ref;     /* frees pdu->securityStateRef */
-   SecmodPduCallback     *free_pdu;           /* called during free_pdu() */
-   SecmodSessionCallback *free_session;       /* called during snmp_sess_close() */
+   SecmodFreeState       *pdu_free_state_ref; /* frees pdu->securityStateRef */
+
+   /* de/encoding routines: mandatory */
+   SecmodOutMsg          *encode_reverse;     /* encode packet back to front */
+   SecmodOutMsg          *encode_forward;     /* encode packet forward */
+   SecmodInMsg           *decode;             /* decode & validate incoming */
 };
 
 
@@ -104,7 +109,6 @@ int register_sec_mod(int, const char *, struct snmp_secmod_def *);
 struct snmp_secmod_def *find_sec_mod(int);
 /* register a security service */
 int unregister_sec_mod(int); /* register a security service */
-SNMPCallback set_default_secmod;
 void init_secmod(void);
 
 #endif /* SNMPSECMOD_H */
