@@ -110,7 +110,8 @@ proxy_parse_config(const char *token, char *line) {
     /* replace current link with us */
     *listpp = newp;
 
-    memdup(&newp->variables, simple_proxy_variables, sizeof(*simple_proxy_variables));
+    memdup((void *) &newp->variables, (void *) simple_proxy_variables,
+           sizeof(*simple_proxy_variables));
 
     /* register our node */
     register_mib("proxy", (struct variable *) newp->variables,
