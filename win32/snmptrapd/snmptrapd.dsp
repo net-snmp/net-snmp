@@ -86,5 +86,13 @@ LINK32=link.exe
 
 SOURCE=..\..\apps\snmptrapd.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\winservice.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\winservice.rc
+# End Source File
 # End Target
 # End Project
