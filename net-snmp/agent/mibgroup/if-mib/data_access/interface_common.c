@@ -191,8 +191,14 @@ netsnmp_access_interface_entry_create(const char *name)
     _access_interface_entry_set_index(entry, name);
 
     entry->if_descr = strdup("unknown");
+    // xxx-rks: if_alias? supposed to be persistent
 
-    entry->if_connector_present = 1; /* assume yes */
+    /*
+     * make some assumptions
+     */
+    entry->if_connector_present = 1;
+    entry->if_admin_status = IFADMINSTATUS_UP;
+    entry->if_oper_status = IFOPERSTATUS_UP;
 
     entry->oid_index.len = 1;
     entry->oid_index.oids = (oid *) & entry->index;
