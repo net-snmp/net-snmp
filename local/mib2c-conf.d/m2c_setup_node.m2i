@@ -1,8 +1,11 @@
-########################################################################
+#############################################################  -*- c -*-
 ## Defaults
 ## $Id$
 ########################################################################
 @if "$m2c_node_name" ne "$node"@
+@  if $node.accessible != 1@
+@    print "Why include setup node for inaccessible node?\n"@
+@  end@
 @  eval $m2c_node_name = $node@
 @  eval $m2c_node_skip_mapping = 0@
 @  eval $m2c_node_needlength = $node.needlength@
@@ -14,12 +17,29 @@
 ########################################################################
 @  if $node.enums == 1@
 ##
+## validate some assumtions
+##
+@    if ("$node.perltype" ne "INTEGER") && ("$node.perltype" ne "BITS")@
+@       print "$node had enums, but isn't INTEGER or BITS! ($node.perltype)\n"@
+@       exit@
+@    end@
+@    if $node.ranges == 1@
+@       print "$node has enums and ranges!\n"@
+@       exit@
+@    end@
+##
 ##   for a TC, prefix definition w/syntax to reduce collisions
 ##
 @    if $node.syntax ne $node.perltype@
 @       eval $m2c_de_pfx = "${m2c_const_pfx}$node.syntax"@
 @    else@
 @       eval $m2c_de_pfx = "${m2c_const_pfx}$node"@
+@    end@
+@    if "$node.perltype" eq "BITS"@
+@       eval $m2c_enum_mask="${m2c_de_pfx}_MASK"@
+@       if $m2c_const_lc == 0@
+@          eval $m2c_enum_mask = uc($m2c_enum_mask)@
+@       end@
 @    end@
 ##
 ##   use longs for enums (w/out length)
@@ -36,6 +56,13 @@
 ## find max size
 ########################################################################
 @  if $node.ranges == 1@
+##
+## I do not *think* you can have both...
+##
+@    if $node.enums == 1@
+@       print "$node has enums and ranges!\n"@
+@       exit@
+@    end@
 @    eval $m2c_node_maxlen = 0@
 @    foreach $a $b range $node@
 @      eval $m2c_node_maxlen = max($m2c_node_maxlen,$b)@
@@ -48,12 +75,17 @@
 ########################################################################
 ## set up extra params, based on if we need length
 ########################################################################
+@  eval $m2c_node_var_ref = "($m2c_decl **)&var->val.string"@
+@  eval $m2c_node_var_val_ptr = "($m2c_decl *)var->val.string"@
+@  eval $m2c_node_get_parm = "${node}_ptr"@
 @  if $m2c_node_needlength == 1@
-@    eval $m2c_node_get_parm = "${node}_ptr_ptr"@
+@    eval $m2c_node_get_parm = "${m2c_node_get_parm}_ptr"@
 @    eval $m2c_node_get_parms = "$m2c_decl **${node}_ptr_ptr, size_t * ${node}_len_ptr"@
 @    eval $m2c_node_set_parms = "$m2c_decl *${node}_ptr, size_t ${node}_len"@
+@    eval $m2c_node_var_ref = "$m2c_node_var_ref, &var->val_len"@
+@    eval $m2c_node_var_val = "$m2c_node_var_val_ptr, var->val_len"@
 @  else@
-@    eval $m2c_node_get_parm = "${node}_ptr"@
+@    eval $m2c_node_var_val = "*($m2c_node_var_val_ptr)"@
 @    eval $m2c_node_get_parms = "$m2c_decl * ${node}_ptr"@
 @    eval $m2c_node_set_parms = "$m2c_decl $node"@
 @  end@
@@ -84,4 +116,46 @@
 @    eval $m2c_node_srh = "${node}"@
 @  end@
 @  eval $m2c_node_srhs = "${node}_len"@
+@end@
+########################################################################
+##
+@eval $m2c_node_summary="$node/$node.syntax/$node.type/$node.decl($m2c_decl)"@
+@if $node.needlength == 0@
+@   eval $m2c_node_summary="$m2c_node_summary/l"@
+@else@
+@   eval $m2c_node_summary="$m2c_node_summary/L"@
+@end@
+@if $node.noaccess == 0@
+@   eval $m2c_node_summary="$m2c_node_summary/A"@
+@else@
+@   eval $m2c_node_summary="$m2c_node_summary/a"@
+@end@
+@if $node.settable == 0@
+@   eval $m2c_node_summary="$m2c_node_summary/w"@
+@else@
+@   eval $m2c_node_summary="$m2c_node_summary/W"@
+@end@
+@if $node.enums == 0@
+@   eval $m2c_node_summary="$m2c_node_summary/e"@
+@else@
+@   eval $m2c_node_summary="$m2c_node_summary/E"@
+@end@
+@if $node.ranges == 0@
+@   eval $m2c_node_summary="$m2c_node_summary/r"@
+@else@
+@   eval $m2c_node_summary="$m2c_node_summary/R"@
+@end@
+@if $node.hasdefval == 0@
+@   eval $m2c_node_summary="$m2c_node_summary/d"@
+@else@
+@   eval $m2c_node_summary="$m2c_node_summary/D"@
+@end@
+@if $node.hashint == 0@
+@   eval $m2c_node_summary="$m2c_node_summary/h"@
+@else@
+@   eval $m2c_node_summary="$m2c_node_summary/H"@
+@end@
+########################################################################
+@if "$m2c_data_context" eq "generated"@
+@   eval $m2c_nvv_sizeof = "$m2c_data_item$node"@
 @end@
