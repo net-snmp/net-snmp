@@ -67,24 +67,8 @@ Optional features to pass to configure for ucd-snmp:
   --with-out-mib-modules="list"   Compile without these mib modules.
   --with-libwrap[=LIBPATH]        Compile in libwrap (tcp_wrappers) support.
 
-Default mib modules compiled into the agent (which can be removed):
-
-  mibII                           support for the mib-II tree.
-  ucd_snmp                        ucd-snmp specific extensions.
-  v2party                         support for the snmpv2 party mib.
-
-Optional mib modules to include:
-
-  host:                           host resources mib support.
-                                    (alpha level code for linux, hpux, solaris)
-  smux_gated:                     smux modules to talk with gated.
-  misc/ipfwacc:                   accounting rules IP firewall information.
-                                    (only tested under linux)
-
-Optional modules for C coders to look at and/or include as extension examples:
-
-  example:                        example C code extension.
-  wombat:                         template file similar to example.
+To get a list of mib modules that you can build with, run configure
+with the --help argument.
 
 LONG (but you should read these) INSTRUCTIONS
 =============================================
