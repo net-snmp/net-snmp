@@ -19,9 +19,9 @@ mkdir %INSTALL_BASE% > NUL:
 mkdir %INSTALL_BASE%\bin > NUL:
 mkdir %INSTALL_BASE%\conf > NUL:
 mkdir %INSTALL_BASE%\lib > NUL:
-mkdir %INSTALL_BASE%\mibs > NUL:
 mkdir %INSTALL_BASE%\share > NUL:
 mkdir %INSTALL_BASE%\share\snmp > NUL:
+mkdir %INSTALL_BASE%\share\snmp\mibs > NUL:
 mkdir %INSTALL_BASE%\share\snmp\snmpconf-data > NUL:
 mkdir %INSTALL_BASE%\share\snmp\snmpconf-data\snmp-data > NUL:
 mkdir %INSTALL_BASE%\share\snmp\snmpconf-data\snmpd-data > NUL:
@@ -32,8 +32,8 @@ mkdir %INSTALL_BASE%\include > NUL:
 mkdir %INSTALL_BASE%\include\net-snmp > NUL:
 mkdir %INSTALL_BASE%\include\ucd-snmp > NUL:
 
-echo Copying MIB files to %INSTALL_BASE%\mibs
-Copy mibs\*.txt %INSTALL_BASE%\mibs > NUL:
+echo Copying MIB files to %INSTALL_BASE%\share\snmp\mibs
+Copy mibs\*.txt %INSTALL_BASE%\share\snmp\mibs > NUL:
 
 echo Copying compiled programs to %INSTALL_BASE%\bin
 Copy win32\bin\*.exe %INSTALL_BASE%\bin > NUL:
