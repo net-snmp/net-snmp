@@ -54,8 +54,8 @@ snmptest:    snmptest.o $(USELIBS)
 snmptrapd:    snmptrapd.o $(USELIBS)
 	${CC} -o $@ snmptrapd.o ${LDFLAGS} ${LIBS} 
 
-snmptrap:    snmptrap.o $(USELIBS)
-	${CC} -o $@ snmptrap.o ${LDFLAGS} ${LIBS} 
+snmptrap:    snmptrap.o ../agent/kernel_sunos5.o $(USELIBS)
+	${CC} -o $@ snmptrap.o ../agent/kernel_sunos5.o ${LDFLAGS} ${LIBS} 
 
 snmpset:    snmpset.o $(USELIBS)
 	${CC} -o $@ snmpset.o ${LDFLAGS} ${LIBS} 
