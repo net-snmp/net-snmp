@@ -66,7 +66,7 @@ netsnmp_init_table_dataset(void) {
                                 "tableoid");
 #endif /* DISABLE_MIB_LOADING */
     register_app_config_handler("add_row", netsnmp_config_parse_add_row,
-                                NULL, "indexes... values...");
+                                NULL, "table_name indexes... values...");
 }
 
 /** Create a netsnmp_table_data_set structure given a table_data definition */
