@@ -39,7 +39,7 @@
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpTCPDomain.h>
 
-oid netsnmp_snmpTCPDomain[] = { TRANSPORT_DOMAIN_TCP_IPV6 };
+oid netsnmp_snmpTCPDomain[] = { TRANSPORT_DOMAIN_TCP_IP };
 static netsnmp_tdomain tcpDomain;
 
 /*
