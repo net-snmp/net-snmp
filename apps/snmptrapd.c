@@ -136,7 +136,10 @@ int dropauth = 0;
 int running = 1;
 int reconfig = 0;
 
-char * log_fmt_str = (char *) NULL; /* how to format logging to stdout */
+const char *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a]): %N\n\t%W Trap (%q) Uptime: %#T\n%v\n",
+	   *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
+const char *trap1_fmt_str = NULL,
+	   *trap2_fmt_str = NULL; /* how to format logging to stdout */
 
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
@@ -450,10 +453,10 @@ int snmp_input(int op,
 		trapOid[trapOidLen++] = pdu->specific_type;
 	    }
 	    if (Print && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
-	        if ((log_fmt_str == (char *) NULL) || (log_fmt_str[0] == '\0'))
+	        if (trap1_fmt_str == NULL || trap1_fmt_str[0] == '\0')
 	            (void) format_plain_trap (out_bfr, SPRINT_MAX_LEN, pdu);
 	        else
-		    (void) format_trap (out_bfr, SPRINT_MAX_LEN, log_fmt_str, pdu);
+		    (void) format_trap (out_bfr, SPRINT_MAX_LEN, trap1_fmt_str, pdu);
                 snmp_log(LOG_INFO, out_bfr);
 	    }
 	    if (Syslog && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
@@ -507,10 +510,7 @@ int snmp_input(int op,
 	    host = gethostbyaddr ((char *)&pduIp->sin_addr,
 				  sizeof (pduIp->sin_addr), AF_INET);
 	    if (Print) {
-	        (void) format_trap (out_bfr, 
-				    SPRINT_MAX_LEN, 
-				    "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n",
-				    pdu);
+	        (void) format_trap (out_bfr, SPRINT_MAX_LEN, trap2_fmt_str, pdu);
                 snmp_log(LOG_INFO, out_bfr);
 	    }
 	    if (Syslog) {
@@ -572,6 +572,32 @@ int snmp_input(int op,
 	fprintf(stderr, "Timeout: This shouldn't happen!\n");
     }
     return 1;
+}
+
+
+static void parse_trap1_fmt(const char *token, char *line)
+{
+    trap1_fmt_str = strdup(line);
+}
+
+
+static void free_trap1_fmt(void)
+{
+    if (trap1_fmt_str != trap1_std_str) free ((char *)trap1_fmt_str);
+    trap1_fmt_str = trap1_std_str;
+}
+
+
+static void parse_trap2_fmt(const char *token, char *line)
+{
+    trap2_fmt_str = strdup(line);
+}
+
+
+static void free_trap2_fmt(void)
+{
+    if (trap2_fmt_str != trap2_std_str) free ((char *)trap2_fmt_str);
+    trap2_fmt_str = trap2_std_str;
 }
 
 
@@ -649,6 +675,12 @@ int main(int argc, char *argv[])
 			    "username (MD5|SHA) passphrase [DES passphrase]");
     register_config_handler("snmptrapd", "usmUser",
                             usm_parse_config_usmUser, NULL, NULL);
+    register_config_handler("snmptrapd", "format1",
+			    parse_trap1_fmt, free_trap1_fmt,
+			    "format");
+    register_config_handler("snmptrapd", "format2",
+			    parse_trap2_fmt, free_trap2_fmt,
+			    "format");
 
   /* we need to be called back later */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
@@ -784,7 +816,7 @@ int main(int argc, char *argv[])
             break;
 
 	case 'F':
-	    log_fmt_str = optarg;
+	    trap1_fmt_str = optarg;
 	    break;
 
 	default:
@@ -808,7 +840,7 @@ int main(int argc, char *argv[])
 #ifndef WIN32
     /* fork the process to the background if we are not printing to stdout */
     if (dofork) {
-      int fd, fdnum;
+      int fd;
 
       switch (fork()) {
 	case -1:
