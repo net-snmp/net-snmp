@@ -656,13 +656,14 @@ agentx_parse_string( u_char *data, size_t *length,
 
 u_char *
 agentx_parse_varbind( u_char *data, size_t *length, int *type,
-		  oid *oid_buf, u_int *oid_len,
-		  u_char *data_buf, u_int *data_len,
+		  oid *oid_buf, size_t *oid_len,
+		  u_char *data_buf, size_t *data_len,
 		  u_int network_byte_order)
 {
      u_char *bufp = data;
      u_int   int_val;
      struct counter64 *c64 = (struct counter64 *)data_buf;
+     size_t convert_tmp;
      
      DEBUGDUMPHEADER("dump_recv", "VarBind:\n");
      DEBUGDUMPHEADER("dump_recv", "Parsing Byte Order\n");
@@ -839,9 +840,9 @@ agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, s
      u_char buffer[BUFSIZ];
      u_char *prefix_ptr;
      oid    oid_buffer[MAX_OID_LEN], end_oid_buf[MAX_OID_LEN];
-     u_int  buf_len         = BUFSIZ;
-     u_int  oid_buf_len     = MAX_OID_LEN;
-     u_int  end_oid_buf_len = MAX_OID_LEN;
+     size_t buf_len         = BUFSIZ;
+     size_t oid_buf_len     = MAX_OID_LEN;
+     size_t end_oid_buf_len = MAX_OID_LEN;
 
      int    range_bound;/* OID-range upper bound */
      int    inc;	/* Inclusive SearchRange flag */
