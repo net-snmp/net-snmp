@@ -626,7 +626,8 @@ Init_HR_SWRun (void)
     }
 #elif HAVE_KVM_GETPROCS
     {
-	kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "kvm_getprocs");
+	if (kd == NULL)
+	    kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "kvm_getprocs");
 	proc_table = kvm_getprocs(kd, KERN_PROC_ALL, 0, &nproc);
     }
 #else
