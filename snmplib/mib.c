@@ -82,6 +82,12 @@ SOFTWARE.
 #include <net-snmp/library/int64.h>
 #include <net-snmp/library/snmp_client.h>
 
+/** @defgroup mib_utilities mib parsing and datatype manipulation routines.
+ *  @ingroup library
+ *
+ *  @{
+ */
+
 static char    *uptimeString(u_long, char *);
 
 static struct tree *_get_realloc_symbol(const oid * objid, size_t objidlen,
