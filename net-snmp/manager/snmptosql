@@ -126,7 +126,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 
 	# create the table in our database if it doesn't exist.
 	setuptable($dbh, $tablelist->{tablename}, $delete);
-	if ($tablelist->{'keephistory'} == 1) {
+	if ($tablelist->{'keephistory'} > 0) {
 	    setuptable($dbh, $tablelist->{tablename}, $delete, "hist");
 	}
 	
@@ -196,7 +196,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 	    $dbh->do("$cmd")
 		or warn "\nnot ok: $cmd => $DBI::errstr\n" if ($doit);
 
-	    if ($tablelist->{'keephistory'}) {
+	    if ($tablelist->{'keephistory'} > 0) {
 		$cmd = "insert into $tablelist->{'tablename'}hist (host, oidindex, " 
 		    . join(", ",keys(%vals))
 		    . ") values('$host', '$id', '"
@@ -206,7 +206,7 @@ nexthost: while (  $hostrow = $cursor->fetchrow_hashref ) {
 		    or warn "\nnot ok: $cmd -> $DBI::errstr\n" if ($doit);
 		
 		# delete the data beyond the number of days requested.
-		$dbh->do("delete from $tablelist->{'tablename'}hist where (unix_timestamp()-unix_timestamp(updated)) > $tablelist->{'keephistory'}*24*60*60") orr warn STDERR "\nnot ok: $DBI::errstr\n" if ($doit);
+		$dbh->do("delete from $tablelist->{'tablename'}hist where (unix_timestamp()-unix_timestamp(updated)) > $tablelist->{'keephistory'}*24*60*60") or warn "\nnot ok: $DBI::errstr\n" if ($doit);
 	    }
 
 	    my $newerr = 
