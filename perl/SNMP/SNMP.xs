@@ -3075,7 +3075,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
               sv_setiv(*err_ind_svp, 0);
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1)))
                  getlabel_flag |= USE_LONG_NAMES;
-	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 12, 1)))
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1)))
                  getlabel_flag |= USE_NUMERIC_OIDS;
               if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums", 8, 1)))
                  sprintval_flag = USE_ENUMS;
