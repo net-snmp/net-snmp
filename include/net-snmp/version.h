@@ -5,7 +5,10 @@
 extern          "C" {
 #endif
 
+#ifdef UCD_COMPATIBLE
     extern const char *NetSnmpVersionInfo;
+#endif
+
     const char     *netsnmp_get_version(void);
 
 #ifdef __cplusplus

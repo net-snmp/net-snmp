@@ -349,7 +349,6 @@ EXPORTS
 	netsnmp_udp_getSecName
 	find_sec_mod
 	strlcpy
-	NetSnmpVersionInfo
 	getopt
 	optarg
 	optind
@@ -377,7 +376,6 @@ EXPORTS
 	Mib                     DATA
 	tree_head               DATA
 	snmp_errno              DATA
-;	NetSnmpVersionInfo      DATA
 	netsnmp_daemonize
 	snmp_log_options_usage
 	netsnmp_container_free_list
