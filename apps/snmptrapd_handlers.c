@@ -789,12 +789,12 @@ int   command_handler( netsnmp_pdu           *pdu,
          */
         if (handler && handler->format && *handler->format) {
             DEBUGMSGTL(( "snmptrapd", "format = '%s'\n", handler->format));
-            !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+            realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                              handler->format,
                                              pdu, transport);
         } else {
             DEBUGMSGTL(( "snmptrapd", "execute format\n"));
-            !realloc_format_trap(&rbuf, &r_len, &o_len, 1,
+            realloc_format_trap(&rbuf, &r_len, &o_len, 1,
                                              EXECUTE_FORMAT,
                                              pdu, transport);
 	}
