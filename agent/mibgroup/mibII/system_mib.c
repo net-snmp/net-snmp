@@ -108,7 +108,7 @@ void system_parse_config_sysloc(const char *token, char *cptr)
 	  sysLocationSet++;
       }
   } else {
-      if (sysContactSet > 0) {
+      if (sysLocationSet > 0) {
 	  /*  This is bogus (and shouldn't happen anyway) -- we already read a
 	      persistent value of sysLocation, which we should ignore in
 	      favour of this one.  */
