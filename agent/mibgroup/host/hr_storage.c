@@ -5,12 +5,19 @@
 
 #include <config.h>
 
+#include <sys/types.h>
 #include <sys/param.h>
 #if HAVE_SYS_VM_H
 #include <sys/vm.h>
 #else
 #if HAVE_VM_VM_H
 #include <vm/vm.h>
+#if HAVE_MACHINE_TYPES_H
+#include <machine/types.h>
+#endif
+#if HAVE_SYS_VMMETER_H
+#include <sys/vmmeter.h>
+#endif
 #else
 #if HAVE_SYS_VMPARAM_H
 #include <sys/vmparam.h>
