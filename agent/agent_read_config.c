@@ -182,6 +182,9 @@ void init_agent_read_config (const char *app)
   register_app_config_handler("authtrapenable",
                           snmpd_parse_config_authtrap, NULL,
                           "1 | 2\t\t(1 = enable, 2 = disable)");
+  register_app_config_handler("pauthtrapenable",
+			  snmpd_parse_config_authtrap, NULL, NULL);
+
 
   if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT ) {
       register_app_config_handler("trapsink",

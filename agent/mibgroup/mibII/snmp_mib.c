@@ -24,6 +24,7 @@
 
 #include "snmp_mib.h"
 #include "sysORTable.h"
+#include "default_store.h"
 
 
 	/*********************
@@ -34,6 +35,7 @@
 	 *********************/
 
 extern int snmp_enableauthentraps;
+extern int snmp_enableauthentrapsset;
        int old_snmp_enableauthentraps;
 
 /*********************
@@ -86,6 +88,19 @@ extern int system_module_oid_len;
 extern int system_module_count;
 #endif
 
+static int
+snmp_enableauthentraps_store(int a, int b, void *c, void *d)
+{
+  char line[SNMP_MAXBUF_SMALL];
+
+  if (snmp_enableauthentrapsset > 0) {
+      snprintf(line, SNMP_MAXBUF_SMALL, "pauthtrapenable %d",
+	       snmp_enableauthentraps);
+      snmpd_store_config(line);
+  }
+  return 0;
+}
+
 void
 init_snmp_mib(void) {
   /* register ourselves with the agent to handle our mib tree */
@@ -96,6 +111,8 @@ init_snmp_mib(void) {
 	REGISTER_SYSOR_TABLE( system_module_oid, system_module_oid_len,
 		"The MIB module for SNMPv2 entities");
 #endif
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+			 snmp_enableauthentraps_store, NULL);
 }
 
 /*
@@ -174,6 +191,10 @@ write_snmp (int action,
 	        DEBUGMSGTL(("mibII/snmp_mib", "not valid %x\n", intval));
 		return SNMP_ERR_WRONGVALUE;
 	    }
+	    if (snmp_enableauthentrapsset < 0) {
+		/*  The object is set in a read-only configuration file.  */
+		return SNMP_ERR_NOTWRITABLE;
+	    }
 	    break;
 
 	case RESERVE2:			/* Allocate memory and similar resources */
@@ -193,9 +214,12 @@ write_snmp (int action,
 	    snmp_enableauthentraps = old_snmp_enableauthentraps;
 	    break;
 
-	case COMMIT:			/* Confirm the SET, performing any irreversible actions,
-						and free resources */
-	    /* save_into_conffile ("authentraps:", intval == 1 ? "yes" : "no"); */
+	case COMMIT:
+	    snmp_enableauthentrapsset = 1;
+	    snmp_save_persistent(ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE));
+	    (void)snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
+				      SNMP_CALLBACK_STORE_DATA, NULL);
+	    snmp_clean_persistent(ds_get_string(DS_LIBRARY_ID,DS_LIB_APPTYPE));
 	    break;
 
 	case FREE:			/* Free any resources allocated */
