@@ -15,21 +15,28 @@
  */
 @include generic-header-top.m2i@
 
-/** other required module components */
-config_require(${name}_interface)
-config_require(${name}_data_lookup)
-config_require(${name}_data_get)
-config_require(${name}_data_set)
+/* other required module components */
+config_require(${name}_interface);
+config_require(${name}_data_access);
+config_require(${name}_data_get);
+config_require(${name}_data_set);
 
-/* OID and column number definitions for table $i */
+/* OID and column number definitions for table $table */
 #include "${name}_oids.h"
-
 
 /* enum definions */
 #include "${name}_enums.h"
 
+/***********************************************************************
+ * function declarations
+ */
+void init_$name(void);
+
+/***********************************************************************
+ * Table declarations
+ */
 @foreach $table table@
-@    include generic-table.m2d@
+@    include m2c_setup_table.m2i@
 @    include details-table.m2i@
 /*
  * When you register your mib, you get to provide a generic
@@ -37,9 +44,10 @@ config_require(${name}_data_set)
  * functions calls.
  */
 @    if "$m2c_context_reg" eq ""@
-/** TODO: update typedef to correct pointer type.
- * (or add @eval $@m2c_context_reg = "TYPE"@ and regenerate code) */
+    /** TODO: update typedef to correct pointer type.
+     * (or add @eval $@m2c_context_reg = "TYPE"@ and regenerate code) */
 @        eval $m2c_context_reg = "void *"@
+
 @    end@
 typedef $m2c_context_reg ${context}_reg;
 
@@ -54,12 +62,23 @@ typedef $m2c_data_context ${context}_data;
 @    include generic-table-indexes.m2i@
 
 /*
- * When your get function is called, you will be passed a
+ * We're just going to use the same data structure for our
+ * undo_context. If you want to do something more efficent,
+ * define your typedef here.
+ */
+typedef ${context}_data ${context}_undo_data;
+
+/*
+ * When your functions are called, you will be passed a
  * ${context}_ctx pointer.
  */
 typedef struct ${context}_ctx_s {
-    ${context}_idx    *idx;
-    $m2c_data_context *data;
+    ${context}_reg    *reg;  /** registration */
+    ${context}_idx    *idx;  /** index */
+
+    ${context}_data   *data; /** data */
+
+    ${context}_undo_data * undo;
 
     /*
      * TODO: add any other useful data
@@ -68,17 +87,7 @@ typedef struct ${context}_ctx_s {
     
 } ${context}_ctx;
 
-/*
- * We're just going to use the same data structure for our
- * undo_context. If you want to do something more efficent,
- * define your typedef here.
- */
-typedef ${context}_ctx ${context}_undo_ctx;
-
 @end@
-
-/* function declarations */
-void init_$name(void);
 
 @include generic-header-bottom.m2i@
 ######################################################################
@@ -90,10 +99,6 @@ void init_$name(void);
  *       version $Revision$ of $RCSfile$ 
  */
 @include generic-source-includes.m2i@
-
-@foreach $table table@
-void initialize_table_$table(void);
-@end@
 
 /* Initializes the $name module */
 void
@@ -110,6 +115,7 @@ init_$name(void)
 ########################################################################
 ##
 @foreach $table table@
+@    include m2c_setup_table.m2i@
 /*
  * Initialize the table $table 
  *    (Define its contents and how it's structured)
@@ -124,7 +130,11 @@ initialize_table_$table(void)
 
     /** create the table registration information structures */
     table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
-    iinfo = SNMP_MALLOC_TYPEDEF(netsnmp_iterator_info);
+    if (!table_info) {
+        snmp_log(LOG_ERR, "table_info malloc failed in "
+                          "initialize_table_$table");
+        return; /** Serious error. */
+    }
 
     /** if your table is read only, it's easiest to change the
         HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
@@ -132,10 +142,15 @@ initialize_table_$table(void)
                                              ${table}_handler,
                                              ${table}_oid,
                                              OID_LENGTH(${table}_oid),
-                                             HANDLER_CAN_RWRITE);
-            
-    if (!my_handler || !table_info || !iinfo) {
-        snmp_log(LOG_ERR, "malloc failed in initialize_table_$table");
+@if $m2c_table_writable == 1@
+                                             HANDLER_CAN_RWRITE
+@else@
+                                             HANDLER_CAN_RONLY
+@end@
+);
+    if (!my_handler) {
+        snmp_log(LOG_ERR, "handler registration failed in "
+                          "initialize_table_$table");
         return; /** Serious error. */
     }
 
@@ -159,7 +174,7 @@ initialize_table_$table(void)
      */
     DEBUGMSGTL(("initialize_table_$table",
                 "Registering $table as a mibs-for-dummies table.\n"));		 
-    netsnmp_register_table_iterator(my_handler, iinfo);
+    netsnmp_register_table_mfd(my_handler, iinfo);
 }
 
 @end@
@@ -168,6 +183,7 @@ initialize_table_$table(void)
 ########################################################################
 @run generic-table-oids.m2c@
 @run mfd-interface.m2c@
+@run mfd-data-access.m2c@
 @run mfd-data-get.m2c@
 @run mfd-data-set.m2c@
 ##@run mib2c.column_enums.conf@
