@@ -3215,15 +3215,59 @@ fi
 done
 
 
+echo $ac_n "checking if $CC allows pointers to void""... $ac_c" 1>&6
+echo "configure:3220: checking if $CC allows pointers to void" >&5
+if eval "test \"`echo '$''{'ac_cv_PTR_TO_VOID'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+cat > conftest.$ac_ext <<EOF
+#line 3226 "configure"
+#include "confdefs.h"
+
+void generic_function(a)
+  void *a;
+{
+}
+
+int main() {
+
+char *cp;
+generic_function((void *) cp);
+
+; return 0; }
+EOF
+if { (eval echo configure:3241: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_cv_PTR_TO_VOID=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  ac_cv_PTR_TO_VOID=no
+fi
+rm -f conftest*
+
+fi
+
+echo "$ac_t""$ac_cv_PTR_TO_VOID" 1>&6
+
+if test "x$ac_cv_PTR_TO_VOID" = "xno"; then
+  cat >> confdefs.h <<\EOF
+#define void char
+EOF
+
+fi
+
 echo $ac_n "checking type of rtentry structure""... $ac_c" 1>&6
-echo "configure:3220: checking type of rtentry structure" >&5
+echo "configure:3264: checking type of rtentry structure" >&5
 if eval "test \"`echo '$''{'ac_cv_RTENTRY_TYPE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   
 
 cat > conftest.$ac_ext <<EOF
-#line 3227 "configure"
+#line 3271 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3241,7 +3285,7 @@ int main() {
   
 ; return 0; }
 EOF
-if { (eval echo configure:3245: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3289: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_RTENTRY_TYPE="BSD-4.4"
 else
@@ -3253,7 +3297,7 @@ rm -f conftest*
 
 if test "x$ac_cv_RTENTRY_TYPE" = "x"; then
 cat > conftest.$ac_ext <<EOF
-#line 3257 "configure"
+#line 3301 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3271,7 +3315,7 @@ rt.rt_hash;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3275: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3319: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_RTENTRY_TYPE="BSD-4.3"
 else
@@ -3301,12 +3345,12 @@ fi
 
 if test "x$ac_cv_RTENTRY_TYPE" = "xunknown"; then
 echo $ac_n "checking for struct rtentry""... $ac_c" 1>&6
-echo "configure:3305: checking for struct rtentry" >&5
+echo "configure:3349: checking for struct rtentry" >&5
 if eval "test \"`echo '$''{'ac_cv_struct_rtentry'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3310 "configure"
+#line 3354 "configure"
 #include "confdefs.h"
 #define KERNEL
 #include<net/route.h>
@@ -3347,13 +3391,13 @@ fi
 
 if test "x$ac_cv_RTENTRY_TYPE" = "xBSD-4.3"; then
 echo $ac_n "checking for struct rtentry has a rt_next node""... $ac_c" 1>&6
-echo "configure:3351: checking for struct rtentry has a rt_next node" >&5
+echo "configure:3395: checking for struct rtentry has a rt_next node" >&5
 if eval "test \"`echo '$''{'ac_cv_struct_rtentry_rt_next'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   
 cat > conftest.$ac_ext <<EOF
-#line 3357 "configure"
+#line 3401 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3371,7 +3415,7 @@ rt.rt_next;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3375: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3419: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_rtentry_rt_next=yes
 else
@@ -3397,13 +3441,13 @@ fi
 fi
 
 echo $ac_n "checking if struct tcpstat has a tcps_rcvmemdrop node""... $ac_c" 1>&6
-echo "configure:3401: checking if struct tcpstat has a tcps_rcvmemdrop node" >&5
+echo "configure:3445: checking if struct tcpstat has a tcps_rcvmemdrop node" >&5
 if eval "test \"`echo '$''{'ac_cv_struct_tcpstat_tcps_rcvmemdrop'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   
 cat > conftest.$ac_ext <<EOF
-#line 3407 "configure"
+#line 3451 "configure"
 #include "confdefs.h"
 
 #ifdef HAVE_NETINET_TCP_VAR_H
@@ -3417,7 +3461,7 @@ tcpstat.tcps_rcvmemdrop = 0;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3421: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3465: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_tcpstat_tcps_rcvmemdrop=yes
 else
@@ -3442,7 +3486,7 @@ fi
 
 
 echo $ac_n "checking for ifnet.if_baudrate""... $ac_c" 1>&6
-echo "configure:3446: checking for ifnet.if_baudrate" >&5
+echo "configure:3490: checking for ifnet.if_baudrate" >&5
 if eval "test \"`echo '$''{'ac_cv_struct_ifnet_IF_BAUDRATE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3453,7 +3497,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3457 "configure"
+#line 3501 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3467,7 +3511,7 @@ dergel.if_baudrate $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3471: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3515: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_BAUDRATE=yes
 else
@@ -3493,7 +3537,7 @@ fi
 
 
 echo $ac_n "checking for ifnet.if_type""... $ac_c" 1>&6
-echo "configure:3497: checking for ifnet.if_type" >&5
+echo "configure:3541: checking for ifnet.if_type" >&5
 if eval "test \"`echo '$''{'ac_cv_struct_ifnet_IF_TYPE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3504,7 +3548,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3508 "configure"
+#line 3552 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3518,7 +3562,7 @@ dergel.if_type $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3522: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3566: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_TYPE=yes
 else
@@ -3544,7 +3588,7 @@ fi
 
 
 echo $ac_n "checking for ifnet.if_imcasts""... $ac_c" 1>&6
-echo "configure:3548: checking for ifnet.if_imcasts" >&5
+echo "configure:3592: checking for ifnet.if_imcasts" >&5
 if eval "test \"`echo '$''{'ac_cv_struct_ifnet_IF_IMCASTS'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3555,7 +3599,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3559 "configure"
+#line 3603 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3569,7 +3613,7 @@ dergel.if_imcasts $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3573: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3617: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_IMCASTS=yes
 else
@@ -3595,7 +3639,7 @@ fi
 
 
 echo $ac_n "checking for ifnet.if_iqdrops""... $ac_c" 1>&6
-echo "configure:3599: checking for ifnet.if_iqdrops" >&5
+echo "configure:3643: checking for ifnet.if_iqdrops" >&5
 if eval "test \"`echo '$''{'ac_cv_struct_ifnet_IF_IQDROPS'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3606,7 +3650,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3610 "configure"
+#line 3654 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3620,7 +3664,7 @@ dergel.if_iqdrops $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3624: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3668: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_IQDROPS=yes
 else
@@ -3646,7 +3690,7 @@ fi
 
 
 echo $ac_n "checking for ifnet.if_noproto""... $ac_c" 1>&6
-echo "configure:3650: checking for ifnet.if_noproto" >&5
+echo "configure:3694: checking for ifnet.if_noproto" >&5
 if eval "test \"`echo '$''{'ac_cv_struct_ifnet_IF_NOPROTO'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3657,7 +3701,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3661 "configure"
+#line 3705 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3671,7 +3715,7 @@ dergel.if_noproto $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3675: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3719: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_NOPROTO=yes
 else
@@ -3697,7 +3741,7 @@ fi
 
 
 echo $ac_n "checking for ifnet.if_omcasts""... $ac_c" 1>&6
-echo "configure:3701: checking for ifnet.if_omcasts" >&5
+echo "configure:3745: checking for ifnet.if_omcasts" >&5
 if eval "test \"`echo '$''{'ac_cv_struct_ifnet_IF_OMCASTS'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3708,7 +3752,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3712 "configure"
+#line 3756 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3722,7 +3766,7 @@ dergel.if_omcasts $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3726: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3770: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_OMCASTS=yes
 else
@@ -3748,7 +3792,7 @@ fi
 
 
 echo $ac_n "checking for ifnet.if_xname""... $ac_c" 1>&6
-echo "configure:3752: checking for ifnet.if_xname" >&5
+echo "configure:3796: checking for ifnet.if_xname" >&5
 if eval "test \"`echo '$''{'ac_cv_struct_ifnet_IF_XNAME'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3759,7 +3803,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3763 "configure"
+#line 3807 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3773,7 +3817,7 @@ dergel.if_xname $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3777: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3821: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_XNAME=yes
 else
@@ -3799,7 +3843,7 @@ fi
 
 
 echo $ac_n "checking for ifnet.if_lastchange.tv_sec""... $ac_c" 1>&6
-echo "configure:3803: checking for ifnet.if_lastchange.tv_sec" >&5
+echo "configure:3847: checking for ifnet.if_lastchange.tv_sec" >&5
 if eval "test \"`echo '$''{'ac_cv_struct_ifnet_IF_LASTCHANGE_TV_SEC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3810,7 +3854,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3814 "configure"
+#line 3858 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3824,7 +3868,7 @@ dergel.if_lastchange.tv_sec $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3828: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3872: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_LASTCHANGE_TV_SEC=yes
 else
@@ -3850,7 +3894,7 @@ fi
 
 
 echo $ac_n "checking for ifnet.if_obytes""... $ac_c" 1>&6
-echo "configure:3854: checking for ifnet.if_obytes" >&5
+echo "configure:3898: checking for ifnet.if_obytes" >&5
 if eval "test \"`echo '$''{'ac_cv_struct_ifnet_IF_OBYTES'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3861,7 +3905,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3865 "configure"
+#line 3909 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3875,7 +3919,7 @@ dergel.if_obytes $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3879: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3923: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_OBYTES=yes
 else
@@ -3901,7 +3945,7 @@ fi
 
 
 echo $ac_n "checking for ifnet.if_ibytes""... $ac_c" 1>&6
-echo "configure:3905: checking for ifnet.if_ibytes" >&5
+echo "configure:3949: checking for ifnet.if_ibytes" >&5
 if eval "test \"`echo '$''{'ac_cv_struct_ifnet_IF_IBYTES'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -3912,7 +3956,7 @@ else
   defineit=""
 fi
 cat > conftest.$ac_ext <<EOF
-#line 3916 "configure"
+#line 3960 "configure"
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -3926,7 +3970,7 @@ dergel.if_ibytes $defineit;
 
 ; return 0; }
 EOF
-if { (eval echo configure:3930: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:3974: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_ifnet_IF_IBYTES=yes
 else
@@ -3952,7 +3996,7 @@ fi
 
 
 echo $ac_n "checking if you have run configure before""... $ac_c" 1>&6
-echo "configure:3956: checking if you have run configure before" >&5
+echo "configure:4000: checking if you have run configure before" >&5
 if eval "test \"`echo '$''{'ac_cv_have_warned'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4004,7 +4048,7 @@ Configuration Files.
 
 System Contact Information" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:4008: checking $MSG_CHECK" >&5
+echo "configure:4052: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_CONTACT'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4064,7 +4108,7 @@ available in the MIB-II tree.  This Can Also Be Over-Ridden Using The
 
 System Location" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:4068: checking $MSG_CHECK" >&5
+echo "configure:4112: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_LOC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4130,7 +4174,7 @@ at the prompt below) the agent will use stdout and stderr instead.
 
 Location to write logfile" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:4134: checking $MSG_CHECK" >&5
+echo "configure:4178: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_LOGFILE'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4200,7 +4244,7 @@ SNMPV2AUTH   Only authenticated V2 transmissions can access the extensible tree.
 
 What type of security to use" | tail -1`
 echo $ac_n "checking $MSG_CHECK""... $ac_c" 1>&6
-echo "configure:4204: checking $MSG_CHECK" >&5
+echo "configure:4248: checking $MSG_CHECK" >&5
 if eval "test \"`echo '$''{'ac_cv_user_prompt_GLOBALSECURITY'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
