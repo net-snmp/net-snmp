@@ -158,7 +158,7 @@ REMOVETESTDATA() {
 
 
 #------------------------------------ -o-
-#
+# Captures output from command, and returns the command's exit code.
 CAPTURE() {	# <command_with_arguments_to_execute>
     echo $* >> $SNMP_TMPDIR/invoked
 
@@ -171,6 +171,7 @@ KNORG
 
 	fi
 	( $* 2>&1 ) > $junkoutputfile 2>&1
+	RC=$?
 
 	if [ $SNMP_VERBOSE -gt 1 ]; then
 		echo "Command Output: "
@@ -179,6 +180,7 @@ KNORG
 		cat $junkoutputfile | sed 's/^/  /'
 		echo "$seperator"
 	fi
+	return $RC
 }
 
 #------------------------------------ -o-
