@@ -605,6 +605,8 @@ struct variable_list {
                                             size_t);
     int             netsnmp_oid_is_subtree(const oid *, size_t, const oid *,
                                            size_t);
+    int             netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
+                                            const oid * in_name2, size_t len2);
     void            init_snmp(const char *);
     u_char         *snmp_pdu_build(netsnmp_pdu *, u_char *, size_t *);
 #ifdef USE_REVERSE_ASNENCODING
