@@ -653,15 +653,19 @@ struct subtree subtrees[] = {
   {{WESMIB, 3}, 7, (struct variable *)wes_extensible_variables,
    sizeof(wes_extensible_variables)/sizeof(*wes_extensible_variables),
    sizeof(*wes_extensible_variables)},
+#ifdef HPUX
   {{WESMIB, 4}, 7, (struct variable *)wes_mem_variables,
    sizeof(wes_mem_variables)/sizeof(*wes_mem_variables),
    sizeof(*wes_mem_variables)},
+#endif
   {{WESMIB, 5}, 7, (struct variable *)wes_lockd_variables,
    sizeof(wes_lockd_variables)/sizeof(*wes_lockd_variables),
    sizeof(*wes_lockd_variables)},
+#ifdef HPUX
   {{WESMIB, 6}, 7, (struct variable *)wes_disk_variables,
    sizeof(wes_disk_variables)/sizeof(*wes_disk_variables),
    sizeof(*wes_disk_variables)},
+#endif
     {{MIB, 1}, 7, (struct variable *)system_variables,
 	 sizeof(system_variables)/sizeof(*system_variables),
 	 sizeof(*system_variables)},
