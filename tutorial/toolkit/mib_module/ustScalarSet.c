@@ -208,6 +208,8 @@ write_ustSSSimpleString(int      action,
           /* Things are working well, so it's now safe to make the change
              permanently.  Make sure that anything done here can't fail! */
           lastChanged = time(NULL);
+	  if (old_string)
+	    free(old_string);
           break;
           
           /* Treat the rest the same as FREE */
