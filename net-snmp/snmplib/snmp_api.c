@@ -2088,6 +2088,7 @@ snmpv3_packet_rbuild(struct snmp_session *session, struct snmp_pdu *pdu,
         parms.wholeMsg = &packet;
         parms.wholeMsgLen = out_length;
         parms.session = session;
+        parms.pdu = pdu;
         result =
             (*sptr->reverse_encode_out)(&parms);
     } else {
@@ -2191,6 +2192,7 @@ snmpv3_packet_build(struct snmp_session *session, struct snmp_pdu *pdu,
         parms.wholeMsg = &cp;
         parms.wholeMsgLen = out_length;
         parms.session = session;
+        parms.pdu = pdu;
         result =
             (*sptr->forward_encode_out)(&parms);
     } else {
@@ -3003,6 +3005,7 @@ snmpv3_parse(
       parms.maxSizeResponse = &max_size_response;
       parms.secStateRef = &pdu->securityStateRef;
       parms.sess = sess;
+      parms.pdu = pdu;
       parms.msg_flags = msg_flags;
       ret_val =
           (*sptr->decode_in)(&parms);
