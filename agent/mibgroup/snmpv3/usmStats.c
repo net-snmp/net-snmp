@@ -28,7 +28,7 @@ void init_usmStats (void) {
 #endif
 }
 
-const u_char *
+u_char *
 var_usmStats(
     struct variable *vp,
     oid     *name,

@@ -172,7 +172,7 @@ void pass_free_config (void)
   numpassthrus = 0;
 }
 
-const u_char *var_extensible_pass(struct variable *vp,
+u_char *var_extensible_pass(struct variable *vp,
 				   oid *name,
 				   size_t *length,
 				   int exact,

@@ -294,7 +294,7 @@ void execfix_parse_config(char *token, char* cptr) {
   strcpy(execp->fixcmd, cptr);
 }
 
-const u_char *var_extensible_shell(struct variable *vp,
+u_char *var_extensible_shell(struct variable *vp,
 				    oid *name,
 				    size_t *length,
 				    int exact,
@@ -394,7 +394,7 @@ struct variable2 extensible_relocatable_variables[] = {
   {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_relocatable, 1, {ERRORFIX }}
 };
 
-const u_char *var_extensible_relocatable(struct variable *vp,
+u_char *var_extensible_relocatable(struct variable *vp,
 					  oid *name,
 					  size_t *length,
 					  int exact,

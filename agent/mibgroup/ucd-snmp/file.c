@@ -78,7 +78,7 @@ void updateFile(int iindex)
 
 /* OID functions */
 
-const u_char *var_file_table(struct variable *vp,
+u_char *var_file_table(struct variable *vp,
 		oid *name,
 		size_t *length,
 		int exact,

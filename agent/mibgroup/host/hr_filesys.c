@@ -180,7 +180,7 @@ int fsys_type_len = sizeof(fsys_type_id)/sizeof(fsys_type_id[0]);
 	 *********************/
 
 
-const u_char *
+u_char *
 var_hrfilesys(struct variable *vp,
 	      oid *name,
 	      size_t *length,

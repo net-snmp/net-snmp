@@ -94,7 +94,7 @@ init_snmp_mib(void) {
 	 *********************/
 
 
-const u_char *
+u_char *
 var_snmp(struct variable *vp,
 	 oid *name,
 	 size_t *length,

@@ -212,7 +212,7 @@ header_system(struct variable *vp,
 extern struct timeval sysOR_lastchange;
 #endif
 
-const u_char	*
+u_char	*
 var_system(struct variable *vp,
 	   oid *name,
 	   size_t *length,

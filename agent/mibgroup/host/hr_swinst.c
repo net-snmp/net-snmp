@@ -230,7 +230,7 @@ header_hrswInstEntry(struct variable *vp,
 	 *********************/
 
 
-const u_char *
+u_char *
 var_hrswinst(struct variable *vp,
 	     oid *name,
 	     size_t *length,

@@ -200,7 +200,7 @@ header_icmp(struct variable *vp,
 #ifndef linux
 #ifdef HAVE_SYS_TCPIPSTATS_H
 
-const u_char *
+u_char *
 var_icmp(struct variable *vp,
 	 oid *name,
 	 size_t *length,
@@ -316,7 +316,7 @@ var_icmp(struct variable *vp,
 
 #else /* not HAVE_SYS_TCPIPSTATS_H */
 
-const u_char *
+u_char *
 var_icmp(struct variable *vp,
 	 oid *name,
 	 size_t *length,
@@ -442,7 +442,7 @@ var_icmp(struct variable *vp,
 
 #else /* linux */
 
-const u_char *
+u_char *
 var_icmp(struct variable *vp,
 	 oid *name,
 	 size_t *length,
@@ -495,7 +495,7 @@ var_icmp(struct variable *vp,
 #endif /* linux */
 #else /* solaris2 */
 
-const u_char *
+u_char *
 var_icmp(struct variable *vp,
 	 oid *name,
 	 size_t *length,

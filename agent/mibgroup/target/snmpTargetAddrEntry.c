@@ -565,7 +565,7 @@ store_snmpTargetAddrEntry(int majorID, int minorID, void *serverarg,
 /*MIB table access routines */
 
 
-const u_char *
+u_char *
 var_snmpTargetAddrEntry(
     struct variable *vp,
     oid     *name,

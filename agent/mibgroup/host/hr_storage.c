@@ -251,7 +251,7 @@ static const char *hrs_descr[] = {
 
 
 
-const u_char *
+u_char *
 var_hrstore(struct variable *vp,
 	    oid *name,
 	    size_t *length,
@@ -359,7 +359,7 @@ var_hrstore(struct variable *vp,
 	    else {
 	        store_idx = store_idx-HRS_TYPE_FS_MAX;
 	        *var_len = strlen( hrs_descr[store_idx] );
-	        return (const u_char *)hrs_descr[store_idx];
+	        return (u_char *)hrs_descr[store_idx];
 	    }
 	case HRSTORE_UNITS:
 	    if ( store_idx < HRS_TYPE_FS_MAX )

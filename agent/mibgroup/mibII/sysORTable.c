@@ -63,7 +63,7 @@ init_sysORTable(void) {
 	 *
 	 *********************/
 
-const u_char *
+u_char *
 var_sysORTable(struct variable *vp,
 		oid *name,
 		size_t *length,

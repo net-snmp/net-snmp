@@ -517,7 +517,7 @@ write_context(int action,
     return SNMP_ERR_NOERROR;
 }
 
-const u_char *
+u_char *
 var_context(struct variable *vp,
 	    oid *name,
 	    size_t *length,

@@ -287,7 +287,8 @@ int
 getMibstat(mibgroup_e grid,  void *resp, size_t entrysize,
 	   req_e req_type, int (*comp)(void *, void *), void *arg)
 {
-    int		ret, rc=-1, mibgr, mibtb, cache_valid, length;
+    int		ret, rc=-1, mibgr, mibtb, cache_valid;
+    size_t	length;
     mibcache	*cachep;
     found_e	result = NOT_FOUND;
     void*	ep;

@@ -328,7 +328,7 @@ header_interfaces(struct variable *vp,
   return MATCH_SUCCEEDED;
 };
 
-const u_char *
+u_char *
 var_interfaces(struct variable *vp,
 	       oid *name,
 	       size_t *length,
@@ -512,7 +512,7 @@ Interface_Scan_Init (void)
     }
 }
 
-const u_char *
+u_char *
 var_ifEntry(struct variable *vp,
 	    oid *name,
 	    size_t *length,
@@ -737,7 +737,7 @@ header_ifEntry(struct variable *vp,
 	 *
 	 *********************/
 
-const u_char	*
+u_char	*
 var_interfaces(struct variable *vp,
 	       oid *name,
 	       size_t *length,
@@ -762,7 +762,7 @@ var_interfaces(struct variable *vp,
 #ifndef solaris2
 #ifndef hpux
 
-const u_char *
+u_char *
 var_ifEntry(struct variable *vp,
 	    oid *name,
 	    size_t *length,
@@ -939,7 +939,7 @@ var_ifEntry(struct variable *vp,
 
 #else /* hpux */
 
-const u_char *
+u_char *
 var_ifEntry(struct variable *vp,
 	    oid *name,
 	    int *length,
@@ -1111,7 +1111,7 @@ IF_cmp(void *addr, void *ep)
 	return (1);
 }
 
-const u_char *
+u_char *
 var_ifEntry(struct variable *vp,
 	    oid *name,
 	    size_t *length,
@@ -1725,7 +1725,7 @@ static int header_interfaces(struct variable *, oid *, size_t *, int, size_t *,
                              WriteMethod **write);
 static int header_ifEntry(struct variable *, oid *, size_t *, int, size_t *,
                              WriteMethod **write);
-const u_char	*var_ifEntry(struct variable *, oid *, size_t *, int, size_t *, 
+u_char	*var_ifEntry(struct variable *, oid *, size_t *, int, size_t *, 
                              WriteMethod **write);
 
 static	char *physaddrbuf;
@@ -1930,7 +1930,7 @@ header_ifEntry(struct variable *vp,
     return interface;
 }
 
-const u_char *
+u_char *
 var_interfaces(struct variable *vp,
 		oid *name,
 		size_t *length,
@@ -1958,7 +1958,7 @@ var_interfaces(struct variable *vp,
     return NULL;
 }
 
-const u_char *
+u_char *
 var_ifEntry(struct variable *vp,
 	    oid *name,
 	    size_t *length,

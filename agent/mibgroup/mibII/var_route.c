@@ -204,7 +204,7 @@ extern const struct in_addr * get_in_address (const void *, int, int);
   var_len       OUT     - length of variable or 0 if function returned
   write_method  out     - pointer to function to set variable, otherwise 0
 */
-const u_char *
+u_char *
 var_ipRouteEntry(struct variable *vp,
 		 oid *name,
 		 size_t *length,
@@ -480,7 +480,7 @@ klgetsa(struct sockaddr_in *dst)
 }
 #endif
 
-const u_char *
+u_char *
 var_ipRouteEntry(struct variable *vp,
 		oid *name,
 		size_t *length,
@@ -698,7 +698,7 @@ IP_Cmp_Route(void *addr, void *ep)
     return (1);		/* Not found */
 }
 
-const u_char *
+u_char *
 var_ipRouteEntry(struct variable *vp,
 		 oid *name,
 		 size_t *length,
@@ -1434,7 +1434,7 @@ suck_krt(int force)
 	return 0;
 }
 
-const u_char *
+u_char *
 var_ipRouteEntry(struct variable *vp,
 		 oid *name,
 		 size_t *length,

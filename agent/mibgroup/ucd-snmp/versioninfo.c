@@ -54,7 +54,7 @@ void init_versioninfo(void)
 }
 
 
-const u_char *var_extensible_version(struct variable *vp,
+u_char *var_extensible_version(struct variable *vp,
 				      oid *name,
 				      size_t *length,
 				      int exact,

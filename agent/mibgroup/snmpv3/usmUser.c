@@ -236,7 +236,7 @@ usm_parse_user(oid *name, size_t name_len)
  * Finally, service the given USMUSER* var-bind.  A NULL user generally
  * results in a NULL return value.
  */
-const u_char *
+u_char *
 var_usmUser(
     struct variable *vp,
     oid     *name,
