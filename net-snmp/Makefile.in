@@ -20,7 +20,7 @@ INSTALLUCDHEADERS=ucd-snmp-config.h $(srcdir)/version.h mib_module_config.h
 INSTALLHEADERS=include/net-snmp/net-snmp-config.h $(srcdir)/version.h mib_module_config.h
 INSTALLSCRIPTS=net-snmp-config
 
-all:	sedscript EXAMPLE.conf include/ucd-snmp/ucd-snmp-config.h subdirs
+all:	sedscript EXAMPLE.conf subdirs
 
 test:   all
 	( cd testing; $(MAKE) test )
@@ -28,9 +28,6 @@ test:   all
 sedscript: sedscript.in include/net-snmp/net-snmp-config.h $(srcdir)/agent/mibgroup/mibdefs.h
 	$(CPP) -DPREFIX=$(prefix) -DLIBDIR=$(libdir) -DDATADIR=$(datadir) $(srcdir)/sedscript.in | egrep '^s[/#]' | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;s/# g/#g/;' > sedscript
 
-
-include/ucd-snmp/ucd-snmp-config.h: include/net-snmp/net-snmp-config.h
-	@egrep -v "IN_UCD_SNMP_SOURCE|SYSTEM_INCLUDE|MACHINE_INCLUDE|mib_module_config" include/net-snmp/net-snmp-config.h > include/ucd-snmp/ucd-snmp-config.h
 
 subdirs:
 	for i in $(SUBDIRS) ; do	\
@@ -106,7 +103,7 @@ makefileclean:
 configclean: makefileclean
 	rm -f config.cache config.status config.log include/net-snmp/net-snmp-config.h
 	rm -f mibs/.index
-	rm -f mib_module_config.h include/ucd-snmp/ucd-snmp-config.h 	\
+	rm -f mib_module_config.h 			\
 		agent/mibgroup/mib_module_includes.h 	\
 		agent/mibgroup/mib_module_inits.h 	\
 		agent/mibgroup/mib_module_shutdown.h 	\
