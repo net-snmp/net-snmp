@@ -24,8 +24,11 @@ else
     --snmpd-module-list)
       echo @MODULE_LIST@
       ;;
+    --base-cflags)
+      echo @CFLAGS@ @CPPFLAGS@ -I@includedir@
+      ;;
     --cflags)
-      echo @CFLAGS@ @CPPFLAGS@ -I. -I@includedir@
+      echo @CFLAGS@ @DEVFLAGS @CPPFLAGS@@ -I. -I@includedir@
       ;;
     --agent-libs)
       # use this one == --netsnmp-agent-libs + --external-libs
@@ -261,7 +264,7 @@ EOF
 	exit 1
       fi
       prefix=@prefix@
-      cmd="@CC@ $cflags @CFLAGS@ -I. -I@includedir@ -o $outname $tmpfile $cfiles @LDFLAGS@ -L@exec_prefix@/lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp @AGENTLIBS@ $ldflags"
+      cmd="@CC@ $cflags @CFLAGS@ @DEVFLAGS@ -I. -I@includedir@ -o $outname $tmpfile $cfiles @LDFLAGS@ -L@exec_prefix@/lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp @AGENTLIBS@ $ldflags"
       echo "running: $cmd"
       `$cmd`
       if test "x$norm" != "x1" ; then
@@ -301,6 +304,9 @@ if test "x$usage" = "xyes"; then
   echo "  These options produce the various compilation flags needed when"
   echo "  building external SNMP applications:"
   echo ""
+  echo "    --base-cflags     lists additional compilation flags needed"
+  echo "                      for external applications (excludes -I. and"
+  echo "                      extra developer warning flags, if any)
   echo "    --cflags          lists additional compilation flags needed"
   echo "    --libs            lists libraries needed for building applications"
   echo "    --agent-libs      lists libraries needed for building subagents"
