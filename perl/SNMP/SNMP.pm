@@ -1774,6 +1774,15 @@ methods returned as numeric OID's rather than descriptions.
 UseLongNames will be set so that the entire OID will be
 returned.  Set on a per-session basis (see UseNumeric).
 
+=item $SNMP::best_guess
+
+default '0'.  This setting controls how <tags> are 
+parsed.  Setting to 0 causes a regular lookup.  Setting 
+to 1 causes a regular expression match (defined as -Ib 
+in snmpcmd) and setting to 2 causes a random access 
+lookup (defined as -IR in snmpcmd).  Can also be set 
+on a per session basis (see BestGuess)
+
 =item $SNMP::save_descriptions
 
 default '0',set non-zero to have mib parser save
@@ -1945,18 +1954,22 @@ all known modules to be loaded.
 
 B<*Not Implemented*>
 
-=item &SNMP::translateObj(<var>[,arg])
+=item &SNMP::translateObj(<var>[,arg,[arg]])
 
-will convert a text obj tag to an OID and
-vice-versa. any iid suffix is retained numerically.
-default behaviour when converting a numeric OID
-to text form is to return leaf indentifier only
-(e.g.,'sysDescr') but when $SNMP::use_long_names
-is non-zero or a non-zero second arg is supplied
-will return longer textual identifier. If no Mib
-is loaded when called and $SNMP::auto_init_mib is
-enabled then the Mib will be loaded. Will return
-'undef' upon failure.
+will convert a text obj tag to an OID and vice-versa.
+Any iid suffix is retained numerically.  Default
+behaviour when converting a numeric OID to text
+form is to return leaf identifier only 
+(e.g.,'sysDescr') but when $SNMP::use_long_names 
+is non-zero or a non-zero second arg is supplied it 
+will return a longer textual identifier.  An optional 
+third argument of non-zero will cause the module name 
+to be prepended to the text name (e.g. 
+'SNMPv2-MIB::sysDescr').  When converting a text obj, 
+the $SNMP::best_guess option is used.  If no Mib is 
+loaded when called and $SNMP::auto_init_mib is enabled 
+then the Mib will be loaded. Will return 'undef' upon 
+failure.
 
 =item &SNMP::getType(<var>)
 
