@@ -211,6 +211,7 @@ static int _context_okay      _((walk_context *context));
 /* Wrapper around fprintf(stderr, ...) for clean and easy debug output. */
 #ifdef	DEBUGGING
 static int _debug_level = 0;
+#define DBOUT PerlIO_stderr(),
 #define	DBPRT(severity, otherargs)					\
 	do {								\
 	    if (_debug_level && severity <= _debug_level) {		\
@@ -221,6 +222,7 @@ static int _debug_level = 0;
 char	_debugx[1024];	/* Space to sprintf() into - used by sprint_objid(). */
 
 #else	/* DEBUGGING */
+#define DBOUT
 #define	DBPRT(severity, otherargs)	/* Ignore */
 
 #endif	/* DEBUGGING */
@@ -1345,7 +1347,7 @@ _context_add(walk_context *context)
 	for (i = 0; i < _valid_contexts->sz_valid; i++)
 	    _valid_contexts->valid[i] = NULL;
 
-	DBPRT(3, ("Created valid_context array 0x%p (%d slots)\n",
+	DBPRT(3, (DBOUT "Created valid_context array 0x%p (%d slots)\n",
 			    _valid_contexts->valid, _valid_contexts->sz_valid));
     }
 
@@ -1363,7 +1365,7 @@ _context_add(walk_context *context)
 	Renew(_valid_contexts->valid, new_sz, walk_context *);
 	assert(_valid_contexts->valid != NULL);
 
-	DBPRT(3, ("Resized valid_context array 0x%p from %d to %d slots\n",
+	DBPRT(3, (DBOUT "Resized valid_context array 0x%p from %d to %d slots\n",
 		    _valid_contexts->valid, _valid_contexts->sz_valid, new_sz));
 
 	_valid_contexts->sz_valid = new_sz;
@@ -1450,7 +1452,7 @@ _bulkwalk_done(walk_context *context)
  	/* This request is complete.  Remove it from list of
  	** walks still in progress.
  	*/
- 	DBPRT(1, ("Ignoring %s request oid %s\n",
+ 	DBPRT(1, (DBOUT "Ignoring %s request oid %s\n",
  	      bt_entry->norepeat? "nonrepeater" : "completed",
  	      sprint_objid(_debugx, bt_entry->req_oid,
  				    bt_entry->req_len)));
@@ -1492,7 +1494,7 @@ _bulkwalk_async_cb(int		op,
    ** Return 0 to indicate success (caller ignores return value).
    */
 
-   DBPRT(2, ("bulkwalk_async_cb(op %d, reqid 0x%08X, context 0x%p)\n",
+   DBPRT(2, (DBOUT "bulkwalk_async_cb(op %d, reqid 0x%08X, context 0x%p)\n",
 							op, reqid, context_ptr));
 
    context = (walk_context *)context_ptr;
@@ -1530,7 +1532,7 @@ _bulkwalk_async_cb(int		op,
 	 {
 	    case SNMP_MSG_RESPONSE:
 	    {
-	       DBPRT(2, ("Calling bulkwalk_recv_pdu(context 0x%p, pdu 0x%p)\n",
+	       DBPRT(2, (DBOUT "Calling bulkwalk_recv_pdu(context 0x%p, pdu 0x%p)\n",
 							   context_ptr, pdu));
 
 	       /* Handle the response PDU.  If an error occurs or there were
@@ -1661,7 +1663,7 @@ _bulkwalk_send_pdu(walk_context *context)
 
       nvars ++;
 
-      DBPRT(1, ("   Add %srepeater %s\n", bt_entry->norepeat ? "non" : "",
+      DBPRT(1, (DBOUT "   Add %srepeater %s\n", bt_entry->norepeat ? "non" : "",
 	         sprint_objid(_debugx, bt_entry->last_oid, bt_entry->last_len)));
    }
 
@@ -1670,7 +1672,7 @@ _bulkwalk_send_pdu(walk_context *context)
 
    context->pkts_exch ++;
 
-   DBPRT(1, ("Sending %ssynchronous request %d...\n",
+   DBPRT(1, (DBOUT "Sending %ssynchronous request %d...\n",
 		     SvTRUE(context->perl_cb) ? "a" : "", context->pkts_exch));
 
    /* We handle the asynchronous and synchronous requests differently here.
@@ -1718,7 +1720,7 @@ _bulkwalk_send_pdu(walk_context *context)
       goto err;
    }
 
-   DBPRT(1, ("%d packets exchanged, response 0x%p\n", context->pkts_exch,
+   DBPRT(1, (DBOUT "%d packets exchanged, response 0x%p\n", context->pkts_exch,
 								    response));
    return response;
 
@@ -1762,7 +1764,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
    SV **err_num_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorNum", 8, 1);
    SV **err_ind_svp = hv_fetch((HV*)SvRV(context->sess_ref), "ErrorInd", 8, 1);
 
-   DBPRT(3, ("bulkwalk: sess_ref = 0x%p, sess_ptr_sv = 0x%p, ss = 0x%p\n",
+   DBPRT(3, (DBOUT "bulkwalk: sess_ref = 0x%p, sess_ptr_sv = 0x%p, ss = 0x%p\n",
 					    context->sess_ref, sess_ptr_sv, ss));
 
    if (SvIV(*hv_fetch((HV*)SvRV(context->sess_ref),"TimeStamp", 9, 1)))
@@ -1871,7 +1873,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 	 }
       }
 
-      DBPRT(2, ("Var %03d request %s\n", pix, sprint_objid(_debugx,
+      DBPRT(2, (DBOUT "Var %03d request %s\n", pix, sprint_objid(_debugx,
 					     expect->req_oid, expect->req_len)));
 
       /* Did we receive an error condition for this variable?
@@ -1892,7 +1894,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 	     (vars->type == SNMP_ENDOFMIBVIEW))
 	 {
 	    expect->complete = 1;
-	    DBPRT(2, ("Ran out of tree for oid %s\n",
+	    DBPRT(2, (DBOUT "Ran out of tree for oid %s\n",
 			   sprint_objid(_debugx, vars->name,vars->name_length)));
 
 	    context->req_remain --;
@@ -1919,7 +1921,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 				   context->reqbase[pix].last_oid,
 				   context->reqbase[pix].last_len) == 0)
 	 {
-	    DBPRT(2, ("Ignoring repeat oid: %s\n",
+	    DBPRT(2, (DBOUT "Ignoring repeat oid: %s\n",
 			sprint_objid(_debugx, vars->name,vars->name_length)));
 
 	    continue;
@@ -1937,11 +1939,11 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
       ** XXX Can we use 'expect' instead of 'context->req_oids[pix]'?
       */
       if (context->oid_saved < context->non_reps) {
-	 DBPRT(2, ("   expected var %s (nonrepeater %d/%d)\n",
+	 DBPRT(2, (DBOUT "   expected var %s (nonrepeater %d/%d)\n",
 		     sprint_objid(_debugx, context->req_oids[pix].req_oid,
 					   context->req_oids[pix].req_len),
 		     pix, context->non_reps));
-	 DBPRT(2, ("   received var %s\n",
+	 DBPRT(2, (DBOUT "   received var %s\n",
 		     sprint_objid(_debugx, vars->name, vars->name_length)));
 
 	 /* This non-repeater has now been seen, so mark the sub-tree as
@@ -1953,7 +1955,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 
       } else {		/* Must be a repeater variable. */
 
-	 DBPRT(2, ("   received oid %s\n",
+	 DBPRT(2, (DBOUT "   received oid %s\n",
 	       sprint_objid(_debugx, vars->name, vars->name_length)));
 
 	 /* Are we already done with this tree?  If so, just ignore this
@@ -2040,7 +2042,7 @@ _bulkwalk_recv_pdu(walk_context *context, struct snmp_pdu *pdu)
 
    } /* next variable in response packet */
 
-   DBPRT(1, ("-- pkt %d saw %d vars, total %d (%d saved)\n", context->pkts_exch,
+   DBPRT(1, (DBOUT "-- pkt %d saw %d vars, total %d (%d saved)\n", context->pkts_exch,
 			   pix, context->oid_total, context->oid_saved));
 
    /* We assert that all non-repeaters must be returned in
@@ -2105,11 +2107,11 @@ _bulkwalk_finish(walk_context *context, int okay)
    if (!async)
       SP -= items;
 
-   DBPRT(1, ("Bulwalk %s (saved %d/%d), ", okay ? "completed" : "had error",
+   DBPRT(1, (DBOUT "Bulwalk %s (saved %d/%d), ", okay ? "completed" : "had error",
 					context->oid_saved, context->oid_total));
 
    if (okay) {
-       DBPRT(1, ("%s %d varbind refs %s\n",
+       DBPRT(1, (DBOUT "%s %d varbind refs %s\n",
 				async ? "pass ref to array of" : "return",
 				context->nreq_oids,
 				async ? "to callback" : "on stack to caller"));
@@ -2138,7 +2140,7 @@ _bulkwalk_finish(walk_context *context, int okay)
        for (i = 0; i < context->nreq_oids; i++) {
 	  bt_entry = &context->req_oids[i];
 
-	  DBPRT(2, ("  %sreq #%d (%s) => %d var%s\n",
+	  DBPRT(2, (DBOUT "  %sreq #%d (%s) => %d var%s\n",
 		 bt_entry->complete ? "" : "incomplete ", i,
 		 sprint_objid(_debugx, bt_entry->req_oid, bt_entry->req_len),
 		 (int)av_len(bt_entry->vars) + 1,
@@ -3636,7 +3638,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	   while (!(okay = _bulkwalk_done(context))) {
 
 	      /* Send a request for the next batch of variables. */
-	      DBPRT(1, ("Building %s GETBULK bulkwalk PDU (%d)...\n",
+	      DBPRT(1, (DBOUT "Building %s GETBULK bulkwalk PDU (%d)...\n",
 					context->pkts_exch ? "next" : "first",
 					context->pkts_exch));
 	      pdu = _bulkwalk_send_pdu(context);
@@ -3669,7 +3671,7 @@ snmp_bulkwalk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref,perl_callback)
 	      continue;
 	   }
 
-	   DBPRT(1, ("Bulkwalk done... calling bulkwalk_finish(%s)...\n",
+	   DBPRT(1, (DBOUT "Bulkwalk done... calling bulkwalk_finish(%s)...\n",
 	       okay ? "okay" : "error"));
 	   npushed = _bulkwalk_finish(context, okay);
 
