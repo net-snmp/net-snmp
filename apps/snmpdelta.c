@@ -239,7 +239,7 @@ void sprint_descriptor(char *buffer,
 		       struct varInfo *vip)
 {
   char *buf = malloc(SPRINT_MAX_LEN), *cp;
-  int buf_len = SPRINT_MAX_LEN, str_len = 0;
+  size_t buf_len = SPRINT_MAX_LEN, str_len = 0;
 
   sprint_realloc_objid((u_char **)&buf, &buf_len, &str_len, 1, 
 	  vip->info_oid, vip->oidlen);
@@ -487,9 +487,13 @@ int main(int argc, char *argv[])
 	  if (!vars){
 	    fprintf(stderr, "Missing variable in reply\n");
 	    continue;
-	  } else {
-	    this_time = *(vars->val.integer);
 	  }
+	  else if (vars->type == SNMP_NOSUCHOBJECT ||
+		   vars->type == SNMP_NOSUCHINSTANCE) {
+	    fprint_variable(stderr, vars->name, vars->name_length, vars);
+	    continue;
+	  }
+	  this_time = *(vars->val.integer);
 	  vars = vars->next_variable;
 	} else {
 	  this_time = 1;
@@ -501,6 +505,11 @@ int main(int argc, char *argv[])
 	  if (vip->oidlen){
 	    if (!vars){
 	      fprintf(stderr, "Missing variable in reply\n");
+	      break;
+	    }
+	    else if (vars->type == SNMP_NOSUCHOBJECT ||
+		     vars->type == SNMP_NOSUCHINSTANCE) {
+	      fprint_variable(stderr, vars->name, vars->name_length, vars);
 	      break;
 	    }
 	    vip->type = vars->type;
@@ -636,7 +645,7 @@ int main(int argc, char *argv[])
 	    ;
 	  if (vars)
 	    fprint_objid(stderr, vars->name, vars->name_length);
-	  fprintf(stderr, "\n");
+	  else fprintf(stderr, "\n");
 /* Don't exit when OIDs from file are not found on agent
 	  exit_code = 1;
 	  break;
