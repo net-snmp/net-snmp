@@ -128,6 +128,7 @@ int
 ${context}_cache_load(netsnmp_container *container)
 {
     ${context}_rowreq_ctx *rowreq_ctx;
+    size_t                 count = 0;
 @if $m2c_include_examples == 1@
     
     /*
@@ -176,15 +177,13 @@ $example_end
      */
     while( 1 ) {
 @   if $m2c_include_examples == 0@
-@      eval $cc_tmp_idx_pfx = "TODO_FIND_"@
         /*
          * TODO: check for end of data
          * bail out if there is no more data
          */
-        if( ${context}_TODO_CHECK_OUT_OF_DATA() )
+        if( 1 )
             break;
 @   else@
-@      eval $cc_tmp_idx_pfx = ""@
 $example_start
     /*
      * get a line (skip blank lines)
@@ -229,9 +228,9 @@ $example_end
 @   foreach $node index@
 @      include m2c_setup_node.m2i@
 @        if $m2c_node_needlength == 1@
-                               , $cc_tmp_idx_pfx${node}, $cc_tmp_idx_pfx${node}_len
+                               , $node, ${node}_len
 @        else@
-                               , $cc_tmp_idx_pfx$node
+                               , $node
 @        end@
 @   end@ # foreach index
                )) {
@@ -260,8 +259,8 @@ $example_end
 @      if "$m2c_data_context" eq "generated"@
 @         eval $m2c_ctx_lh = "$m2c_ctx_rh"@
 @         eval $m2c_ctx_lhs = "$m2c_ctx_rhs"@
-@         eval $m2c_ctx_rh = "TODO_FIND_$node"@
-@         eval $m2c_ctx_rhs = "TODO_FIND_${node}_len"@
+@         eval $m2c_ctx_rh = "$node"@
+@         eval $m2c_ctx_rhs = "${node}_len"@
 @         include generic-value-map.m2i@
     
 @      end@ # data_context ! generated
@@ -272,6 +271,7 @@ $example_end
          * insert into table container
          */
         CONTAINER_INSERT(container, rowreq_ctx);
+        ++count;
     }
 @if $m2c_include_examples == 1@
 
@@ -280,6 +280,9 @@ $example_start
         fclose(filep);
 $example_end
 @end@ # example
+
+    DEBUGMSGT(("verbose:${context}:${context}_cache_load",
+               "inserted %d records\n", count));
 
     return MFD_SUCCESS;
 }
