@@ -1157,7 +1157,6 @@ NETSNMP_STATIC_INLINE int
 _inetCidrRouteTable_check_indexes(inetCidrRouteTable_rowreq_ctx *
                                   rowreq_ctx)
 {
-    netsnmp_table_request_info *tri;
     int             rc;
 
     DEBUGTRACE;
