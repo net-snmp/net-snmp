@@ -460,7 +460,8 @@ netsnmp_instance_helper_handler(netsnmp_mib_handler *handler,
     switch (reqinfo->mode) {
     case MODE_GET:
         if (cmp != 0) {
-            var->type = SNMP_NOSUCHOBJECT;
+            netsnmp_set_request_error(reqinfo, requests,
+                                      SNMP_ERR_NOSUCHOBJECT);
             return SNMP_ERR_NOERROR;
         } else {
             return netsnmp_call_next_handler(handler, reginfo, reqinfo,
