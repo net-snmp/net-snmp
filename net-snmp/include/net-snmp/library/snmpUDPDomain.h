@@ -15,8 +15,7 @@ extern          "C" {
 #include <netinet/in.h>
 #endif
 
-netsnmp_transport *netsnmp_udp_transport(struct sockaddr_in *addr,
-                                         int local);
+netsnmp_transport *netsnmp_udp_transport(struct sockaddr_in *addr, int local);
 
 
 /*
