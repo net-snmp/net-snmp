@@ -176,6 +176,7 @@ netsnmp_binary_array_release(netsnmp_container *c)
 {
     binary_array_table *t = (binary_array_table*)c->private;
     free(t);
+    free(c);
 }
 
 size_t
