@@ -100,10 +100,6 @@ VERSION=$1
 
 nsb-default-paths
 
-if [ $NSB_SRC_DIR != $NSB_BUILD_DIR ];then
-   NSB_BUILD_DIR=$NSB_BUILD_DIR/$VERSION-`nsb-sysname`
-fi
-
 
 ########################################################################
 ########################################################################
