@@ -3,16 +3,16 @@
 #
 
 TARG		= snmpd
-LIBTARG		= libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION) \
-	libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
-USELIBS		= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+LIBTARG		= libucdagent.$(LIB_EXTENSION)$(LIB_VERSION) \
+	libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+USELIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 LOCAL_LIBS	= -L../snmplib -L.
 LIBS		= $(CC_RUNTIME_ARG) -lsnmp @WRAPLIBS@ @LIBS@
-AGENT_LIBS	= $(CC_RUNTIME_ARG) -lucdagent -lucdmibs -lsnmp @WRAPLIBS@ @LIBS@
+AGENT_LIBS	= $(CC_RUNTIME_ARG) -lucdagent -lucdmibs -lsnmp @WRAPLIBS@ @LIBS@ @DLLIBS@
 CPPFLAGS	= -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
 		  -I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup @CPPFLAGS@
 
-CC		= @CC@ $(CPPFLAGS) $(SHLIB_CFLAGS)
+CC		= @CC@ $(CPPFLAGS) $(LIB_CFLAGS)
 SPCC		= @CC@ $(CPPFLAGS)
 
 MIBOBJS		= @mibgroup_list_o@ mib_modules.o
@@ -26,12 +26,11 @@ INSTALLHEADERS=agent_read_config.h agent_registry.h agent_trap.h auto_nlist.h \
 	mibgroup/mibincl.h mibgroup/header_complex.h ucd-snmp-agent-includes.h \
 	mibgroup/struct.h
 
-all: subdirs snmpd libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+all: subdirs snmpd libucdagent.$(LIB_EXTENSION)$(LIB_VERSION)
 
 
 subdirs:
 	cd mibgroup; $(MAKE); cd ..
-#	cd dlmods; $(MAKE); cd ..
 
 getkstat: getkstat.o
 	$(CC) $(CFLAGS) -o $@ $? $(LOCAL_LIBS) $(LIBS)
@@ -49,17 +48,16 @@ snmpd:	${AGENTOBJS} $(USELIBS) $(LIBTARG)
 	${SPCC} $(CFLAGS) -o $@ ${AGENTOBJS} $(LOCAL_LIBS) ${LDFLAGS} ${AGENT_LIBS}  
 
 
-libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION):    ${LIBAGENTOBJS} libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
-	$(SHLIB_LD_CMD) libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ${LIBAGENTOBJS}  $(SHLIB_LD_LIBS)
-	$(RANLIB) libucdagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+libucdagent.$(LIB_EXTENSION)$(LIB_VERSION):    ${LIBAGENTOBJS} libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION)
+	$(LIB_LD_CMD) libucdagent.$(LIB_EXTENSION)$(LIB_VERSION) ${LIBAGENTOBJS}  $(LIB_LD_LIBS)
+	$(RANLIB) libucdagent.$(LIB_EXTENSION)$(LIB_VERSION)
 
-libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION):    ${MIBOBJS}
-	$(SHLIB_LD_CMD) libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ${MIBOBJS}  $(SHLIB_LD_LIBS)
-	$(RANLIB) libucdmibs.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${MIBOBJS}
+	$(LIB_LD_CMD) libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION) ${MIBOBJS}  $(LIB_LD_LIBS)
+	$(RANLIB) libucdmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
 clean:
 	rm -f *.o ${TARG} ${LIBTARG}
-	cd dlmods; $(MAKE) clean; cd ..
 	cd mibgroup; $(MAKE) clean
 
 
@@ -67,8 +65,7 @@ install:  installdirs
 	@$(INSTALL) $(TARG) $(sbindir) ; echo "install:  installed $(TARG) in $(sbindir) "
 	@for i in $(INSTALLHEADERS) ; do $(INSTALL) $(srcdir)/$$i $(includedir) ; echo "install:  installed $$i in $(includedir)" ; done
 	@for i in $(LIBTARG) ; do $(INSTALL) $$i $(libdir) ; $(RANLIB) $(libdir)/$$i ; echo "install:  installed $$i in $(libdir)" ; done
-	$(SHLIB_LDCONFIG_CMD)
-#	cd dlmods ; $(MAKE) install; cd ..
+	$(LIB_LDCONFIG_CMD)
 
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(sbindir) $(snmplibdir) $(includedir) $(libdir)

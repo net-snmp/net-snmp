@@ -147,6 +147,7 @@
 #undef SNMPLIBPATH
 #undef SNMPSHAREPATH
 #undef SNMPCONFPATH
+#undef SNMPDLMODPATH
 
 /* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
    place.  (stdin is closed so that sh scripts won't wait for it) */
@@ -294,6 +295,9 @@
 
 /* Define if you have the sigset function.  */
 #undef HAVE_SIGSET
+
+/* Define if you have the snprintf function.  */
+#undef HAVE_SNPRINTF
 
 /* Define if you have the socket function.  */
 #undef HAVE_SOCKET

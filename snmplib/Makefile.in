@@ -2,7 +2,7 @@
 # Makefile for snmplib
 #
 
-TARG=	libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+TARG=	libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 
 #all but md5.h, vacm.h, libsnmp.h, and read_config.h are copied to the installed
 #include directory
@@ -43,15 +43,15 @@ OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	snmpv3.o snmpusm.o lcd_time.o keytools.o		\
 	scapi.o callback.o default_store.o snmp_alarm.o	mt_support.o
 
-CFLAGS	 = @CFLAGS@ @SHLIB_CFLAGS@
+CFLAGS	 = @CFLAGS@ @LIB_CFLAGS@
 CPPFLAGS = -I. -I.. -I$(srcdir) -I$(srcdir)/.. @CPPFLAGS@
 CC	 = @CC@ $(CPPFLAGS)
 
 all: $(TARG)
 
-libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION):    ${OBJS}
-	$(SHLIB_LD_CMD) libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ${OBJS}
-	$(RANLIB) libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+libsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    ${OBJS}
+	$(LIB_LD_CMD) libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) ${OBJS}
+	$(RANLIB) libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(libdir) $(includedir)
@@ -59,11 +59,11 @@ installdirs:
 install:	$(TARG) installdirs
 	@for i in $(TARG) ; do $(INSTALL) $$i $(libdir) ; $(RANLIB) $(libdir)/$$i ; echo "install:  installed $$i in $(libdir)" ; done
 	@for i in $(INSTALLHEADERS) ; do $(INSTALL) $(srcdir)/$$i $(includedir) ; echo "install:  installed $$i in $(includedir)" ; done
-	$(SHLIB_LDCONFIG_CMD)
+	$(LIB_LDCONFIG_CMD)
 
-../lib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION):	libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
-	cp libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION) ../lib
-	@RANLIB@ ../lib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION) $(SHLIB_LD_LIBS)
+../lib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION):	libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
+	cp libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) ../lib
+	@RANLIB@ ../lib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) $(LIB_LD_LIBS)
 
 parse:  mib.o parse.c
 	$(CC) $(CFLAGS) -DTEST parse.c mib.o -o parse

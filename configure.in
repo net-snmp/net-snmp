@@ -206,9 +206,7 @@ AC_ARG_WITH(out_mib_modules,
     ipfwchains/ipfwchains: firewall chains under ipfw for linux.
                            (Download separately from the ucd-snmp ftp site.)
     target:                Support for the SNMP WGs TARGET-MIB.
-    ucd-snmp/pass_persist: Persistent pass scripts that stay around.
-                           Not currently included by default solely because
-                           it needs more testing.
+    ucd-snmp/dlmod:        Dynamically loadable MIB modules.
     ucd-snmp/diskio:       Table of io-devices and how much data they have
                            read/written.  (only tested on Solaris)
 
@@ -431,6 +429,7 @@ while test "x$tmpset" != "x$SNMPLIBPATH"; do
   eval tmpset="$tmpset"
 done
 AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$SNMPLIBPATH")
+AC_DEFINE_UNQUOTED(SNMPDLMODPATH,"$SNMPLIBPATH/dlmod")
 
 SNMPSHAREPATH=""
 tmpset="$datadir/snmp"
@@ -453,39 +452,35 @@ done
 AC_DEFINE_UNQUOTED(SNMPCONFPATH,"$SNMPCONFPATH")
 
 dnl
-dnl Figure out appropriate shared libraries extensions if necessary.
+dnl Figure out shared libraries extensions.
 dnl
 
-if test "x$with_shared" = "xyes"; then
+if test "x$GCC" = "xyes"; then
+  SHLIB_CFLAGS="-fPIC -shared"
+else
+  SHLIB_CFLAGS="-KPIC"
+fi
+SHLIB_EXTENSION="so"
+SHLIB_VERSION=
+SHLIB_LD_CMD="ld -r -o"
+SHLIB_LDCONFIG_CMD=
+SHLIB_LD_LIBS=
+SHLIB_CC_RUNTIME_ARG=
+SHLIB_RANLIB=":"
 
-    dnl defaults
-
-    if test "x$GCC" = "xyes"; then
-      SHLIB_CFLAGS="-fPIC -shared"
-    else
-      SHLIB_CFLAGS="-KPIC"
-    fi
-    SHLIB_EXTENSION="so"
-    SHLIB_VERSION=
-    SHLIB_LD_CMD="ld -r -o"
-    SHLIB_LDCONFIG_CMD=
-    SHLIB_LD_LIBS=
-    CC_RUNTIME_ARG=
-    RANLIB=":"
-
-    dnl over-rides
-    case $target_os in
+case $target_os in
 
     linux*)
-        SHLIB_LD_CMD='$(CC) -shared $(CFLAGS) -o'
+	SHLIB_LD_CMD='$(CC) -shared $(CFLAGS) -o'
 	SHLIB_LDCONFIG_CMD='PATH="$$PATH:/sbin" ldconfig -n $(libdir)'
-        SHLIB_LD_LIBS='$(LDFLAGS) $(LOCAL_LIBS) $(LIBS)'
+	SHLIB_LD_LIBS='$(LDFLAGS) $(LOCAL_LIBS) $(LIBS)'
+	LDFLAGS="$LDFLAGS -rdynamic"
 	;;
 
     irix*)
 	SHLIB_LD_CMD="ld -shared -o"
-	CC_RUNTIME_ARG="-Wl,-rpath -Wl,$libdir"
-        if test "x$GCC" != "xyes"; then
+	SHLIB_CC_RUNTIME_ARG="-Wl,-rpath -Wl,$libdir"
+	if test "x$GCC" != "xyes"; then
 	    SHLIB_CFLAGS="-KPIC"
 	fi
 	;;
@@ -510,17 +505,17 @@ yes
 
     hpux*)
 	SHLIB_EXTENSION="sl"
-        if test "x$GCC" != "xyes"; then
+	if test "x$GCC" != "xyes"; then
 	    SHLIB_CFLAGS="+Z"
 	fi
-	CC_RUNTIME_ARG="-Wl,+b,$libdir"
+	SHLIB_CC_RUNTIME_ARG="-Wl,+b,$libdir"
 	SHLIB_LD_CMD="ld -b -o"
 	;;
 
     osf*)
-	CC_RUNTIME_ARG="-rpath $libdir"
+	SHLIB_CC_RUNTIME_ARG="-rpath $libdir"
 	SHLIB_LD_CMD="ld -shared -expect_unresolved \"*\" -o"
-        if test "x$GCC" != "xyes"; then
+	if test "x$GCC" != "xyes"; then
 	    SHLIB_CFLAGS=""
 	fi
 	;;
@@ -529,19 +524,20 @@ yes
 	;;
 
     sysv4*)
-	CC_RUNTIME_ARG="-R$libdir"
+	SHLIB_CC_RUNTIME_ARG="-R$libdir"
 	;;
-    
+
     sunos*)
-        if test "x$GCC" != "xyes"; then
+    if test "x$GCC" != "xyes"; then
 	    SHLIB_CFLAGS="-PIC"
 	fi
 	SHLIB_LDCONFIG_CMD='PATH="$$PATH:/usr/etc" ldconfig $(libdir)'
 	;;
-    
+
     solaris*)
 	SHLIB_LD_CMD="ld -G -o"
-	CC_RUNTIME_ARG="-R$libdir"
+	SHLIB_CC_RUNTIME_ARG="-R$libdir"
+	LDFLAGS="$LDFLAGS -export-dynamic"
 	;;
 
     freebsd*)
@@ -559,12 +555,28 @@ yes
 	])
 	;;
 
-    esac
+esac
+
+if test "x$with_shared" = "xyes"; then
+    LIB_EXTENSION="$SHLIB_EXTENSION"
+    LIB_VERSION="$SHLIB_VERSION"
+    LIB_LD_CMD="$SHLIB_LD_CMD"
+    LIB_LD_LIBS="$SHLIB_LD_LIBS"
+    LIB_LDCONFIG_CMD="$SHLIB_LDCONFIG_CMD"
+    LIB_CFLAGS="$SHLIB_CFLAGS"
+    CC_RUNTIME_ARG="$SHLIB_CC_RUNTIME_ARG"
+    RANLIB="$SHLIB_RANLIB"
 else
-    SHLIB_EXTENSION="a"
-    SHLIB_LD_CMD="ar cr"
-    SHLIB_LDCONFIG_CMD=":"
+    LIB_EXTENSION="a"
+    LIB_VERSION=
+    LIB_LD_CMD="ar cr"
+    LIB_LD_LIBS=
+    LIB_CFLAGS=
+    LIB_LDCONFIG_CMD=":"
+    CC_RUNTIME_ARG=
+    RANLIB=":"
 fi
+
 
 dnl guess IPv6 stack type.
 if test "x$enable_ipv6" = "xyes"; then
@@ -695,7 +707,26 @@ EOF
 
     esac
 fi
+
+AC_MSG_CHECKING(whether we have to build PIC code)
+echo "$with_mib_modules" | grep "ucd-snmp/dlmod" >/dev/null
+if test $? -eq 0 ; then
+	DLLIBS="-ldl"
+        LIB_CFLAGS="$LIB_CFLAGS $SHLIB_CFLAGS"
+	AC_MSG_RESULT(yes)
+else
+	DLLIBS=""
+	AC_MSG_RESULT(no)
+fi
+
 AC_SUBST(CC_RUNTIME_ARG)
+AC_SUBST(LIB_CFLAGS)
+AC_SUBST(LIB_EXTENSION)
+AC_SUBST(LIB_VERSION)
+AC_SUBST(LIB_LDCONFIG_CMD)
+AC_SUBST(LIB_LD_CMD)
+AC_SUBST(LIB_LD_LIBS)
+AC_SUBST(SHLIB_CC_RUNTIME_ARG)
 AC_SUBST(SHLIB_CFLAGS)
 AC_SUBST(SHLIB_EXTENSION)
 AC_SUBST(SHLIB_VERSION)
@@ -706,7 +737,7 @@ if test "x$RANLIB" != "x:"; then
     AC_PROG_RANLIB
 fi
 AC_MSG_CHECKING(for how to build the library)
-AC_MSG_RESULT([EXTENSION=$SHLIB_EXTENSION, VERSION=$SHLIB_VERSION, LD=$SHLIB_LD_CMD, LDCONFIG=$SHLIB_LDCONFIG_CMD, RANLIB=$RANLIB, CCFLAGS=$SHLIB_CFLAGS $CC_RUNTIME_ARG])
+AC_MSG_RESULT([EXTENSION=$LIB_EXTENSION, VERSION=$LIB_VERSION, LD=$LIB_LD_CMD, LDCONFIG=$LIB_LDCONFIG_CMD, RANLIB=$RANLIB, CCFLAGS=$LIB_CFLAGS $CC_RUNTIME_ARG])
 
 dnl
 dnl Do hairy agent module processing.
@@ -849,6 +880,7 @@ AC_SUBST(module_list_o)
 AC_SUBST(mibgroup_list_o)
 
 AC_MSG_RESULT(.)
+
 AC_MSG_CHECKING(if directories neeed to be created)
 for i in $module_directories; do
   $srcdir/mkinstalldirs $i
@@ -1167,6 +1199,7 @@ AC_FUNC_GETMNTENT
 AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol)
 AC_CHECK_FUNCS(strchr strdup memcpy memmove index bcopy strcasestr regcomp)
 AC_CHECK_FUNCS(signal sigset sigblock sighold strerror setenv vsnprintf)
+AC_CHECK_FUNCS(snprintf)
 AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(execv system fork getpid strncasecmp sigalrm)
 AC_CHECK_FUNCS(rpmGetPath)
@@ -1714,6 +1747,8 @@ Location to write persistent information],$defaultstore,1)
 PERSISTENT_DIRECTORY=$ac_cv_user_prompt_PERSISTENT_DIRECTORY
 AC_SUBST(PERSISTENT_DIRECTORY)
 
+AC_SUBST(DLLIBS)
+
 AC_OUTPUT([
  Makefile:Makefile.top:Makefile.in
  snmplib/Makefile:Makefile.top:snmplib/Makefile.in 
@@ -1721,7 +1756,6 @@ AC_OUTPUT([
  apps/Makefile:Makefile.top:apps/Makefile.in
  apps/snmpnetstat/Makefile:Makefile.top:apps/snmpnetstat/Makefile.in
  agent/mibgroup/Makefile:Makefile.top:agent/mibgroup/Makefile.in
- agent/dlmods/Makefile:Makefile.top:agent/dlmods/Makefile.in
  local/Makefile:Makefile.top:local/Makefile.in
  testing/Makefile:Makefile.top:testing/Makefile.in
  man/Makefile:Makefile.top:man/Makefile.in
