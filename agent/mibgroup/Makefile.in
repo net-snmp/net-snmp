@@ -32,16 +32,6 @@ makefileindepend: nosysdepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-mibII.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
-mibII.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
-mibII.o:  mibincl.h 
-mibII.o: ./../../snmplib/asn1.h ./../../snmplib/snmp_api.h
-mibII.o: ./../../snmplib/snmp_impl.h ./../snmp_vars.h ./../agent_registry.h
-mibII.o: ./../agent_read_config.h ./../var_struct.h ./../../snmplib/snmp.h
-mibII.o: ./../../snmplib/mib.h ./../../snmplib/snmp_debug.h
-mibII.o: ./../../snmplib/snmp_logging.h 
-mibII.o:  ./../../snmplib/read_config.h
-mibII.o: ./../../snmplib/tools.h mibII/sysORTable.h
 mibII/system_mib.o: ../../config.h ../../mib_module_config.h ../../s/linux.h
 mibII/system_mib.o: ../../s/sysv.h ../../s/generic.h ../../m/generic.h
 mibII/system_mib.o:  
