@@ -90,6 +90,20 @@ snmp_transport	       *snmp_transport_copy	(snmp_transport *t);
 
 void		     	snmp_transport_free	(snmp_transport *t);
 
+
+/*  If the passed oid (in_oid, in_len) corresponds to a supported transport
+    domain, return 1; if not return 0.  If out_oid is not NULL and out_len is
+    not NULL, then the "internal" oid which should be used to identify this
+    domain (e.g. in pdu->tDomain etc.) is written to *out_oid and its length
+    to *out_len.  */
+
+int			snmp_transport_support	(const oid *in_oid,
+						 size_t in_len,
+						 oid **out_oid,
+						 size_t *out_len);
+						 
+
+
 #ifdef __cplusplus
 }
 #endif
