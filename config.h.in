@@ -257,6 +257,9 @@
 /* Define if you have the random function.  */
 #undef HAVE_RANDOM
 
+/* Define if you have the regcomp function.  */
+#undef HAVE_REGCOMP
+
 /* Define if you have the rpmGetPath function.  */
 #undef HAVE_RPMGETPATH
 
@@ -295,6 +298,9 @@
 
 /* Define if you have the statvfs function.  */
 #undef HAVE_STATVFS
+
+/* Define if you have the strcasestr function.  */
+#undef HAVE_STRCASESTR
 
 /* Define if you have the strchr function.  */
 #undef HAVE_STRCHR
@@ -499,6 +505,9 @@
 
 /* Define if you have the <pthread.h> header file.  */
 #undef HAVE_PTHREAD_H
+
+/* Define if you have the <regex.h> header file.  */
+#undef HAVE_REGEX_H
 
 /* Define if you have the <sgtty.h> header file.  */
 #undef HAVE_SGTTY_H
