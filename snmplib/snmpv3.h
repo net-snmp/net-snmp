@@ -16,6 +16,7 @@ void    engineID_conf(const char *word, char *cptr);
 void    engineBoots_conf(const char *, char *);
 void    snmpv3_authtype_conf(const char *word, char *cptr);
 void    snmpv3_privtype_conf(const char *word, char *cptr);
+void	usm_parse_create_usmUser(const char *token, char *line);
 void    init_snmpv3(const char *);
 int	init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
                                 void *clientarg);
