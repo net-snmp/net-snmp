@@ -526,6 +526,9 @@ netsnmp_subtree_load(netsnmp_subtree *new_sub, const char *context_name)
     return 0;
 }
 
+/*
+ * Note: reginfo will be freed on failures
+ */
 int
 netsnmp_register_mib(const char *moduleName,
                      struct variable *var,
@@ -551,10 +554,12 @@ netsnmp_register_mib(const char *moduleName,
     if (moduleName == NULL ||
         mibloc     == NULL) {
         /* Shouldn't happen ??? */
+        netsnmp_handler_registration_free(reginfo);
         return MIB_REGISTRATION_FAILED;
     }
     subtree = (netsnmp_subtree *)calloc(1, sizeof(netsnmp_subtree));
     if (subtree == NULL) {
+        netsnmp_handler_registration_free(reginfo);
         return MIB_REGISTRATION_FAILED;
     }
 
@@ -565,6 +570,7 @@ netsnmp_register_mib(const char *moduleName,
 
     /*  Create the new subtree node being registered.  */
 
+    subtree->reginfo = reginfo;
     subtree->name_a  = snmp_duplicate_objid(mibloc, mibloclen);
     subtree->start_a = snmp_duplicate_objid(mibloc, mibloclen);
     subtree->end_a   = snmp_duplicate_objid(mibloc, mibloclen);
@@ -594,7 +600,6 @@ netsnmp_register_mib(const char *moduleName,
     subtree->range_subid = range_subid;
     subtree->range_ubound = range_ubound;
     subtree->session = ss;
-    subtree->reginfo = reginfo;
     subtree->flags = (u_char)flags;    /*  used to identify instance oids  */
     subtree->flags |= SUBTREE_ATTACHED;
     subtree->global_cacheid = reginfo->global_cacheid;
@@ -633,7 +638,10 @@ netsnmp_register_mib(const char *moduleName,
         }
     } else if (res == MIB_DUPLICATE_REGISTRATION ||
                res == MIB_REGISTRATION_FAILED) {
+        netsnmp_set_lookup_cache_size(old_lookup_cache_val);
+        invalidate_lookup_cache(context);
         netsnmp_subtree_free(subtree);
+        return res;
     }
 
     /*
