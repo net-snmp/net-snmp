@@ -3,6 +3,7 @@
 extern u_char *var_alarmtab();
 extern u_char *var_alarmnextindex();
 extern void alarmTimer();
+extern int alarmGetResponse();
 
 /* defines for values of alarmEntry.sampleType */
 #define ALARM_ABSOLUTE_VALUE 1

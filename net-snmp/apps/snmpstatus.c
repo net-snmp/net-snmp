@@ -25,6 +25,17 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
+#include <string.h>
+#endif
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -42,6 +53,9 @@ SOFTWARE.
 # endif
 #endif
 #include <netdb.h>
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 #include "snmp.h"
 #include "asn1.h"
@@ -76,6 +90,7 @@ int	length_ipInReceives = sizeof(objid_ipInReceives)/sizeof(oid);
 oid	objid_ipOutRequests[] = {1, 3, 6, 1, 2, 1, 4, 10, 0};
 int	length_ipOutRequests = sizeof(objid_ipOutRequests)/sizeof(oid);
 
+void
 usage(){
     fprintf(stderr, "Usage: snmpstatus -v 1 [-q] hostname community               or:\n");
     fprintf(stderr, "Usage: snmpstatus [-v 2] [-q] hostname noAuth                or:\n");
@@ -109,22 +124,21 @@ char *uptime_string(timeticks, buf)
     return buf;
 }
 
-int snmp_v1_setup (session, host, community)
+void snmp_v1_setup (session, host, community)
 struct snmp_session *session;
 char *host;
 char *community;
 {
-    bzero((char *)session, sizeof(struct snmp_session));
+    memset (session, 0, sizeof(struct snmp_session));
     session->peername = host;
     session->version = SNMP_VERSION_1;
     session->community = (u_char *)community;
-    session->community_len = strlen((char *)community);
+    session->community_len = strlen(community);
     session->retries = SNMP_DEFAULT_RETRIES;
     session->timeout = SNMP_DEFAULT_TIMEOUT;
-    return 0;
 }
 
-int snmp_v2_setup (session, host, srcparty, dstparty, context, srcclock, dstclock)
+void snmp_v2_setup (session, host, srcparty, dstparty, context, srcclock, dstclock)
 struct snmp_session *session;
 char *host;
 char *srcparty;
@@ -150,8 +164,7 @@ u_long srcclock, dstclock;
 		fprintf(stderr, "unknown host: %s\n", host);
 		exit(1);
 	    } else {
-		bcopy((char *)hp->h_addr, (char *)&destAddr,
-		      hp->h_length);
+		memcpy(&destAddr, hp->h_addr, hp->h_length);
 	    }
 	}
 	srclen = dstlen = cxtlen = MAX_NAME_LEN;
@@ -160,19 +173,19 @@ u_long srcclock, dstclock;
     }
     else {
 	sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
-	if (read_party_database(ctmp) > 0){
+	if (read_party_database(ctmp) != 0){
 	    fprintf(stderr,
 		    "Couldn't read party database from %s\n",ctmp);
 	    exit(1);
 	}
 	sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
-	if (read_context_database(ctmp) > 0){
+	if (read_context_database(ctmp) != 0){
 	    fprintf(stderr,
 		    "Couldn't read context database from %s\n",ctmp);
 	    exit(1);
 	}
 	sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
-	if (read_acl_database(ctmp) > 0){
+	if (read_acl_database(ctmp) != 0){
 	    fprintf(stderr,
 		    "Couldn't read access control database from %s\n",ctmp);
 	    exit(1);
@@ -182,7 +195,7 @@ u_long srcclock, dstclock;
 	for(pp = party_scanNext(); pp; pp = party_scanNext()){
 	    if (!strcasecmp(pp->partyName, srcparty)){
 		srclen = pp->partyIdentityLen;
-		bcopy(pp->partyIdentity, src, srclen * sizeof(oid));
+		memcpy(src, pp->partyIdentity, srclen * sizeof(oid));
 		break;
 	    }
 	}
@@ -199,7 +212,7 @@ u_long srcclock, dstclock;
 	for(pp = party_scanNext(); pp; pp = party_scanNext()){
 	    if (!strcasecmp(pp->partyName, dstparty)){
 		dstlen = pp->partyIdentityLen;
-		bcopy(pp->partyIdentity, dst, dstlen * sizeof(oid));
+		memcpy(dst, pp->partyIdentity, dstlen * sizeof(oid));
 		break;
 	    }
 	}
@@ -217,8 +230,7 @@ u_long srcclock, dstclock;
 	for(cxp = context_scanNext(); cxp; cxp = context_scanNext()){
 	    if (!strcasecmp(cxp->contextName, context)){
 		cxtlen = cxp->contextIdentityLen;
-		bcopy(cxp->contextIdentity, cxt,
-		      cxtlen * sizeof(oid));
+		memcpy(cxt, cxp->contextIdentity, cxtlen * sizeof(oid));
 		break;
 	    }
 	}
@@ -246,7 +258,7 @@ u_long srcclock, dstclock;
         }
     }
 
-    bzero((char *)session, sizeof(struct snmp_session));
+    memset(session, 0, sizeof(struct snmp_session));
     session->peername = host;
     session->version = SNMP_VERSION_2;
     session->srcParty = src;
@@ -257,9 +269,9 @@ u_long srcclock, dstclock;
     session->contextLen = cxtlen;
     session->retries = SNMP_DEFAULT_RETRIES;
     session->timeout = SNMP_DEFAULT_TIMEOUT;
-    return 0;
 }
 
+int
 main(argc, argv)
     int	    argc;
     char    *argv[];
@@ -270,16 +282,15 @@ main(argc, argv)
     char *hostname = NULL;
     char *community = NULL;
     char *srcparty = NULL, *dstparty = NULL, *context = NULL;
-    int timeout_flag = 0, timeout, retransmission_flag = 0, retransmission;
+    int timeout = SNMP_DEFAULT_TIMEOUT, retransmission = SNMP_DEFAULT_RETRIES;
     char name[MAX_NAME_LEN];
-    char* sysdescr;
+    char *sysdescr = NULL;
     int status;
     int version = 2;
-    int port_flag = 0;
     int dest_port = 0;
     u_long      srcclock = 0, dstclock = 0;
     int clock_flag = 0;
-    u_long uptime;
+    u_long uptime = 0;
     int ipin = 0, ipout = 0, ipackets = 0, opackets = 0;
     int good_var;
     int down_interfaces = 0;
@@ -301,15 +312,12 @@ main(argc, argv)
 		quick_print++;
 		break;
 	    case 'p':
-		port_flag++;
 		dest_port = atoi(optarg);
 		break;
 	    case 't':
-		timeout_flag++;
 		timeout = atoi(optarg) * 1000000L;
 		break;
 	    case 'r':
-		retransmission_flag++;
 		retransmission = atoi(optarg);
 		break;
 	    case 'c':
@@ -350,12 +358,9 @@ main(argc, argv)
 	snmp_v2_setup (&session, hostname, srcparty, dstparty, context,
 		       srcclock, dstclock);
     }
-    if (retransmission_flag)
-        session.retries = retransmission;
-    if (timeout_flag)
-        session.timeout = timeout;
-    if (port_flag)
-        session.remote_port = dest_port;
+    session.retries = retransmission;
+    session.timeout = timeout;
+    session.remote_port = dest_port;
 
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
@@ -378,21 +383,21 @@ retry:
 	if (response->errstat == SNMP_ERR_NOERROR){
 	    for(vars = response->variables; vars; vars = vars->next_variable){
 		if (vars->name_length == length_sysDescr &&
-		    !bcmp((char *)objid_sysDescr, (char*)vars->name, sizeof(objid_sysDescr))){
-			sysdescr = (char*)malloc(vars->val_len+1);
-			bcopy((char *)vars->val.string, sysdescr, vars->val_len);
+		    !memcmp(objid_sysDescr, vars->name, sizeof(objid_sysDescr))){
+			sysdescr = malloc(vars->val_len+1);
+			memcpy(sysdescr, vars->val.string, vars->val_len);
 			sysdescr[vars->val_len] = '\0';
 		}
 		if (vars->name_length == length_sysUpTime &&
-		    !bcmp((char *)objid_sysUpTime, (char*)vars->name, sizeof(objid_sysUpTime))){
+		    !memcmp(objid_sysUpTime, vars->name, sizeof(objid_sysUpTime))){
 			uptime = *vars->val.integer;
 		}
 		if (vars->name_length == length_ipInReceives &&
-		    !bcmp((char *)objid_ipInReceives, (char*)vars->name, sizeof(objid_ipInReceives))){
+		    !memcmp(objid_ipInReceives, vars->name, sizeof(objid_ipInReceives))){
 			ipin = *vars->val.integer;
 		}
 		if (vars->name_length == length_ipOutRequests &&
-		    !bcmp((char *)objid_ipOutRequests, (char*)vars->name, sizeof(objid_ipOutRequests))){
+		    !memcmp(objid_ipOutRequests, vars->name, sizeof(objid_ipOutRequests))){
 			ipout = *vars->val.integer;
 		}
 	    }
@@ -443,34 +448,32 @@ retry:
 
 		index = 0;
 		for(vars = response->variables; vars; vars = vars->next_variable){
-		    if (index == 0 && vars->name_length >= length_ifOperStatus &&
-			!bcmp((char *)objid_ifOperStatus, (char *)vars->name,
-			sizeof(objid_ifOperStatus))){
+		    if (vars->name_length >= length_ifOperStatus &&
+			!memcmp(objid_ifOperStatus, vars->name, sizeof(objid_ifOperStatus))){
 			    if (*vars->val.integer != MIB_IFSTATUS_UP)
 				down_interfaces++;
 			    snmp_add_null_var(pdu, vars->name, vars->name_length);
 			    good_var++;
-		    } else if (index == 1 && vars->name_length >= length_ifInUCastPkts &&
-			!bcmp((char *)objid_ifInUCastPkts, (char *)vars->name,
-			sizeof(objid_ifInUCastPkts))){
+		    } else if (vars->name_length >= length_ifInUCastPkts &&
+			!memcmp(objid_ifInUCastPkts, vars->name, sizeof(objid_ifInUCastPkts))){
 			    ipackets += *vars->val.integer;
 			    snmp_add_null_var(pdu, vars->name, vars->name_length);
 			    good_var++;
-		    } else if (index == 2 && vars->name_length >= length_ifInNUCastPkts &&
-			!bcmp((char *)objid_ifInNUCastPkts, (char *)vars->name,
-			sizeof(objid_ifInNUCastPkts))){
+		    } else if (vars->name_length >= length_ifInNUCastPkts &&
+			!memcmp(objid_ifInNUCastPkts, vars->name,
+				sizeof(objid_ifInNUCastPkts))){
 			    ipackets += *vars->val.integer;
 			    snmp_add_null_var(pdu, vars->name, vars->name_length);
 			    good_var++;
-		    } else if (index == 3 && vars->name_length >= length_ifOutUCastPkts &&
-			!bcmp((char *)objid_ifOutUCastPkts, (char *)vars->name,
-			sizeof(objid_ifOutUCastPkts))){
+		    } else if (vars->name_length >= length_ifOutUCastPkts &&
+			!memcmp(objid_ifOutUCastPkts, vars->name,
+				sizeof(objid_ifOutUCastPkts))){
 			    opackets += *vars->val.integer;
 			    snmp_add_null_var(pdu, vars->name, vars->name_length);
 			    good_var++;
-		    } else if (index == 4 && vars->name_length >= length_ifOutNUCastPkts &&
-			!bcmp((char *)objid_ifOutNUCastPkts, (char *)vars->name,
-			sizeof(objid_ifOutNUCastPkts))){
+		    } else if (vars->name_length >= length_ifOutNUCastPkts &&
+			!memcmp(objid_ifOutNUCastPkts, vars->name,
+				sizeof(objid_ifOutNUCastPkts))){
 			    opackets += *vars->val.integer;
 			    snmp_add_null_var(pdu, vars->name, vars->name_length);
 			    good_var++;

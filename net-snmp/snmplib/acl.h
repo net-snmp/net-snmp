@@ -83,3 +83,4 @@ acl_createEntry(/* int target, int subject, int resources */);
  * The status of this entry is created as invalid.
  */
 
+int read_acl_database();

@@ -678,7 +678,6 @@ eventSendTrap(event, eventType, generic)
     struct snmp_pdu *pdu;
     struct partyEntry *pp;
     u_long uptime;
-    extern u_long sysUpTime();
 
     for (np = eventNotifyTab; np; np = np->next) {
 	if (np->index != event->index
@@ -696,10 +695,10 @@ eventSendTrap(event, eventType, generic)
 	bcopy(sysUpTimeOid, vp->name, sysUpTimeOidLen * sizeof(oid));
 	vp->name_length = sysUpTimeOidLen;
 	vp->type = TIMETICKS;
-	uptime = sysUpTime();
+	uptime = get_uptime();
 	vp->val_len = sizeof(uptime);
 	vp->val.objid = (oid *)malloc(vp->val_len);
-	bcopy(sysUpTime, vp->val.integer, vp->val_len);
+	bcopy(uptime, vp->val.integer, vp->val_len);
 	vp->next_variable = NULL;
 	
 	vp->next_variable
@@ -768,7 +767,6 @@ eventGenerate(index, eventType, generic)
     void *generic;		/* info needed for traps */
 {
     struct eventEntry *event;
-    extern u_long sysUpTime();
     
     event = eventGetRow(index);
     if (event == NULL) {
@@ -777,7 +775,7 @@ eventGenerate(index, eventType, generic)
     }
     
     /* set this before calling eventSendTrap(), so it can use the value */
-    event->lastTimeSent = sysUpTime();
+    event->lastTimeSent = get_uptime();
     event->numEvents++;
     
     eventSendTrap(event, eventType, generic);

@@ -20,11 +20,15 @@
  */
 
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
 /*-
  * Includes of system header files (wrapped in duplicate include prevention)
  */
 
+#include <fcntl.h>
+#include <stropts.h>
 #include <sys/types.h>
 #define _SYS_USER_H
 #include <kvm.h>
@@ -78,7 +82,7 @@ mibcache Mibcache[MIBCACHE_SIZE] = {
 {MIB_CMOT,		0,					(void *)-1, 0, 0, 0, 0},
 {MIB_TRANSMISSION,	0,					(void *)-1, 0, 0, 0, 0},
 {MIB_SNMP,		0,					(void *)-1, 0, 0, 0, 0},
-0,
+{0},
 };
 
 static
@@ -99,7 +103,7 @@ mibmap	Mibmap[MIBCACHE_SIZE] = {
 {MIB2_CMOT,              0,},
 {MIB2_TRANSMISSION,      0,},
 {MIB2_SNMP,              0,},
-0,
+{0},
 };
 
 static	int		sd = -1;	/* /dev/ip stream descriptor. */
@@ -385,7 +389,6 @@ getMibstat(mibgroup_e grid,  void *resp, int entrysize,
 	cachep->cache_last_found = ((char *) ep - (char *) cachep->cache_addr) / entrysize;
     } else
 	ret = 1;		/* Not found */
- Return:
 #ifdef DODEBUG
     printf ("... getMibstat returns %d\n", ret);
 #endif
@@ -524,14 +527,14 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size, int entrysiz
   req->len = 0;
   strbuf.len = tor->OPT_length + tor->OPT_offset;
   flags = 0;
-  if (rc = putmsg(sd, &strbuf, (struct strbuf *) 0, flags)) {
+  if ((rc = putmsg(sd, &strbuf, NULL, flags))) {
     ret = -2;
     goto Return;
   }
   req = (struct opthdr *) (toa + 1);
   for (;;) {
     flags = 0;
-    if ((rc = getmsg(sd, &strbuf, (struct strbuf *) 0, &flags)) == -1) {
+    if ((rc = getmsg(sd, &strbuf, NULL, &flags)) == -1) {
       ret = -EIO;
       break;
     }
@@ -562,7 +565,7 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size, int entrysiz
       strbuf.maxlen = BUFSIZE;
       strbuf.buf = buf;
       do {
-	rc = getmsg(sd, (struct strbuf *) 0, &strbuf, &flags);
+	rc = getmsg(sd, NULL, &strbuf, &flags);
       } while (rc == MOREDATA) ;
       continue;
     }
@@ -574,7 +577,7 @@ getmib(int groupname, int subgroupname, void *statbuf, size_t size, int entrysiz
     strbuf.len = 0;
     flags = 0;
     do {
-      rc = getmsg(sd, (struct strbuf * ) 0, &strbuf, &flags);
+      rc = getmsg(sd, NULL, &strbuf, &flags);
       switch (rc) {
       case -1:
 	rc = -ENOSR;

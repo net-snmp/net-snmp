@@ -47,13 +47,22 @@ SOFTWARE.
 #include "acl.h"
 #include "party.h"
 #include "context.h"
-
 #include "mib.h"
+#include "snmp_groupvars.h"
+#include "extensible/extproto.h"
 
-void	snmp_trap();
+void	send_trap();
+void	send_easy_trap();
 int	create_identical();
 int	parse_var_op_list();
 int	snmp_access();
+static int snmp_outgetresponses_inc;
+static int get_community();
+static int bulk_var_op_list();
+static int create_toobig();
+static int goodValue();
+static void setVariable();
+
 
 struct pbuf *definitelyGetBuf();
 
@@ -77,14 +86,11 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
     u_char	    type;
     long	    zero = 0;
     long	    reqid, errstat, errindex, dummyindex;
-    register u_char *out_auth, *out_header, *out_reqid;
+    register u_char *out_auth, *out_header = NULL, *out_reqid;
     u_char	    *startData = data;
     int		    startLength = length;
-    int		    header_shift, auth_shift;
     int		    packet_len, len;
     struct partyEntry *tmp;
-    oid		    tmpParty[64];
-    int		    tmpPartyLen;
     
     len = length;
     (void)asn_parse_header(data, &len, &type);
@@ -114,23 +120,43 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
     if (data == NULL){
 	ERROR("bad authentication");
 	/* send auth fail trap */
+	send_easy_trap (4);
 	return 0;
     }
     if (pi->version == SNMP_VERSION_1){
 	pi->community_id = get_community(pi->community, pi->community_len);
-	if (pi->community_id == -1)
-	    return NULL;
+	if (pi->community_id == -1) {
+	    snmp_inbadcommunitynames++;
+	    send_easy_trap(4);
+	    return 0;
+	}
     } else if (pi->version == SNMP_VERSION_2){
 	pi->community_id = 0;
     } else {
 	ERROR("Bad Version");
-	return NULL;
+	snmp_inbadversions++;
+	return 0;
     }
+
     data = asn_parse_header(data, &length, &pi->pdutype);
     if (data == NULL){
 	ERROR("bad header");
 	return 0;
     }
+
+    switch (pi->pdutype) {
+    case GET_REQ_MSG:
+    case BULK_REQ_MSG:
+	snmp_ingetrequests++;   break;
+    case GETNEXT_REQ_MSG:
+	snmp_ingetnexts++;      break;
+    case SET_REQ_MSG:
+	snmp_insetrequests++;   break;
+    }
+
+    /* no outgoing variables seen: */
+    snmp_outgetresponses_inc = 0;
+
     if (pi->pdutype != GET_REQ_MSG && pi->pdutype != GETNEXT_REQ_MSG
 	&& pi->pdutype != SET_REQ_MSG && pi->pdutype != BULK_REQ_MSG){
 	return 0;
@@ -151,11 +177,11 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
     ** with the create_identical() routine, which expects them to not
     ** be swapped.
     */
-    bcopy(pi->srcParty, tmpParty, pi->srcPartyLength);
+    memcpy(tmpParty, pi->srcParty, pi->srcPartyLength);
     tmpPartyLen = pi->srcPartyLength;
-    bcopy(pi->dstParty, pi->srcParty, pi->dstPartyLength);
+    memcpy(pi->srcParty, pi->dstParty, pi->dstPartyLength);
     pi->srcPartyLength = pi->dstPartyLength;
-    bcopy(tmpParty, pi->dstParty, tmpPartyLen);
+    memcpy(pi->dstParty, tmpParty, tmpPartyLen);
     pi->dstPartyLength = tmpPartyLen;
 #endif
     /*
@@ -201,16 +227,19 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
     data = asn_parse_int(data, &length, &type, &reqid, sizeof(reqid));
     if (data == NULL){
 	ERROR("bad parse of reqid");
+	snmp_inasnparseerrors++;
 	return 0;
     }
     data = asn_parse_int(data, &length, &type, &errstat, sizeof(errstat));
     if (data == NULL){
 	ERROR("bad parse of errstat");
+	snmp_inasnparseerrors++;
 	return 0;
     }
     data = asn_parse_int(data, &length, &type, &errindex, sizeof(errindex));
     if (data == NULL){
 	ERROR("bad parse of errindex");
+	snmp_inasnparseerrors++;
 	return 0;
     }
 
@@ -316,8 +345,11 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 	       to be fixed. */
 	    if (pi->version == SNMP_VERSION_2)
 		pi->packet_end = out_auth + packet_len;
+	    snmp_intotalreqvars++;
+	    snmp_outgetresponses += snmp_outgetresponses_inc;
 	    break;
 	case SNMP_ERR_TOOBIG:
+	    snmp_intoobigs++;
 	    if (pi->version == SNMP_VERSION_2){
 		create_toobig(out_auth, *out_length, reqid, pi);
 		break;
@@ -334,10 +366,19 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 	case SNMP_ERR_UNDOFAILED:
 	case SNMP_ERR_AUTHORIZATIONERROR:
 	case SNMP_ERR_NOTWRITABLE:
+	    goto reterr;
 	case SNMP_ERR_NOSUCHNAME:
+	    snmp_outnosuchnames++;
+	    goto reterr;
 	case SNMP_ERR_BADVALUE:
+	    snmp_inbadvalues++;
+	    goto reterr;
 	case SNMP_ERR_READONLY:
+	    snmp_inreadonlys++;
+	    goto reterr;
 	case SNMP_ERR_GENERR:
+	    snmp_ingenerrs++;
+reterr:
 	    if (create_identical(startData, out_auth, startLength, errstat,
 				 errindex, pi)){
 		*out_length = pi->packet_end - out_auth;
@@ -382,7 +423,6 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
     int	    (*write_method)();
     u_char  *headerP, *var_list_start;
     int	    dummyLen;
-    int	    header_shift;
     u_char  *getStatPtr();
     int	    noSuchObject;
 
@@ -425,23 +465,23 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	statP = getStatPtr(var_name, &var_name_len, &statType, &statLen, &acl,
 			   exact, &write_method, pi, &noSuchObject);
 	if (pi->version != SNMP_VERSION_2 && statP == NULL
-	    && (pi->pdutype != SET_REQ_MSG || !write_method)){
+	      && (pi->pdutype != SET_REQ_MSG || !write_method)){
             print_mib_oid(var_name,var_name_len);
             printf(" -- ");
-ERROR("Mib Doesn't exist");
+	    printf("Mib Doesn't exist");
 	    return SNMP_ERR_NOSUCHNAME; 
 	}
 
 	/* Effectively, check if this variable is read-only or read-write
 	   (in the MIB sense). */
 	if (pi->pdutype == SET_REQ_MSG && pi->version != SNMP_VERSION_2
-	    && !snmp_access(acl, pi->community_id, rw)){
-ERROR("read-only? (ignoring)");
+	      && !snmp_access(acl, pi->community_id, rw)){
+	    ERROR("read-only? (ignoring)");
 	    return SNMP_ERR_NOSUCHNAME;
 	}
 	if (pi->pdutype == SET_REQ_MSG && pi->version == SNMP_VERSION_2
-	    && !snmp_access(acl, pi->community_id, rw)){
-ERROR("Not Writable");
+	      && !snmp_access(acl, pi->community_id, rw)){
+	    ERROR("Not Writable");
 	    return SNMP_ERR_NOTWRITABLE;
 	}
 	/* Its bogus to check here on getnexts - the whole packet shouldn't
@@ -503,6 +543,7 @@ ERROR("Not Writable");
 	}
 
 	(*index)++;
+	snmp_outgetresponses_inc++;
     }
     if (pi->pdutype != SET_REQ_MSG){
 	/* save a pointer to the end of the packet */
@@ -557,7 +598,6 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
     int	    (*write_method)();
     u_char  *headerP, *var_list_start;
     int	    dummyLen;
-    int	    header_shift;
     u_char  *getStatPtr();
     u_char  *repeaterStart, *out_data_save;
     int	    repeatCount, repeaterLength, indexStart, out_length_save;
@@ -624,6 +664,7 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
 	}
 	(*index)++;
 	non_repeaters--;
+	snmp_outgetresponses_inc++;
     }
 
     repeaterStart = out_data;
@@ -841,7 +882,7 @@ create_identical(snmp_in, snmp_out, snmp_length, errstat, errindex, pi)
 	ERROR("couldn't read_identical");
 	return 0;
     }
-    bcopy((char *)headerPtr, data, messagelen);
+    memcpy(data, headerPtr, messagelen);
     if (pi->version == SNMP_VERSION_2){
 	dummy = snmp_length;
 	data = snmp_secauth_build(snmp_out, (int *)&dummy, pi, messagelen,
@@ -951,7 +992,7 @@ get_community(community, community_len)
 
     for(count = 0; count < NUM_COMMUNITIES; count++){
 	if ((community_len == strlen(communities[count])
-	     && !bcmp(communities[count], (char *)community, community_len)))
+	     && !memcmp(communities[count], community, community_len)))
 	    break;
     }
     if (count == NUM_COMMUNITIES)
@@ -969,6 +1010,7 @@ goodValue(inType, inLen, actualType, actualLen)
     return (inType == actualType);
 }
 
+void
 setVariable(var_val, var_val_type, var_val_len, statP, statLen)
     u_char  *var_val;
     u_char  var_val_type;

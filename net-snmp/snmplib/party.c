@@ -120,6 +120,7 @@ party_createEntry(partyID, partyIDLen)
     return pp;
 }
 
+void
 party_destroyEntry(partyID, partyIDLen)
     oid *partyID;
     int partyIDLen;

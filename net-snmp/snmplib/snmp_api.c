@@ -25,6 +25,17 @@ SOFTWARE.
 #include <config.h>
 
 #include <stdio.h>
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
+#include <string.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <sys/param.h>
 #if TIME_WITH_SYS_TIME
@@ -39,6 +50,9 @@ SOFTWARE.
 #endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
 #endif
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -196,7 +210,7 @@ api_errstring(snmp_errnumber)
 /*
  * Gets initial request ID for all transactions.
  */
-static
+static void
 init_snmp(){
     struct timeval tv;
 
@@ -368,7 +382,7 @@ snmp_open(session)
 /*
  * Free each element in the input request list.
  */
-static
+static void
 free_request_list(rp)
     struct request_list *rp;
 {
@@ -432,6 +446,7 @@ snmp_close(session)
     return 1;
 }
 
+void
 shift_array(begin, length, shift_amount)
     u_char          *begin;
     register int    length;
@@ -627,8 +642,8 @@ snmp_parse(session, pdu, data, length)
     int	    len, four;
     u_char community[128];
     int community_length = 128;
-    struct internal_variable_list *vp;
-    oid	    objid[MAX_NAME_LEN], *op;
+    struct internal_variable_list *vp = NULL;
+    oid	    objid[MAX_NAME_LEN];
 
     len = length;
     (void)asn_parse_header(data, &len, &type);
@@ -736,28 +751,24 @@ snmp_parse(session, pdu, data, length)
     if (type != (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR))
 	return -1;
     while((int)length > 0){
-	if (pdu->variables == NULL){
+	if (vp == NULL){
 	    if (SavedVars){
-		pdu->variables = (struct variable_list *)SavedVars;
 		vp = SavedVars;
 		SavedVars =
 		    (struct internal_variable_list *)SavedVars->next_variable;
 	    } else {
-		vp = (struct internal_variable_list *)
-		    malloc(sizeof(struct internal_variable_list));
-		pdu->variables = (struct variable_list *)vp;
+		vp = malloc(sizeof(struct internal_variable_list));
 	    }
+	    pdu->variables = (struct variable_list *)vp;
 	} else {
 	    if (SavedVars){
 		vp->next_variable = (struct variable_list *)SavedVars;
 		SavedVars =
 		    (struct internal_variable_list *)SavedVars->next_variable;
-		vp = (struct internal_variable_list *)vp->next_variable;
 	    } else {
-		vp->next_variable =
-		    (struct variable_list *)malloc(sizeof(struct internal_variable_list));
-		vp = (struct internal_variable_list *)vp->next_variable;
+		vp->next_variable = malloc(sizeof(struct internal_variable_list));
 	    }
+	    vp = (struct internal_variable_list *)vp->next_variable;
 	}
 	vp->next_variable = NULL;
 	vp->val.string = NULL;
@@ -878,7 +889,7 @@ snmp_send(session, pdu)
 	    pdu->errindex = 0;
     } else if (pdu->command == INFORM_REQ_MSG || pdu->command == TRP2_REQ_MSG){
 	if (session->version != SNMP_VERSION_2){
-	    fprintf(stderr, "Cant send SNMP PDU's in SNMPv2 message.\n");
+	    fprintf(stderr, "Cant send SNMPv2 PDU's in SNMPv1 session.\n");
 	    snmp_errno = SNMPERR_GENERR;/* Fix this XXXXX */
 	    return 0;
 	}
@@ -899,7 +910,7 @@ snmp_send(session, pdu)
 	    
     } else {
 	if (session->version == SNMP_VERSION_2){
-	    fprintf(stderr, "Cant send old Trap PDU in SNMPv2 message.\n");
+	    fprintf(stderr, "Cant send old Trap PDU in SNMPv2 session.\n");
 	    snmp_errno = SNMPERR_GENERR;/* Fix this XXXXX */
 	    return 0;
 	}
@@ -1085,8 +1096,11 @@ snmp_free_internal_pdu(pdu)
 	ovp->next_variable = (struct variable_list *)SavedVars;
 	SavedVars = ovp;
     }
-    if (pdu->enterprise)
-	free((char *)pdu->enterprise);
+    if (pdu->enterprise) free(pdu->enterprise);
+    if (pdu->community) free(pdu->community);
+    if (pdu->srcParty) free(pdu->srcParty);
+    if (pdu->dstParty) free(pdu->dstParty);
+    if (pdu->context) free(pdu->context);
     if (!SavedPdu)
 	SavedPdu = pdu;
     else
@@ -1137,11 +1151,8 @@ snmp_read(fdset)
 	    } else {
 		pdu = (struct snmp_pdu *)malloc(sizeof(struct internal_snmp_pdu));
 	    }
+	    memset (pdu, 0, sizeof(*pdu));
 	    pdu->address = from;
-	    pdu->reqid = 0;
-	    pdu->variables = NULL;
-	    pdu->enterprise = NULL;
-	    pdu->enterprise_length = 0;
 	    if (snmp_parse(sp, pdu, packet, length) != SNMP_ERR_NOERROR){
 		fprintf(stderr, "Unrecognizable or unauthentic packet received\n");
 		snmp_free_internal_pdu(pdu);

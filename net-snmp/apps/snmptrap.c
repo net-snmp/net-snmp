@@ -25,9 +25,21 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#else
+#include <string.h>
+#endif
+#include <ctype.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 # include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
 #endif
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
@@ -60,13 +72,17 @@ SOFTWARE.
 
 #include "snmp.h"
 #include "asn1.h"
+#include "mib.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
 #include "snmp_client.h"
 #include "party.h"
+#include "system.h"
 
 extern int  errno;
 int	snmp_dump_packet = 0;
+int ascii_to_binary();
+int hex_to_binary();
 
 #define NUM_NETWORKS	16   /* max number of interfaces to check */
 
@@ -99,113 +115,6 @@ void *magic;
   return 1;
 }
 
-#ifndef IFF_LOOPBACK
-#define IFF_LOOPBACK 0
-#endif
-#define LOOPBACK    0x7f000001
-u_long
-get_myaddr(){
-    int sd;
-    struct ifconf ifc;
-    struct ifreq conf[NUM_NETWORKS], *ifrp, ifreq;
-    struct sockaddr_in *in_addr;
-    int count;
-    int interfaces;		/* number of interfaces returned by ioctl */
-
-    if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-	return 0;
-    ifc.ifc_len = sizeof(conf);
-    ifc.ifc_buf = (caddr_t)conf;
-    if (ioctl(sd, SIOCGIFCONF, (char *)&ifc) < 0){
-	close(sd);
-	return 0;
-    }
-    ifrp = ifc.ifc_req;
-    interfaces = ifc.ifc_len / sizeof(struct ifreq);
-    for(count = 0; count < interfaces; count++, ifrp++){
-	ifreq = *ifrp;
-	if (ioctl(sd, SIOCGIFFLAGS, (char *)&ifreq) < 0)
-	    continue;
-	in_addr = (struct sockaddr_in *)&ifrp->ifr_addr;
-	if ((ifreq.ifr_flags & IFF_UP)
-	    && (ifreq.ifr_flags & IFF_RUNNING)
-	    && !(ifreq.ifr_flags & IFF_LOOPBACK)
-	    && in_addr->sin_addr.s_addr != LOOPBACK) {
-#ifdef freebsd2
-          if (ioctl(sd, SIOCGIFADDR, (char *)&ifreq) < 0)
-            continue;
-          in_addr = (struct sockaddr_in *)&(ifreq.ifr_addr);
-#endif
-          close(sd);
-          return(htonl(in_addr->sin_addr.s_addr));
-        }
-    }
-    close(sd);
-    return 0;
-}
-
-/*
- * Returns uptime in centiseconds(!).
- */
-long uptime()
-{
-#ifndef solaris2
-
-    struct timeval boottime, now, diff;
-
-#ifndef freebsd2
-
-    int kmem;
-
-    if ((kmem = open("/dev/kmem", 0)) < 0)
-	return 0;
-    nlist(KERNEL_LOC, nl);
-    if (nl[0].n_type == 0){
-	close(kmem);
-	return 0;
-    }
-    
-    lseek(kmem, (long)nl[0].n_value, L_SET);
-    read(kmem, &boottime, sizeof(boottime));
-    close(kmem);
-
-#else /* freebsd2 */
-
-    int 		mib[2];
-    size_t		len;
-
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_BOOTTIME;
-
-    len = sizeof(boottime);
-
-    sysctl(mib, 2, &boottime, &len, NULL, NULL);
-
-#endif /* freebsd2 */
-
-    gettimeofday(&now, 0);
-    now.tv_sec--;
-    now.tv_usec += 1000000L;
-    diff.tv_sec = now.tv_sec - boottime.tv_sec;
-    diff.tv_usec = now.tv_usec - boottime.tv_usec;
-    if (diff.tv_usec > 1000000L){
-	diff.tv_usec -= 1000000L;
-	diff.tv_sec++;
-    }
-    return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
-
-#else /* solaris2 */
-
-    u_long lbolt;
-
-    if (getKstat ("system_misc", "lbolt", &lbolt) < 0)
-	return 0;
-    else
-	return lbolt;
-
-#endif
-}
-
 u_long parse_address(address)
     char *address;
 {
@@ -220,7 +129,7 @@ u_long parse_address(address)
 	fprintf(stderr, "unknown host: %s\n", address);
 	return 0;
     } else {
-	bcopy((char *)hp->h_addr, (char *)&saddr.sin_addr, hp->h_length);
+	memcpy(&saddr.sin_addr, hp->h_addr, hp->h_length);
 	return saddr.sin_addr.s_addr;
     }
 
@@ -307,7 +216,7 @@ snmp_add_var(pdu, name, name_length, type, value)
 	    break;
 	default:
 	    fprintf(stderr, "Internal error in type switching: %c\n", type);
-	    exit(-1);
+	    exit(1);
     }
 }
 
@@ -376,7 +285,6 @@ main(argc, argv)
 {
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu;
-    struct variable_list *vars;
     oid name[MAX_NAME_LEN];
     int name_length;
     int	arg;
@@ -385,10 +293,11 @@ main(argc, argv)
     char *community = NULL;
     char *trap = NULL, *specific = NULL, *description = NULL, *agent = NULL;
     int version = 2;
-    oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN];
-    int srclen = 0, dstlen = 0;
+    oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
+    int srclen = 0, dstlen = 0, contextlen = 0;
     struct partyEntry *pp;
     char ctmp[300];
+    int trivialSNMPv2 = FALSE;
 
     /*
      * usage: snmptrap gateway-name srcParty dstParty trap-type specific-type device-description [ -a agent-addr ]
@@ -424,36 +333,40 @@ main(argc, argv)
 	    gateway = argv[arg];
 	} else if (version == 1 && community == NULL){
 	    community = argv[arg];
-	} else if (version == 2 && srclen == 0){
+	} else if (version == 2 && srclen == 0 && !trivialSNMPv2){
 	    sprintf(ctmp, "%s/party.conf", SNMPLIBPATH);
-	    if (!read_party_database(ctmp)){
+	    if (read_party_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read party database from %s\n", ctmp);
 		exit(0);
 	    }
-	    party_scanInit();
-	    for(pp = party_scanNext(); pp; pp = party_scanNext()){
-		if (!strcasecmp(pp->partyName, argv[arg])){
-		    srclen = pp->partyIdentityLen;
-		    bcopy(pp->partyIdentity, src, srclen * sizeof(oid));
-		    break;
+            if (!strcasecmp(argv[arg], "noauth"))
+                trivialSNMPv2 = TRUE;
+	    else {
+		party_scanInit();
+		for(pp = party_scanNext(); pp; pp = party_scanNext()){
+		    if (!strcasecmp(pp->partyName, argv[arg])){
+			srclen = pp->partyIdentityLen;
+			memcpy(src, pp->partyIdentity, srclen * sizeof(oid));
+			break;
+		    }
 		}
-	    }
-	    if (!pp){
-		srclen = MAX_NAME_LEN;
-		if (!read_objid(argv[arg], src, &srclen)){
-		    fprintf(stderr, "Invalid source party: %s\n", argv[arg]);
-		    srclen = 0;
-		    usage();
+		if (!pp){
+		    srclen = MAX_NAME_LEN;
+		    if (!read_objid(argv[arg], src, &srclen)){
+			fprintf(stderr, "Invalid source party: %s\n", argv[arg]);
+			srclen = 0;
+			usage();
+		    }
 		}
-	    }
-	} else if (version == 2 && dstlen == 0){
+            }
+	} else if (version == 2 && dstlen == 0 && !trivialSNMPv2){
 	    dstlen = MAX_NAME_LEN;
 	    party_scanInit();
 	    for(pp = party_scanNext(); pp; pp = party_scanNext()){
 		if (!strcasecmp(pp->partyName, argv[arg])){
 		    dstlen = pp->partyIdentityLen;
-		    bcopy(pp->partyIdentity, dst, dstlen * sizeof(oid));
+		    memcpy(dst, pp->partyIdentity, dstlen * sizeof(oid));
 		    break;
 		}
 	    }
@@ -473,6 +386,13 @@ main(argc, argv)
     if (trap == NULL) {
 	usage ();
     }
+ 
+    if (trivialSNMPv2){
+        u_long destAddr = parse_address (gateway);;
+        srclen = dstlen = contextlen = MAX_NAME_LEN;
+        ms_party_init(destAddr, src, &srclen, dst, &dstlen,
+                      context, &contextlen);
+    }
 
     memset (&session, 0, sizeof(struct snmp_session));
     session.peername = gateway;
@@ -486,6 +406,8 @@ main(argc, argv)
         session.srcPartyLen = srclen;
         session.dstParty = dst;
         session.dstPartyLen = dstlen;
+	session.context = context;
+	session.contextLen = contextlen;
     }
     session.retries = SNMP_DEFAULT_RETRIES;
     session.timeout = SNMP_DEFAULT_TIMEOUT;
@@ -496,7 +418,7 @@ main(argc, argv)
     ss = snmp_open(&session);
     if (ss == NULL){
 	fprintf(stderr, "Couldn't open snmp\n");
-	exit(-1);
+	exit(1);
     }
 
     if (version == 1) {
@@ -543,7 +465,7 @@ main(argc, argv)
 	}
 	description = argv [arg];
 	if (description == NULL || *description == 0)
-	    pdu->time = uptime();
+	    pdu->time = get_uptime();
 	else
 	    pdu->time = atol (description);
 	arg++;
@@ -554,7 +476,7 @@ main(argc, argv)
 
 	pdu = snmp_pdu_create(TRP2_REQ_MSG);
 	if (*trap == 0) {
-	    sysuptime = uptime ();
+	    sysuptime = get_uptime ();
 	    sprintf (csysuptime, "%ld", sysuptime);
 	    trap = csysuptime;
 	}
@@ -570,15 +492,15 @@ main(argc, argv)
     }
 
     while (arg < argc) {
-      arg += 3;
-      if (arg > argc) break;
-      name_length = MAX_NAME_LEN;
-      if (!read_objid (argv [arg-3], name, &name_length)) {
-	  fprintf (stderr, "Invalid object identifier: %s\n", argv [arg-3]);
-	  continue;
-      }
+	arg += 3;
+	if (arg > argc) break;
+	name_length = MAX_NAME_LEN;
+	if (!read_objid (argv [arg-3], name, &name_length)) {
+	    fprintf (stderr, "Invalid object identifier: %s\n", argv [arg-3]);
+	    continue;
+	}
 
-      snmp_add_var (pdu, name, name_length, argv [arg-2][0], argv [arg-1]);
+	snmp_add_var (pdu, name, name_length, argv [arg-2][0], argv [arg-1]);
     }
 
     if (snmp_send(ss, pdu)== 0){

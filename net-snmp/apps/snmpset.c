@@ -25,6 +25,17 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if HAVE_STRINGS_H
+#include <strings.h>
+#else
+#include <string.h>
+#endif
 #include <sys/types.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -42,8 +53,12 @@ SOFTWARE.
 # endif
 #endif
 #include <netdb.h>
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 #include "snmp.h"
+#include "mib.h"
 #include "asn1.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
@@ -56,6 +71,11 @@ SOFTWARE.
 extern int  errno;
 int	snmp_dump_packet = 0;
 
+void snmp_add_var();
+int ascii_to_binary();
+int hex_to_binary();
+
+void
 usage(){
     fprintf(stderr, "Usage: snmpset -v 1 [-q] hostname community [objectID type value]+    or:\n");
     fprintf(stderr, "Usage: snmpset [-v 2] [-q] hostname noAuth [objectID type value]+     or:\n");
@@ -65,6 +85,7 @@ usage(){
     fprintf(stderr, "\t\tn: NULLOBJ, o: OBJID, t: TIMETICKS, a: IPADDRESS\n");
 }
 
+int
 main(argc, argv)
     int	    argc;
     char    *argv[];
@@ -144,19 +165,19 @@ main(argc, argv)
             community = argv[arg];
 	} else if (version == 2 && srclen == 0 && !trivialSNMPv2){
             sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
-	    if (read_party_database(ctmp) > 0){
+	    if (read_party_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read party database from %s\n",ctmp);
 		exit(0);
 	    }
             sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
-	    if (read_context_database(ctmp) > 0){
+	    if (read_context_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read context database from %s\n",ctmp);
 		exit(0);
 	    }
             sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
-	    if (read_acl_database(ctmp) > 0){
+	    if (read_acl_database(ctmp) != 0){
 		fprintf(stderr,
 			"Couldn't read access control database from %s\n",ctmp);
 		exit(0);
@@ -259,7 +280,7 @@ main(argc, argv)
 		fprintf(stderr, "unknown host: %s\n", hostname);
 		exit(1);
 	    } else {
-              memmove(&destAddr, hp->h_addr, hp->h_length);
+		memmove(&destAddr, hp->h_addr, hp->h_length);
 	    }
 	}
 	srclen = dstlen = contextlen = MAX_NAME_LEN;
@@ -365,6 +386,7 @@ retry:
  * Add a variable with the requested name to the end of the list of
  * variables for this pdu.
  */
+void
 snmp_add_var(pdu, name, name_length, type, value)
     struct snmp_pdu *pdu;
     oid *name;

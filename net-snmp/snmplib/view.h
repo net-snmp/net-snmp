@@ -45,6 +45,7 @@ struct viewEntry {
 
 u_char *var_view();
 int write_view();
+int read_view_database();
 
 struct viewEntry *
 view_getEntry(/* int viewIndex */ );

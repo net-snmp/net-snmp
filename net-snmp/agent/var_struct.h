@@ -47,6 +47,15 @@ struct variable7 {
     oid             name[7];       /* object identifier of variable */
 };
 
+struct variable8 {
+    u_char          magic;          /* passed to function as a hint */
+    char            type;           /* type of variable */
+    u_short         acl;            /* access control list for variable */
+    u_char          *(*findVar)();  /* function that finds variable */
+    u_char          namelen;        /* length of name below */
+    oid             name[8];       /* object identifier of variable */
+};
+
 struct variable13 {
     u_char          magic;          /* passed to function as a hint */
     char            type;           /* type of variable */
