@@ -143,13 +143,14 @@ get_myaddr(){
     close(sd);
     return 0;
 }
-#ifndef solaris2
 
 /*
  * Returns uptime in centiseconds(!).
  */
 long uptime()
 {
+#ifndef solaris2
+
     struct timeval boottime, now, diff;
 
 #ifndef freebsd2
@@ -192,13 +193,16 @@ long uptime()
 	diff.tv_sec++;
     }
     return ((diff.tv_sec * 100) + (diff.tv_usec / 10000));
-#else
+
+#else /* solaris2 */
+
     u_long lbolt;
 
     if (getKstat ("system_misc", "lbolt", &lbolt) < 0)
 	return 0;
     else
 	return lbolt;
+
 #endif
 }
 
@@ -215,6 +219,12 @@ u_long parse_address(address)
     if (hp == NULL){
 	fprintf(stderr, "unknown host: %s\n", address);
 	return 0;
+    } else {
+	bcopy((char *)hp->h_addr, (char *)&saddr.sin_addr, hp->h_length);
+	return saddr.sin_addr.s_addr;
+    }
+
+}
 
 /*
  * Add a variable with the requested name to the end of the list of
@@ -359,15 +369,7 @@ hex_to_binary(cp, bufp)
     return bp - bufp;
 }
 
-
 int
-    } else {
-	bcopy((char *)hp->h_addr, (char *)&saddr.sin_addr, hp->h_length);
-	return saddr.sin_addr.s_addr;
-    }
-
-}
-
 main(argc, argv)
     int	    argc;
     char    *argv[];
