@@ -26,7 +26,9 @@
   if (should_init("versioninfo")) init_versioninfo();
   if (should_init("pass")) init_pass();
   if (should_init("pass_persist")) init_pass_persist();
+#ifndef _MSC_VER
   if (should_init("disk")) init_disk();
+#endif
   if (should_init("loadave")) init_loadave();
   if (should_init("extensible")) init_extensible();
   if (should_init("errormib")) init_errormib();
