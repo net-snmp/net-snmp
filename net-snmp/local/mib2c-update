@@ -22,6 +22,11 @@ UPDATE_MERGED=.merged
 UPDATE_BACKUP=.backup
 UPDATE_PATCH=.patch
 
+#
+# number of diff context lines / patch fuzz factor
+#
+FUZZ=5
+
 #----------------------------------------------------------------------
 #
 debug()
@@ -112,7 +117,7 @@ do_diff()
     # p     Show which C function each change is in.
     # d     smaller changes
     #    --exclude='*Makefile' --unidirectional-new-file
-    diff -u -p -b -w --show-c-function \
+    diff -U $FUZZ -p -b -w --show-c-function \
         --exclude='default-*' --exclude='*.orig' --exclude='*.rej' \
         --exclude='*~' --exclude='*.bak' --exclude='.*' --exclude="#*" \
         --exclude="*.deps" \
@@ -227,7 +232,7 @@ merge_code()
     if [ -f $UPDATE_PATCH/custom.$UPDATE_DATE ]; then
        touch .M2C-UPDATE-MERGE-FAILED
        echo "Patching new generated code"
-       patch -N -d $UPDATE_MERGED -p1 -i ../$UPDATE_PATCH/custom.$UPDATE_DATE
+       patch -F $FUZZ -N -d $UPDATE_MERGED -p1 -i ../$UPDATE_PATCH/custom.$UPDATE_DATE
        if [ $? -ne 0 ]; then
            error "Could not apply custom code patch to new generated code"
            die   "You must fix the problem in $UPDATE_MERGED, and then re-run mib2c-update."
