@@ -169,7 +169,6 @@ int             deny_severity = LOG_WARNING;
 int             snmp_dump_packet;
 int             running = 1;
 int             reconfig = 0;
-int             netsnmp_processing_set = 0;
 
 #ifdef WIN32
 /*
