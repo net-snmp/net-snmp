@@ -171,34 +171,34 @@ ifTable_cache_load(netsnmp_container * container)
     netsnmp_container * ifcontainer =
         netsnmp_access_interface_container_load(NULL,
                                                 NETSNMP_ACCESS_INTERFACE_INIT_NOFLAGS);
-  
+    
     DEBUGMSGTL(("ifTable:access:cache_load","loading cache\n"));
-  
-      /*
+    
+    /*
      * we just got a fresh copy of interface data. compare it to
      * what we've already got, and make any adjustements...
      */
     CONTAINER_FOR_EACH(container,
                        (netsnmp_container_obj_func*)_check_interface_entry_for_updates,
                        ifcontainer);
-  
+    
     /*
      * now add any new interfaces
      */
     CONTAINER_FOR_EACH(ifcontainer,
                        (netsnmp_container_obj_func*)_add_new_interface,
                        container);
-  
-      /*
+    
+    /*
      * free the container. we've either claimed each ifentry, or released it,
      * so the dal function doesn't need to clear the container.
-       */
+     */
     netsnmp_access_interface_container_free(ifcontainer,
                                             NETSNMP_ACCESS_INTERFACE_FREE_DONT_CLEAR );
-  
-      return MFD_SUCCESS;
-  }
-  
+    
+    return MFD_SUCCESS;
+}
+
 /**
  * check entry for update
  *
@@ -220,10 +220,10 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
     }
     else {
         DEBUGMSGTL(("ifTable:access","updating existing entry\n"));
-  
+        
         netsnmp_assert(strcmp(rowreq_ctx->data.ifName,
                               ifentry->if_name) == 0);
-
+        
         /*
          * Check for changes, then update
          */
@@ -231,7 +231,7 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
            (rowreq_ctx->data.ifOperStatus != ifentry->if_oper_status))
             rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
         netsnmp_access_interface_entry_copy(rowreq_ctx->data.ifentry, ifentry);
-  
+        
         /*
          * remove entry from ifcontainer
          */
@@ -260,13 +260,13 @@ _add_new_interface(netsnmp_interface_entry *ifentry,
     }
     else {
         if(rowreq_ctx) {
-              snmp_log(LOG_ERR, "error setting index while loading "
-                       "ifTable cache.\n");
-              ifTable_release_rowreq_ctx(rowreq_ctx);
-          }
+            snmp_log(LOG_ERR, "error setting index while loading "
+                     "ifTable cache.\n");
+            ifTable_release_rowreq_ctx(rowreq_ctx);
+        }
         else
             netsnmp_access_interface_entry_free(ifentry);
-      }
+    }
 }
 
 /**
