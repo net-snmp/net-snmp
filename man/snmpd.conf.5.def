@@ -1,4 +1,4 @@
-.TH SNMPD.CONF 5 "21 Jun 2001"
+.TH SNMPD.CONF 5 "27 Jun 2001"
 .ds )H U.C. Davis, ECE Dept.
 .ds ]W VVERSIONINFO
 .UC 4
@@ -343,7 +343,7 @@ inform notifications.
 If COMMUNITY is not specified, the string from a preceding \fItrapcommunity\fR
 directive will be used. If PORT is not specified, the well known SNMP trap
 port (162) will be used.
-.IP "trapsess [SNMPCMD ARGS] HOST [COMMUNITY]"
+.IP "trapsess [SNMPCMD_ARGS] HOST [COMMUNITY]"
 This is a more generic trap configuration token that allows any type
 of trap destination to be specified with any version of SNMP.  See the 
 .I snmpcmd(1)
