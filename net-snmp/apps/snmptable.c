@@ -420,7 +420,7 @@ void get_table_entries __P((void))
 	}
       }
     } else if (status == STAT_TIMEOUT){
-      fprintf(stderr, "No Response from %s\n", session.peername);
+      fprintf(stderr, "Timeout: No Response from %s\n", session.peername);
       running = 0;
     } else {    /* status == STAT_ERROR */
       snmp_perror("snmptable");

@@ -588,7 +588,7 @@ char **argv;
       }
 	    
     } else if (status == STAT_TIMEOUT){
-      fprintf(stderr, "No Response from %s\n", gateway);
+      fprintf(stderr, "Timeout: No Response from %s\n", gateway);
       response = 0;
       break;
     } else {    /* status == STAT_ERROR */

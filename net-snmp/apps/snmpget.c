@@ -163,7 +163,7 @@ retry:
           goto retry;
       }
     } else if (status == STAT_TIMEOUT){
-	fprintf(stderr,"No Response from %s.\n", session.peername);
+	fprintf(stderr,"Timeout: No Response from %s.\n", session.peername);
 	snmp_close(ss);
 	SOCK_CLEANUP;
 	exit(1);
