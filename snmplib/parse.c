@@ -2409,7 +2409,7 @@ read_module_internal (const char *name)
 		return MODULE_ALREADY_LOADED;
 	    }
 	    if ((fp = fopen(mp->file, "r")) == NULL) {
-		log_perror(mp->file);
+		snmp_log_perror(mp->file);
 		return MODULE_LOAD_FAILED;
 	    }
 	    mp->no_imports=0;		/* Note that we've read the file */
@@ -2946,7 +2946,7 @@ add_mibdir(const char *dirname)
                 } else {
                     /* which module is this */
                     if ((fp = fopen(tmpstr, "r")) == NULL) {
-                        log_perror(tmpstr);
+                        snmp_log_perror(tmpstr);
 			continue;
                     }
                     DEBUGMSGTL(("parse-mibs", "Checking file: %s...\n", tmpstr));
@@ -2980,7 +2980,7 @@ read_mib(const char *filename)
 
     fp = fopen(filename, "r");
     if (fp == NULL) {
-        log_perror(filename);
+        snmp_log_perror(filename);
         return NULL;
     }
     Line = 1;

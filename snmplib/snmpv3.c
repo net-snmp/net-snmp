@@ -210,7 +210,7 @@ setup_engineID(u_char **eidp, const char *text)
    * Allocate memory and store enterprise ID.
    */
   if ((bufp = (u_char *) malloc(len)) == NULL) {
-    log_perror("setup_engineID malloc");
+    snmp_log_perror("setup_engineID malloc");
     return -1;
   }
 

@@ -263,7 +263,7 @@ var_tcp(struct variable *vp,
 	 */
 
     if (sysmp (MP_SAGET, MPSA_TCPIPSTATS, &tcpipstats, sizeof tcpipstats) == -1) {
-	log_perror ("sysmp(MP_SAGET)(MPSA_TCPIPSTATS)");
+	snmp_log_perror ("sysmp(MP_SAGET)(MPSA_TCPIPSTATS)");
     }
 #define tcpstat tcpipstats.tcpstat
 
@@ -880,7 +880,7 @@ Again:	/*
 		next = inpcb.INP_NEXT_SYMBOL;
 
 		if((klookup((unsigned long)next, (char *)&inpcb, sizeof (inpcb)) == 0)) {
-		    log_perror("TCP_Count_Connections - inpcb");
+		    snmp_log_perror("TCP_Count_Connections - inpcb");
 		    break;
 		}
 #if !(defined(freebsd2) || defined(netbsd1) || defined(openbsd2))
@@ -896,7 +896,7 @@ Again:	/*
 			continue;
 		}
 		if(klookup((unsigned long)inpcb.inp_ppcb, (char *)&tcpcb, sizeof (tcpcb)) == 0) {
-		    log_perror("TCP_Count_Connections - tcpcb");
+		    snmp_log_perror("TCP_Count_Connections - tcpcb");
 		    break;
 		}
 

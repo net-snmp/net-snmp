@@ -68,7 +68,7 @@
 #ifdef USING_UCD_SNMP_ERRORMIB_MODULE
 #include "ucd-snmp/errormib.h"
 #else
-#define setPerrorstatus(x) log_perror(x)
+#define setPerrorstatus(x) snmp_log_perror(x)
 #endif
 #include "read_config.h"
 #include "mib_module_config.h"
@@ -203,7 +203,7 @@ int get_exec_output(struct extensible *ex)
         *(aptr++) = NULL;
         copy_word(ex->command,ctmp);
         execv(ctmp,argv);
-        log_perror(ctmp);
+        snmp_log_perror(ctmp);
         exit(1);
       }
     else
@@ -332,7 +332,7 @@ int get_exec_pipes(char *cmd,
       *(aptr++) = NULL;
       copy_word(cmd,ctmp);
       execv(ctmp,argv);
-      log_perror("execv");
+      snmp_log_perror("execv");
       exit(1);
     }
   else

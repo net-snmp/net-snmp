@@ -269,7 +269,7 @@ void wait_for_period(int period)
     case -1:
       /* FALLTHRU */
     default:
-      log_perror("select");
+      snmp_log_perror("select");
       break;
     }
   }

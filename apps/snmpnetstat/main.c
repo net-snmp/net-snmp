@@ -290,7 +290,6 @@ int main(int argc, char *argv[])
     }
     
     snmp_sess_init(&session);
-    enable_stderrlog();
     session.peername = hostname;
     session.remote_port = dest_port;
     if (version == SNMP_VERSION_1 || version == SNMP_VERSION_2c){
