@@ -41,15 +41,15 @@
 @    include m2c_setup_table.m2i@
 
 /* PUBLIC interface initialization routine */
-void _${table}_initialize_interface(${context}_registration_ptr user_ctx,
+void _${context}_initialize_interface(${context}_registration_ptr user_ctx,
                                     u_long flags);
 
 @if $m2c_data_allocate == 1@
-    ${context}_rowreq_ctx * ${table}_allocate_rowreq_ctx(${context}_data *);
+    ${context}_rowreq_ctx * ${context}_allocate_rowreq_ctx(${context}_data *);
 @else@
-    ${context}_rowreq_ctx * ${table}_allocate_rowreq_ctx(void);
+    ${context}_rowreq_ctx * ${context}_allocate_rowreq_ctx(void);
 @end@
-void ${table}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx);
+void ${context}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx);
 @    if ("$m2c_data_context" eq "generated") && ($m2c_data_allocate == 1)@
 static ${context}_data *${context}_allocate_data(void);
 @   end@
@@ -102,7 +102,7 @@ typedef struct ${context}_interface_ctx_s {
 
 static ${context}_interface_ctx ${context}_if_ctx;
 
-static void _${table}_container_init(
+static void _${context}_container_init(
     ${context}_interface_ctx *if_ctx);
 
 
@@ -133,11 +133,11 @@ NETSNMP_STATIC_INLINE int _${context}_check_indexes(${context}_rowreq_ctx * rowr
 
 /**
  * @internal
- * Initialize the table $table 
+ * Initialize the table $context 
  *    (Define its contents and how it's structured)
  */
 void
-_${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flags)
+_${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flags)
 {
     netsnmp_baby_steps_access_methods *access_multiplexer =
         &${context}_if_ctx.access_multiplexer;
@@ -146,7 +146,7 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
     netsnmp_mib_handler *handler;
     int    mfd_modes;
 
-    DEBUGMSGTL(("internal:_${table}_initialize_interface","called\n"));
+    DEBUGMSGTL(("internal:_${context}_initialize_interface","called\n"));
 
 
     /*************************************************
@@ -164,8 +164,8 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
 
     /*  Define the minimum and maximum accessible columns.  This
         optimizes retrival. */
-    tbl_info->min_column = $table.uc_MIN_COL;
-    tbl_info->max_column = $table.uc_MAX_COL;
+    tbl_info->min_column = $context.uc_MIN_COL;
+    tbl_info->max_column = $context.uc_MAX_COL;
 
     /*
      * save users context
@@ -175,9 +175,9 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
     /*
      * set up the container
      */
-    _${table}_container_init(&${context}_if_ctx);
+    _${context}_container_init(&${context}_if_ctx);
     if (NULL == ${context}_if_ctx.container) {
-        snmp_log(LOG_ERR,"could not initialize container for ${table}\n");
+        snmp_log(LOG_ERR,"could not initialize container for ${context}\n");
         return;
     }
     
@@ -193,19 +193,19 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
     /*
      * REQUIRED wrappers for set request handling
      */
-    access_multiplexer->object_syntax_checks = _mfd_${table}_check_objects;
-    access_multiplexer->undo_setup = _mfd_${table}_undo_setup;
-    access_multiplexer->set_values = _mfd_${table}_set_values;
-    access_multiplexer->undo_sets = _mfd_${table}_undo_values;
+    access_multiplexer->object_syntax_checks = _mfd_${context}_check_objects;
+    access_multiplexer->undo_setup = _mfd_${context}_undo_setup;
+    access_multiplexer->set_values = _mfd_${context}_set_values;
+    access_multiplexer->undo_sets = _mfd_${context}_undo_values;
 
     /*
      * no wrappers yet
      */
-    access_multiplexer->pre_request = _mfd_${table}_pre_request;
-    access_multiplexer->post_request = _mfd_${table}_post_request;
-    access_multiplexer->commit = _mfd_${table}_commit;
+    access_multiplexer->pre_request = _mfd_${context}_pre_request;
+    access_multiplexer->post_request = _mfd_${context}_post_request;
+    access_multiplexer->commit = _mfd_${context}_commit;
 @   if $m2c_irreversible_commit == 1@
-    access_multiplexer->irreversible_commit = _mfd_${table}_irreversible_commit;
+    access_multiplexer->irreversible_commit = _mfd_${context}_irreversible_commit;
 @   end@
 ##
 @      if $m2c_table_dependencies == 1@
@@ -213,7 +213,7 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
     /*
      * REQUIRED for tables with dependencies
      */
-    access_multiplexer->consistency_checks = _mfd_${table}_check_dependencies;
+    access_multiplexer->consistency_checks = _mfd_${context}_check_dependencies;
 @      end@
 @   end@ # writable
 
@@ -221,8 +221,8 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
      *
      * Create a registration, save our reg data, register table.
      */
-    DEBUGMSGTL(("$name:init_$table",
-                "Registering $table as a mibs-for-dummies table.\n"));		 
+    DEBUGMSGTL(("$name:init_$context",
+                "Registering $context as a mibs-for-dummies table.\n"));		 
     handler = netsnmp_baby_steps_access_multiplexer_get(access_multiplexer);
     reginfo = netsnmp_handler_registration_create("${context}", handler,
                                                   ${context}_oid,
@@ -324,14 +324,14 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
  */
 ${context}_rowreq_ctx *
 @if $m2c_data_allocate == 1@
-${table}_allocate_rowreq_ctx(${context}_data *data)
+${context}_allocate_rowreq_ctx(${context}_data *data)
 @else@
-${table}_allocate_rowreq_ctx(void)
+${context}_allocate_rowreq_ctx(void)
 @end@
 {
     ${context}_rowreq_ctx *rowreq_ctx = SNMP_MALLOC_TYPEDEF(${context}_rowreq_ctx);
 
-    DEBUGMSGTL(("internal:${table}_allocate_rowreq_ctx","called\n"));
+    DEBUGMSGTL(("internal:${context}_allocate_rowreq_ctx","called\n"));
 
     if(NULL == rowreq_ctx) {
         snmp_log(LOG_ERR,"Couldn't allocate memory for a "
@@ -341,7 +341,7 @@ ${table}_allocate_rowreq_ctx(void)
     else {
         if(NULL != data)
             rowreq_ctx->data = data;
-        else if (NULL == (rowreq_ctx->data = ${table}_allocate_data())) {
+        else if (NULL == (rowreq_ctx->data = ${context}_allocate_data())) {
             SNMP_FREE(rowreq_ctx);
             return NULL;
         }
@@ -359,7 +359,7 @@ ${table}_allocate_rowreq_ctx(void)
 
 @if $m2c_data_init == 1@
     if(SNMPERR_SUCCESS != ${context}_rowreq_ctx_init(rowreq_ctx)) {
-       ${table}_release_rowreq_ctx(if_ctx, rowreq_ctx);
+       ${context}_release_rowreq_ctx(if_ctx, rowreq_ctx);
        rowreq_ctx = NULL;
     }
 @end@
@@ -372,9 +372,9 @@ ${table}_allocate_rowreq_ctx(void)
  * release resources for a ${context}_rowreq_ctx
  */
 void
-${table}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx)
+${context}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx)
 {
-    DEBUGMSGTL(("internal:${table}_release_rowreq_ctx","called\n"));
+    DEBUGMSGTL(("internal:${context}_release_rowreq_ctx","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
     
@@ -384,11 +384,11 @@ ${table}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx)
 
 @if $m2c_data_allocate == 1@
     if(rowreq_ctx->data)
-        ${table}_release_data(rowreq_ctx->data);
+        ${context}_release_data(rowreq_ctx->data);
  
 @   if $m2c_table_settable@
      if(rowreq_ctx->undo) 
-         ${table}_release_data(rowreq_ctx->undo);
+         ${context}_release_data(rowreq_ctx->undo);
 @   end@
 @end@ 
 
@@ -505,11 +505,10 @@ _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
         }
 @   end@ // row creation
     }
-@   if $m2c_data_transient != 0@ #
     else {
         ${context}_row_prep(rowreq_ctx);
     }
-@   end@
+
     return MFD_SUCCESS;
 }
 
@@ -584,7 +583,7 @@ rc = ${node}_get(rowreq_ctx, $m2c_node_var_ref );
 ########################################################################
 ##
 int
-_mfd_${table}_get_values(netsnmp_mib_handler *handler,
+_mfd_${context}_get_values(netsnmp_mib_handler *handler,
                          netsnmp_handler_registration *reginfo,
                          netsnmp_agent_request_info *agtreq_info,
                          netsnmp_request_info *requests)
@@ -596,7 +595,7 @@ _mfd_${table}_get_values(netsnmp_mib_handler *handler,
     void                      (*dataFreeHook)(void *);
     int                        rc;
 
-    DEBUGMSGTL(("internal:_mfd_${table}_get_values","called\n"));
+    DEBUGMSGTL(("internal:_mfd_${context}_get_values","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
     
@@ -622,7 +621,7 @@ _mfd_${table}_get_values(netsnmp_mib_handler *handler,
         if(NULL == tri)
             continue;
         
-        rc = _${table}_get_column(rowreq_ctx, requests->requestvb, tri->colnum);
+        rc = _${context}_get_column(rowreq_ctx, requests->requestvb, tri->colnum);
         if(rc) {
             if(MFD_SKIP == rc) {
                 requests->requestvb->type = ASN_PRIV_RETRY;
@@ -746,7 +745,7 @@ _mfd_${context}_check_objects(netsnmp_mib_handler *handler,
         if(NULL == tri)
             continue;
 
-        rc = _${table}_check_column(rowreq_ctx, requests->requestvb, tri->colnum);
+        rc = _${context}_check_column(rowreq_ctx, requests->requestvb, tri->colnum);
         if(rc) {
             netsnmp_request_set_error(requests, rc);
             break;
@@ -782,7 +781,7 @@ _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
 @      include m2c_setup_node.m2i@
 
     /* (INDEX) $m2c_node_summary */
-    rc = ${table}_${node}_check_index( rowreq_ctx );
+    rc = ${context}_${node}_check_index( rowreq_ctx );
     if(MFD_SUCCESS != rc)
         return SNMP_ERR_NOCREATION;
 @   end@ # for each nonindex
@@ -940,6 +939,7 @@ _${context}_set_column( ${context}_rowreq_ctx *rowreq_ctx,
 @   end@ # for each column
 
     }
+        
 
     return rc;
 }
@@ -947,7 +947,7 @@ _${context}_set_column( ${context}_rowreq_ctx *rowreq_ctx,
 ########################################################################
 ##
 int
-_mfd_${table}_set_values(netsnmp_mib_handler *handler,
+_mfd_${context}_set_values(netsnmp_mib_handler *handler,
                          netsnmp_handler_registration *reginfo,
                          netsnmp_agent_request_info *agtreq_info,
                          netsnmp_request_info *requests)
@@ -957,7 +957,7 @@ _mfd_${table}_set_values(netsnmp_mib_handler *handler,
     netsnmp_table_request_info * tri;
     int                          rc = SNMP_ERR_NOERROR;
 
-    DEBUGMSGTL(("internal:_mfd_${table}_set_values","called\n"));
+    DEBUGMSGTL(("internal:_mfd_${context}_set_values","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
     
@@ -969,7 +969,10 @@ _mfd_${table}_set_values(netsnmp_mib_handler *handler,
         if(NULL == tri)
             continue;
         
-        _${table}_set_column(rowreq_ctx, requests->requestvb, tri->colnum);
+        rc = _${context}_set_column(rowreq_ctx,
+                                    requests->requestvb, tri->colnum);
+        if(MFD_SUCCESS != rc)
+            netsnmp_set_request_error(agtreq_info, requests, rc);
 
     } /* for results */
 
