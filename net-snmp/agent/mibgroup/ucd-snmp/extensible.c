@@ -128,7 +128,7 @@ extern int      numrelocs;      /* ditto */
 extern struct extensible *passthrus;    /* In pass.c */
 extern int      numpassthrus;   /* ditto */
 extern char     sysName[];
-extern struct subtree *subtrees, subtrees_old[];
+extern netsnmp_subtree *subtrees;
 extern struct variable2 extensible_relocatable_variables[];
 extern struct variable2 extensible_passthru_variables[];
 
@@ -549,16 +549,19 @@ var_extensible_relocatable(struct variable *vp,
     return NULL;
 }
 
-struct subtree *
-find_extensible(struct subtree *tp,
-                oid tname[], size_t tnamelen, int exact)
+netsnmp_subtree *
+find_extensible(netsnmp_subtree *tp, oid *tname, size_t tnamelen, int exact)
 {
     size_t          tmp;
     int             i;
     struct extensible *exten = 0;
     struct variable myvp;
     oid             name[MAX_OID_LEN];
-    static struct subtree mysubtree[2];
+    static netsnmp_subtree mysubtree[2] =
+	{ { NULL, 0, NULL, 0, NULL, 0, NULL, 0, 0, NULL, NULL, 0, 0, 0,
+	    NULL, NULL, NULL, 0, 0, NULL, 0, 0 },
+	  { NULL, 0, NULL, 0, NULL, 0, NULL, 0, 0, NULL, NULL, 0, 0, 0,
+	    NULL, NULL, NULL, 0, 0, NULL, 0, 0 } };
 
     for (i = 1; i <= (int) numrelocs; i++) {
         exten = get_exten_instance(relocs, i);
@@ -568,22 +571,26 @@ find_extensible(struct subtree *tp,
             myvp.name[exten->miblen] = name[exten->miblen];
             myvp.namelen = exten->miblen + 1;
             tmp = exten->miblen + 1;
-            if (!header_simple_table
-                (&myvp, name, &tmp, -1, NULL, NULL, numrelocs))
+            if (!header_simple_table(&myvp, name, &tmp, -1, 
+				     NULL, NULL, numrelocs)) {
                 break;
+	    }
         }
     }
-    if (i > (int) numrelocs || exten == NULL)
+    if (i > (int)numrelocs || exten == NULL) {
         return (tp);
-    memcpy(mysubtree[0].name, exten->miboid, exten->miblen * sizeof(oid));
+    }
+
+    if (mysubtree[0].name_a != NULL) {
+	free(mysubtree[0].name_a);
+	mysubtree[0].name_a = NULL;
+    }
+    mysubtree[0].name_a  = snmp_duplicate_objid(exten->miboid, exten->miblen);
     mysubtree[0].namelen = exten->miblen;
-    mysubtree[0].variables =
-        (struct variable *) extensible_relocatable_variables;
-    mysubtree[0].variables_len =
-        sizeof(extensible_relocatable_variables) /
+    mysubtree[0].variables = (struct variable *)extensible_relocatable_variables;
+    mysubtree[0].variables_len = sizeof(extensible_relocatable_variables) /
         sizeof(*extensible_relocatable_variables);
-    mysubtree[0].variables_width =
-        sizeof(*extensible_relocatable_variables);
+    mysubtree[0].variables_width = sizeof(*extensible_relocatable_variables);
     mysubtree[1].namelen = 0;
     return (mysubtree);
 }
