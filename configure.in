@@ -30,6 +30,50 @@ else
   echo "no"
 fi
 
+dnl
+dnl Do hairy agent module processing.
+dnl
+changequote(, )
+AC_MSG_CHECKING(for mib modules to use)
+mibdir="agent/mibgroup"
+module_list=""
+new_module_list="at interfaces snmp tcp icmp ip system udp $with_mib_modules"
+while test "x$new_module_list" != "x"; do
+  for i in $new_module_list
+    do
+    if test -f $mibdir/$i.h -a -f $mibdir/$i.c; then
+      new_list=`grep config_require $mibdir/$i.h | sed 's/.*config_require(\(.*\)).*/\1/'`
+      if test "x$new_list" != "x"; then
+	for j in $new_list
+	  do
+	  if test ! -f $mibdir/$j.h -o ! -f $mibdir/$j.c; then
+	    AC_MSG_ERROR(mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $mibdir)
+	  fi
+	  
+	  if echo "$module_list $new_module_list" | grep $j > /dev/null; then
+	    :
+	  else
+	    new_list_two="$new_list_two $j"
+	  fi
+	done
+      fi
+    else
+      AC_MSG_ERROR(module files $i.h or $i.c could not be found in $mibdir)
+    fi
+    module_list="$module_list $i"
+  done
+  new_module_list="$new_list_two"
+  new_list_two=""
+done
+
+module_list_o=`echo "$module_list " | sed 's/\([^ ]\) /\1.o /g'`
+module_list_c=`echo "$module_list " | sed 's/\([^ ]\) /\1.c /g'`
+changequote([, ])
+AC_SUBST(module_list_c)
+AC_SUBST(module_list_o)
+
+AC_MSG_RESULT($module_list)
+
 dnl Checks for programs.
 AC_CHECK_PROGS(CC,cc gcc c89 shlicc2,cc)
 AC_PROG_CC
@@ -67,7 +111,7 @@ if test "x$GCC" != "xyes"; then
   esac
 fi
 
-AC_SUBST(EXTRACPPFLAGS,$EXTRACPPFLAGS)
+AC_SUBST(EXTRACPPFLAGS)
 AC_MSG_RESULT($EXTRACPPFLAGS)
 
 dnl Set SNMPLIBPATH and SNMPPATH

@@ -671,6 +671,9 @@
 /* Watch out for compilers that don't handle void properly. */
 #undef void
 
+/* Not-to-be-compiled macros for use by configure only */
+#define config_require(x)
+
 #ifndef DONT_INC_STRUCTS
 #include "agent/extensible/struct.h"
 #endif
