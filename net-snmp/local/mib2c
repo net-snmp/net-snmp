@@ -170,6 +170,7 @@ $fh->close;
 if (!$noindent) {
   foreach $i (keys(%written)) {
     next if ($i eq "-");
+    next if (!($i =~ /\.[ch]$/));
     print STDERR "running indent on $i\n" if (!$quiet);
     system("indent -orig -nbc -bap -nut -nfca -T netsnmp_mib_handler -T netsnmp_handler_registration -T netsnmp_delegated_cache -T netsnmp_mib_handler_methods -T netsnmp_old_api_info -T netsnmp_old_api_cache -T netsnmp_set_info -T netsnmp_request_info -T netsnmp_set_info -T netsnmp_tree_cache -T netsnmp_agent_request_info -T netsnmp_cachemap -T netsnmp_agent_session -T netsnmp_array_group_item -T netsnmp_array_group -T netsnmp_table_array_callbacks -T netsnmp_table_row -T netsnmp_table_data -T netsnmp_table_data_set_storage -T netsnmp_table_data_set -T netsnmp_column_info -T netsnmp_table_registration_info -T netsnmp_table_request_info -T netsnmp_iterator_info -T netsnmp_data_list -T netsnmp_oid_array_header -T netsnmp_oid_array_header_wrapper -T netsnmp_oid_stash_node -T netsnmp_pdu -T netsnmp_request_list -T netsnmp_callback_pass -T netsnmp_callback_info -T netsnmp_transport -T netsnmp_transport_list -T netsnmp_tdomain $i");
   }
@@ -491,7 +492,11 @@ sub process {
             return "end";
           }
 	} elsif (/\@\s*els(e|if).*\@/) { #                         ELSE/ELSEIF
-	    die "unexpected else or elsif\n" if ($elseok != 1);
+          if ($elseok != 1) {
+            chop $_;
+            warn "$currentfile:$currentline [$_]\n";
+            die "unexpected else or elsif\n";
+          }
 	    skippart();
             $currentlevel--;
             return "else";
