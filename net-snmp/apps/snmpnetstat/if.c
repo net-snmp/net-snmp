@@ -228,7 +228,13 @@ intpr(int interval)
 		*ifentry = OUTQLEN;
 		snmp_add_null_var (request, varname, varname_len);
 
-		status = snmp_synch_response (Session, request, &response);
+		while ((status = snmp_synch_response (Session, request, &response)) == STAT_SUCCESS) {
+		    if (response->errstat != SNMP_ERR_NOSUCHNAME)
+			break;
+		    if ((request = snmp_fix_pdu(response, SNMP_MSG_GET)) == NULL)
+			break;
+		    snmp_free_pdu(response);
+		}
 		if (status != STAT_SUCCESS || response->errstat != SNMP_ERR_NOERROR) {
 		    fprintf (stderr, "SNMP request failed after %d out of %d interfaces (IF)\n", ifnum, cfg_nnets);
 		    cfg_nnets = ifnum;
@@ -236,9 +242,9 @@ intpr(int interval)
 		}
 		cur_if = if_table + ifnum - 1;
 		for (var = response->variables; var; var = var->next_variable) {
-                  if (snmp_get_do_debugging()) {
-		    print_variable (var->name, var->name_length, var);
-                  }
+		    if (snmp_get_do_debugging()) {
+			print_variable (var->name, var->name_length, var);
+		    }
 		    if (var->val.integer)
 		    switch (var->name [9]) {
 		    case OUTQLEN:
@@ -282,7 +288,7 @@ intpr(int interval)
 		}
 	}
 
-	printf("%*.*s %5.5s %*.*s %*.*s %9.9s %5.5s %9.9s %5.5s %5.5s",
+	printf("%*.*s %5.5s %*.*s %*.*s %10.10s %5.5s %10.10s %5.5s %5.5s",
 		-max_name, max_name, "Name", "Mtu",
 		-max_route, max_route, "Network",
 		-max_ip, max_ip, "Address", "Ipkts", "Ierrs",
@@ -293,7 +299,7 @@ intpr(int interval)
 		printf("%-*.*s %5d ", max_name, max_name, cur_if->name, cur_if->mtu);
 		printf("%-*.*s ", max_route, max_route, cur_if->route);
 		printf("%-*.*s ", max_ip, max_ip, cur_if->ip);
-		printf("%9d %5d %9d %5d %5d",
+		printf("%10d %5d %10d %5d %5d",
 		    cur_if->ipkts, cur_if->ierrs,
 		    cur_if->opkts, cur_if->oerrs,
 		    cur_if->outqueue);
@@ -409,7 +415,13 @@ intpro(int interval)
 		*ifentry = OUTOCTETS;
 		snmp_add_null_var (request, varname, varname_len);
 
-		status = snmp_synch_response (Session, request, &response);
+		while ((status = snmp_synch_response (Session, request, &response)) == STAT_SUCCESS) {
+		    if (response->errstat != SNMP_ERR_NOSUCHNAME)
+			break;
+		    if ((request = snmp_fix_pdu(response, SNMP_MSG_GET)) == NULL)
+			break;
+		    snmp_free_pdu(response);
+		}
 		if (status != STAT_SUCCESS || response->errstat != SNMP_ERR_NOERROR) {
 		    fprintf (stderr, "SNMP request failed for interface %d, variable %ld out of %d interfaces (IF)\n", ifnum, response->errindex, cfg_nnets);
 		    cfg_nnets = ifnum;
@@ -417,9 +429,9 @@ intpro(int interval)
 		}
 		cur_if = if_table + ifnum - 1;
 		for (var = response->variables; var; var = var->next_variable) {
-                  if (snmp_get_do_debugging()) {
-		    print_variable (var->name, var->name_length, var);
-                  }
+		    if (snmp_get_do_debugging()) {
+			print_variable (var->name, var->name_length, var);
+		    }
 		    switch (var->name [9]) {
 		    case OUTQLEN:
 			cur_if->outqueue = *var->val.integer; break;
@@ -622,9 +634,9 @@ sidewaysintpr(unsigned int interval)
 	timerSet(interval);
 
 banner:
-	printf("    input   %-6.6s    output       ", interesting->ift_name);
+	printf("     input   %-6.6s     output       ", interesting->ift_name);
 	if (lastif - iftot > 0)
-		printf("     input  (Total)    output");
+		printf("                 input  (Total)     output");
 	for (ip = iftot; ip < iftot + MAXIF; ip++) {
 		ip->ift_ip = 0;
 		ip->ift_ie = 0;
@@ -633,10 +645,10 @@ banner:
 		ip->ift_co = 0;
 	}
 	putchar('\n');
-	printf("%8.8s %5.5s %8.8s %5.5s %5.5s ",
+	printf("%10.10s %8.8s %10.10s %8.8s %8.8s ",
 		"packets", "errs", "packets", "errs", "colls");
 	if (lastif - iftot > 0)
-		printf("%8.8s %5.5s %8.8s %5.5s %5.5s ",
+		printf("%10.10s %8.8s %10.10s %8.8s %8.8s ",
 			"packets", "errs", "packets", "errs", "colls");
 	putchar('\n');
 	fflush(stdout);
@@ -692,7 +704,7 @@ loop:
 		}
 
 		if (ip == interesting)
-			printf("%8d %5d %8d %5d %5d ",
+			printf("%10d %8d %10d %8d %8d ",
 				now->ift_ip - ip->ift_ip,
 				now->ift_ie - ip->ift_ie,
 				now->ift_op - ip->ift_op,
@@ -710,7 +722,7 @@ loop:
 		sum->ift_co += ip->ift_co;
 	}
 	if (lastif - iftot > 0)
-		printf("%8d %5d %8d %5d %5d ",
+		printf("%10d %8d %10d %8d %8d ",
 			sum->ift_ip - total->ift_ip,
 			sum->ift_ie - total->ift_ie,
 			sum->ift_op - total->ift_op,
