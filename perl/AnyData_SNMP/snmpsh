@@ -37,6 +37,14 @@ $AnyData::Storage::SNMP::debugre = $opts{'R'} if ($opts{'R'});
     || die "\tConnection problem: $DBI::errstr\n";
 $AnyData::Storage::SNMP::debugre = $opts{'R'} if ($opts{'R'});
 
+if (-f "$ENV{'HOME'}/.snmpshrc") {
+    open(I, "$ENV{'HOME'}/.snmpshrc");
+    while(<I>) {
+	doit($_);
+    }
+    close(I);
+}
+
 if ($#ARGV >= 0) {
     # command line command
     if ($ARGV[0] =~ /(select|delete|update|insert)/) {
@@ -54,10 +62,52 @@ if ($#ARGV >= 0) {
 }
 
 sub doit {
-    my $select = shift;
-    $sth = $dbh->prepare($select);
+    my $stmt = shift;
+    my ($name, $args) = ($stmt =~ /^(\w+)\s*(.*)$/);
+
+    #eval
+    if ($name eq "eval") {
+	$stmt =~ s/^eval//;
+	eval $stmt;
+	return;
+    }
+
+    #define alias
+    if ($name eq "alias") {
+	$stmt =~ s/^alias\s+//;
+	if ($args eq "") {
+	    foreach $i (sort keys(%aliases)) {
+		print "alias $i $aliases{$i}\n";
+	    }
+	    return;
+	}
+	($name, $args) = ($stmt =~ /^(\w+)\s*(.*)$/);
+	if ($args eq "") {
+	    if (exists $aliases{$name}) {
+		print "alias $name $aliases{$name}\n";
+	    } else {
+		print "no alias defined for \"$name\"\n";
+	    }
+	    return;
+	}
+#	print "alias: $name $args\n";
+	$aliases{$name} = $args;
+	return;
+    }
+
+    #eval aliases
+    while (exists $aliases{$name}) {
+#	print "modified: $stmt -> ";
+	my @ARGS = split(/\s+/,$args);
+	$stmt = $aliases{$name};
+#	print "$stmt -> ";
+	$stmt =~ s/\\(\d+)/$ARGS[$1-1]/g;
+#	print "$stmt\n";
+	($name, $args) = ($stmt =~ /^(\w+)\s*(.*)$/);
+    }
+    $sth = $dbh->prepare($stmt);
     $sth->execute();
-    if ($select =~ /^select/) {
+    if ($stmt =~ /^select/) {
 	my $table;
 	while($row = $sth->fetchrow_arrayref) {
 	    if ($opts{'t'}) {
@@ -67,6 +117,7 @@ sub doit {
 		$table->rule('-');
 		$table->head(@{$sth->{NAME}});
 		$table->rule('-');
+		$table->row(@$row);
 	    } else {
 		$table->row(@$row);
 	    }

@@ -11,8 +11,14 @@ never have to do this.
 You also need the SQL-Statement module of version 0.2001 or higher.
 
 Install steps:
-  [download, and install the AnyData, and DBI modules]
-  [download, patch, and install the DBD::AnyData modules]
+  [download, and install the AnyData, and DBI modules from:
+     http://www.vpservices.com/jeff/programs/AnyData/]
+  [download, and install the SQL-Statement modules from:
+     http://www.vpservices.com/jeff/programs/AnyData/]
+  [download, patch, and install the 0.05 DBD::AnyData modules:
+     http://www.vpservices.com/jeff/programs/AnyData/
+     cd DBD-AnyData-0.05
+     patch < DBD_AnyData.patch]
   perl Makefile.PL
   make
   make install
