@@ -97,6 +97,7 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
 {
     netsnmp_baby_steps_modes *bs_modes;
     int save_mode, i, rc = SNMP_ERR_NOERROR;
+    u_int    mode_flag;
     u_short *mode_map_ptr;
     
     DEBUGMSGTL(("baby_steps", "Got request, mode %s\n",
@@ -220,7 +221,8 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
         /*
          * skip modes the handler didn't register for
          */
-        if(!(mode_map_ptr[i] & bs_modes->registered)) {
+        mode_flag = netsnmp_baby_step_mode2flag( mode_map_ptr[i] );
+        if(!(mode_flag & bs_modes->registered)) {
             DEBUGMSGTL(("baby_steps",
                         "   skipping mode (not registered)\n"));
             continue;
@@ -231,7 +233,7 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
          */
         if((MODE_SET_UNDO == save_mode) &&
            (MODE_BSTEP_UNDO_COMMIT== mode_map_ptr[i]) &&
-           !(MODE_BSTEP_COMMIT & bs_modes->completed)) {
+           !(BABY_STEP_COMMIT & bs_modes->completed)) {
             DEBUGMSGTL(("baby_steps",
                         "   skipping commit undo (no previous commit)\n"));
             continue;
@@ -252,7 +254,7 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
             else
                 reqinfo->next_mode_ok = mode_map_ptr[i+1];
         }
-        bs_modes->completed |= reqinfo->mode;
+        bs_modes->completed |= mode_flag;
         rc = netsnmp_call_next_handler(handler, reginfo, reqinfo,
                                        requests);
 
@@ -449,4 +451,44 @@ _baby_steps_access_multiplexer(netsnmp_mib_handler *handler,
      */
 
     return rc;
+}
+
+/*
+ * give a baby step mode, return the flag for that mode
+ */
+int
+netsnmp_baby_step_mode2flag( u_int mode )
+{
+    switch( mode ) {
+        case MODE_BSTEP_OBJECT_LOOKUP:
+            return BABY_STEP_OBJECT_LOOKUP;
+        case MODE_BSTEP_SET_VALUE:
+            return BABY_STEP_SET_VALUE;
+        case MODE_BSTEP_IRREVERSIBLE_COMMIT:
+            return BABY_STEP_IRREVERSIBLE_COMMIT;
+        case MODE_BSTEP_CHECK_VALUE:
+            return BABY_STEP_CHECK_VALUE;
+        case MODE_BSTEP_PRE_REQUEST:
+            return BABY_STEP_PRE_REQUEST;
+        case MODE_BSTEP_POST_REQUEST:
+            return BABY_STEP_POST_REQUEST;
+        case MODE_BSTEP_UNDO_SETUP:
+            return BABY_STEP_UNDO_SETUP;
+        case MODE_BSTEP_UNDO_CLEANUP:
+            return BABY_STEP_UNDO_CLEANUP;
+        case MODE_BSTEP_UNDO_SET:
+            return BABY_STEP_UNDO_SET;
+        case MODE_BSTEP_ROW_CREATE:
+            return BABY_STEP_ROW_CREATE;
+        case MODE_BSTEP_CHECK_CONSISTENCY:
+            return BABY_STEP_CHECK_CONSISTENCY;
+        case MODE_BSTEP_COMMIT:
+            return BABY_STEP_COMMIT;
+        case MODE_BSTEP_UNDO_COMMIT:
+            return BABY_STEP_UNDO_COMMIT;
+        default:
+            netsnmp_assert("unknown flag");
+            break;
+    }
+    return 0;
 }
