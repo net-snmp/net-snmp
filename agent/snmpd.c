@@ -297,7 +297,7 @@ usage(char *prog)
 #ifdef WIN32SERVICE
     printf("  -register\t\tregister as a Windows service\n");
     printf("  \t\t\t  (followed by the startup parameter list)\n");
-    printf("  \t\t\t  Note that not all parameters are relevant when running as a service\n");
+    printf("  \t\t\t  Note that some parameters are not relevant when running as a service\n");
 #endif
 #if HAVE_UNISTD_H
     printf("  -u UID\t\tchange to this uid (numeric or textual) after\n"
@@ -426,7 +426,7 @@ setup_log(int restart, int dont_zero, int stderr_log, int syslog_log,
 
 /*******************************************************************-o-******
  * main - Non Windows
- * SnmpDeamonMain - Windows to support windows serivce
+ * SnmpDaemonMain - Windows to support windows service
  *
  * Parameters:
  *	 argc
@@ -1306,8 +1306,8 @@ snmp_input(int op,
 * main function for Windows
 * Parse command line arguments for startup options,
 * to start as service or console mode application in windows.
-* Invokes appropriate startup funcitons depending on the 
-* parameters passesd
+* Invokes appropriate startup functions depending on the 
+* parameters passed
 *************************************************************/
 int
     __cdecl
@@ -1361,10 +1361,7 @@ _tmain(int argc, TCHAR * argv[])
         break;
     default:
         /*
-         * Run Net-Snmpd in console mode 
-         */
-        /*
-         * Invoke SnmpDeamonMain with input arguments 
+         * Run in console mode 
          */
         return SnmpDaemonMain(argc, argv);
         break;
@@ -1372,7 +1369,7 @@ _tmain(int argc, TCHAR * argv[])
 }
 
 /*
- * To stop Snmp Agent deamon 
+ * To stop Snmp Agent daemon
  * This portion is still not working
  */
 void
@@ -1392,4 +1389,4 @@ StopSnmpAgent(void)
     }
 }
 
-#endif/*WIN32SERVICE*/
+#endif /*WIN32SERVICE*/
