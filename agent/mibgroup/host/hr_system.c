@@ -34,12 +34,18 @@
 #include "sys/proc.h"
 #endif
 #if HAVE_UTMPX_H
+#ifndef mingw32
 #include <utmpx.h>
 #else
 #include <utmp.h>
+#endif /* mingw32 */
 #endif
 #include <signal.h>
 #include <errno.h>
+
+#ifdef WIN32
+#include <lm.h>
+#endif
 
 #ifdef linux
 #ifdef HAVE_LINUX_TASKS_H
@@ -588,6 +594,7 @@ static int
 count_users(void)
 {
     int             total = 0;
+#ifndef WIN32
 #if HAVE_UTMPX_H
 #define setutent setutxent
 #define pututline pututxline
@@ -617,6 +624,21 @@ count_users(void)
             ++total;
     }
     endutent();
+#else /* WIN32 */
+   /* 
+    * TODO - Error checking.
+    */
+	LPWKSTA_INFO_102 wkinfo;
+	NET_API_STATUS nstatus;
+	
+	nstatus = NetWkstaGetInfo(NULL, 102, (LPBYTE*)&wkinfo);
+	if (nstatus != NERR_Success) {
+		return 0;
+	}
+	total = (int)wkinfo->wki102_logged_on_users;
+
+	NetApiBufferFree(wkinfo);	
+#endif /* WIN32 */
     return total;
 }
 
