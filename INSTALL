@@ -38,10 +38,11 @@ Note: By default, everything will be installed in /usr/local.
 UCD-SNMP Specific Information
 =============================
 
-As of V3.0.3 the configuration files are now looked for in
-$(prefix)/lib/snmp, where ($prefix) is defined as the value passed to
-the --prefix argument of the configure script, or /usr/local if
-undefined.
+As of V3.3.1 the configuration files are now looked for in
+$(prefix)/share/snmp, where ($prefix) is defined as the value passed
+to the --prefix argument of the configure script, or /usr/local if
+undefined.  In version 3.0.3 till 3.3, the files were kept in
+$(prefix)/lib/snmp
 
 Optional features to pass to configure for ucd-snmp:
 
@@ -56,7 +57,7 @@ Optional features to pass to configure for ucd-snmp:
   --with-security="TYPE"          Default security type to enforce.
                                     (Default: SNMPV1).
   --with-mibdirs="dir1:dir2"     Default directories to look for mibs.
-                                    (Default: PREFIX/lib/snmp/mibs)
+                                    (Default: PREFIX/share/snmp/mibs)
   --with-mibs="item1:item2"      Default mib IDs to load.
                                     (Default: IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:
                                            SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB)

@@ -72,7 +72,7 @@ clean:
 distclean: clean configclean
 
 configclean:
-	rm -f config.cache config.status config.log
+	rm -f config.cache config.status config.log config.h
 	rm -f snmplib/Makefile Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/mibgroup/Makefile local/Makefile
 	rm -f mib_module_config.h agent/mibgroup/mib_module_includes.h agent/mibgroup/mib_module_inits.h agent/mibgroup/mib_module_loads.h
 
