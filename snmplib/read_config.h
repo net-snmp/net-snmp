@@ -35,7 +35,8 @@ void config_perror __P((char *));
 void config_pwarn __P((char *));
 char *skip_white __P((char *));
 char *skip_not_white __P((char *));
-void copy_word __P((char *, char *));
+char *skip_token(char *ptr);
+char *copy_word __P((char *, char *));
 void read_config_with_type __P((char *, char *));
 struct config_line *register_config_handler __P((char *, char *,
                                                  void (*parser)(char *, char *),
@@ -47,5 +48,9 @@ struct config_line *register_premib_handler __P((char *, char *,
                                                  char *));
 void unregister_config_handler __P((char *, char *));
 void read_config_print_usage(char *lead);
+char *read_config_save_octet_string(char *saveto, u_char *str, int len);
+char *read_config_read_octet_string(char *readfrom, u_char **str, int *len);
+char *read_config_read_objid(char *readfrom, oid **objid, int *len);
+char *read_config_save_objid(char *saveto, oid *objid, int len);
 
 #endif /* READ_CONFIG_H */
