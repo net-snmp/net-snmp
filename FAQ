@@ -267,14 +267,13 @@ Does it run on Windows?
 ----------------------
 
   The basic suite should compile and run on Win32 platforms.
-  This includes the library and command-line tools (apart perhaps
-  from 'snmptrapd').
+  This includes the library and command-line tools.
 
-    The basic architecture of the agent builds, but the MIB-II
-  (and other) modules do not (which rather negates the point!).
-  Note that the UCD pass-through extensions do not work under Windows.
+    The basic architecture of the agent builds, including the MIB-II
+  module, but other MIB modules may not.  Note that the UCD
+  pass-through extensions do not work under Windows. 
 
-  Volunteers to assist in implementing Windows versions of these
+  Volunteers to assist in implementing Windows versions of the other
   modules are likely to welcomed with open arms :-)
 
     Further details of Windows support (currently Visual C++ and
