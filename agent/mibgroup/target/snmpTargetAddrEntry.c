@@ -7,7 +7,11 @@
 */
 
 #include <config.h>
+#if HAVE_STRING_H
+#include <string.h>
+#else
 #include <strings.h>
+#endif
 #include <stdlib.h>
 #include <ctype.h>
 
@@ -443,7 +447,7 @@ int snmpTargetAddr_addRowStatus(
 void snmpd_parse_config_targetAddr(token, char_ptr)
      char *token, *char_ptr;
 {
-  char  *cptr = char_ptr, *tcptr, buff[1024];
+  char  *cptr = char_ptr, buff[1024];
   struct targetAddrTable_struct *newEntry;
   int                            i;
 
@@ -503,12 +507,12 @@ void snmpd_parse_config_targetAddr(token, char_ptr)
     snmpTargetAddrTable_dispose(newEntry);
     return;
   }
-  tcptr = buff;
-  tcptr += sprintf(tcptr, "snmp_parse_config_targetAddr, read: %s\n",
+  sprintf(buff, "snmp_parse_config_targetAddr, read: %s\n",
 		   newEntry->name);
-  for(i=0;i<newEntry->tDomainLen;i++)
-    tcptr += sprintf(tcptr, ".%d", (int)newEntry->tDomain[i]);
-  tcptr += sprintf(tcptr, " %s %d %d %s %s %d %d\n",
+  for(i=0;i<newEntry->tDomainLen;i++) {
+    sprintf(&buff[strlen(buff)], ".%d", (int)newEntry->tDomain[i]);
+  }
+  sprintf(&buff[strlen(buff)], " %s %d %d %s %s %d %d\n",
 	  newEntry->tAddress, newEntry->timeout, newEntry->retryCount,
 	  newEntry->tagList,  newEntry->params,  newEntry->storageType, 
 	  newEntry->rowStatus);
@@ -528,7 +532,7 @@ void
 shutdown_snmpTargetAddrEntry(void)
 {
   struct targetAddrTable_struct *curr_struct;
-  char line[1024], *tcptr;
+  char line[1024];
   int  i;
 
   if ( (curr_struct = aAddrTable) != 0) {
@@ -538,17 +542,15 @@ shutdown_snmpTargetAddrEntry(void)
 	   &&
 	   (curr_struct->rowStatus == SNMP_ROW_ACTIVE ||
 	    curr_struct->rowStatus == SNMP_ROW_NOTINSERVICE) ) {
-	tcptr = line;
-	tcptr += sprintf(tcptr, "targetAddr %s ", curr_struct->name);
+	sprintf(line, "targetAddr %s ", curr_struct->name);
 	for(i=0; i < curr_struct->tDomainLen; i++) {
-	  tcptr += sprintf(tcptr, ".%i", (int)curr_struct->tDomain[i]);
+	  sprintf(&line[strlen(line)], ".%i", (int)curr_struct->tDomain[i]);
 	}
-	tcptr += sprintf(tcptr, " %s %i %i \"%s\" %s %i %i", 
+	sprintf(&line[strlen(line)], " %s %i %i \"%s\" %s %i %i", 
 			 curr_struct->tAddress,    curr_struct->timeout, 
 			 curr_struct->retryCount,  curr_struct->tagList,
 			 curr_struct->params,      curr_struct->storageType, 
 			 curr_struct->rowStatus);
-	*tcptr = '\0'; 
 	
 	/* store to file */
 	snmpd_store_config(line);
