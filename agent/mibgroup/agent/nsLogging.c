@@ -276,7 +276,7 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
 				    /* not really, but we need a valid type */
 				    NETSNMP_LOGHANDLER_STDOUT,
 				    *idx->val.integer);
-                    if (logh) {
+                    if (!logh) {
                         netsnmp_set_request_error(reqinfo, request,
                                                   SNMP_ERR_GENERR); /* ??? */
                         return SNMP_ERR_GENERR;
@@ -284,6 +284,7 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
                     idx = idx->next_variable;
 	            logh->type  = 0;
 	            logh->token = strdup(idx->val.string);
+                    netsnmp_insert_iterator_context(request, (void*)logh);
 	            break;
 
                 case RS_DESTROY:
@@ -385,9 +386,6 @@ handle_nsLoggingTable(netsnmp_mib_handler *handler,
         for (request=requests; request; request=request->next) {
             if (requests->processed != 0)
                 continue;
-            if ( request->status != 0 ) {
-                return SNMP_ERR_NOERROR;	/* Already got an error */
-            }
             logh = (netsnmp_log_handler*)netsnmp_extract_iterator_context(request);
             table_info  =                 netsnmp_extract_table_info(request);
 
