@@ -603,7 +603,11 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast) {
     struct stat     sbuf;
     char *ourcopy = strdup(pathname);
     char *entry;
+#ifdef WIN32
+    char buf[MAX_PATH];
+#else
     char buf[MAXPATHLEN];
+#endif
 
     entry = strtok( ourcopy, "/" );
 
@@ -618,7 +622,11 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast) {
         if (stat(buf, &sbuf) < 0) {
             /* DNE, make it */
             snmp_log(LOG_INFO, "Creating directory: %s\n", buf);
+#ifdef WIN32
+	    CreateDirectory(buf, NULL);
+#else
             mkdir(buf, mode);
+#endif
         } else {
             /* exists, is it a file? */
             if ((sbuf.st_mode & S_IFDIR) == 0) {
