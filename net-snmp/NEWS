@@ -1,6 +1,12 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.2*
+ New:
+    snmptrapd:
+      - Embedded perl support for trap handlers (much faster).
+        (configure --with-embedded-perl and run 'perldoc NetSNMP::TrapReceiver')
+
 *5.1*
  New:
 
