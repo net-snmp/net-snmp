@@ -2218,7 +2218,7 @@ asn_rbuild_header (u_char *data,
     char ebuf[128];
     
     data = asn_rbuild_length(data, datalength, length);
-    if (*datalength < 1){
+    if (*datalength < 1 || data == NULL){
 	sprintf(ebuf, "bad header length < 1 :%d, %d", *datalength, length);
 	ERROR_MSG(ebuf);
 	return NULL;
