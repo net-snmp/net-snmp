@@ -46,8 +46,8 @@
  *  of the request before passing it along to the final handler that
  *  returns the real answer.  Most people will want to make use of the
  *  @link instance instance@endlink, @link table table@endlink, @link
- *  table_iterator table_iterator@endlink, @link data_table
- *  data_table@endlink, or @link table_dataset table_dataset@endlink
+ *  table_iterator table_iterator@endlink, @link table_data
+ *  table_data@endlink, or @link table_dataset table_dataset@endlink
  *  helpers to make their life easier.  These "helpers" interpert
  *  important aspects of the request and pass them on to you.
  *
