@@ -616,11 +616,11 @@ sprint_uinteger(char *buf,
 	    break;
 	}
     if (enum_string == NULL)
-	sprintf(buf, "%ld", *var->val.integer);
+	sprintf(buf, "%lu", *var->val.integer);
     else if (quick_print)
 	sprintf(buf, "%s", enum_string);
     else
-	sprintf(buf, "%s(%ld)", enum_string, *var->val.integer);
+	sprintf(buf, "%s(%lu)", enum_string, *var->val.integer);
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
 }
@@ -1746,7 +1746,7 @@ main(int argc, char* argv[])
     oid objid[64];
     int objidlen = sizeof (objid);
     int count;
-    struct variable variable;
+    struct variable_list variable;
 
     init_mib();
     if (argc < 2)
