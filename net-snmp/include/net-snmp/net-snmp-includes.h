@@ -52,10 +52,6 @@
 #include <net-snmp/config_api.h>
 #include <net-snmp/logging_api.h>
 #include <net-snmp/utilities.h>
-
-    /* This is essentially an "internal" API header
-         and is not expected to be used directly
-         in most applications.  */
 #include <net-snmp/snmpv3_api.h>
 
 #endif /* NET_SNMP_INCLUDES_H */
