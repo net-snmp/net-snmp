@@ -166,6 +166,10 @@ sub oidlength {
 #   $var.status        -- node's status
 #   $var.syntax        -- node's syntax
 #   $var.decl          -- C data type
+#   $var.isscalar      -- returns 1 if var contains the name of a scalar
+#   $var.istable       -- returns 1 if var contains the name of a column
+#   $var.parent        -- contains the label of the parent node of $var.
+
 sub process_vars {
     my $it = shift;
 
@@ -181,7 +185,7 @@ sub process_vars {
     $it =~ s/\$(\w+)\.(objectID|label|subID|access|status|syntax)/$SNMP::MIB{$vars{$1}}{$2}/g;
     $it =~ s/\$(\w+)\.(decl)/$perltodecl{$SNMP::MIB{$vars{$1}}{type}}/g;
     $it =~ s/\$(\w+)\.(iscolumn)/($SNMP::MIB{$vars{$1}}{'parent'}{'label'} =~ \/Entry$\/) ? 1 : 0/eg;
-    $it =~ s/\$(\w+)\.(isscalar)/($SNMP::MIB{$vars{$1}}{'parent'}{'label'} !~ \/Entry$\/) ? 1 : 0/eg;
+    $it =~ s/\$(\w+)\.(isscalar)/($SNMP::MIB{$vars{$1}}{'parent'}{'label'} !~ \/Entry$\/ && $SNMP::MIB{$vars{$1}}{access}) ? 1 : 0/eg;
     $it =~ s/\$(\w+)\.(parent)/$SNMP::MIB{$vars{$1}}{'parent'}{'label'}/g;
     # normal variable substitions
     $it =~ s/\$\{(\w+)\}/$vars{$1}/g;
@@ -430,8 +434,22 @@ sub process {
 	    } else {
 		skippart();
 	    }
+	} elsif (/\@\s*prompt\s+\$(\S+)\s*(.*)\@/) {
+	    my ($var, $prompt) = ($1, $2);
+	    if (!$term) {
+		my $haveit = eval { require Term::ReadLine };
+		if ($haveit) {
+		    $term = new Term::ReadLine 'mib2c';
+		}
+	    }
+	    if ($term) {
+		$vars{$var} = $term->readline(process_vars($prompt));
+	    }
 	} else {
 	    die "no output file specified" if (!$out);
+	    if (/\@.*\@/) {
+		warn "The configuration file contained a line with a @@ pair in it which may be a configuration token line mib2c couldn't recognize.";
+	    }
 	    print $out process_vars($_);
 	}
     }
@@ -498,4 +516,19 @@ sub open_conf {
 	exit;
     }
     return $fh;
+}
+
+sub count_scalars {
+    my @k = keys(%scalars);
+    return $#k + 1;
+}
+
+sub count_tables {
+    my @k = keys(%tables);
+    return $#k + 1;
+}
+
+sub count_notifications {
+    my @k = keys(%notifications);
+    return $#k + 1;
 }
