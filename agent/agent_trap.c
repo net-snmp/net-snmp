@@ -78,8 +78,8 @@ extern struct timeval	starttime;
 
 oid objid_enterprisetrap[] = { EXTENSIBLEMIB, 251 };
 oid version_id[]	   = { EXTENSIBLEMIB, AGENTID, OSTYPE };
-int enterprisetrap_len = OID_LENGTH( objid_enterprisetrap );
-int version_id_len     = OID_LENGTH( version_id );
+size_t enterprisetrap_len = OID_LENGTH( objid_enterprisetrap );
+size_t version_id_len     = OID_LENGTH( version_id );
 
 #define SNMPV2_TRAPS_PREFIX	SNMP_OID_SNMPMODULES,1,1,5
 oid  cold_start_oid[] =		{ SNMPV2_TRAPS_PREFIX, 1 };	/* SNMPv2-MIB */
@@ -93,9 +93,9 @@ oid  egp_xxx_oid[] =		{ SNMPV2_TRAPS_PREFIX, 99 };	/* ??? */
 oid  snmptrap_oid[] 	      =	{ SNMPV2_TRAP_OBJS_PREFIX, 1, 0 };
 oid  snmptrapenterprise_oid[] =	{ SNMPV2_TRAP_OBJS_PREFIX, 3, 0 };
 oid  sysuptime_oid[] 	      =	{ SNMP_OID_MIB2,1,3,0 };
-int  snmptrap_oid_len 	      =	OID_LENGTH(snmptrap_oid);
-int  snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
-int  sysuptime_oid_len 	      =	OID_LENGTH(sysuptime_oid);
+size_t  snmptrap_oid_len 	      =	OID_LENGTH(snmptrap_oid);
+size_t  snmptrapenterprise_oid_len = OID_LENGTH(snmptrapenterprise_oid);
+size_t  sysuptime_oid_len 	      =	OID_LENGTH(sysuptime_oid);
 
 
 #define SNMP_AUTHENTICATED_TRAPS_ENABLED	1
