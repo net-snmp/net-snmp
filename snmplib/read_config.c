@@ -843,6 +843,9 @@ read_config_files(int when)
     struct config_line *ltmp;
     struct stat     statbuf;
 
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DONT_PERSIST_STATE)) return;
+
     config_errors = 0;
 
     if (when == PREMIB_CONFIG)
@@ -997,6 +1000,9 @@ read_config_store(const char *type, const char *line)
     mode_t          oldmask;
 #endif
 
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DONT_PERSIST_STATE)) return;
+
     /*
      * store configuration directives in the following order of preference:
      * 1. ENV variable SNMP_PERSISTENT_FILE
@@ -1068,6 +1074,9 @@ snmp_save_persistent(const char *type)
     struct stat     statbuf;
     int             j;
 
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DONT_PERSIST_STATE)) return;
+
     DEBUGMSGTL(("snmp_save_persistent", "saving %s files...\n", type));
     snprintf(file, sizeof(file),
              "%s/%s.conf", get_persistent_directory(), type);
@@ -1126,6 +1135,9 @@ snmp_clean_persistent(const char *type)
     char            file[512];
     struct stat     statbuf;
     int             j;
+
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DONT_PERSIST_STATE)) return;
 
     DEBUGMSGTL(("snmp_clean_persistent", "cleaning %s files...\n", type));
     snprintf(file, sizeof(file),

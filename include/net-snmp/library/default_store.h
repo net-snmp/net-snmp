@@ -9,7 +9,7 @@ extern          "C" {
 #endif
 
 #define NETSNMP_DS_MAX_IDS 3
-#define NETSNMP_DS_MAX_SUBIDS 32        /* needs to be a multiple of 8 */
+#define NETSNMP_DS_MAX_SUBIDS 40        /* needs to be a multiple of 8 */
 
     /*
      * begin storage definitions 
@@ -60,6 +60,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_DONT_PRINT_UNITS    29 /* don't print UNITS suffix */
 #define NETSNMP_DS_LIB_NO_DISPLAY_HINT     30 /* don't apply DISPLAY-HINTs */
 #define NETSNMP_DS_LIB_16BIT_IDS           31   /* restrict requestIDs, etc to 16-bit values */
+#define NETSNMP_DS_LIB_DONT_PERSIST_STATE  32	/* don't save/load any persistant state */
 
     /*
      * library integers 
