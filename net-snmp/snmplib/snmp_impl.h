@@ -124,7 +124,7 @@ struct trapVar {
     struct trapVar *next;  
 };
 
-#ifdef DEBUG
+#ifdef DODEBUG
 #define ERROR(string)	printf("%s(%d): %s\n",__FILE__, __LINE__, string);fflush(stdout);
 #else
 #define ERROR(string)
