@@ -47,6 +47,7 @@
 #endif
 
 #include "asn1.h" 
+#include "system.h"
 #include "snmp_api.h"
 #include "snmp_debug.h"
 #include "snmp_debug.h"
@@ -523,9 +524,6 @@ marker_t atime_newMarker(void)
  */
 void atime_setMarker(marker_t pm)
 {
-  struct timeval tx;
-  time_t tnow;
-
   if (! pm) return;
 
   gettimeofday((struct timeval *)pm, 0);
