@@ -6,7 +6,7 @@ REM
 REM INSTALL_BASE must point to the directory ABOVE the library files.
 REM Generally follows what is the install-net-snmp.bat setting.
 
-set INSTALL_BASE="c:\Program Files\Net-SNMP"
+set INSTALL_BASE="c:\usr"
 
 if "%1" == "-?" goto help
 if "%1" == "/?" goto help

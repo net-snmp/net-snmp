@@ -147,7 +147,7 @@ CONFIGURATION
   All configuration files should be placed in the %SNMPCONFPATH% folder.
 
   Note: All paths in configuration files should use forward slashes (Unix style), 
-  NOT back slashes.  Example: c:/Program Files/net-snmp
+  NOT back slashes.  Example: c:/usr
 
   Included is a Perl script called snmpconf which can be used to create 
   configuration files.  
