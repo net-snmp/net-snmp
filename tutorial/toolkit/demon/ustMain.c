@@ -1,4 +1,7 @@
 #include <ucd-snmp/ucd-snmp-config.h>
+#ifdef HAVE_IN_NETINET_H
+#include <in/netinet.h>
+#endif
 #include <ucd-snmp/ucd-snmp-includes.h>
 #include <ucd-snmp/ucd-snmp-agent-includes.h>
 #include <signal.h>
