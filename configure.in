@@ -1160,7 +1160,7 @@ AC_CHECK_FUNCS(execv system fork getpid strncasecmp sigalrm)
 AC_CHECK_FUNCS(rpmGetPath)
 
 AC_CHECK_FUNCS(getloadavg)
-AC_CHECK_FUNCS(kvm_openfiles nlist)
+AC_CHECK_FUNCS(kvm_openfiles nlist knlist)
 dnl BSDi2 functions differ
 AC_CHECK_FUNCS(statvfs statfs)
 AC_CHECK_FUNCS(getdtablesize)
