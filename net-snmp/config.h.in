@@ -359,6 +359,9 @@
 /* Define if you have the <sys/sockio.h> header file.  */
 #undef HAVE_SYS_SOCKIO_H
 
+/* Define if you have the <sys/stat.h> header file.  */
+#undef HAVE_SYS_STAT_H
+
 /* Define if you have the <sys/statvfs.h> header file.  */
 #undef HAVE_SYS_STATVFS_H
 
@@ -398,6 +401,9 @@
 /* Define if you have the <sys/vmsystm.h> header file.  */
 #undef HAVE_SYS_VMSYSTM_H
 
+/* Define if you have the <sys/vnode.h> header file.  */
+#undef HAVE_SYS_VNODE_H
+
 /* Define if you have the <syslog.h> header file.  */
 #undef HAVE_SYSLOG_H
 
@@ -409,6 +415,12 @@
 
 /* Define if you have the <ufs/ufs/dinode.h> header file.  */
 #undef HAVE_UFS_UFS_DINODE_H
+
+/* Define if you have the <ufs/ufs/inode.h> header file.  */
+#undef HAVE_UFS_UFS_INODE_H
+
+/* Define if you have the <ufs/ufs/quota.h> header file.  */
+#undef HAVE_UFS_UFS_QUOTA_H
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
