@@ -139,25 +139,24 @@ What is it?
 Where can I get it?
 ------------------
 
-WWW:
   Download:
-    - http://www.net-snmp.org/download
+    - http://www.net-snmp.org/download/
+    - ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/ucd-snmp.tar.gz
   Web page:
     - http://www.net-snmp.org/
   Sourceforge Project page:
-    - http://www.net-snmp.org/project
+    - http://www.net-snmp.org/project/
   Mirrors:
     - Bulgaria:  http://rtfm.uni-svishtov.bg/net-snmp/
     - Japan:     ftp://ftp.ayamura.org/pub/net-snmp/
 
-FTP:
-  - ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/ucd-snmp.tar.gz
-  - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
-  - ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
-  - ftp://ftp.win.ne.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
-  - ftp://ftp.chg.ru/pub/networking/management/snmp/ucd-snmp/ucd-snmp.tar.gz
-  - ftp://mirror.aarnet.edu.au/pub/ucd-snmp/ucd-snmp.tar.gz
-  - ftp://archive.logicnet.ro/mirrors/ucd-snmp.ucdavis.edu/
+  Mirrors of the older ucd-snmp.ucdavis.edu site:
+    - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
+    - ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
+    - ftp://ftp.win.ne.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
+    - ftp://ftp.chg.ru/pub/networking/management/snmp/ucd-snmp/ucd-snmp.tar.gz
+    - ftp://mirror.aarnet.edu.au/pub/ucd-snmp/ucd-snmp.tar.gz
+    - ftp://archive.logicnet.ro/mirrors/ucd-snmp.ucdavis.edu/
 
 
 What documentation is available?
