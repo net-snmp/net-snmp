@@ -237,6 +237,17 @@ EXPORTS
 	vacm_scanAccessNext
 	vacm_scanViewInit
 	vacm_scanViewNext
+	snmp_free_varbind
+	snmp_get_dump_packet
+	snmp_get_quick_print
+	snmp_get_random_access
+	snmp_get_suffix_only
+	snmp_set_dump_packet
+	snmp_set_full_objid
+	snmp_set_quick_print
+	snmp_set_random_access
+	snmp_set_suffix_only
+	usm_store_users
 	Mib                     DATA
 	tree_head               DATA
 	snmp_errno              DATA
