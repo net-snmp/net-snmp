@@ -6,32 +6,11 @@
 #
 # CALLS: eval_oneprogram.sh [-h][-lk] <program>
 #
-# SOURCES: TESTCONF.sh
 #
-#
-
-								USAGE_LONG='
-#
-# HOW TO ENTER A NEW TEST
-#
-# Copy the template file (T2.sh) XXX to the tests directory, and have
-# the file begin with a 'T'.  All files in the tests directory
-# begining with a 'T' are assumed to be a test.  See the file for
-# further instructions
-#
-# HOW TESTS ARE RUN AND EVALUATED
-#
-# ...
-# 
-'
 
 #
 # Suggested improvement(s):
 #	Run a given test against a running agent.
-#	Display errors
-#	interactively pick tests to run.
-#	options arguments to pick tests to run.
-#
 #
 # Variables:  (* = exported)
 #  *SNMP_BASEDIR:  	  the source base directory for tests
@@ -41,14 +20,25 @@
 
 # Usage mess.  (No, it works.)
 #
-USAGE="Usage: `basename $0` [-h] [-i] [-v] [-V] [-s] [-T TESTNUMS] [-D bindir] [-S seconds]"
 
 usage() { 
-    echo; 
-    echo $USAGE;
-    #cat <<BLIK | sed 's/^#//' | sed '1d' | $PAGER
-    #$USAGE_LONG
-    #BLIK
+    cat << BLIK
+
+Usage: `basename $0` [-a] [-S SLEEPTIME] [-h] [-i] [-v] [-V] [-s]
+       [-T TESTNUMS] [-D bindir] [-S seconds]"
+
+  -a        run all tests.
+  -T NUMS   run particular tests (command separated list of numbers)
+  -i        run interactively
+  -v        be verbose
+  -V        be very verbose
+  -S TIME   TIME should be used as the timeout when waiting for a
+            response from the agent.
+  -A FLAGS  Extra flags to pass to the agent.
+  -s        Don't erase the runtime data directory for successful tests
+  -x        Turn on SH output debugging for tests.
+
+BLIK
     exit 0
 }
 
