@@ -1417,8 +1417,8 @@ if test "x$embed_perl" = "xyes"; then
     LIBS="$LIBS $perlldopts"
 
     AC_DEFINE(NETSNMP_EMBEDDED_PERL)
-    OTHERAGENTOBJS="snmp_perl.o"
-    LOTHERAGENTOBJS="snmp_perl.lo"
+    OTHERAGENTLIBOBJS="snmp_perl.o"
+    OTHERAGENTLIBLOBJS="snmp_perl.lo"
 fi
 
 dnl reset libs
@@ -2275,8 +2275,8 @@ dnl
 dnl define the agent libraries variable
 dnl
 AC_SUBST(AGENTLIBS)
-AC_SUBST(OTHERLIBAGENTOBJS)
-AC_SUBST(OTHERLIBAGENTLOBJS)
+AC_SUBST(OTHERAGENTLIBOBJS)
+AC_SUBST(OTHERAGENTLIBLOBJS)
 
 dnl
 dnl Prompt for various bits of user information
