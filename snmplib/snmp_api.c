@@ -112,6 +112,7 @@ SOFTWARE.
 #include "default_store.h"
 #include "mt_support.h"
 #include "snmp-tc.h"
+#include "snmp_parse_args.h"
 
 static void _init_snmp (void);
 
@@ -4839,6 +4840,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	     const char *value)
 {
     int result = 0;
+    char *ecp;
     int check = !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
     u_char buf[SPRINT_MAX_LEN];
     size_t tint;
@@ -4862,7 +4864,9 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    result = SNMPERR_VALUE;
 	    goto type_error;
 	}
-        if (sscanf(value, "%ld", &ltmp) != 1) {
+	if (!*value) goto fail;
+        ltmp = strtol(value, &ecp, 10);
+	if (*ecp) {
 	    ep = tp ? tp->enums : NULL;
 	    while (ep) {
 		if (strcmp(value, ep->label) == 0) {
@@ -4900,7 +4904,8 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    result = SNMPERR_VALUE;
 	    goto type_error;
 	}
-        if (sscanf(value, "%lu", &ltmp) == 1)
+        ltmp = strtoul(value, &ecp, 10);
+	if (*value && !*ecp)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED,
 				  (u_char *) &ltmp, sizeof(ltmp));
 	else goto fail;
@@ -4912,7 +4917,8 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    result = SNMPERR_VALUE;
 	    goto type_error;
 	}
-        if (sscanf(value, "%lu", &ltmp) == 1)
+        ltmp = strtoul(value, &ecp, 10);
+	if (*value && !*ecp)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_UINTEGER,
 				  (u_char *) &ltmp, sizeof(ltmp));
 	else goto fail;
@@ -4924,7 +4930,8 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    result = SNMPERR_VALUE;
 	    goto type_error;
 	}
-        if (sscanf(value, "%lu", &ltmp) == 1)
+        ltmp = strtoul(value, &ecp, 10);
+	if (*value && !*ecp)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_COUNTER,
 				  (u_char *) &ltmp, sizeof(ltmp));
 	else goto fail;
@@ -4936,7 +4943,8 @@ snmp_add_var(struct snmp_pdu *pdu,
 	    result = SNMPERR_VALUE;
 	    goto type_error;
 	}
-        if (sscanf(value, "%lu", &ltmp) == 1)
+        ltmp = strtoul(value, &ecp, 10);
+	if (*value && !*ecp)
 	    snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS,
 				  (u_char *) &ltmp, sizeof(long));
 	else goto fail;
@@ -5021,7 +5029,6 @@ snmp_add_var(struct snmp_pdu *pdu,
           for (ep = tp ? tp->enums : NULL; ep; ep = ep->next)
             if (ep->value / 8 >= (int)tint) tint = ep->value / 8 + 1;
 	  for (cp = strtok(lvalue, " \t,"); cp; cp = strtok(NULL, " \t,")) {
-	    char *ecp;
 	    int ix, bit;
 	    ltmp = strtoul(cp, &ecp, 0);
 	    if (*ecp != 0) {
