@@ -38,9 +38,11 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/user.h>
 #include <sys/proc.h>
 #include <sys/types.h>
-/*
-  #include <machine/pte.h>
-  */
+#ifdef mips
+#include <sys/dmap.h>
+#include <machine/pte.h>
+#include <xti.h>
+#endif
 #include <sys/vm.h>
 #include <netinet/in.h>
 #include <syslog.h>
@@ -2532,7 +2534,11 @@ union {
     /*
      *  We don't deal with Zombies and the like...
      */
+#ifdef mips
+    if (proc->p_stat == SZOMB || proc->p_type){
+#else
     if (proc->p_stat == SZOMB || proc->p_flag & (SSYS | SWEXIT)){
+#endif
 	strcpy((char *)buf, "");
 	return strlen(buf);
     }
@@ -2550,11 +2556,16 @@ union {
     /*
      *  Is our target proc in core??
      */
+#ifdef mips
+    if ((proc->p_sched) == 0){
+	lseek(swap, (long)(proc->p_cdmap->dm_ptdaddr), 0);
+#else
     if ((proc->p_flag & SLOAD) == 0){
+	lseek(swap, (long)dtob(proc->p_swaddr), 0);
+#endif
       /*
        *  Not in core -- poke (peek, actually [hopefully]) around swap for u. struct 
        */
-	lseek(swap, (long)dtob(proc->p_swaddr), 0);
 
 	if (read(swap, (char *)user.upages, size) != size) {
 	        ERROR("");
@@ -2688,15 +2699,25 @@ union {
     }
 #endif sunV3
 
+#ifdef mips
+    if ((proc->p_sched) == 0 || argaddr == 0){
+#else
     if ((proc->p_flag & SLOAD) == 0 || argaddr == 0){
-#if !defined(ibm032) || !defined(BSD4_3)
+#endif
+#if defined(mips)
+        vstodb(0, CLSIZE, proc->p_smap, &db, 1);
+#elif !defined(ibm032) || !defined(BSD4_3)
 	vstodb(0, CLSIZE, &u.u_smap, &db, 1);
 #else
-	vstodb(CLSIZE, CLSIZE, &u.u_smap, &db, 1);
+     	vstodb(CLSIZE, CLSIZE, &u.u_smap, &db, 1);
 #endif
 
+#ifdef mips
 	lseek(swap, (long)dtob(db.db_base), 0);
- 	if (read(swap, (char *)&argspac, sizeof(argspac)) != sizeof(argspac)) {
+#else
+	lseek(swap, (long)dtob(db.db_base), 0);
+#endif
+        if (read(swap, (char *)&argspac, sizeof(argspac)) != sizeof(argspac)) {
 	  ERROR("");
 	}
     } else {
@@ -2800,7 +2821,11 @@ vstodb(vsbase, vssize, dmp, dbp, rev)
 	blk = dmmin;
 	vsbase = ctod(vsbase);
 	vssize = ctod(vssize);
+#ifdef mips
+	if (vsbase < 0 || vsbase + vssize > dmp->dm_cnt) {
+#else
 	if (vsbase < 0 || vsbase + vssize > dmp->dm_size) {
+#endif
 	    ERROR("vstodb\n");
 	    return(0);
 	}
