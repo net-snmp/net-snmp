@@ -8,7 +8,7 @@
 
 /* default list of mibs to load */
 
-#define DEFAULT_MIBS "IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB"
+#define DEFAULT_MIBS "IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB"
 
 /* default location to look for mibs to load using the above tokens
    and/or those in the MIBS envrionment variable*/
@@ -803,6 +803,7 @@
 #define config_arch_require(x,y)
 #define config_load_mib(x,y,z)
 #define config_parse_dot_conf(x,y,z)
+#define config_add_mib(x)
   
 #include <mib_module_config.h>
 
