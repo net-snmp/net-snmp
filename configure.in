@@ -12,21 +12,23 @@ if test "x$with_root_access" = "xno"; then
 fi
 
 dnl overflow problems with hpux's sh
+dnl taken from Perl's Configure script 
 
-AC_PATH_PROG(UNAMEPROG,uname)
-
-if test "`$ac_cv_path_UNAMEPROG -s`" = "HP_UX" -a -x /bin/ksh; then
-  (typeset) >/dev/null 2>&1
-  if test $? != 0; then
-    echo feeding configure to /bin/ksh to avoid hpux /bin/sh problems
+echo $ac_n "Checking if I need to feed myself to ksh...  $ac_c"
+if test -f /hp-ux -a -f /bin/ksh; then
+  if (PATH=.; alias -x) >/dev/null 2>&1; then
+    echo "no"
+  else
+    echo "yes"
     if test "x$1" = "x"; then
-      /bin/ksh $0
+      exec /bin/ksh $0
     else
-      /bin/ksh $0 "$@"
+      exec /bin/ksh $0 "$@"
     fi
   fi
+else
+  echo "no"
 fi
-
 
 dnl Checks for programs.
 AC_CHECK_PROGS(CC,cc gcc c89 shlicc2,cc)
@@ -39,6 +41,7 @@ AC_PROG_RANLIB
 AC_PATH_PROG(PSPROG,ps)
 AC_CHECK_PROGS(WHOAMI, whoami logname, whoami)
 AC_CHECK_PROGS(SED,sed gsed)
+AC_PATH_PROG(UNAMEPROG,uname)
 AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG")
 
 AC_AIX
