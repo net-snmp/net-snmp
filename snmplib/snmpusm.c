@@ -1200,9 +1200,9 @@ usm_parse_security_parameters (
 	u_char  *next_ptr;
 	u_char   type_value;
 
-	u_int    octet_string_length = remaining;
-	u_int    sequence_length;
-	u_int    remaining_bytes;
+	size_t   octet_string_length = remaining;
+	size_t   sequence_length;
+	size_t   remaining_bytes;
 
 	long     boots_long;
 	long     time_long;
@@ -1593,15 +1593,15 @@ usm_process_in_msg (
 	size_t  *maxSizeResponse,  /* OUT    - Max size of Response PDU.      */
 	void   **secStateRf)	   /* OUT    - Ref to security state.         */
 {
-	u_int   remaining = wholeMsgLen
+	size_t   remaining = wholeMsgLen
 				- (u_int)
 					((u_long)*secParams-(u_long)*wholeMsg);
 	u_int   boots_uint;
 	u_int   time_uint;
 	u_char  signature[BYTESIZE(USM_MAX_KEYEDHASH_LENGTH)];
-	u_int   signature_length = BYTESIZE(USM_MAX_KEYEDHASH_LENGTH);
+	size_t  signature_length = BYTESIZE(USM_MAX_KEYEDHASH_LENGTH);
 	u_char  salt[BYTESIZE(USM_MAX_SALT_LENGTH)];
-	u_int   salt_length = BYTESIZE(USM_MAX_SALT_LENGTH);
+	size_t  salt_length = BYTESIZE(USM_MAX_SALT_LENGTH);
 	u_char  iv[BYTESIZE(USM_MAX_SALT_LENGTH)];
 	u_int   iv_length = BYTESIZE(USM_MAX_SALT_LENGTH);
 	u_char *data_ptr;
@@ -1955,7 +1955,7 @@ init_usm(void) {
 int
 init_usm_post_config(int majorid, int minorid, void *serverarg,
                      void *clientarg) {
-  u_int	salt_integer_len = sizeof(salt_integer);
+  size_t	salt_integer_len = sizeof(salt_integer);
 
   initialUser = usm_create_initial_user("initial", usmHMACMD5AuthProtocol,
                                         USM_LENGTH_OID_TRANSFORM,

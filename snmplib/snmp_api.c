@@ -3145,7 +3145,8 @@ snmp_sess_read(void *sessp,
     void *magic;
     int ret;
     int new_sd;
-    size_t addrlen, fromlength;
+    int addrlen;
+    int fromlength;
 
     if (!(FD_ISSET(slp->internal->sd, fdset)))
         return;

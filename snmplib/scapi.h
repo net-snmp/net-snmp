@@ -38,13 +38,13 @@ int	sc_init (void);
 int	sc_shutdown (int majorID, int minorID, void *serverarg,
                      void *clientarg);
 
-int	sc_random (	u_char *buf, u_int *buflen);
+int	sc_random (	u_char *buf, size_t *buflen);
 
 int	sc_generate_keyed_hash (
 		oid    *authtype,	size_t   authtypelen,
 		u_char *key,		u_int keylen,
 		u_char *message,	u_int msglen,
-		u_char *MAC,		u_int *maclen);
+		u_char *MAC,		size_t *maclen);
 
 int	sc_check_keyed_hash (
 		oid    *authtype,	size_t   authtypelen,
@@ -56,16 +56,16 @@ int	sc_encrypt (	oid    *privtype,	size_t   privtypelen,
 				u_char *key,		u_int keylen,
 				u_char *iv,		u_int ivlen,
 				u_char *plaintext,	u_int ptlen,
-				u_char *ciphertext,	u_int *ctlen);
+				u_char *ciphertext,	size_t *ctlen);
 
 int	sc_decrypt (	oid    *privtype,	size_t   privtypelen,
 				u_char *key,		u_int keylen,
 				u_char *iv,		u_int ivlen,
 				u_char *ciphertext,	u_int ctlen,
-				u_char *plaintext,	u_int *ptlen);
+				u_char *plaintext,	size_t *ptlen);
 
 int     sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
-                u_char *MAC, u_int *MAC_len);
+                u_char *MAC, size_t *MAC_len);
 
 int     sc_get_transform_type(oid *hashtype, u_int hashtype_len,
                               int (**hash_fn)(

@@ -227,7 +227,7 @@ sc_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
  *	SNMPERR_SC_GENERAL_FAILURE	Any KMT error.
  */
 int
-sc_random(u_char *buf, u_int *buflen)
+sc_random(u_char *buf, size_t *buflen)
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 {
 	int		rval = SNMPERR_SUCCESS;
@@ -306,7 +306,7 @@ int
 sc_generate_keyed_hash(	oid	*authtype,	size_t authtypelen,
 			u_char	*key,		u_int  keylen,
 			u_char	*message,	u_int  msglen,
-			u_char	*MAC,		u_int *maclen)
+			u_char	*MAC,		size_t *maclen)
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 {
 	int		 rval	 = SNMPERR_SUCCESS;
@@ -435,7 +435,7 @@ _SCAPI_NOT_CONFIGURED
 #if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 int
 sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
-        u_char *MAC, u_int *MAC_len)
+        u_char *MAC, size_t *MAC_len)
 {
 
 
@@ -598,7 +598,7 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 		u_char *key,		u_int  keylen,
 		u_char *iv,		u_int  ivlen,
 		u_char *plaintext,	u_int  ptlen,
-		u_char *ciphertext,	u_int *ctlen)
+		u_char *ciphertext,	size_t *ctlen)
 #ifdef								HAVE_LIBKMT
 {
 	int		rval	= SNMPERR_SUCCESS;
@@ -725,7 +725,7 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 		u_char *key,		u_int  keylen,
 		u_char *iv,		u_int  ivlen,
 		u_char *ciphertext,	u_int  ctlen,
-		u_char *plaintext,	u_int *ptlen)
+		u_char *plaintext,	size_t *ptlen)
 #ifdef								HAVE_LIBKMT
 {
 	int		rval	= SNMPERR_SUCCESS;

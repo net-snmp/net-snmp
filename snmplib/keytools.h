@@ -60,23 +60,23 @@ extern int (*kmt_s_ripemd) (
  * Prototypes.h
  */
 int	generate_Ku (	oid	*hashtype,	u_int  hashtype_len,
-				u_char	*P,		u_int  pplen,
-				u_char	*Ku,		u_int *kulen);
+				u_char	*P,		size_t  pplen,
+				u_char	*Ku,		size_t *kulen);
 
 int	generate_kul (	oid	*hashtype,	u_int  hashtype_len,
-				u_char	*engineID,	u_int  engineID_len,
-				u_char	*Ku,		u_int  ku_len,
-				u_char	*Kul,		u_int *kul_len);
+				u_char	*engineID,	size_t  engineID_len,
+				u_char	*Ku,		size_t  ku_len,
+				u_char	*Kul,		size_t *kul_len);
 
 int	encode_keychange (	oid	*hashtype,	u_int  hashtype_len,
-				u_char	*oldkey,	u_int  oldkey_len,
-				u_char	*newkey,	u_int  newkey_len,
-				u_char	*kcstring,	u_int *kcstring_len);
+				u_char	*oldkey,	size_t  oldkey_len,
+				u_char	*newkey,	size_t  newkey_len,
+				u_char	*kcstring,	size_t *kcstring_len);
 
 int	decode_keychange (	oid	*hashtype,	u_int  hashtype_len,
-				u_char	*oldkey,	u_int  oldkey_len,
-				u_char	*kcstring,	u_int  kcstring_len,
-				u_char	*newkey,	u_int *newkey_len);
+				u_char	*oldkey,	size_t  oldkey_len,
+				u_char	*kcstring,	size_t  kcstring_len,
+				u_char	*newkey,	size_t *newkey_len);
 
 
 /*

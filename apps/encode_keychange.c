@@ -111,7 +111,7 @@ int
 main(int argc, char **argv)
 {
 	int		  rval		= SNMPERR_SUCCESS;
-	u_int		  oldKu_len	= SNMP_MAXBUF_SMALL,
+	size_t		  oldKu_len	= SNMP_MAXBUF_SMALL,
 			  newKu_len	= SNMP_MAXBUF_SMALL,
 			  oldkul_len	= SNMP_MAXBUF_SMALL,
 			  newkul_len	= SNMP_MAXBUF_SMALL,
