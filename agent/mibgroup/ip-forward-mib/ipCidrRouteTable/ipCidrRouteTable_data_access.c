@@ -208,6 +208,7 @@ _snarf_route_entry(netsnmp_route_entry *route_entry,
           route_entry->rt_mask, route_entry->rt_tos,
           *((u_long*)route_entry->rt_nexthop)))) {
         CONTAINER_INSERT(container, rowreq_ctx);
+        rowreq_ctx->ipCidrRouteTableRowStatus = ROWSTATUS_ACTIVE;
     }
     else {
         if(rowreq_ctx) {
