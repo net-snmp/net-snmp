@@ -5563,15 +5563,13 @@ snmp_get_random_access(void) {
 
 int snmp_get_fd_for_session(struct snmp_session *sessp) 
 {
-     struct session_list *slp = Sessions;
+    struct session_list *slp;
 
-     while(slp)
-     {
-        if(slp->session == sessp)
-            return slp->internal->sd;
-        slp = slp->next;
-     }
-
-     return 0;
+    slp = (struct session_list *) snmp_sess_pointer(sessp);
+    if ((slp == NULL) || (slp->internal == NULL)) {
+        snmp_errno = SNMPERR_BAD_SESSION; /*MTCRITICAL_RESOURCE*/
+        return 0;
+    }
+    return slp->internal->sd;
 }
 
