@@ -158,7 +158,7 @@ extern "C" {
        /*
         * function to return an iterator for the container
         */
-       struct netsnmp_container_it    *get_iterator;
+       netsnmp_container_it           *get_iterator;
 
        /*
         * function to call another function for each object in the container
