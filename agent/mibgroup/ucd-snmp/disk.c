@@ -144,6 +144,27 @@
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
 
+/*
+ *  * config file parsing routines
+ *   */
+static void       disk_free_config(void);
+static void       disk_parse_config(const char *, char *);
+static void       disk_parse_config_all(const char *, char *);
+static void       find_and_add_allDisks(int minpercent);
+static void       add_device(char *path, char *device,
+	                     int minspace, int minpercent, int override);
+static void       modify_disk_parameters(int index, int minspace,
+	                                 int minpercent);
+static int        disk_exists(char *path);
+static u_char    *find_device(char *path);
+
+struct diskpart {
+    char            device[STRMAX];
+    char            path[STRMAX];
+    int             minimumspace;
+    int             minpercent;
+};
+
 int             numdisks;
 int             allDisksIncluded = 0;
 struct diskpart disks[MAXDISKS];
@@ -192,7 +213,7 @@ init_disk(void)
   allDisksIncluded = 0;
 }
 
-void
+static void
 disk_free_config(void)
 {
   int             i;
@@ -206,7 +227,7 @@ disk_free_config(void)
   }
 }
 
-void 
+static void 
 disk_parse_config(const char *token, char *cptr)
 {
 #if HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS
@@ -254,7 +275,7 @@ disk_parse_config(const char *token, char *cptr)
 #endif /* HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS */
 }
 
-void 
+static void 
 disk_parse_config_all(const char *token, char *cptr)
 {
 #if HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS
@@ -294,7 +315,7 @@ disk_parse_config_all(const char *token, char *cptr)
 }
 
 
-void
+static void
 add_device(char *path, char *device, int minspace, int minpercent, int override) 
 {
   int index = disk_exists(path);
@@ -340,7 +361,7 @@ int disk_exists(char *path)
   return -1;
 }
 
-void 
+static void 
 find_and_add_allDisks(int minpercent)
 {
 #if HAVE_GETMNTENT
@@ -350,20 +371,17 @@ find_and_add_allDisks(int minpercent)
   struct mntent  *mntent;
 #endif
   FILE           *mntfp;
-#else
-#if HAVE_FSTAB_H
+#elif HAVE_FSTAB_H
   struct fstab   *fstab1;
-#else
-#if HAVE_STATFS
+#elif HAVE_STATFS
   struct statfs   statf;
-#endif                          /* HAVE_STATFS */
-#endif                          /* HAVE_FSTAB_H */
-#endif                          /* HAVE_GETMNTENT */
+#endif
 #if defined(HAVE_GETMNTENT) && !defined(HAVE_SETMNTENT)
   int             i;
 #endif
 
   int dummy = 0;
+  char            tmpbuf[1024];
   /* 
    * find the device for the path and copy the device into the
    * string declared above and at the end of the routine return it
@@ -397,8 +415,7 @@ find_and_add_allDisks(int minpercent)
      */
   }
 #endif /* HAVE_SETMNTENT */
-#else
-#if HAVE_FSTAB_H
+#elif HAVE_FSTAB_H
   setfsent();			/* open /etc/fstab */
   while((fstab1 = getfsent()) != NULL) {
     add_device(fstab1->fs_file, fstab1->fs_spec, -1, minpercent, 0);
@@ -410,8 +427,7 @@ find_and_add_allDisks(int minpercent)
      * dummy clause for else below
      */
   }
-#else
-#if HAVE_STATFS
+#elif HAVE_STATFS
   /*
    * since there is no way to get all the mounted systems with just
    * statfs we default to the root partition "/"
@@ -419,12 +435,8 @@ find_and_add_allDisks(int minpercent)
   if (statfs("/", &statf) == 0) {
     add_device("/", statf.f_mntfromname, -1, minpercent, 0);
   }
-#endif /* HAVE_STATFS */
-#endif /* HAVE_FSTAB_H */
-#endif /* HAVE_GETMNTENT */
+#endif
   else {
-   char            tmpbuf[1024];
-
     snprintf(tmpbuf, sizeof(tmpbuf),
              "Couldn't find device for disk %s",
              disks[numdisks].path);
@@ -436,12 +448,11 @@ find_and_add_allDisks(int minpercent)
   }
 #else
   config_perror("'disk' checks not supported on this architecture.");
-#endif                          /* HAVE_FSTAB_H || HAVE_GETMNTENT ||
-				   HAVE_STATFS */  
+#endif                   /* HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS */  
  
 }
 
-u_char *
+static u_char *
 find_device(char *path)
 {
 #if HAVE_GETMNTENT
@@ -451,16 +462,13 @@ find_device(char *path)
   struct mntent  *mntent;
 #endif
   FILE           *mntfp;
-#else
-#if HAVE_FSTAB_H
+#elif HAVE_FSTAB_H
   struct fstab   *fstab;
   struct stat     stat1;
-#else
-#if HAVE_STATFS
+#elif HAVE_STATFS
   struct statfs   statf;
-#endif                          /* HAVE_STATFS */
-#endif                          /* HAVE_FSTAB_H */
-#endif                          /* HAVE_GETMNTENT */
+#endif
+  char            tmpbuf[1024];
   static char     device[STRMAX];
 #if defined(HAVE_GETMNTENT) && !defined(HAVE_SETMNTENT)
   int             i;
@@ -505,26 +513,21 @@ find_device(char *path)
 	       sizeof(device));
   }
 #endif /* HAVE_SETMNTENT */
-#else
-#if HAVE_FSTAB_H
+#elif HAVE_FSTAB_H
   stat(path, &stat1);
   setfsent();
   if ((fstab = getfsfile(path))) {
     copy_nword(fstab->fs_spec, device,
 	       sizeof(device));
   }
-#else
-#if HAVE_STATFS
+#elif HAVE_STATFS
   if (statfs(path, &statf) == 0) {
     copy_word(statf.f_mntfromname, device);
     DEBUGMSGTL(("ucd-snmp/disk", "Disk:  %s\n",
 		statf.f_mntfromname));
   }
-#endif /* HAVE_STATFS */
-#endif /* HAVE_FSTAB_H */
-#endif /* HAVE_GETMNTENT */
+#endif
   else {
-    char            tmpbuf[1024];
     sprintf(tmpbuf, "Couldn't find device for disk %s",
 	    path);
     config_pwarn(tmpbuf);
@@ -534,8 +537,7 @@ find_device(char *path)
 #endif
 #else
   config_perror("'disk' checks not supported on this architecture.");
-#endif                          /* HAVE_FSTAB_H || HAVE_GETMNTENT ||
-				   HAVE_STATFS */  
+#endif                   /* HAVE_FSTAB_H || HAVE_GETMNTENT || HAVE_STATFS */  
   return device;
 }
 
@@ -558,13 +560,8 @@ var_extensible_disk(struct variable *vp,
                     int exact,
                     size_t * var_len, WriteMethod ** write_method)
 {
-    static long     long_ret;
-    static char     errmsg[300];
-	int				disknum = 0;
 
-#ifndef _MSC_VER
-
-    int             percent, iserror;
+    int             percent, iserror, disknum = 0;
 #if !defined(HAVE_SYS_STATVFS_H) && !defined(HAVE_STATFS)
     double          totalblks, free, used, avail, availblks;
 #else
@@ -573,11 +570,9 @@ var_extensible_disk(struct variable *vp,
     int             percent_inode;
 #endif
 #endif
-
+    static long     long_ret;
+    static char     errmsg[300];
     float           multiplier;
-
-#endif /* !_MSC_VER */
-
 
 #if defined(HAVE_STATVFS) || defined(HAVE_STATFS)
 #ifdef STAT_STATFS_FS_DATA
