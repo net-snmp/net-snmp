@@ -261,14 +261,13 @@ agentx_master_handler(
     mib_handler               *handler,
     handler_registration      *reginfo,
     agent_request_info        *reqinfo,
-    request_info              *requests) {
+    request_info              *requests)
+{
+    struct snmp_session *ax_session = (struct snmp_session *)handler->myvoid;
+    request_info        *request = requests;
+    struct snmp_pdu     *pdu;
 
-    struct snmp_session       *ax_session =
-        (struct snmp_session *) handler->myvoid;
-    request_info              *request = requests;
-    struct snmp_pdu           *pdu;
-
-    DEBUGMSGTL(("agentx/master", "agentx master handler starting, mode = %d\n",
+    DEBUGMSGTL(("agentx/master", "agentx master handler starting, mode = 0x%02x\n",
                 reqinfo->mode));
     
     /* build a new pdu based on the pdu type coming in */
@@ -327,31 +326,40 @@ agentx_master_handler(
         /* loop through all the requests and create agentx ones out of them */
 
         if (reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK) {
+	    size_t nlen = request->requestvb->name_length;
+	    oid *nptr   = request->requestvb->name;
+	    
+	    if (snmp_oid_compare(nptr, nlen, request->subtree->start,
+				 request->subtree->start_len) < 0) {
+		DEBUGMSGTL(("agentx/master","inexact request for variable ("));
+		DEBUGMSGOID(("agent/master", nptr, nlen));
+		DEBUGMSG(("agentx/master", ") preceeding region ("));
+		DEBUGMSGOID(("agent/master", request->subtree->start,
+			     request->subtree->start_len));
+		DEBUGMSG(("agentx/master", ")\n"));
+		nptr = request->subtree->start;
+		nlen = request->subtree->start_len;
+	    }
+
 	    if (request->inclusive) {
 		DEBUGMSGTL(("agentx/master", "INCLUSIVE varbind "));
-		DEBUGMSGOID(("agentx/master", request->requestvb->name,
-			     request->requestvb->name_length));
+		DEBUGMSGOID(("agentx/master", nptr, nlen));
 		DEBUGMSG(("agentx/master", " scoped to "));
 		DEBUGMSGOID(("agentx/master", request->range_end,
 			     request->range_end_len));
 		DEBUGMSG(("agentx/master", "\n"));
-		snmp_pdu_add_variable(pdu, request->requestvb->name,
-				      request->requestvb->name_length,
-				      ASN_PRIV_INCL_RANGE,
-				      (u_char *) request->range_end,
+		snmp_pdu_add_variable(pdu, nptr, nlen, ASN_PRIV_INCL_RANGE,
+				      (u_char *)request->range_end,
 				      request->range_end_len * sizeof(oid));
 	    } else {
 		DEBUGMSGTL(("agentx/master", "EXCLUSIVE varbind "));
-		DEBUGMSGOID(("agentx/master", request->requestvb->name,
-			     request->requestvb->name_length));
+		DEBUGMSGOID(("agentx/master", nptr, nlen));
 		DEBUGMSG(("agentx/master", " scoped to "));
 		DEBUGMSGOID(("agentx/master", request->range_end,
 			     request->range_end_len));
 		DEBUGMSG(("agentx/master", "\n"));
-		snmp_pdu_add_variable(pdu, request->requestvb->name,
-				      request->requestvb->name_length,
-				      ASN_PRIV_EXCL_RANGE,
-				      (u_char *) request->range_end,
+		snmp_pdu_add_variable(pdu, nptr, nlen, ASN_PRIV_EXCL_RANGE,
+				      (u_char *)request->range_end,
 				      request->range_end_len * sizeof(oid));
 	    }
         } else {
@@ -370,7 +378,7 @@ agentx_master_handler(
     }
 
     /* send the requests out */
-    DEBUGMSGTL(("agentx","sending pdu\n"));
+    DEBUGMSGTL(("agentx", "sending pdu\n"));
     snmp_async_send(ax_session, pdu, agentx_got_response,
                     create_delegated_cache(handler, reginfo, reqinfo, requests,
                                            (void *) ax_session));
