@@ -358,7 +358,7 @@ File: ${name}_data_access.[c|h]
   FUNC : ${context}_indexes_set
 
   
-@    eval $m2c_processing_types = "r"@
+@    eval $m2c_processing_type = 'r'@
 @    include mfd-access-${m2c_table_access}-defines.m2i@
 
 
