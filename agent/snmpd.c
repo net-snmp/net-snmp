@@ -250,11 +250,11 @@ static void usage(char *prog)
 	printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
 	printf("\t\t(By default LOGFILE=%s)\n",
 #ifdef LOGFILE
-			LOGFILE
+	printf("\t\t(By default LOGFILE=%s)\n", LOGFILE);
 #else
-			"none"
+	printf("\t\t(By default LOGFILE=none)\n");
 #endif
-	      );
+
 #if HAVE_UNISTD_H
 	printf("-g \t\tChange to this gid after opening port\n");
 	printf("-u \t\tChange to this uid after opening port\n");
