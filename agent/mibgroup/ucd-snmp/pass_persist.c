@@ -250,8 +250,11 @@ var_extensible_pass_persist(struct variable *vp,
                  * persistant scripts return "NONE\n" on invalid items 
                  */
                 if (!strncmp(buf, "NONE", 4)) {
-                    *var_len = 0;
-                    return (NULL);
+                    if (exact) {
+                        *var_len = 0;
+                        return (NULL);
+                    }
+                    continue;
                 }
                 newlen = parse_miboid(buf, newname);
 
