@@ -61,16 +61,27 @@ TESTING:
      Change the libtool version information in Makefile.top.  This may
      could be automated in the future, but libtool doesn't like you to
      match your project version with the library version so they have
-     cases where the version numbers can't match.  I've looked into
-     hacking libtool, and decided against it.  Follow the notes beyond
-     the 3 variables:
+     cases where the version numbers can't match.  Libtool uses 3
+     identifiers: LIBCURRENT, LIBAGE and LIBREVISION. These WILL NOT
+     exactly match up with the Net-SNMP release numbers, and they ARE NOT
+     directly used to generate the shared library version numbers.
 
-       LIBCURRENT  = 5
-       LIBREVISION = 3
-       LIBAGE      = 0
-     
-     Functionally, it should match the release number
-     (LIBCURRENT+1).LIBAGE.LIBREVISION.  Do this now, so that when you run
+     The shared library version number will be:
+
+        libxxx.so.(CURRENT-AGE).AGE.REVISION
+
+     *** THIS MEANS YOU MAY NEED TO *DECREMENT* CURRENT FOR A NEW RELEASE ***
+
+         examples:
+
+            release    C.A.R   library name
+            -------   -------  ---------------
+             5.0.9     5.0.9   libxxx.so.5.0.9
+             5.1.2     6.1.2   libxxx.so.5.1.2
+             5.2.8     7.2.8   libxxx.so.5.2.8
+             6.0.0     6.0.0   libxxx.so.6.0.0 (Note: C is decremented!)
+
+     Update these variables now, so that when you run
      make in a second to test things you can spot libtool yelling
      about improper numbering before you make the release and not
      after you've uploaded the tar ball :-/
@@ -201,6 +212,8 @@ RELEASING:
 
           $ cvs2cl -r -f ChangeLog.add -F V4-2-patches --no-ancestors \
              --no-wrap -S
+
+          [xxx-rks: I have to remove --no-ancestors to get this to work for me]
 
        b) Fixup the changelog
 
