@@ -1152,6 +1152,7 @@ void *cb_data;
   int sprintval_flag = USE_BASIC;
   struct snmp_pdu *reply_pdu;
   int old_numeric, old_printfull;
+  snmp_transport *transport = NULL;
 
   SV* cb = ((struct snmp_xs_cb_data*)cb_data)->perl_cb;
   SV* sess_ref = ((struct snmp_xs_cb_data*)cb_data)->sess_ref;
@@ -1200,9 +1201,15 @@ void *cb_data;
 #endif
       av_push(traplist, newSViv(pdu->reqid));
 #if 0 /* XXX: John */
-    /* broke with v5 code.  Need John's help. */
-      cp = inet_ntoa(SIN_ADDR(pdu->address));
-      av_push(traplist, newSVpv(cp, strlen(cp)));
+      if ((transport = snmp_sess_transport(snmp_sess_pointer(ss))) != NULL) {
+	cp = transport->f_fmtaddr(transport, pdu->transport_data,
+				  pdu->transport_data_length);
+	av_push(traplist, newSVpv(cp, strlen(cp)));
+	free(cp);
+      } else {
+	/*  This shouldn't ever happen; every session has a transport.  */
+	av_push(traplist, newSVpv("", 0));
+      }
 #endif
       av_push(traplist, newSVpv((char*) pdu->community, pdu->community_len));
       /* FALLTHRU */
@@ -3912,15 +3919,18 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
                   goto err;
 	      }
 #if 0 /* XXX: John */
-    /* broke in v5.  Not needed ? */
+	      /*  If agent is given then set the v1-TRAP specific
+		  agent-address field to that.  Otherwise set it to
+		  our address.  */
               if (agent && strlen(agent)) {
-                 SIN_ADDR(pdu->address).s_addr = __parse_address(agent);
-                 if (SIN_ADDR(pdu->address).s_addr == -1 && verbose) {
-                    warn("error:trap:invalid agent address: %s", agent);
-                    goto err;
-                 }
+                 if (__parse_address(agent) == -1 && verbose) {
+		   warn("error:trap:invalid agent address: %s", agent);
+		   goto err;
+                 } else {
+		   *((in_addr_t *)pdu->agent_addr) = __parse_address(agent);
+		 }
               } else {
-                 SIN_ADDR(pdu->address).s_addr = get_myaddr();
+                 *((in_addr_t *)pdu->agent_addr) = get_myaddr();
               }
 #endif
               pdu->trap_type = generic;
