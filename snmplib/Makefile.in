@@ -12,13 +12,13 @@ all: $(TARG)
 
 libsnmp.a:    ${OBJS}
 	ar r libsnmp.a ${OBJS}
-	if [ -x /usr/bin/ranlib ] ; then ranlib libsnmp.a ; fi
+	if [ -f /usr/bin/ranlib ] ; then ranlib libsnmp.a ; fi
 
 install:	../lib/libsnmp.a
 
 ../lib/libsnmp.a:	libsnmp.a
 	cp libsnmp.a ../lib
-	if [ -x /usr/bin/ranlib ] ; then ranlib ../lib/libsnmp.a ; fi
+	if [ -f /usr/bin/ranlib ] ; then ranlib ../lib/libsnmp.a ; fi
 
 
 lint:
