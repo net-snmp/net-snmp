@@ -7,6 +7,11 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #include <sys/errno.h>
 
 #include "asn1.h"
@@ -42,7 +47,7 @@ void init_master(void)
 
     snmp_sess_init( session );
     session->version  = AGENTX_VERSION_1;
-    session->peername = AGENTX_SOCKET;
+    session->peername = strdup(AGENTX_SOCKET);
     session->flags  |= SNMP_FLAGS_STREAM_SOCKET;
 
     session->local_port = 1;         /* server */

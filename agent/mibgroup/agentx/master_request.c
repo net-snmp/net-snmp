@@ -33,6 +33,7 @@
 
 #include "agentx/protocol.h"
 #include "agentx/client.h"
+#include "agentx/master.h"
 #include "snmp_agent.h"
 #include "snmp_vars.h"
 #include "var_struct.h"

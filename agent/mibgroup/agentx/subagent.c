@@ -7,6 +7,11 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #include <sys/errno.h>
 
 #include "asn1.h"
@@ -194,7 +199,7 @@ init_subagent( void )
 
     memset(session, 0, sizeof(struct snmp_session));
     session->version = AGENTX_VERSION_1;
-    session->peername = AGENTX_SOCKET;
+    session->peername = strdup(AGENTX_SOCKET);
     session->retries = SNMP_DEFAULT_RETRIES;
     session->timeout = SNMP_DEFAULT_TIMEOUT;
     session->flags  |= SNMP_FLAGS_STREAM_SOCKET;

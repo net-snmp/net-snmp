@@ -48,9 +48,7 @@
 
 #include "agentx/protocol.h"
 
-
-extern int snmp_clone_mem(void **, void *, unsigned);
-
+int agentx_dump(struct snmp_session *,struct snmp_pdu *, u_char *, size_t);
 
 void
 agentx_build_int(u_char *bufp, u_int value, int network_byte_order)

@@ -33,6 +33,7 @@
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 #include "agentx/subagent.h"
+#include "agentx/client.h"
 #endif
 
 extern struct timeval starttime;
@@ -167,7 +168,7 @@ int register_sysORTable(oid *oidin,
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
   if ( agent_role == SUB_AGENT )
-     agentx_add_agentcaps( agentx_session, oidin, oidlen, (char *)descr);
+     agentx_add_agentcaps( agentx_session, oidin, oidlen, descr);
 #endif
 
   return 0;
