@@ -17,7 +17,7 @@ subdirs:
 
 distall: ${srcdir}/configure ${srcdir}/config.h 
 
-install:    subdirs installdirs
+install:    all installdirs
 	for i in $(INSTALLDIRS) ; do \
         ( cd $$i ; $(MAKE) install ) ; \
 	done
