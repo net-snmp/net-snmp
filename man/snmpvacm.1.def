@@ -1,7 +1,7 @@
 .TH SNMPVACM 1 "30 May 2003" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-snmpvacm - creates and maintains View-based Access Control entries on a remote entity.
+snmpvacm - creates and maintains SNMPv3 View-based Access Control entries on a network entity
 .SH SYNOPSIS
 .B snmpvacm
 [COMMON OPTIONS]

@@ -22,7 +22,7 @@
 .TH SNMPBULKGET 1 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-snmpbulkget - communicates with a network entity using SNMP GETBULK Requests.
+snmpbulkget - communicates with a network entity using SNMP GETBULK requests.
 .SH SYNOPSIS
 .B snmpbulkget
 [APPLICATION OPTIONS] [COMMON OPTIONS] OID [OID]...

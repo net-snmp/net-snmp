@@ -30,7 +30,7 @@
 .TH SNMPCMD 1 "09 Jan 2004" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-snmpcmd - commands to communicate with a network entity using SNMP Requests.
+snmpcmd - options and behaviour common to most of the Net-SNMP command-line tools
 .SH SYNOPSIS
 .B snmpcmd
 [OPTIONS] AGENT [PARAMETERS]

@@ -30,7 +30,7 @@
 .TH SNMPSTATUS 1 "25 Jul 2003" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
-snmpstatus - Retrieves important information from a network entity.
+snmpstatus - retrieves a fixed set of management information from a network entity
 .SH SYNOPSIS
 .B snmpstatus
 [COMMON OPTIONS] [-Cf] AGENT
