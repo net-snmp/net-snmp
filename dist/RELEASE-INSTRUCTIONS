@@ -154,12 +154,7 @@ RELEASING:
            complete dependency list).  (and you can't assume they have
            makedepend around).
 
-        c4) [This step is currently only for the 4.x versions]
-
-           The dependencies are appended to 'Makefile.in', rather than a
-           separate 'Makefile.depend'
-
-        c5) [This step is currently only for the 5.x versions]
+        c4) [This step is currently only for the 5.x versions]
 
            Check in the dependencies
 
@@ -167,6 +162,11 @@ RELEASING:
 
            Note: The Makefile.depend is loaded by configure into the real
            Makefile when configure is run.
+
+        c5) [This step is currently only for the 4.x versions]
+
+           The dependencies are appended to 'Makefile.in', rather than a
+           separate 'Makefile.depend'
 
   5) Make sure all changes are checked in:
 
