@@ -224,9 +224,10 @@ __libraries_init()
             return;
         have_inited = 1;
 
+        snmp_set_quick_print(1);
+        /* ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS,1);*/
         init_snmp("perlmod");
     
-        snmp_set_quick_print(1);
         ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS, 1);
         ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
 
@@ -848,7 +849,6 @@ int    best_guess;
          newname_len = MAX_OID_LEN;
          read_objid(tag, newname, &newname_len); /* long name */
       }
-      if (newname_len) rtp = tp = get_tree(newname, newname_len, Mib);
       if (type) *type = (tp ? tp->type : TYPE_UNKNOWN);
       if ((oid_arr == NULL) || (oid_arr_len == NULL)) return rtp;
       memcpy(oid_arr,(char*)newname,newname_len*sizeof(oid));
@@ -1162,7 +1162,7 @@ void *cb_data;
   SV *tmp_sv;
   int type;
   char tmp_type_str[MAX_TYPE_NAME_LEN];
-  char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
+  u_char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
   size_t str_buf_len = sizeof(str_buf);
   size_t out_len = 0;
   int buf_over = 0;
@@ -1822,7 +1822,7 @@ _bulkwalk_recv_pdu(walk_context *context, netsnmp_pdu *pdu)
    netsnmp_variable_list *vars;
    struct tree	*tp;
    char		type_str[MAX_TYPE_NAME_LEN];
-   char		str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
+   u_char	str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
    size_t str_buf_len = sizeof(str_buf);
    size_t out_len = 0;
    int buf_over = 0;
@@ -2481,7 +2481,6 @@ snmp_new_session(version, community, peer, lport, retries, timeout)
         char *	version
         char *	community
         char *	peer
-        int	port
         int	lport
         int	retries
         int	timeout
@@ -2719,7 +2718,7 @@ snmp_init_mib_internals()
         /* should test better to see if it has been done already */
 	if (Mib == NULL) {
            if (verbose) warn("initializing MIB internals (empty)\n");
-           init_mib_internals();
+           /* init_mib_internals(); */
         }
         }
 
@@ -2737,7 +2736,7 @@ snmp_read_mib(mib_file, force=0)
         if ((mib_file == NULL) || (*mib_file == '\0')) {
            if (Mib == NULL) {
               if (verbose) warn("initializing MIB\n");
-              init_mib_internals();
+              /* init_mib_internals(); */
               init_mib();
               if (Mib) {
                  if (verbose) warn("done\n");
@@ -2747,7 +2746,7 @@ snmp_read_mib(mib_file, force=0)
 	   }
         } else {
            if (verbose) warn("reading MIB: %s [%s:%s]\n", mib_file, DEFAULT_MIBDIRS, DEFAULT_MIBS);
-           if (Mib == NULL) init_mib_internals();
+           /* if (Mib == NULL) init_mib_internals();*/
            if (strcmp("ALL",mib_file))
               Mib = read_mib(mib_file);
            else
@@ -2770,7 +2769,7 @@ snmp_read_module(module)
 	CODE:
         {
         int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
-	if (Mib == NULL)     init_mib_internals();
+	/* if (Mib == NULL)     init_mib_internals(); */
 
         if (!strcmp(module,"ALL")) {
            Mib = read_all_mibs();
@@ -3162,7 +3161,7 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
            SV **err_num_svp;
            SV **err_ind_svp;
            int status;
-	   char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
+	   u_char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
            size_t str_buf_len = sizeof(str_buf);
            size_t out_len = 0;
            int buf_over = 0;
@@ -3357,7 +3356,7 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
            SV **err_num_svp;
            SV **err_ind_svp;
            int status;
-	   char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
+	   u_char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
            size_t str_buf_len = sizeof(str_buf);
            size_t out_len = 0;
            int buf_over = 0;
