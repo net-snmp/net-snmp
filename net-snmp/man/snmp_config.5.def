@@ -9,11 +9,13 @@ them, so that the other manual pages don't have to.
 .SH "DIRECTORIES SEARCHED"
 First off, there are numerous places that configuration files can be
 found and read from.  By default, the applications look for
-configuration files in the following 3 directories, in order:
+configuration files in the following 4 directories, in order:
+SYSCONFDIR/snmp,
 DATADIR/snmp, LIBDIR/snmp, and $HOME/.snmp.  In each of these
-directories, it looks for files with the extension of both .conf and
-.local.conf (reading the second ones last).  In this manner, there are
-6 default places a configuration file can exist for any given
+directories, it looks for files with the extension of both
+.IR .conf " and " .local.conf
+(reading the second ones last).  In this manner, there are
+8 default places a configuration file can exist for any given
 configuration file type.
 .PP
 Additionally, the above default search path can be overridden by
@@ -21,7 +23,7 @@ setting the environment variable SNMPCONFPATH to a colon-separated
 list of directories to search for.
 .PP
 Finally, applications that store persistent data will also look in the 
-/var/snmp directory for configuration files there.
+PERSISTENT_DIRECTORY directory for configuration files there.
 .SH "CONFIGURATION FILE TYPES"
 Each application may use multiple configuration files, which will
 configure various different aspects of the application.  For instance, 

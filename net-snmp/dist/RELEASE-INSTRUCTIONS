@@ -58,22 +58,30 @@ TESTING:
 
   1) [This step is currently only for the 5.x versions]
 
-     Change the libtool version information in Makefile.top.  This may
-     could be automated in the future, but libtool doesn't like you to
-     match your project version with the library version so they have
-     cases where the version numbers can't match.  I've looked into
-     hacking libtool, and decided against it.  Follow the notes beyond
-     the 3 variables:
+     a) Update libtool version
 
-       LIBCURRENT  = 5
-       LIBREVISION = 3
-       LIBAGE      = 0
+        Change the libtool version information in Makefile.top.  This may
+        could be automated in the future, but libtool doesn't like you to
+        match your project version with the library version so they have
+        cases where the version numbers can't match.  I've looked into
+        hacking libtool, and decided against it.  Follow the notes beyond
+        the 3 variables:
+
+          LIBCURRENT  = 5
+          LIBREVISION = 3
+          LIBAGE      = 0
      
-     Functionally, it should match the release number
-     LIBCURRENT.LIBAGE.LIBREVISION.  Do this now, so that when you run
-     make in a second to test things you can spot libtool yelling
-     about improper numbering before you make the release and not
-     after you've uploaded the tar ball :-/
+        Functionally, it should match the release number
+        LIBCURRENT.LIBAGE.LIBREVISION.  Do this now, so that when you run
+        make in a second to test things you can spot libtool yelling
+        about improper numbering before you make the release and not
+        after you've uploaded the tar ball :-/
+
+     b) Update the version number
+
+        $ agent/mibgroup/versiontag Ext-5-0-3 reverse nocvs
+
+     c) Edit version number in doxygen.conf file.
 
   2) Log into as many machines types as you can and run "make test".
      You should get perfect results.  If you don't, try running just
@@ -109,9 +117,8 @@ RELEASING:
 
         $ make docs
 
-     c) Copy the doxygen extracted manual pages to the man directory.
-        You'll have to then check these and commit them (possibly adding
-        any new ones that have been modified since then).
+        (This copy the doxygen extracted manual pages to the man
+        directory.  You'll have to then check these and commit them)
         Don't forget to update Makefile.in for any new manual pages.
 
         $ make mancp

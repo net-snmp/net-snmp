@@ -34,17 +34,17 @@ else
       ;;
     --agent-libs)
       # use this one == --netsnmp-agent-libs + --external-libs
-      echo @LDFLAGS@ $NSC_BASE_AGENT_LIBS @AGENTLIBS@
+      echo @LDFLAGS@ -L@libdir@ $NSC_BASE_AGENT_LIBS @AGENTLIBS@ @WRAPLIBS@
       ;;
     --libs)
       # use this one == --netsnmp-libs + --external-libs
-      echo @LDFLAGS@ -lnetsnmp @LIBS@
+      echo @LDFLAGS@ -L@libdir@ -lnetsnmp @LIBS@
       ;;
     --external-libs)
       echo @LDFLAGS@ @LIBS@
       ;;
     --external-agent-libs)
-      echo @LDFLAGS@ @AGENTLIBS@
+      echo @LDFLAGS@ @AGENTLIBS@ @WRAPLIBS@
       ;;
     --netsnmp-libs)
       echo -L@libdir@ -lnetsnmp
@@ -123,7 +123,6 @@ else
 	  exit 1
       fi
 
-      apassphrase=$1
       if test "x$apassphrase" = "x" ; then
           prompt=yes
 	  echo "Enter authentication pass-phrase: "

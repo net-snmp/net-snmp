@@ -361,6 +361,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     netsnmp_session *ax_session = (netsnmp_session *) handler->myvoid;
     netsnmp_request_info *request = requests;
     netsnmp_pdu    *pdu;
+    void           *cb_data;
 
     DEBUGMSGTL(("agentx/master",
                 "agentx master handler starting, mode = 0x%02x\n",
@@ -497,13 +498,23 @@ agentx_master_handler(netsnmp_mib_handler *handler,
     }
 
     /*
+     * When the master sends a CleanupSet PDU, it will never get a response
+     * back from the subagent. So we shouldn't allocate the
+     * netsnmp_delegated_cache structure in this case.
+     */
+    if (pdu->command != AGENTX_MSG_CLEANUPSET)
+        cb_data = netsnmp_create_delegated_cache(handler, reginfo,
+                                                 reqinfo, requests,
+                                                 (void *) ax_session);
+    else
+        cb_data = NULL;
+
+    /*
      * send the requests out 
      */
     DEBUGMSGTL(("agentx", "sending pdu (req=0x%x,trans=0x%x,sess=0x%x)\n",
                 pdu->reqid,pdu->transid, pdu->sessid));
-    snmp_async_send(ax_session, pdu, agentx_got_response,
-                    netsnmp_create_delegated_cache(handler, reginfo,
-                                                   reqinfo, requests,
-                                                   (void *) ax_session));
+    snmp_async_send(ax_session, pdu, agentx_got_response, cb_data);
+
     return SNMP_ERR_NOERROR;
 }

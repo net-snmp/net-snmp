@@ -34,7 +34,7 @@ mib2c.conf files you can use.
 Display a help message.
 .TP
 .BI -c " CONFIGFILE"
-Use CONFIGFILE when generating code.  These files will be search for
+Use CONFIGFILE when generating code.  These files will be searched for
 first in the current directory and then in the DATADIR directory
 (which is where the default mib2c configuration files can be found).
 .TP

@@ -82,6 +82,12 @@ SOFTWARE.
 #include <net-snmp/library/int64.h>
 #include <net-snmp/library/snmp_client.h>
 
+/** @defgroup mib_utilities mib parsing and datatype manipulation routines.
+ *  @ingroup library
+ *
+ *  @{
+ */
+
 static char    *uptimeString(u_long, char *);
 
 static struct tree *_get_realloc_symbol(const oid * objid, size_t objidlen,
@@ -464,7 +470,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
 
             while (repeat && cp < ecp) {
                 value = 0;
-                if (code != 'a') {
+                if (code != 'a' && code != 't') {
                     for (x = 0; x < width; x++) {
                         value = value * 256 + *cp++;
                     }
@@ -494,6 +500,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
                         return 0;
                     }
                     break;
+                case 't': /* new in rfc 3411 */
                 case 'a':
                     while ((*out_len + width + 1) >= *buf_len) {
                         if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
@@ -4828,7 +4835,8 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 			goto bad_id;
 		    if (subid > 255)
 			goto bad_id;
-		    objid[*objidlen++] = subid;
+		    objid[*objidlen] = subid;
+	            (*objidlen)++;
 		    cp = cp2;
 		}
 	    }

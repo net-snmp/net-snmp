@@ -15,7 +15,7 @@
  * New Handler based API 
  */
 /***********************************************************************/
-/** @defgroup handler Agent handler API
+/** @defgroup handler Net-SNMP Agent handler and extensibility API
  *  @ingroup agent
  *
  *  The basic theory goes something like this: In the past, with the
@@ -301,7 +301,7 @@ netsnmp_call_handlers(netsnmp_handler_registration *reginfo,
 }
 
 /** calls a handler with with appropriate NULL checking of arguments, etc. */
-inline int
+NETSNMP_INLINE int
 netsnmp_call_handler(netsnmp_mib_handler *next_handler,
                      netsnmp_handler_registration *reginfo,
                      netsnmp_agent_request_info *reqinfo,
@@ -336,7 +336,7 @@ netsnmp_call_handler(netsnmp_mib_handler *next_handler,
 
 /** calls the next handler in the chain after the current one with
    with appropriate NULL checking, etc. */
-inline int
+NETSNMP_INLINE int
 netsnmp_call_next_handler(netsnmp_mib_handler *current,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info *reqinfo,
@@ -354,7 +354,7 @@ netsnmp_call_next_handler(netsnmp_mib_handler *current,
 
 /** calls the next handler in the chain after the current one with
    with appropriate NULL checking, etc. */
-inline int
+NETSNMP_INLINE int
 netsnmp_call_next_handler_one_request(netsnmp_mib_handler *current,
                                       netsnmp_handler_registration *reginfo,
                                       netsnmp_agent_request_info *reqinfo,
@@ -506,7 +506,7 @@ netsnmp_handler_registration_dup(netsnmp_handler_registration *reginfo)
 /** creates a cache of information which can be saved for future
    reference.  Use netsnmp_handler_check_cache() later to make sure it's still
    valid before referencing it in the future. */
-inline netsnmp_delegated_cache *
+NETSNMP_INLINE netsnmp_delegated_cache *
 netsnmp_create_delegated_cache(netsnmp_mib_handler *handler,
                                netsnmp_handler_registration *reginfo,
                                netsnmp_agent_request_info *reqinfo,
@@ -530,7 +530,7 @@ netsnmp_create_delegated_cache(netsnmp_mib_handler *handler,
 /** check's a given cache and returns it if it is still valid (ie, the
    agent still considers it to be an outstanding request.  Returns
    NULL if it's no longer valid. */
-inline netsnmp_delegated_cache *
+NETSNMP_INLINE netsnmp_delegated_cache *
 netsnmp_handler_check_cache(netsnmp_delegated_cache *dcache)
 {
     if (!dcache)
@@ -544,7 +544,7 @@ netsnmp_handler_check_cache(netsnmp_delegated_cache *dcache)
 }
 
 /** frees a cache once you're finished using it */
-inline void
+NETSNMP_INLINE void
 netsnmp_free_delegated_cache(netsnmp_delegated_cache *dcache)
 {
     /*
@@ -569,7 +569,7 @@ netsnmp_handler_mark_requests_as_delegated(netsnmp_request_info *requests,
 }
 
 /** add data to a request that can be extracted later by submodules */
-inline void
+NETSNMP_INLINE void
 netsnmp_request_add_list_data(netsnmp_request_info *request,
                               netsnmp_data_list *node)
 {
@@ -582,7 +582,7 @@ netsnmp_request_add_list_data(netsnmp_request_info *request,
 }
 
 /** extract data from a request that was added previously by a parent module */
-inline void    *
+NETSNMP_INLINE void    *
 netsnmp_request_get_list_data(netsnmp_request_info *request,
                               const char *name)
 {
@@ -592,7 +592,7 @@ netsnmp_request_get_list_data(netsnmp_request_info *request,
 }
 
 /** Free the extra data stored in a request */
-inline void
+NETSNMP_INLINE void
 netsnmp_free_request_data_set(netsnmp_request_info *request)
 {
     if (request)
@@ -600,7 +600,7 @@ netsnmp_free_request_data_set(netsnmp_request_info *request)
 }
 
 /** Free the extra data stored in a bunch of requests (all data in the chain) */
-inline void
+NETSNMP_INLINE void
 netsnmp_free_request_data_sets(netsnmp_request_info *request)
 {
     if (request && request->parent_data) {

@@ -17,12 +17,13 @@ sub InitMakeParams {
     my %Params = (
 		  NAME         => 'SNMP',
 		  dist         => { SUFFIX => "gz", COMPRESS => "gzip -9f"},
+		  MAN3PODS => { 'SNMP.pm' => '$(INST_MAN3DIR)/SNMP.3' },
 		  XSPROTOARG   => '-noprototypes', 	# XXX remove later?
 		  VERSION_FROM => 'SNMP.pm',
 		  realclean        => { FILES => 'host' },
 		  );
 
-    my $snmp_lib, $snmp_llib, $sep;
+    my ($snmp_lib, $snmp_llib, $sep);
     if ($Config{'osname'} eq 'MSWin32') {
 	$snmp_lib = 'libnetsnmp.lib';
 	$snmp_link_lib = 'libnetsnmp';

@@ -208,6 +208,7 @@ typedef struct agent_set_cache_s {
     int             treecache_len;
     int             treecache_num;
 
+    int             vbcount;
     netsnmp_request_info *requests;
     netsnmp_data_list *agent_data;
 
@@ -241,6 +242,7 @@ save_set_cache(netsnmp_agent_session *asp)
     ptr->treecache_num = asp->treecache_num;
     ptr->agent_data = asp->reqinfo->agent_data;
     ptr->requests = asp->requests;
+    ptr->vbcount = asp->vbcount;
 
     /*
      * make the agent forget about what we've saved 
@@ -275,6 +277,7 @@ get_set_cache(netsnmp_agent_session *asp)
             asp->treecache_len = ptr->treecache_len;
             asp->treecache_num = ptr->treecache_num;
             asp->requests = ptr->requests;
+            asp->vbcount = ptr->vbcount;
             if (!asp->reqinfo) {
                 asp->reqinfo =
                     SNMP_MALLOC_TYPEDEF(netsnmp_agent_request_info);
@@ -912,11 +915,6 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
     asp->oldmode = 0;
     asp->treecache_num = -1;
     asp->treecache_len = 0;
-    asp->vbcount = count_varbinds(asp->pdu->variables);
-    if(asp->vbcount) /* efence doesn't like 0 size allocs */
-        asp->requests =
-            (netsnmp_request_info *) calloc(asp->vbcount,
-                                            sizeof(netsnmp_request_info));
 
     return asp;
 }
@@ -1153,9 +1151,6 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
             case SNMP_MSG_INTERNAL_SET_RESERVE1:
             case SNMP_MSG_INTERNAL_SET_RESERVE2:
             case SNMP_MSG_INTERNAL_SET_ACTION:
-            case SNMP_MSG_INTERNAL_SET_COMMIT:
-            case SNMP_MSG_INTERNAL_SET_FREE:
-            case SNMP_MSG_INTERNAL_SET_UNDO:
                 save_set_cache(asp);
                 break;
         }
@@ -2635,6 +2630,10 @@ handle_pdu(netsnmp_agent_session *asp)
     case SNMP_MSG_INTERNAL_SET_BEGIN:
     case SNMP_MSG_INTERNAL_SET_RESERVE1:
     default:
+        asp->vbcount = count_varbinds(asp->pdu->variables);
+        if (asp->vbcount) /* efence doesn't like 0 size allocs */
+            asp->requests = (netsnmp_request_info *)
+                calloc(asp->vbcount, sizeof(netsnmp_request_info));
         /*
          * collect varbinds 
          */
@@ -2890,7 +2889,7 @@ netsnmp_get_agent_uptime(void)
 
 
 
-inline void
+NETSNMP_INLINE void
 netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
                             netsnmp_data_list *node)
 {
@@ -2903,7 +2902,7 @@ netsnmp_agent_add_list_data(netsnmp_agent_request_info *ari,
     }
 }
 
-inline void    *
+NETSNMP_INLINE void    *
 netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari,
                             const char *name)
 {
@@ -2913,7 +2912,7 @@ netsnmp_agent_get_list_data(netsnmp_agent_request_info *ari,
     return NULL;
 }
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_agent_data_set(netsnmp_agent_request_info *ari)
 {
     if (ari) {
@@ -2921,7 +2920,7 @@ netsnmp_free_agent_data_set(netsnmp_agent_request_info *ari)
     }
 }
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_agent_data_sets(netsnmp_agent_request_info *ari)
 {
     if (ari) {
@@ -2929,7 +2928,7 @@ netsnmp_free_agent_data_sets(netsnmp_agent_request_info *ari)
     }
 }
 
-inline void
+NETSNMP_INLINE void
 netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari)
 {
     if (ari) {

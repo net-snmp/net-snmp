@@ -1,4 +1,4 @@
-.TH "table: Helps you implement a table." 3 "10 Jan 2003" "net-snmp" \" -*- nroff -*-
+.TH "table: Helps you implement a table." 3 "17 Mar 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -40,7 +40,7 @@ More...
 .br
 .RI "\fIcreates a table handler given the netsnmp_table_registration_info object, inserts it into the request chain and then calls \fBnetsnmp_register_handler\fP() to register the table into the agent.\fP"
 .ti -1c
-.RI "netsnmp_table_request_info * \fBnetsnmp_extract_table_info\fP (netsnmp_request_info *request)"
+.RI "NETSNMP_INLINE netsnmp_table_request_info * \fBnetsnmp_extract_table_info\fP (netsnmp_request_info *request)"
 .br
 .RI "\fIextracts the processed table information from a given request.\fP"
 .ti -1c
@@ -92,7 +92,7 @@ checks the original request against the current data being passed in if its grea
 returns 1 if outvar was replaced with the oid from newvar (success). returns 0 if not. 
 .PP
 Definition at line 654 of file table.c.
-.SS "netsnmp_table_request_info* netsnmp_extract_table_info (netsnmp_request_info * request)\fC [inline]\fP"
+.SS "NETSNMP_INLINE netsnmp_table_request_info* netsnmp_extract_table_info (netsnmp_request_info * request)"
 .PP
 extracts the processed table information from a given request.
 .PP

@@ -360,7 +360,7 @@ release_netsnmp_request_groups(void *vp)
     CONTAINER_FREE(c);
 }
 
-netsnmp_index *
+NETSNMP_INLINE netsnmp_index *
 find_next_row(netsnmp_table_request_info *tblreq_info,
               table_container_data * tad)
 {
@@ -402,7 +402,7 @@ find_next_row(netsnmp_table_request_info *tblreq_info,
     return row;
 }
 
-void
+NETSNMP_INLINE void
 build_new_oid(netsnmp_handler_registration *reginfo,
               netsnmp_table_request_info *tblreq_info,
               netsnmp_index *row, netsnmp_request_info *current)
@@ -439,7 +439,7 @@ build_new_oid(netsnmp_handler_registration *reginfo,
  *                                                                    *
  **********************************************************************
  **********************************************************************/
-int
+NETSNMP_INLINE int
 process_get_requests(netsnmp_handler_registration *reginfo,
                      netsnmp_agent_request_info *agtreq_info,
                      netsnmp_request_info *requests,
@@ -543,7 +543,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
  **********************************************************************
  **********************************************************************/
 
-void
+NETSNMP_INLINE void
 group_requests(netsnmp_agent_request_info *agtreq_info,
                netsnmp_request_info *requests,
                netsnmp_container *request_group, table_container_data * tad)
@@ -654,7 +654,7 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
     } /** for( current ... ) */
 }
 
-static void
+static NETSNMP_INLINE void
 process_set_group(netsnmp_index *o, void *c)
 {
     /* xxx-rks: should we continue processing after an error?? */
