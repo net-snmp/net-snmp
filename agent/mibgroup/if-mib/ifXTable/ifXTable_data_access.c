@@ -39,6 +39,11 @@
  * OID: .1.3.6.1.2.1.31.1.1, length: 9
  */
 
+#ifndef USING_IF_MIB_IFTABLE_IFTABLE_MODULE
+static void _check_interface_entry_for_updates(netsnmp_interface_entry *ifentry,
+                                               netsnmp_container * container);
+#endif /* USING_IF_MIB_IFTABLE_IFTABLE_MODULE */
+
 /**
  * initialization for ifXTable data access
  *
@@ -100,6 +105,8 @@ void
 ifXTable_container_init(netsnmp_container ** container_ptr_ptr,
                         netsnmp_cache * cache)
 {
+    DEBUGTRACE;
+
     if ((NULL == cache) || (NULL == container_ptr_ptr)) {
         snmp_log(LOG_ERR, "bad params to ifXTable_container_init\n");
         return;
@@ -150,7 +157,126 @@ ifXTable_container_init(netsnmp_container ** container_ptr_ptr,
 int
 ifXTable_cache_load(netsnmp_container * container)
 {
+#ifndef USING_IF_MIB_IFTABLE_IFTABLE_MODULE
+    netsnmp_container * ifcontainer =
+        netsnmp_access_interface_container_load(NULL,
+                                                NETSNMP_ACCESS_INTERFACE_INIT_NOFLAGS);
+  
+    DEBUGMSGTL(("ifXTable:access:cache_load","loading cache\n"));
+  
+    /*
+     * we just got a fresh copy of interface data. compare it to
+     * what we've already got, and make any adjustements...
+     */
+    CONTAINER_FOR_EACH(ifcontainer,
+                       (netsnmp_container_obj_func*)_check_interface_entry_for_updates,
+                       container);
+
+    // xxx-rks: deal with inactive entries before 5.2
+
+    /*
+     * free the container. we've either claimed each ifentry, or released it,
+     * so the dal function doesn't need to clear the container.
+     */
+    netsnmp_access_interface_container_free(ifcontainer,
+                                            NETSNMP_ACCESS_INTERFACE_FREE_DONT_CLEAR );
+
+    return MFD_SUCCESS;
+#endif /* USING_IF_MIB_IFTABLE_IFTABLE_MODULE */
 }
+
+#ifndef USING_IF_MIB_IFTABLE_IFTABLE_MODULE
+/**
+ * check entry for update
+ *
+ */
+static void
+_check_interface_entry_for_updates(netsnmp_interface_entry *ifentry,
+                           netsnmp_container * container)
+{
+    /*
+     * check for matching entry. We can do this directly, since
+     * both containers use the same index.
+     */
+    ifXTable_rowreq_ctx *rowreq_ctx = CONTAINER_FIND(container, ifentry);
+    if(NULL == rowreq_ctx) {
+        DEBUGMSGTL(("ifXTable:access","creating new entry\n"));
+        /*
+         * allocate an row context and set the index(es), then add it to
+         * the container
+         */
+        rowreq_ctx = ifXTable_allocate_rowreq_ctx(ifentry);
+        if( (NULL != rowreq_ctx) &&
+            ( MFD_SUCCESS == ifXTable_indexes_set(rowreq_ctx, ifentry->index))) {
+            CONTAINER_INSERT(container, rowreq_ctx);
+            ifentry = NULL;
+        }
+        else {
+            if(rowreq_ctx) {
+                snmp_log(LOG_ERR, "error setting index while loading "
+                         "ifXTable cache.\n");
+                ifXTable_release_rowreq_ctx(rowreq_ctx);
+            }
+            else
+                netsnmp_access_interface_entry_free(ifentry);
+        }
+    }
+    else {
+        int updated = 0;
+
+        DEBUGMSGTL(("ifXTable:access","updating existing entry\n"));
+
+        /*
+         * we already have an entry-> copy stats and check for updates.
+         */
+        memcpy(&rowreq_ctx->data->stats, &ifentry->stats,
+               sizeof(ifentry->stats));
+
+        netsnmp_assert(strncmp(rowreq_ctx->data->if_name,
+                               ifentry->if_name, strlen(ifentry->if_name))
+                       == 0);
+        /*
+         * Check for changes. If a pointer changed, swipe the one
+         * from ifentry, since it'll would just be deleted anyway...
+         *
+         * xxx-rks: what should we check for changes?
+         *
+         */
+        if(strcmp(rowreq_ctx->data->if_descr, ifentry->if_descr)) {
+            ++updated;
+            SNMP_SWIPE_MEM(rowreq_ctx->data->if_descr, ifentry->if_descr);
+        }
+        if(strcmp(rowreq_ctx->data->if_alias, ifentry->if_alias)) {
+            ++updated;
+            SNMP_SWIPE_MEM(rowreq_ctx->data->if_alias, ifentry->if_alias);
+        }
+        if(rowreq_ctx->data->if_type != ifentry->if_type) {
+            ++updated;
+            rowreq_ctx->data->if_type = ifentry->if_type;
+        }
+        if(rowreq_ctx->data->if_speed != ifentry->if_speed) {
+            ++updated;
+            rowreq_ctx->data->if_speed = ifentry->if_speed;
+        }
+        if(rowreq_ctx->data->if_mtu != ifentry->if_mtu) {
+            ++updated;
+            rowreq_ctx->data->if_mtu = ifentry->if_mtu;
+        }
+        if((rowreq_ctx->data->if_paddr_len != ifentry->if_paddr_len) ||
+           memcmp(rowreq_ctx->data->if_paddr, ifentry->if_paddr,
+                  ifentry->if_paddr_len)) {
+            ++updated;
+            SNMP_SWIPE_MEM(rowreq_ctx->data->if_paddr, ifentry->if_paddr);
+        }
+        
+        if(updated) {
+            rowreq_ctx->data->if_lastchange = netsnmp_get_agent_uptime();
+        }
+        netsnmp_access_interface_entry_free(ifentry);
+    }
+    
+} 
+#endif /* USING_IF_MIB_IFTABLE_IFTABLE_MODULE */
 
 /**
  * cache clean up
@@ -168,6 +294,7 @@ ifXTable_cache_load(netsnmp_container * container)
 void
 ifXTable_cache_free(netsnmp_container * container)
 {
+    DEBUGMSGTL(("ifXTable:access:cache_free","freeing cache\n"));
 }
 
 /** @} */

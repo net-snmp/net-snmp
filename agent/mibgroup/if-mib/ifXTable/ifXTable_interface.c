@@ -369,7 +369,7 @@ ifXTable_index_from_oid(netsnmp_index * oid_idx,
  * allocate resources for a ifXTable_rowreq_ctx
  */
 ifXTable_rowreq_ctx *
-ifXTable_allocate_rowreq_ctx(void)
+ifXTable_allocate_rowreq_ctx(ifXTable_data * data)
 {
     ifXTable_rowreq_ctx *rowreq_ctx =
         SNMP_MALLOC_TYPEDEF(ifXTable_rowreq_ctx);
@@ -379,7 +379,18 @@ ifXTable_allocate_rowreq_ctx(void)
     if (NULL == rowreq_ctx) {
         snmp_log(LOG_ERR, "Couldn't allocate memory for a "
                  "ifXTable_rowreq_ctx.\n");
+    } else {
+        if (NULL != data)
+            rowreq_ctx->data = data;
+        else if (NULL == (rowreq_ctx->data = ifXTable_allocate_data())) {
+            SNMP_FREE(rowreq_ctx);
+            return NULL;
+        }
     }
+
+    /*
+     * undo context will be allocated when needed (in *_undo_setup)
+     */
 
     rowreq_ctx->oid_idx.oids = rowreq_ctx->oid_tmp;
 
@@ -402,6 +413,11 @@ ifXTable_release_rowreq_ctx(ifXTable_rowreq_ctx * rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
 
+    if (rowreq_ctx->data)
+        ifXTable_release_data(rowreq_ctx->data);
+
+    if (rowreq_ctx->undo)
+        ifXTable_release_data(rowreq_ctx->undo);
 
     /*
      * free index oid pointer
@@ -934,6 +950,15 @@ _mfd_ifXTable_undo_setup(netsnmp_mib_handler *handler,
     ifXTable_rowreq_ctx *rowreq_ctx =
         netsnmp_container_table_extract_context(requests);
     netsnmp_assert(NULL != rowreq_ctx);
+    /*
+     * allocate context, if needed
+     */
+    rowreq_ctx->undo = ifXTable_allocate_data();
+    if (NULL == rowreq_ctx->data) {
+        /** msg already logged */
+        return SNMP_ERR_RESOURCEUNAVAILABLE;
+    }
+
     return ifXTable_undo_setup(rowreq_ctx);
 }
 
@@ -1208,20 +1233,24 @@ _cache_free(netsnmp_cache * cache, void *magic)
 void
 _ifXTable_container_init(ifXTable_interface_ctx * if_ctx)
 {
-    extern oid             ifTable_oid;
-    extern int             ifTable_oid_size;
-
     DEBUGTRACE;
 
     /*
      * set up the cache
+     */
+#ifdef USING_IF_MIB_IFTABLE_IFTABLE_MODULE
+    /*
      * special case: sharing a cache.
      */
+    extern oid             ifTable_oid;
+    extern int             ifTable_oid_size;
+
     if_ctx->cache = netsnmp_cache_find_by_oid(&ifTable_oid, ifTable_oid_size);
     if (NULL != if_ctx->cache) {
         if_ctx->container = (netsnmp_container*)if_ctx->cache->magic;
         return;
     }
+#endif /* USING_IF_MIB_IFTABLE_IFTABLE_MODULE */
 
     snmp_log(LOG_ERR, "error finding cache for ifTable, using new one\n");
     if_ctx->cache = netsnmp_cache_create(30,    /* timeout in seconds */
