@@ -636,16 +636,27 @@ sub gettable {
     my @columns;
     if (!$options->{'columns'}) {
 	if ($textnode) {
+	    my %indexes;
+
+	    if ($parse_indexes) {
+		# get indexes
+		my @indexes =
+		  @{$SNMP::MIB{$textnode}{'children'}[0]{'indexes'}};
+		# quick translate into a hash
+		map { $indexes{$_} = 1; } @indexes;
+	    }
+
 	    # calculate the list of accessible columns that aren't indexes
 	    my $children = $SNMP::MIB{$textnode}{'children'}[0]{'children'};
 	    foreach my $c (@$children) {
 		push @columns,
-		  $root_oid . ".1." . $c->{'subID'};
+		  $root_oid . ".1." . $c->{'subID'}
+		    if (!$indexes{$c->{'label'}});
 	    }
-	} else {
-	    # XXX: requires specification in numeric...  ack.!
-	    @columns = @{$options->{'columns'}};
 	}
+    } else {
+	# XXX: requires specification in numeric OID...  ack.!
+	@columns = @{$options->{'columns'}};
     }
 
     # create the initial walking info.
