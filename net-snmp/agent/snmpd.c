@@ -376,6 +376,8 @@ char *argvrestart;
 char *argvrestartname;
 
 extern char *VersionInfo;
+extern char *optconfigfile;
+extern char dontReadConfigFiles;
 
 void usage(prog)
 char *prog;
@@ -392,6 +394,8 @@ char *prog;
   printf("-p NUM\t\tRun on port NUM instead of the default:  161\n");
   printf("-L\t\tPrint warnings/messages to stdout/err rather than a logfile\n");
   printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
+  printf("-c CONFFILE\tRead CONFFILE as a configuration file.\n");
+  printf("-C\t\tDon't read the default configuration files.\n");
   printf("\t\t(By default LOGFILE=%s)\n",
 #ifdef LOGFILE
          LOGFILE
@@ -420,6 +424,9 @@ main(argc, argv)
     char *cptr, **argvptr;
 
     logfile[0] = 0;
+    optconfigfile = NULL;
+    dontReadConfigFiles = 0;
+    
 #ifdef LOGFILE
     strcpy(logfile,LOGFILE);
 #endif
@@ -430,6 +437,12 @@ main(argc, argv)
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
+                case 'c':
+                    optconfigfile = strdup(argv[++arg]);
+                    break;
+                case 'C':
+                    dontReadConfigFiles = 1;
+                    break;
 		case 'd':
 		    snmp_dump_packet++;
 		    break;
