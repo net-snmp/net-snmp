@@ -356,12 +356,14 @@ sub new {
 
    # allow override of remote SNMP port
    $this->{RemotePort} ||= 161;
+   print("port is:$this->{RemotePort}\n");
 
    # destination host defaults to localhost
    $this->{DestHost} ||= 'localhost';
 
    # community defaults to public
    $this->{Community} ||= 'public';
+   print("com is:$this->{Community}\n");
 
    # number of retries before giving up, defaults to SNMP_DEFAULT_RETRIES
    $this->{Retries} = SNMP::SNMP_DEFAULT_RETRIES() unless defined($this->{Retries});
@@ -438,7 +440,7 @@ sub new {
    $this->{UseSprintValue} ||= $SNMP::use_sprint_value;
    $this->{UseEnums} ||= $SNMP::use_enums;
 
-   bless $this;
+   bless $this, $type;
 }
 
 sub update {
@@ -645,102 +647,6 @@ sub getbulk {
    return(wantarray() ? @res : $res[0]);
 }
 
-package SNMP::TrapSession;
-
-sub new {
-   my $type = shift;
-   my $this = {};
-   my ($name, $aliases, $host_type, $len, $thisaddr);
-
-   %$this = @_;
-
-   $this->{ErrorStr} = ''; # if methods return undef check for expln.
-   $this->{ErrorNum} = 0;  # contains SNMP error return
-
-   # v1 or v2, defaults to v1
-   $this->{Version} ||= 1;
-
-   # allow override of remote SNMP trap port
-   $this->{RemotePort} ||= 162;
-
-   # destination host defaults to localhost
-   $this->{DestHost} ||= 'localhost';
-
-   # community defaults to public
-   $this->{Community} ||= 'public';
-
-   # number of retries before giving up, defaults to SNMP_DEFAULT_RETRIES
-   $this->{Retries} = SNMP::SNMP_DEFAULT_RETRIES() unless defined($this->{Retries});
-
-   # timeout before retry, defaults to SNMP_DEFAULT_TIMEOUT
-   $this->{Timeout} = SNMP::SNMP_DEFAULT_TIMEOUT() unless defined($this->{Timeout});
-
-   # convert to dotted ip addr if needed
-   if ($this->{DestHost} =~ /\d+\.\d+\.\d+\.\d+/) {
-     $this->{DestAddr} = $this->{DestHost};
-   } else {
-     if (($name, $aliases, $host_type, $len, $thisaddr) =
-	 gethostbyname($this->{DestHost})) {
-	 $this->{DestAddr} = join('.', unpack("C4", $thisaddr));
-     } else {
-	 warn("unable to resolve destination address($this->{DestHost}!")
-	     if $SNMP::verbose;
-	 return undef;
-     }
-   }
-
-   if (!($this->{Version} eq '3')) {
-   $this->{SessPtr} = SNMP::_new_session($this->{Version},
-					 $this->{Community},
-					 $this->{DestAddr},
-					 $this->{RemotePort},
-					 $this->{Retries},
-					 $this->{Timeout},
-					);
-   } else {
-       $this->{SecName} ||= 'initial';
-       $this->{SecLevel} ||= 'noAuthNoPriv';
-       $this->{SecLevel} = $SNMP::V3_SEC_LEVEL_MAP{$this->{SecLevel}}
-          if $this->{SecLevel} !~ /^\d+$/;
-       $this->{SecEngineId} ||= '';
-       $this->{ContextEngineId} ||= $this->{SecEngineId};
-       $this->{Context} ||= '';
-       $this->{AuthProto} ||= 'MD5';
-       $this->{AuthPass} ||= '';
-       $this->{PrivProto} ||= 'DES';
-       $this->{PrivPass} ||= '';
-       $this->{EngineBoots} = 0 if not defined $this->{EngineBoots};
-       $this->{EngineTime} = 0 if not defined $this->{EngineTime};
-
-   $this->{SessPtr} = SNMP::_new_v3_session($this->{Version},
-						$this->{DestAddr},
-						$this->{RemotePort},
-						$this->{Retries},
-						$this->{Timeout},
-						$this->{SecName},
-						$this->{SecLevel},
-						$this->{SecEngineId},
-						$this->{ContextEngineId},
-						$this->{Context},
-						$this->{AuthProto},
-						$this->{AuthPass},
-						$this->{PrivProto},
-						$this->{PrivPass},
-						$this->{EngineBoots},
-						$this->{EngineTime},
-						);
-   }
-   
-   return undef unless $this->{SessPtr};
-
-   SNMP::initMib($SNMP::auto_init_mib); # ensures that *some* mib is loaded
-
-   $this->{UseLongNames} ||= $SNMP::use_long_names;
-   $this->{UseSprintValue} ||= $SNMP::use_sprint_value;
-   $this->{UseEnums} ||= $SNMP::use_enums;
-
-   bless $this;
-}
 
 %trap_type = (coldStart => 0, warmStart => 1, linkDown => 2, linkUp => 3,
 	      authFailure => 4, egpNeighborLoss => 5, specific => 6 );
@@ -796,7 +702,7 @@ sub trap {
 }
 
 sub inform {
-# (v2|v3) oid, uptime, <vars>
+# (v3) trapoid, uptime, <vars>
 # $sess->inform(uptime => 1234,
 #             trapoid => 'coldStart',
 #             [[ifIndex, 1, 1],[sysLocation, 0, "here"]]); # optional vars
@@ -818,13 +724,31 @@ sub inform {
    }
 
    my $trap_oid = $param{trapoid};
-   my $uptime = $param{uptime};
-   @res = SNMP::_inform($this, $uptime, $trap_oid, $varbind_list_ref);
+   my $uptime = $param{uptime} || SNMP::_sys_uptime();
+   if($this->{Version} eq '3') {
+     @res = SNMP::_inform($this, $uptime, $trap_oid, $varbind_list_ref);
+   } else {
+     warn("error:inform: This version doesn't support the command\n");
+   }
 
    return(wantarray() ? @res : $res[0]);
 }
 
-###################################################################
+package SNMP::TrapSession;
+@ISA = ('SNMP::Session');
+
+sub new {
+
+   my $type = shift;
+
+   # allow override of remote SNMP trap port
+   unless (grep(/RemotePort/, @_)) {
+       push(@_, 'RemotePort', 162); # push on new default for trap session
+   }
+
+   SNMP::Session::new($type, @_);
+}
+
 package SNMP::Varbind;
 
 $tag_f = 0;
