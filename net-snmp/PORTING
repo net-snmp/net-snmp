@@ -15,7 +15,7 @@ http://ucd-snmp.ucdavis.edu/developer.html.
 
 If you send patches to us, it would greatly help us if you sent them
 to us based on the current checked out copy from CVS.  To do this,
-send us the output of "cvs diff -c" run in the top level ucd-snmp
+send us the output of "cvs diff -u" run in the top level ucd-snmp
 source tree after you have modified the files that will fix the
 problem or add the feature you're submitting the patch for.
 
