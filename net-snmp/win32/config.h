@@ -804,3 +804,7 @@
 #define ENV_SEPARATOR ":"
 #define ENV_SEPARATOR_CHAR ':'
 #endif
+
+typedef int mode_t;
+
+#define AGENT_DIRECTORY_MODE 0700
