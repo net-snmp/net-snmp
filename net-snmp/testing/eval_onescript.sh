@@ -14,7 +14,7 @@
 
 . eval_tools.sh
 
-. $1
+. ./$1
 
 # We shouldn't get here...
 # If we do, it means they didn't exit properly.
