@@ -462,14 +462,13 @@ shutdown_snmpTargetParamsEntry(void)
 
 
 unsigned char *
-var_snmpTargetParamsEntry(vp, name, length, exact, var_len, write_method)
-    struct  variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) (int, unsigned char *,unsigned char, 
-			      int, unsigned char *,oid*, int);
+var_snmpTargetParamsEntry(
+    struct  variable *vp,
+    oid     *name,
+    int     *length,
+    int     exact,
+    int     *var_len,
+    WriteMethod **write_method)
 {
   /* variables we may use later */
   static long long_ret;
@@ -543,15 +542,14 @@ var_snmpTargetParamsEntry(vp, name, length, exact, var_len, write_method)
 
 /* Assign a value to the mpModel variable */
 int
-write_snmpTargetParamsMPModel(action, var_val, var_val_type, 
-			      var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetParamsMPModel(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   static long                    long_ret;
   int                            size, bigsize=1000;
@@ -605,15 +603,14 @@ write_snmpTargetParamsMPModel(action, var_val, var_val_type,
 
 /* Assign a value to the Security Model variable */
 int
-write_snmpTargetParamsSecurityModel(action, var_val, var_val_type, 
-				    var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetParamsSecurityModel(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   static long                    long_ret;
   int                            size, bigsize=1000;
@@ -669,15 +666,14 @@ write_snmpTargetParamsSecurityModel(action, var_val, var_val_type,
 
 /* Assign a value to the Security Name variable */
 int
-write_snmpTargetParamsSecurityName(action, var_val, var_val_type, 
-				   var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetParamsSecurityName(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   static unsigned char           string[1500];
   int                            size=1500, bigsize=1000;
@@ -736,15 +732,14 @@ write_snmpTargetParamsSecurityName(action, var_val, var_val_type,
 
 
 int
-write_snmpTargetParamsSecurityLevel(action, var_val, var_val_type, 
-				    var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetParamsSecurityLevel(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   static long                    long_ret;
   int                            size, bigsize=1000;
@@ -800,15 +795,14 @@ write_snmpTargetParamsSecurityLevel(action, var_val, var_val_type,
 
 /* Assign a value to the Storage Type variable */
 int
-write_snmpTargetParamsStorageType(action, var_val, var_val_type, 
-				  var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetParamsStorageType(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   static long                    long_ret;
   int                            size, bigsize=1000;
@@ -892,15 +886,14 @@ int snmpTargetParams_createNewRow(
 
 /* Assign a value to the Row Status variable */
 int
-write_snmpTargetParamsRowStatus(action, var_val, var_val_type, 
-				var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmpTargetParamsRowStatus(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   int      var_val_len,
+   u_char   *statP,
+   oid      *name,
+   int      name_len)
 {
   enum commit_action_enum        {NOTHING, DESTROY, CREATE, CHANGE};
   enum commit_action_enum        onCommitDo = NOTHING; 

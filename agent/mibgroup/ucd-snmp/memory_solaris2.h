@@ -8,7 +8,7 @@
 #include "mibdefs.h"
 
 int getswap(int);
-unsigned char *var_extensible_mem(struct variable *, oid *, int *, int, int *, WriteMethod **write_method);
+extern FindVarMethod var_extensible_mem;
 
 void init_memory_solaris2(void);
 

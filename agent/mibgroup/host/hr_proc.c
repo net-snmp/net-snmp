@@ -34,7 +34,7 @@ int header_hrproc (struct variable *,oid *, int *, int, int *,  WriteMethod **);
 	 *********************/
 
 
-void	init_hr_proc( )
+void init_hr_proc(void)
 {
     init_device[ HRDEV_PROC ] = Init_HR_Proc;	
     next_device[ HRDEV_PROC ] = Get_Next_HR_Proc;

@@ -138,9 +138,8 @@ struct variable2 icmp_variables[] = {
    registering underneath */
 oid icmp_variables_oid[] = { 1,3,6,1,2,1,5 };
 
-void	init_icmp( )
+void init_icmp(void)
 {
-
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/icmp", icmp_variables, variable2, icmp_variables_oid);
 

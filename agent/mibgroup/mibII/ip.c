@@ -176,9 +176,8 @@ struct variable4 ip_variables[] = {
    registering underneath */
 oid ip_variables_oid[] = { 1,3,6,1,2,1,4 };
 
-void init_ip()
+void init_ip(void)
 {
-
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/ip", ip_variables, variable4, ip_variables_oid);
 

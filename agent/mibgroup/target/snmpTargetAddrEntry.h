@@ -53,21 +53,18 @@ struct targetAddrTable_struct {
 
 extern void          init_snmpTargetAddrEntry(void);
 extern void          shutdown_snmpTargetAddrEntry(void);
-extern unsigned char *var_snmpTargetAddrEntry
-
-(struct variable *, oid *, int *, int, int *, int (**write) 
- (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int));
+extern FindVarMethod var_snmpTargetAddrEntry;
 
 void snmpd_parse_config_targetAddr( char *, char *);
 
-int write_snmpTargetAddrTDomain(    int, u_char *,u_char, int, u_char *,oid*, int);
-int write_snmpTargetAddrTAddress(   int, u_char *,u_char, int, u_char *,oid*, int);
-int write_snmpTargetAddrTimeout(    int, u_char *,u_char, int, u_char *,oid*, int);
-int write_snmpTargetAddrRetryCount( int, u_char *,u_char, int, u_char *,oid*, int);
-int write_snmpTargetAddrTagList(    int, u_char *,u_char, int, u_char *,oid*, int);
-int write_snmpTargetAddrParams(     int, u_char *,u_char, int, u_char *,oid*, int);
-int write_snmpTargetAddrStorageType(int, u_char *,u_char, int, u_char *,oid*, int);
-int write_snmpTargetAddrRowStatus(  int, u_char *,u_char, int, u_char *,oid*, int);
+WriteMethod write_snmpTargetAddrTDomain;
+WriteMethod write_snmpTargetAddrTAddress;
+WriteMethod write_snmpTargetAddrTimeout;
+WriteMethod write_snmpTargetAddrRetryCount;
+WriteMethod write_snmpTargetAddrTagList;
+WriteMethod write_snmpTargetAddrParams;
+WriteMethod write_snmpTargetAddrStorageType;
+WriteMethod write_snmpTargetAddrRowStatus;
 
 
 /* Only load this structure when this .h file is called in the snmp_vars.c 

@@ -73,7 +73,6 @@ extern int sdlist[];
 extern int sdlen;
 extern int (*sd_handlers[])(int);
 
-//XX notused static u_short smux_port;
 static struct timeval smux_rcv_timeout;
 static u_long smux_reqid;
 
@@ -150,7 +149,7 @@ smux_parse_peer_auth( char *token, char *cptr)
 }
 
 void
-smux_free_peer_auth()
+smux_free_peer_auth(void)
 {
 	int i;
 
@@ -217,17 +216,15 @@ init_smux(void)
 }
 
 u_char *
-var_smux(vp, name, length, exact, var_len, write_method)
-	register struct variable *vp;
-	oid *name;
-	int *length;
-	int exact;
-	int *var_len;
-	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int);
+var_smux(struct variable *vp,
+	oid *name,
+	int *length,
+	int exact,
+	int *var_len,
+	WriteMethod **write_method)
 {
 	u_char *valptr, val_type;
 	smux_reg *rptr;
-//XX notused	int fd;
 
 	*write_method = NULL;
 
@@ -260,15 +257,14 @@ var_smux(vp, name, length, exact, var_len, write_method)
 }
 
 int 
-var_smux_write(action, var_val, var_val_type, var_val_len,
-    statP, name, name_len)
-	int action;
-	u_char *var_val;
-	u_char var_val_type;
-	int var_val_len;
-	u_char *statP;
-	oid *name;
-	int name_len;
+var_smux_write(
+	int action,
+	u_char *var_val,
+	u_char var_val_type,
+	int var_val_len,
+	u_char *statP,
+	oid *name,
+	int name_len)
 {
 	smux_reg *rptr;
 	u_char buf[SMUXMAXPKTSIZE], *ptr, sout[6], type;
@@ -333,13 +329,12 @@ var_smux_write(action, var_val, var_val_type, var_val_len,
 }
 
 int
-smux_accept(sd)
-int sd;
+smux_accept(int sd)
 {
 	u_char data[SMUXMAXPKTSIZE], *ptr, type;
 	struct sockaddr_in in_socket;
 	struct timeval tv;
-	int /*XX notused count,*/ fail, fd, len;
+	int fail, fd, len;
 
 	len = sizeof(struct sockaddr_in);
 	/* this may be too high */
@@ -401,14 +396,13 @@ int sd;
 		DEBUGMSGTL (("smux","[smux_accept] fd %d, sdlen %d\n", fd, sdlen));
 	}
 
-	return SMUXOK; //XX ??
+	return SMUXOK;
 }
 
 int
-smux_process(fd)
-	int fd;
+smux_process(int fd)
 {
-	int error, /*XX notused authd, i,*/ len, length;
+	int error, len, length;
 	u_char data[SMUXMAXPKTSIZE], *ptr, type;
 
 	length = recv(fd, data, SMUXMAXPKTSIZE, 0);
@@ -470,11 +464,7 @@ smux_process(fd)
 }
 
 static u_char *
-smux_open_process(fd, ptr, len, fail)
-	int fd;
-	u_char *ptr;
-	int *len;
-	int *fail;
+smux_open_process(int fd, u_char *ptr, int *len, int *fail)
 {
 	u_char type;
 	u_long version;
@@ -554,8 +544,7 @@ smux_open_process(fd, ptr, len, fail)
 }
 
 static void
-smux_send_close(fd, reason)
-    int fd, reason;
+smux_send_close(int fd, int reason)
 {
     u_char outpacket[3], *ptr;
 
@@ -576,11 +565,7 @@ smux_send_close(fd, reason)
         
 
 static int
-smux_auth_peer(name, namelen, passwd, fd)
-	oid *name;
-	int namelen;
-	char *passwd;
-	int fd;
+smux_auth_peer(oid *name, int namelen, char *passwd, int fd)
 {
 	int i;
 
@@ -607,10 +592,7 @@ smux_auth_peer(name, namelen, passwd, fd)
  * Need to catch signal when snmpd goes down and send close pdu to gated 
  */
 static u_char *
-smux_close_process(fd, ptr, len)
-	int fd;
-	u_char *ptr;
-	int *len;
+smux_close_process(int fd, u_char *ptr, int *len)
 {
 	long down = 0;
 	int length = *len;
@@ -628,10 +610,7 @@ smux_close_process(fd, ptr, len)
 }
 
 static u_char *
-smux_rreq_process(sd, ptr, len)
-	int sd;
-	u_char *ptr;
-	int *len;
+smux_rreq_process(int sd, u_char *ptr, int *len)
 {
 	u_long priority;
 	u_long operation;
@@ -639,7 +618,7 @@ smux_rreq_process(sd, ptr, len)
 	int oid_name_len, i, result;
 	u_char type;
         char c_oid[SPRINT_MAX_LEN];
-	smux_reg *rptr, *nrptr; //XX notused , **which;
+	smux_reg *rptr, *nrptr;
 
 	oid_name_len = MAX_OID_LEN;
 	ptr = asn_parse_objid(ptr, len, &type, oid_name, &oid_name_len); 
@@ -779,9 +758,7 @@ done:
 }
 
 static void
-smux_replace_active(actptr, pasptr)
-	smux_reg *actptr;
-	smux_reg *pasptr;
+smux_replace_active(smux_reg *actptr, smux_reg *pasptr)
 {
 	smux_list_detach(&ActiveRegs, &actptr);
 	unregister_mib(actptr->sr_name, actptr->sr_name_len);
@@ -796,11 +773,8 @@ smux_replace_active(actptr, pasptr)
 }
 
 static void
-smux_list_detach(head, m_remove)
-	smux_reg **head;
-	smux_reg **m_remove;
+smux_list_detach(smux_reg **head, smux_reg **m_remove)
 {
-
 	smux_reg *rptr, *rptr2;
 
 	if (*head == NULL) {
@@ -828,9 +802,7 @@ smux_list_detach(head, m_remove)
  * priority) return -1.
  */
 static int
-smux_list_add(head, add)
-	smux_reg **head;
-	smux_reg *add;
+smux_list_add(smux_reg **head, smux_reg *add)
 {
 	smux_reg *rptr;
 	int result;
@@ -882,9 +854,7 @@ smux_list_add(head, add)
  *
  */
 static smux_reg *
-smux_find_replacement(name, name_len)
-	oid *name;
-	int name_len;
+smux_find_replacement(oid *name, int name_len)
 {
 	smux_reg *rptr, *bestptr;
 	int bestlen, difflen;
@@ -908,13 +878,12 @@ smux_find_replacement(name, name_len)
 }
 
 u_char *
-smux_snmp_process(exact, objid, len, return_len, return_type, sd)
-	int exact;
-	oid *objid;
-	int *len;
-	int *return_len;
-	u_char *return_type;
-	int sd;
+smux_snmp_process(int exact,
+	oid *objid,
+	int *len,
+	int *return_len,
+	u_char *return_type,
+	int sd)
 {
 	u_char packet[SMUXMAXPKTSIZE], *ptr, result[SMUXMAXPKTSIZE];
 	int length = SMUXMAXPKTSIZE;
@@ -966,16 +935,15 @@ smux_snmp_process(exact, objid, len, return_len, return_type, sd)
 		return NULL;
 	}
 
-	return ptr; //XX OK ??
+	return ptr;
 }
 
 static u_char *
-smux_parse(rsp, objid, oidlen, return_len, return_type)
-	u_char *rsp;
-	oid *objid;
-	int *oidlen;
-	int *return_len;
-	u_char *return_type;
+smux_parse(u_char *rsp,
+	oid *objid,
+	int *oidlen,
+	int *return_len,
+	u_char *return_type)
 {
 	int length = SMUXMAXPKTSIZE; 
 	u_char *ptr, type;
@@ -1021,13 +989,12 @@ smux_parse(rsp, objid, oidlen, return_len, return_type)
 
 
 static u_char *
-smux_parse_var(varbind, varbindlength, objid, oidlen, varlength, vartype)
-	u_char *varbind;
-	int *varbindlength;
-	oid *objid;
-	int *oidlen;
-	int *varlength;
-	u_char *vartype;
+smux_parse_var(u_char *varbind,
+	int *varbindlength,
+	oid *objid,
+	int *oidlen,
+	int *varlength,
+	u_char *vartype)
 {
 	oid var_name[MAX_OID_LEN];
 	int var_name_len;
@@ -1147,19 +1114,18 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength, vartype)
 
 /* XXX This is a bad hack - do not want to muck with ucd code */
 static int
-smux_build(type, reqid, objid, oidlen, val_type, val, val_len, packet, length)
-	u_char type;
-	u_long reqid;
-	oid *objid;
-	int *oidlen;
-	u_char val_type;
-	u_char *val;
-	int val_len;
-	u_char *packet;
-	int *length;
+smux_build(u_char type,
+	u_long reqid,
+	oid *objid,
+	int *oidlen,
+	u_char val_type,
+	u_char *val,
+	int val_len,
+	u_char *packet,
+	int *length)
 {
 	u_char *ptr, *save1, *save2;
-	int len; //XX notused , len1, len2, len3;
+	int len;
 	long errstat = 0;
 	long errindex = 0;
 
@@ -1210,10 +1176,9 @@ smux_build(type, reqid, objid, oidlen, val_type, val, val_len, packet, length)
 }
 
 static void
-smux_peer_cleanup(sd)
-	int sd;
+smux_peer_cleanup(int sd)
 {
-	smux_reg *nrptr, *rptr, *rptr2; //XX notused , *found[SMUX_MAX_PEERS];
+	smux_reg *nrptr, *rptr, *rptr2;
 	int nfound, i;
 
 	nfound = 0;
@@ -1270,8 +1235,7 @@ smux_peer_cleanup(sd)
 }
 
 int 
-smux_send_rrsp(sd, pri)
-	int sd, pri;
+smux_send_rrsp(int sd, int pri)
 {
 	u_char outdata[6], *ptr;
 	int i, mask;
@@ -1291,3 +1255,4 @@ smux_send_rrsp(sd, pri)
 	else
 		return SMUXOK;
 }
+
