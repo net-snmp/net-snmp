@@ -246,7 +246,7 @@ netsnmp_access_ipaddress_entry_set(netsnmp_ipaddress_entry * entry)
  * such as oid_index, ns_ia_index and flags are not compared.
  *
  * @retval -1  : error
- * @retval >=0 : number of fileds updated
+ * @retval >=0 : number of fields updated
  */
 int
 netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *lhs,
@@ -329,6 +329,44 @@ netsnmp_access_ipaddress_entry_update(netsnmp_ipaddress_entry *lhs,
     }
 
     return changed;
+}
+
+/**
+ * copy an  ipaddress_entry
+ *
+ * @retval -1  : error
+ * @retval 0   : no error
+ */
+int
+netsnmp_access_ipaddress_entry_copy(netsnmp_ipaddress_entry *lhs,
+                                    netsnmp_ipaddress_entry *rhs)
+{
+    int rc;
+
+    if (NULL != lhs->ia_prefix_oid)
+        SNMP_FREE(lhs->ia_prefix_oid);
+    snmp_clone_mem((void **) &lhs->ia_prefix_oid, rhs->ia_prefix_oid,
+                   rhs->ia_prefix_oid_len * sizeof(oid));
+    lhs->ia_prefix_oid_len = rhs->ia_prefix_oid_len;
+
+    /*
+     * copy arch stuff. we don't care if it changed
+     */
+    rc = netsnmp_arch_ipaddress_entry_copy(lhs,rhs);
+    if (0 != rc) {
+        snmp_log(LOG_ERR,"arch ipaddress copy failed\n");
+        return -1;
+    }
+
+    lhs->if_index = rhs->if_index;
+    lhs->ia_storagetype = rhs->ia_storagetype;
+    lhs->ia_address_len = rhs->ia_address_len;
+    memcpy(lhs->ia_address, rhs->ia_address, rhs->ia_address_len);
+    lhs->ia_type = rhs->ia_type;
+    lhs->ia_status = rhs->ia_status;
+    lhs->ia_origin = rhs->ia_origin;
+    
+    return 0;
 }
 
 /**---------------------------------------------------------------------*/
