@@ -1,6 +1,7 @@
 TODO list for the ucd-snmp-coders:
 
-  Snmpv2c support.
+  SNMPv2c support.
+  Implement the host resources mib as a module.
   make agent/mibgroup/read_config.c create a new macro to allow new
     modules to request callbacks to functions for snmpd.conf lines and
     move to required code rather than a module.
@@ -24,7 +25,6 @@ TODO list for the ucd-snmp-coders:
 Other Ideas:
   Make the mib parser figure out which of the above files it needs to
     load rather than loading them all -- Tom Georges & Joe Marzot
-    (tom.georges@antec.com & gmarzot@BayNetworks.com)
 
 ===================
 
