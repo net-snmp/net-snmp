@@ -958,7 +958,7 @@ int main(int argc, char *argv[])
 		syslog(LOG_INFO, "Snmptrapd reconfiguring");
 	    update_config();
             if (trap1_fmt_str_remember) {
-                free_trap1_fmt;
+                free_trap1_fmt();
                 trap1_fmt_str = strdup(trap1_fmt_str_remember);
             }
 	    reconfig = 0;
