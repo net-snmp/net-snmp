@@ -351,9 +351,9 @@ snmp_open(session)
 {
     struct session_list *slp;
     struct snmp_internal_session *isp;
-    u_char *cp;
+    u_char *cp, *comp;
     oid *op;
-    int sd;
+    int sd, comlen;
     in_addr_t addr;
     struct sockaddr_in	me;
     struct hostent *hp;
@@ -368,15 +368,28 @@ snmp_open(session)
 
     /* Copy session structure and link into list */
     slp = (struct session_list *)malloc(sizeof(struct session_list));
+    if (slp == NULL) { 
+      snmp_errno = SNMPERR_GENERR;
+      return(NULL);
+    }
     slp->internal = isp = (struct snmp_internal_session *)malloc(sizeof(struct snmp_internal_session));
+    if (isp == NULL) { 
+      free(slp);
+      snmp_errno = SNMPERR_GENERR;
+      return(NULL);
+    }
     memset(isp, 0, sizeof(struct snmp_internal_session));
     slp->internal->sd = -1; /* mark it not set */
     slp->session = (struct snmp_session *)malloc(sizeof(struct snmp_session));
+    if (slp->session == NULL) { 
+      free(isp);
+      free(slp);
+      snmp_errno = SNMPERR_GENERR;
+      return(NULL);
+    }
     memmove(slp->session, session, sizeof(struct snmp_session));
     session = slp->session;
-    /* now link it in. */
-    slp->next = Sessions;
-    Sessions = slp;
+
     /*
      * session now points to the new structure that still contains pointers to
      * data allocated elsewhere.  Some of this data is copied to space malloc'd
@@ -385,23 +398,40 @@ snmp_open(session)
 
     if (session->peername != NULL){
 	cp = (u_char *)malloc((unsigned)strlen(session->peername) + 1);
+        if (cp == NULL) { 
+          free(slp->session);
+          free(isp);
+          free(slp);
+          snmp_errno = SNMPERR_GENERR;
+          return(NULL);
+        }
 	strcpy((char *)cp, session->peername);
 	session->peername = (char *)cp;
     }
 
     /* Fill in defaults if necessary */
-    if (session->community_len != SNMP_DEFAULT_COMMUNITY_LEN){
-	cp = (u_char *)malloc((unsigned)session->community_len);
-	memmove(cp, session->community, session->community_len);
-    } else {
-	session->community_len = strlen(DEFAULT_COMMUNITY);
-	cp = (u_char *)malloc((unsigned)session->community_len);
-	memmove(cp, DEFAULT_COMMUNITY, session->community_len);
+    comp = session->community;
+    comlen = session->community_len;
+    if (comlen == SNMP_DEFAULT_COMMUNITY_LEN) {
+	comp = DEFAULT_COMMUNITY;
+	comlen = strlen(comp);
     }
+    cp = (u_char *)malloc(comlen);
+    if (cp == NULL) { 
+      free(session->peername);
+      free(slp->session);
+      free(isp);
+      free(slp);
+      snmp_errno = SNMPERR_GENERR;
+      return(NULL);
+    }
+    memcpy(cp, comp, comlen);
     session->community = cp;	/* replace pointer with pointer to new data */
+    session->community_len = comlen;
 
     if (session->srcPartyLen > 0){
 	op = (oid *)malloc((unsigned)session->srcPartyLen * sizeof(oid));
+	if (op) /* XX else NO MEMORY */
 	memmove(op, session->srcParty, session->srcPartyLen * sizeof(oid));
 	session->srcParty = op;
     } else {
@@ -410,6 +440,7 @@ snmp_open(session)
 
     if (session->dstPartyLen > 0){
 	op = (oid *)malloc((unsigned)session->dstPartyLen * sizeof(oid));
+	if (op) /* XX else NO MEMORY */
 	memmove(op, session->dstParty, session->dstPartyLen * sizeof(oid));
 	session->dstParty = op;
     } else {
@@ -418,6 +449,7 @@ snmp_open(session)
 
     if (session->contextLen > 0){
 	op = (oid *)malloc((unsigned)session->contextLen * sizeof(oid));
+	if (op) /* XX else NO MEMORY */
 	memmove(op, session->context, session->contextLen * sizeof(oid));
 	session->context = op;
     } else {
@@ -428,7 +460,10 @@ snmp_open(session)
 	session->retries = DEFAULT_RETRIES;
     if (session->timeout == SNMP_DEFAULT_TIMEOUT)
 	session->timeout = DEFAULT_TIMEOUT;
-    isp->requests = isp->requestsEnd = NULL;
+
+    /* now link it in. */
+    slp->next = Sessions;
+    Sessions = slp;
 
     /* Set up connections */
     sd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -441,6 +476,18 @@ snmp_open(session)
 	}
 	return 0;
     }
+
+#ifdef SO_BSDCOMPAT
+    /* Patch for Linux.  Without this, UDP packets that fail get an ICMP
+     * response.  Linux turns the failed ICMP response into an error message
+     * and return value, unlike all other OS's.
+     */
+    {
+	int one=1;
+	setsockopt(sd, SOL_SOCKET, SO_BSDCOMPAT, &one, sizeof(one));
+    }
+#endif /* SO_BSDCOMPAT */
+
     isp->sd = sd;
     if (session->peername != SNMP_DEFAULT_PEERNAME){
 	if ((addr = inet_addr(session->peername)) != -1){
@@ -473,6 +520,7 @@ snmp_open(session)
 	isp->addr.sin_addr.s_addr = SNMP_DEFAULT_ADDRESS;
     }
 
+    memset(&me, '\0', sizeof(me));
     me.sin_family = AF_INET;
     me.sin_addr.s_addr = INADDR_ANY;
     me.sin_port = htons(session->local_port);
@@ -1723,12 +1771,16 @@ snmp_timeout __P((void))
 			xdump(packet, length, "");
 			printf("\n");
 		    }
+
 		    if (sendto(isp->sd, (char *)packet, length, 0,
 			       (struct sockaddr *)&rp->pdu->address,
 			       sizeof(rp->pdu->address)) < 0){
 			snmp_set_detail(strerror(errno));
 		    }
-		    tv = now;
+
+/* XX time does not stand still for build/send processing */
+		    gettimeofday(&tv, (struct timezone *)0);
+
 		    rp->time = tv;
 		    tv.tv_usec += rp->timeout;
 		    tv.tv_sec += tv.tv_usec / 1000000L;
