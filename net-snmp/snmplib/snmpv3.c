@@ -105,7 +105,7 @@ snmpv3_authtype_conf(const char *word, char *cptr)
   if (strcasecmp(cptr,"MD5") == 0)
     defaultAuthType = usmHMACMD5AuthProtocol;
   else if (strcasecmp(cptr,"SHA") == 0)
-    defaultAuthType = usmHMACMD5AuthProtocol;
+    defaultAuthType = usmHMACSHA1AuthProtocol;
   else
     config_perror("Unknown authentication type");
   defaultAuthTypeLen = USM_LENGTH_OID_TRANSFORM;
