@@ -246,7 +246,7 @@ netsnmp_save_all_data(netsnmp_data_list *head,
 
             /* call registered function to save the rest */
             if (!(data_list_save_ptr)(cp,
-                                      sizeof(buf) - strlen(cp),
+                                      sizeof(buf) - strlen(buf),
                                       head->data)) {
                 read_config_store(type, buf);
             }
