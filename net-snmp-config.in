@@ -30,7 +30,7 @@ else
       echo @prefix@
       ;;
     --exec-prefix)
-      echo @exec-prefix@
+      echo @exec_prefix@
       ;;
     *)
       echo "unknown option $1"
