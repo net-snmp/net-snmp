@@ -1,3 +1,6 @@
+#ifndef SNMP_API_H
+#define SNMP_API_H
+
 /*
  * snmp_api.h - API for access to snmp.
  *
@@ -14,9 +17,6 @@
 #endif
 
  
-#ifndef SNMP_API_H
-#define SNMP_API_H
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -651,12 +651,6 @@ void   snmp_sess_perror     (const char *prog_string, struct snmp_session *ss);
 
 /* end single session API */
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* SNMP_API_H */
-
 /* generic statistic counters */
 
 /* snmpv3 statistics */
@@ -710,3 +704,9 @@ void   snmp_sess_perror     (const char *prog_string, struct snmp_session *ss);
 #define  STAT_SNMP_STATS_END                 STAT_SNMPOUTTRAPS
 
 #define  MAX_STATS                           35
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* SNMP_API_H */
