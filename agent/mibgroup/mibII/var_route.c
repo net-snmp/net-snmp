@@ -1291,11 +1291,6 @@ Route_Scan_Reload(void)
 
         strncpy(name, rt->rt_dev, sizeof(name));
         name[ sizeof(name)-1 ] = 0;
-        /*
-         * linux says ``lo'', but the interface is stored as ``lo0'': 
-         */
-        if (!strcmp(name, "lo"))
-            strcat(name, "0");
 
         rt->rt_flags = flags, rt->rt_refcnt = refcnt;
         rt->rt_use = use, rt->rt_metric = metric;
