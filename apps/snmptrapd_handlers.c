@@ -124,7 +124,7 @@ parse_forward(const char *token, char *line)
         if (!read_objid(buf, obuf, &olen)) {
             char            buf1[STRINGMAX];
             snprintf(buf1,  sizeof(buf1),
-                    "Bad trap OID in traphandle directive: %s", buf);
+                    "Bad trap OID in forward directive: %s", buf);
             buf1[ sizeof(buf1)-1 ] = 0;
             config_perror(buf1);
             return;
@@ -842,6 +842,7 @@ int   forward_handler( netsnmp_pdu           *pdu,
 
     snmp_sess_init( &session );
     session.peername = handler->token;
+    session.remote_port = SNMP_TRAP_PORT;
     session.version  = pdu->version;
     ss = snmp_open( &session );
 
