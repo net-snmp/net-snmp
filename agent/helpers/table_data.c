@@ -126,22 +126,15 @@ netsnmp_table_data_remove_row(table_data *table, netsnmp_table_row *row)
     return row;
 }
 
-/**
- * removes and frees a row of data to a given table and returns the void *
- *
- * returns the void * data on successful deletion.
- *      or NULL on failure (bad arguments)
- */
+/** deletes a row's memory.
+ *  returns the void data that it doesn't know how to delete. */
 void *
-netsnmp_table_data_delete_row(table_data *table, netsnmp_table_row *row)
+netsnmp_table_data_delete_row(netsnmp_table_row *row)
 {
     void *data;
     
-    if (!row || !table)
+    if (!row)
         return NULL;
-    
-    /* remove it from the list */
-    netsnmp_table_data_remove_row(table,row);
     
     /* free the memory we can */
     if (row->indexes)
@@ -152,6 +145,23 @@ netsnmp_table_data_delete_row(table_data *table, netsnmp_table_row *row)
 
     /* return the void * pointer */
     return data;
+}
+
+/**
+ * removes and frees a row of data to a given table and returns the void *
+ *
+ * returns the void * data on successful deletion.
+ *      or NULL on failure (bad arguments)
+ */
+void *
+netsnmp_table_data_remove_and_delete_row(table_data *table, netsnmp_table_row *row)
+{
+    if (!row || !table)
+        return NULL;
+    
+    /* remove it from the list */
+    netsnmp_table_data_remove_row(table,row);
+    return netsnmp_table_data_delete_row(row);
 }
 
 /** swaps out origrow with newrow.  This does *not* delete/free anything! */
