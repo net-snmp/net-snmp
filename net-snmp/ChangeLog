@@ -1,3 +1,89 @@
+Changes since V3.0.3
+
+hardaker 23 Oct 95 16:37:43
+    - (extensible.c) stopped reporting anything for the disk mib if no
+      disks were defined in the snmpd.conf file.  This was causing an
+      error in the agent's error mib when no disks were defined and
+      someone walks the disk mib.
+
+hardaker 20 Nov 95 16:04:47
+    - (README) Added pointer to this file via ftp
+
+hardaker 20 Nov 95 16:05:12
+    - (TODO) Find and fix memory leak sometime
+
+hardaker 20 Nov 95 16:07:45
+    - (configure.in) Check for -lelf for solaris 2.3 and younger
+    - (configure.in) More solaris specifics:  -DSVR4
+    - (configure.in) Caches initial prompt in the configure script so you
+      won't be bugged twice by the initial question.
+
+hardaker 20 Nov 95 16:08:49
+    - (config.h.in) Check for -lelf for solaris 2.3 and younger
+
+hardaker 20 Nov 95 16:09:37
+    - (all autoconf built files) Updated everything to autoconf 2.5
+
+hardaker 20 Nov 95 16:10:49
+    - (trapnotif) Logs no-responce errors.
+    - (trapnotif) Better string checking (quotes all variables now)
+
+hardaker  1 Dec 95 16:20:13
+    - local/snmpcheck:       *new features*
+      - handles failed snmpwalk/get/sets much more gracefully now
+      - new preference:  You can pick what types of problems to check for
+        - -f on the command line only checks for fixable problems
+      - no longer ping::echos hosts before checking them
+        - instead relies on 'No Response' type replies from snmpwalk/get to
+          determine if a host is up.
+        - ping the host is still an option (through the command line and menus)
+      - converted from Tk-b4 to Tk-b8
+      - Added a logging window for debugging and tracking of actions.
+        - new command line options:  -V NUM  initial log verbosity level
+                                     -L      show the log window at startup
+      - Now translates mib numbers into more reasonable names
+
+hardaker  5 Dec 95 14:57:14
+    - (configure*) added AC_TYPE_PID_T to the configure checks
+
+hardaker  5 Dec 95 15:01:10
+    - (snmpcheck)
+      - New flag:  -d, don't start checking anything.  Just bring up interface.
+      - check for blank output of snmpget before parsing with s///g
+        constructs.
+
+hardaker  5 Dec 95 15:05:20
+    - (agent/extensible)
+      - Bug fix:  alphas and sunoses were reporting incorrect extensible
+        exit codes.  (yet another 64/32 bit bug found).
+      - Bug fix: agent-update,restart, and cache mib flush entries were
+        returning values instead of pointers to values.
+
+hardaker 13 Dec 95 15:27:19
+    - (agent/extensible/misc.c) bug fixes for exec items:
+      - a second snmpwalk of the exec item would return the old cache
+        file.  Fixed by reseting the last cachetime to 0 to always rescan
+        after fork/pipe/memory/etc errors.
+      - Made lastresult a static var.  Was returning wrong exit codes
+        under, strangely enough, only sunos-4 machines.
+
+hardaker 20 Dec 95 09:53:10
+    - snmp_open calls getservbyname only once now, at the request of Gary
+      Hayward <gah@dirac.bellcore.com>.
+
+hardaker 20 Dec 95 15:56:16
+    - Found and fixed a memory leak in the routing table mib.
+
+hardaker 28 Dec 95 10:01:35
+    - Added sedscript to the .cvsignore file.
+
+hardaker 28 Dec 95 10:24:37
+    - Added a sedscript which is built from config.h and agent/extensible/mibdefs.h
+      - used to dynamically build mib.txt and local/snmpcheck.
+
+
+-------------------------------------------------------------------------------
+
 Changes since V3.0.2.1
 
 hardaker 29 Sep 95 13:43:49
