@@ -2119,6 +2119,12 @@ How do I compile with 'cc' instead of 'gcc'?
 
   Run configure with --with-cc=cc
 
+  Note that if you've already run configure once, it will probably have
+  detected the presence of 'gcc', cached this information, and may still
+  try to use this anyway.   In which case, simply remove the 'config.cache'
+  file before re-running configure.
+  
+
 
 But gcc doesn't compile it successfully on my new Solaris system. Why not?
 -------------------------------------------------------------------------
