@@ -27,7 +27,7 @@
 #include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_transport.h>
-#include <net-snmp/library/netsnmpIPXDomain.h>
+#include <net-snmp/library/snmpIPXDomain.h>
 
 #define SNMP_IPX_DEFAULT_PORT	36879		/*  Specified in RFC 1420.  */
 static netsnmp_tdomain ipxDomain;

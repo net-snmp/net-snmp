@@ -21,7 +21,7 @@
 #include <net-snmp/library/snmpTCPDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_IPX_DOMAIN
-#include <net-snmp/library/netsnmpIPXDomain.h>
+#include <net-snmp/library/snmpIPXDomain.h>
 #endif
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
 #include <net-snmp/library/snmpUnixDomain.h>
