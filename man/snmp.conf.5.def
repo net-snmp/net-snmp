@@ -13,7 +13,7 @@ the
 section below.
 .SH PLEASE READ FIRST
 First, make sure you have read the snmp_config(5) manual page that
-describes how the ucd-snmp configuration files opperate, where they
+describes how the ucd-snmp configuration files operate, where they
 are located and how they all work together.
 .SH DIRECTIVES
 .IP "mibdirs (mib-dirs|+mib-dirs)"
@@ -22,7 +22,7 @@ directories.  If the directive value starts with a '+' it prepends
 this list to the front of the default directory list compiled into the
 application.  Note that this value can be overridden by the
 .B MIBDIRS
-environmental variable.
+environment variable.
 .IP "mibs (mib-tokens|+mib-tokens)"
 Specifies a ':' separated list of mib tokens that represent textual
 mib files that should be found and parsed.  If the directive value
@@ -31,13 +31,13 @@ mib token list compiled into the application.  The special keyword of
 "ALL" forces all mibs files found to be read. Note that the value
 specified here can be overridden by the
 .B MIBS
-environmental variable.
+environment variable.
 .IP "mibfile file"
 Specifies a textual mib file to read and parse, in addition to the
 list read from the mibs token.  Note that the value
 specified here can be overridden by the
 .B MIBFILES
-environmental variable.
+environment variable.
 .SH "SEE ALSO"
 snmp_config(5), read_config(3).
 .\" Local Variables:
