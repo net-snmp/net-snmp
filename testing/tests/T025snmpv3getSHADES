@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER SNMPv3 get using templateSHA/MD5DES of system.sysUpTime.0
+
+#
+# Begin test
+#
+
+# standard V3 configuration for templateSHA user
+. ./Sv3config
+
+STARTAGENT
+
+CAPTURE "snmpget $SNMP_FLAGS -v 3 -x DES -X templateSHA_test_pass_priv -a MD5 -A templateSHA_test_pass_auth -l ap -u templateSHA -n xxx localhost system.sysUpTime.0"
+
+STOPAGENT
+
+CHECK "system.sysUpTime.0 = Timeticks:"
+
+FINISHED
