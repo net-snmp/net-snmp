@@ -252,6 +252,11 @@
 /* vfsstat.f_files */
 #undef STRUCT_STATVFS_HAS_F_FILES
 
+/* statfs inode structure tests*/
+#undef STRUCT_STATFS_HAS_F_FILES
+#undef STRUCT_STATFS_HAS_F_FFREE
+#undef STRUCT_STATFS_HAS_F_FAVAIL
+
 /* des_ks_struct.weak_key */
 #undef STRUCT_DES_KS_STRUCT_HAS_WEAK_KEY
 
