@@ -4,7 +4,6 @@
 
 #define MASTER_AGENT 0
 #define SUB_AGENT    1
-extern struct snmp_session *agentx_session;
 extern int agent_role;
 
 extern int snmp_dump_packet;

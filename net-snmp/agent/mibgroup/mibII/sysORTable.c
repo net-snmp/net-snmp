@@ -30,7 +30,10 @@
 #include "../struct.h"
 #include "../util_funcs.h"
 #include "../../snmpd.h"
-#include "agentx.h"
+
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+#include "agentx/subagent.h"
+#endif
 
 extern struct timeval starttime;
 
@@ -162,8 +165,10 @@ int register_sysORTable(oid *oidin,
   (*ptr)->next = NULL;
   numEntries++;
 
+#ifdef USING_AGENTX_SUBAGENT_MODULE
   if ( agent_role == SUB_AGENT )
      agentx_add_agentcaps( agentx_session, oidin, oidlen, (char *)descr);
+#endif
 
   return 0;
 }
@@ -199,8 +204,10 @@ int unregister_sysORTable(oid *oidin,
     ptr = &((*ptr)->next);
   }
 
+#ifdef USING_AGENTX_SUBAGENT_MODULE
   if ( agent_role == SUB_AGENT )
      agentx_remove_agentcaps( agentx_session, oidin, oidlen);
+#endif
 
   return found;
 }
