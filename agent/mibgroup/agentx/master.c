@@ -55,6 +55,7 @@ void parse_master_extensions(const char *token,
     char buf[BUFSIZ];
 
     if ( !strcmp( cptr, "agentx" ) ||
+         !strcmp( cptr, "all"    ) ||
          !strcmp( cptr, "yes"    ) ||
          !strcmp( cptr, "on"     )) {
 		i = 1;
@@ -87,7 +88,7 @@ void init_master(void)
      *   whether or not to run as an AgentX master.
      */
 
-  register_app_config_handler("master",
+  snmpd_register_config_handler("master",
                           parse_master_extensions, NULL,
                           "specify 'agentx' for AgentX support");
 }
