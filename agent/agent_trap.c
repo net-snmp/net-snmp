@@ -125,6 +125,8 @@ int create_trap_session (char *sink,
 	sinks = new_sink;
 	return 1;
     }
+
+    /* diagnose snmp_open errors with the input struct snmp_session pointer */
     snmp_sess_perror("snmpd: create_trap_session", &session);
     free(new_sink);
     return 0;
