@@ -1092,13 +1092,6 @@ register_mib_handlers (void)
 		       DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS);
     ds_register_premib(ASN_INTEGER, "snmp","suffixPrinting",
                        DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY);
-    
-    /* setup the default parser configurations, as specified by configure */
-#ifdef MIB_COMMENT_IS_EOL_TERMINATED
-    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM, 1);
-#else  /* !MIB_COMMENT_IS_EOL_TERMINATED */
-    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM, 0);
-#endif /* !MIB_COMMENT_IS_EOL_TERMINATED */
 }
 
 void
