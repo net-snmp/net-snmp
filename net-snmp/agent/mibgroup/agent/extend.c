@@ -41,7 +41,7 @@ void init_extend( void )
     reg   = netsnmp_create_handler_registration(
                 "nsExtendConfigTable", handle_nsExtendConfigTable, 
                 extend_config_oid, OID_LENGTH(extend_config_oid),
-                HANDLER_CAN_RONLY);
+                HANDLER_CAN_RWRITE);
     netsnmp_register_table_data( reg, dinfo, tinfo );
 
         /*
@@ -180,24 +180,36 @@ extend_free_cache(netsnmp_cache *cache, void *magic)
          *
          *************************/
 
+void
+_free_extension( netsnmp_extend *extension )
+{
+    if (!extension)
+        return;
+
+/* Unlink from 'ehead' list ? */
+    SNMP_FREE( extension->token );
+    SNMP_FREE( extension->cache );
+    SNMP_FREE( extension->command );
+    SNMP_FREE( extension->args  );
+    SNMP_FREE( extension->input );
+    SNMP_FREE( extension->row );
+    SNMP_FREE( extension );
+    return;
+}
 
 netsnmp_extend *
-_new_extension( char *exec_name,  char *exec_command,
-                 int  exec_flags, char *exec_args )
+_new_extension( char *exec_name,  int  exec_flags )
 {
     netsnmp_extend     *extension;
     netsnmp_table_row  *row;
     netsnmp_extend     *eptr1, *eptr2; 
 
-    if (!exec_name || !exec_command)
+    if (!exec_name)
         return NULL;
     extension = SNMP_MALLOC_TYPEDEF( netsnmp_extend );
     if (!extension)
         return NULL;
     extension->token    = strdup( exec_name );
-    extension->command  = strdup( exec_command );
-    if (exec_args)
-        extension->args = strdup( exec_args );
     extension->flags    = exec_flags;
     extension->cache    = netsnmp_cache_create( 0, extend_load_cache,
                                                    extend_free_cache, NULL, 0 );
@@ -206,15 +218,12 @@ _new_extension( char *exec_name,  char *exec_command,
 
     row = netsnmp_create_table_data_row();
     if (!row || !extension->cache) {
-        SNMP_FREE( extension->token );
-        SNMP_FREE( extension->command );
-        SNMP_FREE( extension->args );
-        SNMP_FREE( extension->cache );
-        SNMP_FREE( extension );
+        _free_extension( extension );
         SNMP_FREE( row );
         return NULL;
     }
     row->data = (void *)extension;
+    extension->row = row;
     netsnmp_table_row_add_index( row, ASN_OCTET_STR,
                                  exec_name, strlen(exec_name));
     netsnmp_table_data_add_row( dinfo, row);
@@ -250,16 +259,23 @@ _new_extension( char *exec_name,  char *exec_command,
 void
 extend_parse_config(const char *token, char *cptr)
 {
+    netsnmp_extend *extension;
     char exec_name[STRMAX];
     char exec_command[STRMAX];
     int  flags;
 
     cptr = copy_nword(cptr, exec_name,    sizeof(exec_name));
     cptr = copy_nword(cptr, exec_command, sizeof(exec_command));
+    /* XXX - check 'exec_command' exists & is executable */
     flags = (NS_EXTEND_FLAGS_ACTIVE | NS_EXTEND_FLAGS_CONFIG);
     if (!strcmp( token, "sh2" ))
         flags |= NS_EXTEND_FLAGS_SHELL;
-    (void)_new_extension( exec_name, exec_command, flags, cptr );
+    extension = _new_extension( exec_name, flags );
+    if (extension) {
+        extension->command  = strdup( exec_command );
+        if (cptr)
+            extension->args = strdup( cptr );
+    }
 }
 
         /*************************
@@ -356,6 +372,301 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                 continue;
             }
             break;
+
+        /**********
+         *
+         * Start of SET handling
+         *
+         *   All config objects are potentially writable except
+         *     nsExtendStorage which is fixed as either 'permanent'
+         *     (if read from a config file) or 'volatile' (if set via SNMP)
+         *   The string-based settings of a 'permanent' entry cannot 
+         *     be changed - neither can the execution or run type.
+         *   Such entries can be (temporarily) marked as inactive,
+         *     and the cache timeout adjusted, but these changes are
+         *     not persistent.
+         *
+         **********/
+
+        case MODE_SET_RESERVE1:
+            /*
+             * Validate the new assignments
+             */
+            switch (table_info->colnum) {
+            case COLUMN_EXTCFG_COMMAND:
+                if (request->requestvb->type != ASN_OCTET_STR) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGTYPE);
+                    return SNMP_ERR_WRONGTYPE;
+                }
+                /*
+                 * Must have a full path to the command
+                 * XXX - Assumes Unix-style paths
+                 */
+                if (request->requestvb->val_len == 0 ||
+                    request->requestvb->val.string[0] != '/') {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGVALUE);
+                    return SNMP_ERR_WRONGVALUE;
+                }
+                /*
+                 * XXX - need to check this file exists
+                 *       (and is executable)
+                 */
+
+                if (extension && extension->flags & NS_EXTEND_FLAGS_CONFIG) {
+                    /*
+                     * config entries are "permanent" so can't be changed
+                     */
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_NOTWRITABLE);
+                    return SNMP_ERR_NOTWRITABLE;
+                }
+                break;
+
+            case COLUMN_EXTCFG_ARGS:
+            case COLUMN_EXTCFG_INPUT:
+                if (request->requestvb->type != ASN_OCTET_STR) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGTYPE);
+                    return SNMP_ERR_WRONGTYPE;
+                }
+
+                if (extension && extension->flags & NS_EXTEND_FLAGS_CONFIG) {
+                    /*
+                     * config entries are "permanent" so can't be changed
+                     */
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_NOTWRITABLE);
+                    return SNMP_ERR_NOTWRITABLE;
+                }
+                break;
+
+            case COLUMN_EXTCFG_CACHETIME:
+                if (request->requestvb->type != ASN_INTEGER) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGTYPE);
+                    return SNMP_ERR_WRONGTYPE;
+                }
+                i = *request->requestvb->val.integer;
+                /*
+                 * -1 is a special value indicating "don't cache"
+                 *    [[ XXX - should this be 0 ?? ]]
+                 * Otherwise, cache times must be non-negative
+                 */
+                if (i < -1 ) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGVALUE);
+                    return SNMP_ERR_WRONGVALUE;
+                }
+                break;
+
+            case COLUMN_EXTCFG_EXECTYPE:
+                if (request->requestvb->type != ASN_INTEGER) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGTYPE);
+                    return SNMP_ERR_WRONGTYPE;
+                }
+                i = *request->requestvb->val.integer;
+                if (i<1 || i>2) {  /* 'exec(1)' or 'shell(2)' only */
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGVALUE);
+                    return SNMP_ERR_WRONGVALUE;
+                }
+                if (extension && extension->flags & NS_EXTEND_FLAGS_CONFIG) {
+                    /*
+                     * config entries are "permanent" so can't be changed
+                     */
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_NOTWRITABLE);
+                    return SNMP_ERR_NOTWRITABLE;
+                }
+                break;
+
+            case COLUMN_EXTCFG_RUNTYPE:
+                if (request->requestvb->type != ASN_INTEGER) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGTYPE);
+                    return SNMP_ERR_WRONGTYPE;
+                }
+                /*
+                 * 'run-on-read(1)', 'run-on-set(2)'
+                 *  or 'run-command(3)' only
+                 */
+                i = *request->requestvb->val.integer;
+                if (i<1 || i>3) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGVALUE);
+                    return SNMP_ERR_WRONGVALUE;
+                }
+                /*
+                 * 'run-command(3)' can only be used with
+                 *  a pre-existing 'run-on-set(2)' entry.
+                 */
+                if (i==3 && !(extension && (extension->flags & NS_EXTEND_FLAGS_WRITEABLE))) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_INCONSISTENTVALUE);
+                    return SNMP_ERR_INCONSISTENTVALUE;
+                }
+                /*
+                 * 'run-command(3)' is the only valid assignment
+                 *  for permanent (i.e. config) entries
+                 */
+                if ((extension && extension->flags & NS_EXTEND_FLAGS_CONFIG)
+                    && i!=3 ) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_INCONSISTENTVALUE);
+                    return SNMP_ERR_INCONSISTENTVALUE;
+                }
+                break;
+
+            case COLUMN_EXTCFG_STATUS:
+                if (request->requestvb->type != ASN_INTEGER) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGTYPE);
+                    return SNMP_ERR_WRONGTYPE;
+                }
+                i = *request->requestvb->val.integer;
+                switch (i) {
+                case RS_ACTIVE:
+                case RS_NOTINSERVICE:
+                    if (!extension) {
+                        /* Must be used with existing rows */
+                        netsnmp_set_request_error(reqinfo, request,
+                                                  SNMP_ERR_INCONSISTENTVALUE);
+                        return SNMP_ERR_INCONSISTENTVALUE;
+                    }
+                    break;    /* OK */
+                case RS_CREATEANDGO:
+                case RS_CREATEANDWAIT:
+                    if (extension) {
+                        /* Can only be used to create new rows */
+                        netsnmp_set_request_error(reqinfo, request,
+                                                  SNMP_ERR_INCONSISTENTVALUE);
+                        return SNMP_ERR_INCONSISTENTVALUE;
+                    }
+                    extension = _new_extension( table_info->indexes->val.string, 0);
+                    if (!extension) {  /* failed */
+                        netsnmp_set_request_error(reqinfo, request,
+                                                  SNMP_ERR_RESOURCEUNAVAILABLE);
+                        return SNMP_ERR_RESOURCEUNAVAILABLE;
+                    }
+                    netsnmp_insert_table_row( request, extension->row );
+                    break;
+
+                case RS_DESTROY:
+                    break;
+                default:
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGVALUE);
+                    return SNMP_ERR_WRONGVALUE;
+                }
+                break;
+
+            default:
+                netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_ERR_NOTWRITABLE);
+                return SNMP_ERR_NOTWRITABLE;
+            }
+            break;
+
+        case MODE_SET_RESERVE2:
+            switch (table_info->colnum) {
+            case COLUMN_EXTCFG_COMMAND:
+                extension->old_command = extension->command;
+               /*
+                extension->command     = calloc( 
+                    request->requestvb->val_len +1, 1);
+                memcpy(extension->command,
+                    request->requestvb->val.string,
+                    request->requestvb->val_len);
+                */
+                extension->command = netsnmp_strdup_and_null(
+                    request->requestvb->val.string,
+                    request->requestvb->val_len);
+                break;
+            case COLUMN_EXTCFG_ARGS:
+                extension->old_args = extension->args;
+                extension->args = netsnmp_strdup_and_null(
+                    request->requestvb->val.string,
+                    request->requestvb->val_len);
+                break;
+            case COLUMN_EXTCFG_INPUT:
+                extension->old_input = extension->input;
+                extension->input = netsnmp_strdup_and_null(
+                    request->requestvb->val.string,
+                    request->requestvb->val_len);
+                break;
+            }
+            break;
+
+        case MODE_SET_FREE:
+        case MODE_SET_UNDO:
+            switch (table_info->colnum) {
+            case COLUMN_EXTCFG_COMMAND:
+                if ( extension && extension->old_command ) {
+                    SNMP_FREE(extension->command);
+                    extension->command     = extension->old_command;
+                    extension->old_command = NULL;
+                }
+                break;
+            case COLUMN_EXTCFG_ARGS:
+                if ( extension && extension->old_args ) {
+                    SNMP_FREE(extension->args);
+                    extension->args     = extension->old_args;
+                    extension->old_args = NULL;
+                }
+                break;
+            case COLUMN_EXTCFG_INPUT:
+                if ( extension && extension->old_input ) {
+                    SNMP_FREE(extension->input);
+                    extension->input     = extension->old_input;
+                    extension->old_input = NULL;
+                }
+                break;
+            }
+            break;
+
+        case MODE_SET_ACTION:
+            switch (table_info->colnum) {
+            case COLUMN_EXTCFG_STATUS:
+                i = *request->requestvb->val.integer;
+                if (( i == RS_ACTIVE || i == RS_CREATEANDGO ) &&
+                    !(extension && extension->command &&
+                      extension->command[0] == '/' /* &&
+                      is_executable(extension->command) */)) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_INCONSISTENTVALUE);
+                    return SNMP_ERR_INCONSISTENTVALUE;
+                }
+            }
+            break;
+
+        case MODE_SET_COMMIT:
+            switch (table_info->colnum) {
+            case COLUMN_EXTCFG_CACHETIME:
+                i = *request->requestvb->val.integer;
+                extension->cache->timeout = i;
+                break;
+
+            case COLUMN_EXTCFG_EXECTYPE:
+                i = *request->requestvb->val.integer;
+                if ( i == NS_EXTEND_ETYPE_SHELL )
+                    extension->flags |=  NS_EXTEND_FLAGS_SHELL;
+                else
+                    extension->flags &= ~NS_EXTEND_FLAGS_SHELL;
+                break;
+
+            case COLUMN_EXTCFG_STATUS:
+                i = *request->requestvb->val.integer;
+                if ( i == RS_ACTIVE || i == RS_CREATEANDGO ) {
+                    extension->flags |= NS_EXTEND_FLAGS_ACTIVE;
+                } else {
+                    extension->flags &= ~NS_EXTEND_FLAGS_ACTIVE;
+                }
+            }
+            break;
+
         default:
             netsnmp_set_request_error(reqinfo, request, SNMP_ERR_GENERR);
             return SNMP_ERR_GENERR;
