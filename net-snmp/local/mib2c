@@ -45,6 +45,8 @@ $debug=0;
 $quiet=0;
 $nostats = 0;
 $noindent = 0;
+%assignments;
+%outputs;
 
 sub usage {
     print "$0 [-h] [-c configfile] [-f prefix] mibNode\n\n";
@@ -67,7 +69,7 @@ while($#ARGV >= 0) {
 	my $expr = shift;
 	my ($var, $val) = ($expr =~ /([^=]*)=(.*)/);
 	die "no variable specified for -S flag." if (!$var);
-	$vars{$var} = $val;
+        $assignments{$var} = $val;
     }
     $quiet = 1 if (/^-q/);
     $nostats = 1 if (/^-s/);
@@ -109,7 +111,20 @@ while($#ARGV >= 0) {
 	       "BITS", "char",
 	       "TICKS", "u_long",
 	       "GAUGE", "u_long",
-	       "OPAQUE", "char");
+	       "OPAQUE", "u_char");
+%perltolen = ("OCTETSTR",  "1",
+	       "INTEGER",  "0",
+	       "INTEGER32",  "0",
+	       "UNSIGNED32", "0",
+	       "UINTEGER", "0",
+	       "OBJECTID", "1",
+	       "COUNTER64", "0",
+	       "COUNTER", "0",
+	       "IPADDR", "0",
+	       "BITS", "1",
+	       "TICKS", "0",
+	       "GAUGE", "0",
+	       "OPAQUE", "1");
 
 my $mibnode = $SNMP::MIB{$oid};
 die "you didn't give me a valid OID to start with" if (!$mibnode);
@@ -121,6 +136,27 @@ $vars{'oid'} = $oid;
 
 # loop through mib nodes, remembering stuff.
 setup_data($mibnode);
+
+my $defaults = "";
+if (-f "default-$configfile") {
+  $defaults = "default-$configfile";
+} elsif (-f "$ENV{MIB2C_DIR}/default-$configfile") {
+  $defaults = "$ENV{MIB2C_DIR}/default-$configfile";
+} elsif (-f "/usr/local/share/snmp/default-$configfile") {
+  $defaults = "/usr/local/share/snmp/default-$configfile";
+}
+if ( "$defaults" ne "" ) {
+  $fh = open_conf($defaults);
+  process();
+  $fh->close;
+}
+
+my @theassignments = keys(%assignments);
+if ($#theassignments != -1) {
+  foreach $var (@theassignments) {
+    $vars{$var} = $assignments{$var};
+  }
+}
 
 $fh = open_conf($configfile);
 process();
@@ -163,6 +199,9 @@ sub oidlength {
 #   $var.type          -- node's ASN_XXX type
 #   $var.settable      -- 1 if it's writable, 0 if not
 #   $var.noaccess      -- 1 if not-accessible, 0 if not
+#   $var.accessible    -- 1 if accessible, 0 if not
+#   $var.hasdefval     -- 1 if a DEFVAL was defined, 0 if not
+#   $var.access        -- node's defval
 #   $var.access        -- node's access type
 #   $var.status        -- node's status
 #   $var.syntax        -- node's syntax
@@ -181,15 +220,26 @@ sub process_vars {
     $it =~ s/\$(\w+)\.(perltype)/$SNMP::MIB{$vars{$1}}{type}/g;
     $it =~ s/\$(\w+)\.(type)/$perltoctypes{$SNMP::MIB{$vars{$1}}{$2}}/g;
     $it =~ s/\$(\w+)\.(subid)/$SNMP::MIB{$vars{$1}}{subID}/g;
+    $it =~ s/\$(\w+)\.(module)/$SNMP::MIB{$vars{$1}}{moduleID}/g;
     $it =~ s/\$(\w+)\.(settable)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(ReadWrite|Create|WriteOnly)\/)?1:0)/eg;
+    $it =~ s/\$(\w+)\.(readable)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(Read|Create)\/)?1:0)/eg;
     $it =~ s/\$(\w+)\.(noaccess)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(NoAccess)\/)?1:0)/eg;
+    $it =~ s/\$(\w+)\.(accessible)/(($SNMP::MIB{$vars{$1}}{access} !~ \/(NoAccess)\/)?1:0)/eg;
     $it =~ s/\$(\w+)\.(objectID|label|subID|access|status|syntax)/$SNMP::MIB{$vars{$1}}{$2}/g;
     $it =~ s/\$(\w+)\.(decl)/$perltodecl{$SNMP::MIB{$vars{$1}}{type}}/g;
+    $it =~ s/\$(\w+)\.(needlength)/$perltolen{$SNMP::MIB{$vars{$1}}{type}}/g;
     $it =~ s/\$(\w+)\.(iscolumn)/($SNMP::MIB{$vars{$1}}{'parent'}{'label'} =~ \/Entry$\/) ? 1 : 0/eg;
     $it =~ s/\$(\w+)\.(isscalar)/($SNMP::MIB{$vars{$1}}{'parent'}{'label'} !~ \/Entry$\/ && $SNMP::MIB{$vars{$1}}{access}) ? 1 : 0/eg;
     $it =~ s/\$(\w+)\.(parent)/$SNMP::MIB{$vars{$1}}{'parent'}{'label'}/g;
+    $it =~ s/\$(\w+)\.(children)/($#{$SNMP::MIB{$vars{$1}}{'children'}} == 0) ? 0 : 1/eg;
+    $it =~ s/\$(\w+)\.(hasdefval)/(length($SNMP::MIB{$vars{$1}}{'defaultValue'}) == 0) ? 0 : 1/eg;
+    $it =~ s/\$(\w+)\.(defval)/$SNMP::MIB{$vars{$1}}{'defaultValue'}/g;
+    $it =~ s/\$(\w+)\.(hashint)/(length($SNMP::MIB{$vars{$1}}{'hint'}) == 0) ? 0 : 1/eg;
+    $it =~ s/\$(\w+)\.(hint)/$SNMP::MIB{$vars{$1}}{'hint'}/g;
+    $it =~ s/\$(\w+)\.(ranges)/($#{$SNMP::MIB{$vars{$1}}{'ranges'}} == 0) ? 0 : 1/eg;
     # check for enums
     $it =~ s/\$(\w+)\.(enums)/(%{$SNMP::MIB{$vars{$1}}{'enums'}} == 0) ? 0 : 1/eg;
+    $it =~ s/\$(\w+)\.(enumrange)/%{$SNMP::MIB{$vars{$1}}{'enums'}}/eg;
     # normal variable substitions
     $it =~ s/\$\{(\w+)\}/$vars{$1}/g;
     $it =~ s/\$(\w+)/$vars{$1}/g;
@@ -235,70 +285,144 @@ sub process_vars {
 #      evaluates expression, and if expression is true processes
 #      contained part until appropriate @end@ is reached.
 sub skippart {
-    my $endcount = 1;
+    my $endcount = shift;
+    if ( "$endcount" == "" ) {
+      $endcount = 1;
+    }
     while(<$fh>) {
-	if (/\@end\@/) {
+      print "SHIFT($endcount):$_" if ($debug);
+	if (/\@\s*end\@/) {
 	    return if ($endcount == 1);
 	    $endcount--;
 	}
-	if (/\@else\@/) {
+	if (/\@\s*else\@/) {
 	    return process() if ($endcount == 1);
 	}
-	if (/\@(foreach|if)/) {
+	if (/\@\s*(foreach|if)/) {
 	    $endcount++;
 	}
     }
 }
 
+sub close_file {
+  my $name = shift;
+  if (!$name) {
+    print "close_file w/out name!\n";
+    return;
+  }
+  if(!$outputs{$name}) {
+    print "no handle for $name\n";
+    return;
+  }
+  $outputs{$name}->close();
+  delete $outputs{$name};
+#  print STDERR "closing $name\n" if (!$quiet);
+}
+
+sub close_files {
+  foreach $name (keys(%outputs)) {
+    close_file($name);
+  }
+}
+
+sub open_file {
+  my $multiple = shift;
+  my $spec = shift;
+  my $name = $spec;
+  $name =~ s/>//;
+  if ($multiple == 0) {
+    close_files();
+  }
+  $outputs{$name} = new IO::File;
+  $outputs{$name}->open(">$spec") || die "failed to open $name";
+  print STDERR "writing to $name\n" if (!$quiet && !$written{$name});
+  $written{$name} = '1';
+}
 
 sub process {
     while(<$fh>) {
+
 	if (/^\s*\#\#/) {
 	    # noop, it's a comment
-	} elsif (/\@else\@/) {
+	} elsif (/\@\s*exit\@/) {
+	    die "exiting at conf file ($currentfile) request\n";
+	} elsif (/\@\s*else\@/) {
 	    return skippart();
-	} elsif (/\@open\s+([^\@]+)\@/) {
+	} elsif (/\@\s*open\s+([^\@]+)\@/) {
+	    my $arg = $1;
+	    my ($multiple) = (0);
+	    while ($arg =~ s/-(\w+)\s+//) {
+		$multiple = 1 if ($1 eq 'multiple');
+	    }
+	    my $spec = process_vars($arg);
+            open_file($multiple, $spec);
+	} elsif (/\@\s+close\s+([^\@]+)\@/) {
 	    my $spec = process_vars($1);
-	    $out->close() if ($out);
-	    $out = new IO::File;
-	    $out->open(">$spec") || die "failed to open $spec";
-	    print STDERR "writing to $spec\n" if (!$quiet);
-	    $written{$spec} = '1';
-	} elsif (/\@run (.*)\@/) {
-	    next if ($ranalready{$1});
-	    $ranalready{$1} = 1;
+            close_file($spec);
+	} elsif (/\@\s*append\s+([^\@]+)\@/) {
+	    my $arg = $1;
+	    my ($multiple) = (0);
+	    while ($arg =~ s/-(\w+)\s+//) {
+		$multiple = 1 if ($1 eq 'multiple');
+	    }
+	    my $spec = process_vars($arg);
+            $spec=">$spec";
+            open_file($multiple,$spec);
+	} elsif (/\@\s*run (.*)\@/) {
+	    my $arg = $1;
+	    my ($again) = (0);
+	    while ($arg =~ s/-(\w+)\s+//) {
+		$again = 1 if ($1 eq 'again');
+#		if ($1 eq 'file') {
+#		    my ($filearg) = ($arg =~ s/^(\w+)//);
+#		}
+	    }
+	    next if (!$again && $ranalready{$arg});
+	    $ranalready{$arg} = 1;
 	    my $oldfh = $fh;
-	    my $oldout = $out;
+	    my %oldout = %outputs;
+            my %emptyarray;
+            %outputs = %emptyoutputs;
 	    my %oldvars = %vars;
 	    # keep old copy of @vars and just build on it.
-	    $fh = open_conf($1);
-	    $out = undef;
+	    $fh = open_conf($arg);
+#	    $out = undef;
 	    process();
 	    $fh->close();
 	    $fh = $oldfh;
-	    $out = $oldout;
+	    %outputs = %oldout;
 	    # don't keep values in replaced vars.  Revert to ours.
 	    %vars = %oldvars;
-	} elsif (/\@end\@/) {
+	} elsif (/\@\s*include (.*)\@/) {
+	    my $oldfh = $fh;
+	    my %oldvars = %vars;
+	    # keep old copy of @vars and just build on it.
+	    $fh = open_conf($1);
+	    process();
+	    $fh->close();
+	    $fh = $oldfh;
+	    # don't keep values in replaced vars.  Revert to ours.
+	    %vars = %oldvars;
+	} elsif (/\@\s*end\@/) {
 	    return;
-	} elsif (/\@if\s+([^@]*)\@/) {
+	} elsif (/\@\s*if\s+([^@]*)\@/) {
 	    if (eval(process_vars($1))) {
 		process();
 	    } else {
 		skippart();
 	    }
-	} elsif (/\@eval\s+\$(\w+)\s*=\s*([^\@]*)/) {
+	} elsif (/\@\s*eval\s+\$(\w+)\s*=\s*([^\@]*)/) {
 	    my ($v, $e) = ($1, $2);
 #	    print STDERR "eval: $e\n";
 	    my $e = process_vars($e);
 	    $vars{$v} = eval($e);
 #	    warn "$@" if (!defined($vars{$v}));
-	} elsif (/\@perleval\s*(.*)\@/) {
+	} elsif (/\@\s*perleval\s*(.*)\@/) {
 	    print STDERR "perleval: $1\n";
 	    my $res = eval($1);
 	    warn "$@" if ($res);
-	} elsif (/\@skip\@/) {
-	    skippart();
+	} elsif (/\@\s+skip\s*([^@]*)\@/) {
+          return skippart($1);
 	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+scalars*\s*\@/) {
 	    my $var = $1;
 	    my $startpos = $fh->tell();
@@ -453,12 +577,17 @@ sub process {
 	    if ($term) {
 		$vars{$var} = $term->readline(process_vars($prompt));
 	    }
+	} elsif (/\@\s*print\s+([^@]*)\@/) {
+          my $line = process_vars($1);
+          print "$line\n";
 	} else {
-	    die "no output file specified" if (!$out);
+          my $line = process_vars($_);
+          foreach $file (values(%outputs)) {
+            print $file "$line";
+          }
 	    if (/\@.*\@/) {
-		warn "The configuration file contained a line with a @@ pair in it which may be a configuration token line mib2c couldn't recognize.";
+		warn "The configuration file contained a line with a @@ pair in it which may be a configuration token line mib2c couldn't recognize ($_).";
 	    }
-	    print $out process_vars($_);
 	}
     }
 }
@@ -512,15 +641,18 @@ sub max {
 
 sub open_conf {
     my $configfile = shift;
+    $currentfile = $configfile;
 # process .conf file
     my $fh = new IO::File;
     if (-f "$configfile") {
 	$fh->open("$configfile");
+    } elsif (-f "$ENV{MIB2C_DIR}/$configfile") {
+	$fh->open("$ENV{MIB2C_DIR}/$configfile");
     } elsif (-f "/usr/local/share/snmp/$configfile") {
 	$fh->open("/usr/local/share/snmp/$configfile");
     } else {
 	print STDERR "Can't find a configuration file called $configfile\n";
-	print STDERR "I looked in . and /usr/local/share/snmp\n";
+	print STDERR "I looked in ., $ENV{MIB2C_DIR} and /usr/local/share/snmp\n";
 	exit;
     }
     return $fh;
