@@ -225,13 +225,16 @@ netsnmp_register_handler_nocallback(netsnmp_handler_registration *reginfo)
 }
 
 /** inject a new handler into the calling chain of the handlers
-   definedy by the netsnmp_handler_registration pointer.  The new handler is
-   injected at the top of the list and hence will be the new handler
-   to be called first.*/
+   definedy by the netsnmp_handler_registration pointer.  The new
+   handler is injected after the before_what handler, or if NULL at
+   the top of the list and hence will be the new handler to be called
+   first.*/
 int
-netsnmp_inject_handler(netsnmp_handler_registration *reginfo,
-                       netsnmp_mib_handler *handler)
+netsnmp_inject_handler_before(netsnmp_handler_registration *reginfo,
+                              netsnmp_mib_handler *handler,
+                              const char *before_what)
 {
+    netsnmp_mib_handler *nexth, *prevh = NULL;
     if (handler == NULL || reginfo == NULL) {
         snmp_log(LOG_ERR, "netsnmp_inject_handler() called illegally\n");
         return SNMP_ERR_GENERR;
@@ -242,11 +245,40 @@ netsnmp_inject_handler(netsnmp_handler_registration *reginfo,
     }
     DEBUGMSGTL(("handler:inject", "injecting %s before %s\n",
                 handler->handler_name, reginfo->handler->handler_name));
+    if (before_what) {
+        for(nexth = reginfo->handler; nexth;
+            prevh = nexth, nexth = nexth->next) {
+            if (strcmp(nexth->handler_name, before_what) == 0)
+                break;
+        }
+        if (!nexth)
+            return SNMP_ERR_GENERR;
+        if (prevh) {
+            /* after prevh and before nexth */
+            prevh->next = handler;
+            handler->next = nexth;
+            handler->prev = prevh;
+            nexth->prev = handler;
+            return SNMPERR_SUCCESS;
+        }
+        /* else we're first, which is what we do next anyway so fall through */
+    }
     handler->next = reginfo->handler;
     if (reginfo->handler)
         reginfo->handler->prev = handler;
     reginfo->handler = handler;
     return SNMPERR_SUCCESS;
+}
+
+/** inject a new handler into the calling chain of the handlers
+   definedy by the netsnmp_handler_registration pointer.  The new handler is
+   injected at the top of the list and hence will be the new handler
+   to be called first.*/
+int
+netsnmp_inject_handler(netsnmp_handler_registration *reginfo,
+                       netsnmp_mib_handler *handler)
+{
+    return netsnmp_inject_handler_before(reginfo, handler, NULL);
 }
 
 /** @internal
@@ -700,7 +732,8 @@ netsnmp_clear_handler_list(void)
  */
 void
 netsnmp_inject_handler_into_subtree(netsnmp_subtree *tp, const char *name,
-                                    netsnmp_mib_handler *handler)
+                                    netsnmp_mib_handler *handler,
+                                    const char *before_what)
 {
     netsnmp_subtree *tptr;
     netsnmp_mib_handler *mh;
@@ -712,20 +745,23 @@ netsnmp_inject_handler_into_subtree(netsnmp_subtree *tp, const char *name,
         if (strcmp(tptr->label_a, name) == 0) {
             DEBUGMSGTL(("injectHandler", "injecting handler %s into %s\n",
                         handler->handler_name, tptr->label_a));
-            netsnmp_inject_handler(tptr->reginfo, clone_handler(handler));
+            netsnmp_inject_handler_before(tptr->reginfo, clone_handler(handler),
+                                          before_what);
         } else if (tptr->reginfo != NULL &&
 		   tptr->reginfo->handlerName != NULL &&
                    strcmp(tptr->reginfo->handlerName, name) == 0) {
             DEBUGMSGTL(("injectHandler", "injecting handler into %s/%s\n",
                         tptr->label_a, tptr->reginfo->handlerName));
-            netsnmp_inject_handler(tptr->reginfo, clone_handler(handler));
+            netsnmp_inject_handler_before(tptr->reginfo, clone_handler(handler),
+                                          before_what);
         } else {
             for (mh = tptr->reginfo->handler; mh != NULL; mh = mh->next) {
                 if (mh->handler_name && strcmp(mh->handler_name, name) == 0) {
                     DEBUGMSGTL(("injectHandler", "injecting handler into %s\n",
                                 tptr->label_a));
-                    netsnmp_inject_handler(tptr->reginfo,
-					   clone_handler(handler));
+                    netsnmp_inject_handler_before(tptr->reginfo,
+                                                  clone_handler(handler),
+                                                  before_what);
                     break;
                 } else {
                     DEBUGMSGTL(("yyyinjectHandler",
@@ -744,7 +780,7 @@ static int      doneit = 0;
 void
 parse_injectHandler_conf(const char *token, char *cptr)
 {
-    char            handler_to_insert[256];
+    char            handler_to_insert[256], reg_name[256];
     subtree_context_cache *stc;
     netsnmp_mib_handler *handler;
 
@@ -765,11 +801,13 @@ parse_injectHandler_conf(const char *token, char *cptr)
         config_perror("no INTONAME specified.  Can't do insertion.");
         return;
     }
+    cptr = copy_nword(cptr, reg_name, sizeof(reg_name));
+
     for (stc = get_top_context_cache(); stc; stc = stc->next) {
-        DEBUGMSGTL(("injectHandler", "Checking context tree %s\n",
-                    stc->context_name));
-        netsnmp_inject_handler_into_subtree(stc->first_subtree, cptr,
-                                            handler);
+        DEBUGMSGTL(("injectHandler", "Checking context tree %s (before=%s)\n",
+                    stc->context_name, (cptr)?cptr:"null"));
+        netsnmp_inject_handler_into_subtree(stc->first_subtree, reg_name,
+                                            handler, cptr);
     }
 }
 
@@ -793,7 +831,7 @@ netsnmp_init_handler_conf(void)
 {
     snmpd_register_config_handler("injectHandler",
                                   parse_injectHandler_conf,
-                                  NULL, "injectHandler NAME INTONAME");
+                                  NULL, "injectHandler NAME INTONAME [BEFORE_OTHER_NAME]");
     snmp_register_callback(SNMP_CALLBACK_LIBRARY,
                            SNMP_CALLBACK_POST_READ_CONFIG,
                            handler_mark_doneit, NULL);
