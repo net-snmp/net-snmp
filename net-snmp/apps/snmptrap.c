@@ -306,6 +306,8 @@ main(argc, argv)
  
     session.callback = snmp_input;
     session.callback_magic = NULL;
+    if (session.remote_port == SNMP_DEFAULT_REMPORT)
+      session.remote_port = SNMP_TRAP_PORT;
     ss = snmp_open(&session);
     if (ss == NULL){
         snmp_perror("snmptrap");
