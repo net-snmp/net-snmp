@@ -75,7 +75,7 @@ Error in packet
 Reason: (noSuchName) There is no such variable name in this MIB.
 This name doesn't exist: system.sysUpTime
 
-system.sysContact.0 = root@localhost
+system.sysContact.0 = STRING: root@localhost
 .fi
 .IP "" 8
 With the

@@ -51,7 +51,7 @@ The number of IP output packets (ipOutRequests.0)
 .PP
 For example:
 .PP
-snmpstatus -c public netdev-kbox.cc.cmu.edu
+snmpstatus -c public -v 1 netdev-kbox.cc.cmu.edu
 .PP
 will produce output similar to the following:
 .PP
