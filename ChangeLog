@@ -1,5 +1,425 @@
 -------------------------------------------------------------------------------
 
+Changes: V4.2.3 -> V4.2.4
+	
+2002-02-15 15:52  hardaker
+
+   * agent/mibgroup/ucd-snmp/proxy.c:
+
+   check end of mibview conditions
+   
+2002-02-15 08:01  dts12
+
+   * agent/mibgroup/mibII/vacm_vars.c:
+
+   Populate an empty case statement (spotted by Jeroen Ruigrok)
+   
+2002-02-15 07:11  hardaker
+
+   * README.snmpv3:
+
+   remove unneeded -CN and -CO example options
+   
+2002-02-15 06:47  dts12
+
+   * agent/snmpd.c, snmplib/winservice.c, snmplib/winservice.h,
+   snmplib/winservice.rc, win32/snmpd/snmpd.dsp:
+
+   Support for running as a Windows service.
+   (Supplied by Raju Krishnappa & Latha Prabhu)
+   
+2002-02-14 11:11  nba
+
+   * agent/mibgroup/ucd-snmp/vmstat.c:
+
+   Make buffer pointer static so it doesn't leak
+   
+2002-02-14 11:10  nba
+
+   * snmplib/scapi.h:
+
+   Fix bad paranthesis
+   
+2002-02-14 07:40  hardaker
+
+   * agent/snmpd.c:
+
+   fix email address bug #517178
+   
+2002-02-14 01:47  dts12
+
+   * apps/snmpnetstat/if.c:
+
+   Check for running off the end of I/F table (patch from RedHat)
+   
+2002-02-14 01:44  dts12
+
+   * agent/mibgroup/host/hr_swinst.c:
+
+   Include RedHat patches for better RPM support
+   
+2002-02-14 01:38  dts12
+
+   * config.h.in, configure, configure.in:
+
+   Adopt RedHat's configure testing for rpm library requirements
+   
+2002-02-13 16:41  hardaker
+
+   * configure, configure.in:
+
+   enable shared by default except for developers
+   
+2002-02-13 13:51  hardaker
+
+   * agent/mibgroup/target/snmpTargetAddrEntry.c:
+
+   remove inline function from being declared in another function.
+   
+2002-02-13 13:27  hardaker
+
+   * agent/mibgroup/notification/snmpNotifyTable.c:
+
+   remove inline function from being declared in another function.
+   
+2002-02-13 08:18  hardaker
+
+   * perl/SNMP/SNMP.xs:
+
+   fix sets of unsigned32's.
+   
+2002-02-13 07:59  dts12
+
+   * snmplib/mib.c:
+
+   DS_LIB_PRINT_SUFFIX_ONLY is an integer option, not a boolean flag.
+   (Attempting to set this via the SUFFIX environmental variable will
+   turn on packet dumping instead!)
+   
+2002-02-13 04:15  jbpn
+
+   * agent/mibgroup/host/hr_print.c:
+
+     - fix bug #516904 (snmpd dies if no printcap with cgetent), noted by
+       Anonymous -- check return value of cgetnext() properly in
+       Init_HR_Print().
+   
+2002-02-12 07:11  jbpn
+
+   * configure.in, configure:
+
+     - amend fix to bug #516389 (ucd-snmp 4.2.3 libwrap support broken) to
+       actually add -lnsl to link parameters!
+   
+2002-02-12 05:29  jbpn
+
+   * configure, configure.in:
+
+     - fix bug #516389 (ucd-snmp 4.2.3 libwrap support broken) -- USE_LIBWRAP
+       was not being #defined in the case where -lnsl is needed in addition
+       to -lwrap.
+   
+2002-02-12 01:30  dts12
+
+   * agent/mibgroup/mibII/vacm_vars.c:
+
+   Implement the BadCommunity{Names,Uses} counters.
+   
+2002-02-11 10:07  jbpn
+
+   * apps/snmptable.c:
+
+     - fix bugs #489336 and #508146 (duplicate columns and columns in
+       wrong order).
+   
+2002-02-11 08:23  dts12
+
+   * snmplib/snmp_parse_args.c:
+
+   Use the 'ds_set_xxx' library routines, rather than the old 'snmp_set_xxx' calls
+   
+2002-02-11 05:30  jbpn
+
+   * FAQ:
+
+     - mention HPUX-11 and Dynix/PTX 4.4 support, and some spelling fixes
+   
+2002-02-08 06:12  dts12
+
+   * agent/mibgroup/mibII/sysORTable.h:
+
+   Ensure the null versions of the two REGISTER macros swallow their parameters.
+   
+2002-02-08 04:42  dts12
+
+   * agent/snmp_agent.c:
+
+   Implement the missing outgoing error statistics counters
+   (patch #510194 from Latha Prabhu)
+   
+2002-02-08 02:54  dts12
+
+   * agent/snmp_agent.c:
+
+   Process the full list objects in each pass of a SET, even if one entry fails
+   midway through.  This is less efficient than failing immediately, but brings
+   the behaviour in line with the documentation, and ensures that all resources
+   will be released.
+   
+2002-02-08 02:50  dts12
+
+   * agent/snmp_agent.c:
+
+   Return the correct error index for problems in SET handling.
+   (patch #467155, from Latha Prabhu)
+   
+2002-02-08 02:42  dts12
+
+   * agent/mibgroup/: host/hr_storage.c, ucd-snmp/memory.c:
+
+   Added support for memory and swap entries in hrStorageTable for Solaris
+   (from patch #505498 - thanks to Johannes Schmidt-Fischer)
+   
+2002-02-08 02:09  dts12
+
+   * agent/mibgroup/mibII/ip.c:
+
+   Register IP Routing table objects as writable.
+   
+2002-02-07 07:39  dts12
+
+   * README.hpux11, acconfig.h, config.h.in,
+   agent/mibgroup/ucd_snmp.h, agent/mibgroup/host/hr_network.c,
+   agent/mibgroup/host/hr_storage.c, agent/mibgroup/host/hr_swinst.c,
+   agent/mibgroup/host/hr_swrun.c, agent/mibgroup/mibII/at.c,
+   agent/mibgroup/mibII/icmp.c, agent/mibgroup/mibII/interfaces.c,
+   agent/mibgroup/mibII/interfaces.h, agent/mibgroup/mibII/ip.c,
+   agent/mibgroup/mibII/ipAddr.c, agent/mibgroup/mibII/tcp.c,
+   agent/mibgroup/mibII/tcpTable.c, agent/mibgroup/mibII/tcpTable.h,
+   agent/mibgroup/mibII/udp.c, agent/mibgroup/mibII/udpTable.c,
+   agent/mibgroup/mibII/var_route.c, agent/mibgroup/mibII/var_route.h,
+   agent/mibgroup/ucd-snmp/memory.c, mibs/UCD-SNMP-MIB.txt, s/hpux.h:
+
+   Support for HP-UX 11, courtesy of Johannes Schmidt-Fischer.
+   
+2002-02-05 11:45  hardaker
+
+   * COPYING:
+
+   copyright year update for NAI and Cambridge
+   
+2002-02-04 03:17  jbpn
+
+   * snmplib/mib.c:
+
+     - correct processing for timeticks when DS_LIB_NUMERIC_TIMETICKS is
+       set (corrects bug #511793, reported by Anonymous).
+   
+2002-01-28 12:50  hardaker
+
+   * FAQ:
+
+   mirror section update
+   
+2002-01-28 12:49  hardaker
+
+   * agent/agent_trap.h:
+
+   warning added about send_trap_vars and enterprise oid used.
+   
+2002-01-25 06:27  jbpn
+
+   * agent/mibgroup/mibII/vacm_vars.c:
+
+     - fix minor problem with storageType (always okay to set to current
+       value).
+   
+     - don't reset some variables to old value unless we actually set
+       them in the first place!
+   
+2002-01-24 06:06  jbpn
+
+   * snmplib/read_config.c:
+
+     - avoid format string nasties in read_config_store() when writing to
+       files (exposed e.g. by the persistent sysName.0 stuff -- try
+       snmpset host sysName.0 s "%08x" -- oops)
+   
+2002-01-24 03:14  dts12
+
+   * agent/mibgroup/host/hr_swrun.c, agent/mibgroup/host/hr_utils.c,
+   s/aix.h:
+
+   AIX support for Host Resources module.
+       (Thanks to Andy Hood)
+   
+2002-01-23 08:39  jbpn
+
+   * agent/mibgroup/mibII/vacm_vars.c:
+
+     - set viewType to the DEFVAL included(1) for new rows
+   
+2002-01-22 06:36  jbpn
+
+   * agent/mibgroup/mibII/vacm_vars.c:
+
+     - fix bug just introduced where setting an existing row's status to
+       createAndGo(4) or createAndWait(5) would delete the row.
+   
+2002-01-22 04:22  jbpn
+
+   * agent/mibgroup/: notification/snmpNotifyTable.c,
+   target/snmpTargetAddrEntry.c, target/snmpTargetAddrEntry.h,
+   target/snmpTargetParamsEntry.c, target/snmpTargetParamsEntry.h:
+
+     - backport of recent improvements to snmpTargetParamsTable,
+       snmpTargetAddrTable and snmpNotifyTable.
+   
+2002-01-21 04:22  jbpn
+
+   * agent/snmp_vars.c:
+
+     - set noSuchObject to FALSE if we have a valid write_method (this
+       causes the correct exception noSuchInstance to be generated if the
+       requested object doesn't exist).
+   
+2002-01-21 04:20  jbpn
+
+   * agent/snmp_agent.c:
+
+     - slight change to generation of error-index:
+   
+       - explicitly test for error-status == noError, and set error-index
+         to zero in this case;
+   
+       - otherwise use the cached value;
+   
+       - don't zero the cached value in handle_var_list if handle_one_var
+         returns noError
+   
+     - this copes properly with SET requests, where a failing SET will have
+       a FREE phase which will typically return noError.  Previously this
+       would erroneously cause the error-index to be set to zero.
+   
+2002-01-21 04:11  jbpn
+
+   * agent/mibgroup/mibII/vacm_vars.c, snmplib/vacm.c, snmplib/vacm.h:
+
+     - backport of recent vacmSecurityToGroupTable, vacmAccessTable and
+       vacmViewTreeFamilyTable changes (corrected state machines).
+       Before: passed 20,  failed 80, untested 11
+       After:  passed 107, failed 1,  untested 3
+   
+       The still-extant failures are due to the non-implemented
+       vacmContextTable.
+   
+2002-01-15 12:44  nba
+
+   * agent/snmp_vars.c:
+
+   Fix stupid missing sizeof(oid) factor in memcpy
+   
+2002-01-15 12:42  nba
+
+   * agent/mibgroup/ucd-snmp/vmstat.c:
+
+   Dont use static buffer when reading /proc/stat
+   
+2002-01-15 12:41  nba
+
+   * agent/mibgroup/host/hr_system.c, s/solaris2.6.h, s/solaris2.7.h,
+   s/solaris2.8.h:
+
+   Fix hrMaxProcesses for Solaris
+   
+2002-01-15 12:39  nba
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+   Some additional debug statements
+   
+2002-01-09 08:27  nba
+
+   * agent/mibgroup/: kernel_sunos5.c, kernel_sunos5.h:
+
+   Add function to acces raw kstat data
+   
+2002-01-09 08:26  nba
+
+   * agent/mibgroup/host/hr_storage.c:
+
+   Use that sysconf returns a long, to save large phys mem
+   
+2002-01-09 08:24  nba
+
+   * mibs/IANAifType-MIB.txt:
+
+   Update to current IANA version
+   
+2002-01-09 08:23  nba
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+   Care for Linux drivers that maintain octet couters as log long values
+   
+2002-01-09 02:20  jbpn
+
+   * FAQ:
+
+     - add OS X to list of supported OSes, to fix bug #501179 (!)
+   
+2002-01-03 14:01  hardaker
+
+   * agent/mibgroup/ucd-snmp/disk.c:
+
+   fix bug #498809 (I think) by checking setmntent return value.
+   
+2002-01-03 13:52  hardaker
+
+   * apps/snmpnetstat/if.c:
+
+   check against growing server returns as pointed out by bug #498956
+   
+2001-12-18 08:49  jbpn
+
+   * acconfig.h, win32/config.h, win32/config.h.borland:
+
+     - add OSTYPE define for win32
+   
+2001-12-18 08:44  jbpn
+
+   * mibs/UCD-SNMP-MIB.txt:
+
+     - add OBJECT IDENTIFIER for win32 agent
+   
+2001-12-18 06:50  jbpn
+
+   * agent/mibgroup/mibII/system_mib.c:
+
+     - patch from Latha Prabhu to produce more meaningful sysDescr.0
+       strings for Microsoft platforms.
+   
+2001-12-05 07:48  hardaker
+
+   * perl/SNMP/SNMP.xs:
+
+   patch from Jason Gloudon to fix leaking session structures from snmp_timeout().
+   
+2001-12-03 14:52  nba
+
+   * acconfig.h, config.h.in, configure, configure.in:
+
+   Complete the BSD IPSTATS configure tests, as pointed out by Mark Moraes
+   (bug# 487708)
+   
+2001-11-29 16:54  hardaker
+
+   * ChangeLog:
+
+   4.2.3 changes
+	
+-------------------------------------------------------------------------------
+
 Changes: V4.2.2 -> V4.2.3
 	
 2001-11-29 14:22  hardaker
