@@ -3632,6 +3632,104 @@ fi
 
 
 
+echo $ac_n "checking for ifnet.if_obytes""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_struct_ifnet_IF_OBYTES'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+if test "x" = "x"; then
+  defineit="= 0"
+else
+  defineit=""
+fi
+cat > conftest.$ac_ext <<EOF
+#line 3647 "configure"
+#include "confdefs.h"
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+
+int main() { return 0; }
+int t() {
+
+struct ifnet dergel; 
+dergel.if_obytes $defineit;
+
+; return 0; }
+EOF
+if { (eval echo configure:3662: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_cv_struct_ifnet_IF_OBYTES=yes
+else
+  rm -rf conftest*
+  ac_cv_struct_ifnet_IF_OBYTES=no 
+fi
+rm -f conftest*
+
+
+fi
+
+echo "$ac_t""$ac_cv_struct_ifnet_IF_OBYTES" 1>&6
+
+if test "x$ac_cv_struct_ifnet_IF_OBYTES" = "xyes"; then
+  cat >> confdefs.h <<EOF
+#define STRUCT_IFNET_HAS_IF_OBYTES 1
+EOF
+
+fi
+
+
+
+echo $ac_n "checking for ifnet.if_ibytes""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_struct_ifnet_IF_IBYTES'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+if test "x" = "x"; then
+  defineit="= 0"
+else
+  defineit=""
+fi
+cat > conftest.$ac_ext <<EOF
+#line 3696 "configure"
+#include "confdefs.h"
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
+
+int main() { return 0; }
+int t() {
+
+struct ifnet dergel; 
+dergel.if_ibytes $defineit;
+
+; return 0; }
+EOF
+if { (eval echo configure:3711: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  ac_cv_struct_ifnet_IF_IBYTES=yes
+else
+  rm -rf conftest*
+  ac_cv_struct_ifnet_IF_IBYTES=no 
+fi
+rm -f conftest*
+
+
+fi
+
+echo "$ac_t""$ac_cv_struct_ifnet_IF_IBYTES" 1>&6
+
+if test "x$ac_cv_struct_ifnet_IF_IBYTES" = "xyes"; then
+  cat >> confdefs.h <<EOF
+#define STRUCT_IFNET_HAS_IF_IBYTES 1
+EOF
+
+fi
+
+
+
 echo $ac_n "checking if you have run configure before""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_have_warned'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
