@@ -304,8 +304,8 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
                    netsnmp_pdu *pdu, void *cb_data)
 {
     netsnmp_delegated_cache *cache = (netsnmp_delegated_cache *) cb_data;
-    netsnmp_request_info *requests, *request;
-    netsnmp_variable_list *vars, *var;
+    netsnmp_request_info  *requests, *request = NULL;
+    netsnmp_variable_list *vars,     *var     = NULL;
 
     struct simple_proxy *sp;
     oid             myname[MAX_OID_LEN];
@@ -344,26 +344,20 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
         return 0;
 
     case NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE:
+        vars = pdu->variables;
+
         if (pdu->errstat != SNMP_ERR_NOERROR) {
             /*
-             *  This is much too simplistic, but if we receive an error
-             *   from the proxy agent, we've got to do *something* with it.
-             *   We can hardly pretend it didn't happen and process the
-             *   (missing) varbinds regardless!
-             *
-             *  Note that the indentation of the 'else' block has not been
-             *   updated (since this is a temporary fix), so don't be misled.
+             *  If we receive an error from the proxy agent, pass it on up.
+             *  The higher-level processing seems to Do The Right Thing.
              */
             DEBUGMSGTL(("proxy", "got error response (%d)\n", pdu->errstat));
-            netsnmp_set_request_error(cache->reqinfo, requests,
-                                      SNMP_ERR_GENERR);
-	} else {
-        vars = pdu->variables;
+            netsnmp_set_request_error(cache->reqinfo, requests, pdu->errstat);
 
         /*
          * update the original request varbinds with the results 
          */
-        for (var = vars, request = requests;
+	} else for (var = vars, request = requests;
              request && var;
              request = request->next, var = var->next_variable) {
             /*
@@ -455,7 +449,6 @@ proxy_got_response(int operation, netsnmp_session * sess, int reqid,
                      "response to proxy request illegal.  We're screwed.\n");
             netsnmp_set_request_error(cache->reqinfo, requests,
                                       SNMP_ERR_GENERR);
-        }
         }
 
         /* fix bulk_to_next operations */
