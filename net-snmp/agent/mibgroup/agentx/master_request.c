@@ -470,6 +470,7 @@ get_agentx_request(struct agent_snmp_session *asp,
     pdu->reqid       = snmp_get_next_transid();
     pdu->transid     = asp->pdu->transid;
     pdu->sessid      = ax_session->sessid;
+    pdu->flags      |= UCD_MSG_FLAG_EXPECT_RESPONSE;
     switch (asp->pdu->command ) {
 	case SNMP_MSG_GET:
                 DEBUGMSGTL(("agentx/master","-> get\n"));
@@ -485,7 +486,6 @@ get_agentx_request(struct agent_snmp_session *asp,
 		}
 		break;
 	case SNMP_MSG_SET:
-                DEBUGMSGTL(("agentx/master","-> set\n"));
 		switch ( asp->mode ) {
 				/*
 				 * This is a provisional mapping of
@@ -495,18 +495,33 @@ get_agentx_request(struct agent_snmp_session *asp,
 				 */
 		    case RESERVE1:
 		    case RESERVE2:
-				pdu->command = AGENTX_MSG_TESTSET;
-				break;
+			DEBUGMSGTL(("agentx/master","-> testSet\n"));
+			pdu->command = AGENTX_MSG_TESTSET;
+			break;
 		    case ACTION:
-				pdu->command = AGENTX_MSG_COMMITSET;
-				break;
+			DEBUGMSGTL(("agentx/master","-> commitSet\n"));
+			pdu->command = AGENTX_MSG_COMMITSET;
+			break;
 		    case UNDO:
-				pdu->command = AGENTX_MSG_UNDOSET;
-				break;
+			DEBUGMSGTL(("agentx/master","-> undoSet\n"));
+			pdu->command = AGENTX_MSG_UNDOSET;
+			break;
 		    case FREE:
+			DEBUGMSGTL(("agentx/master","-> cleanupSet (free)\n"));
+			pdu->command = AGENTX_MSG_CLEANUPSET;
+			pdu->flags  &= ~(UCD_MSG_FLAG_EXPECT_RESPONSE);
+			/*  No response to this message, so transition the
+			    state machine here.  */
+			asp->mode = FINISHED_FAILURE;
+			break;
 		    case COMMIT:
-				pdu->command = AGENTX_MSG_CLEANUPSET;
-				break;
+			DEBUGMSGTL(("agentx/master","-> cleanupSet (commit)\n"));
+			pdu->command = AGENTX_MSG_CLEANUPSET;
+			pdu->flags  &= ~(UCD_MSG_FLAG_EXPECT_RESPONSE);
+			/*  No response to this message, so transition the
+			    state machine here.  */
+			asp->mode = FINISHED_SUCCESS;
+			break;
 		}
 		break;
 	default:
@@ -593,7 +608,7 @@ agentx_add_request( struct agent_snmp_session *asp,
     sub = find_subtree_previous(vbp->name, vbp->name_length, NULL);
     DEBUGMSGTL(("agentx/master", "%sexact varbind: ", asp->exact?"":"in"));
     if (asp->exact) {
-	DEBUGMSGOID(("agentx/master", vbp->val.string, vbp->val_len));
+	DEBUGMSGOID(("agentx/master", vbp->name, vbp->name_length));
         snmp_pdu_add_variable(request->pdu,
 			      vbp->name, vbp->name_length, vbp->type,
 			      (u_char*)(vbp->val.string), vbp->val_len);

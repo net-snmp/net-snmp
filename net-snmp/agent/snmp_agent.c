@@ -1229,49 +1229,79 @@ handle_snmp_packet(int op, struct snmp_session *session, int reqid,
     return 1;
 }
 
+#ifdef USING_AGENTX_PROTOCOL_MODULE
+void fully_free_agentx_request(struct request_list *req);
+#endif
+
 int
 handle_next_pass(struct agent_snmp_session  *asp)
 {
-    int status;
-    struct request_list *req_p, *next_req;
+    struct request_list *req_p, *next_req, **prevNext;
+    int status, er;
 
 
-        if ( asp->outstanding_requests != NULL )
-	    return SNMP_ERR_NOERROR;
-	status = handle_var_list( asp );
-        if ( asp->outstanding_requests != NULL ) {
-	    if ( status == SNMP_ERR_NOERROR ) {
-		/* Send out any subagent requests */
-		for ( req_p = asp->outstanding_requests ;
-			req_p != NULL ; req_p = next_req ) {
+    if (asp->outstanding_requests != NULL) {
+	return SNMP_ERR_NOERROR;
+    }
 
-		    next_req = req_p->next_request;
-		    if ( snmp_async_send( req_p->session,  req_p->pdu,
-				      req_p->callback, req_p->cb_data ) == 0) {
-				/*
-				 * Send failed - call callback to handle this
-				 */
-			(void)req_p->callback( SNMP_CALLBACK_OP_SEND_FAILED,
-					 req_p->session,
-					 req_p->pdu->reqid,
-					 req_p->pdu,
-					 req_p->cb_data );
-			return SNMP_ERR_GENERR;
-		    }
+    status = handle_var_list(asp);
+    
+    if (asp->outstanding_requests != NULL) {
+	if (status == SNMP_ERR_NOERROR) {
+	    /*  Send out any subagent requests.  */
+
+	    prevNext = &(asp->outstanding_requests);
+
+	    for (req_p = asp->outstanding_requests; req_p; req_p = next_req) {
+		next_req = req_p->next_request;
+		er = req_p->pdu->flags & UCD_MSG_FLAG_EXPECT_RESPONSE;
+
+		if (snmp_async_send(req_p->session, req_p->pdu,
+				    req_p->callback, req_p->cb_data) == 0) {
+		    /*  Send failed - call callback to handle this.  */
+		    (void)req_p->callback(SNMP_CALLBACK_OP_SEND_FAILED,
+					  req_p->session,
+					  req_p->pdu->reqid,
+					  req_p->pdu,
+					  req_p->cb_data);
+		    return SNMP_ERR_GENERR;
+		}
+
+		if (!er) {
+		    /*  We don't expect a response, so this can come off the
+			oustanding request queue now.  */
+
+		    DEBUGMSGTL(("snmp_agent", "no response expected\n"));
+		    *prevNext = next_req;
+#ifdef USING_AGENTX_PROTOCOL_MODULE
+		    fully_free_agentx_request(req_p);
+#else
+		    /*  This probably leaks memory as it doesn't do a "deep
+			free".  It shouldn't ever get called though (maybe
+			SMUX?).  */
+		    free(req_p);
+#endif
+		} else {
+		    prevNext = &(req_p->next_request);
 		}
 	    }
-	    else {
-	    	/* discard outstanding requests */
-		for ( req_p = asp->outstanding_requests ;
-			req_p != NULL ; req_p = next_req ) {
-			
-			next_req = req_p->next_request;
-			free( req_p );
-		}
-		asp->outstanding_requests = NULL;
+	} else {
+	    /*  Discard outstanding requests.  */
+	    for (req_p = asp->outstanding_requests; req_p; req_p = next_req) {
+		next_req = req_p->next_request;
+#ifdef USING_AGENTX_PROTOCOL_MODULE
+		fully_free_agentx_request(req_p);
+#else
+		/*  This probably leaks memory as it doesn't do a "deep
+		    free".  It shouldn't ever get called though (maybe
+		    SMUX?).  */
+		free(req_p);
+#endif
 	    }
+	    asp->outstanding_requests = NULL;
 	}
-	return status;
+    }
+    return status;
 }
 
 	/*

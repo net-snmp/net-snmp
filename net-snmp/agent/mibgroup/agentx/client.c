@@ -107,11 +107,12 @@ agentx_synch_input(int op,
               starttime.tv_sec++;
           }
 	}
-    }
-    else if (op == SNMP_CALLBACK_OP_TIMED_OUT){
+    } else if (op == SNMP_CALLBACK_OP_TIMED_OUT) {
 	state->pdu		= NULL;
 	state->status		= STAT_TIMEOUT;
 	session->s_snmp_errno	= SNMPERR_TIMEOUT;
+    } else if (op == SNMP_CALLBACK_OP_DISCONNECT) {
+      return handle_agentx_packet(op, session, reqid, pdu, magic);
     }
 
     return 1;
@@ -139,8 +140,9 @@ agentx_open_session( struct snmp_session *ss )
     extern oid version_id_len;
 
     DEBUGMSGTL(("agentx/subagent","opening session \n"));
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return 0;
+    }
 
     pdu = snmp_pdu_create(AGENTX_MSG_OPEN);
     if ( pdu == NULL )
@@ -169,8 +171,9 @@ agentx_close_session( struct snmp_session *ss, int why )
     struct snmp_pdu *pdu, *response;
     DEBUGMSGTL(("agentx/subagent","closing session\n"));
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return 0;
+    }
 
     pdu = snmp_pdu_create(AGENTX_MSG_CLOSE);
     if ( pdu == NULL )
@@ -197,7 +200,7 @@ agentx_register(struct snmp_session *ss, oid start[], size_t startlen,
     DEBUGMSGOID(("agentx/subagent", start, startlen));
     DEBUGMSG(("agentx/subagent","\n"));
 
-    if (!IS_AGENTX_VERSION(ss->version)) {
+    if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
       return 0;
     }
 
@@ -245,8 +248,9 @@ agentx_unregister( struct snmp_session *ss, oid start[], size_t startlen,
 {
     struct snmp_pdu *pdu, *response;
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return 0;
+    }
 
     DEBUGMSGTL(("agentx/subagent","unregistering: "));
     DEBUGMSGOID(("agentx/subagent", start, startlen));
@@ -286,8 +290,9 @@ agentx_register_index( struct snmp_session *ss,
     struct snmp_pdu *pdu, *response;
     struct variable_list *varbind2;
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return NULL;
+    }
 
 		/*
 		 * Make a copy of the index request varbind
@@ -361,8 +366,9 @@ agentx_unregister_index( struct snmp_session *ss,
     struct snmp_pdu *pdu, *response;
     struct variable_list *varbind2;
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return -1;
+    }
 
 		/*
 		 * Make a copy of the index request varbind
@@ -409,8 +415,9 @@ agentx_add_agentcaps( struct snmp_session *ss,
 {
     struct snmp_pdu *pdu, *response;
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return 0;
+    }
 
     pdu = snmp_pdu_create(AGENTX_MSG_ADD_AGENT_CAPS);
     if ( pdu == NULL )
@@ -437,8 +444,9 @@ agentx_remove_agentcaps( struct snmp_session *ss,
 {
     struct snmp_pdu *pdu, *response;
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return 0;
+    }
 
     pdu = snmp_pdu_create(AGENTX_MSG_REMOVE_AGENT_CAPS);
     if ( pdu == NULL )
@@ -464,8 +472,9 @@ agentx_send_ping( struct snmp_session *ss )
 {
     struct snmp_pdu *pdu, *response;
 
-    if (! IS_AGENTX_VERSION( ss->version ))
+    if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return 0;
+    }
 
     pdu = snmp_pdu_create(AGENTX_MSG_PING);
     if ( pdu == NULL )
