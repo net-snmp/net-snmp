@@ -748,6 +748,7 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
 	while ( asp->end->next_variable != NULL )
 	    asp->end = asp->end->next_variable;
     asp->vbcount = count_varbinds(asp->start);
+    asp->requests = (request_info *) calloc(asp->vbcount, sizeof(request_info));
 
     return asp;
 }
@@ -764,8 +765,16 @@ free_agent_snmp_session(struct agent_snmp_session *asp)
     if (asp->reqinfo)
         free_agent_request_info(asp->reqinfo);
     if (asp->treecache) {
-        delete_subtree_cache(asp);
         free(asp->treecache);
+    }
+    if (asp->requests) {
+        int i;
+        for(i=0; i < asp->vbcount; i++) {
+            free_request_data_sets(&asp->requests[i]);
+        }
+    }
+    if (asp->requests) {
+        free(asp->requests);
     }
     free(asp);
 }
@@ -1071,10 +1080,14 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
             varbind_ptr->type = ASN_NULL;
 
         /* malloc the request structure */
-        request = SNMP_MALLOC_TYPEDEF(request_info);
-        if (request == NULL)
-            return SNMP_ERR_GENERR;
+        request = &(asp->requests[vbcount-1]);
         request->index = vbcount;
+        request->delegated = 0;
+        request->processed = 0;
+        request->status = 0;
+        request->subtree = tp;
+        if (request->parent_data)
+            free_request_data_sets(request);
 
         /* place them in a cache */
         if (tp->cacheid > -1 && tp->cacheid <= asp->treecache_num &&
@@ -1106,11 +1119,15 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
             asp->pdu->command == SNMP_MSG_GETBULK) {
             request->range_end     = tp->end;
             request->range_end_len = tp->end_len;
+        } else {
+            request->range_end = NULL;
+            request->range_end_len = 0;
         }
 
         /* link into chain */
         if (asp->treecache[cacheid].requests_end)
             asp->treecache[cacheid].requests_end->next = request;
+        request->next = NULL;
         request->prev =
             asp->treecache[cacheid].requests_end;
         asp->treecache[cacheid].requests_end = request;
@@ -1239,47 +1256,33 @@ reassign_requests(struct agent_snmp_session  *asp) {
         (tree_cache *) calloc(asp->treecache_len, sizeof(tree_cache));
     asp->treecache_num = -1;
 
-    for(i = 0; i <= old_treecache_num; i++) {
-        for(request = old_treecache[i].requests_begin; request;
-            request = request->next) {
-
-            if (lastreq)
-                free(lastreq);
-            lastreq = request;
-            
-            if (request->requestvb->type == ASN_NULL) {
-                ret = add_varbind_to_cache(asp, request->index,
-                                           request->requestvb,
-                                           old_treecache[i].subtree->next);
-                if (ret != SNMP_ERR_NOERROR)
-                    return ret; /* WWW: mem leak */
-            } else if (request->requestvb->type == ASN_PRIV_RETRY) {
-                /* re-add the same subtree */
-                request->requestvb->type = ASN_NULL;
-                ret = add_varbind_to_cache(asp, request->index,
-                                           request->requestvb,
-                                           old_treecache[i].subtree);
-                if (ret != SNMP_ERR_NOERROR)
-                    return ret; /* WWW: mem leak */
-            }
+    for(i = 0; i < asp->vbcount; i++) {
+        if (asp->requests[i].requestvb->type == ASN_NULL) {
+            ret = add_varbind_to_cache(asp, asp->requests[i].index,
+                                       asp->requests[i].requestvb,
+                                       asp->requests[i].subtree->next);
+            if (ret != SNMP_ERR_NOERROR)
+                return ret;
+        } else if (asp->requests[i].requestvb->type == ASN_PRIV_RETRY) {
+            /* re-add the same subtree */
+            asp->requests[i].requestvb->type = ASN_NULL;
+            ret = add_varbind_to_cache(asp, asp->requests[i].index,
+                                       asp->requests[i].requestvb,
+                                       asp->requests[i].subtree);
+            if (ret != SNMP_ERR_NOERROR)
+                return ret;
         }
     }
-    if (lastreq)
-        free(lastreq);
+
     free(old_treecache);
     return SNMP_ERR_NOERROR;
 }
 
 void
 delete_request_infos(request_info *reqlist) {
-    request_info *saveit;
     while(reqlist) {
-        /* don't delete varbind */
-        saveit = reqlist;
+        free_request_data_sets(reqlist);
         reqlist = reqlist->next;
-        if (saveit->parent_data)
-            free_all_list_data(saveit->parent_data);
-        free(saveit);
     }
 }
 

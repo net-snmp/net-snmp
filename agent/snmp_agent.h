@@ -42,6 +42,7 @@ typedef struct request_info_s {
    int index;
    struct request_info_s         *next;
    struct request_info_s         *prev;
+   struct subtree *subtree;
 } request_info;
 
 typedef struct _set_info {
@@ -103,6 +104,7 @@ struct agent_snmp_session {
 
    /* new API pointers */
    agent_request_info *reqinfo;
+   request_info *requests;
    tree_cache *treecache;
    int treecache_len; /* length of cache array */
    int treecache_num; /* number of current cache entries */
