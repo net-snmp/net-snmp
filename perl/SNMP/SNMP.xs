@@ -3827,6 +3827,7 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
               } else {
                  SIN_ADDR(pdu->address).s_addr = get_myaddr();
               }
+	      memcpy(&pdu->agent_addr, &pdu->address, sizeof(pdu->address));
               pdu->trap_type = generic;
               pdu->specific_type = specific;
               pdu->time = uptime;
