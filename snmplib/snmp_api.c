@@ -2594,7 +2594,7 @@ _snmp_parse(void * sessp,
         DEBUGMSGTL(("snmp_api","Parsing SNMPv%d message...\n", (1 + pdu->version)));
 
 	/* authenticates message and returns length if valid */
-        DEBUGDUMPSETUP("dump_recv", data, 4);
+        DEBUGDUMPSETUP("dump_recv", data, 0);
         DEBUGMSG(("dump_recv", "SNMPv%d message\n", (1+pdu->version)));
 
         DEBUGINDENTMORE();
