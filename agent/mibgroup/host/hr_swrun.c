@@ -379,6 +379,12 @@ var_hrswrun(struct variable *vp,
 	    sprintf(string, "process name");
 #endif
 	    *var_len = strlen(string);
+	    /* remove trailing newline */
+	    if (*var_len) {
+	        cp = string + *var_len -1;
+	        if (*cp == '\n')
+	            --(*var_len);
+	    }
 	    return (u_char *) string;
 	case HRSWRUN_ID:
             *var_len = nullOidLen;
