@@ -202,6 +202,10 @@ SOURCE=..\..\snmplib\snmp_version.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\snmpCallbackDomain.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\snmpTCPDomain.c
 # End Source File
 # Begin Source File

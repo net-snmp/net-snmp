@@ -227,7 +227,6 @@ init_agent (const char *app)
   auto_nlist_print_tree(-2, 0);
 #endif
 
-#ifndef WIN32
   /* always register a callback transport for internal use */
   callback_master_sess = snmp_callback_open(0, handle_snmp_packet,
                                             snmp_check_packet,
@@ -235,7 +234,6 @@ init_agent (const char *app)
   if (callback_master_sess)
       callback_master_num = callback_master_sess->local_port;
   else
-#endif
       callback_master_num = -1;
 
   init_helpers();
