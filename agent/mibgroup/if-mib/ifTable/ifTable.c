@@ -322,19 +322,19 @@ ifDescr_get(ifTable_rowreq_ctx * rowreq_ctx, char **ifDescr_val_ptr_ptr,
      * make sure there is enough space for data
      */
     if ((NULL == (*ifDescr_val_ptr_ptr))
-        || ((*ifDescr_val_ptr_len_ptr) < rowreq_ctx->data.ifDescr_len)) {
+        || ((*ifDescr_val_ptr_len_ptr) < strlen(rowreq_ctx->data.ifDescr))) {
         /*
          * allocate space for data
          */
         (*ifDescr_val_ptr_ptr) =
-            malloc(rowreq_ctx->data.ifDescr_len *
+            malloc(strlen(rowreq_ctx->data.ifDescr) *
                    sizeof((*ifDescr_val_ptr_ptr)[0]));
         if (NULL == (*ifDescr_val_ptr_ptr)) {
             snmp_log(LOG_ERR, "could not allocate memory\n");
             return MFD_ERROR;
         }
     }
-    (*ifDescr_val_ptr_len_ptr) = rowreq_ctx->data.ifDescr_len;
+    (*ifDescr_val_ptr_len_ptr) = strlen(rowreq_ctx->data.ifDescr);
     memcpy((*ifDescr_val_ptr_ptr), rowreq_ctx->data.ifDescr,
            (*ifDescr_val_ptr_len_ptr) * sizeof((*ifDescr_val_ptr_ptr)[0]));
 
