@@ -868,7 +868,10 @@ int   forward_handler( netsnmp_pdu           *pdu,
         pdu2->transport_data        = NULL;
         pdu2->transport_data_length = 0;
     }
-    snmp_send( ss, pdu2 );
+    if (!snmp_send( ss, pdu2 )) {
+	snmp_sess_perror("Forward failed", ss);
+	snmp_free_pdu(pdu2);
+    }
     snmp_close( ss );
     return NETSNMPTRAPD_HANDLER_OK;
 }
@@ -950,6 +953,7 @@ snmp_input(int op, netsnmp_session *session,
 	            /*
 		     * Still can't find it!  Give up.
 		     */
+		    snmp_log(LOG_ERR, "Cannot find TrapOID in TRAP2 PDU\n");
 		    return 1;		/* ??? */
 		}
 	    }
@@ -1056,10 +1060,10 @@ t        *     d) any other global handlers
         break;
 
     case NETSNMP_CALLBACK_OP_TIMED_OUT:
-        fprintf(stderr, "Timeout: This shouldn't happen!\n");
+        snmp_log(LOG_ERR, "Timeout: This shouldn't happen!\n");
         break;
     default:
-        fprintf(stderr, "Unknown operation (%d): This shouldn't happen!\n", op);
+        snmp_log(LOG_ERR, "Unknown operation (%d): This shouldn't happen!\n", op);
         break;
     }
     return 0;
