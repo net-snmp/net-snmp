@@ -936,8 +936,10 @@ char *read_config_read_objid(char *readfrom, oid **objid, size_t *len) {
     return NULL;
 
   if (*objid == NULL) {
+      *len = 0;
       if ((*objid = (oid*)malloc(MAX_OID_LEN * sizeof(oid))) == NULL)
         return NULL;
+      *len = MAX_OID_LEN;
   }
 
   if (strncmp(readfrom,"NULL",4) == 0) {
@@ -950,6 +952,7 @@ char *read_config_read_objid(char *readfrom, oid **objid, size_t *len) {
 
       if (!read_objid(buf, *objid, len)) {
         DEBUGMSGTL(("read_config_read_objid","Invalid OID"));
+        *len = 0;
         return NULL;
       }
   }
