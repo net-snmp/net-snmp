@@ -10,6 +10,7 @@ void snmpd_parse_config_authtrap (const char *, char *);
 void snmpd_parse_config_trapsink (const char *, char *);
 void snmpd_parse_config_trap2sink (const char *, char *);
 void snmpd_parse_config_informsink (const char *, char *);
+void snmpd_parse_config_trapsess(const char *, char *);
 void snmpd_free_trapsinks (void);
 void snmpd_parse_config_trapcommunity (const char *, char *);
 void snmpd_free_trapcommunity (void);
