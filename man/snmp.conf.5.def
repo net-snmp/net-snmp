@@ -92,6 +92,8 @@ Equivalent to -Oe
 Equivalent to -On
 .IP "dontBreakdownOids (1|yes|true|0|no|false)"
 Equivalent to -Ob
+.IP "escapeQuotes (1|yes|true|0|no|false)"
+Equivalent to -OE
 .IP "quickPrinting (1|yes|true|0|no|false)"
 Equivalent to -Oq
 .IP "suffixPrinting (0|1|2)"
