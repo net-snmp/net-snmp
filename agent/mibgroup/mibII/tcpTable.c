@@ -695,7 +695,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
 
 #if (defined(CAN_USE_SYSCTL) && defined(TCPCTL_PCBLIST))
 
-#if defined(freebsd4)
+#if defined(freebsd4) || defined(freebsd5) || defined(darwin7)
     #define NS_ELEM struct xtcpcb
 #else
     #define NS_ELEM struct xinpcb
