@@ -53,6 +53,11 @@ ucdavis MODULE-IDENTITY
          email:     wjhardaker@ucdavis.edu"
     DESCRIPTION
 	"This file defines the private UCD SNMP MIB extensions."
+    REVISION	 "200201040000Z"
+    DESCRIPTION
+	"Introduced UCDLongDisplayString which is needed for allow
+	 for long configuration settings. Rewrote some definitions
+	 to make them more precise."
     REVISION	 "200101170000Z"
     DESCRIPTION
 	"Added raw CPU and IO counters."
@@ -114,6 +119,41 @@ openbsd           OBJECT IDENTIFIER ::= { ucdSnmpAgent 12 }
 win32		  OBJECT IDENTIFIER ::= { ucdSnmpAgent 13 } -- unlucky
 hpux11            OBJECT IDENTIFIER ::= { ucdSnmpAgent 14 }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
+
+
+UCDLongDisplayString ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1023a"
+    STATUS	current
+    DESCRIPTION
+            "Represents textual information taken from the NVT ASCII
+            character set, as defined in pages 4, 10-11 of RFC 854.
+
+            To summarize RFC 854, the NVT ASCII repertoire specifies:
+
+              - the use of character codes 0-127 (decimal)
+
+              - the graphics characters (32-126) are interpreted as
+                US ASCII
+
+              - NUL, LF, CR, BEL, BS, HT, VT and FF have the special
+                meanings specified in RFC 854
+
+              - the other 25 codes have no standard interpretation
+
+              - the sequence 'CR LF' means newline
+
+              - the sequence 'CR NUL' means carriage-return
+
+              - an 'LF' not preceded by a 'CR' means moving to the
+                same column on the next line.
+
+              - the sequence 'CR x' for any x other than LF or NUL is
+                illegal.  (Note that this also means that a string may
+                end with either 'CR LF' or 'CR NUL', but not with CR.)
+
+            Any object defined using this syntax may not exceed 1023
+            characters in length."
+    SYNTAX OCTET STRING (SIZE (0..1023))
 
 --
 -- Define the Float Textual Convention
@@ -228,12 +268,12 @@ prCount OBJECT-TYPE
     ::= { prEntry 5 }
 
 prErrorFlag OBJECT-TYPE
-    SYNTAX	Integer32
+    SYNTAX	INTEGER { ok(0), error(1) }
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
 	"A Error flag to indicate trouble with a process.  It
-	 goes to 1 if there is an error, 0 if no error."
+	 goes to error(1) if there is an error, ok(0) if no error."
     ::= { prEntry 100 }
 
 prErrMessage OBJECT-TYPE
@@ -782,7 +822,7 @@ versionIdent OBJECT-TYPE
     ::= { version 5 } 
 
 versionConfigureOptions OBJECT-TYPE
-    SYNTAX	DisplayString
+    SYNTAX	LongDisplayString
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION  
@@ -814,12 +854,12 @@ versionRestartAgent OBJECT-TYPE
     ::= { version 12 } 
 
 versionDoDebugging OBJECT-TYPE
-    SYNTAX	Integer32
+    SYNTAX	INTEGER { disabled(0), enabled(1) }
     MAX-ACCESS	read-write
     STATUS	current
     DESCRIPTION  
-	"Set to 1 to turn debugging statements on in the agent or 0
-	 to turn it off."
+	"Set to enabled(1) to turn debugging statements on in the 
+	 agent or to disabled(0) to turn them off."
     ::= { version 20 } 
 
 
