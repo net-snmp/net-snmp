@@ -41,10 +41,6 @@ int   Get_Next_HR_Partition();
 extern int   HRD_index;
 void  Save_HR_Partition();
 
-void	init_hrpartition( )
-{
-}
-
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
 
