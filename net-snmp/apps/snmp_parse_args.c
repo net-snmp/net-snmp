@@ -44,12 +44,13 @@
 #include "view.h"
 #include "acl.h"
 #include "snmp_parse_args.h"
+#include "version.h"
 
 void
 snmp_parse_args_usage(outf)
   FILE *outf;
 {
-  fprintf(outf, "[-v 1|2|2h] [-h] [-d] [-q] [-p P] [-t T] [-r R] [-c S D] hostname <community|srcParty dstParty context>");
+  fprintf(outf, "[-v 1|2|2h] [-V] [-h] [-d] [-q] [-p P] [-t T] [-r R] [-c S D] hostname <community|srcParty dstParty context>");
 }
 
 void
@@ -58,6 +59,7 @@ snmp_parse_args_descriptions(outf)
 {
   fprintf(outf, "  -v 1|2|2h\tspecifies snmp version to transmit.\n");
   fprintf(outf, "  -h\t\tthis help message.\n");
+  fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
   fprintf(outf, "  -q\t\tquick print output for easier parsing ability.\n");
   fprintf(outf, "  -p P\t\tuse port P instead of the default port.\n");
@@ -114,6 +116,10 @@ snmp_parse_args(argc, argv, session)
         clock_flag++;
         srcclock = atoi(argv[++arg]);
         dstclock = atoi(argv[++arg]);
+        break;
+      case 'V':
+        fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+        exit(0);
         break;
       case 'v':
         if (!strcmp(argv[++arg],"1")) {
