@@ -513,6 +513,7 @@ int
 handle_next_pass(struct agent_snmp_session  *asp)
 {
     int status;
+    struct snmp_pdu *pdu = asp->pdu;
     struct request_list *req_p, *next_req;
 
 
@@ -521,7 +522,16 @@ handle_next_pass(struct agent_snmp_session  *asp)
 	status = handle_var_list( asp );
         if ( asp->outstanding_requests != NULL ) {
 	    if ( status == SNMP_ERR_NOERROR ) {
-		/* Send out any AgentX (or similar) requests */
+		/* Send out any subagent requests */
+		for ( req_p = asp->outstanding_requests ;
+			req_p != NULL ; req_p = req_p->next_request ) {
+
+		    snmp_async_send( req_p->session,  req_p->pdu,
+				      req_p->callback, req_p->cb_data );
+		    asp->pdu = snmp_clone_pdu( pdu );
+		    asp->pdu->variables = pdu->variables;
+		    pdu->variables = NULL;
+		}
 	    }
 	    else {
 	    	/* discard outstanding requests */
@@ -547,6 +557,7 @@ handle_var_list(struct agent_snmp_session  *asp)
     size_t  statLen;
     u_short acl;
     WriteMethod *write_method;
+    AddVarMethod *add_method;
     int	    noSuchObject;
     int count;
     
@@ -578,6 +589,12 @@ statp_loop:
 		}
 		varbind_ptr->type = statType;
 	}
+                /* Delegated variables should be added to the
+                   relevant outgoing request */
+        else if ( IS_DELEGATED(statType)) {
+                add_method = (AddVarMethod*)statP;
+                statType = (*add_method)( asp, varbind_ptr );
+        }
 		/* GETNEXT/GETBULK should just skip inaccessible entries */
 	else if ( !in_a_view(varbind_ptr->name, &varbind_ptr->name_length,
                              asp->pdu, varbind_ptr->type)

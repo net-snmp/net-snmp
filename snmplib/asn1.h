@@ -112,6 +112,8 @@ typedef struct counter64 unsigned64;
 #define ASN_APP_UNION (ASN_PRIVATE | 1)		/* or ASN_PRIV_UNION ? */
 #define ASN_PRIV_INCL_RANGE (ASN_PRIVATE | 2)
 #define ASN_PRIV_EXCL_RANGE (ASN_PRIVATE | 3)
+#define ASN_PRIV_DELEGATED  (ASN_PRIVATE | 4)
+#define IS_DELEGATED(x)   ((x) == ASN_PRIV_DELEGATED)
 
 /* value for Counter64 */
 #define ASN_OPAQUE_COUNTER64 (ASN_OPAQUE_TAG2 + ASN_APP_COUNTER64)
