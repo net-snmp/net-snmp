@@ -155,6 +155,20 @@ netsnmp_table_data_set_find_column(netsnmp_table_data_set_storage *start,
 /**
  * extracts a netsnmp_table_data_set pointer from a given request
  */
+netsnmp_table_data_set_storage *
+netsnmp_extract_table_data_set_column(netsnmp_request_info *request,
+                                     unsigned int column)
+{
+    netsnmp_table_data_set_storage *data =
+        netsnmp_extract_table_row_data( request );
+    if (data) {
+        data = netsnmp_table_data_set_find_column(data, column);
+    }
+    return data;
+}
+/**
+ * extracts a netsnmp_table_data_set pointer from a given request
+ */
 inline netsnmp_table_data_set *
 netsnmp_extract_table_data_set(netsnmp_request_info *request)
 {
