@@ -187,14 +187,14 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
 ** routine accounts for tv_usec overflow.
 */
 static void
-timeradd(result, t1, t2)
-	struct timeval *result, *t1, *t2;
+cmutimeradd(rresult, tt1, tt2)
+	struct timeval *rresult, *tt1, *tt2;
 {
-	result->tv_usec = t1->tv_usec + t2->tv_usec;
-	result->tv_sec = t1->tv_sec + t2->tv_sec;
-	while (result->tv_usec > 1000000L) {
-		(result->tv_usec) -= 1000000L;
-		(result->tv_sec)++;
+	rresult->tv_usec = tt1->tv_usec + tt2->tv_usec;
+	rresult->tv_sec = tt1->tv_sec + tt2->tv_sec;
+	while (rresult->tv_usec > 1000000L) {
+		(rresult->tv_usec) -= 1000000L;
+		(rresult->tv_sec)++;
 	}
 }
 
@@ -619,7 +619,7 @@ alarmTimer(now)
 	    /* the request was sent out asynchronously.  snmp_input() will
 	    ** call one of the alarmUpdate routines.
 	    */
-	    timeradd(&alarm->update, now, &alarm->intervalAdd);
+	    cmutimeradd(&alarm->update, now, &alarm->intervalAdd);
 	    continue;
 	}
 	
@@ -638,7 +638,7 @@ alarmTimer(now)
 	    alarmUpdateAbs(alarm, value);
 	}
 
-	timeradd(&alarm->update, now, &alarm->intervalAdd);
+	cmutimeradd(&alarm->update, now, &alarm->intervalAdd);
     }
 }
 
