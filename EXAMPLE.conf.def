@@ -234,7 +234,7 @@ load 12 14 14
 #       If set to 1: restart the agent.
 
 
-# % snmpwalk localhost public .EXTENSIBLEDOTMIB.VERSIONMIBNUM
+# % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.VERSIONMIBNUM
 # local.Version.versionIndex.1 = 1
 # local.Version.versionTag.1 = "3.1"
 # local.Version.versionDate.1 = "$Date$"
@@ -263,7 +263,7 @@ load 12 14 14
 #
 # exec .EXTENSIBLEDOTMIB.50 shelltest /bin/sh /tmp/shtest
 
-# % snmpwalk localhost public .EXTENSIBLEDOTMIB.50
+# % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.50
 # local.50.1.1 = 1
 # local.50.2.1 = "shelltest"
 # local.50.3.1 = "/bin/sh /tmp/shtest"
@@ -304,7 +304,7 @@ load 12 14 14
 
 pass .EXTENSIBLEDOTMIB.255 /bin/sh PREFIX/local/passtest
 
-# % snmpwalk localhost public .EXTENSIBLEDOTMIB.255
+# % snmpwalk -v 1 localhost public .EXTENSIBLEDOTMIB.255
 # local.255.1 = "life the universe and everything"
 # local.255.2.1 = 42
 # local.255.2.2 = OID: 42.42.42
@@ -313,10 +313,10 @@ pass .EXTENSIBLEDOTMIB.255 /bin/sh PREFIX/local/passtest
 # local.255.5 = 42
 # local.255.6 = Gauge: 42
 #
-# % snmpget localhost public .EXTENSIBLEDOTMIB.255.5
+# % snmpget -v 1 localhost public .EXTENSIBLEDOTMIB.255.5
 # local.255.5 = 42
 #
-# % snmpset localhost private .EXTENSIBLEDOTMIB.255.1 s "New string"
+# % snmpset -v 1 localhost private .EXTENSIBLEDOTMIB.255.1 s "New string"
 # local.255.1 = "New string"
 #
 # Note:  For snmpset requests you must use the 'private' community
@@ -327,3 +327,28 @@ pass .EXTENSIBLEDOTMIB.255 /bin/sh PREFIX/local/passtest
 
 # For specific usage information, see the man/snmpd.conf.5 manual page
 # as well as the local/passtest script used in the above example.
+
+# ----------------------------------------------------------------------
+
+#
+# System contact information
+#
+
+# It is also possible to set the sysContact and sysLocation system
+# variables through the snmpd.conf file:
+
+syslocation Right here, right now.
+syscontact Me <me@somewhere.org>
+
+# % snmpwalk -v 1 localhost public system
+# system.sysDescr.0 = "SunOS name sun4c"
+# system.sysObjectID.0 = OID: enterprises.ucdavis.ucdSnmpAgent.sunos4
+# system.sysUpTime.0 = Timeticks: (595637548) 68 days, 22:32:55
+# system.sysContact.0 = "Me <me@somewhere.org>"
+# system.sysName.0 = "name"
+# system.sysLocation.0 = "Right here, right now."
+# system.sysServices.0 = 72
+
+
+# ----------------------------------------------------------------------
+
