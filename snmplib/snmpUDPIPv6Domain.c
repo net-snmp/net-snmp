@@ -43,7 +43,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 
-oid netsnmp_UDPIPv6Domain[10] = { ENTERPRISE_MIB, 3, 3, 4 };
+oid netsnmp_UDPIPv6Domain[] = { TRANSPORT_DOMAIN_UDP_IPV6 };
 static netsnmp_tdomain udp6Domain;
 
 /*

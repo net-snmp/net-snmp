@@ -111,11 +111,11 @@ unknown           OBJECT IDENTIFIER ::= { netSnmpAgentOIDs 255 }
 -- that we could use instead.  The Unix domain, AAL5 PVC domain and
 -- the IPv6 domains are also defined privately here (for now).
 
-netSnmpTCPDomain	OBJECT IDENTIFIER ::= { netSnmpDomains 1 }
-netSnmpUnixDomain	OBJECT IDENTIFIER ::= { netSnmpDomains 2 }
+netSnmpTCPDomain	OBJECT IDENTIFIER ::= { netSnmpDomains 1 } -- obsolete
+netSnmpUnixDomain	OBJECT IDENTIFIER ::= { netSnmpDomains 2 } -- obsolete
 netSnmpAAL5PVCDomain	OBJECT IDENTIFIER ::= { netSnmpDomains 3 }
-netSnmpUDPIPv6Domain	OBJECT IDENTIFIER ::= { netSnmpDomains 4 }
-netSnmpTCPIPv6Domain	OBJECT IDENTIFIER ::= { netSnmpDomains 5 }
+netSnmpUDPIPv6Domain	OBJECT IDENTIFIER ::= { netSnmpDomains 4 } -- obsolete
+netSnmpTCPIPv6Domain	OBJECT IDENTIFIER ::= { netSnmpDomains 5 } -- obsolete
 netSnmpCallbackDomain	OBJECT IDENTIFIER ::= { netSnmpDomains 6 }
 
 END

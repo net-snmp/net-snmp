@@ -39,10 +39,8 @@
 #include <net-snmp/library/snmpUDPDomain.h>
 #include <net-snmp/library/snmpTCPDomain.h>
 
-
-oid netsnmp_snmpTCPDomain[8] = { 1, 3, 6, 1, 3, 91, 1, 1 };
+oid netsnmp_snmpTCPDomain[] = { TRANSPORT_DOMAIN_TCP_IPV6 };
 static netsnmp_tdomain tcpDomain;
-
 
 /*
  * Return a string representing the address in data, or else the "far end"
