@@ -1,0 +1,125 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>&nbsp;/&nbsp;<a class="el" href="dir_000004.html">helpers</a>
+  </div>
+
+  <h1>mode_end_call.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00002 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00003 <span class="comment"> * that may apply:</span>
+00004 <span class="comment"> */</span>
+00005 <span class="comment">/*</span>
+00006 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00007 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00008 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00009 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00010 <span class="comment"> */</span>
+00011 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00012 
+00013 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00014 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00015 
+00016 <span class="preprocessor">#include &lt;net-snmp/agent/mode_end_call.h&gt;</span>
+00017 
+00018 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00019 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00020 <span class="preprocessor">#endif</span>
+00021 
+00047 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+<a name="l00048" id="l00048"></a><a class="code" href="group__mode__end__call.html#ga0">00048</a> <a class="code" href=
+"group__mode__end__call.html#ga0">netsnmp_get_mode_end_call_handler</a>(netsnmp_mode_handler_list *endlist)
+00049 {
+00050     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *me =
+00051         <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
+"stringliteral">"mode_end_call"</span>,
+00052                                netsnmp_mode_end_call_helper);
+00053 
+00054     <span class="keywordflow">if</span> (!me)
+00055         <span class="keywordflow">return</span> NULL;
+00056 
+00057     me-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = endlist;
+00058     <span class="keywordflow">return</span> me;
+00059 }
+00060 
+00067 netsnmp_mode_handler_list *
+<a name="l00068" id="l00068"></a><a class="code" href="group__mode__end__call.html#ga1">00068</a> <a class="code" href=
+"group__mode__end__call.html#ga1">netsnmp_mode_end_call_add_mode_callback</a>(netsnmp_mode_handler_list *endlist,
+00069                                         <span class="keywordtype">int</span> mode,
+00070                                         <a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *callbackh) {
+00071     netsnmp_mode_handler_list *ptr, *ptr2;
+00072     ptr = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_mode_handler_list);
+00073     <span class="keywordflow">if</span> (!ptr)
+00074         <span class="keywordflow">return</span> NULL;
+00075     
+00076     ptr-&gt;mode = mode;
+00077     ptr-&gt;callback_handler = callbackh;
+00078     ptr-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o4">next</a> = NULL;
+00079 
+00080     <span class="keywordflow">if</span> (!endlist)
+00081         <span class="keywordflow">return</span> ptr;
+00082 
+00083     <span class="comment">/* get to end */</span>
+00084     <span class="keywordflow">for</span>(ptr2 = endlist; ptr2-&gt;next != NULL; ptr2 = ptr2-&gt;next);
+00085 
+00086     ptr2-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o4">next</a> = ptr;
+00087     <span class="keywordflow">return</span> endlist;
+00088 }
+00089     
+00091 <span class="keywordtype">int</span>
+00092 netsnmp_mode_end_call_helper(<a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00093                             <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00094                             <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
+00095                             <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
+00096 {
+00097 
+00098     <span class="keywordtype">int</span>             ret;
+00099     <span class="keywordtype">int</span>             ret2 = SNMP_ERR_NOERROR;
+00100     netsnmp_mode_handler_list *ptr;
+00101 
+00102     <span class="comment">/* always call the real handlers first */</span>
+00103     ret = <a class="code" href="group__handler.html#ga17">netsnmp_call_next_handler</a>(handler, reginfo, reqinfo,
+00104                                     requests);
+00105 
+00106     <span class="comment">/* then call the callback handlers */</span>
+00107     <span class="keywordflow">for</span>(ptr = handler-&gt;<a class="code" href=
+"structnetsnmp__mib__handler__s.html#o1">myvoid</a>; ptr; ptr = ptr-&gt;<a class="code" href=
+"structnetsnmp__mib__handler__s.html#o4">next</a>) {
+00108         <span class="keywordflow">if</span> (ptr-&gt;mode == NETSNMP_MODE_END_ALL_MODES ||
+00109             reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> == ptr-&gt;<a class=
+"code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
+00110             ret2 = <a class="code" href=
+"group__handler.html#ga15">netsnmp_call_handler</a>(ptr-&gt;callback_handler, reginfo,
+00111                                              reqinfo, requests);
+00112             <span class="keywordflow">if</span> (ret != SNMP_ERR_NOERROR)
+00113                 ret = ret2;
+00114         }
+00115     }
+00116     
+00117     <span class="keywordflow">return</span> ret2;
+00118 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

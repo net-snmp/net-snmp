@@ -1,0 +1,146 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>group__old__api</h1>Section: net-snmp (3)<br />
+    Updated: 28 Oct 2004<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>old_api: Calls mib module code written in the old style of code. - This is a backwards compatilibity module that
+    allows code written in the old API to be run under the new handler based architecture.
+
+    <p><a name="lbAC" id="lbAC"> </a></p>
+
+    <h3>Functions</h3>
+
+    <p><br />
+    <b>netsnmp_mib_handler</b> * <b>get_old_api_handler</b> (void)<br />
+    <i>returns a old_api handler that should be the final calling handler.</i><br />
+    int <b>netsnmp_register_old_api</b> (const char *moduleName, struct variable *var, size_t varsize, size_t numvars, oid
+    *mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, <b>netsnmp_session</b> *ss, const char *context,
+    int timeout, int flags)<br />
+    <i>Registers an old API set into the mib tree.</i><br />
+    int <b>netsnmp_register_mib_table_row</b> (const char *moduleName, struct variable *var, size_t varsize, size_t numvars, oid
+    *mibloc, size_t mibloclen, int priority, int var_subid, <b>netsnmp_session</b> *ss, const char *context, int timeout, int
+    flags)<br />
+    <i>registers a row within a mib table</i><br />
+    int <b>netsnmp_old_api_helper</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b> *reginfo,
+    <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
+    <i>implements the old_api handler</i> <a name="lbAD" id="lbAD"> </a></p>
+
+    <h2>Detailed Description</h2>
+
+    <p>This is a backwards compatilibity module that allows code written in the old API to be run under the new handler based
+    architecture.</p>
+
+    <p>Use it by calling <b>netsnmp_register_old_api()</b>. <a name="lbAE" id="lbAE"> </a></p>
+
+    <h2>Function Documentation</h2>
+
+    <p><a name="lbAF" id="lbAF"> </a></p>
+
+    <h3><b>netsnmp_mib_handler</b>* get_old_api_handler (void)</h3>
+
+    <p>returns a old_api handler that should be the final calling handler.</p>
+
+    <p>Don't use this function. Use the <b>netsnmp_register_old_api()</b> function instead.</p>
+
+    <p>Definition at line 40 of file old_api.c.</p>
+
+    <p>References netsnmp_create_handler().</p>
+
+    <p>Referenced by netsnmp_register_mib_table_row(), and netsnmp_register_old_api(). <a name="lbAG" id="lbAG"> </a></p>
+
+    <h3>int netsnmp_old_api_helper (<b>netsnmp_mib_handler</b> * handler, <b>netsnmp_handler_registration</b> * reginfo,
+    <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
+
+    <p>implements the old_api handler</p>
+
+    <p>Definition at line 228 of file old_api.c.</p>
+
+    <p>References netsnmp_agent_request_info_s::asp, variable_list::data, netsnmp_handler_registration_s::handlerName,
+    netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid, variable_list::name, variable_list::name_length,
+    netsnmp_create_data_list(), netsnmp_handler_registration, netsnmp_mib_handler, netsnmp_oid_equals(),
+    netsnmp_request_add_list_data(), netsnmp_request_get_list_data(), netsnmp_set_request_error(), netsnmp_request_info_s::next,
+    netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len,
+    SNMP_MALLOC_TYPEDEF, snmp_set_var_typed_value(), variable_list::type, variable_list::val, and variable_list::val_len.
+    <a name="lbAH" id="lbAH"> </a></p>
+
+    <h3>int netsnmp_register_mib_table_row (const char * moduleName, struct variable * var, size_t varsize, size_t numvars, oid *
+    mibloc, size_t mibloclen, int priority, int var_subid, <b>netsnmp_session</b> * ss, const char * context, int timeout, int
+    flags)</h3>
+
+    <p>registers a row within a mib table</p>
+
+    <p>Definition at line 110 of file old_api.c.</p>
+
+    <p>References netsnmp_handler_registration_s::contextName, get_old_api_handler(), netsnmp_handler_registration_s::handler,
+    netsnmp_handler_registration_s::handlerName, netsnmp_handler_registration_s::modes, netsnmp_mib_handler_s::myvoid,
+    netsnmp_handler_registration, netsnmp_handler_registration_free(), netsnmp_register_handler_nocallback(),
+    netsnmp_handler_registration_s::priority, netsnmp_handler_registration_s::range_subid,
+    netsnmp_handler_registration_s::range_ubound, netsnmp_handler_registration_s::rootoid,
+    netsnmp_handler_registration_s::rootoid_len, snmp_call_callbacks(), SNMP_MALLOC_TYPEDEF, and
+    netsnmp_handler_registration_s::timeout. <a name="lbAI" id="lbAI"> </a></p>
+
+    <h3>int netsnmp_register_old_api (const char * moduleName, struct variable * var, size_t varsize, size_t numvars, oid *
+    mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, <b>netsnmp_session</b> * ss, const char * context,
+    int timeout, int flags)</h3>
+
+    <p>Registers an old API set into the mib tree.</p>
+
+    <p>Functionally this mimics the old register_mib_context() function (and in fact the new register_mib_context() function
+    merely calls this new old_api one).</p>
+
+    <p>netsnmp_handler_registration_free(reginfo); already freed</p>
+
+    <p>Definition at line 51 of file old_api.c.</p>
+
+    <p>References netsnmp_handler_registration_s::contextName, get_old_api_handler(), netsnmp_handler_registration_s::handler,
+    netsnmp_handler_registration_s::handlerName, memdup(), netsnmp_handler_registration_s::modes, netsnmp_mib_handler_s::myvoid,
+    netsnmp_handler_registration, netsnmp_register_handler(), netsnmp_handler_registration_s::priority,
+    netsnmp_handler_registration_s::range_subid, netsnmp_handler_registration_s::range_ubound,
+    netsnmp_handler_registration_s::rootoid, netsnmp_handler_registration_s::rootoid_len, SNMP_FREE, SNMP_MALLOC_TYPEDEF, and
+    netsnmp_handler_registration_s::timeout.</p>
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAC">Functions</a></dt>
+        </dl>
+      </dd>
+
+      <dt><a href="#lbAD">Detailed Description</a></dt>
+
+      <dt><a href="#lbAE">Function Documentation</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAF"><b>netsnmp_mib_handler</b>* get_old_api_handler (void)</a></dt>
+
+          <dt><a href="#lbAG">int netsnmp_old_api_helper (<b>netsnmp_mib_handler</b> * handler,
+          <b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b>
+          * requests)</a></dt>
+
+          <dt><a href="#lbAH">int netsnmp_register_mib_table_row (const char * moduleName, struct variable * var, size_t varsize,
+          size_t numvars, oid * mibloc, size_t mibloclen, int priority, int var_subid, <b>netsnmp_session</b> * ss, const char *
+          context, int timeout, int flags)</a></dt>
+
+          <dt><a href="#lbAI">int netsnmp_register_old_api (const char * moduleName, struct variable * var, size_t varsize,
+          size_t numvars, oid * mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, <b>netsnmp_session</b>
+          * ss, const char * context, int timeout, int flags)</a></dt>
+        </dl>
+      </dd>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:43 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

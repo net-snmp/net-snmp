@@ -1,0 +1,231 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>table_dataset.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * table_iterator.h </span>
+00003 <span class="comment"> */</span>
+00004 <span class="preprocessor">#ifndef _TABLE_DATA_SET_HANDLER_H_</span>
+00005 <span class="preprocessor">#define _TABLE_DATA_SET_HANDLER_H_</span>
+00006 
+00007 <span class="preprocessor">#ifdef __cplusplus</span>
+00008 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00009 <span class="preprocessor">#endif</span>
+00010 
+00011     <span class="comment">/*</span>
+00012 <span class="comment">     * This helper is designed to completely automate the task of storing</span>
+00013 <span class="comment">     * tables of data within the agent that are not tied to external data</span>
+00014 <span class="comment">     * sources (like the kernel, hardware, or other processes, etc).  IE,</span>
+00015 <span class="comment">     * all rows within a table are expected to be added manually using</span>
+00016 <span class="comment">     * functions found below.</span>
+00017 <span class="comment">     */</span>
+00018 
+00019     <span class="keywordtype">void</span> netsnmp_init_table_dataset(<span class="keywordtype">void</span>);
+00020 
+00021 <span class="preprocessor">#define TABLE_DATA_SET_NAME "netsnmp_table_data_set"</span>
+00022 
+00023     <span class="comment">/*</span>
+00024 <span class="comment">     * return SNMP_ERR_NOERROR or some SNMP specific protocol error id </span>
+00025 <span class="comment">     */</span>
+00026     <span class="keyword">typedef</span> int     (Netsnmp_Value_Change_Ok) (<span class=
+"keywordtype">char</span> *old_value,
+00027                                                size_t old_value_len,
+00028                                                <span class="keywordtype">char</span> *new_value,
+00029                                                size_t new_value_len,
+00030                                                <span class="keywordtype">void</span> *mydata);
+00031 
+00032     <span class="comment">/*</span>
+00033 <span class="comment">     * stored within a given row </span>
+00034 <span class="comment">     */</span>
+00035     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_table_data_set_storage_s {
+00036         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    column;
+00037 
+00038         <span class="comment">/*</span>
+00039 <span class="comment">         * info about it? </span>
+00040 <span class="comment">         */</span>
+00041         <span class="keywordtype">char</span>            writable;
+00042         Netsnmp_Value_Change_Ok *change_ok_fn;
+00043         <span class="keywordtype">void</span>           *my_change_data;
+00044 
+00045         <span class="comment">/*</span>
+00046 <span class="comment">         * data actually stored </span>
+00047 <span class="comment">         */</span>
+00048         u_char          type;
+00049         <span class="keyword">union </span>{                 <span class="comment">/* value of variable */</span>
+00050             <span class="keywordtype">void</span>           *voidp;
+00051             <span class="keywordtype">long</span>           *integer;
+00052             u_char         *string;
+00053             oid            *objid;
+00054             u_char         *bitstring;
+00055             <span class="keyword">struct </span>counter64 *counter64;
+00056 <span class="preprocessor">#ifdef OPAQUE_SPECIAL_TYPES</span>
+00057             <span class="keywordtype">float</span>          *floatVal;
+00058             <span class="keywordtype">double</span>         *doubleVal;
+00059 <span class="preprocessor">#endif                          </span><span class="comment">/* OPAQUE_SPECIAL_TYPES */</span>
+00060         } data;
+00061         u_long          data_len;
+00062 
+00063         <span class="keyword">struct </span>netsnmp_table_data_set_storage_s *next;
+00064     } netsnmp_table_data_set_storage;
+00065 
+00066     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_table_data_set_s {
+00067         netsnmp_table_data *table;
+00068         netsnmp_table_data_set_storage *default_row;
+00069         <span class="keywordtype">int</span>             allow_creation; <span class=
+"comment">/* set to 1 to allow creation of new rows */</span>
+00070         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    rowstatus_column;
+00071     } netsnmp_table_data_set;
+00072 
+00073     Netsnmp_Node_Handler netsnmp_table_data_set_helper_handler;
+00074 
+00075     <span class="comment">/*</span>
+00076 <span class="comment">     * to set, add column, type, (writable) ? 1 : 0 </span>
+00077 <span class="comment">     */</span>
+00078     <span class="comment">/*</span>
+00079 <span class="comment">     * default value, if not NULL, is the default value used in row</span>
+00080 <span class="comment">     * creation.  It is copied into the storage template (free your</span>
+00081 <span class="comment">     * calling argument). </span>
+00082 <span class="comment">     */</span>
+00083     <span class="keywordtype">int</span>            
+00084         <a class="code" href=
+"group__table__dataset.html#ga9">netsnmp_table_set_add_default_row</a>(netsnmp_table_data_set *,
+00085                                           <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span>, <span class="keywordtype">int</span>, <span class="keywordtype">int</span>,
+00086                                           <span class="keywordtype">void</span> *default_value,
+00087                                           size_t default_value_len);
+00088 
+00089     <span class="comment">/*</span>
+00090 <span class="comment">     * to set, add column, type, (writable) ? 1 : 0, ... </span>
+00091 <span class="comment">     */</span>
+00092 <span class="preprocessor">#if HAVE_STDARG_H</span>
+00093     <span class="keywordtype">void</span>           
+00094         <a class="code" href=
+"group__table__dataset.html#ga25">netsnmp_table_set_multi_add_default_row</a>(netsnmp_table_data_set *,
+00095                                                 ...);
+00096 <span class="preprocessor">#else</span>
+00097     <span class="keywordtype">void</span>            <a class="code" href=
+"group__table__dataset.html#ga25">netsnmp_table_set_multi_add_default_row</a>(va_alist);
+00098 <span class="preprocessor">#endif</span>
+00099     <span class="keywordtype">int</span>             <a class="code" href=
+"group__table__dataset.html#ga8">netsnmp_set_row_column</a>(netsnmp_table_row *,
+00100                                            <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span>, <span class="keywordtype">int</span>, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *,
+00101                                            size_t);
+00102     netsnmp_table_data_set_storage
+00103         *<a class="code" href=
+"group__table__dataset.html#ga4">netsnmp_table_data_set_find_column</a>(netsnmp_table_data_set_storage
+00104                                             *, <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span>);
+00105     netsnmp_table_data_set_storage
+00106        *<a class="code" href="group__table__dataset.html#ga5">netsnmp_extract_table_data_set_column</a>(<a class="code"
+href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *,
+00107                                               <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span>);
+00108     <span class="keywordtype">int</span>            
+00109         <a class="code" href="group__table__dataset.html#ga3">netsnmp_register_table_data_set</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *,
+00110                                         netsnmp_table_data_set *,
+00111                                         <a class="code" href=
+"structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *);
+00112     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>
+00113         *<a class="code" href=
+"group__table__dataset.html#ga2">netsnmp_get_table_data_set_handler</a>(netsnmp_table_data_set *);
+00114     netsnmp_table_data_set *<a class="code" href=
+"group__table__dataset.html#ga1">netsnmp_create_table_data_set</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+00115     <span class="keywordtype">int</span>             <a class="code" href=
+"group__table__dataset.html#ga7">netsnmp_mark_row_column_writable</a>(netsnmp_table_row
+00116                                                      *row, <span class="keywordtype">int</span> column,
+00117                                                      <span class="keywordtype">int</span> writable);
+00118     NETSNMP_INLINE netsnmp_table_data_set
+00119         *<a class="code" href="group__table__dataset.html#ga6">netsnmp_extract_table_data_set</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request);
+00120     <span class="keywordtype">void</span>            netsnmp_config_parse_table_set(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *token,
+00121                                                    <span class="keywordtype">char</span> *line);
+00122     <span class="keywordtype">void</span>            netsnmp_config_parse_add_row(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *token,
+00123                                                  <span class="keywordtype">char</span> *line);
+00124     NETSNMP_INLINE <span class="keywordtype">void</span> <a class="code" href=
+"group__table__dataset.html#ga17">netsnmp_table_dataset_add_index</a>(netsnmp_table_data_set
+00125                                                     *table, u_char type);
+00126     NETSNMP_INLINE <span class="keywordtype">void</span> <a class="code" href=
+"group__table__dataset.html#ga18">netsnmp_table_dataset_add_row</a>(netsnmp_table_data_set
+00127                                                   *table,
+00128                                                   netsnmp_table_row *row);
+00129     NETSNMP_INLINE <span class="keywordtype">void</span> <a class="code" href=
+"group__table__dataset.html#ga23">netsnmp_table_dataset_remove_row</a>(netsnmp_table_data_set
+00130                                                      *table,
+00131                                                      netsnmp_table_row
+00132                                                      *row);
+00133     NETSNMP_INLINE <span class="keywordtype">void</span> <a class="code" href=
+"group__table__dataset.html#ga22">netsnmp_table_dataset_delete_row</a>(netsnmp_table_row
+00134                                                      *row);
+00135     NETSNMP_INLINE <span class="keywordtype">void</span>    
+00136         <a class="code" href=
+"group__table__dataset.html#ga24">netsnmp_table_dataset_remove_and_delete_row</a>(netsnmp_table_data_set
+00137                                                     *table,
+00138                                                     netsnmp_table_row
+00139                                                     *row);
+00140     NETSNMP_INLINE <span class="keywordtype">void</span>    
+00141         <a class="code" href="group__table__dataset.html#ga21">netsnmp_table_dataset_delete_all_data</a>
+00142         (netsnmp_table_data_set_storage *data);
+00143     NETSNMP_INLINE <span class="keywordtype">void</span>    
+00144         <a class="code" href=
+"group__table__dataset.html#ga19">netsnmp_table_dataset_replace_row</a>(netsnmp_table_data_set *table,
+00145                                           netsnmp_table_row *origrow,
+00146                                           netsnmp_table_row *newrow);
+00147     netsnmp_table_row *<a class="code" href=
+"group__table__dataset.html#ga10">netsnmp_table_data_set_clone_row</a>(netsnmp_table_row
+00148                                                         *row);
+00149     <span class="keywordtype">void</span>            <a class="code" href=
+"group__table__dataset.html#ga14">netsnmp_register_auto_data_table</a>(netsnmp_table_data_set
+00150                                                      *table_set,
+00151                                                      <span class="keywordtype">char</span>
+00152                                                      *registration_name);
+00153     <span class="keywordtype">int</span> netsnmp_table_data_num_rows(netsnmp_table_data *table);
+00154 
+00155 <span class="preprocessor">#if HAVE_STDARG_H</span>
+00156     <span class="keywordtype">void</span>           
+00157         <a class="code" href=
+"group__table__dataset.html#ga26">netsnmp_table_set_add_indexes</a>(netsnmp_table_data_set *tset, ...);
+00158 <span class="preprocessor">#else</span>
+00159     <span class="keywordtype">void</span>            netsnmp_table_helper_add_indexes(va_alist);
+00160 <span class="preprocessor">#endif</span>
+00161 
+00162 <span class="preprocessor">#ifdef __cplusplus</span>
+00163 }
+00164 <span class="preprocessor">#endif</span>
+00165 
+00166 <span class=
+"preprocessor">#define netsnmp_table_row_add_column(row, type, value, value_len) snmp_varlist_add_variable(&amp;row-&gt;indexes, NULL, 0, type, (u_char *) value, value_len)</span>
+00167 
+00168 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* _TABLE_DATA_SET_HANDLER_H_ */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:02 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

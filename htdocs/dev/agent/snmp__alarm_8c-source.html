@@ -1,0 +1,462 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>snmp_alarm.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * snmp_alarm.c:</span>
+00003 <span class="comment"> */</span>
+00004 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00005 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00006 <span class="comment"> * that may apply:</span>
+00007 <span class="comment"> */</span>
+00008 <span class="comment">/*</span>
+00009 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00010 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00011 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00012 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00013 <span class="comment"> */</span>
+00019 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00020 
+00021 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00022 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+00023 <span class="preprocessor">#endif</span>
+00024 <span class="preprocessor">#include &lt;signal.h&gt;</span>
+00025 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00026 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00027 <span class="preprocessor">#endif</span>
+00028 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00029 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00030 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00031 <span class="preprocessor">#endif</span>
+00032 <span class="preprocessor">#if HAVE_STRING_H</span>
+00033 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00034 <span class="preprocessor">#endif</span>
+00035 
+00036 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00037 <span class="preprocessor"># ifdef WIN32</span>
+00038 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00039 <span class="preprocessor"># else</span>
+00040 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00041 <span class="preprocessor"># endif</span>
+00042 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00043 <span class="preprocessor">#else</span>
+00044 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00045 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00046 <span class="preprocessor"># else</span>
+00047 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00048 <span class="preprocessor"># endif</span>
+00049 <span class="preprocessor">#endif</span>
+00050 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00051 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00052 <span class="preprocessor">#endif</span>
+00053 
+00054 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00055 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00056 <span class="preprocessor">#endif</span>
+00057 
+00058 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00059 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00060 <span class="preprocessor">#include &lt;net-snmp/config_api.h&gt;</span>
+00061 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00062 
+00063 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00064 <span class="preprocessor">#include &lt;net-snmp/library/callback.h&gt;</span>
+00065 <span class="preprocessor">#include &lt;net-snmp/library/snmp_alarm.h&gt;</span>
+00066 
+00067 <span class="keyword">static</span> <span class="keyword">struct </span>snmp_alarm *thealarms = NULL;
+00068 <span class="keyword">static</span> <span class="keywordtype">int</span>      start_alarms = 0;
+00069 <span class="keyword">static</span> <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> regnum = 1;
+00070 
+00071 <span class="keywordtype">int</span>
+00072 init_alarm_post_config(<span class="keywordtype">int</span> majorid, <span class=
+"keywordtype">int</span> minorid, <span class="keywordtype">void</span> *serverarg,
+00073                        <span class="keywordtype">void</span> *clientarg)
+00074 {
+00075     start_alarms = 1;
+00076     set_an_alarm();
+00077     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00078 }
+00079 
+00080 <span class="keywordtype">void</span>
+00081 init_snmp_alarm(<span class="keywordtype">void</span>)
+00082 {
+00083     start_alarms = 0;
+00084     <a class="code" href="group__callback.html#ga3">snmp_register_callback</a>(SNMP_CALLBACK_LIBRARY,
+00085                            SNMP_CALLBACK_POST_READ_CONFIG,
+00086                            init_alarm_post_config, NULL);
+00087 }
+00088 
+00089 <span class="keywordtype">void</span>
+00090 sa_update_entry(<span class="keyword">struct</span> snmp_alarm *a)
+00091 {
+00092     <span class="keywordflow">if</span> (a-&gt;t.tv_sec == 0 &amp;&amp; a-&gt;t.tv_usec == 0) {
+00093         DEBUGMSGTL((<span class="stringliteral">"snmp_alarm"</span>,
+00094                     <span class="stringliteral">"update_entry: illegal interval specified\n"</span>));
+00095         <span class="keywordflow">return</span>;
+00096     }
+00097 
+00098     <span class="keywordflow">if</span> (a-&gt;t_last.tv_sec == 0 &amp;&amp; a-&gt;t_last.tv_usec == 0) {
+00099         <span class="keyword">struct </span>timeval  t_now;
+00100         <span class="comment">/*</span>
+00101 <span class="comment">         * Never been called yet, call time `t' from now.  </span>
+00102 <span class="comment">         */</span>
+00103         gettimeofday(&amp;t_now, NULL);
+00104 
+00105         a-&gt;t_last.tv_sec = t_now.tv_sec;
+00106         a-&gt;t_last.tv_usec = t_now.tv_usec;
+00107 
+00108         a-&gt;t_next.tv_sec = t_now.tv_sec + a-&gt;t.tv_sec;
+00109         a-&gt;t_next.tv_usec = t_now.tv_usec + a-&gt;t.tv_usec;
+00110 
+00111         <span class="keywordflow">while</span> (a-&gt;t_next.tv_usec &gt;= 1000000) {
+00112             a-&gt;t_next.tv_usec -= 1000000;
+00113             a-&gt;t_next.tv_sec += 1;
+00114         }
+00115     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (a-&gt;t_next.tv_sec == 0 &amp;&amp; a-&gt;t_next.tv_usec == 0) {
+00116         <span class="comment">/*</span>
+00117 <span class="comment">         * We've been called but not reset for the next call.  </span>
+00118 <span class="comment">         */</span>
+00119         <span class="keywordflow">if</span> (a-&gt;flags &amp; SA_REPEAT) {
+00120             a-&gt;t_next.tv_sec = a-&gt;t_last.tv_sec + a-&gt;t.tv_sec;
+00121             a-&gt;t_next.tv_usec = a-&gt;t_last.tv_usec + a-&gt;t.tv_usec;
+00122 
+00123             <span class="keywordflow">while</span> (a-&gt;t_next.tv_usec &gt;= 1000000) {
+00124                 a-&gt;t_next.tv_usec -= 1000000;
+00125                 a-&gt;t_next.tv_sec += 1;
+00126             }
+00127         } <span class="keywordflow">else</span> {
+00128             <span class="comment">/*</span>
+00129 <span class="comment">             * Single time call, remove it.  </span>
+00130 <span class="comment">             */</span>
+00131             <a class="code" href="group__snmp__alarm.html#ga6">snmp_alarm_unregister</a>(a-&gt;clientreg);
+00132         }
+00133     }
+00134 }
+00135 
+00149 <span class="keywordtype">void</span>
+<a name="l00150" id="l00150"></a><a class="code" href="group__snmp__alarm.html#ga6">00150</a> <a class="code" href=
+"group__snmp__alarm.html#ga6">snmp_alarm_unregister</a>(<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> clientreg)
+00151 {
+00152     <span class="keyword">struct </span>snmp_alarm *sa_ptr, **prevNext = &amp;thealarms;
+00153 
+00154     <span class="keywordflow">for</span> (sa_ptr = thealarms;
+00155          sa_ptr != NULL &amp;&amp; sa_ptr-&gt;clientreg != clientreg;
+00156          sa_ptr = sa_ptr-&gt;next) {
+00157         prevNext = &amp;(sa_ptr-&gt;next);
+00158     }
+00159 
+00160     <span class="keywordflow">if</span> (sa_ptr != NULL) {
+00161         *prevNext = sa_ptr-&gt;next;
+00162         DEBUGMSGTL((<span class="stringliteral">"snmp_alarm"</span>, <span class=
+"stringliteral">"unregistered alarm %d\n"</span>, 
+00163                     sa_ptr-&gt;clientreg));
+00164         <span class="comment">/*</span>
+00165 <span class="comment">         * Note:  do not free the clientarg, its the clients responsibility </span>
+00166 <span class="comment">         */</span>
+00167         free(sa_ptr);
+00168     } <span class="keywordflow">else</span> {
+00169         DEBUGMSGTL((<span class="stringliteral">"snmp_alarm"</span>, <span class=
+"stringliteral">"no alarm %d to unregister\n"</span>, clientreg));
+00170     }
+00171 }
+00172 
+00182 <span class="keywordtype">void</span>
+<a name="l00183" id="l00183"></a><a class="code" href="group__snmp__alarm.html#ga7">00183</a> <a class="code" href=
+"group__snmp__alarm.html#ga7">snmp_alarm_unregister_all</a>(<span class="keywordtype">void</span>)
+00184 {
+00185   <span class="keyword">struct </span>snmp_alarm *sa_ptr, *sa_tmp;
+00186 
+00187   <span class="keywordflow">for</span> (sa_ptr = thealarms; sa_ptr != NULL; sa_ptr = sa_tmp) {
+00188     sa_tmp = sa_ptr-&gt;next;
+00189     free(sa_ptr);
+00190   }
+00191   DEBUGMSGTL((<span class="stringliteral">"snmp_alarm"</span>, <span class=
+"stringliteral">"ALL alarms unregistered\n"</span>));
+00192   thealarms = NULL;
+00193 }  
+00194 
+00195 <span class="keyword">struct </span>snmp_alarm *
+00196 sa_find_next(<span class="keywordtype">void</span>)
+00197 {
+00198     <span class="keyword">struct </span>snmp_alarm *a, *lowest = NULL;
+00199 
+00200     <span class="keywordflow">for</span> (a = thealarms; a != NULL; a = a-&gt;next) {
+00201         <span class="keywordflow">if</span> (lowest == NULL) {
+00202             lowest = a;
+00203         } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (a-&gt;t_next.tv_sec == lowest-&gt;t_next.tv_sec) {
+00204             <span class="keywordflow">if</span> (a-&gt;t_next.tv_usec &lt; lowest-&gt;t_next.tv_usec) {
+00205                 lowest = a;
+00206             }
+00207         } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (a-&gt;t_next.tv_sec &lt; lowest-&gt;t_next.tv_sec) {
+00208             lowest = a;
+00209         }
+00210     }
+00211     <span class="keywordflow">return</span> lowest;
+00212 }
+00213 
+00214 <span class="keyword">struct </span>snmp_alarm *
+00215 sa_find_specific(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> clientreg)
+00216 {
+00217     <span class="keyword">struct </span>snmp_alarm *sa_ptr;
+00218     <span class="keywordflow">for</span> (sa_ptr = thealarms; sa_ptr != NULL; sa_ptr = sa_ptr-&gt;next) {
+00219         <span class="keywordflow">if</span> (sa_ptr-&gt;clientreg == clientreg) {
+00220             <span class="keywordflow">return</span> sa_ptr;
+00221         }
+00222     }
+00223     <span class="keywordflow">return</span> NULL;
+00224 }
+00225 
+00226 <span class="keywordtype">void</span>
+00227 run_alarms(<span class="keywordtype">void</span>)
+00228 {
+00229     <span class="keywordtype">int</span>             done = 0;
+00230     <span class="keyword">struct </span>snmp_alarm *a = NULL;
+00231     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    clientreg;
+00232     <span class="keyword">struct </span>timeval  t_now;
+00233 
+00234     <span class="comment">/*</span>
+00235 <span class="comment">     * Loop through everything we have repeatedly looking for the next thing to</span>
+00236 <span class="comment">     * call until all events are finally in the future again.  </span>
+00237 <span class="comment">     */</span>
+00238 
+00239     <span class="keywordflow">while</span> (!done) {
+00240         <span class="keywordflow">if</span> ((a = sa_find_next()) == NULL) {
+00241             <span class="keywordflow">return</span>;
+00242         }
+00243 
+00244         gettimeofday(&amp;t_now, NULL);
+00245 
+00246         <span class="keywordflow">if</span> ((a-&gt;t_next.tv_sec &lt; t_now.tv_sec) ||
+00247             ((a-&gt;t_next.tv_sec == t_now.tv_sec) &amp;&amp;
+00248              (a-&gt;t_next.tv_usec &lt; t_now.tv_usec))) {
+00249             clientreg = a-&gt;clientreg;
+00250             DEBUGMSGTL((<span class="stringliteral">"snmp_alarm"</span>, <span class=
+"stringliteral">"run alarm %d\n"</span>, clientreg));
+00251             (*(a-&gt;thecallback)) (clientreg, a-&gt;clientarg);
+00252             DEBUGMSGTL((<span class="stringliteral">"snmp_alarm"</span>, <span class=
+"stringliteral">"alarm %d completed\n"</span>, clientreg));
+00253 
+00254             <span class="keywordflow">if</span> ((a = sa_find_specific(clientreg)) != NULL) {
+00255                 a-&gt;t_last.tv_sec = t_now.tv_sec;
+00256                 a-&gt;t_last.tv_usec = t_now.tv_usec;
+00257                 a-&gt;t_next.tv_sec = 0;
+00258                 a-&gt;t_next.tv_usec = 0;
+00259                 sa_update_entry(a);
+00260             } <span class="keywordflow">else</span> {
+00261                 DEBUGMSGTL((<span class="stringliteral">"snmp_alarm"</span>, <span class=
+"stringliteral">"alarm %d deleted itself\n"</span>,
+00262                             clientreg));
+00263             }
+00264         } <span class="keywordflow">else</span> {
+00265             done = 1;
+00266         }
+00267     }
+00268 }
+00269 
+00270 
+00271 
+00272 RETSIGTYPE
+00273 alarm_handler(<span class="keywordtype">int</span> a)
+00274 {
+00275     run_alarms();
+00276     set_an_alarm();
+00277 }
+00278 
+00279 
+00280 
+00281 <span class="keywordtype">int</span>
+00282 get_next_alarm_delay_time(<span class="keyword">struct</span> timeval *delta)
+00283 {
+00284     <span class="keyword">struct </span>snmp_alarm *sa_ptr;
+00285     <span class="keyword">struct </span>timeval  t_diff, t_now;
+00286 
+00287     sa_ptr = sa_find_next();
+00288 
+00289     <span class="keywordflow">if</span> (sa_ptr) {
+00290         gettimeofday(&amp;t_now, 0);
+00291 
+00292         <span class="keywordflow">if</span> ((t_now.tv_sec &gt; sa_ptr-&gt;t_next.tv_sec) ||
+00293             ((t_now.tv_sec == sa_ptr-&gt;t_next.tv_sec) &amp;&amp;
+00294              (t_now.tv_usec &gt; sa_ptr-&gt;t_next.tv_usec))) {
+00295             <span class="comment">/*</span>
+00296 <span class="comment">             * Time has already passed.  Return the smallest possible amount of</span>
+00297 <span class="comment">             * time.  </span>
+00298 <span class="comment">             */</span>
+00299             delta-&gt;tv_sec = 0;
+00300             delta-&gt;tv_usec = 1;
+00301             <span class="keywordflow">return</span> sa_ptr-&gt;clientreg;
+00302         } <span class="keywordflow">else</span> {
+00303             <span class="comment">/*</span>
+00304 <span class="comment">             * Time is still in the future.  </span>
+00305 <span class="comment">             */</span>
+00306             t_diff.tv_sec = sa_ptr-&gt;t_next.tv_sec - t_now.tv_sec;
+00307             t_diff.tv_usec = sa_ptr-&gt;t_next.tv_usec - t_now.tv_usec;
+00308 
+00309             <span class="keywordflow">while</span> (t_diff.tv_usec &lt; 0) {
+00310                 t_diff.tv_sec -= 1;
+00311                 t_diff.tv_usec += 1000000;
+00312             }
+00313 
+00314             delta-&gt;tv_sec = t_diff.tv_sec;
+00315             delta-&gt;tv_usec = t_diff.tv_usec;
+00316             <span class="keywordflow">return</span> sa_ptr-&gt;clientreg;
+00317         }
+00318     }
+00319 
+00320     <span class="comment">/*</span>
+00321 <span class="comment">     * Nothing Left.  </span>
+00322 <span class="comment">     */</span>
+00323     <span class="keywordflow">return</span> 0;
+00324 }
+00325 
+00326 
+00327 <span class="keywordtype">void</span>
+00328 set_an_alarm(<span class="keywordtype">void</span>)
+00329 {
+00330     <span class="keyword">struct </span>timeval  delta;
+00331     <span class="keywordtype">int</span>             nextalarm = get_next_alarm_delay_time(&amp;delta);
+00332 
+00333     <span class="comment">/*</span>
+00334 <span class="comment">     * We don't use signals if they asked us nicely not to.  It's expected</span>
+00335 <span class="comment">     * they'll check the next alarm time and do their own calling of</span>
+00336 <span class="comment">     * run_alarms().  </span>
+00337 <span class="comment">     */</span>
+00338 
+00339     <span class="keywordflow">if</span> (nextalarm &amp;&amp; !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+00340                                         NETSNMP_DS_LIB_ALARM_DONT_USE_SIG)) {
+00341 <span class="preprocessor">#ifndef WIN32</span>
+00342 <span class="preprocessor"># ifdef HAVE_SETITIMER</span>
+00343         <span class="keyword">struct </span>itimerval it;
+00344 
+00345         it.it_value.tv_sec = delta.tv_sec;
+00346         it.it_value.tv_usec = delta.tv_usec;
+00347         it.it_interval.tv_sec = 0;
+00348         it.it_interval.tv_usec = 0;
+00349 
+00350         signal(SIGALRM, alarm_handler);
+00351         setitimer(ITIMER_REAL, &amp;it, NULL);
+00352         DEBUGMSGTL((<span class="stringliteral">"snmp_alarm"</span>, <span class=
+"stringliteral">"schedule alarm %d in %d.%03d seconds\n"</span>,
+00353                     nextalarm, delta.tv_sec, (delta.tv_usec / 1000)));
+00354 <span class="preprocessor"># else  </span><span class="comment">/* HAVE_SETITIMER */</span>
+00355 <span class="preprocessor">#  ifdef SIGALRM</span>
+00356         signal(SIGALRM, alarm_handler);
+00357         alarm(delta.tv_sec);
+00358         DEBUGMSGTL((<span class="stringliteral">"snmp_alarm"</span>,
+00359                     <span class="stringliteral">"schedule alarm %d in roughly %d seconds\n"</span>, nextalarm,
+00360                     delta.tv_sec));
+00361 <span class="preprocessor">#  endif  </span><span class="comment">/* SIGALRM */</span>
+00362 <span class="preprocessor"># endif  </span><span class="comment">/* HAVE_SETITIMER */</span>
+00363 <span class="preprocessor">#endif  </span><span class="comment">/* WIN32 */</span>
+00364 
+00365     } <span class="keywordflow">else</span> {
+00366         DEBUGMSGTL((<span class="stringliteral">"snmp_alarm"</span>, <span class=
+"stringliteral">"no alarms found to schedule\n"</span>));
+00367     }
+00368 }
+00369 
+00370 
+00402 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>
+<a name="l00403" id="l00403"></a><a class="code" href="group__snmp__alarm.html#ga14">00403</a> <a class="code" href=
+"group__snmp__alarm.html#ga14">snmp_alarm_register</a>(<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> when, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> flags,
+00404                     SNMPAlarmCallback * thecallback, <span class="keywordtype">void</span> *clientarg)
+00405 {
+00406     <span class="keyword">struct </span>snmp_alarm **sa_pptr;
+00407     <span class="keywordflow">if</span> (thealarms != NULL) {
+00408         <span class="keywordflow">for</span> (sa_pptr = &amp;thealarms; (*sa_pptr) != NULL;
+00409              sa_pptr = &amp;((*sa_pptr)-&gt;next));
+00410     } <span class="keywordflow">else</span> {
+00411         sa_pptr = &amp;thealarms;
+00412     }
+00413 
+00414     *sa_pptr = <a class="code" href="group__util.html#ga38">SNMP_MALLOC_STRUCT</a>(snmp_alarm);
+00415     <span class="keywordflow">if</span> (*sa_pptr == NULL)
+00416         <span class="keywordflow">return</span> 0;
+00417 
+00418     (*sa_pptr)-&gt;t.tv_sec = when;
+00419     (*sa_pptr)-&gt;t.tv_usec = 0;
+00420     (*sa_pptr)-&gt;flags = flags;
+00421     (*sa_pptr)-&gt;clientarg = clientarg;
+00422     (*sa_pptr)-&gt;thecallback = thecallback;
+00423     (*sa_pptr)-&gt;clientreg = regnum++;
+00424     (*sa_pptr)-&gt;next = NULL;
+00425     sa_update_entry(*sa_pptr);
+00426 
+00427     DEBUGMSGTL((<span class="stringliteral">"snmp_alarm"</span>,
+00428                 <span class="stringliteral">"registered alarm %d, t = %d.%03d, flags=0x%02x\n"</span>,
+00429                 (*sa_pptr)-&gt;clientreg, (*sa_pptr)-&gt;t.tv_sec,
+00430                 ((*sa_pptr)-&gt;t.tv_usec / 1000), (*sa_pptr)-&gt;flags));
+00431 
+00432     <span class="keywordflow">if</span> (start_alarms)
+00433         set_an_alarm();
+00434     <span class="keywordflow">return</span> (*sa_pptr)-&gt;clientreg;
+00435 }
+00436 
+00437 
+00474 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>
+<a name="l00475" id="l00475"></a><a class="code" href="group__snmp__alarm.html#ga15">00475</a> <a class="code" href=
+"group__snmp__alarm.html#ga15">snmp_alarm_register_hr</a>(<span class="keyword">struct</span> timeval t, <span class=
+"keywordtype">unsigned</span> <span class="keywordtype">int</span> flags,
+00476                        SNMPAlarmCallback * cb, <span class="keywordtype">void</span> *cd)
+00477 {
+00478     <span class="keyword">struct </span>snmp_alarm **s = NULL;
+00479 
+00480     <span class="keywordflow">for</span> (s = &amp;(thealarms); *s != NULL; s = &amp;((*s)-&gt;next));
+00481 
+00482     *s = <a class="code" href="group__util.html#ga38">SNMP_MALLOC_STRUCT</a>(snmp_alarm);
+00483     <span class="keywordflow">if</span> (*s == NULL) {
+00484         <span class="keywordflow">return</span> 0;
+00485     }
+00486 
+00487     (*s)-&gt;t.tv_sec = t.tv_sec;
+00488     (*s)-&gt;t.tv_usec = t.tv_usec;
+00489     (*s)-&gt;flags = flags;
+00490     (*s)-&gt;clientarg = cd;
+00491     (*s)-&gt;thecallback = cb;
+00492     (*s)-&gt;clientreg = regnum++;
+00493     (*s)-&gt;next = NULL;
+00494 
+00495     sa_update_entry(*s);
+00496 
+00497     DEBUGMSGTL((<span class="stringliteral">"snmp_alarm"</span>,
+00498                 <span class="stringliteral">"registered alarm %d, t = %d.%03d, flags=0x%02x\n"</span>,
+00499                 (*s)-&gt;clientreg, (*s)-&gt;t.tv_sec, ((*s)-&gt;t.tv_usec / 1000),
+00500                 (*s)-&gt;flags));
+00501 
+00502     <span class="keywordflow">if</span> (start_alarms) {
+00503         set_an_alarm();
+00504     }
+00505 
+00506     <span class="keywordflow">return</span> (*s)-&gt;clientreg;
+00507 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:59 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

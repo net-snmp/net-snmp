@@ -1,0 +1,663 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>SNMPCMD</h1>Section: Net-SNMP (1)<br />
+    Updated: 09 Jan 2004<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>snmpcmd - commands to communicate with a network entity using SNMP Requests. <a name="lbAC" id="lbAC"> </a>
+
+    <h2>SYNOPSIS</h2><b>snmpcmd</b> [OPTIONS] AGENT [PARAMETERS] <a name="lbAD" id="lbAD"> </a>
+
+    <h2>DESCRIPTION</h2>This manual page describes the common options for the SNMP commands: <b>snmpbulkget</b>,
+    <b>snmpbulkwalk</b>, <b>snmpdelta</b>, <b>snmpget</b>, <b>snmpgetnext</b>, <b>snmpnetstat</b>, <b>snmpset</b>,
+    <b>snmpstatus</b>, <b>snmptable</b>, <b>snmptest</b>, <b>snmptrap</b>, <b>snmpdf,</b> snmpusm , <b>snmpwalk .</b> The command
+    line applications use the SNMP protocol to communicate with an SNMP capable network entity, an agent. Individual applications
+    typically (but not necessarily) take additional parameters that are given after the agent specification. These parameters are
+    documented in the manual pages for each application.
+
+    <p><a name="lbAE" id="lbAE"> </a></p>
+
+    <h2>OPTIONS</h2>
+
+    <dl compact="compact">
+      <dt><b>-3[MmKk] 0xHEXKEY</b></dt>
+
+      <dd>Sets the keys to be used for SNMPv3 transactions. These options allow you to set the master authentication and
+      encryption keys (-3m and -3M respectively) or set the localized authentication and encryption keys (-3k and -3K
+      respectively). SNMPv3 keys can be either passed in by hand using these flags, or by the use of keys generated from
+      passwords using the -A and -X flags discussed below. For further details on SNMPv3 and it's usage of keying information,
+      see the Net-SNMP tutorial web site ( <a href=
+      "http://www.Net-SNMP.org/tutorial-5/commands/">http://www.Net-SNMP.org/tutorial-5/commands/</a> ). See the snmp.conf manual
+      page on the defAuthMasterKey and related tokens for more information as well.</dd>
+
+      <dt><b>-a</b> <i>authProtocol</i></dt>
+
+      <dd>Set the authentication protocol (MD5|SHA) used for authenticated SNMPv3 messages. Overrides the defAuthType token in
+      the <i>snmp.conf</i> file.</dd>
+
+      <dt><b>-A</b> <i>authPassword</i></dt>
+
+      <dd>Set the authentication pass phrase used for authenticated SNMPv3 messages. Overrides the defAuthPassphrase token in the
+      <i>snmp.conf</i> file. It is insecure to specify pass phrases on the command line, see <i><a href=
+      "snmp.conf.html">snmp.conf</a>(5).</i></dd>
+
+      <dt><b>-c</b> <i>community</i></dt>
+
+      <dd>Set the community string for SNMPv1/v2c transactions. Overrides the defcommunity token in the <i>snmp.conf</i>
+      file.</dd>
+
+      <dt><b>-d</b></dt>
+
+      <dd>Dump (in hexadecimal) the sent and received SNMP packets.</dd>
+
+      <dt><b>-D</b> <i>TOKEN[,...]</i></dt>
+
+      <dd>Turn on debugging output for the given <i>TOKEN</i>(s). Try <i>ALL</i> for extremely verbose output.</dd>
+
+      <dt><b>-e</b> <i>engineID</i></dt>
+
+      <dd>Set the authoritative (security) engineID used for SNMPv3 REQUEST messages. It is typically not necessary to specify
+      this, as it will usually be discovered automatically.</dd>
+
+      <dt><b>-E</b> <i>engineID</i></dt>
+
+      <dd>Set the context engineID used for SNMPv3 REQUEST messages scopedPdu. If not specified, this will default to the
+      authoritative engineID.</dd>
+
+      <dt><b>-h, --help</b></dt>
+
+      <dd>Display a brief usage message and then exit.</dd>
+
+      <dt><b>-H</b></dt>
+
+      <dd>Display a list of configuration file directives understood by the command and then exit.</dd>
+
+      <dt><b>-I</b> <i>[brRhu]</i></dt>
+
+      <dd>Specifies input parsing options. See <b>INPUT OPTIONS</b> below.</dd>
+
+      <dt><b>-l</b> <i>secLevel</i></dt>
+
+      <dd>Set the securityLevel used for SNMPv3 messages (noAuthNoPriv|authNoPriv|authPriv). Appropriate pass phrase(s) must
+      provided when using any level higher than noAuthNoPriv. Overrides the defSecurityLevel token in the <i>snmp.conf</i>
+      file.</dd>
+
+      <dt><b>-L</b> <i>[eEfFoOsS]</i></dt>
+
+      <dd>Specifies output logging options. See <b>LOGGING OPTIONS</b> below.</dd>
+
+      <dt><b>-m</b> <i>MIBLIST</i></dt>
+
+      <dd>Specifies a colon separated list of MIB modules (not files) to load for this application. This overrides the
+      environment variable MIBS.</dd>
+
+      <dd>The special keyword <i>ALL</i> is used to specify all modules in all directories when searching for MIB files. Every
+      file whose name does not begin with "." will be parsed as if it were a MIB file.</dd>
+
+      <dd>If the <i>MIBLIST</i> has a leading '+', then the listed MIB modules are loaded in addition to MIB modules specified in
+      the environment variable MIBS.</dd>
+
+      <dd>If a <i>mibfile</i> token is specified in the <i>snmp.conf file,</i> the <i>-m MIB</i> option overrides the
+      <i>mibfile</i> token.</dd>
+
+      <dt><b>-M</b> <i>DIRLIST</i></dt>
+
+      <dd>Specifies a colon separated list of directories to search for MIBs. This overrides the environment variable
+      MIBDIRS.</dd>
+
+      <dd>If <i>DIRLIST</i> has a leading '+', then the given directories are added to the list of MIB directories. Without the
+      leading '+', the given directory list overrides the list specified with the environment variable MIBDIRS. Note that the
+      directories listed at the end of the list have precedence over directories at the beginning of the list.</dd>
+
+      <dd>If no value is specified for the environment variable MIBDIRS, then the command will still search a default mib
+      directory, after it searches the MIB directories specified on the -M option. The default directory is
+      /usr/local/share/snmp/mibs. To avoid having a default mib directory searched, set the MIBDIRS environment variable to "".
+      Even if the default MIB directory is searched, the directories specified in the -M option have precedence in the search
+      order over the default directory.</dd>
+
+      <dd>If the -M option is specified and either a mibfile or mibdirs token is also specified in the <i>snmp.conf</i> file, the
+      directories in the -M option have precedence in the MIB search order, over the directories set with both the mibdirs token
+      and the mibfile token.</dd>
+
+      <dt><b>-n</b> <i>contextName</i></dt>
+
+      <dd>Set the destination contextName used for SNMPv3 messages. The default contextName is the empty string "". Overrides the
+      defContext token in the <i>snmp.conf</i> file.</dd>
+
+      <dt><b>-O</b> <i>[abeEfnqQsStTuUvxX]</i></dt>
+
+      <dd>Specifies output printing options. See <b>OUTPUT OPTIONS</b> below.</dd>
+
+      <dt><b>-P</b> <i>[cdeRuwW]</i></dt>
+
+      <dd>Specifies MIB parsing options. See <b>MIB PARSING OPTIONS</b> below.</dd>
+
+      <dt><b>-r</b> <i>retries</i></dt>
+
+      <dd>Specifies the number of retries to be used in the requests. The default is 5.</dd>
+
+      <dt><b>-t</b> <i>timeout</i></dt>
+
+      <dd>Specifies the timeout in seconds between retries. The default is 1.</dd>
+
+      <dt><b>-u</b> <i>secName</i></dt>
+
+      <dd>Set the securityName used for authenticated SNMPv3 messages. Overrides the defSecurityName token in the
+      <i>snmp.conf</i> file.</dd>
+
+      <dt><b>-v</b> <i>1</i> | <i>2c</i> | <i>3</i></dt>
+
+      <dd>Specifies the protocol version to use: 1 (RFCs 1155-1157), 2c (RFCs 1901-1908), or 3 (RFCs 2571-2574). The default is
+      typically version 3. This option overrides the defVersion token in the <i>snmp.conf</i> file.</dd>
+
+      <dt><b>-V, --version</b></dt>
+
+      <dd>Display version information for the application and then exit.</dd>
+
+      <dt><b>-x</b> <i>privProtocol</i></dt>
+
+      <dd>Set the privacy protocol (DES) used for encrypted SNMPv3 messages.</dd>
+
+      <dt><b>-X</b> <i>privPassword</i></dt>
+
+      <dd>Set the privacy pass phrase used for encrypted SNMPv3 messages. Overrides the defPrivPassphrase token in the
+      <i>snmp.conf</i> file. It is insecure to specify pass phrases on the command line, see <i><a href=
+      "snmp.conf.html">snmp.conf</a>(5).</i></dd>
+
+      <dt><b>-Z</b> <i>boots,time</i></dt>
+
+      <dd>Set the engineBoots and engineTime used for authenticated SNMPv3 messages. This will initialize the local notion of the
+      agents boots/time with an authenticated value stored in the LCD. It is typically not necessary to specify this option, as
+      these values will usually be discovered automatically.</dd>
+    </dl><a name="lbAF" id="lbAF"> </a>
+
+    <h2>AGENT SPECIFICATION</h2>
+
+    <p>The string <i>AGENT</i> in the <b>SYNOPSIS</b> above specifies the remote SNMP entity with which to communicate. This
+    specification takes the form:</p>
+
+    <dl compact="compact">
+      <dd>[&lt;transport-specifier&gt;:]&lt;transport-address&gt;</dd>
+    </dl>
+
+    <p>At its simplest, the <i>AGENT</i> specification may consist of a hostname, or an IPv4 address in the standard "dotted
+    quad" notation. In this case, communication will be attempted using UDP/IPv4 to port 161 of the given host. Otherwise, the
+    &lt;transport-address&gt; part of the specification is parsed according to the following table:</p>
+
+    <dl compact="compact">
+      <dd>
+        <dl compact="compact">
+          <dt><b>&lt;transport-specifier&gt;</b></dt>
+
+          <dd><b>&lt;transport-address&gt; format</b></dd>
+
+          <dt>udp</dt>
+
+          <dd>hostname[:port] <i>or</i> IPv4-address[:port]</dd>
+
+          <dt>tcp</dt>
+
+          <dd>hostname[:port] <i>or</i> IPv4-address[:port]</dd>
+
+          <dt>unix</dt>
+
+          <dd>pathname</dd>
+
+          <dt>ipx</dt>
+
+          <dd>[network]:node[/port]</dd>
+
+          <dt>aal5pvc <i>or</i> pvc</dt>
+
+          <dd>[interface.][VPI.]VCI</dd>
+
+          <dt>udp6 or udpv6 or udpipv6</dt>
+
+          <dd>hostname[:port] <i>or</i> IPv6-address:port <i>or</i><br />
+           '['IPv6-address']'[:port]</dd>
+
+          <dt>tcp6 or tcpv6 or tcpipv6</dt>
+
+          <dd>hostname[:port] <i>or</i> IPv6-address:port <i>or</i><br />
+           '['IPv6-address']'[:port]</dd>
+        </dl>
+      </dd>
+    </dl>
+
+    <p>Note that &lt;transport-specifier&gt; strings are case-insensitive so that, for example, "tcp" and "TCP" are equivalent.
+    Here are some examples, along with their interpretation:</p>
+
+    <dl compact="compact">
+      <dt><i>hostname:161</i></dt>
+
+      <dd>perform query using UDP/IPv4 datagrams to <i>hostname</i> on port <i>161</i>. The ":161" is redundant here since that
+      is the default SNMP port in any case.</dd>
+
+      <dt><i>udp:hostname</i></dt>
+
+      <dd>identical to the previous specification. The "udp:" is redundant here since UDP/IPv4 is the default transport.</dd>
+
+      <dt><i>TCP:hostname:1161</i></dt>
+
+      <dd>connect to <i>hostname</i> on port <i>1161</i> using TCP/IPv4 and perform query over that connection.</dd>
+
+      <dt><i>ipx::00D0B7AAE308</i></dt>
+
+      <dd>perform query using IPX datagrams to node number <i>00D0B7AAE308</i> on the default network, and using the default IPX
+      port of 36879 (900F hexadecimal), as suggested in RFC 1906.</dd>
+
+      <dt><i>ipx:0AE43409:00D0B721C6C0/1161</i></dt>
+
+      <dd>perform query using IPX datagrams to port <i>1161</i> on node number <i>00D0B721C6C0</i> on network number
+      <i>0AE43409</i>.</dd>
+
+      <dt><i>unix:/tmp/local-agent</i></dt>
+
+      <dd>connect to the Unix domain socket <i>/tmp/local-agent</i>, and perform the query over that connection.</dd>
+
+      <dt><i>/tmp/local-agent</i></dt>
+
+      <dd>identical to the previous specification, since the Unix domain is the default transport iff the first character of the
+      &lt;transport-address&gt; is a '/'.</dd>
+
+      <dt><i>AAL5PVC:100</i></dt>
+
+      <dd>perform the query using AAL5 PDUs sent on the permanent virtual circuit with VPI=0 and VCI=100 (decimal) on the first
+      ATM adapter in the machine.</dd>
+
+      <dt><i>PVC:1.10.32</i></dt>
+
+      <dd>perform the query using AAL5 PDUs sent on the permanent virtual circuit with VPI=10 (decimal) and VCI=32 (decimal) on
+      the second ATM adapter in the machine. Note that "PVC" is a synonym for "AAL5PVC".</dd>
+
+      <dt><i>udp6:hostname:10161</i></dt>
+
+      <dd>perform the query using UDP/IPv6 datagrams to port <i>10161</i> on <i>hostname</i> (which will be looked up as an AAAA
+      record).</dd>
+
+      <dt><i>UDP6:[fe80::2d0:b7ff:fe21:c6c0]</i></dt>
+
+      <dd>perform the query using UDP/IPv6 datagrams to port 161 at address <i>fe80::2d0:b7ff:fe21:c6c0</i>.</dd>
+
+      <dt><i>tcpipv6:[::1]:1611</i></dt>
+
+      <dd>connect to port 1611 on the local host (<i>::1</i> in IPv6 parlance) using TCP/IPv6 and perform query over that
+      connection.</dd>
+    </dl>
+
+    <p>Note that not all the transport domains listed above will always be available; for instance, hosts with no IPv6 support
+    will not be able to use udp6 transport addresses, and attempts to do so will result in the error "Unknown host". Likewise,
+    since AAL5 PVC support is only currently available on Linux, it will fail with the same error on other platforms.</p>
+
+    <p><a name="lbAG" id="lbAG"> </a></p>
+
+    <h2>MIB PARSING OPTIONS</h2>The Net-SNMP MIB parser mostly adheres to the Structure of Management Information (SMI). As that
+    specification has changed through time, and in recognition of the (ahem) diversity in compliance expressed in MIB files,
+    additional options provide more flexibility in reading MIB files.
+
+    <dl compact="compact">
+      <dt><b>-Pw</b></dt>
+
+      <dd>Show some warning messages in resolving the MIB files. Can be also set with the configuration token
+      "mibWarningLevel".</dd>
+
+      <dt><b>-PW</b></dt>
+
+      <dd>Show additional warning messages. Can be also set with the configuration token "mibWarningLevel".</dd>
+
+      <dt><b>-Pe</b></dt>
+
+      <dd>Show MIB errors. Can be also set with the configuration token "showMibErrors". An example of an error that would be
+      shown is if an imported module is not found during MIB parsing.</dd>
+
+      <dt><b>-Pc</b></dt>
+
+      <dd>Allow ASN.1 comment to extend to the end of the MIB source line (i.e. disallow the use of "--" to terminate comments).
+      This overcomes some problems with manually maintained MIB files. Can be also set with the configuration token
+      "strictCommentTerm".</dd>
+
+      <dt><b>-Pd</b></dt>
+
+      <dd>
+        Toggles the default of whether or not to save the DESCRIPTIONs of the MIB objects when parsing. Since the default is to
+        save the DESCRIPTIONS, specifying -Pd will cause the DESCRIPTIONs not to be saved during MIB parsing. For example:
+
+        <p>snmptranslate -Td -OS -IR system.sysDescr.0</p>
+
+        <p>will show a description, while</p>
+
+        <p>snmptranslate -Td -OS -IR -Pd system.sysDescr.0</p>
+
+        <p>will not show a description. Collecting the DESCRIPTION information into the parsed hierarchy increases the memory
+        used by the size of each DESCRIPTION clause.</p>
+      </dd>
+
+      <dt><b>-Pu</b></dt>
+
+      <dd>Allow underline characters in symbols. Can be also set with the configuration token "mibAllowUnderline".</dd>
+
+      <dt><b>-PR</b></dt>
+
+      <dd>Replace MIB objects using the last read MIB file. The parser will replace MIB objects in its hierarchy whenever it sees
+      a sub-identifier and name match. <b>WARNING:</b> Setting this option may result in an incorrect hierarchy. Can be also set
+      with the configuration token "mibReplaceWithLatest".</dd>
+    </dl><a name="lbAH" id="lbAH"> </a>
+
+    <h2>OUTPUT OPTIONS</h2>Output display can be controlled by passing various parameters to the <b>-O</b> flag. The following
+    examples should demonstrate this.
+
+    <p>The default output looks as follows:<br />
+    snmpget -c public -v 1 localhost system.sysUpTime.0<br />
+    SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63</p>
+
+    <dl compact="compact">
+      <dt><b>-Oq</b></dt>
+
+      <dd>Removes the equal sign and type information:<br />
+      system.sysUpTime.0 1:15:09:27.63</dd>
+
+      <dt><b>-OQ</b></dt>
+
+      <dd>Removes the type information:<br />
+      system.sysUpTime.0 = 1:15:09:27.63</dd>
+
+      <dt><b>-Of</b></dt>
+
+      <dd>Gives you the complete OID:<br />
+      <br />
+       .iso.org.dod.internet.mgmt.mib-2.system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63</dd>
+
+      <dt><b>-Os</b></dt>
+
+      <dd>Deletes all but the last symbolic part of the OID:<br />
+      sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63</dd>
+
+      <dt><b>-OS</b></dt>
+
+      <dd>A variation on <b>-Os</b> that adds the name of the MIB that defined the object:<br />
+      SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63<br />
+      (from release 5.0, this is now the default output format)</dd>
+
+      <dt><b>-Ou</b></dt>
+
+      <dd>Prints the OID in the UCD-style (inherited from the original CMU code), That means removing a series of "standard"
+      prefixes, if relevant, and breaking down the OID into the displayable pieces. For example, the OID
+      vacmSecruityModel.0.3.119.101.115 is broken down by default and the string hidden in the OID is shown. The result would
+      look like: vacmSecurityModel.0."test". The -Ob option disables this feature.<br />
+      system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63</dd>
+
+      <dt><b>-On</b></dt>
+
+      <dd>Prints the OID numerically:<br />
+      <br />
+       .1.3.6.1.2.1.1.3.0 = Timeticks: (14096763) 1 day, 15:09:27.63</dd>
+
+      <dt><b>-Oe</b></dt>
+
+      <dd>Removes the symbolic labels from enumerations:<br />
+      snmpget -c public -v 1 localhost ip.ipForwarding.0<br />
+      ip.ipForwarding.0 = INTEGER: <a href="forwarding.html">forwarding</a>(1)<br />
+      snmpget -c public -v 1 -Oe localhost ip.ipForwarding.0<br />
+      ip.ipForwarding.0 = INTEGER: 1</dd>
+
+      <dt><b>-Ob</b></dt>
+
+      <dd>When OIDs contain a index to a table, they are broken into the displayable pieces and shown to you. For example the OID
+      vacmSecurityModel.0.3.119.101.115 is nicely broken down by default and the string hidden in the OID is shown to you as
+      vacmSecurityModel.0."wes". The <b>-Ob</b> option disables this feature and displays it as vacmSecurityModel.0.3.119.101.115
+      again.</dd>
+
+      <dt><b>-OE</b></dt>
+
+      <dd>This modifies the index strings to include a \ to escape the quotes, to allow them to be reused in shell commands, such
+      as vacmSecurityModel.0.\"wes\"</dd>
+
+      <dt><b>-OX</b></dt>
+
+      <dd>This modifies the output of index OIDs, to look more "program like". Square brackets are placed around each index, and
+      the DISPLAY-HINT information and string conversions are used to format each index. If you take an entry from the
+      IPV6-MIB::ipv6RouteTable, it is indexed with an IPv6 address and two integers, and if you are used to IPv6 addresses you
+      will know that decimal OIDs are not the preferred notation. Compare:<br />
+      snmpgetnext -OS host IPV6-MIB:ipv6RouteTable<br />
+      IPV6-MIB::ipv6RouteIfIndex.63.254.1.0.255.0.0.0.0.0.0.0.0.0.0.0.64.1 = INTEGER: 2<br />
+      snmpgetnext -OSX host IPV6-MIB:ipv6RouteTable<br />
+      IPV6-MIB::ipv6RouteIfIndex[3ffe:100:ff00:0:0:0:0:0][64][1] = INTEGER: 2</dd>
+
+      <dt><b>-Oa</b></dt>
+
+      <dd>If a string-valued object definition does not include a Display Hint, then the library attempts to determine whether it
+      is an ascii or binary string, and displays the value accordingly. This flag bypasses this check, and displays all strings
+      as ASCII. Note that this does not affect objects that do have a Display Hint.</dd>
+
+      <dt><b>-Ox</b></dt>
+
+      <dd>This works similarly to '-Oa', but displays strings as Hex.</dd>
+
+      <dt><b>-OT</b></dt>
+
+      <dd>If hexadecimal code is printed, this will also print any printable characters after the hexadecimal codes.</dd>
+
+      <dt><b>-Ov</b></dt>
+
+      <dd>Output only the variable value, not the OID:<br />
+      snmpget -c public -v 1 -Ov localhost ip.ipForwarding.0<br />
+      INTEGER: <a href="forwarding.html">forwarding</a>(1)</dd>
+
+      <dt><b>-OU</b></dt>
+
+      <dd>Do not print the UNITS suffix at the end of the value.</dd>
+
+      <dt><b>-Ot</b></dt>
+
+      <dd>Output timeticks values as raw numbers:<br />
+      system.sysUpTime.0 = 14096763</dd>
+    </dl>
+
+    <p>Note that most of these options can be turned on or off by default by tuning the <i>snmp.conf file.</i> See the
+    <i><a href="snmp.conf.html">snmp.conf</a>(5)</i> manual page for details.</p>
+
+    <p><a name="lbAI" id="lbAI"> </a></p>
+
+    <h2>LOGGING OPTIONS</h2>The mechanism and destination to use for logging of warning and error messages can be controlled by
+    passing various parameters to the <b>-L</b> flag.
+
+    <dl compact="compact">
+      <dt><b>-Le</b></dt>
+
+      <dd>Log messages to the standard error stream.</dd>
+
+      <dt><b>-Lf FILE</b></dt>
+
+      <dd>Log messages to the specified file.</dd>
+
+      <dt><b>-Lo</b></dt>
+
+      <dd>Log messages to the standard output stream.</dd>
+
+      <dt><b>-Ls FACILITY</b></dt>
+
+      <dd>Log messages via syslog, using the specified facility ('d' for LOG_DAEMON, 'u' for LOG_USER, or '0'-'7' for LOG_LOCAL0
+      through LOG_LOCAL7).</dd>
+    </dl>
+
+    <p>There are also "upper case" versions of each of these options, which allow the corresponding logging mechanism to be
+    restricted to certain priorities of message. Using standard error logging as an example:</p>
+
+    <dl compact="compact">
+      <dt><b>-LE pri</b></dt>
+
+      <dd>will log messages of priority 'pri' and above to standard error.</dd>
+
+      <dt><b>-LE p1-p2</b></dt>
+
+      <dd>will log messages with priority between 'p1' and 'p2' (inclusive) to standard error.</dd>
+    </dl>
+
+    <p>For <b>-LF</b> and <b>-LS</b> the priority specification comes before the file or facility token. The priorities
+    recognised are:</p>
+
+    <dl compact="compact">
+      <dd><b>0</b> or <b>!</b> for LOG_EMERG,<br />
+      <b>1</b> or <b>a</b> for LOG_ALERT,<br />
+      <b>2</b> or <b>c</b> for LOG_CRIT,<br />
+      <b>3</b> or <b>e</b> for LOG_ERR,<br />
+      <b>4</b> or <b>w</b> for LOG_WARNING,<br />
+      <b>5</b> or <b>n</b> for LOG_NOTICE,<br />
+      <b>6</b> or <b>i</b> for LOG_INFO, and<br />
+      <b>7</b> or <b>d</b> for LOG_DEBUG.</dd>
+    </dl>
+
+    <p>Normal output is (or will be!) logged at a priority level of <b>LOG_NOTICE</b></p>
+
+    <p><a name="lbAJ" id="lbAJ"> </a></p>
+
+    <h2>INPUT OPTIONS</h2>The <b>-I</b> flag specifies various options that control how your input to the program is parsed. By
+    default, all input parsing methods are used: First the OID is parsed regularly, then <b>-IR</b> is used, then <b>-Ib</b> is
+    used, unless one of the following flags is specified which will force it to only use one method.
+
+    <dl compact="compact">
+      <dt><b>-IR</b></dt>
+
+      <dd>The <b>-IR</b> flag specifies random access lookup, so that if the entire OID path is not specified, it will search for
+      a node in the MIB tree with the given name. Normally, you would have to specify the vacmSecurityModel OID above as
+      .iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmSecurityToGroupTable.vacmSecurityToGroupEntry.vacmSecurityModel.0."wes",
+      but the use of the <b>-IR</b> flag allows you to shorten that to just vacmSecurityModel.0."wes". (Though this OID really
+      needs to be quoted - 'vacmSecurityModel.0."wes"' - to prevent the shell from swallowing the double quotes).</dd>
+
+      <dd>Additionally, see the <b>RANDOM ACCESS MIBS</b> section below.</dd>
+
+      <dt><b>-Ib</b></dt>
+
+      <dd>The <b>-Ib</b> flag indicates that the expression you gave it is actually a regular expression that should be used to
+      search for the best match possible in the MIB tree. This would allow you to specify the node vacmSecurityModel MIB node as
+      something as generic as vacmsecuritymodel (since case insensitive searches are done) or vacm.*model. Note that multiple
+      matches are obviously possible (.* matches everything), and the best result is currently calculated as the one that matches
+      the closest to the beginning of the node name and the highest in the tree. A current side effect of this option is that you
+      cannot specify indexes or multiple nodes, since the '.' is treated as part of the regular expression.</dd>
+
+      <dt><b>-Iu</b></dt>
+
+      <dd>Use the traditional UCD-style input approach of assuming that OIDs are rooted at the 'mib-2' point in the tree (unless
+      they start with an explicit '.') If random access lookup is in effect (which is the default for most commands), then this
+      will only affect OIDs specified with a leading numberic subidentifier (and no initial '.') Thus an input of "snmpcmd ... 1"
+      would refer to 'iso' (from v5.0 onwards) while "snmpcmd -Iu ... 1" would refer to 'system'.</dd>
+
+      <dt><b>-Ir</b></dt>
+
+      <dd>By default, indices into tables and values to be assigned to objects are checked against range and type specified in
+      the MIB. The <b>-Ir</b> flag disables this check. This flag is mostly useful when you are testing an agent. For normal
+      operation it is useful to get your requests checked before they are sent to the remote agent (the diagnostic that the
+      library can provide is also much more precise).</dd>
+
+      <dt><b>-Ih</b></dt>
+
+      <dd>By default, the library will use DISPLAY-HINT information when assigning values. This flag disables this behaviour. The
+      result is that instead of<br />
+      snmpset localhost HOST-RESOURCES-MIB::hrSystemDate.0 = 2002-12-10,2:4:6.8<br />
+      you will have to write<br />
+      snmpset localhost HOST-RESOURCES-MIB::hrSystemData.0 x "07 D2 0C 0A 02 04 06 08"</dd>
+
+      <dt><b>-Is SUFFIX</b></dt>
+
+      <dd>Add the specified suffix to each textual OID given on the command line. It is useful to specify a common index value
+      when you want to retrieve multiple objects from the same row of a table.</dd>
+
+      <dt><b>-IS PREFIX</b></dt>
+
+      <dd>Add the specified prefix to each textual OID given on the command line. Useful to specify an explicit MIB module name
+      for all objects being retrieved (or for incurably lazy typists)</dd>
+    </dl><a name="lbAK" id="lbAK"> </a>
+
+    <h2>RANDOM ACCESS MIBS</h2>In previous releases of the UCD-SNMP package (and if using the <b>-Iu</b> option), an object
+    identifier such as system.sysDescr.0 will be lookup in a single "well known" place, built into the SNMP library (or specified
+    by the PREFIX environment variable). The standard place is: .iso.org.dod.internet.mgmt.mib-2. The identifier may
+    alternatively be a complete object identifier, this is designated by a leading "dot" if using UCD-input style, and is the
+    first thing tried otherwise. To simplify the specification of object identifiers the library supports random access to the
+    identifiers in the MIBs. This is requested by the <b>-IR</b> option to the SNMP applications. Additionally, <b>-Os</b> prints
+    OIDs in this manner. Using this, system.sysDescr.0 may also be entered as sysDescr.0. To search only a single MIB for the
+    identifier (if it appears in more than one), specify it as SNMPv2-MIB::sysDescr.0. (use <b>-OS</b> to print output OIDs in
+    this manner, though this is the default as from v5.0). This notation will also ensure that the specified MIB is loaded, i.e.
+    it need not be mentioned in the <b>-m</b> option (or MIBS environment variable).
+
+    <p><a name="lbAL" id="lbAL"> </a></p>
+
+    <h2>ENVIRONMENT VARIABLES</h2>
+
+    <dl compact="compact">
+      <dt>PREFIX</dt>
+
+      <dd>The standard prefix for object identifiers (if using UCD-style output). Defaults to
+      .iso.org.dod.internet.mgmt.mib-2</dd>
+
+      <dt>MIBS</dt>
+
+      <dd>The list of MIBs to load. Defaults to SNMPv2-TC:SNMPv2-MIB:IF-MIB:IP-MIB:TCP-MIB:UDP-MIB:SNMP-VACM-MIB. Overridden by
+      the <b>-m</b> option.</dd>
+
+      <dt>MIBDIRS</dt>
+
+      <dd>The list of directories to search for MIBs. Defaults to /usr/local/share/snmp/mibs. Overridden by the <b>-M</b>
+      option.</dd>
+    </dl><a name="lbAM" id="lbAM"> </a>
+
+    <h2>FILES</h2>
+
+    <dl compact="compact">
+      <dt>/usr/local/etc/snmp/snmpd.conf</dt>
+
+      <dd>Agent configuration file. See <i><a href="snmpd.conf.html">snmpd.conf</a>(5)</i>.</dd>
+
+      <dt>/usr/local/etc/snmp/snmp.conf</dt>
+
+      <dt>~/.snmp/snmp.conf</dt>
+
+      <dd>Application configuration files. See <i><a href="snmp.conf.html">snmp.conf</a>(5)</i>.</dd>
+    </dl><a name="lbAN" id="lbAN"> </a>
+
+    <h2>SEE ALSO</h2><a href="snmpget.html">snmpget</a>(1), <a href="snmpgetnext.html">snmpgetnext</a>(1), <a href=
+    "snmpset.html">snmpset</a>(1), <a href="snmpbulkget.html">snmpbulkget</a>(1), <a href=
+    "snmpbulkwalk.html">snmpbulkwalk</a>(1), <a href="snmpwalk.html">snmpwalk</a>(1), <a href="snmptable.html">snmptable</a>(1),
+    <a href="snmpnetstat.html">snmpnetstat</a>(1), <a href="snmpdelta.html">snmpdelta</a>(1), <a href=
+    "snmptrap.html">snmptrap</a>(1), <a href="snmpinform.html">snmpinform</a>(1), <a href="snmpusm.html">snmpusm</a>(1), <a href=
+    "snmpstatus.html">snmpstatus</a>(1), <a href="snmptest.html">snmptest</a>(1), <a href="snmp.conf.html">snmp.conf</a>(5).
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+
+      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+
+      <dt><a href="#lbAE">OPTIONS</a></dt>
+
+      <dt><a href="#lbAF">AGENT SPECIFICATION</a></dt>
+
+      <dt><a href="#lbAG">MIB PARSING OPTIONS</a></dt>
+
+      <dt><a href="#lbAH">OUTPUT OPTIONS</a></dt>
+
+      <dt><a href="#lbAI">LOGGING OPTIONS</a></dt>
+
+      <dt><a href="#lbAJ">INPUT OPTIONS</a></dt>
+
+      <dt><a href="#lbAK">RANDOM ACCESS MIBS</a></dt>
+
+      <dt><a href="#lbAL">ENVIRONMENT VARIABLES</a></dt>
+
+      <dt><a href="#lbAM">FILES</a></dt>
+
+      <dt><a href="#lbAN">SEE ALSO</a></dt>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:42 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,731 @@
+<head>
+  <title>MIB information for lookupMIB</title>
+<style type="text/css">
+<!--
+h2{background:#bbeebb}
+h3{background:#ccccee}
+-->
+</style>
+</head>
+<body bgcolor="#ffffff">
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>lookupMIB</b>
+MIB object, which is defined within the <b>DISMAN-NSLOOKUP-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.82</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#lookupCtlTable">lookupCtlTable</a></li>
+  <li><a href="#lookupResultsTable">lookupResultsTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="lookupMaxConcurrentRequests" />
+1
+<br /><b>lookupMaxConcurrentRequests</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.82.1.1</td>
+<td>
+<pre>
+The maximum number of concurrent active lookup requests
+that are allowed within an agent implementation.  A value
+of 0 for this object implies that there is no limit for
+the number of concurrent active requests in effect.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="lookupPurgeTime" />
+2
+<br /><b>lookupPurgeTime</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.82.1.2</td>
+<td>
+<pre>
+The amount of time to wait before automatically
+deleting an entry in the lookupCtlTable and any
+dependent lookupResultsTable entries
+after the lookup operation represented by an
+lookupCtlEntry has completed.
+
+An lookupCtEntry is considered complete
+when its lookupCtlOperStatus object has a
+value of completed(3).
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="lookupCtlTable" /><h3>Table lookupCtlTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>lookupCtlTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-NSLOOKUP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.82.1.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Defines the Lookup Control Table for providing
+the capability of performing a lookup operation,
+gethostbyname or gethostbyaddr, from a remote host.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="lookupCtlEntry" />Row Description</td>
+<td>
+<pre>
+Defines an entry in the lookupCtlTable.  A
+lookupCtlEntry is initially indexed by
+lookupCtlOwnerIndex, which is of type SnmpAdminString,
+a textual convention that allows for use of the SNMPv3
+View-Based Access Control Model (RFC 2575 [11], VACM)
+and also allows an management application to identify
+its entries.  The second index element,
+lookupCtlOperationName, enables the same
+lookupCtlOwnerIndex entity to have multiple outstanding
+requests.
+
+The value of lookupCtlTargetAddressType determines which
+lookup function to perform.  Specification of dns(16)
+
+
+
+
+
+as the value of this index implies that the gethostbyname
+function should be performed to determine the numeric
+addresses associated with a symbolic name via
+lookupResultsTable entries.  Use of a value of either
+ipv4(1) or ipv6(2) implies that the gethostbyaddr function
+should be performed to determine the symbolic name(s)
+associated with a numeric address at a remote host.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>lookupCtlTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="lookupCtlOwnerIndex" />
+1
+<br /><b>lookupCtlOwnerIndex</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To facilitate the provisioning of access control by a
+security administrator using the View-Based Access
+Control Model (RFC 2575, VACM) for tables in which
+multiple users may need to independently create or
+modify entries, the initial index is used as an 'owner
+index'.  Such an initial index has a syntax of
+SnmpAdminString, and can thus be trivially mapped to a
+securityName or groupName as defined in VACM, in
+accordance with a security policy.
+
+When used in conjunction with such a security policy all
+entries in the table belonging to a particular user (or
+group) will have the same value for this initial index.
+For a given user's entries in a particular table, the
+object identifiers for the information in these entries
+will have the same subidentifiers (except for the
+'column' subidentifier) up to the end of the encoded
+owner index. To configure VACM to permit access to this
+
+
+
+
+
+portion of the table, one would create
+vacmViewTreeFamilyTable entries with the value of
+vacmViewTreeFamilySubtree including the owner index
+portion, and vacmViewTreeFamilyMask 'wildcarding' the
+column subidentifier.  More elaborate configurations
+are possible.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="lookupCtlOperationName" />
+2
+<br /><b>lookupCtlOperationName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of a lookup operation.  This is locally unique,
+within the scope of an lookupCtlOwnerIndex.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other lookupCtlTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="lookupCtlTargetAddressType" />
+3
+<br /><b>lookupCtlTargetAddressType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Specifies the type of address for either performing a
+gethostbyname or a gethostbyaddr function at a remote host.
+Specification of dns(16) as the value for this object
+means that the gethostbyname function should be performed
+to return one or more numeric addresses.  Use of a value
+of either ipv4(1) or ipv6(2) means that the gethostbyaddr
+function should be used to return the symbolic names
+associated with a remote host.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="lookupCtlTargetAddress" />
+4
+<br /><b>lookupCtlTargetAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Specifies the address used for a resolver lookup at a
+remote host.  The corresponding lookupCtlAddressType
+objects determines its type as well as the function
+that can be requested.
+
+A value for this object MUST be set prior to
+transitioning its corresponding lookupCtlEntry to
+active(1) via lookupCtlRowStatus.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="lookupCtlOperStatus" />
+5
+<br /><b>lookupCtlOperStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>2</td><td>notStarted</td></tr>
+        <tr><td>3</td><td>completed</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Reflects the operational state of an lookupCtlEntry:
+enabled(1)    - Operation is active.
+           notStarted(2) - Operation has not been enabled.
+           completed(3)  - Operation has completed.
+
+         An operation is automatically enabled(1) when its
+         lookupCtlRowStatus object is transitioned to active(1)
+         status.  Until this occurs lookupCtlOperStatus MUST
+         report a value of notStarted(2).  After the lookup
+         operation completes (success or failure) the value
+         for lookupCtlOperStatus MUST be transitioned to
+         completed(3).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="lookupCtlTime" />
+6
+<br /><b>lookupCtlTime</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Reports the number of milliseconds that a lookup
+operation required to be completed at a remote host.
+Completed means operation failure as well as
+success.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="lookupCtlRc" />
+7
+<br /><b>lookupCtlRc</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The system specific return code from a lookup
+operation.  All implementations MUST return a value
+of 0 for this object when the remote lookup
+operation succeeds.  A non-zero value for this
+objects indicates failure.  It is recommended that
+implementations that support errno use it as the
+value of this object to aid a management
+application in determining the cause of failure.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="lookupCtlRowStatus" />
+8
+<br /><b>lookupCtlRowStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object allows entries to be created and deleted
+in the lookupCtlTable.
+
+A remote lookup operation is started when an
+entry in this table is created via an SNMP SET
+request and the entry is activated.  This
+occurs by setting the value of this object
+to CreateAndGo(4) during row creation or
+by setting this object to active(1) after
+the row is created.
+
+A value MUST be specified for lookupCtlTargetAddress
+prior to a transition to active(1) state being
+accepted.
+
+A remote lookup operation starts when its entry
+first becomes active(1).  Transitions in and
+out of active(1) state have no effect on the
+operational behavior of a remote lookup
+operation, with the exception that deletion of
+an entry in this table by setting its RowStatus
+object to destroy(6) will stop an active
+remote lookup operation.
+
+The operational state of a remote lookup operation
+can be determined by examination of its
+lookupCtlOperStatus object.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="lookupResultsTable" /><h3>Table lookupResultsTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>lookupResultsTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-NSLOOKUP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.82.1.4</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Defines the Lookup Results Table for providing
+the capability of determining the results of a
+operation at a remote host.
+
+
+
+
+
+One or more entries are added to the
+lookupResultsTable when a lookup operation,
+as reflected by an lookupCtlEntry, completes
+successfully.  All entries related to a
+successful lookup operation MUST be added
+to the lookupResultsTable at the same time
+that the associating lookupCtlOperStatus
+object is transitioned to completed(2).
+
+The number of entries added depends on the
+results determined for a particular lookup
+operation.  All entries associated with an
+lookupCtlEntry are removed when the
+lookupCtlEntry is deleted.
+
+A remote host can be multi-homed and have more
+than one IP address associated with it
+(gethostbyname results) and/or it can have more
+than one symbolic name (gethostbyaddr results).
+
+The gethostbyaddr function is called with a
+host address as its parameter and is used
+primarily to determine a symbolic name to
+associate with the host address.  Entries in
+the lookupResultsTable MUST be made for each
+host name returned.  The official host name MUST
+be assigned a lookupResultsIndex of 1.
+
+The gethostbyname function is called with a
+symbolic host name and is used primarily to
+retrieve a host address.  If possible the
+primary host address SHOULD be assigned a
+lookupResultsIndex of 1.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="lookupResultsEntry" />Row Description</td>
+<td>
+<pre>
+Defines an entry in the lookupResultsTable.  The
+first two index elements identify the
+lookupCtlEntry that a lookupResultsEntry belongs
+to.  The third index element selects a single
+lookup operation result.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>lookupResultsTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="lookupCtlOwnerIndex" />
+1
+<br /><b>lookupCtlOwnerIndex</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To facilitate the provisioning of access control by a
+security administrator using the View-Based Access
+Control Model (RFC 2575, VACM) for tables in which
+multiple users may need to independently create or
+modify entries, the initial index is used as an 'owner
+index'.  Such an initial index has a syntax of
+SnmpAdminString, and can thus be trivially mapped to a
+securityName or groupName as defined in VACM, in
+accordance with a security policy.
+
+When used in conjunction with such a security policy all
+entries in the table belonging to a particular user (or
+group) will have the same value for this initial index.
+For a given user's entries in a particular table, the
+object identifiers for the information in these entries
+will have the same subidentifiers (except for the
+'column' subidentifier) up to the end of the encoded
+owner index. To configure VACM to permit access to this
+
+
+
+
+
+portion of the table, one would create
+vacmViewTreeFamilyTable entries with the value of
+vacmViewTreeFamilySubtree including the owner index
+portion, and vacmViewTreeFamilyMask 'wildcarding' the
+column subidentifier.  More elaborate configurations
+are possible.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="lookupCtlOperationName" />
+2
+<br /><b>lookupCtlOperationName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of a lookup operation.  This is locally unique,
+within the scope of an lookupCtlOwnerIndex.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="lookupResultsIndex" />
+1
+<br /><b>lookupResultsIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Entries in the lookupResultsTable are created when
+the result of a lookup operation is determined.
+
+Entries MUST be stored in the lookupResultsTable in
+the order that they are retrieved.  Values assigned
+to lookupResultsIndex MUST start at 1 and increase
+in order.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other lookupResultsTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="lookupResultsAddressType" />
+2
+<br /><b>lookupResultsAddressType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Indicates the type of result of a remote lookup
+operation.  A value of unknown(0) implies that
+either the operation hasn't been started or that
+it has failed.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="lookupResultsAddress" />
+3
+<br /><b>lookupResultsAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Reflects a result for a remote lookup operation
+as per the value of lookupResultsAddressType.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="InetAddressType">InetAddressType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr><tr><td>3</td><td>ipv4z</td></tr><tr><td>4</td><td>ipv6z</td></tr><tr><td>16</td><td>dns</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="InetAddress">InetAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp DISMAN-NSLOOKUP-MIB::lookupMIB</b></p>
+<pre>
++--<a href="#lookupMIB">lookupMIB</a>(82)
+   |
+   +--<a href="#lookupObjects">lookupObjects</a>(1)
+   |  |
+   |  +-- -RW- Unsigned  <a href="#lookupMaxConcurrentRequests">lookupMaxConcurrentRequests</a>(1)
+   |  +-- -RW- Unsigned  <a href="#lookupPurgeTime">lookupPurgeTime</a>(2)
+   |  |        Range: 0..86400
+   |  |
+   |  +--<a href="#lookupCtlTable">lookupCtlTable</a>(3)
+   |  |  |
+   |  |  +--<a href="#lookupCtlEntry">lookupCtlEntry</a>(1)
+   |  |     |  Index: lookupCtlOwnerIndex, lookupCtlOperationName
+   |  |     |
+   |  |     +-- ---- String    <a href="#lookupCtlOwnerIndex">lookupCtlOwnerIndex</a>(1)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- ---- String    <a href="#lookupCtlOperationName">lookupCtlOperationName</a>(2)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- CR-- EnumVal   <a href="#lookupCtlTargetAddressType">lookupCtlTargetAddressType</a>(3)
+   |  |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |  |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |  |     +-- CR-- String    <a href="#lookupCtlTargetAddress">lookupCtlTargetAddress</a>(4)
+   |  |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |  |     |        Size: 0..255
+   |  |     +-- -R-- EnumVal   <a href="#lookupCtlOperStatus">lookupCtlOperStatus</a>(5)
+   |  |     |        Values: notStarted(2), completed(3)
+   |  |     +-- -R-- Unsigned  <a href="#lookupCtlTime">lookupCtlTime</a>(6)
+   |  |     +-- -R-- Integer32 <a href="#lookupCtlRc">lookupCtlRc</a>(7)
+   |  |     +-- CR-- EnumVal   <a href="#lookupCtlRowStatus">lookupCtlRowStatus</a>(8)
+   |  |              Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |  |              Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |  |
+   |  +--<a href="#lookupResultsTable">lookupResultsTable</a>(4)
+   |     |
+   |     +--<a href="#lookupResultsEntry">lookupResultsEntry</a>(1)
+   |        |  Index: lookupCtlOwnerIndex, lookupCtlOperationName, lookupResultsIndex
+   |        |
+   |        +-- ---- Unsigned  <a href="#lookupResultsIndex">lookupResultsIndex</a>(1)
+   |        |        Range: 1..-1
+   |        +-- -R-- EnumVal   <a href="#lookupResultsAddressType">lookupResultsAddressType</a>(2)
+   |        |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |        |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |        +-- -R-- String    <a href="#lookupResultsAddress">lookupResultsAddress</a>(3)
+   |                 Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |                 Size: 0..255
+   |
+   +--<a href="#lookupConformance">lookupConformance</a>(2)
+      |
+      +--<a href="#lookupCompliances">lookupCompliances</a>(1)
+      |  |
+      |  +--<a href="#lookupCompliance">lookupCompliance</a>(1)
+      |
+      +--<a href="#lookupGroups">lookupGroups</a>(2)
+         |
+         +--<a href="#lookupGroup">lookupGroup</a>(1)
+</pre>

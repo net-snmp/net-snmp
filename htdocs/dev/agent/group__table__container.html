@@ -1,0 +1,189 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>table_container: Helps you implement a table when data can be found via a netsnmp_container.<br />
+  <small>[<a class="el" href="group__table.html">table: Helps you implement a table.</a>]</small></h1>The table_container handler
+  is used (automatically) in conjuntion with the <a class="el" href="group__table.html">table</a> handler. <a href=
+  "#_details">More...</a>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__table__container.html#ga1">netsnmp_container_table_handler_get</a> (<a class="el" href=
+      "structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *tabreg, netsnmp_container
+      *container, char key_type)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">register specified callbacks for the specified table/oid. <a href="#ga1"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga2" doxytag=
+      "table_container::netsnmp_container_table_register" id="ga2"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_container_table_register</b> (<a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
+      "structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *tabreg, netsnmp_container
+      *container, char key_type)</td>
+    </tr>
+  </table>
+  <hr />
+  <a name="_details" id="_details"></a>
+
+  <h2>Detailed Description</h2>The table_container handler is used (automatically) in conjuntion with the <a class="el" href=
+  "group__table.html">table</a> handler.
+
+  <p>This handler will use the index information provided by the <a class="el" href="group__table.html"></a> handler to find the
+  row needed to process the request.</p>
+
+  <p>The container must use one of 3 key types. It is the sub-handler's responsibility to ensure that the container and key type
+  match (unless neither is specified, in which case a default will be used.)</p>
+
+  <p>The current key types are:</p>
+
+  <p>TABLE_CONTAINER_KEY_NETSNMP_INDEX The container should do comparisons based on a key that may be cast to a netsnmp index
+  (netsnmp_index *). This index contains only the index portion of the OID, not the entire OID.</p>
+
+  <p>TABLE_CONTAINER_KEY_VARBIND_INDEX The container should do comparisons based on a key that may be cast to a netsnmp variable
+  list (netsnmp_variable_list *). This variable list will contain one varbind for each index component.</p>
+
+  <p>TABLE_CONTAINER_KEY_VARBIND_RAW (NOTE: unimplemented) While not yet implemented, future plans include passing the request
+  varbind with the full OID to a container.</p>
+
+  <p>If a key type is not specified at registration time, the default ket type of TABLE_CONTAINER_KEY_NETSNMP_INDEX will be used.
+  If a container is provided, or the handler name is aliased to a container type, the container must use a netsnmp index.</p>
+
+  <p>If no container is provided, a lookup will be made based on the sub-handler's name, or if that isn't found,
+  "table_container". The table_container key type will be netsnmp_index.</p>
+
+  <p>The container must, at a minimum, implement find and find_next. If a NULL key is passed to the container, it must return the
+  first item, if any. All containers provided by net-snmp fulfil this requirement.</p>
+
+  <p>This handler will only register to process 'data lookup' modes. In traditional net-snmp modes, that is any GET-like mode
+  (GET, GET-NEXT, GET-BULK) or the first phase of a SET (RESERVE1). In the new baby-steps mode, DATA_LOOKUP is it's own mode, and
+  is a pre-cursor to other modes.</p>
+
+  <p>When called, the handler will call the appropriate container method with the appropriate key type. If a row was not found,
+  the result depends on the mode.</p>
+
+  <p>GET Processing An exact match must be found. If one is not, the error NOSUCHINSTANCE is set.</p>
+
+  <p>GET-NEXT / GET-BULK If no row is found, the column number will be increased (using any valid_columns structure that may have
+  been provided), and the first row will be retrieved. If no first row is found, the processed flag will be set, so that the
+  sub-handler can skip any processing related to the request. The agent will notice this unsatisfied request, and attempt to pass
+  it to the next appropriate handler.</p>
+
+  <p>SET If the hander did not register with the HANDLER_CAN_NOT_CREATE flag set in the registration modes, it is assumed that
+  this is a row creation request and a NULL row is added to the request's data list. The sub-handler is responsbile for dealing
+  with any row creation contraints and inserting any newly created rows into the container and the request's data list.</p>
+
+  <p>If a row is found, it will be inserted into the request's data list. The sub-handler may retrieve it by calling
+  netsnmp_container_table_extract_context(request); * NOTE NOTE NOTE:</p>
+
+  <p>This helper and it's API are still being tested and are subject to change.</p>
+  <hr />
+
+  <h2>Function Documentation</h2><a class="anchor" name="ga1" doxytag="table_container.c::netsnmp_container_table_handler_get"
+  id="ga1"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>* netsnmp_container_table_handler_get</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>tabreg</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">netsnmp_container *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>container</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">char&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>key_type</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>register specified callbacks for the specified table/oid.</p>
+
+        <p>Definition at line <a class="el" href="table__container_8c-source.html#l00156">156</a> of file <a class="el" href=
+        "table__container_8c-source.html">table_container.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00051">netsnmp_mib_handler_s::flags</a>, <a class="el"
+        href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>, and <a class="el" href=
+        "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:04 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

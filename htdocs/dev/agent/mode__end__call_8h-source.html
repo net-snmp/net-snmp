@@ -1,0 +1,72 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>mode_end_call.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * mode_end_call.h </span>
+00003 <span class="comment"> */</span>
+00004 <span class="preprocessor">#ifndef MODE_END_CALL_H</span>
+00005 <span class="preprocessor">#define MODE_END_CALL_H</span>
+00006 
+00007 <span class="preprocessor">#ifdef __cplusplus</span>
+00008 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00009 <span class="preprocessor">#endif</span>
+00010 
+00011 <span class="preprocessor">#define NETSNMP_MODE_END_ALL_MODES -999</span>
+00012 
+00013 <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_mode_handler_list_s {
+00014    <span class="keyword">struct </span>netsnmp_mode_handler_list_s *next;
+00015    <span class="keywordtype">int</span> mode;
+00016    <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *callback_handler;
+00017 } netsnmp_mode_handler_list;
+00018 
+00019 <span class="comment">/*</span>
+00020 <span class="comment"> * The helper calls another handler after each mode has been</span>
+00021 <span class="comment"> * processed.</span>
+00022 <span class="comment"> */</span>
+00023 
+00024 <span class="comment">/* public functions */</span>
+00025 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+00026 <a class="code" href=
+"group__mode__end__call.html#ga0">netsnmp_get_mode_end_call_handler</a>(netsnmp_mode_handler_list *endlist);
+00027 
+00028 netsnmp_mode_handler_list *
+00029 <a class="code" href=
+"group__mode__end__call.html#ga1">netsnmp_mode_end_call_add_mode_callback</a>(netsnmp_mode_handler_list *endlist,
+00030                                         <span class="keywordtype">int</span> mode,
+00031                                         <a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *callbackh);
+00032 
+00033 <span class="comment">/* internal */</span>
+00034 Netsnmp_Node_Handler netsnmp_mode_end_call_helper;
+00035 
+00036 <span class="preprocessor">#ifdef __cplusplus</span>
+00037 }
+00038 <span class="preprocessor">#endif</span>
+00039 <span class="preprocessor">#endif</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

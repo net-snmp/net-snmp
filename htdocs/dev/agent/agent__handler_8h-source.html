@@ -1,0 +1,343 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>agent_handler.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00002 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00003 <span class="comment"> * that may apply:</span>
+00004 <span class="comment"> */</span>
+00005 <span class="comment">/*</span>
+00006 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00007 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00008 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00009 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00010 <span class="comment"> */</span>
+00011 <span class="preprocessor">#ifndef AGENT_HANDLER_H</span>
+00012 <span class="preprocessor">#define AGENT_HANDLER_H</span>
+00013 
+00014 <span class="preprocessor">#ifdef __cplusplus</span>
+00015 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00016 <span class="preprocessor">#endif</span>
+00017 
+00025 <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration_s</a>;
+00026 
+00027 <span class="comment">/*</span>
+00028 <span class="comment"> * per mib handler flags.</span>
+00029 <span class="comment"> * NOTE: The last 4 bits are reserved for the handler's own use.</span>
+00030 <span class="comment"> */</span>
+00031 <span class="preprocessor">#define MIB_HANDLER_AUTO_NEXT                   0x00000001</span>
+00032 <span class="preprocessor">#define MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE     0x00000002</span>
+00033 
+00034 <span class="preprocessor">#define MIB_HANDLER_CUSTOM4                     0x10000000</span>
+00035 <span class="preprocessor">#define MIB_HANDLER_CUSTOM3                     0x20000000</span>
+00036 <span class="preprocessor">#define MIB_HANDLER_CUSTOM2                     0x40000000</span>
+00037 <span class="preprocessor">#define MIB_HANDLER_CUSTOM1                     0x80000000</span>
+00038 
+00039 
+<a name="l00046" id="l00046"></a><a class="code" href="structnetsnmp__mib__handler__s.html">00046</a> <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler_s</a> {
+00047         <span class="keywordtype">char</span>           *handler_name;
+<a name="l00049" id="l00049"></a><a class="code" href="structnetsnmp__mib__handler__s.html#o1">00049</a>         <span class=
+"keywordtype">void</span>           *myvoid; 
+<a name="l00051" id="l00051"></a><a class="code" href="structnetsnmp__mib__handler__s.html#o2">00051</a>         <span class=
+"keywordtype">int</span>             flags;
+00052 
+00056         int             (*access_method) (<span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler_s</a> *,
+00057                                           <span class="keyword">struct</span>
+00058 <span class="keyword">                                          </span><a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration_s</a> *,
+00059                                           <span class="keyword">struct</span>
+00060 <span class="keyword">                                          </span><a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info_s</a> *,
+00061                                           <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info_s</a> *);
+00062 
+00063         <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler_s</a> *next;
+00064         <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler_s</a> *prev;
+00065 } <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>;
+00066 
+00067 <span class="comment">/*</span>
+00068 <span class="comment"> * per registration flags</span>
+00069 <span class="comment"> */</span>
+00070 <span class="preprocessor">#define HANDLER_CAN_GETANDGETNEXT     0x01       </span><span class=
+"comment">/* must be able to do both */</span>
+00071 <span class="preprocessor">#define HANDLER_CAN_SET               0x02           </span><span class=
+"comment">/* implies create, too */</span>
+00072 <span class="preprocessor">#define HANDLER_CAN_GETBULK           0x04</span>
+00073 <span class="preprocessor">#define HANDLER_CAN_NOT_CREATE        0x08         </span><span class=
+"comment">/* auto set if ! CAN_SET */</span>
+00074 <span class="preprocessor">#define HANDLER_CAN_BABY_STEP         0x10</span>
+00075 
+00076 
+00077 <span class="preprocessor">#define HANDLER_CAN_RONLY   (HANDLER_CAN_GETANDGETNEXT)</span>
+00078 <span class="preprocessor">#define HANDLER_CAN_RWRITE  (HANDLER_CAN_GETANDGETNEXT | HANDLER_CAN_SET)</span>
+00079 <span class="preprocessor">#define HANDLER_CAN_SET_ONLY (HANDLER_CAN_SET | HANDLER_CAN_NOT_CREATE)</span>
+00080 <span class="preprocessor">#define HANDLER_CAN_DEFAULT (HANDLER_CAN_RONLY | HANDLER_CAN_NOT_CREATE)</span>
+00081 
+<a name="l00091" id="l00091"></a><a class="code" href="structnetsnmp__handler__registration__s.html">00091</a> <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration_s</a> {
+00092 
+<a name="l00094" id="l00094"></a><a class="code" href=
+"structnetsnmp__handler__registration__s.html#o0">00094</a>         <span class="keywordtype">char</span>           *handlerName;
+<a name="l00096" id="l00096"></a><a class="code" href=
+"structnetsnmp__handler__registration__s.html#o1">00096</a>         <span class=
+"keywordtype">char</span>           *contextName;    
+00097 
+<a name="l00101" id="l00101"></a><a class="code" href=
+"structnetsnmp__handler__registration__s.html#o2">00101</a>         oid            *rootoid;
+00102         size_t          rootoid_len;
+00103 
+<a name="l00107" id="l00107"></a><a class="code" href=
+"structnetsnmp__handler__registration__s.html#o4">00107</a>         <a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler;
+00108         <span class="keywordtype">int</span>             modes;
+00109 
+<a name="l00113" id="l00113"></a><a class="code" href=
+"structnetsnmp__handler__registration__s.html#o6">00113</a>         <span class="keywordtype">int</span>             priority;
+00114         <span class="keywordtype">int</span>             range_subid;
+00115         oid             range_ubound;
+00116         <span class="keywordtype">int</span>             timeout;
+00117         <span class="keywordtype">int</span>             global_cacheid;
+00118 
+<a name="l00122" id="l00122"></a><a class="code" href=
+"structnetsnmp__handler__registration__s.html#o11">00122</a>         <span class=
+"keywordtype">void</span> *          my_reg_void;
+00123 
+00124 } <a class="code" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>;
+00125 
+00126 <span class="comment">/*</span>
+00127 <span class="comment"> * function handler definitions </span>
+00128 <span class="comment"> */</span>
+00129 
+00130 <span class="keyword">typedef</span> int (Netsnmp_Node_Handler) (<a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00132     <a class="code" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00134     <a class="code" href="structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
+00135     <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests);
+00136 
+00137     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_handler_args_s {
+00138         <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler;
+00139         <a class="code" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo;
+00140         <a class="code" href="structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo;
+00141         <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests;
+00142     } netsnmp_handler_args;
+00143 
+00144     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_delegated_cache_s {
+00145         <span class="keywordtype">int</span>             transaction_id;
+00146         <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler;
+00147         <a class="code" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo;
+00148         <a class="code" href="structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo;
+00149         <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests;
+00150         <span class="keywordtype">void</span>           *localinfo;
+00151     } netsnmp_delegated_cache;
+00152 
+00153     <span class="comment">/*</span>
+00154 <span class="comment">     * handler API functions </span>
+00155 <span class="comment">     */</span>
+00156     <span class="keywordtype">void</span>            netsnmp_init_handler_conf(<span class="keywordtype">void</span>);
+00157     <span class="keywordtype">int</span>             <a class="code" href=
+"group__handler.html#ga10">netsnmp_register_handler</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>
+00158                                              *reginfo);
+00159     <span class="keywordtype">int</span>             <a class="code" href=
+"group__handler.html#ga11">netsnmp_unregister_handler</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>
+00160                                                *reginfo);
+00161     <span class="keywordtype">int</span>            
+00162         <a class="code" href="group__handler.html#ga12">netsnmp_register_handler_nocallback</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>
+00163                                             *reginfo);
+00164     <span class="keywordtype">int</span>             <a class="code" href=
+"group__handler.html#ga14">netsnmp_inject_handler</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>
+00165                                            *reginfo,
+00166                                            <a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler);
+00167     <span class="keywordtype">int</span>
+00168         <a class="code" href="group__handler.html#ga13">netsnmp_inject_handler_before</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00169                                       <a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00170                                       <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *before_what);
+00171     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>
+00172         *<a class="code" href="group__handler.html#ga32">netsnmp_find_handler_by_name</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>
+00173                                       *reginfo, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *name);
+00174     <span class="keywordtype">void</span>          
+00175         *<a class="code" href="group__handler.html#ga33">netsnmp_find_handler_data_by_name</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>
+00176                                            *reginfo, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *name);
+00177     <span class="keywordtype">int</span>             netsnmp_call_handlers(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>
+00178                                           *reginfo,
+00179                                           <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a>
+00180                                           *reqinfo,
+00181                                           <a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests);
+00182     <span class="keywordtype">int</span>             <a class="code" href=
+"group__handler.html#ga15">netsnmp_call_handler</a>(<a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *next_handler,
+00183                                          <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>
+00184                                          *reginfo,
+00185                                          <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a>
+00186                                          *reqinfo,
+00187                                          <a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests);
+00188     <span class="keywordtype">int</span>             <a class="code" href=
+"group__handler.html#ga17">netsnmp_call_next_handler</a>(<a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *current,
+00189                                               <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>
+00190                                               *reginfo,
+00191                                               <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a>
+00192                                               *reqinfo,
+00193                                               <a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a>
+00194                                               *requests);
+00195     <span class="keywordtype">int</span>             <a class="code" href=
+"group__handler.html#ga18">netsnmp_call_next_handler_one_request</a>(<a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *current,
+00196                                                           <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00197                                                           <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
+00198                                                           <a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests);
+00199     
+00200     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *<a class="code" href=
+"group__handler.html#ga7">netsnmp_create_handler</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *name,
+00201                                                 Netsnmp_Node_Handler *
+00202                                                 handler_access_method);
+00203     <a class="code" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *
+00204     <a class="code" href="group__handler.html#ga8">netsnmp_handler_registration_create</a>(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *name,
+00205                                         <a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00206                                         oid * reg_oid, size_t reg_oid_len,
+00207                                         <span class="keywordtype">int</span> modes);
+00208     <a class="code" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *
+00209     netsnmp_create_handler_registration(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *name, Netsnmp_Node_Handler*
+00210                                         handler_access_method, oid *reg_oid,
+00211                                         size_t reg_oid_len, <span class="keywordtype">int</span> modes);
+00212 
+00213     NETSNMP_INLINE netsnmp_delegated_cache
+00214         *<a class="code" href="group__handler.html#ga23">netsnmp_create_delegated_cache</a>(<a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *,
+00215                                         <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *,
+00216                                         <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *,
+00217                                         <a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *, <span class="keywordtype">void</span> *);
+00218     NETSNMP_INLINE <span class="keywordtype">void</span> <a class="code" href=
+"group__handler.html#ga25">netsnmp_free_delegated_cache</a>(netsnmp_delegated_cache
+00219                                                  *dcache);
+00220     NETSNMP_INLINE netsnmp_delegated_cache
+00221         *<a class="code" href="group__handler.html#ga24">netsnmp_handler_check_cache</a>(netsnmp_delegated_cache *dcache);
+00222     <span class="keywordtype">void</span>            <a class="code" href=
+"group__handler.html#ga36">netsnmp_register_handler_by_name</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *,
+00223                                                      <a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>
+00224                                                      *);
+00225 
+00226     <span class="keywordtype">void</span>            <a class="code" href=
+"group__handler.html#ga37">netsnmp_clear_handler_list</a>(<span class="keywordtype">void</span>);
+00227 
+00228     NETSNMP_INLINE <span class="keywordtype">void</span>
+00229         <a class="code" href="group__handler.html#ga27">netsnmp_request_add_list_data</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request,
+00230                                       <a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node);
+00231 
+00232     NETSNMP_INLINE <span class="keywordtype">int</span>
+00233         <a class="code" href="group__handler.html#ga28">netsnmp_request_remove_list_data</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request,
+00234                                          <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
+00235 
+00236     NETSNMP_INLINE <span class="keywordtype">void</span>    *<a class="code" href=
+"group__handler.html#ga29">netsnmp_request_get_list_data</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a>
+00237                                                   *request,
+00238                                                   <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *name);
+00239 
+00240     NETSNMP_INLINE <span class="keywordtype">void</span>
+00241               <a class="code" href="group__handler.html#ga30">netsnmp_free_request_data_set</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request);
+00242 
+00243     NETSNMP_INLINE <span class="keywordtype">void</span>
+00244              <a class="code" href="group__handler.html#ga31">netsnmp_free_request_data_sets</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request);
+00245 
+00246     <span class="keywordtype">void</span>            <a class="code" href=
+"group__handler.html#ga19">netsnmp_handler_free</a>(<a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *);
+00247     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *<a class="code" href=
+"group__handler.html#ga20">netsnmp_handler_dup</a>(<a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *);
+00248     <a class="code" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>
+00249         *<a class="code" href="group__handler.html#ga22">netsnmp_handler_registration_dup</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *);
+00250     <span class="keywordtype">void</span>           
+00251         <a class="code" href="group__handler.html#ga21">netsnmp_handler_registration_free</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *);
+00252 
+00253 <span class="preprocessor">#define REQUEST_IS_DELEGATED     1</span>
+00254 <span class="preprocessor">#define REQUEST_IS_NOT_DELEGATED 0</span>
+00255     <span class="keywordtype">void</span>           
+00256         <a class="code" href="group__handler.html#ga26">netsnmp_handler_mark_requests_as_delegated</a>(<a class="code"
+href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *,
+00257                                                    <span class="keywordtype">int</span>);
+00258     <span class="keywordtype">void</span>           *netsnmp_handler_get_parent_data(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *,
+00259                                                     <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+00260 
+00261 <span class="preprocessor">#ifdef __cplusplus</span>
+00262 }
+00263 <span class="preprocessor">#endif</span>
+00264 
+00265 <span class="preprocessor">#endif                          </span><span class="comment">/* AGENT_HANDLER_H */</span>
+00266 
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:55 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

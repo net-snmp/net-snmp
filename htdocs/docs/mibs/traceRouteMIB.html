@@ -1,0 +1,2084 @@
+<head>
+  <title>MIB information for traceRouteMIB</title>
+<style type="text/css">
+<!--
+h2{background:#bbeebb}
+h3{background:#ccccee}
+-->
+</style>
+</head>
+<body bgcolor="#ffffff">
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>traceRouteMIB</b>
+MIB object, which is defined within the <b>DISMAN-TRACEROUTE-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.81</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#traceRouteCtlTable">traceRouteCtlTable</a></li>
+  <li><a href="#traceRouteResultsTable">traceRouteResultsTable</a></li>
+  <li><a href="#traceRouteProbeHistoryTable">traceRouteProbeHistoryTable</a></li>
+  <li><a href="#traceRouteHopsTable">traceRouteHopsTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="traceRouteMaxConcurrentRequests" />
+1
+<br /><b>traceRouteMaxConcurrentRequests</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.81.1.1</td>
+<td>
+<pre>
+The maximum number of concurrent active traceroute requests
+that are allowed within an agent implementation.  A value
+of 0 for this object implies that there is no limit for
+the number of concurrent active requests in effect.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="traceRouteCtlTable" /><h3>Table traceRouteCtlTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>traceRouteCtlTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-TRACEROUTE-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.81.1.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Defines the Remote Operations Traceroute Control Table for
+providing the capability of invoking traceroute from a remote
+host.  The results of traceroute operations can be stored in
+the traceRouteResultsTable, traceRouteProbeHistoryTable, and
+the traceRouteHopsTable.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="traceRouteCtlEntry" />Row Description</td>
+<td>
+<pre>
+Defines an entry in the traceRouteCtlTable.  The first
+index element, traceRouteCtlOwnerIndex, is of type
+SnmpAdminString, a textual convention that allows for
+use of the SNMPv3 View-Based Access Control Model
+(RFC 2575 [11], VACM) and allows an management
+application to identify its entries.  The second index,
+traceRouteCtlTestName (also an SnmpAdminString),
+enables the same management application to have
+multiple requests outstanding.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>traceRouteCtlTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlOwnerIndex" />
+1
+<br /><b>traceRouteCtlOwnerIndex</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To facilitate the provisioning of access control by a
+security administrator using the View-Based Access
+Control Model (RFC 2575, VACM) for tables in which
+multiple users may need to independently create or
+modify entries, the initial index is used as an 'owner
+index'.  Such an initial index has a syntax of
+SnmpAdminString, and can thus be trivially mapped to a
+securityName or groupName as defined in VACM, in
+accordance with a security policy.
+
+When used in conjunction with such a security policy
+all entries in the table belonging to a particular user
+(or group) will have the same value for this initial
+index.  For a given user's entries in a particular
+table, the object identifiers for the information in
+these entries will have the same subidentifiers (except
+for the 'column' subidentifier) up to the end of the
+encoded owner index. To configure VACM to permit access
+to this portion of the table, one would create
+vacmViewTreeFamilyTable entries with the value of
+vacmViewTreeFamilySubtree including the owner index
+portion, and vacmViewTreeFamilyMask 'wildcarding' the
+column subidentifier.  More elaborate configurations
+are possible.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlTestName" />
+2
+<br /><b>traceRouteCtlTestName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of a traceroute test.  This is locally unique,
+within the scope of an traceRouteCtlOwnerIndex.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other traceRouteCtlTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlTargetAddressType" />
+3
+<br /><b>traceRouteCtlTargetAddressType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Specifies the type of host address to be used on the
+traceroute request at the remote host.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlTargetAddress" />
+4
+<br /><b>traceRouteCtlTargetAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Specifies the host address used on the
+traceroute request at the remote host.  The
+host address type can be determined by the
+examining the value of the corresponding
+traceRouteCtlTargetAddressType index element.
+
+A value for this object MUST be set prior to
+transitioning its corresponding traceRouteCtlEntry to
+active(1) via traceRouteCtlRowStatus.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlByPassRouteTable" />
+5
+<br /><b>traceRouteCtlByPassRouteTable</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The purpose of this object is to optionally enable
+bypassing the route table.  If enabled, the remote
+host will bypass the normal routing tables and send
+directly to a host on an attached network.  If the
+host is not on a directly-attached network, an
+error is returned.  This option can be used to perform
+the traceroute operation to a local host through an
+interface that has no route defined (e.g., after the
+
+
+
+
+
+interface was dropped by routed).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlDataSize" />
+6
+<br /><b>traceRouteCtlDataSize</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+Specifies the size of the data portion of a traceroute
+request in octets.  A traceroute request is essentially
+transmitted by encoding a UDP datagram into a
+IP packet. So subtracting the size of a UDP header
+(8 octets) and the size of a IP header (20 octets)
+yields a maximum of 65507 octets.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlTimeOut" />
+7
+<br /><b>traceRouteCtlTimeOut</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+Specifies the time-out value, in seconds, for
+a traceroute request.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlProbesPerHop" />
+8
+<br /><b>traceRouteCtlProbesPerHop</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+Specifies the number of times to reissue a traceroute
+request with the same time-to-live (TTL) value.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlPort" />
+9
+<br /><b>traceRouteCtlPort</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+Specifies the UDP port to send the traceroute
+request to.  Need to specify a port that is not in
+        use at the destination (target) host.  The default
+        value for this object is the IANA assigned port,
+        33434, for the traceroute function.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlMaxTtl" />
+10
+<br /><b>traceRouteCtlMaxTtl</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+Specifies the maximum time-to-live value.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlDSField" />
+11
+<br /><b>traceRouteCtlDSField</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+Specifies the value to store in the Differentiated
+Services (DS) Field in the IP packet used to
+encapsulate the traceroute probe.  The DS Field is
+defined as the Type of Service (TOS) octet in a IPv4
+header or as the Traffic Class octet in a IPv6 header.
+
+The value of this object must be a decimal integer
+in the range from 0 to 255.  This option can be used
+to determine what effect an explicit DS Field setting
+has on a traceroute response.  Not all values are legal
+or meaningful.  DS Field usage is often not supported
+by IP implementations.  A value of 0 means that the
+     function represented by this option is not supported.
+     Useful TOS octet values are probably '16' (low delay)
+     and '8' ( high throughput).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlSourceAddressType" />
+12
+<br /><b>traceRouteCtlSourceAddressType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Specifies the type of the source address,
+traceRouteCtlSourceAddress, to be used at a remote host
+when performing a traceroute operation.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlSourceAddress" />
+13
+<br /><b>traceRouteCtlSourceAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Use the specified IP address (which must be given
+as an IP number, not a hostname) as the source
+address in outgoing probe packets. On hosts with
+more than one IP address, this option can be used
+to force the source address to be something other
+than the primary IP address of the interface the
+probe packet is sent on.  If the IP address is not
+one of this machine's interface addresses, an error
+is returned and nothing is sent.  A zero length
+octet string value for this object disables source
+address specification.
+
+The address type (InetAddressType) that relates to
+this object is specified by the corresponding value
+of traceRouteCtlSourceAddressType.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlIfIndex" />
+14
+<br /><b>traceRouteCtlIfIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#InterfaceIndexOrZero">InterfaceIndexOrZero</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InterfaceIndexOrZero"> InterfaceIndexOrZero TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Setting this object to an interface's ifIndex prior
+to starting a remote traceroute operation directs
+the traceroute probes to be transmitted over the
+specified interface.  A value of zero for this object
+implies that this option is not enabled.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlMiscOptions" />
+15
+<br /><b>traceRouteCtlMiscOptions</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Enables an application to specify implementation
+dependent options.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlMaxFailures" />
+16
+<br /><b>traceRouteCtlMaxFailures</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The value of this object indicates the maximum number
+of consecutive timeouts allowed before terminating
+a remote traceroute request.  A value of either 255 (maximum
+hop count/possible TTL value) or a 0 indicates that the
+function of terminating a remote traceroute request when a
+specific number of successive timeouts are detected is
+disabled.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlDontFragment" />
+17
+<br /><b>traceRouteCtlDontFragment</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object enables setting of the don't fragment flag (DF)
+in the IP header for a probe.  Use of this object enables
+performing a manual PATH MTU test.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlInitialTtl" />
+18
+<br /><b>traceRouteCtlInitialTtl</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The value of this object specifies the initial TTL value to
+use.  This enables bypassing the initial (often well known)
+portion of a path.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlFrequency" />
+19
+<br /><b>traceRouteCtlFrequency</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The number of seconds to wait before repeating a
+traceroute test as defined by the value of the
+various objects in the corresponding row.
+
+The number of hops in a single traceroute test
+is determined by the value of the corresponding
+traceRouteCtlProbesPerHop object.  After a
+single test completes the number of seconds as defined
+by the value of traceRouteCtlFrequency MUST elapse
+before the next traceroute test is started.
+
+A value of 0 for this object implies that the test
+as defined by the corresponding entry will not be
+repeated.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlStorageType" />
+20
+<br /><b>traceRouteCtlStorageType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#StorageType">StorageType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#StorageType"> StorageType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The storage type for this conceptual row.
+Conceptual rows having the value 'permanent' need not
+allow write-access to any columnar objects in the row.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlAdminStatus" />
+21
+<br /><b>traceRouteCtlAdminStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>enabled</td></tr>
+        <tr><td>2</td><td>disabled</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+Reflects the desired state that an traceRouteCtlEntry
+should be in:
+
+   enabled(1)  - Attempt to activate the test as defined by
+                 this traceRouteCtlEntry.
+   disabled(2) - Deactivate the test as defined by this
+                 traceRouteCtlEntry.
+
+Refer to the corresponding traceRouteResultsOperStatus to
+determine the operational state of the test defined by
+this entry.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlDescr" />
+22
+<br /><b>traceRouteCtlDescr</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The purpose of this object is to provide a
+descriptive name of the remote traceroute
+test.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlMaxRows" />
+23
+<br /><b>traceRouteCtlMaxRows</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The maximum number of entries allowed in the
+traceRouteProbeHistoryTable.  An implementation of
+this MIB will remove the oldest entry in the
+traceRouteProbeHistoryTable to allow the addition
+of an new entry once the number of rows in the
+traceRouteProbeHistoryTable reaches this value.
+
+Old entries are not removed when a new test is
+started.  Entries are added to the
+traceRouteProbeHistoryTable until traceRouteCtlMaxRows
+is reached before entries begin to be removed.
+
+A value of 0 for this object disables creation of
+traceRouteProbeHistoryTable entries.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlTrapGeneration" />
+24
+<br /><b>traceRouteCtlTrapGeneration</b>
+
+</td><td>
+  BITS
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>0</td><td>pathChange</td></tr>
+        <tr><td>1</td><td>testFailure</td></tr>
+        <tr><td>2</td><td>testCompletion</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The value of this object determines when and if to
+to generate a notification for this entry:
+
+
+
+
+
+pathChange(0)     - Generate a traceRoutePathChange
+    notification when the current path varies from a
+    previously determined path.
+testFailure(1)    - Generate a traceRouteTestFailed
+    notification when the full path to a target
+    can't be determined.
+testCompletion(2) - Generate a traceRouteTestCompleted
+    notification when the path to a target has been
+    determined.
+
+The value of this object defaults to zero, indicating
+that none of the above options have been selected.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlCreateHopsEntries" />
+25
+<br /><b>traceRouteCtlCreateHopsEntries</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The current path for a traceroute test is kept in the
+traceRouteHopsTable on a per hop basis when the value of
+this object is true(1).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlType" />
+26
+<br /><b>traceRouteCtlType</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The value of this object is used either to report or
+select the implementation method to be used for
+performing a traceroute operation. The value of this
+object may be selected from
+traceRouteImplementationTypeDomains.
+
+Additional implementation types should be allocated as
+required by implementers of the DISMAN-TRACEROUTE-MIB
+under their enterprise specific registration point and
+not beneath traceRouteImplementationTypeDomains.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlRowStatus" />
+27
+<br /><b>traceRouteCtlRowStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object allows entries to be created and deleted
+in the traceRouteCtlTable.  Deletion of an entry in
+this table results in all corresponding (same
+traceRouteCtlOwnerIndex and traceRouteCtlTestName
+index values) traceRouteResultsTable,
+traceRouteProbeHistoryTable, and traceRouteHopsTable
+entries being deleted.
+
+A value MUST be specified for traceRouteCtlTargetAddress
+prior to a transition to active(1) state being
+accepted.
+
+Activation of a remote traceroute operation is
+controlled via traceRouteCtlAdminStatus and not
+by transitioning of this object's value to active(1).
+
+Transitions in and out of active(1) state are not
+allowed while an entry's traceRouteResultsOperStatus
+is active(1) with the exception that deletion of
+an entry in this table by setting its RowStatus
+object to destroy(6) will stop an active
+traceroute operation.
+
+The operational state of an traceroute operation
+can be determined by examination of the corresponding
+traceRouteResultsOperStatus object.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="traceRouteResultsTable" /><h3>Table traceRouteResultsTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>traceRouteResultsTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-TRACEROUTE-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.81.1.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Defines the Remote Operations Traceroute Results Table for
+keeping track of the status of a traceRouteCtlEntry.
+
+An entry is added to the traceRouteResultsTable when an
+traceRouteCtlEntry is started by successful transition
+of its traceRouteCtlAdminStatus object to enabled(1).
+An entry is removed from the traceRouteResultsTable when
+its corresponding traceRouteCtlEntry is deleted.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="traceRouteResultsEntry" />Row Description</td>
+<td>
+<pre>
+Defines an entry in the traceRouteResultsTable.  The
+traceRouteResultsTable has the same indexing as the
+traceRouteCtlTable in order for a traceRouteResultsEntry
+to correspond to the traceRouteCtlEntry that caused it to
+be created.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>traceRouteResultsTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlOwnerIndex" />
+1
+<br /><b>traceRouteCtlOwnerIndex</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To facilitate the provisioning of access control by a
+security administrator using the View-Based Access
+Control Model (RFC 2575, VACM) for tables in which
+multiple users may need to independently create or
+modify entries, the initial index is used as an 'owner
+index'.  Such an initial index has a syntax of
+SnmpAdminString, and can thus be trivially mapped to a
+securityName or groupName as defined in VACM, in
+accordance with a security policy.
+
+When used in conjunction with such a security policy
+all entries in the table belonging to a particular user
+(or group) will have the same value for this initial
+index.  For a given user's entries in a particular
+table, the object identifiers for the information in
+these entries will have the same subidentifiers (except
+for the 'column' subidentifier) up to the end of the
+encoded owner index. To configure VACM to permit access
+to this portion of the table, one would create
+vacmViewTreeFamilyTable entries with the value of
+vacmViewTreeFamilySubtree including the owner index
+portion, and vacmViewTreeFamilyMask 'wildcarding' the
+column subidentifier.  More elaborate configurations
+are possible.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlTestName" />
+2
+<br /><b>traceRouteCtlTestName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of a traceroute test.  This is locally unique,
+within the scope of an traceRouteCtlOwnerIndex.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other traceRouteResultsTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="traceRouteResultsOperStatus" />
+1
+<br /><b>traceRouteResultsOperStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>enabled</td></tr>
+        <tr><td>2</td><td>disabled</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Reflects the operational state of an traceRouteCtlEntry:
+enabled(1)  - Test is active.
+           disabled(2) - Test has stopped.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteResultsCurHopCount" />
+2
+<br /><b>traceRouteResultsCurHopCount</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Reflects the current TTL value (range from 1 to
+255) for a remote traceroute operation.
+Maximum TTL value is determined by
+traceRouteCtlMaxTtl.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteResultsCurProbeCount" />
+3
+<br /><b>traceRouteResultsCurProbeCount</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Reflects the current probe count (1..10) for
+a remote traceroute operation. The maximum
+probe count is determined by
+traceRouteCtlProbesPerHop.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteResultsIpTgtAddrType" />
+4
+<br /><b>traceRouteResultsIpTgtAddrType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This objects indicates the type of address stored
+in the corresponding traceRouteResultsIpTgtAddr
+object.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteResultsIpTgtAddr" />
+5
+<br /><b>traceRouteResultsIpTgtAddr</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This objects reports the IP address associated
+with a traceRouteCtlTargetAddress value when the
+destination address is specified as a DNS name.
+The value of this object should be a zero length
+octet string when a DNS name is not specified or
+when a specified DNS name fails to resolve.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteResultsTestAttempts" />
+6
+<br /><b>traceRouteResultsTestAttempts</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The current number of attempts to determine a path
+to a target.  The value of this object MUST be started
+        at 0.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteResultsTestSuccesses" />
+7
+<br /><b>traceRouteResultsTestSuccesses</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The current number of attempts to determine a path
+to a target that have succeeded.  The value of this
+object MUST be reported as 0 when no attempts have
+succeeded.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteResultsLastGoodPath" />
+8
+<br /><b>traceRouteResultsLastGoodPath</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The date and time when the last complete path
+was determined.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="traceRouteProbeHistoryTable" /><h3>Table traceRouteProbeHistoryTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>traceRouteProbeHistoryTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-TRACEROUTE-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.81.1.4</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Defines the Remote Operations Traceroute Results Table for
+storing the results of a traceroute operation.
+
+An implementation of this MIB will remove the oldest
+entry in the traceRouteProbeHistoryTable to allow the
+addition of an new entry once the number of rows in
+the traceRouteProbeHistoryTable reaches the value specified
+by traceRouteCtlMaxRows.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="traceRouteProbeHistoryEntry" />Row Description</td>
+<td>
+<pre>
+Defines a table for storing the results of a traceroute
+operation.  Entries in this table are limited by
+        the value of the corresponding traceRouteCtlMaxRows
+        object.
+
+        The first two index elements identify the
+        traceRouteCtlEntry that a traceRouteProbeHistoryEntry
+        belongs to.  The third index element selects a single
+        traceroute operation result.  The fourth and fifth indexes
+        select the hop and the probe for a particular
+        traceroute operation.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>traceRouteProbeHistoryTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlOwnerIndex" />
+1
+<br /><b>traceRouteCtlOwnerIndex</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To facilitate the provisioning of access control by a
+security administrator using the View-Based Access
+Control Model (RFC 2575, VACM) for tables in which
+multiple users may need to independently create or
+modify entries, the initial index is used as an 'owner
+index'.  Such an initial index has a syntax of
+SnmpAdminString, and can thus be trivially mapped to a
+securityName or groupName as defined in VACM, in
+accordance with a security policy.
+
+When used in conjunction with such a security policy
+all entries in the table belonging to a particular user
+(or group) will have the same value for this initial
+index.  For a given user's entries in a particular
+table, the object identifiers for the information in
+these entries will have the same subidentifiers (except
+for the 'column' subidentifier) up to the end of the
+encoded owner index. To configure VACM to permit access
+to this portion of the table, one would create
+vacmViewTreeFamilyTable entries with the value of
+vacmViewTreeFamilySubtree including the owner index
+portion, and vacmViewTreeFamilyMask 'wildcarding' the
+column subidentifier.  More elaborate configurations
+are possible.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlTestName" />
+2
+<br /><b>traceRouteCtlTestName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of a traceroute test.  This is locally unique,
+within the scope of an traceRouteCtlOwnerIndex.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteProbeHistoryIndex" />
+1
+<br /><b>traceRouteProbeHistoryIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+An entry in this table is created when the result of
+a traceroute probe is determined.  The initial 2 instance
+identifier index values identify the traceRouteCtlEntry
+that a probe result (traceRouteProbeHistoryEntry) belongs
+to.  An entry is removed from this table when
+its corresponding traceRouteCtlEntry is deleted.
+
+An implementation MUST start assigning
+traceRouteProbeHistoryIndex values at 1 and wrap after
+exceeding the maximum possible value as defined by the
+limit of this object ('ffffffff'h).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteProbeHistoryHopIndex" />
+2
+<br /><b>traceRouteProbeHistoryHopIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Indicates which hop in a traceroute path that the probe's
+results are for.  The value of this object is initially
+determined by the value of traceRouteCtlInitialTtl.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteProbeHistoryProbeIndex" />
+3
+<br /><b>traceRouteProbeHistoryProbeIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Indicates the index of a probe for a particular
+hop in a traceroute path.  The number of probes per
+hop is determined by the value of the corresponding
+traceRouteCtlProbesPerHop object.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other traceRouteProbeHistoryTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="traceRouteProbeHistoryHAddrType" />
+4
+<br /><b>traceRouteProbeHistoryHAddrType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This objects indicates the type of address stored
+in the corresponding traceRouteProbeHistoryHAddr
+object.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteProbeHistoryHAddr" />
+5
+<br /><b>traceRouteProbeHistoryHAddr</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The address of a hop in a traceroute path.  This object
+is not allowed to be a DNS name.  The value of the
+corresponding object, traceRouteProbeHistoryHAddrType,
+indicates this object's IP address type.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteProbeHistoryResponse" />
+6
+<br /><b>traceRouteProbeHistoryResponse</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The amount of time measured in milliseconds from when
+a probe was sent to when its response was received or
+when it timed out.  The value of this object is reported
+as 0 when it is not possible to transmit a probe.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteProbeHistoryStatus" />
+7
+<br /><b>traceRouteProbeHistoryStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#OperationResponseStatus">OperationResponseStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#OperationResponseStatus"> OperationResponseStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The result of a traceroute operation made by a remote
+host for a particular probe.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteProbeHistoryLastRC" />
+8
+<br /><b>traceRouteProbeHistoryLastRC</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The last implementation method specific reply code received.
+Traceroute is usually implemented by transmitting a series of
+        probe packets with increasing time-to-live values.  A probe
+        packet is a UDP datagram encapsulated into an IP packet.
+        Each hop in a path to the target (destination) host rejects
+        the probe packets (probe's TTL too small, ICMP reply) until
+        either the maximum TTL is exceeded or the target host is
+        received.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteProbeHistoryTime" />
+9
+<br /><b>traceRouteProbeHistoryTime</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Timestamp for when this probe results were determined.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="traceRouteHopsTable" /><h3>Table traceRouteHopsTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>traceRouteHopsTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-TRACEROUTE-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.81.1.5</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Defines the Remote Operations Traceroute Hop Table for
+keeping track of the results of traceroute tests on a
+per hop basis.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="traceRouteHopsEntry" />Row Description</td>
+<td>
+<pre>
+Defines an entry in the traceRouteHopsTable.
+The first two index elements identify the
+        traceRouteCtlEntry that a traceRouteHopsEntry
+        belongs to.  The third index element,
+        traceRouteHopsHopIndex, selects a
+        hop in a traceroute path.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>traceRouteHopsTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlOwnerIndex" />
+1
+<br /><b>traceRouteCtlOwnerIndex</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To facilitate the provisioning of access control by a
+security administrator using the View-Based Access
+Control Model (RFC 2575, VACM) for tables in which
+multiple users may need to independently create or
+modify entries, the initial index is used as an 'owner
+index'.  Such an initial index has a syntax of
+SnmpAdminString, and can thus be trivially mapped to a
+securityName or groupName as defined in VACM, in
+accordance with a security policy.
+
+When used in conjunction with such a security policy
+all entries in the table belonging to a particular user
+(or group) will have the same value for this initial
+index.  For a given user's entries in a particular
+table, the object identifiers for the information in
+these entries will have the same subidentifiers (except
+for the 'column' subidentifier) up to the end of the
+encoded owner index. To configure VACM to permit access
+to this portion of the table, one would create
+vacmViewTreeFamilyTable entries with the value of
+vacmViewTreeFamilySubtree including the owner index
+portion, and vacmViewTreeFamilyMask 'wildcarding' the
+column subidentifier.  More elaborate configurations
+are possible.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteCtlTestName" />
+2
+<br /><b>traceRouteCtlTestName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of a traceroute test.  This is locally unique,
+within the scope of an traceRouteCtlOwnerIndex.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteHopsHopIndex" />
+1
+<br /><b>traceRouteHopsHopIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Specifies the hop index for a traceroute hop.  Values
+for this object with respect to the same
+traceRouteCtlOwnerIndex and traceRouteCtlTestName
+MUST start at 1 and increase monotonically.
+
+
+
+
+
+
+The traceRouteHopsTable keeps the current traceroute
+path per traceRouteCtlEntry if enabled by
+setting the corresponding traceRouteCtlCreateHopsEntries
+to true(1).
+
+All hops (traceRouteHopsTable entries) in a traceroute
+path MUST be updated at the same time when a traceroute
+operation completes.  Care needs to be applied when either
+a path changes or can't be determined.  The initial portion
+of the path, up to the first hop change, MUST retain the
+same traceRouteHopsHopIndex values.  The remaining portion
+of the path SHOULD be assigned new traceRouteHopsHopIndex
+values.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other traceRouteHopsTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="traceRouteHopsIpTgtAddressType" />
+2
+<br /><b>traceRouteHopsIpTgtAddressType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This objects indicates the type of address stored
+in the corresponding traceRouteHopsIpTargetAddress
+object.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteHopsIpTgtAddress" />
+3
+<br /><b>traceRouteHopsIpTgtAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object reports the IP address associated with
+the hop.  A value for this object should be reported
+as a numeric IP address and not as a DNS name.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteHopsMinRtt" />
+4
+<br /><b>traceRouteHopsMinRtt</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The minimum traceroute round-trip-time (RTT) received for
+this hop.  A value of 0 for this object implies that no
+RTT has been received.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteHopsMaxRtt" />
+5
+<br /><b>traceRouteHopsMaxRtt</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The maximum traceroute round-trip-time (RTT) received for
+this hop.  A value of 0 for this object implies that no
+RTT has been received.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteHopsAverageRtt" />
+6
+<br /><b>traceRouteHopsAverageRtt</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The current average traceroute round-trip-time (RTT) for
+this hop.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteHopsRttSumOfSquares" />
+7
+<br /><b>traceRouteHopsRttSumOfSquares</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+This object contains the sum of all traceroute responses
+received for this hop.  Its purpose is to enable standard
+deviation calculation.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteHopsSentProbes" />
+8
+<br /><b>traceRouteHopsSentProbes</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value of this object reflects the number of probes sent
+for this hop during this traceroute test.  The value of this
+object should start at 0.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteHopsProbeResponses" />
+9
+<br /><b>traceRouteHopsProbeResponses</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Number of responses received for this hop during this
+traceroute test.  This value of this object should start
+at 0.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="traceRouteHopsLastGoodProbe" />
+10
+<br /><b>traceRouteHopsLastGoodProbe</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Date and time was the last response was received for a probe
+for this hop during this traceroute test.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+<a name="traceRoutePathChange" /><h3>Notification: traceRoutePathChange</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>traceRoutePathChange</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-TRACEROUTE-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.81.0.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+The path to a target has changed.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#traceRouteCtlTargetAddressType">traceRouteCtlTargetAddressType</a></td></tr>
+      <tr><td><a href="#traceRouteCtlTargetAddress">traceRouteCtlTargetAddress</a></td></tr>
+      <tr><td><a href="#traceRouteResultsIpTgtAddrType">traceRouteResultsIpTgtAddrType</a></td></tr>
+      <tr><td><a href="#traceRouteResultsIpTgtAddr">traceRouteResultsIpTgtAddr</a></td></tr>
+  </table></td></tr>
+  </table>
+<a name="traceRouteTestFailed" /><h3>Notification: traceRouteTestFailed</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>traceRouteTestFailed</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-TRACEROUTE-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.81.0.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+Could not determine the path to a target.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#traceRouteCtlTargetAddressType">traceRouteCtlTargetAddressType</a></td></tr>
+      <tr><td><a href="#traceRouteCtlTargetAddress">traceRouteCtlTargetAddress</a></td></tr>
+      <tr><td><a href="#traceRouteResultsIpTgtAddrType">traceRouteResultsIpTgtAddrType</a></td></tr>
+      <tr><td><a href="#traceRouteResultsIpTgtAddr">traceRouteResultsIpTgtAddr</a></td></tr>
+  </table></td></tr>
+  </table>
+<a name="traceRouteTestCompleted" /><h3>Notification: traceRouteTestCompleted</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>traceRouteTestCompleted</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-TRACEROUTE-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.81.0.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+The path to a target has just been determined.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#traceRouteCtlTargetAddressType">traceRouteCtlTargetAddressType</a></td></tr>
+      <tr><td><a href="#traceRouteCtlTargetAddress">traceRouteCtlTargetAddress</a></td></tr>
+      <tr><td><a href="#traceRouteResultsIpTgtAddrType">traceRouteResultsIpTgtAddrType</a></td></tr>
+      <tr><td><a href="#traceRouteResultsIpTgtAddr">traceRouteResultsIpTgtAddr</a></td></tr>
+  </table></td></tr>
+  </table>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="OperationResponseStatus">OperationResponseStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>responseReceived</td></tr><tr><td>2</td><td>unknown</td></tr><tr><td>3</td><td>internalError</td></tr><tr><td>4</td><td>requestTimedOut</td></tr><tr><td>5</td><td>unknownDestinationAddress</td></tr><tr><td>6</td><td>noRouteToTarget</td></tr><tr><td>7</td><td>interfaceInactiveToTarget</td></tr><tr><td>8</td><td>arpFailure</td></tr><tr><td>9</td><td>maxConcurrentLimitReached</td></tr><tr><td>10</td><td>unableToResolveDnsName</td></tr><tr><td>11</td><td>invalidHostAddress</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="InetAddress">InetAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="InetAddressType">InetAddressType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr><tr><td>3</td><td>ipv4z</td></tr><tr><td>4</td><td>ipv6z</td></tr><tr><td>16</td><td>dns</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="InterfaceIndexOrZero">InterfaceIndexOrZero</td><td>INTEGER32</td><td><pre></pre></td></tr>
+<tr><td><a name="DateAndTime">DateAndTime</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp DISMAN-TRACEROUTE-MIB::traceRouteMIB</b></p>
+<pre>
++--<a href="#traceRouteMIB">traceRouteMIB</a>(81)
+   |
+   +--<a href="#traceRouteNotifications">traceRouteNotifications</a>(0)
+   |  |
+   |  +--<a href="#traceRoutePathChange">traceRoutePathChange</a>(1)
+   |  +--<a href="#traceRouteTestFailed">traceRouteTestFailed</a>(2)
+   |  +--<a href="#traceRouteTestCompleted">traceRouteTestCompleted</a>(3)
+   |
+   +--<a href="#traceRouteObjects">traceRouteObjects</a>(1)
+   |  |
+   |  +-- -RW- Unsigned  <a href="#traceRouteMaxConcurrentRequests">traceRouteMaxConcurrentRequests</a>(1)
+   |  |
+   |  +--<a href="#traceRouteCtlTable">traceRouteCtlTable</a>(2)
+   |  |  |
+   |  |  +--<a href="#traceRouteCtlEntry">traceRouteCtlEntry</a>(1)
+   |  |     |  Index: traceRouteCtlOwnerIndex, traceRouteCtlTestName
+   |  |     |
+   |  |     +-- ---- String    <a href="#traceRouteCtlOwnerIndex">traceRouteCtlOwnerIndex</a>(1)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- ---- String    <a href="#traceRouteCtlTestName">traceRouteCtlTestName</a>(2)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- CR-- EnumVal   <a href="#traceRouteCtlTargetAddressType">traceRouteCtlTargetAddressType</a>(3)
+   |  |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |  |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |  |     +-- CR-- String    <a href="#traceRouteCtlTargetAddress">traceRouteCtlTargetAddress</a>(4)
+   |  |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |  |     |        Size: 0..255
+   |  |     +-- CR-- EnumVal   <a href="#traceRouteCtlByPassRouteTable">traceRouteCtlByPassRouteTable</a>(5)
+   |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |     |        Values: true(1), false(2)
+   |  |     +-- CR-- Unsigned  <a href="#traceRouteCtlDataSize">traceRouteCtlDataSize</a>(6)
+   |  |     |        Range: 0..65507
+   |  |     +-- CR-- Unsigned  <a href="#traceRouteCtlTimeOut">traceRouteCtlTimeOut</a>(7)
+   |  |     |        Range: 1..60
+   |  |     +-- CR-- Unsigned  <a href="#traceRouteCtlProbesPerHop">traceRouteCtlProbesPerHop</a>(8)
+   |  |     |        Range: 1..10
+   |  |     +-- CR-- Unsigned  <a href="#traceRouteCtlPort">traceRouteCtlPort</a>(9)
+   |  |     |        Range: 1..65535
+   |  |     +-- CR-- Unsigned  <a href="#traceRouteCtlMaxTtl">traceRouteCtlMaxTtl</a>(10)
+   |  |     |        Range: 1..255
+   |  |     +-- CR-- Unsigned  <a href="#traceRouteCtlDSField">traceRouteCtlDSField</a>(11)
+   |  |     |        Range: 0..255
+   |  |     +-- CR-- EnumVal   <a href="#traceRouteCtlSourceAddressType">traceRouteCtlSourceAddressType</a>(12)
+   |  |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |  |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |  |     +-- CR-- String    <a href="#traceRouteCtlSourceAddress">traceRouteCtlSourceAddress</a>(13)
+   |  |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |  |     |        Size: 0..255
+   |  |     +-- CR-- Integer32 <a href="#traceRouteCtlIfIndex">traceRouteCtlIfIndex</a>(14)
+   |  |     |        Textual Convention: <a href="#InterfaceIndexOrZero">InterfaceIndexOrZero</a>
+   |  |     |        Range: 0..2147483647
+   |  |     +-- CR-- String    <a href="#traceRouteCtlMiscOptions">traceRouteCtlMiscOptions</a>(15)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..255
+   |  |     +-- CR-- Unsigned  <a href="#traceRouteCtlMaxFailures">traceRouteCtlMaxFailures</a>(16)
+   |  |     |        Range: 0..255
+   |  |     +-- CR-- EnumVal   <a href="#traceRouteCtlDontFragment">traceRouteCtlDontFragment</a>(17)
+   |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |     |        Values: true(1), false(2)
+   |  |     +-- CR-- Unsigned  <a href="#traceRouteCtlInitialTtl">traceRouteCtlInitialTtl</a>(18)
+   |  |     |        Range: 0..255
+   |  |     +-- CR-- Unsigned  <a href="#traceRouteCtlFrequency">traceRouteCtlFrequency</a>(19)
+   |  |     +-- CR-- EnumVal   <a href="#traceRouteCtlStorageType">traceRouteCtlStorageType</a>(20)
+   |  |     |        Textual Convention: <a href="#StorageType">StorageType</a>
+   |  |     |        Values: other(1), volatile(2), nonVolatile(3), permanent(4), readOnly(5)
+   |  |     +-- CR-- EnumVal   <a href="#traceRouteCtlAdminStatus">traceRouteCtlAdminStatus</a>(21)
+   |  |     |        Values: enabled(1), disabled(2)
+   |  |     +-- CR-- String    <a href="#traceRouteCtlDescr">traceRouteCtlDescr</a>(22)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..255
+   |  |     +-- CR-- Unsigned  <a href="#traceRouteCtlMaxRows">traceRouteCtlMaxRows</a>(23)
+   |  |     +-- CR-- BitString <a href="#traceRouteCtlTrapGeneration">traceRouteCtlTrapGeneration</a>(24)
+   |  |     |        Values: pathChange(0), testFailure(1), testCompletion(2)
+   |  |     +-- CR-- EnumVal   <a href="#traceRouteCtlCreateHopsEntries">traceRouteCtlCreateHopsEntries</a>(25)
+   |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |     |        Values: true(1), false(2)
+   |  |     +-- CR-- ObjID     <a href="#traceRouteCtlType">traceRouteCtlType</a>(26)
+   |  |     +-- CR-- EnumVal   <a href="#traceRouteCtlRowStatus">traceRouteCtlRowStatus</a>(27)
+   |  |              Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |  |              Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |  |
+   |  +--<a href="#traceRouteResultsTable">traceRouteResultsTable</a>(3)
+   |  |  |
+   |  |  +--<a href="#traceRouteResultsEntry">traceRouteResultsEntry</a>(1)
+   |  |     |  Index: traceRouteCtlOwnerIndex, traceRouteCtlTestName
+   |  |     |
+   |  |     +-- -R-- EnumVal   <a href="#traceRouteResultsOperStatus">traceRouteResultsOperStatus</a>(1)
+   |  |     |        Values: enabled(1), disabled(2)
+   |  |     +-- -R-- Gauge     <a href="#traceRouteResultsCurHopCount">traceRouteResultsCurHopCount</a>(2)
+   |  |     +-- -R-- Gauge     <a href="#traceRouteResultsCurProbeCount">traceRouteResultsCurProbeCount</a>(3)
+   |  |     +-- -R-- EnumVal   <a href="#traceRouteResultsIpTgtAddrType">traceRouteResultsIpTgtAddrType</a>(4)
+   |  |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |  |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |  |     +-- -R-- String    <a href="#traceRouteResultsIpTgtAddr">traceRouteResultsIpTgtAddr</a>(5)
+   |  |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |  |     |        Size: 0..255
+   |  |     +-- -R-- Unsigned  <a href="#traceRouteResultsTestAttempts">traceRouteResultsTestAttempts</a>(6)
+   |  |     +-- -R-- Unsigned  <a href="#traceRouteResultsTestSuccesses">traceRouteResultsTestSuccesses</a>(7)
+   |  |     +-- -R-- String    <a href="#traceRouteResultsLastGoodPath">traceRouteResultsLastGoodPath</a>(8)
+   |  |              Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |  |              Size: 8 | 11
+   |  |
+   |  +--<a href="#traceRouteProbeHistoryTable">traceRouteProbeHistoryTable</a>(4)
+   |  |  |
+   |  |  +--<a href="#traceRouteProbeHistoryEntry">traceRouteProbeHistoryEntry</a>(1)
+   |  |     |  Index: traceRouteCtlOwnerIndex, traceRouteCtlTestName, traceRouteProbeHistoryIndex, traceRouteProbeHistoryHopIndex, traceRouteProbeHistoryProbeIndex
+   |  |     |
+   |  |     +-- ---- Unsigned  <a href="#traceRouteProbeHistoryIndex">traceRouteProbeHistoryIndex</a>(1)
+   |  |     |        Range: 1..-1
+   |  |     +-- ---- Unsigned  <a href="#traceRouteProbeHistoryHopIndex">traceRouteProbeHistoryHopIndex</a>(2)
+   |  |     |        Range: 1..255
+   |  |     +-- ---- Unsigned  <a href="#traceRouteProbeHistoryProbeIndex">traceRouteProbeHistoryProbeIndex</a>(3)
+   |  |     |        Range: 1..10
+   |  |     +-- -R-- EnumVal   <a href="#traceRouteProbeHistoryHAddrType">traceRouteProbeHistoryHAddrType</a>(4)
+   |  |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |  |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |  |     +-- -R-- String    <a href="#traceRouteProbeHistoryHAddr">traceRouteProbeHistoryHAddr</a>(5)
+   |  |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |  |     |        Size: 0..255
+   |  |     +-- -R-- Unsigned  <a href="#traceRouteProbeHistoryResponse">traceRouteProbeHistoryResponse</a>(6)
+   |  |     +-- -R-- EnumVal   <a href="#traceRouteProbeHistoryStatus">traceRouteProbeHistoryStatus</a>(7)
+   |  |     |        Textual Convention: <a href="#OperationResponseStatus">OperationResponseStatus</a>
+   |  |     |        Values: responseReceived(1), unknown(2), internalError(3), requestTimedOut(4), unknownDestinationAddress(5), noRouteToTarget(6), interfaceInactiveToTarget(7), arpFailure(8), maxConcurrentLimitReached(9), unableToResolveDnsName(10), invalidHostAddress(11)
+   |  |     +-- -R-- Integer32 <a href="#traceRouteProbeHistoryLastRC">traceRouteProbeHistoryLastRC</a>(8)
+   |  |     +-- -R-- String    <a href="#traceRouteProbeHistoryTime">traceRouteProbeHistoryTime</a>(9)
+   |  |              Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |  |              Size: 8 | 11
+   |  |
+   |  +--<a href="#traceRouteHopsTable">traceRouteHopsTable</a>(5)
+   |     |
+   |     +--<a href="#traceRouteHopsEntry">traceRouteHopsEntry</a>(1)
+   |        |  Index: traceRouteCtlOwnerIndex, traceRouteCtlTestName, traceRouteHopsHopIndex
+   |        |
+   |        +-- ---- Unsigned  <a href="#traceRouteHopsHopIndex">traceRouteHopsHopIndex</a>(1)
+   |        +-- -R-- EnumVal   <a href="#traceRouteHopsIpTgtAddressType">traceRouteHopsIpTgtAddressType</a>(2)
+   |        |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |        |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |        +-- -R-- String    <a href="#traceRouteHopsIpTgtAddress">traceRouteHopsIpTgtAddress</a>(3)
+   |        |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |        |        Size: 0..255
+   |        +-- -R-- Unsigned  <a href="#traceRouteHopsMinRtt">traceRouteHopsMinRtt</a>(4)
+   |        +-- -R-- Unsigned  <a href="#traceRouteHopsMaxRtt">traceRouteHopsMaxRtt</a>(5)
+   |        +-- -R-- Unsigned  <a href="#traceRouteHopsAverageRtt">traceRouteHopsAverageRtt</a>(6)
+   |        +-- -R-- Unsigned  <a href="#traceRouteHopsRttSumOfSquares">traceRouteHopsRttSumOfSquares</a>(7)
+   |        +-- -R-- Unsigned  <a href="#traceRouteHopsSentProbes">traceRouteHopsSentProbes</a>(8)
+   |        +-- -R-- Unsigned  <a href="#traceRouteHopsProbeResponses">traceRouteHopsProbeResponses</a>(9)
+   |        +-- -R-- String    <a href="#traceRouteHopsLastGoodProbe">traceRouteHopsLastGoodProbe</a>(10)
+   |                 Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |                 Size: 8 | 11
+   |
+   +--<a href="#traceRouteConformance">traceRouteConformance</a>(2)
+   |  |
+   |  +--<a href="#traceRouteCompliances">traceRouteCompliances</a>(1)
+   |  |  |
+   |  |  +--<a href="#traceRouteCompliance">traceRouteCompliance</a>(1)
+   |  |
+   |  +--<a href="#traceRouteGroups">traceRouteGroups</a>(2)
+   |     |
+   |     +--<a href="#traceRouteGroup">traceRouteGroup</a>(1)
+   |     +--<a href="#traceRouteTimeStampGroup">traceRouteTimeStampGroup</a>(2)
+   |     |
+   |     +--<a href="#traceRouteNotificationsGroup">traceRouteNotificationsGroup</a>(3)
+   |     |
+   |     +--<a href="#traceRouteHopsTableGroup">traceRouteHopsTableGroup</a>(4)
+   |
+   +--<a href="#traceRouteImplementationTypeDomains">traceRouteImplementationTypeDomains</a>(3)
+      |
+      +--<a href="#traceRouteUsingUdpProbes">traceRouteUsingUdpProbes</a>(1)
+</pre>

@@ -1,0 +1,138 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML>
+<HEAD>
+<TITLE>Extending the UCD agent - the header file</TITLE>
+</HEAD>
+<BODY>
+<H1> The C code header file </H1>
+
+If the MIB file is the definition of the module for external network management
+applications (where applications includes network management personnel!), then
+the header file has traditionally served effectively the same purpose for
+the agent itself.
+<BR>
+  Recent changes to the recommended code structure has resulted in the
+header file becoming increasingly simpler.  It now simply contains definitions
+of the publically visible routines, and can be generated completely by
+<CODE>mib2c</CODE>.
+
+<H3>Function prototypes</H3>
+
+For those interested in the details of this file (for example, if
+coding a module by hand), then the details of these definitions are
+as follows.
+Every header file will have the following two function prototype definitions
+<PRE>
+	extern void          init_example (void);
+	extern FindVarMethod var_example;
+</PRE>
+If the module includes any tables, or other collections of variables
+that are implemented in separate routines, then this second definition
+will be repeated for each of these.
+<BR>
+In addition, if any of the variables can be SET (and it is intended
+to implement them as such), there will be a function prototype definitions
+for each of these, of the form:
+<PRE>
+	extern WriteMethod write_<I>varName</I>;
+</PRE>
+These prototypes are in fact typedef'ed in
+<CODE>&lt agent/snmp_vars.h &gt</CODE>.
+
+<H3>Module dependancies</H3>
+
+This header file is also used to inform the compilation system of
+any dependancies between this module and any others.
+There is one <I>utility module</I> which is required by almost
+every module, and this is included using the directive
+
+<PRE>
+	config_require( util_funcs )
+</PRE>
+
+(which is produced automatically by <CODE>mib2c</CODE>).
+This same syntax can be used to trigger the inclusion of other
+related modules.  An example of this can be seen in
+<CODE>mibII/route_write.h</CODE> which relies on the <CODE>mibII/ip</CODE>
+module, thus:
+<PRE>
+	config_require( mibII/ip )
+</PRE>
+<P>
+One use of this directive is to define a module group, by supplying a header
+file consisting exclusively of such config_require directives.  It can then
+be included or excluded from the agent very simply.
+Examples of this can be seen in <CODE>mibgroup/mibII.h</CODE>
+or <CODE>mibgroup/host.h</CODE>, which list the consituent sub-modules
+of the MIB-II and Host Resources MIBs respectively.
+
+<H3>MIB file information</H3>
+
+Most of the information in this file is (understandably) aimed at the network
+management agent itself.  However, there is one common header file directive
+that is actually intended to affect the utility commands that are included
+within the full distribution:
+<PRE>
+	config_add_mib( HOST-RESOURCES-MIB )
+</PRE>
+  This is used to add the MIB file being implemented to the default list of
+MIBs loaded by such commands.  This means that querying the agent will return
+informative names and values, rather than the raw numeric forms that SNMP
+actually works with.  Of course, it is always possible for the utilities
+to specify that this MIB should be loaded anyway.  But specifying this file
+within the module header file is a useful hint that a particular MIB should
+be loaded, without needing to ask for it explicitly.
+<BR>
+  Note that this will only affect the binaries compiled as part of the same
+configuration run.  It will have no effect on pre-installed binaries, or
+those compiled following a different configuration specification.
+
+<H3>Magic Numbers</H3>
+
+The other common element within the header file defines a set of "magic
+numbers" - one for each object within the implementation module. In fact,
+this can equally well appear within the main code file, as part of the
+variable structure (which will be described in the next part).
+<BR>
+This is the technique used by <CODE>mib2c</CODE>, but most handcrafted modules
+have tended to define these as part of the header file, probably for clarity.
+<P>
+The only necessity is that the names and values are distinct (or more
+precisely, the values are distinct within a single variable handling routine).
+In practise, they tend to be defined using integers incrementing from 1,
+or as the same as the final sub-identifier of the corresponding MIB object
+(or indeed both, as these are frequently themselves successive integers).
+<BR>
+  This is not mandatory, and a counter-example can be seen in the
+example module, where two of the object form a sub-tree, and the corresponding
+magic numbers are based on the final <B>two</B> sub-identifiers (to ensure that
+the values are unique).  But this construction is definitely unusual, and
+the majority of modules simply use successive integers.
+
+<H3>Header file protection</H3>
+
+Normally, the only other contents of the header file will be the
+<CODE>#ifndef/#define/#endif</CODE> statements surrounding the whole file.
+This is used to ensure that the header file is only included once
+by any source code file (or more accurately, that there is no effect
+if it is inadvertantly included a second time).
+<BR>
+Again, as with the rest of the header file, this is generated automatically
+by <CODE>mib2c</CODE>.
+
+<P>
+Having finished all the preparatory work (or let <CODE>mib2c</CODE> deal
+with it), the <A HREF=04-basic-code.html>
+next part</A> starts to look at the code file that actually implements
+the module.
+<P><HR>
+Copyright 1999 - D.T.Shield.
+Not to be distributed without the explicit permission of the author.
+</BODY>
+</HTML>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

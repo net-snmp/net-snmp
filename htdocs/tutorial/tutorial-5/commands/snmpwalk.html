@@ -1,0 +1,62 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Net-SNMP Tutorial -- snmpwalk</title>
+  </head>
+
+  <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
+    <h1>Net-SNMP Tutorial -- snmpwalk</h1>
+    <p>
+      The <b>snmpwalk</b> command essentially performs a whole series
+      of getnexts automatically for you, and stops when it returns
+      results that are no longer inside the range of the OID that you
+      originally specified.  If you wanted to get <b>all of the
+      information</b> stored on a machine in the system MIB group, for
+      instance, you could use this command to do so:
+<pre>
+<ul>
+% <b>snmpwalk -v 2c -c demopublic test.net-snmp.org system</b>
+system.sysDescr.0 = HP-UX net-snmp B.10.20 A 9000/715
+system.sysObjectID.0 = OID: enterprises.ucdavis.ucdSnmpAgent.hpux10
+system.sysUpTime.0 = Timeticks: (586998396) 67 days, 22:33:03.96
+system.sysContact.0 = Wes Hardaker wjhardaker@ucdavis.edu
+system.sysName.0 = net-snmp
+system.sysLocation.0 = UCDavis
+system.sysORLastChange.0 = Timeticks: (0) 0:00:00.00
+system.sysORTable.sysOREntry.sysORIndex.1 = 1
+system.sysORTable.sysOREntry.sysORIndex.2 = 2
+system.sysORTable.sysOREntry.sysORIndex.3 = 3
+system.sysORTable.sysOREntry.sysORIndex.4 = 4
+system.sysORTable.sysOREntry.sysORIndex.5 = 5
+system.sysORTable.sysOREntry.sysORID.1 = OID: .iso.org.dod.internet.snmpV2.snmpModules.snmpMIB
+system.sysORTable.sysOREntry.sysORID.2 = OID: .iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBConformance.vacmMIBGroups.vacmBasicGroup
+system.sysORTable.sysOREntry.sysORID.3 = OID: .iso.org.dod.internet.snmpV2.snmpModules.snmpFrameworkMIB.snmpFrameworkMIBConformance.snmpFrameworkMIBCompliances.snmpFrameworkMIBCompliance
+system.sysORTable.sysOREntry.sysORID.4 = OID: .iso.org.dod.internet.snmpV2.snmpModules.snmpMPDMIB.snmpMPDMIBConformance.snmpMPDMIBCompliances.snmpMPDCompliance
+system.sysORTable.sysOREntry.sysORID.5 = OID: .iso.org.dod.internet.snmpV2.snmpModules.snmpUsmMIB.usmMIBConformance.usmMIBCompliances.usmMIBCompliance
+system.sysORTable.sysOREntry.sysORDescr.1 = The Mib module for SNMPv2 entities.
+system.sysORTable.sysOREntry.sysORDescr.2 = View-based Access Control Model for SNMP.
+system.sysORTable.sysOREntry.sysORDescr.3 = The SNMP Management Architecture MIB.
+system.sysORTable.sysOREntry.sysORDescr.4 = The MIB for Message Processing and Dispatching.
+system.sysORTable.sysOREntry.sysORDescr.5 = The management information definitions for the SNMP User-based Security Model.
+system.sysORTable.sysOREntry.sysORUpTime.1 = Timeticks: (0) 0:00:00.00
+system.sysORTable.sysOREntry.sysORUpTime.2 = Timeticks: (0) 0:00:00.00
+system.sysORTable.sysOREntry.sysORUpTime.3 = Timeticks: (0) 0:00:00.00
+system.sysORTable.sysOREntry.sysORUpTime.4 = Timeticks: (0) 0:00:00.00
+system.sysORTable.sysOREntry.sysORUpTime.5 = Timeticks: (0) 0:00:00.00
+</ul>
+</pre>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Thu Nov  4 15:05:29 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Thu Nov  4 15:38:47 PST 1999
+<!-- hhmts end -->
+  </body>
+</html>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

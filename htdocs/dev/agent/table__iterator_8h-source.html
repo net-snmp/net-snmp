@@ -1,0 +1,150 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>table_iterator.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00002 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00003 <span class="comment"> * that may apply:</span>
+00004 <span class="comment"> */</span>
+00005 <span class="comment">/*</span>
+00006 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00007 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00008 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00009 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00010 <span class="comment"> */</span>
+00016 <span class="preprocessor">#ifndef _TABLE_ITERATOR_HANDLER_H_</span>
+00017 <span class="preprocessor">#define _TABLE_ITERATOR_HANDLER_H_</span>
+00018 
+00019 <span class="preprocessor">#ifdef __cplusplus</span>
+00020 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00021 <span class="preprocessor">#endif</span>
+00022 
+00023     <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__iterator__info__s.html">netsnmp_iterator_info_s</a>;
+00024 
+00025     <span class="keyword">typedef</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *(Netsnmp_First_Data_Point) (<span class="keywordtype">void</span>
+00026                                                                **loop_context,
+00027                                                                <span class="keywordtype">void</span>
+00028                                                                **data_context,
+00029                                                                <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a>
+00030                                                                *,
+00031                                                                <span class="keyword">struct</span>
+00032 <span class="keyword">                                                               </span><a class="code" href=
+"structnetsnmp__iterator__info__s.html">netsnmp_iterator_info_s</a>
+00033                                                                *);
+00034     <span class="keyword">typedef</span> netsnmp_variable_list *(Netsnmp_Next_Data_Point) (<span class=
+"keywordtype">void</span>
+00035                                                               **loop_context,
+00036                                                               <span class="keywordtype">void</span>
+00037                                                               **data_context,
+00038                                                               netsnmp_variable_list
+00039                                                               *,
+00040                                                               <span class="keyword">struct</span>
+00041 <span class="keyword">                                                              </span><a class="code" href=
+"structnetsnmp__iterator__info__s.html">netsnmp_iterator_info_s</a>
+00042                                                               *);
+00043     <span class="keyword">typedef</span> <span class="keywordtype">void</span>   *(Netsnmp_Make_Data_Context) (<span class=
+"keywordtype">void</span> *loop_context,
+00044                                                  <span class="keyword">struct</span>
+00045 <span class="keyword">                                                 </span><a class="code" href=
+"structnetsnmp__iterator__info__s.html">netsnmp_iterator_info_s</a>
+00046                                                  *);
+00047     <span class="keyword">typedef</span> void    (Netsnmp_Free_Loop_Context) (<span class="keywordtype">void</span> *,
+00048                                                  <span class="keyword">struct</span>
+00049 <span class="keyword">                                                 </span><a class="code" href=
+"structnetsnmp__iterator__info__s.html">netsnmp_iterator_info_s</a>
+00050                                                  *);
+00051     <span class="keyword">typedef</span> void    (Netsnmp_Free_Data_Context) (<span class="keywordtype">void</span> *,
+00052                                                  <span class="keyword">struct</span>
+00053 <span class="keyword">                                                 </span><a class="code" href=
+"structnetsnmp__iterator__info__s.html">netsnmp_iterator_info_s</a>
+00054                                                  *);
+00055 
+<a name="l00067" id="l00067"></a><a class="code" href="structnetsnmp__iterator__info__s.html">00067</a>     <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__iterator__info__s.html">netsnmp_iterator_info_s</a> {
+<a name="l00071" id="l00071"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#o0">00071</a>         Netsnmp_First_Data_Point *get_first_data_point;
+00072 
+<a name="l00076" id="l00076"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#o1">00076</a>         Netsnmp_Next_Data_Point *get_next_data_point;
+00077 
+<a name="l00082" id="l00082"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#o2">00082</a>         Netsnmp_Make_Data_Context *make_data_context;
+00083 
+<a name="l00089" id="l00089"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#o3">00089</a>         Netsnmp_Free_Loop_Context *free_loop_context;
+00090 
+<a name="l00096" id="l00096"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#o4">00096</a>        Netsnmp_Free_Data_Context *free_data_context;
+00097 
+<a name="l00104" id="l00104"></a><a class="code" href=
+"structnetsnmp__iterator__info__s.html#o5">00104</a>         Netsnmp_Free_Loop_Context *free_loop_context_at_end;
+00105 
+<a name="l00108" id="l00108"></a><a class="code" href="structnetsnmp__iterator__info__s.html#o6">00108</a>         <span class=
+"keywordtype">void</span>           *myvoid;
+00109         <span class="keywordtype">int</span>             flags;
+00110 <span class="preprocessor">#define NETSNMP_ITERATOR_FLAG_SORTED    0x01</span>
+00111 
+<a name="l00114" id="l00114"></a><a class="code" href="structnetsnmp__iterator__info__s.html#o8">00114</a>         <a class=
+"code" href="structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *table_reginfo;
+00115     } <a class="code" href="structnetsnmp__iterator__info__s.html">netsnmp_iterator_info</a>;
+00116 
+00117 <span class="preprocessor">#define TABLE_ITERATOR_NAME "table_iterator"</span>
+00118 
+00119     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>
+00120         *<a class="code" href="group__table__iterator.html#ga8">netsnmp_get_table_iterator_handler</a>(<a class="code"
+href="structnetsnmp__iterator__info__s.html">netsnmp_iterator_info</a> *iinfo);
+00121     <span class="keywordtype">int</span>            
+00122         <a class="code" href="group__table__iterator.html#ga9">netsnmp_register_table_iterator</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>
+00123                                         *reginfo,
+00124                                         <a class="code" href=
+"structnetsnmp__iterator__info__s.html">netsnmp_iterator_info</a> *iinfo);
+00125 
+00126     <span class="keywordtype">void</span>           *<a class="code" href=
+"group__table__iterator.html#ga10">netsnmp_extract_iterator_context</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a>
+00127                                                      *);
+00128     <span class="keywordtype">void</span>            <a class="code" href=
+"group__table__iterator.html#ga11">netsnmp_insert_iterator_context</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a>
+00129                                                      *, <span class="keywordtype">void</span> *);
+00130 
+00131     Netsnmp_Node_Handler netsnmp_table_iterator_helper_handler;
+00132 
+00133 <span class="preprocessor">#ifdef __cplusplus</span>
+00134 }
+00135 <span class="preprocessor">#endif</span>
+00136 
+00137 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* _TABLE_ITERATOR_HANDLER_H_ */</span>
+00138 
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:02 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,225 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>NET-SNMP Tutorial -- MRTG</title>
+  </head>
+
+  <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
+    <center><h1>NET-SNMP Tutorial -- MRTG</h1></center>
+    <hr>
+    <p> 
+    This page will present a few ideas of what you can monitor on your
+    hosts with the net-snmp using the <a href="http://www.mrtg.org">mrtg</a>
+    utility.
+    <p>
+    This is <i>not</i> an MRTG tutorial, and it is <i>not</i>
+    going to talk about monitoring network traffic.
+    <p>
+    Note, that these examples uses values that are only available from
+    net-snmp-4.2 or above and that the LoadMIBs mrtg directive requires mrtg-2.8.0.
+    <p>
+    <h2>Monitoring CPU load</h2>
+    <p>
+    There are several ways to try to monitor CPU usage, because the system
+    maintains several CPU counters: Idle, System, User, Nice.
+    As MRTG does not allow you to graph more than two values at a time,
+    it is possible to select any two values ang graoh aginst each other,
+    but it it also possible to compute a combined value.
+    <a name="cpu.html">
+    <h3>User vs Idle CPU usage</h3>
+    An example of such a graph is <a href="kontor.cpu.html">here</a>.
+    <p>
+    The corresponding MRTG configuration is
+    <pre>
+    LoadMIBs: /usr/local/share/snmp/mibs/UCD-SNMP-MIB.txt
+
+    Target[kontor.cpu]:ssCpuRawUser.0&amp;ssCpuRawIdle.0:public@10.10.11.2
+    RouterUptime[kontor.cpu]: public@10.10.11.2
+    MaxBytes[kontor.cpu]: 100
+    Title[kontor.cpu]: CPU LOAD
+    PageTop[kontor.cpu]: &lt;H1>User CPU Load %&lt;/H1>
+    Unscaled[kontor.cpu]: ymwd
+    ShortLegend[kontor.cpu]: %
+    YLegend[kontor.cpu]: CPU Utilization
+    Legend1[kontor.cpu]: User CPU in % (Load)
+    Legend2[kontor.cpu]: Idle CPU in % (Load)
+    Legend3[kontor.cpu]:
+    Legend4[kontor.cpu]:
+    LegendI[kontor.cpu]: &nbsp;User
+    LegendO[kontor.cpu]: &nbsp;Idle
+    Options[kontor.cpu]: growright,nopercent
+    </pre>
+    <a name="usrsys.html">
+    <h3>User vs System CPU usage</h3>
+    An example of such a graph is <a href="kontor.usrsys.html">here</a>.
+    <p>
+    The corresponding MRTG configuration is
+    <pre>
+    LoadMIBs: /usr/local/share/snmp/mibs/UCD-SNMP-MIB.txt
+
+    Target[kontor.usrsys]:ssCpuRawUser.0&amp;ssCpuRawSystem.0:public@10.10.11.2
+    RouterUptime[kontor.usrsys]: public@10.10.11.2
+    MaxBytes[kontor.usrsys]: 100
+    Title[kontor.usrsys]: CPU LOAD
+    PageTop[kontor.usrsys]: &lt;H1>CPU (user and system) Load %&lt;/H1>
+    Unscaled[kontor.usrsys]: ymwd
+    ShortLegend[kontor.usrsys]: %
+    YLegend[kontor.usrsys]: CPU Utilization
+    Legend1[kontor.usrsys]: User CPU in % (Load)
+    Legend2[kontor.usrsys]: System CPU in % (Load)
+    Legend3[kontor.usrsys]:
+    Legend4[kontor.usrsys]:
+    LegendI[kontor.usrsys]: &nbsp;User
+    LegendO[kontor.usrsys]: &nbsp;System
+    Options[kontor.usrsys]: growright,nopercent
+    </pre>
+    <a name="cpusum.html">
+    <h3>Active CPU usage</h3>
+    An example of such a graph is <a href="kontor.cpusum.html">here</a>.
+    This example sums User, System and Nice and plots it as a single value.
+    <p>
+    The corresponding MRTG configuration is
+    <pre>
+    LoadMIBs: /usr/local/share/snmp/mibs/UCD-SNMP-MIB.txt
+
+    Target[kontor.cpusum]:ssCpuRawUser.0&amp;ssCpuRawUser.0:public@10.10.11.2 + ssCpuRawSystem.0&amp;ssCpuRawSystem.0:public@10.10.11.2 + ssCpuRawNice.0&amp;ssCpuRawNice.0:public@10.10.11.2
+    RouterUptime[kontor.cpusum]: public@10.10.11.2
+    MaxBytes[kontor.cpusum]: 100
+    Title[kontor.cpusum]: CPU LOAD
+    PageTop[kontor.cpusum]: &lt;H1>Active CPU Load %&lt;/H1>
+    Unscaled[kontor.cpusum]: ymwd
+    ShortLegend[kontor.cpusum]: %
+    YLegend[kontor.cpusum]: CPU Utilization
+    Legend1[kontor.cpusum]: Active CPU in % (Load)
+    Legend2[kontor.cpusum]:
+    Legend3[kontor.cpusum]:
+    Legend4[kontor.cpusum]:
+    LegendI[kontor.cpusum]: &nbsp;Active
+    LegendO[kontor.cpusum]:
+    Options[kontor.cpusum]: growright,nopercent
+    </pre>
+    <h2>Monitoring DISK space</h2>
+    <p>
+    There are two tables that can be used when monitoring disk space,
+    UCD-SNMP-MIB:dskTable and HOST-RESOURCES-MIB:hrStorageTable.
+    There are two noticeable differences bwtween these tables:
+    UCD-SNMP-MIB:dskTable requires a configuration directive in snmpd.conf,
+    but it also gives a direct measure of the percentage of free space
+    <p>
+    On the system I used for these examples, I have the following disks:
+    <pre>
+    $ df
+    Filesystem            Size  Used Avail Use% Mounted on
+    /dev/hda6             289M   56M  218M  21% /
+    /dev/hda1             7.3G  3.2G  4.1G  44% /mnt/windows
+    /dev/hda7             1.7G  1.2G  429M  74% /usr
+    /dev/hdc1              19G  6.7G   11G  37% /space
+    </pre>
+    and I have put the following lines into snmpd.conf:
+    <pre>
+    disk	/	100000
+    disk	/usr	100000
+    disk	/space	100000
+    </pre>
+    <a name="root.html">
+    <h3>Monitoring from dskTable</h3>
+    I used the direct percentage of disk full for the root and /usr
+    partitions in <a href="kontor.root.html">this example</a>
+    It plot the usage of the root and the /usr partitions in one graph.
+    <pre>
+    LoadMIBs: /usr/local/share/snmp/mibs/UCD-SNMP-MIB.txt
+
+    Target[kontor.root]:dskPercent.1&amp;dskPercent.2:public@10.10.11.2
+    RouterUptime[kontor.root]: public@10.10.11.2
+    MaxBytes[kontor.root]: 100
+    Title[kontor.root]: DISK USAGE
+    PageTop[kontor.root]: &lt;H1>DISK / and /usr Usage %&lt;/H1>
+    Unscaled[kontor.root]: ymwd
+    ShortLegend[kontor.root]: %
+    YLegend[kontor.root]: DISK Utilization
+    Legend1[kontor.root]: Root disk
+    Legend2[kontor.root]: /usr disk
+    Legend3[kontor.root]:
+    Legend4[kontor.root]:
+    LegendI[kontor.root]: &nbsp;Root disk
+    LegendO[kontor.root]: &nbsp;/usr disk
+    Options[kontor.root]: growright,gauge,nopercent
+    </pre>
+    <a name="kontor.hrroot">
+    <h3>Monitoring from hrStorageTable</h3>
+    Use of hrStorageTable requires no preceding configuration, as in
+    <a href="kontor.hrroot.html">this example</a>
+    It plot the partition size as one value, and the used space as another.
+    <b>Note:</b>the values returned here are in units of hrStorageUnits, which,
+    dependent on the file system type, may or may not be 1K.
+    <pre>
+    LoadMIBs: /usr/local/share/snmp/mibs/HOST-RESOURCES-MIB.txt
+
+    Target[kontor.hrroot]:hrStorageSize.1&amp;hrStorageUsed.1:public@10.10.11.2
+    RouterUptime[kontor.hrroot]: public@10.10.11.2
+    MaxBytes[kontor.hrroot]: 300000
+    Title[kontor.hrroot]: DISK / USAGE
+    PageTop[kontor.hrroot]: &lt;H1>DISK / Usage&lt;/H1>
+    ShortLegend[kontor.hrroot]: B
+    kMG[kontor.hrroot]: k,M,G,T,P
+    kilo[kontor.hrroot]: 1024
+    YLegend[kontor.hrroot]: DISK / Utilization
+    Legend1[kontor.hrroot]: Root disk size
+    Legend2[kontor.hrroot]: Root disk usage
+    Legend3[kontor.hrroot]:
+    Legend4[kontor.hrroot]:
+    LegendI[kontor.hrroot]: &nbsp;Root disk size
+    LegendO[kontor.hrroot]: &nbsp;Root disk usage
+    Options[kontor.hrroot]: growright,gauge,nopercent
+    </pre>
+    <p>
+    Two further examples that have been offered:
+    <h3>Monitoring TCP connections</h3>
+    <p>
+    <pre>
+    Target[tcpopen]: 
+    .1.3.6.1.2.1.6.9.0&.1.3.6.1.2.1.6.9.0:public@localhost 
+    Options[tcpopen]: nopercent,growright,gauge,noinfo 
+    Title[tcpopen]: Open TCP connections 
+    PageTop[tcpopen]: Open TCP connections
+    MaxBytes[tcpopen]: 1000000 
+    YLegend[tcpopen]: # conns 
+    ShortLegend[tcpopen]: connections 
+    LegendI[tcpopen]: &nbsp;Connections: 
+    LegendO[tcpopen]: 
+    Legend1[tcpopen]: Open TCP connections 
+    </pre>
+    <p>
+    and
+    <h3>Monitoring Free Memory</h3>
+    <p>
+    <pre>
+    Target[freemem]: 
+    .1.3.6.1.4.1.2021.4.11.0&.1.3.6.1.4.1.2021.4.11.0:public@localhost 
+    Options[freemem]: nopercent,growright,gauge,noinfo 
+    Title[freemem]: Free Memory 
+    PageTop[freemem]: Free Memory
+    MaxBytes[freemem]: 1000000 
+    kMG[freemem]: k,M,G,T,P,X 
+    YLegend[freemem]: bytes 
+    ShortLegend[freemem]: bytes 
+    LegendI[freemem]: &nbsp;Free Memory: 
+    LegendO[freemem]: 
+    Legend1[freemem]: Free memory, not including swap, in bytes
+    </pre>
+    <a href="mrtgindex.html">The complete picture</a>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <hardaker@sourceforge.net>"></a></address>
+<!-- Created: Thu Nov  4 14:10:52 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Fri Dec  4 19:46:18 PST 1999
+<!-- hhmts end -->
+  </body>
+</html>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

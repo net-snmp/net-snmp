@@ -1,0 +1,220 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML>
+<HEAD>
+<TITLE>Extending the UCD agent - SETable objects</TITLE>
+</HEAD>
+<BODY>
+<H1> How to implement a SETable object </H1>
+
+Finally, the only remaining area to cover is that of setting data -
+the handling of <CODE>SNMPSET</CODE>.  Particular care should be
+taken here for two reasons.
+<P>
+  Firstly, any errors in the earlier sections can have limited effect.
+The worst that is likely to happen is that the agent will either return
+invalid information, or possibly crash.  Either way, this is unlikely to
+affect the operation of the workstation as a whole.  If there are problems
+in the writing routine, the results could be catastrophic (particularly
+if writing data directly into kernel memory).
+<P>
+  Secondly, this is the least well understood area of the agent, at least
+by the author.  There are relatively few variables that are defined as
+<CODE>READ-WRITE</CODE> in the relevant MIBs, and even fewer that have
+actually been implemented as such.
+I'm therefore describing this from a combination of my understanding of
+how SETs ought to work, personal experience of very simple SET handling
+and what's actually been done by others (which do not necessarily coincide).
+<P>
+There are also subtle differences between the setting of simple
+scalar variables (or individual entries within a table), and
+the creation of a new row within a table.  This will therefore
+be considered separately.
+<P>
+  With these caveats, and a healthy dose of caution, let us proceed.
+Note that the UCD-SNMP development team can accept no responsibility
+for any damage or loss resulting from either following or ignoring the
+information presented here.  You coded it - you fix it!
+<P>
+  <B>N.B:</B>  The API for the write routine changed slightly between
+the 3.x and 4.x releases of the UCD agent. In particular, the value to
+be set was still ASN1-encoded in the 3.x agent, but was directly available
+as a normal value in the 4.x line.
+This was a side effect of other internal changes, but was also felt to
+provide a significantly easier environment with which to work.
+We apologise for the inconvenience, but refunds are not available :-)
+
+
+<H3>Write routine</H3>
+
+The heart of SET handling is the <CODE>write_method</CODE> parameter from
+the variable handling routine.  This is a pointer to the relevant
+routine for setting the variable in question.
+<CODE>Mib2c</CODE> will generate one such routine for each setable variable.
+This routine should be declared using the template
+<PRE>
+	int
+	write_<I>variable</I>(
+	   int      action,
+	   u_char   *var_val,
+	   u_char   var_val_type,
+	   int      var_val_len,
+	   u_char   *statP,
+	   oid      *name,
+	   int      name_len );
+</PRE>
+<P>
+Most of these parameters are fairly self explanatory:
+<BR>
+The last two hold the OID to be set, just as was passed to the
+main variable routine.
+<P>
+  The second, third and fourth parameters provide information about
+the new desired value, both the type, value and length.  This is very
+similar to the way that results are returned from the main variable routine.
+<P>
+  The return value of the routine is simply an indication of whether
+the current stage of the SET was successful or not.  We'll come back to
+this in a minute.  Note that it is the responsibility of this routine to
+check that the OID and value provided are appropriate for the variable
+being implemented.  This includes (but is not limited to) checking:
+<UL>
+<LI>the OID is recognised as one this routine can handle
+<BR>
+		(this should be true if the routine only handles
+		 the one variable, and there are no errors in the
+		 main variable routine or driving code,
+		 but it does no harm to check).
+
+<LI>the value requested is the correct type expected for this OID
+
+<LI>the value requested is appropriate for this OID
+<BR>
+		(within particular ranges, suitable length, etc, etc)
+</UL>
+
+There are two parameters remaining to be considered.
+<P>
+The fifth parameter, <CODE>statP</CODE>, is the value that would
+be returned from a <CODE>GET</CODE> request on this particular variable.
+It could be used to check that the requested new value is
+consistent with the current state, but its main use is to denote that
+a new table row is being created.
+In most cases (particularly when dealing with scalar values or single
+elements of tables), you can normally simply ignore this parameter.
+
+<H3>Actions</H3>
+
+The final parameter to consider is the first one - <CODE>action</CODE>.
+To understand this, it's necessary to know a bit about how SETs
+are implemented.
+<BR>
+  The design of SNMP calls for all variables in a SET request to be
+done "as if simultaneously" - i.e. they should all succeed or all fail.
+However, in practise, the variables are handled in succession.  Thus,
+if one fails, it must be possible to "undo" any changes made to
+the other variables in the request.
+<BR>
+  This is a well understood requirement in the database world, and
+is usually implemented using a "multi-stage commit".  This is certainly
+the mechanism expected within the SNMP community (and has been made
+explicit in the work of the AgentX extensibility group).  In other
+words, the routine to handle setting a variable will be called more
+than once, and the routine must be able to perform the appropriate
+actions depending on how far through the process we currently are.
+This is determined by the value of the <CODE>action</CODE> parameter.
+<P>
+  This is implemented using three basic phases:
+<P>
+<CODE>RESERVE</CODE> is used to check the syntax of all the variables provided,
+that the values being set are sensible and consistent,
+and to allocate any resources required for performing the SET.
+After this stage, the expectation is that the SET ought to succeed,
+though this is not guaranteed.
+<BR>
+ (In fact, with the UCD agent, this is done in two passes - <CODE>RESERVE1</CODE>,
+and <CODE>RESERVE2</CODE>, to allow for dependencies between variables).
+<P>
+  If any of these calls fail (in either pass)
+the write routines are called again with the <CODE>FREE</CODE> action,
+to release any resources that have been allocated.  The agent will then return
+a failure response to the requesting application.
+<P>
+Assuming that the <CODE>RESERVE</CODE> phase was successful,
+the next stage is indicated by the action value <CODE>ACTION</CODE>.
+This is used to actually implement the set
+operation.  However, this must either be done into temporary (persistent)
+storage, or the previous value stored in a similar way, in case any of the
+subsequent <CODE>ACTION</CODE> calls fail.
+This can be seen in the example module, where both write routines have static
+'old' variables, to hold the previous value of the relevant object.
+<P>
+  If the <CODE>ACTION</CODE> phase does fail (for example due to an apparently valid, but unacceptable
+value, or an unforeseen problem), then the list of write routines are
+called again, with the <CODE>UNDO</CODE> action.  This requires the routine to reset
+the value that was changed to its previous value (assuming it was actually
+changed), and then to release any resources that had been allocated.
+As with the <CODE>FREE</CODE> phase, the agent will then return an indication of the error
+to the requesting application.
+<P>
+Only once the <CODE>ACTION</CODE> phase has completed successfully, can the final
+<CODE>COMMIT</CODE> phase be run.
+This is used to complete any writes that were done
+into temporary storage, and then release any allocated resources.
+Note that all the code in this phase should be "safe" code that cannot possibly
+fail (cue hysterical laughter).
+The whole intent of the <CODE>ACTION/COMMIT</CODE> division
+is that all of the fallible code should be done in the <CODE>ACTION</CODE> phase,
+so that it can be backed out if necessary. 
+
+<H3>Table row creation</H3>
+What about creating new rows in a table, I hear you ask.  Good Question.
+This case can often be detected by the fact that a <CODE>GET</CODE> request
+would have failed, and hence the fifth parameter, <CODE>statP</CODE>, will
+be null.  This contrasts with changing the values of an element of an existing
+row, when the <CODE>statP</CODE> parameter would hold the previous value.
+<P>
+The details of precisely how to create a new row will clearly depend on the
+underlying format of the table.  However, one implementation strategy would
+be as follows:
+<UL>
+<LI>The first column object to be <CODE>SET</CODE> would return a null
+value from the var_<I>name</I> routine.  This null <CODE>statP</CODE>
+parameter would be the signal to create a new temporary instance of the
+underlying data structure, filled with dummy values.
+<LI>Subsequent column objects would return pointers to the appropriate
+field of this new data structure from the var_<I>name</I> routine,
+which would then be filled in by the write routine.
+<LI>Once all the necessary fields had been <CODE>SET</CODE>, the
+completed temporary instance could be moved into the "standard"
+structure (or copied, or otherwise used to set things up appropriately).
+</UL>
+However, this is purely a theoretical strategy, and has not been tried
+by the author.  No guarantees are given as to whether this would actually
+work.  There are also questions regarding how to handle incomplete
+or overlapping <CODE>SET</CODE> requests.
+Anyone who has experience of doing this, please get in touch!
+
+
+<HR>
+And that's it. Congratulations for getting this far.
+If you understand everything that's been said,
+then you now know as much as the rest of us about the inner workings
+of the UCD-SNMP agent.  (Well, very nearly).
+<BR>
+All that remains is to try putting this into practise.  Good luck!
+<P>
+And if you've found this helpful, gifts of money, chocolate, alcohol,
+and above all feedback, would be most appreciated :-)
+
+
+<P><HR>
+Copyright 1999 - D.T.Shield.
+Not to be distributed without the explicit permission of the author.
+</BODY>
+</HTML>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

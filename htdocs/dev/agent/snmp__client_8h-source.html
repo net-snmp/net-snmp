@@ -1,0 +1,153 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>snmp_client.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * snmp_client.h</span>
+00003 <span class="comment"> */</span>
+00004 <span class="comment">/***********************************************************</span>
+00005 <span class="comment">        Copyright 1988, 1989 by Carnegie Mellon University</span>
+00006 
+00007 <span class="comment">                      All Rights Reserved</span>
+00008 
+00009 <span class="comment">Permission to use, copy, modify, and distribute this software and its </span>
+00010 <span class="comment">documentation for any purpose and without fee is hereby granted, </span>
+00011 <span class="comment">provided that the above copyright notice appear in all copies and that</span>
+00012 <span class="comment">both that copyright notice and this permission notice appear in </span>
+00013 <span class="comment">supporting documentation, and that the name of CMU not be</span>
+00014 <span class="comment">used in advertising or publicity pertaining to distribution of the</span>
+00015 <span class="comment">software without specific, written prior permission.  </span>
+00016 
+00017 <span class="comment">CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING</span>
+00018 <span class="comment">ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL</span>
+00019 <span class="comment">CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR</span>
+00020 <span class="comment">ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,</span>
+00021 <span class="comment">WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,</span>
+00022 <span class="comment">ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS</span>
+00023 <span class="comment">SOFTWARE.</span>
+00024 <span class="comment">******************************************************************/</span>
+00025 
+00026 <span class="preprocessor">#ifndef SNMP_CLIENT_H</span>
+00027 <span class="preprocessor">#define SNMP_CLIENT_H</span>
+00028 
+00029 <span class="preprocessor">#ifdef __cplusplus</span>
+00030 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00031 <span class="preprocessor">#endif</span>
+00032 
+00033 
+00034     <span class="keyword">struct </span><a class="code" href="structsnmp__pdu.html">snmp_pdu</a>;
+00035     <span class="keyword">struct </span><a class="code" href="structsnmp__session.html">snmp_session</a>;
+00036     <span class="keyword">struct </span><a class="code" href="structvariable__list.html">variable_list</a>;
+00037 
+00038     <span class="keyword">struct </span>synch_state {
+00039         <span class="keywordtype">int</span>             waiting;
+00040         <span class="keywordtype">int</span>             status;
+00041         <span class="comment">/*</span>
+00042 <span class="comment">         * status codes </span>
+00043 <span class="comment">         */</span>
+00044 <span class="preprocessor">#define STAT_SUCCESS    0</span>
+00045 <span class="preprocessor">#define STAT_ERROR      1</span>
+00046 <span class="preprocessor">#define STAT_TIMEOUT 2</span>
+00047         <span class="keywordtype">int</span>             reqid;
+00048         <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu;
+00049     };
+00050 
+00051     <span class="keywordtype">int</span>             snmp_set_var_value(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00052                                        <span class="keyword">const</span> u_char *, size_t);
+00053     <span class="keywordtype">int</span>             snmp_set_var_objid(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * vp,
+00054                                        <span class="keyword">const</span> oid * objid,
+00055                                        size_t name_length);
+00056     <span class="keywordtype">int</span>             <a class="code" href=
+"group__snmp__client.html#ga18">snmp_set_var_typed_value</a>(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *
+00057                                              newvar, u_char type,
+00058                                              <span class="keyword">const</span> u_char * val_str,
+00059                                              size_t val_len);
+00060     <span class="keywordtype">void</span>            snmp_replace_var_types(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * vbl,
+00061                                            u_char old_type,
+00062                                            u_char new_type);
+00063     <span class="keywordtype">void</span>            snmp_reset_var_buffers(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * var);
+00064     <span class="keywordtype">void</span>            snmp_reset_var_types(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * vbl,
+00065                                          u_char new_type);
+00066     <span class="keywordtype">int</span>             count_varbinds(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * var_ptr);
+00067     <span class="keywordtype">int</span>             count_varbinds_of_type(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * var_ptr,
+00068                                            u_char type);
+00069     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *find_varbind_of_type(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *
+00070                                                 var_ptr, u_char type);
+00071 
+00072     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *snmp_add_null_var(<a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *, <span class="keyword">const</span> oid *, size_t);
+00073     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_pdu_create(<span class="keywordtype">int</span>);
+00074     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_fix_pdu(<a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *, <span class="keywordtype">int</span>);
+00075     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_clone_pdu(<a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *);
+00076     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *snmp_split_pdu(<a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *, <span class="keywordtype">int</span> skipCount,
+00077                                    <span class="keywordtype">int</span> copyCount);
+00078 
+00079     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   snmp_varbind_len(<a class="code"
+href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu);
+00080     <span class="keywordtype">int</span>             snmp_clone_var(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00081                                    <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *);
+00082     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *snmp_clone_varbind(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *);
+00083     <span class="keyword">const</span> <span class="keywordtype">char</span>     *snmp_errstring(<span class=
+"keywordtype">int</span>);
+00084     <span class="keywordtype">int</span>             snmp_synch_response(<a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> *, <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *,
+00085                                         <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> **);
+00086     <span class="keywordtype">int</span>             snmp_synch_response_cb(<a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> *,
+00087                                            <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *, <a class="code"
+href="structsnmp__pdu.html">netsnmp_pdu</a> **,
+00088                                            snmp_callback);
+00089     <span class="keywordtype">int</span>             snmp_clone_mem(<span class="keywordtype">void</span> **, <span class=
+"keywordtype">void</span> *, <span class="keywordtype">unsigned</span>);
+00090 
+00091     <span class="comment">/*</span>
+00092 <span class="comment">     * single session API - see snmp_api.h for full details </span>
+00093 <span class="comment">     */</span>
+00094     <span class="keywordtype">int</span>             snmp_sess_synch_response(<span class=
+"keywordtype">void</span> *, <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *,
+00095                                              <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> **);
+00096 
+00097 <span class="preprocessor">#ifdef __cplusplus</span>
+00098 }
+00099 <span class="preprocessor">#endif</span>
+00100 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_CLIENT_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:00 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,140 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>MFD: Running mib2c</title>
+  </head>
+
+  <body bgcolor="#ffffff">
+    <!-- ========================================================= -->
+    <h1>Running mib2c: Generating the template code</h1>
+    <p>
+      The first step is to generate the code. First, create a new directory
+      for the code. For this tutorial, e will assume you have a directory
+      named <code>ifTable</code>. You have two options to generate the
+      code. One is <i>mib2c</i>, and the other is <i>mib2c-update</i>.
+      If you are simply walking through the the tutorial as a learning
+      experience, run <i>mib2c</i> directly. If you are just using the
+      tutorial as a guide for generating your own code, I recommend
+      using the <i>mib2c-update</i> script, so you can take advantage
+      enhancements or bug-fixes in future releases. See the
+      <a href="../../mib2c/mib2c-update.html">mib2c-update page</a> for
+      more details.
+    </p><p>
+      For the tutorial, we will use <i>mib2c</i> directly.
+    </p>
+    <table><tr><td width=20></td><td><code>&nbsp</code></td><td bgcolor=CCCCCC>
+            <code><pre>$ <font color=blue>mib2c -c mib2c.mfd.conf ifTable</font>
+writing to ifTable.h
+| +-> Processing table ifTable
+writing to -
+writing to default-table-ifTable.m2d
+writing to ifTable.c
+writing to ifTable_data_get.h
+writing to ifTable_data_get.c
+| |   +-> Processing nonindex ifDescr
+| |   +-> Processing nonindex ifType
+| |   +-> Processing nonindex ifMtu
+| |   +-> Processing nonindex ifSpeed
+| |   +-> Processing nonindex ifPhysAddress
+| |   +-> Processing nonindex ifAdminStatus
+| |   +-> Processing nonindex ifOperStatus
+| |   +-> Processing nonindex ifLastChange
+| |   +-> Processing nonindex ifInOctets
+| |   +-> Processing nonindex ifInUcastPkts
+| |   +-> Processing nonindex ifInNUcastPkts
+| |   +-> Processing nonindex ifInDiscards
+| |   +-> Processing nonindex ifInErrors
+| |   +-> Processing nonindex ifInUnknownProtos
+| |   +-> Processing nonindex ifOutOctets
+| |   +-> Processing nonindex ifOutUcastPkts
+| |   +-> Processing nonindex ifOutNUcastPkts
+| |   +-> Processing nonindex ifOutDiscards
+| |   +-> Processing nonindex ifOutErrors
+| |   +-> Processing nonindex ifOutQLen
+| |   +-> Processing nonindex ifSpecific
+writing to ifTable_data_set.h
+writing to ifTable_data_set.c
+| |   +-> Processing nonindex ifAdminStatus
+writing to ifTable_oids.h
+writing to ifTable_enums.h
+writing to ifTable_interface.h
+writing to ifTable_interface.c
+writing to ifTable_data_access.h
+writing to ifTable_data_access.c
+writing to ifTable-README-FIRST.txt
+writing to ifTable-README-ifTable.txt
+writing to ifTable_doxygen.conf
+running indent on ifTable_data_get.c
+running indent on ifTable_data_get.h
+running indent on ifTable_interface.c
+running indent on ifTable_interface.h
+running indent on ifTable_enums.h
+running indent on ifTable_oids.h
+running indent on ifTable_data_access.c
+running indent on ifTable_data_set.c
+running indent on ifTable_data_access.h
+running indent on ifTable.c
+running indent on ifTable.h
+running indent on ifTable_data_set.h
+</td></tr>
+    </table>
+    <p>
+      When mib2c finishes, you should have several files. Here is a
+      list, with links to the complete source for this tutorial:
+    </p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+<a href="source/default-table-ifTable.m2d">default-table-ifTable.m2d</a>
+<a href="source/ifTable-README-FIRST.txt">ifTable-README-FIRST.txt
+<a href="source/ifTable-README-ifTable.txt">ifTable-README-ifTable.txt
+<a href="source/ifTable.c">ifTable.c</a>
+<a href="source/ifTable.h">ifTable.h</a>
+<a href="source/ifTable_Makefile">ifTable_Makefile</a>
+<a href="source/ifTable_data_access.c">ifTable_data_access.c</a>
+<a href="source/ifTable_data_access.h">ifTable_data_access.h</a>
+<a href="source/ifTable_data_get.c">ifTable_data_get.c</a>
+<a href="source/ifTable_data_get.h">ifTable_data_get.h</a>
+<a href="source/ifTable_data_set.c">ifTable_data_set.c</a>
+<a href="source/ifTable_data_set.h">ifTable_data_set.h</a>
+<a href="source/ifTable_enums.h">ifTable_enums.h</a>
+<a href="source/ifTable_interface.c">ifTable_interface.c</a>
+<a href="source/ifTable_interface.h">ifTable_interface.h</a>
+<a href="source/ifTable_oids.h">ifTable_oids.h</a>
+<a href="source/ifTable_subagent.c">ifTable_subagent.c</a>
+</pre></td></tr></table>
+    <p><var>ifTable-README-FIRST.txt</var> contains a basic overview of MFD,
+      similar to this tutorial. The basic steps outlined in
+      <var>ifTable-README-ifTable.txt</var> were used to write this tutorial.
+    </p><p>
+      Another new idea introduced with the MFD configuration files is user
+      settable variables to influence the code which is generated. The file
+      <var>default-table-ifTable.m2d</var> contains some of the values
+      used when mib2 was run. (
+      <i>Note: this file is only generated if it does not already exist.
+        It is not updated during subsequent runs of mib2c.</i>
+      ) For this simple example, we are going to use all the defaults. In
+      later tutorials, we'll look more closely at these mib2c variables.
+    </p>
+    <!-- ========================================================= -->
+    <p></p>
+    <font size=+1>
+      <a href="structures.html">Next: data structures</a> |
+      <a href="index.html">Back: Introduction</a> |
+      <a href="../index.html">Up: IF-MIB Tutorials</a>
+    </font>
+    <!-- ========================================================= -->
+    <hr>
+    rstory at freesnmp dot com<br>
+Version $Revision$
+<!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
+<!-- hhmts start -->
+Last modified: Thu Sep  2 13:55:05 EDT 2004
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+  </body>
+</html>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

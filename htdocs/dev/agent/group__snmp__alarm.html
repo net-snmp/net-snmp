@@ -1,0 +1,569 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>generic library based alarm timers for various parts of an application<br />
+  <small>[<a class="el" href="group__library.html">The Net-SNMP library</a>]</small></h1>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga3" doxytag=
+      "snmp_alarm::init_alarm_post_config" id="ga3"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>init_alarm_post_config</b> (int majorid, int minorid, void *serverarg, void
+      *clientarg)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga4" doxytag=
+      "snmp_alarm::init_snmp_alarm" id="ga4"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>init_snmp_alarm</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga5" doxytag=
+      "snmp_alarm::sa_update_entry" id="ga5"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>sa_update_entry</b> (struct snmp_alarm *a)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__alarm.html#ga6">snmp_alarm_unregister</a>
+      (unsigned int clientreg)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This function removes the callback function from a list of registered alarms, unregistering the
+      alarm. <a href="#ga6"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__alarm.html#ga7">snmp_alarm_unregister_all</a>
+      (void)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This function unregisters all alarms currently stored. <a href="#ga7"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga8" doxytag=
+      "snmp_alarm::sa_find_next" id="ga8"></a> snmp_alarm *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>sa_find_next</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga9" doxytag=
+      "snmp_alarm::sa_find_specific" id="ga9"></a> snmp_alarm *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>sa_find_specific</b> (unsigned int clientreg)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga10" doxytag=
+      "snmp_alarm::run_alarms" id="ga10"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>run_alarms</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga11" doxytag=
+      "snmp_alarm::alarm_handler" id="ga11"></a> RETSIGTYPE&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>alarm_handler</b> (int a)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga12" doxytag=
+      "snmp_alarm::get_next_alarm_delay_time" id="ga12"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>get_next_alarm_delay_time</b> (struct timeval *delta)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga13" doxytag=
+      "snmp_alarm::set_an_alarm" id="ga13"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>set_an_alarm</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">unsigned int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__alarm.html#ga14">snmp_alarm_register</a>
+      (unsigned int when, unsigned int flags, SNMPAlarmCallback *thecallback, void *clientarg)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This function registers function callbacks to occur at a speciifc time in the future. <a href=
+      "#ga14"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">unsigned int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__alarm.html#ga15">snmp_alarm_register_hr</a>
+      (struct timeval t, unsigned int flags, SNMPAlarmCallback *cb, void *cd)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This function offers finer granularity as to when the callback function is called by making use of
+      t-&gt;tv_usec value forming the "when" aspect of <a class="el" href=
+      "group__snmp__alarm.html#ga14">snmp_alarm_register()</a>. <a href="#ga15"></a><br /></td>
+    </tr>
+  </table>
+  <hr />
+
+  <h2>Function Documentation</h2><a class="anchor" name="ga14" doxytag="snmp_alarm.c::snmp_alarm_register" id="ga14"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">unsigned int snmp_alarm_register</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">unsigned int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>when</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">unsigned int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>flags</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">SNMPAlarmCallback *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>thecallback</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">void *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>clientarg</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>This function registers function callbacks to occur at a speciifc time in the future.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>when</em>&nbsp;</td>
+
+                <td>is an unsigned integer specifying when the callback function will be called in seconds.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>flags</em>&nbsp;</td>
+
+                <td>is an unsigned integer that specifies how frequent the callback function is called in seconds. Should be
+                SA_REPEAT or 0. If flags is set with SA_REPEAT, then the registered callback function will be called every
+                SA_REPEAT seconds. If flags is 0 then the function will only be called once and then removed from the registered
+                alarm list.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>thecallback</em>&nbsp;</td>
+
+                <td>is a pointer SNMPAlarmCallback which is the callback function being stored and registered.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>clientarg</em>&nbsp;</td>
+
+                <td>is a void pointer used by the callback function. This pointer is assigned to snmp_alarm-&gt;clientarg and
+                passed into the callback function for the client's specifc needs.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>Returns a unique unsigned integer(which is also passed as the first argument of each callback), which can then be
+          used to remove the callback from the list at a later point in the future using the <a class="el" href=
+          "group__snmp__alarm.html#ga6">snmp_alarm_unregister()</a> function. If memory could not be allocated for the snmp_alarm
+          struct 0 is returned.</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>See also:</b></dt>
+
+          <dd>
+            <a class="el" href="group__snmp__alarm.html#ga6">snmp_alarm_unregister</a>
+
+            <p><a class="el" href="group__snmp__alarm.html#ga15">snmp_alarm_register_hr</a></p>
+
+            <p><a class="el" href="group__snmp__alarm.html#ga7">snmp_alarm_unregister_all</a></p>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Examples:</b></dt>
+
+          <dd><a class="el" href="delayed__instance_8c-example.html#a15">delayed_instance.c</a>, and <a class="el" href=
+          "notification_8c-example.html#a28">notification.c</a>.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__alarm_8c-source.html#l00403">403</a> of file <a class="el" href=
+        "snmp__alarm_8c-source.html">snmp_alarm.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8h-source.html#l00064">SNMP_MALLOC_STRUCT</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00194">netsnmp_cache_timer_start()</a>, and <a class=
+        "el" href="cache__handler_8c-source.html#l00574">release_cached_resources()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga15" doxytag="snmp_alarm.c::snmp_alarm_register_hr" id="ga15"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">unsigned int snmp_alarm_register_hr</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">struct timeval&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>t</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">unsigned int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>flags</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">SNMPAlarmCallback *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>cb</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">void *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>cd</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>This function offers finer granularity as to when the callback function is called by making use of t-&gt;tv_usec value
+        forming the "when" aspect of <a class="el" href="group__snmp__alarm.html#ga14">snmp_alarm_register()</a>.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>t</em>&nbsp;</td>
+
+                <td>is a timeval structure used to specify when the callback function(alarm) will be called. Adds the ability to
+                specify microseconds. t.tv_sec and t.tv_usec are assigned to snmp_alarm-&gt;tv_sec and snmp_alarm-&gt;tv_usec
+                respectively internally. The snmp_alarm_register function only assigns seconds(it's when argument).</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>flags</em>&nbsp;</td>
+
+                <td>is an unsigned integer that specifies how frequent the callback function is called in seconds. Should be
+                SA_REPEAT or NULL. If flags is set with SA_REPEAT, then the registered callback function will be called every
+                SA_REPEAT seconds. If flags is NULL then the function will only be called once and then removed from the
+                registered alarm list.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>cb</em>&nbsp;</td>
+
+                <td>is a pointer SNMPAlarmCallback which is the callback function being stored and registered.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>cd</em>&nbsp;</td>
+
+                <td>is a void pointer used by the callback function. This pointer is assigned to snmp_alarm-&gt;clientarg and
+                passed into the callback function for the client's specifc needs.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>Returns a unique unsigned integer(which is also passed as the first argument of each callback), which can then be
+          used to remove the callback from the list at a later point in the future using the <a class="el" href=
+          "group__snmp__alarm.html#ga6">snmp_alarm_unregister()</a> function. If memory could not be allocated for the snmp_alarm
+          struct 0 is returned.</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>See also:</b></dt>
+
+          <dd>
+            <a class="el" href="group__snmp__alarm.html#ga14">snmp_alarm_register</a>
+
+            <p><a class="el" href="group__snmp__alarm.html#ga6">snmp_alarm_unregister</a></p>
+
+            <p><a class="el" href="group__snmp__alarm.html#ga7">snmp_alarm_unregister_all</a></p>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__alarm_8c-source.html#l00475">475</a> of file <a class="el" href=
+        "snmp__alarm_8c-source.html">snmp_alarm.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8h-source.html#l00064">SNMP_MALLOC_STRUCT</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga6" doxytag="snmp_alarm.c::snmp_alarm_unregister" id="ga6"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void snmp_alarm_unregister</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">unsigned int&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>clientreg</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>This function removes the callback function from a list of registered alarms, unregistering the alarm.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>clientreg</em>&nbsp;</td>
+
+                <td>is a unique unsigned integer representing a registered alarm which the client wants to unregister.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>void</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>See also:</b></dt>
+
+          <dd>
+            <a class="el" href="group__snmp__alarm.html#ga14">snmp_alarm_register</a>
+
+            <p><a class="el" href="group__snmp__alarm.html#ga15">snmp_alarm_register_hr</a></p>
+
+            <p><a class="el" href="group__snmp__alarm.html#ga7">snmp_alarm_unregister_all</a></p>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__alarm_8c-source.html#l00150">150</a> of file <a class="el" href=
+        "snmp__alarm_8c-source.html">snmp_alarm.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00224">netsnmp_cache_timer_stop()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga7" doxytag="snmp_alarm.c::snmp_alarm_unregister_all" id="ga7"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void snmp_alarm_unregister_all</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">void&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>This function unregisters all alarms currently stored.</p>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>void</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>See also:</b></dt>
+
+          <dd>
+            <a class="el" href="group__snmp__alarm.html#ga14">snmp_alarm_register</a>
+
+            <p><a class="el" href="group__snmp__alarm.html#ga15">snmp_alarm_register_hr</a></p>
+
+            <p><a class="el" href="group__snmp__alarm.html#ga6">snmp_alarm_unregister</a></p>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__alarm_8c-source.html#l00183">183</a> of file <a class="el" href=
+        "snmp__alarm_8c-source.html">snmp_alarm.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l00846">snmp_shutdown()</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:04 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

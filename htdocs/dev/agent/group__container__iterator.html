@@ -1,0 +1,112 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>Container_iterator</h1>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Typedefs</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga0" doxytag=
+      "Container_iterator::Netsnmp_Iterator_Loop_Key" id="ga0"></a> typedef int(&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>Netsnmp_Iterator_Loop_Key</b> )(void *iterator_ctx, netsnmp_ref_void *loop_ctx,
+      netsnmp_ref_void *key)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga1" doxytag=
+      "Container_iterator::Netsnmp_Iterator_Loop_Data" id="ga1"></a> typedef int(&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>Netsnmp_Iterator_Loop_Data</b> )(void *iterator_ctx, netsnmp_ref_void
+      *loop_ctx, netsnmp_ref_void *data)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga2" doxytag=
+      "Container_iterator::Netsnmp_Iterator_Ctx" id="ga2"></a> typedef int(&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>Netsnmp_Iterator_Ctx</b> )(void *iterator_ctx, netsnmp_ref_void *loop_ctx)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga3" doxytag=
+      "Container_iterator::Netsnmp_Iterator_Ctx_Dup" id="ga3"></a> typedef int(&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>Netsnmp_Iterator_Ctx_Dup</b> )(void *iterator_ctx, netsnmp_ref_void *loop_ctx,
+      netsnmp_ref_void *dup_ctx, int reuse)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga4" doxytag=
+      "Container_iterator::Netsnmp_Iterator_Op" id="ga4"></a> typedef int(&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>Netsnmp_Iterator_Op</b> )(void *iterator_ctx)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga5" doxytag=
+      "Container_iterator::Netsnmp_Iterator_Data" id="ga5"></a> typedef int(&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>Netsnmp_Iterator_Data</b> )(void *iterator_ctx, const void *data)</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga6" doxytag=
+      "Container_iterator::netsnmp_container_iterator_init" id="ga6"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_container_iterator_init</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga7" doxytag=
+      "Container_iterator::netsnmp_container_iterator_get" id="ga7"></a> netsnmp_container *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_container_iterator_get</b> (void *iterator_user_ctx,
+      netsnmp_container_compare *compare, Netsnmp_Iterator_Loop_Key *get_first, Netsnmp_Iterator_Loop_Key *get_next,
+      Netsnmp_Iterator_Loop_Data *get_data, Netsnmp_Iterator_Ctx_Dup *save_pos, Netsnmp_Iterator_Ctx *init_loop_ctx,
+      Netsnmp_Iterator_Ctx *cleanup_loop_ctx, Netsnmp_Iterator_Data *free_user_ctx, int sorted)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga8" doxytag=
+      "Container_iterator::netsnmp_container_iterator_set_data_cb" id="ga8"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_container_iterator_set_data_cb</b> (netsnmp_container *c,
+      Netsnmp_Iterator_Data *insert_data, Netsnmp_Iterator_Data *remove_data, Netsnmp_Iterator_Op *get_size)</td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:05 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,64 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Net-SNMP Tutorial -- snmptable</title>
+  </head>
+
+  <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
+    <h1>Net-SNMP Tutorial -- snmptable</h1>
+    <p>
+      The <b>snmptable</b> command nicely displays a SNMP table for
+      you in an easy to read column based fashion.  Consider the
+      sysORTable, which you saw all the data from in the last
+      section.  It's hard to get a good feel about the correlation of
+      data when its displayed in a long list, like the output of
+      snmpwalk gives you.  Instead, snmptable nicely formats it for
+      you (though sometimes it can be a bit wide, like in this example):
+<pre>
+<ul>
+% <b>snmptable -v 2c -c demopublic test.net-snmp.org sysORTable</b>
+SNMP table: system.sysORTable
+
+ sysORIndex                                                                                                                                      sysORID                                                                     sysORDescr  sysORUpTime
+          1                                                                                             .iso.org.dod.internet.snmpV2.snmpModules.snmpMIB                                            The Mib module for SNMPv2 entities. 0:0:00:00.00
+          2                                         .iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBConformance.vacmMIBGroups.vacmBasicGroup                                      View-based Access Control Model for SNMP. 0:0:00:00.00
+          3 .iso.org.dod.internet.snmpV2.snmpModules.snmpFrameworkMIB.snmpFrameworkMIBConformance.snmpFrameworkMIBCompliances.snmpFrameworkMIBCompliance                                          The SNMP Management Architecture MIB. 0:0:00:00.00
+          4                            .iso.org.dod.internet.snmpV2.snmpModules.snmpMPDMIB.snmpMPDMIBConformance.snmpMPDMIBCompliances.snmpMPDCompliance                                The MIB for Message Processing and Dispatching. 0:0:00:00.00
+          5                                     .iso.org.dod.internet.snmpV2.snmpModules.snmpUsmMIB.usmMIBConformance.usmMIBCompliances.usmMIBCompliance The management information definitions for the SNMP User-based Security Model. 0:0:00:00.00
+</pre>
+But you can adjust the width of the table
+<pre>
+% <b>snmptable -v 2c -c demopublic -Cw 80 test.net-snmp.org sysORTable</b>
+SNMP table: system.sysORTable
+
+ sysORIndex                                                                                                                                      sysORID
+          1                                                                                             .iso.org.dod.internet.snmpV2.snmpModules.snmpMIB
+          2                                         .iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBConformance.vacmMIBGroups.vacmBasicGroup
+          3 .iso.org.dod.internet.snmpV2.snmpModules.snmpFrameworkMIB.snmpFrameworkMIBConformance.snmpFrameworkMIBCompliances.snmpFrameworkMIBCompliance
+          4                            .iso.org.dod.internet.snmpV2.snmpModules.snmpMPDMIB.snmpMPDMIBConformance.snmpMPDMIBCompliances.snmpMPDCompliance
+          5                                     .iso.org.dod.internet.snmpV2.snmpModules.snmpUsmMIB.usmMIBConformance.usmMIBCompliances.usmMIBCompliance
+
+SNMP table: system.sysORTable, part 2
+
+                                                                     sysORDescr  sysORUpTime
+                                            The Mib module for SNMPv2 entities. 0:0:00:00.00
+                                      View-based Access Control Model for SNMP. 0:0:00:00.00
+                                          The SNMP Management Architecture MIB. 0:0:00:00.00
+                                The MIB for Message Processing and Dispatching. 0:0:00:00.00
+ The management information definitions for the SNMP User-based Security Model. 0:0:00:00.00
+</pre>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Thu Nov  4 15:05:29 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Thu Feb 13 09:29:16 PST 2003
+<!-- hhmts end -->
+  </body>
+</html>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

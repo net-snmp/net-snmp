@@ -1,0 +1,1368 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>generic linked-list data handling with a string as a key.<br />
+  <small>[<a class="el" href="group__library.html">The Net-SNMP library</a>]</small></h1>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__data__list.html#ga1">netsnmp_free_list_data</a>
+      (<a class="el" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">frees the data and a name at a given data_list node. <a href="#ga1"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__data__list.html#ga2">netsnmp_free_all_list_data</a>
+      (<a class="el" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">frees all data and nodes in a list. <a href="#ga2"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE <a class="el" href=
+      "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__data__list.html#ga3">netsnmp_create_data_list</a>
+      (const char *name, void *data, Netsnmp_Free_List_Data *beer)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">adds creates a data_list node given a name, data and a free function ptr. <a href=
+      "#ga3"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__data__list.html#ga4">netsnmp_add_list_data</a>
+      (<a class="el" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> **head, <a class="el" href=
+      "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">depreciated: use netsnmp_data_list_add_node() <a href="#ga4"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__data__list.html#ga5">netsnmp_data_list_add_node</a>
+      (<a class="el" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> **head, <a class="el" href=
+      "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">adds data to a datalist <a href="#ga5"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE <a class="el" href=
+      "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__data__list.html#ga6">netsnmp_data_list_add_data</a>
+      (<a class="el" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> **head, const char *name, void *data,
+      Netsnmp_Free_List_Data *beer)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">adds data to a datalist <a href="#ga6"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__data__list.html#ga7">netsnmp_get_list_data</a>
+      (<a class="el" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head, const char *name)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">returns a data_list node's data for a given name within a data_list <a href="#ga7"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE <a class="el" href=
+      "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__data__list.html#ga8">netsnmp_get_list_node</a>
+      (<a class="el" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head, const char *name)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">returns a data_list node for a given name within a data_list <a href="#ga8"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__data__list.html#ga9">netsnmp_remove_list_node</a>
+      (<a class="el" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> **realhead, const char *name)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Removes a named node from a data_list (and frees it). <a href="#ga9"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__data__list.html#ga10">netsnmp_register_save_list</a>
+      (<a class="el" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> **datalist, const char *type, const char
+      *token, Netsnmp_Save_List_Data *data_list_save_ptr, Netsnmp_Read_List_Data *data_list_read_ptr, Netsnmp_Free_List_Data
+      *data_list_free_ptr)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">registers to store a data_list set of data at persistant storage time <a href=
+      "#ga10"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__data__list.html#ga11">netsnmp_save_all_data_callback</a> (int major, int minor, void *serverarg, void
+      *clientarg)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">intended to be registerd as a callback operation. <a href="#ga11"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__data__list.html#ga12">netsnmp_save_all_data</a>
+      (<a class="el" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head, const char *type, const char *token,
+      Netsnmp_Save_List_Data *data_list_save_ptr)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">intended to be called as a callback during persistent save operations. <a href=
+      "#ga12"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__data__list.html#ga13">netsnmp_read_data_callback</a>
+      (const char *token, char *line)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">intended to be registerd as a .conf parser It should be registered using: <a href=
+      "#ga13"></a><br /></td>
+    </tr>
+  </table>
+  <hr />
+
+  <h2>Function Documentation</h2><a class="anchor" name="ga4" doxytag="data_list.c::netsnmp_add_list_data" id="ga4"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE void netsnmp_add_list_data</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__data__list__s.html">netsnmp_data_list</a> **&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>head</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>node</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>depreciated: use netsnmp_data_list_add_node()</p>
+
+        <p>Definition at line <a class="el" href="data__list_8c-source.html#l00083">83</a> of file <a class="el" href=
+        "data__list_8c-source.html">data_list.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00093">netsnmp_data_list_add_node()</a>.</p>
+
+        <p>Referenced by <a class="el" href="data__list_8c-source.html#l00137">netsnmp_data_list_add_data()</a>, <a class="el"
+        href="data__list_8c-source.html#l00321">netsnmp_read_data_callback()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00775">netsnmp_register_auto_data_table()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00880">netsnmp_register_handler_by_name()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00220">netsnmp_register_save_list()</a>, and <a class="el" href=
+        "agent__handler_8c-source.html#l00755">netsnmp_request_add_list_data()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga3" doxytag="data_list.c::netsnmp_create_data_list" id="ga3"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE <a class="el" href=
+            "structnetsnmp__data__list__s.html">netsnmp_data_list</a>* netsnmp_create_data_list</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">void *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>data</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">Netsnmp_Free_List_Data *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>beer</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>adds creates a data_list node given a name, data and a free function ptr.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>name</em>&nbsp;</td>
+
+                <td>the name of the node to cache the data.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>data</em>&nbsp;</td>
+
+                <td>the data to be stored under that name</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>beer</em>&nbsp;</td>
+
+                <td>A function that can free the data pointer (in the future)</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>a newly created data_list node which can be given to the netsnmp_add_list_data function.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="data__list_8c-source.html#l00064">64</a> of file <a class="el" href=
+        "data__list_8c-source.html">data_list.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8h-source.html#l00045">netsnmp_data_list_s::data</a>, <a class="el" href=
+        "data__list_8h-source.html#l00047">netsnmp_data_list_s::free_func</a>, <a class="el" href=
+        "data__list_8h-source.html#l00043">netsnmp_data_list_s::name</a>, and <a class="el" href=
+        "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00330">netsnmp_cache_reqinfo_insert()</a>, <a class=
+        "el" href="data__list_8c-source.html#l00137">netsnmp_data_list_add_data()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00171">netsnmp_insert_iterator_context()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00562">netsnmp_insert_table_row()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00321">netsnmp_read_data_callback()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00775">netsnmp_register_auto_data_table()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00880">netsnmp_register_handler_by_name()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00220">netsnmp_register_save_list()</a>, <a class="el" href=
+        "stash__cache_8c-source.html#l00143">netsnmp_stash_cache_update()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, and <a class="el" href=
+        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga6" doxytag="data_list.c::netsnmp_data_list_add_data" id="ga6"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE <a class="el" href=
+            "structnetsnmp__data__list__s.html">netsnmp_data_list</a>* netsnmp_data_list_add_data</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__data__list__s.html">netsnmp_data_list</a> **&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>head</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">void *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>data</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">Netsnmp_Free_List_Data *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>beer</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>adds data to a datalist</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>head</em>&nbsp;</td>
+
+                <td>a pointer to the head node of a data_list</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>name</em>&nbsp;</td>
+
+                <td>the name of the node to cache the data.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>data</em>&nbsp;</td>
+
+                <td>the data to be stored under that name</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>beer</em>&nbsp;</td>
+
+                <td>A function that can free the data pointer (in the future)</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>a newly created data_list node which was inserted in the list</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="data__list_8c-source.html#l00137">137</a> of file <a class="el" href=
+        "data__list_8c-source.html">data_list.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00083">netsnmp_add_list_data()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00064">netsnmp_create_data_list()</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga5" doxytag="data_list.c::netsnmp_data_list_add_node" id="ga5"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE void netsnmp_data_list_add_node</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__data__list__s.html">netsnmp_data_list</a> **&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>head</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>node</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>adds data to a datalist</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>head</em>&nbsp;</td>
+
+                <td>a pointer to the head node of a data_list</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>node</em>&nbsp;</td>
+
+                <td>a node to stash in the data_list</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="data__list_8c-source.html#l00093">93</a> of file <a class="el" href=
+        "data__list_8c-source.html">data_list.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8h-source.html#l00043">netsnmp_data_list_s::name</a>, <a class="el" href=
+        "data__list_8c-source.html#l00093">netsnmp_data_list_add_node()</a>, <a class="el" href=
+        "data__list_8h-source.html#l00042">netsnmp_data_list_s::next</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+
+        <p>Referenced by <a class="el" href="data__list_8c-source.html#l00083">netsnmp_add_list_data()</a>, and <a class="el"
+        href="data__list_8c-source.html#l00093">netsnmp_data_list_add_node()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga2" doxytag="data_list.c::netsnmp_free_all_list_data" id="ga2"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE void netsnmp_free_all_list_data</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>head</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>frees all data and nodes in a list.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>head</em>&nbsp;</td>
+
+                <td>the top node of the list to be freed.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="data__list_8c-source.html#l00046">46</a> of file <a class="el" href=
+        "data__list_8c-source.html">data_list.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00030">netsnmp_free_list_data()</a>, <a class="el" href=
+        "data__list_8h-source.html#l00042">netsnmp_data_list_s::next</a>, and <a class="el" href=
+        "tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00892">netsnmp_clear_handler_list()</a>, and
+        <a class="el" href="agent__handler_8c-source.html#l00815">netsnmp_free_request_data_sets()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga1" doxytag="data_list.c::netsnmp_free_list_data" id="ga1"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE void netsnmp_free_list_data</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>node</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>frees the data and a name at a given data_list node.</p>
+
+        <p>Note that this doesn't free the node itself.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>node</em>&nbsp;</td>
+
+                <td>the node for which the data should be freed</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="data__list_8c-source.html#l00030">30</a> of file <a class="el" href=
+        "data__list_8c-source.html">data_list.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8h-source.html#l00045">netsnmp_data_list_s::data</a>, <a class="el" href=
+        "data__list_8h-source.html#l00047">netsnmp_data_list_s::free_func</a>, <a class="el" href=
+        "data__list_8h-source.html#l00043">netsnmp_data_list_s::name</a>, and <a class="el" href=
+        "tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
+
+        <p>Referenced by <a class="el" href="data__list_8c-source.html#l00046">netsnmp_free_all_list_data()</a>, <a class="el"
+        href="agent__handler_8c-source.html#l00807">netsnmp_free_request_data_set()</a>, and <a class="el" href=
+        "data__list_8c-source.html#l00189">netsnmp_remove_list_node()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga7" doxytag="data_list.c::netsnmp_get_list_data" id="ga7"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE void* netsnmp_get_list_data</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>head</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>returns a data_list node's data for a given name within a data_list</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>head</em>&nbsp;</td>
+
+                <td>the head node of a data_list</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>name</em>&nbsp;</td>
+
+                <td>the name to find</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>a pointer to the data cached at that node</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="data__list_8c-source.html#l00157">157</a> of file <a class="el" href=
+        "data__list_8c-source.html">data_list.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8h-source.html#l00045">netsnmp_data_list_s::data</a>, <a class="el" href=
+        "data__list_8h-source.html#l00043">netsnmp_data_list_s::name</a>, and <a class="el" href=
+        "data__list_8h-source.html#l00042">netsnmp_data_list_s::next</a>.</p>
+
+        <p>Referenced by <a class="el" href="data__list_8c-source.html#l00321">netsnmp_read_data_callback()</a>, and <a class=
+        "el" href="agent__handler_8c-source.html#l00797">netsnmp_request_get_list_data()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga8" doxytag="data_list.c::netsnmp_get_list_node" id="ga8"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE <a class="el" href=
+            "structnetsnmp__data__list__s.html">netsnmp_data_list</a>* netsnmp_get_list_node</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>head</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>returns a data_list node for a given name within a data_list</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>head</em>&nbsp;</td>
+
+                <td>the head node of a data_list</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>name</em>&nbsp;</td>
+
+                <td>the name to find</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>a pointer to the data_list node</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="data__list_8c-source.html#l00173">173</a> of file <a class="el" href=
+        "data__list_8c-source.html">data_list.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8h-source.html#l00043">netsnmp_data_list_s::name</a>, and <a class="el"
+        href="data__list_8h-source.html#l00042">netsnmp_data_list_s::next</a>.</p>
+
+        <p>Referenced by <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga13" doxytag="data_list.c::netsnmp_read_data_callback" id="ga13"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void netsnmp_read_data_callback</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>token</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>line</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>intended to be registerd as a .conf parser It should be registered using:</p>
+
+        <p>register_app_config_handler("token", netsnmp_read_data_callback, XXX)</p>
+
+        <p>where INFO_POINTER is a pointer to a netsnmp_data_list_saveinfo object containing apporpriate registration
+        information</p>
+
+        <p>Definition at line <a class="el" href="data__list_8c-source.html#l00321">321</a> of file <a class="el" href=
+        "data__list_8c-source.html">data_list.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00083">netsnmp_add_list_data()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00064">netsnmp_create_data_list()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00157">netsnmp_get_list_data()</a>, <a class="el" href=
+        "read__config_8c-source.html#l01722">read_config_read_data()</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+
+        <p>Referenced by <a class="el" href="data__list_8c-source.html#l00220">netsnmp_register_save_list()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga10" doxytag="data_list.c::netsnmp_register_save_list" id="ga10"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void netsnmp_register_save_list</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__data__list__s.html">netsnmp_data_list</a> **&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>datalist</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>type</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>token</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">Netsnmp_Save_List_Data *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>data_list_save_ptr</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">Netsnmp_Read_List_Data *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>data_list_read_ptr</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">Netsnmp_Free_List_Data *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>data_list_free_ptr</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>registers to store a data_list set of data at persistant storage time</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>datalist</em>&nbsp;</td>
+
+                <td>the data to be saved</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>type</em>&nbsp;</td>
+
+                <td>the name of the application to save the data as. If left NULL the default application name that was
+                registered during the init_snmp call will be used (recommended).</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>token</em>&nbsp;</td>
+
+                <td>the unique token identifier string to use as the first word in the persistent file line.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>data_list_save_ptr</em>&nbsp;</td>
+
+                <td>a function pointer which will be called to save the rest of the data to a buffer.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>data_list_read_ptr</em>&nbsp;</td>
+
+                <td>a function pointer which can read the remainder of a saved line and return the application specific void *
+                pointer.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>data_list_free_ptr</em>&nbsp;</td>
+
+                <td>a function pointer which will be passed to the data node for freeing it in the future when/if the list/node
+                is cleaned up or destroyed.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt>
+
+          <dd>netsnmp_register_save_list should handle the same token name being saved from different types?</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="data__list_8c-source.html#l00220">220</a> of file <a class="el" href=
+        "data__list_8c-source.html">data_list.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00083">netsnmp_add_list_data()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00064">netsnmp_create_data_list()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00321">netsnmp_read_data_callback()</a>, <a class="el" href=
+        "read__config_8c-source.html#l00196">register_config_handler()</a>, <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>, <a class="el" href=
+        "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>, and <a class="el" href=
+        "callback_8c-source.html#l00115">snmp_register_callback()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga9" doxytag="data_list.c::netsnmp_remove_list_node" id="ga9"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_remove_list_node</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__data__list__s.html">netsnmp_data_list</a> **&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>realhead</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Removes a named node from a data_list (and frees it).</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>realhead</em>&nbsp;</td>
+
+                <td>a pointer to the head node of a data_list</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>name</em>&nbsp;</td>
+
+                <td>the name to find and remove</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>0 on successful find-and-delete, 1 otherwise.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="data__list_8c-source.html#l00189">189</a> of file <a class="el" href=
+        "data__list_8c-source.html">data_list.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00030">netsnmp_free_list_data()</a>, and <a class="el" href=
+        "data__list_8h-source.html#l00042">netsnmp_data_list_s::next</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00776">netsnmp_request_remove_list_data()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga12" doxytag="data_list.c::netsnmp_save_all_data" id="ga12"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_save_all_data</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>head</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>type</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>token</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">Netsnmp_Save_List_Data *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>data_list_save_ptr</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>intended to be called as a callback during persistent save operations.</p>
+
+        <p>See the netsnmp_save_all_data_callback for where this is typically used.</p>
+
+        <p>Definition at line <a class="el" href="data__list_8c-source.html#l00286">286</a> of file <a class="el" href=
+        "data__list_8c-source.html">data_list.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8h-source.html#l00045">netsnmp_data_list_s::data</a>, <a class="el" href=
+        "data__list_8h-source.html#l00043">netsnmp_data_list_s::name</a>, <a class="el" href=
+        "data__list_8h-source.html#l00042">netsnmp_data_list_s::next</a>, and <a class="el" href=
+        "read__config_8c-source.html#l01181">read_config_store()</a>.</p>
+
+        <p>Referenced by <a class="el" href="data__list_8c-source.html#l00269">netsnmp_save_all_data_callback()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga11" doxytag="data_list.c::netsnmp_save_all_data_callback" id="ga11"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_save_all_data_callback</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>major</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>minor</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">void *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>serverarg</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">void *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>clientarg</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>intended to be registerd as a callback operation.</p>
+
+        <p>It should be registered using:</p>
+
+        <p>snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA, netsnmp_save_all_data_callback,
+        INFO_POINTER);</p>
+
+        <p>where INFO_POINTER is a pointer to a netsnmp_data_list_saveinfo object containing apporpriate registration
+        information</p>
+
+        <p>Definition at line <a class="el" href="data__list_8c-source.html#l00269">269</a> of file <a class="el" href=
+        "data__list_8c-source.html">data_list.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00286">netsnmp_save_all_data()</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

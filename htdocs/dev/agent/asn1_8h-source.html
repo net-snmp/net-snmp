@@ -1,0 +1,492 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>asn1.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef ASN1_H</span>
+00002 <span class="preprocessor">#define ASN1_H</span>
+00003 
+00004 <span class="preprocessor">#ifdef __cplusplus</span>
+00005 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00006 <span class="preprocessor">#endif</span>
+00007 
+00008 <span class="preprocessor">#define PARSE_PACKET    0</span>
+00009 <span class="preprocessor">#define DUMP_PACKET     1</span>
+00010 
+00011     <span class="comment">/*</span>
+00012 <span class="comment">     * Definitions for Abstract Syntax Notation One, ASN.1</span>
+00013 <span class="comment">     * As defined in ISO/IS 8824 and ISO/IS 8825</span>
+00014 <span class="comment">     *</span>
+00015 <span class="comment">     *</span>
+00016 <span class="comment">     */</span>
+00017 <span class="comment">/***********************************************************</span>
+00018 <span class="comment">        Copyright 1988, 1989 by Carnegie Mellon University</span>
+00019 
+00020 <span class="comment">                      All Rights Reserved</span>
+00021 
+00022 <span class="comment">Permission to use, copy, modify, and distribute this software and its </span>
+00023 <span class="comment">documentation for any purpose and without fee is hereby granted, </span>
+00024 <span class="comment">provided that the above copyright notice appear in all copies and that</span>
+00025 <span class="comment">both that copyright notice and this permission notice appear in </span>
+00026 <span class="comment">supporting documentation, and that the name of CMU not be</span>
+00027 <span class="comment">used in advertising or publicity pertaining to distribution of the</span>
+00028 <span class="comment">software without specific, written prior permission.  </span>
+00029 
+00030 <span class="comment">CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING</span>
+00031 <span class="comment">ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL</span>
+00032 <span class="comment">CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR</span>
+00033 <span class="comment">ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,</span>
+00034 <span class="comment">WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,</span>
+00035 <span class="comment">ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS</span>
+00036 <span class="comment">SOFTWARE.</span>
+00037 <span class="comment">******************************************************************/</span>
+00038 
+00039 
+00040 <span class="preprocessor">#ifndef MAX_SUBID               </span><span class=
+"comment">/* temporary - duplicate definition protection */</span>
+00041 <span class="preprocessor">#ifndef EIGHTBIT_SUBIDS</span>
+00042     <span class="keyword">typedef</span> u_long  oid;
+00043 <span class="preprocessor">#define MAX_SUBID   0xFFFFFFFF</span>
+00044 <span class="preprocessor">#else</span>
+00045     <span class="keyword">typedef</span> u_char  oid;
+00046 <span class="preprocessor">#define MAX_SUBID   0xFF</span>
+00047 <span class="preprocessor">#endif</span>
+00048 <span class="preprocessor">#endif</span>
+00049 
+00050 <span class="preprocessor">#define MIN_OID_LEN         2</span>
+00051 <span class="preprocessor">#define MAX_OID_LEN         128 </span><span class="comment">/* max subid's in an oid */</span>
+00052 <span class="preprocessor">#ifndef MAX_NAME_LEN            </span><span class=
+"comment">/* conflicts with some libraries */</span>
+00053 <span class="preprocessor">#define MAX_NAME_LEN        MAX_OID_LEN </span><span class=
+"comment">/* obsolete. use MAX_OID_LEN */</span>
+00054 <span class="preprocessor">#endif</span>
+00055 
+00056 <span class="preprocessor">#define OID_LENGTH(x)  (sizeof(x)/sizeof(oid))</span>
+00057 
+00058 
+00059 <span class="preprocessor">#define ASN_BOOLEAN         ((u_char)0x01)</span>
+00060 <span class="preprocessor">#define ASN_INTEGER         ((u_char)0x02)</span>
+00061 <span class="preprocessor">#define ASN_BIT_STR         ((u_char)0x03)</span>
+00062 <span class="preprocessor">#define ASN_OCTET_STR       ((u_char)0x04)</span>
+00063 <span class="preprocessor">#define ASN_NULL            ((u_char)0x05)</span>
+00064 <span class="preprocessor">#define ASN_OBJECT_ID       ((u_char)0x06)</span>
+00065 <span class="preprocessor">#define ASN_SEQUENCE        ((u_char)0x10)</span>
+00066 <span class="preprocessor">#define ASN_SET             ((u_char)0x11)</span>
+00067 
+00068 <span class="preprocessor">#define ASN_UNIVERSAL       ((u_char)0x00)</span>
+00069 <span class="preprocessor">#define ASN_APPLICATION     ((u_char)0x40)</span>
+00070 <span class="preprocessor">#define ASN_CONTEXT         ((u_char)0x80)</span>
+00071 <span class="preprocessor">#define ASN_PRIVATE         ((u_char)0xC0)</span>
+00072 
+00073 <span class="preprocessor">#define ASN_PRIMITIVE       ((u_char)0x00)</span>
+00074 <span class="preprocessor">#define ASN_CONSTRUCTOR     ((u_char)0x20)</span>
+00075 
+00076 <span class="preprocessor">#define ASN_LONG_LEN        (0x80)</span>
+00077 <span class="preprocessor">#define ASN_EXTENSION_ID    (0x1F)</span>
+00078 <span class="preprocessor">#define ASN_BIT8            (0x80)</span>
+00079 
+00080 <span class="preprocessor">#define IS_CONSTRUCTOR(byte)    ((byte) &amp; ASN_CONSTRUCTOR)</span>
+00081 <span class="preprocessor">#define IS_EXTENSION_ID(byte)   (((byte) &amp; ASN_EXTENSION_ID) == ASN_EXTENSION_ID)</span>
+00082 
+00083     <span class="keyword">struct </span>counter64 {
+00084         u_long          high;
+00085         u_long          low;
+00086     };
+00087 
+00088 <span class="preprocessor">#ifdef OPAQUE_SPECIAL_TYPES</span>
+00089     <span class="keyword">typedef</span> <span class="keyword">struct </span>counter64 integer64;
+00090     <span class="keyword">typedef</span> <span class="keyword">struct </span>counter64 unsigned64;
+00091 
+00092     <span class="comment">/*</span>
+00093 <span class="comment">     * The BER inside an OPAQUE is an context specific with a value of 48 (0x30)</span>
+00094 <span class="comment">     * plus the "normal" tag. For a Counter64, the tag is 0x46 (i.e., an</span>
+00095 <span class="comment">     * applications specific tag with value 6). So the value for a 64 bit</span>
+00096 <span class="comment">     * counter is 0x46 + 0x30, or 0x76 (118 base 10). However, values</span>
+00097 <span class="comment">     * greater than 30 can not be encoded in one octet. So the first octet</span>
+00098 <span class="comment">     * has the class, in this case context specific (ASN_CONTEXT), and</span>
+00099 <span class="comment">     * the special value (i.e., 31) to indicate that the real value follows</span>
+00100 <span class="comment">     * in one or more octets. The high order bit of each following octet</span>
+00101 <span class="comment">     * indicates if the value is encoded in additional octets. A high order</span>
+00102 <span class="comment">     * bit of zero, indicates the last. For this "hack", only one octet</span>
+00103 <span class="comment">     * will be used for the value. </span>
+00104 <span class="comment">     */</span>
+00105 
+00106     <span class="comment">/*</span>
+00107 <span class="comment">     * first octet of the tag </span>
+00108 <span class="comment">     */</span>
+00109 <span class="preprocessor">#define ASN_OPAQUE_TAG1 (ASN_CONTEXT | ASN_EXTENSION_ID)</span>
+00110     <span class="comment">/*</span>
+00111 <span class="comment">     * base value for the second octet of the tag - the</span>
+00112 <span class="comment">     * second octet was the value for the tag </span>
+00113 <span class="comment">     */</span>
+00114 <span class="preprocessor">#define ASN_OPAQUE_TAG2 ((u_char)0x30)</span>
+00115 
+00116 <span class="preprocessor">#define ASN_OPAQUE_TAG2U ((u_char)0x2f) </span><span class=
+"comment">/* second octet of tag for union */</span>
+00117 
+00118     <span class="comment">/*</span>
+00119 <span class="comment">     * All the ASN.1 types for SNMP "should have been" defined in this file,</span>
+00120 <span class="comment">     * but they were not. (They are defined in snmp_impl.h)  Thus, the tag for</span>
+00121 <span class="comment">     * Opaque and Counter64 is defined, again, here with a different names. </span>
+00122 <span class="comment">     */</span>
+00123 <span class="preprocessor">#define ASN_APP_OPAQUE (ASN_APPLICATION | 4)</span>
+00124 <span class="preprocessor">#define ASN_APP_COUNTER64 (ASN_APPLICATION | 6)</span>
+00125 <span class="preprocessor">#define ASN_APP_FLOAT (ASN_APPLICATION | 8)</span>
+00126 <span class="preprocessor">#define ASN_APP_DOUBLE (ASN_APPLICATION | 9)</span>
+00127 <span class="preprocessor">#define ASN_APP_I64 (ASN_APPLICATION | 10)</span>
+00128 <span class="preprocessor">#define ASN_APP_U64 (ASN_APPLICATION | 11)</span>
+00129 <span class="preprocessor">#define ASN_APP_UNION (ASN_PRIVATE | 1) </span><span class=
+"comment">/* or ASN_PRIV_UNION ? */</span>
+00130 
+00131     <span class="comment">/*</span>
+00132 <span class="comment">     * value for Counter64 </span>
+00133 <span class="comment">     */</span>
+00134 <span class="preprocessor">#define ASN_OPAQUE_COUNTER64 (ASN_OPAQUE_TAG2 + ASN_APP_COUNTER64)</span>
+00135     <span class="comment">/*</span>
+00136 <span class="comment">     * max size of BER encoding of Counter64 </span>
+00137 <span class="comment">     */</span>
+00138 <span class="preprocessor">#define ASN_OPAQUE_COUNTER64_MX_BER_LEN 12</span>
+00139 
+00140     <span class="comment">/*</span>
+00141 <span class="comment">     * value for Float </span>
+00142 <span class="comment">     */</span>
+00143 <span class="preprocessor">#define ASN_OPAQUE_FLOAT (ASN_OPAQUE_TAG2 + ASN_APP_FLOAT)</span>
+00144     <span class="comment">/*</span>
+00145 <span class="comment">     * size of BER encoding of Float </span>
+00146 <span class="comment">     */</span>
+00147 <span class="preprocessor">#define ASN_OPAQUE_FLOAT_BER_LEN 7</span>
+00148 
+00149     <span class="comment">/*</span>
+00150 <span class="comment">     * value for Double </span>
+00151 <span class="comment">     */</span>
+00152 <span class="preprocessor">#define ASN_OPAQUE_DOUBLE (ASN_OPAQUE_TAG2 + ASN_APP_DOUBLE)</span>
+00153     <span class="comment">/*</span>
+00154 <span class="comment">     * size of BER encoding of Double </span>
+00155 <span class="comment">     */</span>
+00156 <span class="preprocessor">#define ASN_OPAQUE_DOUBLE_BER_LEN 11</span>
+00157 
+00158     <span class="comment">/*</span>
+00159 <span class="comment">     * value for Integer64 </span>
+00160 <span class="comment">     */</span>
+00161 <span class="preprocessor">#define ASN_OPAQUE_I64 (ASN_OPAQUE_TAG2 + ASN_APP_I64)</span>
+00162     <span class="comment">/*</span>
+00163 <span class="comment">     * max size of BER encoding of Integer64 </span>
+00164 <span class="comment">     */</span>
+00165 <span class="preprocessor">#define ASN_OPAQUE_I64_MX_BER_LEN 11</span>
+00166 
+00167     <span class="comment">/*</span>
+00168 <span class="comment">     * value for Unsigned64 </span>
+00169 <span class="comment">     */</span>
+00170 <span class="preprocessor">#define ASN_OPAQUE_U64 (ASN_OPAQUE_TAG2 + ASN_APP_U64)</span>
+00171     <span class="comment">/*</span>
+00172 <span class="comment">     * max size of BER encoding of Unsigned64 </span>
+00173 <span class="comment">     */</span>
+00174 <span class="preprocessor">#define ASN_OPAQUE_U64_MX_BER_LEN 12</span>
+00175 
+00176 <span class="preprocessor">#endif                          </span><span class="comment">/* OPAQUE_SPECIAL_TYPES */</span>
+00177 
+00178 
+00179 <span class="preprocessor">#define ASN_PRIV_INCL_RANGE (ASN_PRIVATE | 2)</span>
+00180 <span class="preprocessor">#define ASN_PRIV_EXCL_RANGE (ASN_PRIVATE | 3)</span>
+00181 <span class="preprocessor">#define ASN_PRIV_DELEGATED  (ASN_PRIVATE | 5)</span>
+00182 <span class="preprocessor">#define ASN_PRIV_IMPLIED_OCTET_STR  (ASN_PRIVATE | ASN_OCTET_STR)       </span><span class=
+"comment">/* 4 */</span>
+00183 <span class="preprocessor">#define ASN_PRIV_IMPLIED_OBJECT_ID  (ASN_PRIVATE | ASN_OBJECT_ID)       </span><span class=
+"comment">/* 6 */</span>
+00184 <span class="preprocessor">#define ASN_PRIV_RETRY      (ASN_PRIVATE | 7)</span>
+00185 <span class="preprocessor">#define IS_DELEGATED(x)   ((x) == ASN_PRIV_DELEGATED)</span>
+00186 
+00187 
+00188     <span class="keywordtype">int</span>             asn_check_packet(u_char *, size_t);
+00189     u_char         *asn_parse_int(u_char *, size_t *, u_char *, <span class="keywordtype">long</span> *,
+00190                                   size_t);
+00191     u_char         *asn_build_int(u_char *, size_t *, u_char, <span class="keyword">const</span> <span class=
+"keywordtype">long</span> *,
+00192                                   size_t);
+00193     u_char         *asn_parse_unsigned_int(u_char *, size_t *, u_char *,
+00194                                            u_long *, size_t);
+00195     u_char         *asn_build_unsigned_int(u_char *, size_t *, u_char,
+00196                                            <span class="keyword">const</span> u_long *, size_t);
+00197     u_char         *asn_parse_string(u_char *, size_t *, u_char *,
+00198                                      u_char *, size_t *);
+00199     u_char         *asn_build_string(u_char *, size_t *, u_char,
+00200                                      <span class="keyword">const</span> u_char *, size_t);
+00201     u_char         *asn_parse_header(u_char *, size_t *, u_char *);
+00202     u_char         *asn_parse_sequence(u_char *, size_t *, u_char *, u_char expected_type,      <span class=
+"comment">/* must be this type */</span>
+00203                                        <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *estr);       <span class="comment">/* error message prefix */</span>
+00204     u_char         *asn_build_header(u_char *, size_t *, u_char, size_t);
+00205     u_char         *asn_build_sequence(u_char *, size_t *, u_char, size_t);
+00206     u_char         *asn_parse_length(u_char *, u_long *);
+00207     u_char         *asn_build_length(u_char *, size_t *, size_t);
+00208     u_char         *asn_parse_objid(u_char *, size_t *, u_char *, oid *,
+00209                                     size_t *);
+00210     u_char         *asn_build_objid(u_char *, size_t *, u_char, oid *,
+00211                                     size_t);
+00212     u_char         *asn_parse_null(u_char *, size_t *, u_char *);
+00213     u_char         *asn_build_null(u_char *, size_t *, u_char);
+00214     u_char         *asn_parse_bitstring(u_char *, size_t *, u_char *,
+00215                                         u_char *, size_t *);
+00216     u_char         *asn_build_bitstring(u_char *, size_t *, u_char,
+00217                                         <span class="keyword">const</span> u_char *, size_t);
+00218     u_char         *asn_parse_unsigned_int64(u_char *, size_t *, u_char *,
+00219                                              <span class="keyword">struct</span> counter64 *, size_t);
+00220     u_char         *asn_build_unsigned_int64(u_char *, size_t *, u_char,
+00221                                              <span class="keyword">const</span> <span class=
+"keyword">struct</span> counter64 *, size_t);
+00222     u_char         *asn_parse_signed_int64(u_char *, size_t *, u_char *,
+00223                                            <span class="keyword">struct</span> counter64 *, size_t);
+00224     u_char         *asn_build_signed_int64(u_char *, size_t *, u_char,
+00225                                            <span class="keyword">const</span> <span class=
+"keyword">struct</span> counter64 *, size_t);
+00226     u_char         *asn_build_float(u_char *, size_t *, u_char, <span class="keyword">const</span> <span class=
+"keywordtype">float</span> *,
+00227                                     size_t);
+00228     u_char         *asn_parse_float(u_char *, size_t *, u_char *, <span class="keywordtype">float</span> *,
+00229                                     size_t);
+00230     u_char         *asn_build_double(u_char *, size_t *, u_char, <span class="keyword">const</span> <span class=
+"keywordtype">double</span> *,
+00231                                      size_t);
+00232     u_char         *asn_parse_double(u_char *, size_t *, u_char *,
+00233                                      <span class="keywordtype">double</span> *, size_t);
+00234 
+00235 <span class="preprocessor">#ifdef USE_REVERSE_ASNENCODING</span>
+00236 
+00237     <span class="comment">/*</span>
+00238 <span class="comment">     * Re-allocator function for below.  </span>
+00239 <span class="comment">     */</span>
+00240 
+00241     <span class="keywordtype">int</span>             asn_realloc(u_char **, size_t *);
+00242 
+00243     <span class="comment">/*</span>
+00244 <span class="comment">     * Re-allocating reverse ASN.1 encoder functions.  Synopsis:</span>
+00245 <span class="comment">     * </span>
+00246 <span class="comment">     * u_char *buf = (u_char*)malloc(100);</span>
+00247 <span class="comment">     * u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);</span>
+00248 <span class="comment">     * size_t buf_len = 100, offset = 0;</span>
+00249 <span class="comment">     * long data = 12345;</span>
+00250 <span class="comment">     * int allow_realloc = 1;</span>
+00251 <span class="comment">     * </span>
+00252 <span class="comment">     * if (asn_realloc_rbuild_int(&amp;buf, &amp;buf_len, &amp;offset, allow_realloc,</span>
+00253 <span class="comment">     * type, &amp;data, sizeof(long)) == 0) {</span>
+00254 <span class="comment">     * error;</span>
+00255 <span class="comment">     * }</span>
+00256 <span class="comment">     * </span>
+00257 <span class="comment">     * NOTE WELL: after calling one of these functions with allow_realloc</span>
+00258 <span class="comment">     * non-zero, buf might have moved, buf_len might have grown and</span>
+00259 <span class="comment">     * offset will have increased by the size of the encoded data.</span>
+00260 <span class="comment">     * You should **NEVER** do something like this:</span>
+00261 <span class="comment">     * </span>
+00262 <span class="comment">     * u_char *buf = (u_char *)malloc(100), *ptr;</span>
+00263 <span class="comment">     * u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);</span>
+00264 <span class="comment">     * size_t buf_len = 100, offset = 0;</span>
+00265 <span class="comment">     * long data1 = 1234, data2 = 5678;</span>
+00266 <span class="comment">     * int rc = 0, allow_realloc = 1;</span>
+00267 <span class="comment">     * </span>
+00268 <span class="comment">     * rc  = asn_realloc_rbuild_int(&amp;buf, &amp;buf_len, &amp;offset, allow_realloc,</span>
+00269 <span class="comment">     * type, &amp;data1, sizeof(long));</span>
+00270 <span class="comment">     * ptr = buf[buf_len - offset];   / * points at encoding of data1 * /</span>
+00271 <span class="comment">     * if (rc == 0) {</span>
+00272 <span class="comment">     * error;</span>
+00273 <span class="comment">     * }</span>
+00274 <span class="comment">     * rc  = asn_realloc_rbuild_int(&amp;buf, &amp;buf_len, &amp;offset, allow_realloc,</span>
+00275 <span class="comment">     * type, &amp;data2, sizeof(long));</span>
+00276 <span class="comment">     * make use of ptr here;</span>
+00277 <span class="comment">     * </span>
+00278 <span class="comment">     * </span>
+00279 <span class="comment">     * ptr is **INVALID** at this point.  In general, you should store the</span>
+00280 <span class="comment">     * offset value and compute pointers when you need them:</span>
+00281 <span class="comment">     * </span>
+00282 <span class="comment">     * </span>
+00283 <span class="comment">     * </span>
+00284 <span class="comment">     * u_char *buf = (u_char *)malloc(100), *ptr;</span>
+00285 <span class="comment">     * u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);</span>
+00286 <span class="comment">     * size_t buf_len = 100, offset = 0, ptr_offset;</span>
+00287 <span class="comment">     * long data1 = 1234, data2 = 5678;</span>
+00288 <span class="comment">     * int rc = 0, allow_realloc = 1;</span>
+00289 <span class="comment">     * </span>
+00290 <span class="comment">     * rc  = asn_realloc_rbuild_int(&amp;buf, &amp;buf_len, &amp;offset, allow_realloc,</span>
+00291 <span class="comment">     * type, &amp;data1, sizeof(long));</span>
+00292 <span class="comment">     * ptr_offset = offset;</span>
+00293 <span class="comment">     * if (rc == 0) {</span>
+00294 <span class="comment">     * error;</span>
+00295 <span class="comment">     * }</span>
+00296 <span class="comment">     * rc  = asn_realloc_rbuild_int(&amp;buf, &amp;buf_len, &amp;offset, allow_realloc,</span>
+00297 <span class="comment">     * type, &amp;data2, sizeof(long));</span>
+00298 <span class="comment">     * ptr = buf + buf_len - ptr_offset</span>
+00299 <span class="comment">     * make use of ptr here;</span>
+00300 <span class="comment">     * </span>
+00301 <span class="comment">     * </span>
+00302 <span class="comment">     * </span>
+00303 <span class="comment">     * Here, you can see that ptr will be a valid pointer even if the block of</span>
+00304 <span class="comment">     * memory has been moved, as it may well have been.  Plenty of examples of</span>
+00305 <span class="comment">     * usage all over asn1.c, snmp_api.c, snmpusm.c.</span>
+00306 <span class="comment">     * </span>
+00307 <span class="comment">     * The other thing you should **NEVER** do is to pass a pointer to a buffer</span>
+00308 <span class="comment">     * on the stack as the first argument when allow_realloc is non-zero, unless</span>
+00309 <span class="comment">     * you really know what you are doing and your machine/compiler allows you to</span>
+00310 <span class="comment">     * free non-heap memory.  There are rumours that such things exist, but many</span>
+00311 <span class="comment">     * consider them no more than the wild tales of a fool.</span>
+00312 <span class="comment">     * </span>
+00313 <span class="comment">     * Of course, you can pass allow_realloc as zero, to indicate that you do not</span>
+00314 <span class="comment">     * wish the packet buffer to be reallocated for some reason; perhaps because</span>
+00315 <span class="comment">     * it is on the stack.  This may be useful to emulate the functionality of</span>
+00316 <span class="comment">     * the old API:</span>
+00317 <span class="comment">     * </span>
+00318 <span class="comment">     * u_char my_static_buffer[100], *cp = NULL;</span>
+00319 <span class="comment">     * size_t my_static_buffer_len = 100;</span>
+00320 <span class="comment">     * float my_pi = (float)22/(float)7;</span>
+00321 <span class="comment">     * </span>
+00322 <span class="comment">     * cp = asn_rbuild_float(my_static_buffer, &amp;my_static_buffer_len,</span>
+00323 <span class="comment">     * ASN_OPAQUE_FLOAT, &amp;my_pi, sizeof(float));</span>
+00324 <span class="comment">     * if (cp == NULL) {</span>
+00325 <span class="comment">     * error;</span>
+00326 <span class="comment">     * }</span>
+00327 <span class="comment">     * </span>
+00328 <span class="comment">     * </span>
+00329 <span class="comment">     * IS EQUIVALENT TO:</span>
+00330 <span class="comment">     * </span>
+00331 <span class="comment">     * </span>
+00332 <span class="comment">     * u_char my_static_buffer[100];</span>
+00333 <span class="comment">     * size_t my_static_buffer_len = 100, my_offset = 0;</span>
+00334 <span class="comment">     * float my_pi = (float)22/(float)7;</span>
+00335 <span class="comment">     * int rc = 0;</span>
+00336 <span class="comment">     * </span>
+00337 <span class="comment">     * rc = asn_realloc_rbuild_float(&amp;my_static_buffer, &amp;my_static_buffer_len,</span>
+00338 <span class="comment">     * &amp;my_offset, 0,</span>
+00339 <span class="comment">     * ASN_OPAQUE_FLOAT, &amp;my_pi, sizeof(float));</span>
+00340 <span class="comment">     * if (rc == 0) {</span>
+00341 <span class="comment">     * error;</span>
+00342 <span class="comment">     * }</span>
+00343 <span class="comment">     * </span>
+00344 <span class="comment">     * </span>
+00345 <span class="comment">     */</span>
+00346 
+00347 
+00348     <span class="keywordtype">int</span>             asn_realloc_rbuild_int(u_char ** pkt, size_t * pkt_len,
+00349                                            size_t * offset,
+00350                                            <span class="keywordtype">int</span> allow_realloc, u_char type,
+00351                                            <span class="keyword">const</span> <span class=
+"keywordtype">long</span> *data, size_t data_size);
+00352 
+00353     <span class="keywordtype">int</span>             asn_realloc_rbuild_string(u_char ** pkt,
+00354                                               size_t * pkt_len,
+00355                                               size_t * offset,
+00356                                               <span class="keywordtype">int</span> allow_realloc,
+00357                                               u_char type,
+00358                                               <span class="keyword">const</span> u_char * data,
+00359                                               size_t data_size);
+00360 
+00361     <span class="keywordtype">int</span>             asn_realloc_rbuild_unsigned_int(u_char ** pkt,
+00362                                                     size_t * pkt_len,
+00363                                                     size_t * offset,
+00364                                                     <span class="keywordtype">int</span> allow_realloc,
+00365                                                     u_char type,
+00366                                                     <span class="keyword">const</span> u_long * data,
+00367                                                     size_t data_size);
+00368 
+00369     <span class="keywordtype">int</span>             asn_realloc_rbuild_header(u_char ** pkt,
+00370                                               size_t * pkt_len,
+00371                                               size_t * offset,
+00372                                               <span class="keywordtype">int</span> allow_realloc,
+00373                                               u_char type,
+00374                                               size_t data_size);
+00375 
+00376     <span class="keywordtype">int</span>             asn_realloc_rbuild_sequence(u_char ** pkt,
+00377                                                 size_t * pkt_len,
+00378                                                 size_t * offset,
+00379                                                 <span class="keywordtype">int</span> allow_realloc,
+00380                                                 u_char type,
+00381                                                 size_t data_size);
+00382 
+00383     <span class="keywordtype">int</span>             asn_realloc_rbuild_length(u_char ** pkt,
+00384                                               size_t * pkt_len,
+00385                                               size_t * offset,
+00386                                               <span class="keywordtype">int</span> allow_realloc,
+00387                                               size_t data_size);
+00388 
+00389     <span class="keywordtype">int</span>             asn_realloc_rbuild_objid(u_char ** pkt,
+00390                                              size_t * pkt_len,
+00391                                              size_t * offset,
+00392                                              <span class="keywordtype">int</span> allow_realloc,
+00393                                              u_char type, <span class="keyword">const</span> oid *,
+00394                                              size_t);
+00395 
+00396     <span class="keywordtype">int</span>             asn_realloc_rbuild_null(u_char ** pkt,
+00397                                             size_t * pkt_len,
+00398                                             size_t * offset,
+00399                                             <span class="keywordtype">int</span> allow_realloc,
+00400                                             u_char type);
+00401 
+00402     <span class="keywordtype">int</span>             asn_realloc_rbuild_bitstring(u_char ** pkt,
+00403                                                  size_t * pkt_len,
+00404                                                  size_t * offset,
+00405                                                  <span class="keywordtype">int</span> allow_realloc,
+00406                                                  u_char type,
+00407                                                  <span class="keyword">const</span> u_char * data,
+00408                                                  size_t data_size);
+00409 
+00410     <span class="keywordtype">int</span>             asn_realloc_rbuild_unsigned_int64(u_char ** pkt,
+00411                                                       size_t * pkt_len,
+00412                                                       size_t * offset,
+00413                                                       <span class="keywordtype">int</span> allow_realloc,
+00414                                                       u_char type,
+00415                                                       <span class="keyword">struct</span> counter64
+00416                                                       <span class="keyword">const</span> *data, size_t);
+00417 
+00418     <span class="keywordtype">int</span>             asn_realloc_rbuild_signed_int64(u_char ** pkt,
+00419                                                     size_t * pkt_len,
+00420                                                     size_t * offset,
+00421                                                     <span class="keywordtype">int</span> allow_realloc,
+00422                                                     u_char type,
+00423                                                     <span class="keyword">const</span> <span class=
+"keyword">struct</span> counter64 *data,
+00424                                                     size_t);
+00425 
+00426     <span class="keywordtype">int</span>             asn_realloc_rbuild_float(u_char ** pkt,
+00427                                              size_t * pkt_len,
+00428                                              size_t * offset,
+00429                                              <span class="keywordtype">int</span> allow_realloc,
+00430                                              u_char type, <span class="keyword">const</span> <span class=
+"keywordtype">float</span> *data,
+00431                                              size_t data_size);
+00432 
+00433     <span class="keywordtype">int</span>             asn_realloc_rbuild_double(u_char ** pkt,
+00434                                               size_t * pkt_len,
+00435                                               size_t * offset,
+00436                                               <span class="keywordtype">int</span> allow_realloc,
+00437                                               u_char type, <span class="keyword">const</span> <span class=
+"keywordtype">double</span> *data,
+00438                                               size_t data_size);
+00439 <span class="preprocessor">#endif</span>
+00440 
+00441 <span class="preprocessor">#ifdef __cplusplus</span>
+00442 }
+00443 <span class="preprocessor">#endif</span>
+00444 <span class="preprocessor">#endif                          </span><span class="comment">/* ASN1_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

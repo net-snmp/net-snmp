@@ -1,0 +1,406 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>netsnmp_handler_registration_s Struct Reference<br />
+  <small>[<a class="el" href="group__handler.html">Net-SNMP Agent handler and extensibility API</a>,&nbsp;<a class="el" href=
+  "group__handler.html">Net-SNMP Agent handler and extensibility API</a>]</small></h1>Root registration info. <a href=
+  "#_details">More...</a>
+
+  <p><code>#include &lt;<a class="el" href="agent__handler_8h-source.html">agent_handler.h</a>&gt;</code></p>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Data Fields</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__handler__registration__s.html#o0">handlerName</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">for mrTable listings, and other uses <a href="#o0"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__handler__registration__s.html#o1">contextName</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">NULL = default context. <a href="#o1"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">oid *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__handler__registration__s.html#o2">rootoid</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">where are we registered at? <a href="#o2"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o3" doxytag=
+      "netsnmp_handler_registration_s::rootoid_len" id="o3"></a> size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>rootoid_len</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__handler__registration__s.html#o4">handler</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">handler details <a href="#o4"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o5" doxytag=
+      "netsnmp_handler_registration_s::modes" id="o5"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>modes</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__handler__registration__s.html#o6">priority</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">more optional stuff <a href="#o6"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o7" doxytag=
+      "netsnmp_handler_registration_s::range_subid" id="o7"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>range_subid</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o8" doxytag=
+      "netsnmp_handler_registration_s::range_ubound" id="o8"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>range_ubound</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o9" doxytag=
+      "netsnmp_handler_registration_s::timeout" id="o9"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>timeout</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o10" doxytag=
+      "netsnmp_handler_registration_s::global_cacheid" id="o10"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>global_cacheid</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__handler__registration__s.html#o11">my_reg_void</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">void ptr for registeree <a href="#o11"></a><br /></td>
+    </tr>
+  </table>
+  <hr />
+  <a name="_details" id="_details"></a>
+
+  <h2>Detailed Description</h2>Root registration info.
+
+  <p>The variables handlerName, contextName, and rootoid need to be allocated on the heap, when the registration structure is
+  unregistered using <a class="el" href="group__agent__registry.html#ga42">unregister_mib_context()</a> the code attempts to free
+  them.</p>
+
+  <dl compact="compact">
+    <dt><b>Examples:</b></dt>
+
+    <dd>
+      <p><a class="el" href="delayed__instance_8c-example.html#_a8">delayed_instance.c</a>.</p>
+    </dd>
+  </dl>
+
+  <p>Definition at line <a class="el" href="agent__handler_8h-source.html#l00091">91</a> of file <a class="el" href=
+  "agent__handler_8h-source.html">agent_handler.h</a>.</p>
+  <hr />
+
+  <h2>Field Documentation</h2><a class="anchor" name="o1" doxytag="netsnmp_handler_registration_s::contextName" id="o1"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">char* <a class="el" href=
+            "structnetsnmp__handler__registration__s.html#o1">netsnmp_handler_registration_s::contextName</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>NULL = default context.</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8h-source.html#l00096">96</a> of file <a class="el" href=
+        "agent__handler_8h-source.html">agent_handler.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00621">netsnmp_handler_registration_dup()</a>,
+        <a class="el" href="agent__handler_8c-source.html#l00608">netsnmp_handler_registration_free()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00270">netsnmp_register_handler_nocallback()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00260">netsnmp_unregister_handler()</a>, and <a class="el" href=
+        "agent__registry_8c-source.html#l00916">unregister_mib_context()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o4" doxytag="netsnmp_handler_registration_s::handler" id="o4"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>* <a class="el" href=
+            "structnetsnmp__handler__registration__s.html#o4">netsnmp_handler_registration_s::handler</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>handler details</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8h-source.html#l00107">107</a> of file <a class="el" href=
+        "agent__handler_8h-source.html">agent_handler.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00825">netsnmp_find_handler_by_name()</a>, <a class=
+        "el" href="table__array_8c-source.html#l00196">netsnmp_find_table_array_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00163">netsnmp_handler_registration_create()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00621">netsnmp_handler_registration_dup()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00608">netsnmp_handler_registration_free()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00322">netsnmp_inject_handler_before()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00270">netsnmp_register_handler_nocallback()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, and <a class="el" href=
+        "table__array_8c-source.html#l00152">netsnmp_table_container_register()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o0" doxytag="netsnmp_handler_registration_s::handlerName" id="o0"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">char* <a class="el" href=
+            "structnetsnmp__handler__registration__s.html#o0">netsnmp_handler_registration_s::handlerName</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>for mrTable listings, and other uses</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8h-source.html#l00094">94</a> of file <a class="el" href=
+        "agent__handler_8h-source.html">agent_handler.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00417">netsnmp_cache_helper_handler()</a>, <a class=
+        "el" href="agent__handler_8c-source.html#l00163">netsnmp_handler_registration_create()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00621">netsnmp_handler_registration_dup()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00608">netsnmp_handler_registration_free()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, and <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o11" doxytag="netsnmp_handler_registration_s::my_reg_void" id="o11"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void* <a class="el" href=
+            "structnetsnmp__handler__registration__s.html#o11">netsnmp_handler_registration_s::my_reg_void</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>void ptr for registeree</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8h-source.html#l00122">122</a> of file <a class="el" href=
+        "agent__handler_8h-source.html">agent_handler.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o6" doxytag="netsnmp_handler_registration_s::priority" id="o6"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int <a class="el" href=
+            "structnetsnmp__handler__registration__s.html#o6">netsnmp_handler_registration_s::priority</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>more optional stuff</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8h-source.html#l00113">113</a> of file <a class="el" href=
+        "agent__handler_8h-source.html">agent_handler.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00163">netsnmp_handler_registration_create()</a>,
+        <a class="el" href="agent__handler_8c-source.html#l00621">netsnmp_handler_registration_dup()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00270">netsnmp_register_handler_nocallback()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00260">netsnmp_unregister_handler()</a>, and <a class="el" href=
+        "agent__registry_8c-source.html#l00916">unregister_mib_context()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o2" doxytag="netsnmp_handler_registration_s::rootoid" id="o2"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">oid* <a class="el" href=
+            "structnetsnmp__handler__registration__s.html#o2">netsnmp_handler_registration_s::rootoid</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>where are we registered at?</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8h-source.html#l00101">101</a> of file <a class="el" href=
+        "agent__handler_8h-source.html">agent_handler.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00417">netsnmp_cache_helper_handler()</a>, <a class=
+        "el" href="agent__handler_8c-source.html#l00163">netsnmp_handler_registration_create()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00621">netsnmp_handler_registration_dup()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00608">netsnmp_handler_registration_free()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00305">netsnmp_register_cache_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00270">netsnmp_register_handler_nocallback()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, <a class="el" href=
+        "scalar_8c-source.html#l00114">netsnmp_register_read_only_scalar()</a>, <a class="el" href=
+        "scalar_8c-source.html#l00079">netsnmp_register_scalar()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00058">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00772">netsnmp_table_build_oid()</a>, <a class="el" href=
+        "table_8c-source.html#l00806">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00656">netsnmp_table_data_build_result()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00260">netsnmp_unregister_handler()</a>, and <a class="el" href=
+        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr />
+  The documentation for this struct was generated from the following file:
+
+  <ul>
+    <li><a class="el" href="agent__handler_8h-source.html">agent_handler.h</a></li>
+  </ul>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,93 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>container_iterator.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 
+00006 <span class="preprocessor">#ifndef _CONTAINER_ITERATOR_HANDLER_H_</span>
+00007 <span class="preprocessor">#define _CONTAINER_ITERATOR_HANDLER_H_</span>
+00008 
+00009 <span class="preprocessor">#include "container.h"</span>
+00010 
+00011 <span class="preprocessor">#ifdef __cplusplus</span>
+00012 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00013 <span class="preprocessor">#endif</span>
+00014 
+00015     <span class="keyword">typedef</span> int (Netsnmp_Iterator_Loop_Key) (<span class=
+"keywordtype">void</span> *iterator_ctx,
+00016                                              netsnmp_ref_void* loop_ctx,
+00017                                              netsnmp_ref_void* key);
+00018     <span class="keyword">typedef</span> int (Netsnmp_Iterator_Loop_Data)(<span class=
+"keywordtype">void</span> *iterator_ctx,
+00019                                              netsnmp_ref_void* loop_ctx,
+00020                                              netsnmp_ref_void* data);
+00021     <span class="keyword">typedef</span> int (Netsnmp_Iterator_Ctx) (<span class="keywordtype">void</span> *iterator_ctx,
+00022                                          netsnmp_ref_void* loop_ctx);
+00023     <span class="keyword">typedef</span> int (Netsnmp_Iterator_Ctx_Dup) (<span class=
+"keywordtype">void</span> *iterator_ctx,
+00024                                             netsnmp_ref_void* loop_ctx,
+00025                                             netsnmp_ref_void* dup_ctx,
+00026                                             <span class="keywordtype">int</span> reuse);
+00027     <span class="keyword">typedef</span> int (Netsnmp_Iterator_Op) (<span class="keywordtype">void</span> *iterator_ctx);
+00028     <span class="keyword">typedef</span> int (Netsnmp_Iterator_Data) (<span class="keywordtype">void</span> *iterator_ctx,
+00029                                             <span class="keyword">const</span> <span class=
+"keywordtype">void</span> *data);    
+00030 
+00031     <span class="keywordtype">void</span> netsnmp_container_iterator_init(<span class="keywordtype">void</span>);
+00032 
+00033     netsnmp_container* netsnmp_container_iterator_get(
+00034         <span class="keywordtype">void</span> *iterator_user_ctx,
+00035         netsnmp_container_compare * compare,
+00036         Netsnmp_Iterator_Loop_Key * get_first,
+00037         Netsnmp_Iterator_Loop_Key * get_next,
+00038         Netsnmp_Iterator_Loop_Data * get_data,
+00039         Netsnmp_Iterator_Ctx_Dup * save_pos, <span class="comment">/* iff returning static data */</span>
+00040         Netsnmp_Iterator_Ctx * init_loop_ctx,
+00041         Netsnmp_Iterator_Ctx * cleanup_loop_ctx,
+00042         Netsnmp_Iterator_Data * free_user_ctx,
+00043         <span class="keywordtype">int</span> sorted);
+00044     
+00045     <span class="comment">/*</span>
+00046 <span class="comment">     * set up optional callbacks/</span>
+00047 <span class="comment">     * NOTE: even though the first parameter is a generic netsnmp_container,</span>
+00048 <span class="comment">     *       this function should only be called for a container created</span>
+00049 <span class="comment">     *       by netsnmp_container_iterator_get.</span>
+00050 <span class="comment">     */</span>
+00051     <span class="keywordtype">void</span>
+00052     netsnmp_container_iterator_set_data_cb(netsnmp_container *c,
+00053                                            Netsnmp_Iterator_Data * insert_data,
+00054                                            Netsnmp_Iterator_Data * remove_data,
+00055                                            Netsnmp_Iterator_Op * get_size);
+00056 
+00057 <span class="preprocessor">#ifdef __cplusplus</span>
+00058 }
+00059 <span class="preprocessor">#endif</span>
+00060 
+00061 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* _CONTAINER_ITERATOR_HANDLER_H_ */</span>
+00062 
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

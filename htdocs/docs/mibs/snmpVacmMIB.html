@@ -1,0 +1,1172 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>snmpVacmMIB</b>
+MIB object, which is defined within the <b>SNMP-VIEW-BASED-ACM-MIB</b> MIB
+document as <b>.1.3.6.1.6.3.16</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#vacmContextTable">vacmContextTable</a></li>
+  <li><a href="#vacmSecurityToGroupTable">vacmSecurityToGroupTable</a></li>
+  <li><a href="#vacmAccessTable">vacmAccessTable</a></li>
+  <li><a href="#vacmViewTreeFamilyTable">vacmViewTreeFamilyTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="vacmViewSpinLock" />
+1
+<br /><b>vacmViewSpinLock</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TestAndIncr">TestAndIncr</a>
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.6.3.16.1.5.1</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TestAndIncr"> TestAndIncr TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+An advisory lock used to allow cooperating SNMP
+Command Generator applications to coordinate their
+use of the Set operation in creating or modifying
+views.
+
+When creating a new view or altering an existing
+view, it is important to understand the potential
+interactions with other uses of the view.  The
+vacmViewSpinLock should be retrieved.  The name of
+the view to be created should be determined to be
+unique by the SNMP Command Generator application by
+consulting the vacmViewTreeFamilyTable.  Finally,
+the named view may be created (Set), including the
+advisory lock.
+If another SNMP Command Generator application has
+altered the views in the meantime, then the spin
+lock's value will have changed, and so this creation
+will fail because it will specify the wrong value for
+the spin lock.
+
+Since this is an advisory lock, the use of this lock
+is not enforced.
+                
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="vacmContextTable" /><h3>Table vacmContextTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>vacmContextTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>SNMP-VIEW-BASED-ACM-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.6.3.16.1.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The table of locally available contexts.
+This table provides information to SNMP Command
+Generator applications so that they can properly
+                 configure the vacmAccessTable to control access to
+                 all contexts at the SNMP entity.
+This table may change dynamically if the SNMP entity
+                 allows that contexts are added/deleted dynamically
+                 (for instance when its configuration changes).  Such
+                 changes would happen only if the management
+                 instrumentation at that SNMP entity recognizes more
+                 (or fewer) contexts.
+The presence of entries in this table and of entries
+                 in the vacmAccessTable are independent.  That is, a
+                 context identified by an entry in this table is not
+                 necessarily referenced by any entries in the
+                 vacmAccessTable; and the context(s) referenced by an
+                 entry in the vacmAccessTable does not necessarily
+                 currently exist and thus need not be identified by an
+                 entry in this table.
+This table must be made accessible via the default
+                 context so that Command Responder applications have
+                 a standard way of retrieving the information.
+This table is read-only.  It cannot be configured via
+                 SNMP.
+                
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="vacmContextEntry" />Row Description</td>
+<td>
+<pre>
+Information about a particular context.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>vacmContextTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="vacmContextName" />
+1
+<br /><b>vacmContextName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A human readable name identifying a particular
+context at a particular SNMP entity.
+
+The empty contextName (zero length) represents the
+default context.
+                
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other vacmContextTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+</table>
+</ul>
+<a name="vacmSecurityToGroupTable" /><h3>Table vacmSecurityToGroupTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>vacmSecurityToGroupTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>SNMP-VIEW-BASED-ACM-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.6.3.16.1.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+This table maps a combination of securityModel and
+securityName into a groupName which is used to define
+an access control policy for a group of principals.
+                
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="vacmSecurityToGroupEntry" />Row Description</td>
+<td>
+<pre>
+An entry in this table maps the combination of a
+securityModel and securityName into a groupName.
+                
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>vacmSecurityToGroupTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="vacmSecurityModel" />
+1
+<br /><b>vacmSecurityModel</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#SnmpSecurityModel">SnmpSecurityModel</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpSecurityModel"> SnmpSecurityModel TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The Security Model, by which the vacmSecurityName
+referenced by this entry is provided.
+
+Note, this object may not take the 'any' (0) value.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmSecurityName" />
+2
+<br /><b>vacmSecurityName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The securityName for the principal, represented in a
+Security Model independent format, which is mapped by
+this entry to a groupName.
+                
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other vacmSecurityToGroupTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="vacmGroupName" />
+3
+<br /><b>vacmGroupName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of the group to which this entry (e.g., the
+combination of securityModel and securityName)
+belongs.
+
+This groupName is used as index into the
+vacmAccessTable to select an access control policy.
+However, a value in this table does not imply that an
+instance with the value exists in table vacmAccesTable.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmSecurityToGroupStorageType" />
+4
+<br /><b>vacmSecurityToGroupStorageType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#StorageType">StorageType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#StorageType"> StorageType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The storage type for this conceptual row.
+Conceptual rows having the value 'permanent' need not
+allow write-access to any columnar objects in the row.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmSecurityToGroupStatus" />
+5
+<br /><b>vacmSecurityToGroupStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The status of this conceptual row.
+Until instances of all corresponding columns are
+                 appropriately configured, the value of the
+corresponding instance of the vacmSecurityToGroupStatus
+                 column is 'notReady'.
+In particular, a newly created row cannot be made
+                 active until a value has been set for vacmGroupName.
+The  RowStatus TC [RFC2579] requires that this
+                 DESCRIPTION clause states under which circumstances
+                 other objects in this row can be modified:
+The value of this object has no effect on whether
+                 other objects in this conceptual row can be modified.
+                
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="vacmAccessTable" /><h3>Table vacmAccessTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>vacmAccessTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>SNMP-VIEW-BASED-ACM-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.6.3.16.1.4</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The table of access rights for groups.
+Each entry is indexed by a groupName, a contextPrefix,
+                 a securityModel and a securityLevel.  To determine
+                 whether access is allowed, one entry from this table
+                 needs to be selected and the proper viewName from that
+                 entry must be used for access control checking.
+To select the proper entry, follow these steps:
+1) the set of possible matches is formed by the
+                    intersection of the following sets of entries:
+     the set of entries with identical vacmGroupName
+                      the union of these two sets:
+                       - the set with identical vacmAccessContextPrefix
+                       - the set of entries with vacmAccessContextMatch
+                         value of 'prefix' and matching
+                         vacmAccessContextPrefix
+                      intersected with the union of these two sets:
+                       - the set of entries with identical
+                         vacmSecurityModel
+                       - the set of entries with vacmSecurityModel
+                         value of 'any'
+                      intersected with the set of entries with
+                      vacmAccessSecurityLevel value less than or equal
+                      to the requested securityLevel
+2) if this set has only one member, we're done
+                    otherwise, it comes down to deciding how to weight
+                    the preferences between ContextPrefixes,
+                    SecurityModels, and SecurityLevels as follows:
+                    a) if the subset of entries with securityModel
+                       matching the securityModel in the message is
+                       not empty, then discard the rest.
+                    b) if the subset of entries with
+                       vacmAccessContextPrefix matching the contextName
+                       in the message is not empty,
+                       then discard the rest
+                    c) discard all entries with ContextPrefixes shorter
+                       than the longest one remaining in the set
+                    d) select the entry with the highest securityLevel
+Please note that for securityLevel noAuthNoPriv, all
+                 groups are really equivalent since the assumption that
+                 the securityName has been authenticated does not hold.
+                
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="vacmAccessEntry" />Row Description</td>
+<td>
+<pre>
+An access right configured in the Local Configuration
+Datastore (LCD) authorizing access to an SNMP context.
+
+Entries in this table can use an instance value for
+object vacmGroupName even if no entry in table
+vacmAccessSecurityToGroupTable has a corresponding
+value for object vacmGroupName.
+                
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>vacmAccessTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="vacmGroupName" />
+3
+<br /><b>vacmGroupName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of the group to which this entry (e.g., the
+combination of securityModel and securityName)
+belongs.
+
+This groupName is used as index into the
+vacmAccessTable to select an access control policy.
+However, a value in this table does not imply that an
+instance with the value exists in table vacmAccesTable.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmAccessContextPrefix" />
+1
+<br /><b>vacmAccessContextPrefix</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+In order to gain the access rights allowed by this
+conceptual row, a contextName must match exactly
+(if the value of vacmAccessContextMatch is 'exact')
+or partially (if the value of vacmAccessContextMatch
+is 'prefix') to the value of the instance of this
+object.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmAccessSecurityModel" />
+2
+<br /><b>vacmAccessSecurityModel</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#SnmpSecurityModel">SnmpSecurityModel</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpSecurityModel"> SnmpSecurityModel TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+In order to gain the access rights allowed by this
+conceptual row, this securityModel must be in use.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmAccessSecurityLevel" />
+3
+<br /><b>vacmAccessSecurityLevel</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#SnmpSecurityLevel">SnmpSecurityLevel</a>
+     <br>(ENUM list below)
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpSecurityLevel"> SnmpSecurityLevel TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The minimum level of security required in order to
+gain the access rights allowed by this conceptual
+row.  A securityLevel of noAuthNoPriv is less than
+authNoPriv which in turn is less than authPriv.
+
+If multiple entries are equally indexed except for
+this vacmAccessSecurityLevel index, then the entry
+which has the highest value for
+vacmAccessSecurityLevel is selected.
+                
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other vacmAccessTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="vacmAccessContextMatch" />
+4
+<br /><b>vacmAccessContextMatch</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>exact</td></tr>
+        <tr><td>2</td><td>prefix</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+If the value of this object is exact(1), then all
+rows where the contextName exactly matches
+vacmAccessContextPrefix are selected.
+
+If the value of this object is prefix(2), then all
+rows where the contextName whose starting octets
+exactly match vacmAccessContextPrefix are selected.
+This allows for a simple form of wildcarding.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmAccessReadViewName" />
+5
+<br /><b>vacmAccessReadViewName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of an instance of this object identifies
+the MIB view of the SNMP context to which this
+conceptual row authorizes read access.
+
+The identified MIB view is that one for which the
+vacmViewTreeFamilyViewName has the same value as the
+instance of this object; if the value is the empty
+string or if there is no active MIB view having this
+value of vacmViewTreeFamilyViewName, then no access
+is granted.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmAccessWriteViewName" />
+6
+<br /><b>vacmAccessWriteViewName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of an instance of this object identifies
+the MIB view of the SNMP context to which this
+conceptual row authorizes write access.
+
+The identified MIB view is that one for which the
+vacmViewTreeFamilyViewName has the same value as the
+instance of this object; if the value is the empty
+string or if there is no active MIB view having this
+value of vacmViewTreeFamilyViewName, then no access
+is granted.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmAccessNotifyViewName" />
+7
+<br /><b>vacmAccessNotifyViewName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of an instance of this object identifies
+the MIB view of the SNMP context to which this
+conceptual row authorizes access for notifications.
+
+The identified MIB view is that one for which the
+vacmViewTreeFamilyViewName has the same value as the
+instance of this object; if the value is the empty
+string or if there is no active MIB view having this
+value of vacmViewTreeFamilyViewName, then no access
+is granted.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmAccessStorageType" />
+8
+<br /><b>vacmAccessStorageType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#StorageType">StorageType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#StorageType"> StorageType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The storage type for this conceptual row.
+Conceptual rows having the value 'permanent' need not
+                 allow write-access to any columnar objects in the row.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmAccessStatus" />
+9
+<br /><b>vacmAccessStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The status of this conceptual row.
+The  RowStatus TC [RFC2579] requires that this
+                 DESCRIPTION clause states under which circumstances
+                 other objects in this row can be modified:
+The value of this object has no effect on whether
+                 other objects in this conceptual row can be modified.
+                
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="vacmViewTreeFamilyTable" /><h3>Table vacmViewTreeFamilyTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>vacmViewTreeFamilyTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>SNMP-VIEW-BASED-ACM-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.6.3.16.1.5.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Locally held information about families of subtrees
+within MIB views.
+
+Each MIB view is defined by two sets of view subtrees:
+  - the included view subtrees, and
+  - the excluded view subtrees.
+Every such view subtree, both the included and the
+
+excluded ones, is defined in this table.
+
+To determine if a particular object instance is in
+a particular MIB view, compare the object instance's
+OBJECT IDENTIFIER with each of the MIB view's active
+entries in this table.  If none match, then the
+object instance is not in the MIB view.  If one or
+more match, then the object instance is included in,
+or excluded from, the MIB view according to the
+value of vacmViewTreeFamilyType in the entry whose
+value of vacmViewTreeFamilySubtree has the most
+sub-identifiers.  If multiple entries match and have
+the same number of sub-identifiers (when wildcarding
+is specified with the value of vacmViewTreeFamilyMask),
+then the lexicographically greatest instance of
+vacmViewTreeFamilyType determines the inclusion or
+exclusion.
+
+An object instance's OBJECT IDENTIFIER X matches an
+active entry in this table when the number of
+sub-identifiers in X is at least as many as in the
+value of vacmViewTreeFamilySubtree for the entry,
+and each sub-identifier in the value of
+vacmViewTreeFamilySubtree matches its corresponding
+sub-identifier in X.  Two sub-identifiers match
+either if the corresponding bit of the value of
+vacmViewTreeFamilyMask for the entry is zero (the
+'wild card' value), or if they are equal.
+
+A 'family' of subtrees is the set of subtrees defined
+by a particular combination of values of
+vacmViewTreeFamilySubtree and vacmViewTreeFamilyMask.
+
+In the case where no 'wild card' is defined in the
+vacmViewTreeFamilyMask, the family of subtrees reduces
+to a single subtree.
+
+When creating or changing MIB views, an SNMP Command
+Generator application should utilize the
+vacmViewSpinLock to try to avoid collisions.  See
+DESCRIPTION clause of vacmViewSpinLock.
+
+When creating MIB views, it is strongly advised that
+first the 'excluded' vacmViewTreeFamilyEntries are
+created and then the 'included' entries.
+
+When deleting MIB views, it is strongly advised that
+first the 'included' vacmViewTreeFamilyEntries are
+
+deleted and then the 'excluded' entries.
+
+If a create for an entry for instance-level access
+control is received and the implementation does not
+support instance-level granularity, then an
+inconsistentName error must be returned.
+                
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="vacmViewTreeFamilyEntry" />Row Description</td>
+<td>
+<pre>
+Information on a particular family of view subtrees
+included in or excluded from a particular SNMP
+context's MIB view.
+
+Implementations must not restrict the number of
+families of view subtrees for a given MIB view,
+except as dictated by resource constraints on the
+overall number of entries in the
+vacmViewTreeFamilyTable.
+
+If no conceptual rows exist in this table for a given
+MIB view (viewName), that view may be thought of as
+consisting of the empty set of view subtrees.
+                
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>vacmViewTreeFamilyTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="vacmViewTreeFamilyViewName" />
+1
+<br /><b>vacmViewTreeFamilyViewName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The human readable name for a family of view subtrees.
+
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmViewTreeFamilySubtree" />
+2
+<br /><b>vacmViewTreeFamilySubtree</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The MIB subtree which when combined with the
+corresponding instance of vacmViewTreeFamilyMask
+defines a family of view subtrees.
+                
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other vacmViewTreeFamilyTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="vacmViewTreeFamilyMask" />
+3
+<br /><b>vacmViewTreeFamilyMask</b>
+
+</td><td>
+  OCTETSTR
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The bit mask which, in combination with the
+corresponding instance of vacmViewTreeFamilySubtree,
+defines a family of view subtrees.
+
+Each bit of this bit mask corresponds to a
+sub-identifier of vacmViewTreeFamilySubtree, with the
+most significant bit of the i-th octet of this octet
+string value (extended if necessary, see below)
+corresponding to the (8*i - 7)-th sub-identifier, and
+the least significant bit of the i-th octet of this
+octet string corresponding to the (8*i)-th
+sub-identifier, where i is in the range 1 through 16.
+
+Each bit of this bit mask specifies whether or not
+the corresponding sub-identifiers must match when
+determining if an OBJECT IDENTIFIER is in this
+family of view subtrees; a '1' indicates that an
+exact match must occur; a '0' indicates 'wild card',
+i.e., any sub-identifier value matches.
+
+Thus, the OBJECT IDENTIFIER X of an object instance
+is contained in a family of view subtrees if, for
+each sub-identifier of the value of
+vacmViewTreeFamilySubtree, either:
+
+  the i-th bit of vacmViewTreeFamilyMask is 0, or
+
+  the i-th sub-identifier of X is equal to the i-th
+  sub-identifier of the value of
+  vacmViewTreeFamilySubtree.
+
+If the value of this bit mask is M bits long and
+
+there are more than M sub-identifiers in the
+corresponding instance of vacmViewTreeFamilySubtree,
+then the bit mask is extended with 1's to be the
+required length.
+
+Note that when the value of this object is the
+zero-length string, this extension rule results in
+a mask of all-1's being used (i.e., no 'wild card'),
+and the family of view subtrees is the one view
+subtree uniquely identified by the corresponding
+instance of vacmViewTreeFamilySubtree.
+
+Note that masks of length greater than zero length
+do not need to be supported.  In this case this
+object is made read-only.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmViewTreeFamilyType" />
+4
+<br /><b>vacmViewTreeFamilyType</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>included</td></tr>
+        <tr><td>2</td><td>excluded</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+Indicates whether the corresponding instances of
+vacmViewTreeFamilySubtree and vacmViewTreeFamilyMask
+define a family of view subtrees which is included in
+or excluded from the MIB view.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmViewTreeFamilyStorageType" />
+5
+<br /><b>vacmViewTreeFamilyStorageType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#StorageType">StorageType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#StorageType"> StorageType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The storage type for this conceptual row.
+Conceptual rows having the value 'permanent' need not
+                 allow write-access to any columnar objects in the row.
+                
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="vacmViewTreeFamilyStatus" />
+6
+<br /><b>vacmViewTreeFamilyStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The status of this conceptual row.
+The  RowStatus TC [RFC2579] requires that this
+                 DESCRIPTION clause states under which circumstances
+                 other objects in this row can be modified:
+The value of this object has no effect on whether
+                 other objects in this conceptual row can be modified.
+                
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="TestAndIncr">TestAndIncr</td><td>INTEGER</td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpSecurityLevel">SnmpSecurityLevel</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>noAuthNoPriv</td></tr><tr><td>2</td><td>authNoPriv</td></tr><tr><td>3</td><td>authPriv</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpSecurityModel">SnmpSecurityModel</td><td>INTEGER</td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp SNMP-VIEW-BASED-ACM-MIB::snmpVacmMIB</b></p>
+<pre>
++--<a href="#snmpVacmMIB">snmpVacmMIB</a>(16)
+   |
+   +--<a href="#vacmMIBObjects">vacmMIBObjects</a>(1)
+   |  |
+   |  +--<a href="#vacmContextTable">vacmContextTable</a>(1)
+   |  |  |
+   |  |  +--<a href="#vacmContextEntry">vacmContextEntry</a>(1)
+   |  |     |  Index: vacmContextName
+   |  |     |
+   |  |     +-- -R-- String    <a href="#vacmContextName">vacmContextName</a>(1)
+   |  |              Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |              Size: 0..32
+   |  |
+   |  +--<a href="#vacmSecurityToGroupTable">vacmSecurityToGroupTable</a>(2)
+   |  |  |
+   |  |  +--<a href="#vacmSecurityToGroupEntry">vacmSecurityToGroupEntry</a>(1)
+   |  |     |  Index: vacmSecurityModel, vacmSecurityName
+   |  |     |
+   |  |     +-- ---- INTEGER   <a href="#vacmSecurityModel">vacmSecurityModel</a>(1)
+   |  |     |        Textual Convention: <a href="#SnmpSecurityModel">SnmpSecurityModel</a>
+   |  |     |        Range: 1..2147483647
+   |  |     +-- ---- String    <a href="#vacmSecurityName">vacmSecurityName</a>(2)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 1..32
+   |  |     +-- CR-- String    <a href="#vacmGroupName">vacmGroupName</a>(3)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 1..32
+   |  |     +-- CR-- EnumVal   <a href="#vacmSecurityToGroupStorageType">vacmSecurityToGroupStorageType</a>(4)
+   |  |     |        Textual Convention: <a href="#StorageType">StorageType</a>
+   |  |     |        Values: other(1), volatile(2), nonVolatile(3), permanent(4), readOnly(5)
+   |  |     +-- CR-- EnumVal   <a href="#vacmSecurityToGroupStatus">vacmSecurityToGroupStatus</a>(5)
+   |  |              Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |  |              Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |  |
+   |  +--<a href="#vacmAccessTable">vacmAccessTable</a>(4)
+   |  |  |
+   |  |  +--<a href="#vacmAccessEntry">vacmAccessEntry</a>(1)
+   |  |     |  Index: vacmGroupName, vacmAccessContextPrefix, vacmAccessSecurityModel, vacmAccessSecurityLevel
+   |  |     |
+   |  |     +-- ---- String    <a href="#vacmAccessContextPrefix">vacmAccessContextPrefix</a>(1)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- ---- INTEGER   <a href="#vacmAccessSecurityModel">vacmAccessSecurityModel</a>(2)
+   |  |     |        Textual Convention: <a href="#SnmpSecurityModel">SnmpSecurityModel</a>
+   |  |     |        Range: 0..2147483647
+   |  |     +-- ---- EnumVal   <a href="#vacmAccessSecurityLevel">vacmAccessSecurityLevel</a>(3)
+   |  |     |        Textual Convention: <a href="#SnmpSecurityLevel">SnmpSecurityLevel</a>
+   |  |     |        Values: noAuthNoPriv(1), authNoPriv(2), authPriv(3)
+   |  |     +-- CR-- EnumVal   <a href="#vacmAccessContextMatch">vacmAccessContextMatch</a>(4)
+   |  |     |        Values: exact(1), prefix(2)
+   |  |     +-- CR-- String    <a href="#vacmAccessReadViewName">vacmAccessReadViewName</a>(5)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- CR-- String    <a href="#vacmAccessWriteViewName">vacmAccessWriteViewName</a>(6)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- CR-- String    <a href="#vacmAccessNotifyViewName">vacmAccessNotifyViewName</a>(7)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- CR-- EnumVal   <a href="#vacmAccessStorageType">vacmAccessStorageType</a>(8)
+   |  |     |        Textual Convention: <a href="#StorageType">StorageType</a>
+   |  |     |        Values: other(1), volatile(2), nonVolatile(3), permanent(4), readOnly(5)
+   |  |     +-- CR-- EnumVal   <a href="#vacmAccessStatus">vacmAccessStatus</a>(9)
+   |  |              Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |  |              Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |  |
+   |  +--<a href="#vacmMIBViews">vacmMIBViews</a>(5)
+   |     |
+   |     +-- -RW- INTEGER   <a href="#vacmViewSpinLock">vacmViewSpinLock</a>(1)
+   |     |        Textual Convention: <a href="#TestAndIncr">TestAndIncr</a>
+   |     |        Range: 0..2147483647
+   |     |
+   |     +--<a href="#vacmViewTreeFamilyTable">vacmViewTreeFamilyTable</a>(2)
+   |        |
+   |        +--<a href="#vacmViewTreeFamilyEntry">vacmViewTreeFamilyEntry</a>(1)
+   |           |  Index: vacmViewTreeFamilyViewName, vacmViewTreeFamilySubtree
+   |           |
+   |           +-- ---- String    <a href="#vacmViewTreeFamilyViewName">vacmViewTreeFamilyViewName</a>(1)
+   |           |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |           |        Size: 1..32
+   |           +-- ---- ObjID     <a href="#vacmViewTreeFamilySubtree">vacmViewTreeFamilySubtree</a>(2)
+   |           +-- CR-- String    <a href="#vacmViewTreeFamilyMask">vacmViewTreeFamilyMask</a>(3)
+   |           |        Size: 0..16
+   |           +-- CR-- EnumVal   <a href="#vacmViewTreeFamilyType">vacmViewTreeFamilyType</a>(4)
+   |           |        Values: included(1), excluded(2)
+   |           +-- CR-- EnumVal   <a href="#vacmViewTreeFamilyStorageType">vacmViewTreeFamilyStorageType</a>(5)
+   |           |        Textual Convention: <a href="#StorageType">StorageType</a>
+   |           |        Values: other(1), volatile(2), nonVolatile(3), permanent(4), readOnly(5)
+   |           +-- CR-- EnumVal   <a href="#vacmViewTreeFamilyStatus">vacmViewTreeFamilyStatus</a>(6)
+   |                    Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |                    Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |
+   +--<a href="#vacmMIBConformance">vacmMIBConformance</a>(2)
+      |
+      +--<a href="#vacmMIBCompliances">vacmMIBCompliances</a>(1)
+      |  |
+      |  +--<a href="#vacmMIBCompliance">vacmMIBCompliance</a>(1)
+      |
+      +--<a href="#vacmMIBGroups">vacmMIBGroups</a>(2)
+         |
+         +--<a href="#vacmBasicGroup">vacmBasicGroup</a>(1)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,494 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>various PDU processing routines<br />
+  <small>[<a class="el" href="group__library.html">The Net-SNMP library</a>]</small></h1>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Defines</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga29" doxytag=
+      "snmp_client::BSD4_2" id="ga29"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>BSD4_2</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga30" doxytag=
+      "snmp_client::NFDBITS" id="ga30"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>NFDBITS</b>&nbsp;&nbsp;&nbsp;(sizeof(fd_mask) * NBBY)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga31" doxytag=
+      "snmp_client::FD_SET" id="ga31"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>FD_SET</b>(n, p)&nbsp;&nbsp;&nbsp;((p)-&gt;fds_bits[(n)/NFDBITS] |= (1 &lt;&lt;
+      ((n) % NFDBITS)))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga32" doxytag=
+      "snmp_client::FD_CLR" id="ga32"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>FD_CLR</b>(n, p)&nbsp;&nbsp;&nbsp;((p)-&gt;fds_bits[(n)/NFDBITS] &amp;= ~(1
+      &lt;&lt; ((n) % NFDBITS)))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga33" doxytag=
+      "snmp_client::FD_ISSET" id="ga33"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>FD_ISSET</b>(n, p)&nbsp;&nbsp;&nbsp;((p)-&gt;fds_bits[(n)/NFDBITS] &amp; (1
+      &lt;&lt; ((n) % NFDBITS)))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga34" doxytag=
+      "snmp_client::FD_ZERO" id="ga34"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>FD_ZERO</b>(p)&nbsp;&nbsp;&nbsp;memset((p), 0, sizeof(*(p)))</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Typedefs</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga0" doxytag=
+      "snmp_client::fd_mask" id="ga0"></a> typedef long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>fd_mask</b></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga3" doxytag=
+      "snmp_client::snmp_pdu_create" id="ga3"></a> <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_pdu_create</b> (int command)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga4" doxytag=
+      "snmp_client::snmp_add_null_var" id="ga4"></a> <a class="el" href="structvariable__list.html">netsnmp_variable_list</a>
+      *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_add_null_var</b> (<a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *pdu, const oid *name, size_t name_length)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga5" doxytag=
+      "snmp_client::snmp_clone_var" id="ga5"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_clone_var</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *var, <a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *newvar)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga6" doxytag=
+      "snmp_client::snmp_clone_mem" id="ga6"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_clone_mem</b> (void **dstPtr, void *srcPtr, unsigned len)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga7" doxytag=
+      "snmp_client::snmp_reset_var_buffers" id="ga7"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_reset_var_buffers</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *var)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga12" doxytag=
+      "snmp_client::snmp_clone_varbind" id="ga12"></a> <a class="el" href="structvariable__list.html">netsnmp_variable_list</a>
+      *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_clone_varbind</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *varlist)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga13" doxytag=
+      "snmp_client::snmp_clone_pdu" id="ga13"></a> <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_clone_pdu</b> (<a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga14" doxytag=
+      "snmp_client::snmp_split_pdu" id="ga14"></a> <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_split_pdu</b> (<a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu, int skip_count, int copy_count)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga15" doxytag=
+      "snmp_client::snmp_fix_pdu" id="ga15"></a> <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_fix_pdu</b> (<a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu, int command)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga16" doxytag=
+      "snmp_client::snmp_varbind_len" id="ga16"></a> unsigned long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_varbind_len</b> (<a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga17" doxytag=
+      "snmp_client::snmp_set_var_objid" id="ga17"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_set_var_objid</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *vp, const oid *objid, size_t name_length)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__client.html#ga18">snmp_set_var_typed_value</a>
+      (<a class="el" href="structvariable__list.html">netsnmp_variable_list</a> *newvar, u_char type, const u_char *val_str,
+      size_t val_len)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure. <a href=
+      "#ga18"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga19" doxytag=
+      "snmp_client::count_varbinds" id="ga19"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>count_varbinds</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *var_ptr)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga20" doxytag=
+      "snmp_client::count_varbinds_of_type" id="ga20"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>count_varbinds_of_type</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *var_ptr, u_char type)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga21" doxytag=
+      "snmp_client::find_varbind_of_type" id="ga21"></a> <a class="el" href="structvariable__list.html">netsnmp_variable_list</a>
+      *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>find_varbind_of_type</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *var_ptr, u_char type)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga22" doxytag=
+      "snmp_client::snmp_set_var_value" id="ga22"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_set_var_value</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *newvar, const u_char *val_str, size_t val_len)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga23" doxytag=
+      "snmp_client::snmp_replace_var_types" id="ga23"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_replace_var_types</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *vbl, u_char old_type, u_char new_type)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga24" doxytag=
+      "snmp_client::snmp_reset_var_types" id="ga24"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_reset_var_types</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *vbl, u_char new_type)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga25" doxytag=
+      "snmp_client::snmp_synch_response_cb" id="ga25"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_synch_response_cb</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *ss, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu,
+      <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> **response, snmp_callback pcb)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga26" doxytag=
+      "snmp_client::snmp_synch_response" id="ga26"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_synch_response</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *ss, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu,
+      <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> **response)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga27" doxytag=
+      "snmp_client::snmp_sess_synch_response" id="ga27"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_synch_response</b> (void *sessp, <a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *pdu, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> **response)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga28" doxytag=
+      "snmp_client::snmp_errstring" id="ga28"></a> const char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_errstring</b> (int errstat)</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Variables</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">const char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>error_string</b> [19]</td>
+    </tr>
+  </table>
+  <hr />
+
+  <h2>Function Documentation</h2><a class="anchor" name="ga18" doxytag="snmp_client.c::snmp_set_var_typed_value" id="ga18"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int snmp_set_var_typed_value</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href="structvariable__list.html">netsnmp_variable_list</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>newvar</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">u_char&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>type</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const u_char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>val_str</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>val_len</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>snmp_set_var_typed_value is used to set data into the netsnmp_variable_list structure.</p>
+
+        <p>Used to return data to the snmp request via the netsnmp_request_info structure's requestvb pointer.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>newvar</em>&nbsp;</td>
+
+                <td>the structure gets populated with the given data, type, val_str, and val_len.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>type</em>&nbsp;</td>
+
+                <td>is the asn data type to be copied</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>val_str</em>&nbsp;</td>
+
+                <td>is a buffer containing the value to be copied into the newvar structure.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>val_len</em>&nbsp;</td>
+
+                <td>the length of val_str</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>returns 0 on success and 1 on a malloc error</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Examples:</b></dt>
+
+          <dd><a class="el" href="delayed__instance_8c-example.html#a19">delayed_instance.c</a>.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__client_8c-source.html#l00670">670</a> of file <a class="el" href=
+        "snmp__client_8c-source.html">snmp_client.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__api_8h-source.html#l00521">variable_list::type</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l02655">check_getnext_results()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l03054">handle_pdu()</a>, <a class="el" href=
+        "table_8c-source.html#l00864">netsnmp_check_getnext_reply()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "table_8c-source.html#l00739">netsnmp_table_build_result()</a>, and <a class="el" href=
+        "table__data_8c-source.html#l00656">netsnmp_table_data_build_result()</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr />
+
+  <h2>Variable Documentation</h2><a class="anchor" name="ga1" doxytag="snmp_client.c::error_string" id="ga1"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">const char* error_string[19]</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p><b>Initial value:</b></p>
+
+        <div class="fragment">
+          <pre class="fragment">
+ {
+    <span class="stringliteral">"(noError) No Error"</span>,
+    <span class="stringliteral">"(tooBig) Response message would have been too large."</span>,
+    <span class="stringliteral">"(noSuchName) There is no such variable name in this MIB."</span>,
+    <span class="stringliteral">"(badValue) The value given has the wrong type or length."</span>,
+    <span class="stringliteral">"(readOnly) The two parties used do not have access to use the specified SNMP PDU."</span>,
+    <span class="stringliteral">"(genError) A general failure occured"</span>,
+    <span class="stringliteral">"noAccess"</span>,
+    <span class="stringliteral">"wrongType (The set datatype does not match the data type the agent expects)"</span>,
+    <span class="stringliteral">"wrongLength (The set value has an illegal length from what the agent expects)"</span>,
+    <span class="stringliteral">"wrongEncoding"</span>,
+    <span class="stringliteral">"wrongValue (The set value is illegal or unsupported in some way)"</span>,
+    <span class=
+"stringliteral">"noCreation (That table does not support row creation or that object can not ever be created)"</span>,
+    <span class="stringliteral">"inconsistentValue (The set value is illegal or unsupported in some way)"</span>,
+    <span class="stringliteral">"resourceUnavailable (This is likely a out-of-memory failure within the agent)"</span>,
+    <span class="stringliteral">"commitFailed"</span>,
+    <span class="stringliteral">"undoFailed"</span>,
+    <span class="stringliteral">"authorizationError (access denied to that object)"</span>,
+    <span class="stringliteral">"notWritable (That object does not support modification)"</span>,
+    <span class="stringliteral">"inconsistentName (That object can not currently be created)"</span>
+}
+</pre>
+        </div>
+
+        <p>Definition at line <a class="el" href="snmp__client_8c-source.html#l00926">926</a> of file <a class="el" href=
+        "snmp__client_8c-source.html">snmp_client.c</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:04 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

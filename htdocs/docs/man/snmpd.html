@@ -1,0 +1,290 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>SNMPD</h1>Section: Net-SNMP (8)<br />
+    Updated: 7 Feb 2002<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>snmpd - daemon to respond to SNMP request packets. <a name="lbAC" id="lbAC"> </a>
+
+    <h2>SYNOPSIS</h2><b>snmpd</b> [OPTIONS] [LISTENING ADDRESSES] <a name="lbAD" id="lbAD"> </a>
+
+    <h2>DESCRIPTION</h2><b>snmpd</b> is an SNMP agent which binds to a port and awaits requests from SNMP management software.
+    Upon receiving a request, it processes the request(s), collects the requested information and/or performs the requested
+    operation(s) and returns the information to the sender. <a name="lbAE" id="lbAE"> </a>
+
+    <h2>OPTIONS</h2>
+
+    <dl compact="compact">
+      <dt><b>-a</b></dt>
+
+      <dd>Log the source addresses of incoming requests.</dd>
+
+      <dt><b>-A</b></dt>
+
+      <dd>Append to the log file rather than truncating it.</dd>
+
+      <dt><b>-c</b> <i>FILE</i></dt>
+
+      <dd>Read <i>FILE</i> as a configuration file (or a comma-separated list of configuration files).</dd>
+
+      <dt><b>-C</b></dt>
+
+      <dd>Do not read any configuration files except the ones optionally specified by the <b>-c</b> option. Note that this
+      behaviour also covers the persistent configuration files. This may result in dynamically-assigned values being reset
+      following an agent restart, unless the relevant persistent config files are explicitly loaded using the <b>-c</b>
+      option.</dd>
+
+      <dt><b>-d</b></dt>
+
+      <dd>Dump (in hexadecimal) the sent and received SNMP packets.</dd>
+
+      <dt><b>-D</b><i>[TOKEN[,...]]</i></dt>
+
+      <dd>Turn on debugging output for the given <i>TOKEN</i>(s). Without any tokens specified, it defaults to printing all the
+      tokens (which is equivalent to the keyword "ALL"). You might want to try <i>ALL</i> for extremely verbose output. Note: You
+      can not put a space between the -D flag and the listed TOKENs.</dd>
+
+      <dt><b>-f</b></dt>
+
+      <dd>Do not fork() from the calling shell.</dd>
+
+      <dt><b>-g</b> <i>GID</i></dt>
+
+      <dd>Change to the numerical group ID <i>GID</i> after opening listening sockets.</dd>
+
+      <dt><b>-h, --help</b></dt>
+
+      <dd>Display a brief usage message and then exit.</dd>
+
+      <dt><b>-H</b></dt>
+
+      <dd>Display a list of configuration file directives understood by the agent and then exit.</dd>
+
+      <dt><b>-I</b> <i>[-]INITLIST</i></dt>
+
+      <dd>
+        This option specifies which modules you do (or do not) want to be initialized when the agent starts up. If the
+        comma-separated <i>INITLIST</i> is preceded with a '-', it is the list of modules that you do <i>not</i> want to be
+        started. Otherwise, <i>INITLIST</i> is the list of modules to be started.
+
+        <p>To get a list of compiled modules, run the agent with the arguments <i>-Dmib_init -H</i> (assumes you have debugging
+        support compiled in).</p>
+      </dd>
+
+      <dt><b>-l</b> [<i>FILE</i>]</dt>
+
+      <dd>Log all output from the agent (including stdout and stderr) to <i>FILE</i>. If no filename is given, log to a default
+      file set at compile time (normally /var/log/snmpd.log).<br />
+      This option is being deprecated, and '-Lf FILE' should be used instead.</dd>
+
+      <dt><b>-L[efos]</b></dt>
+
+      <dd>Specify where logging output should be directed (standard error or output, to a file or via syslog). See LOGGING
+      OPTIONS in <a href="snmpcmd.html">snmpcmd</a>(5) for details.<br />
+      This option deprecates the <b>-l</b> <b>-s</b> and <b>-S</b> options.</dd>
+
+      <dt><b>-p</b> <i>FILE</i></dt>
+
+      <dd>Save the process ID of the daemon in <i>FILE</i>.<br />
+      This option deprecates the <b>-P</b> option.</dd>
+
+      <dt><b>-P</b> <i>FILE</i></dt>
+
+      <dd>Save the process ID of the daemon in <i>FILE</i>. This option is being deprecated, and '-p FILE' should be used
+      instead.</dd>
+
+      <dt><b>-q</b></dt>
+
+      <dd>Print simpler output for easier automated parsing.</dd>
+
+      <dt><b>-r</b></dt>
+
+      <dd>Do not require root access to run the daemon. Specifically, do not exit if files only accessible to root (such as
+      /dev/kmem etc.) cannot be opened.</dd>
+
+      <dt><b>-s</b></dt>
+
+      <dd>Use syslog for logging.<br />
+      This option is being deprecated, and '-Ls FACILITY' should be used instead.</dd>
+
+      <dt><b>-S</b> d|0-7</dt>
+
+      <dd>Specifies the syslog facility to use when logging to syslog.<br />
+      This option is being deprecated, and '-Ls FACILITY' should be used instead.</dd>
+
+      <dt><b>-u</b> <i>UID</i></dt>
+
+      <dd>Change to the user ID <i>UID</i> (which can be given in numerical or textual form) after opening listening
+      sockets.</dd>
+
+      <dt><b>-v, --version</b></dt>
+
+      <dd>Print version information for the agent and then exit.</dd>
+
+      <dt><b>-V</b></dt>
+
+      <dd>Symbolically dump SNMP transactions.</dd>
+
+      <dt><b>-x</b> <i>ADDRESS</i></dt>
+
+      <dd>Listens for AgentX connections on the specified address rather than the default '/var/agentx/master'. The address can
+      either be a Unix domain socket path, or the address of a network interface. The format is the same as the format of
+      listening addresses described below.</dd>
+
+      <dt><b>-X</b></dt>
+
+      <dd>Run as an AgentX subagent rather than as an SNMP master agent.</dd>
+    </dl><a name="lbAF" id="lbAF"> </a>
+
+    <h2>LISTENING ADDRESSES</h2>By default, <b>snmpd</b> listens for incoming SNMP requests only on UDP port 161. However, it is
+    possible to modify this behaviour by specifying one or more listening addresses as arguments to <b>snmpd</b>. A listening
+    address takes the form:
+
+    <dl compact="compact">
+      <dd>[&lt;transport-specifier&gt;:]&lt;transport-address&gt;</dd>
+    </dl>
+
+    <p>At its simplest, a listening address may consist only of a port number, in which case <b>snmpd</b> listens on that UDP
+    port on all IPv4 interfaces. Otherwise, the &lt;transport-address&gt; part of the specification is parsed according to the
+    following table:</p>
+
+    <dl compact="compact">
+      <dd>
+        <dl compact="compact">
+          <dt><b>&lt;transport-specifier&gt;</b></dt>
+
+          <dd><b>&lt;transport-address&gt; format</b></dd>
+
+          <dt>udp</dt>
+
+          <dd>hostname[:port] <i>or</i> IPv4-address[:port]</dd>
+
+          <dt>tcp</dt>
+
+          <dd>hostname[:port] <i>or</i> IPv4-address[:port]</dd>
+
+          <dt>unix</dt>
+
+          <dd>pathname</dd>
+
+          <dt>ipx</dt>
+
+          <dd>[network]:node[/port]</dd>
+
+          <dt>aal5pvc <i>or</i> pvc</dt>
+
+          <dd>[interface.][VPI.]VCI</dd>
+
+          <dt>udp6 <i>or</i> udpv6 <i>or</i> udpipv6</dt>
+
+          <dd>hostname[:port] <i>or</i> IPv6-address[:port]</dd>
+
+          <dt>tcp6 <i>or</i> tcpv6 <i>or</i> tcpipv6</dt>
+
+          <dd>hostname[:port] <i>or</i> IPv6-address[:port]</dd>
+        </dl>
+      </dd>
+    </dl>
+
+    <p>Note that &lt;transport-specifier&gt; strings are case-insensitive so that, for example, "tcp" and "TCP" are equivalent.
+    Here are some examples, along with their interpretation:</p>
+
+    <dl compact="compact">
+      <dt><i>127.0.0.1:161</i></dt>
+
+      <dd>listen on UDP port 161, but only on the loopback interface. This prevents <b>snmpd</b> being queried remotely (which is
+      a bit pointless). The ":161" is redundant here since that is the default SNMP port in any case.</dd>
+
+      <dt><i>TCP:1161</i></dt>
+
+      <dd>listen on TCP port 1161 on all IPv4 interfaces.</dd>
+
+      <dt><i>ipx:/40000</i></dt>
+
+      <dd>listen on IPX port 40000 on all IPX interfaces.</dd>
+
+      <dt><i>unix:/tmp/local-agent</i></dt>
+
+      <dd>listen on the Unix domain socket <i>/tmp/local-agent</i>.</dd>
+
+      <dt><i>/tmp/local-agent</i></dt>
+
+      <dd>identical to the previous specification, since the Unix domain is the default transport iff the first character of the
+      &lt;transport-address&gt; is a '/'.</dd>
+
+      <dt><i>PVC:161</i></dt>
+
+      <dd>listen on the AAL5 permanent virtual circuit with VPI=0 and VCI=161 (decimal) on the first ATM adapter in the
+      machine.</dd>
+
+      <dt><i>udp6:10161</i></dt>
+
+      <dd>listen on port 10161 on all IPv6 interfaces.</dd>
+    </dl>
+
+    <p>Note that not all the transport domains listed above will always be available; for instance, hosts with no IPv6 support
+    will not be able to use udp6 transport addresses, and attempts to do so will result in the error "Error opening specified
+    endpoint". Likewise, since AAL5 PVC support is only currently available on Linux, it will fail with the same error on other
+    platforms.</p>
+
+    <p><a name="lbAG" id="lbAG"> </a></p>
+
+    <h2>CONFIGURATION FILES</h2>
+
+    <p><b>snmpd</b> checks for the existence of and parses the following files:</p>
+
+    <dl compact="compact">
+      <dt><b>/usr/local/etc/snmp/snmp.conf</b></dt>
+
+      <dd>Common configuration for the agent and applications. See <i><a href="snmp.conf.html">snmp.conf</a>(5)</i> for
+      details.</dd>
+
+      <dt><b>/usr/local/etc/snmp/snmpd.conf</b></dt>
+
+      <dt><b>/usr/local/etc/snmp/snmpd.local.conf</b></dt>
+
+      <dd>Agent-specific configuration. See <i><a href="snmpd.conf.html">snmpd.conf</a>(5)</i> for details. These files are
+      optional and may be used to configure access control, trap generation, subagent protocols and much else besides.</dd>
+
+      <dd>In addition to these two configuration files in /usr/local/etc/snmp, the agent will read any files with the names
+      <i>snmpd.conf</i> and <i>snmpd.local.conf</i> in a colon separated path specified in the SNMPCONFPATH environment
+      variable.</dd>
+
+      <dt><b>/usr/local/share/snmp/mibs/</b></dt>
+
+      <dd>The agent will also load all files in this directory as MIBs. It will not, however, load any file that begins with a
+      '.' or descend into subdirectories.</dd>
+    </dl><a name="lbAH" id="lbAH"> </a>
+
+    <h2>SEE ALSO</h2>(in recommended reading order)
+
+    <p><a href="snmp.conf.html">snmp.conf</a>(5), <a href="snmpd.conf.html">snmpd.conf</a>(5)</p>
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+
+      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+
+      <dt><a href="#lbAE">OPTIONS</a></dt>
+
+      <dt><a href="#lbAF">LISTENING ADDRESSES</a></dt>
+
+      <dt><a href="#lbAG">CONFIGURATION FILES</a></dt>
+
+      <dt><a href="#lbAH">SEE ALSO</a></dt>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:45 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

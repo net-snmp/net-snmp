@@ -1,0 +1,470 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>group__table__dataset</h1>Section: net-snmp (3)<br />
+    Updated: 28 Oct 2004<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>table_dataset: Helps you implement a table with automatted storage. - This handler helps you implement a table
+    where all the data is expected to be stored within the agent itself and not in some external storage location.
+
+    <p><a name="lbAC" id="lbAC"> </a></p>
+
+    <h3>Functions</h3>
+
+    <p><br />
+    void <b>netsnmp_init_table_dataset</b> (void)<br />
+    <br />
+    netsnmp_table_data_set * <b>netsnmp_create_table_data_set</b> (const char *table_name)<br />
+    <i>Create a netsnmp_table_data_set structure given a table_data definition.</i><br />
+    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_table_data_set_handler</b> (netsnmp_table_data_set *data_set)<br />
+    <i>Given a netsnmp_table_data_set definition, create a handler for it.</i><br />
+    int <b>netsnmp_register_table_data_set</b> (<b>netsnmp_handler_registration</b> *reginfo, netsnmp_table_data_set *data_set,
+    <b>netsnmp_table_registration_info</b> *table_info)<br />
+    <i>register a given data_set at a given oid (specified in the netsnmp_handler_registration pointer).</i><br />
+    netsnmp_table_data_set_storage * <b>netsnmp_table_data_set_find_column</b> (netsnmp_table_data_set_storage *start, unsigned
+    int column)<br />
+    <i>Finds a column within a given storage set, given the pointer to the start of the storage set list.</i><br />
+    netsnmp_table_data_set_storage * <b>netsnmp_extract_table_data_set_column</b> (<b>netsnmp_request_info</b> *request, unsigned
+    int column)<br />
+    <i>extracts a netsnmp_table_data_set pointer from a given request</i><br />
+    NETSNMP_INLINE netsnmp_table_data_set * <b>netsnmp_extract_table_data_set</b> (<b>netsnmp_request_info</b> *request)<br />
+    <i>extracts a netsnmp_table_data_set pointer from a given request</i><br />
+    int <b>netsnmp_mark_row_column_writable</b> (netsnmp_table_row *row, int column, int writable)<br />
+    <i>marks a given column in a row as writable or not.</i><br />
+    int <b>netsnmp_set_row_column</b> (netsnmp_table_row *row, unsigned int column, int type, const char *value, size_t
+    value_len)<br />
+    <i>sets a given column in a row with data given a type, value, and length.</i><br />
+    int <b>netsnmp_table_set_add_default_row</b> (netsnmp_table_data_set *table_set, unsigned int column, int type, int writable,
+    void *default_value, size_t default_value_len)<br />
+    <i>adds a new default row to a table_set.</i><br />
+    netsnmp_table_row * <b>netsnmp_table_data_set_clone_row</b> (netsnmp_table_row *row)<br />
+    <i>clones a dataset row, including all data.</i><br />
+    netsnmp_table_row * <b>netsnmp_table_data_set_create_row_from_defaults</b> (netsnmp_table_data_set_storage *defrow)<br />
+    <i>creates a new row from an existing defined default set</i><br />
+    newrow_stash * <b>netsnmp_table_data_set_create_newrowstash</b> (netsnmp_table_data_set *datatable,
+    <b>netsnmp_table_request_info</b> *table_info)<br />
+    <br />
+    int <b>netsnmp_table_data_set_helper_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b>
+    *reginfo, <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
+    <i>implements the table data helper.</i><br />
+    void <b>netsnmp_register_auto_data_table</b> (netsnmp_table_data_set *table_set, char *registration_name)<br />
+    <i>registers a table_dataset so that the 'add_row' snmpd.conf token can be used to add data to this table.</i><br />
+    void <b>netsnmp_config_parse_table_set</b> (const char *token, char *line)<br />
+    <br />
+    void <b>netsnmp_config_parse_add_row</b> (const char *token, char *line)<br />
+    <br />
+    NETSNMP_INLINE void <b>netsnmp_table_dataset_add_index</b> (netsnmp_table_data_set *table, u_char type)<br />
+    <i>adds an index to the table.</i><br />
+    NETSNMP_INLINE void <b>netsnmp_table_dataset_add_row</b> (netsnmp_table_data_set *table, netsnmp_table_row *row)<br />
+    <i>adds a new row to a dataset table</i><br />
+    NETSNMP_INLINE void <b>netsnmp_table_dataset_replace_row</b> (netsnmp_table_data_set *table, netsnmp_table_row *origrow,
+    netsnmp_table_row *newrow)<br />
+    <i>adds a new row to a dataset table</i><br />
+    NETSNMP_INLINE netsnmp_table_data_set_storage * <b>netsnmp_table_dataset_delete_data</b> (netsnmp_table_data_set_storage
+    *data)<br />
+    <i>deletes a single dataset table data.</i><br />
+    NETSNMP_INLINE void <b>netsnmp_table_dataset_delete_all_data</b> (netsnmp_table_data_set_storage *data)<br />
+    <i>deletes all the data from this node and beyond in the linked list</i><br />
+    NETSNMP_INLINE void <b>netsnmp_table_dataset_delete_row</b> (netsnmp_table_row *row)<br />
+    <i>deletes all the data from this node and beyond in the linked list</i><br />
+    NETSNMP_INLINE void <b>netsnmp_table_dataset_remove_row</b> (netsnmp_table_data_set *table, netsnmp_table_row *row)<br />
+    <i>removes a row from the table, but doesn't delete/free anything</i><br />
+    NETSNMP_INLINE void <b>netsnmp_table_dataset_remove_and_delete_row</b> (netsnmp_table_data_set *table, netsnmp_table_row
+    *row)<br />
+    <i>removes a row from the table and then deletes it (and all it's data)</i><br />
+    void <b>netsnmp_table_set_multi_add_default_row</b> (va_dcl)<br />
+    <i>adds multiple data column definitions to each row.</i><br />
+    void <b>netsnmp_table_set_add_indexes</b> (va_alist)<br />
+    <i>adds multiple indexes to a table_dataset helper object.</i><br />
+    int <b>netsnmp_table_set_num_rows</b> (netsnmp_table_data_set *table)<br />
+    <a name="lbAD" id="lbAD"> </a></p>
+
+    <h2>Detailed Description</h2>
+
+    <p>This handler helps you implement a table where all the data is expected to be stored within the agent itself and not in
+    some external storage location.</p>
+
+    <p>It handles all MIB requests including GETs, GETNEXTs and SETs. It's possible to simply create a table without actually
+    ever defining a handler to be called when SNMP requests come in. To use the data, you can either attach a sub-handler that
+    merely uses/manipulates the data further when requests come in, or you can loop through it externally when it's actually
+    needed. This handler is most useful in cases where a table is holding configuration data for something which gets triggered
+    via another event.</p>
+
+    <p>NOTE NOTE NOTE: This helper isn't complete and is likely to change somewhat over time. Specifically, the way it stores
+    data internally may change drastically. <a name="lbAE" id="lbAE"> </a></p>
+
+    <h2>Function Documentation</h2>
+
+    <p><a name="lbAF" id="lbAF"> </a></p>
+
+    <h3>netsnmp_table_data_set* netsnmp_create_table_data_set (const char * table_name)</h3>
+
+    <p>Create a netsnmp_table_data_set structure given a table_data definition.</p>
+
+    <p><b>Examples:</b> <b>data_set.c</b>.</p>
+
+    <p>Definition at line 74 of file table_dataset.c.</p>
+
+    <p>References netsnmp_create_table_data(), and SNMP_MALLOC_TYPEDEF. <a name="lbAG" id="lbAG"> </a></p>
+
+    <h3>NETSNMP_INLINE netsnmp_table_data_set* netsnmp_extract_table_data_set (<b>netsnmp_request_info</b> * request)</h3>
+
+    <p>extracts a netsnmp_table_data_set pointer from a given request</p>
+
+    <p>Definition at line 187 of file table_dataset.c.</p>
+
+    <p>References netsnmp_request_get_list_data(). <a name="lbAH" id="lbAH"> </a></p>
+
+    <h3>netsnmp_table_data_set_storage* netsnmp_extract_table_data_set_column (<b>netsnmp_request_info</b> * request, unsigned
+    int column)</h3>
+
+    <p>extracts a netsnmp_table_data_set pointer from a given request</p>
+
+    <p>Definition at line 173 of file table_dataset.c.</p>
+
+    <p>References netsnmp_extract_table_row_data(), and netsnmp_table_data_set_find_column(). <a name="lbAI" id="lbAI"> </a></p>
+
+    <h3><b>netsnmp_mib_handler</b>* netsnmp_get_table_data_set_handler (netsnmp_table_data_set * data_set)</h3>
+
+    <p>Given a netsnmp_table_data_set definition, create a handler for it.</p>
+
+    <p>Definition at line 86 of file table_dataset.c.</p>
+
+    <p>References netsnmp_mib_handler_s::flags, netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_mib_handler, and
+    snmp_log().</p>
+
+    <p>Referenced by netsnmp_register_table_data_set(). <a name="lbAJ" id="lbAJ"> </a></p>
+
+    <h3>int netsnmp_mark_row_column_writable (netsnmp_table_row * row, int column, int writable)</h3>
+
+    <p>marks a given column in a row as writable or not.</p>
+
+    <p><b>Examples:</b> <b>data_set.c</b>.</p>
+
+    <p>Definition at line 197 of file table_dataset.c.</p>
+
+    <p>References netsnmp_table_data_set_find_column(), snmp_log(), and SNMP_MALLOC_TYPEDEF.</p>
+
+    <p>Referenced by netsnmp_table_data_set_create_row_from_defaults(). <a name="lbAK" id="lbAK"> </a></p>
+
+    <h3>void netsnmp_register_auto_data_table (netsnmp_table_data_set * table_set, char * registration_name)</h3>
+
+    <p>registers a table_dataset so that the 'add_row' snmpd.conf token can be used to add data to this table.</p>
+
+    <p>If registration_name is NULL then the name used when the table was created will be used instead.</p>
+
+    <p><b>Todo</b></p>
+
+    <dl compact="compact">
+      <dd>create a properly free'ing registeration pointer for the datalist, and get the datalist freed at shutdown.</dd>
+    </dl>
+
+    <p><b>Examples:</b> <b>data_set.c</b>.</p>
+
+    <p>Definition at line 775 of file table_dataset.c.</p>
+
+    <p>References variable_list::name, netsnmp_add_list_data(), netsnmp_create_data_list(), and SNMP_MALLOC_TYPEDEF. <a name=
+    "lbAL" id="lbAL"> </a></p>
+
+    <h3>int netsnmp_register_table_data_set (<b>netsnmp_handler_registration</b> * reginfo, netsnmp_table_data_set * data_set,
+    <b>netsnmp_table_registration_info</b> * table_info)</h3>
+
+    <p>register a given data_set at a given oid (specified in the netsnmp_handler_registration pointer).</p>
+
+    <p>The reginfo-&gt;handler-&gt;access_method *may* be null if the call doesn't ever want to be called for SNMP
+    operations.</p>
+
+    <p><b>Examples:</b> <b>data_set.c</b>.</p>
+
+    <p>Definition at line 113 of file table_dataset.c.</p>
+
+    <p>References netsnmp_table_registration_info_s::indexes, netsnmp_table_registration_info_s::max_column,
+    netsnmp_table_registration_info_s::min_column, netsnmp_get_table_data_set_handler(), netsnmp_handler_registration,
+    netsnmp_inject_handler(), netsnmp_register_table_data(), SNMP_MALLOC_TYPEDEF, SNMP_MAX, and SNMP_MIN. <a name="lbAM" id=
+    "lbAM"> </a></p>
+
+    <h3>int netsnmp_set_row_column (netsnmp_table_row * row, unsigned int column, int type, const char * value, size_t
+    value_len)</h3>
+
+    <p>sets a given column in a row with data given a type, value, and length.</p>
+
+    <p>Data is memdup'ed by the function.</p>
+
+    <p><b>Examples:</b> <b>data_set.c</b>.</p>
+
+    <p>Definition at line 233 of file table_dataset.c.</p>
+
+    <p>References memdup(), netsnmp_table_data_set_find_column(), SNMP_FREE, snmp_log(), and SNMP_MALLOC_TYPEDEF.</p>
+
+    <p>Referenced by netsnmp_table_data_set_create_row_from_defaults(). <a name="lbAN" id="lbAN"> </a></p>
+
+    <h3>netsnmp_table_row* netsnmp_table_data_set_clone_row (netsnmp_table_row * row)</h3>
+
+    <p>clones a dataset row, including all data.</p>
+
+    <p>Definition at line 347 of file table_dataset.c.</p>
+
+    <p>References memdup(), and netsnmp_table_data_clone_row().</p>
+
+    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbAO" id="lbAO"> </a></p>
+
+    <h3>netsnmp_table_row* netsnmp_table_data_set_create_row_from_defaults (netsnmp_table_data_set_storage * defrow)</h3>
+
+    <p>creates a new row from an existing defined default set</p>
+
+    <p>Definition at line 381 of file table_dataset.c.</p>
+
+    <p>References netsnmp_create_table_data_row(), netsnmp_mark_row_column_writable(), and netsnmp_set_row_column(). <a name=
+    "lbAP" id="lbAP"> </a></p>
+
+    <h3>netsnmp_table_data_set_storage* netsnmp_table_data_set_find_column (netsnmp_table_data_set_storage * start, unsigned int
+    column)</h3>
+
+    <p>Finds a column within a given storage set, given the pointer to the start of the storage set list.</p>
+
+    <p>Definition at line 161 of file table_dataset.c.</p>
+
+    <p>Referenced by netsnmp_extract_table_data_set_column(), netsnmp_mark_row_column_writable(), netsnmp_set_row_column(),
+    netsnmp_table_data_set_helper_handler(), and netsnmp_table_set_add_default_row(). <a name="lbAQ" id="lbAQ"> </a></p>
+
+    <h3>int netsnmp_table_data_set_helper_handler (<b>netsnmp_mib_handler</b> * handler, <b>netsnmp_handler_registration</b> *
+    reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b> * requests)</h3>
+
+    <p>implements the table data helper.</p>
+
+    <p>This is the routine that takes care of all SNMP requests coming into the table.</p>
+
+    <p>Definition at line 419 of file table_dataset.c.</p>
+
+    <p>References netsnmp_table_request_info_s::colnum, variable_list::data, netsnmp_table_request_info_s::index_oid,
+    netsnmp_table_request_info_s::index_oid_len, netsnmp_agent_request_info_s::mode, netsnmp_mib_handler_s::myvoid,
+    variable_list::name, variable_list::name_length, netsnmp_create_data_list(), netsnmp_extract_table_info(),
+    netsnmp_extract_table_row(), netsnmp_handler_registration, netsnmp_mib_handler, netsnmp_oid_stash_add_data(),
+    netsnmp_oid_stash_get_data(), netsnmp_request_add_list_data(), netsnmp_set_request_error(), netsnmp_strdup_and_null(),
+    netsnmp_table_data_build_result(), netsnmp_table_data_set_clone_row(), netsnmp_table_data_set_find_column(),
+    netsnmp_table_dataset_add_row(), netsnmp_table_dataset_delete_row(), netsnmp_table_dataset_remove_and_delete_row(),
+    netsnmp_table_dataset_replace_row(), netsnmp_request_info_s::next, netsnmp_request_info_s::processed,
+    netsnmp_request_info_s::requestvb, netsnmp_handler_registration_s::rootoid_len, SNMP_FREE, snmp_log(), SNMP_MALLOC_TYPEDEF,
+    variable_list::type, variable_list::val, and variable_list::val_len. <a name="lbAR" id="lbAR"> </a></p>
+
+    <h3>NETSNMP_INLINE void netsnmp_table_dataset_add_index (netsnmp_table_data_set * table, u_char type)</h3>
+
+    <p>adds an index to the table.</p>
+
+    <p>Call this repeatly for each index.</p>
+
+    <p><b>Examples:</b> <b>data_set.c</b>.</p>
+
+    <p>Definition at line 961 of file table_dataset.c.</p>
+
+    <p>Referenced by netsnmp_table_set_add_indexes(). <a name="lbAS" id="lbAS"> </a></p>
+
+    <h3>NETSNMP_INLINE void netsnmp_table_dataset_add_row (netsnmp_table_data_set * table, netsnmp_table_row * row)</h3>
+
+    <p>adds a new row to a dataset table</p>
+
+    <p><b>Examples:</b> <b>data_set.c</b>.</p>
+
+    <p>Definition at line 970 of file table_dataset.c.</p>
+
+    <p>References netsnmp_table_data_add_row().</p>
+
+    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbAT" id="lbAT"> </a></p>
+
+    <h3>NETSNMP_INLINE void netsnmp_table_dataset_delete_all_data (netsnmp_table_data_set_storage * data)</h3>
+
+    <p>deletes all the data from this node and beyond in the linked list</p>
+
+    <p>Definition at line 1006 of file table_dataset.c.</p>
+
+    <p>References netsnmp_table_dataset_delete_data().</p>
+
+    <p>Referenced by netsnmp_table_dataset_delete_row(), and netsnmp_table_dataset_remove_and_delete_row(). <a name="lbAU" id=
+    "lbAU"> </a></p>
+
+    <h3>NETSNMP_INLINE netsnmp_table_data_set_storage* netsnmp_table_dataset_delete_data (netsnmp_table_data_set_storage *
+    data)</h3>
+
+    <p>deletes a single dataset table data.</p>
+
+    <p>returns the (possibly still good) next pointer of the deleted data object.</p>
+
+    <p>Definition at line 993 of file table_dataset.c.</p>
+
+    <p>References SNMP_FREE.</p>
+
+    <p>Referenced by netsnmp_table_dataset_delete_all_data(). <a name="lbAV" id="lbAV"> </a></p>
+
+    <h3>NETSNMP_INLINE void netsnmp_table_dataset_delete_row (netsnmp_table_row * row)</h3>
+
+    <p>deletes all the data from this node and beyond in the linked list</p>
+
+    <p>Definition at line 1016 of file table_dataset.c.</p>
+
+    <p>References netsnmp_table_data_delete_row(), and netsnmp_table_dataset_delete_all_data().</p>
+
+    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbAW" id="lbAW"> </a></p>
+
+    <h3>NETSNMP_INLINE void netsnmp_table_dataset_remove_and_delete_row (netsnmp_table_data_set * table, netsnmp_table_row *
+    row)</h3>
+
+    <p>removes a row from the table and then deletes it (and all it's data)</p>
+
+    <p>Definition at line 1040 of file table_dataset.c.</p>
+
+    <p>References netsnmp_table_data_remove_and_delete_row(), and netsnmp_table_dataset_delete_all_data().</p>
+
+    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbAX" id="lbAX"> </a></p>
+
+    <h3>NETSNMP_INLINE void netsnmp_table_dataset_remove_row (netsnmp_table_data_set * table, netsnmp_table_row * row)</h3>
+
+    <p>removes a row from the table, but doesn't delete/free anything</p>
+
+    <p>Definition at line 1029 of file table_dataset.c.</p>
+
+    <p>References netsnmp_table_data_remove_and_delete_row(). <a name="lbAY" id="lbAY"> </a></p>
+
+    <h3>NETSNMP_INLINE void netsnmp_table_dataset_replace_row (netsnmp_table_data_set * table, netsnmp_table_row * origrow,
+    netsnmp_table_row * newrow)</h3>
+
+    <p>adds a new row to a dataset table</p>
+
+    <p>Definition at line 980 of file table_dataset.c.</p>
+
+    <p>References netsnmp_table_data_replace_row().</p>
+
+    <p>Referenced by netsnmp_table_data_set_helper_handler(). <a name="lbAZ" id="lbAZ"> </a></p>
+
+    <h3>int netsnmp_table_set_add_default_row (netsnmp_table_data_set * table_set, unsigned int column, int type, int writable,
+    void * default_value, size_t default_value_len)</h3>
+
+    <p>adds a new default row to a table_set.</p>
+
+    <p>Arguments should be the table_set, column number, variable type and finally a 1 if it is allowed to be writable, or a 0 if
+    not. If the default_value field is not NULL, it will be used to populate new valuse in that column fro newly created rows. It
+    is copied into the storage template (free your calling argument).</p>
+
+    <p>returns SNMPERR_SUCCESS or SNMPERR_FAILURE</p>
+
+    <p>Definition at line 289 of file table_dataset.c.</p>
+
+    <p>References memdup(), netsnmp_table_data_set_find_column(), snmp_log(), and SNMP_MALLOC_TYPEDEF.</p>
+
+    <p>Referenced by netsnmp_table_set_multi_add_default_row(). <a name="lbBA" id="lbBA"> </a></p>
+
+    <h3>void netsnmp_table_set_add_indexes (va_alist)</h3>
+
+    <p>adds multiple indexes to a table_dataset helper object.</p>
+
+    <p>To end the list, use a 0 after the list of ASN index types.</p>
+
+    <p>Definition at line 1101 of file table_dataset.c.</p>
+
+    <p>References netsnmp_table_dataset_add_index(). <a name="lbBB" id="lbBB"> </a></p>
+
+    <h3>void netsnmp_table_set_multi_add_default_row (va_dcl)</h3>
+
+    <p>adds multiple data column definitions to each row.</p>
+
+    <p>Functionally, this is a wrapper around calling netsnmp_table_set_add_default_row repeatedly for you.</p>
+
+    <p>Definition at line 1062 of file table_dataset.c.</p>
+
+    <p>References netsnmp_table_set_add_default_row(), and netsnmp_table_set_multi_add_default_row().</p>
+
+    <p>Referenced by netsnmp_table_set_multi_add_default_row().</p>
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAC">Functions</a></dt>
+        </dl>
+      </dd>
+
+      <dt><a href="#lbAD">Detailed Description</a></dt>
+
+      <dt><a href="#lbAE">Function Documentation</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAF">netsnmp_table_data_set* netsnmp_create_table_data_set (const char * table_name)</a></dt>
+
+          <dt><a href="#lbAG">NETSNMP_INLINE netsnmp_table_data_set* netsnmp_extract_table_data_set (<b>netsnmp_request_info</b>
+          * request)</a></dt>
+
+          <dt><a href="#lbAH">netsnmp_table_data_set_storage* netsnmp_extract_table_data_set_column (<b>netsnmp_request_info</b>
+          * request, unsigned int column)</a></dt>
+
+          <dt><a href="#lbAI"><b>netsnmp_mib_handler</b>* netsnmp_get_table_data_set_handler (netsnmp_table_data_set *
+          data_set)</a></dt>
+
+          <dt><a href="#lbAJ">int netsnmp_mark_row_column_writable (netsnmp_table_row * row, int column, int writable)</a></dt>
+
+          <dt><a href="#lbAK">void netsnmp_register_auto_data_table (netsnmp_table_data_set * table_set, char *
+          registration_name)</a></dt>
+
+          <dt><a href="#lbAL">int netsnmp_register_table_data_set (<b>netsnmp_handler_registration</b> * reginfo,
+          netsnmp_table_data_set * data_set, <b>netsnmp_table_registration_info</b> * table_info)</a></dt>
+
+          <dt><a href="#lbAM">int netsnmp_set_row_column (netsnmp_table_row * row, unsigned int column, int type, const char *
+          value, size_t value_len)</a></dt>
+
+          <dt><a href="#lbAN">netsnmp_table_row* netsnmp_table_data_set_clone_row (netsnmp_table_row * row)</a></dt>
+
+          <dt><a href="#lbAO">netsnmp_table_row* netsnmp_table_data_set_create_row_from_defaults (netsnmp_table_data_set_storage
+          * defrow)</a></dt>
+
+          <dt><a href="#lbAP">netsnmp_table_data_set_storage* netsnmp_table_data_set_find_column (netsnmp_table_data_set_storage
+          * start, unsigned int column)</a></dt>
+
+          <dt><a href="#lbAQ">int netsnmp_table_data_set_helper_handler (<b>netsnmp_mib_handler</b> * handler,
+          <b>netsnmp_handler_registration</b> * reginfo, <b>netsnmp_agent_request_info</b> * reqinfo, <b>netsnmp_request_info</b>
+          * requests)</a></dt>
+
+          <dt><a href="#lbAR">NETSNMP_INLINE void netsnmp_table_dataset_add_index (netsnmp_table_data_set * table, u_char
+          type)</a></dt>
+
+          <dt><a href="#lbAS">NETSNMP_INLINE void netsnmp_table_dataset_add_row (netsnmp_table_data_set * table,
+          netsnmp_table_row * row)</a></dt>
+
+          <dt><a href="#lbAT">NETSNMP_INLINE void netsnmp_table_dataset_delete_all_data (netsnmp_table_data_set_storage *
+          data)</a></dt>
+
+          <dt><a href="#lbAU">NETSNMP_INLINE netsnmp_table_data_set_storage* netsnmp_table_dataset_delete_data
+          (netsnmp_table_data_set_storage * data)</a></dt>
+
+          <dt><a href="#lbAV">NETSNMP_INLINE void netsnmp_table_dataset_delete_row (netsnmp_table_row * row)</a></dt>
+
+          <dt><a href="#lbAW">NETSNMP_INLINE void netsnmp_table_dataset_remove_and_delete_row (netsnmp_table_data_set * table,
+          netsnmp_table_row * row)</a></dt>
+
+          <dt><a href="#lbAX">NETSNMP_INLINE void netsnmp_table_dataset_remove_row (netsnmp_table_data_set * table,
+          netsnmp_table_row * row)</a></dt>
+
+          <dt><a href="#lbAY">NETSNMP_INLINE void netsnmp_table_dataset_replace_row (netsnmp_table_data_set * table,
+          netsnmp_table_row * origrow, netsnmp_table_row * newrow)</a></dt>
+
+          <dt><a href="#lbAZ">int netsnmp_table_set_add_default_row (netsnmp_table_data_set * table_set, unsigned int column, int
+          type, int writable, void * default_value, size_t default_value_len)</a></dt>
+
+          <dt><a href="#lbBA">void netsnmp_table_set_add_indexes (va_alist)</a></dt>
+
+          <dt><a href="#lbBB">void netsnmp_table_set_multi_add_default_row (va_dcl)</a></dt>
+        </dl>
+      </dd>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:44 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,99 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+
+<p class="SectionTitle">
+Net-SNMP Tutorial -- snmpget
+</p>
+
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Net-SNMP Tutorial -- snmpget</title>
+  </head>
+
+  <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
+    <h1>Net-SNMP Tutorial -- snmpget</h1>
+    <p>
+      The <b>snmpget</b> command can be used to retrieve data from a
+      remote host given its host name, authentication information and
+      an OID.  As a simple example:
+<pre>
+<ul>
+% <b>snmpget -c demopublic -v 2c test.net-snmp.org system.sysUpTime.0</b>
+system.sysUpTime.0 = Timeticks: (586731977) 67 days, 21:48:39.77
+</ul>
+</pre>
+    <p>
+      In the above example, <i>test.net-snmp.org</i> is the host name
+      we wanted to talk to, using the SNMP community string
+      <i>demopublic</i> and we requested the value of the OID
+      <i>system.sysUpTime.0</i>.
+
+    <p>
+      Earlier versions of the ucd-snmp utilities used SNMPv1 by default
+      and expected the community name to follow the host name. The net-snmp
+      versions of these tools now typically use SNMPv3 by default, and require
+      both the version <B>and</B> the community string to be given as
+      command line options (as illustrated in these examples). SNMPv2c,
+      which is similar in nature to SNMPv1 with small modifications, still
+      used clear-text community names as "passwords" to authenticate the
+      issuer of the command.  The result from a command using the
+      SNMPv2c version would have been the same:
+<pre>
+<ul>
+% <b>snmpget -v 2c -c demopublic test.net-snmp.org system.sysUpTime.0</b>
+system.sysUpTime.0 = Timeticks: (586752671) 67 days, 21:52:06.71
+</ul>
+</pre>
+    <p>
+      All of the utilities allow abbreviation of the OIDs and do
+      random searches by default, and hence you can only specify a
+      small portion of the oid if you would prefer:
+<pre>
+<ul>
+% <b>snmpget -v 2c -c demopublic test.net-snmp.org sysUpTime.0</b>
+system.sysUpTime.0 = Timeticks: (586752671) 67 days, 21:52:06.71
+</ul>
+</pre>
+    <p>
+      A common mistake when using the snmpget command is to leave off
+      the index into the data you're looking for.  In the above
+      commands, the variable requested by the OID is a scalar and the
+      index to scalars is always a simple '0' (zero), hence the
+      trailing '.0' in all the oids above.  If you had left it off,
+      you would have gotten an error.  Note that the errrors differ
+      slightly between SNMPv1 and SNMPv2c:
+<pre>
+<ul>
+% <b>snmpget -v 2c -c demopublic test.net-snmp.org sysUpTime</b>
+Error in packet
+Reason: (noSuchName) There is no such variable name in this MIB.
+This name doesn't exist: system.sysUpTime
+% <b>snmpget -v 2c -c demopublic test.net-snmp.org sysUpTime</b>
+system.sysUpTime = No Such Instance currently exists
+</ul>
+</pre>
+    <p>
+      Multiple variables can be retrieved in one transaction as well:
+<pre>
+<ul>
+% <b>snmpget -v 2c -c demopublic test.net-snmp.org sysUpTime.0 ucdDemoUserList.0</b>
+system.sysUpTime.0 = Timeticks: (586903243) 67 days, 22:17:12.43
+enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADESUser"
+</ul>
+</pre>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Thu Nov  4 15:05:29 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Thu Mar  7 14:05:03 PST 2002
+<!-- hhmts end -->
+  </body>
+</html>
+<!--#include virtual="/sfbutton.html" -->
+
+<br />
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

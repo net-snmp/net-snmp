@@ -1,0 +1,2266 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>ipv6MIB</b>
+MIB object, which is defined within the <b>IPV6-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.55</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#ipv6IfTable">ipv6IfTable</a></li>
+  <li><a href="#ipv6IfStatsTable">ipv6IfStatsTable</a></li>
+  <li><a href="#ipv6AddrPrefixTable">ipv6AddrPrefixTable</a></li>
+  <li><a href="#ipv6AddrTable">ipv6AddrTable</a></li>
+  <li><a href="#ipv6RouteTable">ipv6RouteTable</a></li>
+  <li><a href="#ipv6NetToMediaTable">ipv6NetToMediaTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6Forwarding" />
+1
+<br /><b>ipv6Forwarding</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>forwarding</td></tr>
+        <tr><td>2</td><td>notForwarding</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.55.1.1</td>
+<td>
+<pre>
+The indication of whether this entity is acting
+as an IPv6 router in respect to the forwarding of
+datagrams received by, but not addressed to, this
+entity.  IPv6 routers forward datagrams.  IPv6
+hosts do not (except those source-routed via the
+host).
+
+Note that for some managed nodes, this object may
+take on only a subset of the values possible.
+Accordingly, it is appropriate for an agent to
+return a `wrongValue' response if a management
+station attempts to change this object to an
+inappropriate value.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6DefaultHopLimit" />
+2
+<br /><b>ipv6DefaultHopLimit</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.55.1.2</td>
+<td>
+<pre>
+The default value inserted into the Hop Limit
+field of the IPv6 header of datagrams originated
+at this entity, whenever a Hop Limit value is not
+supplied by the transport layer protocol.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6Interfaces" />
+3
+<br /><b>ipv6Interfaces</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.55.1.3</td>
+<td>
+<pre>
+The number of IPv6 interfaces (regardless of
+their current state) present on this system.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfTableLastChange" />
+4
+<br /><b>ipv6IfTableLastChange</b>
+
+</td><td>
+  TICKS
+
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.55.1.4</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime at the time of the last
+insertion or removal of an entry in the
+ipv6IfTable. If the number of entries has been
+unchanged since the last re-initialization of
+the local network management subsystem, then this
+object contains a zero value.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6RouteNumber" />
+9
+<br /><b>ipv6RouteNumber</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.55.1.9</td>
+<td>
+<pre>
+The number of current ipv6RouteTable entries.
+This is primarily to avoid having to read
+the table in order to determine this number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6DiscardedRoutes" />
+10
+<br /><b>ipv6DiscardedRoutes</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.55.1.10</td>
+<td>
+<pre>
+The number of routing entries which were chosen
+to be discarded even though they are valid.  One
+possible reason for discarding such an entry could
+be to free-up buffer space for other routing
+entries.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="ipv6IfTable" /><h3>Table ipv6IfTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6IfTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.1.5</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The IPv6 Interfaces table contains information
+on the entity's internetwork-layer interfaces.
+An IPv6 interface constitutes a logical network
+layer attachment to the layer immediately below
+
+IPv6 including internet layer 'tunnels', such as
+tunnels over IPv4 or IPv6 itself.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="ipv6IfEntry" />Row Description</td>
+<td>
+<pre>
+An interface entry containing objects
+about a particular IPv6 interface.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>ipv6IfTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6IfIndex" />
+1
+<br /><b>ipv6IfIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#Ipv6IfIndex">Ipv6IfIndex</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Ipv6IfIndex"> Ipv6IfIndex TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A unique non-zero value identifying
+the particular IPv6 interface.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other ipv6IfTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6IfDescr" />
+2
+<br /><b>ipv6IfDescr</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A textual string containing information about the
+interface.  This string may be set by the network
+management system.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfLowerLayer" />
+3
+<br /><b>ipv6IfLowerLayer</b>
+
+</td><td>
+  OBJECTID
+
+ <br>
+ <a href="#VariablePointer">VariablePointer</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#VariablePointer"> VariablePointer TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object identifies the protocol layer over
+which this network interface operates.  If this
+network interface operates over the data-link
+layer, then the value of this object refers to an
+instance of ifIndex [6]. If this network interface
+operates over an IPv4 interface, the value of this
+object refers to an instance of ipAdEntAddr [3].
+
+If this network interface operates over another
+IPv6 interface, the value of this object refers to
+an instance of ipv6IfIndex.  If this network
+interface is not currently operating over an active
+protocol layer, then the value of this object
+should be set to the OBJECT ID { 0 0 }.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfEffectiveMtu" />
+4
+<br /><b>ipv6IfEffectiveMtu</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The size of the largest IPv6 packet which can be
+sent/received on the interface, specified in
+octets.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfReasmMaxSize" />
+5
+<br /><b>ipv6IfReasmMaxSize</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The size of the largest IPv6 datagram which this
+entity can re-assemble from incoming IPv6 fragmented
+datagrams received on this interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIdentifier" />
+6
+<br /><b>ipv6IfIdentifier</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#Ipv6AddressIfIdentifier">Ipv6AddressIfIdentifier</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Ipv6AddressIfIdentifier"> Ipv6AddressIfIdentifier TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The Interface Identifier for this interface that
+is (at least) unique on the link this interface is
+        attached to. The Interface Identifier is combined
+        with an address prefix to form an interface address.
+By default, the Interface Identifier is autoconfigured
+        according to the rules of the link type this
+        interface is attached to.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIdentifierLength" />
+7
+<br /><b>ipv6IfIdentifierLength</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The length of the Interface Identifier in bits.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfPhysicalAddress" />
+8
+<br /><b>ipv6IfPhysicalAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#PhysAddress">PhysAddress</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#PhysAddress"> PhysAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The interface's physical address. For example, for
+an IPv6 interface attached to an 802.x link, this
+object normally contains a MAC address. Note that
+in some cases this address may differ from the
+address of the interface's protocol sub-layer.  The
+interface's media-specific MIB must define the bit
+and byte ordering and the format of the value of
+this object. For interfaces which do not have such
+an address (e.g., a serial line), this object should
+contain an octet string of zero length.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfAdminStatus" />
+9
+<br /><b>ipv6IfAdminStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>up</td></tr>
+        <tr><td>2</td><td>down</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The desired state of the interface.  When a managed
+system initializes,  all IPv6 interfaces start with
+ipv6IfAdminStatus in the down(2) state.  As a result
+of either explicit management action or per
+configuration information retained by the managed
+
+system,  ipv6IfAdminStatus is then changed to
+the up(1) state (or remains in the down(2) state).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfOperStatus" />
+10
+<br /><b>ipv6IfOperStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>up</td></tr>
+        <tr><td>2</td><td>down</td></tr>
+        <tr><td>3</td><td>noIfIdentifier</td></tr>
+        <tr><td>4</td><td>unknown</td></tr>
+        <tr><td>5</td><td>notPresent</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The current operational state of the interface.
+The noIfIdentifier(3) state indicates that no valid
+Interface Identifier is assigned to the interface.
+This state usually indicates that the link-local
+interface address failed Duplicate Address Detection.
+If ipv6IfAdminStatus is down(2) then ipv6IfOperStatus
+should be down(2).  If ipv6IfAdminStatus is changed
+to up(1) then ipv6IfOperStatus should change to up(1)
+if the interface is ready to transmit and receive
+network traffic; it should remain in the down(2) or
+noIfIdentifier(3) state if and only if there is a
+fault that prevents it from going to the up(1) state;
+it should remain in the notPresent(5) state if
+the interface has missing (typically, lower layer)
+components.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfLastChange" />
+11
+<br /><b>ipv6IfLastChange</b>
+
+</td><td>
+  TICKS
+
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime at the time the interface
+entered its current operational state.  If the
+current state was entered prior to the last
+re-initialization of the local network management
+
+subsystem, then this object contains a zero
+value.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="ipv6IfStatsTable" /><h3>Table ipv6IfStatsTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6IfStatsTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.1.6</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+IPv6 interface traffic statistics.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="ipv6IfStatsEntry" />Row Description</td>
+<td>
+<pre>
+An interface statistics entry containing objects
+at a particular IPv6 interface.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>ipv6IfStatsTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6IfIndex" />
+1
+<br /><b>ipv6IfIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#Ipv6IfIndex">Ipv6IfIndex</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Ipv6IfIndex"> Ipv6IfIndex TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A unique non-zero value identifying
+the particular IPv6 interface.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other ipv6IfStatsTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsInReceives" />
+1
+<br /><b>ipv6IfStatsInReceives</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of input datagrams received by
+the interface, including those received in error.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsInHdrErrors" />
+2
+<br /><b>ipv6IfStatsInHdrErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of input datagrams discarded due to
+errors in their IPv6 headers, including version
+number mismatch, other format errors, hop count
+exceeded, errors discovered in processing their
+IPv6 options, etc.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsInTooBigErrors" />
+3
+<br /><b>ipv6IfStatsInTooBigErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of input datagrams that could not be
+forwarded because their size exceeded the link MTU
+of outgoing interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsInNoRoutes" />
+4
+<br /><b>ipv6IfStatsInNoRoutes</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of input datagrams discarded because no
+route could be found to transmit them to their
+destination.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsInAddrErrors" />
+5
+<br /><b>ipv6IfStatsInAddrErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of input datagrams discarded because
+the IPv6 address in their IPv6 header's destination
+field was not a valid address to be received at
+this entity.  This count includes invalid
+addresses (e.g., ::0) and unsupported addresses
+(e.g., addresses with unallocated prefixes).  For
+entities which are not IPv6 routers and therefore
+do not forward datagrams, this counter includes
+datagrams discarded because the destination address
+was not a local address.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsInUnknownProtos" />
+6
+<br /><b>ipv6IfStatsInUnknownProtos</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of locally-addressed datagrams
+received successfully but discarded because of an
+unknown or unsupported protocol. This counter is
+incremented at the interface to which these
+datagrams were addressed which might not be
+necessarily the input interface for some of
+the datagrams.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsInTruncatedPkts" />
+7
+<br /><b>ipv6IfStatsInTruncatedPkts</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of input datagrams discarded because
+datagram frame didn't carry enough data.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsInDiscards" />
+8
+<br /><b>ipv6IfStatsInDiscards</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of input IPv6 datagrams for which no
+problems were encountered to prevent their
+continued processing, but which were discarded
+(e.g., for lack of buffer space).  Note that this
+counter does not include any datagrams discarded
+while awaiting re-assembly.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsInDelivers" />
+9
+<br /><b>ipv6IfStatsInDelivers</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of datagrams successfully
+delivered to IPv6 user-protocols (including ICMP).
+This counter is incremented at the interface to
+which these datagrams were addressed which might
+not be necessarily the input interface for some of
+the datagrams.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsOutForwDatagrams" />
+10
+<br /><b>ipv6IfStatsOutForwDatagrams</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of output datagrams which this
+entity received and forwarded to their final
+destinations.  In entities which do not act
+as IPv6 routers, this counter will include
+only those packets which were Source-Routed
+via this entity, and the Source-Route
+processing was successful.  Note that for
+a successfully forwarded datagram the counter
+of the outgoing interface is incremented.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsOutRequests" />
+11
+<br /><b>ipv6IfStatsOutRequests</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of IPv6 datagrams which local IPv6
+user-protocols (including ICMP) supplied to IPv6 in
+requests for transmission.  Note that this counter
+does not include any datagrams counted in
+ipv6IfStatsOutForwDatagrams.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsOutDiscards" />
+12
+<br /><b>ipv6IfStatsOutDiscards</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of output IPv6 datagrams for which no
+problem was encountered to prevent their
+transmission to their destination, but which were
+discarded (e.g., for lack of buffer space).  Note
+that this counter would include datagrams counted
+in ipv6IfStatsOutForwDatagrams if any such packets
+met this (discretionary) discard criterion.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsOutFragOKs" />
+13
+<br /><b>ipv6IfStatsOutFragOKs</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of IPv6 datagrams that have been
+successfully fragmented at this output interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsOutFragFails" />
+14
+<br /><b>ipv6IfStatsOutFragFails</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of IPv6 datagrams that have been
+discarded because they needed to be fragmented
+at this output interface but could not be.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsOutFragCreates" />
+15
+<br /><b>ipv6IfStatsOutFragCreates</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of output datagram fragments that have
+been generated as a result of fragmentation at
+this output interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsReasmReqds" />
+16
+<br /><b>ipv6IfStatsReasmReqds</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of IPv6 fragments received which needed
+to be reassembled at this interface.  Note that this
+counter is incremented at the interface to which
+these fragments were addressed which might not
+be necessarily the input interface for some of
+the fragments.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsReasmOKs" />
+17
+<br /><b>ipv6IfStatsReasmOKs</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of IPv6 datagrams successfully
+reassembled.  Note that this counter is incremented
+at the interface to which these datagrams were
+addressed which might not be necessarily the input
+interface for some of the fragments.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsReasmFails" />
+18
+<br /><b>ipv6IfStatsReasmFails</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of failures detected by the IPv6 re-
+assembly algorithm (for whatever reason: timed
+out, errors, etc.).  Note that this is not
+necessarily a count of discarded IPv6 fragments
+since some algorithms (notably the algorithm in
+RFC 815) can lose track of the number of fragments
+by combining them as they are received.
+This counter is incremented at the interface to which
+these fragments were addressed which might not be
+necessarily the input interface for some of the
+fragments.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsInMcastPkts" />
+19
+<br /><b>ipv6IfStatsInMcastPkts</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of multicast packets received
+by the interface
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfStatsOutMcastPkts" />
+20
+<br /><b>ipv6IfStatsOutMcastPkts</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of multicast packets transmitted
+by the interface
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="ipv6AddrPrefixTable" /><h3>Table ipv6AddrPrefixTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6AddrPrefixTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.1.7</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The list of IPv6 address prefixes of
+IPv6 interfaces.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="ipv6AddrPrefixEntry" />Row Description</td>
+<td>
+<pre>
+An interface entry containing objects of
+a particular IPv6 address prefix.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>ipv6AddrPrefixTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6IfIndex" />
+1
+<br /><b>ipv6IfIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#Ipv6IfIndex">Ipv6IfIndex</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Ipv6IfIndex"> Ipv6IfIndex TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A unique non-zero value identifying
+the particular IPv6 interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6AddrPrefix" />
+1
+<br /><b>ipv6AddrPrefix</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#Ipv6AddressPrefix">Ipv6AddressPrefix</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Ipv6AddressPrefix"> Ipv6AddressPrefix TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The prefix associated with the this interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6AddrPrefixLength" />
+2
+<br /><b>ipv6AddrPrefixLength</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The length of the prefix (in bits).
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other ipv6AddrPrefixTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6AddrPrefixOnLinkFlag" />
+3
+<br /><b>ipv6AddrPrefixOnLinkFlag</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object has the value 'true(1)', if this
+prefix can be used  for on-link determination
+and the value 'false(2)' otherwise.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6AddrPrefixAutonomousFlag" />
+4
+<br /><b>ipv6AddrPrefixAutonomousFlag</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Autonomous address configuration flag. When
+true(1), indicates that this prefix can be used
+for autonomous address configuration (i.e. can
+be used to form a local interface address).
+If false(2), it is not used to autoconfigure
+a local interface address.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6AddrPrefixAdvPreferredLifetime" />
+5
+<br /><b>ipv6AddrPrefixAdvPreferredLifetime</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+It is the length of time in seconds that this
+prefix will remain preferred, i.e. time until
+deprecation.  A value of 4,294,967,295 represents
+infinity.
+
+The address generated from a deprecated prefix
+should no longer be used as a source address in
+new communications, but packets received on such
+an interface are processed as expected.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6AddrPrefixAdvValidLifetime" />
+6
+<br /><b>ipv6AddrPrefixAdvValidLifetime</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+It is the length of time in seconds that this
+prefix will remain valid, i.e. time until
+invalidation.  A value of 4,294,967,295 represents
+infinity.
+
+The address generated from an invalidated prefix
+should not appear as the destination or source
+address of a packet.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="ipv6AddrTable" /><h3>Table ipv6AddrTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6AddrTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.1.8</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The table of addressing information relevant to
+this node's interface addresses.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="ipv6AddrEntry" />Row Description</td>
+<td>
+<pre>
+The addressing information for one of this
+node's interface addresses.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>ipv6AddrTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6IfIndex" />
+1
+<br /><b>ipv6IfIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#Ipv6IfIndex">Ipv6IfIndex</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Ipv6IfIndex"> Ipv6IfIndex TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A unique non-zero value identifying
+the particular IPv6 interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6AddrAddress" />
+1
+<br /><b>ipv6AddrAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#Ipv6Address">Ipv6Address</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Ipv6Address"> Ipv6Address TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The IPv6 address to which this entry's addressing
+information pertains.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other ipv6AddrTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6AddrPfxLength" />
+2
+<br /><b>ipv6AddrPfxLength</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The length of the prefix (in bits) associated with
+the IPv6 address of this entry.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6AddrType" />
+3
+<br /><b>ipv6AddrType</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>stateless</td></tr>
+        <tr><td>2</td><td>stateful</td></tr>
+        <tr><td>3</td><td>unknown</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The type of address. Note that 'stateless(1)'
+refers to an address that was statelessly
+autoconfigured; 'stateful(2)' refers to a address
+which was acquired by via a stateful protocol
+(e.g. DHCPv6, manual configuration).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6AddrAnycastFlag" />
+4
+<br /><b>ipv6AddrAnycastFlag</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object has the value 'true(1)', if this
+address is an anycast address and the value
+'false(2)' otherwise.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6AddrStatus" />
+5
+<br /><b>ipv6AddrStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>preferred</td></tr>
+        <tr><td>3</td><td>invalid</td></tr>
+        <tr><td>4</td><td>inaccessible</td></tr>
+        <tr><td>5</td><td>unknown</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Address status.  The preferred(1) state indicates
+that this is a valid address that can appear as
+the destination or source address of a packet.
+The deprecated(2) state indicates that this is
+a valid but deprecated address that should no longer
+be used as a source address in new communications,
+but packets addressed to such an address are
+processed as expected. The invalid(3) state indicates
+that this is not valid address which should not
+
+appear as the destination or source address of
+a packet. The inaccessible(4) state indicates that
+the address is not accessible because the interface
+to which this address is assigned is not operational.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="ipv6RouteTable" /><h3>Table ipv6RouteTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6RouteTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.1.11</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+IPv6 Routing table. This table contains
+an entry for each valid IPv6 unicast route
+that can be used for packet forwarding
+determination.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="ipv6RouteEntry" />Row Description</td>
+<td>
+<pre>
+A routing entry.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>ipv6RouteTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6RouteDest" />
+1
+<br /><b>ipv6RouteDest</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#Ipv6Address">Ipv6Address</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Ipv6Address"> Ipv6Address TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The destination IPv6 address of this route.
+This object may not take a Multicast address
+value.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6RoutePfxLength" />
+2
+<br /><b>ipv6RoutePfxLength</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Indicates the prefix length of the destination
+address.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6RouteIndex" />
+3
+<br /><b>ipv6RouteIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The value which uniquely identifies the route
+among the routes to the same network layer
+destination.  The way this value is chosen is
+implementation specific but it must be unique for
+ipv6RouteDest/ipv6RoutePfxLength pair and remain
+constant for the life of the route.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other ipv6RouteTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6RouteIfIndex" />
+4
+<br /><b>ipv6RouteIfIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#Ipv6IfIndexOrZero">Ipv6IfIndexOrZero</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Ipv6IfIndexOrZero"> Ipv6IfIndexOrZero TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The index value which uniquely identifies the local
+interface through which the next hop of this
+route should be reached.  The interface identified
+by a particular value of this index is the same
+interface as identified by the same value of
+ipv6IfIndex.  For routes of the discard type this
+value can be zero.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6RouteNextHop" />
+5
+<br /><b>ipv6RouteNextHop</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#Ipv6Address">Ipv6Address</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Ipv6Address"> Ipv6Address TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+On remote routes, the address of the next
+system en route;  otherwise, ::0
+('00000000000000000000000000000000'H in ASN.1
+string representation).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6RouteType" />
+6
+<br /><b>ipv6RouteType</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>other</td></tr>
+        <tr><td>2</td><td>discard</td></tr>
+        <tr><td>3</td><td>local</td></tr>
+        <tr><td>4</td><td>remote</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The type of route. Note that 'local(3)' refers
+to a route for which the next hop is the final
+destination; 'remote(4)' refers to a route for
+which  the  next  hop is not the final
+destination; 'discard(2)' refers to a route
+indicating that packets to destinations matching
+this route are to be discarded (sometimes called
+black-hole route).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6RouteProtocol" />
+7
+<br /><b>ipv6RouteProtocol</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>other</td></tr>
+        <tr><td>2</td><td>local</td></tr>
+        <tr><td>3</td><td>netmgmt</td></tr>
+        <tr><td>4</td><td>ndisc</td></tr>
+        <tr><td>5</td><td>rip</td></tr>
+        <tr><td>6</td><td>ospf</td></tr>
+        <tr><td>7</td><td>bgp</td></tr>
+        <tr><td>8</td><td>idrp</td></tr>
+        <tr><td>9</td><td>igrp</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The routing mechanism via which this route was
+learned.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6RoutePolicy" />
+8
+<br /><b>ipv6RoutePolicy</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The general set of conditions that would cause the
+selection of one multipath route (set of next hops
+for a given destination) is referred to as 'policy'.
+Unless the mechanism indicated by ipv6RouteProtocol
+specified otherwise, the policy specifier is the
+8-bit Traffic Class field of the IPv6 packet header
+that is zero extended at the left to a 32-bit value.
+
+Protocols defining 'policy' otherwise must either
+define a set of values which are valid for
+this object or must implement an integer-
+instanced  policy table for which this object's
+value acts as an index.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6RouteAge" />
+9
+<br /><b>ipv6RouteAge</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of seconds since this route was last
+updated or otherwise determined to be correct.
+Note that no semantics of `too old' can be implied
+except through knowledge of the routing protocol
+by which the route was learned.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6RouteNextHopRDI" />
+10
+<br /><b>ipv6RouteNextHopRDI</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The Routing Domain ID of the Next Hop.
+The  semantics of this object are determined by
+the routing-protocol specified in  the  route's
+ipv6RouteProtocol value.   When  this object is
+unknown or not relevant its value should be set
+to zero.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6RouteMetric" />
+11
+<br /><b>ipv6RouteMetric</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The routing metric for this route. The
+semantics of this metric are determined by the
+routing protocol specified in the route's
+ipv6RouteProtocol value.  When this is unknown
+or not relevant to the protocol indicated by
+ipv6RouteProtocol, the object value should be
+set to its maximum value (4,294,967,295).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6RouteWeight" />
+12
+<br /><b>ipv6RouteWeight</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The system internal weight value for this route.
+The semantics of this value are determined by
+the implementation specific rules. Generally,
+within routes with the same ipv6RoutePolicy value,
+the lower the weight value the more preferred is
+the route.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6RouteInfo" />
+13
+<br /><b>ipv6RouteInfo</b>
+
+</td><td>
+  OBJECTID
+
+ <br>
+ <a href="#RowPointer">RowPointer</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowPointer"> RowPointer TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A reference to MIB definitions specific to the
+particular routing protocol which is responsible
+for this route, as determined by the  value
+specified  in the route's ipv6RouteProto value.
+If this information is not present,  its  value
+should be set to the OBJECT ID { 0 0 },
+which is a syntactically valid object  identifier,
+and any implementation conforming to ASN.1
+and the Basic Encoding Rules must  be  able  to
+generate and recognize this value.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6RouteValid" />
+14
+<br /><b>ipv6RouteValid</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Setting this object to the value 'false(2)' has
+the effect of invalidating the corresponding entry
+in the ipv6RouteTable object.  That is, it
+effectively disassociates the destination
+
+identified with said entry from the route
+identified with said entry.  It is an
+implementation-specific matter as to whether the
+agent removes an invalidated entry from the table.
+Accordingly, management stations must be prepared
+to receive tabular information from agents that
+corresponds to entries not currently in use.
+Proper interpretation of such entries requires
+examination of the relevant ipv6RouteValid
+object.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="ipv6NetToMediaTable" /><h3>Table ipv6NetToMediaTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6NetToMediaTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.1.12</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The IPv6 Address Translation table used for
+mapping from IPv6 addresses to physical addresses.
+
+The IPv6 address translation table contain the
+Ipv6Address to `physical' address equivalencies.
+Some interfaces do not use translation tables
+for determining address equivalencies; if all
+interfaces are of this type, then the Address
+Translation table is empty, i.e., has zero
+entries.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="ipv6NetToMediaEntry" />Row Description</td>
+<td>
+<pre>
+Each entry contains one IPv6 address to `physical'
+address equivalence.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>ipv6NetToMediaTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6IfIndex" />
+1
+<br /><b>ipv6IfIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#Ipv6IfIndex">Ipv6IfIndex</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Ipv6IfIndex"> Ipv6IfIndex TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A unique non-zero value identifying
+the particular IPv6 interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6NetToMediaNetAddress" />
+1
+<br /><b>ipv6NetToMediaNetAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#Ipv6Address">Ipv6Address</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Ipv6Address"> Ipv6Address TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The IPv6 Address corresponding to
+the media-dependent `physical' address.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other ipv6NetToMediaTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6NetToMediaPhysAddress" />
+2
+<br /><b>ipv6NetToMediaPhysAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#PhysAddress">PhysAddress</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#PhysAddress"> PhysAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The media-dependent `physical' address.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6NetToMediaType" />
+3
+<br /><b>ipv6NetToMediaType</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>other</td></tr>
+        <tr><td>2</td><td>dynamic</td></tr>
+        <tr><td>3</td><td>static</td></tr>
+        <tr><td>4</td><td>local</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The type of the mapping. The 'dynamic(2)' type
+indicates that the IPv6 address to physical
+addresses mapping has been dynamically
+resolved using the IPv6 Neighbor Discovery
+protocol. The static(3)' types indicates that
+the mapping has been statically configured.
+The local(4) indicates that the mapping is
+provided for an entity's own interface address.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfNetToMediaState" />
+4
+<br /><b>ipv6IfNetToMediaState</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>reachable</td></tr>
+        <tr><td>2</td><td>stale</td></tr>
+        <tr><td>3</td><td>delay</td></tr>
+        <tr><td>4</td><td>probe</td></tr>
+        <tr><td>5</td><td>invalid</td></tr>
+        <tr><td>6</td><td>unknown</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The Neighbor Unreachability Detection [8] state
+for the interface when the address mapping in
+this entry is used.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfNetToMediaLastUpdated" />
+5
+<br /><b>ipv6IfNetToMediaLastUpdated</b>
+
+</td><td>
+  TICKS
+
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime at the time this entry
+was last updated.  If this entry was updated prior
+to the last re-initialization of the local network
+management subsystem, then this object contains
+a zero value.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6NetToMediaValid" />
+6
+<br /><b>ipv6NetToMediaValid</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Setting this object to the value 'false(2)' has
+the effect of invalidating the corresponding entry
+in the ipv6NetToMediaTable.  That is, it effectively
+disassociates the interface identified with said
+entry from the mapping identified with said entry.
+It is an implementation-specific matter as to
+
+whether the agent removes an invalidated entry
+from the table.  Accordingly, management stations
+must be prepared to receive tabular information
+from agents that corresponds to entries not
+currently in use.  Proper interpretation of such
+entries requires examination of the relevant
+ipv6NetToMediaValid object.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+<a name="ipv6IfStateChange" /><h3>Notification: ipv6IfStateChange</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>ipv6IfStateChange</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.55.2.0.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+An ipv6IfStateChange notification signifies
+that there has been a change in the state of
+an ipv6 interface.  This notification should
+be generated when the interface's operational
+status transitions to or from the up(1) state.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#ipv6IfDescr">ipv6IfDescr</a></td></tr>
+      <tr><td><a href="#ipv6IfOperStatus">ipv6IfOperStatus</a></td></tr>
+  </table></td></tr>
+  </table>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre></pre></td></tr>
+<tr><td><a name="VariablePointer">VariablePointer</td><td>OBJECTID</td><td><pre></pre></td></tr>
+<tr><td><a name="PhysAddress">PhysAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="Ipv6AddressIfIdentifier">Ipv6AddressIfIdentifier</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="Ipv6IfIndex">Ipv6IfIndex</td><td>INTEGER32</td><td><pre></pre></td></tr>
+<tr><td><a name="RowPointer">RowPointer</td><td>OBJECTID</td><td><pre></pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="Ipv6AddressPrefix">Ipv6AddressPrefix</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="Ipv6IfIndexOrZero">Ipv6IfIndexOrZero</td><td>INTEGER32</td><td><pre></pre></td></tr>
+<tr><td><a name="Ipv6Address">Ipv6Address</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp IPV6-MIB::ipv6MIB</b></p>
+<pre>
++--<a href="#ipv6MIB">ipv6MIB</a>(55)
+   |
+   +--<a href="#ipv6MIBObjects">ipv6MIBObjects</a>(1)
+   |  |
+   |  +-- -RW- EnumVal   <a href="#ipv6Forwarding">ipv6Forwarding</a>(1)
+   |  |        Values: forwarding(1), notForwarding(2)
+   |  +-- -RW- INTEGER   <a href="#ipv6DefaultHopLimit">ipv6DefaultHopLimit</a>(2)
+   |  |        Range: 0..255
+   |  +-- -R-- Unsigned  <a href="#ipv6Interfaces">ipv6Interfaces</a>(3)
+   |  +-- -R-- TimeTicks <a href="#ipv6IfTableLastChange">ipv6IfTableLastChange</a>(4)
+   |  |        Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |
+   |  +--<a href="#ipv6IfTable">ipv6IfTable</a>(5)
+   |  |  |
+   |  |  +--<a href="#ipv6IfEntry">ipv6IfEntry</a>(1)
+   |  |     |  Index: ipv6IfIndex
+   |  |     |
+   |  |     +-- ---- Integer32 <a href="#ipv6IfIndex">ipv6IfIndex</a>(1)
+   |  |     |        Textual Convention: <a href="#Ipv6IfIndex">Ipv6IfIndex</a>
+   |  |     |        Range: 1..2147483647
+   |  |     +-- -RW- String    <a href="#ipv6IfDescr">ipv6IfDescr</a>(2)
+   |  |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |  |     |        Size: 0..255
+   |  |     +-- -R-- ObjID     <a href="#ipv6IfLowerLayer">ipv6IfLowerLayer</a>(3)
+   |  |     |        Textual Convention: <a href="#VariablePointer">VariablePointer</a>
+   |  |     +-- -R-- Unsigned  <a href="#ipv6IfEffectiveMtu">ipv6IfEffectiveMtu</a>(4)
+   |  |     +-- -R-- Unsigned  <a href="#ipv6IfReasmMaxSize">ipv6IfReasmMaxSize</a>(5)
+   |  |     |        Range: 0..65535
+   |  |     +-- -RW- String    <a href="#ipv6IfIdentifier">ipv6IfIdentifier</a>(6)
+   |  |     |        Textual Convention: <a href="#Ipv6AddressIfIdentifier">Ipv6AddressIfIdentifier</a>
+   |  |     |        Size: 0..8
+   |  |     +-- -RW- INTEGER   <a href="#ipv6IfIdentifierLength">ipv6IfIdentifierLength</a>(7)
+   |  |     |        Range: 0..64
+   |  |     +-- -R-- String    <a href="#ipv6IfPhysicalAddress">ipv6IfPhysicalAddress</a>(8)
+   |  |     |        Textual Convention: <a href="#PhysAddress">PhysAddress</a>
+   |  |     +-- -RW- EnumVal   <a href="#ipv6IfAdminStatus">ipv6IfAdminStatus</a>(9)
+   |  |     |        Values: up(1), down(2)
+   |  |     +-- -R-- EnumVal   <a href="#ipv6IfOperStatus">ipv6IfOperStatus</a>(10)
+   |  |     |        Values: up(1), down(2), noIfIdentifier(3), unknown(4), notPresent(5)
+   |  |     +-- -R-- TimeTicks <a href="#ipv6IfLastChange">ipv6IfLastChange</a>(11)
+   |  |              Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |
+   |  +--<a href="#ipv6IfStatsTable">ipv6IfStatsTable</a>(6)
+   |  |  |
+   |  |  +--<a href="#ipv6IfStatsEntry">ipv6IfStatsEntry</a>(1)
+   |  |     |
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsInReceives">ipv6IfStatsInReceives</a>(1)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsInHdrErrors">ipv6IfStatsInHdrErrors</a>(2)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsInTooBigErrors">ipv6IfStatsInTooBigErrors</a>(3)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsInNoRoutes">ipv6IfStatsInNoRoutes</a>(4)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsInAddrErrors">ipv6IfStatsInAddrErrors</a>(5)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsInUnknownProtos">ipv6IfStatsInUnknownProtos</a>(6)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsInTruncatedPkts">ipv6IfStatsInTruncatedPkts</a>(7)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsInDiscards">ipv6IfStatsInDiscards</a>(8)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsInDelivers">ipv6IfStatsInDelivers</a>(9)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsOutForwDatagrams">ipv6IfStatsOutForwDatagrams</a>(10)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsOutRequests">ipv6IfStatsOutRequests</a>(11)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsOutDiscards">ipv6IfStatsOutDiscards</a>(12)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsOutFragOKs">ipv6IfStatsOutFragOKs</a>(13)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsOutFragFails">ipv6IfStatsOutFragFails</a>(14)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsOutFragCreates">ipv6IfStatsOutFragCreates</a>(15)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsReasmReqds">ipv6IfStatsReasmReqds</a>(16)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsReasmOKs">ipv6IfStatsReasmOKs</a>(17)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsReasmFails">ipv6IfStatsReasmFails</a>(18)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsInMcastPkts">ipv6IfStatsInMcastPkts</a>(19)
+   |  |     +-- -R-- Counter   <a href="#ipv6IfStatsOutMcastPkts">ipv6IfStatsOutMcastPkts</a>(20)
+   |  |
+   |  +--<a href="#ipv6AddrPrefixTable">ipv6AddrPrefixTable</a>(7)
+   |  |  |
+   |  |  +--<a href="#ipv6AddrPrefixEntry">ipv6AddrPrefixEntry</a>(1)
+   |  |     |  Index: ipv6IfIndex, ipv6AddrPrefix, ipv6AddrPrefixLength
+   |  |     |
+   |  |     +-- ---- String    <a href="#ipv6AddrPrefix">ipv6AddrPrefix</a>(1)
+   |  |     |        Textual Convention: <a href="#Ipv6AddressPrefix">Ipv6AddressPrefix</a>
+   |  |     |        Size: 0..16
+   |  |     +-- ---- INTEGER   <a href="#ipv6AddrPrefixLength">ipv6AddrPrefixLength</a>(2)
+   |  |     |        Range: 0..128
+   |  |     +-- -R-- EnumVal   <a href="#ipv6AddrPrefixOnLinkFlag">ipv6AddrPrefixOnLinkFlag</a>(3)
+   |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |     |        Values: true(1), false(2)
+   |  |     +-- -R-- EnumVal   <a href="#ipv6AddrPrefixAutonomousFlag">ipv6AddrPrefixAutonomousFlag</a>(4)
+   |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |     |        Values: true(1), false(2)
+   |  |     +-- -R-- Unsigned  <a href="#ipv6AddrPrefixAdvPreferredLifetime">ipv6AddrPrefixAdvPreferredLifetime</a>(5)
+   |  |     +-- -R-- Unsigned  <a href="#ipv6AddrPrefixAdvValidLifetime">ipv6AddrPrefixAdvValidLifetime</a>(6)
+   |  |
+   |  +--<a href="#ipv6AddrTable">ipv6AddrTable</a>(8)
+   |  |  |
+   |  |  +--<a href="#ipv6AddrEntry">ipv6AddrEntry</a>(1)
+   |  |     |  Index: ipv6IfIndex, ipv6AddrAddress
+   |  |     |
+   |  |     +-- ---- String    <a href="#ipv6AddrAddress">ipv6AddrAddress</a>(1)
+   |  |     |        Textual Convention: <a href="#Ipv6Address">Ipv6Address</a>
+   |  |     |        Size: 16
+   |  |     +-- -R-- INTEGER   <a href="#ipv6AddrPfxLength">ipv6AddrPfxLength</a>(2)
+   |  |     |        Range: 0..128
+   |  |     +-- -R-- EnumVal   <a href="#ipv6AddrType">ipv6AddrType</a>(3)
+   |  |     |        Values: stateless(1), stateful(2), unknown(3)
+   |  |     +-- -R-- EnumVal   <a href="#ipv6AddrAnycastFlag">ipv6AddrAnycastFlag</a>(4)
+   |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |     |        Values: true(1), false(2)
+   |  |     +-- -R-- EnumVal   <a href="#ipv6AddrStatus">ipv6AddrStatus</a>(5)
+   |  |              Values: preferred(1), invalid(3), inaccessible(4), unknown(5)
+   |  |
+   |  +-- -R-- Gauge     <a href="#ipv6RouteNumber">ipv6RouteNumber</a>(9)
+   |  +-- -R-- Counter   <a href="#ipv6DiscardedRoutes">ipv6DiscardedRoutes</a>(10)
+   |  |
+   |  +--<a href="#ipv6RouteTable">ipv6RouteTable</a>(11)
+   |  |  |
+   |  |  +--<a href="#ipv6RouteEntry">ipv6RouteEntry</a>(1)
+   |  |     |  Index: ipv6RouteDest, ipv6RoutePfxLength, ipv6RouteIndex
+   |  |     |
+   |  |     +-- ---- String    <a href="#ipv6RouteDest">ipv6RouteDest</a>(1)
+   |  |     |        Textual Convention: <a href="#Ipv6Address">Ipv6Address</a>
+   |  |     |        Size: 16
+   |  |     +-- ---- INTEGER   <a href="#ipv6RoutePfxLength">ipv6RoutePfxLength</a>(2)
+   |  |     |        Range: 0..128
+   |  |     +-- ---- Unsigned  <a href="#ipv6RouteIndex">ipv6RouteIndex</a>(3)
+   |  |     +-- -R-- Integer32 <a href="#ipv6RouteIfIndex">ipv6RouteIfIndex</a>(4)
+   |  |     |        Textual Convention: <a href="#Ipv6IfIndexOrZero">Ipv6IfIndexOrZero</a>
+   |  |     |        Range: 0..2147483647
+   |  |     +-- -R-- String    <a href="#ipv6RouteNextHop">ipv6RouteNextHop</a>(5)
+   |  |     |        Textual Convention: <a href="#Ipv6Address">Ipv6Address</a>
+   |  |     |        Size: 16
+   |  |     +-- -R-- EnumVal   <a href="#ipv6RouteType">ipv6RouteType</a>(6)
+   |  |     |        Values: other(1), discard(2), local(3), remote(4)
+   |  |     +-- -R-- EnumVal   <a href="#ipv6RouteProtocol">ipv6RouteProtocol</a>(7)
+   |  |     |        Values: other(1), local(2), netmgmt(3), ndisc(4), rip(5), ospf(6), bgp(7), idrp(8), igrp(9)
+   |  |     +-- -R-- Integer32 <a href="#ipv6RoutePolicy">ipv6RoutePolicy</a>(8)
+   |  |     +-- -R-- Unsigned  <a href="#ipv6RouteAge">ipv6RouteAge</a>(9)
+   |  |     +-- -R-- Unsigned  <a href="#ipv6RouteNextHopRDI">ipv6RouteNextHopRDI</a>(10)
+   |  |     +-- -R-- Unsigned  <a href="#ipv6RouteMetric">ipv6RouteMetric</a>(11)
+   |  |     +-- -R-- Unsigned  <a href="#ipv6RouteWeight">ipv6RouteWeight</a>(12)
+   |  |     +-- -R-- ObjID     <a href="#ipv6RouteInfo">ipv6RouteInfo</a>(13)
+   |  |     |        Textual Convention: <a href="#RowPointer">RowPointer</a>
+   |  |     +-- -RW- EnumVal   <a href="#ipv6RouteValid">ipv6RouteValid</a>(14)
+   |  |              Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |              Values: true(1), false(2)
+   |  |
+   |  +--<a href="#ipv6NetToMediaTable">ipv6NetToMediaTable</a>(12)
+   |     |
+   |     +--<a href="#ipv6NetToMediaEntry">ipv6NetToMediaEntry</a>(1)
+   |        |  Index: ipv6IfIndex, ipv6NetToMediaNetAddress
+   |        |
+   |        +-- ---- String    <a href="#ipv6NetToMediaNetAddress">ipv6NetToMediaNetAddress</a>(1)
+   |        |        Textual Convention: <a href="#Ipv6Address">Ipv6Address</a>
+   |        |        Size: 16
+   |        +-- -R-- String    <a href="#ipv6NetToMediaPhysAddress">ipv6NetToMediaPhysAddress</a>(2)
+   |        |        Textual Convention: <a href="#PhysAddress">PhysAddress</a>
+   |        +-- -R-- EnumVal   <a href="#ipv6NetToMediaType">ipv6NetToMediaType</a>(3)
+   |        |        Values: other(1), dynamic(2), static(3), local(4)
+   |        +-- -R-- EnumVal   <a href="#ipv6IfNetToMediaState">ipv6IfNetToMediaState</a>(4)
+   |        |        Values: reachable(1), stale(2), delay(3), probe(4), invalid(5), unknown(6)
+   |        +-- -R-- TimeTicks <a href="#ipv6IfNetToMediaLastUpdated">ipv6IfNetToMediaLastUpdated</a>(5)
+   |        |        Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |        +-- -RW- EnumVal   <a href="#ipv6NetToMediaValid">ipv6NetToMediaValid</a>(6)
+   |                 Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |                 Values: true(1), false(2)
+   |
+   +--<a href="#ipv6Notifications">ipv6Notifications</a>(2)
+   |  |
+   |  +--<a href="#ipv6NotificationPrefix">ipv6NotificationPrefix</a>(0)
+   |     |
+   |     +--<a href="#ipv6IfStateChange">ipv6IfStateChange</a>(1)
+   |
+   +--<a href="#ipv6Conformance">ipv6Conformance</a>(3)
+      |
+      +--<a href="#ipv6Compliances">ipv6Compliances</a>(1)
+      |  |
+      |  +--<a href="#ipv6Compliance">ipv6Compliance</a>(1)
+      |
+      +--<a href="#ipv6Groups">ipv6Groups</a>(2)
+         |
+         +--<a href="#ipv6GeneralGroup">ipv6GeneralGroup</a>(1)
+         |
+         +--<a href="#ipv6NotificationGroup">ipv6NotificationGroup</a>(2)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

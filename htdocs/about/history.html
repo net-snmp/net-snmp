@@ -1,0 +1,134 @@
+<!--#set var="section" value="about" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+
+<p class="SectionTitle">
+History
+</p>
+
+<p>The roots of the Net-SNMP project go all the way back to 1992, and
+Carnegie-Mellon University.  The Network Group group at CMU (led by
+Steve Waldbusser) developed an implementation of a relatively new
+network management protocol - SNMP.  This suite included a library,
+a selection of simple management commands, and an "agent" (which
+reported most of the standard management information, as defined
+in RFC 1213).  The code was made publically available, and used
+by a number of people (including several commercial companies).</p>
+
+<p>One of these people that picked up on the CMU-SNMP suite was an
+overworked system administrator at the University of California,
+Davis - Wes Hardaker.  He extended the agent to provide more
+information about his local systems (a private precursor to the
+Host Resources MIB) and to flag up certain error situations. He
+also added a simple way for the agent to run additional scripts
+and report the results, turning it into an extensible agent.
+In 1995, this code was also made publically available (as ucd-snmp
+v3.0), and the UCD project was born.</p>
+
+<p>One of the people that picked up on the UCD-SNMP suite was another
+overworked system administrator at the University of Liverpool -
+Dave Shield.  He was looking for a way to monitor the local print
+system (which was itself also overloaded), and detect incipient
+backlogs before they got out of control.  He submitted various
+patches to Wes to improve the behaviour on HP-UX systems, with an
+eye to replacing the vendor-supplied agent, but soon got distracted
+into working on the UCD-SNMP code in its own right.</p>
+
+<p>At about the same tame, the UCD suite was picked up by yet another
+overworked system administrator from Denmark - Niels Baggesen.  He
+also submitted a number of patches to Wes, improving the behaviour
+under Solaris, and generally working on the solidity and stability
+of the code.  Eventually Wes got fed up of applying a stream of
+patches, and opened the CVS code base up to both Dave and Niels,
+together with Joe Marzot (who had been developing a Perl interface
+to the SNMP library) and Mike Slifcak (who had been working on a
+thread-safe API, among other things).
+UCD-SNMP had become a fully-fledged collaborative Open Source project.</p>
+
+<p>Over the years, the UCD code was used by an ever-increasing number
+of people - many of whom submitted patches or suggested improvements
+(both large and small).  Niels moved jobs, but continued to work on
+the code.  Dave stayed put at Liverpool, and continued to work on the
+code.  Wes even moved to Europe, and then back to the US, but continued
+to work on the code.</p>
+
+<p>In 1998, the IETF engaged Wes to develop a reference implentation
+of the long-awaited SNMPv3 specifications - which were finally in the
+process of being agreed (after a long, and not entirely trouble-free
+gestation).  This work was initially done in parallel to the ongoing
+maintenance of the public UCD v3 code, but eventually was merged back
+into the main development tree.
+This SNMPv3-capable suite (which also saw the first support for AgentX,
+and dropped the now obsolete SNMPv2p) was released as ucd-snmp v4.0 in
+August 1999.</p>
+
+<p>Although the initial work had been started at UC Davis, and the
+project still bore the name, the links with this institution were
+growing increasingly tenuous.  Wes no longer worked there, and most
+of the other core developers had never even seen the place!</p>
+
+<p>Eventually in late 2000, the project changed its name to Net-SNMP
+and relocated to SourceForge - allowing the administrative support
+tasks to be more widely shared (rather than Wes having to do it all!)
+At the same time, the code saw a major restructuring of the agent
+framework, with a much more flexible MIB module API, and a number of
+"helpers".  This was probably the most visible example of an ongoing
+general modularisation of much of the code including a network
+transport layer, pluggable SNMPv3 access control and security models,
+and trap handling.</p>
+
+<p>The result of all this activity was released in April 2002 as
+net-snmp v5.0, and was the subject of an article in the Simple
+Times later that year, describing some of the recent changes.</p>
+
+<p>Even prior to the v5 release, and increasingly since, the Net-SNMP
+suite has been picked up by more and more people, on an ever-widening
+variety of systems.  The support for Microsoft Windows has improved
+dramatically, due to the efforts of a large number of coders - not
+least Mike Slifcak, Robert Story (who joined the core developers
+shortly before the v5 release), and the two latest recruits - Alex
+Burger and Andy Smith.</p>
+
+<p>At the same time, the code has been ported to a nunber of different
+embedded systems ([[LIKE WHAT?]]) as well as being adopted as part
+of the default distribution of most Linux and BSD-based systems.
+Also, a number of separately developed packages have appeared which
+build upon the Net-SNMP framework - either higher-level management
+applications, or to provide an API wrapper for other programming
+languages.  Such independent packages are the most reliable indication
+of the success of the Net-SNMP project (which has consistently been
+in the top 2% of project activity on SourceForge for almost the whole
+time it has been based there).</p>
+
+<p>And what of the future?</p>
+<p>The rate of development of the project shows no sign of slackening -
+quite the reverse.  The level of traffic on the mailing lists has
+climbed ever higher, and the number of people actively offering code
+to the project has never been higher.</p>
+
+<p>The latest release (v5.2 at the time of this writing) has seen the introduction of a "network
+information abstraction layer", to improve the clarity and portability
+of the original MIB-2 modules (which has included some of the oldest
+code in the project - and it's shown!)</p>
+
+<p>A similar idea is being investigated for the system hardware
+information, pulling together the Host Resources and private 'ucdavis'
+modules (and updating them in the light of practical experience).
+And there is a long list of other ideas for developing the code.</p>
+
+<p>In the slightly longer term, it's likely that the underlying SNMP
+library will receive similar treatment to that seen with the v5 agent.
+The most probable distinguishing feature of an eventual v6 release
+will be a re-structured (and properly modularised) SNMP library,
+allowing much greater flexibility in how it can be configured and used.</p>
+
+<p>But predicting the future is notoriously unreliable, and it is quite
+possible that the Net-SNMP project will develop in ways none of us
+have yet thought of.  But it seems extremely unlikely that it will
+disappear any time soon.</p>
+
+<p>Watch this space....</p>
+
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

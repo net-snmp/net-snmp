@@ -1,0 +1,5 @@
+# Redirect for transition from old site
+# For Redirect line, escape all &s
+RedirectMatch .* /tutorial/tutorial-5
+
+

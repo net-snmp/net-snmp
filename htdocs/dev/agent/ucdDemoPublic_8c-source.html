@@ -1,0 +1,267 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000007.html">mibgroup</a>&nbsp;/&nbsp;<a class="el" href="dir_000008.html">examples</a>
+  </div>
+
+  <h1>ucdDemoPublic.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * ucdDemoPublic.c </span>
+00003 <span class="comment"> */</span>
+00004 
+00005 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00006 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00007 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00008 <span class="preprocessor">#endif</span>
+00009 <span class="preprocessor">#if HAVE_STRING_H</span>
+00010 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00011 <span class="preprocessor">#else</span>
+00012 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00013 <span class="preprocessor">#endif</span>
+00014 
+00015 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00016 <span class="preprocessor"># ifdef WIN32</span>
+00017 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00018 <span class="preprocessor"># else</span>
+00019 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00020 <span class="preprocessor"># endif</span>
+00021 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00022 <span class="preprocessor">#else</span>
+00023 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00024 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00025 <span class="preprocessor"># else</span>
+00026 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00027 <span class="preprocessor"># endif</span>
+00028 <span class="preprocessor">#endif</span>
+00029 
+00030 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00031 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00032 <span class="preprocessor">#endif</span>
+00033 
+00034 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00035 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00036 
+00037 <span class="preprocessor">#include "util_funcs.h"</span>
+00038 <span class="preprocessor">#include "ucdDemoPublic.h"</span>
+00039 
+00040 <span class="preprocessor">#define MYMAX 1024</span>
+00041 <span class="preprocessor">#define MAXUSERS 10</span>
+00042 
+00043 <span class="keywordtype">int</span>             num = 0;
+00044 <span class="keyword">static</span> <span class="keywordtype">char</span>     demoUsers[MAXUSERS][MYMAX + 1];
+00045 <span class="keyword">static</span> <span class="keywordtype">char</span>     demopass[MYMAX + 1];
+00046 
+00047 <span class="keywordtype">void</span>
+00048 ucdDemo_parse_user(<span class="keyword">const</span> <span class="keywordtype">char</span> *word, <span class=
+"keywordtype">char</span> *line)
+00049 {
+00050     <span class="keywordflow">if</span> (num == MAXUSERS)
+00051         <span class="keywordflow">return</span>;
+00052 
+00053     <span class="keywordflow">if</span> (strlen(line) &gt; MYMAX)
+00054         <span class="keywordflow">return</span>;
+00055 
+00056     strcpy(demoUsers[num++], line);
+00057 }
+00058 
+00059 
+00060 <span class="keywordtype">void</span>
+00061 ucdDemo_parse_userpass(<span class="keyword">const</span> <span class="keywordtype">char</span> *word, <span class=
+"keywordtype">char</span> *line)
+00062 {
+00063     <span class="keywordflow">if</span> (strlen(line) &gt; MYMAX)
+00064         <span class="keywordflow">return</span>;
+00065 
+00066     strcpy(demopass, line);
+00067 }
+00068 
+00069 <span class="comment">/*</span>
+00070 <span class="comment"> * this variable defines function callbacks and type return information </span>
+00071 <span class="comment"> * for the ucdDemoPublic mib </span>
+00072 <span class="comment"> */</span>
+00073 
+00074 <span class="keyword">struct </span>variable2 ucdDemoPublic_variables[] = {
+00075     {UCDDEMORESETKEYS, ASN_INTEGER, RWRITE, var_ucdDemoPublic, 1, {1}},
+00076     {UCDDEMOPUBLICSTRING, ASN_OCTET_STR, RWRITE, var_ucdDemoPublic, 1,
+00077      {2}},
+00078     {UCDDEMOUSERLIST, ASN_OCTET_STR, RWRITE, var_ucdDemoPublic, 1, {3}},
+00079     {UCDDEMOPASSPHRASE, ASN_OCTET_STR, RWRITE, var_ucdDemoPublic, 1, {4}},
+00080 
+00081 };
+00082 
+00083 <span class="comment">/*</span>
+00084 <span class="comment"> * Define the OID pointer to the top of the mib tree that we're</span>
+00085 <span class="comment"> * registering underneath </span>
+00086 <span class="comment"> */</span>
+00087 oid             ucdDemoPublic_variables_oid[] =
+00088     { 1, 3, 6, 1, 4, 1, 2021, 14, 1, 1 };
+00089 
+00090 <span class="keywordtype">void</span>
+00091 init_ucdDemoPublic(<span class="keywordtype">void</span>)
+00092 {
+00093     REGISTER_MIB(<span class="stringliteral">"examples/ucdDemoPublic"</span>, ucdDemoPublic_variables,
+00094                  variable2, ucdDemoPublic_variables_oid);
+00095     snmpd_register_config_handler(<span class="stringliteral">"demoUser"</span>,
+00096                                   ucdDemo_parse_user, NULL, <span class="stringliteral">"USER"</span>);
+00097     snmpd_register_config_handler(<span class="stringliteral">"demoPass"</span>,
+00098                                   ucdDemo_parse_userpass, NULL,
+00099                                   <span class="stringliteral">"PASSPHASE"</span>);
+00100 }
+00101 
+00102 <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>   publicString[MYMAX + 1];
+00103 
+00104 <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  *
+00105 var_ucdDemoPublic(<span class="keyword">struct</span> variable *vp,
+00106                   oid * name,
+00107                   size_t * length,
+00108                   <span class="keywordtype">int</span> exact, size_t * var_len, WriteMethod ** write_method)
+00109 {
+00110     <span class="keyword">static</span> <span class="keywordtype">long</span>     long_ret;
+00111     <span class="keyword">static</span> <span class="keywordtype">char</span>     string[MYMAX + 1], *cp;
+00112     <span class="keywordtype">int</span>             i;
+00113 
+00114     *write_method = 0;          <span class="comment">/* assume it isnt writable for the time being */</span>
+00115     *var_len = <span class="keyword">sizeof</span>(long_ret);        <span class=
+"comment">/* assume an integer and change later if not */</span>
+00116 
+00117     <span class="keywordflow">if</span> (header_generic(vp, name, length, exact, var_len, write_method))
+00118         <span class="keywordflow">return</span> 0;
+00119 
+00120     <span class="comment">/*</span>
+00121 <span class="comment">     * this is where we do the value assignments for the mib results. </span>
+00122 <span class="comment">     */</span>
+00123     <span class="keywordflow">switch</span> (vp-&gt;magic) {
+00124 
+00125     <span class="keywordflow">case</span> UCDDEMORESETKEYS:
+00126         *write_method = write_ucdDemoResetKeys;
+00127         long_ret = 0;
+00128         <span class="keywordflow">return</span> (<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span> *) &amp;long_ret;
+00129 
+00130     <span class="keywordflow">case</span> UCDDEMOPUBLICSTRING:
+00131         *write_method = write_ucdDemoPublicString;
+00132         *var_len = strlen(publicString);
+00133         <span class="keywordflow">return</span> (<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span> *) publicString;
+00134 
+00135     <span class="keywordflow">case</span> UCDDEMOUSERLIST:
+00136         cp = string;
+00137         <span class="keywordflow">for</span> (i = 0; i &lt; num; i++) {
+00138             snprintf(cp, <span class="keyword">sizeof</span>(string)-strlen(string), <span class=
+"stringliteral">" %s"</span>, demoUsers[i]);
+00139             string[MYMAX] = 0;
+00140             cp = cp + strlen(cp);
+00141         }
+00142         *var_len = strlen(string);
+00143         <span class="keywordflow">return</span> (<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span> *) string;
+00144 
+00145     <span class="keywordflow">case</span> UCDDEMOPASSPHRASE:
+00146         *var_len = strlen(demopass);
+00147         <span class="keywordflow">return</span> (<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span> *) demopass;
+00148 
+00149     <span class="keywordflow">default</span>:
+00150         DEBUGMSGTL((<span class="stringliteral">"snmpd"</span>, <span class=
+"stringliteral">"unknown sub-id %d in var_ucdDemoPublic\n"</span>,
+00151                     vp-&gt;magic));
+00152     }
+00153     <span class="keywordflow">return</span> 0;
+00154 }
+00155 
+00156 <span class="keywordtype">int</span>
+00157 write_ucdDemoResetKeys(<span class="keywordtype">int</span> action,
+00158                        u_char * var_val,
+00159                        u_char var_val_type,
+00160                        size_t var_val_len,
+00161                        u_char * statP, oid * name, size_t name_len)
+00162 {
+00163     <span class="comment">/*</span>
+00164 <span class="comment">     * variables we may use later </span>
+00165 <span class="comment">     */</span>
+00166     <span class="keyword">static</span> <span class="keywordtype">long</span>     long_ret;
+00167     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  *engineID;
+00168     size_t          engineIDLen;
+00169     <span class="keywordtype">int</span>             i;
+00170     <span class="keyword">struct </span>usmUser *user;
+00171 
+00172     <span class="keywordflow">if</span> (var_val_type != ASN_INTEGER) {
+00173         DEBUGMSGTL((<span class="stringliteral">"ucdDemoPublic"</span>,
+00174                     <span class="stringliteral">"write to ucdDemoResetKeys not ASN_INTEGER\n"</span>));
+00175         <span class="keywordflow">return</span> SNMP_ERR_WRONGTYPE;
+00176     }
+00177     <span class="keywordflow">if</span> (var_val_len &gt; <span class="keyword">sizeof</span>(long_ret)) {
+00178         DEBUGMSGTL((<span class="stringliteral">"ucdDemoPublic"</span>,
+00179                     <span class="stringliteral">"write to ucdDemoResetKeys: bad length\n"</span>));
+00180         <span class="keywordflow">return</span> SNMP_ERR_WRONGLENGTH;
+00181     }
+00182     <span class="keywordflow">if</span> (action == COMMIT) {
+00183         long_ret = *((<span class="keywordtype">long</span> *) var_val);
+00184         <span class="keywordflow">if</span> (long_ret == 1) {
+00185             engineID = snmpv3_generate_engineID(&amp;engineIDLen);
+00186             <span class="keywordflow">for</span> (i = 0; i &lt; num; i++) {
+00187                 user = usm_get_user(engineID, engineIDLen, demoUsers[i]);
+00188                 <span class="keywordflow">if</span> (user) {
+00189                     usm_set_user_password(user, <span class="stringliteral">"userSetAuthPass"</span>,
+00190                                           demopass);
+00191                     usm_set_user_password(user, <span class="stringliteral">"userSetPrivPass"</span>,
+00192                                           demopass);
+00193                 }
+00194             }
+00195             <span class="comment">/*</span>
+00196 <span class="comment">             * reset the keys </span>
+00197 <span class="comment">             */</span>
+00198         }
+00199     }
+00200     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00201 }
+00202 
+00203 <span class="keywordtype">int</span>
+00204 write_ucdDemoPublicString(<span class="keywordtype">int</span> action,
+00205                           u_char * var_val,
+00206                           u_char var_val_type,
+00207                           size_t var_val_len,
+00208                           u_char * statP, oid * name, size_t name_len)
+00209 {
+00210     <span class="keywordflow">if</span> (var_val_type != ASN_OCTET_STR) {
+00211         DEBUGMSGTL((<span class="stringliteral">"ucdDemoPublic"</span>,
+00212                     <span class="stringliteral">"write to ucdDemoPublicString not ASN_OCTET_STR\n"</span>));
+00213         <span class="keywordflow">return</span> SNMP_ERR_WRONGTYPE;
+00214     }
+00215     <span class="keywordflow">if</span> (var_val_len &gt; MYMAX) {
+00216         DEBUGMSGTL((<span class="stringliteral">"ucdDemoPublic"</span>,
+00217                     <span class="stringliteral">"write to ucdDemoPublicString: bad length\n"</span>));
+00218         <span class="keywordflow">return</span> SNMP_ERR_WRONGLENGTH;
+00219     }
+00220     <span class="keywordflow">if</span> (action == COMMIT) {
+00221         <span class="keywordflow">if</span> (var_val_len != 0) {
+00222             strcpy(publicString, var_val);
+00223             publicString[var_val_len] = <span class="charliteral">'\0'</span>;
+00224         } <span class="keywordflow">else</span>
+00225             publicString[0] = <span class="charliteral">'\0'</span>;
+00226     }
+00227     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00228 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

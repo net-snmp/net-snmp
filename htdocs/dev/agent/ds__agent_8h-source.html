@@ -1,0 +1,95 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>ds_agent.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef NETSNMP_DS_AGENT_H</span>
+00002 <span class="preprocessor">#define NETSNMP_DS_AGENT_H</span>
+00003 <span class="comment">/*</span>
+00004 <span class="comment"> * defines agent's default store registrations </span>
+00005 <span class="comment"> */</span>
+00006 
+00007 <span class="comment">/*</span>
+00008 <span class="comment"> * booleans </span>
+00009 <span class="comment"> */</span>
+00010 <span class="preprocessor">#define NETSNMP_DS_AGENT_VERBOSE        0       </span><span class=
+"comment">/* 1 if verbose output desired */</span>
+00011 <span class="preprocessor">#define NETSNMP_DS_AGENT_ROLE           1       </span><span class=
+"comment">/* 0 if master, 1 if client */</span>
+00012 <span class="preprocessor">#define NETSNMP_DS_AGENT_NO_ROOT_ACCESS 2       </span><span class=
+"comment">/* 1 if we can't get root access */</span>
+00013 <span class="preprocessor">#define NETSNMP_DS_AGENT_AGENTX_MASTER  3       </span><span class=
+"comment">/* 1 if AgentX desired */</span>
+00014 <span class="preprocessor">#define NETSNMP_DS_AGENT_QUIT_IMMEDIATELY 4     </span><span class=
+"comment">/* 1 to never start the agent */</span>
+00015 <span class="preprocessor">#define NETSNMP_DS_AGENT_DISABLE_PERL   5       </span><span class=
+"comment">/* 1 to never enable perl */</span>
+00016 <span class="preprocessor">#define NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS 6 </span><span class=
+"comment">/* 1 = !see !connect msgs */</span>
+00017 <span class="preprocessor">#define NETSNMP_DS_AGENT_LEAVE_PIDFILE  7       </span><span class=
+"comment">/* 1 = leave PID file on exit */</span>
+00018 <span class="preprocessor">#define NETSNMP_DS_AGENT_NO_CACHING     8       </span><span class=
+"comment">/* 1 = disable netsnmp_cache */</span>
+00019 
+00020 <span class="comment">/*</span>
+00021 <span class="comment"> * strings </span>
+00022 <span class="comment"> */</span>
+00023 <span class="preprocessor">#define NETSNMP_DS_AGENT_PROGNAME 0     </span><span class="comment">/* argv[0] */</span>
+00024 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_SOCKET 1     </span><span class=
+"comment">/* AF_UNIX or ip:port socket addr */</span>
+00025 <span class="preprocessor">#define NETSNMP_DS_AGENT_PORTS    2     </span><span class=
+"comment">/* localhost:9161,tcp:localhost:9161... */</span>
+00026 <span class="preprocessor">#define NETSNMP_DS_AGENT_INTERNAL_SECNAME  3    </span><span class=
+"comment">/* used by disman/mteTriggerTable. */</span>
+00027 <span class="preprocessor">#define NETSNMP_DS_AGENT_PERL_INIT_FILE    4    </span><span class=
+"comment">/* used by embedded perl */</span>
+00028 <span class="preprocessor">#define NETSNMP_DS_SMUX_SOCKET    5     </span><span class=
+"comment">/* ip:port socket addr */</span>
+00029 
+00030 <span class="comment">/*</span>
+00031 <span class="comment"> * integers </span>
+00032 <span class="comment"> */</span>
+00033 <span class="preprocessor">#define NETSNMP_DS_AGENT_FLAGS    0     </span><span class="comment">/* session.flags */</span>
+00034 <span class="preprocessor">#define NETSNMP_DS_AGENT_USERID   1</span>
+00035 <span class="preprocessor">#define NETSNMP_DS_AGENT_GROUPID  2</span>
+00036 <span class="preprocessor">#define NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL 3 </span><span class=
+"comment">/* ping master every SECONDS */</span>
+00037 <span class="preprocessor">#define NETSNMP_DS_AGENT_AGENTX_TIMEOUT  4</span>
+00038 <span class="preprocessor">#define NETSNMP_DS_AGENT_AGENTX_RETRIES  5</span>
+00039 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_SOCK_PERM     6      </span><span class=
+"comment">/* permissions for the */</span>
+00040 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_DIR_PERM      7      </span><span class=
+"comment">/*     AgentX socket   */</span>
+00041 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_SOCK_USER     8      </span><span class=
+"comment">/* ownership for the   */</span>
+00042 <span class="preprocessor">#define NETSNMP_DS_AGENT_X_SOCK_GROUP    9      </span><span class=
+"comment">/*     AgentX socket   */</span>
+00043 <span class="preprocessor">#define NETSNMP_DS_AGENT_CACHE_TIMEOUT  10      </span><span class=
+"comment">/* default cache timeout */</span>
+00044 
+00045 <span class="preprocessor">#endif</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

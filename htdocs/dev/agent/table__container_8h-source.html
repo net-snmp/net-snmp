@@ -1,0 +1,125 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>table_container.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * table_container.h</span>
+00003 <span class="comment"> * $Id$</span>
+00004 <span class="comment"> */</span>
+00005 <span class="preprocessor">#ifndef _TABLE_CONTAINER_HANDLER_H_</span>
+00006 <span class="preprocessor">#define _TABLE_CONTAINER_HANDLER_H_</span>
+00007 
+00008 <span class="preprocessor">#ifdef __cplusplus</span>
+00009 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00010 <span class="preprocessor">#endif</span>
+00011 
+00012     <span class="comment">/*</span>
+00013 <span class="comment">     * The table container helper is designed to simplify the task of</span>
+00014 <span class="comment">     * writing a table handler for the net-snmp agent when the data being</span>
+00015 <span class="comment">     * accessed is accessible via a netsnmp_container.</span>
+00016 <span class="comment">     * </span>
+00017 <span class="comment">     * Functionally, it is a specialized version of the more</span>
+00018 <span class="comment">     * generic table helper but easies the burden of GETNEXT processing by</span>
+00019 <span class="comment">     * retrieving the appropriate row for each index through</span>
+00020 <span class="comment">     * function calls which should be supplied by the module that wishes</span>
+00021 <span class="comment">     * help.  The module the table_container helps should, afterwards,</span>
+00022 <span class="comment">     * never be called for the case of "MODE_GETNEXT" and only for the GET</span>
+00023 <span class="comment">     * and SET related modes instead.</span>
+00024 <span class="comment">     */</span>
+00025     
+00026 <span class="preprocessor">#include &lt;net-snmp/library/container.h&gt;</span>
+00027 <span class="preprocessor">#include &lt;net-snmp/agent/table.h&gt;</span>
+00028     
+00029 <span class="preprocessor">#define TABLE_CONTAINER_ROW       "table_container:row"</span>
+00030 <span class="preprocessor">#define TABLE_CONTAINER_CONTAINER "table_container:container"</span>
+00031     
+00032 <span class="preprocessor">#define TABLE_CONTAINER_KEY_NETSNMP_INDEX         1 </span><span class=
+"comment">/* default */</span>
+00033 <span class="preprocessor">#define TABLE_CONTAINER_KEY_VARBIND_INDEX         2</span>
+00034 <span class="preprocessor">#define TABLE_CONTAINER_KEY_VARBIND_RAW           3</span>
+00035 
+00036     <span class="comment">/*</span>
+00037 <span class="comment">     * register a container table</span>
+00038 <span class="comment">     */</span>
+00039     <span class="keywordtype">int</span>            
+00040     netsnmp_container_table_register(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00041                                      <a class="code" href=
+"structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a>
+00042                                      *tabreq,
+00043                                      netsnmp_container *container,
+00044                                      <span class="keywordtype">char</span> key_type);
+00045     <span class="comment">/*</span>
+00046 <span class="comment">     * get an injectable containe table handler</span>
+00047 <span class="comment">     */</span>
+00048     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+00049     <a class="code" href="group__table__container.html#ga1">netsnmp_container_table_handler_get</a>(<a class="code" href=
+"structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *tabreq,
+00050                                         netsnmp_container *container,
+00051                                         <span class="keywordtype">char</span> key_type);
+00052     
+00054 <span class="preprocessor">#ifdef NETSNMP_USE_INLINE</span>
+00055     NETSNMP_STATIC_INLINE <span class="keywordtype">void</span> *
+00056     netsnmp_container_table_row_extract(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request)
+00057     {
+00058         <span class="comment">/*</span>
+00059 <span class="comment">         * NOTE: this function must match in table_container.c and table_container.h.</span>
+00060 <span class="comment">         *       if you change one, change them both!</span>
+00061 <span class="comment">         */</span>
+00062         <span class="keywordflow">return</span> <a class="code" href=
+"group__handler.html#ga29">netsnmp_request_get_list_data</a>(request, TABLE_CONTAINER_ROW);
+00063     }
+00064 <span class="preprocessor">#else</span>
+00065     <span class="keywordtype">void</span> *
+00066     netsnmp_container_table_extract_context(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request);
+00067 <span class="preprocessor">#endif </span><span class="comment">/* inline */</span>
+00068 
+00069     <span class="keywordtype">void</span> netsnmp_container_table_insert_row(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request,
+00070                                             netsnmp_index *row);
+00071 
+00073     netsnmp_container*
+00074     netsnmp_container_table_container_extract(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request);
+00075 
+00076     <span class="keywordtype">void</span> *
+00077     netsnmp_container_table_find_next_row(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request,
+00078                                           <a class="code" href=
+"structnetsnmp__table__request__info__s.html">netsnmp_table_request_info</a> *tblreq,
+00079                                           netsnmp_container *container,
+00080                                           <span class="keywordtype">char</span> key_type );
+00081 <span class="preprocessor">#ifdef __cplusplus</span>
+00082 }
+00083 <span class="preprocessor">#endif</span>
+00084 
+00085 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* _TABLE_CONTAINER_HANDLER_H_ */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:02 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,107 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>snmpCallbackDomain.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef _SNMPCALLBACKDOMAIN_H</span>
+00002 <span class="preprocessor">#define _SNMPCALLBACKDOMAIN_H</span>
+00003 
+00004 <span class="preprocessor">#ifndef NET_SNMP_CONFIG_H</span>
+00005 <span class="preprocessor">#error "Please include &lt;netsnmp/net-snmp-config.h&gt; before this file"</span>
+00006 <span class="preprocessor">#endif</span>
+00007 
+00008 <span class="preprocessor">#ifdef __cplusplus</span>
+00009 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00010 <span class="preprocessor">#endif</span>
+00011 
+00012 <span class="preprocessor">#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN</span>
+00013 
+00014 <span class="preprocessor">#include &lt;net-snmp/library/snmp_transport.h&gt;</span>
+00015 
+00016 <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_callback_pass_s {
+00017     <span class="keywordtype">int</span>             return_transport_num;
+00018     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu;
+00019     <span class="keyword">struct </span>netsnmp_callback_pass_s *next;
+00020 } netsnmp_callback_pass;
+00021 
+00022 <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_callback_info_s {
+00023     <span class="keywordtype">int</span>             linkedto;
+00024     <span class="keywordtype">void</span>           *parent_data;
+00025     netsnmp_callback_pass *data;
+00026     <span class="keywordtype">int</span>             callback_num;
+00027     <span class="keywordtype">int</span>             pipefds[2];
+00028 } netsnmp_callback_info;
+00029 
+00030 netsnmp_transport *netsnmp_callback_transport(<span class="keywordtype">int</span>);
+00031 <span class="keywordtype">int</span>             netsnmp_callback_hook_parse(<a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> * sp,
+00032                                             <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu,
+00033                                             u_char * packetptr,
+00034                                             size_t len);
+00035 <span class="keywordtype">int</span>             netsnmp_callback_hook_build(<a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> * sp,
+00036                                             <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu,
+00037                                             u_char * ptk, size_t * len);
+00038 <span class="keywordtype">int</span>             netsnmp_callback_check_packet(u_char * pkt, size_t len);
+00039 <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *netsnmp_callback_create_pdu(netsnmp_transport *transport,
+00040                                             <span class="keywordtype">void</span> *opaque, size_t olength);
+00041 <a class="code" href="structsnmp__session.html">netsnmp_session</a> *netsnmp_callback_open(<span class=
+"keywordtype">int</span> attach_to,
+00042                                        <span class="keywordtype">int</span> (*return_func) (<span class=
+"keywordtype">int</span> op,
+00043                                                            <a class="code" href=
+"structsnmp__session.html">netsnmp_session</a>
+00044                                                            * session,
+00045                                                            <span class="keywordtype">int</span> reqid,
+00046                                                            <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>
+00047                                                            *pdu,
+00048                                                            <span class="keywordtype">void</span> *magic),
+00049                                        <span class="keywordtype">int</span> (*fpre_parse) (<a class="code" href=
+"structsnmp__session.html">netsnmp_session</a>
+00050                                                           *,
+00051                                                           <span class="keyword">struct</span>
+00052                                                           netsnmp_transport_s
+00053                                                           *, <span class="keywordtype">void</span> *, <span class=
+"keywordtype">int</span>),
+00054                                        <span class="keywordtype">int</span> (*fpost_parse) (netsnmp_session
+00055                                                            *,
+00056                                                            <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *,
+00057                                                            <span class="keywordtype">int</span>));
+00058 <span class="keywordtype">void</span>             netsnmp_clear_callback_list(<span class="keywordtype">void</span>);
+00059 
+00060 <span class="preprocessor">#else</span>
+00061 
+00062 <span class="preprocessor">#define netsnmp_clear_callback_list()</span>
+00063 
+00064      
+00065 <span class="preprocessor">#endif </span><span class="comment">/*SNMP_TRANSPORT_CALLBACK_DOMAIN*/</span>
+00066 
+00067 <span class="preprocessor">#ifdef __cplusplus</span>
+00068 }
+00069 <span class="preprocessor">#endif</span>
+00070 <span class="preprocessor">#endif</span><span class="comment">/*_SNMPCALLBACKDOMAIN_H*/</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:01 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

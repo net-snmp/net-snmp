@@ -1,0 +1,344 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML><HEAD>
+<TITLE>Net-SNMP Developers' C Language Style Guide</TITLE>
+</HEAD><BODY BGCOLOR=white>
+
+<H1>Net-SNMP Developers' C Language Style Guide</H1>
+
+<STRONG>Compiled by Wes Hardaker and Dave Shield</STRONG>,
+based on discussion on the net-snmp-coders mailing list during 
+<A HREF="http://www.geocrawler.com/mail/thread.php3?subject=design+proposal+-+coding+style&list=6845">
+May</A> and
+<A HREF="http://www.geocrawler.com/mail/thread.php3?subject=CodingStyle&list=6845">
+July</A>
+2001.
+<BR>
+The layout of this document is modelled on the
+<A HREF="http://dev.apache.org/styleguide.html">
+Apache Developers' C Language Style Guide.</A>
+
+<HR>
+
+<H2>Introduction</H2>
+
+<P>
+It has long been recognised that code is much easier to understand
+and maintain if it is layed out in a clear and consistant manner.
+This guide is an attempt to set out an agreed set of style conventions
+for use within the Net-SNMP project, balancing the sometimes conflicting
+desires for relatively compact, yet readable code.
+If you wish to assist in the development of this software by
+providing code or patches, please could you ensure that any such code
+abides by the guidelines outlined here.
+<P>
+It is inevitable that this will not exactly match your preferred
+coding style.  Many of the individual guidelines could quite easily
+choose one of the other common alternatives, without significantly
+affecting the overall readability.  But the benefits of having an
+agreed style are really only achieved if it is applied consistently
+to the whole of the code.  The core developers have had to restrain
+their individual preferences to achieve this - please can you do likewise.
+
+<P>This style can be generated (more or less) with the following arguments
+to GNU indent:
+
+<P><UL><CODE>-orig -nbc -bap -di16 -nfca -nfc1 -nut</CODE></UL>
+
+(but see caveats below).
+Not all versions of indent will necessarily recognise all these options.
+<BR>
+Note that these guidelines are just that - <I><B>guidelines</B></I> - and there
+may occasionally be good reasons for departing from them, in order to
+improve the readability of a particular section of code.  However
+"<I>I don't like this style</I>" does not count as a good reason!
+
+<H2>The Guidelines</H2>
+
+<UL>
+<LI> Procedures and Functions
+  <UL>
+   <LI>The name of a procedure should be as descriptive as possible
+       (within the constraints of a reasonable-length name!)
+       Multiple words within a procedure name should be
+       <CODE>separated_by_underscores</CODE>,
+       not <CODE>denotedByCapitalisation</CODE>.
+   <LI>Each procedure should be preceded by a block comment,
+       starting "<CODE>/**&nbsp;</CODE>" (note the trailing space),
+       describing its purpose, return values and
+       any memory-management implications.
+   <LI>The return type, and the procedure declaration should follow,
+       on <I><B>separate</B></I> lines,
+       both starting in the first column.
+   <LI>A procedure returning a pointer to a type should declare this as
+      <CODE>netsnmp_<I>type</I> *</CODE> with a single space between the
+      type name and the pointer character.
+      <BR>
+       Note that <CODE>indent -di16</CODE> will mis-format such declarations.
+   <LI>Related procedures (such as might typically be defined within a
+       single code file) should be given names starting with a common token.
+       (See also debugging output below).
+       <BR>
+       <FONT COLOR=red><I>
+       'Private' procedures, used only within this file, should be given
+       a name starting with an underscore, followed by the common token.
+       </I></FONT>
+   <LI>Procedures should be declared with ANSI-style arguments.
+   <LI>This should be no space between the procedure name and the opening
+       bracket, or between the brackets and the arguments.
+   <LI>Pointers belong with the parameter name, not the type.
+       <BR>
+       (Note that <CODE>indent</CODE> will mis-format this for non-recognised
+        types).
+   <LI>The opening and closing braces should be in the first column.
+   <LI>Each procedure should be followed by two blank lines.
+  </UL>
+
+<LI> Comments
+  <UL>
+   <LI>All comments on the same line as code should start in column 33
+       (except where long code lines dictates otherwise).
+       These can be either single-line, or 'block' format.
+   <LI>All other comments should be in 'block' format, with the starting
+       and ending tokens on separate lines from the main text.
+       The body lines should each start with a '*' character.
+   <LI>Such block comments should precede the relevant code,
+       and be indented by four spaces.
+   <LI>All comments must use the C-style <CODE> /* */ </CODE> syntax,
+       rather than the C++-style <CODE> //</CODE>
+  </UL>
+
+<LI> Variables and statements
+  <UL>
+   <LI>Variable declarations should be lined up, with the name
+       starting in column 16 <BR>(i.e. <CODE>indent -di16</CODE> - but
+       see procedures returning pointer types above).
+   <LI>Net-SNMP data structures all start with the prefix <CODE>netsnmp_</CODE>.
+       The basic template for such structures is: <PRE>
+            typedef struct netsnmp_<I>wombat</I>_s {
+                <I>int something_or_other</I>
+            } netsnmp_<I>wombat</I>; </PRE>
+       Note that the underlying <CODE>struct netsnmp_<I>wombat</I>_s</CODE>
+       type will rarely be used directly.
+   <LI>Variable names should be used consistently between related procedures.
+   <LI>Debugging output should use the same prefix token as the
+       procedure name.
+   <LI>Comparisons with a constant value should be of the form
+       <CODE>if (NULL == variable)</CODE>.
+       <BR><FONT COLOR=red><I>
+       Should this hold for <B><I>all</I></B> binary comparisons, or just equality.
+       </I></FONT>
+  </UL>
+
+<LI> Code layout and indentation
+  <UL>
+   <LI>Each level of indentation of code is four spaces,
+       and tab characters should not be used.
+   <LI>Lines should normally be no longer than 75 characters in width.
+   <LI>Longer statements should be broken over two or more lines,
+       with the continuation lines indented by a further four characters.
+       Continuations of long procedure calls (or similar parenthesised lists)
+       should be indented to match the opening bracket.
+   <LI>If possible, long statement lines should be broken immediately after
+       a binary operator.
+   <LI>Opening braces should be on the same line as the relevant control
+       statement, with the corresponding closing brace on a line of its own.
+       (i.e. <I>K&amp;R</I>-style).
+   <LI>The closing brace of an <CODE>if</CODE> block, the <CODE>else</CODE>
+       keyword and the following brace should all be on the same line.
+       (i.e. <I>cuddle-else</I> style - <CODE>} else {</CODE>).
+   <LI>Single-statement control structures should use explicit braces.
+   <LI>There should be no space between a procedure call and the opening
+       bracket, nor between the opening and closing
+       brackets and the corresponding arguments.
+   <LI>There should be a single space between a control statement
+       keyword (<CODE>if</CODE>, <CODE>switch</CODE>, <CODE>while</CODE>,
+       <CODE>for</CODE>, etc) and the opening bracket of the test.
+   <LI>There should be a single space after each semicolon in a <CODE>for
+       </CODE> control statement, and after each comma in argument lists
+       (including procedure declarations).
+   <LI>There should be (at least) a single space on either side of a
+       binary operator.
+   <LI><CODE>case</CODE> keywords should be indented to match the
+       initial <CODE>switch</CODE> statement.
+   <LI>There should be no space between a cast and the item being modified,
+       and a single space between the type and pointer character (if present)
+       - i.e. <CODE>(char *)buf</CODE>.
+       <FONT COLOR=red><I>
+       &nbsp;&nbsp;OK?
+       </I></FONT>
+  </UL>
+</UL>
+
+
+<HR>
+<H2>FROM HERE ON IS THE ORIGINAL APACHE STUFF</H2>
+<HR>
+<H2>Details and Examples</H2>
+
+<OL>
+<LI><STRONG>Indentation, General Style</STRONG>
+
+<P>Each level of indentation of code is four spaces. Tab characters
+   should never be used. Specific indentation rules for function
+   declarations and control-flow keywords are given below.
+
+<P>Example:
+<PRE>
+    main(int argc, char **argc)
+    {
+        if (argc != 0) {
+            fprintf(stderr, "No arguments allowed\n");
+            exit(1);
+        }
+        exit(0);
+    }
+</PRE>
+<P>
+<A NAME="long-exps">If an expression</A> (or a routine declaration or
+invocation) would extend 
+past column 80, the terms or arguments are wrapped at a convenient spot
+and the wrapped portion is indented under the first term in the expression
+(or the first argument to the function).
+>Conditional expressions should be wrapped to keep single or
+parenthesized terms as atomic as possible, and place Boolean operators
+at either the start (preferable) or end of the line.
+</P>
+<P>
+Example:
+</P>
+<PRE>
+     static const char *really_long_name(int i, int j,
+                                         const char *args, void *foo,
+                                         int k)
+
+     if (cond1 &amp;&amp; (item2 || item3) &amp;&amp; (!item4)
+         &amp;&amp; (item5 || item6) &amp;&amp; item7) {
+         do_a_thing();
+     }
+</PRE>
+<LI><STRONG>Comments</STRONG>
+
+<P>Provide comments which explain the function of code where it is not
+   clear from the code itself.  Provide rationale where necessary for
+   particular bits of code.
+
+<P>Comments should be indented to same level as the surrounding text.
+
+<P>Example:
+
+<PRE>
+    code;
+    /* comment */
+    code;
+</PRE>
+
+<LI><STRONG>Function Declaration and Layout</STRONG>
+
+<P>Functions are laid out as follows:
+
+<PRE>
+    int main(int argc, char **argv)
+    {
+        code;
+    }
+</PRE>
+
+<P>The return type is placed on the same line as the function. Arguments
+   (if any) are given in ANSI style. If no arguments, declare function
+   as <SAMP>void</SAMP>. No space
+   between function name and opening bracket, single space after comma
+   separating each argument. The opening brace is placed on the line
+   after the definition, indented to line up with the start of the 
+   return type text. The code is indented with four spaces, and the closing
+   brace is indented to line up with the opening brace.  <STRONG>Also
+   see the section on indenting <A HREF="#long-exps">long declarations
+   and invocations</A>.</STRONG>
+<P>
+<LI><STRONG>Function Calls</STRONG>
+
+<P>Space after commas in function calls. No space between function name
+   and opening bracket.
+<PRE>
+    f(a, b);
+</PRE>
+<P><STRONG>Also
+   see the section on indenting <A HREF="#long-exps">long declarations
+   and invocations</A>.</STRONG>
+</P>
+<LI><STRONG>Flow-Control Layout</STRONG>
+
+<P>Flow-control statements (<SAMP>if</SAMP>, <SAMP>while</SAMP>,
+   <SAMP>for</SAMP>, <EM>etc.</EM>) are laid out as in this example:
+
+<PRE>
+    if (expr) {
+        code;
+    }
+    else {
+        code;
+    }
+</PRE>
+
+<P>There is a space between the keyword and the opening bracket.
+   Opening brace placed on same line as the flow keyword. The code
+   itself is indented by four spaces. The closing brace is indented to
+   line up with the opening brace. If an <SAMP>else</SAMP> clause is used, the
+   <SAMP>else</SAMP> keyword is placed on the line following the closing
+   brace and is indented to line up with the corresponding
+   <SAMP>if</SAMP>.  <STRONG>Also 
+   see the section on indenting <A HREF="#long-exps">long
+   expressions</A>.</STRONG>
+   
+<P>
+ 
+<LI><STRONG><SAMP>for</SAMP> Layout</STRONG>
+
+<P>Space after the semi-colons. Example:
+
+<PRE>
+    for (a; b; c)
+</PRE>
+
+<LI><STRONG><SAMP>switch</SAMP> Layout</STRONG>
+
+<P><SAMP>case</SAMP> lines within a <SAMP>switch()</SAMP> are indented to
+   same level as the switch 
+   statement itself. The code for each case is indented by four spaces.
+   Braces are laid out as for other control-flow keywords. Example:
+
+<PRE>
+    switch (x) {
+    case a:
+        code;
+    case b:
+        code;
+    }
+</PRE>
+
+<LI><STRONG>Expressions</STRONG>
+
+<P>Space before and after assignment and other and operators. No space
+   between unary operators (increment, decrement, and negation) and the
+   lvalue. Examples:
+
+<PRE>
+    a = b
+    a + b
+    a &lt; b
+    a = -b
+    a = !b
+    ++a
+</PRE>
+
+<LI><STRONG>Capitalisation of Enums</STRONG>
+
+<P>No rule.
+</OL>
+</BODY>
+</HTML>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,77 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>UCD-SNMP Tutorial -- snmpset</h1>
+    <p>
+      <b>Note:</b>  Much of this tutorial requires <a
+	href="ftp://ftp.sourceforge.net/pub/sourceforge/n/ne/net-snmp/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
+	so make sure you get it before running the commands found in
+	this tutorial.</b> 
+      <p><b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
+      href="/tutorial-5">is available</a> as well.  The commands is
+      the ucd-snmp specific tutorial will not work as expected if you
+      are using net-snmp and not ucd-snmp.
+      <br><br>
+    <hr>
+    <p>
+      The <b>snmpset</b> command is used to actually modify
+      information on the remote host.  For each variable you want to
+      set, you need to specify the OID to update, the data type and
+      the value you want to set it to.
+    <p>
+      The valid datatypes can be found at the end of the snmpset help
+      output:
+<pre>
+<ul>
+% <b>snmpset -h |& tail -4</b>
+  type - one of i, u, t, a, o, s, x, d, n
+    i: INTEGER, u: unsigned INTEGER, t: TIMETICKS, a: IPADDRESS
+    o: OBJID, s: STRING, x: HEX STRING, d: DECIMAL STRING
+    U: unsigned int64, I: signed int64, F: float, D: double
+</ul>
+</pre>
+    <p>
+      So, lets check, set, and check again the value of a variable
+      using snmpget and snmpset:
+<pre>
+<ul>
+% <b>snmpget test.net-snmp.org demopublic ucdDemoPublicString.0</b>
+enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoPublicString.0 =  "hi there"
+% <b>snmpset test.net-snmp.org demopublic ucdDemoPublicString.0 s "hello world"</b>
+enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoPublicString.0 = "hello world"
+% <b>snmpget test.net-snmp.org demopublic ucdDemoPublicString.0</b>
+enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoPublicString.0
+=  "hello world"
+</ul>
+</pre>
+    <p>
+      As you can see, we successfully changed the value of the
+      ucdDemoPublicString.0 object.
+    <p>
+      Note that if you don't have write permission to the object, the
+      errors will differ greatly between SNMPv1 and SNMPv2c:
+<pre>
+<ul>
+% <b>snmpset test.net-snmp.org badcommunity ucdDemoPublicString.0 s "hello"</b>
+Error in packet.
+Reason: (noSuchName) There is no such variable name in this MIB.
+This name doesn't exist: ucdDemoPublicString.0
+% <b>snmpset -v 2c test.net-snmp.org badcommunity ucdDemoPublicString.0 s "hello"</b>
+Error in packet.
+Reason: notWritable
+</ul>
+</pre>
+    <p>SNMPv1 did not have nearly as descriptive error codes, which
+    SNMPv2c fixed.  It's a good reason to use SNMPv2c in preference to 
+    SNMPv1.  Even better, is to use SNMPv3 which has a much better
+    security system and also uses the better error reporting.  We'll
+    talk extensively about SNMPv3 later.
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Thu Nov  4 15:05:29 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Mon Aug  2 10:56:01 EDT 2004
+<!-- hhmts end -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

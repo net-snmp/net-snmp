@@ -1,0 +1,811 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000007.html">mibgroup</a>&nbsp;/&nbsp;<a class="el" href="dir_000008.html">examples</a>
+  </div>
+
+  <h1>example.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> *  Template MIB group implementation - example.c</span>
+00003 <span class="comment"> *</span>
+00004 <span class="comment"> */</span>
+00005 
+00006 <span class="comment">/*</span>
+00007 <span class="comment"> * include important headers </span>
+00008 <span class="comment"> */</span>
+00009 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00010 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00011 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00012 <span class="preprocessor">#endif</span>
+00013 <span class="preprocessor">#if HAVE_STRING_H</span>
+00014 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00015 <span class="preprocessor">#else</span>
+00016 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00017 <span class="preprocessor">#endif</span>
+00018 
+00019 <span class="comment">/*</span>
+00020 <span class="comment"> * needed by util_funcs.h </span>
+00021 <span class="comment"> */</span>
+00022 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00023 <span class="preprocessor"># ifdef WIN32</span>
+00024 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00025 <span class="preprocessor"># else</span>
+00026 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00027 <span class="preprocessor"># endif</span>
+00028 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00029 <span class="preprocessor">#else</span>
+00030 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00031 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00032 <span class="preprocessor"># else</span>
+00033 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00034 <span class="preprocessor"># endif</span>
+00035 <span class="preprocessor">#endif</span>
+00036 
+00037 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00038 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00039 <span class="preprocessor">#endif</span>
+00040 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00041 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00042 <span class="preprocessor">#endif</span>
+00043 
+00044 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00045 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00046 
+00047 <span class="comment">/*</span>
+00048 <span class="comment"> * header_generic() comes from here </span>
+00049 <span class="comment"> */</span>
+00050 <span class="preprocessor">#include "util_funcs.h"</span>
+00051 
+00052 <span class="comment">/*</span>
+00053 <span class="comment"> * include our .h file </span>
+00054 <span class="comment"> */</span>
+00055 <span class="preprocessor">#include "example.h"</span>
+00056 
+00057 
+00058    <span class="comment">/*</span>
+00059 <span class="comment">    *  Certain objects can be set via configuration file directives.</span>
+00060 <span class="comment">    *  These variables hold the values for such objects, as they need to</span>
+00061 <span class="comment">    *   be accessible to both the config handlers, and the callback routine.</span>
+00062 <span class="comment">    */</span>
+00063 <span class="preprocessor">#define EXAMPLE_STR_LEN 300</span>
+00064 <span class="preprocessor">#define EXAMPLE_STR_DEFAULT     "life the universe and everything"</span>
+00065 <span class="keywordtype">int</span>             example_int = 42;
+00066 <span class="keywordtype">char</span>            example_str[EXAMPLE_STR_LEN];
+00067 
+00068         <span class="comment">/*</span>
+00069 <span class="comment">         * Forward declarations for the config handlers </span>
+00070 <span class="comment">         */</span>
+00071 <span class="keywordtype">void</span>            example_parse_config_exampleint(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *token,
+00072                                                 <span class="keywordtype">char</span> *cptr);
+00073 <span class="keywordtype">void</span>            example_parse_config_examplestr(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *token,
+00074                                                 <span class="keywordtype">char</span> *cptr);
+00075 <span class="keywordtype">void</span>            example_free_config_exampleint(<span class="keywordtype">void</span>);
+00076 <span class="keywordtype">void</span>            example_free_config_examplestr(<span class="keywordtype">void</span>);
+00077 
+00078 
+00079         <span class="comment">/*********************</span>
+00080 <span class="comment">         *</span>
+00081 <span class="comment">         *  Initialisation &amp; common implementation functions</span>
+00082 <span class="comment">         *</span>
+00083 <span class="comment">         *********************/</span>
+00084 
+00085     <span class="comment">/*</span>
+00086 <span class="comment">     * This array structure defines a representation of the</span>
+00087 <span class="comment">     *  MIB being implemented.</span>
+00088 <span class="comment">     *</span>
+00089 <span class="comment">     * The type of the array is 'struct variableN', where N is</span>
+00090 <span class="comment">     *  large enough to contain the longest OID sub-component</span>
+00091 <span class="comment">     *  being loaded.  This will normally be the maximum value</span>
+00092 <span class="comment">     *  of the fifth field in each line.  In this case, the second</span>
+00093 <span class="comment">     *  and third entries are both of size 2, so we're using</span>
+00094 <span class="comment">     *  'struct variable2'</span>
+00095 <span class="comment">     *</span>
+00096 <span class="comment">     * The supported values for N are listed in &lt;agent/var_struct.h&gt;</span>
+00097 <span class="comment">     *  If the value you need is not listed there, simply use the</span>
+00098 <span class="comment">     *  next largest that is.</span>
+00099 <span class="comment">     *</span>
+00100 <span class="comment">     * The format of each line is as follows</span>
+00101 <span class="comment">     *  (using the first entry as an example):</span>
+00102 <span class="comment">     *      1: EXAMPLESTRING:</span>
+00103 <span class="comment">     *          The magic number defined in the example header file.</span>
+00104 <span class="comment">     *          This is passed to the callback routine and is used</span>
+00105 <span class="comment">     *            to determine which object is being queried.</span>
+00106 <span class="comment">     *      2: ASN_OCTET_STR:</span>
+00107 <span class="comment">     *          The type of the object.</span>
+00108 <span class="comment">     *          Valid types are listed in &lt;snmp_impl.h&gt;</span>
+00109 <span class="comment">     *      3: RONLY (or RWRITE):</span>
+00110 <span class="comment">     *          Whether this object can be SET or not.</span>
+00111 <span class="comment">     *      4: var_example:</span>
+00112 <span class="comment">     *          The callback routine, used when the object is queried.</span>
+00113 <span class="comment">     *          This will usually be the same for all objects in a module</span>
+00114 <span class="comment">     *            and is typically defined later in this file.</span>
+00115 <span class="comment">     *      5: 1:</span>
+00116 <span class="comment">     *          The length of the OID sub-component (the next field)</span>
+00117 <span class="comment">     *      6: {1}:</span>
+00118 <span class="comment">     *          The OID sub-components of this entry.</span>
+00119 <span class="comment">     *          In other words, the bits of the full OID that differ</span>
+00120 <span class="comment">     *            between the various entries of this array.</span>
+00121 <span class="comment">     *          This value is appended to the common prefix (defined later)</span>
+00122 <span class="comment">     *            to obtain the full OID of each entry.</span>
+00123 <span class="comment">     */</span>
+00124 <span class="keyword">struct </span>variable2 example_variables[] = {
+00125     {EXAMPLESTRING, ASN_OCTET_STR, RONLY, var_example, 1, {1}},
+00126     {EXAMPLEINTEGER, ASN_INTEGER, RWRITE, var_example, 2, {2, 1}},
+00127     {EXAMPLEOBJECTID, ASN_OBJECT_ID, RONLY, var_example, 2, {2, 2}},
+00128     {EXAMPLETIMETICKS, ASN_TIMETICKS, RONLY, var_example, 1, {3}},
+00129     {EXAMPLEIPADDRESS, ASN_IPADDRESS, RONLY, var_example, 1, {4}},
+00130     {EXAMPLECOUNTER, ASN_COUNTER, RONLY, var_example, 1, {5}},
+00131     {EXAMPLEGAUGE, ASN_GAUGE, RONLY, var_example, 1, {6}},
+00132     {EXAMPLETRIGGERTRAP, ASN_INTEGER, RWRITE, var_example, 1, {7}},
+00133     {EXAMPLETRIGGERTRAP2, ASN_INTEGER, RWRITE, var_example, 1, {8}}
+00134 };
+00135 
+00136     <span class="comment">/*</span>
+00137 <span class="comment">     * This array defines the OID of the top of the mib tree that we're</span>
+00138 <span class="comment">     *  registering underneath.</span>
+00139 <span class="comment">     * Note that this needs to be the correct size for the OID being </span>
+00140 <span class="comment">     *  registered, so that the length of the OID can be calculated.</span>
+00141 <span class="comment">     *  The format given here is the simplest way to achieve this.</span>
+00142 <span class="comment">     */</span>
+00143 oid             example_variables_oid[] = { 1, 3, 6, 1, 4, 1, 2021, 254 };
+00144 
+00145 
+00146 
+00147     <span class="comment">/*</span>
+00148 <span class="comment">     * This function is called at the time the agent starts up</span>
+00149 <span class="comment">     *  to do any initializations that might be required.</span>
+00150 <span class="comment">     *</span>
+00151 <span class="comment">     * In theory it is optional and can be omitted if no</span>
+00152 <span class="comment">     *  initialization is needed.  In practise, every module</span>
+00153 <span class="comment">     *  will need to register itself (or the objects being</span>
+00154 <span class="comment">     *  implemented will not appear in the MIB tree), and this</span>
+00155 <span class="comment">     *  registration is typically done here.</span>
+00156 <span class="comment">     *</span>
+00157 <span class="comment">     * If this function is added or removed, you must re-run</span>
+00158 <span class="comment">     *  the configure script, to detect this change.</span>
+00159 <span class="comment">     */</span>
+00160 <span class="keywordtype">void</span>
+00161 init_example(<span class="keywordtype">void</span>)
+00162 {
+00163     <span class="comment">/*</span>
+00164 <span class="comment">     * Register ourselves with the agent to handle our mib tree.</span>
+00165 <span class="comment">     * The arguments are:</span>
+00166 <span class="comment">     *    descr:   A short description of the mib group being loaded.</span>
+00167 <span class="comment">     *    var:     The variable structure to load.</span>
+00168 <span class="comment">     *                  (the name of the variable structure defined above)</span>
+00169 <span class="comment">     *    vartype: The type of this variable structure</span>
+00170 <span class="comment">     *    theoid:  The OID pointer this MIB is being registered underneath.</span>
+00171 <span class="comment">     */</span>
+00172     REGISTER_MIB(<span class="stringliteral">"example"</span>, example_variables, variable2,
+00173                  example_variables_oid);
+00174 
+00175 
+00176     <span class="comment">/*</span>
+00177 <span class="comment">     *  Register config handlers for the two objects that can be set</span>
+00178 <span class="comment">     *   via configuration file directive.</span>
+00179 <span class="comment">     *  Also set a default value for the string object.  Note that the</span>
+00180 <span class="comment">     *   example integer variable was initialised above.</span>
+00181 <span class="comment">     */</span>
+00182     strncpy(example_str, EXAMPLE_STR_DEFAULT, EXAMPLE_STR_LEN);
+00183 
+00184     snmpd_register_config_handler(<span class="stringliteral">"exampleint"</span>,
+00185                                   example_parse_config_exampleint,
+00186                                   example_free_config_exampleint,
+00187                                   <span class="stringliteral">"exampleint value"</span>);
+00188     snmpd_register_config_handler(<span class="stringliteral">"examplestr"</span>,
+00189                                   example_parse_config_examplestr,
+00190                                   example_free_config_examplestr,
+00191                                   <span class="stringliteral">"examplestr value"</span>);
+00192     snmpd_register_config_handler(<span class="stringliteral">"examplestring"</span>,
+00193                                   example_parse_config_examplestr,
+00194                                   example_free_config_examplestr,
+00195                                   <span class="stringliteral">"examplestring value"</span>);
+00196 
+00197     <span class="comment">/*</span>
+00198 <span class="comment">     * One common requirement is to read values from the kernel.</span>
+00199 <span class="comment">     * This is usually initialised here, to speed up access when the</span>
+00200 <span class="comment">     *  information is read in, as a response to an incoming request.</span>
+00201 <span class="comment">     *</span>
+00202 <span class="comment">     * This module doesn't actually use this mechanism,</span>
+00203 <span class="comment">     * so this call is commented out here.</span>
+00204 <span class="comment">     */</span>
+00205     <span class="comment">/*</span>
+00206 <span class="comment">     * auto_nlist( "example_symbol", 0, 0 ); </span>
+00207 <span class="comment">     */</span>
+00208 }
+00209 
+00210         <span class="comment">/*********************</span>
+00211 <span class="comment">         *</span>
+00212 <span class="comment">         *  Configuration file handling functions</span>
+00213 <span class="comment">         *</span>
+00214 <span class="comment">         *********************/</span>
+00215 
+00216 <span class="keywordtype">void</span>
+00217 example_parse_config_exampleint(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token, <span class="keywordtype">char</span> *cptr)
+00218 {
+00219     example_int = atoi(cptr);
+00220 }
+00221 
+00222 <span class="keywordtype">void</span>
+00223 example_parse_config_examplestr(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token, <span class="keywordtype">char</span> *cptr)
+00224 {
+00225     <span class="comment">/*</span>
+00226 <span class="comment">     * Make sure the string fits in the space allocated for it.</span>
+00227 <span class="comment">     */</span>
+00228     <span class="keywordflow">if</span> (strlen(cptr) &lt; EXAMPLE_STR_LEN)
+00229         strcpy(example_str, cptr);
+00230     <span class="keywordflow">else</span> {
+00231         <span class="comment">/*</span>
+00232 <span class="comment">         * Truncate the string if necessary.</span>
+00233 <span class="comment">         * An alternative approach would be to log an error,</span>
+00234 <span class="comment">         *  and discard this value altogether.</span>
+00235 <span class="comment">         */</span>
+00236         strncpy(example_str, cptr, EXAMPLE_STR_LEN - 4);
+00237         example_str[EXAMPLE_STR_LEN - 4] = 0;
+00238         strcat(example_str, <span class="stringliteral">"..."</span>);
+00239         example_str[EXAMPLE_STR_LEN - 1] = 0;
+00240     }
+00241 }
+00242 
+00243         <span class="comment">/*</span>
+00244 <span class="comment">         * We don't need to do anything special when closing down </span>
+00245 <span class="comment">         */</span>
+00246 <span class="keywordtype">void</span>
+00247 example_free_config_exampleint(<span class="keywordtype">void</span>)
+00248 {
+00249 }
+00250 
+00251 <span class="keywordtype">void</span>
+00252 example_free_config_examplestr(<span class="keywordtype">void</span>)
+00253 {
+00254 }
+00255 
+00256         <span class="comment">/*********************</span>
+00257 <span class="comment">         *</span>
+00258 <span class="comment">         *  System specific implementation functions</span>
+00259 <span class="comment">         *</span>
+00260 <span class="comment">         *********************/</span>
+00261 
+00262     <span class="comment">/*</span>
+00263 <span class="comment">     * Define the callback function used in the example_variables structure.</span>
+00264 <span class="comment">     * This is called whenever an incoming request refers to an object</span>
+00265 <span class="comment">     *  within this sub-tree.</span>
+00266 <span class="comment">     *</span>
+00267 <span class="comment">     * Four of the parameters are used to pass information in.</span>
+00268 <span class="comment">     * These are:</span>
+00269 <span class="comment">     *    vp      The entry from the 'example_variables' array for the</span>
+00270 <span class="comment">     *             object being queried.</span>
+00271 <span class="comment">     *    name    The OID from the request.</span>
+00272 <span class="comment">     *    length  The length of this OID.</span>
+00273 <span class="comment">     *    exact   A flag to indicate whether this is an 'exact' request</span>
+00274 <span class="comment">     *             (GET/SET) or an 'inexact' one (GETNEXT/GETBULK).</span>
+00275 <span class="comment">     *</span>
+00276 <span class="comment">     * Four of the parameters are used to pass information back out.</span>
+00277 <span class="comment">     * These are:</span>
+00278 <span class="comment">     *    name     The OID being returned.</span>
+00279 <span class="comment">     *    length   The length of this OID.</span>
+00280 <span class="comment">     *    var_len  The length of the answer being returned.</span>
+00281 <span class="comment">     *    write_method   A pointer to the SET function for this object.</span>
+00282 <span class="comment">     *</span>
+00283 <span class="comment">     * Note that name &amp; length serve a dual purpose in both roles.</span>
+00284 <span class="comment">     */</span>
+00285 
+00286 u_char         *
+00287 var_example(<span class="keyword">struct</span> variable *vp,
+00288             oid * name,
+00289             size_t * length,
+00290             <span class="keywordtype">int</span> exact, size_t * var_len, WriteMethod ** write_method)
+00291 {
+00292     <span class="comment">/*</span>
+00293 <span class="comment">     *  The result returned from this function needs to be a pointer to</span>
+00294 <span class="comment">     *    static data (so that it can be accessed from outside).</span>
+00295 <span class="comment">     *  Define suitable variables for any type of data we may return.</span>
+00296 <span class="comment">     */</span>
+00297     <span class="keyword">static</span> <span class="keywordtype">char</span>     string[EXAMPLE_STR_LEN];    <span class=
+"comment">/* for EXAMPLESTRING   */</span>
+00298     <span class="keyword">static</span> oid      oid_ret[8]; <span class="comment">/* for EXAMPLEOBJECTID */</span>
+00299     <span class="keyword">static</span> <span class="keywordtype">long</span>     long_ret;   <span class=
+"comment">/* for everything else */</span>
+00300 
+00301     <span class="comment">/*</span>
+00302 <span class="comment">     * Before returning an answer, we need to check that the request</span>
+00303 <span class="comment">     *  refers to a valid instance of this object.  The utility routine</span>
+00304 <span class="comment">     *  'header_generic' can be used to do this for scalar objects.</span>
+00305 <span class="comment">     *</span>
+00306 <span class="comment">     * This routine 'header_simple_table' does the same thing for "simple"</span>
+00307 <span class="comment">     *  tables. (See the AGENT.txt file for the definition of a simple table).</span>
+00308 <span class="comment">     *</span>
+00309 <span class="comment">     * Both these utility routines also set up default values for the</span>
+00310 <span class="comment">     *  return arguments (assuming the check succeeded).</span>
+00311 <span class="comment">     * The name and length are set suitably for the current object,</span>
+00312 <span class="comment">     *  var_len assumes that the result is an integer of some form,</span>
+00313 <span class="comment">     *  and write_method assumes that the object cannot be set.</span>
+00314 <span class="comment">     *</span>
+00315 <span class="comment">     * If these assumptions are correct, this callback routine simply</span>
+00316 <span class="comment">     * needs to return a pointer to the appropriate value (using 'long_ret').</span>
+00317 <span class="comment">     * Otherwise, 'var_len' and/or 'write_method' should be set suitably.</span>
+00318 <span class="comment">     */</span>
+00319     DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class="stringliteral">"var_example entered\n"</span>));
+00320     <span class="keywordflow">if</span> (header_generic(vp, name, length, exact, var_len, write_method) ==
+00321         MATCH_FAILED)
+00322         <span class="keywordflow">return</span> NULL;
+00323 
+00324 
+00325     <span class="comment">/*</span>
+00326 <span class="comment">     * Many object will need to obtain data from the operating system in</span>
+00327 <span class="comment">     *  order to return the appropriate value.  Typically, this is done</span>
+00328 <span class="comment">     *  here - immediately following the 'header' call, and before the</span>
+00329 <span class="comment">     *  switch statement. This is particularly appropriate if a single </span>
+00330 <span class="comment">     *  interface call can return data for all the objects supported.</span>
+00331 <span class="comment">     *</span>
+00332 <span class="comment">     * This example module does not rely on external data, so no such</span>
+00333 <span class="comment">     *  calls are needed in this case.  </span>
+00334 <span class="comment">     */</span>
+00335 
+00336     <span class="comment">/*</span>
+00337 <span class="comment">     * Now use the magic number from the variable pointer 'vp' to</span>
+00338 <span class="comment">     *  select the particular object being queried.</span>
+00339 <span class="comment">     * In each case, one of the static objects is set up with the</span>
+00340 <span class="comment">     *  appropriate information, and returned mapped to a 'u_char *'</span>
+00341 <span class="comment">     */</span>
+00342     <span class="keywordflow">switch</span> (vp-&gt;magic) {
+00343     <span class="keywordflow">case</span> EXAMPLESTRING:
+00344         sprintf(string, example_str);
+00345         <span class="comment">/*</span>
+00346 <span class="comment">         * Note that the assumption that the answer will be an</span>
+00347 <span class="comment">         *  integer does not hold true in this case, so the length</span>
+00348 <span class="comment">         *  of the answer needs to be set explicitly.           </span>
+00349 <span class="comment">         */</span>
+00350         *var_len = strlen(string);
+00351         <span class="keywordflow">return</span> (u_char *) string;
+00352 
+00353     <span class="keywordflow">case</span> EXAMPLEINTEGER:
+00354         <span class="comment">/*</span>
+00355 <span class="comment">         * Here the length assumption is correct, but the</span>
+00356 <span class="comment">         *  object is writeable, so we need to set the</span>
+00357 <span class="comment">         *  write_method pointer as well as the current value.</span>
+00358 <span class="comment">         */</span>
+00359         long_ret = example_int;
+00360         *write_method = write_exampleint;
+00361         <span class="keywordflow">return</span> (u_char *) &amp; long_ret;
+00362 
+00363     <span class="keywordflow">case</span> EXAMPLEOBJECTID:
+00364         oid_ret[0] = 1;
+00365         oid_ret[1] = 3;
+00366         oid_ret[2] = 6;
+00367         oid_ret[3] = 1;
+00368         oid_ret[4] = 4;
+00369         oid_ret[5] = oid_ret[6] = oid_ret[7] = 42;
+00370         <span class="comment">/*</span>
+00371 <span class="comment">         * Again, the assumption regarding the answer length is wrong.</span>
+00372 <span class="comment">         */</span>
+00373         *var_len = 8 * <span class="keyword">sizeof</span>(oid);
+00374         <span class="keywordflow">return</span> (u_char *) oid_ret;
+00375 
+00376     <span class="keywordflow">case</span> EXAMPLETIMETICKS:
+00377         <span class="comment">/*</span>
+00378 <span class="comment">         * Here both assumptions are correct,</span>
+00379 <span class="comment">         *  so we just need to set up the answer.</span>
+00380 <span class="comment">         */</span>
+00381         long_ret = 363136200;   <span class="comment">/* 42 days, 42 minutes and 42.0 seconds */</span>
+00382         <span class="keywordflow">return</span> (u_char *) &amp; long_ret;
+00383 
+00384     <span class="keywordflow">case</span> EXAMPLEIPADDRESS:
+00385         <span class="comment">/*</span>
+00386 <span class="comment">         * ipaddresses get returned as a long.  ick </span>
+00387 <span class="comment">         */</span>
+00388         <span class="comment">/*</span>
+00389 <span class="comment">         * we're returning 127.0.0.1 </span>
+00390 <span class="comment">         */</span>
+00391         long_ret = ntohl(INADDR_LOOPBACK);
+00392         <span class="keywordflow">return</span> (u_char *) &amp; long_ret;
+00393 
+00394     <span class="keywordflow">case</span> EXAMPLECOUNTER:
+00395         long_ret = 42;
+00396         <span class="keywordflow">return</span> (u_char *) &amp; long_ret;
+00397 
+00398     <span class="keywordflow">case</span> EXAMPLEGAUGE:
+00399         long_ret = 42;          <span class="comment">/* Do we detect a theme running through these answers? */</span>
+00400         <span class="keywordflow">return</span> (u_char *) &amp; long_ret;
+00401 
+00402     <span class="keywordflow">case</span> EXAMPLETRIGGERTRAP:
+00403         <span class="comment">/*</span>
+00404 <span class="comment">         * This object is essentially "write-only".</span>
+00405 <span class="comment">         * It only exists to trigger the sending of a trap.</span>
+00406 <span class="comment">         * Reading it will always return 0.</span>
+00407 <span class="comment">         */</span>
+00408         long_ret = 0;
+00409         *write_method = write_exampletrap;
+00410         <span class="keywordflow">return</span> (u_char *) &amp; long_ret;
+00411 
+00412     <span class="keywordflow">case</span> EXAMPLETRIGGERTRAP2:
+00413         <span class="comment">/*</span>
+00414 <span class="comment">         * This object is essentially "write-only".</span>
+00415 <span class="comment">         * It only exists to trigger the sending of a v2 trap.</span>
+00416 <span class="comment">         * Reading it will always return 0.</span>
+00417 <span class="comment">         */</span>
+00418         long_ret = 0;
+00419         *write_method = write_exampletrap2;
+00420         <span class="keywordflow">return</span> (u_char *) &amp; long_ret;
+00421 
+00422     <span class="keywordflow">default</span>:
+00423         <span class="comment">/*</span>
+00424 <span class="comment">         *  This will only be triggered if there's a problem with</span>
+00425 <span class="comment">         *   the coding of the module.  SNMP requests that reference</span>
+00426 <span class="comment">         *   a non-existant OID will be directed elsewhere.</span>
+00427 <span class="comment">         *  If this branch is reached, log an error, so that</span>
+00428 <span class="comment">         *   the problem can be investigated.</span>
+00429 <span class="comment">         */</span>
+00430         DEBUGMSGTL((<span class="stringliteral">"snmpd"</span>, <span class=
+"stringliteral">"unknown sub-id %d in examples/var_example\n"</span>,
+00431                     vp-&gt;magic));
+00432     }
+00433     <span class="comment">/*</span>
+00434 <span class="comment">     * If we fall through to here, fail by returning NULL.</span>
+00435 <span class="comment">     * This is essentially a continuation of the 'default' case above.</span>
+00436 <span class="comment">     */</span>
+00437     <span class="keywordflow">return</span> NULL;
+00438 }
+00439 
+00440         <span class="comment">/*********************</span>
+00441 <span class="comment">         *</span>
+00442 <span class="comment">         *  Writeable object SET handling routines</span>
+00443 <span class="comment">         *</span>
+00444 <span class="comment">         *********************/</span>
+00445 <span class="keywordtype">int</span>
+00446 write_exampleint(<span class="keywordtype">int</span> action,
+00447                  u_char * var_val,
+00448                  u_char var_val_type,
+00449                  size_t var_val_len,
+00450                  u_char * statP, oid * name, size_t name_len)
+00451 {
+00452     <span class="comment">/*</span>
+00453 <span class="comment">     * Define an arbitrary maximum permissible value </span>
+00454 <span class="comment">     */</span>
+00455 <span class="preprocessor">#define MAX_EXAMPLE_INT 100</span>
+00456     <span class="keyword">static</span> <span class="keywordtype">long</span>     intval;
+00457     <span class="keyword">static</span> <span class="keywordtype">long</span>     old_intval;
+00458 
+00459     <span class="keywordflow">switch</span> (action) {
+00460     <span class="keywordflow">case</span> RESERVE1:
+00461         <span class="comment">/*</span>
+00462 <span class="comment">         *  Check that the value being set is acceptable</span>
+00463 <span class="comment">         */</span>
+00464         <span class="keywordflow">if</span> (var_val_type != ASN_INTEGER) {
+00465             DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"%x not integer type"</span>, var_val_type));
+00466             <span class="keywordflow">return</span> SNMP_ERR_WRONGTYPE;
+00467         }
+00468         <span class="keywordflow">if</span> (var_val_len &gt; <span class="keyword">sizeof</span>(long)) {
+00469             DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"wrong length %x"</span>, var_val_len));
+00470             <span class="keywordflow">return</span> SNMP_ERR_WRONGLENGTH;
+00471         }
+00472 
+00473         intval = *((<span class="keywordtype">long</span> *) var_val);
+00474         <span class="keywordflow">if</span> (intval &gt; MAX_EXAMPLE_INT) {
+00475             DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"wrong value %x"</span>, intval));
+00476             <span class="keywordflow">return</span> SNMP_ERR_WRONGVALUE;
+00477         }
+00478         <span class="keywordflow">break</span>;
+00479 
+00480     <span class="keywordflow">case</span> RESERVE2:
+00481         <span class="comment">/*</span>
+00482 <span class="comment">         *  This is conventially where any necesary</span>
+00483 <span class="comment">         *   resources are allocated (e.g. calls to malloc)</span>
+00484 <span class="comment">         *  Here, we are using static variables</span>
+00485 <span class="comment">         *   so don't need to worry about this.</span>
+00486 <span class="comment">         */</span>
+00487         <span class="keywordflow">break</span>;
+00488 
+00489     <span class="keywordflow">case</span> FREE:
+00490         <span class="comment">/*</span>
+00491 <span class="comment">         *  This is where any of the above resources</span>
+00492 <span class="comment">         *   are freed again (because one of the other</span>
+00493 <span class="comment">         *   values being SET failed for some reason).</span>
+00494 <span class="comment">         *  Again, since we are using static variables</span>
+00495 <span class="comment">         *   we don't need to worry about this either.</span>
+00496 <span class="comment">         */</span>
+00497         <span class="keywordflow">break</span>;
+00498 
+00499     <span class="keywordflow">case</span> ACTION:
+00500         <span class="comment">/*</span>
+00501 <span class="comment">         *  Set the variable as requested.</span>
+00502 <span class="comment">         *   Note that this may need to be reversed,</span>
+00503 <span class="comment">         *   so save any information needed to do this.</span>
+00504 <span class="comment">         */</span>
+00505         old_intval = example_int;
+00506         example_int = intval;
+00507         <span class="keywordflow">break</span>;
+00508 
+00509     <span class="keywordflow">case</span> UNDO:
+00510         <span class="comment">/*</span>
+00511 <span class="comment">         *  Something failed, so re-set the</span>
+00512 <span class="comment">         *   variable to its previous value</span>
+00513 <span class="comment">         *  (and free any allocated resources).</span>
+00514 <span class="comment">         */</span>
+00515         example_int = old_intval;
+00516         <span class="keywordflow">break</span>;
+00517 
+00518     <span class="keywordflow">case</span> COMMIT:
+00519         <span class="comment">/*</span>
+00520 <span class="comment">         *  Everything worked, so we can discard any</span>
+00521 <span class="comment">         *   saved information, and make the change</span>
+00522 <span class="comment">         *   permanent (e.g. write to the config file).</span>
+00523 <span class="comment">         *  We also free any allocated resources.</span>
+00524 <span class="comment">         *</span>
+00525 <span class="comment">         *  In this case, there's nothing to do.</span>
+00526 <span class="comment">         */</span>
+00527         <span class="keywordflow">break</span>;
+00528 
+00529     }
+00530     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00531 }
+00532 
+00533 <span class="keywordtype">int</span>
+00534 write_exampletrap(<span class="keywordtype">int</span> action,
+00535                   u_char * var_val,
+00536                   u_char var_val_type,
+00537                   size_t var_val_len,
+00538                   u_char * statP, oid * name, size_t name_len)
+00539 {
+00540     <span class="keywordtype">long</span>            intval;
+00541 
+00542     DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"write_exampletrap entered: action=%d\n"</span>,
+00543                 action));
+00544     <span class="keywordflow">switch</span> (action) {
+00545     <span class="keywordflow">case</span> RESERVE1:
+00546         <span class="comment">/*</span>
+00547 <span class="comment">         *  The only acceptable value is the integer 1</span>
+00548 <span class="comment">         */</span>
+00549         <span class="keywordflow">if</span> (var_val_type != ASN_INTEGER) {
+00550             DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"%x not integer type"</span>, var_val_type));
+00551             <span class="keywordflow">return</span> SNMP_ERR_WRONGTYPE;
+00552         }
+00553         <span class="keywordflow">if</span> (var_val_len &gt; <span class="keyword">sizeof</span>(long)) {
+00554             DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"wrong length %x"</span>, var_val_len));
+00555             <span class="keywordflow">return</span> SNMP_ERR_WRONGLENGTH;
+00556         }
+00557 
+00558         intval = *((<span class="keywordtype">long</span> *) var_val);
+00559         <span class="keywordflow">if</span> (intval != 1) {
+00560             DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"wrong value %x"</span>, intval));
+00561             <span class="keywordflow">return</span> SNMP_ERR_WRONGVALUE;
+00562         }
+00563         <span class="keywordflow">break</span>;
+00564 
+00565     <span class="keywordflow">case</span> RESERVE2:
+00566         <span class="comment">/*</span>
+00567 <span class="comment">         * No resources are required.... </span>
+00568 <span class="comment">         */</span>
+00569         <span class="keywordflow">break</span>;
+00570 
+00571     <span class="keywordflow">case</span> FREE:
+00572         <span class="comment">/*</span>
+00573 <span class="comment">         * ... so no resources need be freed </span>
+00574 <span class="comment">         */</span>
+00575         <span class="keywordflow">break</span>;
+00576 
+00577     <span class="keywordflow">case</span> ACTION:
+00578         <span class="comment">/*</span>
+00579 <span class="comment">         *  Having triggered the sending of a trap,</span>
+00580 <span class="comment">         *   it would be impossible to revoke this,</span>
+00581 <span class="comment">         *   so we can't actually invoke the action here.</span>
+00582 <span class="comment">         */</span>
+00583         <span class="keywordflow">break</span>;
+00584 
+00585     <span class="keywordflow">case</span> UNDO:
+00586         <span class="comment">/*</span>
+00587 <span class="comment">         * We haven't done anything yet,</span>
+00588 <span class="comment">         * so there's nothing to undo </span>
+00589 <span class="comment">         */</span>
+00590         <span class="keywordflow">break</span>;
+00591 
+00592     <span class="keywordflow">case</span> COMMIT:
+00593         <span class="comment">/*</span>
+00594 <span class="comment">         *  Everything else worked, so it's now safe</span>
+00595 <span class="comment">         *   to trigger the trap.</span>
+00596 <span class="comment">         *  Note that this is *only* acceptable since</span>
+00597 <span class="comment">         *   the trap sending routines are "failsafe".</span>
+00598 <span class="comment">         *  (In fact, they can fail, but they return no</span>
+00599 <span class="comment">         *   indication of this, which is the next best thing!)</span>
+00600 <span class="comment">         */</span>
+00601         DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"write_exampletrap sending the trap\n"</span>,
+00602                     action));
+00603         <a class="code" href="group__agent__trap.html#ga43">send_easy_trap</a>(SNMP_TRAP_ENTERPRISESPECIFIC, 99);
+00604         DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"write_exampletrap trap sent\n"</span>, action));
+00605         <span class="keywordflow">break</span>;
+00606 
+00607     }
+00608     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00609 }
+00610 
+00611 <span class="comment">/*</span>
+00612 <span class="comment"> * this documents how to send a SNMPv2 (and higher) trap via the</span>
+00613 <span class="comment"> * send_v2trap() API.</span>
+00614 <span class="comment"> * </span>
+00615 <span class="comment"> * Coding SNMP-v2 Trap:</span>
+00616 <span class="comment"> * </span>
+00617 <span class="comment"> * The SNMPv2-Trap PDU contains at least a pair of object names and</span>
+00618 <span class="comment"> * values: - sysUpTime.0 whose value is the time in hundredths of a</span>
+00619 <span class="comment"> * second since the netwok management portion of system was last</span>
+00620 <span class="comment"> * reinitialized.  - snmpTrapOID.0 which is part of the trap group SNMPv2</span>
+00621 <span class="comment"> * MIB whose value is the object-id of the specific trap you have defined</span>
+00622 <span class="comment"> * in your own MIB.  Other variables can be added to caracterize the</span>
+00623 <span class="comment"> * trap.</span>
+00624 <span class="comment"> * </span>
+00625 <span class="comment"> * The function send_v2trap adds automaticallys the two objects but the</span>
+00626 <span class="comment"> * value of snmpTrapOID.0 is 0.0 by default. If you want to add your trap</span>
+00627 <span class="comment"> * name, you have to reconstruct this object and to add your own</span>
+00628 <span class="comment"> * variable.</span>
+00629 <span class="comment"> * </span>
+00630 <span class="comment"> */</span>
+00631 
+00632 
+00633 
+00634 <span class="keywordtype">int</span>
+00635 write_exampletrap2(<span class="keywordtype">int</span> action,
+00636                    u_char * var_val,
+00637                    u_char var_val_type,
+00638                    size_t var_val_len,
+00639                    u_char * statP, oid * name, size_t name_len)
+00640 {
+00641     <span class="keywordtype">long</span>            intval;
+00642 
+00643     <span class="comment">/*</span>
+00644 <span class="comment">     * these variales will be used when we send the trap </span>
+00645 <span class="comment">     */</span>
+00646     oid             objid_snmptrap[] = { 1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0 };     <span class=
+"comment">/* snmpTrapOID.0 */</span>
+00647     oid             demo_trap[] = { 1, 3, 6, 1, 4, 1, 2021, 13, 990 };  <span class="comment">/*demo-trap */</span>
+00648     oid             example_string_oid[] =
+00649         { 1, 3, 6, 1, 4, 1, 2021, 254, 1, 0 };
+00650     <span class="keyword">static</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> var_trap;
+00651     <span class="keyword">static</span> <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> var_obj;
+00652 
+00653     DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"write_exampletrap2 entered: action=%d\n"</span>,
+00654                 action));
+00655     <span class="keywordflow">switch</span> (action) {
+00656     <span class="keywordflow">case</span> RESERVE1:
+00657         <span class="comment">/*</span>
+00658 <span class="comment">         *  The only acceptable value is the integer 1</span>
+00659 <span class="comment">         */</span>
+00660         <span class="keywordflow">if</span> (var_val_type != ASN_INTEGER) {
+00661             DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"%x not integer type"</span>, var_val_type));
+00662             <span class="keywordflow">return</span> SNMP_ERR_WRONGTYPE;
+00663         }
+00664         <span class="keywordflow">if</span> (var_val_len &gt; <span class="keyword">sizeof</span>(long)) {
+00665             DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"wrong length %x"</span>, var_val_len));
+00666             <span class="keywordflow">return</span> SNMP_ERR_WRONGLENGTH;
+00667         }
+00668 
+00669         intval = *((<span class="keywordtype">long</span> *) var_val);
+00670         <span class="keywordflow">if</span> (intval != 1) {
+00671             DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"wrong value %x"</span>, intval));
+00672             <span class="keywordflow">return</span> SNMP_ERR_WRONGVALUE;
+00673         }
+00674         <span class="keywordflow">break</span>;
+00675 
+00676     <span class="keywordflow">case</span> RESERVE2:
+00677         <span class="comment">/*</span>
+00678 <span class="comment">         * No resources are required.... </span>
+00679 <span class="comment">         */</span>
+00680         <span class="keywordflow">break</span>;
+00681 
+00682     <span class="keywordflow">case</span> FREE:
+00683         <span class="comment">/*</span>
+00684 <span class="comment">         * ... so no resources need be freed </span>
+00685 <span class="comment">         */</span>
+00686         <span class="keywordflow">break</span>;
+00687 
+00688     <span class="keywordflow">case</span> ACTION:
+00689         <span class="comment">/*</span>
+00690 <span class="comment">         *  Having triggered the sending of a trap,</span>
+00691 <span class="comment">         *   it would be impossible to revoke this,</span>
+00692 <span class="comment">         *   so we can't actually invoke the action here.</span>
+00693 <span class="comment">         */</span>
+00694         <span class="keywordflow">break</span>;
+00695 
+00696     <span class="keywordflow">case</span> UNDO:
+00697         <span class="comment">/*</span>
+00698 <span class="comment">         * We haven't done anything yet,</span>
+00699 <span class="comment">         * so there's nothing to undo </span>
+00700 <span class="comment">         */</span>
+00701         <span class="keywordflow">break</span>;
+00702 
+00703     <span class="keywordflow">case</span> COMMIT:
+00704         <span class="comment">/*</span>
+00705 <span class="comment">         *  Everything else worked, so it's now safe</span>
+00706 <span class="comment">         *   to trigger the trap.</span>
+00707 <span class="comment">         *  Note that this is *only* acceptable since</span>
+00708 <span class="comment">         *   the trap sending routines are "failsafe".</span>
+00709 <span class="comment">         *  (In fact, they can fail, but they return no</span>
+00710 <span class="comment">         *   indication of this, which is the next best thing!)</span>
+00711 <span class="comment">         */</span>
+00712 
+00713         <span class="comment">/*</span>
+00714 <span class="comment">         * trap definition objects </span>
+00715 <span class="comment">         */</span>
+00716 
+00717         var_trap.<a class="code" href="structvariable__list.html#o0">next_variable</a> = &amp;var_obj;      <span class=
+"comment">/* next variable */</span>
+00718         var_trap.<a class="code" href="structvariable__list.html#o1">name</a> = objid_snmptrap; <span class=
+"comment">/* snmpTrapOID.0 */</span>
+00719         var_trap.<a class="code" href="structvariable__list.html#o2">name_length</a> = <span class=
+"keyword">sizeof</span>(objid_snmptrap) / <span class="keyword">sizeof</span>(oid);    <span class=
+"comment">/* number of sub-ids */</span>
+00720         var_trap.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_OBJECT_ID;
+00721         var_trap.<a class="code" href="structvariable__list.html#o4">val</a>.objid = demo_trap; <span class=
+"comment">/* demo-trap objid */</span>
+00722         var_trap.<a class="code" href="structvariable__list.html#o5">val_len</a> = <span class=
+"keyword">sizeof</span>(demo_trap);   <span class="comment">/* length in bytes (not number of subids!) */</span>
+00723 
+00724 
+00725         <span class="comment">/*</span>
+00726 <span class="comment">         * additional objects </span>
+00727 <span class="comment">         */</span>
+00728 
+00729 
+00730         var_obj.<a class="code" href="structvariable__list.html#o0">next_variable</a> = NULL;   <span class=
+"comment">/* No more variables after this one */</span>
+00731         var_obj.<a class="code" href="structvariable__list.html#o1">name</a> = example_string_oid;
+00732         var_obj.<a class="code" href="structvariable__list.html#o2">name_length</a> = <span class=
+"keyword">sizeof</span>(example_string_oid) / <span class="keyword">sizeof</span>(oid); <span class=
+"comment">/* number of sub-ids */</span>
+00733         var_obj.<a class="code" href="structvariable__list.html#o3">type</a> = ASN_OCTET_STR;   <span class=
+"comment">/* type of variable */</span>
+00734         var_obj.<a class="code" href="structvariable__list.html#o4">val</a>.string = example_str;       <span class=
+"comment">/* value */</span>
+00735         var_obj.<a class="code" href="structvariable__list.html#o5">val_len</a> = strlen(example_str);
+00736         DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"write_exampletrap2 sending the v2 trap\n"</span>,
+00737                     action));
+00738         <a class="code" href="group__agent__trap.html#ga44">send_v2trap</a>(&amp;var_trap);
+00739         DEBUGMSGTL((<span class="stringliteral">"example"</span>, <span class=
+"stringliteral">"write_exampletrap2 v2 trap sent\n"</span>,
+00740                     action));
+00741 
+00742         <span class="keywordflow">break</span>;
+00743 
+00744     }
+00745     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00746 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

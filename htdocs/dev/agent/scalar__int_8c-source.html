@@ -1,0 +1,89 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000007.html">mibgroup</a>&nbsp;/&nbsp;<a class="el" href="dir_000008.html">examples</a>
+  </div>
+
+  <h1>scalar_int.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 
+00022 <span class="comment">/*</span>
+00023 <span class="comment"> * start be including the appropriate header files </span>
+00024 <span class="comment"> */</span>
+00025 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00026 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00027 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00028 
+00029 <span class="comment">/*</span>
+00030 <span class="comment"> * Then, we declare the variables we want to be accessed </span>
+00031 <span class="comment"> */</span>
+00032 <span class="keyword">static</span> <span class="keywordtype">int</span>      example1 = 42;  <span class=
+"comment">/* default value */</span>
+00033 
+00034 <span class="comment">/*</span>
+00035 <span class="comment"> * our initialization routine, automatically called by the agent </span>
+00036 <span class="comment"> * (to get called, the function name must match init_FILENAME())</span>
+00037 <span class="comment"> */</span>
+00038 <span class="keywordtype">void</span>
+00039 init_scalar_int(<span class="keywordtype">void</span>)
+00040 {
+00041     <span class="comment">/*</span>
+00042 <span class="comment">     * the OID we want to register our integer at.  This should be a</span>
+00043 <span class="comment">     * fully qualified instance.  In our case, it's a scalar at:</span>
+00044 <span class="comment">     * NET-SNMP-EXAMPLES-MIB::netSnmpExampleInteger.0 (note the</span>
+00045 <span class="comment">     * trailing 0 which is required for any instantiation of any</span>
+00046 <span class="comment">     * scalar object) </span>
+00047 <span class="comment">     */</span>
+00048     oid             my_registration_oid[] =
+00049         { 1, 3, 6, 1, 4, 1, 8072, 2, 1, 1, 0 };
+00050 
+00051     <span class="comment">/*</span>
+00052 <span class="comment">     * a debugging statement.  Run the agent with -Dexample_scalar_int to see</span>
+00053 <span class="comment">     * the output of this debugging statement. </span>
+00054 <span class="comment">     */</span>
+00055     DEBUGMSGTL((<span class="stringliteral">"example_scalar_int"</span>,
+00056                 <span class="stringliteral">"Initalizing example scalar int.  Default value = %d\n"</span>,
+00057                 example1));
+00058 
+00059     <span class="comment">/*</span>
+00060 <span class="comment">     * the line below registers our "example1" variable above as</span>
+00061 <span class="comment">     * accessible and makes it writable.  A read only version of the</span>
+00062 <span class="comment">     * same registration would merely call</span>
+00063 <span class="comment">     * register_read_only_int_instance() instead.</span>
+00064 <span class="comment">     * </span>
+00065 <span class="comment">     * If we wanted a callback when the value was retrieved or set</span>
+00066 <span class="comment">     * (even though the details of doing this are handled for you),</span>
+00067 <span class="comment">     * you could change the NULL pointer below to a valid handler</span>
+00068 <span class="comment">     * function. </span>
+00069 <span class="comment">     */</span>
+00070     <a class="code" href="group__instance.html#ga18">netsnmp_register_int_instance</a>(<span class=
+"stringliteral">"my example int variable"</span>,
+00071                                   my_registration_oid,
+00072                                   OID_LENGTH(my_registration_oid),
+00073                                   &amp;example1, NULL);
+00074 
+00075     DEBUGMSGTL((<span class="stringliteral">"example_scalar_int"</span>,
+00076                 <span class="stringliteral">"Done initalizing example scalar int\n"</span>));
+00077 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:59 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

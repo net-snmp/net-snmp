@@ -1,0 +1,61 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>VARIABLES</h1>Section: Net-SNMP (5)<br />
+    Updated: 02 Mar 1999<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2><br />
+        variables - Format of specifying variable names to SNMP tools. <a name="lbAC" id="lbAC"> </a>
+
+    <h2>SYNOPSIS</h2><br />
+        system.sysdescr.0 <a name="lbAD" id="lbAD"> </a>
+
+    <h2>DESCRIPTION</h2>Variable names are in the format of Object Identifiers (ASN.1). There are several methods of
+    representation. Each variable name is given in the format of A.B.C.D..., where A, B, C, and D are subidentifiers in one of
+    two forms of notation. Each subidentifier may be encoded as a decimal integer, or a symbol as found in the RFC1066 MIB. The
+    case of the symbols is not significant.<br />
+    If there is no leading "." in the variable name, the name will be formed as if having been preceded with
+    "iso.org.dod.internet.mgmt.mib.". A "." must be placed before the first variable if the user is to fully specify the name.
+    For example:
+
+    <p><i>1.1.0 system.sysDescr.0 and 1.sysDescr.0</i></p>
+
+    <p>all refer to the same variable name. Likewise:</p>
+
+    <p><i>.1.3.6.1.2.1.1.1.0 .iso.org.dod.internet.mgmt.mib.system.sysdescr.0 .1.3.6.1.2.1.1.sysdescr.0</i></p>
+
+    <p>All refer to the same variable name.</p>
+
+    <p>The description of the variables in the MIB is given in the set of MIB files defined by the MIBS environment variable (or
+    the default list defined at compilation time) and the MIB files in the /usr/local/share/snmp/mibs directory (or the MIBDIRS
+    environment variable). <a name="lbAE" id="lbAE"> </a></p>
+
+    <h2>SEE ALSO</h2>RFC 1065, RFC 1066, RFC 1067, ISO IS 8824(ASN.1) <a name="lbAF" id="lbAF"> </a>
+
+    <h2>BUGS</h2>The parser of the MIB files file is not expected to handle bizarre (although correct) interpretations of the
+    ASN.1 notation.
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+
+      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+
+      <dt><a href="#lbAE">SEE ALSO</a></dt>
+
+      <dt><a href="#lbAF">BUGS</a></dt>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:45 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

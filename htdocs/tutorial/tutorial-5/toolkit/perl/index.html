@@ -1,0 +1,42 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>perl support</title>
+  </head>
+
+  <body bgcolor="#ffffff">
+    <h1>perl support</h1>
+    
+    Right now there is not a whole lot here, but this should
+    eventually be a tutorial for using all the various perl modules,
+    including how to embed perl directly within the net-snmp agent
+    (similar to how mod_perl support allows you to embed perl directly
+    into the apache web server).
+    <p>
+      For the time being, I'll offer <a href="perl_module.pl">a perl
+      module source code</a> which can be used as a perl SNMP agent,
+      perl subagent, or sourced directly within a agent containing
+      embedded perl support.  To make it work directly within your
+      agent, you must have compiled the net-snmp package using
+      --enable-embedded-perl and then in your snmpd.conf file you can
+      put:
+    <ul>
+	perl do "<a href="perl_module.pl">/path/to/perl_module.pl</a>"
+    </ul>
+    
+
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wes@hardakers.net>">Wes Hardaker</a></address>
+<!-- Created: Fri May  3 14:29:52 PDT 2002 -->
+<!-- hhmts start -->
+Last modified: Fri Oct  4 14:35:29 PDT 2002
+<!-- hhmts end -->
+  </body>
+</html>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,2874 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>ucdavis</b>
+MIB object, which is defined within the <b>UCD-SNMP-MIB</b> MIB
+document as <b>.1.3.6.1.4.1.2021</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#prTable">prTable</a></li>
+  <li><a href="#extTable">extTable</a></li>
+  <li><a href="#dskTable">dskTable</a></li>
+  <li><a href="#laTable">laTable</a></li>
+  <li><a href="#fileTable">fileTable</a></li>
+  <li><a href="#logMatchTable">logMatchTable</a></li>
+  <li><a href="#mrTable">mrTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="memIndex" />
+1
+<br /><b>memIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.1</td>
+<td>
+<pre>
+Bogus Index.  This should always return the integer 0.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memErrorName" />
+2
+<br /><b>memErrorName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.2</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Bogus Name. This should always return the string 'swap'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memTotalSwap" />
+3
+<br /><b>memTotalSwap</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.3</td>
+<td>
+<pre>
+Total Swap Size configured for the host.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memAvailSwap" />
+4
+<br /><b>memAvailSwap</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.4</td>
+<td>
+<pre>
+Available Swap Space on the host.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memTotalReal" />
+5
+<br /><b>memTotalReal</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.5</td>
+<td>
+<pre>
+Total Real/Physical Memory Size on the host.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memAvailReal" />
+6
+<br /><b>memAvailReal</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.6</td>
+<td>
+<pre>
+Available Real/Physical Memory Space on the host.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memTotalSwapTXT" />
+7
+<br /><b>memTotalSwapTXT</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.7</td>
+<td>
+<pre>
+Total virtual memory used by text.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memAvailSwapTXT" />
+8
+<br /><b>memAvailSwapTXT</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.8</td>
+<td>
+<pre>
+Active virtual memory used by text.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memTotalRealTXT" />
+9
+<br /><b>memTotalRealTXT</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.9</td>
+<td>
+<pre>
+Total Real/Physical Memory Size used by text.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memAvailRealTXT" />
+10
+<br /><b>memAvailRealTXT</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.10</td>
+<td>
+<pre>
+Active Real/Physical Memory Space used by text.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memTotalFree" />
+11
+<br /><b>memTotalFree</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.11</td>
+<td>
+<pre>
+Total Available Memory on the host
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memMinimumSwap" />
+12
+<br /><b>memMinimumSwap</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.12</td>
+<td>
+<pre>
+Minimum amount of free swap required to be free
+or else memErrorSwap is set to 1 and an error string is
+returned memSwapErrorMsg.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memShared" />
+13
+<br /><b>memShared</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.13</td>
+<td>
+<pre>
+Total Shared Memory
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memBuffer" />
+14
+<br /><b>memBuffer</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.14</td>
+<td>
+<pre>
+Total Buffered Memory
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memCached" />
+15
+<br /><b>memCached</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.15</td>
+<td>
+<pre>
+Total Cached Memory
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memSwapError" />
+100
+<br /><b>memSwapError</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.100</td>
+<td>
+<pre>
+Error flag.  1 indicates very little swap space left
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="memSwapErrorMsg" />
+101
+<br /><b>memSwapErrorMsg</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.4.101</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Error message describing the Error Flag condition
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssIndex" />
+1
+<br /><b>ssIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.1</td>
+<td>
+<pre>
+Reference Index for each observed systemStat (1).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssErrorName" />
+2
+<br /><b>ssErrorName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.2</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The list of systemStats names (vmstat) we're Counting.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssSwapIn" />
+3
+<br /><b>ssSwapIn</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.3</td>
+<td>
+<pre>
+Amount of memory swapped in from disk (kB/s).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssSwapOut" />
+4
+<br /><b>ssSwapOut</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.4</td>
+<td>
+<pre>
+Amount of memory swapped to disk (kB/s).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssCpuRawUser" />
+50
+<br /><b>ssCpuRawUser</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.50</td>
+<td>
+<pre>
+user CPU time.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssCpuRawNice" />
+51
+<br /><b>ssCpuRawNice</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.51</td>
+<td>
+<pre>
+nice CPU time.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssCpuRawSystem" />
+52
+<br /><b>ssCpuRawSystem</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.52</td>
+<td>
+<pre>
+system CPU time.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssCpuRawIdle" />
+53
+<br /><b>ssCpuRawIdle</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.53</td>
+<td>
+<pre>
+idle CPU time.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssCpuRawWait" />
+54
+<br /><b>ssCpuRawWait</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.54</td>
+<td>
+<pre>
+iowait CPU time. This is primarily a SysV thingie
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssCpuRawKernel" />
+55
+<br /><b>ssCpuRawKernel</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.55</td>
+<td>
+<pre>
+kernel CPU time.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssCpuRawInterrupt" />
+56
+<br /><b>ssCpuRawInterrupt</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.56</td>
+<td>
+<pre>
+interruptlevel CPU time. This is primarily a BSD thingie
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssIORawSent" />
+57
+<br /><b>ssIORawSent</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.57</td>
+<td>
+<pre>
+Number of blocks sent to a block device
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssIORawReceived" />
+58
+<br /><b>ssIORawReceived</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.58</td>
+<td>
+<pre>
+Number of blocks received from a block device
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssRawInterrupts" />
+59
+<br /><b>ssRawInterrupts</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.59</td>
+<td>
+<pre>
+Number of interrupts processed
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssRawContexts" />
+60
+<br /><b>ssRawContexts</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.60</td>
+<td>
+<pre>
+Number of context switches
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssCpuRawSoftIRQ" />
+61
+<br /><b>ssCpuRawSoftIRQ</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.61</td>
+<td>
+<pre>
+Soft IRQ CPU time. This is for Linux 2.6
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssRawSwapIn" />
+62
+<br /><b>ssRawSwapIn</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.62</td>
+<td>
+<pre>
+Number of blocks swapped in
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssRawSwapOut" />
+63
+<br /><b>ssRawSwapOut</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.11.63</td>
+<td>
+<pre>
+Number of blocks swapped out
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="logMatchMaxEntries" />
+1
+<br /><b>logMatchMaxEntries</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.16.1</td>
+<td>
+<pre>
+The maximum number of logmatch entries
+this snmpd daemon can support.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="versionIndex" />
+1
+<br /><b>versionIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.100.1</td>
+<td>
+<pre>
+Index to mib (always 0)
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="versionTag" />
+2
+<br /><b>versionTag</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.100.2</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+CVS tag keyword
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="versionDate" />
+3
+<br /><b>versionDate</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.100.3</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Date string from RCS keyword
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="versionCDate" />
+4
+<br /><b>versionCDate</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.100.4</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Date string from ctime() 
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="versionIdent" />
+5
+<br /><b>versionIdent</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.100.5</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Id string from RCS keyword
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="versionConfigureOptions" />
+6
+<br /><b>versionConfigureOptions</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.100.6</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Options passed to the configure script when this agent was built.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="versionClearCache" />
+10
+<br /><b>versionClearCache</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.4.1.2021.100.10</td>
+<td>
+<pre>
+Set to 1 to clear the exec cache, if enabled
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="versionUpdateConfig" />
+11
+<br /><b>versionUpdateConfig</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.4.1.2021.100.11</td>
+<td>
+<pre>
+Set to 1 to read-read the config file(s).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="versionRestartAgent" />
+12
+<br /><b>versionRestartAgent</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.4.1.2021.100.12</td>
+<td>
+<pre>
+Set to 1 to restart the agent.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="versionSavePersistentData" />
+13
+<br /><b>versionSavePersistentData</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.4.1.2021.100.13</td>
+<td>
+<pre>
+Set to 1 to force the agent to save it's persistent data immediately.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="versionDoDebugging" />
+20
+<br /><b>versionDoDebugging</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.4.1.2021.100.20</td>
+<td>
+<pre>
+Set to 1 to turn debugging statements on in the agent or 0
+to turn it off.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="snmperrIndex" />
+1
+<br /><b>snmperrIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.101.1</td>
+<td>
+<pre>
+Bogus Index for snmperrs (always 0).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="snmperrNames" />
+2
+<br /><b>snmperrNames</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.101.2</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+snmp
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="snmperrErrorFlag" />
+100
+<br /><b>snmperrErrorFlag</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.101.100</td>
+<td>
+<pre>
+A Error flag to indicate trouble with the agent.  It
+goes to 1 if there is an error, 0 if no error.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="snmperrErrMessage" />
+101
+<br /><b>snmperrErrMessage</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.4.1.2021.101.101</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+An error message describing the problem (if one exists).
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="prTable" /><h3>Table prTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>prTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table containing information on running
+programs/daemons configured for monitoring in the
+snmpd.conf file of the agent.  Processes violating the
+number of running processes required by the agent's
+configuration file are flagged with numerical and
+textual errors.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="prEntry" />Row Description</td>
+<td>
+<pre>
+An entry containing a process and its statistics.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>prTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="prIndex" />
+1
+<br /><b>prIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Reference Index for each observed process.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other prTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="prNames" />
+2
+<br /><b>prNames</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The process name we're counting/checking on.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="prMin" />
+3
+<br /><b>prMin</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The minimum number of processes that should be
+running.  An error flag is generated if the number of
+running processes is < the minimum.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="prMax" />
+4
+<br /><b>prMax</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The maximum number of processes that should be
+running.  An error flag is generated if the number of
+running processes is > the maximum.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="prCount" />
+5
+<br /><b>prCount</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of current processes running with the name
+in question.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="prErrorFlag" />
+100
+<br /><b>prErrorFlag</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A Error flag to indicate trouble with a process.  It
+goes to 1 if there is an error, 0 if no error.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="prErrMessage" />
+101
+<br /><b>prErrMessage</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+An error message describing the problem (if one exists).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="prErrFix" />
+102
+<br /><b>prErrFix</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+Setting this to one will try to fix the problem if
+the agent has been configured with a script to call
+to attempt to fix problems automatically using remote
+snmp operations.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="prErrFixCmd" />
+103
+<br /><b>prErrFixCmd</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The command that gets run when the prErrFix column is 
+set to 1.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="extTable" /><h3>Table extTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>extTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.8</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of extensible commands returning output and
+result codes.  These commands are configured via the
+agent's snmpd.conf file.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="extEntry" />Row Description</td>
+<td>
+<pre>
+An entry containing an extensible script/program and its output.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>extTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="extIndex" />
+1
+<br /><b>extIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Reference Index for extensible scripts.  Simply an
+integer row number.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other extTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="extNames" />
+2
+<br /><b>extNames</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A Short, one name description of the extensible command.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="extCommand" />
+3
+<br /><b>extCommand</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The command line to be executed.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="extResult" />
+100
+<br /><b>extResult</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The result code (exit status) from the executed command.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="extOutput" />
+101
+<br /><b>extOutput</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The first line of output of the executed command.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="extErrFix" />
+102
+<br /><b>extErrFix</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+Setting this to one will try to fix the problem if
+the agent has been configured with a script to call
+to attempt to fix problems automatically using remote
+snmp operations.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="extErrFixCmd" />
+103
+<br /><b>extErrFixCmd</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The command that gets run when the extErrFix column is 
+set to 1.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="dskTable" /><h3>Table dskTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>dskTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.9</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Disk watching information.  Partions to be watched
+are configured by the snmpd.conf file of the agent.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="dskEntry" />Row Description</td>
+<td>
+<pre>
+An entry containing a disk and its statistics.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>dskTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="dskIndex" />
+1
+<br /><b>dskIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Integer reference number (row number) for the disk mib.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other dskTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="dskPath" />
+2
+<br /><b>dskPath</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Path where the disk is mounted.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskDevice" />
+3
+<br /><b>dskDevice</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Path of the device for the partition
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskMinimum" />
+4
+<br /><b>dskMinimum</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Minimum space required on the disk (in kBytes) before the
+errors are triggered.  Either this or dskMinPercent is
+configured via the agent's snmpd.conf file.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskMinPercent" />
+5
+<br /><b>dskMinPercent</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Percentage of minimum space required on the disk before the
+errors are triggered.  Either this or dskMinimum is
+configured via the agent's snmpd.conf file.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskTotal" />
+6
+<br /><b>dskTotal</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Total size of the disk/partion (kBytes)
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskAvail" />
+7
+<br /><b>dskAvail</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Available space on the disk
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskUsed" />
+8
+<br /><b>dskUsed</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Used space on the disk
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskPercent" />
+9
+<br /><b>dskPercent</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Percentage of space used on disk
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskPercentNode" />
+10
+<br /><b>dskPercentNode</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Percentage of inodes used on disk
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskErrorFlag" />
+100
+<br /><b>dskErrorFlag</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Error flag signaling that the disk or partition is under
+the minimum required space configured for it.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dskErrorMsg" />
+101
+<br /><b>dskErrorMsg</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A text description providing a warning and the space left
+on the disk.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="laTable" /><h3>Table laTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>laTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.10</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Load average information.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="laEntry" />Row Description</td>
+<td>
+<pre>
+An entry containing a load average and its values.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>laTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="laIndex" />
+1
+<br /><b>laIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+reference index/row number for each observed loadave.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other laTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="laNames" />
+2
+<br /><b>laNames</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The list of loadave names we're watching.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="laLoad" />
+3
+<br /><b>laLoad</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The 1,5 and 10 minute load averages (one per row).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="laConfig" />
+4
+<br /><b>laConfig</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The watch point for load-averages to signal an
+error.  If the load averages rises above this value,
+the laErrorFlag below is set.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="laLoadInt" />
+5
+<br /><b>laLoadInt</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The 1,5 and 10 minute load averages as an integer.
+This is computed by taking the floating point
+loadaverage value and multiplying by 100, then
+converting the value to an integer.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="laLoadFloat" />
+6
+<br /><b>laLoadFloat</b>
+
+</td><td>
+  OPAQUE
+
+ <br>
+ <a href="#Float">Float</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Float"> Float TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The 1,5 and 10 minute load averages as an opaquely
+wrapped floating point number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="laErrorFlag" />
+100
+<br /><b>laErrorFlag</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A Error flag to indicate the load-average has crossed
+its threshold value defined in the snmpd.conf file.
+It is set to 1 if the threshold is crossed, 0 otherwise.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="laErrMessage" />
+101
+<br /><b>laErrMessage</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+An error message describing the load-average and its
+surpased watch-point value.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="fileTable" /><h3>Table fileTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>fileTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.15</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Table of monitored files.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="fileEntry" />Row Description</td>
+<td>
+<pre>
+Entry of file
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>fileTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="fileIndex" />
+1
+<br /><b>fileIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Index of file
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other fileTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="fileName" />
+2
+<br /><b>fileName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Filename
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="fileSize" />
+3
+<br /><b>fileSize</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Size of file (kB)
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="fileMax" />
+4
+<br /><b>fileMax</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Limit of filesize (kB)
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="fileErrorFlag" />
+100
+<br /><b>fileErrorFlag</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Limit exceeded flag
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="fileErrorMsg" />
+101
+<br /><b>fileErrorMsg</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Filesize error message
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="logMatchTable" /><h3>Table logMatchTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>logMatchTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.16.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Table of monitored files.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="logMatchEntry" />Row Description</td>
+<td>
+<pre>
+Entry of file
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>logMatchTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="logMatchIndex" />
+1
+<br /><b>logMatchIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Index of logmatch
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other logMatchTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="logMatchName" />
+2
+<br /><b>logMatchName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+logmatch instance name
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="logMatchFilename" />
+3
+<br /><b>logMatchFilename</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+filename to be logmatched
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="logMatchRegEx" />
+4
+<br /><b>logMatchRegEx</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+regular expression
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="logMatchGlobalCounter" />
+5
+<br /><b>logMatchGlobalCounter</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+global count of matches
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="logMatchGlobalCount" />
+6
+<br /><b>logMatchGlobalCount</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Description.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="logMatchCurrentCounter" />
+7
+<br /><b>logMatchCurrentCounter</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Regex match counter. This counter will
+be reset with each logfile rotation.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="logMatchCurrentCount" />
+8
+<br /><b>logMatchCurrentCount</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Description.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="logMatchCounter" />
+9
+<br /><b>logMatchCounter</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Regex match counter. This counter will
+be reset with each read
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="logMatchCount" />
+10
+<br /><b>logMatchCount</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Description.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="logMatchCycle" />
+11
+<br /><b>logMatchCycle</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+time between updates (if not queried) in seconds
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="logMatchErrorFlag" />
+100
+<br /><b>logMatchErrorFlag</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+errorflag: is this line configured correctly?
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="logMatchRegExCompilation" />
+101
+<br /><b>logMatchRegExCompilation</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+message of regex precompilation
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="mrTable" /><h3>Table mrTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mrTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.102</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table displaying all the oid's registered by mib modules in
+the agent.  Since the agent is modular in nature, this lists
+each module's OID it is responsible for and the name of the module
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mrEntry" />Row Description</td>
+<td>
+<pre>
+An entry containing a registered mib oid.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mrTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mrIndex" />
+1
+<br /><b>mrIndex</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The registry slot of a mibmodule.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mrTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mrModuleName" />
+2
+<br /><b>mrModuleName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The module name that registered this OID.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ssIOSent" />
+5
+<br /><b>ssIOSent</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Blocks sent to a block device (blocks/s). Deprecated, replaced by
+the ssIORawSent object
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssIOReceive" />
+6
+<br /><b>ssIOReceive</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Blocks received from a block device (blocks/s). Deprecated, replaced by
+the ssIORawReceived object
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssSysInterrupts" />
+7
+<br /><b>ssSysInterrupts</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of interrupts per second, including the clock.
+Deprecated, replaced by ssRawInterrupts
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssSysContext" />
+8
+<br /><b>ssSysContext</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of context switches per second.
+Deprecated, replaced by ssRawContext
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssCpuUser" />
+9
+<br /><b>ssCpuUser</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+percentages of user CPU time. Deprecated, replaced by the ssCpuRawUser
+object
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssCpuSystem" />
+10
+<br /><b>ssCpuSystem</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+percentages of system CPU time. Deprecated, replaced by of the
+ssCpuRawSystem object
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ssCpuIdle" />
+11
+<br /><b>ssCpuIdle</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+percentages of idle CPU time. Deprecated, replaced by of the
+ssCpuRawIdle object
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+<a name="ucdStart" /><h3>Notification: ucdStart</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>ucdStart</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.251.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+  </table></td></tr>
+  </table>
+<a name="ucdShutdown" /><h3>Notification: ucdShutdown</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>ucdShutdown</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-SNMP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.251.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+This trap is sent when the agent terminates
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+  </table></td></tr>
+  </table>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="Float">Float</td><td>OPAQUE</td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp UCD-SNMP-MIB::ucdavis</b></p>
+<pre>
++--<a href="#ucdavis">ucdavis</a>(2021)
+   |
+   +--<a href="#prTable">prTable</a>(2)
+   |  |
+   |  +--<a href="#prEntry">prEntry</a>(1)
+   |     |  Index: prIndex
+   |     |
+   |     +-- -R-- Integer32 <a href="#prIndex">prIndex</a>(1)
+   |     |        Range: 0..65535
+   |     +-- -R-- String    <a href="#prNames">prNames</a>(2)
+   |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- Integer32 <a href="#prMin">prMin</a>(3)
+   |     +-- -R-- Integer32 <a href="#prMax">prMax</a>(4)
+   |     +-- -R-- Integer32 <a href="#prCount">prCount</a>(5)
+   |     +-- -R-- Integer32 <a href="#prErrorFlag">prErrorFlag</a>(100)
+   |     +-- -R-- String    <a href="#prErrMessage">prErrMessage</a>(101)
+   |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |     |        Size: 0..255
+   |     +-- -RW- Integer32 <a href="#prErrFix">prErrFix</a>(102)
+   |     +-- -R-- String    <a href="#prErrFixCmd">prErrFixCmd</a>(103)
+   |              Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |              Size: 0..255
+   |
+   +--<a href="#memory">memory</a>(4)
+   |  |
+   |  +-- -R-- Integer32 <a href="#memIndex">memIndex</a>(1)
+   |  +-- -R-- String    <a href="#memErrorName">memErrorName</a>(2)
+   |  |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |  |        Size: 0..255
+   |  +-- -R-- Integer32 <a href="#memTotalSwap">memTotalSwap</a>(3)
+   |  +-- -R-- Integer32 <a href="#memAvailSwap">memAvailSwap</a>(4)
+   |  +-- -R-- Integer32 <a href="#memTotalReal">memTotalReal</a>(5)
+   |  +-- -R-- Integer32 <a href="#memAvailReal">memAvailReal</a>(6)
+   |  +-- -R-- Integer32 <a href="#memTotalSwapTXT">memTotalSwapTXT</a>(7)
+   |  +-- -R-- Integer32 <a href="#memAvailSwapTXT">memAvailSwapTXT</a>(8)
+   |  +-- -R-- Integer32 <a href="#memTotalRealTXT">memTotalRealTXT</a>(9)
+   |  +-- -R-- Integer32 <a href="#memAvailRealTXT">memAvailRealTXT</a>(10)
+   |  +-- -R-- Integer32 <a href="#memTotalFree">memTotalFree</a>(11)
+   |  +-- -R-- Integer32 <a href="#memMinimumSwap">memMinimumSwap</a>(12)
+   |  +-- -R-- Integer32 <a href="#memShared">memShared</a>(13)
+   |  +-- -R-- Integer32 <a href="#memBuffer">memBuffer</a>(14)
+   |  +-- -R-- Integer32 <a href="#memCached">memCached</a>(15)
+   |  +-- -R-- Integer32 <a href="#memSwapError">memSwapError</a>(100)
+   |  +-- -R-- String    <a href="#memSwapErrorMsg">memSwapErrorMsg</a>(101)
+   |           Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |           Size: 0..255
+   |
+   +--<a href="#extTable">extTable</a>(8)
+   |  |
+   |  +--<a href="#extEntry">extEntry</a>(1)
+   |     |  Index: extIndex
+   |     |
+   |     +-- -R-- Integer32 <a href="#extIndex">extIndex</a>(1)
+   |     |        Range: 0..65535
+   |     +-- -R-- String    <a href="#extNames">extNames</a>(2)
+   |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- String    <a href="#extCommand">extCommand</a>(3)
+   |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- Integer32 <a href="#extResult">extResult</a>(100)
+   |     +-- -R-- String    <a href="#extOutput">extOutput</a>(101)
+   |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |     |        Size: 0..255
+   |     +-- -RW- Integer32 <a href="#extErrFix">extErrFix</a>(102)
+   |     +-- -R-- String    <a href="#extErrFixCmd">extErrFixCmd</a>(103)
+   |              Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |              Size: 0..255
+   |
+   +--<a href="#dskTable">dskTable</a>(9)
+   |  |
+   |  +--<a href="#dskEntry">dskEntry</a>(1)
+   |     |  Index: dskIndex
+   |     |
+   |     +-- -R-- Integer32 <a href="#dskIndex">dskIndex</a>(1)
+   |     |        Range: 0..65535
+   |     +-- -R-- String    <a href="#dskPath">dskPath</a>(2)
+   |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- String    <a href="#dskDevice">dskDevice</a>(3)
+   |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- Integer32 <a href="#dskMinimum">dskMinimum</a>(4)
+   |     +-- -R-- Integer32 <a href="#dskMinPercent">dskMinPercent</a>(5)
+   |     +-- -R-- Integer32 <a href="#dskTotal">dskTotal</a>(6)
+   |     +-- -R-- Integer32 <a href="#dskAvail">dskAvail</a>(7)
+   |     +-- -R-- Integer32 <a href="#dskUsed">dskUsed</a>(8)
+   |     +-- -R-- Integer32 <a href="#dskPercent">dskPercent</a>(9)
+   |     +-- -R-- Integer32 <a href="#dskPercentNode">dskPercentNode</a>(10)
+   |     +-- -R-- Integer32 <a href="#dskErrorFlag">dskErrorFlag</a>(100)
+   |     +-- -R-- String    <a href="#dskErrorMsg">dskErrorMsg</a>(101)
+   |              Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |              Size: 0..255
+   |
+   +--<a href="#laTable">laTable</a>(10)
+   |  |
+   |  +--<a href="#laEntry">laEntry</a>(1)
+   |     |  Index: laIndex
+   |     |
+   |     +-- -R-- Integer32 <a href="#laIndex">laIndex</a>(1)
+   |     |        Range: 0..3
+   |     +-- -R-- String    <a href="#laNames">laNames</a>(2)
+   |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- String    <a href="#laLoad">laLoad</a>(3)
+   |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- String    <a href="#laConfig">laConfig</a>(4)
+   |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- Integer32 <a href="#laLoadInt">laLoadInt</a>(5)
+   |     +-- -R-- Opaque    <a href="#laLoadFloat">laLoadFloat</a>(6)
+   |     |        Textual Convention: <a href="#Float">Float</a>
+   |     |        Size: 7
+   |     +-- -R-- Integer32 <a href="#laErrorFlag">laErrorFlag</a>(100)
+   |     +-- -R-- String    <a href="#laErrMessage">laErrMessage</a>(101)
+   |              Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |              Size: 0..255
+   |
+   +--<a href="#systemStats">systemStats</a>(11)
+   |  |
+   |  +-- -R-- Integer32 <a href="#ssIndex">ssIndex</a>(1)
+   |  +-- -R-- String    <a href="#ssErrorName">ssErrorName</a>(2)
+   |  |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |  |        Size: 0..255
+   |  +-- -R-- Integer32 <a href="#ssSwapIn">ssSwapIn</a>(3)
+   |  +-- -R-- Integer32 <a href="#ssSwapOut">ssSwapOut</a>(4)
+   |  +-- -R-- Integer32 <a href="#ssIOSent">ssIOSent</a>(5)
+   |  +-- -R-- Integer32 <a href="#ssIOReceive">ssIOReceive</a>(6)
+   |  +-- -R-- Integer32 <a href="#ssSysInterrupts">ssSysInterrupts</a>(7)
+   |  +-- -R-- Integer32 <a href="#ssSysContext">ssSysContext</a>(8)
+   |  +-- -R-- Integer32 <a href="#ssCpuUser">ssCpuUser</a>(9)
+   |  +-- -R-- Integer32 <a href="#ssCpuSystem">ssCpuSystem</a>(10)
+   |  +-- -R-- Integer32 <a href="#ssCpuIdle">ssCpuIdle</a>(11)
+   |  +-- -R-- Counter   <a href="#ssCpuRawUser">ssCpuRawUser</a>(50)
+   |  +-- -R-- Counter   <a href="#ssCpuRawNice">ssCpuRawNice</a>(51)
+   |  +-- -R-- Counter   <a href="#ssCpuRawSystem">ssCpuRawSystem</a>(52)
+   |  +-- -R-- Counter   <a href="#ssCpuRawIdle">ssCpuRawIdle</a>(53)
+   |  +-- -R-- Counter   <a href="#ssCpuRawWait">ssCpuRawWait</a>(54)
+   |  +-- -R-- Counter   <a href="#ssCpuRawKernel">ssCpuRawKernel</a>(55)
+   |  +-- -R-- Counter   <a href="#ssCpuRawInterrupt">ssCpuRawInterrupt</a>(56)
+   |  +-- -R-- Counter   <a href="#ssIORawSent">ssIORawSent</a>(57)
+   |  +-- -R-- Counter   <a href="#ssIORawReceived">ssIORawReceived</a>(58)
+   |  +-- -R-- Counter   <a href="#ssRawInterrupts">ssRawInterrupts</a>(59)
+   |  +-- -R-- Counter   <a href="#ssRawContexts">ssRawContexts</a>(60)
+   |  +-- -R-- Counter   <a href="#ssCpuRawSoftIRQ">ssCpuRawSoftIRQ</a>(61)
+   |  +-- -R-- Counter   <a href="#ssRawSwapIn">ssRawSwapIn</a>(62)
+   |  +-- -R-- Counter   <a href="#ssRawSwapOut">ssRawSwapOut</a>(63)
+   |
+   +--<a href="#ucdInternal">ucdInternal</a>(12)
+   |
+   +--<a href="#ucdExperimental">ucdExperimental</a>(13)
+   |
+   +--<a href="#fileTable">fileTable</a>(15)
+   |  |
+   |  +--<a href="#fileEntry">fileEntry</a>(1)
+   |     |  Index: fileIndex
+   |     |
+   |     +-- -R-- Integer32 <a href="#fileIndex">fileIndex</a>(1)
+   |     |        Range: 0..2147483647
+   |     +-- -R-- String    <a href="#fileName">fileName</a>(2)
+   |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- Integer32 <a href="#fileSize">fileSize</a>(3)
+   |     +-- -R-- Integer32 <a href="#fileMax">fileMax</a>(4)
+   |     +-- -R-- EnumVal   <a href="#fileErrorFlag">fileErrorFlag</a>(100)
+   |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |     |        Values: true(1), false(2)
+   |     +-- -R-- String    <a href="#fileErrorMsg">fileErrorMsg</a>(101)
+   |              Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |              Size: 0..255
+   |
+   +--<a href="#logMatch">logMatch</a>(16)
+   |  |
+   |  +-- -R-- Integer32 <a href="#logMatchMaxEntries">logMatchMaxEntries</a>(1)
+   |  |
+   |  +--<a href="#logMatchTable">logMatchTable</a>(2)
+   |     |
+   |     +--<a href="#logMatchEntry">logMatchEntry</a>(1)
+   |        |  Index: logMatchIndex
+   |        |
+   |        +-- -R-- Integer32 <a href="#logMatchIndex">logMatchIndex</a>(1)
+   |        |        Range: 1..2147483647
+   |        +-- -R-- String    <a href="#logMatchName">logMatchName</a>(2)
+   |        |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |        |        Size: 0..255
+   |        +-- -R-- String    <a href="#logMatchFilename">logMatchFilename</a>(3)
+   |        |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |        |        Size: 0..255
+   |        +-- -R-- String    <a href="#logMatchRegEx">logMatchRegEx</a>(4)
+   |        |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |        |        Size: 0..255
+   |        +-- -R-- Counter   <a href="#logMatchGlobalCounter">logMatchGlobalCounter</a>(5)
+   |        +-- -R-- Integer32 <a href="#logMatchGlobalCount">logMatchGlobalCount</a>(6)
+   |        +-- -R-- Counter   <a href="#logMatchCurrentCounter">logMatchCurrentCounter</a>(7)
+   |        +-- -R-- Integer32 <a href="#logMatchCurrentCount">logMatchCurrentCount</a>(8)
+   |        +-- -R-- Counter   <a href="#logMatchCounter">logMatchCounter</a>(9)
+   |        +-- -R-- Integer32 <a href="#logMatchCount">logMatchCount</a>(10)
+   |        +-- -R-- Integer32 <a href="#logMatchCycle">logMatchCycle</a>(11)
+   |        +-- -R-- EnumVal   <a href="#logMatchErrorFlag">logMatchErrorFlag</a>(100)
+   |        |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |        |        Values: true(1), false(2)
+   |        +-- -R-- String    <a href="#logMatchRegExCompilation">logMatchRegExCompilation</a>(101)
+   |                 Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |                 Size: 0..255
+   |
+   +--<a href="#version">version</a>(100)
+   |  |
+   |  +-- -R-- Integer32 <a href="#versionIndex">versionIndex</a>(1)
+   |  +-- -R-- String    <a href="#versionTag">versionTag</a>(2)
+   |  |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |  |        Size: 0..255
+   |  +-- -R-- String    <a href="#versionDate">versionDate</a>(3)
+   |  |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |  |        Size: 0..255
+   |  +-- -R-- String    <a href="#versionCDate">versionCDate</a>(4)
+   |  |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |  |        Size: 0..255
+   |  +-- -R-- String    <a href="#versionIdent">versionIdent</a>(5)
+   |  |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |  |        Size: 0..255
+   |  +-- -R-- String    <a href="#versionConfigureOptions">versionConfigureOptions</a>(6)
+   |  |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |  |        Size: 0..255
+   |  +-- -RW- Integer32 <a href="#versionClearCache">versionClearCache</a>(10)
+   |  +-- -RW- Integer32 <a href="#versionUpdateConfig">versionUpdateConfig</a>(11)
+   |  +-- -RW- Integer32 <a href="#versionRestartAgent">versionRestartAgent</a>(12)
+   |  +-- -RW- Integer32 <a href="#versionSavePersistentData">versionSavePersistentData</a>(13)
+   |  +-- -RW- Integer32 <a href="#versionDoDebugging">versionDoDebugging</a>(20)
+   |
+   +--<a href="#snmperrs">snmperrs</a>(101)
+   |  |
+   |  +-- -R-- Integer32 <a href="#snmperrIndex">snmperrIndex</a>(1)
+   |  +-- -R-- String    <a href="#snmperrNames">snmperrNames</a>(2)
+   |  |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |  |        Size: 0..255
+   |  +-- -R-- Integer32 <a href="#snmperrErrorFlag">snmperrErrorFlag</a>(100)
+   |  +-- -R-- String    <a href="#snmperrErrMessage">snmperrErrMessage</a>(101)
+   |           Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |           Size: 0..255
+   |
+   +--<a href="#mrTable">mrTable</a>(102)
+   |  |
+   |  +--<a href="#mrEntry">mrEntry</a>(1)
+   |     |  Index: mrIndex
+   |     |
+   |     +-- -R-- ObjID     <a href="#mrIndex">mrIndex</a>(1)
+   |     +-- -R-- String    <a href="#mrModuleName">mrModuleName</a>(2)
+   |              Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |              Size: 0..255
+   |
+   +--<a href="#ucdSnmpAgent">ucdSnmpAgent</a>(250)
+   |  |
+   |  +--<a href="#hpux9">hpux9</a>(1)
+   |  |
+   |  +--<a href="#sunos4">sunos4</a>(2)
+   |  |
+   |  +--<a href="#solaris">solaris</a>(3)
+   |  |
+   |  +--<a href="#osf">osf</a>(4)
+   |  |
+   |  +--<a href="#ultrix">ultrix</a>(5)
+   |  |
+   |  +--<a href="#hpux10">hpux10</a>(6)
+   |  |
+   |  +--<a href="#netbsd1">netbsd1</a>(7)
+   |  |
+   |  +--<a href="#freebsd">freebsd</a>(8)
+   |  |
+   |  +--<a href="#irix">irix</a>(9)
+   |  |
+   |  +--<a href="#linux">linux</a>(10)
+   |  |
+   |  +--<a href="#bsdi">bsdi</a>(11)
+   |  |
+   |  +--<a href="#openbsd">openbsd</a>(12)
+   |  |
+   |  +--<a href="#win32">win32</a>(13)
+   |  |
+   |  +--<a href="#hpux11">hpux11</a>(14)
+   |  |
+   |  +--<a href="#unknown">unknown</a>(255)
+   |
+   +--<a href="#ucdTraps">ucdTraps</a>(251)
+      |
+      +--<a href="#ucdStart">ucdStart</a>(1)
+      +--<a href="#ucdShutdown">ucdShutdown</a>(2)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

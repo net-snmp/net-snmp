@@ -1,0 +1,146 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>MFD : ifXTable data access</title>
+  </head>
+
+  <body bgcolor="#ffffff">
+    <!-- ========================================================= -->
+    <h1>MFD : ifXTable data access</h1>
+    <p>
+      The net-snmp access routine returns a container of
+      <var>netsnmp_interface_entry</var> pointers that contain a snapshot
+      of the current data. However, as I mentioned before, this structure
+      does not contain all the data we need for ifXTable mib. For example,
+      the Linux kernel doesn't report the last time an interface was
+      changed. We have to periodically poll for the interfaces, and check
+      to see if each entry has changed. This polling has the added
+      benefit of always keeping our cache current.
+    </p>
+    <!-- ========================================================= -->
+    <h2>Initialization</h2>
+    <p>
+      When the agent starts up and initializes, the
+      <var>ifXTable_init_data</var> function will be called to allow us to
+      do any initilization for our data access functions. We don't have any,
+      so we'll just leave the function body empty.
+    </p><p>
+      The <var>cached-container</var> access method also has it's own
+      initilization routine, <var>ifXTable_container_init</var>. This
+      allow you to use a custom container or tweak the cache parameters.
+      We'll cover both of these more advanced topic in a later tutorial.
+      For now, we'll leave the function body alone, using the default
+      container and default cache parameters.
+    </p>
+    <!-- ========================================================= -->
+    <h2>Loading the cache</h2>
+    <p>
+      
+    </p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifXTable_cache_load(netsnmp_container * container)
+{<font color=blue>
+    netsnmp_container * ifcontainer;</font>
+    ifXTable_rowreq_ctx *rowreq_ctx;
+
+    DEBUGMSGTL(("verbose:ifXTable_cache_load", "called\n"));
+
+    /*
+     * TODO: update container
+     *
+     * loop over your data, allocate, set index, insert into the container
+     */<font color=blue>
+    /*
+     * get a container of netsnmp_interface_entry pointers from
+     * the data access routine.
+     */
+    ifcontainer =
+        netsnmp_access_interface_container_load(NULL,
+                                                NETSNMP_ACCESS_INTERFACE_INIT_NOFLAGS);
+
+    /*
+     * netsnmp_containers don't have efficient iterators yet, so use the
+     * foreach macro to get a callback for each interface.
+     */
+    CONTAINER_FOR_EACH(ifcontainer,
+                       (netsnmp_container_obj_func*)_check_interface_entry_for_updates,
+                       container);
+
+    /*
+     * free the container. we've either claimed each ifentry, or released it,
+     * so the dal function doesn't need to clear the container.
+     */
+    netsnmp_access_interface_container_free(ifcontainer,
+                                            NETSNMP_ACCESS_INTERFACE_FREE_DONT_CLEAR );
+              </font>
+    return MFD_SUCCESS;
+}
+    while (1) {
+        /*
+         * TODO: check for end of data
+         *
+         * bail out if there is no more data
+         */
+        if (ifXTable_OUT_OF_DATA())
+            break;
+
+        /*
+         * allocate an row context and set the index(es)
+         */
+        rowreq_ctx = ifXTable_allocate_rowreq_ctx(NULL);
+        if (MFD_SUCCESS != ifXTable_indexes_set(rowreq_ctx, ifIndex)) {
+            snmp_log(LOG_ERR, "error setting index while loading "
+                     "ifXTable cache.\n");
+            ifXTable_release_rowreq_ctx(rowreq_ctx);
+            continue;
+        }
+
+        /*
+         * TODO: populate data context
+         */
+        /*
+         * TRANSIENT or semi-TRANSIENT data:
+         * can copy data in row_prep or here, depending on when you
+         * want to take the hit. Either copy the data now, or save
+         * any info needed and do it in row_prep.
+         */
+
+        /*
+         * insert into table container
+         */
+        CONTAINER_INSERT(container, rowreq_ctx);
+    }
+
+    return MFD_SUCCESS;
+            </pre></td></tr>
+    </table>
+    <!-- ========================================================= -->
+    <h2></h2>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+              <font color=blue>
+              </font>
+            </pre></td></tr>
+    </table>
+    <!-- ========================================================= -->
+    <font size=+1>
+      <a href="data_get.html">Next: get data</a>
+      <a href="structures.html">Back: structures</a> |
+      <a href="../index.html">Up: IF-MIB Tutorials</a>
+    </font>
+    <hr>
+    rstory at freesnmp dot com<br>
+Version $Revision$
+<!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
+<!-- hhmts start -->
+Last modified: Tue May  4 12:08:26 EDT 2004
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+  </body>
+</html>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,165 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>strtol.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * Copyright (c) 1990 The Regents of the University of California.</span>
+00003 <span class="comment"> * All rights reserved.</span>
+00004 <span class="comment"> *</span>
+00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+00006 <span class="comment"> * modification, are permitted provided that the following conditions</span>
+00007 <span class="comment"> * are met:</span>
+00008 <span class="comment"> * 1. Redistributions of source code must retain the above copyright</span>
+00009 <span class="comment"> *        notice, this list of conditions and the following disclaimer.</span>
+00010 <span class="comment"> * 2. Redistributions in binary form must reproduce the above copyright</span>
+00011 <span class="comment"> *        notice, this list of conditions and the following disclaimer in the</span>
+00012 <span class="comment"> *        documentation and/or other materials provided with the distribution.</span>
+00013 <span class="comment"> * 3. All advertising materials mentioning features or use of this software</span>
+00014 <span class="comment"> *        must display the following acknowledgement:</span>
+00015 <span class="comment"> *              This product includes software developed by the University of</span>
+00016 <span class="comment"> *              California, Berkeley and its contributors.</span>
+00017 <span class="comment"> * 4. Neither the name of the University nor the names of its contributors</span>
+00018 <span class="comment"> *        may be used to endorse or promote products derived from this software</span>
+00019 <span class="comment"> *        without specific prior written permission.</span>
+00020 <span class="comment"> *</span>
+00021 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND</span>
+00022 <span class="comment"> * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span>
+00023 <span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span>
+00024 <span class="comment"> * ARE DISCLAIMED.      IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE</span>
+00025 <span class="comment"> * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL</span>
+00026 <span class="comment"> * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS</span>
+00027 <span class="comment"> * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)</span>
+00028 <span class="comment"> * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT</span>
+00029 <span class="comment"> * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY</span>
+00030 <span class="comment"> * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF</span>
+00031 <span class="comment"> * SUCH DAMAGE.</span>
+00032 <span class="comment"> */</span>
+00033 
+00034 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00035 
+00036 <span class="preprocessor">#if defined(LIBC_SCCS) &amp;&amp; !defined(lint)</span>
+00037 <span class="keyword">static</span> <span class="keywordtype">char</span>     sccsid[] = <span class=
+"stringliteral">"@(#)strtol.c    5.4 (Berkeley) 2/23/91"</span>;
+00038 <span class="preprocessor">#endif                          </span><span class="comment">/* LIBC_SCCS and not lint */</span>
+00039 
+00040 <span class="preprocessor">#if !HAVE_STRTOL</span>
+00041 
+00042 <span class="preprocessor">#if HAVE_LIMITS_H</span>
+00043 <span class="preprocessor">#include &lt;limits.h&gt;</span>
+00044 <span class="preprocessor">#endif</span>
+00045 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+00046 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+00047 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00048 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00049 <span class="preprocessor">#endif</span>
+00050 
+00051 <span class="comment">/*</span>
+00052 <span class="comment"> * Convert a string to a long integer.</span>
+00053 <span class="comment"> *</span>
+00054 <span class="comment"> * Ignores `locale' stuff.  Assumes that the upper and lower case</span>
+00055 <span class="comment"> * alphabets and digits are each contiguous.</span>
+00056 <span class="comment"> */</span>
+00057 <span class="keywordtype">long</span>
+00058 strtol(<span class="keyword">const</span> <span class="keywordtype">char</span> *nptr, <span class=
+"keywordtype">char</span> **endptr, <span class="keywordtype">int</span> base)
+00059 {
+00060     <span class="keyword">const</span> <span class="keywordtype">char</span>     *s = nptr;
+00061     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   acc;
+00062     <span class="keywordtype">int</span>             c;
+00063     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   cutoff;
+00064     <span class="keywordtype">int</span>             neg = 0, any, cutlim;
+00065 
+00066     <span class="comment">/*</span>
+00067 <span class="comment">     * Skip white space and pick up leading +/- sign if any. If base is 0,</span>
+00068 <span class="comment">     * allow 0x for hex and 0 for octal, else assume decimal; if base is</span>
+00069 <span class="comment">     * already 16, allow 0x.</span>
+00070 <span class="comment">     */</span>
+00071     <span class="keywordflow">do</span> {
+00072         c = *s++;
+00073     } <span class="keywordflow">while</span> (isspace(c));
+00074     <span class="keywordflow">if</span> (c == <span class="charliteral">'-'</span>) {
+00075         neg = 1;
+00076         c = *s++;
+00077     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (c == <span class="charliteral">'+'</span>)
+00078         c = *s++;
+00079     <span class="keywordflow">if</span> ((base == 0 || base == 16) &amp;&amp; c == <span class=
+"charliteral">'0'</span> &amp;&amp; (*s == <span class="charliteral">'x'</span> || *s == <span class="charliteral">'X'</span>)) {
+00080         c = s[1];
+00081         s += 2;
+00082         base = 16;
+00083     }
+00084     <span class="keywordflow">if</span> (base == 0)
+00085         base = c == <span class="charliteral">'0'</span> ? 8 : 10;
+00086 
+00087     <span class="comment">/*</span>
+00088 <span class="comment">     * Compute the cutoff value between legal numbers and illegal numbers.</span>
+00089 <span class="comment">     * That is the largest legal value, divided by the base.  An input</span>
+00090 <span class="comment">     * number that is greater than this value, if followed by a legal</span>
+00091 <span class="comment">     * input character, is too big.  One that is equal to this value may</span>
+00092 <span class="comment">     * be valid or not; the limit between valid and invalid numbers is</span>
+00093 <span class="comment">     * then based on the last digit.  For instance, if the range for longs</span>
+00094 <span class="comment">     * is [-2147483648..2147483647] and the input base is 10, cutoff will</span>
+00095 <span class="comment">     * be set to 214748364 and cutlim to either 7 (neg==0) or 8 (neg==1),</span>
+00096 <span class="comment">     * meaning that if we have accumulated a value &gt; 214748364, or equal</span>
+00097 <span class="comment">     * but the next digit is &gt; 7 (or 8), the number is too big, and we</span>
+00098 <span class="comment">     * will return a range error.</span>
+00099 <span class="comment">     *</span>
+00100 <span class="comment">     * Set any if any `digits' consumed; make it negative to indicate</span>
+00101 <span class="comment">     * overflow.</span>
+00102 <span class="comment">     */</span>
+00103     cutoff = neg ? -(<span class="keywordtype">unsigned</span> long) LONG_MIN : LONG_MAX;
+00104     cutlim = cutoff % (<span class="keywordtype">unsigned</span> long) base;
+00105     cutoff /= (<span class="keywordtype">unsigned</span> long) base;
+00106     <span class="keywordflow">for</span> (acc = 0, any = 0;; c = *s++) {
+00107         <span class="keywordflow">if</span> (isdigit(c))
+00108             c -= <span class="charliteral">'0'</span>;
+00109         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (isalpha(c))
+00110             c -= isupper(c) ? <span class="charliteral">'A'</span> - 10 : <span class="charliteral">'a'</span> - 10;
+00111         <span class="keywordflow">else</span>
+00112             <span class="keywordflow">break</span>;
+00113         <span class="keywordflow">if</span> (c &gt;= base)
+00114             <span class="keywordflow">break</span>;
+00115         <span class="keywordflow">if</span> (any &lt; 0 || acc &gt; cutoff || acc == cutoff &amp;&amp; c &gt; cutlim)
+00116             any = -1;
+00117         <span class="keywordflow">else</span> {
+00118             any = 1;
+00119             acc *= base;
+00120             acc += c;
+00121         }
+00122     }
+00123     <span class="keywordflow">if</span> (any &lt; 0) {
+00124         acc = neg ? LONG_MIN : LONG_MAX;
+00125         errno = ERANGE;
+00126     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (neg)
+00127         acc = -acc;
+00128     <span class="keywordflow">if</span> (endptr != 0)
+00129         *endptr = any ? s - 1 : (<span class="keywordtype">char</span> *) nptr;
+00130     <span class="keywordflow">return</span> (acc);
+00131 }
+00132 
+00133 <span class="preprocessor">#endif                          </span><span class="comment">/* !HAVE_STRTOL */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:02 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

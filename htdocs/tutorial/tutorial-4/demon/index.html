@@ -1,0 +1,68 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <!-- ========================================================= -->
+    <h1>Net-SNMP Tutorial -- demons</h1>
+    <p>
+      Net-SNMP provides two server applications, or demons (aka daemons).
+      These servers usually run in the background on a machine, listening
+      for incoming packets and, if necessary, responding to them.
+    </p>
+    <!-- ========================================================= -->
+    <h2>Net-SNMP Agent: snmpd</h2>
+    <p>
+      The first daemon is <b>snmpd</b>, which is a
+      <a href="../../snmp/terms.html#snmp">SNMP</a> agent. <i>snmpd</i>
+      listens for SNMP requests. A typical SNMP agent allows a client to
+      query information about the device running the SNMP agent. Some
+      devices also allow configuration to be set via SNMP.
+    </p><p>
+      Depending on configuration, <i>snmpd</i> may also act as an
+      <a href="../../snmp/terms.html#AgentX">AgentX</a> or
+      <a href="../../snmp/terms.html#SMUX">SMUX</a> master agent. If your
+      situation warrants it, <i>snmpd</i> can even act as a client to
+      an AgentX master agent.
+    </p><p>
+      The Net-SNMP agent can be built to monitor things such as
+    <ul>
+      <li>network traffic
+      <li>disk space
+      <li>disk IO
+      <li>CPU usage
+      <li> ... and more
+    </ul>
+    (Note: not all statistic are available on all platforms)
+    </p>
+    <!-- ========================================================= -->
+    <h2>Net-SNMP Trap Receiver: snmptrapd</h2>
+    <p>
+      The second daemon is <b>snmptrapd</b>, which is a SNMP
+      <a href="../../snmp/terms.html#notification">notification</a> receiver.
+      <i>snmptrapd</i> listens for incoming SNMP notifications
+      (<a href="../../snmp/terms.html#trap">traps</a> and
+      <a href="../../snmp/terms.html#informs">informs</a>). When a notification
+      is received, <i>snmptrapd</i> can be configured to
+    <ul>
+      <li>log the notification
+      <li>forward the notification to another notification receiver
+      <li>send an email message
+      <li>run a script
+      <li>any combination of the above
+    </ul>
+    </p>
+    <!-- ========================================================= -->
+    <font size=+1>
+      <a href="snmpd.html">Next: Configuring snmpd</a> |
+      <a href="snmptrapd.html">Skip to: Configuring snmptrapd</a> |
+      <a href="../..">Back to Top</a>
+    </font>
+    <hr>
+    rstory at freesnmp dot com<br>
+<!-- Created: Sun Aug 29 17:35:46 EDT 2004 -->
+<!-- hhmts start -->
+Last modified: Sun Aug 29 22:39:30 EDT 2004
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

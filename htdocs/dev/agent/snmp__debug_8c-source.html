@@ -1,0 +1,564 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>snmp_debug.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00002 
+00003 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00004 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00005 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00006 <span class="preprocessor">#endif</span>
+00007 <span class="preprocessor">#if HAVE_STRING_H</span>
+00008 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00009 <span class="preprocessor">#else</span>
+00010 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00011 <span class="preprocessor">#endif</span>
+00012 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00013 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00014 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00015 <span class="preprocessor">#endif</span>
+00016 <span class="preprocessor">#if HAVE_STDARG_H</span>
+00017 <span class="preprocessor">#include &lt;stdarg.h&gt;</span>
+00018 <span class="preprocessor">#else</span>
+00019 <span class="preprocessor">#include &lt;varargs.h&gt;</span>
+00020 <span class="preprocessor">#endif</span>
+00021 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00022 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00023 <span class="preprocessor">#endif</span>
+00024 
+00025 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00026 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00027 <span class="preprocessor">#endif</span>
+00028 
+00029 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00030 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00031 <span class="preprocessor">#include &lt;net-snmp/library/snmp_debug.h&gt;</span>        <span class=
+"comment">/* For this file's "internal" definitions */</span>
+00032 <span class="preprocessor">#include &lt;net-snmp/config_api.h&gt;</span>
+00033 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00034 
+00035 <span class="preprocessor">#include &lt;net-snmp/library/mib.h&gt;</span>
+00036 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00037 
+00038 <span class="keyword">static</span> <span class="keywordtype">int</span>      dodebug = SNMP_ALWAYS_DEBUG;
+00039 <span class="keywordtype">int</span>             debug_num_tokens = 0;
+00040 <span class="keyword">static</span> <span class="keywordtype">int</span>      debug_print_everything = 0;
+00041 
+00042 netsnmp_token_descr dbg_tokens[MAX_DEBUG_TOKENS];
+00043 
+00044 <span class="comment">/*</span>
+00045 <span class="comment"> * indent debugging:  provide a space padded section to return an indent for </span>
+00046 <span class="comment"> */</span>
+00047 <span class="keyword">static</span> <span class="keywordtype">int</span>      debugindent = 0;
+00048 <span class="preprocessor">#define INDENTMAX 80</span>
+00049 <span class="keyword">static</span> <span class="keywordtype">char</span>     debugindentchars[] =
+00050     <span class="stringliteral">"                                                                                "</span>;
+00051 
+00052 <span class="comment">/*</span>
+00053 <span class="comment"> * Prototype definitions </span>
+00054 <span class="comment"> */</span>
+00055 <span class="keywordtype">void</span>            debug_config_register_tokens(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *configtoken,
+00056                                              <span class="keywordtype">char</span> *tokens);
+00057 <span class="keywordtype">void</span>            debug_config_turn_on_debugging(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *configtoken,
+00058                                                <span class="keywordtype">char</span> *line);
+00059 
+00060 <span class="keywordtype">char</span>           *
+00061 debug_indent(<span class="keywordtype">void</span>)
+00062 {
+00063     <span class="keywordflow">return</span> debugindentchars;
+00064 }
+00065 
+00066 <span class="keywordtype">void</span>
+00067 debug_indent_add(<span class="keywordtype">int</span> amount)
+00068 {
+00069     <span class="keywordflow">if</span> (debugindent + amount &gt;= 0 &amp;&amp; debugindent + amount &lt; 80) {
+00070         debugindentchars[debugindent] = <span class="charliteral">' '</span>;
+00071         debugindent += amount;
+00072         debugindentchars[debugindent] = <span class="charliteral">'\0'</span>;
+00073     }
+00074 }
+00075 
+00076 <span class="keywordtype">void</span>
+00077 debug_config_register_tokens(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *configtoken, <span class="keywordtype">char</span> *tokens)
+00078 {
+00079     debug_register_tokens(tokens);
+00080 }
+00081 
+00082 <span class="keywordtype">void</span>
+00083 debug_config_turn_on_debugging(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *configtoken, <span class="keywordtype">char</span> *line)
+00084 {
+00085     snmp_set_do_debugging(atoi(line));
+00086 }
+00087 
+00088 <span class="keywordtype">void</span>
+00089 snmp_debug_init(<span class="keywordtype">void</span>)
+00090 {
+00091     debugindentchars[0] = <span class="charliteral">'\0'</span>; <span class=
+"comment">/* zero out the debugging indent array. */</span>
+00092     <span class="comment">/*</span>
+00093 <span class="comment">     * Hmmm....</span>
+00094 <span class="comment">     *   this "init" routine seems to be called *after* processing</span>
+00095 <span class="comment">     *   the command line options.   So we can't clear the debug</span>
+00096 <span class="comment">     *   token array here, and will just have to rely on it being</span>
+00097 <span class="comment">     *   initialised to 0 automatically.</span>
+00098 <span class="comment">     * So much for trying to program responsibly :-)</span>
+00099 <span class="comment">     */</span>
+00100 <span class="comment">/*  memset(dbg_tokens, 0, MAX_DEBUG_TOKENS*sizeof(struct token_dscr));  */</span>
+00101     register_prenetsnmp_mib_handler(<span class="stringliteral">"snmp"</span>, <span class=
+"stringliteral">"doDebugging"</span>,
+00102                                     debug_config_turn_on_debugging, NULL,
+00103                                     <span class="stringliteral">"(1|0)"</span>);
+00104     register_prenetsnmp_mib_handler(<span class="stringliteral">"snmp"</span>, <span class=
+"stringliteral">"debugTokens"</span>,
+00105                                     debug_config_register_tokens, NULL,
+00106                                     <span class="stringliteral">"token[,token...]"</span>);
+00107 }
+00108 
+00109 <span class="keywordtype">void</span>
+00110 debug_register_tokens(<span class="keywordtype">char</span> *tokens)
+00111 {
+00112     <span class="keywordtype">char</span>           *newp, *cp;
+00113     <span class="keywordtype">char</span>           *st;
+00114 
+00115     <span class="keywordflow">if</span> (tokens == 0 || *tokens == 0)
+00116         <span class="keywordflow">return</span>;
+00117 
+00118     newp = strdup(tokens);      <span class="comment">/* strtok_r messes it up */</span>
+00119     cp = strtok_r(newp, DEBUG_TOKEN_DELIMITER, &amp;st);
+00120     <span class="keywordflow">while</span> (cp) {
+00121         <span class="keywordflow">if</span> (strlen(cp) &lt; MAX_DEBUG_TOKEN_LEN) {
+00122             <span class="keywordflow">if</span> (strcasecmp(cp, DEBUG_ALWAYS_TOKEN) == 0) {
+00123                 debug_print_everything = 1;
+00124             } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (debug_num_tokens &lt; MAX_DEBUG_TOKENS) {
+00125                 dbg_tokens[debug_num_tokens].token_name = strdup(cp);
+00126                 dbg_tokens[debug_num_tokens++].enabled  = 1;
+00127             } <span class="keywordflow">else</span> {
+00128                 <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_NOTICE, <span class=
+"stringliteral">"Unable to register debug token %s"</span>, cp);
+00129             }
+00130         } <span class="keywordflow">else</span> {
+00131             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_NOTICE, <span class=
+"stringliteral">"Debug token %s over length"</span>, cp);
+00132         }
+00133         cp = strtok_r(NULL, DEBUG_TOKEN_DELIMITER, &amp;st);
+00134     }
+00135     free(newp);
+00136 }
+00137 
+00138 
+00139 <span class="comment">/* </span>
+00140 <span class="comment"> * Print all registered tokens along with their current status</span>
+00141 <span class="comment"> */</span>
+00142 <span class="keywordtype">void</span> 
+00143 debug_print_registered_tokens(<span class="keywordtype">void</span>) {
+00144     <span class="keywordtype">int</span> i;
+00145 
+00146     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_INFO, <span class=
+"stringliteral">"%d tokens registered :\n"</span>, debug_num_tokens);
+00147     <span class="keywordflow">for</span> (i=0; i&lt;debug_num_tokens; i++) {
+00148         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>( LOG_INFO, <span class=
+"stringliteral">"%d) %s : %d\n"</span>, 
+00149                  i, dbg_tokens [i].token_name, dbg_tokens [i].enabled);
+00150     }
+00151 }
+00152 
+00153 
+00154 <span class="comment">/*</span>
+00155 <span class="comment"> * Enable logs on a given token</span>
+00156 <span class="comment"> */</span>
+00157 <span class="keywordtype">int</span>
+00158 debug_enable_token_logs (<span class="keyword">const</span> <span class="keywordtype">char</span> *token) {
+00159     <span class="keywordtype">int</span> i;
+00160 
+00161     <span class="comment">/* debugging flag is on or off */</span>
+00162     <span class="keywordflow">if</span> (!dodebug)
+00163         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00164 
+00165     <span class="keywordflow">if</span> (debug_num_tokens == 0 || debug_print_everything) {
+00166         <span class="comment">/* no tokens specified, print everything */</span>
+00167         <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00168     } <span class="keywordflow">else</span> {
+00169         <span class="keywordflow">for</span>(i=0; i &lt; debug_num_tokens; i++) {
+00170             <span class="keywordflow">if</span> (dbg_tokens[i].token_name &amp;&amp;
+00171                 strncmp(dbg_tokens[i].token_name, token, 
+00172                         strlen(dbg_tokens[i].token_name)) == 0) {
+00173                 dbg_tokens[i].enabled = 1;
+00174                 <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00175             }
+00176         }
+00177     }
+00178     <span class="keywordflow">return</span> SNMPERR_GENERR;
+00179 }
+00180 
+00181 <span class="comment">/*</span>
+00182 <span class="comment"> * Diable logs on a given token</span>
+00183 <span class="comment"> */</span>
+00184 <span class="keywordtype">int</span>
+00185 debug_disable_token_logs (<span class="keyword">const</span> <span class="keywordtype">char</span> *token) {
+00186     <span class="keywordtype">int</span> i;
+00187 
+00188     <span class="comment">/* debugging flag is on or off */</span>
+00189     <span class="keywordflow">if</span> (!dodebug)
+00190         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00191 
+00192     <span class="keywordflow">if</span> (debug_num_tokens == 0 || debug_print_everything) {
+00193         <span class="comment">/* no tokens specified, print everything */</span>
+00194         <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00195     } <span class="keywordflow">else</span> {
+00196         <span class="keywordflow">for</span>(i=0; i &lt; debug_num_tokens; i++) {
+00197             <span class="keywordflow">if</span> (strncmp(dbg_tokens[i].token_name, token, 
+00198                   strlen(dbg_tokens[i].token_name)) == 0) {
+00199                 dbg_tokens[i].enabled = 0;
+00200                 <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00201             }
+00202         }
+00203     }
+00204     <span class="keywordflow">return</span> SNMPERR_GENERR;
+00205 }
+00206 
+00207 
+00208 <span class="comment">/*</span>
+00209 <span class="comment"> * debug_is_token_registered(char *TOKEN):</span>
+00210 <span class="comment"> * </span>
+00211 <span class="comment"> * returns SNMPERR_SUCCESS</span>
+00212 <span class="comment"> * or SNMPERR_GENERR</span>
+00213 <span class="comment"> * </span>
+00214 <span class="comment"> * if TOKEN has been registered and debugging support is turned on.</span>
+00215 <span class="comment"> */</span>
+00216 <span class="keywordtype">int</span>
+00217 debug_is_token_registered(<span class="keyword">const</span> <span class="keywordtype">char</span> *token)
+00218 {
+00219     <span class="keywordtype">int</span>             i;
+00220 
+00221     <span class="comment">/*</span>
+00222 <span class="comment">     * debugging flag is on or off </span>
+00223 <span class="comment">     */</span>
+00224     <span class="keywordflow">if</span> (!dodebug)
+00225         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00226 
+00227     <span class="keywordflow">if</span> (debug_num_tokens == 0 || debug_print_everything) {
+00228         <span class="comment">/*</span>
+00229 <span class="comment">         * no tokens specified, print everything </span>
+00230 <span class="comment">         */</span>
+00231         <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00232     } <span class="keywordflow">else</span> {
+00233         <span class="keywordflow">for</span> (i = 0; i &lt; debug_num_tokens; i++) {
+00234             <span class="keywordflow">if</span> (dbg_tokens[i].token_name &amp;&amp;
+00235                 strncmp(dbg_tokens[i].token_name, token,
+00236                         strlen(dbg_tokens[i].token_name)) == 0) {
+00237                 <span class="keywordflow">if</span> (dbg_tokens[i].enabled)
+00238                     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00239                 <span class="keywordflow">else</span>
+00240                     <span class="keywordflow">return</span> SNMPERR_GENERR;
+00241             }
+00242         }
+00243     }
+00244     <span class="keywordflow">return</span> SNMPERR_GENERR;
+00245 }
+00246 
+00247 <span class="keywordtype">void</span>
+00248 <span class="preprocessor">#if HAVE_STDARG_H</span>
+00249 debugmsg(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *format, ...)
+00250 #<span class="keywordflow">else</span>
+00251 debugmsg(va_alist)
+00252      va_dcl
+00253 #endif
+00254 {
+00255     va_list         debugargs;
+00256 
+00257 <span class="preprocessor">#if HAVE_STDARG_H</span>
+00258     va_start(debugargs, format);
+00259 <span class="preprocessor">#else</span>
+00260     <span class="keyword">const</span> <span class="keywordtype">char</span>     *format;
+00261     <span class="keyword">const</span> <span class="keywordtype">char</span>     *token;
+00262 
+00263     va_start(debugargs);
+00264     token = va_arg(debugargs, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00265     format = va_arg(debugargs, <span class="keyword">const</span> <span class="keywordtype">char</span> *);   <span class=
+"comment">/* ??? */</span>
+00266 <span class="preprocessor">#endif</span>
+00267 
+00268     <span class="keywordflow">if</span> (debug_is_token_registered(token) == SNMPERR_SUCCESS) {
+00269         snmp_vlog(LOG_DEBUG, format, debugargs);
+00270     }
+00271     va_end(debugargs);
+00272 }
+00273 
+00274 <span class="keywordtype">void</span>
+00275 debugmsg_oid(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keyword">const</span> oid * theoid, size_t len)
+00276 {
+00277     u_char         *buf = NULL;
+00278     size_t          buf_len = 0, out_len = 0;
+00279 
+00280     <span class="keywordflow">if</span> (sprint_realloc_objid(&amp;buf, &amp;buf_len, &amp;out_len, 1, theoid, len)) {
+00281         <span class="keywordflow">if</span> (buf != NULL) {
+00282             debugmsg(token, <span class="stringliteral">"%s"</span>, buf);
+00283         }
+00284     } <span class="keywordflow">else</span> {
+00285         <span class="keywordflow">if</span> (buf != NULL) {
+00286             debugmsg(token, <span class="stringliteral">"%s [TRUNCATED]"</span>, buf);
+00287         }
+00288     }
+00289 
+00290     <span class="keywordflow">if</span> (buf != NULL) {
+00291         free(buf);
+00292     }
+00293 }
+00294 
+00295 <span class="keywordtype">void</span>
+00296 debugmsg_suboid(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keyword">const</span> oid * theoid, size_t len)
+00297 {
+00298     u_char         *buf = NULL;
+00299     size_t          buf_len = 0, out_len = 0;
+00300     <span class="keywordtype">int</span>             buf_overflow = 0;
+00301 
+00302     netsnmp_sprint_realloc_objid(&amp;buf, &amp;buf_len, &amp;out_len, 1,
+00303                                  &amp;buf_overflow, theoid, len);
+00304     <span class="keywordflow">if</span>(buf_overflow) {
+00305         <span class="keywordflow">if</span> (buf != NULL) {
+00306             debugmsg(token, <span class="stringliteral">"%s [TRUNCATED]"</span>, buf);
+00307         }
+00308     } <span class="keywordflow">else</span> {
+00309         <span class="keywordflow">if</span> (buf != NULL) {
+00310             debugmsg(token, <span class="stringliteral">"%s"</span>, buf);
+00311         }
+00312     }
+00313 
+00314     <span class="keywordflow">if</span> (buf != NULL) {
+00315         free(buf);
+00316     }
+00317 }
+00318 
+00319 <span class="keywordtype">void</span>
+00320 debugmsg_var(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * var)
+00321 {
+00322     u_char         *buf = NULL;
+00323     size_t          buf_len = 0, out_len = 0;
+00324 
+00325     <span class="keywordflow">if</span> (var == NULL || token == NULL) {
+00326         <span class="keywordflow">return</span>;
+00327     }
+00328 
+00329     <span class="keywordflow">if</span> (sprint_realloc_variable(&amp;buf, &amp;buf_len, &amp;out_len, 1,
+00330                                 var-&gt;<a class="code" href="structvariable__list.html#o1">name</a>, var-&gt;<a class=
+"code" href="structvariable__list.html#o2">name_length</a>, var)) {
+00331         <span class="keywordflow">if</span> (buf != NULL) {
+00332             debugmsg(token, <span class="stringliteral">"%s"</span>, buf);
+00333         }
+00334     } <span class="keywordflow">else</span> {
+00335         <span class="keywordflow">if</span> (buf != NULL) {
+00336             debugmsg(token, <span class="stringliteral">"%s [TRUNCATED]"</span>, buf);
+00337         }
+00338     }
+00339 
+00340     <span class="keywordflow">if</span> (buf != NULL) {
+00341         free(buf);
+00342     }
+00343 }
+00344 
+00345 <span class="keywordtype">void</span>
+00346 debugmsg_oidrange(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keyword">const</span> oid * theoid, size_t len,
+00347                   size_t var_subid, oid range_ubound)
+00348 {
+00349     u_char         *buf = NULL;
+00350     size_t          buf_len = 0, out_len = 0, i = 0;
+00351     <span class="keywordtype">int</span>             rc = 0;
+00352 
+00353     <span class="keywordflow">if</span> (var_subid == 0) {
+00354         rc = sprint_realloc_objid(&amp;buf, &amp;buf_len, &amp;out_len, 1, theoid,
+00355                                   len);
+00356     } <span class="keywordflow">else</span> {
+00357         <span class="keywordtype">char</span>            tmpbuf[128];
+00358         <span class="comment">/* XXX - ? check for 0 == var_subid -1 ? */</span>
+00359         rc = sprint_realloc_objid(&amp;buf, &amp;buf_len, &amp;out_len, 1, theoid,
+00360                                   var_subid-1);  <span class="comment">/* Adjust for C's 0-based array indexing */</span>
+00361         <span class="keywordflow">if</span> (rc) {
+00362             sprintf(tmpbuf, <span class="stringliteral">".%lu--%lu"</span>, theoid[var_subid - 1],
+00363                     range_ubound);
+00364             rc = snmp_strcat(&amp;buf, &amp;buf_len, &amp;out_len, 1, tmpbuf);
+00365             <span class="keywordflow">if</span> (rc) {
+00366                 <span class="keywordflow">for</span> (i = var_subid; i &lt; len; i++) {
+00367                     sprintf(tmpbuf, <span class="stringliteral">".%lu"</span>, theoid[i]);
+00368                     <span class="keywordflow">if</span> (!snmp_strcat(&amp;buf, &amp;buf_len, &amp;out_len, 1, tmpbuf)) {
+00369                         <span class="keywordflow">break</span>;
+00370                     }
+00371                 }
+00372             }
+00373         }
+00374     }
+00375 
+00376 
+00377     <span class="keywordflow">if</span> (buf != NULL) {
+00378         debugmsg(token, <span class="stringliteral">"%s%s"</span>, buf, rc ? <span class=
+"stringliteral">""</span> : <span class="stringliteral">" [TRUNCATED]"</span>);
+00379         free(buf);
+00380     }
+00381 }
+00382 
+00383 <span class="keywordtype">void</span>
+00384 debugmsg_hex(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, u_char * thedata, size_t len)
+00385 {
+00386     u_char         *buf = NULL;
+00387     size_t          buf_len = 0, out_len = 0;
+00388 
+00389     <span class="keywordflow">if</span> (sprint_realloc_hexstring
+00390         (&amp;buf, &amp;buf_len, &amp;out_len, 1, thedata, len)) {
+00391         <span class="keywordflow">if</span> (buf != NULL) {
+00392             debugmsg(token, <span class="stringliteral">"%s"</span>, buf);
+00393         }
+00394     } <span class="keywordflow">else</span> {
+00395         <span class="keywordflow">if</span> (buf != NULL) {
+00396             debugmsg(token, <span class="stringliteral">"%s [TRUNCATED]"</span>, buf);
+00397         }
+00398     }
+00399 
+00400     <span class="keywordflow">if</span> (buf != NULL) {
+00401         free(buf);
+00402     }
+00403 }
+00404 
+00405 <span class="keywordtype">void</span>
+00406 debugmsg_hextli(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token, u_char * thedata, size_t len)
+00407 {
+00408     <span class="keywordtype">char</span>            buf[SPRINT_MAX_LEN], token2[SPRINT_MAX_LEN];
+00409     u_char         *b3 = NULL;
+00410     size_t          b3_len = 0, o3_len = 0;
+00411     <span class="keywordtype">int</span>             incr;
+00412     sprintf(token2, <span class="stringliteral">"dumpx_%s"</span>, token);
+00413 
+00414     <span class="comment">/*</span>
+00415 <span class="comment">     * XX tracing lines removed from this function DEBUGTRACE; </span>
+00416 <span class="comment">     */</span>
+00417     DEBUGIF(token2) {
+00418         <span class="keywordflow">for</span> (incr = 16; len &gt; 0; len -= incr, thedata += incr) {
+00419             <span class="keywordflow">if</span> ((int) len &lt; incr) {
+00420                 incr = len;
+00421             }
+00422             <span class="comment">/*</span>
+00423 <span class="comment">             * XXnext two lines were DEBUGPRINTINDENT(token);</span>
+00424 <span class="comment">             */</span>
+00425             sprintf(buf, <span class="stringliteral">"dumpx%s"</span>, token);
+00426             debugmsg(buf, <span class="stringliteral">"%s: %s"</span>, token2, debug_indent());
+00427             <span class="keywordflow">if</span> (sprint_realloc_hexstring
+00428                 (&amp;b3, &amp;b3_len, &amp;o3_len, 1, thedata, incr)) {
+00429                 <span class="keywordflow">if</span> (b3 != NULL) {
+00430                     debugmsg(token2, <span class="stringliteral">"%s"</span>, b3);
+00431                 }
+00432             } <span class="keywordflow">else</span> {
+00433                 <span class="keywordflow">if</span> (b3 != NULL) {
+00434                     debugmsg(token2, <span class="stringliteral">"%s [TRUNCATED]"</span>, b3);
+00435                 }
+00436             }
+00437             o3_len = 0;
+00438         }
+00439     }
+00440     <span class="keywordflow">if</span> (b3 != NULL) {
+00441         free(b3);
+00442     }
+00443 }
+00444 
+00445 <span class="keywordtype">void</span>
+00446 <span class="preprocessor">#if HAVE_STDARG_H</span>
+00447 debugmsgtoken(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *format, ...)
+00448 #<span class="keywordflow">else</span>
+00449 debugmsgtoken(va_alist)
+00450      va_dcl
+00451 #endif
+00452 {
+00453     va_list         debugargs;
+00454 
+00455 <span class="preprocessor">#if HAVE_STDARG_H</span>
+00456     va_start(debugargs, format);
+00457 <span class="preprocessor">#else</span>
+00458     <span class="keyword">const</span> <span class="keywordtype">char</span>     *token;
+00459 
+00460     va_start(debugargs);
+00461     token = va_arg(debugargs, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00462 <span class="preprocessor">#endif</span>
+00463 
+00464     debugmsg(token, <span class="stringliteral">"%s: "</span>, token);
+00465 
+00466     va_end(debugargs);
+00467 }
+00468 
+00469 <span class="keywordtype">void</span>
+00470 <span class="preprocessor">#if HAVE_STDARG_H</span>
+00471 debug_combo_nc(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *format, ...)
+00472 #<span class="keywordflow">else</span>
+00473 debugmsgtoken(va_alist)
+00474      va_dcl
+00475 #endif
+00476 {
+00477     va_list         debugargs;
+00478 
+00479 <span class="preprocessor">#if HAVE_STDARG_H</span>
+00480     va_start(debugargs, format);
+00481 <span class="preprocessor">#else</span>
+00482     <span class="keyword">const</span> <span class="keywordtype">char</span>     *format;
+00483     <span class="keyword">const</span> <span class="keywordtype">char</span>     *token;
+00484 
+00485     va_start(debugargs);
+00486     token = va_arg(debugargs, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00487     format = va_arg(debugargs, <span class="keyword">const</span> <span class="keywordtype">char</span> *);   <span class=
+"comment">/* ??? */</span>
+00488 <span class="preprocessor">#endif</span>
+00489 
+00490     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_DEBUG, <span class=
+"stringliteral">"%s: "</span>, token);
+00491     snmp_vlog(LOG_DEBUG, format, debugargs);
+00492 
+00493     va_end(debugargs);
+00494 }
+00495 
+00496 <span class="comment">/*</span>
+00497 <span class="comment"> * for speed, these shouldn't be in default_storage space </span>
+00498 <span class="comment"> */</span>
+00499 <span class="keywordtype">void</span>
+00500 snmp_set_do_debugging(<span class="keywordtype">int</span> val)
+00501 {
+00502     dodebug = val;
+00503 }
+00504 
+00505 <span class="keywordtype">int</span>
+00506 snmp_get_do_debugging(<span class="keywordtype">void</span>)
+00507 {
+00508     <span class="keywordflow">return</span> dodebug;
+00509 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:00 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,520 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML><BODY bgcolor="#ffffff" background="../ucd-snmp-bg3.gif"><PRE>
+
+<HTML><HEAD><TITLE>Manpage of MIB_API</TITLE>
+</HEAD><BODY>
+<H1>MIB_API</H1>
+Section: Net-SNMP (3)<BR>Updated: 06 Mar 2002<BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+init_mib, add_mibdir, init_mib_internals,
+add_module_replacement,
+read_module, read_mib, read_all_mibs,
+read_objid, read_module_node,
+get_module_node, read_objid
+snmp_set_mib_warnings, snmp_set_save_descriptions,
+shutdown_mib,
+print_mib,
+print_variable, fprint_variable, snprint_variable, sprint_realloc_variable,
+print_value, fprint_value, snprint_value, sprint_realloc_value,
+print_objid, fprint_objid, snprint_objid, sprint_realloc_objid,
+print_description, fprint_description - mib_api functions
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>#include &lt;<A HREF="file:/usr/include/net-snmp/mib_api.h">net-snmp/mib_api.h</A>&gt;</B>
+
+<P>
+
+<B>void init_mib(void);</B>
+
+<BR>
+
+<B>int add_mibdir(char *</B><I>dirname</I><B>);</B>
+
+<BR>
+
+<B>int add_module_replacement(char *</B><I>old_module</I><B>, char *</B><I>new_module</I><B>, char *</B><I>tag</I><B>, int </B><I>len</I><B>);</B>
+
+<BR>
+
+<B>void init_mib_internals(void);</B>
+
+<BR>
+
+<B>struct tree *read_module(char *</B><I>name</I><B>);</B>
+
+<BR>
+
+<B>struct tree *read_mib(char *</B><I>filename</I><B>);</B>
+
+<BR>
+
+<B>struct tree *read_all_mibs(void);</B>
+
+<P>
+
+<B>void shutdown_mib(void);</B>
+
+<P>
+
+<B>void print_mib(FILE *</B><I>fp</I><B>);</B>
+
+<P>
+
+<B>int read_objid(char *</B><I>input</I><B>, oid *</B><I>output</I><B>, int *</B><I>out_len</I><B>);</B>
+
+<BR>
+
+<B>int get_module_node(char *</B><I>name</I><B>, char *</B><I>module</I><B>, oid *</B><I>objid</I><B>, int *</B><I>objidlen</I><B>);</B>
+
+<P>
+
+<B>void print_variable(const oid *</B><I>objid</I><B>, size_t </B><I>objidlen</I><B>, struct variable_list *</B><I>variable</I><B>);</B>
+
+<BR>
+
+<B>void fprint_variable(FILE *</B><I>fp</I><B>, const oid *</B><I>objid</I><B>, size_t </B><I>objidlen</I><B>, struct variable_list *</B><I>variable</I><B>);</B>
+
+<BR>
+
+<B>int snprint_variable(char *</B><I>buf</I><B>, size_t </B><I>len</I><B>, const oid *</B><I>objid</I><B>, size_t </B><I>objidlen</I><B>, struct variable_list *</B><I>variable</I><B>);</B>
+
+<BR>
+
+<B>int sprint_realloc_variable(u_char **</B><I>buf</I><B>, size_t *</B><I>buf_len</I><B>, size_t *</B><I>out_len</I><B>, int </B><I>allow_realloc</I><B>, const oid *</B><I>objid</I><B>, size_t </B><I>objidlen</I><B>, struct variable_list *</B><I>variable</I><B>);</B>
+
+<P>
+
+<B>void print_value(oid *objid, size_t objidlen, struct variable_list *variable)</B>
+
+<BR>
+
+<B>void fprint_value(FILE *</B><I>fp</I><B>, const oid *</B><I>objid</I><B>, size_t </B><I>objidlen</I><B>, struct variable_list *</B><I>variable</I><B>);</B>
+
+<BR>
+
+<B>int snprint_value(char *</B><I>buf</I><B>, size_t </B><I>len</I><B>, const oid *</B><I>objid</I><B>, size_t </B><I>objidlen</I><B>, struct variable_list *</B><I>variable</I><B>);</B>
+
+<BR>
+
+<B>int sprint_realloc_value(u_char **</B><I>buf</I><B>, size_t *</B><I>buf_len</I><B>, size_t *</B><I>out_len</I><B>, int </B><I>allow_realloc</I><B>, const oid *</B><I>objid</I><B>, size_t </B><I>objidlen</I><B>, struct variable_list *</B><I>variable</I><B>);</B>
+
+<P>
+
+<B>void print_objid(const oid *</B><I>objid</I><B>, size_t </B><I>objidlen</I><B>);</B>
+
+<BR>
+
+<B>void fprint_objid(FILE *</B><I>fp</I><B>, const oid *</B><I>objid</I><B>, size_t </B><I>objidlen</I><B>);</B>
+
+<BR>
+
+<B>int snprint_objid(char *</B><I>buf</I><B>, size_t </B><I>len</I><B>, const oid *</B><I>objid</I><B>, size_t </B><I>objidlen</I><B>);</B>
+
+<BR>
+
+<B>int sprint_realloc_objid(u_char **</B><I>buf</I><B>, size_t *</B><I>buf_len</I><B>, size_t *</B><I>out_len</I><B>, int allow_realloc</B><I>, const oid *</I><B>objid</B><I>, size_t </I><B>objidlen</B><I>);</I>
+
+<P>
+
+<B>void print_description(const oid *</B><I>objid</I><B>, size_t </B><I>objidlen</I><B>);</B>
+
+<BR>
+
+<B>void fprint_description(FILE *</B><I>fp</I><B>, const oid *</B><I>objid</I><B>, size_t </B><I>objidlen</I><B>);</B>
+
+<P>
+
+<B>void snmp_set_mib_warnings(int </B><I>level</I><B>);</B>
+
+<BR>
+
+<B>void snmp_set_save_descriptions(int </B><I>save</I><B>);</B>
+
+<P>
+
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+The functions dealing with MIB modules fall into four groups.  Those
+dealing with initialisation and shutdown, those that read in and
+parse MIB files, those that search the MIB tree, and various output
+routines.
+<A NAME="lbAE">&nbsp;</A>
+<H3>Initialisation and Shutdown</H3>
+
+<B>init_mib</B>
+
+is a convenience function that handles all calls to
+<B>add_mibdir</B>, <B>read_module</B> and <B>read_mib</B>
+
+for standard applications.  It should be called before any other
+routine that manipulates or accesses the MIB tree.  This routine sets
+up various internal structures, as well as reading in the default MIB
+modules, as detailed below.
+<P>
+
+<B>add_mibdir</B>
+
+is used to define the range of directory locations which are searched
+for files containing MIB modules (one module per file).  By default,
+this will be set to the directory
+<I>/usr/local/share/mibs</I>
+
+but this can be overridden by setting the environment variable
+<I>MIBDIRS</I>
+
+to a (colon-separated) list of directories to search.
+Note that this does not actually load the MIB modules located
+in that directory, but is an initialisation step to make them available.
+This function returns a count of files found in the directory, or a -1
+if there is an error.  
+<P>
+
+<B>init_mib_internals</B>
+
+sets up the internal structures, preparatory to reading in MIB
+modules.  It should be called after all calls to
+<B>add_mibdir</B>,
+
+and before and calls to
+<B>read_module</B>.
+
+This is called automatically if
+<B>init_mib</B>
+
+is used.
+<P>
+
+<B>shutdown_mib</B>
+
+will clear the information that was gathered by 
+<B>read_module</B>, <B>add_mibdir</B> and <B>add_module_replacement</B>.
+
+It is strongly recommended that one does not invoke
+<B>shutdown_mib</B>
+
+while there are SNMP sessions being actively managed.
+<A NAME="lbAF">&nbsp;</A>
+<H3>Reading and Parsing MIBs</H3>
+
+<B>add_module_replacement</B>
+
+can be used to allow new MIB modules to obsolete older ones, without
+needing to amend the imports clauses of other modules.  It takes the
+names of the old and new modules, together with an indication of which
+portions of the old module are affected.
+<DL COMPACT><DT><DD>
+<TABLE>
+<TR VALIGN=top><TD><B>tag </B></TD><TD><B> len </B></TD><TD><B> load the new module when:</B><BR></TD></TR>
+<TR VALIGN=top><TD>NULL </TD><TD> 0 </TD><TD> always (the old module is a strict subset of the new)<BR></TD></TR>
+<TR VALIGN=top><TD>name </TD><TD> 0 </TD><TD> for the given tag only<BR></TD></TR>
+<TR VALIGN=top><TD>name </TD><TD> non-0 </TD><TD> for any identifier with this prefix<BR></TD></TR>
+</TABLE>
+
+</DL>
+
+It can also be used to handle errors in the module identifiers used
+in MIB import clauses (such as referring to
+<I>RFC1213</I>
+
+instead of
+<I>RFC1213-MIB</I>).
+
+<P>
+
+<B>read_module</B>
+
+locates and parses the module specified, together with any modules
+that it imports from, and adds the contents of these modules to the
+active MIB tree.  Note that
+<B>add_mibdir</B>
+
+must first be called to add the directory containing the file with the
+module definition, if this is not in the standard path.
+<BR>
+
+By default, the following MIB modules will be loaded:  IP-MIB, IF-MIB,
+TCP-MIB, UDP-MIB, SNMPv2-MIB, RFC1213-MIB, UCD-SNMP-MIB.
+This can be overridden by setting the environment variable
+<I>MIBS</I>
+
+to a (colon-separated) list of modules to load.
+If this variable starts with a plus character, then the specified modules
+are added to the default list.  Otherwise only those modules listed are
+loaded (together with any others they import from).
+If
+<I>MIBS</I>
+
+is set to
+<I>ALL</I>,
+
+<B>read_all_mibs</B>
+
+is called to load all the MIB files found in all the specified
+<I>MIBDIRS</I>.
+
+<P>
+
+<B>read_mib</B>
+
+parses the file specified, together with any modules that it imports
+from, and adds the contents to the active MIB tree.  Such a file can
+contain more then one module, though care must be taken that any
+imports occur earlier in the file, if they are not to be read from the
+installed modules.  Note that the file specified does not need to be
+in any of the directories initialised by
+<B>add_mibdir</B>
+
+(or the default setup), though any imported modules do.
+<BR>
+
+The environment variable
+<I>MIBFILES</I>
+
+can be set to a (colon-separated) list of files containing MIBs to load.
+<P>
+
+<B>read_objid</B>
+
+takes a string containing a textual version of an object identifier
+(in either numeric or descriptor form), and transforms this into the
+corresponding list of sub-identifiers.  This is returned in the
+<I>output</I>
+
+parameter, with the number of sub-identifiers returned via
+<I>out_len</I>.
+
+When called, 
+<I>out_len</I>
+
+must hold the maximum length of the
+<I>output</I>
+
+array.
+This function returns a value of 1 if it succeeds in parsing the string
+and 0 otherwise.
+<A NAME="lbAG">&nbsp;</A>
+<H3>Searching the MIB Tree</H3>
+
+<B>get_module_node</B>
+
+takes a descriptor and the name of a module, and returns the corresponding
+oid list, in the same way as
+<B>read_objid</B>
+
+above.
+<BR>
+
+If the module name is specified as &quot;ANY&quot;, then this routine will
+assume that the descriptor given is unique within the tree, and will
+return the matching entry.  If this assumption is invalid, then the
+behaviour as to which variable is returned is implementation
+dependent.
+<A NAME="lbAH">&nbsp;</A>
+<H3>Output</H3>
+
+<B>print_mib</B>
+
+will print out a representation of the currently active MIB tree to
+the specified FILE pointer.
+<P>
+
+<B>print_variable</B>
+
+will take an object identifier (as returned by
+<B>read_objid</B>
+
+or
+<B>get_module_node</B>)
+
+and an instance of such a variable, and prints to the standard output
+the textual form of the object identifier together with the value
+of the variable.
+<B>fprint_variable</B>
+
+does the same, but prints to the FILE pointer specified by the initial
+parameter.
+<BR>
+
+<B>snprint_variable</B>
+
+prints the same information into the buffer pointed to by
+<I>buf</I>
+
+which is of length
+<I>len</I>
+
+and returns either the number of characters printed, or -1 if the
+buffer was not large enough.  In the latter case,
+<I>buf</I>
+
+will typically contained a truncated version of the information (but
+this behaviour is not guaranteed).  This function replaces the
+obsolete function
+<B>sprint_variable</B>.
+
+<BR>
+
+<B>sprint_realloc_variable</B>
+
+is the low-level function used to implement all these functions.  It
+prints to a specified offset in a string buffer.  The
+<I>buf</I>
+
+parameter points to a pointer to that buffer;
+<I>buf_len</I>
+
+points to a variable holding the current size of that buffer, and
+<I>out_len</I>
+
+points to a variable holding the offset to which to print.
+<I>out_len</I>
+
+will be updated to hold the offset of the character following the last
+one added to the buffer.  If
+<I>allow_realloc</I>
+
+is 1, the buffer will be dynamically expanded, as necessary, to hold
+the output; the variables pointed to by
+<I>buf</I>
+
+and
+<I>buf_len</I>
+
+will be updated.  If
+<I>allow_realloc</I>
+
+is 0, the buffer will not be dynamically expanded.
+<B>sprint_realloc_variable</B>
+
+returns 0 if
+<I>allow_realloc</I>
+
+is 1 and an attempt to allocate memory to expand the buffer fails, or
+if
+<I>allow_realloc</I>
+
+is 0 and the output wouldn't fit in the buffer.  Otherwise it returns
+1.  When using this function you should be careful to call
+<B><A HREF="free.html">free</A></B>(3)
+
+on
+<I>*buf</I>
+
+when you have finished with it.
+<P>
+
+<B>print_value</B>,
+
+<B>fprint_value</B>,
+
+<B>snprint_value</B>
+
+and
+<B>sprint_realloc_value</B>
+
+do the same as the equivalent
+<B>print_variable</B>
+
+routines, but only displaying the value of the variable, without the
+corresponding object identifier.
+<P>
+
+<B>print_objid</B>,
+
+<B>fprint_objid</B>,
+
+<B>snprint_objid</B>,
+
+and
+<B>sprint_realloc_objid</B>
+
+take an object identifier (without an accompanying variable instance)
+and print out the textual representation.
+<P>
+
+<B>print_description</B>
+
+and
+<B>fprint_description</B>
+
+take an object identifier (as for
+<B>print_objid</B>
+
+above) and print out the associated DESCRIPTION clause.
+<P>
+
+Note that there are no corresponding routines
+<B>snprint_description</B>
+
+or
+<B>sprint_realloc_description</B>.
+
+By default the parser does not save descriptions since they may be
+huge.  In order to be able to print them, you must call
+<B><A HREF="snmp_set_save_descriptions.html">snmp_set_save_descriptions</A>(1)</B>.
+
+<P>
+
+In general the parser is silent about what strangenesses it sees in
+the MIB files. To get warnings reported, call
+<B>snmp_set_mib_warnings</B>
+
+with a
+<I>level</I>
+
+of 1 (or 2 for even more warnings).
+<A NAME="lbAI">&nbsp;</A>
+<H2>ENVIRONMENT VARIABLES</H2>
+
+<DL COMPACT>
+<DT>MIBDIRS<DD>
+A colon separated list of directories to search for MIB modules.
+Default: /usr/local/lib/snmp/mibs
+<DT>MIBFILES<DD>
+A colon separated list of files to load.
+Default: (none)
+<DT>MIBS<DD>
+A colon separated list of MIB modules to load.
+Default: IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-SNMP-MIB.
+</DL>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="snmp_api.html">snmp_api</A></B>(3)
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DL>
+<DT><A HREF="#lbAE">Initialisation and Shutdown</A><DD>
+<DT><A HREF="#lbAF">Reading and Parsing MIBs</A><DD>
+<DT><A HREF="#lbAG">Searching the MIB Tree</A><DD>
+<DT><A HREF="#lbAH">Output</A><DD>
+</DL>
+<DT><A HREF="#lbAI">ENVIRONMENT VARIABLES</A><DD>
+<DT><A HREF="#lbAJ">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 21:37:34 GMT, March 22, 2004
+</BODY>
+</HTML>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

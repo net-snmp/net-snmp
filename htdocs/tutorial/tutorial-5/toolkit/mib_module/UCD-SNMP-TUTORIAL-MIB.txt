@@ -1,0 +1,117 @@
+UCD-SNMP-TUTORIAL-MIB DEFINITIONS ::= BEGIN
+
+-- A Comment!
+
+-- IMPORTS: Include definitions from other mibs here, which is always
+-- the first item in a MIB file.
+IMPORTS
+	ucdExperimental		              FROM UCD-SNMP-MIB,
+	MODULE-IDENTITY                       FROM SNMPv2-SMI
+	MODULE-COMPLIANCE, OBJECT-GROUP       FROM SNMPv2-CONF;
+
+--
+-- A brief description and update information about this mib.
+--
+ucdSnmpTutorialMIB MODULE-IDENTITY
+    LAST-UPDATED "9911030000Z"            -- 30 Aug 1999, midnight
+    ORGANIZATION "UCDavis"
+    CONTACT-INFO "
+                  Author:     Wes Hardaker
+                              University of California at Davis
+                  postal:     IT-DCAS
+                              UCDavis
+                              Davis, CA 95616
+                              USA
+                  email:      wjhardaker@ucdavis.edu
+                  phone:      +1-530-754-7571
+                 "
+    DESCRIPTION  "A simple mib for demonstration purposes.
+                 "
+    ::= { ucdExperimental 4242 }
+
+-- Define typical mib nodes, like where the objects are going to lie.
+-- we'll prefix everything in this mib with ust (ucd snmp tutorial)
+ustMIBObjects     OBJECT IDENTIFIER ::= { ucdSnmpTutorialMIB 1 }
+ustMIBConformance OBJECT IDENTIFIER ::= { ucdSnmpTutorialMIB 2 }
+
+-- Define the sections of the mib them selves:
+
+--
+-- 1) First, a simple scalar set that includes two objects:
+--
+ustScalarSet      OBJECT IDENTIFIER ::= { ustMIBObjects 1 }
+
+ustSSSimpleString OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+	"This is a simple test string.  It does nothing more than
+	return its current value, and changes values only when set by
+	an incoming SNMP set request."
+    DEFVAL { Hello World }
+    ::= { ustScalarSet 1 }
+
+ustSSSecondsSinceChanged OBJECT-TYPE
+    SYNTAX      TimeTicks
+    UNITS      "1/100th Seconds"
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"This object indicates the number of 1/100th seconds since the
+	ustSSSimpleString object has changed.  If it is has never been
+	modified, it will be the time passed since the start of the
+	agent."
+    ::= { ustScalarSet 2 }
+
+--
+-- The above definitions produce a section of the mib tree that looks
+-- like this (including our parent node, printed using the
+-- snmptranslate command):
+--
+--
+--   % snmptranslate -M+. -mUCD-SNMP-TUTORIAL-MIB -p -R ucdExperimental
+--   +-ucdExperimental(13)
+--     |
+--     +-ucdSnmpTutorialMIB(4242)
+--       |
+--       +-ustMIBObjects(1)
+--       | |
+--       | +-ustScalarSet(1)
+--       |    |
+--       |    +- -RW- String    ustSSSimpleString(1)
+--       |    +- -R-  TimeTicks ustSSSecondsSinceChanged(2)
+--       |
+--       +-ustMIBConformance(2)
+
+
+-- You can then use the snmptranslate command to get the numerical or
+-- textual OID representation of any piece of the tree:
+
+
+-- Getting a OID:
+--   % snmptranslate -M+. -mUCD-SNMP-TUTORIAL-MIB -R ustSSSecondsSinceChanged
+--   .1.3.6.1.4.1.2021.13.4242.1.1.2
+
+
+-- Getting a textual OID:
+--   % snmptranslate -n -M+. -mUCD-SNMP-TUTORIAL-MIB -R ustSSSecondsSinceChanged
+--   enterprises.ucdavis.ucdExperimental.ucdSnmpTutorialMIB.ustMIBObjects.ustScalarSet.ustSSSecondsSinceChanged
+
+
+-- Getting a description:
+--   % snmptranslate -d -M+. -mUCD-SNMP-TUTORIAL-MIB -R ustSSSecondsSinceChanged 
+--   .1.3.6.1.4.1.2021.13.4242.1.1.2
+--   SYNTAX  TimeTicks
+--   UNITS   "1/100th Seconds"
+--   MAX-ACCESS      read-only
+--   STATUS  current
+--   DESCRIPTION     "This object indicates the number of 1/100th seconds since the
+--           ustSSSimpleString object has changed.  If it is has never been
+--           modified, it will be the time passed since the start of the
+--           agent."
+
+
+
+-- END:  Don't forget this!
+END

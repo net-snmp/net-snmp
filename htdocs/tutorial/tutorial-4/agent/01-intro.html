@@ -1,0 +1,101 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML>
+<HEAD>
+<TITLE>Extending the UCD agent - overview</TITLE>
+</HEAD>
+<BODY>
+<H1> How to write a Mib module </H1>
+
+<H2>Introduction</H2>
+
+The design of the UCD SNMP agent has always been shaped by the desire
+to be able to extend its functionality by adding new modules.
+One of the earliest developments from the underlying CMU code base
+was the ability to call external scripts, and this is probably the
+simplest method of extending the agent.
+<BR>
+  However, there are circumstances where such an approach is felt to
+be inappropriate - perhaps from considerations of speed, access to
+the necessary data, reliability or elegance.  In such cases, the obvious
+solution is to provide C code that can be compiled into the agent itself
+to implement the desired module.  Many of the more recent developments in
+the code structure have been intended to ease this process.
+In particular, one of the more recent additions to the suite is the tool
+<CODE>mib2c</CODE>.  This is designed to take a portion of the MIB tree
+(as defined by a MIB file) and generate the code skeleton necessary to
+implement this.  This document will cover the use <CODE>mib2c</CODE>,
+as well as describing the requirements and functionality of the code
+in more detail.
+
+<P>
+  In order to implement a new MIB module, three files are necessary,
+and these will be considered in turn.  Note that, by the very nature of
+the task, this document cannot cover the details of precisely how to obtain
+the necessary information from the operating system or application.
+Instead, it describes the code framework that is needed, freeing the
+implementer from needing to understand the detailed internals of the agent,
+and allowing them to concentrate on the particular problem in hand.
+
+<P>
+  It may prove useful to examine some of the existing module implementations
+and examples in the light of this description, and suitable examples will
+be referred to at the appropriate points.  However, it should be remembered
+that the UCD agent seeks to support a wide variety of systems, often with
+dramatically differing implementations and interfaces, and this is
+reflected in the complexity of the code.  Also, the agent has developed
+gradually over the years, and there is often some measure of duplication
+or redundancy as a result.
+<BR>
+  As the FAQ states, the official slogan of the UCD-SNMP developers is
+<BLOCKQUOTE>
+	<I>The current implementation is non-obvious and may need to be improved.</I>
+</BLOCKQUOTE>
+This document describes the ideal, straightforward cases - real life is
+rarely so simple, and the example modules may prove easier to follow at
+a first reading.
+<BR>
+  It is also advisable to have a compiled and installed implementation
+available before starting to extend the agent.  This will make debugging
+and testing the agent much easier.
+
+<P>
+  A note regarding terminology - the word "module" is widely used throughout
+this document, with a number of different meanings.
+<UL>
+<LI>support for a new MIB,<BR>
+		i.e. the whole of the  functionality that is required.
+		This is usually termed a <I>MIB module</I>;
+<LI> a self-contained subset of this,
+		implemented as a single unit. <BR>
+		This is usually termed an <I>implementation module</I>
+		(or simply "a module");
+<LI>  the combination of such subsets,
+		usually termed a <I>module group</I>.
+</UL>
+
+Note that the first and third of these are often synonymous - the
+difference being that a MIB module refers to the view from outside the agent,
+regarding this as a seamless whole and hiding the internal implementation.
+A "module group" is used where the internal structure is of more relevance,
+and recognises the fact that the functionality may be provided by a number
+of co-operating implementation modules.
+<P>
+  Anyway, enough waffle - on with the details: The three files needed are
+<UL>
+<LI>  a MIB definition file;
+<LI>  a C header file;
+<LI>  a C implementation file.
+</UL>
+The <A HREF="02-mib.html">next part</A> looks at the MIB definition
+file, and how this impacts on the agent implementation.
+<P><HR>
+Copyright 1999 - D.T.Shield.
+Not to be distributed without the explicit permission of the author.
+</BODY>
+</HTML>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

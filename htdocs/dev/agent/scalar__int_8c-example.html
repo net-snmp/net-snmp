@@ -1,0 +1,106 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>scalar_int.c</h1>This example creates some scalar registrations that allows some simple variables to be accessed via SNMP.
+  In a more realistic example, it is likely that these variables would also be manipulated in other ways outside of SNMP
+  gets/sets.
+
+  <p>If this module is compiled into an agent, you should be able to issue snmp commands that look something like (authentication
+  information not shown in these commands):</p>
+
+  <ul>
+    <li>snmpget localhost netSnmpExampleInteger.0</li>
+
+    <li>netSnmpExampleScalars = 42</li>
+  </ul>
+
+  <ul>
+    <li>snmpset localhost netSnmpExampleInteger.0 = 1234</li>
+
+    <li>netSnmpExampleScalars = 1234</li>
+  </ul>
+
+  <ul>
+    <li>snmpget localhost netSnmpExampleInteger.0</li>
+
+    <li>netSnmpExampleScalars = 1234</li>
+  </ul>
+
+  <div class="fragment">
+    <pre class="fragment">
+<span class="comment">/*</span>
+<span class="comment"> * start be including the appropriate header files </span>
+<span class="comment"> */</span>
+<span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+<span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+
+<span class="comment">/*</span>
+<span class="comment"> * Then, we declare the variables we want to be accessed </span>
+<span class="comment"> */</span>
+<span class="keyword">static</span> <span class="keywordtype">int</span>      example1 = 42;  <span class=
+"comment">/* default value */</span>
+
+<span class="comment">/*</span>
+<span class="comment"> * our initialization routine, automatically called by the agent </span>
+<span class="comment"> * (to get called, the function name must match init_FILENAME())</span>
+<span class="comment"> */</span>
+<span class="keywordtype">void</span>
+init_scalar_int(<span class="keywordtype">void</span>)
+{
+    <span class="comment">/*</span>
+<span class="comment">     * the OID we want to register our integer at.  This should be a</span>
+<span class="comment">     * fully qualified instance.  In our case, it's a scalar at:</span>
+<span class="comment">     * NET-SNMP-EXAMPLES-MIB::netSnmpExampleInteger.0 (note the</span>
+<span class="comment">     * trailing 0 which is required for any instantiation of any</span>
+<span class="comment">     * scalar object) </span>
+<span class="comment">     */</span>
+    oid             my_registration_oid[] =
+        { 1, 3, 6, 1, 4, 1, 8072, 2, 1, 1, 0 };
+
+    <span class="comment">/*</span>
+<span class="comment">     * a debugging statement.  Run the agent with -Dexample_scalar_int to see</span>
+<span class="comment">     * the output of this debugging statement. </span>
+<span class="comment">     */</span>
+    DEBUGMSGTL((<span class="stringliteral">"example_scalar_int"</span>,
+                <span class="stringliteral">"Initalizing example scalar int.  Default value = %d\n"</span>,
+                example1));
+
+    <span class="comment">/*</span>
+<span class="comment">     * the line below registers our "example1" variable above as</span>
+<span class="comment">     * accessible and makes it writable.  A read only version of the</span>
+<span class="comment">     * same registration would merely call</span>
+<span class="comment">     * register_read_only_int_instance() instead.</span>
+<span class="comment">     * </span>
+<span class="comment">     * If we wanted a callback when the value was retrieved or set</span>
+<span class="comment">     * (even though the details of doing this are handled for you),</span>
+<span class="comment">     * you could change the NULL pointer below to a valid handler</span>
+<span class="comment">     * function. </span>
+<span class="comment">     */</span>
+    <a name="a31" id="a31"></a><a class="code" href="group__instance.html#ga18">netsnmp_register_int_instance</a>(<span class=
+"stringliteral">"my example int variable"</span>,
+                                  my_registration_oid,
+                                  OID_LENGTH(my_registration_oid),
+                                  &amp;example1, NULL);
+
+    DEBUGMSGTL((<span class="stringliteral">"example_scalar_int"</span>,
+                <span class="stringliteral">"Done initalizing example scalar int\n"</span>));
+}
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:55 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,88 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>watcher.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * watcher.h </span>
+00003 <span class="comment"> */</span>
+00004 <span class="preprocessor">#ifndef NETSNMP_WATCHER_H</span>
+00005 <span class="preprocessor">#define NETSNMP_WATCHER_H</span>
+00006 
+00007 <span class="preprocessor">#ifdef __cplusplus</span>
+00008 <span class="keyword">extern</span> <span class="stringliteral">"C"</span> {
+00009 <span class="preprocessor">#endif</span>
+00010 
+00011 <span class="preprocessor">#define WATCHER_FIXED_SIZE    0x01</span>
+00012 <span class="preprocessor">#define WATCHER_MAX_SIZE      0x02</span>
+00013 
+00014 <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_watcher_info_s {
+00015     <span class="keywordtype">void</span>     *data;
+00016     size_t    data_size;
+00017     size_t    max_size;
+00018     u_char    type;
+00019     <span class="keywordtype">int</span>       flags;
+00020 } netsnmp_watcher_info;
+00021 
+00022 <span class="keywordtype">int</span> netsnmp_register_watched_instance( <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00023                                        netsnmp_watcher_info         *winfo);
+00024 <span class="keywordtype">int</span> netsnmp_register_watched_scalar(   <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00025                                        netsnmp_watcher_info         *winfo);
+00026 <span class="keywordtype">int</span> netsnmp_register_watched_timestamp(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00027                                        marker_t timestamp);
+00028 <span class="keywordtype">int</span> netsnmp_register_watched_spinlock(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00029                                       <span class="keywordtype">int</span> *spinlock);    
+00030 
+00031 <span class="preprocessor">#define WATCHER_HANDLER_NAME "watcher"</span>
+00032 
+00033 <a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>  *netsnmp_get_watcher_handler(<span class=
+"keywordtype">void</span>);
+00034 netsnmp_watcher_info *netsnmp_create_watcher_info(<span class="keywordtype">void</span> *, size_t, u_char, <span class=
+"keywordtype">int</span>);
+00035 Netsnmp_Node_Handler  netsnmp_watcher_helper_handler;
+00036 
+00037 <a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>  *netsnmp_get_watched_timestamp_handler(<span class=
+"keywordtype">void</span>);
+00038 Netsnmp_Node_Handler  netsnmp_watched_timestamp_handler;
+00039 
+00040 <a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>  *netsnmp_get_watched_spinlock_handler(<span class=
+"keywordtype">void</span>);
+00041 Netsnmp_Node_Handler  netsnmp_watched_spinlock_handler;
+00042 
+00043 <span class="preprocessor">#ifdef __cplusplus</span>
+00044 }
+00045 <span class="preprocessor">#endif</span>
+00046 
+00047 <span class="preprocessor">#endif </span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

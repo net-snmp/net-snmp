@@ -1,0 +1,110 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <p>
+      <b>Note:</b>  Much of this tutorial requires <a
+	href="ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
+	so make sure you get it before running the commands found in
+	this tutorial.</b> 
+      <p><b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
+      href="/tutorial-5">is available</a> as well.  The commands is
+      the ucd-snmp specific tutorial will not work as expected if you
+      are using net-snmp and not ucd-snmp.
+      <br><br>
+    <hr>
+    <h1>UCD-SNMP Tutorial -- MIB Module</h1>
+    <p>
+      Here we discuss how to write a simple mib module, to extend the
+      agent using C code.
+    <p>
+      Here are the files discussed in this example so you can download
+      them:
+      <center>
+      <table border=1>
+	<tr bgcolor="#d0d0ff"><th>File</th><th>Description</th></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="UCD-SNMP-TUTORIAL-MIB.txt">UCD-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be writing
+	code for</td>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="ustScalarSet.h">ustScalarSet.h</a></td><td>The mib module's header file</td>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="ustScalarSet.c">ustScalarSet.c</a></td><td>The mib module's C source code</td>
+      </table>
+      </center>
+    <p>
+      This example builds the C code necessary to implement the <a
+      href="UCD-SNMP-TUTORIAL-MIB.txt">UCD-SNMP-TUTORIAL-MIB</a> MIB.
+      The majority of the code was written using the mib2c program,
+      not discussed here.
+    <p>
+      The API for the mib module code is fully discussed in
+      <a>http://www.csc.liv.ac.uk/~daves/Misc/UCD/guide.html</a> and is
+      <b>highly</b> recommended reading material.
+    <p>
+      The MIB is a simple one (also not discussed extensively here).
+      It contains only two variables: a string, and the time since the
+      string was last modified.  The string can be set using an
+      SNMP-SET, which then updates the archived value and resets the
+      timer.
+    <p>
+      To use it, get the <a
+      href="ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz">ucd-snmp
+      source code</a> and extract it.  Then download the 
+      <a href="ustScalarSet.h">ustScalarSet.h</a> and
+      <a href="ustScalarSet.c">ustScalarSet.c</a> that make up the
+      code for the mib module.  Place them in the ucd-snmp source
+      directory under the agent/mibgroups sub-directory.  Configure
+      the ucd-snmp package to include them when it is compiled by
+      adding an argument to the configure script:
+    <pre>
+% <b>./configure --with-mib-modules=ustScalarSet</b>
+    </pre>
+    <p>
+      Note that <i>ustScalarSet</i> is the prefix to our .c and .h
+      files.
+    <p>
+      Build your new agent with the tutorial code by running make:
+    <pre>
+% <b>make</b>
+    </pre>
+    <p>
+      Finally, install the whole lot by running make install:
+    <pre>
+% <b>make install</b>
+    </pre>
+    <p>
+      Lets use a horrible (security wise) <a
+      href="snmpd.conf">snmpd.conf</a> file so we're all consistent.
+      Download it and place it in /usr/local/share/snmp/snmpd.conf.
+    <p>
+      Lets talk about the important pieces in these files:
+...
+    <h3>Set Processing</h3>
+    <p>
+      To process an SNMP-SET, the agent must use a series of calls to
+      the mib module code to ensure that processing of all sets in the
+      incoming packet can be successful.  This gives you or other mib
+      modules the chance to bail out early on in the transaction
+      sequence and thus stop all of the transactions in the set from
+      happening.  This is important for continuity.  However, it makes 
+      set code processing a bit more complex.  Let's examine a simple
+      state diagram that the master agent uses at each step of the
+      way:
+    <p>
+      <center><img src=set-actions.jpg></center>
+    <p>
+      In a perfect operation with no failures, we take the vertical
+      path on the left.  If <b>any</b> of the mib modules being acted
+      upon returns an error of any kind, we will branch to the right
+      to one of the failure states where you must clean up and
+      possibly undo what you did in previous steps.
+    <p>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Fri Nov  5 12:09:03 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Mon Mar 25 08:40:58 PST 2002
+<!-- hhmts end -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

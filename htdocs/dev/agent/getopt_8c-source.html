@@ -1,0 +1,160 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>getopt.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * Copyright (c) 1987, 1993, 1994</span>
+00003 <span class="comment"> *      The Regents of the University of California.  All rights reserved.</span>
+00004 <span class="comment"> *</span>
+00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+00006 <span class="comment"> * modification, are permitted provided that the following conditions</span>
+00007 <span class="comment"> * are met:</span>
+00008 <span class="comment"> * 1. Redistributions of source code must retain the above copyright</span>
+00009 <span class="comment"> *    notice, this list of conditions and the following disclaimer.</span>
+00010 <span class="comment"> * 2. Redistributions in binary form must reproduce the above copyright</span>
+00011 <span class="comment"> *    notice, this list of conditions and the following disclaimer in the</span>
+00012 <span class="comment"> *    documentation and/or other materials provided with the distribution.</span>
+00013 <span class="comment"> * 3. All advertising materials mentioning features or use of this software</span>
+00014 <span class="comment"> *    must display the following acknowledgement:</span>
+00015 <span class="comment"> *      This product includes software developed by the University of</span>
+00016 <span class="comment"> *      California, Berkeley and its contributors.</span>
+00017 <span class="comment"> * 4. Neither the name of the University nor the names of its contributors</span>
+00018 <span class="comment"> *    may be used to endorse or promote products derived from this software</span>
+00019 <span class="comment"> *    without specific prior written permission.</span>
+00020 <span class="comment"> *</span>
+00021 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND</span>
+00022 <span class="comment"> * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span>
+00023 <span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span>
+00024 <span class="comment"> * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE</span>
+00025 <span class="comment"> * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL</span>
+00026 <span class="comment"> * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS</span>
+00027 <span class="comment"> * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)</span>
+00028 <span class="comment"> * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT</span>
+00029 <span class="comment"> * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY</span>
+00030 <span class="comment"> * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF</span>
+00031 <span class="comment"> * SUCH DAMAGE.</span>
+00032 <span class="comment"> */</span>
+00033 
+00034 <span class="preprocessor">#if defined(LIBC_SCCS) &amp;&amp; !defined(lint)</span>
+00035 <span class="comment">/*</span>
+00036 <span class="comment"> * static char sccsid[] = "from: @(#)getopt.c   8.2 (Berkeley) 4/2/94"; </span>
+00037 <span class="comment"> */</span>
+00038 <span class="keyword">static</span> <span class="keywordtype">char</span>    *rcsid =
+00039     <span class="stringliteral">"$Id$"</span>;
+00040 <span class="preprocessor">#endif                          </span><span class="comment">/* LIBC_SCCS and not lint */</span>
+00041 
+00042 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00043 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00044 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00045 
+00046 <span class="preprocessor">#ifdef _BSD</span>
+00047 <span class="keyword">extern</span> <span class="keywordtype">char</span>    *__progname;
+00048 <span class="preprocessor">#else</span>
+00049 <span class="preprocessor">#define __progname "getopt"</span>
+00050 <span class="preprocessor">#endif</span>
+00051 
+00052 <span class="keywordtype">int</span>             opterr = 1,     <span class=
+"comment">/* if error message should be printed */</span>
+00053                 optind = 1,     <span class="comment">/* index into parent argv vector */</span>
+00054                 optopt,         <span class="comment">/* character checked for validity */</span>
+00055                 optreset;       <span class="comment">/* reset getopt */</span>
+00056 <span class="keywordtype">char</span>           *optarg;         <span class=
+"comment">/* argument associated with option */</span>
+00057 <span class="keywordtype">char</span>            EMSG[] = <span class="stringliteral">""</span>;
+00058 
+00059 <span class="preprocessor">#define BADCH   (int)'?'</span>
+00060 <span class="preprocessor">#define BADARG  (int)':'</span>
+00061 
+00062 <span class="comment">/*</span>
+00063 <span class="comment"> * getopt --</span>
+00064 <span class="comment"> *      Parse argc/argv argument vector.</span>
+00065 <span class="comment"> */</span>
+00066 <span class="keywordtype">int</span>
+00067 getopt(<span class="keywordtype">int</span> nargc, <span class="keywordtype">char</span> *<span class=
+"keyword">const</span> *nargv, <span class="keyword">const</span> <span class="keywordtype">char</span> *ostr)
+00068 {
+00069     <span class="keyword">static</span> <span class="keywordtype">char</span>    *place = EMSG;       <span class=
+"comment">/* option letter processing */</span>
+00070     <span class="keywordtype">char</span>           *oli;        <span class=
+"comment">/* option letter list index */</span>
+00071 
+00072     <span class="keywordflow">if</span> (optreset || !*place) {  <span class="comment">/* update scanning pointer */</span>
+00073         optreset = 0;
+00074         <span class="keywordflow">if</span> (optind &gt;= nargc || *(place = nargv[optind]) != <span class=
+"charliteral">'-'</span>) {
+00075             place = EMSG;
+00076             <span class="keywordflow">return</span> (-1);
+00077         }
+00078         <span class="keywordflow">if</span> (place[1] &amp;&amp; *++place == <span class=
+"charliteral">'-'</span>) {      <span class="comment">/* found "--" */</span>
+00079             ++optind;
+00080             place = EMSG;
+00081             <span class="keywordflow">return</span> (-1);
+00082         }
+00083     }                           <span class="comment">/* option letter okay? */</span>
+00084     <span class="keywordflow">if</span> ((optopt = (int) *place++) == (int) <span class="charliteral">':'</span> ||
+00085         !(oli = strchr(ostr, optopt))) {
+00086         <span class="comment">/*</span>
+00087 <span class="comment">         * if the user didn't specify '-' as an option,</span>
+00088 <span class="comment">         * assume it means -1.</span>
+00089 <span class="comment">         */</span>
+00090         <span class="keywordflow">if</span> (optopt == (int) <span class="charliteral">'-'</span>)
+00091             <span class="keywordflow">return</span> (-1);
+00092         <span class="keywordflow">if</span> (!*place)
+00093             ++optind;
+00094         <span class="keywordflow">if</span> (opterr &amp;&amp; *ostr != <span class="charliteral">':'</span>)
+00095             (void) fprintf(stderr,
+00096                            <span class="stringliteral">"%s: illegal option -- %c\n"</span>, __progname,
+00097                            optopt);
+00098         <span class="keywordflow">return</span> (BADCH);
+00099     }
+00100     <span class="keywordflow">if</span> (*++oli != <span class="charliteral">':'</span>) {        <span class=
+"comment">/* don't need argument */</span>
+00101         optarg = NULL;
+00102         <span class="keywordflow">if</span> (!*place)
+00103             ++optind;
+00104     } <span class="keywordflow">else</span> {                    <span class="comment">/* need an argument */</span>
+00105         <span class="keywordflow">if</span> (*place)             <span class="comment">/* no white space */</span>
+00106             optarg = place;
+00107         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (nargc &lt;= ++optind) {   <span class=
+"comment">/* no arg */</span>
+00108             place = EMSG;
+00109             <span class="keywordflow">if</span> (*ostr == <span class="charliteral">':'</span>)
+00110                 <span class="keywordflow">return</span> (BADARG);
+00111             <span class="keywordflow">if</span> (opterr)
+00112                 (void) fprintf(stderr,
+00113                                <span class="stringliteral">"%s: option requires an argument -- %c\n"</span>,
+00114                                __progname, optopt);
+00115             <span class="keywordflow">return</span> (BADCH);
+00116         } <span class="keywordflow">else</span>                  <span class="comment">/* white space */</span>
+00117             optarg = nargv[optind];
+00118         place = EMSG;
+00119         ++optind;
+00120     }
+00121     <span class="keywordflow">return</span> (optopt);            <span class="comment">/* dump back option letter */</span>
+00122 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,102 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>snmp_alarm.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef SNMP_ALARM_H</span>
+00002 <span class="preprocessor">#define SNMP_ALARM_H</span>
+00003 
+00004 <span class="preprocessor">#ifdef __cplusplus</span>
+00005 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00006 <span class="preprocessor">#endif</span>
+00007 
+00008     <span class="keyword">typedef</span> void    (SNMPAlarmCallback) (<span class=
+"keywordtype">unsigned</span> <span class="keywordtype">int</span> clientreg,
+00009                                          <span class="keywordtype">void</span> *clientarg);
+00010 
+00011     <span class="comment">/*</span>
+00012 <span class="comment">     * alarm flags </span>
+00013 <span class="comment">     */</span>
+00014 <span class="preprocessor">#define SA_REPEAT 0x01          </span><span class=
+"comment">/* keep repeating every X seconds */</span>
+00015 
+00016     <span class="keyword">struct </span>snmp_alarm {
+00017         <span class="keyword">struct </span>timeval  t;
+00018         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    flags;
+00019         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    clientreg;
+00020         <span class="keyword">struct </span>timeval  t_last;
+00021         <span class="keyword">struct </span>timeval  t_next;
+00022         <span class="keywordtype">void</span>           *clientarg;
+00023         SNMPAlarmCallback *thecallback;
+00024         <span class="keyword">struct </span>snmp_alarm *next;
+00025     };
+00026 
+00027     <span class="comment">/*</span>
+00028 <span class="comment">     * the ones you should need </span>
+00029 <span class="comment">     */</span>
+00030     <span class="keywordtype">void</span>            <a class="code" href=
+"group__snmp__alarm.html#ga6">snmp_alarm_unregister</a>(<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> clientreg);
+00031     <span class="keywordtype">void</span>            <a class="code" href=
+"group__snmp__alarm.html#ga7">snmp_alarm_unregister_all</a>(<span class="keywordtype">void</span>);
+00032     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    <a class="code" href=
+"group__snmp__alarm.html#ga14">snmp_alarm_register</a>(<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> when,
+00033                                         <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> flags,
+00034                                         SNMPAlarmCallback * thecallback,
+00035                                         <span class="keywordtype">void</span> *clientarg);
+00036 
+00037     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    <a class="code" href=
+"group__snmp__alarm.html#ga15">snmp_alarm_register_hr</a>(<span class="keyword">struct</span> timeval t,
+00038                                            <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> flags,
+00039                                            SNMPAlarmCallback * cb,
+00040                                            <span class="keywordtype">void</span> *cd);
+00041 
+00042 
+00043     <span class="comment">/*</span>
+00044 <span class="comment">     * the ones you shouldn't </span>
+00045 <span class="comment">     */</span>
+00046     <span class="keywordtype">void</span>            init_snmp_alarm(<span class="keywordtype">void</span>);
+00047     <span class="keywordtype">int</span>             init_alarm_post_config(<span class=
+"keywordtype">int</span> majorid, <span class="keywordtype">int</span> minorid,
+00048                                            <span class="keywordtype">void</span> *serverarg,
+00049                                            <span class="keywordtype">void</span> *clientarg);
+00050     <span class="keywordtype">void</span>            sa_update_entry(<span class="keyword">struct</span> snmp_alarm *alrm);
+00051     <span class="keyword">struct </span>snmp_alarm *sa_find_next(<span class="keywordtype">void</span>);
+00052     <span class="keywordtype">void</span>            run_alarms(<span class="keywordtype">void</span>);
+00053     RETSIGTYPE      alarm_handler(<span class="keywordtype">int</span> a);
+00054     <span class="keywordtype">void</span>            set_an_alarm(<span class="keywordtype">void</span>);
+00055     <span class="keywordtype">int</span>             get_next_alarm_delay_time(<span class=
+"keyword">struct</span> timeval *delta);
+00056 
+00057 <span class="preprocessor">#ifdef __cplusplus</span>
+00058 }
+00059 <span class="preprocessor">#endif</span>
+00060 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_ALARM_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:59 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

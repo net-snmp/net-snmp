@@ -1,0 +1,253 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>MIBs For Dummies : ifXTable data GET</title>
+  </head>
+
+  <body>
+    <h1>MIBs For Dummies : ifXTable data GET</h1>
+    Once the correct table context has been found, the individual node
+    get routines will be called. These are generated in the file
+    <var>ifXTable_data_get.c</var>. The code generated for each node
+    defaults to returning <var>MFD_SKIP</var>, which will cause Net-SNMP to
+    skip the column for the given table context. If you compile and run the
+    code before implementing any code in the get routines, and try to walk
+    the ifXTable, each node's get routine will be called once for each
+    interface. Since every function will return <var>MFD_SKIP</var>, snmpwalk
+    will eventually return END OF MIB.<P>
+    <h2>Implementing the get routines</h2>
+      We are using the same data structures that the <var>ifTable</var>
+      implementation uses for the Linux kernel. I won't cover every
+      node, as they are all very similar.
+<p>
+    <h3>ifName_get</h2>
+    The <var>ifName</var> node is a string. First we check that the string
+    is large enough to hold the name in our <var>data context</var>,
+    allocating memory if it is not. Then the name is copied and the length
+    variable is set.<P>
+    <table><tr>
+          <td width=20></td>
+          <td><bold>Generated code</bold></td>
+          <td width=20></td>
+          <td><bold>Modified code</bold></td>
+        </tr><tr>
+          <td></td>
+          <td bgcolor=CCCCCC><pre>
+int
+ifName_get(ifXTable_ctx * ctx, char **ifName_ptr_ptr,
+           size_t * ifName_len_ptr)
+{
+    /** syntax-DisplayString-get.m2i not found, using generic */
+   /** we should have a non-NULL pointer and enough storage */
+    netsnmp_assert((NULL != ifName_ptr_ptr) && (NULL != *ifName_ptr_ptr));
+    netsnmp_assert(NULL != ifName_len_ptr);
+
+    netsnmp_assert(NULL != ctx);
+
+    /*
+     * TODO:
+     * set (* ifName_ptr_ptr) and (* ifName_len_ptr) from ctx->data.
+     */
+    return MFD_SKIP;            /* TODO: remove this once you've set data */
+
+    return SNMP_ERR_NOERROR;
+}
+</pre></td>
+          <td></td><td bgcolor=CCCCCC><pre>
+int
+ifName_get(ifXTable_ctx * ctx, char **ifName_ptr_ptr,
+           size_t * ifName_len_ptr)
+{
+    /** syntax-DisplayString-get.m2i not found, using generic */
+   /** we should have a non-NULL pointer and enough storage */
+    netsnmp_assert((NULL != ifName_ptr_ptr) && (NULL != *ifName_ptr_ptr));
+    netsnmp_assert(NULL != ifName_len_ptr);
+
+    netsnmp_assert(NULL != ctx);
+
+    /*
+     * TODO:
+     * set (* ifName_ptr_ptr) and (* ifName_len_ptr) from ctx->data.
+     */<font color=blue>
+    if (*ifName_len_ptr < strnlen(ctx->data.Name,sizeof(ctx->data.Name))) {
+       *ifName_ptr_ptr = malloc(strnlen(ctx->data.Name,sizeof(ctx->data.Name)));
+    }
+    *ifName_len_ptr = strnlen(ctx->data.Name,sizeof(ctx->data.Name));
+    memcpy(*ifName_ptr_ptr, ctx->data.Name, *ifName_len_ptr);
+</font>
+    return SNMP_ERR_NOERROR;
+}
+</pre></td>
+        </tr>
+      </table>
+    </table>
+    <p>
+      <!-- ========================================================= -->
+    <h3>ifInMulticastPkts_get</h2>
+    The <var>ifInMulticastPkts</var> node is a integer. However, we don't
+    always have the data for this node. At compile time we test a macro that
+    will be set during configure to determine if the data is available.
+    variable is set.<P>
+    <table><tr>
+          <td width=20></td>
+          <td><bold>Generated code</bold></td>
+          <td width=20></td>
+          <td><bold>Modified code</bold></td>
+        </tr><tr>
+          <td></td>
+          <td bgcolor=CCCCCC><pre>
+int
+ifInMulticastPkts_get(ifXTable_ctx * ctx, u_long * ifInMulticastPkts_ptr)
+{
+    /** syntax-COUNTER-get.m2i not found, using generic */
+   /** we should have a non-NULL pointer */
+    netsnmp_assert(NULL != ifInMulticastPkts_ptr);
+
+    netsnmp_assert(NULL != ctx);
+
+    /*
+     * TODO:
+     * set (* ifInMulticastPkts_ptr) from ctx->data.
+     */
+    return MFD_SKIP;            /* TODO: remove this once you've set data */
+
+    /*
+     * TODO:
+     * value mapping
+     *
+     * If the values for your data type don't exactly match the
+     * possible values defined by the mib, you should map them here.
+     */
+
+
+    return SNMP_ERR_NOERROR;
+}
+</pre></td>
+          <td></td><td bgcolor=CCCCCC><pre>
+int
+ifInMulticastPkts_get(ifXTable_ctx * ctx, u_long * ifInMulticastPkts_ptr)
+{
+    /** syntax-COUNTER-get.m2i not found, using generic */
+   /** we should have a non-NULL pointer */
+    netsnmp_assert(NULL != ifInMulticastPkts_ptr);
+
+    netsnmp_assert(NULL != ctx);
+
+    /*
+     * TODO:
+     * set (* ifInMulticastPkts_ptr) from ctx->data.
+     */<font color=blue>
+#if STRUCT_IFNET_HAS_IF_IMCASTS
+    temp_ifInMulticastPkts = (u_long) ctx->data.ifnet.if_imcasts;
+#else</font>
+    return MFD_SKIP;            /* TODO: remove this once you've set data */<font color=blue>
+#endif
+</font>
+    /*
+     * TODO:
+     * value mapping
+     *
+     * If the values for your data type don't exactly match the
+     * possible values defined by the mib, you should map them here.
+     */
+
+
+    return SNMP_ERR_NOERROR;
+}
+</pre></td>
+        </tr>
+      </table>
+    </table>
+    <p>
+      <!-- ========================================================= -->
+    <h3>ifHCInOctets_get</h2>
+    The <var>ifHCInOctets</var> node is a 64 bit counter. Net-SNMP uses a
+    structure containing the high and low 32 bits for 64 bit counters. We
+    use if_ibytes if it is available, or if_ipackets otherwise. This logic
+    is straight from the current <var>ifTable</var> implementation.<P>
+    <table><tr>
+          <td width=20></td>
+          <td><bold>Generated code</bold></td>
+          <td width=20></td>
+          <td><bold>Modified code</bold></td>
+        </tr><tr>
+          <td></td>
+          <td bgcolor=CCCCCC><pre>
+int
+ifHCInOctets_get(ifXTable_ctx * ctx, U64 * ifHCInOctets_ptr)
+{
+   /** we should have a non-NULL pointer */
+    netsnmp_assert(NULL != ifHCInOctets_ptr);
+
+    /*
+     * TODO:
+     * get (* ifHCInOctets_ptr).low and (* ifHCInOctets_ptr).high from ctx->data.
+     */
+
+
+    return SNMP_ERR_NOERROR;
+}
+</pre></td>
+          <td></td><td bgcolor=CCCCCC><pre>
+int
+ifHCInOctets_get(ifXTable_ctx * ctx, U64 * ifHCInOctets_ptr)
+{
+   /** we should have a non-NULL pointer */
+    netsnmp_assert(NULL != ifHCInOctets_ptr);
+
+    /*
+     * TODO:
+     * get (* ifHCInOctets_ptr).low and (* ifHCInOctets_ptr).high from ctx->data.
+     */<font color=blue>
+    (*ifHCInOctets_ptr).high = 0;
+#ifdef STRUCT_IFNET_HAS_IF_IBYTES
+    (*ifHCInOctets_ptr).low = (u_long) ctx->data.ifnet.if_ibytes;
+#else
+     (*ifHCInOctets_ptr).low = (u_long) ctx->data.ifnet.if_ipackets * 308; /* XXX */
+#endif
+</font>
+
+    return SNMP_ERR_NOERROR;
+}
+</pre></td>
+        </tr>
+      </table>
+    </table>
+    <p>
+      <!-- ========================================================= -->
+    <h3></h2>
+    The <var></var> node is 
+    <table><tr>
+          <td width=20></td>
+          <td><bold>Generated code</bold></td>
+          <td width=20></td>
+          <td><bold>Modified code</bold></td>
+        </tr><tr>
+          <td></td>
+          <td bgcolor=CCCCCC><pre>
+</pre></td>
+          <td></td><td bgcolor=CCCCCC><pre>
+</pre></td>
+        </tr>
+      </table>
+    </table>
+    <p>
+      <!-- ========================================================= -->
+      <!-- ========================================================= -->
+      <!-- ========================================================= -->
+    <hr>
+    rstory at freesnmp dot com<br>
+Version $Revision$
+<!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
+<!-- hhmts start -->
+Last modified: Sat Nov  1 19:34:12 EST 2003
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+  </body>
+</html>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,63 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>MFD: IF-MIB</title>
+  </head>
+
+  <body bgcolor="#ffffff">
+    <!-- ========================================================= -->
+    <h1>MFD: IF-MIB</h1>
+    <p><em>NOTE: this tutorial is based on the code for the upcoming release
+        5.2 (currently in the main CVS line). If you generate code from a
+        release prior to 5.2, your results may vary.</em>
+    </p>
+    <p>
+      This tutorial documents the process of implementing the
+      <var>IF-MIB</var> MIB module for Linux. We'll start with the
+      <var>ifTable</var>, and then do the <var>ifXTable</var>.
+    </p>
+    <h2>Introduction</h2>
+    <p>
+      The data for both of these tables comes from the kernel. This means
+      that we have to explicity ask for the data, the data may not be
+      in the format we would like it to be in, and all the data we want may
+      not be available. It also means that we will not be notified when the
+      data changes.
+    </p><p>
+      We cannot really do anything about the format of the data that we get
+      from the kernel. The ifXTable presenta an additional twist, in that it
+      contains 64 bit counters for statistics, and the statistics available
+      for the Linux 2.4 kernels are only 32 bits. So we'll  cache data and
+      do periodic polls to maintaine these values.
+    </p><p>
+      As is often the case with external data, the interfaces data we get
+      from the kernel is not sorted by the index specified by the MIB. The
+      kernel reports data by interface names ('eth0', 'lo', etc), and the
+      <var>IF-MIB</var> tables specifies an integer, <var>ifIndex</var>, as
+      the table index.
+    </p>
+      
+    <!-- ========================================================= -->
+    </p>
+    <font size=+1>
+      <a href="ifTable/index.html">Next: ifTable</a> |
+      <a href="../index.html">Up: MFD Tutorials</a> |
+      Skip to: ifXTable
+    </font>
+    <!-- ========================================================= -->
+    <hr>
+    rstory at freesnmp dot com<br>
+Version $Revision$
+<!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
+<!-- hhmts start -->
+Last modified: Thu Apr 22 22:18:07 EDT 2004
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+  </body>
+</html>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,109 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>SNMPBULKWALK</h1>Section: Net-SNMP (1)<br />
+    Updated: 17 Jun 1998<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>snmpbulkwalk - communicates with a network entity using SNMP BULK Requests. <a name="lbAC" id="lbAC"> </a>
+
+    <h2>SYNOPSIS</h2><b>snmpbulkwalk</b> [APPLICATION OPTIONS] [COMMON OPTIONS] [OID] <a name="lbAD" id="lbAD"> </a>
+
+    <h2>DESCRIPTION</h2><b>snmpbulkwalk</b> is an SNMP application that uses SNMP GETBULK requests to query a network entity
+    efficiently for a tree of information.
+
+    <p>An object identifier (OID) may be given on the command line. This OID specifies which portion of the object identifier
+    space will be searched using GETBULK requests. All variables in the subtree below the given OID are queried and their values
+    presented to the user. Each variable name is given in the format specified in <i><a href=
+    "variables.html">variables</a>(5)</i>. If no OID argument is present, <b>snmpbulkwalk</b> will search MIB-2.</p>
+
+    <p>If the network entity has an error processing the request packet, an error packet will be returned and a message will be
+    shown, helping to pinpoint why the request was malformed.</p>
+
+    <p>If the tree search causes attempts to search beyond the end of the MIB, the message "End of MIB" will be displayed.
+    <a name="lbAE" id="lbAE"> </a></p>
+
+    <h2>OPTIONS</h2>
+
+    <dl compact="compact">
+      <dt><b>-Cc</b></dt>
+
+      <dd>Do not check whether the returned OIDs are increasing. Some agents (LaserJets are an example) return OIDs out of order,
+      but can complete the walk anyway. Other agents return OIDs that are out of order and can cause <b>snmpbulkwalk</b> to loop
+      indefinitely. By default, <b>snmpbulkwalk</b> tries to detect this behavior and warns you when it hits an agent acting
+      illegally. Use <b>-Cc</b> to turn off this behaviour.</dd>
+
+      <dt><b>-Ci</b></dt>
+
+      <dd>Include the given OID in the search range. Normally <b>snmpbulkwalk</b> uses GETBULK requests starting with the OID you
+      specified and returns all results in the MIB tree after that OID. Sometimes, you may wish to include the OID specified on
+      the command line in the printed results if it is a valid OID in the tree itself. This option lets you do this.</dd>
+
+      <dt><b>-Cn</b><i>&lt;NUM&gt;</i></dt>
+
+      <dd>Set the <i>non-repeaters</i> field in the GETBULK PDUs. This specifies the number of supplied variables that should not
+      be iterated over. The default is 0.</dd>
+
+      <dt><b>-Cp</b></dt>
+
+      <dd>Upon completion of the walk, print the number of variables found.</dd>
+
+      <dt><b>-Cr</b><i>&lt;NUM&gt;</i></dt>
+
+      <dd>Set the <i>max-repetitions</i> field in the GETBULK PDUs. This specifies the maximum number of iterations over the
+      repeating variables. The default is 10.</dd>
+    </dl>
+
+    <p>In addition to these options, <b>snmpbulkwalk</b> takes the common options described in the <i><a href=
+    "snmpcmd.html">snmpcmd</a>(1)</i> manual page. <a name="lbAF" id="lbAF"> </a></p>
+
+    <h2>EXAMPLE</h2>The command:
+
+    <p>snmpbulkwalk -v2c -Os -c public zeus system</p>
+
+    <p>will retrieve all of the variables under system:</p>
+
+    <p>sysDescr.0 = STRING: "SunOS zeus.net.cmu.edu 4.1.3_U1 1 sun4m"<br />
+    sysObjectID.0 = OID: enterprises.hp.nm.hpsystem.10.1.1<br />
+    sysUpTime.0 = Timeticks: (155274552) 17 days, 23:19:05<br />
+    sysContact.0 = STRING: ""<br />
+    sysName.0 = STRING: "zeus.net.cmu.edu"<br />
+    sysLocation.0 = STRING: ""<br />
+    sysServices.0 = INTEGER: 72</p>
+
+    <p>In contrast to <b>snmpwalk</b>, this information will typically be gathered in a single transaction with the agent, rather
+    than one transaction per variable found. <b>snmpbulkwalk</b> is thus more efficient in terms of network utilisation, which
+    may be especially important when retrieving large tables. <a name="lbAG" id="lbAG"> </a></p>
+
+    <h2>NOTE</h2>As the name implies, <b>snmpbulkwalk</b> utilizes the SNMP GETBULK message, which is not available in SNMP v1.
+    <a name="lbAH" id="lbAH"> </a>
+
+    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="variables.html">variables</a>(5).
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+
+      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+
+      <dt><a href="#lbAE">OPTIONS</a></dt>
+
+      <dt><a href="#lbAF">EXAMPLE</a></dt>
+
+      <dt><a href="#lbAG">NOTE</a></dt>
+
+      <dt><a href="#lbAH">SEE ALSO</a></dt>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:43 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,155 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Net-SNMP Tutorial: TRAPs vs INFORMs for SNMPv3<head>
+<title>Net-SNMP Tutorial -- TRAPs vs INFORMs for SNMPv3</title>
+</head>
+  <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
+<h1>Net-SNMP Tutorial -- TRAPs vs INFORMs for SNMPv3</h1>
+
+<p>
+<h2>Prerequisite reading:</h2>
+<p>
+<ul>
+<li> <a href="snmpv3.html">net-snmp snmpv3 options</a>
+<li> <a href="snmptrap.html">net-snmp trap summary</a>
+</ul>
+<p>
+<h2>TRAPs vs INFORMs</h2>
+<p>
+A quick recap on the difference between TRAPs and INFORMs: A TRAP is a
+SNMP message sent from one application to another (which is typically
+on a remote host).  They're purpose is merely to notify the other
+application that something has happened, has been noticed, etc.  The
+big problem with TRAPs is that they're unacknowledged so you don't
+actually know if the remote application received your oh-so-important
+message to it.  SNMPv2 PDUs fixed this by introducing the notion of an
+INFORM, which is nothing more than an acknowledged TRAP.  IE, when the
+remote application receives the INFORM it sends back a "I got it"
+message.  This is nice because then the person sending the traps can
+keep trying until the trap gets through.  The net-snmp <a
+href="/man/snmptrap.1.html"><b>snmptrap</b></a> program can send both
+TRAPs and INFORMs.  Add -Ci to the command line of snmptrap if you
+want it to send a an INFORM instead, or call the <b>snmpinform</b>
+command (which is functionally the same as snmptrap -Ci).  Note that
+you must use snmpv2c or snmpv3 to send INFORMs.  <a
+href="/man/snmptrapd.8.html">snmptrapd</a> is able to receive and
+display both INFORMs and TRAPs.
+<p>
+<b>Note:</b> snmptrapd will <b>not</b> display SNMPv3
+TRAPs or INFORMs sent by a user which has not been configured using
+the createUser directives discussed below.  They will be silently
+dropped by the snmptrapd program.  If your run snmptrapd with the
+-Dusm flag you'll get debugging output which says "no such user",
+which is exactly why they're being dropped.
+<p>
+<h2>SNMPv3, users and engineIDs</h2>
+<p>
+TRAPs and INFORMs get a little
+more complex with respect to SNMPv3.  The reason behind it is how the
+user database is maintained.  SNMPv1 and SNMPv2c community based
+messages merely always display the message to the end user.  SNMPv3
+mandates that the message is rejected unless the SNMPv3 user sending
+the trap already exists in the user database.  Sounds simple enough,
+right?  Except for one small problem: The user database in a SNMPv3
+application is actually referenced by a combination of the user's name
+(called a "security Name") and a identifier for the given SNMP
+application your talking to (called an "engineID").  Normally when you
+use the rest of the snmp applications (<a
+href="/man/snmpget.1.html">snmpget</a>, <a
+href="/man/snmpwalk.1.html">snmpwalk</a>, ...) the application
+"discovers" the remote engineID for you and then inserts the
+username, engineID and passwords into user database based on this
+remote engineID.  Makes things all nice and simple when talking to a
+remote agent.
+<h2>SNMPv3 INFORMs</h2>
+<p>
+INFORMs operate on a similar principal.  When you send an INFORM you
+use the remote engineID when sending the message and the securityName
+and engineID must exist as a pair in the remote user table.  The
+snmptrap program discovers the remote engineID just like the rest of
+the applications would do and then appropriately creates the SNMPv3
+message with the proper user that the remote side is expecting to
+get.  And all is well.  So, all you have to do when setting up the
+remote snmptrapd application (assuming you're using our trap/inform
+receiver) is to create a v3 user in the snmptrapd configuration
+database.  You do this as follows:
+<p>
+<ol>
+<li> Stop any currently running snmptrapd
+<li> edit /var/net-snmp/snmptrapd.conf to insert the following line:
+<pre>
+  createUser myuser MD5 mypassword DES myotherpassword
+</pre>
+Where myuser is the security name you want to use, and mypassword is
+your authentication password and myotherpassword is your encryption
+password (or leave it blank if you want it to be the same or don't
+want to use encryption).
+<li> (re)start the snmptrapd program.
+</ol>
+<p>
+Now, you should be able to use the snmpinform command to send the trap
+demon a coldStart INFORM message:
+<ul>
+snmpinform -v 3 -u myuser -a MD5 -A mypassword -l authNoPriv localhost 42 coldStart.0
+</ul>
+<p>
+If you did everything correctly, you should have seen something like
+this in your snmptrapd output:
+<p>
+<pre>
+    2001-10-31 11:21:05 localhost.localdomain [127.0.0.1]:
+            sysUpTimeInstance = Timeticks: (42) 0:00:00.42  snmpTrapOID.0 = OID: coldStart.0
+</pre>
+<h2>SNMPv3 TRAPs</h2>
+SNMPv3 TRAPs are a bit more complicated in some ways, but it makes
+sense the protocol works this way if you spend a long time thinking
+about it.  The difference is that SNMPv3 TRAPs use the engineID of the
+<b>local</b> application sending the trap rather than the engineID of
+the <b>remote</b> application.  This means that you have to create
+users in your remote user database with a bit more care and need to
+create one for every engineID you wish to send traps from.  This means
+that if you want to have 100 snmp agents send snmpv3 traps to your
+trap receiver, you need 100 createUser directives in your
+/var/net-snmp/snmptrapd.conf file.
+<p>
+So, try the following:
+<ol>
+<li> Stop any currently running snmptrapd
+<li> edit /var/net-snmp/snmptrapd.conf to insert the following line:
+<pre>
+  createUser -e 0x0102030405 myuser MD5 mypassword DES myotherpassword
+</pre>
+Note that this time we explicitly set the engineID of the user to
+0x0102030405 (which technically is not a recommended value, but it
+really doesn't matter).
+<li> (re)start the snmptrapd program.
+</ol>
+<p>
+Now, you should be able to use the snmptrap command to send the trap
+demon a coldStart v3 TRAP message:
+<ul>
+snmptrap -e 0x0102030405 -v 3 -u myuser -a MD5 -A mypassword -l authNoPriv localhost 42 coldStart.0
+</ul>
+<p>
+This should produce similar output as the example above did.
+<p>
+I should go rambling on here about the intricate details of v3
+engineIDs, INFORMs, TRAPs, engineID discovery, secret keys, passwords,
+localized keys, etc.  But it took the SNMPv3 working group 18223 lines
+of text (RFCs 2570 - 2575) to try and explain it all, so I don't think
+I'll reiterate that here.
+<hr>
+<!-- Created: Wed Oct 31 08:20:33 PST 2001 -->
+<!-- hhmts start -->
+Last modified: Fri Apr 25 06:24:44 PDT 2003
+<!-- hhmts end -->
+  </body>
+</html>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

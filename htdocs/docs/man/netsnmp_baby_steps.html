@@ -1,0 +1,89 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>group__baby__steps</h1>Section: net-snmp (3)<br />
+    Updated: 28 Oct 2004<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>baby_steps: calls your handler in baby_steps for set processing. - <a name="lbAC" id="lbAC"> </a>
+
+    <h3>Functions</h3>
+
+    <p><br />
+    <b>netsnmp_mib_handler</b> * <b>netsnmp_baby_steps_handler_get</b> (u_long modes)<br />
+    <i>returns a baby_steps handler that can be injected into a given handler chain.</i><br />
+    void <b>netsnmp_baby_steps_handler_init</b> (void)<br />
+    <i>initializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for
+    configuration file use.</i><br />
+    <b>netsnmp_mib_handler</b> * <b>netsnmp_baby_steps_access_multiplexer_get</b> (netsnmp_baby_steps_access_methods *am)<br />
+    <i>returns a baby_steps handler that can be injected into a given handler chain.</i><br />
+    int <b>netsnmp_baby_step_mode2flag</b> (u_int mode)<br />
+    <a name="lbAD" id="lbAD"> </a></p>
+
+    <h2>Function Documentation</h2>
+
+    <p><a name="lbAE" id="lbAE"> </a></p>
+
+    <h3><b>netsnmp_mib_handler</b>* netsnmp_baby_steps_access_multiplexer_get (netsnmp_baby_steps_access_methods * am)</h3>
+
+    <p>returns a baby_steps handler that can be injected into a given handler chain.</p>
+
+    <p>Definition at line 338 of file baby_steps.c.</p>
+
+    <p>References netsnmp_mib_handler_s::flags, netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), and netsnmp_mib_handler.
+    <a name="lbAF" id="lbAF"> </a></p>
+
+    <h3><b>netsnmp_mib_handler</b>* netsnmp_baby_steps_handler_get (u_long modes)</h3>
+
+    <p>returns a baby_steps handler that can be injected into a given handler chain.</p>
+
+    <p>Definition at line 61 of file baby_steps.c.</p>
+
+    <p>References netsnmp_mib_handler_s::myvoid, netsnmp_create_handler(), netsnmp_handler_free(), netsnmp_mib_handler,
+    snmp_log(), and SNMP_MALLOC_TYPEDEF.</p>
+
+    <p>Referenced by netsnmp_baby_steps_handler_init(). <a name="lbAG" id="lbAG"> </a></p>
+
+    <h3>void netsnmp_baby_steps_handler_init (void)</h3>
+
+    <p>initializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for
+    configuration file use.</p>
+
+    <p>Definition at line 321 of file baby_steps.c.</p>
+
+    <p>References netsnmp_baby_steps_handler_get(), and netsnmp_register_handler_by_name().</p>
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAC">Functions</a></dt>
+        </dl>
+      </dd>
+
+      <dt><a href="#lbAD">Function Documentation</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAE"><b>netsnmp_mib_handler</b>* netsnmp_baby_steps_access_multiplexer_get
+          (netsnmp_baby_steps_access_methods * am)</a></dt>
+
+          <dt><a href="#lbAF"><b>netsnmp_mib_handler</b>* netsnmp_baby_steps_handler_get (u_long modes)</a></dt>
+
+          <dt><a href="#lbAG">void netsnmp_baby_steps_handler_init (void)</a></dt>
+        </dl>
+      </dd>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:44 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,172 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML>
+<HEAD>
+<TITLE>Extending the UCD agent - general tables</TITLE>
+</HEAD>
+<BODY>
+<H1> General Tables </H1>
+
+Some table structures are not suitable for the simple table approach,
+due to the failure of one or more of the assumptions listed earlier.
+Perhaps they are indexed by something other than a single integer
+(such as a 4-octet IP address), or the maximum index is not easily
+determinable (such as the interfaces table), or not all indices are
+valid (running software), or the necessary data is not directly
+accessible (interfaces again).
+<BR>
+  In such circumstances, a more general approach is needed.  In
+contrast with the two styles already covered, this style of module
+will commonly combine the two functions of request validation and
+data retrieval.
+Note that <CODE>mib2c</CODE> will assume the simple table case,
+and this will need to be corrected.
+
+<H3>General table algorithm</H3>
+
+  The basic algorithm is as follows:
+<BLOCKQUOTE>
+	Perform any necessary initialization, then walk through the
+underlying instances, retrieving the data for each one, until the
+desired instance is found.  If no valid entry is found, return failure.
+</BLOCKQUOTE>
+  For an exact match (<CODE>GET</CODE> and similar), identifying the desired
+instance is trivial - construct the OID (from the 'vp' variable
+parameter and the index value or values), and see whether it matches
+the requested OID.
+<BR>
+  For <CODE>GETNEXT</CODE>, the situation is not quite so simple.  Depending on the
+underlying representation of the data, the entries may be returned in
+the same order as they should appear in the table (i.e. lexically
+increasing by index).  However, this is not guaranteed, and the
+natural way of retrieving the data may be in some "random" order.
+In this case, then the whole table needs to be traversed for each request.
+in order to determine the appropriate successor.
+<BR>
+  This random order is the worst case, and dictates the structure
+of the code used in most currently implemented tables.  The ordered
+case can be regarded as a simplification of this more general one.
+<P>
+  The algorithm outlined above can now be expanded into the following
+pseudo-code:
+<PRE>
+	Init_<I>{Name}</I>_Entry();	<I>// Perform any necessary initialisation</I>
+
+	while (( index = Get_Next_<I>{Name}</I>_Entry() ) != EndMarker ) {
+			<I>// This steps through the underlying table,
+			//   returning the current index,
+			//   or some suitable end-marker when all
+			//   the entries have been examined.
+			// Note that this routine should also return the
+			//   data for this entry, either via a parameter,
+			//   or some external location</I>
+
+	    construct OID from vp->name and index
+	    compare new OID and request
+	    if valid {
+		save current data
+		if finished	<I>// exact match, or ordered table</I>
+		    break;	<I>//  so don't look at any more entries</I>
+
+	    }
+
+		<I>//  Otherwise, we need to loop round, and examine
+		//    the next entry in the table.  Either because
+		//    the entry wasn't valid for this request,
+		//    or the entry was a possible "next" candidate,
+		//    but we don't know that there isn't there's a
+		//    better one later in the table.</I>
+	}
+
+	if no saved data	<I>// Nothing matched</I>
+	   return failure
+
+		<I>// Otherwise, go on to the switch handling
+		//  we've already covered in the earlier styles.</I>
+</PRE>
+
+
+  This is now very close to the actual code used in many current
+implementations (such as the the routine <CODE>header_ifEntry</CODE> in
+<CODE>mibII/interfaces.c</CODE>).   Notice that the pseudo-code fragment
+<CODE>if valid</CODE> expands in practise to
+<PRE>
+	if ((exact && (result == 0))  ||
+			<I>//</I> <CODE>GET</CODE><I> request, and identical OIDs</I>
+	    (!exact && (result < 0)) )
+			<I>//</I> <CODE>GETNEXT</CODE><I>, and candidate OID is later
+			//  than requested OID.</I>
+</PRE>
+This is a very common expression, that can be seen in most
+of the table implementations.
+<P>
+  Notice also that the interfaces table returns immediately
+the first valid entry is found, even for <CODE>GETNEXT</CODE> requests.
+This is because entries are returned in lexical order, so
+the first succeeding entry will be the one that's required.
+<BR>
+(As an aside, this also means that the underlying data can
+be saved implicitly within the 'next entry' routine - not very
+clean, but it saves some unnecessary copying).
+<P>
+  The more general case can be seen in the TCP and UDP tables
+(see <CODE>mibII/tcp.c</CODE> and <CODE>mibII/udp.c</CODE>).
+Here, the <CODE>if valid</CODE> fragment expands to:
+<PRE>
+	if ( exact && (result == 0)) {
+		<I>// save results</I>
+		break;
+	}
+	else if (!exact && (result < 0)) {
+	    if ( .... ) { 	<I>// no saved OID, or this OID
+				//  precedes the saved OID
+		// save this OID into 'lowest'
+		// save the results into Lowinpcb
+		// </I><B>don't</B><I> break, since we still need to look
+		//      at the rest of the table</I>
+	    }
+	}
+</PRE>
+The <CODE>GET</CODE> match handling is just as we've already seen - is this the
+requested OID or not.
+If so, save the results and move on to the switch statement.
+  The <CODE>GETNEXT</CODE> case is more complicated. As well as considering whether
+this is a possible match (using the same test we've already seen), we
+also have to check whether this is a better match than anything we've
+already seen.  This is done by comparing the current candidate (<CODE>newname</CODE>)
+with the best match found so far (<CODE>lowest</CODE>).
+<BR>
+  Only if this extra comparison shows that the new OID is earlier
+than the saved one, do we need to save both the new OID, and any associated
+data (such as the <CODE>inpcb</CODE> block, and state flag).  But having found one
+better match, we don't know that there isn't an even better one later
+on.  So we can't break out of the enclosing loop - we need to keep going
+and examine all the remaining entries of the table.
+
+<P>
+These two cases (the TCP and UDP tables) also show a more general style
+of indexing.  Rather than simply appending a single index value to the
+OID prefix, these routines have to add the local four-octet IP address
+plus port (and the same for the remote end in the case of the TCP table).
+This is the purpose of the <CODE>op</CODE> and <CODE>cp</CODE> section of code that precedes
+the comparison.
+<P>
+  These two are probably among the most complex cases you are likely to
+encounter.  If you can follow the code here, then you've probably
+cracked the problem of understanding how the agent works.
+
+<P>
+Finally, the <A HREF=08-writing.html>next part</A> discusses
+how to implement a writable (or <CODE>SET</CODE>able) object in a MIB module.
+
+
+<P><HR>
+Copyright 1999 - D.T.Shield.
+Not to be distributed without the explicit permission of the author.
+</BODY>
+</HTML>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

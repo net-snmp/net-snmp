@@ -1,0 +1,674 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>
+  </div>
+
+  <h1>object_monitor.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * object_monitor.c</span>
+00003 <span class="comment"> *</span>
+00004 <span class="comment"> * $Id$</span>
+00005 <span class="comment"> *</span>
+00006 <span class="comment"> * functions and data structures for cooperating code to monitor objects.</span>
+00007 <span class="comment"> *</span>
+00008 <span class="comment"> * WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!</span>
+00009 <span class="comment"> * WARNING!                                                       WARNING!</span>
+00010 <span class="comment"> * WARNING!                                                       WARNING!</span>
+00011 <span class="comment"> * WARNING!         This code is under active development         WARNING!</span>
+00012 <span class="comment"> * WARNING!         and is subject to change at any time.         WARNING!</span>
+00013 <span class="comment"> * WARNING!                                                       WARNING!</span>
+00014 <span class="comment"> * WARNING!                                                       WARNING!</span>
+00015 <span class="comment"> * WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!</span>
+00016 <span class="comment"> */</span>
+00017 
+00018 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00019 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00020 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00021 <span class="preprocessor">#include &lt;net-snmp/library/container.h&gt;</span>
+00022 <span class="preprocessor">#include &lt;net-snmp/library/snmp_assert.h&gt;</span>
+00023 
+00024 <span class="preprocessor">#include "net-snmp/agent/object_monitor.h"</span>
+00025 
+00026 <span class="preprocessor">#if ! defined TRUE</span>
+00027 <span class="preprocessor">#  define TRUE 1</span>
+00028 <span class="preprocessor">#elsif TRUE != 1</span>
+00029 error <span class="stringliteral">"TRUE != 1"</span>
+00030 <span class="preprocessor">#endif</span>
+00031 <span class="comment">/**************************************************************************</span>
+00032 <span class="comment"> *</span>
+00033 <span class="comment"> * Private data structures</span>
+00034 <span class="comment"> *</span>
+00035 <span class="comment"> **************************************************************************/</span>
+00036     <span class="comment">/*</span>
+00037 <span class="comment">     * individual callback info for an object</span>
+00038 <span class="comment">     */</span>
+00039     <span class="keyword">typedef</span> <span class="keyword">struct </span>monitor_info_s {
+00040 
+00042     <span class="keywordtype">int</span>             priority;
+00043 
+00045     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *watcher;
+00046 
+00048     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    events;
+00049 
+00051     netsnmp_object_monitor_callback *cb;
+00052 
+00054     <span class="keywordtype">void</span>           *watcher_data;
+00055 
+00056     <span class="keyword">struct </span>monitor_info_s *next;
+00057 
+00058 } monitor_info;
+00059 
+00060 <span class="comment">/*</span>
+00061 <span class="comment"> * list of watchers for a given object</span>
+00062 <span class="comment"> */</span>
+00063 <span class="keyword">typedef</span> <span class="keyword">struct </span>watcher_list_s {
+00064 
+00066     netsnmp_index  monitored_object;
+00067 
+00068     monitor_info   *head;
+00069 
+00070 } watcher_list;
+00071 
+00072 <span class="comment">/*</span>
+00073 <span class="comment"> * temp holder for ordered list of callbacks</span>
+00074 <span class="comment"> */</span>
+00075 <span class="keyword">typedef</span> <span class="keyword">struct </span>callback_placeholder_s {
+00076 
+00077     monitor_info   *mi;
+00078     netsnmp_monitor_callback_header *cbh;
+00079 
+00080     <span class="keyword">struct </span>callback_placeholder_s *next;
+00081 
+00082 } callback_placeholder;
+00083 
+00084 
+00085 <span class="comment">/**************************************************************************</span>
+00086 <span class="comment"> *</span>
+00087 <span class="comment"> * </span>
+00088 <span class="comment"> *</span>
+00089 <span class="comment"> **************************************************************************/</span>
+00090 
+00091 <span class="comment">/*</span>
+00092 <span class="comment"> * local statics</span>
+00093 <span class="comment"> */</span>
+00094 <span class="keyword">static</span> <span class="keywordtype">char</span>     need_init = 1;
+00095 <span class="keyword">static</span> netsnmp_container *monitored_objects = NULL;
+00096 <span class="keyword">static</span> netsnmp_monitor_callback_header *callback_pending_list;
+00097 <span class="keyword">static</span> callback_placeholder *callback_ready_list;
+00098 
+00099 <span class="comment">/*</span>
+00100 <span class="comment"> * local prototypes</span>
+00101 <span class="comment"> */</span>
+00102 <span class="keyword">static</span> watcher_list *find_watchers(oid * object, size_t oid_len);
+00103 <span class="keyword">static</span> <span class=
+"keywordtype">int</span>      insert_watcher(oid *, size_t, monitor_info *);
+00104 <span class="keyword">static</span> <span class="keywordtype">int</span>      check_registered(<span class=
+"keywordtype">unsigned</span> <span class="keywordtype">int</span> event, oid * o, <span class="keywordtype">int</span> o_l,
+00105                                  watcher_list ** pWl, monitor_info ** pMi);
+00106 <span class="keyword">static</span> <span class="keywordtype">void</span>     move_pending_to_ready(<span class=
+"keywordtype">void</span>);
+00107 
+00108 
+00109 <span class="comment">/**************************************************************************</span>
+00110 <span class="comment"> *</span>
+00111 <span class="comment"> * Public functions</span>
+00112 <span class="comment"> *</span>
+00113 <span class="comment"> **************************************************************************/</span>
+00114 
+00115 <span class="comment">/*</span>
+00116 <span class="comment"> * </span>
+00117 <span class="comment"> */</span>
+00118 <span class="keywordtype">void</span>
+00119 netsnmp_monitor_init(<span class="keywordtype">void</span>)
+00120 {
+00121     <span class="keywordflow">if</span> (!need_init)
+00122         <span class="keywordflow">return</span>;
+00123 
+00124     callback_pending_list = NULL;
+00125     callback_ready_list = NULL;
+00126 
+00127     monitored_objects = netsnmp_container_get(<span class="stringliteral">"object_monitor:binary_array"</span>);
+00128     <span class="keywordflow">if</span> (NULL != monitored_objects)
+00129         need_init = 0;
+00130     monitored_objects-&gt;compare = netsnmp_compare_netsnmp_index;
+00131     monitored_objects-&gt;ncompare = netsnmp_ncompare_netsnmp_index;
+00132     
+00133     <span class="keywordflow">return</span>;
+00134 }
+00135 
+00136 
+00137 <span class="comment">/**************************************************************************</span>
+00138 <span class="comment"> *</span>
+00139 <span class="comment"> * Registration functions</span>
+00140 <span class="comment"> *</span>
+00141 <span class="comment"> **************************************************************************/</span>
+00142 
+00168 <span class="keywordtype">int</span>
+00169 netsnmp_monitor_register(oid * object, size_t oid_len, <span class="keywordtype">int</span> priority,
+00170                          <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> events, <span class="keywordtype">void</span> *watcher_data,
+00171                          netsnmp_object_monitor_callback * cb)
+00172 {
+00173     monitor_info   *mi;
+00174     <span class="keywordtype">int</span>             rc;
+00175 
+00176     netsnmp_assert(need_init == 0);
+00177 
+00178     mi = calloc(1, <span class="keyword">sizeof</span>(monitor_info));
+00179     <span class="keywordflow">if</span> (NULL == mi)
+00180         <span class="keywordflow">return</span> SNMPERR_MALLOC;
+00181 
+00182     mi-&gt;priority = priority;
+00183     mi-&gt;events = events;
+00184     mi-&gt;watcher_data = watcher_data;
+00185     mi-&gt;cb = cb;
+00186 
+00187     rc = insert_watcher(object, oid_len, mi);
+00188     <span class="keywordflow">if</span> (rc != SNMPERR_SUCCESS)
+00189         free(mi);
+00190 
+00191     <span class="keywordflow">return</span> rc;
+00192 }
+00193 
+00204 <span class="keywordtype">int</span>
+00205 netsnmp_monitor_unregister(oid * object, size_t oid_len, <span class="keywordtype">int</span> priority,
+00206                            <span class="keywordtype">void</span> *wd, netsnmp_object_monitor_callback * cb)
+00207 {
+00208     monitor_info   *mi, *last;
+00209 
+00210     watcher_list   *wl = find_watchers(object, oid_len);
+00211     <span class="keywordflow">if</span> (NULL == wl)
+00212         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00213 
+00214     last = NULL;
+00215     mi = wl-&gt;head;
+00216     <span class="keywordflow">while</span> (mi) {
+00217         <span class="keywordflow">if</span> ((mi-&gt;cb == cb) &amp;&amp; (mi-&gt;priority == priority) &amp;&amp;
+00218             (mi-&gt;watcher_data == wd))
+00219             <span class="keywordflow">break</span>;
+00220         last = mi;
+00221         mi = mi-&gt;next;
+00222     }
+00223 
+00224     <span class="keywordflow">if</span> (NULL == mi)
+00225         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00226 
+00227     <span class="keywordflow">if</span> (NULL == last)
+00228         wl-&gt;head = mi-&gt;next;
+00229     <span class="keywordflow">else</span>
+00230         last-&gt;next = mi-&gt;next;
+00231 
+00232     <span class="keywordflow">if</span> (NULL == wl-&gt;head) {
+00233         CONTAINER_REMOVE(monitored_objects, wl);
+00234         free(wl-&gt;monitored_object.oids);
+00235         free(wl);
+00236     }
+00237 
+00238     free(mi);
+00239 
+00240     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00241 }
+00242 
+00243 <span class="comment">/**************************************************************************</span>
+00244 <span class="comment"> *</span>
+00245 <span class="comment"> * object monitor functions</span>
+00246 <span class="comment"> *</span>
+00247 <span class="comment"> **************************************************************************/</span>
+00248 
+00265 <span class="keywordtype">void</span>
+00266 netsnmp_notify_monitor(netsnmp_monitor_callback_header * cbh)
+00267 {
+00268 
+00269     netsnmp_assert(need_init == 0);
+00270 
+00271     <span class="comment">/*</span>
+00272 <span class="comment">     * put processing of until response has been sent</span>
+00273 <span class="comment">     */</span>
+00274     cbh-&gt;private = callback_pending_list;
+00275     callback_pending_list = cbh;
+00276 
+00277     <span class="keywordflow">return</span>;
+00278 }
+00279 
+00290 <span class="keywordtype">int</span>
+00291 netsnmp_monitor_check_registered(<span class="keywordtype">int</span> event, oid * o, <span class=
+"keywordtype">int</span> o_l)
+00292 {
+00293     <span class="keywordflow">return</span> check_registered(event, o, o_l, NULL, NULL);
+00294 }
+00295 
+00302 <span class="keywordtype">void</span>
+00303 netsnmp_monitor_process_callbacks(<span class="keywordtype">void</span>)
+00304 {
+00305     netsnmp_assert(need_init == 0);
+00306     netsnmp_assert(NULL == callback_ready_list);
+00307 
+00308     <span class="keywordflow">if</span> (NULL == callback_pending_list) {
+00309         DEBUGMSGT((<span class="stringliteral">"object_monitor"</span>, <span class=
+"stringliteral">"No callbacks to process"</span>));
+00310         <span class="keywordflow">return</span>;
+00311     }
+00312 
+00313     DEBUGMSG((<span class="stringliteral">"object_monitor"</span>, <span class=
+"stringliteral">"Checking for registered "</span> <span class="stringliteral">"callbacks."</span>));
+00314 
+00315     <span class="comment">/*</span>
+00316 <span class="comment">     * move an pending notification which has a registered watcher to the</span>
+00317 <span class="comment">     * ready list. Free any other notifications.</span>
+00318 <span class="comment">     */</span>
+00319     move_pending_to_ready();
+00320 
+00321     <span class="comment">/*</span>
+00322 <span class="comment">     * call callbacks</span>
+00323 <span class="comment">     */</span>
+00324     <span class="keywordflow">while</span> (callback_ready_list) {
+00325 
+00326         <span class="comment">/*</span>
+00327 <span class="comment">         * pop off the first item</span>
+00328 <span class="comment">         */</span>
+00329         callback_placeholder *current_cbr;
+00330         current_cbr = callback_ready_list;
+00331         callback_ready_list = current_cbr-&gt;next;
+00332 
+00333         <span class="comment">/*</span>
+00334 <span class="comment">         * setup, then call callback</span>
+00335 <span class="comment">         */</span>
+00336         current_cbr-&gt;cbh-&gt;watcher_data = current_cbr-&gt;mi-&gt;watcher_data;
+00337         current_cbr-&gt;cbh-&gt;priority = current_cbr-&gt;mi-&gt;priority;
+00338         (*current_cbr-&gt;mi-&gt;cb) (current_cbr-&gt;cbh);
+00339 
+00340         <span class="comment">/*</span>
+00341 <span class="comment">         * release memory (don't free current_cbr-&gt;mi)</span>
+00342 <span class="comment">         */</span>
+00343         <span class="keywordflow">if</span> (--(current_cbr-&gt;cbh-&gt;refs) == 0) {
+00344             free(current_cbr-&gt;cbh-&gt;monitored_object.oids);
+00345             free(current_cbr-&gt;cbh);
+00346         }
+00347         free(current_cbr);
+00348 
+00349         <span class="comment">/*</span>
+00350 <span class="comment">         * check for any new pending notifications</span>
+00351 <span class="comment">         */</span>
+00352         move_pending_to_ready();
+00353 
+00354     }
+00355 
+00356     netsnmp_assert(callback_ready_list == NULL);
+00357     netsnmp_assert(callback_pending_list = NULL);
+00358 
+00359     <span class="keywordflow">return</span>;
+00360 }
+00361 
+00362 <span class="comment">/**************************************************************************</span>
+00363 <span class="comment"> *</span>
+00364 <span class="comment"> * COOPERATIVE helpers</span>
+00365 <span class="comment"> *</span>
+00366 <span class="comment"> **************************************************************************/</span>
+00386 <span class="keywordtype">void</span>
+00387 netsnmp_notify_cooperative(<span class="keywordtype">int</span> event, oid * o, size_t o_len, <span class=
+"keywordtype">char</span> o_steal,
+00388                            <span class="keywordtype">void</span> *object_info)
+00389 {
+00390     netsnmp_monitor_callback_cooperative *cbh;
+00391 
+00392     netsnmp_assert(need_init == 0);
+00393 
+00394     cbh = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_monitor_callback_cooperative);
+00395     <span class="keywordflow">if</span> (NULL == cbh) {
+00396         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"could not allocate memory for "</span>
+00397                  <span class="stringliteral">"cooperative callback"</span>);
+00398         <span class="keywordflow">return</span>;
+00399     }
+00400 
+00401     cbh-&gt;hdr.event = event;
+00402     cbh-&gt;hdr.object_info = object_info;
+00403     cbh-&gt;hdr.monitored_object.len = o_len;
+00404 
+00405     <span class="keywordflow">if</span> (o_steal) {
+00406         cbh-&gt;hdr.monitored_object.oids = o;
+00407     } <span class="keywordflow">else</span> {
+00408         cbh-&gt;hdr.monitored_object.oids = snmp_duplicate_objid(o, o_len);
+00409     }
+00410 
+00411     netsnmp_notify_monitor((netsnmp_monitor_callback_header *) cbh);
+00412 }
+00413 
+00414 <span class="preprocessor">#ifndef DOXYGEN_SHOULD_IGNORE_THIS</span>
+00415 <span class="comment">/*************************************************************************</span>
+00416 <span class="comment"> *************************************************************************</span>
+00417 <span class="comment"> *************************************************************************</span>
+00418 <span class="comment"> * WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!</span>
+00419 <span class="comment"> * WARNING!                                                       WARNING!</span>
+00420 <span class="comment"> * WARNING!                                                       WARNING!</span>
+00421 <span class="comment"> * WARNING!         This code is under active development         WARNING!</span>
+00422 <span class="comment"> * WARNING!         and is subject to change at any time.         WARNING!</span>
+00423 <span class="comment"> * WARNING!                                                       WARNING!</span>
+00424 <span class="comment"> * WARNING!                                                       WARNING!</span>
+00425 <span class="comment"> * WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!</span>
+00426 <span class="comment"> *************************************************************************</span>
+00427 <span class="comment"> *************************************************************************</span>
+00428 <span class="comment"> *************************************************************************</span>
+00429 <span class="comment"> */</span>
+00430 <span class="keyword">static</span> watcher_list *
+00431 find_watchers(oid * object, size_t oid_len)
+00432 {
+00433     netsnmp_index oah;
+00434 
+00435     oah.oids = object;
+00436     oah.len = oid_len;
+00437 
+00438     <span class="keywordflow">return</span> (watcher_list *)CONTAINER_FIND(monitored_objects, &amp;oah);
+00439 }
+00440 
+00441 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00442 insert_watcher(oid * object, size_t oid_len, monitor_info * mi)
+00443 {
+00444     watcher_list   *wl = find_watchers(object, oid_len);
+00445     <span class="keywordtype">int</span>             rc = SNMPERR_SUCCESS;
+00446 
+00447     <span class="keywordflow">if</span> (NULL != wl) {
+00448 
+00449         monitor_info   *last, *current;
+00450 
+00451         netsnmp_assert(wl-&gt;head != NULL);
+00452 
+00453         last = NULL;
+00454         current = wl-&gt;head;
+00455         <span class="keywordflow">while</span> (current) {
+00456             <span class="keywordflow">if</span> (mi-&gt;priority == current-&gt;priority) {
+00457                 <span class="comment">/*</span>
+00458 <span class="comment">                 * check for duplicate</span>
+00459 <span class="comment">                 */</span>
+00460                 <span class="keywordflow">if</span> (mi-&gt;watcher_data == current-&gt;watcher_data)
+00461                     <span class="keywordflow">return</span> SNMPERR_VALUE; 
+00462             } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (mi-&gt;priority &gt; current-&gt;priority) {
+00463                 <span class="keywordflow">break</span>;
+00464             }
+00465             last = current;
+00466             current = current-&gt;next;
+00467         }
+00468         <span class="keywordflow">if</span> (NULL == last) {
+00469             mi-&gt;next = wl-&gt;head;
+00470             wl-&gt;head = mi;
+00471         } <span class="keywordflow">else</span> {
+00472             mi-&gt;next = last-&gt;next;
+00473             last-&gt;next = mi;
+00474         }
+00475     } <span class="keywordflow">else</span> {
+00476 
+00477         <span class="comment">/*</span>
+00478 <span class="comment">         * first watcher for this oid; set up list</span>
+00479 <span class="comment">         */</span>
+00480         wl = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(watcher_list);
+00481         <span class="keywordflow">if</span> (NULL == wl)
+00482             <span class="keywordflow">return</span> SNMPERR_MALLOC;
+00483 
+00484         <span class="comment">/*</span>
+00485 <span class="comment">         * copy index oid</span>
+00486 <span class="comment">         */</span>
+00487         wl-&gt;monitored_object.len = oid_len;
+00488         wl-&gt;monitored_object.oids = malloc(<span class="keyword">sizeof</span>(oid) * oid_len);
+00489         <span class="keywordflow">if</span> (NULL == wl-&gt;monitored_object.oids) {
+00490             free(wl);
+00491             <span class="keywordflow">return</span> SNMPERR_MALLOC;
+00492         }
+00493         memcpy(wl-&gt;monitored_object.oids, object, <span class="keyword">sizeof</span>(oid) * oid_len);
+00494 
+00495         <span class="comment">/*</span>
+00496 <span class="comment">         * add watcher, and insert into array</span>
+00497 <span class="comment">         */</span>
+00498         wl-&gt;head = mi;
+00499         mi-&gt;next = NULL;
+00500         rc = CONTAINER_INSERT(monitored_objects, wl);
+00501         <span class="keywordflow">if</span> (rc) {
+00502             free(wl-&gt;monitored_object.oids);
+00503             free(wl);
+00504             <span class="keywordflow">return</span> rc;
+00505         }
+00506     }
+00507     <span class="keywordflow">return</span> rc;
+00508 }
+00509 
+00528 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00529 check_registered(<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> event, oid * o, <span class="keywordtype">int</span> o_l,
+00530                  watcher_list ** pWl, monitor_info ** pMi)
+00531 {
+00532     watcher_list   *wl;
+00533     monitor_info   *mi;
+00534 
+00535     netsnmp_assert(need_init == 0);
+00536 
+00537     <span class="comment">/*</span>
+00538 <span class="comment">     * check to see if anyone has registered for callbacks</span>
+00539 <span class="comment">     * for the object.</span>
+00540 <span class="comment">     */</span>
+00541     wl = find_watchers(o, o_l);
+00542     <span class="keywordflow">if</span> (pWl)
+00543         *pWl = wl;
+00544     <span class="keywordflow">if</span> (NULL == wl)
+00545         <span class="keywordflow">return</span> 0;
+00546 
+00547     <span class="comment">/*</span>
+00548 <span class="comment">     * check if any watchers are watching for this specific event</span>
+00549 <span class="comment">     */</span>
+00550     <span class="keywordflow">for</span> (mi = wl-&gt;head; mi; mi = mi-&gt;next) {
+00551 
+00552         <span class="keywordflow">if</span> (mi-&gt;events &amp; event) {
+00553             <span class="keywordflow">if</span> (pMi)
+00554                 *pMi = mi;
+00555             <span class="keywordflow">return</span> TRUE;
+00556         }
+00557     }
+00558 
+00559     <span class="keywordflow">return</span> 0;
+00560 }
+00561 
+00565 <span class="keyword">inline</span> <span class="keywordtype">void</span>
+00566 insert_ready(callback_placeholder * new_cbr)
+00567 {
+00568     callback_placeholder *current_cbr, *last_cbr;
+00569 
+00570     <span class="comment">/*</span>
+00571 <span class="comment">     * insert in callback ready list</span>
+00572 <span class="comment">     */</span>
+00573     last_cbr = NULL;
+00574     current_cbr = callback_ready_list;
+00575     <span class="keywordflow">while</span> (current_cbr) {
+00576 
+00577         <span class="keywordflow">if</span> (new_cbr-&gt;mi-&gt;priority &gt; current_cbr-&gt;mi-&gt;priority)
+00578             <span class="keywordflow">break</span>;
+00579 
+00580         last_cbr = current_cbr;
+00581         current_cbr = current_cbr-&gt;next;
+00582     }
+00583     <span class="keywordflow">if</span> (NULL == last_cbr) {
+00584         new_cbr-&gt;next = callback_ready_list;
+00585         callback_ready_list = new_cbr;
+00586     } <span class="keywordflow">else</span> {
+00587         new_cbr-&gt;next = last_cbr-&gt;next;
+00588         last_cbr-&gt;next = new_cbr;
+00589     }
+00590 }
+00591 
+00598 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00599 move_pending_to_ready(<span class="keywordtype">void</span>)
+00600 {
+00601     <span class="comment">/*</span>
+00602 <span class="comment">     * check to see if anyone has registered for callbacks</span>
+00603 <span class="comment">     * for each object.</span>
+00604 <span class="comment">     */</span>
+00605     <span class="keywordflow">while</span> (callback_pending_list) {
+00606 
+00607         watcher_list   *wl;
+00608         monitor_info   *mi;
+00609         netsnmp_monitor_callback_header *cbp;
+00610 
+00611         <span class="comment">/*</span>
+00612 <span class="comment">         * pop off first item</span>
+00613 <span class="comment">         */</span>
+00614         cbp = callback_pending_list;
+00615         callback_pending_list = cbp-&gt;private; 
+00617         <span class="keywordflow">if</span> (0 == check_registered(cbp-&gt;event, cbp-&gt;monitored_object.oids,
+00618                                   cbp-&gt;monitored_object.len, &amp;wl,
+00619                                   &amp;mi)) {
+00620 
+00621             <span class="comment">/*</span>
+00622 <span class="comment">             * nobody watching, free memory</span>
+00623 <span class="comment">             */</span>
+00624             free(cbp);
+00625             <span class="keywordflow">continue</span>;
+00626         }
+00627 
+00628         <span class="comment">/*</span>
+00629 <span class="comment">         * Found at least one; check the rest of the list and</span>
+00630 <span class="comment">         * save callback for processing</span>
+00631 <span class="comment">         */</span>
+00632         <span class="keywordflow">for</span> (; mi; mi = mi-&gt;next) {
+00633 
+00634             callback_placeholder *new_cbr;
+00635 
+00636             <span class="keywordflow">if</span> (0 == (mi-&gt;events &amp; cbp-&gt;event))
+00637                 <span class="keywordflow">continue</span>;
+00638 
+00639             <span class="comment">/*</span>
+00640 <span class="comment">             * create temprory placeholder.</span>
+00641 <span class="comment">             *</span>
+00642 <span class="comment">             * I hate to allocate memory here, as I'd like this code to</span>
+00643 <span class="comment">             * be fast and lean. But I don't have time to think of another</span>
+00644 <span class="comment">             * solution os this will have to do for now.</span>
+00645 <span class="comment">             *</span>
+00646 <span class="comment">             * I need a list of monitor_info (mi) objects for each</span>
+00647 <span class="comment">             * callback which has registered for the event, and want</span>
+00648 <span class="comment">             * that list sorted by the priority required by the watcher.</span>
+00649 <span class="comment">             */</span>
+00650             new_cbr = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(callback_placeholder);
+00651             <span class="keywordflow">if</span> (NULL == new_cbr) {
+00652                 <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"malloc failed, callback dropped."</span>);
+00653                 <span class="keywordflow">continue</span>;
+00654             }
+00655             new_cbr-&gt;cbh = cbp;
+00656             new_cbr-&gt;mi = mi;
+00657             ++cbp-&gt;refs;
+00658 
+00659             <span class="comment">/*</span>
+00660 <span class="comment">             * insert in callback ready list</span>
+00661 <span class="comment">             */</span>
+00662             insert_ready(new_cbr);
+00663 
+00664         } 
+00665     } 
+00667     netsnmp_assert(callback_pending_list == NULL);
+00668 }
+00669 
+00670 
+00671 <span class="preprocessor">#if defined TESTING_OBJECT_MONITOR</span>
+00672 <span class="comment">/**************************************************************************</span>
+00673 <span class="comment"> *</span>
+00674 <span class="comment"> * (untested) TEST CODE</span>
+00675 <span class="comment"> *</span>
+00676 <span class="comment"> */</span>
+00677 <span class="keywordtype">void</span>
+00678 dummy_callback(netsnmp_monitor_callback_header * cbh)
+00679 {
+00680     printf(<span class="stringliteral">"Callback received.\n"</span>);
+00681 }
+00682 
+00683 <span class="keywordtype">void</span>
+00684 dump_watchers(netsnmp_index *oah, <span class="keywordtype">void</span> *)
+00685 {
+00686     watcher_list   *wl = (watcher_list *) oah;
+00687     netsnmp_monitor_callback_header *cbh = wl-&gt;head;
+00688 
+00689     printf(<span class="stringliteral">"Watcher List for OID "</span>);
+00690     <a class="code" href="group__mib__utilities.html#ga66">print_objid</a>(wl-&gt;hdr-&gt;oids, wl-&gt;hdr-&gt;len);
+00691     printf(<span class="stringliteral">"\n"</span>);
+00692 
+00693     <span class="keywordflow">while</span> (cbh) {
+00694 
+00695         printf(<span class="stringliteral">"Priority = %d;, Events = %d; Watcher Data = 0x%x\n"</span>,
+00696                cbh-&gt;priority, cbh-&gt;events, cbh-&gt;watcher_data);
+00697 
+00698         cbh = cbh-&gt;private;
+00699     }
+00700 }
+00701 
+00702 <span class="keywordtype">void</span>
+00703 main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv)
+00704 {
+00705 
+00706     oid             object[3] = { 1, 3, 6 };
+00707     <span class="keywordtype">int</span>             object_len = 3;
+00708     <span class="keywordtype">int</span>             rc;
+00709 
+00710     <span class="comment">/*</span>
+00711 <span class="comment">     * init</span>
+00712 <span class="comment">     */</span>
+00713     netsnmp_monitor_init();
+00714 
+00715     <span class="comment">/*</span>
+00716 <span class="comment">     * insert an object</span>
+00717 <span class="comment">     */</span>
+00718     rc = netsnmp_monitor_register(object, object_len, 0,
+00719                                   EVENT_ROW_ADD, (<span class="keywordtype">void</span> *) 0xdeadbeef,
+00720                                   dummy_callback);
+00721     printf(<span class="stringliteral">"insert an object: %d\n"</span>, rc);
+00722 
+00723     <span class="comment">/*</span>
+00724 <span class="comment">     * insert same object, new priority</span>
+00725 <span class="comment">     */</span>
+00726     netsnmp_monitor_register(object, object_len, 10,
+00727                              EVENT_ROW_ADD, (<span class="keywordtype">void</span> *) 0xdeadbeef,
+00728                              dummy_callback);
+00729     printf(<span class="stringliteral">"insert same object, new priority: %d\n"</span>, rc);
+00730 
+00731     <span class="comment">/*</span>
+00732 <span class="comment">     * insert same object, same priority, new data</span>
+00733 <span class="comment">     */</span>
+00734     netsnmp_monitor_register(object, object_len, 10,
+00735                              EVENT_ROW_ADD, (<span class="keywordtype">void</span> *) 0xbeefdead,
+00736                              dummy_callback);
+00737     printf(<span class="stringliteral">"insert same object, same priority, new data: %d\n"</span>, rc);
+00738 
+00739     <span class="comment">/*</span>
+00740 <span class="comment">     * insert same object, same priority, same data</span>
+00741 <span class="comment">     */</span>
+00742     netsnmp_monitor_register(object, object_len, 10,
+00743                              EVENT_ROW_ADD, (<span class="keywordtype">void</span> *) 0xbeefdead,
+00744                              dummy_callback);
+00745     printf(<span class="stringliteral">"insert same object, same priority, new data: %d\n"</span>, rc);
+00746 
+00747 
+00748     <span class="comment">/*</span>
+00749 <span class="comment">     * dump table</span>
+00750 <span class="comment">     */</span>
+00751     CONTAINER_FOR_EACH(monitored_objects, dump_watchers, NULL);
+00752 }
+00753 <span class="preprocessor">#endif </span>
+00755 <span class="preprocessor">#endif </span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:58 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

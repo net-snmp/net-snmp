@@ -1,0 +1,169 @@
+/*
+www.net-snmp.org
+
+The layout for this page was [borrowed|stolen|abducted] from the kind
+folks at the Layout Reservoir. http://www.bluerobot.com/web/layouts/
+
+Here's the permission notice from the page on Oct 23, 2003:
+
+Please feel free to borrow, steal, abduct, and/or torture the documents 
+contained in the Layout Reservoir. Though you need not give credit to 
+BlueRobot.com, a comment in your source code would help other developers 
+to find this resource. Enjoy.
+*/
+
+body {
+  margin:0px;
+  padding:0px;
+  font-family:verdana, arial, helvetica, sans-serif;
+  font-size: 0.7em;
+  color:#333;
+  background-color:white;
+}
+
+pre{
+  font-family:      "Courier New"
+  Courier
+  monospace;
+  font-size: 1.1em;
+}
+        
+h1 {
+  margin:10px 0px 15px 0px;
+  padding:0px;
+  font-size:2.4em;
+  line-height:1em;
+  font-weight:900;
+  color:#000;
+}
+
+h2{
+  margin:10px 0px 15px 0px;
+  padding:0px;
+  font-size:2.0em;
+  line-height:1em;
+  font-weight:900;
+  color:#000;
+}
+
+h3{
+  margin:10px 0px 15px 0px;
+  padding:0px;
+  font-size:1.5em;
+  line-height:1em;
+  font-weight:900;
+  color:#000;
+}
+
+h4{
+  margin:10px 0px 15px 0px;
+  padding:0px;
+  font-size:1.3em;
+  line-height:1em;
+  font-weight:900;
+  color:#000;
+}
+       
+p {
+  /* font:11px/20px verdana, arial, helvetica, sans-serif; */
+  margin:0px 0px 1em 0px;
+  padding:0px;
+  line-height:125%;  
+}
+/* #Content>p {margin:0px;}  */
+/* #Content>p+p {text-indent:30px;}  */
+
+a {
+  color:#09c;
+  font-size:1em;
+  text-decoration:none;
+  font-weight:600;
+  font-family:verdana, arial, helvetica, sans-serif;
+}
+a:link {color:#09c;}
+a:visited {color:#07a;}
+a:hover {background-color:#eee;}
+
+#skip {
+  display:none;
+}
+
+#Header {
+  font-family: verdana,arial,serif; 
+  font-size: 2.1em; 
+  font-weight: bold;  
+  margin:0px 10px 10px 0px;
+  padding:0px 10px 0px 20px;
+  /* For IE5/Win's benefit height = [correct height] + [top padding] + [top and bottom border widths] */
+  height:40px; /* 14px + 17px + 2px = 33px */
+  border-style:solid;
+  border-color:black;
+  border-width:1px 0px; /* top and bottom borders: 1px; left and right borders: 0px */
+  line-height:11px;
+  background-color:#eee;      
+  
+  /* Ugly brilliant hack removed - messed up Konqueror.  Just set height anyways otherwise ie6 messed up */
+  height:40px; /* the correct height */
+  background: url('/images/postcards2.jpg');
+  background-repeat: repeat; 
+}
+/* I've heard this called the "be nice to Opera 5" rule. Basically, it feeds correct 
+length values to user agents that exhibit the parsing error exploited above yet get 
+the CSS box model right and understand the CSS2 parent-child selector. ALWAYS include
+a "be nice to Opera 5" rule every time you use the Tantek Celik hack (above). */
+body>#Header {height:40px;}
+
+#Header2 {
+  position:absolute;
+  top:6px;
+  left:10px;
+  width:150px;
+  /* For IE5/Win's benefit height = [correct height] + [top padding] + [top and bottom border widths] */
+  height:30px; /* 14px + 17px + 2px = 33px */
+
+}
+
+#HeaderMap {
+  display:none; 
+}
+
+#Content {
+  margin:0px 0px 0px 0px;
+  padding:0px;
+}
+       
+#LeftSide {
+  display:none;
+}
+
+#Menu {
+  padding:10px;
+  background-color:#eee;
+  border:1px dashed #999;
+}
+/* Again, "be nice to Opera 5". */
+body>#Menu {width:150px;}
+
+#ModificationDate {
+  margin:0px 50px 20px 0px;
+}
+
+.Copyright { font-family: verdana,arial,serif; font-size: 1em;}
+.Email { font-family: verdana,arial,serif; font-size: 0.85em;}
+
+.NewsItem { font-family: verdana,arial,serif; font-size: 1em; }
+.NewsItemUrgent { font-family: verdana,arial,serif; font-size: 1em; background-color: #ccff99;}
+.NewsItemDate { font-family: verdana,arial,serif; font-size: 1em; font-weight: bold; }
+
+.SectionTitle { font-family: verdana,arial,serif; font-size: 1.2em; font-weight: bold; text-decoration: underline;}
+.SectionBody { font-family: verdana,arial,serif; font-size: 1em; }
+
+.ModificationDate { font-family: verdana,arial,serif; font-size: 0.9em; }
+
+.w3Valid { display:none; }
+
+.HeaderSmall { font-family: verdana,arial,serif; font-size: 0.50em;}
+
+.Indent { padding-left:1em; }
+.Indent2 { padding-left:2em; }
+

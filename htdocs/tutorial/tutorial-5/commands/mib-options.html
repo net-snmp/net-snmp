@@ -1,0 +1,133 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>NET-SNMP Tutorial -- Using local MIBs</title>
+  </head>
+
+  <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
+    <h1>NET-SNMP Tutorial -- Using local MIBs</h1>
+
+    <p>
+      The net-snmp tools can translate numeric object identifies
+      (OIDs) into textual object identifiers using the MIB description
+      files.  The net-snmp toolkit provides a few of the standard
+      MIBs, but certainly doesn't contain all the MIBs known to man.
+
+    <p>
+      First off, you should know about the paths that the tools load
+      MIBs from.  By default, it loads things from the following list
+      of directories:
+
+    <ol>
+      <li> $HOME/.snmp/mibs
+      <li> /usr/local/share/snmp/mibs
+    </ol>
+
+    <p>
+      So, lets say you have a MIB called <a
+      href="ftp://ftp.cisco.com/pub/mibs/v2/CISCO-RHINO-MIB.my">CISCO-RHINO-MIB</a>
+      that you want parsed (it really exists, and I particularly liked
+      the name so I'm using it in the tutorial).  Place the file in
+      one of the above two directories.  If you pulled it from another
+      file (like an RFC), make sure it doesn't contain anything
+      non-MIB related (like the text leading up to it, and the page
+      separators).  The very first line in the file should begin with
+      something like "CISCO-RHINO-MIB DEFINITIONS ::= BEGIN"
+
+    <p>
+      No, pick a node in the file that you want to translate that
+      currently isn't being translated.  From the CISCO-RHINO-MIB, I'll
+      pick the <i>ciscoLS1010ChassisFanLed</i> node.
+
+    <p>First, lets verify that our handy snmptranslate command
+      (discussed <a href="snmptranslate.html">earlier</a>) doesn't
+      yet know about this node:
+
+<pre>
+<ul>
+% <b>snmptranslate -IR ciscoLS1010ChassisFanLed</b>
+Unknown object identifier: ciscoLS1010ChassisFanLed
+</ul>
+</pre>
+
+    <p>Nope, it doesn't.  So, first we need to download the <a
+      href="ftp://ftp.cisco.com/pub/mibs/v2/CISCO-RHINO-MIB.my">CISCO-RHINO-MIB.my</a>
+      file and place it in a directory that our snmp tools can find it
+      in.  So, I'm going to place the file in $HOME/.snmp/mibs.
+
+    <p>Now, lets use the <i>-m</i> flag to snmptranslate to tell it to
+    load that mib.  We'll use "-m +CISCO-RHINO-MIB" to indicate that
+    we want the tool to load not only the default set of mibs, but the
+    CISCO-RHINO-MIB as well (the leading '+' plus means "also").
+
+    <pre>
+    <ul>
+<b>snmptranslate -m +CISCO-RHINO-MIB -IR ciscoLS1010ChassisFanLed</b>
+Cannot find module (CISCO-SMI): At line 31 in $HOME/.snmp/mibs/CISCO-RHINO-MIB.my
+Unlinked OID in CISCO-RHINO-MIB: ciscoLS1010ChassisMIB ::= { workgroup 11 }
+Cannot adopt OID in CISCO-RHINO-MIB: ciscoAtmSwitchInvalidCellHeader ::= { ciscoAtmSwitchInvalidCellHeaderEntry 2 }
+<i>... rest of output truncated ...</i>
+    </ul>
+  </pre>
+
+    <p>
+    Wait a minute...  What the heck is all that stuff?  Errors!  Well,
+    the first line is the most important and it's telling us that we're
+    missing the CISCO-SMI MIB as well.  So, if we go <a
+    href="ftp://ftp.cisco.com/pub/mibs/v2/CISCO-SMI.my">download that
+    MIB file</a> and place it in our $HOME/.snmp/mibs directory as
+    well the command should suddenly work:
+
+    <pre>
+    <ul>
+<b>snmptranslate -m +CISCO-RHINO-MIB -IR ciscoLS1010ChassisFanLed</b>
+.1.3.6.1.4.1.9.5.11.1.1.12
+    </ul>
+  </pre>
+
+
+    <p>
+      <b>Success!</b>
+
+
+    <p>One last comment: You can also force loading of a given MIB and
+    its node in one fell swoop (and this method is the one most highly
+    recommended by Niels Baggesen, one of our primary core
+    developers):
+
+    <pre>
+    <ul>
+<b>snmptranslate CISCO-RHINO-MIB::ciscoLS1010ChassisFanLed</b>
+.1.3.6.1.4.1.9.5.11.1.1.12
+    </ul>
+  </pre>
+
+    <p>So, there you have it.  A complete example for how to get your
+    own <i>insert-spiffy-mib-here</i> loaded into the net-snmp tools.
+
+    <p>Please note the following sections of the FAQ as well:
+    <ul>
+      <li><a
+      href="http://www.net-snmp.org/FAQ.html#How_do_I_add_a_MIB_">How
+      do I add a MIB</a>
+      <li><a
+      href="http://www.net-snmp.org/FAQ.html#How_do_I_add_a_MIB_to_the_tools_">How do I add a MIB to the tools?</a>
+    <li><a href="http://www.net-snmp.org/FAQ.html#I_m_getting_answers__but_they_re_all_numbers__Why_">I'm getting answers, but they're all numbers. Why?</a>
+    <li>... (Read the entire <a
+    href="http://www.net-snmp.org/FAQ.html">FAQ</a> Please!)
+    </ul>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Thu Nov  4 15:38:15 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Thu Jul 12 23:13:44 PDT 2001
+<!-- hhmts end -->
+  </body>
+</html>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,168 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>SNMPCONF</h1>Section: Net-SNMP (1)<br />
+    Updated: 08 Feb 2002<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>snmpconf - creates and modifies SNMP configuration files <a name="lbAC" id="lbAC"> </a>
+
+    <h2>SYNOPSIS</h2><b>snmpconf</b> [OPTIONS] [fileToCreate]
+
+    <dl compact="compact">
+      <dt>Start with:</dt>
+
+      <dd><b>snmpconf</b> -g basic_setup</dd>
+
+      <dt>Or even just:</dt>
+
+      <dd><b>snmpconf</b></dd>
+    </dl><a name="lbAD" id="lbAD"> </a>
+
+    <h2>DESCRIPTION</h2><b>snmpconf</b> is a simple Perl script that walks you through setting up a configuration file step by
+    step. It should be fairly straight forward to use. Merely run it and answer its questions.
+
+    <p>In its default mode of operation, it prompts the user with menus showing sections of the various configuration files it
+    knows about. When the user selects a section, a sub-menu is shown listing of the descriptions of the tokens that can be
+    created in that section. When a description is selected, the user is prompted with questions that construct the configuration
+    line in question.</p>
+
+    <p>Finally, when the user quits the program any configuration files that have been edited by the user are saved to the local
+    directory, fully commented.</p>
+
+    <p>A particularly useful option is the <b>-g</b> switch, which walks a user through a specific set of configuration
+    questions. Run:</p>
+
+    <dl compact="compact">
+      <dd>
+        <p>snmpconf -g basic_setup</p>
+      </dd>
+    </dl>
+
+    <p>for an example. <a name="lbAE" id="lbAE"> </a></p>
+
+    <h2>OPTIONS</h2>
+
+    <dl compact="compact">
+      <dt><b>-f</b></dt>
+
+      <dd>Force overwriting existing files in the current directory without prompting the user if this is a desired thing to
+      do.</dd>
+
+      <dt><b>-i</b></dt>
+
+      <dd>When finished, install the files into the location where the global system commands expect to find them.</dd>
+
+      <dt><b>-p</b></dt>
+
+      <dd>When finished, install the files into the users home directory's .snmp subdirectory (where the applications will also
+      search for configuration files).</dd>
+
+      <dt><b>-I</b> <i>DIRECTORY</i></dt>
+
+      <dd>When finished, install the files into the directory <i>DIRECTORY</i>.</dd>
+
+      <dt><b>-a</b></dt>
+
+      <dd>Don't ask any questions. Simply read in the various known configuration files and write them back out again. This has
+      the effect of "auto-commenting" the configuration files for you. See the <b>NEAT TRICKS</b> section below.</dd>
+
+      <dt><b>-r</b><i>all|none</i></dt>
+
+      <dd>Read in either all or none of the found configuration files. Normally <b>snmpconf</b> prompts you for which files you
+      wish to read in. Reading in these configuration files will merge these files with the results of the questions that it asks
+      of you.</dd>
+
+      <dt><b>-R</b> <i>FILE,...</i></dt>
+
+      <dd>Read in a specific list of configuration files.</dd>
+
+      <dt><b>-g</b> <i>GROUPNAME</i></dt>
+
+      <dd>
+        Groups of configuration entries can be created that can be used to walk a user through a series of questions to create an
+        initial configuration file. There are no menus to navigate, just a list of questions. Run:
+
+        <dl compact="compact">
+          <dd>
+            <dl compact="compact">
+              <dd>
+                <p>snmpconf -g basic_setup</p>
+              </dd>
+            </dl>
+
+            <p>for a good example.</p>
+          </dd>
+        </dl>
+      </dd>
+
+      <dt><b>-G</b></dt>
+
+      <dd>List all the known groups.</dd>
+
+      <dt><b>-c</b> <i>CONFIGDIR</i></dt>
+
+      <dd><b>snmpconf</b> uses a directory of configuration information to learn about the files and questions that it should be
+      asking. This option tells <b>snmpconf</b> to use a different location for configuring itself.</dd>
+
+      <dt><b>-q</b></dt>
+
+      <dd>Run slightly more quietly. Since this is an interactive program, I don't recommend this option since it only removes
+      information from the output that is designed to help you.</dd>
+
+      <dt><b>-d</b></dt>
+
+      <dd>Turn on <b>lots</b> of debugging output.</dd>
+
+      <dt><b>-D</b></dt>
+
+      <dd>Add <b>even more</b> debugging output in the form of Perl variable dumps.</dd>
+    </dl><a name="lbAF" id="lbAF"> </a>
+
+    <h2>NEAT TRICKS</h2>
+
+    <dl compact="compact">
+      <dt>snmpconf -g basic_setup</dt>
+
+      <dd>Have I mentioned this command enough yet? It's designed to walk someone through an initial setup for the <i><a href=
+      "snmpd.html">snmpd</a>(8)</i> daemon. Really, you should try it.</dd>
+
+      <dt>snmpconf -R /usr/local/snmp/snmpd.conf -a -f snmpd.conf</dt>
+
+      <dd>Automatically reads in an snmpd.conf file (for example) and adds comments to them describing what each token does. Try
+      it. It's cool.</dd>
+    </dl><a name="lbAG" id="lbAG"> </a>
+
+    <h2>NOTES</h2><b>snmpconf</b> is actually a very generic utility that could be easily configured to help construct just about
+    any kind of configuration file. Its default configuration set of files are SNMP based. <a name="lbAH" id="lbAH"> </a>
+
+    <h2>SEE ALSO</h2><a href="snmpd.html">snmpd</a>(8), <a href="snmp_config.html">snmp_config</a>(5), <a href=
+    "snmp.conf.html">snmp.conf</a>(5), <a href="snmpd.conf.html">snmpd.conf</a>(5)
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+
+      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+
+      <dt><a href="#lbAE">OPTIONS</a></dt>
+
+      <dt><a href="#lbAF">NEAT TRICKS</a></dt>
+
+      <dt><a href="#lbAG">NOTES</a></dt>
+
+      <dt><a href="#lbAH">SEE ALSO</a></dt>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:43 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

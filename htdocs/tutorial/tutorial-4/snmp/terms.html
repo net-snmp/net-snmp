@@ -1,0 +1,222 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>SNMP Terminology</h1>
+    This document details some of the terminology that might be new to those
+    who are not familiar with SNMP.
+    <p>
+      It's not very comprehensive right now, but we hope to flush it out real
+      soon now.
+    </p>
+
+      <!-- ========================================================= -->
+    <h2>Basic SNMP Terminology</h2>
+
+    <ul>
+      <li><a name="snmp">SNMP</a> : Simple Network Management Protocol.<p>
+        The SNMP specificatins define two things: a protocol and a data
+        definition language.
+        <br>
+        The SNMP protocol defines a few simple operations: GET, GET-NEXT,
+        SET and TRAP. Versions 2c and 3 define a few more: GET-BULK and
+        INFORM. These are the requests that are sent between clients and
+        servers.
+        <br>
+        The data definition language is the Structure of Management
+        Information, or SMI. It is based on ASN.1, and is used to create
+        text documents that define Managed Information Bases, or MIBs. A
+        MIB defines a set of data objects and the format for those objects.
+        Each data object is identified by a unique Object Identifier, or OID.
+        </p>
+      <li><a name="oid">OID</a> : An Object Identifier<p>
+        An OID is a
+        series of integers that uniquely identify a data object. OIDs can
+        be represented in two ways. The first is using raw numbers, like so:
+        <code>.1.3.6.1.2.1.1.5.0</code><p>
+        While the raw numbers are easy for a computer to understand, it is
+        a little harder for us humans. A MIB can be used to convert the
+        number to the names used in the MIB. The above OID translates to:
+        <code>.iso.org.dod.internet.mgmt.mib-2.system.sysName.0</code><br>
+        </p>
+      <li><a name="pdu">PDU</a> : A Protocol Data Unit<p>
+        A PDU is simply
+        a data packet. The SNMP specifications define the format for
+        each supported PDU type. SNMP PDUs contain various header fields
+        (which depend on the protocol version being used and the PDU
+        type), and variable bindings (varbinds).
+        </p>
+      <li><a name="varbind">varbinds</a> : Variable bindings<p>
+        A Variable binding, or varbind, is an OID for an object, and the
+          data value associated with that object.
+        </p>
+      <li><a name="get">GET request</a><p>
+        A GET request PDU ...
+        </p>
+      <li><a name="getnext">GETNEXT request</a><p>
+        ...
+        </p>
+      <li><a name="set">SET request</a><p>
+          ...
+        </p>
+      <li><a name="notification">Notifications</a><p>
+          A notification is an unsolicted message from a SNMP agent or device
+          that is sent to a notification receiver (aka Network Managment
+          System (NMS) or Element Management System (EMS)). Notifications
+          generally indicate a status change on the device. It could be
+          information about the change, or a message to indicate an alarm
+          condition.
+          SNMP defines two types of notifications: traps and informs.
+        </p>
+      <li><a name="trap">Traps</a><p>
+          A SNMP trap is an unsolicited message sent to a notification
+          receiver. Unlike messages sent to a SNMP agent, traps are not
+          confirmed by the receiver. If it is critical that a Network
+          Management System (NMS) be able to detect when a message is
+          lost, then the device must provide a method for detecting
+          lost messages, such as a log table or sequence numbers. If
+          the device supports informs, critical notifications should be
+          sent using informs.
+        </p>
+      <li><a name="informs">Informs</a><p>
+          A SNMP inform is an unsolicited message sent to a notification
+          receiver. It was not introduced into the protocol until SNMP
+          version 2c, so it is not availabe in devices that only support
+          SNMP version 1. Unlike SNMP traps, informs are confirmed
+          messages, and thus are more appropriate for critical notifications.
+        </p>
+    </ul>
+    
+      <!-- ========================================================= -->
+    <h2> SNMP Related Terminology</h2>
+
+    <ul>
+      <li><a name="subagent"></a>
+        <p>
+          A SNMP subagent is a process which uses a protocol other than
+          SNMP to communicate with a master agent. The subagent does not
+          directly communicate with SNMP client, instead it relies on the
+          master agent to handle the protocol details of SNMP. One of the
+          primary advantages of subagents is that they can be added or
+          removed dynamically, and new agents can be developed with any
+          changes to the master agent. The two most commonly used protocols
+          for subagents are <a href="#AgentX">AgentX</a> and
+          <a href="#SMUX">SMUX</a>.
+      <li><a name="AgentX"></a>
+        <p>
+          AgentX is an agent extension protocol. An AgentX master agent
+          acts as a central communication center for one or more AgentX
+          <a href="#subagent">sub-agents</a>. The
+          <a href="http://www.ietf.org">IETF</a> document
+          defining AgentX is
+          <a href="http://www.apps.ietf.org/rfc/rfc2741.html">RFC 2741</a>.
+        </p>
+      <li><a name="SMUX"></a>
+        <p>
+          SMUX is an agent extension protocol. It started on the
+          <a href="http://www.ietf.org">IETF</a> standards track, but was
+          superceded by later work (eg AgentX), and the document defining it
+          (<a href="http://www.apps.ietf.org/rfc/rfc1227.html">RFC 1227</a>)
+          was moved to <i>historic</i> status.
+        </p>
+    </ul>
+
+    <!-- ========================================================= -->
+    <h2>MIB Terminology</h2>
+
+    <ul>
+      <li><a name="max-access">MAX-ACCESS</a>
+        <p>
+      <li><a name="augment">Augmentation</a> table
+        <p>
+    </ul>
+
+    <!-- ========================================================= -->
+    <h2>Network/Socket Terminology</h2>
+
+    <ul>
+      <li><a name="udp">UDP</a>
+        <p>
+          UDP, or User Datagram Protocol, is a network packet protocol, defined
+          in <a href="http://www.apps.ietf.org/rfc/rfc768.html">RFC 768</a>. UDP
+          is a <i>connectionless</i> protocol, which means that the packet is
+          sent, and no confirmation is received from the other side (like sending
+          a letter in the mail). This makes it less resource intensive, but also
+          less reliable, than TCP connections.
+        </p>
+      <li><a name="tcp">TCP</a>
+        <p>
+          TCP, or Transmission Control Protocol, is a network packet protocol,
+          defined in
+          <a href="http://www.apps.ietf.org/rfc/rfc793.html">RFC 793</a>. TCP
+          is a <i>connection oriented</i> protocol, which means that the
+          sender and receiver communicate to try and ensure the packet is
+          delivered (like sending a fax). This makes it more resource intensive,
+          but also more reliable than UDP packets.
+        </p>
+    </ul>
+
+    <!-- ========================================================= -->
+    <h2>SNMP Table Terminology</h2>
+    <ul>
+      <li><a name="dependencies">Dependencies</a><br>
+        When one or more columns in a table depend on another object (in the same
+        table, or in another table), a <b>DEPENDENCY</b> exists. For example, if you
+            have a table that determine a color with three columns (red, green and
+            blue) that define the percentage of each primary color, the total for
+            the three columns must equal 100 percent. So, in addition to checking
+            that each colums has a valid value between 0 and 100, the total of
+            all three columns must equal 100.
+        <p>
+      <li><a name="rowcreate">row creation</a>
+        <p>
+    </ul>
+    
+    <!-- ========================================================= -->
+    <h2>Net-SNMP Developer Terminology</h2>
+        
+    <h3>Table attributes</h3>
+    <ul>
+      <li><a name="transient">Transient</a> data<br>
+       TRANSIENT data is data that may be overwritten by another funtion
+       or process. For example, many OS functions return data in a
+       static buffer that will be reused the next time the function is
+       called.  Because of this, we will assume that you will copy the
+       raw data retrieved from these other sources to a generated
+       structure for use within the Net-SNMP agent.  (Don't worry, we'll
+       help you)
+        <p>
+      <li><a name="external">External</a> data<br>
+       EXTERNAL data is data that is owned by some other process,
+       device, file or mechanism.  The agent must use some interface to
+       read or modify the data.  An external process may modify the data
+       without the agent's knowledge. For example, the Net-SNMP agent
+       implements the interface table (ifTable), which reports on
+       network interfaces. The host operating system owns this data, and
+       Net-SNMP must use system calls to report or manipulate the data.
+       Examples of external data include data stored in kernel space, in
+       files, in another non-memory shared process, and data stored in
+       devices.
+        <p>
+      <li><a name="unsorted">Unsorted</a> data<br>
+       UNSORTED data is data that is not kept in the same order as the way
+       SNMP expects the index(es) for the table to be kept. [It could very
+       well be sorted in some other order, but for the purpose of SNMP, the
+       order is incorrect.]  If you're not sure if your data is sorted
+       in an SNMP compliant way, its likely not.
+        <p>
+       Because the raw data is unsorted, to satisfy a particular request, the
+       entire data set must be examined to find the apropriate index.
+        <p>
+    </ul>
+      <!-- ========================================================= -->
+    <hr>
+    rstory at freesnmp dot com<br>
+Version $Revision$
+<!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
+<!-- hhmts start -->
+Last modified: Sun Aug 29 22:27:53 EDT 2004
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

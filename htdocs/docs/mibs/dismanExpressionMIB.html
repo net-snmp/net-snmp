@@ -1,0 +1,1673 @@
+<head>
+  <title>MIB information for dismanExpressionMIB</title>
+<style type="text/css">
+<!--
+h2{background:#bbeebb}
+h3{background:#ccccee}
+-->
+</style>
+</head>
+<body bgcolor="#ffffff">
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>dismanExpressionMIB</b>
+MIB object, which is defined within the <b>DISMAN-EXPRESSION-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.90</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#expExpressionTable">expExpressionTable</a></li>
+  <li><a href="#expErrorTable">expErrorTable</a></li>
+  <li><a href="#expObjectTable">expObjectTable</a></li>
+  <li><a href="#expValueTable">expValueTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="expResourceDeltaMinimum" />
+1
+<br /><b>expResourceDeltaMinimum</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.90.1.1.1</td>
+<td>
+<pre>
+The minimum expExpressionDeltaInterval this system will
+accept.  A system may use the larger values of this minimum to
+lessen the impact of constantly computing deltas.  For larger
+delta sampling intervals the system samples less often and
+suffers less overhead.  This object provides a way to enforce
+such lower overhead for all expressions created after it is
+set.
+
+The value -1 indicates that expResourceDeltaMinimum is
+irrelevant as the system will not accept 'deltaValue' as a
+value for expObjectSampleType.
+
+Unless explicitly resource limited, a system's value for
+this object should be 1, allowing as small as a 1 second
+interval for ongoing delta sampling.
+
+Changing this value will not invalidate an existing setting
+of expObjectSampleType.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expResourceDeltaWildcardInstanceMaximum" />
+2
+<br /><b>expResourceDeltaWildcardInstanceMaximum</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.90.1.1.2</td>
+<td>
+<pre>
+For every instance of a deltaValue object, one dynamic instance
+entry is needed for holding the instance value from the previous
+sample, i.e. to maintain state.
+
+This object limits maximum number of dynamic instance entries
+this system will support for wildcarded delta objects in
+expressions. For a given delta expression, the number of
+dynamic instances is the number of values that meet all criteria
+to exist times the number of delta values in the expression.
+
+A value of 0 indicates no preset limit, that is, the limit
+is dynamic based on system operation and resources.
+
+Unless explicitly resource limited, a system's value for
+this object should be 0.
+
+
+Changing this value will not eliminate or inhibit existing delta
+wildcard instance objects but will prevent the creation of more
+such objects.
+
+An attempt to allocate beyond the limit results in expErrorCode
+being tooManyWildcardValues for that evaluation attempt.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expResourceDeltaWildcardInstances" />
+3
+<br /><b>expResourceDeltaWildcardInstances</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.90.1.1.3</td>
+<td>
+<pre>
+The number of currently active instance entries as
+defined for expResourceDeltaWildcardInstanceMaximum.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expResourceDeltaWildcardInstancesHigh" />
+4
+<br /><b>expResourceDeltaWildcardInstancesHigh</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.90.1.1.4</td>
+<td>
+<pre>
+The highest value of expResourceDeltaWildcardInstances
+that has occurred since initialization of the managed
+system.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expResourceDeltaWildcardInstanceResourceLacks" />
+5
+<br /><b>expResourceDeltaWildcardInstanceResourceLacks</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.90.1.1.5</td>
+<td>
+<pre>
+The number of times this system could not evaluate an
+expression because that would have created a value instance in
+excess of expResourceDeltaWildcardInstanceMaximum.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="expExpressionTable" /><h3>Table expExpressionTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>expExpressionTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EXPRESSION-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.90.1.2.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of expression definitions.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="expExpressionEntry" />Row Description</td>
+<td>
+<pre>
+Information about a single expression.  New expressions
+can be created using expExpressionRowStatus.
+
+To create an expression first create the named entry in this
+table.  Then use expExpressionName to populate expObjectTable.
+For expression evaluation to succeed all related entries in
+expExpressionTable and expObjectTable must be 'active'.  If
+these conditions are not met the corresponding values in
+expValue simply are not instantiated.
+
+Deleting an entry deletes all related entries in expObjectTable
+and expErrorTable.
+
+Because of the relationships among the multiple tables for an
+expression (expExpressionTable, expObjectTable, and
+expValueTable) and the SNMP rules for independence in setting
+object values, it is necessary to do final error checking when
+an expression is evaluated, that is, when one of its instances
+in expValueTable is read or a delta interval expires.  Earlier
+checking need not be done and an implementation may not impose
+any ordering on the creation of objects related to an
+expression.
+
+To maintain security of MIB information, when creating a new row in
+this table, the managed system must record the security credentials
+of the requester.  These security credentials are the parameters
+necessary as inputs to isAccessAllowed from the Architecture for
+
+Describing SNMP Management Frameworks.  When obtaining the objects
+that make up the expression, the system must (conceptually) use
+isAccessAllowed to ensure that it does not violate security.
+
+The evaluation of the expression takes place under the
+security credentials of the creator of its expExpressionEntry.
+
+Values of read-write objects in this table may be changed
+
+at any time.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>expExpressionTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="expExpressionOwner" />
+1
+<br /><b>expExpressionOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this entry. The exact semantics of this
+string are subject to the security policy defined by the
+security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expExpressionName" />
+2
+<br /><b>expExpressionName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of the expression.  This is locally unique, within
+the scope of an expExpressionOwner.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other expExpressionTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="expExpression" />
+3
+<br /><b>expExpression</b>
+
+</td><td>
+  OCTETSTR
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The expression to be evaluated.  This object is the same
+as a DisplayString (RFC 1903) except for its maximum length.
+
+Except for the variable names the expression is in ANSI C
+syntax.  Only the subset of ANSI C operators and functions
+listed here is allowed.
+
+Variables are expressed as a dollar sign ('@
+) and an
+
+integer that corresponds to an expObjectIndex.  An
+example of a valid expression is:
+
+     (-)*100
+
+Expressions must not be recursive, that is although an expression
+may use the results of another expression, it must not contain
+any variable that is directly or indirectly a result of its own
+evaluation. The managed system must check for recursive
+expressions.
+
+The only allowed operators are:
+
+     ( )
+     - (unary)
+     + - * / %
+     & | ^ << >> ~
+     ! && || == != > >= < <=
+
+Note the parentheses are included for parenthesizing the
+expression, not for casting data types.
+
+The only constant types defined are:
+
+     int (32-bit signed)
+     long (64-bit signed)
+     unsigned int
+     unsigned long
+     hexadecimal
+     character
+     string
+     oid
+
+The default type for a positive integer is int unless it is too
+large in which case it is long.
+
+All but oid are as defined for ANSI C.  Note that a
+hexadecimal constant may end up as a scalar or an array of
+8-bit integers.  A string constant is enclosed in double
+quotes and may contain back-slashed individual characters
+as in ANSI C.
+
+An oid constant comprises 32-bit, unsigned integers and at
+least one period, for example:
+
+     0.
+     .0
+     1.3.6.1
+
+No additional leading or trailing subidentifiers are automatically
+added to an OID constant.  The constant is taken as expressed.
+
+Integer-typed objects are treated as 32- or 64-bit, signed
+or unsigned integers, as appropriate.  The results of
+mixing them are as for ANSI C, including the type of the
+result.  Note that a 32-bit value is thus promoted to 64 bits
+only in an operation with a 64-bit value.  There is no
+provision for larger values to handle overflow.
+
+Relative to SNMP data types, a resulting value becomes
+unsigned when calculating it uses any unsigned value,
+including a counter.  To force the final value to be of
+data type counter the expression must explicitly use the
+counter32() or counter64() function (defined below).
+
+OCTET STRINGS and OBJECT IDENTIFIERs are treated as
+one-dimensioned arrays of unsigned 8-bit integers and
+unsigned 32-bit integers, respectively.
+
+IpAddresses are treated as 32-bit, unsigned integers in
+network byte order, that is, the hex version of 255.0.0.0 is
+0xff000000.
+
+Conditional expressions result in a 32-bit, unsigned integer
+of value 0 for false or 1 for true. When an arbitrary value
+is used as a boolean 0 is false and non-zero is true.
+
+Rules for the resulting data type from an operation, based on
+the operator:
+
+For << and >> the result is the same as the left hand operand.
+
+For &&, ||, ==, !=, <, <=, >, and >= the result is always
+Unsigned32.
+
+For unary - the result is always Integer32.
+
+For +, -, *, /, %, &, |, and ^ the result is promoted according
+to the following rules, in order from most to least preferred:
+
+     If left hand and right hand operands are the same type,
+     use that.
+
+     If either side is Counter64, use that.
+
+     If either side is IpAddress, use that.
+
+
+     If either side is TimeTicks, use that.
+
+     If either side is Counter32, use that.
+
+     Otherwise use Unsigned32.
+
+The following rules say what operators apply with what data
+types.  Any combination not explicitly defined does not work.
+
+For all operators any of the following can be the left hand or
+right hand operand: Integer32, Counter32, Unsigned32, Counter64.
+
+The operato
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expExpressionValueType" />
+4
+<br /><b>expExpressionValueType</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>counter32</td></tr>
+        <tr><td>2</td><td>unsigned32</td></tr>
+        <tr><td>3</td><td>timeTicks</td></tr>
+        <tr><td>4</td><td>integer32</td></tr>
+        <tr><td>5</td><td>ipAddress</td></tr>
+        <tr><td>6</td><td>octetString</td></tr>
+        <tr><td>7</td><td>objectId</td></tr>
+        <tr><td>8</td><td>counter64</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The type of the expression value.  One and only one of the
+value objects in expValueTable will be instantiated to match
+this type.
+
+If the result of the expression can not be made into this type,
+an invalidOperandType error will occur.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expExpressionComment" />
+5
+<br /><b>expExpressionComment</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A comment to explain the use or meaning of the expression.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expExpressionDeltaInterval" />
+6
+<br /><b>expExpressionDeltaInterval</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+Sampling interval for objects in this expression with
+expObjectSampleType 'deltaValue'.
+
+This object has no effect if the the expression has no
+deltaValue objects.
+
+A value of 0 indicates no automated sampling.  In this case
+the delta is the difference from the last time the expression
+was evaluated.  Note that this is subject to unpredictable
+delta times in the face of retries or multiple managers.
+
+A value greater than zero is the number of seconds between
+automated samples.
+
+Until the delta interval has expired once the delta for the
+
+object is effectively not instantiated and evaluating
+the expression has results as if the object itself were not
+instantiated.
+
+Note that delta values potentially consume large amounts of
+system CPU and memory.  Delta state and processing must
+continue constantly even if the expression is not being used.
+That is, the expression is being evaluated every delta interval,
+even if no application is reading those values.  For wildcarded
+objects this can be substantial overhead.
+
+Note that delta intervals, external expression value sampling
+intervals and delta intervals for expressions within other
+expressions can have unusual interactions as they are impossible
+to synchronize accurately.  In general one interval embedded
+below another must be enough shorter that the higher sample
+sees relatively smooth, predictable behavior.  So, for example,
+to avoid the higher level getting the same sample twice, the
+lower level should sample at least twice as fast as the higher
+level does.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expExpressionPrefix" />
+7
+<br /><b>expExpressionPrefix</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+An object prefix to assist an application in determining
+the instance indexing to use in expValueTable, relieving the
+application of the need to scan the expObjectTable to
+determine such a prefix.
+
+See expObjectTable for information on wildcarded objects.
+
+If the expValueInstance portion of the value OID may
+be treated as a scalar (that is, normally, 0) the value of
+expExpressionPrefix is zero length, that is, no OID at all.
+Note that zero length implies a null OID, not the OID 0.0.
+
+Otherwise, the value of expExpressionPrefix is the expObjectID
+value of any one of the wildcarded objects for the expression.
+This is sufficient, as the remainder, that is, the instance
+fragment relevant to instancing the values, must be the same for
+all wildcarded objects in the expression.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expExpressionErrors" />
+8
+<br /><b>expExpressionErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of errors encountered while evaluating this
+expression.
+
+Note that an object in the expression not being accessible,
+is not considered an error. An example of an inaccessible
+object is when the object is excluded from the view of the
+user whose security credentials are used in the expression
+evaluation. In such cases, it is a legitimate condition
+that causes the corresponding expression value not to be
+instantiated.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expExpressionEntryStatus" />
+9
+<br /><b>expExpressionEntryStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The control that allows creation and deletion of entries.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="expErrorTable" /><h3>Table expErrorTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>expErrorTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EXPRESSION-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.90.1.2.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of expression errors.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="expErrorEntry" />Row Description</td>
+<td>
+<pre>
+Information about errors in processing an expression.
+Entries appear in this table only when there is a matching
+     expExpressionEntry and then only when there has been an
+     error for that expression as reflected by the error codes
+     defined for expErrorCode.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>expErrorTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="expExpressionOwner" />
+1
+<br /><b>expExpressionOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this entry. The exact semantics of this
+string are subject to the security policy defined by the
+security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expExpressionName" />
+2
+<br /><b>expExpressionName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of the expression.  This is locally unique, within
+the scope of an expExpressionOwner.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other expErrorTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="expErrorTime" />
+1
+<br /><b>expErrorTime</b>
+
+</td><td>
+  TICKS
+
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime the last time an error caused a
+failure to evaluate this expression.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expErrorIndex" />
+2
+<br /><b>expErrorIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The one-dimensioned character array index into
+expExpression for where the error occurred.  The value
+zero indicates irrelevance.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expErrorCode" />
+3
+<br /><b>expErrorCode</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>invalidSyntax</td></tr>
+        <tr><td>2</td><td>undefinedObjectIndex</td></tr>
+        <tr><td>3</td><td>unrecognizedOperator</td></tr>
+        <tr><td>4</td><td>unrecognizedFunction</td></tr>
+        <tr><td>5</td><td>invalidOperandType</td></tr>
+        <tr><td>6</td><td>unmatchedParenthesis</td></tr>
+        <tr><td>7</td><td>tooManyWildcardValues</td></tr>
+        <tr><td>8</td><td>recursion</td></tr>
+        <tr><td>9</td><td>deltaTooShort</td></tr>
+        <tr><td>10</td><td>resourceUnavailable</td></tr>
+        <tr><td>11</td><td>divideByZero</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The error that occurred.  In the following explanations the
+expected timing of the error is in parentheses.  'S' means
+the error occurs on a Set request.  'E' means the error
+
+occurs on the attempt to evaluate the expression either due to
+Get from expValueTable or in ongoing delta processing.
+
+invalidSyntax       the value sent for expExpression is not
+               valid Expression MIB expression syntax
+               (S)
+undefinedObjectIndex     an object reference () in
+               expExpression does not have a matching
+               instance in expObjectTable (E)
+unrecognizedOperator     the value sent for expExpression held an
+               unrecognized operator (S)
+unrecognizedFunction     the value sent for expExpression held an
+               unrecognized function name (S)
+invalidOperandType  an operand in expExpression is not the
+               right type for the associated operator
+               or result (SE)
+unmatchedParenthesis     the value sent for expExpression is not
+               correctly parenthesized (S)
+tooManyWildcardValues    evaluating the expression exceeded the
+               limit set by
+               expResourceDeltaWildcardInstanceMaximum
+               (E)
+recursion      through some chain of embedded
+               expressions the expression invokes itself
+               (E)
+deltaTooShort       the delta for the next evaluation passed
+               before the system could evaluate the
+               present sample (E)
+resourceUnavailable some resource, typically dynamic memory,
+               was unavailable (SE)
+divideByZero        an attempt to divide by zero occurred
+               (E)
+
+For the errors that occur when the attempt is made to set
+expExpression Set request fails with the SNMP error code
+'wrongValue'.  Such failures refer to the most recent failure to
+Set expExpression, not to the present value of expExpression
+which must be either unset or syntactically correct.
+
+Errors that occur during evaluation for a Get* operation return
+the SNMP error code 'genErr' except for 'tooManyWildcardValues'
+and 'resourceUnavailable' which return the SNMP error code
+'resourceUnavailable'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expErrorInstance" />
+4
+<br /><b>expErrorInstance</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The expValueInstance being evaluated when the error
+occurred.  A zero-length indicates irrelevance.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="expObjectTable" /><h3>Table expObjectTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>expObjectTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EXPRESSION-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.90.1.2.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of object definitions for each expExpression.
+Wildcarding instance IDs:
+It is legal to omit all or part of the instance portion for
+     some or all of the objects in an expression. (See the
+     DESCRIPTION of expObjectID for details.  However, note that
+     if more than one object in the same expression is wildcarded
+     in this way, they all must be objects where that portion of
+     the instance is the same.  In other words, all objects may be
+     in the same SEQUENCE or in different SEQUENCEs but with the
+     same semantic index value (e.g., a value of ifIndex)
+     for the wildcarded portion.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="expObjectEntry" />Row Description</td>
+<td>
+<pre>
+Information about an object.  An application uses
+expObjectEntryStatus to create entries in this table while
+in the process of defining an expression.
+
+Values of read-create objects in this table may be
+changed at any time.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>expObjectTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="expExpressionOwner" />
+1
+<br /><b>expExpressionOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this entry. The exact semantics of this
+string are subject to the security policy defined by the
+security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expExpressionName" />
+2
+<br /><b>expExpressionName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of the expression.  This is locally unique, within
+the scope of an expExpressionOwner.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expObjectIndex" />
+1
+<br /><b>expObjectIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+Within an expression, a unique, numeric identification for an
+object.  Prefixed with a dollar sign ('@
+) this is used to
+reference the object in the corresponding expExpression.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other expObjectTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="expObjectID" />
+2
+<br /><b>expObjectID</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The OBJECT IDENTIFIER (OID) of this object.  The OID may be
+fully qualified, meaning it includes a complete instance
+identifier part (e.g., ifInOctets.1 or sysUpTime.0), or it
+may not be fully qualified, meaning it may lack all or part
+of the instance identifier.  If the expObjectID is not fully
+qualified, then expObjectWildcard must be set to true(1).
+The value of the expression will be multiple
+values, as if done for a GetNext sweep of the object.
+
+An object here may itself be the result of an expression but
+recursion is not allowed.
+
+NOTE:  The simplest implementations of this MIB may not allow
+wildcards.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expObjectIDWildcard" />
+3
+<br /><b>expObjectIDWildcard</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A true value indicates the expObjecID of this row is a wildcard
+object. False indicates that expObjectID is fully instanced.
+If all expObjectWildcard values for a given expression are FALSE,
+
+expExpressionPrefix will reflect a scalar object (i.e. will
+be 0.0).
+
+NOTE:  The simplest implementations of this MIB may not allow
+wildcards.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expObjectSampleType" />
+4
+<br /><b>expObjectSampleType</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>absoluteValue</td></tr>
+        <tr><td>2</td><td>deltaValue</td></tr>
+        <tr><td>3</td><td>changedValue</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The method of sampling the selected variable.
+An 'absoluteValue' is simply the present value of the object.
+A 'deltaValue' is the present value minus the previous value,
+     which was sampled expExpressionDeltaInterval seconds ago.
+     This is intended primarily for use with SNMP counters, which are
+     meaningless as an 'absoluteValue', but may be used with any
+     integer-based value.
+A 'changedValue' is a boolean for whether the present value is
+     different from the previous value.  It is applicable to any data
+     type and results in an Unsigned32 with value 1 if the object's
+     value is changed and 0 if not.  In all other respects it is as a
+     'deltaValue' and all statements and operation regarding delta
+     values apply to changed values.
+When an expression contains both delta and absolute values
+     the absolute values are obtained at the end of the delta
+     period.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expObjectDeltaDiscontinuityID" />
+5
+<br /><b>expObjectDeltaDiscontinuityID</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The OBJECT IDENTIFIER (OID) of a TimeTicks, TimeStamp, or
+DateAndTime object that indicates a discontinuity in the value
+at expObjectID.
+
+
+This object is instantiated only if expObjectSampleType is
+'deltaValue' or 'changedValue'.
+
+The OID may be for a leaf object (e.g. sysUpTime.0) or may
+be wildcarded to match expObjectID.
+
+This object supports normal checking for a discontinuity in a
+counter.  Note that if this object does not point to sysUpTime
+discontinuity checking must still check sysUpTime for an overall
+discontinuity.
+
+If the object identified is not accessible no discontinuity
+check will be made.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expObjectDiscontinuityIDWildcard" />
+6
+<br /><b>expObjectDiscontinuityIDWildcard</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A true value indicates the expObjectDeltaDiscontinuityID of
+this row is a wildcard object.  False indicates that
+expObjectDeltaDiscontinuityID is fully instanced.
+
+This object is instantiated only if expObjectSampleType is
+'deltaValue' or 'changedValue'.
+
+NOTE:  The simplest implementations of this MIB may not allow
+wildcards.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expObjectDiscontinuityIDType" />
+7
+<br /><b>expObjectDiscontinuityIDType</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>timeTicks</td></tr>
+        <tr><td>2</td><td>timeStamp</td></tr>
+        <tr><td>3</td><td>dateAndTime</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The value 'timeTicks' indicates the expObjectDeltaDiscontinuityID
+of this row is of syntax TimeTicks.  The value 'timeStamp' indicates
+syntax TimeStamp.  The value 'dateAndTime indicates syntax
+DateAndTime.
+
+This object is instantiated only if expObjectSampleType is
+'deltaValue' or 'changedValue'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expObjectConditional" />
+8
+<br /><b>expObjectConditional</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The OBJECT IDENTIFIER (OID) of an object that overrides
+whether the instance of expObjectID is to be considered
+usable.  If the value of the object at expObjectConditional
+is 0 or not instantiated, the object at expObjectID is
+treated as if it is not instantiated.  In other words,
+expObjectConditional is a filter that controls whether or
+not to use the value at expObjectID.
+
+The OID may be for a leaf object (e.g. sysObjectID.0) or may be
+wildcarded to match expObjectID.  If expObject is wildcarded and
+expObjectID in the same row is not, the wild portion of
+expObjectConditional must match the wildcarding of the rest of
+the expression.  If no object in the expression is wildcarded
+but expObjectConditional is, use the lexically first instance
+(if any) of expObjectConditional.
+
+If the value of expObjectConditional is 0.0 operation is
+as if the value pointed to by expObjectConditional is a
+non-zero (true) value.
+
+Note that expObjectConditional can not trivially use an object
+of syntax TruthValue, since the underlying value is not 0 or 1.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expObjectConditionalWildcard" />
+9
+<br /><b>expObjectConditionalWildcard</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A true value indicates the expObjectConditional of this row is
+a wildcard object. False indicates that expObjectConditional is
+fully instanced.
+
+NOTE: The simplest implementations of this MIB may not allow
+wildcards.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expObjectEntryStatus" />
+10
+<br /><b>expObjectEntryStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The control that allows creation/deletion of entries.
+Objects in this table may be changed while
+     expObjectEntryStatus is in any state.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="expValueTable" /><h3>Table expValueTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>expValueTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EXPRESSION-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.90.1.3.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of values from evaluated expressions.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="expValueEntry" />Row Description</td>
+<td>
+<pre>
+A single value from an evaluated expression.  For a given
+instance, only one 'Val' object in the conceptual row will be
+instantiated, that is, the one with the appropriate type for
+the value.  For values that contain no objects of
+expObjectSampleType 'deltaValue' or 'changedValue', reading a
+value from the table causes the evaluation of the expression
+for that value.  For those that contain a 'deltaValue' or
+'changedValue' the value read is as of the last sampling
+interval.
+
+If in the attempt to evaluate the expression one or more
+of the necessary objects is not available, the corresponding
+entry in this table is effectively not instantiated.
+
+To maintain security of MIB information, when creating a new
+row in this table, the managed system must record the security
+credentials of the requester.  These security credentials are
+the parameters necessary as inputs to isAccessAllowed from
+[RFC2571]. When obtaining the objects that make up the
+expression, the system must (conceptually) use isAccessAllowed to
+ensure that it does not violate security.
+
+The evaluation of that expression takes place under the
+
+security credentials of the creator of its expExpressionEntry.
+
+To maintain security of MIB information, expression evaluation must
+take place using security credentials for the implied Gets of the
+objects in the expression as inputs (conceptually) to
+isAccessAllowed from the Architecture for Describing SNMP
+Management Frameworks.  These are the security credentials of the
+creator of the corresponding expExpressionEntry.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>expValueTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="expExpressionOwner" />
+1
+<br /><b>expExpressionOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this entry. The exact semantics of this
+string are subject to the security policy defined by the
+security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expExpressionName" />
+2
+<br /><b>expExpressionName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of the expression.  This is locally unique, within
+the scope of an expExpressionOwner.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expValueInstance" />
+1
+<br /><b>expValueInstance</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The final instance portion of a value's OID according to
+the wildcarding in instances of expObjectID for the
+expression.  The prefix of this OID fragment is 0.0,
+leading to the following behavior.
+
+If there is no wildcarding, the value is 0.0.0.  In other
+words, there is one value which standing alone would have
+been a scalar with a 0 at the end of its OID.
+
+If there is wildcarding, the value is 0.0 followed by
+a value that the wildcard can take, thus defining one value
+instance for each real, possible value of the wildcard.
+So, for example, if the wildcard worked out to be an ifIndex,
+there is an expValueInstance for each applicable ifIndex.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other expValueTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="expValueCounter32Val" />
+2
+<br /><b>expValueCounter32Val</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value when expExpressionValueType is 'counter32'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expValueUnsigned32Val" />
+3
+<br /><b>expValueUnsigned32Val</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value when expExpressionValueType is 'unsigned32'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expValueTimeTicksVal" />
+4
+<br /><b>expValueTimeTicksVal</b>
+
+</td><td>
+  TICKS
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value when expExpressionValueType is 'timeTicks'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expValueInteger32Val" />
+5
+<br /><b>expValueInteger32Val</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value when expExpressionValueType is 'integer32'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expValueIpAddressVal" />
+6
+<br /><b>expValueIpAddressVal</b>
+
+</td><td>
+  IPADDR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value when expExpressionValueType is 'ipAddress'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expValueOctetStringVal" />
+7
+<br /><b>expValueOctetStringVal</b>
+
+</td><td>
+  OCTETSTR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value when expExpressionValueType is 'octetString'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expValueOidVal" />
+8
+<br /><b>expValueOidVal</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value when expExpressionValueType is 'objectId'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="expValueCounter64Val" />
+9
+<br /><b>expValueCounter64Val</b>
+
+</td><td>
+  COUNTER64
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value when expExpressionValueType is 'counter64'.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp DISMAN-EXPRESSION-MIB::dismanExpressionMIB</b></p>
+<pre>
++--<a href="#dismanExpressionMIB">dismanExpressionMIB</a>(90)
+   |
+   +--<a href="#dismanExpressionMIBObjects">dismanExpressionMIBObjects</a>(1)
+   |  |
+   |  +--<a href="#expResource">expResource</a>(1)
+   |  |  |
+   |  |  +-- -RW- Integer32 <a href="#expResourceDeltaMinimum">expResourceDeltaMinimum</a>(1)
+   |  |  |        Range: -1 | 1..600
+   |  |  +-- -RW- Unsigned  <a href="#expResourceDeltaWildcardInstanceMaximum">expResourceDeltaWildcardInstanceMaximum</a>(2)
+   |  |  +-- -R-- Gauge     <a href="#expResourceDeltaWildcardInstances">expResourceDeltaWildcardInstances</a>(3)
+   |  |  +-- -R-- Gauge     <a href="#expResourceDeltaWildcardInstancesHigh">expResourceDeltaWildcardInstancesHigh</a>(4)
+   |  |  +-- -R-- Counter   <a href="#expResourceDeltaWildcardInstanceResourceLacks">expResourceDeltaWildcardInstanceResourceLacks</a>(5)
+   |  |
+   |  +--<a href="#expDefine">expDefine</a>(2)
+   |  |  |
+   |  |  +--<a href="#expExpressionTable">expExpressionTable</a>(1)
+   |  |  |  |
+   |  |  |  +--<a href="#expExpressionEntry">expExpressionEntry</a>(1)
+   |  |  |     |  Index: expExpressionOwner, expExpressionName
+   |  |  |     |
+   |  |  |     +-- ---- String    <a href="#expExpressionOwner">expExpressionOwner</a>(1)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..32
+   |  |  |     +-- ---- String    <a href="#expExpressionName">expExpressionName</a>(2)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 1..32
+   |  |  |     +-- CR-- String    <a href="#expExpression">expExpression</a>(3)
+   |  |  |     |        Size: 1..1024
+   |  |  |     +-- CR-- EnumVal   <a href="#expExpressionValueType">expExpressionValueType</a>(4)
+   |  |  |     |        Values: counter32(1), unsigned32(2), timeTicks(3), integer32(4), ipAddress(5), octetString(6), objectId(7), counter64(8)
+   |  |  |     +-- CR-- String    <a href="#expExpressionComment">expExpressionComment</a>(5)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..255
+   |  |  |     +-- CR-- Integer32 <a href="#expExpressionDeltaInterval">expExpressionDeltaInterval</a>(6)
+   |  |  |     |        Range: 0..86400
+   |  |  |     +-- -R-- ObjID     <a href="#expExpressionPrefix">expExpressionPrefix</a>(7)
+   |  |  |     +-- -R-- Counter   <a href="#expExpressionErrors">expExpressionErrors</a>(8)
+   |  |  |     +-- CR-- EnumVal   <a href="#expExpressionEntryStatus">expExpressionEntryStatus</a>(9)
+   |  |  |              Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |  |  |              Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |  |  |
+   |  |  +--<a href="#expErrorTable">expErrorTable</a>(2)
+   |  |  |  |
+   |  |  |  +--<a href="#expErrorEntry">expErrorEntry</a>(1)
+   |  |  |     |  Index: expExpressionOwner, expExpressionName
+   |  |  |     |
+   |  |  |     +-- -R-- TimeTicks <a href="#expErrorTime">expErrorTime</a>(1)
+   |  |  |     |        Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |  |     +-- -R-- Integer32 <a href="#expErrorIndex">expErrorIndex</a>(2)
+   |  |  |     +-- -R-- EnumVal   <a href="#expErrorCode">expErrorCode</a>(3)
+   |  |  |     |        Values: invalidSyntax(1), undefinedObjectIndex(2), unrecognizedOperator(3), unrecognizedFunction(4), invalidOperandType(5), unmatchedParenthesis(6), tooManyWildcardValues(7), recursion(8), deltaTooShort(9), resourceUnavailable(10), divideByZero(11)
+   |  |  |     +-- -R-- ObjID     <a href="#expErrorInstance">expErrorInstance</a>(4)
+   |  |  |
+   |  |  +--<a href="#expObjectTable">expObjectTable</a>(3)
+   |  |     |
+   |  |     +--<a href="#expObjectEntry">expObjectEntry</a>(1)
+   |  |        |  Index: expExpressionOwner, expExpressionName, expObjectIndex
+   |  |        |
+   |  |        +-- ---- Unsigned  <a href="#expObjectIndex">expObjectIndex</a>(1)
+   |  |        |        Range: 1..2147483647
+   |  |        +-- CR-- ObjID     <a href="#expObjectID">expObjectID</a>(2)
+   |  |        +-- CR-- EnumVal   <a href="#expObjectIDWildcard">expObjectIDWildcard</a>(3)
+   |  |        |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |        |        Values: true(1), false(2)
+   |  |        +-- CR-- EnumVal   <a href="#expObjectSampleType">expObjectSampleType</a>(4)
+   |  |        |        Values: absoluteValue(1), deltaValue(2), changedValue(3)
+   |  |        +-- CR-- ObjID     <a href="#expObjectDeltaDiscontinuityID">expObjectDeltaDiscontinuityID</a>(5)
+   |  |        +-- CR-- EnumVal   <a href="#expObjectDiscontinuityIDWildcard">expObjectDiscontinuityIDWildcard</a>(6)
+   |  |        |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |        |        Values: true(1), false(2)
+   |  |        +-- CR-- EnumVal   <a href="#expObjectDiscontinuityIDType">expObjectDiscontinuityIDType</a>(7)
+   |  |        |        Values: timeTicks(1), timeStamp(2), dateAndTime(3)
+   |  |        +-- CR-- ObjID     <a href="#expObjectConditional">expObjectConditional</a>(8)
+   |  |        +-- CR-- EnumVal   <a href="#expObjectConditionalWildcard">expObjectConditionalWildcard</a>(9)
+   |  |        |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |        |        Values: true(1), false(2)
+   |  |        +-- CR-- EnumVal   <a href="#expObjectEntryStatus">expObjectEntryStatus</a>(10)
+   |  |                 Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |  |                 Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |  |
+   |  +--<a href="#expValue">expValue</a>(3)
+   |     |
+   |     +--<a href="#expValueTable">expValueTable</a>(1)
+   |        |
+   |        +--<a href="#expValueEntry">expValueEntry</a>(1)
+   |           |  Index: expExpressionOwner, expExpressionName, expValueInstance
+   |           |
+   |           +-- ---- ObjID     <a href="#expValueInstance">expValueInstance</a>(1)
+   |           +-- -R-- Counter   <a href="#expValueCounter32Val">expValueCounter32Val</a>(2)
+   |           +-- -R-- Unsigned  <a href="#expValueUnsigned32Val">expValueUnsigned32Val</a>(3)
+   |           +-- -R-- TimeTicks <a href="#expValueTimeTicksVal">expValueTimeTicksVal</a>(4)
+   |           +-- -R-- Integer32 <a href="#expValueInteger32Val">expValueInteger32Val</a>(5)
+   |           +-- -R-- IpAddr    <a href="#expValueIpAddressVal">expValueIpAddressVal</a>(6)
+   |           +-- -R-- String    <a href="#expValueOctetStringVal">expValueOctetStringVal</a>(7)
+   |           +-- -R-- ObjID     <a href="#expValueOidVal">expValueOidVal</a>(8)
+   |           +-- -R-- Counter64 <a href="#expValueCounter64Val">expValueCounter64Val</a>(9)
+   |
+   +--<a href="#dismanExpressionMIBConformance">dismanExpressionMIBConformance</a>(3)
+      |
+      +--<a href="#dismanExpressionMIBCompliances">dismanExpressionMIBCompliances</a>(1)
+      |  |
+      |  +--<a href="#dismanExpressionMIBCompliance">dismanExpressionMIBCompliance</a>(1)
+      |
+      +--<a href="#dismanExpressionMIBGroups">dismanExpressionMIBGroups</a>(2)
+         |
+         +--<a href="#dismanExpressionResourceGroup">dismanExpressionResourceGroup</a>(1)
+         +--<a href="#dismanExpressionDefinitionGroup">dismanExpressionDefinitionGroup</a>(2)
+         +--<a href="#dismanExpressionValueGroup">dismanExpressionValueGroup</a>(3)
+</pre>

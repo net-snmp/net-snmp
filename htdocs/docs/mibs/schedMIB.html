@@ -1,0 +1,1006 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>schedMIB</b>
+MIB object, which is defined within the <b>DISMAN-SCHEDULE-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.63</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#schedTable">schedTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="schedLocalTime" />
+1
+<br /><b>schedLocalTime</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.63.1.1</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The local time used by the scheduler.  Schedules which
+refer to calendar time will use the local time indicated
+by this object.  An implementation MUST return all 11 bytes
+of the DateAndTime textual-convention so that a manager
+may retrieve the offset from GMT time.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="schedTable" /><h3>Table schedTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>schedTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-SCHEDULE-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.63.1.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+This table defines scheduled actions triggered by
+SNMP set operations.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="schedEntry" />Row Description</td>
+<td>
+<pre>
+An entry describing a particular scheduled action.
+Unless noted otherwise, writable objects of this row
+         can be modified independent of the current value of
+         schedRowStatus, schedAdminStatus and schedOperStatus.
+         In particular, it is legal to modify schedInterval
+         and the objects in the schedCalendarGroup when
+         schedRowStatus is active and schedAdminStatus and
+         schedOperStatus are both enabled.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>schedTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="schedOwner" />
+1
+<br /><b>schedOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this scheduling entry.  The exact semantics of
+this string are subject to the security policy defined by
+
+the security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedName" />
+2
+<br /><b>schedName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The locally-unique, administratively assigned name for this
+scheduling entry.  This object allows a schedOwner to have
+multiple entries in the schedTable.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other schedTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="schedDescr" />
+3
+<br /><b>schedDescr</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The human readable description of the purpose of this
+scheduling entry.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedInterval" />
+4
+<br /><b>schedInterval</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The number of seconds between two action invocations of
+a periodic scheduler.  Implementations must guarantee
+that action invocations will not occur before at least
+schedInterval seconds have passed.
+
+The scheduler must ignore all periodic schedules that
+have a schedInterval value of 0.  A periodic schedule
+with a scheduling interval of 0 seconds will therefore
+never invoke an action.
+
+Implementations may be forced to delay invocations in the
+face of local constraints.  A scheduled management function
+should therefore not rely on the accuracy provided by the
+scheduler implementation.
+
+Note that implementations which maintain a list of pending
+activations must re-calculate them when this object is
+changed.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedWeekDay" />
+5
+<br /><b>schedWeekDay</b>
+
+</td><td>
+  BITS
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>0</td><td>sunday</td></tr>
+        <tr><td>1</td><td>monday</td></tr>
+        <tr><td>2</td><td>tuesday</td></tr>
+        <tr><td>3</td><td>wednesday</td></tr>
+        <tr><td>4</td><td>thursday</td></tr>
+        <tr><td>5</td><td>friday</td></tr>
+        <tr><td>6</td><td>saturday</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The set of weekdays on which the scheduled action should
+take place.  Setting multiple bits will include several
+weekdays in the set of possible weekdays for this schedule.
+Setting all bits will cause the scheduler to ignore the
+weekday.
+
+Note that implementations which maintain a list of pending
+activations must re-calculate them when this object is
+changed.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedMonth" />
+6
+<br /><b>schedMonth</b>
+
+</td><td>
+  BITS
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>0</td><td>january</td></tr>
+        <tr><td>1</td><td>february</td></tr>
+        <tr><td>2</td><td>march</td></tr>
+        <tr><td>3</td><td>april</td></tr>
+        <tr><td>4</td><td>may</td></tr>
+        <tr><td>5</td><td>june</td></tr>
+        <tr><td>6</td><td>july</td></tr>
+        <tr><td>7</td><td>august</td></tr>
+        <tr><td>8</td><td>september</td></tr>
+        <tr><td>9</td><td>october</td></tr>
+        <tr><td>10</td><td>november</td></tr>
+        <tr><td>11</td><td>december</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The set of months during which the scheduled action should
+take place.  Setting multiple bits will include several
+months in the set of possible months for this schedule.
+
+Setting all bits will cause the scheduler to ignore the
+month.
+
+Note that implementations which maintain a list of pending
+activations must re-calculate them when this object is
+changed.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedDay" />
+7
+<br /><b>schedDay</b>
+
+</td><td>
+  BITS
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>0</td><td>d1</td></tr>
+        <tr><td>1</td><td>d2</td></tr>
+        <tr><td>2</td><td>d3</td></tr>
+        <tr><td>3</td><td>d4</td></tr>
+        <tr><td>4</td><td>d5</td></tr>
+        <tr><td>5</td><td>d6</td></tr>
+        <tr><td>6</td><td>d7</td></tr>
+        <tr><td>7</td><td>d8</td></tr>
+        <tr><td>8</td><td>d9</td></tr>
+        <tr><td>9</td><td>d10</td></tr>
+        <tr><td>10</td><td>d11</td></tr>
+        <tr><td>11</td><td>d12</td></tr>
+        <tr><td>12</td><td>d13</td></tr>
+        <tr><td>13</td><td>d14</td></tr>
+        <tr><td>14</td><td>d15</td></tr>
+        <tr><td>15</td><td>d16</td></tr>
+        <tr><td>16</td><td>d17</td></tr>
+        <tr><td>17</td><td>d18</td></tr>
+        <tr><td>18</td><td>d19</td></tr>
+        <tr><td>19</td><td>d20</td></tr>
+        <tr><td>20</td><td>d21</td></tr>
+        <tr><td>21</td><td>d22</td></tr>
+        <tr><td>22</td><td>d23</td></tr>
+        <tr><td>23</td><td>d24</td></tr>
+        <tr><td>24</td><td>d25</td></tr>
+        <tr><td>25</td><td>d26</td></tr>
+        <tr><td>26</td><td>d27</td></tr>
+        <tr><td>27</td><td>d28</td></tr>
+        <tr><td>28</td><td>d29</td></tr>
+        <tr><td>29</td><td>d30</td></tr>
+        <tr><td>30</td><td>d31</td></tr>
+        <tr><td>31</td><td>r1</td></tr>
+        <tr><td>32</td><td>r2</td></tr>
+        <tr><td>33</td><td>r3</td></tr>
+        <tr><td>34</td><td>r4</td></tr>
+        <tr><td>35</td><td>r5</td></tr>
+        <tr><td>36</td><td>r6</td></tr>
+        <tr><td>37</td><td>r7</td></tr>
+        <tr><td>38</td><td>r8</td></tr>
+        <tr><td>39</td><td>r9</td></tr>
+        <tr><td>40</td><td>r10</td></tr>
+        <tr><td>41</td><td>r11</td></tr>
+        <tr><td>42</td><td>r12</td></tr>
+        <tr><td>43</td><td>r13</td></tr>
+        <tr><td>44</td><td>r14</td></tr>
+        <tr><td>45</td><td>r15</td></tr>
+        <tr><td>46</td><td>r16</td></tr>
+        <tr><td>47</td><td>r17</td></tr>
+        <tr><td>48</td><td>r18</td></tr>
+        <tr><td>49</td><td>r19</td></tr>
+        <tr><td>50</td><td>r20</td></tr>
+        <tr><td>51</td><td>r21</td></tr>
+        <tr><td>52</td><td>r22</td></tr>
+        <tr><td>53</td><td>r23</td></tr>
+        <tr><td>54</td><td>r24</td></tr>
+        <tr><td>55</td><td>r25</td></tr>
+        <tr><td>56</td><td>r26</td></tr>
+        <tr><td>57</td><td>r27</td></tr>
+        <tr><td>58</td><td>r28</td></tr>
+        <tr><td>59</td><td>r29</td></tr>
+        <tr><td>60</td><td>r30</td></tr>
+        <tr><td>61</td><td>r31</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The set of days in a month on which a scheduled action
+should take place.  There are two sets of bits one can
+use to define the day within a month:
+
+Enumerations starting with the letter 'd' indicate a
+day in a month relative to the first day of a month.
+The first day of the month can therefore be specified
+by setting the bit d1(0) and d31(30) means the last
+day of a month with 31 days.
+
+Enumerations starting with the letter 'r' indicate a
+day in a month in reverse order, relative to the last
+day of a month.  The last day in the month can therefore
+be specified by setting the bit r1(31) and r31(61) means
+the first day of a month with 31 days.
+
+Setting multiple bits will include several days in the set
+of possible days for this schedule.  Setting all bits will
+cause the scheduler to ignore the day within a month.
+
+Setting all bits starting with the letter 'd' or the
+letter 'r' will also cause the scheduler to ignore the
+day within a month.
+
+Note that implementations which maintain a list of pending
+activations must re-calculate them when this object is
+changed.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedHour" />
+8
+<br /><b>schedHour</b>
+
+</td><td>
+  BITS
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>0</td><td>h0</td></tr>
+        <tr><td>1</td><td>h1</td></tr>
+        <tr><td>2</td><td>h2</td></tr>
+        <tr><td>3</td><td>h3</td></tr>
+        <tr><td>4</td><td>h4</td></tr>
+        <tr><td>5</td><td>h5</td></tr>
+        <tr><td>6</td><td>h6</td></tr>
+        <tr><td>7</td><td>h7</td></tr>
+        <tr><td>8</td><td>h8</td></tr>
+        <tr><td>9</td><td>h9</td></tr>
+        <tr><td>10</td><td>h10</td></tr>
+        <tr><td>11</td><td>h11</td></tr>
+        <tr><td>12</td><td>h12</td></tr>
+        <tr><td>13</td><td>h13</td></tr>
+        <tr><td>14</td><td>h14</td></tr>
+        <tr><td>15</td><td>h15</td></tr>
+        <tr><td>16</td><td>h16</td></tr>
+        <tr><td>17</td><td>h17</td></tr>
+        <tr><td>18</td><td>h18</td></tr>
+        <tr><td>19</td><td>h19</td></tr>
+        <tr><td>20</td><td>h20</td></tr>
+        <tr><td>21</td><td>h21</td></tr>
+        <tr><td>22</td><td>h22</td></tr>
+        <tr><td>23</td><td>h23</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The set of hours within a day during which the scheduled
+action should take place.
+
+Note that implementations which maintain a list of pending
+activations must re-calculate them when this object is
+changed.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedMinute" />
+9
+<br /><b>schedMinute</b>
+
+</td><td>
+  BITS
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>0</td><td>m0</td></tr>
+        <tr><td>1</td><td>m1</td></tr>
+        <tr><td>2</td><td>m2</td></tr>
+        <tr><td>3</td><td>m3</td></tr>
+        <tr><td>4</td><td>m4</td></tr>
+        <tr><td>5</td><td>m5</td></tr>
+        <tr><td>6</td><td>m6</td></tr>
+        <tr><td>7</td><td>m7</td></tr>
+        <tr><td>8</td><td>m8</td></tr>
+        <tr><td>9</td><td>m9</td></tr>
+        <tr><td>10</td><td>m10</td></tr>
+        <tr><td>11</td><td>m11</td></tr>
+        <tr><td>12</td><td>m12</td></tr>
+        <tr><td>13</td><td>m13</td></tr>
+        <tr><td>14</td><td>m14</td></tr>
+        <tr><td>15</td><td>m15</td></tr>
+        <tr><td>16</td><td>m16</td></tr>
+        <tr><td>17</td><td>m17</td></tr>
+        <tr><td>18</td><td>m18</td></tr>
+        <tr><td>19</td><td>m19</td></tr>
+        <tr><td>20</td><td>m20</td></tr>
+        <tr><td>21</td><td>m21</td></tr>
+        <tr><td>22</td><td>m22</td></tr>
+        <tr><td>23</td><td>m23</td></tr>
+        <tr><td>24</td><td>m24</td></tr>
+        <tr><td>25</td><td>m25</td></tr>
+        <tr><td>26</td><td>m26</td></tr>
+        <tr><td>27</td><td>m27</td></tr>
+        <tr><td>28</td><td>m28</td></tr>
+        <tr><td>29</td><td>m29</td></tr>
+        <tr><td>30</td><td>m30</td></tr>
+        <tr><td>31</td><td>m31</td></tr>
+        <tr><td>32</td><td>m32</td></tr>
+        <tr><td>33</td><td>m33</td></tr>
+        <tr><td>34</td><td>m34</td></tr>
+        <tr><td>35</td><td>m35</td></tr>
+        <tr><td>36</td><td>m36</td></tr>
+        <tr><td>37</td><td>m37</td></tr>
+        <tr><td>38</td><td>m38</td></tr>
+        <tr><td>39</td><td>m39</td></tr>
+        <tr><td>40</td><td>m40</td></tr>
+        <tr><td>41</td><td>m41</td></tr>
+        <tr><td>42</td><td>m42</td></tr>
+        <tr><td>43</td><td>m43</td></tr>
+        <tr><td>44</td><td>m44</td></tr>
+        <tr><td>45</td><td>m45</td></tr>
+        <tr><td>46</td><td>m46</td></tr>
+        <tr><td>47</td><td>m47</td></tr>
+        <tr><td>48</td><td>m48</td></tr>
+        <tr><td>49</td><td>m49</td></tr>
+        <tr><td>50</td><td>m50</td></tr>
+        <tr><td>51</td><td>m51</td></tr>
+        <tr><td>52</td><td>m52</td></tr>
+        <tr><td>53</td><td>m53</td></tr>
+        <tr><td>54</td><td>m54</td></tr>
+        <tr><td>55</td><td>m55</td></tr>
+        <tr><td>56</td><td>m56</td></tr>
+        <tr><td>57</td><td>m57</td></tr>
+        <tr><td>58</td><td>m58</td></tr>
+        <tr><td>59</td><td>m59</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The set of minutes within an hour when the scheduled action
+should take place.
+
+Note that implementations which maintain a list of pending
+activations must re-calculate them when this object is
+changed.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedContextName" />
+10
+<br /><b>schedContextName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The context which contains the local MIB variable pointed
+to by schedVariable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedVariable" />
+11
+<br /><b>schedVariable</b>
+
+</td><td>
+  OBJECTID
+
+ <br>
+ <a href="#VariablePointer">VariablePointer</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#VariablePointer"> VariablePointer TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+An object identifier pointing to a local MIB variable
+which resolves to an ASN.1 primitive type of INTEGER.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedValue" />
+12
+<br /><b>schedValue</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The value which is written to the MIB object pointed to by
+schedVariable when the scheduler invokes an action.  The
+implementation shall enforce the use of access control
+rules when performing the set operation on schedVariable.
+This is accomplished by calling the isAccessAllowed abstract
+service interface as defined in RFC 2571.
+
+Note that an implementation may choose to issue an SNMP Set
+message to the SNMP engine and leave the access control
+decision to the normal message processing procedure.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedType" />
+13
+<br /><b>schedType</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>periodic</td></tr>
+        <tr><td>2</td><td>calendar</td></tr>
+        <tr><td>3</td><td>oneshot</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The type of this schedule.  The value periodic(1) indicates
+that this entry specifies a periodic schedule.  A periodic
+schedule is defined by the value of schedInterval.  The
+values of schedWeekDay, schedMonth, schedDay, schedHour
+and schedMinute are ignored.
+
+The value calendar(2) indicates that this entry describes a
+calendar schedule.  A calendar schedule is defined by the
+values of schedWeekDay, schedMonth, schedDay, schedHour and
+schedMinute.  The value of schedInterval is ignored.  A
+calendar schedule will trigger on all local times that
+satisfy the bits set in schedWeekDay, schedMonth, schedDay,
+schedHour and schedMinute.
+
+The value oneshot(3) indicates that this entry describes a
+one-shot schedule.  A one-shot schedule is similar to a
+calendar schedule with the additional feature that it
+disables itself by changing in the `finished'
+schedOperStatus once the schedule triggers an action.
+
+Note that implementations which maintain a list of pending
+activations must re-calculate them when this object is
+changed.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedAdminStatus" />
+14
+<br /><b>schedAdminStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>enabled</td></tr>
+        <tr><td>2</td><td>disabled</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The desired state of the schedule.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedOperStatus" />
+15
+<br /><b>schedOperStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>enabled</td></tr>
+        <tr><td>2</td><td>disabled</td></tr>
+        <tr><td>3</td><td>finished</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The current operational state of this schedule.  The state
+enabled(1) indicates this entry is active and that the
+scheduler will invoke actions at appropriate times.  The
+disabled(2) state indicates that this entry is currently
+inactive and ignored by the scheduler.  The finished(3)
+state indicates that the schedule has ended.  Schedules
+in the finished(3) state are ignored by the scheduler.
+A one-shot schedule enters the finished(3) state when it
+deactivates itself.
+
+Note that the operational state must not be enabled(1)
+when the schedRowStatus is not active.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedFailures" />
+16
+<br /><b>schedFailures</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+This variable counts the number of failures while invoking
+the scheduled action.  This counter at most increments once
+for a triggered action.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedLastFailure" />
+17
+<br /><b>schedLastFailure</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#SnmpPduErrorStatus">SnmpPduErrorStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpPduErrorStatus"> SnmpPduErrorStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The most recent error that occurred during the invocation of
+a scheduled action.  The value noError(0) is returned
+if no errors have occurred yet.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedLastFailed" />
+18
+<br /><b>schedLastFailed</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The date and time when the most recent failure occurred.
+The value '0000000000000000'H is returned if no failure
+         occurred since the last re-initialization of the scheduler.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedStorageType" />
+19
+<br /><b>schedStorageType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#StorageType">StorageType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#StorageType"> StorageType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object defines whether this scheduled action is kept
+in volatile storage and lost upon reboot or if this row is
+backed up by non-volatile or permanent storage.
+
+Conceptual rows having the value `permanent' must allow
+write access to the columnar objects schedDescr,
+schedInterval, schedContextName, schedVariable, schedValue,
+and schedAdminStatus.  If an implementation supports the
+schedCalendarGroup, write access must be also allowed to
+the columnar objects schedWeekDay, schedMonth, schedDay,
+schedHour, schedMinute.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedRowStatus" />
+20
+<br /><b>schedRowStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The status of this scheduled action.  A control that allows
+entries to be added and removed from this table.
+
+Note that the operational state must change to enabled
+when the administrative state is enabled and the row
+status changes to active(1).
+
+Attempts to destroy(6) a row or to set a row
+notInService(2) while the operational state is enabled
+result in inconsistentValue errors.
+
+The value of this object has no effect on whether other
+objects in this conceptual row can be modified.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="schedTriggers" />
+21
+<br /><b>schedTriggers</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+This variable counts the number of attempts (either
+successful or failed) to invoke the scheduled action.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+<a name="schedActionFailure" /><h3>Notification: schedActionFailure</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>schedActionFailure</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-SCHEDULE-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.63.2.0.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+This notification is generated whenever the invocation of a
+scheduled action fails.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#schedLastFailure">schedLastFailure</a></td></tr>
+      <tr><td><a href="#schedLastFailed">schedLastFailed</a></td></tr>
+  </table></td></tr>
+  </table>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpPduErrorStatus">SnmpPduErrorStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>-1</td><td>noResponse</td></tr><tr><td>0</td><td>noError</td></tr><tr><td>1</td><td>tooBig</td></tr><tr><td>2</td><td>noSuchName</td></tr><tr><td>3</td><td>badValue</td></tr><tr><td>4</td><td>readOnly</td></tr><tr><td>5</td><td>genErr</td></tr><tr><td>6</td><td>noAccess</td></tr><tr><td>7</td><td>wrongType</td></tr><tr><td>8</td><td>wrongLength</td></tr><tr><td>9</td><td>wrongEncoding</td></tr><tr><td>10</td><td>wrongValue</td></tr><tr><td>11</td><td>noCreation</td></tr><tr><td>12</td><td>inconsistentValue</td></tr><tr><td>13</td><td>resourceUnavailable</td></tr><tr><td>14</td><td>commitFailed</td></tr><tr><td>15</td><td>undoFailed</td></tr><tr><td>16</td><td>authorizationError</td></tr><tr><td>17</td><td>notWritable</td></tr><tr><td>18</td><td>inconsistentName</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="VariablePointer">VariablePointer</td><td>OBJECTID</td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="DateAndTime">DateAndTime</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp DISMAN-SCHEDULE-MIB::schedMIB</b></p>
+<pre>
++--<a href="#schedMIB">schedMIB</a>(63)
+   |
+   +--<a href="#schedObjects">schedObjects</a>(1)
+   |  |
+   |  +-- -R-- String    <a href="#schedLocalTime">schedLocalTime</a>(1)
+   |  |        Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |  |        Size: 11
+   |  |
+   |  +--<a href="#schedTable">schedTable</a>(2)
+   |     |
+   |     +--<a href="#schedEntry">schedEntry</a>(1)
+   |        |  Index: schedOwner, schedName
+   |        |
+   |        +-- ---- String    <a href="#schedOwner">schedOwner</a>(1)
+   |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |        |        Size: 0..32
+   |        +-- ---- String    <a href="#schedName">schedName</a>(2)
+   |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |        |        Size: 1..32
+   |        +-- CR-- String    <a href="#schedDescr">schedDescr</a>(3)
+   |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |        |        Size: 0..255
+   |        +-- CR-- Unsigned  <a href="#schedInterval">schedInterval</a>(4)
+   |        +-- CR-- BitString <a href="#schedWeekDay">schedWeekDay</a>(5)
+   |        |        Values: sunday(0), monday(1), tuesday(2), wednesday(3), thursday(4), friday(5), saturday(6)
+   |        +-- CR-- BitString <a href="#schedMonth">schedMonth</a>(6)
+   |        |        Values: january(0), february(1), march(2), april(3), may(4), june(5), july(6), august(7), september(8), october(9), november(10), december(11)
+   |        +-- CR-- BitString <a href="#schedDay">schedDay</a>(7)
+   |        |        Values: d1(0), d2(1), d3(2), d4(3), d5(4), d6(5), d7(6), d8(7), d9(8), d10(9), d11(10), d12(11), d13(12), d14(13), d15(14), d16(15), d17(16), d18(17), d19(18), d20(19), d21(20), d22(21), d23(22), d24(23), d25(24), d26(25), d27(26), d28(27), d29(28), d30(29), d31(30), r1(31), r2(32), r3(33), r4(34), r5(35), r6(36), r7(37), r8(38), r9(39), r10(40), r11(41), r12(42), r13(43), r14(44), r15(45), r16(46), r17(47), r18(48), r19(49), r20(50), r21(51), r22(52), r23(53), r24(54), r25(55), r26(56), r27(57), r28(58), r29(59), r30(60), r31(61)
+   |        +-- CR-- BitString <a href="#schedHour">schedHour</a>(8)
+   |        |        Values: h0(0), h1(1), h2(2), h3(3), h4(4), h5(5), h6(6), h7(7), h8(8), h9(9), h10(10), h11(11), h12(12), h13(13), h14(14), h15(15), h16(16), h17(17), h18(18), h19(19), h20(20), h21(21), h22(22), h23(23)
+   |        +-- CR-- BitString <a href="#schedMinute">schedMinute</a>(9)
+   |        |        Values: m0(0), m1(1), m2(2), m3(3), m4(4), m5(5), m6(6), m7(7), m8(8), m9(9), m10(10), m11(11), m12(12), m13(13), m14(14), m15(15), m16(16), m17(17), m18(18), m19(19), m20(20), m21(21), m22(22), m23(23), m24(24), m25(25), m26(26), m27(27), m28(28), m29(29), m30(30), m31(31), m32(32), m33(33), m34(34), m35(35), m36(36), m37(37), m38(38), m39(39), m40(40), m41(41), m42(42), m43(43), m44(44), m45(45), m46(46), m47(47), m48(48), m49(49), m50(50), m51(51), m52(52), m53(53), m54(54), m55(55), m56(56), m57(57), m58(58), m59(59)
+   |        +-- CR-- String    <a href="#schedContextName">schedContextName</a>(10)
+   |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |        |        Size: 0..32
+   |        +-- CR-- ObjID     <a href="#schedVariable">schedVariable</a>(11)
+   |        |        Textual Convention: <a href="#VariablePointer">VariablePointer</a>
+   |        +-- CR-- Integer32 <a href="#schedValue">schedValue</a>(12)
+   |        +-- CR-- EnumVal   <a href="#schedType">schedType</a>(13)
+   |        |        Values: periodic(1), calendar(2), oneshot(3)
+   |        +-- CR-- EnumVal   <a href="#schedAdminStatus">schedAdminStatus</a>(14)
+   |        |        Values: enabled(1), disabled(2)
+   |        +-- -R-- EnumVal   <a href="#schedOperStatus">schedOperStatus</a>(15)
+   |        |        Values: enabled(1), disabled(2), finished(3)
+   |        +-- -R-- Counter   <a href="#schedFailures">schedFailures</a>(16)
+   |        +-- -R-- EnumVal   <a href="#schedLastFailure">schedLastFailure</a>(17)
+   |        |        Textual Convention: <a href="#SnmpPduErrorStatus">SnmpPduErrorStatus</a>
+   |        |        Values: noResponse(-1), noError(0), tooBig(1), noSuchName(2), badValue(3), readOnly(4), genErr(5), noAccess(6), wrongType(7), wrongLength(8), wrongEncoding(9), wrongValue(10), noCreation(11), inconsistentValue(12), resourceUnavailable(13), commitFailed(14), undoFailed(15), authorizationError(16), notWritable(17), inconsistentName(18)
+   |        +-- -R-- String    <a href="#schedLastFailed">schedLastFailed</a>(18)
+   |        |        Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |        |        Size: 8 | 11
+   |        +-- CR-- EnumVal   <a href="#schedStorageType">schedStorageType</a>(19)
+   |        |        Textual Convention: <a href="#StorageType">StorageType</a>
+   |        |        Values: other(1), volatile(2), nonVolatile(3), permanent(4), readOnly(5)
+   |        +-- CR-- EnumVal   <a href="#schedRowStatus">schedRowStatus</a>(20)
+   |        |        Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |        |        Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |        +-- -R-- Counter   <a href="#schedTriggers">schedTriggers</a>(21)
+   |
+   +--<a href="#schedNotifications">schedNotifications</a>(2)
+   |  |
+   |  +--<a href="#schedTraps">schedTraps</a>(0)
+   |     |
+   |     +--<a href="#schedActionFailure">schedActionFailure</a>(1)
+   |
+   +--<a href="#schedConformance">schedConformance</a>(3)
+      |
+      +--<a href="#schedCompliances">schedCompliances</a>(1)
+      |  |
+      |  +--<a href="#schedCompliance">schedCompliance</a>(1)
+      |  +--<a href="#schedCompliance2">schedCompliance2</a>(2)
+      |
+      +--<a href="#schedGroups">schedGroups</a>(2)
+         |
+         +--<a href="#schedGroup">schedGroup</a>(1)
+         +--<a href="#schedCalendarGroup">schedCalendarGroup</a>(2)
+         |
+         +--<a href="#schedNotificationsGroup">schedNotificationsGroup</a>(3)
+         |
+         +--<a href="#schedGroup2">schedGroup2</a>(4)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

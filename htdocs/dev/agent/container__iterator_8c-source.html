@@ -1,0 +1,601 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>container_iterator.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * $Id$</span>
+00003 <span class="comment"> *</span>
+00004 <span class="comment"> */</span>
+00005 
+00006 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00007 
+00008 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00009 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00010 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00011 <span class="preprocessor">#endif</span>
+00012 <span class="preprocessor">#if HAVE_MALLOC_H</span>
+00013 <span class="preprocessor">#include &lt;malloc.h&gt;</span>
+00014 <span class="preprocessor">#endif</span>
+00015 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00016 <span class="preprocessor">#if HAVE_STRING_H</span>
+00017 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00018 <span class="preprocessor">#else</span>
+00019 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00020 <span class="preprocessor">#endif</span>
+00021 
+00022 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00023 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00024 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00025 <span class="preprocessor">#include &lt;net-snmp/library/container.h&gt;</span>
+00026 <span class="preprocessor">#include &lt;net-snmp/library/tools.h&gt;</span>
+00027 <span class="preprocessor">#include &lt;net-snmp/library/snmp_assert.h&gt;</span>
+00028 
+00029 <span class="preprocessor">#include &lt;net-snmp/library/container_iterator.h&gt;</span>
+00030 
+<a name="l00043" id="l00043"></a><a class="code" href="structiterator__info__s.html">00043</a> <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structiterator__info__s.html">iterator_info_s</a> {
+00044    <span class="comment">/*</span>
+00045 <span class="comment">    * netsnmp_conatiner  must be first</span>
+00046 <span class="comment">    */</span>
+00047    netsnmp_container c;
+00048 
+00049    <span class="comment">/*</span>
+00050 <span class="comment">    * iterator data</span>
+00051 <span class="comment">    */</span>
+00052    Netsnmp_Iterator_Loop_Key *get_first;
+00053    Netsnmp_Iterator_Loop_Key *get_next;
+00054    
+00055    Netsnmp_Iterator_Loop_Data *get_data;
+00056 
+00057    Netsnmp_Iterator_Data *free_user_ctx;
+00058    
+00059    Netsnmp_Iterator_Ctx *init_loop_ctx;
+00060    Netsnmp_Iterator_Ctx *cleanup_loop_ctx;
+00061    Netsnmp_Iterator_Ctx_Dup *save_pos;
+00062    
+00063    Netsnmp_Iterator_Data * release_data;
+00064    Netsnmp_Iterator_Data * insert_data;
+00065    Netsnmp_Iterator_Data * remove_data;
+00066 
+00067    Netsnmp_Iterator_Op * get_size;
+00068    
+00069    <span class="keywordtype">int</span>             sorted;
+00070    
+<a name="l00073" id="l00073"></a><a class="code" href="structiterator__info__s.html#o13">00073</a>    <span class=
+"keywordtype">void</span>           *user_ctx;
+00074 } <a class="code" href="structiterator__info__s.html">iterator_info</a>;
+00075 
+00076 <span class="comment">/**********************************************************************</span>
+00077 <span class="comment"> *</span>
+00078 <span class="comment"> * iterator</span>
+00079 <span class="comment"> *</span>
+00080 <span class="comment"> **********************************************************************/</span>
+00081 <span class="keyword">static</span> <span class="keywordtype">void</span> *
+00082 _iterator_get(<a class="code" href="structiterator__info__s.html">iterator_info</a> *ii, <span class=
+"keyword">const</span> <span class="keywordtype">void</span> *key)
+00083 {
+00084     <span class="keywordtype">int</span> cmp, rc = SNMP_ERR_NOERROR;
+00085     netsnmp_ref_void best = { NULL };
+00086     netsnmp_ref_void tmp = { NULL };
+00087     netsnmp_ref_void loop_ctx = { NULL };
+00088 
+00089     DEBUGMSGT((<span class="stringliteral">"container_iterator"</span>,<span class=
+"stringliteral">"&gt;%s\n"</span>, <span class="stringliteral">"_iterator_get"</span>));
+00090     
+00091     <span class="keywordflow">if</span>(ii-&gt;<a class="code" href="structiterator__info__s.html#o5">init_loop_ctx</a>)
+00092         ii-&gt;<a class="code" href="structiterator__info__s.html#o5">init_loop_ctx</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx);
+00093     
+00094     rc = ii-&gt;<a class="code" href="structiterator__info__s.html#o1">get_first</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;tmp);
+00095     <span class="keywordflow">if</span>(SNMP_ERR_NOERROR != rc) {
+00096         <span class="keywordflow">if</span>(SNMP_ENDOFMIBVIEW != rc)
+00097             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"bad rc %d from get_next\n"</span>, rc);
+00098     }
+00099     <span class="keywordflow">else</span> {
+00100         <span class="keywordflow">for</span>( ;
+00101              (NULL != tmp.val) &amp;&amp; (SNMP_ERR_NOERROR == rc);
+00102              rc = ii-&gt;<a class="code" href="structiterator__info__s.html#o2">get_next</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;tmp) ) {
+00103             
+00104             <span class="comment">/*</span>
+00105 <span class="comment">             * if keys are equal, we are done.</span>
+00106 <span class="comment">             */</span>
+00107             cmp = ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.compare(tmp.val, key);
+00108             <span class="keywordflow">if</span>(0 == cmp) {
+00109                 best.val = tmp.val;
+00110                 <span class="keywordflow">if</span>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o3">get_data</a>)
+00111                     ii-&gt;<a class="code" href="structiterator__info__s.html#o3">get_data</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;best);
+00112             }
+00113             
+00114             <span class="comment">/*</span>
+00115 <span class="comment">             * if data is sorted and if key is greater,</span>
+00116 <span class="comment">             * we are done (not found)</span>
+00117 <span class="comment">             */</span>
+00118             <span class="keywordflow">if</span>((cmp &gt; 0) &amp;&amp; ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o12">sorted</a>)
+00119                 <span class="keywordflow">break</span>;
+00120         } <span class="comment">/* end for */</span>
+00121     }
+00122     
+00123     <span class="keywordflow">if</span>(ii-&gt;<a class="code" href="structiterator__info__s.html#o6">cleanup_loop_ctx</a>)
+00124         ii-&gt;<a class="code" href="structiterator__info__s.html#o6">cleanup_loop_ctx</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>,&amp;loop_ctx);
+00125 
+00126     <span class="keywordflow">return</span> best.val;
+00127 }
+00128 
+00136 <span class="keyword">static</span> <span class="keywordtype">void</span> *
+00137 _iterator_get_next(<a class="code" href="structiterator__info__s.html">iterator_info</a> *ii, <span class=
+"keyword">const</span> <span class="keywordtype">void</span> *key)
+00138 {
+00139     <span class="keywordtype">int</span> cmp, rc = SNMP_ERR_NOERROR;
+00140     netsnmp_ref_void best_val = { NULL };
+00141     netsnmp_ref_void best_ctx = { NULL };
+00142     netsnmp_ref_void tmp = { NULL };
+00143     netsnmp_ref_void loop_ctx = { NULL };
+00144 
+00145     DEBUGMSGT((<span class="stringliteral">"container_iterator"</span>,<span class=
+"stringliteral">"&gt;%s\n"</span>, <span class="stringliteral">"_iterator_get_next"</span>));
+00146     
+00147     <span class="comment">/*</span>
+00148 <span class="comment">     * initialize loop context</span>
+00149 <span class="comment">     */</span>
+00150     <span class="keywordflow">if</span>(ii-&gt;<a class="code" href="structiterator__info__s.html#o5">init_loop_ctx</a>)
+00151         ii-&gt;<a class="code" href="structiterator__info__s.html#o5">init_loop_ctx</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx);
+00152     
+00153     <span class="comment">/*</span>
+00154 <span class="comment">     * get first item</span>
+00155 <span class="comment">     */</span>
+00156     rc = ii-&gt;<a class="code" href="structiterator__info__s.html#o1">get_first</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;tmp);
+00157     <span class="keywordflow">if</span>(SNMP_ERR_NOERROR == rc) {
+00158         <span class="comment">/*</span>
+00159 <span class="comment">         * special case: if key is null, find the first item.</span>
+00160 <span class="comment">         * this is each if the container is sorted, since we're</span>
+00161 <span class="comment">         * already done!  Otherwise, get the next item for the</span>
+00162 <span class="comment">         * first comparison in the loop below.</span>
+00163 <span class="comment">         */</span>
+00164         <span class="keywordflow">if</span> (NULL == key) {
+00165             <span class="keywordflow">if</span>(ii-&gt;<a class="code" href="structiterator__info__s.html#o3">get_data</a>)
+00166                 ii-&gt;<a class="code" href="structiterator__info__s.html#o7">save_pos</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;best_ctx, 1);
+00167             best_val.val = tmp.val;
+00168             <span class="keywordflow">if</span>(ii-&gt;<a class="code" href="structiterator__info__s.html#o12">sorted</a>)
+00169                 tmp.val = NULL; <span class="comment">/* so we skip for loop */</span>
+00170             <span class="keywordflow">else</span>
+00171                 rc = ii-&gt;<a class="code" href="structiterator__info__s.html#o2">get_next</a>(ii-&gt;<a class="code"
+href="structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;tmp);
+00172         }
+00173         <span class="comment">/*</span>
+00174 <span class="comment">         * loop over remaining items</span>
+00175 <span class="comment">         */</span>
+00176         <span class="keywordflow">for</span>( ;
+00177              (NULL != tmp.val) &amp;&amp; (rc == SNMP_ERR_NOERROR);
+00178              rc = ii-&gt;<a class="code" href="structiterator__info__s.html#o2">get_next</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;tmp) ) {
+00179             
+00180             <span class="comment">/*</span>
+00181 <span class="comment">             * if we have a key, this is a get-next, and we need to compare</span>
+00182 <span class="comment">             * the key to the tmp value to see if the tmp value is greater</span>
+00183 <span class="comment">             * than the key, but less than any previous match.</span>
+00184 <span class="comment">             *</span>
+00185 <span class="comment">             * if there is no key, this is a get-first, and we need to</span>
+00186 <span class="comment">             * compare the best value agains the tmp value to see if the</span>
+00187 <span class="comment">             * tmp value is lesser than the best match.</span>
+00188 <span class="comment">             */</span>
+00189             <span class="keywordflow">if</span>(key) <span class="comment">/* get next */</span>
+00190                 cmp = ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.compare(tmp.val, key);
+00191             <span class="keywordflow">else</span> { <span class="comment">/* get first */</span>
+00192                 <span class="comment">/*</span>
+00193 <span class="comment">                 * best value and tmp value should never be equal,</span>
+00194 <span class="comment">                 * otherwise we'd be comparing a pointer to itself.</span>
+00195 <span class="comment">                 * (see note on context reuse in comments above function.</span>
+00196 <span class="comment">                 */</span>
+00197                 <span class="keywordflow">if</span>(best_val.val == tmp.val) {
+00198                     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,<span class=
+"stringliteral">"illegal reuse of data context in "</span>
+00199                              <span class="stringliteral">"container_iterator\n"</span>);
+00200                     rc = SNMP_ERR_GENERR;
+00201                     <span class="keywordflow">break</span>;
+00202                 }
+00203                 cmp = ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.compare(best_val.val, tmp.val);
+00204             }
+00205             <span class="keywordflow">if</span>(cmp &gt; 0) {
+00206                 <span class="comment">/*</span>
+00207 <span class="comment">                 * if we don't have a key (get-first) or a current best match,</span>
+00208 <span class="comment">                 * then the comparison above is all we need to know that</span>
+00209 <span class="comment">                 * tmp is the best match. otherwise, compare against the</span>
+00210 <span class="comment">                 * current best match.</span>
+00211 <span class="comment">                 */</span>
+00212                 <span class="keywordflow">if</span>((NULL == key) || (NULL == best_val.val) ||
+00213                    ((cmp=ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o0">c</a>.compare(tmp.val, best_val.val)) &lt; 0) ) {
+00214                     DEBUGMSGT((<span class="stringliteral">"container_iterator:results"</span>,<span class=
+"stringliteral">" best match\n"</span>));
+00215                     best_val.val = tmp.val;
+00216                     <span class="keywordflow">if</span>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o3">get_data</a>)
+00217                         ii-&gt;<a class="code" href="structiterator__info__s.html#o7">save_pos</a>(ii-&gt;<a class="code"
+href="structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;best_ctx, 1);
+00218                 }
+00219             }
+00220             <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span>((cmp == 0) &amp;&amp; ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o12">sorted</a> &amp;&amp; key) {
+00221                 <span class="comment">/*</span>
+00222 <span class="comment">                 * if keys are equal and container is sorted, then we know</span>
+00223 <span class="comment">                 * the next key will be the one we want.</span>
+00224 <span class="comment">                 * NOTE: if no vars, treat as generr, since we</span>
+00225 <span class="comment">                 *    went past the end of the container when we know</span>
+00226 <span class="comment">                 *    the next item is the one we want. (IGN-A)</span>
+00227 <span class="comment">                 */</span>
+00228                 rc = ii-&gt;<a class="code" href="structiterator__info__s.html#o2">get_next</a>(ii-&gt;<a class="code"
+href="structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;tmp);
+00229                 <span class="keywordflow">if</span>(SNMP_ERR_NOERROR == rc) {
+00230                     best_val.val = tmp.val;
+00231                     <span class="keywordflow">if</span>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o3">get_data</a>)
+00232                         ii-&gt;<a class="code" href="structiterator__info__s.html#o7">save_pos</a>(ii-&gt;<a class="code"
+href="structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;best_ctx, 1);
+00233                 }
+00234                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(SNMP_ENDOFMIBVIEW == rc)
+00235                     rc = SNMPERR_GENERR; <span class="comment">/* not found */</span>
+00236                 <span class="keywordflow">break</span>;
+00237             }
+00238             
+00239         } <span class="comment">/* end for */</span>
+00240     }
+00241 
+00242     <span class="comment">/*</span>
+00243 <span class="comment">     * no vars is ok, except as noted above (IGN-A)</span>
+00244 <span class="comment">     */</span>
+00245     <span class="keywordflow">if</span>(SNMP_ENDOFMIBVIEW == rc)
+00246         rc = SNMP_ERR_NOERROR;
+00247             
+00248     <span class="comment">/*</span>
+00249 <span class="comment">     * get data, iff necessary</span>
+00250 <span class="comment">     * clear return value iff errors</span>
+00251 <span class="comment">     */</span>
+00252     <span class="keywordflow">if</span>(SNMP_ERR_NOERROR == rc) {
+00253         <span class="keywordflow">if</span>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o3">get_data</a> &amp;&amp; best_val.val) {
+00254             rc = ii-&gt;<a class="code" href="structiterator__info__s.html#o3">get_data</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;best_ctx, &amp;best_val);
+00255             <span class="keywordflow">if</span>(SNMP_ERR_NOERROR != rc) {
+00256                 <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"bad rc %d from get_data\n"</span>, rc);
+00257                 best_val.val = NULL;
+00258             }
+00259         }
+00260     }
+00261     <span class="keywordflow">else</span> <span class="keywordflow">if</span>(SNMP_ENDOFMIBVIEW != rc) {
+00262         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"bad rc %d from get_next\n"</span>, rc);
+00263         best_val.val = NULL;
+00264     }
+00265 
+00266     <span class="comment">/*</span>
+00267 <span class="comment">     * if we have a saved loop ctx, clean it up</span>
+00268 <span class="comment">     */</span>
+00269     <span class="keywordflow">if</span>((best_ctx.val != NULL) &amp;&amp; (best_ctx.val != loop_ctx.val) &amp;&amp;
+00270        (ii-&gt;<a class="code" href="structiterator__info__s.html#o6">cleanup_loop_ctx</a>))
+00271         ii-&gt;<a class="code" href="structiterator__info__s.html#o6">cleanup_loop_ctx</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>,&amp;best_ctx);
+00272 
+00273     <span class="comment">/*</span>
+00274 <span class="comment">     * clean up loop ctx</span>
+00275 <span class="comment">     */</span>
+00276     <span class="keywordflow">if</span>(ii-&gt;<a class="code" href="structiterator__info__s.html#o6">cleanup_loop_ctx</a>)
+00277         ii-&gt;<a class="code" href="structiterator__info__s.html#o6">cleanup_loop_ctx</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>,&amp;loop_ctx);
+00278 
+00279     DEBUGMSGT((<span class="stringliteral">"container_iterator:results"</span>,<span class=
+"stringliteral">" returning %p\n"</span>, best_val.val));
+00280     <span class="keywordflow">return</span> best_val.val;
+00281 }
+00282 
+00283 <span class="comment">/**********************************************************************</span>
+00284 <span class="comment"> *</span>
+00285 <span class="comment"> * container</span>
+00286 <span class="comment"> *</span>
+00287 <span class="comment"> **********************************************************************/</span>
+00288 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00289 _iterator_free(<a class="code" href="structiterator__info__s.html">iterator_info</a> *ii)
+00290 {
+00291     DEBUGMSGT((<span class="stringliteral">"container_iterator"</span>,<span class=
+"stringliteral">"&gt;%s\n"</span>, <span class="stringliteral">"_iterator_free"</span>));
+00292     
+00293     <span class="keywordflow">if</span>(NULL == ii)
+00294         <span class="keywordflow">return</span>;
+00295     
+00296     <span class="keywordflow">if</span>(ii-&gt;<a class="code" href="structiterator__info__s.html#o13">user_ctx</a>)
+00297         ii-&gt;<a class="code" href="structiterator__info__s.html#o4">free_user_ctx</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>,ii-&gt;<a class="code" href="structiterator__info__s.html#o13">user_ctx</a>);
+00298     
+00299     free(ii);
+00300 }
+00301 
+00302 <span class="keyword">static</span> <span class="keywordtype">void</span> *
+00303 _iterator_find(<a class="code" href="structiterator__info__s.html">iterator_info</a> *ii, <span class=
+"keyword">const</span> <span class="keywordtype">void</span> *data)
+00304 {
+00305     DEBUGMSGT((<span class="stringliteral">"container_iterator"</span>,<span class=
+"stringliteral">"&gt;%s\n"</span>, <span class="stringliteral">"_iterator_find"</span>));
+00306     
+00307     <span class="keywordflow">if</span>((NULL == ii) || (NULL == data))
+00308         <span class="keywordflow">return</span> NULL;
+00309 
+00310     <span class="keywordflow">return</span> _iterator_get(ii, data);
+00311 }
+00312 
+00313 <span class="keyword">static</span> <span class="keywordtype">void</span> *
+00314 _iterator_find_next(<a class="code" href="structiterator__info__s.html">iterator_info</a> *ii, <span class=
+"keyword">const</span> <span class="keywordtype">void</span> *data)
+00315 {
+00316     DEBUGMSGT((<span class="stringliteral">"container_iterator"</span>,<span class=
+"stringliteral">"&gt;%s\n"</span>, <span class="stringliteral">"_iterator_find_next"</span>));
+00317     
+00318     <span class="keywordflow">if</span>(NULL == ii)
+00319         <span class="keywordflow">return</span> NULL;
+00320 
+00321     <span class="keywordflow">return</span> _iterator_get_next(ii, data);
+00322 }
+00323 
+00324 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00325 _iterator_insert(<a class="code" href="structiterator__info__s.html">iterator_info</a> *ii, <span class=
+"keyword">const</span> <span class="keywordtype">void</span> *data)
+00326 {
+00327     DEBUGMSGT((<span class="stringliteral">"container_iterator"</span>,<span class=
+"stringliteral">"&gt;%s\n"</span>, <span class="stringliteral">"_iterator_insert"</span>));
+00328     
+00329     <span class="keywordflow">if</span>(NULL == ii)
+00330         <span class="keywordflow">return</span> -1;
+00331 
+00332     <span class="keywordflow">if</span>(NULL == ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o9">insert_data</a>)
+00333         <span class="keywordflow">return</span> -1;
+00334 
+00335     <span class="keywordflow">return</span> ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o9">insert_data</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, data);
+00336 }
+00337 
+00338 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00339 _iterator_remove(<a class="code" href="structiterator__info__s.html">iterator_info</a> *ii, <span class=
+"keyword">const</span> <span class="keywordtype">void</span> *data)
+00340 {
+00341     DEBUGMSGT((<span class="stringliteral">"container_iterator"</span>,<span class=
+"stringliteral">"&gt;%s\n"</span>, <span class="stringliteral">"_iterator_remove"</span>));
+00342     
+00343     <span class="keywordflow">if</span>(NULL == ii)
+00344         <span class="keywordflow">return</span> -1;
+00345 
+00346     <span class="keywordflow">if</span>(NULL == ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o10">remove_data</a>)
+00347         <span class="keywordflow">return</span> -1;
+00348 
+00349     <span class="keywordflow">return</span> ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o10">remove_data</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, data);
+00350 }
+00351 
+00352 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00353 _iterator_release(<a class="code" href="structiterator__info__s.html">iterator_info</a> *ii, <span class=
+"keyword">const</span> <span class="keywordtype">void</span> *data)
+00354 {
+00355     DEBUGMSGT((<span class="stringliteral">"container_iterator"</span>,<span class=
+"stringliteral">"&gt;%s\n"</span>, <span class="stringliteral">"_iterator_release"</span>));
+00356     
+00357     <span class="keywordflow">if</span>(NULL == ii)
+00358         <span class="keywordflow">return</span> -1;
+00359 
+00360     <span class="keywordflow">if</span>(NULL == ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o8">release_data</a>)
+00361         <span class="keywordflow">return</span> -1;
+00362 
+00363     <span class="keywordflow">return</span> ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o8">release_data</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, data);
+00364 }
+00365 
+00366 <span class="keyword">static</span> size_t
+00367 _iterator_size(<a class="code" href="structiterator__info__s.html">iterator_info</a> *ii)
+00368 {
+00369     size_t count = 0;
+00370     <span class="keywordtype">int</span> rc = SNMP_ERR_NOERROR;
+00371     netsnmp_ref_void loop_ctx = { NULL };
+00372     netsnmp_ref_void tmp = { NULL };
+00373 
+00374     DEBUGMSGT((<span class="stringliteral">"container_iterator"</span>,<span class=
+"stringliteral">"&gt;%s\n"</span>, <span class="stringliteral">"_iterator_size"</span>));
+00375     
+00376     <span class="keywordflow">if</span>(NULL == ii)
+00377         <span class="keywordflow">return</span> -1;
+00378 
+00379     <span class="keywordflow">if</span>(NULL != ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o11">get_size</a>)
+00380         <span class="keywordflow">return</span> ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o11">get_size</a>(ii-&gt;<a class="code" href="structiterator__info__s.html#o13">user_ctx</a>);
+00381 
+00382     <span class="comment">/*</span>
+00383 <span class="comment">     * no get_size. loop and count ourselves</span>
+00384 <span class="comment">     */</span>
+00385     <span class="keywordflow">if</span>(ii-&gt;<a class="code" href="structiterator__info__s.html#o5">init_loop_ctx</a>)
+00386         ii-&gt;<a class="code" href="structiterator__info__s.html#o5">init_loop_ctx</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx);
+00387     
+00388     <span class="keywordflow">for</span>( rc = ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o1">get_first</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;tmp);
+00389          NULL != tmp.val;
+00390          rc = ii-&gt;<a class="code" href="structiterator__info__s.html#o2">get_next</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;tmp) )
+00391         ++count;
+00392 
+00393     <span class="keywordflow">if</span>(ii-&gt;<a class="code" href="structiterator__info__s.html#o6">cleanup_loop_ctx</a>)
+00394         ii-&gt;<a class="code" href="structiterator__info__s.html#o6">cleanup_loop_ctx</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>,&amp;loop_ctx);
+00395 
+00396     <span class="keywordflow">return</span> count;
+00397 }
+00398 
+00399 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00400 _iterator_for_each(<a class="code" href=
+"structiterator__info__s.html">iterator_info</a> *ii, netsnmp_container_obj_func *f,
+00401                    <span class="keywordtype">void</span> *ctx)
+00402 {
+00403     <span class="keywordtype">int</span> rc = SNMP_ERR_NOERROR;
+00404     netsnmp_ref_void loop_ctx = { NULL };
+00405     netsnmp_ref_void tmp = { NULL };
+00406 
+00407     DEBUGMSGT((<span class="stringliteral">"container_iterator"</span>,<span class=
+"stringliteral">"&gt;%s\n"</span>, <span class="stringliteral">"_iterator_foreach"</span>));
+00408     
+00409     <span class="keywordflow">if</span>(NULL == ii)
+00410         <span class="keywordflow">return</span>;
+00411 
+00412     <span class="keywordflow">if</span>(ii-&gt;<a class="code" href="structiterator__info__s.html#o5">init_loop_ctx</a>)
+00413         ii-&gt;<a class="code" href="structiterator__info__s.html#o5">init_loop_ctx</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx);
+00414     
+00415     <span class="keywordflow">for</span>( rc = ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o1">get_first</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;tmp);
+00416          NULL != tmp.val;
+00417          rc = ii-&gt;<a class="code" href="structiterator__info__s.html#o2">get_next</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>, &amp;loop_ctx, &amp;tmp) )
+00418         (*f) (tmp.val, ctx);
+00419 
+00420     <span class="keywordflow">if</span>(ii-&gt;<a class="code" href="structiterator__info__s.html#o6">cleanup_loop_ctx</a>)
+00421         ii-&gt;<a class="code" href="structiterator__info__s.html#o6">cleanup_loop_ctx</a>(ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o13">user_ctx</a>,&amp;loop_ctx);
+00422 }
+00423 
+00424 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00425 _iterator_clear(netsnmp_container *container, netsnmp_container_obj_func *f,
+00426                  <span class="keywordtype">void</span> *context)
+00427 {
+00428     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_WARNING,<span class=
+"stringliteral">"clear is meaningless for iterator container.\n"</span>);
+00429 }
+00430 
+00431 <span class="comment">/**********************************************************************</span>
+00432 <span class="comment"> *</span>
+00433 <span class="comment"> */</span>
+00434 netsnmp_container*
+00435 netsnmp_container_iterator_get(<span class="keywordtype">void</span> *iterator_user_ctx,
+00436                                netsnmp_container_compare * compare,
+00437                                Netsnmp_Iterator_Loop_Key * get_first,
+00438                                Netsnmp_Iterator_Loop_Key * get_next,
+00439                                Netsnmp_Iterator_Loop_Data * get_data,
+00440                                Netsnmp_Iterator_Ctx_Dup * save_pos,
+00441                                Netsnmp_Iterator_Ctx * init_loop_ctx,
+00442                                Netsnmp_Iterator_Ctx * cleanup_loop_ctx,
+00443                                Netsnmp_Iterator_Data * free_user_ctx,
+00444                                <span class="keywordtype">int</span> sorted)
+00445 {
+00446     <a class="code" href="structiterator__info__s.html">iterator_info</a> *ii;
+00447 
+00448     <span class="comment">/*</span>
+00449 <span class="comment">     * sanity checks</span>
+00450 <span class="comment">     */</span>
+00451     <span class="keywordflow">if</span>(get_data &amp;&amp; ! save_pos) {
+00452         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"save_pos required with get_data\n"</span>);
+00453         <span class="keywordflow">return</span> NULL;
+00454     }
+00455 
+00456     <span class="comment">/*</span>
+00457 <span class="comment">     * allocate memory</span>
+00458 <span class="comment">     */</span>
+00459     ii = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(<a class="code" href=
+"structiterator__info__s.html">iterator_info</a>);
+00460     <span class="keywordflow">if</span> (NULL==ii) {
+00461         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"couldn't allocate memory\n"</span>);
+00462         <span class="keywordflow">return</span> NULL;
+00463     }
+00464 
+00465     <span class="comment">/*</span>
+00466 <span class="comment">     * init container structure with iterator functions</span>
+00467 <span class="comment">     */</span>
+00468     ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.cfree = (netsnmp_container_rc*)_iterator_free;
+00469     ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.compare = compare;
+00470     ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.<a class="code" href=
+"structiterator__info__s.html#o11">get_size</a> = (netsnmp_container_size*)_iterator_size;
+00471     ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.init = NULL;
+00472     ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.insert = (netsnmp_container_op*)_iterator_insert;
+00473     ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.remove = (netsnmp_container_op*)_iterator_remove;
+00474     ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.release = (netsnmp_container_op*)_iterator_release;
+00475     ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.find = (netsnmp_container_rtn*)_iterator_find;
+00476     ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o0">c</a>.find_next = (netsnmp_container_rtn*)_iterator_find_next;
+00477     ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.get_subset = NULL;
+00478     ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.get_iterator = NULL;
+00479     ii-&gt;<a class="code" href=
+"structiterator__info__s.html#o0">c</a>.for_each = (netsnmp_container_func*)_iterator_for_each;
+00480     ii-&gt;<a class="code" href="structiterator__info__s.html#o0">c</a>.clear = _iterator_clear;
+00481 
+00482     <span class="comment">/*</span>
+00483 <span class="comment">     * init iterator structure with user functions</span>
+00484 <span class="comment">     */</span>
+00485     ii-&gt;<a class="code" href="structiterator__info__s.html#o1">get_first</a> = get_first;
+00486     ii-&gt;<a class="code" href="structiterator__info__s.html#o2">get_next</a> = get_next;
+00487     ii-&gt;<a class="code" href="structiterator__info__s.html#o3">get_data</a> = get_data;
+00488     ii-&gt;<a class="code" href="structiterator__info__s.html#o7">save_pos</a> = save_pos;
+00489     ii-&gt;<a class="code" href="structiterator__info__s.html#o5">init_loop_ctx</a> = init_loop_ctx;
+00490     ii-&gt;<a class="code" href="structiterator__info__s.html#o6">cleanup_loop_ctx</a> = cleanup_loop_ctx;
+00491     ii-&gt;<a class="code" href="structiterator__info__s.html#o4">free_user_ctx</a> = free_user_ctx;
+00492     ii-&gt;<a class="code" href="structiterator__info__s.html#o12">sorted</a> = sorted;
+00493 
+00494     ii-&gt;<a class="code" href="structiterator__info__s.html#o13">user_ctx</a> = iterator_user_ctx;
+00495 
+00496     <span class="keywordflow">return</span> (netsnmp_container*)ii;
+00497 }
+00498 
+00499 <span class="keywordtype">void</span>
+00500 netsnmp_container_iterator_set_data_cb(netsnmp_container *c,
+00501                                        Netsnmp_Iterator_Data * insert_data,
+00502                                        Netsnmp_Iterator_Data * remove_data,
+00503                                        Netsnmp_Iterator_Op * get_size)
+00504 {
+00505     <a class="code" href="structiterator__info__s.html">iterator_info</a> *ii = (<a class="code" href=
+"structiterator__info__s.html">iterator_info</a> *)c;
+00506     <span class="keywordflow">if</span>(NULL == ii)
+00507         <span class="keywordflow">return</span>;
+00508     
+00509     ii-&gt;<a class="code" href="structiterator__info__s.html#o9">insert_data</a> = insert_data;
+00510     ii-&gt;<a class="code" href="structiterator__info__s.html#o10">remove_data</a> = remove_data;
+00511     ii-&gt;<a class="code" href="structiterator__info__s.html#o11">get_size</a> = get_size;
+00512 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

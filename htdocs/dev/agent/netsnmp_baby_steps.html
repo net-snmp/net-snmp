@@ -1,0 +1,96 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML><BODY bgcolor="#ffffff" background="../ucd-snmp-bg3.gif"><PRE>
+
+<HTML><HEAD><TITLE>Manpage of baby_steps: calls your handler in baby_steps for set processing.</TITLE>
+</HEAD><BODY>
+<H1>baby_steps: calls your handler in baby_steps for set processing.</H1>
+Section: C Library Functions (3)<BR>Updated: 22 Mar 2004<BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+baby_steps: calls your handler in baby_steps for set processing. - 
+<A NAME="lbAC">&nbsp;</A>
+<H3>Functions</H3>
+
+<P>
+
+<BR>
+
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_baby_steps_handler</B> (u_long modes)
+
+<BR>
+
+<I>returns a baby_steps handler that can be injected into a given handler chain.</I>
+
+<BR>
+
+void <B>netsnmp_init_baby_steps_helper</B> (void)
+
+<BR>
+
+<I>initializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for configuration file use.</I>
+
+
+<A NAME="lbAD">&nbsp;</A>
+<H2>FUNCTION DOCUMENTATION</H2>
+
+<P>
+
+<A NAME="lbAE">&nbsp;</A>
+<H3><B>netsnmp_mib_handler</B>* netsnmp_get_baby_steps_handler (u_long modes)</H3>
+
+<P>
+
+returns a baby_steps handler that can be injected into a given handler chain.
+<P>
+
+Definition at line 49 of file baby_steps.c.
+<P>
+
+References netsnmp_mib_handler_s::myvoid, and netsnmp_create_handler().
+<P>
+
+Referenced by netsnmp_init_baby_steps_helper().
+<A NAME="lbAF">&nbsp;</A>
+<H3>void netsnmp_init_baby_steps_helper (void)</H3>
+
+<P>
+
+initializes the baby_steps helper which then registers a baby_steps handler as a run-time injectable handler for configuration file use.
+<P>
+
+Definition at line 199 of file baby_steps.c.
+<P>
+
+References netsnmp_get_baby_steps_handler(), and netsnmp_register_handler_by_name().
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DL>
+<DT><A HREF="#lbAC">Functions</A><DD>
+</DL>
+<DT><A HREF="#lbAD">FUNCTION DOCUMENTATION</A><DD>
+<DL>
+<DT><A HREF="#lbAE"><B>netsnmp_mib_handler</B>* netsnmp_get_baby_steps_handler (u_long modes)</A><DD>
+<DT><A HREF="#lbAF">void netsnmp_init_baby_steps_helper (void)</A><DD>
+</DL>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 21:37:33 GMT, March 22, 2004
+</BODY>
+</HTML>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

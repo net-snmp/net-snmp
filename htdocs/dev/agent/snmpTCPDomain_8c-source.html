@@ -1,0 +1,485 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>snmpTCPDomain.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00002 
+00003 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00004 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00005 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+00006 
+00007 <span class="preprocessor">#if HAVE_STRING_H</span>
+00008 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00009 <span class="preprocessor">#else</span>
+00010 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00011 <span class="preprocessor">#endif</span>
+00012 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00013 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00014 <span class="preprocessor">#endif</span>
+00015 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00016 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+00017 <span class="preprocessor">#endif</span>
+00018 <span class="preprocessor">#if HAVE_SYS_SOCKET_H</span>
+00019 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+00020 <span class="preprocessor">#endif</span>
+00021 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00022 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00023 <span class="preprocessor">#endif</span>
+00024 <span class="preprocessor">#if HAVE_ARPA_INET_H</span>
+00025 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+00026 <span class="preprocessor">#endif</span>
+00027 <span class="preprocessor">#if HAVE_FCNTL_H</span>
+00028 <span class="preprocessor">#include &lt;fcntl.h&gt;</span>
+00029 <span class="preprocessor">#endif</span>
+00030 
+00031 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00032 <span class="preprocessor">#include &lt;winsock2.h&gt;</span>
+00033 <span class="preprocessor">#include &lt;ws2tcpip.h&gt;</span>
+00034 <span class="preprocessor">#endif</span>
+00035 
+00036 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00037 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00038 <span class="preprocessor">#endif</span>
+00039 
+00040 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00041 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00042 
+00043 <span class="preprocessor">#include &lt;net-snmp/library/snmp_transport.h&gt;</span>
+00044 <span class="preprocessor">#include &lt;net-snmp/library/snmpUDPDomain.h&gt;</span>
+00045 <span class="preprocessor">#include &lt;net-snmp/library/snmpTCPDomain.h&gt;</span>
+00046 
+00047 oid netsnmp_snmpTCPDomain[] = { TRANSPORT_DOMAIN_TCP_IP };
+00048 <span class="keyword">static</span> netsnmp_tdomain tcpDomain;
+00049 
+00050 <span class="comment">/*</span>
+00051 <span class="comment"> * Return a string representing the address in data, or else the "far end"</span>
+00052 <span class="comment"> * address if data is NULL.  </span>
+00053 <span class="comment"> */</span>
+00054 
+00055 <span class="keyword">static</span> <span class="keywordtype">char</span> *
+00056 netsnmp_tcp_fmtaddr(netsnmp_transport *t, <span class="keywordtype">void</span> *data, <span class=
+"keywordtype">int</span> len)
+00057 {
+00058     <span class="keyword">struct </span>sockaddr_in *to = NULL;
+00059 
+00060     <span class="keywordflow">if</span> (data != NULL &amp;&amp; len == <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr_in)) {
+00061         to = (<span class="keyword">struct </span>sockaddr_in *) data;
+00062     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;data != NULL &amp;&amp;
+00063                t-&gt;data_length == <span class="keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_in)) {
+00064         to = (<span class="keyword">struct </span>sockaddr_in *) t-&gt;data;
+00065     }
+00066     <span class="keywordflow">if</span> (to == NULL) {
+00067         <span class="keywordflow">return</span> strdup(<span class="stringliteral">"TCP: unknown"</span>);
+00068     } <span class="keywordflow">else</span> {
+00069         <span class="keywordtype">char</span> tmp[64];
+00070 
+00071         sprintf(tmp, <span class="stringliteral">"TCP: [%s]:%hd"</span>,
+00072                 inet_ntoa(to-&gt;sin_addr), ntohs(to-&gt;sin_port));
+00073         <span class="keywordflow">return</span> strdup(tmp);
+00074     }
+00075 }
+00076 
+00077 
+00078 
+00079 <span class="comment">/*</span>
+00080 <span class="comment"> * You can write something into opaque that will subsequently get passed back </span>
+00081 <span class="comment"> * to your send function if you like.  For instance, you might want to</span>
+00082 <span class="comment"> * remember where a PDU came from, so that you can send a reply there...  </span>
+00083 <span class="comment"> */</span>
+00084 
+00085 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00086 netsnmp_tcp_recv(netsnmp_transport *t, <span class="keywordtype">void</span> *buf, <span class=
+"keywordtype">int</span> size,
+00087                  <span class="keywordtype">void</span> **opaque, <span class="keywordtype">int</span> *olength)
+00088 {
+00089     <span class="keywordtype">int</span> rc = -1;
+00090 
+00091     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+00092         <span class="keywordflow">while</span> (rc &lt; 0) {
+00093             rc = recv(t-&gt;sock, buf, size, 0);
+00094             <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
+00095                 DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp"</span>, <span class=
+"stringliteral">"recv fd %d err %d (\"%s\")\n"</span>,
+00096                             t-&gt;sock, errno, strerror(errno)));
+00097                 <span class="keywordflow">break</span>;
+00098             }
+00099             DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp"</span>, <span class=
+"stringliteral">"recv fd %d got %d bytes\n"</span>,
+00100                         t-&gt;sock, rc));
+00101         }
+00102     } <span class="keywordflow">else</span> {
+00103         <span class="keywordflow">return</span> -1;
+00104     }
+00105 
+00106     <span class="keywordflow">if</span> (opaque != NULL &amp;&amp; olength != NULL) {
+00107         <span class="keywordflow">if</span> (t-&gt;data_length &gt; 0) {
+00108             <span class="keywordflow">if</span> ((*opaque = malloc(t-&gt;data_length)) != NULL) {
+00109                 memcpy(*opaque, t-&gt;data, t-&gt;data_length);
+00110                 *olength = t-&gt;data_length;
+00111             } <span class="keywordflow">else</span> {
+00112                 *olength = 0;
+00113             }
+00114         } <span class="keywordflow">else</span> {
+00115             *opaque = NULL;
+00116             *olength = 0;
+00117         }
+00118     }
+00119 
+00120     <span class="keywordflow">return</span> rc;
+00121 }
+00122 
+00123 
+00124 
+00125 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00126 netsnmp_tcp_send(netsnmp_transport *t, <span class="keywordtype">void</span> *buf, <span class=
+"keywordtype">int</span> size,
+00127                  <span class="keywordtype">void</span> **opaque, <span class="keywordtype">int</span> *olength)
+00128 {
+00129     <span class="keywordtype">int</span> rc = -1;
+00130 
+00131     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+00132         <span class="keywordflow">while</span> (rc &lt; 0) {
+00133             rc = send(t-&gt;sock, buf, size, 0);
+00134             <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
+00135                 <span class="keywordflow">break</span>;
+00136             }
+00137         }
+00138     }
+00139     <span class="keywordflow">return</span> rc;
+00140 }
+00141 
+00142 
+00143 
+00144 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00145 netsnmp_tcp_close(netsnmp_transport *t)
+00146 {
+00147     <span class="keywordtype">int</span> rc = -1;
+00148     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+00149         DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp"</span>, <span class=
+"stringliteral">"close fd %d\n"</span>, t-&gt;sock));
+00150 <span class="preprocessor">#ifndef HAVE_CLOSESOCKET</span>
+00151         rc = close(t-&gt;sock);
+00152 <span class="preprocessor">#else</span>
+00153         rc = closesocket(t-&gt;sock);
+00154 <span class="preprocessor">#endif</span>
+00155         t-&gt;sock = -1;
+00156     }
+00157     <span class="keywordflow">return</span> rc;
+00158 }
+00159 
+00160 
+00161 
+00162 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00163 netsnmp_tcp_accept(netsnmp_transport *t)
+00164 {
+00165     <span class="keyword">struct </span>sockaddr *farend = NULL;
+00166     <span class="keywordtype">int</span>             newsock = -1, sockflags = 0;
+00167     socklen_t       farendlen = <span class="keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_in);
+00168     <span class="keywordtype">char</span>           *string = NULL;
+00169 
+00170     farend = (<span class="keyword">struct </span>sockaddr *) malloc(<span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_in));
+00171 
+00172     <span class="keywordflow">if</span> (farend == NULL) {
+00173         <span class="comment">/*</span>
+00174 <span class="comment">         * Indicate that the acceptance of this socket failed.  </span>
+00175 <span class="comment">         */</span>
+00176         DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp"</span>, <span class=
+"stringliteral">"accept: malloc failed\n"</span>));
+00177         <span class="keywordflow">return</span> -1;
+00178     }
+00179 
+00180     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+00181         newsock = accept(t-&gt;sock, farend, &amp;farendlen);
+00182 
+00183         <span class="keywordflow">if</span> (newsock &lt; 0) {
+00184             DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp"</span>, <span class=
+"stringliteral">"accept failed rc %d errno %d \"%s\"\n"</span>,
+00185                         newsock, errno, strerror(errno)));
+00186             free(farend);
+00187             <span class="keywordflow">return</span> newsock;
+00188         }
+00189 
+00190         <span class="keywordflow">if</span> (t-&gt;data != NULL) {
+00191             free(t-&gt;data);
+00192         }
+00193 
+00194         t-&gt;data = farend;
+00195         t-&gt;data_length = farendlen;
+00196         string = netsnmp_tcp_fmtaddr(NULL, farend, farendlen);
+00197         DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp"</span>, <span class=
+"stringliteral">"accept succeeded (from %s)\n"</span>, string));
+00198         free(string);
+00199 
+00200         <span class="comment">/*</span>
+00201 <span class="comment">         * Try to make the new socket blocking.  </span>
+00202 <span class="comment">         */</span>
+00203 
+00204 <span class="preprocessor">#ifdef WIN32</span>
+00205         ioctlsocket(newsock, FIONBIO, &amp;sockflags);
+00206 <span class="preprocessor">#else</span>
+00207         <span class="keywordflow">if</span> ((sockflags = fcntl(newsock, F_GETFL, 0)) &gt;= 0) {
+00208             fcntl(newsock, F_SETFL, (sockflags &amp; ~O_NONBLOCK));
+00209         } <span class="keywordflow">else</span> {
+00210             DEBUGMSGTL((<span class="stringliteral">"netsnmp_tcp"</span>, <span class=
+"stringliteral">"couldn't f_getfl of fd %d\n"</span>,newsock));
+00211         }
+00212 <span class="preprocessor">#endif</span>
+00213 
+00214         <span class="comment">/*</span>
+00215 <span class="comment">         * Allow user to override the send and receive buffers. Default is</span>
+00216 <span class="comment">         * to use os default.  Don't worry too much about errors --</span>
+00217 <span class="comment">         * just plough on regardless.  </span>
+00218 <span class="comment">         */</span>
+00219         netsnmp_sock_buffer_set(newsock, SO_SNDBUF, 1, 0);
+00220         netsnmp_sock_buffer_set(newsock, SO_RCVBUF, 1, 0);
+00221 
+00222         <span class="keywordflow">return</span> newsock;
+00223     } <span class="keywordflow">else</span> {
+00224         free(farend);
+00225         <span class="keywordflow">return</span> -1;
+00226     }
+00227 }
+00228 
+00229 
+00230 
+00231 <span class="comment">/*</span>
+00232 <span class="comment"> * Open a TCP-based transport for SNMP.  Local is TRUE if addr is the local</span>
+00233 <span class="comment"> * address to bind to (i.e. this is a server-type session); otherwise addr is </span>
+00234 <span class="comment"> * the remote address to send things to.  </span>
+00235 <span class="comment"> */</span>
+00236 
+00237 netsnmp_transport *
+00238 netsnmp_tcp_transport(<span class="keyword">struct</span> sockaddr_in *addr, <span class="keywordtype">int</span> local)
+00239 {
+00240     netsnmp_transport *t = NULL;
+00241     <span class="keywordtype">int</span> rc = 0;
+00242 
+00243 
+00244     <span class="keywordflow">if</span> (addr == NULL || addr-&gt;sin_family != AF_INET) {
+00245         <span class="keywordflow">return</span> NULL;
+00246     }
+00247 
+00248     t = (netsnmp_transport *) malloc(<span class="keyword">sizeof</span>(netsnmp_transport));
+00249     <span class="keywordflow">if</span> (t == NULL) {
+00250         <span class="keywordflow">return</span> NULL;
+00251     }
+00252     memset(t, 0, <span class="keyword">sizeof</span>(netsnmp_transport));
+00253 
+00254     t-&gt;data = malloc(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in));
+00255     <span class="keywordflow">if</span> (t-&gt;data == NULL) {
+00256         netsnmp_transport_free(t);
+00257         <span class="keywordflow">return</span> NULL;
+00258     }
+00259     t-&gt;data_length = <span class="keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_in);
+00260     memcpy(t-&gt;data, addr, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in));
+00261 
+00262     t-&gt;domain = netsnmp_snmpTCPDomain;
+00263     t-&gt;domain_length =
+00264         <span class="keyword">sizeof</span>(netsnmp_snmpTCPDomain) / <span class=
+"keyword">sizeof</span>(netsnmp_snmpTCPDomain[0]);
+00265 
+00266     t-&gt;sock = socket(PF_INET, SOCK_STREAM, 0);
+00267     <span class="keywordflow">if</span> (t-&gt;sock &lt; 0) {
+00268         netsnmp_transport_free(t);
+00269         <span class="keywordflow">return</span> NULL;
+00270     }
+00271 
+00272     t-&gt;flags = NETSNMP_TRANSPORT_FLAG_STREAM;
+00273 
+00274     <span class="keywordflow">if</span> (local) {
+00275         <span class="keywordtype">int</span> sockflags = 0, opt = 1;
+00276 
+00277         <span class="comment">/*</span>
+00278 <span class="comment">         * This session is inteneded as a server, so we must bind to the given </span>
+00279 <span class="comment">         * IP address (which may include an interface address, or could be</span>
+00280 <span class="comment">         * INADDR_ANY, but will always include a port number.  </span>
+00281 <span class="comment">         */</span>
+00282 
+00283         t-&gt;flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
+00284         t-&gt;local = malloc(6);
+00285         <span class="keywordflow">if</span> (t-&gt;local == NULL) {
+00286             netsnmp_tcp_close(t);
+00287             netsnmp_transport_free(t);
+00288             <span class="keywordflow">return</span> NULL;
+00289         }
+00290         memcpy(t-&gt;local, (u_char *) &amp; (addr-&gt;sin_addr.s_addr), 4);
+00291         t-&gt;local[4] = (htons(addr-&gt;sin_port) &amp; 0xff00) &gt;&gt; 8;
+00292         t-&gt;local[5] = (htons(addr-&gt;sin_port) &amp; 0x00ff) &gt;&gt; 0;
+00293         t-&gt;local_length = 6;
+00294 
+00295         <span class="comment">/*</span>
+00296 <span class="comment">         * We should set SO_REUSEADDR too.  </span>
+00297 <span class="comment">         */</span>
+00298 
+00299         setsockopt(t-&gt;sock, SOL_SOCKET, SO_REUSEADDR, (<span class="keywordtype">void</span> *)&amp;opt,
+00300                    <span class="keyword">sizeof</span>(opt));
+00301 
+00302         rc = bind(t-&gt;sock, (<span class="keyword">struct</span> sockaddr *)addr, <span class=
+"keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr));
+00303         <span class="keywordflow">if</span> (rc != 0) {
+00304             netsnmp_tcp_close(t);
+00305             netsnmp_transport_free(t);
+00306             <span class="keywordflow">return</span> NULL;
+00307         }
+00308 
+00309         <span class="comment">/*</span>
+00310 <span class="comment">         * Since we are going to be letting select() tell us when connections</span>
+00311 <span class="comment">         * are ready to be accept()ed, we need to make the socket n0n-blocking</span>
+00312 <span class="comment">         * to avoid the race condition described in W. R. Stevens, ``Unix</span>
+00313 <span class="comment">         * Network Programming Volume I Second Edition'', pp. 422--4, which</span>
+00314 <span class="comment">         * could otherwise wedge the agent.</span>
+00315 <span class="comment">         */</span>
+00316 
+00317 <span class="preprocessor">#ifdef WIN32</span>
+00318         opt = 1;
+00319         ioctlsocket(t-&gt;sock, FIONBIO, &amp;opt);
+00320 <span class="preprocessor">#else</span>
+00321         sockflags = fcntl(t-&gt;sock, F_GETFL, 0);
+00322         fcntl(t-&gt;sock, F_SETFL, sockflags | O_NONBLOCK);
+00323 <span class="preprocessor">#endif</span>
+00324 
+00325         <span class="comment">/*</span>
+00326 <span class="comment">         * Now sit here and wait for connections to arrive.  </span>
+00327 <span class="comment">         */</span>
+00328 
+00329         rc = listen(t-&gt;sock, NETSNMP_STREAM_QUEUE_LEN);
+00330         <span class="keywordflow">if</span> (rc != 0) {
+00331             netsnmp_tcp_close(t);
+00332             netsnmp_transport_free(t);
+00333             <span class="keywordflow">return</span> NULL;
+00334         }
+00335         
+00336         <span class="comment">/*</span>
+00337 <span class="comment">         * no buffer size on listen socket - doesn't make sense</span>
+00338 <span class="comment">         */</span>
+00339 
+00340     } <span class="keywordflow">else</span> {
+00341         t-&gt;remote = malloc(6);
+00342         <span class="keywordflow">if</span> (t-&gt;remote == NULL) {
+00343             netsnmp_tcp_close(t);
+00344             netsnmp_transport_free(t);
+00345             <span class="keywordflow">return</span> NULL;
+00346         }
+00347         memcpy(t-&gt;remote, (u_char *) &amp; (addr-&gt;sin_addr.s_addr), 4);
+00348         t-&gt;remote[4] = (htons(addr-&gt;sin_port) &amp; 0xff00) &gt;&gt; 8;
+00349         t-&gt;remote[5] = (htons(addr-&gt;sin_port) &amp; 0x00ff) &gt;&gt; 0;
+00350         t-&gt;remote_length = 6;
+00351 
+00352         <span class="comment">/*</span>
+00353 <span class="comment">         * This is a client-type session, so attempt to connect to the far</span>
+00354 <span class="comment">         * end.  We don't go non-blocking here because it's not obvious what</span>
+00355 <span class="comment">         * you'd then do if you tried to do snmp_sends before the connection</span>
+00356 <span class="comment">         * had completed.  So this can block.</span>
+00357 <span class="comment">         */</span>
+00358 
+00359         rc = connect(t-&gt;sock, (<span class="keyword">struct</span> sockaddr *)addr,
+00360                      <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr));
+00361 
+00362         <span class="keywordflow">if</span> (rc &lt; 0) {
+00363             netsnmp_tcp_close(t);
+00364             netsnmp_transport_free(t);
+00365             <span class="keywordflow">return</span> NULL;
+00366         }
+00367 
+00368         <span class="comment">/*</span>
+00369 <span class="comment">         * Allow user to override the send and receive buffers. Default is</span>
+00370 <span class="comment">         * to use os default.  Don't worry too much about errors --</span>
+00371 <span class="comment">         * just plough on regardless.  </span>
+00372 <span class="comment">         */</span>
+00373         netsnmp_sock_buffer_set(t-&gt;sock, SO_SNDBUF, local, 0);
+00374         netsnmp_sock_buffer_set(t-&gt;sock, SO_RCVBUF, local, 0);
+00375     }
+00376 
+00377     <span class="comment">/*</span>
+00378 <span class="comment">     * Message size is not limited by this transport (hence msgMaxSize</span>
+00379 <span class="comment">     * is equal to the maximum legal size of an SNMP message).  </span>
+00380 <span class="comment">     */</span>
+00381 
+00382     t-&gt;msgMaxSize = 0x7fffffff;
+00383     t-&gt;f_recv     = netsnmp_tcp_recv;
+00384     t-&gt;f_send     = netsnmp_tcp_send;
+00385     t-&gt;f_close    = netsnmp_tcp_close;
+00386     t-&gt;f_accept   = netsnmp_tcp_accept;
+00387     t-&gt;f_fmtaddr  = netsnmp_tcp_fmtaddr;
+00388 
+00389     <span class="keywordflow">return</span> t;
+00390 }
+00391 
+00392 
+00393 
+00394 netsnmp_transport *
+00395 netsnmp_tcp_create_tstring(<span class="keyword">const</span> <span class="keywordtype">char</span> *string, <span class=
+"keywordtype">int</span> local)
+00396 {
+00397     <span class="keyword">struct </span>sockaddr_in addr;
+00398 
+00399     <span class="keywordflow">if</span> (netsnmp_sockaddr_in(&amp;addr, string, 0)) {
+00400         <span class="keywordflow">return</span> netsnmp_tcp_transport(&amp;addr, local);
+00401     } <span class="keywordflow">else</span> {
+00402         <span class="keywordflow">return</span> NULL;
+00403     }
+00404 }
+00405 
+00406 
+00407 
+00408 netsnmp_transport *
+00409 netsnmp_tcp_create_ostring(<span class="keyword">const</span> u_char * o, size_t o_len, <span class=
+"keywordtype">int</span> local)
+00410 {
+00411     <span class="keyword">struct </span>sockaddr_in addr;
+00412 
+00413     <span class="keywordflow">if</span> (o_len == 6) {
+00414         <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">short</span> porttmp = (o[4] &lt;&lt; 8) + o[5];
+00415         addr.sin_family = AF_INET;
+00416         memcpy((u_char *) &amp; (addr.sin_addr.s_addr), o, 4);
+00417         addr.sin_port = htons(porttmp);
+00418         <span class="keywordflow">return</span> netsnmp_tcp_transport(&amp;addr, local);
+00419     }
+00420     <span class="keywordflow">return</span> NULL;
+00421 }
+00422 
+00423 
+00424 
+00425 <span class="keywordtype">void</span>
+00426 netsnmp_tcp_ctor(<span class="keywordtype">void</span>)
+00427 {
+00428     tcpDomain.name = netsnmp_snmpTCPDomain;
+00429     tcpDomain.name_length = <span class="keyword">sizeof</span>(netsnmp_snmpTCPDomain) / <span class=
+"keyword">sizeof</span>(oid);
+00430     tcpDomain.prefix = calloc(2, <span class="keyword">sizeof</span>(<span class="keywordtype">char</span> *));
+00431     tcpDomain.prefix[0] = <span class="stringliteral">"tcp"</span>;
+00432 
+00433     tcpDomain.f_create_from_tstring = netsnmp_tcp_create_tstring;
+00434     tcpDomain.f_create_from_ostring = netsnmp_tcp_create_ostring;
+00435 
+00436     netsnmp_tdomain_register(&amp;tcpDomain);
+00437 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:01 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,1849 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>read_config.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * read_config.c</span>
+00003 <span class="comment"> */</span>
+00004 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00005 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00006 <span class="comment"> * that may apply:</span>
+00007 <span class="comment"> */</span>
+00008 <span class="comment">/*</span>
+00009 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00010 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00011 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00012 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00013 <span class="comment"> */</span>
+00014 
+00067 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00068 
+00069 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00070 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+00071 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00072 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00073 <span class="preprocessor">#endif</span>
+00074 <span class="preprocessor">#if HAVE_STRING_H</span>
+00075 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00076 <span class="preprocessor">#else</span>
+00077 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00078 <span class="preprocessor">#endif</span>
+00079 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00080 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+00081 <span class="preprocessor">#endif</span>
+00082 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00083 <span class="preprocessor">#if HAVE_SYS_PARAM_H</span>
+00084 <span class="preprocessor">#include &lt;sys/param.h&gt;</span>
+00085 <span class="preprocessor">#endif</span>
+00086 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00087 <span class="preprocessor"># ifdef WIN32</span>
+00088 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00089 <span class="preprocessor"># else</span>
+00090 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00091 <span class="preprocessor"># endif</span>
+00092 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00093 <span class="preprocessor">#else</span>
+00094 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00095 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00096 <span class="preprocessor"># else</span>
+00097 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00098 <span class="preprocessor"># endif</span>
+00099 <span class="preprocessor">#endif</span>
+00100 <span class="preprocessor">#ifdef HAVE_SYS_STAT_H</span>
+00101 <span class="preprocessor">#include &lt;sys/stat.h&gt;</span>
+00102 <span class="preprocessor">#endif</span>
+00103 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00104 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00105 <span class="preprocessor">#endif</span>
+00106 <span class="preprocessor">#if HAVE_ARPA_INET_H</span>
+00107 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+00108 <span class="preprocessor">#endif</span>
+00109 <span class="preprocessor">#if HAVE_SYS_SELECT_H</span>
+00110 <span class="preprocessor">#include &lt;sys/select.h&gt;</span>
+00111 <span class="preprocessor">#endif</span>
+00112 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00113 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00114 <span class="preprocessor">#endif</span>
+00115 <span class="preprocessor">#if HAVE_SYS_SOCKET_H</span>
+00116 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+00117 <span class="preprocessor">#endif</span>
+00118 <span class="preprocessor">#if HAVE_NETDB_H</span>
+00119 <span class="preprocessor">#include &lt;netdb.h&gt;</span>
+00120 <span class="preprocessor">#endif</span>
+00121 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+00122 
+00123 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00124 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00125 <span class="preprocessor">#endif</span>
+00126 
+00127 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00128 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00129 <span class="preprocessor">#include &lt;net-snmp/config_api.h&gt;</span>
+00130 <span class="preprocessor">#include &lt;net-snmp/library/read_config.h&gt;</span>       <span class=
+"comment">/* for "internal" definitions */</span>
+00131 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00132 
+00133 <span class="preprocessor">#include &lt;net-snmp/library/mib.h&gt;</span>
+00134 <span class="preprocessor">#include &lt;net-snmp/library/parse.h&gt;</span>
+00135 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00136 <span class="preprocessor">#include &lt;net-snmp/library/callback.h&gt;</span>
+00137 
+00138 <span class="keyword">static</span> <span class="keywordtype">int</span>      config_errors;
+00139 
+00140 <span class="keyword">struct </span>config_files *config_files = NULL;
+00141 
+00142 <span class="keyword">struct </span>config_line *
+00143 register_prenetsnmp_mib_handler(<span class="keyword">const</span> <span class="keywordtype">char</span> *type,
+00144                                 <span class="keyword">const</span> <span class="keywordtype">char</span> *token,
+00145                                 <span class="keywordtype">void</span> (*parser) (<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keywordtype">char</span> *),
+00146                                 <span class="keywordtype">void</span> (*releaser) (<span class=
+"keywordtype">void</span>), <span class="keyword">const</span> <span class="keywordtype">char</span> *help)
+00147 {
+00148     <span class="keyword">struct </span>config_line *ltmp;
+00149     ltmp = <a class="code" href=
+"group__read__config.html#ga8">register_config_handler</a>(type, token, parser, releaser, help);
+00150     <span class="keywordflow">if</span> (ltmp != NULL)
+00151         ltmp-&gt;config_time = PREMIB_CONFIG;
+00152     <span class="keywordflow">return</span> (ltmp);
+00153 }
+00154 
+00155 <span class="keyword">struct </span>config_line *
+00156 register_app_prenetsnmp_mib_handler(<span class="keyword">const</span> <span class="keywordtype">char</span> *token,
+00157                                     <span class="keywordtype">void</span> (*parser) (<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keywordtype">char</span> *),
+00158                                     <span class="keywordtype">void</span> (*releaser) (<span class=
+"keywordtype">void</span>),
+00159                                     <span class="keyword">const</span> <span class="keywordtype">char</span> *help)
+00160 {
+00161     <span class="keywordflow">return</span> (register_prenetsnmp_mib_handler
+00162             (NULL, token, parser, releaser, help));
+00163 }
+00164 
+00195 <span class="keyword">struct </span>config_line *
+<a name="l00196" id="l00196"></a><a class="code" href="group__read__config.html#ga8">00196</a> <a class="code" href=
+"group__read__config.html#ga8">register_config_handler</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type_param,
+00197                         <span class="keyword">const</span> <span class="keywordtype">char</span> *token,
+00198                         <span class="keywordtype">void</span> (*parser) (<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keywordtype">char</span> *),
+00199                         <span class="keywordtype">void</span> (*releaser) (<span class=
+"keywordtype">void</span>), <span class="keyword">const</span> <span class="keywordtype">char</span> *help)
+00200 {
+00201     <span class="keyword">struct </span>config_files **ctmp = &amp;config_files;
+00202     <span class="keyword">struct </span>config_line **ltmp, *ltmp2;
+00203     <span class="keyword">const</span> <span class="keywordtype">char</span>     *type = type_param;
+00204     <span class="keywordtype">char</span>           *cptr, buf[STRINGMAX];
+00205     <span class="keywordtype">char</span>           *st;
+00206 
+00207     <span class="keywordflow">if</span> (type == NULL) {
+00208         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+00209                                      NETSNMP_DS_LIB_APPTYPE);
+00210     }
+00211 
+00212     <span class="comment">/*</span>
+00213 <span class="comment">     * Handle multiple types (recursively)</span>
+00214 <span class="comment">     */</span>
+00215     cptr = strchr( type, <span class="charliteral">':'</span> );
+00216     <span class="keywordflow">if</span> (cptr) {
+00217         strncpy(buf, type, STRINGMAX);
+00218         buf[STRINGMAX - 1] = <span class="charliteral">'\0'</span>;
+00219         ltmp2 = NULL;
+00220         cptr = strtok_r(buf, <span class="stringliteral">":"</span>, &amp;st);
+00221         <span class="keywordflow">while</span> (cptr) {
+00222             ltmp2 = <a class="code" href=
+"group__read__config.html#ga8">register_config_handler</a>(cptr, token, parser, releaser, help);
+00223             cptr  = strtok_r(NULL, <span class="stringliteral">":"</span>, &amp;st);
+00224         }
+00225         <span class="keywordflow">return</span> ltmp2;
+00226     }
+00227     
+00228     <span class="comment">/*</span>
+00229 <span class="comment">     * Find type in current list  -OR-  create a new file type.</span>
+00230 <span class="comment">     */</span>
+00231     <span class="keywordflow">while</span> (*ctmp != NULL &amp;&amp; strcmp((*ctmp)-&gt;fileHeader, type)) {
+00232         ctmp = &amp;((*ctmp)-&gt;next);
+00233     }
+00234 
+00235     <span class="keywordflow">if</span> (*ctmp == NULL) {
+00236         *ctmp = (<span class="keyword">struct </span>config_files *)
+00237             calloc(1, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> config_files));
+00238         <span class="keywordflow">if</span> (!*ctmp) {
+00239             <span class="keywordflow">return</span> NULL;
+00240         }
+00241 
+00242         (*ctmp)-&gt;fileHeader = strdup(type);
+00243     }
+00244 
+00245     <span class="comment">/*</span>
+00246 <span class="comment">     * Find parser type in current list  -OR-  create a new</span>
+00247 <span class="comment">     * line parser entry.</span>
+00248 <span class="comment">     */</span>
+00249     ltmp = &amp;((*ctmp)-&gt;start);
+00250 
+00251     <span class="keywordflow">while</span> (*ltmp != NULL &amp;&amp; strcmp((*ltmp)-&gt;config_token, token)) {
+00252         ltmp = &amp;((*ltmp)-&gt;next);
+00253     }
+00254 
+00255     <span class="keywordflow">if</span> (*ltmp == NULL) {
+00256         *ltmp = (<span class="keyword">struct </span>config_line *)
+00257             calloc(1, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> config_line));
+00258         <span class="keywordflow">if</span> (!*ltmp) {
+00259             <span class="keywordflow">return</span> NULL;
+00260         }
+00261 
+00262         (*ltmp)-&gt;config_time = NORMAL_CONFIG;
+00263         (*ltmp)-&gt;config_token = strdup(token);
+00264         <span class="keywordflow">if</span> (help != NULL)
+00265             (*ltmp)-&gt;help = strdup(help);
+00266     }
+00267 
+00268     <span class="comment">/*</span>
+00269 <span class="comment">     * Add/Replace the parse/free functions for the given line type</span>
+00270 <span class="comment">     * in the given file type.</span>
+00271 <span class="comment">     */</span>
+00272     (*ltmp)-&gt;parse_line = parser;
+00273     (*ltmp)-&gt;free_func = releaser;
+00274 
+00275     <span class="keywordflow">return</span> (*ltmp);
+00276 
+00277 }                               <span class="comment">/* end register_config_handler() */</span>
+00278 
+00279 <span class="keyword">struct </span>config_line *
+00280 register_app_config_handler(<span class="keyword">const</span> <span class="keywordtype">char</span> *token,
+00281                             <span class="keywordtype">void</span> (*parser) (<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keywordtype">char</span> *),
+00282                             <span class="keywordtype">void</span> (*releaser) (<span class=
+"keywordtype">void</span>), <span class="keyword">const</span> <span class="keywordtype">char</span> *help)
+00283 {
+00284     <span class="keywordflow">return</span> (<a class="code" href=
+"group__read__config.html#ga8">register_config_handler</a>(NULL, token, parser, releaser, help));
+00285 }
+00286 
+00287 
+00288 
+00300 <span class="keywordtype">void</span>
+<a name="l00301" id="l00301"></a><a class="code" href="group__read__config.html#ga10">00301</a> <a class="code" href=
+"group__read__config.html#ga10">unregister_config_handler</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type_param, <span class="keyword">const</span> <span class="keywordtype">char</span> *token)
+00302 {
+00303     <span class="keyword">struct </span>config_files **ctmp = &amp;config_files;
+00304     <span class="keyword">struct </span>config_line **ltmp, *ltmp2;
+00305     <span class="keyword">const</span> <span class="keywordtype">char</span>     *type = type_param;
+00306     <span class="keywordtype">char</span>           *cptr, buf[STRINGMAX];
+00307     <span class="keywordtype">char</span>           *st;
+00308 
+00309     <span class="keywordflow">if</span> (type == NULL) {
+00310         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+00311                                      NETSNMP_DS_LIB_APPTYPE);
+00312     }
+00313 
+00314     <span class="comment">/*</span>
+00315 <span class="comment">     * Handle multiple types (recursively)</span>
+00316 <span class="comment">     */</span>
+00317     cptr = strchr( type, <span class="charliteral">':'</span> );
+00318     <span class="keywordflow">if</span> (cptr) {
+00319         strncpy(buf, type, STRINGMAX);
+00320         buf[STRINGMAX - 1] = <span class="charliteral">'\0'</span>;
+00321         cptr = strtok_r(buf, <span class="stringliteral">":"</span>, &amp;st);
+00322         <span class="keywordflow">while</span> (cptr) {
+00323             <a class="code" href="group__read__config.html#ga10">unregister_config_handler</a>(cptr, token);
+00324             cptr  = strtok_r(NULL, <span class="stringliteral">":"</span>, &amp;st);
+00325         }
+00326         <span class="keywordflow">return</span>;
+00327     }
+00328     
+00329     <span class="comment">/*</span>
+00330 <span class="comment">     * find type in current list </span>
+00331 <span class="comment">     */</span>
+00332     <span class="keywordflow">while</span> (*ctmp != NULL &amp;&amp; strcmp((*ctmp)-&gt;fileHeader, type)) {
+00333         ctmp = &amp;((*ctmp)-&gt;next);
+00334     }
+00335 
+00336     <span class="keywordflow">if</span> (*ctmp == NULL) {
+00337         <span class="comment">/*</span>
+00338 <span class="comment">         * Not found, return. </span>
+00339 <span class="comment">         */</span>
+00340         <span class="keywordflow">return</span>;
+00341     }
+00342 
+00343     ltmp = &amp;((*ctmp)-&gt;start);
+00344     <span class="keywordflow">if</span> (*ltmp == NULL) {
+00345         <span class="comment">/*</span>
+00346 <span class="comment">         * Not found, return. </span>
+00347 <span class="comment">         */</span>
+00348         <span class="keywordflow">return</span>;
+00349     }
+00350     <span class="keywordflow">if</span> (strcmp((*ltmp)-&gt;config_token, token) == 0) {
+00351         <span class="comment">/*</span>
+00352 <span class="comment">         * found it at the top of the list </span>
+00353 <span class="comment">         */</span>
+00354         ltmp2 = (*ltmp)-&gt;next;
+00355         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>((*ltmp)-&gt;config_token);
+00356         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>((*ltmp)-&gt;help);
+00357         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(*ltmp);
+00358         (*ctmp)-&gt;start = ltmp2;
+00359         <span class="keywordflow">return</span>;
+00360     }
+00361     <span class="keywordflow">while</span> ((*ltmp)-&gt;next != NULL
+00362            &amp;&amp; strcmp((*ltmp)-&gt;next-&gt;config_token, token)) {
+00363         ltmp = &amp;((*ltmp)-&gt;next);
+00364     }
+00365     <span class="keywordflow">if</span> ((*ltmp)-&gt;next != NULL) {
+00366         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>((*ltmp)-&gt;next-&gt;config_token);
+00367         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>((*ltmp)-&gt;next-&gt;help);
+00368         ltmp2 = (*ltmp)-&gt;next-&gt;next;
+00369         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>((*ltmp)-&gt;next);
+00370         (*ltmp)-&gt;next = ltmp2;
+00371     }
+00372 }
+00373 
+00374 <span class="keywordtype">void</span>
+00375 unregister_app_config_handler(<span class="keyword">const</span> <span class="keywordtype">char</span> *token)
+00376 {
+00377     <a class="code" href="group__read__config.html#ga10">unregister_config_handler</a>(NULL, token);
+00378 }
+00379 
+00380 <span class="keywordtype">void</span>
+00381 unregister_all_config_handlers()
+00382 {
+00383     <span class="keyword">struct </span>config_files *ctmp, *save;
+00384     <span class="keyword">struct </span>config_line *ltmp;
+00385 
+00386     free_config();
+00387 
+00388     <span class="comment">/*</span>
+00389 <span class="comment">     * Keep using config_files until there are no more! </span>
+00390 <span class="comment">     */</span>
+00391     <span class="keywordflow">for</span> (ctmp = config_files; ctmp;) {
+00392         <span class="keywordflow">for</span> (ltmp = ctmp-&gt;start; ltmp; ltmp = ctmp-&gt;start) {
+00393             <a class="code" href="group__read__config.html#ga10">unregister_config_handler</a>(ctmp-&gt;fileHeader,
+00394                                       ltmp-&gt;config_token);
+00395         }
+00396         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(ctmp-&gt;fileHeader);
+00397         save = ctmp-&gt;next;
+00398         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(ctmp);
+00399         ctmp = save;
+00400         config_files = save;
+00401     }
+00402 }
+00403 
+00404 <span class="preprocessor">#ifdef TESTING</span>
+00405 <span class="keywordtype">void</span>
+00406 print_config_handlers(<span class="keywordtype">void</span>)
+00407 {
+00408     <span class="keyword">struct </span>config_files *ctmp = config_files;
+00409     <span class="keyword">struct </span>config_line *ltmp;
+00410 
+00411     <span class="keywordflow">for</span> (; ctmp != NULL; ctmp = ctmp-&gt;next) {
+00412         DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"read_conf: %s\n"</span>, ctmp-&gt;fileHeader));
+00413         <span class="keywordflow">for</span> (ltmp = ctmp-&gt;start; ltmp != NULL; ltmp = ltmp-&gt;next)
+00414             DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"                   %s\n"</span>,
+00415                         ltmp-&gt;config_token));
+00416     }
+00417 }
+00418 <span class="preprocessor">#endif</span>
+00419 
+00420 <span class="keywordtype">int</span>             linecount;
+00421 <span class="keyword">const</span> <span class="keywordtype">char</span>     *curfilename;
+00422 
+00423 <span class="keyword">struct </span>config_line *
+00424 read_config_get_handlers(<span class="keyword">const</span> <span class="keywordtype">char</span> *type)
+00425 {
+00426     <span class="keyword">struct </span>config_files *ctmp = config_files;
+00427     <span class="keywordflow">for</span> (; ctmp != NULL &amp;&amp; strcmp(ctmp-&gt;fileHeader, type);
+00428          ctmp = ctmp-&gt;next);
+00429     <span class="keywordflow">if</span> (ctmp)
+00430         <span class="keywordflow">return</span> ctmp-&gt;start;
+00431     <span class="keywordflow">return</span> NULL;
+00432 }
+00433 
+00434 <span class="keywordtype">void</span>
+00435 read_config_with_type(<span class="keyword">const</span> <span class="keywordtype">char</span> *filename, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *type)
+00436 {
+00437     <span class="keyword">struct </span>config_line *ctmp = read_config_get_handlers(type);
+00438     <span class="keywordflow">if</span> (ctmp)
+00439         read_config(filename, ctmp, EITHER_CONFIG);
+00440     <span class="keywordflow">else</span>
+00441         DEBUGMSGTL((<span class="stringliteral">"read_config"</span>,
+00442                     <span class="stringliteral">"read_config: I have no registrations for type:%s,file:%s\n"</span>,
+00443                     type, filename));
+00444 }
+00445 
+00446 
+00447 <span class="keyword">struct </span>config_line *
+00448 read_config_find_handler(<span class="keyword">struct</span> config_line *line_handlers,
+00449                          <span class="keyword">const</span> <span class="keywordtype">char</span> *token)
+00450 {
+00451     <span class="keyword">struct </span>config_line *lptr;
+00452 
+00453     <span class="keywordflow">for</span> (lptr = line_handlers; lptr != NULL; lptr = lptr-&gt;next) {
+00454         <span class="keywordflow">if</span> (!strcasecmp(token, lptr-&gt;config_token)) {
+00455             <span class="keywordflow">return</span> lptr;
+00456         }
+00457     }
+00458     <span class="keywordflow">return</span> NULL;
+00459 }
+00460 
+00461 
+00462 <span class="comment">/*</span>
+00463 <span class="comment"> * searches a config_line linked list for a match </span>
+00464 <span class="comment"> */</span>
+00465 <span class="keywordtype">int</span>
+00466 run_config_handler(<span class="keyword">struct</span> config_line *lptr,
+00467                    <span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keywordtype">char</span> *cptr, <span class="keywordtype">int</span> when)
+00468 {
+00469     <span class="keywordtype">char</span>            tmpbuf[STRINGMAX];
+00470     <span class="keywordtype">char</span>           *cp;
+00471     lptr = read_config_find_handler(lptr, token);
+00472     <span class="keywordflow">if</span> (lptr != NULL) {
+00473         <span class="keywordflow">if</span> (when == EITHER_CONFIG || lptr-&gt;config_time == when) {
+00474             DEBUGMSGTL((<span class="stringliteral">"read_config"</span>,
+00475                         <span class="stringliteral">"Found a parser.  Calling it: %s / %s\n"</span>, token,
+00476                         cptr));
+00477             <span class="comment">/*</span>
+00478 <span class="comment">             * Stomp on any trailing whitespace</span>
+00479 <span class="comment">             */</span>
+00480             cp = &amp;(cptr[strlen(cptr)-1]);
+00481             <span class="keywordflow">while</span> (isspace(*cp)) {
+00482                 *(cp--) = <span class="charliteral">'\0'</span>;
+00483             }
+00484             (*(lptr-&gt;parse_line)) (token, cptr);
+00485         }
+00486     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (when != PREMIB_CONFIG &amp;&amp; 
+00487                !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+00488                                        NETSNMP_DS_LIB_NO_TOKEN_WARNINGS)) {
+00489         snprintf(tmpbuf, <span class="keyword">sizeof</span>(tmpbuf), <span class=
+"stringliteral">"Unknown token: %s."</span>, token);
+00490         tmpbuf[ <span class="keyword">sizeof</span>(tmpbuf)-1 ] = 0;
+00491         config_pwarn(tmpbuf);
+00492         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00493     }
+00494     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00495 }
+00496 
+00497 <span class="comment">/*</span>
+00498 <span class="comment"> * takens an arbitrary string and tries to intepret it based on the</span>
+00499 <span class="comment"> * known configuration handlers for all registered types.  May produce</span>
+00500 <span class="comment"> * inconsistent results when multiple tokens of the same name are</span>
+00501 <span class="comment"> * registered under different file types. </span>
+00502 <span class="comment"> */</span>
+00503 
+00504 <span class="comment">/*</span>
+00505 <span class="comment"> * we allow = delimeters here </span>
+00506 <span class="comment"> */</span>
+00507 <span class="preprocessor">#define SNMP_CONFIG_DELIMETERS " \t="</span>
+00508 
+00509 <span class="keywordtype">int</span>
+00510 snmp_config_when(<span class="keywordtype">char</span> *line, <span class="keywordtype">int</span> when)
+00511 {
+00512     <span class="keywordtype">char</span>           *cptr, buf[STRINGMAX], tmpbuf[STRINGMAX];
+00513     <span class="keyword">struct </span>config_line *lptr = NULL;
+00514     <span class="keyword">struct </span>config_files *ctmp = config_files;
+00515     <span class="keywordtype">char</span>           *st;
+00516 
+00517     <span class="keywordflow">if</span> (line == NULL) {
+00518         config_perror(<span class="stringliteral">"snmp_config() called with a null string."</span>);
+00519         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00520     }
+00521 
+00522     strncpy(buf, line, STRINGMAX);
+00523     buf[STRINGMAX - 1] = <span class="charliteral">'\0'</span>;
+00524     cptr = strtok_r(buf, SNMP_CONFIG_DELIMETERS, &amp;st);
+00525     <span class="keywordflow">if</span> (cptr &amp;&amp; cptr[0] == <span class="charliteral">'['</span>) {
+00526         <span class="keywordflow">if</span> (cptr[strlen(cptr) - 1] != <span class="charliteral">']'</span>) {
+00527             snprintf(tmpbuf, <span class="keyword">sizeof</span>(tmpbuf),
+00528                     <span class="stringliteral">"no matching ']' for type %s."</span>,
+00529                     cptr + 1);
+00530             tmpbuf[ <span class="keyword">sizeof</span>(tmpbuf)-1 ] = 0;
+00531             config_perror(tmpbuf);
+00532             <span class="keywordflow">return</span> SNMPERR_GENERR;
+00533         }
+00534         cptr[strlen(cptr) - 1] = <span class="charliteral">'\0'</span>;
+00535         lptr = read_config_get_handlers(cptr + 1);
+00536         <span class="keywordflow">if</span> (lptr == NULL) {
+00537             snprintf(tmpbuf,  <span class="keyword">sizeof</span>(tmpbuf),
+00538                      <span class="stringliteral">"No handlers regestered for type %s."</span>,
+00539                     cptr + 1);
+00540             tmpbuf[ <span class="keyword">sizeof</span>(tmpbuf)-1 ] = 0;
+00541             config_perror(tmpbuf);
+00542             <span class="keywordflow">return</span> SNMPERR_GENERR;
+00543         }
+00544         cptr = strtok_r(NULL, SNMP_CONFIG_DELIMETERS, &amp;st);
+00545         lptr = read_config_find_handler(lptr, cptr);
+00546     } <span class="keywordflow">else</span> {
+00547         <span class="comment">/*</span>
+00548 <span class="comment">         * we have to find a token </span>
+00549 <span class="comment">         */</span>
+00550         <span class="keywordflow">for</span> (; ctmp != NULL &amp;&amp; lptr == NULL; ctmp = ctmp-&gt;next)
+00551             lptr = read_config_find_handler(ctmp-&gt;start, cptr);
+00552     }
+00553     <span class="keywordflow">if</span> (lptr == NULL &amp;&amp; netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+00554                                           NETSNMP_DS_LIB_NO_TOKEN_WARNINGS)) {
+00555         snprintf(tmpbuf, <span class="keyword">sizeof</span>(tmpbuf), <span class=
+"stringliteral">"Unknown token: %s."</span>, cptr);
+00556         tmpbuf[ <span class="keyword">sizeof</span>(tmpbuf)-1 ] = 0;
+00557         config_pwarn(tmpbuf);
+00558         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00559     }
+00560 
+00561     <span class="comment">/*</span>
+00562 <span class="comment">     * use the original string instead since strtok_r messed up the original </span>
+00563 <span class="comment">     */</span>
+00564     line = skip_white(line + (cptr - buf) + strlen(cptr) + 1);
+00565 
+00566     <span class="keywordflow">return</span> (run_config_handler(lptr, cptr, line, when));
+00567 }
+00568 
+00569 <span class="keywordtype">int</span>
+00570 netsnmp_config(<span class="keywordtype">char</span> *line)
+00571 {
+00572     <span class="keywordtype">int</span>             ret = SNMP_ERR_NOERROR;
+00573     DEBUGMSGTL((<span class="stringliteral">"snmp_config"</span>, <span class=
+"stringliteral">"remembering line \"%s\"\n"</span>, line));
+00574     netsnmp_config_remember(line);      <span class="comment">/* always remember it so it's read</span>
+00575 <span class="comment">                                         * processed after a free_config()</span>
+00576 <span class="comment">                                         * call */</span>
+00577     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+00578                                NETSNMP_DS_LIB_HAVE_READ_CONFIG)) {
+00579         DEBUGMSGTL((<span class="stringliteral">"snmp_config"</span>, <span class=
+"stringliteral">"  ... processing it now\n"</span>));
+00580         ret = snmp_config_when(line, NORMAL_CONFIG);
+00581     }
+00582     <span class="keywordflow">return</span> ret;
+00583 }
+00584 
+00585 <span class="keywordtype">void</span>
+00586 netsnmp_config_remember_in_list(<span class="keywordtype">char</span> *line,
+00587                                 <span class="keyword">struct</span> read_config_memory **mem)
+00588 {
+00589     <span class="keywordflow">if</span> (mem == NULL)
+00590         <span class="keywordflow">return</span>;
+00591 
+00592     <span class="keywordflow">while</span> (*mem != NULL)
+00593         mem = &amp;((*mem)-&gt;next);
+00594 
+00595     *mem = <a class="code" href="group__util.html#ga38">SNMP_MALLOC_STRUCT</a>(read_config_memory);
+00596     <span class="keywordflow">if</span> (line)
+00597         (*mem)-&gt;line = strdup(line);
+00598 }
+00599 
+00600 <span class="keywordtype">void</span>
+00601 netsnmp_config_remember_free_list(<span class="keyword">struct</span> read_config_memory **mem)
+00602 {
+00603     <span class="keyword">struct </span>read_config_memory *tmpmem;
+00604     <span class="keywordflow">while</span> (*mem) {
+00605         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>((*mem)-&gt;line);
+00606         tmpmem = (*mem)-&gt;next;
+00607         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(*mem);
+00608         *mem = NULL;
+00609         mem = &amp;tmpmem;
+00610     }
+00611 }
+00612 
+00613 <span class="keywordtype">void</span>
+00614 netsnmp_config_process_memory_list(<span class="keyword">struct</span> read_config_memory **memp,
+00615                                    <span class="keywordtype">int</span> when, <span class="keywordtype">int</span> clear)
+00616 {
+00617 
+00618     <span class="keyword">struct </span>read_config_memory *mem;
+00619 
+00620     <span class="keywordflow">if</span> (!memp)
+00621         <span class="keywordflow">return</span>;
+00622 
+00623     mem = *memp;
+00624 
+00625     <span class="keywordflow">while</span> (mem) {
+00626         DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"processing memory: %s\n"</span>, mem-&gt;line));
+00627         snmp_config_when(mem-&gt;line, when);
+00628         mem = mem-&gt;next;
+00629     }
+00630 
+00631     <span class="keywordflow">if</span> (clear)
+00632         netsnmp_config_remember_free_list(memp);
+00633 }
+00634 
+00635 <span class="comment">/*</span>
+00636 <span class="comment"> * default storage location implementation </span>
+00637 <span class="comment"> */</span>
+00638 <span class="keyword">static</span> <span class="keyword">struct </span>read_config_memory *memorylist = NULL;
+00639 
+00640 <span class="keywordtype">void</span>
+00641 netsnmp_config_remember(<span class="keywordtype">char</span> *line)
+00642 {
+00643     netsnmp_config_remember_in_list(line, &amp;memorylist);
+00644 }
+00645 
+00646 <span class="keywordtype">void</span>
+00647 netsnmp_config_process_memories(<span class="keywordtype">void</span>)
+00648 {
+00649     netsnmp_config_process_memory_list(&amp;memorylist, EITHER_CONFIG, 1);
+00650 }
+00651 
+00652 <span class="keywordtype">void</span>
+00653 netsnmp_config_process_memories_when(<span class="keywordtype">int</span> when, <span class="keywordtype">int</span> clear)
+00654 {
+00655     netsnmp_config_process_memory_list(&amp;memorylist, when, clear);
+00656 }
+00657 
+00658 <span class="comment">/*******************************************************************-o-******</span>
+00659 <span class="comment"> * read_config</span>
+00660 <span class="comment"> *</span>
+00661 <span class="comment"> * Parameters:</span>
+00662 <span class="comment"> *      *filename</span>
+00663 <span class="comment"> *      *line_handler</span>
+00664 <span class="comment"> *       when</span>
+00665 <span class="comment"> *</span>
+00666 <span class="comment"> * Read &lt;filename&gt; and process each line in accordance with the list of</span>
+00667 <span class="comment"> * &lt;line_handler&gt; functions.</span>
+00668 <span class="comment"> *</span>
+00669 <span class="comment"> *</span>
+00670 <span class="comment"> * For each line in &lt;filename&gt;, search the list of &lt;line_handler&gt;'s </span>
+00671 <span class="comment"> * for an entry that matches the first token on the line.  This comparison is</span>
+00672 <span class="comment"> * case insensitive.</span>
+00673 <span class="comment"> *</span>
+00674 <span class="comment"> * For each match, check that &lt;when&gt; is the designated time for the</span>
+00675 <span class="comment"> * &lt;line_handler&gt; function to be executed before processing the line.</span>
+00676 <span class="comment"> */</span>
+00677 <span class="keywordtype">void</span>
+00678 read_config(<span class="keyword">const</span> <span class="keywordtype">char</span> *filename,
+00679             <span class="keyword">struct</span> config_line *line_handler, <span class="keywordtype">int</span> when)
+00680 {
+00681 
+00682     FILE           *ifile;
+00683     <span class="keywordtype">char</span>            line[STRINGMAX], token[STRINGMAX], tmpbuf[STRINGMAX];
+00684     <span class="keywordtype">char</span>           *cptr;
+00685     <span class="keywordtype">int</span>             i;
+00686     <span class="keyword">struct </span>config_line *lptr;
+00687 
+00688     linecount = 0;
+00689     curfilename = filename;
+00690 
+00691     <span class="keywordflow">if</span> ((ifile = fopen(filename, <span class="stringliteral">"r"</span>)) == NULL) {
+00692 <span class="preprocessor">#ifdef ENOENT</span>
+00693         <span class="keywordflow">if</span> (errno == ENOENT) {
+00694             DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"%s: %s\n"</span>, filename,
+00695                         strerror(errno)));
+00696         } <span class="keywordflow">else</span>
+00697 <span class="preprocessor">#endif                          </span><span class="comment">/* ENOENT */</span>
+00698 <span class="preprocessor">#ifdef EACCES</span>
+00699         <span class="keywordflow">if</span> (errno == EACCES) {
+00700             DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"%s: %s\n"</span>, filename,
+00701                         strerror(errno)));
+00702         } <span class="keywordflow">else</span>
+00703 <span class="preprocessor">#endif                          </span><span class="comment">/* EACCES */</span>
+00704 <span class="preprocessor">#if defined(ENOENT) || defined(EACCES)</span>
+00705         {
+00706             snmp_log_perror(filename);
+00707         }
+00708 <span class="preprocessor">#else                           </span><span class=
+"comment">/* defined(ENOENT) || defined(EACCES) */</span>
+00709             snmp_log_perror(filename);
+00710 <span class="preprocessor">#endif                          </span><span class="comment">/* ENOENT */</span>
+00711         <span class="keywordflow">return</span>;
+00712     } <span class="keywordflow">else</span> {
+00713         DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"Reading configuration %s\n"</span>,
+00714                     filename));
+00715     }
+00716 
+00717     <span class="keywordflow">while</span> (fgets(line, <span class="keyword">sizeof</span>(line), ifile) != NULL) {
+00718         lptr = line_handler;
+00719         linecount++;
+00720         cptr = line;
+00721         i = strlen(line) - 1;
+00722         <span class="keywordflow">if</span> (line[i] == <span class="charliteral">'\n'</span>)
+00723             line[i] = 0;
+00724         <span class="comment">/*</span>
+00725 <span class="comment">         * check blank line or # comment </span>
+00726 <span class="comment">         */</span>
+00727         <span class="keywordflow">if</span> ((cptr = skip_white(cptr))) {
+00728             cptr = copy_nword(cptr, token, <span class="keyword">sizeof</span>(token));
+00729             <span class="keywordflow">if</span> (token[0] == <span class="charliteral">'['</span>) {
+00730                 <span class="keywordflow">if</span> (token[strlen(token) - 1] != <span class="charliteral">']'</span>) {
+00731                     snprintf(tmpbuf, <span class="keyword">sizeof</span>(tmpbuf),
+00732                             <span class="stringliteral">"no matching ']' for type %s."</span>,
+00733                             &amp;token[1]);
+00734                     tmpbuf[ <span class="keyword">sizeof</span>(tmpbuf)-1 ] = 0;
+00735                     config_perror(tmpbuf);
+00736                     <span class="keywordflow">continue</span>;
+00737                 }
+00738                 token[strlen(token) - 1] = <span class="charliteral">'\0'</span>;
+00739                 lptr = read_config_get_handlers(&amp;token[1]);
+00740                 <span class="keywordflow">if</span> (lptr == NULL) {
+00741                     snprintf(tmpbuf, <span class="keyword">sizeof</span>(tmpbuf),
+00742                             <span class="stringliteral">"No handlers regestered for type %s."</span>,
+00743                             &amp;token[1]);
+00744                     tmpbuf[ <span class="keyword">sizeof</span>(tmpbuf)-1 ] = 0;
+00745                     config_perror(tmpbuf);
+00746                     <span class="keywordflow">continue</span>;
+00747                 }
+00748                 DEBUGMSGTL((<span class="stringliteral">"read_config"</span>,
+00749                             <span class="stringliteral">"Switching to new context: %s%s\n"</span>,
+00750                             ((cptr) ? <span class="stringliteral">"(this line only) "</span> : <span class=
+"stringliteral">""</span>),
+00751                             &amp;token[1]));
+00752                 <span class="keywordflow">if</span> (cptr == NULL) {
+00753                     <span class="comment">/*</span>
+00754 <span class="comment">                     * change context permanently </span>
+00755 <span class="comment">                     */</span>
+00756                     line_handler = lptr;
+00757                     <span class="keywordflow">continue</span>;
+00758                 } <span class="keywordflow">else</span> {
+00759                     <span class="comment">/*</span>
+00760 <span class="comment">                     * the rest of this line only applies. </span>
+00761 <span class="comment">                     */</span>
+00762                     cptr = copy_nword(cptr, token, <span class="keyword">sizeof</span>(token));
+00763                 }
+00764             } <span class="keywordflow">else</span> {
+00765                 lptr = line_handler;
+00766             }
+00767             <span class="keywordflow">if</span> (cptr == NULL) {
+00768                 snprintf(tmpbuf, <span class="keyword">sizeof</span>(tmpbuf),
+00769                         <span class="stringliteral">"Blank line following %s token."</span>, token);
+00770                 tmpbuf[ <span class="keyword">sizeof</span>(tmpbuf)-1 ] = 0;
+00771                 config_perror(tmpbuf);
+00772             } <span class="keywordflow">else</span> {
+00773                 DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"%s:%d examining: %s\n"</span>,
+00774                             filename, linecount, line));
+00775                 run_config_handler(lptr, token, cptr, when);
+00776             }
+00777         }
+00778     }
+00779     fclose(ifile);
+00780     <span class="keywordflow">return</span>;
+00781 
+00782 }                               <span class="comment">/* end read_config() */</span>
+00783 
+00784 
+00785 
+00786 <span class="keywordtype">void</span>
+00787 free_config(<span class="keywordtype">void</span>)
+00788 {
+00789     <span class="keyword">struct </span>config_files *ctmp = config_files;
+00790     <span class="keyword">struct </span>config_line *ltmp;
+00791 
+00792     <span class="keywordflow">for</span> (; ctmp != NULL; ctmp = ctmp-&gt;next)
+00793         <span class="keywordflow">for</span> (ltmp = ctmp-&gt;start; ltmp != NULL; ltmp = ltmp-&gt;next)
+00794             <span class="keywordflow">if</span> (ltmp-&gt;free_func)
+00795                 (*(ltmp-&gt;free_func)) ();
+00796 }
+00797 
+00798 <span class="keywordtype">void</span>
+00799 read_configs(<span class="keywordtype">void</span>)
+00800 {
+00801     <span class="keywordtype">char</span> *optional_config = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+00802                                                NETSNMP_DS_LIB_OPTIONALCONFIG);
+00803     <span class="keywordtype">char</span> *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+00804                                        NETSNMP_DS_LIB_APPTYPE);
+00805     <span class="keywordtype">char</span> *st;
+00806 
+00807     DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"reading normal configuration tokens\n"</span>));
+00808 
+00809     <span class="keywordflow">if</span> (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+00810                                 NETSNMP_DS_LIB_DONT_READ_CONFIGS)) {
+00811         read_config_files(NORMAL_CONFIG);
+00812     }
+00813 
+00814     <span class="comment">/*</span>
+00815 <span class="comment">     * do this even when the normal above wasn't done </span>
+00816 <span class="comment">     */</span>
+00817     <span class="keywordflow">if</span> (optional_config &amp;&amp; type) {
+00818       <span class="keywordtype">char</span>           *newp, *cp;
+00819       newp = strdup(optional_config);      <span class="comment">/* strtok_r messes it up */</span>
+00820       cp = strtok_r(newp, <span class="stringliteral">","</span>, &amp;st);
+00821       <span class="keywordflow">while</span> (cp) {
+00822         <span class="keyword">struct </span>stat     statbuf;
+00823         <span class="keywordflow">if</span> (stat(cp, &amp;statbuf)) {
+00824             DEBUGMSGTL((<span class="stringliteral">"read_config"</span>,
+00825                         <span class="stringliteral">"Optional File \"%s\" does not exist.\n"</span>,
+00826                         cp));
+00827             snmp_log_perror(cp);
+00828         } <span class="keywordflow">else</span> {
+00829             DEBUGMSGTL((<span class="stringliteral">"read_config"</span>,
+00830                         <span class="stringliteral">"Reading optional config file: \"%s\"\n"</span>,
+00831                         cp));
+00832             read_config_with_type(cp, type);
+00833         }
+00834         cp = strtok_r(NULL, <span class="stringliteral">","</span>, &amp;st);
+00835       }
+00836       free(newp);
+00837     }
+00838 
+00839     netsnmp_config_process_memories_when(NORMAL_CONFIG, 1);
+00840 
+00841     <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_LIBRARY_ID, 
+00842                            NETSNMP_DS_LIB_HAVE_READ_CONFIG, 1);
+00843     <a class="code" href="group__callback.html#ga5">snmp_call_callbacks</a>(SNMP_CALLBACK_LIBRARY,
+00844                         SNMP_CALLBACK_POST_READ_CONFIG, NULL);
+00845 }
+00846 
+00847 <span class="keywordtype">void</span>
+00848 read_premib_configs(<span class="keywordtype">void</span>)
+00849 {
+00850     DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"reading premib configuration tokens\n"</span>));
+00851 
+00852     <span class="keywordflow">if</span> (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+00853                                 NETSNMP_DS_LIB_DONT_READ_CONFIGS)) {
+00854         read_config_files(PREMIB_CONFIG);
+00855     }
+00856 
+00857     netsnmp_config_process_memories_when(PREMIB_CONFIG, 0);
+00858 
+00859     <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_LIBRARY_ID, 
+00860                            NETSNMP_DS_LIB_HAVE_READ_PREMIB_CONFIG, 1);
+00861     <a class="code" href="group__callback.html#ga5">snmp_call_callbacks</a>(SNMP_CALLBACK_LIBRARY,
+00862                         SNMP_CALLBACK_POST_PREMIB_READ_CONFIG, NULL);
+00863 }
+00864 
+00865 <span class="comment">/*******************************************************************-o-******</span>
+00866 <span class="comment"> * set_configuration_directory</span>
+00867 <span class="comment"> *</span>
+00868 <span class="comment"> * Parameters:</span>
+00869 <span class="comment"> *      char *dir - value of the directory</span>
+00870 <span class="comment"> * Sets the configuration directory. Multiple directories can be</span>
+00871 <span class="comment"> * specified, but need to be seperated by 'ENV_SEPARATOR_CHAR'.</span>
+00872 <span class="comment"> */</span>
+00873 <span class="keywordtype">void</span>
+00874 set_configuration_directory(<span class="keyword">const</span> <span class="keywordtype">char</span> *dir)
+00875 {
+00876     netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
+00877                           NETSNMP_DS_LIB_CONFIGURATION_DIR, dir);
+00878 }
+00879 
+00880 <span class="comment">/*******************************************************************-o-******</span>
+00881 <span class="comment"> * get_configuration_directory</span>
+00882 <span class="comment"> *</span>
+00883 <span class="comment"> * Parameters: -</span>
+00884 <span class="comment"> * Retrieve the configuration directory or directories.</span>
+00885 <span class="comment"> * (For backwards compatibility that is:</span>
+00886 <span class="comment"> *       SNMPCONFPATH, SNMPSHAREPATH, SNMPLIBPATH, HOME/.snmp</span>
+00887 <span class="comment"> * First check whether the value is set.</span>
+00888 <span class="comment"> * If not set give it the default value.</span>
+00889 <span class="comment"> * Return the value.</span>
+00890 <span class="comment"> * We always retrieve it new, since we have to do it anyway if it is just set.</span>
+00891 <span class="comment"> */</span>
+00892 <span class="keyword">const</span> <span class="keywordtype">char</span>     *
+00893 get_configuration_directory()
+00894 {
+00895     <span class="keywordtype">char</span>            defaultPath[SPRINT_MAX_LEN];
+00896     <span class="keywordtype">char</span>           *homepath;
+00897 
+00898     <span class="keywordflow">if</span> (NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+00899                                       NETSNMP_DS_LIB_CONFIGURATION_DIR)) {
+00900         homepath = <a class="code" href="group__util.html#ga24">netsnmp_getenv</a>(<span class=
+"stringliteral">"HOME"</span>);
+00901         snprintf(defaultPath, <span class="keyword">sizeof</span>(defaultPath), <span class=
+"stringliteral">"%s%c%s%c%s%s%s%s"</span>,
+00902                 SNMPCONFPATH, ENV_SEPARATOR_CHAR,
+00903                 SNMPSHAREPATH, ENV_SEPARATOR_CHAR, SNMPLIBPATH,
+00904                 ((homepath == NULL) ? <span class="stringliteral">""</span> : ENV_SEPARATOR),
+00905                 ((homepath == NULL) ? <span class="stringliteral">""</span> : homepath),
+00906                 ((homepath == NULL) ? <span class="stringliteral">""</span> : <span class=
+"stringliteral">"/.snmp"</span>));
+00907         defaultPath[ <span class="keyword">sizeof</span>(defaultPath)-1 ] = 0;
+00908         set_configuration_directory(defaultPath);
+00909     }
+00910     <span class="keywordflow">return</span> (netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+00911                                   NETSNMP_DS_LIB_CONFIGURATION_DIR));
+00912 }
+00913 
+00914 <span class="comment">/*******************************************************************-o-******</span>
+00915 <span class="comment"> * set_persistent_directory</span>
+00916 <span class="comment"> *</span>
+00917 <span class="comment"> * Parameters:</span>
+00918 <span class="comment"> *      char *dir - value of the directory</span>
+00919 <span class="comment"> * Sets the configuration directory. </span>
+00920 <span class="comment"> * No multiple directories may be specified.</span>
+00921 <span class="comment"> * (However, this is not checked)</span>
+00922 <span class="comment"> */</span>
+00923 <span class="keywordtype">void</span>
+00924 set_persistent_directory(<span class="keyword">const</span> <span class="keywordtype">char</span> *dir)
+00925 {
+00926     netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
+00927                           NETSNMP_DS_LIB_PERSISTENT_DIR, dir);
+00928 }
+00929 
+00930 <span class="comment">/*******************************************************************-o-******</span>
+00931 <span class="comment"> * get_persistent_directory</span>
+00932 <span class="comment"> *</span>
+00933 <span class="comment"> * Parameters: -</span>
+00934 <span class="comment"> * Function will retrieve the persisten directory value.</span>
+00935 <span class="comment"> * First check whether the value is set.</span>
+00936 <span class="comment"> * If not set give it the default value.</span>
+00937 <span class="comment"> * Return the value. </span>
+00938 <span class="comment"> * We always retrieve it new, since we have to do it anyway if it is just set.</span>
+00939 <span class="comment"> */</span>
+00940 <span class="keyword">const</span> <span class="keywordtype">char</span>     *
+00941 get_persistent_directory()
+00942 {
+00943     <span class="keywordflow">if</span> (NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+00944                                       NETSNMP_DS_LIB_PERSISTENT_DIR)) {
+00945         set_persistent_directory(PERSISTENT_DIRECTORY);
+00946     }
+00947     <span class="keywordflow">return</span> (netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+00948                                   NETSNMP_DS_LIB_PERSISTENT_DIR));
+00949 }
+00950 
+00951 <span class="comment">/*******************************************************************-o-******</span>
+00952 <span class="comment"> * set_temp_file_pattern</span>
+00953 <span class="comment"> *</span>
+00954 <span class="comment"> * Parameters:</span>
+00955 <span class="comment"> *      char *pattern - value of the file pattern</span>
+00956 <span class="comment"> * Sets the temp file pattern. </span>
+00957 <span class="comment"> * Multiple patterns may not be specified.</span>
+00958 <span class="comment"> * (However, this is not checked)</span>
+00959 <span class="comment"> */</span>
+00960 <span class="keywordtype">void</span>
+00961 set_temp_file_pattern(<span class="keyword">const</span> <span class="keywordtype">char</span> *pattern)
+00962 {
+00963     netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
+00964                           NETSNMP_DS_LIB_TEMP_FILE_PATTERN, pattern);
+00965 }
+00966 
+00967 <span class="comment">/*******************************************************************-o-******</span>
+00968 <span class="comment"> * get_temp_file_pattern</span>
+00969 <span class="comment"> *</span>
+00970 <span class="comment"> * Parameters: -</span>
+00971 <span class="comment"> * Function will retrieve the temp file pattern value.</span>
+00972 <span class="comment"> * First check whether the value is set.</span>
+00973 <span class="comment"> * If not set give it the default value.</span>
+00974 <span class="comment"> * Return the value. </span>
+00975 <span class="comment"> * We always retrieve it new, since we have to do it anyway if it is just set.</span>
+00976 <span class="comment"> */</span>
+00977 <span class="keyword">const</span> <span class="keywordtype">char</span>     *
+00978 get_temp_file_pattern()
+00979 {
+00980     <span class="keywordflow">if</span> (NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+00981                                       NETSNMP_DS_LIB_TEMP_FILE_PATTERN)) {
+00982         set_temp_file_pattern(NETSNMP_TEMP_FILE_PATTERN);
+00983     }
+00984     <span class="keywordflow">return</span> (netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+00985                                   NETSNMP_DS_LIB_TEMP_FILE_PATTERN));
+00986 }
+00987 
+00988 <span class="comment">/*******************************************************************-o-******</span>
+00989 <span class="comment"> * read_config_files</span>
+00990 <span class="comment"> *</span>
+00991 <span class="comment"> * Parameters:</span>
+00992 <span class="comment"> *      when    == PREMIB_CONFIG, NORMAL_CONFIG  -or-  EITHER_CONFIG</span>
+00993 <span class="comment"> *</span>
+00994 <span class="comment"> *</span>
+00995 <span class="comment"> * Traverse the list of config file types, performing the following actions</span>
+00996 <span class="comment"> * for each --</span>
+00997 <span class="comment"> *</span>
+00998 <span class="comment"> * First, build a search path for config files.  If the contents of </span>
+00999 <span class="comment"> * environment variable SNMPCONFPATH are NULL, then use the following</span>
+01000 <span class="comment"> * path list (where the last entry exists only if HOME is non-null):</span>
+01001 <span class="comment"> *</span>
+01002 <span class="comment"> *      SNMPSHAREPATH:SNMPLIBPATH:${HOME}/.snmp</span>
+01003 <span class="comment"> *</span>
+01004 <span class="comment"> * Then, In each of these directories, read config files by the name of:</span>
+01005 <span class="comment"> *</span>
+01006 <span class="comment"> *      &lt;dir&gt;/&lt;fileHeader&gt;.conf         -AND-</span>
+01007 <span class="comment"> *      &lt;dir&gt;/&lt;fileHeader&gt;.local.conf</span>
+01008 <span class="comment"> *</span>
+01009 <span class="comment"> * where &lt;fileHeader&gt; is taken from the config file type structure.</span>
+01010 <span class="comment"> *</span>
+01011 <span class="comment"> *</span>
+01012 <span class="comment"> * PREMIB_CONFIG causes free_config() to be invoked prior to any other action.</span>
+01013 <span class="comment"> *</span>
+01014 <span class="comment"> *</span>
+01015 <span class="comment"> * EXITs if any 'config_errors' are logged while parsing config file lines.</span>
+01016 <span class="comment"> */</span>
+01017 <span class="keywordtype">void</span>
+01018 read_config_files(<span class="keywordtype">int</span> when)
+01019 {
+01020     <span class="keywordtype">int</span>             i, j;
+01021     <span class="keywordtype">char</span>            configfile[300];
+01022     <span class="keywordtype">char</span>           *envconfpath, *persfile;
+01023     <span class="keyword">const</span> <span class="keywordtype">char</span>     *confpath, *perspath;
+01024     <span class="keywordtype">char</span>           *cptr1, *cptr2;
+01025     <span class="keywordtype">char</span>            defaultPath[SPRINT_MAX_LEN];
+01026 
+01027     <span class="keyword">struct </span>config_files *ctmp = config_files;
+01028     <span class="keyword">struct </span>config_line *ltmp;
+01029     <span class="keyword">struct </span>stat     statbuf;
+01030 
+01031     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+01032                                NETSNMP_DS_LIB_DONT_PERSIST_STATE)) <span class="keywordflow">return</span>;
+01033 
+01034     config_errors = 0;
+01035 
+01036     <span class="keywordflow">if</span> (when == PREMIB_CONFIG)
+01037         free_config();
+01038 
+01039     confpath = get_configuration_directory();
+01040 
+01041     <span class="comment">/*</span>
+01042 <span class="comment">     * read all config file types </span>
+01043 <span class="comment">     */</span>
+01044     <span class="keywordflow">for</span> (; ctmp != NULL; ctmp = ctmp-&gt;next) {
+01045 
+01046         ltmp = ctmp-&gt;start;
+01047 
+01048         <span class="comment">/*</span>
+01049 <span class="comment">         * persistent path can change via conf file, so make sure</span>
+01050 <span class="comment">         * we have a valid pointer.</span>
+01051 <span class="comment">         */</span>
+01052         perspath = get_persistent_directory();
+01053 
+01054         <span class="comment">/*</span>
+01055 <span class="comment">         * read the config files </span>
+01056 <span class="comment">         */</span>
+01057         <span class="keywordflow">if</span> ((envconfpath = <a class="code" href=
+"group__util.html#ga24">netsnmp_getenv</a>(<span class="stringliteral">"SNMPCONFPATH"</span>)) == NULL) {
+01058             snprintf(defaultPath, <span class="keyword">sizeof</span>(defaultPath), <span class=
+"stringliteral">"%s%s%s"</span>,
+01059                     ((confpath == NULL) ? <span class="stringliteral">""</span> : confpath),
+01060                     ((perspath == NULL) ? <span class="stringliteral">""</span> : ENV_SEPARATOR),
+01061                     ((perspath == NULL) ? <span class="stringliteral">""</span> : perspath));
+01062             defaultPath[ <span class="keyword">sizeof</span>(defaultPath)-1 ] = 0;
+01063             envconfpath = strdup(defaultPath);
+01064         } <span class="keywordflow">else</span> {
+01065             envconfpath = strdup(envconfpath);
+01066         }
+01067 
+01068         DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"config path used:%s\n"</span>, envconfpath));
+01069         cptr1 = cptr2 = envconfpath;
+01070         i = 1;
+01071         <span class="keywordflow">while</span> (i &amp;&amp; *cptr2 != 0) {
+01072             <span class="keywordflow">while</span> (*cptr1 != 0 &amp;&amp; *cptr1 != ENV_SEPARATOR_CHAR)
+01073                 cptr1++;
+01074             <span class="keywordflow">if</span> (*cptr1 == 0)
+01075                 i = 0;
+01076             <span class="keywordflow">else</span>
+01077                 *cptr1 = 0;
+01078             <span class="comment">/*</span>
+01079 <span class="comment">             * for proper persistent storage retrival, we need to read old backup</span>
+01080 <span class="comment">             * copies of the previous storage files.  If the application in</span>
+01081 <span class="comment">             * question has died without the proper call to snmp_clean_persistent,</span>
+01082 <span class="comment">             * then we read all the configuration files we can, starting with</span>
+01083 <span class="comment">             * the oldest first.</span>
+01084 <span class="comment">             */</span>
+01085             persfile = <a class="code" href="group__util.html#ga24">netsnmp_getenv</a>(<span class=
+"stringliteral">"SNMP_PERSISTENT_FILE"</span>);
+01086             <span class="keywordflow">if</span> (strncmp(cptr2, perspath, strlen(perspath)) == 0 ||
+01087                 (persfile != NULL &amp;&amp;
+01088                  strncmp(cptr2, persfile, strlen(persfile)) == 0)) {
+01089                 <span class="comment">/*</span>
+01090 <span class="comment">                 * limit this to the known storage directory only </span>
+01091 <span class="comment">                 */</span>
+01092                 <span class="keywordflow">for</span> (j = 0; j &lt;= MAX_PERSISTENT_BACKUPS; j++) {
+01093                     snprintf(configfile, <span class="keyword">sizeof</span>(configfile),
+01094                            <span class="stringliteral">"%s/%s.%d.conf"</span>, cptr2,
+01095                             ctmp-&gt;fileHeader, j);
+01096                     configfile[ <span class="keyword">sizeof</span>(configfile)-1 ] = 0;
+01097                     <span class="keywordflow">if</span> (stat(configfile, &amp;statbuf) != 0) {
+01098                         <span class="comment">/*</span>
+01099 <span class="comment">                         * file not there, continue </span>
+01100 <span class="comment">                         */</span>
+01101                         <span class="keywordflow">break</span>;
+01102                     } <span class="keywordflow">else</span> {
+01103                         <span class="comment">/*</span>
+01104 <span class="comment">                         * backup exists, read it </span>
+01105 <span class="comment">                         */</span>
+01106                         DEBUGMSGTL((<span class="stringliteral">"read_config_files"</span>,
+01107                                     <span class="stringliteral">"old config file found: %s, parsing\n"</span>,
+01108                                     configfile));
+01109                         read_config(configfile, ltmp, when);
+01110                     }
+01111                 }
+01112             }
+01113             snprintf(configfile, <span class="keyword">sizeof</span>(configfile),
+01114                      <span class="stringliteral">"%s/%s.conf"</span>, cptr2, ctmp-&gt;fileHeader);
+01115             configfile[ <span class="keyword">sizeof</span>(configfile)-1 ] = 0;
+01116             read_config(configfile, ltmp, when);
+01117             snprintf(configfile, <span class="keyword">sizeof</span>(configfile),
+01118                      <span class="stringliteral">"%s/%s.local.conf"</span>, cptr2, ctmp-&gt;fileHeader);
+01119             configfile[ <span class="keyword">sizeof</span>(configfile)-1 ] = 0;
+01120             read_config(configfile, ltmp, when);
+01121             cptr2 = ++cptr1;
+01122         }
+01123         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(envconfpath);
+01124     }
+01125 
+01126     <span class="keywordflow">if</span> (config_errors) {
+01127         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"net-snmp: %d error(s) in config file(s)\n"</span>,
+01128                  config_errors);
+01129         <span class="comment">/*</span>
+01130 <span class="comment">         * exit(1); </span>
+01131 <span class="comment">         */</span>
+01132     }
+01133 }
+01134 
+01135 <span class="keywordtype">void</span>
+01136 read_config_print_usage(<span class="keyword">const</span> <span class="keywordtype">char</span> *lead)
+01137 {
+01138     <span class="keyword">struct </span>config_files *ctmp = config_files;
+01139     <span class="keyword">struct </span>config_line *ltmp;
+01140 
+01141     <span class="keywordflow">if</span> (lead == NULL)
+01142         lead = <span class="stringliteral">""</span>;
+01143 
+01144     <span class="keywordflow">for</span> (ctmp = config_files; ctmp != NULL; ctmp = ctmp-&gt;next) {
+01145         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_INFO, <span class=
+"stringliteral">"%sIn %s.conf and %s.local.conf:\n"</span>, lead,
+01146                  ctmp-&gt;fileHeader, ctmp-&gt;fileHeader);
+01147         <span class="keywordflow">for</span> (ltmp = ctmp-&gt;start; ltmp != NULL; ltmp = ltmp-&gt;next) {
+01148             DEBUGIF(<span class="stringliteral">"read_config_usage"</span>) {
+01149                 <span class="keywordflow">if</span> (ltmp-&gt;config_time == PREMIB_CONFIG)
+01150                     DEBUGMSG((<span class="stringliteral">"read_config_usage"</span>, <span class=
+"stringliteral">"*"</span>));
+01151                 <span class="keywordflow">else</span>
+01152                     DEBUGMSG((<span class="stringliteral">"read_config_usage"</span>, <span class=
+"stringliteral">" "</span>));
+01153             }
+01154             <span class="keywordflow">if</span> (ltmp-&gt;help) {
+01155                 <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_INFO, <span class=
+"stringliteral">"%s%s%-24s %s\n"</span>, lead, lead,
+01156                          ltmp-&gt;config_token, ltmp-&gt;help);
+01157             } <span class="keywordflow">else</span> {
+01158                 DEBUGIF(<span class="stringliteral">"read_config_usage"</span>) {
+01159                     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_INFO, <span class=
+"stringliteral">"%s%s%-24s [NO HELP]\n"</span>, lead, lead,
+01160                              ltmp-&gt;config_token);
+01161                 }
+01162             }
+01163         }
+01164     }
+01165 }
+01166 
+01180 <span class="keywordtype">void</span>
+<a name="l01181" id="l01181"></a><a class="code" href="group__read__config.html#ga37">01181</a> <a class="code" href=
+"group__read__config.html#ga37">read_config_store</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type, <span class="keyword">const</span> <span class="keywordtype">char</span> *line)
+01182 {
+01183 <span class="preprocessor">#ifdef PERSISTENT_DIRECTORY</span>
+01184     <span class="keywordtype">char</span>            file[512], *filep;
+01185     FILE           *fout;
+01186 <span class="preprocessor">#ifdef PERSISTENT_MASK</span>
+01187     mode_t          oldmask;
+01188 <span class="preprocessor">#endif</span>
+01189 
+01190     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+01191                                NETSNMP_DS_LIB_DONT_PERSIST_STATE)) <span class="keywordflow">return</span>;
+01192 
+01193     <span class="comment">/*</span>
+01194 <span class="comment">     * store configuration directives in the following order of preference:</span>
+01195 <span class="comment">     * 1. ENV variable SNMP_PERSISTENT_FILE</span>
+01196 <span class="comment">     * 2. configured &lt;PERSISTENT_DIRECTORY&gt;/&lt;type&gt;.conf</span>
+01197 <span class="comment">     */</span>
+01198     <span class="keywordflow">if</span> ((filep = <a class="code" href=
+"group__util.html#ga24">netsnmp_getenv</a>(<span class="stringliteral">"SNMP_PERSISTENT_FILE"</span>)) == NULL) {
+01199         snprintf(file, <span class="keyword">sizeof</span>(file),
+01200                  <span class="stringliteral">"%s/%s.conf"</span>, get_persistent_directory(), type);
+01201         file[ <span class="keyword">sizeof</span>(file)-1 ] = 0;
+01202         filep = file;
+01203     }
+01204 <span class="preprocessor">#ifdef PERSISTENT_MASK</span>
+01205     oldmask = umask(PERSISTENT_MASK);
+01206 <span class="preprocessor">#endif</span>
+01207     <span class="keywordflow">if</span> (mkdirhier(filep, AGENT_DIRECTORY_MODE, 1)) {
+01208         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,
+01209                  <span class="stringliteral">"Failed to create the persistent directory for %s\n"</span>,
+01210                  file);
+01211     }
+01212     <span class="keywordflow">if</span> ((fout = fopen(filep, <span class="stringliteral">"a"</span>)) != NULL) {
+01213         fprintf(fout, <span class="stringliteral">"%s"</span>, line);
+01214         <span class="keywordflow">if</span> (line[strlen(line)] != <span class="charliteral">'\n'</span>)
+01215             fprintf(fout, <span class="stringliteral">"\n"</span>);
+01216         DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"storing: %s\n"</span>, line));
+01217         fclose(fout);
+01218     } <span class="keywordflow">else</span> {
+01219         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"read_config_store open failure on %s\n"</span>, filep);
+01220     }
+01221 <span class="preprocessor">#ifdef PERSISTENT_MASK</span>
+01222     umask(oldmask);
+01223 <span class="preprocessor">#endif</span>
+01224 
+01225 <span class="preprocessor">#endif</span>
+01226 }                               <span class="comment">/* end read_config_store() */</span>
+01227 
+01228 <span class="keywordtype">void</span>
+01229 read_app_config_store(<span class="keyword">const</span> <span class="keywordtype">char</span> *line)
+01230 {
+01231     <a class="code" href=
+"group__read__config.html#ga37">read_config_store</a>(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+01232                                             NETSNMP_DS_LIB_APPTYPE), line);
+01233 }
+01234 
+01235 
+01236 
+01237 
+01238 <span class="comment">/*******************************************************************-o-******</span>
+01239 <span class="comment"> * snmp_save_persistent</span>
+01240 <span class="comment"> *</span>
+01241 <span class="comment"> * Parameters:</span>
+01242 <span class="comment"> *      *type</span>
+01243 <span class="comment"> *      </span>
+01244 <span class="comment"> *</span>
+01245 <span class="comment"> * Save the file "&lt;PERSISTENT_DIRECTORY&gt;/&lt;type&gt;.conf" into a backup copy</span>
+01246 <span class="comment"> * called "&lt;PERSISTENT_DIRECTORY&gt;/&lt;type&gt;.%d.conf", which %d is an</span>
+01247 <span class="comment"> * incrementing number on each call, but less than MAX_PERSISTENT_BACKUPS.</span>
+01248 <span class="comment"> *</span>
+01249 <span class="comment"> * Should be called just before all persistent information is supposed to be</span>
+01250 <span class="comment"> * written to move aside the existing persistent cache.</span>
+01251 <span class="comment"> * snmp_clean_persistent should then be called afterward all data has been</span>
+01252 <span class="comment"> * saved to remove these backup files.</span>
+01253 <span class="comment"> *</span>
+01254 <span class="comment"> * Note: on an rename error, the files are removed rather than saved.</span>
+01255 <span class="comment"> *</span>
+01256 <span class="comment"> */</span>
+01257 <span class="keywordtype">void</span>
+01258 snmp_save_persistent(<span class="keyword">const</span> <span class="keywordtype">char</span> *type)
+01259 {
+01260     <span class="keywordtype">char</span>            file[512], fileold[SPRINT_MAX_LEN];
+01261     <span class="keyword">struct </span>stat     statbuf;
+01262     <span class="keywordtype">int</span>             j;
+01263 
+01264     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+01265                                NETSNMP_DS_LIB_DONT_PERSIST_STATE)) <span class="keywordflow">return</span>;
+01266 
+01267     DEBUGMSGTL((<span class="stringliteral">"snmp_save_persistent"</span>, <span class=
+"stringliteral">"saving %s files...\n"</span>, type));
+01268     snprintf(file, <span class="keyword">sizeof</span>(file),
+01269              <span class="stringliteral">"%s/%s.conf"</span>, get_persistent_directory(), type);
+01270     file[ <span class="keyword">sizeof</span>(file)-1 ] = 0;
+01271     <span class="keywordflow">if</span> (stat(file, &amp;statbuf) == 0) {
+01272         <span class="keywordflow">for</span> (j = 0; j &lt;= MAX_PERSISTENT_BACKUPS; j++) {
+01273             snprintf(fileold, <span class="keyword">sizeof</span>(fileold),
+01274                      <span class="stringliteral">"%s/%s.%d.conf"</span>, get_persistent_directory(), type, j);
+01275             fileold[ <span class="keyword">sizeof</span>(fileold)-1 ] = 0;
+01276             <span class="keywordflow">if</span> (stat(fileold, &amp;statbuf) != 0) {
+01277                 DEBUGMSGTL((<span class="stringliteral">"snmp_save_persistent"</span>,
+01278                             <span class="stringliteral">" saving old config file: %s -&gt; %s.\n"</span>, file,
+01279                             fileold));
+01280                 <span class="keywordflow">if</span> (rename(file, fileold)) {
+01281                     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"Cannot rename %s to %s\n"</span>, file, fileold);
+01282                      <span class="comment">/* moving it failed, try nuking it, as leaving</span>
+01283 <span class="comment">                      * it around is very bad. */</span>
+01284                     <span class="keywordflow">if</span> (unlink(file) == -1)
+01285                         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"Cannot unlink %s\n"</span>, file);
+01286                 }
+01287                 <span class="keywordflow">break</span>;
+01288             }
+01289         }
+01290     }
+01291     <span class="comment">/*</span>
+01292 <span class="comment">     * save a warning header to the top of the new file </span>
+01293 <span class="comment">     */</span>
+01294     snprintf(fileold, <span class="keyword">sizeof</span>(fileold),
+01295             <span class=
+"stringliteral">"#\n# net-snmp (or ucd-snmp) persistent data file.\n#\n############################################################################\n# STOP STOP STOP STOP STOP STOP STOP STOP STOP \n#\n#          **** DO NOT EDIT THIS FILE ****\n#\n# STOP STOP STOP STOP STOP STOP STOP STOP STOP \n############################################################################\n#\n# DO NOT STORE CONFIGURATION ENTRIES HERE.\n# Please save normal configuration tokens for %s in SNMPCONFPATH/%s.conf.\n# Only \"createUser\" tokens should be placed here by %s administrators.\n# (Did I mention: do not edit this file?)\n#\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"</span>,
+01296             type, type, type);
+01297     fileold[ <span class="keyword">sizeof</span>(fileold)-1 ] = 0;
+01298     <a class="code" href="group__read__config.html#ga37">read_config_store</a>(type, fileold);
+01299 }
+01300 
+01301 
+01302 <span class="comment">/*******************************************************************-o-******</span>
+01303 <span class="comment"> * snmp_clean_persistent</span>
+01304 <span class="comment"> *</span>
+01305 <span class="comment"> * Parameters:</span>
+01306 <span class="comment"> *      *type</span>
+01307 <span class="comment"> *      </span>
+01308 <span class="comment"> *</span>
+01309 <span class="comment"> * Unlink all backup files called "&lt;PERSISTENT_DIRECTORY&gt;/&lt;type&gt;.%d.conf".</span>
+01310 <span class="comment"> *</span>
+01311 <span class="comment"> * Should be called just after we successfull dumped the last of the</span>
+01312 <span class="comment"> * persistent data, to remove the backup copies of previous storage dumps.</span>
+01313 <span class="comment"> *</span>
+01314 <span class="comment"> * XXX  Worth overwriting with random bytes first?  This would</span>
+01315 <span class="comment"> *      ensure that the data is destroyed, even a buffer containing the</span>
+01316 <span class="comment"> *      data persists in memory or swap.  Only important if secrets</span>
+01317 <span class="comment"> *      will be stored here.</span>
+01318 <span class="comment"> */</span>
+01319 <span class="keywordtype">void</span>
+01320 snmp_clean_persistent(<span class="keyword">const</span> <span class="keywordtype">char</span> *type)
+01321 {
+01322     <span class="keywordtype">char</span>            file[512];
+01323     <span class="keyword">struct </span>stat     statbuf;
+01324     <span class="keywordtype">int</span>             j;
+01325 
+01326     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+01327                                NETSNMP_DS_LIB_DONT_PERSIST_STATE)) <span class="keywordflow">return</span>;
+01328 
+01329     DEBUGMSGTL((<span class="stringliteral">"snmp_clean_persistent"</span>, <span class=
+"stringliteral">"cleaning %s files...\n"</span>, type));
+01330     snprintf(file, <span class="keyword">sizeof</span>(file),
+01331              <span class="stringliteral">"%s/%s.conf"</span>, get_persistent_directory(), type);
+01332     file[ <span class="keyword">sizeof</span>(file)-1 ] = 0;
+01333     <span class="keywordflow">if</span> (stat(file, &amp;statbuf) == 0) {
+01334         <span class="keywordflow">for</span> (j = 0; j &lt;= MAX_PERSISTENT_BACKUPS; j++) {
+01335             snprintf(file, <span class="keyword">sizeof</span>(file),
+01336                      <span class="stringliteral">"%s/%s.%d.conf"</span>, get_persistent_directory(), type, j);
+01337             file[ <span class="keyword">sizeof</span>(file)-1 ] = 0;
+01338             <span class="keywordflow">if</span> (stat(file, &amp;statbuf) == 0) {
+01339                 DEBUGMSGTL((<span class="stringliteral">"snmp_clean_persistent"</span>,
+01340                             <span class="stringliteral">" removing old config file: %s\n"</span>, file));
+01341                 <span class="keywordflow">if</span> (unlink(file) == -1)
+01342                     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"Cannot unlink %s\n"</span>, file);
+01343             }
+01344         }
+01345     }
+01346 }
+01347 
+01348 
+01349 
+01350 
+01351 <span class="comment">/*</span>
+01352 <span class="comment"> * config_perror: prints a warning string associated with a file and</span>
+01353 <span class="comment"> * line number of a .conf file and increments the error count. </span>
+01354 <span class="comment"> */</span>
+01355 <span class="keywordtype">void</span>
+01356 config_perror(<span class="keyword">const</span> <span class="keywordtype">char</span> *string)
+01357 {
+01358     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"%s: line %d: Error: %s\n"</span>, curfilename, linecount,
+01359              string);
+01360     config_errors++;
+01361 }
+01362 
+01363 <span class="keywordtype">void</span>
+01364 config_pwarn(<span class="keyword">const</span> <span class="keywordtype">char</span> *string)
+01365 {
+01366     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_WARNING, <span class=
+"stringliteral">"%s: line %d: Warning: %s\n"</span>, curfilename,
+01367              linecount, string);
+01368 }
+01369 
+01370 <span class="comment">/*</span>
+01371 <span class="comment"> * skip all white spaces and return 1 if found something either end of</span>
+01372 <span class="comment"> * line or a comment character </span>
+01373 <span class="comment"> */</span>
+01374 <span class="keywordtype">char</span>           *
+01375 skip_white(<span class="keywordtype">char</span> *ptr)
+01376 {
+01377     <span class="keywordflow">if</span> (ptr == NULL)
+01378         <span class="keywordflow">return</span> (NULL);
+01379     <span class="keywordflow">while</span> (*ptr != 0 &amp;&amp; isspace(*ptr))
+01380         ptr++;
+01381     <span class="keywordflow">if</span> (*ptr == 0 || *ptr == <span class="charliteral">'#'</span>)
+01382         <span class="keywordflow">return</span> (NULL);
+01383     <span class="keywordflow">return</span> (ptr);
+01384 }
+01385 
+01386 <span class="keywordtype">char</span>           *
+01387 skip_not_white(<span class="keywordtype">char</span> *ptr)
+01388 {
+01389     <span class="keywordflow">if</span> (ptr == NULL)
+01390         <span class="keywordflow">return</span> (NULL);
+01391     <span class="keywordflow">while</span> (*ptr != 0 &amp;&amp; !isspace(*ptr))
+01392         ptr++;
+01393     <span class="keywordflow">if</span> (*ptr == 0 || *ptr == <span class="charliteral">'#'</span>)
+01394         <span class="keywordflow">return</span> (NULL);
+01395     <span class="keywordflow">return</span> (ptr);
+01396 }
+01397 
+01398 <span class="keywordtype">char</span>           *
+01399 skip_token(<span class="keywordtype">char</span> *ptr)
+01400 {
+01401     ptr = skip_white(ptr);
+01402     ptr = skip_not_white(ptr);
+01403     ptr = skip_white(ptr);
+01404     <span class="keywordflow">return</span> (ptr);
+01405 }
+01406 
+01407 <span class="comment">/*</span>
+01408 <span class="comment"> * copy_word</span>
+01409 <span class="comment"> * copies the next 'token' from 'from' into 'to', maximum len-1 characters.</span>
+01410 <span class="comment"> * currently a token is anything seperate by white space</span>
+01411 <span class="comment"> * or within quotes (double or single) (i.e. "the red rose" </span>
+01412 <span class="comment"> * is one token, \"the red rose\" is three tokens)</span>
+01413 <span class="comment"> * a '\' character will allow a quote character to be treated</span>
+01414 <span class="comment"> * as a regular character </span>
+01415 <span class="comment"> * It returns a pointer to first non-white space after the end of the token</span>
+01416 <span class="comment"> * being copied or to 0 if we reach the end.</span>
+01417 <span class="comment"> * Note: Partially copied words (greater than len) still returns a !NULL ptr</span>
+01418 <span class="comment"> * Note: partially copied words are, however, null terminated.</span>
+01419 <span class="comment"> */</span>
+01420 
+01421 <span class="keywordtype">char</span>           *
+01422 copy_nword(<span class="keywordtype">char</span> *from, <span class="keywordtype">char</span> *to, <span class=
+"keywordtype">int</span> len)
+01423 {
+01424     <span class="keywordtype">char</span>            quote;
+01425     <span class="keywordflow">if</span> (!from || !to)
+01426         <span class="keywordflow">return</span> NULL;
+01427     <span class="keywordflow">if</span> ((*from == <span class="charliteral">'\"'</span>) || (*from == <span class=
+"charliteral">'\''</span>)) {
+01428         quote = *(from++);
+01429         <span class="keywordflow">while</span> ((*from != quote) &amp;&amp; (*from != 0)) {
+01430             <span class="keywordflow">if</span> ((*from == <span class=
+"charliteral">'\\'</span>) &amp;&amp; (*(from + 1) != 0)) {
+01431                 <span class="keywordflow">if</span> (len &gt; 0) {  <span class=
+"comment">/* don't copy beyond len bytes */</span>
+01432                     *to++ = *(from + 1);
+01433                     <span class="keywordflow">if</span> (--len == 0)
+01434                         *(to - 1) = <span class="charliteral">'\0'</span>;       <span class=
+"comment">/* null protect the last spot */</span>
+01435                 }
+01436                 from = from + 2;
+01437             } <span class="keywordflow">else</span> {
+01438                 <span class="keywordflow">if</span> (len &gt; 0) {  <span class=
+"comment">/* don't copy beyond len bytes */</span>
+01439                     *to++ = *from++;
+01440                     <span class="keywordflow">if</span> (--len == 0)
+01441                         *(to - 1) = <span class="charliteral">'\0'</span>;       <span class=
+"comment">/* null protect the last spot */</span>
+01442                 } <span class="keywordflow">else</span>
+01443                     from++;
+01444             }
+01445         }
+01446         <span class="keywordflow">if</span> (*from == 0) {
+01447             DEBUGMSGTL((<span class="stringliteral">"read_config_copy_word"</span>,
+01448                         <span class="stringliteral">"no end quote found in config string\n"</span>));
+01449         } <span class="keywordflow">else</span>
+01450             from++;
+01451     } <span class="keywordflow">else</span> {
+01452         <span class="keywordflow">while</span> (*from != 0 &amp;&amp; !isspace(*from)) {
+01453             <span class="keywordflow">if</span> ((*from == <span class=
+"charliteral">'\\'</span>) &amp;&amp; (*(from + 1) != 0)) {
+01454                 <span class="keywordflow">if</span> (len &gt; 0) {  <span class=
+"comment">/* don't copy beyond len bytes */</span>
+01455                     *to++ = *(from + 1);
+01456                     <span class="keywordflow">if</span> (--len == 0)
+01457                         *(to - 1) = <span class="charliteral">'\0'</span>;       <span class=
+"comment">/* null protect the last spot */</span>
+01458                 }
+01459                 from = from + 2;
+01460             } <span class="keywordflow">else</span> {
+01461                 <span class="keywordflow">if</span> (len &gt; 0) {  <span class=
+"comment">/* don't copy beyond len bytes */</span>
+01462                     *to++ = *from++;
+01463                     <span class="keywordflow">if</span> (--len == 0)
+01464                         *(to - 1) = <span class="charliteral">'\0'</span>;       <span class=
+"comment">/* null protect the last spot */</span>
+01465                 } <span class="keywordflow">else</span>
+01466                     from++;
+01467             }
+01468         }
+01469     }
+01470     <span class="keywordflow">if</span> (len &gt; 0)
+01471         *to = 0;
+01472     from = skip_white(from);
+01473     <span class="keywordflow">return</span> (from);
+01474 }                               <span class="comment">/* copy_word */</span>
+01475 
+01476 <span class="comment">/*</span>
+01477 <span class="comment"> * copy_word</span>
+01478 <span class="comment"> * copies the next 'token' from 'from' into 'to'.</span>
+01479 <span class="comment"> * currently a token is anything seperate by white space</span>
+01480 <span class="comment"> * or within quotes (double or single) (i.e. "the red rose" </span>
+01481 <span class="comment"> * is one token, \"the red rose\" is three tokens)</span>
+01482 <span class="comment"> * a '\' character will allow a quote character to be treated</span>
+01483 <span class="comment"> * as a regular character </span>
+01484 <span class="comment"> * It returns a pointer to first non-white space after the end of the token</span>
+01485 <span class="comment"> * being copied or to 0 if we reach the end.</span>
+01486 <span class="comment"> */</span>
+01487 
+01488 <span class="keyword">static</span> <span class="keywordtype">int</span>      have_warned = 0;
+01489 <span class="keywordtype">char</span>           *
+01490 copy_word(<span class="keywordtype">char</span> *from, <span class="keywordtype">char</span> *to)
+01491 {
+01492     <span class="keywordflow">if</span> (!have_warned) {
+01493         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_INFO,
+01494                  <span class="stringliteral">"copy_word() called.  Use copy_nword() instead.\n"</span>);
+01495         have_warned = 1;
+01496     }
+01497     <span class="keywordflow">return</span> copy_nword(from, to, SPRINT_MAX_LEN);
+01498 }                               <span class="comment">/* copy_word */</span>
+01499 
+01500 <span class="comment">/*</span>
+01501 <span class="comment"> * read_config_save_octet_string(): saves an octet string as a length</span>
+01502 <span class="comment"> * followed by a string of hex </span>
+01503 <span class="comment"> */</span>
+01504 <span class="keywordtype">char</span>           *
+01505 read_config_save_octet_string(<span class="keywordtype">char</span> *saveto, u_char * str, size_t len)
+01506 {
+01507     <span class="keywordtype">int</span>             i;
+01508     u_char         *cp;
+01509 
+01510     <span class="comment">/*</span>
+01511 <span class="comment">     * is everything easily printable </span>
+01512 <span class="comment">     */</span>
+01513     <span class="keywordflow">for</span> (i = 0, cp = str; i &lt; (int) len &amp;&amp; cp &amp;&amp;
+01514          (isalpha(*cp) || isdigit(*cp) || *cp == <span class="charliteral">' '</span>); cp++, i++);
+01515 
+01516     <span class="keywordflow">if</span> (len != 0 &amp;&amp; i == (int) len) {
+01517         *saveto++ = <span class="charliteral">'"'</span>;
+01518         memcpy(saveto, str, len);
+01519         saveto += len;
+01520         *saveto++ = <span class="charliteral">'"'</span>;
+01521         *saveto = <span class="charliteral">'\0'</span>;
+01522     } <span class="keywordflow">else</span> {
+01523         <span class="keywordflow">if</span> (str != NULL) {
+01524             sprintf(saveto, <span class="stringliteral">"0x"</span>);
+01525             saveto += 2;
+01526             <span class="keywordflow">for</span> (i = 0; i &lt; (int) len; i++) {
+01527                 sprintf(saveto, <span class="stringliteral">"%02x"</span>, str[i]);
+01528                 saveto = saveto + 2;
+01529             }
+01530         } <span class="keywordflow">else</span> {
+01531             sprintf(saveto, <span class="stringliteral">"\"\""</span>);
+01532             saveto += 2;
+01533         }
+01534     }
+01535     <span class="keywordflow">return</span> saveto;
+01536 }
+01537 
+01538 <span class="comment">/*</span>
+01539 <span class="comment"> * read_config_read_octet_string(): reads an octet string that was</span>
+01540 <span class="comment"> * saved by the read_config_save_octet_string() function </span>
+01541 <span class="comment"> */</span>
+01542 <span class="keywordtype">char</span>           *
+01543 read_config_read_octet_string(<span class="keywordtype">char</span> *readfrom, u_char ** str, size_t * len)
+01544 {
+01545     u_char         *cptr = NULL;
+01546     <span class="keywordtype">char</span>           *cptr1;
+01547     u_int           tmp;
+01548     <span class="keywordtype">int</span>             i;
+01549     size_t          ilen;
+01550 
+01551     <span class="keywordflow">if</span> (readfrom == NULL || str == NULL)
+01552         <span class="keywordflow">return</span> NULL;
+01553 
+01554     <span class="keywordflow">if</span> (strncasecmp(readfrom, <span class="stringliteral">"0x"</span>, 2) == 0) {
+01555         <span class="comment">/*</span>
+01556 <span class="comment">         * A hex string submitted. How long? </span>
+01557 <span class="comment">         */</span>
+01558         readfrom += 2;
+01559         cptr1 = skip_not_white(readfrom);
+01560         <span class="keywordflow">if</span> (cptr1)
+01561             ilen = (cptr1 - readfrom);
+01562         <span class="keywordflow">else</span>
+01563             ilen = strlen(readfrom);
+01564 
+01565         <span class="keywordflow">if</span> (ilen % 2) {
+01566             DEBUGMSGTL((<span class="stringliteral">"read_config_read_octet_string"</span>,
+01567                         <span class="stringliteral">"invalid hex string: wrong length"</span>));
+01568             <span class="keywordflow">return</span> NULL;
+01569         }
+01570         ilen = ilen / 2;
+01571 
+01572         <span class="comment">/*</span>
+01573 <span class="comment">         * malloc data space if needed (+1 for good measure) </span>
+01574 <span class="comment">         */</span>
+01575         <span class="keywordflow">if</span> (*str == NULL) {
+01576             <span class="keywordflow">if</span> ((cptr = (u_char *) malloc(ilen + 1)) == NULL) {
+01577                 <span class="keywordflow">return</span> NULL;
+01578             }
+01579             *str = cptr;
+01580         } <span class="keywordflow">else</span> {
+01581             <span class="keywordflow">if</span> (ilen &gt;= *len)
+01582                 ilen = *len-1;
+01583             cptr = *str;
+01584         }
+01585         *len = ilen;
+01586 
+01587         <span class="comment">/*</span>
+01588 <span class="comment">         * copy validated data </span>
+01589 <span class="comment">         */</span>
+01590         <span class="keywordflow">for</span> (i = 0; i &lt; (int) *len; i++) {
+01591             <span class="keywordflow">if</span> (1 == sscanf(readfrom, <span class="stringliteral">"%2x"</span>, &amp;tmp))
+01592                 *cptr++ = (u_char) tmp;
+01593             <span class="keywordflow">else</span> {
+01594                 <span class="comment">/*</span>
+01595 <span class="comment">                 * we may lose memory, but don't know caller's buffer XX free(cptr); </span>
+01596 <span class="comment">                 */</span>
+01597                 <span class="keywordflow">return</span> (NULL);
+01598             }
+01599             readfrom += 2;
+01600         }
+01601         *cptr++ = <span class="charliteral">'\0'</span>;
+01602         readfrom = skip_white(readfrom);
+01603     } <span class="keywordflow">else</span> {
+01604         <span class="comment">/*</span>
+01605 <span class="comment">         * Normal string </span>
+01606 <span class="comment">         */</span>
+01607 
+01608         <span class="comment">/*</span>
+01609 <span class="comment">         * malloc string space if needed (including NULL terminator) </span>
+01610 <span class="comment">         */</span>
+01611         <span class="keywordflow">if</span> (*str == NULL) {
+01612             <span class="keywordtype">char</span>            buf[SNMP_MAXBUF];
+01613             readfrom = copy_nword(readfrom, buf, <span class="keyword">sizeof</span>(buf));
+01614 
+01615             *len = strlen(buf);
+01616             <span class="keywordflow">if</span> ((cptr = (u_char *) malloc(*len + 1)) == NULL)
+01617                 <span class="keywordflow">return</span> NULL;
+01618             *str = cptr;
+01619             <span class="keywordflow">if</span> (cptr) {
+01620                 memcpy(cptr, buf, *len + 1);
+01621             }
+01622         } <span class="keywordflow">else</span> {
+01623             readfrom = copy_nword(readfrom, (<span class="keywordtype">char</span> *) *str, *len);
+01624             *len = strlen(*str);
+01625         }
+01626     }
+01627 
+01628     <span class="keywordflow">return</span> readfrom;
+01629 }
+01630 
+01631 
+01632 <span class="comment">/*</span>
+01633 <span class="comment"> * read_config_save_objid(): saves an objid as a numerical string </span>
+01634 <span class="comment"> */</span>
+01635 <span class="keywordtype">char</span>           *
+01636 read_config_save_objid(<span class="keywordtype">char</span> *saveto, oid * objid, size_t len)
+01637 {
+01638     <span class="keywordtype">int</span>             i;
+01639 
+01640     <span class="keywordflow">if</span> (len == 0) {
+01641         strcat(saveto, <span class="stringliteral">"NULL"</span>);
+01642         saveto += strlen(saveto);
+01643         <span class="keywordflow">return</span> saveto;
+01644     }
+01645 
+01646     <span class="comment">/*</span>
+01647 <span class="comment">     * in case len=0, this makes it easier to read it back in </span>
+01648 <span class="comment">     */</span>
+01649     <span class="keywordflow">for</span> (i = 0; i &lt; (int) len; i++) {
+01650         sprintf(saveto, <span class="stringliteral">".%ld"</span>, objid[i]);
+01651         saveto += strlen(saveto);
+01652     }
+01653     <span class="keywordflow">return</span> saveto;
+01654 }
+01655 
+01656 <span class="comment">/*</span>
+01657 <span class="comment"> * read_config_read_objid(): reads an objid from a format saved by the above </span>
+01658 <span class="comment"> */</span>
+01659 <span class="keywordtype">char</span>           *
+01660 read_config_read_objid(<span class="keywordtype">char</span> *readfrom, oid ** objid, size_t * len)
+01661 {
+01662 
+01663     <span class="keywordflow">if</span> (objid == NULL || readfrom == NULL || len == NULL)
+01664         <span class="keywordflow">return</span> NULL;
+01665 
+01666     <span class="keywordflow">if</span> (*objid == NULL) {
+01667         *len = 0;
+01668         <span class="keywordflow">if</span> ((*objid = (oid *) malloc(MAX_OID_LEN * <span class=
+"keyword">sizeof</span>(oid))) == NULL)
+01669             <span class="keywordflow">return</span> NULL;
+01670         *len = MAX_OID_LEN;
+01671     }
+01672 
+01673     <span class="keywordflow">if</span> (strncmp(readfrom, <span class="stringliteral">"NULL"</span>, 4) == 0) {
+01674         <span class="comment">/*</span>
+01675 <span class="comment">         * null length oid </span>
+01676 <span class="comment">         */</span>
+01677         *len = 0;
+01678     } <span class="keywordflow">else</span> {
+01679         <span class="comment">/*</span>
+01680 <span class="comment">         * qualify the string for read_objid </span>
+01681 <span class="comment">         */</span>
+01682         <span class="keywordtype">char</span>            buf[SPRINT_MAX_LEN];
+01683         copy_nword(readfrom, buf, <span class="keyword">sizeof</span>(buf));
+01684 
+01685         <span class="keywordflow">if</span> (!<a class="code" href=
+"group__mib__utilities.html#ga61">read_objid</a>(buf, *objid, len)) {
+01686             DEBUGMSGTL((<span class="stringliteral">"read_config_read_objid"</span>, <span class=
+"stringliteral">"Invalid OID"</span>));
+01687             *len = 0;
+01688             <span class="keywordflow">return</span> NULL;
+01689         }
+01690     }
+01691 
+01692     readfrom = skip_token(readfrom);
+01693     <span class="keywordflow">return</span> readfrom;
+01694 }
+01695 
+01721 <span class="keywordtype">char</span>           *
+<a name="l01722" id="l01722"></a><a class="code" href="group__read__config.html#ga52">01722</a> <a class="code" href=
+"group__read__config.html#ga52">read_config_read_data</a>(<span class="keywordtype">int</span> type, <span class=
+"keywordtype">char</span> *readfrom, <span class="keywordtype">void</span> *dataptr,
+01723                       size_t * len)
+01724 {
+01725     <span class="keywordtype">int</span>            *intp;
+01726     <span class="keywordtype">char</span>          **charpp;
+01727     oid           **oidpp;
+01728     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>   *uintp;
+01729 
+01730     <span class="keywordflow">if</span> (dataptr &amp;&amp; readfrom)
+01731         <span class="keywordflow">switch</span> (type) {
+01732         <span class="keywordflow">case</span> ASN_INTEGER:
+01733             intp = (<span class="keywordtype">int</span> *) dataptr;
+01734             *intp = atoi(readfrom);
+01735             readfrom = skip_token(readfrom);
+01736             <span class="keywordflow">return</span> readfrom;
+01737 
+01738         <span class="keywordflow">case</span> ASN_TIMETICKS:
+01739         <span class="keywordflow">case</span> ASN_UNSIGNED:
+01740             uintp = (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *) dataptr;
+01741             *uintp = strtoul(readfrom, NULL, 0);
+01742             readfrom = skip_token(readfrom);
+01743             <span class="keywordflow">return</span> readfrom;
+01744 
+01745         <span class="keywordflow">case</span> ASN_OCTET_STR:
+01746         <span class="keywordflow">case</span> ASN_BIT_STR:
+01747             charpp = (<span class="keywordtype">char</span> **) dataptr;
+01748             <span class="keywordflow">return</span> read_config_read_octet_string(readfrom,
+01749                                                  (u_char **) charpp, len);
+01750 
+01751         <span class="keywordflow">case</span> ASN_OBJECT_ID:
+01752             oidpp = (oid **) dataptr;
+01753             <span class="keywordflow">return</span> read_config_read_objid(readfrom, oidpp, len);
+01754 
+01755         <span class="keywordflow">default</span>:
+01756             DEBUGMSGTL((<span class="stringliteral">"read_config_read_data"</span>, <span class=
+"stringliteral">"Fail: Unknown type: %d"</span>,
+01757                         type));
+01758             <span class="keywordflow">return</span> NULL;
+01759         }
+01760     <span class="keywordflow">return</span> NULL;
+01761 }
+01762 
+01763 <span class="comment">/*</span>
+01764 <span class="comment"> * read_config_read_memory():</span>
+01765 <span class="comment"> * </span>
+01766 <span class="comment"> * similar to read_config_read_data, but expects a generic memory</span>
+01767 <span class="comment"> * pointer rather than a specific type of pointer.  Len is expected to</span>
+01768 <span class="comment"> * be the amount of available memory.</span>
+01769 <span class="comment"> */</span>
+01770 <span class="keywordtype">char</span>           *
+01771 read_config_read_memory(<span class="keywordtype">int</span> type, <span class="keywordtype">char</span> *readfrom,
+01772                         <span class="keywordtype">char</span> *dataptr, size_t * len)
+01773 {
+01774     <span class="keywordtype">int</span>            *intp;
+01775     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>   *uintp;
+01776     <span class="keywordtype">char</span>            buf[SPRINT_MAX_LEN];
+01777 
+01778     <span class="keywordflow">if</span> (!dataptr || !readfrom)
+01779         <span class="keywordflow">return</span> NULL;
+01780 
+01781     <span class="keywordflow">switch</span> (type) {
+01782     <span class="keywordflow">case</span> ASN_INTEGER:
+01783         <span class="keywordflow">if</span> (*len &lt; <span class="keyword">sizeof</span>(int))
+01784             <span class="keywordflow">return</span> NULL;
+01785         intp = (<span class="keywordtype">int</span> *) dataptr;
+01786         readfrom = copy_nword(readfrom, buf, <span class="keyword">sizeof</span>(buf));
+01787         *intp = atoi(buf);
+01788         *len = <span class="keyword">sizeof</span>(int);
+01789         <span class="keywordflow">return</span> readfrom;
+01790 
+01791     <span class="keywordflow">case</span> ASN_TIMETICKS:
+01792     <span class="keywordflow">case</span> ASN_UNSIGNED:
+01793         <span class="keywordflow">if</span> (*len &lt; <span class="keyword">sizeof</span>(<span class=
+"keywordtype">unsigned</span> int))
+01794             <span class="keywordflow">return</span> NULL;
+01795         uintp = (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *) dataptr;
+01796         readfrom = copy_nword(readfrom, buf, <span class="keyword">sizeof</span>(buf));
+01797         *uintp = strtoul(buf, NULL, 0);
+01798         *len = <span class="keyword">sizeof</span>(<span class="keywordtype">unsigned</span> int);
+01799         <span class="keywordflow">return</span> readfrom;
+01800 
+01801     <span class="keywordflow">case</span> ASN_OCTET_STR:
+01802     <span class="keywordflow">case</span> ASN_BIT_STR:
+01803     <span class="keywordflow">case</span> ASN_PRIV_IMPLIED_OCTET_STR:
+01804         <span class="keywordflow">return</span> read_config_read_octet_string(readfrom,
+01805                                              (u_char **) &amp; dataptr, len);
+01806 
+01807     <span class="keywordflow">case</span> ASN_PRIV_IMPLIED_OBJECT_ID:
+01808     <span class="keywordflow">case</span> ASN_OBJECT_ID:
+01809         readfrom =
+01810             read_config_read_objid(readfrom, (oid **) &amp; dataptr, len);
+01811         *len *= <span class="keyword">sizeof</span>(oid);
+01812         <span class="keywordflow">return</span> readfrom;
+01813 
+01814     <span class="keywordflow">default</span>:
+01815         DEBUGMSGTL((<span class="stringliteral">"read_config_read_memory"</span>, <span class=
+"stringliteral">"Fail: Unknown type: %d"</span>,
+01816                     type));
+01817         <span class="keywordflow">return</span> NULL;
+01818     }
+01819     <span class="keywordflow">return</span> NULL;
+01820 }
+01821 
+01849 <span class="keywordtype">char</span>           *
+<a name="l01850" id="l01850"></a><a class="code" href="group__read__config.html#ga54">01850</a> <a class="code" href=
+"group__read__config.html#ga54">read_config_store_data</a>(<span class="keywordtype">int</span> type, <span class=
+"keywordtype">char</span> *storeto, <span class="keywordtype">void</span> *dataptr, size_t * len)
+01851 {
+01852     <span class="keywordflow">return</span> read_config_store_data_prefix(<span class=
+"charliteral">' '</span>, type, storeto, dataptr, *len);
+01853 }
+01854 
+01855 <span class="keywordtype">char</span>           *
+01856 read_config_store_data_prefix(<span class="keywordtype">char</span> prefix, <span class=
+"keywordtype">int</span> type, <span class="keywordtype">char</span> *storeto,
+01857                               <span class="keywordtype">void</span> *dataptr, size_t len)
+01858 {
+01859     <span class="keywordtype">int</span>            *intp;
+01860     u_char        **charpp;
+01861     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>   *uintp;
+01862     oid           **oidpp;
+01863 
+01864     <span class="keywordflow">if</span> (dataptr &amp;&amp; storeto)
+01865         <span class="keywordflow">switch</span> (type) {
+01866         <span class="keywordflow">case</span> ASN_INTEGER:
+01867             intp = (<span class="keywordtype">int</span> *) dataptr;
+01868             sprintf(storeto, <span class="stringliteral">"%c%d"</span>, prefix, *intp);
+01869             <span class="keywordflow">return</span> (storeto + strlen(storeto));
+01870 
+01871         <span class="keywordflow">case</span> ASN_TIMETICKS:
+01872         <span class="keywordflow">case</span> ASN_UNSIGNED:
+01873             uintp = (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *) dataptr;
+01874             sprintf(storeto, <span class="stringliteral">"%c%u"</span>, prefix, *uintp);
+01875             <span class="keywordflow">return</span> (storeto + strlen(storeto));
+01876 
+01877         <span class="keywordflow">case</span> ASN_OCTET_STR:
+01878         <span class="keywordflow">case</span> ASN_BIT_STR:
+01879             *storeto++ = prefix;
+01880             charpp = (u_char **) dataptr;
+01881             <span class="keywordflow">return</span> read_config_save_octet_string(storeto, *charpp, len);
+01882 
+01883         <span class="keywordflow">case</span> ASN_OBJECT_ID:
+01884             *storeto++ = prefix;
+01885             oidpp = (oid **) dataptr;
+01886             <span class="keywordflow">return</span> read_config_save_objid(storeto, *oidpp, len);
+01887 
+01888         <span class="keywordflow">default</span>:
+01889             DEBUGMSGTL((<span class="stringliteral">"read_config_store_data_prefix"</span>,
+01890                         <span class="stringliteral">"Fail: Unknown type: %d"</span>, type));
+01891             <span class="keywordflow">return</span> NULL;
+01892         }
+01893     <span class="keywordflow">return</span> NULL;
+01894 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:58 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,53 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>snmp_parse_args.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef SNMP_PARSE_ARGS_H</span>
+00002 <span class="preprocessor">#define SNMP_PARSE_ARGS_H</span>
+00003 <span class="preprocessor">#ifdef __cplusplus</span>
+00004 <span class="keyword">extern</span> <span class="stringliteral">"C"</span> {
+00005 <span class="preprocessor">#endif</span>
+00006 
+00007 <span class="keywordtype">int</span>
+00008 snmp_parse_args(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv, <a class="code"
+href="structsnmp__session.html">netsnmp_session</a> *session,
+00009                 <span class="keyword">const</span> <span class="keywordtype">char</span> *localOpts, <span class=
+"keywordtype">void</span> (*proc)(<span class="keywordtype">int</span>, <span class="keywordtype">char</span> *<span class=
+"keyword">const</span> *, <span class="keywordtype">int</span>));
+00010 
+00011 <span class="keywordtype">void</span>
+00012 snmp_parse_args_descriptions(FILE *);
+00013 
+00014 <span class="keywordtype">void</span>
+00015 snmp_parse_args_usage(FILE *);
+00016 
+00017 <span class="preprocessor">#ifdef __cplusplus</span>
+00018 }
+00019 <span class="preprocessor">#endif</span>
+00020 <span class="preprocessor">#endif</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:01 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,1357 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>cache_handler: Maintains a cache of data for use by lower level handlers.<br />
+  <small>[<a class="el" href="group__utilities.html">utility_handlers: simplify request processing</a>]</small></h1>This helper
+  checks to see whether the data has been loaded "recently" (according to the timeout for that particular cache) and calls the
+  registered "load_cache" routine if necessary. <a href="#_details">More...</a>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_cache *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__cache__handler.html#ga0">netsnmp_cache_get_head</a>
+      (void)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">get cache head <a href="#ga0"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_cache *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__cache__handler.html#ga1">netsnmp_cache_find_by_oid</a>
+      (oid *rootoid, int rootoid_len)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">find existing cache <a href="#ga1"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_cache *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__cache__handler.html#ga2">netsnmp_cache_create</a> (int
+      timeout, NetsnmpCacheLoad *load_hook, NetsnmpCacheFree *free_hook, oid *rootoid, int rootoid_len)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">returns a cache <a href="#ga2"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">unsigned int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__cache__handler.html#ga4">netsnmp_cache_timer_start</a>
+      (netsnmp_cache *cache)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">starts the recurring cache_load callback <a href="#ga4"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__cache__handler.html#ga5">netsnmp_cache_timer_stop</a>
+      (netsnmp_cache *cache)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">stops the recurring cache_load callback <a href="#ga5"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__cache__handler.html#ga6">netsnmp_cache_handler_get</a>
+      (netsnmp_cache *cache)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">returns a cache handler that can be injected into a given handler chain. <a href=
+      "#ga6"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__cache__handler.html#ga7">netsnmp_get_cache_handler</a>
+      (int timeout, NetsnmpCacheLoad *load_hook, NetsnmpCacheFree *free_hook, oid *rootoid, int rootoid_len)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">returns a cache handler that can be injected into a given handler chain. <a href=
+      "#ga7"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__cache__handler.html#ga8">netsnmp_cache_handler_register</a> (<a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, netsnmp_cache *cache)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">functionally the same as calling <a class="el" href=
+      "group__handler.html#ga10">netsnmp_register_handler()</a> but also injects a cache handler at the same time for you.
+      <a href="#ga8"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__cache__handler.html#ga9">netsnmp_register_cache_handler</a> (<a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, int timeout, NetsnmpCacheLoad
+      *load_hook, NetsnmpCacheFree *free_hook)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">functionally the same as calling <a class="el" href=
+      "group__handler.html#ga10">netsnmp_register_handler()</a> but also injects a cache handler at the same time for you.
+      <a href="#ga9"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga10" doxytag=
+      "cache_handler::_build_cache_name" id="ga10"></a> NETSNMP_STATIC_INLINE char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>_build_cache_name</b> (const char *name)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__cache__handler.html#ga11">netsnmp_cache_reqinfo_insert</a> (netsnmp_cache *cache, <a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, const char *name)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Insert the cache information for a given request (PDU). <a href="#ga11"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_cache *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__cache__handler.html#ga12">netsnmp_cache_reqinfo_extract</a> (<a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, const char *name)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Extract the cache information for a given request (PDU). <a href="#ga12"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_cache *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__cache__handler.html#ga13">netsnmp_extract_cache_info</a> (<a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Extract the cache information for a given request (PDU). <a href="#ga13"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__cache__handler.html#ga14">netsnmp_cache_check_expired</a> (netsnmp_cache *cache)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Check if the cache timeout has passed. <a href="#ga14"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__cache__handler.html#ga15">netsnmp_cache_check_and_reload</a> (netsnmp_cache *cache)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Reload the cache if required. <a href="#ga15"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__cache__handler.html#ga16">netsnmp_cache_is_valid</a>
+      (<a class="el" href="structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, const char
+      *name)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Is the cache valid for a given request? <a href="#ga16"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__cache__handler.html#ga17">netsnmp_is_cache_valid</a>
+      (<a class="el" href="structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">for backwards compat <a href="#ga17"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__cache__handler.html#ga18">netsnmp_cache_helper_handler</a> (<a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler, <a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Implements the cache handler. <a href="#ga18"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__cache__handler.html#ga21">release_cached_resources</a>
+      (unsigned int regNo, void *clientargs)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">run regularly to automatically release cached resources. <a href="#ga21"></a><br /></td>
+    </tr>
+  </table>
+  <hr />
+  <a name="_details" id="_details"></a>
+
+  <h2>Detailed Description</h2>This helper checks to see whether the data has been loaded "recently" (according to the timeout
+  for that particular cache) and calls the registered "load_cache" routine if necessary.
+
+  <p>The lower handlers can then work with this local cached data.</p>
+
+  <p>A timeout value of -1 will cause <a class="el" href="group__cache__handler.html#ga14">netsnmp_cache_check_expired()</a> to
+  always return true, and thus the cache will be reloaded for every request.</p>
+
+  <p>To minimze resource use by the agent, a periodic callback checks for expired caches, and will call the free_cache function
+  for any expired cache.</p>
+
+  <p>The load_cache route should return a negative number if the cache was not successfully loaded. 0 or any positive number
+  indicates successs.</p>
+
+  <p>Several flags can be set to affect the operations on the cache.</p>
+
+  <p>If NETSNMP_CACHE_DONT_INVALIDATE_ON_SET is set, the free_cache method will not be called after a set request has processed.
+  It is assumed that the lower mib handler using the cache has maintained cache consistency.</p>
+
+  <p>If NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD is set, the free_cache method will not be called before the load_cache method is
+  called. It is assumed that the load_cache routine will properly deal with being called with a valid cache.</p>
+
+  <p>If NETSNMP_CACHE_DONT_FREE_EXPIRED is set, the free_cache method will not be called with the cache expires. The expired flag
+  will be set, but the valid flag will not be cleared. It is assumed that the load_cache routine will properly deal with being
+  called with a valid cache.</p>
+
+  <p>If NETSNMP_CACHE_PRELOAD is set when a the cache handler is created, the cache load routine will be called immediately.</p>
+
+  <p>If NETSNMP_CACHE_DONT_AUTO_RELEASE is set, the periodic callback that checks for expired caches will skip the cache. The
+  cache will only be checked for expiration when a request triggers the cache handler. This is useful if the cache has it's own
+  periodic callback to keep the cache fresh.</p>
+
+  <p>If NETSNMP_CACHE_AUTO_RELOAD is set, a timer will be set up to reload the cache when it expires. This is useful for keeping
+  the cache fresh, even in the absence of incoming snmp requests.</p>
+
+  <p>Here are some suggestions for some common situations.</p>
+
+  <p>Cached File: If your table is based on a file that may periodically change, you can test the modification date to see if the
+  file has changed since the last cache load. To get the cache helper to call the load function for every request, set the
+  timeout to -1, which will cause the cache to always report that it is expired. This means that you will want to prevent the
+  agent from flushing the cache when it has expired, and you will have to flush it manually if you detect that the file has
+  changed. To accomplish this, set the following flags:</p>
+
+  <p>NETSNMP_CACHE_DONT_FREE_EXPIRED NETSNMP_CACHE_DONT_AUTO_RELEASE</p>
+
+  <p>Constant (periodic) reload: If you want the cache kept up to date regularly, even if no requests for the table are received,
+  you can have your cache load routine called periodically. This is very useful if you need to monitor the data for changes (eg a
+  <em>LastChanged</em> object). You will need to prevent the agent from flushing the cache when it expires. Set the cache timeout
+  to the frequency, in seconds, that you wish to reload your cache, and set the following flags:</p>
+
+  <p>NETSNMP_CACHE_DONT_FREE_EXPIRED NETSNMP_CACHE_DONT_AUTO_RELEASE NETSNMP_CACHE_AUTO_RELOAD</p>
+  <hr />
+
+  <h2>Function Documentation</h2><a class="anchor" name="ga15" doxytag="cache_handler.c::netsnmp_cache_check_and_reload" id=
+  "ga15"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_cache_check_and_reload</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_cache *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>cache</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Reload the cache if required.</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00382">382</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="cache__handler_8c-source.html#l00367">netsnmp_cache_check_expired()</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00417">netsnmp_cache_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga14" doxytag="cache_handler.c::netsnmp_cache_check_expired" id="ga14"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_cache_check_expired</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_cache *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>cache</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Check if the cache timeout has passed.</p>
+
+        <p>Sets and return the expired flag.</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00367">367</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8c-source.html#l00846">atime_ready()</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00382">netsnmp_cache_check_and_reload()</a>, and
+        <a class="el" href="cache__handler_8c-source.html#l00574">release_cached_resources()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga2" doxytag="cache_handler.c::netsnmp_cache_create" id="ga2"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_cache* netsnmp_cache_create</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>timeout</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">NetsnmpCacheLoad *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>load_hook</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">NetsnmpCacheFree *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>free_hook</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>rootoid</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>rootoid_len</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>returns a cache</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00139">139</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__logging_8c-source.html#l01137">snmp_log()</a>, and <a class="el" href=
+        "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00273">netsnmp_get_cache_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga1" doxytag="cache_handler.c::netsnmp_cache_find_by_oid" id="ga1"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_cache* netsnmp_cache_find_by_oid</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>rootoid</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>rootoid_len</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>find existing cache</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00123">123</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__api_8c-source.html#l06212">netsnmp_oid_equals()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga0" doxytag="cache_handler.c::netsnmp_cache_get_head" id="ga0"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_cache* netsnmp_cache_get_head</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">void&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>get cache head</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00115">115</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga6" doxytag="cache_handler.c::netsnmp_cache_handler_get" id="ga6"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>* netsnmp_cache_handler_get</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_cache *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>cache</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>returns a cache handler that can be injected into a given handler chain.</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00244">244</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00051">netsnmp_mib_handler_s::flags</a>, <a class="el"
+        href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00194">netsnmp_cache_timer_start()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, and <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00292">netsnmp_cache_handler_register()</a>, and
+        <a class="el" href="cache__handler_8c-source.html#l00273">netsnmp_get_cache_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga8" doxytag="cache_handler.c::netsnmp_cache_handler_register" id="ga8"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_cache_handler_register</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">netsnmp_cache *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>cache</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>functionally the same as calling <a class="el" href="group__handler.html#ga10">netsnmp_register_handler()</a> but also
+        injects a cache handler at the same time for you.</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00292">292</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="cache__handler_8c-source.html#l00244">netsnmp_cache_handler_get()</a>, <a class="el"
+        href="group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, and <a class="el" href=
+        "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga18" doxytag="cache_handler.c::netsnmp_cache_helper_handler" id="ga18"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_cache_helper_handler</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>handler</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>requests</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Implements the cache handler.</p>
+
+        <p>next handler called automatically - 'AUTO_NEXT'</p>
+
+        <p>next handler called automatically - 'AUTO_NEXT'</p>
+
+        <p>next handler called automatically - 'AUTO_NEXT'</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00417">417</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00051">netsnmp_mib_handler_s::flags</a>, <a class="el"
+        href="agent__handler_8h-source.html#l00094">netsnmp_handler_registration_s::handlerName</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00159">netsnmp_agent_request_info_s::mode</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00382">netsnmp_cache_check_and_reload()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00399">netsnmp_cache_is_valid()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00330">netsnmp_cache_reqinfo_insert()</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l03496">netsnmp_set_all_requests_error()</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga16" doxytag="cache_handler.c::netsnmp_cache_is_valid" id="ga16"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_cache_is_valid</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Is the cache valid for a given request?</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00399">399</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="cache__handler_8c-source.html#l00347">netsnmp_cache_reqinfo_extract()</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00417">netsnmp_cache_helper_handler()</a>, and
+        <a class="el" href="cache__handler_8c-source.html#l00410">netsnmp_is_cache_valid()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga12" doxytag="cache_handler.c::netsnmp_cache_reqinfo_extract" id="ga12"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_cache* netsnmp_cache_reqinfo_extract</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Extract the cache information for a given request (PDU).</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00347">347</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00399">netsnmp_cache_is_valid()</a>, and <a class=
+        "el" href="cache__handler_8c-source.html#l00359">netsnmp_extract_cache_info()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga11" doxytag="cache_handler.c::netsnmp_cache_reqinfo_insert" id="ga11"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void netsnmp_cache_reqinfo_insert</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_cache *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>cache</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Insert the cache information for a given request (PDU).</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00330">330</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00064">netsnmp_create_data_list()</a>, and <a class="el"
+        href="tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00417">netsnmp_cache_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga4" doxytag="cache_handler.c::netsnmp_cache_timer_start" id="ga4"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">unsigned int netsnmp_cache_timer_start</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_cache *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>cache</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>starts the recurring cache_load callback</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00194">194</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__alarm_8c-source.html#l00403">snmp_alarm_register()</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00244">netsnmp_cache_handler_get()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga5" doxytag="cache_handler.c::netsnmp_cache_timer_stop" id="ga5"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void netsnmp_cache_timer_stop</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_cache *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>cache</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>stops the recurring cache_load callback</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00224">224</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__alarm_8c-source.html#l00150">snmp_alarm_unregister()</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga13" doxytag="cache_handler.c::netsnmp_extract_cache_info" id="ga13"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_cache* netsnmp_extract_cache_info</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>reqinfo</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Extract the cache information for a given request (PDU).</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00359">359</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="cache__handler_8c-source.html#l00347">netsnmp_cache_reqinfo_extract()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga7" doxytag="cache_handler.c::netsnmp_get_cache_handler" id="ga7"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>* netsnmp_get_cache_handler</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>timeout</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">NetsnmpCacheLoad *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>load_hook</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">NetsnmpCacheFree *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>free_hook</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>rootoid</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>rootoid_len</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>returns a cache handler that can be injected into a given handler chain.</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00273">273</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el"
+        href="cache__handler_8c-source.html#l00139">netsnmp_cache_create()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00244">netsnmp_cache_handler_get()</a>, and <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00305">netsnmp_register_cache_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga17" doxytag="cache_handler.c::netsnmp_is_cache_valid" id="ga17"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_is_cache_valid</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>reqinfo</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>for backwards compat</p>
+
+        <p><a class="el" href="group__cache__handler.html#ga16">netsnmp_cache_is_valid()</a> is preferred.</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00410">410</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="cache__handler_8c-source.html#l00399">netsnmp_cache_is_valid()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga9" doxytag="cache_handler.c::netsnmp_register_cache_handler" id="ga9"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_register_cache_handler</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>timeout</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">NetsnmpCacheLoad *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>load_hook</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">NetsnmpCacheFree *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>free_hook</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>functionally the same as calling <a class="el" href="group__handler.html#ga10">netsnmp_register_handler()</a> but also
+        injects a cache handler at the same time for you.</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00305">305</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="cache__handler_8c-source.html#l00273">netsnmp_get_cache_handler()</a>, <a class="el"
+        href="group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga21" doxytag="cache_handler.c::release_cached_resources" id="ga21"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void release_cached_resources</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">unsigned int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>regNo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">void *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>clientargs</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>run regularly to automatically release cached resources.</p>
+
+        <p>xxx - method to prevent cache from expiring while a request is being processed (e.g. delegated request). proposal: set
+        a flag, which would be cleared when request finished (which could be acomplished by a dummy data list item in agent req
+        info &amp; custom free function).</p>
+
+        <p>Definition at line <a class="el" href="cache__handler_8c-source.html#l00574">574</a> of file <a class="el" href=
+        "cache__handler_8c-source.html">cache_handler.c</a>.</p>
+
+        <p>References <a class="el" href="cache__handler_8c-source.html#l00367">netsnmp_cache_check_expired()</a>, <a class="el"
+        href="cache__handler_8c-source.html#l00574">release_cached_resources()</a>, and <a class="el" href=
+        "snmp__alarm_8c-source.html#l00403">snmp_alarm_register()</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00574">release_cached_resources()</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:04 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

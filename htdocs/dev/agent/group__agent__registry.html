@@ -1,0 +1,1011 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc<br />
+  <small>[<a class="el" href="group__agent.html">The Net-SNMP agent</a>]</small></h1>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Data Structures</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>lookup_cache_s</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>lookup_cache_context_s</b></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Defines</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga76" doxytag=
+      "agent_registry::IN_SNMP_VARS_C" id="ga76"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>IN_SNMP_VARS_C</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga77" doxytag=
+      "agent_registry::SUBTREE_DEFAULT_CACHE_SIZE" id="ga77"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SUBTREE_DEFAULT_CACHE_SIZE</b>&nbsp;&nbsp;&nbsp;8</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga78" doxytag=
+      "agent_registry::SUBTREE_MAX_CACHE_SIZE" id="ga78"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SUBTREE_MAX_CACHE_SIZE</b>&nbsp;&nbsp;&nbsp;32</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Typedefs</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga2" doxytag=
+      "agent_registry::lookup_cache" id="ga2"></a> typedef lookup_cache_s&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>lookup_cache</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga3" doxytag=
+      "agent_registry::lookup_cache_context" id="ga3"></a> typedef lookup_cache_context_s&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>lookup_cache_context</b></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga20" doxytag=
+      "agent_registry::invalidate_lookup_cache" id="ga20"></a> NETSNMP_STATIC_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>invalidate_lookup_cache</b> (const char *context)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__agent__registry.html#ga21">netsnmp_set_lookup_cache_size</a> (int newsize)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">set the lookup cache size for optimized agent registration performance. <a href=
+      "#ga21"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__agent__registry.html#ga22">netsnmp_get_lookup_cache_size</a> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">retrieves the current value of the lookup cache size <a href="#ga22"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga23" doxytag=
+      "agent_registry::netsnmp_subtree_free" id="ga23"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_subtree_free</b> (netsnmp_subtree *a)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga24" doxytag=
+      "agent_registry::netsnmp_subtree_deepcopy" id="ga24"></a> netsnmp_subtree *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_subtree_deepcopy</b> (netsnmp_subtree *a)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga25" doxytag=
+      "agent_registry::get_top_context_cache" id="ga25"></a> subtree_context_cache *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>get_top_context_cache</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga26" doxytag=
+      "agent_registry::netsnmp_subtree_find_first" id="ga26"></a> netsnmp_subtree *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_subtree_find_first</b> (const char *context_name)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga27" doxytag=
+      "agent_registry::add_subtree" id="ga27"></a> netsnmp_subtree *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>add_subtree</b> (netsnmp_subtree *new_tree, const char *context_name)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga28" doxytag=
+      "agent_registry::netsnmp_subtree_replace_first" id="ga28"></a> netsnmp_subtree *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_subtree_replace_first</b> (netsnmp_subtree *new_tree, const char
+      *context_name)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga29" doxytag=
+      "agent_registry::netsnmp_subtree_compare" id="ga29"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_subtree_compare</b> (const netsnmp_subtree *ap, const netsnmp_subtree
+      *bp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga30" doxytag=
+      "agent_registry::netsnmp_subtree_join" id="ga30"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_subtree_join</b> (netsnmp_subtree *root)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga31" doxytag=
+      "agent_registry::netsnmp_subtree_split" id="ga31"></a> netsnmp_subtree *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_subtree_split</b> (netsnmp_subtree *current, oid name[], int
+      name_len)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga32" doxytag=
+      "agent_registry::netsnmp_subtree_load" id="ga32"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_subtree_load</b> (netsnmp_subtree *new_sub, const char
+      *context_name)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga33" doxytag=
+      "agent_registry::netsnmp_register_mib" id="ga33"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_register_mib</b> (const char *moduleName, struct variable *var, size_t
+      varsize, size_t numvars, oid *mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, <a class="el"
+      href="structsnmp__session.html">netsnmp_session</a> *ss, const char *context, int timeout, int flags, <a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, int perform_callback)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga35" doxytag=
+      "agent_registry::register_mib_reattach" id="ga35"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>register_mib_reattach</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga36" doxytag=
+      "agent_registry::register_mib_detach" id="ga36"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>register_mib_detach</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga37" doxytag=
+      "agent_registry::register_mib_context" id="ga37"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>register_mib_context</b> (const char *moduleName, struct variable *var, size_t
+      varsize, size_t numvars, oid *mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, <a class="el"
+      href="structsnmp__session.html">netsnmp_session</a> *ss, const char *context, int timeout, int flags)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga38" doxytag=
+      "agent_registry::register_mib_range" id="ga38"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>register_mib_range</b> (const char *moduleName, struct variable *var, size_t
+      varsize, size_t numvars, oid *mibloc, size_t mibloclen, int priority, int range_subid, oid range_ubound, <a class="el"
+      href="structsnmp__session.html">netsnmp_session</a> *ss)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga39" doxytag=
+      "agent_registry::register_mib_priority" id="ga39"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>register_mib_priority</b> (const char *moduleName, struct variable *var, size_t
+      varsize, size_t numvars, oid *mibloc, size_t mibloclen, int priority)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga40" doxytag=
+      "agent_registry::register_mib" id="ga40"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>register_mib</b> (const char *moduleName, struct variable *var, size_t varsize,
+      size_t numvars, oid *mibloc, size_t mibloclen)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga41" doxytag=
+      "agent_registry::netsnmp_subtree_unload" id="ga41"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_subtree_unload</b> (netsnmp_subtree *sub, netsnmp_subtree *prev, const
+      char *context)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__agent__registry.html#ga42">unregister_mib_context</a>
+      (oid *name, size_t len, int priority, int range_subid, oid range_ubound, const char *context)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Unregisters an OID that has an associated context name value. <a href="#ga42"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga43" doxytag=
+      "agent_registry::netsnmp_unregister_mib_table_row" id="ga43"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_unregister_mib_table_row</b> (oid *name, size_t len, int priority, int
+      var_subid, oid range_ubound, const char *context)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga44" doxytag=
+      "agent_registry::unregister_mib_range" id="ga44"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>unregister_mib_range</b> (oid *name, size_t len, int priority, int range_subid,
+      oid range_ubound)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga45" doxytag=
+      "agent_registry::unregister_mib_priority" id="ga45"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>unregister_mib_priority</b> (oid *name, size_t len, int priority)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga46" doxytag=
+      "agent_registry::unregister_mib" id="ga46"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>unregister_mib</b> (oid *name, size_t len)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga47" doxytag=
+      "agent_registry::unregister_mibs_by_session" id="ga47"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>unregister_mibs_by_session</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *ss)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga48" doxytag=
+      "agent_registry::in_a_view" id="ga48"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>in_a_view</b> (oid *name, size_t *namelen, <a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *pdu, int type)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga49" doxytag=
+      "agent_registry::check_access" id="ga49"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>check_access</b> (<a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__agent__registry.html#ga50">netsnmp_acm_check_subtree</a> (<a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu, oid *name, size_t namelen)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">checks to see if everything within a given subtree is either: in view, not in view, or possibly
+      both. <a href="#ga50"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga51" doxytag=
+      "agent_registry::get_context_lookup_cache" id="ga51"></a> NETSNMP_STATIC_INLINE lookup_cache_context *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>get_context_lookup_cache</b> (const char *context)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga52" doxytag=
+      "agent_registry::lookup_cache_add" id="ga52"></a> NETSNMP_STATIC_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>lookup_cache_add</b> (const char *context, netsnmp_subtree *next,
+      netsnmp_subtree *previous)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga53" doxytag=
+      "agent_registry::lookup_cache_replace" id="ga53"></a> NETSNMP_STATIC_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>lookup_cache_replace</b> (lookup_cache *ptr, netsnmp_subtree *next,
+      netsnmp_subtree *previous)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga54" doxytag=
+      "agent_registry::lookup_cache_find" id="ga54"></a> NETSNMP_STATIC_INLINE lookup_cache *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>lookup_cache_find</b> (const char *context, oid *name, size_t name_len, int
+      *retcmp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga55" doxytag=
+      "agent_registry::netsnmp_subtree_find_prev" id="ga55"></a> netsnmp_subtree *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_subtree_find_prev</b> (oid *name, size_t len, netsnmp_subtree *subtree,
+      const char *context_name)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga56" doxytag=
+      "agent_registry::netsnmp_subtree_find_next" id="ga56"></a> netsnmp_subtree *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_subtree_find_next</b> (oid *name, size_t len, netsnmp_subtree *subtree,
+      const char *context_name)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga57" doxytag=
+      "agent_registry::netsnmp_subtree_find" id="ga57"></a> netsnmp_subtree *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_subtree_find</b> (oid *name, size_t len, netsnmp_subtree *subtree,
+      const char *context_name)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga58" doxytag=
+      "agent_registry::get_session_for_oid" id="ga58"></a> <a class="el" href="structsnmp__session.html">netsnmp_session</a>
+      *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>get_session_for_oid</b> (oid *name, size_t len, const char *context_name)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga59" doxytag=
+      "agent_registry::setup_tree" id="ga59"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>setup_tree</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga60" doxytag=
+      "agent_registry::remove_tree_entry" id="ga60"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>remove_tree_entry</b> (oid *name, size_t len)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga61" doxytag=
+      "agent_registry::shutdown_tree" id="ga61"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>shutdown_tree</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga62" doxytag=
+      "agent_registry::clear_subtree" id="ga62"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>clear_subtree</b> (netsnmp_subtree *sub)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga63" doxytag=
+      "agent_registry::clear_lookup_cache" id="ga63"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>clear_lookup_cache</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga64" doxytag=
+      "agent_registry::clear_context" id="ga64"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>clear_context</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga65" doxytag=
+      "agent_registry::dump_idx_registry" id="ga65"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>dump_idx_registry</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga66" doxytag=
+      "agent_registry::dump_registry" id="ga66"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>dump_registry</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga67" doxytag=
+      "agent_registry::register_readfd" id="ga67"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>register_readfd</b> (int fd, void(*func)(int, void *), void *data)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga68" doxytag=
+      "agent_registry::register_writefd" id="ga68"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>register_writefd</b> (int fd, void(*func)(int, void *), void *data)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga69" doxytag=
+      "agent_registry::register_exceptfd" id="ga69"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>register_exceptfd</b> (int fd, void(*func)(int, void *), void *data)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga70" doxytag=
+      "agent_registry::unregister_readfd" id="ga70"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>unregister_readfd</b> (int fd)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga71" doxytag=
+      "agent_registry::unregister_writefd" id="ga71"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>unregister_writefd</b> (int fd)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga72" doxytag=
+      "agent_registry::unregister_exceptfd" id="ga72"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>unregister_exceptfd</b> (int fd)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga73" doxytag=
+      "agent_registry::agent_SIGCHLD_handler" id="ga73"></a> RETSIGTYPE&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>agent_SIGCHLD_handler</b> (int sig)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga74" doxytag=
+      "agent_registry::register_signal" id="ga74"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>register_signal</b> (int sig, void(*func)(int))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga75" doxytag=
+      "agent_registry::unregister_signal" id="ga75"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>unregister_signal</b> (int sig)</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Variables</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga0" doxytag=
+      "agent_registry::context_subtrees" id="ga0"></a> subtree_context_cache *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>context_subtrees</b> = NULL</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga1" doxytag=
+      "agent_registry::lookup_cache_size" id="ga1"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>lookup_cache_size</b> = 0</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga5" doxytag=
+      "agent_registry::external_readfd" id="ga5"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_readfd</b> [NUM_EXTERNAL_FDS]</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga6" doxytag=
+      "agent_registry::external_readfdlen" id="ga6"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_readfdlen</b> = 0</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga7" doxytag=
+      "agent_registry::external_writefd" id="ga7"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_writefd</b> [NUM_EXTERNAL_FDS]</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga8" doxytag=
+      "agent_registry::external_writefdlen" id="ga8"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_writefdlen</b> = 0</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga9" doxytag=
+      "agent_registry::external_exceptfd" id="ga9"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_exceptfd</b> [NUM_EXTERNAL_FDS]</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga10" doxytag=
+      "agent_registry::external_exceptfdlen" id="ga10"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_exceptfdlen</b> = 0</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga11" doxytag=
+      "agent_registry::external_readfdfunc" id="ga11"></a> void(*&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_readfdfunc</b> [NUM_EXTERNAL_FDS])(int, void *)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga12" doxytag=
+      "agent_registry::external_writefdfunc" id="ga12"></a> void(*&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_writefdfunc</b> [NUM_EXTERNAL_FDS])(int, void *)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga13" doxytag=
+      "agent_registry::external_exceptfdfunc" id="ga13"></a> void(*&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_exceptfdfunc</b> [NUM_EXTERNAL_FDS])(int, void *)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga14" doxytag=
+      "agent_registry::external_readfd_data" id="ga14"></a> void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_readfd_data</b> [NUM_EXTERNAL_FDS]</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga15" doxytag=
+      "agent_registry::external_writefd_data" id="ga15"></a> void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_writefd_data</b> [NUM_EXTERNAL_FDS]</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga16" doxytag=
+      "agent_registry::external_exceptfd_data" id="ga16"></a> void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_exceptfd_data</b> [NUM_EXTERNAL_FDS]</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga17" doxytag=
+      "agent_registry::external_signal_scheduled" id="ga17"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_signal_scheduled</b> [NUM_EXTERNAL_SIGS]</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga18" doxytag=
+      "agent_registry::external_signal_handler" id="ga18"></a> void(*&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>external_signal_handler</b> [NUM_EXTERNAL_SIGS])(int)</td>
+    </tr>
+  </table>
+  <hr />
+
+  <h2>Function Documentation</h2><a class="anchor" name="ga50" doxytag="agent_registry.c::netsnmp_acm_check_subtree" id=
+  "ga50"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_acm_check_subtree</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>pdu</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>namelen</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>checks to see if everything within a given subtree is either: in view, not in view, or possibly both.</p>
+
+        <p>If the entire subtree is not-in-view we can use this information to skip calling the sub-handlers entirely.</p>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>0 if entire subtree is accessible, 5 if not and 7 if portions are both. 1 on error (illegal pdu version).</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__registry_8c-source.html#l01236">1236</a> of file <a class="el" href=
+        "agent__registry_8c-source.html">agent_registry.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__api_8h-source.html#l00098">snmp_pdu::flags</a>, <a class="el" href=
+        "callback_8c-source.html#l00182">snmp_call_callbacks()</a>, and <a class="el" href=
+        "snmp__api_8h-source.html#l00081">snmp_pdu::version</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l01803">netsnmp_add_varbind_to_cache()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga22" doxytag="agent_registry.c::netsnmp_get_lookup_cache_size" id="ga22"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_get_lookup_cache_size</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">void&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>retrieves the current value of the lookup cache size</p>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>the current lookup cache size</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__registry_8c-source.html#l01309">1309</a> of file <a class="el" href=
+        "agent__registry_8c-source.html">agent_registry.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__registry_8c-source.html#l00916">unregister_mib_context()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga21" doxytag="agent_registry.c::netsnmp_set_lookup_cache_size" id="ga21"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void netsnmp_set_lookup_cache_size</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">int&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>newsize</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>set the lookup cache size for optimized agent registration performance.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>newsize</em>&nbsp;</td>
+
+                <td>set to the maximum size of a cache for a given context. Set to 0 to completely disable caching, or to -1 to
+                set to the default cache size (8), or to a number of your chosing. The rough guide is that it should be equal to
+                the maximum number of simultanious managers you expect to talk to the agent (M) times 80% (or so, he says
+                randomly) the average number (N) of varbinds you expect to receive in a given request for a manager. ie, M times
+                N. Bigger does NOT necessarily mean better. Certainly 16 should be an upper limit. 32 is the hard coded
+                limit.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__registry_8c-source.html#l01296">1296</a> of file <a class="el" href=
+        "agent__registry_8c-source.html">agent_registry.c</a>.</p>
+
+        <p>References <a class="el" href="agent__registry_8c-source.html#l01296">netsnmp_set_lookup_cache_size()</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__registry_8c-source.html#l01296">netsnmp_set_lookup_cache_size()</a>, and
+        <a class="el" href="agent__registry_8c-source.html#l00916">unregister_mib_context()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga42" doxytag="agent_registry.c::unregister_mib_context" id="ga42"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int unregister_mib_context</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>len</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>priority</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>range_subid</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">oid&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>range_ubound</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>context</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Unregisters an OID that has an associated context name value.</p>
+
+        <p>Typically used when a module has multiple contexts defined. The parameters priority, range_subid, and range_ubound
+        should be used in conjunction with agentx, see RFC 2741, otherwise these values should always be 0.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>name</em>&nbsp;</td>
+
+                <td>the specific OID to unregister if it conatins the associated context.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>len</em>&nbsp;</td>
+
+                <td>the length of the OID, use OID_LENGTH macro.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>priority</em>&nbsp;</td>
+
+                <td>a value between 1 and 255, used to achieve a desired configuration when different sessions register identical
+                or overlapping regions. Subagents with no particular knowledge of priority should register with the default value
+                of 127.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>range_subid</em>&nbsp;</td>
+
+                <td>permits specifying a range in place of one of a subtree sub-identifiers. When this value is zero, no range is
+                being specified.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>range_ubound</em>&nbsp;</td>
+
+                <td>the upper bound of a sub-identifier's range. This field is present only if range_subid is not 0.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>context</em>&nbsp;</td>
+
+                <td>a context name that has been created</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__registry_8c-source.html#l00916">916</a> of file <a class="el" href=
+        "agent__registry_8c-source.html">agent_registry.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::contextName</a>,
+        <a class="el" href="agent__registry_8c-source.html#l01309">netsnmp_get_lookup_cache_size()</a>, <a class="el" href=
+        "snmp__api_8c-source.html#l06212">netsnmp_oid_equals()</a>, <a class="el" href=
+        "agent__registry_8c-source.html#l01296">netsnmp_set_lookup_cache_size()</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00113">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00114">netsnmp_handler_registration_s::range_subid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::range_ubound</a>, and <a class="el" href=
+        "callback_8c-source.html#l00182">snmp_call_callbacks()</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00260">netsnmp_unregister_handler()</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

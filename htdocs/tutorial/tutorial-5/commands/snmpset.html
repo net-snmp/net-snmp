@@ -1,0 +1,76 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Net-SNMP Tutorial -- snmpset</title>
+  </head>
+
+  <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
+    <h1>Net-SNMP Tutorial -- snmpset</h1>
+    <p>
+      The <b>snmpset</b> command is used to actually modify
+      information on the remote host.  For each variable you want to
+      set, you need to specify the OID to update, the data type and
+      the value you want to set it to.
+    <p>
+      The valid datatypes can be found at the end of the snmpset help
+      output:
+<pre>
+<ul>
+% <b>snmpset -h |& tail -4</b>
+  type - one of i, u, t, a, o, s, x, d, n
+    i: INTEGER, u: unsigned INTEGER, t: TIMETICKS, a: IPADDRESS
+    o: OBJID, s: STRING, x: HEX STRING, d: DECIMAL STRING
+    U: unsigned int64, I: signed int64, F: float, D: double
+</ul>
+</pre>
+    <p>
+      So, lets check, set, and check again the value of a variable
+      using snmpget and snmpset:
+<pre>
+<ul>
+% <b>snmpget -v 2c -c demopublic test.net-snmp.org ucdDemoPublicString.0</b>
+enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoPublicString.0 =  "hi there"
+% <b>snmpset -v 2c -c demopublic test.net-snmp.org ucdDemoPublicString.0 s "hello world"</b>
+enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoPublicString.0 = "hello world"
+% <b>snmpget -v 2c -c demopublic test.net-snmp.org ucdDemoPublicString.0</b>
+enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoPublicString.0
+=  "hello world"
+</ul>
+</pre>
+    <p>
+      As you can see, we successfully changed the value of the
+      ucdDemoPublicString.0 object.
+    <p>
+      Note that if you don't have write permission to the object, the
+      errors will differ greatly between SNMPv1 and SNMPv2c:
+<pre>
+<ul>
+% <b>snmpset -v 2c -c badcommunity test.net-snmp.org ucdDemoPublicString.0 s "hello"</b>
+Error in packet.
+Reason: (noSuchName) There is no such variable name in this MIB.
+This name doesn't exist: ucdDemoPublicString.0
+% <b>snmpset -v 2c -c badcommunity test.net-snmp.org ucdDemoPublicString.0 s "hello"</b>
+Error in packet.
+Reason: notWritable
+</ul>
+</pre>
+    <p>SNMPv1 did not have nearly as descriptive error codes, which
+    SNMPv2c fixed.  It's a good reason to use SNMPv2c in preference to 
+    SNMPv1.  Even better, is to use SNMPv3 which has a much better
+    security system and also uses the better error reporting.  We'll
+    talk extensively about SNMPv3 later.
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Thu Nov  4 15:05:29 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Fri Aug 11 08:52:13 PDT 2000
+<!-- hhmts end -->
+  </body>
+</html>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

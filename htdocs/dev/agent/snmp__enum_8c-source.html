@@ -1,0 +1,519 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>snmp_enum.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00002 
+00003 <span class="preprocessor">#ifdef HAVE_STDLIB_H</span>
+00004 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00005 <span class="preprocessor">#endif</span>
+00006 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00007 <span class="preprocessor">#if HAVE_STRING_H</span>
+00008 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00009 <span class="preprocessor">#else</span>
+00010 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00011 <span class="preprocessor">#endif</span>
+00012 
+00013 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00014 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00015 <span class="preprocessor">#endif</span>
+00016 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00017 
+00018 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00019 <span class="preprocessor">#include &lt;net-snmp/config_api.h&gt;</span>
+00020 
+00021 <span class="preprocessor">#include &lt;net-snmp/library/snmp_enum.h&gt;</span>
+00022 <span class="preprocessor">#include &lt;net-snmp/library/tools.h&gt;</span>
+00023 
+00024 <span class="keyword">struct </span>snmp_enum_list_str {
+00025     <span class="keywordtype">char</span>           *name;
+00026     <span class="keyword">struct </span>snmp_enum_list *list;
+00027     <span class="keyword">struct </span>snmp_enum_list_str *next;
+00028 };
+00029 
+00030 <span class="keyword">static</span> <span class="keyword">struct </span>snmp_enum_list ***snmp_enum_lists;
+00031 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    current_maj_num;
+00032 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    current_min_num;
+00033 <span class="keyword">struct </span>snmp_enum_list_str *sliststorage;
+00034 
+00035 <span class="keywordtype">int</span>
+00036 init_snmp_enum(<span class="keyword">const</span> <span class="keywordtype">char</span> *type)
+00037 {
+00038     <span class="keywordtype">int</span>             i;
+00039 
+00040     <span class="keywordflow">if</span> (!snmp_enum_lists)
+00041         snmp_enum_lists = (<span class="keyword">struct </span>snmp_enum_list ***)
+00042             calloc(1, <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> snmp_enum_list **) * SE_MAX_IDS);
+00043     <span class="keywordflow">if</span> (!snmp_enum_lists)
+00044         <span class="keywordflow">return</span> SE_NOMEM;
+00045     current_maj_num = SE_MAX_IDS;
+00046 
+00047     <span class="keywordflow">for</span> (i = 0; i &lt; SE_MAX_IDS; i++) {
+00048         <span class="keywordflow">if</span> (!snmp_enum_lists[i])
+00049             snmp_enum_lists[i] = (<span class="keyword">struct </span>snmp_enum_list **)
+00050                 calloc(1, <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> snmp_enum_list *) * SE_MAX_SUBIDS);
+00051         <span class="keywordflow">if</span> (!snmp_enum_lists[i])
+00052             <span class="keywordflow">return</span> SE_NOMEM;
+00053     }
+00054     current_min_num = SE_MAX_SUBIDS;
+00055 
+00056     <span class="keywordflow">if</span> (!sliststorage)
+00057         sliststorage = NULL;
+00058 
+00059     <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(type, <span class=
+"stringliteral">"enum"</span>, se_read_conf, NULL, NULL);
+00060     <span class="keywordflow">return</span> SE_OK;
+00061 }
+00062 
+00063 <span class="keywordtype">int</span>
+00064 se_store_in_list(<span class="keyword">struct</span> snmp_enum_list *new_list,
+00065               <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> major, <span class=
+"keywordtype">unsigned</span> <span class="keywordtype">int</span> minor)
+00066 {
+00067     <span class="keywordtype">int</span>             ret = SE_OK;
+00068 
+00069     <span class="keywordflow">if</span> (major &gt; current_maj_num || minor &gt; current_min_num) {
+00070         <span class="comment">/*</span>
+00071 <span class="comment">         * XXX: realloc </span>
+00072 <span class="comment">         */</span>
+00073         <span class="keywordflow">return</span> SE_NOMEM;
+00074     }
+00075 
+00076 
+00077     <span class="keywordflow">if</span> (snmp_enum_lists[major][minor] != NULL)
+00078         ret = SE_ALREADY_THERE;
+00079 
+00080     snmp_enum_lists[major][minor] = new_list;
+00081 
+00082     <span class="keywordflow">return</span> ret;
+00083 }
+00084 
+00085 <span class="keywordtype">void</span>
+00086 se_read_conf(<span class="keyword">const</span> <span class="keywordtype">char</span> *word, <span class=
+"keywordtype">char</span> *cptr)
+00087 {
+00088     <span class="keywordtype">int</span> major, minor;
+00089     <span class="keywordtype">int</span> value;
+00090     <span class="keywordtype">char</span> *cp, *cp2;
+00091     <span class="keywordtype">char</span> e_name[BUFSIZ];
+00092     <span class="keywordtype">char</span> e_enum[  BUFSIZ];
+00093 
+00094     <span class="keywordflow">if</span> (!cptr || *cptr==<span class="charliteral">'\0'</span>)
+00095         <span class="keywordflow">return</span>;
+00096 
+00097     <span class="comment">/*</span>
+00098 <span class="comment">     * Extract the first token</span>
+00099 <span class="comment">     *   (which should be the name of the list)</span>
+00100 <span class="comment">     */</span>
+00101     cp = copy_nword(cptr, e_name, <span class="keyword">sizeof</span>(e_name));
+00102     cp = skip_white(cp);
+00103     <span class="keywordflow">if</span> (!cp || *cp==<span class="charliteral">'\0'</span>)
+00104         <span class="keywordflow">return</span>;
+00105 
+00106 
+00107     <span class="comment">/*</span>
+00108 <span class="comment">     * Add each remaining enumeration to the list,</span>
+00109 <span class="comment">     *   using the appropriate style interface</span>
+00110 <span class="comment">     */</span>
+00111     <span class="keywordflow">if</span> (sscanf(e_name, <span class=
+"stringliteral">"%d:%d"</span>, &amp;major, &amp;minor) == 2) {
+00112         <span class="comment">/*</span>
+00113 <span class="comment">         *  Numeric major/minor style</span>
+00114 <span class="comment">         */</span>
+00115         <span class="keywordflow">while</span> (1) {
+00116             cp = copy_nword(cp, e_enum, <span class="keyword">sizeof</span>(e_enum));
+00117             <span class="keywordflow">if</span> (sscanf(e_enum, <span class=
+"stringliteral">"%d:"</span>, &amp;value) != 1) {
+00118                 <span class="keywordflow">break</span>;
+00119             }
+00120             cp2 = e_enum;
+00121             <span class="keywordflow">while</span> (*(cp2++) != <span class="charliteral">':'</span>)
+00122                 ;
+00123             se_add_pair(major, minor, cp2, value);
+00124             <span class="keywordflow">if</span> (!cp)
+00125                 <span class="keywordflow">break</span>;
+00126         }
+00127     } <span class="keywordflow">else</span> {
+00128         <span class="comment">/*</span>
+00129 <span class="comment">         *  Named enumeration</span>
+00130 <span class="comment">         */</span>
+00131         <span class="keywordflow">while</span> (1) {
+00132             cp = copy_nword(cp, e_enum, <span class="keyword">sizeof</span>(e_enum));
+00133             <span class="keywordflow">if</span> (sscanf(e_enum, <span class=
+"stringliteral">"%d:"</span>, &amp;value) != 1) {
+00134                 <span class="keywordflow">break</span>;
+00135             }
+00136             cp2 = e_enum;
+00137             <span class="keywordflow">while</span> (*(cp2++) != <span class="charliteral">':'</span>)
+00138                 ;
+00139             se_add_pair_to_slist(e_name, cp2, value);
+00140             <span class="keywordflow">if</span> (!cp)
+00141                 <span class="keywordflow">break</span>;
+00142         }
+00143     }
+00144 }
+00145 
+00146 <span class="keywordtype">void</span>
+00147 se_store_enum_list(<span class="keyword">struct</span> snmp_enum_list *new_list,
+00148                    <span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keywordtype">char</span> *type)
+00149 {
+00150     <span class="keyword">struct </span>snmp_enum_list *listp = new_list;
+00151     <span class="keywordtype">char</span> line[2048];
+00152     <span class="keywordtype">char</span> buf[512];
+00153     <span class="keywordtype">int</span>  len = 0;
+00154 
+00155     snprintf(line, <span class="keyword">sizeof</span>(line), <span class="stringliteral">"enum %s"</span>, token);
+00156     <span class="keywordflow">while</span> (listp) {
+00157         snprintf(buf, <span class="keyword">sizeof</span>(buf), <span class=
+"stringliteral">" %d:%s"</span>, listp-&gt;value, listp-&gt;label);
+00158         <span class="comment">/*</span>
+00159 <span class="comment">         * Calculate the space left in the buffer.</span>
+00160 <span class="comment">         * If this is not sufficient to include the next enum,</span>
+00161 <span class="comment">         *   then save the line so far, and start again.</span>
+00162 <span class="comment">         */</span>
+00163         len = <span class="keyword">sizeof</span>(line) - strlen(line);
+00164         <span class="keywordflow">if</span> ((int)strlen(buf) &gt; len) {
+00165             <a class="code" href="group__read__config.html#ga37">read_config_store</a>(type, line);
+00166             snprintf(line, <span class="keyword">sizeof</span>(line), <span class="stringliteral">"enum %s"</span>, token);
+00167             len = <span class="keyword">sizeof</span>(line);
+00168         }
+00169 
+00170         strncat(line, buf, len);
+00171         listp = listp-&gt;next;
+00172     }
+00173 
+00174     <span class="comment">/*</span>
+00175 <span class="comment">     * If there's anything left, then save that.</span>
+00176 <span class="comment">     * But don't bother saving an empty 'overflow' line.</span>
+00177 <span class="comment">     */</span>
+00178     <span class="keywordflow">if</span> (len != <span class="keyword">sizeof</span>(line))
+00179         <a class="code" href="group__read__config.html#ga37">read_config_store</a>(type, line);
+00180 
+00181     <span class="keywordflow">return</span>;
+00182 }
+00183 
+00184 <span class="keywordtype">void</span>
+00185 se_store_list(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> major, <span class=
+"keywordtype">unsigned</span> <span class="keywordtype">int</span> minor, <span class="keywordtype">char</span> *type)
+00186 {
+00187     <span class="keywordtype">char</span> token[32];
+00188 
+00189     snprintf(token, <span class="keyword">sizeof</span>(token), <span class="stringliteral">"%d:%d"</span>, major, minor);
+00190     se_store_enum_list(se_find_list(major, minor), token, type);
+00191 }
+00192 
+00193 <span class="keyword">struct </span>snmp_enum_list *
+00194 se_find_list(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> major, <span class=
+"keywordtype">unsigned</span> <span class="keywordtype">int</span> minor)
+00195 {
+00196     <span class="keywordflow">if</span> (major &gt; current_maj_num || minor &gt; current_min_num)
+00197         <span class="keywordflow">return</span> NULL;
+00198 
+00199     <span class="keywordflow">return</span> snmp_enum_lists[major][minor];
+00200 }
+00201 
+00202 <span class="keywordtype">int</span>
+00203 se_find_value_in_list(<span class="keyword">struct</span> snmp_enum_list *list, <span class=
+"keywordtype">char</span> *label)
+00204 {
+00205     <span class="keywordflow">if</span> (!list)
+00206         <span class="keywordflow">return</span> SE_DNE;          <span class=
+"comment">/* XXX: um, no good solution here */</span>
+00207     <span class="keywordflow">while</span> (list) {
+00208         <span class="keywordflow">if</span> (strcmp(list-&gt;label, label) == 0)
+00209             <span class="keywordflow">return</span> (list-&gt;value);
+00210         list = list-&gt;next;
+00211     }
+00212 
+00213     <span class="keywordflow">return</span> SE_DNE;              <span class=
+"comment">/* XXX: um, no good solution here */</span>
+00214 }
+00215 
+00216 <span class="keywordtype">int</span>
+00217 se_find_free_value_in_list(<span class="keyword">struct</span> snmp_enum_list *list)
+00218 {
+00219     <span class="keywordtype">int</span> max_value = 0;
+00220     <span class="keywordflow">if</span> (!list)
+00221         <span class="keywordflow">return</span> SE_DNE;
+00222 
+00223     <span class="keywordflow">for</span> (;list; list=list-&gt;next) {
+00224         <span class="keywordflow">if</span> (max_value &lt; list-&gt;value)
+00225             max_value = list-&gt;value;
+00226     }
+00227     <span class="keywordflow">return</span> max_value+1;
+00228 }
+00229 
+00230 <span class="keywordtype">int</span>
+00231 se_find_value(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> major, <span class=
+"keywordtype">unsigned</span> <span class="keywordtype">int</span> minor, <span class="keywordtype">char</span> *label)
+00232 {
+00233     <span class="keywordflow">return</span> se_find_value_in_list(se_find_list(major, minor), label);
+00234 }
+00235 
+00236 <span class="keywordtype">int</span>
+00237 se_find_free_value(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> major, <span class=
+"keywordtype">unsigned</span> <span class="keywordtype">int</span> minor)
+00238 {
+00239     <span class="keywordflow">return</span> se_find_free_value_in_list(se_find_list(major, minor));
+00240 }
+00241 
+00242 <span class="keywordtype">char</span>           *
+00243 se_find_label_in_list(<span class="keyword">struct</span> snmp_enum_list *list, <span class="keywordtype">int</span> value)
+00244 {
+00245     <span class="keywordflow">if</span> (!list)
+00246         <span class="keywordflow">return</span> NULL;
+00247     <span class="keywordflow">while</span> (list) {
+00248         <span class="keywordflow">if</span> (list-&gt;value == value)
+00249             <span class="keywordflow">return</span> (list-&gt;label);
+00250         list = list-&gt;next;
+00251     }
+00252     <span class="keywordflow">return</span> NULL;
+00253 }
+00254 
+00255 <span class="keywordtype">char</span>           *
+00256 se_find_label(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> major, <span class=
+"keywordtype">unsigned</span> <span class="keywordtype">int</span> minor, <span class="keywordtype">int</span> value)
+00257 {
+00258     <span class="keywordflow">return</span> se_find_label_in_list(se_find_list(major, minor), value);
+00259 }
+00260 
+00261 <span class="keywordtype">int</span>
+00262 se_add_pair_to_list(<span class="keyword">struct</span> snmp_enum_list **list, <span class=
+"keywordtype">char</span> *label, <span class="keywordtype">int</span> value)
+00263 {
+00264     <span class="keyword">struct </span>snmp_enum_list *lastnode = NULL;
+00265 
+00266     <span class="keywordflow">if</span> (!list)
+00267         <span class="keywordflow">return</span> SE_DNE;
+00268 
+00269     <span class="keywordflow">while</span> (*list) {
+00270         <span class="keywordflow">if</span> ((*list)-&gt;value == value)
+00271             <span class="keywordflow">return</span> (SE_ALREADY_THERE);
+00272         lastnode = (*list);
+00273         (*list) = (*list)-&gt;next;
+00274     }
+00275 
+00276     <span class="keywordflow">if</span> (lastnode) {
+00277         lastnode-&gt;next = <a class="code" href="group__util.html#ga38">SNMP_MALLOC_STRUCT</a>(snmp_enum_list);
+00278         lastnode = lastnode-&gt;next;
+00279     } <span class="keywordflow">else</span> {
+00280         (*list) = <a class="code" href="group__util.html#ga38">SNMP_MALLOC_STRUCT</a>(snmp_enum_list);
+00281         lastnode = (*list);
+00282     }
+00283     <span class="keywordflow">if</span> (!lastnode)
+00284         <span class="keywordflow">return</span> (SE_NOMEM);
+00285     lastnode-&gt;label = label;
+00286     lastnode-&gt;value = value;
+00287     lastnode-&gt;next = NULL;
+00288     <span class="keywordflow">return</span> (SE_OK);
+00289 }
+00290 
+00291 <span class="keywordtype">int</span>
+00292 se_add_pair(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> major, <span class=
+"keywordtype">unsigned</span> <span class="keywordtype">int</span> minor, <span class=
+"keywordtype">char</span> *label, <span class="keywordtype">int</span> value)
+00293 {
+00294     <span class="keyword">struct </span>snmp_enum_list *list = se_find_list(major, minor);
+00295     <span class="keywordtype">int</span>             created = (list) ? 1 : 0;
+00296     <span class="keywordtype">int</span>             ret = se_add_pair_to_list(&amp;list, label, value);
+00297     <span class="keywordflow">if</span> (!created)
+00298         se_store_in_list(list, major, minor);
+00299     <span class="keywordflow">return</span> ret;
+00300 }
+00301 
+00302 <span class="comment">/*</span>
+00303 <span class="comment"> * remember a list of enums based on a lookup name.</span>
+00304 <span class="comment"> */</span>
+00305 <span class="keyword">struct </span>snmp_enum_list *
+00306 se_find_slist(<span class="keyword">const</span> <span class="keywordtype">char</span> *listname)
+00307 {
+00308     <span class="keyword">struct </span>snmp_enum_list_str *sptr, *lastp = NULL;
+00309     <span class="keywordflow">if</span> (!listname)
+00310         <span class="keywordflow">return</span> NULL;
+00311 
+00312     <span class="keywordflow">for</span> (sptr = sliststorage;
+00313          sptr != NULL; lastp = sptr, sptr = sptr-&gt;next)
+00314         <span class="keywordflow">if</span> (sptr-&gt;name &amp;&amp; strcmp(sptr-&gt;name, listname) == 0)
+00315             <span class="keywordflow">return</span> sptr-&gt;list;
+00316 
+00317     <span class="keywordflow">return</span> NULL;
+00318 }
+00319 
+00320 
+00321 <span class="keywordtype">char</span>           *
+00322 se_find_label_in_slist(<span class="keyword">const</span> <span class="keywordtype">char</span> *listname, <span class=
+"keywordtype">int</span> value)
+00323 {
+00324     <span class="keywordflow">return</span> (se_find_label_in_list(se_find_slist(listname), value));
+00325 }
+00326 
+00327 
+00328 <span class="keywordtype">int</span>
+00329 se_find_value_in_slist(<span class="keyword">const</span> <span class="keywordtype">char</span> *listname, <span class=
+"keywordtype">char</span> *label)
+00330 {
+00331     <span class="keywordflow">return</span> (se_find_value_in_list(se_find_slist(listname), label));
+00332 }
+00333 
+00334 <span class="keywordtype">int</span>
+00335 se_find_free_value_in_slist(<span class="keyword">const</span> <span class="keywordtype">char</span> *listname)
+00336 {
+00337     <span class="keywordflow">return</span> (se_find_free_value_in_list(se_find_slist(listname)));
+00338 }
+00339 
+00340 <span class="keywordtype">int</span>
+00341 se_add_pair_to_slist(<span class="keyword">const</span> <span class="keywordtype">char</span> *listname, <span class=
+"keywordtype">char</span> *label, <span class="keywordtype">int</span> value)
+00342 {
+00343     <span class="keyword">struct </span>snmp_enum_list *list = se_find_slist(listname);
+00344     <span class="keywordtype">int</span>             created = (list) ? 1 : 0;
+00345     <span class="keywordtype">int</span>             ret = se_add_pair_to_list(&amp;list, label, value);
+00346 
+00347     <span class="keywordflow">if</span> (!created) {
+00348         <span class="keyword">struct </span>snmp_enum_list_str *sptr =
+00349             <a class="code" href="group__util.html#ga38">SNMP_MALLOC_STRUCT</a>(snmp_enum_list_str);
+00350         <span class="keywordflow">if</span> (!sptr)
+00351             <span class="keywordflow">return</span> SE_NOMEM;
+00352         sptr-&gt;next = sliststorage;
+00353         sptr-&gt;name = strdup(listname);
+00354         sptr-&gt;list = list;
+00355         sliststorage = sptr;
+00356     }
+00357     <span class="keywordflow">return</span> ret;
+00358 }
+00359 
+00360 <span class="keywordtype">void</span>
+00361 clear_snmp_enum(<span class="keywordtype">void</span>)
+00362 {
+00363     <span class="keyword">struct </span>snmp_enum_list_str *sptr = sliststorage, *next = NULL;
+00364     <span class="keyword">struct </span>snmp_enum_list *list = NULL, *nextlist = NULL;
+00365     <span class="keywordtype">int</span> i;
+00366 
+00367     <span class="keywordflow">while</span> (sptr != NULL) {
+00368         next = sptr-&gt;next;
+00369         list = sptr-&gt;list;
+00370         <span class="keywordflow">while</span> (list != NULL) {
+00371             nextlist = list-&gt;next;
+00372             <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(list-&gt;label);
+00373             <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(list);
+00374             list = nextlist;
+00375         }
+00376         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(sptr-&gt;name);
+00377         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(sptr);
+00378         sptr = next;
+00379     }
+00380     sliststorage = NULL;
+00381 
+00382     <span class="keywordflow">if</span> (snmp_enum_lists) {
+00383         <span class="keywordflow">for</span> (i = 0; i &lt; SE_MAX_IDS; i++) {
+00384             <span class="keywordflow">if</span> (snmp_enum_lists[i])
+00385                 <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(snmp_enum_lists[i]);
+00386         }
+00387         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(snmp_enum_lists);
+00388     }
+00389 }
+00390 
+00391 <span class="keywordtype">void</span>
+00392 se_clear_list(<span class="keyword">struct</span> snmp_enum_list **list)
+00393 {
+00394     <span class="keyword">struct </span>snmp_enum_list *this_entry, *next_entry;
+00395 
+00396     <span class="keywordflow">if</span> (!list)
+00397         <span class="keywordflow">return</span>;
+00398 
+00399     this_entry = *list;
+00400     <span class="keywordflow">while</span> (this_entry) {
+00401         next_entry = this_entry-&gt;next;
+00402         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(this_entry-&gt;label);
+00403         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(this_entry);
+00404         this_entry = next_entry;
+00405     }
+00406     *list = NULL;
+00407     <span class="keywordflow">return</span>;
+00408 }
+00409 
+00410 <span class="keywordtype">void</span>
+00411 se_clear_slist(<span class="keyword">const</span> <span class="keywordtype">char</span> *listname)
+00412 {
+00413     <span class="keyword">struct </span>snmp_enum_list *list = se_find_slist(listname);
+00414     se_clear_list(&amp;list);
+00415 }
+00416 
+00417 <span class="keywordtype">void</span>
+00418 se_store_slist(<span class="keyword">const</span> <span class="keywordtype">char</span> *listname, <span class=
+"keywordtype">char</span> *type)
+00419 {
+00420     <span class="keyword">struct </span>snmp_enum_list *list = se_find_slist(listname);
+00421     se_store_enum_list(list, listname, type);
+00422 }
+00423 
+00424 <span class="keywordtype">int</span>
+00425 se_store_slist_callback(<span class="keywordtype">int</span> majorID, <span class="keywordtype">int</span> minorID,
+00426                         <span class="keywordtype">void</span> *serverargs, <span class=
+"keywordtype">void</span> *clientargs)
+00427 {
+00428     <span class="keywordtype">char</span> *appname = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+00429                                           NETSNMP_DS_LIB_APPTYPE);
+00430     se_store_slist((<span class="keywordtype">char</span> *)clientargs, appname);
+00431     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00432 }
+00433 
+00434 <span class="keywordtype">void</span>
+00435 se_clear_all_lists(<span class="keywordtype">void</span>)
+00436 {
+00437     <span class="keyword">struct </span>snmp_enum_list_str *sptr = NULL;
+00438 
+00439     <span class="keywordflow">for</span> (sptr = sliststorage; sptr != NULL; sptr = sptr-&gt;next)
+00440         se_clear_list(&amp;(sptr-&gt;list));
+00441 }
+00442 
+00443 <span class="preprocessor">#ifdef TESTING</span>
+00444 main()
+00445 {
+00446     init_snmp_enum();
+00447     se_add_pair(1, 1, <span class="stringliteral">"hi"</span>, 1);
+00448     se_add_pair(1, 1, <span class="stringliteral">"there"</span>, 2);
+00449     printf(<span class="stringliteral">"hi: %d\n"</span>, se_find_value(1, 1, <span class="stringliteral">"hi"</span>));
+00450     printf(<span class="stringliteral">"2: %s\n"</span>, se_find_label(1, 1, 2));
+00451 
+00452     se_add_pair_to_slist(<span class="stringliteral">"testing"</span>, <span class=
+"stringliteral">"life, and everything"</span>, 42);
+00453     se_add_pair_to_slist(<span class="stringliteral">"testing"</span>, <span class=
+"stringliteral">"resturant at the end of the universe"</span>,
+00454                          2);
+00455 
+00456     printf(<span class="stringliteral">"life, and everything: %d\n"</span>,
+00457            se_find_value_in_slist(<span class="stringliteral">"testing"</span>, <span class=
+"stringliteral">"life, and everything"</span>));
+00458     printf(<span class="stringliteral">"2: %s\n"</span>, se_find_label_in_slist(<span class=
+"stringliteral">"testing"</span>, 2));
+00459 }
+00460 <span class="preprocessor">#endif                          </span><span class="comment">/* TESTING */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:00 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

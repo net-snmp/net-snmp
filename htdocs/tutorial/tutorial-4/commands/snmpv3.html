@@ -1,0 +1,199 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>UCD-SNMP Tutorial -- SNMPv3 Options</h1>
+    <p>
+      <b>Note:</b>  Much of this tutorial requires <a
+	href="ftp://ftp.sourceforge.net/pub/sourceforge/n/ne/net-snmp/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
+	so make sure you get it before running the commands found in
+	this tutorial.</b> 
+      <p><b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
+      href="/tutorial-5">is available</a> as well.  The commands is
+      the ucd-snmp specific tutorial will not work as expected if you
+      are using net-snmp and not ucd-snmp.
+      <br><br>
+    <hr>
+    <h2>Introduction</h2>
+    <p>
+      The 3rd version of the SNMP protocol introduced a whole slew of
+      new security related features that have been missing from the
+      previous versions.  In SNMPv1 and SNMPv2c, a simple community
+      string was put in clear text into the packet to authenticate the 
+      request.  This is obviously highly insecure.  (If its not
+      obvious, then just trust me).
+    <p>
+      SNMPv3 introduces advanced security which splits the
+      authentication and the authorization into two pieces:
+    <ul>
+
+      <li> The USM is the default
+      <i>Security Module</i> (and the only one we currently support).
+      The <i>U</i> stands for <i>User-based</i>, as it is contains a
+      list of users and their attributes.  The USM is described by <a
+      href="ftp://ftp.ietf.org/rfc/rfc2574.txt">RFC 2574</a>.
+
+      <li>The VACM is the <i>Version-based Access Control Module</i>
+      and controls which users (and SNMPv1/v2c communities as well)
+      are allowed to access and how they can access sections of the
+      MIB tree.  The VACM is described by <a
+      href="ftp://ftp.ietf.org/rfc/rfc2575.txt">RFC 2575</a>.
+
+    </ul>
+      
+    <p>
+      This document will discuss how to use the ucd-snmp tools to get
+      and set data from a remote host.
+    <h2>Users</h2>
+    A user's profile contains the following data:
+<pre>
+<ul>
+% <b>snmptranslate -Tp -IR usmUserTable</b>
++--usmUserTable(2)
+   |
+   +--usmUserEntry(1)
+      |
+      +-- ---- String    usmUserEngineID(1)
+      |        Textual Convention: SnmpEngineID
+      |        Size: 5..32
+      +-- ---- String    usmUserName(2)
+      |        Textual Convention: SnmpAdminString
+      |        Size: 1..32
+      +-- -R-- String    usmUserSecurityName(3)
+      |        Textual Convention: SnmpAdminString
+      |        Size: 0..255
+      +-- CR-- ObjID     usmUserCloneFrom(4)
+      |        Textual Convention: RowPointer
+      +-- CR-- ObjID     usmUserAuthProtocol(5)
+      |        Textual Convention: AutonomousType
+      +-- CR-- String    usmUserAuthKeyChange(6)
+      |        Textual Convention: KeyChange
+      +-- CR-- String    usmUserOwnAuthKeyChange(7)
+      |        Textual Convention: KeyChange
+      +-- CR-- ObjID     usmUserPrivProtocol(8)
+      |        Textual Convention: AutonomousType
+      +-- CR-- String    usmUserPrivKeyChange(9)
+      |        Textual Convention: KeyChange
+      +-- CR-- String    usmUserOwnPrivKeyChange(10)
+      |        Textual Convention: KeyChange
+      +-- CR-- String    usmUserPublic(11)
+      |        Size: 0..32
+      +-- CR-- EnumVal   usmUserStorageType(12)
+      |        Textual Convention: StorageType
+      |        Values: other(1), volatile(2), nonVolatile(3), permanent(4), readOnly(5)
+      +-- CR-- EnumVal   usmUserStatus(13)
+               Textual Convention: RowStatus
+               Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+</ul>
+</pre>
+    <p> Well, thats nice but what does it mean?
+
+    <p>
+      To summarize the most importantly each user has a name (called
+      a <b>securityName</b>) an authentication type
+      (<b>authProtocol</b>) and a privacy type (<b>privProtocol</b>)
+      as well as associated keys for each of these (<b>authKey</b> and 
+      <b>privKey</b>).
+    <p>
+      Authentication is performed by using a users <b>authKey</b> to
+      sign the message being sent.  The <b>authProtocol</b> can be
+      either <i>MD5</i> or <i>SHA</i> at this time.  <b>authKey</b>s
+      (and <b>privKey</b>s) are generated from a passphrase that must
+      be at least 8 characters in length.
+    <p>
+      Authentication is performed by using a users <b>privKey</b> to
+      encrypt the data portion the message being sent.  The
+      <b>privProtocol</b> can only be <i>DES</i> at this time. 
+    <p>
+      Messages can be be sent unauthenticated, authenticated, or
+      authenticated and encrypted by setting the <b>securityLevel</b>
+      to use.
+    <p>
+      All of this information is passed to commands using the command
+      line arguments described in the table below.  Additionally, you
+      can put default values in your ~/.snmp/snmp.conf files using the 
+      tokens specified in the 3rd column.
+      <center>
+      <table border=1 bgcolor="#d0d0ff">
+	<tr bgcolor="#d0ffd0"><th>Parameter</th><th>Command Line Flag</th><th>snmp.conf token</th></tr>
+	<tr><td>securityName</td><td>-u <i>NAME</i></td><td>defSecurityName NAME</td></tr>
+	<tr><td>authProtocol</td><td>-a <i>(MD5|SHA)</i></td><td>defAuthType (MD5|SHA)</td></tr>
+	<tr><td>privProtocol</td><td>-x <i>DES</i></td><td>defPrivType DES</td></tr>
+	<tr><td>authKey</td><td>-A <i>PASSPHRASE</i></td><td>defAuthPassphrase PASSPHRASE</td></tr>
+	<tr><td>privKey</td><td>-X <i>PASSPHRASE</i></td><td>defPrivPassphrase PASSPHRASE</td></tr>
+	<tr><td>securityLevel</td><td>-l <i>(noAuthNoPriv|authNoPriv|authPriv)</i></td><td>defSecurityLevel (noAuthNoPriv|authNoPriv|authPriv)</td></tr>
+	<tr><td>context</td><td>-n <i>CONTEXTNAME</i></td><td>defContext CONTEXTNAME</td></tr>
+      </table>
+      </center>
+      <h2>Examples</h2>
+    <p> Here is a completely unauthenticated request (which still
+    needs a user name, none the less):
+<pre>
+<ul>
+% <b>snmpgetnext -v 3 -n none -u noAuthUser -l noAuthNoPriv test.net-snmp.org sysUpTime</b>
+system.sysUpTime.0 = Timeticks: (83467131) 9 days, 15:51:11.31
+</ul>
+</pre>
+
+    <p> Here is a authenticated request:
+<pre>
+<ul>
+% <b>snmpgetnext -v 3 -n none -u MD5User -a MD5 -A "The UCD Demo Password" -l authNoPriv test.net-snmp.org sysUpTime</b>
+system.sysUpTime.0 = Timeticks: (83491735) 9 days, 15:55:17.35
+</ul>
+</pre>
+
+    <p> And finally, here is an authenticated and encrypted request:
+<pre>
+<ul>
+% <b>snmpgetnext -v 3 -n none -u MD5DESUser -a MD5 -A "The UCD Demo Password" -x DES -X "The UCD Demo Password" -l authPriv test.net-snmp.org system</b>
+system.sysUpTime.0 = Timeticks: (83493111) 9 days, 15:55:31.11
+</ul>
+</pre>
+    <p> Of course, they don't look much different since they all
+    worked identically.  But, the host above allows us to look at it
+    using any level of authentication.  Any hosts you set up should be
+    more restricted than that and require at least a level of
+    authNoPriv when you configure the VACM access control.
+    <p> Finally, consider a snmp.conf file that looks like this:
+<ul>
+<pre>
+defContext none
+defSecurityName MD5User
+defAuthPassphrase The UCD Demo Password
+defVersion 3
+defAuthType MD5
+defSecurityLevel authNoPriv
+</pre>
+</ul>
+    This sets up the defaults for you so that your snmp commands can
+    boil down to something as simple as:
+<pre>
+<ul>
+% <b>snmpgetnext test.net-snmp.org sysUpTime</b>
+system.sysUpTime.3.0 = Timeticks: (83517052) 9 days, 15:59:30.52
+</ul>
+</pre>
+    <p>
+      Or:
+<pre>
+<ul>
+% <b>snmpset test.net-snmp.org ucdDemoPublicString.0 s "I changed  something"</b>
+enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoPublicString.2.0 = "I changed something"
+</ul>
+</pre>
+    Then:
+<pre>
+<ul>
+% <b>snmpget test.net-snmp.org ucdDemoPublicString.0</b>
+enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoPublicString.2.0 = "I changed something"
+</ul>
+</pre>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Fri Dec 17 09:00:32 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Mon Aug  2 10:57:40 EDT 2004
+<!-- hhmts end -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

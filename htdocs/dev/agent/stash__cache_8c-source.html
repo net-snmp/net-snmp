@@ -1,0 +1,239 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>&nbsp;/&nbsp;<a class="el" href="dir_000004.html">helpers</a>
+  </div>
+
+  <h1>stash_cache.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00002 
+00003 <span class="preprocessor">#if HAVE_STRING_H</span>
+00004 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00005 <span class="preprocessor">#else</span>
+00006 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00007 <span class="preprocessor">#endif</span>
+00008 
+00009 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00010 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00011 
+00012 <span class="preprocessor">#include &lt;net-snmp/agent/stash_cache.h&gt;</span>
+00013 
+00014 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00015 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00016 <span class="preprocessor">#endif</span>
+00017 
+00028 netsnmp_stash_cache_info *
+00029 netsnmp_get_new_stash_cache(<span class="keywordtype">void</span>)
+00030 {
+00031     netsnmp_stash_cache_info *cinfo;
+00032 
+00033     cinfo = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_stash_cache_info);
+00034     cinfo-&gt;cache_length = 30;
+00035     <span class="keywordflow">return</span> cinfo;
+00036 }
+00037 
+00041 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+<a name="l00042" id="l00042"></a><a class="code" href="group__stash__cache.html#ga1">00042</a> <a class="code" href=
+"group__stash__cache.html#ga1">netsnmp_get_stash_cache_handler</a>(<span class="keywordtype">void</span>)
+00043 {
+00044     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler;
+00045     netsnmp_stash_cache_info *cinfo;
+00046 
+00047     cinfo = netsnmp_get_new_stash_cache();
+00048     <span class="keywordflow">if</span> (!cinfo)
+00049         <span class="keywordflow">return</span> NULL;
+00050 
+00051     handler = <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
+"stringliteral">"stash_cache"</span>, netsnmp_stash_cache_helper);
+00052     <span class="keywordflow">if</span> (!handler) {
+00053         free(cinfo);
+00054         <span class="keywordflow">return</span> NULL;
+00055     }
+00056 
+00057     handler-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = cinfo;
+00058 
+00059     <span class="keywordflow">return</span> handler;
+00060 }
+00061 
+00063 netsnmp_oid_stash_node  **
+<a name="l00064" id="l00064"></a><a class="code" href="group__stash__cache.html#ga2">00064</a> <a class="code" href=
+"group__stash__cache.html#ga2">netsnmp_extract_stash_cache</a>(<a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo)
+00065 {
+00066     <span class="keywordflow">return</span> netsnmp_agent_get_list_data(reqinfo, STASH_CACHE_NAME);
+00067 }
+00068 
+00069 
+00071 <span class="keywordtype">int</span>
+00072 netsnmp_stash_cache_helper(<a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00073                            <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00074                            <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
+00075                            <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
+00076 {
+00077     netsnmp_stash_cache_info *cinfo;
+00078     netsnmp_oid_stash_node *cnode;
+00079     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *cdata;
+00080     <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request;
+00081     <span class="keywordtype">int</span> ret;
+00082 
+00083     DEBUGMSGTL((<span class="stringliteral">"helper:stash_cache"</span>, <span class=
+"stringliteral">"Got request\n"</span>));
+00084 
+00085     cinfo = (netsnmp_stash_cache_info *) handler-&gt;<a class="code" href=
+"structnetsnmp__mib__handler__s.html#o1">myvoid</a>;
+00086     <span class="keywordflow">if</span> (!cinfo) {
+00087         cinfo = netsnmp_get_new_stash_cache();
+00088         handler-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = cinfo;
+00089     }
+00090 
+00091     <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
+00092 
+00093     <span class="keywordflow">case</span> MODE_GET:
+00094         <span class="keywordflow">if</span> ((ret = <a class="code" href=
+"group__stash__cache.html#ga4">netsnmp_stash_cache_update</a>(handler, reginfo,
+00095                                               reqinfo, requests, cinfo)))
+00096             <span class="keywordflow">return</span> ret;
+00097         <span class="keywordflow">for</span>(request = requests; request; request = request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o13">next</a>) {
+00098             cdata =
+00099                 <a class="code" href="group__oid__stash.html#ga5">netsnmp_oid_stash_get_data</a>(cinfo-&gt;cache,
+00100                                            requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00101                                            requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a>);
+00102             <span class="keywordflow">if</span> (cdata &amp;&amp; cdata-&gt;<a class="code" href=
+"structvariable__list.html#o4">val</a>.string &amp;&amp; cdata-&gt;<a class="code" href=
+"structvariable__list.html#o5">val_len</a>) {
+00103                 <a class="code" href="group__snmp__client.html#ga18">snmp_set_var_typed_value</a>(request-&gt;<a class=
+"code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>, cdata-&gt;<a class="code" href=
+"structvariable__list.html#o3">type</a>,
+00104                                          cdata-&gt;<a class="code" href=
+"structvariable__list.html#o4">val</a>.string, cdata-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a>);
+00105             }
+00106         }
+00107         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00108         <span class="keywordflow">break</span>;
+00109 
+00110     <span class="keywordflow">case</span> MODE_GETNEXT:
+00111         <span class="keywordflow">if</span> ((ret = <a class="code" href=
+"group__stash__cache.html#ga4">netsnmp_stash_cache_update</a>(handler, reginfo,
+00112                                               reqinfo, requests, cinfo)))
+00113             <span class="keywordflow">return</span> ret;
+00114         <span class="keywordflow">for</span>(request = requests; request; request = request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o13">next</a>) {
+00115             cnode =
+00116                 <a class="code" href="group__oid__stash.html#ga4">netsnmp_oid_stash_getnext_node</a>(cinfo-&gt;cache,
+00117                                                requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00118                                                requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a>);
+00119             <span class="keywordflow">if</span> (cnode &amp;&amp; cnode-&gt;thedata) {
+00120                 cdata = cnode-&gt;thedata;
+00121                 <span class="keywordflow">if</span> (cdata-&gt;<a class="code" href=
+"structvariable__list.html#o4">val</a>.string &amp;&amp; cdata-&gt;<a class="code" href=
+"structvariable__list.html#o1">name</a> &amp;&amp; cdata-&gt;<a class="code" href=
+"structvariable__list.html#o2">name_length</a>) {
+00122                     <a class="code" href="group__snmp__client.html#ga18">snmp_set_var_typed_value</a>(request-&gt;<a class=
+"code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>, cdata-&gt;<a class="code" href=
+"structvariable__list.html#o3">type</a>,
+00123                                              cdata-&gt;<a class="code" href=
+"structvariable__list.html#o4">val</a>.string, cdata-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a>);
+00124                     snmp_set_var_objid(request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>, cdata-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00125                                        cdata-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a>);
+00126                 }
+00127             }
+00128         }
+00129         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00130         <span class="keywordflow">break</span>;
+00131 
+00132     <span class="keywordflow">default</span>:
+00133         cinfo-&gt;cache_valid = 0;
+00134         <span class="keywordflow">return</span> <a class="code" href=
+"group__handler.html#ga17">netsnmp_call_next_handler</a>(handler, reginfo, reqinfo,
+00135                                          requests);
+00136     }
+00137     <span class="keywordflow">return</span> SNMP_ERR_GENERR;     <span class="comment">/* should never get here */</span>
+00138 }
+00139 
+00142 <span class="keywordtype">int</span>
+<a name="l00143" id="l00143"></a><a class="code" href="group__stash__cache.html#ga4">00143</a> <a class="code" href=
+"group__stash__cache.html#ga4">netsnmp_stash_cache_update</a>(<a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00144                            <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00145                            <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
+00146                            <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests,
+00147                            netsnmp_stash_cache_info *cinfo)
+00148 {
+00149     <span class="keywordtype">int</span> old_mode;
+00150     <span class="keywordtype">int</span> ret;
+00151     <span class="keywordflow">if</span> (!cinfo-&gt;cache_time ||
+00152         <a class="code" href="group__util.html#ga20">atime_ready</a>(cinfo-&gt;cache_time, 1000*cinfo-&gt;cache_length)) {
+00153         DEBUGMSGTL((<span class="stringliteral">"stash_cache"</span>,
+00154                     <span class="stringliteral">"(re)filling cache (done every %d seconds)\n"</span>,
+00155                     cinfo-&gt;cache_length));
+00156         <span class="comment">/* free the old */</span>
+00157         <a class="code" href="group__oid__stash.html#ga9">netsnmp_oid_stash_free</a>(&amp;cinfo-&gt;cache,
+00158                                (NetSNMPStashFreeNode *) snmp_free_var);
+00159 
+00160         <span class="comment">/* change modes to the GET_STASH mode */</span>
+00161         old_mode = reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a>;
+00162         reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> = MODE_GET_STASH;
+00163         netsnmp_agent_add_list_data(reqinfo,
+00164                                     <a class="code" href=
+"group__data__list.html#ga3">netsnmp_create_data_list</a>(STASH_CACHE_NAME,
+00165                                                              &amp;cinfo-&gt;cache,
+00166                                                              NULL));
+00167 
+00168         <span class="comment">/* have the next handler fill stuff in and switch modes back */</span>
+00169         ret = <a class="code" href=
+"group__handler.html#ga17">netsnmp_call_next_handler</a>(handler, reginfo, reqinfo, requests);
+00170         reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> = old_mode;
+00171 
+00172         <span class="comment">/* update the cache time */</span>
+00173         <span class="keywordflow">if</span> (cinfo-&gt;cache_time) {
+00174             <a class="code" href="group__util.html#ga16">atime_setMarker</a>(cinfo-&gt;cache_time);
+00175         } <span class="keywordflow">else</span> {
+00176             cinfo-&gt;cache_time = <a class="code" href="group__util.html#ga15">atime_newMarker</a>();
+00177         }
+00178         <span class="keywordflow">return</span> ret;
+00179     }
+00180     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00181 }
+00182 
+00187 <span class="keywordtype">void</span>
+<a name="l00188" id="l00188"></a><a class="code" href="group__stash__cache.html#ga5">00188</a> <a class="code" href=
+"group__debug.html#ga8">netsnmp_init_stash_cache_helper</a>(<span class="keywordtype">void</span>)
+00189 {
+00190     <a class="code" href="group__handler.html#ga36">netsnmp_register_handler_by_name</a>(<span class=
+"stringliteral">"stash_cache"</span>,
+00191                                      <a class="code" href=
+"group__stash__cache.html#ga1">netsnmp_get_stash_cache_handler</a>());
+00192 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:02 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

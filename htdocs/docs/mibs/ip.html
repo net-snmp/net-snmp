@@ -1,0 +1,822 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>ip</b>
+MIB object, which is defined within the <b>IP-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.4</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#ipAddrTable">ipAddrTable</a></li>
+  <li><a href="#ipNetToMediaTable">ipNetToMediaTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipForwarding" />
+1
+<br /><b>ipForwarding</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>forwarding</td></tr>
+        <tr><td>2</td><td>notForwarding</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.4.1</td>
+<td>
+<pre>
+The indication of whether this entity is acting as an IP
+router in respect to the forwarding of datagrams received
+by, but not addressed to, this entity.  IP routers forward
+datagrams.  IP hosts do not (except those source-routed via
+the host).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipDefaultTTL" />
+2
+<br /><b>ipDefaultTTL</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.4.2</td>
+<td>
+<pre>
+The default value inserted into the Time-To-Live field of
+the IP header of datagrams originated at this entity,
+whenever a TTL value is not supplied by the transport layer
+protocol.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipInReceives" />
+3
+<br /><b>ipInReceives</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.3</td>
+<td>
+<pre>
+The total number of input datagrams received from
+interfaces, including those received in error.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipInHdrErrors" />
+4
+<br /><b>ipInHdrErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.4</td>
+<td>
+<pre>
+The number of input datagrams discarded due to errors in
+their IP headers, including bad checksums, version number
+mismatch, other format errors, time-to-live exceeded, errors
+discovered in processing their IP options, etc.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipInAddrErrors" />
+5
+<br /><b>ipInAddrErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.5</td>
+<td>
+<pre>
+The number of input datagrams discarded because the IP
+address in their IP header's destination field was not a
+valid address to be received at this entity.  This count
+includes invalid addresses (e.g., 0.0.0.0) and addresses of
+unsupported Classes (e.g., Class E).  For entities which are
+not IP routers and therefore do not forward datagrams, this
+counter includes datagrams discarded because the destination
+address was not a local address.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipForwDatagrams" />
+6
+<br /><b>ipForwDatagrams</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.6</td>
+<td>
+<pre>
+The number of input datagrams for which this entity was not
+their final IP destination, as a result of which an attempt
+was made to find a route to forward them to that final
+destination.  In entities which do not act as IP routers,
+this counter will include only those packets which were
+Source-Routed via this entity, and the Source-Route option
+processing was successful.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipInUnknownProtos" />
+7
+<br /><b>ipInUnknownProtos</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.7</td>
+<td>
+<pre>
+The number of locally-addressed datagrams received
+successfully but discarded because of an unknown or
+unsupported protocol.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipInDiscards" />
+8
+<br /><b>ipInDiscards</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.8</td>
+<td>
+<pre>
+The number of input IP datagrams for which no problems were
+encountered to prevent their continued processing, but which
+were discarded (e.g., for lack of buffer space).  Note that
+this counter does not include any datagrams discarded while
+awaiting re-assembly.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipInDelivers" />
+9
+<br /><b>ipInDelivers</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.9</td>
+<td>
+<pre>
+The total number of input datagrams successfully delivered
+to IP user-protocols (including ICMP).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipOutRequests" />
+10
+<br /><b>ipOutRequests</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.10</td>
+<td>
+<pre>
+The total number of IP datagrams which local IP user-
+protocols (including ICMP) supplied to IP in requests for
+transmission.  Note that this counter does not include any
+datagrams counted in ipForwDatagrams.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipOutDiscards" />
+11
+<br /><b>ipOutDiscards</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.11</td>
+<td>
+<pre>
+The number of output IP datagrams for which no problem was
+encountered to prevent their transmission to their
+destination, but which were discarded (e.g., for lack of
+buffer space).  Note that this counter would include
+datagrams counted in ipForwDatagrams if any such packets met
+this (discretionary) discard criterion.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipOutNoRoutes" />
+12
+<br /><b>ipOutNoRoutes</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.12</td>
+<td>
+<pre>
+The number of IP datagrams discarded because no route could
+be found to transmit them to their destination.  Note that
+this counter includes any packets counted in ipForwDatagrams
+which meet this `no-route' criterion.  Note that this
+includes any datagrams which a host cannot route because all
+of its default routers are down.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipReasmTimeout" />
+13
+<br /><b>ipReasmTimeout</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.13</td>
+<td>
+<pre>
+The maximum number of seconds which received fragments are
+held while they are awaiting reassembly at this entity.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipReasmReqds" />
+14
+<br /><b>ipReasmReqds</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.14</td>
+<td>
+<pre>
+The number of IP fragments received which needed to be
+reassembled at this entity.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipReasmOKs" />
+15
+<br /><b>ipReasmOKs</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.15</td>
+<td>
+<pre>
+The number of IP datagrams successfully re-assembled.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipReasmFails" />
+16
+<br /><b>ipReasmFails</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.16</td>
+<td>
+<pre>
+The number of failures detected by the IP re-assembly
+algorithm (for whatever reason: timed out, errors, etc).
+Note that this is not necessarily a count of discarded IP
+fragments since some algorithms (notably the algorithm in
+RFC 815) can lose track of the number of fragments by
+
+combining them as they are received.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFragOKs" />
+17
+<br /><b>ipFragOKs</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.17</td>
+<td>
+<pre>
+The number of IP datagrams that have been successfully
+fragmented at this entity.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFragFails" />
+18
+<br /><b>ipFragFails</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.18</td>
+<td>
+<pre>
+The number of IP datagrams that have been discarded because
+they needed to be fragmented at this entity but could not
+be, e.g., because their Don't Fragment flag was set.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFragCreates" />
+19
+<br /><b>ipFragCreates</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.19</td>
+<td>
+<pre>
+The number of IP datagram fragments that have been
+generated as a result of fragmentation at this entity.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipRoutingDiscards" />
+23
+<br /><b>ipRoutingDiscards</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.4.23</td>
+<td>
+<pre>
+The number of routing entries which were chosen to be
+discarded even though they are valid.  One possible reason
+for discarding such an entry could be to free-up buffer
+space for other routing entries.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="ipAddrTable" /><h3>Table ipAddrTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipAddrTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.4.20</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The table of addressing information relevant to this
+entity's IP addresses.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="ipAddrEntry" />Row Description</td>
+<td>
+<pre>
+The addressing information for one of this entity's IP
+addresses.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>ipAddrTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipAdEntAddr" />
+1
+<br /><b>ipAdEntAddr</b>
+
+</td><td>
+  IPADDR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The IP address to which this entry's addressing information
+pertains.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other ipAddrTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipAdEntIfIndex" />
+2
+<br /><b>ipAdEntIfIndex</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The index value which uniquely identifies the interface to
+which this entry is applicable.  The interface identified by
+a particular value of this index is the same interface as
+identified by the same value of RFC 1573's ifIndex.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipAdEntNetMask" />
+3
+<br /><b>ipAdEntNetMask</b>
+
+</td><td>
+  IPADDR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The subnet mask associated with the IP address of this
+entry.  The value of the mask is an IP address with all the
+network bits set to 1 and all the hosts bits set to 0.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipAdEntBcastAddr" />
+4
+<br /><b>ipAdEntBcastAddr</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value of the least-significant bit in the IP broadcast
+address used for sending datagrams on the (logical)
+            interface associated with the IP address of this entry.  For
+            example, when the Internet standard all-ones broadcast
+            address is used, the value will be 1.  This value applies to
+            both the subnet and network broadcasts addresses used by the
+            entity on this (logical) interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipAdEntReasmMaxSize" />
+5
+<br /><b>ipAdEntReasmMaxSize</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The size of the largest IP datagram which this entity can
+re-assemble from incoming IP fragmented datagrams received
+on this interface.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="ipNetToMediaTable" /><h3>Table ipNetToMediaTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipNetToMediaTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.4.22</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The IP Address Translation table used for mapping from IP
+addresses to physical addresses.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="ipNetToMediaEntry" />Row Description</td>
+<td>
+<pre>
+Each entry contains one IpAddress to `physical' address
+equivalence.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>ipNetToMediaTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipNetToMediaIfIndex" />
+1
+<br /><b>ipNetToMediaIfIndex</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The interface on which this entry's equivalence is
+effective.  The interface identified by a particular value
+of this index is the same interface as identified by the
+same value of RFC 1573's ifIndex.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipNetToMediaNetAddress" />
+3
+<br /><b>ipNetToMediaNetAddress</b>
+
+</td><td>
+  IPADDR
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The IpAddress corresponding to the media-dependent
+`physical' address.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other ipNetToMediaTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipNetToMediaPhysAddress" />
+2
+<br /><b>ipNetToMediaPhysAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#PhysAddress">PhysAddress</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#PhysAddress"> PhysAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The media-dependent `physical' address.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipNetToMediaType" />
+4
+<br /><b>ipNetToMediaType</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>other</td></tr>
+        <tr><td>2</td><td>invalid</td></tr>
+        <tr><td>3</td><td>dynamic</td></tr>
+        <tr><td>4</td><td>static</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The type of mapping.
+Setting this object to the value invalid(2) has the effect
+            of invalidating the corresponding entry in the
+            ipNetToMediaTable.  That is, it effectively disassociates
+            the interface identified with said entry from the mapping
+            identified with said entry.  It is an implementation-
+            specific matter as to whether the agent removes an
+            invalidated entry from the table.  Accordingly, management
+            stations must be prepared to receive tabular information
+            from agents that corresponds to entries not currently in
+            use.  Proper interpretation of such entries requires
+            examination of the relevant ipNetToMediaType object.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="PhysAddress">PhysAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp IP-MIB::ip</b></p>
+<pre>
++--<a href="#ip">ip</a>(4)
+   |
+   +-- -RW- EnumVal   <a href="#ipForwarding">ipForwarding</a>(1)
+   |        Values: forwarding(1), notForwarding(2)
+   +-- -RW- INTEGER   <a href="#ipDefaultTTL">ipDefaultTTL</a>(2)
+   |        Range: 1..255
+   +-- -R-- Counter   <a href="#ipInReceives">ipInReceives</a>(3)
+   +-- -R-- Counter   <a href="#ipInHdrErrors">ipInHdrErrors</a>(4)
+   +-- -R-- Counter   <a href="#ipInAddrErrors">ipInAddrErrors</a>(5)
+   +-- -R-- Counter   <a href="#ipForwDatagrams">ipForwDatagrams</a>(6)
+   +-- -R-- Counter   <a href="#ipInUnknownProtos">ipInUnknownProtos</a>(7)
+   +-- -R-- Counter   <a href="#ipInDiscards">ipInDiscards</a>(8)
+   +-- -R-- Counter   <a href="#ipInDelivers">ipInDelivers</a>(9)
+   +-- -R-- Counter   <a href="#ipOutRequests">ipOutRequests</a>(10)
+   +-- -R-- Counter   <a href="#ipOutDiscards">ipOutDiscards</a>(11)
+   +-- -R-- Counter   <a href="#ipOutNoRoutes">ipOutNoRoutes</a>(12)
+   +-- -R-- Integer32 <a href="#ipReasmTimeout">ipReasmTimeout</a>(13)
+   +-- -R-- Counter   <a href="#ipReasmReqds">ipReasmReqds</a>(14)
+   +-- -R-- Counter   <a href="#ipReasmOKs">ipReasmOKs</a>(15)
+   +-- -R-- Counter   <a href="#ipReasmFails">ipReasmFails</a>(16)
+   +-- -R-- Counter   <a href="#ipFragOKs">ipFragOKs</a>(17)
+   +-- -R-- Counter   <a href="#ipFragFails">ipFragFails</a>(18)
+   +-- -R-- Counter   <a href="#ipFragCreates">ipFragCreates</a>(19)
+   |
+   +--<a href="#ipAddrTable">ipAddrTable</a>(20)
+   |  |
+   |  +--<a href="#ipAddrEntry">ipAddrEntry</a>(1)
+   |     |  Index: ipAdEntAddr
+   |     |
+   |     +-- -R-- IpAddr    <a href="#ipAdEntAddr">ipAdEntAddr</a>(1)
+   |     +-- -R-- INTEGER   <a href="#ipAdEntIfIndex">ipAdEntIfIndex</a>(2)
+   |     |        Range: 1..2147483647
+   |     +-- -R-- IpAddr    <a href="#ipAdEntNetMask">ipAdEntNetMask</a>(3)
+   |     +-- -R-- INTEGER   <a href="#ipAdEntBcastAddr">ipAdEntBcastAddr</a>(4)
+   |     |        Range: 0..1
+   |     +-- -R-- INTEGER   <a href="#ipAdEntReasmMaxSize">ipAdEntReasmMaxSize</a>(5)
+   |              Range: 0..65535
+   |
+   +--<a href="#ipNetToMediaTable">ipNetToMediaTable</a>(22)
+   |  |
+   |  +--<a href="#ipNetToMediaEntry">ipNetToMediaEntry</a>(1)
+   |     |  Index: ipNetToMediaIfIndex, ipNetToMediaNetAddress
+   |     |
+   |     +-- CR-- INTEGER   <a href="#ipNetToMediaIfIndex">ipNetToMediaIfIndex</a>(1)
+   |     |        Range: 1..2147483647
+   |     +-- CR-- String    <a href="#ipNetToMediaPhysAddress">ipNetToMediaPhysAddress</a>(2)
+   |     |        Textual Convention: <a href="#PhysAddress">PhysAddress</a>
+   |     +-- CR-- IpAddr    <a href="#ipNetToMediaNetAddress">ipNetToMediaNetAddress</a>(3)
+   |     +-- CR-- EnumVal   <a href="#ipNetToMediaType">ipNetToMediaType</a>(4)
+   |              Values: other(1), invalid(2), dynamic(3), static(4)
+   |
+   +-- -R-- Counter   <a href="#ipRoutingDiscards">ipRoutingDiscards</a>(23)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

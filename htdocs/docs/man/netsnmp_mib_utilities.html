@@ -1,0 +1,1496 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>group__mib__utilities</h1>Section: net-snmp (3)<br />
+    Updated: 28 Oct 2004<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>mib parsing and datatype manipulation routines. - <a name="lbAC" id="lbAC"> </a>
+
+    <h3>Data Structures</h3>
+
+    <p><br />
+    struct <b>_PrefixList</b><br />
+    <br />
+    struct <b>parse_hints</b><br />
+    <a name="lbAD" id="lbAD"> </a></p>
+
+    <h3>Typedefs</h3>
+
+    <p><br />
+    typedef _PrefixList * <b>PrefixListPtr</b><br />
+    <br />
+    typedef _PrefixList <b>PrefixList</b><br />
+    <a name="lbAE" id="lbAE"> </a></p>
+
+    <h3>Enumerations</h3>
+
+    <p><br />
+    enum <b>inet_address_type</b> { <b>IPV4</b> = 1, <b>IPV6</b> = 2, <b>IPV4Z</b> = 3, <b>IPV6Z</b> = 4, <b>DNS</b> = 16 }<br />
+    <a name="lbAF" id="lbAF"> </a></p>
+
+    <h3>Functions</h3>
+
+    <p><br />
+    int <b>_sprint_hexstring_line</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const u_char *cp,
+    size_t line_len)<br />
+    <i>Prints a hexadecimal string into a buffer.</i><br />
+    int <b>sprint_realloc_hexstring</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const u_char *cp,
+    size_t len)<br />
+    <br />
+    int <b>sprint_realloc_asciistring</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const u_char *cp,
+    size_t len)<br />
+    <i>Prints an ascii string into a buffer.</i><br />
+    int <b>sprint_realloc_octet_string</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Prints an octet string into a buffer.</i><br />
+    int <b>sprint_realloc_counter64</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Prints a counter into a buffer.</i><br />
+    int <b>sprint_realloc_opaque</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Prints an object identifier into a buffer.</i><br />
+    int <b>sprint_realloc_object_identifier</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Prints an object identifier into a buffer.</i><br />
+    int <b>sprint_realloc_timeticks</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Prints a timetick variable into a buffer.</i><br />
+    int <b>sprint_realloc_hinted_integer</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, long val, const
+    char decimaltype, const char *hint, const char *units)<br />
+    <i>Prints an integer according to the hint into a buffer.</i><br />
+    int <b>sprint_realloc_integer</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Prints an integer into a buffer.</i><br />
+    int <b>sprint_realloc_uinteger</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Prints an unsigned integer into a buffer.</i><br />
+    int <b>sprint_realloc_gauge</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Prints a gauge value into a buffer.</i><br />
+    int <b>sprint_realloc_counter</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Prints a counter value into a buffer.</i><br />
+    int <b>sprint_realloc_networkaddress</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Prints a network address into a buffer.</i><br />
+    int <b>sprint_realloc_ipaddress</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Prints an ip-address into a buffer.</i><br />
+    int <b>sprint_realloc_null</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Prints a null value into a buffer.</i><br />
+    int <b>sprint_realloc_bitstring</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Prints a bit string into a buffer.</i><br />
+    int <b>sprint_realloc_nsapaddress</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <br />
+    int <b>sprint_realloc_badtype</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Fallback routine for a bad type, prints 'Variable has bad type' into a buffer.</i><br />
+    int <b>sprint_realloc_by_type</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> *var, const struct enum_list *enums, const char *hint, const char *units)<br />
+    <i>Universal print routine, prints a variable into a buffer according to the variable type.</i><br />
+    tree * <b>get_tree_head</b> (void)<br />
+    <i>Retrieves the tree head.</i><br />
+    char * <b>snmp_out_toggle_options</b> (char *options)<br />
+    <br />
+    void <b>snmp_out_toggle_options_usage</b> (const char *lead, FILE *outf)<br />
+    <br />
+    char * <b>snmp_in_options</b> (char *optarg, int argc, char *const *argv)<br />
+    <br />
+    char * <b>snmp_in_toggle_options</b> (char *options)<br />
+    <br />
+    void <b>snmp_in_toggle_options_usage</b> (const char *lead, FILE *outf)<br />
+    <i>Prints out a help usage for the in* toggle options.</i><br />
+    void <b>register_mib_handlers</b> (void)<br />
+    <br />
+    void <b>netsnmp_set_mib_directory</b> (const char *dir)<br />
+    <br />
+    char * <b>netsnmp_get_mib_directory</b> (void)<br />
+    <br />
+    void <b>netsnmp_fixup_mib_directory</b> (void)<br />
+    <br />
+    void <b>init_mib</b> (void)<br />
+    <i>Initialises the mib reader.</i><br />
+    void <b>shutdown_mib</b> (void)<br />
+    <i>Unloads all mibs.</i><br />
+    void <b>print_mib</b> (FILE *fp)<br />
+    <i>Prints the MIBs to the file fp.</i><br />
+    void <b>print_ascii_dump</b> (FILE *fp)<br />
+    <br />
+    void <b>set_function</b> (struct tree *subtree)<br />
+    <i>Set's the printing function printomat in a subtree according it's type.</i><br />
+    int <b>read_objid</b> (const char *input, oid *output, size_t *out_len)<br />
+    <i>Reads an object identifier from an input string into internal OID form.</i><br />
+    void <b>netsnmp_sprint_realloc_objid</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, int
+    *buf_overflow, const oid *objid, size_t objidlen)<br />
+    <br />
+    tree * <b>netsnmp_sprint_realloc_objid_tree</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, int
+    *buf_overflow, const oid *objid, size_t objidlen)<br />
+    <br />
+    int <b>sprint_realloc_objid</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const oid *objid, size_t
+    objidlen)<br />
+    <br />
+    int <b>snprint_objid</b> (char *buf, size_t buf_len, const oid *objid, size_t objidlen)<br />
+    <br />
+    void <b>print_objid</b> (const oid *objid, size_t objidlen)<br />
+    <i>Prints an oid to stdout.</i><br />
+    void <b>fprint_objid</b> (FILE *f, const oid *objid, size_t objidlen)<br />
+    <i>Prints an oid to a file descriptor.</i><br />
+    int <b>sprint_realloc_variable</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const oid *objid,
+    size_t objidlen, const <b>netsnmp_variable_list</b> *variable)<br />
+    <br />
+    int <b>snprint_variable</b> (char *buf, size_t buf_len, const oid *objid, size_t objidlen, const <b>netsnmp_variable_list</b>
+    *variable)<br />
+    <br />
+    void <b>print_variable</b> (const oid *objid, size_t objidlen, const <b>netsnmp_variable_list</b> *variable)<br />
+    <i>Prints a variable to stdout.</i><br />
+    void <b>fprint_variable</b> (FILE *f, const oid *objid, size_t objidlen, const <b>netsnmp_variable_list</b> *variable)<br />
+    <i>Prints a variable to a file descriptor.</i><br />
+    int <b>sprint_realloc_value</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, const oid *objid, size_t
+    objidlen, const <b>netsnmp_variable_list</b> *variable)<br />
+    <br />
+    int <b>snprint_value</b> (char *buf, size_t buf_len, const oid *objid, size_t objidlen, const <b>netsnmp_variable_list</b>
+    *variable)<br />
+    <br />
+    void <b>print_value</b> (const oid *objid, size_t objidlen, const <b>netsnmp_variable_list</b> *variable)<br />
+    <br />
+    void <b>fprint_value</b> (FILE *f, const oid *objid, size_t objidlen, const <b>netsnmp_variable_list</b> *variable)<br />
+    <br />
+    int <b>build_oid_segment</b> (<b>netsnmp_variable_list</b> *var)<br />
+    <i>Takes the value in VAR and turns it into an OID segment in var-&gt;name.</i><br />
+    int <b>build_oid_noalloc</b> (oid *in, size_t in_len, size_t *out_len, oid *prefix, size_t prefix_len,
+    <b>netsnmp_variable_list</b> *indexes)<br />
+    <br />
+    int <b>build_oid</b> (oid **out, size_t *out_len, oid *prefix, size_t prefix_len, <b>netsnmp_variable_list</b>
+    *indexes)<br />
+    <br />
+    int <b>parse_oid_indexes</b> (oid *oidIndex, size_t oidLen, <b>netsnmp_variable_list</b> *data)<br />
+    <br />
+    int <b>parse_one_oid_index</b> (oid **oidStart, size_t *oidLen, <b>netsnmp_variable_list</b> *data, int complete)<br />
+    <br />
+    int <b>dump_realloc_oid_to_inetaddress</b> (const int addr_type, const oid *objid, size_t objidlen, u_char **buf, size_t
+    *buf_len, size_t *out_len, int allow_realloc, char quotechar)<br />
+    <br />
+    int <b>dump_realloc_oid_to_string</b> (const oid *objid, size_t objidlen, u_char **buf, size_t *buf_len, size_t *out_len, int
+    allow_realloc, char quotechar)<br />
+    <br />
+    tree * <b>get_tree</b> (const oid *objid, size_t objidlen, struct tree *subtree)<br />
+    <i>Clone of get_symbol that doesn't take a buffer argument.</i><br />
+    void <b>print_description</b> (oid *objid, size_t objidlen, int width)<br />
+    <i>Prints on oid description on stdout.</i><br />
+    void <b>fprint_description</b> (FILE *f, oid *objid, size_t objidlen, int width)<br />
+    <i>Prints on oid description into a file descriptor.</i><br />
+    int <b>snprint_description</b> (char *buf, size_t buf_len, oid *objid, size_t objidlen, int width)<br />
+    <br />
+    int <b>sprint_realloc_description</b> (u_char **buf, size_t *buf_len, size_t *out_len, int allow_realloc, oid *objid, size_t
+    objidlen, int width)<br />
+    <br />
+    int <b>get_module_node</b> (const char *fname, const char *module, oid *objid, size_t *objidlen)<br />
+    <br />
+    int <b>get_wild_node</b> (const char *name, oid *objid, size_t *objidlen)<br />
+    <br />
+    int <b>get_node</b> (const char *name, oid *objid, size_t *objidlen)<br />
+    <br />
+    void <b>clear_tree_flags</b> (register struct tree *tp)<br />
+    <br />
+    void <b>print_oid_report</b> (FILE *fp)<br />
+    <br />
+    void <b>print_oid_report_enable_labeledoid</b> (void)<br />
+    <br />
+    void <b>print_oid_report_enable_oid</b> (void)<br />
+    <br />
+    void <b>print_oid_report_enable_suffix</b> (void)<br />
+    <br />
+    void <b>print_oid_report_enable_symbolic</b> (void)<br />
+    <br />
+    char * <b>uptime_string</b> (u_long timeticks, char *buf)<br />
+    <i>Converts timeticks to hours, minutes, seconds string.</i><br />
+    oid * <b>snmp_parse_oid</b> (const char *argv, oid *root, size_t *rootlen)<br />
+    <i>Given a string, parses an oid out of it (if possible).</i><br />
+    const char * <b>parse_octet_hint</b> (const char *hint, const char *value, unsigned char **new_val, int *new_val_len)<br />
+    <br />
+    u_char <b>mib_to_asn_type</b> (int mib_type)<br />
+    <br />
+    int <b>netsnmp_str2oid</b> (const char *S, oid *O, int L)<br />
+    <i>Converts a string to its OID form.</i><br />
+    int <b>netsnmp_oid2chars</b> (char *C, int L, const oid *O)<br />
+    <i>Converts an OID to its character form.</i><br />
+    int <b>netsnmp_oid2str</b> (char *S, int L, oid *O)<br />
+    <i>Converts an OID to its string form.</i><br />
+    int <b>snprint_by_type</b> (char *buf, size_t buf_len, <b>netsnmp_variable_list</b> *var, const struct enum_list *enums,
+    const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_hexstring</b> (char *buf, size_t buf_len, const u_char *cp, size_t len)<br />
+    <br />
+    int <b>snprint_asciistring</b> (char *buf, size_t buf_len, const u_char *cp, size_t len)<br />
+    <br />
+    int <b>snprint_octet_string</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list
+    *enums, const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_opaque</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list *enums,
+    const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_object_identifier</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct
+    enum_list *enums, const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_timeticks</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list
+    *enums, const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_hinted_integer</b> (char *buf, size_t buf_len, long val, const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_integer</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list
+    *enums, const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_uinteger</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list
+    *enums, const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_gauge</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list *enums,
+    const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_counter</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list
+    *enums, const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_networkaddress</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list
+    *enums, const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_ipaddress</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list
+    *enums, const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_null</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list *enums,
+    const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_bitstring</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list
+    *enums, const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_nsapaddress</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list
+    *enums, const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_counter64</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list
+    *enums, const char *hint, const char *units)<br />
+    <br />
+    int <b>snprint_badtype</b> (char *buf, size_t buf_len, const <b>netsnmp_variable_list</b> *var, const struct enum_list
+    *enums, const char *hint, const char *units)<br />
+    <a name="lbAG" id="lbAG"> </a></p>
+
+    <h3>Variables</h3>
+
+    <p><br />
+    tree * <b>tree_head</b><br />
+    <br />
+    tree * <b>Mib</b><br />
+    <br />
+    oid <b>RFC1213_MIB</b> [] = { 1, 3, 6, 1, 2, 1 }<br />
+    <br />
+    PrefixList <b>mib_prefixes</b> []<br />
+    <a name="lbAH" id="lbAH"> </a></p>
+
+    <h2>Function Documentation</h2>
+
+    <p><a name="lbAI" id="lbAI"> </a></p>
+
+    <h3>int _sprint_hexstring_line (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const u_char * cp,
+    size_t line_len)</h3>
+
+    <p>Prints a hexadecimal string into a buffer.</p>
+
+    <p>The characters pointed by *cp are encoded as hexadecimal string.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> address of the buffer to print to.<br />
+      <i>buf_len</i> address to an integer containing the size of buf.<br />
+      <i>out_len</i> incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>cp</i> the array of characters to encode.<br />
+      <i>len</i> the array length of cp.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 271 of file mib.c.</p>
+
+    <p>References snmp_realloc(). <a name="lbAJ" id="lbAJ"> </a></p>
+
+    <h3>int build_oid (oid ** out, size_t * out_len, oid * prefix, size_t prefix_len, <b>netsnmp_variable_list</b> *
+    indexes)</h3>
+
+    <p>xxx-rks: should free previous value?</p>
+
+    <p>Definition at line 3557 of file mib.c.</p>
+
+    <p>Referenced by netsnmp_table_build_oid(), and netsnmp_table_data_generate_index_oid(). <a name="lbAK" id="lbAK"> </a></p>
+
+    <h3>int build_oid_segment (<b>netsnmp_variable_list</b> * var)</h3>
+
+    <p>Takes the value in VAR and turns it into an OID segment in var-&gt;name.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>var</i> The variable.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>SNMPERR_SUCCESS or SNMPERR_GENERR</dd>
+    </dl>
+
+    <p>Definition at line 3421 of file mib.c.</p>
+
+    <p>References variable_list::name, variable_list::name_length, variable_list::name_loc, SNMP_FREE, variable_list::type,
+    variable_list::val, and variable_list::val_len. <a name="lbAL" id="lbAL"> </a></p>
+
+    <h3>void fprint_description (FILE * f, oid * objid, size_t objidlen, int width)</h3>
+
+    <p>Prints on oid description into a file descriptor.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>f</i> The file descriptor to print to.<br />
+      <i>objid</i> The object identifier.<br />
+      <i>objidlen</i> The object id length.<br />
+      <i>width</i> Number of subidentifiers.</dd>
+    </dl>
+
+    <p>Definition at line 4401 of file mib.c.</p>
+
+    <p>References SNMP_FREE.</p>
+
+    <p>Referenced by print_description(). <a name="lbAM" id="lbAM"> </a></p>
+
+    <h3>void fprint_objid (FILE * f, const oid * objid, size_t objidlen)</h3>
+
+    <p>Prints an oid to a file descriptor.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>f</i> The file descriptor to print to.<br />
+      <i>objid</i> The oid to print<br />
+      <i>objidlen</i> The length of oidid.</dd>
+    </dl>
+
+    <p>Definition at line 3149 of file mib.c.</p>
+
+    <p>References SNMP_FREE.</p>
+
+    <p>Referenced by print_objid(). <a name="lbAN" id="lbAN"> </a></p>
+
+    <h3>void fprint_variable (FILE * f, const oid * objid, size_t objidlen, const <b>netsnmp_variable_list</b> * variable)</h3>
+
+    <p>Prints a variable to a file descriptor.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>f</i> The file descriptor to print to.<br />
+      <i>objid</i> The object id.<br />
+      <i>objidlen</i> The length of teh object id.<br />
+      <i>variable</i> The variable to print.</dd>
+    </dl>
+
+    <p>Definition at line 3296 of file mib.c.</p>
+
+    <p>References SNMP_FREE.</p>
+
+    <p>Referenced by print_variable(). <a name="lbAO" id="lbAO"> </a></p>
+
+    <h3>struct tree* get_tree (const oid * objid, size_t objidlen, struct tree * subtree)</h3>
+
+    <p>Clone of get_symbol that doesn't take a buffer argument.</p>
+
+    <p><b>See also:</b></p>
+
+    <dl compact="compact">
+      <dd>get_symbol</dd>
+    </dl>
+
+    <p>Definition at line 4356 of file mib.c. <a name="lbAP" id="lbAP"> </a></p>
+
+    <h3>struct tree* get_tree_head (void)</h3>
+
+    <p>Retrieves the tree head.</p>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>the tree head.</dd>
+    </dl>
+
+    <p>Definition at line 2049 of file mib.c. <a name="lbAQ" id="lbAQ"> </a></p>
+
+    <h3>int get_wild_node (const char * name, oid * objid, size_t * objidlen)</h3>
+
+    <p><b>See also:</b></p>
+
+    <dl compact="compact">
+      <dd>comments on find_best_tree_node for usage after first time.</dd>
+    </dl>
+
+    <p>Definition at line 5406 of file mib.c.</p>
+
+    <p>Referenced by snmp_parse_oid(). <a name="lbAR" id="lbAR"> </a></p>
+
+    <h3>void init_mib (void)</h3>
+
+    <p>Initialises the mib reader.</p>
+
+    <p>Reads in all settings from the environment.</p>
+
+    <p>Definition at line 2537 of file mib.c.</p>
+
+    <p>References netsnmp_fixup_mib_directory(), netsnmp_get_mib_directory(), netsnmp_getenv(), and SNMP_FREE.</p>
+
+    <p>Referenced by init_snmp(). <a name="lbAS" id="lbAS"> </a></p>
+
+    <h3>void netsnmp_fixup_mib_directory (void)</h3>
+
+    <p>swap in the new value and repeat</p>
+
+    <p>Definition at line 2490 of file mib.c.</p>
+
+    <p>References netsnmp_get_mib_directory(), netsnmp_getenv(), netsnmp_set_mib_directory(), and SNMP_FREE.</p>
+
+    <p>Referenced by init_mib(). <a name="lbAT" id="lbAT"> </a></p>
+
+    <h3>char* netsnmp_get_mib_directory (void)</h3>
+
+    <p>Check if the environment variable is set</p>
+
+    <p>Not set use hard coded path</p>
+
+    <p>Definition at line 2443 of file mib.c.</p>
+
+    <p>References netsnmp_getenv(), and netsnmp_set_mib_directory().</p>
+
+    <p>Referenced by init_mib(), and netsnmp_fixup_mib_directory(). <a name="lbAU" id="lbAU"> </a></p>
+
+    <h3>int netsnmp_oid2chars (char * C, int L, const oid * O)</h3>
+
+    <p>Converts an OID to its character form.</p>
+
+    <p>in example 5 . 1 . 2 . 3 . 4 . 5 = 12345</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>C</i> The character buffer.<br />
+      <i>L</i> The length of the buffer.<br />
+      <i>O</i> The oid.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>0 on Sucess, 1 on failure.</dd>
+    </dl>
+
+    <p>length</p>
+
+    <p>Definition at line 6149 of file mib.c.</p>
+
+    <p>Referenced by netsnmp_oid2str(). <a name="lbAV" id="lbAV"> </a></p>
+
+    <h3>int netsnmp_oid2str (char * S, int L, oid * O)</h3>
+
+    <p>Converts an OID to its string form.</p>
+
+    <p>in example 5 . 'h' . 'e' . 'l' . 'l' . 'o' = 'hello\0' (null terminated)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>S</i> The character string buffer.<br />
+      <i>L</i> The length of the string buffer.<br />
+      <i>O</i> The oid.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>0 on Sucess, 1 on failure.</dd>
+    </dl>
+
+    <p>Definition at line 6177 of file mib.c.</p>
+
+    <p>References netsnmp_oid2chars(). <a name="lbAW" id="lbAW"> </a></p>
+
+    <h3>void netsnmp_set_mib_directory (const char * dir)</h3>
+
+    <p>New dir starts with '+', thus we add it.</p>
+
+    <p>If dir starts with '+' skip '+' it.</p>
+
+    <p>set_string calls strdup, so if we allocated memory, free it</p>
+
+    <p>Definition at line 2388 of file mib.c.</p>
+
+    <p>References SNMP_FREE.</p>
+
+    <p>Referenced by netsnmp_fixup_mib_directory(), and netsnmp_get_mib_directory(). <a name="lbAX" id="lbAX"> </a></p>
+
+    <h3>int netsnmp_str2oid (const char * S, oid * O, int L)</h3>
+
+    <p>Converts a string to its OID form.</p>
+
+    <p>in example 'hello' = 5 . 'h' . 'e' . 'l' . 'l' . 'o'</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>S</i> The string.<br />
+      <i>O</i> The oid.<br />
+      <i>L</i> The length of the oid.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>0 on Sucess, 1 on failure.</dd>
+    </dl>
+
+    <p>Definition at line 6114 of file mib.c. <a name="lbAY" id="lbAY"> </a></p>
+
+    <h3>void print_description (oid * objid, size_t objidlen, int width)</h3>
+
+    <p>Prints on oid description on stdout.</p>
+
+    <p><b>See also:</b></p>
+
+    <dl compact="compact">
+      <dd><b>fprint_description</b></dd>
+    </dl>
+
+    <p>Definition at line 4385 of file mib.c.</p>
+
+    <p>References fprint_description(). <a name="lbAZ" id="lbAZ"> </a></p>
+
+    <h3>void print_mib (FILE * fp)</h3>
+
+    <p>Prints the MIBs to the file fp.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>fp</i> The file descriptor to print to.</dd>
+    </dl>
+
+    <p>Definition at line 2730 of file mib.c. <a name="lbBA" id="lbBA"> </a></p>
+
+    <h3>void print_objid (const oid * objid, size_t objidlen)</h3>
+
+    <p>Prints an oid to stdout.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>objid</i> The oid to print<br />
+      <i>objidlen</i> The length of oidid.</dd>
+    </dl>
+
+    <p>Definition at line 3135 of file mib.c.</p>
+
+    <p>References fprint_objid(). <a name="lbBB" id="lbBB"> </a></p>
+
+    <h3>void print_variable (const oid * objid, size_t objidlen, const <b>netsnmp_variable_list</b> * variable)</h3>
+
+    <p>Prints a variable to stdout.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>objid</i> The object id.<br />
+      <i>objidlen</i> The length of teh object id.<br />
+      <i>variable</i> The variable to print.</dd>
+    </dl>
+
+    <p>Definition at line 3280 of file mib.c.</p>
+
+    <p>References fprint_variable(). <a name="lbBC" id="lbBC"> </a></p>
+
+    <h3>int read_objid (const char * input, oid * output, size_t * out_len)</h3>
+
+    <p>Reads an object identifier from an input string into internal OID form.</p>
+
+    <p>When called, out_len must hold the maximum length of the output array.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>input</i> the input string.<br />
+      <i>output</i> the oid wirte.<br />
+      <i>out_len</i> number of subid's in output.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 if successful.</dd>
+    </dl>
+
+    <p>If an error occurs, this function returns 0 and MAY set snmp_errno. snmp_errno is NOT set if SET_SNMP_ERROR evaluates to
+    nothing. This can make multi-threaded use a tiny bit more robust.</p>
+
+    <p>Definition at line 2828 of file mib.c.</p>
+
+    <p>References SNMP_FREE.</p>
+
+    <p>Referenced by snmp_parse_oid(). <a name="lbBD" id="lbBD"> </a></p>
+
+    <h3>void set_function (struct tree * subtree)</h3>
+
+    <p>Set's the printing function printomat in a subtree according it's type.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>subtree</i> The subtree to set.</dd>
+    </dl>
+
+    <p>Definition at line 2751 of file mib.c. <a name="lbBE" id="lbBE"> </a></p>
+
+    <h3>void shutdown_mib (void)</h3>
+
+    <p>Unloads all mibs.</p>
+
+    <p>Definition at line 2707 of file mib.c.</p>
+
+    <p>References SNMP_FREE.</p>
+
+    <p>Referenced by snmp_shutdown(). <a name="lbBF" id="lbBF"> </a></p>
+
+    <h3>void snmp_in_toggle_options_usage (const char * lead, FILE * outf)</h3>
+
+    <p>Prints out a help usage for the in* toggle options.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>lead</i> The lead to print for every line.<br />
+      <i>outf</i> The file descriptor to write to.</dd>
+    </dl>
+
+    <p>Definition at line 2300 of file mib.c. <a name="lbBG" id="lbBG"> </a></p>
+
+    <h3>oid* snmp_parse_oid (const char * argv, oid * root, size_t * rootlen)</h3>
+
+    <p>Given a string, parses an oid out of it (if possible).</p>
+
+    <p>It will try to parse it based on predetermined configuration if present or by every method possible otherwise. If a suffix
+    has been registered using NETSNMP_DS_LIB_OIDSUFFIX, it will be appended to the input string before processing.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>argv</i> The OID to string parse<br />
+      <i>root</i> An OID array where the results are stored.<br />
+      <i>rootlen</i> The max length of the array going in and the data length coming out.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>The root oid pointer if successful, or NULL otherwise.</dd>
+    </dl>
+
+    <p>Definition at line 5720 of file mib.c.</p>
+
+    <p>References get_wild_node(), and read_objid(). <a name="lbBH" id="lbBH"> </a></p>
+
+    <h3>int sprint_realloc_asciistring (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const u_char * cp,
+    size_t len)</h3>
+
+    <p>Prints an ascii string into a buffer.</p>
+
+    <p>The characters pointed by *cp are encoded as an ascii string.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> address of the buffer to print to.<br />
+      <i>buf_len</i> address to an integer containing the size of buf.<br />
+      <i>out_len</i> incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>cp</i> the array of characters to encode.<br />
+      <i>len</i> the array length of cp.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 363 of file mib.c.</p>
+
+    <p>References snmp_realloc().</p>
+
+    <p>Referenced by sprint_realloc_octet_string(). <a name="lbBI" id="lbBI"> </a></p>
+
+    <h3>int sprint_realloc_badtype (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Fallback routine for a bad type, prints 'Variable has bad type' into a buffer.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 1934 of file mib.c.</p>
+
+    <p>Referenced by sprint_realloc_by_type(). <a name="lbBJ" id="lbBJ"> </a></p>
+
+    <h3>int sprint_realloc_bitstring (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Prints a bit string into a buffer.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 1795 of file mib.c.</p>
+
+    <p>References sprint_realloc_by_type(), variable_list::type, variable_list::val, and variable_list::val_len.</p>
+
+    <p>Referenced by sprint_realloc_by_type(). <a name="lbBK" id="lbBK"> </a></p>
+
+    <h3>int sprint_realloc_by_type (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Universal print routine, prints a variable into a buffer according to the variable type.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 1969 of file mib.c.</p>
+
+    <p>References sprint_realloc_badtype(), sprint_realloc_bitstring(), sprint_realloc_counter(), sprint_realloc_counter64(),
+    sprint_realloc_gauge(), sprint_realloc_integer(), sprint_realloc_ipaddress(), sprint_realloc_null(),
+    sprint_realloc_object_identifier(), sprint_realloc_octet_string(), sprint_realloc_opaque(), sprint_realloc_timeticks(),
+    sprint_realloc_uinteger(), and variable_list::type.</p>
+
+    <p>Referenced by sprint_realloc_bitstring(), sprint_realloc_counter(), sprint_realloc_counter64(), sprint_realloc_gauge(),
+    sprint_realloc_integer(), sprint_realloc_ipaddress(), sprint_realloc_networkaddress(), sprint_realloc_null(),
+    sprint_realloc_object_identifier(), sprint_realloc_octet_string(), sprint_realloc_opaque(), sprint_realloc_timeticks(),
+    sprint_realloc_uinteger(), and table_helper_handler(). <a name="lbBL" id="lbBL"> </a></p>
+
+    <h3>int sprint_realloc_counter (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Prints a counter value into a buffer.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 1562 of file mib.c.</p>
+
+    <p>References sprint_realloc_by_type(), variable_list::type, and variable_list::val.</p>
+
+    <p>Referenced by sprint_realloc_by_type(). <a name="lbBM" id="lbBM"> </a></p>
+
+    <h3>int sprint_realloc_counter64 (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Prints a counter into a buffer.</p>
+
+    <p>The variable var is encoded as a counter value.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 867 of file mib.c.</p>
+
+    <p>References sprint_realloc_by_type(), variable_list::type, and variable_list::val.</p>
+
+    <p>Referenced by sprint_realloc_by_type(), and sprint_realloc_opaque(). <a name="lbBN" id="lbBN"> </a></p>
+
+    <h3>int sprint_realloc_gauge (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Prints a gauge value into a buffer.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 1489 of file mib.c.</p>
+
+    <p>References sprint_realloc_by_type(), sprint_realloc_hinted_integer(), variable_list::type, and variable_list::val.</p>
+
+    <p>Referenced by sprint_realloc_by_type(). <a name="lbBO" id="lbBO"> </a></p>
+
+    <h3>int sprint_realloc_hinted_integer (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, long val, const
+    char decimaltype, const char * hint, const char * units)</h3>
+
+    <p>Prints an integer according to the hint into a buffer.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may _NOT_ be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 1215 of file mib.c.</p>
+
+    <p>References sprint_realloc_hinted_integer().</p>
+
+    <p>Referenced by sprint_realloc_gauge(), sprint_realloc_hinted_integer(), sprint_realloc_integer(), and
+    sprint_realloc_uinteger(). <a name="lbBP" id="lbBP"> </a></p>
+
+    <h3>int sprint_realloc_integer (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Prints an integer into a buffer.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 1289 of file mib.c.</p>
+
+    <p>References sprint_realloc_by_type(), sprint_realloc_hinted_integer(), variable_list::type, and variable_list::val.</p>
+
+    <p>Referenced by sprint_realloc_by_type(). <a name="lbBQ" id="lbBQ"> </a></p>
+
+    <h3>int sprint_realloc_ipaddress (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Prints an ip-address into a buffer.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 1691 of file mib.c.</p>
+
+    <p>References snmp_realloc(), sprint_realloc_by_type(), variable_list::type, and variable_list::val.</p>
+
+    <p>Referenced by sprint_realloc_by_type(). <a name="lbBR" id="lbBR"> </a></p>
+
+    <h3>int sprint_realloc_networkaddress (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Prints a network address into a buffer.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 1625 of file mib.c.</p>
+
+    <p>References snmp_realloc(), sprint_realloc_by_type(), variable_list::type, variable_list::val, and variable_list::val_len.
+    <a name="lbBS" id="lbBS"> </a></p>
+
+    <h3>int sprint_realloc_null (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Prints a null value into a buffer.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 1751 of file mib.c.</p>
+
+    <p>References sprint_realloc_by_type(), and variable_list::type.</p>
+
+    <p>Referenced by sprint_realloc_by_type(). <a name="lbBT" id="lbBT"> </a></p>
+
+    <h3>int sprint_realloc_object_identifier (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Prints an object identifier into a buffer.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 1071 of file mib.c.</p>
+
+    <p>References sprint_realloc_by_type(), variable_list::type, variable_list::val, and variable_list::val_len.</p>
+
+    <p>Referenced by sprint_realloc_by_type(). <a name="lbBU" id="lbBU"> </a></p>
+
+    <h3>int sprint_realloc_octet_string (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Prints an octet string into a buffer.</p>
+
+    <p>The variable var is encoded as octet string.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 423 of file mib.c.</p>
+
+    <p>References snmp_realloc(), sprint_realloc_asciistring(), sprint_realloc_by_type(), variable_list::type,
+    variable_list::val, and variable_list::val_len.</p>
+
+    <p>Referenced by sprint_realloc_by_type(). <a name="lbBV" id="lbBV"> </a></p>
+
+    <h3>int sprint_realloc_opaque (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Prints an object identifier into a buffer.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 981 of file mib.c.</p>
+
+    <p>References sprint_realloc_by_type(), sprint_realloc_counter64(), variable_list::type, variable_list::val, and
+    variable_list::val_len.</p>
+
+    <p>Referenced by sprint_realloc_by_type(). <a name="lbBW" id="lbBW"> </a></p>
+
+    <h3>int sprint_realloc_timeticks (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Prints a timetick variable into a buffer.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 1141 of file mib.c.</p>
+
+    <p>References sprint_realloc_by_type(), variable_list::type, and variable_list::val.</p>
+
+    <p>Referenced by sprint_realloc_by_type(). <a name="lbBX" id="lbBX"> </a></p>
+
+    <h3>int sprint_realloc_uinteger (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc, const
+    <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char * units)</h3>
+
+    <p>Prints an unsigned integer into a buffer.</p>
+
+    <p>If allow_realloc is true the buffer will be (re)allocated to fit in the needed size. (Note: *buf may change due to
+    this.)</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>buf</i> Address of the buffer to print to.<br />
+      <i>buf_len</i> Address to an integer containing the size of buf.<br />
+      <i>out_len</i> Incremented by the number of characters printed.<br />
+      <i>allow_realloc</i> if not zero reallocate the buffer to fit the needed size.<br />
+      <i>var</i> The variable to encode.<br />
+      <i>enums</i> The enumeration ff this variable is enumerated. may be NULL.<br />
+      <i>hint</i> Contents of the DISPLAY-HINT clause of the MIB. See RFC 1903 Section 3.1 for details. may be NULL.<br />
+      <i>units</i> Contents of the UNITS clause of the MIB. may be NULL.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>1 on success, or 0 on failure (out of memory, or buffer to small when not allowed to realloc.)</dd>
+    </dl>
+
+    <p>Definition at line 1392 of file mib.c.</p>
+
+    <p>References sprint_realloc_by_type(), sprint_realloc_hinted_integer(), variable_list::type, and variable_list::val.</p>
+
+    <p>Referenced by sprint_realloc_by_type(). <a name="lbBY" id="lbBY"> </a></p>
+
+    <h3>char* uptime_string (u_long timeticks, char * buf)</h3>
+
+    <p>Converts timeticks to hours, minutes, seconds string.</p>
+
+    <p>CMU compatible does not show centiseconds.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>timeticks</i> The timeticks to convert.<br />
+      <i>buf</i> Buffer to write to, has to be at least 40 Bytes large.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>The buffer</dd>
+    </dl>
+
+    <p><b>See also:</b></p>
+
+    <dl compact="compact">
+      <dd>uptimeString</dd>
+    </dl>
+
+    <p>Definition at line 5691 of file mib.c. <a name="lbBZ" id="lbBZ"> </a></p>
+
+    <h2>Variable Documentation</h2>
+
+    <p><a name="lbCA" id="lbCA"> </a></p>
+
+    <h3>PrefixList mib_prefixes[]</h3>
+
+    <p><b>Initial value:</b></p>
+    <pre>
+ {
+    {&amp;Standard_Prefix[0]},      
+    {'.iso.org.dod.internet.mgmt.mib-2'},
+    {'.iso.org.dod.internet.experimental'},
+    {'.iso.org.dod.internet.private'},
+    {'.iso.org.dod.internet.snmpParties'},
+    {'.iso.org.dod.internet.snmpSecrets'},
+    {NULL, 0}                   
+}
+</pre>
+
+    <p>Definition at line 160 of file mib.c.</p>
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAC">Data Structures</a></dt>
+
+          <dt><a href="#lbAD">Typedefs</a></dt>
+
+          <dt><a href="#lbAE">Enumerations</a></dt>
+
+          <dt><a href="#lbAF">Functions</a></dt>
+
+          <dt><a href="#lbAG">Variables</a></dt>
+        </dl>
+      </dd>
+
+      <dt><a href="#lbAH">Function Documentation</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAI">int _sprint_hexstring_line (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc,
+          const u_char * cp, size_t line_len)</a></dt>
+
+          <dt><a href="#lbAJ">int build_oid (oid ** out, size_t * out_len, oid * prefix, size_t prefix_len,
+          <b>netsnmp_variable_list</b> * indexes)</a></dt>
+
+          <dt><a href="#lbAK">int build_oid_segment (<b>netsnmp_variable_list</b> * var)</a></dt>
+
+          <dt><a href="#lbAL">void fprint_description (FILE * f, oid * objid, size_t objidlen, int width)</a></dt>
+
+          <dt><a href="#lbAM">void fprint_objid (FILE * f, const oid * objid, size_t objidlen)</a></dt>
+
+          <dt><a href="#lbAN">void fprint_variable (FILE * f, const oid * objid, size_t objidlen, const
+          <b>netsnmp_variable_list</b> * variable)</a></dt>
+
+          <dt><a href="#lbAO">struct tree* get_tree (const oid * objid, size_t objidlen, struct tree * subtree)</a></dt>
+
+          <dt><a href="#lbAP">struct tree* get_tree_head (void)</a></dt>
+
+          <dt><a href="#lbAQ">int get_wild_node (const char * name, oid * objid, size_t * objidlen)</a></dt>
+
+          <dt><a href="#lbAR">void init_mib (void)</a></dt>
+
+          <dt><a href="#lbAS">void netsnmp_fixup_mib_directory (void)</a></dt>
+
+          <dt><a href="#lbAT">char* netsnmp_get_mib_directory (void)</a></dt>
+
+          <dt><a href="#lbAU">int netsnmp_oid2chars (char * C, int L, const oid * O)</a></dt>
+
+          <dt><a href="#lbAV">int netsnmp_oid2str (char * S, int L, oid * O)</a></dt>
+
+          <dt><a href="#lbAW">void netsnmp_set_mib_directory (const char * dir)</a></dt>
+
+          <dt><a href="#lbAX">int netsnmp_str2oid (const char * S, oid * O, int L)</a></dt>
+
+          <dt><a href="#lbAY">void print_description (oid * objid, size_t objidlen, int width)</a></dt>
+
+          <dt><a href="#lbAZ">void print_mib (FILE * fp)</a></dt>
+
+          <dt><a href="#lbBA">void print_objid (const oid * objid, size_t objidlen)</a></dt>
+
+          <dt><a href="#lbBB">void print_variable (const oid * objid, size_t objidlen, const <b>netsnmp_variable_list</b> *
+          variable)</a></dt>
+
+          <dt><a href="#lbBC">int read_objid (const char * input, oid * output, size_t * out_len)</a></dt>
+
+          <dt><a href="#lbBD">void set_function (struct tree * subtree)</a></dt>
+
+          <dt><a href="#lbBE">void shutdown_mib (void)</a></dt>
+
+          <dt><a href="#lbBF">void snmp_in_toggle_options_usage (const char * lead, FILE * outf)</a></dt>
+
+          <dt><a href="#lbBG">oid* snmp_parse_oid (const char * argv, oid * root, size_t * rootlen)</a></dt>
+
+          <dt><a href="#lbBH">int sprint_realloc_asciistring (u_char ** buf, size_t * buf_len, size_t * out_len, int
+          allow_realloc, const u_char * cp, size_t len)</a></dt>
+
+          <dt><a href="#lbBI">int sprint_realloc_badtype (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc,
+          const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char *
+          units)</a></dt>
+
+          <dt><a href="#lbBJ">int sprint_realloc_bitstring (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc,
+          const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char *
+          units)</a></dt>
+
+          <dt><a href="#lbBK">int sprint_realloc_by_type (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc,
+          const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char *
+          units)</a></dt>
+
+          <dt><a href="#lbBL">int sprint_realloc_counter (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc,
+          const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char *
+          units)</a></dt>
+
+          <dt><a href="#lbBM">int sprint_realloc_counter64 (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc,
+          const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char *
+          units)</a></dt>
+
+          <dt><a href="#lbBN">int sprint_realloc_gauge (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc,
+          const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char *
+          units)</a></dt>
+
+          <dt><a href="#lbBO">int sprint_realloc_hinted_integer (u_char ** buf, size_t * buf_len, size_t * out_len, int
+          allow_realloc, long val, const char decimaltype, const char * hint, const char * units)</a></dt>
+
+          <dt><a href="#lbBP">int sprint_realloc_integer (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc,
+          const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char *
+          units)</a></dt>
+
+          <dt><a href="#lbBQ">int sprint_realloc_ipaddress (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc,
+          const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char *
+          units)</a></dt>
+
+          <dt><a href="#lbBR">int sprint_realloc_networkaddress (u_char ** buf, size_t * buf_len, size_t * out_len, int
+          allow_realloc, const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char
+          * units)</a></dt>
+
+          <dt><a href="#lbBS">int sprint_realloc_null (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc,
+          const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char *
+          units)</a></dt>
+
+          <dt><a href="#lbBT">int sprint_realloc_object_identifier (u_char ** buf, size_t * buf_len, size_t * out_len, int
+          allow_realloc, const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char
+          * units)</a></dt>
+
+          <dt><a href="#lbBU">int sprint_realloc_octet_string (u_char ** buf, size_t * buf_len, size_t * out_len, int
+          allow_realloc, const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char
+          * units)</a></dt>
+
+          <dt><a href="#lbBV">int sprint_realloc_opaque (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc,
+          const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char *
+          units)</a></dt>
+
+          <dt><a href="#lbBW">int sprint_realloc_timeticks (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc,
+          const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char *
+          units)</a></dt>
+
+          <dt><a href="#lbBX">int sprint_realloc_uinteger (u_char ** buf, size_t * buf_len, size_t * out_len, int allow_realloc,
+          const <b>netsnmp_variable_list</b> * var, const struct enum_list * enums, const char * hint, const char *
+          units)</a></dt>
+
+          <dt><a href="#lbBY">char* uptime_string (u_long timeticks, char * buf)</a></dt>
+        </dl>
+      </dd>
+
+      <dt><a href="#lbBZ">Variable Documentation</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbCA">PrefixList mib_prefixes[]</a></dt>
+        </dl>
+      </dd>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:44 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,78 @@
+Web site maintenance
+==================== 
+
+Updating About / NEWS
+---------------------
+
+  Edit /about/news.html
+
+
+Updating About / Change Log
+---------------------------
+
+  Replace /docs/readmefiles/NEWS with new text file from the source code.
+
+
+Updating About / License
+------------------------
+
+  Replace /COPYING with new text file from the source code.
+
+
+Updating Documentation / README Files
+-------------------------------------
+
+  The main list of README files is in /docs/readmefiles.html.
+
+  Each README file has a .html file in /docs/ that has an include of the actual
+  text README file from /docs/readmefiles/
+
+  To update existing README files, just copy the updated files to /docs/readmefiles/
+
+  To add a new README file:
+
+  -copy file to /docs/readmefiles/
+  -create a .html file in /docs/ which includes the README file
+
+
+Updating Documentation / FAQ
+----------------------------
+
+ -cd (source dir)
+ -make FAQ.html
+ -local/add-header-footer.pl --section=documentation FAQ.html
+ -copy FAQ.html to \docs\
+
+
+Updating Documentation / INSTALL
+--------------------------------
+
+  Replace /docs/readmefiles/INSTALL with new text file from the source code.
+
+
+Updating Documentation / Man pages
+----------------------------------
+
+ -cd (source dir)/man
+ -make html
+ -find . -name '*.html' | ../local/add-header-footer.pl --section=documentation --body --tidy
+ -cp *.html to web site /docs/man
+
+
+Updating Documentation / MIBS
+-----------------------------
+
+ -cd (source dir)/mibs
+ -make htmldir
+ -find html/. -name '*.html' | ../local/add-header-footer.pl --section=documentation --body
+ -cp html/*.html to web site /docs/mibs
+
+
+Updating Development / API
+--------------------------
+
+ -cd (source dir)
+ -make docs
+ -find docs/html/. -name '*.html' | local/add-header-footer.pl --section=development --body --tidy
+
+

@@ -1,0 +1,243 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>SNMP.CONF</h1>Section: Net-SNMP (5)<br />
+    Updated: 11 Dec 2002<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>/usr/local/etc/snmp/snmp.conf, ~/.snmp/snmp.conf - configuration files for the Net-SNMP applications. <a name=
+    "lbAC" id="lbAC"> </a>
+
+    <h2>DESCRIPTION</h2><b>snmp.conf</b> is the configuration file which define how the Net-SNMP applications operate. Tokens
+    that can be put in them are described in the <b>DIRECTIVES</b> section below.
+
+    <p>/usr/local/etc/snmp/snmp.conf is a common file, shared by all users of the system.<br />
+    ~/.snmp/snmp.conf is a personal file, with configuration settings for a particular user. <a name="lbAD" id="lbAD"> </a></p>
+
+    <h2>PLEASE READ FIRST</h2>Make sure you make these files readable only by the user if you are storing sensitive information
+    in them like passphrases!
+
+    <p>First, make sure you have read the <i><a href="snmp_config.html">snmp_config</a>(5)</i> manual page that describes how the
+    Net-SNMP configuration files operate, where they are located and how they all work together. <a name="lbAE" id="lbAE">
+    </a></p>
+
+    <h2>DIRECTIVES</h2>
+
+    <dl compact="compact">
+      <dt>mibdirs (mib-dirs|+mib-dirs)</dt>
+
+      <dd>Look for textual MIBs to parse in the list of ':' separated directories. If the directive value starts with a '+' it
+      prepends this list to the front of the default directory list compiled into the application. Note that this value can be
+      overridden by the <b>MIBDIRS</b> environment variable.</dd>
+
+      <dt>mibs (mib-tokens|+mib-tokens)</dt>
+
+      <dd>Specifies a ':' separated list of MIB tokens that represent textual MIB files that should be found and parsed. If the
+      directive value starts with a '+' it prepends this list to the front of the default MIB token list compiled into the
+      application. The special keyword of "ALL" forces all MIBs files found to be read. Note that the value specified here can be
+      overridden by the <b>MIBS</b> environment variable.</dd>
+
+      <dt>mibfile file</dt>
+
+      <dd>Specifies a textual MIB file to read and parse, in addition to the list read from the MIBs token. Note that the value
+      specified here can be overridden by the <b>MIBFILES</b> environment variable.</dd>
+
+      <dt>persistentDir directory</dt>
+
+      <dd>The directory where snmpd and snmptrapd stores their persistent data files.</dd>
+
+      <dt>tempFilePattern pattern</dt>
+
+      <dd>The file pattern used by snmptrapd to create temporary files. Example: /tmp/snmpdXXXXXX. Used by mkstemp() and mktemp()
+      functions.</dd>
+
+      <dt>defaultPort port</dt>
+
+      <dd>The default port number that all SNMP applications and daemons should use.</dd>
+
+      <dt>defVersion (1|2c|3)</dt>
+
+      <dd>The default SNMP version to use.</dd>
+
+      <dt>defCommunity string</dt>
+
+      <dd>The default SNMPv1 and SNMPv2c community string to use.</dd>
+
+      <dt>defSecurityName string</dt>
+
+      <dd>The default SNMPv3 USM security name you want to use for SNMPv3 requests.</dd>
+
+      <dt>defContext string</dt>
+
+      <dd>The default SNMPv3 context name you want to use.</dd>
+
+      <dt>defPassphrase string</dt>
+
+      <dt>defAuthPassphrase string</dt>
+
+      <dt>defPrivPassphrase string</dt>
+
+      <dd>The default SNMPv3 USM passphrase(s) to use. <b>defPassphrase</b> will be used for both authentication and privacy pass
+      phrases if it is specified.</dd>
+
+      <dt>defAuthType MD5|SHA</dt>
+
+      <dd>The SNMPv3 USM authentication type to use.</dd>
+
+      <dt>defPrivType DES</dt>
+
+      <dd>The SNMPv3 USM privacy type to use. Currently, DES is the only possible value.</dd>
+
+      <dt>defSecurityLevel noAuthNoPriv|authNoPriv|authPriv</dt>
+
+      <dd>The SNMPv3 default security level to use.</dd>
+
+      <dt>defAuthMasterKey 0xHEXSTRING</dt>
+
+      <dt>defPrivMasterKey 0xHEXSTRING</dt>
+
+      <dt>defAuthLocalizedKey 0xHEXSTRING</dt>
+
+      <dt>defPrivLocalizedKey 0xHEXSTRING</dt>
+
+      <dd>Defines the SNMPv3 keys to be used for SNMPv3 secure communications. SNMPv3 keys are frequently derived from a
+      passphrase, as discussed in the defPassphrase section above, however for improved security a truely random key can be
+      generated and used instead (which would normally has better entropy than a password unless your password is amazingly
+      long). But to do this, you need to specify the hexadecimal keys directly to be used for authentication and encryption.
+      These tokens let you do just that. They are equivalent to the short-form command line arguments -3m, -3M, -3k, and -3K.
+      Localized keys are master keys which have been converted to a unique key which is only suitable for on particular SNMP
+      engine (agent). The length of the key needs to be appropriate for the authentication or encryption type being used (auth
+      keys: MD5=16 bytes, SHA1=20 bytes, DES=16 bytes (8 bytes of which is used as an IV and not a key), and AES=16 bytes).</dd>
+
+      <dt>showMibErrors (1|yes|true|0|no|false)</dt>
+
+      <dd>Whether or not to display textual MIB parsing errors when commands are run.</dd>
+
+      <dt>strictCommentTerm (1|yes|true|0|no|false)</dt>
+
+      <dd>Whether or not MIBs that are parsed should be strict about comment termination. "--" terminates a comment if this is
+      true. Many MIBs have broken comments in them, hence this option.</dd>
+
+      <dt>mibAllowUnderline (1|yes|true|0|no|false)</dt>
+
+      <dd>Allow underline characters in MIBs (illegal).</dd>
+
+      <dt>mibWarningLevel integerValue</dt>
+
+      <dd>The minimum warning level of the warnings printed by the MIB parser.</dd>
+
+      <dt>logTimestamp (1|yes|true|0|no|false)</dt>
+
+      <dd>Whether the commands should log timestamps with their error/message logging or not. Note that output will not look as
+      pretty with timestamps if the source code that is doing the logging does incremental logging of messages that are not line
+      buffered before being passed to the logging routines. This option is only used when file logging is active.</dd>
+
+      <dt>printNumericEnums (1|yes|true|0|no|false)</dt>
+
+      <dd>Equivalent to <b>-Oe</b>.</dd>
+
+      <dt>printNumericOids (1|yes|true|0|no|false)</dt>
+
+      <dd>Equivalent to <b>-On</b>.</dd>
+
+      <dt>dontBreakdownOids (1|yes|true|0|no|false)</dt>
+
+      <dd>Equivalent to <b>-Ob</b>.</dd>
+
+      <dt>escapeQuotes (1|yes|true|0|no|false)</dt>
+
+      <dd>Equivalent to <b>-OE</b>.</dd>
+
+      <dt>quickPrinting (1|yes|true|0|no|false)</dt>
+
+      <dd>Equivalent to <b>-Oq</b>.</dd>
+
+      <dt>dontPrintUnits (1|yes|true|0|no|false)</dt>
+
+      <dd>Equivalent to <b>-OU</b>.</dd>
+
+      <dt>printHexText (1|yes|true|0|no|false)</dt>
+
+      <dd>Equivalent to <b>-OT</b>.</dd>
+
+      <dt>suffixPrinting (0|1|2)</dt>
+
+      <dd>If the value is 1, its equivalent to <b>-Os</b> and if the value is 2 it's equivalent to <b>-OS</b>.</dd>
+
+      <dt>oidOutputFormat (1|2|3|4|5|6)</dt>
+
+      <dd>Maps -O options as follow: -Os=1, -OS=2, -Of=3, -On=4, -Ou=5. The value 6 has no matching -O option. It suppresses
+      output.</dd>
+
+      <dt>extendedIndex (1|yes|true|0|no|false)</dt>
+
+      <dd>Equivalent to <b>-OX</b>.</dd>
+
+      <dt>noRangeCheck (1|yes|true|0|no|false)</dt>
+
+      <dd>Disables the validation of values that is done by <b>snmpset</b> before issuing the request to the agent. Equivalent to
+      <b>-Ir</b>.</dd>
+
+      <dt>noDisplayHint (1|yes|true|0|no|false)</dt>
+
+      <dd>Disables the use of DISPLAY-HINT information when parsing indices and values to set. Equivalent to <b>-Ih</b>.</dd>
+
+      <dt>dumpPacket (1|yes|true|0|no|false)</dt>
+
+      <dd>Whether the commands should dump packets by default.</dd>
+
+      <dt>doDebugging (1|0)</dt>
+
+      <dd>Turns on debugging for all applications run if set to 1.</dd>
+
+      <dt>debugTokens TOKEN[,TOKEN...]</dt>
+
+      <dd>The debugging tokens that should be printed. See the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual page for
+      debugging usage details.</dd>
+
+      <dt>serverRecvBuf integer</dt>
+
+      <dd><b>serverRecvBuf</b> is used to specify the receive buffer size (in bytes) for the initialization of server sockets
+      (eg. snmpd, snmptrapd). If the OS hard limit is smaller than <b>serverRecvBuf</b> the resulting buffer will be lowered so
+      it is close to the hard limit. Some platforms may decide to increment the actual buffersize themselves for internal
+      housekeeping. This directive will be ignored on platforms that don't support</dd>
+
+      <dt>serverSendBuf integer</dt>
+
+      <dd>Similar to serverRecvBuf, but this directive applies to the send buffer of server sockets.</dd>
+
+      <dt>clientRecvBuf integer</dt>
+
+      <dd>Similar to serverRecvBuf, but this directive applies to the receive buffer of client sockets (eg. snmpget).</dd>
+
+      <dt>clientSendBuf integer</dt>
+
+      <dd>Similar to serverRecvBuf, but this directive applies to the send buffer of client sockets.</dd>
+    </dl><a name="lbAF" id="lbAF"> </a>
+
+    <h2>SEE ALSO</h2><a href="snmp_config.html">snmp_config</a>(5), <a href="read_config.html">read_config</a>(3), <a href=
+    "snmpcmd.html">snmpcmd</a>(1).
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dt><a href="#lbAC">DESCRIPTION</a></dt>
+
+      <dt><a href="#lbAD">PLEASE READ FIRST</a></dt>
+
+      <dt><a href="#lbAE">DIRECTIVES</a></dt>
+
+      <dt><a href="#lbAF">SEE ALSO</a></dt>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:45 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

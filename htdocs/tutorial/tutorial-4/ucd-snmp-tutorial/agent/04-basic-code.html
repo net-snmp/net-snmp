@@ -1,0 +1,302 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML>
+<HEAD>
+<TITLE>Extending the UCD agent - core code structure</TITLE>
+</HEAD>
+<BODY>
+<H1> Core structure of the implementation code </H1>
+
+The core work of implementing the module is done in the C code file.
+As indicated earlier, much of the detail of this will be dependent
+on the particular module being implemented, and this can only be
+described by the individual programmer concerned.
+<BR>
+  However, there is a fairly clearly defined framework that the
+implementation will need to follow, though this varies slightly
+depending on the style of the module being implemented
+(in particular whether it forms a table
+or a series of individual values).  The differences will be covered
+in the following pages, but we first need to consider the overall shape
+of the framework, and the elements that are common to all styles.
+These are essentially the compulsory routines, the common
+header definitions, and assorted initialisation code.
+<BR>
+As with the header file, most of this will be generated automatically
+by <CODE>mib2c</CODE>.
+
+
+<H3> Standard includes </H3>
+
+  Certain header files are either compulsory, or required so frequently
+that they should be included as a matter of course.  These are as follows:
+
+<PRE>
+  #include &lt;config.h&gt;			<I>// local SNMP configuration details</I>
+  #include "mib_module_config.h"	<I>// list of which modules are supported </I>
+  #if HAVE_STDLIB_H
+  #include &lt;stdlib.h&gt;
+  #endif
+  #if HAVE_STRING_H
+  #include &lt;string.h&gt;
+  #else
+  #include &lt;strings.h&gt;
+  #endif
+
+  #include &lt;sys/types.h&gt;
+</PRE>
+
+All of these will usually be the first files to be included.
+
+<PRE>
+  #include "mibincl.h"			<I>// Standard set of SNMP includes</I>
+  #include "util_funcs.h"		<I>// utility function declarations</I>
+  #include "read_config.h"		<I>// if the module uses run-time</I>
+					<I>//	configuration controls</I>
+  #include "auto_nlist.h"		<I>// structures for a BSD-based</I>
+					<I>//	kernel using nlist</I>
+  #include "system.h"
+
+  #include "name.h"			<I>// the module-specific header</I>
+</PRE>
+
+
+These conventionally come at the end of the list of includes.
+In between will come all the standard system-provided header files
+required for the library functions used in the file.
+
+
+<H3>Module definition</H3>
+
+  Much of the code defining the contents of the MIB has traditionally
+been held in the header file.  However, much of this has slowly migrated
+to the code file, and this is now the recommended location for it
+(as typified by the output of <CODE>mib2c</CODE).
+The main element of this is a variable structure
+specifying the details of the objects implemented.
+This takes the form of an
+unconstrained array of type <CODE>struct variable</CODE><I>N</I>
+(where <I>N</I> is the length of the longest suffix in the table). Thus
+<PRE>
+		struct variable<I>2</I> example_variables[] = {
+			&lt; individual entries go here &gt;
+		};
+</PRE>
+		
+ Each entry corresponds to one object in the MIB tree (or one column in the
+case of table entries), and these should be listed in increasing OID order.
+A single entry consists of six fields:
+<UL>
+<LI> a <I>magic number</I> (the #defined integer constant described earlier)
+<LI> a type indicator (from the values listed in &lt;snmplib/snmp_impl.h&gt;)
+<LI> an access indicator (essentially <CODE>RWRITE</CODE> or <CODE>RONLY</CODE>)
+<LI> the name of the routine used to handle this entry
+<LI> the length of the OID suffix used, and
+<LI> an array of integers specifying this suffix
+		(more on this in a moment)
+</UL>		
+Thus a typical variable entry would look like:
+<PRE>
+	{ EXAMPLESTRING, ASN_OCTET_STR, RONLY, var_example, 1, {1}}
+</PRE>	
+If the magic numbers have not been defined in the header file, then they
+should be defined here, usually comming immediately before the corresponding
+variable entry.  This is the technique used by <CODE>mib2c</CODE>.
+<BR>
+  Note that in practise, only certain sizes of the structure
+variable<I>N</I>  are defined (listed in
+<CODE>&lt;agent/var_struct.h&gt;</CODE>),
+being sufficient to meet the common requirements.  If your particular module
+needs a non-supported value, the easiest thing is simply to use the next
+largest value that is supported.
+<P>
+The module also needs to declare the location within the MIB tree where
+it should be registered.  This is done using a declaration of the form
+<PRE>
+	oid example_variables_oid[] = { 1,3,6,1,4,1,2021,254 }
+</PRE>
+where the contents of the array give the object identifier of the
+root of the module.
+
+
+<H3>Module initialisation</H3>
+
+  Many modules require some form of initialisation before they can
+start providing the necessary information.  This is done by providing
+a routine called <CODE>init_</CODE><I>{name}</I>
+(where <I>{name}</I> is the name of the module).
+<BR>
+This routine is theoretically optional, but in practise is required to
+<I>register</I> this module with the main agent at the very least.
+This specifies the list of variables being implemented (from the variableN
+structure) and declare where these fit into the overall MIB tree.
+
+<P>
+This is done by using the <CODE>REGISTER_MIB</CODE> macro,
+as follows:
+<PRE>
+	REGISTER_MIB( "example",  example_variables, variable2,
+			example_variables_oid );
+</PRE>
+
+where <CODE>"example"</CODE> is used for identification purposed
+(and is usually the name being used for the module),
+<CODE>example_variables</CODE>
+is the structure defining the variables being implemented,
+<CODE>variable2</CODE> is the type used for this structure,
+and <CODE>example_variables_oid</CODE> is the location of the root.
+<P>
+In fact, this macro is simply a wrapper round the routine
+<CODE>register_mib()</CODE>, but the details of this can safely be
+ignored, unless more control over the registration is required.
+
+
+<P>
+  One common requirement, particularly on older operating systems or
+for the more obscure areas of the system, is to be able to read data
+directly from kernel memory.  The preparation for this is typically done
+here by one or more statements of the form
+<PRE>
+	#ifdef <I>{NAME}</I>_SYMBOL
+	auto_nlist( <I>{NAME}</I>_SYMBOL, 0, 0);
+	#endif
+</PRE>
+
+where <I>{NAME}</I>_SYMBOL is defined as part of the system-specific configuration,
+to be the name of the appropriate kernel variable or data structure.
+(The two 0 values are because the kernel information is simply being
+primed at this point - this call will be reused later when the actual
+values are required).
+Note that this is probably the first thing described so far which isn't
+provided by <CODE>mib2c</CODE>!
+
+<P>
+  Other possibilities for initialisation may include registering config file
+directive handlers (which are documented in the <CODE>read_config(5)</CODE>
+man page), and registering the MIB module (either in whole or in part)
+in the sysOR table.
+The first of these is covered in the example module, and the
+second in many of the other modules within the main UCD distribution.
+
+
+<H3>Variable handling</H3>
+
+The other obligatory routine is that which actually handles a request
+for a particular variable instance.  This is the routine that appeared
+in the variable<I>N</I> structure, so while the name is not fixed, it
+should be the same as was used there.
+<BR>
+  This routine has six parameters, which will be described in turn.
+<P>
+Four of these parameters are used for passing in information about the
+request, these being:
+<PRE>
+	struct variable *vp;
+		<I>// The entry in the </I><CODE>variable</CODE><I>N array from the
+		//   header file, for the object under consideration.
+		// Note that the </I><CODE>name</CODE><I> field of this structure has been
+		//   completed into a fully qualified OID, by prepending
+		//   the prefix common to the whole array.</I>
+	oid *name;	<I>// The OID from the request</I>
+	int *length;	<I>// The length of this OID</I>
+	int exact;	<I>// A flag to indicate whether this is an exact
+			// request (GET/SET) or an 'inexact' one (GETNEXT)</I>
+</PRE>
+
+Four of the parameters are used to return information about the answer.
+The function also returns a pointer to the actual data for the variable
+requested (or NULL if this data is not available for any reason).
+The other result parameters are:
+
+<PRE>
+	oid *name;	<I>// The OID being returned</I>
+	int *length;	<I>// The length of this OID</I>
+	int *var_len;	<I>// The length of the answer being returned</I>
+	WriteMethod **write_method;
+			<I>// A pointer to the SET function for this variable</I>
+</PRE>
+
+Note that two of the parameters (<CODE>name</CODE> and <CODE>length</CODE>)
+serve a dual purpose, being used for both input and output.
+
+<P>
+  The first thing that this routine needs to do is to validate the request,
+to ensure that it does indeed lie in the range implemented by this
+particular module.  This is done in slightly different ways, depending on
+the style of the module, so this will be discussed in more detail later.
+<BR>
+At the same time, it is common to retrieve some of the information needed
+for answering the query.
+<P>
+  Then the routine uses the <I>Magic Number</I> field from the <CODE>vp</CODE>
+parameter to determine which of the possible variables being implemented
+is being requested.
+This is done using a <CODE>switch</CODE> statement, which should have as many cases as
+there are entries in the variable<I>N</I> array (or more precisely, as many as specify
+this routine as their handler), plus an additional <CODE>default</CODE> case to
+handle an erroneous call.
+<BR>
+  Each branch of the switch statement needs to ensure that the return
+parameters are filled in correctly, set up a (static) return variable
+with the correct data, and then return a pointer to this value.
+These can be done separately for each branch, or once at the start,
+being overridden in particular branches if necessary.
+
+<P>
+In fact, the default validation routines make the assumption that
+the variable is both read-only, and of integer type (which includes the
+<CODE>COUNTER</CODE> and <CODE>GAUGE</CODE> types among others), and set the
+return paramaters <CODE>write_method</CODE> and <CODE>var_len</CODE>
+appropriately.
+These settings can then be corrected for those cases when either or
+both of these assumptions are wrong.
+Examples of this can be seen in the example module.
+<CODE>EXAMPLEINTEGER</CODE> is writeable, so this branch sets the
+<CODE>write_method</CODE> parameter,
+and <CODE>EXAMPLEOBJECTID</CODE> is not an integer, so this branch sets the
+<CODE>var_len</CODE> parameter.
+In the case of <CODE>EXAMPLESTRING</CODE>, both assumptions are wrong, so this
+branch needs to set both these parameters explicitly.
+<P>
+  Note that because the routine returns a pointer to a <B>static</B> result,
+a suitable variable must be declared somewhere for this.  Two global variables
+are provided for this purpose - <CODE>long_return</CODE> (for integer results) and
+<CODE>return_buf</CODE> (for other types).  This latter is a generic array (of type
+<CODE>u_char</CODE>) that can contain up to 256 bytes of data.
+Alternatively, static variables can be declared, either within the code file,
+or local to this particular variable routine.  This last is the approach
+adopted by <CODE>mib2c</CODE>, which defines four such local variables,
+(<CODE>long_ret, string, objid</CODE> and <CODE>c64</CODE>).
+
+<H3>Mib2c requirements</H3>
+Most of the code described here is generated by <CODE>mib2c</CODE>.
+The main exceptions (which therefore need to be provided by the programmer)
+are
+<UL>
+<LI>  Any initialisation, other than the basic registration<BR>
+(including kernel data initialisation, config file handling,
+or sysOR registration).
+<LI>  Retrieving the necessary data, and setting the appropriate return
+value correctly.
+<LI>  The <CODE>var_len</CODE> (and possibly  <CODE>write_method</CODE>)
+return parameters for variable types that are not recognised by <CODE>mib2c</CODE>
+<LI>  The contents of any write routines (see later).
+</UL> 
+Everything else should be useable as generated.
+<P>
+<HR>
+This concludes the preliminary walk-through of the general structure of the
+C implementation.  To fill in the details, we will need to consider the various
+styles of module separately.  The <A HREF=05-nontable.html>next part</A>
+will look at scalar (i.e. non-table based) modules.
+
+<P><HR>
+Copyright 1999 - D.T.Shield.
+Not to be distributed without the explicit permission of the author.
+</BODY>
+</HTML>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,71 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML><BODY bgcolor="#ffffff" background="../ucd-snmp-bg3.gif"><PRE>
+
+<HTML><HEAD><TITLE>Manpage of null_container: Helps you implement specialized</TITLE>
+</HEAD><BODY>
+<H1>null_container: Helps you implement specialized</H1>
+Section: C Library Functions (3)<BR>Updated: 22 Mar 2004<BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+null_container: Helps you implement specialized - containers. 
+More...
+<A NAME="lbAC">&nbsp;</A>
+<H3>Modules</H3>
+
+<P>
+
+<BR>
+
+<B>null_container: Helps you implement specialized</B>
+
+<BR>
+
+<I>containers.</I>
+
+<P>
+
+<P>
+
+<A NAME="lbAD">&nbsp;</A>
+<H2>DETAILED DESCRIPTION</H2>
+
+<P>
+
+containers.
+<P>
+
+This is a simple container that doesn't actually contain anything. All the methods simply log a debug message and return.
+<P>
+
+The original intent for this container is as a wrapper for a specialized container. Implement the functions you need, create a null_container, and override the default functions with your specialized versions.
+<P>
+
+You can use the 'container:null' debug token to see what functions are being called, to help determine if you need to implement them. 
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DL>
+<DT><A HREF="#lbAC">Modules</A><DD>
+</DL>
+<DT><A HREF="#lbAD">DETAILED DESCRIPTION</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 21:37:34 GMT, March 22, 2004
+</BODY>
+</HTML>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

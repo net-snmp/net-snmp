@@ -1,0 +1,898 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>snprintf.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * Copyright Patrick Powell 1995</span>
+00003 <span class="comment"> * This code is based on code written by Patrick Powell (papowell@astart.com)</span>
+00004 <span class="comment"> * It may be used for any purpose as long as this notice remains intact</span>
+00005 <span class="comment"> * on all source code distributions</span>
+00006 <span class="comment"> */</span>
+00007 
+00008 <span class="comment">/**************************************************************</span>
+00009 <span class="comment"> * Original:</span>
+00010 <span class="comment"> * Patrick Powell Tue Apr 11 09:48:21 PDT 1995</span>
+00011 <span class="comment"> * A bombproof version of doprnt (dopr) included.</span>
+00012 <span class="comment"> * Sigh.  This sort of thing is always nasty do deal with.  Note that</span>
+00013 <span class="comment"> * the version here does not include floating point...</span>
+00014 <span class="comment"> *</span>
+00015 <span class="comment"> * snprintf() is used instead of sprintf() as it does limit checks</span>
+00016 <span class="comment"> * for string length.  This covers a nasty loophole.</span>
+00017 <span class="comment"> *</span>
+00018 <span class="comment"> * The other functions are there to prevent NULL pointers from</span>
+00019 <span class="comment"> * causing nast effects.</span>
+00020 <span class="comment"> *</span>
+00021 <span class="comment"> * More Recently:</span>
+00022 <span class="comment"> *  Brandon Long &lt;blong@fiction.net&gt; 9/15/96 for mutt 0.43</span>
+00023 <span class="comment"> *  This was ugly.  It is still ugly.  I opted out of floating point</span>
+00024 <span class="comment"> *  numbers, but the formatter understands just about everything</span>
+00025 <span class="comment"> *  from the normal C string format, at least as far as I can tell from</span>
+00026 <span class="comment"> *  the Solaris 2.5 printf(3S) man page.</span>
+00027 <span class="comment"> *</span>
+00028 <span class="comment"> *  Brandon Long &lt;blong@fiction.net&gt; 10/22/97 for mutt 0.87.1</span>
+00029 <span class="comment"> *    Ok, added some minimal floating point support, which means this</span>
+00030 <span class="comment"> *    probably requires libm on most operating systems.  Don't yet</span>
+00031 <span class="comment"> *    support the exponent (e,E) and sigfig (g,G).  Also, fmtint()</span>
+00032 <span class="comment"> *    was pretty badly broken, it just wasn't being exercised in ways</span>
+00033 <span class="comment"> *    which showed it, so that's been fixed.  Also, formated the code</span>
+00034 <span class="comment"> *    to mutt conventions, and removed dead code left over from the</span>
+00035 <span class="comment"> *    original.  Also, there is now a builtin-test, just compile with:</span>
+00036 <span class="comment"> *           gcc -DTEST_SNPRINTF -o snprintf snprintf.c -lm</span>
+00037 <span class="comment"> *    and run snprintf for results.</span>
+00038 <span class="comment"> * </span>
+00039 <span class="comment"> *  Thomas Roessler &lt;roessler@guug.de&gt; 01/27/98 for mutt 0.89i</span>
+00040 <span class="comment"> *    The PGP code was using unsigned hexadecimal formats. </span>
+00041 <span class="comment"> *    Unfortunately, unsigned formats simply didn't work.</span>
+00042 <span class="comment"> *</span>
+00043 <span class="comment"> *  Michael Elkins &lt;me@cs.hmc.edu&gt; 03/05/98 for mutt 0.90.8</span>
+00044 <span class="comment"> *    The original code assumed that both snprintf() and vsnprintf() were</span>
+00045 <span class="comment"> *    missing.  Some systems only have snprintf() but not vsnprintf(), so</span>
+00046 <span class="comment"> *    the code is now broken down under HAVE_SNPRINTF and HAVE_VSNPRINTF.</span>
+00047 <span class="comment"> *</span>
+00048 <span class="comment"> *  Andrew Tridgell (tridge@samba.org) Oct 1998</span>
+00049 <span class="comment"> *    fixed handling of %.0f</span>
+00050 <span class="comment"> *    added test for HAVE_LONG_DOUBLE</span>
+00051 <span class="comment"> *</span>
+00052 <span class="comment"> **************************************************************/</span>
+00053 
+00054 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00055 
+00056 <span class="preprocessor">#if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF)</span>
+00057 
+00058 <span class="preprocessor">#if HAVE_STRING_H</span>
+00059 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00060 <span class="preprocessor">#else</span>
+00061 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00062 <span class="preprocessor">#endif</span>
+00063 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+00064 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00065 
+00066 <span class="preprocessor">#if HAVE_STDARG_H</span>
+00067 <span class="preprocessor"># include &lt;stdarg.h&gt;</span>
+00068 <span class="preprocessor"># define HAVE_STDARGS           </span><span class=
+"comment">/* let's hope that works everywhere (mj) */</span>
+00069 <span class="preprocessor"># define VA_LOCAL_DECL   va_list ap</span>
+00070 <span class="preprocessor"># define VA_START(f)     va_start(ap, f)</span>
+00071 <span class="preprocessor"># define VA_SHIFT(v,t)  ;       </span><span class="comment">/* no-op for ANSI */</span>
+00072 <span class="preprocessor"># define VA_END          va_end(ap)</span>
+00073 <span class="preprocessor">#elif HAVE_VARARGS_H</span>
+00074 <span class="preprocessor">#  include &lt;varargs.h&gt;</span>
+00075 <span class="preprocessor">#  undef HAVE_STDARGS</span>
+00076 <span class="preprocessor">#  define VA_LOCAL_DECL   va_list ap</span>
+00077 <span class="preprocessor">#  define VA_START(f)     va_start(ap)  </span><span class="comment">/* f is ignored! */</span>
+00078 <span class="preprocessor">#  define VA_SHIFT(v,t) v = va_arg(ap,t)</span>
+00079 <span class="preprocessor">#  define VA_END        va_end(ap)</span>
+00080 <span class="preprocessor">#else</span>
+00081 <span class="comment">/*</span>
+00082 <span class="comment"> * XX ** NO VARARGS ** XX</span>
+00083 <span class="comment"> */</span>
+00084 <span class="preprocessor">#endif</span>
+00085 
+00086 <span class="preprocessor">#ifdef HAVE_LONG_DOUBLE</span>
+00087 <span class="preprocessor">#define LDOUBLE long double</span>
+00088 <span class="preprocessor">#else</span>
+00089 <span class="preprocessor">#define LDOUBLE double</span>
+00090 <span class="preprocessor">#endif</span>
+00091 
+00092 <span class="keywordtype">int</span>             snprintf(<span class=
+"keywordtype">char</span> *str, size_t count, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *fmt, ...);
+00093 <span class="keywordtype">int</span>             vsnprintf(<span class=
+"keywordtype">char</span> *str, size_t count, <span class="keyword">const</span> <span class="keywordtype">char</span> *fmt,
+00094                           va_list arg);
+00095 
+00096 <span class="keyword">static</span> <span class="keywordtype">void</span>     dopr(<span class=
+"keywordtype">char</span> *buffer, size_t maxlen, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *format,
+00097                      va_list args);
+00098 <span class="keyword">static</span> <span class="keywordtype">void</span>     fmtstr(<span class=
+"keywordtype">char</span> *buffer, size_t * currlen, size_t maxlen,
+00099                        <span class="keywordtype">char</span> *value, <span class=
+"keywordtype">int</span> flags, <span class="keywordtype">int</span> min, <span class="keywordtype">int</span> max);
+00100 <span class="keyword">static</span> <span class="keywordtype">void</span>     fmtint(<span class=
+"keywordtype">char</span> *buffer, size_t * currlen, size_t maxlen,
+00101                        <span class="keywordtype">long</span> value, <span class="keywordtype">int</span> base, <span class=
+"keywordtype">int</span> min, <span class="keywordtype">int</span> max, <span class="keywordtype">int</span> flags);
+00102 <span class="keyword">static</span> <span class="keywordtype">void</span>     fmtfp(<span class=
+"keywordtype">char</span> *buffer, size_t * currlen, size_t maxlen,
+00103                       LDOUBLE fvalue, <span class="keywordtype">int</span> min, <span class=
+"keywordtype">int</span> max, <span class="keywordtype">int</span> flags);
+00104 <span class="keyword">static</span> <span class="keywordtype">void</span>     dopr_outch(<span class=
+"keywordtype">char</span> *buffer, size_t * currlen, size_t maxlen,
+00105                            <span class="keywordtype">char</span> c);
+00106 
+00107 <span class="comment">/*</span>
+00108 <span class="comment"> * dopr(): poor man's version of doprintf</span>
+00109 <span class="comment"> */</span>
+00110 
+00111 <span class="comment">/*</span>
+00112 <span class="comment"> * format read states </span>
+00113 <span class="comment"> */</span>
+00114 <span class="preprocessor">#define DP_S_DEFAULT 0</span>
+00115 <span class="preprocessor">#define DP_S_FLAGS   1</span>
+00116 <span class="preprocessor">#define DP_S_MIN     2</span>
+00117 <span class="preprocessor">#define DP_S_DOT     3</span>
+00118 <span class="preprocessor">#define DP_S_MAX     4</span>
+00119 <span class="preprocessor">#define DP_S_MOD     5</span>
+00120 <span class="preprocessor">#define DP_S_CONV    6</span>
+00121 <span class="preprocessor">#define DP_S_DONE    7</span>
+00122 
+00123 <span class="comment">/*</span>
+00124 <span class="comment"> * format flags - Bits </span>
+00125 <span class="comment"> */</span>
+00126 <span class="preprocessor">#define DP_F_MINUS      (1 &lt;&lt; 0)</span>
+00127 <span class="preprocessor">#define DP_F_PLUS       (1 &lt;&lt; 1)</span>
+00128 <span class="preprocessor">#define DP_F_SPACE      (1 &lt;&lt; 2)</span>
+00129 <span class="preprocessor">#define DP_F_NUM        (1 &lt;&lt; 3)</span>
+00130 <span class="preprocessor">#define DP_F_ZERO       (1 &lt;&lt; 4)</span>
+00131 <span class="preprocessor">#define DP_F_UP         (1 &lt;&lt; 5)</span>
+00132 <span class="preprocessor">#define DP_F_UNSIGNED   (1 &lt;&lt; 6)</span>
+00133 
+00134 <span class="comment">/*</span>
+00135 <span class="comment"> * Conversion Flags </span>
+00136 <span class="comment"> */</span>
+00137 <span class="preprocessor">#define DP_C_SHORT   1</span>
+00138 <span class="preprocessor">#define DP_C_LONG    2</span>
+00139 <span class="preprocessor">#define DP_C_LDOUBLE 3</span>
+00140 
+00141 <span class="preprocessor">#define char_to_int(p) (p - '0')</span>
+00142 <span class="preprocessor">#define MAX(p,q) ((p &gt;= q) ? p : q)</span>
+00143 
+00144 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00145 dopr(<span class="keywordtype">char</span> *buffer, size_t maxlen, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *format, va_list args)
+00146 {
+00147     <span class="keywordtype">char</span>            ch;
+00148     <span class="keywordtype">long</span>            value;
+00149     LDOUBLE         fvalue;
+00150     <span class="keywordtype">char</span>           *strvalue;
+00151     <span class="keywordtype">int</span>             min;
+00152     <span class="keywordtype">int</span>             max;
+00153     <span class="keywordtype">int</span>             state;
+00154     <span class="keywordtype">int</span>             flags;
+00155     <span class="keywordtype">int</span>             cflags;
+00156     size_t          currlen;
+00157 
+00158     state = DP_S_DEFAULT;
+00159     currlen = flags = cflags = min = 0;
+00160     max = -1;
+00161     ch = *format++;
+00162 
+00163     <span class="keywordflow">while</span> (state != DP_S_DONE) {
+00164         <span class="keywordflow">if</span> ((ch == <span class="charliteral">'\0'</span>) || (currlen &gt;= maxlen))
+00165             state = DP_S_DONE;
+00166 
+00167         <span class="keywordflow">switch</span> (state) {
+00168         <span class="keywordflow">case</span> DP_S_DEFAULT:
+00169             <span class="keywordflow">if</span> (ch == <span class="charliteral">'%'</span>)
+00170                 state = DP_S_FLAGS;
+00171             <span class="keywordflow">else</span>
+00172                 dopr_outch(buffer, &amp;currlen, maxlen, ch);
+00173             ch = *format++;
+00174             <span class="keywordflow">break</span>;
+00175         <span class="keywordflow">case</span> DP_S_FLAGS:
+00176             <span class="keywordflow">switch</span> (ch) {
+00177             <span class="keywordflow">case</span> <span class="charliteral">'-'</span>:
+00178                 flags |= DP_F_MINUS;
+00179                 ch = *format++;
+00180                 <span class="keywordflow">break</span>;
+00181             <span class="keywordflow">case</span> <span class="charliteral">'+'</span>:
+00182                 flags |= DP_F_PLUS;
+00183                 ch = *format++;
+00184                 <span class="keywordflow">break</span>;
+00185             <span class="keywordflow">case</span> <span class="charliteral">' '</span>:
+00186                 flags |= DP_F_SPACE;
+00187                 ch = *format++;
+00188                 <span class="keywordflow">break</span>;
+00189             <span class="keywordflow">case</span> <span class="charliteral">'#'</span>:
+00190                 flags |= DP_F_NUM;
+00191                 ch = *format++;
+00192                 <span class="keywordflow">break</span>;
+00193             <span class="keywordflow">case</span> <span class="charliteral">'0'</span>:
+00194                 flags |= DP_F_ZERO;
+00195                 ch = *format++;
+00196                 <span class="keywordflow">break</span>;
+00197             <span class="keywordflow">default</span>:
+00198                 state = DP_S_MIN;
+00199                 <span class="keywordflow">break</span>;
+00200             }
+00201             <span class="keywordflow">break</span>;
+00202         <span class="keywordflow">case</span> DP_S_MIN:
+00203             <span class="keywordflow">if</span> (isdigit(ch)) {
+00204                 min = 10 * min + char_to_int(ch);
+00205                 ch = *format++;
+00206             } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (ch == <span class=
+"charliteral">'*'</span>) {
+00207                 min = va_arg(args, <span class="keywordtype">int</span>);
+00208                 ch = *format++;
+00209                 state = DP_S_DOT;
+00210             } <span class="keywordflow">else</span>
+00211                 state = DP_S_DOT;
+00212             <span class="keywordflow">break</span>;
+00213         <span class="keywordflow">case</span> DP_S_DOT:
+00214             <span class="keywordflow">if</span> (ch == <span class="charliteral">'.'</span>) {
+00215                 state = DP_S_MAX;
+00216                 ch = *format++;
+00217             } <span class="keywordflow">else</span>
+00218                 state = DP_S_MOD;
+00219             <span class="keywordflow">break</span>;
+00220         <span class="keywordflow">case</span> DP_S_MAX:
+00221             <span class="keywordflow">if</span> (isdigit(ch)) {
+00222                 <span class="keywordflow">if</span> (max &lt; 0)
+00223                     max = 0;
+00224                 max = 10 * max + char_to_int(ch);
+00225                 ch = *format++;
+00226             } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (ch == <span class=
+"charliteral">'*'</span>) {
+00227                 max = va_arg(args, <span class="keywordtype">int</span>);
+00228                 ch = *format++;
+00229                 state = DP_S_MOD;
+00230             } <span class="keywordflow">else</span>
+00231                 state = DP_S_MOD;
+00232             <span class="keywordflow">break</span>;
+00233         <span class="keywordflow">case</span> DP_S_MOD:
+00234             <span class="comment">/*</span>
+00235 <span class="comment">             * Currently, we don't support Long Long, bummer </span>
+00236 <span class="comment">             */</span>
+00237             <span class="keywordflow">switch</span> (ch) {
+00238             <span class="keywordflow">case</span> <span class="charliteral">'h'</span>:
+00239                 cflags = DP_C_SHORT;
+00240                 ch = *format++;
+00241                 <span class="keywordflow">break</span>;
+00242             <span class="keywordflow">case</span> <span class="charliteral">'l'</span>:
+00243                 cflags = DP_C_LONG;
+00244                 ch = *format++;
+00245                 <span class="keywordflow">break</span>;
+00246             <span class="keywordflow">case</span> <span class="charliteral">'L'</span>:
+00247                 cflags = DP_C_LDOUBLE;
+00248                 ch = *format++;
+00249                 <span class="keywordflow">break</span>;
+00250             <span class="keywordflow">default</span>:
+00251                 <span class="keywordflow">break</span>;
+00252             }
+00253             state = DP_S_CONV;
+00254             <span class="keywordflow">break</span>;
+00255         <span class="keywordflow">case</span> DP_S_CONV:
+00256             <span class="keywordflow">switch</span> (ch) {
+00257             <span class="keywordflow">case</span> <span class="charliteral">'d'</span>:
+00258             <span class="keywordflow">case</span> <span class="charliteral">'i'</span>:
+00259                 <span class="keywordflow">if</span> (cflags == DP_C_SHORT)
+00260                     value = va_arg(args, <span class="keywordtype">short</span> <span class="keywordtype">int</span>);
+00261                 <span class="keywordflow">else</span> <span class="keywordflow">if</span> (cflags == DP_C_LONG)
+00262                     value = va_arg(args, <span class="keywordtype">long</span> <span class="keywordtype">int</span>);
+00263                 <span class="keywordflow">else</span>
+00264                     value = va_arg(args, <span class="keywordtype">int</span>);
+00265                 fmtint(buffer, &amp;currlen, maxlen, value, 10, min, max,
+00266                        flags);
+00267                 <span class="keywordflow">break</span>;
+00268             <span class="keywordflow">case</span> <span class="charliteral">'o'</span>:
+00269                 flags |= DP_F_UNSIGNED;
+00270                 <span class="keywordflow">if</span> (cflags == DP_C_SHORT)
+00271                     value = va_arg(args, <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">short</span> <span class="keywordtype">int</span>);
+00272                 <span class="keywordflow">else</span> <span class="keywordflow">if</span> (cflags == DP_C_LONG)
+00273                     value = va_arg(args, <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">long</span> <span class="keywordtype">int</span>);
+00274                 <span class="keywordflow">else</span>
+00275                     value = va_arg(args, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>);
+00276                 fmtint(buffer, &amp;currlen, maxlen, value, 8, min, max,
+00277                        flags);
+00278                 <span class="keywordflow">break</span>;
+00279             <span class="keywordflow">case</span> <span class="charliteral">'u'</span>:
+00280                 flags |= DP_F_UNSIGNED;
+00281                 <span class="keywordflow">if</span> (cflags == DP_C_SHORT)
+00282                     value = va_arg(args, <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">short</span> <span class="keywordtype">int</span>);
+00283                 <span class="keywordflow">else</span> <span class="keywordflow">if</span> (cflags == DP_C_LONG)
+00284                     value = va_arg(args, <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">long</span> <span class="keywordtype">int</span>);
+00285                 <span class="keywordflow">else</span>
+00286                     value = va_arg(args, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>);
+00287                 fmtint(buffer, &amp;currlen, maxlen, value, 10, min, max,
+00288                        flags);
+00289                 <span class="keywordflow">break</span>;
+00290             <span class="keywordflow">case</span> <span class="charliteral">'X'</span>:
+00291                 flags |= DP_F_UP;
+00292             <span class="keywordflow">case</span> <span class="charliteral">'x'</span>:
+00293                 flags |= DP_F_UNSIGNED;
+00294                 <span class="keywordflow">if</span> (cflags == DP_C_SHORT)
+00295                     value = va_arg(args, <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">short</span> <span class="keywordtype">int</span>);
+00296                 <span class="keywordflow">else</span> <span class="keywordflow">if</span> (cflags == DP_C_LONG)
+00297                     value = va_arg(args, <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">long</span> <span class="keywordtype">int</span>);
+00298                 <span class="keywordflow">else</span>
+00299                     value = va_arg(args, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>);
+00300                 fmtint(buffer, &amp;currlen, maxlen, value, 16, min, max,
+00301                        flags);
+00302                 <span class="keywordflow">break</span>;
+00303             <span class="keywordflow">case</span> <span class="charliteral">'f'</span>:
+00304                 <span class="keywordflow">if</span> (cflags == DP_C_LDOUBLE)
+00305                     fvalue = va_arg(args, LDOUBLE);
+00306                 <span class="keywordflow">else</span>
+00307                     fvalue = va_arg(args, <span class="keywordtype">double</span>);
+00308                 <span class="comment">/*</span>
+00309 <span class="comment">                 * um, floating point? </span>
+00310 <span class="comment">                 */</span>
+00311                 fmtfp(buffer, &amp;currlen, maxlen, fvalue, min, max, flags);
+00312                 <span class="keywordflow">break</span>;
+00313             <span class="keywordflow">case</span> <span class="charliteral">'E'</span>:
+00314                 flags |= DP_F_UP;
+00315             <span class="keywordflow">case</span> <span class="charliteral">'e'</span>:
+00316                 <span class="keywordflow">if</span> (cflags == DP_C_LDOUBLE)
+00317                     fvalue = va_arg(args, LDOUBLE);
+00318                 <span class="keywordflow">else</span>
+00319                     fvalue = va_arg(args, <span class="keywordtype">double</span>);
+00320                 <span class="keywordflow">break</span>;
+00321             <span class="keywordflow">case</span> <span class="charliteral">'G'</span>:
+00322                 flags |= DP_F_UP;
+00323             <span class="keywordflow">case</span> <span class="charliteral">'g'</span>:
+00324                 <span class="keywordflow">if</span> (cflags == DP_C_LDOUBLE)
+00325                     fvalue = va_arg(args, LDOUBLE);
+00326                 <span class="keywordflow">else</span>
+00327                     fvalue = va_arg(args, <span class="keywordtype">double</span>);
+00328                 <span class="keywordflow">break</span>;
+00329             <span class="keywordflow">case</span> <span class="charliteral">'c'</span>:
+00330                 dopr_outch(buffer, &amp;currlen, maxlen, va_arg(args, <span class="keywordtype">int</span>));
+00331                 <span class="keywordflow">break</span>;
+00332             <span class="keywordflow">case</span> <span class="charliteral">'s'</span>:
+00333                 strvalue = va_arg(args, <span class="keywordtype">char</span> *);
+00334                 <span class="keywordflow">if</span> (max &lt; 0)
+00335                     max = maxlen;       <span class="comment">/* ie, no max */</span>
+00336                 fmtstr(buffer, &amp;currlen, maxlen, strvalue, flags, min,
+00337                        max);
+00338                 <span class="keywordflow">break</span>;
+00339             <span class="keywordflow">case</span> <span class="charliteral">'p'</span>:
+00340                 strvalue = (<span class="keywordtype">char</span> *) va_arg(args, <span class="keywordtype">void</span> *);
+00341                 fmtint(buffer, &amp;currlen, maxlen, (<span class="keywordtype">long</span>) strvalue, 16, min,
+00342                        max, flags);
+00343                 <span class="keywordflow">break</span>;
+00344             <span class="keywordflow">case</span> <span class="charliteral">'n'</span>:
+00345                 <span class="keywordflow">if</span> (cflags == DP_C_SHORT) {
+00346                     <span class="keywordtype">short</span> <span class="keywordtype">int</span>      *num;
+00347                     num = va_arg(args, <span class="keywordtype">short</span> <span class="keywordtype">int</span> *);
+00348                     *num = currlen;
+00349                 } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (cflags == DP_C_LONG) {
+00350                     <span class="keywordtype">long</span> <span class="keywordtype">int</span>       *num;
+00351                     num = va_arg(args, <span class="keywordtype">long</span> <span class="keywordtype">int</span> *);
+00352                     *num = currlen;
+00353                 } <span class="keywordflow">else</span> {
+00354                     <span class="keywordtype">int</span>            *num;
+00355                     num = va_arg(args, <span class="keywordtype">int</span> *);
+00356                     *num = currlen;
+00357                 }
+00358                 <span class="keywordflow">break</span>;
+00359             <span class="keywordflow">case</span> <span class="charliteral">'%'</span>:
+00360                 dopr_outch(buffer, &amp;currlen, maxlen, ch);
+00361                 <span class="keywordflow">break</span>;
+00362             <span class="keywordflow">case</span> <span class="charliteral">'w'</span>:
+00363                 <span class="comment">/*</span>
+00364 <span class="comment">                 * not supported yet, treat as next char </span>
+00365 <span class="comment">                 */</span>
+00366                 ch = *format++;
+00367                 <span class="keywordflow">break</span>;
+00368             <span class="keywordflow">default</span>:
+00369                 <span class="comment">/*</span>
+00370 <span class="comment">                 * Unknown, skip </span>
+00371 <span class="comment">                 */</span>
+00372                 <span class="keywordflow">break</span>;
+00373             }
+00374             ch = *format++;
+00375             state = DP_S_DEFAULT;
+00376             flags = cflags = min = 0;
+00377             max = -1;
+00378             <span class="keywordflow">break</span>;
+00379         <span class="keywordflow">case</span> DP_S_DONE:
+00380             <span class="keywordflow">break</span>;
+00381         <span class="keywordflow">default</span>:
+00382             <span class="comment">/*</span>
+00383 <span class="comment">             * hmm? </span>
+00384 <span class="comment">             */</span>
+00385             <span class="keywordflow">break</span>;              <span class=
+"comment">/* some picky compilers need this */</span>
+00386         }
+00387     }
+00388     <span class="keywordflow">if</span> (currlen &lt; maxlen - 1)
+00389         buffer[currlen] = <span class="charliteral">'\0'</span>;
+00390     <span class="keywordflow">else</span>
+00391         buffer[maxlen - 1] = <span class="charliteral">'\0'</span>;
+00392 }
+00393 
+00394 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00395 fmtstr(<span class="keywordtype">char</span> *buffer, size_t * currlen, size_t maxlen,
+00396        <span class="keywordtype">char</span> *value, <span class="keywordtype">int</span> flags, <span class=
+"keywordtype">int</span> min, <span class="keywordtype">int</span> max)
+00397 {
+00398     <span class="keywordtype">int</span>             padlen, strln;      <span class="comment">/* amount to pad */</span>
+00399     <span class="keywordtype">int</span>             cnt = 0;
+00400 
+00401     <span class="keywordflow">if</span> (value == 0) {
+00402         value = <span class="stringliteral">"&lt;NULL&gt;"</span>;
+00403     }
+00404 
+00405     <span class="keywordflow">for</span> (strln = 0; value[strln]; ++strln);     <span class="comment">/* strlen */</span>
+00406     padlen = min - strln;
+00407     <span class="keywordflow">if</span> (padlen &lt; 0)
+00408         padlen = 0;
+00409     <span class="keywordflow">if</span> (flags &amp; DP_F_MINUS)
+00410         padlen = -padlen;       <span class="comment">/* Left Justify */</span>
+00411 
+00412     <span class="keywordflow">while</span> ((padlen &gt; 0) &amp;&amp; (cnt &lt; max)) {
+00413         dopr_outch(buffer, currlen, maxlen, <span class="charliteral">' '</span>);
+00414         --padlen;
+00415         ++cnt;
+00416     }
+00417     <span class="keywordflow">while</span> (*value &amp;&amp; (cnt &lt; max)) {
+00418         dopr_outch(buffer, currlen, maxlen, *value++);
+00419         ++cnt;
+00420     }
+00421     <span class="keywordflow">while</span> ((padlen &lt; 0) &amp;&amp; (cnt &lt; max)) {
+00422         dopr_outch(buffer, currlen, maxlen, <span class="charliteral">' '</span>);
+00423         ++padlen;
+00424         ++cnt;
+00425     }
+00426 }
+00427 
+00428 <span class="comment">/*</span>
+00429 <span class="comment"> * Have to handle DP_F_NUM (ie 0x and 0 alternates) </span>
+00430 <span class="comment"> */</span>
+00431 
+00432 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00433 fmtint(<span class="keywordtype">char</span> *buffer, size_t * currlen, size_t maxlen,
+00434        <span class="keywordtype">long</span> value, <span class="keywordtype">int</span> base, <span class=
+"keywordtype">int</span> min, <span class="keywordtype">int</span> max, <span class="keywordtype">int</span> flags)
+00435 {
+00436     <span class="keywordtype">int</span>             signvalue = 0;
+00437     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   uvalue;
+00438     <span class="keywordtype">char</span>            convert[20];
+00439     <span class="keywordtype">int</span>             place = 0;
+00440     <span class="keywordtype">int</span>             spadlen = 0;        <span class=
+"comment">/* amount to space pad */</span>
+00441     <span class="keywordtype">int</span>             zpadlen = 0;        <span class=
+"comment">/* amount to zero pad */</span>
+00442     <span class="keywordtype">int</span>             caps = 0;
+00443 
+00444     <span class="keywordflow">if</span> (max &lt; 0)
+00445         max = 0;
+00446 
+00447     uvalue = value;
+00448 
+00449     <span class="keywordflow">if</span> (!(flags &amp; DP_F_UNSIGNED)) {
+00450         <span class="keywordflow">if</span> (value &lt; 0) {
+00451             signvalue = <span class="charliteral">'-'</span>;
+00452             uvalue = -value;
+00453         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (flags &amp; DP_F_PLUS)   <span class=
+"comment">/* Do a sign (+/i) */</span>
+00454             signvalue = <span class="charliteral">'+'</span>;
+00455         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (flags &amp; DP_F_SPACE)
+00456             signvalue = <span class="charliteral">' '</span>;
+00457     }
+00458 
+00459     <span class="keywordflow">if</span> (flags &amp; DP_F_UP)
+00460         caps = 1;               <span class="comment">/* Should characters be upper case? */</span>
+00461 
+00462     <span class="keywordflow">do</span> {
+00463         convert[place++] = (caps ? <span class="stringliteral">"0123456789ABCDEF"</span> : <span class=
+"stringliteral">"0123456789abcdef"</span>)
+00464             [uvalue % (unsigned) base];
+00465         uvalue = (uvalue / (unsigned) base);
+00466     } <span class="keywordflow">while</span> (uvalue &amp;&amp; (place &lt; 20));
+00467     <span class="keywordflow">if</span> (place == 20)
+00468         place--;
+00469     convert[place] = 0;
+00470 
+00471     zpadlen = max - place;
+00472     spadlen = min - MAX(max, place) - (signvalue ? 1 : 0);
+00473     <span class="keywordflow">if</span> (zpadlen &lt; 0)
+00474         zpadlen = 0;
+00475     <span class="keywordflow">if</span> (spadlen &lt; 0)
+00476         spadlen = 0;
+00477     <span class="keywordflow">if</span> (flags &amp; DP_F_ZERO) {
+00478         zpadlen = MAX(zpadlen, spadlen);
+00479         spadlen = 0;
+00480     }
+00481     <span class="keywordflow">if</span> (flags &amp; DP_F_MINUS)
+00482         spadlen = -spadlen;     <span class="comment">/* Left Justifty */</span>
+00483 
+00484 <span class="preprocessor">#ifdef DEBUG_SNPRINTF</span>
+00485     dprint(1,
+00486            (debugfile, <span class="stringliteral">"zpad: %d, spad: %d, min: %d, max: %d, place: %d\n"</span>,
+00487             zpadlen, spadlen, min, max, place));
+00488 <span class="preprocessor">#endif</span>
+00489 
+00490     <span class="comment">/*</span>
+00491 <span class="comment">     * Spaces </span>
+00492 <span class="comment">     */</span>
+00493     <span class="keywordflow">while</span> (spadlen &gt; 0) {
+00494         dopr_outch(buffer, currlen, maxlen, <span class="charliteral">' '</span>);
+00495         --spadlen;
+00496     }
+00497 
+00498     <span class="comment">/*</span>
+00499 <span class="comment">     * Sign </span>
+00500 <span class="comment">     */</span>
+00501     <span class="keywordflow">if</span> (signvalue)
+00502         dopr_outch(buffer, currlen, maxlen, signvalue);
+00503 
+00504     <span class="comment">/*</span>
+00505 <span class="comment">     * Zeros </span>
+00506 <span class="comment">     */</span>
+00507     <span class="keywordflow">if</span> (zpadlen &gt; 0) {
+00508         <span class="keywordflow">while</span> (zpadlen &gt; 0) {
+00509             dopr_outch(buffer, currlen, maxlen, <span class="charliteral">'0'</span>);
+00510             --zpadlen;
+00511         }
+00512     }
+00513 
+00514     <span class="comment">/*</span>
+00515 <span class="comment">     * Digits </span>
+00516 <span class="comment">     */</span>
+00517     <span class="keywordflow">while</span> (place &gt; 0)
+00518         dopr_outch(buffer, currlen, maxlen, convert[--place]);
+00519 
+00520     <span class="comment">/*</span>
+00521 <span class="comment">     * Left Justified spaces </span>
+00522 <span class="comment">     */</span>
+00523     <span class="keywordflow">while</span> (spadlen &lt; 0) {
+00524         dopr_outch(buffer, currlen, maxlen, <span class="charliteral">' '</span>);
+00525         ++spadlen;
+00526     }
+00527 }
+00528 
+00529 <span class="keyword">static</span>          LDOUBLE
+00530 abs_val(LDOUBLE value)
+00531 {
+00532     LDOUBLE         result = value;
+00533 
+00534     <span class="keywordflow">if</span> (value &lt; 0)
+00535         result = -value;
+00536 
+00537     <span class="keywordflow">return</span> result;
+00538 }
+00539 
+00540 <span class="keyword">static</span>          LDOUBLE
+00541 pow10(<span class="keywordtype">int</span> exp)
+00542 {
+00543     LDOUBLE         result = 1;
+00544 
+00545     <span class="keywordflow">while</span> (exp) {
+00546         result *= 10;
+00547         exp--;
+00548     }
+00549 
+00550     <span class="keywordflow">return</span> result;
+00551 }
+00552 
+00553 <span class="keyword">static</span> <span class="keywordtype">long</span>
+00554 round(LDOUBLE value)
+00555 {
+00556     <span class="keywordtype">long</span>            intpart;
+00557 
+00558     intpart = value;
+00559     value = value - intpart;
+00560     <span class="keywordflow">if</span> (value &gt;= 0.5)
+00561         intpart++;
+00562 
+00563     <span class="keywordflow">return</span> intpart;
+00564 }
+00565 
+00566 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00567 fmtfp(<span class="keywordtype">char</span> *buffer, size_t * currlen, size_t maxlen,
+00568       LDOUBLE fvalue, <span class="keywordtype">int</span> min, <span class="keywordtype">int</span> max, <span class=
+"keywordtype">int</span> flags)
+00569 {
+00570     <span class="keywordtype">int</span>             signvalue = 0;
+00571     LDOUBLE         ufvalue;
+00572     <span class="keywordtype">char</span>            iconvert[20];
+00573     <span class="keywordtype">char</span>            fconvert[20];
+00574     <span class="keywordtype">int</span>             iplace = 0;
+00575     <span class="keywordtype">int</span>             fplace = 0;
+00576     <span class="keywordtype">int</span>             padlen = 0; <span class="comment">/* amount to pad */</span>
+00577     <span class="keywordtype">int</span>             zpadlen = 0;
+00578     <span class="keywordtype">int</span>             caps = 0;
+00579     <span class="keywordtype">long</span>            intpart;
+00580     <span class="keywordtype">long</span>            fracpart;
+00581 
+00582     <span class="comment">/*</span>
+00583 <span class="comment">     * AIX manpage says the default is 0, but Solaris says the default</span>
+00584 <span class="comment">     * is 6, and sprintf on AIX defaults to 6</span>
+00585 <span class="comment">     */</span>
+00586     <span class="keywordflow">if</span> (max &lt; 0)
+00587         max = 6;
+00588 
+00589     ufvalue = abs_val(fvalue);
+00590 
+00591     <span class="keywordflow">if</span> (fvalue &lt; 0)
+00592         signvalue = <span class="charliteral">'-'</span>;
+00593     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (flags &amp; DP_F_PLUS) <span class=
+"comment">/* Do a sign (+/i) */</span>
+00594         signvalue = <span class="charliteral">'+'</span>;
+00595     <span class="keywordflow">else</span> <span class="keywordflow">if</span> (flags &amp; DP_F_SPACE)
+00596         signvalue = <span class="charliteral">' '</span>;
+00597 
+00598 <span class="preprocessor">#if 0</span>
+00599     <span class="keywordflow">if</span> (flags &amp; DP_F_UP)
+00600         caps = 1;               <span class="comment">/* Should characters be upper case? */</span>
+00601 <span class="preprocessor">#endif</span>
+00602 
+00603     intpart = ufvalue;
+00604 
+00605     <span class="comment">/*</span>
+00606 <span class="comment">     * Sorry, we only support 9 digits past the decimal because of our </span>
+00607 <span class="comment">     * conversion method</span>
+00608 <span class="comment">     */</span>
+00609     <span class="keywordflow">if</span> (max &gt; 9)
+00610         max = 9;
+00611 
+00612     <span class="comment">/*</span>
+00613 <span class="comment">     * We "cheat" by converting the fractional part to integer by</span>
+00614 <span class="comment">     * * multiplying by a factor of 10</span>
+00615 <span class="comment">     */</span>
+00616     fracpart = round((pow10(max)) * (ufvalue - intpart));
+00617 
+00618     <span class="keywordflow">if</span> (fracpart &gt;= pow10(max)) {
+00619         intpart++;
+00620         fracpart -= pow10(max);
+00621     }
+00622 <span class="preprocessor">#ifdef DEBUG_SNPRINTF</span>
+00623     dprint(1,
+00624            (debugfile, <span class="stringliteral">"fmtfp: %f =? %d.%d\n"</span>, fvalue, intpart, fracpart));
+00625 <span class="preprocessor">#endif</span>
+00626 
+00627     <span class="comment">/*</span>
+00628 <span class="comment">     * Convert integer part </span>
+00629 <span class="comment">     */</span>
+00630     <span class="keywordflow">do</span> {
+00631         iconvert[iplace++] =
+00632             (caps ? <span class="stringliteral">"0123456789ABCDEF"</span> : <span class=
+"stringliteral">"0123456789abcdef"</span>)[intpart % 10];
+00633         intpart = (intpart / 10);
+00634     } <span class="keywordflow">while</span> (intpart &amp;&amp; (iplace &lt; 20));
+00635     <span class="keywordflow">if</span> (iplace == 20)
+00636         iplace--;
+00637     iconvert[iplace] = 0;
+00638 
+00639     <span class="comment">/*</span>
+00640 <span class="comment">     * Convert fractional part </span>
+00641 <span class="comment">     */</span>
+00642     <span class="keywordflow">do</span> {
+00643         fconvert[fplace++] =
+00644             (caps ? <span class="stringliteral">"0123456789ABCDEF"</span> : <span class=
+"stringliteral">"0123456789abcdef"</span>)[fracpart %
+00645                                                              10];
+00646         fracpart = (fracpart / 10);
+00647     } <span class="keywordflow">while</span> (fracpart &amp;&amp; (fplace &lt; 20));
+00648     <span class="keywordflow">if</span> (fplace == 20)
+00649         fplace--;
+00650     fconvert[fplace] = 0;
+00651 
+00652     <span class="comment">/*</span>
+00653 <span class="comment">     * -1 for decimal point, another -1 if we are printing a sign </span>
+00654 <span class="comment">     */</span>
+00655     padlen = min - iplace - max - 1 - ((signvalue) ? 1 : 0);
+00656     zpadlen = max - fplace;
+00657     <span class="keywordflow">if</span> (zpadlen &lt; 0)
+00658         zpadlen = 0;
+00659     <span class="keywordflow">if</span> (padlen &lt; 0)
+00660         padlen = 0;
+00661     <span class="keywordflow">if</span> (flags &amp; DP_F_MINUS)
+00662         padlen = -padlen;       <span class="comment">/* Left Justifty */</span>
+00663 
+00664     <span class="keywordflow">if</span> ((flags &amp; DP_F_ZERO) &amp;&amp; (padlen &gt; 0)) {
+00665         <span class="keywordflow">if</span> (signvalue) {
+00666             dopr_outch(buffer, currlen, maxlen, signvalue);
+00667             --padlen;
+00668             signvalue = 0;
+00669         }
+00670         <span class="keywordflow">while</span> (padlen &gt; 0) {
+00671             dopr_outch(buffer, currlen, maxlen, <span class="charliteral">'0'</span>);
+00672             --padlen;
+00673         }
+00674     }
+00675     <span class="keywordflow">while</span> (padlen &gt; 0) {
+00676         dopr_outch(buffer, currlen, maxlen, <span class="charliteral">' '</span>);
+00677         --padlen;
+00678     }
+00679     <span class="keywordflow">if</span> (signvalue)
+00680         dopr_outch(buffer, currlen, maxlen, signvalue);
+00681 
+00682     <span class="keywordflow">while</span> (iplace &gt; 0)
+00683         dopr_outch(buffer, currlen, maxlen, iconvert[--iplace]);
+00684 
+00685     <span class="comment">/*</span>
+00686 <span class="comment">     * Decimal point.  This should probably use locale to find the correct</span>
+00687 <span class="comment">     * char to print out.</span>
+00688 <span class="comment">     */</span>
+00689     <span class="keywordflow">if</span> (max &gt; 0) {
+00690         dopr_outch(buffer, currlen, maxlen, <span class="charliteral">'.'</span>);
+00691 
+00692         <span class="keywordflow">while</span> (fplace &gt; 0)
+00693             dopr_outch(buffer, currlen, maxlen, fconvert[--fplace]);
+00694     }
+00695 
+00696     <span class="keywordflow">while</span> (zpadlen &gt; 0) {
+00697         dopr_outch(buffer, currlen, maxlen, <span class="charliteral">'0'</span>);
+00698         --zpadlen;
+00699     }
+00700 
+00701     <span class="keywordflow">while</span> (padlen &lt; 0) {
+00702         dopr_outch(buffer, currlen, maxlen, <span class="charliteral">' '</span>);
+00703         ++padlen;
+00704     }
+00705 }
+00706 
+00707 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00708 dopr_outch(<span class="keywordtype">char</span> *buffer, size_t * currlen, size_t maxlen, <span class=
+"keywordtype">char</span> c)
+00709 {
+00710     <span class="keywordflow">if</span> (*currlen &lt; maxlen)
+00711         buffer[(*currlen)++] = c;
+00712 }
+00713 
+00714 <span class="preprocessor">#ifndef HAVE_VSNPRINTF</span>
+00715 <span class="keywordtype">int</span>
+00716 vsnprintf(<span class="keywordtype">char</span> *str, size_t count, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *fmt, va_list args)
+00717 {
+00718     str[0] = 0;
+00719     dopr(str, count, fmt, args);
+00720     <span class="keywordflow">return</span> (strlen(str));
+00721 }
+00722 <span class="preprocessor">#endif                          </span><span class="comment">/* !HAVE_VSNPRINTF */</span>
+00723 
+00724 <span class="preprocessor">#ifndef HAVE_SNPRINTF</span>
+00725 <span class="comment">/*</span>
+00726 <span class="comment"> * VARARGS3 </span>
+00727 <span class="comment"> */</span>
+00728 <span class="preprocessor">#ifdef HAVE_STDARGS</span>
+00729 <span class="keywordtype">int</span>
+00730 snprintf(<span class="keywordtype">char</span> *str, size_t count, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *fmt, ...)
+00731 #<span class="keywordflow">else</span>
+00732 <span class="keywordtype">int</span>
+00733 snprintf(va_alist)
+00734      va_dcl
+00735 #endif
+00736 {
+00737 <span class="preprocessor">#ifndef HAVE_STDARGS</span>
+00738     <span class="keywordtype">char</span>           *str;
+00739     size_t          count;
+00740     <span class="keywordtype">char</span>           *fmt;
+00741 <span class="preprocessor">#endif</span>
+00742     VA_LOCAL_DECL;
+00743 
+00744     VA_START(fmt);
+00745     VA_SHIFT(str, <span class="keywordtype">char</span> *);
+00746     VA_SHIFT(count, size_t);
+00747     VA_SHIFT(fmt, <span class="keywordtype">char</span> *);
+00748     (void) vsnprintf(str, count, fmt, ap);
+00749     VA_END;
+00750     <span class="keywordflow">return</span> (strlen(str));
+00751 }
+00752 <span class="preprocessor">#endif                          </span><span class="comment">/* !HAVE_SNPRINTF */</span>
+00753 
+00754 <span class="preprocessor">#ifdef TEST_SNPRINTF</span>
+00755 <span class="preprocessor">#ifndef LONG_STRING</span>
+00756 <span class="preprocessor">#define LONG_STRING 1024</span>
+00757 <span class="preprocessor">#endif</span>
+00758 <span class="keywordtype">int</span>
+00759 main(<span class="keywordtype">void</span>)
+00760 {
+00761     <span class="keywordtype">char</span>            buf1[LONG_STRING];
+00762     <span class="keywordtype">char</span>            buf2[LONG_STRING];
+00763     <span class="keywordtype">char</span>           *fp_fmt[] = {
+00764         <span class="stringliteral">"%-1.5f"</span>,
+00765         <span class="stringliteral">"%1.5f"</span>,
+00766         <span class="stringliteral">"%123.9f"</span>,
+00767         <span class="stringliteral">"%10.5f"</span>,
+00768         <span class="stringliteral">"% 10.5f"</span>,
+00769         <span class="stringliteral">"%+22.9f"</span>,
+00770         <span class="stringliteral">"%+4.9f"</span>,
+00771         <span class="stringliteral">"%01.3f"</span>,
+00772         <span class="stringliteral">"%4f"</span>,
+00773         <span class="stringliteral">"%3.1f"</span>,
+00774         <span class="stringliteral">"%3.2f"</span>,
+00775         <span class="stringliteral">"%.0f"</span>,
+00776         <span class="stringliteral">"%.1f"</span>,
+00777         NULL
+00778     };
+00779     <span class="keywordtype">double</span>          fp_nums[] =
+00780         { -1.5, 134.21, 91340.2, 341.1234, 0203.9, 0.96, 0.996,
+00781         0.9996, 1.996, 4.136, 0
+00782     };
+00783     <span class="keywordtype">char</span>           *int_fmt[] = {
+00784         <span class="stringliteral">"%-1.5d"</span>,
+00785         <span class="stringliteral">"%1.5d"</span>,
+00786         <span class="stringliteral">"%123.9d"</span>,
+00787         <span class="stringliteral">"%5.5d"</span>,
+00788         <span class="stringliteral">"%10.5d"</span>,
+00789         <span class="stringliteral">"% 10.5d"</span>,
+00790         <span class="stringliteral">"%+22.33d"</span>,
+00791         <span class="stringliteral">"%01.3d"</span>,
+00792         <span class="stringliteral">"%4d"</span>,
+00793         NULL
+00794     };
+00795     <span class="keywordtype">long</span>            int_nums[] = { -1, 134, 91340, 341, 0203, 0 };
+00796     <span class="keywordtype">int</span>             x, y;
+00797     <span class="keywordtype">int</span>             fail = 0;
+00798     <span class="keywordtype">int</span>             num = 0;
+00799 
+00800     printf(<span class="stringliteral">"Testing snprintf format codes against system sprintf...\n"</span>);
+00801 
+00802     <span class="keywordflow">for</span> (x = 0; fp_fmt[x] != NULL; x++)
+00803         <span class="keywordflow">for</span> (y = 0; fp_nums[y] != 0; y++) {
+00804             snprintf(buf1, <span class="keyword">sizeof</span>(buf1), fp_fmt[x], fp_nums[y]);
+00805             sprintf(buf2, fp_fmt[x], fp_nums[y]);
+00806             <span class="keywordflow">if</span> (strcmp(buf1, buf2)) {
+00807                 printf
+00808                     (<span class=
+"stringliteral">"snprintf doesn't match Format: %s\n\tsnprintf = %s\n\tsprintf  = %s\n"</span>,
+00809                      fp_fmt[x], buf1, buf2);
+00810                 fail++;
+00811             }
+00812             num++;
+00813         }
+00814 
+00815     <span class="keywordflow">for</span> (x = 0; int_fmt[x] != NULL; x++)
+00816         <span class="keywordflow">for</span> (y = 0; int_nums[y] != 0; y++) {
+00817             snprintf(buf1, <span class="keyword">sizeof</span>(buf1), int_fmt[x], int_nums[y]);
+00818             sprintf(buf2, int_fmt[x], int_nums[y]);
+00819             <span class="keywordflow">if</span> (strcmp(buf1, buf2)) {
+00820                 printf
+00821                     (<span class=
+"stringliteral">"snprintf doesn't match Format: %s\n\tsnprintf = %s\n\tsprintf  = %s\n"</span>,
+00822                      int_fmt[x], buf1, buf2);
+00823                 fail++;
+00824             }
+00825             num++;
+00826         }
+00827     printf(<span class="stringliteral">"%d tests failed out of %d.\n"</span>, fail, num);
+00828 }
+00829 <span class="preprocessor">#endif                          </span><span class="comment">/* SNPRINTF_TEST */</span>
+00830 
+00831 <span class="preprocessor">#endif                          </span><span class="comment">/* !HAVE_SNPRINTF */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:02 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

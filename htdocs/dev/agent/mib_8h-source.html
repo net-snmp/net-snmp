@@ -1,0 +1,744 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>mib.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef MIB_H</span>
+00002 <span class="preprocessor">#define MIB_H</span>
+00003 
+00004 <span class="preprocessor">#ifdef __cplusplus</span>
+00005 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00006 <span class="preprocessor">#endif</span>
+00007     <span class="comment">/*</span>
+00008 <span class="comment">     * mib.h - Definitions for the variables as defined in the MIB</span>
+00009 <span class="comment">     *</span>
+00010 <span class="comment">     * Update: 1998-07-17 &lt;jhy@gsu.edu&gt;</span>
+00011 <span class="comment">     * Added prototypes for print_oid_report* functions.</span>
+00012 <span class="comment">     */</span>
+00013 <span class="comment">/***********************************************************</span>
+00014 <span class="comment">        Copyright 1988, 1989 by Carnegie Mellon University</span>
+00015 
+00016 <span class="comment">                      All Rights Reserved</span>
+00017 
+00018 <span class="comment">Permission to use, copy, modify, and distribute this software and its </span>
+00019 <span class="comment">documentation for any purpose and without fee is hereby granted, </span>
+00020 <span class="comment">provided that the above copyright notice appear in all copies and that</span>
+00021 <span class="comment">both that copyright notice and this permission notice appear in </span>
+00022 <span class="comment">supporting documentation, and that the name of CMU not be</span>
+00023 <span class="comment">used in advertising or publicity pertaining to distribution of the</span>
+00024 <span class="comment">software without specific, written prior permission.  </span>
+00025 
+00026 <span class="comment">CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING</span>
+00027 <span class="comment">ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL</span>
+00028 <span class="comment">CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR</span>
+00029 <span class="comment">ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,</span>
+00030 <span class="comment">WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,</span>
+00031 <span class="comment">ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS</span>
+00032 <span class="comment">SOFTWARE.</span>
+00033 <span class="comment">******************************************************************/</span>
+00034 
+00035 <span class="preprocessor">#include &lt;stdio.h&gt;</span>              <span class="comment">/* for FILE */</span>
+00036 
+00037 <span class="preprocessor">#define MIB 1, 3, 6, 1, 2, 1</span>
+00038 
+00039 <span class="preprocessor">#define MIB_IFTYPE_OTHER                    1</span>
+00040 <span class="preprocessor">#define MIB_IFTYPE_REGULAR1822              2</span>
+00041 <span class="preprocessor">#define MIB_IFTYPE_HDH1822                  3</span>
+00042 <span class="preprocessor">#define MIB_IFTYPE_DDNX25                   4</span>
+00043 <span class="preprocessor">#define MIB_IFTYPE_RFC877X25                5</span>
+00044 <span class="preprocessor">#define MIB_IFTYPE_ETHERNETCSMACD           6</span>
+00045 <span class="preprocessor">#define MIB_IFTYPE_ISO88023CSMACD           7</span>
+00046 <span class="preprocessor">#define MIB_IFTYPE_ISO88024TOKENBUS         8</span>
+00047 <span class="preprocessor">#define MIB_IFTYPE_ISO88025TOKENRING        9</span>
+00048 <span class="preprocessor">#define MIB_IFTYPE_ISO88026MAN              10</span>
+00049 <span class="preprocessor">#define MIB_IFTYPE_STARLAN                  11</span>
+00050 <span class="preprocessor">#define MIB_IFTYPE_PROTEON10MBIT            12</span>
+00051 <span class="preprocessor">#define MIB_IFTYPE_PROTEON80MBIT            13</span>
+00052 <span class="preprocessor">#define MIB_IFTYPE_HYPERCHANNEL             14</span>
+00053 <span class="preprocessor">#define MIB_IFTYPE_FDDI                     15</span>
+00054 <span class="preprocessor">#define MIB_IFTYPE_LAPB                     16</span>
+00055 <span class="preprocessor">#define MIB_IFTYPE_SDLC                     17</span>
+00056 <span class="preprocessor">#define MIB_IFTYPE_T1CARRIER                18</span>
+00057 <span class="preprocessor">#define MIB_IFTYPE_CEPT                     19</span>
+00058 <span class="preprocessor">#define MIB_IFTYPE_BASICISDN                20</span>
+00059 <span class="preprocessor">#define MIB_IFTYPE_PRIMARYISDN              21</span>
+00060 <span class="preprocessor">#define MIB_IFTYPE_PROPPOINTTOPOINTSERIAL   22</span>
+00061 
+00062 <span class="preprocessor">#define MIB_IFSTATUS_UP         1</span>
+00063 <span class="preprocessor">#define MIB_IFSTATUS_DOWN       2</span>
+00064 <span class="preprocessor">#define MIB_IFSTATUS_TESTING    3</span>
+00065 
+00066 <span class="preprocessor">#define MIB_FORWARD_GATEWAY     1</span>
+00067 <span class="preprocessor">#define MIB_FORWARD_HOST        2</span>
+00068 
+00069 <span class="preprocessor">#define MIB_IPROUTETYPE_OTHER   1</span>
+00070 <span class="preprocessor">#define MIB_IPROUTETYPE_INVALID 2</span>
+00071 <span class="preprocessor">#define MIB_IPROUTETYPE_DIRECT  3</span>
+00072 <span class="preprocessor">#define MIB_IPROUTETYPE_REMOTE  4</span>
+00073 
+00074 <span class="preprocessor">#define MIB_IPROUTEPROTO_OTHER      1</span>
+00075 <span class="preprocessor">#define MIB_IPROUTEPROTO_LOCAL      2</span>
+00076 <span class="preprocessor">#define MIB_IPROUTEPROTO_NETMGMT    3</span>
+00077 <span class="preprocessor">#define MIB_IPROUTEPROTO_ICMP       4</span>
+00078 <span class="preprocessor">#define MIB_IPROUTEPROTO_EGP        5</span>
+00079 <span class="preprocessor">#define MIB_IPROUTEPROTO_GGP        6</span>
+00080 <span class="preprocessor">#define MIB_IPROUTEPROTO_HELLO      7</span>
+00081 <span class="preprocessor">#define MIB_IPROUTEPROTO_RIP        8</span>
+00082 <span class="preprocessor">#define MIB_IPROUTEPROTO_ISIS       9</span>
+00083 <span class="preprocessor">#define MIB_IPROUTEPROTO_ESIS       10</span>
+00084 <span class="preprocessor">#define MIB_IPROUTEPROTO_CISCOIGRP  11</span>
+00085 <span class="preprocessor">#define MIB_IPROUTEPROTO_BBNSPFIGP  12</span>
+00086 <span class="preprocessor">#define MIB_IPROUTEPROTO_OIGP       13</span>
+00087 
+00088 <span class="preprocessor">#define MIB_TCPRTOALG_OTHER     1</span>
+00089 <span class="preprocessor">#define MIB_TCPRTOALG_CONSTANT  2</span>
+00090 <span class="preprocessor">#define MIB_TCPRTOALG_RSRE      3</span>
+00091 <span class="preprocessor">#define MIB_TCPRTOALG_VANJ      4</span>
+00092 
+00093 <span class="preprocessor">#define MIB_TCPCONNSTATE_CLOSED         1</span>
+00094 <span class="preprocessor">#define MIB_TCPCONNSTATE_LISTEN         2</span>
+00095 <span class="preprocessor">#define MIB_TCPCONNSTATE_SYNSENT        3</span>
+00096 <span class="preprocessor">#define MIB_TCPCONNSTATE_SYNRECEIVED    4</span>
+00097 <span class="preprocessor">#define MIB_TCPCONNSTATE_ESTABLISHED    5</span>
+00098 <span class="preprocessor">#define MIB_TCPCONNSTATE_FINWAIT1       6</span>
+00099 <span class="preprocessor">#define MIB_TCPCONNSTATE_FINWAIT2       7</span>
+00100 <span class="preprocessor">#define MIB_TCPCONNSTATE_CLOSEWAIT      8</span>
+00101 <span class="preprocessor">#define MIB_TCPCONNSTATE_LASTACK        9</span>
+00102 <span class="preprocessor">#define MIB_TCPCONNSTATE_CLOSING        10</span>
+00103 <span class="preprocessor">#define MIB_TCPCONNSTATE_TIMEWAIT       11</span>
+00104 
+00105 <span class="preprocessor">#define MIB_EGPNEIGHSTATE_IDLE          1</span>
+00106 <span class="preprocessor">#define MIB_EGPNEIGHSTATE_AQUISITION    2</span>
+00107 <span class="preprocessor">#define MIB_EGPNEIGHSTATE_DOWN          3</span>
+00108 <span class="preprocessor">#define MIB_EGPNEIGHSTATE_UP            4</span>
+00109 <span class="preprocessor">#define MIB_EGPNEIGHSTATE_CEASE         5</span>
+00110 
+00111     <span class="keyword">struct </span><a class="code" href="structvariable__list.html">variable_list</a>;
+00112     <span class="keyword">struct </span>enum_list;
+00113 
+00114     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga58">print_mib</a>(FILE * fp);
+00115     <span class="keywordtype">void</span>            print_ascii_dump(FILE *);
+00116     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga61">read_objid</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, oid *, size_t *);
+00117     <span class="keywordtype">void</span>            register_mib_handlers(<span class="keywordtype">void</span>);
+00118     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga53">netsnmp_set_mib_directory</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *dir);
+00119     <span class="keywordtype">char</span>            *<a class="code" href=
+"group__mib__utilities.html#ga54">netsnmp_get_mib_directory</a>(<span class="keywordtype">void</span>);
+00120     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga55">netsnmp_fixup_mib_directory</a>(<span class="keywordtype">void</span>);
+00121     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga56">init_mib</a>(<span class="keywordtype">void</span>);
+00122     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga57">shutdown_mib</a>(<span class="keywordtype">void</span>);
+00123     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga84">print_description</a>(oid *, size_t, <span class="keywordtype">int</span>);
+00124     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga85">fprint_description</a>(FILE *, oid *, size_t, <span class="keywordtype">int</span>);
+00125     <span class="keywordtype">int</span>             snprint_description(<span class=
+"keywordtype">char</span> *, size_t, oid *, size_t, <span class="keywordtype">int</span>);
+00126     <span class="keywordtype">int</span>             sprint_realloc_description(u_char **, size_t *, size_t *,
+00127                                                <span class="keywordtype">int</span>, oid *, size_t, <span class=
+"keywordtype">int</span>);
+00128     <span class="keywordtype">int</span>             get_module_node(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *, oid *,
+00129                                     size_t *);
+00130     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga90">get_wild_node</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, oid *, size_t *);
+00131     <span class="keywordtype">int</span>             get_node(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, oid *, size_t *);
+00132     oid            *<a class="code" href="group__mib__utilities.html#ga103">snmp_parse_oid</a>(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, oid *, size_t *);
+00133     <span class="keyword">struct </span>tree    *get_symbol(oid *, size_t, <span class=
+"keyword">struct</span> tree *, <span class="keywordtype">char</span> *);
+00134     <span class="keyword">struct </span>tree    *<a class="code" href=
+"group__mib__utilities.html#ga83">get_tree</a>(<span class="keyword">const</span> oid *, size_t, <span class=
+"keyword">struct</span> tree *);
+00135     <span class="keyword">struct </span>tree    *<a class="code" href=
+"group__mib__utilities.html#ga45">get_tree_head</a>(<span class="keywordtype">void</span>);
+00136     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga60">set_function</a>(<span class="keyword">struct</span> tree *);
+00137 
+00138     <span class="keywordtype">int</span>             parse_one_oid_index(oid ** oidStart, size_t * oidLen,
+00139                                         <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * data,
+00140                                         <span class="keywordtype">int</span> complete);
+00141     <span class="keywordtype">int</span>             parse_oid_indexes(oid * oidIndex, size_t oidLen,
+00142                                       <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * data);
+00143     <span class="keywordtype">int</span>             build_oid_noalloc(oid * in, size_t in_len,
+00144                                       size_t * out_len, oid * prefix,
+00145                                       size_t prefix_len,
+00146                                       <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * indexes);
+00147     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga78">build_oid</a>(oid ** out, size_t * out_len, oid * prefix,
+00148                               size_t prefix_len,
+00149                               <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * indexes);
+00150     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga76">build_oid_segment</a>(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * var);
+00151 
+00152 
+00153     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga70">print_variable</a>(<span class="keyword">const</span> oid * objid, size_t objidlen,
+00154                                    <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * variable);
+00155 
+00156     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga71">fprint_variable</a>(FILE * fp,
+00157                                     <span class="keyword">const</span> oid * objid, size_t objidlen,
+00158                                     <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * variable);
+00159 
+00160     <span class="keywordtype">int</span>             snprint_variable(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00161                                      <span class="keyword">const</span> oid * objid, size_t objidlen,
+00162                                      <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * variable);
+00163 
+00164     <span class="keywordtype">int</span>             sprint_realloc_variable(u_char ** buf,
+00165                                             size_t * buf_len,
+00166                                             size_t * out_len,
+00167                                             <span class="keywordtype">int</span> allow_realloc,
+00168                                             <span class="keyword">const</span> oid * objid,
+00169                                             size_t objidlen,
+00170                                             <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *
+00171                                             variable);
+00172 
+00173 <span class="preprocessor">#ifndef DISABLE_MIB_LOADING</span>
+00174     <span class="keyword">struct </span>tree    *
+00175 <span class="preprocessor">#else</span>
+00176     <span class="keywordtype">void</span>
+00177 <span class="preprocessor">#endif</span>
+00178                     netsnmp_sprint_realloc_objid_tree(u_char ** buf,
+00179                                                       size_t * buf_len,
+00180                                                       size_t * out_len,
+00181                                                       <span class="keywordtype">int</span> allow_realloc,
+00182                                                       <span class="keywordtype">int</span> *buf_overflow,
+00183                                                       <span class="keyword">const</span> oid * objid,
+00184                                                       size_t objidlen);
+00185 
+00186     <span class="keywordtype">void</span>
+00187                     netsnmp_sprint_realloc_objid(u_char ** buf,
+00188                                                  size_t * buf_len,
+00189                                                  size_t * out_len,
+00190                                                  <span class="keywordtype">int</span> allow_realloc,
+00191                                                  <span class="keywordtype">int</span> *buf_overflow,
+00192                                                  <span class="keyword">const</span> oid * objid,
+00193                                                  size_t objidlen);
+00194 
+00195     <span class="keywordtype">void</span>            print_value(<span class=
+"keyword">const</span> oid * objid, size_t objidlen,
+00196                                 <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * variable);
+00197 
+00198     <span class="keywordtype">void</span>            fprint_value(FILE * fp,
+00199                                  <span class="keyword">const</span> oid * objid, size_t objidlen,
+00200                                  <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * variable);
+00201 
+00202     <span class="keywordtype">int</span>             snprint_value(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00203                                   <span class="keyword">const</span> oid * objid, size_t objidlen,
+00204                                   <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * variable);
+00205 
+00206     <span class="keywordtype">int</span>             sprint_realloc_value(u_char ** buf, size_t * buf_len,
+00207                                          size_t * out_len,
+00208                                          <span class="keywordtype">int</span> allow_realloc,
+00209                                          <span class="keyword">const</span> oid * objid,
+00210                                          size_t objidlen,
+00211                                          <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * variable);
+00212 
+00213 
+00214     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga66">print_objid</a>(<span class="keyword">const</span> oid * objid, size_t objidlen);
+00215 
+00216     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga67">fprint_objid</a>(FILE * fp,
+00217                                  <span class="keyword">const</span> oid * objid, size_t objidlen);
+00218 
+00219     <span class="keywordtype">int</span>             snprint_objid(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00220                                   <span class="keyword">const</span> oid * objid, size_t objidlen);
+00221 
+00222     <span class="keywordtype">int</span>             sprint_realloc_objid(u_char ** buf, size_t * buf_len,
+00223                                          size_t * out_len,
+00224                                          <span class="keywordtype">int</span> allow_realloc,
+00225                                          <span class="keyword">const</span> oid * objid,
+00226                                          size_t objidlen);
+00227 
+00228 
+00229     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga44">sprint_realloc_by_type</a>(u_char ** buf, size_t * buf_len,
+00230                                            size_t * out_len,
+00231                                            <span class="keywordtype">int</span> allow_realloc,
+00232                                            <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * var,
+00233                                            <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *enums,
+00234                                            <span class="keyword">const</span> <span class="keywordtype">char</span> *hint,
+00235                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *units);
+00236 
+00237     <span class="keywordtype">int</span>             sprint_realloc_hexstring(u_char ** buf,
+00238                                              size_t * buf_len,
+00239                                              size_t * out_len,
+00240                                              <span class="keywordtype">int</span> allow_realloc,
+00241                                              <span class="keyword">const</span> u_char *, size_t);
+00242 
+00243     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga27">sprint_realloc_asciistring</a>(u_char ** buf,
+00244                                                size_t * buf_len,
+00245                                                size_t * out_len,
+00246                                                <span class="keywordtype">int</span> allow_realloc,
+00247                                                <span class="keyword">const</span> u_char * cp,
+00248                                                size_t len);
+00249 
+00250     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga28">sprint_realloc_octet_string</a>(u_char ** buf,
+00251                                                 size_t * buf_len,
+00252                                                 size_t * out_len,
+00253                                                 <span class="keywordtype">int</span> allow_realloc,
+00254                                                 <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00255                                                 <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00256                                                 <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00257                                                 <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+00258 
+00259     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga30">sprint_realloc_opaque</a>(u_char ** buf, size_t * buf_len,
+00260                                           size_t * out_len,
+00261                                           <span class="keywordtype">int</span> allow_realloc,
+00262                                           <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00263                                           <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00264                                           <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00265 
+00266     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga31">sprint_realloc_object_identifier</a>(u_char ** buf,
+00267                                                      size_t * buf_len,
+00268                                                      size_t * out_len,
+00269                                                      <span class="keywordtype">int</span> allow_realloc,
+00270                                                      <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a>
+00271                                                      *, <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00272                                                      <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *,
+00273                                                      <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+00274 
+00275     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga32">sprint_realloc_timeticks</a>(u_char ** buf,
+00276                                              size_t * buf_len,
+00277                                              size_t * out_len,
+00278                                              <span class="keywordtype">int</span> allow_realloc,
+00279                                              <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00280                                              <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00281                                              <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00282 
+00283     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga33">sprint_realloc_hinted_integer</a>(u_char ** buf,
+00284                                                   size_t * buf_len,
+00285                                                   size_t * out_len,
+00286                                                   <span class="keywordtype">int</span> allow_realloc, <span class=
+"keywordtype">long</span>,
+00287                                                   <span class="keyword">const</span> <span class=
+"keywordtype">char</span>, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00288                                                   <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+00289 
+00290     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga34">sprint_realloc_integer</a>(u_char ** buf, size_t * buf_len,
+00291                                            size_t * out_len,
+00292                                            <span class="keywordtype">int</span> allow_realloc,
+00293                                            <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00294                                            <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00295                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00296 
+00297     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga35">sprint_realloc_uinteger</a>(u_char ** buf,
+00298                                             size_t * buf_len,
+00299                                             size_t * out_len,
+00300                                             <span class="keywordtype">int</span> allow_realloc,
+00301                                             <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00302                                             <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00303                                             <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00304 
+00305     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga36">sprint_realloc_gauge</a>(u_char ** buf, size_t * buf_len,
+00306                                          size_t * out_len,
+00307                                          <span class="keywordtype">int</span> allow_realloc,
+00308                                          <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00309                                          <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00310                                          <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00311 
+00312     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga37">sprint_realloc_counter</a>(u_char ** buf, size_t * buf_len,
+00313                                            size_t * out_len,
+00314                                            <span class="keywordtype">int</span> allow_realloc,
+00315                                            <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00316                                            <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00317                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00318 
+00319     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga38">sprint_realloc_networkaddress</a>(u_char ** buf,
+00320                                                   size_t * buf_len,
+00321                                                   size_t * out_len,
+00322                                                   <span class="keywordtype">int</span> allow_realloc,
+00323                                                   <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00324                                                   <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00325                                                   <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *,
+00326                                                   <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+00327 
+00328     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga39">sprint_realloc_ipaddress</a>(u_char ** buf,
+00329                                              size_t * buf_len,
+00330                                              size_t * out_len,
+00331                                              <span class="keywordtype">int</span> allow_realloc,
+00332                                              <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00333                                              <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00334                                              <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00335 
+00336     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga40">sprint_realloc_null</a>(u_char ** buf, size_t * buf_len,
+00337                                         size_t * out_len,
+00338                                         <span class="keywordtype">int</span> allow_realloc,
+00339                                         <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00340                                         <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00341                                         <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00342 
+00343     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga41">sprint_realloc_bitstring</a>(u_char ** buf,
+00344                                              size_t * buf_len,
+00345                                              size_t * out_len,
+00346                                              <span class="keywordtype">int</span> allow_realloc,
+00347                                              <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00348                                              <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00349                                              <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00350 
+00351     <span class="keywordtype">int</span>             sprint_realloc_nsapaddress(u_char ** buf,
+00352                                                size_t * buf_len,
+00353                                                size_t * out_len,
+00354                                                <span class="keywordtype">int</span> allow_realloc,
+00355                                                <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00356                                                <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00357                                                <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00358 
+00359     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga29">sprint_realloc_counter64</a>(u_char ** buf,
+00360                                              size_t * buf_len,
+00361                                              size_t * out_len,
+00362                                              <span class="keywordtype">int</span> allow_realloc,
+00363                                              <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00364                                              <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00365                                              <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00366 
+00367     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga43">sprint_realloc_badtype</a>(u_char ** buf, size_t * buf_len,
+00368                                            size_t * out_len,
+00369                                            <span class="keywordtype">int</span> allow_realloc,
+00370                                            <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00371                                            <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00372                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00373 
+00374 <span class="preprocessor">#ifdef OPAQUE_SPECIAL_TYPES</span>
+00375     <span class="keywordtype">int</span>             sprint_realloc_float(u_char ** buf, size_t * buf_len,
+00376                                          size_t * out_len,
+00377                                          <span class="keywordtype">int</span> allow_realloc,
+00378                                          <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00379                                          <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00380                                          <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00381 
+00382     <span class="keywordtype">int</span>             sprint_realloc_double(u_char ** buf, size_t * buf_len,
+00383                                           size_t * out_len,
+00384                                           <span class="keywordtype">int</span> allow_realloc,
+00385                                           <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00386                                           <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00387                                           <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00388 <span class="preprocessor">#endif</span>
+00389 
+00390 
+00391     <span class="keywordtype">int</span>             snprint_by_type(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00392                                     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * var,
+00393                                     <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *enums,
+00394                                     <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *hint, <span class="keyword">const</span> <span class="keywordtype">char</span> *units);
+00395 
+00396     <span class="keywordtype">int</span>             snprint_hexstring(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00397                                       <span class="keyword">const</span> u_char *, size_t);
+00398 
+00399     <span class="keywordtype">int</span>             snprint_asciistring(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00400                                         <span class="keyword">const</span> u_char * cp, size_t len);
+00401 
+00402     <span class="keywordtype">int</span>             snprint_octet_string(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00403                                          <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00404                                          <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00405                                          <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00406 
+00407     <span class="keywordtype">int</span>             snprint_opaque(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00408                                    <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00409                                    <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00410                                    <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00411 
+00412     <span class="keywordtype">int</span>             snprint_object_identifier(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00413                                               <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00414                                               <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00415                                               <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00416 
+00417     <span class="keywordtype">int</span>             snprint_timeticks(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00418                                       <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00419                                       <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00420                                       <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00421 
+00422     <span class="keywordtype">int</span>             snprint_hinted_integer(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00423                                            <span class="keywordtype">long</span>, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+00424                                            <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00425 
+00426     <span class="keywordtype">int</span>             snprint_integer(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00427                                     <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00428                                     <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00429                                     <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00430 
+00431     <span class="keywordtype">int</span>             snprint_uinteger(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00432                                      <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00433                                      <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00434                                      <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00435 
+00436     <span class="keywordtype">int</span>             snprint_gauge(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00437                                   <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00438                                   <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00439                                   <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00440 
+00441     <span class="keywordtype">int</span>             snprint_counter(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00442                                     <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00443                                     <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00444                                     <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00445 
+00446     <span class="keywordtype">int</span>             snprint_networkaddress(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00447                                            <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00448                                            <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *,
+00449                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00450 
+00451     <span class="keywordtype">int</span>             snprint_ipaddress(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00452                                       <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00453                                       <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00454                                       <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00455 
+00456     <span class="keywordtype">int</span>             snprint_null(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00457                                  <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00458                                  <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00459                                  <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00460 
+00461     <span class="keywordtype">int</span>             snprint_bitstring(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00462                                       <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00463                                       <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00464                                       <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00465 
+00466     <span class="keywordtype">int</span>             snprint_nsapaddress(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00467                                         <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00468                                         <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00469                                         <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00470 
+00471     <span class="keywordtype">int</span>             snprint_counter64(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00472                                       <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00473                                       <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00474                                       <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00475 
+00476     <span class="keywordtype">int</span>             snprint_badtype(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00477                                     <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00478                                     <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00479                                     <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00480 
+00481 <span class="preprocessor">#ifdef OPAQUE_SPECIAL_TYPES</span>
+00482     <span class="keywordtype">int</span>             snprint_float(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00483                                   <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00484                                   <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00485                                   <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00486 
+00487     <span class="keywordtype">int</span>             snprint_double(<span class=
+"keywordtype">char</span> *buf, size_t buf_len,
+00488                                    <span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *,
+00489                                    <span class="keyword">const</span> <span class=
+"keyword">struct</span> enum_list *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00490                                    <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00491 <span class="preprocessor">#endif</span>
+00492 
+00493     <span class="keywordtype">void</span>            print_oid_report(FILE *);
+00494     <span class="keywordtype">void</span>            print_oid_report_enable_labeledoid(<span class=
+"keywordtype">void</span>);
+00495     <span class="keywordtype">void</span>            print_oid_report_enable_oid(<span class="keywordtype">void</span>);
+00496     <span class="keywordtype">void</span>            print_oid_report_enable_suffix(<span class="keywordtype">void</span>);
+00497     <span class="keywordtype">void</span>            print_oid_report_enable_symbolic(<span class=
+"keywordtype">void</span>);
+00498 
+00499     <span class="keyword">const</span> <span class="keywordtype">char</span>     *parse_octet_hint(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *hint, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *value,
+00500                                      <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span> **new_val, <span class="keywordtype">int</span> *new_val_len);
+00501 
+00502     <span class="keywordtype">void</span>            clear_tree_flags(<span class="keyword">register</span> <span class=
+"keyword">struct</span> tree *tp);
+00503 
+00504     <span class="keywordtype">char</span>           *snmp_out_toggle_options(<span class="keywordtype">char</span> *);
+00505     <span class="keywordtype">void</span>            snmp_out_toggle_options_usage(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, FILE *);
+00506     <span class="keywordtype">char</span>           *snmp_in_toggle_options(<span class="keywordtype">char</span> *);
+00507     <span class="keywordtype">char</span>           *snmp_in_options(<span class="keywordtype">char</span> *, <span class=
+"keywordtype">int</span>, <span class="keywordtype">char</span> * <span class="keyword">const</span> *);
+00508     <span class="keywordtype">void</span>            <a class="code" href=
+"group__mib__utilities.html#ga51">snmp_in_toggle_options_usage</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, FILE *);
+00509     u_char          mib_to_asn_type(<span class="keywordtype">int</span> mib_type);
+00510 
+00511 
+00512     <span class="keywordtype">int</span>             <a class="code" href=
+"group__mib__utilities.html#ga111">netsnmp_str2oid</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *S, oid * O, <span class="keywordtype">int</span> L);
+00513 
+00514 
+00515 <span class="preprocessor">#define NETSNMP_STRING_OUTPUT_GUESS  1</span>
+00516 <span class="preprocessor">#define NETSNMP_STRING_OUTPUT_ASCII  2</span>
+00517 <span class="preprocessor">#define NETSNMP_STRING_OUTPUT_HEX    3</span>
+00518 
+00519 <span class="preprocessor">#define NETSNMP_OID_OUTPUT_SUFFIX  1</span>
+00520 <span class="preprocessor">#define NETSNMP_OID_OUTPUT_MODULE  2</span>
+00521 <span class="preprocessor">#define NETSNMP_OID_OUTPUT_FULL    3</span>
+00522 <span class="preprocessor">#define NETSNMP_OID_OUTPUT_NUMERIC 4</span>
+00523 <span class="preprocessor">#define NETSNMP_OID_OUTPUT_UCD     5</span>
+00524 <span class="preprocessor">#define NETSNMP_OID_OUTPUT_NONE    6</span>
+00525 <span class="preprocessor">#ifdef __cplusplus</span>
+00526 }
+00527 <span class="preprocessor">#endif</span>
+00528 <span class="preprocessor">#endif                          </span><span class="comment">/* MIB_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,190 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000007.html">mibgroup</a>&nbsp;/&nbsp;<a class="el" href="dir_000008.html">examples</a>
+  </div>
+
+  <h1>data_set.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 
+00063 <span class="comment">/*</span>
+00064 <span class="comment"> * start be including the appropriate header files </span>
+00065 <span class="comment"> */</span>
+00066 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00067 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00068 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00069 
+00070 <span class="comment">/*</span>
+00071 <span class="comment"> * our initialization routine, automatically called by the agent </span>
+00072 <span class="comment"> */</span>
+00073 <span class="comment">/*</span>
+00074 <span class="comment"> * (to get called, the function name must match init_FILENAME() </span>
+00075 <span class="comment"> */</span>
+00076 <span class="keywordtype">void</span>
+00077 init_data_set(<span class="keywordtype">void</span>)
+00078 {
+00079     netsnmp_table_data_set *table_set;
+00080     netsnmp_table_row *row;
+00081 
+00082     <span class="comment">/*</span>
+00083 <span class="comment">     * the OID we want to register our integer at.  This should be the</span>
+00084 <span class="comment">     * * OID node for the entire table.  In our case this is the</span>
+00085 <span class="comment">     * * netSnmpIETFWGTable oid definition </span>
+00086 <span class="comment">     */</span>
+00087     oid             my_registration_oid[] =
+00088         { 1, 3, 6, 1, 4, 1, 8072, 2, 2, 1 };
+00089 
+00090     <span class="comment">/*</span>
+00091 <span class="comment">     * a debugging statement.  Run the agent with -Dexample_data_set to see</span>
+00092 <span class="comment">     * * the output of this debugging statement. </span>
+00093 <span class="comment">     */</span>
+00094     DEBUGMSGTL((<span class="stringliteral">"example_data_set"</span>,
+00095                 <span class="stringliteral">"Initalizing example dataset table\n"</span>));
+00096 
+00097     <span class="comment">/*</span>
+00098 <span class="comment">     * It's going to be the "working group chairs" table, since I'm</span>
+00099 <span class="comment">     * * sitting at an IETF convention while I'm writing this.</span>
+00100 <span class="comment">     * *</span>
+00101 <span class="comment">     * *  column 1 = index = string = WG name</span>
+00102 <span class="comment">     * *  column 2 = string = chair #1</span>
+00103 <span class="comment">     * *  column 3 = string = chair #2  (most WGs have 2 chairs now)</span>
+00104 <span class="comment">     */</span>
+00105 
+00106     table_set = <a class="code" href="group__table__dataset.html#ga1">netsnmp_create_table_data_set</a>(<span class=
+"stringliteral">"netSnmpIETFWGTable"</span>);
+00107 
+00108     <span class="comment">/*</span>
+00109 <span class="comment">     * allow the creation of new rows via SNMP SETs </span>
+00110 <span class="comment">     */</span>
+00111     table_set-&gt;allow_creation = 1;
+00112 
+00113     <span class="comment">/*</span>
+00114 <span class="comment">     * set up what a row "should" look like, starting with the index </span>
+00115 <span class="comment">     */</span>
+00116     <a class="code" href="group__table__dataset.html#ga17">netsnmp_table_dataset_add_index</a>(table_set, ASN_OCTET_STR);
+00117 
+00118     <span class="comment">/*</span>
+00119 <span class="comment">     * define what the columns should look like.  both are octet strings here </span>
+00120 <span class="comment">     */</span>
+00121     <a class="code" href="group__table__dataset.html#ga25">netsnmp_table_set_multi_add_default_row</a>(table_set,
+00122                                             <span class="comment">/*</span>
+00123 <span class="comment">                                             * column 2 = OCTET STRING,</span>
+00124 <span class="comment">                                             * writable = 1,</span>
+00125 <span class="comment">                                             * default value = NULL,</span>
+00126 <span class="comment">                                             * default value len = 0 </span>
+00127 <span class="comment">                                             */</span>
+00128                                             2, ASN_OCTET_STR, 1, NULL, 0,
+00129                                             <span class="comment">/*</span>
+00130 <span class="comment">                                             * similar </span>
+00131 <span class="comment">                                             */</span>
+00132                                             3, ASN_OCTET_STR, 1, NULL, 0,
+00133                                             0 <span class="comment">/* done */</span> );
+00134 
+00135     <span class="comment">/*</span>
+00136 <span class="comment">     * register the table </span>
+00137 <span class="comment">     */</span>
+00138     <span class="comment">/*</span>
+00139 <span class="comment">     * if we wanted to handle specific data in a specific way, or note</span>
+00140 <span class="comment">     * * when requests came in we could change the NULL below to a valid</span>
+00141 <span class="comment">     * * handler method in which we could over ride the default</span>
+00142 <span class="comment">     * * behaviour of the table_dataset helper </span>
+00143 <span class="comment">     */</span>
+00144     <a class="code" href=
+"group__table__dataset.html#ga3">netsnmp_register_table_data_set</a>(netsnmp_create_handler_registration
+00145                                     (<span class="stringliteral">"netSnmpIETFWGTable"</span>, NULL,
+00146                                      my_registration_oid,
+00147                                      OID_LENGTH(my_registration_oid),
+00148                                      HANDLER_CAN_RWRITE), table_set, NULL);
+00149 
+00150 
+00151     <span class="comment">/*</span>
+00152 <span class="comment">     * create the a row for the table, and add the data </span>
+00153 <span class="comment">     */</span>
+00154     row = <a class="code" href="group__table__data.html#ga13">netsnmp_create_table_data_row</a>();
+00155     <span class="comment">/*</span>
+00156 <span class="comment">     * set the index to the IETF WG name "snmpv3" </span>
+00157 <span class="comment">     */</span>
+00158     netsnmp_table_row_add_index(row, ASN_OCTET_STR, <span class="stringliteral">"snmpv3"</span>,
+00159                                 strlen(<span class="stringliteral">"snmpv3"</span>));
+00160 
+00161 
+00162     <span class="comment">/*</span>
+00163 <span class="comment">     * set column 2 to be the WG chair name "Russ Mundy" </span>
+00164 <span class="comment">     */</span>
+00165     <a class="code" href="group__table__dataset.html#ga8">netsnmp_set_row_column</a>(row, 2, ASN_OCTET_STR,
+00166                            <span class="stringliteral">"Russ Mundy"</span>, strlen(<span class=
+"stringliteral">"Russ Mundy"</span>));
+00167     <a class="code" href=
+"group__table__dataset.html#ga7">netsnmp_mark_row_column_writable</a>(row, 2, 1);        <span class=
+"comment">/* make writable via SETs */</span>
+00168 
+00169     <span class="comment">/*</span>
+00170 <span class="comment">     * set column 3 to be the WG chair name "David Harrington" </span>
+00171 <span class="comment">     */</span>
+00172     <a class="code" href="group__table__dataset.html#ga8">netsnmp_set_row_column</a>(row, 3, ASN_OCTET_STR, <span class=
+"stringliteral">"David Harrington"</span>,
+00173                            strlen(<span class="stringliteral">"David Harrington"</span>));
+00174     <a class="code" href=
+"group__table__dataset.html#ga7">netsnmp_mark_row_column_writable</a>(row, 3, 1);        <span class=
+"comment">/* make writable via SETs */</span>
+00175 
+00176     <span class="comment">/*</span>
+00177 <span class="comment">     * add the row to the table </span>
+00178 <span class="comment">     */</span>
+00179     <a class="code" href="group__table__dataset.html#ga18">netsnmp_table_dataset_add_row</a>(table_set, row);
+00180 
+00181 <span class="preprocessor">#ifdef ADD_MORE_DATA</span>
+00182     <span class="comment">/*</span>
+00183 <span class="comment">     * add the data, for the second row </span>
+00184 <span class="comment">     */</span>
+00185     row = <a class="code" href="group__table__data.html#ga13">netsnmp_create_table_data_row</a>();
+00186     netsnmp_table_row_add_index(row, ASN_OCTET_STR, <span class="stringliteral">"snmpconf"</span>,
+00187                                 strlen(<span class="stringliteral">"snmpconf"</span>));
+00188     <a class="code" href="group__table__dataset.html#ga8">netsnmp_set_row_column</a>(row, 2, ASN_OCTET_STR, <span class=
+"stringliteral">"David Partain"</span>,
+00189                            strlen(<span class="stringliteral">"David Partain"</span>));
+00190     <a class="code" href=
+"group__table__dataset.html#ga7">netsnmp_mark_row_column_writable</a>(row, 2, 1);        <span class=
+"comment">/* make writable */</span>
+00191     <a class="code" href="group__table__dataset.html#ga8">netsnmp_set_row_column</a>(row, 3, ASN_OCTET_STR, <span class=
+"stringliteral">"Jon Saperia"</span>,
+00192                            strlen(<span class="stringliteral">"Jon Saperia"</span>));
+00193     <a class="code" href=
+"group__table__dataset.html#ga7">netsnmp_mark_row_column_writable</a>(row, 3, 1);        <span class=
+"comment">/* make writable */</span>
+00194     <a class="code" href="group__table__dataset.html#ga18">netsnmp_table_dataset_add_row</a>(table_set, row);
+00195 <span class="preprocessor">#endif</span>
+00196 
+00197     <span class="comment">/*</span>
+00198 <span class="comment">     * Finally, this actually allows the "add_row" token it the</span>
+00199 <span class="comment">     * * snmpd.conf file to add rows to this table.</span>
+00200 <span class="comment">     * * Example snmpd.conf line:</span>
+00201 <span class="comment">     * *   add_row netSnmpIETFWGTable eos "Glenn Waters" "Dale Francisco"</span>
+00202 <span class="comment">     */</span>
+00203     <a class="code" href="group__table__dataset.html#ga14">netsnmp_register_auto_data_table</a>(table_set, NULL);
+00204 
+00205     DEBUGMSGTL((<span class="stringliteral">"example_data_set"</span>, <span class=
+"stringliteral">"Done initializing.\n"</span>));
+00206 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,412 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>snmpAAL5PVCDomain.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00002 
+00003 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00004 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00005 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+00006 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+00007 
+00008 <span class="preprocessor">#if HAVE_STRING_H</span>
+00009 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00010 <span class="preprocessor">#else</span>
+00011 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00012 <span class="preprocessor">#endif</span>
+00013 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00014 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00015 <span class="preprocessor">#endif</span>
+00016 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00017 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+00018 <span class="preprocessor">#endif</span>
+00019 <span class="preprocessor">#if HAVE_SYS_SOCKET_H</span>
+00020 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+00021 <span class="preprocessor">#endif</span>
+00022 <span class="preprocessor">#include &lt;atm.h&gt;</span>
+00023 
+00024 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00025 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00026 <span class="preprocessor">#endif</span>
+00027 
+00028 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00029 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00030 <span class="preprocessor">#include &lt;net-snmp/config_api.h&gt;</span>
+00031 
+00032 <span class="preprocessor">#include &lt;net-snmp/library/snmp_transport.h&gt;</span>
+00033 <span class="preprocessor">#include &lt;net-snmp/library/snmpAAL5PVCDomain.h&gt;</span>
+00034 
+00035 
+00036 oid netsnmp_AAL5PVCDomain[10] = { ENTERPRISE_MIB, 3, 3, 3 };
+00037 <span class="keyword">static</span> netsnmp_tdomain aal5pvcDomain;
+00038 
+00039 
+00040 <span class="comment">/*</span>
+00041 <span class="comment"> * Return a string representing the address in data, or else the "far end"</span>
+00042 <span class="comment"> * address if data is NULL.  </span>
+00043 <span class="comment"> */</span>
+00044 
+00045 <span class="keyword">static</span> <span class="keywordtype">char</span> *
+00046 netsnmp_aal5pvc_fmtaddr(netsnmp_transport *t, <span class="keywordtype">void</span> *data, <span class=
+"keywordtype">int</span> len)
+00047 {
+00048     <span class="keyword">struct </span>sockaddr_atmpvc *to = NULL;
+00049 
+00050     <span class="keywordflow">if</span> (data != NULL &amp;&amp; len == <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr_atmpvc)) {
+00051         to = (<span class="keyword">struct </span>sockaddr_atmpvc *) data;
+00052     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;data != NULL &amp;&amp;
+00053                t-&gt;data_length == <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr_atmpvc)) {
+00054         to = (<span class="keyword">struct </span>sockaddr_atmpvc *) t-&gt;data;
+00055     }
+00056     <span class="keywordflow">if</span> (to == NULL) {
+00057         <span class="keywordflow">return</span> strdup(<span class="stringliteral">"AAL5 PVC: unknown"</span>);
+00058     } <span class="keywordflow">else</span> {
+00059         <span class="keywordtype">char</span> tmp[64];
+00060         sprintf(tmp, <span class="stringliteral">"AAL5 PVC: %hd.%hd.%d"</span>, to-&gt;sap_addr.itf,
+00061                 to-&gt;sap_addr.vpi, to-&gt;sap_addr.vci);
+00062         <span class="keywordflow">return</span> strdup(tmp);
+00063     }
+00064 }
+00065 
+00066 
+00067 
+00068 <span class="comment">/*</span>
+00069 <span class="comment"> * You can write something into opaque that will subsequently get passed back </span>
+00070 <span class="comment"> * to your send function if you like.  For instance, you might want to</span>
+00071 <span class="comment"> * remember where a PDU came from, so that you can send a reply there...  </span>
+00072 <span class="comment"> */</span>
+00073 
+00074 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00075 netsnmp_aal5pvc_recv(netsnmp_transport *t, <span class="keywordtype">void</span> *buf, <span class=
+"keywordtype">int</span> size,
+00076                      <span class="keywordtype">void</span> **opaque, <span class="keywordtype">int</span> *olength)
+00077 {
+00078     <span class="keywordtype">int</span> rc = -1;
+00079 
+00080     <span class="keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+00081         <span class="keywordflow">while</span> (rc &lt; 0) {
+00082             rc = recv(t-&gt;sock, buf, size, 0);
+00083             <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
+00084                 <span class="keywordflow">break</span>;
+00085             }
+00086         }
+00087 
+00088         <span class="keywordflow">if</span> (rc &gt;= 0) {
+00089             <span class="keywordtype">char</span> *string = netsnmp_aal5pvc_fmtaddr(t, NULL, 0);
+00090             DEBUGMSGTL((<span class="stringliteral">"netsnmp_aal5pvc"</span>,
+00091                         <span class="stringliteral">"recv on fd %d got %d bytes (from %s)\n"</span>, t-&gt;sock,
+00092                         rc, string));
+00093             free(string);
+00094         } <span class="keywordflow">else</span> {
+00095             DEBUGMSGTL((<span class="stringliteral">"netsnmp_aal5pvc"</span>, <span class=
+"stringliteral">"recv on fd %d err %d (\"%s\")\n"</span>, 
+00096                         t-&gt;sock, errno, strerror(errno)));
+00097         }
+00098         *opaque = NULL;
+00099         *olength = 0;
+00100     }
+00101     <span class="keywordflow">return</span> rc;
+00102 }
+00103 
+00104 
+00105 
+00106 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00107 netsnmp_aal5pvc_send(netsnmp_transport *t, <span class="keywordtype">void</span> *buf, <span class=
+"keywordtype">int</span> size,
+00108                   <span class="keywordtype">void</span> **opaque, <span class="keywordtype">int</span> *olength)
+00109 {
+00110     <span class="keywordtype">int</span> rc = -1;
+00111     <span class="keyword">struct </span>sockaddr *to = NULL;
+00112 
+00113     <span class="keywordflow">if</span> (opaque != NULL &amp;&amp; *opaque != NULL &amp;&amp;
+00114         *olength == <span class="keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_atmpvc)) {
+00115         to = (<span class="keyword">struct </span>sockaddr *) (*opaque);
+00116     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (t != NULL &amp;&amp; t-&gt;data != NULL &amp;&amp;
+00117                t-&gt;data_length == <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr_atmpvc)) {
+00118         to = (<span class="keyword">struct </span>sockaddr *) (t-&gt;data);
+00119     }
+00120 
+00121     <span class="keywordflow">if</span> (to != NULL &amp;&amp; t != NULL &amp;&amp; t-&gt;sock &gt;= 0) {
+00122         <span class="keywordtype">char</span> *string = netsnmp_aal5pvc_fmtaddr(NULL, (<span class=
+"keywordtype">void</span> *)to,
+00123                                             <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_atmpvc));
+00124         DEBUGMSGTL((<span class="stringliteral">"netsnmp_aal5pvc"</span>,<span class=
+"stringliteral">"send %d bytes from %p to %s on fd %d\n"</span>,
+00125                     size, buf, string, t-&gt;sock));
+00126         free(string);
+00127         <span class="keywordflow">while</span> (rc &lt; 0) {
+00128             rc = send(t-&gt;sock, buf, size, 0);
+00129             <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
+00130                 <span class="keywordflow">break</span>;
+00131             }
+00132         }
+00133     }
+00134     <span class="keywordflow">return</span> rc;
+00135 }
+00136 
+00137 
+00138 
+00139 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00140 netsnmp_aal5pvc_close(netsnmp_transport *t)
+00141 {
+00142     <span class="keywordtype">int</span> rc = -1;
+00143 
+00144     <span class="keywordflow">if</span> (t-&gt;sock &gt;= 0) {
+00145         DEBUGMSGTL((<span class="stringliteral">"netsnmp_aal5pvc"</span>, <span class=
+"stringliteral">"close fd %d\n"</span>, t-&gt;sock));
+00146 <span class="preprocessor">#ifndef HAVE_CLOSESOCKET</span>
+00147         rc = close(t-&gt;sock);
+00148 <span class="preprocessor">#else</span>
+00149         rc = closesocket(t-&gt;sock);
+00150 <span class="preprocessor">#endif</span>
+00151         t-&gt;sock = -1;
+00152     }
+00153     <span class="keywordflow">return</span> rc;
+00154 }
+00155 
+00156 
+00157 
+00158 <span class="comment">/*</span>
+00159 <span class="comment"> * Open an AAL5 PVC transport for SNMP.  Local is TRUE if addr is the local </span>
+00160 <span class="comment"> * NSAP to bind to (i.e. this is a server-type session); otherwise addr is </span>
+00161 <span class="comment"> * the remote NSAP to send things to.  </span>
+00162 <span class="comment"> */</span>
+00163 
+00164 netsnmp_transport *
+00165 netsnmp_aal5pvc_transport(<span class="keyword">struct</span> sockaddr_atmpvc *addr, <span class=
+"keywordtype">int</span> local)
+00166 {
+00167     <span class="keywordtype">char</span>           *string = NULL;
+00168     <span class="keyword">struct </span>atm_qos  qos;
+00169     netsnmp_transport *t = NULL;
+00170 
+00171     <span class="keywordflow">if</span> (addr == NULL || addr-&gt;sap_family != AF_ATMPVC) {
+00172         <span class="keywordflow">return</span> NULL;
+00173     }
+00174 
+00175     t = (netsnmp_transport *) malloc(<span class="keyword">sizeof</span>(netsnmp_transport));
+00176     <span class="keywordflow">if</span> (t == NULL) {
+00177         <span class="keywordflow">return</span> NULL;
+00178     }
+00179 
+00180     string = netsnmp_aal5pvc_fmtaddr(NULL, (<span class="keywordtype">void</span> *) addr,
+00181                                   <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr_atmpvc));
+00182     DEBUGMSGTL((<span class="stringliteral">"netsnmp_aal5pvc"</span>, <span class=
+"stringliteral">"open %s %s\n"</span>, local ? <span class="stringliteral">"local"</span> : <span class=
+"stringliteral">"remote"</span>,
+00183                 string));
+00184     free(string);
+00185 
+00186     memset(t, 0, <span class="keyword">sizeof</span>(netsnmp_transport));
+00187 
+00188     t-&gt;domain = netsnmp_AAL5PVCDomain;
+00189     t-&gt;domain_length =
+00190         <span class="keyword">sizeof</span>(netsnmp_AAL5PVCDomain) / <span class=
+"keyword">sizeof</span>(netsnmp_AAL5PVCDomain[0]);
+00191 
+00192     t-&gt;sock = socket(PF_ATMPVC, SOCK_DGRAM, 0);
+00193     <span class="keywordflow">if</span> (t-&gt;sock &lt; 0) {
+00194         DEBUGMSGTL((<span class="stringliteral">"netsnmp_aal5pvc"</span>,<span class=
+"stringliteral">"socket failed (%s)\n"</span>,strerror(errno)));
+00195         netsnmp_transport_free(t);
+00196         <span class="keywordflow">return</span> NULL;
+00197     }
+00198     DEBUGMSGTL((<span class="stringliteral">"netsnmp_aal5pvc"</span>, <span class=
+"stringliteral">"fd %d opened\n"</span>, t-&gt;sock));
+00199 
+00200     <span class="comment">/*</span>
+00201 <span class="comment">     * Set up the QOS parameters.  </span>
+00202 <span class="comment">     */</span>
+00203 
+00204     memset(&amp;qos, 0, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> atm_qos));
+00205     qos.aal = ATM_AAL5;
+00206     qos.rxtp.traffic_class = ATM_UBR;
+00207     qos.rxtp.max_sdu = SNMP_MAX_LEN;    <span class="comment">/*  Hmm -- this is a bit small?  */</span>
+00208     qos.txtp = qos.rxtp;
+00209 
+00210     <span class="keywordflow">if</span> (setsockopt(t-&gt;sock, SOL_ATM, SO_ATMQOS, &amp;qos, <span class=
+"keyword">sizeof</span>(qos)) &lt; 0) {
+00211         DEBUGMSGTL((<span class="stringliteral">"netsnmp_aal5pvc"</span>, <span class=
+"stringliteral">"setsockopt failed (%s)\n"</span>,
+00212                     strerror(errno)));
+00213         netsnmp_aal5pvc_close(t);
+00214         netsnmp_transport_free(t);
+00215         <span class="keywordflow">return</span> NULL;
+00216     }
+00217 
+00218     <span class="keywordflow">if</span> (local) {
+00219         t-&gt;local = malloc(8);
+00220         <span class="keywordflow">if</span> (t-&gt;local == NULL) {
+00221             netsnmp_transport_free(t);
+00222             <span class="keywordflow">return</span> NULL;
+00223         }
+00224         t-&gt;local[0] = (addr-&gt;sap_addr.itf &amp; 0xff00) &gt;&gt; 8;
+00225         t-&gt;local[1] = (addr-&gt;sap_addr.itf &amp; 0x00ff) &gt;&gt; 0;
+00226         t-&gt;local[2] = (addr-&gt;sap_addr.vpi &amp; 0xff00) &gt;&gt; 8;
+00227         t-&gt;local[3] = (addr-&gt;sap_addr.vpi &amp; 0x00ff) &gt;&gt; 0;
+00228         t-&gt;local[4] = (addr-&gt;sap_addr.vci &amp; 0xff000000) &gt;&gt; 24;
+00229         t-&gt;local[5] = (addr-&gt;sap_addr.vci &amp; 0x00ff0000) &gt;&gt; 16;
+00230         t-&gt;local[6] = (addr-&gt;sap_addr.vci &amp; 0x0000ff00) &gt;&gt; 8;
+00231         t-&gt;local[7] = (addr-&gt;sap_addr.vci &amp; 0x000000ff) &gt;&gt; 0;
+00232         t-&gt;local_length = 8;
+00233 
+00234         <span class="keywordflow">if</span> (bind(t-&gt;sock, (<span class="keyword">struct</span> sockaddr *) addr,
+00235                  <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_atmpvc)) &lt; 0) {
+00236             DEBUGMSGTL((<span class="stringliteral">"netsnmp_aal5pvc"</span>, <span class=
+"stringliteral">"bind failed (%s)\n"</span>,
+00237                         strerror(errno)));
+00238             netsnmp_aal5pvc_close(t);
+00239             netsnmp_transport_free(t);
+00240             <span class="keywordflow">return</span> NULL;
+00241         }
+00242     } <span class="keywordflow">else</span> {
+00243         t-&gt;remote = malloc(8);
+00244         <span class="keywordflow">if</span> (t-&gt;remote == NULL) {
+00245             netsnmp_transport_free(t);
+00246             <span class="keywordflow">return</span> NULL;
+00247         }
+00248         t-&gt;remote[0] = (addr-&gt;sap_addr.itf &amp; 0xff00) &gt;&gt; 8;
+00249         t-&gt;remote[1] = (addr-&gt;sap_addr.itf &amp; 0x00ff) &gt;&gt; 0;
+00250         t-&gt;remote[2] = (addr-&gt;sap_addr.vpi &amp; 0xff00) &gt;&gt; 8;
+00251         t-&gt;remote[3] = (addr-&gt;sap_addr.vpi &amp; 0x00ff) &gt;&gt; 0;
+00252         t-&gt;remote[4] = (addr-&gt;sap_addr.vci &amp; 0xff000000) &gt;&gt; 24;
+00253         t-&gt;remote[5] = (addr-&gt;sap_addr.vci &amp; 0x00ff0000) &gt;&gt; 16;
+00254         t-&gt;remote[6] = (addr-&gt;sap_addr.vci &amp; 0x0000ff00) &gt;&gt; 8;
+00255         t-&gt;remote[7] = (addr-&gt;sap_addr.vci &amp; 0x000000ff) &gt;&gt; 0;
+00256         t-&gt;remote_length = 8;
+00257 
+00258         <span class="keywordflow">if</span> (connect(t-&gt;sock, (<span class="keyword">struct</span> sockaddr *) addr,
+00259                     <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_atmpvc)) &lt; 0) {
+00260             DEBUGMSGTL((<span class="stringliteral">"netsnmp_aal5pvc"</span>, <span class=
+"stringliteral">"connect failed (%s)\n"</span>,
+00261                         strerror(errno)));
+00262             netsnmp_aal5pvc_close(t);
+00263             netsnmp_transport_free(t);
+00264             <span class="keywordflow">return</span> NULL;
+00265         }
+00266     }
+00267 
+00268     t-&gt;data = malloc(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_atmpvc));
+00269     <span class="keywordflow">if</span> (t-&gt;data == NULL) {
+00270         netsnmp_transport_free(t);
+00271         <span class="keywordflow">return</span> NULL;
+00272     }
+00273     memcpy(t-&gt;data, addr, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_atmpvc));
+00274     t-&gt;data_length = <span class="keyword">sizeof</span>(<span class="keyword">struct </span>sockaddr_atmpvc);
+00275 
+00276     <span class="comment">/*</span>
+00277 <span class="comment">     * 16-bit length field in the trailer, no headers.  </span>
+00278 <span class="comment">     */</span>
+00279 
+00280     t-&gt;msgMaxSize = 0xffff;
+00281     t-&gt;f_recv     = netsnmp_aal5pvc_recv;
+00282     t-&gt;f_send     = netsnmp_aal5pvc_send;
+00283     t-&gt;f_close    = netsnmp_aal5pvc_close;
+00284     t-&gt;f_accept   = NULL;
+00285     t-&gt;f_fmtaddr  = netsnmp_aal5pvc_fmtaddr;
+00286 
+00287     <span class="keywordflow">return</span> t;
+00288 }
+00289 
+00290 
+00291 
+00292 netsnmp_transport *
+00293 netsnmp_aal5pvc_create_tstring(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *string, <span class="keywordtype">int</span> local)
+00294 {
+00295     <span class="keyword">struct </span>sockaddr_atmpvc addr;
+00296 
+00297     <span class="keywordflow">if</span> (string != NULL) {
+00298         addr.sap_family = AF_ATMPVC;
+00299 
+00300         <span class="keywordflow">if</span> (sscanf(string, <span class=
+"stringliteral">"%hd.%hd.%d"</span>, &amp;(addr.sap_addr.itf),
+00301                    &amp;(addr.sap_addr.vpi), &amp;(addr.sap_addr.vci)) == 3) {
+00302             <span class="keywordflow">return</span> netsnmp_aal5pvc_transport(&amp;addr, local);
+00303         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (sscanf(string, <span class=
+"stringliteral">"%hd.%d"</span>, &amp;(addr.sap_addr.vpi),
+00304                           &amp;(addr.sap_addr.vci)) == 2) {
+00305             addr.sap_addr.itf = 0;
+00306             <span class="keywordflow">return</span> netsnmp_aal5pvc_transport(&amp;addr, local);
+00307         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (sscanf(string, <span class=
+"stringliteral">"%d"</span>, &amp;(addr.sap_addr.vci)) == 1) {
+00308             addr.sap_addr.itf = 0;
+00309             addr.sap_addr.vpi = 0;
+00310             <span class="keywordflow">return</span> netsnmp_aal5pvc_transport(&amp;addr, local);
+00311         } <span class="keywordflow">else</span> {
+00312             <span class="keywordflow">return</span> NULL;
+00313         }
+00314     } <span class="keywordflow">else</span> {
+00315         <span class="keywordflow">return</span> NULL;
+00316     }
+00317 }
+00318 
+00319 
+00320 
+00321 netsnmp_transport *
+00322 netsnmp_aal5pvc_create_ostring(<span class="keyword">const</span> u_char * o, size_t o_len, <span class=
+"keywordtype">int</span> local)
+00323 {
+00324     <span class="keyword">struct </span>sockaddr_atmpvc addr;
+00325 
+00326     <span class="keywordflow">if</span> (o_len == 8) {
+00327         addr.sap_family = AF_ATMPVC;
+00328         addr.sap_addr.itf = (o[0] &lt;&lt; 8) + (o[1] &lt;&lt; 0);
+00329         addr.sap_addr.vpi = (o[2] &lt;&lt; 8) + (o[3] &lt;&lt; 0);
+00330         addr.sap_addr.vci =
+00331             (o[4] &lt;&lt; 24) + (o[5] &lt;&lt; 16) + (o[6] &lt;&lt; 8) + (o[7] &lt;&lt; 0);
+00332         <span class="keywordflow">return</span> netsnmp_aal5pvc_transport(&amp;addr, local);
+00333     }
+00334 
+00335     <span class="keywordflow">return</span> NULL;
+00336 }
+00337 
+00338 
+00339 
+00340 <span class="keywordtype">void</span>
+00341 netsnmp_aal5pvc_ctor(<span class="keywordtype">void</span>)
+00342 {
+00343     aal5pvcDomain.name = netsnmp_AAL5PVCDomain;
+00344     aal5pvcDomain.name_length = <span class="keyword">sizeof</span>(netsnmp_AAL5PVCDomain) / <span class=
+"keyword">sizeof</span>(oid);
+00345     aal5pvcDomain.prefix = calloc(3, <span class="keyword">sizeof</span>(<span class="keywordtype">char</span> *));
+00346     aal5pvcDomain.prefix[0] = <span class="stringliteral">"aal5pvc"</span>;
+00347     aal5pvcDomain.prefix[1] = <span class="stringliteral">"pvc"</span>;
+00348 
+00349     aal5pvcDomain.f_create_from_tstring = netsnmp_aal5pvc_create_tstring;
+00350     aal5pvcDomain.f_create_from_ostring = netsnmp_aal5pvc_create_ostring;
+00351 
+00352     netsnmp_tdomain_register(&amp;aal5pvcDomain);
+00353 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:01 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

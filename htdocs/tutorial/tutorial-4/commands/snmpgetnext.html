@@ -1,0 +1,71 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>UCD-SNMP Tutorial -- snmpgetnext</h1>
+    <p>
+      <b>Note:</b>  Much of this tutorial requires <a
+	href="ftp://ftp.sourceforge.net/pub/sourceforge/n/ne/net-snmp/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
+	so make sure you get it before running the commands found in
+	this tutorial.</b> 
+      <p><b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
+      href="/tutorial-5">is available</a> as well.  The commands is
+      the ucd-snmp specific tutorial will not work as expected if you
+      are using net-snmp and not ucd-snmp.
+      <br><br>
+    <hr>
+    <p>
+      The <b>snmpgetnext</b> command, which is similar in usage to the
+      snmpget command, is used to retrieve the <b>next</b> oid in the
+      mib tree of data.  Instead of returing the data you requested,
+      it returns the <b>next</b> OID in the tree and its value:
+<pre>
+<ul>
+% <b>snmpgetnext test.net-snmp.org demopublic system.sysUpTime.0</b>
+system.sysContact.0 = Wes Hardaker wjhardaker@ucdavis.edu
+</ul>
+</pre>
+    <p>
+      You could use the snmpgetnext command to manually walk down the
+      mib tree in the remote host, by always specifying the last OID
+      that you saw on the command line for the next command:
+<pre>
+<ul>
+% <b>snmpgetnext test.net-snmp.org demopublic system.sysUpTime.0</b>
+system.sysContact.0 = Wes Hardaker wjhardaker@ucdavis.edu
+% <b>snmpgetnext test.net-snmp.org demopublic system.sysContact.0</b>
+system.sysName.0 = ucd-snmp
+% <b>snmpgetnext test.net-snmp.org demopublic system.sysName.0</b>
+system.sysLocation.0 = UCDavis
+</ul>
+</pre>
+    <p>In fact, the <a href="snmpwalk.html">snmpwalk</a> command
+    described in the next section, implements exactly this but in one
+    command!
+    <p>
+      Unlike the snmpget command, the snmpgetnext command does return
+      data for a OID which is too short or is missing the index part
+      of the OID.  For instance, if you remember from the last snmpget 
+      discussion, if you left off the .0 on the end of the OID you
+      were requesting on a snmpget command, you were issued an error.
+      With snmpgetnext, you're still issued an answer, because you
+      will always get the next value in the tree, regardless of
+      weather or not you specified a valid OID for a variable or not:
+<pre>
+<ul>
+% <b>snmpgetnext test.net-snmp.org demopublic system.sysUpTime</b>
+system.sysUpTime.0 = Timeticks: (586978184) 67 days, 22:29:41.84
+% <b>snmpgetnext test.net-snmp.org demopublic system</b>
+system.sysDescr.0 = HP-UX ucd-snmp B.10.20 A 9000/715
+% <b>snmpgetnext test.net-snmp.org demopublic .1.3.6</b>
+system.sysDescr.0 = HP-UX ucd-snmp B.10.20 A 9000/715
+</ul>
+</pre>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Thu Nov  4 15:05:29 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Mon Aug  2 10:55:34 EDT 2004
+<!-- hhmts end -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

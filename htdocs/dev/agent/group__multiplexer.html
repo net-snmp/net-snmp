@@ -1,0 +1,220 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>multiplexer: splits mode requests into calls to different handlers.<br />
+  <small>[<a class="el" href="group__utilities.html">utility_handlers: simplify request processing</a>]</small></h1>The
+  multiplexer helper lets you split the calling chain depending on the calling mode (get vs getnext vs set). <a href=
+  "#_details">More...</a>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__multiplexer.html#ga0">netsnmp_get_multiplexer_handler</a> (<a class="el" href=
+      "structnetsnmp__mib__handler__methods.html">netsnmp_mib_handler_methods</a> *req)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">returns a multiplixer handler given a <a class="el" href=
+      "structnetsnmp__mib__handler__methods.html">netsnmp_mib_handler_methods</a> structure of subhandlers. <a href=
+      "#ga0"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__multiplexer.html#ga1">netsnmp_multiplexer_helper_handler</a> (<a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler, <a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">implements the multiplexer helper <a href="#ga1"></a><br /></td>
+    </tr>
+  </table>
+  <hr />
+  <a name="_details" id="_details"></a>
+
+  <h2>Detailed Description</h2>The multiplexer helper lets you split the calling chain depending on the calling mode (get vs
+  getnext vs set).
+
+  <p>Useful if you want different routines to handle different aspects of SNMP requests, which is very common for GET vs SET type
+  actions.</p>
+
+  <p>Functionally:</p>
+
+  <ol type="1">
+    <li>GET requests call the get_method</li>
+
+    <li>GETNEXT requests call the getnext_method, or if not present, the get_method.</li>
+
+    <li>GETBULK requests call the getbulk_method, or if not present, the getnext_method, or if even that isn't present the
+    get_method.</li>
+
+    <li>SET requests call the set_method, or if not present return a SNMP_ERR_NOTWRITABLE error.</li>
+  </ol>
+  <hr />
+
+  <h2>Function Documentation</h2><a class="anchor" name="ga0" doxytag="multiplexer.c::netsnmp_get_multiplexer_handler" id=
+  "ga0"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>* netsnmp_get_multiplexer_handler</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__methods.html">netsnmp_mib_handler_methods</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>req</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>returns a multiplixer handler given a <a class="el" href=
+        "structnetsnmp__mib__handler__methods.html">netsnmp_mib_handler_methods</a> structure of subhandlers.</p>
+
+        <p>Definition at line <a class="el" href="multiplexer_8c-source.html#l00036">36</a> of file <a class="el" href=
+        "multiplexer_8c-source.html">multiplexer.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el"
+        href="agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga1" doxytag="multiplexer.c::netsnmp_multiplexer_helper_handler" id="ga1"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_multiplexer_helper_handler</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>handler</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>requests</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>implements the multiplexer helper</p>
+
+        <p>Definition at line <a class="el" href="multiplexer_8c-source.html#l00057">57</a> of file <a class="el" href=
+        "multiplexer_8c-source.html">multiplexer.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8h-source.html#l00159">netsnmp_agent_request_info_s::mode</a>, <a class=
+        "el" href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00382">netsnmp_call_handler()</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l03496">netsnmp_set_all_requests_error()</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:04 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,164 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>UCD-SNMP Tutorial -- snmptranslate</h1>
+    <p>
+      <b>Note:</b>  Much of this tutorial requires <a
+	href="ftp://ftp.sourceforge.net/pub/sourceforge/n/ne/net-snmp/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
+	so make sure you get it before running the commands found in
+	this tutorial.</b> 
+      <p><b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
+      href="/tutorial-5">is available</a> as well.  The commands is
+      the ucd-snmp specific tutorial will not work as expected if you
+      are using net-snmp and not ucd-snmp.
+      <br><br>
+    <hr>
+    <p>
+      The <b>snmptranslate</b> tool is a very powerful tool that
+      allows you to browse the MIB tree in various ways from the
+      command line.
+    <p>
+      In its simplest form, it merely translates a textual oid into a
+      numerical one:
+<pre>
+<ul>
+% <b>snmptranslate system.sysUpTime.0</b>
+.1.3.6.1.2.1.1.3.0
+</ul>
+</pre>
+    <p>
+      It can also translate into textual as well, by adding the -On
+      flag to its options
+<pre>
+<ul>
+% <b>snmptranslate -On .1.3.6.1.2.1.1.3.0</b>
+system.sysUpTime.0
+</ul>
+</pre>
+    <p>
+      Note that the argument passed can describe a OID in any fashion, 
+      and the -On flag merely toggles which type of output is
+      displayed:
+
+<pre>
+<ul>
+% <b>snmptranslate -On .iso.3.6.1.private.enterprises.2021.2.1.prNames.0</b>
+enterprises.ucdavis.procTable.prEntry.prNames.0
+</ul>
+</pre>
+    <p>
+      Note how the oid was abbreviated for you?  You can change this
+      behaviour as well with -Of (most useful with the -On flag too):
+<pre>
+<ul>
+% <b>snmptranslate -Ofn .iso.3.6.1.private.enterprises.2021.2.1.prNames.0</b>
+.iso.org.dod.internet.private.enterprises.ucdavis.procTable.prEntry.prNames.0
+</ul>
+</pre>
+    <p>
+      The last two commands started with '.' in the beginning of the
+      oid.  This is because they were a fully qualified OID starting
+      from the very root of the tree (.1 == .iso).
+    <p>
+      The first three commands make use of the default prefix that
+      assumes if you don't start with a '.' at the beginning you want
+      a sub section of the <i>mib2</i> tree.  You can change the
+      default prefix by setting the environmental variable
+      <i>PREFIX</i> to be the one you would rather use.
+    <p>
+      The problem with the above commands is that you have to remember
+      the entire OID for what you're looking for, even with the nice
+      prefix.  Now, we wouldn't be a very good package if we didn't
+      provide some sort of random lookup function right?  Well, the
+      good news is that we do.  <i>-IR</i> nicely does this for us, and
+      searches the MIB tree for the node you want:
+<pre>
+<ul>
+% <b>snmptranslate -On sysUpTime.0</b>
+Invalid object identifier: sysUpTime.0
+% <b>snmptranslate -On -IR sysUpTime.0</b>
+system.sysUpTime.0
+</ul>
+</pre>
+    <p> Finally, starting with version 4.1, it'll even try to do regex
+    pattern matching to find the exact node you want given only a
+    piece of its name by using the -Ib (best match) option:
+<pre>
+<ul>
+% <b>snmptranslate -On -Ib 'sys.*ime'</b>
+system.sysUpTime
+</pre>
+</ul>
+    <p> To get a list of all the nodes that match a given pattern, use 
+    the -TB flag:
+
+<pre>
+<ul>
+% <b>snmptranslate -On -TB 'vacm.*table'</b>
+.iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmContextTable
+.iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmSecurityToGroupTable
+.iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmAccessTable
+.iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmMIBViews.vacmViewTreeFamilyTable
+</pre>
+</ul>
+    <p> To get extended information about a mib node, use the -Td
+    (description) flag:
+<pre>
+<ul>
+% <b>snmptranslate -Td -Ib 'sys.*ime'</b>
+.1.3.6.1.2.1.1.3
+sysUpTime OBJECT-TYPE
+  -- FROM	SNMPv2-MIB, RFC1213-MIB
+  SYNTAX	TimeTicks
+  MAX-ACCESS	read-only
+  STATUS	current
+  DESCRIPTION	"The time (in hundredths of a second) since the network
+            management portion of the system was last re-initialized."
+::= { iso(1) org(3) dod(6) internet(1) mgmt(2) mib-2(1) system(1) 3 }
+</ul>
+</pre>
+    <p> Finally, last but certainly not least, if you want a pretty
+    diagram of a section of the mib tree, check out the -Tp flag:
+<pre>
+<ul>
+% <b>snmptranslate -Tp system</b>
++--system(1)
+   |
+   +-- -R-- String    sysDescr(1)
+   |        Textual Convention: DisplayString
+   +-- -R-- ObjID     sysObjectID(2)
+   +-- -R-- TimeTicks sysUpTime(3)
+   +-- -RW- String    sysContact(4)
+   |        Textual Convention: DisplayString
+   +-- -RW- String    sysName(5)
+   |        Textual Convention: DisplayString
+   +-- -RW- String    sysLocation(6)
+   |        Textual Convention: DisplayString
+   +-- -R-- Integer   sysServices(7)
+   +-- -R-- TimeTicks sysORLastChange(8)
+   |        Textual Convention: TimeStamp
+   |
+   +--sysORTable(9)
+      |
+      +--sysOREntry(1)
+         |
+         +-- ---- Integer   sysORIndex(1)
+         +-- -R-- ObjID     sysORID(2)
+         +-- -R-- String    sysORDescr(3)
+         |        Textual Convention: DisplayString
+         +-- -R-- TimeTicks sysORUpTime(4)
+                  Textual Convention: TimeStamp
+</ul>
+</pre>
+    <p> As a homework assignment, we'll leave it up to you to run
+    <i>snmptranslate -Tp</i> without an oid argument, which prints the
+    known MIB tree in its entirety.
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Thu Nov  4 14:22:55 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Mon Aug  2 10:56:37 EDT 2004
+<!-- hhmts end -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

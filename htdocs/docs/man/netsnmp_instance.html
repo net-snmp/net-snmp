@@ -1,0 +1,234 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>group__instance</h1>Section: net-snmp (3)<br />
+    Updated: 28 Oct 2004<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>instance: process individual MIB instances easily. - <a name="lbAC" id="lbAC"> </a>
+
+    <h3>Functions</h3>
+
+    <p><br />
+    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_instance_handler</b> (void)<br />
+    <i>Creates an instance helper handler, calls netsnmp_create_handler, which then could be registered, using</i>
+    <b>netsnmp_register_handler()</b>.<br />
+    int <b>netsnmp_register_instance</b> (<b>netsnmp_handler_registration</b> *reginfo)<br />
+    <i>This function registers an instance helper handler, which is a way of registering an exact OID such that GENEXT requests
+    are handled entirely by the helper.</i><br />
+    int <b>netsnmp_register_read_only_instance</b> (<b>netsnmp_handler_registration</b> *reginfo)<br />
+    <i>This function injects a 'read only' handler into the handler chain prior to serializing/registering the handler.</i><br />
+    int <b>netsnmp_register_read_only_ulong_instance</b> (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it,
+    Netsnmp_Node_Handler *subhandler)<br />
+    <br />
+    int <b>netsnmp_register_ulong_instance</b> (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it,
+    Netsnmp_Node_Handler *subhandler)<br />
+    <br />
+    int <b>netsnmp_register_read_only_counter32_instance</b> (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it,
+    Netsnmp_Node_Handler *subhandler)<br />
+    <br />
+    int <b>netsnmp_register_read_only_long_instance</b> (const char *name, oid *reg_oid, size_t reg_oid_len, long *it,
+    Netsnmp_Node_Handler *subhandler)<br />
+    <br />
+    int <b>netsnmp_register_long_instance</b> (const char *name, oid *reg_oid, size_t reg_oid_len, long *it, Netsnmp_Node_Handler
+    *subhandler)<br />
+    <br />
+    int <b>netsnmp_register_read_only_int_instance</b> (const char *name, oid *reg_oid, size_t reg_oid_len, int *it,
+    Netsnmp_Node_Handler *subhandler)<br />
+    <br />
+    int <b>register_read_only_int_instance</b> (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler
+    *subhandler)<br />
+    <br />
+    int <b>netsnmp_register_read_only_ulong_instance_context</b> (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it,
+    Netsnmp_Node_Handler *subhandler, const char *contextName)<br />
+    <br />
+    int <b>netsnmp_register_ulong_instance_context</b> (const char *name, oid *reg_oid, size_t reg_oid_len, u_long *it,
+    Netsnmp_Node_Handler *subhandler, const char *contextName)<br />
+    <br />
+    int <b>netsnmp_register_read_only_counter32_instance_context</b> (const char *name, oid *reg_oid, size_t reg_oid_len, u_long
+    *it, Netsnmp_Node_Handler *subhandler, const char *contextName)<br />
+    <br />
+    int <b>netsnmp_register_read_only_long_instance_context</b> (const char *name, oid *reg_oid, size_t reg_oid_len, long *it,
+    Netsnmp_Node_Handler *subhandler, const char *contextName)<br />
+    <br />
+    int <b>netsnmp_register_long_instance_context</b> (const char *name, oid *reg_oid, size_t reg_oid_len, long *it,
+    Netsnmp_Node_Handler *subhandler, const char *contextName)<br />
+    <br />
+    int <b>netsnmp_register_read_only_int_instance_context</b> (const char *name, oid *reg_oid, size_t reg_oid_len, int *it,
+    Netsnmp_Node_Handler *subhandler, const char *contextName)<br />
+    <br />
+    int <b>register_read_only_int_instance_context</b> (const char *name, oid *reg_oid, size_t reg_oid_len, int *it,
+    Netsnmp_Node_Handler *subhandler, const char *contextName)<br />
+    <br />
+    int <b>netsnmp_register_int_instance</b> (const char *name, oid *reg_oid, size_t reg_oid_len, int *it, Netsnmp_Node_Handler
+    *subhandler)<br />
+    <i>This function registers an int helper handler to a specified OID.</i><br />
+    int <b>netsnmp_instance_ulong_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b> *reginfo,
+    <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
+    <br />
+    int <b>netsnmp_instance_counter32_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b>
+    *reginfo, <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
+    <br />
+    int <b>netsnmp_instance_long_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b> *reginfo,
+    <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
+    <br />
+    int <b>netsnmp_instance_int_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b> *reginfo,
+    <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
+    <br />
+    int <b>netsnmp_instance_helper_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b>
+    *reginfo, <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
+    <a name="lbAD" id="lbAD"> </a></p>
+
+    <h2>Function Documentation</h2>
+
+    <p><a name="lbAE" id="lbAE"> </a></p>
+
+    <h3><b>netsnmp_mib_handler</b>* netsnmp_get_instance_handler (void)</h3>
+
+    <p>Creates an instance helper handler, calls netsnmp_create_handler, which then could be registered, using
+    <b>netsnmp_register_handler()</b>.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd>
+        <i>void</i> .RE
+
+        <p><b>Returns:</b></p>
+
+        <dl compact="compact">
+          <dd>Returns a pointer to a netsnmp_mib_handler struct which contains the handler's name and the access method</dd>
+        </dl>
+
+        <p>Definition at line 46 of file instance.c.</p>
+
+        <p>References netsnmp_create_handler().</p>
+
+        <p>Referenced by netsnmp_register_instance(), netsnmp_register_read_only_instance(), netsnmp_register_read_only_scalar(),
+        and netsnmp_register_scalar().</p>
+      </dd>
+    </dl><a name="lbAF" id="lbAF"> </a>
+
+    <h3>int netsnmp_register_instance (<b>netsnmp_handler_registration</b> * reginfo)</h3>
+
+    <p>This function registers an instance helper handler, which is a way of registering an exact OID such that GENEXT requests
+    are handled entirely by the helper.</p>
+
+    <p>First need to inject it into the calling chain of the handler defined by the netsnmp_handler_registration struct, reginfo.
+    The new handler is injected at the top of the list and will be the new handler to be called first. This function also injects
+    a serialize handler before actually calling netsnmp_register_handle, registering reginfo.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>reginfo</i> a handler registration structure which could get created using netsnmp_create_handler_registration. Used
+      to register an instance helper handler.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILED and
+      MIB_DUPLICATE_REGISTRATION.</dd>
+    </dl>
+
+    <p><b>Examples:</b> <b>delayed_instance.c</b>.</p>
+
+    <p>Definition at line 71 of file instance.c.</p>
+
+    <p>References netsnmp_get_instance_handler(), netsnmp_handler_registration, netsnmp_inject_handler(), and
+    netsnmp_register_serialize().</p>
+
+    <p>Referenced by netsnmp_register_int_instance(). <a name="lbAG" id="lbAG"> </a></p>
+
+    <h3>int netsnmp_register_int_instance (const char * name, oid * reg_oid, size_t reg_oid_len, int * it, Netsnmp_Node_Handler *
+    subhandler)</h3>
+
+    <p>This function registers an int helper handler to a specified OID.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>name</i> the name used for registration pruposes.<br />
+      <i>reg_oid</i> the OID where you want to register your integer at<br />
+      <i>reg_oid_len</i> the length of the OID<br />
+      <i>it</i> the integer value to be registered during initialization<br />
+      <i>subhandler</i> a handler to do whatever you want to do, otherwise use NULL to use the default int handler.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILED and
+      MIB_DUPLICATE_REGISTRATION.</dd>
+    </dl>
+
+    <p><b>Examples:</b> <b>scalar_int.c</b>.</p>
+
+    <p>Definition at line 372 of file instance.c.</p>
+
+    <p>References netsnmp_handler_registration, and netsnmp_register_instance(). <a name="lbAH" id="lbAH"> </a></p>
+
+    <h3>int netsnmp_register_read_only_instance (<b>netsnmp_handler_registration</b> * reginfo)</h3>
+
+    <p>This function injects a 'read only' handler into the handler chain prior to serializing/registering the handler.</p>
+
+    <p>The only purpose of this 'read only' handler is to return an appropriate error for any requests passed to it in a SET
+    mode. Inserting it into your handler chain will ensure you're never asked to perform a SET request so you can ignore those
+    error conditions.</p>
+
+    <p><b>Parameters:</b></p>
+
+    <dl compact="compact">
+      <dd><i>reginfo</i> a handler registration structure which could get created using netsnmp_create_handler_registration. Used
+      to register a read only instance helper handler.</dd>
+    </dl>
+
+    <p><b>Returns:</b></p>
+
+    <dl compact="compact">
+      <dd>MIB_REGISTERED_OK is returned if the registration was a success. Failures are MIB_REGISTRATION_FAILED and
+      MIB_DUPLICATE_REGISTRATION.</dd>
+    </dl>
+
+    <p>Definition at line 96 of file instance.c.</p>
+
+    <p>References netsnmp_get_instance_handler(), netsnmp_get_read_only_handler(), netsnmp_handler_registration,
+    netsnmp_inject_handler(), and netsnmp_register_serialize().</p>
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAC">Functions</a></dt>
+        </dl>
+      </dd>
+
+      <dt><a href="#lbAD">Function Documentation</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAE"><b>netsnmp_mib_handler</b>* netsnmp_get_instance_handler (void)</a></dt>
+
+          <dt><a href="#lbAF">int netsnmp_register_instance (<b>netsnmp_handler_registration</b> * reginfo)</a></dt>
+
+          <dt><a href="#lbAG">int netsnmp_register_int_instance (const char * name, oid * reg_oid, size_t reg_oid_len, int * it,
+          Netsnmp_Node_Handler * subhandler)</a></dt>
+
+          <dt><a href="#lbAH">int netsnmp_register_read_only_instance (<b>netsnmp_handler_registration</b> * reginfo)</a></dt>
+        </dl>
+      </dd>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:43 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,206 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>MFD: ifXTable</title>
+  </head>
+
+  <body bgcolor="#ffffff">
+    <!-- ========================================================= -->
+    <h1>Running mib2c</h1>
+    <p>
+      The first step is to generate the code. Create a new directory somewhere
+      and run:
+    </p>
+    <table><tr><td width=20></td><td><td bgcolor=CCCCCC>
+            <pre>$ <font color=blue>mib2c -c mfd-top.m2c ifXTable</font>
+writing to ifXTable.h
+| +-> Processing table ifXTable
+writing to -
+There are no defaults for ifXTable. Would you like to
+
+  1) Accept hard-coded defaults [DEFAULT]
+  2) Set defaults now
+
+Select your choice : <font color=blue>2</font>
+
+</pre><td>
+Notes:<br> Select '2', to change some of the defaults.
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+
+This table has writable columns. Do you want to generate
+code for writeable columns, or restrict the table to read-only?
+
+  1) generate code with writeable columns [DEFAULT]
+  2) generate code with read-only columns
+
+Select your choice : <font color=blue>[RETURN]</font>
+
+</pre><td>
+Notes:<br>We will be implementing set support.
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+
+Writable tables sometimes have dependencies beteen columns
+or with other tables. If there are no dependencies in this table, you
+might want the extra code.
+
+  1) do not generate dependency code [DEFAULT]
+  2) generate dependency code
+
+Select your choice : <font color=blue>[RETURN]</font>
+
+</pre><td>
+Notes:<br> While the ifXTable is related to the ifTable, the two tables do
+not have any dependencies.
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+
+Do you want to use an existing data structure for the USER context?
+
+  1) No, use netsnmp_data_list * [DEFAULT]
+  2) Yes, use my own structure
+
+Select your choice : <font color=blue>[RETURN]</font>
+
+</pre><td>
+Notes:<br> We don't need to track anything at the table level, so
+we'll just accept the default.
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+
+Do you want to use an existing data structure for the DATA context?
+
+  1) No, use generated [DEFAULT]
+  2) Yes, use my own structure
+
+Select your choice : <font color=blue>2</font>
+Enter your DATA context : <font color=blue>netsnmp_interface_entry</font>
+
+</pre><td>
+Notes:<br> We'll be using the net-snmp access routines to get interface
+data, so we'll just use the netsnmp_interface_entry structure to
+keep that data.
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+
+Do you want to allocate your 'netsnmp_interface_entry', or
+embed it directly?
+
+  1) directly embed structure [DEFAULT]
+  2) dynamically allocate structure
+
+Select your choice : <font color=blue>2</font>
+
+</pre><td>
+Notes:<br> The net-snmp access routines will provide us with allocated
+structures, so we'll just use those instead of copying them to an
+embeded structure.
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+
+Do you need to initialize elements in your 'netsnmp_interface_entry'
+when a new instance is created?
+
+  1) no, no initialization needed [DEFAULT]
+  2) yes, initilization is needed
+
+Select your choice : <font color=blue>[RETURN]</font>
+
+</pre><td>
+Notes:<br> We'll be using the net-snmp data access routines to create
+the netsnmp_interface_entry structures, and those routines will
+take care of initialization for us.
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+
+Which method would you like to use to gather data about available rows?
+
+  1) container-cached : [DEFAULT]  This access method uses a
+     netsnmp_container to keep track of the indexes (and data, usually)
+     for each row. Thi method is best for:
+         - Internal data (maintained by the agent)
+         - External data (maintained by another process) which can be
+           cached (minumum cache time is 1 second)
+     
+  2) unsorted-external : This access method iterates over all of your data
+     to find the row with the appropriate index. This method is best for
+         - External data that cannot be cached.
+
+Select your choice : <font color=blue>[RETURN]</font>
+
+</pre><td>
+Notes:<br> We are going to keep a cache and refresh it periodically.
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+
+When accessing your data, is your data TRANSIENT?
+
+  1) Yes. My data is TRANSIENT (e.g. a pointer to a static buffer that
+     my be overwritten during a request) and needs to be copied during
+     processing.
+
+  2) Yes. My data is SEMI-TRANSIENT (e.g. an allocated pointer to a
+     copy of the data).
+
+  3) No, my data is PERSISTENT (e.g. an allocated pointer to the actual
+     data, which is under the agent's control)
+
+Select your choice [DEFAULT=1] : <font color=blue>2</font>
+
+</pre><td>
+Notes:<br> We get a copy of the interface data via the netsnmp data access
+functions.
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+
+Do you want example code to be generated?
+
+  1) generate example code [DEFAULT]
+  2) do not generate example code
+
+Select your choice : <font color=blue>2</font></pre>
+</pre><td>
+Notes:<br> We saw the example code in the last tutorial, so we'll skip
+it this time.
+</td></tr></table>
+    <p>
+      As before, when finished, you should have several files:
+    </p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+<a href="source/ifXTable.c">ifXTable.c</a>
+<a href="source/ifXTable_data_access.c">ifXTable_data_access.c</a>
+<a href="source/ifXTable_data_access.h">ifXTable_data_access.h</a>
+<a href="source/ifXTable_data_get.c">ifXTable_data_get.c</a>
+<a href="source/ifXTable_data_get.h">ifXTable_data_get.h</a>
+<a href="source/ifXTable_data_set.c">ifXTable_data_set.c</a>
+<a href="source/ifXTable_data_set.h">ifXTable_data_set.h</a>
+<a href="source/ifXTable_enums.h">ifXTable_enums.h</a>
+<a href="source/ifXTable.h">ifXTable.h</a>
+<a href="source/ifXTable_interface.c">ifXTable_interface.c</a>
+<a href="source/ifXTable_interface.h">ifXTable_interface.h</a>
+<a href="source/ifXTable_Makefile">ifXTable_Makefile</a>
+<a href="source/ifXTable_oids.h">ifXTable_oids.h</a>
+<a href="source/ifXTable-README-FIRST.txt">ifXTable-README-FIRST.txt</a>
+<a href="source/ifXTable-README-ifXTable.txt">ifXTable-README-ifXTable.txt</a>
+<a href="source/ifXTable_subagent.c">ifXTable_subagent.c</a>
+</pre></td></tr></table>
+    <p>
+      You should read <var>ifXTable-README-FIRST.txt</var> for a basic overview
+      of MFD. The basic steps outlined in
+      <var>ifXTable-README-ifXTable.txt</var> were used to write this tutorial.
+    </p>
+      <!-- ========================================================= -->
+    <p></p><font size=+1>
+      <a href="structures.html">Next: data structures</a>
+      <a href="mib2c.html">Back: running mib2c</a> |
+      <a href="../index.html">Up: IF-MIB Tutorials</a>
+    </font>
+    <!-- ========================================================= -->
+    <hr>
+    rstory at freesnmp dot com<br>
+Version $Revision$
+<!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
+<!-- hhmts start -->
+Last modified: Mon May  3 13:12:17 EDT 2004
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+  </body>
+</html>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,230 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>read_config.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> *  read_config.h: reads configuration files for extensible sections.</span>
+00003 <span class="comment"> *</span>
+00004 <span class="comment"> */</span>
+00005 <span class="preprocessor">#ifndef READ_CONFIG_H</span>
+00006 <span class="preprocessor">#define READ_CONFIG_H</span>
+00007 
+00008 <span class="preprocessor">#ifdef __cplusplus</span>
+00009 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00010 <span class="preprocessor">#endif</span>
+00011 
+00012 <span class="preprocessor">#define STRINGMAX 1024</span>
+00013 
+00014 <span class="preprocessor">#define NORMAL_CONFIG 0</span>
+00015 <span class="preprocessor">#define PREMIB_CONFIG 1</span>
+00016 <span class="preprocessor">#define EITHER_CONFIG 2</span>
+00017 
+00018 
+00019 
+00020     <span class="comment">/*</span>
+00021 <span class="comment">     * Defines a set of file types and the parse and free functions</span>
+00022 <span class="comment">     * which process the syntax following a given token in a given file.</span>
+00023 <span class="comment">     */</span>
+00024     <span class="keyword">struct </span>config_files {
+00025         <span class="keywordtype">char</span>           *fileHeader;     <span class=
+"comment">/* Label for entire file. */</span>
+00026         <span class="keyword">struct </span>config_line *start;
+00027         <span class="keyword">struct </span>config_files *next;
+00028     };
+00029 
+00030     <span class="keyword">struct </span>config_line {
+00031         <span class="keywordtype">char</span>           *config_token;   <span class=
+"comment">/* Label for each line parser</span>
+00032 <span class="comment">                                         * in the given file. */</span>
+00033         void            (*parse_line) (<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keywordtype">char</span> *);
+00034         void            (*free_func) (void);
+00035         <span class="keyword">struct </span>config_line *next;
+00036         <span class="keywordtype">char</span>            config_time;    <span class=
+"comment">/* {NORMAL,PREMIB,EITHER}_CONFIG */</span>
+00037         <span class="keywordtype">char</span>           *help;
+00038     };
+00039 
+00040     <span class="keyword">struct </span>read_config_memory {
+00041         <span class="keywordtype">char</span>           *line;
+00042         <span class="keyword">struct </span>read_config_memory *next;
+00043     };
+00044 
+00045 
+00046     <span class="keywordtype">int</span>             netsnmp_config(<span class=
+"keywordtype">char</span> *);     <span class="comment">/* parse a simple line: token=values */</span>
+00047     <span class="keywordtype">void</span>            netsnmp_config_remember(<span class=
+"keywordtype">char</span> *);    <span class="comment">/* process later, during snmp_init() */</span>
+00048     <span class="keywordtype">void</span>            netsnmp_config_process_memories(<span class=
+"keywordtype">void</span>);      <span class="comment">/* run all memories through parser */</span>
+00049     <span class="keywordtype">void</span>            read_config(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">struct</span> config_line *, <span class="keywordtype">int</span>);
+00050     <span class="keywordtype">void</span>            read_configs(<span class="keywordtype">void</span>);
+00051     <span class="keywordtype">void</span>            read_premib_configs(<span class="keywordtype">void</span>);
+00052     <span class="keywordtype">void</span>            read_config_files(<span class="keywordtype">int</span>);
+00053     <span class="keywordtype">void</span>            free_config(<span class="keywordtype">void</span>);
+00054     <span class="keywordtype">void</span>            config_perror(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+00055     <span class="keywordtype">void</span>            config_pwarn(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+00056     <span class="keywordtype">char</span>           *skip_white(<span class="keywordtype">char</span> *);
+00057     <span class="keywordtype">char</span>           *skip_not_white(<span class="keywordtype">char</span> *);
+00058     <span class="keywordtype">char</span>           *skip_token(<span class="keywordtype">char</span> *);
+00059     <span class="keywordtype">char</span>           *copy_nword(<span class="keywordtype">char</span> *, <span class=
+"keywordtype">char</span> *, <span class="keywordtype">int</span>);
+00060     <span class="keywordtype">char</span>           *copy_word(<span class="keywordtype">char</span> *, <span class=
+"keywordtype">char</span> *);  <span class="comment">/* do not use */</span>
+00061     <span class="keywordtype">void</span>            read_config_with_type(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00062     <span class="keyword">struct </span>config_line *<a class="code" href=
+"group__read__config.html#ga8">register_config_handler</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *,
+00063                                                 <span class="keywordtype">void</span> (*parser) (<span class=
+"keyword">const</span> <span class="keywordtype">char</span>
+00064                                                                 *, <span class="keywordtype">char</span> *),
+00065                                                 <span class="keywordtype">void</span> (*releaser) (<span class=
+"keywordtype">void</span>),
+00066                                                 <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+00067     <span class="keyword">struct </span>config_line *register_app_config_handler(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+00068                                                     <span class="keywordtype">void</span> (*parser) (<span class=
+"keyword">const</span>
+00069                                                                     <span class="keywordtype">char</span> *,
+00070                                                                     <span class="keywordtype">char</span>
+00071                                                                     *),
+00072                                                     <span class="keywordtype">void</span> (*releaser)
+00073                                                     (<span class="keywordtype">void</span>), <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *);
+00074     <span class="keyword">struct </span>config_line *register_prenetsnmp_mib_handler(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+00075                                                         <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *,
+00076                                                         <span class="keywordtype">void</span> (*parser)
+00077                                                         (<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *,
+00078                                                          <span class="keywordtype">char</span> *),
+00079                                                         <span class="keywordtype">void</span> (*releaser)
+00080                                                         (<span class="keywordtype">void</span>),
+00081                                                         <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+00082     <span class="keyword">struct </span>config_line *register_app_prenetsnmp_mib_handler(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *,
+00083                                                             <span class="keywordtype">void</span> (*parser)
+00084                                                             (<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *,
+00085                                                              <span class="keywordtype">char</span> *),
+00086                                                             <span class="keywordtype">void</span>
+00087                                                             (*releaser)
+00088                                                             (<span class="keywordtype">void</span>),
+00089                                                             <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+00090     <span class="keywordtype">void</span>            <a class="code" href=
+"group__read__config.html#ga10">unregister_config_handler</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00091     <span class="keywordtype">void</span>            unregister_app_config_handler(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *);
+00092     <span class="keywordtype">void</span>            unregister_all_config_handlers(<span class="keywordtype">void</span>);
+00093     <span class="keywordtype">void</span>            read_config_print_usage(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *lead);
+00094     <span class="keywordtype">char</span>           *read_config_save_octet_string(<span class=
+"keywordtype">char</span> *saveto,
+00095                                                   u_char * str,
+00096                                                   size_t len);
+00097     <span class="keywordtype">char</span>           *read_config_read_octet_string(<span class=
+"keywordtype">char</span> *readfrom,
+00098                                                   u_char ** str,
+00099                                                   size_t * len);
+00100     <span class="keywordtype">char</span>           *read_config_read_objid(<span class=
+"keywordtype">char</span> *readfrom, oid ** objid,
+00101                                            size_t * len);
+00102     <span class="keywordtype">char</span>           *read_config_save_objid(<span class=
+"keywordtype">char</span> *saveto, oid * objid,
+00103                                            size_t len);
+00104     <span class="keywordtype">char</span>           *<a class="code" href=
+"group__read__config.html#ga52">read_config_read_data</a>(<span class="keywordtype">int</span> type, <span class=
+"keywordtype">char</span> *readfrom,
+00105                                           <span class="keywordtype">void</span> *dataptr, size_t * len);
+00106     <span class="keywordtype">char</span>           *read_config_read_memory(<span class=
+"keywordtype">int</span> type, <span class="keywordtype">char</span> *readfrom,
+00107                                             <span class="keywordtype">char</span> *dataptr, size_t * len);
+00108     <span class="keywordtype">char</span>           *<a class="code" href=
+"group__read__config.html#ga54">read_config_store_data</a>(<span class="keywordtype">int</span> type, <span class=
+"keywordtype">char</span> *storeto,
+00109                                            <span class="keywordtype">void</span> *dataptr, size_t * len);
+00110     <span class="keywordtype">char</span>           *read_config_store_data_prefix(<span class=
+"keywordtype">char</span> prefix, <span class="keywordtype">int</span> type,
+00111                                                   <span class="keywordtype">char</span> *storeto,
+00112                                                   <span class="keywordtype">void</span> *dataptr, size_t len);
+00113     <span class="keywordtype">void</span>            <a class="code" href=
+"group__read__config.html#ga37">read_config_store</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type, <span class="keyword">const</span> <span class="keywordtype">char</span> *line);
+00114     <span class="keywordtype">void</span>            read_app_config_store(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *line);
+00115     <span class="keywordtype">void</span>            snmp_save_persistent(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type);
+00116     <span class="keywordtype">void</span>            snmp_clean_persistent(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type);
+00117     <span class="keyword">struct </span>config_line *read_config_get_handlers(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *type);
+00118 
+00119     <span class="comment">/*</span>
+00120 <span class="comment">     * external memory list handlers </span>
+00121 <span class="comment">     */</span>
+00122     <span class="keywordtype">void</span>            snmp_config_remember_in_list(<span class=
+"keywordtype">char</span> *line,
+00123                                                  <span class="keyword">struct</span> read_config_memory
+00124                                                  **mem);
+00125     <span class="keywordtype">void</span>            snmp_config_process_memory_list(<span class="keyword">struct</span>
+00126                                                     read_config_memory
+00127                                                     **mem, <span class="keywordtype">int</span>, <span class=
+"keywordtype">int</span>);
+00128     <span class="keywordtype">void</span>            snmp_config_remember_free_list(<span class="keyword">struct</span>
+00129                                                    read_config_memory
+00130                                                    **mem);
+00131 
+00132     <span class="keywordtype">void</span>            set_configuration_directory(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *dir);
+00133     <span class="keyword">const</span> <span class="keywordtype">char</span>     *get_configuration_directory(<span class=
+"keywordtype">void</span>);
+00134     <span class="keywordtype">void</span>            set_persistent_directory(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *dir);
+00135     <span class="keyword">const</span> <span class="keywordtype">char</span>     *get_persistent_directory(<span class=
+"keywordtype">void</span>);
+00136     <span class="keywordtype">void</span>            set_temp_file_pattern(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *pattern);
+00137     <span class="keyword">const</span> <span class="keywordtype">char</span>     *get_temp_file_pattern(<span class=
+"keywordtype">void</span>);
+00138     <span class="keywordtype">void</span>            handle_long_opt(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *myoptarg);
+00139 
+00140 <span class="preprocessor">#ifdef __cplusplus</span>
+00141 }
+00142 <span class="preprocessor">#endif</span>
+00143 <span class="preprocessor">#endif                          </span><span class="comment">/* READ_CONFIG_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:58 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,621 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>keytools.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00002 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00003 <span class="comment"> * that may apply:</span>
+00004 <span class="comment"> */</span>
+00005 <span class="comment">/*</span>
+00006 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00007 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00008 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00009 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00010 <span class="comment"> */</span>
+00011 
+00012 <span class="comment">/*</span>
+00013 <span class="comment"> * keytools.c</span>
+00014 <span class="comment"> */</span>
+00015 
+00016 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00017 
+00018 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00019 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00020 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00021 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00022 <span class="preprocessor">#endif</span>
+00023 <span class="preprocessor">#ifdef HAVE_NETINET_IN_H</span>
+00024 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00025 <span class="preprocessor">#endif</span>
+00026 <span class="preprocessor">#ifdef HAVE_STDLIB_H</span>
+00027 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00028 <span class="preprocessor">#endif</span>
+00029 <span class="preprocessor">#if HAVE_STRING_H</span>
+00030 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00031 <span class="preprocessor">#else</span>
+00032 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00033 <span class="preprocessor">#endif</span>
+00034 
+00035 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00036 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00037 <span class="preprocessor">#endif</span>
+00038 
+00039 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00040 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00041 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00042 
+00043 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00044 <span class="preprocessor">#ifdef USE_OPENSSL</span>
+00045 <span class="preprocessor">#       include &lt;openssl/hmac.h&gt;</span>
+00046 <span class="preprocessor">#else</span>
+00047 <span class="preprocessor">#ifdef USE_INTERNAL_MD5</span>
+00048 <span class="preprocessor">#include &lt;net-snmp/library/md5.h&gt;</span>
+00049 <span class="preprocessor">#endif</span>
+00050 <span class="preprocessor">#endif</span>
+00051 
+00052 <span class="preprocessor">#ifdef USE_PKCS</span>
+00053 <span class="preprocessor">#include &lt;security/cryptoki.h&gt;</span>
+00054 <span class="preprocessor">#endif</span>
+00055 
+00056 <span class="preprocessor">#include &lt;net-snmp/library/scapi.h&gt;</span>
+00057 <span class="preprocessor">#include &lt;net-snmp/library/keytools.h&gt;</span>
+00058 
+00059 <span class="preprocessor">#include &lt;net-snmp/library/transform_oids.h&gt;</span>
+00060 
+00061 <span class="comment">/*******************************************************************-o-******</span>
+00062 <span class="comment"> * generate_Ku</span>
+00063 <span class="comment"> *</span>
+00064 <span class="comment"> * Parameters:</span>
+00065 <span class="comment"> *      *hashtype       MIB OID for the transform type for hashing.</span>
+00066 <span class="comment"> *       hashtype_len   Length of OID value.</span>
+00067 <span class="comment"> *      *P              Pre-allocated bytes of passpharase.</span>
+00068 <span class="comment"> *       pplen          Length of passphrase.</span>
+00069 <span class="comment"> *      *Ku             Buffer to contain Ku.</span>
+00070 <span class="comment"> *      *kulen          Length of Ku buffer.</span>
+00071 <span class="comment"> *      </span>
+00072 <span class="comment"> * Returns:</span>
+00073 <span class="comment"> *      SNMPERR_SUCCESS                 Success.</span>
+00074 <span class="comment"> *      SNMPERR_GENERR                  All errors.</span>
+00075 <span class="comment"> *</span>
+00076 <span class="comment"> *</span>
+00077 <span class="comment"> * Convert a passphrase into a master user key, Ku, according to the</span>
+00078 <span class="comment"> * algorithm given in RFC 2274 concerning the SNMPv3 User Security Model (USM)</span>
+00079 <span class="comment"> * as follows:</span>
+00080 <span class="comment"> *</span>
+00081 <span class="comment"> * Expand the passphrase to fill the passphrase buffer space, if necessary,</span>
+00082 <span class="comment"> * concatenation as many duplicates as possible of P to itself.  If P is</span>
+00083 <span class="comment"> * larger than the buffer space, truncate it to fit.</span>
+00084 <span class="comment"> *</span>
+00085 <span class="comment"> * Then hash the result with the given hashtype transform.  Return</span>
+00086 <span class="comment"> * the result as Ku.</span>
+00087 <span class="comment"> *</span>
+00088 <span class="comment"> * If successful, kulen contains the size of the hash written to Ku.</span>
+00089 <span class="comment"> *</span>
+00090 <span class="comment"> * NOTE  Passphrases less than USM_LENGTH_P_MIN characters in length</span>
+00091 <span class="comment"> *       cause an error to be returned.</span>
+00092 <span class="comment"> *       (Punt this check to the cmdline apps?  XXX)</span>
+00093 <span class="comment"> */</span>
+00094 <span class="keywordtype">int</span>
+00095 generate_Ku(<span class="keyword">const</span> oid * hashtype, u_int hashtype_len,
+00096             u_char * P, size_t pplen, u_char * Ku, size_t * kulen)
+00097 #<span class="keywordflow">if</span> defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
+00098 {
+00099     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS,
+00100         nbytes = USM_LENGTH_EXPANDED_PASSPHRASE;
+00101 
+00102     u_int           i, pindex = 0;
+00103 
+00104     u_char          buf[USM_LENGTH_KU_HASHBLOCK], *bufp;
+00105 
+00106 <span class="preprocessor">#ifdef USE_OPENSSL</span>
+00107     EVP_MD_CTX     *ctx = malloc(<span class="keyword">sizeof</span>(EVP_MD_CTX));
+00108 <span class="preprocessor">#else</span>
+00109     MDstruct        MD;
+00110 <span class="preprocessor">#endif</span>
+00111     <span class="comment">/*</span>
+00112 <span class="comment">     * Sanity check.</span>
+00113 <span class="comment">     */</span>
+00114     <span class="keywordflow">if</span> (!hashtype || !P || !Ku || !kulen || (*kulen &lt;= 0)
+00115         || (hashtype_len != USM_LENGTH_OID_TRANSFORM)) {
+00116         QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
+00117     }
+00118 
+00119     <span class="keywordflow">if</span> (pplen &lt; USM_LENGTH_P_MIN) {
+00120         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"Error: passphrase chosen is below the length "</span>
+00121                  <span class="stringliteral">"requirements of the USM (min=%d).\n"</span>,USM_LENGTH_P_MIN);
+00122         snmp_set_detail(<span class="stringliteral">"The supplied password length is too short."</span>);
+00123         QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
+00124     }
+00125 
+00126 
+00127     <span class="comment">/*</span>
+00128 <span class="comment">     * Setup for the transform type.</span>
+00129 <span class="comment">     */</span>
+00130 <span class="preprocessor">#ifdef USE_OPENSSL</span>
+00131 
+00132 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00133     <span class="keywordflow">if</span> (ISTRANSFORM(hashtype, HMACMD5Auth))
+00134         EVP_DigestInit(ctx, EVP_md5());
+00135     <span class="keywordflow">else</span>
+00136 <span class="preprocessor">#endif</span>
+00137         <span class="keywordflow">if</span> (ISTRANSFORM(hashtype, HMACSHA1Auth))
+00138         EVP_DigestInit(ctx, EVP_sha1());
+00139     <span class="keywordflow">else</span> {
+00140         free(ctx);
+00141         <span class="keywordflow">return</span> (SNMPERR_GENERR);
+00142     }
+00143 <span class="preprocessor">#else</span>
+00144     MDbegin(&amp;MD);
+00145 <span class="preprocessor">#endif                          </span><span class="comment">/* USE_OPENSSL */</span>
+00146 
+00147     <span class="keywordflow">while</span> (nbytes &gt; 0) {
+00148         bufp = buf;
+00149         <span class="keywordflow">for</span> (i = 0; i &lt; USM_LENGTH_KU_HASHBLOCK; i++) {
+00150             *bufp++ = P[pindex++ % pplen];
+00151         }
+00152 <span class="preprocessor">#ifdef USE_OPENSSL</span>
+00153         EVP_DigestUpdate(ctx, buf, USM_LENGTH_KU_HASHBLOCK);
+00154 <span class="preprocessor">#elif USE_INTERNAL_MD5</span>
+00155         <span class="keywordflow">if</span> (MDupdate(&amp;MD, buf, USM_LENGTH_KU_HASHBLOCK * 8)) {
+00156             rval = SNMPERR_USM_ENCRYPTIONERROR;
+00157             <span class="keywordflow">goto</span> md5_fin;
+00158         }
+00159 <span class="preprocessor">#endif                          </span><span class="comment">/* USE_OPENSSL */</span>
+00160 
+00161         nbytes -= USM_LENGTH_KU_HASHBLOCK;
+00162     }
+00163 
+00164 <span class="preprocessor">#ifdef USE_OPENSSL</span>
+00165     EVP_DigestFinal(ctx, (<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span> *) Ku, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *) kulen);
+00166     <span class="comment">/*</span>
+00167 <span class="comment">     * what about free() </span>
+00168 <span class="comment">     */</span>
+00169 <span class="preprocessor">#elif USE_INTERNAL_MD5</span>
+00170     <span class="keywordflow">if</span> (MDupdate(&amp;MD, buf, 0)) {
+00171         rval = SNMPERR_USM_ENCRYPTIONERROR;
+00172         <span class="keywordflow">goto</span> md5_fin;
+00173     }
+00174     *kulen = sc_get_properlength(hashtype, hashtype_len);
+00175     MDget(&amp;MD, Ku, *kulen);
+00176   md5_fin:
+00177     memset(&amp;MD, 0, <span class="keyword">sizeof</span>(MD));
+00178 <span class="preprocessor">#endif                          </span><span class="comment">/* USE_INTERNAL_MD5 */</span>
+00179 
+00180 
+00181 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00182     DEBUGMSGTL((<span class="stringliteral">"generate_Ku"</span>, <span class=
+"stringliteral">"generating Ku (from %s): "</span>, P));
+00183     <span class="keywordflow">for</span> (i = 0; i &lt; *kulen; i++)
+00184         DEBUGMSG((<span class="stringliteral">"generate_Ku"</span>, <span class="stringliteral">"%02x"</span>, Ku[i]));
+00185     DEBUGMSG((<span class="stringliteral">"generate_Ku"</span>, <span class="stringliteral">"\n"</span>));
+00186 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_TESTING_CODE */</span>
+00187 
+00188 
+00189   generate_Ku_quit:
+00190     memset(buf, 0, <span class="keyword">sizeof</span>(buf));
+00191 <span class="preprocessor">#ifdef USE_OPENSSL</span>
+00192     free(ctx);
+00193 <span class="preprocessor">#endif</span>
+00194     <span class="keywordflow">return</span> rval;
+00195 
+00196 }                               <span class="comment">/* end generate_Ku() */</span>
+00197 <span class="preprocessor">#elif USE_PKCS</span>
+00198 {
+00199     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00200 
+00201     <span class="comment">/*</span>
+00202 <span class="comment">     * Sanity check.</span>
+00203 <span class="comment">     */</span>
+00204     <span class="keywordflow">if</span> (!hashtype || !P || !Ku || !kulen || (*kulen &lt;= 0)
+00205         || (hashtype_len != USM_LENGTH_OID_TRANSFORM)) {
+00206         QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
+00207     }
+00208 
+00209     <span class="keywordflow">if</span> (pplen &lt; USM_LENGTH_P_MIN) {
+00210         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"Error: passphrase chosen is below the length "</span>
+00211                  <span class="stringliteral">"requirements of the USM (min=%d).\n"</span>,USM_LENGTH_P_MIN);
+00212         snmp_set_detail(<span class="stringliteral">"The supplied password length is too short."</span>);
+00213         QUITFUN(SNMPERR_GENERR, generate_Ku_quit);
+00214     }
+00215 
+00216     <span class="comment">/*</span>
+00217 <span class="comment">     * Setup for the transform type.</span>
+00218 <span class="comment">     */</span>
+00219 
+00220 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00221     <span class="keywordflow">if</span> (ISTRANSFORM(hashtype, HMACMD5Auth))
+00222         <span class="keywordflow">return</span> pkcs_generate_Ku(CKM_MD5, P, pplen, Ku, kulen);
+00223     <span class="keywordflow">else</span>
+00224 <span class="preprocessor">#endif</span>
+00225         <span class="keywordflow">if</span> (ISTRANSFORM(hashtype, HMACSHA1Auth))
+00226         <span class="keywordflow">return</span> pkcs_generate_Ku(CKM_SHA_1, P, pplen, Ku, kulen);
+00227     <span class="keywordflow">else</span> {
+00228         <span class="keywordflow">return</span> (SNMPERR_GENERR);
+00229     }
+00230 
+00231   generate_Ku_quit:
+00232 
+00233     <span class="keywordflow">return</span> rval;
+00234 }                               <span class="comment">/* end generate_Ku() */</span>
+00235 <span class="preprocessor">#else</span>
+00236 _KEYTOOLS_NOT_AVAILABLE
+00237 <span class="preprocessor">#endif                          </span><span class="comment">/* internal or openssl */</span>
+00238 <span class="comment">/*******************************************************************-o-******</span>
+00239 <span class="comment"> * generate_kul</span>
+00240 <span class="comment"> *</span>
+00241 <span class="comment"> * Parameters:</span>
+00242 <span class="comment"> *      *hashtype</span>
+00243 <span class="comment"> *       hashtype_len</span>
+00244 <span class="comment"> *      *engineID</span>
+00245 <span class="comment"> *       engineID_len</span>
+00246 <span class="comment"> *      *Ku             Master key for a given user.</span>
+00247 <span class="comment"> *       ku_len         Length of Ku in bytes.</span>
+00248 <span class="comment"> *      *Kul            Localized key for a given user at engineID.</span>
+00249 <span class="comment"> *      *kul_len        Length of Kul buffer (IN); Length of Kul key (OUT).</span>
+00250 <span class="comment"> *      </span>
+00251 <span class="comment"> * Returns:</span>
+00252 <span class="comment"> *      SNMPERR_SUCCESS                 Success.</span>
+00253 <span class="comment"> *      SNMPERR_GENERR                  All errors.</span>
+00254 <span class="comment"> *</span>
+00255 <span class="comment"> *</span>
+00256 <span class="comment"> * Ku MUST be the proper length (currently fixed) for the given hashtype.</span>
+00257 <span class="comment"> *</span>
+00258 <span class="comment"> * Upon successful return, Kul contains the localized form of Ku at</span>
+00259 <span class="comment"> * engineID, and the length of the key is stored in kul_len.</span>
+00260 <span class="comment"> *</span>
+00261 <span class="comment"> * The localized key method is defined in RFC2274, Sections 2.6 and A.2, and</span>
+00262 <span class="comment"> * originally documented in:</span>
+00263 <span class="comment"> *      U. Blumenthal, N. C. Hien, B. Wijnen,</span>
+00264 <span class="comment"> *      "Key Derivation for Network Management Applications",</span>
+00265 <span class="comment"> *      IEEE Network Magazine, April/May issue, 1997.</span>
+00266 <span class="comment"> *</span>
+00267 <span class="comment"> *</span>
+00268 <span class="comment"> * ASSUMES  SNMP_MAXBUF &gt;= sizeof(Ku + engineID + Ku).</span>
+00269 <span class="comment"> *</span>
+00270 <span class="comment"> * NOTE  Localized keys for privacy transforms are generated via</span>
+00271 <span class="comment"> *       the authentication transform held by the same usmUser.</span>
+00272 <span class="comment"> *</span>
+00273 <span class="comment"> * XXX  An engineID of any length is accepted, even if larger than</span>
+00274 <span class="comment"> *      what is spec'ed for the textual convention.</span>
+00275 <span class="comment"> */</span>
+00276 <span class="keywordtype">int</span>
+00277 generate_kul(<span class="keyword">const</span> oid * hashtype, u_int hashtype_len,
+00278              u_char * engineID, size_t engineID_len,
+00279              u_char * Ku, size_t ku_len,
+00280              u_char * Kul, size_t * kul_len)
+00281 #<span class="keywordflow">if</span> defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5) || defined(USE_PKCS)
+00282 {
+00283     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00284     u_int           nbytes = 0;
+00285     size_t          properlength;
+00286 
+00287     u_char          buf[SNMP_MAXBUF];
+00288 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00289     <span class="keywordtype">int</span>             i;
+00290 <span class="preprocessor">#endif</span>
+00291 
+00292 
+00293     <span class="comment">/*</span>
+00294 <span class="comment">     * Sanity check.</span>
+00295 <span class="comment">     */</span>
+00296     <span class="keywordflow">if</span> (!hashtype || !engineID || !Ku || !Kul || !kul_len
+00297         || (engineID_len &lt;= 0) || (ku_len &lt;= 0) || (*kul_len &lt;= 0)
+00298         || (hashtype_len != USM_LENGTH_OID_TRANSFORM)) {
+00299         QUITFUN(SNMPERR_GENERR, generate_kul_quit);
+00300     }
+00301 
+00302 
+00303     properlength = sc_get_properlength(hashtype, hashtype_len);
+00304     <span class="keywordflow">if</span> (properlength == SNMPERR_GENERR)
+00305         QUITFUN(SNMPERR_GENERR, generate_kul_quit);
+00306 
+00307 
+00308     <span class="keywordflow">if</span> (((int) *kul_len &lt; properlength) || ((int) ku_len &lt; properlength)) {
+00309         QUITFUN(SNMPERR_GENERR, generate_kul_quit);
+00310     }
+00311 
+00312     <span class="comment">/*</span>
+00313 <span class="comment">     * Concatenate Ku and engineID properly, then hash the result.</span>
+00314 <span class="comment">     * Store it in Kul.</span>
+00315 <span class="comment">     */</span>
+00316     nbytes = 0;
+00317     memcpy(buf, Ku, properlength);
+00318     nbytes += properlength;
+00319     memcpy(buf + nbytes, engineID, engineID_len);
+00320     nbytes += engineID_len;
+00321     memcpy(buf + nbytes, Ku, properlength);
+00322     nbytes += properlength;
+00323 
+00324     rval = sc_hash(hashtype, hashtype_len, buf, nbytes, Kul, kul_len);
+00325 
+00326 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00327     DEBUGMSGTL((<span class="stringliteral">"generate_kul"</span>, <span class=
+"stringliteral">"generating Kul (from Ku): "</span>));
+00328     <span class="keywordflow">for</span> (i = 0; i &lt; *kul_len; i++)
+00329         DEBUGMSG((<span class="stringliteral">"generate_kul"</span>, <span class="stringliteral">"%02x"</span>, Kul[i]));
+00330     DEBUGMSG((<span class="stringliteral">"generate_kul"</span>, <span class="stringliteral">"keytools\n"</span>));
+00331 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_TESTING_CODE */</span>
+00332 
+00333     QUITFUN(rval, generate_kul_quit);
+00334 
+00335 
+00336   generate_kul_quit:
+00337     <span class="keywordflow">return</span> rval;
+00338 
+00339 }                               <span class="comment">/* end generate_kul() */</span>
+00340 
+00341 <span class="preprocessor">#else</span>
+00342 _KEYTOOLS_NOT_AVAILABLE
+00343 <span class="preprocessor">#endif                          </span><span class="comment">/* internal or openssl */</span>
+00344 <span class="comment">/*******************************************************************-o-******</span>
+00345 <span class="comment"> * encode_keychange</span>
+00346 <span class="comment"> *</span>
+00347 <span class="comment"> * Parameters:</span>
+00348 <span class="comment"> *      *hashtype       MIB OID for the hash transform type.</span>
+00349 <span class="comment"> *       hashtype_len   Length of the MIB OID hash transform type.</span>
+00350 <span class="comment"> *      *oldkey         Old key that is used to encodes the new key.</span>
+00351 <span class="comment"> *       oldkey_len     Length of oldkey in bytes.</span>
+00352 <span class="comment"> *      *newkey         New key that is encoded using the old key.</span>
+00353 <span class="comment"> *       newkey_len     Length of new key in bytes.</span>
+00354 <span class="comment"> *      *kcstring       Buffer to contain the KeyChange TC string.</span>
+00355 <span class="comment"> *      *kcstring_len   Length of kcstring buffer.</span>
+00356 <span class="comment"> *      </span>
+00357 <span class="comment"> * Returns:</span>
+00358 <span class="comment"> *      SNMPERR_SUCCESS                 Success.</span>
+00359 <span class="comment"> *      SNMPERR_GENERR                  All errors.</span>
+00360 <span class="comment"> *</span>
+00361 <span class="comment"> *</span>
+00362 <span class="comment"> * Uses oldkey and acquired random bytes to encode newkey into kcstring</span>
+00363 <span class="comment"> * according to the rules of the KeyChange TC described in RFC 2274, Section 5.</span>
+00364 <span class="comment"> *</span>
+00365 <span class="comment"> * Upon successful return, *kcstring_len contains the length of the</span>
+00366 <span class="comment"> * encoded string.</span>
+00367 <span class="comment"> *</span>
+00368 <span class="comment"> * ASSUMES      Old and new key are always equal to each other, although</span>
+00369 <span class="comment"> *              this may be less than the transform type hash output</span>
+00370 <span class="comment"> *              output length (eg, using KeyChange for a DESPriv key when</span>
+00371 <span class="comment"> *              the user also uses SHA1Auth).  This also implies that the</span>
+00372 <span class="comment"> *              hash placed in the second 1/2 of the key change string</span>
+00373 <span class="comment"> *              will be truncated before the XOR'ing when the hash output is </span>
+00374 <span class="comment"> *              larger than that 1/2 of the key change string.</span>
+00375 <span class="comment"> *</span>
+00376 <span class="comment"> *              *kcstring_len will be returned as exactly twice that same</span>
+00377 <span class="comment"> *              length though the input buffer may be larger.</span>
+00378 <span class="comment"> *</span>
+00379 <span class="comment"> * XXX FIX:     Does not handle varibable length keys.</span>
+00380 <span class="comment"> * XXX FIX:     Does not handle keys larger than the hash algorithm used.</span>
+00381 <span class="comment"> */</span>
+00382 <span class="keywordtype">int</span>
+00383 encode_keychange(<span class="keyword">const</span> oid * hashtype, u_int hashtype_len,
+00384                  u_char * oldkey, size_t oldkey_len,
+00385                  u_char * newkey, size_t newkey_len,
+00386                  u_char * kcstring, size_t * kcstring_len)
+00387 #<span class="keywordflow">if</span> defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5) || defined(USE_PKCS)
+00388 {
+00389     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00390     size_t          properlength;
+00391     size_t          nbytes = 0;
+00392 
+00393     u_char         *tmpbuf = NULL;
+00394 
+00395 
+00396     <span class="comment">/*</span>
+00397 <span class="comment">     * Sanity check.</span>
+00398 <span class="comment">     */</span>
+00399     <span class="keywordflow">if</span> (!hashtype || !oldkey || !newkey || !kcstring || !kcstring_len
+00400         || (oldkey_len &lt;= 0) || (newkey_len &lt;= 0) || (*kcstring_len &lt;= 0)
+00401         || (hashtype_len != USM_LENGTH_OID_TRANSFORM)) {
+00402         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
+00403     }
+00404 
+00405     <span class="comment">/*</span>
+00406 <span class="comment">     * Setup for the transform type.</span>
+00407 <span class="comment">     */</span>
+00408     properlength = sc_get_properlength(hashtype, hashtype_len);
+00409     <span class="keywordflow">if</span> (properlength == SNMPERR_GENERR)
+00410         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
+00411 
+00412     <span class="keywordflow">if</span> ((oldkey_len != newkey_len) || (*kcstring_len &lt; (2 * oldkey_len))) {
+00413         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
+00414     }
+00415 
+00416     properlength = <a class="code" href="group__util.html#ga46">SNMP_MIN</a>((<span class=
+"keywordtype">int</span>) oldkey_len, properlength);
+00417 
+00418     <span class="comment">/*</span>
+00419 <span class="comment">     * Use the old key and some random bytes to encode the new key</span>
+00420 <span class="comment">     * in the KeyChange TC format:</span>
+00421 <span class="comment">     *      . Get random bytes (store in first half of kcstring),</span>
+00422 <span class="comment">     *      . Hash (oldkey | random_bytes) (into second half of kcstring),</span>
+00423 <span class="comment">     *      . XOR hash and newkey (into second half of kcstring).</span>
+00424 <span class="comment">     *</span>
+00425 <span class="comment">     * Getting the wrong number of random bytes is considered an error.</span>
+00426 <span class="comment">     */</span>
+00427     nbytes = properlength;
+00428 
+00429 <span class="preprocessor">#if defined(SNMP_TESTING_CODE) &amp;&amp; defined(RANDOMZEROS)</span>
+00430     memset(kcstring, 0, nbytes);
+00431     DEBUGMSG((<span class="stringliteral">"encode_keychange"</span>,
+00432               <span class="stringliteral">"** Using all zero bits for \"random\" delta of )"</span>
+00433               <span class="stringliteral">"the keychange string! **\n"</span>));
+00434 <span class="preprocessor">#else                           </span><span class="comment">/* !SNMP_TESTING_CODE */</span>
+00435     rval = sc_random(kcstring, &amp;nbytes);
+00436     QUITFUN(rval, encode_keychange_quit);
+00437     <span class="keywordflow">if</span> ((int) nbytes != properlength) {
+00438         QUITFUN(SNMPERR_GENERR, encode_keychange_quit);
+00439     }
+00440 <span class="preprocessor">#endif                          </span><span class="comment">/* !SNMP_TESTING_CODE */</span>
+00441 
+00442     tmpbuf = (u_char *) malloc(properlength * 2);
+00443     <span class="keywordflow">if</span> (tmpbuf) {
+00444         memcpy(tmpbuf, oldkey, properlength);
+00445         memcpy(tmpbuf + properlength, kcstring, properlength);
+00446 
+00447         *kcstring_len -= properlength;
+00448         rval = sc_hash(hashtype, hashtype_len, tmpbuf, properlength * 2,
+00449                        kcstring + properlength, kcstring_len);
+00450 
+00451         QUITFUN(rval, encode_keychange_quit);
+00452 
+00453         *kcstring_len = (properlength * 2);
+00454 
+00455         kcstring += properlength;
+00456         nbytes = 0;
+00457         <span class="keywordflow">while</span> ((int) (nbytes++) &lt; properlength) {
+00458             *kcstring++ ^= *newkey++;
+00459         }
+00460     }
+00461 
+00462   encode_keychange_quit:
+00463     <span class="keywordflow">if</span> (rval != SNMPERR_SUCCESS)
+00464         memset(kcstring, 0, *kcstring_len);
+00465     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(tmpbuf);
+00466 
+00467     <span class="keywordflow">return</span> rval;
+00468 
+00469 }                               <span class="comment">/* end encode_keychange() */</span>
+00470 
+00471 <span class="preprocessor">#else</span>
+00472 _KEYTOOLS_NOT_AVAILABLE
+00473 <span class="preprocessor">#endif                          </span><span class="comment">/* internal or openssl */</span>
+00474 <span class="comment">/*******************************************************************-o-******</span>
+00475 <span class="comment"> * decode_keychange</span>
+00476 <span class="comment"> *</span>
+00477 <span class="comment"> * Parameters:</span>
+00478 <span class="comment"> *      *hashtype       MIB OID of the hash transform to use.</span>
+00479 <span class="comment"> *       hashtype_len   Length of the hash transform MIB OID.</span>
+00480 <span class="comment"> *      *oldkey         Old key that is used to encode the new key.</span>
+00481 <span class="comment"> *       oldkey_len     Length of oldkey in bytes.</span>
+00482 <span class="comment"> *      *kcstring       Encoded KeyString buffer containing the new key.</span>
+00483 <span class="comment"> *       kcstring_len   Length of kcstring in bytes.</span>
+00484 <span class="comment"> *      *newkey         Buffer to hold the extracted new key.</span>
+00485 <span class="comment"> *      *newkey_len     Length of newkey in bytes.</span>
+00486 <span class="comment"> *      </span>
+00487 <span class="comment"> * Returns:</span>
+00488 <span class="comment"> *      SNMPERR_SUCCESS                 Success.</span>
+00489 <span class="comment"> *      SNMPERR_GENERR                  All errors.</span>
+00490 <span class="comment"> *</span>
+00491 <span class="comment"> *</span>
+00492 <span class="comment"> * Decodes a string of bits encoded according to the KeyChange TC described</span>
+00493 <span class="comment"> * in RFC 2274, Section 5.  The new key is extracted from *kcstring with</span>
+00494 <span class="comment"> * the aid of the old key.</span>
+00495 <span class="comment"> *</span>
+00496 <span class="comment"> * Upon successful return, *newkey_len contains the length of the new key.</span>
+00497 <span class="comment"> *</span>
+00498 <span class="comment"> *</span>
+00499 <span class="comment"> * ASSUMES      Old key is exactly 1/2 the length of the KeyChange buffer,</span>
+00500 <span class="comment"> *              although this length may be less than the hash transform</span>
+00501 <span class="comment"> *              output.  Thus the new key length will be equal to the old</span>
+00502 <span class="comment"> *              key length.</span>
+00503 <span class="comment"> */</span>
+00504 <span class="comment">/*</span>
+00505 <span class="comment"> * XXX:  if the newkey is not long enough, it should be freed and remalloced </span>
+00506 <span class="comment"> */</span>
+00507 <span class="keywordtype">int</span>
+00508 decode_keychange(<span class="keyword">const</span> oid * hashtype, u_int hashtype_len,
+00509                  u_char * oldkey, size_t oldkey_len,
+00510                  u_char * kcstring, size_t kcstring_len,
+00511                  u_char * newkey, size_t * newkey_len)
+00512 #<span class="keywordflow">if</span> defined(USE_OPENSSL) || defined(USE_INTERNAL_MD5) || defined(USE_PKCS)
+00513 {
+00514     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00515     size_t          properlength = 0;
+00516     u_int           nbytes = 0;
+00517 
+00518     u_char         *bufp, tmp_buf[SNMP_MAXBUF];
+00519     size_t          tmp_buf_len = SNMP_MAXBUF;
+00520     u_char         *tmpbuf = NULL;
+00521 
+00522 
+00523 
+00524     <span class="comment">/*</span>
+00525 <span class="comment">     * Sanity check.</span>
+00526 <span class="comment">     */</span>
+00527     <span class="keywordflow">if</span> (!hashtype || !oldkey || !kcstring || !newkey || !newkey_len
+00528         || (oldkey_len &lt;= 0) || (kcstring_len &lt;= 0) || (*newkey_len &lt;= 0)
+00529         || (hashtype_len != USM_LENGTH_OID_TRANSFORM)) {
+00530         QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
+00531     }
+00532 
+00533 
+00534     <span class="comment">/*</span>
+00535 <span class="comment">     * Setup for the transform type.</span>
+00536 <span class="comment">     */</span>
+00537     properlength = sc_get_properlength(hashtype, hashtype_len);
+00538     <span class="keywordflow">if</span> (properlength == SNMPERR_GENERR)
+00539         QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
+00540 
+00541 
+00542     <span class="keywordflow">if</span> (((oldkey_len * 2) != kcstring_len) || (*newkey_len &lt; oldkey_len)) {
+00543         QUITFUN(SNMPERR_GENERR, decode_keychange_quit);
+00544     }
+00545 
+00546     properlength = oldkey_len;
+00547     *newkey_len = properlength;
+00548 
+00549     <span class="comment">/*</span>
+00550 <span class="comment">     * Use the old key and the given KeyChange TC string to recover</span>
+00551 <span class="comment">     * the new key:</span>
+00552 <span class="comment">     *      . Hash (oldkey | random_bytes) (into newkey),</span>
+00553 <span class="comment">     *      . XOR hash and encoded (second) half of kcstring (into newkey).</span>
+00554 <span class="comment">     */</span>
+00555     tmpbuf = (u_char *) malloc(properlength * 2);
+00556     <span class="keywordflow">if</span> (tmpbuf) {
+00557         memcpy(tmpbuf, oldkey, properlength);
+00558         memcpy(tmpbuf + properlength, kcstring, properlength);
+00559 
+00560         rval = sc_hash(hashtype, hashtype_len, tmpbuf, properlength * 2,
+00561                        tmp_buf, &amp;tmp_buf_len);
+00562         QUITFUN(rval, decode_keychange_quit);
+00563 
+00564         memcpy(newkey, tmp_buf, properlength);
+00565         bufp = kcstring + properlength;
+00566         nbytes = 0;
+00567         <span class="keywordflow">while</span> ((int) (nbytes++) &lt; properlength) {
+00568             *newkey++ ^= *bufp++;
+00569         }
+00570     }
+00571 
+00572   decode_keychange_quit:
+00573     <span class="keywordflow">if</span> (rval != SNMPERR_SUCCESS) {
+00574         memset(newkey, 0, properlength);
+00575     }
+00576     memset(tmp_buf, 0, SNMP_MAXBUF);
+00577     <span class="keywordflow">if</span> (tmpbuf != NULL)
+00578         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(tmpbuf);
+00579 
+00580     <span class="keywordflow">return</span> rval;
+00581 
+00582 }                               <span class="comment">/* end decode_keychange() */</span>
+00583 
+00584 <span class="preprocessor">#else</span>
+00585 _KEYTOOLS_NOT_AVAILABLE
+00586 <span class="preprocessor">#endif                          </span><span class="comment">/* internal or openssl */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,735 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>container_binary_array.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * container_binary_array.c</span>
+00003 <span class="comment"> * $Id$</span>
+00004 <span class="comment"> *</span>
+00005 <span class="comment"> * see comments in header file.</span>
+00006 <span class="comment"> *</span>
+00007 <span class="comment"> */</span>
+00008 
+00009 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00010 
+00011 <span class="preprocessor">#if HAVE_IO_H</span>
+00012 <span class="preprocessor">#include &lt;io.h&gt;</span>
+00013 <span class="preprocessor">#endif</span>
+00014 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00015 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00016 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00017 <span class="preprocessor">#endif</span>
+00018 <span class="preprocessor">#if HAVE_MALLOC_H</span>
+00019 <span class="preprocessor">#include &lt;malloc.h&gt;</span>
+00020 <span class="preprocessor">#endif</span>
+00021 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00022 <span class="preprocessor">#if HAVE_STRING_H</span>
+00023 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00024 <span class="preprocessor">#else</span>
+00025 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00026 <span class="preprocessor">#endif</span>
+00027 
+00028 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00029 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00030 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00031 <span class="preprocessor">#include &lt;net-snmp/library/container.h&gt;</span>
+00032 <span class="preprocessor">#include &lt;net-snmp/library/container_binary_array.h&gt;</span>
+00033 <span class="preprocessor">#include &lt;net-snmp/library/tools.h&gt;</span>
+00034 <span class="preprocessor">#include &lt;net-snmp/library/snmp_assert.h&gt;</span>
+00035 
+00036 <span class="keyword">typedef</span> <span class="keyword">struct </span>binary_array_table_s {
+00037     size_t                     max_size;   <span class="comment">/* Size of the current data table */</span>
+00038     size_t                     count;      <span class="comment">/* Index of the next free entry */</span>
+00039     <span class="keywordtype">int</span>                        dirty;
+00040     <span class="keywordtype">int</span>                        data_size;  <span class=
+"comment">/* Size of an individual entry */</span>
+00041     <span class="keywordtype">void</span>                     **data;       <span class=
+"comment">/* The table itself */</span>
+00042 } binary_array_table;
+00043 
+00044 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00045 array_qsort(<span class="keywordtype">void</span> **data, <span class="keywordtype">int</span> first, <span class=
+"keywordtype">int</span> last, netsnmp_container_compare *f)
+00046 {
+00047     <span class="keywordtype">int</span> i, j;
+00048     <span class="keywordtype">void</span> *mid, *tmp;
+00049     
+00050     i = first;
+00051     j = last;
+00052     mid = data[(first+last)/2];
+00053     
+00054     <span class="keywordflow">do</span> {
+00055         <span class="keywordflow">while</span> ( ((*f)(data[i], mid) &lt; 0) &amp;&amp; (i &lt; last))
+00056             ++i;
+00057         <span class="keywordflow">while</span> ( ((*f)(mid, data[j]) &lt; 0) &amp;&amp; (j &gt; first))
+00058             --j;
+00059 
+00060         <span class="keywordflow">if</span>(i &lt; j) {
+00061             tmp = data[i];
+00062             data[i] = data[j];
+00063             data[j] = tmp;
+00064             ++i;
+00065             --j;
+00066         }
+00067         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (i == j) {
+00068             ++i;
+00069             --j;
+00070             <span class="keywordflow">break</span>;
+00071         }
+00072     } <span class="keywordflow">while</span>(i &lt;= j);
+00073 
+00074     <span class="keywordflow">if</span> (j &gt; first)
+00075         array_qsort(data, first, j, f);
+00076     
+00077     <span class="keywordflow">if</span> (i &lt; last)
+00078         array_qsort(data, i, last, f);
+00079 }
+00080 
+00081 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00082 Sort_Array(netsnmp_container *c)
+00083 {
+00084     binary_array_table *t = (binary_array_table*)c-&gt;container_data;
+00085     netsnmp_assert(t!=NULL);
+00086     netsnmp_assert(c-&gt;compare!=NULL);
+00087     
+00088     <span class="keywordflow">if</span> (t-&gt;dirty) {
+00089         <span class="comment">/*</span>
+00090 <span class="comment">         * Sort the table </span>
+00091 <span class="comment">         */</span>
+00092         <span class="keywordflow">if</span> (t-&gt;count &gt; 1)
+00093             array_qsort(t-&gt;data, 0, t-&gt;count - 1, c-&gt;compare);
+00094         t-&gt;dirty = 0;
+00095     }
+00096 
+00097     <span class="keywordflow">return</span> 1;
+00098 }
+00099 
+00100 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00101 binary_search(<span class="keyword">const</span> <span class=
+"keywordtype">void</span> *val, netsnmp_container *c, <span class="keywordtype">int</span> exact)
+00102 {
+00103     binary_array_table *t = (binary_array_table*)c-&gt;container_data;
+00104     size_t             len = t-&gt;count;
+00105     size_t             half;
+00106     size_t             middle = 0;
+00107     size_t             first = 0;
+00108     <span class="keywordtype">int</span>                result = 0;
+00109 
+00110     <span class="keywordflow">if</span> (!len)
+00111         <span class="keywordflow">return</span> -1;
+00112 
+00113     <span class="keywordflow">if</span> (t-&gt;dirty)
+00114         Sort_Array(c);
+00115 
+00116     <span class="keywordflow">while</span> (len &gt; 0) {
+00117         half = len &gt;&gt; 1;
+00118         middle = first;
+00119         middle += half;
+00120         <span class="keywordflow">if</span> ((result =
+00121              c-&gt;compare(t-&gt;data[middle], val)) &lt; 0) {
+00122             first = middle;
+00123             ++first;
+00124             len = len - half - 1;
+00125         } <span class="keywordflow">else</span> {
+00126             <span class="keywordflow">if</span>(result == 0) {
+00127                 first = middle;
+00128                 <span class="keywordflow">break</span>;
+00129             }
+00130             len = half;
+00131         }
+00132     }
+00133 
+00134     <span class="keywordflow">if</span> (first &gt;= t-&gt;count)
+00135         <span class="keywordflow">return</span> -1;
+00136 
+00137     <span class="keywordflow">if</span>(first != middle) {
+00138         <span class="comment">/* last compare wasn't against first, so get actual result */</span>
+00139         result = c-&gt;compare(t-&gt;data[first], val);
+00140     }
+00141 
+00142     <span class="keywordflow">if</span>(result == 0) {
+00143         <span class="keywordflow">if</span> (!exact) {
+00144             <span class="keywordflow">if</span> (++first == t-&gt;count)
+00145                first = -1;
+00146         }
+00147     }
+00148     <span class="keywordflow">else</span> {
+00149         <span class="keywordflow">if</span>(exact)
+00150             first = -1;
+00151     }
+00152 
+00153     <span class="keywordflow">return</span> first;
+00154 }
+00155 
+00156 NETSNMP_STATIC_INLINE binary_array_table *
+00157 netsnmp_binary_array_initialize(<span class="keywordtype">void</span>)
+00158 {
+00159     binary_array_table *t;
+00160 
+00161     t = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(binary_array_table);
+00162     <span class="keywordflow">if</span> (t == NULL)
+00163         <span class="keywordflow">return</span> NULL;
+00164 
+00165     t-&gt;max_size = 0;
+00166     t-&gt;count = 0;
+00167     t-&gt;dirty = 0;
+00168     t-&gt;data_size = <span class="keyword">sizeof</span>(<span class="keywordtype">void</span>*);
+00169     t-&gt;data = NULL;
+00170 
+00171     <span class="keywordflow">return</span> t;
+00172 }
+00173 
+00174 <span class="keywordtype">void</span>
+00175 netsnmp_binary_array_release(netsnmp_container *c)
+00176 {
+00177     binary_array_table *t = (binary_array_table*)c-&gt;container_data;
+00178     <span class="keywordflow">if</span> (t-&gt;data != NULL) {
+00179         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(t-&gt;data);
+00180     }
+00181     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(t);
+00182     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(c);
+00183 }
+00184 
+00185 NETSNMP_STATIC_INLINE size_t
+00186 netsnmp_binary_array_count(netsnmp_container *c)
+00187 {
+00188     binary_array_table *t = (binary_array_table*)c-&gt;container_data;
+00189     <span class="comment">/*</span>
+00190 <span class="comment">     * return count</span>
+00191 <span class="comment">     */</span>
+00192     <span class="keywordflow">return</span> t ? t-&gt;count : 0;
+00193 }
+00194 
+00195 NETSNMP_STATIC_INLINE <span class="keywordtype">void</span>           *
+00196 netsnmp_binary_array_get(netsnmp_container *c, <span class="keyword">const</span> <span class=
+"keywordtype">void</span> *key, <span class="keywordtype">int</span> exact)
+00197 {
+00198     binary_array_table *t = (binary_array_table*)c-&gt;container_data;
+00199     <span class="keywordtype">int</span>             index = 0;
+00200 
+00201     <span class="comment">/*</span>
+00202 <span class="comment">     * if there is no data, return NULL;</span>
+00203 <span class="comment">     */</span>
+00204     <span class="keywordflow">if</span> (!t-&gt;count)
+00205         <span class="keywordflow">return</span> 0;
+00206 
+00207     <span class="comment">/*</span>
+00208 <span class="comment">     * if the table is dirty, sort it.</span>
+00209 <span class="comment">     */</span>
+00210     <span class="keywordflow">if</span> (t-&gt;dirty)
+00211         Sort_Array(c);
+00212 
+00213     <span class="comment">/*</span>
+00214 <span class="comment">     * if there is a key, search. Otherwise default is 0;</span>
+00215 <span class="comment">     */</span>
+00216     <span class="keywordflow">if</span> (key) {
+00217         <span class="keywordflow">if</span> ((index = binary_search(key, c, exact)) == -1)
+00218             <span class="keywordflow">return</span> 0;
+00219     }
+00220 
+00221     <span class="keywordflow">return</span> t-&gt;data[index];
+00222 }
+00223 
+00224 NETSNMP_STATIC_INLINE <span class="keywordtype">int</span>
+00225 netsnmp_binary_array_replace(netsnmp_container *c, <span class="keywordtype">void</span> *entry)
+00226 {
+00227     binary_array_table *t = (binary_array_table*)c-&gt;container_data;
+00228     <span class="keywordtype">int</span>             index = 0;
+00229 
+00230     <span class="comment">/*</span>
+00231 <span class="comment">     * if there is no data, return NULL;</span>
+00232 <span class="comment">     */</span>
+00233     <span class="keywordflow">if</span> (!t-&gt;count)
+00234         <span class="keywordflow">return</span> 0;
+00235 
+00236     <span class="comment">/*</span>
+00237 <span class="comment">     * if the table is dirty, sort it.</span>
+00238 <span class="comment">     */</span>
+00239     <span class="keywordflow">if</span> (t-&gt;dirty)
+00240         Sort_Array(c);
+00241 
+00242     <span class="comment">/*</span>
+00243 <span class="comment">     * search</span>
+00244 <span class="comment">     */</span>
+00245     <span class="keywordflow">if</span> ((index = binary_search(entry, c, 1)) == -1)
+00246         <span class="keywordflow">return</span> 0;
+00247 
+00248     t-&gt;data[index] = entry;
+00249 
+00250     <span class="keywordflow">return</span> 0;
+00251 }
+00252 
+00253 <span class="keywordtype">int</span>
+00254 netsnmp_binary_array_remove(netsnmp_container *c, <span class="keyword">const</span> <span class=
+"keywordtype">void</span> *key, <span class="keywordtype">void</span> **save)
+00255 {
+00256     binary_array_table *t = (binary_array_table*)c-&gt;container_data;
+00257     <span class="keywordtype">int</span>             index = 0;
+00258 
+00259     <span class="keywordflow">if</span> (save)
+00260         *save = NULL;
+00261     
+00262     <span class="comment">/*</span>
+00263 <span class="comment">     * if there is no data, return NULL;</span>
+00264 <span class="comment">     */</span>
+00265     <span class="keywordflow">if</span> (!t-&gt;count)
+00266         <span class="keywordflow">return</span> 0;
+00267 
+00268     <span class="comment">/*</span>
+00269 <span class="comment">     * if the table is dirty, sort it.</span>
+00270 <span class="comment">     */</span>
+00271     <span class="keywordflow">if</span> (t-&gt;dirty)
+00272         Sort_Array(c);
+00273 
+00274     <span class="comment">/*</span>
+00275 <span class="comment">     * search</span>
+00276 <span class="comment">     */</span>
+00277     <span class="keywordflow">if</span> ((index = binary_search(key, c, 1)) == -1)
+00278         <span class="keywordflow">return</span> -1;
+00279 
+00280     <span class="comment">/*</span>
+00281 <span class="comment">     * find old data and save it, if ptr provided</span>
+00282 <span class="comment">     */</span>
+00283     <span class="keywordflow">if</span> (save)
+00284         *save = t-&gt;data[index];
+00285 
+00286     <span class="comment">/*</span>
+00287 <span class="comment">     * if entry was last item, just decrement count</span>
+00288 <span class="comment">     */</span>
+00289     --t-&gt;count;
+00290     <span class="keywordflow">if</span> (index != (int)t-&gt;count) {
+00291         <span class="comment">/*</span>
+00292 <span class="comment">         * otherwise, shift array down</span>
+00293 <span class="comment">         */</span>
+00294         memmove(&amp;t-&gt;data[index], &amp;t-&gt;data[index+1], t-&gt;data_size * (t-&gt;count - index));
+00295     }
+00296 
+00297     <span class="keywordflow">return</span> 0;
+00298 }
+00299 
+00300 NETSNMP_STATIC_INLINE <span class="keywordtype">void</span>
+00301 netsnmp_binary_array_for_each(netsnmp_container *c,
+00302                               netsnmp_container_obj_func *fe,
+00303                               <span class="keywordtype">void</span> *context, <span class="keywordtype">int</span> sort)
+00304 {
+00305     binary_array_table *t = (binary_array_table*)c-&gt;container_data;
+00306     size_t             i;
+00307 
+00308     <span class="keywordflow">if</span> (sort &amp;&amp; t-&gt;dirty)
+00309         Sort_Array(c);
+00310 
+00311     <span class="keywordflow">for</span> (i = 0; i &lt; t-&gt;count; ++i)
+00312         (*fe) (t-&gt;data[i], context);
+00313 }
+00314 
+00315 NETSNMP_STATIC_INLINE <span class="keywordtype">void</span>
+00316 netsnmp_binary_array_clear(netsnmp_container *c,
+00317                            netsnmp_container_obj_func *fe,
+00318                            <span class="keywordtype">void</span> *context)
+00319 {
+00320     binary_array_table *t = (binary_array_table*)c-&gt;container_data;
+00321 
+00322     <span class="keywordflow">if</span>( NULL != fe ) {
+00323         size_t             i;
+00324 
+00325         <span class="keywordflow">for</span> (i = 0; i &lt; t-&gt;count; ++i)
+00326             (*fe) (t-&gt;data[i], context);
+00327     }
+00328 
+00329     t-&gt;count = 0;
+00330     t-&gt;dirty = 0;
+00331 }
+00332 
+00333 NETSNMP_STATIC_INLINE <span class="keywordtype">int</span>
+00334 netsnmp_binary_array_insert(netsnmp_container *c, <span class="keyword">const</span> <span class=
+"keywordtype">void</span> *entry)
+00335 {
+00336     binary_array_table *t = (binary_array_table*)c-&gt;container_data;
+00337     <span class="keywordtype">int</span>             new_max;
+00338     <span class="keywordtype">void</span>           *new_data;   <span class=
+"comment">/* Used for * a) extending the data table</span>
+00339 <span class="comment">                                 * * b) the next entry to use */</span>
+00340 
+00341     <span class="keywordflow">if</span> (t-&gt;max_size &lt;= t-&gt;count) {
+00342         <span class="comment">/*</span>
+00343 <span class="comment">         * Table is full, so extend it to double the size</span>
+00344 <span class="comment">         */</span>
+00345         new_max = 2 * t-&gt;max_size;
+00346         <span class="keywordflow">if</span> (new_max == 0)
+00347             new_max = 10;       <span class="comment">/* Start with 10 entries */</span>
+00348 
+00349         new_data = (<span class="keywordtype">void</span> *) calloc(new_max, t-&gt;data_size);
+00350         <span class="keywordflow">if</span> (new_data == NULL)
+00351             <span class="keywordflow">return</span> -1;
+00352 
+00353         <span class="keywordflow">if</span> (t-&gt;data) {
+00354             memcpy(new_data, t-&gt;data, t-&gt;max_size * t-&gt;data_size);
+00355             <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(t-&gt;data);
+00356         }
+00357         t-&gt;data = new_data;
+00358         t-&gt;max_size = new_max;
+00359     }
+00360 
+00361     <span class="comment">/*</span>
+00362 <span class="comment">     * Insert the new entry into the data array</span>
+00363 <span class="comment">     */</span>
+00364     t-&gt;data[t-&gt;count++] = (<span class="keywordtype">void</span>*)entry;
+00365     t-&gt;dirty = 1;
+00366     <span class="keywordflow">return</span> 0;
+00367 }
+00368 
+00369 NETSNMP_STATIC_INLINE <span class="keywordtype">void</span>           *
+00370 netsnmp_binary_array_retrieve(netsnmp_container *c, <span class="keywordtype">int</span> *max_oids, <span class=
+"keywordtype">int</span> sort)
+00371 {
+00372     binary_array_table *t = (binary_array_table*)c-&gt;container_data;
+00373     <span class="keywordflow">if</span> (sort &amp;&amp; t-&gt;dirty)
+00374         Sort_Array(c);
+00375 
+00376     *max_oids = t-&gt;count;
+00377     <span class="keywordflow">return</span> t-&gt;data;
+00378 }
+00379 
+00380 <span class="comment">/**********************************************************************</span>
+00381 <span class="comment"> *</span>
+00382 <span class="comment"> * Special case support for subsets</span>
+00383 <span class="comment"> *</span>
+00384 <span class="comment"> */</span>
+00385 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00386 binary_search_for_start(netsnmp_index *val, netsnmp_container *c)
+00387 {
+00388     binary_array_table *t = (binary_array_table*)c-&gt;container_data;
+00389     size_t             len = t-&gt;count;
+00390     size_t             half;
+00391     size_t             middle;
+00392     size_t             first = 0;
+00393     <span class="keywordtype">int</span>                result = 0;
+00394 
+00395     <span class="keywordflow">if</span> (!len)
+00396         <span class="keywordflow">return</span> -1;
+00397 
+00398     <span class="keywordflow">if</span> (t-&gt;dirty)
+00399         Sort_Array(c);
+00400 
+00401     <span class="keywordflow">while</span> (len &gt; 0) {
+00402         half = len &gt;&gt; 1;
+00403         middle = first;
+00404         middle += half;
+00405         <span class="keywordflow">if</span> ((result = c-&gt;ncompare(t-&gt;data[middle], val)) &lt; 0) {
+00406             first = middle;
+00407             ++first;
+00408             len = len - half - 1;
+00409         } <span class="keywordflow">else</span>
+00410             len = half;
+00411     }
+00412 
+00413     <span class="keywordflow">if</span> ((first &gt;= t-&gt;count) ||
+00414         c-&gt;ncompare(t-&gt;data[first], val) != 0)
+00415         <span class="keywordflow">return</span> -1;
+00416 
+00417     <span class="keywordflow">return</span> first;
+00418 }
+00419 
+00420 <span class="keywordtype">void</span>          **
+00421 netsnmp_binary_array_get_subset(netsnmp_container *c, <span class="keywordtype">void</span> *key, <span class=
+"keywordtype">int</span> *len)
+00422 {
+00423     binary_array_table *t = (binary_array_table*)c-&gt;container_data;
+00424     <span class="keywordtype">void</span>          **subset;
+00425     <span class="keywordtype">int</span>             start, end;
+00426     size_t          i;
+00427 
+00428     <span class="comment">/*</span>
+00429 <span class="comment">     * if there is no data, return NULL;</span>
+00430 <span class="comment">     */</span>
+00431     <span class="keywordflow">if</span> (!t-&gt;count || !key)
+00432         <span class="keywordflow">return</span> 0;
+00433 
+00434     <span class="comment">/*</span>
+00435 <span class="comment">     * if the table is dirty, sort it.</span>
+00436 <span class="comment">     */</span>
+00437     <span class="keywordflow">if</span> (t-&gt;dirty)
+00438         Sort_Array(c);
+00439 
+00440     <span class="comment">/*</span>
+00441 <span class="comment">     * find matching items</span>
+00442 <span class="comment">     */</span>
+00443     start = end = binary_search_for_start(key, c);
+00444     <span class="keywordflow">if</span> (start == -1)
+00445         <span class="keywordflow">return</span> 0;
+00446 
+00447     <span class="keywordflow">for</span> (i = start + 1; i &lt; t-&gt;count; ++i) {
+00448         <span class="keywordflow">if</span> (0 != c-&gt;ncompare(t-&gt;data[i], key))
+00449             <span class="keywordflow">break</span>;
+00450         ++end;
+00451     }
+00452 
+00453     *len = end - start + 1;
+00454     subset = malloc((*len) * t-&gt;data_size);
+00455     memcpy(subset, &amp;t-&gt;data[start], t-&gt;data_size * (*len));
+00456 
+00457     <span class="keywordflow">return</span> subset;
+00458 }
+00459 
+00460 <span class="comment">/**********************************************************************</span>
+00461 <span class="comment"> *</span>
+00462 <span class="comment"> * container</span>
+00463 <span class="comment"> *</span>
+00464 <span class="comment"> */</span>
+00465 <span class="keyword">static</span> <span class="keywordtype">void</span> *
+00466 _ba_find(netsnmp_container *container, <span class="keyword">const</span> <span class="keywordtype">void</span> *data)
+00467 {
+00468     <span class="keywordflow">return</span> netsnmp_binary_array_get(container, data, 1);
+00469 }
+00470 
+00471 <span class="keyword">static</span> <span class="keywordtype">void</span> *
+00472 _ba_find_next(netsnmp_container *container, <span class="keyword">const</span> <span class="keywordtype">void</span> *data)
+00473 {
+00474     <span class="keywordflow">return</span> netsnmp_binary_array_get(container, data, 0);
+00475 }
+00476 
+00477 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00478 _ba_insert(netsnmp_container *container, <span class="keyword">const</span> <span class="keywordtype">void</span> *data)
+00479 {
+00480     <span class="keywordflow">return</span> netsnmp_binary_array_insert(container, data);
+00481 }
+00482 
+00483 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00484 _ba_remove(netsnmp_container *container, <span class="keyword">const</span> <span class="keywordtype">void</span> *data)
+00485 {
+00486     <span class="keywordflow">return</span> netsnmp_binary_array_remove(container,data, NULL);
+00487 }
+00488 
+00489 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00490 _ba_free(netsnmp_container *container)
+00491 {
+00492     netsnmp_binary_array_release(container);
+00493     <span class="keywordflow">return</span> 0;
+00494 }
+00495 
+00496 <span class="keyword">static</span> size_t
+00497 _ba_size(netsnmp_container *container)
+00498 {
+00499     <span class="keywordflow">return</span> netsnmp_binary_array_count(container);
+00500 }
+00501 
+00502 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00503 _ba_for_each(netsnmp_container *container, netsnmp_container_obj_func *f,
+00504              <span class="keywordtype">void</span> *context)
+00505 {
+00506     netsnmp_binary_array_for_each(container, f, context, 1);
+00507 }
+00508 
+00509 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00510 _ba_clear(netsnmp_container *container, netsnmp_container_obj_func *f,
+00511              <span class="keywordtype">void</span> *context)
+00512 {
+00513     netsnmp_binary_array_clear(container, f, context);
+00514 }
+00515 
+00516 <span class="keyword">static</span> netsnmp_void_array *
+00517 _ba_get_subset(netsnmp_container *container, <span class="keywordtype">void</span> *data)
+00518 {
+00519     netsnmp_void_array * va;
+00520     <span class="keywordtype">void</span> ** rtn;
+00521     <span class="keywordtype">int</span> len;
+00522 
+00523     rtn = netsnmp_binary_array_get_subset(container, data, &amp;len);
+00524     <span class="keywordflow">if</span> ((NULL==rtn) || (len &lt;=0))
+00525         <span class="keywordflow">return</span> NULL;
+00526     
+00527     va = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_void_array);
+00528     <span class="keywordflow">if</span> (NULL==va)
+00529         <span class="keywordflow">return</span> NULL;
+00530 
+00531     va-&gt;size = len;
+00532     va-&gt;array = rtn;
+00533 
+00534     <span class="keywordflow">return</span> va;
+00535 }
+00536 
+00537 netsnmp_container *
+00538 netsnmp_container_get_binary_array(<span class="keywordtype">void</span>)
+00539 {
+00540     <span class="comment">/*</span>
+00541 <span class="comment">     * allocate memory</span>
+00542 <span class="comment">     */</span>
+00543     netsnmp_container *c = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_container);
+00544     <span class="keywordflow">if</span> (NULL==c) {
+00545         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"couldn't allocate memory\n"</span>);
+00546         <span class="keywordflow">return</span> NULL;
+00547     }
+00548 
+00549     c-&gt;container_data = netsnmp_binary_array_initialize();
+00550         
+00551     c-&gt;get_size = _ba_size;
+00552     c-&gt;init = NULL;
+00553     c-&gt;cfree = _ba_free;
+00554     c-&gt;insert = _ba_insert;
+00555     c-&gt;remove = _ba_remove;
+00556     c-&gt;find = _ba_find;
+00557     c-&gt;find_next = _ba_find_next;
+00558     c-&gt;get_subset = _ba_get_subset;
+00559     c-&gt;get_iterator = NULL;
+00560     c-&gt;for_each = _ba_for_each;
+00561     c-&gt;clear = _ba_clear;
+00562         
+00563     <span class="keywordflow">return</span> c;
+00564 }
+00565 
+00566 netsnmp_factory *
+00567 netsnmp_container_get_binary_array_factory(<span class="keywordtype">void</span>)
+00568 {
+00569     <span class="keyword">static</span> netsnmp_factory f = { <span class="stringliteral">"binary_array"</span>,
+00570                                  (netsnmp_factory_produce_f*)
+00571                                  netsnmp_container_get_binary_array };
+00572     
+00573     <span class="keywordflow">return</span> &amp;f;
+00574 }
+00575 
+00576 <span class="keywordtype">void</span>
+00577 netsnmp_container_binary_array_init(<span class="keywordtype">void</span>)
+00578 {
+00579     netsnmp_container_register(<span class="stringliteral">"binary_array"</span>,
+00580                                netsnmp_container_get_binary_array_factory());
+00581 }
+00582 
+00583 <span class="preprocessor">#ifdef NOT_YET</span>
+00584 <span class="keywordtype">void</span> *
+00585 netsnmp_binary_array_iterator_first(netsnmp_iterator *it)
+00586 {
+00587     binary_array_table *t;
+00588 
+00589     <span class="keywordflow">if</span>(NULL == it) {
+00590         netsnmp_assert(NULL != it);
+00591         <span class="keywordflow">return</span> NULL;
+00592     }
+00593     <span class="keywordflow">if</span>(NULL == it-&gt;container) {
+00594         netsnmp_assert(NULL != it-&gt;container);
+00595         <span class="keywordflow">return</span> NULL;
+00596     }
+00597     <span class="keywordflow">if</span>(NULL == it-&gt;container-&gt;container_data) {
+00598         netsnmp_assert(NULL != it-&gt;container-&gt;container_data);
+00599         <span class="keywordflow">return</span> NULL;
+00600     }
+00601     t = (binary_array_table*)(it-&gt;container-&gt;container_data);
+00602     
+00603     (int)(it-&gt;context) = 0;
+00604 
+00605     <span class="keywordflow">if</span>((int)(it-&gt;context) &lt;= t-&gt;count)
+00606         <span class="keywordflow">return</span> NULL;
+00607 
+00608     <span class="keywordflow">return</span> t-&gt;data[ (int)(it-&gt;context) ];
+00609 }
+00610 
+00611 netsnmp_binary_array_iterator_next(netsnmp_iterator *it)
+00612 {
+00613     <span class="keywordflow">if</span>(NULL == it) {
+00614         netsnmp_assert(NULL != it);
+00615         <span class="keywordflow">return</span> NULL;
+00616     }
+00617     <span class="keywordflow">if</span>(NULL == it-&gt;container) {
+00618         netsnmp_assert(NULL != it-&gt;container);
+00619         <span class="keywordflow">return</span> NULL;
+00620     }
+00621     <span class="keywordflow">if</span>(NULL == it-&gt;container-&gt;container_data) {
+00622         netsnmp_assert(NULL != it-&gt;container-&gt;container_data);
+00623         <span class="keywordflow">return</span> NULL;
+00624     }
+00625     t = (binary_array_table*)(it-&gt;container-&gt;container_data);
+00626 
+00627     ++(int)(it-&gt;context);
+00628 
+00629     <span class="keywordflow">if</span>((int)(it-&gt;context) &lt;= t-&gt;count)
+00630         <span class="keywordflow">return</span> NULL;
+00631 
+00632     <span class="keywordflow">return</span> t-&gt;data[ (int)(it-&gt;context) ];
+00633    
+00634 }
+00635 
+00636 <span class="keywordtype">void</span> *
+00637 netsnmp_binary_array_iterator_last(netsnmp_iterator *it)
+00638 {
+00639     <span class="keywordflow">if</span>(NULL == it) {
+00640         netsnmp_assert(NULL != it);
+00641         <span class="keywordflow">return</span> NULL;
+00642     }
+00643     <span class="keywordflow">if</span>(NULL == it-&gt;container) {
+00644         netsnmp_assert(NULL != it-&gt;container);
+00645         <span class="keywordflow">return</span> NULL;
+00646     }
+00647     <span class="keywordflow">if</span>(NULL == it-&gt;container-&gt;container_data) {
+00648         netsnmp_assert(NULL != it-&gt;container-&gt;container_data);
+00649         <span class="keywordflow">return</span> NULL;
+00650     }
+00651     t = (binary_array_table*)(it-&gt;container-&gt;container_data);
+00652     
+00653     <span class="keywordflow">return</span> t-&gt;data[ t-&gt;count - 1 ];
+00654 }
+00655 
+00656 <span class="comment">/*  void * */</span>
+00657 <span class="comment">/*  netsnmp_binary_array_iterator_position(netsnmp_iterator *it) */</span>
+00658 <span class="comment">/*  { */</span>
+00659 <span class="comment">/*      if(NULL == it) { */</span>
+00660 <span class="comment">/*          netsnmp_assert(NULL != it); */</span>
+00661 <span class="comment">/*          return NULL; */</span>
+00662 <span class="comment">/*      } */</span>
+00663 <span class="comment">/*      if(NULL == it-&gt;container) { */</span>
+00664 <span class="comment">/*          netsnmp_assert(NULL != it-&gt;container); */</span>
+00665 <span class="comment">/*          return NULL; */</span>
+00666 <span class="comment">/*      } */</span>
+00667 <span class="comment">/*      if(NULL == it-&gt;container-&gt;container_data) { */</span>
+00668 <span class="comment">/*          netsnmp_assert(NULL != it-&gt;container-&gt;container_data); */</span>
+00669 <span class="comment">/*          return NULL; */</span>
+00670 <span class="comment">/*      } */</span>
+00671 <span class="comment">/*      t = (binary_array_table*)(it-&gt;container-&gt;container_data); */</span>
+00672     
+00673 <span class="comment">/*  } */</span>
+00674 
+00675 netsnmp_iterator *
+00676 netsnmp_binary_array_iterator_get(netsnmp_container *c)
+00677 {
+00678     netsnmp_iterator* it;
+00679 
+00680     <span class="keywordflow">if</span>(NULL == c)
+00681         <span class="keywordflow">return</span> NULL;
+00682 
+00683     it = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_iterator);
+00684     <span class="keywordflow">if</span>(NULL == it)
+00685         <span class="keywordflow">return</span> NULL;
+00686 
+00687     it-&gt;container = c;
+00688     (int)(it-&gt;context) = 0;
+00689 
+00690     it-&gt;first = netsnmp_binary_array_iterator_first;
+00691     it-&gt;next = netsnmp_binary_array_iterator_next;
+00692     it-&gt;last = netsnmp_binary_array_iterator_last;
+00693     it-&gt;position = NULL;<span class="comment">/*netsnmp_binary_array_iterator_position;*/</span>
+00694 }
+00695 <span class="preprocessor">#endif</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,69 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>group__watcher</h1>Section: net-snmp (3)<br />
+    Updated: 28 Oct 2004<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>watcher: watch a specified variable and process - it as an instance or scalar object
+
+    <p><a name="lbAC" id="lbAC"> </a></p>
+
+    <h3>Functions</h3>
+
+    <p><br />
+    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_watcher_handler</b> (void)<br />
+    <br />
+    netsnmp_watcher_info * <b>netsnmp_create_watcher_info</b> (void *data, size_t size, u_char type, int flags)<br />
+    <br />
+    int <b>netsnmp_register_watched_instance</b> (<b>netsnmp_handler_registration</b> *reginfo, netsnmp_watcher_info
+    *watchinfo)<br />
+    <br />
+    int <b>netsnmp_register_watched_scalar</b> (<b>netsnmp_handler_registration</b> *reginfo, netsnmp_watcher_info
+    *watchinfo)<br />
+    <br />
+    int <b>netsnmp_watcher_helper_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b> *reginfo,
+    <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
+    <br />
+    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_watched_timestamp_handler</b> (void)<br />
+    <br />
+    int <b>netsnmp_register_watched_timestamp</b> (<b>netsnmp_handler_registration</b> *reginfo, marker_t timestamp)<br />
+    <br />
+    int <b>netsnmp_watched_timestamp_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b>
+    *reginfo, <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
+    <br />
+    <b>netsnmp_mib_handler</b> * <b>netsnmp_get_watched_spinlock_handler</b> (void)<br />
+    <br />
+    int <b>netsnmp_register_watched_spinlock</b> (<b>netsnmp_handler_registration</b> *reginfo, int *spinlock)<br />
+    <br />
+    int <b>netsnmp_watched_spinlock_handler</b> (<b>netsnmp_mib_handler</b> *handler, <b>netsnmp_handler_registration</b>
+    *reginfo, <b>netsnmp_agent_request_info</b> *reqinfo, <b>netsnmp_request_info</b> *requests)<br />
+    <a name="lbAD" id="lbAD"> </a></p>
+
+    <h2>Detailed Description</h2>
+
+    <p>it as an instance or scalar object</p>
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAC">Functions</a></dt>
+        </dl>
+      </dd>
+
+      <dt><a href="#lbAD">Detailed Description</a></dt>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:44 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

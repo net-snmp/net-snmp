@@ -1,0 +1,250 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Net-SNMP Tutorial -- Commands</title>
+  </head>
+
+  <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
+    <h1>Net-SNMP Tutorial -- Commands</h1>
+
+    <p>
+      All of the net-snmp commands pick a common set of options, which
+      the next few sections will be discussing. The only commands that
+      do not accept these common set of arguments are the running
+      demons (like snmpd and snmptrapd).
+
+    <p>
+       A list of all of the options that are available for use from a
+       command can be printed by passing "-h" on the command lien to
+       any of the commands.
+
+    <h3>Command Options Affecting Output Formatting</h3>
+    <p>
+      All of the commands allow you to format their output in a manner
+      which you personally will find attractive. The behavior is
+      controlled using the -O flag:
+<pre>
+<ul>
+% <b>snmpget -h</b>
+Usage: snmpget [options...] <hostname> [<objectID> ...]
+...
+  -O <OIDOPTS>	Toggle various defaults controlling oid printing:
+		  OIDOPTS values:
+		      n: Print oids numerically.
+		      e: Print enums numerically.
+		      E: Escape quotes in string indices.
+		      X: Extended index format.
+		      b: Dont break oid indexes down.
+		      q: Quick print for easier parsing.
+		      f: Print full oids on output.
+		      s: Print only last symbolic element of oid.
+		      S: Print MIB module-id plus last element.
+		      t: Print timeticks unparsed as numeric integers.
+		      v: Print values only (not OID = value).
+</ul>
+</pre>
+    <p>
+      Here are brief examples of all the above options in use:
+      <li> -On
+	<p>  This flag controls whether or not you want to display
+	the results using numerical order to textual OIDs:
+<pre>
+<ul>
+% <b>snmpgetnext -v 2c -c demopublic test.net-snmp.org sysObjectID</b>
+system.sysObjectID.0 = OID: enterprises.ucdavis.ucdSnmpAgent.hpux10
+% <b>snmpgetnext -v 2c -On -c demopublic test.net-snmp.org sysObjectID</b>
+.1.3.6.1.2.1.1.2.0 = OID: .1.3.6.1.4.1.2021.250.6
+</ul>
+</pre>
+      <li> -Oe
+	<p> Similarly, this flag controls whether you want to display
+	enumerated lists numerically or with textual translations
+	(this example will not work for you  the:
+<pre>
+<ul>
+% <b>snmpgetnext -v 2c -c demopublic test.net-snmp.org snmpEnableAuthenTraps</b>
+snmp.snmpEnableAuthenTraps.0 = disabled(2)
+% <b>snmpgetnext -v 2c -c demopublic test.net-snmp.org snmpEnableAuthenTraps</b>
+snmp.snmpEnableAuthenTraps.0 = 2
+</ul>
+</pre>
+
+<li> -Ob
+	<p> Many SNMP tables are indexed by strings. The strings are
+	then translated into OID segments so that they can be
+	referenced in a SNMP request. The best way to understand this
+	is through an example. So, let's take a look at the
+	usmUserEntry object and how it is indexed:
+<pre>
+<ul>
+% <b>snmptranslate -Td -R usmUserEntry</b>
+.1.3.6.1.6.3.15.1.2.2.1
+usmUserEntry OBJECT-TYPE
+  -- FROM       SNMP-USER-BASED-SM-MIB
+  MAX-ACCESS    not-accessible
+  STATUS        current
+  INDEXES        { usmUserEngineID, usmUserName }
+  DESCRIPTION   "A user configured in the SNMP engine's Local
+                 Configuration Datastore (LCD) for the User-based
+                 Security Model.
+                "
+::= { iso(1) org(3) dod(6) internet(1) snmpV2(6) snmpModules(3) snmpUsmMIB(15) usmMIBObjects(1) usmUser(2) usmUserTable(2) 1 }
+</ul>
+</pre>
+	<p> As you can see by the above description, it is indexed by
+	two different objects: usmUserEngineID, and usmUserName. Both
+	of these are strings. The default for all of the commands is
+	to breakdown the result for you to make it easier for you to decode
+	the above indexes out of the printed result:
+<pre>
+<ul>
+% <b>snmpgetnext -v 2c -c demopublic test.net-snmp.org usmUserEntry</b>
+.iso.org.dod.internet.snmpV2.snmpModules.snmpUsmMIB.usmMIBObjects.usmUser.usmUserTable.usmUserEntry.usmUserOwnPrivKeyChange."........."."MD5User" = ""
+</ul>
+</pre>
+	<p> As you can see, they OID in the output above shows 2
+	strings in it: "........." and "MD5User".  The first string is
+	an engine ID which is full of unprintable characters, so in
+	this case it didn't help much that the library printed it out
+	for us.  However, the user string "MD5User" got nicely printed
+	instead.  We generally think this is much easier to understand
+	than looking at the numbers directly. However, this is
+	available to you as an option as well:
+<pre>
+<ul>
+% <b>snmpgetnext -Ob -v 2c -c demopublic test.net-snmp.org usmUserEntry</b>
+.iso.org.dod.internet.snmpV2.snmpModules.snmpUsmMIB.usmMIBObjects.usmUser.usmUserTable.usmUserEntry.usmUserOwnPrivKeyChange.9.128.0.7.229.1.169.237.235.161.7.77.68.53.85.115.101.114 = ""
+</ul>
+</pre>
+	<p> Here you can see that the OID is much more complex, and
+	does not intuitively look like it contains 2 strings to the
+	naked eye.
+
+	<p> Of course, all of the net-snmp commands also accept
+	strings in the requested OID, although most shells will
+	require you to escape the quotes with a back slash:
+<pre>
+<ul>
+% <b>snmpget -v 2c -c demopublic test.net-snmp.org usmUserOwnPrivKeyChange.9.128.0.7.229.1.169.237.235.161.\"MD5User\"</b>
+.iso.org.dod.internet.snmpV2.snmpModules.snmpUsmMIB.usmMIBObjects.usmUser.usmUserTable.usmUserEntry.usmUserOwnPrivKeyChange."........."."MD5User" = ""
+</ul>
+</pre>
+<li>-OX
+	<p>A more elaborate output for index values is -OX. This format is
+	output-only - no provision has been made to accept it on input.
+	<p>Especially the IPv6 mibs return values that can be very difficult to
+	read, and is very different from the ways you normally see the values
+	involved.
+	<p>Consider for instance the IPV6-MIB:ipv6RouteTable
+<pre><ul>
+$ <b>snmptranslate -Td IPV6-MIB::ipv6RouteEntry</b>
+.1.3.6.1.2.1.55.1.11.1
+ipv6RouteEntry OBJECT-TYPE
+  -- FROM	IPV6-MIB
+  MAX-ACCESS	not-accessible
+  STATUS	current
+  INDEX		{ ipv6RouteDest, ipv6RoutePfxLength, ipv6RouteIndex }
+  DESCRIPTION	"A routing entry."
+::= { iso(1) org(3) dod(6) internet(1) mgmt(2) mib-2(1) ipv6MIB(55) ipv6MIBObjects(1) ipv6RouteTable(11) 1 }
+</ul></pre>
+i.e. the index is an IPv6 address and two integers. So requesting
+<pre><ul>
+$ <b>snmpgetnext -OS host IPV6-MIB::ipv6RouteTable</b>
+IPV6-MIB::ipv6RouteIfIndex.63.254.1.0.255.0.0.0.0.0.0.0.0.0.0.0.64.1 = 2
+</ul></pre>
+is not easily read. But how about
+<pre><ul>
+$ <b>snmpgetnext -OSX host IPV6-MIB::ipv6RouteTable</b>
+IPV6-MIB::ipv6RouteIfIndex[3ffe:100:ff00:0:0:0:0:0][64][1] = 2
+</ul></pre>
+	It looks a lot nicer. The format puts square brackets around each index,
+	and uses DISPLAY-HINT information and string conversions to format
+	each index.
+    <p>
+      <li> -Os, -OS, and -Of
+    <p>
+      Shorting the output of those really long OIDs is also possible,
+      using the -Os and -OS command (the -OS version pre-pends the url
+      with the MIB name that the node came from):
+<pre>
+<ul>
+<p>
+% <b>snmpget -v 2c -c demopublic test.net-snmp.org sysUpTime.0 ucdDemoUserList.0</b>
+system.sysUpTime.0 = Timeticks: (586910990) 67 days, 22:18:29.90
+enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADESUser"
+% <b>snmpget -Os -v 2c -c demopublic test.net-snmp.org sysUpTime.0 ucdDemoUserList.0</b>
+sysUpTime.0 = Timeticks: (586910990) 67 days, 22:18:29.90
+ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADESUser"
+% <b>snmpget -OS -v 2c -c demopublic test.net-snmp.org sysUpTime.0 ucdDemoUserList.0</b>
+RFC1213-MIB::sysUpTime.0 = Timeticks: (586911833) 67 days, 22:18:38.33
+UCD-DEMO-MIB::ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADESUser"
+</ul>
+</pre>
+	<p>As you can see the above options only print out the last
+	node in the OID, but the -OS option additionally prepends the
+	output with the name of the MIB that the OID can be found in.
+	<p>-Of Is sort of the reverse of the previous options and
+	always displays the full OID:
+<pre>
+<ul>
+% <b>snmpget -Of -v 2c -c demopublic test.net-snmp.org sysUpTime.0 ucdDemoUserList.0</b>
+.iso.org.dod.internet.mgmt.mib-2.system.sysUpTime.0 = Timeticks: (741998862) 85 days, 21:06:28.62
+.iso.org.dod.internet.private.enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADESUser"
+</ul>
+</pre>
+	<li>-Ov
+	<P>  The -Ov flag outputs only the value, but not variable name
+<pre>
+<ul>
+% <b>snmpget -Ov -v 2c -c demopublic test.net-snmp.org sysObjectID.0</b>
+OID: enterprises.ucdavis.ucdSnmpAgent.hpux10
+</ul>
+</pre>
+	<li>-Oq
+	<P>  Finally,  the -Oq flag allows us to print everything as
+	quick as possible in a fashion that is easily parsible by
+	things like scripting languages:
+<pre>
+<ul>
+% <b>snmpget -Oq -v 2c -c demopublic test.net-snmp.org sysObjectID.0</b>
+system.sysObjectID.0 enterprises.ucdavis.ucdSnmpAgent.hpux10
+</ul>
+</pre>
+
+	<p> Note that in the above output, there is no equal sign 
+	and there is no "OID:" string in the output.
+
+	<p>
+      <li> Combinations
+	<p> Of course, you're allowed to combine many of these options 
+	into one statement:
+<pre>
+<ul>
+% <b>snmpget -Oqs -v 2c -c demopublic test.net-snmp.org sysObjectID.0</b>
+sysObjectID.0 hpux10
+</ul>
+</pre>
+	<p>For shell scripts, the -Oqv option is useful. It only returns the
+	value of the attribute, which is useful for instance in (using sh/ksh/bash
+	syntax)
+<pre>
+<ul>
+% <b>interfaces=`snmpget -Oqv -v 2c -c demopublic test.net-snmp.org ifNumber.0`</b>
+</ul>
+</pre>
+
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Thu Nov  4 15:38:15 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Fri Dec 17 08:52:43 PST 1999
+<!-- hhmts end -->
+  </body>
+</html>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

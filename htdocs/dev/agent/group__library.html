@@ -1,0 +1,1971 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>The Net-SNMP library</h1>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Modules</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__asn1__packet__parse.html">asn1 parsing and datatype
+      manipulation routines.</a></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__callback.html">A generic callback mechanism</a></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__data__list.html">generic linked-list data handling with
+      a string as a key.</a></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__default__store.html">storage space for
+      defaults</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">The purpose of the default storage is three-fold:.<br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__mib__utilities.html">mib parsing and datatype
+      manipulation routines.</a></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__oid__stash.html">Store and retrieve data referenced by
+      an OID.</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This is essentially a way of storing data associated with a given OID.<br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__read__config.html">parsing various configuration files
+      at run time</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">The read_config related functions are a fairly extensible system of parsing various configuration
+      files at the run time.<br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__alarm.html">generic library based alarm timers
+      for various parts of an application</a></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__client.html">various PDU processing
+      routines</a></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__logging.html">generic logging for
+      net-snmp</a></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html">Memory Utility Routines</a></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Data Structures</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_internal_session</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>session_list</b></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Defines</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga116" doxytag="library::MIN"
+      id="ga116"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>MIN</b>(a, b)&nbsp;&nbsp;&nbsp;(((a) &lt; (b)) ? (a) : (b))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga117" doxytag=
+      "library::MIB_CLIENTS_ARE_EVIL" id="ga117"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>MIB_CLIENTS_ARE_EVIL</b>&nbsp;&nbsp;&nbsp;1</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga118" doxytag=
+      "library::_init_agent_callback_transport" id="ga118"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>_init_agent_callback_transport</b>()</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga119" doxytag=
+      "library::SNMP_NEED_REQUEST_LIST" id="ga119"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_NEED_REQUEST_LIST</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>timercmp</b>(tvp, uvp, cmp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga121" doxytag=
+      "library::timerclear" id="ga121"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>timerclear</b>(tvp)&nbsp;&nbsp;&nbsp;(tvp)-&gt;tv_sec = (tvp)-&gt;tv_usec =
+      0</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga122" doxytag=
+      "library::MAX_PACKET_LENGTH" id="ga122"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>MAX_PACKET_LENGTH</b>&nbsp;&nbsp;&nbsp;(0x7fffffff)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga123" doxytag=
+      "library::NETSNMP_STREAM_QUEUE_LEN" id="ga123"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>NETSNMP_STREAM_QUEUE_LEN</b>&nbsp;&nbsp;&nbsp;5</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga124" doxytag="library::BSD4_2"
+      id="ga124"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>BSD4_2</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga125" doxytag=
+      "library::NFDBITS" id="ga125"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>NFDBITS</b>&nbsp;&nbsp;&nbsp;(sizeof(fd_mask) * NBBY)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga126" doxytag="library::FD_SET"
+      id="ga126"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>FD_SET</b>(n, p)&nbsp;&nbsp;&nbsp;((p)-&gt;fds_bits[(n)/NFDBITS] |= (1 &lt;&lt;
+      ((n) % NFDBITS)))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga127" doxytag="library::FD_CLR"
+      id="ga127"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>FD_CLR</b>(n, p)&nbsp;&nbsp;&nbsp;((p)-&gt;fds_bits[(n)/NFDBITS] &amp;= ~(1
+      &lt;&lt; ((n) % NFDBITS)))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga128" doxytag=
+      "library::FD_ISSET" id="ga128"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>FD_ISSET</b>(n, p)&nbsp;&nbsp;&nbsp;((p)-&gt;fds_bits[(n)/NFDBITS] &amp; (1
+      &lt;&lt; ((n) % NFDBITS)))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga129" doxytag=
+      "library::FD_ZERO" id="ga129"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>FD_ZERO</b>(p)&nbsp;&nbsp;&nbsp;memset((p), 0, sizeof(*(p)))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga130" doxytag=
+      "library::DEFAULT_COMMUNITY" id="ga130"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>DEFAULT_COMMUNITY</b>&nbsp;&nbsp;&nbsp;"public"</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga131" doxytag=
+      "library::DEFAULT_RETRIES" id="ga131"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>DEFAULT_RETRIES</b>&nbsp;&nbsp;&nbsp;5</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga132" doxytag=
+      "library::DEFAULT_TIMEOUT" id="ga132"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>DEFAULT_TIMEOUT</b>&nbsp;&nbsp;&nbsp;1000000L</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga133" doxytag=
+      "library::DEFAULT_REMPORT" id="ga133"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>DEFAULT_REMPORT</b>&nbsp;&nbsp;&nbsp;SNMP_PORT</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga134" doxytag=
+      "library::DEFAULT_ENTERPRISE" id="ga134"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>DEFAULT_ENTERPRISE</b>&nbsp;&nbsp;&nbsp;default_enterprise</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga135" doxytag=
+      "library::DEFAULT_TIME" id="ga135"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>DEFAULT_TIME</b>&nbsp;&nbsp;&nbsp;0</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga136" doxytag=
+      "library::MAXIMUM_PACKET_SIZE" id="ga136"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>MAXIMUM_PACKET_SIZE</b>&nbsp;&nbsp;&nbsp;0x7fffffff</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>DEBUGPRINTPDUTYPE</b>(token, type)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga138" doxytag=
+      "library::ERROR_STAT_LENGTH" id="ga138"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>ERROR_STAT_LENGTH</b>&nbsp;&nbsp;&nbsp;11</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Typedefs</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga8" doxytag="library::fd_mask"
+      id="ga8"></a> typedef long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>fd_mask</b></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__library.html#ga21">init_agent</a> (const char
+      *app)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Initialize the agent. <a href="#ga21"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga22" doxytag=
+      "library::shutdown_agent" id="ga22"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>shutdown_agent</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga24" doxytag=
+      "library::snmp_build" id="ga24"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_build</b> (u_char **pkt, size_t *pkt_len, size_t *offset, <a class="el"
+      href="structsnmp__session.html">netsnmp_session</a> *pss, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga34" doxytag=
+      "library::snmp_get_errno" id="ga34"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_get_errno</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga35" doxytag=
+      "library::snmp_synch_reset" id="ga35"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_synch_reset</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *notused)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga36" doxytag=
+      "library::snmp_synch_setup" id="ga36"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_synch_setup</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *notused)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga37" doxytag=
+      "library::strerror" id="ga37"></a> const char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>strerror</b> (int err)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga38" doxytag=
+      "library::snmp_get_next_reqid" id="ga38"></a> long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_get_next_reqid</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga39" doxytag=
+      "library::snmp_get_next_msgid" id="ga39"></a> long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_get_next_msgid</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga40" doxytag=
+      "library::snmp_get_next_sessid" id="ga40"></a> long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_get_next_sessid</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga41" doxytag=
+      "library::snmp_get_next_transid" id="ga41"></a> long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_get_next_transid</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga42" doxytag=
+      "library::snmp_perror" id="ga42"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_perror</b> (const char *prog_string)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga43" doxytag=
+      "library::snmp_set_detail" id="ga43"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_set_detail</b> (const char *detail_string)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga44" doxytag=
+      "library::snmp_api_errstring" id="ga44"></a> const char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_api_errstring</b> (int snmp_errnumber)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga45" doxytag=
+      "library::snmp_error" id="ga45"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_error</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *psess, int *p_errno, int *p_snmp_errno, char **p_str)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga46" doxytag=
+      "library::snmp_sess_error" id="ga46"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_error</b> (void *sessp, int *p_errno, int *p_snmp_errno, char
+      **p_str)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga47" doxytag=
+      "library::netsnmp_sess_log_error" id="ga47"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_sess_log_error</b> (int priority, const char *prog_string, <a class=
+      "el" href="structsnmp__session.html">netsnmp_session</a> *ss)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga48" doxytag=
+      "library::snmp_sess_perror" id="ga48"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_perror</b> (const char *prog_string, <a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *ss)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga49" doxytag=
+      "library::snmp_sess_init" id="ga49"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_init</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *session)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga50" doxytag=
+      "library::init_snmp_enums" id="ga50"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>init_snmp_enums</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__library.html#ga51">init_snmp</a> (const char
+      *type)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Calls the functions to do config file loading and mib module parsing in the correct order. <a href=
+      "#ga51"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga52" doxytag=
+      "library::snmp_store" id="ga52"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_store</b> (const char *type)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__library.html#ga53">snmp_shutdown</a> (const char
+      *type)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Shuts down the application, saving any needed persistent storage, and appropriate clean up. <a href=
+      "#ga53"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga54" doxytag=
+      "library::snmp_open" id="ga54"></a> <a class="el" href="structsnmp__session.html">netsnmp_session</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_open</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *session)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga55" doxytag=
+      "library::snmp_open_ex" id="ga55"></a> <a class="el" href="structsnmp__session.html">netsnmp_session</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_open_ex</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *session, int(*fpre_parse)(<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *, netsnmp_transport *, void *, int), int(*fparse)(<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *, u_char *,
+      size_t), int(*fpost_parse)(<a class="el" href="structsnmp__session.html">netsnmp_session</a> *, <a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *, int), int(*fbuild)(<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *, u_char *,
+      size_t *), int(*frbuild)(<a class="el" href="structsnmp__session.html">netsnmp_session</a> *, <a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *, u_char **, size_t *, size_t *), int(*fcheck)(u_char *, size_t))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga57" doxytag=
+      "library::snmpv3_engineID_probe" id="ga57"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmpv3_engineID_probe</b> (struct session_list *slp, <a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *in_session)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga59" doxytag=
+      "library::snmp_add" id="ga59"></a> <a class="el" href="structsnmp__session.html">netsnmp_session</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_add</b> (<a class="el" href="structsnmp__session.html">netsnmp_session</a>
+      *in_session, netsnmp_transport *transport, int(*fpre_parse)(<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *, netsnmp_transport *, void *, int), int(*fpost_parse)(<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *, int))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga60" doxytag=
+      "library::snmp_add_full" id="ga60"></a> <a class="el" href="structsnmp__session.html">netsnmp_session</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_add_full</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *in_session, netsnmp_transport *transport, int(*fpre_parse)(<a class="el"
+      href="structsnmp__session.html">netsnmp_session</a> *, netsnmp_transport *, void *, int), int(*fparse)(<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *, u_char *,
+      size_t), int(*fpost_parse)(<a class="el" href="structsnmp__session.html">netsnmp_session</a> *, <a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *, int), int(*fbuild)(<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *, u_char *,
+      size_t *), int(*frbuild)(<a class="el" href="structsnmp__session.html">netsnmp_session</a> *, <a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *, u_char **, size_t *, size_t *), int(*fcheck)(u_char *, size_t), <a class="el"
+      href="structsnmp__pdu.html">netsnmp_pdu</a> *(*fcreate_pdu)(netsnmp_transport *, void *, size_t))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga61" doxytag=
+      "library::snmp_sess_add_ex" id="ga61"></a> void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_add_ex</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *in_session, netsnmp_transport *transport, int(*fpre_parse)(<a class="el"
+      href="structsnmp__session.html">netsnmp_session</a> *, netsnmp_transport *, void *, int), int(*fparse)(<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *, u_char *,
+      size_t), int(*fpost_parse)(<a class="el" href="structsnmp__session.html">netsnmp_session</a> *, <a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *, int), int(*fbuild)(<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *, u_char *,
+      size_t *), int(*frbuild)(<a class="el" href="structsnmp__session.html">netsnmp_session</a> *, <a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *, u_char **, size_t *, size_t *), int(*fcheck)(u_char *, size_t), <a class="el"
+      href="structsnmp__pdu.html">netsnmp_pdu</a> *(*fcreate_pdu)(netsnmp_transport *, void *, size_t))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga62" doxytag=
+      "library::snmp_sess_add" id="ga62"></a> void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_add</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *in_session, netsnmp_transport *transport, int(*fpre_parse)(<a class="el"
+      href="structsnmp__session.html">netsnmp_session</a> *, netsnmp_transport *, void *, int), int(*fpost_parse)(<a class="el"
+      href="structsnmp__session.html">netsnmp_session</a> *, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *,
+      int))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga63" doxytag=
+      "library::snmp_sess_open" id="ga63"></a> void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_open</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *pss)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga64" doxytag=
+      "library::create_user_from_session" id="ga64"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>create_user_from_session</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *session)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga66" doxytag=
+      "library::snmp_sess_close" id="ga66"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_close</b> (void *sessp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga67" doxytag=
+      "library::snmp_close" id="ga67"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_close</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *session)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga68" doxytag=
+      "library::snmp_close_sessions" id="ga68"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_close_sessions</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga71" doxytag=
+      "library::snmpv3_packet_build" id="ga71"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmpv3_packet_build</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *session, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu,
+      u_char *packet, size_t *out_length, u_char *pdu_data, size_t pdu_data_len)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga73" doxytag=
+      "library::snmp_pdu_build" id="ga73"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_pdu_build</b> (<a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu, u_char *cp, size_t *out_length)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga74" doxytag=
+      "library::snmpv3_parse" id="ga74"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmpv3_parse</b> (<a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu, u_char *data, size_t *length, u_char **after_header, <a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *sess)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga75" doxytag=
+      "library::snmpv3_make_report" id="ga75"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmpv3_make_report</b> (<a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *pdu, int error)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga76" doxytag=
+      "library::snmpv3_get_report_type" id="ga76"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmpv3_get_report_type</b> (<a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *pdu)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga78" doxytag=
+      "library::snmp_pdu_parse" id="ga78"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_pdu_parse</b> (<a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu, u_char *data, size_t *length)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga79" doxytag=
+      "library::snmpv3_scopedPDU_parse" id="ga79"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmpv3_scopedPDU_parse</b> (<a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *pdu, u_char *cp, size_t *length)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga80" doxytag=
+      "library::snmp_send" id="ga80"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_send</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *session, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga81" doxytag=
+      "library::snmp_sess_send" id="ga81"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_send</b> (void *sessp, <a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *pdu)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga82" doxytag=
+      "library::snmp_async_send" id="ga82"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_async_send</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *session, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu,
+      snmp_callback callback, void *cb_data)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga84" doxytag=
+      "library::snmp_sess_async_send" id="ga84"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_async_send</b> (void *sessp, <a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *pdu, snmp_callback callback, void *cb_data)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga85" doxytag=
+      "library::snmp_free_var" id="ga85"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_free_var</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *var)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga86" doxytag=
+      "library::snmp_free_varbind" id="ga86"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_free_varbind</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *var)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga87" doxytag=
+      "library::snmp_free_pdu" id="ga87"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_free_pdu</b> (<a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga88" doxytag=
+      "library::snmp_create_sess_pdu" id="ga88"></a> <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_create_sess_pdu</b> (netsnmp_transport *transport, void *opaque, size_t
+      olength)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga90" doxytag=
+      "library::snmp_read" id="ga90"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_read</b> (fd_set *fdset)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga91" doxytag=
+      "library::_sess_read" id="ga91"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>_sess_read</b> (void *sessp, fd_set *fdset)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga92" doxytag=
+      "library::snmp_sess_read" id="ga92"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_read</b> (void *sessp, fd_set *fdset)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga93" doxytag=
+      "library::snmp_select_info" id="ga93"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_select_info</b> (int *numfds, fd_set *fdset, struct timeval *timeout, int
+      *block)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga94" doxytag=
+      "library::snmp_sess_select_info" id="ga94"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_select_info</b> (void *sessp, int *numfds, fd_set *fdset, struct
+      timeval *timeout, int *block)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga95" doxytag=
+      "library::snmp_timeout" id="ga95"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_timeout</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga96" doxytag=
+      "library::snmp_sess_timeout" id="ga96"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_timeout</b> (void *sessp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga97" doxytag=
+      "library::snmp_oid_ncompare" id="ga97"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_oid_ncompare</b> (const oid *in_name1, size_t len1, const oid *in_name2,
+      size_t len2, size_t max_len)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__library.html#ga98">snmp_oid_compare</a> (const oid
+      *in_name1, size_t len1, const oid *in_name2, size_t len2)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">lexicographical compare two object identifiers. <a href="#ga98"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__library.html#ga99">snmp_oidtree_compare</a> (const oid
+      *in_name1, size_t len1, const oid *in_name2, size_t len2)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Compares 2 OIDs to determine if they are equal up until the shortest length. <a href=
+      "#ga99"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__library.html#ga100">netsnmp_oid_equals</a> (const oid
+      *in_name1, size_t len1, const oid *in_name2, size_t len2)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Compares 2 OIDs to determine if they are exactly equal. <a href="#ga100"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__library.html#ga101">netsnmp_oid_is_subtree</a> (const
+      oid *in_name1, size_t len1, const oid *in_name2, size_t len2)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Identical to netsnmp_oid_equals, except only the length up to len1 is compared. <a href=
+      "#ga101"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__library.html#ga102">netsnmp_oid_find_prefix</a> (const
+      oid *in_name1, size_t len1, const oid *in_name2, size_t len2)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Given two OIDs, determine the common prefix to them both. <a href="#ga102"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga104" doxytag=
+      "library::snmp_pdu_add_variable" id="ga104"></a> <a class="el" href="structvariable__list.html">netsnmp_variable_list</a>
+      *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_pdu_add_variable</b> (<a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *pdu, const oid *name, size_t name_length, u_char type, const u_char *value, size_t
+      len)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga105" doxytag=
+      "library::snmp_varlist_add_variable" id="ga105"></a> <a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_varlist_add_variable</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> **varlist, const oid *name, size_t name_length, u_char type, const
+      u_char *value, size_t len)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga106" doxytag=
+      "library::snmp_add_var" id="ga106"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_add_var</b> (<a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu, const oid *name, size_t name_length, char type, const char *value)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga107" doxytag=
+      "library::snmp_sess_pointer" id="ga107"></a> void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_pointer</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *session)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga108" doxytag=
+      "library::snmp_sess_session" id="ga108"></a> <a class="el" href="structsnmp__session.html">netsnmp_session</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_session</b> (void *sessp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga109" doxytag=
+      "library::snmp_sess_transport" id="ga109"></a> netsnmp_transport *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_transport</b> (void *sessp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga110" doxytag=
+      "library::snmp_sess_transport_set" id="ga110"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_sess_transport_set</b> (void *sp, netsnmp_transport *t)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga111" doxytag=
+      "library::snmp_duplicate_objid" id="ga111"></a> oid *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_duplicate_objid</b> (const oid *objToCopy, size_t objToCopyLen)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga112" doxytag=
+      "library::snmp_increment_statistic" id="ga112"></a> u_int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_increment_statistic</b> (int which)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga113" doxytag=
+      "library::snmp_increment_statistic_by" id="ga113"></a> u_int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_increment_statistic_by</b> (int which, int count)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga114" doxytag=
+      "library::snmp_get_statistic" id="ga114"></a> u_int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_get_statistic</b> (int which)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga115" doxytag=
+      "library::snmp_init_statistics" id="ga115"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_init_statistics</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Variables</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga1" doxytag="library::subtrees"
+      id="ga1"></a> netsnmp_subtree *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>subtrees</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga2" doxytag=
+      "library::long_return" id="ga2"></a> long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>long_return</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga3" doxytag=
+      "library::return_buf" id="ga3"></a> u_char&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>return_buf</b> [258]</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga4" doxytag=
+      "library::starttime" id="ga4"></a> timeval&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>starttime</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga5" doxytag=
+      "library::callback_master_num" id="ga5"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>callback_master_num</b> = -1</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga6" doxytag="library::nullOid"
+      id="ga6"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>nullOid</b> [] = { 0, 0 }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga7" doxytag=
+      "library::nullOidLen" id="ga7"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>nullOidLen</b> = sizeof(nullOid)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga12" doxytag=
+      "library::Sessions" id="ga12"></a> session_list *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>Sessions</b> = NULL</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga17" doxytag=
+      "library::snmp_errno" id="ga17"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_errno</b> = 0</td>
+    </tr>
+  </table>
+  <hr />
+
+  <h2>Define Documentation</h2><a class="anchor" name="ga137" doxytag="snmp_api.c::DEBUGPRINTPDUTYPE" id="ga137"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define DEBUGPRINTPDUTYPE</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">token,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">type&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p><b>Value:</b></p>
+
+        <div class="fragment">
+          <pre class="fragment">
+<span class="keywordflow">switch</span>(type) { \
+      <span class="keywordflow">case</span> SNMP_MSG_GET: \
+        DEBUGDUMPSECTION(token, <span class="stringliteral">"PDU-GET"</span>); \
+        <span class="keywordflow">break</span>; \
+      <span class="keywordflow">case</span> SNMP_MSG_GETNEXT: \
+        DEBUGDUMPSECTION(token, <span class="stringliteral">"PDU-GETNEXT"</span>); \
+        <span class="keywordflow">break</span>; \
+      <span class="keywordflow">case</span> SNMP_MSG_RESPONSE: \
+        DEBUGDUMPSECTION(token, <span class="stringliteral">"PDU-RESPONSE"</span>); \
+        <span class="keywordflow">break</span>; \
+      <span class="keywordflow">case</span> SNMP_MSG_SET: \
+        DEBUGDUMPSECTION(token, <span class="stringliteral">"PDU-SET"</span>); \
+        <span class="keywordflow">break</span>; \
+      <span class="keywordflow">case</span> SNMP_MSG_GETBULK: \
+        DEBUGDUMPSECTION(token, <span class="stringliteral">"PDU-GETBULK"</span>); \
+        <span class="keywordflow">break</span>; \
+      <span class="keywordflow">case</span> SNMP_MSG_INFORM: \
+        DEBUGDUMPSECTION(token, <span class="stringliteral">"PDU-INFORM"</span>); \
+        <span class="keywordflow">break</span>; \
+      <span class="keywordflow">case</span> SNMP_MSG_TRAP2: \
+        DEBUGDUMPSECTION(token, <span class="stringliteral">"PDU-TRAP2"</span>); \
+        <span class="keywordflow">break</span>; \
+      <span class="keywordflow">case</span> SNMP_MSG_REPORT: \
+        DEBUGDUMPSECTION(token, <span class="stringliteral">"PDU-REPORT"</span>); \
+        <span class="keywordflow">break</span>; \
+      <span class="keywordflow">default</span>: \
+        DEBUGDUMPSECTION(token, <span class="stringliteral">"PDU-UNKNOWN"</span>); \
+        <span class="keywordflow">break</span>; \
+    }
+</pre>
+        </div>
+
+        <p>Definition at line <a class="el" href="snmp__api_8c-source.html#l00374">374</a> of file <a class="el" href=
+        "snmp__api_8c-source.html">snmp_api.c</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga120" doxytag="snmp_api.c::timercmp" id="ga120"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define timercmp</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">tvp,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">uvp,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">cmp&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p><b>Value:</b></p>
+
+        <div class="fragment">
+          <pre class="fragment">
+<span class="comment">/* CSTYLED */</span> \
+        ((tvp)-&gt;tv_sec cmp (uvp)-&gt;tv_sec || \
+        ((tvp)-&gt;tv_sec == (uvp)-&gt;tv_sec &amp;&amp; \
+        <span class="comment">/* CSTYLED */</span> \
+        (tvp)-&gt;tv_usec cmp (uvp)-&gt;tv_usec))
+</pre>
+        </div>
+
+        <p>Definition at line <a class="el" href="snmp__api_8c-source.html#l00145">145</a> of file <a class="el" href=
+        "snmp__api_8c-source.html">snmp_api.c</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr />
+
+  <h2>Function Documentation</h2><a class="anchor" name="ga21" doxytag="snmp_vars.c::init_agent" id="ga21"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int init_agent</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const char *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>app</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Initialize the agent.</p>
+
+        <p>Calls into init_agent_read_config to set tha app's configuration file in the appropriate default storage space,
+        NETSNMP_DS_LIB_APPTYPE. Need to call init_agent before calling init_snmp.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>app</em>&nbsp;</td>
+
+                <td>the configuration file to be read in, gets stored in default storage</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>Returns non-zero on failure and zero on success.</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>See also:</b></dt>
+
+          <dd><a class="el" href="group__library.html#ga51">init_snmp</a></dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__vars_8c-source.html#l00269">269</a> of file <a class="el" href=
+        "snmp__vars_8c-source.html">snmp_vars.c</a>.</p>
+
+        <p>References <a class="el" href="default__store_8c-source.html#l00197">netsnmp_ds_set_boolean()</a>, <a class="el" href=
+        "all__helpers_8c-source.html#l00034">netsnmp_init_helpers()</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga51" doxytag="snmp_api.c::init_snmp" id="ga51"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void init_snmp</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const char *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>type</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Calls the functions to do config file loading and mib module parsing in the correct order.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>type</em>&nbsp;</td>
+
+                <td>label for the config file "type"</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>void</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>See also:</b></dt>
+
+          <dd><a class="el" href="group__library.html#ga21">init_agent</a></dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__api_8c-source.html#l00778">778</a> of file <a class="el" href=
+        "snmp__api_8c-source.html">snmp_api.c</a>.</p>
+
+        <p>References <a class="el" href="mib_8c-source.html#l02537">init_mib()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga100" doxytag="snmp_api.c::netsnmp_oid_equals" id="ga100"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_oid_equals</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>in_name1</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>len1</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>in_name2</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>len2</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Compares 2 OIDs to determine if they are exactly equal.</p>
+
+        <p>This should be faster than doing a snmp_oid_compare for different length OIDs, since the length is checked first and
+        if != returns immediately. Might be very slighly faster if lengths are ==.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>in_name1</em>&nbsp;</td>
+
+                <td>A pointer to the first oid.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>len1</em>&nbsp;</td>
+
+                <td>length of the first OID (in segments, not bytes)</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>in_name2</em>&nbsp;</td>
+
+                <td>A pointer to the second oid.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>len2</em>&nbsp;</td>
+
+                <td>length of the second OID (in segments, not bytes)</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>0 if they are equal, 1 if they are not.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__api_8c-source.html#l06212">6212</a> of file <a class="el" href=
+        "snmp__api_8c-source.html">snmp_api.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00123">netsnmp_cache_find_by_oid()</a>, <a class="el"
+        href="old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, and <a class="el" href=
+        "agent__registry_8c-source.html#l00916">unregister_mib_context()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga102" doxytag="snmp_api.c::netsnmp_oid_find_prefix" id="ga102"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_oid_find_prefix</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>in_name1</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>len1</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>in_name2</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>len2</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Given two OIDs, determine the common prefix to them both.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>in_name1</em>&nbsp;</td>
+
+                <td>A pointer to the first oid.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>len1</em>&nbsp;</td>
+
+                <td>Length of the first oid.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>in_name2</em>&nbsp;</td>
+
+                <td>A pointer to the second oid.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>len2</em>&nbsp;</td>
+
+                <td>Length of the second oid.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>length of largest common index of commonality. 1 = first, 0 if none * or -1 on error.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__api_8c-source.html#l06268">6268</a> of file <a class="el" href=
+        "snmp__api_8c-source.html">snmp_api.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8h-source.html#l00089">SNMP_MIN</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l01803">netsnmp_add_varbind_to_cache()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga101" doxytag="snmp_api.c::netsnmp_oid_is_subtree" id="ga101"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_oid_is_subtree</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>in_name1</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>len1</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>in_name2</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>len2</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Identical to netsnmp_oid_equals, except only the length up to len1 is compared.</p>
+
+        <p>Functionally, this determines if in_name2 is equal or a subtree of in_name1</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>in_name1</em>&nbsp;</td>
+
+                <td>A pointer to the first oid.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>len1</em>&nbsp;</td>
+
+                <td>length of the first OID (in segments, not bytes)</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>in_name2</em>&nbsp;</td>
+
+                <td>A pointer to the second oid.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>len2</em>&nbsp;</td>
+
+                <td>length of the second OID (in segments, not bytes)</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>0 if one is a common prefix of the other.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__api_8c-source.html#l06248">6248</a> of file <a class="el" href=
+        "snmp__api_8c-source.html">snmp_api.c</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga98" doxytag="snmp_api.c::snmp_oid_compare" id="ga98"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int snmp_oid_compare</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>in_name1</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>len1</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>in_name2</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>len2</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>lexicographical compare two object identifiers.</p>
+
+        <p>Caution: this method is called often by command responder applications (ie, agent).</p>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>-1 if name1 &lt; name2, 0 if name1 = name2, 1 if name1 &gt; name2</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__api_8c-source.html#l06144">6144</a> of file <a class="el" href=
+        "snmp__api_8c-source.html">snmp_api.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l02655">check_getnext_results()</a>, <a class="el" href=
+        "table_8c-source.html#l00864">netsnmp_check_getnext_reply()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00171">netsnmp_insert_iterator_context()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00562">netsnmp_insert_table_row()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00058">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00051">netsnmp_table_data_add_row()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00245">netsnmp_table_data_get_from_oid()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, <a class="el" href=
+        "snmp__api_8c-source.html#l06193">snmp_oidtree_compare()</a>, and <a class="el" href=
+        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga99" doxytag="snmp_api.c::snmp_oidtree_compare" id="ga99"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int snmp_oidtree_compare</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>in_name1</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>len1</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>in_name2</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>len2</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Compares 2 OIDs to determine if they are equal up until the shortest length.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>in_name1</em>&nbsp;</td>
+
+                <td>A pointer to the first oid.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>len1</em>&nbsp;</td>
+
+                <td>length of the first OID (in segments, not bytes)</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>in_name2</em>&nbsp;</td>
+
+                <td>A pointer to the second oid.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>len2</em>&nbsp;</td>
+
+                <td>length of the second OID (in segments, not bytes)</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>0 if they are equal, 1 if in_name1 is &gt; in_name2, or -1 if &lt;.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__api_8c-source.html#l06193">6193</a> of file <a class="el" href=
+        "snmp__api_8c-source.html">snmp_api.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__api_8c-source.html#l06144">snmp_oid_compare()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga53" doxytag="snmp_api.c::snmp_shutdown" id="ga53"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void snmp_shutdown</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const char *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>type</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Shuts down the application, saving any needed persistent storage, and appropriate clean up.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>type</em>&nbsp;</td>
+
+                <td>Label for the config file "type" used</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>void</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__api_8c-source.html#l00846">846</a> of file <a class="el" href=
+        "snmp__api_8c-source.html">snmp_api.c</a>.</p>
+
+        <p>References <a class="el" href="mib_8c-source.html#l02707">shutdown_mib()</a>, <a class="el" href=
+        "snmp__alarm_8c-source.html#l00183">snmp_alarm_unregister_all()</a>, and <a class="el" href=
+        "callback_8c-source.html#l00182">snmp_call_callbacks()</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:04 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

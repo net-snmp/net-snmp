@@ -1,0 +1,2566 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>scriptMIB</b>
+MIB object, which is defined within the <b>DISMAN-SCRIPT-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.64</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#smLangTable">smLangTable</a></li>
+  <li><a href="#smExtsnTable">smExtsnTable</a></li>
+  <li><a href="#smScriptTable">smScriptTable</a></li>
+  <li><a href="#smCodeTable">smCodeTable</a></li>
+  <li><a href="#smLaunchTable">smLaunchTable</a></li>
+  <li><a href="#smRunTable">smRunTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="smLangTable" /><h3>Table smLangTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>smLangTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-SCRIPT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.64.1.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+This table lists supported script languages.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="smLangEntry" />Row Description</td>
+<td>
+<pre>
+An entry describing a particular language.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>smLangTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="smLangIndex" />
+1
+<br /><b>smLangIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The locally arbitrary, but unique identifier associated
+with this language entry.
+
+The value is expected to remain constant at least from one
+re-initialization of the entity's network management system
+to the next re-initialization.
+
+Note that the data type and the range of this object must
+be consistent with the definition of smScriptLanguage.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other smLangTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="smLangLanguage" />
+2
+<br /><b>smLangLanguage</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The globally unique identification of the language.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLangVersion" />
+3
+<br /><b>smLangVersion</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The version number of the language. The zero-length string
+shall be used if the language does not have a version
+number.
+
+It is suggested that the version number consist of one or
+more decimal numbers separated by dots, where the first
+number is called the major version number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLangVendor" />
+4
+<br /><b>smLangVendor</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+An object identifier which identifies the vendor who
+provides the implementation of the language. This object
+identifier SHALL point to the object identifier directly
+below the enterprise object identifier {1 3 6 1 4 1}
+allocated for the vendor. The value must be the object
+identifier {0 0} if the vendor is not known.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLangRevision" />
+5
+<br /><b>smLangRevision</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The version number of the language implementation.
+The value of this object must be an empty string if
+version number of the implementation is unknown.
+
+It is suggested that the value consist of one or more
+decimal numbers separated by dots, where the first
+number is called the major version number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLangDescr" />
+6
+<br /><b>smLangDescr</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A textual description of the language.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="smExtsnTable" /><h3>Table smExtsnTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>smExtsnTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-SCRIPT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.64.1.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+This table lists supported language extensions.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="smExtsnEntry" />Row Description</td>
+<td>
+<pre>
+An entry describing a particular language extension.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>smExtsnTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="smLangIndex" />
+1
+<br /><b>smLangIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The locally arbitrary, but unique identifier associated
+with this language entry.
+
+The value is expected to remain constant at least from one
+re-initialization of the entity's network management system
+to the next re-initialization.
+
+Note that the data type and the range of this object must
+be consistent with the definition of smScriptLanguage.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smExtsnIndex" />
+1
+<br /><b>smExtsnIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The locally arbitrary, but unique identifier associated
+with this language extension entry.
+
+The value is expected to remain constant at least from one
+re-initialization of the entity's network management system
+to the next re-initialization.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other smExtsnTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="smExtsnExtension" />
+2
+<br /><b>smExtsnExtension</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The globally unique identification of the language
+extension.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smExtsnVersion" />
+3
+<br /><b>smExtsnVersion</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The version number of the language extension.
+It is suggested that the version number consist of one or
+more decimal numbers separated by dots, where the first
+number is called the major version number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smExtsnVendor" />
+4
+<br /><b>smExtsnVendor</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+An object identifier which identifies the vendor who
+provides the implementation of the extension. The
+object identifier value should point to the OID node
+directly below the enterprise OID {1 3 6 1 4 1}
+allocated for the vendor. The value must by the object
+identifier {0 0} if the vendor is not known.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smExtsnRevision" />
+5
+<br /><b>smExtsnRevision</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The version number of the extension implementation.
+The value of this object must be an empty string if
+version number of the implementation is unknown.
+
+It is suggested that the value consist of one or more
+decimal numbers separated by dots, where the first
+number is called the major version number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smExtsnDescr" />
+6
+<br /><b>smExtsnDescr</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A textual description of the language extension.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="smScriptTable" /><h3>Table smScriptTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>smScriptTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-SCRIPT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.64.1.3.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+This table lists and describes locally known scripts.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="smScriptEntry" />Row Description</td>
+<td>
+<pre>
+An entry describing a particular script. Every script that
+is stored in non-volatile memory is required to appear in
+this script table.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>smScriptTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="smScriptOwner" />
+1
+<br /><b>smScriptOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The manager who owns this row in the smScriptTable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smScriptName" />
+2
+<br /><b>smScriptName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The locally-unique, administratively assigned name for this
+script. This object allows an smScriptOwner to have multiple
+entries in the smScriptTable.
+
+This value of this object may be used to derive the name
+(e.g. a file name) which is used by the Script MIB
+implementation to access the script in non-volatile
+storage. The details of this mapping are implementation
+specific. However, the mapping needs to ensure that scripts
+created by different owners with the same script name do not
+map to the same name in non-volatile storage.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other smScriptTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="smScriptDescr" />
+3
+<br /><b>smScriptDescr</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A description of the purpose of the script.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smScriptLanguage" />
+4
+<br /><b>smScriptLanguage</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The value of this object type identifies an entry in the
+smLangTable which is used to execute this script.
+The special value 0 may be used by hard-wired scripts
+that can not be modified and that are executed by
+internal functions.
+
+Set requests to change this object are invalid if the
+value of smScriptOperStatus is `enabled' or `compiling'
+and will result in an inconsistentValue error.
+
+Note that the data type and the range of this object must
+be consistent with the definition of smLangIndex.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smScriptSource" />
+5
+<br /><b>smScriptSource</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object either contains a reference to the script
+source or an empty string. A reference must be given
+in the form of a Uniform Resource Locator (URL) as
+defined in RFC 2396. The allowed character sets and the
+encoding rules defined in RFC 2396 section 2 apply.
+
+When the smScriptAdminStatus object is set to `enabled',
+the Script MIB implementation will `pull' the script
+source from the URL contained in this object if the URL
+is not empty.
+
+An empty URL indicates that the script source is loaded
+from local storage. The script is read from the smCodeTable
+if the value of smScriptStorageType is volatile. Otherwise,
+the script is read from non-volatile storage.
+
+Note: This document does not mandate implementation of any
+specific URL scheme. An attempt to load a script from a
+nonsupported URL scheme will cause the smScriptOperStatus
+to report an `unknownProtocol' error.
+
+Set requests to change this object are invalid if the
+value of smScriptOperStatus is `enabled', `editing',
+`retrieving' or `compiling' and will result in an
+inconsistentValue error.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smScriptAdminStatus" />
+6
+<br /><b>smScriptAdminStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>enabled</td></tr>
+        <tr><td>2</td><td>disabled</td></tr>
+        <tr><td>3</td><td>editing</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The value of this object indicates the desired status of
+the script. See the definition of smScriptOperStatus for
+a description of the values.
+
+When the smScriptAdminStatus object is set to `enabled' and
+the smScriptOperStatus is `disabled' or one of the error
+states, the Script MIB implementation will `pull' the script
+source from the URL contained in the smScriptSource object
+if the URL is not empty.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smScriptOperStatus" />
+7
+<br /><b>smScriptOperStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>enabled</td></tr>
+        <tr><td>2</td><td>disabled</td></tr>
+        <tr><td>3</td><td>editing</td></tr>
+        <tr><td>4</td><td>retrieving</td></tr>
+        <tr><td>5</td><td>compiling</td></tr>
+        <tr><td>6</td><td>noSuchScript</td></tr>
+        <tr><td>7</td><td>accessDenied</td></tr>
+        <tr><td>8</td><td>wrongLanguage</td></tr>
+        <tr><td>9</td><td>wrongVersion</td></tr>
+        <tr><td>10</td><td>compilationFailed</td></tr>
+        <tr><td>11</td><td>noResourcesLeft</td></tr>
+        <tr><td>12</td><td>unknownProtocol</td></tr>
+        <tr><td>13</td><td>protocolFailure</td></tr>
+        <tr><td>14</td><td>genericError</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The actual status of the script in the runtime system. The
+value of this object is only meaningful when the value of
+the smScriptRowStatus object is `active'.
+
+The smScriptOperStatus object may have the following values:
+
+- `enabled' indicates that the script is available and can
+   be started by a launch table entry.
+
+- `disabled' indicates that the script can not be used.
+
+- `editing' indicates that the script can be modified in the
+  smCodeTable.
+
+- `retrieving' indicates that the script is currently being
+  loaded from non-volatile storage or a remote system.
+
+- `compiling' indicates that the script is currently being
+  compiled by the runtime system.
+
+- `noSuchScript' indicates that the script does not exist
+  at the smScriptSource.
+
+- `accessDenied' indicates that the script can not be loaded
+  from the smScriptSource due to a lack of permissions.
+
+- `wrongLanguage' indicates that the script can not be
+   loaded from the smScriptSource because of a language
+   mismatch.
+
+- `wrongVersion' indicates that the script can not be loaded
+  from the smScriptSource because of a language version
+  mismatch.
+
+- `compilationFailed' indicates that the compilation failed.
+
+- `noResourcesLeft' indicates that the runtime system does
+  not have enough resources to load the script.
+
+- `unknownProtocol' indicates that the script could not be
+  loaded from the smScriptSource because the requested
+  protocol is not supported.
+
+- `protocolFailure' indicates that the script could not be
+  loaded from the smScriptSource because of a protocol
+  failure.
+
+- `genericError' indicates that the script could not be
+
+  loaded due to an error condition not listed above.
+
+The `retrieving' and `compiling' states are transient states
+which will either lead to one of the error states or the
+`enabled' state. The `disabled' and `editing' states are
+administrative states which are only reached by explicit
+management operations.
+
+All launch table entries that refer to this script table
+entry shall have an smLaunchOperStatus value of `disabled'
+when the value of this object is not `enabled'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smScriptStorageType" />
+8
+<br /><b>smScriptStorageType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#StorageType">StorageType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#StorageType"> StorageType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object defines whether this row and the script
+controlled by this row are kept in volatile storage and
+lost upon reboot or if this row is backed up by
+non-volatile or permanent storage.
+
+The storage type of this row always complies with the value
+of this entry if the value of the corresponding RowStatus
+object is `active'.
+
+However, the storage type of the script controlled by this
+row may be different, if the value of this entry is
+`non-volatile'. The script controlled by this row is written
+into local non-volatile storage if the following condition
+becomes true:
+
+(a) the URL contained in the smScriptSource object is empty
+    and
+(b) the smScriptStorageType is `nonVolatile'
+    and
+(c) the smScriptOperStatus is `enabled'
+
+Setting this object to `volatile' removes a script from
+non-volatile storage if the script controlled by this row
+has been in non-volatile storage before. Attempts to set
+this object to permanent will always fail with an
+inconsistentValue error.
+
+The value of smScriptStorageType is only meaningful if the
+value of the corresponding RowStatus object is `active'.
+
+If smScriptStorageType has the value permanent(4), then all
+objects whose MAX-ACCESS value is read-create must be
+writable, with the exception of the smScriptStorageType and
+smScriptRowStatus objects, which shall be read-only.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smScriptRowStatus" />
+9
+<br /><b>smScriptRowStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A control that allows entries to be added and removed from
+this table.
+
+Changing the smScriptRowStatus from `active' to
+`notInService' will remove the associated script from the
+runtime system.
+
+Deleting conceptual rows from this table may affect the
+deletion of other resources associated with this row. For
+example, a script stored in non-volatile storage may be
+removed from non-volatile storage.
+
+An entry may not exist in the `active' state unless all
+required objects in the entry have appropriate values. Rows
+that are not complete or not in service are not known by the
+script runtime system.
+
+Attempts to `destroy' a row or to set a row `notInService'
+while the smScriptOperStatus is `enabled' will result in an
+inconsistentValue error.
+
+Attempts to `destroy' a row or to set a row `notInService'
+where the value of the smScriptStorageType object is
+`permanent' or `readOnly' will result in an
+inconsistentValue error.
+
+The value of this object has no effect on whether other
+objects in this conceptual row can be modified.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smScriptError" />
+10
+<br /><b>smScriptError</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object contains a descriptive error message if the
+transition into the operational status `enabled' failed.
+         Implementations must reset the error message to a
+         zero-length string when a new attempt to change the
+         script status to `enabled' is started.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smScriptLastChange" />
+11
+<br /><b>smScriptLastChange</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The date and time when this script table entry was last
+modified. The value '0000000000000000'H is returned if
+the script table entry has not yet been modified.
+
+Note that the resetting of smScriptError is not considered
+a change of the script table entry.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="smCodeTable" /><h3>Table smCodeTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>smCodeTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-SCRIPT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.64.1.3.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+This table contains the script code for scripts that are
+written via SNMP write operations.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="smCodeEntry" />Row Description</td>
+<td>
+<pre>
+An entry describing a particular fragment of a script.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>smCodeTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="smScriptOwner" />
+1
+<br /><b>smScriptOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The manager who owns this row in the smScriptTable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smScriptName" />
+2
+<br /><b>smScriptName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The locally-unique, administratively assigned name for this
+script. This object allows an smScriptOwner to have multiple
+entries in the smScriptTable.
+
+This value of this object may be used to derive the name
+(e.g. a file name) which is used by the Script MIB
+implementation to access the script in non-volatile
+storage. The details of this mapping are implementation
+specific. However, the mapping needs to ensure that scripts
+created by different owners with the same script name do not
+map to the same name in non-volatile storage.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smCodeIndex" />
+1
+<br /><b>smCodeIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The index value identifying this code fragment.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other smCodeTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="smCodeText" />
+2
+<br /><b>smCodeText</b>
+
+</td><td>
+  OCTETSTR
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The code that makes up a fragment of a script. The format
+of this code fragment depends on the script language which
+is identified by the associated smScriptLanguage object.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smCodeRowStatus" />
+3
+<br /><b>smCodeRowStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A control that allows entries to be added and removed from
+this table.
+
+The value of this object has no effect on whether other
+objects in this conceptual row can be modified.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="smLaunchTable" /><h3>Table smLaunchTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>smLaunchTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-SCRIPT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.64.1.4.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+This table lists and describes scripts that are ready
+to be executed together with their parameters.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="smLaunchEntry" />Row Description</td>
+<td>
+<pre>
+An entry describing a particular executable script.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>smLaunchTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="smLaunchOwner" />
+1
+<br /><b>smLaunchOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The manager who owns this row in the smLaunchTable. Every
+instance of a running script started from a particular entry
+in the smLaunchTable (i.e. entries in the smRunTable) will
+be owned by the same smLaunchOwner used to index the entry
+in the smLaunchTable. This owner is not necessarily the same
+as the owner of the script itself (smLaunchScriptOwner).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchName" />
+2
+<br /><b>smLaunchName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The locally-unique, administratively assigned name for this
+launch table entry. This object allows an smLaunchOwner to
+have multiple entries in the smLaunchTable. The smLaunchName
+is an arbitrary name that must be different from any other
+smLaunchTable entries with the same smLaunchOwner but can be
+the same as other entries in the smLaunchTable with
+different smLaunchOwner values. Note that the value of
+smLaunchName is not related in any way to the name of the
+script being launched.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other smLaunchTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="smLaunchScriptOwner" />
+3
+<br /><b>smLaunchScriptOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of this object in combination with the value of
+smLaunchScriptName identifies the script that can be
+launched from this smLaunchTable entry. Attempts to write
+this object will fail with an inconsistentValue error if
+the value of smLaunchOperStatus is `enabled'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchScriptName" />
+4
+<br /><b>smLaunchScriptName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of this object in combination with the value of
+the smLaunchScriptOwner identifies the script that can be
+launched from this smLaunchTable entry. The zero-length
+string may be used to point to a non-existing script.
+
+Attempts to write this object will fail with an
+inconsistentValue error if the value of smLaunchOperStatus
+is `enabled'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchArgument" />
+5
+<br /><b>smLaunchArgument</b>
+
+</td><td>
+  OCTETSTR
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The argument supplied to the script. When a script is
+invoked, the value of this object is used to initialize
+the smRunArgument object.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchMaxRunning" />
+6
+<br /><b>smLaunchMaxRunning</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The maximum number of concurrently running scripts that may
+be invoked from this entry in the smLaunchTable. Lowering
+the current value of this object does not affect any scripts
+that are already executing.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchMaxCompleted" />
+7
+<br /><b>smLaunchMaxCompleted</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The maximum number of finished scripts invoked from this
+entry in the smLaunchTable allowed to be retained in the
+smRunTable. Whenever the value of this object is changed
+and whenever a script terminates, entries in the smRunTable
+are deleted if necessary until the number of completed
+scripts is smaller than the value of this object. Scripts
+whose smRunEndTime value indicates the oldest completion
+time are deleted first.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchLifeTime" />
+8
+<br /><b>smLaunchLifeTime</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TimeInterval">TimeInterval</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeInterval"> TimeInterval TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The default maximum amount of time a script launched
+from this entry may run. The value of this object is used
+to initialize the smRunLifeTime object when a script is
+launched. Changing the value of an smLaunchLifeTime
+instance does not affect scripts previously launched from
+
+this entry.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchExpireTime" />
+9
+<br /><b>smLaunchExpireTime</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TimeInterval">TimeInterval</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeInterval"> TimeInterval TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The default maximum amount of time information about a
+script launched from this entry is kept in the smRunTable
+after the script has completed execution.  The value of
+this object is used to initialize the smRunExpireTime
+object when a script is launched. Changing the value of an
+smLaunchExpireTime instance does not affect scripts
+previously launched from this entry.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchStart" />
+10
+<br /><b>smLaunchStart</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+This object is used to start the execution of scripts.
+When retrieved, the value will be the value of smRunIndex
+for the last script that started execution by manipulating
+this object. The value will be zero if no script started
+execution yet.
+
+A script is started by setting this object to an unused
+smRunIndex value. A new row in the smRunTable will be
+created which is indexed by the value supplied by the
+set-request in addition to the value of smLaunchOwner and
+smLaunchName. An unused value can be obtained by reading
+the smLaunchRunIndexNext object.
+
+Setting this object to the special value 0 will start
+the script with a self-generated smRunIndex value. The
+consequence is that the script invoker has no reliable
+way to determine the smRunIndex value for this script
+invocation and that the invoker has therefore no way
+to obtain the results from this script invocation. The
+special value 0 is however useful for scheduled script
+invocations.
+
+If this object is set, the following checks must be
+
+performed:
+
+1) The value of the smLaunchOperStatus object in this
+   entry of the smLaunchTable must be `enabled'.
+2) The values of smLaunchScriptOwner and
+   smLaunchScriptName of this row must identify an
+   existing entry in the smScriptTable.
+3) The value of smScriptOperStatus of this entry must
+   be `enabled'.
+4) The principal performing the set operation must have
+   read access to the script. This must be checked by
+   calling the isAccessAllowed abstract service interface
+   defined in RFC 2271 on the row in the smScriptTable
+   identified by smLaunchScriptOwner and smLaunchScriptName.
+   The isAccessAllowed abstract service interface must be
+   called on all columnar objects in the smScriptTable with
+   a MAX-ACCESS value different than `not-accessible'. The
+   test fails as soon as a call indicates that access is
+   not allowed.
+5) If the value provided by the set operation is not 0,
+   a check must be made that the value is currently not
+   in use. Otherwise, if the value provided by the set
+   operation is 0, a suitable unused value must be
+   generated.
+6) The number of currently executing scripts invoked
+   from this smLaunchTable entry must be less than
+   smLaunchMaxRunning.
+
+Attempts to start a script will fail with an
+inconsistentValue error if one of the checks described
+above fails.
+
+Otherwise, if all checks have been passed, a new entry
+in the smRunTable will be created indexed by smLaunchOwner,
+smLaunchName and the new value for smRunIndex. The value
+of smLaunchArgument will be copied into smRunArgument,
+the value of smLaunchLifeTime will be copied to
+smRunLifeTime, and the value of smLaunchExpireTime
+will be copied to smRunExpireTime.
+
+The smRunStartTime will be set to the current time and
+the smRunState will be set to `initializing' before the
+script execution is initiated in the appropriate runtime
+system.
+
+Note that the data type and the range of this object must
+be consistent with the smRunIndex object. Since this
+object might be written from the scheduling MIB, the
+
+data type Integer32 rather than Unsigned32 is used.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchControl" />
+11
+<br /><b>smLaunchControl</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>abort</td></tr>
+        <tr><td>2</td><td>suspend</td></tr>
+        <tr><td>3</td><td>resume</td></tr>
+        <tr><td>4</td><td>nop</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+This object is used to request a state change for all
+running scripts in the smRunTable that were started from
+this row in the smLaunchTable.
+
+Setting this object to abort(1), suspend(2) or resume(3)
+will set the smRunControl object of all applicable rows
+in the smRunTable to abort(1), suspend(2) or resume(3)
+respectively. The phrase `applicable rows' means the set of
+rows which were created from this entry in the smLaunchTable
+and whose value of smRunState allows the corresponding
+state change as described in the definition of the
+smRunControl object. Setting this object to nop(4) has no
+effect.
+
+Attempts to set this object lead to an inconsistentValue
+error only if all implicated sets on all the applicable
+rows lead to inconsistentValue errors. It is not allowed
+to return an inconsistentValue error if at least one state
+change on one of the applicable rows was successful.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchAdminStatus" />
+12
+<br /><b>smLaunchAdminStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>enabled</td></tr>
+        <tr><td>2</td><td>disabled</td></tr>
+        <tr><td>3</td><td>autostart</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The value of this object indicates the desired status of
+this launch table entry. The values enabled(1) and
+autostart(3) both indicate that the launch table entry
+
+should transition into the operational enabled(1) state as
+soon as the associated script table entry is enabled(1).
+
+The value autostart(3) further indicates that the script
+is started automatically by conceptually writing the
+value 0 into the associated smLaunchStart object during
+the transition from the `disabled' into the `enabled'
+operational state. This is useful for scripts that are
+to be launched on system start-up.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchOperStatus" />
+13
+<br /><b>smLaunchOperStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>enabled</td></tr>
+        <tr><td>2</td><td>disabled</td></tr>
+        <tr><td>3</td><td>expired</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value of this object indicates the actual status of
+this launch table entry.  The smLaunchOperStatus object
+may have the following values:
+
+- `enabled' indicates that the launch table entry is
+  available and can be used to start scripts.
+
+- `disabled' indicates that the launch table entry can
+  not be used to start scripts.
+
+- `expired' indicates that the launch table entry can
+  not be used to start scripts and will disappear as
+  soon as all smRunTable entries associated with this
+  launch table entry have disappeared.
+
+The value `enabled' requires that the smLaunchRowStatus
+object is active. The value `disabled' requires that there
+are no entries in the smRunTable associated with this
+smLaunchTable entry.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchRunIndexNext" />
+14
+<br /><b>smLaunchRunIndexNext</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+This variable is used for creating rows in the smRunTable.
+The value of this variable is a currently unused value
+for smRunIndex, which can be written into the smLaunchStart
+object associated with this row to launch a script.
+
+The value returned when reading this variable must be unique
+for the smLaunchOwner and smLaunchName associated with this
+row. Subsequent attempts to read this variable must return
+different values.
+
+This variable will return the special value 0 if no new rows
+can be created.
+
+Note that the data type and the range of this object must be
+consistent with the definition of smRunIndex.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchStorageType" />
+15
+<br /><b>smLaunchStorageType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#StorageType">StorageType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#StorageType"> StorageType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object defines if this row is kept in volatile storage
+and lost upon reboot or if this row is backed up by stable
+storage.
+
+The value of smLaunchStorageType is only meaningful if the
+value of the corresponding RowStatus object is active.
+
+If smLaunchStorageType has the value permanent(4), then all
+objects whose MAX-ACCESS value is read-create must be
+writable, with the exception of the smLaunchStorageType and
+smLaunchRowStatus objects, which shall be read-only.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchRowStatus" />
+16
+<br /><b>smLaunchRowStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A control that allows entries to be added and removed from
+this table.
+
+Attempts to `destroy' a row or to set a row `notInService'
+while the smLaunchOperStatus is `enabled' will result in
+an inconsistentValue error.
+
+Attempts to `destroy' a row or to set a row `notInService'
+where the value of the smLaunchStorageType object is
+`permanent' or `readOnly' will result in an
+inconsistentValue error.
+
+The value of this object has no effect on whether other
+objects in this conceptual row can be modified.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchError" />
+17
+<br /><b>smLaunchError</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object contains a descriptive error message if an
+attempt to launch a script fails. Implementations must reset
+the error message to a zero-length string when a new attempt
+to launch a script is started.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchLastChange" />
+18
+<br /><b>smLaunchLastChange</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The date and time when this launch table entry was last
+modified. The value '0000000000000000'H is returned if
+the launch table entry has not yet been modified.
+
+Note that a change of smLaunchStart, smLaunchControl,
+smLaunchRunIndexNext, smLaunchRowExpireTime, or the
+resetting of smLaunchError is not considered a change
+of this launch table entry.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchRowExpireTime" />
+19
+<br /><b>smLaunchRowExpireTime</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TimeInterval">TimeInterval</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeInterval"> TimeInterval TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of this object specifies how long this row remains
+in the `enabled' or `disabled' operational state. The value
+reported by this object ticks backwards. When the value
+reaches 0, it stops ticking backward and the row is
+deleted if there are no smRunTable entries associated with
+
+this smLaunchTable entry. Otherwise, the smLaunchOperStatus
+changes to `expired' and the row deletion is deferred
+until there are no smRunTable entries associated with this
+smLaunchTable entry.
+
+The smLaunchRowExpireTime will not tick backwards if it is
+set to its maximum value (2147483647). In other words,
+setting this object to its maximum value turns the timer
+off.
+
+The value of this object may be set in order to increase
+or reduce the remaining time that the launch table entry
+may be used. Setting the value to 0 will cause an immediate
+row deletion or transition into the `expired' operational
+state.
+
+It is not possible to set this object while the operational
+status is `expired'. Attempts to modify this object while
+the operational status is `expired' leads to an
+inconsistentValue error.
+
+Note that the timer ticks backwards independent of the
+operational state of the launch table entry.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="smRunTable" /><h3>Table smRunTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>smRunTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-SCRIPT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.64.1.4.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+This table lists and describes scripts that are currently
+running or have been running in the past.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="smRunEntry" />Row Description</td>
+<td>
+<pre>
+An entry describing a particular running or finished
+script.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>smRunTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="smLaunchOwner" />
+1
+<br /><b>smLaunchOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The manager who owns this row in the smLaunchTable. Every
+instance of a running script started from a particular entry
+in the smLaunchTable (i.e. entries in the smRunTable) will
+be owned by the same smLaunchOwner used to index the entry
+in the smLaunchTable. This owner is not necessarily the same
+as the owner of the script itself (smLaunchScriptOwner).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smLaunchName" />
+2
+<br /><b>smLaunchName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The locally-unique, administratively assigned name for this
+launch table entry. This object allows an smLaunchOwner to
+have multiple entries in the smLaunchTable. The smLaunchName
+is an arbitrary name that must be different from any other
+smLaunchTable entries with the same smLaunchOwner but can be
+the same as other entries in the smLaunchTable with
+different smLaunchOwner values. Note that the value of
+smLaunchName is not related in any way to the name of the
+script being launched.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smRunIndex" />
+1
+<br /><b>smRunIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The locally arbitrary, but unique identifier associated
+with this running or finished script. This value must be
+unique for all rows in the smRunTable with the same
+smLaunchOwner and smLaunchName.
+
+Note that the data type and the range of this object must
+be consistent with the definition of smLaunchRunIndexNext
+and smLaunchStart.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other smRunTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="smRunArgument" />
+2
+<br /><b>smRunArgument</b>
+
+</td><td>
+  OCTETSTR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The argument supplied to the script when it started.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smRunStartTime" />
+3
+<br /><b>smRunStartTime</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The date and time when the execution started. The value
+'0000000000000000'H is returned if the script has not
+started yet.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smRunEndTime" />
+4
+<br /><b>smRunEndTime</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The date and time when the execution terminated. The value
+'0000000000000000'H is returned if the script has not
+terminated yet.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smRunLifeTime" />
+5
+<br /><b>smRunLifeTime</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TimeInterval">TimeInterval</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeInterval"> TimeInterval TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object specifies how long the script can execute.
+This object returns the remaining time that the script
+may run. The object is initialized with the value of the
+associated smLaunchLifeTime object and ticks backwards.
+The script is aborted immediately when the value reaches 0.
+
+The value of this object may be set in order to increase or
+reduce the remaining time that the script may run. Setting
+this value to 0 will abort script execution immediately,
+and, if the value of smRunExpireTime is also 0, will remove
+this entry from the smRunTable once it has terminated.
+
+If smRunLifeTime is set to its maximum value (2147483647),
+either by a set operation or by its initialization from the
+smLaunchLifeTime object, then it will not tick backwards.
+A running script with a maximum smRunLifeTime value will
+thus never be terminated with a `lifeTimeExceeded' exit
+code.
+
+The value of smRunLifeTime reflects the real-time execution
+time as seen by the outside world. The value of this object
+will always be 0 for a script that finished execution, that
+is smRunState has the value `terminated'.
+
+The value of smRunLifeTime does not change while a script
+is suspended, that is smRunState has the value `suspended'.
+Note that this does not affect set operations. It is legal
+to modify smRunLifeTime via set operations while a script
+is suspended.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smRunExpireTime" />
+6
+<br /><b>smRunExpireTime</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TimeInterval">TimeInterval</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeInterval"> TimeInterval TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of this object specifies how long this row can
+exist in the smRunTable after the script has terminated.
+This object returns the remaining time that the row may
+exist before it is aged out. The object is initialized with
+the value of the associated smLaunchExpireTime object and
+ticks backwards. The entry in the smRunTable is destroyed
+when the value reaches 0 and the smRunState has the value
+`terminated'.
+
+The value of this object may be set in order to increase or
+reduce the remaining time that the row may exist.  Setting
+the value to 0 will destroy this entry as soon as the
+smRunState has the value `terminated'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smRunExitCode" />
+7
+<br /><b>smRunExitCode</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>noError</td></tr>
+        <tr><td>2</td><td>halted</td></tr>
+        <tr><td>3</td><td>lifeTimeExceeded</td></tr>
+        <tr><td>4</td><td>noResourcesLeft</td></tr>
+        <tr><td>5</td><td>languageError</td></tr>
+        <tr><td>6</td><td>runtimeError</td></tr>
+        <tr><td>7</td><td>invalidArgument</td></tr>
+        <tr><td>8</td><td>securityViolation</td></tr>
+        <tr><td>9</td><td>genericError</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value of this object indicates the reason why a
+script finished execution. The smRunExitCode code may have
+one of the following values:
+
+- `noError', which indicates that the script completed
+   successfully without errors;
+
+- `halted', which indicates that the script was halted
+   by a request from an authorized manager;
+
+- `lifeTimeExceeded', which indicates that the script
+   exited because a time limit was exceeded;
+
+- `noResourcesLeft', which indicates that the script
+   exited because it ran out of resources (e.g. memory);
+
+- `languageError', which indicates that the script exited
+   because of a language error (e.g. a syntax error in an
+   interpreted language);
+
+- `runtimeError', which indicates that the script exited
+   due to a runtime error (e.g. a division by zero);
+
+- `invalidArgument', which indicates that the script could
+   not be run because of invalid script arguments;
+
+- `securityViolation', which indicates that the script
+   exited due to a security violation;
+
+- `genericError', which indicates that the script exited
+   for an unspecified reason.
+
+If the script has not yet begun running, or is currently
+running, the value will be `noError'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smRunResult" />
+8
+<br /><b>smRunResult</b>
+
+</td><td>
+  OCTETSTR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The result value produced by the running script. Note that
+the result may change while the script is executing.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smRunControl" />
+9
+<br /><b>smRunControl</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>abort</td></tr>
+        <tr><td>2</td><td>suspend</td></tr>
+        <tr><td>3</td><td>resume</td></tr>
+        <tr><td>4</td><td>nop</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The value of this object indicates the desired status of the
+script execution defined by this row.
+
+Setting this object to `abort' will abort execution if the
+
+value of smRunState is `initializing', `executing',
+`suspending', `suspended' or `resuming'. Setting this object
+to `abort' when the value of smRunState is `aborting' or
+`terminated', or if the implementation can determine that
+the attempt to abort the execution would fail, will result
+in an inconsistentValue error.
+
+Setting this object to `suspend' will suspend execution
+if the value of smRunState is `executing'. Setting this
+object to `suspend' will cause an inconsistentValue error
+if the value of smRunState is not `executing' or if the
+implementation can determine that the attempt to suspend
+the execution would fail.
+
+Setting this object to `resume' will resume execution
+if the value of smRunState is `suspending' or
+`suspended'. Setting this object to `resume' will cause an
+inconsistentValue error if the value of smRunState is
+not `suspended' or if the implementation can determine
+that the attempt to resume the execution would fail.
+
+Setting this object to nop(4) has no effect.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smRunState" />
+10
+<br /><b>smRunState</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>initializing</td></tr>
+        <tr><td>2</td><td>executing</td></tr>
+        <tr><td>3</td><td>suspending</td></tr>
+        <tr><td>4</td><td>suspended</td></tr>
+        <tr><td>5</td><td>resuming</td></tr>
+        <tr><td>6</td><td>aborting</td></tr>
+        <tr><td>7</td><td>terminated</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value of this object indicates the script's execution
+state. If the script has been invoked but has not yet
+begun execution, the value will be `initializing'. If the
+script is running, the value will be `executing'.
+
+A running script which received a request to suspend
+execution first transitions into a temporary `suspending'
+state.  The temporary `suspending' state changes to
+`suspended' when the script has actually been suspended. The
+temporary `suspending' state changes back to `executing' if
+
+the attempt to suspend the running script fails.
+
+A suspended script which received a request to resume
+execution first transitions into a temporary `resuming'
+state. The temporary `resuming' state changes to `running'
+when the script has actually been resumed. The temporary
+`resuming' state changes back to `suspended' if the attempt
+to resume the suspended script fails.
+
+A script which received a request to abort execution but
+which is still running first transitions into a temporary
+`aborting' state.
+
+A script which has finished its execution is `terminated'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smRunError" />
+11
+<br /><b>smRunError</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object contains a descriptive error message if the
+script startup or execution raised an abnormal condition.
+An implementation must store a descriptive error message
+in this object if the script exits with the smRunExitCode
+`genericError'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smRunResultTime" />
+12
+<br /><b>smRunResultTime</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The date and time when the smRunResult was last updated.
+The value '0000000000000000'H is returned if smRunResult
+has not yet been updated after the creation of this
+smRunTable entry.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="smRunErrorTime" />
+13
+<br /><b>smRunErrorTime</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The date and time when the smRunError was last updated.
+The value '0000000000000000'H is returned if smRunError
+
+has not yet been updated after the creation of this
+smRunTable entry.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+<a name="smScriptAbort" /><h3>Notification: smScriptAbort</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>smScriptAbort</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-SCRIPT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.64.2.0.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+This notification is generated whenever a running script
+terminates with an smRunExitCode unequal to `noError'.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#smRunExitCode">smRunExitCode</a></td></tr>
+      <tr><td><a href="#smRunEndTime">smRunEndTime</a></td></tr>
+      <tr><td><a href="#smRunError">smRunError</a></td></tr>
+  </table></td></tr>
+  </table>
+<a name="smScriptResult" /><h3>Notification: smScriptResult</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>smScriptResult</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-SCRIPT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.64.2.0.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+This notification can be used by scripts to notify other
+management applications about results produced by the
+script.
+
+This notification is not automatically generated by the
+Script MIB implementation. It is the responsibility of
+the executing script to emit this notification where it
+is appropriate to do so.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#smRunResult">smRunResult</a></td></tr>
+  </table></td></tr>
+  </table>
+<a name="smScriptException" /><h3>Notification: smScriptException</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>smScriptException</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-SCRIPT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.64.2.0.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+This notification can be used by scripts to notify other
+management applications about script errors.
+
+This notification is not automatically generated by the
+Script MIB implementation. It is the responsibility of
+the executing script or the runtime system to emit this
+notification where it is appropriate to do so.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#smRunError">smRunError</a></td></tr>
+  </table></td></tr>
+  </table>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="TimeInterval">TimeInterval</td><td>INTEGER</td><td><pre></pre></td></tr>
+<tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="DateAndTime">DateAndTime</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp DISMAN-SCRIPT-MIB::scriptMIB</b></p>
+<pre>
++--<a href="#scriptMIB">scriptMIB</a>(64)
+   |
+   +--<a href="#smObjects">smObjects</a>(1)
+   |  |
+   |  +--<a href="#smLangTable">smLangTable</a>(1)
+   |  |  |
+   |  |  +--<a href="#smLangEntry">smLangEntry</a>(1)
+   |  |     |  Index: smLangIndex
+   |  |     |
+   |  |     +-- ---- Integer32 <a href="#smLangIndex">smLangIndex</a>(1)
+   |  |     |        Range: 1..2147483647
+   |  |     +-- -R-- ObjID     <a href="#smLangLanguage">smLangLanguage</a>(2)
+   |  |     +-- -R-- String    <a href="#smLangVersion">smLangVersion</a>(3)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- -R-- ObjID     <a href="#smLangVendor">smLangVendor</a>(4)
+   |  |     +-- -R-- String    <a href="#smLangRevision">smLangRevision</a>(5)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- -R-- String    <a href="#smLangDescr">smLangDescr</a>(6)
+   |  |              Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |              Size: 0..255
+   |  |
+   |  +--<a href="#smExtsnTable">smExtsnTable</a>(2)
+   |  |  |
+   |  |  +--<a href="#smExtsnEntry">smExtsnEntry</a>(1)
+   |  |     |  Index: smLangIndex, smExtsnIndex
+   |  |     |
+   |  |     +-- ---- Integer32 <a href="#smExtsnIndex">smExtsnIndex</a>(1)
+   |  |     |        Range: 1..2147483647
+   |  |     +-- -R-- ObjID     <a href="#smExtsnExtension">smExtsnExtension</a>(2)
+   |  |     +-- -R-- String    <a href="#smExtsnVersion">smExtsnVersion</a>(3)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- -R-- ObjID     <a href="#smExtsnVendor">smExtsnVendor</a>(4)
+   |  |     +-- -R-- String    <a href="#smExtsnRevision">smExtsnRevision</a>(5)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- -R-- String    <a href="#smExtsnDescr">smExtsnDescr</a>(6)
+   |  |              Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |              Size: 0..255
+   |  |
+   |  +--<a href="#smScriptObjects">smScriptObjects</a>(3)
+   |  |  |
+   |  |  +--<a href="#smScriptTable">smScriptTable</a>(1)
+   |  |  |  |
+   |  |  |  +--<a href="#smScriptEntry">smScriptEntry</a>(1)
+   |  |  |     |  Index: smScriptOwner, smScriptName
+   |  |  |     |
+   |  |  |     +-- ---- String    <a href="#smScriptOwner">smScriptOwner</a>(1)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..32
+   |  |  |     +-- ---- String    <a href="#smScriptName">smScriptName</a>(2)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 1..32
+   |  |  |     +-- CR-- String    <a href="#smScriptDescr">smScriptDescr</a>(3)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..255
+   |  |  |     +-- CR-- Integer32 <a href="#smScriptLanguage">smScriptLanguage</a>(4)
+   |  |  |     |        Range: 0..2147483647
+   |  |  |     +-- CR-- String    <a href="#smScriptSource">smScriptSource</a>(5)
+   |  |  |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |  |  |     |        Size: 0..255
+   |  |  |     +-- CR-- EnumVal   <a href="#smScriptAdminStatus">smScriptAdminStatus</a>(6)
+   |  |  |     |        Values: enabled(1), disabled(2), editing(3)
+   |  |  |     +-- -R-- EnumVal   <a href="#smScriptOperStatus">smScriptOperStatus</a>(7)
+   |  |  |     |        Values: enabled(1), disabled(2), editing(3), retrieving(4), compiling(5), noSuchScript(6), accessDenied(7), wrongLanguage(8), wrongVersion(9), compilationFailed(10), noResourcesLeft(11), unknownProtocol(12), protocolFailure(13), genericError(14)
+   |  |  |     +-- CR-- EnumVal   <a href="#smScriptStorageType">smScriptStorageType</a>(8)
+   |  |  |     |        Textual Convention: <a href="#StorageType">StorageType</a>
+   |  |  |     |        Values: other(1), volatile(2), nonVolatile(3), permanent(4), readOnly(5)
+   |  |  |     +-- CR-- EnumVal   <a href="#smScriptRowStatus">smScriptRowStatus</a>(9)
+   |  |  |     |        Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |  |  |     |        Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |  |  |     +-- -R-- String    <a href="#smScriptError">smScriptError</a>(10)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..255
+   |  |  |     +-- -R-- String    <a href="#smScriptLastChange">smScriptLastChange</a>(11)
+   |  |  |              Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |  |  |              Size: 8 | 11
+   |  |  |
+   |  |  +--<a href="#smCodeTable">smCodeTable</a>(2)
+   |  |     |
+   |  |     +--<a href="#smCodeEntry">smCodeEntry</a>(1)
+   |  |        |  Index: smScriptOwner, smScriptName, smCodeIndex
+   |  |        |
+   |  |        +-- ---- Unsigned  <a href="#smCodeIndex">smCodeIndex</a>(1)
+   |  |        |        Range: 1..2147483647
+   |  |        +-- CR-- String    <a href="#smCodeText">smCodeText</a>(2)
+   |  |        |        Size: 1..1024
+   |  |        +-- CR-- EnumVal   <a href="#smCodeRowStatus">smCodeRowStatus</a>(3)
+   |  |                 Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |  |                 Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |  |
+   |  +--<a href="#smRunObjects">smRunObjects</a>(4)
+   |     |
+   |     +--<a href="#smLaunchTable">smLaunchTable</a>(1)
+   |     |  |
+   |     |  +--<a href="#smLaunchEntry">smLaunchEntry</a>(1)
+   |     |     |  Index: smLaunchOwner, smLaunchName
+   |     |     |
+   |     |     +-- ---- String    <a href="#smLaunchOwner">smLaunchOwner</a>(1)
+   |     |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |     |        Size: 0..32
+   |     |     +-- ---- String    <a href="#smLaunchName">smLaunchName</a>(2)
+   |     |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |     |        Size: 1..32
+   |     |     +-- CR-- String    <a href="#smLaunchScriptOwner">smLaunchScriptOwner</a>(3)
+   |     |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |     |        Size: 0..32
+   |     |     +-- CR-- String    <a href="#smLaunchScriptName">smLaunchScriptName</a>(4)
+   |     |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |     |        Size: 0..32
+   |     |     +-- CR-- String    <a href="#smLaunchArgument">smLaunchArgument</a>(5)
+   |     |     +-- CR-- Unsigned  <a href="#smLaunchMaxRunning">smLaunchMaxRunning</a>(6)
+   |     |     |        Range: 1..2147483647
+   |     |     +-- CR-- Unsigned  <a href="#smLaunchMaxCompleted">smLaunchMaxCompleted</a>(7)
+   |     |     |        Range: 1..2147483647
+   |     |     +-- CR-- INTEGER   <a href="#smLaunchLifeTime">smLaunchLifeTime</a>(8)
+   |     |     |        Textual Convention: <a href="#TimeInterval">TimeInterval</a>
+   |     |     |        Range: 0..2147483647
+   |     |     +-- CR-- INTEGER   <a href="#smLaunchExpireTime">smLaunchExpireTime</a>(9)
+   |     |     |        Textual Convention: <a href="#TimeInterval">TimeInterval</a>
+   |     |     |        Range: 0..2147483647
+   |     |     +-- CR-- Integer32 <a href="#smLaunchStart">smLaunchStart</a>(10)
+   |     |     |        Range: 0..2147483647
+   |     |     +-- CR-- EnumVal   <a href="#smLaunchControl">smLaunchControl</a>(11)
+   |     |     |        Values: abort(1), suspend(2), resume(3), nop(4)
+   |     |     +-- CR-- EnumVal   <a href="#smLaunchAdminStatus">smLaunchAdminStatus</a>(12)
+   |     |     |        Values: enabled(1), disabled(2), autostart(3)
+   |     |     +-- -R-- EnumVal   <a href="#smLaunchOperStatus">smLaunchOperStatus</a>(13)
+   |     |     |        Values: enabled(1), disabled(2), expired(3)
+   |     |     +-- -R-- Integer32 <a href="#smLaunchRunIndexNext">smLaunchRunIndexNext</a>(14)
+   |     |     |        Range: 1..2147483647
+   |     |     +-- CR-- EnumVal   <a href="#smLaunchStorageType">smLaunchStorageType</a>(15)
+   |     |     |        Textual Convention: <a href="#StorageType">StorageType</a>
+   |     |     |        Values: other(1), volatile(2), nonVolatile(3), permanent(4), readOnly(5)
+   |     |     +-- CR-- EnumVal   <a href="#smLaunchRowStatus">smLaunchRowStatus</a>(16)
+   |     |     |        Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |     |     |        Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |     |     +-- -R-- String    <a href="#smLaunchError">smLaunchError</a>(17)
+   |     |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |     |        Size: 0..255
+   |     |     +-- -R-- String    <a href="#smLaunchLastChange">smLaunchLastChange</a>(18)
+   |     |     |        Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |     |     |        Size: 8 | 11
+   |     |     +-- CR-- INTEGER   <a href="#smLaunchRowExpireTime">smLaunchRowExpireTime</a>(19)
+   |     |              Textual Convention: <a href="#TimeInterval">TimeInterval</a>
+   |     |              Range: 0..2147483647
+   |     |
+   |     +--<a href="#smRunTable">smRunTable</a>(2)
+   |        |
+   |        +--<a href="#smRunEntry">smRunEntry</a>(1)
+   |           |  Index: smLaunchOwner, smLaunchName, smRunIndex
+   |           |
+   |           +-- ---- Integer32 <a href="#smRunIndex">smRunIndex</a>(1)
+   |           |        Range: 1..2147483647
+   |           +-- -R-- String    <a href="#smRunArgument">smRunArgument</a>(2)
+   |           +-- -R-- String    <a href="#smRunStartTime">smRunStartTime</a>(3)
+   |           |        Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |           |        Size: 8 | 11
+   |           +-- -R-- String    <a href="#smRunEndTime">smRunEndTime</a>(4)
+   |           |        Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |           |        Size: 8 | 11
+   |           +-- -RW- INTEGER   <a href="#smRunLifeTime">smRunLifeTime</a>(5)
+   |           |        Textual Convention: <a href="#TimeInterval">TimeInterval</a>
+   |           |        Range: 0..2147483647
+   |           +-- -RW- INTEGER   <a href="#smRunExpireTime">smRunExpireTime</a>(6)
+   |           |        Textual Convention: <a href="#TimeInterval">TimeInterval</a>
+   |           |        Range: 0..2147483647
+   |           +-- -R-- EnumVal   <a href="#smRunExitCode">smRunExitCode</a>(7)
+   |           |        Values: noError(1), halted(2), lifeTimeExceeded(3), noResourcesLeft(4), languageError(5), runtimeError(6), invalidArgument(7), securityViolation(8), genericError(9)
+   |           +-- -R-- String    <a href="#smRunResult">smRunResult</a>(8)
+   |           +-- -RW- EnumVal   <a href="#smRunControl">smRunControl</a>(9)
+   |           |        Values: abort(1), suspend(2), resume(3), nop(4)
+   |           +-- -R-- EnumVal   <a href="#smRunState">smRunState</a>(10)
+   |           |        Values: initializing(1), executing(2), suspending(3), suspended(4), resuming(5), aborting(6), terminated(7)
+   |           +-- -R-- String    <a href="#smRunError">smRunError</a>(11)
+   |           |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |           |        Size: 0..255
+   |           +-- -R-- String    <a href="#smRunResultTime">smRunResultTime</a>(12)
+   |           |        Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |           |        Size: 8 | 11
+   |           +-- -R-- String    <a href="#smRunErrorTime">smRunErrorTime</a>(13)
+   |                    Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |                    Size: 8 | 11
+   |
+   +--<a href="#smNotifications">smNotifications</a>(2)
+   |  |
+   |  +--<a href="#smTraps">smTraps</a>(0)
+   |     |
+   |     +--<a href="#smScriptAbort">smScriptAbort</a>(1)
+   |     +--<a href="#smScriptResult">smScriptResult</a>(2)
+   |     +--<a href="#smScriptException">smScriptException</a>(3)
+   |
+   +--<a href="#smConformance">smConformance</a>(3)
+      |
+      +--<a href="#smCompliances">smCompliances</a>(1)
+      |  |
+      |  +--<a href="#smCompliance">smCompliance</a>(1)
+      |  +--<a href="#smCompliance2">smCompliance2</a>(2)
+      |
+      +--<a href="#smGroups">smGroups</a>(2)
+         |
+         +--<a href="#smLanguageGroup">smLanguageGroup</a>(1)
+         +--<a href="#smScriptGroup">smScriptGroup</a>(2)
+         +--<a href="#smCodeGroup">smCodeGroup</a>(3)
+         +--<a href="#smLaunchGroup">smLaunchGroup</a>(4)
+         +--<a href="#smRunGroup">smRunGroup</a>(5)
+         |
+         +--<a href="#smNotificationsGroup">smNotificationsGroup</a>(6)
+         |
+         +--<a href="#smScriptGroup2">smScriptGroup2</a>(7)
+         +--<a href="#smLaunchGroup2">smLaunchGroup2</a>(8)
+         +--<a href="#smRunGroup2">smRunGroup2</a>(9)
+         |
+         +--<a href="#smNotificationsGroup2">smNotificationsGroup2</a>(10)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,929 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>agentxMIB</b>
+MIB object, which is defined within the <b>AGENTX-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.74</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#agentxConnectionTable">agentxConnectionTable</a></li>
+  <li><a href="#agentxSessionTable">agentxSessionTable</a></li>
+  <li><a href="#agentxRegistrationTable">agentxRegistrationTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="agentxDefaultTimeout" />
+1
+<br /><b>agentxDefaultTimeout</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.74.1.1.1</td>
+<td>
+<pre>
+The default length of time, in seconds, that the master
+agent should allow to elapse after dispatching a message
+to a session before it regards the subagent as not
+responding.  This is a system-wide value that may
+override the timeout value associated with a particular
+session (agentxSessionTimeout) or a particular registered
+MIB region (agentxRegTimeout).  If the associated value of
+agentxSessionTimeout and agentxRegTimeout are zero, or
+impractical in accordance with implementation-specific
+procedure of the master agent, the value represented by
+this object will be the effective timeout value for the
+
+master agent to await a response to a dispatch from a
+given subagent.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxMasterAgentXVer" />
+2
+<br /><b>agentxMasterAgentXVer</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.74.1.1.2</td>
+<td>
+<pre>
+The AgentX protocol version supported by this master agent.
+The current protocol version is 1.  Note that the master agent
+must also allow interaction with earlier version subagents.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxConnTableLastChange" />
+1
+<br /><b>agentxConnTableLastChange</b>
+
+</td><td>
+  TICKS
+
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.74.1.2.1</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime when the last row creation or deletion
+occurred in the agentxConnectionTable.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxSessionTableLastChange" />
+1
+<br /><b>agentxSessionTableLastChange</b>
+
+</td><td>
+  TICKS
+
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.74.1.3.1</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime when the last row creation or deletion
+occurred in the agentxSessionTable.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxRegistrationTableLastChange" />
+1
+<br /><b>agentxRegistrationTableLastChange</b>
+
+</td><td>
+  TICKS
+
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.74.1.4.1</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime when the last row creation or deletion
+occurred in the agentxRegistrationTable.
+     
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="agentxConnectionTable" /><h3>Table agentxConnectionTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>agentxConnectionTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>AGENTX-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.74.1.2.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The agentxConnectionTable tracks all current AgentX transport
+connections.  There may be zero, one, or more AgentX sessions
+carried on a given AgentX connection.
+     
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="agentxConnectionEntry" />Row Description</td>
+<td>
+<pre>
+An agentxConnectionEntry contains information describing a
+single AgentX transport connection.  A connection may be
+
+used to support zero or more AgentX sessions.  An entry is
+created when a new transport connection is established,
+and is destroyed when the transport connection is terminated.
+     
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>agentxConnectionTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="agentxConnIndex" />
+1
+<br /><b>agentxConnIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+agentxConnIndex contains the value that uniquely identifies
+an open transport connection used by this master agent
+to provide AgentX service.  Values of this index should
+not be re-used.  The value assigned to a given transport
+connection is constant for the lifetime of that connection.
+     
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other agentxConnectionTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="agentxConnOpenTime" />
+2
+<br /><b>agentxConnOpenTime</b>
+
+</td><td>
+  TICKS
+
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime when this connection was established
+and, therefore, its value when this entry was added to the table.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxConnTransportDomain" />
+3
+<br /><b>agentxConnTransportDomain</b>
+
+</td><td>
+  OBJECTID
+
+ <br>
+ <a href="#TDomain">TDomain</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TDomain"> TDomain TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The transport protocol in use for this connection to the
+subagent.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxConnTransportAddress" />
+4
+<br /><b>agentxConnTransportAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#AgentxTAddress">AgentxTAddress</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#AgentxTAddress"> AgentxTAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The transport address of the remote (subagent) end of this
+connection to the master agent.  This object may be zero-length
+for unix-domain sockets (and possibly other types of transport
+addresses) since the subagent need not bind a filename to its
+local socket.
+     
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="agentxSessionTable" /><h3>Table agentxSessionTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>agentxSessionTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>AGENTX-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.74.1.3.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of AgentX subagent sessions currently in effect.
+
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="agentxSessionEntry" />Row Description</td>
+<td>
+<pre>
+Information about a single open session between the AgentX
+master agent and a subagent is contained in this entry.  An
+entry is created when a new session is successfully established
+and is destroyed either when the subagent transport connection
+has terminated or when the subagent session is closed.
+     
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>agentxSessionTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="agentxConnIndex" />
+1
+<br /><b>agentxConnIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+agentxConnIndex contains the value that uniquely identifies
+an open transport connection used by this master agent
+to provide AgentX service.  Values of this index should
+not be re-used.  The value assigned to a given transport
+connection is constant for the lifetime of that connection.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxSessionIndex" />
+1
+<br /><b>agentxSessionIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+A unique index for the subagent session.  It is the same as
+h.sessionID defined in the agentx header.  Note that if
+a subagent's session with the master agent is closed for
+any reason its index should not be re-used.
+A value of zero(0) is specifically allowed in order
+to be compatible with the definition of h.sessionId.
+     
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other agentxSessionTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="agentxSessionObjectID" />
+2
+<br /><b>agentxSessionObjectID</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+This is taken from the o.id field of the agentx-Open-PDU.
+This attribute will report a value of '0.0' for subagents
+not supporting the notion of an AgentX session object
+identifier.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxSessionDescr" />
+3
+<br /><b>agentxSessionDescr</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A textual description of the session.  This is analogous to
+sysDescr defined in the SNMPv2-MIB in RFC 1907 [19] and is
+taken from the o.descr field of the agentx-Open-PDU.
+This attribute will report a zero-length string value for
+subagents not supporting the notion of a session description.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxSessionAdminStatus" />
+4
+<br /><b>agentxSessionAdminStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>up</td></tr>
+        <tr><td>2</td><td>down</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The administrative (desired) status of the session.  Setting
+the value to 'down(2)' closes the subagent session (with c.reason
+set to 'reasonByManager').
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxSessionOpenTime" />
+5
+<br /><b>agentxSessionOpenTime</b>
+
+</td><td>
+  TICKS
+
+ <br>
+ <a href="#TimeStamp">TimeStamp</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeStamp"> TimeStamp TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of sysUpTime when this session was opened and,
+therefore, its value when this entry was added to the table.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxSessionAgentXVer" />
+6
+<br /><b>agentxSessionAgentXVer</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The version of the AgentX protocol supported by the
+session.  This must be less than or equal to the value of
+agentxMasterAgentXVer.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxSessionTimeout" />
+7
+<br /><b>agentxSessionTimeout</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The length of time, in seconds, that a master agent should
+allow to elapse after dispatching a message to this session
+before it regards the subagent as not responding.  This value
+is taken from the o.timeout field of the agentx-Open-PDU.
+This is a session-specific value that may be overridden by
+values associated with the specific registered MIB regions
+(see agentxRegTimeout). A value of zero(0) indicates that
+the master agent's default timeout value should be used
+
+(see agentxDefaultTimeout).
+     
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="agentxRegistrationTable" /><h3>Table agentxRegistrationTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>agentxRegistrationTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>AGENTX-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.74.1.4.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of registered regions.
+
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="agentxRegistrationEntry" />Row Description</td>
+<td>
+<pre>
+Contains information for a single registered region.  An
+entry is created when a session  successfully registers a
+region and is destroyed for any of three reasons: this region
+is unregistered by the session, the session is closed,
+or the subagent connection is closed.
+     
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>agentxRegistrationTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="agentxConnIndex" />
+1
+<br /><b>agentxConnIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+agentxConnIndex contains the value that uniquely identifies
+an open transport connection used by this master agent
+to provide AgentX service.  Values of this index should
+not be re-used.  The value assigned to a given transport
+connection is constant for the lifetime of that connection.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxSessionIndex" />
+1
+<br /><b>agentxSessionIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+A unique index for the subagent session.  It is the same as
+h.sessionID defined in the agentx header.  Note that if
+a subagent's session with the master agent is closed for
+any reason its index should not be re-used.
+A value of zero(0) is specifically allowed in order
+to be compatible with the definition of h.sessionId.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxRegIndex" />
+1
+<br /><b>agentxRegIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+agentxRegIndex uniquely identifies a registration entry.
+This value is constant for the lifetime of an entry.
+     
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other agentxRegistrationTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="agentxRegContext" />
+2
+<br /><b>agentxRegContext</b>
+
+</td><td>
+  OCTETSTR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The context in which the session supports the objects in this
+region.  A zero-length context indicates the default context.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxRegStart" />
+3
+<br /><b>agentxRegStart</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The starting OBJECT IDENTIFIER of this registration entry.  The
+session identified by agentxSessionIndex implements objects
+starting at this value (inclusive).  Note that this value could
+identify an object type, an object instance, or a partial object
+instance.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxRegRangeSubId" />
+4
+<br /><b>agentxRegRangeSubId</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+agentxRegRangeSubId is used to specify the range.  This is
+taken from r.region_subid in the registration PDU.  If the value
+of this object is zero, no range is specified.  If it is non-zero,
+it identifies the `nth' sub-identifier in r.region for which
+this entry's agentxRegUpperBound value is substituted in the
+OID for purposes of defining the region's upper bound.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxRegUpperBound" />
+5
+<br /><b>agentxRegUpperBound</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+agentxRegUpperBound represents the upper-bound sub-identifier in
+a registration.  This is taken from the r.upper_bound in the
+registration PDU.  If agentxRegRangeSubid (r.region_subid) is
+zero, this value is also zero and is not used to define an upper
+bound for this registration.
+    
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxRegPriority" />
+6
+<br /><b>agentxRegPriority</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The registration priority.  Lower values have higher priority.
+This value is taken from r.priority in the register PDU.
+Sessions should use the value of 127 for r.priority if a
+default value is desired.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxRegTimeout" />
+7
+<br /><b>agentxRegTimeout</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The timeout value, in seconds, for responses to
+requests associated with this registered MIB region.
+A value of zero(0) indicates the default value (indicated
+by by agentxSessionTimeout or agentxDefaultTimeout) is to
+be used.  This value is taken from the r.timeout field of
+the agentx-Register-PDU.
+     
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="agentxRegInstance" />
+8
+<br /><b>agentxRegInstance</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of agentxRegInstance is `true' for
+registrations for which the INSTANCE_REGISTRATION
+was set, and is `false' for all other registrations.
+     
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="TDomain">TDomain</td><td>OBJECTID</td><td><pre></pre></td></tr>
+<tr><td><a name="TimeStamp">TimeStamp</td><td>TICKS</td><td><pre></pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="AgentxTAddress">AgentxTAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp AGENTX-MIB::agentxMIB</b></p>
+<pre>
++--<a href="#agentxMIB">agentxMIB</a>(74)
+   |
+   +--<a href="#agentxObjects">agentxObjects</a>(1)
+   |  |
+   |  +--<a href="#agentxGeneral">agentxGeneral</a>(1)
+   |  |  |
+   |  |  +-- -R-- INTEGER   <a href="#agentxDefaultTimeout">agentxDefaultTimeout</a>(1)
+   |  |  |        Range: 0..255
+   |  |  +-- -R-- INTEGER   <a href="#agentxMasterAgentXVer">agentxMasterAgentXVer</a>(2)
+   |  |           Range: 1..255
+   |  |
+   |  +--<a href="#agentxConnection">agentxConnection</a>(2)
+   |  |  |
+   |  |  +-- -R-- TimeTicks <a href="#agentxConnTableLastChange">agentxConnTableLastChange</a>(1)
+   |  |  |        Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |  |
+   |  |  +--<a href="#agentxConnectionTable">agentxConnectionTable</a>(2)
+   |  |     |
+   |  |     +--<a href="#agentxConnectionEntry">agentxConnectionEntry</a>(1)
+   |  |        |  Index: agentxConnIndex
+   |  |        |
+   |  |        +-- ---- Unsigned  <a href="#agentxConnIndex">agentxConnIndex</a>(1)
+   |  |        |        Range: 1..2147483647
+   |  |        +-- -R-- TimeTicks <a href="#agentxConnOpenTime">agentxConnOpenTime</a>(2)
+   |  |        |        Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |        +-- -R-- ObjID     <a href="#agentxConnTransportDomain">agentxConnTransportDomain</a>(3)
+   |  |        |        Textual Convention: <a href="#TDomain">TDomain</a>
+   |  |        +-- -R-- String    <a href="#agentxConnTransportAddress">agentxConnTransportAddress</a>(4)
+   |  |                 Textual Convention: <a href="#AgentxTAddress">AgentxTAddress</a>
+   |  |                 Size: 0..255
+   |  |
+   |  +--<a href="#agentxSession">agentxSession</a>(3)
+   |  |  |
+   |  |  +-- -R-- TimeTicks <a href="#agentxSessionTableLastChange">agentxSessionTableLastChange</a>(1)
+   |  |  |        Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |  |
+   |  |  +--<a href="#agentxSessionTable">agentxSessionTable</a>(2)
+   |  |     |
+   |  |     +--<a href="#agentxSessionEntry">agentxSessionEntry</a>(1)
+   |  |        |  Index: agentxConnIndex, agentxSessionIndex
+   |  |        |
+   |  |        +-- ---- Unsigned  <a href="#agentxSessionIndex">agentxSessionIndex</a>(1)
+   |  |        |        Range: 0..2147483647
+   |  |        +-- -R-- ObjID     <a href="#agentxSessionObjectID">agentxSessionObjectID</a>(2)
+   |  |        +-- -R-- String    <a href="#agentxSessionDescr">agentxSessionDescr</a>(3)
+   |  |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |        |        Size: 0..255
+   |  |        +-- -RW- EnumVal   <a href="#agentxSessionAdminStatus">agentxSessionAdminStatus</a>(4)
+   |  |        |        Values: up(1), down(2)
+   |  |        +-- -R-- TimeTicks <a href="#agentxSessionOpenTime">agentxSessionOpenTime</a>(5)
+   |  |        |        Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |  |        +-- -R-- INTEGER   <a href="#agentxSessionAgentXVer">agentxSessionAgentXVer</a>(6)
+   |  |        |        Range: 1..255
+   |  |        +-- -R-- INTEGER   <a href="#agentxSessionTimeout">agentxSessionTimeout</a>(7)
+   |  |                 Range: 0..255
+   |  |
+   |  +--<a href="#agentxRegistration">agentxRegistration</a>(4)
+   |     |
+   |     +-- -R-- TimeTicks <a href="#agentxRegistrationTableLastChange">agentxRegistrationTableLastChange</a>(1)
+   |     |        Textual Convention: <a href="#TimeStamp">TimeStamp</a>
+   |     |
+   |     +--<a href="#agentxRegistrationTable">agentxRegistrationTable</a>(2)
+   |        |
+   |        +--<a href="#agentxRegistrationEntry">agentxRegistrationEntry</a>(1)
+   |           |  Index: agentxConnIndex, agentxSessionIndex, agentxRegIndex
+   |           |
+   |           +-- ---- Unsigned  <a href="#agentxRegIndex">agentxRegIndex</a>(1)
+   |           |        Range: 1..2147483647
+   |           +-- -R-- String    <a href="#agentxRegContext">agentxRegContext</a>(2)
+   |           +-- -R-- ObjID     <a href="#agentxRegStart">agentxRegStart</a>(3)
+   |           +-- -R-- Unsigned  <a href="#agentxRegRangeSubId">agentxRegRangeSubId</a>(4)
+   |           +-- -R-- Unsigned  <a href="#agentxRegUpperBound">agentxRegUpperBound</a>(5)
+   |           +-- -R-- Unsigned  <a href="#agentxRegPriority">agentxRegPriority</a>(6)
+   |           +-- -R-- INTEGER   <a href="#agentxRegTimeout">agentxRegTimeout</a>(7)
+   |           |        Range: 0..255
+   |           +-- -R-- EnumVal   <a href="#agentxRegInstance">agentxRegInstance</a>(8)
+   |                    Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |                    Values: true(1), false(2)
+   |
+   +--<a href="#agentxConformance">agentxConformance</a>(2)
+      |
+      +--<a href="#agentxMIBGroups">agentxMIBGroups</a>(1)
+      |  |
+      |  +--<a href="#agentxMIBGroup">agentxMIBGroup</a>(1)
+      |
+      +--<a href="#agentxMIBCompliances">agentxMIBCompliances</a>(2)
+         |
+         +--<a href="#agentxMIBCompliance">agentxMIBCompliance</a>(1)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

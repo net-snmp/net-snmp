@@ -1,0 +1,606 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>lcd_time.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * lcd_time.c</span>
+00003 <span class="comment"> *</span>
+00004 <span class="comment"> * XXX  Should etimelist entries with &lt;0,0&gt; time tuples be timed out?</span>
+00005 <span class="comment"> * XXX  Need a routine to free the memory?  (Perhaps at shutdown?)</span>
+00006 <span class="comment"> */</span>
+00007 
+00008 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00009 
+00010 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00011 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00012 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00013 <span class="preprocessor">#endif</span>
+00014 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00015 <span class="preprocessor">#ifdef HAVE_STDLIB_H</span>
+00016 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00017 <span class="preprocessor">#endif</span>
+00018 <span class="preprocessor">#if HAVE_STRING_H</span>
+00019 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00020 <span class="preprocessor">#else</span>
+00021 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00022 <span class="preprocessor">#endif</span>
+00023 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00024 <span class="preprocessor"># ifdef WIN32</span>
+00025 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00026 <span class="preprocessor"># else</span>
+00027 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00028 <span class="preprocessor"># endif</span>
+00029 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00030 <span class="preprocessor">#else</span>
+00031 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00032 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00033 <span class="preprocessor"># else</span>
+00034 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00035 <span class="preprocessor"># endif</span>
+00036 <span class="preprocessor">#endif</span>
+00037 <span class="preprocessor">#ifdef HAVE_NETINET_IN_H</span>
+00038 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00039 <span class="preprocessor">#endif</span>
+00040 
+00041 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00042 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00043 <span class="preprocessor">#endif</span>
+00044 
+00045 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00046 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00047 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00048 
+00049 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00050 <span class="preprocessor">#include &lt;net-snmp/library/callback.h&gt;</span>
+00051 <span class="preprocessor">#include &lt;net-snmp/library/snmp_secmod.h&gt;</span>
+00052 <span class="preprocessor">#include &lt;net-snmp/library/snmpusm.h&gt;</span>
+00053 <span class="preprocessor">#include &lt;net-snmp/library/lcd_time.h&gt;</span>
+00054 <span class="preprocessor">#include &lt;net-snmp/library/scapi.h&gt;</span>
+00055 <span class="preprocessor">#include &lt;net-snmp/library/snmpv3.h&gt;</span>
+00056 
+00057 <span class="preprocessor">#include &lt;net-snmp/library/transform_oids.h&gt;</span>
+00058 
+00059 <span class="comment">/*</span>
+00060 <span class="comment"> * Global static hashlist to contain Enginetime entries.</span>
+00061 <span class="comment"> *</span>
+00062 <span class="comment"> * New records are prepended to the appropriate list at the hash index.</span>
+00063 <span class="comment"> */</span>
+00064 <span class="keyword">static</span> Enginetime etimelist[ETIMELIST_SIZE];
+00065 
+00066 
+00067 
+00068 
+00069 <span class="comment">/*******************************************************************-o-******</span>
+00070 <span class="comment"> * get_enginetime</span>
+00071 <span class="comment"> *</span>
+00072 <span class="comment"> * Parameters:</span>
+00073 <span class="comment"> *      *engineID</span>
+00074 <span class="comment"> *       engineID_len</span>
+00075 <span class="comment"> *      *engineboot</span>
+00076 <span class="comment"> *      *engine_time</span>
+00077 <span class="comment"> *      </span>
+00078 <span class="comment"> * Returns:</span>
+00079 <span class="comment"> *      SNMPERR_SUCCESS         Success -- when a record for engineID is found.</span>
+00080 <span class="comment"> *      SNMPERR_GENERR          Otherwise.</span>
+00081 <span class="comment"> *</span>
+00082 <span class="comment"> *</span>
+00083 <span class="comment"> * Lookup engineID and return the recorded values for the</span>
+00084 <span class="comment"> * &lt;engine_time, engineboot&gt; tuple adjusted to reflect the estimated time</span>
+00085 <span class="comment"> * at the engine in question.</span>
+00086 <span class="comment"> *</span>
+00087 <span class="comment"> * Special case: if engineID is NULL or if engineID_len is 0 then</span>
+00088 <span class="comment"> * the time tuple is returned immediately as zero.</span>
+00089 <span class="comment"> *</span>
+00090 <span class="comment"> * XXX  What if timediff wraps?  &gt;shrug&lt;</span>
+00091 <span class="comment"> * XXX  Then: you need to increment the boots value.  Now.  Detecting</span>
+00092 <span class="comment"> *            this is another matter.</span>
+00093 <span class="comment"> */</span>
+00094 <span class="keywordtype">int</span>
+00095 get_enginetime(u_char * engineID,
+00096                u_int engineID_len,
+00097                u_int * engineboot,
+00098                u_int * engine_time, u_int authenticated)
+00099 {
+00100     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00101     time_t          timediff = 0;
+00102     Enginetime      e = NULL;
+00103 
+00104 
+00105 
+00106     <span class="comment">/*</span>
+00107 <span class="comment">     * Sanity check.</span>
+00108 <span class="comment">     */</span>
+00109     <span class="keywordflow">if</span> (!engine_time || !engineboot) {
+00110         QUITFUN(SNMPERR_GENERR, get_enginetime_quit);
+00111     }
+00112 
+00113 
+00114     <span class="comment">/*</span>
+00115 <span class="comment">     * Compute estimated current engine_time tuple at engineID if</span>
+00116 <span class="comment">     * a record is cached for it.</span>
+00117 <span class="comment">     */</span>
+00118     *engine_time = *engineboot = 0;
+00119 
+00120     <span class="keywordflow">if</span> (!engineID || (engineID_len &lt;= 0)) {
+00121         QUITFUN(SNMPERR_GENERR, get_enginetime_quit);
+00122     }
+00123 
+00124     <span class="keywordflow">if</span> (!(e = search_enginetime_list(engineID, engineID_len))) {
+00125         QUITFUN(SNMPERR_GENERR, get_enginetime_quit);
+00126     }
+00127 <span class="preprocessor">#ifdef LCD_TIME_SYNC_OPT</span>
+00128     <span class="keywordflow">if</span> (!authenticated || e-&gt;authenticatedFlag) {
+00129 <span class="preprocessor">#endif</span>
+00130         *engine_time = e-&gt;engineTime;
+00131         *engineboot = e-&gt;engineBoot;
+00132 
+00133        timediff = snmpv3_local_snmpEngineTime() - e-&gt;lastReceivedEngineTime;
+00134 
+00135 <span class="preprocessor">#ifdef LCD_TIME_SYNC_OPT</span>
+00136     }
+00137 <span class="preprocessor">#endif</span>
+00138 
+00139     <span class="keywordflow">if</span> (timediff &gt; (int) (ENGINETIME_MAX - *engine_time)) {
+00140         *engine_time = (timediff - (ENGINETIME_MAX - *engine_time));
+00141 
+00142         <span class="comment">/*</span>
+00143 <span class="comment">         * FIX -- move this check up... should not change anything</span>
+00144 <span class="comment">         * * if engineboot is already locked.  ???</span>
+00145 <span class="comment">         */</span>
+00146         <span class="keywordflow">if</span> (*engineboot &lt; ENGINEBOOT_MAX) {
+00147             *engineboot += 1;
+00148         }
+00149 
+00150     } <span class="keywordflow">else</span> {
+00151         *engine_time += timediff;
+00152     }
+00153 
+00154     DEBUGMSGTL((<span class="stringliteral">"lcd_get_enginetime"</span>, <span class="stringliteral">"engineID "</span>));
+00155     DEBUGMSGHEX((<span class="stringliteral">"lcd_get_enginetime"</span>, engineID, engineID_len));
+00156     DEBUGMSG((<span class="stringliteral">"lcd_get_enginetime"</span>, <span class=
+"stringliteral">": boots=%d, time=%d\n"</span>, *engineboot,
+00157               *engine_time));
+00158 
+00159   get_enginetime_quit:
+00160     <span class="keywordflow">return</span> rval;
+00161 
+00162 }                               <span class="comment">/* end get_enginetime() */</span>
+00163 
+00164 <span class="comment">/*******************************************************************-o-******</span>
+00165 <span class="comment"> * get_enginetime</span>
+00166 <span class="comment"> *</span>
+00167 <span class="comment"> * Parameters:</span>
+00168 <span class="comment"> *      *engineID</span>
+00169 <span class="comment"> *       engineID_len</span>
+00170 <span class="comment"> *      *engineboot</span>
+00171 <span class="comment"> *      *engine_time</span>
+00172 <span class="comment"> *      </span>
+00173 <span class="comment"> * Returns:</span>
+00174 <span class="comment"> *      SNMPERR_SUCCESS         Success -- when a record for engineID is found.</span>
+00175 <span class="comment"> *      SNMPERR_GENERR          Otherwise.</span>
+00176 <span class="comment"> *</span>
+00177 <span class="comment"> *</span>
+00178 <span class="comment"> * Lookup engineID and return the recorded values for the</span>
+00179 <span class="comment"> * &lt;engine_time, engineboot&gt; tuple adjusted to reflect the estimated time</span>
+00180 <span class="comment"> * at the engine in question.</span>
+00181 <span class="comment"> *</span>
+00182 <span class="comment"> * Special case: if engineID is NULL or if engineID_len is 0 then</span>
+00183 <span class="comment"> * the time tuple is returned immediately as zero.</span>
+00184 <span class="comment"> *</span>
+00185 <span class="comment"> * XXX  What if timediff wraps?  &gt;shrug&lt;</span>
+00186 <span class="comment"> * XXX  Then: you need to increment the boots value.  Now.  Detecting</span>
+00187 <span class="comment"> *            this is another matter.</span>
+00188 <span class="comment"> */</span>
+00189 <span class="keywordtype">int</span>
+00190 get_enginetime_ex(u_char * engineID,
+00191                   u_int engineID_len,
+00192                   u_int * engineboot,
+00193                   u_int * engine_time,
+00194                   u_int * last_engine_time, u_int authenticated)
+00195 {
+00196     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00197     time_t          timediff = 0;
+00198     Enginetime      e = NULL;
+00199 
+00200 
+00201 
+00202     <span class="comment">/*</span>
+00203 <span class="comment">     * Sanity check.</span>
+00204 <span class="comment">     */</span>
+00205     <span class="keywordflow">if</span> (!engine_time || !engineboot || !last_engine_time) {
+00206         QUITFUN(SNMPERR_GENERR, get_enginetime_ex_quit);
+00207     }
+00208 
+00209 
+00210     <span class="comment">/*</span>
+00211 <span class="comment">     * Compute estimated current engine_time tuple at engineID if</span>
+00212 <span class="comment">     * a record is cached for it.</span>
+00213 <span class="comment">     */</span>
+00214     *last_engine_time = *engine_time = *engineboot = 0;
+00215 
+00216     <span class="keywordflow">if</span> (!engineID || (engineID_len &lt;= 0)) {
+00217         QUITFUN(SNMPERR_GENERR, get_enginetime_ex_quit);
+00218     }
+00219 
+00220     <span class="keywordflow">if</span> (!(e = search_enginetime_list(engineID, engineID_len))) {
+00221         QUITFUN(SNMPERR_GENERR, get_enginetime_ex_quit);
+00222     }
+00223 <span class="preprocessor">#ifdef LCD_TIME_SYNC_OPT</span>
+00224     <span class="keywordflow">if</span> (!authenticated || e-&gt;authenticatedFlag) {
+00225 <span class="preprocessor">#endif</span>
+00226         *last_engine_time = *engine_time = e-&gt;engineTime;
+00227         *engineboot = e-&gt;engineBoot;
+00228 
+00229        timediff = snmpv3_local_snmpEngineTime() - e-&gt;lastReceivedEngineTime;
+00230 
+00231 <span class="preprocessor">#ifdef LCD_TIME_SYNC_OPT</span>
+00232     }
+00233 <span class="preprocessor">#endif</span>
+00234 
+00235     <span class="keywordflow">if</span> (timediff &gt; (int) (ENGINETIME_MAX - *engine_time)) {
+00236         *engine_time = (timediff - (ENGINETIME_MAX - *engine_time));
+00237 
+00238         <span class="comment">/*</span>
+00239 <span class="comment">         * FIX -- move this check up... should not change anything</span>
+00240 <span class="comment">         * * if engineboot is already locked.  ???</span>
+00241 <span class="comment">         */</span>
+00242         <span class="keywordflow">if</span> (*engineboot &lt; ENGINEBOOT_MAX) {
+00243             *engineboot += 1;
+00244         }
+00245 
+00246     } <span class="keywordflow">else</span> {
+00247         *engine_time += timediff;
+00248     }
+00249 
+00250     DEBUGMSGTL((<span class="stringliteral">"lcd_get_enginetime_ex"</span>, <span class=
+"stringliteral">"engineID "</span>));
+00251     DEBUGMSGHEX((<span class="stringliteral">"lcd_get_enginetime_ex"</span>, engineID, engineID_len));
+00252     DEBUGMSG((<span class="stringliteral">"lcd_get_enginetime_ex"</span>, <span class=
+"stringliteral">": boots=%d, time=%d\n"</span>,
+00253               *engineboot, *engine_time));
+00254 
+00255   get_enginetime_ex_quit:
+00256     <span class="keywordflow">return</span> rval;
+00257 
+00258 }                               <span class="comment">/* end get_enginetime_ex() */</span>
+00259 
+00260 
+00261 <span class="keywordtype">void</span> free_enginetime(<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span> *engineID, size_t engineID_len)
+00262 {
+00263     Enginetime      e = NULL;
+00264     <span class="keywordtype">int</span>             rval = 0;
+00265 
+00266     rval = hash_engineID(engineID, engineID_len);
+00267     <span class="keywordflow">if</span> (rval &lt; 0)
+00268         <span class="keywordflow">return</span>;
+00269 
+00270     e = etimelist[rval];
+00271 
+00272     <span class="keywordflow">while</span> (e != NULL) {
+00273         etimelist[rval] = e-&gt;next;
+00274         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(e-&gt;engineID);
+00275         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(e);
+00276         e = etimelist[rval];
+00277     }
+00278 
+00279 }
+00280 
+00281 
+00282 
+00283 <span class="comment">/*******************************************************************-o-******</span>
+00284 <span class="comment"> * set_enginetime</span>
+00285 <span class="comment"> *</span>
+00286 <span class="comment"> * Parameters:</span>
+00287 <span class="comment"> *      *engineID</span>
+00288 <span class="comment"> *       engineID_len</span>
+00289 <span class="comment"> *       engineboot</span>
+00290 <span class="comment"> *       engine_time</span>
+00291 <span class="comment"> *      </span>
+00292 <span class="comment"> * Returns:</span>
+00293 <span class="comment"> *      SNMPERR_SUCCESS         Success.</span>
+00294 <span class="comment"> *      SNMPERR_GENERR          Otherwise.</span>
+00295 <span class="comment"> *</span>
+00296 <span class="comment"> *</span>
+00297 <span class="comment"> * Lookup engineID and store the given &lt;engine_time, engineboot&gt; tuple</span>
+00298 <span class="comment"> * and then stamp the record with a consistent source of local time.</span>
+00299 <span class="comment"> * If the engineID record does not exist, create one.</span>
+00300 <span class="comment"> *</span>
+00301 <span class="comment"> * Special case: engineID is NULL or engineID_len is 0 defines an engineID</span>
+00302 <span class="comment"> * that is "always set."</span>
+00303 <span class="comment"> *</span>
+00304 <span class="comment"> * XXX  "Current time within the local engine" == time(NULL)...</span>
+00305 <span class="comment"> */</span>
+00306 <span class="keywordtype">int</span>
+00307 set_enginetime(u_char * engineID,
+00308                u_int engineID_len,
+00309                u_int engineboot, u_int engine_time, u_int authenticated)
+00310 {
+00311     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS, iindex;
+00312     Enginetime      e = NULL;
+00313 
+00314 
+00315 
+00316     <span class="comment">/*</span>
+00317 <span class="comment">     * Sanity check.</span>
+00318 <span class="comment">     */</span>
+00319     <span class="keywordflow">if</span> (!engineID || (engineID_len &lt;= 0)) {
+00320         <span class="keywordflow">return</span> rval;
+00321     }
+00322 
+00323 
+00324     <span class="comment">/*</span>
+00325 <span class="comment">     * Store the given &lt;engine_time, engineboot&gt; tuple in the record</span>
+00326 <span class="comment">     * for engineID.  Create a new record if necessary.</span>
+00327 <span class="comment">     */</span>
+00328     <span class="keywordflow">if</span> (!(e = search_enginetime_list(engineID, engineID_len))) {
+00329         <span class="keywordflow">if</span> ((iindex = hash_engineID(engineID, engineID_len)) &lt; 0) {
+00330             QUITFUN(SNMPERR_GENERR, set_enginetime_quit);
+00331         }
+00332 
+00333         e = (Enginetime) calloc(1, <span class="keyword">sizeof</span>(*e));
+00334 
+00335         e-&gt;next = etimelist[iindex];
+00336         etimelist[iindex] = e;
+00337 
+00338         e-&gt;engineID = (u_char *) calloc(1, engineID_len);
+00339         memcpy(e-&gt;engineID, engineID, engineID_len);
+00340 
+00341         e-&gt;engineID_len = engineID_len;
+00342     }
+00343 <span class="preprocessor">#ifdef LCD_TIME_SYNC_OPT</span>
+00344     <span class="keywordflow">if</span> (authenticated || !e-&gt;authenticatedFlag) {
+00345         e-&gt;authenticatedFlag = authenticated;
+00346 <span class="preprocessor">#else</span>
+00347     <span class="keywordflow">if</span> (authenticated) {
+00348 <span class="preprocessor">#endif</span>
+00349         e-&gt;engineTime = engine_time;
+00350         e-&gt;engineBoot = engineboot;
+00351         e-&gt;lastReceivedEngineTime = snmpv3_local_snmpEngineTime();
+00352     }
+00353 
+00354     e = NULL;                   <span class="comment">/* Indicates a successful update. */</span>
+00355 
+00356     DEBUGMSGTL((<span class="stringliteral">"lcd_set_enginetime"</span>, <span class="stringliteral">"engineID "</span>));
+00357     DEBUGMSGHEX((<span class="stringliteral">"lcd_set_enginetime"</span>, engineID, engineID_len));
+00358     DEBUGMSG((<span class="stringliteral">"lcd_set_enginetime"</span>, <span class=
+"stringliteral">": boots=%d, time=%d\n"</span>, engineboot,
+00359               engine_time));
+00360 
+00361   set_enginetime_quit:
+00362     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(e);
+00363 
+00364     <span class="keywordflow">return</span> rval;
+00365 
+00366 }                               <span class="comment">/* end set_enginetime() */</span>
+00367 
+00368 
+00369 
+00370 
+00371 <span class="comment">/*******************************************************************-o-******</span>
+00372 <span class="comment"> * search_enginetime_list</span>
+00373 <span class="comment"> *</span>
+00374 <span class="comment"> * Parameters:</span>
+00375 <span class="comment"> *      *engineID</span>
+00376 <span class="comment"> *       engineID_len</span>
+00377 <span class="comment"> *      </span>
+00378 <span class="comment"> * Returns:</span>
+00379 <span class="comment"> *      Pointer to a etimelist record with engineID &lt;engineID&gt;  -OR-</span>
+00380 <span class="comment"> *      NULL if no record exists.</span>
+00381 <span class="comment"> *</span>
+00382 <span class="comment"> *</span>
+00383 <span class="comment"> * Search etimelist for an entry with engineID.</span>
+00384 <span class="comment"> *</span>
+00385 <span class="comment"> * ASSUMES that no engineID will have more than one record in the list.</span>
+00386 <span class="comment"> */</span>
+00387 Enginetime
+00388 search_enginetime_list(u_char * engineID, u_int engineID_len)
+00389 {
+00390     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00391     Enginetime      e = NULL;
+00392 
+00393 
+00394     <span class="comment">/*</span>
+00395 <span class="comment">     * Sanity check.</span>
+00396 <span class="comment">     */</span>
+00397     <span class="keywordflow">if</span> (!engineID || (engineID_len &lt;= 0)) {
+00398         QUITFUN(SNMPERR_GENERR, search_enginetime_list_quit);
+00399     }
+00400 
+00401 
+00402     <span class="comment">/*</span>
+00403 <span class="comment">     * Find the entry for engineID if there be one.</span>
+00404 <span class="comment">     */</span>
+00405     rval = hash_engineID(engineID, engineID_len);
+00406     <span class="keywordflow">if</span> (rval &lt; 0) {
+00407         QUITFUN(SNMPERR_GENERR, search_enginetime_list_quit);
+00408     }
+00409     e = etimelist[rval];
+00410 
+00411     <span class="keywordflow">for</span> ( <span class="comment">/*EMPTY*/</span>; e; e = e-&gt;next) {
+00412         <span class="keywordflow">if</span> ((engineID_len == e-&gt;engineID_len)
+00413             &amp;&amp; !memcmp(e-&gt;engineID, engineID, engineID_len)) {
+00414             <span class="keywordflow">break</span>;
+00415         }
+00416     }
+00417 
+00418 
+00419   search_enginetime_list_quit:
+00420     <span class="keywordflow">return</span> e;
+00421 
+00422 }                               <span class="comment">/* end search_enginetime_list() */</span>
+00423 
+00424 
+00425 
+00426 
+00427 
+00428 <span class="comment">/*******************************************************************-o-******</span>
+00429 <span class="comment"> * hash_engineID</span>
+00430 <span class="comment"> *</span>
+00431 <span class="comment"> * Parameters:</span>
+00432 <span class="comment"> *      *engineID</span>
+00433 <span class="comment"> *       engineID_len</span>
+00434 <span class="comment"> *      </span>
+00435 <span class="comment"> * Returns:</span>
+00436 <span class="comment"> *      &gt;0                      etimelist index for this engineID.</span>
+00437 <span class="comment"> *      SNMPERR_GENERR          Error.</span>
+00438 <span class="comment"> *      </span>
+00439 <span class="comment"> * </span>
+00440 <span class="comment"> * Use a cheap hash to build an index into the etimelist.  Method is </span>
+00441 <span class="comment"> * to hash the engineID, then split the hash into u_int's and add them up</span>
+00442 <span class="comment"> * and modulo the size of the list.</span>
+00443 <span class="comment"> *</span>
+00444 <span class="comment"> */</span>
+00445 <span class="keywordtype">int</span>
+00446 hash_engineID(u_char * engineID, u_int engineID_len)
+00447 {
+00448     <span class="keywordtype">int</span>             rval = SNMPERR_GENERR;
+00449     size_t          buf_len = SNMP_MAXBUF;
+00450     u_int           additive = 0;
+00451     u_char         *bufp, buf[SNMP_MAXBUF];
+00452     <span class="keywordtype">void</span>           *context = NULL;
+00453 
+00454 
+00455 
+00456     <span class="comment">/*</span>
+00457 <span class="comment">     * Sanity check.</span>
+00458 <span class="comment">     */</span>
+00459     <span class="keywordflow">if</span> (!engineID || (engineID_len &lt;= 0)) {
+00460         QUITFUN(SNMPERR_GENERR, hash_engineID_quit);
+00461     }
+00462 
+00463 
+00464     <span class="comment">/*</span>
+00465 <span class="comment">     * Hash engineID into a list index.</span>
+00466 <span class="comment">     */</span>
+00467 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00468     rval = sc_hash(usmHMACMD5AuthProtocol,
+00469                    <span class="keyword">sizeof</span>(usmHMACMD5AuthProtocol) / <span class="keyword">sizeof</span>(oid),
+00470                    engineID, engineID_len, buf, &amp;buf_len);
+00471 <span class="preprocessor">#else</span>
+00472     rval = sc_hash(usmHMACSHA1AuthProtocol,
+00473                    <span class="keyword">sizeof</span>(usmHMACSHA1AuthProtocol) / <span class="keyword">sizeof</span>(oid),
+00474                    engineID, engineID_len, buf, &amp;buf_len);
+00475 <span class="preprocessor">#endif</span>
+00476     QUITFUN(rval, hash_engineID_quit);
+00477 
+00478     <span class="keywordflow">for</span> (bufp = buf; (bufp - buf) &lt; (int) buf_len; bufp += 4) {
+00479         additive += (u_int) * bufp;
+00480     }
+00481 
+00482   hash_engineID_quit:
+00483     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(context);
+00484     memset(buf, 0, SNMP_MAXBUF);
+00485 
+00486     <span class="keywordflow">return</span> (rval &lt; 0) ? rval : (additive % ETIMELIST_SIZE);
+00487 
+00488 }                               <span class="comment">/* end hash_engineID() */</span>
+00489 
+00490 
+00491 
+00492 
+00493 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00494 <span class="comment">/*******************************************************************-o-******</span>
+00495 <span class="comment"> * dump_etimelist_entry</span>
+00496 <span class="comment"> *</span>
+00497 <span class="comment"> * Parameters:</span>
+00498 <span class="comment"> *      e</span>
+00499 <span class="comment"> *      count</span>
+00500 <span class="comment"> */</span>
+00501 <span class="keywordtype">void</span>
+00502 dump_etimelist_entry(Enginetime e, <span class="keywordtype">int</span> count)
+00503 {
+00504     u_int           buflen;
+00505     <span class="keywordtype">char</span>            tabs[SNMP_MAXBUF], *t = tabs, *s;
+00506 
+00507 
+00508 
+00509     count += 1;
+00510     <span class="keywordflow">while</span> (count--) {
+00511         t += sprintf(t, <span class="stringliteral">"  "</span>);
+00512     }
+00513 
+00514 
+00515     buflen = e-&gt;engineID_len;
+00516 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00517     <span class="keywordflow">if</span> (!(s = dump_snmpEngineID(e-&gt;engineID, &amp;buflen))) {
+00518 <span class="preprocessor">#endif</span>
+00519         <a class="code" href="group__util.html#ga6">binary_to_hex</a>(e-&gt;engineID, e-&gt;engineID_len, &amp;s);
+00520 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00521     }
+00522 <span class="preprocessor">#endif</span>
+00523 
+00524     DEBUGMSGTL((<span class="stringliteral">"dump_etimelist"</span>, <span class="stringliteral">"%s\n"</span>, tabs));
+00525     DEBUGMSGTL((<span class="stringliteral">"dump_etimelist"</span>, <span class=
+"stringliteral">"%s%s (len=%d) &lt;%d,%d&gt;\n"</span>, tabs,
+00526                 s, e-&gt;engineID_len, e-&gt;engineTime, e-&gt;engineBoot));
+00527     DEBUGMSGTL((<span class="stringliteral">"dump_etimelist"</span>, <span class=
+"stringliteral">"%s%ld (%ld)"</span>, tabs,
+00528                 e-&gt;lastReceivedEngineTime,
+00529                 snmpv3_local_snmpEngineTime() - e-&gt;lastReceivedEngineTime));
+00530 
+00531     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(s);
+00532 
+00533 }                               <span class="comment">/* end dump_etimelist_entry() */</span>
+00534 
+00535 
+00536 
+00537 
+00538 <span class="comment">/*******************************************************************-o-******</span>
+00539 <span class="comment"> * dump_etimelist</span>
+00540 <span class="comment"> */</span>
+00541 <span class="keywordtype">void</span>
+00542 dump_etimelist(<span class="keywordtype">void</span>)
+00543 {
+00544     <span class="keywordtype">int</span>             iindex = -1, count = 0;
+00545     Enginetime      e;
+00546 
+00547 
+00548 
+00549     DEBUGMSGTL((<span class="stringliteral">"dump_etimelist"</span>, <span class="stringliteral">"\n"</span>));
+00550 
+00551     <span class="keywordflow">while</span> (++iindex &lt; ETIMELIST_SIZE) {
+00552         DEBUGMSG((<span class="stringliteral">"dump_etimelist"</span>, <span class="stringliteral">"[%d]"</span>, iindex));
+00553 
+00554         count = 0;
+00555         e = etimelist[iindex];
+00556 
+00557         <span class="keywordflow">while</span> (e) {
+00558             dump_etimelist_entry(e, count++);
+00559             e = e-&gt;next;
+00560         }
+00561 
+00562         <span class="keywordflow">if</span> (count &gt; 0) {
+00563             DEBUGMSG((<span class="stringliteral">"dump_etimelist"</span>, <span class="stringliteral">"\n"</span>));
+00564         }
+00565     }                           <span class="comment">/* endwhile */</span>
+00566 
+00567     DEBUGMSG((<span class="stringliteral">"dump_etimelist"</span>, <span class="stringliteral">"\n"</span>));
+00568 
+00569 }                               <span class="comment">/* end dump_etimelist() */</span>
+00570 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_TESTING_CODE */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

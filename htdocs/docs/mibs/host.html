@@ -1,0 +1,2421 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>host</b>
+MIB object, which is defined within the <b>HOST-RESOURCES-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.25</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#hrStorageTable">hrStorageTable</a></li>
+  <li><a href="#hrDeviceTable">hrDeviceTable</a></li>
+  <li><a href="#hrProcessorTable">hrProcessorTable</a></li>
+  <li><a href="#hrNetworkTable">hrNetworkTable</a></li>
+  <li><a href="#hrPrinterTable">hrPrinterTable</a></li>
+  <li><a href="#hrDiskStorageTable">hrDiskStorageTable</a></li>
+  <li><a href="#hrPartitionTable">hrPartitionTable</a></li>
+  <li><a href="#hrFSTable">hrFSTable</a></li>
+  <li><a href="#hrSWRunTable">hrSWRunTable</a></li>
+  <li><a href="#hrSWRunPerfTable">hrSWRunPerfTable</a></li>
+  <li><a href="#hrSWInstalledTable">hrSWInstalledTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrSystemUptime" />
+1
+<br /><b>hrSystemUptime</b>
+
+</td><td>
+  TICKS
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.25.1.1</td>
+<td>
+<pre>
+The amount of time since this host was last
+initialized.  Note that this is different from
+sysUpTime in the SNMPv2-MIB [RFC1907] because
+sysUpTime is the uptime of the network management
+portion of the system.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSystemDate" />
+2
+<br /><b>hrSystemDate</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.25.1.2</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The host's notion of the local date and time of day.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSystemInitialLoadDevice" />
+3
+<br /><b>hrSystemInitialLoadDevice</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.25.1.3</td>
+<td>
+<pre>
+The index of the hrDeviceEntry for the device from
+which this host is configured to load its initial
+operating system configuration (i.e., which operating
+system code and/or boot parameters).
+
+Note that writing to this object just changes the
+configuration that will be used the next time the
+operating system is loaded and does not actually cause
+the reload to occur.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSystemInitialLoadParameters" />
+4
+<br /><b>hrSystemInitialLoadParameters</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InternationalDisplayString">InternationalDisplayString</a>
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.25.1.4</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InternationalDisplayString"> InternationalDisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object contains the parameters (e.g. a pathname
+and parameter) supplied to the load device when
+requesting the initial operating system configuration
+from that device.
+
+     Note that writing to this object just changes the
+     configuration that will be used the next time the
+     operating system is loaded and does not actually cause
+     the reload to occur.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSystemNumUsers" />
+5
+<br /><b>hrSystemNumUsers</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.25.1.5</td>
+<td>
+<pre>
+The number of user sessions for which this host is
+storing state information.  A session is a collection
+of processes requiring a single act of user
+authentication and possibly subject to collective job
+control.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSystemProcesses" />
+6
+<br /><b>hrSystemProcesses</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.25.1.6</td>
+<td>
+<pre>
+The number of process contexts currently loaded or
+running on this system.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSystemMaxProcesses" />
+7
+<br /><b>hrSystemMaxProcesses</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.25.1.7</td>
+<td>
+<pre>
+The maximum number of process contexts this system
+can support.  If there is no fixed maximum, the value
+should be zero.  On systems that have a fixed maximum,
+this object can help diagnose failures that occur when
+this maximum is reached.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrMemorySize" />
+2
+<br /><b>hrMemorySize</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#KBytes">KBytes</a>
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.25.2.2</td>
+<td>
+<p>
+Note: this object is based on the <a href="#KBytes"> KBytes TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The amount of physical read-write main memory,
+typically RAM, contained by the host.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSWOSIndex" />
+1
+<br /><b>hrSWOSIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.25.4.1</td>
+<td>
+<pre>
+The value of the hrSWRunIndex for the hrSWRunEntry
+that represents the primary operating system running
+on this host.  This object is useful for quickly and
+uniquely identifying that primary operating system.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSWInstalledLastChange" />
+1
+<br /><b>hrSWInstalledLastChange</b>
+
+</td><td>
+  TICKS
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.25.6.1</td>
+<td>
+<pre>
+The value of sysUpTime when an entry in the
+hrSWInstalledTable was last added, renamed, or
+deleted.  Because this table is likely to contain many
+entries, polling of this object allows a management
+station to determine when re-downloading of the table
+might be useful.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSWInstalledLastUpdateTime" />
+2
+<br /><b>hrSWInstalledLastUpdateTime</b>
+
+</td><td>
+  TICKS
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.25.6.2</td>
+<td>
+<pre>
+The value of sysUpTime when the hrSWInstalledTable
+was last completely updated.  Because caching of this
+data will be a popular implementation strategy,
+retrieval of this object allows a management station
+to obtain a guarantee that no data in this table is
+older than the indicated time.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="hrStorageTable" /><h3>Table hrStorageTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrStorageTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.2.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The (conceptual) table of logical storage areas on
+the host.
+
+An entry shall be placed in the storage table for each
+logical area of storage that is allocated and has
+fixed resource limits.  The amount of storage
+represented in an entity is the amount actually usable
+by the requesting entity, and excludes loss due to
+formatting or file system reference information.
+
+These entries are associated with logical storage
+areas, as might be seen by an application, rather than
+physical storage entities which are typically seen by
+an operating system.  Storage such as tapes and
+floppies without file systems on them are typically
+not allocated in chunks by the operating system to
+requesting applications, and therefore shouldn't
+appear in this table.  Examples of valid storage for
+this table include disk partitions, file systems, ram
+(for some architectures this is further segmented into
+regular memory, extended memory, and so on), backing
+store for virtual memory (`swap space').
+
+This table is intended to be a useful diagnostic for
+`out of memory' and `out of buffers' types of
+failures.  In addition, it can be a useful performance
+monitoring tool for tracking memory, disk, or buffer
+usage.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="hrStorageEntry" />Row Description</td>
+<td>
+<pre>
+A (conceptual) entry for one logical storage area on
+the host.  As an example, an instance of the
+hrStorageType object might be named hrStorageType.3
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>hrStorageTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrStorageIndex" />
+1
+<br /><b>hrStorageIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A unique value for each logical storage area
+contained by the host.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other hrStorageTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrStorageType" />
+2
+<br /><b>hrStorageType</b>
+
+</td><td>
+  OBJECTID
+
+ <br>
+ <a href="#AutonomousType">AutonomousType</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#AutonomousType"> AutonomousType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The type of storage represented by this entry.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrStorageDescr" />
+3
+<br /><b>hrStorageDescr</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A description of the type and instance of the storage
+described by this entry.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrStorageAllocationUnits" />
+4
+<br /><b>hrStorageAllocationUnits</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The size, in bytes, of the data objects allocated
+from this pool.  If this entry is monitoring sectors,
+blocks, buffers, or packets, for example, this number
+will commonly be greater than one.  Otherwise this
+number will typically be one.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrStorageSize" />
+5
+<br /><b>hrStorageSize</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The size of the storage represented by this entry, in
+units of hrStorageAllocationUnits. This object is
+writable to allow remote configuration of the size of
+the storage area in those cases where such an
+operation makes sense and is possible on the
+underlying system. For example, the amount of main
+memory allocated to a buffer pool might be modified or
+the amount of disk space allocated to virtual memory
+might be modified.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrStorageUsed" />
+6
+<br /><b>hrStorageUsed</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The amount of the storage represented by this entry
+that is allocated, in units of
+hrStorageAllocationUnits.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrStorageAllocationFailures" />
+7
+<br /><b>hrStorageAllocationFailures</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of requests for storage represented by
+this entry that could not be honored due to not enough
+storage.  It should be noted that as this object has a
+SYNTAX of Counter32, that it does not have a defined
+initial value.  However, it is recommended that this
+object be initialized to zero, even though management
+stations must not depend on such an initialization.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="hrDeviceTable" /><h3>Table hrDeviceTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrDeviceTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The (conceptual) table of devices contained by the
+host.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="hrDeviceEntry" />Row Description</td>
+<td>
+<pre>
+A (conceptual) entry for one device contained by the
+host.  As an example, an instance of the hrDeviceType
+object might be named hrDeviceType.3
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>hrDeviceTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrDeviceIndex" />
+1
+<br /><b>hrDeviceIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A unique value for each device contained by the host.
+The value for each device must remain constant at
+least from one re-initialization of the agent to the
+next re-initialization.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other hrDeviceTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrDeviceType" />
+2
+<br /><b>hrDeviceType</b>
+
+</td><td>
+  OBJECTID
+
+ <br>
+ <a href="#AutonomousType">AutonomousType</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#AutonomousType"> AutonomousType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+An indication of the type of device.
+If this value is
+        `hrDeviceProcessor { hrDeviceTypes 3 }' then an entry
+        exists in the hrProcessorTable which corresponds to
+        this device.
+If this value is
+        `hrDeviceNetwork { hrDeviceTypes 4 }', then an entry
+        exists in the hrNetworkTable which corresponds to this
+        device.
+If this value is
+        `hrDevicePrinter { hrDeviceTypes 5 }', then an entry
+        exists in the hrPrinterTable which corresponds to this
+        device.
+If this value is
+        `hrDeviceDiskStorage { hrDeviceTypes 6 }', then an
+        entry exists in the hrDiskStorageTable which
+        corresponds to this device.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrDeviceDescr" />
+3
+<br /><b>hrDeviceDescr</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A textual description of this device, including the
+device's manufacturer and revision, and optionally,
+its serial number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrDeviceID" />
+4
+<br /><b>hrDeviceID</b>
+
+</td><td>
+  OBJECTID
+
+ <br>
+ <a href="#ProductID">ProductID</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#ProductID"> ProductID TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The product ID for this device.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrDeviceStatus" />
+5
+<br /><b>hrDeviceStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>unknown</td></tr>
+        <tr><td>2</td><td>running</td></tr>
+        <tr><td>3</td><td>warning</td></tr>
+        <tr><td>4</td><td>testing</td></tr>
+        <tr><td>5</td><td>down</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The current operational state of the device described
+by this row of the table.  A value unknown(1)
+indicates that the current state of the device is
+unknown.  running(2) indicates that the device is up
+and running and that no unusual error conditions are
+known.  The warning(3) state indicates that agent has
+been informed of an unusual error condition by the
+operational software (e.g., a disk device driver) but
+that the device is still 'operational'.  An example
+would be a high number of soft errors on a disk.  A
+value of testing(4), indicates that the device is not
+available for use because it is in the testing state.
+The state of down(5) is used only when the agent has
+been informed that the device is not available for any
+use.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrDeviceErrors" />
+6
+<br /><b>hrDeviceErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of errors detected on this device.  It
+should be noted that as this object has a SYNTAX of
+Counter32, that it does not have a defined initial
+value.  However, it is recommended that this object be
+initialized to zero, even though management stations
+must not depend on such an initialization.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="hrProcessorTable" /><h3>Table hrProcessorTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrProcessorTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The (conceptual) table of processors contained by the
+host.
+
+Note that this table is potentially sparse: a
+(conceptual) entry exists only if the correspondent
+value of the hrDeviceType object is
+`hrDeviceProcessor'.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="hrProcessorEntry" />Row Description</td>
+<td>
+<pre>
+A (conceptual) entry for one processor contained by
+the host.  The hrDeviceIndex in the index represents
+the entry in the hrDeviceTable that corresponds to the
+hrProcessorEntry.
+
+As an example of how objects in this table are named,
+an instance of the hrProcessorFrwID object might be
+named hrProcessorFrwID.3
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>hrProcessorTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrDeviceIndex" />
+1
+<br /><b>hrDeviceIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A unique value for each device contained by the host.
+The value for each device must remain constant at
+least from one re-initialization of the agent to the
+next re-initialization.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other hrProcessorTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrProcessorFrwID" />
+1
+<br /><b>hrProcessorFrwID</b>
+
+</td><td>
+  OBJECTID
+
+ <br>
+ <a href="#ProductID">ProductID</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#ProductID"> ProductID TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The product ID of the firmware associated with the
+processor.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrProcessorLoad" />
+2
+<br /><b>hrProcessorLoad</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The average, over the last minute, of the percentage
+of time that this processor was not idle.
+Implementations may approximate this one minute
+smoothing period if necessary.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="hrNetworkTable" /><h3>Table hrNetworkTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrNetworkTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.4</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The (conceptual) table of network devices contained
+by the host.
+
+Note that this table is potentially sparse: a
+(conceptual) entry exists only if the correspondent
+value of the hrDeviceType object is
+`hrDeviceNetwork'.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="hrNetworkEntry" />Row Description</td>
+<td>
+<pre>
+A (conceptual) entry for one network device contained
+by the host.  The hrDeviceIndex in the index
+represents the entry in the hrDeviceTable that
+corresponds to the hrNetworkEntry.
+
+As an example of how objects in this table are named,
+an instance of the hrNetworkIfIndex object might be
+named hrNetworkIfIndex.3
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>hrNetworkTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrDeviceIndex" />
+1
+<br /><b>hrDeviceIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A unique value for each device contained by the host.
+The value for each device must remain constant at
+least from one re-initialization of the agent to the
+next re-initialization.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other hrNetworkTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrNetworkIfIndex" />
+1
+<br /><b>hrNetworkIfIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#InterfaceIndexOrZero">InterfaceIndexOrZero</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InterfaceIndexOrZero"> InterfaceIndexOrZero TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of ifIndex which corresponds to this
+network device. If this device is not represented in
+the ifTable, then this value shall be zero.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="hrPrinterTable" /><h3>Table hrPrinterTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrPrinterTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.5</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The (conceptual) table of printers local to the host.
+Note that this table is potentially sparse: a
+        (conceptual) entry exists only if the correspondent
+        value of the hrDeviceType object is
+        `hrDevicePrinter'.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="hrPrinterEntry" />Row Description</td>
+<td>
+<pre>
+A (conceptual) entry for one printer local to the
+host.  The hrDeviceIndex in the index represents the
+entry in the hrDeviceTable that corresponds to the
+hrPrinterEntry.
+
+As an example of how objects in this table are named,
+an instance of the hrPrinterStatus object might be
+named hrPrinterStatus.3
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>hrPrinterTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrDeviceIndex" />
+1
+<br /><b>hrDeviceIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A unique value for each device contained by the host.
+The value for each device must remain constant at
+least from one re-initialization of the agent to the
+next re-initialization.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other hrPrinterTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrPrinterStatus" />
+1
+<br /><b>hrPrinterStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>other</td></tr>
+        <tr><td>2</td><td>unknown</td></tr>
+        <tr><td>3</td><td>idle</td></tr>
+        <tr><td>4</td><td>printing</td></tr>
+        <tr><td>5</td><td>warmup</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The current status of this printer device.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrPrinterDetectedErrorState" />
+2
+<br /><b>hrPrinterDetectedErrorState</b>
+
+</td><td>
+  OCTETSTR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+This object represents any error conditions detected
+by the printer.  The error conditions are encoded as
+bits in an octet string, with the following
+definitions:
+
+     Condition         Bit #
+
+     lowPaper              0
+
+     noPaper               1
+     lowToner              2
+     noToner               3
+     doorOpen              4
+     jammed                5
+     offline               6
+     serviceRequested      7
+     inputTrayMissing      8
+     outputTrayMissing     9
+     markerSupplyMissing  10
+     outputNearFull       11
+     outputFull           12
+     inputTrayEmpty       13
+     overduePreventMaint  14
+
+Bits are numbered starting with the most significant
+bit of the first byte being bit 0, the least
+significant bit of the first byte being bit 7, the
+most significant bit of the second byte being bit 8,
+and so on.  A one bit encodes that the condition was
+detected, while a zero bit encodes that the condition
+was not detected.
+
+This object is useful for alerting an operator to
+specific warning or error conditions that may occur,
+especially those requiring human intervention.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="hrDiskStorageTable" /><h3>Table hrDiskStorageTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrDiskStorageTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.6</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The (conceptual) table of long-term storage devices
+contained by the host.  In particular, disk devices
+accessed remotely over a network are not included
+here.
+
+Note that this table is potentially sparse: a
+(conceptual) entry exists only if the correspondent
+value of the hrDeviceType object is
+`hrDeviceDiskStorage'.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="hrDiskStorageEntry" />Row Description</td>
+<td>
+<pre>
+A (conceptual) entry for one long-term storage device
+contained by the host.  The hrDeviceIndex in the index
+represents the entry in the hrDeviceTable that
+corresponds to the hrDiskStorageEntry. As an example,
+an instance of the hrDiskStorageCapacity object might
+be named hrDiskStorageCapacity.3
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>hrDiskStorageTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrDeviceIndex" />
+1
+<br /><b>hrDeviceIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A unique value for each device contained by the host.
+The value for each device must remain constant at
+least from one re-initialization of the agent to the
+next re-initialization.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other hrDiskStorageTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrDiskStorageAccess" />
+1
+<br /><b>hrDiskStorageAccess</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>readWrite</td></tr>
+        <tr><td>2</td><td>readOnly</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+An indication if this long-term storage device is
+readable and writable or only readable.  This should
+reflect the media type, any write-protect mechanism,
+and any device configuration that affects the entire
+device.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrDiskStorageMedia" />
+2
+<br /><b>hrDiskStorageMedia</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>other</td></tr>
+        <tr><td>2</td><td>unknown</td></tr>
+        <tr><td>3</td><td>hardDisk</td></tr>
+        <tr><td>4</td><td>floppyDisk</td></tr>
+        <tr><td>5</td><td>opticalDiskROM</td></tr>
+        <tr><td>6</td><td>opticalDiskWORM</td></tr>
+        <tr><td>7</td><td>opticalDiskRW</td></tr>
+        <tr><td>8</td><td>ramDisk</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+An indication of the type of media used in this long-
+term storage device.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrDiskStorageRemoveble" />
+3
+<br /><b>hrDiskStorageRemoveble</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Denotes whether or not the disk media may be removed
+from the drive.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrDiskStorageCapacity" />
+4
+<br /><b>hrDiskStorageCapacity</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#KBytes">KBytes</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#KBytes"> KBytes TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The total size for this long-term storage device. If
+the media is removable and is currently removed, this
+value should be zero.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="hrPartitionTable" /><h3>Table hrPartitionTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrPartitionTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.7</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The (conceptual) table of partitions for long-term
+storage devices contained by the host.  In particular,
+partitions accessed remotely over a network are not
+included here.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="hrPartitionEntry" />Row Description</td>
+<td>
+<pre>
+A (conceptual) entry for one partition.  The
+hrDeviceIndex in the index represents the entry in the
+hrDeviceTable that corresponds to the
+hrPartitionEntry.
+
+As an example of how objects in this table are named,
+an instance of the hrPartitionSize object might be
+named hrPartitionSize.3.1
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>hrPartitionTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrDeviceIndex" />
+1
+<br /><b>hrDeviceIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A unique value for each device contained by the host.
+The value for each device must remain constant at
+least from one re-initialization of the agent to the
+next re-initialization.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrPartitionIndex" />
+1
+<br /><b>hrPartitionIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A unique value for each partition on this long-term
+storage device.  The value for each long-term storage
+device must remain constant at least from one re-
+initialization of the agent to the next re-
+initialization.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other hrPartitionTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrPartitionLabel" />
+2
+<br /><b>hrPartitionLabel</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InternationalDisplayString">InternationalDisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InternationalDisplayString"> InternationalDisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A textual description of this partition.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrPartitionID" />
+3
+<br /><b>hrPartitionID</b>
+
+</td><td>
+  OCTETSTR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A descriptor which uniquely represents this partition
+to the responsible operating system.  On some systems,
+this might take on a binary representation.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrPartitionSize" />
+4
+<br /><b>hrPartitionSize</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#KBytes">KBytes</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#KBytes"> KBytes TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The size of this partition.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrPartitionFSIndex" />
+5
+<br /><b>hrPartitionFSIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The index of the file system mounted on this
+partition.  If no file system is mounted on this
+partition, then this value shall be zero.  Note that
+multiple partitions may point to one file system,
+denoting that that file system resides on those
+partitions.  Multiple file systems may not reside on
+one partition.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="hrFSTable" /><h3>Table hrFSTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrFSTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.3.8</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The (conceptual) table of file systems local to this
+host or remotely mounted from a file server.  File
+systems that are in only one user's environment on a
+multi-user system will not be included in this table.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="hrFSEntry" />Row Description</td>
+<td>
+<pre>
+A (conceptual) entry for one file system local to
+this host or remotely mounted from a file server.
+File systems that are in only one user's environment
+on a multi-user system will not be included in this
+table.
+
+As an example of how objects in this table are named,
+an instance of the hrFSMountPoint object might be
+named hrFSMountPoint.3
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>hrFSTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrFSIndex" />
+1
+<br /><b>hrFSIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A unique value for each file system local to this
+host.  The value for each file system must remain
+constant at least from one re-initialization of the
+agent to the next re-initialization.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other hrFSTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrFSMountPoint" />
+2
+<br /><b>hrFSMountPoint</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InternationalDisplayString">InternationalDisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InternationalDisplayString"> InternationalDisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The path name of the root of this file system.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrFSRemoteMountPoint" />
+3
+<br /><b>hrFSRemoteMountPoint</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InternationalDisplayString">InternationalDisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InternationalDisplayString"> InternationalDisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A description of the name and/or address of the
+server that this file system is mounted from.  This
+may also include parameters such as the mount point on
+the remote file system.  If this is not a remote file
+system, this string should have a length of zero.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrFSType" />
+4
+<br /><b>hrFSType</b>
+
+</td><td>
+  OBJECTID
+
+ <br>
+ <a href="#AutonomousType">AutonomousType</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#AutonomousType"> AutonomousType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of this object identifies the type of this
+file system.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrFSAccess" />
+5
+<br /><b>hrFSAccess</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>readWrite</td></tr>
+        <tr><td>2</td><td>readOnly</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+An indication if this file system is logically
+configured by the operating system to be readable and
+writable or only readable.  This does not represent
+any local access-control policy, except one that is
+applied to the file system as a whole.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrFSBootable" />
+6
+<br /><b>hrFSBootable</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A flag indicating whether this file system is
+bootable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrFSStorageIndex" />
+7
+<br /><b>hrFSStorageIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The index of the hrStorageEntry that represents
+information about this file system.  If there is no
+such information available, then this value shall be
+zero.  The relevant storage entry will be useful in
+tracking the percent usage of this file system and
+diagnosing errors that may occur when it runs out of
+space.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrFSLastFullBackupDate" />
+8
+<br /><b>hrFSLastFullBackupDate</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The last date at which this complete file system was
+copied to another storage device for backup.  This
+        information is useful for ensuring that backups are
+        being performed regularly.
+If this information is not known, then this variable
+        shall have the value corresponding to January 1, year
+        0000, 00:00:00.0, which is encoded as
+        (hex)'00 00 01 01 00 00 00 00'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrFSLastPartialBackupDate" />
+9
+<br /><b>hrFSLastPartialBackupDate</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The last date at which a portion of this file system
+was copied to another storage device for backup.  This
+information is useful for ensuring that backups are
+being performed regularly.
+
+If this information is not known, then this variable
+shall have the value corresponding to January 1, year
+0000, 00:00:00.0, which is encoded as
+(hex)'00 00 01 01 00 00 00 00'.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="hrSWRunTable" /><h3>Table hrSWRunTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrSWRunTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.4.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The (conceptual) table of software running on the
+host.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="hrSWRunEntry" />Row Description</td>
+<td>
+<pre>
+A (conceptual) entry for one piece of software
+running on the host Note that because the installed
+software table only contains information for software
+stored locally on this host, not every piece of
+running software will be found in the installed
+software table.  This is true of software that was
+loaded and run from a non-local source, such as a
+network-mounted file system.
+
+As an example of how objects in this table are named,
+an instance of the hrSWRunName object might be named
+hrSWRunName.1287
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>hrSWRunTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrSWRunIndex" />
+1
+<br /><b>hrSWRunIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A unique value for each piece of software running on
+the host.  Wherever possible, this should be the
+system's native, unique identification number.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other hrSWRunTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrSWRunName" />
+2
+<br /><b>hrSWRunName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InternationalDisplayString">InternationalDisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InternationalDisplayString"> InternationalDisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A textual description of this running piece of
+software, including the manufacturer, revision,  and
+the name by which it is commonly known.  If this
+software was installed locally, this should be the
+same string as used in the corresponding
+hrSWInstalledName.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSWRunID" />
+3
+<br /><b>hrSWRunID</b>
+
+</td><td>
+  OBJECTID
+
+ <br>
+ <a href="#ProductID">ProductID</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#ProductID"> ProductID TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The product ID of this running piece of software.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSWRunPath" />
+4
+<br /><b>hrSWRunPath</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InternationalDisplayString">InternationalDisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InternationalDisplayString"> InternationalDisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A description of the location on long-term storage
+(e.g. a disk drive) from which this software was
+loaded.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSWRunParameters" />
+5
+<br /><b>hrSWRunParameters</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InternationalDisplayString">InternationalDisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InternationalDisplayString"> InternationalDisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A description of the parameters supplied to this
+software when it was initially loaded.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSWRunType" />
+6
+<br /><b>hrSWRunType</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>unknown</td></tr>
+        <tr><td>2</td><td>operatingSystem</td></tr>
+        <tr><td>3</td><td>deviceDriver</td></tr>
+        <tr><td>4</td><td>application</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The type of this software.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSWRunStatus" />
+7
+<br /><b>hrSWRunStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>running</td></tr>
+        <tr><td>2</td><td>runnable</td></tr>
+        <tr><td>3</td><td>notRunnable</td></tr>
+        <tr><td>4</td><td>invalid</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The status of this running piece of software.
+Setting this value to invalid(4) shall cause this
+software to stop running and to be unloaded. Sets to
+other values are not valid.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="hrSWRunPerfTable" /><h3>Table hrSWRunPerfTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrSWRunPerfTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.5.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The (conceptual) table of running software
+performance metrics.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="hrSWRunPerfEntry" />Row Description</td>
+<td>
+<pre>
+A (conceptual) entry containing software performance
+metrics.  As an example, an instance of the
+hrSWRunPerfCPU object might be named
+hrSWRunPerfCPU.1287
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>hrSWRunPerfTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrSWRunIndex" />
+1
+<br /><b>hrSWRunIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A unique value for each piece of software running on
+the host.  Wherever possible, this should be the
+system's native, unique identification number.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other hrSWRunPerfTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrSWRunPerfCPU" />
+1
+<br /><b>hrSWRunPerfCPU</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of centi-seconds of the total system's CPU
+resources consumed by this process.  Note that on a
+multi-processor system, this value may increment by
+more than one centi-second in one centi-second of real
+(wall clock) time.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSWRunPerfMem" />
+2
+<br /><b>hrSWRunPerfMem</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#KBytes">KBytes</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#KBytes"> KBytes TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The total amount of real system memory allocated to
+this process.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="hrSWInstalledTable" /><h3>Table hrSWInstalledTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>hrSWInstalledTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>HOST-RESOURCES-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.25.6.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The (conceptual) table of software installed on this
+host.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="hrSWInstalledEntry" />Row Description</td>
+<td>
+<pre>
+A (conceptual) entry for a piece of software
+installed on this host.
+
+As an example of how objects in this table are named,
+an instance of the hrSWInstalledName object might be
+named hrSWInstalledName.96
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>hrSWInstalledTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrSWInstalledIndex" />
+1
+<br /><b>hrSWInstalledIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A unique value for each piece of software installed
+on the host.  This value shall be in the range from 1
+to the number of pieces of software installed on the
+host.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other hrSWInstalledTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="hrSWInstalledName" />
+2
+<br /><b>hrSWInstalledName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InternationalDisplayString">InternationalDisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InternationalDisplayString"> InternationalDisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A textual description of this installed piece of
+software, including the manufacturer, revision, the
+name by which it is commonly known, and optionally,
+its serial number.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSWInstalledID" />
+3
+<br /><b>hrSWInstalledID</b>
+
+</td><td>
+  OBJECTID
+
+ <br>
+ <a href="#ProductID">ProductID</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#ProductID"> ProductID TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The product ID of this installed piece of software.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSWInstalledType" />
+4
+<br /><b>hrSWInstalledType</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>unknown</td></tr>
+        <tr><td>2</td><td>operatingSystem</td></tr>
+        <tr><td>3</td><td>deviceDriver</td></tr>
+        <tr><td>4</td><td>application</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The type of this software.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="hrSWInstalledDate" />
+5
+<br /><b>hrSWInstalledDate</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The last-modification date of this application as it
+would appear in a directory listing.
+
+If this information is not known, then this variable
+shall have the value corresponding to January 1, year
+0000, 00:00:00.0, which is encoded as
+(hex)'00 00 01 01 00 00 00 00'.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="InterfaceIndexOrZero">InterfaceIndexOrZero</td><td>INTEGER32</td><td><pre></pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="DateAndTime">DateAndTime</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="KBytes">KBytes</td><td>INTEGER32</td><td><pre></pre></td></tr>
+<tr><td><a name="InternationalDisplayString">InternationalDisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="ProductID">ProductID</td><td>OBJECTID</td><td><pre></pre></td></tr>
+<tr><td><a name="AutonomousType">AutonomousType</td><td>OBJECTID</td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp HOST-RESOURCES-MIB::host</b></p>
+<pre>
++--<a href="#host">host</a>(25)
+   |
+   +--<a href="#hrSystem">hrSystem</a>(1)
+   |  |
+   |  +-- -R-- TimeTicks <a href="#hrSystemUptime">hrSystemUptime</a>(1)
+   |  +-- -RW- String    <a href="#hrSystemDate">hrSystemDate</a>(2)
+   |  |        Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |  |        Size: 8 | 11
+   |  +-- -RW- Integer32 <a href="#hrSystemInitialLoadDevice">hrSystemInitialLoadDevice</a>(3)
+   |  |        Range: 1..2147483647
+   |  +-- -RW- String    <a href="#hrSystemInitialLoadParameters">hrSystemInitialLoadParameters</a>(4)
+   |  |        Textual Convention: <a href="#InternationalDisplayString">InternationalDisplayString</a>
+   |  |        Size: 0..128
+   |  +-- -R-- Gauge     <a href="#hrSystemNumUsers">hrSystemNumUsers</a>(5)
+   |  +-- -R-- Gauge     <a href="#hrSystemProcesses">hrSystemProcesses</a>(6)
+   |  +-- -R-- Integer32 <a href="#hrSystemMaxProcesses">hrSystemMaxProcesses</a>(7)
+   |           Range: 0..2147483647
+   |
+   +--<a href="#hrStorage">hrStorage</a>(2)
+   |  |
+   |  +--<a href="#hrStorageTypes">hrStorageTypes</a>(1)
+   |  |
+   |  +-- -R-- Integer32 <a href="#hrMemorySize">hrMemorySize</a>(2)
+   |  |        Textual Convention: <a href="#KBytes">KBytes</a>
+   |  |        Range: 0..2147483647
+   |  |
+   |  +--<a href="#hrStorageTable">hrStorageTable</a>(3)
+   |     |
+   |     +--<a href="#hrStorageEntry">hrStorageEntry</a>(1)
+   |        |  Index: hrStorageIndex
+   |        |
+   |        +-- -R-- Integer32 <a href="#hrStorageIndex">hrStorageIndex</a>(1)
+   |        |        Range: 1..2147483647
+   |        +-- -R-- ObjID     <a href="#hrStorageType">hrStorageType</a>(2)
+   |        |        Textual Convention: <a href="#AutonomousType">AutonomousType</a>
+   |        +-- -R-- String    <a href="#hrStorageDescr">hrStorageDescr</a>(3)
+   |        |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |        |        Size: 0..255
+   |        +-- -R-- Integer32 <a href="#hrStorageAllocationUnits">hrStorageAllocationUnits</a>(4)
+   |        |        Range: 1..2147483647
+   |        +-- -RW- Integer32 <a href="#hrStorageSize">hrStorageSize</a>(5)
+   |        |        Range: 0..2147483647
+   |        +-- -R-- Integer32 <a href="#hrStorageUsed">hrStorageUsed</a>(6)
+   |        |        Range: 0..2147483647
+   |        +-- -R-- Counter   <a href="#hrStorageAllocationFailures">hrStorageAllocationFailures</a>(7)
+   |
+   +--<a href="#hrDevice">hrDevice</a>(3)
+   |  |
+   |  +--<a href="#hrDeviceTypes">hrDeviceTypes</a>(1)
+   |  |
+   |  +--<a href="#hrDeviceTable">hrDeviceTable</a>(2)
+   |  |  |
+   |  |  +--<a href="#hrDeviceEntry">hrDeviceEntry</a>(1)
+   |  |     |  Index: hrDeviceIndex
+   |  |     |
+   |  |     +-- -R-- Integer32 <a href="#hrDeviceIndex">hrDeviceIndex</a>(1)
+   |  |     |        Range: 1..2147483647
+   |  |     +-- -R-- ObjID     <a href="#hrDeviceType">hrDeviceType</a>(2)
+   |  |     |        Textual Convention: <a href="#AutonomousType">AutonomousType</a>
+   |  |     +-- -R-- String    <a href="#hrDeviceDescr">hrDeviceDescr</a>(3)
+   |  |     |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+   |  |     |        Size: 0..64
+   |  |     +-- -R-- ObjID     <a href="#hrDeviceID">hrDeviceID</a>(4)
+   |  |     |        Textual Convention: <a href="#ProductID">ProductID</a>
+   |  |     +-- -R-- EnumVal   <a href="#hrDeviceStatus">hrDeviceStatus</a>(5)
+   |  |     |        Values: unknown(1), running(2), warning(3), testing(4), down(5)
+   |  |     +-- -R-- Counter   <a href="#hrDeviceErrors">hrDeviceErrors</a>(6)
+   |  |
+   |  +--<a href="#hrProcessorTable">hrProcessorTable</a>(3)
+   |  |  |
+   |  |  +--<a href="#hrProcessorEntry">hrProcessorEntry</a>(1)
+   |  |     |  Index: hrDeviceIndex
+   |  |     |
+   |  |     +-- -R-- ObjID     <a href="#hrProcessorFrwID">hrProcessorFrwID</a>(1)
+   |  |     |        Textual Convention: <a href="#ProductID">ProductID</a>
+   |  |     +-- -R-- Integer32 <a href="#hrProcessorLoad">hrProcessorLoad</a>(2)
+   |  |              Range: 0..100
+   |  |
+   |  +--<a href="#hrNetworkTable">hrNetworkTable</a>(4)
+   |  |  |
+   |  |  +--<a href="#hrNetworkEntry">hrNetworkEntry</a>(1)
+   |  |     |  Index: hrDeviceIndex
+   |  |     |
+   |  |     +-- -R-- Integer32 <a href="#hrNetworkIfIndex">hrNetworkIfIndex</a>(1)
+   |  |              Textual Convention: <a href="#InterfaceIndexOrZero">InterfaceIndexOrZero</a>
+   |  |              Range: 0..2147483647
+   |  |
+   |  +--<a href="#hrPrinterTable">hrPrinterTable</a>(5)
+   |  |  |
+   |  |  +--<a href="#hrPrinterEntry">hrPrinterEntry</a>(1)
+   |  |     |  Index: hrDeviceIndex
+   |  |     |
+   |  |     +-- -R-- EnumVal   <a href="#hrPrinterStatus">hrPrinterStatus</a>(1)
+   |  |     |        Values: other(1), unknown(2), idle(3), printing(4), warmup(5)
+   |  |     +-- -R-- String    <a href="#hrPrinterDetectedErrorState">hrPrinterDetectedErrorState</a>(2)
+   |  |
+   |  +--<a href="#hrDiskStorageTable">hrDiskStorageTable</a>(6)
+   |  |  |
+   |  |  +--<a href="#hrDiskStorageEntry">hrDiskStorageEntry</a>(1)
+   |  |     |  Index: hrDeviceIndex
+   |  |     |
+   |  |     +-- -R-- EnumVal   <a href="#hrDiskStorageAccess">hrDiskStorageAccess</a>(1)
+   |  |     |        Values: readWrite(1), readOnly(2)
+   |  |     +-- -R-- EnumVal   <a href="#hrDiskStorageMedia">hrDiskStorageMedia</a>(2)
+   |  |     |        Values: other(1), unknown(2), hardDisk(3), floppyDisk(4), opticalDiskROM(5), opticalDiskWORM(6), opticalDiskRW(7), ramDisk(8)
+   |  |     +-- -R-- EnumVal   <a href="#hrDiskStorageRemoveble">hrDiskStorageRemoveble</a>(3)
+   |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |     |        Values: true(1), false(2)
+   |  |     +-- -R-- Integer32 <a href="#hrDiskStorageCapacity">hrDiskStorageCapacity</a>(4)
+   |  |              Textual Convention: <a href="#KBytes">KBytes</a>
+   |  |              Range: 0..2147483647
+   |  |
+   |  +--<a href="#hrPartitionTable">hrPartitionTable</a>(7)
+   |  |  |
+   |  |  +--<a href="#hrPartitionEntry">hrPartitionEntry</a>(1)
+   |  |     |  Index: hrDeviceIndex, hrPartitionIndex
+   |  |     |
+   |  |     +-- -R-- Integer32 <a href="#hrPartitionIndex">hrPartitionIndex</a>(1)
+   |  |     |        Range: 1..2147483647
+   |  |     +-- -R-- String    <a href="#hrPartitionLabel">hrPartitionLabel</a>(2)
+   |  |     |        Textual Convention: <a href="#InternationalDisplayString">InternationalDisplayString</a>
+   |  |     |        Size: 0..128
+   |  |     +-- -R-- String    <a href="#hrPartitionID">hrPartitionID</a>(3)
+   |  |     +-- -R-- Integer32 <a href="#hrPartitionSize">hrPartitionSize</a>(4)
+   |  |     |        Textual Convention: <a href="#KBytes">KBytes</a>
+   |  |     |        Range: 0..2147483647
+   |  |     +-- -R-- Integer32 <a href="#hrPartitionFSIndex">hrPartitionFSIndex</a>(5)
+   |  |              Range: 0..2147483647
+   |  |
+   |  +--<a href="#hrFSTable">hrFSTable</a>(8)
+   |  |  |
+   |  |  +--<a href="#hrFSEntry">hrFSEntry</a>(1)
+   |  |     |  Index: hrFSIndex
+   |  |     |
+   |  |     +-- -R-- Integer32 <a href="#hrFSIndex">hrFSIndex</a>(1)
+   |  |     |        Range: 1..2147483647
+   |  |     +-- -R-- String    <a href="#hrFSMountPoint">hrFSMountPoint</a>(2)
+   |  |     |        Textual Convention: <a href="#InternationalDisplayString">InternationalDisplayString</a>
+   |  |     |        Size: 0..128
+   |  |     +-- -R-- String    <a href="#hrFSRemoteMountPoint">hrFSRemoteMountPoint</a>(3)
+   |  |     |        Textual Convention: <a href="#InternationalDisplayString">InternationalDisplayString</a>
+   |  |     |        Size: 0..128
+   |  |     +-- -R-- ObjID     <a href="#hrFSType">hrFSType</a>(4)
+   |  |     |        Textual Convention: <a href="#AutonomousType">AutonomousType</a>
+   |  |     +-- -R-- EnumVal   <a href="#hrFSAccess">hrFSAccess</a>(5)
+   |  |     |        Values: readWrite(1), readOnly(2)
+   |  |     +-- -R-- EnumVal   <a href="#hrFSBootable">hrFSBootable</a>(6)
+   |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |     |        Values: true(1), false(2)
+   |  |     +-- -R-- Integer32 <a href="#hrFSStorageIndex">hrFSStorageIndex</a>(7)
+   |  |     |        Range: 0..2147483647
+   |  |     +-- -RW- String    <a href="#hrFSLastFullBackupDate">hrFSLastFullBackupDate</a>(8)
+   |  |     |        Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |  |     |        Size: 8 | 11
+   |  |     +-- -RW- String    <a href="#hrFSLastPartialBackupDate">hrFSLastPartialBackupDate</a>(9)
+   |  |              Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |  |              Size: 8 | 11
+   |  |
+   |  +--<a href="#hrFSTypes">hrFSTypes</a>(9)
+   |
+   +--<a href="#hrSWRun">hrSWRun</a>(4)
+   |  |
+   |  +-- -R-- Integer32 <a href="#hrSWOSIndex">hrSWOSIndex</a>(1)
+   |  |        Range: 1..2147483647
+   |  |
+   |  +--<a href="#hrSWRunTable">hrSWRunTable</a>(2)
+   |     |
+   |     +--<a href="#hrSWRunEntry">hrSWRunEntry</a>(1)
+   |        |  Index: hrSWRunIndex
+   |        |
+   |        +-- -R-- Integer32 <a href="#hrSWRunIndex">hrSWRunIndex</a>(1)
+   |        |        Range: 1..2147483647
+   |        +-- -R-- String    <a href="#hrSWRunName">hrSWRunName</a>(2)
+   |        |        Textual Convention: <a href="#InternationalDisplayString">InternationalDisplayString</a>
+   |        |        Size: 0..64
+   |        +-- -R-- ObjID     <a href="#hrSWRunID">hrSWRunID</a>(3)
+   |        |        Textual Convention: <a href="#ProductID">ProductID</a>
+   |        +-- -R-- String    <a href="#hrSWRunPath">hrSWRunPath</a>(4)
+   |        |        Textual Convention: <a href="#InternationalDisplayString">InternationalDisplayString</a>
+   |        |        Size: 0..128
+   |        +-- -R-- String    <a href="#hrSWRunParameters">hrSWRunParameters</a>(5)
+   |        |        Textual Convention: <a href="#InternationalDisplayString">InternationalDisplayString</a>
+   |        |        Size: 0..128
+   |        +-- -R-- EnumVal   <a href="#hrSWRunType">hrSWRunType</a>(6)
+   |        |        Values: unknown(1), operatingSystem(2), deviceDriver(3), application(4)
+   |        +-- -RW- EnumVal   <a href="#hrSWRunStatus">hrSWRunStatus</a>(7)
+   |                 Values: running(1), runnable(2), notRunnable(3), invalid(4)
+   |
+   +--<a href="#hrSWRunPerf">hrSWRunPerf</a>(5)
+   |  |
+   |  +--<a href="#hrSWRunPerfTable">hrSWRunPerfTable</a>(1)
+   |     |
+   |     +--<a href="#hrSWRunPerfEntry">hrSWRunPerfEntry</a>(1)
+   |        |
+   |        +-- -R-- Integer32 <a href="#hrSWRunPerfCPU">hrSWRunPerfCPU</a>(1)
+   |        |        Range: 0..2147483647
+   |        +-- -R-- Integer32 <a href="#hrSWRunPerfMem">hrSWRunPerfMem</a>(2)
+   |                 Textual Convention: <a href="#KBytes">KBytes</a>
+   |                 Range: 0..2147483647
+   |
+   +--<a href="#hrSWInstalled">hrSWInstalled</a>(6)
+   |  |
+   |  +-- -R-- TimeTicks <a href="#hrSWInstalledLastChange">hrSWInstalledLastChange</a>(1)
+   |  +-- -R-- TimeTicks <a href="#hrSWInstalledLastUpdateTime">hrSWInstalledLastUpdateTime</a>(2)
+   |  |
+   |  +--<a href="#hrSWInstalledTable">hrSWInstalledTable</a>(3)
+   |     |
+   |     +--<a href="#hrSWInstalledEntry">hrSWInstalledEntry</a>(1)
+   |        |  Index: hrSWInstalledIndex
+   |        |
+   |        +-- -R-- Integer32 <a href="#hrSWInstalledIndex">hrSWInstalledIndex</a>(1)
+   |        |        Range: 1..2147483647
+   |        +-- -R-- String    <a href="#hrSWInstalledName">hrSWInstalledName</a>(2)
+   |        |        Textual Convention: <a href="#InternationalDisplayString">InternationalDisplayString</a>
+   |        |        Size: 0..64
+   |        +-- -R-- ObjID     <a href="#hrSWInstalledID">hrSWInstalledID</a>(3)
+   |        |        Textual Convention: <a href="#ProductID">ProductID</a>
+   |        +-- -R-- EnumVal   <a href="#hrSWInstalledType">hrSWInstalledType</a>(4)
+   |        |        Values: unknown(1), operatingSystem(2), deviceDriver(3), application(4)
+   |        +-- -R-- String    <a href="#hrSWInstalledDate">hrSWInstalledDate</a>(5)
+   |                 Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |                 Size: 8 | 11
+   |
+   +--<a href="#hrMIBAdminInfo">hrMIBAdminInfo</a>(7)
+      |
+      +--<a href="#hostResourcesMibModule">hostResourcesMibModule</a>(1)
+      |
+      +--<a href="#hrMIBCompliances">hrMIBCompliances</a>(2)
+      |  |
+      |  +--<a href="#hrMIBCompliance">hrMIBCompliance</a>(1)
+      |
+      +--<a href="#hrMIBGroups">hrMIBGroups</a>(3)
+         |
+         +--<a href="#hrSystemGroup">hrSystemGroup</a>(1)
+         +--<a href="#hrStorageGroup">hrStorageGroup</a>(2)
+         +--<a href="#hrDeviceGroup">hrDeviceGroup</a>(3)
+         +--<a href="#hrSWRunGroup">hrSWRunGroup</a>(4)
+         +--<a href="#hrSWRunPerfGroup">hrSWRunPerfGroup</a>(5)
+         +--<a href="#hrSWInstalledGroup">hrSWInstalledGroup</a>(6)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,55 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>example_scalar_int: instantiates a few example scalars.</h1>Section: C Library Functions (3)<br />
+    Updated: 6 Mar 2002<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>example_scalar_int: instantiates a few example scalars. - This example merely creates some scalar registrations
+    that allows some simple variables to be accessed via SNMP. More... <a name="lbAC" id="lbAC"> </a>
+
+    <h3>Functions</h3>
+
+    <p><br />
+    void <b>init_scalar_int</b> (void)<br />
+    <a name="lbAD" id="lbAD"> </a></p>
+
+    <h2>DETAILED DESCRIPTION</h2>
+
+    <p>This example merely creates some scalar registrations that allows some simple variables to be accessed via SNMP.</p>
+
+    <p>In a more realistic example, it is likely that these variables would also be manipulated in other ways outside of SNMP
+    gets/sets.</p>
+
+    <p>If this module is compiled into an agent, you should be able to issue snmp commands that look something like
+    (authentication information not shown in these commands):</p>
+
+    <p>snmpget localhost netSnmpExampleInteger.0 netSnmpExampleScalars = 42</p>
+
+    <p>snmpset localhost netSnmpExampleInteger.0 = 1234 netSnmpExampleScalars = 1234</p>
+
+    <p>snmpget localhost netSnmpExampleInteger.0 netSnmpExampleScalars = 1234</p>
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAC">Functions</a></dt>
+        </dl>
+      </dd>
+
+      <dt><a href="#lbAD">DETAILED DESCRIPTION</a></dt>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:43 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

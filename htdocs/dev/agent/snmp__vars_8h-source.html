@@ -1,0 +1,150 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>snmp_vars.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * Definitions for SNMP (RFC 1067) agent variable finder.</span>
+00003 <span class="comment"> *</span>
+00004 <span class="comment"> */</span>
+00005 
+00006 <span class="preprocessor">#ifndef _SNMP_VARS_H_</span>
+00007 <span class="preprocessor">#define _SNMP_VARS_H_</span>
+00008 
+00009 <span class="preprocessor">#ifdef __cplusplus</span>
+00010 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00011 <span class="preprocessor">#endif</span>
+00012 
+00013 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00014 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00015 <span class="comment"> * that may apply:</span>
+00016 <span class="comment"> */</span>
+00017 <span class="comment">/***********************************************************</span>
+00018 <span class="comment">        Copyright 1988, 1989 by Carnegie Mellon University</span>
+00019 <span class="comment">        Copyright 1989  TGV, Incorporated</span>
+00020 
+00021 <span class="comment">                      All Rights Reserved</span>
+00022 
+00023 <span class="comment">Permission to use, copy, modify, and distribute this software and its</span>
+00024 <span class="comment">documentation for any purpose and without fee is hereby granted,</span>
+00025 <span class="comment">provided that the above copyright notice appear in all copies and that</span>
+00026 <span class="comment">both that copyright notice and this permission notice appear in</span>
+00027 <span class="comment">supporting documentation, and that the name of CMU and TGV not be used</span>
+00028 <span class="comment">in advertising or publicity pertaining to distribution of the software</span>
+00029 <span class="comment">without specific, written prior permission.</span>
+00030 
+00031 <span class="comment">CMU AND TGV DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,</span>
+00032 <span class="comment">INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO</span>
+00033 <span class="comment">EVENT SHALL CMU OR TGV BE LIABLE FOR ANY SPECIAL, INDIRECT OR</span>
+00034 <span class="comment">CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF</span>
+00035 <span class="comment">USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR</span>
+00036 <span class="comment">OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR</span>
+00037 <span class="comment">PERFORMANCE OF THIS SOFTWARE.</span>
+00038 <span class="comment">******************************************************************/</span>
+00039 <span class="comment">/*</span>
+00040 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00041 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00042 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00043 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00044 <span class="comment"> */</span>
+00045 
+00046     <span class="keyword">struct </span>variable;
+00047 
+00048     <span class="comment">/*</span>
+00049 <span class="comment">     * Function pointer called by the master agent for writes. </span>
+00050 <span class="comment">     */</span>
+00051     <span class="keyword">typedef</span> int     (WriteMethod) (<span class="keywordtype">int</span> action,
+00052                                    u_char * var_val,
+00053                                    u_char var_val_type,
+00054                                    size_t var_val_len,
+00055                                    u_char * statP,
+00056                                    oid * name, size_t length);
+00057 
+00058     <span class="comment">/*</span>
+00059 <span class="comment">     * Function pointer called by the master agent for mib information retrieval </span>
+00060 <span class="comment">     */</span>
+00061     <span class="keyword">typedef</span> u_char *(FindVarMethod) (<span class="keyword">struct </span>variable * vp,
+00062                                      oid * name,
+00063                                      size_t * length,
+00064                                      <span class="keywordtype">int</span> exact,
+00065                                      size_t * var_len,
+00066                                      WriteMethod ** write_method);
+00067 
+00068     <span class="comment">/*</span>
+00069 <span class="comment">     * Function pointer called by the master agent for setting up subagent requests </span>
+00070 <span class="comment">     */</span>
+00071     <span class="keyword">typedef</span> int     (AddVarMethod) (netsnmp_agent_session *asp,
+00072                                     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * vbp);
+00073 
+00074     <span class="keyword">struct </span>nlist;
+00075 
+00076     <span class="keyword">extern</span> <span class="keywordtype">long</span>     long_return;
+00077     <span class="keyword">extern</span> u_char   return_buf[];
+00078 
+00079     <span class="keyword">extern</span> oid      nullOid[];
+00080     <span class="keyword">extern</span> <span class="keywordtype">int</span>      nullOidLen;
+00081 
+00082 <span class="preprocessor">#define INST    0xFFFFFFFF      </span><span class=
+"comment">/* used to fill out the instance field of the variables table */</span>
+00083 
+00084     <span class="keyword">struct </span>variable {
+00085         u_char          magic;  <span class="comment">/* passed to function as a hint */</span>
+00086         <span class="keywordtype">char</span>            type;   <span class="comment">/* type of variable */</span>
+00087         <span class="comment">/*</span>
+00088 <span class="comment">         * See important comment in snmp_vars.c relating to acl </span>
+00089 <span class="comment">         */</span>
+00090         u_short         acl;    <span class="comment">/* access control list for variable */</span>
+00091         FindVarMethod  *findVar;        <span class="comment">/* function that finds variable */</span>
+00092         u_char          namelen;        <span class="comment">/* length of above */</span>
+00093         oid             name[MAX_OID_LEN];      <span class="comment">/* object identifier of variable */</span>
+00094     };
+00095 
+00096     <span class="keywordtype">int</span>             <a class="code" href=
+"group__library.html#ga21">init_agent</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00097     <span class="keywordtype">void</span>            shutdown_agent(<span class="keywordtype">void</span>);
+00098 
+00099 <span class="preprocessor">#ifdef USING_AGENTX_SUBAGENT_MODULE</span>
+00100     <span class="keywordtype">void</span>            netsnmp_enable_subagent(<span class="keywordtype">void</span>);
+00101 <span class="preprocessor">#endif</span>
+00102 
+00103 <span class="preprocessor">#ifndef _AGENT_REGISTRY_H</span>
+00104 <span class="preprocessor">#include &lt;net-snmp/agent/agent_handler.h&gt;</span>
+00105 <span class="preprocessor">#include &lt;net-snmp/agent/var_struct.h&gt;</span>
+00106 <span class="preprocessor">#include &lt;net-snmp/agent/agent_registry.h&gt;</span>
+00107 <span class="preprocessor">#endif</span>
+00108 
+00109     <span class="comment">/*</span>
+00110 <span class="comment">     * fail overloads non-negative integer value. it must be -1 ! </span>
+00111 <span class="comment">     */</span>
+00112 <span class="preprocessor">#define MATCH_FAILED    (-1)</span>
+00113 <span class="preprocessor">#define MATCH_SUCCEEDED 0</span>
+00114 
+00115 <span class="preprocessor">#ifdef __cplusplus</span>
+00116 }
+00117 <span class="preprocessor">#endif</span>
+00118 <span class="preprocessor">#endif                          </span><span class="comment">/* _SNMP_VARS_H_ */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:01 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

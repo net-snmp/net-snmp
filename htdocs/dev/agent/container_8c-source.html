@@ -1,0 +1,499 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>container.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00002 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00003 <span class="preprocessor">#include &lt;net-snmp/library/container.h&gt;</span>
+00004 <span class="preprocessor">#include &lt;net-snmp/library/container_binary_array.h&gt;</span>
+00005 <span class="preprocessor">#include &lt;net-snmp/library/container_list_ssll.h&gt;</span>
+00006 <span class="preprocessor">#include &lt;net-snmp/library/container_null.h&gt;</span>
+00007 
+00008 <span class="comment">/*------------------------------------------------------------------</span>
+00009 <span class="comment"> */</span>
+00010 <span class="keyword">static</span> netsnmp_container *containers = NULL;
+00011 
+00012 <span class="keyword">typedef</span> <span class="keyword">struct </span>container_type_s {
+00013    <span class="keyword">const</span> <span class="keywordtype">char</span>                 *name;
+00014    netsnmp_factory            *factory;
+00015 } container_type;
+00016 
+00017 netsnmp_factory *
+00018 netsnmp_container_get_factory(<span class="keyword">const</span> <span class="keywordtype">char</span> *type);
+00019 
+00020 <span class="comment">/*------------------------------------------------------------------</span>
+00021 <span class="comment"> */</span>
+00022 <span class="keyword">static</span> <span class="keywordtype">void</span> 
+00023 _factory_free(container_type *data, <span class="keywordtype">void</span> *context)
+00024 {
+00025     <span class="keywordflow">if</span> (data == NULL)
+00026         <span class="keywordflow">return</span>;
+00027     
+00028     <span class="keywordflow">if</span> (data-&gt;name != NULL) {
+00029         DEBUGMSGTL((<span class="stringliteral">"container"</span>, <span class=
+"stringliteral">"  _factory_free_list() called for %s\n"</span>,
+00030                     data-&gt;name));
+00031         free((<span class="keywordtype">void</span> *)data-&gt;name); <span class=
+"comment">/* SNMP_FREE wasted on object about to be freed */</span>
+00032     }
+00033     free(data); <span class="comment">/* SNMP_FREE wasted on param */</span>
+00034 }
+00035 
+00036 <span class="comment">/*------------------------------------------------------------------</span>
+00037 <span class="comment"> */</span>
+00038 <span class="keywordtype">void</span>
+00039 netsnmp_container_init_list(<span class="keywordtype">void</span>)
+00040 {
+00041     <span class="keywordflow">if</span> (NULL != containers)
+00042         <span class="keywordflow">return</span>;
+00043 
+00044     <span class="comment">/*</span>
+00045 <span class="comment">     * create a binary arry container to hold container</span>
+00046 <span class="comment">     * factories</span>
+00047 <span class="comment">     */</span>
+00048     containers = netsnmp_container_get_binary_array();
+00049     containers-&gt;compare = netsnmp_compare_cstring;
+00050 
+00051     <span class="comment">/*</span>
+00052 <span class="comment">     * register containers</span>
+00053 <span class="comment">     */</span>
+00054     netsnmp_container_binary_array_init();
+00055     netsnmp_container_ssll_init();
+00056     netsnmp_container_null_init();
+00057 
+00058     <span class="comment">/*</span>
+00059 <span class="comment">     * default aliases for some containers</span>
+00060 <span class="comment">     */</span>
+00061     netsnmp_container_register(<span class="stringliteral">"table_container"</span>,
+00062                                netsnmp_container_get_factory(<span class="stringliteral">"binary_array"</span>));
+00063     netsnmp_container_register(<span class="stringliteral">"linked_list"</span>,
+00064                                netsnmp_container_get_factory(<span class=
+"stringliteral">"sorted_singly_linked_list"</span>));
+00065     netsnmp_container_register(<span class="stringliteral">"ssll_container"</span>,
+00066                                netsnmp_container_get_factory(<span class=
+"stringliteral">"sorted_singly_linked_list"</span>));
+00067 }
+00068 
+00069 <span class="keywordtype">void</span>
+00070 netsnmp_container_free_list(<span class="keywordtype">void</span>)
+00071 {
+00072     DEBUGMSGTL((<span class="stringliteral">"container"</span>, <span class=
+"stringliteral">"netsnmp_container_free_list() called\n"</span>));
+00073     <span class="keywordflow">if</span> (containers == NULL)
+00074         <span class="keywordflow">return</span>;
+00075 
+00076     <span class="comment">/*</span>
+00077 <span class="comment">     * free memory used by each factory entry</span>
+00078 <span class="comment">     */</span>
+00079     CONTAINER_FOR_EACH(containers, _factory_free, NULL);
+00080 
+00081     <span class="comment">/*</span>
+00082 <span class="comment">     * free factory container</span>
+00083 <span class="comment">     */</span>
+00084     CONTAINER_FREE(containers);
+00085     containers = NULL;
+00086 }
+00087 
+00088 <span class="keywordtype">int</span>
+00089 netsnmp_container_register(<span class="keyword">const</span> <span class=
+"keywordtype">char</span>* name, netsnmp_factory *f)
+00090 {
+00091     container_type *ct, tmp;
+00092 
+00093     tmp.name = name;
+00094     ct = CONTAINER_FIND(containers, &amp;tmp);
+00095     <span class="keywordflow">if</span> (NULL!=ct) {
+00096         DEBUGMSGT((<span class="stringliteral">"container_registry"</span>,
+00097                    <span class="stringliteral">"replacing previous container factory\n"</span>));
+00098         ct-&gt;factory = f;
+00099     }
+00100     <span class="keywordflow">else</span> {
+00101         ct = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(container_type);
+00102         <span class="keywordflow">if</span> (NULL == ct)
+00103             <span class="keywordflow">return</span> -1;
+00104         ct-&gt;name = strdup(name);
+00105         ct-&gt;factory = f;
+00106         CONTAINER_INSERT(containers, ct);
+00107     }
+00108     DEBUGMSGT((<span class="stringliteral">"container_registry"</span>, <span class=
+"stringliteral">"registered container factory %s (%s)\n"</span>,
+00109                ct-&gt;name, f-&gt;product));
+00110 
+00111     <span class="keywordflow">return</span> 0;
+00112 }
+00113 
+00114 <span class="comment">/*------------------------------------------------------------------</span>
+00115 <span class="comment"> */</span>
+00116 netsnmp_factory *
+00117 netsnmp_container_get_factory(<span class="keyword">const</span> <span class="keywordtype">char</span> *type)
+00118 {
+00119     container_type ct, *found;
+00120     
+00121     ct.name = type;
+00122     found = CONTAINER_FIND(containers, &amp;ct);
+00123 
+00124     <span class="keywordflow">return</span> found ? found-&gt;factory : NULL;
+00125 }
+00126 
+00127 netsnmp_factory *
+00128 netsnmp_container_find_factory(<span class="keyword">const</span> <span class="keywordtype">char</span> *type_list)
+00129 {
+00130     netsnmp_factory   *f = NULL;
+00131     <span class="keywordtype">char</span>              *list, *entry;
+00132     <span class="keywordtype">char</span>              *st;
+00133 
+00134     <span class="keywordflow">if</span> (NULL==type_list)
+00135         <span class="keywordflow">return</span> NULL;
+00136 
+00137     list = strdup(type_list);
+00138     entry = strtok_r(list, <span class="stringliteral">":"</span>, &amp;st);
+00139     <span class="keywordflow">while</span>(entry) {
+00140         f = netsnmp_container_get_factory(entry);
+00141         <span class="keywordflow">if</span> (NULL != f)
+00142             <span class="keywordflow">break</span>;
+00143         entry = strtok_r(NULL, <span class="stringliteral">":"</span>, &amp;st);
+00144     }
+00145 
+00146     free(list);
+00147     <span class="keywordflow">return</span> f;
+00148 }
+00149 
+00150 <span class="comment">/*------------------------------------------------------------------</span>
+00151 <span class="comment"> */</span>
+00152 netsnmp_container *
+00153 netsnmp_container_get(<span class="keyword">const</span> <span class="keywordtype">char</span> *type)
+00154 {
+00155     netsnmp_factory *f = netsnmp_container_get_factory(type);
+00156     <span class="keywordflow">if</span> (f)
+00157         <span class="keywordflow">return</span> f-&gt;produce();
+00158 
+00159     <span class="keywordflow">return</span> NULL;
+00160 }
+00161 
+00162 <span class="comment">/*------------------------------------------------------------------</span>
+00163 <span class="comment"> */</span>
+00164 netsnmp_container *
+00165 netsnmp_container_find(<span class="keyword">const</span> <span class="keywordtype">char</span> *type)
+00166 {
+00167     netsnmp_factory *f = netsnmp_container_find_factory(type);
+00168     netsnmp_container *c = f ? f-&gt;produce() : NULL;
+00169 
+00170     <span class="comment">/*</span>
+00171 <span class="comment">     * provide default compare</span>
+00172 <span class="comment">     */</span>
+00173     <span class="keywordflow">if</span> (c &amp;&amp; (NULL == c-&gt;compare))
+00174         c-&gt;compare = netsnmp_compare_netsnmp_index;
+00175 
+00176     <span class="keywordflow">return</span> c;
+00177 }
+00178 
+00179 <span class="comment">/*------------------------------------------------------------------</span>
+00180 <span class="comment"> */</span>
+00181 <span class="keywordtype">void</span>
+00182 netsnmp_container_add_index(netsnmp_container *primary,
+00183                             netsnmp_container *new_index)
+00184 {
+00185     netsnmp_container *curr = primary;
+00186 
+00187     <span class="keywordflow">if</span>((NULL == new_index) || (NULL == primary)) {
+00188         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"add index called with null pointer\n"</span>);
+00189         <span class="keywordflow">return</span>;
+00190     }
+00191 
+00192     <span class="keywordflow">while</span>(curr-&gt;next)
+00193         curr = curr-&gt;next;
+00194 
+00195     curr-&gt;next = new_index;
+00196     new_index-&gt;prev = curr;
+00197 }
+00198 
+00199 <span class="preprocessor">#ifndef NETSNMP_USE_INLINE </span><span class="comment">/* default is to inline */</span>
+00200 
+00201 <span class="comment">/*------------------------------------------------------------------</span>
+00202 <span class="comment"> * These functions should EXACTLY match the inline version in</span>
+00203 <span class="comment"> * container.h. If you chance one, change them both.</span>
+00204 <span class="comment"> */</span>
+00205 <span class="keywordtype">int</span> CONTAINER_INSERT(netsnmp_container *x, <span class="keyword">const</span> <span class=
+"keywordtype">void</span> *k)
+00206 { 
+00207     <span class="keywordtype">int</span> rc2, rc = 0;
+00208     
+00210     <span class="keywordflow">while</span>(x-&gt;prev)
+00211         x = x-&gt;prev;
+00212     <span class="keywordflow">while</span>(x) {
+00213         rc2 = x-&gt;insert(x,k);
+00214         <span class="keywordflow">if</span> (rc2) {
+00215             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,<span class=
+"stringliteral">"error on subcontainer insert (%d)\n"</span>, rc2);
+00216             rc = rc2;
+00217         }
+00218         x = x-&gt;next;
+00219     }
+00220     <span class="keywordflow">return</span> rc;
+00221 }
+00222 
+00223 <span class="comment">/*------------------------------------------------------------------</span>
+00224 <span class="comment"> * These functions should EXACTLY match the inline version in</span>
+00225 <span class="comment"> * container.h. If you chance one, change them both.</span>
+00226 <span class="comment"> */</span>
+00227 <span class="keywordtype">int</span> CONTAINER_REMOVE(netsnmp_container *x, <span class="keyword">const</span> <span class=
+"keywordtype">void</span> *k)
+00228 {
+00229     <span class="keywordtype">int</span> rc2, rc = 0;
+00230     
+00232     <span class="keywordflow">while</span>(x-&gt;next)
+00233         x = x-&gt;next;
+00234     <span class="keywordflow">while</span>(x) {
+00235         rc2 = x-&gt;remove(x,k);
+00236         <span class="keywordflow">if</span> (rc2) {
+00237             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,<span class=
+"stringliteral">"error on subcontainer remove (%d)\n"</span>, rc2);
+00238             rc = rc2;
+00239         }
+00240         x = x-&gt;prev;
+00241         
+00242     }
+00243     <span class="keywordflow">return</span> rc;
+00244 }
+00245 
+00246 <span class="comment">/*------------------------------------------------------------------</span>
+00247 <span class="comment"> * These functions should EXACTLY match the inline version in</span>
+00248 <span class="comment"> * container.h. If you chance one, change them both.</span>
+00249 <span class="comment"> */</span>
+00250 <span class="keywordtype">int</span> CONTAINER_FREE(netsnmp_container *x)
+00251 {
+00252     <span class="keywordtype">int</span>  rc2, rc = 0;
+00253         
+00255     <span class="keywordflow">while</span>(x-&gt;next)
+00256         x = x-&gt;next;
+00257     <span class="keywordflow">while</span>(x) {
+00258         netsnmp_container *tmp;
+00259         tmp = x-&gt;prev;
+00260         <span class="keywordflow">if</span> (NULL != x-&gt;container_name)
+00261             <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(x-&gt;container_name);
+00262         rc2 = x-&gt;cfree(x);
+00263         <span class="keywordflow">if</span> (rc2) {
+00264             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,<span class=
+"stringliteral">"error on subcontainer cfree (%d)\n"</span>, rc2);
+00265             rc = rc2;
+00266         }
+00267         x = tmp;
+00268     }
+00269     <span class="keywordflow">return</span> rc;
+00270 }
+00271 
+00272 <span class="comment">/*------------------------------------------------------------------</span>
+00273 <span class="comment"> * These functions should EXACTLY match the function version in</span>
+00274 <span class="comment"> * container.c. If you change one, change them both.</span>
+00275 <span class="comment"> */</span>
+00276 <span class="comment">/*</span>
+00277 <span class="comment"> * clear all containers. When clearing the *first* container, and</span>
+00278 <span class="comment"> * *only* the first container, call the function f for each item.</span>
+00279 <span class="comment"> * After calling this function, all containers should be empty.</span>
+00280 <span class="comment"> */</span>
+00281 <span class="keywordtype">void</span> CONTAINER_CLEAR(netsnmp_container *x, netsnmp_container_obj_func *f,
+00282                     <span class="keywordtype">void</span> *c)
+00283 {
+00285     <span class="keywordflow">while</span>(x-&gt;next)
+00286         x = x-&gt;next;
+00287     <span class="keywordflow">while</span>(x-&gt;prev) {
+00288         x-&gt;clear(x, NULL, c);
+00289         x = x-&gt;prev;
+00290     }
+00291     x-&gt;clear(x, f, c);
+00292 }
+00293 
+00294 <span class="comment">/*------------------------------------------------------------------</span>
+00295 <span class="comment"> * These functions should EXACTLY match the function version in</span>
+00296 <span class="comment"> * container.c. If you change one, change them both.</span>
+00297 <span class="comment"> */</span>
+00298 <span class="comment">/*</span>
+00299 <span class="comment"> * Find a sub-container with the given name</span>
+00300 <span class="comment"> */</span>
+00301 netsnmp_container *SUBCONTAINER_FIND(netsnmp_container *x,
+00302                                      <span class="keyword">const</span> <span class="keywordtype">char</span>* name)
+00303 {
+00304     <span class="keywordflow">if</span> ((NULL == x) || (NULL == name))
+00305         <span class="keywordflow">return</span> NULL;
+00306     
+00308     <span class="keywordflow">while</span>(x-&gt;prev)
+00309         x = x-&gt;prev;
+00310     <span class="keywordflow">while</span>(x) {
+00311         <span class=
+"keywordflow">if</span> ((NULL != x-&gt;container_name) &amp;&amp; (0 == strcmp(name,x-&gt;container_name)))
+00312             <span class="keywordflow">break</span>;
+00313         x = x-&gt;next;
+00314     }
+00315     <span class="keywordflow">return</span> x;
+00316 }
+00317 <span class="preprocessor">#endif</span>
+00318 
+00319 
+00320 <span class="comment">/*------------------------------------------------------------------</span>
+00321 <span class="comment"> */</span>
+00322 <span class="keywordtype">void</span>
+00323 netsnmp_init_container(netsnmp_container         *c,
+00324                        netsnmp_container_rc      *init,
+00325                        netsnmp_container_rc      *cfree,
+00326                        netsnmp_container_size    *size,
+00327                        netsnmp_container_compare *cmp,
+00328                        netsnmp_container_op      *ins,
+00329                        netsnmp_container_op      *rem,
+00330                        netsnmp_container_rtn     *fnd)
+00331 {
+00332     <span class="keywordflow">if</span> (c == NULL)
+00333         <span class="keywordflow">return</span>;
+00334 
+00335     c-&gt;init = init;
+00336     c-&gt;cfree = cfree;
+00337     c-&gt;get_size = size;
+00338     c-&gt;compare = cmp;
+00339     c-&gt;insert = ins;
+00340     c-&gt;remove = rem;
+00341     c-&gt;find = fnd;
+00342 }
+00343 
+00344 <span class="comment">/*------------------------------------------------------------------</span>
+00345 <span class="comment"> *</span>
+00346 <span class="comment"> * simple comparison routines</span>
+00347 <span class="comment"> *</span>
+00348 <span class="comment"> */</span>
+00349 <span class="keywordtype">int</span>
+00350 netsnmp_compare_netsnmp_index(<span class="keyword">const</span> <span class="keywordtype">void</span> *lhs, <span class=
+"keyword">const</span> <span class="keywordtype">void</span> *rhs)
+00351 {
+00352     <span class="keywordtype">int</span> rc;
+00353     netsnmp_assert((NULL != lhs) &amp;&amp; (NULL != rhs));
+00354     DEBUGIF(<span class="stringliteral">"compare:index"</span>) {
+00355         DEBUGMSGT((<span class="stringliteral">"compare:index"</span>, <span class="stringliteral">"compare "</span>));
+00356         DEBUGMSGSUBOID((<span class="stringliteral">"compare:index"</span>, ((<span class=
+"keyword">const</span> netsnmp_index *) lhs)-&gt;oids,
+00357                      ((<span class="keyword">const</span> netsnmp_index *) lhs)-&gt;len));
+00358         DEBUGMSG((<span class="stringliteral">"compare:index"</span>, <span class="stringliteral">" to "</span>));
+00359         DEBUGMSGSUBOID((<span class="stringliteral">"compare:index"</span>, ((<span class=
+"keyword">const</span> netsnmp_index *) rhs)-&gt;oids,
+00360                      ((<span class="keyword">const</span> netsnmp_index *) rhs)-&gt;len));
+00361         DEBUGMSG((<span class="stringliteral">"compare:index"</span>, <span class="stringliteral">"\n"</span>));
+00362     }
+00363     rc = <a class="code" href="group__library.html#ga98">snmp_oid_compare</a>(((<span class=
+"keyword">const</span> netsnmp_index *) lhs)-&gt;oids,
+00364                           ((<span class="keyword">const</span> netsnmp_index *) lhs)-&gt;len,
+00365                           ((<span class="keyword">const</span> netsnmp_index *) rhs)-&gt;oids,
+00366                           ((<span class="keyword">const</span> netsnmp_index *) rhs)-&gt;len);
+00367     DEBUGMSGT((<span class="stringliteral">"compare:index"</span>, <span class=
+"stringliteral">"result was %d\n"</span>, rc));
+00368     <span class="keywordflow">return</span> rc;
+00369 }
+00370 
+00371 <span class="keywordtype">int</span>
+00372 netsnmp_ncompare_netsnmp_index(<span class="keyword">const</span> <span class="keywordtype">void</span> *lhs, <span class=
+"keyword">const</span> <span class="keywordtype">void</span> *rhs)
+00373 {
+00374     <span class="keywordtype">int</span> rc;
+00375     netsnmp_assert((NULL != lhs) &amp;&amp; (NULL != rhs));
+00376     DEBUGIF(<span class="stringliteral">"compare:index"</span>) {
+00377         DEBUGMSGT((<span class="stringliteral">"compare:index"</span>, <span class="stringliteral">"compare "</span>));
+00378         DEBUGMSGSUBOID((<span class="stringliteral">"compare:index"</span>, ((<span class=
+"keyword">const</span> netsnmp_index *) lhs)-&gt;oids,
+00379                      ((<span class="keyword">const</span> netsnmp_index *) lhs)-&gt;len));
+00380         DEBUGMSG((<span class="stringliteral">"compare:index"</span>, <span class="stringliteral">" to "</span>));
+00381         DEBUGMSGSUBOID((<span class="stringliteral">"compare:index"</span>, ((<span class=
+"keyword">const</span> netsnmp_index *) rhs)-&gt;oids,
+00382                      ((<span class="keyword">const</span> netsnmp_index *) rhs)-&gt;len));
+00383         DEBUGMSG((<span class="stringliteral">"compare:index"</span>, <span class="stringliteral">"\n"</span>));
+00384     }
+00385     rc = snmp_oid_ncompare(((<span class="keyword">const</span> netsnmp_index *) lhs)-&gt;oids,
+00386                            ((<span class="keyword">const</span> netsnmp_index *) lhs)-&gt;len,
+00387                            ((<span class="keyword">const</span> netsnmp_index *) rhs)-&gt;oids,
+00388                            ((<span class="keyword">const</span> netsnmp_index *) rhs)-&gt;len,
+00389                            ((<span class="keyword">const</span> netsnmp_index *) rhs)-&gt;len);
+00390     DEBUGMSGT((<span class="stringliteral">"compare:index"</span>, <span class=
+"stringliteral">"result was %d\n"</span>, rc));
+00391     <span class="keywordflow">return</span> rc;
+00392 }
+00393 
+00394 <span class="keywordtype">int</span>
+00395 netsnmp_compare_cstring(<span class="keyword">const</span> <span class="keywordtype">void</span> * lhs, <span class=
+"keyword">const</span> <span class="keywordtype">void</span> * rhs)
+00396 {
+00397     <span class="keywordflow">return</span> strcmp(((<span class="keyword">const</span> container_type*)lhs)-&gt;name,
+00398                   ((<span class="keyword">const</span> container_type*)rhs)-&gt;name);
+00399 }
+00400 
+00401 <span class="keywordtype">int</span>
+00402 netsnmp_ncompare_cstring(<span class="keyword">const</span> <span class="keywordtype">void</span> * lhs, <span class=
+"keyword">const</span> <span class="keywordtype">void</span> * rhs)
+00403 {
+00404     <span class="keywordflow">return</span> strncmp(((<span class="keyword">const</span> container_type*)lhs)-&gt;name,
+00405                    ((<span class="keyword">const</span> container_type*)rhs)-&gt;name,
+00406                    strlen(((<span class="keyword">const</span> container_type*)rhs)-&gt;name));
+00407 }
+00408 
+00409 <span class="comment">/*</span>
+00410 <span class="comment"> * compare two memory buffers</span>
+00411 <span class="comment"> *</span>
+00412 <span class="comment"> * since snmp strings aren't NULL terminated, we can't use strcmp. So</span>
+00413 <span class="comment"> * compare up to the length of the smaller, and then use length to</span>
+00414 <span class="comment"> * break any ties.</span>
+00415 <span class="comment"> */</span>
+00416 <span class="keywordtype">int</span>
+00417 netsnmp_compare_mem(<span class="keyword">const</span> <span class="keywordtype">char</span> * lhs, size_t lhs_len,
+00418                     <span class="keyword">const</span> <span class="keywordtype">char</span> * rhs, size_t rhs_len)
+00419 {
+00420     <span class="keywordtype">int</span> rc, min = <a class="code" href=
+"group__util.html#ga46">SNMP_MIN</a>(lhs_len, rhs_len);
+00421 
+00422     rc = memcmp(lhs, rhs, min);
+00423     <span class="keywordflow">if</span>((rc==0) &amp;&amp; (lhs_len != rhs_len)) {
+00424         <span class="keywordflow">if</span>(lhs_len &lt; rhs_len)
+00425             rc = -1;
+00426         <span class="keywordflow">else</span>
+00427             rc = 1;
+00428     }
+00429 
+00430     <span class="keywordflow">return</span> rc;
+00431 }
+00432 
+00433 <span class="comment">/*------------------------------------------------------------------</span>
+00434 <span class="comment"> * netsnmp_container_simple_free</span>
+00435 <span class="comment"> *</span>
+00436 <span class="comment"> * useful function to pass to CONTAINER_FOR_EACH, when a simple</span>
+00437 <span class="comment"> * free is needed for every item.</span>
+00438 <span class="comment"> */</span>
+00439 <span class="keywordtype">void</span> 
+00440 netsnmp_container_simple_free(<span class="keywordtype">void</span> *data, <span class="keywordtype">void</span> *context)
+00441 {
+00442     <span class="keywordflow">if</span> (data == NULL)
+00443         <span class="keywordflow">return</span>;
+00444     
+00445     DEBUGMSGTL((<span class="stringliteral">"verbose:container"</span>,
+00446                 <span class="stringliteral">"netsnmp_container_simple_free) called for %p/%p\n"</span>,
+00447                 data, context));
+00448     free((<span class="keywordtype">void</span>*)data); <span class="comment">/* SNMP_FREE wasted on param */</span>
+00449 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

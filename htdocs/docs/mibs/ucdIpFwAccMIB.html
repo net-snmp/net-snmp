@@ -1,0 +1,642 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>ucdIpFwAccMIB</b>
+MIB object, which is defined within the <b>UCD-IPFWACC-MIB</b> MIB
+document as <b>.1.3.6.1.4.1.2021.13.1</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#ipFwAccTable">ipFwAccTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="ipFwAccTable" /><h3>Table ipFwAccTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipFwAccTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>UCD-IPFWACC-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.4.1.2021.13.1.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table with the accounting rules of the IP firewall
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="ipFwAccEntry" />Row Description</td>
+<td>
+<pre>
+An accounting rule of the IP firewall
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>ipFwAccTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipFwAccIndex" />
+1
+<br /><b>ipFwAccIndex</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Reference index for each firewall rule.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other ipFwAccTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipFwAccSrcAddr" />
+2
+<br /><b>ipFwAccSrcAddr</b>
+
+</td><td>
+  IPADDR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The source address in the firewall rule.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccSrcNetMask" />
+3
+<br /><b>ipFwAccSrcNetMask</b>
+
+</td><td>
+  IPADDR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The netmask of the source address in the firewall rule.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccDstAddr" />
+4
+<br /><b>ipFwAccDstAddr</b>
+
+</td><td>
+  IPADDR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The destination address in the firewall rule.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccDstNetMask" />
+5
+<br /><b>ipFwAccDstNetMask</b>
+
+</td><td>
+  IPADDR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The netmask of the destination address in the firewall rule.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccViaName" />
+6
+<br /><b>ipFwAccViaName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DisplayString">DisplayString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DisplayString"> DisplayString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of the interface to which the rule applies. If no
+interface is associated with the present rule, this should
+contain a dash (-).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccViaAddr" />
+7
+<br /><b>ipFwAccViaAddr</b>
+
+</td><td>
+  IPADDR
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The address of the interface to which the rule applies.
+Using this parameter makes sense when multiple addresses are
+associated to the same physical interface. If not defined
+for the current rule this should be set to 0.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccProto" />
+8
+<br /><b>ipFwAccProto</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>other</td></tr>
+        <tr><td>2</td><td>all</td></tr>
+        <tr><td>3</td><td>tcp</td></tr>
+        <tr><td>4</td><td>udp</td></tr>
+        <tr><td>5</td><td>icmp</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The protocol(s) to which the rule applies.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccBidir" />
+9
+<br /><b>ipFwAccBidir</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>unidirectional</td></tr>
+        <tr><td>2</td><td>bidirectional</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Whether the rule works in both directions (i.e. with the
+source and destination parts swapped) or not.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccDir" />
+10
+<br /><b>ipFwAccDir</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>both</td></tr>
+        <tr><td>2</td><td>in</td></tr>
+        <tr><td>3</td><td>out</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Whether the rule applies to packets entering or exiting the
+kernel.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccBytes" />
+11
+<br /><b>ipFwAccBytes</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of bytes that matched this rule since the last
+reset of the counters.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccPackets" />
+12
+<br /><b>ipFwAccPackets</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of packets that matched this rule since the last
+reset of the counters.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccNrSrcPorts" />
+13
+<br /><b>ipFwAccNrSrcPorts</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ports that refer to the source address.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccNrDstPorts" />
+14
+<br /><b>ipFwAccNrDstPorts</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ports that refer to the destination address.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccSrcIsRange" />
+15
+<br /><b>ipFwAccSrcIsRange</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>srchasrange</td></tr>
+        <tr><td>2</td><td>srchasnorange</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Interpret the first two ports of the source part as
+the upper and lower limit of an interval or not.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccDstIsRange" />
+16
+<br /><b>ipFwAccDstIsRange</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>dsthasrange</td></tr>
+        <tr><td>2</td><td>dsthasnorange</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Interpret the first two ports of the destination part as
+the upper and lower limit of an interval or not.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccPort1" />
+17
+<br /><b>ipFwAccPort1</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Port number 1.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccPort2" />
+18
+<br /><b>ipFwAccPort2</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Port number 2.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccPort3" />
+19
+<br /><b>ipFwAccPort3</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Port number 3.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccPort4" />
+20
+<br /><b>ipFwAccPort4</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Port number 4.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccPort5" />
+21
+<br /><b>ipFwAccPort5</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Port number 5.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccPort6" />
+22
+<br /><b>ipFwAccPort6</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Port number 6.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccPort7" />
+23
+<br /><b>ipFwAccPort7</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Port number 7.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccPort8" />
+24
+<br /><b>ipFwAccPort8</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Port number 8.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccPort9" />
+25
+<br /><b>ipFwAccPort9</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Port number 9.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipFwAccPort10" />
+26
+<br /><b>ipFwAccPort10</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Port number 10.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="DisplayString">DisplayString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp UCD-IPFWACC-MIB::ucdIpFwAccMIB</b></p>
+<pre>
++--<a href="#ucdIpFwAccMIB">ucdIpFwAccMIB</a>(1)
+   |
+   +--<a href="#ipFwAccTable">ipFwAccTable</a>(1)
+      |
+      +--<a href="#ipFwAccEntry">ipFwAccEntry</a>(1)
+         |  Index: ipFwAccIndex
+         |
+         +-- -R-- Integer32 <a href="#ipFwAccIndex">ipFwAccIndex</a>(1)
+         |        Range: 0..2147483647
+         +-- -R-- IpAddr    <a href="#ipFwAccSrcAddr">ipFwAccSrcAddr</a>(2)
+         +-- -R-- IpAddr    <a href="#ipFwAccSrcNetMask">ipFwAccSrcNetMask</a>(3)
+         +-- -R-- IpAddr    <a href="#ipFwAccDstAddr">ipFwAccDstAddr</a>(4)
+         +-- -R-- IpAddr    <a href="#ipFwAccDstNetMask">ipFwAccDstNetMask</a>(5)
+         +-- -R-- String    <a href="#ipFwAccViaName">ipFwAccViaName</a>(6)
+         |        Textual Convention: <a href="#DisplayString">DisplayString</a>
+         |        Size: 1..64
+         +-- -R-- IpAddr    <a href="#ipFwAccViaAddr">ipFwAccViaAddr</a>(7)
+         +-- -R-- EnumVal   <a href="#ipFwAccProto">ipFwAccProto</a>(8)
+         |        Values: other(1), all(2), tcp(3), udp(4), icmp(5)
+         +-- -R-- EnumVal   <a href="#ipFwAccBidir">ipFwAccBidir</a>(9)
+         |        Values: unidirectional(1), bidirectional(2)
+         +-- -R-- EnumVal   <a href="#ipFwAccDir">ipFwAccDir</a>(10)
+         |        Values: both(1), in(2), out(3)
+         +-- -R-- Counter   <a href="#ipFwAccBytes">ipFwAccBytes</a>(11)
+         +-- -R-- Counter   <a href="#ipFwAccPackets">ipFwAccPackets</a>(12)
+         +-- -R-- Integer32 <a href="#ipFwAccNrSrcPorts">ipFwAccNrSrcPorts</a>(13)
+         +-- -R-- Integer32 <a href="#ipFwAccNrDstPorts">ipFwAccNrDstPorts</a>(14)
+         +-- -R-- EnumVal   <a href="#ipFwAccSrcIsRange">ipFwAccSrcIsRange</a>(15)
+         |        Values: srchasrange(1), srchasnorange(2)
+         +-- -R-- EnumVal   <a href="#ipFwAccDstIsRange">ipFwAccDstIsRange</a>(16)
+         |        Values: dsthasrange(1), dsthasnorange(2)
+         +-- -R-- Integer32 <a href="#ipFwAccPort1">ipFwAccPort1</a>(17)
+         +-- -R-- Integer32 <a href="#ipFwAccPort2">ipFwAccPort2</a>(18)
+         +-- -R-- Integer32 <a href="#ipFwAccPort3">ipFwAccPort3</a>(19)
+         +-- -R-- Integer32 <a href="#ipFwAccPort4">ipFwAccPort4</a>(20)
+         +-- -R-- Integer32 <a href="#ipFwAccPort5">ipFwAccPort5</a>(21)
+         +-- -R-- Integer32 <a href="#ipFwAccPort6">ipFwAccPort6</a>(22)
+         +-- -R-- Integer32 <a href="#ipFwAccPort7">ipFwAccPort7</a>(23)
+         +-- -R-- Integer32 <a href="#ipFwAccPort8">ipFwAccPort8</a>(24)
+         +-- -R-- Integer32 <a href="#ipFwAccPort9">ipFwAccPort9</a>(25)
+         +-- -R-- Integer32 <a href="#ipFwAccPort10">ipFwAccPort10</a>(26)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

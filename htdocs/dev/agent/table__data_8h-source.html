@@ -1,0 +1,173 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>table_data.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * table_iterator.h </span>
+00003 <span class="comment"> */</span>
+00004 <span class="preprocessor">#ifndef _TABLE_DATA_HANDLER_H_</span>
+00005 <span class="preprocessor">#define _TABLE_DATA_HANDLER_H_</span>
+00006 
+00007 <span class="preprocessor">#ifdef __cplusplus</span>
+00008 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00009 <span class="preprocessor">#endif</span>
+00010 
+00011     <span class="comment">/*</span>
+00012 <span class="comment">     * This helper is designed to completely automate the task of storing</span>
+00013 <span class="comment">     * tables of data within the agent that are not tied to external data</span>
+00014 <span class="comment">     * sources (like the kernel, hardware, or other processes, etc).  IE,</span>
+00015 <span class="comment">     * all rows within a table are expected to be added manually using</span>
+00016 <span class="comment">     * functions found below.</span>
+00017 <span class="comment">     */</span>
+00018 
+00019 <span class="preprocessor">#define TABLE_DATA_NAME "table_data"</span>
+00020 <span class="preprocessor">#define TABLE_DATA_ROW  "table_data"</span>
+00021 <span class="preprocessor">#define TABLE_DATA_TABLE "table_data_table"</span>
+00022 
+00023     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_table_row_s {
+00024         <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *indexes; <span class=
+"comment">/* stored permanently if store_indexes = 1 */</span>
+00025         oid            *index_oid;
+00026         size_t          index_oid_len;
+00027         <span class="keywordtype">void</span>           *data;   <span class="comment">/* the data to store */</span>
+00028 
+00029         <span class="keyword">struct </span>netsnmp_table_row_s *next, *prev;        <span class=
+"comment">/* if used in a list */</span>
+00030     } netsnmp_table_row;
+00031 
+00032     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_table_data_s {
+00033         <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *indexes_template;        <span class=
+"comment">/* containing only types */</span>
+00034         <span class="keywordtype">char</span>           *name;   <span class=
+"comment">/* if !NULL, it's registered globally */</span>
+00035         <span class="keywordtype">int</span>             flags;  <span class="comment">/* not currently used */</span>
+00036         <span class="keywordtype">int</span>             store_indexes;
+00037         netsnmp_table_row *first_row;
+00038         netsnmp_table_row *last_row;
+00039     } netsnmp_table_data;
+00040 
+00041     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *<a class="code" href=
+"group__table__data.html#ga8">netsnmp_get_table_data_handler</a>(netsnmp_table_data
+00042                                                         *table);
+00043     <span class="keywordtype">void</span>            <a class="code" href=
+"group__table__data.html#ga0">netsnmp_table_data_generate_index_oid</a>(netsnmp_table_row
+00044                                                           *row);
+00045     <span class="keywordtype">int</span>             <a class="code" href=
+"group__table__data.html#ga1">netsnmp_table_data_add_row</a>(netsnmp_table_data *table,
+00046                                                netsnmp_table_row *row);
+00047     netsnmp_table_row *<a class="code" href=
+"group__table__data.html#ga2">netsnmp_table_data_remove_row</a>(netsnmp_table_data
+00048                                                      *table,
+00049                                                      netsnmp_table_row
+00050                                                      *row);
+00051     <span class="keywordtype">void</span>           *<a class="code" href=
+"group__table__data.html#ga3">netsnmp_table_data_delete_row</a>(netsnmp_table_row *row);
+00052     <span class="keywordtype">void</span>          
+00053         *<a class="code" href="group__table__data.html#ga4">netsnmp_table_data_remove_and_delete_row</a>(netsnmp_table_data
+00054                                                   *table,
+00055                                                   netsnmp_table_row *row);
+00056 
+00057     netsnmp_table_row *<a class="code" href=
+"group__table__data.html#ga6">netsnmp_table_data_get</a>(netsnmp_table_data *table,
+00058                                               <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *
+00059                                               indexes);
+00060 
+00061     netsnmp_table_row *<a class="code" href=
+"group__table__data.html#ga7">netsnmp_table_data_get_from_oid</a>(netsnmp_table_data
+00062                                                        *table,
+00063                                                        oid * searchfor,
+00064                                                        size_t
+00065                                                        searchfor_len);
+00066 
+00067     <span class="keywordtype">int</span>            
+00068         <a class="code" href="group__table__data.html#ga9">netsnmp_register_table_data</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00069                                     netsnmp_table_data *table,
+00070                                     <a class="code" href=
+"structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a>
+00071                                     *table_info);
+00072     <span class="keywordtype">int</span>            
+00073         <a class="code" href="group__table__data.html#ga10">netsnmp_register_read_only_table_data</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>
+00074                                               *reginfo,
+00075                                               netsnmp_table_data *table,
+00076                                               <a class="code" href=
+"structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a>
+00077                                               *table_info);
+00078 
+00079     netsnmp_table_row  *<a class="code" href="group__table__data.html#ga15">netsnmp_extract_table_row</a>(<a class="code"
+href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *);
+00080     netsnmp_table_data *<a class="code" href="group__table__data.html#ga16">netsnmp_extract_table</a>(    <a class="code"
+href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *);
+00081     <span class="keywordtype">void</span>           *<a class="code" href=
+"group__table__data.html#ga17">netsnmp_extract_table_row_data</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *);
+00082     <span class="keywordtype">void</span> <a class="code" href=
+"group__table__data.html#ga14">netsnmp_insert_table_row</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *, netsnmp_table_row *);
+00083     netsnmp_table_data *<a class="code" href="group__table__data.html#ga12">netsnmp_create_table_data</a>(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *name);
+00084     netsnmp_table_row *<a class="code" href="group__table__data.html#ga13">netsnmp_create_table_data_row</a>(<span class=
+"keywordtype">void</span>);
+00085     netsnmp_table_row *<a class="code" href=
+"group__table__data.html#ga19">netsnmp_table_data_clone_row</a>(netsnmp_table_row
+00086                                                     *row);
+00087     NETSNMP_INLINE <span class="keywordtype">void</span>
+00088        <a class="code" href="group__table__data.html#ga5">netsnmp_table_data_replace_row</a>(netsnmp_table_data *table,
+00089                                       netsnmp_table_row *origrow,
+00090                                       netsnmp_table_row *newrow);
+00091 
+00092     <span class="keywordtype">int</span>            
+00093         <a class="code" href="group__table__data.html#ga18">netsnmp_table_data_build_result</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a>
+00094                                         *reginfo,
+00095                                         <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a>
+00096                                         *reqinfo,
+00097                                         <a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request,
+00098                                         netsnmp_table_row *row, <span class="keywordtype">int</span> column,
+00099                                         u_char type, u_char * result_data,
+00100                                         size_t result_data_len);
+00101     <span class="keywordtype">int</span> netsnmp_table_data_num_rows(netsnmp_table_data *table);
+00102 
+00103 
+00104 <span class=
+"preprocessor">#define netsnmp_table_data_add_index(thetable, type) snmp_varlist_add_variable(&amp;thetable-&gt;indexes_template, NULL, 0, type, NULL, 0)</span>
+00105 <span class=
+"preprocessor">#define netsnmp_table_row_add_index(row, type, value, value_len) snmp_varlist_add_variable(&amp;row-&gt;indexes, NULL, 0, type, (const u_char *) value, value_len)</span>
+00106 
+00107 
+00108     Netsnmp_Node_Handler netsnmp_table_data_helper_handler;
+00109 
+00110 <span class="preprocessor">#ifdef __cplusplus</span>
+00111 }
+00112 <span class="preprocessor">#endif</span>
+00113 
+00114 <span class="preprocessor">#endif                          </span><span class="comment">/* _TABLE_DATA_HANDLER_H_ */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:02 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

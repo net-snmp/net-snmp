@@ -1,0 +1,753 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>&nbsp;/&nbsp;<a class="el" href="dir_000004.html">helpers</a>
+  </div>
+
+  <h1>table_iterator.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * table_iterator.c </span>
+00003 <span class="comment"> */</span>
+00004 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00005 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00006 <span class="comment"> * that may apply:</span>
+00007 <span class="comment"> */</span>
+00008 <span class="comment">/*</span>
+00009 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00010 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00011 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00012 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00013 <span class="comment"> */</span>
+00014 
+00084 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00085 
+00086 <span class="preprocessor">#if HAVE_STRING_H</span>
+00087 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00088 <span class="preprocessor">#else</span>
+00089 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00090 <span class="preprocessor">#endif</span>
+00091 
+00092 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00093 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00094 
+00095 <span class="preprocessor">#include &lt;net-snmp/agent/table.h&gt;</span>
+00096 <span class="preprocessor">#include &lt;net-snmp/agent/serialize.h&gt;</span>
+00097 <span class="preprocessor">#include &lt;net-snmp/agent/table_iterator.h&gt;</span>
+00098 <span class="preprocessor">#include &lt;net-snmp/agent/stash_cache.h&gt;</span>
+00099 
+00100 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00101 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00102 <span class="preprocessor">#endif</span>
+00103 
+00105 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+<a name="l00106" id="l00106"></a><a class="code" href="group__table__iterator.html#ga8">00106</a> <a class="code" href=
+"group__table__iterator.html#ga8">netsnmp_get_table_iterator_handler</a>(<a class="code" href=
+"structnetsnmp__iterator__info__s.html">netsnmp_iterator_info</a> *iinfo)
+00107 {
+00108     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *me =
+00109         <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(TABLE_ITERATOR_NAME,
+00110                                netsnmp_table_iterator_helper_handler);
+00111 
+00112     <span class="keywordflow">if</span> (!me || !iinfo)
+00113         <span class="keywordflow">return</span> NULL;
+00114 
+00115     me-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = iinfo;
+00116     <span class="keywordflow">return</span> me;
+00117 }
+00118 
+00119 
+00137 <span class="keywordtype">int</span>
+<a name="l00138" id="l00138"></a><a class="code" href="group__table__iterator.html#ga9">00138</a> <a class="code" href=
+"group__table__iterator.html#ga9">netsnmp_register_table_iterator</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00139                                 <a class="code" href=
+"structnetsnmp__iterator__info__s.html">netsnmp_iterator_info</a> *iinfo)
+00140 {
+00141     <a class="code" href="group__handler.html#ga14">netsnmp_inject_handler</a>(reginfo,
+00142                            <a class="code" href=
+"group__table__iterator.html#ga8">netsnmp_get_table_iterator_handler</a>(iinfo));
+00143     <span class="keywordflow">if</span> (!iinfo)
+00144         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00145 
+00146     <span class="keywordflow">return</span> <a class="code" href=
+"group__table.html#ga1">netsnmp_register_table</a>(reginfo, iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o8">table_reginfo</a>);
+00147 }
+00148 
+00162 NETSNMP_INLINE <span class="keywordtype">void</span>    *
+<a name="l00163" id="l00163"></a><a class="code" href="group__table__iterator.html#ga10">00163</a> <a class="code" href=
+"group__table__iterator.html#ga10">netsnmp_extract_iterator_context</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request)
+00164 {
+00165     <span class="keywordflow">return</span> <a class="code" href=
+"group__handler.html#ga29">netsnmp_request_get_list_data</a>(request, TABLE_ITERATOR_NAME);
+00166 }
+00167 
+00170 NETSNMP_INLINE <span class="keywordtype">void</span>
+<a name="l00171" id="l00171"></a><a class="code" href="group__table__iterator.html#ga11">00171</a> <a class="code" href=
+"group__table__iterator.html#ga11">netsnmp_insert_iterator_context</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, <span class="keywordtype">void</span> *data)
+00172 {
+00173     <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a>       *req;
+00174     <a class="code" href="structnetsnmp__table__request__info__s.html">netsnmp_table_request_info</a> *table_info = NULL;
+00175     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a>      *this_index = NULL;
+00176     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a>      *that_index = NULL;
+00177     oid      base_oid[] = {0, 0};       <span class="comment">/* Make sure index OIDs are legal! */</span>
+00178     oid      this_oid[MAX_OID_LEN];
+00179     oid      that_oid[MAX_OID_LEN];
+00180     size_t   this_oid_len, that_oid_len;
+00181 
+00182     <span class="keywordflow">if</span> (!request)
+00183         <span class="keywordflow">return</span>;
+00184 
+00185     <span class="comment">/*</span>
+00186 <span class="comment">     * We'll add the new row information to any request</span>
+00187 <span class="comment">     * structure with the same index values as the request</span>
+00188 <span class="comment">     * passed in (which includes that one!).</span>
+00189 <span class="comment">     *</span>
+00190 <span class="comment">     * So construct an OID based on these index values.</span>
+00191 <span class="comment">     */</span>
+00192 
+00193     table_info = <a class="code" href="group__table.html#ga2">netsnmp_extract_table_info</a>(request);
+00194     this_index = table_info-&gt;<a class="code" href="structnetsnmp__table__request__info__s.html#o2">indexes</a>;
+00195     build_oid_noalloc(this_oid, MAX_OID_LEN, &amp;this_oid_len,
+00196                       base_oid, 2, this_index);
+00197 
+00198     <span class="comment">/*</span>
+00199 <span class="comment">     * We need to look through the whole of the request list</span>
+00200 <span class="comment">     * (as received by the current handler), as there's no</span>
+00201 <span class="comment">     * guarantee that this routine will be called by the first</span>
+00202 <span class="comment">     * varbind that refers to this row.</span>
+00203 <span class="comment">     *   In particular, a RowStatus controlled row creation</span>
+00204 <span class="comment">     * may easily occur later in the variable list.</span>
+00205 <span class="comment">     *</span>
+00206 <span class="comment">     * So first, we rewind to the head of the list....</span>
+00207 <span class="comment">     */</span>
+00208     <span class="keywordflow">for</span> (req=request; req-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o14">prev</a>; req=req-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o14">prev</a>)
+00209         ;
+00210 
+00211     <span class="comment">/*</span>
+00212 <span class="comment">     * ... and then start looking for matching indexes</span>
+00213 <span class="comment">     * (by constructing OIDs from these index values)</span>
+00214 <span class="comment">     */</span>
+00215     <span class="keywordflow">for</span> (; req; req=req-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o13">next</a>) {
+00216         table_info = <a class="code" href="group__table.html#ga2">netsnmp_extract_table_info</a>(req);
+00217         that_index = table_info-&gt;<a class="code" href="structnetsnmp__table__request__info__s.html#o2">indexes</a>;
+00218         build_oid_noalloc(that_oid, MAX_OID_LEN, &amp;that_oid_len,
+00219                           base_oid, 2, that_index);
+00220       
+00221         <span class="comment">/*</span>
+00222 <span class="comment">         * This request has the same index values,</span>
+00223 <span class="comment">         * so add the newly-created row information.</span>
+00224 <span class="comment">         */</span>
+00225         <span class="keywordflow">if</span> (<a class="code" href=
+"group__library.html#ga98">snmp_oid_compare</a>(this_oid, this_oid_len,
+00226                              that_oid, that_oid_len) == 0) {
+00227             <a class="code" href="group__handler.html#ga27">netsnmp_request_add_list_data</a>(req,
+00228                 <a class="code" href=
+"group__data__list.html#ga3">netsnmp_create_data_list</a>(TABLE_ITERATOR_NAME, data, NULL));
+00229         }
+00230     }
+00231 }
+00232 
+00233 <span class="preprocessor">#define TI_REQUEST_CACHE "ti_cache"</span>
+00234 
+00235 <span class="keyword">typedef</span> <span class="keyword">struct </span>ti_cache_info_s {
+00236    oid best_match[MAX_OID_LEN];
+00237    size_t best_match_len;
+00238    <span class="keywordtype">void</span> *data_context;
+00239    Netsnmp_Free_Data_Context *free_context;
+00240    <a class="code" href="structnetsnmp__iterator__info__s.html">netsnmp_iterator_info</a> *iinfo;
+00241    <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *results;
+00242 } ti_cache_info;
+00243 
+00244 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00245 netsnmp_free_ti_cache(<span class="keywordtype">void</span> *it) {
+00246     ti_cache_info *beer = it;
+00247     <span class="keywordflow">if</span> (!it) <span class="keywordflow">return</span>;
+00248     <span class="keywordflow">if</span> (beer-&gt;data_context &amp;&amp; beer-&gt;free_context) {
+00249             (beer-&gt;free_context)(beer-&gt;data_context, beer-&gt;iinfo);
+00250     }
+00251     <span class="keywordflow">if</span> (beer-&gt;results) {
+00252         snmp_free_varbind(beer-&gt;results);
+00253     }
+00254     free(beer);
+00255 }
+00256 
+00257 <span class="comment">/* caches information (in the request) we'll need at a later point in time */</span>
+00258 <span class="keyword">static</span> ti_cache_info *
+00259 netsnmp_iterator_remember(<a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request,
+00260                           oid *oid_to_save,
+00261                           size_t oid_to_save_len,
+00262                           <span class="keywordtype">void</span> *callback_data_context,
+00263                           <span class="keywordtype">void</span> *callback_loop_context,
+00264                           <a class="code" href="structnetsnmp__iterator__info__s.html">netsnmp_iterator_info</a> *iinfo)
+00265 {
+00266     ti_cache_info *ti_info;
+00267 
+00268     <span class="keywordflow">if</span> (!request || !oid_to_save || oid_to_save_len &gt; MAX_OID_LEN)
+00269         <span class="keywordflow">return</span> NULL;
+00270 
+00271     <span class="comment">/* extract existing cached state */</span>
+00272     ti_info = <a class="code" href="group__handler.html#ga29">netsnmp_request_get_list_data</a>(request, TI_REQUEST_CACHE);
+00273 
+00274     <span class="comment">/* no existing cached state.  make a new one. */</span>
+00275     <span class="keywordflow">if</span> (!ti_info) {
+00276         ti_info = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(ti_cache_info);
+00277         <a class="code" href="group__handler.html#ga27">netsnmp_request_add_list_data</a>(request,
+00278                                       netsnmp_create_data_list
+00279                                       (TI_REQUEST_CACHE,
+00280                                        ti_info,
+00281                                        netsnmp_free_ti_cache));
+00282     }
+00283 
+00284     <span class="comment">/* free existing cache before replacing */</span>
+00285     <span class="keywordflow">if</span> (ti_info-&gt;data_context &amp;&amp; ti_info-&gt;free_context)
+00286         (ti_info-&gt;free_context)(ti_info-&gt;data_context, iinfo);
+00287 
+00288     <span class="comment">/* maybe generate it from the loop context? */</span>
+00289     <span class="keywordflow">if</span> (iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o2">make_data_context</a> &amp;&amp; !callback_data_context) {
+00290         callback_data_context =
+00291             (iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o2">make_data_context</a>)(callback_loop_context, iinfo);
+00292 
+00293     }
+00294 
+00295     <span class="comment">/* save data as requested */</span>
+00296     ti_info-&gt;data_context = callback_data_context;
+00297     ti_info-&gt;free_context = iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o4">free_data_context</a>;
+00298     ti_info-&gt;best_match_len = oid_to_save_len;
+00299     ti_info-&gt;iinfo = iinfo;
+00300     <span class="keywordflow">if</span> (oid_to_save_len)
+00301         memcpy(ti_info-&gt;best_match, oid_to_save, oid_to_save_len * <span class="keyword">sizeof</span>(oid));
+00302 
+00303     <span class="keywordflow">return</span> ti_info;
+00304 }    
+00305 
+00306 <span class="preprocessor">#define TABLE_ITERATOR_NOTAGAIN 255</span>
+00307 
+00308 <span class="keywordtype">int</span>
+<a name="l00309" id="l00309"></a><a class="code" href="group__table__iterator.html#ga14">00309</a> <a class="code" href=
+"group__table__iterator.html#ga14">netsnmp_table_iterator_helper_handler</a>(<a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00310                                       <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00311                                       <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
+00312                                       <a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
+00313 {
+00314 
+00315     <a class="code" href="structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *tbl_info;
+00316     <a class="code" href="structnetsnmp__table__request__info__s.html">netsnmp_table_request_info</a> *table_info = NULL;
+00317     oid             coloid[MAX_OID_LEN];
+00318     size_t          coloid_len;
+00319     <span class="keywordtype">int</span>             ret;
+00320     <span class="keyword">static</span> oid      myname[MAX_OID_LEN];
+00321     size_t          myname_len;
+00322     <span class="keywordtype">int</span>             oldmode = 0;
+00323     <a class="code" href="structnetsnmp__iterator__info__s.html">netsnmp_iterator_info</a> *iinfo;
+00324     <span class="keywordtype">int</span> notdone;
+00325     <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, *reqtmp = NULL;
+00326     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *index_search = NULL;
+00327     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *free_this_index_search = NULL;
+00328     <span class="keywordtype">void</span>           *callback_loop_context = NULL, *last_loop_context;
+00329     <span class="keywordtype">void</span>           *callback_data_context = NULL;
+00330     ti_cache_info  *ti_info = NULL;
+00331     <span class="keywordtype">int</span>             request_count = 0;
+00332     netsnmp_oid_stash_node **cinfo = NULL;
+00333     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *old_indexes = NULL, *vb;
+00334     <a class="code" href=
+"structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *table_reg_info = NULL;
+00335     <span class="keywordtype">int</span> i;
+00336     <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a>    *ldata;
+00337     
+00338     iinfo = (<a class="code" href=
+"structnetsnmp__iterator__info__s.html">netsnmp_iterator_info</a> *) handler-&gt;<a class="code" href=
+"structnetsnmp__mib__handler__s.html#o1">myvoid</a>;
+00339     <span class="keywordflow">if</span> (!iinfo || !reginfo || !reqinfo)
+00340         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00341 
+00342     tbl_info = iinfo-&gt;<a class="code" href="structnetsnmp__iterator__info__s.html#o8">table_reginfo</a>;
+00343 
+00344     <span class="comment">/*</span>
+00345 <span class="comment">     * copy in the table registration oid for later use </span>
+00346 <span class="comment">     */</span>
+00347     coloid_len = reginfo-&gt;<a class="code" href="structnetsnmp__handler__registration__s.html#o3">rootoid_len</a> + 2;
+00348     memcpy(coloid, reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o2">rootoid</a>, reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o3">rootoid_len</a> * <span class="keyword">sizeof</span>(oid));
+00349     coloid[reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o3">rootoid_len</a>] = 1;   <span class="comment">/* table.entry node */</span>
+00350 
+00351     <span class="comment">/*</span>
+00352 <span class="comment">     * illegally got here if these functions aren't defined </span>
+00353 <span class="comment">     */</span>
+00354     <span class="keywordflow">if</span> (iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o0">get_first_data_point</a> == NULL ||
+00355         iinfo-&gt;<a class="code" href="structnetsnmp__iterator__info__s.html#o1">get_next_data_point</a> == NULL) {
+00356         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,
+00357                  <span class="stringliteral">"table_iterator helper called without data accessor functions\n"</span>);
+00358         <span class="keywordflow">return</span> SNMP_ERR_GENERR;
+00359     }
+00360 
+00361     <span class="comment">/* preliminary analysis */</span>
+00362     <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
+00363     <span class="keywordflow">case</span> MODE_GET_STASH:
+00364         cinfo = <a class="code" href="group__stash__cache.html#ga2">netsnmp_extract_stash_cache</a>(reqinfo);
+00365         table_reg_info = <a class="code" href="group__table.html#ga3">netsnmp_find_table_registration_info</a>(reginfo);
+00366 
+00367         <span class="comment">/* XXX: move this malloc to stash_cache handler? */</span>
+00368         reqtmp = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a>);
+00369         reqtmp-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o15">subtree</a> = requests-&gt;<a class=
+"code" href="structnetsnmp__request__info__s.html#o15">subtree</a>;
+00370         table_info = <a class="code" href="group__table.html#ga2">netsnmp_extract_table_info</a>(requests);
+00371         <a class="code" href="group__handler.html#ga27">netsnmp_request_add_list_data</a>(reqtmp,
+00372                                       <a class="code" href="group__data__list.html#ga3">netsnmp_create_data_list</a>
+00373                                       (TABLE_HANDLER_NAME,
+00374                                        (<span class="keywordtype">void</span> *) table_info, NULL));
+00375 
+00376         <span class="comment">/* remember the indexes that were originally parsed. */</span>
+00377         old_indexes = table_info-&gt;indexes;
+00378         <span class="keywordflow">break</span>;
+00379 
+00380     <span class="keywordflow">case</span> MODE_GETNEXT:
+00381         <span class="keywordflow">for</span>(request = requests ; request; request = request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o13">next</a>) {
+00382             <span class="keywordflow">if</span> (request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o6">processed</a>)
+00383                 <span class="keywordflow">continue</span>;
+00384             table_info = <a class="code" href="group__table.html#ga2">netsnmp_extract_table_info</a>(request);
+00385             <span class="keywordflow">if</span> (table_info-&gt;colnum &lt; tbl_info-&gt;<a class="code" href=
+"structnetsnmp__table__registration__info__s.html#o2">min_column</a> - 1) {
+00386                 <span class="comment">/* XXX: optimize better than this */</span>
+00387                 <span class="comment">/* for now, just increase to colnum-1 */</span>
+00388                 <span class="comment">/* we need to jump to the lowest result of the min_column</span>
+00389 <span class="comment">                   and take it, comparing to nothing from the request */</span>
+00390                 table_info-&gt;<a class="code" href=
+"structnetsnmp__table__request__info__s.html#o0">colnum</a> = tbl_info-&gt;<a class="code" href=
+"structnetsnmp__table__registration__info__s.html#o2">min_column</a> - 1;
+00391             } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (table_info-&gt;colnum &gt; tbl_info-&gt;<a class="code" href=
+"structnetsnmp__table__registration__info__s.html#o3">max_column</a>) {
+00392                 request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o6">processed</a> = TABLE_ITERATOR_NOTAGAIN;
+00393             }
+00394 
+00395             ti_info =
+00396                 <a class="code" href=
+"group__handler.html#ga29">netsnmp_request_get_list_data</a>(request, TI_REQUEST_CACHE);
+00397             <span class="keywordflow">if</span> (!ti_info) {
+00398                 ti_info = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(ti_cache_info);
+00399                 <a class="code" href="group__handler.html#ga27">netsnmp_request_add_list_data</a>(request,
+00400                                               <a class="code" href=
+"group__data__list.html#ga3">netsnmp_create_data_list</a>
+00401                                               (TI_REQUEST_CACHE,
+00402                                                ti_info,
+00403                                                netsnmp_free_ti_cache));
+00404             }
+00405 
+00406             <span class="comment">/* XXX: if no valid requests, don't even loop below */</span>
+00407         }
+00408         <span class="keywordflow">break</span>;
+00409     }
+00410 
+00411     <span class="comment">/*</span>
+00412 <span class="comment">     * collect all information for each needed row</span>
+00413 <span class="comment">     */</span>
+00414     <span class="keywordflow">if</span> (reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a> == MODE_GET ||
+00415         reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> == MODE_GETNEXT ||
+00416         reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> == MODE_GET_STASH ||
+00417         reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> == MODE_SET_RESERVE1) {
+00418         <span class="comment">/*</span>
+00419 <span class="comment">         * Count the number of request in the list,</span>
+00420 <span class="comment">         *   so that we'll know when we're finished</span>
+00421 <span class="comment">         */</span>
+00422         <span class="keywordflow">for</span>(request = requests ; request; request = request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o13">next</a>)
+00423             request_count++;
+00424         notdone = 1;
+00425         <span class="keywordflow">while</span>(notdone) {
+00426             notdone = 0;
+00427 
+00428             <span class="comment">/* find first data point */</span>
+00429             <span class="keywordflow">if</span> (!index_search) {
+00430                 <span class="keywordflow">if</span> (free_this_index_search) {
+00431                     <span class="comment">/* previously done */</span>
+00432                     index_search = free_this_index_search;
+00433                 } <span class="keywordflow">else</span> {
+00434                     table_info = <a class="code" href="group__table.html#ga2">netsnmp_extract_table_info</a>(requests);
+00435                     index_search = snmp_clone_varbind(table_info-&gt;<a class="code" href=
+"structnetsnmp__table__request__info__s.html#o2">indexes</a>);
+00436                     free_this_index_search = index_search;
+00437 
+00438                     <span class="comment">/* setup, malloc search data: */</span>
+00439                     <span class="keywordflow">if</span> (!index_search) {
+00440                         <span class="comment">/*</span>
+00441 <span class="comment">                         * hmmm....  invalid table? </span>
+00442 <span class="comment">                         */</span>
+00443                         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_WARNING,
+00444                                  <span class="stringliteral">"invalid index list or failed malloc for table %s\n"</span>,
+00445                                  reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o0">handlerName</a>);
+00446                         <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00447                     }
+00448                 }
+00449             }
+00450 
+00451             index_search =
+00452                 (iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o0">get_first_data_point</a>) (&amp;callback_loop_context,
+00453                                                &amp;callback_data_context,
+00454                                                index_search, iinfo);
+00455 
+00456             <span class="comment">/* loop over each data point */</span>
+00457             <span class="keywordflow">while</span>(index_search) {
+00458 
+00459                 <span class="comment">/* remember to free this later */</span>
+00460                 free_this_index_search = index_search;
+00461             
+00462                 <span class="comment">/* compare against each request*/</span>
+00463                 <span class="keywordflow">for</span>(request = requests ; request; request = request-&gt;<a class="code"
+href="structnetsnmp__request__info__s.html#o13">next</a>) {
+00464                     <span class="keywordflow">if</span> (request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o6">processed</a>)
+00465                         <span class="keywordflow">continue</span>;
+00466 
+00467                     <span class="comment">/* XXX: store in an array for faster retrival */</span>
+00468                     table_info = <a class="code" href="group__table.html#ga2">netsnmp_extract_table_info</a>(request);
+00469                     coloid[reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o3">rootoid_len</a> + 1] = table_info-&gt;<a class="code" href=
+"structnetsnmp__table__request__info__s.html#o0">colnum</a>;
+00470 
+00471                     ti_info =
+00472                         <a class="code" href=
+"group__handler.html#ga29">netsnmp_request_get_list_data</a>(request, TI_REQUEST_CACHE);
+00473 
+00474                     <span class="keywordflow">switch</span>(reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
+00475                     <span class="keywordflow">case</span> MODE_GET:
+00476                     <span class="keywordflow">case</span> MODE_SET_RESERVE1:
+00477                         <span class="comment">/* looking for exact matches */</span>
+00478                         build_oid_noalloc(myname, MAX_OID_LEN, &amp;myname_len,
+00479                                           coloid, coloid_len, index_search);
+00480                         <span class="keywordflow">if</span> (<a class="code" href=
+"group__library.html#ga98">snmp_oid_compare</a>(myname, myname_len,
+00481                                              request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00482                                              request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
+"structvariable__list.html#o2">name_length</a>) == 0) {
+00483                             <span class="comment">/* keep this */</span>
+00484                             netsnmp_iterator_remember(request,
+00485                                                       myname, myname_len,
+00486                                                       callback_data_context,
+00487                                                       callback_loop_context, iinfo);
+00488                             request_count--;   <span class="comment">/* One less to look for */</span>
+00489                         } <span class="keywordflow">else</span> {
+00490                             <span class="keywordflow">if</span> (iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o4">free_data_context</a> &amp;&amp; callback_data_context) {
+00491                                 (iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o4">free_data_context</a>)(callback_data_context,
+00492                                                            iinfo);
+00493                             }
+00494                         }
+00495                         <span class="keywordflow">break</span>;
+00496 
+00497                     <span class="keywordflow">case</span> MODE_GET_STASH:
+00498                         <span class="comment">/* collect data for each column for every row */</span>
+00499                         build_oid_noalloc(myname, MAX_OID_LEN, &amp;myname_len,
+00500                                           coloid, coloid_len, index_search);
+00501                         reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a> = MODE_GET;
+00502                         ldata =
+00503                             <a class="code" href=
+"group__data__list.html#ga8">netsnmp_get_list_node</a>(reqtmp-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o1">parent_data</a>,
+00504                                                   TABLE_ITERATOR_NAME);
+00505                         <span class="keywordflow">if</span> (!ldata) {
+00506                             <a class="code" href="group__handler.html#ga27">netsnmp_request_add_list_data</a>(reqtmp,
+00507                                                           <a class="code" href=
+"group__data__list.html#ga3">netsnmp_create_data_list</a>
+00508                                                           (TABLE_ITERATOR_NAME,
+00509                                                            callback_data_context,
+00510                                                            NULL));
+00511                         } <span class="keywordflow">else</span> {
+00512                             <span class="comment">/* may have changed */</span>
+00513                             ldata-&gt;<a class="code" href=
+"structnetsnmp__data__list__s.html#o2">data</a> = callback_data_context;
+00514                         }
+00515 
+00516                         table_info-&gt;<a class="code" href=
+"structnetsnmp__table__request__info__s.html#o2">indexes</a> = index_search;
+00517                         <span class="keywordflow">for</span>(i = table_reg_info-&gt;<a class="code" href=
+"structnetsnmp__table__registration__info__s.html#o2">min_column</a>;
+00518                             i &lt;= (int)table_reg_info-&gt;<a class="code" href=
+"structnetsnmp__table__registration__info__s.html#o3">max_column</a>; i++) {
+00519                             myname[reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o3">rootoid_len</a> + 1] = i;
+00520                             table_info-&gt;<a class="code" href=
+"structnetsnmp__table__request__info__s.html#o0">colnum</a> = i;
+00521                             vb = reqtmp-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a> =
+00522                                 <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a>);
+00523                             vb-&gt;<a class="code" href="structvariable__list.html#o3">type</a> = ASN_NULL;
+00524                             snmp_set_var_objid(vb, myname, myname_len);
+00525                             <a class="code" href="group__handler.html#ga17">netsnmp_call_next_handler</a>(handler, reginfo,
+00526                                                       reqinfo, reqtmp);
+00527                             reqtmp-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a> = NULL;
+00528                             reqtmp-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o6">processed</a> = 0;
+00529                             <span class="keywordflow">if</span> (vb-&gt;type != ASN_NULL) { <span class=
+"comment">/* XXX, not all */</span>
+00530                                 <a class="code" href=
+"group__oid__stash.html#ga2">netsnmp_oid_stash_add_data</a>(cinfo, myname,
+00531                                                            myname_len, vb);
+00532                             } <span class="keywordflow">else</span> {
+00533                                 snmp_free_var(vb);
+00534                             }
+00535                         }
+00536                         reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a> = MODE_GET_STASH;
+00537                         <span class="keywordflow">break</span>;
+00538 
+00539                     <span class="keywordflow">case</span> MODE_GETNEXT:
+00540                         <span class="comment">/* looking for "next" matches */</span>
+00541                         <span class="keywordflow">if</span> (<a class="code" href=
+"group__table.html#ga13">netsnmp_check_getnext_reply</a>
+00542                             (request, coloid, coloid_len, index_search,
+00543                              &amp;ti_info-&gt;results)) {
+00544                             netsnmp_iterator_remember(request,
+00545                                                       ti_info-&gt;results-&gt;name,
+00546                                                       ti_info-&gt;results-&gt;name_length,
+00547                                                       callback_data_context,
+00548                                                       callback_loop_context, iinfo);
+00549                             <span class="comment">/*</span>
+00550 <span class="comment">                             *  If we've been told that the rows are sorted,</span>
+00551 <span class="comment">                             *   then the first valid one we find</span>
+00552 <span class="comment">                             *   must be the right one.</span>
+00553 <span class="comment">                             */</span>
+00554                             <span class="keywordflow">if</span> (iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o7">flags</a> &amp; NETSNMP_ITERATOR_FLAG_SORTED)
+00555                                 request_count--;
+00556                         
+00557                         } <span class="keywordflow">else</span> {
+00558                             <span class="keywordflow">if</span> (iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o4">free_data_context</a> &amp;&amp; callback_data_context) {
+00559                                 (iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o4">free_data_context</a>)(callback_data_context,
+00560                                                            iinfo);
+00561                             }
+00562                         }
+00563                         <span class="keywordflow">break</span>;
+00564 
+00565                     <span class="keywordflow">case</span> MODE_SET_RESERVE2:
+00566                     <span class="keywordflow">case</span> MODE_SET_FREE:
+00567                     <span class="keywordflow">case</span> MODE_SET_UNDO:
+00568                     <span class="keywordflow">case</span> MODE_SET_COMMIT:
+00569                         <span class="comment">/* needed processing already done in RESERVE1 */</span>
+00570                         <span class="keywordflow">break</span>;
+00571 
+00572                     <span class="keywordflow">default</span>:
+00573                         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,
+00574                                  <span class="stringliteral">"table_iterator called with unsupported mode\n"</span>);
+00575                         <span class="keywordflow">break</span>;  <span class="comment">/* XXX return */</span>
+00576                 
+00577                     }
+00578                 }
+00579 
+00580                 <span class="comment">/* Is there any point in carrying on? */</span>
+00581                 <span class="keywordflow">if</span> (!request_count)
+00582                     <span class="keywordflow">break</span>;
+00583                 <span class="comment">/* get the next search possibility */</span>
+00584                 last_loop_context = callback_loop_context;
+00585                 index_search =
+00586                     (iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o1">get_next_data_point</a>) (&amp;callback_loop_context,
+00587                                                   &amp;callback_data_context,
+00588                                                   index_search, iinfo);
+00589                 <span class="keywordflow">if</span> (iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o3">free_loop_context</a> &amp;&amp; last_loop_context &amp;&amp;
+00590                     callback_data_context != last_loop_context) {
+00591                     (iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o3">free_loop_context</a>) (last_loop_context, iinfo);
+00592                     last_loop_context = NULL;
+00593                 }
+00594             }
+00595 
+00596             <span class="comment">/* free loop context before going on */</span>
+00597             <span class="keywordflow">if</span> (callback_loop_context &amp;&amp; iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o5">free_loop_context_at_end</a>) {
+00598                 (iinfo-&gt;<a class="code" href=
+"structnetsnmp__iterator__info__s.html#o5">free_loop_context_at_end</a>) (callback_loop_context,
+00599                                                    iinfo);
+00600                 callback_loop_context = NULL;
+00601             }
+00602 
+00603             <span class="comment">/* decide which (GETNEXT) requests are not yet filled */</span>
+00604             <span class="keywordflow">if</span> (reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a> == MODE_GETNEXT) {
+00605                 <span class="keywordflow">for</span>(request = requests ; request; request = request-&gt;<a class="code"
+href="structnetsnmp__request__info__s.html#o13">next</a>) {
+00606                     <span class="keywordflow">if</span> (request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o6">processed</a>)
+00607                         <span class="keywordflow">continue</span>;
+00608                     ti_info =
+00609                         <a class="code" href="group__handler.html#ga29">netsnmp_request_get_list_data</a>(request,
+00610                                                       TI_REQUEST_CACHE);
+00611                     <span class="keywordflow">if</span> (!ti_info-&gt;results) {
+00612                         table_info = <a class="code" href="group__table.html#ga2">netsnmp_extract_table_info</a>(request);
+00613                         <span class="keywordflow">if</span> (table_info-&gt;<a class="code" href=
+"structnetsnmp__table__request__info__s.html#o0">colnum</a> == tbl_info-&gt;<a class="code" href=
+"structnetsnmp__table__registration__info__s.html#o3">max_column</a>) {
+00614                             coloid[reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o3">rootoid_len</a>+1] = table_info-&gt;<a class="code" href=
+"structnetsnmp__table__request__info__s.html#o0">colnum</a>+1;
+00615                             snmp_set_var_objid(request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>,
+00616                                                coloid, reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o3">rootoid_len</a>+2);
+00617                             request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o6">processed</a> = TABLE_ITERATOR_NOTAGAIN;
+00618                             <span class="keywordflow">break</span>;
+00619                         } <span class="keywordflow">else</span> {
+00620                             table_info-&gt;<a class="code" href=
+"structnetsnmp__table__request__info__s.html#o0">colnum</a>++;
+00621                             notdone = 1;
+00622                         }
+00623                     }
+00624                 }
+00625             }
+00626         }
+00627     }
+00628 
+00629     <span class="keywordflow">if</span> (reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a> == MODE_GET ||
+00630         reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> == MODE_GETNEXT ||
+00631         reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> == MODE_SET_RESERVE1) {
+00632         <span class="comment">/* per request last minute processing */</span>
+00633         <span class="keywordflow">for</span>(request = requests ; request; request = request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o13">next</a>) {
+00634             <span class="keywordflow">if</span> (request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o6">processed</a>)
+00635                 <span class="keywordflow">continue</span>;
+00636             ti_info =
+00637                 <a class="code" href=
+"group__handler.html#ga29">netsnmp_request_get_list_data</a>(request, TI_REQUEST_CACHE);
+00638             table_info =
+00639                 <a class="code" href="group__table.html#ga2">netsnmp_extract_table_info</a>(request);
+00640 
+00641             <span class="keywordflow">if</span> (!ti_info)
+00642                 <span class="keywordflow">continue</span>;
+00643         
+00644             <span class="keywordflow">switch</span>(reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
+00645 
+00646             <span class="keywordflow">case</span> MODE_GETNEXT:
+00647                 <span class="keywordflow">if</span> (ti_info-&gt;best_match_len)
+00648                     snmp_set_var_objid(request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>, ti_info-&gt;best_match,
+00649                                        ti_info-&gt;best_match_len);
+00650                 <span class="keywordflow">else</span> {
+00651                     coloid[reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o3">rootoid_len</a>+1] = table_info-&gt;<a class="code" href=
+"structnetsnmp__table__request__info__s.html#o0">colnum</a>+1;
+00652                     snmp_set_var_objid(request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>,
+00653                                        coloid, reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o3">rootoid_len</a>+2);
+00654                     request-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o6">processed</a> = 1;
+00655                 }
+00656                 snmp_free_varbind(table_info-&gt;<a class="code" href=
+"structnetsnmp__table__request__info__s.html#o2">indexes</a>);
+00657                 table_info-&gt;<a class="code" href=
+"structnetsnmp__table__request__info__s.html#o2">indexes</a> = snmp_clone_varbind(ti_info-&gt;results);
+00658                 <span class="comment">/* FALL THROUGH */</span>
+00659 
+00660             <span class="keywordflow">case</span> MODE_GET:
+00661             <span class="keywordflow">case</span> MODE_SET_RESERVE1:
+00662                 <span class="keywordflow">if</span> (ti_info-&gt;data_context)
+00663                     <span class="comment">/* we don't add a free pointer, since it's in the</span>
+00664 <span class="comment">                       TI_REQUEST_CACHE instead */</span>
+00665                     <a class="code" href="group__handler.html#ga27">netsnmp_request_add_list_data</a>(request,
+00666                                                   <a class="code" href=
+"group__data__list.html#ga3">netsnmp_create_data_list</a>
+00667                                                   (TABLE_ITERATOR_NAME,
+00668                                                    ti_info-&gt;data_context,
+00669                                                    NULL));
+00670                 <span class="keywordflow">break</span>;
+00671             
+00672             <span class="keywordflow">default</span>:
+00673                 <span class="keywordflow">break</span>;
+00674             }
+00675         }
+00676             
+00677         <span class="comment">/* we change all GETNEXT operations into GET operations.</span>
+00678 <span class="comment">           why? because we're just so nice to the lower levels.</span>
+00679 <span class="comment">           maybe someday they'll pay us for it.  doubtful though. */</span>
+00680         oldmode = reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a>;
+00681         <span class="keywordflow">if</span> (reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a> == MODE_GETNEXT) {
+00682             reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> = MODE_GET;
+00683         }
+00684     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a> == MODE_GET_STASH) {
+00685         <a class="code" href="group__handler.html#ga31">netsnmp_free_request_data_sets</a>(reqtmp);
+00686         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(reqtmp);
+00687         table_info-&gt;<a class="code" href="structnetsnmp__table__request__info__s.html#o2">indexes</a> = old_indexes;
+00688     }
+00689 
+00690 
+00691     <span class="comment">/* Finally, we get to call the next handler below us.  Boy, wasn't</span>
+00692 <span class="comment">       all that simple?  They better be glad they don't have to do it! */</span>
+00693     <span class="keywordflow">if</span> (reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a> != MODE_GET_STASH) {
+00694         DEBUGMSGTL((<span class="stringliteral">"table_iterator"</span>, <span class=
+"stringliteral">"call subhandler for mode: %s\n"</span>,
+00695                     se_find_label_in_slist(<span class="stringliteral">"agent_mode"</span>, oldmode)));
+00696         ret =
+00697             <a class="code" href=
+"group__handler.html#ga17">netsnmp_call_next_handler</a>(handler, reginfo, reqinfo, requests);
+00698     }
+00699 
+00700     <span class="comment">/* reverse the previously saved mode if we were a getnext */</span>
+00701     <span class="keywordflow">if</span> (oldmode == MODE_GETNEXT) {
+00702         reqinfo-&gt;<a class="code" href="structnetsnmp__agent__request__info__s.html#o0">mode</a> = oldmode;
+00703     }
+00704 
+00705     <span class="comment">/* cleanup */</span>
+00706     <span class="keywordflow">if</span> (free_this_index_search)
+00707         snmp_free_varbind(free_this_index_search);
+00708 
+00709     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00710 }
+00711 
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:02 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

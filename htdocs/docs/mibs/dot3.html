@@ -1,0 +1,1830 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>dot3</b>
+MIB object, which is defined within the <b>EtherLike-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.10.7</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#dot3StatsTable">dot3StatsTable</a></li>
+  <li><a href="#dot3CollTable">dot3CollTable</a></li>
+  <li><a href="#dot3ControlTable">dot3ControlTable</a></li>
+  <li><a href="#dot3PauseTable">dot3PauseTable</a></li>
+  <li><a href="#dot3HCStatsTable">dot3HCStatsTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="dot3StatsTable" /><h3>Table dot3StatsTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>dot3StatsTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>EtherLike-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.10.7.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Statistics for a collection of ethernet-like
+interfaces attached to a particular system.
+There will be one row in this table for each
+ethernet-like interface in the system.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="dot3StatsEntry" />Row Description</td>
+<td>
+<pre>
+Statistics for a particular interface to an
+ethernet-like medium.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>dot3StatsTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="dot3StatsIndex" />
+1
+<br /><b>dot3StatsIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#InterfaceIndex">InterfaceIndex</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+An index value that uniquely identifies an
+interface to an ethernet-like medium.  The
+interface identified by a particular value of
+this index is the same interface as identified
+by the same value of ifIndex.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other dot3StatsTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="dot3StatsAlignmentErrors" />
+2
+<br /><b>dot3StatsAlignmentErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames received on a particular
+interface that are not an integral number of
+octets in length and do not pass the FCS check.
+
+The count represented by an instance of this
+object is incremented when the alignmentError
+status is returned by the MAC service to the
+LLC (or other MAC user). Received frames for
+which multiple error conditions pertain are,
+according to the conventions of IEEE 802.3
+Layer Management, counted exclusively according
+
+to the error status presented to the LLC.
+
+This counter does not increment for group
+encoding schemes greater than 4 bits per group.
+
+For interfaces operating at 10 Gb/s, this
+counter can roll over in less than 5 minutes if
+it is incrementing at its maximum rate.  Since
+that amount of time could be less than a
+management station's poll cycle time, in order
+to avoid a loss of information, a management
+station is advised to poll the
+dot3HCStatsAlignmentErrors object for 10 Gb/s
+or faster interfaces.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsFCSErrors" />
+3
+<br /><b>dot3StatsFCSErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames received on a particular
+interface that are an integral number of octets
+in length but do not pass the FCS check.  This
+count does not include frames received with
+frame-too-long or frame-too-short error.
+
+The count represented by an instance of this
+object is incremented when the frameCheckError
+status is returned by the MAC service to the
+LLC (or other MAC user). Received frames for
+which multiple error conditions pertain are,
+according to the conventions of IEEE 802.3
+Layer Management, counted exclusively according
+to the error status presented to the LLC.
+
+Note:  Coding errors detected by the physical
+layer for speeds above 10 Mb/s will cause the
+frame to fail the FCS check.
+
+For interfaces operating at 10 Gb/s, this
+counter can roll over in less than 5 minutes if
+
+it is incrementing at its maximum rate.  Since
+that amount of time could be less than a
+management station's poll cycle time, in order
+to avoid a loss of information, a management
+station is advised to poll the
+dot3HCStatsFCSErrors object for 10 Gb/s or
+faster interfaces.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsSingleCollisionFrames" />
+4
+<br /><b>dot3StatsSingleCollisionFrames</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames that are involved in a single
+collision, and are subsequently transmitted
+successfully.
+
+A frame that is counted by an instance of this
+object is also counted by the corresponding
+instance of either the ifOutUcastPkts,
+ifOutMulticastPkts, or ifOutBroadcastPkts,
+and is not counted by the corresponding
+instance of the dot3StatsMultipleCollisionFrames
+object.
+
+This counter does not increment when the
+interface is operating in full-duplex mode.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsMultipleCollisionFrames" />
+5
+<br /><b>dot3StatsMultipleCollisionFrames</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames that are involved in more
+than one collision and are subsequently
+                    transmitted successfully.
+A frame that is counted by an instance of this
+                    object is also counted by the corresponding
+                    instance of either the ifOutUcastPkts,
+                    ifOutMulticastPkts, or ifOutBroadcastPkts,
+                    and is not counted by the corresponding
+                    instance of the dot3StatsSingleCollisionFrames
+                    object.
+This counter does not increment when the
+                    interface is operating in full-duplex mode.
+Discontinuities in the value of this counter can
+                    occur at re-initialization of the management
+                    system, and at other times as indicated by the
+                    value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsSQETestErrors" />
+6
+<br /><b>dot3StatsSQETestErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of times that the SQE TEST ERROR
+is received on a particular interface. The
+SQE TEST ERROR is set in accordance with the
+rules for verification of the SQE detection
+mechanism in the PLS Carrier Sense Function as
+described in IEEE Std. 802.3, 2000 Edition,
+section 7.2.4.6.
+
+This counter does not increment on interfaces
+operating at speeds greater than 10 Mb/s, or on
+interfaces operating in full-duplex mode.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsDeferredTransmissions" />
+7
+<br /><b>dot3StatsDeferredTransmissions</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames for which the first
+transmission attempt on a particular interface
+is delayed because the medium is busy.
+
+The count represented by an instance of this
+object does not include frames involved in
+collisions.
+
+This counter does not increment when the
+interface is operating in full-duplex mode.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsLateCollisions" />
+8
+<br /><b>dot3StatsLateCollisions</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of times that a collision is
+detected on a particular interface later than
+one slotTime into the transmission of a packet.
+
+A (late) collision included in a count
+represented by an instance of this object is
+also considered as a (generic) collision for
+purposes of other collision-related
+statistics.
+
+This counter does not increment when the
+interface is operating in full-duplex mode.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsExcessiveCollisions" />
+9
+<br /><b>dot3StatsExcessiveCollisions</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames for which transmission on a
+particular interface fails due to excessive
+collisions.
+
+This counter does not increment when the
+interface is operating in full-duplex mode.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsInternalMacTransmitErrors" />
+10
+<br /><b>dot3StatsInternalMacTransmitErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames for which transmission on a
+particular interface fails due to an internal
+MAC sublayer transmit error. A frame is only
+counted by an instance of this object if it is
+not counted by the corresponding instance of
+either the dot3StatsLateCollisions object, the
+dot3StatsExcessiveCollisions object, or the
+dot3StatsCarrierSenseErrors object.
+
+The precise meaning of the count represented by
+an instance of this object is implementation-
+specific.  In particular, an instance of this
+object may represent a count of transmission
+errors on a particular interface that are not
+otherwise counted.
+
+For interfaces operating at 10 Gb/s, this
+counter can roll over in less than 5 minutes if
+it is incrementing at its maximum rate.  Since
+that amount of time could be less than a
+management station's poll cycle time, in order
+to avoid a loss of information, a management
+station is advised to poll the
+dot3HCStatsInternalMacTransmitErrors object for
+10 Gb/s or faster interfaces.
+
+Discontinuities in the value of this counter can
+
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsCarrierSenseErrors" />
+11
+<br /><b>dot3StatsCarrierSenseErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of times that the carrier sense
+condition was lost or never asserted when
+attempting to transmit a frame on a particular
+interface.
+
+The count represented by an instance of this
+object is incremented at most once per
+transmission attempt, even if the carrier sense
+condition fluctuates during a transmission
+attempt.
+
+This counter does not increment when the
+interface is operating in full-duplex mode.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsFrameTooLongs" />
+13
+<br /><b>dot3StatsFrameTooLongs</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames received on a particular
+interface that exceed the maximum permitted
+frame size.
+
+The count represented by an instance of this
+object is incremented when the frameTooLong
+status is returned by the MAC service to the
+LLC (or other MAC user). Received frames for
+which multiple error conditions pertain are,
+according to the conventions of IEEE 802.3
+Layer Management, counted exclusively according
+to the error status presented to the LLC.
+
+For interfaces operating at 10 Gb/s, this
+counter can roll over in less than 80 minutes if
+it is incrementing at its maximum rate.  Since
+that amount of time could be less than a
+management station's poll cycle time, in order
+to avoid a loss of information, a management
+station is advised to poll the
+dot3HCStatsFrameTooLongs object for 10 Gb/s
+or faster interfaces.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsInternalMacReceiveErrors" />
+16
+<br /><b>dot3StatsInternalMacReceiveErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames for which reception on a
+particular interface fails due to an internal
+MAC sublayer receive error. A frame is only
+counted by an instance of this object if it is
+not counted by the corresponding instance of
+either the dot3StatsFrameTooLongs object, the
+dot3StatsAlignmentErrors object, or the
+dot3StatsFCSErrors object.
+
+The precise meaning of the count represented by
+an instance of this object is implementation-
+specific.  In particular, an instance of this
+object may represent a count of receive errors
+on a particular interface that are not
+otherwise counted.
+
+For interfaces operating at 10 Gb/s, this
+counter can roll over in less than 5 minutes if
+
+it is incrementing at its maximum rate.  Since
+that amount of time could be less than a
+management station's poll cycle time, in order
+to avoid a loss of information, a management
+station is advised to poll the
+dot3HCStatsInternalMacReceiveErrors object for
+10 Gb/s or faster interfaces.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsEtherChipSet" />
+17
+<br /><b>dot3StatsEtherChipSet</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+******** THIS OBJECT IS DEPRECATED ********
+This object contains an OBJECT IDENTIFIER
+                    which identifies the chipset used to
+                    realize the interface. Ethernet-like
+                    interfaces are typically built out of
+                    several different chips. The MIB implementor
+                    is presented with a decision of which chip
+                    to identify via this object. The implementor
+                    should identify the chip which is usually
+                    called the Medium Access Control chip.
+                    If no such chip is easily identifiable,
+                    the implementor should identify the chip
+                    which actually gathers the transmit
+                    and receive statistics and error
+                    indications. This would allow a
+                    manager station to correlate the
+                    statistics and the chip generating
+                    them, giving it the ability to take
+                    into account any known anomalies
+                    in the chip.
+This object has been deprecated.  Implementation
+                    feedback indicates that it is of limited use for
+                    debugging network problems in the field, and
+                    the administrative overhead involved in
+                    maintaining a registry of chipset OIDs is not
+                    justified.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsSymbolErrors" />
+18
+<br /><b>dot3StatsSymbolErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+For an interface operating at 100 Mb/s, the
+number of times there was an invalid data symbol
+when a valid carrier was present.
+
+For an interface operating in half-duplex mode
+at 1000 Mb/s, the number of times the receiving
+media is non-idle (a carrier event) for a period
+of time equal to or greater than slotTime, and
+during which there was at least one occurrence
+of an event that causes the PHY to indicate
+'Data reception error' or 'carrier extend error'
+on the GMII.
+
+For an interface operating in full-duplex mode
+at 1000 Mb/s, the number of times the receiving
+media is non-idle (a carrier event) for a period
+of time equal to or greater than minFrameSize,
+and during which there was at least one
+occurrence of an event that causes the PHY to
+indicate 'Data reception error' on the GMII.
+
+For an interface operating at 10 Gb/s, the
+number of times the receiving media is non-idle
+(a carrier event) for a period of time equal to
+or greater than minFrameSize, and during which
+there was at least one occurrence of an event
+that causes the PHY to indicate 'Receive Error'
+on the XGMII.
+
+The count represented by an instance of this
+object is incremented at most once per carrier
+event, even if multiple symbol errors occur
+during the carrier event.  This count does
+not increment if a collision is present.
+
+This counter does not increment when the
+interface is operating at 10 Mb/s.
+
+For interfaces operating at 10 Gb/s, this
+counter can roll over in less than 5 minutes if
+it is incrementing at its maximum rate.  Since
+that amount of time could be less than a
+
+management station's poll cycle time, in order
+to avoid a loss of information, a management
+station is advised to poll the
+dot3HCStatsSymbolErrors object for 10 Gb/s
+or faster interfaces.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsDuplexStatus" />
+19
+<br /><b>dot3StatsDuplexStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>unknown</td></tr>
+        <tr><td>2</td><td>halfDuplex</td></tr>
+        <tr><td>3</td><td>fullDuplex</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The current mode of operation of the MAC
+entity.  'unknown' indicates that the current
+duplex mode could not be determined.
+
+Management control of the duplex mode is
+accomplished through the MAU MIB.  When
+an interface does not support autonegotiation,
+or when autonegotiation is not enabled, the
+duplex mode is controlled using
+ifMauDefaultType.  When autonegotiation is
+supported and enabled, duplex mode is controlled
+using ifMauAutoNegAdvertisedBits.  In either
+case, the currently operating duplex mode is
+reflected both in this object and in ifMauType.
+
+Note that this object provides redundant
+information with ifMauType.  Normally, redundant
+objects are discouraged.  However, in this
+instance, it allows a management application to
+determine the duplex status of an interface
+without having to know every possible value of
+ifMauType.  This was felt to be sufficiently
+valuable to justify the redundancy.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsRateControlAbility" />
+20
+<br /><b>dot3StatsRateControlAbility</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+'true' for interfaces operating at speeds above
+1000 Mb/s that support Rate Control through
+lowering the average data rate of the MAC
+sublayer, with frame granularity, and 'false'
+otherwise.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3StatsRateControlStatus" />
+21
+<br /><b>dot3StatsRateControlStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>rateControlOff</td></tr>
+        <tr><td>2</td><td>rateControlOn</td></tr>
+        <tr><td>3</td><td>unknown</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The current Rate Control mode of operation of
+the MAC sublayer of this interface.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="dot3CollTable" /><h3>Table dot3CollTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>dot3CollTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>EtherLike-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.10.7.5</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A collection of collision histograms for a
+particular set of interfaces.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="dot3CollEntry" />Row Description</td>
+<td>
+<pre>
+A cell in the histogram of per-frame
+collisions for a particular interface.  An
+
+instance of this object represents the
+frequency of individual MAC frames for which
+the transmission (successful or otherwise) on a
+particular interface is accompanied by a
+particular number of media collisions.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>dot3CollTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ifIndex" />
+1
+<br /><b>ifIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#InterfaceIndex">InterfaceIndex</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A unique value, greater than zero, for each interface.  It
+is recommended that values are assigned contiguously
+starting from 1.  The value for each interface sub-layer
+must remain constant at least from one re-initialization of
+the entity's network management system to the next re-
+initialization.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3CollCount" />
+2
+<br /><b>dot3CollCount</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The number of per-frame media collisions for
+which a particular collision histogram cell
+represents the frequency on a particular
+interface.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other dot3CollTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="dot3CollFrequencies" />
+3
+<br /><b>dot3CollFrequencies</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of individual MAC frames for which the
+transmission (successful or otherwise) on a
+particular interface occurs after the
+frame has experienced exactly the number
+of collisions in the associated
+dot3CollCount object.
+
+For example, a frame which is transmitted
+on interface 77 after experiencing
+exactly 4 collisions would be indicated
+by incrementing only dot3CollFrequencies.77.4.
+No other instance of dot3CollFrequencies would
+be incremented in this example.
+
+This counter does not increment when the
+interface is operating in full-duplex mode.
+
+Discontinuities in the value of this counter can
+
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="dot3ControlTable" /><h3>Table dot3ControlTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>dot3ControlTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>EtherLike-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.10.7.9</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of descriptive and status information
+about the MAC Control sublayer on the
+ethernet-like interfaces attached to a
+particular system.  There will be one row in
+this table for each ethernet-like interface in
+the system which implements the MAC Control
+sublayer.  If some, but not all, of the
+ethernet-like interfaces in the system implement
+the MAC Control sublayer, there will be fewer
+rows in this table than in the dot3StatsTable.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="dot3ControlEntry" />Row Description</td>
+<td>
+<pre>
+An entry in the table, containing information
+about the MAC Control sublayer on a single
+ethernet-like interface.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>dot3ControlTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="dot3StatsIndex" />
+1
+<br /><b>dot3StatsIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#InterfaceIndex">InterfaceIndex</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+An index value that uniquely identifies an
+interface to an ethernet-like medium.  The
+interface identified by a particular value of
+this index is the same interface as identified
+by the same value of ifIndex.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other dot3ControlTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="dot3ControlFunctionsSupported" />
+1
+<br /><b>dot3ControlFunctionsSupported</b>
+
+</td><td>
+  BITS
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>0</td><td>pause</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A list of the possible MAC Control functions
+implemented for this interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3ControlInUnknownOpcodes" />
+2
+<br /><b>dot3ControlInUnknownOpcodes</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of MAC Control frames received on this
+interface that contain an opcode that is not
+supported by this device.
+
+For interfaces operating at 10 Gb/s, this
+counter can roll over in less than 5 minutes if
+it is incrementing at its maximum rate.  Since
+that amount of time could be less than a
+management station's poll cycle time, in order
+to avoid a loss of information, a management
+station is advised to poll the
+dot3HCControlInUnknownOpcodes object for 10 Gb/s
+or faster interfaces.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3HCControlInUnknownOpcodes" />
+3
+<br /><b>dot3HCControlInUnknownOpcodes</b>
+
+</td><td>
+  COUNTER64
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of MAC Control frames received on this
+interface that contain an opcode that is not
+supported by this device.
+
+This counter is a 64 bit version of
+dot3ControlInUnknownOpcodes.  It should be used
+on interfaces operating at 10 Gb/s or faster.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="dot3PauseTable" /><h3>Table dot3PauseTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>dot3PauseTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>EtherLike-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.10.7.10</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of descriptive and status information
+about the MAC Control PAUSE function on the
+ethernet-like interfaces attached to a
+particular system. There will be one row in
+this table for each ethernet-like interface in
+the system which supports the MAC Control PAUSE
+function (i.e., the 'pause' bit in the
+corresponding instance of
+dot3ControlFunctionsSupported is set).  If some,
+but not all, of the ethernet-like interfaces in
+the system implement the MAC Control PAUSE
+function (for example, if some interfaces only
+support half-duplex), there will be fewer rows
+in this table than in the dot3StatsTable.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="dot3PauseEntry" />Row Description</td>
+<td>
+<pre>
+An entry in the table, containing information
+about the MAC Control PAUSE function on a single
+ethernet-like interface.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>dot3PauseTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="dot3StatsIndex" />
+1
+<br /><b>dot3StatsIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#InterfaceIndex">InterfaceIndex</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+An index value that uniquely identifies an
+interface to an ethernet-like medium.  The
+interface identified by a particular value of
+this index is the same interface as identified
+by the same value of ifIndex.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other dot3PauseTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="dot3PauseAdminMode" />
+1
+<br /><b>dot3PauseAdminMode</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>disabled</td></tr>
+        <tr><td>2</td><td>enabledXmit</td></tr>
+        <tr><td>3</td><td>enabledRcv</td></tr>
+        <tr><td>4</td><td>enabledXmitAndRcv</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+This object is used to configure the default
+administrative PAUSE mode for this interface.
+
+This object represents the
+administratively-configured PAUSE mode for this
+interface.  If auto-negotiation is not enabled
+or is not implemented for the active MAU
+attached to this interface, the value of this
+object determines the operational PAUSE mode
+of the interface whenever it is operating in
+full-duplex mode.  In this case, a set to this
+object will force the interface into the
+specified mode.
+
+If auto-negotiation is implemented and enabled
+for the MAU attached to this interface, the
+PAUSE mode for this interface is determined by
+auto-negotiation, and the value of this object
+denotes the mode to which the interface will
+automatically revert if/when auto-negotiation is
+later disabled.  Note that when auto-negotiation
+is running, administrative control of the PAUSE
+mode may be accomplished using the
+ifMauAutoNegCapAdvertisedBits object in the
+MAU-MIB.
+
+Note that the value of this object is ignored
+when the interface is not operating in
+full-duplex mode.
+
+An attempt to set this object to
+'enabledXmit(2)' or 'enabledRcv(3)' will fail
+on interfaces that do not support operation
+at greater than 100 Mb/s.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3PauseOperMode" />
+2
+<br /><b>dot3PauseOperMode</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>disabled</td></tr>
+        <tr><td>2</td><td>enabledXmit</td></tr>
+        <tr><td>3</td><td>enabledRcv</td></tr>
+        <tr><td>4</td><td>enabledXmitAndRcv</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+This object reflects the PAUSE mode currently
+in use on this interface, as determined by
+                    either (1) the result of the auto-negotiation
+                    function or (2) if auto-negotiation is not
+                    enabled or is not implemented for the active MAU
+                    attached to this interface, by the value of
+                    dot3PauseAdminMode.  Interfaces operating at
+                    100 Mb/s or less will never return
+                    'enabledXmit(2)' or 'enabledRcv(3)'.  Interfaces
+                    operating in half-duplex mode will always return
+                    'disabled(1)'.  Interfaces on which
+                    auto-negotiation is enabled but not yet
+                    completed should return the value
+                    'disabled(1)'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3InPauseFrames" />
+3
+<br /><b>dot3InPauseFrames</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of MAC Control frames received on this
+interface with an opcode indicating the PAUSE
+operation.
+
+This counter does not increment when the
+interface is operating in half-duplex mode.
+
+For interfaces operating at 10 Gb/s, this
+counter can roll over in less than 5 minutes if
+it is incrementing at its maximum rate.  Since
+that amount of time could be less than a
+management station's poll cycle time, in order
+to avoid a loss of information, a management
+station is advised to poll the
+dot3HCInPauseFrames object for 10 Gb/s or
+faster interfaces.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3OutPauseFrames" />
+4
+<br /><b>dot3OutPauseFrames</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of MAC Control frames transmitted on
+this interface with an opcode indicating the
+PAUSE operation.
+
+This counter does not increment when the
+interface is operating in half-duplex mode.
+
+For interfaces operating at 10 Gb/s, this
+counter can roll over in less than 5 minutes if
+it is incrementing at its maximum rate.  Since
+that amount of time could be less than a
+management station's poll cycle time, in order
+to avoid a loss of information, a management
+station is advised to poll the
+dot3HCOutPauseFrames object for 10 Gb/s or
+faster interfaces.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3HCInPauseFrames" />
+5
+<br /><b>dot3HCInPauseFrames</b>
+
+</td><td>
+  COUNTER64
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of MAC Control frames received on this
+interface with an opcode indicating the PAUSE
+operation.
+
+This counter does not increment when the
+interface is operating in half-duplex mode.
+
+This counter is a 64 bit version of
+dot3InPauseFrames.  It should be used on
+interfaces operating at 10 Gb/s or faster.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3HCOutPauseFrames" />
+6
+<br /><b>dot3HCOutPauseFrames</b>
+
+</td><td>
+  COUNTER64
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of MAC Control frames transmitted on
+this interface with an opcode indicating the
+PAUSE operation.
+
+This counter does not increment when the
+interface is operating in half-duplex mode.
+
+This counter is a 64 bit version of
+dot3OutPauseFrames.  It should be used on
+interfaces operating at 10 Gb/s or faster.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="dot3HCStatsTable" /><h3>Table dot3HCStatsTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>dot3HCStatsTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>EtherLike-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.10.7.11</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table containing 64-bit versions of error
+counters from the dot3StatsTable.  The 32-bit
+versions of these counters may roll over quite
+quickly on higher speed ethernet interfaces.
+The counters that have 64-bit versions in this
+table are the counters that apply to full-duplex
+interfaces, since 10 Gb/s and faster
+ethernet-like interfaces do not support
+half-duplex, and very few 1000 Mb/s
+ethernet-like interfaces support half-duplex.
+
+Entries in this table are recommended for
+interfaces capable of operating at 1000 Mb/s or
+faster, and are required for interfaces capable
+of operating at 10 Gb/s or faster.  Lower speed
+ethernet-like interfaces do not need entries in
+this table, in which case there may be fewer
+entries in this table than in the
+dot3StatsTable. However, implementations
+containing interfaces with a mix of speeds may
+choose to implement entries in this table for
+
+all ethernet-like interfaces.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="dot3HCStatsEntry" />Row Description</td>
+<td>
+<pre>
+An entry containing 64-bit statistics for a
+single ethernet-like interface.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>dot3HCStatsTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="dot3StatsIndex" />
+1
+<br /><b>dot3StatsIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#InterfaceIndex">InterfaceIndex</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InterfaceIndex"> InterfaceIndex TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+An index value that uniquely identifies an
+interface to an ethernet-like medium.  The
+interface identified by a particular value of
+this index is the same interface as identified
+by the same value of ifIndex.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other dot3HCStatsTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="dot3HCStatsAlignmentErrors" />
+1
+<br /><b>dot3HCStatsAlignmentErrors</b>
+
+</td><td>
+  COUNTER64
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames received on a particular
+interface that are not an integral number of
+octets in length and do not pass the FCS check.
+
+The count represented by an instance of this
+object is incremented when the alignmentError
+status is returned by the MAC service to the
+LLC (or other MAC user). Received frames for
+which multiple error conditions pertain are,
+according to the conventions of IEEE 802.3
+Layer Management, counted exclusively according
+to the error status presented to the LLC.
+
+This counter does not increment for group
+encoding schemes greater than 4 bits per group.
+
+This counter is a 64 bit version of
+dot3StatsAlignmentErrors.  It should be used
+on interfaces operating at 10 Gb/s or faster.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3HCStatsFCSErrors" />
+2
+<br /><b>dot3HCStatsFCSErrors</b>
+
+</td><td>
+  COUNTER64
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames received on a particular
+interface that are an integral number of octets
+in length but do not pass the FCS check.  This
+count does not include frames received with
+frame-too-long or frame-too-short error.
+
+The count represented by an instance of this
+object is incremented when the frameCheckError
+status is returned by the MAC service to the
+LLC (or other MAC user). Received frames for
+which multiple error conditions pertain are,
+according to the conventions of IEEE 802.3
+Layer Management, counted exclusively according
+to the error status presented to the LLC.
+
+Note:  Coding errors detected by the physical
+layer for speeds above 10 Mb/s will cause the
+frame to fail the FCS check.
+
+This counter is a 64 bit version of
+dot3StatsFCSErrors.  It should be used on
+interfaces operating at 10 Gb/s or faster.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3HCStatsInternalMacTransmitErrors" />
+3
+<br /><b>dot3HCStatsInternalMacTransmitErrors</b>
+
+</td><td>
+  COUNTER64
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames for which transmission on a
+particular interface fails due to an internal
+MAC sublayer transmit error. A frame is only
+
+counted by an instance of this object if it is
+not counted by the corresponding instance of
+either the dot3StatsLateCollisions object, the
+dot3StatsExcessiveCollisions object, or the
+dot3StatsCarrierSenseErrors object.
+
+The precise meaning of the count represented by
+an instance of this object is implementation-
+specific.  In particular, an instance of this
+object may represent a count of transmission
+errors on a particular interface that are not
+otherwise counted.
+
+This counter is a 64 bit version of
+dot3StatsInternalMacTransmitErrors.  It should
+be used on interfaces operating at 10 Gb/s or
+faster.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3HCStatsFrameTooLongs" />
+4
+<br /><b>dot3HCStatsFrameTooLongs</b>
+
+</td><td>
+  COUNTER64
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames received on a particular
+interface that exceed the maximum permitted
+frame size.
+
+The count represented by an instance of this
+object is incremented when the frameTooLong
+status is returned by the MAC service to the
+LLC (or other MAC user). Received frames for
+which multiple error conditions pertain are,
+according to the conventions of IEEE 802.3
+Layer Management, counted exclusively according
+to the error status presented to the LLC.
+
+This counter is a 64 bit version of
+dot3StatsFrameTooLongs.  It should be used on
+interfaces operating at 10 Gb/s or faster.
+
+Discontinuities in the value of this counter can
+
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3HCStatsInternalMacReceiveErrors" />
+5
+<br /><b>dot3HCStatsInternalMacReceiveErrors</b>
+
+</td><td>
+  COUNTER64
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A count of frames for which reception on a
+particular interface fails due to an internal
+MAC sublayer receive error. A frame is only
+counted by an instance of this object if it is
+not counted by the corresponding instance of
+either the dot3StatsFrameTooLongs object, the
+dot3StatsAlignmentErrors object, or the
+dot3StatsFCSErrors object.
+
+The precise meaning of the count represented by
+an instance of this object is implementation-
+specific.  In particular, an instance of this
+object may represent a count of receive errors
+on a particular interface that are not
+otherwise counted.
+
+This counter is a 64 bit version of
+dot3StatsInternalMacReceiveErrors.  It should be
+used on interfaces operating at 10 Gb/s or
+faster.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="dot3HCStatsSymbolErrors" />
+6
+<br /><b>dot3HCStatsSymbolErrors</b>
+
+</td><td>
+  COUNTER64
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+For an interface operating at 100 Mb/s, the
+number of times there was an invalid data symbol
+when a valid carrier was present.
+
+For an interface operating in half-duplex mode
+at 1000 Mb/s, the number of times the receiving
+media is non-idle (a carrier event) for a period
+of time equal to or greater than slotTime, and
+during which there was at least one occurrence
+of an event that causes the PHY to indicate
+'Data reception error' or 'carrier extend error'
+on the GMII.
+
+For an interface operating in full-duplex mode
+at 1000 Mb/s, the number of times the receiving
+media is non-idle (a carrier event) for a period
+of time equal to or greater than minFrameSize,
+and during which there was at least one
+occurrence of an event that causes the PHY to
+indicate 'Data reception error' on the GMII.
+
+For an interface operating at 10 Gb/s, the
+number of times the receiving media is non-idle
+(a carrier event) for a period of time equal to
+or greater than minFrameSize, and during which
+there was at least one occurrence of an event
+that causes the PHY to indicate 'Receive Error'
+on the XGMII.
+
+The count represented by an instance of this
+object is incremented at most once per carrier
+event, even if multiple symbol errors occur
+during the carrier event.  This count does
+not increment if a collision is present.
+
+This counter is a 64 bit version of
+dot3StatsSymbolErrors.  It should be used on
+interfaces operating at 10 Gb/s or faster.
+
+Discontinuities in the value of this counter can
+occur at re-initialization of the management
+system, and at other times as indicated by the
+value of ifCounterDiscontinuityTime.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="InterfaceIndex">InterfaceIndex</td><td>INTEGER32</td><td><pre></pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp EtherLike-MIB::dot3</b></p>
+<pre>
++--<a href="#dot3">dot3</a>(7)
+   |
+   +--<a href="#dot3StatsTable">dot3StatsTable</a>(2)
+   |  |
+   |  +--<a href="#dot3StatsEntry">dot3StatsEntry</a>(1)
+   |     |  Index: dot3StatsIndex
+   |     |
+   |     +-- -R-- Integer32 <a href="#dot3StatsIndex">dot3StatsIndex</a>(1)
+   |     |        Textual Convention: <a href="#InterfaceIndex">InterfaceIndex</a>
+   |     |        Range: 1..2147483647
+   |     +-- -R-- Counter   <a href="#dot3StatsAlignmentErrors">dot3StatsAlignmentErrors</a>(2)
+   |     +-- -R-- Counter   <a href="#dot3StatsFCSErrors">dot3StatsFCSErrors</a>(3)
+   |     +-- -R-- Counter   <a href="#dot3StatsSingleCollisionFrames">dot3StatsSingleCollisionFrames</a>(4)
+   |     +-- -R-- Counter   <a href="#dot3StatsMultipleCollisionFrames">dot3StatsMultipleCollisionFrames</a>(5)
+   |     +-- -R-- Counter   <a href="#dot3StatsSQETestErrors">dot3StatsSQETestErrors</a>(6)
+   |     +-- -R-- Counter   <a href="#dot3StatsDeferredTransmissions">dot3StatsDeferredTransmissions</a>(7)
+   |     +-- -R-- Counter   <a href="#dot3StatsLateCollisions">dot3StatsLateCollisions</a>(8)
+   |     +-- -R-- Counter   <a href="#dot3StatsExcessiveCollisions">dot3StatsExcessiveCollisions</a>(9)
+   |     +-- -R-- Counter   <a href="#dot3StatsInternalMacTransmitErrors">dot3StatsInternalMacTransmitErrors</a>(10)
+   |     +-- -R-- Counter   <a href="#dot3StatsCarrierSenseErrors">dot3StatsCarrierSenseErrors</a>(11)
+   |     +-- -R-- Counter   <a href="#dot3StatsFrameTooLongs">dot3StatsFrameTooLongs</a>(13)
+   |     +-- -R-- Counter   <a href="#dot3StatsInternalMacReceiveErrors">dot3StatsInternalMacReceiveErrors</a>(16)
+   |     +-- -R-- ObjID     <a href="#dot3StatsEtherChipSet">dot3StatsEtherChipSet</a>(17)
+   |     +-- -R-- Counter   <a href="#dot3StatsSymbolErrors">dot3StatsSymbolErrors</a>(18)
+   |     +-- -R-- EnumVal   <a href="#dot3StatsDuplexStatus">dot3StatsDuplexStatus</a>(19)
+   |     |        Values: unknown(1), halfDuplex(2), fullDuplex(3)
+   |     +-- -R-- EnumVal   <a href="#dot3StatsRateControlAbility">dot3StatsRateControlAbility</a>(20)
+   |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |     |        Values: true(1), false(2)
+   |     +-- -R-- EnumVal   <a href="#dot3StatsRateControlStatus">dot3StatsRateControlStatus</a>(21)
+   |              Values: rateControlOff(1), rateControlOn(2), unknown(3)
+   |
+   +--<a href="#dot3CollTable">dot3CollTable</a>(5)
+   |  |
+   |  +--<a href="#dot3CollEntry">dot3CollEntry</a>(1)
+   |     |  Index: ifIndex, dot3CollCount
+   |     |
+   |     +-- ---- Integer32 <a href="#dot3CollCount">dot3CollCount</a>(2)
+   |     |        Range: 1..16
+   |     +-- -R-- Counter   <a href="#dot3CollFrequencies">dot3CollFrequencies</a>(3)
+   |
+   +--<a href="#dot3Tests">dot3Tests</a>(6)
+   |  |
+   |  +--<a href="#dot3TestTdr">dot3TestTdr</a>(1)
+   |  +--<a href="#dot3TestLoopBack">dot3TestLoopBack</a>(2)
+   |
+   +--<a href="#dot3Errors">dot3Errors</a>(7)
+   |  |
+   |  +--<a href="#dot3ErrorInitError">dot3ErrorInitError</a>(1)
+   |  +--<a href="#dot3ErrorLoopbackError">dot3ErrorLoopbackError</a>(2)
+   |
+   +--<a href="#dot3ControlTable">dot3ControlTable</a>(9)
+   |  |
+   |  +--<a href="#dot3ControlEntry">dot3ControlEntry</a>(1)
+   |     |  Index: dot3StatsIndex
+   |     |
+   |     +-- -R-- BitString <a href="#dot3ControlFunctionsSupported">dot3ControlFunctionsSupported</a>(1)
+   |     |        Values: pause(0)
+   |     +-- -R-- Counter   <a href="#dot3ControlInUnknownOpcodes">dot3ControlInUnknownOpcodes</a>(2)
+   |     +-- -R-- Counter64 <a href="#dot3HCControlInUnknownOpcodes">dot3HCControlInUnknownOpcodes</a>(3)
+   |
+   +--<a href="#dot3PauseTable">dot3PauseTable</a>(10)
+   |  |
+   |  +--<a href="#dot3PauseEntry">dot3PauseEntry</a>(1)
+   |     |  Index: dot3StatsIndex
+   |     |
+   |     +-- -RW- EnumVal   <a href="#dot3PauseAdminMode">dot3PauseAdminMode</a>(1)
+   |     |        Values: disabled(1), enabledXmit(2), enabledRcv(3), enabledXmitAndRcv(4)
+   |     +-- -R-- EnumVal   <a href="#dot3PauseOperMode">dot3PauseOperMode</a>(2)
+   |     |        Values: disabled(1), enabledXmit(2), enabledRcv(3), enabledXmitAndRcv(4)
+   |     +-- -R-- Counter   <a href="#dot3InPauseFrames">dot3InPauseFrames</a>(3)
+   |     +-- -R-- Counter   <a href="#dot3OutPauseFrames">dot3OutPauseFrames</a>(4)
+   |     +-- -R-- Counter64 <a href="#dot3HCInPauseFrames">dot3HCInPauseFrames</a>(5)
+   |     +-- -R-- Counter64 <a href="#dot3HCOutPauseFrames">dot3HCOutPauseFrames</a>(6)
+   |
+   +--<a href="#dot3HCStatsTable">dot3HCStatsTable</a>(11)
+      |
+      +--<a href="#dot3HCStatsEntry">dot3HCStatsEntry</a>(1)
+         |  Index: dot3StatsIndex
+         |
+         +-- -R-- Counter64 <a href="#dot3HCStatsAlignmentErrors">dot3HCStatsAlignmentErrors</a>(1)
+         +-- -R-- Counter64 <a href="#dot3HCStatsFCSErrors">dot3HCStatsFCSErrors</a>(2)
+         +-- -R-- Counter64 <a href="#dot3HCStatsInternalMacTransmitErrors">dot3HCStatsInternalMacTransmitErrors</a>(3)
+         +-- -R-- Counter64 <a href="#dot3HCStatsFrameTooLongs">dot3HCStatsFrameTooLongs</a>(4)
+         +-- -R-- Counter64 <a href="#dot3HCStatsInternalMacReceiveErrors">dot3HCStatsInternalMacReceiveErrors</a>(5)
+         +-- -R-- Counter64 <a href="#dot3HCStatsSymbolErrors">dot3HCStatsSymbolErrors</a>(6)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

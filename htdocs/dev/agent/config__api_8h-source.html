@@ -1,0 +1,55 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href="dir_000001.html">net-snmp</a>
+  </div>
+
+  <h1>config_api.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef NET_SNMP_CONFIG_API_H</span>
+00002 <span class="preprocessor">#define NET_SNMP_CONFIG_API_H</span>
+00003 
+00009 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00010 
+00011     <span class="comment">/*</span>
+00012 <span class="comment">     *  For the initial release, this will just refer to the</span>
+00013 <span class="comment">     *  relevant UCD header files.</span>
+00014 <span class="comment">     *    In due course, the routines relevant to this area of the</span>
+00015 <span class="comment">     *  API will be identified, and listed here directly.</span>
+00016 <span class="comment">     *</span>
+00017 <span class="comment">     *  But for the time being, this header file is a placeholder,</span>
+00018 <span class="comment">     *  to allow application writers to adopt the new header file names.</span>
+00019 <span class="comment">     */</span>
+00020 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00021 
+00022 <span class="preprocessor">#include &lt;net-snmp/library/read_config.h&gt;</span>
+00023 <span class="preprocessor">#include &lt;net-snmp/library/default_store.h&gt;</span>
+00024 
+00025 <span class="preprocessor">#include &lt;stdio.h&gt;</span>              <span class=
+"comment">/* for FILE definition */</span>
+00026 <span class="preprocessor">#include &lt;net-snmp/library/snmp_parse_args.h&gt;</span>
+00027 <span class="preprocessor">#include &lt;net-snmp/library/snmp_enum.h&gt;</span>
+00028 <span class="preprocessor">#include &lt;net-snmp/library/vacm.h&gt;</span>
+00029 
+00030 <span class="preprocessor">#endif                          </span><span class="comment">/* NET_SNMP_CONFIG_API_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,104 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>agent_trap.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef AGENT_TRAP_H</span>
+00002 <span class="preprocessor">#define AGENT_TRAP_H</span>
+00003 
+00004 <span class="preprocessor">#ifdef __cplusplus</span>
+00005 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00006 <span class="preprocessor">#endif</span>
+00007 
+00008 <span class="keyword">struct </span>agent_add_trap_args {
+00009     <a class="code" href="structsnmp__session.html">netsnmp_session</a> *ss;
+00010     <span class="keywordtype">int</span>             confirm;
+00011 };
+00012 
+00013 <span class="keywordtype">void</span>            init_traps(<span class="keywordtype">void</span>);
+00014 <span class="keywordtype">void</span>            <a class="code" href=
+"group__agent__trap.html#ga43">send_easy_trap</a>(<span class="keywordtype">int</span>, <span class="keywordtype">int</span>);
+00015 <span class="keywordtype">void</span>            send_trap_pdu(<a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *);
+00016 <span class="keywordtype">void</span>            <a class="code" href=
+"group__agent__trap.html#ga44">send_v2trap</a>(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *);
+00017 <span class="keywordtype">void</span>            send_trap_vars(<span class="keywordtype">int</span>, <span class=
+"keywordtype">int</span>, <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *);
+00018 <span class="keywordtype">void</span>            send_enterprise_trap_vars(<span class=
+"keywordtype">int</span> trap, <span class="keywordtype">int</span> specific,
+00019                                           oid * enterprise,
+00020                                           <span class="keywordtype">int</span> enterprise_length,
+00021                                           <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * vars);
+00022 <span class="keywordtype">int</span>             netsnmp_send_traps(<span class="keywordtype">int</span> trap, <span class=
+"keywordtype">int</span> specific,
+00023                           oid * enterprise, <span class="keywordtype">int</span> enterprise_length,
+00024                           <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * vars,
+00025                           <span class="comment">/* These next two are currently unused */</span>
+00026                           <span class="keywordtype">char</span> * context, <span class="keywordtype">int</span> flags);
+00027 <span class="keywordtype">void</span>            snmpd_parse_config_authtrap(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keywordtype">char</span> *);
+00028 <span class="keywordtype">void</span>            snmpd_parse_config_trapsink(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keywordtype">char</span> *);
+00029 <span class="keywordtype">void</span>            snmpd_parse_config_trap2sink(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keywordtype">char</span> *);
+00030 <span class="keywordtype">void</span>            snmpd_parse_config_informsink(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keywordtype">char</span> *);
+00031 <span class="keywordtype">void</span>            snmpd_parse_config_trapsess(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keywordtype">char</span> *);
+00032 <span class="keywordtype">void</span>            <a class="code" href=
+"group__agent__trap.html#ga35">snmpd_free_trapsinks</a>(<span class="keywordtype">void</span>);
+00033 <span class="keywordtype">void</span>            snmpd_parse_config_trapcommunity(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keywordtype">char</span> *);
+00034 <span class="keywordtype">void</span>            snmpd_free_trapcommunity(<span class="keywordtype">void</span>);
+00035 <span class="keywordtype">void</span>            send_trap_to_sess(<a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> * sess,
+00036                                   <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *template_pdu);
+00037 
+00038 <span class="keywordtype">int</span>             create_trap_session(<span class=
+"keywordtype">char</span> *, u_short, <span class="keywordtype">char</span> *, <span class="keywordtype">int</span>, <span class=
+"keywordtype">int</span>);
+00039 <span class="keywordtype">int</span>             add_trap_session(<a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> *, <span class="keywordtype">int</span>, <span class=
+"keywordtype">int</span>, <span class="keywordtype">int</span>);
+00040 <span class="keywordtype">int</span>             remove_trap_session(<a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> *);
+00041 
+00042 <span class="keywordtype">void</span>                   convert_v2_to_v1(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *, <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *);
+00043 <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *convert_v1_to_v2(<a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *);
+00044 <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *convert_v2pdu_to_v1(<a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *);
+00045 <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *convert_v1pdu_to_v2(<a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *);
+00046 
+00047 <span class="preprocessor">#ifdef __cplusplus</span>
+00048 }
+00049 <span class="preprocessor">#endif</span>
+00050 <span class="preprocessor">#endif                          </span><span class="comment">/* AGENT_TRAP_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

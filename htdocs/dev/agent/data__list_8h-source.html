@@ -1,0 +1,155 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>data_list.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00002 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00003 <span class="comment"> * that may apply:</span>
+00004 <span class="comment"> */</span>
+00005 <span class="comment">/*</span>
+00006 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00007 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00008 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00009 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00010 <span class="comment"> */</span>
+00011 <span class="comment">/*</span>
+00012 <span class="comment"> * @file netsnmp_data_list.h</span>
+00013 <span class="comment"> *</span>
+00014 <span class="comment"> * @addtogroup agent</span>
+00015 <span class="comment"> * @addtogroup library *</span>
+00016 <span class="comment"> *</span>
+00017 <span class="comment"> * $Id$</span>
+00018 <span class="comment"> *</span>
+00019 <span class="comment"> * External definitions for functions and variables in netsnmp_data_list.c.</span>
+00020 <span class="comment"> *</span>
+00021 <span class="comment"> * @{</span>
+00022 <span class="comment"> */</span>
+00023 
+00024 <span class="preprocessor">#ifndef DATA_LIST_H</span>
+00025 <span class="preprocessor">#define DATA_LIST_H</span>
+00026 
+00027 <span class="preprocessor">#ifdef __cplusplus</span>
+00028 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00029 <span class="preprocessor">#endif</span>
+00030 
+00031 <span class="preprocessor">#include &lt;net-snmp/library/snmp_impl.h&gt;</span>
+00032 <span class="preprocessor">#include &lt;net-snmp/library/tools.h&gt;</span>
+00033 
+00034     <span class="keyword">typedef</span> void    (Netsnmp_Free_List_Data) (<span class="keywordtype">void</span> *);
+00035     <span class="keyword">typedef</span> int     (Netsnmp_Save_List_Data) (<span class=
+"keywordtype">char</span> *buf, size_t buf_len, <span class="keywordtype">void</span> *);
+00036     <span class="keyword">typedef</span> <span class="keywordtype">void</span> *  (Netsnmp_Read_List_Data) (<span class=
+"keywordtype">char</span> *buf, size_t buf_len);
+00037 
+<a name="l00041" id="l00041"></a><a class="code" href="structnetsnmp__data__list__s.html">00041</a>     <span class=
+"keyword">typedef</span> <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list_s</a> {
+00042         <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list_s</a> *next;
+00043         <span class="keywordtype">char</span>           *name;
+<a name="l00045" id="l00045"></a><a class="code" href="structnetsnmp__data__list__s.html#o2">00045</a>         <span class=
+"keywordtype">void</span>           *data;
+<a name="l00047" id="l00047"></a><a class="code" href=
+"structnetsnmp__data__list__s.html#o3">00047</a>         Netsnmp_Free_List_Data *free_func;
+00048     } <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a>;
+00049 
+00050     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_data_list_saveinfo_s {
+00051        <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> **datalist;
+00052        <span class="keyword">const</span> <span class="keywordtype">char</span> *type;
+00053        <span class="keyword">const</span> <span class="keywordtype">char</span> *token;
+00054        Netsnmp_Save_List_Data *data_list_save_ptr;
+00055        Netsnmp_Read_List_Data *data_list_read_ptr;
+00056        Netsnmp_Free_List_Data *data_list_free_ptr;
+00057     } netsnmp_data_list_saveinfo;
+00058 
+00059     NETSNMP_INLINE <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> * 
+00060       <a class="code" href="group__data__list.html#ga3">netsnmp_create_data_list</a>(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class=
+"keywordtype">void</span> *, Netsnmp_Free_List_Data* );
+00061     <span class="keywordtype">void</span>            <a class="code" href=
+"group__data__list.html#ga5">netsnmp_data_list_add_node</a>(<a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a> **head,
+00062                                                <a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node);
+00063     <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *
+00064       <a class="code" href="group__data__list.html#ga6">netsnmp_data_list_add_data</a>(<a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a> **head,
+00065                                  <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *name, <span class="keywordtype">void</span> *data,
+00066                                  Netsnmp_Free_List_Data * beer);
+00067     <span class="keywordtype">void</span>           *<a class="code" href=
+"group__data__list.html#ga7">netsnmp_get_list_data</a>(<a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head,
+00068                                           <span class="keyword">const</span> <span class="keywordtype">char</span> *node);
+00069     <span class="keywordtype">void</span>            <a class="code" href=
+"group__data__list.html#ga1">netsnmp_free_list_data</a>(<a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head);    <span class="comment">/* single */</span>
+00070     <span class="keywordtype">void</span>            <a class="code" href=
+"group__data__list.html#ga2">netsnmp_free_all_list_data</a>(<a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head);        <span class="comment">/* multiple */</span>
+00071     <span class="keywordtype">int</span>             <a class="code" href=
+"group__data__list.html#ga9">netsnmp_remove_list_node</a>(<a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a> **realhead,
+00072                                              <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *name);
+00073     NETSNMP_INLINE <a class="code" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a> *
+00074     <a class="code" href="group__data__list.html#ga8">netsnmp_get_list_node</a>(<a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head,
+00075                           <span class="keyword">const</span> <span class="keywordtype">char</span> *name);
+00076 
+00078     <span class="keywordtype">void</span>            <a class="code" href=
+"group__data__list.html#ga4">netsnmp_add_list_data</a>(<a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a> **head,
+00079                                           <a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node);
+00080 
+00081 
+00082     <span class="keywordtype">void</span>
+00083     <a class="code" href="group__data__list.html#ga10">netsnmp_register_save_list</a>(<a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a> **datalist,
+00084                                <span class="keyword">const</span> <span class="keywordtype">char</span> *type, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *token,
+00085                                Netsnmp_Save_List_Data *data_list_save_ptr,
+00086                                Netsnmp_Read_List_Data *data_list_read_ptr,
+00087                                Netsnmp_Free_List_Data *data_list_free_ptr);
+00088     <span class="keywordtype">int</span>
+00089     <a class="code" href="group__data__list.html#ga12">netsnmp_save_all_data</a>(<a class="code" href=
+"structnetsnmp__data__list__s.html">netsnmp_data_list</a> *head,
+00090                           <span class="keyword">const</span> <span class="keywordtype">char</span> *type, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *token,
+00091                           Netsnmp_Save_List_Data * data_list_save_ptr);
+00092     SNMPCallback netsnmp_save_all_data_callback;
+00093     <span class="keywordtype">void</span> <a class="code" href=
+"group__data__list.html#ga13">netsnmp_read_data_callback</a>(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token, <span class="keywordtype">char</span> *line);
+00094 <span class="preprocessor">#ifdef __cplusplus</span>
+00095 }
+00096 <span class="preprocessor">#endif</span>
+00097 <span class="preprocessor">#endif</span>
+00098 
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,2407 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>Memory Utility Routines<br />
+  <small>[<a class="el" href="group__library.html">The Net-SNMP library</a>]</small></h1>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Defines</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga25" doxytag=
+      "util::SNMP_MAXPATH" id="ga25"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_MAXPATH</b>&nbsp;&nbsp;&nbsp;1024</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga26" doxytag=
+      "util::SNMP_MAXBUF" id="ga26"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_MAXBUF</b>&nbsp;&nbsp;&nbsp;(1024 * 4)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga27" doxytag=
+      "util::SNMP_MAXBUF_MEDIUM" id="ga27"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_MAXBUF_MEDIUM</b>&nbsp;&nbsp;&nbsp;1024</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga28" doxytag=
+      "util::SNMP_MAXBUF_SMALL" id="ga28"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_MAXBUF_SMALL</b>&nbsp;&nbsp;&nbsp;512</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga29" doxytag=
+      "util::SNMP_MAXBUF_MESSAGE" id="ga29"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_MAXBUF_MESSAGE</b>&nbsp;&nbsp;&nbsp;1500</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga30" doxytag=
+      "util::SNMP_MAXOID" id="ga30"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_MAXOID</b>&nbsp;&nbsp;&nbsp;64</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga31" doxytag=
+      "util::SNMP_MAX_CMDLINE_OIDS" id="ga31"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_MAX_CMDLINE_OIDS</b>&nbsp;&nbsp;&nbsp;128</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga32" doxytag=
+      "util::SNMP_FILEMODE_CLOSED" id="ga32"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_FILEMODE_CLOSED</b>&nbsp;&nbsp;&nbsp;0600</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga33" doxytag=
+      "util::SNMP_FILEMODE_OPEN" id="ga33"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_FILEMODE_OPEN</b>&nbsp;&nbsp;&nbsp;0644</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga34" doxytag="util::BYTESIZE"
+      id="ga34"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>BYTESIZE</b>(bitsize)&nbsp;&nbsp;&nbsp;((bitsize + 7) &gt;&gt; 3)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga35" doxytag="util::ROUNDUP8"
+      id="ga35"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>ROUNDUP8</b>(x)&nbsp;&nbsp;&nbsp;( ( (x+7) &gt;&gt; 3 ) * 8 )</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga36">SNMP_FREE</a>(s)&nbsp;&nbsp;&nbsp;do {
+      if (s) { free((void *)s); s=NULL; } } while(0)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Frees a pointer only if it is !NULL and sets its value to NULL. <a href="#ga36"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga37">SNMP_SWIPE_MEM</a>(n,
+      s)&nbsp;&nbsp;&nbsp;do { if (n) free((void *)n); n = s; s=NULL; } while(0)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Frees pointer n only if it is !NULL, sets n to s and sets s to NULL. <a href="#ga37"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__util.html#ga38">SNMP_MALLOC_STRUCT</a>(s)&nbsp;&nbsp;&nbsp;(struct s *) calloc(1, sizeof(struct s))</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it. <a href=
+      "#ga38"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(td)&nbsp;&nbsp;&nbsp;(td *) calloc(1, sizeof(td))</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Mallocs memory of sizeof(t), zeros it and returns a pointer to it. <a href="#ga39"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga40">SNMP_ZERO</a>(s, l)&nbsp;&nbsp;&nbsp;do
+      { if (s) memset(s, 0, l); } while(0)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Zeros l bytes of memory starting at s. <a href="#ga40"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga41" doxytag="util::TOUPPER"
+      id="ga41"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>TOUPPER</b>(c)&nbsp;&nbsp;&nbsp;(c &gt;= 'a' &amp;&amp; c &lt;= 'z' ? c - ('a'
+      - 'A') : c)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga42" doxytag="util::TOLOWER"
+      id="ga42"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>TOLOWER</b>(c)&nbsp;&nbsp;&nbsp;(c &gt;= 'A' &amp;&amp; c &lt;= 'Z' ? c + ('a'
+      - 'A') : c)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga43" doxytag="util::HEX2VAL"
+      id="ga43"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>HEX2VAL</b>(s)&nbsp;&nbsp;&nbsp;((isalpha(s) ? (TOLOWER(s)-'a'+10) :
+      (TOLOWER(s)-'0')) &amp; 0xf)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga44" doxytag="util::VAL2HEX"
+      id="ga44"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>VAL2HEX</b>(s)&nbsp;&nbsp;&nbsp;( (s) + (((s) &gt;= 10) ? ('a'-10) : '0')
+      )</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga45">SNMP_MAX</a>(a,
+      b)&nbsp;&nbsp;&nbsp;((a) &gt; (b) ? (a) : (b))</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Computers the maximum of a and b. <a href="#ga45"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga46">SNMP_MIN</a>(a,
+      b)&nbsp;&nbsp;&nbsp;((a) &gt; (b) ? (b) : (a))</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Computers the minimum of a and b. <a href="#ga46"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga47" doxytag="util::FALSE" id=
+      "ga47"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>FALSE</b>&nbsp;&nbsp;&nbsp;0</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga48" doxytag="util::TRUE" id=
+      "ga48"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>TRUE</b>&nbsp;&nbsp;&nbsp;1</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>QUITFUN</b>(e, l)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>DIFFTIMEVAL</b>(now, then, diff)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga51" doxytag=
+      "util::USM_LENGTH_OID_TRANSFORM" id="ga51"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>USM_LENGTH_OID_TRANSFORM</b>&nbsp;&nbsp;&nbsp;10</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">#define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>ISTRANSFORM</b>(ttype, toid)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga53" doxytag=
+      "util::ENGINETIME_MAX" id="ga53"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>ENGINETIME_MAX</b>&nbsp;&nbsp;&nbsp;2147483647</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga54" doxytag=
+      "util::ENGINEBOOT_MAX" id="ga54"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>ENGINEBOOT_MAX</b>&nbsp;&nbsp;&nbsp;2147483647</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Typedefs</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga0" doxytag="util::marker_t"
+      id="ga0"></a> typedef void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>marker_t</b></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga1">snmp_realloc</a> (u_char **buf, size_t
+      *buf_len)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This function increase the size of the buffer pointed at by *buf, which is initially of size
+      *buf_len. <a href="#ga1"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga2">free_zero</a> (void *buf, size_t
+      size)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">zeros memory before freeing it. <a href="#ga2"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga3">malloc_random</a> (size_t *size)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Returns pointer to allocaed &amp; set buffer on success, size contains number of random bytes
+      filled. <a href="#ga3"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga4" doxytag="util::malloc_zero"
+      id="ga4"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>malloc_zero</b> (size_t size)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga5">memdup</a> (u_char **to, const u_char
+      *from, size_t size)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Duplicates a memory block. <a href="#ga5"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga6">binary_to_hex</a> (const u_char *input,
+      size_t len, char **output)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">converts binary to hexidecimal <a href="#ga6"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga7">netsnmp_hex_to_binary</a> (u_char **buf,
+      size_t *buf_len, size_t *out_len, int allow_realloc, const char *hex, const char *delim)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">convert an ASCII hex string (with specified delimiters) to binary <a href="#ga7"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga8">snmp_hex_to_binary</a> (u_char **buf,
+      size_t *buf_len, size_t *out_len, int allow_realloc, const char *hex)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">convert an ASCII hex string to binary <a href="#ga8"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga9">hex_to_binary2</a> (const u_char *input,
+      size_t len, char **output)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">hex_to_binary2 <a href="#ga9"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga10" doxytag=
+      "util::snmp_decimal_to_binary" id="ga10"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_decimal_to_binary</b> (u_char **buf, size_t *buf_len, size_t *out_len, int
+      allow_realloc, const char *decimal)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga11" doxytag=
+      "util::snmp_strcat" id="ga11"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_strcat</b> (u_char **buf, size_t *buf_len, size_t *out_len, int
+      allow_realloc, const u_char *s)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga12">netsnmp_strdup_and_null</a> (const
+      u_char *from, size_t from_len)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">copies a (possible) unterminated string of a given length into a new buffer and null terminates it
+      as well (new buffer MAY be one byte longer to account for this <a href="#ga12"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga13" doxytag="util::dump_chunk"
+      id="ga13"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>dump_chunk</b> (const char *debugtoken, const char *title, const u_char *buf,
+      int size)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga14" doxytag=
+      "util::dump_snmpEngineID" id="ga14"></a> char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>dump_snmpEngineID</b> (const u_char *buf, size_t *buflen)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">marker_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga15">atime_newMarker</a> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">create a new time marker. <a href="#ga15"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga16">atime_setMarker</a> (marker_t pm)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">set a time marker. <a href="#ga16"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga17">atime_diff</a> (marker_t first,
+      marker_t second)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Returns the difference (in msec) between the two markers. <a href="#ga17"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga18">uatime_diff</a> (marker_t first,
+      marker_t second)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Returns the difference (in u_long msec) between the two markers. <a href="#ga18"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga19">uatime_hdiff</a> (marker_t first,
+      marker_t second)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Returns the difference (in u_long 1/100th secs) between the two markers (functionally this is what
+      sysUpTime needs). <a href="#ga19"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga20">atime_ready</a> (marker_t pm, int
+      deltaT)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or
+      cannot be tested (no marker). <a href="#ga20"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga21">uatime_ready</a> (marker_t pm, unsigned
+      int deltaT)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or
+      cannot be tested (no marker). <a href="#ga21"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga22">marker_tticks</a> (marker_t pm)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Return the number of timeTicks since the given marker. <a href="#ga22"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga23" doxytag=
+      "util::timeval_tticks" id="ga23"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>timeval_tticks</b> (struct timeval *tv)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__util.html#ga24">netsnmp_getenv</a> (const char
+      *name)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Non Windows: Returns a pointer to the desired environment variable or NULL if the environment
+      variable does not exist. <a href="#ga24"></a><br /></td>
+    </tr>
+  </table>
+  <hr />
+
+  <h2>Define Documentation</h2><a class="anchor" name="ga50" doxytag="tools.h::DIFFTIMEVAL" id="ga50"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define DIFFTIMEVAL</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">now,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">then,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">diff&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p><b>Value:</b></p>
+
+        <div class="fragment">
+          <pre class="fragment">
+{                                                       \
+        now.tv_sec--;                                   \
+        now.tv_usec += 1000000L;                        \
+        diff.tv_sec  = now.tv_sec  - then.tv_sec;       \
+        diff.tv_usec = now.tv_usec - then.tv_usec;      \
+        <span class="keywordflow">if</span> (diff.tv_usec &gt; 1000000L){                   \
+                diff.tv_usec -= 1000000L;               \
+                diff.tv_sec++;                          \
+        }                                               \
+}
+</pre>
+        </div>
+
+        <p>Definition at line <a class="el" href="tools_8h-source.html#l00120">120</a> of file <a class="el" href=
+        "tools_8h-source.html">tools.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga52" doxytag="tools.h::ISTRANSFORM" id="ga52"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define ISTRANSFORM</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">ttype,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">toid&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p><b>Value:</b></p>
+
+        <div class="fragment">
+          <pre class="fragment">
+!<a class="code" href="group__library.html#ga98">snmp_oid_compare</a>(ttype, USM_LENGTH_OID_TRANSFORM,              \
+                usm ## toid ## Protocol, USM_LENGTH_OID_TRANSFORM)
+</pre>
+        </div>
+
+        <p>Definition at line <a class="el" href="tools_8h-source.html#l00139">139</a> of file <a class="el" href=
+        "tools_8h-source.html">tools.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga49" doxytag="tools.h::QUITFUN" id="ga49"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define QUITFUN</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">e,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">l&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p><b>Value:</b></p>
+
+        <div class="fragment">
+          <pre class="fragment">
+<span class="keywordflow">if</span> ( (e) != SNMPERR_SUCCESS) {  \
+                rval = SNMPERR_GENERR;  \
+                <span class="keywordflow">goto</span> l ;                \
+        }
+</pre>
+        </div>
+
+        <p>Definition at line <a class="el" href="tools_8h-source.html#l00107">107</a> of file <a class="el" href=
+        "tools_8h-source.html">tools.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga36" doxytag="tools.h::SNMP_FREE" id="ga36"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define SNMP_FREE</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">s&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap">&nbsp;&nbsp;&nbsp;do { if (s) { free((void *)s); s=NULL; } } while(0)</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Frees a pointer only if it is !NULL and sets its value to NULL.</p>
+
+        <p>Definition at line <a class="el" href="tools_8h-source.html#l00053">53</a> of file <a class="el" href=
+        "tools_8h-source.html">tools.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="mib_8c-source.html#l03421">build_oid_segment()</a>, <a class="el" href=
+        "mib_8c-source.html#l04401">fprint_description()</a>, <a class="el" href="mib_8c-source.html#l03149">fprint_objid()</a>,
+        <a class="el" href="mib_8c-source.html#l03296">fprint_variable()</a>, <a class="el" href=
+        "mib_8c-source.html#l02537">init_mib()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00347">netsnmp_cache_reqinfo_extract()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00330">netsnmp_cache_reqinfo_insert()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, <a class="el" href=
+        "mib_8c-source.html#l02490">netsnmp_fixup_mib_directory()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00046">netsnmp_free_all_list_data()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00721">netsnmp_free_delegated_cache()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00030">netsnmp_free_list_data()</a>, <a class="el" href=
+        "tools_8c-source.html#l00922">netsnmp_getenv()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00557">netsnmp_handler_free()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00608">netsnmp_handler_registration_free()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, <a class="el" href=
+        "mib_8c-source.html#l02388">netsnmp_set_mib_directory()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00233">netsnmp_set_row_column()</a>, <a class="el" href=
+        "table_8c-source.html#l00806">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00177">netsnmp_table_data_delete_row()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00993">netsnmp_table_dataset_delete_data()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, <a class="el" href=
+        "mib_8c-source.html#l02828">read_objid()</a>, <a class="el" href="mib_8c-source.html#l02707">shutdown_mib()</a>,
+        <a class="el" href="callback_8c-source.html#l00295">snmp_unregister_callback()</a>, and <a class="el" href=
+        "read__config_8c-source.html#l00301">unregister_config_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga38" doxytag="tools.h::SNMP_MALLOC_STRUCT" id="ga38"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define SNMP_MALLOC_STRUCT</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">s&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap">&nbsp;&nbsp;&nbsp;(struct s *) calloc(1, sizeof(struct s))</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Mallocs memory of sizeof(struct s), zeros it and returns a pointer to it.</p>
+
+        <p>Definition at line <a class="el" href="tools_8h-source.html#l00064">64</a> of file <a class="el" href=
+        "tools_8h-source.html">tools.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__alarm_8c-source.html#l00403">snmp_alarm_register()</a>, and <a class="el"
+        href="snmp__alarm_8c-source.html#l00475">snmp_alarm_register_hr()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga39" doxytag="tools.h::SNMP_MALLOC_TYPEDEF" id="ga39"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define SNMP_MALLOC_TYPEDEF</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">td&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap">&nbsp;&nbsp;&nbsp;(td *) calloc(1, sizeof(td))</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Mallocs memory of sizeof(t), zeros it and returns a pointer to it.</p>
+
+        <p>Definition at line <a class="el" href="tools_8h-source.html#l00068">68</a> of file <a class="el" href=
+        "tools_8h-source.html">tools.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="baby__steps_8c-source.html#l00061">netsnmp_baby_steps_handler_get()</a>, <a class=
+        "el" href="cache__handler_8c-source.html#l00139">netsnmp_cache_create()</a>, <a class="el" href=
+        "table__container_8c-source.html#l00156">netsnmp_container_table_handler_get()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00064">netsnmp_create_data_list()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00683">netsnmp_create_delegated_cache()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00544">netsnmp_create_table_data()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00554">netsnmp_create_table_data_row()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00074">netsnmp_create_table_data_set()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00163">netsnmp_handler_registration_create()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00197">netsnmp_mark_row_column_writable()</a>, <a class="el" href=
+        "mode__end__call_8c-source.html#l00068">netsnmp_mode_end_call_add_mode_callback()</a>, <a class="el" href=
+        "oid__stash_8c-source.html#l00050">netsnmp_oid_stash_create_sized_node()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00775">netsnmp_register_auto_data_table()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00220">netsnmp_register_save_list()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00113">netsnmp_register_table_data_set()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00233">netsnmp_set_row_column()</a>, <a class="el" href=
+        "table__array_8c-source.html#l00152">netsnmp_table_container_register()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00289">netsnmp_table_set_add_default_row()</a>, and <a class="el" href=
+        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga45" doxytag="tools.h::SNMP_MAX" id="ga45"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define SNMP_MAX</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">a,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">b&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap">&nbsp;&nbsp;&nbsp;((a) &gt; (b) ? (a) : (b))</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Computers the maximum of a and b.</p>
+
+        <p>Definition at line <a class="el" href="tools_8h-source.html#l00085">85</a> of file <a class="el" href=
+        "tools_8h-source.html">tools.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="table__dataset_8c-source.html#l00113">netsnmp_register_table_data_set()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga46" doxytag="tools.h::SNMP_MIN" id="ga46"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define SNMP_MIN</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">a,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">b&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap">&nbsp;&nbsp;&nbsp;((a) &gt; (b) ? (b) : (a))</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Computers the minimum of a and b.</p>
+
+        <p>Definition at line <a class="el" href="tools_8h-source.html#l00089">89</a> of file <a class="el" href=
+        "tools_8h-source.html">tools.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__api_8c-source.html#l06268">netsnmp_oid_find_prefix()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00113">netsnmp_register_table_data_set()</a>, and <a class="el" href=
+        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga37" doxytag="tools.h::SNMP_SWIPE_MEM" id="ga37"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define SNMP_SWIPE_MEM</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">n,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">s&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap">&nbsp;&nbsp;&nbsp;do { if (n) free((void *)n); n = s; s=NULL; } while(0)</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Frees pointer n only if it is !NULL, sets n to s and sets s to NULL.</p>
+
+        <p>Definition at line <a class="el" href="tools_8h-source.html#l00057">57</a> of file <a class="el" href=
+        "tools_8h-source.html">tools.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga40" doxytag="tools.h::SNMP_ZERO" id="ga40"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">#define SNMP_ZERO</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">s,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">l&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap">&nbsp;&nbsp;&nbsp;do { if (s) memset(s, 0, l); } while(0)</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Zeros l bytes of memory starting at s.</p>
+
+        <p>Definition at line <a class="el" href="tools_8h-source.html#l00072">72</a> of file <a class="el" href=
+        "tools_8h-source.html">tools.h</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr />
+
+  <h2>Function Documentation</h2><a class="anchor" name="ga17" doxytag="tools.h::atime_diff" id="ga17"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">long atime_diff</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">marker_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>first</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">marker_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>second</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Returns the difference (in msec) between the two markers.</p>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00791">791</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="tools_8c-source.html#l00846">atime_ready()</a>, and <a class="el" href=
+        "tools_8c-source.html#l00894">marker_tticks()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga15" doxytag="tools.h::atime_newMarker" id="ga15"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">marker_t atime_newMarker</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">void&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>create a new time marker.</p>
+
+        <p>NOTE: Caller must free time marker when no longer needed.</p>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00767">767</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="tools_8c-source.html#l00846">atime_ready()</a>, <a class="el" href=
+        "tools_8c-source.html#l00894">marker_tticks()</a>, <a class="el" href=
+        "stash__cache_8c-source.html#l00143">netsnmp_stash_cache_update()</a>, and <a class="el" href=
+        "tools_8c-source.html#l00868">uatime_ready()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga20" doxytag="tools.h::atime_ready" id="ga20"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int atime_ready</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">marker_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>pm</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>deltaT</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no
+        marker).</p>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00846">846</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8c-source.html#l00791">atime_diff()</a>, and <a class="el" href=
+        "tools_8c-source.html#l00767">atime_newMarker()</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00367">netsnmp_cache_check_expired()</a>, and
+        <a class="el" href="stash__cache_8c-source.html#l00143">netsnmp_stash_cache_update()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga16" doxytag="tools.h::atime_setMarker" id="ga16"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void atime_setMarker</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">marker_t&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>pm</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>set a time marker.</p>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00778">778</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="stash__cache_8c-source.html#l00143">netsnmp_stash_cache_update()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga6" doxytag="tools.h::binary_to_hex" id="ga6"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_int binary_to_hex</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const u_char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>input</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>len</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">char **&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>output</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>converts binary to hexidecimal</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>*input</em>&nbsp;</td>
+
+                <td>Binary data.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>len</em>&nbsp;</td>
+
+                <td>Length of binary data.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>**output</em>&nbsp;</td>
+
+                <td>NULL terminated string equivalent in hex.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>olen Length of output string not including NULL terminator.</dd>
+        </dl>FIX Is there already one of these in the UCD SNMP codebase? The old one should be used, or this one should be moved
+        to snmplib/snmp_api.c.
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00284">284</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga2" doxytag="tools.h::free_zero" id="ga2"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void free_zero</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">void *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>buf</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>size</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>zeros memory before freeing it.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>*buf</em>&nbsp;</td>
+
+                <td>Pointer at bytes to free.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>size</em>&nbsp;</td>
+
+                <td>Number of bytes in buf.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00182">182</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="tools_8c-source.html#l00321">hex_to_binary2()</a>, and <a class="el" href=
+        "tools_8c-source.html#l00202">malloc_random()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga9" doxytag="tools.h::hex_to_binary2" id="ga9"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int hex_to_binary2</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const u_char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>input</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>len</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">char **&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>output</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>hex_to_binary2</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>*input</em>&nbsp;</td>
+
+                <td>Printable data in base16.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>len</em>&nbsp;</td>
+
+                <td>Length in bytes of data.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>**output</em>&nbsp;</td>
+
+                <td>Binary data equivalent to input.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>SNMPERR_GENERR on failure, otherwise length of allocated string.</dd>
+        </dl>Input of an odd length is right aligned.
+
+        <p>FIX Another version of "hex-to-binary" which takes odd length input strings. It also allocates the memory to hold the
+        binary data. Should be integrated with the official hex_to_binary() function.</p>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00321">321</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8c-source.html#l00182">free_zero()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga3" doxytag="tools.h::malloc_random" id="ga3"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_char* malloc_random</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">size_t *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>size</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Returns pointer to allocaed &amp; set buffer on success, size contains number of random bytes filled.</p>
+
+        <p>buf is NULL and *size set to KMT error value upon failure.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>size</em>&nbsp;</td>
+
+                <td>Number of bytes to malloc() and fill with random bytes.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>a malloced buffer</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00202">202</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8c-source.html#l00182">free_zero()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga22" doxytag="tools.h::marker_tticks" id="ga22"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int marker_tticks</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">marker_t&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>pm</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Return the number of timeTicks since the given marker.</p>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00894">894</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8c-source.html#l00791">atime_diff()</a>, and <a class="el" href=
+        "tools_8c-source.html#l00767">atime_newMarker()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga5" doxytag="tools.h::memdup" id="ga5"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int memdup</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">u_char **&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>to</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const u_char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>from</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>size</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Duplicates a memory block.</p>
+
+        <p>Copies a existing memory location from a pointer to another, newly malloced, pointer.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>to</em>&nbsp;</td>
+
+                <td>Pointer to allocate and copy memory to.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>from</em>&nbsp;</td>
+
+                <td>Pointer to copy memory from.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>size</em>&nbsp;</td>
+
+                <td>Size of the data to be copied.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>SNMPERR_SUCCESS on success, SNMPERR_GENERR on failure.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00233">233</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00163">netsnmp_handler_registration_create()</a>,
+        <a class="el" href="agent__handler_8c-source.html#l00621">netsnmp_handler_registration_dup()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00233">netsnmp_set_row_column()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00690">netsnmp_table_data_clone_row()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00347">netsnmp_table_data_set_clone_row()</a>, and <a class="el" href=
+        "table__dataset_8c-source.html#l00289">netsnmp_table_set_add_default_row()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga24" doxytag="tools.h::netsnmp_getenv" id="ga24"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">char* netsnmp_getenv</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const char *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>name</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Non Windows: Returns a pointer to the desired environment variable or NULL if the environment variable does not
+        exist.</p>
+
+        <p>Windows: Returns a pointer to the desired environment variable if it exists. If it does not, the variable is looked up
+        in the registry in HKCU-SNMP or HKLM-SNMP (whichever it finds first) and stores the result in the environment variable.
+        It then returns a pointer to environment variable.</p>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00922">922</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
+
+        <p>Referenced by <a class="el" href="mib_8c-source.html#l02537">init_mib()</a>, <a class="el" href=
+        "mib_8c-source.html#l02490">netsnmp_fixup_mib_directory()</a>, <a class="el" href=
+        "mib_8c-source.html#l02443">netsnmp_get_mib_directory()</a>, and <a class="el" href=
+        "read__config_8c-source.html#l01181">read_config_store()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga7" doxytag="tools.h::netsnmp_hex_to_binary" id="ga7"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_hex_to_binary</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">u_char **&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>buf</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>buf_len</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>out_len</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>allow_realloc</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>hex</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>delim</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>convert an ASCII hex string (with specified delimiters) to binary</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>buf</em>&nbsp;</td>
+
+                <td>address of a pointer (pointer to pointer) for the output buffer. If allow_realloc is set, the buffer may be
+                grown via snmp_realloc to accomodate the data.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>buf_len</em>&nbsp;</td>
+
+                <td>pointer to a size_t containing the initial size of buf.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>out_len</em>&nbsp;</td>
+
+                <td>On input, a pointer to a size_t indicating an offset into buf. The binary data will be stored at this offset.
+                On output, this pointer will have updated the offset to be the first byte after the converted data.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>allow_realloc</em>&nbsp;</td>
+
+                <td>If true, the buffer can be reallocated. If false, and the buffer is not large enough to contain the string,
+                an error will be returned.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>hex</em>&nbsp;</td>
+
+                <td>pointer to hex string to be converted. May be prefixed by "0x" or "0X".</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>delim</em>&nbsp;</td>
+
+                <td>point to a string of allowed delimiters between bytes. If not specified, any non-hex characters will be an
+                error.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Return values:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>1</em>&nbsp;</td>
+
+                <td>success</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>0</em>&nbsp;</td>
+
+                <td>error</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00422">422</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8c-source.html#l00118">snmp_realloc()</a>.</p>
+
+        <p>Referenced by <a class="el" href="tools_8c-source.html#l00481">snmp_hex_to_binary()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga12" doxytag="tools.h::netsnmp_strdup_and_null" id="ga12"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">char* netsnmp_strdup_and_null</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const u_char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>from</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>from_len</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>copies a (possible) unterminated string of a given length into a new buffer and null terminates it as well (new buffer
+        MAY be one byte longer to account for this</p>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00252">252</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>Referenced by <a class="el" href=
+        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga8" doxytag="tools.h::snmp_hex_to_binary" id="ga8"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int snmp_hex_to_binary</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">u_char **&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>buf</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>buf_len</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>out_len</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>allow_realloc</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>hex</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>convert an ASCII hex string to binary</p>
+
+        <dl compact="compact">
+          <dt><b>Note:</b></dt>
+
+          <dd>This is a wrapper which calls netsnmp_hex_to_binary with a delimiter string of " ".</dd>
+        </dl>See netsnmp_hex_to_binary for parameter descriptions.
+
+        <dl compact="compact">
+          <dt><b>Return values:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>1</em>&nbsp;</td>
+
+                <td>success</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>0</em>&nbsp;</td>
+
+                <td>error</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00481">481</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8c-source.html#l00422">netsnmp_hex_to_binary()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga1" doxytag="tools.h::snmp_realloc" id="ga1"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int snmp_realloc</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">u_char **&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>buf</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>buf_len</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>This function increase the size of the buffer pointed at by *buf, which is initially of size *buf_len.</p>
+
+        <p>Contents are preserved **AT THE BOTTOM END OF THE BUFFER**. If memory can be (re-)allocated then it returns 1, else it
+        returns 0.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>buf</em>&nbsp;</td>
+
+                <td>pointer to a buffer pointer</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>buf_len</em>&nbsp;</td>
+
+                <td>pointer to current size of buffer in bytes</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Note:</b></dt>
+
+          <dd>The current re-allocation algorithm is to increase the buffer size by whichever is the greater of 256 bytes or the
+          current buffer size, up to a maximum increase of 8192 bytes.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00118">118</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="mib_8c-source.html#l00271">_sprint_hexstring_line()</a>, <a class="el" href=
+        "tools_8c-source.html#l00422">netsnmp_hex_to_binary()</a>, <a class="el" href=
+        "mib_8c-source.html#l00363">sprint_realloc_asciistring()</a>, <a class="el" href=
+        "mib_8c-source.html#l01691">sprint_realloc_ipaddress()</a>, <a class="el" href=
+        "mib_8c-source.html#l01625">sprint_realloc_networkaddress()</a>, and <a class="el" href=
+        "mib_8c-source.html#l00423">sprint_realloc_octet_string()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga18" doxytag="tools.h::uatime_diff" id="ga18"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_long uatime_diff</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">marker_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>first</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">marker_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>second</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Returns the difference (in u_long msec) between the two markers.</p>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00808">808</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="tools_8c-source.html#l00868">uatime_ready()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga19" doxytag="tools.h::uatime_hdiff" id="ga19"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_long uatime_hdiff</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">marker_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>first</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">marker_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>second</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Returns the difference (in u_long 1/100th secs) between the two markers (functionally this is what sysUpTime
+        needs).</p>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00826">826</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga21" doxytag="tools.h::uatime_ready" id="ga21"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int uatime_ready</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">marker_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>pm</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">unsigned int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>deltaT</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Test: Has (marked time plus delta) exceeded current time (in msec) ? Returns 0 if test fails or cannot be tested (no
+        marker).</p>
+
+        <p>Definition at line <a class="el" href="tools_8c-source.html#l00868">868</a> of file <a class="el" href=
+        "tools_8c-source.html">tools.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8c-source.html#l00767">atime_newMarker()</a>, and <a class="el" href=
+        "tools_8c-source.html#l00808">uatime_diff()</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:05 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

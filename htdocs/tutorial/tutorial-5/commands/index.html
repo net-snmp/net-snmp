@@ -1,0 +1,41 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+
+<p class="SectionTitle">
+Net-SNMP Tutorial -- Commands
+</p>
+
+<p>The net-snmp toolkit provides a suite of command line applications that can be used to query and act on remote SNMP agents. These instructions/lessions do assume that you have properly made and
+installed the package! If you have not installed them, most of them should still work providing that you set the environmental variable <i>MIBDIRS</i>to <i>SRCDIR/mibs</i>, where <i>SRCDIR</i> is the
+directory containg the net-snmp source tree.</p>
+<p><b>Note:</b> Most of these commands are designed to work if you cut and paste them into your own shell. They all operate on the <a href="snmpv3.html">demonstration agent</a> running on the
+net-snmp web site host, so you don't have to have an agent installed at your site to test these commands.</p>
+<p><b>Note:</b> Many of these commands assume you are running net-snmp 4.1 or higher.</p>
+<h3>Sections:</h3>
+<ol>
+<li><a href="snmptranslate.html">snmptranslate</a>: learning about the MIB tree.</li>
+<li><a href="snmpget.html">snmpget</a>: retrieving data from a host.</li>
+<li><a href="snmpgetnext.html">snmpgetnext</a>: retrieving unknown indexed data.</li>
+<li><a href="snmpwalk.html">snmpwalk</a>: retrieving lots of data at once!</li>
+<li><a href="snmptable.html">snmptable</a>: displaying table.</li>
+<li><a href="snmpset.html">snmpset</a>: peforming write operations.</li>
+<li><a href="snmptrap.html">snmptrap</a>: Sending and receiving traps, and acting upon them.
+<ol>
+<li><a href="snmptrap-v3.html">Sending and receiving SNMPv3 TRAPs and INFORMs</a></li>
+</ol>
+</li>
+<li>Common command options:
+<ol>
+<li><a href="mib-options.html">Using and loading MIBS</a></li>
+<li><a href="snmpv3.html">SNMPv3 Options</a></li>
+<li>Customized <a href="output-options.html">Output Formats</a></li>
+</ol>
+</li>
+</ol>
+
+
+<br />
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

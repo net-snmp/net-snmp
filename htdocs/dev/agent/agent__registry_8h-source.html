@@ -1,0 +1,283 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>agent_registry.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef AGENT_REGISTRY_H</span>
+00002 <span class="preprocessor">#define AGENT_REGISTRY_H</span>
+00003 
+00004 <span class="comment">/***********************************************************************/</span>
+00005 <span class="comment">/*</span>
+00006 <span class="comment"> * new version2 agent handler API structures </span>
+00007 <span class="comment"> */</span>
+00008 <span class="comment">/***********************************************************************/</span>
+00009 
+00010 <span class="preprocessor">#include &lt;net-snmp/agent/snmp_agent.h&gt;</span>
+00011 
+00012 <span class="preprocessor">#ifdef __cplusplus</span>
+00013 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00014 <span class="preprocessor">#endif</span>
+00015 
+00016 <span class="comment">/***********************************************************************/</span>
+00017     <span class="comment">/*</span>
+00018 <span class="comment">     * requests api definitions </span>
+00019 <span class="comment">     */</span>
+00020 <span class="comment">/***********************************************************************/</span>
+00021 
+00022     <span class="comment">/*</span>
+00023 <span class="comment">     * the structure of parameters passed to registered ACM modules </span>
+00024 <span class="comment">     */</span>
+00025 <span class="keyword">struct </span>view_parameters {
+00026     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu;
+00027     oid            *name;
+00028     size_t          namelen;
+00029     <span class="keywordtype">int</span>             test;
+00030     <span class="keywordtype">int</span>             errorcode;          <span class=
+"comment">/*  Do not change unless you're</span>
+00031 <span class="comment">                                            specifying an error, as it starts</span>
+00032 <span class="comment">                                            in a success state.  */</span>
+00033     <span class="keywordtype">int</span>             check_subtree;
+00034 };
+00035 
+00036 <span class="keyword">struct </span>register_parameters {
+00037     oid            *name;
+00038     size_t          namelen;
+00039     <span class="keywordtype">int</span>             priority;
+00040     <span class="keywordtype">int</span>             range_subid;
+00041     oid             range_ubound;
+00042     <span class="keywordtype">int</span>             timeout;
+00043     u_char          flags;
+00044     <span class="keyword">const</span> <span class="keywordtype">char</span>     *contextName;
+00045 };
+00046 
+00047 <span class="keyword">typedef</span> <span class="keyword">struct </span>subtree_context_cache_s {
+00048     <span class="keywordtype">char</span>                                *context_name;
+00049     <span class="keyword">struct </span>netsnmp_subtree_s            *first_subtree;
+00050     <span class="keyword">struct </span>subtree_context_cache_s      *next;
+00051 } subtree_context_cache;
+00052 
+00053 
+00054 
+00055 <span class="keywordtype">void</span>             setup_tree               (<span class="keywordtype">void</span>);
+00056 <span class="keywordtype">void</span>             shutdown_tree    (<span class="keywordtype">void</span>);
+00057 
+00058 
+00059 netsnmp_subtree *netsnmp_subtree_find     (oid *, size_t, netsnmp_subtree *,
+00060                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *context_name);
+00061 
+00062 netsnmp_subtree *netsnmp_subtree_find_next(oid *, size_t, netsnmp_subtree *,
+00063                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *context_name);
+00064 
+00065 netsnmp_subtree *netsnmp_subtree_find_prev(oid *, size_t,netsnmp_subtree *,
+00066                                            <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *context_name);
+00067 
+00068 netsnmp_subtree *netsnmp_subtree_find_first(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *context_name);
+00069 
+00070 <a class="code" href="structsnmp__session.html">netsnmp_session</a> *get_session_for_oid       (oid *, size_t, 
+00071                                             <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *context_name);
+00072 
+00073 subtree_context_cache *get_top_context_cache(<span class="keywordtype">void</span>);
+00074 
+00075 <span class="keywordtype">void</span> <a class="code" href=
+"group__agent__registry.html#ga21">netsnmp_set_lookup_cache_size</a>(<span class="keywordtype">int</span> newsize);
+00076 <span class="keywordtype">int</span> <a class="code" href=
+"group__agent__registry.html#ga22">netsnmp_get_lookup_cache_size</a>(<span class="keywordtype">void</span>);
+00077 
+00078 <span class="preprocessor">#define MIB_REGISTERED_OK                0</span>
+00079 <span class="preprocessor">#define MIB_DUPLICATE_REGISTRATION      -1</span>
+00080 <span class="preprocessor">#define MIB_REGISTRATION_FAILED         -2</span>
+00081 <span class="preprocessor">#define MIB_UNREGISTERED_OK              0</span>
+00082 <span class="preprocessor">#define MIB_NO_SUCH_REGISTRATION        -1</span>
+00083 <span class="preprocessor">#define MIB_UNREGISTRATION_FAILED       -2</span>
+00084 <span class="preprocessor">#define DEFAULT_MIB_PRIORITY            127</span>
+00085 
+00086 <span class="keywordtype">int</span>             register_mib               (<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">struct</span> variable *,
+00087                                             size_t, size_t, oid *, size_t);
+00088 
+00089 <span class="keywordtype">int</span>             register_mib_priority      (<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">struct</span> variable *,
+00090                                             size_t, size_t, oid *, size_t,
+00091                                             <span class="keywordtype">int</span>);
+00092 
+00093 <span class="keywordtype">int</span>             register_mib_range         (<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">struct</span> variable *,
+00094                                             size_t, size_t, oid *, size_t, 
+00095                                             <span class="keywordtype">int</span>, <span class=
+"keywordtype">int</span>, oid, <a class="code" href="structsnmp__session.html">netsnmp_session</a> *);
+00096 
+00097 <span class="keywordtype">int</span>             register_mib_context       (<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keyword">struct</span> variable *,
+00098                                             size_t, size_t, oid *, size_t,
+00099                                             <span class="keywordtype">int</span>, <span class=
+"keywordtype">int</span>, oid, <a class="code" href="structsnmp__session.html">netsnmp_session</a> *,
+00100                                             <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keywordtype">int</span>, <span class="keywordtype">int</span>);
+00101 
+00102 <span class="keywordtype">int</span>     <a class="code" href=
+"group__old__api.html#ga2">netsnmp_register_mib_table_row</a>     (<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">struct</span> variable *,
+00103                                             size_t, size_t, oid *, size_t, 
+00104                                             <span class="keywordtype">int</span>, <span class=
+"keywordtype">int</span>, <a class="code" href="structsnmp__session.html">netsnmp_session</a> *,
+00105                                             <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keywordtype">int</span>, <span class="keywordtype">int</span>);
+00106 
+00107 <span class="keywordtype">int</span>             unregister_mib             (oid *, size_t);
+00108 
+00109 <span class="keywordtype">int</span>             unregister_mib_priority    (oid *, size_t, <span class=
+"keywordtype">int</span>);
+00110 <span class="keywordtype">int</span>             unregister_mib_range       (oid *, size_t, <span class=
+"keywordtype">int</span>, <span class="keywordtype">int</span>, oid);
+00111 <span class="keywordtype">int</span>             <a class="code" href=
+"group__agent__registry.html#ga42">unregister_mib_context</a>     (oid *, size_t, <span class=
+"keywordtype">int</span>, <span class="keywordtype">int</span>, oid,
+00112                                             <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00113 <span class="keywordtype">void</span>            clear_context              (<span class="keywordtype">void</span>);
+00114 <span class="keywordtype">void</span>            unregister_mibs_by_session (<a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> *);
+00115 <span class="keywordtype">int</span>     netsnmp_unregister_mib_table_row   (oid *mibloc, size_t mibloclen,
+00116                                             <span class="keywordtype">int</span> priority, <span class=
+"keywordtype">int</span> var_subid,
+00117                                             oid range_ubound,
+00118                                             <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *context);
+00119 
+00120 <span class="keywordtype">int</span>             compare_tree               (<span class=
+"keyword">const</span> oid *, size_t, 
+00121                                             <span class="keyword">const</span> oid *, size_t);
+00122 <span class="keywordtype">int</span>             in_a_view                  (oid *, size_t *, 
+00123                                             <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *, <span class=
+"keywordtype">int</span>);
+00124 <span class="keywordtype">int</span>             check_access               (<a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *pdu);
+00125 <span class="keywordtype">int</span>             <a class="code" href=
+"group__agent__registry.html#ga50">netsnmp_acm_check_subtree</a>  (<a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *, oid *, size_t);
+00126 <span class="keywordtype">void</span>            register_mib_reattach      (<span class="keywordtype">void</span>);
+00127 <span class="keywordtype">void</span>            register_mib_detach        (<span class="keywordtype">void</span>);
+00128 
+00129 <span class="comment">/*</span>
+00130 <span class="comment"> * REGISTER_MIB(): This macro simply loads register_mib with less pain:</span>
+00131 <span class="comment"> * </span>
+00132 <span class="comment"> * descr:   A short description of the mib group being loaded.</span>
+00133 <span class="comment"> * var:     The variable structure to load.</span>
+00134 <span class="comment"> * vartype: The variable structure used to define it (variable[2, 4, ...])</span>
+00135 <span class="comment"> * theoid:  An *initialized* *exact length* oid pointer.</span>
+00136 <span class="comment"> *          (sizeof(theoid) *must* return the number of elements!) </span>
+00137 <span class="comment"> */</span>
+00138 
+00139 <span class="preprocessor">#define REGISTER_MIB(descr, var, vartype, theoid)                      \</span>
+00140 <span class="preprocessor">  if (register_mib(descr, (struct variable *) var, sizeof(struct vartype), \</span>
+00141 <span class="preprocessor">               sizeof(var)/sizeof(struct vartype),                     \</span>
+00142 <span class="preprocessor">               theoid, sizeof(theoid)/sizeof(oid)) != MIB_REGISTERED_OK ) \</span>
+00143 <span class="preprocessor">        DEBUGMSGTL(("register_mib", "%s registration failed\n", descr));</span>
+00144 
+00145 
+00146 
+00147 <span class="preprocessor">#define NUM_EXTERNAL_FDS 32</span>
+00148 <span class="preprocessor">#define FD_REGISTERED_OK                 0</span>
+00149 <span class="preprocessor">#define FD_REGISTRATION_FAILED          -2</span>
+00150 <span class="preprocessor">#define FD_UNREGISTERED_OK               0</span>
+00151 <span class="preprocessor">#define FD_NO_SUCH_REGISTRATION         -1</span>
+00152 
+00153 <span class="keyword">extern</span> <span class=
+"keywordtype">int</span>      external_readfd[NUM_EXTERNAL_FDS],   external_readfdlen;
+00154 <span class="keyword">extern</span> <span class=
+"keywordtype">int</span>      external_writefd[NUM_EXTERNAL_FDS],  external_writefdlen;
+00155 <span class="keyword">extern</span> <span class=
+"keywordtype">int</span>      external_exceptfd[NUM_EXTERNAL_FDS], external_exceptfdlen;
+00156 
+00157 <span class="keyword">extern</span> void     (*external_readfdfunc[NUM_EXTERNAL_FDS])   (int, <span class=
+"keywordtype">void</span> *);
+00158 <span class="keyword">extern</span> void     (*external_writefdfunc[NUM_EXTERNAL_FDS])  (int, <span class=
+"keywordtype">void</span> *);
+00159 <span class="keyword">extern</span> void     (*external_exceptfdfunc[NUM_EXTERNAL_FDS]) (int, <span class=
+"keywordtype">void</span> *);
+00160 
+00161 <span class="keyword">extern</span> <span class="keywordtype">void</span>    *external_readfd_data[NUM_EXTERNAL_FDS];
+00162 <span class="keyword">extern</span> <span class="keywordtype">void</span>    *external_writefd_data[NUM_EXTERNAL_FDS];
+00163 <span class="keyword">extern</span> <span class="keywordtype">void</span>    *external_exceptfd_data[NUM_EXTERNAL_FDS];
+00164 
+00165 <span class="keywordtype">int</span>             register_readfd(<span class="keywordtype">int</span>, <span class=
+"keywordtype">void</span> (*func)(<span class="keywordtype">int</span>, <span class="keywordtype">void</span> *),   <span class=
+"keywordtype">void</span> *);
+00166 <span class="keywordtype">int</span>             register_writefd(<span class="keywordtype">int</span>, <span class=
+"keywordtype">void</span> (*func)(<span class="keywordtype">int</span>, <span class="keywordtype">void</span> *),  <span class=
+"keywordtype">void</span> *);
+00167 <span class="keywordtype">int</span>             register_exceptfd(<span class="keywordtype">int</span>, <span class=
+"keywordtype">void</span> (*func)(<span class="keywordtype">int</span>, <span class="keywordtype">void</span> *), <span class=
+"keywordtype">void</span> *);
+00168 <span class="keywordtype">int</span>             unregister_readfd(<span class="keywordtype">int</span>);
+00169 <span class="keywordtype">int</span>             unregister_writefd(<span class="keywordtype">int</span>);
+00170 <span class="keywordtype">int</span>             unregister_exceptfd(<span class="keywordtype">int</span>);
+00171 
+00172 
+00173 
+00174 <span class="preprocessor">#define NUM_EXTERNAL_SIGS 32</span>
+00175 <span class="preprocessor">#define SIG_REGISTERED_OK                0</span>
+00176 <span class="preprocessor">#define SIG_REGISTRATION_FAILED         -2</span>
+00177 <span class="preprocessor">#define SIG_UNREGISTERED_OK              0</span>
+00178 
+00179 <span class="keyword">extern</span> <span class="keywordtype">int</span>      external_signal_scheduled[NUM_EXTERNAL_SIGS];
+00180 <span class="keyword">extern</span> void     (*external_signal_handler[NUM_EXTERNAL_SIGS])(int);
+00181 
+00182 <span class="keywordtype">int</span>             register_signal(<span class="keywordtype">int</span>, <span class=
+"keywordtype">void</span> (*func)(<span class="keywordtype">int</span>));
+00183 <span class="keywordtype">int</span>             unregister_signal(<span class="keywordtype">int</span>);
+00184 
+00185 
+00186 
+00187 <span class="comment">/*</span>
+00188 <span class="comment"> * internal API.  Don't use this.  Use netsnmp_register_handler instead </span>
+00189 <span class="comment"> */</span>
+00190 
+00191 <span class="keyword">struct </span><a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration_s</a>;
+00192 
+00193 <span class="keywordtype">int</span>             netsnmp_register_mib(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">struct</span> variable *,
+00194                                      size_t, size_t, oid *, size_t,
+00195                                      <span class="keywordtype">int</span>, <span class=
+"keywordtype">int</span>, oid, <a class="code" href="structsnmp__session.html">netsnmp_session</a> *,
+00196                                      <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keywordtype">int</span>, <span class="keywordtype">int</span>,
+00197                                      <span class="keyword">struct</span> <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration_s</a> *,
+00198                                      <span class="keywordtype">int</span>);
+00199 
+00200 <span class="preprocessor">#ifdef __cplusplus</span>
+00201 }
+00202 <span class="preprocessor">#endif</span>
+00203 
+00204 <span class="preprocessor">#endif                          </span><span class="comment">/* AGENT_REGISTRY_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,471 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>default_store.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * default_store.c: storage space for defaults </span>
+00003 <span class="comment"> */</span>
+00004 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00005 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00006 <span class="comment"> * that may apply:</span>
+00007 <span class="comment"> */</span>
+00008 <span class="comment">/*</span>
+00009 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00010 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00011 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00012 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00013 <span class="comment"> */</span>
+00128 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00129 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00130 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00131 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00132 <span class="preprocessor">#endif</span>
+00133 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00134 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00135 <span class="preprocessor">#endif</span>
+00136 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00137 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00138 <span class="preprocessor">#endif</span>
+00139 <span class="preprocessor">#if HAVE_STRING_H</span>
+00140 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00141 <span class="preprocessor">#else</span>
+00142 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00143 <span class="preprocessor">#endif</span>
+00144 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00145 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00146 <span class="preprocessor">#endif</span>
+00147 
+00148 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00149 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00150 <span class="preprocessor">#endif</span>
+00151 
+00152 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00153 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00154 <span class="preprocessor">#include &lt;net-snmp/config_api.h&gt;</span>
+00155 <span class="preprocessor">#include &lt;net-snmp/library/default_store.h&gt;</span>    <span class=
+"comment">/* for "internal" definitions */</span>
+00156 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00157 
+00158 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00159 
+00160 <span class="keyword">static</span> <span class="keyword">const</span> <span class=
+"keywordtype">char</span> * stores [NETSNMP_DS_MAX_IDS] = { <span class="stringliteral">"LIB"</span>, <span class=
+"stringliteral">"APP"</span>, <span class="stringliteral">"TOK"</span> };
+00161 
+00162 <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ds_read_config_s {
+00163   u_char          type;
+00164   <span class="keywordtype">char</span>           *token;
+00165   <span class="keywordtype">char</span>           *ftype;
+00166   <span class="keywordtype">int</span>             storeid;
+00167   <span class="keywordtype">int</span>             which;
+00168   <span class="keyword">struct </span>netsnmp_ds_read_config_s *next;
+00169 } netsnmp_ds_read_config;
+00170 
+00171 <span class="keyword">static</span> netsnmp_ds_read_config *netsnmp_ds_configs = NULL;
+00172 
+00173 <span class="keyword">static</span> <span class=
+"keywordtype">int</span>   netsnmp_ds_integers[NETSNMP_DS_MAX_IDS][NETSNMP_DS_MAX_SUBIDS];
+00174 <span class="keyword">static</span> <span class=
+"keywordtype">char</span>  netsnmp_ds_booleans[NETSNMP_DS_MAX_IDS][NETSNMP_DS_MAX_SUBIDS/8];
+00175 <span class="keyword">static</span> <span class=
+"keywordtype">char</span> *netsnmp_ds_strings[NETSNMP_DS_MAX_IDS][NETSNMP_DS_MAX_SUBIDS];
+00176 <span class="keyword">static</span> <span class=
+"keywordtype">void</span> *netsnmp_ds_voids[NETSNMP_DS_MAX_IDS][NETSNMP_DS_MAX_SUBIDS];
+00177 
+00178 <span class="comment">/*</span>
+00179 <span class="comment"> * Prototype definitions </span>
+00180 <span class="comment"> */</span>
+00181 <span class="keywordtype">void</span>            netsnmp_ds_handle_config(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token, <span class="keywordtype">char</span> *line);
+00182 
+00196 <span class="keywordtype">int</span>
+<a name="l00197" id="l00197"></a><a class="code" href="group__default__store.html#ga8">00197</a> <a class="code" href=
+"group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(<span class="keywordtype">int</span> storeid, <span class=
+"keywordtype">int</span> which, <span class="keywordtype">int</span> value)
+00198 {
+00199     <span class="keywordflow">if</span> (storeid &lt; 0 || storeid &gt;= NETSNMP_DS_MAX_IDS || 
+00200         which   &lt; 0 || which   &gt;= NETSNMP_DS_MAX_SUBIDS) {
+00201         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00202     }
+00203 
+00204     DEBUGMSGTL((<span class="stringliteral">"netsnmp_ds_set_boolean"</span>, <span class=
+"stringliteral">"Setting %s:%d = %d/%s\n"</span>,
+00205                 stores[storeid], which, value, ((value) ? <span class="stringliteral">"True"</span> : <span class=
+"stringliteral">"False"</span>)));
+00206 
+00207     <span class="keywordflow">if</span> (value &gt; 0) {
+00208         netsnmp_ds_booleans[storeid][which/8] |= (1 &lt;&lt; (which % 8));
+00209     } <span class="keywordflow">else</span> {
+00210         netsnmp_ds_booleans[storeid][which/8] &amp;= (0xff7f &gt;&gt; (7 - (which % 8)));
+00211     }
+00212 
+00213     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00214 }
+00215 
+00216 <span class="keywordtype">int</span>
+00217 netsnmp_ds_toggle_boolean(<span class="keywordtype">int</span> storeid, <span class="keywordtype">int</span> which)
+00218 {
+00219     <span class="keywordflow">if</span> (storeid &lt; 0 || storeid &gt;= NETSNMP_DS_MAX_IDS || 
+00220         which   &lt; 0 || which   &gt;= NETSNMP_DS_MAX_SUBIDS) {
+00221         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00222     }
+00223 
+00224     <span class="keywordflow">if</span> ((netsnmp_ds_booleans[storeid][which/8] &amp; (1 &lt;&lt; (which % 8))) == 0) {
+00225         netsnmp_ds_booleans[storeid][which/8] |= (1 &lt;&lt; (which % 8));
+00226     } <span class="keywordflow">else</span> {
+00227         netsnmp_ds_booleans[storeid][which/8] &amp;= (0xff7f &gt;&gt; (7 - (which % 8)));
+00228     }
+00229 
+00230     DEBUGMSGTL((<span class="stringliteral">"netsnmp_ds_toggle_boolean"</span>, <span class=
+"stringliteral">"Setting %s:%d = %d/%s\n"</span>,
+00231                 stores[storeid], which, netsnmp_ds_booleans[storeid][which/8],
+00232                 ((netsnmp_ds_booleans[storeid][which/8]) ? <span class="stringliteral">"True"</span> : <span class=
+"stringliteral">"False"</span>)));
+00233 
+00234     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00235 }
+00236 
+00237 <span class="keywordtype">int</span>
+00238 netsnmp_ds_get_boolean(<span class="keywordtype">int</span> storeid, <span class="keywordtype">int</span> which)
+00239 {
+00240     <span class="keywordflow">if</span> (storeid &lt; 0 || storeid &gt;= NETSNMP_DS_MAX_IDS || 
+00241         which   &lt; 0 || which   &gt;= NETSNMP_DS_MAX_SUBIDS) {
+00242         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00243     }
+00244 
+00245     <span class="keywordflow">return</span> (netsnmp_ds_booleans[storeid][which/8] &amp; (1 &lt;&lt; (which % 8))) ? 1:0;
+00246 }
+00247 
+00248 <span class="keywordtype">int</span>
+00249 netsnmp_ds_set_int(<span class="keywordtype">int</span> storeid, <span class="keywordtype">int</span> which, <span class=
+"keywordtype">int</span> value)
+00250 {
+00251     <span class="keywordflow">if</span> (storeid &lt; 0 || storeid &gt;= NETSNMP_DS_MAX_IDS || 
+00252         which   &lt; 0 || which   &gt;= NETSNMP_DS_MAX_SUBIDS) {
+00253         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00254     }
+00255 
+00256     DEBUGMSGTL((<span class="stringliteral">"netsnmp_ds_set_int"</span>, <span class=
+"stringliteral">"Setting %s:%d = %d\n"</span>,
+00257                 stores[storeid], which, value));
+00258 
+00259     netsnmp_ds_integers[storeid][which] = value;
+00260     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00261 }
+00262 
+00263 <span class="keywordtype">int</span>
+00264 netsnmp_ds_get_int(<span class="keywordtype">int</span> storeid, <span class="keywordtype">int</span> which)
+00265 {
+00266     <span class="keywordflow">if</span> (storeid &lt; 0 || storeid &gt;= NETSNMP_DS_MAX_IDS || 
+00267         which   &lt; 0 || which   &gt;= NETSNMP_DS_MAX_SUBIDS) {
+00268         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00269     }
+00270 
+00271     <span class="keywordflow">return</span> netsnmp_ds_integers[storeid][which];
+00272 }
+00273 
+00274 <span class="keywordtype">int</span>
+00275 netsnmp_ds_set_string(<span class="keywordtype">int</span> storeid, <span class=
+"keywordtype">int</span> which, <span class="keyword">const</span> <span class="keywordtype">char</span> *value)
+00276 {
+00277     <span class="keywordflow">if</span> (storeid &lt; 0 || storeid &gt;= NETSNMP_DS_MAX_IDS || 
+00278         which   &lt; 0 || which   &gt;= NETSNMP_DS_MAX_SUBIDS) {
+00279         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00280     }
+00281 
+00282     DEBUGMSGTL((<span class="stringliteral">"netsnmp_ds_set_string"</span>, <span class=
+"stringliteral">"Setting %s:%d = \"%s\"\n"</span>,
+00283                 stores[storeid], which, (value ? value : <span class="stringliteral">"(null)"</span>)));
+00284 
+00285     <span class="comment">/*</span>
+00286 <span class="comment">     * is some silly person is calling us with our own pointer?</span>
+00287 <span class="comment">     */</span>
+00288     <span class="keywordflow">if</span> (netsnmp_ds_strings[storeid][which] == value)
+00289         <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00290     
+00291     <span class="keywordflow">if</span> (netsnmp_ds_strings[storeid][which] != NULL) {
+00292         free(netsnmp_ds_strings[storeid][which]);
+00293         netsnmp_ds_strings[storeid][which] = NULL;
+00294     }
+00295 
+00296     <span class="keywordflow">if</span> (value) {
+00297         netsnmp_ds_strings[storeid][which] = strdup(value);
+00298     } <span class="keywordflow">else</span> {
+00299         netsnmp_ds_strings[storeid][which] = NULL;
+00300     }
+00301 
+00302     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00303 }
+00304 
+00305 <span class="keywordtype">char</span> *
+00306 netsnmp_ds_get_string(<span class="keywordtype">int</span> storeid, <span class="keywordtype">int</span> which)
+00307 {
+00308     <span class="keywordflow">if</span> (storeid &lt; 0 || storeid &gt;= NETSNMP_DS_MAX_IDS || 
+00309         which   &lt; 0 || which   &gt;= NETSNMP_DS_MAX_SUBIDS) {
+00310         <span class="keywordflow">return</span> NULL;
+00311     }
+00312 
+00313     <span class="keywordflow">return</span> netsnmp_ds_strings[storeid][which];
+00314 }
+00315 
+00316 <span class="keywordtype">int</span>
+00317 netsnmp_ds_set_void(<span class="keywordtype">int</span> storeid, <span class="keywordtype">int</span> which, <span class=
+"keywordtype">void</span> *value)
+00318 {
+00319     <span class="keywordflow">if</span> (storeid &lt; 0 || storeid &gt;= NETSNMP_DS_MAX_IDS || 
+00320         which   &lt; 0 || which   &gt;= NETSNMP_DS_MAX_SUBIDS) {
+00321         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00322     }
+00323 
+00324     DEBUGMSGTL((<span class="stringliteral">"netsnmp_ds_set_void"</span>, <span class=
+"stringliteral">"Setting %s:%d = %x\n"</span>,
+00325                 stores[storeid], which, value));
+00326 
+00327     netsnmp_ds_voids[storeid][which] = value;
+00328 
+00329     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00330 }
+00331 
+00332 <span class="keywordtype">void</span> *
+00333 netsnmp_ds_get_void(<span class="keywordtype">int</span> storeid, <span class="keywordtype">int</span> which)
+00334 {
+00335     <span class="keywordflow">if</span> (storeid &lt; 0 || storeid &gt;= NETSNMP_DS_MAX_IDS || 
+00336         which   &lt; 0 || which   &gt;= NETSNMP_DS_MAX_SUBIDS) {
+00337         <span class="keywordflow">return</span> NULL;
+00338     }
+00339 
+00340     <span class="keywordflow">return</span> netsnmp_ds_voids[storeid][which];
+00341 }
+00342 
+00343 <span class="keywordtype">void</span>
+00344 netsnmp_ds_handle_config(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keywordtype">char</span> *line)
+00345 {
+00346     netsnmp_ds_read_config *drsp;
+00347     <span class="keywordtype">char</span>            buf[SNMP_MAXBUF];
+00348     <span class="keywordtype">char</span>           *value, *endptr;
+00349     <span class="keywordtype">int</span>             itmp;
+00350     <span class="keywordtype">char</span>           *st;
+00351 
+00352     DEBUGMSGTL((<span class="stringliteral">"netsnmp_ds_handle_config"</span>, <span class=
+"stringliteral">"handling %s\n"</span>, token));
+00353 
+00354     <span class="keywordflow">for</span> (drsp = netsnmp_ds_configs;
+00355          drsp != NULL &amp;&amp; strcasecmp(token, drsp-&gt;token) != 0;
+00356          drsp = drsp-&gt;next);
+00357 
+00358     <span class="keywordflow">if</span> (drsp != NULL) {
+00359         DEBUGMSGTL((<span class="stringliteral">"netsnmp_ds_handle_config"</span>,
+00360                     <span class="stringliteral">"setting: token=%s, type=%d, id=%s, which=%d\n"</span>,
+00361                     drsp-&gt;token, drsp-&gt;type, stores[drsp-&gt;storeid],
+00362                     drsp-&gt;which));
+00363 
+00364         <span class="keywordflow">switch</span> (drsp-&gt;type) {
+00365         <span class="keywordflow">case</span> ASN_BOOLEAN:
+00366             value = strtok_r(line, <span class="stringliteral">" \t\n"</span>, &amp;st);
+00367             <span class="keywordflow">if</span> (strcasecmp(value, <span class="stringliteral">"yes"</span>) == 0 || 
+00368                 strcasecmp(value, <span class="stringliteral">"true"</span>) == 0) {
+00369                 itmp = 1;
+00370             } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (strcasecmp(value, <span class=
+"stringliteral">"no"</span>) == 0 ||
+00371                        strcasecmp(value, <span class="stringliteral">"false"</span>) == 0) {
+00372                 itmp = 0;
+00373             } <span class="keywordflow">else</span> {
+00374                 itmp = strtol(value, &amp;endptr, 10);
+00375                 <span class="keywordflow">if</span> (*endptr != 0 || itmp &lt; 0 || itmp &gt; 1) {
+00376                     config_perror(<span class="stringliteral">"Should be yes|no|true|false|0|1"</span>);
+00377                 }
+00378             }
+00379             <a class="code" href=
+"group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(drsp-&gt;storeid, drsp-&gt;which, itmp);
+00380             DEBUGMSGTL((<span class="stringliteral">"netsnmp_ds_handle_config"</span>, <span class=
+"stringliteral">"bool: %d\n"</span>, itmp));
+00381             <span class="keywordflow">break</span>;
+00382 
+00383         <span class="keywordflow">case</span> ASN_INTEGER:
+00384             value = strtok_r(line, <span class="stringliteral">" \t\n"</span>, &amp;st);
+00385             itmp = strtol(value, &amp;endptr, 10);
+00386             <span class="keywordflow">if</span> (*endptr != 0) {
+00387                 config_perror(<span class="stringliteral">"Bad integer value"</span>);
+00388             } <span class="keywordflow">else</span> {
+00389                 netsnmp_ds_set_int(drsp-&gt;storeid, drsp-&gt;which, itmp);
+00390             }
+00391             DEBUGMSGTL((<span class="stringliteral">"netsnmp_ds_handle_config"</span>, <span class=
+"stringliteral">"int: %d\n"</span>, itmp));
+00392             <span class="keywordflow">break</span>;
+00393 
+00394         <span class="keywordflow">case</span> ASN_OCTET_STR:
+00395             <span class="keywordflow">if</span> (*line == <span class="charliteral">'"'</span>) {
+00396                 copy_nword(line, buf, <span class="keyword">sizeof</span>(buf));
+00397                 netsnmp_ds_set_string(drsp-&gt;storeid, drsp-&gt;which, buf);
+00398             } <span class="keywordflow">else</span> {
+00399                 netsnmp_ds_set_string(drsp-&gt;storeid, drsp-&gt;which, line);
+00400             }
+00401             DEBUGMSGTL((<span class="stringliteral">"netsnmp_ds_handle_config"</span>, <span class=
+"stringliteral">"string: %s\n"</span>, line));
+00402             <span class="keywordflow">break</span>;
+00403 
+00404         <span class="keywordflow">default</span>:
+00405             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"netsnmp_ds_handle_config: type %d (0x%02x)\n"</span>,
+00406                      drsp-&gt;type, drsp-&gt;type);
+00407             <span class="keywordflow">break</span>;
+00408         }
+00409     } <span class="keywordflow">else</span> {
+00410         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"netsnmp_ds_handle_config: no registration for %s\n"</span>,
+00411                  token);
+00412     }
+00413 }
+00414 
+00415 
+00416 <span class="keywordtype">int</span>
+00417 netsnmp_ds_register_config(u_char type, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *ftype, <span class="keyword">const</span> <span class="keywordtype">char</span> *token,
+00418                            <span class="keywordtype">int</span> storeid, <span class="keywordtype">int</span> which)
+00419 {
+00420     netsnmp_ds_read_config *drsp;
+00421 
+00422     <span class="keywordflow">if</span> (storeid &lt; 0 || storeid &gt;= NETSNMP_DS_MAX_IDS    || 
+00423         which   &lt; 0 || which   &gt;= NETSNMP_DS_MAX_SUBIDS || token == NULL) {
+00424         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00425     }
+00426 
+00427     <span class="keywordflow">if</span> (netsnmp_ds_configs == NULL) {
+00428         netsnmp_ds_configs = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_ds_read_config);
+00429         drsp = netsnmp_ds_configs;
+00430     } <span class="keywordflow">else</span> {
+00431         <span class="keywordflow">for</span> (drsp = netsnmp_ds_configs; drsp-&gt;next != NULL; drsp = drsp-&gt;next);
+00432         drsp-&gt;next = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_ds_read_config);
+00433         drsp = drsp-&gt;next;
+00434     }
+00435 
+00436     drsp-&gt;type    = type;
+00437     drsp-&gt;ftype   = strdup(ftype);
+00438     drsp-&gt;token   = strdup(token);
+00439     drsp-&gt;storeid = storeid;
+00440     drsp-&gt;which   = which;
+00441 
+00442     <span class="keywordflow">switch</span> (type) {
+00443     <span class="keywordflow">case</span> ASN_BOOLEAN:
+00444         <a class="code" href=
+"group__read__config.html#ga8">register_config_handler</a>(ftype, token, netsnmp_ds_handle_config, NULL,
+00445                                 <span class="stringliteral">"(1|yes|true|0|no|false)"</span>);
+00446         <span class="keywordflow">break</span>;
+00447 
+00448     <span class="keywordflow">case</span> ASN_INTEGER:
+00449         <a class="code" href=
+"group__read__config.html#ga8">register_config_handler</a>(ftype, token, netsnmp_ds_handle_config, NULL,
+00450                                 <span class="stringliteral">"integerValue"</span>);
+00451         <span class="keywordflow">break</span>;
+00452 
+00453     <span class="keywordflow">case</span> ASN_OCTET_STR:
+00454         <a class="code" href=
+"group__read__config.html#ga8">register_config_handler</a>(ftype, token, netsnmp_ds_handle_config, NULL,
+00455                                 <span class="stringliteral">"string"</span>);
+00456         <span class="keywordflow">break</span>;
+00457 
+00458     }
+00459     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00460 }
+00461 
+00462 <span class="keywordtype">int</span>
+00463 netsnmp_ds_register_premib(u_char type, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *ftype, <span class="keyword">const</span> <span class="keywordtype">char</span> *token,
+00464                            <span class="keywordtype">int</span> storeid, <span class="keywordtype">int</span> which)
+00465 {
+00466     netsnmp_ds_read_config *drsp;
+00467 
+00468     <span class="keywordflow">if</span> (storeid &lt; 0 || storeid &gt;= NETSNMP_DS_MAX_IDS    || 
+00469         which   &lt; 0 || which   &gt;= NETSNMP_DS_MAX_SUBIDS || token == NULL) {
+00470         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00471     }
+00472 
+00473     <span class="keywordflow">if</span> (netsnmp_ds_configs == NULL) {
+00474         netsnmp_ds_configs = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_ds_read_config);
+00475         drsp = netsnmp_ds_configs;
+00476     } <span class="keywordflow">else</span> {
+00477         <span class="keywordflow">for</span> (drsp = netsnmp_ds_configs; drsp-&gt;next != NULL; drsp = drsp-&gt;next);
+00478         drsp-&gt;next = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_ds_read_config);
+00479         drsp = drsp-&gt;next;
+00480     }
+00481 
+00482     drsp-&gt;type    = type;
+00483     drsp-&gt;ftype   = strdup(ftype);
+00484     drsp-&gt;token   = strdup(token);
+00485     drsp-&gt;storeid = storeid;
+00486     drsp-&gt;which   = which;
+00487 
+00488     <span class="keywordflow">switch</span> (type) {
+00489     <span class="keywordflow">case</span> ASN_BOOLEAN:
+00490         register_prenetsnmp_mib_handler(ftype, token, netsnmp_ds_handle_config,
+00491                                         NULL, <span class="stringliteral">"(1|yes|true|0|no|false)"</span>);
+00492         <span class="keywordflow">break</span>;
+00493 
+00494     <span class="keywordflow">case</span> ASN_INTEGER:
+00495         register_prenetsnmp_mib_handler(ftype, token, netsnmp_ds_handle_config,
+00496                                         NULL, <span class="stringliteral">"integerValue"</span>);
+00497         <span class="keywordflow">break</span>;
+00498 
+00499     <span class="keywordflow">case</span> ASN_OCTET_STR:
+00500         register_prenetsnmp_mib_handler(ftype, token, netsnmp_ds_handle_config,
+00501                                         NULL, <span class="stringliteral">"string"</span>);
+00502         <span class="keywordflow">break</span>;
+00503 
+00504     }
+00505     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00506 }
+00507 
+00508 <span class="keywordtype">void</span>
+00509 netsnmp_ds_shutdown()
+00510 {
+00511     netsnmp_ds_read_config *drsp;
+00512     <span class="keywordtype">int</span>             i, j;
+00513 
+00514     <span class="keywordflow">for</span> (drsp = netsnmp_ds_configs; drsp; drsp = netsnmp_ds_configs) {
+00515         netsnmp_ds_configs = drsp-&gt;next;
+00516 
+00517         <a class="code" href="group__read__config.html#ga10">unregister_config_handler</a>(drsp-&gt;ftype, drsp-&gt;token);
+00518         <span class="keywordflow">if</span> (drsp-&gt;ftype != NULL) {
+00519             free(drsp-&gt;ftype);
+00520         }
+00521         <span class="keywordflow">if</span> (drsp-&gt;token != NULL) {
+00522             free(drsp-&gt;token);
+00523         }
+00524         free(drsp);
+00525     }
+00526 
+00527     <span class="keywordflow">for</span> (i = 0; i &lt; NETSNMP_DS_MAX_IDS; i++) {
+00528         <span class="keywordflow">for</span> (j = 0; j &lt; NETSNMP_DS_MAX_SUBIDS; j++) {
+00529             <span class="keywordflow">if</span> (netsnmp_ds_strings[i][j] != NULL) {
+00530                 free(netsnmp_ds_strings[i][j]);
+00531                 netsnmp_ds_strings[i][j] = NULL;
+00532             }
+00533         }
+00534     }
+00535 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

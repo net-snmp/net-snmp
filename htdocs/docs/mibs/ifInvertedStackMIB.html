@@ -1,0 +1,248 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>ifInvertedStackMIB</b>
+MIB object, which is defined within the <b>IF-INVERTED-STACK-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.77</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#ifInvStackTable">ifInvStackTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="ifInvStackTable" /><h3>Table ifInvStackTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ifInvStackTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IF-INVERTED-STACK-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.77.1.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table containing information on the relationships between
+the multiple sub-layers of network interfaces.  In
+          particular, it contains information on which sub-layers run
+          'underneath' which other sub-layers, where each sub-layer
+          corresponds to a conceptual row in the ifTable.  For
+          example, when the sub-layer with ifIndex value x runs
+          underneath the sub-layer with ifIndex value y, then this
+          table contains:
+  ifInvStackStatus.x.y=active
+For each ifIndex value, z, which identifies an active
+          interface, there are always at least two instantiated rows
+          in this table associated with z.  For one of these rows, z
+          is the value of ifStackHigherLayer; for the other, z is the
+          value of ifStackLowerLayer.  (If z is not involved in
+          multiplexing, then these are the only two rows associated
+          with z.)
+For example, two rows exist even for an interface which has
+          no others stacked on top or below it:
+  ifInvStackStatus.z.0=active
+            ifInvStackStatus.0.z=active
+This table contains exactly the same number of rows as the
+          ifStackTable, but the rows appear in a different order.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="ifInvStackEntry" />Row Description</td>
+<td>
+<pre>
+Information on a particular relationship between two sub-
+layers, specifying that one sub-layer runs underneath the
+other sub-layer.  Each sub-layer corresponds to a conceptual
+row in the ifTable.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>ifInvStackTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ifStackLowerLayer" />
+2
+<br /><b>ifStackLowerLayer</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#InterfaceIndexOrZero">InterfaceIndexOrZero</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InterfaceIndexOrZero"> InterfaceIndexOrZero TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of ifIndex corresponding to the lower sub-layer
+of the relationship, i.e., the sub-layer which runs 'below'
+the sub-layer identified by the corresponding instance of
+ifStackHigherLayer.  If there is no lower sub-layer, then
+this object has the value 0.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ifStackHigherLayer" />
+1
+<br /><b>ifStackHigherLayer</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#InterfaceIndexOrZero">InterfaceIndexOrZero</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InterfaceIndexOrZero"> InterfaceIndexOrZero TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The value of ifIndex corresponding to the higher sub-layer
+of the relationship, i.e., the sub-layer which runs on 'top'
+of the sub-layer identified by the corresponding instance of
+ifStackLowerLayer.  If there is no higher sub-layer (below
+the internetwork layer), then this object has the value 0.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other ifInvStackTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ifInvStackStatus" />
+1
+<br /><b>ifInvStackStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The status of the relationship between two sub-layers.
+An instance of this object exists for each instance of the
+          ifStackStatus object, and vice versa.  For example, if the
+          variable ifStackStatus.H.L exists, then the variable
+          ifInvStackStatus.L.H must also exist, and vice versa.  In
+          addition, the two variables always have the same value.
+However, unlike ifStackStatus, the ifInvStackStatus object
+          is NOT write-able.  A network management application wishing
+          to change a relationship between sub-layers H and L cannot
+          do so by modifying the value of ifInvStackStatus.L.H, but
+          must instead modify the value of ifStackStatus.H.L.  After
+          the ifStackTable is modified, the change will be reflected
+          in this table.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="InterfaceIndexOrZero">InterfaceIndexOrZero</td><td>INTEGER32</td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp IF-INVERTED-STACK-MIB::ifInvertedStackMIB</b></p>
+<pre>
++--<a href="#ifInvertedStackMIB">ifInvertedStackMIB</a>(77)
+   |
+   +--<a href="#ifInvMIBObjects">ifInvMIBObjects</a>(1)
+      |
+      +--<a href="#ifInvStackTable">ifInvStackTable</a>(1)
+      |  |
+      |  +--<a href="#ifInvStackEntry">ifInvStackEntry</a>(1)
+      |     |  Index: ifStackLowerLayer, ifStackHigherLayer
+      |     |
+      |     +-- -R-- EnumVal   <a href="#ifInvStackStatus">ifInvStackStatus</a>(1)
+      |              Textual Convention: <a href="#RowStatus">RowStatus</a>
+      |              Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+      |
+      +--<a href="#ifInvConformance">ifInvConformance</a>(2)
+         |
+         +--<a href="#ifInvGroups">ifInvGroups</a>(1)
+         |  |
+         |  +--<a href="#ifInvStackGroup">ifInvStackGroup</a>(1)
+         |
+         +--<a href="#ifInvCompliances">ifInvCompliances</a>(2)
+            |
+            +--<a href="#ifInvCompliance">ifInvCompliance</a>(1)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

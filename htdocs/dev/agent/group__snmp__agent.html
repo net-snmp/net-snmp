@@ -1,0 +1,1909 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>net-snmp agent related processing<br />
+  <small>[<a class="el" href="group__agent.html">The Net-SNMP agent</a>]</small></h1>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Data Structures</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>addrCache</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>_agent_nsap</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>agent_set_cache_s</b></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Defines</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga82" doxytag=
+      "snmp_agent::SNMP_NEED_REQUEST_LIST" id="ga82"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_NEED_REQUEST_LIST</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga83" doxytag=
+      "snmp_agent::SNMP_ADDRCACHE_SIZE" id="ga83"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_ADDRCACHE_SIZE</b>&nbsp;&nbsp;&nbsp;10</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga84" doxytag=
+      "snmp_agent::SNMP_ADDRCACHE_MAXAGE" id="ga84"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_ADDRCACHE_MAXAGE</b>&nbsp;&nbsp;&nbsp;300</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Typedefs</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga2" doxytag=
+      "snmp_agent::agent_nsap" id="ga2"></a> typedef _agent_nsap&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>agent_nsap</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga9" doxytag=
+      "snmp_agent::agent_set_cache" id="ga9"></a> typedef agent_set_cache_s&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>agent_set_cache</b></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Enumerations</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">enum &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom">{ <b>SNMP_ADDRCACHE_UNUSED</b> = 0, <b>SNMP_ADDRCACHE_USED</b> = 1 }</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga13" doxytag=
+      "snmp_agent::netsnmp_agent_check_packet" id="ga13"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_agent_check_packet</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *, struct netsnmp_transport_s *, void *, int)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga14" doxytag=
+      "snmp_agent::netsnmp_agent_check_parse" id="ga14"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_agent_check_parse</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *, int)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga15" doxytag=
+      "snmp_agent::delete_subnetsnmp_tree_cache" id="ga15"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>delete_subnetsnmp_tree_cache</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__agent.html#ga16">handle_pdu</a>
+      (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This function calls into netsnmp_set_mode_request_error, sets error_value given a reqinfo-&gt;mode
+      value. <a href="#ga16"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga17" doxytag=
+      "snmp_agent::netsnmp_handle_request" id="ga17"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_handle_request</b> (netsnmp_agent_session *asp, int status)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__agent.html#ga18">netsnmp_wrap_up_request</a>
+      (netsnmp_agent_session *asp, int status)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga19" doxytag=
+      "snmp_agent::check_delayed_request" id="ga19"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>check_delayed_request</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__agent.html#ga20">handle_getnext_loop</a>
+      (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">repeatedly calls getnext handlers looking for an answer till all requests are satisified. <a href=
+      "#ga20"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga21" doxytag=
+      "snmp_agent::handle_set_loop" id="ga21"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>handle_set_loop</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga22" doxytag=
+      "snmp_agent::netsnmp_check_queued_chain_for" id="ga22"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_check_queued_chain_for</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga23" doxytag=
+      "snmp_agent::netsnmp_add_queued" id="ga23"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_add_queued</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga24" doxytag=
+      "snmp_agent::netsnmp_remove_from_delegated" id="ga24"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_remove_from_delegated</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga25" doxytag=
+      "snmp_agent::netsnmp_allocate_globalcacheid" id="ga25"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_allocate_globalcacheid</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga26" doxytag=
+      "snmp_agent::netsnmp_get_local_cachid" id="ga26"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_get_local_cachid</b> (netsnmp_cachemap *cache_store, int globalid)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga27" doxytag=
+      "snmp_agent::netsnmp_get_or_add_local_cachid" id="ga27"></a> netsnmp_cachemap *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_get_or_add_local_cachid</b> (netsnmp_cachemap **cache_store, int
+      globalid, int localid)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga28" doxytag=
+      "snmp_agent::netsnmp_free_cachemap" id="ga28"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_free_cachemap</b> (netsnmp_cachemap *cache_store)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga29" doxytag=
+      "snmp_agent::save_set_cache" id="ga29"></a> agent_set_cache *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>save_set_cache</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga30" doxytag=
+      "snmp_agent::get_set_cache" id="ga30"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>get_set_cache</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga31" doxytag=
+      "snmp_agent::_reorder_getbulk" id="ga31"></a> NETSNMP_STATIC_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>_reorder_getbulk</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga32" doxytag=
+      "snmp_agent::getNextSessID" id="ga32"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>getNextSessID</b> ()</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__agent.html#ga33">agent_check_and_process</a> (int
+      block)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This function checks for packets arriving on the SNMP port and processes them(snmp_read) if some are
+      found, using the select(). <a href="#ga33"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga34" doxytag=
+      "snmp_agent::netsnmp_addrcache_initialise" id="ga34"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_addrcache_initialise</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga35" doxytag=
+      "snmp_agent::netsnmp_addrcache_add" id="ga35"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_addrcache_add</b> (const char *addr)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga36" doxytag=
+      "snmp_agent::netsnmp_addrcache_age" id="ga36"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_addrcache_age</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga37" doxytag=
+      "snmp_agent::netsnmp_agent_check_packet" id="ga37"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_agent_check_packet</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *session, netsnmp_transport *transport, void *transport_data, int
+      transport_data_length)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga38" doxytag=
+      "snmp_agent::netsnmp_register_agent_nsap" id="ga38"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_register_agent_nsap</b> (netsnmp_transport *t)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga39" doxytag=
+      "snmp_agent::netsnmp_deregister_agent_nsap" id="ga39"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_deregister_agent_nsap</b> (int handle)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga40" doxytag=
+      "snmp_agent::init_master_agent" id="ga40"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>init_master_agent</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga41" doxytag=
+      "snmp_agent::clear_nsap_list" id="ga41"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>clear_nsap_list</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga42" doxytag=
+      "snmp_agent::shutdown_master_agent" id="ga42"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>shutdown_master_agent</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga43" doxytag=
+      "snmp_agent::init_agent_snmp_session" id="ga43"></a> netsnmp_agent_session *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>init_agent_snmp_session</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *session, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga44" doxytag=
+      "snmp_agent::free_agent_snmp_session" id="ga44"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>free_agent_snmp_session</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga45" doxytag=
+      "snmp_agent::netsnmp_check_for_delegated" id="ga45"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_check_for_delegated</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga46" doxytag=
+      "snmp_agent::netsnmp_check_delegated_chain_for" id="ga46"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_check_delegated_chain_for</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga47" doxytag=
+      "snmp_agent::netsnmp_check_for_delegated_and_add" id="ga47"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_check_for_delegated_and_add</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga48" doxytag=
+      "snmp_agent::netsnmp_remove_delegated_requests_for_session" id="ga48"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_remove_delegated_requests_for_session</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *sess)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga49" doxytag=
+      "snmp_agent::dump_sess_list" id="ga49"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>dump_sess_list</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga50" doxytag=
+      "snmp_agent::netsnmp_remove_and_free_agent_snmp_session" id="ga50"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_remove_and_free_agent_snmp_session</b> (netsnmp_agent_session
+      *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga51" doxytag=
+      "snmp_agent::netsnmp_free_agent_snmp_session_by_session" id="ga51"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_free_agent_snmp_session_by_session</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *sess, void(*free_request)(netsnmp_request_list *))</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__agent.html#ga52">handle_snmp_packet</a> (int op,
+      <a class="el" href="structsnmp__session.html">netsnmp_session</a> *session, int reqid, <a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *pdu, void *magic)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">handles an incoming SNMP packet into the agent <a href="#ga52"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__agent.html#ga53">netsnmp_add_varbind_to_cache</a>
+      (netsnmp_agent_session *asp, int vbcount, <a class="el" href="structvariable__list.html">netsnmp_variable_list</a>
+      *varbind_ptr, netsnmp_subtree *tp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga54" doxytag=
+      "snmp_agent::check_acm" id="ga54"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>check_acm</b> (netsnmp_agent_session *asp, u_char type)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga55" doxytag=
+      "snmp_agent::netsnmp_create_subtree_cache" id="ga55"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_create_subtree_cache</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga56" doxytag=
+      "snmp_agent::netsnmp_reassign_requests" id="ga56"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_reassign_requests</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga57" doxytag=
+      "snmp_agent::netsnmp_delete_request_infos" id="ga57"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_delete_request_infos</b> (<a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *reqlist)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga58" doxytag=
+      "snmp_agent::netsnmp_delete_subtree_cache" id="ga58"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_delete_subtree_cache</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga59" doxytag=
+      "snmp_agent::netsnmp_check_requests_error" id="ga59"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_check_requests_error</b> (<a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga60" doxytag=
+      "snmp_agent::netsnmp_check_requests_status" id="ga60"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_check_requests_status</b> (netsnmp_agent_session *asp, <a class="el"
+      href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests, int look_for_specific)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga61" doxytag=
+      "snmp_agent::netsnmp_check_all_requests_status" id="ga61"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_check_all_requests_status</b> (netsnmp_agent_session *asp, int
+      look_for_specific)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga62" doxytag=
+      "snmp_agent::handle_var_requests" id="ga62"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>handle_var_requests</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga63" doxytag=
+      "snmp_agent::netsnmp_check_outstanding_agent_requests" id="ga63"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_check_outstanding_agent_requests</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__agent.html#ga64">netsnmp_check_transaction_id</a>
+      (int transaction_id)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Decide if the requested transaction_id is still being processed within the agent. <a href=
+      "#ga64"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__agent.html#ga65">check_getnext_results</a>
+      (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">returns 1 if there are valid GETNEXT requests left. <a href="#ga65"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga66" doxytag=
+      "snmp_agent::handle_set" id="ga66"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>handle_set</b> (netsnmp_agent_session *asp)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_STATIC_INLINE int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__agent.html#ga67">_request_set_error</a>
+      (<a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, int mode, int
+      error_value)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">set error for a request <a href="#ga67"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__agent.html#ga68">netsnmp_request_set_error</a>
+      (<a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, int error_value)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">set error for a request <a href="#ga68"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__snmp__agent.html#ga69">netsnmp_request_set_error_all</a> (<a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests, int error)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">set error for all requests <a href="#ga69"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga70" doxytag=
+      "snmp_agent::netsnmp_marker_uptime" id="ga70"></a> u_long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_marker_uptime</b> (marker_t pm)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga71" doxytag=
+      "snmp_agent::netsnmp_timeval_uptime" id="ga71"></a> u_long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_timeval_uptime</b> (struct timeval *tv)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga72" doxytag=
+      "snmp_agent::netsnmp_get_agent_uptime" id="ga72"></a> u_long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_get_agent_uptime</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga73" doxytag=
+      "snmp_agent::netsnmp_agent_add_list_data" id="ga73"></a> NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_agent_add_list_data</b> (<a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *ari, <a class="el" href=
+      "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga74" doxytag=
+      "snmp_agent::netsnmp_agent_remove_list_data" id="ga74"></a> NETSNMP_INLINE int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_agent_remove_list_data</b> (<a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *ari, const char *name)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga75" doxytag=
+      "snmp_agent::netsnmp_agent_get_list_data" id="ga75"></a> NETSNMP_INLINE void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_agent_get_list_data</b> (<a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *ari, const char *name)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga76" doxytag=
+      "snmp_agent::netsnmp_free_agent_data_set" id="ga76"></a> NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_free_agent_data_set</b> (<a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *ari)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga77" doxytag=
+      "snmp_agent::netsnmp_free_agent_data_sets" id="ga77"></a> NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_free_agent_data_sets</b> (<a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *ari)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga78" doxytag=
+      "snmp_agent::netsnmp_free_agent_request_info" id="ga78"></a> NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_free_agent_request_info</b> (<a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *ari)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__snmp__agent.html#ga79">netsnmp_set_request_error</a>
+      (<a class="el" href="structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el"
+      href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, int error_value)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">deprecated, use netsnmp_request_set_error instead <a href="#ga79"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__snmp__agent.html#ga80">netsnmp_set_mode_request_error</a> (int mode, <a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, int error_value)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">deprecated, use netsnmp_request_set_error instead <a href="#ga80"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__snmp__agent.html#ga81">netsnmp_set_all_requests_error</a> (<a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests, int error_value)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">set error for all request <a href="#ga81"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Variables</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga1" doxytag=
+      "snmp_agent::log_addresses" id="ga1"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>log_addresses</b> = 0</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga6" doxytag=
+      "snmp_agent::agent_delegated_list" id="ga6"></a> netsnmp_agent_session *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>agent_delegated_list</b> = NULL</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga7" doxytag=
+      "snmp_agent::netsnmp_agent_queued_list" id="ga7"></a> netsnmp_agent_session *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_agent_queued_list</b> = NULL</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga11" doxytag=
+      "snmp_agent::main_session" id="ga11"></a> <a class="el" href="structsnmp__session.html">netsnmp_session</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>main_session</b> = NULL</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga12" doxytag=
+      "snmp_agent::starttime" id="ga12"></a> timeval&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>starttime</b></td>
+    </tr>
+  </table>
+  <hr />
+
+  <h2>Function Documentation</h2><a class="anchor" name="ga67" doxytag="snmp_agent.c::_request_set_error" id="ga67"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_STATIC_INLINE int _request_set_error</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>request</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>mode</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>error_value</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>set error for a request</p>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l03239">3239</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8h-source.html#l00078">netsnmp_request_info_s::delegated</a>, <a class="el"
+        href="snmp__agent_8h-source.html#l00079">netsnmp_request_info_s::processed</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00058">netsnmp_request_info_s::requestvb</a>, <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00082">netsnmp_request_info_s::status</a>, and <a class="el" href=
+        "snmp__api_8h-source.html#l00521">variable_list::type</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l03307">netsnmp_request_set_error()</a>, <a class="el"
+        href="snmp__agent_8c-source.html#l03322">netsnmp_request_set_error_all()</a>, <a class="el" href=
+        "snmp__agent_8c-source.html#l03480">netsnmp_set_mode_request_error()</a>, and <a class="el" href=
+        "snmp__agent_8c-source.html#l03461">netsnmp_set_request_error()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga33" doxytag="snmp_agent.c::agent_check_and_process" id="ga33"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int agent_check_and_process</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">int&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>block</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>This function checks for packets arriving on the SNMP port and processes them(snmp_read) if some are found, using the
+        select().</p>
+
+        <p>If block is non zero, the function call blocks until a packet arrives</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>block</em>&nbsp;</td>
+
+                <td>used to control blocking in the select() function, 1 = block forever, and 0 = don't block</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>Returns a positive integer if packets were processed, and -1 if an error was found.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l00556">556</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga65" doxytag="snmp_agent.c::check_getnext_results" id="ga65"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int check_getnext_results</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_agent_session *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>asp</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>returns 1 if there are valid GETNEXT requests left.</p>
+
+        <p>Returns 0 if not.</p>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l02655">2655</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8h-source.html#l00080">netsnmp_request_info_s::inclusive</a>, <a class="el"
+        href="snmp__agent_8h-source.html#l00084">netsnmp_request_info_s::index</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00517">variable_list::name</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00519">variable_list::name_length</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00092">netsnmp_request_info_s::next</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00072">netsnmp_request_info_s::range_end</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00073">netsnmp_request_info_s::range_end_len</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00087">netsnmp_request_info_s::repeat</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00058">netsnmp_request_info_s::requestvb</a>, <a class="el" href=
+        "snmp__api_8c-source.html#l06144">snmp_oid_compare()</a>, <a class="el" href=
+        "snmp__client_8c-source.html#l00670">snmp_set_var_typed_value()</a>, and <a class="el" href=
+        "snmp__api_8h-source.html#l00521">variable_list::type</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l02760">handle_getnext_loop()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga20" doxytag="snmp_agent.c::handle_getnext_loop" id="ga20"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int handle_getnext_loop</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_agent_session *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>asp</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>repeatedly calls getnext handlers looking for an answer till all requests are satisified.</p>
+
+        <p>It's expected that one pass has been made before entering this function</p>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l02760">2760</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8c-source.html#l02655">check_getnext_results()</a>, and <a class="el" href=
+        "snmp__api_8h-source.html#l00515">variable_list::next_variable</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l03054">handle_pdu()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga16" doxytag="snmp_agent.c::handle_pdu" id="ga16"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int handle_pdu</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_agent_session *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>asp</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>This function calls into netsnmp_set_mode_request_error, sets error_value given a reqinfo-&gt;mode value.</p>
+
+        <p>It's used to send specific errors back to the agent to process accordingly.</p>
+
+        <p>If error_value is set to SNMP_NOSUCHOBJECT, SNMP_NOSUCHINSTANCE, or SNMP_ENDOFMIBVIEW the following is applicable:
+        Sets the error_value to request-&gt;requestvb-&gt;type if reqinfo-&gt;mode value is set to MODE_GET. If the
+        reqinfo-&gt;mode value is set to MODE_GETNEXT or MODE_GETBULK the code calls snmp_log logging an error message.</p>
+
+        <p>Otherwise, the request-&gt;status value is checked, if it's &lt; 0 snmp_log is called with an error message and
+        SNMP_ERR_GENERR is assigned to request-&gt;status. If the request-&gt;status value is &gt;= 0 the error_value is set to
+        request-&gt;status.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>reqinfo</em>&nbsp;</td>
+
+                <td>is a pointer to the netsnmp_agent_request_info struct. It contains the reqinfo-&gt;mode which is required to
+                set error_value or log error messages.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>request</em>&nbsp;</td>
+
+                <td>is a pointer to the netsnmp_request_info struct. The error_value is set to
+                request-&gt;requestvb-&gt;type</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>error_value</em>&nbsp;</td>
+
+                <td>
+                  is the exception value you want to set, below are possible values.
+
+                  <ul>
+                    <li>SNMP_NOSUCHOBJECT</li>
+
+                    <li>SNMP_NOSUCHINSTANCE</li>
+
+                    <li>SNMP_ENDOFMIBVIEW</li>
+
+                    <li>SNMP_ERR_NOERROR</li>
+
+                    <li>SNMP_ERR_TOOBIG</li>
+
+                    <li>SNMP_ERR_NOSUCHNAME</li>
+
+                    <li>SNMP_ERR_BADVALUE</li>
+
+                    <li>SNMP_ERR_READONLY</li>
+
+                    <li>SNMP_ERR_GENERR</li>
+
+                    <li>SNMP_ERR_NOACCESS</li>
+
+                    <li>SNMP_ERR_WRONGTYPE</li>
+
+                    <li>SNMP_ERR_WRONGLENGTH</li>
+
+                    <li>SNMP_ERR_WRONGENCODING</li>
+
+                    <li>SNMP_ERR_WRONGVALUE</li>
+
+                    <li>SNMP_ERR_NOCREATION</li>
+
+                    <li>SNMP_ERR_INCONSISTENTVALUE</li>
+
+                    <li>SNMP_ERR_RESOURCEUNAVAILABLE</li>
+
+                    <li>SNMP_ERR_COMMITFAILED</li>
+
+                    <li>SNMP_ERR_UNDOFAILED</li>
+
+                    <li>SNMP_ERR_AUTHORIZATIONERROR</li>
+
+                    <li>SNMP_ERR_NOTWRITABLE</li>
+
+                    <li>SNMP_ERR_INCONSISTENTNAME</li>
+                  </ul>
+                </td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>Returns error_value under all conditions.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l03054">3054</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8c-source.html#l02760">handle_getnext_loop()</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00515">variable_list::next_variable</a>, <a class="el" href=
+        "snmp__client_8c-source.html#l00670">snmp_set_var_typed_value()</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00082">netsnmp_request_info_s::status</a>, and <a class="el" href=
+        "snmp__api_8h-source.html#l00521">variable_list::type</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga52" doxytag="snmp_agent.c::handle_snmp_packet" id="ga52"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int handle_snmp_packet</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>op</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structsnmp__session.html">netsnmp_session</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>session</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqid</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>pdu</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">void *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>magic</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>handles an incoming SNMP packet into the agent</p>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l01702">1702</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__api_8h-source.html#l00083">snmp_pdu::command</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00093">snmp_pdu::errstat</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00222">snmp_session::s_snmp_errno</a>, <a class="el" href=
+        "agent__trap_8c-source.html#l00878">send_easy_trap()</a>, and <a class="el" href=
+        "snmp__api_8h-source.html#l00081">snmp_pdu::version</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga53" doxytag="snmp_agent.c::netsnmp_add_varbind_to_cache" id="ga53"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__request__info__s.html">netsnmp_request_info</a>* netsnmp_add_varbind_to_cache</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_agent_session *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>asp</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>vbcount</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structvariable__list.html">netsnmp_variable_list</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>varbind_ptr</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">netsnmp_subtree *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>tp</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <dl compact="compact">
+          <dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt>
+
+          <dd>make this be more intelligent about ranges. Right now we merely take the highest level commonality of a
+          registration range and use that. At times we might be able to be smarter about checking the range itself as opposed to
+          the node above where the range exists, but I doubt this will come up all that frequently.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l01803">1803</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8h-source.html#l00069">netsnmp_request_info_s::agent_req_info</a>,
+        <a class="el" href="snmp__agent_8h-source.html#l00078">netsnmp_request_info_s::delegated</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00080">netsnmp_request_info_s::inclusive</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00084">netsnmp_request_info_s::index</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00517">variable_list::name</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00519">variable_list::name_length</a>, <a class="el" href=
+        "agent__registry_8c-source.html#l01236">netsnmp_acm_check_subtree()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00815">netsnmp_free_request_data_sets()</a>, <a class="el" href=
+        "snmp__api_8c-source.html#l06268">netsnmp_oid_find_prefix()</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00092">netsnmp_request_info_s::next</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00064">netsnmp_request_info_s::parent_data</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00093">netsnmp_request_info_s::prev</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00079">netsnmp_request_info_s::processed</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00072">netsnmp_request_info_s::range_end</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00073">netsnmp_request_info_s::range_end_len</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00058">netsnmp_request_info_s::requestvb</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00089">netsnmp_request_info_s::requestvb_start</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00082">netsnmp_request_info_s::status</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00094">netsnmp_request_info_s::subtree</a>, and <a class="el" href=
+        "snmp__api_8h-source.html#l00521">variable_list::type</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga64" doxytag="snmp_agent.c::netsnmp_check_transaction_id" id="ga64"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_check_transaction_id</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">int&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>transaction_id</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Decide if the requested transaction_id is still being processed within the agent.</p>
+
+        <p>This is used to validate whether a delayed cache (containing possibly freed pointers) is still usable.</p>
+
+        <p>returns SNMPERR_SUCCESS if it's still valid, or SNMPERR_GENERR if not.</p>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l02565">2565</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00707">netsnmp_handler_check_cache()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga68" doxytag="snmp_agent.c::netsnmp_request_set_error" id="ga68"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_request_set_error</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>request</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>error_value</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>set error for a request</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>request</em>&nbsp;</td>
+
+                <td>request which has error</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>error_value</em>&nbsp;</td>
+
+                <td>error value for request</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l03307">3307</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8c-source.html#l03239">_request_set_error()</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00069">netsnmp_request_info_s::agent_req_info</a>, and <a class="el" href=
+        "snmp__agent_8h-source.html#l00159">netsnmp_agent_request_info_s::mode</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga69" doxytag="snmp_agent.c::netsnmp_request_set_error_all" id="ga69"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE int netsnmp_request_set_error_all</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>requests</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>error</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>set error for all requests</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>requests</em>&nbsp;</td>
+
+                <td>request list</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>error_value</em>&nbsp;</td>
+
+                <td>error value for requests</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>SNMPERR_SUCCESS, or an error code</dd>
+        </dl>
+
+        <p>paranoid sanity checks</p>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l03322">3322</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8c-source.html#l03239">_request_set_error()</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00069">netsnmp_request_info_s::agent_req_info</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00159">netsnmp_agent_request_info_s::mode</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00092">netsnmp_request_info_s::next</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l03496">netsnmp_set_all_requests_error()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga81" doxytag="snmp_agent.c::netsnmp_set_all_requests_error" id="ga81"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_set_all_requests_error</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>requests</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>error_value</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>set error for all request</p>
+
+        <dl compact="compact">
+          <dt><b><a class="el" href="deprecated.html#_deprecated000003">Deprecated:</a></b></dt>
+
+          <dd>use netsnmp_request_set_error_all</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>reqinfo</em>&nbsp;</td>
+
+                <td>agent_request_info pointer for requests</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>requests</em>&nbsp;</td>
+
+                <td>request list</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>error_value</em>&nbsp;</td>
+
+                <td>error value for requests</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>error_value</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l03496">3496</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8c-source.html#l03322">netsnmp_request_set_error_all()</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00417">netsnmp_cache_helper_handler()</a>, and
+        <a class="el" href="multiplexer_8c-source.html#l00057">netsnmp_multiplexer_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga80" doxytag="snmp_agent.c::netsnmp_set_mode_request_error" id="ga80"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_set_mode_request_error</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>mode</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>request</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>error_value</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>deprecated, use netsnmp_request_set_error instead</p>
+
+        <dl compact="compact">
+          <dt><b><a class="el" href="deprecated.html#_deprecated000002">Deprecated:</a></b></dt>
+
+          <dd>, use netsnmp_request_set_error instead</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>mode</em>&nbsp;</td>
+
+                <td>Net-SNMP agent processing mode</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>request</em>&nbsp;</td>
+
+                <td>request_info pointer</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>error_value</em>&nbsp;</td>
+
+                <td>error value for requests</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>error_value</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l03480">3480</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8c-source.html#l03239">_request_set_error()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga79" doxytag="snmp_agent.c::netsnmp_set_request_error" id="ga79"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_set_request_error</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>request</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>error_value</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>deprecated, use netsnmp_request_set_error instead</p>
+
+        <dl compact="compact">
+          <dt><b><a class="el" href="deprecated.html#_deprecated000001">Deprecated:</a></b></dt>
+
+          <dd>, use netsnmp_request_set_error instead</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>reqinfo</em>&nbsp;</td>
+
+                <td>agent_request_info pointer for request</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>request</em>&nbsp;</td>
+
+                <td>request_info pointer</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>error_value</em>&nbsp;</td>
+
+                <td>error value for requests</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>error_value</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Examples:</b></dt>
+
+          <dd><a class="el" href="delayed__instance_8c-example.html#a22">delayed_instance.c</a>.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l03461">3461</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8c-source.html#l03239">_request_set_error()</a>, and <a class="el" href=
+        "snmp__agent_8h-source.html#l00159">netsnmp_agent_request_info_s::mode</a>.</p>
+
+        <p>Referenced by <a class="el" href="old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, and <a class="el" href=
+        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga18" doxytag="snmp_agent.c::netsnmp_wrap_up_request" id="ga18"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_wrap_up_request</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_agent_session *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>asp</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>status</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>if asp-&gt;pdu</p>
+
+        <p>Definition at line <a class="el" href="snmp__agent_8c-source.html#l01470">1470</a> of file <a class="el" href=
+        "snmp__agent_8c-source.html">snmp_agent.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__api_8h-source.html#l00083">snmp_pdu::command</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00095">snmp_pdu::errindex</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00093">snmp_pdu::errstat</a>, <a class="el" href=
+        "snmp__api_8h-source.html#l00515">variable_list::next_variable</a>, and <a class="el" href=
+        "snmp__api_8h-source.html#l00521">variable_list::type</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,739 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>MFD : ifTable data access</title>
+  </head>
+
+  <body bgcolor="#ffffff">
+    <h1>MFD : ifTable data access</h1>
+    <p>
+      Now that we have the basic code generated, the next step is to
+      implement the data access functions. The data access code is
+      responsible for reading the available data and determining the valid
+      indexes. For each data item, or row, a new <i>row request</i>
+      structure is created. The <i>mib context</i>, contained in the
+      <i>row request</i>, is initialized with the appropriate index
+      data for the row, and then the row is inserted into the table
+      container. The module can also initialize the <i>data context</i> at
+      this time, or delay that processing for later. (see
+      <a href="../../faq.html#init_data_context">When should I initialize
+        the data context?</a>)
+    </p><p>
+      In the Linux kernel, interface
+      statistics are available by reading the file /proc/net/dev. The format
+      looks like this:
+    </p>
+    <table><tr><td></td><td bgcolor=CCCCCC><pre>
+Inter-|   Receive                                                |  Transmit
+ face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
+    lo:45312667  382442    0    0    0     0          0         0 45312667  382442    0    0    0     0       0          0
+  eth0:2116574495 13308144    0    0    0     0          0         0 816012310 7565504    0    0    0 3604480       0          0
+            </pre></td></tr></table>
+    <p>
+      (If you want to try this tutorial on a non-Linux system, just copy
+      the above data to any file, and update the code to use a static copy
+      of the file. Note that some ioctl calls are made for some data that
+      isn't found in /proc/net/dev. If your OS doesn't support the ioctl
+      calls that are used, comment them out or replace them with code to
+      get the data for your OS.)
+    </p><p>
+      As is often the case with external data, the interfaces data we get
+      from the kernel is not sorted by the index specified by the MIB. The
+      kernel reports data by interface names ('eth0', 'lo', etc), and the
+      ifTable is ordered by the arbitrary ifIndex.
+    </p><p>
+      To keep this tutorial simple, we aren't going to implment
+      every column in the ifTable. In particular, the ifAdminStatus,
+      ifOperStatus and ifLastChange columns will not be implemented.
+      This also lets us ignore set support for the time being.
+      We'll cover dealing with these columns later on.
+    </p>
+    <!-- ========================================================= -->
+    <h2>Introduction</h2>
+    <p>
+      The default data access method used by MFD is the
+      <var>container-cached</var> method. Basically this means that a
+      <var>netsnmp_container</var> will be used to cache the data for
+      our table. (If you don't want caching, don't worry. You can
+      configure the cache to be rebuilt for every request.)
+    </p>
+    <!-- ========================================================= -->
+    <h2>Initialization</h2>
+    <p>
+      There are two initialization routines called for
+      <var>container-cached</var>. One is the data init routine that
+      is common to all <var>MFD</var> code. The other is specificly
+      to init the container and cache.
+    </p>
+    <h3>Data init</h3>
+    <p>
+      The data init routine is called at startup, and
+      any necessary data related setup can be done here. In this
+      example, we are going to set up a <var>netsnmp_column_info</var>
+      structure to let the agent know which columns we will be
+      implementing. This will allow the agent to skip these columns.
+    </p><p>
+      The format of the data file we are using changed between the
+      2.2 and 2.4 versions of the kernel. We need to know which format
+      the current system is using, so we call a routine that will take a peek
+      at the data file to determine the format of the file.
+    </p>
+    <table><tr>
+          <td width=20></td>
+          <td><bold>Modified code</bold></td>
+        </tr><tr>
+          <td></td>
+          <td bgcolor=CCCCCC><pre>
+int
+ifTable_init_data(ifTable_registration_ptr ifTable_reg)
+{<font color=blue>
+    static unsigned int my_columns[] = {
+        COLUMN_IFINDEX, COLUMN_IFTYPE, COLUMN_IFPHYSADDRESS,
+        COLUMN_IFINOCTETS, COLUMN_IFINUCASTPKTS,
+        COLUMN_IFOUTOCTETS, COLUMN_IFOUTUCASTPKTS };
+    static netsnmp_column_info valid_columns;
+</font>
+    DEBUGMSGTL(("verbose:ifTable_init_data", "called\n"));
+
+    /*
+     ***************************************************
+     ***             START EXAMPLE CODE              ***
+     ***---------------------------------------------***/<font color=blue>
+    /*
+     * we only want to process certain columns, and ignore
+     * anything else.
+     */
+    valid_columns.isRange = 0;
+    valid_columns.details.list = my_columns;
+    valid_columns.list_count = sizeof(my_columns)/sizeof(int);
+    ifTable_valid_columns_set(&valid_columns);
+
+    _choose_proc_format();</font>
+    /*
+     ***---------------------------------------------***
+     ***              END  EXAMPLE CODE              ***
+     ***************************************************/
+
+    return MFD_SUCCESS;
+}
+              </pre></td></tr>
+    </table>
+    <h3>Container init</h3>
+    <p>
+      The container init routine is called right after the data
+      init routine. We are going to leave the default code as-is,
+      to have a container allocated for us. (The timeout could
+      be increased, depending on your tolerance for stale data.
+      Set it to -1 if you want to rebuild the cache for every
+      request.) We are going to to set one extra flag, to have
+      the cache pre-load right away. This will allow the agent to
+      discover all the index values at startup, which is necessar
+      because other parts of the agent need to know what ifIndex
+      values are valid.
+    </p>
+    <table><tr>
+          <td width=20></td>
+          <td><bold>Modified code</bold></td>
+        </tr><tr>
+          <td></td>
+          <td bgcolor=CCCCCC><pre>
+void
+ifTable_container_init(netsnmp_container ** container_ptr_ptr,
+                       netsnmp_cache * cache)
+{
+    DEBUGMSGTL(("verbose:ifTable_container_init", "called\n"));
+
+    if ((NULL == cache) || (NULL == container_ptr_ptr)) {
+        snmp_log(LOG_ERR, "bad params to ifTable_container_init\n");
+        return;
+    }
+
+    /*
+     * For advanced users, you can use a custom container. If you
+     * do not create one, one will be created for you.
+     */
+    *container_ptr_ptr = NULL;
+
+    /*
+     * Also for advance users, you can set parameters for the
+     * cache. Do not change the magic pointer, as it is used
+     * by the MFD helper.
+     */
+    cache->timeout = 30;        /* seconds */
+<font color=blue>
+    /*
+     * preload to assign initial index values
+     */
+    cache->flags |= NETSNMP_CACHE_PRELOAD;</font>
+}
+            </pre></td></tr>
+    </table>
+    <!-- ========================================================= -->
+    <h2>Cache Helper</h2>
+    <p>
+      The cache helper is used to load the indexes (and by default,
+      the data) for each row in a table. In this tutorial, we will be
+      using all of the default behavior, with the addition of the
+      pre-loading (remember the flag we set during continer init?).
+    </p>
+    <h3>Cache Load</h3>
+    <p>
+      The default behaviour is to load the cache when a request is
+      received for data from the table. If requests continue to come
+      in, the cached data will be used until the time expires, at
+      which point the cache will be unloaded and the re-loaded. 
+    </p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifTable_cache_load(netsnmp_container * container)
+{
+    ifTable_rowreq_ctx *rowreq_ctx;<font color=blue>
+    int rc = MFD_SUCCESS;</font>
+
+    /*
+     * this example code is based on a data source that is a
+     * text file to be read and parsed.
+     */
+    FILE           *filep;
+    char            line[MAX_LINE_SIZE];<font color=blue>
+    int             fd;</font>
+
+    /*
+     * temporary storage for index values
+     */
+    /*
+     * ifIndex(1)/InterfaceIndex/ASN_INTEGER/long(long)//l/A/w/e/R/d/H
+     */
+    long            ifIndex;
+
+    DEBUGMSGTL(("verbose:ifTable_cache_load", "called\n"));
+
+    /*
+     ***************************************************
+     ***             START EXAMPLE CODE              ***
+     ***---------------------------------------------***/
+    /*
+     * open our data file.
+     */
+    filep = fopen(<font color=blue>"/proc/net/dev"</font>, "r");
+    if (NULL == filep) {
+        return MFD_RESOURCE_UNAVAILABLE;
+    }<font color=blue>
+
+    /*
+     * create socket for ioctls
+     */
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(fd < 0) {
+        fclose(filep);
+        return MFD_RESOURCE_UNAVAILABLE;
+    }
+
+    /*
+     * ignore header lines
+     */
+    fgets(line, sizeof(line), filep);
+    fgets(line, sizeof(line), filep);
+</font>
+    /*
+     ***---------------------------------------------***
+     ***              END  EXAMPLE CODE              ***
+     ***************************************************/
+    /*
+     * TODO: update container
+     *
+     * loop over your data, allocate, set index, insert into the container
+     */<font color=blue>
+    /*
+     * The rest of the file provides the statistics for an interface.
+     * Read in each line in turn, isolate the interface name
+     *   and retrieve (or create) the corresponding data structure.
+     */</font>
+    while (1) {<font color=blue>
+        struct ifreq    ifrq;
+        int             scan_count;
+        char           *stats, *ifstart;
+        unsigned long   rec_pkt, rec_oct, rec_err, rec_drop;
+        unsigned long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
+</font>
+        /*
+         ***************************************************
+         ***             START EXAMPLE CODE              ***
+         ***---------------------------------------------***/
+        /*
+         * get a line (skip blank lines)
+         */
+        do {
+            if (!fgets(line, sizeof(line), filep)) {
+                /*
+                 * we're done 
+                 */
+                fclose(filep);
+                filep = NULL;
+            }
+        } while (filep && (line[0] == '\n'));
+
+        /*
+         * check for end of data
+         */
+        if (NULL == filep)
+            break;
+        
+        /*
+         * TODO: parse line
+         * parse line into variables
+         */<font color=blue>
+        ifstart = line;
+        while (*ifstart && *ifstart == ' ')
+            ifstart++;
+        if ((!*ifstart) || ((stats = strrchr(ifstart, ':')) == NULL)) {
+            snmp_log(LOG_ERR,
+                     "interface data format error 1, line ==|%s|\n",
+                     line);
+            DEBUGMSGTL(("ifTable", "found '%s'\n", ifstart));
+            continue;
+        }
+
+        /*
+         * If we've met this interface before, use the same index.
+         * Otherwise find an unused index value and use that.
+         */
+        *stats++ = 0; /* null terminate name */
+        ifIndex = se_find_value_in_slist("interfaces", ifstart);
+        if (ifIndex == SE_DNE) {
+            ifIndex = se_find_free_value_in_slist("interfaces");
+            if (ifIndex == SE_DNE)
+                ifIndex = 1;       /* Completely new list! */
+            se_add_pair_to_slist("interfaces",
+                                 strdup(ifstart), ifIndex);
+            DEBUGMSGTL(("ifTable:ifIndex", "new ifIndex %d for %s\n",
+                        ifIndex, ifstart));
+        }
+        if ((NULL == ifstart) || (0 == ifIndex)) {
+            rc = MFD_END_OF_DATA;
+            break;
+        }
+</font>
+        /*
+         ***---------------------------------------------***
+         ***              END  EXAMPLE CODE              ***
+         ***************************************************/
+
+        /*
+         * allocate an row context and set the index(es)
+         */
+        rowreq_ctx = ifTable_allocate_rowreq_ctx();
+        if (NULL == rowreq_ctx) {
+            snmp_log(LOG_ERR, "memory allocation failed\n");<font color=blue>
+            rc = MFD_RESOURCE_UNAVAILABLE;
+            break;</font>
+        }
+        if (MFD_SUCCESS != ifTable_indexes_set(rowreq_ctx, ifIndex)) {
+            snmp_log(LOG_ERR, "error setting index while loading "
+                     "ifTable cache.\n");
+            ifTable_release_rowreq_ctx(rowreq_ctx);
+            continue;
+        }
+<font color=blue>        
+        rec_pkt = rec_oct = rec_err = rec_drop = 0;
+        snd_pkt = snd_oct = snd_err = snd_drop = coll = 0;
+        if (scan_line_to_use == scan_line_2_2) {
+            scan_count = sscanf(stats, scan_line_to_use,
+                                &rec_oct, &rec_pkt, &rec_err, &rec_drop,
+                                &snd_oct, &snd_pkt, &snd_err, &snd_drop,
+                                &coll);
+        } else {
+            scan_count = sscanf(stats, scan_line_to_use,
+                                &rec_pkt, &rec_err,
+                                &snd_pkt, &snd_err, &coll);
+        }
+        if(scan_count != scan_expected) {
+            snmp_log(LOG_ERR,
+                     "error scanning interface data (expected %d, got %d)\n",
+                     scan_expected, scan_count);
+            rc = MFD_ERROR;
+            break;
+        }
+        if (scan_line_to_use != scan_line_2_2) {
+            rec_oct = rec_pkt * 308;
+            snd_oct = snd_pkt * 308;
+        }
+</font>
+        /*
+         * TODO: populate data context
+         */
+        /*
+         * TRANSIENT or semi-TRANSIENT data:
+         * copy data or save any info needed to do it in row_prep.
+         */
+        /*
+         * TODO: setup/save data for ifDescr
+         * ifDescr(2)/DisplayString/ASN_OCTET_STR/char(char)//L/A/w/e/R/d/H
+         */
+    /** no mapping */<font color=blue>
+        /** no code to get description yet */
+        rowreq_ctx->data.ifDescr[0] = 0;
+        rowreq_ctx->data.ifDescr_len = 0;
+</font>
+        /*
+         * TODO: setup/save data for ifMtu
+         * ifMtu(4)/INTEGER32/ASN_INTEGER/long(long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        //rowreq_ctx->data.ifMtu = TODO_FIND_ifMtu;
+</font>
+        /*
+         * TODO: setup/save data for ifSpeed
+         * ifSpeed(5)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        //rowreq_ctx->data.ifSpeed = TODO_FIND_ifSpeed;
+</font>
+        /*
+         * TODO: setup/save data for ifPhysAddress
+         * ifPhysAddress(6)/PhysAddress/ASN_OCTET_STR/char(char)//L/A/w/e/r/d/H
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */
+        /*
+         * make sure there is enough space for data
+         */<font color=blue>
+        if (sizeof(rowreq_ctx->data.ifPhysAddress) < 6) {
+            snmp_log(LOG_ERR, "not enough space for address while loading "
+                         "ifTable cache.\n");
+            ifTable_release_rowreq_ctx(rowreq_ctx);
+            continue;
+        }
+        rowreq_ctx->data.ifPhysAddress_len = 6;
+        strncpy(ifrq.ifr_name, ifstart, sizeof(ifrq.ifr_name));
+        ifrq.ifr_name[ sizeof(ifrq.ifr_name)-1 ] = 0;
+        if (ioctl(fd, SIOCGIFHWADDR, &ifrq) < 0)
+            memset(rowreq_ctx->data.ifPhysAddress, (0), 6);
+        else {
+            memcpy(rowreq_ctx->data.ifPhysAddress,
+                   ifrq.ifr_hwaddr.sa_data, 6);
+        }
+</font>
+        /*
+         * TODO: setup/save data for ifType
+         * ifType(3)/IANAifType/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
+         */
+        /*
+         * TODO:
+         * value mapping
+         */
+        if (MFD_SUCCESS !=
+            ifType_map(&rowreq_ctx->data.ifType,
+                       <font color=blue>ifrq.ifr_hwaddr.sa_family</font>)) {
+            snmp_log(LOG_ERR, "error mapping ifType while loading "
+                     "ifTable cache.\n");
+            ifTable_release_rowreq_ctx(rowreq_ctx);
+            continue;
+        }
+
+        /*
+         * TODO: setup/save data for ifAdminStatus
+         * ifAdminStatus(7)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
+         */
+        /*
+         * TODO:
+         * value mapping
+         */
+
+        /*
+         * TODO: setup/save data for ifOperStatus
+         * ifOperStatus(8)/INTEGER/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
+         */
+        /*
+         * TODO:
+         * value mapping
+         */
+
+        /*
+         * TODO: setup/save data for ifLastChange
+         * ifLastChange(9)/TICKS/ASN_TIMETICKS/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        //rowreq_ctx->data.ifLastChange = TODO_FIND_ifLastChange;
+</font>
+        /*
+         * TODO: setup/save data for ifInOctets
+         * ifInOctets(10)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        rowreq_ctx->data.ifInOctets = rec_oct;
+</font>
+        /*
+         * TODO: setup/save data for ifInUcastPkts
+         * ifInUcastPkts(11)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        rowreq_ctx->data.ifInUcastPkts = rec_pkt;
+</font>
+        /*
+         * TODO: setup/save data for ifInNUcastPkts
+         * ifInNUcastPkts(12)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        //rowreq_ctx->data.ifInNUcastPkts = TODO_FIND_ifInNUcastPkts;
+</font>
+        /*
+         * TODO: setup/save data for ifInDiscards
+         * ifInDiscards(13)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        rowreq_ctx->data.ifInDiscards = rec_drop;
+</font>
+        /*
+         * TODO: setup/save data for ifInErrors
+         * ifInErrors(14)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        rowreq_ctx->data.ifInErrors = rec_err;
+</font>
+        /*
+         * TODO: setup/save data for ifInUnknownProtos
+         * ifInUnknownProtos(15)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        //rowreq_ctx->data.ifInUnknownProtos = TODO_FIND_ifInUnknownProtos;
+</font>
+        /*
+         * TODO: setup/save data for ifOutOctets
+         * ifOutOctets(16)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        rowreq_ctx->data.ifOutOctets = snd_oct;
+</font>
+        /*
+         * TODO: setup/save data for ifOutUcastPkts
+         * ifOutUcastPkts(17)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        rowreq_ctx->data.ifOutUcastPkts = snd_pkt;
+</font>
+        /*
+         * TODO: setup/save data for ifOutNUcastPkts
+         * ifOutNUcastPkts(18)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        //rowreq_ctx->data.ifOutNUcastPkts = TODO_FIND_ifOutNUcastPkts;
+</font>
+        /*
+         * TODO: setup/save data for ifOutDiscards
+         * ifOutDiscards(19)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        rowreq_ctx->data.ifOutDiscards = snd_drop;
+</font>
+        /*
+         * TODO: setup/save data for ifOutErrors
+         * ifOutErrors(20)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        rowreq_ctx->data.ifOutErrors = snd_err;
+</font>
+        /*
+         * TODO: setup/save data for ifOutQLen
+         * ifOutQLen(21)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */<font color=blue>
+        //rowreq_ctx->data.ifOutQLen = TODO_FIND_ifOutQLen;
+</font>
+        /*
+         * TODO: setup/save data for ifSpecific
+         * ifSpecific(22)/OBJECTID/ASN_OBJECT_ID/oid(oid)//L/A/w/e/r/d/h
+         */
+    /** no mapping */
+        /*
+         * TODO:
+         * update, replace or delete, if needed.
+         */
+        /*
+         * make sure there is enough space for data
+         */<font color=blue>
+        /** not implemented */
+</font>
+        /*
+         * insert into table container
+         */
+        CONTAINER_INSERT(container, rowreq_ctx);
+    }
+
+    /*
+     ***************************************************
+     ***             START EXAMPLE CODE              ***
+     ***---------------------------------------------***/<font color=blue>
+    close(fd);</font>
+    if (NULL != filep)
+        fclose(filep);
+    /*
+     ***---------------------------------------------***
+     ***              END  EXAMPLE CODE              ***
+     ***************************************************/
+<font color=blue>
+    return rc;</font>
+}
+</pre></td>
+        </tr>
+      </table>
+    </p>
+    <h3>Cache Unload</h3>
+    <p>
+      When a cache has expired, the unload routine is called. The MFD
+      interface code calls the cache free routine to allow your handler
+      to do any necessary cleanup. Note that you should not actually
+      remove items from the container or delete anything - that will be
+      handled automaticaly by the container class.
+    </p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+void
+ifTable_cache_free(netsnmp_container * container)
+{
+    DEBUGMSGTL(("verbose:ifTable_cache_free", "called\n"));
+}
+</pre></td>
+        </tr>
+      </table>
+    <p>
+      In this simple example, we get most of our data from an external
+      file, so simply flushing the cache meets our needs. In later
+      tutorials, we'll see how to supress the cache unload/free and
+      re-use existing data.
+    </p>
+    <p>
+      The agent does runs a periodic check (the default is every 60
+      seconds, I believe) for expired caches, and will call the
+      unload routine for expired caches. See the documentation
+      page on the cache helper for ways to modify this behavior, if
+      you need to.
+    </p>
+    <!-- ========================================================= -->
+    <h2>Row preparation</h2>
+    <p>
+      The row preparation function <var>ifTable_row_prep</var> is common
+      to all data access methods. After the correct row request context
+      is found for a request, this routine will be called for each row
+      that is referenced in the incoming request. This gives you
+      one last chance to update the context before the request is processed.
+    </p><p>
+      The primary purpose of the cache load
+      routine (for MFD tables) is to set up the indexes. In this case,
+      we have access to everything we need during cache loading, so we
+      set up all our data there. If some data needed to be retrieved
+      from another source, we could delay loading it until the row is
+      needed.
+    </p><p>
+      Not, however, that while the cache load routine won't be called
+      again until the cache expires, the row prep routine is called
+      for each request. This is why we perform the ioctl to retrieve the
+      physical address (ifPhysAddr) during the cache load. If the ioctl
+      was for data that changed frequently, we could have chosen to
+      update that data here. That is an option if you don't mind having
+      a mix of cached data and fresh data.
+    </p><p>
+      Since we have already done the processing we need to do, so we'll
+      just leave this function as is.
+    </p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifTable_row_prep(ifTable_rowreq_ctx * rowreq_ctx)
+{
+    DEBUGMSGTL(("verbose:ifTable_row_prep", "called\n"));
+
+    netsnmp_assert(NULL != rowreq_ctx);
+
+
+    return MFD_SUCCESS;
+}
+</pre></td>
+        </tr>
+      </table>
+      <!-- ========================================================= -->
+    <p></p>
+    <font size=+1>
+      <a href="data_get.html">Next: Get data</a> |
+      <a href="structures.html">Back: Structures</a> |
+      <a href="../index.html">Up: IF-MIB Tutorials</a>
+    </font>
+      <!-- ========================================================= -->
+      <!-- ========================================================= -->
+    <hr>
+    rstory at freesnmp dot com<br>
+Version $Revision$
+<!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
+<!-- hhmts start -->
+Last modified: Tue Aug 31 13:03:17 EDT 2004
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+  </body>
+</html>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

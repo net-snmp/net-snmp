@@ -1,0 +1,273 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>winpipe.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment">  Copyright (c) Fabasoft R&amp;D Software GmbH &amp; Co KG, 2003</span>
+00003 <span class="comment">  oss@fabasoft.com</span>
+00004 <span class="comment">  Author: Bernhard Penz &lt;bernhard.penz@fabasoft.com&gt;</span>
+00005 
+00006 <span class="comment">  Redistribution and use in source and binary forms, with or without</span>
+00007 <span class="comment">  modification, are permitted provided that the following conditions are met:</span>
+00008 
+00009 <span class="comment">  *  Redistributions of source code must retain the above copyright notice,</span>
+00010 <span class="comment">     this list of conditions and the following disclaimer.</span>
+00011 
+00012 <span class="comment">  *  Redistributions in binary form must reproduce the above copyright</span>
+00013 <span class="comment">     notice, this list of conditions and the following disclaimer in the</span>
+00014 <span class="comment">     documentation and/or other materials provided with the distribution.</span>
+00015 
+00016 <span class="comment">  *  The name of Fabasoft R&amp;D Software GmbH &amp; Co KG or any of its subsidiaries, </span>
+00017 <span class="comment">     brand or product names may not be used to endorse or promote products </span>
+00018 <span class="comment">     derived from this software without specific prior written permission.</span>
+00019 
+00020 <span class="comment">  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ``AS IS'' AND ANY</span>
+00021 <span class="comment">  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span>
+00022 <span class="comment">  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR</span>
+00023 <span class="comment">  PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT HOLDER BE</span>
+00024 <span class="comment">  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span>
+00025 <span class="comment">  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span>
+00026 <span class="comment">  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR</span>
+00027 <span class="comment">  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,</span>
+00028 <span class="comment">  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE</span>
+00029 <span class="comment">  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN</span>
+00030 <span class="comment">  IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+00031 <span class="comment">*/</span>
+00032 
+00033 <span class="preprocessor">#ifdef WIN32</span>
+00034 
+00035 <span class="preprocessor">#include &lt;io.h&gt;</span>
+00036 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00037 
+00038 <span class="keyword">static</span> <span class="keywordtype">int</span> InitUPDSocket(SOCKET *sock, <span class=
+"keyword">struct</span> sockaddr_in *socketaddress)
+00039 {
+00040         *sock = 0;
+00041         memset(socketaddress, 0, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_in));
+00042 
+00043         <span class="keywordflow">if</span>( (*sock = socket(AF_INET, SOCK_DGRAM, 0)) == SOCKET_ERROR)
+00044         {
+00045                 <span class="keywordflow">return</span> -1;
+00046         }
+00047         socketaddress-&gt;sin_family = AF_INET;
+00048         socketaddress-&gt;sin_addr.S_un.S_addr = htonl(INADDR_LOOPBACK);
+00049         socketaddress-&gt;sin_port = 0;
+00050 
+00051         <span class="keywordflow">if</span>(bind(*sock, (<span class=
+"keyword">struct</span> sockaddr *) socketaddress, <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr)) == SOCKET_ERROR)
+00052         {
+00053                 <span class="keywordflow">return</span> -1;
+00054         }
+00055 
+00056         <span class="keywordflow">return</span> 0;
+00057 }
+00058 
+00059 <span class="keyword">static</span> <span class="keywordtype">int</span> ConnectUDPSocket(SOCKET *sock, <span class=
+"keyword">struct</span> sockaddr_in *socketaddress, SOCKET *remotesocket)
+00060 {
+00061         <span class="keywordtype">int</span> size = <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr);
+00062         <span class="keywordflow">if</span> (getsockname(*sock, (<span class=
+"keyword">struct</span> sockaddr *) socketaddress, &amp;size) == SOCKET_ERROR)
+00063         {
+00064                 <span class="keywordflow">return</span> -1;
+00065         }
+00066 
+00067         <span class="keywordflow">if</span>(size != <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr))
+00068         {
+00069                 <span class="keywordflow">return</span> -1;
+00070         }
+00071 
+00072         <span class="keywordflow">if</span> (connect(*remotesocket, (<span class=
+"keyword">struct</span> sockaddr *) socketaddress, <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> sockaddr)) == SOCKET_ERROR)
+00073         {
+00074                 <span class="keywordflow">return</span> -1;
+00075         }
+00076 
+00077         <span class="keywordflow">return</span> 0;
+00078 }
+00079 
+00080 <span class="keyword">static</span> <span class="keywordtype">int</span> TestUDPSend(SOCKET *sock, <span class=
+"keyword">struct</span> sockaddr_in *socketaddress)
+00081 {
+00082         <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> port = socketaddress-&gt;sin_port;
+00083         <span class="keywordtype">int</span> size = <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr);
+00084 
+00085         <span class="keywordtype">int</span> bytessent = send(*sock, (<span class=
+"keywordtype">char</span> *) &amp;port, <span class="keyword">sizeof</span>(port), 0);
+00086         <span class="keywordflow">if</span>(bytessent != <span class="keyword">sizeof</span>(port))
+00087         {
+00088                 <span class="keywordflow">return</span> -1;
+00089         }
+00090 
+00091         <span class="keywordflow">return</span> 0;
+00092 }
+00093 
+00094 <span class="keyword">static</span> <span class=
+"keywordtype">int</span> TestUDPReceive(SOCKET *sock, SOCKET *remotesocket, <span class=
+"keyword">struct</span> sockaddr_in *remotesocketaddress)
+00095 {
+00096         <span class="keyword">struct </span>sockaddr_in recvfromaddress;
+00097         <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> readbuffer[2];
+00098         <span class="keywordtype">int</span> size = <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr);
+00099 
+00100         <span class="keywordtype">int</span> bytesreceived = recvfrom(*sock,(<span class=
+"keywordtype">char</span> *) &amp;readbuffer, <span class="keyword">sizeof</span>(readbuffer), 0, (<span class=
+"keyword">struct</span> sockaddr *) &amp;recvfromaddress, &amp;size) ;
+00101         <span class="keywordflow">if</span>(bytesreceived != <span class="keyword">sizeof</span>(<span class=
+"keywordtype">unsigned</span> short) || size != <span class="keyword">sizeof</span>(<span class=
+"keyword">struct </span>sockaddr) || readbuffer[0] != (<span class=
+"keywordtype">unsigned</span> short) remotesocketaddress-&gt;sin_port || recvfromaddress.sin_family != remotesocketaddress-&gt;sin_family || recvfromaddress.sin_addr.S_un.S_addr != remotesocketaddress-&gt;sin_addr.S_un.S_addr || recvfromaddress.sin_port != remotesocketaddress-&gt;sin_port)
+00102         {
+00103                 <span class="keywordflow">return</span> -1;
+00104         }
+00105 
+00106         <span class="keywordflow">return</span> 0;
+00107 }
+00108 
+00109 <span class="keyword">static</span> <span class="keywordtype">void</span> CloseUDPSocketPair(SOCKET *socketpair)
+00110 {
+00111         <span class="keywordtype">int</span> i = WSAGetLastError();
+00112 
+00113         <span class="keywordflow">if</span>(socketpair[0] != INVALID_SOCKET)
+00114         {
+00115                 closesocket(socketpair[0]);
+00116         }
+00117         <span class="keywordflow">if</span>(socketpair[1] =! INVALID_SOCKET)
+00118         {
+00119                 closesocket(socketpair[1]);
+00120         }
+00121 }
+00122 
+00123 <span class="comment">/*</span>
+00124 <span class="comment">        Windows unnamed pipe emulation, used to enable select()</span>
+00125 <span class="comment">        on a Windows machine for the CALLBACK (pipe-based) transport domain.</span>
+00126 <span class="comment">*/</span>
+00127 <span class="keywordtype">int</span> create_winpipe_transport(<span class="keywordtype">int</span> *pipefds)
+00128 {
+00129         SOCKET socketpair[2];
+00130         <span class="keyword">struct </span>sockaddr_in socketaddress[2];
+00131 
+00132         <span class="keyword">struct </span>timeval waittime = {0, 200000};
+00133         fd_set readset;
+00134 
+00135         <span class="keywordflow">if</span> (InitUPDSocket(&amp;socketpair[0], &amp;socketaddress[0]))
+00136         {
+00137                 CloseUDPSocketPair(socketpair);
+00138                 <span class="keywordflow">return</span> -1;
+00139         }
+00140         <span class="keywordflow">if</span> (InitUPDSocket(&amp;socketpair[1], &amp;socketaddress[1]))
+00141         {
+00142                 CloseUDPSocketPair(socketpair);
+00143                 <span class="keywordflow">return</span> -1;
+00144         }
+00145 
+00146         <span class="comment">/*</span>
+00147 <span class="comment">                I have two UDP sockets - now lets connect them to each other.</span>
+00148 <span class="comment">        */</span>
+00149 
+00150         <span class=
+"keywordflow">if</span> (ConnectUDPSocket(&amp;socketpair[0], &amp;socketaddress[0], &amp;socketpair[1]))
+00151         {
+00152                 CloseUDPSocketPair(socketpair);
+00153                 <span class="keywordflow">return</span> -1;
+00154         }
+00155         <span class=
+"keywordflow">if</span>(ConnectUDPSocket(&amp;socketpair[1], &amp;socketaddress[1], &amp;socketpair[0]))
+00156         {
+00157                 CloseUDPSocketPair(socketpair);
+00158                 <span class="keywordflow">return</span> -1;
+00159         }
+00160 
+00161         <span class="comment">/*</span>
+00162 <span class="comment">                The two sockets are connected to each other, now lets test the connection</span>
+00163 <span class="comment">                by sending the own port number.</span>
+00164 <span class="comment">        */</span>
+00165         <span class="keywordflow">if</span>(TestUDPSend(&amp;socketpair[0], &amp;socketaddress[0]))
+00166         {
+00167                 CloseUDPSocketPair(socketpair);
+00168                 <span class="keywordflow">return</span> -1;
+00169         }
+00170         <span class="keywordflow">if</span>(TestUDPSend(&amp;socketpair[1], &amp;socketaddress[1]))
+00171         {
+00172                 CloseUDPSocketPair(socketpair);
+00173                 <span class="keywordflow">return</span> -1;
+00174         }
+00175 
+00176         <span class="comment">/*</span>
+00177 <span class="comment">                Port numbers sent, now lets select() on the socketpair and check that </span>
+00178 <span class="comment">                both messages got through</span>
+00179 <span class="comment">        */</span>
+00180         FD_ZERO(&amp;readset);
+00181         FD_SET(socketpair[0], &amp;readset);
+00182         FD_SET(socketpair[1], &amp;readset);
+00183 
+00184         <span class="comment">/*</span>
+00185 <span class="comment">                For some unknown reason the timeout setting in the select call does not have</span>
+00186 <span class="comment">                the desired effect, and for yet another unknown reason a Sleep(1) solves this</span>
+00187 <span class="comment">                problem.</span>
+00188 <span class="comment">        */</span>
+00189         Sleep(1);
+00190         <span class=
+"keywordflow">if</span>(select(0, &amp;readset, NULL, NULL, &amp;waittime) != 2 || !FD_ISSET(socketpair[0], &amp;readset) || !FD_ISSET(socketpair[1], &amp;readset))
+00191         {
+00192                 CloseUDPSocketPair(socketpair);
+00193                 <span class="keywordflow">return</span> -1;
+00194         }
+00195 
+00196         <span class="comment">/*</span>
+00197 <span class="comment">                Check if the packets I receive were really sent by me, and nobody else</span>
+00198 <span class="comment">                tried to sneak.</span>
+00199 <span class="comment">        */</span>
+00200     <span class="keywordflow">if</span>(TestUDPReceive(&amp;socketpair[0], &amp;socketpair[1], &amp;socketaddress[1]))
+00201         {
+00202                 CloseUDPSocketPair(socketpair);
+00203                 <span class="keywordflow">return</span> -1;
+00204         }
+00205         <span class="keywordflow">if</span>(TestUDPReceive(&amp;socketpair[1], &amp;socketpair[0], &amp;socketaddress[0]))
+00206         {
+00207                 CloseUDPSocketPair(socketpair);
+00208                 <span class="keywordflow">return</span> -1;
+00209         }
+00210 
+00211         <span class="comment">/*</span>
+00212 <span class="comment">                All sanity checks passed, I can return a "UDP pipe"</span>
+00213 <span class="comment">        */</span>
+00214         pipefds[0] = (int) socketpair[0];
+00215         pipefds[1] = (int) socketpair[1];
+00216 
+00217         <span class="keywordflow">return</span> 0;
+00218 }
+00219 
+00220 <span class="preprocessor">#endif </span><span class="comment">/* WIN32 */</span>
+00221 
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

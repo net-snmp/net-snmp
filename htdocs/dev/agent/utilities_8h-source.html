@@ -1,0 +1,85 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href="dir_000001.html">net-snmp</a>
+  </div>
+
+  <h1>utilities.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef NET_SNMP_UTILITIES_H</span>
+00002 <span class="preprocessor">#define NET_SNMP_UTILITIES_H</span>
+00003 
+00012 <span class="preprocessor">#ifndef NET_SNMP_CONFIG_H</span>
+00013 <span class="preprocessor">#error "Please include &lt;net-snmp/net-snmp-config.h&gt; before this file"</span>
+00014 <span class="preprocessor">#endif</span>
+00015 
+00016 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00017 
+00018     <span class="comment">/*</span>
+00019 <span class="comment">     *  For the initial release, this will just refer to the</span>
+00020 <span class="comment">     *  relevant UCD header files.</span>
+00021 <span class="comment">     *    In due course, the routines relevant to this area of the</span>
+00022 <span class="comment">     *  API will be identified, and listed here directly.</span>
+00023 <span class="comment">     *</span>
+00024 <span class="comment">     *  But for the time being, this header file is a placeholder,</span>
+00025 <span class="comment">     *  to allow application writers to adopt the new header file names.</span>
+00026 <span class="comment">     */</span>
+00027 
+00028 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00029 <span class="preprocessor">#include &lt;net-snmp/library/snmp_client.h&gt;</span>
+00030 <span class="preprocessor">#if HAVE_GETOPT_H</span>
+00031 <span class="preprocessor">#include &lt;getopt.h&gt;</span>
+00032 <span class="preprocessor">#else</span>
+00033 <span class="preprocessor">#include &lt;net-snmp/library/getopt.h&gt;</span>
+00034 <span class="preprocessor">#endif</span>
+00035 
+00036 <span class="preprocessor">#ifdef HAVE_NETINET_IN_H</span>
+00037 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>         <span class="comment">/* for in_addr_t */</span>
+00038 <span class="preprocessor">#endif</span>
+00039 <span class="preprocessor">#include &lt;net-snmp/library/system.h&gt;</span>
+00040 <span class="preprocessor">#include &lt;net-snmp/library/tools.h&gt;</span>
+00041 <span class="preprocessor">#include &lt;net-snmp/library/asn1.h&gt;</span>      <span class=
+"comment">/* for counter64 */</span>
+00042 <span class="preprocessor">#include &lt;net-snmp/library/int64.h&gt;</span>
+00043 
+00044 <span class="preprocessor">#include &lt;net-snmp/library/mt_support.h&gt;</span>
+00045 <span class="comment">/*  #include &lt;net-snmp/library/snmp_locking.h&gt;  */</span>
+00046 <span class="preprocessor">#include &lt;net-snmp/library/snmp_alarm.h&gt;</span>
+00047 <span class="preprocessor">#include &lt;net-snmp/library/callback.h&gt;</span>
+00048 <span class="preprocessor">#include &lt;net-snmp/library/data_list.h&gt;</span>
+00049 <span class="preprocessor">#include &lt;net-snmp/library/oid_stash.h&gt;</span>
+00050 <span class="preprocessor">#include &lt;net-snmp/library/snmp.h&gt;</span>
+00051 <span class="preprocessor">#include &lt;net-snmp/library/snmp_impl.h&gt;</span>
+00052 <span class="preprocessor">#include &lt;net-snmp/library/snmp-tc.h&gt;</span>
+00053 <span class="preprocessor">#include &lt;net-snmp/library/check_varbind.h&gt;</span>
+00054 <span class="preprocessor">#include &lt;net-snmp/library/container.h&gt;</span>
+00055 <span class="preprocessor">#include &lt;net-snmp/library/container_binary_array.h&gt;</span>
+00056 <span class="preprocessor">#include &lt;net-snmp/library/container_list_ssll.h&gt;</span>
+00057 <span class="preprocessor">#include &lt;net-snmp/library/container_iterator.h&gt;</span>
+00058 
+00059 <span class="preprocessor">#include &lt;net-snmp/library/snmp_assert.h&gt;</span>
+00060 
+00061 <span class="preprocessor">#include &lt;net-snmp/version.h&gt;</span>
+00062 
+00063 <span class="preprocessor">#endif                          </span><span class="comment">/* NET_SNMP_UTILITIES_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,264 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>&nbsp;/&nbsp;<a class="el" href="dir_000004.html">helpers</a>
+  </div>
+
+  <h1>row_merge.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00002 
+00003 <span class="preprocessor">#if HAVE_STRING_H</span>
+00004 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00005 <span class="preprocessor">#else</span>
+00006 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00007 <span class="preprocessor">#endif</span>
+00008 
+00009 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00010 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00011 
+00012 <span class="preprocessor">#include &lt;net-snmp/agent/row_merge.h&gt;</span>
+00013 
+00014 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00015 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00016 <span class="preprocessor">#endif</span>
+00017 
+00030 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+<a name="l00031" id="l00031"></a><a class="code" href="group__row__merge.html#ga0">00031</a> <a class="code" href=
+"group__row__merge.html#ga0">netsnmp_get_row_merge_handler</a>(<span class="keywordtype">int</span> prefix_len)
+00032 {
+00033     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *ret = NULL;
+00034     ret = <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
+"stringliteral">"row_merge"</span>,
+00035                                   netsnmp_row_merge_helper_handler);
+00036     <span class="keywordflow">if</span> (ret) {
+00037         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = (<span class=
+"keywordtype">void</span> *) prefix_len;
+00038     }
+00039     <span class="keywordflow">return</span> ret;
+00040 }
+00041 
+00044 <span class="keywordtype">int</span>
+<a name="l00045" id="l00045"></a><a class="code" href="group__row__merge.html#ga1">00045</a> <a class="code" href=
+"group__row__merge.html#ga1">netsnmp_register_row_merge</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo)
+00046 {
+00047     <a class="code" href="group__handler.html#ga14">netsnmp_inject_handler</a>(reginfo,
+00048                     <a class="code" href=
+"group__row__merge.html#ga0">netsnmp_get_row_merge_handler</a>(reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o3">rootoid_len</a>+1));
+00049     <span class="keywordflow">return</span> <a class="code" href=
+"group__handler.html#ga10">netsnmp_register_handler</a>(reginfo);
+00050 }
+00051 
+00052 <span class="preprocessor">#define ROW_MERGE_WAITING 0</span>
+00053 <span class="preprocessor">#define ROW_MERGE_ACTIVE  1</span>
+00054 <span class="preprocessor">#define ROW_MERGE_DONE    2</span>
+00055 
+00057 <span class="keywordtype">int</span>
+<a name="l00058" id="l00058"></a><a class="code" href="group__row__merge.html#ga2">00058</a> <a class="code" href=
+"group__row__merge.html#ga2">netsnmp_row_merge_helper_handler</a>(<a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00059                                  <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00060                                  <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
+00061                                  <a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
+00062 {
+00063     <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, **saved_requests;
+00064     <span class="keywordtype">char</span> *saved_status;
+00065     <span class="keywordtype">int</span> i, j, ret, tail, count = 0;
+00066 
+00067     <span class="comment">/*</span>
+00068 <span class="comment">     * xxx-rks - for sets, should store this info in agent request info, so it</span>
+00069 <span class="comment">     *           doesn't need to be done for every mode.</span>
+00070 <span class="comment">     *</span>
+00071 <span class="comment">     * XXX - Need some mechanism for specifying the length of the table OID</span>
+00072 <span class="comment">     *  i.e. where to start looking for shared indexes</span>
+00073 <span class="comment">     *  N.B: The first subidentifier after the table OID will typically vary,</span>
+00074 <span class="comment">     *    being the column subidentifier, so skip this as well.</span>
+00075 <span class="comment">     */</span>
+00076     <span class="comment">/* int SKIP_OID = reginfo-&gt;rootoid_len + 2; */</span>
+00077     <span class="keywordtype">int</span> SKIP_OID = (int)handler-&gt;<a class="code" href=
+"structnetsnmp__mib__handler__s.html#o1">myvoid</a> + 1;
+00078 
+00079     DEBUGMSGTL((<span class="stringliteral">"helper:row_merge"</span>, <span class=
+"stringliteral">"Got request (%d)\n"</span>, SKIP_OID));
+00080     DEBUGMSGOID((<span class="stringliteral">"helper:row_merge"</span>, reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o2">rootoid</a>, reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o3">rootoid_len</a>));
+00081     DEBUGMSG((<span class="stringliteral">"helper:row_merge"</span>, <span class="stringliteral">"\n"</span>));
+00082 
+00083     <span class="comment">/*</span>
+00084 <span class="comment">     * Count the requests, and set up an array to keep</span>
+00085 <span class="comment">     *  track of the original order.</span>
+00086 <span class="comment">     */</span>
+00087     <span class="keywordflow">for</span> (request = requests; request; request = request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o13">next</a>) 
+00088         count++;
+00089 
+00090     <span class="comment">/*</span>
+00091 <span class="comment">     * Optimization: skip all this if there is just one request</span>
+00092 <span class="comment">     */</span>
+00093     <span class="keywordflow">if</span>(count == 1) {
+00094         DEBUGMSGTL((<span class="stringliteral">"helper:row_merge"</span>, <span class=
+"stringliteral">"  only one varbind\n"</span>));
+00095         <span class="keywordflow">return</span> <a class="code" href=
+"group__handler.html#ga17">netsnmp_call_next_handler</a>(handler, reginfo, reqinfo, requests);
+00096     }
+00097 
+00098     <span class="comment">/*</span>
+00099 <span class="comment">     * allocate memory for saved structure</span>
+00100 <span class="comment">     */</span>
+00101     saved_requests = (<a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a>**)calloc(count+1, <span class="keyword">sizeof</span>(<a class=
+"code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a>*));
+00102     saved_status   =                  (<span class="keywordtype">char</span>*)calloc(count,   <span class=
+"keyword">sizeof</span>(<span class="keywordtype">char</span>));
+00103 
+00104     <span class="comment">/*</span>
+00105 <span class="comment">     * set up saved requests, and set any processed requests to done</span>
+00106 <span class="comment">     */</span>
+00107     i = 0;
+00108     <span class="keywordflow">for</span> (request = requests; request; request = request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o13">next</a>, i++) {
+00109         <span class="keywordflow">if</span> (request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o6">processed</a>) {
+00110             saved_status[i] = ROW_MERGE_DONE;
+00111             DEBUGMSGTL((<span class="stringliteral">"helper:row_merge"</span>, <span class=
+"stringliteral">"  skipping processed oid: "</span>));
+00112             DEBUGMSGOID((<span class="stringliteral">"helper:row_merge"</span>, request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00113                          request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
+"structvariable__list.html#o2">name_length</a>));
+00114             DEBUGMSG((<span class="stringliteral">"helper:row_merge"</span>, <span class="stringliteral">"\n"</span>));
+00115         }
+00116         saved_requests[i] = request;
+00117     }
+00118 
+00119     <span class="comment">/*</span>
+00120 <span class="comment">     * Note that saved_requests[count] is valid</span>
+00121 <span class="comment">     *    (because of the 'count+1' in the calloc above),</span>
+00122 <span class="comment">     * but NULL (since it's past the end of the list).</span>
+00123 <span class="comment">     * This simplifies the re-linking later.</span>
+00124 <span class="comment">     */</span>
+00125 
+00126     <span class="comment">/*</span>
+00127 <span class="comment">     * Work through the (unprocessed) requests in order.</span>
+00128 <span class="comment">     * For each of these, search the rest of the list for any</span>
+00129 <span class="comment">     *   matching indexes, and link them into a new list.</span>
+00130 <span class="comment">     */</span>
+00131     <span class="keywordflow">for</span> (i=0; i&lt;count; i++) {
+00132         <span class="keywordflow">if</span> (saved_status[i] != ROW_MERGE_WAITING) {
+00133             <span class="comment">/*</span>
+00134 <span class="comment">             * Already processed, so just re-link into the original list</span>
+00135 <span class="comment">             */</span>
+00136             saved_requests[i]-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o13">next</a> = saved_requests[i+1];
+00137             <span class="keywordflow">continue</span>;
+00138         }
+00139 
+00140         DEBUGMSGTL((<span class="stringliteral">"helper:row_merge"</span>, <span class=
+"stringliteral">"  oid[%d]: "</span>, i));
+00141         DEBUGMSGOID((<span class=
+"stringliteral">"helper:row_merge"</span>, saved_requests[i]-&gt;requestvb-&gt;name, saved_requests[i]-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
+"structvariable__list.html#o2">name_length</a>));
+00142         DEBUGMSG((<span class="stringliteral">"helper:row_merge"</span>, <span class="stringliteral">"\n"</span>));
+00143 
+00144         saved_requests[i]-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o13">next</a> = NULL;
+00145         saved_status[i] = ROW_MERGE_ACTIVE;
+00146         tail = i;
+00147         <span class="keywordflow">for</span> (j=i+1; j&lt;count; j++) {
+00148             <span class="keywordflow">if</span> (saved_status[j] != ROW_MERGE_WAITING) {
+00149                 <span class="keywordflow">continue</span>;
+00150             }
+00151             DEBUGMSGTL((<span class="stringliteral">"helper:row_merge"</span>, <span class=
+"stringliteral">"? oid[%d]: "</span>, j));
+00152             DEBUGMSGOID((<span class=
+"stringliteral">"helper:row_merge"</span>, saved_requests[j]-&gt;requestvb-&gt;name, saved_requests[j]-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
+"structvariable__list.html#o2">name_length</a>));
+00153             DEBUGMSG((<span class="stringliteral">"helper:row_merge"</span>, <span class="stringliteral">"\n"</span>));
+00154             <span class="keywordflow">if</span> (!<a class="code" href="group__library.html#ga98">snmp_oid_compare</a>(
+00155                     saved_requests[i]-&gt;requestvb-&gt;name+SKIP_OID,
+00156                     saved_requests[i]-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
+"structvariable__list.html#o2">name_length</a>-SKIP_OID,
+00157                     saved_requests[j]-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
+"structvariable__list.html#o1">name</a>+SKIP_OID,
+00158                     saved_requests[j]-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
+"structvariable__list.html#o2">name_length</a>-SKIP_OID)) {
+00159                 DEBUGMSGTL((<span class="stringliteral">"helper:row_merge"</span>, <span class=
+"stringliteral">"merged\n"</span>));
+00160                 saved_requests[tail]-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o13">next</a> = saved_requests[j];
+00161                 saved_requests[j]-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o13">next</a>    = NULL;
+00162                 saved_status[j] = ROW_MERGE_ACTIVE;
+00163                 tail = j;
+00164             }
+00165         }
+00166 
+00167         <span class="comment">/*</span>
+00168 <span class="comment">         * call the next handler with this list, and </span>
+00169 <span class="comment">         * restore the original next pointer </span>
+00170 <span class="comment">         */</span>
+00171         ret = <a class="code" href="group__handler.html#ga17">netsnmp_call_next_handler</a>(handler, reginfo, reqinfo,
+00172                                         saved_requests[i]);
+00173         saved_requests[i]-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o13">next</a> = saved_requests[i+1];
+00174 
+00175         <span class="keywordflow">if</span> (ret != SNMP_ERR_NOERROR) {
+00176             <span class="comment">/* </span>
+00177 <span class="comment">             * Something went wrong.</span>
+00178 <span class="comment">             * Re-link the rest of the original list,</span>
+00179 <span class="comment">             *   clean up, and report back.</span>
+00180 <span class="comment">             */</span>
+00181             <span class="keywordflow">for</span> (j=0; j&lt;count; j++)
+00182                 saved_requests[j]-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o13">next</a> = saved_requests[j+1];
+00183             free(saved_requests);
+00184             free(saved_status);
+00185             <span class="keywordflow">return</span> ret;
+00186         }
+00187     }
+00188 
+00189     free(saved_requests);
+00190     free(saved_status);
+00191     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00192 }
+00193 
+00199 <span class="keywordtype">void</span>
+<a name="l00200" id="l00200"></a><a class="code" href="group__row__merge.html#ga3">00200</a> <a class="code" href=
+"group__row__merge.html#ga3">netsnmp_init_row_merge</a>(<span class="keywordtype">void</span>)
+00201 {
+00202     <a class="code" href="group__handler.html#ga36">netsnmp_register_handler_by_name</a>(<span class=
+"stringliteral">"row_merge"</span>,
+00203                                      <a class="code" href=
+"group__row__merge.html#ga0">netsnmp_get_row_merge_handler</a>(-1));
+00204 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:58 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,158 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML>
+<HEAD>
+<TITLE>Checklist for adding a MIB module to the UCD-SNMP agent</TITLE>
+</HEAD>
+<BODY>
+<H1>Checklist for adding a MIB module to the UCD-SNMP agent</H1>
+
+We're often asked how to add a MIB implementation module
+(e.g. as produced by <TT>mib2c</TT>) to the agent, and check
+that it's working.
+The following is a step-by-step guide to the process,
+with frequent checks to confirm that things have been
+successful.
+<P>
+Please note that if, at any point, a particular check fails
+to return the results expected you should <B><I>not</I></B>
+proceed with the next stage.  Instead you should try and
+identify what went wrong since the previous (successful)
+check, and fix it.
+<P>
+Note further that the various names (MIB files, modules, objects
+and numeric OIDs) are examples only.  You should replace them with
+the appropriate names for the MIB module you are implementing.
+Such names will be given in <I>italics</I> in the examples.
+
+<H2>Checklist</H2>
+<OL>
+<LI> Remove any old copies of the source tree that you might have,
+     and unpack a new, clean copy from the tarball.
+     <BR>
+     <I>(This isn't strictly necessary, but is a useful step to
+         avoid earlier attempts getting in the way)</I>
+     <P>
+
+<LI> Copy the two files produced by <TT>mib2c</TT> into the
+     directory <TT>agent/mibgroup</TT> in this clean tree:
+     <PRE>
+          $ cd ~/ucd-snmp-4.2.1
+               <I>or wherever the tarball was unpacked to</I>
+          $ cd agent/mibgroup
+          $ cp ~/<I>mymib</I>.[ch] <B>.</B>
+               <I>or wherever the files were generated</I>
+     </PRE>
+
+<LI> Configure the source code to include your new MIB module:
+     <PRE>
+          $ cd ../..
+          $ ./configure --with-mib-modules=<I>mymib</I>
+     </PRE>
+
+			<UL>
+			<LI><B><I>Check 1</I></B><BR>
+			       Does the file <TT>agent/Makefile</TT>
+			       contain a reference to <I>mymib</I>?
+			</UL>
+			<P>
+
+<LI> Compile the suite (<TT>make</TT>) but don't install it yet.
+
+			<P>
+			<UL>
+			<LI><B><I>Check 2</I></B><BR>
+			       Is there now a file
+			       <TT>agent/mibgroup/<I>mymib</I>.o</TT>?
+			</UL>
+			<P>
+
+<LI> Run the newly-compiled agent in a 'testing' mode:
+     <PRE>
+          $ agent/snmpd -f -L -d -p 9999
+     </PRE>
+     <I>(This runs the agent on a temporary port (<TT> -p 9999</TT>)
+         so that it doesn't need special priviledges, or interfere
+         with your 'normal' agent.
+         Incoming and outgoing packets are printed (<TT>-d</TT>),
+         to show what's happening, and the agent is run as a 'non-daemon'
+         command (<TT>-f -L</TT>) so that you can see these messages.
+         Note that this ties up the current shell, so you'll need to
+         run the following checks in a different terminal window.)</I>.
+
+			<P>
+			<UL>
+			<LI><B><I>Check 3a</I></B><BR>
+			       Does the agent respond to requests?
+     <PRE>
+          $ snmpgetnext -p 9999 localhost public system
+	  system.sysDescr.0 = <I>something or other</I>
+     </PRE>
+
+			</UL>
+			<P>
+			<UL>
+			<LI><B><I>Check 3b</I></B><BR>
+			       Does the agent respond to requests
+			       for objects in your new module?
+     <PRE>
+          $ snmpgetnext -p 9999 localhost public <I>.1.3.6.1.4.1.9999</I>
+	  <I>.1.3.6.1.4.1.9999.1.1.0 = something or other</I>
+     </PRE>
+     <I>(Replace this OID with the OID at the top of the subtree that
+         you're implementing in this module.)</I>
+			</UL>
+			<P>
+			<UL>
+			<LI><B><I>Check 3c</I></B><BR>
+			       Can the tools parse the MIB file?
+     <PRE>
+          $ snmpgetnext -OS -p 9999 localhost public <I>MY-MIB::myObject</I>
+	  <I>MY-MIB::myObject.0 = something or other</I>
+     </PRE>
+     <I>(Replace the module name with the name of the MIB module you are
+         implementing, and the object name with the name of one of the
+         objects in this module.)</I>
+			</UL>
+			<P>
+
+<LI> Kill the 'test' agent.  (Ctrl-C should do it).
+
+<LI> Install the agent.  (<TT>make install</TT>).
+
+			<P>
+			<UL>
+			<LI><B><I>Check 4</I></B><BR>
+                               Does the newly installed agent have the
+                               correct (i.e. recent) timestamp?
+     <PRE>
+          $ ls -l <I>/usr/local/sbin/snmpd</I>
+     </PRE>
+     <I>(This is the most likely location for the new agent.  But use
+     whatever was reported as part of the <TT>make install</TT> output).</I>
+			</UL>
+			<P>
+
+<LI> Run the newly-installed agent in a 'testing' mode, as before.
+     <PRE>
+          $ /usr/local/sbin/snmpd -f -L -d -p 9999
+     </PRE>
+			<P>
+			<UL>
+			<LI><B><I>Check 5</I></B><BR>
+                               Repeat Checks 3a, 3b and 3c
+			</UL>
+</OL>
+
+If all this succeeds, your newly installed agent appears to be working
+correctly.  
+It's probably safe to consider running this new agent instead of the one
+that comes with your distribution (if this is what you want to do).
+
+</BODY>
+</HTML>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,331 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>asn1 parsing and datatype manipulation routines.<br />
+  <small>[<a class="el" href="group__library.html">The Net-SNMP library</a>]</small></h1>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Defines</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga28" doxytag=
+      "asn1_packet_parse::NULL" id="ga28"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>NULL</b>&nbsp;&nbsp;&nbsp;0</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga5" doxytag=
+      "asn1_packet_parse::asn_check_packet" id="ga5"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_check_packet</b> (u_char *pkt, size_t len)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga7" doxytag=
+      "asn1_packet_parse::asn_parse_int" id="ga7"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_parse_int</b> (u_char *data, size_t *datalength, u_char *type, long *intp,
+      size_t intsize)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga8" doxytag=
+      "asn1_packet_parse::asn_parse_unsigned_int" id="ga8"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_parse_unsigned_int</b> (u_char *data, size_t *datalength, u_char *type,
+      u_long *intp, size_t intsize)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga9" doxytag=
+      "asn1_packet_parse::asn_build_int" id="ga9"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_build_int</b> (u_char *data, size_t *datalength, u_char type, const long
+      *intp, size_t intsize)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga10" doxytag=
+      "asn1_packet_parse::asn_build_unsigned_int" id="ga10"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_build_unsigned_int</b> (u_char *data, size_t *datalength, u_char type,
+      const u_long *intp, size_t intsize)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga11" doxytag=
+      "asn1_packet_parse::asn_parse_string" id="ga11"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_parse_string</b> (u_char *data, size_t *datalength, u_char *type, u_char
+      *string, size_t *strlength)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga12" doxytag=
+      "asn1_packet_parse::asn_build_string" id="ga12"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_build_string</b> (u_char *data, size_t *datalength, u_char type, const
+      u_char *string, size_t strlength)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga13" doxytag=
+      "asn1_packet_parse::asn_parse_header" id="ga13"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_parse_header</b> (u_char *data, size_t *datalength, u_char *type)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga14" doxytag=
+      "asn1_packet_parse::asn_parse_sequence" id="ga14"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_parse_sequence</b> (u_char *data, size_t *datalength, u_char *type, u_char
+      expected_type, const char *estr)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga15" doxytag=
+      "asn1_packet_parse::asn_build_header" id="ga15"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_build_header</b> (u_char *data, size_t *datalength, u_char type, size_t
+      length)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga16" doxytag=
+      "asn1_packet_parse::asn_build_sequence" id="ga16"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_build_sequence</b> (u_char *data, size_t *datalength, u_char type, size_t
+      length)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga17" doxytag=
+      "asn1_packet_parse::asn_parse_length" id="ga17"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_parse_length</b> (u_char *data, u_long *length)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga18" doxytag=
+      "asn1_packet_parse::asn_build_length" id="ga18"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_build_length</b> (u_char *data, size_t *datalength, size_t length)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga19" doxytag=
+      "asn1_packet_parse::asn_parse_objid" id="ga19"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_parse_objid</b> (u_char *data, size_t *datalength, u_char *type, oid
+      *objid, size_t *objidlength)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga20" doxytag=
+      "asn1_packet_parse::asn_build_objid" id="ga20"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_build_objid</b> (u_char *data, size_t *datalength, u_char type, oid *objid,
+      size_t objidlength)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga21" doxytag=
+      "asn1_packet_parse::asn_parse_null" id="ga21"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_parse_null</b> (u_char *data, size_t *datalength, u_char *type)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga22" doxytag=
+      "asn1_packet_parse::asn_build_null" id="ga22"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_build_null</b> (u_char *data, size_t *datalength, u_char type)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga23" doxytag=
+      "asn1_packet_parse::asn_parse_bitstring" id="ga23"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_parse_bitstring</b> (u_char *data, size_t *datalength, u_char *type, u_char
+      *string, size_t *strlength)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga24" doxytag=
+      "asn1_packet_parse::asn_build_bitstring" id="ga24"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_build_bitstring</b> (u_char *data, size_t *datalength, u_char type, const
+      u_char *string, size_t strlength)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga25" doxytag=
+      "asn1_packet_parse::asn_parse_unsigned_int64" id="ga25"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_parse_unsigned_int64</b> (u_char *data, size_t *datalength, u_char *type,
+      struct counter64 *cp, size_t countersize)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga26" doxytag=
+      "asn1_packet_parse::asn_build_unsigned_int64" id="ga26"></a> u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_build_unsigned_int64</b> (u_char *data, size_t *datalength, u_char type,
+      const struct counter64 *cp, size_t countersize)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga27" doxytag=
+      "asn1_packet_parse::asn_realloc" id="ga27"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>asn_realloc</b> (u_char **pkt, size_t *pkt_len)</td>
+    </tr>
+  </table>
+  <hr />
+  <a name="_details" id="_details"></a>
+
+  <h2>Detailed Description</h2>Note on
+
+  <p>Re-allocating reverse ASN.1 encoder functions. Synopsis:</p>
+
+  <div class="fragment">
+    <pre class="fragment">
+ u_char *buf = (u_char*)malloc(100);
+ u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
+ size_t buf_len = 100, offset = 0;
+ <span class="keywordtype">long</span> data = 12345;
+ <span class="keywordtype">int</span> allow_realloc = 1;
+ 
+ <span class="keywordflow">if</span> (asn_realloc_rbuild_int(&amp;buf, &amp;buf_len, &amp;offset, allow_realloc,
+                            type, &amp;data, <span class="keyword">sizeof</span>(<span class="keywordtype">long</span>)) == 0) {
+     error;
+ }
+</pre>
+  </div>
+
+  <p>NOTE WELL: after calling one of these functions with allow_realloc non-zero, buf might have moved, buf_len might have grown
+  and offset will have increased by the size of the encoded data. You should **NEVER** do something like this:</p>
+
+  <div class="fragment">
+    <pre class="fragment">
+ u_char *buf = (u_char *)malloc(100), *ptr;
+ u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
+ size_t buf_len = 100, offset = 0;
+ <span class="keywordtype">long</span> data1 = 1234, data2 = 5678;
+ <span class="keywordtype">int</span> rc = 0, allow_realloc = 1;
+ 
+ rc  = asn_realloc_rbuild_int(&amp;buf, &amp;buf_len, &amp;offset, allow_realloc,
+                                type, &amp;data1, <span class="keyword">sizeof</span>(<span class="keywordtype">long</span>));
+ ptr = buf[buf_len - offset];   / * points at encoding of data1 * /
+ <span class="keywordflow">if</span> (rc == 0) {
+      error;
+ }
+ rc  = asn_realloc_rbuild_int(&amp;buf, &amp;buf_len, &amp;offset, allow_realloc,
+                              type, &amp;data2, <span class="keyword">sizeof</span>(<span class="keywordtype">long</span>));
+ make use of ptr here;
+</pre>
+  </div>
+
+  <p>ptr is **INVALID** at this point. In general, you should store the offset value and compute pointers when you need them:</p>
+
+  <div class="fragment">
+    <pre class="fragment">
+ u_char *buf = (u_char *)malloc(100), *ptr;
+ u_char type = (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER);
+ size_t buf_len = 100, offset = 0, ptr_offset;
+ <span class="keywordtype">long</span> data1 = 1234, data2 = 5678;
+ <span class="keywordtype">int</span> rc = 0, allow_realloc = 1;
+ 
+ rc  = asn_realloc_rbuild_int(&amp;buf, &amp;buf_len, &amp;offset, allow_realloc,
+                              type, &amp;data1, <span class="keyword">sizeof</span>(<span class="keywordtype">long</span>));
+ ptr_offset = offset;
+ <span class="keywordflow">if</span> (rc == 0) {
+      error;
+ }
+ rc  = asn_realloc_rbuild_int(&amp;buf, &amp;buf_len, &amp;offset, allow_realloc,
+                              type, &amp;data2, <span class="keyword">sizeof</span>(<span class="keywordtype">long</span>));
+ ptr = buf + buf_len - ptr_offset
+ make use of ptr here;
+</pre>
+  </div>
+
+  <p>Here, you can see that ptr will be a valid pointer even if the block of memory has been moved, as it may well have been.
+  Plenty of examples of usage all over <a class="el" href="asn1_8c.html">asn1.c</a>, <a class="el" href=
+  "snmp__api_8c.html">snmp_api.c</a>, <a class="el" href="snmpusm_8c.html">snmpusm.c</a>.</p>
+
+  <p>The other thing you should **NEVER** do is to pass a pointer to a buffer on the stack as the first argument when
+  allow_realloc is non-zero, unless you really know what you are doing and your machine/compiler allows you to free non-heap
+  memory. There are rumours that such things exist, but many consider them no more than the wild tales of a fool.</p>
+
+  <p>Of course, you can pass allow_realloc as zero, to indicate that you do not wish the packet buffer to be reallocated for some
+  reason; perhaps because it is on the stack. This may be useful to emulate the functionality of the old API:</p>
+
+  <div class="fragment">
+    <pre class="fragment">
+ u_char my_static_buffer[100], *cp = NULL;
+ size_t my_static_buffer_len = 100;
+ <span class="keywordtype">float</span> my_pi = (float)22/(float)7;
+ 
+ cp = asn_rbuild_float(my_static_buffer, &amp;my_static_buffer_len,
+                       ASN_OPAQUE_FLOAT, &amp;my_pi, <span class="keyword">sizeof</span>(<span class=
+"keywordtype">float</span>));
+ <span class="keywordflow">if</span> (cp == NULL) {
+ error;
+ }
+</pre>
+  </div>
+
+  <p>IS EQUIVALENT TO:</p>
+
+  <div class="fragment">
+    <pre class="fragment">
+ u_char my_static_buffer[100];
+ size_t my_static_buffer_len = 100, my_offset = 0;
+ <span class="keywordtype">float</span> my_pi = (float)22/(float)7;
+ <span class="keywordtype">int</span> rc = 0;
+ 
+ rc = asn_realloc_rbuild_float(&amp;my_static_buffer, &amp;my_static_buffer_len,
+                               &amp;my_offset, 0,
+                               ASN_OPAQUE_FLOAT, &amp;my_pi, <span class="keyword">sizeof</span>(<span class=
+"keywordtype">float</span>));
+ <span class="keywordflow">if</span> (rc == 0) {
+   error;
+ }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,56 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>set_helper.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef SET_HELPER_H</span>
+00002 <span class="preprocessor">#define SET_HELPER_H</span>
+00003 
+00004 <span class="preprocessor">#ifdef __cplusplus</span>
+00005 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00006 <span class="preprocessor">#endif</span>
+00007 
+00008 <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_set_info_s {
+00009     <span class="keywordtype">int</span>             action;
+00010     <span class="keywordtype">void</span>           *stateRef;
+00011 
+00012     <span class="comment">/*</span>
+00013 <span class="comment">     * don't use yet: </span>
+00014 <span class="comment">     */</span>
+00015     <span class="keywordtype">void</span>          **oldData;
+00016     <span class="keywordtype">int</span>             setCleanupFlags;    <span class=
+"comment">/* XXX: client sets this to: */</span>
+00017 <span class="preprocessor">#define AUTO_FREE_STATEREF 0x01 </span><span class="comment">/* calls free(stateRef) */</span>
+00018 <span class="preprocessor">#define AUTO_FREE_OLDDATA  0x02 </span><span class="comment">/* calls free(*oldData) */</span>
+00019 <span class="preprocessor">#define AUTO_UNDO          0x04 </span><span class="comment">/* ... */</span>
+00020 } netsnmp_set_info;
+00021 
+00022 <span class="preprocessor">#ifdef __cplusplus</span>
+00023 }
+00024 <span class="preprocessor">#endif</span>
+00025 <span class="preprocessor">#endif</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:59 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

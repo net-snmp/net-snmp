@@ -1,0 +1,611 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>snmpCallbackDomain.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00002 
+00003 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00004 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00005 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+00006 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+00007 
+00008 <span class="preprocessor">#ifdef WIN32</span>
+00009 <span class="preprocessor">#include &lt;net-snmp/library/winpipe.h&gt;</span>
+00010 <span class="preprocessor">#endif</span>
+00011 <span class="preprocessor">#if HAVE_STRING_H</span>
+00012 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00013 <span class="preprocessor">#else</span>
+00014 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00015 <span class="preprocessor">#endif</span>
+00016 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00017 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00018 <span class="preprocessor">#endif</span>
+00019 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00020 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+00021 <span class="preprocessor">#endif</span>
+00022 <span class="preprocessor">#if HAVE_SYS_SOCKET_H</span>
+00023 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+00024 <span class="preprocessor">#endif</span>
+00025 <span class="preprocessor">#if HAVE_SYS_UN_H</span>
+00026 <span class="preprocessor">#include &lt;sys/un.h&gt;</span>
+00027 <span class="preprocessor">#endif</span>
+00028 <span class="preprocessor">#if HAVE_IO_H</span>
+00029 <span class="preprocessor">#include &lt;io.h&gt;</span>
+00030 <span class="preprocessor">#endif</span>
+00031 <span class="preprocessor">#if HAVE_FCNTL_H</span>
+00032 <span class="preprocessor">#include &lt;fcntl.h&gt;</span>
+00033 <span class="preprocessor">#endif</span>
+00034 
+00035 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00036 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00037 <span class="preprocessor">#endif</span>
+00038 
+00039 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00040 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00041 <span class="preprocessor">#include &lt;net-snmp/config_api.h&gt;</span>
+00042 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00043 
+00044 <span class="preprocessor">#include &lt;net-snmp/library/snmp_transport.h&gt;</span>
+00045 <span class="preprocessor">#include &lt;net-snmp/library/snmpUnixDomain.h&gt;</span>
+00046 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00047 <span class="preprocessor">#include &lt;net-snmp/library/snmp_client.h&gt;</span>
+00048 <span class="preprocessor">#include &lt;net-snmp/library/snmpCallbackDomain.h&gt;</span>
+00049 
+00050 <span class="preprocessor">#ifndef NETSNMP_STREAM_QUEUE_LEN</span>
+00051 <span class="preprocessor">#define NETSNMP_STREAM_QUEUE_LEN  5</span>
+00052 <span class="preprocessor">#endif</span>
+00053 
+00054 <span class="preprocessor">#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN</span>
+00055 
+00056 <span class="keyword">static</span> netsnmp_transport_list *trlist = NULL;
+00057 
+00058 <span class="keyword">static</span> <span class="keywordtype">int</span>      callback_count = 0;
+00059 
+00060 <span class="keyword">typedef</span> <span class="keyword">struct </span>callback_hack_s {
+00061     <span class="keywordtype">void</span>           *orig_transport_data;
+00062     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu;
+00063 } callback_hack;
+00064 
+00065 <span class="keyword">typedef</span> <span class="keyword">struct </span>callback_queue_s {
+00066     <span class="keywordtype">int</span>             callback_num;
+00067     netsnmp_callback_pass *item;
+00068     <span class="keyword">struct </span>callback_queue_s *next, *prev;
+00069 } callback_queue;
+00070 
+00071 callback_queue *thequeue;
+00072 
+00073 <span class="keyword">static</span> netsnmp_transport *
+00074 find_transport_from_callback_num(<span class="keywordtype">int</span> num)
+00075 {
+00076     <span class="keyword">static</span> netsnmp_transport_list *ptr;
+00077     <span class="keywordflow">for</span> (ptr = trlist; ptr; ptr = ptr-&gt;next)
+00078         <span class="keywordflow">if</span> (((netsnmp_callback_info *) ptr-&gt;transport-&gt;data)-&gt;
+00079             callback_num == num)
+00080             <span class="keywordflow">return</span> ptr-&gt;transport;
+00081     <span class="keywordflow">return</span> NULL;
+00082 }
+00083 
+00084 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00085 callback_debug_pdu(<span class="keyword">const</span> <span class="keywordtype">char</span> *ourstring, <a class="code"
+href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu)
+00086 {
+00087     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *vb;
+00088     <span class="keywordtype">int</span>             i = 1;
+00089     DEBUGMSGTL((ourstring,
+00090                 <span class="stringliteral">"PDU: command = %d, errstat = %d, errindex = %d\n"</span>,
+00091                 pdu-&gt;<a class="code" href="structsnmp__pdu.html#o1">command</a>, pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o6">errstat</a>, pdu-&gt;<a class="code" href="structsnmp__pdu.html#o7">errindex</a>));
+00092     <span class="keywordflow">for</span> (vb = pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o17">variables</a>; vb; vb = vb-&gt;<a class="code" href=
+"structvariable__list.html#o0">next_variable</a>) {
+00093         DEBUGMSGTL((ourstring, <span class="stringliteral">"  var %d:"</span>, i++));
+00094         DEBUGMSGVAR((ourstring, vb));
+00095         DEBUGMSG((ourstring, <span class="stringliteral">"\n"</span>));
+00096     }
+00097 }
+00098 
+00099 <span class="keywordtype">void</span>
+00100 callback_push_queue(<span class="keywordtype">int</span> num, netsnmp_callback_pass *item)
+00101 {
+00102     callback_queue *newitem = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(callback_queue);
+00103     callback_queue *ptr;
+00104 
+00105     newitem-&gt;callback_num = num;
+00106     newitem-&gt;item = item;
+00107     <span class="keywordflow">if</span> (thequeue) {
+00108         <span class="keywordflow">for</span> (ptr = thequeue; ptr &amp;&amp; ptr-&gt;next; ptr = ptr-&gt;next) {
+00109         }
+00110         ptr-&gt;next = newitem;
+00111         newitem-&gt;prev = ptr;
+00112     } <span class="keywordflow">else</span> {
+00113         thequeue = newitem;
+00114     }
+00115     DEBUGIF(<span class="stringliteral">"dump_send_callback_transport"</span>) {
+00116         callback_debug_pdu(<span class="stringliteral">"dump_send_callback_transport"</span>, item-&gt;pdu);
+00117     }
+00118 }
+00119 
+00120 netsnmp_callback_pass *
+00121 callback_pop_queue(<span class="keywordtype">int</span> num)
+00122 {
+00123     netsnmp_callback_pass *cp;
+00124     callback_queue *ptr;
+00125 
+00126     <span class="keywordflow">for</span> (ptr = thequeue; ptr; ptr = ptr-&gt;next) {
+00127         <span class="keywordflow">if</span> (ptr-&gt;callback_num == num) {
+00128             <span class="keywordflow">if</span> (ptr-&gt;prev) {
+00129                 ptr-&gt;prev-&gt;next = ptr-&gt;next;
+00130             } <span class="keywordflow">else</span> {
+00131                 thequeue = ptr-&gt;next;
+00132             }
+00133             <span class="keywordflow">if</span> (ptr-&gt;next) {
+00134                 ptr-&gt;next-&gt;prev = ptr-&gt;prev;
+00135             }
+00136             cp = ptr-&gt;item;
+00137             <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(ptr);
+00138             DEBUGIF(<span class="stringliteral">"dump_recv_callback_transport"</span>) {
+00139                 callback_debug_pdu(<span class="stringliteral">"dump_recv_callback_transport"</span>,
+00140                                    cp-&gt;pdu);
+00141             }
+00142             <span class="keywordflow">return</span> cp;
+00143         }
+00144     }
+00145     <span class="keywordflow">return</span> NULL;
+00146 }
+00147 
+00148 <span class="comment">/*</span>
+00149 <span class="comment"> * Return a string representing the address in data, or else the "far end"</span>
+00150 <span class="comment"> * address if data is NULL.  </span>
+00151 <span class="comment"> */</span>
+00152 
+00153 <span class="keywordtype">char</span> *
+00154 netsnmp_callback_fmtaddr(netsnmp_transport *t, <span class="keywordtype">void</span> *data, <span class=
+"keywordtype">int</span> len)
+00155 {
+00156     <span class="keywordtype">char</span> buf[SPRINT_MAX_LEN];
+00157     netsnmp_callback_info *mystuff;
+00158 
+00159     <span class="keywordflow">if</span> (!t)
+00160         <span class="keywordflow">return</span> strdup(<span class="stringliteral">"callback: unknown"</span>);
+00161 
+00162     mystuff = (netsnmp_callback_info *) t-&gt;data;
+00163 
+00164     <span class="keywordflow">if</span> (!mystuff)
+00165         <span class="keywordflow">return</span> strdup(<span class="stringliteral">"callback: unknown"</span>);
+00166 
+00167     snprintf(buf, SPRINT_MAX_LEN, <span class="stringliteral">"callback: %d on fd %d"</span>,
+00168              mystuff-&gt;callback_num, mystuff-&gt;pipefds[0]);
+00169     <span class="keywordflow">return</span> strdup(buf);
+00170 }
+00171 
+00172 
+00173 
+00174 <span class="comment">/*</span>
+00175 <span class="comment"> * You can write something into opaque that will subsequently get passed back </span>
+00176 <span class="comment"> * to your send function if you like.  For instance, you might want to</span>
+00177 <span class="comment"> * remember where a PDU came from, so that you can send a reply there...  </span>
+00178 <span class="comment"> */</span>
+00179 
+00180 <span class="keywordtype">int</span>
+00181 netsnmp_callback_recv(netsnmp_transport *t, <span class="keywordtype">void</span> *buf, <span class=
+"keywordtype">int</span> size,
+00182                       <span class="keywordtype">void</span> **opaque, <span class="keywordtype">int</span> *olength)
+00183 {
+00184     <span class="keywordtype">int</span> rc = -1;
+00185     <span class="keywordtype">char</span> newbuf[1];
+00186     netsnmp_callback_info *mystuff = (netsnmp_callback_info *) t-&gt;data;
+00187 
+00188     DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>, <span class=
+"stringliteral">"hook_recv enter\n"</span>));
+00189 
+00190     <span class="keywordflow">while</span> (rc &lt; 0) {
+00191 <span class="preprocessor">#ifdef WIN32</span>
+00192         rc = recv(mystuff-&gt;pipefds[0], newbuf, 1, 0);
+00193 <span class="preprocessor">#else</span>
+00194         rc = read(mystuff-&gt;pipefds[0], newbuf, 1);
+00195 <span class="preprocessor">#endif</span>
+00196         <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
+00197             <span class="keywordflow">break</span>;
+00198         }
+00199     }
+00200 
+00201     <span class="keywordflow">if</span> (mystuff-&gt;linkedto) {
+00202         <span class="comment">/*</span>
+00203 <span class="comment">         * we're the client.  We don't need to do anything. </span>
+00204 <span class="comment">         */</span>
+00205     } <span class="keywordflow">else</span> {
+00206         <span class="comment">/*</span>
+00207 <span class="comment">         * malloc the space here, but it's filled in by</span>
+00208 <span class="comment">         * snmp_callback_created_pdu() below </span>
+00209 <span class="comment">         */</span>
+00210         <span class="keywordtype">int</span>            *returnnum = (<span class=
+"keywordtype">int</span> *) calloc(1, <span class="keyword">sizeof</span>(<span class="keywordtype">int</span>));
+00211         *opaque = returnnum;
+00212         *olength = <span class="keyword">sizeof</span>(int);
+00213     }
+00214     DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>, <span class=
+"stringliteral">"hook_recv exit\n"</span>));
+00215     <span class="keywordflow">return</span> rc;
+00216 }
+00217 
+00218 
+00219 
+00220 <span class="keywordtype">int</span>
+00221 netsnmp_callback_send(netsnmp_transport *t, <span class="keywordtype">void</span> *buf, <span class=
+"keywordtype">int</span> size,
+00222                       <span class="keywordtype">void</span> **opaque, <span class="keywordtype">int</span> *olength)
+00223 {
+00224     <span class="keywordtype">int</span> from, rc = -1;
+00225     netsnmp_callback_info *mystuff = (netsnmp_callback_info *) t-&gt;data;
+00226     netsnmp_callback_pass *cp;
+00227 
+00228     <span class="comment">/*</span>
+00229 <span class="comment">     * extract the pdu from the hacked buffer </span>
+00230 <span class="comment">     */</span>
+00231     netsnmp_transport *other_side;
+00232     callback_hack  *ch = (callback_hack *) * opaque;
+00233     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu = ch-&gt;pdu;
+00234     *opaque = ch-&gt;orig_transport_data;
+00235     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(ch);
+00236 
+00237     DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>, <span class=
+"stringliteral">"hook_send enter\n"</span>));
+00238 
+00239     cp = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_callback_pass);
+00240     <span class="keywordflow">if</span> (!cp)
+00241         <span class="keywordflow">return</span> -1;
+00242 
+00243     cp-&gt;pdu = snmp_clone_pdu(pdu);
+00244     <span class="keywordflow">if</span> (cp-&gt;pdu-&gt;transport_data) {
+00245         <span class="comment">/*</span>
+00246 <span class="comment">         * not needed and not properly freed later </span>
+00247 <span class="comment">         */</span>
+00248         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(cp-&gt;pdu-&gt;transport_data);
+00249     }
+00250 
+00251     <span class="keywordflow">if</span> (cp-&gt;pdu-&gt;flags &amp; UCD_MSG_FLAG_EXPECT_RESPONSE)
+00252         cp-&gt;pdu-&gt;<a class="code" href="structsnmp__pdu.html#o9">flags</a> ^= UCD_MSG_FLAG_EXPECT_RESPONSE;
+00253 
+00254     <span class="comment">/*</span>
+00255 <span class="comment">     * push the sent pdu onto the stack </span>
+00256 <span class="comment">     */</span>
+00257     <span class="comment">/*</span>
+00258 <span class="comment">     * AND send a bogus byte to the remote callback receiver's pipe </span>
+00259 <span class="comment">     */</span>
+00260     <span class="keywordflow">if</span> (mystuff-&gt;linkedto) {
+00261         <span class="comment">/*</span>
+00262 <span class="comment">         * we're the client, send it to the parent </span>
+00263 <span class="comment">         */</span>
+00264         cp-&gt;return_transport_num = mystuff-&gt;callback_num;
+00265 
+00266         other_side = find_transport_from_callback_num(mystuff-&gt;linkedto);
+00267         <span class="keywordflow">if</span> (!other_side)
+00268             <span class="keywordflow">return</span> -1;
+00269 
+00270         <span class="keywordflow">while</span> (rc &lt; 0) {
+00271 <span class="preprocessor">#ifdef WIN32</span>
+00272             rc = send(((netsnmp_callback_info*) other_side-&gt;data)-&gt;pipefds[1], <span class=
+"stringliteral">" "</span>, 1, 0);
+00273 <span class="preprocessor">#else</span>
+00274             rc = write(((netsnmp_callback_info *)other_side-&gt;data)-&gt;pipefds[1],
+00275                        <span class="stringliteral">" "</span>, 1);
+00276 <span class="preprocessor">#endif</span>
+00277             <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
+00278                 <span class="keywordflow">break</span>;
+00279             }
+00280         }
+00281         callback_push_queue(mystuff-&gt;linkedto, cp);
+00282         <span class="comment">/*</span>
+00283 <span class="comment">         * we don't need the transport data any more </span>
+00284 <span class="comment">         */</span>
+00285         <span class="keywordflow">if</span> (*opaque) {
+00286             <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(*opaque);
+00287             *opaque = NULL;
+00288         }
+00289     } <span class="keywordflow">else</span> {
+00290         <span class="comment">/*</span>
+00291 <span class="comment">         * we're the server, send it to the person that sent us the request </span>
+00292 <span class="comment">         */</span>
+00293         from = **((<span class="keywordtype">int</span> **) opaque);
+00294         <span class="comment">/*</span>
+00295 <span class="comment">         * we don't need the transport data any more </span>
+00296 <span class="comment">         */</span>
+00297         <span class="keywordflow">if</span> (*opaque) {
+00298             <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(*opaque);
+00299             *opaque = NULL;
+00300         }
+00301         other_side = find_transport_from_callback_num(from);
+00302         <span class="keywordflow">if</span> (!other_side)
+00303             <span class="keywordflow">return</span> -1;
+00304         <span class="keywordflow">while</span> (rc &lt; 0) {
+00305 <span class="preprocessor">#ifdef WIN32</span>
+00306             rc = send(((netsnmp_callback_info*) other_side-&gt;data)-&gt;pipefds[1], <span class=
+"stringliteral">" "</span>, 1, 0);
+00307 <span class="preprocessor">#else</span>
+00308             rc = write(((netsnmp_callback_info *)other_side-&gt;data)-&gt;pipefds[1],
+00309                        <span class="stringliteral">" "</span>, 1);
+00310 <span class="preprocessor">#endif</span>
+00311             <span class="keywordflow">if</span> (rc &lt; 0 &amp;&amp; errno != EINTR) {
+00312                 <span class="keywordflow">break</span>;
+00313             }
+00314         }
+00315         callback_push_queue(from, cp);
+00316     }
+00317 
+00318     DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>, <span class=
+"stringliteral">"hook_send exit\n"</span>));
+00319     <span class="keywordflow">return</span> 0;
+00320 }
+00321 
+00322 
+00323 
+00324 <span class="keywordtype">int</span>
+00325 netsnmp_callback_close(netsnmp_transport *t)
+00326 {
+00327     <span class="keywordtype">int</span>             rc;
+00328     netsnmp_callback_info *mystuff = (netsnmp_callback_info *) t-&gt;data;
+00329     DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>, <span class=
+"stringliteral">"hook_close enter\n"</span>));
+00330 
+00331 <span class="preprocessor">#ifdef WIN32</span>
+00332     rc  = closesocket(mystuff-&gt;pipefds[0]);
+00333     rc |= closesocket(mystuff-&gt;pipefds[1]);
+00334 <span class="preprocessor">#else</span>
+00335     rc  = close(mystuff-&gt;pipefds[0]);
+00336     rc |= close(mystuff-&gt;pipefds[1]);
+00337 <span class="preprocessor">#endif</span>
+00338 
+00339     rc |= netsnmp_transport_remove_from_list(&amp;trlist, t);
+00340 
+00341     DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>, <span class=
+"stringliteral">"hook_close exit\n"</span>));
+00342     <span class="keywordflow">return</span> rc;
+00343 }
+00344 
+00345 
+00346 
+00347 <span class="keywordtype">int</span>
+00348 netsnmp_callback_accept(netsnmp_transport *t)
+00349 {
+00350     DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>, <span class=
+"stringliteral">"hook_accept enter\n"</span>));
+00351     DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>, <span class=
+"stringliteral">"hook_accept exit\n"</span>));
+00352     <span class="keywordflow">return</span> 0;
+00353 }
+00354 
+00355 
+00356 
+00357 <span class="comment">/*</span>
+00358 <span class="comment"> * Open a Callback-domain transport for SNMP.  Local is TRUE if addr</span>
+00359 <span class="comment"> * is the local address to bind to (i.e. this is a server-type</span>
+00360 <span class="comment"> * session); otherwise addr is the remote address to send things to</span>
+00361 <span class="comment"> * (and we make up a temporary name for the local end of the</span>
+00362 <span class="comment"> * connection).  </span>
+00363 <span class="comment"> */</span>
+00364 
+00365 netsnmp_transport *
+00366 netsnmp_callback_transport(<span class="keywordtype">int</span> to)
+00367 {
+00368 
+00369     netsnmp_transport *t = NULL;
+00370     netsnmp_callback_info *mydata;
+00371     <span class="keywordtype">int</span>             rc;
+00372 
+00373     <span class="comment">/*</span>
+00374 <span class="comment">     * transport </span>
+00375 <span class="comment">     */</span>
+00376     t = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_transport);
+00377     <span class="keywordflow">if</span> (!t)
+00378         <span class="keywordflow">return</span> NULL;
+00379 
+00380     <span class="comment">/*</span>
+00381 <span class="comment">     * our stuff </span>
+00382 <span class="comment">     */</span>
+00383     mydata = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_callback_info);
+00384     mydata-&gt;linkedto = to;
+00385     mydata-&gt;callback_num = ++callback_count;
+00386     mydata-&gt;data = NULL;
+00387     t-&gt;data = mydata;
+00388 
+00389 <span class="preprocessor">#ifdef WIN32</span>
+00390     rc = create_winpipe_transport(mydata-&gt;pipefds);
+00391 <span class="preprocessor">#else</span>
+00392     rc = pipe(mydata-&gt;pipefds);
+00393 <span class="preprocessor">#endif</span>
+00394     t-&gt;sock = mydata-&gt;pipefds[0];
+00395 
+00396     <span class="keywordflow">if</span> (rc) {
+00397         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(mydata);
+00398         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(t);
+00399         <span class="keywordflow">return</span> NULL;
+00400     }
+00401 
+00402     t-&gt;f_recv    = netsnmp_callback_recv;
+00403     t-&gt;f_send    = netsnmp_callback_send;
+00404     t-&gt;f_close   = netsnmp_callback_close;
+00405     t-&gt;f_accept  = netsnmp_callback_accept;
+00406     t-&gt;f_fmtaddr = netsnmp_callback_fmtaddr;
+00407 
+00408     netsnmp_transport_add_to_list(&amp;trlist, t);
+00409 
+00410     <span class="keywordflow">if</span> (to)
+00411         DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>, <span class=
+"stringliteral">"initialized %d linked to %d\n"</span>,
+00412                     mydata-&gt;callback_num, to));
+00413     <span class="keywordflow">else</span>
+00414         DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>,
+00415                     <span class="stringliteral">"initialized master listening on %d\n"</span>,
+00416                     mydata-&gt;callback_num));
+00417     <span class="keywordflow">return</span> t;
+00418 }
+00419 
+00420 <span class="keywordtype">int</span>
+00421 netsnmp_callback_hook_parse(<a class="code" href="structsnmp__session.html">netsnmp_session</a> * sp,
+00422                             <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu,
+00423                             u_char * packetptr, size_t len)
+00424 {
+00425     <span class="keywordflow">if</span> (SNMP_MSG_RESPONSE == pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o1">command</a> ||
+00426         SNMP_MSG_REPORT == pdu-&gt;<a class="code" href="structsnmp__pdu.html#o1">command</a>)
+00427         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o9">flags</a> |= UCD_MSG_FLAG_RESPONSE_PDU;
+00428     <span class="keywordflow">else</span>
+00429         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o9">flags</a> &amp;= (~UCD_MSG_FLAG_RESPONSE_PDU);
+00430 
+00431     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00432 }
+00433 
+00434 <span class="keywordtype">int</span>
+00435 netsnmp_callback_hook_build(<a class="code" href="structsnmp__session.html">netsnmp_session</a> * sp,
+00436                             <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu, u_char * ptk, size_t * len)
+00437 {
+00438     <span class="comment">/*</span>
+00439 <span class="comment">     * very gross hack, as this is passed later to the transport_send</span>
+00440 <span class="comment">     * function </span>
+00441 <span class="comment">     */</span>
+00442     callback_hack  *ch = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(callback_hack);
+00443     DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>, <span class=
+"stringliteral">"hook_build enter\n"</span>));
+00444     ch-&gt;pdu = pdu;
+00445     ch-&gt;orig_transport_data = pdu-&gt;<a class="code" href="structsnmp__pdu.html#o13">transport_data</a>;
+00446     pdu-&gt;<a class="code" href="structsnmp__pdu.html#o13">transport_data</a> = ch;
+00447     <span class="keywordflow">switch</span> (pdu-&gt;<a class="code" href="structsnmp__pdu.html#o1">command</a>) {
+00448     <span class="keywordflow">case</span> SNMP_MSG_RESPONSE:
+00449     <span class="keywordflow">case</span> SNMP_MSG_TRAP:
+00450     <span class="keywordflow">case</span> SNMP_MSG_TRAP2:
+00451         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o9">flags</a> &amp;= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
+00452         <span class="keywordflow">break</span>;
+00453     }
+00454     *len = 1;
+00455     DEBUGMSGTL((<span class="stringliteral">"transport_callback"</span>, <span class=
+"stringliteral">"hook_build exit\n"</span>));
+00456     <span class="keywordflow">return</span> 1;
+00457 }
+00458 
+00459 <span class="keywordtype">int</span>
+00460 netsnmp_callback_check_packet(u_char * pkt, size_t len)
+00461 {
+00462     <span class="keywordflow">return</span> 1;
+00463 }
+00464 
+00465 <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *
+00466 netsnmp_callback_create_pdu(netsnmp_transport *transport,
+00467                             <span class="keywordtype">void</span> *opaque, size_t olength)
+00468 {
+00469     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu;
+00470     netsnmp_callback_pass *cp =
+00471         callback_pop_queue(((netsnmp_callback_info *) transport-&gt;data)-&gt;
+00472                            callback_num);
+00473     <span class="keywordflow">if</span> (!cp)
+00474         <span class="keywordflow">return</span> NULL;
+00475     pdu = cp-&gt;pdu;
+00476     pdu-&gt;<a class="code" href="structsnmp__pdu.html#o13">transport_data</a> = opaque;
+00477     pdu-&gt;<a class="code" href="structsnmp__pdu.html#o14">transport_data_length</a> = olength;
+00478     <span class="keywordflow">if</span> (opaque)                 <span class=
+"comment">/* if created, we're the server */</span>
+00479         *((<span class="keywordtype">int</span> *) opaque) = cp-&gt;return_transport_num;
+00480     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(cp);
+00481     <span class="keywordflow">return</span> pdu;
+00482 }
+00483 
+00484 <a class="code" href="structsnmp__session.html">netsnmp_session</a> *
+00485 netsnmp_callback_open(<span class="keywordtype">int</span> attach_to,
+00486                       <span class="keywordtype">int</span> (*return_func) (<span class="keywordtype">int</span> op,
+00487                                           <a class="code" href="structsnmp__session.html">netsnmp_session</a> * session,
+00488                                           <span class="keywordtype">int</span> reqid, <a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *pdu,
+00489                                           <span class="keywordtype">void</span> *magic),
+00490                       <span class="keywordtype">int</span> (*fpre_parse) (<a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> *,
+00491                                          <span class="keyword">struct</span> netsnmp_transport_s *,
+00492                                          <span class="keywordtype">void</span> *, <span class="keywordtype">int</span>),
+00493                       <span class="keywordtype">int</span> (*fpost_parse) (netsnmp_session *, <a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *,
+00494                                           <span class="keywordtype">int</span>))
+00495 {
+00496     netsnmp_session callback_sess, *callback_ss;
+00497     netsnmp_transport *callback_tr;
+00498 
+00499     callback_tr = netsnmp_callback_transport(attach_to);
+00500     snmp_sess_init(&amp;callback_sess);
+00501     callback_sess.<a class="code" href="structsnmp__session.html#o11">callback</a> = return_func;
+00502     <span class="keywordflow">if</span> (attach_to) {
+00503         <span class="comment">/*</span>
+00504 <span class="comment">         * client </span>
+00505 <span class="comment">         */</span>
+00506         <span class="comment">/*</span>
+00507 <span class="comment">         * trysess.community = (u_char *) callback_ss; </span>
+00508 <span class="comment">         */</span>
+00509     } <span class="keywordflow">else</span> {
+00510         callback_sess.<a class="code" href="structsnmp__session.html#o20">isAuthoritative</a> = SNMP_SESS_AUTHORITATIVE;
+00511     }
+00512     callback_sess.<a class="code" href="structsnmp__session.html#o7">remote_port</a> = 0;
+00513     callback_sess.<a class="code" href="structsnmp__session.html#o1">retries</a> = 0;
+00514     callback_sess.<a class="code" href="structsnmp__session.html#o2">timeout</a> = 30000000;
+00515     callback_sess.<a class="code" href="structsnmp__session.html#o0">version</a> = SNMP_DEFAULT_VERSION;       <span class=
+"comment">/* (mostly) bogus */</span>
+00516     callback_ss = snmp_add_full(&amp;callback_sess, callback_tr,
+00517                                 fpre_parse,
+00518                                 netsnmp_callback_hook_parse, fpost_parse,
+00519                                 netsnmp_callback_hook_build,
+00520                                 NULL,
+00521                                 netsnmp_callback_check_packet,
+00522                                 netsnmp_callback_create_pdu);
+00523     <span class="keywordflow">if</span> (callback_ss)
+00524         callback_ss-&gt;<a class="code" href="structsnmp__session.html#o9">local_port</a> =
+00525             ((netsnmp_callback_info *) callback_tr-&gt;data)-&gt;callback_num;
+00526     <span class="keywordflow">return</span> callback_ss;
+00527 }
+00528 
+00529 
+00530 
+00531 <span class="keywordtype">void</span>
+00532 netsnmp_clear_callback_list(<span class="keywordtype">void</span>)
+00533 {
+00534 
+00535     netsnmp_transport_list *list = trlist, *next = NULL;
+00536     netsnmp_transport *tr = NULL;
+00537 
+00538     DEBUGMSGTL((<span class="stringliteral">"callback_clear"</span>, <span class=
+"stringliteral">"called netsnmp_callback_clear_list()\n"</span>));
+00539     <span class="keywordflow">while</span> (list != NULL) {
+00540         next = list-&gt;<a class="code" href="structsnmp__session.html#o5">next</a>;
+00541         tr = list-&gt;transport;
+00542 
+00543         <span class="keywordflow">if</span> (tr != NULL) {
+00544             tr-&gt;f_close(tr);
+00545             netsnmp_transport_remove_from_list(&amp;trlist, list-&gt;transport);
+00546             netsnmp_transport_free(list-&gt;transport);
+00547         }
+00548         list = next;
+00549     }
+00550     trlist = NULL;
+00551 
+00552 }
+00553 
+00554 <span class="preprocessor">#endif </span><span class="comment">/* SNMP_TRANSPORT_CALLBACK_DOMAIN */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:01 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

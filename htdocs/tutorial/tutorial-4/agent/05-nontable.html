@@ -1,0 +1,198 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML>
+<HEAD>
+<TITLE>Extending the UCD agent - scalar modules</TITLE>
+</HEAD>
+<BODY>
+<H1> Non-table-based modules </H1>
+
+Having looked at the general structure of a module implementation,
+it's now time to look at this in more detail.  We'll start with the
+simplest style of module - a collection of independent variables.
+This could easily be implemented as a series of completely separate 
+modules - the main reason for combining them is to avoid the proliferation
+of multiple versions of very similar code.
+<P>
+  Recall that the variable handling routine needs to cover two distinct
+purposes - validation of the request, and provision of the answer.  In
+this style of module, these are handled separately.
+Once again, <CODE>mib2c</CODE> does much of the donkey work, generating
+the whole of the request validation code (so the description of this section
+can be skipped if desired), and even providing a skeleton
+for returning the data. This latter still requires some input from the
+programmer, to actually return the correct results (rather than dummy values).
+
+<H2>Request Validation</H2>
+
+This is done using a standard utility function <CODE>header_generic</CODE>.
+The parameters for this are exactly the same as
+for the main routine, and are simply passed through directly.
+It returns an integer result, as a flag to indicate
+whether the validation succeeded or not.
+<BR>
+  If the validation fails, then the main routine should return immediately,
+leaving the parameters untouched, and indicate the failure by returning a
+NULL value.  Thus the initial code fragment of a scalar-variable style
+implementation will typically look like:
+
+<PRE>
+    u_char  *
+    var_system(vp, name, length, exact, var_len, write_method)
+    {
+	if (header_generic(vp, name, length, exact, var_len, write_method)
+						== MATCH_FAILED )
+	    return NULL;
+
+	<I>[ etc, etc, etc ]</I>
+    }
+</PRE>
+
+  Although the utility function can be used as a "black box",
+it's worth looking more closely at exactly what it does (since
+the table-handling modules will need to do something fairly similar).
+It has two (or possibly three) separate functions:
+<UL>
+<LI>checking that the request is valid,
+<LI>setting up the OID for the result,
+<LI>and (optionally) setting up default values for the other return parameters.
+</UL>
+<BR>
+  In order to actually validate the request, the header routine first needs
+to construct the OID under consideration, in order to compare it with
+that originally asked for.  The driving code has already combined the
+OID prefix (constant throughout the module) with the entry-specific suffix,
+before calling the main variable handler.
+This is available via the <CODE>name</CODE>
+field of the parameter <CODE>vp</CODE>.  
+  For a scalar variable, completing the OID is therefore
+simply a matter of appending the instance identifier 0 to this.
+The full OID is
+built up in a local oid array <CODE>newname</CODE> defined for this purpose.
+<BR>
+This gives the following code fragment:
+
+<PRE>
+    int
+    header_generic(vp, name, length, exact, var_len, write_method)
+    {
+	oid newname[MAX_NAME_LEN];
+
+	memcpy((char *)newname, (char *)vp->name,
+			(int)vp->namelen * sizeof(oid));
+	newname[ vp->namelen ] = 0;
+
+		:
+    }
+</PRE>
+
+<P>
+  Having formed the OID, this can then be compared against the variable
+specified in the original request, which is available as the <CODE>name</CODE> parameter.
+This comparison is done using the <CODE>snmp_oid_compare</CODE> function, which takes the
+two OIDs (together with their respective lengths), and returns -1, 0 or 1
+depending on whether the first OID precedes, matches or follows the second.
+<P>
+In the case of an 'exact' match (i.e. a GET/SET/etc), then the request is only
+valid if the two OIDs are identical (<CODE>snmp_oid_compare</CODE> returns 0).
+In the case of a
+GETNEXT (or GETBULK) request, it's valid if the OID being considered comes
+after that of the original request (<CODE>snmp_oid_compare</CODE> returns -1).
+<P>
+  This gives the code fragment
+
+<PRE>
+	result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
+			<I>// +1 because of the extra instance sub-identifier</I>
+	if ((exact && (result != 0))		<I>// GET match fails</I>
+		|| (!exact && (result >= 0)))	<I>// GETNEXT match fails</I>
+	    return(MATCH_FAILED);
+</PRE>
+
+
+  Note that in this case, we're only interested in the single variable
+indicated by the <CODE>vp</CODE> parameter.  The fact that this module may well
+implement other variables as well is ignored.  The 'lexically next'
+requirement of the GETNEXT request is handled by working through the
+variable entries in order until one matches.  And yes, this is not the
+most efficient implementation possible!
+<BR>
+<FONT SIZE=-1> Note that in releases prior to 3.6, the <CODE>snmp_oid_compare</CODE>
+function was called simply <CODE>compare</CODE>.  </FONT>
+
+<P>
+  Finally, having determined that the request is valid, this routine must
+update the <CODE>name</CODE> and <CODE>length</CODE> parameters to return
+the OID being processed.
+It also sets default values for the other two return parameters.
+
+<PRE>
+	memcpy( (char *)name,(char *)newname,
+		((int)vp->namelen + 1) * sizeof(oid));
+	*length = vp->namelen + 1;
+	*write_method = 0;		<I>// Non-writeable</I>
+	*var_len = sizeof(long);	<I>// default to integer results</I>
+	return(MATCH_SUCCEEDED);
+</PRE>
+
+
+These three code fragments combine to form the full <CODE>header_generic</CODE>
+code which can be seen in the file <CODE>util_funcs.c</CODE>
+<P>
+  <B>Note</B>: This validation used to be done using a separate function for
+each module (conventionally called <CODE>header_</CODE><I>{name}</I>),
+and many modules may still be coded in this style.  The code for these are
+to all intents and purposes identical to the <CODE>header_generic</CODE>
+routine described above.
+
+
+<H2>Data Retrieval</H2>
+
+  The other main job of the request handling routine is to retrieve any
+necessary data, and return the appropriate answer to the original request.
+This must be done even if <CODE>mib2c</CODE> is being used to generate
+the framework of the implementation. 
+As has been indicated earlier, the different cases are handled using
+a <CODE>switch</CODE> statement, with the <I>Magic Number</I> field of the <CODE>vp</CODE> parameter
+being used to distinguish between them.
+<BR>
+  The data necessary for answering the request can be retrieved for each
+variable individually in the relevant case statement
+(as is the case with the system group), or using a
+common block of data before processing the switch (as is done for the ICMP
+group, among others).
+<P>
+  With many of the modules implemented so far, this data is read
+from a kernel structure. This can be done using the <CODE>auto_nlist</CODE> routine
+already mentioned, providing a variable in which to store the results
+and an indication of its size (see the <CODE>!HAVE_SYS_TCPIPSTATS_H</CODE> case of
+the ICMP group for an example).
+Alternatively, there may be <CODE>ioctl</CODE> calls on suitable
+devices, specific system calls, or special files that can be read to
+provide the necessary information.
+<P>
+  If the available data provides the requested value immediately, then
+the individual branch becomes a simple assignment to the appropriate
+static return variable - either one of the global static variables
+(e.g <CODE>long_return</CODE>) or the local equivalents (such as generated by<CODE>mib2c</CODE>). 
+Otherwise, the requested value may need to be calculated by combining two
+or more items of data (e.g. <CODE>IPINHDRERRORS</CODE> in <CODE>mibII/ip.c</CODE>) or by applying
+a mapping or other calculation involving available information (e.g. <CODE>IPFORWARDING</CODE>
+from the same group).
+<P>
+  In each of these cases, the routine should return a pointer to the
+result value, casting this to the pseudo-generic <CODE>(u_char *)</CODE>
+<P>
+<HR>
+So much for the scalar case.
+The <A HREF=06-table1.html>next part</A> looks at how to handle simple tables.
+<P><HR>
+Copyright 1999 - D.T.Shield.
+Not to be distributed without the explicit permission of the author.
+</BODY>
+</HTML>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

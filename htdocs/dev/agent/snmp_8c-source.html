@@ -1,0 +1,483 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>snmp.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * Simple Network Management Protocol (RFC 1067).</span>
+00003 <span class="comment"> *</span>
+00004 <span class="comment"> */</span>
+00005 <span class="comment">/**********************************************************************</span>
+00006 <span class="comment">        Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University</span>
+00007 
+00008 <span class="comment">                      All Rights Reserved</span>
+00009 
+00010 <span class="comment">Permission to use, copy, modify, and distribute this software and its </span>
+00011 <span class="comment">documentation for any purpose and without fee is hereby granted, </span>
+00012 <span class="comment">provided that the above copyright notice appear in all copies and that</span>
+00013 <span class="comment">both that copyright notice and this permission notice appear in </span>
+00014 <span class="comment">supporting documentation, and that the name of CMU not be</span>
+00015 <span class="comment">used in advertising or publicity pertaining to distribution of the</span>
+00016 <span class="comment">software without specific, written prior permission.  </span>
+00017 
+00018 <span class="comment">CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING</span>
+00019 <span class="comment">ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL</span>
+00020 <span class="comment">CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR</span>
+00021 <span class="comment">ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,</span>
+00022 <span class="comment">WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,</span>
+00023 <span class="comment">ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS</span>
+00024 <span class="comment">SOFTWARE.</span>
+00025 <span class="comment">******************************************************************/</span>
+00026 
+00027 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00028 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+00029 
+00030 <span class="preprocessor">#ifdef KINETICS</span>
+00031 <span class="preprocessor">#include "gw.h"</span>
+00032 <span class="preprocessor">#include "ab.h"</span>
+00033 <span class="preprocessor">#include "inet.h"</span>
+00034 <span class="preprocessor">#include "fp4/cmdmacro.h"</span>
+00035 <span class="preprocessor">#include "fp4/pbuf.h"</span>
+00036 <span class="preprocessor">#include "glob.h"</span>
+00037 <span class="preprocessor">#endif</span>
+00038 
+00039 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00040 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00041 
+00042 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00043 <span class="preprocessor">#ifdef HAVE_STRING_H</span>
+00044 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00045 <span class="preprocessor">#else</span>
+00046 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00047 <span class="preprocessor">#endif</span>
+00048 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00049 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00050 <span class="preprocessor">#endif</span>
+00051 <span class="preprocessor">#ifdef HAVE_SYS_SELECT_H</span>
+00052 <span class="preprocessor">#include &lt;sys/select.h&gt;</span>
+00053 <span class="preprocessor">#endif</span>
+00054 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00055 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00056 <span class="preprocessor">#endif</span>
+00057 <span class="preprocessor">#ifndef NULL</span>
+00058 <span class="preprocessor">#define NULL 0</span>
+00059 <span class="preprocessor">#endif</span>
+00060 
+00061 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00062 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00063 <span class="preprocessor">#endif</span>
+00064 
+00065 <span class="preprocessor">#ifdef vms</span>
+00066 <span class="preprocessor">#include &lt;in.h&gt;</span>
+00067 <span class="preprocessor">#endif</span>
+00068 
+00069 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00070 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00071 
+00072 <span class="preprocessor">#include &lt;net-snmp/library/asn1.h&gt;</span>
+00073 <span class="preprocessor">#include &lt;net-snmp/library/snmp.h&gt;</span>      <span class=
+"comment">/* for "internal" definitions */</span>
+00074 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00075 <span class="preprocessor">#include &lt;net-snmp/library/mib.h&gt;</span>
+00076 
+00092 <span class="keywordtype">void</span>
+00093 xdump(<span class="keyword">const</span> u_char * cp, size_t length, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *prefix)
+00094 {
+00095     <span class="keywordtype">int</span>             col, count;
+00096     <span class="keywordtype">char</span>           *buffer;
+00097 
+00098     buffer = (<span class="keywordtype">char</span> *) malloc(strlen(prefix) + 80);
+00099     <span class="keywordflow">if</span> (!buffer) {
+00100         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_NOTICE,
+00101                  <span class="stringliteral">"xdump: malloc failed. packet-dump skipped\n"</span>);
+00102         <span class="keywordflow">return</span>;
+00103     }
+00104 
+00105     count = 0;
+00106     <span class="keywordflow">while</span> (count &lt; (int) length) {
+00107         strcpy(buffer, prefix);
+00108         sprintf(buffer + strlen(buffer), <span class="stringliteral">"%.4d: "</span>, count);
+00109 
+00110         <span class="keywordflow">for</span> (col = 0; ((count + col) &lt; (int) length) &amp;&amp; col &lt; 16; col++) {
+00111             sprintf(buffer + strlen(buffer), <span class="stringliteral">"%02X "</span>, cp[count + col]);
+00112             <span class="keywordflow">if</span> (col % 4 == 3)
+00113                 strcat(buffer, <span class="stringliteral">" "</span>);
+00114         }
+00115         <span class="keywordflow">for</span> (; col &lt; 16; col++) {       <span class=
+"comment">/* pad end of buffer with zeros */</span>
+00116             strcat(buffer, <span class="stringliteral">"   "</span>);
+00117             <span class="keywordflow">if</span> (col % 4 == 3)
+00118                 strcat(buffer, <span class="stringliteral">" "</span>);
+00119         }
+00120         strcat(buffer, <span class="stringliteral">"  "</span>);
+00121         <span class="keywordflow">for</span> (col = 0; ((count + col) &lt; (int) length) &amp;&amp; col &lt; 16; col++) {
+00122             buffer[col + 60] =
+00123                 isprint(cp[count + col]) ? cp[count + col] : <span class="charliteral">'.'</span>;
+00124         }
+00125         buffer[col + 60] = <span class="charliteral">'\n'</span>;
+00126         buffer[col + 60 + 1] = 0;
+00127         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_DEBUG, <span class=
+"stringliteral">"%s"</span>, buffer);
+00128         count += col;
+00129     }
+00130     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_DEBUG, <span class="stringliteral">"\n"</span>);
+00131     free(buffer);
+00132 
+00133 }                               <span class="comment">/* end xdump() */</span>
+00134 
+00135 <span class="comment">/*</span>
+00136 <span class="comment"> * u_char * snmp_parse_var_op(</span>
+00137 <span class="comment"> * u_char *data              IN - pointer to the start of object</span>
+00138 <span class="comment"> * oid *var_name             OUT - object id of variable </span>
+00139 <span class="comment"> * int *var_name_len         IN/OUT - length of variable name </span>
+00140 <span class="comment"> * u_char *var_val_type      OUT - type of variable (int or octet string) (one byte) </span>
+00141 <span class="comment"> * int *var_val_len          OUT - length of variable </span>
+00142 <span class="comment"> * u_char **var_val          OUT - pointer to ASN1 encoded value of variable </span>
+00143 <span class="comment"> * int *listlength          IN/OUT - number of valid bytes left in var_op_list </span>
+00144 <span class="comment"> */</span>
+00145 
+00146 u_char         *
+00147 snmp_parse_var_op(u_char * data,
+00148                   oid * var_name,
+00149                   size_t * var_name_len,
+00150                   u_char * var_val_type,
+00151                   size_t * var_val_len,
+00152                   u_char ** var_val, size_t * listlength)
+00153 {
+00154     u_char          var_op_type;
+00155     size_t          var_op_len = *listlength;
+00156     u_char         *var_op_start = data;
+00157 
+00158     data = asn_parse_sequence(data, &amp;var_op_len, &amp;var_op_type,
+00159                               (ASN_SEQUENCE | ASN_CONSTRUCTOR), <span class="stringliteral">"var_op"</span>);
+00160     <span class="keywordflow">if</span> (data == NULL) {
+00161         <span class="comment">/*</span>
+00162 <span class="comment">         * msg detail is set </span>
+00163 <span class="comment">         */</span>
+00164         <span class="keywordflow">return</span> NULL;
+00165     }
+00166     DEBUGDUMPHEADER(<span class="stringliteral">"recv"</span>, <span class="stringliteral">"Name"</span>);
+00167     data =
+00168         asn_parse_objid(data, &amp;var_op_len, &amp;var_op_type, var_name,
+00169                         var_name_len);
+00170     DEBUGINDENTLESS();
+00171     <span class="keywordflow">if</span> (data == NULL) {
+00172         ERROR_MSG(<span class="stringliteral">"No OID for variable"</span>);
+00173         <span class="keywordflow">return</span> NULL;
+00174     }
+00175     <span class="keywordflow">if</span> (var_op_type !=
+00176         (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OBJECT_ID))
+00177         <span class="keywordflow">return</span> NULL;
+00178     *var_val = data;            <span class="comment">/* save pointer to this object */</span>
+00179     <span class="comment">/*</span>
+00180 <span class="comment">     * find out what type of object this is </span>
+00181 <span class="comment">     */</span>
+00182     data = asn_parse_header(data, &amp;var_op_len, var_val_type);
+00183     <span class="keywordflow">if</span> (data == NULL) {
+00184         ERROR_MSG(<span class="stringliteral">"No header for value"</span>);
+00185         <span class="keywordflow">return</span> NULL;
+00186     }
+00187     <span class="comment">/*</span>
+00188 <span class="comment">     * XXX no check for type! </span>
+00189 <span class="comment">     */</span>
+00190     *var_val_len = var_op_len;
+00191     data += var_op_len;
+00192     *listlength -= (int) (data - var_op_start);
+00193     <span class="keywordflow">return</span> data;
+00194 }
+00195 
+00196 <span class="comment">/*</span>
+00197 <span class="comment"> * u_char * snmp_build_var_op(</span>
+00198 <span class="comment"> * u_char *data      IN - pointer to the beginning of the output buffer</span>
+00199 <span class="comment"> * oid *var_name        IN - object id of variable </span>
+00200 <span class="comment"> * int *var_name_len    IN - length of object id </span>
+00201 <span class="comment"> * u_char var_val_type  IN - type of variable </span>
+00202 <span class="comment"> * int    var_val_len   IN - length of variable </span>
+00203 <span class="comment"> * u_char *var_val      IN - value of variable </span>
+00204 <span class="comment"> * int *listlength      IN/OUT - number of valid bytes left in</span>
+00205 <span class="comment"> * output buffer </span>
+00206 <span class="comment"> */</span>
+00207 
+00208 u_char         *
+00209 snmp_build_var_op(u_char * data,
+00210                   oid * var_name,
+00211                   size_t * var_name_len,
+00212                   u_char var_val_type,
+00213                   size_t var_val_len,
+00214                   u_char * var_val, size_t * listlength)
+00215 {
+00216     size_t          dummyLen, headerLen;
+00217     u_char         *dataPtr;
+00218 
+00219     dummyLen = *listlength;
+00220     dataPtr = data;
+00221 <span class="preprocessor">#if 0</span>
+00222     data = asn_build_sequence(data, &amp;dummyLen,
+00223                               (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
+00224                               0);
+00225     <span class="keywordflow">if</span> (data == NULL) {
+00226         <span class="keywordflow">return</span> NULL;
+00227     }
+00228 <span class="preprocessor">#endif</span>
+00229     <span class="keywordflow">if</span> (dummyLen &lt; 4)
+00230         <span class="keywordflow">return</span> NULL;
+00231     data += 4;
+00232     dummyLen -= 4;
+00233 
+00234     headerLen = data - dataPtr;
+00235     *listlength -= headerLen;
+00236     DEBUGDUMPHEADER(<span class="stringliteral">"send"</span>, <span class="stringliteral">"Name"</span>);
+00237     data = asn_build_objid(data, listlength,
+00238                            (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+00239                                      ASN_OBJECT_ID), var_name,
+00240                            *var_name_len);
+00241     DEBUGINDENTLESS();
+00242     <span class="keywordflow">if</span> (data == NULL) {
+00243         ERROR_MSG(<span class="stringliteral">"Can't build OID for variable"</span>);
+00244         <span class="keywordflow">return</span> NULL;
+00245     }
+00246     DEBUGDUMPHEADER(<span class="stringliteral">"send"</span>, <span class="stringliteral">"Value"</span>);
+00247     <span class="keywordflow">switch</span> (var_val_type) {
+00248     <span class="keywordflow">case</span> ASN_INTEGER:
+00249         data = asn_build_int(data, listlength, var_val_type,
+00250                              (<span class="keywordtype">long</span> *) var_val, var_val_len);
+00251         <span class="keywordflow">break</span>;
+00252     <span class="keywordflow">case</span> ASN_GAUGE:
+00253     <span class="keywordflow">case</span> ASN_COUNTER:
+00254     <span class="keywordflow">case</span> ASN_TIMETICKS:
+00255     <span class="keywordflow">case</span> ASN_UINTEGER:
+00256         data = asn_build_unsigned_int(data, listlength, var_val_type,
+00257                                       (u_long *) var_val, var_val_len);
+00258         <span class="keywordflow">break</span>;
+00259 <span class="preprocessor">#ifdef OPAQUE_SPECIAL_TYPES</span>
+00260     <span class="keywordflow">case</span> ASN_OPAQUE_COUNTER64:
+00261     <span class="keywordflow">case</span> ASN_OPAQUE_U64:
+00262 <span class="preprocessor">#endif</span>
+00263     <span class="keywordflow">case</span> ASN_COUNTER64:
+00264         data = asn_build_unsigned_int64(data, listlength, var_val_type,
+00265                                         (<span class="keyword">struct</span> counter64 *) var_val,
+00266                                         var_val_len);
+00267         <span class="keywordflow">break</span>;
+00268     <span class="keywordflow">case</span> ASN_OCTET_STR:
+00269     <span class="keywordflow">case</span> ASN_IPADDRESS:
+00270     <span class="keywordflow">case</span> ASN_OPAQUE:
+00271     <span class="keywordflow">case</span> ASN_NSAP:
+00272         data = asn_build_string(data, listlength, var_val_type,
+00273                                 var_val, var_val_len);
+00274         <span class="keywordflow">break</span>;
+00275     <span class="keywordflow">case</span> ASN_OBJECT_ID:
+00276         data = asn_build_objid(data, listlength, var_val_type,
+00277                                (oid *) var_val, var_val_len / <span class="keyword">sizeof</span>(oid));
+00278         <span class="keywordflow">break</span>;
+00279     <span class="keywordflow">case</span> ASN_NULL:
+00280         data = asn_build_null(data, listlength, var_val_type);
+00281         <span class="keywordflow">break</span>;
+00282     <span class="keywordflow">case</span> ASN_BIT_STR:
+00283         data = asn_build_bitstring(data, listlength, var_val_type,
+00284                                    var_val, var_val_len);
+00285         <span class="keywordflow">break</span>;
+00286     <span class="keywordflow">case</span> SNMP_NOSUCHOBJECT:
+00287     <span class="keywordflow">case</span> SNMP_NOSUCHINSTANCE:
+00288     <span class="keywordflow">case</span> SNMP_ENDOFMIBVIEW:
+00289         data = asn_build_null(data, listlength, var_val_type);
+00290         <span class="keywordflow">break</span>;
+00291 <span class="preprocessor">#ifdef OPAQUE_SPECIAL_TYPES</span>
+00292     <span class="keywordflow">case</span> ASN_OPAQUE_FLOAT:
+00293         data = asn_build_float(data, listlength, var_val_type,
+00294                                (<span class="keywordtype">float</span> *) var_val, var_val_len);
+00295         <span class="keywordflow">break</span>;
+00296     <span class="keywordflow">case</span> ASN_OPAQUE_DOUBLE:
+00297         data = asn_build_double(data, listlength, var_val_type,
+00298                                 (<span class="keywordtype">double</span> *) var_val, var_val_len);
+00299         <span class="keywordflow">break</span>;
+00300     <span class="keywordflow">case</span> ASN_OPAQUE_I64:
+00301         data = asn_build_signed_int64(data, listlength, var_val_type,
+00302                                       (<span class="keyword">struct</span> counter64 *) var_val,
+00303                                       var_val_len);
+00304         <span class="keywordflow">break</span>;
+00305 <span class="preprocessor">#endif                          </span><span class="comment">/* OPAQUE_SPECIAL_TYPES */</span>
+00306     <span class="keywordflow">default</span>:
+00307         {
+00308         <span class="keywordtype">char</span> error_buf[64];
+00309         snprintf(error_buf, <span class="keyword">sizeof</span>(error_buf),
+00310                 <span class="stringliteral">"wrong type in snmp_build_var_op: %d"</span>, var_val_type);
+00311         ERROR_MSG(error_buf);
+00312         data = NULL;
+00313         }
+00314     }
+00315     DEBUGINDENTLESS();
+00316     <span class="keywordflow">if</span> (data == NULL) {
+00317         <span class="keywordflow">return</span> NULL;
+00318     }
+00319     dummyLen = (data - dataPtr) - headerLen;
+00320 
+00321     asn_build_sequence(dataPtr, &amp;dummyLen,
+00322                        (u_char) (ASN_SEQUENCE | ASN_CONSTRUCTOR),
+00323                        dummyLen);
+00324     <span class="keywordflow">return</span> data;
+00325 }
+00326 
+00327 <span class="preprocessor">#ifdef USE_REVERSE_ASNENCODING</span>
+00328 <span class="keywordtype">int</span>
+00329 snmp_realloc_rbuild_var_op(u_char ** pkt, size_t * pkt_len,
+00330                            size_t * offset, <span class="keywordtype">int</span> allow_realloc,
+00331                            <span class="keyword">const</span> oid * var_name, size_t * var_name_len,
+00332                            u_char var_val_type,
+00333                            u_char * var_val, size_t var_val_len)
+00334 {
+00335     size_t          start_offset = *offset;
+00336     <span class="keywordtype">int</span>             rc = 0;
+00337 
+00338     <span class="comment">/*</span>
+00339 <span class="comment">     * Encode the value.  </span>
+00340 <span class="comment">     */</span>
+00341     DEBUGDUMPHEADER(<span class="stringliteral">"send"</span>, <span class="stringliteral">"Value"</span>);
+00342 
+00343     <span class="keywordflow">switch</span> (var_val_type) {
+00344     <span class="keywordflow">case</span> ASN_INTEGER:
+00345         rc = asn_realloc_rbuild_int(pkt, pkt_len, offset, allow_realloc,
+00346                                     var_val_type, (<span class="keywordtype">long</span> *) var_val,
+00347                                     var_val_len);
+00348         <span class="keywordflow">break</span>;
+00349 
+00350     <span class="keywordflow">case</span> ASN_GAUGE:
+00351     <span class="keywordflow">case</span> ASN_COUNTER:
+00352     <span class="keywordflow">case</span> ASN_TIMETICKS:
+00353     <span class="keywordflow">case</span> ASN_UINTEGER:
+00354         rc = asn_realloc_rbuild_unsigned_int(pkt, pkt_len, offset,
+00355                                              allow_realloc, var_val_type,
+00356                                              (u_long *) var_val,
+00357                                              var_val_len);
+00358         <span class="keywordflow">break</span>;
+00359 
+00360 <span class="preprocessor">#ifdef OPAQUE_SPECIAL_TYPES</span>
+00361     <span class="keywordflow">case</span> ASN_OPAQUE_COUNTER64:
+00362     <span class="keywordflow">case</span> ASN_OPAQUE_U64:
+00363 <span class="preprocessor">#endif</span>
+00364     <span class="keywordflow">case</span> ASN_COUNTER64:
+00365         rc = asn_realloc_rbuild_unsigned_int64(pkt, pkt_len, offset,
+00366                                                allow_realloc, var_val_type,
+00367                                                (<span class="keyword">struct</span> counter64 *)
+00368                                                var_val, var_val_len);
+00369         <span class="keywordflow">break</span>;
+00370 
+00371     <span class="keywordflow">case</span> ASN_OCTET_STR:
+00372     <span class="keywordflow">case</span> ASN_IPADDRESS:
+00373     <span class="keywordflow">case</span> ASN_OPAQUE:
+00374     <span class="keywordflow">case</span> ASN_NSAP:
+00375         rc = asn_realloc_rbuild_string(pkt, pkt_len, offset, allow_realloc,
+00376                                        var_val_type, var_val, var_val_len);
+00377         <span class="keywordflow">break</span>;
+00378 
+00379     <span class="keywordflow">case</span> ASN_OBJECT_ID:
+00380         rc = asn_realloc_rbuild_objid(pkt, pkt_len, offset, allow_realloc,
+00381                                       var_val_type, (oid *) var_val,
+00382                                       var_val_len / <span class="keyword">sizeof</span>(oid));
+00383         <span class="keywordflow">break</span>;
+00384 
+00385     <span class="keywordflow">case</span> ASN_NULL:
+00386         rc = asn_realloc_rbuild_null(pkt, pkt_len, offset, allow_realloc,
+00387                                      var_val_type);
+00388         <span class="keywordflow">break</span>;
+00389 
+00390     <span class="keywordflow">case</span> ASN_BIT_STR:
+00391         rc = asn_realloc_rbuild_bitstring(pkt, pkt_len, offset,
+00392                                           allow_realloc, var_val_type,
+00393                                           var_val, var_val_len);
+00394         <span class="keywordflow">break</span>;
+00395 
+00396     <span class="keywordflow">case</span> SNMP_NOSUCHOBJECT:
+00397     <span class="keywordflow">case</span> SNMP_NOSUCHINSTANCE:
+00398     <span class="keywordflow">case</span> SNMP_ENDOFMIBVIEW:
+00399         rc = asn_realloc_rbuild_null(pkt, pkt_len, offset, allow_realloc,
+00400                                      var_val_type);
+00401         <span class="keywordflow">break</span>;
+00402 
+00403 <span class="preprocessor">#ifdef OPAQUE_SPECIAL_TYPES</span>
+00404     <span class="keywordflow">case</span> ASN_OPAQUE_FLOAT:
+00405         rc = asn_realloc_rbuild_float(pkt, pkt_len, offset, allow_realloc,
+00406                                       var_val_type, (<span class="keywordtype">float</span> *) var_val,
+00407                                       var_val_len);
+00408         <span class="keywordflow">break</span>;
+00409 
+00410     <span class="keywordflow">case</span> ASN_OPAQUE_DOUBLE:
+00411         rc = asn_realloc_rbuild_double(pkt, pkt_len, offset, allow_realloc,
+00412                                        var_val_type, (<span class="keywordtype">double</span> *) var_val,
+00413                                        var_val_len);
+00414         <span class="keywordflow">break</span>;
+00415 
+00416     <span class="keywordflow">case</span> ASN_OPAQUE_I64:
+00417         rc = asn_realloc_rbuild_signed_int64(pkt, pkt_len, offset,
+00418                                              allow_realloc, var_val_type,
+00419                                              (<span class="keyword">struct</span> counter64 *) var_val,
+00420                                              var_val_len);
+00421         <span class="keywordflow">break</span>;
+00422 <span class="preprocessor">#endif                          </span><span class="comment">/* OPAQUE_SPECIAL_TYPES */</span>
+00423     <span class="keywordflow">default</span>:
+00424         {
+00425         <span class="keywordtype">char</span> error_buf[64];
+00426         snprintf(error_buf, <span class="keyword">sizeof</span>(error_buf),
+00427                 <span class="stringliteral">"wrong type in snmp_realloc_rbuild_var_op: %d"</span>, var_val_type);
+00428         ERROR_MSG(error_buf);
+00429         rc = 0;
+00430         }
+00431     }
+00432     DEBUGINDENTLESS();
+00433 
+00434     <span class="keywordflow">if</span> (rc == 0) {
+00435         <span class="keywordflow">return</span> 0;
+00436     }
+00437 
+00438     <span class="comment">/*</span>
+00439 <span class="comment">     * Build the OID.  </span>
+00440 <span class="comment">     */</span>
+00441 
+00442     DEBUGDUMPHEADER(<span class="stringliteral">"send"</span>, <span class="stringliteral">"Name"</span>);
+00443     rc = asn_realloc_rbuild_objid(pkt, pkt_len, offset, allow_realloc,
+00444                                   (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+00445                                             ASN_OBJECT_ID), var_name,
+00446                                   *var_name_len);
+00447     DEBUGINDENTLESS();
+00448     <span class="keywordflow">if</span> (rc == 0) {
+00449         ERROR_MSG(<span class="stringliteral">"Can't build OID for variable"</span>);
+00450         <span class="keywordflow">return</span> 0;
+00451     }
+00452 
+00453     <span class="comment">/*</span>
+00454 <span class="comment">     * Build the sequence header.  </span>
+00455 <span class="comment">     */</span>
+00456 
+00457     rc = asn_realloc_rbuild_sequence(pkt, pkt_len, offset, allow_realloc,
+00458                                      (u_char) (ASN_SEQUENCE |
+00459                                                ASN_CONSTRUCTOR),
+00460                                      *offset - start_offset);
+00461     <span class="keywordflow">return</span> rc;
+00462 }
+00463 
+00464 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* USE_REVERSE_ASNENCODING */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:59 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

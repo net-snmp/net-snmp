@@ -1,0 +1,115 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <center><h1>NET-SNMP Tutorial -- Demon</h1></center>
+<hr>
+    <h1>*** WARNING WARNING WARNING ***</h1>
+    <p>
+      <b>Note:</b>  Much of this tutorial requires <a
+	href="ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
+	so make sure you get it before running the commands found in
+	this tutorial.</b> 
+      <p><b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
+      href="/tutorial-5">is available</a> as well.  The commands is
+      the ucd-snmp specific tutorial will not work as expected if you
+      are using net-snmp and not ucd-snmp.
+      <br><br>
+    <hr>
+      <b>We strongly recomment that AgentX subagent developers use the
+      5.1 or 5.2 versions of net-snmp.
+       The AgentX support in the 5.0 versions of the net-snmp package is still beta
+      level quality.  Although many people have used it successfully,
+      we're not confident enough yet to say that its bug free (and in
+      fact we know its not in areas).  Use at your own risk.</b>
+    <h1>Sub-Agent Demon tutorial</h1>
+    <p>
+      Finally, lets take the previous example and implement it in our
+      own process which attaches to the master agent using the AgentX
+      protocol.  This is easier than you might think, as we provide
+      libraries to do the work for you and additionally the mib module 
+      code that we wrote in the last section does not have to change
+      at all.  We merely compile it ourselves this time, outside the
+      main net-snmp package and put a main() wrapper around it.
+    <p>
+      First, the files you'll need:
+      <center><table border=1>
+	<tr bgcolor="#d0d0ff"><th>File</th><th>Description</th></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="../demoapp/Makefile">Makefile</a></td><td>A simple makefile 
+	used to build the projects</td>
+	<tr bgcolor="#d0d0ff"><td>
+	      <a href="../mib_module/UCD-SNMP-TUTORIAL-MIB.txt">UCD-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be serving</td></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="../mib_module/ustScalarSet.h">ustScalarSet.h</a></td><td>The mib module's header file (same)</td></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="../mib_module/ustScalarSet.c">ustScalarSet.c</a></td><td>The mib module's C source code  (same)</td></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="ustMain.c">ustMain.c</a></td><td>The
+	main() code for our demon</td></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="../mib_module/snmpd.conf">snmpd.conf</a></td><td>The example
+	configuration file for access control</td></tr>
+      </table></center>
+    <p>
+      Now, build and install the net-snmp package.  You'll need to
+      configure it for AgentX support by compiling in those mib
+      modules, so run configure like:
+      <pre>
+% <b>./configure --with-mib-modules="agentx"</b>
+    </pre>
+    <p>
+      This will actually compile the code for both the master and the
+      subagent support.  <b>Do not compile in the ustScalarSet code
+      like you did last time!</b> The demon that it builds when you
+      run make will by default be a master agent:
+    <pre>
+% <b>make</b>
+% <b>make install</b>
+    </pre>
+    <p>
+      Now, you can fire up the master agent using the configuration
+      file found above.  As root (of course):
+    <pre>
+% <b>/usr/local/sbin/snmpd -C -c snmpd.conf</b>
+    </pre>
+    <p>
+      Once the agent is started, we can build and attach our own to
+      it.
+    <p>
+      To do so, compile the ustMain program using the Makefile found
+      above.  Note that it links with the <i>libucdagent</i> and the
+      <i>libucdmibs</i> libraries in addition to the regular
+      <i>libsnmp</i> one.
+    <p>
+      <pre>
+% <b>make</b>
+cc -I/usr/local/include -g   -c ustMain.c -o ustMain.o
+cc -I/usr/local/include -g   -c ustScalarSet.c -o ustScalarSet.o
+cc -o ustMain ustMain.o ustScalarSet.o -L/usr/local/lib -lucdagent -lucdmibs -lsnmp
+    </pre>
+    <p>
+      Then run snmpwalk to ensure that the current running demon is
+      missing the code we've just built and that it doesn't exist:
+      <pre>
+% <b>snmpwalk localhost democommunity ucdavis.13.4242</b>
+      </pre>
+    <p>
+      Then run the application we just built:
+      <pre>
+% <b>./ustMain</b>
+      </pre>
+    <p>
+      That should attach to the running agent and make it now respond
+      to our same query above, but with results this time:
+      <pre>
+% <b>snmpwalk localhost democommunity ucdavis.13.4242</b>
+      </pre>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <hardaker@users.sourceforge.net>"></a></address>
+<!-- Created: Fri Nov  5 14:28:37 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Thu Sep  2 21:11:14 EDT 2004
+<!-- hhmts end -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

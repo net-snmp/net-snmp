@@ -1,0 +1,120 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>mt_support.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * mt_support.h - multi-thread resource locking support declarations </span>
+00003 <span class="comment"> */</span>
+00004 <span class="comment">/*</span>
+00005 <span class="comment"> * Author: Markku Laukkanen</span>
+00006 <span class="comment"> * Created: 6-Sep-1999</span>
+00007 <span class="comment"> * History:</span>
+00008 <span class="comment"> *  8-Sep-1999 M. Slifcak method names changed;</span>
+00009 <span class="comment"> *                        use array of resource locking structures.</span>
+00010 <span class="comment"> */</span>
+00011 
+00012 <span class="preprocessor">#ifndef MT_SUPPORT_H</span>
+00013 <span class="preprocessor">#define MT_SUPPORT_H</span>
+00014 
+00015 <span class="preprocessor">#ifdef __cplusplus</span>
+00016 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00017 <span class="preprocessor">#endif</span>
+00018   
+00019 <span class="comment">/*</span>
+00020 <span class="comment"> * Lock group identifiers </span>
+00021 <span class="comment"> */</span>
+00022 
+00023 <span class="preprocessor">#define MT_LIBRARY_ID      0</span>
+00024 <span class="preprocessor">#define MT_APPLICATION_ID  1</span>
+00025 <span class="preprocessor">#define MT_TOKEN_ID        2</span>
+00026 
+00027 <span class="preprocessor">#define MT_MAX_IDS         3    </span><span class=
+"comment">/* one greater than last from above */</span>
+00028 <span class="preprocessor">#define MT_MAX_SUBIDS      10</span>
+00029 
+00030 
+00031 <span class="comment">/*</span>
+00032 <span class="comment"> * Lock resource identifiers for library resources </span>
+00033 <span class="comment"> */</span>
+00034 
+00035 <span class="preprocessor">#define MT_LIB_NONE        0</span>
+00036 <span class="preprocessor">#define MT_LIB_SESSION     1</span>
+00037 <span class="preprocessor">#define MT_LIB_REQUESTID   2</span>
+00038 <span class="preprocessor">#define MT_LIB_MESSAGEID   3</span>
+00039 <span class="preprocessor">#define MT_LIB_SESSIONID   4</span>
+00040 <span class="preprocessor">#define MT_LIB_TRANSID     5</span>
+00041 
+00042 <span class="preprocessor">#define MT_LIB_MAXIMUM     6    </span><span class=
+"comment">/* must be one greater than the last one */</span>
+00043 
+00044 
+00045 <span class="preprocessor">#if defined(NS_REENTRANT) || defined(WIN32)</span>
+00046 
+00047 <span class="preprocessor">#if HAVE_PTHREAD_H</span>
+00048 <span class="preprocessor">#include &lt;pthread.h&gt;</span>
+00049 <span class="keyword">typedef</span> pthread_mutex_t mutex_type;
+00050 <span class="preprocessor">#ifdef pthread_mutexattr_default</span>
+00051 <span class="preprocessor">#define MT_MUTEX_INIT_DEFAULT pthread_mutexattr_default</span>
+00052 <span class="preprocessor">#else</span>
+00053 <span class="preprocessor">#define MT_MUTEX_INIT_DEFAULT 0</span>
+00054 <span class="preprocessor">#endif</span>
+00055 
+00056 <span class="preprocessor">#elif defined(WIN32) || defined(cygwin)</span>
+00057 
+00058 <span class="preprocessor">#include &lt;windows.h&gt;</span>
+00059 <span class="keyword">typedef</span> CRITICAL_SECTION mutex_type;
+00060 
+00061 <span class="preprocessor">#else  </span><span class="comment">/*  HAVE_PTHREAD_H  */</span>
+00062 error <span class="stringliteral">"There is no re-entrant support as defined."</span>
+00063 <span class="preprocessor">#endif </span><span class="comment">/*  HAVE_PTHREAD_H  */</span>
+00064 
+00065 
+00066 <span class="keywordtype">int</span>             snmp_res_init(<span class="keywordtype">void</span>);
+00067 <span class="keywordtype">int</span>             snmp_res_lock(<span class="keywordtype">int</span> groupID, <span class=
+"keywordtype">int</span> resourceID);
+00068 <span class="keywordtype">int</span>             snmp_res_unlock(<span class="keywordtype">int</span> groupID, <span class=
+"keywordtype">int</span> resourceID);
+00069 <span class="keywordtype">int</span>             snmp_res_destroy_mutex(<span class=
+"keywordtype">int</span> groupID, <span class="keywordtype">int</span> resourceID);
+00070 
+00071 <span class="preprocessor">#else </span><span class="comment">/*  NS_REENTRANT  */</span>
+00072 
+00073 <span class="preprocessor">#ifndef WIN32</span>
+00074 <span class="preprocessor">#define snmp_res_init() do {} while (0)</span>
+00075 <span class="preprocessor">#define snmp_res_lock(x,y) do {} while (0)</span>
+00076 <span class="preprocessor">#define snmp_res_unlock(x,y) do {} while (0)</span>
+00077 <span class="preprocessor">#define snmp_res_destroy_mutex(x,y) do {} while (0)</span>
+00078 <span class="preprocessor">#endif </span><span class="comment">/*  WIN32  */</span>
+00079 
+00080 <span class="preprocessor">#endif </span><span class="comment">/*  NS_REENTRANT  */</span>
+00081 
+00082 <span class="preprocessor">#ifdef __cplusplus</span>
+00083 }
+00084 <span class="preprocessor">#endif</span>
+00085 <span class="preprocessor">#endif </span><span class="comment">/*  MT_SUPPORT_H  */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

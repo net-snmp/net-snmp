@@ -1,0 +1,175 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Net-SNMP Tutorial -- dynamic module loading</title>
+  </head>
+
+
+  <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
+    <center><h1>NET-SNMP Tutorial --  Dynamic Module Creation for the net-snmp agent</h1></center>
+    <p>
+      First off, you need to write a mib module first before you can
+      do this part of the tutorial.  We assume you have read and
+      completed the <a href="../mib_module/index.html">mib module
+      portion</a> of the toolkit tutorial.
+
+      This part of the tutorial shows how to install a dynamic module
+      into the agent, assuming you already have written a mib-module
+      which we'll then compile into a dynamic module.
+
+      For example purposes, we'll refer to some example MIB objects
+      and code: the <a
+      href="../mib_module/NET-SNMP-TUTORIAL-MIB.txt">NET-SNMP-TUTORIAL-MIB</a>
+      MIB, and the <a href="nstAgentPluginObject.c">example mib
+      module</a> and it's <a href="nstAgentPluginObject.h">header
+      file</a>.
+
+    <p><b>Note:</b> For this to work, you must have compiled the
+      net-snmp package with dynamicly loadable module support turned
+      on, as well as built it with --enable-shared turned on.  (It's
+      on by default, if your system supports it).  You can check for
+      support in your agent but looking at the output of the "snmpd
+      -H" command for the "dlmod" token.  If its listed, the compiled
+      agent supports it.
+
+    <p><b>Note:</b> All command line options below assume you have an
+    appropriately setup ~/.snmp/snmp.conf file that allows you to not
+    have to specify a snmp version number, community name, username,
+    or whatever else in order to talk to your agent.  The agent, of
+    course, must have a matching /usr/local/share/snmp/snmpd.conf file 
+    (or equivalent).
+
+    <p>
+      Here are the files discussed in this example so you can download
+      them:
+      <center>
+      <table border=1>
+	<tr bgcolor="#d0d0ff"><th>File</th><th>Description</th></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="../demoapp/Makefile">Makefile</a></td><td>A simple makefile 
+	used to build the projects</td>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="../mib_module/NET-SNMP-TUTORIAL-MIB.txt">NET-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be writing
+	code for</td>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="nstAgentPluginObject.h">nstAgentPluginObject.h</a></td><td>The mib module's header file</td>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="nstAgentPluginObject.c">nstAgentPluginObject.c</a></td><td>The mib module's C source code</td>
+      </table>
+      </center>
+      <hr>
+    <p>
+      The shared object loader calls the "init_nstAgentPluginObject()"
+      function in the above code when it gets loaded, and calls the
+      "deinit_nstAgentPluginObject()" when (and if) the module is
+      unloaded.  These function names to use are built by adding the
+      shared object's module name (UCD-DLMOD-MIB::dlmodName) to the
+      `init_' and `deinit_' prefixes.
+      <p>
+      Steps to build the shared object:
+      <ol>
+	<li>First off we must get the 
+<a href="../demoapp/Makefile">Makefile</a> file, the <a
+href="nstAgentPluginObject.h">nstAgentPluginObject.h</a> file, and the <a
+href="nstAgentPluginObject.c">nstAgentPluginObject.c</a> file.
+	<li><b>make nstAgentPluginObject.so</b>
+    </ol>
+    <p>
+      Steps to test the shared object:
+      <ol>
+      <li> Start the snmpd and watch the dlmod and nstAgentPluginObject
+      modules interact using the debugging flag (this assumes you
+      already have <a
+      href="http://www.net-snmp.org/FAQ.html#I_don_t_understand_the_new_access_control_stuff___what_does_it_mean_">access control</a> set up properly for your agent):
+	<p><ul>
+	  <li> % <b>snmpd -f -L -DnstAgentPluginObject,dlmod </b>
+	</ul><p>
+      <li> In another window, test to make sure that the agent doesn't 
+      currently support the nstAgentPluginObject (if you get different results 
+      running this command you need to recompile the net-snmp agent
+      without the nstAgentPluginObject mib module compiled in directly):
+	<p><ul>
+	  <li> % <b>snmpget  localhost NET-SNMP-TUTORIAL-MIB::nstAgentPluginObject.0 </b>
+	<p><pre>
+nstAgentPluginObject.0 = No Such Object available on this agent at this OID
+	    </pre>	</ul><p>
+
+      <li> Then, run snmpset to create a new row in the dlmod table:
+	<p><ul>
+	  <li> % <b>snmpset  localhost UCD-DLMOD-MIB::dlmodStatus.1 i create </b>
+<p><pre>
+dlmodStatus.1 = create(6)
+</pre>
+	<p></ul>
+      <li> See that the row was created:
+	<p><ul>
+	    <li> % <b>snmptable  localhost UCD-DLMOD-MIB::dlmodTable </b>
+<p><pre>
+SNMP table: dlmodTable
+
+ dlmodName dlmodPath dlmodError dlmodStatus
+                                   unloaded
+</pre><p>
+	</ul>
+      <li> Then set the properties of the row up to point to our new
+      object and to give it a name:
+	<p><ul>
+	  <li> % <b>snmpset localhost UCD-DLMOD-MIB::dlmodName.1 s "nstAgentPluginObject" UCD-DLMOD-MIB::dlmodPath.1 s "/path/to/nstAgentPluginObject.so" </b>
+<p><pre>
+dlmodName.1 = "nstAgentPluginObject" 
+dlmodName.1 = "/path/to/nstAgentPluginObject.so"
+</pre>
+	  <li> % <b>snmptable  localhost UCD-DLMOD-MIB::dlmodTable </b>
+<p><pre>
+SNMP table: dlmodTable
+
+    dlmodName dlmodPath                 dlmodError   dlmodStatus
+ nstAgentPluginObject /path/to/nstAgentPluginObject.so                  unloaded
+</pre><p>
+	</ul>
+	<li> Finally, load the shared object into the running agent:
+	<p><ul>
+	  <li> % <b>snmpset  localhost UCD-DLMOD-MIB::dlmodStatus.1 i load </b>
+<p><pre>
+dlmodStatus.1 = loaded(1)
+</pre>
+	  <li> % <b>snmptable  localhost UCD-DLMOD-MIB::dlmodTable </b>
+<p><pre>
+SNMP table: dlmodTable
+
+    dlmodName                      dlmodPath dlmodError dlmodStatus
+ nstAgentPluginObject /path/to/nstAgentPluginObject.so                 loaded
+</pre><p>
+	</ul>
+      <li> If everything above was done correctly, then the following
+	command should work and will access the shared object's data:
+	<p><ul><li> % <b>snmpget  localhost NET-SNMP-TUTORIAL-MIB::nstAgentPluginObject.0 </b>
+<p><pre>
+nstAgentPluginObject.0 = INTEGER: 3
+</pre><p>
+	</ul>
+    </ol>
+    <hr>
+    <p> You can also load shared objects using the "dlmod" token in the
+    snmpd.conf file by putting a line like this in your snmpd.conf file:
+<p><pre>
+      dlmod nstAgentPluginObject /path/to/nstAgentPluginObject.so
+    </pre>  
+    <p>The first argument specifies the shared object's module name
+      (UCD-DLMOD-MIB::dlmodName) and second argument specifies the
+      full pathname of the shared object file.
+    <hr>
+    <address><a href="mailto:Wes Hardaker <hardaker@users.sourceforge.net>">Wes Hardaker</a></address>
+<!-- Created: Thu Oct  5 16:20:27 PDT 2000 -->
+<!-- hhmts start -->
+Last modified: Thu Jan 30 15:39:40 PST 2003
+<!-- hhmts end -->
+  </body>
+</html>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

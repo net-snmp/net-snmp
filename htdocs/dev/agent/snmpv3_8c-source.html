@@ -1,0 +1,1776 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>snmpv3.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * snmpv3.c</span>
+00003 <span class="comment"> */</span>
+00004 
+00005 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00006 <span class="preprocessor">#ifdef HAVE_LIMITS_H</span>
+00007 <span class="preprocessor">#include &lt;limits.h&gt;</span>
+00008 <span class="preprocessor">#endif</span>
+00009 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00010 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00011 
+00012 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00013 <span class="preprocessor"># ifdef WIN32</span>
+00014 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00015 <span class="preprocessor"># else</span>
+00016 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00017 <span class="preprocessor"># endif</span>
+00018 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00019 <span class="preprocessor">#else</span>
+00020 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00021 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00022 <span class="preprocessor"># else</span>
+00023 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00024 <span class="preprocessor"># endif</span>
+00025 <span class="preprocessor">#endif</span>
+00026 <span class="preprocessor">#if HAVE_SYS_TIMES_H</span>
+00027 <span class="preprocessor">#include &lt;sys/times.h&gt;</span>
+00028 <span class="preprocessor">#endif</span>
+00029 <span class="preprocessor">#if HAVE_STRING_H</span>
+00030 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00031 <span class="preprocessor">#else</span>
+00032 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00033 <span class="preprocessor">#endif</span>
+00034 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+00035 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00036 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00037 <span class="preprocessor">#endif</span>
+00038 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00039 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+00040 <span class="preprocessor">#endif</span>
+00041 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00042 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00043 <span class="preprocessor">#endif</span>
+00044 <span class="preprocessor">#if HAVE_SYS_SOCKET_H</span>
+00045 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+00046 <span class="preprocessor">#endif</span>
+00047 <span class="preprocessor">#if HAVE_NETDB_H</span>
+00048 <span class="preprocessor">#include &lt;netdb.h&gt;</span>
+00049 <span class="preprocessor">#endif</span>
+00050 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00051 <span class="preprocessor">#       include &lt;stdlib.h&gt;</span>
+00052 <span class="preprocessor">#endif</span>
+00053 
+00054 <span class="comment">/*</span>
+00055 <span class="comment"> * Stuff needed for getHwAddress(...) </span>
+00056 <span class="comment"> */</span>
+00057 <span class="preprocessor">#ifdef HAVE_SYS_IOCTL_H</span>
+00058 <span class="preprocessor">#       include &lt;sys/ioctl.h&gt;</span>
+00059 <span class="preprocessor">#endif</span>
+00060 <span class="preprocessor">#ifdef HAVE_NET_IF_H</span>
+00061 <span class="preprocessor">#       include &lt;net/if.h&gt;</span>
+00062 <span class="preprocessor">#endif</span>
+00063 
+00064 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00065 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00066 <span class="preprocessor">#endif</span>
+00067 
+00068 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00069 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00070 <span class="preprocessor">#include &lt;net-snmp/config_api.h&gt;</span>
+00071 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00072 
+00073 <span class="preprocessor">#include &lt;net-snmp/library/snmpv3.h&gt;</span>
+00074 <span class="preprocessor">#include &lt;net-snmp/library/callback.h&gt;</span>
+00075 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00076 <span class="preprocessor">#include &lt;net-snmp/library/lcd_time.h&gt;</span>
+00077 <span class="preprocessor">#include &lt;net-snmp/library/scapi.h&gt;</span>
+00078 <span class="preprocessor">#include &lt;net-snmp/library/keytools.h&gt;</span>
+00079 <span class="preprocessor">#include &lt;net-snmp/library/lcd_time.h&gt;</span>
+00080 <span class="preprocessor">#include &lt;net-snmp/library/snmp_secmod.h&gt;</span>
+00081 <span class="preprocessor">#include &lt;net-snmp/library/snmpusm.h&gt;</span>
+00082 <span class="preprocessor">#include &lt;net-snmp/library/transform_oids.h&gt;</span>
+00083 
+00084 <span class="keyword">static</span> u_long   engineBoots = 1;
+00085 <span class="keyword">static</span> <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> engineIDType = ENGINEID_TYPE_NETSNMP_RND;
+00086 <span class="keyword">static</span> <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span> *engineID = NULL;
+00087 <span class="keyword">static</span> size_t   engineIDLength = 0;
+00088 <span class="keyword">static</span> <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span> *engineIDNic = NULL;
+00089 <span class="keyword">static</span> <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> engineIDIsSet = 0;  <span class="comment">/* flag if ID set by config */</span>
+00090 <span class="keyword">static</span> <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">char</span> *oldEngineID = NULL;
+00091 <span class="keyword">static</span> size_t   oldEngineIDLength = 0;
+00092 <span class="keyword">static</span> <span class="keyword">struct </span>timeval snmpv3starttime;
+00093 
+00094 <span class="comment">/*</span>
+00095 <span class="comment"> * Set up default snmpv3 parameter value storage.</span>
+00096 <span class="comment"> */</span>
+00097 <span class="keyword">static</span> <span class="keyword">const</span> oid *defaultAuthType = NULL;
+00098 <span class="keyword">static</span> size_t   defaultAuthTypeLen = 0;
+00099 <span class="keyword">static</span> <span class="keyword">const</span> oid *defaultPrivType = NULL;
+00100 <span class="keyword">static</span> size_t   defaultPrivTypeLen = 0;
+00101 
+00102 <span class="comment">/* this is probably an over-kill ifdef, but why not */</span>
+00103 <span class=
+"preprocessor">#if defined(HAVE_SYS_TIMES_H) &amp;&amp; defined(HAVE_UNISTD_H) &amp;&amp; defined(HAVE_TIMES) &amp;&amp; defined(_SC_CLK_TCK) &amp;&amp; defined(HAVE_SYSCONF) &amp;&amp; defined(UINT_MAX)</span>
+00104 
+00105 <span class="preprocessor">#define SNMP_USE_TIMES 1</span>
+00106 
+00107 <span class="keyword">static</span> clock_t snmpv3startClock;
+00108 <span class="keyword">static</span> <span class="keywordtype">long</span> clockticks = 0;
+00109 <span class="keyword">static</span> <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> lastcalltime = 0;
+00110 <span class="keyword">static</span> <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> wrapcounter = 0;
+00111 
+00112 <span class="preprocessor">#endif </span><span class="comment">/* times() tests */</span>
+00113 
+00114 <span class="preprocessor">#if defined(IFHWADDRLEN) &amp;&amp; defined(SIOCGIFHWADDR)</span>
+00115 <span class="keyword">static</span> <span class="keywordtype">int</span>      getHwAddress(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *networkDevice, <span class="keywordtype">char</span> *addressOut);
+00116 <span class="preprocessor">#endif</span>
+00117 
+00118 <span class="keywordtype">void</span>
+00119 snmpv3_authtype_conf(<span class="keyword">const</span> <span class="keywordtype">char</span> *word, <span class=
+"keywordtype">char</span> *cptr)
+00120 {
+00121 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00122     <span class="keywordflow">if</span> (strcasecmp(cptr, <span class="stringliteral">"MD5"</span>) == 0)
+00123         defaultAuthType = usmHMACMD5AuthProtocol;
+00124     <span class="keywordflow">else</span>
+00125 <span class="preprocessor">#endif</span>
+00126         <span class="keywordflow">if</span> (strcasecmp(cptr, <span class="stringliteral">"SHA"</span>) == 0)
+00127         defaultAuthType = usmHMACSHA1AuthProtocol;
+00128     <span class="keywordflow">else</span>
+00129         config_perror(<span class="stringliteral">"Unknown authentication type"</span>);
+00130     defaultAuthTypeLen = USM_LENGTH_OID_TRANSFORM;
+00131     DEBUGMSGTL((<span class="stringliteral">"snmpv3"</span>, <span class=
+"stringliteral">"set default authentication type: %s\n"</span>, cptr));
+00132 }
+00133 
+00134 <span class="keyword">const</span> oid      *
+00135 get_default_authtype(size_t * len)
+00136 {
+00137     <span class="keywordflow">if</span> (defaultAuthType == NULL) {
+00138         defaultAuthType = SNMP_DEFAULT_AUTH_PROTO;
+00139         defaultAuthTypeLen = SNMP_DEFAULT_AUTH_PROTOLEN;
+00140     }
+00141     <span class="keywordflow">if</span> (len)
+00142         *len = defaultAuthTypeLen;
+00143     <span class="keywordflow">return</span> defaultAuthType;
+00144 }
+00145 
+00146 <span class="keywordtype">void</span>
+00147 snmpv3_privtype_conf(<span class="keyword">const</span> <span class="keywordtype">char</span> *word, <span class=
+"keywordtype">char</span> *cptr)
+00148 {
+00149     <span class="keywordtype">int</span> testcase = 0;
+00150 
+00151 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00152     <span class="keywordflow">if</span> (strcasecmp(cptr, <span class="stringliteral">"DES"</span>) == 0) {
+00153         testcase = 1;
+00154         defaultPrivType = usmDESPrivProtocol;
+00155     }
+00156 <span class="preprocessor">#endif</span>
+00157 
+00158 <span class="preprocessor">#if HAVE_AES</span>
+00159     <span class="comment">/* XXX AES: assumes oid length == des oid length */</span>
+00160     <span class="keywordflow">if</span> (strcasecmp(cptr, <span class="stringliteral">"AES128"</span>) == 0 ||
+00161         strcasecmp(cptr, <span class="stringliteral">"AES"</span>) == 0) {
+00162         testcase = 1;
+00163         defaultPrivType = usmAES128PrivProtocol;
+00164     }
+00165 <span class="preprocessor">#endif</span>
+00166     <span class="keywordflow">if</span> (testcase == 0)
+00167         config_perror(<span class="stringliteral">"Unknown privacy type"</span>);
+00168     defaultPrivTypeLen = SNMP_DEFAULT_PRIV_PROTOLEN;
+00169     DEBUGMSGTL((<span class="stringliteral">"snmpv3"</span>, <span class=
+"stringliteral">"set default privacy type: %s\n"</span>, cptr));
+00170 }
+00171 
+00172 <span class="keyword">const</span> oid      *
+00173 get_default_privtype(size_t * len)
+00174 {
+00175     <span class="keywordflow">if</span> (defaultPrivType == NULL) {
+00176 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00177         defaultPrivType = usmDESPrivProtocol;
+00178 <span class="preprocessor">#else</span>
+00179         defaultPrivType = usmAESPrivProtocol;
+00180 <span class="preprocessor">#endif</span>
+00181         defaultPrivTypeLen = USM_LENGTH_OID_TRANSFORM;
+00182     }
+00183     <span class="keywordflow">if</span> (len)
+00184         *len = defaultPrivTypeLen;
+00185     <span class="keywordflow">return</span> defaultPrivType;
+00186 }
+00187 
+00188 <span class="comment">/*******************************************************************-o-******</span>
+00189 <span class="comment"> * snmpv3_secLevel_conf</span>
+00190 <span class="comment"> *</span>
+00191 <span class="comment"> * Parameters:</span>
+00192 <span class="comment"> *      *word</span>
+00193 <span class="comment"> *      *cptr</span>
+00194 <span class="comment"> *</span>
+00195 <span class="comment"> * Line syntax:</span>
+00196 <span class="comment"> *      defSecurityLevel "noAuthNoPriv" | "authNoPriv" | "authPriv"</span>
+00197 <span class="comment"> */</span>
+00198 <span class="keywordtype">void</span>
+00199 snmpv3_secLevel_conf(<span class="keyword">const</span> <span class="keywordtype">char</span> *word, <span class=
+"keywordtype">char</span> *cptr)
+00200 {
+00201     <span class="keywordtype">char</span>            buf[1024];
+00202 
+00203     <span class="keywordflow">if</span> (strcasecmp(cptr, <span class=
+"stringliteral">"noAuthNoPriv"</span>) == 0 || strcmp(cptr, <span class="stringliteral">"1"</span>) == 0 ||
+00204         strcasecmp(cptr, <span class="stringliteral">"nanp"</span>) == 0) {
+00205         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
+00206                            NETSNMP_DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_NOAUTH);
+00207     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (strcasecmp(cptr, <span class=
+"stringliteral">"authNoPriv"</span>) == 0 || strcmp(cptr, <span class="stringliteral">"2"</span>) == 0 ||
+00208                strcasecmp(cptr, <span class="stringliteral">"anp"</span>) == 0) {
+00209         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
+00210                            NETSNMP_DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_AUTHNOPRIV);
+00211     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (strcasecmp(cptr, <span class=
+"stringliteral">"authPriv"</span>) == 0 || strcmp(cptr, <span class="stringliteral">"3"</span>) == 0 ||
+00212                strcasecmp(cptr, <span class="stringliteral">"ap"</span>) == 0) {
+00213         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
+00214                            NETSNMP_DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_AUTHPRIV);
+00215     } <span class="keywordflow">else</span> {
+00216         snprintf(buf, <span class="keyword">sizeof</span>(buf), <span class=
+"stringliteral">"Unknown security level: %s"</span>, cptr);
+00217         buf[ <span class="keyword">sizeof</span>(buf)-1 ] = 0;
+00218         config_perror(buf);
+00219     }
+00220     DEBUGMSGTL((<span class="stringliteral">"snmpv3"</span>, <span class=
+"stringliteral">"default secLevel set to: %s = %d\n"</span>, cptr,
+00221                 netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+00222                                    NETSNMP_DS_LIB_SECLEVEL)));
+00223 }
+00224 
+00225 
+00226 <span class="keywordtype">int</span>
+00227 snmpv3_options(<span class="keywordtype">char</span> *optarg, <a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> * session, <span class="keywordtype">char</span> **Apsz,
+00228                <span class="keywordtype">char</span> **Xpsz, <span class="keywordtype">int</span> argc, <span class=
+"keywordtype">char</span> *<span class="keyword">const</span> *argv)
+00229 {
+00230     <span class="keywordtype">char</span>           *cp = optarg;
+00231     <span class="keywordtype">int</span> testcase;
+00232     optarg++;
+00233     <span class="comment">/*</span>
+00234 <span class="comment">     * Support '... -3x=value ....' syntax</span>
+00235 <span class="comment">     */</span>
+00236     <span class="keywordflow">if</span> (*optarg == <span class="charliteral">'='</span>) {
+00237         optarg++;
+00238     }
+00239     <span class="comment">/*</span>
+00240 <span class="comment">     * and '.... "-3x value" ....'  (*with* the quotes)</span>
+00241 <span class="comment">     */</span>
+00242     <span class="keywordflow">while</span> (*optarg &amp;&amp; isspace(*optarg)) {
+00243         optarg++;
+00244     }
+00245     <span class="comment">/*</span>
+00246 <span class="comment">     * Finally, handle ".... -3x value ...." syntax</span>
+00247 <span class="comment">     *   (*without* surrounding quotes)</span>
+00248 <span class="comment">     */</span>
+00249     <span class="keywordflow">if</span> (!*optarg) {
+00250         <span class="comment">/*</span>
+00251 <span class="comment">         * We've run off the end of the argument</span>
+00252 <span class="comment">         *  so move on the the next.</span>
+00253 <span class="comment">         */</span>
+00254         optarg = argv[optind++];
+00255         <span class="keywordflow">if</span> (optind &gt; argc) {
+00256             fprintf(stderr,
+00257                     <span class="stringliteral">"Missing argument after SNMPv3 '-3%c' option.\n"</span>, *cp);
+00258             <span class="keywordflow">return</span> (-1);
+00259         }
+00260     }
+00261 
+00262     <span class="keywordflow">switch</span> (*cp) {
+00263 
+00264     <span class="keywordflow">case</span> <span class="charliteral">'Z'</span>:
+00265         session-&gt;<a class="code" href="structsnmp__session.html#o23">engineBoots</a> = strtoul(optarg, NULL, 10);
+00266         <span class="keywordflow">if</span> (session-&gt;<a class="code" href=
+"structsnmp__session.html#o23">engineBoots</a> == 0 || !isdigit(optarg[0])) {
+00267             fprintf(stderr, <span class="stringliteral">"Need engine boots value after -3Z flag.\n"</span>);
+00268             <span class="keywordflow">return</span> (-1);
+00269         }
+00270         cp = strchr(optarg, <span class="charliteral">','</span>);
+00271         <span class="keywordflow">if</span> (cp &amp;&amp; *(++cp) &amp;&amp; isdigit(*cp))
+00272             session-&gt;<a class="code" href="structsnmp__session.html#o24">engineTime</a> = strtoul(cp, NULL, 10);
+00273         <span class="keywordflow">else</span> {
+00274             fprintf(stderr, <span class="stringliteral">"Need engine time value after -3Z flag.\n"</span>);
+00275             <span class="keywordflow">return</span> (-1);
+00276         }
+00277         <span class="keywordflow">break</span>;
+00278 
+00279     <span class="keywordflow">case</span> <span class="charliteral">'e'</span>:{
+00280             size_t          ebuf_len = 32, eout_len = 0;
+00281             u_char         *ebuf = (u_char *) malloc(ebuf_len);
+00282 
+00283             <span class="keywordflow">if</span> (ebuf == NULL) {
+00284                 fprintf(stderr, <span class="stringliteral">"malloc failure processing -3e flag.\n"</span>);
+00285                 <span class="keywordflow">return</span> (-1);
+00286             }
+00287             <span class="keywordflow">if</span> (!<a class="code" href="group__util.html#ga8">snmp_hex_to_binary</a>
+00288                 (&amp;ebuf, &amp;ebuf_len, &amp;eout_len, 1, optarg)) {
+00289                 fprintf(stderr, <span class="stringliteral">"Bad engine ID value after -3e flag.\n"</span>);
+00290                 <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(ebuf);
+00291                 <span class="keywordflow">return</span> (-1);
+00292             }
+00293             session-&gt;<a class="code" href="structsnmp__session.html#o27">securityEngineID</a> = ebuf;
+00294             session-&gt;<a class="code" href="structsnmp__session.html#o28">securityEngineIDLen</a> = eout_len;
+00295             <span class="keywordflow">break</span>;
+00296         }
+00297 
+00298     <span class="keywordflow">case</span> <span class="charliteral">'E'</span>:{
+00299             size_t          ebuf_len = 32, eout_len = 0;
+00300             u_char         *ebuf = (u_char *) malloc(ebuf_len);
+00301 
+00302             <span class="keywordflow">if</span> (ebuf == NULL) {
+00303                 fprintf(stderr, <span class="stringliteral">"malloc failure processing -3E flag.\n"</span>);
+00304                 <span class="keywordflow">return</span> (-1);
+00305             }
+00306             <span class="keywordflow">if</span> (!<a class="code" href="group__util.html#ga8">snmp_hex_to_binary</a>
+00307                 (&amp;ebuf, &amp;ebuf_len, &amp;eout_len, 1, optarg)) {
+00308                 fprintf(stderr, <span class="stringliteral">"Bad engine ID value after -3E flag.\n"</span>);
+00309                 <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(ebuf);
+00310                 <span class="keywordflow">return</span> (-1);
+00311             }
+00312             session-&gt;<a class="code" href="structsnmp__session.html#o21">contextEngineID</a> = ebuf;
+00313             session-&gt;<a class="code" href="structsnmp__session.html#o22">contextEngineIDLen</a> = eout_len;
+00314             <span class="keywordflow">break</span>;
+00315         }
+00316 
+00317     <span class="keywordflow">case</span> <span class="charliteral">'n'</span>:
+00318         session-&gt;<a class="code" href="structsnmp__session.html#o25">contextName</a> = optarg;
+00319         session-&gt;<a class="code" href="structsnmp__session.html#o26">contextNameLen</a> = strlen(optarg);
+00320         <span class="keywordflow">break</span>;
+00321 
+00322     <span class="keywordflow">case</span> <span class="charliteral">'u'</span>:
+00323         session-&gt;<a class="code" href="structsnmp__session.html#o29">securityName</a> = optarg;
+00324         session-&gt;<a class="code" href="structsnmp__session.html#o30">securityNameLen</a> = strlen(optarg);
+00325         <span class="keywordflow">break</span>;
+00326 
+00327     <span class="keywordflow">case</span> <span class="charliteral">'l'</span>:
+00328         <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class=
+"stringliteral">"noAuthNoPriv"</span>) || !strcmp(optarg, <span class="stringliteral">"1"</span>) ||
+00329             !strcasecmp(optarg, <span class="stringliteral">"nanp"</span>)) {
+00330             session-&gt;<a class="code" href="structsnmp__session.html#o44">securityLevel</a> = SNMP_SEC_LEVEL_NOAUTH;
+00331         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class=
+"stringliteral">"authNoPriv"</span>)
+00332                    || !strcmp(optarg, <span class="stringliteral">"2"</span>) || !strcasecmp(optarg, <span class=
+"stringliteral">"anp"</span>)) {
+00333             session-&gt;<a class="code" href="structsnmp__session.html#o44">securityLevel</a> = SNMP_SEC_LEVEL_AUTHNOPRIV;
+00334         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class=
+"stringliteral">"authPriv"</span>) || !strcmp(optarg, <span class="stringliteral">"3"</span>)
+00335                    || !strcasecmp(optarg, <span class="stringliteral">"ap"</span>)) {
+00336             session-&gt;<a class="code" href="structsnmp__session.html#o44">securityLevel</a> = SNMP_SEC_LEVEL_AUTHPRIV;
+00337         } <span class="keywordflow">else</span> {
+00338             fprintf(stderr,
+00339                     <span class="stringliteral">"Invalid security level specified after -3l flag: %s\n"</span>,
+00340                     optarg);
+00341             <span class="keywordflow">return</span> (-1);
+00342         }
+00343 
+00344         <span class="keywordflow">break</span>;
+00345 
+00346     <span class="keywordflow">case</span> <span class="charliteral">'a'</span>:
+00347 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00348         <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"MD5"</span>)) {
+00349             session-&gt;<a class="code" href="structsnmp__session.html#o31">securityAuthProto</a> = usmHMACMD5AuthProtocol;
+00350             session-&gt;<a class="code" href=
+"structsnmp__session.html#o32">securityAuthProtoLen</a> = USM_AUTH_PROTO_MD5_LEN;
+00351         } <span class="keywordflow">else</span>
+00352 <span class="preprocessor">#endif</span>
+00353             <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"SHA"</span>)) {
+00354             session-&gt;<a class="code" href=
+"structsnmp__session.html#o31">securityAuthProto</a> = usmHMACSHA1AuthProtocol;
+00355             session-&gt;<a class="code" href=
+"structsnmp__session.html#o32">securityAuthProtoLen</a> = USM_AUTH_PROTO_SHA_LEN;
+00356         } <span class="keywordflow">else</span> {
+00357             fprintf(stderr,
+00358                     <span class="stringliteral">"Invalid authentication protocol specified after -3a flag: %s\n"</span>,
+00359                     optarg);
+00360             <span class="keywordflow">return</span> (-1);
+00361         }
+00362         <span class="keywordflow">break</span>;
+00363 
+00364     <span class="keywordflow">case</span> <span class="charliteral">'x'</span>:
+00365         testcase = 0;
+00366 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00367         <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"DES"</span>)) {
+00368             session-&gt;<a class="code" href="structsnmp__session.html#o37">securityPrivProto</a> = usmDESPrivProtocol;
+00369             session-&gt;<a class="code" href=
+"structsnmp__session.html#o38">securityPrivProtoLen</a> = USM_PRIV_PROTO_DES_LEN;
+00370             testcase = 1;
+00371         }
+00372 <span class="preprocessor">#endif</span>
+00373 <span class="preprocessor">#ifdef HAVE_AES</span>
+00374         <span class="keywordflow">if</span> (!strcasecmp(optarg, <span class="stringliteral">"AES128"</span>) ||
+00375             strcasecmp(optarg, <span class="stringliteral">"AES"</span>)) {
+00376             session-&gt;<a class="code" href="structsnmp__session.html#o37">securityPrivProto</a> = usmAES128PrivProtocol;
+00377             session-&gt;<a class="code" href=
+"structsnmp__session.html#o38">securityPrivProtoLen</a> = USM_PRIV_PROTO_AES128_LEN;
+00378             testcase = 1;
+00379         }
+00380 <span class="preprocessor">#endif</span>
+00381         <span class="keywordflow">if</span> (testcase == 0) {
+00382             fprintf(stderr,
+00383                     <span class="stringliteral">"Invalid privacy protocol specified after -3x flag: %s\n"</span>,
+00384                     optarg);
+00385             <span class="keywordflow">return</span> (-1);
+00386         }
+00387         <span class="keywordflow">break</span>;
+00388 
+00389     <span class="keywordflow">case</span> <span class="charliteral">'A'</span>:
+00390         *Apsz = optarg;
+00391         <span class="keywordflow">break</span>;
+00392 
+00393     <span class="keywordflow">case</span> <span class="charliteral">'X'</span>:
+00394         *Xpsz = optarg;
+00395         <span class="keywordflow">break</span>;
+00396 
+00397     <span class="keywordflow">case</span> <span class="charliteral">'m'</span>: {
+00398         size_t bufSize = <span class="keyword">sizeof</span>(session-&gt;<a class="code" href=
+"structsnmp__session.html#o33">securityAuthKey</a>);
+00399         u_char *tmpp = session-&gt;<a class="code" href="structsnmp__session.html#o33">securityAuthKey</a>;
+00400         <span class="keywordflow">if</span> (!<a class="code" href=
+"group__util.html#ga8">snmp_hex_to_binary</a>(&amp;tmpp, &amp;bufSize,
+00401                                 &amp;session-&gt;<a class="code" href=
+"structsnmp__session.html#o34">securityAuthKeyLen</a>, 0, optarg)) {
+00402             fprintf(stderr, <span class="stringliteral">"Bad key value after -3m flag.\n"</span>);
+00403             <span class="keywordflow">return</span> (-1);
+00404         }
+00405         <span class="keywordflow">break</span>;
+00406     }
+00407 
+00408     <span class="keywordflow">case</span> <span class="charliteral">'M'</span>: {
+00409         size_t bufSize = <span class="keyword">sizeof</span>(session-&gt;<a class="code" href=
+"structsnmp__session.html#o39">securityPrivKey</a>);
+00410         u_char *tmpp = session-&gt;<a class="code" href="structsnmp__session.html#o39">securityPrivKey</a>;
+00411         <span class="keywordflow">if</span> (!<a class="code" href=
+"group__util.html#ga8">snmp_hex_to_binary</a>(&amp;tmpp, &amp;bufSize,
+00412              &amp;session-&gt;<a class="code" href="structsnmp__session.html#o40">securityPrivKeyLen</a>, 0, optarg)) {
+00413             fprintf(stderr, <span class="stringliteral">"Bad key value after -3M flag.\n"</span>);
+00414             <span class="keywordflow">return</span> (-1);
+00415         }
+00416         <span class="keywordflow">break</span>;
+00417     }
+00418 
+00419     <span class="keywordflow">case</span> <span class="charliteral">'k'</span>: {
+00420         size_t          kbuf_len = 32, kout_len = 0;
+00421         u_char         *kbuf = (u_char *) malloc(kbuf_len);
+00422 
+00423         <span class="keywordflow">if</span> (kbuf == NULL) {
+00424             fprintf(stderr, <span class="stringliteral">"malloc failure processing -3k flag.\n"</span>);
+00425             <span class="keywordflow">return</span> (-1);
+00426         }
+00427         <span class="keywordflow">if</span> (!<a class="code" href="group__util.html#ga8">snmp_hex_to_binary</a>
+00428             (&amp;kbuf, &amp;kbuf_len, &amp;kout_len, 1, optarg)) {
+00429             fprintf(stderr, <span class="stringliteral">"Bad key value after -3k flag.\n"</span>);
+00430             <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(kbuf);
+00431             <span class="keywordflow">return</span> (-1);
+00432         }
+00433         session-&gt;<a class="code" href="structsnmp__session.html#o35">securityAuthLocalKey</a> = kbuf;
+00434         session-&gt;<a class="code" href="structsnmp__session.html#o36">securityAuthLocalKeyLen</a> = kout_len;
+00435         <span class="keywordflow">break</span>;
+00436     }
+00437 
+00438     <span class="keywordflow">case</span> <span class="charliteral">'K'</span>: {
+00439         size_t          kbuf_len = 32, kout_len = 0;
+00440         u_char         *kbuf = (u_char *) malloc(kbuf_len);
+00441 
+00442         <span class="keywordflow">if</span> (kbuf == NULL) {
+00443             fprintf(stderr, <span class="stringliteral">"malloc failure processing -3K flag.\n"</span>);
+00444             <span class="keywordflow">return</span> (-1);
+00445         }
+00446         <span class="keywordflow">if</span> (!<a class="code" href="group__util.html#ga8">snmp_hex_to_binary</a>
+00447             (&amp;kbuf, &amp;kbuf_len, &amp;kout_len, 1, optarg)) {
+00448             fprintf(stderr, <span class="stringliteral">"Bad key value after -3K flag.\n"</span>);
+00449             <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(kbuf);
+00450             <span class="keywordflow">return</span> (-1);
+00451         }
+00452         session-&gt;<a class="code" href="structsnmp__session.html#o41">securityPrivLocalKey</a> = kbuf;
+00453         session-&gt;<a class="code" href="structsnmp__session.html#o42">securityPrivLocalKeyLen</a> = kout_len;
+00454         <span class="keywordflow">break</span>;
+00455     }
+00456         
+00457     <span class="keywordflow">default</span>:
+00458         fprintf(stderr, <span class="stringliteral">"Unknown SNMPv3 option passed to -3: %c.\n"</span>, *cp);
+00459         <span class="keywordflow">return</span> -1;
+00460     }
+00461     <span class="keywordflow">return</span> 0;
+00462 }
+00463 
+00464 <span class="comment">/*******************************************************************-o-******</span>
+00465 <span class="comment"> * setup_engineID</span>
+00466 <span class="comment"> *</span>
+00467 <span class="comment"> * Parameters:</span>
+00468 <span class="comment"> *      **eidp</span>
+00469 <span class="comment"> *       *text  Printable (?) text to be plugged into the snmpEngineID.</span>
+00470 <span class="comment"> *</span>
+00471 <span class="comment"> * Return:</span>
+00472 <span class="comment"> *      Length of allocated engineID string in bytes,  -OR-</span>
+00473 <span class="comment"> *      -1 on error.</span>
+00474 <span class="comment"> *</span>
+00475 <span class="comment"> *</span>
+00476 <span class="comment"> * Create an snmpEngineID using text and the local IP address.  If eidp</span>
+00477 <span class="comment"> * is defined, use it to return a pointer to the newly allocated data.</span>
+00478 <span class="comment"> * Otherwise, use the result to define engineID defined in this module.</span>
+00479 <span class="comment"> *</span>
+00480 <span class="comment"> * Line syntax:</span>
+00481 <span class="comment"> *      engineID &lt;text&gt; | NULL</span>
+00482 <span class="comment"> *</span>
+00483 <span class="comment"> * XXX  What if a node has multiple interfaces?</span>
+00484 <span class="comment"> * XXX  What if multiple engines all choose the same address?</span>
+00485 <span class="comment"> *      (answer:  You're screwed, because you might need a kul database</span>
+00486 <span class="comment"> *       which is dependant on the current engineID.  Enumeration and other</span>
+00487 <span class="comment"> *       tricks won't work). </span>
+00488 <span class="comment"> */</span>
+00489 <span class="keywordtype">int</span>
+00490 setup_engineID(u_char ** eidp, <span class="keyword">const</span> <span class="keywordtype">char</span> *text)
+00491 {
+00492     <span class="keywordtype">int</span>             enterpriseid = htonl(ENTERPRISE_OID),
+00493         netsnmpoid = htonl(NETSNMP_OID),
+00494         localsetup = (eidp) ? 0 : 1;
+00495 
+00496     <span class="comment">/*</span>
+00497 <span class="comment">     * Use local engineID if *eidp == NULL.  </span>
+00498 <span class="comment">     */</span>
+00499 <span class="preprocessor">#ifdef HAVE_GETHOSTNAME</span>
+00500     u_char          buf[SNMP_MAXBUF_SMALL];
+00501     <span class="keyword">struct </span>hostent *hent = NULL;
+00502 <span class="preprocessor">#endif</span>
+00503     u_char         *bufp = NULL;
+00504     size_t          len;
+00505     <span class="keywordtype">int</span>             localEngineIDType = engineIDType;
+00506     <span class="keywordtype">int</span>             tmpint;
+00507     time_t          tmptime;
+00508 
+00509     engineIDIsSet = 1;
+00510 
+00511 <span class="preprocessor">#ifdef HAVE_GETHOSTNAME</span>
+00512 <span class="preprocessor">#ifdef AF_INET6</span>
+00513     <span class="comment">/*</span>
+00514 <span class="comment">     * see if they selected IPV4 or IPV6 support </span>
+00515 <span class="comment">     */</span>
+00516     <span class="keywordflow">if</span> ((ENGINEID_TYPE_IPV6 == localEngineIDType) ||
+00517         (ENGINEID_TYPE_IPV4 == localEngineIDType)) {
+00518         <span class="comment">/*</span>
+00519 <span class="comment">         * get the host name and save the information </span>
+00520 <span class="comment">         */</span>
+00521         gethostname((<span class="keywordtype">char</span> *) buf, <span class="keyword">sizeof</span>(buf));
+00522         hent = gethostbyname((<span class="keywordtype">char</span> *) buf);
+00523         <span class="keywordflow">if</span> (hent &amp;&amp; hent-&gt;h_addrtype == AF_INET6) {
+00524             localEngineIDType = ENGINEID_TYPE_IPV6;
+00525         } <span class="keywordflow">else</span> {
+00526             <span class="comment">/*</span>
+00527 <span class="comment">             * Not IPV6 so we go with default </span>
+00528 <span class="comment">             */</span>
+00529             localEngineIDType = ENGINEID_TYPE_IPV4;
+00530         }
+00531     }
+00532 <span class="preprocessor">#else</span>
+00533     <span class="comment">/*</span>
+00534 <span class="comment">     * No IPV6 support.  Check if they selected IPV6 engineID type.</span>
+00535 <span class="comment">     *  If so make it IPV4 instead </span>
+00536 <span class="comment">     */</span>
+00537     <span class="keywordflow">if</span> (ENGINEID_TYPE_IPV6 == localEngineIDType) {
+00538         localEngineIDType = ENGINEID_TYPE_IPV4;
+00539     }
+00540     <span class="keywordflow">if</span> (ENGINEID_TYPE_IPV4 == localEngineIDType) {
+00541         <span class="comment">/*</span>
+00542 <span class="comment">         * get the host name and save the information </span>
+00543 <span class="comment">         */</span>
+00544         gethostname((<span class="keywordtype">char</span> *) buf, <span class="keyword">sizeof</span>(buf));
+00545         hent = gethostbyname((<span class="keywordtype">char</span> *) buf);
+00546     }
+00547 <span class="preprocessor">#endif</span>
+00548 <span class="preprocessor">#endif                          </span><span class="comment">/* HAVE_GETHOSTNAME */</span>
+00549 
+00550     <span class="comment">/*</span>
+00551 <span class="comment">     * Determine if we have text and if so setup our localEngineIDType</span>
+00552 <span class="comment">     * * appropriately.  </span>
+00553 <span class="comment">     */</span>
+00554     <span class="keywordflow">if</span> (NULL != text) {
+00555         engineIDType = localEngineIDType = ENGINEID_TYPE_TEXT;
+00556     }
+00557     <span class="comment">/*</span>
+00558 <span class="comment">     * Determine length of the engineID string. </span>
+00559 <span class="comment">     */</span>
+00560     len = 5;                    <span class="comment">/* always have 5 leading bytes */</span>
+00561     <span class="keywordflow">switch</span> (localEngineIDType) {
+00562     <span class="keywordflow">case</span> ENGINEID_TYPE_TEXT:
+00563         len += strlen(text);    <span class="comment">/* 5 leading bytes+text. No NULL char */</span>
+00564         <span class="keywordflow">break</span>;
+00565 <span class="preprocessor">#if defined(IFHWADDRLEN) &amp;&amp; defined(SIOCGIFHWADDR)</span>
+00566     <span class="keywordflow">case</span> ENGINEID_TYPE_MACADDR:        <span class="comment">/* MAC address */</span>
+00567         len += 6;               <span class="comment">/* + 6 bytes for MAC address */</span>
+00568         <span class="keywordflow">break</span>;
+00569 <span class="preprocessor">#endif</span>
+00570     <span class="keywordflow">case</span> ENGINEID_TYPE_IPV4:   <span class="comment">/* IPv4 */</span>
+00571         len += 4;               <span class="comment">/* + 4 byte IPV4 address */</span>
+00572         <span class="keywordflow">break</span>;
+00573     <span class="keywordflow">case</span> ENGINEID_TYPE_IPV6:   <span class="comment">/* IPv6 */</span>
+00574         len += 16;              <span class="comment">/* + 16 byte IPV6 address */</span>
+00575         <span class="keywordflow">break</span>;
+00576     <span class="keywordflow">case</span> ENGINEID_TYPE_NETSNMP_RND:        <span class=
+"comment">/* Net-SNMP specific encoding */</span>
+00577         <span class="keywordflow">if</span> (engineID)           <span class=
+"comment">/* already setup, keep current value */</span>
+00578             <span class="keywordflow">return</span> engineIDLength;
+00579         <span class="keywordflow">if</span> (oldEngineID) {
+00580             len = oldEngineIDLength;
+00581         } <span class="keywordflow">else</span> {
+00582             len += <span class="keyword">sizeof</span>(int) + <span class="keyword">sizeof</span>(time_t);
+00583         }
+00584         <span class="keywordflow">break</span>;
+00585     <span class="keywordflow">default</span>:
+00586         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,
+00587                  <span class="stringliteral">"Unknown EngineID type requested for setup (%d).  Using IPv4.\n"</span>,
+00588                  localEngineIDType);
+00589         localEngineIDType = ENGINEID_TYPE_IPV4; <span class="comment">/* make into IPV4 */</span>
+00590         len += 4;               <span class="comment">/* + 4 byte IPv4 address */</span>
+00591         <span class="keywordflow">break</span>;
+00592     }                           <span class="comment">/* switch */</span>
+00593 
+00594 
+00595     <span class="comment">/*</span>
+00596 <span class="comment">     * Allocate memory and store enterprise ID.</span>
+00597 <span class="comment">     */</span>
+00598     <span class="keywordflow">if</span> ((bufp = (u_char *) malloc(len)) == NULL) {
+00599         snmp_log_perror(<span class="stringliteral">"setup_engineID malloc"</span>);
+00600         <span class="keywordflow">return</span> -1;
+00601     }
+00602     <span class="keywordflow">if</span> (localEngineIDType == ENGINEID_TYPE_NETSNMP_RND)
+00603         <span class="comment">/*</span>
+00604 <span class="comment">         * we must use the net-snmp enterprise id here, regardless </span>
+00605 <span class="comment">         */</span>
+00606         memcpy(bufp, &amp;netsnmpoid, <span class="keyword">sizeof</span>(netsnmpoid));    <span class=
+"comment">/* XXX Must be 4 bytes! */</span>
+00607     <span class="keywordflow">else</span>
+00608         memcpy(bufp, &amp;enterpriseid, <span class="keyword">sizeof</span>(enterpriseid));      <span class=
+"comment">/* XXX Must be 4 bytes! */</span>
+00609 
+00610     bufp[0] |= 0x80;
+00611 
+00612 
+00613     <span class="comment">/*</span>
+00614 <span class="comment">     * Store the given text  -OR-   the first found IP address</span>
+00615 <span class="comment">     *  -OR-  the MAC address  -OR-  random elements</span>
+00616 <span class="comment">     * (the latter being the recommended default)</span>
+00617 <span class="comment">     */</span>
+00618     <span class="keywordflow">switch</span> (localEngineIDType) {
+00619     <span class="keywordflow">case</span> ENGINEID_TYPE_NETSNMP_RND:
+00620         <span class="keywordflow">if</span> (oldEngineID) {
+00621             <span class="comment">/*</span>
+00622 <span class="comment">             * keep our previous notion of the engineID </span>
+00623 <span class="comment">             */</span>
+00624             memcpy(bufp, oldEngineID, oldEngineIDLength);
+00625         } <span class="keywordflow">else</span> {
+00626             <span class="comment">/*</span>
+00627 <span class="comment">             * Here we've desigend our own ENGINEID that is not based on</span>
+00628 <span class="comment">             * an address which may change and may even become conflicting</span>
+00629 <span class="comment">             * in the future like most of the default v3 engineID types</span>
+00630 <span class="comment">             * suffer from.</span>
+00631 <span class="comment">             * </span>
+00632 <span class="comment">             * Ours is built from 2 fairly random elements: a random number and</span>
+00633 <span class="comment">             * the current time in seconds.  This method suffers from boxes</span>
+00634 <span class="comment">             * that may not have a correct clock setting and random number</span>
+00635 <span class="comment">             * seed at startup, but few OSes should have that problem.</span>
+00636 <span class="comment">             */</span>
+00637             bufp[4] = ENGINEID_TYPE_NETSNMP_RND;
+00638             tmpint = random();
+00639             memcpy(bufp + 5, &amp;tmpint, <span class="keyword">sizeof</span>(tmpint));
+00640             tmptime = time(NULL);
+00641             memcpy(bufp + 5 + <span class="keyword">sizeof</span>(tmpint), &amp;tmptime, <span class=
+"keyword">sizeof</span>(tmptime));
+00642         }
+00643         <span class="keywordflow">break</span>;
+00644     <span class="keywordflow">case</span> ENGINEID_TYPE_TEXT:
+00645         bufp[4] = ENGINEID_TYPE_TEXT;
+00646         memcpy((<span class="keywordtype">char</span> *) bufp + 5, text, strlen(text));
+00647         <span class="keywordflow">break</span>;
+00648 <span class="preprocessor">#ifdef HAVE_GETHOSTNAME</span>
+00649 <span class="preprocessor">#ifdef AF_INET6</span>
+00650     <span class="keywordflow">case</span> ENGINEID_TYPE_IPV6:
+00651         bufp[4] = ENGINEID_TYPE_IPV6;
+00652         memcpy(bufp + 5, hent-&gt;h_addr_list[0], hent-&gt;h_length);
+00653         <span class="keywordflow">break</span>;
+00654 <span class="preprocessor">#endif</span>
+00655 <span class="preprocessor">#endif</span>
+00656 <span class="preprocessor">#if defined(IFHWADDRLEN) &amp;&amp; defined(SIOCGIFHWADDR)</span>
+00657     <span class="keywordflow">case</span> ENGINEID_TYPE_MACADDR:
+00658         {
+00659             <span class="keywordtype">int</span>             x;
+00660             bufp[4] = ENGINEID_TYPE_MACADDR;
+00661             <span class="comment">/*</span>
+00662 <span class="comment">             * use default NIC if none provided </span>
+00663 <span class="comment">             */</span>
+00664             <span class="keywordflow">if</span> (NULL == engineIDNic) {
+00665                 x = getHwAddress(DEFAULT_NIC, &amp;bufp[5]);
+00666             } <span class="keywordflow">else</span> {
+00667                 x = getHwAddress(engineIDNic, &amp;bufp[5]);
+00668             }
+00669             <span class="keywordflow">if</span> (0 != x)
+00670                 <span class="comment">/*</span>
+00671 <span class="comment">                 * function failed fill MAC address with zeros </span>
+00672 <span class="comment">                 */</span>
+00673             {
+00674                 memset(&amp;bufp[5], 0, 6);
+00675             }
+00676         }
+00677         <span class="keywordflow">break</span>;
+00678 <span class="preprocessor">#endif</span>
+00679     <span class="keywordflow">case</span> ENGINEID_TYPE_IPV4:
+00680     <span class="keywordflow">default</span>:
+00681         bufp[4] = ENGINEID_TYPE_IPV4;
+00682 <span class="preprocessor">#ifdef HAVE_GETHOSTNAME</span>
+00683         <span class="keywordflow">if</span> (hent &amp;&amp; hent-&gt;h_addrtype == AF_INET) {
+00684             memcpy(bufp + 5, hent-&gt;h_addr_list[0], hent-&gt;h_length);
+00685         } <span class="keywordflow">else</span> {                <span class=
+"comment">/* Unknown address type.  Default to 127.0.0.1. */</span>
+00686 
+00687             bufp[5] = 127;
+00688             bufp[6] = 0;
+00689             bufp[7] = 0;
+00690             bufp[8] = 1;
+00691         }
+00692 <span class="preprocessor">#else                           </span><span class="comment">/* HAVE_GETHOSTNAME */</span>
+00693         <span class="comment">/*</span>
+00694 <span class="comment">         * Unknown address type.  Default to 127.0.0.1. </span>
+00695 <span class="comment">         */</span>
+00696         bufp[5] = 127;
+00697         bufp[6] = 0;
+00698         bufp[7] = 0;
+00699         bufp[8] = 1;
+00700 <span class="preprocessor">#endif                          </span><span class="comment">/* HAVE_GETHOSTNAME */</span>
+00701         <span class="keywordflow">break</span>;
+00702     }
+00703 
+00704     <span class="comment">/*</span>
+00705 <span class="comment">     * Pass the string back to the calling environment, or use it for</span>
+00706 <span class="comment">     * our local engineID.</span>
+00707 <span class="comment">     */</span>
+00708     <span class="keywordflow">if</span> (localsetup) {
+00709         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(engineID);
+00710         engineID = bufp;
+00711         engineIDLength = len;
+00712 
+00713     } <span class="keywordflow">else</span> {
+00714         *eidp = bufp;
+00715     }
+00716 
+00717 
+00718     <span class="keywordflow">return</span> len;
+00719 
+00720 }                               <span class="comment">/* end setup_engineID() */</span>
+00721 
+00722 <span class="keywordtype">int</span>
+00723 free_engineID(<span class="keywordtype">int</span> majorid, <span class="keywordtype">int</span> minorid, <span class=
+"keywordtype">void</span> *serverarg,
+00724               <span class="keywordtype">void</span> *clientarg)
+00725 {
+00726     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(engineID);
+00727     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(engineIDNic);
+00728     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(oldEngineID);
+00729     <span class="keywordflow">return</span> 0;
+00730 }
+00731 
+00732 <span class="keywordtype">int</span>
+00733 free_enginetime_on_shutdown(<span class="keywordtype">int</span> majorid, <span class=
+"keywordtype">int</span> minorid, <span class="keywordtype">void</span> *serverarg,
+00734                             <span class="keywordtype">void</span> *clientarg)
+00735 {
+00736     DEBUGMSGTL((<span class="stringliteral">"snmpv3"</span>, <span class=
+"stringliteral">"free enginetime callback called\n"</span>));
+00737     <span class="keywordflow">if</span> (engineID != NULL)
+00738         free_enginetime(engineID, engineIDLength);
+00739     <span class="keywordflow">return</span> 0;
+00740 }
+00741 
+00742 <span class="keywordtype">void</span>
+00743 usm_parse_create_usmUser(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keywordtype">char</span> *line)
+00744 {
+00745     <span class="keywordtype">char</span>           *cp;
+00746     <span class="keywordtype">char</span>            buf[SNMP_MAXBUF_MEDIUM];
+00747     <span class="keyword">struct </span>usmUser *newuser;
+00748     u_char          userKey[SNMP_MAXBUF_SMALL], *tmpp;
+00749     size_t          userKeyLen = SNMP_MAXBUF_SMALL;
+00750     size_t          privKeyLen = 0;
+00751     size_t          ret;
+00752     <span class="keywordtype">int</span>             testcase;
+00753 
+00754     newuser = usm_create_user();
+00755 
+00756     <span class="comment">/*</span>
+00757 <span class="comment">     * READ: Security Name </span>
+00758 <span class="comment">     */</span>
+00759     cp = copy_nword(line, buf, <span class="keyword">sizeof</span>(buf));
+00760 
+00761     <span class="comment">/*</span>
+00762 <span class="comment">     * might be a -e ENGINEID argument </span>
+00763 <span class="comment">     */</span>
+00764     <span class="keywordflow">if</span> (strcmp(buf, <span class="stringliteral">"-e"</span>) == 0) {
+00765         size_t          ebuf_len = 32, eout_len = 0;
+00766         u_char         *ebuf = (u_char *) malloc(ebuf_len);
+00767 
+00768         <span class="keywordflow">if</span> (ebuf == NULL) {
+00769             config_perror(<span class="stringliteral">"malloc failure processing -e flag"</span>);
+00770             usm_free_user(newuser);
+00771             <span class="keywordflow">return</span>;
+00772         }
+00773 
+00774         <span class="comment">/*</span>
+00775 <span class="comment">         * Get the specified engineid from the line.  </span>
+00776 <span class="comment">         */</span>
+00777         cp = copy_nword(cp, buf, <span class="keyword">sizeof</span>(buf));
+00778         <span class="keywordflow">if</span> (!<a class="code" href=
+"group__util.html#ga8">snmp_hex_to_binary</a>(&amp;ebuf, &amp;ebuf_len, &amp;eout_len, 1, buf)) {
+00779             config_perror(<span class="stringliteral">"invalid EngineID argument to -e"</span>);
+00780             usm_free_user(newuser);
+00781             <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(ebuf);
+00782             <span class="keywordflow">return</span>;
+00783         }
+00784 
+00785         newuser-&gt;engineID = ebuf;
+00786         newuser-&gt;engineIDLen = eout_len;
+00787         cp = copy_nword(cp, buf, <span class="keyword">sizeof</span>(buf));
+00788     } <span class="keywordflow">else</span> {
+00789         newuser-&gt;engineID = snmpv3_generate_engineID(&amp;ret);
+00790         <span class="keywordflow">if</span> (ret == 0) {
+00791             usm_free_user(newuser);
+00792             <span class="keywordflow">return</span>;
+00793         }
+00794         newuser-&gt;engineIDLen = ret;
+00795     }
+00796 
+00797     newuser-&gt;secName = strdup(buf);
+00798     newuser-&gt;name = strdup(buf);
+00799 
+00800     <span class="keywordflow">if</span> (!cp)
+00801         <span class="keywordflow">goto</span> add;               <span class=
+"comment">/* no authentication or privacy type */</span>
+00802 
+00803     <span class="comment">/*</span>
+00804 <span class="comment">     * READ: Authentication Type </span>
+00805 <span class="comment">     */</span>
+00806 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00807     <span class="keywordflow">if</span> (strncmp(cp, <span class="stringliteral">"MD5"</span>, 3) == 0) {
+00808         memcpy(newuser-&gt;authProtocol, usmHMACMD5AuthProtocol,
+00809                <span class="keyword">sizeof</span>(usmHMACMD5AuthProtocol));
+00810     } <span class="keywordflow">else</span>
+00811 <span class="preprocessor">#endif</span>
+00812         <span class="keywordflow">if</span> (strncmp(cp, <span class="stringliteral">"SHA"</span>, 3) == 0) {
+00813         memcpy(newuser-&gt;authProtocol, usmHMACSHA1AuthProtocol,
+00814                <span class="keyword">sizeof</span>(usmHMACSHA1AuthProtocol));
+00815     } <span class="keywordflow">else</span> {
+00816         config_perror(<span class="stringliteral">"Unknown authentication protocol"</span>);
+00817         usm_free_user(newuser);
+00818         <span class="keywordflow">return</span>;
+00819     }
+00820 
+00821     cp = skip_token(cp);
+00822 
+00823     <span class="comment">/*</span>
+00824 <span class="comment">     * READ: Authentication Pass Phrase or key</span>
+00825 <span class="comment">     */</span>
+00826     <span class="keywordflow">if</span> (!cp) {
+00827         config_perror(<span class="stringliteral">"no authentication pass phrase"</span>);
+00828         usm_free_user(newuser);
+00829         <span class="keywordflow">return</span>;
+00830     }
+00831     cp = copy_nword(cp, buf, <span class="keyword">sizeof</span>(buf));
+00832     <span class="keywordflow">if</span> (strcmp(buf,<span class="stringliteral">"-m"</span>) == 0) {
+00833         <span class="comment">/* a master key is specified */</span>
+00834         cp = copy_nword(cp, buf, <span class="keyword">sizeof</span>(buf));
+00835         ret = <span class="keyword">sizeof</span>(userKey);
+00836         tmpp = userKey;
+00837         userKeyLen = 0;
+00838         <span class="keywordflow">if</span> (!<a class="code" href=
+"group__util.html#ga8">snmp_hex_to_binary</a>(&amp;tmpp, &amp;ret, &amp;userKeyLen, 0, buf)) {
+00839             config_perror(<span class="stringliteral">"invalid key value argument to -m"</span>);
+00840             usm_free_user(newuser);
+00841             <span class="keywordflow">return</span>;
+00842         }
+00843     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (strcmp(buf,<span class=
+"stringliteral">"-l"</span>) != 0) {
+00844         <span class="comment">/* a password is specified */</span>
+00845         userKeyLen = <span class="keyword">sizeof</span>(userKey);
+00846         ret = generate_Ku(newuser-&gt;authProtocol, newuser-&gt;authProtocolLen,
+00847                           (u_char *) buf, strlen(buf), userKey, &amp;userKeyLen);
+00848         <span class="keywordflow">if</span> (ret != SNMPERR_SUCCESS) {
+00849             config_perror(<span class="stringliteral">"could not generate the authentication key from the "</span>
+00850                           <span class="stringliteral">"suppiled pass phrase."</span>);
+00851             usm_free_user(newuser);
+00852             <span class="keywordflow">return</span>;
+00853         }
+00854     }        
+00855         
+00856     <span class="comment">/*</span>
+00857 <span class="comment">     * And turn it into a localized key </span>
+00858 <span class="comment">     */</span>
+00859     ret =
+00860         sc_get_properlength(newuser-&gt;authProtocol,
+00861                             newuser-&gt;authProtocolLen);
+00862     <span class="keywordflow">if</span> (ret &lt;= 0) {
+00863         config_perror(<span class="stringliteral">"Could not get proper authentication protocol key length"</span>);
+00864         <span class="keywordflow">return</span>;
+00865     }
+00866     newuser-&gt;authKey = (u_char *) malloc(ret);
+00867 
+00868     <span class="keywordflow">if</span> (strcmp(buf,<span class="stringliteral">"-l"</span>) == 0) {
+00869         <span class="comment">/* a local key is directly specified */</span>
+00870         cp = copy_nword(cp, buf, <span class="keyword">sizeof</span>(buf));
+00871         newuser-&gt;authKeyLen = 0;
+00872         <span class="keywordflow">if</span> (!<a class="code" href=
+"group__util.html#ga8">snmp_hex_to_binary</a>(&amp;newuser-&gt;authKey, &amp;ret,
+00873                                 &amp;newuser-&gt;authKeyLen, 0, buf)) {
+00874             config_perror(<span class="stringliteral">"invalid key value argument to -l"</span>);
+00875             usm_free_user(newuser);
+00876             <span class="keywordflow">return</span>;
+00877         }
+00878         <span class="keywordflow">if</span> (ret != newuser-&gt;authKeyLen) {
+00879             config_perror(<span class="stringliteral">"improper key length to -l"</span>);
+00880             usm_free_user(newuser);
+00881             <span class="keywordflow">return</span>;
+00882         }
+00883     } <span class="keywordflow">else</span> {
+00884         newuser-&gt;authKeyLen = ret;
+00885         ret = generate_kul(newuser-&gt;authProtocol, newuser-&gt;authProtocolLen,
+00886                            newuser-&gt;engineID, newuser-&gt;engineIDLen,
+00887                            userKey, userKeyLen,
+00888                            newuser-&gt;authKey, &amp;newuser-&gt;authKeyLen);
+00889         <span class="keywordflow">if</span> (ret != SNMPERR_SUCCESS) {
+00890             config_perror(<span class="stringliteral">"could not generate localized authentication key "</span>
+00891                           <span class="stringliteral">"(Kul) from the master key (Ku)."</span>);
+00892             usm_free_user(newuser);
+00893             <span class="keywordflow">return</span>;
+00894         }
+00895     }
+00896 
+00897     <span class="keywordflow">if</span> (!cp)
+00898         <span class="keywordflow">goto</span> add;               <span class=
+"comment">/* no privacy type (which is legal) */</span>
+00899 
+00900     <span class="comment">/*</span>
+00901 <span class="comment">     * READ: Privacy Type </span>
+00902 <span class="comment">     */</span>
+00903     testcase = 0;
+00904 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00905     <span class="keywordflow">if</span> (strncmp(cp, <span class="stringliteral">"DES"</span>, 3) == 0) {
+00906         memcpy(newuser-&gt;privProtocol, usmDESPrivProtocol,
+00907                <span class="keyword">sizeof</span>(usmDESPrivProtocol));
+00908         testcase = 1;
+00909         <span class="comment">/* DES uses a 128 bit key, 64 bits of which is a salt */</span>
+00910         privKeyLen = 16;
+00911     }
+00912 <span class="preprocessor">#endif</span>
+00913 <span class="preprocessor">#ifdef HAVE_AES</span>
+00914     <span class="keywordflow">if</span> (strncmp(cp, <span class="stringliteral">"AES128"</span>, 6) == 0 ||
+00915                strncmp(cp, <span class="stringliteral">"AES"</span>, 3) == 0) {
+00916         memcpy(newuser-&gt;privProtocol, usmAESPrivProtocol,
+00917                <span class="keyword">sizeof</span>(usmAESPrivProtocol));
+00918         testcase = 1;
+00919         privKeyLen = 16;
+00920     }
+00921 <span class="preprocessor">#endif</span>
+00922     <span class="keywordflow">if</span> (testcase == 0) {
+00923         config_perror(<span class="stringliteral">"Unknown privacy protocol"</span>);
+00924         usm_free_user(newuser);
+00925         <span class="keywordflow">return</span>;
+00926     }
+00927 
+00928     cp = skip_token(cp);
+00929     <span class="comment">/*</span>
+00930 <span class="comment">     * READ: Encryption Pass Phrase or key</span>
+00931 <span class="comment">     */</span>
+00932     <span class="keywordflow">if</span> (!cp) {
+00933         <span class="comment">/*</span>
+00934 <span class="comment">         * assume the same as the authentication key </span>
+00935 <span class="comment">         */</span>
+00936         <a class="code" href=
+"group__util.html#ga5">memdup</a>(&amp;newuser-&gt;privKey, newuser-&gt;authKey, newuser-&gt;authKeyLen);
+00937         newuser-&gt;privKeyLen = newuser-&gt;authKeyLen;
+00938     } <span class="keywordflow">else</span> {
+00939         cp = copy_nword(cp, buf, <span class="keyword">sizeof</span>(buf));
+00940         
+00941         <span class="keywordflow">if</span> (strcmp(buf,<span class="stringliteral">"-m"</span>) == 0) {
+00942             <span class="comment">/* a master key is specified */</span>
+00943             cp = copy_nword(cp, buf, <span class="keyword">sizeof</span>(buf));
+00944             ret = <span class="keyword">sizeof</span>(userKey);
+00945             tmpp = userKey;
+00946             userKeyLen = 0;
+00947             <span class="keywordflow">if</span> (!<a class="code" href=
+"group__util.html#ga8">snmp_hex_to_binary</a>(&amp;tmpp, &amp;ret, &amp;userKeyLen, 0, buf)) {
+00948                 config_perror(<span class="stringliteral">"invalid key value argument to -m"</span>);
+00949                 usm_free_user(newuser);
+00950                 <span class="keywordflow">return</span>;
+00951             }
+00952         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (strcmp(buf,<span class=
+"stringliteral">"-l"</span>) != 0) {
+00953             <span class="comment">/* a password is specified */</span>
+00954             userKeyLen = <span class="keyword">sizeof</span>(userKey);
+00955             ret = generate_Ku(newuser-&gt;authProtocol, newuser-&gt;authProtocolLen,
+00956                               (u_char *) buf, strlen(buf), userKey, &amp;userKeyLen);
+00957             <span class="keywordflow">if</span> (ret != SNMPERR_SUCCESS) {
+00958                 config_perror(<span class="stringliteral">"could not generate the privacy key from the "</span>
+00959                               <span class="stringliteral">"suppiled pass phrase."</span>);
+00960                 usm_free_user(newuser);
+00961                 <span class="keywordflow">return</span>;
+00962             }
+00963         }        
+00964         
+00965         <span class="comment">/*</span>
+00966 <span class="comment">         * And turn it into a localized key </span>
+00967 <span class="comment">         */</span>
+00968         ret =
+00969             sc_get_properlength(newuser-&gt;authProtocol,
+00970                                 newuser-&gt;authProtocolLen);
+00971         <span class="keywordflow">if</span> (ret &lt; 0) {
+00972             config_perror(<span class="stringliteral">"could not get proper key length to use for the "</span>
+00973                           <span class="stringliteral">"privacy algorithm."</span>);
+00974             usm_free_user(newuser);
+00975             <span class="keywordflow">return</span>;
+00976         }
+00977         newuser-&gt;privKey = (u_char *) malloc(ret);
+00978 
+00979         <span class="keywordflow">if</span> (strcmp(buf,<span class="stringliteral">"-l"</span>) == 0) {
+00980             <span class="comment">/* a local key is directly specified */</span>
+00981             cp = copy_nword(cp, buf, <span class="keyword">sizeof</span>(buf));
+00982             newuser-&gt;privKeyLen = 0;
+00983             <span class="keywordflow">if</span> (!<a class="code" href=
+"group__util.html#ga8">snmp_hex_to_binary</a>(&amp;newuser-&gt;privKey, &amp;ret,
+00984                                     &amp;newuser-&gt;privKeyLen, 0, buf)) {
+00985                 config_perror(<span class="stringliteral">"invalid key value argument to -l"</span>);
+00986                 usm_free_user(newuser);
+00987                 <span class="keywordflow">return</span>;
+00988             }
+00989         } <span class="keywordflow">else</span> {
+00990             newuser-&gt;privKeyLen = ret;
+00991             ret = generate_kul(newuser-&gt;authProtocol, newuser-&gt;authProtocolLen,
+00992                                newuser-&gt;engineID, newuser-&gt;engineIDLen,
+00993                                userKey, userKeyLen,
+00994                                newuser-&gt;privKey, &amp;newuser-&gt;privKeyLen);
+00995             <span class="keywordflow">if</span> (ret != SNMPERR_SUCCESS) {
+00996                 config_perror(<span class="stringliteral">"could not generate localized privacy key "</span>
+00997                               <span class="stringliteral">"(Kul) from the master key (Ku)."</span>);
+00998                 usm_free_user(newuser);
+00999                 <span class="keywordflow">return</span>;
+01000             }
+01001         }
+01002     }
+01003 
+01004     <span class="keywordflow">if</span> ((newuser-&gt;privKeyLen &gt;= privKeyLen) || (privKeyLen == 0)){
+01005       newuser-&gt;privKeyLen = privKeyLen;
+01006     }
+01007     <span class="keywordflow">else</span> {
+01008       <span class="comment">/* The privKey length is smaller than required by privProtocol */</span>
+01009       usm_free_user(newuser);
+01010       <span class="keywordflow">return</span>;
+01011     }
+01012 
+01013   add:
+01014     usm_add_user(newuser);
+01015     DEBUGMSGTL((<span class="stringliteral">"usmUser"</span>, <span class=
+"stringliteral">"created a new user %s at "</span>, newuser-&gt;secName));
+01016     DEBUGMSGHEX((<span class="stringliteral">"usmUser"</span>, newuser-&gt;engineID, newuser-&gt;engineIDLen));
+01017     DEBUGMSG((<span class="stringliteral">"usmUser"</span>, <span class="stringliteral">"\n"</span>));
+01018 }
+01019 
+01020 <span class="comment">/*******************************************************************-o-******</span>
+01021 <span class="comment"> * engineBoots_conf</span>
+01022 <span class="comment"> *</span>
+01023 <span class="comment"> * Parameters:</span>
+01024 <span class="comment"> *      *word</span>
+01025 <span class="comment"> *      *cptr</span>
+01026 <span class="comment"> *</span>
+01027 <span class="comment"> * Line syntax:</span>
+01028 <span class="comment"> *      engineBoots &lt;num_boots&gt;</span>
+01029 <span class="comment"> */</span>
+01030 <span class="keywordtype">void</span>
+01031 engineBoots_conf(<span class="keyword">const</span> <span class="keywordtype">char</span> *word, <span class=
+"keywordtype">char</span> *cptr)
+01032 {
+01033     engineBoots = atoi(cptr) + 1;
+01034     DEBUGMSGTL((<span class="stringliteral">"snmpv3"</span>, <span class=
+"stringliteral">"engineBoots: %d\n"</span>, engineBoots));
+01035 }
+01036 
+01037 <span class="comment">/*******************************************************************-o-******</span>
+01038 <span class="comment"> * engineIDType_conf</span>
+01039 <span class="comment"> *</span>
+01040 <span class="comment"> * Parameters:</span>
+01041 <span class="comment"> *      *word</span>
+01042 <span class="comment"> *      *cptr</span>
+01043 <span class="comment"> *</span>
+01044 <span class="comment"> * Line syntax:</span>
+01045 <span class="comment"> *      engineIDType &lt;1 or 3&gt;</span>
+01046 <span class="comment"> *              1 is default for IPv4 engine ID type.  Will automatically</span>
+01047 <span class="comment"> *                  chose between IPv4 &amp; IPv6 if either 1 or 2 is specified.</span>
+01048 <span class="comment"> *              2 is for IPv6.</span>
+01049 <span class="comment"> *              3 is hardware (MAC) address, currently supported under Linux</span>
+01050 <span class="comment"> */</span>
+01051 <span class="keywordtype">void</span>
+01052 engineIDType_conf(<span class="keyword">const</span> <span class="keywordtype">char</span> *word, <span class=
+"keywordtype">char</span> *cptr)
+01053 {
+01054     engineIDType = atoi(cptr);
+01055     <span class="comment">/*</span>
+01056 <span class="comment">     * verify valid type selected </span>
+01057 <span class="comment">     */</span>
+01058     <span class="keywordflow">switch</span> (engineIDType) {
+01059     <span class="keywordflow">case</span> ENGINEID_TYPE_IPV4:   <span class="comment">/* IPv4 */</span>
+01060     <span class="keywordflow">case</span> ENGINEID_TYPE_IPV6:   <span class="comment">/* IPv6 */</span>
+01061         <span class="comment">/*</span>
+01062 <span class="comment">         * IPV? is always good </span>
+01063 <span class="comment">         */</span>
+01064         <span class="keywordflow">break</span>;
+01065 <span class="preprocessor">#if defined(IFHWADDRLEN) &amp;&amp; defined(SIOCGIFHWADDR)</span>
+01066     <span class="keywordflow">case</span> ENGINEID_TYPE_MACADDR:        <span class="comment">/* MAC address */</span>
+01067         <span class="keywordflow">break</span>;
+01068 <span class="preprocessor">#endif</span>
+01069     <span class="keywordflow">default</span>:
+01070         <span class="comment">/*</span>
+01071 <span class="comment">         * unsupported one chosen </span>
+01072 <span class="comment">         */</span>
+01073         config_perror(<span class="stringliteral">"Unsupported enginedIDType, forcing IPv4"</span>);
+01074         engineIDType = ENGINEID_TYPE_IPV4;
+01075     }
+01076     DEBUGMSGTL((<span class="stringliteral">"snmpv3"</span>, <span class=
+"stringliteral">"engineIDType: %d\n"</span>, engineIDType));
+01077 }
+01078 
+01079 <span class="comment">/*******************************************************************-o-******</span>
+01080 <span class="comment"> * engineIDNic_conf</span>
+01081 <span class="comment"> *</span>
+01082 <span class="comment"> * Parameters:</span>
+01083 <span class="comment"> *      *word</span>
+01084 <span class="comment"> *      *cptr</span>
+01085 <span class="comment"> *</span>
+01086 <span class="comment"> * Line syntax:</span>
+01087 <span class="comment"> *      engineIDNic &lt;string&gt;</span>
+01088 <span class="comment"> *              eth0 is default</span>
+01089 <span class="comment"> */</span>
+01090 <span class="keywordtype">void</span>
+01091 engineIDNic_conf(<span class="keyword">const</span> <span class="keywordtype">char</span> *word, <span class=
+"keywordtype">char</span> *cptr)
+01092 {
+01093     <span class="comment">/*</span>
+01094 <span class="comment">     * Make sure they haven't already specified the engineID via the</span>
+01095 <span class="comment">     * * configuration file </span>
+01096 <span class="comment">     */</span>
+01097     <span class="keywordflow">if</span> (0 == engineIDIsSet)
+01098         <span class="comment">/*</span>
+01099 <span class="comment">         * engineID has NOT been set via configuration file </span>
+01100 <span class="comment">         */</span>
+01101     {
+01102         <span class="comment">/*</span>
+01103 <span class="comment">         * See if already set if so erase &amp; release it </span>
+01104 <span class="comment">         */</span>
+01105         <span class="keywordflow">if</span> (NULL != engineIDNic) {
+01106             <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(engineIDNic);
+01107         }
+01108         engineIDNic = (u_char *) malloc(strlen(cptr) + 1);
+01109         <span class="keywordflow">if</span> (NULL != engineIDNic) {
+01110             strcpy((<span class="keywordtype">char</span> *) engineIDNic, cptr);
+01111             DEBUGMSGTL((<span class="stringliteral">"snmpv3"</span>, <span class=
+"stringliteral">"Initializing engineIDNic: %s\n"</span>,
+01112                         engineIDNic));
+01113         } <span class="keywordflow">else</span> {
+01114             DEBUGMSGTL((<span class="stringliteral">"snmpv3"</span>,
+01115                         <span class="stringliteral">"Error allocating memory for engineIDNic!\n"</span>));
+01116         }
+01117     } <span class="keywordflow">else</span> {
+01118         DEBUGMSGTL((<span class="stringliteral">"snmpv3"</span>,
+01119                     <span class="stringliteral">"NOT setting engineIDNic, engineID already set\n"</span>));
+01120     }
+01121 }
+01122 
+01123 <span class="comment">/*******************************************************************-o-******</span>
+01124 <span class="comment"> * engineID_conf</span>
+01125 <span class="comment"> *</span>
+01126 <span class="comment"> * Parameters:</span>
+01127 <span class="comment"> *      *word</span>
+01128 <span class="comment"> *      *cptr</span>
+01129 <span class="comment"> *</span>
+01130 <span class="comment"> * This function reads a string from the configuration file and uses that</span>
+01131 <span class="comment"> * string to initialize the engineID.  It's assumed to be human readable.</span>
+01132 <span class="comment"> */</span>
+01133 <span class="keywordtype">void</span>
+01134 engineID_conf(<span class="keyword">const</span> <span class="keywordtype">char</span> *word, <span class=
+"keywordtype">char</span> *cptr)
+01135 {
+01136     setup_engineID(NULL, cptr);
+01137     DEBUGMSGTL((<span class="stringliteral">"snmpv3"</span>, <span class=
+"stringliteral">"initialized engineID with: %s\n"</span>, cptr));
+01138 }
+01139 
+01140 <span class="keywordtype">void</span>
+01141 version_conf(<span class="keyword">const</span> <span class="keywordtype">char</span> *word, <span class=
+"keywordtype">char</span> *cptr)
+01142 {
+01143     <span class="keywordtype">int</span> valid = 0;
+01144 <span class="preprocessor">#ifndef DISABLE_SNMPV1</span>
+01145     <span class="keywordflow">if</span> ((strcmp(cptr,  <span class="stringliteral">"1"</span>) == 0) ||
+01146         (strcmp(cptr, <span class="stringliteral">"v1"</span>) == 0)) {
+01147         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION, 
+01148                            NETSNMP_DS_SNMP_VERSION_1);       <span class="comment">/* bogus value */</span>
+01149         valid = 1;
+01150     }
+01151 <span class="preprocessor">#endif</span>
+01152 <span class="preprocessor">#ifndef DISABLE_SNMPV2C</span>
+01153     <span class="keywordflow">if</span> ((strcasecmp(cptr,  <span class="stringliteral">"2c"</span>) == 0) ||
+01154                (strcasecmp(cptr, <span class="stringliteral">"v2c"</span>) == 0)) {
+01155         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION, 
+01156                            NETSNMP_DS_SNMP_VERSION_2c);
+01157         valid = 1;
+01158     }
+01159 <span class="preprocessor">#endif</span>
+01160     <span class="keywordflow">if</span> ((strcasecmp(cptr,  <span class="stringliteral">"3"</span> ) == 0) ||
+01161                (strcasecmp(cptr, <span class="stringliteral">"v3"</span> ) == 0)) {
+01162         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION, 
+01163                            NETSNMP_DS_SNMP_VERSION_3);
+01164         valid = 1;
+01165     }
+01166     <span class="keywordflow">if</span> (!valid) {
+01167         config_perror(<span class="stringliteral">"Unknown version specification"</span>);
+01168         <span class="keywordflow">return</span>;
+01169     }
+01170     DEBUGMSGTL((<span class="stringliteral">"snmpv3"</span>, <span class=
+"stringliteral">"set default version to %d\n"</span>,
+01171                 netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+01172                                    NETSNMP_DS_LIB_SNMPVERSION)));
+01173 }
+01174 
+01175 <span class="comment">/*</span>
+01176 <span class="comment"> * engineID_old_conf(const char *, char *):</span>
+01177 <span class="comment"> * </span>
+01178 <span class="comment"> * Reads a octet string encoded engineID into the oldEngineID and</span>
+01179 <span class="comment"> * oldEngineIDLen pointers.</span>
+01180 <span class="comment"> */</span>
+01181 <span class="keywordtype">void</span>
+01182 oldengineID_conf(<span class="keyword">const</span> <span class="keywordtype">char</span> *word, <span class=
+"keywordtype">char</span> *cptr)
+01183 {
+01184     read_config_read_octet_string(cptr, &amp;oldEngineID, &amp;oldEngineIDLength);
+01185 }
+01186 
+01187 <span class="comment">/*</span>
+01188 <span class="comment"> * merely call </span>
+01189 <span class="comment"> */</span>
+01190 <span class="keywordtype">void</span>
+01191 get_enginetime_alarm(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> regnum, <span class=
+"keywordtype">void</span> *clientargs)
+01192 {
+01193     <span class="comment">/* we do this every so (rarely) often just to make sure we watch</span>
+01194 <span class="comment">       wrapping of the times() output */</span>
+01195     snmpv3_local_snmpEngineTime();
+01196 }
+01197 
+01198 <span class="comment">/*******************************************************************-o-******</span>
+01199 <span class="comment"> * init_snmpv3</span>
+01200 <span class="comment"> *</span>
+01201 <span class="comment"> * Parameters:</span>
+01202 <span class="comment"> *      *type   Label for the config file "type" used by calling entity.</span>
+01203 <span class="comment"> *      </span>
+01204 <span class="comment"> * Set time and engineID.</span>
+01205 <span class="comment"> * Set parsing functions for config file tokens.</span>
+01206 <span class="comment"> * Initialize SNMP Crypto API (SCAPI).</span>
+01207 <span class="comment"> */</span>
+01208 <span class="keywordtype">void</span>
+01209 init_snmpv3(<span class="keyword">const</span> <span class="keywordtype">char</span> *type)
+01210 {
+01211 <span class="preprocessor">#if SNMP_USE_TIMES</span>
+01212   <span class="keyword">struct </span>tms dummy;
+01213 
+01214   <span class="comment">/* fixme: -1 is fault code... */</span>
+01215   snmpv3startClock = times(&amp;dummy);
+01216 
+01217   <span class="comment">/* remember how many ticks per second there are, since times() returns this */</span>
+01218 
+01219   clockticks = sysconf(_SC_CLK_TCK);
+01220 
+01221 <span class="preprocessor">#endif </span><span class="comment">/* SNMP_USE_TIMES */</span>
+01222 
+01223     gettimeofday(&amp;snmpv3starttime, NULL);
+01224 
+01225     <span class="keywordflow">if</span> (!type)
+01226         type = <span class="stringliteral">"__snmpapp__"</span>;
+01227 
+01228     <span class="comment">/*</span>
+01229 <span class="comment">     * we need to be called back later </span>
+01230 <span class="comment">     */</span>
+01231     <a class="code" href="group__callback.html#ga3">snmp_register_callback</a>(SNMP_CALLBACK_LIBRARY,
+01232                            SNMP_CALLBACK_POST_READ_CONFIG,
+01233                            init_snmpv3_post_config, NULL);
+01234 
+01235     <a class="code" href="group__callback.html#ga3">snmp_register_callback</a>(SNMP_CALLBACK_LIBRARY,
+01236                            SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
+01237                            init_snmpv3_post_premib_config, NULL);
+01238     <span class="comment">/*</span>
+01239 <span class="comment">     * we need to be called back later </span>
+01240 <span class="comment">     */</span>
+01241     <a class="code" href=
+"group__callback.html#ga3">snmp_register_callback</a>(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+01242                            snmpv3_store, (<span class="keywordtype">void</span> *) strdup(type));
+01243 
+01244     <span class="comment">/*</span>
+01245 <span class="comment">     * Free stuff at shutdown time</span>
+01246 <span class="comment">     */</span>
+01247     <a class="code" href="group__callback.html#ga3">snmp_register_callback</a>(SNMP_CALLBACK_LIBRARY,
+01248                            SNMP_CALLBACK_SHUTDOWN,
+01249                            free_enginetime_on_shutdown, NULL);
+01250 
+01251     <span class="comment">/*</span>
+01252 <span class="comment">     * initialize submodules </span>
+01253 <span class="comment">     */</span>
+01254     <span class="comment">/*</span>
+01255 <span class="comment">     * NOTE: this must be after the callbacks are registered above,</span>
+01256 <span class="comment">     * since they need to be called before the USM callbacks. </span>
+01257 <span class="comment">     */</span>
+01258     init_secmod();
+01259 
+01260     <span class="comment">/*</span>
+01261 <span class="comment">     * register all our configuration handlers (ack, there's a lot) </span>
+01262 <span class="comment">     */</span>
+01263 
+01264     <span class="comment">/*</span>
+01265 <span class="comment">     * handle engineID setup before everything else which may depend on it </span>
+01266 <span class="comment">     */</span>
+01267     register_prenetsnmp_mib_handler(type, <span class="stringliteral">"engineID"</span>, engineID_conf, NULL,
+01268                                     <span class="stringliteral">"string"</span>);
+01269     register_prenetsnmp_mib_handler(type, <span class="stringliteral">"oldEngineID"</span>, oldengineID_conf,
+01270                                     NULL, NULL);
+01271     register_prenetsnmp_mib_handler(type, <span class="stringliteral">"engineIDType"</span>,
+01272                                     engineIDType_conf, NULL, <span class="stringliteral">"num"</span>);
+01273     register_prenetsnmp_mib_handler(type, <span class="stringliteral">"engineIDNic"</span>, engineIDNic_conf,
+01274                                     NULL, <span class="stringliteral">"string"</span>);
+01275     <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(type, <span class=
+"stringliteral">"engineBoots"</span>, engineBoots_conf, NULL,
+01276                             NULL);
+01277 
+01278     <span class="comment">/*</span>
+01279 <span class="comment">     * default store config entries </span>
+01280 <span class="comment">     */</span>
+01281     netsnmp_ds_register_config(ASN_OCTET_STR, <span class="stringliteral">"snmp"</span>, <span class=
+"stringliteral">"defSecurityName"</span>,
+01282                                NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SECNAME);
+01283     netsnmp_ds_register_config(ASN_OCTET_STR, <span class="stringliteral">"snmp"</span>, <span class=
+"stringliteral">"defContext"</span>, 
+01284                                NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CONTEXT);
+01285     netsnmp_ds_register_config(ASN_OCTET_STR, <span class="stringliteral">"snmp"</span>, <span class=
+"stringliteral">"defPassphrase"</span>,
+01286                                NETSNMP_DS_LIBRARY_ID,
+01287                                NETSNMP_DS_LIB_PASSPHRASE);
+01288     netsnmp_ds_register_config(ASN_OCTET_STR, <span class="stringliteral">"snmp"</span>, <span class=
+"stringliteral">"defAuthPassphrase"</span>,
+01289                                NETSNMP_DS_LIBRARY_ID,
+01290                                NETSNMP_DS_LIB_AUTHPASSPHRASE);
+01291     netsnmp_ds_register_config(ASN_OCTET_STR, <span class="stringliteral">"snmp"</span>, <span class=
+"stringliteral">"defPrivPassphrase"</span>,
+01292                                NETSNMP_DS_LIBRARY_ID,
+01293                                NETSNMP_DS_LIB_PRIVPASSPHRASE);
+01294     netsnmp_ds_register_config(ASN_OCTET_STR, <span class="stringliteral">"snmp"</span>, <span class=
+"stringliteral">"defAuthMasterKey"</span>,
+01295                                NETSNMP_DS_LIBRARY_ID,
+01296                                NETSNMP_DS_LIB_AUTHMASTERKEY);
+01297     netsnmp_ds_register_config(ASN_OCTET_STR, <span class="stringliteral">"snmp"</span>, <span class=
+"stringliteral">"defPrivMasterKey"</span>,
+01298                                NETSNMP_DS_LIBRARY_ID,
+01299                                NETSNMP_DS_LIB_PRIVMASTERKEY);
+01300     netsnmp_ds_register_config(ASN_OCTET_STR, <span class="stringliteral">"snmp"</span>, <span class=
+"stringliteral">"defAuthLocalizedKey"</span>,
+01301                                NETSNMP_DS_LIBRARY_ID,
+01302                                NETSNMP_DS_LIB_AUTHLOCALIZEDKEY);
+01303     netsnmp_ds_register_config(ASN_OCTET_STR, <span class="stringliteral">"snmp"</span>, <span class=
+"stringliteral">"defPrivLocalizedKey"</span>,
+01304                                NETSNMP_DS_LIBRARY_ID,
+01305                                NETSNMP_DS_LIB_PRIVLOCALIZEDKEY);
+01306     <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(<span class=
+"stringliteral">"snmp"</span>, <span class="stringliteral">"defVersion"</span>, version_conf, NULL,
+01307                             <span class="stringliteral">"1|2c|3"</span>);
+01308 
+01309     <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(<span class=
+"stringliteral">"snmp"</span>, <span class="stringliteral">"defAuthType"</span>, snmpv3_authtype_conf,
+01310                             NULL, <span class="stringliteral">"MD5|SHA"</span>);
+01311     <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(<span class=
+"stringliteral">"snmp"</span>, <span class="stringliteral">"defPrivType"</span>, snmpv3_privtype_conf,
+01312                             NULL,
+01313 #ifdef HAVE_AES
+01314                             <span class="stringliteral">"DES (AES support not available)"</span>);
+01315 <span class="preprocessor">#else</span>
+01316                             <span class="stringliteral">"DES|AES"</span>);
+01317 <span class="preprocessor">#endif</span>
+01318     <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(<span class=
+"stringliteral">"snmp"</span>, <span class="stringliteral">"defSecurityLevel"</span>,
+01319                             snmpv3_secLevel_conf, NULL,
+01320                             <span class="stringliteral">"noAuthNoPriv|authNoPriv|authPriv"</span>);
+01321     <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(type, <span class=
+"stringliteral">"userSetAuthPass"</span>, usm_set_password,
+01322                             NULL, NULL);
+01323     <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(type, <span class=
+"stringliteral">"userSetPrivPass"</span>, usm_set_password,
+01324                             NULL, NULL);
+01325     <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(type, <span class=
+"stringliteral">"userSetAuthKey"</span>, usm_set_password, NULL,
+01326                             NULL);
+01327     <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(type, <span class=
+"stringliteral">"userSetPrivKey"</span>, usm_set_password, NULL,
+01328                             NULL);
+01329     <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(type, <span class=
+"stringliteral">"userSetAuthLocalKey"</span>, usm_set_password,
+01330                             NULL, NULL);
+01331     <a class="code" href="group__read__config.html#ga8">register_config_handler</a>(type, <span class=
+"stringliteral">"userSetPrivLocalKey"</span>, usm_set_password,
+01332                             NULL, NULL);
+01333 }
+01334 
+01335 <span class="comment">/*</span>
+01336 <span class="comment"> * initializations for SNMPv3 to be called after the configuration files</span>
+01337 <span class="comment"> * have been read.</span>
+01338 <span class="comment"> */</span>
+01339 
+01340 <span class="keywordtype">int</span>
+01341 init_snmpv3_post_config(<span class="keywordtype">int</span> majorid, <span class=
+"keywordtype">int</span> minorid, <span class="keywordtype">void</span> *serverarg,
+01342                         <span class="keywordtype">void</span> *clientarg)
+01343 {
+01344 
+01345     size_t          engineIDLen;
+01346     u_char         *c_engineID;
+01347 
+01348     c_engineID = snmpv3_generate_engineID(&amp;engineIDLen);
+01349 
+01350     <span class="keywordflow">if</span> (engineIDLen == 0) {
+01351         <span class="comment">/*</span>
+01352 <span class="comment">         * Somethine went wrong - help! </span>
+01353 <span class="comment">         */</span>
+01354         <span class="keywordflow">return</span> SNMPERR_GENERR;
+01355     }
+01356 
+01357     <span class="comment">/*</span>
+01358 <span class="comment">     * if our engineID has changed at all, the boots record must be set to 1 </span>
+01359 <span class="comment">     */</span>
+01360     <span class="keywordflow">if</span> (engineIDLen != (int) oldEngineIDLength ||
+01361         oldEngineID == NULL || c_engineID == NULL ||
+01362         memcmp(oldEngineID, c_engineID, engineIDLen) != 0) {
+01363         engineBoots = 1;
+01364     }
+01365 
+01366     <span class="comment">/*</span>
+01367 <span class="comment">     * set our local engineTime in the LCD timing cache </span>
+01368 <span class="comment">     */</span>
+01369     set_enginetime(c_engineID, engineIDLen,
+01370                    snmpv3_local_snmpEngineBoots(),
+01371                    snmpv3_local_snmpEngineTime(), TRUE);
+01372 
+01373     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(c_engineID);
+01374     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+01375 }
+01376 
+01377 <span class="keywordtype">int</span>
+01378 init_snmpv3_post_premib_config(<span class="keywordtype">int</span> majorid, <span class=
+"keywordtype">int</span> minorid, <span class="keywordtype">void</span> *serverarg,
+01379                                <span class="keywordtype">void</span> *clientarg)
+01380 {
+01381     <span class="keywordflow">if</span> (!engineIDIsSet)
+01382         setup_engineID(NULL, NULL);
+01383 
+01384     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+01385 }
+01386 
+01387 <span class="comment">/*******************************************************************-o-******</span>
+01388 <span class="comment"> * store_snmpv3</span>
+01389 <span class="comment"> *</span>
+01390 <span class="comment"> * Parameters:</span>
+01391 <span class="comment"> *      *type</span>
+01392 <span class="comment"> */</span>
+01393 <span class="keywordtype">int</span>
+01394 snmpv3_store(<span class="keywordtype">int</span> majorID, <span class="keywordtype">int</span> minorID, <span class=
+"keywordtype">void</span> *serverarg, <span class="keywordtype">void</span> *clientarg)
+01395 {
+01396     <span class="keywordtype">char</span>            line[SNMP_MAXBUF_SMALL];
+01397     u_char          c_engineID[SNMP_MAXBUF_SMALL];
+01398     <span class="keywordtype">int</span>             engineIDLen;
+01399     <span class="keyword">const</span> <span class="keywordtype">char</span>     *type = (<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *) clientarg;
+01400 
+01401     <span class="keywordflow">if</span> (type == NULL)           <span class=
+"comment">/* should never happen, since the arg is ours */</span>
+01402         type = <span class="stringliteral">"unknown"</span>;
+01403 
+01404     sprintf(line, <span class="stringliteral">"engineBoots %ld"</span>, engineBoots);
+01405     <a class="code" href="group__read__config.html#ga37">read_config_store</a>(type, line);
+01406 
+01407     engineIDLen = snmpv3_get_engineID(c_engineID, SNMP_MAXBUF_SMALL);
+01408 
+01409     <span class="keywordflow">if</span> (engineIDLen) {
+01410         <span class="comment">/*</span>
+01411 <span class="comment">         * store the engineID used for this run </span>
+01412 <span class="comment">         */</span>
+01413         sprintf(line, <span class="stringliteral">"oldEngineID "</span>);
+01414         read_config_save_octet_string(line + strlen(line), c_engineID,
+01415                                       engineIDLen);
+01416         <a class="code" href="group__read__config.html#ga37">read_config_store</a>(type, line);
+01417     }
+01418     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+01419 }                               <span class="comment">/* snmpv3_store() */</span>
+01420 
+01421 u_long
+01422 snmpv3_local_snmpEngineBoots(<span class="keywordtype">void</span>)
+01423 {
+01424     <span class="keywordflow">return</span> engineBoots;
+01425 }
+01426 
+01427 
+01428 <span class="comment">/*******************************************************************-o-******</span>
+01429 <span class="comment"> * snmpv3_get_engineID</span>
+01430 <span class="comment"> *</span>
+01431 <span class="comment"> * Parameters:</span>
+01432 <span class="comment"> *      *buf</span>
+01433 <span class="comment"> *       buflen</span>
+01434 <span class="comment"> *      </span>
+01435 <span class="comment"> * Returns:</span>
+01436 <span class="comment"> *      Length of engineID      On Success</span>
+01437 <span class="comment"> *      SNMPERR_GENERR          Otherwise.</span>
+01438 <span class="comment"> *</span>
+01439 <span class="comment"> *</span>
+01440 <span class="comment"> * Store engineID in buf; return the length.</span>
+01441 <span class="comment"> *</span>
+01442 <span class="comment"> */</span>
+01443 size_t
+01444 snmpv3_get_engineID(u_char * buf, size_t buflen)
+01445 {
+01446     <span class="comment">/*</span>
+01447 <span class="comment">     * Sanity check.</span>
+01448 <span class="comment">     */</span>
+01449     <span class="keywordflow">if</span> (!buf || (buflen &lt; engineIDLength)) {
+01450         <span class="keywordflow">return</span> 0;
+01451     }
+01452 
+01453     memcpy(buf, engineID, engineIDLength);
+01454     <span class="keywordflow">return</span> engineIDLength;
+01455 
+01456 }                               <span class="comment">/* end snmpv3_get_engineID() */</span>
+01457 
+01458 <span class="comment">/*******************************************************************-o-******</span>
+01459 <span class="comment"> * snmpv3_clone_engineID</span>
+01460 <span class="comment"> *</span>
+01461 <span class="comment"> * Parameters:</span>
+01462 <span class="comment"> *      **dest</span>
+01463 <span class="comment"> *       *dest_len</span>
+01464 <span class="comment"> *       src</span>
+01465 <span class="comment"> *       srclen</span>
+01466 <span class="comment"> *      </span>
+01467 <span class="comment"> * Returns:</span>
+01468 <span class="comment"> *      Length of engineID      On Success</span>
+01469 <span class="comment"> *      0                       Otherwise.</span>
+01470 <span class="comment"> *</span>
+01471 <span class="comment"> *</span>
+01472 <span class="comment"> * Clones engineID, creates memory</span>
+01473 <span class="comment"> *</span>
+01474 <span class="comment"> */</span>
+01475 <span class="keywordtype">int</span>
+01476 snmpv3_clone_engineID(u_char ** dest, size_t * destlen, u_char * src,
+01477                       size_t srclen)
+01478 {
+01479     <span class="keywordflow">if</span> (!dest || !destlen)
+01480         <span class="keywordflow">return</span> 0;
+01481 
+01482     <span class="keywordflow">if</span> (*dest) {
+01483         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(*dest);
+01484         *dest = NULL;
+01485     }
+01486     *destlen = 0;
+01487 
+01488     <span class="keywordflow">if</span> (srclen &amp;&amp; src) {
+01489         *dest = (u_char *) malloc(srclen);
+01490         <span class="keywordflow">if</span> (*dest == NULL)
+01491             <span class="keywordflow">return</span> 0;
+01492         memmove(*dest, src, srclen);
+01493         *destlen = srclen;
+01494     }
+01495     <span class="keywordflow">return</span> *destlen;
+01496 }                               <span class="comment">/* end snmpv3_clone_engineID() */</span>
+01497 
+01498 
+01499 <span class="comment">/*******************************************************************-o-******</span>
+01500 <span class="comment"> * snmpv3_generate_engineID</span>
+01501 <span class="comment"> *</span>
+01502 <span class="comment"> * Parameters:</span>
+01503 <span class="comment"> *      *length</span>
+01504 <span class="comment"> *      </span>
+01505 <span class="comment"> * Returns:</span>
+01506 <span class="comment"> *      Pointer to copy of engineID     On Success.</span>
+01507 <span class="comment"> *      NULL                            If malloc() or snmpv3_get_engineID()</span>
+01508 <span class="comment"> *                                              fail.</span>
+01509 <span class="comment"> *</span>
+01510 <span class="comment"> * Generates a malloced copy of our engineID.</span>
+01511 <span class="comment"> *</span>
+01512 <span class="comment"> * 'length' is set to the length of engineID  -OR-  &lt; 0 on failure.</span>
+01513 <span class="comment"> */</span>
+01514 u_char         *
+01515 snmpv3_generate_engineID(size_t * length)
+01516 {
+01517     u_char         *newID;
+01518     newID = (u_char *) malloc(engineIDLength);
+01519 
+01520     <span class="keywordflow">if</span> (newID) {
+01521         *length = snmpv3_get_engineID(newID, engineIDLength);
+01522     }
+01523 
+01524     <span class="keywordflow">if</span> (*length == 0) {
+01525         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(newID);
+01526         newID = NULL;
+01527     }
+01528 
+01529     <span class="keywordflow">return</span> newID;
+01530 
+01531 }                               <span class="comment">/* end snmpv3_generate_engineID() */</span>
+01532 
+01533 <span class="comment">/*</span>
+01534 <span class="comment"> * snmpv3_local_snmpEngineTime(): return the number of seconds since the</span>
+01535 <span class="comment"> * snmpv3 engine last incremented engine_boots </span>
+01536 <span class="comment"> */</span>
+01537 u_long
+01538 snmpv3_local_snmpEngineTime(<span class="keywordtype">void</span>)
+01539 {
+01540 <span class="preprocessor">#ifdef SNMP_USE_TIMES</span>
+01541   <span class="keyword">struct </span>tms dummy;
+01542   clock_t now = times(&amp;dummy);
+01543   <span class="comment">/* fixme: -1 is fault code... */</span>
+01544   <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> result;
+01545 
+01546   <span class="keywordflow">if</span> (now &lt; snmpv3startClock) {
+01547       result = UINT_MAX - (snmpv3startClock - now);
+01548   } <span class="keywordflow">else</span> {
+01549       result = now - snmpv3startClock;
+01550   }
+01551   <span class="keywordflow">if</span> (result &lt; lastcalltime) {
+01552       <span class="comment">/* wrapped */</span>
+01553       wrapcounter++;
+01554   }
+01555   lastcalltime = result;
+01556   result =  (UINT_MAX/clockticks)*wrapcounter + result/clockticks;
+01557 
+01558   <span class="keywordflow">return</span> result;
+01559 <span class="preprocessor">#else </span><span class="comment">/* !SNMP_USE_TIMES */</span>
+01560     <span class="keyword">struct </span>timeval  now;
+01561 
+01562     gettimeofday(&amp;now, NULL);
+01563     <span class="keywordflow">return</span> calculate_sectime_diff(&amp;now, &amp;snmpv3starttime);
+01564 <span class="preprocessor">#endif </span><span class="comment">/* HAVE_SYS_TIMES_H */</span>
+01565 }
+01566 
+01567 
+01568 
+01569 <span class="comment">/*</span>
+01570 <span class="comment"> * Code only for Linux systems </span>
+01571 <span class="comment"> */</span>
+01572 <span class="preprocessor">#if defined(IFHWADDRLEN) &amp;&amp; defined(SIOCGIFHWADDR)</span>
+01573 <span class="keyword">static</span> <span class="keywordtype">int</span>
+01574 getHwAddress(<span class="keyword">const</span> <span class="keywordtype">char</span> *networkDevice, <span class=
+"comment">/* e.g. "eth0", "eth1" */</span>
+01575              <span class="keywordtype">char</span> *addressOut)
+01576 {                               <span class="comment">/* return address. Len=IFHWADDRLEN */</span>
+01577     <span class="comment">/*</span>
+01578 <span class="comment">     * getHwAddress(...)</span>
+01579 <span class="comment">     * *</span>
+01580 <span class="comment">     * *  This function will return a Network Interfaces Card's Hardware</span>
+01581 <span class="comment">     * *  address (aka MAC address).</span>
+01582 <span class="comment">     * *</span>
+01583 <span class="comment">     * *  Input Parameter(s):</span>
+01584 <span class="comment">     * *      networkDevice - a null terminated string with the name of a network</span>
+01585 <span class="comment">     * *                      device.  Examples: eth0, eth1, etc...</span>
+01586 <span class="comment">     * *</span>
+01587 <span class="comment">     * *  Output Parameter(s):</span>
+01588 <span class="comment">     * *      addressOut -    This is the binary value of the hardware address.</span>
+01589 <span class="comment">     * *                      This value is NOT converted into a hexadecimal string.</span>
+01590 <span class="comment">     * *                      The caller must pre-allocate for a return value of</span>
+01591 <span class="comment">     * *                      length IFHWADDRLEN</span>
+01592 <span class="comment">     * *</span>
+01593 <span class="comment">     * *  Return value:   This function will return zero (0) for success.  If</span>
+01594 <span class="comment">     * *                  an error occurred the function will return -1.</span>
+01595 <span class="comment">     * *</span>
+01596 <span class="comment">     * *  Caveats:    This has only been tested on Ethernet networking cards.</span>
+01597 <span class="comment">     */</span>
+01598     <span class="keywordtype">int</span>             sock;       <span class="comment">/* our socket */</span>
+01599     <span class="keyword">struct </span>ifreq    request;    <span class=
+"comment">/* struct which will have HW address */</span>
+01600 
+01601     <span class="keywordflow">if</span> ((NULL == networkDevice) || (NULL == addressOut)) {
+01602         <span class="keywordflow">return</span> -1;
+01603     }
+01604     <span class="comment">/*</span>
+01605 <span class="comment">     * In order to find out the hardware (MAC) address of our system under</span>
+01606 <span class="comment">     * * Linux we must do the following:</span>
+01607 <span class="comment">     * * 1.  Create a socket</span>
+01608 <span class="comment">     * * 2.  Do an ioctl(...) call with the SIOCGIFHWADDRLEN operation.</span>
+01609 <span class="comment">     */</span>
+01610     sock = socket(AF_INET, SOCK_DGRAM, 0);
+01611     <span class="keywordflow">if</span> (sock &lt; 0) {
+01612         <span class="keywordflow">return</span> -1;
+01613     }
+01614     <span class="comment">/*</span>
+01615 <span class="comment">     * erase the request block </span>
+01616 <span class="comment">     */</span>
+01617     memset(&amp;request, 0, <span class="keyword">sizeof</span>(request));
+01618     <span class="comment">/*</span>
+01619 <span class="comment">     * copy the name of the net device we want to find the HW address for </span>
+01620 <span class="comment">     */</span>
+01621     strncpy(request.ifr_name, networkDevice, IFNAMSIZ - 1);
+01622     <span class="comment">/*</span>
+01623 <span class="comment">     * Get the HW address </span>
+01624 <span class="comment">     */</span>
+01625     <span class="keywordflow">if</span> (ioctl(sock, SIOCGIFHWADDR, &amp;request)) {
+01626         close(sock);
+01627         <span class="keywordflow">return</span> -1;
+01628     }
+01629     close(sock);
+01630     memcpy(addressOut, request.ifr_hwaddr.sa_data, IFHWADDRLEN);
+01631     <span class="keywordflow">return</span> 0;
+01632 }
+01633 <span class="preprocessor">#endif</span>
+01634 
+01635 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+01636 <span class="comment">/*</span>
+01637 <span class="comment"> * snmpv3_set_engineBootsAndTime(): this function does not exist.  Go away. </span>
+01638 <span class="comment"> */</span>
+01639 <span class="comment">/*</span>
+01640 <span class="comment"> * It certainly should never be used, unless in a testing scenero,</span>
+01641 <span class="comment"> * which is why it was created </span>
+01642 <span class="comment"> */</span>
+01643 <span class="keywordtype">void</span>
+01644 snmpv3_set_engineBootsAndTime(<span class="keywordtype">int</span> boots, <span class="keywordtype">int</span> ttime)
+01645 {
+01646     engineBoots = boots;
+01647     gettimeofday(&amp;snmpv3starttime, NULL);
+01648     snmpv3starttime.tv_sec -= ttime;
+01649 }
+01650 <span class="preprocessor">#endif</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:02 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

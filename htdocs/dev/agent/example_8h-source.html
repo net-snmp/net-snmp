@@ -1,0 +1,89 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000007.html">mibgroup</a>&nbsp;/&nbsp;<a class="el" href="dir_000008.html">examples</a>
+  </div>
+
+  <h1>example.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> *  Template MIB group interface - example.h</span>
+00003 <span class="comment"> *</span>
+00004 <span class="comment"> */</span>
+00005 
+00006 <span class="comment">/*</span>
+00007 <span class="comment"> * Don't include ourselves twice </span>
+00008 <span class="comment"> */</span>
+00009 <span class="preprocessor">#ifndef _MIBGROUP_EXAMPLE_H</span>
+00010 <span class="preprocessor">#define _MIBGROUP_EXAMPLE_H</span>
+00011 
+00012     <span class="comment">/*</span>
+00013 <span class="comment">     * We use 'header_generic' from the util_funcs module,</span>
+00014 <span class="comment">     *  so make sure this module is included in the agent.</span>
+00015 <span class="comment">     */</span>
+00016 config_require(util_funcs)
+00017 
+00018 
+00019     <span class="comment">/*</span>
+00020 <span class="comment">     * Declare our publically-visible functions.</span>
+00021 <span class="comment">     * Typically, these will include the initialization and shutdown functions,</span>
+00022 <span class="comment">     *  the main request callback routine and any writeable object methods.</span>
+00023 <span class="comment">     *</span>
+00024 <span class="comment">     * Function prototypes are provided for the callback routine ('FindVarMethod')</span>
+00025 <span class="comment">     *  and writeable object methods ('WriteMethod').</span>
+00026 <span class="comment">     */</span>
+00027      extern <span class="keywordtype">void</span>     init_example(<span class="keywordtype">void</span>);
+00028      extern FindVarMethod var_example;
+00029      extern WriteMethod write_exampleint;
+00030      extern WriteMethod write_exampletrap;
+00031      extern WriteMethod write_exampletrap2;
+00032 
+00033 
+00034     <span class="comment">/*</span>
+00035 <span class="comment">     * Magic number definitions.</span>
+00036 <span class="comment">     * These must be unique for each object implemented within a</span>
+00037 <span class="comment">     *  single mib module callback routine.</span>
+00038 <span class="comment">     *</span>
+00039 <span class="comment">     * Typically, these will be the last OID sub-component for</span>
+00040 <span class="comment">     *  each entry, or integers incrementing from 1.</span>
+00041 <span class="comment">     *  (which may well result in the same values anyway).</span>
+00042 <span class="comment">     *</span>
+00043 <span class="comment">     * Here, the second and third objects are form a 'sub-table' and</span>
+00044 <span class="comment">     *   the magic numbers are chosen to match these OID sub-components.</span>
+00045 <span class="comment">     * This is purely for programmer convenience.</span>
+00046 <span class="comment">     * All that really matters is that the numbers are unique.</span>
+00047 <span class="comment">     */</span>
+00048 
+00049 #define EXAMPLESTRING           1
+00050 #define EXAMPLEINTEGER          21
+00051 #define EXAMPLEOBJECTID         22
+00052 #define EXAMPLETIMETICKS        3
+00053 #define EXAMPLEIPADDRESS        4
+00054 #define EXAMPLECOUNTER          5
+00055 #define EXAMPLEGAUGE            6
+00056 #define EXAMPLETRIGGERTRAP      7
+00057 #define EXAMPLETRIGGERTRAP2     8
+00058 
+00059 #endif                          <span class="comment">/* _MIBGROUP_EXAMPLE_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

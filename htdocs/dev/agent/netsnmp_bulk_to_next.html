@@ -1,0 +1,135 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML><BODY bgcolor="#ffffff" background="../ucd-snmp-bg3.gif"><PRE>
+
+<HTML><HEAD><TITLE>Manpage of bulk_to_next: convert GETBULK requests into GETNEXT requests for the handler.</TITLE>
+</HEAD><BODY>
+<H1>bulk_to_next: convert GETBULK requests into GETNEXT requests for the handler.</H1>
+Section: C Library Functions (3)<BR>Updated: 22 Mar 2004<BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+bulk_to_next: convert GETBULK requests into GETNEXT requests for the handler. - The only purpose of this handler is to convert a GETBULK request to a GETNEXT request. 
+More...
+<A NAME="lbAC">&nbsp;</A>
+<H3>handler</H3>
+
+<P>
+
+<BR>
+
+void <B>netsnmp_init_bulk_to_next_helper</B> (void)
+
+<BR>
+
+<I>initializes the bulk_to_next helper which then registers a bulk_to_next handler as a run-time injectable handler for configuration file use.</I>
+
+
+<A NAME="lbAD">&nbsp;</A>
+<H3>Functions</H3>
+
+<P>
+
+<BR>
+
+<B>netsnmp_mib_handler</B> * <B>netsnmp_get_bulk_to_next_handler</B> (void)
+
+<BR>
+
+<I>returns a bulk_to_next handler that can be injected into a given handler chain.</I>
+
+<BR>
+
+void <B>netsnmp_bulk_to_next_fix_requests</B> (netsnmp_request_info *requests)
+
+<BR>
+
+<I>takes answered requests and decrements the repeat count and updates the requests to the next to-do varbind in the list</I>
+
+
+<A NAME="lbAE">&nbsp;</A>
+<H2>DETAILED DESCRIPTION</H2>
+
+<P>
+
+The only purpose of this handler is to convert a GETBULK request to a GETNEXT request.
+<P>
+
+It is inserted into handler chains where the handler has not set the HANDLER_CAN_GETBULK flag. 
+<A NAME="lbAF">&nbsp;</A>
+<H2>FUNCTION DOCUMENTATION</H2>
+
+<P>
+
+<A NAME="lbAG">&nbsp;</A>
+<H3>void netsnmp_bulk_to_next_fix_requests (netsnmp_request_info * requests)</H3>
+
+<P>
+
+takes answered requests and decrements the repeat count and updates the requests to the next to-do varbind in the list
+<P>
+
+Definition at line 39 of file bulk_to_next.c.
+<P>
+
+References variable_list::name, variable_list::name_length, netsnmp_request_info_s::next, variable_list::next_variable, netsnmp_request_info_s::repeat, netsnmp_request_info_s::requestvb, and variable_list::type.
+<A NAME="lbAH">&nbsp;</A>
+<H3><B>netsnmp_mib_handler</B>* netsnmp_get_bulk_to_next_handler (void)</H3>
+
+<P>
+
+returns a bulk_to_next handler that can be injected into a given handler chain.
+<P>
+
+Definition at line 30 of file bulk_to_next.c.
+<P>
+
+References netsnmp_create_handler().
+<P>
+
+Referenced by netsnmp_init_bulk_to_next_helper(), and netsnmp_register_handler().
+<A NAME="lbAI">&nbsp;</A>
+<H3>void netsnmp_init_bulk_to_next_helper (void)</H3>
+
+<P>
+
+initializes the bulk_to_next helper which then registers a bulk_to_next handler as a run-time injectable handler for configuration file use.
+<P>
+
+Definition at line 95 of file bulk_to_next.c.
+<P>
+
+Referenced by netsnmp_init_helpers().
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DL>
+<DT><A HREF="#lbAC">handler</A><DD>
+<DT><A HREF="#lbAD">Functions</A><DD>
+</DL>
+<DT><A HREF="#lbAE">DETAILED DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">FUNCTION DOCUMENTATION</A><DD>
+<DL>
+<DT><A HREF="#lbAG">void netsnmp_bulk_to_next_fix_requests (netsnmp_request_info * requests)</A><DD>
+<DT><A HREF="#lbAH"><B>netsnmp_mib_handler</B>* netsnmp_get_bulk_to_next_handler (void)</A><DD>
+<DT><A HREF="#lbAI">void netsnmp_init_bulk_to_next_helper (void)</A><DD>
+</DL>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 21:37:33 GMT, March 22, 2004
+</BODY>
+</HTML>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

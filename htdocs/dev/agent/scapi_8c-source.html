@@ -1,0 +1,1116 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>scapi.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00002 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00003 <span class="comment"> * that may apply:</span>
+00004 <span class="comment"> */</span>
+00005 <span class="comment">/*</span>
+00006 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00007 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00008 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00009 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00010 <span class="comment"> */</span>
+00011 
+00012 <span class="comment">/*</span>
+00013 <span class="comment"> * scapi.c</span>
+00014 <span class="comment"> *</span>
+00015 <span class="comment"> */</span>
+00016 
+00017 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00018 
+00019 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00020 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00021 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00022 <span class="preprocessor">#endif</span>
+00023 <span class="preprocessor">#ifdef HAVE_STDLIB_H</span>
+00024 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00025 <span class="preprocessor">#endif</span>
+00026 <span class="preprocessor">#if HAVE_STRING_H</span>
+00027 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00028 <span class="preprocessor">#else</span>
+00029 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00030 <span class="preprocessor">#endif</span>
+00031 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00032 <span class="preprocessor"># ifdef WIN32</span>
+00033 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00034 <span class="preprocessor"># else</span>
+00035 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00036 <span class="preprocessor"># endif</span>
+00037 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00038 <span class="preprocessor">#else</span>
+00039 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00040 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00041 <span class="preprocessor"># else</span>
+00042 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00043 <span class="preprocessor"># endif</span>
+00044 <span class="preprocessor">#endif</span>
+00045 <span class="preprocessor">#ifdef HAVE_NETINET_IN_H</span>
+00046 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00047 <span class="preprocessor">#endif</span>
+00048 
+00049 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00050 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00051 <span class="preprocessor">#endif</span>
+00052 
+00053 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00054 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00055 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00056 
+00057 <span class="preprocessor">#ifdef USE_INTERNAL_MD5</span>
+00058 <span class="preprocessor">#include &lt;net-snmp/library/md5.h&gt;</span>
+00059 <span class="preprocessor">#endif</span>
+00060 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00061 <span class="preprocessor">#include &lt;net-snmp/library/callback.h&gt;</span>
+00062 <span class="preprocessor">#include &lt;net-snmp/library/snmp_secmod.h&gt;</span>
+00063 <span class="preprocessor">#include &lt;net-snmp/library/snmpusm.h&gt;</span>
+00064 <span class="preprocessor">#include &lt;net-snmp/library/keytools.h&gt;</span>
+00065 <span class="preprocessor">#include &lt;net-snmp/library/scapi.h&gt;</span>
+00066 <span class="preprocessor">#include &lt;net-snmp/library/mib.h&gt;</span>
+00067 <span class="preprocessor">#include &lt;net-snmp/library/transform_oids.h&gt;</span>
+00068 
+00069 <span class="preprocessor">#ifdef USE_OPENSSL</span>
+00070 <span class="preprocessor">#include &lt;openssl/hmac.h&gt;</span>
+00071 <span class="preprocessor">#include &lt;openssl/evp.h&gt;</span>
+00072 <span class="preprocessor">#include &lt;openssl/rand.h&gt;</span>
+00073 <span class="preprocessor">#include &lt;openssl/des.h&gt;</span>
+00074 <span class="preprocessor">#ifdef HAVE_AES</span>
+00075 <span class="preprocessor">#include &lt;openssl/aes.h&gt;</span>
+00076 <span class="preprocessor">#endif</span>
+00077 
+00078 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00079 <span class="preprocessor">#ifdef STRUCT_DES_KS_STRUCT_HAS_WEAK_KEY</span>
+00080 <span class="comment">/* these are older names for newer structures that exist in openssl .9.7 */</span>
+00081 <span class="preprocessor">#define DES_key_schedule    des_key_schedule </span>
+00082 <span class="preprocessor">#define DES_cblock          des_cblock </span>
+00083 <span class="preprocessor">#define DES_key_sched       des_key_sched </span>
+00084 <span class="preprocessor">#define DES_ncbc_encrypt    des_ncbc_encrypt</span>
+00085 <span class="preprocessor">#define DES_cbc_encrypt    des_cbc_encrypt</span>
+00086 <span class="preprocessor">#define OLD_DES</span>
+00087 <span class="preprocessor">#endif</span>
+00088 <span class="preprocessor">#endif</span>
+00089 
+00090 <span class="preprocessor">#endif </span><span class="comment">/* HAVE_OPENSSL */</span>
+00091 
+00092 <span class="preprocessor">#ifdef USE_PKCS</span>
+00093 <span class="preprocessor">#include &lt;security/cryptoki.h&gt;</span>
+00094 <span class="preprocessor">#endif</span>
+00095 
+00096 <span class="preprocessor">#ifdef QUITFUN</span>
+00097 <span class="preprocessor">#undef QUITFUN</span>
+00098 <span class="preprocessor">#define QUITFUN(e, l)                                   \</span>
+00099 <span class="preprocessor">        if (e != SNMPERR_SUCCESS) {                     \</span>
+00100 <span class="preprocessor">                rval = SNMPERR_SC_GENERAL_FAILURE;      \</span>
+00101 <span class="preprocessor">                goto l ;                                \</span>
+00102 <span class="preprocessor">        }</span>
+00103 <span class="preprocessor">#endif</span>
+00104 
+00105 
+00106 <span class="comment">/*</span>
+00107 <span class="comment"> * sc_get_properlength(oid *hashtype, u_int hashtype_len):</span>
+00108 <span class="comment"> * </span>
+00109 <span class="comment"> * Given a hashing type ("hashtype" and its length hashtype_len), return</span>
+00110 <span class="comment"> * the length of the hash result.</span>
+00111 <span class="comment"> * </span>
+00112 <span class="comment"> * Returns either the length or SNMPERR_GENERR for an unknown hashing type.</span>
+00113 <span class="comment"> */</span>
+00114 <span class="keywordtype">int</span>
+00115 sc_get_properlength(<span class="keyword">const</span> oid * hashtype, u_int hashtype_len)
+00116 {
+00117     DEBUGTRACE;
+00118     <span class="comment">/*</span>
+00119 <span class="comment">     * Determine transform type hash length.</span>
+00120 <span class="comment">     */</span>
+00121 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00122     <span class="keywordflow">if</span> (ISTRANSFORM(hashtype, HMACMD5Auth)) {
+00123         <span class="keywordflow">return</span> BYTESIZE(SNMP_TRANS_AUTHLEN_HMACMD5);
+00124     } <span class="keywordflow">else</span>
+00125 <span class="preprocessor">#endif</span>
+00126         <span class="keywordflow">if</span> (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
+00127         <span class="keywordflow">return</span> BYTESIZE(SNMP_TRANS_AUTHLEN_HMACSHA1);
+00128     }
+00129     <span class="keywordflow">return</span> SNMPERR_GENERR;
+00130 }
+00131 
+00132 <span class="keywordtype">int</span>
+00133 sc_get_proper_priv_length(<span class="keyword">const</span> oid * privtype, u_int privtype_len)
+00134 {
+00135     <span class="keywordtype">int</span> properlength = 0;
+00136 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00137     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, DESPriv)) {
+00138         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
+00139     }
+00140 <span class="preprocessor">#endif</span>
+00141 <span class="preprocessor">#ifdef HAVE_AES</span>
+00142     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, AESPriv)) {
+00143         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES);
+00144     }
+00145 <span class="preprocessor">#endif</span>
+00146     <span class="keywordflow">return</span> properlength;
+00147 }
+00148 
+00149 
+00150 <span class="comment">/*******************************************************************-o-******</span>
+00151 <span class="comment"> * sc_init</span>
+00152 <span class="comment"> *</span>
+00153 <span class="comment"> * Returns:</span>
+00154 <span class="comment"> *      SNMPERR_SUCCESS                 Success.</span>
+00155 <span class="comment"> */</span>
+00156 <span class="keywordtype">int</span>
+00157 sc_init(<span class="keywordtype">void</span>)
+00158 {
+00159     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00160 
+00161 <span class="preprocessor">#ifndef USE_OPENSSL</span>
+00162 <span class="preprocessor">#ifdef USE_INTERNAL_MD5</span>
+00163     <span class="keyword">struct </span>timeval  tv;
+00164 
+00165     DEBUGTRACE;
+00166 
+00167     gettimeofday(&amp;tv, (<span class="keyword">struct</span> timezone *) 0);
+00168 
+00169     srandom(tv.tv_sec ^ tv.tv_usec);
+00170 <span class="preprocessor">#elif USE_PKCS</span>
+00171     DEBUGTRACE;
+00172     rval = pkcs_init();
+00173 <span class="preprocessor">#else</span>
+00174     rval = SNMPERR_SC_NOT_CONFIGURED;
+00175 <span class="preprocessor">#endif                           </span><span class="comment">/* USE_INTERNAL_MD5 */</span>
+00176     <span class="comment">/*</span>
+00177 <span class="comment">     * XXX ogud: The only reason to do anything here with openssl is to </span>
+00178 <span class="comment">     * * XXX ogud: seed random number generator </span>
+00179 <span class="comment">     */</span>
+00180 <span class="preprocessor">#endif                          </span><span class="comment">/* ifndef USE_OPENSSL */</span>
+00181     <span class="keywordflow">return</span> rval;
+00182 }                               <span class="comment">/* end sc_init() */</span>
+00183 
+00184 <span class="comment">/*******************************************************************-o-******</span>
+00185 <span class="comment"> * sc_random</span>
+00186 <span class="comment"> *</span>
+00187 <span class="comment"> * Parameters:</span>
+00188 <span class="comment"> *      *buf            Pre-allocated buffer.</span>
+00189 <span class="comment"> *      *buflen         Size of buffer.</span>
+00190 <span class="comment"> *      </span>
+00191 <span class="comment"> * Returns:</span>
+00192 <span class="comment"> *      SNMPERR_SUCCESS                 Success.</span>
+00193 <span class="comment"> */</span>
+00194 <span class="keywordtype">int</span>
+00195 sc_random(u_char * buf, size_t * buflen)
+00196 #<span class="keywordflow">if</span> defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(USE_PKCS)
+00197 {
+00198     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00199 <span class="preprocessor">#ifdef USE_INTERNAL_MD5</span>
+00200     <span class="keywordtype">int</span>             i;
+00201     <span class="keywordtype">int</span>             rndval;
+00202     u_char         *ucp = buf;
+00203 <span class="preprocessor">#endif</span>
+00204 
+00205     DEBUGTRACE;
+00206 
+00207 <span class="preprocessor">#ifdef USE_OPENSSL</span>
+00208     RAND_bytes(buf, *buflen);   <span class="comment">/* will never fail */</span>
+00209 <span class="preprocessor">#elif USE_PKCS                  </span><span class="comment">/* USE_PKCS */</span>
+00210     pkcs_random(buf, *buflen);
+00211 <span class="preprocessor">#else                           </span><span class="comment">/* USE_INTERNAL_MD5 */</span>
+00212     <span class="comment">/*</span>
+00213 <span class="comment">     * fill the buffer with random integers.  Note that random()</span>
+00214 <span class="comment">     * is defined in config.h and may not be truly the random()</span>
+00215 <span class="comment">     * system call if something better existed </span>
+00216 <span class="comment">     */</span>
+00217     rval = *buflen - *buflen % <span class="keyword">sizeof</span>(rndval);
+00218     <span class="keywordflow">for</span> (i = 0; i &lt; rval; i += <span class="keyword">sizeof</span>(rndval)) {
+00219         rndval = random();
+00220         memcpy(ucp, &amp;rndval, <span class="keyword">sizeof</span>(rndval));
+00221         ucp += <span class="keyword">sizeof</span>(rndval);
+00222     }
+00223 
+00224     rndval = random();
+00225     memcpy(ucp, &amp;rndval, *buflen % <span class="keyword">sizeof</span>(rndval));
+00226 
+00227     rval = SNMPERR_SUCCESS;
+00228 <span class="preprocessor">#endif                          </span><span class="comment">/* USE_OPENSSL */</span>
+00229     <span class="keywordflow">return</span> rval;
+00230 
+00231 }                               <span class="comment">/* end sc_random() */</span>
+00232 
+00233 <span class="preprocessor">#else</span>
+00234 _SCAPI_NOT_CONFIGURED
+00235 <span class="preprocessor">#endif                          </span><span class="comment">/*  */</span>
+00236 <span class="comment">/*******************************************************************-o-******</span>
+00237 <span class="comment"> * sc_generate_keyed_hash</span>
+00238 <span class="comment"> *</span>
+00239 <span class="comment"> * Parameters:</span>
+00240 <span class="comment"> *       authtype       Type of authentication transform.</span>
+00241 <span class="comment"> *       authtypelen</span>
+00242 <span class="comment"> *      *key            Pointer to key (Kul) to use in keyed hash.</span>
+00243 <span class="comment"> *       keylen         Length of key in bytes.</span>
+00244 <span class="comment"> *      *message        Pointer to the message to hash.</span>
+00245 <span class="comment"> *       msglen         Length of the message.</span>
+00246 <span class="comment"> *      *MAC            Will be returned with allocated bytes containg hash.</span>
+00247 <span class="comment"> *      *maclen         Length of the hash buffer in bytes; also indicates</span>
+00248 <span class="comment"> *                              whether the MAC should be truncated.</span>
+00249 <span class="comment"> *      </span>
+00250 <span class="comment"> * Returns:</span>
+00251 <span class="comment"> *      SNMPERR_SUCCESS                 Success.</span>
+00252 <span class="comment"> *      SNMPERR_GENERR                  All errs</span>
+00253 <span class="comment"> *</span>
+00254 <span class="comment"> *</span>
+00255 <span class="comment"> * A hash of the first msglen bytes of message using a keyed hash defined</span>
+00256 <span class="comment"> * by authtype is created and stored in MAC.  MAC is ASSUMED to be a buffer</span>
+00257 <span class="comment"> * of at least maclen bytes.  If the length of the hash is greater than</span>
+00258 <span class="comment"> * maclen, it is truncated to fit the buffer.  If the length of the hash is</span>
+00259 <span class="comment"> * less than maclen, maclen set to the number of hash bytes generated.</span>
+00260 <span class="comment"> *</span>
+00261 <span class="comment"> * ASSUMED that the number of hash bits is a multiple of 8.</span>
+00262 <span class="comment"> */</span>
+00263 <span class="keywordtype">int</span>
+00264 sc_generate_keyed_hash(<span class="keyword">const</span> oid * authtype, size_t authtypelen,
+00265                        u_char * key, u_int keylen,
+00266                        u_char * message, u_int msglen,
+00267                        u_char * MAC, size_t * maclen)
+00268 #<span class="keywordflow">if</span>  defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(USE_PKCS)
+00269 {
+00270     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00271     <span class="keywordtype">int</span>             properlength;
+00272 
+00273     u_char          buf[SNMP_MAXBUF_SMALL];
+00274 <span class="preprocessor">#if  defined(USE_OPENSSL) || defined(USE_PKCS)</span>
+00275     size_t             buf_len = <span class="keyword">sizeof</span>(buf);
+00276 <span class="preprocessor">#endif</span>
+00277 
+00278     DEBUGTRACE;
+00279 
+00280 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00281     {
+00282         <span class="keywordtype">int</span>             i;
+00283         DEBUGMSG((<span class="stringliteral">"sc_generate_keyed_hash"</span>,
+00284                   <span class="stringliteral">"sc_generate_keyed_hash(): key=0x"</span>));
+00285         <span class="keywordflow">for</span> (i = 0; i &lt; keylen; i++)
+00286             DEBUGMSG((<span class="stringliteral">"sc_generate_keyed_hash"</span>, <span class=
+"stringliteral">"%02x"</span>, key[i] &amp; 0xff));
+00287         DEBUGMSG((<span class="stringliteral">"sc_generate_keyed_hash"</span>, <span class=
+"stringliteral">" (%d)\n"</span>, keylen));
+00288     }
+00289 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_TESTING_CODE */</span>
+00290 
+00291     <span class="comment">/*</span>
+00292 <span class="comment">     * Sanity check.</span>
+00293 <span class="comment">     */</span>
+00294     <span class="keywordflow">if</span> (!authtype || !key || !message || !MAC || !maclen
+00295         || (keylen &lt;= 0) || (msglen &lt;= 0) || (*maclen &lt;= 0)
+00296         || (authtypelen != USM_LENGTH_OID_TRANSFORM)) {
+00297         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
+00298     }
+00299 
+00300     properlength = sc_get_properlength(authtype, authtypelen);
+00301     <span class="keywordflow">if</span> (properlength == SNMPERR_GENERR)
+00302         <span class="keywordflow">return</span> properlength;
+00303 
+00304     <span class="keywordflow">if</span> (((int) keylen &lt; properlength)) {
+00305         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
+00306     }
+00307 <span class="preprocessor">#ifdef USE_OPENSSL</span>
+00308     <span class="comment">/*</span>
+00309 <span class="comment">     * Determine transform type.</span>
+00310 <span class="comment">     */</span>
+00311 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00312     <span class="keywordflow">if</span> (ISTRANSFORM(authtype, HMACMD5Auth))
+00313         HMAC(EVP_md5(), key, keylen, message, msglen, buf, &amp;buf_len);
+00314     <span class="keywordflow">else</span>
+00315 <span class="preprocessor">#endif</span>
+00316         <span class="keywordflow">if</span> (ISTRANSFORM(authtype, HMACSHA1Auth))
+00317         HMAC(EVP_sha1(), key, keylen, message, msglen, buf, &amp;buf_len);
+00318     <span class="keywordflow">else</span> {
+00319         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
+00320     }
+00321     <span class="keywordflow">if</span> ((int)buf_len != properlength) {
+00322         QUITFUN(rval, sc_generate_keyed_hash_quit);
+00323     }
+00324     <span class="keywordflow">if</span> ((int)*maclen &gt; buf_len)
+00325         *maclen = buf_len;
+00326     memcpy(MAC, buf, *maclen);
+00327 
+00328 <span class="preprocessor">#elif USE_PKCS                    </span><span class="comment">/* USE_PKCS */</span>
+00329 
+00330 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00331     <span class="keywordflow">if</span> (ISTRANSFORM(authtype, HMACMD5Auth)) {
+00332         <span class="keywordflow">if</span> (pkcs_sign(CKM_MD5_HMAC,key, keylen, message,
+00333                         msglen, buf, &amp;buf_len) != SNMPERR_SUCCESS) {
+00334             QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
+00335         }
+00336     } <span class="keywordflow">else</span>
+00337 <span class="preprocessor">#endif</span>
+00338         <span class="keywordflow">if</span> (ISTRANSFORM(authtype, HMACSHA1Auth)) {
+00339         <span class="keywordflow">if</span> (pkcs_sign(CKM_SHA_1_HMAC,key, keylen, message,
+00340                         msglen, buf, &amp;buf_len) != SNMPERR_SUCCESS) {
+00341             QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
+00342         }
+00343     } <span class="keywordflow">else</span> {
+00344         QUITFUN(SNMPERR_GENERR, sc_generate_keyed_hash_quit);
+00345     }
+00346 
+00347     <span class="keywordflow">if</span> (buf_len != properlength) {
+00348         QUITFUN(rval, sc_generate_keyed_hash_quit);
+00349     }
+00350     <span class="keywordflow">if</span> (*maclen &gt; buf_len)
+00351         *maclen = buf_len;
+00352     memcpy(MAC, buf, *maclen);
+00353 
+00354 <span class="preprocessor">#else                            </span><span class="comment">/* USE_INTERNAL_MD5 */</span>
+00355     <span class="keywordflow">if</span> ((int) *maclen &gt; properlength)
+00356         *maclen = properlength;
+00357     <span class="keywordflow">if</span> (MDsign(message, msglen, MAC, *maclen, key, keylen)) {
+00358         rval = SNMPERR_GENERR;
+00359         <span class="keywordflow">goto</span> sc_generate_keyed_hash_quit;
+00360     }
+00361 <span class="preprocessor">#endif                          </span><span class="comment">/* USE_OPENSSL */</span>
+00362 
+00363 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00364     {
+00365         <span class="keywordtype">char</span>           *s;
+00366         <span class="keywordtype">int</span>             len = <a class="code" href=
+"group__util.html#ga6">binary_to_hex</a>(MAC, *maclen, &amp;s);
+00367 
+00368         DEBUGMSGTL((<span class="stringliteral">"scapi"</span>, <span class=
+"stringliteral">"Full v3 message hash: %s\n"</span>, s));
+00369         <a class="code" href="group__util.html#ga40">SNMP_ZERO</a>(s, len);
+00370         <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(s);
+00371     }
+00372 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_TESTING_CODE */</span>
+00373 
+00374   sc_generate_keyed_hash_quit:
+00375     <a class="code" href="group__util.html#ga40">SNMP_ZERO</a>(buf, SNMP_MAXBUF_SMALL);
+00376     <span class="keywordflow">return</span> rval;
+00377 }                               <span class="comment">/* end sc_generate_keyed_hash() */</span>
+00378 
+00379 <span class="preprocessor">#else</span>
+00380                 _SCAPI_NOT_CONFIGURED
+00381 <span class="preprocessor">#endif                          </span><span class="comment">/* */</span>
+00382 <span class="comment">/*</span>
+00383 <span class="comment"> * sc_hash(): a generic wrapper around whatever hashing package we are using.</span>
+00384 <span class="comment"> * </span>
+00385 <span class="comment"> * IN:</span>
+00386 <span class="comment"> * hashtype    - oid pointer to a hash type</span>
+00387 <span class="comment"> * hashtypelen - length of oid pointer</span>
+00388 <span class="comment"> * buf         - u_char buffer to be hashed</span>
+00389 <span class="comment"> * buf_len     - integer length of buf data</span>
+00390 <span class="comment"> * MAC_len     - length of the passed MAC buffer size.</span>
+00391 <span class="comment"> * </span>
+00392 <span class="comment"> * OUT:    </span>
+00393 <span class="comment"> * MAC         - pre-malloced space to store hash output.</span>
+00394 <span class="comment"> * MAC_len     - length of MAC output to the MAC buffer.</span>
+00395 <span class="comment"> * </span>
+00396 <span class="comment"> * Returns:</span>
+00397 <span class="comment"> * SNMPERR_SUCCESS              Success.</span>
+00398 <span class="comment"> * SNMP_SC_GENERAL_FAILURE      Any error.</span>
+00399 <span class="comment"> */</span>
+00400 <span class="keywordtype">int</span>
+00401 sc_hash(<span class="keyword">const</span> oid * hashtype, size_t hashtypelen, u_char * buf,
+00402         size_t buf_len, u_char * MAC, size_t * MAC_len)
+00403 #<span class="keywordflow">if</span> defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(USE_PKCS)
+00404 {
+00405 <span class="preprocessor">#if defined(USE_OPENSSL) || defined(USE_PKCS)</span>
+00406     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00407 <span class="preprocessor">#endif</span>
+00408 
+00409 <span class="preprocessor">#ifdef USE_OPENSSL</span>
+00410     <span class="keyword">const</span> EVP_MD         *hashfn;
+00411     EVP_MD_CTX     ctx, *cptr;
+00412 <span class="preprocessor">#endif</span>
+00413 
+00414     DEBUGTRACE;
+00415 
+00416     <span class="keywordflow">if</span> (hashtype == NULL || hashtypelen &lt; 0 || buf == NULL ||
+00417         buf_len &lt; 0 || MAC == NULL || MAC_len == NULL ||
+00418         (int) (*MAC_len) &lt; sc_get_properlength(hashtype, hashtypelen))
+00419         <span class="keywordflow">return</span> (SNMPERR_GENERR);
+00420 
+00421 <span class="preprocessor">#ifdef USE_OPENSSL</span>
+00422     <span class="comment">/*</span>
+00423 <span class="comment">     * Determine transform type.</span>
+00424 <span class="comment">     */</span>
+00425 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00426     <span class="keywordflow">if</span> (ISTRANSFORM(hashtype, HMACMD5Auth)) {
+00427         hashfn = (<span class="keyword">const</span> EVP_MD *) EVP_md5();
+00428     } <span class="keywordflow">else</span>
+00429 <span class="preprocessor">#endif</span>
+00430         <span class="keywordflow">if</span> (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
+00431         hashfn = (<span class="keyword">const</span> EVP_MD *) EVP_sha1();
+00432     } <span class="keywordflow">else</span> {
+00433         <span class="keywordflow">return</span> (SNMPERR_GENERR);
+00434     }
+00435 
+00437     memset(&amp;ctx, 0, <span class="keyword">sizeof</span>(ctx));
+00438     cptr = &amp;ctx;
+00439 <span class="preprocessor">#if defined(OLD_DES)</span>
+00440     EVP_DigestInit(cptr, hashfn);
+00441 <span class="preprocessor">#else </span><span class="comment">/* !OLD_DES */</span>
+00442     <span class="comment">/* this is needed if the runtime library is different than the compiled</span>
+00443 <span class="comment">       library since the openssl versions are very different. */</span>
+00444     <span class="keywordflow">if</span> (SSLeay() &lt; 0x907000) {
+00445         <span class="comment">/* the old version of the struct was bigger and thus more</span>
+00446 <span class="comment">           memory is needed. should be 152, but we use 256 for safety. */</span>
+00447         cptr = malloc(256);
+00448         EVP_DigestInit(cptr, hashfn);
+00449     } <span class="keywordflow">else</span> {
+00450         EVP_MD_CTX_init(cptr);
+00451         EVP_DigestInit(cptr, hashfn);
+00452     }
+00453 <span class="preprocessor">#endif</span>
+00454 
+00456     EVP_DigestUpdate(cptr, buf, buf_len);
+00457 
+00459 <span class="preprocessor">#if defined(OLD_DES)</span>
+00460     EVP_DigestFinal(cptr, MAC, MAC_len);
+00461 <span class="preprocessor">#else </span><span class="comment">/* !OLD_DES */</span>
+00462     <span class="keywordflow">if</span> (SSLeay() &lt; 0x907000) {
+00463         EVP_DigestFinal(cptr, MAC, MAC_len);
+00464         free(cptr);
+00465     } <span class="keywordflow">else</span> {
+00466         EVP_DigestFinal_ex(cptr, MAC, MAC_len);
+00467         EVP_MD_CTX_cleanup(cptr);
+00468     }
+00469 <span class="preprocessor">#endif                          </span><span class="comment">/* OLD_DES */</span>
+00470     <span class="keywordflow">return</span> (rval);
+00471 <span class="preprocessor">#elif USE_PKCS                  </span><span class="comment">/* USE_PKCS */</span>
+00472 
+00473 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00474     <span class="keywordflow">if</span> (ISTRANSFORM(hashtype, HMACMD5Auth)) {
+00475         rval = pkcs_digest(CKM_MD5, buf, buf_len, MAC, MAC_len);
+00476     } <span class="keywordflow">else</span>
+00477 <span class="preprocessor">#endif</span>
+00478         <span class="keywordflow">if</span> (ISTRANSFORM(hashtype, HMACSHA1Auth)) {
+00479         rval = pkcs_digest(CKM_SHA_1, buf, buf_len, MAC, MAC_len);
+00480     } <span class="keywordflow">else</span> {
+00481         <span class="keywordflow">return</span> (SNMPERR_GENERR);
+00482     }
+00483 
+00484      <span class="keywordflow">return</span> (rval);
+00485 
+00486 <span class="preprocessor">#else                           </span><span class="comment">/* USE_INTERNAL_MD5 */</span>
+00487 
+00488     <span class="keywordflow">if</span> (MDchecksum(buf, buf_len, MAC, *MAC_len)) {
+00489         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00490     }
+00491     <span class="keywordflow">if</span> (*MAC_len &gt; 16)
+00492         *MAC_len = 16;
+00493     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00494 
+00495 <span class="preprocessor">#endif                          </span><span class="comment">/* USE_OPENSSL */</span>
+00496 }
+00497 <span class="preprocessor">#else                           </span><span class=
+"comment">/* !defined(USE_OPENSSL) &amp;&amp; !defined(USE_INTERNAL_MD5) */</span>
+00498 _SCAPI_NOT_CONFIGURED
+00499 <span class="preprocessor">#endif                          </span><span class=
+"comment">/* !defined(USE_OPENSSL) &amp;&amp; !defined(USE_INTERNAL_MD5) */</span>
+00500 <span class="comment">/*******************************************************************-o-******</span>
+00501 <span class="comment"> * sc_check_keyed_hash</span>
+00502 <span class="comment"> *</span>
+00503 <span class="comment"> * Parameters:</span>
+00504 <span class="comment"> *       authtype       Transform type of authentication hash.</span>
+00505 <span class="comment"> *      *key            Key bits in a string of bytes.</span>
+00506 <span class="comment"> *       keylen         Length of key in bytes.</span>
+00507 <span class="comment"> *      *message        Message for which to check the hash.</span>
+00508 <span class="comment"> *       msglen         Length of message.</span>
+00509 <span class="comment"> *      *MAC            Given hash.</span>
+00510 <span class="comment"> *       maclen         Length of given hash; indicates truncation if it is</span>
+00511 <span class="comment"> *                              shorter than the normal size of output for</span>
+00512 <span class="comment"> *                              given hash transform.</span>
+00513 <span class="comment"> * Returns:</span>
+00514 <span class="comment"> *      SNMPERR_SUCCESS         Success.</span>
+00515 <span class="comment"> *      SNMP_SC_GENERAL_FAILURE Any error</span>
+00516 <span class="comment"> *</span>
+00517 <span class="comment"> *</span>
+00518 <span class="comment"> * Check the hash given in MAC against the hash of message.  If the length</span>
+00519 <span class="comment"> * of MAC is less than the length of the transform hash output, only maclen</span>
+00520 <span class="comment"> * bytes are compared.  The length of MAC cannot be greater than the</span>
+00521 <span class="comment"> * length of the hash transform output.</span>
+00522 <span class="comment"> */</span>
+00523 <span class="keywordtype">int</span>
+00524 sc_check_keyed_hash(<span class="keyword">const</span> oid * authtype, size_t authtypelen,
+00525                     u_char * key, u_int keylen,
+00526                     u_char * message, u_int msglen,
+00527                     u_char * MAC, u_int maclen)
+00528 #<span class="keywordflow">if</span> defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL) || defined(USE_PKCS)
+00529 {
+00530     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00531     size_t          buf_len = SNMP_MAXBUF_SMALL;
+00532 
+00533     u_char          buf[SNMP_MAXBUF_SMALL];
+00534 
+00535     DEBUGTRACE;
+00536 
+00537 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00538     {
+00539         <span class="keywordtype">int</span>             i;
+00540         DEBUGMSG((<span class="stringliteral">"scapi"</span>, <span class=
+"stringliteral">"sc_check_keyed_hash():    key=0x"</span>));
+00541         <span class="keywordflow">for</span> (i = 0; i &lt; keylen; i++)
+00542             DEBUGMSG((<span class="stringliteral">"scapi"</span>, <span class=
+"stringliteral">"%02x"</span>, key[i] &amp; 0xff));
+00543         DEBUGMSG((<span class="stringliteral">"scapi"</span>, <span class="stringliteral">" (%d)\n"</span>, keylen));
+00544     }
+00545 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_TESTING_CODE */</span>
+00546 
+00547     <span class="comment">/*</span>
+00548 <span class="comment">     * Sanity check.</span>
+00549 <span class="comment">     */</span>
+00550     <span class="keywordflow">if</span> (!authtype || !key || !message || !MAC
+00551         || (keylen &lt;= 0) || (msglen &lt;= 0) || (maclen &lt;= 0)
+00552         || (authtypelen != USM_LENGTH_OID_TRANSFORM)) {
+00553         QUITFUN(SNMPERR_GENERR, sc_check_keyed_hash_quit);
+00554     }
+00555 
+00556 
+00557     <span class="comment">/*</span>
+00558 <span class="comment">     * Generate a full hash of the message, then compare</span>
+00559 <span class="comment">     * the result with the given MAC which may shorter than</span>
+00560 <span class="comment">     * the full hash length.</span>
+00561 <span class="comment">     */</span>
+00562     rval = sc_generate_keyed_hash(authtype, authtypelen,
+00563                                   key, keylen,
+00564                                   message, msglen, buf, &amp;buf_len);
+00565     QUITFUN(rval, sc_check_keyed_hash_quit);
+00566 
+00567     <span class="keywordflow">if</span> (maclen &gt; msglen) {
+00568         QUITFUN(SNMPERR_GENERR, sc_check_keyed_hash_quit);
+00569 
+00570     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (memcmp(buf, MAC, maclen) != 0) {
+00571         QUITFUN(SNMPERR_GENERR, sc_check_keyed_hash_quit);
+00572     }
+00573 
+00574 
+00575   sc_check_keyed_hash_quit:
+00576     <a class="code" href="group__util.html#ga40">SNMP_ZERO</a>(buf, SNMP_MAXBUF_SMALL);
+00577 
+00578     <span class="keywordflow">return</span> rval;
+00579 
+00580 }                               <span class="comment">/* end sc_check_keyed_hash() */</span>
+00581 
+00582 <span class="preprocessor">#else</span>
+00583 _SCAPI_NOT_CONFIGURED
+00584 <span class="preprocessor">#endif                          </span><span class="comment">/* USE_INTERNAL_MD5 */</span>
+00585 <span class="comment">/*******************************************************************-o-******</span>
+00586 <span class="comment"> * sc_encrypt</span>
+00587 <span class="comment"> *</span>
+00588 <span class="comment"> * Parameters:</span>
+00589 <span class="comment"> *       privtype       Type of privacy cryptographic transform.</span>
+00590 <span class="comment"> *      *key            Key bits for crypting.</span>
+00591 <span class="comment"> *       keylen         Length of key (buffer) in bytes.</span>
+00592 <span class="comment"> *      *iv             IV bits for crypting.</span>
+00593 <span class="comment"> *       ivlen          Length of iv (buffer) in bytes.</span>
+00594 <span class="comment"> *      *plaintext      Plaintext to crypt.</span>
+00595 <span class="comment"> *       ptlen          Length of plaintext.</span>
+00596 <span class="comment"> *      *ciphertext     Ciphertext to crypt.</span>
+00597 <span class="comment"> *      *ctlen          Length of ciphertext.</span>
+00598 <span class="comment"> *      </span>
+00599 <span class="comment"> * Returns:</span>
+00600 <span class="comment"> *      SNMPERR_SUCCESS                 Success.</span>
+00601 <span class="comment"> *      SNMPERR_SC_NOT_CONFIGURED       Encryption is not supported.</span>
+00602 <span class="comment"> *      SNMPERR_SC_GENERAL_FAILURE      Any other error</span>
+00603 <span class="comment"> *</span>
+00604 <span class="comment"> *</span>
+00605 <span class="comment"> * Encrypt plaintext into ciphertext using key and iv.</span>
+00606 <span class="comment"> *</span>
+00607 <span class="comment"> * ctlen contains actual number of crypted bytes in ciphertext upon</span>
+00608 <span class="comment"> * successful return.</span>
+00609 <span class="comment"> */</span>
+00610 <span class="keywordtype">int</span>
+00611 sc_encrypt(<span class="keyword">const</span> oid * privtype, size_t privtypelen,
+00612            u_char * key, u_int keylen,
+00613            u_char * iv, u_int ivlen,
+00614            u_char * plaintext, u_int ptlen,
+00615            u_char * ciphertext, size_t * ctlen)
+00616 #<span class="keywordflow">if</span> defined(USE_OPENSSL)
+00617 {
+00618     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00619     u_int           properlength = 0, properlength_iv = 0;
+00620     u_char          pad_block[128];      <span class="comment">/* bigger than anything I need */</span>
+00621     u_char          my_iv[128];  <span class="comment">/* ditto */</span>
+00622     <span class="keywordtype">int</span>             pad, plast, pad_size = 0;
+00623     <span class="keywordtype">int</span>             have_trans;
+00624 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00625 <span class="preprocessor">#ifdef OLD_DES</span>
+00626     DES_key_schedule key_sch;
+00627 <span class="preprocessor">#else</span>
+00628     DES_key_schedule key_sched_store;
+00629     DES_key_schedule *key_sch = &amp;key_sched_store;
+00630 <span class="preprocessor">#endif</span>
+00631     DES_cblock       key_struct;
+00632 <span class="preprocessor">#endif</span>
+00633 <span class="preprocessor">#ifdef HAVE_AES</span>
+00634     AES_KEY aes_key;
+00635     <span class="keywordtype">int</span> new_ivlen = 0;
+00636 <span class="preprocessor">#endif</span>
+00637 
+00638     DEBUGTRACE;
+00639 
+00640     <span class="comment">/*</span>
+00641 <span class="comment">     * Sanity check.</span>
+00642 <span class="comment">     */</span>
+00643 <span class="preprocessor">#if     !defined(SCAPI_AUTHPRIV)</span>
+00644     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"Encryption support not enabled.\n"</span>);
+00645     <span class="keywordflow">return</span> SNMPERR_SC_NOT_CONFIGURED;
+00646 <span class="preprocessor">#endif</span>
+00647 
+00648     <span class="keywordflow">if</span> (!privtype || !key || !iv || !plaintext || !ciphertext || !ctlen
+00649         || (keylen &lt;= 0) || (ivlen &lt;= 0) || (ptlen &lt;= 0) || (*ctlen &lt;= 0)
+00650         || (privtypelen != USM_LENGTH_OID_TRANSFORM)) {
+00651         QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+00652     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (ptlen &gt; *ctlen) {
+00653         QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+00654     }
+00655 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00656     {
+00657         size_t          buf_len = 128, out_len = 0;
+00658         u_char         *buf = (u_char *) malloc(buf_len);
+00659 
+00660         <span class="keywordflow">if</span> (buf != NULL) {
+00661             <span class="keywordflow">if</span> (sprint_realloc_hexstring(&amp;buf, &amp;buf_len, &amp;out_len, 1,
+00662                                          iv, ivlen)) {
+00663                 DEBUGMSGTL((<span class="stringliteral">"scapi"</span>, <span class=
+"stringliteral">"encrypt: IV: %s/"</span>, buf));
+00664             } <span class="keywordflow">else</span> {
+00665                 DEBUGMSGTL((<span class="stringliteral">"scapi"</span>, <span class=
+"stringliteral">"encrypt: IV: %s [TRUNCATED]/"</span>, buf));
+00666             }
+00667             out_len = 0;
+00668             <span class="keywordflow">if</span> (sprint_realloc_hexstring(&amp;buf, &amp;buf_len, &amp;out_len, 1,
+00669                                          key, keylen)) {
+00670                 DEBUGMSG((<span class="stringliteral">"scapi"</span>, <span class="stringliteral">"%s\n"</span>, buf));
+00671             } <span class="keywordflow">else</span> {
+00672                 DEBUGMSG((<span class="stringliteral">"scapi"</span>, <span class=
+"stringliteral">"%s [TRUNCATED]\n"</span>, buf));
+00673             }
+00674             out_len = 0;
+00675             <span class="keywordflow">if</span> (sprint_realloc_hexstring(&amp;buf, &amp;buf_len, &amp;out_len, 1,
+00676                                          plaintext, 16)) {
+00677                 DEBUGMSGTL((<span class="stringliteral">"scapi"</span>, <span class=
+"stringliteral">"encrypt: string: %s\n"</span>, buf));
+00678             } <span class="keywordflow">else</span> {
+00679                 DEBUGMSGTL((<span class="stringliteral">"scapi"</span>, <span class=
+"stringliteral">"encrypt: string: %s [TRUNCATED]\n"</span>,
+00680                             buf));
+00681             }
+00682             free(buf);
+00683         } <span class="keywordflow">else</span> {
+00684             DEBUGMSGTL((<span class="stringliteral">"scapi"</span>,
+00685                         <span class="stringliteral">"encrypt: malloc fail for debug output\n"</span>));
+00686         }
+00687     }
+00688 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_TESTING_CODE */</span>
+00689 
+00690 
+00691     <span class="comment">/*</span>
+00692 <span class="comment">     * Determine privacy transform.</span>
+00693 <span class="comment">     */</span>
+00694     have_trans = 0;
+00695 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00696     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, DESPriv)) {
+00697         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
+00698         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
+00699         pad_size = properlength;
+00700         have_trans = 1;
+00701     }
+00702 <span class="preprocessor">#endif</span>
+00703 <span class="preprocessor">#ifdef HAVE_AES</span>
+00704     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, AESPriv)) {
+00705         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES);
+00706         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES_IV);
+00707         have_trans = 1;
+00708     }
+00709 <span class="preprocessor">#endif</span>
+00710     <span class="keywordflow">if</span> (!have_trans) {
+00711         QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+00712     }
+00713 
+00714     <span class="keywordflow">if</span> ((keylen &lt; properlength) || (ivlen &lt; properlength_iv)) {
+00715         QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+00716     }
+00717 
+00718     memset(my_iv, 0, <span class="keyword">sizeof</span>(my_iv));
+00719 
+00720 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00721     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, DESPriv)) {
+00722 
+00723         <span class="comment">/*</span>
+00724 <span class="comment">         * now calculate the padding needed </span>
+00725 <span class="comment">         */</span>
+00726         pad = pad_size - (ptlen % pad_size);
+00727         plast = (int) ptlen - (pad_size - pad);
+00728         <span class="keywordflow">if</span> (pad == pad_size)
+00729             pad = 0;
+00730         <span class="keywordflow">if</span> (ptlen + pad &gt; *ctlen) {
+00731             QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);    <span class="comment">/* not enough space */</span>
+00732         }
+00733         <span class="keywordflow">if</span> (pad &gt; 0) {              <span class=
+"comment">/* copy data into pad block if needed */</span>
+00734             memcpy(pad_block, plaintext + plast, pad_size - pad);
+00735             memset(&amp;pad_block[pad_size - pad], pad, pad);   <span class="comment">/* filling in padblock */</span>
+00736         }
+00737 
+00738         memcpy(key_struct, key, <span class="keyword">sizeof</span>(key_struct));
+00739         (void) DES_key_sched(&amp;key_struct, key_sch);
+00740 
+00741         memcpy(my_iv, iv, ivlen);
+00742         <span class="comment">/*</span>
+00743 <span class="comment">         * encrypt the data </span>
+00744 <span class="comment">         */</span>
+00745         DES_ncbc_encrypt(plaintext, ciphertext, plast, key_sch,
+00746                          (DES_cblock *) my_iv, DES_ENCRYPT);
+00747         <span class="keywordflow">if</span> (pad &gt; 0) {
+00748             <span class="comment">/*</span>
+00749 <span class="comment">             * then encrypt the pad block </span>
+00750 <span class="comment">             */</span>
+00751             DES_ncbc_encrypt(pad_block, ciphertext + plast, pad_size,
+00752                              key_sch, (DES_cblock *) my_iv, DES_ENCRYPT);
+00753             *ctlen = plast + pad_size;
+00754         } <span class="keywordflow">else</span> {
+00755             *ctlen = plast;
+00756         }
+00757     }
+00758 <span class="preprocessor">#endif</span>
+00759 <span class="preprocessor">#ifdef HAVE_AES</span>
+00760     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, AESPriv)) {
+00761         (void) AES_set_encrypt_key(key, properlength*8, &amp;aes_key);
+00762 
+00763         memcpy(my_iv, iv, ivlen);
+00764         <span class="comment">/*</span>
+00765 <span class="comment">         * encrypt the data </span>
+00766 <span class="comment">         */</span>
+00767         AES_cfb128_encrypt(plaintext, ciphertext, ptlen,
+00768                            &amp;aes_key, my_iv, &amp;new_ivlen, AES_ENCRYPT);
+00769         *ctlen = ptlen;
+00770     }
+00771 <span class="preprocessor">#endif</span>
+00772   sc_encrypt_quit:
+00773     <span class="comment">/*</span>
+00774 <span class="comment">     * clear memory just in case </span>
+00775 <span class="comment">     */</span>
+00776     memset(my_iv, 0, <span class="keyword">sizeof</span>(my_iv));
+00777     memset(pad_block, 0, <span class="keyword">sizeof</span>(pad_block));
+00778 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00779     memset(key_struct, 0, <span class="keyword">sizeof</span>(key_struct));
+00780 <span class="preprocessor">#ifdef OLD_DES</span>
+00781     memset(&amp;key_sch, 0, <span class="keyword">sizeof</span>(key_sch));
+00782 <span class="preprocessor">#else</span>
+00783     memset(&amp;key_sched_store, 0, <span class="keyword">sizeof</span>(key_sched_store));
+00784 <span class="preprocessor">#endif</span>
+00785 <span class="preprocessor">#endif</span>
+00786 <span class="preprocessor">#ifdef HAVE_AES</span>
+00787     memset(&amp;aes_key,0,<span class="keyword">sizeof</span>(aes_key));
+00788 <span class="preprocessor">#endif</span>
+00789     <span class="keywordflow">return</span> rval;
+00790 
+00791 }                               <span class="comment">/* end sc_encrypt() */</span>
+00792 <span class="preprocessor">#elif defined(USE_PKCS)</span>
+00793 {
+00794     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00795     u_int           properlength, properlength_iv;
+00796     u_char          pkcs_des_key[8];
+00797 
+00798     DEBUGTRACE;
+00799 
+00800     <span class="comment">/*</span>
+00801 <span class="comment">     * Sanity check.</span>
+00802 <span class="comment">     */</span>
+00803 <span class="preprocessor">#if     !defined(SCAPI_AUTHPRIV)</span>
+00804     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"Encryption support not enabled.\n"</span>);
+00805     <span class="keywordflow">return</span> SNMPERR_SC_NOT_CONFIGURED;
+00806 <span class="preprocessor">#endif</span>
+00807 
+00808     <span class="keywordflow">if</span> (!privtype || !key || !iv || !plaintext || !ciphertext || !ctlen
+00809         || (keylen &lt;= 0) || (ivlen &lt;= 0) || (ptlen &lt;= 0) || (*ctlen &lt;= 0)
+00810         || (privtypelen != USM_LENGTH_OID_TRANSFORM)) {
+00811         QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+00812     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (ptlen &gt; *ctlen) {
+00813         QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+00814     }
+00815 
+00816     <span class="comment">/*</span>
+00817 <span class="comment">     * Determine privacy transform.</span>
+00818 <span class="comment">     */</span>
+00819     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, DESPriv)) {
+00820         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
+00821         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
+00822     } <span class="keywordflow">else</span> {
+00823         QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+00824     }
+00825 
+00826     <span class="keywordflow">if</span> ((keylen &lt; properlength) || (ivlen &lt; properlength_iv)) {
+00827         QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
+00828     }
+00829 
+00830     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, DESPriv)) {
+00831         memset(pkcs_des_key, 0, <span class="keyword">sizeof</span>(pkcs_des_key));
+00832         memcpy(pkcs_des_key, key, <span class="keyword">sizeof</span>(pkcs_des_key));
+00833         rval = pkcs_encrpyt(CKM_DES_CBC, pkcs_des_key,
+00834                 <span class="keyword">sizeof</span>(pkcs_des_key), iv, ivlen, plaintext, ptlen,
+00835                 ciphertext, ctlen);
+00836     }
+00837 
+00838   sc_encrypt_quit:
+00839     <span class="keywordflow">return</span> rval;
+00840 }
+00841 <span class="preprocessor">#else</span>
+00842 {
+00843 <span class="preprocessor">#       if USE_INTERNAL_MD5</span>
+00844     {
+00845         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"Encryption support not enabled.\n"</span>);
+00846         DEBUGMSGTL((<span class="stringliteral">"scapi"</span>, <span class=
+"stringliteral">"Encrypt function not defined.\n"</span>));
+00847         <span class="keywordflow">return</span> SNMPERR_SC_GENERAL_FAILURE;
+00848     }
+00849 
+00850 <span class="preprocessor">#       else</span>
+00851     _SCAPI_NOT_CONFIGURED
+00852 <span class="preprocessor">#       endif                   </span><span class="comment">/* USE_INTERNAL_MD5 */</span>
+00853 }
+00854 <span class="preprocessor">#endif                          </span><span class="comment">/* */</span>
+00855 
+00856 
+00857 
+00858 <span class="comment">/*******************************************************************-o-******</span>
+00859 <span class="comment"> * sc_decrypt</span>
+00860 <span class="comment"> *</span>
+00861 <span class="comment"> * Parameters:</span>
+00862 <span class="comment"> *       privtype</span>
+00863 <span class="comment"> *      *key</span>
+00864 <span class="comment"> *       keylen</span>
+00865 <span class="comment"> *      *iv</span>
+00866 <span class="comment"> *       ivlen</span>
+00867 <span class="comment"> *      *ciphertext</span>
+00868 <span class="comment"> *       ctlen</span>
+00869 <span class="comment"> *      *plaintext</span>
+00870 <span class="comment"> *      *ptlen</span>
+00871 <span class="comment"> *      </span>
+00872 <span class="comment"> * Returns:</span>
+00873 <span class="comment"> *      SNMPERR_SUCCESS                 Success.</span>
+00874 <span class="comment"> *      SNMPERR_SC_NOT_CONFIGURED       Encryption is not supported.</span>
+00875 <span class="comment"> *      SNMPERR_SC_GENERAL_FAILURE      Any other error</span>
+00876 <span class="comment"> *</span>
+00877 <span class="comment"> *</span>
+00878 <span class="comment"> * Decrypt ciphertext into plaintext using key and iv.</span>
+00879 <span class="comment"> *</span>
+00880 <span class="comment"> * ptlen contains actual number of plaintext bytes in plaintext upon</span>
+00881 <span class="comment"> * successful return.</span>
+00882 <span class="comment"> */</span>
+00883 <span class="keywordtype">int</span>
+00884 sc_decrypt(<span class="keyword">const</span> oid * privtype, size_t privtypelen,
+00885            u_char * key, u_int keylen,
+00886            u_char * iv, u_int ivlen,
+00887            u_char * ciphertext, u_int ctlen,
+00888            u_char * plaintext, size_t * ptlen)
+00889 #ifdef USE_OPENSSL
+00890 {
+00891 
+00892     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00893     u_char          my_iv[128];
+00894 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00895 <span class="preprocessor">#ifdef OLD_DES</span>
+00896     DES_key_schedule key_sch;
+00897 <span class="preprocessor">#else</span>
+00898     DES_key_schedule key_sched_store;
+00899     DES_key_schedule *key_sch = &amp;key_sched_store;
+00900 <span class="preprocessor">#endif</span>
+00901     DES_cblock      key_struct;
+00902 <span class="preprocessor">#endif</span>
+00903     u_int           properlength = 0, properlength_iv = 0;
+00904     <span class="keywordtype">int</span>             have_transform;
+00905 <span class="preprocessor">#ifdef HAVE_AES</span>
+00906     <span class="keywordtype">int</span> new_ivlen = 0;
+00907     AES_KEY aes_key;
+00908 <span class="preprocessor">#endif</span>
+00909 
+00910     DEBUGTRACE;
+00911 
+00912     <span class="keywordflow">if</span> (!privtype || !key || !iv || !plaintext || !ciphertext || !ptlen
+00913         || (ctlen &lt;= 0) || (*ptlen &lt;= 0) || (*ptlen &lt; ctlen)
+00914         || (privtypelen != USM_LENGTH_OID_TRANSFORM)) {
+00915         QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
+00916     }
+00917 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00918     {
+00919         size_t          buf_len = 128, out_len = 0;
+00920         u_char         *buf = (u_char *) malloc(buf_len);
+00921 
+00922         <span class="keywordflow">if</span> (buf != NULL) {
+00923             <span class="keywordflow">if</span> (sprint_realloc_hexstring(&amp;buf, &amp;buf_len, &amp;out_len, 1,
+00924                                          iv, ivlen)) {
+00925                 DEBUGMSGTL((<span class="stringliteral">"scapi"</span>, <span class=
+"stringliteral">"decrypt: IV: %s/"</span>, buf));
+00926             } <span class="keywordflow">else</span> {
+00927                 DEBUGMSGTL((<span class="stringliteral">"scapi"</span>, <span class=
+"stringliteral">"decrypt: IV: %s [TRUNCATED]/"</span>, buf));
+00928             }
+00929             out_len = 0;
+00930             <span class="keywordflow">if</span> (sprint_realloc_hexstring(&amp;buf, &amp;buf_len, &amp;out_len, 1,
+00931                                          key, keylen)) {
+00932                 DEBUGMSG((<span class="stringliteral">"scapi"</span>, <span class="stringliteral">"%s\n"</span>, buf));
+00933             } <span class="keywordflow">else</span> {
+00934                 DEBUGMSG((<span class="stringliteral">"scapi"</span>, <span class="stringliteral">"%s\n"</span>, buf));
+00935             }
+00936             free(buf);
+00937         } <span class="keywordflow">else</span> {
+00938             DEBUGMSGTL((<span class="stringliteral">"scapi"</span>,
+00939                         <span class="stringliteral">"decrypt: malloc fail for debug output\n"</span>));
+00940         }
+00941     }
+00942 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_TESTING_CODE */</span>
+00943 
+00944     <span class="comment">/*</span>
+00945 <span class="comment">     * Determine privacy transform.</span>
+00946 <span class="comment">     */</span>
+00947     have_transform = 0;
+00948 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00949     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, DESPriv)) {
+00950         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
+00951         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
+00952         have_transform = 1;
+00953     }
+00954 <span class="preprocessor">#endif</span>
+00955 <span class="preprocessor">#ifdef HAVE_AES</span>
+00956     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, AESPriv)) {
+00957         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES);
+00958         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES_IV);
+00959         have_transform = 1;
+00960     }
+00961 <span class="preprocessor">#endif</span>
+00962     <span class="keywordflow">if</span> (!have_transform) {
+00963         QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
+00964     }
+00965 
+00966     <span class="keywordflow">if</span> ((keylen &lt; properlength) || (ivlen &lt; properlength_iv)) {
+00967         QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
+00968     }
+00969 
+00970     memset(my_iv, 0, <span class="keyword">sizeof</span>(my_iv));
+00971 <span class="preprocessor">#ifndef DISABLE_DES</span>
+00972     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, DESPriv)) {
+00973         memcpy(key_struct, key, <span class="keyword">sizeof</span>(key_struct));
+00974         (void) DES_key_sched(&amp;key_struct, key_sch);
+00975 
+00976         memcpy(my_iv, iv, ivlen);
+00977         DES_cbc_encrypt(ciphertext, plaintext, ctlen, key_sch,
+00978                         (DES_cblock *) my_iv, DES_DECRYPT);
+00979         *ptlen = ctlen;
+00980     }
+00981 <span class="preprocessor">#endif</span>
+00982 <span class="preprocessor">#ifdef HAVE_AES</span>
+00983     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, AESPriv)) {
+00984         (void) AES_set_encrypt_key(key, properlength*8, &amp;aes_key);
+00985 
+00986         memcpy(my_iv, iv, ivlen);
+00987         <span class="comment">/*</span>
+00988 <span class="comment">         * encrypt the data </span>
+00989 <span class="comment">         */</span>
+00990         AES_cfb128_encrypt(ciphertext, plaintext, ctlen,
+00991                            &amp;aes_key, my_iv, &amp;new_ivlen, AES_DECRYPT);
+00992         *ptlen = ctlen;
+00993     }
+00994 <span class="preprocessor">#endif</span>
+00995 
+00996     <span class="comment">/*</span>
+00997 <span class="comment">     * exit cond </span>
+00998 <span class="comment">     */</span>
+00999   sc_decrypt_quit:
+01000 <span class="preprocessor">#ifndef DISABLE_DES</span>
+01001 <span class="preprocessor">#ifdef OLD_DES</span>
+01002     memset(&amp;key_sch, 0, <span class="keyword">sizeof</span>(key_sch));
+01003 <span class="preprocessor">#else</span>
+01004     memset(&amp;key_sched_store, 0, <span class="keyword">sizeof</span>(key_sched_store));
+01005 <span class="preprocessor">#endif</span>
+01006     memset(key_struct, 0, <span class="keyword">sizeof</span>(key_struct));
+01007 <span class="preprocessor">#endif</span>
+01008     memset(my_iv, 0, <span class="keyword">sizeof</span>(my_iv));
+01009     <span class="keywordflow">return</span> rval;
+01010 }                               <span class="comment">/* USE OPEN_SSL */</span>
+01011 <span class="preprocessor">#elif USE_PKCS                  </span><span class="comment">/* USE PKCS */</span>
+01012 {
+01013     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+01014     u_int           properlength, properlength_iv;
+01015     u_char          pkcs_des_key[8];
+01016 
+01017     DEBUGTRACE;
+01018 
+01019     <span class="keywordflow">if</span> (!privtype || !key || !iv || !plaintext || !ciphertext || !ptlen
+01020         || (ctlen &lt;= 0) || (*ptlen &lt;= 0) || (*ptlen &lt; ctlen)
+01021         || (privtypelen != USM_LENGTH_OID_TRANSFORM)) {
+01022         QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
+01023     }
+01024 
+01025     <span class="comment">/*</span>
+01026 <span class="comment">     * Determine privacy transform.</span>
+01027 <span class="comment">     */</span>
+01028     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, DESPriv)) {
+01029         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
+01030         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
+01031     } <span class="keywordflow">else</span> {
+01032         QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
+01033     }
+01034 
+01035     <span class="keywordflow">if</span> ((keylen &lt; properlength) || (ivlen &lt; properlength_iv)) {
+01036         QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
+01037     }
+01038 
+01039     <span class="keywordflow">if</span> (ISTRANSFORM(privtype, DESPriv)) {
+01040         memset(pkcs_des_key, 0, <span class="keyword">sizeof</span>(pkcs_des_key));
+01041         memcpy(pkcs_des_key, key, <span class="keyword">sizeof</span>(pkcs_des_key));
+01042         rval = pkcs_decrpyt(CKM_DES_CBC, pkcs_des_key, 
+01043                 <span class="keyword">sizeof</span>(pkcs_des_key), iv, ivlen, ciphertext,
+01044                 ctlen, plaintext, ptlen);
+01045         *ptlen = ctlen;
+01046     }
+01047 
+01048   sc_decrypt_quit:
+01049     <span class="keywordflow">return</span> rval;
+01050 }                               <span class="comment">/* USE PKCS */</span>
+01051 <span class="preprocessor">#else</span>
+01052 {
+01053 <span class="preprocessor">#if     !defined(SCAPI_AUTHPRIV)</span>
+01054     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"Encryption support not enabled.\n"</span>);
+01055     <span class="keywordflow">return</span> SNMPERR_SC_NOT_CONFIGURED;
+01056 <span class="preprocessor">#else</span>
+01057 <span class="preprocessor">#       if USE_INTERNAL_MD5</span>
+01058     {
+01059         DEBUGMSGTL((<span class="stringliteral">"scapi"</span>, <span class=
+"stringliteral">"Decryption function not defined.\n"</span>));
+01060         <span class="keywordflow">return</span> SNMPERR_SC_GENERAL_FAILURE;
+01061     }
+01062 
+01063 <span class="preprocessor">#       else</span>
+01064     _SCAPI_NOT_CONFIGURED
+01065 <span class="preprocessor">#       endif                   </span><span class="comment">/* USE_INTERNAL_MD5 */</span>
+01066 <span class="preprocessor">#endif                          </span><span class="comment">/*  */</span>
+01067 }
+01068 <span class="preprocessor">#endif                          </span><span class="comment">/* USE_OPENSSL */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:59 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,258 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>mode_end_call: at the end of a series of requests, call another handler hook.<br />
+  <small>[<a class="el" href="group__utilities.html">utility_handlers: simplify request processing</a>]</small></h1>Handlers that
+  want to loop through a series of requests and then receive a callback at the end of a particular MODE can use this helper to
+  make this possible. <a href="#_details">More...</a>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__mode__end__call.html#ga0">netsnmp_get_mode_end_call_handler</a> (netsnmp_mode_handler_list *endlist)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">returns a mode_end_call handler that can be injected into a given handler chain. <a href=
+      "#ga0"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_mode_handler_list *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__mode__end__call.html#ga1">netsnmp_mode_end_call_add_mode_callback</a> (netsnmp_mode_handler_list *endlist, int
+      mode, <a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *callbackh)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">adds a mode specific callback to the callback list. <a href="#ga1"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga2" doxytag=
+      "mode_end_call::netsnmp_mode_end_call_helper" id="ga2"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_mode_end_call_helper</b> (<a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler, <a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)</td>
+    </tr>
+  </table>
+  <hr />
+  <a name="_details" id="_details"></a>
+
+  <h2>Detailed Description</h2>Handlers that want to loop through a series of requests and then receive a callback at the end of
+  a particular MODE can use this helper to make this possible.
+
+  <p>For most modules, this is not needed as the handler itself could perform a for() loop around the request list and then
+  perform its actions afterwards. However, if something like the serialize helper is in use this isn't possible because not all
+  the requests for a given handler are being passed downward in a single group. Thus, this helper *must* be added above other
+  helpers like the serialize helper to be useful.</p>
+
+  <p>Multiple mode specific handlers can be registered and will be called in the order they were regestered in. Callbacks
+  regesterd with a mode of NETSNMP_MODE_END_ALL_MODES will be called for all modes.</p>
+  <hr />
+
+  <h2>Function Documentation</h2><a class="anchor" name="ga0" doxytag="mode_end_call.c::netsnmp_get_mode_end_call_handler" id=
+  "ga0"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>* netsnmp_get_mode_end_call_handler</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_mode_handler_list *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>endlist</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>returns a mode_end_call handler that can be injected into a given handler chain.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>endlist</em>&nbsp;</td>
+
+                <td>The callback list for the handler to make use of.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>An injectable Net-SNMP handler.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="mode__end__call_8c-source.html#l00048">48</a> of file <a class="el" href=
+        "mode__end__call_8c-source.html">mode_end_call.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el"
+        href="agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, and <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga1" doxytag="mode_end_call.c::netsnmp_mode_end_call_add_mode_callback" id="ga1"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_mode_handler_list* netsnmp_mode_end_call_add_mode_callback</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_mode_handler_list *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>endlist</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>mode</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>callbackh</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>adds a mode specific callback to the callback list.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>endinfo</em>&nbsp;</td>
+
+                <td>the information structure for the mode_end_call helper. Can be NULL to create a new list.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>mode</em>&nbsp;</td>
+
+                <td>the mode to be called upon. A mode of NETSNMP_MODE_END_ALL_MODES = all modes.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>callbackh</em>&nbsp;</td>
+
+                <td>the netsnmp_mib_handler callback to call.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>the new registration information list upon success.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="mode__end__call_8c-source.html#l00068">68</a> of file <a class="el" href=
+        "mode__end__call_8c-source.html">mode_end_call.c</a>.</p>
+
+        <p>References <a class="el" href="group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, and <a class="el" href=
+        "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:04 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

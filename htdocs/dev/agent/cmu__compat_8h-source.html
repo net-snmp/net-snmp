@@ -1,0 +1,361 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>cmu_compat.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00002 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00003 <span class="comment"> * that may apply:</span>
+00004 <span class="comment"> */</span>
+00005 <span class="comment">/*</span>
+00006 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00007 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00008 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00009 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00010 <span class="comment"> */</span>
+00011 
+00012 <span class="comment">/*</span>
+00013 <span class="comment"> *  CMU compatability definitions and structures.</span>
+00014 <span class="comment"> *</span>
+00015 <span class="comment"> *    (since the UCD package split from the CMU one</span>
+00016 <span class="comment"> *     about 8 years ago, that's probably enough time</span>
+00017 <span class="comment"> *     for people to convert any outstanding code!)</span>
+00018 <span class="comment"> */</span>
+00019 
+00020 <span class="preprocessor">#ifndef NET_SNMP_CMU_COMPAT_H</span>
+00021 <span class="preprocessor">#define NET_SNMP_CMU_COMPAT_H</span>
+00022 
+00023 <span class="preprocessor">#ifdef __cplusplus</span>
+00024 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00025 <span class="preprocessor">#endif</span>
+00026 
+00027     <span class="comment">/*</span>
+00028 <span class="comment">     * ============================</span>
+00029 <span class="comment">     * *</span>
+00030 <span class="comment">     * * Enumerations and definitions</span>
+00031 <span class="comment">     * *</span>
+00032 <span class="comment">     * * ============================ </span>
+00033 <span class="comment">     */</span>
+00034 <span class="preprocessor">#include &lt;net-snmp/definitions.h&gt;</span>
+00035     <span class="comment">/*</span>
+00036 <span class="comment">     * From parse.h </span>
+00037 <span class="comment">     */</span>
+00038 <span class="preprocessor">#define ACCESS_READONLY         MIB_ACCESS_READONLY</span>
+00039 <span class="preprocessor">#define ACCESS_READWRITE        MIB_ACCESS_READWRITE</span>
+00040 <span class="preprocessor">#define ACCESS_WRITEONLY        MIB_ACCESS_WRITEONLY</span>
+00041 <span class="preprocessor">#define ACCESS_NOACCESS         MIB_ACCESS_NOACCESS</span>
+00042 <span class="preprocessor">#define ACCESS_NOTIFY           MIB_ACCESS_NOTIFY</span>
+00043 <span class="preprocessor">#define ACCESS_CREATE           MIB_ACCESS_CREATE</span>
+00044 <span class="preprocessor">#define STATUS_MANDATORY        MIB_STATUS_MANDATORY</span>
+00045 <span class="preprocessor">#define STATUS_OPTIONAL         MIB_STATUS_OPTIONAL</span>
+00046 <span class="preprocessor">#define STATUS_OBSOLETE         MIB_STATUS_OBSOLETE</span>
+00047 <span class="preprocessor">#define STATUS_DEPRECATED       MIB_STATUS_DEPRECATED</span>
+00048 <span class="preprocessor">#define STATUS_CURRENT          MIB_STATUS_CURRENT</span>
+00049     <span class="comment">/*</span>
+00050 <span class="comment">     * From smnp_impl.h </span>
+00051 <span class="comment">     */</span>
+00052 <span class="preprocessor">#define INTEGER     ASN_INTEGER</span>
+00053 <span class="preprocessor">#define STRING      ASN_OCTET_STR</span>
+00054 <span class="preprocessor">#define OBJID       ASN_OBJECT_ID</span>
+00055 <span class="preprocessor">#define NULLOBJ     ASN_NULL</span>
+00056 <span class="preprocessor">#define BITSTRING   ASN_BIT_STR </span><span class="comment">/* HISTORIC - don't use */</span>
+00057 <span class="preprocessor">#define IPADDRESS   ASN_IPADDRESS</span>
+00058 <span class="preprocessor">#define COUNTER     ASN_COUNTER</span>
+00059 <span class="preprocessor">#define GAUGE       ASN_GAUGE</span>
+00060 <span class="preprocessor">#define UNSIGNED    ASN_UNSIGNED</span>
+00061 <span class="preprocessor">#define TIMETICKS   ASN_TIMETICKS</span>
+00062 <span class="preprocessor">#define ASNT_OPAQUE ASN_OPAQUE</span>
+00063 <span class="preprocessor">#define NSAP        ASN_NSAP</span>
+00064 <span class="preprocessor">#define COUNTER64   ASN_COUNTER64</span>
+00065 <span class="preprocessor">#define UINTEGER    ASN_UINTEGER</span>
+00066     <span class="comment">/*</span>
+00067 <span class="comment">     * From snmp.h </span>
+00068 <span class="comment">     */</span>
+00069 <span class="preprocessor">#define GET_REQ_MSG         SNMP_MSG_GET</span>
+00070 <span class="preprocessor">#define GETNEXT_REQ_MSG     SNMP_MSG_GETNEXT</span>
+00071 <span class="preprocessor">#define GET_RSP_MSG         SNMP_MSG_RESPONSE</span>
+00072 <span class="preprocessor">#define SET_REQ_MSG         SNMP_MSG_SET</span>
+00073 <span class="preprocessor">#define TRP_REQ_MSG         SNMP_MSG_TRAP</span>
+00074 <span class="preprocessor">#define BULK_REQ_MSG        SNMP_MSG_GETBULK</span>
+00075 <span class="preprocessor">#define INFORM_REQ_MSG      SNMP_MSG_INFORM</span>
+00076 <span class="preprocessor">#define TRP2_REQ_MSG        SNMP_MSG_TRAP2</span>
+00077 <span class="preprocessor">#define REPORT_RSP_MSG      SNMP_MSG_REPORT</span>
+00078     <span class="comment">/*</span>
+00079 <span class="comment">     * since CMU V1.5 </span>
+00080 <span class="comment">     */</span>
+00081 <span class="preprocessor">#define SNMP_PDU_GET        SNMP_MSG_GET</span>
+00082 <span class="preprocessor">#define SNMP_PDU_GETNEXT    SNMP_MSG_GETNEXT</span>
+00083 <span class="preprocessor">#define SNMP_PDU_RESPONSE   SNMP_MSG_RESPONSE</span>
+00084 <span class="preprocessor">#define SNMP_PDU_SET        SNMP_MSG_SET</span>
+00085 <span class="preprocessor">#define SNMP_PDU_GETBULK    SNMP_MSG_GETBULK</span>
+00086 <span class="preprocessor">#define SNMP_PDU_INFORM     SNMP_MSG_INFORM</span>
+00087 <span class="preprocessor">#define SNMP_PDU_V2TRAP     SNMP_MSG_TRAP2</span>
+00088 <span class="preprocessor">#define SNMP_PDU_REPORT     SNMP_MSG_REPORT</span>
+00089 <span class="preprocessor">#define SNMP_TRAP_AUTHENTICATIONFAILURE SNMP_TRAP_AUTHFAIL</span>
+00090 <span class="preprocessor">#define SMI_INTEGER     ASN_INTEGER</span>
+00091 <span class="preprocessor">#define SMI_STRING      ASN_OCTET_STR</span>
+00092 <span class="preprocessor">#define SMI_OBJID       ASN_OBJECT_ID</span>
+00093 <span class="preprocessor">#define SMI_NULLOBJ     ASN_NULL</span>
+00094 <span class="preprocessor">#define SMI_IPADDRESS   ASN_IPADDRESS</span>
+00095 <span class="preprocessor">#define SMI_COUNTER32   ASN_COUNTER</span>
+00096 <span class="preprocessor">#define SMI_GAUGE32     ASN_GAUGE</span>
+00097 <span class="preprocessor">#define SMI_UNSIGNED32  SMI_GAUGE32</span>
+00098 <span class="preprocessor">#define SMI_TIMETICKS   ASN_TIMETICKS</span>
+00099 <span class="preprocessor">#define SMI_OPAQUE      ASN_OPAQUE</span>
+00100 <span class="preprocessor">#define SMI_COUNTER64   ASN_COUNTER64</span>
+00101     <span class="comment">/*</span>
+00102 <span class="comment">     * ============================</span>
+00103 <span class="comment">     * *</span>
+00104 <span class="comment">     * *     Function declarations</span>
+00105 <span class="comment">     * *     and global variables</span>
+00106 <span class="comment">     * *</span>
+00107 <span class="comment">     * * ============================ </span>
+00108 <span class="comment">     */</span>
+00109 <span class="keyword">extern</span> <span class="keywordtype">int</span>      snmp_dump_packet;       <span class=
+"comment">/* from snmp_api.h */</span>
+00110 <span class="keyword">extern</span> <span class="keywordtype">int</span>      quick_print;    <span class=
+"comment">/* from snmp_api.h */</span>
+00111 
+00112 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>     <span class=
+"comment">/* for snmp_pdu &amp; snmp_session */</span>
+00113 
+00114 <span class="keywordtype">int</span>             mib_TxtToOid(<span class=
+"keywordtype">char</span> *, oid **, size_t *); <span class="comment">/* from snmp.h */</span>
+00115 <span class="keywordtype">int</span>             mib_OidToTxt(oid *, size_t, <span class=
+"keywordtype">char</span> *, size_t);    <span class="comment">/* from snmp.h */</span>
+00116 <span class="keywordtype">char</span>           *snmp_pdu_type(<a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *);   <span class="comment">/* from snmp.h */</span>
+00117 u_char         *cmu_snmp_parse(<a class="code" href="structsnmp__session.html">netsnmp_session</a> * session, <a class=
+"code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu, u_char * data, size_t length);      <span class=
+"comment">/* from snmp.h */</span>
+00118 
+00119 
+00120 
+00121 
+00122         <span class="comment">/*</span>
+00123 <span class="comment">         * ============================</span>
+00124 <span class="comment">         * *</span>
+00125 <span class="comment">         * * MIB-II data structures</span>
+00126 <span class="comment">         * *    (from mib.h) </span>
+00127 <span class="comment">         * *</span>
+00128 <span class="comment">         * * ============================ </span>
+00129 <span class="comment">         */</span>
+00130 
+00131 
+00132 <span class="keyword">struct </span>mib_system {
+00133     <span class="keywordtype">char</span>            sysDescr[32];       <span class=
+"comment">/* textual description */</span>
+00134     u_char          sysObjectID[16];    <span class="comment">/* OBJECT IDENTIFIER of system */</span>
+00135     u_char          ObjIDLen;   <span class="comment">/* length of sysObjectID */</span>
+00136     u_int           sysUpTime;  <span class="comment">/* Uptime in 100/s of a second */</span>
+00137 };
+00138 
+00139 <span class="keyword">struct </span>mib_interface {
+00140     <span class="keywordtype">int</span>             ifNumber;   <span class="comment">/* number of interfaces */</span>
+00141 };
+00142 
+00143 <span class="keyword">struct </span>mib_ifEntry {
+00144     <span class="keywordtype">int</span>             ifIndex;    <span class=
+"comment">/* index of this interface  */</span>
+00145     <span class="keywordtype">char</span>            ifDescr[32];        <span class=
+"comment">/* english description of interface */</span>
+00146     <span class="keywordtype">int</span>             ifType;     <span class=
+"comment">/* network type of device   */</span>
+00147     <span class="keywordtype">int</span>             ifMtu;      <span class=
+"comment">/* size of largest packet in bytes  */</span>
+00148     u_int           ifSpeed;    <span class="comment">/* bandwidth in bits/sec    */</span>
+00149     u_char          ifPhysAddress[11];  <span class="comment">/* interface's address */</span>
+00150     u_char          PhysAddrLen;        <span class="comment">/* length of physAddr */</span>
+00151     <span class="keywordtype">int</span>             ifAdminStatus;      <span class=
+"comment">/* desired state of interface */</span>
+00152     <span class="keywordtype">int</span>             ifOperStatus;       <span class=
+"comment">/* current operational status */</span>
+00153     u_int           ifLastChange;       <span class="comment">/* value of sysUpTime when current state entered */</span>
+00154     u_int           ifInOctets; <span class="comment">/* number of octets received on interface */</span>
+00155     u_int           ifInUcastPkts;      <span class="comment">/* number of unicast packets delivered */</span>
+00156     u_int           ifInNUcastPkts;     <span class="comment">/* number of broadcasts or multicasts */</span>
+00157     u_int           ifInDiscards;       <span class="comment">/* number of packets discarded with no error */</span>
+00158     u_int           ifInErrors; <span class="comment">/* number of packets containing errors */</span>
+00159     u_int           ifInUnknownProtos;  <span class="comment">/* number of packets with unknown protocol */</span>
+00160     u_int           ifOutOctets;        <span class="comment">/* number of octets transmitted */</span>
+00161     u_int           ifOutUcastPkts;     <span class="comment">/* number of unicast packets sent */</span>
+00162     u_int           ifOutNUcastPkts;    <span class="comment">/* number of broadcast or multicast pkts */</span>
+00163     u_int           ifOutDiscards;      <span class="comment">/* number of packets discarded with no error */</span>
+00164     u_int           ifOutErrors;        <span class="comment">/* number of pkts discarded with an error */</span>
+00165     u_int           ifOutQLen;  <span class="comment">/* number of packets in output queue */</span>
+00166 };
+00167 
+00168 <span class="keyword">struct </span>mib_atEntry {
+00169     <span class="keywordtype">int</span>             atIfIndex;  <span class=
+"comment">/* interface on which this entry maps */</span>
+00170     u_char          atPhysAddress[11];  <span class="comment">/* physical address of destination */</span>
+00171     u_char          PhysAddressLen;     <span class="comment">/* length of atPhysAddress */</span>
+00172     u_int           atNetAddress;       <span class="comment">/* IP address of physical address */</span>
+00173 };
+00174 
+00175 <span class="keyword">struct </span>mib_ip {
+00176     <span class="keywordtype">int</span>             ipForwarding;       <span class=
+"comment">/* 1 if gateway, 2 if host */</span>
+00177     <span class="keywordtype">int</span>             ipDefaultTTL;       <span class=
+"comment">/* default TTL for pkts originating here */</span>
+00178     u_int           ipInReceives;       <span class="comment">/* no. of IP packets received from interfaces */</span>
+00179     u_int           ipInHdrErrors;      <span class="comment">/* number of pkts discarded due to header errors */</span>
+00180     u_int           ipInAddrErrors;     <span class="comment">/* no. of pkts discarded due to bad address */</span>
+00181     u_int           ipForwDatagrams;    <span class="comment">/* number pf pkts forwarded through this entity */</span>
+00182     u_int           ipInUnknownProtos;  <span class="comment">/* no. of local-addressed pkts w/unknown proto */</span>
+00183     u_int           ipInDiscards;       <span class="comment">/* number of error-free packets discarded */</span>
+00184     u_int           ipInDelivers;       <span class="comment">/* number of datagrams delivered to upper level */</span>
+00185     u_int           ipOutRequests;      <span class="comment">/* number of IP datagrams originating locally */</span>
+00186     u_int           ipOutDiscards;      <span class="comment">/* number of error-free output IP pkts discarded */</span>
+00187     u_int           ipOutNoRoutes;      <span class="comment">/* number of IP pkts discarded due to no route */</span>
+00188     <span class="keywordtype">int</span>             ipReasmTimeout;     <span class=
+"comment">/* seconds fragment is held awaiting reassembly */</span>
+00189     u_int           ipReasmReqds;       <span class="comment">/* no. of fragments needing reassembly (here) */</span>
+00190     u_int           ipReasmOKs; <span class="comment">/* number of fragments reassembled */</span>
+00191     u_int           ipReasmFails;       <span class="comment">/* number of failures in IP reassembly */</span>
+00192     u_int           ipFragOKs;  <span class="comment">/* number of datagrams fragmented here */</span>
+00193     u_int           ipFragFails;        <span class="comment">/* no. pkts unable to be fragmented here */</span>
+00194     u_int           ipFragCreates;      <span class="comment">/* number of IP fragments created here */</span>
+00195 };
+00196 
+00197 <span class="keyword">struct </span>mib_ipAddrEntry {
+00198     u_int           ipAdEntAddr;        <span class="comment">/* IP address of this entry */</span>
+00199     <span class="keywordtype">int</span>             ipAdEntIfIndex;     <span class=
+"comment">/* IF for this entry */</span>
+00200     u_int           ipAdEntNetMask;     <span class="comment">/* subnet mask of this entry */</span>
+00201     <span class="keywordtype">int</span>             ipAdEntBcastAddr;   <span class=
+"comment">/* read the MIB for this one */</span>
+00202     <span class="keywordtype">int</span>             ipAdEntReasmMaxSize;
+00203                 <span class="comment">/* max size for dg reassembly   {ipAddrEntry 5} */</span>
+00204 };
+00205 
+00206 <span class="keyword">struct </span>mib_ipRouteEntry {
+00207     u_int           ipRouteDest;        <span class="comment">/* destination IP addr for this route */</span>
+00208     <span class="keywordtype">int</span>             ipRouteIfIndex;     <span class=
+"comment">/* index of local IF for this route */</span>
+00209     <span class="keywordtype">int</span>             ipRouteMetric1;     <span class=
+"comment">/* Primary routing metric */</span>
+00210     <span class="keywordtype">int</span>             ipRouteMetric2;     <span class=
+"comment">/* Alternate routing metric */</span>
+00211     <span class="keywordtype">int</span>             ipRouteMetric3;     <span class=
+"comment">/* Alternate routing metric */</span>
+00212     <span class="keywordtype">int</span>             ipRouteMetric4;     <span class=
+"comment">/* Alternate routing metric */</span>
+00213     u_int           ipRouteNextHop;     <span class="comment">/* IP addr of next hop */</span>
+00214     <span class="keywordtype">int</span>             ipRouteType;        <span class=
+"comment">/* Type of this route */</span>
+00215     <span class="keywordtype">int</span>             ipRouteProto;       <span class=
+"comment">/* How this route was learned */</span>
+00216     <span class="keywordtype">int</span>             ipRouteAge; <span class=
+"comment">/* No. of seconds since updating this route */</span>
+00217 };
+00218 
+00219 <span class="keyword">struct </span>mib_icmp {
+00220     u_int           icmpInMsgs; <span class="comment">/* Total of ICMP msgs received */</span>
+00221     u_int           icmpInErrors;       <span class="comment">/* Total of ICMP msgs received with errors */</span>
+00222     u_int           icmpInDestUnreachs;
+00223     u_int           icmpInTimeExcds;
+00224     u_int           icmpInParmProbs;
+00225     u_int           icmpInSrcQuenchs;
+00226     u_int           icmpInRedirects;
+00227     u_int           icmpInEchos;
+00228     u_int           icmpInEchoReps;
+00229     u_int           icmpInTimestamps;
+00230     u_int           icmpInTimestampReps;
+00231     u_int           icmpInAddrMasks;
+00232     u_int           icmpInAddrMaskReps;
+00233     u_int           icmpOutMsgs;
+00234     u_int           icmpOutErrors;
+00235     u_int           icmpOutDestUnreachs;
+00236     u_int           icmpOutTimeExcds;
+00237     u_int           icmpOutParmProbs;
+00238     u_int           icmpOutSrcQuenchs;
+00239     u_int           icmpOutRedirects;
+00240     u_int           icmpOutEchos;
+00241     u_int           icmpOutEchoReps;
+00242     u_int           icmpOutTimestamps;
+00243     u_int           icmpOutTimestampReps;
+00244     u_int           icmpOutAddrMasks;
+00245     u_int           icmpOutAddrMaskReps;
+00246 };
+00247 
+00248 <span class="keyword">struct </span>mib_tcp {
+00249     <span class="keywordtype">int</span>             tcpRtoAlgorithm;    <span class=
+"comment">/* retransmission timeout algorithm */</span>
+00250     <span class="keywordtype">int</span>             tcpRtoMin;  <span class=
+"comment">/* minimum retransmission timeout (mS) */</span>
+00251     <span class="keywordtype">int</span>             tcpRtoMax;  <span class=
+"comment">/* maximum retransmission timeout (mS) */</span>
+00252     <span class="keywordtype">int</span>             tcpMaxConn; <span class=
+"comment">/* maximum tcp connections possible */</span>
+00253     u_int           tcpActiveOpens;     <span class="comment">/* number of SYN-SENT -&gt; CLOSED transitions */</span>
+00254     u_int           tcpPassiveOpens;    <span class="comment">/* number of SYN-RCVD -&gt; LISTEN transitions */</span>
+00255     u_int           tcpAttemptFails;    <span class=
+"comment">/*(SYN-SENT,SYN-RCVD)-&gt;CLOSED or SYN-RCVD-&gt;LISTEN */</span>
+00256     u_int           tcpEstabResets;     <span class="comment">/* (ESTABLISHED,CLOSE-WAIT) -&gt; CLOSED */</span>
+00257     u_int           tcpCurrEstab;       <span class="comment">/* number in ESTABLISHED or CLOSE-WAIT state */</span>
+00258     u_int           tcpInSegs;  <span class="comment">/* number of segments received */</span>
+00259     u_int           tcpOutSegs; <span class="comment">/* number of segments sent */</span>
+00260     u_int           tcpRetransSegs;     <span class="comment">/* number of retransmitted segments */</span>
+00261 };
+00262 
+00263 <span class="keyword">struct </span>mib_tcpConnEntry {
+00264     <span class="keywordtype">int</span>             tcpConnState;       <span class=
+"comment">/* State of this connection */</span>
+00265     u_int           tcpConnLocalAddress;        <span class="comment">/* local IP address for this connection */</span>
+00266     <span class="keywordtype">int</span>             tcpConnLocalPort;   <span class=
+"comment">/* local port for this connection */</span>
+00267     u_int           tcpConnRemAddress;  <span class="comment">/* remote IP address for this connection */</span>
+00268     <span class="keywordtype">int</span>             tcpConnRemPort;     <span class=
+"comment">/* remote port for this connection */</span>
+00269 };
+00270 
+00271 <span class="keyword">struct </span>mib_udp {
+00272     u_int           udpInDatagrams;     <span class="comment">/* No. of UDP datagrams delivered to users */</span>
+00273     u_int           udpNoPorts; <span class="comment">/* No. of UDP datagrams to port with no listener */</span>
+00274     u_int           udpInErrors;        <span class="comment">/* No. of UDP datagrams unable to be delivered */</span>
+00275     u_int           udpOutDatagrams;    <span class="comment">/* No. of UDP datagrams sent from this entity */</span>
+00276 };
+00277 
+00278 <span class="keyword">struct </span>mib_egp {
+00279     u_int           egpInMsgs;  <span class="comment">/* No. of EGP msgs received without error */</span>
+00280     u_int           egpInErrors;        <span class="comment">/* No. of EGP msgs received with error */</span>
+00281     u_int           egpOutMsgs; <span class="comment">/* No. of EGP msgs sent */</span>
+00282     u_int           egpOutErrors;       <span class="comment">/* No. of (outgoing) EGP msgs dropped due to error */</span>
+00283 };
+00284 
+00285 <span class="keyword">struct </span>mib_egpNeighEntry {
+00286     <span class="keywordtype">int</span>             egpNeighState;      <span class=
+"comment">/* local EGP state with this entry's neighbor */</span>
+00287     u_int           egpNeighAddr;       <span class="comment">/* IP address of this entry's neighbor */</span>
+00288 };
+00289 
+00290 <span class="preprocessor">#ifdef __cplusplus</span>
+00291 }
+00292 <span class="preprocessor">#endif</span>
+00293 <span class="preprocessor">#endif                          </span><span class="comment">/* NET_SNMP_CMU_COMPAT_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

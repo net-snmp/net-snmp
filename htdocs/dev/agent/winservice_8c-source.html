@@ -1,0 +1,1109 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>winservice.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * Windows Service related function definitions</span>
+00003 <span class="comment"> * By Raju Krishnappa(raju_krishnappa@yahoo.com)</span>
+00004 <span class="comment"> *</span>
+00005 <span class="comment"> */</span>
+00006 
+00007 <span class="preprocessor">#ifdef WIN32</span>
+00008 
+00009 <span class="preprocessor">#include &lt;windows.h&gt;</span>
+00010 <span class="preprocessor">#include &lt;tchar.h&gt;</span>
+00011 
+00012 <span class="preprocessor">#include &lt;stdio.h&gt;</span>              <span class="comment">/* sprintf */</span>
+00013 <span class="preprocessor">#include &lt;process.h&gt;</span>            <span class="comment">/* beginthreadex  */</span>
+00014 
+00015 <span class="preprocessor">#include &lt;net-snmp/library/winservice.h&gt;</span>
+00016 
+00017 <span class="preprocessor">#ifdef mingw32 </span><span class=
+"comment">/* MinGW doesn't fully support exception handling. */</span>
+00018 
+00019 <span class="preprocessor">#define TRY if(1)</span>
+00020 <span class="preprocessor">#define LEAVE goto labelFIN</span>
+00021 <span class="preprocessor">#define FINALLY do { \</span>
+00022 <span class="preprocessor">labelFIN: \</span>
+00023 <span class="preprocessor">        ; \</span>
+00024 <span class="preprocessor">} while(0); if(1)</span>
+00025 
+00026 <span class="preprocessor">#else</span>
+00027 
+00028 <span class="preprocessor">#define TRY __try</span>
+00029 <span class="preprocessor">#define LEAVE __leave</span>
+00030 <span class="preprocessor">#define FINALLY __finally</span>
+00031 
+00032 <span class="preprocessor">#endif </span><span class="comment">/* mingw32 */</span>
+00033 
+00034     <span class="comment">/*</span>
+00035 <span class="comment">     * External global variables used here</span>
+00036 <span class="comment">     */</span>
+00037 
+00038     <span class="comment">/*</span>
+00039 <span class="comment">     * Application Name </span>
+00040 <span class="comment">     * This should be declared by the application, which wants to register as</span>
+00041 <span class="comment">     * windows service</span>
+00042 <span class="comment">     */</span>
+00043 <span class="keyword">extern</span> LPTSTR app_name;
+00044 
+00045     <span class="comment">/*</span>
+00046 <span class="comment">     * Declare global variable</span>
+00047 <span class="comment">     */</span>
+00048 
+00049     <span class="comment">/*</span>
+00050 <span class="comment">     * Flag to indicate whether process is running as Service </span>
+00051 <span class="comment">     */</span>
+00052 BOOL g_fRunningAsService = FALSE;
+00053 
+00054     <span class="comment">/*</span>
+00055 <span class="comment">     * Variable to maintain Current Service status </span>
+00056 <span class="comment">     */</span>
+00057 <span class="keyword">static</span> SERVICE_STATUS ServiceStatus;
+00058 
+00059     <span class="comment">/*</span>
+00060 <span class="comment">     * Service Handle </span>
+00061 <span class="comment">     */</span>
+00062 <span class="keyword">static</span> SERVICE_STATUS_HANDLE hServiceStatus = 0L;
+00063 
+00064     <span class="comment">/*</span>
+00065 <span class="comment">     * Service Table Entry </span>
+00066 <span class="comment">     */</span>
+00067 SERVICE_TABLE_ENTRY ServiceTableEntry[] = {
+00068   {NULL, ServiceMain},          <span class="comment">/* Service Main function */</span>
+00069   {NULL, NULL}
+00070 };
+00071 
+00072     <span class="comment">/*</span>
+00073 <span class="comment">     * Handle to Thread, to implement Pause, Resume and Stop functions</span>
+00074 <span class="comment">     */</span>
+00075 <span class="keyword">static</span> HANDLE hServiceThread = NULL;    <span class="comment">/* Thread Handle */</span>
+00076 
+00077     <span class="comment">/*</span>
+00078 <span class="comment">     * Holds calling partys Function Entry point, that should start</span>
+00079 <span class="comment">     * when entering service mode</span>
+00080 <span class="comment">     */</span>
+00081 <span class="keyword">static</span> INT (*ServiceEntryPoint) (INT Argc, LPTSTR Argv[]) = 0L;
+00082 
+00083     <span class="comment">/*</span>
+00084 <span class="comment">     * To hold Stop Function address, to be called when STOP request</span>
+00085 <span class="comment">     * received from the SCM</span>
+00086 <span class="comment">     */</span>
+00087 <span class="keyword">static</span> VOID (*StopFunction) (VOID) = 0L;
+00088 
+00089 VOID
+00090 ProcessError (WORD eventLogType, LPCTSTR pszMessage, <span class="keywordtype">int</span> useGetLastError, <span class=
+"keywordtype">int</span> quiet);
+00091 
+00092     <span class="comment">/*</span>
+00093 <span class="comment">     * To register as Windows Service with SCM(Service Control Manager)</span>
+00094 <span class="comment">     * Input - Service Name, Service Display Name,Service Description and</span>
+00095 <span class="comment">     * Service startup arguments</span>
+00096 <span class="comment">     */</span>
+00097 <span class="keywordtype">int</span>
+00098 RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
+00099                  LPCTSTR lpszServiceDescription,
+00100                  InputParams * StartUpArg, <span class="keywordtype">int</span> quiet) <span class=
+"comment">/* Startup argument to the service */</span>
+00101 {
+00102   TCHAR szServicePath[MAX_PATH];        <span class="comment">/* To hold module File name */</span>
+00103   TCHAR MsgErrorString[MAX_STR_SIZE];   <span class="comment">/* Message or Error string */</span>
+00104   TCHAR szServiceCommand[MAX_PATH + 9]; <span class="comment">/* Command to execute */</span>
+00105   SC_HANDLE hSCManager = NULL;
+00106   SC_HANDLE hService = NULL;
+00107   TCHAR szRegAppLogKey[] =
+00108     <span class="stringliteral">"SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\"</span>;
+00109   TCHAR szRegKey[512];
+00110   HKEY hKey = NULL;             <span class="comment">/* Key to registry entry */</span>
+00111   HKEY hParamKey = NULL;        <span class="comment">/* To store startup parameters */</span>
+00112   DWORD dwData;                 <span class="comment">/* Type of logging supported */</span>
+00113   DWORD i, j;                   <span class="comment">/* Loop variables */</span>
+00114   <span class="keywordtype">int</span> exitStatus = 0;
+00115   GetModuleFileName (NULL, szServicePath, MAX_PATH);
+00116   TRY
+00117   {
+00118 
+00119     <span class="comment">/*</span>
+00120 <span class="comment">     * Open Service Control Manager handle </span>
+00121 <span class="comment">     */</span>
+00122     hSCManager = OpenSCManager (NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+00123     <span class="keywordflow">if</span> (hSCManager == NULL)
+00124       {
+00125         ProcessError (EVENTLOG_ERROR_TYPE, _T (<span class=
+"stringliteral">"Can't open SCM (Service Control Manager)"</span>), 1, quiet);
+00126         exitStatus = SERVICE_ERROR_SCM_OPEN;
+00127         LEAVE;
+00128       }
+00129 
+00130     <span class="comment">/*</span>
+00131 <span class="comment">     * Generate the Command to be executed by SCM </span>
+00132 <span class="comment">     */</span>
+00133     _snprintf (szServiceCommand, <span class="keyword">sizeof</span>(szServiceCommand), <span class=
+"stringliteral">"%s %s"</span>, szServicePath, _T (<span class="stringliteral">"-service"</span>));
+00134 
+00135     <span class="comment">/*</span>
+00136 <span class="comment">     * Create the Desired service </span>
+00137 <span class="comment">     */</span>
+00138     hService = CreateService (hSCManager, lpszServiceName, lpszServiceDisplayName,
+00139                         SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS,
+00140                         SERVICE_AUTO_START, SERVICE_ERROR_NORMAL, szServiceCommand,
+00141                               NULL,     <span class="comment">/* load-order group */</span>
+00142                               NULL,     <span class="comment">/* group member tag */</span>
+00143                               NULL,     <span class="comment">/* dependencies */</span>
+00144                               NULL,     <span class="comment">/* account */</span>
+00145                               NULL);    <span class="comment">/* password */</span>
+00146     <span class="keywordflow">if</span> (hService == NULL)
+00147       {
+00148         _snprintf (MsgErrorString, <span class="keyword">sizeof</span>(MsgErrorString), <span class=
+"stringliteral">"%s %s"</span>,
+00149                    _T (<span class="stringliteral">"Can't create service"</span>), lpszServiceDisplayName);
+00150         ProcessError (EVENTLOG_ERROR_TYPE, MsgErrorString, 1, quiet);
+00151 
+00152         exitStatus = SERVICE_ERROR_CREATE_SERVICE;
+00153         LEAVE;
+00154       }
+00155 
+00156     <span class="comment">/*</span>
+00157 <span class="comment">     * Create registry entries for EventLog </span>
+00158 <span class="comment">     */</span>
+00159     <span class="comment">/*</span>
+00160 <span class="comment">     * Create registry Application event log key </span>
+00161 <span class="comment">     */</span>
+00162     _tcscpy (szRegKey, szRegAppLogKey);
+00163     _tcscat (szRegKey, lpszServiceName);
+00164 
+00165     <span class="comment">/*</span>
+00166 <span class="comment">     * Create registry key </span>
+00167 <span class="comment">     */</span>
+00168     <span class="keywordflow">if</span> (RegCreateKey (HKEY_LOCAL_MACHINE, szRegKey, &amp;hKey) != ERROR_SUCCESS)
+00169       {
+00170         _snprintf (MsgErrorString, <span class="keyword">sizeof</span>(MsgErrorString), <span class=
+"stringliteral">"%s %s"</span>,
+00171                    _T (<span class="stringliteral">"is unable to create registry entries"</span>), lpszServiceDisplayName);
+00172         ProcessError (EVENTLOG_ERROR_TYPE, MsgErrorString, 1, quiet);
+00173         exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
+00174         LEAVE;
+00175       }
+00176 
+00177     <span class="comment">/*</span>
+00178 <span class="comment">     * Add Event ID message file name to the 'EventMessageFile' subkey </span>
+00179 <span class="comment">     */</span>
+00180     RegSetValueEx (hKey, <span class="stringliteral">"EventMessageFile"</span>, 0, REG_EXPAND_SZ,
+00181                    (CONST BYTE *) szServicePath,
+00182                    _tcslen (szServicePath) + <span class="keyword">sizeof</span> (TCHAR));
+00183 
+00184     <span class="comment">/*</span>
+00185 <span class="comment">     * Set the supported types flags. </span>
+00186 <span class="comment">     */</span>
+00187     dwData = EVENTLOG_ERROR_TYPE | EVENTLOG_WARNING_TYPE | EVENTLOG_INFORMATION_TYPE;
+00188     RegSetValueEx (hKey, <span class="stringliteral">"TypesSupported"</span>, 0, REG_DWORD,
+00189                    (CONST BYTE *) &amp; dwData, <span class="keyword">sizeof</span> (DWORD));
+00190 
+00191     <span class="comment">/*</span>
+00192 <span class="comment">     * Close Registry key </span>
+00193 <span class="comment">     */</span>
+00194     RegCloseKey (hKey);
+00195 
+00196     <span class="comment">/*</span>
+00197 <span class="comment">     * Set Service Description String  and save startup parameters if present</span>
+00198 <span class="comment">     */</span>
+00199     <span class="keywordflow">if</span> (lpszServiceDescription != NULL || StartUpArg-&gt;Argc &gt; 2)
+00200       {
+00201         <span class="comment">/*</span>
+00202 <span class="comment">         * Create Registry Key path </span>
+00203 <span class="comment">         */</span>
+00204         _tcscpy (szRegKey, _T (<span class="stringliteral">"SYSTEM\\CurrentControlSet\\Services\\"</span>));
+00205         _tcscat (szRegKey, app_name);
+00206         hKey = NULL;
+00207 
+00208         <span class="comment">/*</span>
+00209 <span class="comment">         * Open Registry key using Create and Set access. </span>
+00210 <span class="comment">         */</span>
+00211         <span class="keywordflow">if</span> (RegOpenKeyEx (HKEY_LOCAL_MACHINE, szRegKey, 0, KEY_WRITE,
+00212                           &amp;hKey) != ERROR_SUCCESS)
+00213           {
+00214             _snprintf (MsgErrorString, <span class="keyword">sizeof</span>(MsgErrorString), <span class=
+"stringliteral">"%s %s"</span>,
+00215                        _T (<span class="stringliteral">"is unable to create registry entries"</span>),
+00216                        lpszServiceDisplayName);
+00217             ProcessError (EVENTLOG_ERROR_TYPE, MsgErrorString, 1, quiet);
+00218             exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
+00219             LEAVE;
+00220           }
+00221 
+00222         <span class="comment">/*</span>
+00223 <span class="comment">         * Create description subkey and the set value </span>
+00224 <span class="comment">         */</span>
+00225         <span class="keywordflow">if</span> (lpszServiceDescription != NULL)
+00226           {
+00227             <span class="keywordflow">if</span> (RegSetValueEx (hKey, <span class=
+"stringliteral">"Description"</span>, 0, REG_SZ,
+00228                                (CONST BYTE *) lpszServiceDescription,
+00229                                _tcslen (lpszServiceDescription) +
+00230                                <span class="keyword">sizeof</span> (TCHAR)) != ERROR_SUCCESS)
+00231               {
+00232                 _snprintf (MsgErrorString, <span class="keyword">sizeof</span>(MsgErrorString), <span class=
+"stringliteral">"%s %s"</span>,
+00233                            _T (<span class="stringliteral">"is unable to create registry entries"</span>),
+00234                            lpszServiceDisplayName);
+00235                 ProcessError (EVENTLOG_ERROR_TYPE, MsgErrorString, 1, quiet);
+00236                 exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
+00237                 LEAVE;
+00238               };
+00239           }
+00240 
+00241         <span class="comment">/*</span>
+00242 <span class="comment">         * Save startup arguments if they are present </span>
+00243 <span class="comment">         */</span>
+00244         <span class="keywordflow">if</span> (StartUpArg-&gt;Argc &gt; 2)
+00245           {
+00246             <span class="comment">/*</span>
+00247 <span class="comment">             * Create Subkey parameters </span>
+00248 <span class="comment">             */</span>
+00249             <span class="keywordflow">if</span> (RegCreateKeyEx
+00250                 (hKey, <span class="stringliteral">"Parameters"</span>, 0, NULL,
+00251                  REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL,
+00252                  &amp;hParamKey, NULL) != ERROR_SUCCESS)
+00253               {
+00254                 _snprintf (MsgErrorString, <span class="keyword">sizeof</span>(MsgErrorString), <span class=
+"stringliteral">"%s %s"</span>,
+00255                            _T (<span class="stringliteral">"is unable to create registry entries"</span>),
+00256                            lpszServiceDisplayName);
+00257                 ProcessError (EVENTLOG_ERROR_TYPE, MsgErrorString, 1, quiet);
+00258                 exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
+00259                 LEAVE;
+00260               }
+00261 
+00262             <span class="comment">/*</span>
+00263 <span class="comment">             * Save parameters </span>
+00264 <span class="comment">             */</span>
+00265 
+00266             <span class="comment">/*</span>
+00267 <span class="comment">             * Loop through arguments </span>
+00268 <span class="comment">             */</span>
+00269             <span class="keywordflow">if</span> (quiet) <span class=
+"comment">/* Make sure we don't store -quiet arg */</span>
+00270               i = 3;
+00271             <span class="keywordflow">else</span>
+00272               i = 2;
+00273 
+00274             <span class="keywordflow">for</span> (j = 1; i &lt; StartUpArg-&gt;Argc; i++, j++)
+00275               {
+00276                 _snprintf (szRegKey, <span class="keyword">sizeof</span>(szRegKey), <span class=
+"stringliteral">"%s%d"</span>, _T (<span class="stringliteral">"Param"</span>), j);
+00277 
+00278                 <span class="comment">/*</span>
+00279 <span class="comment">                 * Create registry key </span>
+00280 <span class="comment">                 */</span>
+00281                 <span class="keywordflow">if</span> (RegSetValueEx
+00282                     (hParamKey, szRegKey, 0, REG_SZ,
+00283                      (CONST BYTE *) StartUpArg-&gt;Argv[i],
+00284                      _tcslen (StartUpArg-&gt;Argv[i]) +
+00285                      <span class="keyword">sizeof</span> (TCHAR)) != ERROR_SUCCESS)
+00286                   {
+00287                     _snprintf (MsgErrorString, <span class="keyword">sizeof</span>(MsgErrorString), <span class=
+"stringliteral">"%s %s"</span>,
+00288                                _T (<span class="stringliteral">"is unable to create registry entries"</span>),
+00289                                lpszServiceDisplayName);
+00290                     ProcessError (EVENTLOG_ERROR_TYPE, MsgErrorString, 1, quiet);
+00291                     exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
+00292                     LEAVE;
+00293                   };
+00294               }
+00295           }
+00296 
+00297         <span class="comment">/*</span>
+00298 <span class="comment">         * Everything is set, delete hKey </span>
+00299 <span class="comment">         */</span>
+00300         RegCloseKey (hParamKey);
+00301         RegCloseKey (hKey);
+00302       }
+00303 
+00304     <span class="comment">/*</span>
+00305 <span class="comment">     * Ready to Log messages </span>
+00306 <span class="comment">     */</span>
+00307 
+00308     <span class="comment">/*</span>
+00309 <span class="comment">     * Successfully registered as service </span>
+00310 <span class="comment">     */</span>
+00311     _snprintf (MsgErrorString, <span class="keyword">sizeof</span>(MsgErrorString), <span class=
+"stringliteral">"%s %s"</span>, lpszServiceName,
+00312                _T (<span class="stringliteral">"successfully registered as a service"</span>));
+00313 
+00314     <span class="comment">/*</span>
+00315 <span class="comment">     * Log message to eventlog </span>
+00316 <span class="comment">     */</span>
+00317     ProcessError (EVENTLOG_INFORMATION_TYPE, MsgErrorString, 0, quiet);
+00318   }
+00319 
+00320   FINALLY
+00321   {
+00322     <span class="keywordflow">if</span> (hSCManager)
+00323       CloseServiceHandle (hSCManager);
+00324     <span class="keywordflow">if</span> (hService)
+00325       CloseServiceHandle (hService);
+00326     <span class="keywordflow">if</span> (hKey)
+00327       RegCloseKey (hKey);
+00328     <span class="keywordflow">if</span> (hParamKey)
+00329       RegCloseKey (hParamKey);
+00330   }
+00331   <span class="keywordflow">return</span> (exitStatus);
+00332 }
+00333 
+00334     <span class="comment">/*</span>
+00335 <span class="comment">     * Unregister the service with the  Windows SCM </span>
+00336 <span class="comment">     * Input - ServiceName</span>
+00337 <span class="comment">     */</span>
+00338 <span class="keywordtype">int</span>
+00339 UnregisterService (LPCSTR lpszServiceName, <span class="keywordtype">int</span> quiet)
+00340 {
+00341   TCHAR MsgErrorString[MAX_STR_SIZE];   <span class="comment">/* Message or Error string */</span>
+00342   SC_HANDLE hSCManager = NULL;  <span class="comment">/* SCM handle */</span>
+00343   SC_HANDLE hService = NULL;    <span class="comment">/* Service Handle */</span>
+00344   SERVICE_STATUS sStatus;
+00345   TCHAR szRegAppLogKey[] =
+00346     <span class="stringliteral">"SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\"</span>;
+00347   TCHAR szRegKey[512];
+00348   <span class="keywordtype">int</span> exitStatus = 0;
+00349 <span class="comment">/*  HKEY hKey = NULL;           ?* Key to registry entry */</span>
+00350   TRY
+00351   {
+00352     <span class="comment">/*</span>
+00353 <span class="comment">     * Open Service Control Manager </span>
+00354 <span class="comment">     */</span>
+00355     hSCManager = OpenSCManager (NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+00356     <span class="keywordflow">if</span> (hSCManager == NULL)
+00357       {
+00358         ProcessError (EVENTLOG_ERROR_TYPE, _T (<span class=
+"stringliteral">"Can't open SCM (Service Control Manager)"</span>), 1, quiet);
+00359         exitStatus = SERVICE_ERROR_SCM_OPEN;       
+00360         LEAVE;
+00361       }
+00362 
+00363     <span class="comment">/*</span>
+00364 <span class="comment">     * Open registered service </span>
+00365 <span class="comment">     */</span>
+00366     hService = OpenService (hSCManager, lpszServiceName, SERVICE_ALL_ACCESS);
+00367     <span class="keywordflow">if</span> (hService == NULL)
+00368       {
+00369         _snprintf (MsgErrorString, <span class="keyword">sizeof</span>(MsgErrorString), <span class=
+"stringliteral">"%s %s"</span>, _T (<span class="stringliteral">"Can't open service"</span>),
+00370                    lpszServiceName);
+00371         ProcessError (EVENTLOG_ERROR_TYPE, MsgErrorString, 1, quiet);
+00372         exitStatus = SERVICE_ERROR_OPEN_SERVICE;       
+00373         LEAVE;
+00374       }
+00375 
+00376     <span class="comment">/*</span>
+00377 <span class="comment">     * Query service status </span>
+00378 <span class="comment">     * If running stop before deleting </span>
+00379 <span class="comment">     */</span>
+00380     <span class="keywordflow">if</span> (QueryServiceStatus (hService, &amp;sStatus))
+00381       {
+00382         <span class="keywordflow">if</span> (sStatus.dwCurrentState == SERVICE_RUNNING
+00383             || sStatus.dwCurrentState == SERVICE_PAUSED)
+00384           {
+00385             ControlService (hService, SERVICE_CONTROL_STOP, &amp;sStatus);
+00386           }
+00387       };
+00388 
+00389     <span class="comment">/*</span>
+00390 <span class="comment">     * Delete the service  </span>
+00391 <span class="comment">     */</span>
+00392     <span class="keywordflow">if</span> (DeleteService (hService) == FALSE)
+00393       {
+00394         _snprintf (MsgErrorString, <span class="keyword">sizeof</span>(MsgErrorString), <span class=
+"stringliteral">"%s %s"</span>, _T (<span class="stringliteral">"Can't delete service"</span>),
+00395                    lpszServiceName);
+00396 
+00397         <span class="comment">/*</span>
+00398 <span class="comment">         * Log message to eventlog </span>
+00399 <span class="comment">         */</span>
+00400         ProcessError (EVENTLOG_ERROR_TYPE, MsgErrorString, 0, quiet);
+00401         LEAVE;
+00402       }
+00403 
+00404     <span class="comment">/*</span>
+00405 <span class="comment">     * Log "Service deleted successfully " message to eventlog</span>
+00406 <span class="comment">     */</span>
+00407     _snprintf (MsgErrorString, <span class="keyword">sizeof</span>(MsgErrorString), <span class=
+"stringliteral">"%s %s"</span>, lpszServiceName, _T (<span class="stringliteral">"service deleted"</span>));
+00408     ProcessError (EVENTLOG_INFORMATION_TYPE, MsgErrorString, 0, quiet);
+00409 
+00410     <span class="comment">/*</span>
+00411 <span class="comment">     * Delete registry entries for EventLog </span>
+00412 <span class="comment">     */</span>
+00413     _tcscpy (szRegKey, szRegAppLogKey);
+00414     _tcscat (szRegKey, lpszServiceName);
+00415     RegDeleteKey (HKEY_LOCAL_MACHINE, szRegKey);
+00416   }
+00417 
+00418   <span class="comment">/*</span>
+00419 <span class="comment">   * Delete the handles </span>
+00420 <span class="comment">   */</span>
+00421   FINALLY
+00422   {
+00423     <span class="keywordflow">if</span> (hService)
+00424       CloseServiceHandle (hService);
+00425     <span class="keywordflow">if</span> (hSCManager)
+00426       CloseServiceHandle (hSCManager);
+00427   }
+00428   <span class="keywordflow">return</span> (exitStatus);
+00429 }
+00430 
+00431     <span class="comment">/*</span>
+00432 <span class="comment">     * To write message to Windows Event log</span>
+00433 <span class="comment">     * Input - Event Type, Message string</span>
+00434 <span class="comment">     */</span>
+00435 VOID
+00436 WriteToEventLog (WORD wType, LPCTSTR pszFormat, ...)
+00437 {
+00438   TCHAR szMessage[512];
+00439   LPTSTR LogStr[1];
+00440   va_list ArgList;
+00441   HANDLE hEventSource = NULL;
+00442   va_start (ArgList, pszFormat);
+00443   _vsnprintf (szMessage, <span class="keyword">sizeof</span>(szMessage), pszFormat, ArgList);
+00444   va_end (ArgList);
+00445   LogStr[0] = szMessage;
+00446   hEventSource = RegisterEventSource (NULL, app_name);
+00447   <span class="keywordflow">if</span> (hEventSource == NULL)
+00448     <span class="keywordflow">return</span>;
+00449   ReportEvent (hEventSource, wType, 0,
+00450                DISPLAY_MSG,     <span class="comment">/* To Just output the text to event log */</span>
+00451                NULL, 1, 0, LogStr, NULL);
+00452   DeregisterEventSource (hEventSource);
+00453 }
+00454 
+00455     <span class="comment">/*</span>
+00456 <span class="comment">     * Pre-process the second command-line argument from the user. </span>
+00457 <span class="comment">     *     Service related options are:</span>
+00458 <span class="comment">     *     -register       - registers the service</span>
+00459 <span class="comment">     *     -unregister     - unregisters the service</span>
+00460 <span class="comment">     *     -service        - run as service</span>
+00461 <span class="comment">     *     other command-line arguments are ignored here.</span>
+00462 <span class="comment">     *</span>
+00463 <span class="comment">     * Return: Type indicating the option specified</span>
+00464 <span class="comment">     */</span>
+00465 INT
+00466 ParseCmdLineForServiceOption (<span class="keywordtype">int</span> argc, TCHAR * argv[], <span class=
+"keywordtype">int</span> *quiet)
+00467 {
+00468   <span class="keywordtype">int</span> nReturn = RUN_AS_CONSOLE; <span class=
+"comment">/* Defualted to run as console */</span>
+00469 
+00470   <span class="keywordflow">if</span> (argc &gt;= 2)
+00471     {
+00472 
+00473       <span class="comment">/*</span>
+00474 <span class="comment">       * second argument present </span>
+00475 <span class="comment">       */</span>
+00476       <span class="keywordflow">if</span> (lstrcmpi (_T (<span class="stringliteral">"-register"</span>), argv[1]) == 0)
+00477         {
+00478           nReturn = REGISTER_SERVICE;
+00479         }
+00480 
+00481       <span class="keywordflow">else</span> <span class="keywordflow">if</span> (lstrcmpi (_T (<span class=
+"stringliteral">"-unregister"</span>), argv[1]) == 0)
+00482         {
+00483           nReturn = UN_REGISTER_SERVICE;
+00484         }
+00485 
+00486       <span class="keywordflow">else</span> <span class="keywordflow">if</span> (lstrcmpi (_T (<span class=
+"stringliteral">"-service"</span>), argv[1]) == 0)
+00487         {
+00488           nReturn = RUN_AS_SERVICE;
+00489         }
+00490     }
+00491 
+00492   <span class="keywordflow">if</span> (argc &gt;= 3)
+00493   {
+00494     <span class="comment">/*</span>
+00495 <span class="comment">     * third argument present </span>
+00496 <span class="comment">     */</span>
+00497     <span class="keywordflow">if</span> (lstrcmpi (_T (<span class="stringliteral">"-quiet"</span>), argv[2]) == 0)
+00498     {
+00499       *quiet = 1;       
+00500     }
+00501   }
+00502   
+00503   <span class="keywordflow">return</span> nReturn;
+00504 }
+00505 
+00506     <span class="comment">/*</span>
+00507 <span class="comment">     * Write error message to Event Log, console or pop-up window</span>
+00508 <span class="comment">     *</span>
+00509 <span class="comment">     * If useGetLastError is 1, the last error returned from GetLastError()</span>
+00510 <span class="comment">     * is appended to pszMessage, separated by a ": ".</span>
+00511 <span class="comment">     *</span>
+00512 <span class="comment">     * eventLogType:                 MessageBox equivalent:</span>
+00513 <span class="comment">     * </span>
+00514 <span class="comment">     * EVENTLOG_INFORMATION_TYPE     MB_ICONASTERISK</span>
+00515 <span class="comment">     * EVENTLOG_WARNING_TYPE         MB_ICONEXCLAMATION</span>
+00516 <span class="comment">     * EVENTLOG_ERROR_TYPE           MB_ICONSTOP</span>
+00517 <span class="comment">     * </span>
+00518 <span class="comment">     */</span>
+00519 VOID
+00520 ProcessError (WORD eventLogType, LPCTSTR pszMessage, <span class="keywordtype">int</span> useGetLastError, <span class=
+"keywordtype">int</span> quiet)
+00521 {
+00522   LPTSTR pErrorMsgTemp = NULL;
+00523   HANDLE hEventSource = NULL;
+00524   TCHAR pszMessageFull[MAX_STR_SIZE]; <span class="comment">/* Combined pszMessage and GetLastError */</span>
+00525 
+00526   <span class="comment">/*</span>
+00527 <span class="comment">   * If useGetLastError enabled, generate text from GetLastError() and append to</span>
+00528 <span class="comment">   * pszMessageFull</span>
+00529 <span class="comment">   */</span>
+00530   <span class="keywordflow">if</span> (useGetLastError) {
+00531   FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |
+00532                  FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError (),
+00533                  MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
+00534         (LPTSTR) &amp; pErrorMsgTemp, 0, NULL);
+00535 
+00536     _snprintf (pszMessageFull, <span class="keyword">sizeof</span>(pszMessageFull), <span class=
+"stringliteral">"%s: %s"</span>, pszMessage, pErrorMsgTemp);
+00537     <span class="keywordflow">if</span> (pErrorMsgTemp) {
+00538       LocalFree (pErrorMsgTemp);
+00539       pErrorMsgTemp = NULL;
+00540     }
+00541   }
+00542   <span class="keywordflow">else</span> {
+00543     _snprintf (pszMessageFull, <span class="keyword">sizeof</span>(pszMessageFull), <span class=
+"stringliteral">"%s"</span>, pszMessage);
+00544   }
+00545   
+00546   hEventSource = RegisterEventSource (NULL, app_name);
+00547   <span class="keywordflow">if</span> (hEventSource != NULL) {
+00548     pErrorMsgTemp = pszMessageFull;
+00549     
+00550     <span class="keywordflow">if</span> (ReportEvent (hEventSource, 
+00551           eventLogType, 
+00552           0,
+00553           DISPLAY_MSG,  <span class="comment">/* To Just output the text to event log */</span>
+00554           NULL, 
+00555           1, 
+00556           0, 
+00557           &amp;pErrorMsgTemp, 
+00558           NULL)) {
+00559     }
+00560     <span class="keywordflow">else</span> {
+00561       FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |
+00562           FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError (),
+00563           MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
+00564           (LPTSTR) &amp; pErrorMsgTemp, 0, NULL);
+00565       
+00566       fprintf(stderr,<span class=
+"stringliteral">"Could NOT lot to Event Log.  Error returned from ReportEvent(): %s\n"</span>,pErrorMsgTemp);
+00567       <span class="keywordflow">if</span> (pErrorMsgTemp) {
+00568         LocalFree (pErrorMsgTemp);
+00569         pErrorMsgTemp = NULL;
+00570       }
+00571     }
+00572     DeregisterEventSource (hEventSource);
+00573     }
+00574 
+00575       <span class="keywordflow">if</span> (quiet) {
+00576     fprintf(stderr,<span class="stringliteral">"%s\n"</span>,pszMessageFull);
+00577       }
+00578       <span class="keywordflow">else</span> {
+00579     <span class="keywordflow">switch</span> (eventLogType) {
+00580       <span class="keywordflow">case</span> EVENTLOG_INFORMATION_TYPE:
+00581         MessageBox (NULL, pszMessageFull, app_name, MB_ICONASTERISK);
+00582         <span class="keywordflow">break</span>;
+00583       <span class="keywordflow">case</span> EVENTLOG_WARNING_TYPE:
+00584         MessageBox (NULL, pszMessageFull, app_name, MB_ICONEXCLAMATION);
+00585         <span class="keywordflow">break</span>;
+00586       <span class="keywordflow">case</span> EVENTLOG_ERROR_TYPE:
+00587         MessageBox (NULL, pszMessageFull, app_name, MB_ICONSTOP);
+00588         <span class="keywordflow">break</span>;
+00589       <span class="keywordflow">default</span>:
+00590         MessageBox (NULL, pszMessageFull, app_name, EVENTLOG_WARNING_TYPE);
+00591         <span class="keywordflow">break</span>;
+00592       }
+00593     }
+00594   
+00595   LocalFree (pErrorMsgTemp);  
+00596 }
+00597 
+00598     <span class="comment">/*</span>
+00599 <span class="comment">     *  To update current service status </span>
+00600 <span class="comment">     *  Sends the current service status to the SCM. Also updates</span>
+00601 <span class="comment">     *  the global service status structure.</span>
+00602 <span class="comment">     */</span>
+00603 <span class="keyword">static</span> BOOL
+00604 UpdateServiceStatus (DWORD dwStatus, DWORD dwErrorCode, DWORD dwWaitHint)
+00605 {
+00606   DWORD <span class="keyword">static</span> dwCheckpoint = 1;
+00607   DWORD dwControls = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE;
+00608   <span class="keywordflow">if</span> (g_fRunningAsService == FALSE)
+00609     <span class="keywordflow">return</span> FALSE;
+00610   ZeroMemory (&amp;ServiceStatus, <span class="keyword">sizeof</span> (ServiceStatus));
+00611   ServiceStatus.dwServiceType = SERVICE_WIN32;
+00612   ServiceStatus.dwCurrentState = dwStatus;
+00613   ServiceStatus.dwWaitHint = dwWaitHint;
+00614   <span class="keywordflow">if</span> (dwErrorCode)
+00615     {
+00616       ServiceStatus.dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
+00617       ServiceStatus.dwServiceSpecificExitCode = dwErrorCode;
+00618     }
+00619 
+00620   <span class="comment">/*</span>
+00621 <span class="comment">   * special cases that depend on the new state </span>
+00622 <span class="comment">   */</span>
+00623   <span class="keywordflow">switch</span> (dwStatus)
+00624     {
+00625     <span class="keywordflow">case</span> SERVICE_START_PENDING:
+00626       dwControls = 0;
+00627       <span class="keywordflow">break</span>;
+00628     <span class="keywordflow">case</span> SERVICE_RUNNING:
+00629     <span class="keywordflow">case</span> SERVICE_STOPPED:
+00630       dwCheckpoint = 0;
+00631       <span class="keywordflow">break</span>;
+00632     }
+00633   ServiceStatus.dwCheckPoint = dwCheckpoint++;
+00634   ServiceStatus.dwControlsAccepted = dwControls;
+00635   <span class="keywordflow">return</span> ReportCurrentServiceStatus ();
+00636 }
+00637 
+00638     <span class="comment">/*</span>
+00639 <span class="comment">     * Reports current Service status to SCM</span>
+00640 <span class="comment">     */</span>
+00641 <span class="keyword">static</span> BOOL
+00642 ReportCurrentServiceStatus ()
+00643 {
+00644   <span class="keywordflow">return</span> SetServiceStatus (hServiceStatus, &amp;ServiceStatus);
+00645 }
+00646 
+00647     <span class="comment">/*</span>
+00648 <span class="comment">     * The ServiceMain function to start service.</span>
+00649 <span class="comment">     */</span>
+00650 VOID WINAPI
+00651 ServiceMain (DWORD argc, LPTSTR argv[])
+00652 {
+00653   SECURITY_ATTRIBUTES SecurityAttributes;
+00654   DWORD dwThreadId;
+00655 
+00656   <span class="comment">/*</span>
+00657 <span class="comment">   * Input Arguments to function startup </span>
+00658 <span class="comment">   */</span>
+00659   DWORD ArgCount = 0;
+00660   LPTSTR *ArgArray = NULL;
+00661   TCHAR szRegKey[512];
+00662   TCHAR szValue[128];
+00663   DWORD nSize;
+00664   HKEY hParamKey = NULL;        <span class="comment">/* To read startup parameters */</span>
+00665   DWORD TotalParams = 0;
+00666   DWORD i;
+00667   InputParams ThreadInputParams;
+00668 
+00669   <span class="comment">/*</span>
+00670 <span class="comment">   * Build the Input parameters to pass to worker thread </span>
+00671 <span class="comment">   */</span>
+00672 
+00673   <span class="comment">/*</span>
+00674 <span class="comment">   * SCM sends Service Name as first arg, increment to point</span>
+00675 <span class="comment">   * arguments user specified while starting contorl agent</span>
+00676 <span class="comment">   */</span>
+00677 
+00678   <span class="comment">/*</span>
+00679 <span class="comment">   * Read registry parameter </span>
+00680 <span class="comment">   */</span>
+00681   ArgCount = 1;
+00682 
+00683   <span class="comment">/*</span>
+00684 <span class="comment">   * Create Registry Key path </span>
+00685 <span class="comment">   */</span>
+00686   _snprintf (szRegKey, <span class="keyword">sizeof</span>(szRegKey), <span class="stringliteral">"%s%s\\%s"</span>,
+00687              _T (<span class="stringliteral">"SYSTEM\\CurrentControlSet\\Services\\"</span>), app_name,
+00688              <span class="stringliteral">"Parameters"</span>);
+00689   <span class="keywordflow">if</span> (RegOpenKeyEx
+00690       (HKEY_LOCAL_MACHINE, szRegKey, 0, KEY_ALL_ACCESS, &amp;hParamKey) == ERROR_SUCCESS)
+00691     {
+00692 
+00693       <span class="comment">/*</span>
+00694 <span class="comment">       * Read startup Configuration information </span>
+00695 <span class="comment">       */</span>
+00696       <span class="comment">/*</span>
+00697 <span class="comment">       * Find number of subkeys inside parameters </span>
+00698 <span class="comment">       */</span>
+00699       <span class="keywordflow">if</span> (RegQueryInfoKey (hParamKey, NULL, NULL, 0,
+00700            NULL, NULL, NULL, &amp;TotalParams,
+00701            NULL, NULL, NULL, NULL) == ERROR_SUCCESS)
+00702         {
+00703           <span class="keywordflow">if</span> (TotalParams != 0)
+00704             {
+00705               ArgCount += TotalParams;
+00706 
+00707               <span class="comment">/*</span>
+00708 <span class="comment">               * Allocate memory to hold strings </span>
+00709 <span class="comment">               */</span>
+00710               ArgArray = (LPTSTR *) malloc (<span class="keyword">sizeof</span> (LPTSTR) * ArgCount);
+00711 
+00712               <span class="comment">/*</span>
+00713 <span class="comment">               * Copy first argument </span>
+00714 <span class="comment">               */</span>
+00715               ArgArray[0] = _tcsdup (argv[0]);
+00716               <span class="keywordflow">for</span> (i = 1; i &lt;= TotalParams; i++)
+00717                 {
+00718 
+00719                   <span class="comment">/*</span>
+00720 <span class="comment">                   * Create Subkey value name </span>
+00721 <span class="comment">                   */</span>
+00722                   _snprintf (szRegKey, <span class="keyword">sizeof</span>(szRegKey), <span class=
+"stringliteral">"%s%d"</span>, <span class="stringliteral">"Param"</span>, i);
+00723 
+00724                   <span class="comment">/*</span>
+00725 <span class="comment">                   * Set size </span>
+00726 <span class="comment">                   */</span>
+00727                   nSize = 128;
+00728                   RegQueryValueEx (hParamKey, szRegKey, 0, NULL,
+00729                                    (LPBYTE) &amp; szValue, &amp;nSize);
+00730                   ArgArray[i] = _tcsdup (szValue);
+00731                 }
+00732             }
+00733         }
+00734       RegCloseKey (hParamKey);
+00735     }
+00736   <span class="keywordflow">if</span> (ArgCount == 1)
+00737     {
+00738 
+00739       <span class="comment">/*</span>
+00740 <span class="comment">       * No statup agrs are given </span>
+00741 <span class="comment">       */</span>
+00742       ThreadInputParams.Argc = argc;
+00743       ThreadInputParams.Argv = argv;
+00744     }
+00745 
+00746   <span class="keywordflow">else</span>
+00747     {
+00748       ThreadInputParams.Argc = ArgCount;
+00749       ThreadInputParams.Argv = ArgArray;
+00750     }
+00751 
+00752   <span class="comment">/*</span>
+00753 <span class="comment">   * Register Service Control Handler </span>
+00754 <span class="comment">   */</span>
+00755   hServiceStatus = RegisterServiceCtrlHandler (app_name, ControlHandler);
+00756   <span class="keywordflow">if</span> (hServiceStatus == 0)
+00757     {
+00758       WriteToEventLog (EVENTLOG_ERROR_TYPE,
+00759                        _T (<span class="stringliteral">"RegisterServiceCtrlHandler failed"</span>));
+00760       <span class="keywordflow">return</span>;
+00761     }
+00762 
+00763   <span class="comment">/*</span>
+00764 <span class="comment">   * Update the service status to START_PENDING </span>
+00765 <span class="comment">   */</span>
+00766   UpdateServiceStatus (SERVICE_START_PENDING, NO_ERROR, SCM_WAIT_INTERVAL);
+00767 
+00768   <span class="comment">/*</span>
+00769 <span class="comment">   * Spin of worker thread, which does majority of the work </span>
+00770 <span class="comment">   */</span>
+00771   TRY
+00772   {
+00773     <span class="keywordflow">if</span> (SetSimpleSecurityAttributes (&amp;SecurityAttributes) == FALSE)
+00774       {
+00775         WriteToEventLog (EVENTLOG_ERROR_TYPE,
+00776                          _T (<span class="stringliteral">"Couldn't init security attributes"</span>));
+00777         LEAVE;
+00778       }
+00779     hServiceThread =
+00780       (<span class="keywordtype">void</span> *) _beginthreadex (&amp;SecurityAttributes, 0,
+00781                                ThreadFunction,
+00782                                (<span class="keywordtype">void</span> *) &amp;ThreadInputParams, 0, &amp;dwThreadId);
+00783     <span class="keywordflow">if</span> (hServiceThread == NULL)
+00784       {
+00785         WriteToEventLog (EVENTLOG_ERROR_TYPE, _T (<span class="stringliteral">"Couldn't start worker thread"</span>));
+00786         LEAVE;
+00787       }
+00788 
+00789     <span class="comment">/*</span>
+00790 <span class="comment">     * Set Service Status to Running </span>
+00791 <span class="comment">     */</span>
+00792     UpdateServiceStatus (SERVICE_RUNNING, NO_ERROR, SCM_WAIT_INTERVAL);
+00793 
+00794     <span class="comment">/*</span>
+00795 <span class="comment">     * Wait for termination event and worker thread to</span>
+00796 <span class="comment">     * * spin down.</span>
+00797 <span class="comment">     */</span>
+00798     WaitForSingleObject (hServiceThread, INFINITE);
+00799   }
+00800   FINALLY
+00801   {
+00802     <span class="comment">/*</span>
+00803 <span class="comment">     * Release resources </span>
+00804 <span class="comment">     */</span>
+00805     UpdateServiceStatus (SERVICE_STOPPED, NO_ERROR, SCM_WAIT_INTERVAL);
+00806     <span class="keywordflow">if</span> (hServiceThread)
+00807       CloseHandle (hServiceThread);
+00808     FreeSecurityAttributes (&amp;SecurityAttributes);
+00809 
+00810     <span class="comment">/*</span>
+00811 <span class="comment">     * Delete allocated argument list </span>
+00812 <span class="comment">     */</span>
+00813     <span class="keywordflow">if</span> (ArgCount &gt; 1 &amp;&amp; ArgArray != NULL)
+00814       {
+00815         <span class="comment">/*</span>
+00816 <span class="comment">         * Delete all strings </span>
+00817 <span class="comment">         */</span>
+00818         <span class="keywordflow">for</span> (i = 0; i &lt; ArgCount; i++)
+00819           {
+00820             free (ArgArray[i]);
+00821           }
+00822         free (ArgArray);
+00823       }
+00824   }
+00825 }
+00826 
+00827     <span class="comment">/*</span>
+00828 <span class="comment">     * Function to start as Windows service</span>
+00829 <span class="comment">     * The calling party should specify their entry point as input parameter</span>
+00830 <span class="comment">     * Returns TRUE if the Service is started successfully</span>
+00831 <span class="comment">     */</span>
+00832 BOOL
+00833 RunAsService (INT (*ServiceFunction) (INT, LPTSTR *))
+00834 {
+00835 
+00836   <span class="comment">/*</span>
+00837 <span class="comment">   * Set the ServiceEntryPoint </span>
+00838 <span class="comment">   */</span>
+00839   ServiceEntryPoint = ServiceFunction;
+00840 
+00841   <span class="comment">/*</span>
+00842 <span class="comment">   * By default, mark as Running as a service </span>
+00843 <span class="comment">   */</span>
+00844   g_fRunningAsService = TRUE;
+00845 
+00846   <span class="comment">/*</span>
+00847 <span class="comment">   * Initialize ServiceTableEntry table </span>
+00848 <span class="comment">   */</span>
+00849   ServiceTableEntry[0].lpServiceName = app_name;        <span class="comment">/* Application Name */</span>
+00850 
+00851   <span class="comment">/*</span>
+00852 <span class="comment">   * Call SCM via StartServiceCtrlDispatcher to run as Service </span>
+00853 <span class="comment">   * * If the function returns TRUE we are running as Service, </span>
+00854 <span class="comment">   */</span>
+00855   <span class="keywordflow">if</span> (StartServiceCtrlDispatcher (ServiceTableEntry) == FALSE)
+00856     {
+00857       g_fRunningAsService = FALSE;
+00858 
+00859       <span class="comment">/*</span>
+00860 <span class="comment">       * Some other error has occurred. </span>
+00861 <span class="comment">       */</span>
+00862       WriteToEventLog (EVENTLOG_ERROR_TYPE,
+00863                        _T (<span class="stringliteral">"Couldn't start service - %s"</span>), app_name);
+00864     }
+00865   <span class="keywordflow">return</span> g_fRunningAsService;
+00866 }
+00867 
+00868     <span class="comment">/*</span>
+00869 <span class="comment">     * Service control handler function</span>
+00870 <span class="comment">     * Responds to SCM commands/requests</span>
+00871 <span class="comment">     * This service handles 4 commands</span>
+00872 <span class="comment">     * - interrogate, pause, continue and stop.</span>
+00873 <span class="comment">     */</span>
+00874 VOID WINAPI
+00875 ControlHandler (DWORD dwControl)
+00876 {
+00877   <span class="keywordflow">switch</span> (dwControl)
+00878     {
+00879     <span class="keywordflow">case</span> SERVICE_CONTROL_INTERROGATE:
+00880       ProcessServiceInterrogate ();
+00881       <span class="keywordflow">break</span>;
+00882 
+00883     <span class="keywordflow">case</span> SERVICE_CONTROL_PAUSE:
+00884       ProcessServicePause ();
+00885       <span class="keywordflow">break</span>;
+00886 
+00887     <span class="keywordflow">case</span> SERVICE_CONTROL_CONTINUE:
+00888       ProcessServiceContinue ();
+00889       <span class="keywordflow">break</span>;
+00890 
+00891     <span class="keywordflow">case</span> SERVICE_CONTROL_STOP:
+00892       ProcessServiceStop ();
+00893       <span class="keywordflow">break</span>;
+00894     }
+00895 }
+00896 
+00897     <span class="comment">/*</span>
+00898 <span class="comment">     * To stop the service.</span>
+00899 <span class="comment">     * If a stop function was registered, invoke it,</span>
+00900 <span class="comment">     * otherwise terminate the worker thread.</span>
+00901 <span class="comment">     * After stopping, Service status is set to STOP in </span>
+00902 <span class="comment">     * main loop</span>
+00903 <span class="comment">     */</span>
+00904 VOID
+00905 ProcessServiceStop (VOID)
+00906 {
+00907   UpdateServiceStatus (SERVICE_STOP_PENDING, NO_ERROR, SCM_WAIT_INTERVAL);
+00908 
+00909   <span class="keywordflow">if</span> (StopFunction != NULL)
+00910     {
+00911       (*StopFunction) ();
+00912     }
+00913 
+00914   <span class="keywordflow">else</span>
+00915     {
+00916       TerminateThread (hServiceThread, 0);
+00917     }
+00918 }
+00919 
+00920     <span class="comment">/*</span>
+00921 <span class="comment">     * Returns the current state of the service to the SCM.</span>
+00922 <span class="comment">     */</span>
+00923 VOID
+00924 ProcessServiceInterrogate (VOID)
+00925 {
+00926   ReportCurrentServiceStatus ();
+00927 }
+00928 
+00929     <span class="comment">/*</span>
+00930 <span class="comment">     * To Create a security descriptor with a NULL ACL, which</span>
+00931 <span class="comment">     * allows unlimited access. Returns a SECURITY_ATTRIBUTES</span>
+00932 <span class="comment">     * structure that contains the security descriptor.</span>
+00933 <span class="comment">     * The structure contains a dynamically allocated security</span>
+00934 <span class="comment">     * descriptor that must be freed either manually, or by</span>
+00935 <span class="comment">     * calling FreeSecurityAttributes </span>
+00936 <span class="comment">     */</span>
+00937 BOOL
+00938 SetSimpleSecurityAttributes (SECURITY_ATTRIBUTES * pSecurityAttr)
+00939 {
+00940   BOOL fReturn = FALSE;
+00941   SECURITY_DESCRIPTOR *pSecurityDesc = NULL;
+00942 
+00943   <span class="comment">/*</span>
+00944 <span class="comment">   * If an invalid address is passed as a parameter, return</span>
+00945 <span class="comment">   * FALSE right away. </span>
+00946 <span class="comment">   */</span>
+00947   <span class="keywordflow">if</span> (!pSecurityAttr)
+00948     <span class="keywordflow">return</span> FALSE;
+00949   pSecurityDesc =
+00950     (SECURITY_DESCRIPTOR *) LocalAlloc (LPTR, SECURITY_DESCRIPTOR_MIN_LENGTH);
+00951   <span class="keywordflow">if</span> (!pSecurityDesc)
+00952     <span class="keywordflow">return</span> FALSE;
+00953   fReturn =
+00954     InitializeSecurityDescriptor (pSecurityDesc, SECURITY_DESCRIPTOR_REVISION);
+00955   <span class="keywordflow">if</span> (fReturn != FALSE)
+00956     {
+00957       fReturn = SetSecurityDescriptorDacl (pSecurityDesc, TRUE, NULL, FALSE);
+00958     }
+00959   <span class="keywordflow">if</span> (fReturn != FALSE)
+00960     {
+00961       pSecurityAttr-&gt;nLength = <span class="keyword">sizeof</span> (SECURITY_ATTRIBUTES);
+00962       pSecurityAttr-&gt;lpSecurityDescriptor = pSecurityDesc;
+00963       pSecurityAttr-&gt;bInheritHandle = TRUE;
+00964     }
+00965 
+00966   <span class="keywordflow">else</span>
+00967     {
+00968       <span class="comment">/*</span>
+00969 <span class="comment">       * Couldn't initialize or set security descriptor. </span>
+00970 <span class="comment">       */</span>
+00971       LocalFree (pSecurityDesc);
+00972     }
+00973   <span class="keywordflow">return</span> fReturn;
+00974 }
+00975 
+00976     <span class="comment">/*</span>
+00977 <span class="comment">     * This function Frees the security descriptor, if any was created.</span>
+00978 <span class="comment">     */</span>
+00979 VOID
+00980 FreeSecurityAttributes (SECURITY_ATTRIBUTES * pSecurityAttr)
+00981 {
+00982   <span class="keywordflow">if</span> (pSecurityAttr &amp;&amp; pSecurityAttr-&gt;lpSecurityDescriptor)
+00983     LocalFree (pSecurityAttr-&gt;lpSecurityDescriptor);
+00984 }
+00985 
+00986     <span class="comment">/*</span>
+00987 <span class="comment">     * This function runs in the worker thread</span>
+00988 <span class="comment">     * until an exit is forced, or until the SCM issues the STOP command.</span>
+00989 <span class="comment">     * Invokes registered service function</span>
+00990 <span class="comment">     * Returns when called registered function returns</span>
+00991 <span class="comment">     *</span>
+00992 <span class="comment">     * Input:</span>
+00993 <span class="comment">     *   lpParam contains argc and argv, pass to service main function </span>
+00994 <span class="comment">     */</span>
+00995 DWORD WINAPI
+00996 ThreadFunction (LPVOID lpParam)
+00997 {
+00998   InputParams * pInputArg = (InputParams *) lpParam;
+00999   <span class="keywordflow">return</span> (*ServiceEntryPoint) (pInputArg-&gt;Argc, pInputArg-&gt;Argv);
+01000 }
+01001 
+01002     <span class="comment">/*</span>
+01003 <span class="comment">     * This function is called to register an application-specific function</span>
+01004 <span class="comment">     *   which is invoked when the SCM stops the worker thread.</span>
+01005 <span class="comment">     */</span>
+01006 VOID
+01007 RegisterStopFunction (VOID (*StopFunc) (VOID))
+01008 {
+01009   StopFunction = StopFunc;
+01010 }
+01011 
+01012     <span class="comment">/*</span>
+01013 <span class="comment">     * SCM pause command invokes this function</span>
+01014 <span class="comment">     * If the service is not running, this function does nothing.</span>
+01015 <span class="comment">     * Otherwise, suspend the worker thread and update the status.</span>
+01016 <span class="comment">     */</span>
+01017 VOID
+01018 ProcessServicePause (VOID)
+01019 {
+01020   <span class="keywordflow">if</span> (ServiceStatus.dwCurrentState == SERVICE_RUNNING)
+01021     {
+01022       UpdateServiceStatus (SERVICE_PAUSE_PENDING, NO_ERROR, SCM_WAIT_INTERVAL);
+01023 
+01024       <span class="keywordflow">if</span> (SuspendThread (hServiceThread) != -1)
+01025         {
+01026           UpdateServiceStatus (SERVICE_PAUSED, NO_ERROR, SCM_WAIT_INTERVAL);
+01027         }
+01028     }
+01029 }
+01030 
+01031     <span class="comment">/*</span>
+01032 <span class="comment">     * SCM resume command invokes this function</span>
+01033 <span class="comment">     * If the service is not paused, this function does nothing.</span>
+01034 <span class="comment">     * Otherwise, resume the worker thread and update the status.</span>
+01035 <span class="comment">     */</span>
+01036 VOID
+01037 ProcessServiceContinue (VOID)
+01038 {
+01039   <span class="keywordflow">if</span> (ServiceStatus.dwCurrentState == SERVICE_PAUSED)
+01040     {
+01041       UpdateServiceStatus (SERVICE_CONTINUE_PENDING, NO_ERROR, SCM_WAIT_INTERVAL);
+01042 
+01043       <span class="keywordflow">if</span> (ResumeThread (hServiceThread) != -1)
+01044         {
+01045           UpdateServiceStatus (SERVICE_RUNNING, NO_ERROR, SCM_WAIT_INTERVAL);
+01046         }
+01047     }
+01048 }
+01049 
+01050 <span class="preprocessor">#endif </span><span class="comment">/* WIN32 */</span>
+01051 
+01052 
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,816 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>Trap generation routines for mib modules to use<br />
+  <small>[<a class="el" href="group__agent.html">The Net-SNMP agent</a>]</small></h1>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Data Structures</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>trap_sink</b></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Defines</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga54" doxytag=
+      "agent_trap::SNMPV2_TRAPS_PREFIX" id="ga54"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMPV2_TRAPS_PREFIX</b>&nbsp;&nbsp;&nbsp;SNMP_OID_SNMPMODULES,1,1,5</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga55" doxytag=
+      "agent_trap::SNMPV2_TRAP_OBJS_PREFIX" id="ga55"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMPV2_TRAP_OBJS_PREFIX</b>&nbsp;&nbsp;&nbsp;SNMP_OID_SNMPMODULES,1,1,4</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga56" doxytag=
+      "agent_trap::SNMPV2_COMM_OBJS_PREFIX" id="ga56"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMPV2_COMM_OBJS_PREFIX</b>&nbsp;&nbsp;&nbsp;SNMP_OID_SNMPMODULES,18,1</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga57" doxytag=
+      "agent_trap::SNMP_AUTHENTICATED_TRAPS_ENABLED" id="ga57"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_AUTHENTICATED_TRAPS_ENABLED</b>&nbsp;&nbsp;&nbsp;1</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga58" doxytag=
+      "agent_trap::SNMP_AUTHENTICATED_TRAPS_DISABLED" id="ga58"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>SNMP_AUTHENTICATED_TRAPS_DISABLED</b>&nbsp;&nbsp;&nbsp;2</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga59" doxytag=
+      "agent_trap::MAX_ARGS" id="ga59"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>MAX_ARGS</b>&nbsp;&nbsp;&nbsp;128</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga27" doxytag=
+      "agent_trap::init_traps" id="ga27"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>init_traps</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga29" doxytag=
+      "agent_trap::add_trap_session" id="ga29"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>add_trap_session</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *ss, int pdutype, int confirm, int version)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga30" doxytag=
+      "agent_trap::remove_trap_session" id="ga30"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>remove_trap_session</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *ss)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga31" doxytag=
+      "agent_trap::create_trap_session" id="ga31"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>create_trap_session</b> (char *sink, u_short sinkport, char *com, int version,
+      int pdutype)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__agent__trap.html#ga35">snmpd_free_trapsinks</a>
+      (void)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This function allows you to make a distinction between generic traps from different classes of
+      equipment. <a href="#ga35"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga36" doxytag=
+      "agent_trap::find_varbind_in_list" id="ga36"></a> <a class="el" href="structvariable__list.html">netsnmp_variable_list</a>
+      *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>find_varbind_in_list</b> (<a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *vblist, oid *name, size_t len)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga37" doxytag=
+      "agent_trap::convert_v2pdu_to_v1" id="ga37"></a> <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>convert_v2pdu_to_v1</b> (<a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *template_v2pdu)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga38" doxytag=
+      "agent_trap::convert_v1pdu_to_v2" id="ga38"></a> <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>convert_v1pdu_to_v2</b> (<a class="el" href=
+      "structsnmp__pdu.html">netsnmp_pdu</a> *template_v1pdu)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga39" doxytag=
+      "agent_trap::netsnmp_send_traps" id="ga39"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_send_traps</b> (int trap, int specific, oid *enterprise, int
+      enterprise_length, <a class="el" href="structvariable__list.html">netsnmp_variable_list</a> *vars, char *context, int
+      flags)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga40" doxytag=
+      "agent_trap::send_enterprise_trap_vars" id="ga40"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>send_enterprise_trap_vars</b> (int trap, int specific, oid *enterprise, int
+      enterprise_length, <a class="el" href="structvariable__list.html">netsnmp_variable_list</a> *vars)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga41" doxytag=
+      "agent_trap::send_trap_to_sess" id="ga41"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>send_trap_to_sess</b> (<a class="el" href=
+      "structsnmp__session.html">netsnmp_session</a> *sess, <a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *template_pdu)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga42" doxytag=
+      "agent_trap::send_trap_vars" id="ga42"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>send_trap_vars</b> (int trap, int specific, <a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *vars)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__agent__trap.html#ga43">send_easy_trap</a> (int trap,
+      int specific)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Sends an SNMPv1 trap (or the SNMPv2 equivalent) to the list of configured trap destinations (or
+      "sinks"), using the provided values for the generic trap type and specific trap value. <a href="#ga43"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__agent__trap.html#ga44">send_v2trap</a> (<a class="el"
+      href="structvariable__list.html">netsnmp_variable_list</a> *vars)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Uses the supplied list of variable bindings to form an SNMPv2 trap, which is sent to SNMPv2-capable
+      sinks on the configured list. <a href="#ga44"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga45" doxytag=
+      "agent_trap::send_trap_pdu" id="ga45"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>send_trap_pdu</b> (<a class="el" href="structsnmp__pdu.html">netsnmp_pdu</a>
+      *pdu)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga46" doxytag=
+      "agent_trap::snmpd_parse_config_authtrap" id="ga46"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmpd_parse_config_authtrap</b> (const char *token, char *cptr)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga47" doxytag=
+      "agent_trap::snmpd_parse_config_trapsink" id="ga47"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmpd_parse_config_trapsink</b> (const char *token, char *cptr)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga48" doxytag=
+      "agent_trap::snmpd_parse_config_trap2sink" id="ga48"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmpd_parse_config_trap2sink</b> (const char *word, char *cptr)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga49" doxytag=
+      "agent_trap::snmpd_parse_config_informsink" id="ga49"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmpd_parse_config_informsink</b> (const char *word, char *cptr)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga51" doxytag=
+      "agent_trap::snmpd_parse_config_trapsess" id="ga51"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmpd_parse_config_trapsess</b> (const char *word, char *cptr)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga52" doxytag=
+      "agent_trap::snmpd_parse_config_trapcommunity" id="ga52"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmpd_parse_config_trapcommunity</b> (const char *word, char *cptr)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga53" doxytag=
+      "agent_trap::snmpd_free_trapcommunity" id="ga53"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmpd_free_trapcommunity</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Variables</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga0" doxytag="agent_trap::sinks"
+      id="ga0"></a> trap_sink *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>sinks</b> = NULL</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga1" doxytag=
+      "agent_trap::starttime" id="ga1"></a> timeval&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>starttime</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga2" doxytag=
+      "agent_trap::objid_enterprisetrap" id="ga2"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>objid_enterprisetrap</b> [] = { NOTIFICATION_MIB }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga3" doxytag=
+      "agent_trap::trap_version_id" id="ga3"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>trap_version_id</b> [] = { SYSTEM_MIB }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga4" doxytag=
+      "agent_trap::enterprisetrap_len" id="ga4"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>enterprisetrap_len</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga5" doxytag=
+      "agent_trap::trap_version_id_len" id="ga5"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>trap_version_id_len</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga6" doxytag=
+      "agent_trap::trap_prefix" id="ga6"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>trap_prefix</b> [] = { SNMPV2_TRAPS_PREFIX }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga7" doxytag=
+      "agent_trap::cold_start_oid" id="ga7"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>cold_start_oid</b> [] = { SNMPV2_TRAPS_PREFIX, 1 }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga8" doxytag=
+      "agent_trap::warm_start_oid" id="ga8"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>warm_start_oid</b> [] = { SNMPV2_TRAPS_PREFIX, 2 }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga9" doxytag=
+      "agent_trap::link_down_oid" id="ga9"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>link_down_oid</b> [] = { SNMPV2_TRAPS_PREFIX, 3 }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga10" doxytag=
+      "agent_trap::link_up_oid" id="ga10"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>link_up_oid</b> [] = { SNMPV2_TRAPS_PREFIX, 4 }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga11" doxytag=
+      "agent_trap::auth_fail_oid" id="ga11"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>auth_fail_oid</b> [] = { SNMPV2_TRAPS_PREFIX, 5 }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga12" doxytag=
+      "agent_trap::egp_xxx_oid" id="ga12"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>egp_xxx_oid</b> [] = { SNMPV2_TRAPS_PREFIX, 99 }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga13" doxytag=
+      "agent_trap::snmptrap_oid" id="ga13"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmptrap_oid</b> [] = { SNMPV2_TRAP_OBJS_PREFIX, 1, 0 }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmptrapenterprise_oid</b> []</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga15" doxytag=
+      "agent_trap::sysuptime_oid" id="ga15"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>sysuptime_oid</b> [] = { SNMP_OID_MIB2, 1, 3, 0 }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga16" doxytag=
+      "agent_trap::snmptrap_oid_len" id="ga16"></a> size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmptrap_oid_len</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga17" doxytag=
+      "agent_trap::snmptrapenterprise_oid_len" id="ga17"></a> size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmptrapenterprise_oid_len</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga18" doxytag=
+      "agent_trap::sysuptime_oid_len" id="ga18"></a> size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>sysuptime_oid_len</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga19" doxytag=
+      "agent_trap::agentaddr_oid" id="ga19"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>agentaddr_oid</b> [] = { SNMPV2_COMM_OBJS_PREFIX, 3, 0 }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga20" doxytag=
+      "agent_trap::agentaddr_oid_len" id="ga20"></a> size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>agentaddr_oid_len</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga21" doxytag=
+      "agent_trap::community_oid" id="ga21"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>community_oid</b> [] = { SNMPV2_COMM_OBJS_PREFIX, 4, 0 }</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga22" doxytag=
+      "agent_trap::community_oid_len" id="ga22"></a> size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>community_oid_len</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga23" doxytag=
+      "agent_trap::snmp_trapcommunity" id="ga23"></a> char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_trapcommunity</b> = NULL</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga24" doxytag=
+      "agent_trap::snmp_enableauthentraps" id="ga24"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_enableauthentraps</b> = SNMP_AUTHENTICATED_TRAPS_DISABLED</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga25" doxytag=
+      "agent_trap::snmp_enableauthentrapsset" id="ga25"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>snmp_enableauthentrapsset</b> = 0</td>
+    </tr>
+  </table>
+  <hr />
+
+  <h2>Function Documentation</h2><a class="anchor" name="ga43" doxytag="agent_trap.c::send_easy_trap" id="ga43"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void send_easy_trap</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>trap</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>specific</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Sends an SNMPv1 trap (or the SNMPv2 equivalent) to the list of configured trap destinations (or "sinks"), using the
+        provided values for the generic trap type and specific trap value.</p>
+
+        <p>This function eventually calls send_enterprise_trap_vars. If the trap type is not set to SNMP_TRAP_ENTERPRISESPECIFIC
+        the enterprise and enterprise_length paramater is set to the pre defined SYSTEM_MIB oid and length respectively. If the
+        trap type is set to SNMP_TRAP_ENTERPRISESPECIFIC the enterprise and enterprise_length parameters are set to the
+        pre-defined NOTIFICATION_MIB oid and length respectively.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>trap</em>&nbsp;</td>
+
+                <td>is the generic trap type.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>specific</em>&nbsp;</td>
+
+                <td>is the specific trap value.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>void</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>See also:</b></dt>
+
+          <dd>
+            send_enterprise_trap_vars
+
+            <p><a class="el" href="group__agent__trap.html#ga44">send_v2trap</a></p>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__trap_8c-source.html#l00878">878</a> of file <a class="el" href=
+        "agent__trap_8c-source.html">agent_trap.c</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l01702">handle_snmp_packet()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga44" doxytag="agent_trap.c::send_v2trap" id="ga44"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void send_v2trap</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href="structvariable__list.html">netsnmp_variable_list</a>
+            *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>vars</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Uses the supplied list of variable bindings to form an SNMPv2 trap, which is sent to SNMPv2-capable sinks on the
+        configured list.</p>
+
+        <p>An equivalent INFORM is sent to the configured list of inform sinks. Sinks that can only handle SNMPv1 traps are
+        skipped.</p>
+
+        <p>This function eventually calls send_enterprise_trap_vars. If the trap type is not set to SNMP_TRAP_ENTERPRISESPECIFIC
+        the enterprise and enterprise_length paramater is set to the pre defined SYSTEM_MIB oid and length respectively. If the
+        trap type is set to SNMP_TRAP_ENTERPRISESPECIFIC the enterprise and enterprise_length parameters are set to the
+        pre-defined NOTIFICATION_MIB oid and length respectively.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>vars</em>&nbsp;</td>
+
+                <td>is used to supply list of variable bindings to form an SNMPv2 trap.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>void</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>See also:</b></dt>
+
+          <dd>
+            <a class="el" href="group__agent__trap.html#ga43">send_easy_trap</a>
+
+            <p>send_enterprise_trap_vars</p>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Examples:</b></dt>
+
+          <dd><a class="el" href="notification_8c-example.html#a30">notification.c</a>.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__trap_8c-source.html#l00907">907</a> of file <a class="el" href=
+        "agent__trap_8c-source.html">agent_trap.c</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga35" doxytag="agent_trap.c::snmpd_free_trapsinks" id="ga35"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void snmpd_free_trapsinks</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">void&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>This function allows you to make a distinction between generic traps from different classes of equipment.</p>
+
+        <p>For example, you may want to handle a SNMP_TRAP_LINKDOWN trap for a particular device in a different manner to a
+        generic system SNMP_TRAP_LINKDOWN trap.</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>trap</em>&nbsp;</td>
+
+                <td>
+                  is the generic trap type. The trap types are:
+
+                  <ul>
+                    <li>SNMP_TRAP_COLDSTART: cold start</li>
+
+                    <li>SNMP_TRAP_WARMSTART: warm start</li>
+
+                    <li>SNMP_TRAP_LINKDOWN: link down</li>
+
+                    <li>SNMP_TRAP_LINKUP: link up</li>
+
+                    <li>SNMP_TRAP_AUTHFAIL: authentication failure</li>
+
+                    <li>SNMP_TRAP_EGPNEIGHBORLOSS: egp neighbor loss</li>
+
+                    <li>SNMP_TRAP_ENTERPRISESPECIFIC: enterprise specific</li>
+                  </ul>
+                </td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>specific</em>&nbsp;</td>
+
+                <td>is the specific trap value.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>enterprise</em>&nbsp;</td>
+
+                <td>is an enterprise oid in which you want to send specifc traps from.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>enterprise_length</em>&nbsp;</td>
+
+                <td>is the length of the enterprise oid, use macro, OID_LENGTH, to compute length.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>vars</em>&nbsp;</td>
+
+                <td>is used to supply list of variable bindings to form an SNMPv2 trap.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>void</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>See also:</b></dt>
+
+          <dd>
+            <a class="el" href="group__agent__trap.html#ga43">send_easy_trap</a>
+
+            <p><a class="el" href="group__agent__trap.html#ga44">send_v2trap</a></p>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__trap_8c-source.html#l00342">342</a> of file <a class="el" href=
+        "agent__trap_8c-source.html">agent_trap.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__api_8h-source.html#l00199">snmp_session::next</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr />
+
+  <h2>Variable Documentation</h2><a class="anchor" name="ga14" doxytag="agent_trap.c::snmptrapenterprise_oid" id="ga14"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">oid snmptrapenterprise_oid[]</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p><b>Initial value:</b></p>
+
+        <div class="fragment">
+          <pre class="fragment">
+    { SNMPV2_TRAP_OBJS_PREFIX, 3, 0 }
+</pre>
+        </div>
+
+        <p>Definition at line <a class="el" href="agent__trap_8c-source.html#l00102">102</a> of file <a class="el" href=
+        "agent__trap_8c-source.html">agent_trap.c</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

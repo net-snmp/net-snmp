@@ -1,0 +1,1747 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>snmp_session Struct Reference</h1>The snmp session structure. <a href="#_details">More...</a>
+
+  <p><code>#include &lt;<a class="el" href="snmp__api_8h-source.html">snmp_api.h</a>&gt;</code></p>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Data Fields</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o0">version</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">snmp version <a href="#o0"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o1">retries</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Number of retries before timeout. <a href="#o1"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o2">timeout</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Number of uS until first timeout, then exponential backoff. <a href="#o2"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o3" doxytag=
+      "snmp_session::flags" id="o3"></a> u_long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>flags</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o4" doxytag=
+      "snmp_session::subsession" id="o4"></a> <a class="el" href="structsnmp__session.html">snmp_session</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>subsession</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o5" doxytag="snmp_session::next"
+      id="o5"></a> <a class="el" href="structsnmp__session.html">snmp_session</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>next</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o6">peername</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Domain name or dotted IP address of default peer. <a href="#o6"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_short&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o7">remote_port</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">UDP port number of peer. <a href="#o7"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o8">localname</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">My Domain name or dotted IP address, 0 for default. <a href="#o8"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_short&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o9">local_port</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">My UDP port number, 0 for default, picked randomly. <a href="#o9"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_char *(*&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o10">authenticator</a> )(u_char *,
+      size_t *, u_char *, size_t)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Authentication function or NULL if null authentication is used. <a href="#o10"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">netsnmp_callback&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o11">callback</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Function to interpret incoming data. <a href="#o11"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o12">callback_magic</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Pointer to data that the callback function may consider important. <a href="#o12"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o13">s_errno</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">copy of system errno <a href="#o13"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o14">s_snmp_errno</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">copy of library errno <a href="#o14"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">long&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o15">sessid</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Session id - AgentX only. <a href="#o15"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o16">community</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">community for outgoing requests. <a href="#o16"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o17">community_len</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Length of community name. <a href="#o17"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o18">rcvMsgMaxSize</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Largest message to try to receive. <a href="#o18"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o19">sndMsgMaxSize</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Largest message to try to send. <a href="#o19"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_char&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o20">isAuthoritative</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">are we the authoritative engine? <a href="#o20"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o21">contextEngineID</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">authoritative snmpEngineID <a href="#o21"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o22">contextEngineIDLen</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Length of contextEngineID. <a href="#o22"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o23">engineBoots</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">initial engineBoots for remote engine <a href="#o23"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o24">engineTime</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">initial engineTime for remote engine <a href="#o24"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o25">contextName</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">authoritative contextName <a href="#o25"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o26">contextNameLen</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Length of contextName. <a href="#o26"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o27">securityEngineID</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">authoritative snmpEngineID <a href="#o27"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o28">securityEngineIDLen</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Length of contextEngineID. <a href="#o28"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o29">securityName</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">on behalf of this principal <a href="#o29"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o30">securityNameLen</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Length of securityName. <a href="#o30"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">oid *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o31">securityAuthProto</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">auth protocol oid <a href="#o31"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o32">securityAuthProtoLen</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Length of auth protocol oid. <a href="#o32"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_char&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o33">securityAuthKey</a>
+      [USM_AUTH_KU_LEN]</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Ku for auth protocol XXX. <a href="#o33"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o34">securityAuthKeyLen</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Length of Ku for auth protocol. <a href="#o34"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o35">securityAuthLocalKey</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Kul for auth protocol. <a href="#o35"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o36">securityAuthLocalKeyLen</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Length of Kul for auth protocol XXX. <a href="#o36"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">oid *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o37">securityPrivProto</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">priv protocol oid <a href="#o37"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o38">securityPrivProtoLen</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Length of priv protocol oid. <a href="#o38"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_char&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o39">securityPrivKey</a>
+      [USM_PRIV_KU_LEN]</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Ku for privacy protocol XXX. <a href="#o39"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o40">securityPrivKeyLen</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Length of Ku for priv protocol. <a href="#o40"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">u_char *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o41">securityPrivLocalKey</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Kul for priv protocol. <a href="#o41"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o42">securityPrivLocalKeyLen</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Length of Kul for priv protocol XXX. <a href="#o42"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o43">securityModel</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">snmp security model, v1, v2c, usm <a href="#o43"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o44">securityLevel</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">noAuthNoPriv, authNoPriv, authPriv <a href="#o44"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o45">securityInfo</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">security module specific <a href="#o45"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structsnmp__session.html#o46">myvoid</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">use as you want data <a href="#o46"></a><br /></td>
+    </tr>
+  </table>
+  <hr />
+  <a name="_details" id="_details"></a>
+
+  <h2>Detailed Description</h2>The snmp session structure.
+
+  <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00187">187</a> of file <a class="el" href=
+  "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+  <hr />
+
+  <h2>Field Documentation</h2><a class="anchor" name="o10" doxytag="snmp_session::authenticator" id="o10"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_char*(* <a class="el" href=
+            "structsnmp__session.html#o10">snmp_session::authenticator</a>)(u_char *, size_t *, u_char *, size_t)</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Authentication function or NULL if null authentication is used.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o11" doxytag="snmp_session::callback" id="o11"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_callback <a class="el" href=
+            "structsnmp__session.html#o11">snmp_session::callback</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Function to interpret incoming data.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00214">214</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o12" doxytag="snmp_session::callback_magic" id="o12"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void* <a class="el" href=
+            "structsnmp__session.html#o12">snmp_session::callback_magic</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Pointer to data that the callback function may consider important.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00218">218</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o16" doxytag="snmp_session::community" id="o16"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_char* <a class="el" href=
+            "structsnmp__session.html#o16">snmp_session::community</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>community for outgoing requests.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00230">230</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o17" doxytag="snmp_session::community_len" id="o17"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">size_t <a class="el" href=
+            "structsnmp__session.html#o17">snmp_session::community_len</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Length of community name.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00232">232</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o21" doxytag="snmp_session::contextEngineID" id="o21"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_char* <a class="el" href=
+            "structsnmp__session.html#o21">snmp_session::contextEngineID</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>authoritative snmpEngineID</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00244">244</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o22" doxytag="snmp_session::contextEngineIDLen" id="o22"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">size_t <a class="el" href=
+            "structsnmp__session.html#o22">snmp_session::contextEngineIDLen</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Length of contextEngineID.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00246">246</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o25" doxytag="snmp_session::contextName" id="o25"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">char* <a class="el" href=
+            "structsnmp__session.html#o25">snmp_session::contextName</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>authoritative contextName</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00252">252</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o26" doxytag="snmp_session::contextNameLen" id="o26"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">size_t <a class="el" href=
+            "structsnmp__session.html#o26">snmp_session::contextNameLen</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Length of contextName.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00254">254</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o23" doxytag="snmp_session::engineBoots" id="o23"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_int <a class="el" href=
+            "structsnmp__session.html#o23">snmp_session::engineBoots</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>initial engineBoots for remote engine</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00248">248</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o24" doxytag="snmp_session::engineTime" id="o24"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_int <a class="el" href=
+            "structsnmp__session.html#o24">snmp_session::engineTime</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>initial engineTime for remote engine</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00250">250</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o20" doxytag="snmp_session::isAuthoritative" id="o20"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_char <a class="el" href=
+            "structsnmp__session.html#o20">snmp_session::isAuthoritative</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>are we the authoritative engine?</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00242">242</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o9" doxytag="snmp_session::local_port" id="o9"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_short <a class="el" href=
+            "structsnmp__session.html#o9">snmp_session::local_port</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>My UDP port number, 0 for default, picked randomly.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00208">208</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o8" doxytag="snmp_session::localname" id="o8"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">char* <a class="el" href=
+            "structsnmp__session.html#o8">snmp_session::localname</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>My Domain name or dotted IP address, 0 for default.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00206">206</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o46" doxytag="snmp_session::myvoid" id="o46"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void* <a class="el" href=
+            "structsnmp__session.html#o46">snmp_session::myvoid</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>use as you want data</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00303">303</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o6" doxytag="snmp_session::peername" id="o6"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">char* <a class="el" href=
+            "structsnmp__session.html#o6">snmp_session::peername</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Domain name or dotted IP address of default peer.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00202">202</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o18" doxytag="snmp_session::rcvMsgMaxSize" id="o18"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">size_t <a class="el" href=
+            "structsnmp__session.html#o18">snmp_session::rcvMsgMaxSize</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Largest message to try to receive.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00234">234</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o7" doxytag="snmp_session::remote_port" id="o7"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_short <a class="el" href=
+            "structsnmp__session.html#o7">snmp_session::remote_port</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>UDP port number of peer.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00204">204</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o1" doxytag="snmp_session::retries" id="o1"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int <a class="el" href=
+            "structsnmp__session.html#o1">snmp_session::retries</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Number of retries before timeout.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00194">194</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o13" doxytag="snmp_session::s_errno" id="o13"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int <a class="el" href=
+            "structsnmp__session.html#o13">snmp_session::s_errno</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>copy of system errno</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00220">220</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o14" doxytag="snmp_session::s_snmp_errno" id="o14"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int <a class="el" href=
+            "structsnmp__session.html#o14">snmp_session::s_snmp_errno</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>copy of library errno</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00222">222</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l01702">handle_snmp_packet()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o33" doxytag="snmp_session::securityAuthKey" id="o33"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_char <a class="el" href=
+            "structsnmp__session.html#o33">snmp_session::securityAuthKey</a>[USM_AUTH_KU_LEN]</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Ku for auth protocol XXX.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00269">269</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o34" doxytag="snmp_session::securityAuthKeyLen" id="o34"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">size_t <a class="el" href=
+            "structsnmp__session.html#o34">snmp_session::securityAuthKeyLen</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Length of Ku for auth protocol.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00271">271</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o35" doxytag="snmp_session::securityAuthLocalKey" id="o35"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_char* <a class="el" href=
+            "structsnmp__session.html#o35">snmp_session::securityAuthLocalKey</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Kul for auth protocol.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00273">273</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o36" doxytag="snmp_session::securityAuthLocalKeyLen" id="o36"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">size_t <a class="el" href=
+            "structsnmp__session.html#o36">snmp_session::securityAuthLocalKeyLen</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Length of Kul for auth protocol XXX.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00275">275</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o31" doxytag="snmp_session::securityAuthProto" id="o31"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">oid* <a class="el" href=
+            "structsnmp__session.html#o31">snmp_session::securityAuthProto</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>auth protocol oid</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00265">265</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o32" doxytag="snmp_session::securityAuthProtoLen" id="o32"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">size_t <a class="el" href=
+            "structsnmp__session.html#o32">snmp_session::securityAuthProtoLen</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Length of auth protocol oid.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00267">267</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o27" doxytag="snmp_session::securityEngineID" id="o27"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_char* <a class="el" href=
+            "structsnmp__session.html#o27">snmp_session::securityEngineID</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>authoritative snmpEngineID</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00256">256</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o28" doxytag="snmp_session::securityEngineIDLen" id="o28"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">size_t <a class="el" href=
+            "structsnmp__session.html#o28">snmp_session::securityEngineIDLen</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Length of contextEngineID.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00258">258</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o45" doxytag="snmp_session::securityInfo" id="o45"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void* <a class="el" href=
+            "structsnmp__session.html#o45">snmp_session::securityInfo</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>security module specific</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00298">298</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o44" doxytag="snmp_session::securityLevel" id="o44"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int <a class="el" href=
+            "structsnmp__session.html#o44">snmp_session::securityLevel</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>noAuthNoPriv, authNoPriv, authPriv</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00293">293</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o43" doxytag="snmp_session::securityModel" id="o43"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int <a class="el" href=
+            "structsnmp__session.html#o43">snmp_session::securityModel</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>snmp security model, v1, v2c, usm</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00291">291</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o29" doxytag="snmp_session::securityName" id="o29"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">char* <a class="el" href=
+            "structsnmp__session.html#o29">snmp_session::securityName</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>on behalf of this principal</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00260">260</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o30" doxytag="snmp_session::securityNameLen" id="o30"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">size_t <a class="el" href=
+            "structsnmp__session.html#o30">snmp_session::securityNameLen</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Length of securityName.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00262">262</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o39" doxytag="snmp_session::securityPrivKey" id="o39"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_char <a class="el" href=
+            "structsnmp__session.html#o39">snmp_session::securityPrivKey</a>[USM_PRIV_KU_LEN]</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Ku for privacy protocol XXX.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00282">282</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o40" doxytag="snmp_session::securityPrivKeyLen" id="o40"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">size_t <a class="el" href=
+            "structsnmp__session.html#o40">snmp_session::securityPrivKeyLen</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Length of Ku for priv protocol.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00284">284</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o41" doxytag="snmp_session::securityPrivLocalKey" id="o41"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">u_char* <a class="el" href=
+            "structsnmp__session.html#o41">snmp_session::securityPrivLocalKey</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Kul for priv protocol.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00286">286</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o42" doxytag="snmp_session::securityPrivLocalKeyLen" id="o42"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">size_t <a class="el" href=
+            "structsnmp__session.html#o42">snmp_session::securityPrivLocalKeyLen</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Length of Kul for priv protocol XXX.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00288">288</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o37" doxytag="snmp_session::securityPrivProto" id="o37"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">oid* <a class="el" href=
+            "structsnmp__session.html#o37">snmp_session::securityPrivProto</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>priv protocol oid</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00278">278</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o38" doxytag="snmp_session::securityPrivProtoLen" id="o38"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">size_t <a class="el" href=
+            "structsnmp__session.html#o38">snmp_session::securityPrivProtoLen</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Length of priv protocol oid.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00280">280</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o15" doxytag="snmp_session::sessid" id="o15"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">long <a class="el" href=
+            "structsnmp__session.html#o15">snmp_session::sessid</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Session id - AgentX only.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00224">224</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o19" doxytag="snmp_session::sndMsgMaxSize" id="o19"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">size_t <a class="el" href=
+            "structsnmp__session.html#o19">snmp_session::sndMsgMaxSize</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Largest message to try to send.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00236">236</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o2" doxytag="snmp_session::timeout" id="o2"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">long <a class="el" href=
+            "structsnmp__session.html#o2">snmp_session::timeout</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Number of uS until first timeout, then exponential backoff.</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00196">196</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o0" doxytag="snmp_session::version" id="o0"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">long <a class="el" href=
+            "structsnmp__session.html#o0">snmp_session::version</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>snmp version</p>
+
+        <p>Definition at line <a class="el" href="snmp__api_8h-source.html#l00192">192</a> of file <a class="el" href=
+        "snmp__api_8h-source.html">snmp_api.h</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr />
+  The documentation for this struct was generated from the following file:
+
+  <ul>
+    <li><a class="el" href="snmp__api_8h-source.html">snmp_api.h</a></li>
+  </ul>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

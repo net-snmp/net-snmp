@@ -1,0 +1,63 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <center><h1>UCD-SNMP Tutorial -- Commands</h1></center>
+    <p>
+      <b>Note:</b>  Much of this tutorial requires <a
+	href="ftp://ftp.sourceforge.net/pub/sourceforge/n/ne/net-snmp/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
+	so make sure you get it before running the commands found in
+	this tutorial.</b> 
+      <p><b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
+      href="/tutorial-5">is available</a> as well.  The commands is
+      the ucd-snmp specific tutorial will not work as expected if you
+      are using net-snmp and not ucd-snmp.
+      <br><br>
+    <hr>
+    <p> 
+      The ucd-snmp toolkit provides a suite of command line
+      applications that can be used to query and act on remote SNMP
+      agents.  These instructions/lessions do assume that you have
+      properly made and installed the package!  If you have not
+      installed them, most of them should still work providing that
+      you set the environmental variable <i>MIBDIRS</i>to
+      <i>SRCDIR/mibs</i>, where <i>SRCDIR</i> is the directory
+      containg the ucd-snmp source tree.
+
+    <p>
+      <b>Note:</b> Most of these commands are designed to work if you
+      cut and paste them into your own shell.  They all operate on the
+      <a href="snmpv3.html">demonstration agent</a> running on the
+      ucd-snmp web site host, so you don't have to have an agent
+      installed at your site to test these commands.
+    <p>
+      <b>Note:</b> Many of these commands assume you are running
+      ucd-snmp 4.1 or higher.
+
+    <h3>Sections:</h3>
+    <ol>
+	<li><a href="snmptranslate.html">snmptranslate</a>: learning about the MIB tree.
+	<li><a href="snmpget.html">snmpget</a>: retrieving data from a host.
+	<li><a href="snmpgetnext.html">snmpgetnext</a>: retrieving unknown indexed data.
+	<li><a href="snmpwalk.html">snmpwalk</a>: retrieving lots of data at once!
+	<li><a href="snmptable.html">snmptable</a>: displaying table.
+	<li><a href="snmpset.html">snmpset</a>: peforming write operations.
+	<li><a href="snmptrap.html">snmptrap</a>: Sending and receiving traps, and acting upon them.
+	<ol>
+	  <li><a href="snmptrap-v3.html">Sending and receiving SNMPv3 TRAPs and INFORMs</a>
+	</ol>
+	<li>Common command options:
+	<ol>
+	  <li><a href="mib-options.html">Using and loading MIBS</a>
+	  <li><a href="snmpv3.html">SNMPv3 Options</a>
+	  <li>Customized <a href="output-options.html">Output Formats</a>
+	</ol>
+    </ol>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Thu Nov  4 14:10:52 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Mon Aug  2 10:53:36 EDT 2004
+<!-- hhmts end -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

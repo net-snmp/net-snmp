@@ -1,0 +1,348 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Net-SNMP Tutorial -- Demo Application</title>
+  </head>
+
+  <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
+    <h1>Net-SNMP Tutorial -- Demo Application</h1>
+    <p>
+      Here we discuss how to write a simple application.  It's only
+      purpose is to retrieve the value of a variable from a remote
+      host.
+    <p>
+      Here are the files discussed in this example so you can download 
+      them:
+      <center>
+      <table border=1>
+	<tr bgcolor="#d0d0ff"><th>File</th><th>Description</th></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="Makefile">Makefile</a></td><td>A simple Makefile to
+	build the application</td></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="snmpdemoapp.c">snmpdemoapp.c</a></td><td>The C source code</td>
+      </table>
+      </center>
+    <p>
+      First, we must include some header files.  After you've
+      installed the net-snmp toolkit, some easy to use header files
+      have been installed that handle most situations you'll run
+      into.  We start our <i>snmpdemoapp.c</i> file with these:
+<pre>
+#include &lt;net-snmp/net-snmp-config.h&gt;
+#include &lt;net-snmp/net-snmp-includes.h&gt;
+</pre>
+    <p>
+      Next, we'll set up some local definitions that you can toggle if
+      you want to use SNMPv3 or SNMPv1.  By default, we're setting up
+      for SNMPv3 here (which is more complex, so make sure you've read
+      about the <a href="../../commands/snmpv3.html"> SNMPv3 Options
+      </a> first.  If you don't want to deal with SNMPv3 for now,
+      turn the #define statement below to #undef.
+<pre>
+/* change the word "undef" to "define" to try the (insecure) SNMPv1 version */
+#define DEMO_USE_SNMP_VERSION_3
+
+#ifdef DEMO_USE_SNMP_VERSION_3
+#include "net-snmp/transform_oids.h"
+const char *our_v3_passphrase = "The UCD Demo Password";
+#endif
+</pre>
+    <p>
+      Next, we declare our main() routine and the variables we need:
+<pre>
+main() {
+</pre>
+    <ul>
+      <p>
+	  The first variables we need to declare:
+	<ol>
+	  <li> <b>struct snmp_session</b>: 
+	    A structure that holds information about who we're going
+	    to be talking to.  We need to declare 2 of these, one to
+	    fill with information, and second which is a pointer
+	    returned by the library.
+	  <li> <b>struct snmp_pdu</b>:  
+	    This structure will hold all of the information that we're
+	    going to send to the remote host.  We'll declare a second
+	    for the information they they are going to send back.
+	  <li> <b>oid</b>:
+	    An OID is going to hold the location of the information
+	    which we want to retrieve.  It'll need a size as well.
+	  <li> <b>struct variable_list</b>: 
+	    This will hold the variables that we want to
+	    manipulate via SNMP.
+	</ol>
+    </ul>
+    <pre>
+    struct snmp_session session, *ss;
+    struct snmp_pdu *pdu;
+    struct snmp_pdu *response;
+	    
+    oid anOID[MAX_OID_LEN];
+    size_t anOID_len = MAX_OID_LEN;
+
+    struct variable_list *vars;
+    int status;
+    </pre>
+    <p>
+      Then, the first thing we must do is to inialize the snmp library:
+    <pre>
+    /*
+     * Initialize the SNMP library
+     */
+    init_snmp("snmpapp");
+    </pre>
+    <p>
+      Next, we'll inialize a session that describes who we want to
+      talk to, what version of SNMP we want to use, how to
+      authenticate to it, etc.  A full definition of this session
+      can be found in the net-snmp/snmp_api.h header file.
+    <p>
+      We've picked SNMPv3 by default above, which is a bit more complex to
+      understand so make sure you've read 
+    </p>
+    <pre>
+     /*
+     * Initialize a "session" that defines who we're going to talk to
+     */
+    snmp_sess_init( &session );                   /* set up defaults */
+    session.peername = "test.net-snmp.org";
+
+    /* set up the authentication parameters for talking to the server */
+
+#ifdef DEMO_USE_SNMP_VERSION_3
+
+    /* Use SNMPv3 to talk to the experimental server */
+
+    /* set the SNMP version number */
+    session.version=SNMP_VERSION_3;
+        
+    /* set the SNMPv3 user name */
+    session.securityName = strdup("MD5User");
+    session.securityNameLen = strlen(session.securityName);
+
+    /* set the security level to authenticated, but not encrypted */
+    session.securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
+
+    /* set the authentication method to MD5 */
+    session.securityAuthProto = usmHMACMD5AuthProtocol;
+    session.securityAuthProtoLen = sizeof(usmHMACMD5AuthProtocol)/sizeof(oid);
+    session.securityAuthKeyLen = USM_AUTH_KU_LEN;
+
+    /* set the authentication key to a MD5 hashed version of our
+       passphrase "The UCD Demo Password" (which must be at least 8
+       characters long) */
+    if (generate_Ku(session.securityAuthProto,
+                    session.securityAuthProtoLen,
+                    (u_char *) our_v3_passphrase, strlen(our_v3_passphrase),
+                    session.securityAuthKey,
+                    &session.securityAuthKeyLen) != SNMPERR_SUCCESS) {
+        snmp_perror(argv[0]);
+        snmp_log(LOG_ERR,
+                 "Error generating Ku from authentication pass phrase. \n");
+        exit(1);
+    }
+    
+#else /* we'll use the insecure (but simplier) SNMPv1 */
+
+    /* set the SNMP version number */
+    session.version = SNMP_VERSION_1;
+
+    /* set the SNMPv1 community name used for authentication */
+    session.community = "demopublic";
+    session.community_len = strlen(session.community);
+
+#endif /* SNMPv1 */
+   </pre>
+    <p>
+      After we have established the session, we then need to open it.
+      Opening it returns a pointer to another session that we should
+      use for all our future calls:
+<pre>
+    /* windows32 specific initialization (is a noop on unix) */
+    SOCK_STARTUP;
+
+    /*
+     * Open the session
+     */
+    ss = snmp_open(&session);                     /* establish the session */
+</pre>
+
+    <p>
+      If the session failed to open properly, print an error message
+      and exit:
+<pre>
+    if (!ss) {
+        snmp_perror("ack");
+        snmp_log(LOG_ERR, "something horrible happened!!!\n");
+        exit(2);
+    }
+</pre>
+    <p>
+      Next we create the PDU the we are going to send to the remote
+      host when we request information.  In this case, we're going to
+      create a SNMP-GET pdu, which is what the <a
+      href="../../commands/snmpget.html">snmpget</a> program uses, for 
+      instance.  It retrieves a value for each oid that you initalize
+      it with.
+    <pre>
+    /*
+     * Create the PDU for the data for our request.
+     *   1) We're going to GET the system.sysDescr.0 node.
+     */
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
+    </pre>
+    <p>
+      So, let's fill it with our requested oid.  Let's get the
+      <i>system.sysDescr.0</i> variable for this example.
+      There are numerious ways you could create the oid in question.
+      You could put in the numerical unsigned integer values yourself
+      into the <i>anOID</i> array we created above, or you could use
+      one of the following function calls to do it.  We recommend the
+      first one (get_node), as it is the most powerful and accepts
+      more types of OIDs.
+
+    <pre>
+    read_objid(".1.3.6.1.2.1.1.1.0", anOID, &anOID_len);
+
+#if OTHER_METHODS
+    get_node("sysDescr.0", anOID, &anOID_len);
+    read_objid("system.sysDescr.0", anOID, &anOID_len);
+#endif
+    </pre>
+
+    <p>
+      So we add this oid, with a NULL value to the PDU using the
+      following statement: (all oids should be paired with a NULL
+      value for outgoing requests for information.  For an SNMP-SET
+      pdu, we'd put in the value we wanted to set the oid to).
+    <pre>
+    snmp_add_null_var(pdu, anOID, anOID_len);
+    </pre>
+    <p>
+      Finally, we can send out the request using the session pointer
+      and the pdu and we get back a status and the response, which is
+      stored in the newly malloced <i>response</i> pdu pointer.
+    <pre>
+    /*
+     * Send the Request out.
+     */
+    status = snmp_synch_response(ss, pdu, &response);
+    </pre>
+    <p>
+      Now we can examine the information, assuming our request was
+      fulfilled properly.  If not, we'll print the error that caused
+      the problem:
+    <pre>
+    /*
+     * Process the response.
+     */
+    if (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR) {
+      /*
+       * SUCCESS: Print the result variables
+       */
+    </pre>
+    <ul>
+	<p>
+	  Lets print the pdu's variable to the terminal using the
+	  print_variable routine:
+	<pre>
+      for(vars = response->variables; vars; vars = vars->next_variable)
+        print_variable(vars->name, vars->name_length, vars);
+	</pre>
+	<p>
+	  Then, for kicks, lets get the information and manipulate it
+	  ourselves (checking to make sure its the type we're
+	  expecting (a string) first):
+	<p>
+	<pre>
+      /* manipuate the information ourselves */
+      for(vars = response->variables; vars; vars = vars->next_variable) {
+        int count=1;
+        if (vars->type == ASN_OCTET_STR) {
+	  char *sp = (char *)malloc(1 + vars->val_len);
+	  memcpy(sp, vars->val.string, vars->val_len);
+	  sp[vars->val_len] = '\0';
+          printf("value #%d is a string: %s\n", count++, sp);
+	  free(sp);
+	}
+        else
+          printf("value #%d is NOT a string! Ack!\n", count++);
+      }
+	</pre>
+	<p>
+	  Finally, print a description of the error in case there was
+	  one:
+	<pre>
+    } else {
+      /*
+       * FAILURE: print what went wrong!
+       */
+
+      if (status == STAT_SUCCESS)
+        fprintf(stderr, "Error in packet\nReason: %s\n",
+                snmp_errstring(response->errstat));
+      else
+        snmp_sess_perror("snmpget", ss);
+
+    }
+	</pre>
+    </ul>
+    <p>
+      Last, but not least, free the response, as it is now our job to
+      do so.  Exit cleanly by calling snmp_close() as well:
+    <pre>
+    /*
+     * Clean up:
+     *  1) free the response.
+     *  2) close the session.
+     */
+    if (response)
+      snmp_free_pdu(response);
+    snmp_close(ss);
+
+    /* windows32 specific cleanup (is a noop on unix) */
+    SOCK_CLEANUP;
+
+} /* main() */
+    </pre>
+    <p>
+      Ok, we're done.  lets compile it (using the Makefile distributed 
+      above):
+      <pre>
+% <b>make snmpdemoapp</b>
+cc -I/usr/local/include -g   -c snmpdemoapp.c -o snmpdemoapp.o
+cc -o snmpdemoapp snmpdemoapp.o -lsnmp
+    </pre>
+    <p>
+      And then, run it, which produces the results we were expecting:
+    <pre>
+% <b>./snmpdemoapp</b>
+system.sysDescr.0 = HP-UX net-snmp B.10.20 A 9000/715
+value #1 is a string: HP-UX net-snmp B.10.20 A 9000/715
+    </pre>
+    <p>
+      Homework:
+    <ol>
+      <li>
+	Change the program to use an SNMP_MSG_GETNEXT PDU instead.
+      <li>
+	Change the program to request more variables (like system.sysUpTime.0 
+	and/or system.sysLocation.0).
+    </ol>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <hardaker@users.sourceforge.net>"></a></address>
+<!-- Created: Fri Nov  5 12:09:03 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Fri Jul 20 14:55:22 PDT 2001
+<!-- hhmts end -->
+  </body>
+</html>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,2021 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>snmpksm.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * snmpksm.c</span>
+00003 <span class="comment"> *</span>
+00004 <span class="comment"> * This code implements the Kerberos Security Model (KSM) for SNMP.</span>
+00005 <span class="comment"> *</span>
+00006 <span class="comment"> * Security number - 2066432</span>
+00007 <span class="comment"> */</span>
+00008 
+00009 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00010 
+00011 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00012 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00013 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00014 <span class="preprocessor">#endif</span>
+00015 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00016 <span class="preprocessor">#ifdef HAVE_STDLIB_H</span>
+00017 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00018 <span class="preprocessor">#endif</span>
+00019 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00020 <span class="preprocessor"># ifdef WIN32</span>
+00021 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00022 <span class="preprocessor"># else</span>
+00023 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00024 <span class="preprocessor"># endif</span>
+00025 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00026 <span class="preprocessor">#else</span>
+00027 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00028 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00029 <span class="preprocessor"># else</span>
+00030 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00031 <span class="preprocessor"># endif</span>
+00032 <span class="preprocessor">#endif</span>
+00033 <span class="preprocessor">#if HAVE_STRING_H</span>
+00034 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00035 <span class="preprocessor">#else</span>
+00036 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00037 <span class="preprocessor">#endif</span>
+00038 <span class="preprocessor">#ifdef HAVE_NETINET_IN_H</span>
+00039 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00040 <span class="preprocessor">#endif</span>
+00041 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+00042 
+00043 
+00044 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00045 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00046 <span class="preprocessor">#endif</span>
+00047 
+00048 <span class="preprocessor">#ifdef HEIMDAL</span>
+00049 <span class="preprocessor">#ifndef MIT_NEW_CRYPTO</span>
+00050 <span class="preprocessor">#define OLD_HEIMDAL</span>
+00051 <span class="preprocessor">#endif                          </span><span class="comment">/* ! MIT_NEW_CRYPTO */</span>
+00052 <span class="preprocessor">#endif                          </span><span class="comment">/* HEIMDAL */</span>
+00053 
+00054 <span class="preprocessor">#ifdef HEIMDAL</span>
+00055 <span class="preprocessor">#define oid heimdal_oid_renamed</span>
+00056 <span class="preprocessor">#endif                          </span><span class="comment">/* HEIMDAL */</span>
+00057 <span class="preprocessor">#include &lt;krb5.h&gt;</span>
+00058 <span class="preprocessor">#include &lt;com_err.h&gt;</span>
+00059 <span class="preprocessor">#ifdef HEIMDAL</span>
+00060 <span class="preprocessor">#undef oid</span>
+00061 <span class="preprocessor">#endif                          </span><span class="comment">/* HEIMDAL */</span>
+00062 
+00063 <span class="preprocessor">#ifdef HEIMDAL</span>
+00064 <span class="preprocessor">#define CHECKSUM_TYPE(x)        (x)-&gt;cksumtype</span>
+00065 <span class="preprocessor">#define CHECKSUM_CONTENTS(x)    ((char *)((x)-&gt;checksum.data))</span>
+00066 <span class="preprocessor">#define CHECKSUM_LENGTH(x)      (x)-&gt;checksum.length</span>
+00067 <span class="preprocessor">#define TICKET_CLIENT(x)        (x)-&gt;client</span>
+00068 <span class="preprocessor">#else                           </span><span class="comment">/* HEIMDAL */</span>
+00069 <span class="preprocessor">#define CHECKSUM_TYPE(x)        (x)-&gt;checksum_type</span>
+00070 <span class="preprocessor">#define CHECKSUM_CONTENTS(x)    (x)-&gt;contents</span>
+00071 <span class="preprocessor">#define CHECKSUM_LENGTH(x)      (x)-&gt;length</span>
+00072 <span class="preprocessor">#define TICKET_CLIENT(x)        (x)-&gt;enc_part2-&gt;client</span>
+00073 <span class="preprocessor">#endif                          </span><span class="comment">/* HEIMDAL */</span>
+00074 
+00075 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00076 <span class="preprocessor">#include &lt;net-snmp/config_api.h&gt;</span>
+00077 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00078 
+00079 <span class="preprocessor">#include &lt;net-snmp/library/asn1.h&gt;</span>
+00080 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00081 <span class="preprocessor">#include &lt;net-snmp/library/callback.h&gt;</span>
+00082 <span class="preprocessor">#include &lt;net-snmp/library/keytools.h&gt;</span>
+00083 <span class="preprocessor">#include &lt;net-snmp/library/snmpv3.h&gt;</span>
+00084 <span class="preprocessor">#include &lt;net-snmp/library/lcd_time.h&gt;</span>
+00085 <span class="preprocessor">#include &lt;net-snmp/library/scapi.h&gt;</span>
+00086 <span class="preprocessor">#include &lt;net-snmp/library/callback.h&gt;</span>
+00087 <span class="preprocessor">#include &lt;net-snmp/library/snmp_secmod.h&gt;</span>
+00088 <span class="preprocessor">#include &lt;net-snmp/library/snmpksm.h&gt;</span>
+00089 
+00090 <span class="keyword">static</span> krb5_context kcontext = NULL;
+00091 <span class="keyword">static</span> krb5_rcache rcache = NULL;
+00092 <span class="keyword">static</span> krb5_keytab keytab = NULL;
+00093 <span class="keyword">static</span> <span class="keywordtype">int</span> keytab_setup = 0;
+00094 <span class="keyword">static</span> <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *service_name = NULL;
+00095 
+00096 <span class="keyword">static</span> <span class="keywordtype">int</span>      ksm_session_init(<a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> *);
+00097 <span class="keyword">static</span> <span class="keywordtype">void</span>     ksm_free_state_ref(<span class=
+"keywordtype">void</span> *);
+00098 <span class="keyword">static</span> <span class="keywordtype">int</span>      ksm_free_pdu(<a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *);
+00099 <span class="keyword">static</span> <span class="keywordtype">int</span>      ksm_clone_pdu(<a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *, <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *);
+00100 
+00101 <span class="keyword">static</span> <span class="keywordtype">int</span>      ksm_insert_cache(<span class=
+"keywordtype">long</span>, krb5_auth_context, u_char *,
+00102                                  size_t);
+00103 <span class="keyword">static</span> <span class="keywordtype">void</span>     ksm_decrement_ref_count(<span class=
+"keywordtype">long</span>);
+00104 <span class="keyword">static</span> <span class="keywordtype">void</span>     ksm_increment_ref_count(<span class=
+"keywordtype">long</span>);
+00105 <span class="keyword">static</span> <span class="keyword">struct </span>ksm_cache_entry *ksm_get_cache(<span class=
+"keywordtype">long</span>);
+00106 
+00107 <span class="preprocessor">#define HASHSIZE        64</span>
+00108 
+00109 <span class="comment">/*</span>
+00110 <span class="comment"> * Our information stored for the response PDU.</span>
+00111 <span class="comment"> */</span>
+00112 
+00113 <span class="keyword">struct </span>ksm_secStateRef {
+00114     krb5_auth_context auth_context;
+00115     krb5_cksumtype  cksumtype;
+00116 };
+00117 
+00118 <span class="comment">/*</span>
+00119 <span class="comment"> * A KSM outgoing pdu cache entry</span>
+00120 <span class="comment"> */</span>
+00121 
+00122 <span class="keyword">struct </span>ksm_cache_entry {
+00123     <span class="keywordtype">long</span>            msgid;
+00124     <span class="keywordtype">int</span>             refcount;
+00125     krb5_auth_context auth_context;
+00126     u_char         *secName;
+00127     size_t          secNameLen;
+00128     <span class="keyword">struct </span>ksm_cache_entry *next;
+00129 };
+00130 
+00131 <span class="comment">/*</span>
+00132 <span class="comment"> * Poor man's hash table</span>
+00133 <span class="comment"> */</span>
+00134 
+00135 <span class="keyword">static</span> <span class="keyword">struct </span>ksm_cache_entry *ksm_hash_table[HASHSIZE];
+00136 
+00137 <span class="comment">/*</span>
+00138 <span class="comment"> * Stuff to deal with config values</span>
+00139 <span class="comment"> * Note the conditionals that wrap these--i don't know if these are</span>
+00140 <span class="comment"> * needed, since i don't know how library initialization and callbacks</span>
+00141 <span class="comment"> * and stuff work</span>
+00142 <span class="comment"> */</span>
+00143 
+00144 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00145 init_snmpksm_post_config(<span class="keywordtype">int</span> majorid, <span class=
+"keywordtype">int</span> minorid, <span class="keywordtype">void</span> *serverarg,
+00146                          <span class="keywordtype">void</span> *clientarg)
+00147 {
+00148 
+00149     <span class="keywordflow">if</span> (kcontext == NULL) {
+00150         <span class="comment">/* not reached, i'd imagine */</span>
+00151         <span class="keywordflow">return</span> SNMPERR_KRB5;
+00152     }
+00153 
+00154     <span class="keywordflow">if</span> (service_name == NULL) {
+00155         <span class="comment">/* always reached, i'd imagine */</span>
+00156         <span class="keywordtype">char</span> *c = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+00157                                         NETSNMP_DS_LIB_KSM_SERVICE_NAME);
+00158         <span class="keywordflow">if</span> (c != NULL) {
+00159                 service_name = c;
+00160         }
+00161         <span class="keywordflow">else</span> {
+00162                 service_name = <span class="stringliteral">"host"</span>;
+00163         }
+00164     }
+00165 
+00166     <span class="keywordflow">if</span> (keytab_setup == 0) {
+00167         <span class="comment">/* always reached, i'd imagine */</span>
+00168         <span class="keywordtype">char</span> *c = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+00169                                         NETSNMP_DS_LIB_KSM_KEYTAB);
+00170         <span class="keywordflow">if</span> (c) {
+00171             krb5_error_code retval;
+00172             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Using keytab %s\n"</span>, c));
+00173             retval = krb5_kt_resolve(kcontext, c, &amp;keytab);
+00174             <span class="keywordflow">if</span> (retval) {
+00175                 DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"krb5_kt_resolve(\"%s\") failed. KSM "</span>
+00176                             <span class="stringliteral">"config callback failing\n"</span>, error_message(retval)));
+00177                 <span class="keywordflow">return</span> SNMPERR_KRB5;
+00178             }
+00179         }
+00180         <span class="keywordflow">else</span> {
+00181             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Using default keytab\n"</span>, c));
+00182         }
+00183         keytab_setup = 1;
+00184     }
+00185 
+00186     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00187 }
+00188 
+00189 <span class="comment">/*</span>
+00190 <span class="comment"> * Initialize all of the state required for Kerberos (right now, just call</span>
+00191 <span class="comment"> * krb5_init_context).</span>
+00192 <span class="comment"> */</span>
+00193 
+00194 <span class="keywordtype">void</span>
+00195 init_ksm(<span class="keywordtype">void</span>)
+00196 {
+00197     krb5_error_code retval;
+00198     <span class="keyword">struct </span>snmp_secmod_def *def;
+00199     <span class="keywordtype">int</span>             i;
+00200 
+00201     netsnmp_ds_register_config(ASN_OCTET_STR, <span class="stringliteral">"snmp"</span>, <span class=
+"stringliteral">"defKSMKeytab"</span>,
+00202                                NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_KSM_KEYTAB);
+00203     netsnmp_ds_register_config(ASN_OCTET_STR, <span class="stringliteral">"snmp"</span>, <span class=
+"stringliteral">"defKSMServiceName"</span>,
+00204                                NETSNMP_DS_LIBRARY_ID,
+00205                                NETSNMP_DS_LIB_KSM_SERVICE_NAME);
+00206     <a class="code" href="group__callback.html#ga3">snmp_register_callback</a>(SNMP_CALLBACK_LIBRARY,
+00207                            SNMP_CALLBACK_POST_READ_CONFIG,
+00208                            init_snmpksm_post_config, NULL);
+00209 
+00210 
+00211     <span class="keywordflow">if</span> (kcontext == NULL) {
+00212         retval = krb5_init_context(&amp;kcontext);
+00213 
+00214         <span class="keywordflow">if</span> (retval) {
+00215             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"krb5_init_context failed (%s), not "</span>
+00216                         <span class="stringliteral">"registering KSM\n"</span>, error_message(retval)));
+00217             <span class="keywordflow">return</span>;
+00218         }
+00219     }
+00220 
+00221     <span class="keywordflow">for</span> (i = 0; i &lt; HASHSIZE; i++)
+00222         ksm_hash_table[i] = NULL;
+00223 
+00224     def = <a class="code" href="group__util.html#ga38">SNMP_MALLOC_STRUCT</a>(snmp_secmod_def);
+00225 
+00226     <span class="keywordflow">if</span> (!def) {
+00227         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Unable to malloc snmp_secmod struct, not "</span>
+00228                     <span class="stringliteral">"registering KSM\n"</span>));
+00229         <span class="keywordflow">return</span>;
+00230     }
+00231 
+00232     def-&gt;encode_reverse = ksm_rgenerate_out_msg;
+00233     def-&gt;decode = ksm_process_in_msg;
+00234     def-&gt;session_open = ksm_session_init;
+00235     def-&gt;pdu_free_state_ref = ksm_free_state_ref;
+00236     def-&gt;pdu_free = ksm_free_pdu;
+00237     def-&gt;pdu_clone = ksm_clone_pdu;
+00238 
+00239     register_sec_mod(2066432, <span class="stringliteral">"ksm"</span>, def);
+00240 }
+00241 
+00242 <span class="comment">/*</span>
+00243 <span class="comment"> * These routines implement a simple cache for information we need to</span>
+00244 <span class="comment"> * process responses.  When we send out a request, it contains an AP_REQ;</span>
+00245 <span class="comment"> * we get back an AP_REP, and we need the authorization context from the</span>
+00246 <span class="comment"> * AP_REQ to decrypt the AP_REP.  But because right now there's nothing</span>
+00247 <span class="comment"> * that gets preserved across calls to rgenerate_out_msg to process_in_msg,</span>
+00248 <span class="comment"> * we cache these internally based on the message ID (we also cache the</span>
+00249 <span class="comment"> * passed-in security name, for reasons that are mostly stupid).</span>
+00250 <span class="comment"> */</span>
+00251 
+00252 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00253 ksm_insert_cache(<span class="keywordtype">long</span> msgid, krb5_auth_context auth_context,
+00254                  u_char * secName, size_t secNameLen)
+00255 {
+00256     <span class="keyword">struct </span>ksm_cache_entry *entry;
+00257     <span class="keywordtype">int</span>             bucket;
+00258     <span class="keywordtype">int</span>             retval;
+00259 
+00260     entry = <a class="code" href="group__util.html#ga38">SNMP_MALLOC_STRUCT</a>(ksm_cache_entry);
+00261 
+00262     <span class="keywordflow">if</span> (!entry)
+00263         <span class="keywordflow">return</span> SNMPERR_MALLOC;
+00264 
+00265     entry-&gt;msgid = msgid;
+00266     entry-&gt;auth_context = auth_context;
+00267     entry-&gt;refcount = 1;
+00268 
+00269     retval = <a class="code" href="group__util.html#ga5">memdup</a>(&amp;entry-&gt;secName, secName, secNameLen);
+00270 
+00271     <span class="keywordflow">if</span> (retval != SNMPERR_SUCCESS) {
+00272         free(entry);
+00273         <span class="keywordflow">return</span> retval;
+00274     }
+00275 
+00276     entry-&gt;secNameLen = secNameLen;
+00277 
+00278     bucket = msgid % HASHSIZE;
+00279 
+00280     entry-&gt;next = ksm_hash_table[bucket];
+00281     ksm_hash_table[bucket] = entry;
+00282 
+00283     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00284 }
+00285 
+00286 <span class="keyword">static</span> <span class="keyword">struct </span>ksm_cache_entry *
+00287 ksm_get_cache(<span class="keywordtype">long</span> msgid)
+00288 {
+00289     <span class="keyword">struct </span>ksm_cache_entry *entry;
+00290     <span class="keywordtype">int</span>             bucket;
+00291 
+00292     bucket = msgid % HASHSIZE;
+00293 
+00294     <span class="keywordflow">for</span> (entry = ksm_hash_table[bucket]; entry != NULL;
+00295          entry = entry-&gt;next)
+00296         <span class="keywordflow">if</span> (entry-&gt;msgid == msgid)
+00297             <span class="keywordflow">return</span> entry;
+00298 
+00299     <span class="keywordflow">return</span> NULL;
+00300 }
+00301 
+00302 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00303 ksm_decrement_ref_count(<span class="keywordtype">long</span> msgid)
+00304 {
+00305     <span class="keyword">struct </span>ksm_cache_entry *entry, *entry1;
+00306     <span class="keywordtype">int</span>             bucket;
+00307 
+00308     bucket = msgid % HASHSIZE;
+00309 
+00310     <span class="keywordflow">if</span> (ksm_hash_table[bucket] &amp;&amp; ksm_hash_table[bucket]-&gt;msgid == msgid) {
+00311         entry = ksm_hash_table[bucket];
+00312 
+00313         <span class="comment">/*</span>
+00314 <span class="comment">         * If the reference count is zero, then free it</span>
+00315 <span class="comment">         */</span>
+00316 
+00317         <span class="keywordflow">if</span> (--entry-&gt;refcount &lt;= 0) {
+00318             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Freeing entry for msgid %ld\n"</span>, msgid));
+00319             krb5_auth_con_free(kcontext, entry-&gt;auth_context);
+00320             free(entry-&gt;secName);
+00321             ksm_hash_table[bucket] = entry-&gt;next;
+00322             free(entry);
+00323         }
+00324 
+00325         <span class="keywordflow">return</span>;
+00326 
+00327     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (ksm_hash_table[bucket])
+00328         <span class="keywordflow">for</span> (entry1 = ksm_hash_table[bucket], entry = entry1-&gt;next;
+00329              entry != NULL; entry1 = entry, entry = entry-&gt;next)
+00330             <span class="keywordflow">if</span> (entry-&gt;msgid == msgid) {
+00331 
+00332                 <span class="keywordflow">if</span> (--entry-&gt;refcount &lt;= 0) {
+00333                     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Freeing entry for msgid %ld\n"</span>,
+00334                                 msgid));
+00335                     krb5_auth_con_free(kcontext, entry-&gt;auth_context);
+00336                     free(entry-&gt;secName);
+00337                     entry1-&gt;next = entry-&gt;next;
+00338                     free(entry);
+00339                 }
+00340 
+00341                 <span class="keywordflow">return</span>;
+00342             }
+00343 
+00344     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+00345                 <span class="stringliteral">"KSM: Unable to decrement cache entry for msgid %ld.\n"</span>,
+00346                 msgid));
+00347 }
+00348 
+00349 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00350 ksm_increment_ref_count(<span class="keywordtype">long</span> msgid)
+00351 {
+00352     <span class="keyword">struct </span>ksm_cache_entry *entry = ksm_get_cache(msgid);
+00353 
+00354     <span class="keywordflow">if</span> (!entry) {
+00355         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Unable to find cache entry for msgid %ld "</span>
+00356                     <span class="stringliteral">"for increment\n"</span>, msgid));
+00357         <span class="keywordflow">return</span>;
+00358     }
+00359 
+00360     entry-&gt;refcount++;
+00361 }
+00362 
+00363 <span class="comment">/*</span>
+00364 <span class="comment"> * Initialize specific session information (right now, just set up things to</span>
+00365 <span class="comment"> * not do an engineID probe)</span>
+00366 <span class="comment"> */</span>
+00367 
+00368 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00369 ksm_session_init(<a class="code" href="structsnmp__session.html">netsnmp_session</a> * sess)
+00370 {
+00371     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+00372                 <span class="stringliteral">"KSM: Reached our session initialization callback\n"</span>));
+00373 
+00374     sess-&gt;<a class="code" href="structsnmp__session.html#o3">flags</a> |= SNMP_FLAGS_DONT_PROBE;
+00375 
+00376     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00377 }
+00378 
+00379 <span class="comment">/*</span>
+00380 <span class="comment"> * Free our state information (this is only done on the agent side)</span>
+00381 <span class="comment"> */</span>
+00382 
+00383 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00384 ksm_free_state_ref(<span class="keywordtype">void</span> *ptr)
+00385 {
+00386     <span class="keyword">struct </span>ksm_secStateRef *ref = (<span class="keyword">struct </span>ksm_secStateRef *) ptr;
+00387 
+00388     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: Freeing state reference\n"</span>));
+00389 
+00390     krb5_auth_con_free(kcontext, ref-&gt;auth_context);
+00391 
+00392     free(ref);
+00393 }
+00394 
+00395 <span class="comment">/*</span>
+00396 <span class="comment"> * This is called when the PDU is freed; this will decrement reference counts</span>
+00397 <span class="comment"> * for entries in our state cache.</span>
+00398 <span class="comment"> */</span>
+00399 
+00400 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00401 ksm_free_pdu(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu)
+00402 {
+00403     ksm_decrement_ref_count(pdu-&gt;<a class="code" href="structsnmp__pdu.html#o3">msgid</a>);
+00404 
+00405     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Decrementing cache entry for PDU msgid %ld\n"</span>,
+00406                 pdu-&gt;<a class="code" href="structsnmp__pdu.html#o3">msgid</a>));
+00407 
+00408     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00409 }
+00410 
+00411 <span class="comment">/*</span>
+00412 <span class="comment"> * This is called when a PDU is cloned (to increase reference counts)</span>
+00413 <span class="comment"> */</span>
+00414 
+00415 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00416 ksm_clone_pdu(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu, <a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *pdu2)
+00417 {
+00418     ksm_increment_ref_count(pdu-&gt;<a class="code" href="structsnmp__pdu.html#o3">msgid</a>);
+00419 
+00420     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Incrementing cache entry for PDU msgid %ld\n"</span>,
+00421                 pdu-&gt;<a class="code" href="structsnmp__pdu.html#o3">msgid</a>));
+00422 
+00423     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00424 }
+00425 
+00426 <span class="comment">/****************************************************************************</span>
+00427 <span class="comment"> *</span>
+00428 <span class="comment"> * ksm_generate_out_msg</span>
+00429 <span class="comment"> *</span>
+00430 <span class="comment"> * Parameters:</span>
+00431 <span class="comment"> *      (See list below...)</span>
+00432 <span class="comment"> *</span>
+00433 <span class="comment"> * Returns:</span>
+00434 <span class="comment"> *      SNMPERR_GENERIC                        On success.</span>
+00435 <span class="comment"> *      SNMPERR_KRB5</span>
+00436 <span class="comment"> *      ... and others</span>
+00437 <span class="comment"> *</span>
+00438 <span class="comment"> *</span>
+00439 <span class="comment"> * Generate an outgoing message.</span>
+00440 <span class="comment"> *</span>
+00441 <span class="comment"> ****************************************************************************/</span>
+00442 
+00443 <span class="keywordtype">int</span>
+00444 ksm_rgenerate_out_msg(<span class="keyword">struct</span> snmp_secmod_outgoing_params *parms)
+00445 {
+00446     krb5_auth_context auth_context = NULL;
+00447     krb5_error_code retcode;
+00448     krb5_ccache     cc = NULL;
+00449     <span class="keywordtype">int</span>             retval = SNMPERR_SUCCESS;
+00450     krb5_data       outdata, ivector;
+00451     krb5_keyblock  *subkey = NULL;
+00452 <span class="preprocessor">#ifdef MIT_NEW_CRYPTO</span>
+00453     krb5_data       input;
+00454     krb5_enc_data   output;
+00455     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    numcksumtypes;
+00456     krb5_cksumtype  *cksumtype_array;
+00457 <span class="preprocessor">#elif defined OLD_HEIMDAL       </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+00458     krb5_crypto heim_crypto = NULL;
+00459 <span class="preprocessor">#else                           </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+00460     krb5_encrypt_block eblock;
+00461 <span class="preprocessor">#endif                          </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+00462     size_t          blocksize, encrypted_length;
+00463     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  *encrypted_data = NULL;
+00464     <span class="keywordtype">int</span>             zero = 0, i;
+00465     u_char         *cksum_pointer, *endp = *parms-&gt;wholeMsg;
+00466     krb5_cksumtype  cksumtype;
+00467     krb5_checksum   pdu_checksum;
+00468     u_char         **wholeMsg = parms-&gt;wholeMsg;
+00469     size_t         *offset = parms-&gt;wholeMsgOffset, seq_offset;
+00470     <span class="keyword">struct </span>ksm_secStateRef *ksm_state = (<span class=
+"keyword">struct </span>ksm_secStateRef *)
+00471         parms-&gt;secStateRef;
+00472 <span class="preprocessor">#ifdef OLD_HEIMDAL</span>
+00473     krb5_data encrypted_scoped_pdu;
+00474 <span class="preprocessor">#endif                          </span><span class="comment">/* OLD_HEIMDAL */</span>
+00475     <span class="keywordtype">int</span> rc;
+00476     <span class="keywordtype">char</span> *colon = NULL;
+00477 
+00478     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class="stringliteral">"Starting KSM processing\n"</span>));
+00479 
+00480     outdata.length = 0;
+00481     outdata.data = NULL;
+00482     ivector.length = 0;
+00483     ivector.data = NULL;
+00484     CHECKSUM_CONTENTS(&amp;pdu_checksum) = NULL;
+00485 
+00486     <span class="keywordflow">if</span> (!ksm_state) {
+00487         <span class="comment">/*</span>
+00488 <span class="comment">         * If we've got a port number as part of the "peername", then</span>
+00489 <span class="comment">         * suppress this (temporarily) while we build the credential info.</span>
+00490 <span class="comment">         *   XXX - what about "udp:host" style addresses?</span>
+00491 <span class="comment">         */</span>
+00492         colon = strrchr(params-&gt;session-&gt;peername, <span class="charliteral">':'</span>);
+00493         <span class="keywordflow">if</span> (colon != NULL) {
+00494             *colon=<span class="charliteral">'\0'</span>;
+00495         }
+00496 
+00497         <span class="comment">/*</span>
+00498 <span class="comment">         * If we don't have a ksm_state, then we're a request.  Get a</span>
+00499 <span class="comment">         * credential cache and build a ap_req.</span>
+00500 <span class="comment">         */</span>
+00501         retcode = krb5_cc_default(kcontext, &amp;cc);
+00502 
+00503         <span class="keywordflow">if</span> (retcode) {
+00504             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: krb5_cc_default failed: %s\n"</span>,
+00505                         error_message(retcode)));
+00506             snmp_set_detail(error_message(retcode));
+00507             retval = SNMPERR_KRB5;
+00508             <span class="keywordflow">goto</span> error;
+00509         }
+00510 
+00511         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: Set credential cache successfully\n"</span>));
+00512 
+00513         <span class="comment">/*</span>
+00514 <span class="comment">         * This seems odd, since we don't need this until later (or earlier,</span>
+00515 <span class="comment">         * depending on how you look at it), but because the most likely</span>
+00516 <span class="comment">         * errors are Kerberos at this point, I'll get this now to save</span>
+00517 <span class="comment">         * time not encoding the rest of the packet.</span>
+00518 <span class="comment">         *</span>
+00519 <span class="comment">         * Also, we need the subkey to encrypt the PDU (if required).</span>
+00520 <span class="comment">         */</span>
+00521 
+00522         retcode =
+00523             krb5_mk_req(kcontext, &amp;auth_context,
+00524                         AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SUBKEY,
+00525                         (<span class="keywordtype">char</span> *) service_name, parms-&gt;session-&gt;peername, NULL,
+00526                         cc, &amp;outdata);
+00527 
+00528         <span class="keywordflow">if</span> (colon != NULL)
+00529             *colon=<span class="charliteral">':'</span>;
+00530 
+00531         <span class="keywordflow">if</span> (retcode) {
+00532             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: krb5_mk_req failed: %s\n"</span>,
+00533                         error_message(retcode)));
+00534             snmp_set_detail(error_message(retcode));
+00535             retval = SNMPERR_KRB5;
+00536             <span class="keywordflow">goto</span> error;
+00537         }
+00538 
+00539         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: ticket retrieved successfully for \"%s/%s\" "</span>
+00540                     <span class="stringliteral">"(may not be actual ticket sname)\n"</span>, service_name,
+00541                     parms-&gt;session-&gt;peername));
+00542 
+00543     } <span class="keywordflow">else</span> {
+00544 
+00545         <span class="comment">/*</span>
+00546 <span class="comment">         * Grab the auth_context from our security state reference</span>
+00547 <span class="comment">         */</span>
+00548 
+00549         auth_context = ksm_state-&gt;auth_context;
+00550 
+00551         <span class="comment">/*</span>
+00552 <span class="comment">         * Bundle up an AP_REP.  Note that we do this only when we</span>
+00553 <span class="comment">         * have a security state reference (which means we're in an agent</span>
+00554 <span class="comment">         * and we're sending a response).</span>
+00555 <span class="comment">         */</span>
+00556 
+00557         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: Starting reply processing.\n"</span>));
+00558 
+00559         retcode = krb5_mk_rep(kcontext, auth_context, &amp;outdata);
+00560 
+00561         <span class="keywordflow">if</span> (retcode) {
+00562             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: krb5_mk_rep failed: %s\n"</span>,
+00563                         error_message(retcode)));
+00564             snmp_set_detail(error_message(retcode));
+00565             retval = SNMPERR_KRB5;
+00566             <span class="keywordflow">goto</span> error;
+00567         }
+00568 
+00569         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: Finished with krb5_mk_rep()\n"</span>));
+00570     }
+00571 
+00572     <span class="comment">/*</span>
+00573 <span class="comment">     * If we have to encrypt the PDU, do that now</span>
+00574 <span class="comment">     */</span>
+00575 
+00576     <span class="keywordflow">if</span> (parms-&gt;secLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
+00577 
+00578         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: Starting PDU encryption.\n"</span>));
+00579 
+00580         <span class="comment">/*</span>
+00581 <span class="comment">         * It's weird -</span>
+00582 <span class="comment">         *</span>
+00583 <span class="comment">         * If we're on the manager, it's a local subkey (because that's in</span>
+00584 <span class="comment">         * our AP_REQ)</span>
+00585 <span class="comment">         *</span>
+00586 <span class="comment">         * If we're on the agent, it's a remote subkey (because that comes</span>
+00587 <span class="comment">         * FROM the received AP_REQ).</span>
+00588 <span class="comment">         */</span>
+00589 
+00590         <span class="keywordflow">if</span> (ksm_state)
+00591             retcode = krb5_auth_con_getremotesubkey(kcontext, auth_context,
+00592                                                     &amp;subkey);
+00593         <span class="keywordflow">else</span>
+00594             retcode = krb5_auth_con_getlocalsubkey(kcontext, auth_context,
+00595                                                    &amp;subkey);
+00596 
+00597         <span class="keywordflow">if</span> (retcode) {
+00598             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+00599                         <span class="stringliteral">"KSM: krb5_auth_con_getlocalsubkey failed: %s\n"</span>,
+00600                         error_message(retcode)));
+00601             snmp_set_detail(error_message(retcode));
+00602             retval = SNMPERR_KRB5;
+00603             <span class="keywordflow">goto</span> error;
+00604         }
+00605 
+00606         <span class="comment">/*</span>
+00607 <span class="comment">         * Note that here we need to handle different things between the</span>
+00608 <span class="comment">         * old and new crypto APIs.  First, we need to get the final encrypted</span>
+00609 <span class="comment">         * length of the PDU.</span>
+00610 <span class="comment">         */</span>
+00611 
+00612 <span class="preprocessor">#ifdef MIT_NEW_CRYPTO</span>
+00613         retcode = krb5_c_encrypt_length(kcontext, subkey-&gt;enctype,
+00614                                         parms-&gt;scopedPduLen,
+00615                                         &amp;encrypted_length);
+00616 
+00617         <span class="keywordflow">if</span> (retcode) {
+00618             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+00619                         <span class="stringliteral">"Encryption length calculation failed: %s\n"</span>,
+00620                         error_message(retcode)));
+00621             snmp_set_detail(error_message(retcode));
+00622             retval = SNMPERR_KRB5;
+00623             <span class="keywordflow">goto</span> error;
+00624         }
+00625 <span class="preprocessor">#elif defined OLD_HEIMDAL</span>
+00626         retcode = krb5_crypto_init(kcontext, subkey, 0, &amp;heim_crypto);
+00627         <span class="keywordflow">if</span> (retcode) {
+00628             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"krb5_crypto_init failed: %s\n"</span>,
+00629                         error_message(retcode)));
+00630             snmp_set_detail(error_message(retcode));
+00631             retval = SNMPERR_KRB5;
+00632             <span class="keywordflow">goto</span> error;
+00633         }
+00634         encrypted_length = krb5_get_wrapped_length(kcontext, heim_crypto,
+00635                                                    parms-&gt;scopedPduLen);
+00636 <span class="preprocessor">#else                           </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+00637 
+00638         krb5_use_enctype(kcontext, &amp;eblock, subkey-&gt;enctype);
+00639         retcode = krb5_process_key(kcontext, &amp;eblock, subkey);
+00640 
+00641         <span class="keywordflow">if</span> (retcode) {
+00642             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"krb5_process_key failed: %s\n"</span>,
+00643                         error_message(retcode)));
+00644             snmp_set_detail(error_message(retcode));
+00645             retval = SNMPERR_KRB5;
+00646             <span class="keywordflow">goto</span> error;
+00647         }
+00648 
+00649         encrypted_length = krb5_encrypt_size(parms-&gt;scopedPduLen,
+00650                                              eblock.crypto_entry);
+00651 <span class="preprocessor">#endif                          </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+00652 
+00653 <span class="preprocessor">#ifndef OLD_HEIMDAL </span><span class=
+"comment">/* since heimdal allocs the space for us */</span>
+00654         encrypted_data = malloc(encrypted_length);
+00655 
+00656         <span class="keywordflow">if</span> (!encrypted_data) {
+00657             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+00658                         <span class="stringliteral">"KSM: Unable to malloc %d bytes for encrypt "</span>
+00659                         <span class="stringliteral">"buffer: %s\n"</span>, parms-&gt;scopedPduLen,
+00660                         strerror(errno)));
+00661             retval = SNMPERR_MALLOC;
+00662 <span class="preprocessor">#ifndef MIT_NEW_CRYPTO</span>
+00663             krb5_finish_key(kcontext, &amp;eblock);
+00664 <span class="preprocessor">#endif                          </span><span class="comment">/* ! MIT_NEW_CRYPTO */</span>
+00665 
+00666             <span class="keywordflow">goto</span> error;
+00667         }
+00668 <span class="preprocessor">#endif </span><span class="comment">/* ! OLD_HEIMDAL */</span>
+00669 
+00670         <span class="comment">/*</span>
+00671 <span class="comment">         * We need to set up a blank initialization vector for the encryption.</span>
+00672 <span class="comment">         * Use a block of all zero's (which is dependent on the block size</span>
+00673 <span class="comment">         * of the encryption method).</span>
+00674 <span class="comment">         */</span>
+00675 
+00676 <span class="preprocessor">#ifdef MIT_NEW_CRYPTO</span>
+00677 
+00678         retcode = krb5_c_block_size(kcontext, subkey-&gt;enctype, &amp;blocksize);
+00679 
+00680         <span class="keywordflow">if</span> (retcode) {
+00681             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+00682                         <span class="stringliteral">"Unable to determine crypto block size: %s\n"</span>,
+00683                         error_message(retcode)));
+00684             snmp_set_detail(error_message(retcode));
+00685             retval = SNMPERR_KRB5;
+00686             <span class="keywordflow">goto</span> error;
+00687         }
+00688 <span class="preprocessor">#elif defined (OLD_HEIMDAL)     </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+00689 <span class="preprocessor">#else                           </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+00690 
+00691         blocksize =
+00692             krb5_enctype_array[subkey-&gt;enctype]-&gt;system-&gt;block_length;
+00693 
+00694 <span class="preprocessor">#endif                          </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+00695 
+00696 <span class="preprocessor">#ifndef OLD_HEIMDAL     </span><span class="comment">/* since allocs the space for us */</span>
+00697         ivector.data = malloc(blocksize);
+00698 
+00699         <span class="keywordflow">if</span> (!ivector.data) {
+00700             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Unable to allocate %d bytes for ivector\n"</span>,
+00701                         blocksize));
+00702             retval = SNMPERR_MALLOC;
+00703             <span class="keywordflow">goto</span> error;
+00704         }
+00705 
+00706         ivector.length = blocksize;
+00707         memset(ivector.data, 0, blocksize);
+00708 <span class="preprocessor">#endif </span><span class="comment">/* OLD_HEIMDAL */</span>
+00709 
+00710         <span class="comment">/*</span>
+00711 <span class="comment">         * Finally!  Do the encryption!</span>
+00712 <span class="comment">         */</span>
+00713 
+00714 <span class="preprocessor">#ifdef MIT_NEW_CRYPTO</span>
+00715 
+00716         input.data = (<span class="keywordtype">char</span> *) parms-&gt;scopedPdu;
+00717         input.length = parms-&gt;scopedPduLen;
+00718         output.ciphertext.data = (<span class="keywordtype">char</span> *) encrypted_data;
+00719         output.ciphertext.length = encrypted_length;
+00720 
+00721         retcode =
+00722             krb5_c_encrypt(kcontext, subkey, KSM_KEY_USAGE_ENCRYPTION,
+00723                            &amp;ivector, &amp;input, &amp;output);
+00724 
+00725 <span class="preprocessor">#elif defined OLD_HEIMDAL </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+00726 
+00727         krb5_data_zero(&amp;encrypted_scoped_pdu);
+00728         retcode = krb5_encrypt(kcontext, heim_crypto, KSM_KEY_USAGE_ENCRYPTION,
+00729                                parms-&gt;scopedPdu, parms-&gt;scopedPduLen,
+00730                                &amp;encrypted_scoped_pdu);
+00731         <span class="keywordflow">if</span> (retcode == 0) {
+00732                 encrypted_length = encrypted_scoped_pdu.length;
+00733                 encrypted_data = encrypted_scoped_pdu.data;
+00734                 krb5_data_zero(&amp;encrypted_scoped_pdu);
+00735         }
+00736 <span class="preprocessor">#else                           </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+00737 
+00738         retcode = krb5_encrypt(kcontext, (krb5_pointer) parms-&gt;scopedPdu,
+00739                                (krb5_pointer) encrypted_data,
+00740                                parms-&gt;scopedPduLen, &amp;eblock, ivector.data);
+00741 
+00742         krb5_finish_key(kcontext, &amp;eblock);
+00743 
+00744 <span class="preprocessor">#endif                          </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+00745 
+00746         <span class="keywordflow">if</span> (retcode) {
+00747             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: krb5_encrypt failed: %s\n"</span>,
+00748                         error_message(retcode)));
+00749             retval = SNMPERR_KRB5;
+00750             snmp_set_detail(error_message(retcode));
+00751             <span class="keywordflow">goto</span> error;
+00752         }
+00753 
+00754         *offset = 0;
+00755 
+00756         rc = asn_realloc_rbuild_string(wholeMsg, parms-&gt;wholeMsgLen,
+00757                                              offset, 1,
+00758                                              (u_char) (ASN_UNIVERSAL |
+00759                                                        ASN_PRIMITIVE |
+00760                                                        ASN_OCTET_STR),
+00761                                              encrypted_data,
+00762                                              encrypted_length);
+00763 
+00764         <span class="keywordflow">if</span> (rc == 0) {
+00765             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Building encrypted payload failed.\n"</span>));
+00766             retval = SNMPERR_TOO_LONG;
+00767             <span class="keywordflow">goto</span> error;
+00768         }
+00769 
+00770         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: Encryption complete.\n"</span>));
+00771 
+00772     } <span class="keywordflow">else</span> {
+00773         <span class="comment">/*</span>
+00774 <span class="comment">         * Plaintext PDU (not encrypted)</span>
+00775 <span class="comment">         */</span>
+00776 
+00777         <span class="keywordflow">if</span> (*parms-&gt;wholeMsgLen &lt; parms-&gt;scopedPduLen) {
+00778             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Not enough room for plaintext PDU.\n"</span>));
+00779             retval = SNMPERR_TOO_LONG;
+00780             <span class="keywordflow">goto</span> error;
+00781         }
+00782     }
+00783 
+00784     <span class="comment">/*</span>
+00785 <span class="comment">     * Start encoding the msgSecurityParameters</span>
+00786 <span class="comment">     *</span>
+00787 <span class="comment">     * For now, use 0 for the response hint</span>
+00788 <span class="comment">     */</span>
+00789 
+00790     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: scopedPdu added to payload\n"</span>));
+00791 
+00792     seq_offset = *offset;
+00793 
+00794     rc = asn_realloc_rbuild_int(wholeMsg, parms-&gt;wholeMsgLen,
+00795                                       offset, 1,
+00796                                       (u_char) (ASN_UNIVERSAL |
+00797                                                 ASN_PRIMITIVE |
+00798                                                 ASN_INTEGER),
+00799                                       (<span class="keywordtype">long</span> *) &amp;zero, <span class=
+"keyword">sizeof</span>(zero));
+00800 
+00801     <span class="keywordflow">if</span> (rc == 0) {
+00802         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Building ksm security parameters failed.\n"</span>));
+00803         retval = SNMPERR_TOO_LONG;
+00804         <span class="keywordflow">goto</span> error;
+00805     }
+00806 
+00807     rc = asn_realloc_rbuild_string(wholeMsg, parms-&gt;wholeMsgLen,
+00808                                          offset, 1,
+00809                                          (u_char) (ASN_UNIVERSAL |
+00810                                                    ASN_PRIMITIVE |
+00811                                                    ASN_OCTET_STR),
+00812                                          (u_char *) outdata.data,
+00813                                          outdata.length);
+00814 
+00815     <span class="keywordflow">if</span> (rc == 0) {
+00816         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Building ksm AP_REQ failed.\n"</span>));
+00817         retval = SNMPERR_TOO_LONG;
+00818         <span class="keywordflow">goto</span> error;
+00819     }
+00820 
+00821     <span class="comment">/*</span>
+00822 <span class="comment">     * If we didn't encrypt the packet, we haven't yet got the subkey.</span>
+00823 <span class="comment">     * Get that now.</span>
+00824 <span class="comment">     */</span>
+00825 
+00826     <span class="keywordflow">if</span> (!subkey) {
+00827         <span class="keywordflow">if</span> (ksm_state)
+00828             retcode = krb5_auth_con_getremotesubkey(kcontext, auth_context,
+00829                                                     &amp;subkey);
+00830         <span class="keywordflow">else</span>
+00831             retcode = krb5_auth_con_getlocalsubkey(kcontext, auth_context,
+00832                                                    &amp;subkey);
+00833         <span class="keywordflow">if</span> (retcode) {
+00834             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"krb5_auth_con_getlocalsubkey failed: %s\n"</span>,
+00835                         error_message(retcode)));
+00836             snmp_set_detail(error_message(retcode));
+00837             retval = SNMPERR_KRB5;
+00838             <span class="keywordflow">goto</span> error;
+00839         }
+00840 <span class="preprocessor">#ifdef OLD_HEIMDAL</span>
+00841          retcode = krb5_crypto_init(kcontext, subkey, 0, &amp;heim_crypto);
+00842         <span class="keywordflow">if</span> (retcode) {
+00843             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"krb5_crypto_init failed: %s\n"</span>,
+00844                         error_message(retcode)));
+00845             snmp_set_detail(error_message(retcode));
+00846             retval = SNMPERR_KRB5;
+00847             <span class="keywordflow">goto</span> error;
+00848         }
+00849 <span class="preprocessor">#endif                                  </span><span class="comment">/* OLD_HEIMDAL */</span>
+00850     }
+00851 
+00852     <span class="comment">/*</span>
+00853 <span class="comment">     * Now, we need to pick the "right" checksum algorithm.  For old</span>
+00854 <span class="comment">     * crypto, just pick CKSUMTYPE_RSA_MD5_DES; for new crypto, pick</span>
+00855 <span class="comment">     * one of the "approved" ones.</span>
+00856 <span class="comment">     */</span>
+00857 
+00858 <span class="preprocessor">#ifdef MIT_NEW_CRYPTO</span>
+00859     retcode = krb5_c_keyed_checksum_types(kcontext, subkey-&gt;enctype,
+00860                                           &amp;numcksumtypes, &amp;cksumtype_array);
+00861 
+00862     <span class="keywordflow">if</span> (retcode) {
+00863         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Unable to find appropriate keyed checksum: %s\n"</span>,
+00864                     error_message(retcode)));
+00865         snmp_set_detail(error_message(retcode));
+00866         retval = SNMPERR_KRB5;
+00867         <span class="keywordflow">goto</span> error;
+00868     }
+00869 
+00870     <span class="keywordflow">if</span> (numcksumtypes &lt;= 0) {
+00871         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"We received a list of zero cksumtypes for this "</span>
+00872                     <span class="stringliteral">"enctype (%d)\n"</span>, subkey-&gt;enctype));
+00873         snmp_set_detail(<span class="stringliteral">"No valid checksum type for this encryption type"</span>);
+00874         retval = SNMPERR_KRB5;
+00875         <span class="keywordflow">goto</span> error;
+00876     }
+00877 
+00878     <span class="comment">/*</span>
+00879 <span class="comment">     * It's not clear to me from the API which checksum you're supposed</span>
+00880 <span class="comment">     * to support, so I'm taking a guess at the first one</span>
+00881 <span class="comment">     */</span>
+00882 
+00883     cksumtype = cksumtype_array[0];
+00884 
+00885     krb5_free_cksumtypes(kcontext, cksumtype_array);
+00886 
+00887     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: Choosing checksum type of %d (subkey type "</span>
+00888                 <span class="stringliteral">"of %d)\n"</span>, cksumtype, subkey-&gt;enctype));
+00889 
+00890     retcode = krb5_c_checksum_length(kcontext, cksumtype, &amp;blocksize);
+00891 
+00892     <span class="keywordflow">if</span> (retcode) {
+00893         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Unable to determine checksum length: %s\n"</span>,
+00894                     error_message(retcode)));
+00895         snmp_set_detail(error_message(retcode));
+00896         retval = SNMPERR_KRB5;
+00897         <span class="keywordflow">goto</span> error;
+00898     }
+00899 
+00900     CHECKSUM_LENGTH(&amp;pdu_checksum) = blocksize;
+00901 
+00902 <span class="preprocessor">#else </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+00903     <span class="keywordflow">if</span> (ksm_state)
+00904         cksumtype = ksm_state-&gt;cksumtype;
+00905     <span class="keywordflow">else</span>
+00906 <span class="preprocessor">#ifdef OLD_HEIMDAL</span>
+00907     {
+00908             <span class="comment">/* no way to tell what kind of checksum to use without trying */</span>
+00909             retval = krb5_create_checksum(kcontext, heim_crypto, 
+00910                                           KSM_KEY_USAGE_CHECKSUM, 0,
+00911                                           parms-&gt;scopedPdu, parms-&gt;scopedPduLen,
+00912                                           &amp;pdu_checksum);
+00913             <span class="keywordflow">if</span> (retval) {
+00914                     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Unable to create a checksum: %s\n"</span>,
+00915                                 error_message(retval)));
+00916                     snmp_set_detail(error_message(retcode));
+00917                     retval = SNMPERR_KRB5;
+00918                     <span class="keywordflow">goto</span> error;
+00919             }
+00920             cksumtype = CHECKSUM_TYPE(&amp;pdu_checksum);
+00921     }
+00922 <span class="preprocessor">#else                                   </span><span class="comment">/* OLD_HEIMDAL */</span>
+00923         cksumtype = CKSUMTYPE_RSA_MD5_DES;
+00924 <span class="preprocessor">#endif                                  </span><span class="comment">/* OLD_HEIMDAL */</span>
+00925 
+00926 <span class="preprocessor">#ifdef OLD_HEIMDAL</span>
+00927         <span class="keywordflow">if</span> (!krb5_checksum_is_keyed(kcontext, cksumtype)) {
+00928 <span class="preprocessor">#else                           </span><span class="comment">/* OLD_HEIMDAL */</span>
+00929     <span class="keywordflow">if</span> (!is_keyed_cksum(cksumtype)) {
+00930 <span class="preprocessor">#endif                          </span><span class="comment">/* OLD_HEIMDAL */</span>
+00931         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Checksum type %d is not a keyed checksum\n"</span>,
+00932                     cksumtype));
+00933         snmp_set_detail(<span class="stringliteral">"Checksum is not a keyed checksum"</span>);
+00934         retval = SNMPERR_KRB5;
+00935         <span class="keywordflow">goto</span> error;
+00936     }
+00937 
+00938 <span class="preprocessor">#ifdef OLD_HEIMDAL</span>
+00939     <span class="keywordflow">if</span> (!krb5_checksum_is_collision_proof(kcontext, cksumtype)) {
+00940 <span class="preprocessor">#else                           </span><span class="comment">/* OLD_HEIMDAL */</span>
+00941     <span class="keywordflow">if</span> (!is_coll_proof_cksum(cksumtype)) {
+00942 <span class="preprocessor">#endif                          </span><span class="comment">/* OLD_HEIMDAL */</span>
+00943         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Checksum type %d is not a collision-proof "</span>
+00944                     <span class="stringliteral">"checksum\n"</span>, cksumtype));
+00945         snmp_set_detail(<span class="stringliteral">"Checksum is not a collision-proof checksum"</span>);
+00946         retval = SNMPERR_KRB5;
+00947         <span class="keywordflow">goto</span> error;
+00948     }
+00949 
+00950 <span class="preprocessor">#ifdef OLD_HEIMDAL</span>
+00951     <span class="keywordflow">if</span> (CHECKSUM_CONTENTS(&amp;pdu_checksum) != NULL ) {
+00952         <span class="comment">/* we did the bogus checksum--don't need to ask for the size again</span>
+00953 <span class="comment">         * or initialize cksumtype; just free the bits */</span>
+00954         free(CHECKSUM_CONTENTS(&amp;pdu_checksum));
+00955         CHECKSUM_CONTENTS(&amp;pdu_checksum) = NULL;
+00956     }
+00957     <span class="keywordflow">else</span> {
+00958         retval = krb5_checksumsize(kcontext, cksumtype,
+00959                                    &amp;CHECKSUM_LENGTH(&amp;pdu_checksum));
+00960         <span class="keywordflow">if</span> (retval) {
+00961             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Unable to determine checksum length: %s\n"</span>,
+00962                         error_message(retval)));
+00963             snmp_set_detail(error_message(retcode));
+00964             retval = SNMPERR_KRB5;
+00965             <span class="keywordflow">goto</span> error;
+00966         }
+00967 <span class="preprocessor">#else                   </span><span class="comment">/* OLD_HEIMDAL */</span>
+00968     CHECKSUM_LENGTH(&amp;pdu_checksum) = krb5_checksum_size(kcontext, cksumtype);
+00969 <span class="preprocessor">#endif                  </span><span class="comment">/* OLD_HEIMDAL */</span>
+00970     CHECKSUM_TYPE(&amp;pdu_checksum) = cksumtype;
+00971 <span class="preprocessor">#ifdef OLD_HEIMDAL</span>
+00972     }
+00973 <span class="preprocessor">#endif                  </span><span class="comment">/* OLD_HEIMDAL */</span>
+00974 
+00975 <span class="preprocessor">#endif </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+00976 
+00977     <span class="comment">/*</span>
+00978 <span class="comment">     * Note that here, we're just leaving blank space for the checksum;</span>
+00979 <span class="comment">     * we remember where that is, and we'll fill it in later.</span>
+00980 <span class="comment">     */</span>
+00981 
+00982     *offset += CHECKSUM_LENGTH(&amp;pdu_checksum);
+00983     memset(*wholeMsg + *parms-&gt;wholeMsgLen - *offset, 0, CHECKSUM_LENGTH(&amp;pdu_checksum));
+00984 
+00985     cksum_pointer = *wholeMsg + *parms-&gt;wholeMsgLen - *offset;
+00986 
+00987     rc = asn_realloc_rbuild_header(wholeMsg, parms-&gt;wholeMsgLen,
+00988                                          parms-&gt;wholeMsgOffset, 1,
+00989                                          (u_char) (ASN_UNIVERSAL |
+00990                                                    ASN_PRIMITIVE |
+00991                                                    ASN_OCTET_STR),
+00992                                          CHECKSUM_LENGTH(&amp;pdu_checksum));
+00993 
+00994     <span class="keywordflow">if</span> (rc == 0) {
+00995         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Building ksm security parameters failed.\n"</span>));
+00996         retval = SNMPERR_TOO_LONG;
+00997         <span class="keywordflow">goto</span> error;
+00998     }
+00999 
+01000     rc = asn_realloc_rbuild_int(wholeMsg, parms-&gt;wholeMsgLen,
+01001                                       parms-&gt;wholeMsgOffset, 1,
+01002                                       (u_char) (ASN_UNIVERSAL |
+01003                                                 ASN_PRIMITIVE |
+01004                                                 ASN_OCTET_STR),
+01005                                       (<span class="keywordtype">long</span> *) &amp;cksumtype,
+01006                                       <span class="keyword">sizeof</span>(cksumtype));
+01007 
+01008     <span class="keywordflow">if</span> (rc == 0) {
+01009         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Building ksm security parameters failed.\n"</span>));
+01010         retval = SNMPERR_TOO_LONG;
+01011         <span class="keywordflow">goto</span> error;
+01012     }
+01013 
+01014     rc = asn_realloc_rbuild_sequence(wholeMsg, parms-&gt;wholeMsgLen,
+01015                                            parms-&gt;wholeMsgOffset, 1,
+01016                                            (u_char) (ASN_SEQUENCE |
+01017                                                      ASN_CONSTRUCTOR),
+01018                                            *offset - seq_offset);
+01019 
+01020     <span class="keywordflow">if</span> (rc == 0) {
+01021         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Building ksm security parameters failed.\n"</span>));
+01022         retval = SNMPERR_TOO_LONG;
+01023         <span class="keywordflow">goto</span> error;
+01024     }
+01025 
+01026     rc = asn_realloc_rbuild_header(wholeMsg, parms-&gt;wholeMsgLen,
+01027                                          parms-&gt;wholeMsgOffset, 1,
+01028                                          (u_char) (ASN_UNIVERSAL |
+01029                                                    ASN_PRIMITIVE |
+01030                                                    ASN_OCTET_STR),
+01031                                          *offset - seq_offset);
+01032 
+01033     <span class="keywordflow">if</span> (rc == 0) {
+01034         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Building ksm security parameters failed.\n"</span>));
+01035         retval = SNMPERR_TOO_LONG;
+01036         <span class="keywordflow">goto</span> error;
+01037     }
+01038 
+01039     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: Security parameter encoding completed\n"</span>));
+01040 
+01041     <span class="comment">/*</span>
+01042 <span class="comment">     * We're done with the KSM security parameters - now we do the global</span>
+01043 <span class="comment">     * header and wrap up the whole PDU.</span>
+01044 <span class="comment">     */</span>
+01045 
+01046     <span class="keywordflow">if</span> (*parms-&gt;wholeMsgLen &lt; parms-&gt;globalDataLen) {
+01047         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Building global data failed.\n"</span>));
+01048         retval = SNMPERR_TOO_LONG;
+01049         <span class="keywordflow">goto</span> error;
+01050     }
+01051 
+01052     *offset += parms-&gt;globalDataLen;
+01053     memcpy(*wholeMsg + *parms-&gt;wholeMsgLen - *offset,
+01054            parms-&gt;globalData, parms-&gt;globalDataLen);
+01055 
+01056     rc = asn_realloc_rbuild_sequence(wholeMsg, parms-&gt;wholeMsgLen,
+01057                                            offset, 1,
+01058                                            (u_char) (ASN_SEQUENCE |
+01059                                                      ASN_CONSTRUCTOR),
+01060                                            *offset);
+01061 
+01062     <span class="keywordflow">if</span> (rc == 0) {
+01063         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Building master packet sequence.\n"</span>));
+01064         retval = SNMPERR_TOO_LONG;
+01065         <span class="keywordflow">goto</span> error;
+01066     }
+01067 
+01068     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: PDU master packet encoding complete.\n"</span>));
+01069 
+01070     <span class="comment">/*</span>
+01071 <span class="comment">     * Now we need to checksum the entire PDU (since it's built).</span>
+01072 <span class="comment">     */</span>
+01073 
+01074 <span class="preprocessor">#ifndef OLD_HEIMDAL </span><span class=
+"comment">/* since heimdal allocs the mem for us */</span>
+01075     CHECKSUM_CONTENTS(&amp;pdu_checksum) = malloc(CHECKSUM_LENGTH(&amp;pdu_checksum));
+01076 
+01077     <span class="keywordflow">if</span> (!CHECKSUM_CONTENTS(&amp;pdu_checksum)) {
+01078         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Unable to malloc %d bytes for checksum\n"</span>,
+01079                     CHECKSUM_LENGTH(&amp;pdu_checksum)));
+01080         retval = SNMPERR_MALLOC;
+01081         <span class="keywordflow">goto</span> error;
+01082     }
+01083 <span class="preprocessor">#endif                                  </span><span class="comment">/* ! OLD_HEIMDAL */</span>
+01084 <span class="preprocessor">#ifdef MIT_NEW_CRYPTO</span>
+01085 
+01086     input.data = (<span class="keywordtype">char</span> *) (*wholeMsg + *parms-&gt;wholeMsgLen - *offset);
+01087     input.length = *offset;
+01088         retcode = krb5_c_make_checksum(kcontext, cksumtype, subkey,
+01089                                        KSM_KEY_USAGE_CHECKSUM, &amp;input,
+01090                                        &amp;pdu_checksum);
+01091 
+01092 <span class="preprocessor">#elif defined(OLD_HEIMDAL)      </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01093 
+01094         retcode = krb5_create_checksum(kcontext, heim_crypto,
+01095                                        KSM_KEY_USAGE_CHECKSUM, cksumtype,
+01096                                        *wholeMsg + *parms-&gt;wholeMsgLen
+01097                                        - *offset, *offset, &amp;pdu_checksum);
+01098 <span class="preprocessor">#else                           </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01099 
+01100     retcode = krb5_calculate_checksum(kcontext, cksumtype, *wholeMsg +
+01101                                       *parms-&gt;wholeMsgLen - *offset,
+01102                                       *offset,
+01103                                       (krb5_pointer) subkey-&gt;contents,
+01104                                       subkey-&gt;length, &amp;pdu_checksum);
+01105 
+01106 <span class="preprocessor">#endif                          </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01107 
+01108     <span class="keywordflow">if</span> (retcode) {
+01109         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Calculate checksum failed: %s\n"</span>,
+01110                     error_message(retcode)));
+01111         retval = SNMPERR_KRB5;
+01112         snmp_set_detail(error_message(retcode));
+01113         <span class="keywordflow">goto</span> error;
+01114     }
+01115 
+01116     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: Checksum calculation complete.\n"</span>));
+01117 
+01118     memcpy(cksum_pointer, CHECKSUM_CONTENTS(&amp;pdu_checksum), CHECKSUM_LENGTH(&amp;pdu_checksum));
+01119 
+01120     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: Writing checksum of %d bytes at offset %d\n"</span>,
+01121                 CHECKSUM_LENGTH(&amp;pdu_checksum), cksum_pointer - (*wholeMsg + 1)));
+01122 
+01123     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class="stringliteral">"KSM: Checksum:"</span>));
+01124 
+01125     <span class="keywordflow">for</span> (i = 0; i &lt; CHECKSUM_LENGTH(&amp;pdu_checksum); i++)
+01126         DEBUGMSG((<span class="stringliteral">"ksm"</span>, <span class="stringliteral">" %02x"</span>,
+01127                   (<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span>) CHECKSUM_CONTENTS(&amp;pdu_checksum)[i]));
+01128 
+01129     DEBUGMSG((<span class="stringliteral">"ksm"</span>, <span class="stringliteral">"\n"</span>));
+01130 
+01131     <span class="comment">/*</span>
+01132 <span class="comment">     * If we're _not_ called as part of a response (null ksm_state),</span>
+01133 <span class="comment">     * then save the auth_context for later using our cache routines.</span>
+01134 <span class="comment">     */</span>
+01135 
+01136     <span class="keywordflow">if</span> (!ksm_state) {
+01137         <span class="keywordflow">if</span> ((retval = ksm_insert_cache(parms-&gt;pdu-&gt;msgid, auth_context,
+01138                                        (u_char *) parms-&gt;secName,
+01139                                        parms-&gt;secNameLen)) !=
+01140             SNMPERR_SUCCESS)
+01141             <span class="keywordflow">goto</span> error;
+01142         auth_context = NULL;
+01143     }
+01144 
+01145     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM processing complete!\n"</span>));
+01146 
+01147   error:
+01148 
+01149     <span class="keywordflow">if</span> (CHECKSUM_CONTENTS(&amp;pdu_checksum))
+01150 <span class="preprocessor">#ifdef MIT_NEW_CRYPTO</span>
+01151         krb5_free_checksum_contents(kcontext, &amp;pdu_checksum);
+01152 <span class="preprocessor">#else                           </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01153         free(CHECKSUM_CONTENTS(&amp;pdu_checksum));
+01154 <span class="preprocessor">#endif                          </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01155 
+01156     <span class="keywordflow">if</span> (ivector.data)
+01157         free(ivector.data);
+01158 
+01159     <span class="keywordflow">if</span> (subkey)
+01160         krb5_free_keyblock(kcontext, subkey);
+01161 
+01162 <span class="preprocessor">#ifdef OLD_HEIMDAL </span><span class="comment">/* OLD_HEIMDAL */</span>
+01163     <span class="keywordflow">if</span> (heim_crypto)
+01164             krb5_crypto_destroy(kcontext, heim_crypto);
+01165 <span class="preprocessor">#endif </span><span class="comment">/* OLD_HEIMDAL */</span>
+01166 
+01167     <span class="keywordflow">if</span> (encrypted_data)
+01168         free(encrypted_data);
+01169 
+01170     <span class="keywordflow">if</span> (cc)
+01171         krb5_cc_close(kcontext, cc);
+01172 
+01173     <span class="keywordflow">if</span> (auth_context &amp;&amp; !ksm_state)
+01174         krb5_auth_con_free(kcontext, auth_context);
+01175 
+01176     <span class="keywordflow">return</span> retval;
+01177 }
+01178 
+01179 <span class="comment">/****************************************************************************</span>
+01180 <span class="comment"> *</span>
+01181 <span class="comment"> * ksm_process_in_msg</span>
+01182 <span class="comment"> *</span>
+01183 <span class="comment"> * Parameters:</span>
+01184 <span class="comment"> *      (See list below...)</span>
+01185 <span class="comment"> *</span>
+01186 <span class="comment"> * Returns:</span>
+01187 <span class="comment"> *      KSM_ERR_NO_ERROR                        On success.</span>
+01188 <span class="comment"> *      SNMPERR_KRB5</span>
+01189 <span class="comment"> *      KSM_ERR_GENERIC_ERROR</span>
+01190 <span class="comment"> *      KSM_ERR_UNSUPPORTED_SECURITY_LEVEL</span>
+01191 <span class="comment"> *</span>
+01192 <span class="comment"> *</span>
+01193 <span class="comment"> * Processes an incoming message.</span>
+01194 <span class="comment"> *</span>
+01195 <span class="comment"> ****************************************************************************/</span>
+01196 
+01197 <span class="keywordtype">int</span>
+01198 ksm_process_in_msg(<span class="keyword">struct</span> snmp_secmod_incoming_params *parms)
+01199 {
+01200     <span class="keywordtype">long</span>            temp;
+01201     krb5_cksumtype  cksumtype;
+01202     krb5_auth_context auth_context = NULL;
+01203     krb5_error_code retcode;
+01204     krb5_checksum   checksum;
+01205     krb5_data       ap_req, ivector;
+01206     krb5_flags      flags;
+01207     krb5_keyblock  *subkey = NULL;
+01208 <span class="preprocessor">#ifdef MIT_NEW_CRYPTO</span>
+01209     krb5_data       input, output;
+01210     krb5_boolean    valid;
+01211     krb5_enc_data   in_crypt;
+01212 <span class="preprocessor">#elif defined OLD_HEIMDAL       </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01213     krb5_data output;
+01214     krb5_crypto heim_crypto = NULL;
+01215 <span class="preprocessor">#else                           </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01216     krb5_encrypt_block eblock;
+01217 <span class="preprocessor">#endif                          </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01218     krb5_ticket    *ticket = NULL;
+01219     <span class="keywordtype">int</span>             retval = SNMPERR_SUCCESS, response = 0;
+01220     size_t          length =
+01221         parms-&gt;wholeMsgLen - (u_int) (parms-&gt;secParams - parms-&gt;wholeMsg);
+01222     u_char         *current = parms-&gt;secParams, type;
+01223     size_t          cksumlength, blocksize;
+01224     <span class="keywordtype">long</span>            hint;
+01225     <span class="keywordtype">char</span>           *cname;
+01226     <span class="keyword">struct </span>ksm_secStateRef *ksm_state;
+01227     <span class="keyword">struct </span>ksm_cache_entry *entry;
+01228 
+01229     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class="stringliteral">"Processing has begun\n"</span>));
+01230 
+01231     CHECKSUM_CONTENTS(&amp;checksum) = NULL;
+01232     ap_req.data = NULL;
+01233     ivector.length = 0;
+01234     ivector.data = NULL;
+01235 
+01236     <span class="comment">/*</span>
+01237 <span class="comment">     * First, parse the security parameters (because we need the subkey inside</span>
+01238 <span class="comment">     * of the ticket to do anything</span>
+01239 <span class="comment">     */</span>
+01240 
+01241     <span class="keywordflow">if</span> ((current = asn_parse_sequence(current, &amp;length, &amp;type,
+01242                                       (ASN_UNIVERSAL | ASN_PRIMITIVE |
+01243                                        ASN_OCTET_STR),
+01244                                       <span class="stringliteral">"ksm first octet"</span>)) == NULL) {
+01245         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Initial security paramter parsing failed\n"</span>));
+01246 
+01247         retval = SNMPERR_ASN_PARSE_ERR;
+01248         <span class="keywordflow">goto</span> error;
+01249     }
+01250 
+01251     <span class="keywordflow">if</span> ((current = asn_parse_sequence(current, &amp;length, &amp;type,
+01252                                       (ASN_SEQUENCE | ASN_CONSTRUCTOR),
+01253                                       <span class="stringliteral">"ksm sequence"</span>)) == NULL) {
+01254         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+01255                     <span class="stringliteral">"Security parameter sequence parsing failed\n"</span>));
+01256 
+01257         retval = SNMPERR_ASN_PARSE_ERR;
+01258         <span class="keywordflow">goto</span> error;
+01259     }
+01260 
+01261     <span class="keywordflow">if</span> ((current = asn_parse_int(current, &amp;length, &amp;type, &amp;temp,
+01262                                  <span class="keyword">sizeof</span>(temp))) == NULL) {
+01263         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Security parameter checksum type parsing"</span>
+01264                     <span class="stringliteral">"failed\n"</span>));
+01265 
+01266         retval = SNMPERR_ASN_PARSE_ERR;
+01267         <span class="keywordflow">goto</span> error;
+01268     }
+01269 
+01270     cksumtype = temp;
+01271 
+01272 <span class="preprocessor">#ifdef MIT_NEW_CRYPTO</span>
+01273     <span class="keywordflow">if</span> (!krb5_c_valid_cksumtype(cksumtype)) {
+01274         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Invalid checksum type (%d)\n"</span>, cksumtype));
+01275 
+01276         retval = SNMPERR_KRB5;
+01277         snmp_set_detail(<span class="stringliteral">"Invalid checksum type"</span>);
+01278         <span class="keywordflow">goto</span> error;
+01279     }
+01280 
+01281     <span class="keywordflow">if</span> (!krb5_c_is_keyed_cksum(cksumtype)) {
+01282         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Checksum type %d is not a keyed checksum\n"</span>,
+01283                     cksumtype));
+01284         snmp_set_detail(<span class="stringliteral">"Checksum is not a keyed checksum"</span>);
+01285         retval = SNMPERR_KRB5;
+01286         <span class="keywordflow">goto</span> error;
+01287     }
+01288 
+01289     <span class="keywordflow">if</span> (!krb5_c_is_coll_proof_cksum(cksumtype)) {
+01290         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Checksum type %d is not a collision-proof "</span>
+01291                     <span class="stringliteral">"checksum\n"</span>, cksumtype));
+01292         snmp_set_detail(<span class="stringliteral">"Checksum is not a collision-proof checksum"</span>);
+01293         retval = SNMPERR_KRB5;
+01294         <span class="keywordflow">goto</span> error;
+01295     }
+01296 <span class="preprocessor">#else </span><span class="comment">/* ! MIT_NEW_CRYPTO */</span>
+01297 <span class="preprocessor">#ifdef OLD_HEIMDAL</span>
+01298     <span class="comment">/* kludge */</span>
+01299     <span class="keywordflow">if</span> (krb5_checksumsize(kcontext, cksumtype, &amp;cksumlength)) {
+01300 <span class="preprocessor">#else                                   </span><span class="comment">/* OLD_HEIMDAL */</span>
+01301     <span class="keywordflow">if</span> (!valid_cksumtype(cksumtype)) {
+01302 <span class="preprocessor">#endif                                  </span><span class="comment">/* OLD_HEIMDAL */</span>
+01303         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Invalid checksum type (%d)\n"</span>, cksumtype));
+01304 
+01305         retval = SNMPERR_KRB5;
+01306         snmp_set_detail(<span class="stringliteral">"Invalid checksum type"</span>);
+01307         <span class="keywordflow">goto</span> error;
+01308     }
+01309 
+01310 <span class="preprocessor">#ifdef OLD_HEIMDAL</span>
+01311     <span class="keywordflow">if</span> (!krb5_checksum_is_keyed(kcontext, cksumtype)) {
+01312 <span class="preprocessor">#else                                   </span><span class="comment">/* OLD_HEIMDAL */</span>
+01313     <span class="keywordflow">if</span> (!is_keyed_cksum(cksumtype)) {
+01314 <span class="preprocessor">#endif                                  </span><span class="comment">/* OLD_HEIMDAL */</span>
+01315         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Checksum type %d is not a keyed checksum\n"</span>,
+01316                     cksumtype));
+01317         snmp_set_detail(<span class="stringliteral">"Checksum is not a keyed checksum"</span>);
+01318         retval = SNMPERR_KRB5;
+01319         <span class="keywordflow">goto</span> error;
+01320     }
+01321 
+01322 <span class="preprocessor">#ifdef OLD_HEIMDAL</span>
+01323     <span class="keywordflow">if</span> (!krb5_checksum_is_collision_proof(kcontext, cksumtype)) {
+01324 <span class="preprocessor">#else                                   </span><span class="comment">/* OLD_HEIMDAL */</span>
+01325     <span class="keywordflow">if</span> (!is_coll_proof_cksum(cksumtype)) {
+01326 <span class="preprocessor">#endif                                  </span><span class="comment">/* OLD_HEIMDAL */</span>
+01327         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Checksum type %d is not a collision-proof "</span>
+01328                     <span class="stringliteral">"checksum\n"</span>, cksumtype));
+01329         snmp_set_detail(<span class="stringliteral">"Checksum is not a collision-proof checksum"</span>);
+01330         retval = SNMPERR_KRB5;
+01331         <span class="keywordflow">goto</span> error;
+01332     }
+01333 <span class="preprocessor">#endif </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01334 
+01335     CHECKSUM_TYPE(&amp;checksum) = cksumtype;
+01336 
+01337     cksumlength = length;
+01338 
+01339     <span class="keywordflow">if</span> ((current = asn_parse_sequence(current, &amp;cksumlength, &amp;type,
+01340                                       (ASN_UNIVERSAL | ASN_PRIMITIVE |
+01341                                        ASN_OCTET_STR), <span class="stringliteral">"ksm checksum"</span>)) ==
+01342         NULL) {
+01343         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+01344                     <span class="stringliteral">"Security parameter checksum parsing failed\n"</span>));
+01345 
+01346         retval = SNMPERR_ASN_PARSE_ERR;
+01347         <span class="keywordflow">goto</span> error;
+01348     }
+01349 
+01350     CHECKSUM_CONTENTS(&amp;checksum) = malloc(cksumlength);
+01351     <span class="keywordflow">if</span> (!CHECKSUM_CONTENTS(&amp;checksum)) {
+01352         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Unable to malloc %d bytes for checksum.\n"</span>,
+01353                     cksumlength));
+01354         retval = SNMPERR_MALLOC;
+01355         <span class="keywordflow">goto</span> error;
+01356     }
+01357 
+01358     memcpy(CHECKSUM_CONTENTS(&amp;checksum), current, cksumlength);
+01359 
+01360     CHECKSUM_LENGTH(&amp;checksum) = cksumlength;
+01361     CHECKSUM_TYPE(&amp;checksum) = cksumtype;
+01362 
+01363     <span class="comment">/*</span>
+01364 <span class="comment">     * Zero out the checksum so the validation works correctly</span>
+01365 <span class="comment">     */</span>
+01366 
+01367     memset(current, 0, cksumlength);
+01368 
+01369     current += cksumlength;
+01370     length = parms-&gt;wholeMsgLen - (u_int) (current - parms-&gt;wholeMsg);
+01371 
+01372     <span class="keywordflow">if</span> ((current = asn_parse_sequence(current, &amp;length, &amp;type,
+01373                                       (ASN_UNIVERSAL | ASN_PRIMITIVE |
+01374                                        ASN_OCTET_STR), <span class="stringliteral">"ksm ap_req"</span>)) ==
+01375         NULL) {
+01376         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM security parameter AP_REQ/REP parsing "</span>
+01377                     <span class="stringliteral">"failed\n"</span>));
+01378 
+01379         retval = SNMPERR_ASN_PARSE_ERR;
+01380         <span class="keywordflow">goto</span> error;
+01381     }
+01382 
+01383     ap_req.length = length;
+01384     ap_req.data = malloc(length);
+01385     <span class="keywordflow">if</span> (!ap_req.data) {
+01386         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+01387                     <span class="stringliteral">"KSM unable to malloc %d bytes for AP_REQ/REP.\n"</span>,
+01388                     length));
+01389         retval = SNMPERR_MALLOC;
+01390         <span class="keywordflow">goto</span> error;
+01391     }
+01392 
+01393     memcpy(ap_req.data, current, length);
+01394 
+01395     current += length;
+01396     length = parms-&gt;wholeMsgLen - (u_int) (current - parms-&gt;wholeMsg);
+01397 
+01398     <span class="keywordflow">if</span> ((current = asn_parse_int(current, &amp;length, &amp;type, &amp;hint,
+01399                                  <span class="keyword">sizeof</span>(hint))) == NULL) {
+01400         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+01401                     <span class="stringliteral">"KSM security parameter hint parsing failed\n"</span>));
+01402 
+01403         retval = SNMPERR_ASN_PARSE_ERR;
+01404         <span class="keywordflow">goto</span> error;
+01405     }
+01406 
+01407     <span class="comment">/*</span>
+01408 <span class="comment">     * Okay!  We've got it all!  Now try decoding the damn ticket.</span>
+01409 <span class="comment">     *</span>
+01410 <span class="comment">     * But of course there's a WRINKLE!  We need to figure out if we're</span>
+01411 <span class="comment">     * processing a AP_REQ or an AP_REP.  How do we do that?  We're going</span>
+01412 <span class="comment">     * to cheat, and look at the first couple of bytes (which is what</span>
+01413 <span class="comment">     * the Kerberos library routines do anyway).</span>
+01414 <span class="comment">     *</span>
+01415 <span class="comment">     * If there are ever new Kerberos message formats, we'll need to fix</span>
+01416 <span class="comment">     * this here.</span>
+01417 <span class="comment">     *</span>
+01418 <span class="comment">     * If it's a _response_, then we need to get the auth_context</span>
+01419 <span class="comment">     * from our cache.</span>
+01420 <span class="comment">     */</span>
+01421 
+01422     <span class="keywordflow">if</span> (ap_req.length
+01423 <span class="preprocessor">#ifndef HEIMDAL</span>
+01424         &amp;&amp; (ap_req.data[0] == 0x6e || ap_req.data[0] == 0x4e)) {
+01425 <span class="preprocessor">#else                           </span><span class="comment">/* HEIMDAL */</span>
+01426         &amp;&amp; (((<span class="keywordtype">char</span> *)ap_req.data)[0] == 0x6e || ((<span class=
+"keywordtype">char</span> *)ap_req.data)[0] == 0x4e)) {
+01427 <span class="preprocessor">#endif</span>
+01428 
+01429         <span class="comment">/*</span>
+01430 <span class="comment">         * We need to initalize the authorization context, and set the</span>
+01431 <span class="comment">         * replay cache in it (and initialize the replay cache if we</span>
+01432 <span class="comment">         * haven't already</span>
+01433 <span class="comment">         */</span>
+01434 
+01435         retcode = krb5_auth_con_init(kcontext, &amp;auth_context);
+01436 
+01437         <span class="keywordflow">if</span> (retcode) {
+01438             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"krb5_auth_con_init failed: %s\n"</span>,
+01439                         error_message(retcode)));
+01440             retval = SNMPERR_KRB5;
+01441             snmp_set_detail(error_message(retcode));
+01442             <span class="keywordflow">goto</span> error;
+01443         }
+01444 
+01445         <span class="keywordflow">if</span> (!rcache) {
+01446             krb5_data       server;
+01447             server.data = <span class="stringliteral">"host"</span>;
+01448             server.length = strlen(server.data);
+01449 
+01450             retcode = krb5_get_server_rcache(kcontext, &amp;server, &amp;rcache);
+01451 
+01452             <span class="keywordflow">if</span> (retcode) {
+01453                 DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"krb5_get_server_rcache failed: %s\n"</span>,
+01454                             error_message(retcode)));
+01455                 retval = SNMPERR_KRB5;
+01456                 snmp_set_detail(error_message(retcode));
+01457                 <span class="keywordflow">goto</span> error;
+01458             }
+01459         }
+01460 
+01461         retcode = krb5_auth_con_setrcache(kcontext, auth_context, rcache);
+01462 
+01463         <span class="keywordflow">if</span> (retcode) {
+01464             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"krb5_auth_con_setrcache failed: %s\n"</span>,
+01465                         error_message(retcode)));
+01466             retval = SNMPERR_KRB5;
+01467             snmp_set_detail(error_message(retcode));
+01468             <span class="keywordflow">goto</span> error;
+01469         }
+01470 
+01471         retcode = krb5_rd_req(kcontext, &amp;auth_context, &amp;ap_req, NULL,
+01472                               keytab, &amp;flags, &amp;ticket);
+01473 
+01474         krb5_auth_con_setrcache(kcontext, auth_context, NULL);
+01475 
+01476         <span class="keywordflow">if</span> (retcode) {
+01477             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"krb5_rd_req() failed: %s\n"</span>,
+01478                         error_message(retcode)));
+01479             retval = SNMPERR_KRB5;
+01480             snmp_set_detail(error_message(retcode));
+01481             <span class="keywordflow">goto</span> error;
+01482         }
+01483 
+01484         retcode =
+01485             krb5_unparse_name(kcontext, TICKET_CLIENT(ticket), &amp;cname);
+01486 
+01487         <span class="keywordflow">if</span> (retcode == 0) {
+01488             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM authenticated principal name: %s\n"</span>,
+01489                         cname));
+01490             free(cname);
+01491         }
+01492 
+01493         <span class="comment">/*</span>
+01494 <span class="comment">         * Check to make sure AP_OPTS_MUTUAL_REQUIRED was set</span>
+01495 <span class="comment">         */</span>
+01496 
+01497         <span class="keywordflow">if</span> (!(flags &amp; AP_OPTS_MUTUAL_REQUIRED)) {
+01498             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+01499                         <span class="stringliteral">"KSM MUTUAL_REQUIRED not set in request!\n"</span>));
+01500             retval = SNMPERR_KRB5;
+01501             snmp_set_detail(<span class="stringliteral">"MUTUAL_REQUIRED not set in message"</span>);
+01502             <span class="keywordflow">goto</span> error;
+01503         }
+01504 
+01505         retcode =
+01506             krb5_auth_con_getremotesubkey(kcontext, auth_context, &amp;subkey);
+01507 
+01508         <span class="keywordflow">if</span> (retcode) {
+01509             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM remote subkey retrieval failed: %s\n"</span>,
+01510                         error_message(retcode)));
+01511             retval = SNMPERR_KRB5;
+01512             snmp_set_detail(error_message(retcode));
+01513             <span class="keywordflow">goto</span> error;
+01514         }
+01515 
+01516 <span class="preprocessor">#ifndef HEIMDAL</span>
+01517     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (ap_req.length &amp;&amp; (ap_req.data[0] == 0x6f ||
+01518                                  ap_req.data[0] == 0x4f)) {
+01519 <span class="preprocessor">#else                           </span><span class="comment">/* HEIMDAL */</span>
+01520     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (ap_req.length &amp;&amp; (((<span class=
+"keywordtype">char</span> *)ap_req.data)[0] == 0x6f ||
+01521                                  ((<span class="keywordtype">char</span> *)ap_req.data)[0] == 0x4f)) {
+01522 <span class="preprocessor">#endif                          </span><span class="comment">/* HEIMDAL */</span>
+01523         <span class="comment">/*</span>
+01524 <span class="comment">         * Looks like a response; let's see if we've got that auth_context</span>
+01525 <span class="comment">         * in our cache.</span>
+01526 <span class="comment">         */</span>
+01527 
+01528         krb5_ap_rep_enc_part *repl = NULL;
+01529 
+01530         response = 1;
+01531 
+01532         entry = ksm_get_cache(parms-&gt;pdu-&gt;msgid);
+01533 
+01534         <span class="keywordflow">if</span> (!entry) {
+01535             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+01536                         <span class="stringliteral">"KSM: Unable to find auth_context for PDU with "</span>
+01537                         <span class="stringliteral">"message ID of %ld\n"</span>, parms-&gt;pdu-&gt;msgid));
+01538             retval = SNMPERR_KRB5;
+01539             <span class="keywordflow">goto</span> error;
+01540         }
+01541 
+01542         auth_context = entry-&gt;auth_context;
+01543 
+01544         <span class="comment">/*</span>
+01545 <span class="comment">         * In that case, let's call the rd_rep function</span>
+01546 <span class="comment">         */</span>
+01547 
+01548         retcode = krb5_rd_rep(kcontext, auth_context, &amp;ap_req, &amp;repl);
+01549 
+01550         <span class="keywordflow">if</span> (repl)
+01551             krb5_free_ap_rep_enc_part(kcontext, repl);
+01552 
+01553         <span class="keywordflow">if</span> (retcode) {
+01554             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: krb5_rd_rep() failed: %s\n"</span>,
+01555                         error_message(retcode)));
+01556             retval = SNMPERR_KRB5;
+01557             <span class="keywordflow">goto</span> error;
+01558         }
+01559 
+01560         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM: krb5_rd_rep() decoded successfully.\n"</span>));
+01561 
+01562         retcode =
+01563             krb5_auth_con_getlocalsubkey(kcontext, auth_context, &amp;subkey);
+01564 
+01565         <span class="keywordflow">if</span> (retcode) {
+01566             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Unable to retrieve local subkey: %s\n"</span>,
+01567                         error_message(retcode)));
+01568             retval = SNMPERR_KRB5;
+01569             snmp_set_detail(<span class="stringliteral">"Unable to retrieve local subkey"</span>);
+01570             <span class="keywordflow">goto</span> error;
+01571         }
+01572 
+01573     } <span class="keywordflow">else</span> {
+01574 <span class="preprocessor">#ifndef HEIMDAL</span>
+01575         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Unknown Kerberos message type (%02x)\n"</span>,
+01576                     ap_req.data[0]));
+01577 <span class="preprocessor">#else                           </span><span class="comment">/* HEIMDAL */</span>
+01578          DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Unknown Kerberos message type (%02x)\n"</span>,
+01579                     ((<span class="keywordtype">char</span> *)ap_req.data)[0]));
+01580 <span class="preprocessor">#endif</span>
+01581         retval = SNMPERR_KRB5;
+01582         snmp_set_detail(<span class="stringliteral">"Unknown Kerberos message type"</span>);
+01583         <span class="keywordflow">goto</span> error;
+01584     }
+01585 
+01586 <span class="preprocessor">#ifdef MIT_NEW_CRYPTO</span>
+01587     input.data = (<span class="keywordtype">char</span> *) parms-&gt;wholeMsg;
+01588     input.length = parms-&gt;wholeMsgLen;
+01589 
+01590     retcode =
+01591         krb5_c_verify_checksum(kcontext, subkey, KSM_KEY_USAGE_CHECKSUM,
+01592                                &amp;input, &amp;checksum, &amp;valid);
+01593 <span class="preprocessor">#elif defined(OLD_HEIMDAL)      </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01594     retcode = krb5_crypto_init(kcontext, subkey, 0, &amp;heim_crypto);
+01595     <span class="keywordflow">if</span> (retcode) {
+01596             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"krb5_crypto_init failed: %s\n"</span>,
+01597                         error_message(retcode)));
+01598             snmp_set_detail(error_message(retcode));
+01599             retval = SNMPERR_KRB5;
+01600             <span class="keywordflow">goto</span> error;
+01601     }
+01602     retcode = krb5_verify_checksum(kcontext, heim_crypto,
+01603                                    KSM_KEY_USAGE_CHECKSUM, parms-&gt;wholeMsg,
+01604                                    parms-&gt;wholeMsgLen, &amp;checksum);
+01605 <span class="preprocessor">#else                           </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01606     retcode = krb5_verify_checksum(kcontext, cksumtype, &amp;checksum,
+01607                                    parms-&gt;wholeMsg, parms-&gt;wholeMsgLen,
+01608                                    (krb5_pointer) subkey-&gt;contents,
+01609                                    subkey-&gt;length);
+01610 <span class="preprocessor">#endif                          </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01611 
+01612     <span class="keywordflow">if</span> (retcode) {
+01613         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM checksum verification failed: %s\n"</span>,
+01614                     error_message(retcode)));
+01615         retval = SNMPERR_KRB5;
+01616         snmp_set_detail(error_message(retcode));
+01617         <span class="keywordflow">goto</span> error;
+01618     }
+01619 
+01620     <span class="comment">/*</span>
+01621 <span class="comment">     * Don't ask me why they didn't simply return an error, but we have</span>
+01622 <span class="comment">     * to check to see if "valid" is false.</span>
+01623 <span class="comment">     */</span>
+01624 
+01625 <span class="preprocessor">#ifdef MIT_NEW_CRYPTO</span>
+01626     <span class="keywordflow">if</span> (!valid) {
+01627         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Computed checksum did not match supplied "</span>
+01628                     <span class="stringliteral">"checksum!\n"</span>));
+01629         retval = SNMPERR_KRB5;
+01630         snmp_set_detail
+01631             (<span class="stringliteral">"Computed checksum did not match supplied checksum"</span>);
+01632         <span class="keywordflow">goto</span> error;
+01633     }
+01634 <span class="preprocessor">#endif                          </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01635 
+01636     <span class="comment">/*</span>
+01637 <span class="comment">     * Handle an encrypted PDU.  Note that it's an OCTET_STRING of the</span>
+01638 <span class="comment">     * output of whatever Kerberos cryptosystem you're using (defined by</span>
+01639 <span class="comment">     * the encryption type).  Note that this is NOT the EncryptedData</span>
+01640 <span class="comment">     * sequence - it's what goes in the "cipher" field of EncryptedData.</span>
+01641 <span class="comment">     */</span>
+01642 
+01643     <span class="keywordflow">if</span> (parms-&gt;secLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
+01644 
+01645         <span class="keywordflow">if</span> ((current = asn_parse_sequence(current, &amp;length, &amp;type,
+01646                                           (ASN_UNIVERSAL | ASN_PRIMITIVE |
+01647                                            ASN_OCTET_STR), <span class="stringliteral">"ksm pdu"</span>)) ==
+01648             NULL) {
+01649             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM sPDU octet decoding failed\n"</span>));
+01650             retval = SNMPERR_ASN_PARSE_ERR;
+01651             <span class="keywordflow">goto</span> error;
+01652         }
+01653 
+01654         <span class="comment">/*</span>
+01655 <span class="comment">         * The PDU is now pointed at by "current", and the length is in</span>
+01656 <span class="comment">         * "length".</span>
+01657 <span class="comment">         */</span>
+01658 
+01659         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM starting sPDU decode\n"</span>));
+01660 
+01661         <span class="comment">/*</span>
+01662 <span class="comment">         * We need to set up a blank initialization vector for the decryption.</span>
+01663 <span class="comment">         * Use a block of all zero's (which is dependent on the block size</span>
+01664 <span class="comment">         * of the encryption method).</span>
+01665 <span class="comment">         */</span>
+01666 
+01667 <span class="preprocessor">#ifdef MIT_NEW_CRYPTO</span>
+01668 
+01669         retcode = krb5_c_block_size(kcontext, subkey-&gt;enctype, &amp;blocksize);
+01670 
+01671         <span class="keywordflow">if</span> (retcode) {
+01672             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+01673                         <span class="stringliteral">"Unable to determine crypto block size: %s\n"</span>,
+01674                         error_message(retcode)));
+01675             snmp_set_detail(error_message(retcode));
+01676             retval = SNMPERR_KRB5;
+01677             <span class="keywordflow">goto</span> error;
+01678         }
+01679 <span class="preprocessor">#elif defined(OLD_HEIMDAL)      </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01680 <span class="preprocessor">#else                           </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01681 
+01682         blocksize =
+01683             krb5_enctype_array[subkey-&gt;enctype]-&gt;system-&gt;block_length;
+01684 
+01685 <span class="preprocessor">#endif                          </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01686 
+01687 <span class="preprocessor">#ifndef OLD_HEIMDAL</span>
+01688         ivector.data = malloc(blocksize);
+01689 
+01690         <span class="keywordflow">if</span> (!ivector.data) {
+01691             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Unable to allocate %d bytes for ivector\n"</span>,
+01692                         blocksize));
+01693             retval = SNMPERR_MALLOC;
+01694             <span class="keywordflow">goto</span> error;
+01695         }
+01696 
+01697         ivector.length = blocksize;
+01698         memset(ivector.data, 0, blocksize);
+01699 
+01700 <span class="preprocessor">#ifndef MIT_NEW_CRYPTO</span>
+01701 
+01702         krb5_use_enctype(kcontext, &amp;eblock, subkey-&gt;enctype);
+01703 
+01704         retcode = krb5_process_key(kcontext, &amp;eblock, subkey);
+01705 
+01706         <span class="keywordflow">if</span> (retcode) {
+01707             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM key post-processing failed: %s\n"</span>,
+01708                         error_message(retcode)));
+01709             snmp_set_detail(error_message(retcode));
+01710             retval = SNMPERR_KRB5;
+01711             <span class="keywordflow">goto</span> error;
+01712         }
+01713 <span class="preprocessor">#endif                          </span><span class="comment">/* !MIT_NEW_CRYPTO */</span>
+01714 
+01715 <span class="preprocessor">#endif </span><span class="comment">/* ! OLD_HEIMDAL */</span>
+01716 
+01717         <span class="keywordflow">if</span> (length &gt; *parms-&gt;scopedPduLen) {
+01718             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM not enough room - have %d bytes to "</span>
+01719                         <span class="stringliteral">"decrypt but only %d bytes available\n"</span>, length,
+01720                         *parms-&gt;scopedPduLen));
+01721             retval = SNMPERR_TOO_LONG;
+01722 <span class="preprocessor">#ifndef MIT_NEW_CRYPTO</span>
+01723 <span class="preprocessor">#ifndef OLD_HEIMDAL</span>
+01724             krb5_finish_key(kcontext, &amp;eblock);
+01725 <span class="preprocessor">#endif                          </span><span class="comment">/* ! OLD_HEIMDAL */</span>
+01726 <span class="preprocessor">#endif                          </span><span class="comment">/* ! MIT_NEW_CRYPTO */</span>
+01727             <span class="keywordflow">goto</span> error;
+01728         }
+01729 <span class="preprocessor">#ifdef MIT_NEW_CRYPTO</span>
+01730         in_crypt.ciphertext.data = (<span class="keywordtype">char</span> *) current;
+01731         in_crypt.ciphertext.length = length;
+01732         in_crypt.enctype = subkey-&gt;enctype;
+01733         output.data = (<span class="keywordtype">char</span> *) *parms-&gt;scopedPdu;
+01734         output.length = *parms-&gt;scopedPduLen;
+01735 
+01736         retcode =
+01737             krb5_c_decrypt(kcontext, subkey, KSM_KEY_USAGE_ENCRYPTION,
+01738                            &amp;ivector, &amp;in_crypt, &amp;output);
+01739 <span class="preprocessor">#elif defined (OLD_HEIMDAL)     </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01740         retcode = krb5_decrypt(kcontext, heim_crypto, KSM_KEY_USAGE_ENCRYPTION,
+01741                                current, length, &amp;output);
+01742         <span class="keywordflow">if</span> (retcode == 0) {
+01743                 *parms-&gt;scopedPdu = (<span class="keywordtype">char</span> *) output.data;
+01744                 *parms-&gt;scopedPduLen = output.length;
+01745                 krb5_data_zero(&amp;output);
+01746         }
+01747 <span class="preprocessor">#else                           </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01748 
+01749         retcode = krb5_decrypt(kcontext, (krb5_pointer) current,
+01750                                *parms-&gt;scopedPdu, length, &amp;eblock,
+01751                                ivector.data);
+01752 
+01753         krb5_finish_key(kcontext, &amp;eblock);
+01754 
+01755 <span class="preprocessor">#endif                          </span><span class="comment">/* MIT_NEW_CRYPTO */</span>
+01756 
+01757         <span class="keywordflow">if</span> (retcode) {
+01758             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Decryption failed: %s\n"</span>,
+01759                         error_message(retcode)));
+01760             snmp_set_detail(error_message(retcode));
+01761             retval = SNMPERR_KRB5;
+01762             <span class="keywordflow">goto</span> error;
+01763         }
+01764 
+01765         *parms-&gt;scopedPduLen = length;
+01766 
+01767     } <span class="keywordflow">else</span> {
+01768         <span class="comment">/*</span>
+01769 <span class="comment">         * Clear PDU</span>
+01770 <span class="comment">         */</span>
+01771 
+01772         *parms-&gt;scopedPdu = current;
+01773         *parms-&gt;scopedPduLen =
+01774             parms-&gt;wholeMsgLen - (current - parms-&gt;wholeMsg);
+01775     }
+01776 
+01777     <span class="comment">/*</span>
+01778 <span class="comment">     * A HUGE GROSS HACK</span>
+01779 <span class="comment">     */</span>
+01780 
+01781     *parms-&gt;maxSizeResponse = parms-&gt;maxMsgSize - 200;
+01782 
+01783     DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class="stringliteral">"KSM processing complete\n"</span>));
+01784 
+01785     <span class="comment">/*</span>
+01786 <span class="comment">     * Set the secName to the right value (a hack for now).  But that's</span>
+01787 <span class="comment">     * only used for when we're processing a request, not a response.</span>
+01788 <span class="comment">     */</span>
+01789 
+01790     <span class="keywordflow">if</span> (!response) {
+01791 
+01792         retcode = krb5_unparse_name(kcontext, TICKET_CLIENT(ticket),
+01793                                     &amp;cname);
+01794 
+01795         <span class="keywordflow">if</span> (retcode) {
+01796             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM krb5_unparse_name failed: %s\n"</span>,
+01797                         error_message(retcode)));
+01798             snmp_set_detail(error_message(retcode));
+01799             retval = SNMPERR_KRB5;
+01800             <span class="keywordflow">goto</span> error;
+01801         }
+01802 
+01803         <span class="keywordflow">if</span> (strlen(cname) &gt; *parms-&gt;secNameLen + 1) {
+01804             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>,
+01805                         <span class="stringliteral">"KSM: Principal length (%d) is too long (%d)\n"</span>,
+01806                         strlen(cname), parms-&gt;secNameLen));
+01807             retval = SNMPERR_TOO_LONG;
+01808             free(cname);
+01809             <span class="keywordflow">goto</span> error;
+01810         }
+01811 
+01812         strcpy(parms-&gt;secName, cname);
+01813         *parms-&gt;secNameLen = strlen(cname);
+01814 
+01815         free(cname);
+01816 
+01817         <span class="comment">/*</span>
+01818 <span class="comment">         * Also, if we're not a response, keep around our auth_context so we</span>
+01819 <span class="comment">         * can encode the reply message correctly</span>
+01820 <span class="comment">         */</span>
+01821 
+01822         ksm_state = <a class="code" href="group__util.html#ga38">SNMP_MALLOC_STRUCT</a>(ksm_secStateRef);
+01823 
+01824         <span class="keywordflow">if</span> (!ksm_state) {
+01825             DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"KSM unable to malloc memory for "</span>
+01826                         <span class="stringliteral">"ksm_secStateRef\n"</span>));
+01827             retval = SNMPERR_MALLOC;
+01828             <span class="keywordflow">goto</span> error;
+01829         }
+01830 
+01831         ksm_state-&gt;auth_context = auth_context;
+01832         auth_context = NULL;
+01833         ksm_state-&gt;cksumtype = cksumtype;
+01834 
+01835         *parms-&gt;secStateRef = ksm_state;
+01836     } <span class="keywordflow">else</span> {
+01837 
+01838         <span class="comment">/*</span>
+01839 <span class="comment">         * We _still_ have to set the secName in process_in_msg().  Do</span>
+01840 <span class="comment">         * that now with what we were passed in before (we cached it,</span>
+01841 <span class="comment">         * remember?)</span>
+01842 <span class="comment">         */</span>
+01843 
+01844         memcpy(parms-&gt;secName, entry-&gt;secName, entry-&gt;secNameLen);
+01845         *parms-&gt;secNameLen = entry-&gt;secNameLen;
+01846     }
+01847 
+01848     <span class="comment">/*</span>
+01849 <span class="comment">     * Just in case</span>
+01850 <span class="comment">     */</span>
+01851 
+01852     parms-&gt;secEngineID = (u_char *) <span class="stringliteral">""</span>;
+01853     *parms-&gt;secEngineIDLen = 0;
+01854 
+01855     auth_context = NULL;        <span class="comment">/* So we don't try to free it on success */</span>
+01856 
+01857   error:
+01858     <span class="keywordflow">if</span> (retval == SNMPERR_ASN_PARSE_ERR &amp;&amp;
+01859         snmp_increment_statistic(STAT_SNMPINASNPARSEERRS) == 0)
+01860         DEBUGMSGTL((<span class="stringliteral">"ksm"</span>, <span class=
+"stringliteral">"Failed to increment statistics.\n"</span>));
+01861 
+01862     <span class="keywordflow">if</span> (subkey)
+01863         krb5_free_keyblock(kcontext, subkey);
+01864 
+01865 <span class="preprocessor">#ifdef OLD_HEIMDAL </span><span class="comment">/* OLD_HEIMDAL */</span>
+01866     <span class="keywordflow">if</span> (heim_crypto)
+01867             krb5_crypto_destroy(kcontext, heim_crypto);
+01868 <span class="preprocessor">#endif </span><span class="comment">/* OLD_HEIMDAL */</span>
+01869 
+01870     <span class="keywordflow">if</span> (CHECKSUM_CONTENTS(&amp;checksum))
+01871         free(CHECKSUM_CONTENTS(&amp;checksum));
+01872 
+01873     <span class="keywordflow">if</span> (ivector.data)
+01874         free(ivector.data);
+01875 
+01876     <span class="keywordflow">if</span> (ticket)
+01877         krb5_free_ticket(kcontext, ticket);
+01878 
+01879     <span class="keywordflow">if</span> (!response &amp;&amp; auth_context)
+01880         krb5_auth_con_free(kcontext, auth_context);
+01881 
+01882     <span class="keywordflow">if</span> (ap_req.data)
+01883         free(ap_req.data);
+01884 
+01885     <span class="keywordflow">return</span> retval;
+01886 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:01 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,444 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>&nbsp;/&nbsp;<a class="el" href="dir_000004.html">helpers</a>
+  </div>
+
+  <h1>watcher.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00002 
+00003 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00004 <span class="preprocessor">#if HAVE_STRING_H</span>
+00005 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00006 <span class="preprocessor">#else</span>
+00007 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00008 <span class="preprocessor">#endif</span>
+00009 
+00010 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00011 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00012 
+00013 <span class="preprocessor">#include &lt;net-snmp/agent/watcher.h&gt;</span>
+00014 <span class="preprocessor">#include &lt;net-snmp/agent/instance.h&gt;</span>
+00015 <span class="preprocessor">#include &lt;net-snmp/agent/scalar.h&gt;</span>
+00016 
+00017 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00018 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00019 <span class="preprocessor">#endif</span>
+00020 
+00021 
+00027 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+00028 netsnmp_get_watcher_handler(<span class="keywordtype">void</span>)
+00029 {
+00030     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *ret = NULL;
+00031     
+00032     ret = <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
+"stringliteral">"watcher"</span>,
+00033                                  netsnmp_watcher_helper_handler);
+00034     <span class="keywordflow">if</span> (ret) {
+00035         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o2">flags</a> |= MIB_HANDLER_AUTO_NEXT;
+00036     }
+00037     <span class="keywordflow">return</span> ret;
+00038 }
+00039 
+00040 netsnmp_watcher_info *
+00041 netsnmp_create_watcher_info(<span class="keywordtype">void</span> *data, size_t size, u_char type, <span class=
+"keywordtype">int</span> flags)
+00042 {
+00043     netsnmp_watcher_info *winfo = <a class="code" href=
+"group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_watcher_info);
+00044 
+00045     winfo-&gt;data      = data;
+00046     winfo-&gt;data_size = size;
+00047     winfo-&gt;max_size  = size;    <span class="comment">/* Probably wrong for non-fixed size data */</span>
+00048     winfo-&gt;type      = type;
+00049     <span class="keywordflow">if</span> (flags)
+00050         winfo-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o2">flags</a> = flags;
+00051     <span class="keywordflow">else</span>
+00052         winfo-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o2">flags</a> = WATCHER_FIXED_SIZE;
+00053 
+00054     <span class="keywordflow">return</span> winfo;
+00055 }
+00056 
+00057 <span class="keywordtype">int</span>
+00058 netsnmp_register_watched_instance(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00059                                   netsnmp_watcher_info         *watchinfo)
+00060 {
+00061     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *whandler;
+00062 
+00063     whandler         = netsnmp_get_watcher_handler();
+00064     whandler-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = (<span class=
+"keywordtype">void</span> *)watchinfo;
+00065 
+00066     <a class="code" href="group__handler.html#ga14">netsnmp_inject_handler</a>(reginfo, whandler);
+00067     <span class="keywordflow">return</span> <a class="code" href=
+"group__instance.html#ga1">netsnmp_register_instance</a>(reginfo);
+00068 }
+00069 
+00070 <span class="keywordtype">int</span>
+00071 netsnmp_register_watched_scalar(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00072                                   netsnmp_watcher_info         *watchinfo)
+00073 {
+00074     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *whandler;
+00075 
+00076     whandler         = netsnmp_get_watcher_handler();
+00077     whandler-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = (<span class=
+"keywordtype">void</span> *)watchinfo;
+00078 
+00079     <a class="code" href="group__handler.html#ga14">netsnmp_inject_handler</a>(reginfo, whandler);
+00080     <span class="keywordflow">return</span> <a class="code" href=
+"group__scalar.html#ga1">netsnmp_register_scalar</a>(reginfo);
+00081 }
+00082 
+00083 
+00084 
+00085 <span class="keywordtype">int</span>
+00086 netsnmp_watcher_helper_handler(<a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00087                                <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00088                                <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
+00089                                <a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
+00090 {
+00091     netsnmp_watcher_info *winfo = (netsnmp_watcher_info *) handler-&gt;<a class="code" href=
+"structnetsnmp__mib__handler__s.html#o1">myvoid</a>;
+00092     u_char              *old_data;
+00093     <span class="keywordtype">int</span>                  cmp;
+00094 
+00095     DEBUGMSGTL((<span class="stringliteral">"helper:watcher"</span>, <span class=
+"stringliteral">"Got request:  %d\n"</span>, reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a>));
+00096     cmp = <a class="code" href="group__library.html#ga98">snmp_oid_compare</a>(requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00097                            requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a>,
+00098                            reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o2">rootoid</a>, reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o3">rootoid_len</a>);
+00099 
+00100     DEBUGMSGTL(( <span class="stringliteral">"helper:watcher"</span>, <span class="stringliteral">"  oid:"</span>, cmp));
+00101     DEBUGMSGOID((<span class="stringliteral">"helper:watcher"</span>, requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00102                                    requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
+"structvariable__list.html#o2">name_length</a>));
+00103     DEBUGMSG((   <span class="stringliteral">"helper:watcher"</span>, <span class="stringliteral">"\n"</span>));
+00104 
+00105 
+00106 
+00107     <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
+00108         <span class="comment">/*</span>
+00109 <span class="comment">         * data requests </span>
+00110 <span class="comment">         */</span>
+00111     <span class="keywordflow">case</span> MODE_GET:
+00112         <a class="code" href="group__snmp__client.html#ga18">snmp_set_var_typed_value</a>(requests-&gt;<a class="code"
+href="structnetsnmp__request__info__s.html#o0">requestvb</a>,
+00113                                  winfo-&gt;<a class="code" href="structvariable__list.html#o3">type</a>,
+00114                                  winfo-&gt;<a class="code" href="structvariable__list.html#o8">data</a>,
+00115                                  winfo-&gt;data_size);
+00116         <span class="keywordflow">break</span>;
+00117 
+00118         <span class="comment">/*</span>
+00119 <span class="comment">         * SET requests.  Should only get here if registered RWRITE </span>
+00120 <span class="comment">         */</span>
+00121     <span class="keywordflow">case</span> MODE_SET_RESERVE1:
+00122         <span class="keywordflow">if</span> (requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
+"structvariable__list.html#o3">type</a> != winfo-&gt;<a class="code" href="structvariable__list.html#o3">type</a>)
+00123             <a class="code" href="group__snmp__agent.html#ga79">netsnmp_set_request_error</a>(reqinfo, requests,
+00124                                       SNMP_ERR_WRONGTYPE);
+00125 
+00126         <span class="keywordflow">if</span> (((winfo-&gt;flags &amp; WATCHER_MAX_SIZE) &amp;&amp;
+00127                requests-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#o5">val_len</a> &gt;  winfo-&gt;max_size) ||
+00128             ((winfo-&gt;flags &amp; WATCHER_FIXED_SIZE) &amp;&amp;
+00129                requests-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class=
+"code" href="structvariable__list.html#o5">val_len</a> != winfo-&gt;data_size))
+00130              <a class="code" href="group__snmp__agent.html#ga79">netsnmp_set_request_error</a>(reqinfo, requests,
+00131                                       SNMP_ERR_WRONGLENGTH);
+00132         <span class="keywordflow">break</span>;
+00133 
+00134     <span class="keywordflow">case</span> MODE_SET_RESERVE2:
+00135         <span class="comment">/*</span>
+00136 <span class="comment">         * store old info for undo later </span>
+00137 <span class="comment">         */</span>
+00138         <a class="code" href=
+"group__util.html#ga5">memdup</a>(&amp;old_data, (u_char *) winfo-&gt;data, winfo-&gt;data_size);
+00139         <span class="keywordflow">if</span> (old_data == NULL) {
+00140             <a class="code" href="group__snmp__agent.html#ga79">netsnmp_set_request_error</a>(reqinfo, requests,
+00141                                       SNMP_ERR_RESOURCEUNAVAILABLE);
+00142             <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00143         }
+00144         <a class="code" href="group__handler.html#ga27">netsnmp_request_add_list_data</a>(requests,
+00145                                       netsnmp_create_data_list
+00146                                       (<span class="stringliteral">"watcher"</span>, old_data, free));
+00147         <span class="keywordflow">break</span>;
+00148 
+00149     <span class="keywordflow">case</span> MODE_SET_FREE:
+00150         <span class="comment">/*</span>
+00151 <span class="comment">         * nothing to do </span>
+00152 <span class="comment">         */</span>
+00153         <span class="keywordflow">break</span>;
+00154 
+00155     <span class="keywordflow">case</span> MODE_SET_ACTION:
+00156         <span class="comment">/*</span>
+00157 <span class="comment">         * update current </span>
+00158 <span class="comment">         */</span>
+00159         memcpy(winfo-&gt;data, (<span class="keywordtype">void</span> *)requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string,
+00160                                     requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a>);
+00161         <span class="keywordflow">break</span>;
+00162 
+00163     <span class="keywordflow">case</span> MODE_SET_UNDO:
+00164         memcpy(winfo-&gt;data,
+00165                <a class="code" href="group__handler.html#ga29">netsnmp_request_get_list_data</a>(requests, <span class=
+"stringliteral">"watcher"</span>),
+00166                winfo-&gt;data_size);
+00167         <span class="keywordflow">break</span>;
+00168 
+00169     <span class="keywordflow">case</span> MODE_SET_COMMIT:
+00170         winfo-&gt;data_size = requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a>;
+00171         <span class="keywordflow">break</span>;
+00172 
+00173     }
+00174 
+00175     <span class="comment">/* next handler called automatically - 'AUTO_NEXT' */</span>
+00176     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00177 }
+00178 
+00179 
+00180     <span class="comment">/***************************</span>
+00181 <span class="comment">     *</span>
+00182 <span class="comment">     * A specialised form of the above, reporting</span>
+00183 <span class="comment">     *   the sysUpTime indicated by a given timestamp</span>
+00184 <span class="comment">     *</span>
+00185 <span class="comment">     ***************************/</span>
+00186 
+00187 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+00188 netsnmp_get_watched_timestamp_handler(<span class="keywordtype">void</span>)
+00189 {
+00190     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *ret = NULL;
+00191     
+00192     ret = <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
+"stringliteral">"watcher"</span>,
+00193                                  netsnmp_watched_timestamp_handler);
+00194     <span class="keywordflow">if</span> (ret) {
+00195         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o2">flags</a> |= MIB_HANDLER_AUTO_NEXT;
+00196     }
+00197     <span class="keywordflow">return</span> ret;
+00198 }
+00199 
+00200 <span class="keywordtype">int</span>
+00201 netsnmp_register_watched_timestamp(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00202                                    marker_t timestamp)
+00203 {
+00204     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *whandler;
+00205 
+00206     whandler         = netsnmp_get_watched_timestamp_handler();
+00207     whandler-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = (<span class=
+"keywordtype">void</span> *)timestamp;
+00208     <a class="code" href="group__handler.html#ga14">netsnmp_inject_handler</a>(reginfo, whandler);
+00209     <span class="keywordflow">return</span> <a class="code" href=
+"group__scalar.html#ga1">netsnmp_register_scalar</a>(reginfo);   <span class="comment">/* XXX - or instance? */</span>
+00210 }
+00211 
+00212 
+00213 <span class="keywordtype">int</span>
+00214 netsnmp_watched_timestamp_handler(<a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00215                                <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00216                                <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
+00217                                <a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
+00218 {
+00219     marker_t timestamp = (marker_t) handler-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a>;
+00220     <span class="keywordtype">int</span>      uptime;
+00221     <span class="keywordtype">int</span>      cmp;
+00222 
+00223     DEBUGMSGTL((<span class="stringliteral">"helper:watcher:timestamp"</span>,
+00224                                <span class="stringliteral">"Got request:  %d\n"</span>, reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a>));
+00225     cmp = <a class="code" href="group__library.html#ga98">snmp_oid_compare</a>(requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00226                            requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a>,
+00227                            reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o2">rootoid</a>, reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o3">rootoid_len</a>);
+00228 
+00229     DEBUGMSGTL(( <span class="stringliteral">"helper:watcher:timestamp"</span>, <span class=
+"stringliteral">"  oid:"</span>, cmp));
+00230     DEBUGMSGOID((<span class="stringliteral">"helper:watcher:timestamp"</span>, requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00231                                    requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
+"structvariable__list.html#o2">name_length</a>));
+00232     DEBUGMSG((   <span class="stringliteral">"helper:watcher:timestamp"</span>, <span class="stringliteral">"\n"</span>));
+00233 
+00234 
+00235 
+00236     <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
+00237         <span class="comment">/*</span>
+00238 <span class="comment">         * data requests </span>
+00239 <span class="comment">         */</span>
+00240     <span class="keywordflow">case</span> MODE_GET:
+00241         uptime = netsnmp_marker_uptime( timestamp );
+00242         <a class="code" href="group__snmp__client.html#ga18">snmp_set_var_typed_value</a>(requests-&gt;<a class="code"
+href="structnetsnmp__request__info__s.html#o0">requestvb</a>,
+00243                                  ASN_TIMETICKS,
+00244                                  (u_char *) &amp;uptime,
+00245                                  <span class="keyword">sizeof</span>(uptime));
+00246         <span class="keywordflow">break</span>;
+00247 
+00248         <span class="comment">/*</span>
+00249 <span class="comment">         * Timestamps are inherently Read-Only,</span>
+00250 <span class="comment">         *  so don't need to support SET requests.</span>
+00251 <span class="comment">         */</span>
+00252     <span class="keywordflow">case</span> MODE_SET_RESERVE1:
+00253         <a class="code" href="group__snmp__agent.html#ga79">netsnmp_set_request_error</a>(reqinfo, requests,
+00254                                   SNMP_ERR_NOTWRITABLE);
+00255         <span class="keywordflow">return</span> SNMP_ERR_NOTWRITABLE;
+00256     }
+00257 
+00258     <span class="comment">/* next handler called automatically - 'AUTO_NEXT' */</span>
+00259     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00260 }
+00261 
+00262     <span class="comment">/***************************</span>
+00263 <span class="comment">     *</span>
+00264 <span class="comment">     * Another specialised form of the above,</span>
+00265 <span class="comment">     *   implementing a 'TestAndIncr' spinlock</span>
+00266 <span class="comment">     *</span>
+00267 <span class="comment">     ***************************/</span>
+00268 
+00269 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *
+00270 netsnmp_get_watched_spinlock_handler(<span class="keywordtype">void</span>)
+00271 {
+00272     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *ret = NULL;
+00273     
+00274     ret = <a class="code" href="group__handler.html#ga7">netsnmp_create_handler</a>(<span class=
+"stringliteral">"watcher"</span>,
+00275                                  netsnmp_watched_spinlock_handler);
+00276     <span class="keywordflow">if</span> (ret) {
+00277         ret-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o2">flags</a> |= MIB_HANDLER_AUTO_NEXT;
+00278     }
+00279     <span class="keywordflow">return</span> ret;
+00280 }
+00281 
+00282 <span class="keywordtype">int</span>
+00283 netsnmp_register_watched_spinlock(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00284                                    <span class="keywordtype">int</span> *spinlock)
+00285 {
+00286     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>  *whandler;
+00287     netsnmp_watcher_info *winfo;
+00288 
+00289     whandler         = netsnmp_get_watched_spinlock_handler();
+00290     whandler-&gt;<a class="code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a> = (<span class=
+"keywordtype">void</span> *)spinlock;
+00291     winfo            = netsnmp_create_watcher_info((<span class="keywordtype">void</span> *)spinlock,
+00292                            <span class="keyword">sizeof</span>(<span class=
+"keywordtype">int</span>), ASN_INTEGER, WATCHER_FIXED_SIZE);
+00293     <a class="code" href="group__handler.html#ga14">netsnmp_inject_handler</a>(reginfo, whandler);
+00294     <span class="keywordflow">return</span> netsnmp_register_watched_scalar(reginfo, winfo);
+00295 }
+00296 
+00297 
+00298 <span class="keywordtype">int</span>
+00299 netsnmp_watched_spinlock_handler(<a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+00300                                <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+00301                                <a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
+00302                                <a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
+00303 {
+00304     <span class="keywordtype">int</span>     *spinlock = (<span class="keywordtype">int</span> *) handler-&gt;<a class=
+"code" href="structnetsnmp__mib__handler__s.html#o1">myvoid</a>;
+00305     <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request;
+00306     <span class="keywordtype">int</span>      cmp;
+00307 
+00308     DEBUGMSGTL((<span class="stringliteral">"helper:watcher:spinlock"</span>,
+00309                                <span class="stringliteral">"Got request:  %d\n"</span>, reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a>));
+00310     cmp = <a class="code" href="group__library.html#ga98">snmp_oid_compare</a>(requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00311                            requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a>,
+00312                            reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o2">rootoid</a>, reginfo-&gt;<a class="code" href=
+"structnetsnmp__handler__registration__s.html#o3">rootoid_len</a>);
+00313 
+00314     DEBUGMSGTL(( <span class="stringliteral">"helper:watcher:spinlock"</span>, <span class=
+"stringliteral">"  oid:"</span>, cmp));
+00315     DEBUGMSGOID((<span class="stringliteral">"helper:watcher:spinlock"</span>, requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href="structvariable__list.html#o1">name</a>,
+00316                                    requests-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
+"structvariable__list.html#o2">name_length</a>));
+00317     DEBUGMSG((   <span class="stringliteral">"helper:watcher:spinlock"</span>, <span class="stringliteral">"\n"</span>));
+00318 
+00319 
+00320 
+00321     <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
+00322         <span class="comment">/*</span>
+00323 <span class="comment">         * Ensure the assigned value matches the current one</span>
+00324 <span class="comment">         */</span>
+00325     <span class="keywordflow">case</span> MODE_SET_RESERVE1:
+00326         <span class="keywordflow">for</span> (request=requests; request; request=request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o13">next</a>) {
+00327             <span class="keywordflow">if</span> (*request-&gt;<a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a class="code" href=
+"structvariable__list.html#o4">val</a>.integer != *spinlock) {
+00328                 <a class="code" href=
+"group__snmp__agent.html#ga79">netsnmp_set_request_error</a>(reqinfo, requests, SNMP_ERR_WRONGVALUE);
+00329                 <span class="keywordflow">return</span> SNMP_ERR_WRONGVALUE;
+00330 
+00331             }
+00332         }
+00333         <span class="keywordflow">break</span>;
+00334 
+00335         <span class="comment">/*</span>
+00336 <span class="comment">         * Everything else worked, so increment the spinlock</span>
+00337 <span class="comment">         */</span>
+00338     <span class="keywordflow">case</span> MODE_SET_COMMIT:
+00339         (*spinlock)++;
+00340         <span class="keywordflow">break</span>;
+00341     }
+00342 
+00343     <span class="comment">/* next handler called automatically - 'AUTO_NEXT' */</span>
+00344     <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+00345 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,197 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>container_null.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * container_null.c</span>
+00003 <span class="comment"> * $Id$</span>
+00004 <span class="comment"> *</span>
+00005 <span class="comment"> * see comments in header file.</span>
+00006 <span class="comment"> *</span>
+00007 <span class="comment"> */</span>
+00008 
+00009 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00010 
+00011 <span class="preprocessor">#if HAVE_IO_H</span>
+00012 <span class="preprocessor">#include &lt;io.h&gt;</span>
+00013 <span class="preprocessor">#endif</span>
+00014 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00015 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00016 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00017 <span class="preprocessor">#endif</span>
+00018 <span class="preprocessor">#if HAVE_MALLOC_H</span>
+00019 <span class="preprocessor">#include &lt;malloc.h&gt;</span>
+00020 <span class="preprocessor">#endif</span>
+00021 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00022 <span class="preprocessor">#if HAVE_STRING_H</span>
+00023 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00024 <span class="preprocessor">#else</span>
+00025 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00026 <span class="preprocessor">#endif</span>
+00027 
+00028 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00029 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00030 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00031 <span class="preprocessor">#include &lt;net-snmp/library/container.h&gt;</span>
+00032 <span class="preprocessor">#include &lt;net-snmp/library/container_binary_array.h&gt;</span>
+00033 <span class="preprocessor">#include &lt;net-snmp/library/tools.h&gt;</span>
+00034 <span class="preprocessor">#include &lt;net-snmp/library/snmp_assert.h&gt;</span>
+00035 
+00053 <span class="comment">/**********************************************************************</span>
+00054 <span class="comment"> *</span>
+00055 <span class="comment"> * container</span>
+00056 <span class="comment"> *</span>
+00057 <span class="comment"> */</span>
+00058 <span class="keyword">static</span> <span class="keywordtype">void</span> *
+00059 _null_find(netsnmp_container *container, <span class="keyword">const</span> <span class="keywordtype">void</span> *data)
+00060 {
+00061     DEBUGMSGTL((<span class="stringliteral">"container:null:find"</span>,<span class="stringliteral">"in\n"</span>));
+00062     <span class="keywordflow">return</span> NULL;
+00063 }
+00064 
+00065 <span class="keyword">static</span> <span class="keywordtype">void</span> *
+00066 _null_find_next(netsnmp_container *container, <span class="keyword">const</span> <span class=
+"keywordtype">void</span> *data)
+00067 {
+00068     DEBUGMSGTL((<span class="stringliteral">"container:null:find_next"</span>,<span class="stringliteral">"in\n"</span>));
+00069     <span class="keywordflow">return</span> NULL;
+00070 }
+00071 
+00072 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00073 _null_insert(netsnmp_container *container, <span class="keyword">const</span> <span class="keywordtype">void</span> *data)
+00074 {
+00075     DEBUGMSGTL((<span class="stringliteral">"container:null:insert"</span>,<span class="stringliteral">"in\n"</span>));
+00076     <span class="keywordflow">return</span> 0;
+00077 }
+00078 
+00079 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00080 _null_remove(netsnmp_container *container, <span class="keyword">const</span> <span class="keywordtype">void</span> *data)
+00081 {
+00082     DEBUGMSGTL((<span class="stringliteral">"container:null:remove"</span>,<span class="stringliteral">"in\n"</span>));
+00083     <span class="keywordflow">return</span> 0;
+00084 }
+00085 
+00086 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00087 _null_free(netsnmp_container *container)
+00088 {
+00089     DEBUGMSGTL((<span class="stringliteral">"container:null:free"</span>,<span class="stringliteral">"in\n"</span>));
+00090     free(container);
+00091     <span class="keywordflow">return</span> 0;
+00092 }
+00093 
+00094 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00095 _null_init(netsnmp_container *container)
+00096 {
+00097     DEBUGMSGTL((<span class="stringliteral">"container:null:"</span>,<span class="stringliteral">"in\n"</span>));
+00098     <span class="keywordflow">return</span> 0;
+00099 }
+00100 
+00101 <span class="keyword">static</span> size_t
+00102 _null_size(netsnmp_container *container)
+00103 {
+00104     DEBUGMSGTL((<span class="stringliteral">"container:null:size"</span>,<span class="stringliteral">"in\n"</span>));
+00105     <span class="keywordflow">return</span> 0;
+00106 }
+00107 
+00108 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00109 _null_for_each(netsnmp_container *container, netsnmp_container_obj_func *f,
+00110              <span class="keywordtype">void</span> *context)
+00111 {
+00112     DEBUGMSGTL((<span class="stringliteral">"container:null:for_each"</span>,<span class="stringliteral">"in\n"</span>));
+00113 }
+00114 
+00115 <span class="keyword">static</span> netsnmp_void_array *
+00116 _null_get_subset(netsnmp_container *container, <span class="keywordtype">void</span> *data)
+00117 {
+00118     DEBUGMSGTL((<span class="stringliteral">"container:null:get_subset"</span>,<span class="stringliteral">"in\n"</span>));
+00119     <span class="keywordflow">return</span> NULL;
+00120 }
+00121 
+00122 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00123 _null_clear(netsnmp_container *container, netsnmp_container_obj_func *f,
+00124                  <span class="keywordtype">void</span> *context)
+00125 {
+00126     DEBUGMSGTL((<span class="stringliteral">"container:null:clear"</span>,<span class="stringliteral">"in\n"</span>));
+00127 }
+00128 
+00129 <span class="comment">/**********************************************************************</span>
+00130 <span class="comment"> *</span>
+00131 <span class="comment"> * factory</span>
+00132 <span class="comment"> *</span>
+00133 <span class="comment"> */</span>
+00134 
+00135 netsnmp_container *
+00136 netsnmp_container_get_null(<span class="keywordtype">void</span>)
+00137 {
+00138     <span class="comment">/*</span>
+00139 <span class="comment">     * allocate memory</span>
+00140 <span class="comment">     */</span>
+00141     netsnmp_container *c;
+00142     DEBUGMSGTL((<span class="stringliteral">"container:null:get_null"</span>,<span class="stringliteral">"in\n"</span>));
+00143     c = <a class="code" href="group__util.html#ga39">SNMP_MALLOC_TYPEDEF</a>(netsnmp_container);
+00144     <span class="keywordflow">if</span> (NULL==c) {
+00145         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"couldn't allocate memory\n"</span>);
+00146         <span class="keywordflow">return</span> NULL;
+00147     }
+00148 
+00149     c-&gt;container_data = NULL;
+00150         
+00151     c-&gt;get_size = _null_size;
+00152     c-&gt;init = _null_init;
+00153     c-&gt;cfree = _null_free;
+00154     c-&gt;insert = _null_insert;
+00155     c-&gt;remove = _null_remove;
+00156     c-&gt;find = _null_find;
+00157     c-&gt;find_next = _null_find_next;
+00158     c-&gt;get_subset = _null_get_subset;
+00159     c-&gt;get_iterator = 0; <span class="comment">/* _null_iterator; */</span>
+00160     c-&gt;for_each = _null_for_each;
+00161     c-&gt;clear = _null_clear;
+00162        
+00163     <span class="keywordflow">return</span> c;
+00164 }
+00165 
+00166 netsnmp_factory *
+00167 netsnmp_container_get_null_factory(<span class="keywordtype">void</span>)
+00168 {
+00169     <span class="keyword">static</span> netsnmp_factory f = { <span class="stringliteral">"null"</span>,
+00170                                  (netsnmp_factory_produce_f*)
+00171                                  netsnmp_container_get_null};
+00172     
+00173     DEBUGMSGTL((<span class="stringliteral">"container:null:get_null_factory"</span>,<span class=
+"stringliteral">"in\n"</span>));
+00174     <span class="keywordflow">return</span> &amp;f;
+00175 }
+00176 
+00177 <span class="keywordtype">void</span>
+00178 netsnmp_container_null_init(<span class="keywordtype">void</span>)
+00179 {
+00180     netsnmp_container_register(<span class="stringliteral">"null"</span>,
+00181                                netsnmp_container_get_null_factory());
+00182 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

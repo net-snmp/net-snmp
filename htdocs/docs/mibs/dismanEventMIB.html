@@ -1,0 +1,3273 @@
+<head>
+  <title>MIB information for dismanEventMIB</title>
+<style type="text/css">
+<!--
+h2{background:#bbeebb}
+h3{background:#ccccee}
+-->
+</style>
+</head>
+<body bgcolor="#ffffff">
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>dismanEventMIB</b>
+MIB object, which is defined within the <b>DISMAN-EVENT-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.88</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#mteTriggerTable">mteTriggerTable</a></li>
+  <li><a href="#mteTriggerDeltaTable">mteTriggerDeltaTable</a></li>
+  <li><a href="#mteTriggerExistenceTable">mteTriggerExistenceTable</a></li>
+  <li><a href="#mteTriggerBooleanTable">mteTriggerBooleanTable</a></li>
+  <li><a href="#mteTriggerThresholdTable">mteTriggerThresholdTable</a></li>
+  <li><a href="#mteObjectsTable">mteObjectsTable</a></li>
+  <li><a href="#mteEventTable">mteEventTable</a></li>
+  <li><a href="#mteEventNotificationTable">mteEventNotificationTable</a></li>
+  <li><a href="#mteEventSetTable">mteEventSetTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteResourceSampleMinimum" />
+1
+<br /><b>mteResourceSampleMinimum</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.88.1.1.1</td>
+<td>
+<pre>
+The minimum mteTriggerFrequency this system will
+accept.  A system may use the larger values of this minimum to
+lessen the impact of constant sampling.  For larger
+sampling intervals the system samples less often and
+suffers less overhead.  This object provides a way to enforce
+such lower overhead for all triggers created after it is
+set.
+
+Unless explicitly resource limited, a system's value for
+this object SHOULD be 1, allowing as small as a 1 second
+interval for ongoing trigger sampling.
+
+Changing this value will not invalidate an existing setting
+of mteTriggerFrequency.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteResourceSampleInstanceMaximum" />
+2
+<br /><b>mteResourceSampleInstanceMaximum</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.88.1.1.2</td>
+<td>
+<pre>
+The maximum number of instance entries this system will
+support for sampling.
+
+These are the entries that maintain state, one for each
+instance of each sampled object as selected by
+mteTriggerValueID.  Note that wildcarded objects result
+in multiple instances of this state.
+
+A value of 0 indicates no preset limit, that is, the limit
+is dynamic based on system operation and resources.
+
+Unless explicitly resource limited, a system's value for
+this object SHOULD be 0.
+
+Changing this value will not eliminate or inhibit existing
+sample state but could prevent allocation of additional state
+information.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteResourceSampleInstances" />
+3
+<br /><b>mteResourceSampleInstances</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.88.1.1.3</td>
+<td>
+<pre>
+The number of currently active instance entries as
+defined for mteResourceSampleInstanceMaximum.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteResourceSampleInstancesHigh" />
+4
+<br /><b>mteResourceSampleInstancesHigh</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.88.1.1.4</td>
+<td>
+<pre>
+The highest value of mteResourceSampleInstances that has
+occurred since initialization of the management system.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteResourceSampleInstanceLacks" />
+5
+<br /><b>mteResourceSampleInstanceLacks</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.88.1.1.5</td>
+<td>
+<pre>
+The number of times this system could not take a new sample
+because that allocation would have exceeded the limit set by
+mteResourceSampleInstanceMaximum.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerFailures" />
+1
+<br /><b>mteTriggerFailures</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.88.1.2.1</td>
+<td>
+<pre>
+The number of times an attempt to check for a trigger
+condition has failed.  This counts individually for each
+attempt in a group of targets or each attempt for a
+
+
+wildcarded object.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventFailures" />
+1
+<br /><b>mteEventFailures</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+    <td>.1.3.6.1.2.1.88.1.4.1</td>
+<td>
+<pre>
+The number of times an attempt to invoke an event
+has failed.  This counts individually for each
+attempt in a group of targets or each attempt for a
+wildcarded trigger object.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteHotTrigger" />
+1
+<br /><b>mteHotTrigger</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Notify</td>
+    <td>.1.3.6.1.2.1.88.2.1.1</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of the trigger causing the notification.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteHotTargetName" />
+2
+<br /><b>mteHotTargetName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Notify</td>
+    <td>.1.3.6.1.2.1.88.2.1.2</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The SNMP Target MIB's snmpTargetAddrName related to the
+notification.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteHotContextName" />
+3
+<br /><b>mteHotContextName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Notify</td>
+    <td>.1.3.6.1.2.1.88.2.1.3</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The context name related to the notification.  This MUST be as
+fully-qualified as possible, including filling in wildcard
+information determined in processing.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteHotOID" />
+4
+<br /><b>mteHotOID</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>Notify</td>
+    <td>.1.3.6.1.2.1.88.2.1.4</td>
+<td>
+<pre>
+The object identifier of the destination object related to the
+notification.  This MUST be as fully-qualified as possible,
+including filling in wildcard information determined in
+processing.
+
+For a trigger-related notification this is from
+mteTriggerValueID.
+
+For a set failure this is from mteEventSetObject.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteHotValue" />
+5
+<br /><b>mteHotValue</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>Notify</td>
+    <td>.1.3.6.1.2.1.88.2.1.5</td>
+<td>
+<pre>
+The value of the object at mteTriggerValueID when a
+trigger fired.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteFailedReason" />
+6
+<br /><b>mteFailedReason</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#FailureReason">FailureReason</a>
+     <br>(ENUM list below)
+
+  </td><td>Notify</td>
+    <td>.1.3.6.1.2.1.88.2.1.6</td>
+<td>
+<p>
+Note: this object is based on the <a href="#FailureReason"> FailureReason TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The reason for the failure of an attempt to check for a
+trigger condition or set an object in response to an event.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="mteTriggerTable" /><h3>Table mteTriggerTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteTriggerTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of management event trigger information.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mteTriggerEntry" />Row Description</td>
+<td>
+<pre>
+Information about a single trigger.  Applications create and
+delete entries using mteTriggerEntryStatus.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mteTriggerTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteOwner" />
+1
+<br /><b>mteOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this entry. The exact semantics of this
+string are subject to the security policy defined by the
+security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerName" />
+2
+<br /><b>mteTriggerName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A locally-unique, administratively assigned name for the
+trigger within the scope of mteOwner.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mteTriggerTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteTriggerComment" />
+3
+<br /><b>mteTriggerComment</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A description of the trigger's function and use.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerTest" />
+4
+<br /><b>mteTriggerTest</b>
+
+</td><td>
+  BITS
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>0</td><td>existence</td></tr>
+        <tr><td>1</td><td>boolean</td></tr>
+        <tr><td>2</td><td>threshold</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The type of trigger test to perform.  For 'boolean' and
+'threshold'  tests, the object at mteTriggerValueID MUST
+evaluate to an integer, that is, anything that ends up encoded
+for transmission (that is, in BER, not ASN.1) as an integer.
+
+For 'existence', the specific test is as selected by
+mteTriggerExistenceTest.  When an object appears, vanishes
+or changes value, the trigger fires. If the object's
+appearance caused the trigger firing, the object MUST
+vanish before the trigger can be fired again for it, and
+vice versa. If the trigger fired due to a change in the
+object's value, it will be fired again on every successive
+value change for that object.
+
+For 'boolean', the specific test is as selected by
+mteTriggerBooleanTest.  If the test result is true the trigger
+fires.  The trigger will not fire again until the value has
+become false and come back to true.
+
+For 'threshold' the test works as described below for
+
+
+mteTriggerThresholdStartup, mteTriggerThresholdRising, and
+mteTriggerThresholdFalling.
+
+Note that combining 'boolean' and 'threshold' tests on the
+same object may be somewhat redundant.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerSampleType" />
+5
+<br /><b>mteTriggerSampleType</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>absoluteValue</td></tr>
+        <tr><td>2</td><td>deltaValue</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The type of sampling to perform.
+An 'absoluteValue' sample requires only a single sample to be
+        meaningful, and is exactly the value of the object at
+        mteTriggerValueID at the sample time.
+A 'deltaValue' requires two samples to be meaningful and is
+        thus not available for testing until the second and subsequent
+        samples after the object at mteTriggerValueID is first found
+        to exist.  It is the difference between the two samples.  For
+        unsigned values it is always positive, based on unsigned
+        arithmetic.  For signed values it can be positive or negative.
+For SNMP counters to be meaningful they should be sampled as a
+        'deltaValue'.
+For 'deltaValue' mteTriggerDeltaTable contains further
+        parameters.
+If only 'existence' is set in mteTriggerTest this object has
+        no meaning.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerValueID" />
+6
+<br /><b>mteTriggerValueID</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The object identifier of the MIB object to sample to see
+if the trigger should fire.
+
+This may be wildcarded by truncating all or part of the
+instance portion, in which case the value is obtained
+as if with a GetNext function, checking multiple values
+
+
+if they exist.  If such wildcarding is applied,
+mteTriggerValueIDWildcard must be 'true' and if not it must
+be 'false'.
+
+Bad object identifiers or a mismatch between truncating the
+identifier and the value of mteTriggerValueIDWildcard result
+in operation as one would expect when providing the wrong
+identifier to a Get or GetNext operation.  The Get will fail
+or get the wrong object.  The GetNext will indeed get whatever
+is next, proceeding until it runs past the initial part of the
+identifier and perhaps many unintended objects for confusing
+results.  If the value syntax of those objects is not usable,
+that results in a 'badType' error that terminates the scan.
+
+Each instance that fills the wildcard is independent of any
+additional instances, that is, wildcarded objects operate
+as if there were a separate table entry for each instance
+that fills the wildcard without having to actually predict
+all possible instances ahead of time.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerValueIDWildcard" />
+7
+<br /><b>mteTriggerValueIDWildcard</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Control for whether mteTriggerValueID is to be treated as
+fully-specified or wildcarded, with 'true' indicating wildcard.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerTargetTag" />
+8
+<br /><b>mteTriggerTargetTag</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpTagValue">SnmpTagValue</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpTagValue"> SnmpTagValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The tag for the target(s) from which to obtain the condition
+for a trigger check.
+
+A length of 0 indicates the local system.  In this case,
+access to the objects indicated by mteTriggerValueID is under
+the security credentials of the requester that set
+mteTriggerEntryStatus to 'active'.  Those credentials are the
+input parameters for isAccessAllowed from the Architecture for
+Describing SNMP Management Frameworks.
+
+Otherwise access rights are checked according to the security
+
+
+parameters resulting from the tag.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerContextName" />
+9
+<br /><b>mteTriggerContextName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The management context from which to obtain mteTriggerValueID.
+This may be wildcarded by leaving characters off the end.  For
+        example use 'Repeater' to wildcard to 'Repeater1',
+        'Repeater2', 'Repeater-999.87b', and so on.  To indicate such
+        wildcarding is intended, mteTriggerContextNameWildcard must
+        be 'true'.
+Each instance that fills the wildcard is independent of any
+        additional instances, that is, wildcarded objects operate
+        as if there were a separate table entry for each instance
+        that fills the wildcard without having to actually predict
+        all possible instances ahead of time.
+Operation of this feature assumes that the local system has a
+        list of available contexts against which to apply the
+        wildcard.  If the objects are being read from the local
+        system, this is clearly the system's own list of contexts.
+        For a remote system a local version of such a list is not
+        defined by any current standard and may not be available, so
+        this function MAY not be supported.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerContextNameWildcard" />
+10
+<br /><b>mteTriggerContextNameWildcard</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Control for whether mteTriggerContextName is to be treated as
+fully-specified or wildcarded, with 'true' indicating wildcard.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerFrequency" />
+11
+<br /><b>mteTriggerFrequency</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The number of seconds to wait between trigger samples.  To
+encourage consistency in sampling, the interval is measured
+from the beginning of one check to the beginning of the next
+and the timer is restarted immediately when it expires, not
+when the check completes.
+
+If the next sample begins before the previous one completed the
+system may either attempt to make the check or treat this as an
+error condition with the error 'sampleOverrun'.
+
+A frequency of 0 indicates instantaneous recognition of the
+condition.  This is not possible in many cases, but may
+be supported in cases where it makes sense and the system is
+able to do so.  This feature allows the MIB to be used in
+implementations where such interrupt-driven behavior is
+possible and is not likely to be supported for all MIB objects
+even then since such sampling generally has to be tightly
+integrated into low-level code.
+
+Systems that can support this SHOULD document those cases
+where it can be used.  In cases where it can not, setting this
+object to 0 should be disallowed.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerObjectsOwner" />
+12
+<br /><b>mteTriggerObjectsOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To go with mteTriggerObjects, the mteOwner of a group of
+objects from mteObjectsTable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerObjects" />
+13
+<br /><b>mteTriggerObjects</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The mteObjectsName of a group of objects from
+mteObjectsTable.  These objects are to be added to any
+Notification resulting from the firing of this trigger.
+
+A list of objects may also be added based on the event or on
+the value of mteTriggerTest.
+
+
+
+A length of 0 indicates no additional objects.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerEnabled" />
+14
+<br /><b>mteTriggerEnabled</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A control to allow a trigger to be configured but not used.
+When the value is 'false' the trigger is not sampled.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerEntryStatus" />
+15
+<br /><b>mteTriggerEntryStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The control that allows creation and deletion of entries.
+Once made active an entry may not be modified except to
+delete it.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="mteTriggerDeltaTable" /><h3>Table mteTriggerDeltaTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteTriggerDeltaTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of management event trigger information for delta
+sampling.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mteTriggerDeltaEntry" />Row Description</td>
+<td>
+<pre>
+Information about a single trigger's delta sampling.  Entries
+automatically exist in this this table for each mteTriggerEntry
+that has mteTriggerSampleType set to 'deltaValue'.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mteTriggerDeltaTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteOwner" />
+1
+<br /><b>mteOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this entry. The exact semantics of this
+string are subject to the security policy defined by the
+security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerName" />
+2
+<br /><b>mteTriggerName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A locally-unique, administratively assigned name for the
+trigger within the scope of mteOwner.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mteTriggerDeltaTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteTriggerDeltaDiscontinuityID" />
+1
+<br /><b>mteTriggerDeltaDiscontinuityID</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The OBJECT IDENTIFIER (OID) of a TimeTicks, TimeStamp, or
+DateAndTime object that indicates a discontinuity in the value
+at mteTriggerValueID.
+
+The OID may be for a leaf object (e.g. sysUpTime.0) or may
+be wildcarded to match mteTriggerValueID.
+
+This object supports normal checking for a discontinuity in a
+counter.  Note that if this object does not point to sysUpTime
+discontinuity checking MUST still check sysUpTime for an overall
+discontinuity.
+
+If the object identified is not accessible the sample attempt
+is in error, with the error code as from an SNMP request.
+
+Bad object identifiers or a mismatch between truncating the
+identifier and the value of mteDeltaDiscontinuityIDWildcard
+result in operation as one would expect when providing the
+wrong identifier to a Get operation.  The Get will fail or get
+the wrong object.  If the value syntax of those objects is not
+usable, that results in an error that terminates the sample
+with a 'badType' error code.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerDeltaDiscontinuityIDWildcard" />
+2
+<br /><b>mteTriggerDeltaDiscontinuityIDWildcard</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Control for whether mteTriggerDeltaDiscontinuityID is to be
+treated as fully-specified or wildcarded, with 'true'
+indicating wildcard. Note that the value of this object will
+be the same as that of the corresponding instance of
+mteTriggerValueIDWildcard when the corresponding
+
+
+mteTriggerSampleType is 'deltaValue'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerDeltaDiscontinuityIDType" />
+3
+<br /><b>mteTriggerDeltaDiscontinuityIDType</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>timeTicks</td></tr>
+        <tr><td>2</td><td>timeStamp</td></tr>
+        <tr><td>3</td><td>dateAndTime</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The value 'timeTicks' indicates the
+mteTriggerDeltaDiscontinuityID of this row is of syntax
+TimeTicks.  The value 'timeStamp' indicates syntax TimeStamp.
+The value 'dateAndTime' indicates syntax DateAndTime.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="mteTriggerExistenceTable" /><h3>Table mteTriggerExistenceTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteTriggerExistenceTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.4</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of management event trigger information for existence
+triggers.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mteTriggerExistenceEntry" />Row Description</td>
+<td>
+<pre>
+Information about a single existence trigger.  Entries
+automatically exist in this this table for each mteTriggerEntry
+that has 'existence' set in mteTriggerTest.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mteTriggerExistenceTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteOwner" />
+1
+<br /><b>mteOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this entry. The exact semantics of this
+string are subject to the security policy defined by the
+security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerName" />
+2
+<br /><b>mteTriggerName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A locally-unique, administratively assigned name for the
+trigger within the scope of mteOwner.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mteTriggerExistenceTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteTriggerExistenceTest" />
+1
+<br /><b>mteTriggerExistenceTest</b>
+
+</td><td>
+  BITS
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>0</td><td>present</td></tr>
+        <tr><td>1</td><td>absent</td></tr>
+        <tr><td>2</td><td>changed</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The type of existence test to perform.  The trigger fires
+when the object at mteTriggerValueID is seen to go from
+present to absent, from absent to present, or to have it's
+value changed, depending on which tests are selected:
+
+present(0) - when this test is selected, the trigger fires
+when the mteTriggerValueID object goes from absent to present.
+
+absent(1)  - when this test is selected, the trigger fires
+when the mteTriggerValueID object goes from present to absent.
+changed(2) - when this test is selected, the trigger fires
+the mteTriggerValueID object value changes.
+
+Once the trigger has fired for either presence or absence it
+will not fire again for that state until the object has been
+to the other state. 
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerExistenceStartup" />
+2
+<br /><b>mteTriggerExistenceStartup</b>
+
+</td><td>
+  BITS
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>0</td><td>present</td></tr>
+        <tr><td>1</td><td>absent</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+Control for whether an event may be triggered when this entry
+is first set to 'active' and the test specified by
+mteTriggerExistenceTest is true.  Setting an option causes
+that trigger to fire when its test is true.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerExistenceObjectsOwner" />
+3
+<br /><b>mteTriggerExistenceObjectsOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To go with mteTriggerExistenceObjects, the mteOwner of a
+group of objects from mteObjectsTable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerExistenceObjects" />
+4
+<br /><b>mteTriggerExistenceObjects</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The mteObjectsName of a group of objects from
+mteObjectsTable.  These objects are to be added to any
+Notification resulting from the firing of this trigger for
+this test.
+
+A list of objects may also be added based on the overall
+trigger, the event or other settings in mteTriggerTest.
+
+A length of 0 indicates no additional objects.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerExistenceEventOwner" />
+5
+<br /><b>mteTriggerExistenceEventOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To go with mteTriggerExistenceEvent, the mteOwner of an event
+entry from the mteEventTable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerExistenceEvent" />
+6
+<br /><b>mteTriggerExistenceEvent</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The mteEventName of the event to invoke when mteTriggerType is
+'existence' and this trigger fires.  A length of 0 indicates no
+event.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="mteTriggerBooleanTable" /><h3>Table mteTriggerBooleanTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteTriggerBooleanTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.5</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of management event trigger information for boolean
+triggers.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mteTriggerBooleanEntry" />Row Description</td>
+<td>
+<pre>
+Information about a single boolean trigger.  Entries
+automatically exist in this this table for each mteTriggerEntry
+that has 'boolean' set in mteTriggerTest.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mteTriggerBooleanTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteOwner" />
+1
+<br /><b>mteOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this entry. The exact semantics of this
+string are subject to the security policy defined by the
+security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerName" />
+2
+<br /><b>mteTriggerName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A locally-unique, administratively assigned name for the
+trigger within the scope of mteOwner.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mteTriggerBooleanTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteTriggerBooleanComparison" />
+1
+<br /><b>mteTriggerBooleanComparison</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>unequal</td></tr>
+        <tr><td>2</td><td>equal</td></tr>
+        <tr><td>3</td><td>less</td></tr>
+        <tr><td>4</td><td>lessOrEqual</td></tr>
+        <tr><td>5</td><td>greater</td></tr>
+        <tr><td>6</td><td>greaterOrEqual</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The type of boolean comparison to perform.
+The value at mteTriggerValueID is compared to
+        mteTriggerBooleanValue, so for example if
+        mteTriggerBooleanComparison is 'less' the result would be true
+        if the value at mteTriggerValueID is less than the value of
+        mteTriggerBooleanValue.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerBooleanValue" />
+2
+<br /><b>mteTriggerBooleanValue</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The value to use for the test specified by
+mteTriggerBooleanTest.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerBooleanStartup" />
+3
+<br /><b>mteTriggerBooleanStartup</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Control for whether an event may be triggered when this entry
+is first set to 'active' or a new instance of the object at
+mteTriggerValueID is found and the test specified by
+mteTriggerBooleanComparison is true.  In that case an event is
+triggered if mteTriggerBooleanStartup is 'true'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerBooleanObjectsOwner" />
+4
+<br /><b>mteTriggerBooleanObjectsOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To go with mteTriggerBooleanObjects, the mteOwner of a group
+of objects from mteObjectsTable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerBooleanObjects" />
+5
+<br /><b>mteTriggerBooleanObjects</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The mteObjectsName of a group of objects from
+mteObjectsTable.  These objects are to be added to any
+Notification resulting from the firing of this trigger for
+this test.
+
+A list of objects may also be added based on the overall
+trigger, the event or other settings in mteTriggerTest.
+
+A length of 0 indicates no additional objects.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerBooleanEventOwner" />
+6
+<br /><b>mteTriggerBooleanEventOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To go with mteTriggerBooleanEvent, the mteOwner of an event
+entry from mteEventTable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerBooleanEvent" />
+7
+<br /><b>mteTriggerBooleanEvent</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The mteEventName of the event to invoke when mteTriggerType is
+'boolean' and this trigger fires.  A length of 0 indicates no
+event.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="mteTriggerThresholdTable" /><h3>Table mteTriggerThresholdTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteTriggerThresholdTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.2.6</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of management event trigger information for threshold
+triggers.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mteTriggerThresholdEntry" />Row Description</td>
+<td>
+<pre>
+Information about a single threshold trigger.  Entries
+automatically exist in this table for each mteTriggerEntry
+that has 'threshold' set in mteTriggerTest.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mteTriggerThresholdTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteOwner" />
+1
+<br /><b>mteOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this entry. The exact semantics of this
+string are subject to the security policy defined by the
+security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerName" />
+2
+<br /><b>mteTriggerName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A locally-unique, administratively assigned name for the
+trigger within the scope of mteOwner.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mteTriggerThresholdTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdStartup" />
+1
+<br /><b>mteTriggerThresholdStartup</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>rising</td></tr>
+        <tr><td>2</td><td>falling</td></tr>
+        <tr><td>3</td><td>risingOrFalling</td></tr>
+      </table>
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The event that may be triggered when this entry is first
+set to 'active' and a new instance of the object at
+mteTriggerValueID is found.  If the first sample after this
+instance becomes active is greater than or equal to
+mteTriggerThresholdRising and mteTriggerThresholdStartup is
+equal to 'rising' or 'risingOrFalling', then one
+mteTriggerThresholdRisingEvent is triggered for that instance.
+If the first sample after this entry becomes active is less
+than or equal to mteTriggerThresholdFalling and
+mteTriggerThresholdStartup is equal to 'falling' or
+'risingOrFalling', then one mteTriggerThresholdRisingEvent is
+triggered for that instance.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdRising" />
+2
+<br /><b>mteTriggerThresholdRising</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+A threshold value to check against if mteTriggerType is
+'threshold'.
+
+When the current sampled value is greater than or equal to
+this threshold, and the value at the last sampling interval
+was less than this threshold, one
+mteTriggerThresholdRisingEvent is triggered.  That event is
+also triggered if the first sample after this entry becomes
+active is greater than or equal to this threshold and
+mteTriggerThresholdStartup is equal to 'rising' or
+'risingOrFalling'.
+
+After a rising event is generated, another such event is not
+triggered until the sampled value falls below this threshold
+and reaches mteTriggerThresholdFalling.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdFalling" />
+3
+<br /><b>mteTriggerThresholdFalling</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+A threshold value to check against if mteTriggerType is
+'threshold'.
+
+When the current sampled value is less than or equal to this
+threshold, and the value at the last sampling interval was
+greater than this threshold, one
+mteTriggerThresholdFallingEvent is triggered.  That event is
+also triggered if the first sample after this entry becomes
+active is less than or equal to this threshold and
+mteTriggerThresholdStartup is equal to 'falling' or
+'risingOrFalling'.
+
+After a falling event is generated, another such event is not
+triggered until the sampled value rises above this threshold
+and reaches mteTriggerThresholdRising.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdDeltaRising" />
+4
+<br /><b>mteTriggerThresholdDeltaRising</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+A threshold value to check against if mteTriggerType is
+'threshold'.
+
+When the delta value (difference) between the current sampled
+value (value(n)) and the previous sampled value (value(n-1))
+is greater than or equal to this threshold,
+and the delta value calculated at the last sampling interval
+(i.e. value(n-1) - value(n-2)) was less than this threshold,
+one mteTriggerThresholdDeltaRisingEvent is triggered. That event
+is also triggered if the first delta value calculated after this
+entry becomes active, i.e. value(2) - value(1), where value(1)
+is the first sample taken of that instance, is greater than or
+equal to this threshold.
+
+After a rising event is generated, another such event is not
+triggered until the delta value falls below this threshold and
+reaches mteTriggerThresholdDeltaFalling.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdDeltaFalling" />
+5
+<br /><b>mteTriggerThresholdDeltaFalling</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+A threshold value to check against if mteTriggerType is
+'threshold'.
+
+When the delta value (difference) between the current sampled
+value (value(n)) and the previous sampled value (value(n-1))
+is less than or equal to this threshold,
+and the delta value calculated at the last sampling interval
+(i.e. value(n-1) - value(n-2)) was greater than this threshold,
+one mteTriggerThresholdDeltaFallingEvent is triggered. That event
+is also triggered if the first delta value calculated after this
+entry becomes active, i.e. value(2) - value(1), where value(1)
+is the first sample taken of that instance, is less than or
+equal to this threshold.
+
+After a falling event is generated, another such event is not
+triggered until the delta value falls below this threshold and
+reaches mteTriggerThresholdDeltaRising.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdObjectsOwner" />
+6
+<br /><b>mteTriggerThresholdObjectsOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To go with mteTriggerThresholdObjects, the mteOwner of a group
+of objects from mteObjectsTable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdObjects" />
+7
+<br /><b>mteTriggerThresholdObjects</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The mteObjectsName of a group of objects from
+mteObjectsTable.  These objects are to be added to any
+Notification resulting from the firing of this trigger for
+this test.
+
+A list of objects may also be added based on the overall
+
+
+trigger, the event or other settings in mteTriggerTest.
+
+A length of 0 indicates no additional objects.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdRisingEventOwner" />
+8
+<br /><b>mteTriggerThresholdRisingEventOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To go with mteTriggerThresholdRisingEvent, the mteOwner of an
+event entry from mteEventTable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdRisingEvent" />
+9
+<br /><b>mteTriggerThresholdRisingEvent</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The mteEventName of the event to invoke when mteTriggerType is
+'threshold' and this trigger fires based on
+mteTriggerThresholdRising.  A length of 0 indicates no event.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdFallingEventOwner" />
+10
+<br /><b>mteTriggerThresholdFallingEventOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To go with mteTriggerThresholdFallingEvent, the mteOwner of an
+event entry from mteEventTable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdFallingEvent" />
+11
+<br /><b>mteTriggerThresholdFallingEvent</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The mteEventName of the event to invoke when mteTriggerType is
+'threshold' and this trigger fires based on
+mteTriggerThresholdFalling.  A length of 0 indicates no event.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdDeltaRisingEventOwner" />
+12
+<br /><b>mteTriggerThresholdDeltaRisingEventOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To go with mteTriggerThresholdDeltaRisingEvent, the mteOwner
+of an event entry from mteEventTable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdDeltaRisingEvent" />
+13
+<br /><b>mteTriggerThresholdDeltaRisingEvent</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The mteEventName of the event to invoke when mteTriggerType is
+'threshold' and this trigger fires based on
+mteTriggerThresholdDeltaRising. A length of 0 indicates
+no event.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdDeltaFallingEventOwner" />
+14
+<br /><b>mteTriggerThresholdDeltaFallingEventOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To go with mteTriggerThresholdDeltaFallingEvent, the mteOwner
+of an event entry from mteEventTable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteTriggerThresholdDeltaFallingEvent" />
+15
+<br /><b>mteTriggerThresholdDeltaFallingEvent</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The mteEventName of the event to invoke when mteTriggerType is
+'threshold' and this trigger fires based on
+mteTriggerThresholdDeltaFalling.  A length of 0 indicates
+no event.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="mteObjectsTable" /><h3>Table mteObjectsTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteObjectsTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.3.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of objects that can be added to notifications based
+on the trigger, trigger test, or event, as pointed to by
+entries in those tables.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mteObjectsEntry" />Row Description</td>
+<td>
+<pre>
+A group of objects.  Applications create and delete entries
+using mteObjectsEntryStatus.
+
+When adding objects to a notification they are added in the
+lexical order of their index in this table.  Those associated
+with a trigger come first, then trigger test, then event.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mteObjectsTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteOwner" />
+1
+<br /><b>mteOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this entry. The exact semantics of this
+string are subject to the security policy defined by the
+security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteObjectsName" />
+1
+<br /><b>mteObjectsName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A locally-unique, administratively assigned name for a group
+of objects.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteObjectsIndex" />
+2
+<br /><b>mteObjectsIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+An arbitrary integer for the purpose of identifying
+individual objects within a mteObjectsName group.
+
+
+Objects within a group are placed in the notification in the
+numerical order of this index.
+
+Groups are placed in the notification in the order of the
+selections for overall trigger, trigger test, and event.
+Within trigger test they are in the same order as the
+numerical values of the bits defined for mteTriggerTest.
+
+Bad object identifiers or a mismatch between truncating the
+identifier and the value of mteDeltaDiscontinuityIDWildcard
+result in operation as one would expect when providing the
+wrong identifier to a Get operation.  The Get will fail or get
+the wrong object.  If the object is not available it is omitted
+from the notification.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mteObjectsTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteObjectsID" />
+3
+<br /><b>mteObjectsID</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The object identifier of a MIB object to add to a
+Notification that results from the firing of a trigger.
+
+This may be wildcarded by truncating all or part of the
+instance portion, in which case the instance portion of the
+OID for obtaining this object will be the same as that used
+in obtaining the mteTriggerValueID that fired.  If such
+wildcarding is applied, mteObjectsIDWildcard must be
+'true' and if not it must be 'false'.
+
+Each instance that fills the wildcard is independent of any
+additional instances, that is, wildcarded objects operate
+as if there were a separate table entry for each instance
+that fills the wildcard without having to actually predict
+all possible instances ahead of time.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteObjectsIDWildcard" />
+4
+<br /><b>mteObjectsIDWildcard</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Control for whether mteObjectsID is to be treated as
+fully-specified or wildcarded, with 'true' indicating wildcard.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteObjectsEntryStatus" />
+5
+<br /><b>mteObjectsEntryStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The control that allows creation and deletion of entries.
+Once made active an entry MAY not be modified except to
+delete it.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="mteEventTable" /><h3>Table mteEventTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteEventTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.4.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of management event action information.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mteEventEntry" />Row Description</td>
+<td>
+<pre>
+Information about a single event.  Applications create and
+delete entries using mteEventEntryStatus.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mteEventTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteOwner" />
+1
+<br /><b>mteOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this entry. The exact semantics of this
+string are subject to the security policy defined by the
+security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventName" />
+1
+<br /><b>mteEventName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A locally-unique, administratively assigned name for the
+event.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mteEventTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteEventComment" />
+2
+<br /><b>mteEventComment</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A description of the event's function and use.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventActions" />
+3
+<br /><b>mteEventActions</b>
+
+</td><td>
+  BITS
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>0</td><td>notification</td></tr>
+        <tr><td>1</td><td>set</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The actions to perform when this event occurs.
+For 'notification', Traps and/or Informs are sent according
+        to the configuration in the SNMP Notification MIB.
+For 'set', an SNMP Set operation is performed according to
+        control values in this entry.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventEnabled" />
+4
+<br /><b>mteEventEnabled</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A control to allow an event to be configured but not used.
+When the value is 'false' the event does not execute even if
+
+
+triggered.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventEntryStatus" />
+5
+<br /><b>mteEventEntryStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The control that allows creation and deletion of entries.
+Once made active an entry MAY not be modified except to
+delete it.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="mteEventNotificationTable" /><h3>Table mteEventNotificationTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteEventNotificationTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.4.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of information about notifications to be sent as a
+consequence of management events.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mteEventNotificationEntry" />Row Description</td>
+<td>
+<pre>
+Information about a single event's notification.  Entries
+automatically exist in this this table for each mteEventEntry
+that has 'notification' set in mteEventActions.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mteEventNotificationTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteOwner" />
+1
+<br /><b>mteOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this entry. The exact semantics of this
+string are subject to the security policy defined by the
+security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventName" />
+1
+<br /><b>mteEventName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A locally-unique, administratively assigned name for the
+event.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mteEventNotificationTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteEventNotification" />
+1
+<br /><b>mteEventNotification</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The object identifier from the NOTIFICATION-TYPE for the
+notification to use if metEventActions has 'notification' set.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventNotificationObjectsOwner" />
+2
+<br /><b>mteEventNotificationObjectsOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To go with mteEventNotificationObjects, the mteOwner of a
+group of objects from mteObjectsTable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventNotificationObjects" />
+3
+<br /><b>mteEventNotificationObjects</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The mteObjectsName of a group of objects from
+mteObjectsTable if mteEventActions has 'notification' set.
+These objects are to be added to any Notification generated by
+this event.
+
+Objects may also be added based on the trigger that stimulated
+the event.
+
+A length of 0 indicates no additional objects.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="mteEventSetTable" /><h3>Table mteEventSetTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mteEventSetTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.1.4.4</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+A table of management event action information.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mteEventSetEntry" />Row Description</td>
+<td>
+<pre>
+Information about a single event's set option.  Entries
+automatically exist in this this table for each mteEventEntry
+that has 'set' set in mteEventActions.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mteEventSetTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteOwner" />
+1
+<br /><b>mteOwner</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The owner of this entry. The exact semantics of this
+string are subject to the security policy defined by the
+security administrator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventName" />
+1
+<br /><b>mteEventName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A locally-unique, administratively assigned name for the
+event.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mteEventSetTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mteEventSetObject" />
+1
+<br /><b>mteEventSetObject</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The object identifier from the MIB object to set if
+mteEventActions has 'set' set.
+
+This object identifier may be wildcarded by leaving
+sub-identifiers off the end, in which case
+nteEventSetObjectWildCard must be 'true'.
+
+If mteEventSetObject is wildcarded the instance used to set the
+object to which it points is the same as the instance from the
+value of mteTriggerValueID that triggered the event.
+
+Each instance that fills the wildcard is independent of any
+additional instances, that is, wildcarded objects operate
+as if there were a separate table entry for each instance
+that fills the wildcard without having to actually predict
+all possible instances ahead of time.
+
+Bad object identifiers or a mismatch between truncating the
+identifier and the value of mteSetObjectWildcard
+result in operation as one would expect when providing the
+wrong identifier to a Set operation.  The Set will fail or set
+the wrong object.  If the value syntax of the destination
+object is not correct, the Set fails with the normal SNMP
+error code.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventSetObjectWildcard" />
+2
+<br /><b>mteEventSetObjectWildcard</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Control over whether mteEventSetObject is to be treated as
+fully-specified or wildcarded, with 'true' indicating wildcard
+if mteEventActions has 'set' set.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventSetValue" />
+3
+<br /><b>mteEventSetValue</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadWrite</td>
+<td>
+<pre>
+The value to which to set the object at mteEventSetObject
+if mteEventActions has 'set' set.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventSetTargetTag" />
+4
+<br /><b>mteEventSetTargetTag</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpTagValue">SnmpTagValue</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpTagValue"> SnmpTagValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The tag for the target(s) at which to set the object at
+mteEventSetObject to mteEventSetValue if mteEventActions
+has 'set' set.
+
+Systems limited to self management MAY reject a non-zero
+length for the value of this object.
+
+A length of 0 indicates the local system.  In this case,
+access to the objects indicated by mteEventSetObject is under
+the security credentials of the requester that set
+mteTriggerEntryStatus to 'active'.  Those credentials are the
+input parameters for isAccessAllowed from the Architecture for
+Describing SNMP Management Frameworks.
+
+Otherwise access rights are checked according to the security
+parameters resulting from the tag.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventSetContextName" />
+5
+<br /><b>mteEventSetContextName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The management context in which to set mteEventObjectID.
+if mteEventActions has 'set' set.
+
+This may be wildcarded by leaving characters off the end.  To
+indicate such wildcarding mteEventSetContextNameWildcard must
+be 'true'.
+
+If this context name is wildcarded the value used to complete
+the wildcarding of mteTriggerContextName will be appended.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mteEventSetContextNameWildcard" />
+6
+<br /><b>mteEventSetContextNameWildcard</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadWrite</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Control for whether mteEventSetContextName is to be treated as
+fully-specified or wildcarded, with 'true' indicating wildcard
+if mteEventActions has 'set' set.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+<a name="mteTriggerFired" /><h3>Notification: mteTriggerFired</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>mteTriggerFired</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+Notification that the trigger indicated by the object
+instances has fired, for triggers with mteTriggerType
+'boolean' or 'existence'.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#mteHotTrigger">mteHotTrigger</a></td></tr>
+      <tr><td><a href="#mteHotTargetName">mteHotTargetName</a></td></tr>
+      <tr><td><a href="#mteHotContextName">mteHotContextName</a></td></tr>
+      <tr><td><a href="#mteHotOID">mteHotOID</a></td></tr>
+      <tr><td><a href="#mteHotValue">mteHotValue</a></td></tr>
+  </table></td></tr>
+  </table>
+<a name="mteTriggerRising" /><h3>Notification: mteTriggerRising</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>mteTriggerRising</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+Notification that the rising threshold was met for triggers
+with mteTriggerType 'threshold'.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#mteHotTrigger">mteHotTrigger</a></td></tr>
+      <tr><td><a href="#mteHotTargetName">mteHotTargetName</a></td></tr>
+      <tr><td><a href="#mteHotContextName">mteHotContextName</a></td></tr>
+      <tr><td><a href="#mteHotOID">mteHotOID</a></td></tr>
+      <tr><td><a href="#mteHotValue">mteHotValue</a></td></tr>
+  </table></td></tr>
+  </table>
+<a name="mteTriggerFalling" /><h3>Notification: mteTriggerFalling</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>mteTriggerFalling</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+Notification that the falling threshold was met for triggers
+with mteTriggerType 'threshold'.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#mteHotTrigger">mteHotTrigger</a></td></tr>
+      <tr><td><a href="#mteHotTargetName">mteHotTargetName</a></td></tr>
+      <tr><td><a href="#mteHotContextName">mteHotContextName</a></td></tr>
+      <tr><td><a href="#mteHotOID">mteHotOID</a></td></tr>
+      <tr><td><a href="#mteHotValue">mteHotValue</a></td></tr>
+  </table></td></tr>
+  </table>
+<a name="mteTriggerFailure" /><h3>Notification: mteTriggerFailure</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>mteTriggerFailure</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.4</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+Notification that an attempt to check a trigger has failed.
+The network manager must enable this notification only with
+        a certain fear and trembling, as it can easily crowd out more
+        important information.  It should be used only to help diagnose
+        a problem that has appeared in the error counters and can not
+        be found otherwise.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#mteHotTrigger">mteHotTrigger</a></td></tr>
+      <tr><td><a href="#mteHotTargetName">mteHotTargetName</a></td></tr>
+      <tr><td><a href="#mteHotContextName">mteHotContextName</a></td></tr>
+      <tr><td><a href="#mteHotOID">mteHotOID</a></td></tr>
+      <tr><td><a href="#mteFailedReason">mteFailedReason</a></td></tr>
+  </table></td></tr>
+  </table>
+<a name="mteEventSetFailure" /><h3>Notification: mteEventSetFailure</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>mteEventSetFailure</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-EVENT-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.88.2.0.5</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+Notification that an attempt to do a set in response to an
+event has failed.
+
+The network manager must enable this notification only with
+a certain fear and trembling, as it can easily crowd out more
+important information.  It should be used only to help diagnose
+a problem that has appeared in the error counters and can not
+be found otherwise.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#mteHotTrigger">mteHotTrigger</a></td></tr>
+      <tr><td><a href="#mteHotTargetName">mteHotTargetName</a></td></tr>
+      <tr><td><a href="#mteHotContextName">mteHotContextName</a></td></tr>
+      <tr><td><a href="#mteHotOID">mteHotOID</a></td></tr>
+      <tr><td><a href="#mteFailedReason">mteFailedReason</a></td></tr>
+  </table></td></tr>
+  </table>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="SnmpTagValue">SnmpTagValue</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="FailureReason">FailureReason</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>-6</td><td>sampleOverrun</td></tr><tr><td>-5</td><td>badType</td></tr><tr><td>-4</td><td>noResponse</td></tr><tr><td>-3</td><td>destinationUnreachable</td></tr><tr><td>-2</td><td>badDestination</td></tr><tr><td>-1</td><td>localResourceLack</td></tr><tr><td>0</td><td>noError</td></tr><tr><td>1</td><td>tooBig</td></tr><tr><td>2</td><td>noSuchName</td></tr><tr><td>3</td><td>badValue</td></tr><tr><td>4</td><td>readOnly</td></tr><tr><td>5</td><td>genErr</td></tr><tr><td>6</td><td>noAccess</td></tr><tr><td>7</td><td>wrongType</td></tr><tr><td>8</td><td>wrongLength</td></tr><tr><td>9</td><td>wrongEncoding</td></tr><tr><td>10</td><td>wrongValue</td></tr><tr><td>11</td><td>noCreation</td></tr><tr><td>12</td><td>inconsistentValue</td></tr><tr><td>13</td><td>resourceUnavailable</td></tr><tr><td>14</td><td>commitFailed</td></tr><tr><td>15</td><td>undoFailed</td></tr><tr><td>16</td><td>authorizationError</td></tr><tr><td>17</td><td>notWritable</td></tr><tr><td>18</td><td>inconsistentName</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp DISMAN-EVENT-MIB::dismanEventMIB</b></p>
+<pre>
++--<a href="#dismanEventMIB">dismanEventMIB</a>(88)
+   |
+   +--<a href="#dismanEventMIBObjects">dismanEventMIBObjects</a>(1)
+   |  |
+   |  +--<a href="#mteResource">mteResource</a>(1)
+   |  |  |
+   |  |  +-- -RW- Integer32 <a href="#mteResourceSampleMinimum">mteResourceSampleMinimum</a>(1)
+   |  |  |        Range: 1..2147483647
+   |  |  +-- -RW- Unsigned  <a href="#mteResourceSampleInstanceMaximum">mteResourceSampleInstanceMaximum</a>(2)
+   |  |  +-- -R-- Gauge     <a href="#mteResourceSampleInstances">mteResourceSampleInstances</a>(3)
+   |  |  +-- -R-- Gauge     <a href="#mteResourceSampleInstancesHigh">mteResourceSampleInstancesHigh</a>(4)
+   |  |  +-- -R-- Counter   <a href="#mteResourceSampleInstanceLacks">mteResourceSampleInstanceLacks</a>(5)
+   |  |
+   |  +--<a href="#mteTrigger">mteTrigger</a>(2)
+   |  |  |
+   |  |  +-- -R-- Counter   <a href="#mteTriggerFailures">mteTriggerFailures</a>(1)
+   |  |  |
+   |  |  +--<a href="#mteTriggerTable">mteTriggerTable</a>(2)
+   |  |  |  |
+   |  |  |  +--<a href="#mteTriggerEntry">mteTriggerEntry</a>(1)
+   |  |  |     |  Index: mteOwner, mteTriggerName
+   |  |  |     |
+   |  |  |     +-- ---- String    <a href="#mteOwner">mteOwner</a>(1)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..32
+   |  |  |     +-- ---- String    <a href="#mteTriggerName">mteTriggerName</a>(2)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 1..32
+   |  |  |     +-- CR-- String    <a href="#mteTriggerComment">mteTriggerComment</a>(3)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..255
+   |  |  |     +-- CR-- BitString <a href="#mteTriggerTest">mteTriggerTest</a>(4)
+   |  |  |     |        Values: existence(0), boolean(1), threshold(2)
+   |  |  |     +-- CR-- EnumVal   <a href="#mteTriggerSampleType">mteTriggerSampleType</a>(5)
+   |  |  |     |        Values: absoluteValue(1), deltaValue(2)
+   |  |  |     +-- CR-- ObjID     <a href="#mteTriggerValueID">mteTriggerValueID</a>(6)
+   |  |  |     +-- CR-- EnumVal   <a href="#mteTriggerValueIDWildcard">mteTriggerValueIDWildcard</a>(7)
+   |  |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |  |     |        Values: true(1), false(2)
+   |  |  |     +-- CR-- String    <a href="#mteTriggerTargetTag">mteTriggerTargetTag</a>(8)
+   |  |  |     |        Textual Convention: <a href="#SnmpTagValue">SnmpTagValue</a>
+   |  |  |     |        Size: 0..255
+   |  |  |     +-- CR-- String    <a href="#mteTriggerContextName">mteTriggerContextName</a>(9)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..255
+   |  |  |     +-- CR-- EnumVal   <a href="#mteTriggerContextNameWildcard">mteTriggerContextNameWildcard</a>(10)
+   |  |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |  |     |        Values: true(1), false(2)
+   |  |  |     +-- CR-- Unsigned  <a href="#mteTriggerFrequency">mteTriggerFrequency</a>(11)
+   |  |  |     +-- CR-- String    <a href="#mteTriggerObjectsOwner">mteTriggerObjectsOwner</a>(12)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..32
+   |  |  |     +-- CR-- String    <a href="#mteTriggerObjects">mteTriggerObjects</a>(13)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..32
+   |  |  |     +-- CR-- EnumVal   <a href="#mteTriggerEnabled">mteTriggerEnabled</a>(14)
+   |  |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |  |     |        Values: true(1), false(2)
+   |  |  |     +-- CR-- EnumVal   <a href="#mteTriggerEntryStatus">mteTriggerEntryStatus</a>(15)
+   |  |  |              Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |  |  |              Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |  |  |
+   |  |  +--<a href="#mteTriggerDeltaTable">mteTriggerDeltaTable</a>(3)
+   |  |  |  |
+   |  |  |  +--<a href="#mteTriggerDeltaEntry">mteTriggerDeltaEntry</a>(1)
+   |  |  |     |  Index: mteOwner, mteTriggerName
+   |  |  |     |
+   |  |  |     +-- -RW- ObjID     <a href="#mteTriggerDeltaDiscontinuityID">mteTriggerDeltaDiscontinuityID</a>(1)
+   |  |  |     +-- -RW- EnumVal   <a href="#mteTriggerDeltaDiscontinuityIDWildcard">mteTriggerDeltaDiscontinuityIDWildcard</a>(2)
+   |  |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |  |     |        Values: true(1), false(2)
+   |  |  |     +-- -RW- EnumVal   <a href="#mteTriggerDeltaDiscontinuityIDType">mteTriggerDeltaDiscontinuityIDType</a>(3)
+   |  |  |              Values: timeTicks(1), timeStamp(2), dateAndTime(3)
+   |  |  |
+   |  |  +--<a href="#mteTriggerExistenceTable">mteTriggerExistenceTable</a>(4)
+   |  |  |  |
+   |  |  |  +--<a href="#mteTriggerExistenceEntry">mteTriggerExistenceEntry</a>(1)
+   |  |  |     |  Index: mteOwner, mteTriggerName
+   |  |  |     |
+   |  |  |     +-- -RW- BitString <a href="#mteTriggerExistenceTest">mteTriggerExistenceTest</a>(1)
+   |  |  |     |        Values: present(0), absent(1), changed(2)
+   |  |  |     +-- -RW- BitString <a href="#mteTriggerExistenceStartup">mteTriggerExistenceStartup</a>(2)
+   |  |  |     |        Values: present(0), absent(1)
+   |  |  |     +-- -RW- String    <a href="#mteTriggerExistenceObjectsOwner">mteTriggerExistenceObjectsOwner</a>(3)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..32
+   |  |  |     +-- -RW- String    <a href="#mteTriggerExistenceObjects">mteTriggerExistenceObjects</a>(4)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..32
+   |  |  |     +-- -RW- String    <a href="#mteTriggerExistenceEventOwner">mteTriggerExistenceEventOwner</a>(5)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..32
+   |  |  |     +-- -RW- String    <a href="#mteTriggerExistenceEvent">mteTriggerExistenceEvent</a>(6)
+   |  |  |              Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |              Size: 0..32
+   |  |  |
+   |  |  +--<a href="#mteTriggerBooleanTable">mteTriggerBooleanTable</a>(5)
+   |  |  |  |
+   |  |  |  +--<a href="#mteTriggerBooleanEntry">mteTriggerBooleanEntry</a>(1)
+   |  |  |     |  Index: mteOwner, mteTriggerName
+   |  |  |     |
+   |  |  |     +-- -RW- EnumVal   <a href="#mteTriggerBooleanComparison">mteTriggerBooleanComparison</a>(1)
+   |  |  |     |        Values: unequal(1), equal(2), less(3), lessOrEqual(4), greater(5), greaterOrEqual(6)
+   |  |  |     +-- -RW- Integer32 <a href="#mteTriggerBooleanValue">mteTriggerBooleanValue</a>(2)
+   |  |  |     +-- -RW- EnumVal   <a href="#mteTriggerBooleanStartup">mteTriggerBooleanStartup</a>(3)
+   |  |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |  |     |        Values: true(1), false(2)
+   |  |  |     +-- -RW- String    <a href="#mteTriggerBooleanObjectsOwner">mteTriggerBooleanObjectsOwner</a>(4)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..32
+   |  |  |     +-- -RW- String    <a href="#mteTriggerBooleanObjects">mteTriggerBooleanObjects</a>(5)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..32
+   |  |  |     +-- -RW- String    <a href="#mteTriggerBooleanEventOwner">mteTriggerBooleanEventOwner</a>(6)
+   |  |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |     |        Size: 0..32
+   |  |  |     +-- -RW- String    <a href="#mteTriggerBooleanEvent">mteTriggerBooleanEvent</a>(7)
+   |  |  |              Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |  |              Size: 0..32
+   |  |  |
+   |  |  +--<a href="#mteTriggerThresholdTable">mteTriggerThresholdTable</a>(6)
+   |  |     |
+   |  |     +--<a href="#mteTriggerThresholdEntry">mteTriggerThresholdEntry</a>(1)
+   |  |        |  Index: mteOwner, mteTriggerName
+   |  |        |
+   |  |        +-- -RW- EnumVal   <a href="#mteTriggerThresholdStartup">mteTriggerThresholdStartup</a>(1)
+   |  |        |        Values: rising(1), falling(2), risingOrFalling(3)
+   |  |        +-- -RW- Integer32 <a href="#mteTriggerThresholdRising">mteTriggerThresholdRising</a>(2)
+   |  |        +-- -RW- Integer32 <a href="#mteTriggerThresholdFalling">mteTriggerThresholdFalling</a>(3)
+   |  |        +-- -RW- Integer32 <a href="#mteTriggerThresholdDeltaRising">mteTriggerThresholdDeltaRising</a>(4)
+   |  |        +-- -RW- Integer32 <a href="#mteTriggerThresholdDeltaFalling">mteTriggerThresholdDeltaFalling</a>(5)
+   |  |        +-- -RW- String    <a href="#mteTriggerThresholdObjectsOwner">mteTriggerThresholdObjectsOwner</a>(6)
+   |  |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |        |        Size: 0..32
+   |  |        +-- -RW- String    <a href="#mteTriggerThresholdObjects">mteTriggerThresholdObjects</a>(7)
+   |  |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |        |        Size: 0..32
+   |  |        +-- -RW- String    <a href="#mteTriggerThresholdRisingEventOwner">mteTriggerThresholdRisingEventOwner</a>(8)
+   |  |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |        |        Size: 0..32
+   |  |        +-- -RW- String    <a href="#mteTriggerThresholdRisingEvent">mteTriggerThresholdRisingEvent</a>(9)
+   |  |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |        |        Size: 0..32
+   |  |        +-- -RW- String    <a href="#mteTriggerThresholdFallingEventOwner">mteTriggerThresholdFallingEventOwner</a>(10)
+   |  |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |        |        Size: 0..32
+   |  |        +-- -RW- String    <a href="#mteTriggerThresholdFallingEvent">mteTriggerThresholdFallingEvent</a>(11)
+   |  |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |        |        Size: 0..32
+   |  |        +-- -RW- String    <a href="#mteTriggerThresholdDeltaRisingEventOwner">mteTriggerThresholdDeltaRisingEventOwner</a>(12)
+   |  |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |        |        Size: 0..32
+   |  |        +-- -RW- String    <a href="#mteTriggerThresholdDeltaRisingEvent">mteTriggerThresholdDeltaRisingEvent</a>(13)
+   |  |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |        |        Size: 0..32
+   |  |        +-- -RW- String    <a href="#mteTriggerThresholdDeltaFallingEventOwner">mteTriggerThresholdDeltaFallingEventOwner</a>(14)
+   |  |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |        |        Size: 0..32
+   |  |        +-- -RW- String    <a href="#mteTriggerThresholdDeltaFallingEvent">mteTriggerThresholdDeltaFallingEvent</a>(15)
+   |  |                 Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |                 Size: 0..32
+   |  |
+   |  +--<a href="#mteObjects">mteObjects</a>(3)
+   |  |  |
+   |  |  +--<a href="#mteObjectsTable">mteObjectsTable</a>(1)
+   |  |     |
+   |  |     +--<a href="#mteObjectsEntry">mteObjectsEntry</a>(1)
+   |  |        |  Index: mteOwner, mteObjectsName, mteObjectsIndex
+   |  |        |
+   |  |        +-- ---- String    <a href="#mteObjectsName">mteObjectsName</a>(1)
+   |  |        |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |        |        Size: 1..32
+   |  |        +-- ---- Unsigned  <a href="#mteObjectsIndex">mteObjectsIndex</a>(2)
+   |  |        |        Range: 1..2147483647
+   |  |        +-- CR-- ObjID     <a href="#mteObjectsID">mteObjectsID</a>(3)
+   |  |        +-- CR-- EnumVal   <a href="#mteObjectsIDWildcard">mteObjectsIDWildcard</a>(4)
+   |  |        |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |        |        Values: true(1), false(2)
+   |  |        +-- CR-- EnumVal   <a href="#mteObjectsEntryStatus">mteObjectsEntryStatus</a>(5)
+   |  |                 Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |  |                 Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |  |
+   |  +--<a href="#mteEvent">mteEvent</a>(4)
+   |     |
+   |     +-- -R-- Counter   <a href="#mteEventFailures">mteEventFailures</a>(1)
+   |     |
+   |     +--<a href="#mteEventTable">mteEventTable</a>(2)
+   |     |  |
+   |     |  +--<a href="#mteEventEntry">mteEventEntry</a>(1)
+   |     |     |  Index: mteOwner, mteEventName
+   |     |     |
+   |     |     +-- ---- String    <a href="#mteEventName">mteEventName</a>(1)
+   |     |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |     |        Size: 1..32
+   |     |     +-- CR-- String    <a href="#mteEventComment">mteEventComment</a>(2)
+   |     |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |     |        Size: 0..255
+   |     |     +-- CR-- BitString <a href="#mteEventActions">mteEventActions</a>(3)
+   |     |     |        Values: notification(0), set(1)
+   |     |     +-- CR-- EnumVal   <a href="#mteEventEnabled">mteEventEnabled</a>(4)
+   |     |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |     |     |        Values: true(1), false(2)
+   |     |     +-- CR-- EnumVal   <a href="#mteEventEntryStatus">mteEventEntryStatus</a>(5)
+   |     |              Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |     |              Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |     |
+   |     +--<a href="#mteEventNotificationTable">mteEventNotificationTable</a>(3)
+   |     |  |
+   |     |  +--<a href="#mteEventNotificationEntry">mteEventNotificationEntry</a>(1)
+   |     |     |  Index: mteOwner, mteEventName
+   |     |     |
+   |     |     +-- -RW- ObjID     <a href="#mteEventNotification">mteEventNotification</a>(1)
+   |     |     +-- -RW- String    <a href="#mteEventNotificationObjectsOwner">mteEventNotificationObjectsOwner</a>(2)
+   |     |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |     |        Size: 0..32
+   |     |     +-- -RW- String    <a href="#mteEventNotificationObjects">mteEventNotificationObjects</a>(3)
+   |     |              Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |              Size: 0..32
+   |     |
+   |     +--<a href="#mteEventSetTable">mteEventSetTable</a>(4)
+   |        |
+   |        +--<a href="#mteEventSetEntry">mteEventSetEntry</a>(1)
+   |           |  Index: mteOwner, mteEventName
+   |           |
+   |           +-- -RW- ObjID     <a href="#mteEventSetObject">mteEventSetObject</a>(1)
+   |           +-- -RW- EnumVal   <a href="#mteEventSetObjectWildcard">mteEventSetObjectWildcard</a>(2)
+   |           |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |           |        Values: true(1), false(2)
+   |           +-- -RW- Integer32 <a href="#mteEventSetValue">mteEventSetValue</a>(3)
+   |           +-- -RW- String    <a href="#mteEventSetTargetTag">mteEventSetTargetTag</a>(4)
+   |           |        Textual Convention: <a href="#SnmpTagValue">SnmpTagValue</a>
+   |           |        Size: 0..255
+   |           +-- -RW- String    <a href="#mteEventSetContextName">mteEventSetContextName</a>(5)
+   |           |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |           |        Size: 0..255
+   |           +-- -RW- EnumVal   <a href="#mteEventSetContextNameWildcard">mteEventSetContextNameWildcard</a>(6)
+   |                    Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |                    Values: true(1), false(2)
+   |
+   +--<a href="#dismanEventMIBNotificationPrefix">dismanEventMIBNotificationPrefix</a>(2)
+   |  |
+   |  +--<a href="#dismanEventMIBNotifications">dismanEventMIBNotifications</a>(0)
+   |  |  |
+   |  |  +--<a href="#mteTriggerFired">mteTriggerFired</a>(1)
+   |  |  +--<a href="#mteTriggerRising">mteTriggerRising</a>(2)
+   |  |  +--<a href="#mteTriggerFalling">mteTriggerFalling</a>(3)
+   |  |  +--<a href="#mteTriggerFailure">mteTriggerFailure</a>(4)
+   |  |  +--<a href="#mteEventSetFailure">mteEventSetFailure</a>(5)
+   |  |
+   |  +--<a href="#dismanEventMIBNotificationObjects">dismanEventMIBNotificationObjects</a>(1)
+   |     |
+   |     +-- ---N String    <a href="#mteHotTrigger">mteHotTrigger</a>(1)
+   |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |        Size: 0..255
+   |     +-- ---N String    <a href="#mteHotTargetName">mteHotTargetName</a>(2)
+   |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |        Size: 0..255
+   |     +-- ---N String    <a href="#mteHotContextName">mteHotContextName</a>(3)
+   |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |        Size: 0..255
+   |     +-- ---N ObjID     <a href="#mteHotOID">mteHotOID</a>(4)
+   |     +-- ---N Integer32 <a href="#mteHotValue">mteHotValue</a>(5)
+   |     +-- ---N EnumVal   <a href="#mteFailedReason">mteFailedReason</a>(6)
+   |              Textual Convention: <a href="#FailureReason">FailureReason</a>
+   |              Values: localResourceLack(-1), badDestination(-2), destinationUnreachable(-3), noResponse(-4), badType(-5), sampleOverrun(-6), noError(0), tooBig(1), noSuchName(2), badValue(3), readOnly(4), genErr(5), noAccess(6), wrongType(7), wrongLength(8), wrongEncoding(9), wrongValue(10), noCreation(11), inconsistentValue(12), resourceUnavailable(13), commitFailed(14), undoFailed(15), authorizationError(16), notWritable(17), inconsistentName(18)
+   |
+   +--<a href="#dismanEventMIBConformance">dismanEventMIBConformance</a>(3)
+      |
+      +--<a href="#dismanEventMIBCompliances">dismanEventMIBCompliances</a>(1)
+      |  |
+      |  +--<a href="#dismanEventMIBCompliance">dismanEventMIBCompliance</a>(1)
+      |
+      +--<a href="#dismanEventMIBGroups">dismanEventMIBGroups</a>(2)
+         |
+         +--<a href="#dismanEventResourceGroup">dismanEventResourceGroup</a>(1)
+         +--<a href="#dismanEventTriggerGroup">dismanEventTriggerGroup</a>(2)
+         +--<a href="#dismanEventObjectsGroup">dismanEventObjectsGroup</a>(3)
+         +--<a href="#dismanEventEventGroup">dismanEventEventGroup</a>(4)
+         +--<a href="#dismanEventNotificationObjectGroup">dismanEventNotificationObjectGroup</a>(5)
+         |
+         +--<a href="#dismanEventNotificationGroup">dismanEventNotificationGroup</a>(6)
+</pre>

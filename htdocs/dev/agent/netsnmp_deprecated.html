@@ -1,0 +1,56 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML><BODY bgcolor="#ffffff" background="../ucd-snmp-bg3.gif"><PRE>
+
+<HTML><HEAD><TITLE>Manpage of deprecated</TITLE>
+</HEAD><BODY>
+<H1>deprecated</H1>
+Section: C Library Functions (3)<BR>Updated: 22 Mar 2004<BR><A HREF="#index">Index</A>
+<A HREF="../index.html">Return to Main Contents</A><HR>
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+deprecated - Deprecated List
+<DL COMPACT>
+<DT>Global <B>netsnmp_add_list_data</B>(netsnmp_data_list **head, netsnmp_data_list *node) <DD>
+use netsnmp_data_list_add_node instead
+</DL>
+<P>
+
+<DL COMPACT>
+<DT>Global <B>netsnmp_set_all_requests_error</B>(netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests, int error_value) <DD>
+use netsnmp_request_set_error_all
+</DL>
+<P>
+
+<DL COMPACT>
+<DT>Global <B>netsnmp_set_mode_request_error</B>(int mode, netsnmp_request_info *request, int error_value) <DD>
+, use netsnmp_request_set_error instead
+</DL>
+<P>
+
+<DL COMPACT>
+<DT>Global <B>netsnmp_set_request_error</B>(netsnmp_agent_request_info *reqinfo, netsnmp_request_info *request, int error_value) <DD>
+, use netsnmp_request_set_error instead 
+<P>
+</DL>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="http://localhost/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 21:37:34 GMT, March 22, 2004
+</BODY>
+</HTML>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

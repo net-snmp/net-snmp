@@ -1,0 +1,63 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>group__container__iterator</h1>Section: net-snmp (3)<br />
+    Updated: 28 Oct 2004<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>Container_iterator - <a name="lbAC" id="lbAC"> </a>
+
+    <h3>Typedefs</h3>
+
+    <p><br />
+    typedef int( <b>Netsnmp_Iterator_Loop_Key</b> )(void *iterator_ctx, netsnmp_ref_void *loop_ctx, netsnmp_ref_void *key)<br />
+    <br />
+    typedef int( <b>Netsnmp_Iterator_Loop_Data</b> )(void *iterator_ctx, netsnmp_ref_void *loop_ctx, netsnmp_ref_void
+    *data)<br />
+    <br />
+    typedef int( <b>Netsnmp_Iterator_Ctx</b> )(void *iterator_ctx, netsnmp_ref_void *loop_ctx)<br />
+    <br />
+    typedef int( <b>Netsnmp_Iterator_Ctx_Dup</b> )(void *iterator_ctx, netsnmp_ref_void *loop_ctx, netsnmp_ref_void *dup_ctx, int
+    reuse)<br />
+    <br />
+    typedef int( <b>Netsnmp_Iterator_Op</b> )(void *iterator_ctx)<br />
+    <br />
+    typedef int( <b>Netsnmp_Iterator_Data</b> )(void *iterator_ctx, const void *data)<br />
+    <a name="lbAD" id="lbAD"> </a></p>
+
+    <h3>Functions</h3>
+
+    <p><br />
+    void <b>netsnmp_container_iterator_init</b> (void)<br />
+    <br />
+    netsnmp_container * <b>netsnmp_container_iterator_get</b> (void *iterator_user_ctx, netsnmp_container_compare *compare,
+    Netsnmp_Iterator_Loop_Key *get_first, Netsnmp_Iterator_Loop_Key *get_next, Netsnmp_Iterator_Loop_Data *get_data,
+    Netsnmp_Iterator_Ctx_Dup *save_pos, Netsnmp_Iterator_Ctx *init_loop_ctx, Netsnmp_Iterator_Ctx *cleanup_loop_ctx,
+    Netsnmp_Iterator_Data *free_user_ctx, int sorted)<br />
+    <br />
+    void <b>netsnmp_container_iterator_set_data_cb</b> (netsnmp_container *c, Netsnmp_Iterator_Data *insert_data,
+    Netsnmp_Iterator_Data *remove_data, Netsnmp_Iterator_Op *get_size)</p>
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAC">Typedefs</a></dt>
+
+          <dt><a href="#lbAD">Functions</a></dt>
+        </dl>
+      </dd>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:44 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,283 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>
+  </div>
+
+  <h1>auto_nlist.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00002 
+00003 <span class="preprocessor">#ifdef CAN_USE_NLIST</span>
+00004 <span class="preprocessor">#if HAVE_STRING_H</span>
+00005 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00006 <span class="preprocessor">#else</span>
+00007 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00008 <span class="preprocessor">#endif</span>
+00009 
+00010 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00011 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00012 <span class="preprocessor">#endif</span>
+00013 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00014 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+00015 <span class="preprocessor">#include &lt;fcntl.h&gt;</span>
+00016 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00017 <span class="preprocessor">#ifdef HAVE_NLIST_H</span>
+00018 <span class="preprocessor">#include &lt;nlist.h&gt;</span>
+00019 <span class="preprocessor">#endif</span>
+00020 <span class="preprocessor">#if HAVE_KVM_H</span>
+00021 <span class="preprocessor">#include &lt;kvm.h&gt;</span>
+00022 <span class="preprocessor">#endif</span>
+00023 
+00024 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00025 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00026 <span class="preprocessor">#endif</span>
+00027 
+00028 <span class="preprocessor">#include &lt;net-snmp/agent/auto_nlist.h&gt;</span>
+00029 <span class="preprocessor">#include "autonlist.h"</span>
+00030 <span class="preprocessor">#include "kernel.h"</span>
+00031 
+00032 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00033 <span class="preprocessor">#include &lt;net-snmp/agent/ds_agent.h&gt;</span>
+00034 
+00035 <span class="keyword">struct </span>autonlist *nlists = 0;
+00036 <span class="keyword">static</span> <span class="keywordtype">void</span>     init_nlist(<span class=
+"keyword">struct</span> nlist *);
+00037 
+00038 <span class="keywordtype">long</span>
+00039 auto_nlist_value(<span class="keyword">const</span> <span class="keywordtype">char</span> *string)
+00040 {
+00041     <span class="keyword">struct </span>autonlist **ptr, *it = 0;
+00042     <span class="keywordtype">int</span>             cmp;
+00043 
+00044     <span class="keywordflow">if</span> (string == 0)
+00045         <span class="keywordflow">return</span> 0;
+00046 
+00047     ptr = &amp;nlists;
+00048     <span class="keywordflow">while</span> (*ptr != 0 &amp;&amp; it == 0) {
+00049         cmp = strcmp((*ptr)-&gt;symbol, string);
+00050         <span class="keywordflow">if</span> (cmp == 0)
+00051             it = *ptr;
+00052         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (cmp &lt; 0) {
+00053             ptr = &amp;((*ptr)-&gt;left);
+00054         } <span class="keywordflow">else</span> {
+00055             ptr = &amp;((*ptr)-&gt;right);
+00056         }
+00057     }
+00058     <span class="keywordflow">if</span> (*ptr == 0) {
+00059         *ptr = (<span class="keyword">struct </span>autonlist *) malloc(<span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> autonlist));
+00060         it = *ptr;
+00061         it-&gt;left = 0;
+00062         it-&gt;right = 0;
+00063         it-&gt;symbol = (<span class="keywordtype">char</span> *) malloc(strlen(string) + 1);
+00064         strcpy(it-&gt;symbol, string);
+00065         <span class="comment">/*</span>
+00066 <span class="comment">         * allocate an extra byte for inclusion of a preceding '_' later </span>
+00067 <span class="comment">         */</span>
+00068         it-&gt;nl[0].n_name = (<span class="keywordtype">char</span> *) malloc(strlen(string) + 2);
+00069 <span class="preprocessor">#ifdef aix4</span>
+00070         strcpy(it-&gt;nl[0].n_name, string);
+00071 <span class="preprocessor">#else</span>
+00072         sprintf(it-&gt;nl[0].n_name, <span class="stringliteral">"_%s"</span>, string);
+00073 <span class="preprocessor">#endif</span>
+00074         it-&gt;nl[1].n_name = 0;
+00075         init_nlist(it-&gt;nl);
+00076 <span class="preprocessor">#ifndef aix4</span>
+00077         <span class="keywordflow">if</span> (it-&gt;nl[0].n_type == 0) {
+00078             strcpy(it-&gt;nl[0].n_name, string);
+00079             init_nlist(it-&gt;nl);
+00080         }
+00081 <span class="preprocessor">#endif</span>
+00082         <span class="keywordflow">if</span> (it-&gt;nl[0].n_type == 0) {
+00083             <span class="keywordflow">if</span> (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00084                                         NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+00085                 <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"nlist err: neither %s nor _%s found.\n"</span>,
+00086                          string, string);
+00087             }
+00088             <span class="keywordflow">return</span> (-1);
+00089         } <span class="keywordflow">else</span> {
+00090             DEBUGMSGTL((<span class="stringliteral">"auto_nlist"</span>, <span class=
+"stringliteral">"nlist:  found symbol %s at %x.\n"</span>,
+00091                         it-&gt;symbol, it-&gt;nl[0].n_value));
+00092             <span class="keywordflow">return</span> (it-&gt;nl[0].n_value);
+00093         }
+00094     } <span class="keywordflow">else</span>
+00095         <span class="keywordflow">return</span> (it-&gt;nl[0].n_value);
+00096 }
+00097 
+00098 <span class="keywordtype">int</span>
+00099 auto_nlist(<span class="keyword">const</span> <span class="keywordtype">char</span> *string, <span class=
+"keywordtype">char</span> *var, <span class="keywordtype">int</span> size)
+00100 {
+00101     <span class="keywordtype">long</span>            result;
+00102     <span class="keywordtype">int</span>             ret;
+00103     result = auto_nlist_value(string);
+00104     <span class="keywordflow">if</span> (result != -1) {
+00105         <span class="keywordflow">if</span> (var != NULL) {
+00106             ret = klookup(result, var, size);
+00107             <span class="keywordflow">if</span> (!ret)
+00108                 <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR,
+00109                          <span class="stringliteral">"auto_nlist failed on %s at location %lx\n"</span>,
+00110                          string, result);
+00111             <span class="keywordflow">return</span> ret;
+00112         } <span class="keywordflow">else</span>
+00113             <span class="keywordflow">return</span> 1;
+00114     }
+00115     <span class="keywordflow">return</span> 0;
+00116 }
+00117 
+00118 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00119 init_nlist(<span class="keyword">struct</span> nlist nl[])
+00120 {
+00121 <span class="preprocessor">#ifdef CAN_USE_NLIST</span>
+00122     <span class="keywordtype">int</span>             ret;
+00123 <span class="preprocessor">#if HAVE_KVM_OPENFILES</span>
+00124     kvm_t          *kernel;
+00125     <span class="keywordtype">char</span>            kvm_errbuf[4096];
+00126 
+00127     <span class="keywordflow">if</span> ((kernel = kvm_openfiles(KERNEL_LOC, NULL, NULL, O_RDONLY, kvm_errbuf))
+00128         == NULL) {
+00129         <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00130                                    NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+00131             <span class="keywordflow">return</span>;
+00132         } <span class="keywordflow">else</span> {
+00133             snmp_log_perror(<span class="stringliteral">"kvm_openfiles"</span>);
+00134             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"kvm_openfiles: %s\n"</span>, kvm_errbuf);
+00135             exit(1);
+00136         }
+00137     }
+00138     <span class="keywordflow">if</span> ((ret = kvm_nlist(kernel, nl)) == -1) {
+00139         <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00140                                    NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+00141             <span class="keywordflow">return</span>;
+00142         } <span class="keywordflow">else</span> {
+00143             snmp_log_perror(<span class="stringliteral">"kvm_nlist"</span>);
+00144             exit(1);
+00145         }
+00146     }
+00147     kvm_close(kernel);
+00148 <span class="preprocessor">#else                           </span><span class="comment">/* ! HAVE_KVM_OPENFILES */</span>
+00149 <span class="preprocessor">#if defined(aix4) &amp;&amp; defined(HAVE_KNLIST)</span>
+00150     <span class="keywordflow">if</span> (knlist(nl, 1, <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> nlist)) == -1) {
+00151         DEBUGMSGTL((<span class="stringliteral">"auto_nlist"</span>, <span class=
+"stringliteral">"knlist failed on symbol:  %s\n"</span>,
+00152                     nl[0].n_name));
+00153         <span class="keywordflow">if</span> (errno == EFAULT) {
+00154             nl[0].n_type = 0;
+00155             nl[0].n_value = 0;
+00156         } <span class="keywordflow">else</span> {
+00157             snmp_log_perror(<span class="stringliteral">"knlist"</span>);
+00158             <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00159                                        NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+00160                 <span class="keywordflow">return</span>;
+00161             } <span class="keywordflow">else</span> {
+00162                 exit(1);
+00163             }
+00164         }
+00165     }
+00166 <span class="preprocessor">#else</span>
+00167     <span class="keywordflow">if</span> ((ret = nlist(KERNEL_LOC, nl)) == -1) {
+00168         <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00169                                    NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+00170             <span class="keywordflow">return</span>;
+00171         } <span class="keywordflow">else</span> {
+00172             snmp_log_perror(<span class="stringliteral">"nlist"</span>);
+00173             exit(1);
+00174         }
+00175     }
+00176 <span class="preprocessor">#endif                          </span><span class="comment">/*aix4 */</span>
+00177 <span class="preprocessor">#endif                          </span><span class="comment">/* ! HAVE_KVM_OPENFILES */</span>
+00178     <span class="keywordflow">for</span> (ret = 0; nl[ret].n_name != NULL; ret++) {
+00179 <span class="preprocessor">#ifdef aix4</span>
+00180         <span class="keywordflow">if</span> (nl[ret].n_type == 0 &amp;&amp; nl[ret].n_value != 0)
+00181             nl[ret].n_type = 1;
+00182 <span class="preprocessor">#endif</span>
+00183         <span class="keywordflow">if</span> (nl[ret].n_type == 0) {
+00184             <span class="keywordflow">if</span> (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00185                                         NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+00186                 DEBUGMSGTL((<span class="stringliteral">"auto_nlist"</span>, <span class=
+"stringliteral">"nlist err:  %s not found\n"</span>,
+00187                             nl[ret].n_name));
+00188             }
+00189         } <span class="keywordflow">else</span> {
+00190             DEBUGMSGTL((<span class="stringliteral">"auto_nlist"</span>, <span class=
+"stringliteral">"nlist: %s 0x%X\n"</span>, nl[ret].n_name,
+00191                         (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>) nl[ret].n_value));
+00192         }
+00193     }
+00194 <span class="preprocessor">#endif                          </span><span class="comment">/* CAN_USE_NLIST */</span>
+00195 }
+00196 
+00197 <span class="keywordtype">int</span>
+00198 KNLookup(<span class="keyword">struct</span> nlist nl[], <span class="keywordtype">int</span> nl_which, <span class=
+"keywordtype">char</span> *buf, <span class="keywordtype">int</span> s)
+00199 {
+00200     <span class="keyword">struct </span>nlist   *nlp = &amp;nl[nl_which];
+00201 
+00202     <span class="keywordflow">if</span> (nlp-&gt;n_value == 0) {
+00203         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"Accessing non-nlisted variable: %s\n"</span>,
+00204                  nlp-&gt;n_name);
+00205         nlp-&gt;n_value = -1;      <span class="comment">/* only one error message ... */</span>
+00206         <span class="keywordflow">return</span> 0;
+00207     }
+00208     <span class="keywordflow">if</span> (nlp-&gt;n_value == -1)
+00209         <span class="keywordflow">return</span> 0;
+00210 
+00211     <span class="keywordflow">return</span> klookup(nlp-&gt;n_value, buf, s);
+00212 }
+00213 
+00214 <span class="preprocessor">#ifdef TESTING</span>
+00215 <span class="keywordtype">void</span>
+00216 auto_nlist_print_tree(<span class="keywordtype">int</span> indent, <span class="keyword">struct</span> autonlist *ptr)
+00217 {
+00218     <span class="keywordtype">char</span>            buf[1024];
+00219     <span class="keywordflow">if</span> (indent == -2) {
+00220         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"nlist tree:\n"</span>);
+00221         auto_nlist_print_tree(12, nlists);
+00222     } <span class="keywordflow">else</span> {
+00223         <span class="keywordflow">if</span> (ptr == 0)
+00224             <span class="keywordflow">return</span>;
+00225         sprintf(buf, <span class="stringliteral">"%%%ds\n"</span>, indent);
+00226         <span class="comment">/*</span>
+00227 <span class="comment">         * DEBUGMSGTL(("auto_nlist", "buf: %s\n",buf)); </span>
+00228 <span class="comment">         */</span>
+00229         DEBUGMSGTL((<span class="stringliteral">"auto_nlist"</span>, buf, ptr-&gt;symbol));
+00230         auto_nlist_print_tree(indent + 2, ptr-&gt;left);
+00231         auto_nlist_print_tree(indent + 2, ptr-&gt;right);
+00232     }
+00233 }
+00234 <span class="preprocessor">#endif</span>
+00235 <span class="preprocessor">#else                           </span><span class="comment">/* !CAN_USE_NLIST */</span>
+00236 <span class="keywordtype">int</span>
+00237 auto_nlist_noop(<span class="keywordtype">void</span>)
+00238 {
+00239     <span class="keywordflow">return</span> 0;
+00240 }
+00241 <span class="preprocessor">#endif                          </span><span class="comment">/* CAN_USE_NLIST */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

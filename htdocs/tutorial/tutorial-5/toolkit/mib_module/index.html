@@ -1,0 +1,188 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Net-SNMP Tutorial -- MIB Module</title>
+  </head>
+
+  <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
+    <h1>Net-SNMP Tutorial -- MIB Module</h1>
+    <h2>Writing a net-snmp MIB Module</h2>
+    <p>
+      Here we discuss how to write a simple mib module, to extend the
+      agent using C code.
+    <p>
+      The 5.0 net-snmp agent is designed to give the mib module writer
+      an easier task when it comes to writing mib code.  To do this,
+      it provides some "helper" modules that you can make use of to
+      suit your specific needs.  The net-snmp agent handles things in
+      "chains" of these helpers, and you can add helpers to your
+      calling chain to do things for you.
+    <h3> MIBs For Dummies and mib2c </h3>
+    <p>
+      Here is tutorial on <a href="../mfd/index.html">using mib2c
+	and mib2c.mfd.conf</a> to generate a code template for a table.
+    <h3> A simple scalar attached to a variable </h3>
+    <p>
+      Here is <a
+		 href="http://www.net-snmp.org/tutorial-5/agent/scalar__int_8c-example.html">some
+	example</a> code that describes how to implement a simple,
+      single scalar which is based on a variable.
+    <h3> A simple scalar with the value returned from code </h3>
+    <p>
+      Here is <a
+		 href="http://www.net-snmp.org/tutorial-5/agent/delayed__instance_8c-example.html">some
+	example</a> code that describes how to implement a generic
+      instance (not tied to a variable, like the above example) as
+      well has how to delay answering queries for a bit (in the
+      example, an alarm is set to add a delay to the answer).
+    <h3> A table of data, stored within the agent </h3>
+    <p>
+      Here is a more complex <a
+				href="http://www.net-snmp.org/tutorial-5/agent/data__set_8c-example.html"> example</a>
+      example that implements a table, where the table data is
+      completely contained within the agent.
+    <h3> Sending SNMP notifications (traps and informs) from inside the agent. </h3>
+    <p>
+      Here is an <a href="http://www.net-snmp.org/tutorial-5/agent/notification_8c-example.html">example</a> of how to use the agent's internal notification
+      sending API to send a notification to all of the agent's trap receivers.
+    <h3> The older (and thus backward compatible) ucd-snmp 4.X API </h3>
+    <p>
+      Of course, you can continue to write code using the older API
+      set.  A tutorial on it can be found <a
+      href="http://www.net-snmp.org/tutorial/toolkit/mib_module/">here</a>.
+      <hr>
+
+      <h2> The MIB Module API </h2>
+    <p>
+      The new API is documented more completely <a
+      href="http://www.net-snmp.org/tutorial-5/agent/group__handler.html#_details">here</a>.
+      Additionally, see the complete list of (mostly) documented
+      available helpers and other information <a
+      href="http://www.net-snmp.org/tutorial-5/agent/modules.html">here</a>
+      <hr>
+    <h2>Compiling in your new MIB module</h2>
+    <p>
+      There are a few ways to get your new MIB module loaded and
+      accessible via SNMP requests.  We'll discuss all three ways
+      separately.  To make this easy to test the procedures outlined
+      below, we've provided three simple mib modules which implement
+      the three simple scalars in the <a
+      href="NET-SNMP-TUTORIAL-MIB.txt">NET-SNMP-TUTORIAL-MIB</a> MIB.
+      To see how MIBs can be properly used by the tools, please see
+      the <a
+      href="http://www.net-snmp.org/tutorial-5/commands/mib-options.html">mib-options
+      tutorial</a>.
+      <ol>
+      <li>
+	Compile it into the master agent.
+	<p>
+	  Lets assume you're going to compile in a new mib module.
+	  For our example, lets use the <a
+	  href="nstAgentModuleObject.c">example mib module</a> and
+	  it's <a href="nstAgentModuleObject.h">header file</a>.  To
+	  do this, you would put the nstAgentModuleObject.h and
+	  nstAgentModuleObject.c files into the net-snmp source code
+	  directory.  You do this by copying them into a
+	  agent/mibgroup/nstAgentModuleObject.h and
+	  agent/mibgroup/nstAgentModuleObject.c file.
+	<p>
+	  Next, you have to configure the package to find them and
+	  compile them into the agent.  To do this, you run the
+	  configure script giving it the extra module names you want
+	  it to load:
+
+	  <pre>
+% <b>./configure --with-mib-modules="nstAgentModuleObject"</b>
+	</pre>
+
+	<p>
+	  If you had multiple modules to include (like a second "XXX"
+	  module, for example), you can separate them with spaces
+	  inside the quotes (e.g.,
+	  --with-mib-modules="nstAgentModuleObject XXX").
+	<p>
+	  Note that nstAgentModuleObject is the prefix and the
+	  configure script will actually look for a
+	  nstAgentModuleObject.h and a nstAgentModuleObject.c file.
+	  You <b>must</b> have a .h file and you can not get it to work
+	  with just a .c file.
+	<p>
+	  Build your new agent with your new code in it by running make:
+	<pre>
+% <b>make</b>
+	</pre>
+	<p>
+	  Finally, install the whole lot by running make install:
+    <pre>
+% <b>make install</b>
+    </pre>
+	<p>
+	  You can test out the functionality by starting the snmpd
+	  agent:
+    <pre>
+% <b>/usr/local/sbin/snmpd</b>
+    </pre>
+	<p>
+	  And then running snmpget and snmpset on the scalar object
+	  [proper authentication information not shown in this command]:
+    <pre>
+% <b>snmpget localhost NET-SNMP-TUTORIAL-MIB::nstAgentModuleObject.0</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentModuleObject.0 = INTEGER: 1
+
+% <b>snmpset localhost NET-SNMP-TUTORIAL-MIB::nstAgentModuleObject.0 = 5</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentModuleObject.0 = INTEGER: 5
+
+% <b>snmpget localhost NET-SNMP-TUTORIAL-MIB::nstAgentModuleObject.0</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentModuleObject.0 = INTEGER: 5
+    </pre>
+
+      <li> You can also compile your code into a "subagent" which then
+      attaches itself to the master agent using the <a
+      href="http://www.scguild.com/agentx/">AgentX
+      subagent protocol</a>.  Our libraries provide support to make
+      this easy to do and this is discussed in greater detail in a <a
+      href="../demon/index.html">later section</a>.
+
+	<br>
+	<br>
+      <li> Finally, you can also compile your code into pluggable
+      shared object and tell the snmpd agent to load it.  This is also
+      discussed in greater detail in a <a
+      href="../dlmod/index.html">later section</a>
+    </ol>
+    <hr>
+    <h2>Set Processing</h2>
+    <p>
+      To process an SNMP-SET, the agent must use a series of calls to
+      the mib module code to ensure that processing of all sets in the
+      incoming packet can be successful.  This gives you or other mib
+      modules the chance to bail out early on in the transaction
+      sequence and thus stop all of the transactions in the set from
+      happening.  This is important for continuity.  However, it makes 
+      set code processing a bit more complex.  Let's examine a simple
+      state diagram that the master agent uses at each step of the
+      way:
+    <p>
+      <center><img src=set-actions.jpg></center>
+    <p>
+      In a perfect operation with no failures, we take the vertical
+      path on the left.  If <b>any</b> of the mib modules being acted
+      upon returns an error of any kind, we will branch to the right
+      to one of the failure states where you must clean up and
+      possibly undo what you did in previous steps.
+    <p>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <hardaker@users.sourceforge.net>"></a></address>
+<!-- Created: Fri Nov  5 12:09:03 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Thu Sep  2 22:09:21 EDT 2004
+<!-- hhmts end -->
+  </body>
+</html>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,109 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>SNMPSET</h1>Section: Net-SNMP (1)<br />
+    Updated: 08 Feb 2002<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>snmpset - communicates with a network entity using SNMP SET Requests. <a name="lbAC" id="lbAC"> </a>
+
+    <h2>SYNOPSIS</h2><b>snmpset</b> [COMMON OPTIONS] OID TYPE VALUE [OID TYPE VALUE]... <a name="lbAD" id="lbAD"> </a>
+
+    <h2>DESCRIPTION</h2><b>snmpset</b> is an SNMP application that uses the SNMP SET request to set information on a network
+    entity. One or more object identifiers (OIDs) must be given as arguments on the command line. A type and a value to be set
+    must accompany each object identifier. Each variable name is given in the format specified in <i><a href=
+    "variables.html">variables</a>(5)</i>.
+
+    <p>The <i>TYPE</i> is a single character, one of:</p>
+
+    <dl compact="compact">
+      <dd>
+        <dl compact="compact">
+          <dt><b>i</b></dt>
+
+          <dd>INTEGER</dd>
+
+          <dt><b>u</b></dt>
+
+          <dd>UNSIGNED</dd>
+
+          <dt><b>s</b></dt>
+
+          <dd>STRING</dd>
+
+          <dt><b>x</b></dt>
+
+          <dd>HEX STRING</dd>
+
+          <dt><b>d</b></dt>
+
+          <dd>DECIMAL STRING</dd>
+
+          <dt><b>n</b></dt>
+
+          <dd>NULLOBJ</dd>
+
+          <dt><b>o</b></dt>
+
+          <dd>OBJID</dd>
+
+          <dt><b>t</b></dt>
+
+          <dd>TIMETICKS</dd>
+
+          <dt><b>a</b></dt>
+
+          <dd>IPADDRESS</dd>
+
+          <dt><b>b</b></dt>
+
+          <dd>BITS</dd>
+        </dl>
+      </dd>
+    </dl>Most of these will use the obvious corresponding ASN.1 type. value, and the 'u' unsigned type is also used for handling
+    Gauge32 values.
+
+    <p>If you have the proper MIB file loaded, you can, in most cases, replace the type with an '=' sign. For an object of type
+    OCTET STRING this will assume a string like the 's' type notation. For other types it will do "The Right Thing".</p>
+
+    <p>For example:</p>
+
+    <p>snmpset -c private -v 1 test-hub system.sysContact.0 s <a href="mailto:dpz@noc.rutgers.edu">dpz@noc.rutgers.edu</a>
+    ip.ipforwarding.0 = 2</p>
+
+    <p>will set the variables sysContact.0 and ipForwarding.0:</p>
+
+    <p>system.sysContact.0 = STRING: "<a href="mailto:dpz@noc.rutgers.edu">dpz@noc.rutgers.edu</a>"<br />
+    ip.ipForwarding.0 = INTEGER: <a href="not-forwarding.html">not-forwarding</a>(2)</p>
+
+    <p>If the network entity has an error processing the request packet, an error packet will be returned and a message will be
+    shown, helping to pinpoint in what way the request was malformed. <a name="lbAE" id="lbAE"> </a></p>
+
+    <h2>OPTIONS</h2><b>snmpset</b> takes the common options described in the <i><a href="snmpcmd.html">snmpcmd</a>(1)</i> manual
+    page. <a name="lbAF" id="lbAF"> </a>
+
+    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="variables.html">variables</a>(5).
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+
+      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+
+      <dt><a href="#lbAE">OPTIONS</a></dt>
+
+      <dt><a href="#lbAF">SEE ALSO</a></dt>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:43 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

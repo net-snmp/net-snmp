@@ -1,0 +1,122 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>MFD: ifXTable Data Structures</title>
+  </head>
+
+  <body bgcolor="#ffffff">
+    <!-- ========================================================= -->
+    <h1>MFD: ifXTable Data Structures</h1>
+    <p>
+      Let's take a look in <var>ifXTable.h</var>. Since we will be using
+      the netsnmp access routines to get the interface  data, we specified
+      <var>netsnmp_interface_entry</var> as our data context. You might
+      expect to run into it a lot in the code. Instead, the code uses
+      a typedef:
+    </p>
+    <table><tr><td width=20></td>
+          <td><td bgcolor=CCCCCC><pre>
+    /*
+     * data context
+     */
+    typedef <font color=red>netsnmp_interface_entry</font> ifXTable_data;
+          </pre></td></tr></table>
+    <p>
+      Whenever you see <var>ifXTable_data</var>, remember that it is
+      simply a typedef for <var>netsnmp_interface_entry</var>. As we will
+      see in a moment, the the row request context has a pointer to an
+      <var>ifXTable_data</var> structure. The first edit we need to make
+      is to include the interface access header file:
+    </p>
+    <table><tr><td width=20></td>
+          <td><td bgcolor=CCCCCC><pre>
+#include &lt;net-snmp/library/asn1.h&gt;<font color=blue>
+#include &lt;net-snmp/data_access/interface.h&gt;</font>
+            </pre></td></tr></table>
+<p>
+      However, the <var>netsnmp_interface_entry</var> does not contain all
+      the information we need to implement all the ifXTable columns.
+      In particluar, the ifLinkUpDownTrapEnable and ifAlias columns are
+      specific to the ifXTable, and not kept in the netsnmp_interface_entry
+      structure. To keep track of them, we'll add them to the
+      <var>rowrequest_context</var>. Because we specified a type for our
+      data context, mib2c did not generate storage for any columns. So
+      we need to add storage. For consistency's sake, we'll use mib2c to
+      generate a data context. We specify <em>dummy</em> as the output file
+      name, so that it won't get confused with the other ifXTable
+      implementation files.
+    </p>
+    <table><tr><td width=20></td>
+          <td><td bgcolor=CCCCCC><pre>
+$ <font color=blue>mib2c -f dummy -c mib2c.column_storage.conf ifXTable</font>
+          </pre></td></tr></table>
+    <p></p>
+    <p>
+      Then we copy the definitions we need from <var>dummy_storage.h</var>
+      to the <var>rowrequest_context</var> in <var>ifXTable.h</var>:
+    </p>
+    <table><tr><td width=20></td>
+          <td><td bgcolor=CCCCCC><pre>
+    /*
+     *********************************************************************
+     * Row request context
+     * When your functions are called, you will be passed a
+     * ifXTable_rowreq_ctx pointer.
+     */
+    typedef struct ifXTable_rowreq_ctx_s {
+
+    /** this must be first for container compare to work */
+        netsnmp_index   oid_idx;
+        oid             oid_tmp[MAX_OID_LEN];   /* xxx-rks: shrink this */
+
+        ifXTable_mib_index tbl_idx;
+
+        ifXTable_data  *data;
+        ifXTable_undo_data *undo;
+
+    /** implementor's context pointer provided during registration */
+        ifXTable_registration_ptr ifXTable_reg;
+
+        /*
+         * TODO:
+         * add any other useful data
+         *       (e.g. flags for when a column has been set)
+         */<font color=blue>
+        /** ifLinkUpDownTrapEnable(14)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h */
+        u_long          ifLinkUpDownTrapEnable;
+
+        /** ifAlias(18)/DisplayString/ASN_OCTET_STR/char(char)//L/A/W/e/R/d/H */
+        char            ifAlias[64];
+        size_t          ifAlias_len;        /* # of char elements, not bytes */
+</font>
+        /*
+         * storage for future expansion
+         */
+        netsnmp_data_list *ifXTable_data_list;
+
+    } ifXTable_rowreq_ctx;
+            </pre></td>
+        </tr>
+    </table>
+    <!-- ========================================================= -->
+    <font size=+1>
+      <a href="data_access.html">Next: data access</a> |
+      <a href="mib2c.html">Back: running mib2c</a> |
+      <a href="../index.html">Up: IF-MIB Tutorials</a>
+    </font>
+    <hr>
+    rstory at freesnmp dot com<br>
+Version $Revision$
+<!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
+<!-- hhmts start -->
+Last modified: Mon May  3 21:51:06 EDT 2004
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+  </body>
+</html>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,339 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>
+  </div>
+
+  <h1>agent_read_config.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * agent_read_config.c</span>
+00003 <span class="comment"> */</span>
+00004 
+00005 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00006 
+00007 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00008 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00009 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00010 <span class="preprocessor">#endif</span>
+00011 <span class="preprocessor">#if HAVE_STRING_H</span>
+00012 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00013 <span class="preprocessor">#else</span>
+00014 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00015 <span class="preprocessor">#endif</span>
+00016 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00017 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+00018 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+00019 
+00020 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00021 <span class="preprocessor"># ifdef WIN32</span>
+00022 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00023 <span class="preprocessor"># else</span>
+00024 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00025 <span class="preprocessor"># endif</span>
+00026 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00027 <span class="preprocessor">#else</span>
+00028 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00029 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00030 <span class="preprocessor"># else</span>
+00031 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00032 <span class="preprocessor"># endif</span>
+00033 <span class="preprocessor">#endif</span>
+00034 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00035 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00036 <span class="preprocessor">#endif</span>
+00037 <span class="preprocessor">#if HAVE_NETINET_IN_SYSTM_H</span>
+00038 <span class="preprocessor">#include &lt;netinet/in_systm.h&gt;</span>
+00039 <span class="preprocessor">#endif</span>
+00040 <span class="preprocessor">#if HAVE_NETINET_IP_H</span>
+00041 <span class="preprocessor">#include &lt;netinet/ip.h&gt;</span>
+00042 <span class="preprocessor">#endif</span>
+00043 <span class="preprocessor">#ifdef INET6</span>
+00044 <span class="preprocessor">#if HAVE_NETINET_IP6_H</span>
+00045 <span class="preprocessor">#include &lt;netinet/ip6.h&gt;</span>
+00046 <span class="preprocessor">#endif</span>
+00047 <span class="preprocessor">#endif</span>
+00048 <span class="preprocessor">#if HAVE_SYS_QUEUE_H</span>
+00049 <span class="preprocessor">#include &lt;sys/queue.h&gt;</span>
+00050 <span class="preprocessor">#endif</span>
+00051 <span class="preprocessor">#if HAVE_SYS_SOCKET_H</span>
+00052 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+00053 <span class="preprocessor">#if HAVE_SYS_SOCKETVAR_H</span>
+00054 <span class="preprocessor">#ifndef dynix</span>
+00055 <span class="preprocessor">#include &lt;sys/socketvar.h&gt;</span>
+00056 <span class="preprocessor">#else</span>
+00057 <span class="preprocessor">#include &lt;sys/param.h&gt;</span>
+00058 <span class="preprocessor">#endif</span>
+00059 <span class="preprocessor">#endif</span>
+00060 <span class="preprocessor">#elif HAVE_WINSOCK_H</span>
+00061 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00062 <span class="preprocessor">#endif</span>
+00063 <span class="preprocessor">#if HAVE_SYS_STREAM_H</span>
+00064 <span class="preprocessor">#   ifdef sysv5UnixWare7</span>
+00065 <span class="preprocessor">#      define _KMEMUSER 1   </span><span class=
+"comment">/* &lt;sys/stream.h&gt; needs this for queue_t */</span>
+00066 <span class="preprocessor">#   endif</span>
+00067 <span class="preprocessor">#include &lt;sys/stream.h&gt;</span>
+00068 <span class="preprocessor">#endif</span>
+00069 <span class="preprocessor">#if HAVE_NET_ROUTE_H</span>
+00070 <span class="preprocessor">#include &lt;net/route.h&gt;</span>
+00071 <span class="preprocessor">#endif</span>
+00072 <span class="preprocessor">#if HAVE_NETINET_IP_VAR_H</span>
+00073 <span class="preprocessor">#include &lt;netinet/ip_var.h&gt;</span>
+00074 <span class="preprocessor">#endif</span>
+00075 <span class="preprocessor">#ifdef INET6</span>
+00076 <span class="preprocessor">#if HAVE_NETINET6_IP6_VAR_H</span>
+00077 <span class="preprocessor">#include &lt;netinet6/ip6_var.h&gt;</span>
+00078 <span class="preprocessor">#endif</span>
+00079 <span class="preprocessor">#endif</span>
+00080 <span class="preprocessor">#if HAVE_NETINET_IN_PCB_H</span>
+00081 <span class="preprocessor">#include &lt;netinet/in_pcb.h&gt;</span>
+00082 <span class="preprocessor">#endif</span>
+00083 <span class="preprocessor">#if HAVE_INET_MIB2_H</span>
+00084 <span class="preprocessor">#include &lt;inet/mib2.h&gt;</span>
+00085 <span class="preprocessor">#endif</span>
+00086 
+00087 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00088 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00089 <span class="preprocessor">#endif</span>
+00090 
+00091 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00092 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+00093 <span class="preprocessor">#endif</span>
+00094 <span class="preprocessor">#ifdef HAVE_PWD_H</span>
+00095 <span class="preprocessor">#include &lt;pwd.h&gt;</span>
+00096 <span class="preprocessor">#endif</span>
+00097 <span class="preprocessor">#ifdef HAVE_GRP_H</span>
+00098 <span class="preprocessor">#include &lt;grp.h&gt;</span>
+00099 <span class="preprocessor">#endif</span>
+00100 
+00101 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00102 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00103 
+00104 <span class="preprocessor">#include "mibgroup/struct.h"</span>
+00105 <span class="preprocessor">#include &lt;net-snmp/agent/agent_trap.h&gt;</span>
+00106 <span class="preprocessor">#include "snmpd.h"</span>
+00107 <span class="preprocessor">#include &lt;net-snmp/agent/agent_callbacks.h&gt;</span>
+00108 <span class="preprocessor">#include &lt;net-snmp/agent/table.h&gt;</span>
+00109 <span class="preprocessor">#include &lt;net-snmp/agent/table_iterator.h&gt;</span>
+00110 <span class="preprocessor">#include &lt;net-snmp/agent/table_data.h&gt;</span>
+00111 <span class="preprocessor">#include &lt;net-snmp/agent/table_dataset.h&gt;</span>
+00112 <span class="preprocessor">#include "agent_module_includes.h"</span>
+00113 <span class="preprocessor">#include "mib_module_includes.h"</span>
+00114 
+00115 <span class="keywordtype">char</span>            dontReadConfigFiles;
+00116 <span class="keywordtype">char</span>           *optconfigfile;
+00117 
+00118 <span class="preprocessor">#ifdef HAVE_UNISTD_H</span>
+00119 <span class="keywordtype">void</span>
+00120 snmpd_set_agent_user(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keywordtype">char</span> *cptr)
+00121 {
+00122 <span class="preprocessor">#if defined(HAVE_GETPWNAM) &amp;&amp; defined(HAVE_PWD_H)</span>
+00123     <span class="keyword">struct </span>passwd  *info;
+00124 <span class="preprocessor">#endif</span>
+00125 
+00126     <span class="keywordflow">if</span> (cptr[0] == <span class="charliteral">'#'</span>) {
+00127         <span class="keywordtype">char</span>           *ecp;
+00128         <span class="keywordtype">int</span>             uid;
+00129         uid = strtoul(cptr + 1, &amp;ecp, 10);
+00130         <span class="keywordflow">if</span> (*ecp != 0) {
+00131             config_perror(<span class="stringliteral">"Bad number"</span>);
+00132         } <span class="keywordflow">else</span> {
+00133             netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+00134                                NETSNMP_DS_AGENT_USERID, uid);
+00135         }
+00136     }
+00137 <span class="preprocessor">#if defined(HAVE_GETPWNAM) &amp;&amp; defined(HAVE_PWD_H)</span>
+00138     <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((info = getpwnam(cptr)) != NULL) {
+00139         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+00140                            NETSNMP_DS_AGENT_USERID, info-&gt;pw_uid);
+00141     } <span class="keywordflow">else</span> {
+00142         config_perror(<span class="stringliteral">"User not found in passwd database"</span>);
+00143     }
+00144     endpwent();
+00145 <span class="preprocessor">#endif</span>
+00146 }
+00147 
+00148 <span class="keywordtype">void</span>
+00149 snmpd_set_agent_group(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keywordtype">char</span> *cptr)
+00150 {
+00151 <span class="preprocessor">#if defined(HAVE_GETGRNAM) &amp;&amp; defined(HAVE_GRP_H)</span>
+00152     <span class="keyword">struct </span>group   *info;
+00153 <span class="preprocessor">#endif</span>
+00154 
+00155     <span class="keywordflow">if</span> (cptr[0] == <span class="charliteral">'#'</span>) {
+00156         <span class="keywordtype">char</span>           *ecp;
+00157         <span class="keywordtype">int</span>             gid = strtoul(cptr + 1, &amp;ecp, 10);
+00158         <span class="keywordflow">if</span> (*ecp != 0) {
+00159             config_perror(<span class="stringliteral">"Bad number"</span>);
+00160         } <span class="keywordflow">else</span> {
+00161             netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+00162                                NETSNMP_DS_AGENT_GROUPID, gid);
+00163         }
+00164     }
+00165 <span class="preprocessor">#if defined(HAVE_GETGRNAM) &amp;&amp; defined(HAVE_GRP_H)</span>
+00166     <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((info = getgrnam(cptr)) != NULL) {
+00167         netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+00168                            NETSNMP_DS_AGENT_GROUPID, info-&gt;gr_gid);
+00169     } <span class="keywordflow">else</span> {
+00170         config_perror(<span class="stringliteral">"Group not found in group database"</span>);
+00171     }
+00172     endpwent();
+00173 <span class="preprocessor">#endif</span>
+00174 }
+00175 <span class="preprocessor">#endif</span>
+00176 
+00177 <span class="keywordtype">void</span>
+00178 snmpd_set_agent_address(<span class="keyword">const</span> <span class="keywordtype">char</span> *token, <span class=
+"keywordtype">char</span> *cptr)
+00179 {
+00180     <span class="keywordtype">char</span>            buf[SPRINT_MAX_LEN];
+00181     <span class="keywordtype">char</span>           *ptr;
+00182 
+00183     <span class="comment">/*</span>
+00184 <span class="comment">     * has something been specified before? </span>
+00185 <span class="comment">     */</span>
+00186     ptr = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
+00187                                 NETSNMP_DS_AGENT_PORTS);
+00188 
+00189     <span class="keywordflow">if</span> (ptr) {
+00190         <span class="comment">/*</span>
+00191 <span class="comment">         * append to the older specification string </span>
+00192 <span class="comment">         */</span>
+00193         sprintf(buf, <span class="stringliteral">"%s,%s"</span>, ptr, cptr);
+00194     } <span class="keywordflow">else</span> {
+00195         strcpy(buf, cptr);
+00196     }
+00197 
+00198     DEBUGMSGTL((<span class="stringliteral">"snmpd_ports"</span>, <span class=
+"stringliteral">"port spec: %s\n"</span>, buf));
+00199     netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, 
+00200                           NETSNMP_DS_AGENT_PORTS, buf);
+00201 }
+00202 
+00203 <span class="keywordtype">void</span>
+00204 init_agent_read_config(<span class="keyword">const</span> <span class="keywordtype">char</span> *app)
+00205 {
+00206     <span class="keywordflow">if</span> (app != NULL) {
+00207         netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
+00208                               NETSNMP_DS_LIB_APPTYPE, app);
+00209     } <span class="keywordflow">else</span> {
+00210         app = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+00211                                     NETSNMP_DS_LIB_APPTYPE);
+00212     }
+00213 
+00214     register_app_config_handler(<span class="stringliteral">"authtrapenable"</span>,
+00215                                 snmpd_parse_config_authtrap, NULL,
+00216                                 <span class="stringliteral">"1 | 2\t\t(1 = enable, 2 = disable)"</span>);
+00217     register_app_config_handler(<span class="stringliteral">"pauthtrapenable"</span>,
+00218                                 snmpd_parse_config_authtrap, NULL, NULL);
+00219 
+00220 
+00221     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00222                                NETSNMP_DS_AGENT_ROLE) == MASTER_AGENT) {
+00223 <span class="preprocessor">#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)</span>
+00224         register_app_config_handler(<span class="stringliteral">"trapsink"</span>,
+00225                                     snmpd_parse_config_trapsink,
+00226                                     snmpd_free_trapsinks,
+00227                                     <span class="stringliteral">"host [community] [port]"</span>);
+00228         register_app_config_handler(<span class="stringliteral">"trap2sink"</span>,
+00229                                     snmpd_parse_config_trap2sink, NULL,
+00230                                     <span class="stringliteral">"host [community] [port]"</span>);
+00231         register_app_config_handler(<span class="stringliteral">"informsink"</span>,
+00232                                     snmpd_parse_config_informsink, NULL,
+00233                                     <span class="stringliteral">"host [community] [port]"</span>);
+00234 <span class="preprocessor">#endif </span><span class="comment">/* support for community based SNMP */</span>
+00235         register_app_config_handler(<span class="stringliteral">"trapsess"</span>,
+00236                                     snmpd_parse_config_trapsess, NULL,
+00237                                     <span class="stringliteral">"[snmpcmdargs] host"</span>);
+00238     }
+00239 <span class="preprocessor">#if !defined(DISABLE_SNMPV1) || !defined(DISABLE_SNMPV2C)</span>
+00240     register_app_config_handler(<span class="stringliteral">"trapcommunity"</span>,
+00241                                 snmpd_parse_config_trapcommunity,
+00242                                 snmpd_free_trapcommunity,
+00243                                 <span class="stringliteral">"community-string"</span>);
+00244 <span class="preprocessor">#endif </span><span class="comment">/* support for community based SNMP */</span>
+00245 <span class="preprocessor">#ifdef HAVE_UNISTD_H</span>
+00246     register_app_config_handler(<span class="stringliteral">"agentuser"</span>,
+00247                                 snmpd_set_agent_user, NULL, <span class="stringliteral">"userid"</span>);
+00248     register_app_config_handler(<span class="stringliteral">"agentgroup"</span>,
+00249                                 snmpd_set_agent_group, NULL, <span class="stringliteral">"groupid"</span>);
+00250 <span class="preprocessor">#endif</span>
+00251     register_app_config_handler(<span class="stringliteral">"agentaddress"</span>,
+00252                                 snmpd_set_agent_address, NULL,
+00253                                 <span class="stringliteral">"SNMP bind address"</span>);
+00254     netsnmp_ds_register_config(ASN_BOOLEAN, app, <span class="stringliteral">"quit"</span>, 
+00255                                NETSNMP_DS_APPLICATION_ID,
+00256                                NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);
+00257     netsnmp_ds_register_config(ASN_BOOLEAN, app, <span class="stringliteral">"leave_pidfile"</span>, 
+00258                                NETSNMP_DS_APPLICATION_ID,
+00259                                NETSNMP_DS_AGENT_LEAVE_PIDFILE);
+00260     netsnmp_init_handler_conf();
+00261 
+00262 <span class="preprocessor">#include "agent_module_dot_conf.h"</span>
+00263 <span class="preprocessor">#include "mib_module_dot_conf.h"</span>
+00264 <span class="preprocessor">#ifdef TESTING</span>
+00265     print_config_handlers();
+00266 <span class="preprocessor">#endif</span>
+00267 }
+00268 
+00269 <span class="keywordtype">void</span>
+00270 update_config(<span class="keywordtype">void</span>)
+00271 {
+00272     <a class="code" href="group__callback.html#ga5">snmp_call_callbacks</a>(SNMP_CALLBACK_APPLICATION,
+00273                         SNMPD_CALLBACK_PRE_UPDATE_CONFIG, NULL);
+00274     free_config();
+00275     read_configs();
+00276 }
+00277 
+00278 
+00279 <span class="keywordtype">void</span>
+00280 snmpd_register_config_handler(<span class="keyword">const</span> <span class="keywordtype">char</span> *token,
+00281                               <span class="keywordtype">void</span> (*parser) (<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keywordtype">char</span> *),
+00282                               <span class="keywordtype">void</span> (*releaser) (<span class=
+"keywordtype">void</span>), <span class="keyword">const</span> <span class="keywordtype">char</span> *help)
+00283 {
+00284     DEBUGMSGTL((<span class="stringliteral">"snmpd_register_app_config_handler"</span>,
+00285                 <span class="stringliteral">"registering .conf token for \"%s\"\n"</span>, token));
+00286     register_app_config_handler(token, parser, releaser, help);
+00287 }
+00288 
+00289 <span class="keywordtype">void</span>
+00290 snmpd_unregister_config_handler(<span class="keyword">const</span> <span class="keywordtype">char</span> *token)
+00291 {
+00292     unregister_app_config_handler(token);
+00293 }
+00294 
+00295 <span class="comment">/*</span>
+00296 <span class="comment"> * this function is intended for use by mib-modules to store permenant</span>
+00297 <span class="comment"> * configuration information generated by sets or persistent counters </span>
+00298 <span class="comment"> */</span>
+00299 <span class="keywordtype">void</span>
+00300 snmpd_store_config(<span class="keyword">const</span> <span class="keywordtype">char</span> *line)
+00301 {
+00302     read_app_config_store(line);
+00303 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,2908 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>Net-SNMP Agent handler and extensibility API<br />
+  <small>[<a class="el" href="group__agent.html">The Net-SNMP agent</a>]</small></h1>The basic theory goes something like this:
+  In the past, with the original mib module api (which derived from the original CMU SNMP code) the underlying mib modules were
+  passed very little information (only the truly most basic information about a request). <a href="#_details">More...</a>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Modules</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__utilities.html">utility_handlers: simplify request
+      processing</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">A group of handlers intended to simplify certain aspects of processing a request for a MIB
+      object.<br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__leaf.html">leaf_handlers: process individual leaf
+      objects</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">A group of handlers to implement individual leaf objects and instances (both scalar objects, and
+      individual objects and instances within a table).<br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__baby__steps.html">baby_steps: calls your handler in
+      baby_steps for set processing.</a></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__old__api.html">old_api: Calls mib module code written
+      in the old style of code.</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This is a backwards compatilibity module that allows code written in the old API to be run under the
+      new handler based architecture.<br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__stash__cache.html">stash_cache: automatically caches
+      data for certain handlers.</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This handler caches data in an optimized way which may aleviate the need for the lower level
+      handlers to perform as much optimization.<br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">group &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__table.html">table: Helps you implement a
+      table.</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This handler helps you implement a table by doing some of the processing for you.<br /></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Data Structures</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler_s</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">the mib handler structure to be registered <a href=
+      "structnetsnmp__mib__handler__s.html#_details">More...</a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration_s</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Root registration info. <a href=
+      "structnetsnmp__handler__registration__s.html#_details">More...</a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_handler_args_s</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_delegated_cache_s</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler_s</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">the mib handler structure to be registered <a href=
+      "structnetsnmp__mib__handler__s.html#_details">More...</a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">struct &nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration_s</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Root registration info. <a href=
+      "structnetsnmp__handler__registration__s.html#_details">More...</a><br /></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Defines</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga43" doxytag=
+      "handler::MIB_HANDLER_AUTO_NEXT" id="ga43"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>MIB_HANDLER_AUTO_NEXT</b>&nbsp;&nbsp;&nbsp;0x00000001</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga44" doxytag=
+      "handler::MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE" id="ga44"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE</b>&nbsp;&nbsp;&nbsp;0x00000002</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga45" doxytag=
+      "handler::MIB_HANDLER_CUSTOM4" id="ga45"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>MIB_HANDLER_CUSTOM4</b>&nbsp;&nbsp;&nbsp;0x10000000</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga46" doxytag=
+      "handler::MIB_HANDLER_CUSTOM3" id="ga46"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>MIB_HANDLER_CUSTOM3</b>&nbsp;&nbsp;&nbsp;0x20000000</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga47" doxytag=
+      "handler::MIB_HANDLER_CUSTOM2" id="ga47"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>MIB_HANDLER_CUSTOM2</b>&nbsp;&nbsp;&nbsp;0x40000000</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga48" doxytag=
+      "handler::MIB_HANDLER_CUSTOM1" id="ga48"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>MIB_HANDLER_CUSTOM1</b>&nbsp;&nbsp;&nbsp;0x80000000</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga49" doxytag=
+      "handler::HANDLER_CAN_GETANDGETNEXT" id="ga49"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_GETANDGETNEXT</b>&nbsp;&nbsp;&nbsp;0x01</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga50" doxytag=
+      "handler::HANDLER_CAN_SET" id="ga50"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_SET</b>&nbsp;&nbsp;&nbsp;0x02</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga51" doxytag=
+      "handler::HANDLER_CAN_GETBULK" id="ga51"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_GETBULK</b>&nbsp;&nbsp;&nbsp;0x04</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga52" doxytag=
+      "handler::HANDLER_CAN_NOT_CREATE" id="ga52"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_NOT_CREATE</b>&nbsp;&nbsp;&nbsp;0x08</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga53" doxytag=
+      "handler::HANDLER_CAN_BABY_STEP" id="ga53"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_BABY_STEP</b>&nbsp;&nbsp;&nbsp;0x10</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga54" doxytag=
+      "handler::HANDLER_CAN_RONLY" id="ga54"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_RONLY</b>&nbsp;&nbsp;&nbsp;(HANDLER_CAN_GETANDGETNEXT)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga55" doxytag=
+      "handler::HANDLER_CAN_RWRITE" id="ga55"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_RWRITE</b>&nbsp;&nbsp;&nbsp;(HANDLER_CAN_GETANDGETNEXT |
+      HANDLER_CAN_SET)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga56" doxytag=
+      "handler::HANDLER_CAN_SET_ONLY" id="ga56"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_SET_ONLY</b>&nbsp;&nbsp;&nbsp;(HANDLER_CAN_SET |
+      HANDLER_CAN_NOT_CREATE)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga57" doxytag=
+      "handler::HANDLER_CAN_DEFAULT" id="ga57"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>HANDLER_CAN_DEFAULT</b>&nbsp;&nbsp;&nbsp;(HANDLER_CAN_RONLY |
+      HANDLER_CAN_NOT_CREATE)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga58" doxytag=
+      "handler::REQUEST_IS_DELEGATED" id="ga58"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>REQUEST_IS_DELEGATED</b>&nbsp;&nbsp;&nbsp;1</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga59" doxytag=
+      "handler::REQUEST_IS_NOT_DELEGATED" id="ga59"></a> #define&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>REQUEST_IS_NOT_DELEGATED</b>&nbsp;&nbsp;&nbsp;0</td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Typedefs</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">typedef <a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler_s</a>&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga2">netsnmp_mib_handler</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Typedefs the <a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler_s</a>
+      struct into netsnmp_mib_handler. <a href="#ga2"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">typedef <a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration_s</a>&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga3">netsnmp_handler_registration</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Typedefs the <a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration_s</a> struct into netsnmp_handler_registration.
+      <a href="#ga3"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga4" doxytag=
+      "handler::Netsnmp_Node_Handler" id="ga4"></a> typedef int(&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>Netsnmp_Node_Handler</b> )(<a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler, <a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga5" doxytag=
+      "handler::netsnmp_handler_args" id="ga5"></a> typedef netsnmp_handler_args_s&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_handler_args</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga6" doxytag=
+      "handler::netsnmp_delegated_cache" id="ga6"></a> typedef netsnmp_delegated_cache_s&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_delegated_cache</b></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Functions</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga7">netsnmp_create_handler</a> (const
+      char *name, Netsnmp_Node_Handler *handler_access_method)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">creates a netsnmp_mib_handler structure given a name and a access method. <a href=
+      "#ga7"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__handler.html#ga8">netsnmp_handler_registration_create</a> (const char *name, <a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler, oid *reg_oid, size_t reg_oid_len, int modes)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">creates a handler registration structure given a name, a access_method function, a registration
+      location oid and the modes the handler supports. <a href="#ga8"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga9" doxytag=
+      "handler::netsnmp_create_handler_registration" id="ga9"></a> <a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_create_handler_registration</b> (const char *name, Netsnmp_Node_Handler
+      *handler_access_method, oid *reg_oid, size_t reg_oid_len, int modes)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga10">netsnmp_register_handler</a>
+      (<a class="el" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">register a handler, as defined by the netsnmp_handler_registration pointer. <a href=
+      "#ga10"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga11">netsnmp_unregister_handler</a>
+      (<a class="el" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">unregister a handler, as defined by the netsnmp_handler_registration pointer. <a href=
+      "#ga11"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__handler.html#ga12">netsnmp_register_handler_nocallback</a> (<a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">register a handler, as defined by the netsnmp_handler_registration pointer. <a href=
+      "#ga12"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga13">netsnmp_inject_handler_before</a>
+      (<a class="el" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el"
+      href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler, const char *before_what)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">inject a new handler into the calling chain of the handlers definedy by the
+      netsnmp_handler_registration pointer. <a href="#ga13"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga14">netsnmp_inject_handler</a>
+      (<a class="el" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el"
+      href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">inject a new handler into the calling chain of the handlers definedy by the
+      netsnmp_handler_registration pointer. <a href="#ga14"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga15">netsnmp_call_handler</a> (<a class=
+      "el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *next_handler, <a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">calls a handler with with appropriate NULL checking of arguments, etc. <a href=
+      "#ga15"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga16" doxytag=
+      "handler::netsnmp_call_handlers" id="ga16"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_call_handlers</b> (<a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga17">netsnmp_call_next_handler</a>
+      (<a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *current, <a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">calls the next handler in the chain after the current one with with appropriate NULL checking, etc.
+      <a href="#ga17"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__handler.html#ga18">netsnmp_call_next_handler_one_request</a> (<a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *current, <a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">calls the next handler in the chain after the current one with with appropriate NULL checking, etc.
+      <a href="#ga18"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga19">netsnmp_handler_free</a> (<a class=
+      "el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">free's the resourceses associated with a given handler <a href="#ga19"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga20">netsnmp_handler_dup</a> (<a class=
+      "el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">dulpicates a handler and all subsequent handlers see also _clone_handler <a href=
+      "#ga20"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__handler.html#ga21">netsnmp_handler_registration_free</a> (<a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">free the resources associated with a handler registration object <a href="#ga21"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga22">netsnmp_handler_registration_dup</a>
+      (<a class="el" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">duplicates the handler registration object <a href="#ga22"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE netsnmp_delegated_cache *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga23">netsnmp_create_delegated_cache</a>
+      (<a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler, <a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, <a class="el" href=
+      "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo, <a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests, void *localinfo)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">creates a cache of information which can be saved for future reference. <a href=
+      "#ga23"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE netsnmp_delegated_cache *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga24">netsnmp_handler_check_cache</a>
+      (netsnmp_delegated_cache *dcache)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">check's a given cache and returns it if it is still valid (ie, the agent still considers it to be an
+      outstanding request. <a href="#ga24"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga25">netsnmp_free_delegated_cache</a>
+      (netsnmp_delegated_cache *dcache)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">frees a cache once you're finished using it <a href="#ga25"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__handler.html#ga26">netsnmp_handler_mark_requests_as_delegated</a> (<a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests, int isdelegated)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">marks a list of requests as delegated (or not if isdelegaded = 0) <a href="#ga26"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga27">netsnmp_request_add_list_data</a>
+      (<a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, <a class="el" href=
+      "structnetsnmp__data__list__s.html">netsnmp_data_list</a> *node)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">add data to a request that can be extracted later by submodules <a href="#ga27"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga28">netsnmp_request_remove_list_data</a>
+      (<a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, const char *name)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">remove data from a request <a href="#ga28"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga29">netsnmp_request_get_list_data</a>
+      (<a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request, const char *name)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">extract data from a request that was added previously by a parent module <a href=
+      "#ga29"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga30">netsnmp_free_request_data_set</a>
+      (<a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Free the extra data stored in a request. <a href="#ga30"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">NETSNMP_INLINE void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga31">netsnmp_free_request_data_sets</a>
+      (<a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *request)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Free the extra data stored in a bunch of requests (all data in the chain). <a href=
+      "#ga31"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga32">netsnmp_find_handler_by_name</a>
+      (<a class="el" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, const char
+      *name)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Returns a handler from a chain based on the name. <a href="#ga32"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "group__handler.html#ga33">netsnmp_find_handler_data_by_name</a> (<a class="el" href=
+      "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo, const char *name)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Returns a handler's void * pointer from a chain based on the name. <a href="#ga33"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga35" doxytag=
+      "handler::handler_free_callback" id="ga35"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>handler_free_callback</b> (void *free)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga36">netsnmp_register_handler_by_name</a>
+      (const char *name, <a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">registers a given handler by name so that it can be found easily later. <a href=
+      "#ga36"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="group__handler.html#ga37">netsnmp_clear_handler_list</a>
+      (void)</td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">clears the entire handler-registration list <a href="#ga37"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga38" doxytag=
+      "handler::netsnmp_inject_handler_into_subtree" id="ga38"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_inject_handler_into_subtree</b> (netsnmp_subtree *tp, const char *name,
+      <a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler, const char *before_what)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga39" doxytag=
+      "handler::parse_injectHandler_conf" id="ga39"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>parse_injectHandler_conf</b> (const char *token, char *cptr)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga41" doxytag=
+      "handler::netsnmp_init_handler_conf" id="ga41"></a> void&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_init_handler_conf</b> (void)</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="ga42" doxytag=
+      "handler::netsnmp_handler_get_parent_data" id="ga42"></a> void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>netsnmp_handler_get_parent_data</b> (<a class="el" href=
+      "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *, const char *)</td>
+    </tr>
+  </table>
+  <hr />
+  <a name="_details" id="_details"></a>
+
+  <h2>Detailed Description</h2>The basic theory goes something like this: In the past, with the original mib module api (which
+  derived from the original CMU SNMP code) the underlying mib modules were passed very little information (only the truly most
+  basic information about a request).
+
+  <p>This worked well at the time but in todays world of subagents, device instrumentation, low resource consumption, etc, it
+  just isn't flexible enough. "handlers" are here to fix all that.</p>
+
+  <p>With the rewrite of the agent internals for the net-snmp 5.0 release, we introduce a modular calling scheme that allows
+  agent modules to be written in a very flexible manner, and more importantly allows reuse of code in a decent way (and without
+  the memory and speed overheads of OO languages like C++).</p>
+
+  <p>Functionally, the notion of what a handler does is the same as the older api: A handler is <a class="el" href=
+  "group__handler.html#ga7">created</a> and then <a class="el" href="group__handler.html#ga10">registered</a> with the main agent
+  at a given OID in the OID tree and gets called any time a request is made that it should respond to. You probably should use
+  one of the convenience helpers instead of doing anything else yourself though:</p>
+
+  <p>Most importantly, though, is that the handlers are built on the notion of modularity and reuse. Specifically, rather than do
+  all the really hard work (like parsing table indexes out of an incoming oid request) in each module, the API is designed to
+  make it easy to write "helper" handlers that merely process some aspect of the request before passing it along to the final
+  handler that returns the real answer. Most people will want to make use of the <a class="el" href=
+  "group__instance.html">instance</a>, <a class="el" href="group__table.html">table</a>, <a class="el" href=
+  "group__table__iterator.html">table_iterator</a>, <a class="el" href="group__table__data.html">table_data</a>, or <a class="el"
+  href="group__table__dataset.html">table_dataset</a> helpers to make their life easier. These "helpers" interpert important
+  aspects of the request and pass them on to you.</p>
+
+  <p>For instance, the <a class="el" href="group__table.html">table</a> helper is designed to hand you a list of extracted index
+  values from an incoming request. THe <a class="el" href="group__table__iterator.html">table_iterator</a> helper is built on top
+  of the table helper, and is designed to help you iterate through data stored elsewhere (like in a kernel) that is not in OID
+  lexographical order (ie, don't write your own index/oid sorting routine, use this helper instead). The beauty of the <a class=
+  "el" href="group__table__iterator.html">table_iterator helper@, as well as the instance instance@ helper is that they take care
+  of the complex GETNEXT processing entirely for you and hand you everything you need to merely return the data as if it was a
+  GET request. Much less code and hair pulling. I've pulled all my hair out to help you so that only one of us has to be
+  bald.</a></p>
+  <hr />
+
+  <h2>Typedef Documentation</h2><a class="anchor" name="ga3" doxytag="agent_handler.h::netsnmp_handler_registration" id=
+  "ga3"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">struct <a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration_s</a> <a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Typedefs the <a class="el" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration_s</a>
+        struct into netsnmp_handler_registration.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00292">netsnmp_cache_handler_register()</a>,
+        <a class="el" href="cache__handler_8c-source.html#l00417">netsnmp_cache_helper_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00382">netsnmp_call_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00512">netsnmp_call_next_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00534">netsnmp_call_next_handler_one_request()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00683">netsnmp_create_delegated_cache()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00825">netsnmp_find_handler_by_name()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00842">netsnmp_find_handler_data_by_name()</a>, <a class="el" href=
+        "table__array_8c-source.html#l00196">netsnmp_find_table_array_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00137">netsnmp_find_table_registration_info()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00163">netsnmp_handler_registration_create()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00621">netsnmp_handler_registration_dup()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00608">netsnmp_handler_registration_free()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00322">netsnmp_inject_handler_before()</a>, <a class="el" href=
+        "multiplexer_8c-source.html#l00057">netsnmp_multiplexer_helper_handler()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00305">netsnmp_register_cache_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00270">netsnmp_register_handler_nocallback()</a>, <a class="el" href=
+        "instance_8c-source.html#l00071">netsnmp_register_instance()</a>, <a class="el" href=
+        "instance_8c-source.html#l00372">netsnmp_register_int_instance()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, <a class="el" href=
+        "instance_8c-source.html#l00096">netsnmp_register_read_only_instance()</a>, <a class="el" href=
+        "scalar_8c-source.html#l00114">netsnmp_register_read_only_scalar()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00297">netsnmp_register_read_only_table_data()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00045">netsnmp_register_row_merge()</a>, <a class="el" href=
+        "scalar_8c-source.html#l00079">netsnmp_register_scalar()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00043">netsnmp_register_serialize()</a>, <a class="el" href=
+        "table_8c-source.html#l00111">netsnmp_register_table()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00286">netsnmp_register_table_data()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00113">netsnmp_register_table_data_set()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00138">netsnmp_register_table_iterator()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00058">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00051">netsnmp_serialize_helper_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00721">netsnmp_sparse_table_register()</a>, <a class="el" href=
+        "stash__cache_8c-source.html#l00143">netsnmp_stash_cache_update()</a>, <a class="el" href=
+        "table_8c-source.html#l00772">netsnmp_table_build_oid()</a>, <a class="el" href=
+        "table_8c-source.html#l00806">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
+        "table_8c-source.html#l00739">netsnmp_table_build_result()</a>, <a class="el" href=
+        "table__array_8c-source.html#l00152">netsnmp_table_container_register()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00656">netsnmp_table_data_build_result()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00260">netsnmp_unregister_handler()</a>, and <a class="el" href=
+        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga2" doxytag="agent_handler.h::netsnmp_mib_handler" id="ga2"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">struct <a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler_s</a> <a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Typedefs the <a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler_s</a> struct into
+        netsnmp_mib_handler.</p>
+
+        <p>Referenced by <a class="el" href="baby__steps_8c-source.html#l00338">netsnmp_baby_steps_access_multiplexer_get()</a>,
+        <a class="el" href="baby__steps_8c-source.html#l00061">netsnmp_baby_steps_handler_get()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00244">netsnmp_cache_handler_get()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00292">netsnmp_cache_handler_register()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00417">netsnmp_cache_helper_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00382">netsnmp_call_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00512">netsnmp_call_next_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00534">netsnmp_call_next_handler_one_request()</a>, <a class="el" href=
+        "table__container_8c-source.html#l00156">netsnmp_container_table_handler_get()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00683">netsnmp_create_delegated_cache()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00105">netsnmp_create_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00825">netsnmp_find_handler_by_name()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00842">netsnmp_find_handler_data_by_name()</a>, <a class="el" href=
+        "table__array_8c-source.html#l00196">netsnmp_find_table_array_handler()</a>, <a class="el" href=
+        "bulk__to__next_8c-source.html#l00030">netsnmp_get_bulk_to_next_handler()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00273">netsnmp_get_cache_handler()</a>, <a class="el" href=
+        "mode__end__call_8c-source.html#l00048">netsnmp_get_mode_end_call_handler()</a>, <a class="el" href=
+        "multiplexer_8c-source.html#l00036">netsnmp_get_multiplexer_handler()</a>, <a class="el" href=
+        "read__only_8c-source.html#l00032">netsnmp_get_read_only_handler()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00031">netsnmp_get_row_merge_handler()</a>, <a class="el" href=
+        "stash__cache_8c-source.html#l00042">netsnmp_get_stash_cache_handler()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00263">netsnmp_get_table_data_handler()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00086">netsnmp_get_table_data_set_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00088">netsnmp_get_table_handler()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00106">netsnmp_get_table_iterator_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00579">netsnmp_handler_dup()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00557">netsnmp_handler_free()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00163">netsnmp_handler_registration_create()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00322">netsnmp_inject_handler_before()</a>, <a class="el" href=
+        "mode__end__call_8c-source.html#l00068">netsnmp_mode_end_call_add_mode_callback()</a>, <a class="el" href=
+        "multiplexer_8c-source.html#l00057">netsnmp_multiplexer_helper_handler()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00305">netsnmp_register_cache_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00880">netsnmp_register_handler_by_name()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00270">netsnmp_register_handler_nocallback()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00058">netsnmp_row_merge_helper_handler()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00051">netsnmp_serialize_helper_handler()</a>, <a class="el" href=
+        "stash__cache_8c-source.html#l00143">netsnmp_stash_cache_update()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, and <a class="el" href=
+        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr />
+
+  <h2>Function Documentation</h2><a class="anchor" name="ga15" doxytag="agent_handler.c::netsnmp_call_handler" id="ga15"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_call_handler</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>next_handler</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>requests</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>calls a handler with with appropriate NULL checking of arguments, etc.</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00382">382</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="structnetsnmp__mib__handler__s.html#o3">netsnmp_mib_handler_s::access_method</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00051">netsnmp_mib_handler_s::flags</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00159">netsnmp_agent_request_info_s::mode</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00512">netsnmp_call_next_handler()</a>, <a class="el"
+        href="agent__handler_8c-source.html#l00534">netsnmp_call_next_handler_one_request()</a>, and <a class="el" href=
+        "multiplexer_8c-source.html#l00057">netsnmp_multiplexer_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga17" doxytag="agent_handler.c::netsnmp_call_next_handler" id="ga17"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_call_next_handler</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>current</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>requests</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>calls the next handler in the chain after the current one with with appropriate NULL checking, etc.</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00512">512</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8c-source.html#l00382">netsnmp_call_handler()</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+
+        <p>Referenced by <a class="el" href="row__merge_8c-source.html#l00058">netsnmp_row_merge_helper_handler()</a>, <a class=
+        "el" href="serialize_8c-source.html#l00051">netsnmp_serialize_helper_handler()</a>, <a class="el" href=
+        "stash__cache_8c-source.html#l00143">netsnmp_stash_cache_update()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, and <a class="el" href=
+        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga18" doxytag="agent_handler.c::netsnmp_call_next_handler_one_request" id="ga18"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_call_next_handler_one_request</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>current</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>requests</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>calls the next handler in the chain after the current one with with appropriate NULL checking, etc.</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00534">534</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8c-source.html#l00382">netsnmp_call_handler()</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, <a class="el" href=
+        "snmp__agent_8h-source.html#l00092">netsnmp_request_info_s::next</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga37" doxytag="agent_handler.c::netsnmp_clear_handler_list" id="ga37"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void netsnmp_clear_handler_list</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">void&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>clears the entire handler-registration list</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00892">892</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00046">netsnmp_free_all_list_data()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga23" doxytag="agent_handler.c::netsnmp_create_delegated_cache" id="ga23"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE netsnmp_delegated_cache *
+            netsnmp_create_delegated_cache</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>handler</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href=
+            "structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reqinfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>requests</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">void *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>localinfo</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>creates a cache of information which can be saved for future reference.</p>
+
+        <p>Use <a class="el" href="group__handler.html#ga24">netsnmp_handler_check_cache()</a> later to make sure it's still
+        valid before referencing it in the future.</p>
+
+        <dl compact="compact">
+          <dt><b>Examples:</b></dt>
+
+          <dd><a class="el" href="delayed__instance_8c-example.html#a16">delayed_instance.c</a>.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00683">683</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8h-source.html#l00162">netsnmp_agent_request_info_s::asp</a>, <a class="el"
+        href="group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, and <a class="el" href=
+        "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga7" doxytag="agent_handler.c::netsnmp_create_handler" id="ga7"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> * netsnmp_create_handler</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">Netsnmp_Node_Handler *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>handler_access_method</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>creates a netsnmp_mib_handler structure given a name and a access method.</p>
+
+        <p>The returned handler should then be <a class="el" href="group__handler.html#ga10">registered.</a></p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>name</em>&nbsp;</td>
+
+                <td>is the handler name and is copied then assigned to netsnmp_mib_handler-&gt;handler_name</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>handler_access_method</em>&nbsp;</td>
+
+                <td>is a function pointer used as the access method for this handler registration instance for whatever required
+                needs.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>a pointer to a populated netsnmp_mib_handler struct to be registered</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>See also:</b></dt>
+
+          <dd>
+            netsnmp_create_handler_registration()
+
+            <p><a class="el" href="group__handler.html#ga10">netsnmp_register_handler()</a></p>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00105">105</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="structnetsnmp__mib__handler__s.html#o3">netsnmp_mib_handler_s::access_method</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href="tools_8h-source.html#l00053">SNMP_FREE</a>, and
+        <a class="el" href="tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
+
+        <p>Referenced by <a class="el" href="old__api_8c-source.html#l00040">get_old_api_handler()</a>, <a class="el" href=
+        "baby__steps_8c-source.html#l00338">netsnmp_baby_steps_access_multiplexer_get()</a>, <a class="el" href=
+        "baby__steps_8c-source.html#l00061">netsnmp_baby_steps_handler_get()</a>, <a class="el" href=
+        "cache__handler_8c-source.html#l00244">netsnmp_cache_handler_get()</a>, <a class="el" href=
+        "table__container_8c-source.html#l00156">netsnmp_container_table_handler_get()</a>, <a class="el" href=
+        "bulk__to__next_8c-source.html#l00030">netsnmp_get_bulk_to_next_handler()</a>, <a class="el" href=
+        "debug__handler_8c-source.html#l00054">netsnmp_get_debug_handler()</a>, <a class="el" href=
+        "instance_8c-source.html#l00046">netsnmp_get_instance_handler()</a>, <a class="el" href=
+        "mode__end__call_8c-source.html#l00048">netsnmp_get_mode_end_call_handler()</a>, <a class="el" href=
+        "multiplexer_8c-source.html#l00036">netsnmp_get_multiplexer_handler()</a>, <a class="el" href=
+        "read__only_8c-source.html#l00032">netsnmp_get_read_only_handler()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00031">netsnmp_get_row_merge_handler()</a>, <a class="el" href=
+        "scalar_8c-source.html#l00051">netsnmp_get_scalar_handler()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00034">netsnmp_get_serialize_handler()</a>, <a class="el" href=
+        "stash__cache_8c-source.html#l00042">netsnmp_get_stash_cache_handler()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00263">netsnmp_get_table_data_handler()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00086">netsnmp_get_table_data_set_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00088">netsnmp_get_table_handler()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00106">netsnmp_get_table_iterator_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00710">netsnmp_sparse_table_handler_get()</a>, and <a class="el" href=
+        "table_8c-source.html#l00721">netsnmp_sparse_table_register()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga32" doxytag="agent_handler.c::netsnmp_find_handler_by_name" id="ga32"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> * netsnmp_find_handler_by_name</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Returns a handler from a chain based on the name.</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00825">825</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00842">netsnmp_find_handler_data_by_name()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga33" doxytag="agent_handler.c::netsnmp_find_handler_data_by_name" id="ga33"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void * netsnmp_find_handler_data_by_name</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Returns a handler's void * pointer from a chain based on the name.</p>
+
+        <p>This probably shouldn't be used by the general public as the void * data may change as a handler evolves. Handlers
+        should really advertise some function for you to use instead.</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00842">842</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el"
+        href="agent__handler_8c-source.html#l00825">netsnmp_find_handler_by_name()</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, and <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>.</p>
+
+        <p>Referenced by <a class="el" href="table_8c-source.html#l00137">netsnmp_find_table_registration_info()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga25" doxytag="agent_handler.c::netsnmp_free_delegated_cache" id="ga25"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE void netsnmp_free_delegated_cache</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_delegated_cache *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>dcache</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>frees a cache once you're finished using it</p>
+
+        <dl compact="compact">
+          <dt><b>Examples:</b></dt>
+
+          <dd><a class="el" href="delayed__instance_8c-example.html#a23">delayed_instance.c</a>.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00721">721</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga30" doxytag="agent_handler.c::netsnmp_free_request_data_set" id="ga30"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE void netsnmp_free_request_data_set</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>request</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Free the extra data stored in a request.</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00807">807</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00030">netsnmp_free_list_data()</a>, and <a class="el" href=
+        "snmp__agent_8h-source.html#l00064">netsnmp_request_info_s::parent_data</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga31" doxytag="agent_handler.c::netsnmp_free_request_data_sets" id="ga31"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE void netsnmp_free_request_data_sets</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>request</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Free the extra data stored in a bunch of requests (all data in the chain).</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00815">815</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00046">netsnmp_free_all_list_data()</a>, and <a class="el"
+        href="snmp__agent_8h-source.html#l00064">netsnmp_request_info_s::parent_data</a>.</p>
+
+        <p>Referenced by <a class="el" href="snmp__agent_8c-source.html#l01803">netsnmp_add_varbind_to_cache()</a>, and <a class=
+        "el" href="table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga24" doxytag="agent_handler.c::netsnmp_handler_check_cache" id="ga24"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE netsnmp_delegated_cache * netsnmp_handler_check_cache</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">netsnmp_delegated_cache *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>dcache</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>check's a given cache and returns it if it is still valid (ie, the agent still considers it to be an outstanding
+        request.</p>
+
+        <p>Returns NULL if it's no longer valid.</p>
+
+        <dl compact="compact">
+          <dt><b>Examples:</b></dt>
+
+          <dd><a class="el" href="delayed__instance_8c-example.html#a17">delayed_instance.c</a>.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00707">707</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8c-source.html#l02565">netsnmp_check_transaction_id()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga20" doxytag="agent_handler.c::netsnmp_handler_dup" id="ga20"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> * netsnmp_handler_dup</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>handler</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>dulpicates a handler and all subsequent handlers see also _clone_handler</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00579">579</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00049">netsnmp_mib_handler_s::myvoid</a>, <a class="el"
+        href="agent__handler_8c-source.html#l00557">netsnmp_handler_free()</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::prev</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00621">netsnmp_handler_registration_dup()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga19" doxytag="agent_handler.c::netsnmp_handler_free" id="ga19"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void netsnmp_handler_free</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>handler</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>free's the resourceses associated with a given handler</p>
+
+        <p>make sure we aren't pointing to ourselves.</p>
+
+        <p>XXX : segv here at shutdown if SHUTDOWN_AGENT_CLEANLY defined. About 30 functions down the stack, starting in
+        clear_context() -&gt; clear_subtree()</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00557">557</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>,
+        <a class="el" href="group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, and <a class="el" href=
+        "tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
+
+        <p>Referenced by <a class="el" href="baby__steps_8c-source.html#l00061">netsnmp_baby_steps_handler_get()</a>, <a class=
+        "el" href="agent__handler_8c-source.html#l00579">netsnmp_handler_dup()</a>, and <a class="el" href=
+        "agent__handler_8c-source.html#l00608">netsnmp_handler_registration_free()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga26" doxytag="agent_handler.c::netsnmp_handler_mark_requests_as_delegated" id="ga26"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void netsnmp_handler_mark_requests_as_delegated</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>requests</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>isdelegated</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>marks a list of requests as delegated (or not if isdelegaded = 0)</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00735">735</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="snmp__agent_8h-source.html#l00078">netsnmp_request_info_s::delegated</a>, and <a class=
+        "el" href="snmp__agent_8h-source.html#l00092">netsnmp_request_info_s::next</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga8" doxytag="agent_handler.c::netsnmp_handler_registration_create" id="ga8"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *
+            netsnmp_handler_registration_create</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>handler</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">oid *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reg_oid</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">size_t&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reg_oid_len</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">int&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>modes</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>creates a handler registration structure given a name, a access_method function, a registration location oid and the
+        modes the handler supports.</p>
+
+        <p>If modes == 0, then modes will automatically be set to the default value of only HANDLER_CAN_DEFAULT, which is by
+        default read-only GET and GETNEXT requests. A hander which supports sets but not row creation should set us a mode of
+        HANDLER_CAN_SET_ONLY.</p>
+
+        <dl compact="compact">
+          <dt><b>Note:</b></dt>
+
+          <dd>This ends up calling netsnmp_create_handler(name, handler_access_method)</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>name</em>&nbsp;</td>
+
+                <td>is the handler name and is copied then assigned to netsnmp_handler_registration-&gt;handlerName.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>handler_access_method</em>&nbsp;</td>
+
+                <td>is a function pointer used as the access method for this handler registration instance for whatever required
+                needs.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>reg_oid</em>&nbsp;</td>
+
+                <td>is the registration location oid.</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>reg_oid_len</em>&nbsp;</td>
+
+                <td>is the length of reg_oid, can use the macro, OID_LENGTH</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>modes</em>&nbsp;</td>
+
+                <td>is used to configure read/write access. If modes == 0, then modes will automatically be set to the default
+                value of only HANDLER_CAN_DEFAULT, which is by default read-only GET and GETNEXT requests. The other two mode
+                options are read only, HANDLER_CAN_RONLY, and read/write, HANDLER_CAN_RWRITE.</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <ul>
+          <li>HANDLER_CAN_GETANDGETNEXT</li>
+
+          <li>HANDLER_CAN_SET</li>
+
+          <li>HANDLER_CAN_GETBULK</li>
+        </ul>
+
+        <ul>
+          <li>HANDLER_CAN_RONLY (HANDLER_CAN_GETANDGETNEXT)</li>
+
+          <li>HANDLER_CAN_RWRITE (HANDLER_CAN_GETANDGETNEXT | HANDLER_CAN_SET)</li>
+
+          <li>HANDLER_CAN_DEFAULT HANDLER_CAN_RONLY</li>
+        </ul>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>Returns a pointer to a netsnmp_handler_registration struct. NULL is returned only when memory could not be
+          allocated for the netsnmp_handler_registration struct.</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>See also:</b></dt>
+
+          <dd>
+            <a class="el" href="group__handler.html#ga7">netsnmp_create_handler()</a>
+
+            <p><a class="el" href="group__handler.html#ga10">netsnmp_register_handler()</a></p>
+          </dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00163">163</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00094">netsnmp_handler_registration_s::handlerName</a>, <a class="el"
+        href="tools_8c-source.html#l00233">memdup()</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00108">netsnmp_handler_registration_s::modes</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00113">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, and <a class="el" href=
+        "tools_8h-source.html#l00068">SNMP_MALLOC_TYPEDEF</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga22" doxytag="agent_handler.c::netsnmp_handler_registration_dup" id="ga22"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *
+            netsnmp_handler_registration_dup</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>reginfo</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>duplicates the handler registration object</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00621">621</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::contextName</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>, <a class="el"
+        href="agent__handler_8h-source.html#l00094">netsnmp_handler_registration_s::handlerName</a>, <a class="el" href=
+        "tools_8c-source.html#l00233">memdup()</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00108">netsnmp_handler_registration_s::modes</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00579">netsnmp_handler_dup()</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00608">netsnmp_handler_registration_free()</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00113">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00114">netsnmp_handler_registration_s::range_subid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::range_ubound</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00116">netsnmp_handler_registration_s::timeout</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga21" doxytag="agent_handler.c::netsnmp_handler_registration_free" id="ga21"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void netsnmp_handler_registration_free</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>reginfo</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>free the resources associated with a handler registration object</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00608">608</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::contextName</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>, <a class="el"
+        href="agent__handler_8h-source.html#l00094">netsnmp_handler_registration_s::handlerName</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00557">netsnmp_handler_free()</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, and <a class="el" href=
+        "tools_8h-source.html#l00053">SNMP_FREE</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00621">netsnmp_handler_registration_dup()</a>, and
+        <a class="el" href="old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga14" doxytag="agent_handler.c::netsnmp_inject_handler" id="ga14"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_inject_handler</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>handler</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>inject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer.</p>
+
+        <p>The new handler is injected at the top of the list and hence will be the new handler to be called first.</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00374">374</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00322">netsnmp_inject_handler_before()</a>, and <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00292">netsnmp_cache_handler_register()</a>,
+        <a class="el" href="cache__handler_8c-source.html#l00305">netsnmp_register_cache_handler()</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00202">netsnmp_register_handler()</a>, <a class="el" href=
+        "instance_8c-source.html#l00071">netsnmp_register_instance()</a>, <a class="el" href=
+        "instance_8c-source.html#l00096">netsnmp_register_read_only_instance()</a>, <a class="el" href=
+        "scalar_8c-source.html#l00114">netsnmp_register_read_only_scalar()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00297">netsnmp_register_read_only_table_data()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00045">netsnmp_register_row_merge()</a>, <a class="el" href=
+        "scalar_8c-source.html#l00079">netsnmp_register_scalar()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00043">netsnmp_register_serialize()</a>, <a class="el" href=
+        "table_8c-source.html#l00111">netsnmp_register_table()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00286">netsnmp_register_table_data()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00113">netsnmp_register_table_data_set()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00138">netsnmp_register_table_iterator()</a>, and <a class="el" href=
+        "table_8c-source.html#l00721">netsnmp_sparse_table_register()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga13" doxytag="agent_handler.c::netsnmp_inject_handler_before" id="ga13"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_inject_handler_before</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>reginfo</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>handler</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>before_what</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>inject a new handler into the calling chain of the handlers definedy by the netsnmp_handler_registration pointer.</p>
+
+        <p>The new handler is injected after the before_what handler, or if NULL at the top of the list and hence will be the new
+        handler to be called first.</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00322">322</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00064">netsnmp_mib_handler_s::prev</a>, and <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>.</p>
+
+        <p>Referenced by <a class="el" href="agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga10" doxytag="agent_handler.c::netsnmp_register_handler" id="ga10"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_register_handler</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>reginfo</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>register a handler, as defined by the netsnmp_handler_registration pointer.</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00202">202</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::contextName</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>, <a class="el"
+        href="agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00094">netsnmp_handler_registration_s::handlerName</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00108">netsnmp_handler_registration_s::modes</a>, <a class="el" href=
+        "bulk__to__next_8c-source.html#l00030">netsnmp_get_bulk_to_next_handler()</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "agent__handler_8c-source.html#l00374">netsnmp_inject_handler()</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00113">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00114">netsnmp_handler_registration_s::range_subid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::range_ubound</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00116">netsnmp_handler_registration_s::timeout</a>.</p>
+
+        <p>Referenced by <a class="el" href="cache__handler_8c-source.html#l00292">netsnmp_cache_handler_register()</a>,
+        <a class="el" href="cache__handler_8c-source.html#l00305">netsnmp_register_cache_handler()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00051">netsnmp_register_old_api()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00045">netsnmp_register_row_merge()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00043">netsnmp_register_serialize()</a>, <a class="el" href=
+        "table_8c-source.html#l00111">netsnmp_register_table()</a>, and <a class="el" href=
+        "table_8c-source.html#l00721">netsnmp_sparse_table_register()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga36" doxytag="agent_handler.c::netsnmp_register_handler_by_name" id="ga36"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void netsnmp_register_handler_by_name</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>handler</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>registers a given handler by name so that it can be found easily later.</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00880">880</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00083">netsnmp_add_list_data()</a>, <a class="el" href=
+        "data__list_8c-source.html#l00064">netsnmp_create_data_list()</a>, and <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>.</p>
+
+        <p>Referenced by <a class="el" href="baby__steps_8c-source.html#l00321">netsnmp_baby_steps_handler_init()</a>, <a class=
+        "el" href="bulk__to__next_8c-source.html#l00114">netsnmp_init_bulk_to_next_helper()</a>, <a class="el" href=
+        "debug__handler_8c-source.html#l00158">netsnmp_init_debug_helper()</a>, <a class="el" href=
+        "read__only_8c-source.html#l00086">netsnmp_init_read_only_helper()</a>, <a class="el" href=
+        "row__merge_8c-source.html#l00200">netsnmp_init_row_merge()</a>, <a class="el" href=
+        "serialize_8c-source.html#l00096">netsnmp_init_serialize()</a>, and <a class="el" href=
+        "stash__cache_8c-source.html#l00188">netsnmp_init_stash_cache_helper()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga12" doxytag="agent_handler.c::netsnmp_register_handler_nocallback" id="ga12"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_register_handler_nocallback</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>reginfo</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>register a handler, as defined by the netsnmp_handler_registration pointer.</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00270">270</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::contextName</a>,
+        <a class="el" href="agent__handler_8h-source.html#l00107">netsnmp_handler_registration_s::handler</a>, <a class="el"
+        href="agent__handler_8h-source.html#l00047">netsnmp_mib_handler_s::handler_name</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00108">netsnmp_handler_registration_s::modes</a>, <a class="el" href=
+        "group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "group__handler.html#ga2">netsnmp_mib_handler</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00063">netsnmp_mib_handler_s::next</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00113">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00114">netsnmp_handler_registration_s::range_subid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::range_ubound</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, <a class="el" href=
+        "snmp__logging_8c-source.html#l01137">snmp_log()</a>, and <a class="el" href=
+        "agent__handler_8h-source.html#l00116">netsnmp_handler_registration_s::timeout</a>.</p>
+
+        <p>Referenced by <a class="el" href="old__api_8c-source.html#l00110">netsnmp_register_mib_table_row()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga27" doxytag="agent_handler.c::netsnmp_request_add_list_data" id="ga27"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE void netsnmp_request_add_list_data</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>request</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap"><a class="el" href="structnetsnmp__data__list__s.html">netsnmp_data_list</a>
+            *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>node</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>add data to a request that can be extracted later by submodules</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>requset</em>&nbsp;</td>
+
+                <td>the netsnmp request info structure</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>node</em>&nbsp;</td>
+
+                <td>this is the data to be added to the linked list request-&gt;parent_data</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>void</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Examples:</b></dt>
+
+          <dd><a class="el" href="delayed__instance_8c-example.html#a25">delayed_instance.c</a>.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00755">755</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00083">netsnmp_add_list_data()</a>, and <a class="el" href=
+        "snmp__agent_8h-source.html#l00064">netsnmp_request_info_s::parent_data</a>.</p>
+
+        <p>Referenced by <a class="el" href="table__iterator_8c-source.html#l00171">netsnmp_insert_iterator_context()</a>,
+        <a class="el" href="table__data_8c-source.html#l00562">netsnmp_insert_table_row()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, and <a class="el" href=
+        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga29" doxytag="agent_handler.c::netsnmp_request_get_list_data" id="ga29"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE void * netsnmp_request_get_list_data</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>request</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>extract data from a request that was added previously by a parent module</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>request</em>&nbsp;</td>
+
+                <td>the netsnmp request info function</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>name</em>&nbsp;</td>
+
+                <td>used to compare against the request-&gt;parent_data-&gt;name value, if a match is found
+                request-&gt;parent_data-&gt;data is returned</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>a void pointer(request-&gt;parent_data-&gt;data), otherwise NULL is returned if request is NULL or
+          request-&gt;parent_data is NULL or request-&gt;parent_data object is not found.</dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Examples:</b></dt>
+
+          <dd><a class="el" href="delayed__instance_8c-example.html#a27">delayed_instance.c</a>.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00797">797</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00157">netsnmp_get_list_data()</a>, and <a class="el" href=
+        "snmp__agent_8h-source.html#l00064">netsnmp_request_info_s::parent_data</a>.</p>
+
+        <p>Referenced by <a class="el" href="table__array_8c-source.html#l00213">netsnmp_extract_array_context()</a>, <a class=
+        "el" href="table__iterator_8c-source.html#l00163">netsnmp_extract_iterator_context()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00635">netsnmp_extract_table()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00187">netsnmp_extract_table_data_set()</a>, <a class="el" href=
+        "table_8c-source.html#l00128">netsnmp_extract_table_info()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00627">netsnmp_extract_table_row()</a>, <a class="el" href=
+        "old__api_8c-source.html#l00228">netsnmp_old_api_helper()</a>, and <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga28" doxytag="agent_handler.c::netsnmp_request_remove_list_data" id="ga28"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">NETSNMP_INLINE int netsnmp_request_remove_list_data</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__request__info__s.html">netsnmp_request_info</a> *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>request</em>,</td>
+          </tr>
+
+          <tr>
+            <td class="md" nowrap="nowrap" align="right"></td>
+
+            <td class="md"></td>
+
+            <td class="md" nowrap="nowrap">const char *&nbsp;</td>
+
+            <td class="mdname" nowrap="nowrap"><em>name</em></td>
+          </tr>
+
+          <tr>
+            <td class="md"></td>
+
+            <td class="md">)&nbsp;</td>
+
+            <td class="md" colspan="2"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>remove data from a request</p>
+
+        <dl compact="compact">
+          <dt><b>Parameters:</b></dt>
+
+          <dd>
+            <table border="0" cellspacing="2" cellpadding="0">
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>requset</em>&nbsp;</td>
+
+                <td>the netsnmp request info structure</td>
+              </tr>
+
+              <tr>
+                <td valign="top"></td>
+
+                <td valign="top"><em>name</em>&nbsp;</td>
+
+                <td>this is the name of the previously added data</td>
+              </tr>
+            </table>
+          </dd>
+        </dl>
+
+        <dl compact="compact">
+          <dt><b>Returns:</b></dt>
+
+          <dd>0 on successful find-and-delete, 1 otherwise.</dd>
+        </dl>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00776">776</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="data__list_8c-source.html#l00189">netsnmp_remove_list_node()</a>, and <a class="el"
+        href="snmp__agent_8h-source.html#l00064">netsnmp_request_info_s::parent_data</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="ga11" doxytag="agent_handler.c::netsnmp_unregister_handler" id="ga11"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">int netsnmp_unregister_handler</td>
+
+            <td class="md" valign="top">(&nbsp;</td>
+
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *&nbsp;</td>
+
+            <td class="mdname1" valign="top" nowrap="nowrap"><em>reginfo</em></td>
+
+            <td class="md" valign="top">&nbsp;)&nbsp;</td>
+
+            <td class="md" nowrap="nowrap"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>unregister a handler, as defined by the netsnmp_handler_registration pointer.</p>
+
+        <p>Definition at line <a class="el" href="agent__handler_8c-source.html#l00260">260</a> of file <a class="el" href=
+        "agent__handler_8c-source.html">agent_handler.c</a>.</p>
+
+        <p>References <a class="el" href="agent__handler_8h-source.html#l00096">netsnmp_handler_registration_s::contextName</a>,
+        <a class="el" href="group__handler.html#ga3">netsnmp_handler_registration</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00113">netsnmp_handler_registration_s::priority</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00114">netsnmp_handler_registration_s::range_subid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00115">netsnmp_handler_registration_s::range_ubound</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00101">netsnmp_handler_registration_s::rootoid</a>, <a class="el" href=
+        "agent__handler_8h-source.html#l00102">netsnmp_handler_registration_s::rootoid_len</a>, and <a class="el" href=
+        "agent__registry_8c-source.html#l00916">unregister_mib_context()</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

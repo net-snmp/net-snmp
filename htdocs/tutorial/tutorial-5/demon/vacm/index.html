@@ -1,0 +1,72 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+<TITLE>VACM (Access Control) configuration</TITLE>
+</HEAD>
+<BODY>
+<h1>VACM (Access Control) configuration</h1>
+<P>Romain Kang drew a beautiful diagram depicting the VACM access control
+configuration tokens and how they interact with each other:
+<img src=vacm.jpg>
+<P>Here is something similair, in text format:
+<pre>
+#*************************************************************
+# Define the views that the demogroup will be
+# restricted to.
+#
+# Format:
+#    view NAME TYPE SUBTREE [MASK]
+#
+view demoWrite included .1.3.6.1.4.1.2021.14.1.1
+view demoRead  included .1.3.6.1.4.1.2021.14.1.1
+view demoRead  included .1.3.6.1.2.1.1
+#    ---+---- 
+#       +---------------------------------------------------------+
+#                                                                 |
+#*************************************************************    |
+# Map any v1 style communities to a securityName                  |
+#                                                                 |
+# Format:                                                         |
+#    com2sec NAME SOURCE COMMUNITY                                |
+#                                                                 |
+com2sec v1User  default demopublic_v1                             |
+com2sec v2cUser default demopublic                                |
+#       ---+---                                                   |
+#          +----------------------------------------------------+ |
+#                                                               | |
+#                                                               | |
+#************************************************************** | |
+# Define the demogroup users and their access models            | |
+#                                                               | |
+# Format:                                                       | |
+#    group NAME MODEL SECURITY                                  | |
+#                                                               | |
+#                      +----------------------------------------+ |
+#                     \|/                                         |
+#                   _______                                       |
+group demogroup v1  v1User                                        |
+group demogroup v2c v2cUser                                       |
+#     ----+----                                                   |
+#         +---------------------------------------------------+   |
+#                                                             |   |
+#                                                             |   |
+#***********************************************************  |   |
+# Define views for the group                                  |   |
+#                                                             |   |
+# Format:                                                     |   |
+#    access NAME CONTEXT MODEL LEVEL PREFX READ WRITE NOTIFY  |   |
+#                                                             |   |
+#          +--------------------------------------------------+   | 
+#          |                             +--------+---------------+
+#         \|/                           \|/      \|/ 
+#      _________                      ________ _________
+access demogroup "" any noauth prefix demoRead demoWrite none
+</pre>
+</BODY>
+</HTML>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,1653 @@
+<head>
+  <title>MIB information for pingMIB</title>
+<style type="text/css">
+<!--
+h2{background:#bbeebb}
+h3{background:#ccccee}
+-->
+</style>
+</head>
+<body bgcolor="#ffffff">
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>pingMIB</b>
+MIB object, which is defined within the <b>DISMAN-PING-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.80</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#pingCtlTable">pingCtlTable</a></li>
+  <li><a href="#pingResultsTable">pingResultsTable</a></li>
+  <li><a href="#pingProbeHistoryTable">pingProbeHistoryTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="pingMaxConcurrentRequests" />
+1
+<br /><b>pingMaxConcurrentRequests</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadWrite</td>
+    <td>.1.3.6.1.2.1.80.1.1</td>
+<td>
+<pre>
+The maximum number of concurrent active ping requests
+that are allowed within an agent implementation.  A value
+of 0 for this object implies that there is no limit for
+the number of concurrent active requests in effect.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="pingCtlTable" /><h3>Table pingCtlTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>pingCtlTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-PING-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.80.1.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Defines the ping Control Table for providing, via SNMP,
+the capability of performing ping operations at
+a remote host.  The results of these operations are
+stored in the pingResultsTable and the
+pingProbeHistoryTable.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="pingCtlEntry" />Row Description</td>
+<td>
+<pre>
+Defines an entry in the pingCtlTable.  The first index
+element, pingCtlOwnerIndex, is of type SnmpAdminString,
+a textual convention that allows for use of the SNMPv3
+
+
+
+
+
+View-Based Access Control Model (RFC 2575 [11], VACM)
+and allows an management application to identify its
+entries.  The second index, pingCtlTestName (also an
+SnmpAdminString), enables the same management
+application to have multiple outstanding requests.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>pingCtlTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="pingCtlOwnerIndex" />
+1
+<br /><b>pingCtlOwnerIndex</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To facilitate the provisioning of access control by a
+security administrator using the View-Based Access
+Control Model (RFC 2575, VACM) for tables in which
+multiple users may need to independently create or
+modify entries, the initial index is used as an 'owner
+
+
+
+
+
+index'.  Such an initial index has a syntax of
+SnmpAdminString, and can thus be trivially mapped to a
+securityName or groupName as defined in VACM, in
+accordance with a security policy.
+
+When used in conjunction with such a security policy all
+entries in the table belonging to a particular user (or
+group) will have the same value for this initial index.
+For a given user's entries in a particular table, the
+object identifiers for the information in these entries
+will have the same subidentifiers (except for the 'column'
+subidentifier) up to the end of the encoded owner index.
+To configure VACM to permit access to this portion of the
+table, one would create vacmViewTreeFamilyTable entries
+with the value of vacmViewTreeFamilySubtree including
+the owner index portion, and vacmViewTreeFamilyMask
+'wildcarding' the column subidentifier.  More elaborate
+configurations are possible.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlTestName" />
+2
+<br /><b>pingCtlTestName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of the ping test.  This is locally unique, within
+the scope of an pingCtlOwnerIndex.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other pingCtlTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="pingCtlTargetAddressType" />
+3
+<br /><b>pingCtlTargetAddressType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Specifies the type of host address to be used at a remote
+host for performing a ping operation.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlTargetAddress" />
+4
+<br /><b>pingCtlTargetAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Specifies the host address to be used at a remote host for
+performing a ping operation.  The host address type is
+determined by the object value of corresponding
+pingCtlTargetAddressType.
+
+
+
+
+
+A value for this object MUST be set prior to transitioning
+its corresponding pingCtlEntry to active(1) via
+pingCtlRowStatus.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlDataSize" />
+5
+<br /><b>pingCtlDataSize</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+Specifies the size of the data portion to be
+transmitted in a ping operation in octets.  A ping
+request is usually an ICMP message encoded
+into an IP packet.  An IP packet has a maximum size
+of 65535 octets.  Subtracting the size of the ICMP
+or UDP header (both 8 octets) and the size of the IP
+header (20 octets) yields a maximum size of 65507
+octets.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlTimeOut" />
+6
+<br /><b>pingCtlTimeOut</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+Specifies the time-out value, in seconds, for a
+remote ping operation.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlProbeCount" />
+7
+<br /><b>pingCtlProbeCount</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+Specifies the number of times to perform a ping
+operation at a remote host.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlAdminStatus" />
+8
+<br /><b>pingCtlAdminStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>enabled</td></tr>
+        <tr><td>2</td><td>disabled</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+Reflects the desired state that a pingCtlEntry should be
+in:
+
+   enabled(1)  - Attempt to activate the test as defined by
+                 this pingCtlEntry.
+   disabled(2) - Deactivate the test as defined by this
+                 pingCtlEntry.
+
+Refer to the corresponding pingResultsOperStatus to
+determine the operational state of the test defined by
+this entry.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlDataFill" />
+9
+<br /><b>pingCtlDataFill</b>
+
+</td><td>
+  OCTETSTR
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The content of this object is used together with the
+corresponding pingCtlDataSize value to determine how to
+fill the data portion of a probe packet.  The option of
+selecting a data fill pattern can be useful when links
+are compressed or have data pattern sensitivities. The
+contents of pingCtlDataFill should be repeated in a ping
+packet when the size of the data portion of the ping
+packet is greater than the size of pingCtlDataFill.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlFrequency" />
+10
+<br /><b>pingCtlFrequency</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The number of seconds to wait before repeating a ping test
+as defined by the value of the various objects in the
+corresponding row.
+
+A single ping test consists of a series of ping probes.
+The number of probes is determined by the value of the
+corresponding pingCtlProbeCount object.  After a single
+
+
+
+
+
+test completes the number of seconds as defined by the
+value of pingCtlFrequency MUST elapse before the
+next ping test is started.
+
+A value of 0 for this object implies that the test
+as defined by the corresponding entry will not be
+repeated.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlMaxRows" />
+11
+<br /><b>pingCtlMaxRows</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The maximum number of entries allowed in the
+pingProbeHistoryTable.  An implementation of this
+MIB will remove the oldest entry in the
+pingProbeHistoryTable to allow the addition of an
+new entry once the number of rows in the
+pingProbeHistoryTable reaches this value.
+
+Old entries are not removed when a new test is
+started.  Entries are added to the pingProbeHistoryTable
+until pingCtlMaxRows is reached before entries begin to
+be removed.
+
+A value of 0 for this object disables creation of
+pingProbeHistoryTable entries.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlStorageType" />
+12
+<br /><b>pingCtlStorageType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#StorageType">StorageType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#StorageType"> StorageType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The storage type for this conceptual row.
+Conceptual rows having the value 'permanent' need not
+allow write-access to any columnar objects in the row.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlTrapGeneration" />
+13
+<br /><b>pingCtlTrapGeneration</b>
+
+</td><td>
+  BITS
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>0</td><td>probeFailure</td></tr>
+        <tr><td>1</td><td>testFailure</td></tr>
+        <tr><td>2</td><td>testCompletion</td></tr>
+      </table>
+
+  </td><td>Create</td>
+<td>
+<pre>
+The value of this object determines when and if
+to generate a notification for this entry:
+
+probeFailure(0)   - Generate a pingProbeFailed
+    notification subject to the value of
+    pingCtlTrapProbeFailureFilter.  The object
+    pingCtlTrapProbeFailureFilter can be used
+    to specify the number of successive probe failures
+    that are required before a pingProbeFailed
+    notification can be generated.
+testFailure(1)    - Generate a pingTestFailed
+    notification. In this instance the object
+    pingCtlTrapTestFailureFilter can be used to
+    determine the number of probe failures that
+    signal when a test fails.
+testCompletion(2) - Generate a pingTestCompleted
+    notification.
+
+The value of this object defaults to zero, indicating
+that none of the above options have been selected.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlTrapProbeFailureFilter" />
+14
+<br /><b>pingCtlTrapProbeFailureFilter</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The value of this object is used to determine when
+to generate a pingProbeFailed NOTIFICATION.
+
+Setting pingCtlTrapGeneration
+to probeFailure(0) implies that a pingProbeFailed
+NOTIFICATION is generated only when the number of
+successive probe failures as indicated by the
+value of pingCtlTrapPrbefailureFilter fail within
+a given ping test.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlTrapTestFailureFilter" />
+15
+<br /><b>pingCtlTrapTestFailureFilter</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The value of this object is used to determine when
+to generate a pingTestFailed NOTIFICATION.
+
+Setting pingCtlTrapGeneration to testFailure(1)
+implies that a pingTestFailed NOTIFICATION is
+generated only when the number of ping failures
+within a test exceed the value of
+pingCtlTrapTestFailureFilter.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlType" />
+16
+<br /><b>pingCtlType</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+The value of this object is used to either report or
+select the implementation method to be used for
+calculating a ping response time.  The value of this
+object MAY be selected from pingImplementationTypeDomains.
+
+Additional implementation types SHOULD be allocated as
+required by implementers of the DISMAN-PING-MIB under
+their enterprise specific registration point and not
+beneath pingImplementationTypeDomains.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlDescr" />
+17
+<br /><b>pingCtlDescr</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The purpose of this object is to provide a
+descriptive name of the remote ping test.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlSourceAddressType" />
+18
+<br /><b>pingCtlSourceAddressType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Specifies the type of the source address,
+pingCtlSourceAddress, to be used at a remote host
+when performing a ping operation.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlSourceAddress" />
+19
+<br /><b>pingCtlSourceAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Use the specified IP address (which must be given
+in numeric form, not as a hostname) as the source
+address in outgoing probe packets.  On hosts with
+more than one IP address, this option can be used
+to force the source address to be something other
+than the primary IP address of the interface the
+probe packet is sent on.  If the IP address is not
+one of this machine's interface addresses, an error
+is returned and nothing is sent.  A zero length
+octet string value for this object disables source
+address specification.
+
+The address type (InetAddressType) that relates to
+this object is specified by the corresponding value
+of pingCtlSourceAddressType.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlIfIndex" />
+20
+<br /><b>pingCtlIfIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#InterfaceIndexOrZero">InterfaceIndexOrZero</a>
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InterfaceIndexOrZero"> InterfaceIndexOrZero TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Setting this object to an interface's ifIndex prior
+to starting a remote ping operation directs
+the ping probes to be transmitted over the
+specified interface.  A value of zero for this object
+means that this option is not enabled.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlByPassRouteTable" />
+21
+<br /><b>pingCtlByPassRouteTable</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TruthValue">TruthValue</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TruthValue"> TruthValue TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The purpose of this object is to optionally enable
+bypassing the route table.  If enabled, the remote
+host will bypass the normal routing tables and send
+directly to a host on an attached network.  If the
+host is not on a directly-attached network, an
+
+
+
+
+
+error is returned.  This option can be used to perform
+the ping operation to a local host through an
+interface that has no route defined (e.g., after the
+interface was dropped by routed).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlDSField" />
+22
+<br /><b>pingCtlDSField</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>Create</td>
+<td>
+<pre>
+Specifies the value to store in the Differentiated
+Services (DS) Field in the IP packet used to
+encapsulate the ping probe.  The DS Field is defined
+as the Type of Service (TOS) octet in a IPv4 header
+or as the Traffic Class octet in a IPv6 header.
+
+The value of this object must be a decimal integer
+in the range from 0 to 255.  This option can be used
+to determine what effect an explicit DS Field setting
+has on a ping response.  Not all values are legal or
+meaningful.  A value of 0 means that the function
+     represented by this option is not supported.  DS Field
+     usage is often not supported by IP implementations and
+     not all values are supported.  Refer to RFC 2474 for
+     guidance on usage of this field.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlRowStatus" />
+23
+<br /><b>pingCtlRowStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#RowStatus">RowStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>Create</td>
+<td>
+<p>
+Note: this object is based on the <a href="#RowStatus"> RowStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This object allows entries to be created and deleted
+in the pingCtlTable.  Deletion of an entry in this
+table results in all corresponding (same
+pingCtlOwnerIndex and pingCtlTestName index values)
+pingResultsTable and pingProbeHistoryTable entries
+being deleted.
+
+A value MUST be specified for pingCtlTargetAddress
+prior to a transition to active(1) state being
+
+
+
+
+
+accepted.
+
+Activation of a remote ping operation is controlled
+via pingCtlAdminStatus and not by changing
+this object's value to active(1).
+
+Transitions in and out of active(1) state are not
+allowed while an entry's pingResultsOperStatus is
+active(1) with the exception that deletion of
+an entry in this table by setting its RowStatus
+object to destroy(6) will stop an active
+ping operation.
+
+The operational state of a ping operation
+can be determined by examination of its
+pingResultsOperStatus object.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="pingResultsTable" /><h3>Table pingResultsTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>pingResultsTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-PING-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.80.1.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Defines the Ping Results Table for providing
+the capability of performing ping operations at
+a remote host.  The results of these operations are
+stored in the pingResultsTable and the pingPastProbeTable.
+
+An entry is added to the pingResultsTable when an
+pingCtlEntry is started by successful transition
+of its pingCtlAdminStatus object to enabled(1).
+An entry is removed from the pingResultsTable when
+its corresponding pingCtlEntry is deleted.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="pingResultsEntry" />Row Description</td>
+<td>
+<pre>
+Defines an entry in the pingResultsTable.  The
+pingResultsTable has the same indexing as the
+pingCtlTable in order for a pingResultsEntry to
+
+
+
+
+
+correspond to the pingCtlEntry that caused it to
+be created.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>pingResultsTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="pingCtlOwnerIndex" />
+1
+<br /><b>pingCtlOwnerIndex</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To facilitate the provisioning of access control by a
+security administrator using the View-Based Access
+Control Model (RFC 2575, VACM) for tables in which
+multiple users may need to independently create or
+modify entries, the initial index is used as an 'owner
+
+
+
+
+
+index'.  Such an initial index has a syntax of
+SnmpAdminString, and can thus be trivially mapped to a
+securityName or groupName as defined in VACM, in
+accordance with a security policy.
+
+When used in conjunction with such a security policy all
+entries in the table belonging to a particular user (or
+group) will have the same value for this initial index.
+For a given user's entries in a particular table, the
+object identifiers for the information in these entries
+will have the same subidentifiers (except for the 'column'
+subidentifier) up to the end of the encoded owner index.
+To configure VACM to permit access to this portion of the
+table, one would create vacmViewTreeFamilyTable entries
+with the value of vacmViewTreeFamilySubtree including
+the owner index portion, and vacmViewTreeFamilyMask
+'wildcarding' the column subidentifier.  More elaborate
+configurations are possible.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlTestName" />
+2
+<br /><b>pingCtlTestName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of the ping test.  This is locally unique, within
+the scope of an pingCtlOwnerIndex.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other pingResultsTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="pingResultsOperStatus" />
+1
+<br /><b>pingResultsOperStatus</b>
+
+</td><td>
+  INTEGER
+
+      <table border=2 bgcolor="#cccccc">
+      <tr><th>Value</th><th>Label/Meaning</th></tr>
+        <tr><td>1</td><td>enabled</td></tr>
+        <tr><td>2</td><td>disabled</td></tr>
+      </table>
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Reflects the operational state of a pingCtlEntry:
+enabled(1)   - Test is active.
+disabled(2)  - Test has stopped.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingResultsIpTargetAddressType" />
+2
+<br /><b>pingResultsIpTargetAddressType</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#InetAddressType">InetAddressType</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddressType"> InetAddressType TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This objects indicates the type of address stored
+in the corresponding pingResultsIpTargetAddress
+object.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingResultsIpTargetAddress" />
+3
+<br /><b>pingResultsIpTargetAddress</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#InetAddress">InetAddress</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#InetAddress"> InetAddress TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+This objects reports the IP address associated
+with a pingCtlTargetAddress value when the destination
+address is specified as a DNS name.  The value of
+this object should be a zero length octet string
+when a DNS name is not specified or when a
+specified DNS name fails to resolve.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingResultsMinRtt" />
+4
+<br /><b>pingResultsMinRtt</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The minimum ping round-trip-time (RTT) received.  A value
+of 0 for this object implies that no RTT has been received.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingResultsMaxRtt" />
+5
+<br /><b>pingResultsMaxRtt</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The maximum ping round-trip-time (RTT) received.  A value
+of 0 for this object implies that no RTT has been received.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingResultsAverageRtt" />
+6
+<br /><b>pingResultsAverageRtt</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The current average ping round-trip-time (RTT).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingResultsProbeResponses" />
+7
+<br /><b>pingResultsProbeResponses</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Number of responses received for the corresponding
+pingCtlEntry and pingResultsEntry.  The value of this object
+        MUST be reported as 0 when no probe responses have been
+        received.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingResultsSentProbes" />
+8
+<br /><b>pingResultsSentProbes</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The value of this object reflects the number of probes sent
+for the corresponding pingCtlEntry and pingResultsEntry.
+The value of this object MUST be reported as 0 when no probes
+have been sent.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingResultsRttSumOfSquares" />
+9
+<br /><b>pingResultsRttSumOfSquares</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+This object contains the sum of the squares for all ping
+responses received.  Its purpose is to enable standard
+deviation calculation.  The value of this object MUST
+be reported as 0 when no ping responses have been
+received.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingResultsLastGoodProbe" />
+10
+<br /><b>pingResultsLastGoodProbe</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Date and time when the last response was received for
+a probe.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="pingProbeHistoryTable" /><h3>Table pingProbeHistoryTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>pingProbeHistoryTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-PING-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.80.1.4</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+Defines a table for storing the results of a ping
+operation.  Entries in this table are limited by
+
+
+
+
+
+the value of the corresponding pingCtlMaxRows
+object.
+
+An entry in this table is created when the result of
+a ping probe is determined.  The initial 2 instance
+identifier index values identify the pingCtlEntry
+that a probe result (pingProbeHistoryEntry) belongs
+to.  An entry is removed from this table when
+its corresponding pingCtlEntry is deleted.
+
+An implementation of this MIB will remove the oldest
+entry in the pingProbeHistoryTable to allow the
+addition of an new entry once the number of rows in
+the pingProbeHistoryTable reaches the value specified
+by pingCtlMaxRows.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="pingProbeHistoryEntry" />Row Description</td>
+<td>
+<pre>
+Defines an entry in the pingProbeHistoryTable.
+The first two index elements identify the
+pingCtlEntry that a pingProbeHistoryEntry belongs
+to.  The third index element selects a single
+probe result.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>pingProbeHistoryTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="pingCtlOwnerIndex" />
+1
+<br /><b>pingCtlOwnerIndex</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+To facilitate the provisioning of access control by a
+security administrator using the View-Based Access
+Control Model (RFC 2575, VACM) for tables in which
+multiple users may need to independently create or
+modify entries, the initial index is used as an 'owner
+
+
+
+
+
+index'.  Such an initial index has a syntax of
+SnmpAdminString, and can thus be trivially mapped to a
+securityName or groupName as defined in VACM, in
+accordance with a security policy.
+
+When used in conjunction with such a security policy all
+entries in the table belonging to a particular user (or
+group) will have the same value for this initial index.
+For a given user's entries in a particular table, the
+object identifiers for the information in these entries
+will have the same subidentifiers (except for the 'column'
+subidentifier) up to the end of the encoded owner index.
+To configure VACM to permit access to this portion of the
+table, one would create vacmViewTreeFamilyTable entries
+with the value of vacmViewTreeFamilySubtree including
+the owner index portion, and vacmViewTreeFamilyMask
+'wildcarding' the column subidentifier.  More elaborate
+configurations are possible.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingCtlTestName" />
+2
+<br /><b>pingCtlTestName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The name of the ping test.  This is locally unique, within
+the scope of an pingCtlOwnerIndex.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingProbeHistoryIndex" />
+1
+<br /><b>pingProbeHistoryIndex</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+An entry in this table is created when the result of
+a ping probe is determined.  The initial 2 instance
+identifier index values identify the pingCtlEntry
+that a probe result (pingProbeHistoryEntry) belongs
+to.
+
+An implementation MUST start assigning
+pingProbeHistoryIndex values at 1 and wrap after
+exceeding the maximum possible value as defined by
+the limit of this object ('ffffffff'h).
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other pingProbeHistoryTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="pingProbeHistoryResponse" />
+2
+<br /><b>pingProbeHistoryResponse</b>
+
+</td><td>
+  UNSIGNED32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The amount of time measured in milliseconds from when
+a probe was sent to when its response was received or
+when it timed out.  The value of this object is reported
+as 0 when it is not possible to transmit a probe.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingProbeHistoryStatus" />
+3
+<br /><b>pingProbeHistoryStatus</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#OperationResponseStatus">OperationResponseStatus</a>
+     <br>(ENUM list below)
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#OperationResponseStatus"> OperationResponseStatus TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The result of a particular probe done by a remote host.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingProbeHistoryLastRC" />
+4
+<br /><b>pingProbeHistoryLastRC</b>
+
+</td><td>
+  INTEGER32
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The last implementation method specific reply code received.
+If the ICMP Echo capability is being used then a successful
+probe ends when an ICMP response is received that contains
+the code ICMP_ECHOREPLY(0).  The ICMP responses are defined
+normally in the ip_icmp include file.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="pingProbeHistoryTime" />
+5
+<br /><b>pingProbeHistoryTime</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#DateAndTime">DateAndTime</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#DateAndTime"> DateAndTime TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Timestamp for when this probe result was determined.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+<a name="pingProbeFailed" /><h3>Notification: pingProbeFailed</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>pingProbeFailed</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-PING-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.80.0.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+Generated when a probe failure is detected when the
+corresponding pingCtlTrapGeneration object is set to
+probeFailure(0) subject to the value of
+pingCtlTrapProbeFailureFilter.  The object
+pingCtlTrapProbeFailureFilter can be used to specify the
+number of successive probe failures that are required
+before this notification can be generated.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#pingCtlTargetAddressType">pingCtlTargetAddressType</a></td></tr>
+      <tr><td><a href="#pingCtlTargetAddress">pingCtlTargetAddress</a></td></tr>
+      <tr><td><a href="#pingResultsOperStatus">pingResultsOperStatus</a></td></tr>
+      <tr><td><a href="#pingResultsIpTargetAddressType">pingResultsIpTargetAddressType</a></td></tr>
+      <tr><td><a href="#pingResultsIpTargetAddress">pingResultsIpTargetAddress</a></td></tr>
+      <tr><td><a href="#pingResultsMinRtt">pingResultsMinRtt</a></td></tr>
+      <tr><td><a href="#pingResultsMaxRtt">pingResultsMaxRtt</a></td></tr>
+      <tr><td><a href="#pingResultsAverageRtt">pingResultsAverageRtt</a></td></tr>
+      <tr><td><a href="#pingResultsProbeResponses">pingResultsProbeResponses</a></td></tr>
+      <tr><td><a href="#pingResultsSentProbes">pingResultsSentProbes</a></td></tr>
+      <tr><td><a href="#pingResultsRttSumOfSquares">pingResultsRttSumOfSquares</a></td></tr>
+      <tr><td><a href="#pingResultsLastGoodProbe">pingResultsLastGoodProbe</a></td></tr>
+  </table></td></tr>
+  </table>
+<a name="pingTestFailed" /><h3>Notification: pingTestFailed</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>pingTestFailed</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-PING-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.80.0.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+Generated when a ping test is determined to have failed
+when the corresponding pingCtlTrapGeneration object is
+set to testFailure(1).  In this instance
+pingCtlTrapTestFailureFilter should specify the number of
+probes in a test required to have failed in order to
+consider the test as failed.
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#pingCtlTargetAddressType">pingCtlTargetAddressType</a></td></tr>
+      <tr><td><a href="#pingCtlTargetAddress">pingCtlTargetAddress</a></td></tr>
+      <tr><td><a href="#pingResultsOperStatus">pingResultsOperStatus</a></td></tr>
+      <tr><td><a href="#pingResultsIpTargetAddressType">pingResultsIpTargetAddressType</a></td></tr>
+      <tr><td><a href="#pingResultsIpTargetAddress">pingResultsIpTargetAddress</a></td></tr>
+      <tr><td><a href="#pingResultsMinRtt">pingResultsMinRtt</a></td></tr>
+      <tr><td><a href="#pingResultsMaxRtt">pingResultsMaxRtt</a></td></tr>
+      <tr><td><a href="#pingResultsAverageRtt">pingResultsAverageRtt</a></td></tr>
+      <tr><td><a href="#pingResultsProbeResponses">pingResultsProbeResponses</a></td></tr>
+      <tr><td><a href="#pingResultsSentProbes">pingResultsSentProbes</a></td></tr>
+      <tr><td><a href="#pingResultsRttSumOfSquares">pingResultsRttSumOfSquares</a></td></tr>
+      <tr><td><a href="#pingResultsLastGoodProbe">pingResultsLastGoodProbe</a></td></tr>
+  </table></td></tr>
+  </table>
+<a name="pingTestCompleted" /><h3>Notification: pingTestCompleted</h3>
+
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Notification Name</td><td>pingTestCompleted</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>DISMAN-PING-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.80.0.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Notification Description</td>
+<td>
+<pre>
+Generated at the completion of a ping test when the
+corresponding pingCtlTrapGeneration object is set to
+testCompletion(4).
+</pre>
+</td>
+  </tr>
+  <tr> <td bgcolor="#bbbbbb">Mandatory<br />Objects</td><td>
+  <table border=2>
+      <tr><td><a href="#pingCtlTargetAddressType">pingCtlTargetAddressType</a></td></tr>
+      <tr><td><a href="#pingCtlTargetAddress">pingCtlTargetAddress</a></td></tr>
+      <tr><td><a href="#pingResultsOperStatus">pingResultsOperStatus</a></td></tr>
+      <tr><td><a href="#pingResultsIpTargetAddressType">pingResultsIpTargetAddressType</a></td></tr>
+      <tr><td><a href="#pingResultsIpTargetAddress">pingResultsIpTargetAddress</a></td></tr>
+      <tr><td><a href="#pingResultsMinRtt">pingResultsMinRtt</a></td></tr>
+      <tr><td><a href="#pingResultsMaxRtt">pingResultsMaxRtt</a></td></tr>
+      <tr><td><a href="#pingResultsAverageRtt">pingResultsAverageRtt</a></td></tr>
+      <tr><td><a href="#pingResultsProbeResponses">pingResultsProbeResponses</a></td></tr>
+      <tr><td><a href="#pingResultsSentProbes">pingResultsSentProbes</a></td></tr>
+      <tr><td><a href="#pingResultsRttSumOfSquares">pingResultsRttSumOfSquares</a></td></tr>
+      <tr><td><a href="#pingResultsLastGoodProbe">pingResultsLastGoodProbe</a></td></tr>
+  </table></td></tr>
+  </table>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="InetAddress">InetAddress</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="OperationResponseStatus">OperationResponseStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>responseReceived</td></tr><tr><td>2</td><td>unknown</td></tr><tr><td>3</td><td>internalError</td></tr><tr><td>4</td><td>requestTimedOut</td></tr><tr><td>5</td><td>unknownDestinationAddress</td></tr><tr><td>6</td><td>noRouteToTarget</td></tr><tr><td>7</td><td>interfaceInactiveToTarget</td></tr><tr><td>8</td><td>arpFailure</td></tr><tr><td>9</td><td>maxConcurrentLimitReached</td></tr><tr><td>10</td><td>unableToResolveDnsName</td></tr><tr><td>11</td><td>invalidHostAddress</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="RowStatus">RowStatus</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>active</td></tr><tr><td>2</td><td>notInService</td></tr><tr><td>3</td><td>notReady</td></tr><tr><td>4</td><td>createAndGo</td></tr><tr><td>5</td><td>createAndWait</td></tr><tr><td>6</td><td>destroy</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="TruthValue">TruthValue</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>true</td></tr><tr><td>2</td><td>false</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="StorageType">StorageType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>1</td><td>other</td></tr><tr><td>2</td><td>volatile</td></tr><tr><td>3</td><td>nonVolatile</td></tr><tr><td>4</td><td>permanent</td></tr><tr><td>5</td><td>readOnly</td></tr></table></td><td><pre></pre></td></tr>
+<tr><td><a name="DateAndTime">DateAndTime</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="InterfaceIndexOrZero">InterfaceIndexOrZero</td><td>INTEGER32</td><td><pre></pre></td></tr>
+<tr><td><a name="InetAddressType">InetAddressType</td><td>INTEGER<table border=2 bgcolor="#cccccc"><tr><th>Value</th><th>Label/Meaning</th></tr><tr><td>0</td><td>unknown</td></tr><tr><td>1</td><td>ipv4</td></tr><tr><td>2</td><td>ipv6</td></tr><tr><td>3</td><td>ipv4z</td></tr><tr><td>4</td><td>ipv6z</td></tr><tr><td>16</td><td>dns</td></tr></table></td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp DISMAN-PING-MIB::pingMIB</b></p>
+<pre>
++--<a href="#pingMIB">pingMIB</a>(80)
+   |
+   +--<a href="#pingNotifications">pingNotifications</a>(0)
+   |  |
+   |  +--<a href="#pingProbeFailed">pingProbeFailed</a>(1)
+   |  +--<a href="#pingTestFailed">pingTestFailed</a>(2)
+   |  +--<a href="#pingTestCompleted">pingTestCompleted</a>(3)
+   |
+   +--<a href="#pingObjects">pingObjects</a>(1)
+   |  |
+   |  +-- -RW- Unsigned  <a href="#pingMaxConcurrentRequests">pingMaxConcurrentRequests</a>(1)
+   |  |
+   |  +--<a href="#pingCtlTable">pingCtlTable</a>(2)
+   |  |  |
+   |  |  +--<a href="#pingCtlEntry">pingCtlEntry</a>(1)
+   |  |     |  Index: pingCtlOwnerIndex, pingCtlTestName
+   |  |     |
+   |  |     +-- ---- String    <a href="#pingCtlOwnerIndex">pingCtlOwnerIndex</a>(1)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- ---- String    <a href="#pingCtlTestName">pingCtlTestName</a>(2)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..32
+   |  |     +-- CR-- EnumVal   <a href="#pingCtlTargetAddressType">pingCtlTargetAddressType</a>(3)
+   |  |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |  |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |  |     +-- CR-- String    <a href="#pingCtlTargetAddress">pingCtlTargetAddress</a>(4)
+   |  |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |  |     |        Size: 0..255
+   |  |     +-- CR-- Unsigned  <a href="#pingCtlDataSize">pingCtlDataSize</a>(5)
+   |  |     |        Range: 0..65507
+   |  |     +-- CR-- Unsigned  <a href="#pingCtlTimeOut">pingCtlTimeOut</a>(6)
+   |  |     |        Range: 1..60
+   |  |     +-- CR-- Unsigned  <a href="#pingCtlProbeCount">pingCtlProbeCount</a>(7)
+   |  |     |        Range: 1..15
+   |  |     +-- CR-- EnumVal   <a href="#pingCtlAdminStatus">pingCtlAdminStatus</a>(8)
+   |  |     |        Values: enabled(1), disabled(2)
+   |  |     +-- CR-- String    <a href="#pingCtlDataFill">pingCtlDataFill</a>(9)
+   |  |     |        Size: 0..1024
+   |  |     +-- CR-- Unsigned  <a href="#pingCtlFrequency">pingCtlFrequency</a>(10)
+   |  |     +-- CR-- Unsigned  <a href="#pingCtlMaxRows">pingCtlMaxRows</a>(11)
+   |  |     +-- CR-- EnumVal   <a href="#pingCtlStorageType">pingCtlStorageType</a>(12)
+   |  |     |        Textual Convention: <a href="#StorageType">StorageType</a>
+   |  |     |        Values: other(1), volatile(2), nonVolatile(3), permanent(4), readOnly(5)
+   |  |     +-- CR-- BitString <a href="#pingCtlTrapGeneration">pingCtlTrapGeneration</a>(13)
+   |  |     |        Values: probeFailure(0), testFailure(1), testCompletion(2)
+   |  |     +-- CR-- Unsigned  <a href="#pingCtlTrapProbeFailureFilter">pingCtlTrapProbeFailureFilter</a>(14)
+   |  |     |        Range: 0..15
+   |  |     +-- CR-- Unsigned  <a href="#pingCtlTrapTestFailureFilter">pingCtlTrapTestFailureFilter</a>(15)
+   |  |     |        Range: 0..15
+   |  |     +-- CR-- ObjID     <a href="#pingCtlType">pingCtlType</a>(16)
+   |  |     +-- CR-- String    <a href="#pingCtlDescr">pingCtlDescr</a>(17)
+   |  |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |  |     |        Size: 0..255
+   |  |     +-- CR-- EnumVal   <a href="#pingCtlSourceAddressType">pingCtlSourceAddressType</a>(18)
+   |  |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |  |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |  |     +-- CR-- String    <a href="#pingCtlSourceAddress">pingCtlSourceAddress</a>(19)
+   |  |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |  |     |        Size: 0..255
+   |  |     +-- CR-- Integer32 <a href="#pingCtlIfIndex">pingCtlIfIndex</a>(20)
+   |  |     |        Textual Convention: <a href="#InterfaceIndexOrZero">InterfaceIndexOrZero</a>
+   |  |     |        Range: 0..2147483647
+   |  |     +-- CR-- EnumVal   <a href="#pingCtlByPassRouteTable">pingCtlByPassRouteTable</a>(21)
+   |  |     |        Textual Convention: <a href="#TruthValue">TruthValue</a>
+   |  |     |        Values: true(1), false(2)
+   |  |     +-- CR-- Unsigned  <a href="#pingCtlDSField">pingCtlDSField</a>(22)
+   |  |     |        Range: 0..255
+   |  |     +-- CR-- EnumVal   <a href="#pingCtlRowStatus">pingCtlRowStatus</a>(23)
+   |  |              Textual Convention: <a href="#RowStatus">RowStatus</a>
+   |  |              Values: active(1), notInService(2), notReady(3), createAndGo(4), createAndWait(5), destroy(6)
+   |  |
+   |  +--<a href="#pingResultsTable">pingResultsTable</a>(3)
+   |  |  |
+   |  |  +--<a href="#pingResultsEntry">pingResultsEntry</a>(1)
+   |  |     |  Index: pingCtlOwnerIndex, pingCtlTestName
+   |  |     |
+   |  |     +-- -R-- EnumVal   <a href="#pingResultsOperStatus">pingResultsOperStatus</a>(1)
+   |  |     |        Values: enabled(1), disabled(2)
+   |  |     +-- -R-- EnumVal   <a href="#pingResultsIpTargetAddressType">pingResultsIpTargetAddressType</a>(2)
+   |  |     |        Textual Convention: <a href="#InetAddressType">InetAddressType</a>
+   |  |     |        Values: unknown(0), ipv4(1), ipv6(2), ipv4z(3), ipv6z(4), dns(16)
+   |  |     +-- -R-- String    <a href="#pingResultsIpTargetAddress">pingResultsIpTargetAddress</a>(3)
+   |  |     |        Textual Convention: <a href="#InetAddress">InetAddress</a>
+   |  |     |        Size: 0..255
+   |  |     +-- -R-- Unsigned  <a href="#pingResultsMinRtt">pingResultsMinRtt</a>(4)
+   |  |     +-- -R-- Unsigned  <a href="#pingResultsMaxRtt">pingResultsMaxRtt</a>(5)
+   |  |     +-- -R-- Unsigned  <a href="#pingResultsAverageRtt">pingResultsAverageRtt</a>(6)
+   |  |     +-- -R-- Unsigned  <a href="#pingResultsProbeResponses">pingResultsProbeResponses</a>(7)
+   |  |     +-- -R-- Unsigned  <a href="#pingResultsSentProbes">pingResultsSentProbes</a>(8)
+   |  |     +-- -R-- Unsigned  <a href="#pingResultsRttSumOfSquares">pingResultsRttSumOfSquares</a>(9)
+   |  |     +-- -R-- String    <a href="#pingResultsLastGoodProbe">pingResultsLastGoodProbe</a>(10)
+   |  |              Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |  |              Size: 8 | 11
+   |  |
+   |  +--<a href="#pingProbeHistoryTable">pingProbeHistoryTable</a>(4)
+   |     |
+   |     +--<a href="#pingProbeHistoryEntry">pingProbeHistoryEntry</a>(1)
+   |        |  Index: pingCtlOwnerIndex, pingCtlTestName, pingProbeHistoryIndex
+   |        |
+   |        +-- ---- Unsigned  <a href="#pingProbeHistoryIndex">pingProbeHistoryIndex</a>(1)
+   |        |        Range: 1..-1
+   |        +-- -R-- Unsigned  <a href="#pingProbeHistoryResponse">pingProbeHistoryResponse</a>(2)
+   |        +-- -R-- EnumVal   <a href="#pingProbeHistoryStatus">pingProbeHistoryStatus</a>(3)
+   |        |        Textual Convention: <a href="#OperationResponseStatus">OperationResponseStatus</a>
+   |        |        Values: responseReceived(1), unknown(2), internalError(3), requestTimedOut(4), unknownDestinationAddress(5), noRouteToTarget(6), interfaceInactiveToTarget(7), arpFailure(8), maxConcurrentLimitReached(9), unableToResolveDnsName(10), invalidHostAddress(11)
+   |        +-- -R-- Integer32 <a href="#pingProbeHistoryLastRC">pingProbeHistoryLastRC</a>(4)
+   |        +-- -R-- String    <a href="#pingProbeHistoryTime">pingProbeHistoryTime</a>(5)
+   |                 Textual Convention: <a href="#DateAndTime">DateAndTime</a>
+   |                 Size: 8 | 11
+   |
+   +--<a href="#pingConformance">pingConformance</a>(2)
+   |  |
+   |  +--<a href="#pingCompliances">pingCompliances</a>(1)
+   |  |  |
+   |  |  +--<a href="#pingCompliance">pingCompliance</a>(1)
+   |  |
+   |  +--<a href="#pingGroups">pingGroups</a>(2)
+   |     |
+   |     +--<a href="#pingGroup">pingGroup</a>(1)
+   |     +--<a href="#pingTimeStampGroup">pingTimeStampGroup</a>(2)
+   |     |
+   |     +--<a href="#pingNotificationsGroup">pingNotificationsGroup</a>(3)
+   |
+   +--<a href="#pingImplementationTypeDomains">pingImplementationTypeDomains</a>(3)
+      |
+      +--<a href="#pingIcmpEcho">pingIcmpEcho</a>(1)
+      +--<a href="#pingUdpEcho">pingUdpEcho</a>(2)
+      +--<a href="#pingSnmpQuery">pingSnmpQuery</a>(3)
+      +--<a href="#pingTcpConnectionAttempt">pingTcpConnectionAttempt</a>(4)
+</pre>

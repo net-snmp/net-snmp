@@ -1,0 +1,195 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>mt_support.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * mt_support.c - multi-thread resource locking support </span>
+00003 <span class="comment"> */</span>
+00004 <span class="comment">/*</span>
+00005 <span class="comment"> * Author: Markku Laukkanen</span>
+00006 <span class="comment"> * Created: 6-Sep-1999</span>
+00007 <span class="comment"> * History:</span>
+00008 <span class="comment"> *  8-Sep-1999 M. Slifcak method names changed;</span>
+00009 <span class="comment"> *                        use array of resource locking structures.</span>
+00010 <span class="comment"> */</span>
+00011 
+00012 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00013 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+00014 <span class="preprocessor">#include &lt;net-snmp/library/mt_support.h&gt;</span>
+00015 
+00016 <span class="preprocessor">#ifdef __cplusplus</span>
+00017 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00018 <span class="preprocessor">#endif</span>
+00019 
+00020 <span class="preprocessor">#ifdef NS_REENTRANT</span>
+00021 
+00022 <span class="keyword">static</span> mutex_type s_res[MT_MAX_IDS][MT_LIB_MAXIMUM];  <span class=
+"comment">/* locking structures */</span>
+00023 
+00024 <span class="keyword">static</span> mutex_type *
+00025 _mt_res(<span class="keywordtype">int</span> groupID, <span class="keywordtype">int</span> resourceID)
+00026 {
+00027     <span class="keywordflow">if</span> (groupID &lt; 0) {
+00028         <span class="keywordflow">return</span> 0;
+00029     }
+00030     <span class="keywordflow">if</span> (groupID &gt;= MT_MAX_IDS) {
+00031         <span class="keywordflow">return</span> 0;
+00032     }
+00033     <span class="keywordflow">if</span> (resourceID &lt; 0) {
+00034         <span class="keywordflow">return</span> 0;
+00035     }
+00036     <span class="keywordflow">if</span> (resourceID &gt;= MT_LIB_MAXIMUM) {
+00037         <span class="keywordflow">return</span> 0;
+00038     }
+00039     <span class="keywordflow">return</span> (&amp;s_res[groupID][resourceID]);
+00040 }
+00041 
+00042 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00043 snmp_res_init_mutex(mutex_type *mutex)
+00044 {
+00045     <span class="keywordtype">int</span> rc = 0;
+00046 <span class="preprocessor">#if HAVE_PTHREAD_H</span>
+00047     rc = pthread_mutex_init(mutex, MT_MUTEX_INIT_DEFAULT);
+00048 <span class="preprocessor">#elif defined(WIN32)</span>
+00049     InitializeCriticalSection(mutex);
+00050 <span class="preprocessor">#endif</span>
+00051 
+00052     <span class="keywordflow">return</span> rc;
+00053 }
+00054 
+00055 <span class="keywordtype">int</span>
+00056 snmp_res_init(<span class="keywordtype">void</span>)
+00057 {
+00058     <span class="keywordtype">int</span> ii, jj, rc = 0;
+00059     mutex_type *mutex;
+00060 
+00061     <span class="keywordflow">for</span> (jj = 0; (0 == rc) &amp;&amp; (jj &lt; MT_MAX_IDS); jj++) {
+00062         <span class="keywordflow">for</span> (ii = 0; (0 == rc) &amp;&amp; (ii &lt; MT_LIB_MAXIMUM); ii++) {
+00063             mutex = _mt_res(jj, ii);
+00064             <span class="keywordflow">if</span> (!mutex) {
+00065                 <span class="keywordflow">continue</span>;
+00066             }
+00067             rc = snmp_res_init_mutex(mutex);
+00068         }
+00069     }
+00070 
+00071     <span class="keywordflow">return</span> rc;
+00072 }
+00073 
+00074 <span class="keywordtype">int</span>
+00075 snmp_res_destroy_mutex(<span class="keywordtype">int</span> groupID, <span class="keywordtype">int</span> resourceID)
+00076 {
+00077     <span class="keywordtype">int</span> rc = 0;
+00078     mutex_type *mutex = _mt_res(groupID, resourceID);
+00079     <span class="keywordflow">if</span> (!mutex) {
+00080         <span class="keywordflow">return</span> EFAULT;
+00081     }
+00082 
+00083 <span class="preprocessor">#if HAVE_PTHREAD_H</span>
+00084     rc = pthread_mutex_destroy(mutex);
+00085 <span class="preprocessor">#elif defined(WIN32)</span>
+00086     DeleteCriticalSection(mutex);
+00087 <span class="preprocessor">#endif</span>
+00088 
+00089     <span class="keywordflow">return</span> rc;
+00090 }
+00091 
+00092 <span class="keywordtype">int</span>
+00093 snmp_res_lock(<span class="keywordtype">int</span> groupID, <span class="keywordtype">int</span> resourceID)
+00094 {
+00095     <span class="keywordtype">int</span> rc = 0;
+00096     mutex_type *mutex = _mt_res(groupID, resourceID);
+00097     
+00098     <span class="keywordflow">if</span> (!mutex) {
+00099         <span class="keywordflow">return</span> EFAULT;
+00100     }
+00101 
+00102 <span class="preprocessor">#if HAVE_PTHREAD_H</span>
+00103     rc = pthread_mutex_lock(mutex);
+00104 <span class="preprocessor">#elif defined(WIN32)</span>
+00105     EnterCriticalSection(mutex);
+00106 <span class="preprocessor">#endif</span>
+00107 
+00108     <span class="keywordflow">return</span> rc;
+00109 }
+00110 
+00111 <span class="keywordtype">int</span>
+00112 snmp_res_unlock(<span class="keywordtype">int</span> groupID, <span class="keywordtype">int</span> resourceID)
+00113 {
+00114     <span class="keywordtype">int</span> rc = 0;
+00115     mutex_type *mutex = _mt_res(groupID, resourceID);
+00116 
+00117     <span class="keywordflow">if</span> (!mutex) {
+00118         <span class="keywordflow">return</span> EFAULT;
+00119     }
+00120 
+00121 <span class="preprocessor">#if HAVE_PTHREAD_H</span>
+00122     rc = pthread_mutex_unlock(mutex);
+00123 <span class="preprocessor">#elif defined(WIN32)</span>
+00124     LeaveCriticalSection(mutex);
+00125 <span class="preprocessor">#endif</span>
+00126 
+00127     <span class="keywordflow">return</span> rc;
+00128 }
+00129 
+00130 <span class="preprocessor">#else  </span><span class="comment">/*  NS_REENTRANT  */</span>
+00131 <span class="preprocessor">#ifdef WIN32</span>
+00132 
+00133 <span class="comment">/*</span>
+00134 <span class="comment"> * Provide "do nothing" targets for Release (.DLL) builds. </span>
+00135 <span class="comment"> */</span>
+00136 
+00137 <span class="keywordtype">int</span>
+00138 snmp_res_init(<span class="keywordtype">void</span>)
+00139 {
+00140     <span class="keywordflow">return</span> 0;
+00141 }
+00142 
+00143 <span class="keywordtype">int</span>
+00144 snmp_res_lock(<span class="keywordtype">int</span> groupID, <span class="keywordtype">int</span> resourceID)
+00145 {
+00146     <span class="keywordflow">return</span> 0;
+00147 }
+00148 
+00149 <span class="keywordtype">int</span>
+00150 snmp_res_unlock(<span class="keywordtype">int</span> groupID, <span class="keywordtype">int</span> resourceID)
+00151 {
+00152     <span class="keywordflow">return</span> 0;
+00153 }
+00154 
+00155 <span class="keywordtype">int</span>
+00156 snmp_res_destroy_mutex(<span class="keywordtype">int</span> groupID, <span class="keywordtype">int</span> resourceID)
+00157 {
+00158     <span class="keywordflow">return</span> 0;
+00159 }
+00160 <span class="preprocessor">#endif </span><span class="comment">/*  WIN32  */</span>
+00161 <span class="preprocessor">#endif </span><span class="comment">/*  NS_REENTRANT  */</span>
+00162 
+00163 <span class="preprocessor">#ifdef __cplusplus</span>
+00164 }
+00165 <span class="preprocessor">#endif</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

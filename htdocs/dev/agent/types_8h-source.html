@@ -1,0 +1,214 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href="dir_000001.html">net-snmp</a>
+  </div>
+
+  <h1>types.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef NET_SNMP_TYPES_H</span>
+00002 <span class="preprocessor">#define NET_SNMP_TYPES_H</span>
+00003 
+00008 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00009 
+00010 <span class="preprocessor">#ifndef NET_SNMP_CONFIG_H</span>
+00011 <span class="preprocessor">#error "Please include &lt;net-snmp/net-snmp-config.h&gt; before this file"</span>
+00012 <span class="preprocessor">#endif</span>
+00013 
+00014                         <span class="comment">/*</span>
+00015 <span class="comment">                         * For 'timeval' </span>
+00016 <span class="comment">                         */</span>
+00017 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00018 <span class="preprocessor"># ifdef WIN32</span>
+00019 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00020 <span class="preprocessor"># else</span>
+00021 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00022 <span class="preprocessor"># endif</span>
+00023 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00024 <span class="preprocessor">#else</span>
+00025 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00026 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00027 <span class="preprocessor"># else</span>
+00028 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00029 <span class="preprocessor"># endif</span>
+00030 <span class="preprocessor">#endif</span>
+00031 
+00032 <span class="preprocessor">#ifdef HAVE_INTTYPES_H</span>
+00033 <span class="preprocessor">#include &lt;inttypes.h&gt;</span>
+00034 <span class="preprocessor">#endif</span>
+00035 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00036 <span class="preprocessor">#ifdef HAVE_WINSOCK_H</span>
+00037 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00038 <span class="preprocessor">#endif</span>
+00039 
+00040 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00041 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>         <span class=
+"comment">/* For definition of in_addr_t */</span>
+00042 <span class="preprocessor">#endif</span>
+00043 
+00044 <span class="preprocessor">#ifdef __cplusplus</span>
+00045 <span class="keyword">extern</span> <span class="stringliteral">"C"</span> {
+00046 <span class="preprocessor">#endif</span>
+00047 
+00048 <span class="preprocessor">#ifndef MAX_SUBID               </span><span class=
+"comment">/* temporary - duplicate definition protection */</span>
+00049 <span class="preprocessor">#ifndef EIGHTBIT_SUBIDS</span>
+00050 <span class="keyword">typedef</span> u_long  oid;
+00051 <span class="preprocessor">#define MAX_SUBID   0xFFFFFFFF</span>
+00052 <span class="preprocessor">#else</span>
+00053 <span class="keyword">typedef</span> u_char  oid;
+00054 <span class="preprocessor">#define MAX_SUBID   0xFF</span>
+00055 <span class="preprocessor">#endif</span>
+00056 <span class="preprocessor">#endif</span>
+00057 
+00058 <span class="preprocessor">#ifndef HAVE_SOCKLEN_T</span>
+00059 <span class="keyword">typedef</span> u_int socklen_t;
+00060 <span class="preprocessor">#endif</span>
+00061 
+00062 <span class="preprocessor">#ifndef HAVE_IN_ADDR_T</span>
+00063 <span class="keyword">typedef</span> u_int in_addr_t;
+00064 <span class="preprocessor">#endif</span>
+00065 
+00066 <span class="preprocessor">#ifndef HAVE_SSIZE_T</span>
+00067 <span class="preprocessor">#if defined(__INT_MAX__) &amp;&amp; __INT_MAX__ == 2147483647</span>
+00068 <span class="keyword">typedef</span> <span class="keywordtype">int</span> ssize_t;
+00069 <span class="preprocessor">#else</span>
+00070 <span class="keyword">typedef</span> <span class="keywordtype">long</span> ssize_t;
+00071 <span class="preprocessor">#endif</span>
+00072 <span class="preprocessor">#endif</span>
+00073 
+00074     <span class="comment">/*</span>
+00075 <span class="comment">     * Try to ensure we have 32-bit (and hopefully 64-bit)</span>
+00076 <span class="comment">     *    integer types available.</span>
+00077 <span class="comment">     */</span>
+00078 <span class="preprocessor">#ifndef HAVE_INT32_T</span>
+00079 <span class="preprocessor">#if   SIZEOF_INT == 4</span>
+00080 <span class="keyword">typedef</span> <span class="keywordtype">int</span> int32_t
+00081 <span class="preprocessor">#elif SIZEOF_LONG == 4</span>
+00082 <span class="keyword">typedef</span> <span class="keywordtype">long</span> int32_t
+00083 <span class="preprocessor">#elif SIZEOF_SHORT == 4</span>
+00084 <span class="keyword">typedef</span> <span class="keywordtype">short</span> int32_t
+00085 <span class="preprocessor">#else</span>
+00086 <span class="keyword">typedef</span> <span class="keywordtype">int</span> int32_t
+00087 <span class="preprocessor">#define _INT32_IS_NOT_32BIT</span>
+00088 <span class="preprocessor">#endif</span>
+00089 <span class="preprocessor">#endif</span>
+00090 
+00091 <span class="preprocessor">#ifndef HAVE_UINT32_T</span>
+00092 <span class="preprocessor">#ifdef HAVE_U_INT32_T</span>
+00093 <span class="keyword">typedef</span> u_int32_t        uint32_t
+00094 <span class="preprocessor">#else</span>
+00095 <span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> int32_t uint32_t
+00096 <span class="preprocessor">#endif</span>
+00097 <span class="preprocessor">#endif</span>
+00098 
+00099 <span class="preprocessor">#ifndef HAVE_INT64_T</span>
+00100 <span class="preprocessor">#if SIZEOF_LONG == 8</span>
+00101 <span class="keyword">typedef</span> <span class="keywordtype">long</span> int64_t
+00102 <span class="preprocessor">#elif SIZEOF_LONG_LONG == 8</span>
+00103 <span class="keyword">typedef</span> <span class="keywordtype">long</span> <span class="keywordtype">long</span> int64_t
+00104 <span class="preprocessor">#elif   SIZEOF_INT == 8</span>
+00105 <span class="keyword">typedef</span> <span class="keywordtype">int</span> int64_t
+00106 <span class="preprocessor">#elif SIZEOF_LONG &gt;= 8</span>
+00107 <span class="keyword">typedef</span> <span class="keywordtype">long</span> int64_t
+00108 <span class="preprocessor">#define _INT64_IS_NOT_64BIT</span>
+00109 <span class="preprocessor">#else</span>
+00110 <span class="preprocessor">#define _NO_64BIT_TYPE 1</span>
+00111 <span class="preprocessor">#endif</span>
+00112 <span class="preprocessor">#endif</span>
+00113 
+00114 <span class="preprocessor">#ifndef HAVE_UINT64_T</span>
+00115 <span class="preprocessor">#ifdef HAVE_U_INT64_T</span>
+00116 <span class="keyword">typedef</span> u_int64_t        uint64_t
+00117 <span class="preprocessor">#elif !defined(_NO_64BIT_TYPE)</span>
+00118 <span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> int64_t uint64_t
+00119 <span class="preprocessor">#endif</span>
+00120 <span class="preprocessor">#endif</span>
+00121 
+00122     <span class="comment">/*</span>
+00123 <span class="comment">     *  For the initial release, this will just refer to the</span>
+00124 <span class="comment">     *  relevant UCD header files.</span>
+00125 <span class="comment">     *    In due course, the types and structures relevant to the</span>
+00126 <span class="comment">     *  Net-SNMP API will be identified, and defined here directly.</span>
+00127 <span class="comment">     *</span>
+00128 <span class="comment">     *  But for the time being, this header file is primarily a placeholder,</span>
+00129 <span class="comment">     *  to allow application writers to adopt the new header file names.</span>
+00130 <span class="comment">     */</span>
+00131 
+00132 
+00133 <span class="preprocessor">#include &lt;net-snmp/definitions.h&gt;</span>
+00134 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00135 <span class="comment">/*</span>
+00136 <span class="comment"> * #include &lt;net-snmp/library/libsnmp.h&gt; </span>
+00137 <span class="comment"> */</span>
+00138 
+00139     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_index_s {
+00140        <span class="keywordtype">int</span>          len;
+00141        oid         *oids;
+00142     } netsnmp_index;
+00143 
+00144 
+00145     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_void_array_s {
+00146        size_t  size;
+00147        <span class="keywordtype">void</span> * *array;
+00148     } netsnmp_void_array;
+00149 
+00150     <span class="comment">/*</span>
+00151 <span class="comment">     * references to various types</span>
+00152 <span class="comment">     */</span>
+00153     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_void {
+00154        <span class="keywordtype">void</span> * val;
+00155     } netsnmp_ref_void;
+00156 
+00157 <span class="preprocessor">#if 0</span>
+00158     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_u_char {
+00159        u_char * val;
+00160     } netsnmp_ref_U_char;
+00161 
+00162     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_char {
+00163        <span class="keywordtype">char</span> * val;
+00164     } netsnmp_ref_void;
+00165 
+00166     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_int_s {
+00167        <span class="keywordtype">int</span> val;
+00168     } netsnmp_ref_int;
+00169 
+00170     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_u_int_s {
+00171        u_int val;
+00172     } netsnmp_ref_int;
+00173 
+00174     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_u_long_s {
+00175        u_long val;
+00176     } netsnmp_ref_u_long;
+00177 <span class="preprocessor">#endif</span>
+00178 
+00179     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_ref_size_t_s {
+00180        size_t val;
+00181     } * netsnmp_ref_size_t;
+00182 
+00183 <span class="preprocessor">#ifdef __cplusplus</span>
+00184 }
+00185 <span class="preprocessor">#endif</span>
+00186 
+00187 <span class="preprocessor">#endif                          </span><span class="comment">/* NET_SNMP_TYPES_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:02 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

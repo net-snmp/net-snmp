@@ -1,0 +1,378 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>
+  </div>
+
+  <h1>snmp_vars.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * snmp_vars.c - return a pointer to the named variable.</span>
+00003 <span class="comment"> */</span>
+00009 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00010 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00011 <span class="comment"> * that may apply:</span>
+00012 <span class="comment"> */</span>
+00013 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00014 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00015 <span class="comment"> * that may apply:</span>
+00016 <span class="comment"> */</span>
+00017 <span class="comment">/***********************************************************</span>
+00018 <span class="comment">        Copyright 1988, 1989, 1990 by Carnegie Mellon University</span>
+00019 <span class="comment">        Copyright 1989  TGV, Incorporated</span>
+00020 
+00021 <span class="comment">                      All Rights Reserved</span>
+00022 
+00023 <span class="comment">Permission to use, copy, modify, and distribute this software and its</span>
+00024 <span class="comment">documentation for any purpose and without fee is hereby granted,</span>
+00025 <span class="comment">provided that the above copyright notice appear in all copies and that</span>
+00026 <span class="comment">both that copyright notice and this permission notice appear in</span>
+00027 <span class="comment">supporting documentation, and that the name of CMU and TGV not be used</span>
+00028 <span class="comment">in advertising or publicity pertaining to distribution of the software</span>
+00029 <span class="comment">without specific, written prior permission.</span>
+00030 
+00031 <span class="comment">CMU AND TGV DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,</span>
+00032 <span class="comment">INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO</span>
+00033 <span class="comment">EVENT SHALL CMU OR TGV BE LIABLE FOR ANY SPECIAL, INDIRECT OR</span>
+00034 <span class="comment">CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF</span>
+00035 <span class="comment">USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR</span>
+00036 <span class="comment">OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR</span>
+00037 <span class="comment">PERFORMANCE OF THIS SOFTWARE.</span>
+00038 <span class="comment">******************************************************************/</span>
+00039 <span class="comment">/*</span>
+00040 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00041 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00042 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00043 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00044 <span class="comment"> */</span>
+00045 
+00046 <span class="comment">/*</span>
+00047 <span class="comment"> * additions, fixes and enhancements for Linux by Erik Schoenfelder</span>
+00048 <span class="comment"> * (schoenfr@ibr.cs.tu-bs.de) 1994/1995.</span>
+00049 <span class="comment"> * Linux additions taken from CMU to UCD stack by Jennifer Bray of Origin</span>
+00050 <span class="comment"> * (jbray@origin-at.co.uk) 1997</span>
+00051 <span class="comment"> */</span>
+00052 <span class="comment">/*</span>
+00053 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00054 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00055 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00056 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00057 <span class="comment"> */</span>
+00058 
+00059 <span class="comment">/*</span>
+00060 <span class="comment"> * XXXWWW merge todo: incl/excl range changes in differences between</span>
+00061 <span class="comment"> * 1.194 and 1.199 </span>
+00062 <span class="comment"> */</span>
+00063 
+00064 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00065 <span class="preprocessor">#if HAVE_STRING_H</span>
+00066 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00067 <span class="preprocessor">#endif</span>
+00068 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00069 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00070 <span class="preprocessor">#endif</span>
+00071 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00072 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00073 <span class="preprocessor">#include &lt;fcntl.h&gt;</span>
+00074 
+00075 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00076 <span class="preprocessor"># ifdef WIN32</span>
+00077 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00078 <span class="preprocessor"># else</span>
+00079 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00080 <span class="preprocessor"># endif</span>
+00081 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00082 <span class="preprocessor">#else</span>
+00083 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00084 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00085 <span class="preprocessor"># else</span>
+00086 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00087 <span class="preprocessor"># endif</span>
+00088 <span class="preprocessor">#endif</span>
+00089 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00090 <span class="preprocessor"># include &lt;winsock.h&gt;</span>
+00091 <span class="preprocessor">#endif</span>
+00092 <span class="preprocessor">#if HAVE_SYS_SOCKET_H</span>
+00093 <span class="preprocessor"># include &lt;sys/socket.h&gt;</span>
+00094 <span class="preprocessor">#endif</span>
+00095 <span class="preprocessor">#if HAVE_SYS_STREAM_H</span>
+00096 <span class="preprocessor">#   ifdef sysv5UnixWare7</span>
+00097 <span class="preprocessor">#      define _KMEMUSER 1 </span><span class=
+"comment">/* &lt;sys/stream.h&gt; needs this for queue_t */</span>
+00098 <span class="preprocessor">#   endif</span>
+00099 <span class="preprocessor">#include &lt;sys/stream.h&gt;</span>
+00100 <span class="preprocessor">#endif</span>
+00101 <span class="preprocessor">#if HAVE_SYS_SOCKETVAR_H</span>
+00102 <span class="preprocessor"># include &lt;sys/socketvar.h&gt;</span>
+00103 <span class="preprocessor">#endif</span>
+00104 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00105 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00106 <span class="preprocessor">#endif</span>
+00107 <span class="preprocessor">#if HAVE_NETINET_IN_SYSTM_H</span>
+00108 <span class="preprocessor">#include &lt;netinet/in_systm.h&gt;</span>
+00109 <span class="preprocessor">#endif</span>
+00110 <span class="preprocessor">#if HAVE_NETINET_IP_H</span>
+00111 <span class="preprocessor">#include &lt;netinet/ip.h&gt;</span>
+00112 <span class="preprocessor">#endif</span>
+00113 <span class="preprocessor">#ifdef INET6</span>
+00114 <span class="preprocessor">#if HAVE_NETINET_IP6_H</span>
+00115 <span class="preprocessor">#include &lt;netinet/ip6.h&gt;</span>
+00116 <span class="preprocessor">#endif</span>
+00117 <span class="preprocessor">#endif</span>
+00118 <span class="preprocessor">#if HAVE_SYS_QUEUE_H</span>
+00119 <span class="preprocessor">#include &lt;sys/queue.h&gt;</span>
+00120 <span class="preprocessor">#endif</span>
+00121 <span class="preprocessor">#if HAVE_NET_ROUTE_H</span>
+00122 <span class="preprocessor">#include &lt;net/route.h&gt;</span>
+00123 <span class="preprocessor">#endif</span>
+00124 <span class="preprocessor">#if HAVE_NETINET_IP_VAR_H</span>
+00125 <span class="preprocessor">#include &lt;netinet/ip_var.h&gt;</span>
+00126 <span class="preprocessor">#endif</span>
+00127 <span class="preprocessor">#ifdef INET6</span>
+00128 <span class="preprocessor">#if HAVE_NETINET6_IP6_VAR_H</span>
+00129 <span class="preprocessor">#include &lt;netinet6/ip6_var.h&gt;</span>
+00130 <span class="preprocessor">#endif</span>
+00131 <span class="preprocessor">#endif</span>
+00132 <span class="preprocessor">#if HAVE_NETINET_IN_PCB_H</span>
+00133 <span class="preprocessor">#include &lt;netinet/in_pcb.h&gt;</span>
+00134 <span class="preprocessor">#endif</span>
+00135 <span class="preprocessor">#if HAVE_INET_MIB2_H</span>
+00136 <span class="preprocessor">#include &lt;inet/mib2.h&gt;</span>
+00137 <span class="preprocessor">#endif</span>
+00138 
+00139 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00140 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00141 <span class="preprocessor">#endif</span>
+00142 
+00143 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00144 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00145 <span class="preprocessor">#include &lt;net-snmp/agent/mib_modules.h&gt;</span>
+00146 <span class="preprocessor">#include "kernel.h"</span>
+00147 
+00148 <span class="preprocessor">#include "mibgroup/struct.h"</span>
+00149 <span class="preprocessor">#include "snmpd.h"</span>
+00150 <span class="preprocessor">#include "net-snmp/agent/all_helpers.h"</span>
+00151 <span class="preprocessor">#include "agent_module_includes.h"</span>
+00152 <span class="preprocessor">#include "mib_module_includes.h"</span>
+00153 <span class="preprocessor">#include "net-snmp/library/container.h"</span>
+00154 
+00155 <span class="preprocessor">#ifndef  MIN</span>
+00156 <span class="preprocessor">#define  MIN(a,b)                     (((a) &lt; (b)) ? (a) : (b))</span>
+00157 <span class="preprocessor">#endif</span>
+00158 
+00159 <span class="keyword">static</span> <span class="keywordtype">char</span>     done_init_agent = 0;
+00160 
+00161 <span class="comment">/*</span>
+00162 <span class="comment"> * mib clients are passed a pointer to a oid buffer.  Some mib clients</span>
+00163 <span class="comment"> * * (namely, those first noticed in mibII/vacm.c) modify this oid buffer</span>
+00164 <span class="comment"> * * before they determine if they really need to send results back out</span>
+00165 <span class="comment"> * * using it.  If the master agent determined that the client was not the</span>
+00166 <span class="comment"> * * right one to talk with, it will use the same oid buffer to pass to the</span>
+00167 <span class="comment"> * * rest of the clients, which may not longer be valid.  This should be</span>
+00168 <span class="comment"> * * fixed in all clients rather than the master.  However, its not a</span>
+00169 <span class="comment"> * * particularily easy bug to track down so this saves debugging time at</span>
+00170 <span class="comment"> * * the expense of a few memcpy's.</span>
+00171 <span class="comment"> */</span>
+00172 <span class="preprocessor">#define MIB_CLIENTS_ARE_EVIL 1</span>
+00173 
+00174 <span class="keyword">extern</span> netsnmp_subtree *subtrees;
+00175 
+00176 <span class="comment">/*</span>
+00177 <span class="comment"> *      Each variable name is placed in the variable table, without the</span>
+00178 <span class="comment"> * terminating substring that determines the instance of the variable.  When</span>
+00179 <span class="comment"> * a string is found that is lexicographicly preceded by the input string,</span>
+00180 <span class="comment"> * the function for that entry is called to find the method of access of the</span>
+00181 <span class="comment"> * instance of the named variable.  If that variable is not found, NULL is</span>
+00182 <span class="comment"> * returned, and the search through the table continues (it will probably</span>
+00183 <span class="comment"> * stop at the next entry).  If it is found, the function returns a character</span>
+00184 <span class="comment"> * pointer and a length or a function pointer.  The former is the address</span>
+00185 <span class="comment"> * of the operand, the latter is a write routine for the variable.</span>
+00186 <span class="comment"> *</span>
+00187 <span class="comment"> * u_char *</span>
+00188 <span class="comment"> * findVar(name, length, exact, var_len, write_method)</span>
+00189 <span class="comment"> * oid      *name;          IN/OUT - input name requested, output name found</span>
+00190 <span class="comment"> * int      length;         IN/OUT - number of sub-ids in the in and out oid's</span>
+00191 <span class="comment"> * int      exact;          IN - TRUE if an exact match was requested.</span>
+00192 <span class="comment"> * int      len;            OUT - length of variable or 0 if function returned.</span>
+00193 <span class="comment"> * int      write_method;   OUT - pointer to function to set variable,</span>
+00194 <span class="comment"> *                                otherwise 0</span>
+00195 <span class="comment"> *</span>
+00196 <span class="comment"> *     The writeVar function is returned to handle row addition or complex</span>
+00197 <span class="comment"> * writes that require boundary checking or executing an action.</span>
+00198 <span class="comment"> * This routine will be called three times for each varbind in the packet.</span>
+00199 <span class="comment"> * The first time for each varbind, action is set to RESERVE1.  The type</span>
+00200 <span class="comment"> * and value should be checked during this pass.  If any other variables</span>
+00201 <span class="comment"> * in the MIB depend on this variable, this variable will be stored away</span>
+00202 <span class="comment"> * (but *not* committed!) in a place where it can be found by a call to</span>
+00203 <span class="comment"> * writeVar for a dependent variable, even in the same PDU.  During</span>
+00204 <span class="comment"> * the second pass, action is set to RESERVE2.  If this variable is dependent</span>
+00205 <span class="comment"> * on any other variables, it will check them now.  It must check to see</span>
+00206 <span class="comment"> * if any non-committed values have been stored for variables in the same</span>
+00207 <span class="comment"> * PDU that it depends on.  Sometimes resources will need to be reserved</span>
+00208 <span class="comment"> * in the first two passes to guarantee that the operation can proceed</span>
+00209 <span class="comment"> * during the third pass.  During the third pass, if there were no errors</span>
+00210 <span class="comment"> * in the first two passes, writeVar is called for every varbind with action</span>
+00211 <span class="comment"> * set to COMMIT.  It is now that the values should be written.  If there</span>
+00212 <span class="comment"> * were errors during the first two passes, writeVar is called in the third</span>
+00213 <span class="comment"> * pass once for each varbind, with the action set to FREE.  An opportunity</span>
+00214 <span class="comment"> * is thus provided to free those resources reserved in the first two passes.</span>
+00215 <span class="comment"> * </span>
+00216 <span class="comment"> * writeVar(action, var_val, var_val_type, var_val_len, statP, name, name_len)</span>
+00217 <span class="comment"> * int      action;         IN - RESERVE1, RESERVE2, COMMIT, or FREE</span>
+00218 <span class="comment"> * u_char   *var_val;       IN - input or output buffer space</span>
+00219 <span class="comment"> * u_char   var_val_type;   IN - type of input buffer</span>
+00220 <span class="comment"> * int      var_val_len;    IN - input and output buffer len</span>
+00221 <span class="comment"> * u_char   *statP;         IN - pointer to local statistic</span>
+00222 <span class="comment"> * oid      *name           IN - pointer to name requested</span>
+00223 <span class="comment"> * int      name_len        IN - number of sub-ids in the name</span>
+00224 <span class="comment"> */</span>
+00225 
+00226 <span class="keywordtype">long</span>            long_return;
+00227 <span class="preprocessor">#ifndef ibm032</span>
+00228 u_char          return_buf[258];
+00229 <span class="preprocessor">#else</span>
+00230 u_char          return_buf[256];        <span class="comment">/* nee 64 */</span>
+00231 <span class="preprocessor">#endif</span>
+00232 
+00233 <span class="keyword">struct </span>timeval  starttime;
+00234 
+00235 <span class="keywordtype">int</span>             callback_master_num = -1;
+00236 
+00237 <span class="preprocessor">#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN</span>
+00238 <a class="code" href="structsnmp__session.html">netsnmp_session</a> *callback_master_sess = NULL;
+00239 
+00240 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00241 _init_agent_callback_transport(<span class="keywordtype">void</span>)
+00242 {
+00243     <span class="comment">/*</span>
+00244 <span class="comment">     * always register a callback transport for internal use </span>
+00245 <span class="comment">     */</span>
+00246     callback_master_sess = netsnmp_callback_open(0, handle_snmp_packet,
+00247                                                  netsnmp_agent_check_packet,
+00248                                                  netsnmp_agent_check_parse);
+00249     <span class="keywordflow">if</span> (callback_master_sess)
+00250         callback_master_num = callback_master_sess-&gt;<a class="code" href="structsnmp__session.html#o9">local_port</a>;
+00251 }
+00252 <span class="preprocessor">#else</span>
+00253 <span class="preprocessor">#define _init_agent_callback_transport()</span>
+00254 <span class="preprocessor">#endif</span>
+00255 
+00268 <span class="keywordtype">int</span>
+<a name="l00269" id="l00269"></a><a class="code" href="group__library.html#ga21">00269</a> <a class="code" href=
+"group__library.html#ga21">init_agent</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *app)
+00270 {
+00271     <span class="keywordtype">int</span>             r = 0;
+00272 
+00273     <span class="keywordflow">if</span>(++done_init_agent &gt; 1) {
+00274         <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_WARNING, <span class=
+"stringliteral">"ignoring extra call to init_agent (%d)\n"</span>, 
+00275                  done_init_agent);
+00276         <span class="keywordflow">return</span> r;
+00277     }
+00278 
+00279     <span class="comment">/*</span>
+00280 <span class="comment">     * get current time (ie, the time the agent started) </span>
+00281 <span class="comment">     */</span>
+00282     gettimeofday(&amp;starttime, NULL);
+00283     starttime.tv_sec--;
+00284     starttime.tv_usec += 1000000L;
+00285 
+00286     <span class="comment">/*</span>
+00287 <span class="comment">     * we handle alarm signals ourselves in the select loop </span>
+00288 <span class="comment">     */</span>
+00289     <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_LIBRARY_ID, 
+00290                            NETSNMP_DS_LIB_ALARM_DONT_USE_SIG, 1);
+00291 
+00292 <span class="preprocessor">#ifdef CAN_USE_NLIST</span>
+00293     init_kmem(<span class="stringliteral">"/dev/kmem"</span>);
+00294 <span class="preprocessor">#endif</span>
+00295 
+00296     setup_tree();
+00297 
+00298     init_agent_read_config(app);
+00299 
+00300 <span class="preprocessor">#ifdef TESTING</span>
+00301     auto_nlist_print_tree(-2, 0);
+00302 <span class="preprocessor">#endif</span>
+00303 
+00304     _init_agent_callback_transport();
+00305     
+00306     <a class="code" href="group__debug.html#ga9">netsnmp_init_helpers</a>();
+00307     init_traps();
+00308     netsnmp_container_init_list();
+00309 
+00310     <span class="comment">/*</span>
+00311 <span class="comment">     * initialize agentx subagent if necessary. </span>
+00312 <span class="comment">     */</span>
+00313 <span class="preprocessor">#ifdef USING_AGENTX_SUBAGENT_MODULE</span>
+00314     <span class="keywordflow">if</span> (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00315                                NETSNMP_DS_AGENT_ROLE) == SUB_AGENT) {
+00316         r = subagent_pre_init();
+00317         init_subagent();
+00318     }
+00319 <span class="preprocessor">#endif</span>
+00320 
+00321     <span class="comment">/*</span>
+00322 <span class="comment">     * Register configuration tokens from transport modules.  </span>
+00323 <span class="comment">     */</span>
+00324 <span class="preprocessor">#ifdef SNMP_TRANSPORT_UDP_DOMAIN</span>
+00325     netsnmp_udp_agent_config_tokens_register();
+00326 <span class="preprocessor">#endif</span>
+00327 <span class="preprocessor">#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN</span>
+00328     netsnmp_udp6_agent_config_tokens_register();
+00329 <span class="preprocessor">#endif</span>
+00330 <span class="preprocessor">#ifdef SNMP_TRANSPORT_UNIX_DOMAIN</span>
+00331     netsnmp_unix_agent_config_tokens_register();
+00332 <span class="preprocessor">#endif</span>
+00333 
+00334 <span class="preprocessor">#ifdef NETSNMP_EMBEDDED_PERL</span>
+00335     init_perl();
+00336 <span class="preprocessor">#endif</span>
+00337 
+00338 <span class="preprocessor">#  include "agent_module_inits.h"</span>
+00339 
+00340     <span class="keywordflow">return</span> r;
+00341 }                               <span class="comment">/* end init_agent() */</span>
+00342 
+00343 oid             nullOid[] = { 0, 0 };
+00344 <span class="keywordtype">int</span>             nullOidLen = <span class="keyword">sizeof</span>(nullOid);
+00345 
+00346 <span class="keywordtype">void</span>
+00347 shutdown_agent(<span class="keywordtype">void</span>) {
+00348 
+00349     <span class="comment">/* probably some of this can be called as shutdown callback */</span>
+00350     shutdown_tree();
+00351     clear_context();
+00352     netsnmp_clear_callback_list();
+00353     netsnmp_clear_tdomain_list();
+00354     <a class="code" href="group__handler.html#ga37">netsnmp_clear_handler_list</a>();
+00355     netsnmp_container_free_list();
+00356     clear_sec_mod();
+00357     clear_snmp_enum();
+00358     clear_callback();
+00359     clear_user_list();
+00360 
+00361     done_init_agent = 0;
+00362 }
+00363 
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:01 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

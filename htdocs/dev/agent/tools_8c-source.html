@@ -1,0 +1,957 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>tools.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * tools.c</span>
+00003 <span class="comment"> */</span>
+00004 
+00005 <span class="preprocessor">#define NETSNMP_TOOLS_C 1 </span><span class=
+"comment">/* dont re-define malloc wrappers here */</span>
+00006 
+00007 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00008 
+00009 <span class="preprocessor">#include &lt;ctype.h&gt;</span>
+00010 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00011 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00012 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00013 <span class="preprocessor"># ifdef WIN32</span>
+00014 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00015 <span class="preprocessor"># else</span>
+00016 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00017 <span class="preprocessor"># endif</span>
+00018 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00019 <span class="preprocessor">#else</span>
+00020 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00021 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00022 <span class="preprocessor"># else</span>
+00023 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00024 <span class="preprocessor"># endif</span>
+00025 <span class="preprocessor">#endif</span>
+00026 <span class="preprocessor">#ifdef HAVE_SYS_SOCKET_H</span>
+00027 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+00028 <span class="preprocessor">#endif</span>
+00029 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00030 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00031 <span class="preprocessor">#endif</span>
+00032 <span class="preprocessor">#ifdef HAVE_STDLIB_H</span>
+00033 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00034 <span class="preprocessor">#endif</span>
+00035 <span class="preprocessor">#if HAVE_STRING_H</span>
+00036 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00037 <span class="preprocessor">#else</span>
+00038 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00039 <span class="preprocessor">#endif</span>
+00040 <span class="preprocessor">#ifdef HAVE_NETINET_IN_H</span>
+00041 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00042 <span class="preprocessor">#endif</span>
+00043 <span class="preprocessor">#ifdef HAVE_ARPA_INET_H</span>
+00044 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+00045 <span class="preprocessor">#endif</span>
+00046 
+00047 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00048 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00049 <span class="preprocessor">#endif</span>
+00050 
+00051 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00052 <span class="preprocessor">#include &lt;net-snmp/output_api.h&gt;</span>
+00053 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00054 <span class="preprocessor">#include &lt;net-snmp/library/tools.h&gt;</span>     <span class=
+"comment">/* for "internal" definitions */</span>
+00055 
+00056 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00057 <span class="preprocessor">#include &lt;net-snmp/library/mib.h&gt;</span>
+00058 <span class="preprocessor">#include &lt;net-snmp/library/scapi.h&gt;</span>
+00059 
+00060 <span class="preprocessor">#ifdef WIN32</span>
+00061 
+00064 <span class="keywordtype">char</span> * netsnmp_strdup( <span class="keyword">const</span> <span class=
+"keywordtype">char</span> * ptr)
+00065 {
+00066     <span class="keywordflow">return</span> strdup(ptr);
+00067 }
+00071 <span class="keywordtype">void</span> * netsnmp_calloc(size_t nmemb, size_t size)
+00072 {
+00073     <span class="keywordflow">return</span> calloc(nmemb, size);
+00074 }
+00075 
+00079 <span class="keywordtype">void</span> * netsnmp_malloc(size_t size)
+00080 {
+00081     <span class="keywordflow">return</span> malloc(size);
+00082 }
+00083 
+00087 <span class="keywordtype">void</span> * netsnmp_realloc( <span class="keywordtype">void</span> * ptr, size_t size)
+00088 {
+00089     <span class="keywordflow">return</span> realloc(ptr, size);
+00090 }
+00091 
+00096 <span class="keywordtype">void</span> netsnmp_free( <span class="keywordtype">void</span> * ptr)
+00097 {
+00098     <span class="keywordflow">if</span> (ptr)
+00099         free(ptr);
+00100 }
+00101 <span class="preprocessor">#endif </span><span class="comment">/* WIN32 */</span>
+00102 
+00117 <span class="keywordtype">int</span>
+<a name="l00118" id="l00118"></a><a class="code" href="group__util.html#ga1">00118</a> <a class="code" href=
+"group__util.html#ga1">snmp_realloc</a>(u_char ** buf, size_t * buf_len)
+00119 {
+00120     u_char         *new_buf = NULL;
+00121     size_t          new_buf_len = 0;
+00122 
+00123     <span class="keywordflow">if</span> (buf == NULL) {
+00124         <span class="keywordflow">return</span> 0;
+00125     }
+00126 
+00127     <span class="keywordflow">if</span> (*buf_len &lt;= 255) {
+00128         new_buf_len = *buf_len + 256;
+00129     } <span class="keywordflow">else</span> <span class=
+"keywordflow">if</span> (*buf_len &gt; 255 &amp;&amp; *buf_len &lt;= 8191) {
+00130         new_buf_len = *buf_len * 2;
+00131     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (*buf_len &gt; 8191) {
+00132         new_buf_len = *buf_len + 8192;
+00133     }
+00134 
+00135     <span class="keywordflow">if</span> (*buf == NULL) {
+00136         new_buf = (u_char *) malloc(new_buf_len);
+00137     } <span class="keywordflow">else</span> {
+00138         new_buf = (u_char *) realloc(*buf, new_buf_len);
+00139     }
+00140 
+00141     <span class="keywordflow">if</span> (new_buf != NULL) {
+00142         *buf = new_buf;
+00143         *buf_len = new_buf_len;
+00144         <span class="keywordflow">return</span> 1;
+00145     } <span class="keywordflow">else</span> {
+00146         <span class="keywordflow">return</span> 0;
+00147     }
+00148 }
+00149 
+00150 <span class="keywordtype">int</span>
+00151 snmp_strcat(u_char ** buf, size_t * buf_len, size_t * out_len,
+00152             <span class="keywordtype">int</span> allow_realloc, <span class="keyword">const</span> u_char * s)
+00153 {
+00154     <span class="keywordflow">if</span> (buf == NULL || buf_len == NULL || out_len == NULL) {
+00155         <span class="keywordflow">return</span> 0;
+00156     }
+00157 
+00158     <span class="keywordflow">if</span> (s == NULL) {
+00159         <span class="comment">/*</span>
+00160 <span class="comment">         * Appending a NULL string always succeeds since it is a NOP.  </span>
+00161 <span class="comment">         */</span>
+00162         <span class="keywordflow">return</span> 1;
+00163     }
+00164 
+00165     <span class="keywordflow">while</span> ((*out_len + strlen((<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *) s) + 1) &gt;= *buf_len) {
+00166         <span class="keywordflow">if</span> (!(allow_realloc &amp;&amp; <a class="code" href=
+"group__util.html#ga1">snmp_realloc</a>(buf, buf_len))) {
+00167             <span class="keywordflow">return</span> 0;
+00168         }
+00169     }
+00170 
+00171     strcpy((<span class="keywordtype">char</span> *) (*buf + *out_len), (<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *) s);
+00172     *out_len += strlen((<span class="keywordtype">char</span> *) (*buf + *out_len));
+00173     <span class="keywordflow">return</span> 1;
+00174 }
+00175 
+00181 <span class="keywordtype">void</span>
+<a name="l00182" id="l00182"></a><a class="code" href="group__util.html#ga2">00182</a> <a class="code" href=
+"group__util.html#ga2">free_zero</a>(<span class="keywordtype">void</span> *buf, size_t size)
+00183 {
+00184     <span class="keywordflow">if</span> (buf) {
+00185         memset(buf, 0, size);
+00186         free(buf);
+00187     }
+00188 
+00189 }                               <span class="comment">/* end free_zero() */</span>
+00190 
+00201 u_char         *
+<a name="l00202" id="l00202"></a><a class="code" href="group__util.html#ga3">00202</a> <a class="code" href=
+"group__util.html#ga3">malloc_random</a>(size_t * size)
+00203 {
+00204     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS;
+00205     u_char         *buf = (u_char *) calloc(1, *size);
+00206 
+00207     <span class="keywordflow">if</span> (buf) {
+00208         rval = sc_random(buf, size);
+00209 
+00210         <span class="keywordflow">if</span> (rval &lt; 0) {
+00211             <a class="code" href="group__util.html#ga2">free_zero</a>(buf, *size);
+00212             buf = NULL;
+00213         } <span class="keywordflow">else</span> {
+00214             *size = rval;
+00215         }
+00216     }
+00217 
+00218     <span class="keywordflow">return</span> buf;
+00219 
+00220 }                               <span class="comment">/* end malloc_random() */</span>
+00221 
+00232 <span class="keywordtype">int</span>
+<a name="l00233" id="l00233"></a><a class="code" href="group__util.html#ga5">00233</a> <a class="code" href=
+"group__util.html#ga5">memdup</a>(u_char ** to, <span class="keyword">const</span> u_char * from, size_t size)
+00234 {
+00235     <span class="keywordflow">if</span> (to == NULL)
+00236         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00237     <span class="keywordflow">if</span> (from == NULL) {
+00238         *to = NULL;
+00239         <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00240     }
+00241     <span class="keywordflow">if</span> ((*to = (u_char *) malloc(size)) == NULL)
+00242         <span class="keywordflow">return</span> SNMPERR_GENERR;
+00243     memcpy(*to, from, size);
+00244     <span class="keywordflow">return</span> SNMPERR_SUCCESS;
+00245 
+00246 }                               <span class="comment">/* end memdup() */</span>
+00247 
+00251 <span class="keywordtype">char</span>           *
+<a name="l00252" id="l00252"></a><a class="code" href="group__util.html#ga12">00252</a> <a class="code" href=
+"group__util.html#ga12">netsnmp_strdup_and_null</a>(<span class="keyword">const</span> u_char * from, size_t from_len)
+00253 {
+00254     u_char         *ret;
+00255 
+00256     <span class="keywordflow">if</span> (from_len == 0 || from[from_len - 1] != <span class="charliteral">'\0'</span>) {
+00257         ret = malloc(from_len + 1);
+00258         <span class="keywordflow">if</span> (!ret)
+00259             <span class="keywordflow">return</span> NULL;
+00260         ret[from_len] = <span class="charliteral">'\0'</span>;
+00261     } <span class="keywordflow">else</span> {
+00262         ret = malloc(from_len);
+00263         <span class="keywordflow">if</span> (!ret)
+00264             <span class="keywordflow">return</span> NULL;
+00265         ret[from_len - 1] = <span class="charliteral">'\0'</span>;
+00266     }
+00267     memcpy(ret, from, from_len);
+00268     <span class="keywordflow">return</span> ret;
+00269 }
+00270 
+00283 u_int
+<a name="l00284" id="l00284"></a><a class="code" href="group__util.html#ga6">00284</a> <a class="code" href=
+"group__util.html#ga6">binary_to_hex</a>(<span class="keyword">const</span> u_char * input, size_t len, <span class=
+"keywordtype">char</span> **output)
+00285 {
+00286     u_int           olen = (len * 2) + 1;
+00287     <span class="keywordtype">char</span>           *s = (<span class=
+"keywordtype">char</span> *) calloc(1, olen), *op = s;
+00288     <span class="keyword">const</span> u_char   *ip = input;
+00289 
+00290 
+00291     <span class="keywordflow">while</span> (ip - input &lt; (int) len) {
+00292         *op++ = VAL2HEX((*ip &gt;&gt; 4) &amp; 0xf);
+00293         *op++ = VAL2HEX(*ip &amp; 0xf);
+00294         ip++;
+00295     }
+00296     *op = <span class="charliteral">'\0'</span>;
+00297 
+00298     *output = s;
+00299     <span class="keywordflow">return</span> olen;
+00300 
+00301 }                               <span class="comment">/* end binary_to_hex() */</span>
+00302 
+00303 
+00304 
+00305 
+00320 <span class="keywordtype">int</span>
+<a name="l00321" id="l00321"></a><a class="code" href="group__util.html#ga9">00321</a> <a class="code" href=
+"group__util.html#ga9">hex_to_binary2</a>(<span class="keyword">const</span> u_char * input, size_t len, <span class=
+"keywordtype">char</span> **output)
+00322 {
+00323     u_int           olen = (len / 2) + (len % 2);
+00324     <span class="keywordtype">char</span>           *s = (<span class=
+"keywordtype">char</span> *) calloc(1, (olen) ? olen : 1), *op = s;
+00325     <span class="keyword">const</span> u_char   *ip = input;
+00326 
+00327 
+00328     *output = NULL;
+00329     *op = 0;
+00330     <span class="keywordflow">if</span> (len % 2) {
+00331         <span class="keywordflow">if</span> (!isxdigit(*ip))
+00332             <span class="keywordflow">goto</span> hex_to_binary2_quit;
+00333         *op++ = HEX2VAL(*ip);
+00334         ip++;
+00335     }
+00336 
+00337     <span class="keywordflow">while</span> (ip - input &lt; (int) len) {
+00338         <span class="keywordflow">if</span> (!isxdigit(*ip))
+00339             <span class="keywordflow">goto</span> hex_to_binary2_quit;
+00340         *op = HEX2VAL(*ip) &lt;&lt; 4;
+00341         ip++;
+00342 
+00343         <span class="keywordflow">if</span> (!isxdigit(*ip))
+00344             <span class="keywordflow">goto</span> hex_to_binary2_quit;
+00345         *op++ += HEX2VAL(*ip);
+00346         ip++;
+00347     }
+00348 
+00349     *output = s;
+00350     <span class="keywordflow">return</span> olen;
+00351 
+00352   hex_to_binary2_quit:
+00353     <a class="code" href="group__util.html#ga2">free_zero</a>(s, olen);
+00354     <span class="keywordflow">return</span> -1;
+00355 
+00356 }                               <span class="comment">/* end hex_to_binary2() */</span>
+00357 
+00358 <span class="keywordtype">int</span>
+00359 snmp_decimal_to_binary(u_char ** buf, size_t * buf_len, size_t * out_len,
+00360                        <span class="keywordtype">int</span> allow_realloc, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *decimal)
+00361 {
+00362     <span class="keywordtype">int</span>             subid = 0;
+00363     <span class="keyword">const</span> <span class="keywordtype">char</span>     *cp = decimal;
+00364 
+00365     <span class="keywordflow">if</span> (buf == NULL || buf_len == NULL || out_len == NULL
+00366         || decimal == NULL) {
+00367         <span class="keywordflow">return</span> 0;
+00368     }
+00369 
+00370     <span class="keywordflow">while</span> (*cp != <span class="charliteral">'\0'</span>) {
+00371         <span class="keywordflow">if</span> (isspace((<span class="keywordtype">int</span>) *cp) || *cp == <span class=
+"charliteral">'.'</span>) {
+00372             cp++;
+00373             <span class="keywordflow">continue</span>;
+00374         }
+00375         <span class="keywordflow">if</span> (!isdigit((<span class="keywordtype">int</span>) *cp)) {
+00376             <span class="keywordflow">return</span> 0;
+00377         }
+00378         <span class="keywordflow">if</span> ((subid = atoi(cp)) &gt; 255) {
+00379             <span class="keywordflow">return</span> 0;
+00380         }
+00381         <span class="keywordflow">if</span> ((*out_len &gt;= *buf_len) &amp;&amp;
+00382             !(allow_realloc &amp;&amp; <a class="code" href="group__util.html#ga1">snmp_realloc</a>(buf, buf_len))) {
+00383             <span class="keywordflow">return</span> 0;
+00384         }
+00385         *(*buf + *out_len) = (u_char) subid;
+00386         (*out_len)++;
+00387         <span class="keywordflow">while</span> (isdigit((<span class="keywordtype">int</span>) *cp)) {
+00388             cp++;
+00389         }
+00390     }
+00391     <span class="keywordflow">return</span> 1;
+00392 }
+00393 
+00421 <span class="keywordtype">int</span>
+<a name="l00422" id="l00422"></a><a class="code" href="group__util.html#ga7">00422</a> <a class="code" href=
+"group__util.html#ga7">netsnmp_hex_to_binary</a>(u_char ** buf, size_t * buf_len, size_t * out_len,
+00423                       <span class="keywordtype">int</span> allow_realloc, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *hex, <span class="keyword">const</span> <span class="keywordtype">char</span> *delim)
+00424 {
+00425     <span class="keywordtype">int</span>             subid = 0;
+00426     <span class="keyword">const</span> <span class="keywordtype">char</span>     *cp = hex;
+00427 
+00428     <span class="keywordflow">if</span> (buf == NULL || buf_len == NULL || out_len == NULL || hex == NULL) {
+00429         <span class="keywordflow">return</span> 0;
+00430     }
+00431 
+00432     <span class="keywordflow">if</span> ((*cp == <span class=
+"charliteral">'0'</span>) &amp;&amp; ((*(cp + 1) == <span class="charliteral">'x'</span>) || (*(cp + 1) == <span class=
+"charliteral">'X'</span>))) {
+00433         cp += 2;
+00434     }
+00435 
+00436     <span class="keywordflow">while</span> (*cp != <span class="charliteral">'\0'</span>) {
+00437         <span class="keywordflow">if</span> (!isxdigit((<span class="keywordtype">int</span>) *cp)) {
+00438             <span class="keywordflow">if</span> ((NULL != delim) &amp;&amp; (NULL != strchr(delim, *cp))) {
+00439                 cp++;
+00440                 <span class="keywordflow">continue</span>;
+00441             }
+00442             <span class="keywordflow">return</span> 0;
+00443         }
+00444         <span class="keywordflow">if</span> (sscanf(cp, <span class="stringliteral">"%2x"</span>, &amp;subid) == 0) {
+00445             <span class="keywordflow">return</span> 0;
+00446         }
+00447         <span class="comment">/*</span>
+00448 <span class="comment">         * if we dont' have enough space, realloc.</span>
+00449 <span class="comment">         * (snmp_realloc will adjust buf_len to new size)</span>
+00450 <span class="comment">         */</span>
+00451         <span class="keywordflow">if</span> ((*out_len &gt;= *buf_len) &amp;&amp;
+00452             !(allow_realloc &amp;&amp; <a class="code" href="group__util.html#ga1">snmp_realloc</a>(buf, buf_len))) {
+00453             <span class="keywordflow">return</span> 0;
+00454         }
+00455         *(*buf + *out_len) = (u_char) subid;
+00456         (*out_len)++;
+00457         <span class="keywordflow">if</span> (*++cp == <span class="charliteral">'\0'</span>) {
+00458             <span class="comment">/*</span>
+00459 <span class="comment">             * Odd number of hex digits is an error.  </span>
+00460 <span class="comment">             */</span>
+00461             <span class="keywordflow">return</span> 0;
+00462         } <span class="keywordflow">else</span> {
+00463             cp++;
+00464         }
+00465     }
+00466     <span class="keywordflow">return</span> 1;
+00467 }
+00468 
+00480 <span class="keywordtype">int</span>
+<a name="l00481" id="l00481"></a><a class="code" href="group__util.html#ga8">00481</a> <a class="code" href=
+"group__util.html#ga8">snmp_hex_to_binary</a>(u_char ** buf, size_t * buf_len, size_t * out_len,
+00482                    <span class="keywordtype">int</span> allow_realloc, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *hex)
+00483 {
+00484     <span class="keywordflow">return</span> <a class="code" href=
+"group__util.html#ga7">netsnmp_hex_to_binary</a>(buf, buf_len, out_len, allow_realloc, hex, <span class=
+"stringliteral">" "</span>);
+00485 }
+00486 
+00487 <span class="comment">/*******************************************************************-o-******</span>
+00488 <span class="comment"> * dump_chunk</span>
+00489 <span class="comment"> *</span>
+00490 <span class="comment"> * Parameters:</span>
+00491 <span class="comment"> *      *title  (May be NULL.)</span>
+00492 <span class="comment"> *      *buf</span>
+00493 <span class="comment"> *       size</span>
+00494 <span class="comment"> */</span>
+00495 <span class="keywordtype">void</span>
+00496 dump_chunk(<span class="keyword">const</span> <span class="keywordtype">char</span> *debugtoken, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *title, <span class="keyword">const</span> u_char * buf,
+00497            <span class="keywordtype">int</span> size)
+00498 {
+00499     u_int           printunit = 64;     <span class="comment">/* XXX  Make global. */</span>
+00500     <span class="keywordtype">char</span>            chunk[SNMP_MAXBUF], *s, *sp;
+00501 
+00502     <span class="keywordflow">if</span> (title &amp;&amp; (*title != <span class="charliteral">'\0'</span>)) {
+00503         DEBUGMSGTL((debugtoken, <span class="stringliteral">"%s\n"</span>, title));
+00504     }
+00505 
+00506 
+00507     memset(chunk, 0, SNMP_MAXBUF);
+00508     size = <a class="code" href="group__util.html#ga6">binary_to_hex</a>(buf, size, &amp;s);
+00509     sp = s;
+00510 
+00511     <span class="keywordflow">while</span> (size &gt; 0) {
+00512         <span class="keywordflow">if</span> (size &gt; (int) printunit) {
+00513             strncpy(chunk, sp, printunit);
+00514             chunk[printunit] = <span class="charliteral">'\0'</span>;
+00515             DEBUGMSGTL((debugtoken, <span class="stringliteral">"\t%s\n"</span>, chunk));
+00516         } <span class="keywordflow">else</span> {
+00517             DEBUGMSGTL((debugtoken, <span class="stringliteral">"\t%s\n"</span>, sp));
+00518         }
+00519 
+00520         sp += printunit;
+00521         size -= printunit;
+00522     }
+00523 
+00524 
+00525     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(s);
+00526 
+00527 }                               <span class="comment">/* end dump_chunk() */</span>
+00528 
+00529 
+00530 
+00531 
+00532 <span class="comment">/*******************************************************************-o-******</span>
+00533 <span class="comment"> * dump_snmpEngineID</span>
+00534 <span class="comment"> *</span>
+00535 <span class="comment"> * Parameters:</span>
+00536 <span class="comment"> *      *estring</span>
+00537 <span class="comment"> *      *estring_len</span>
+00538 <span class="comment"> *      </span>
+00539 <span class="comment"> * Returns:</span>
+00540 <span class="comment"> *      Allocated memory pointing to a string of buflen char representing</span>
+00541 <span class="comment"> *      a printf'able form of the snmpEngineID.</span>
+00542 <span class="comment"> *</span>
+00543 <span class="comment"> *      -OR- NULL on error.</span>
+00544 <span class="comment"> *</span>
+00545 <span class="comment"> *</span>
+00546 <span class="comment"> * Translates the snmpEngineID TC into a printable string.  From RFC 2271,</span>
+00547 <span class="comment"> * Section 5 (pp. 36-37):</span>
+00548 <span class="comment"> *</span>
+00549 <span class="comment"> * First bit:   0       Bit string structured by means non-SNMPv3.</span>
+00550 <span class="comment"> *              1       Structure described by SNMPv3 SnmpEngineID TC.</span>
+00551 <span class="comment"> *  </span>
+00552 <span class="comment"> * Bytes 1-4:           Enterprise ID.  (High bit of first byte is ignored.)</span>
+00553 <span class="comment"> *  </span>
+00554 <span class="comment"> * Byte 5:      0       (RESERVED by IANA.)</span>
+00555 <span class="comment"> *              1       IPv4 address.           (   4 octets)</span>
+00556 <span class="comment"> *              2       IPv6 address.           (  16 octets)</span>
+00557 <span class="comment"> *              3       MAC address.            (   6 octets)</span>
+00558 <span class="comment"> *              4       Locally defined text.   (0-27 octets)</span>
+00559 <span class="comment"> *              5       Locally defined octets. (0-27 octets)</span>
+00560 <span class="comment"> *              6-127   (RESERVED for enterprise.)</span>
+00561 <span class="comment"> *  </span>
+00562 <span class="comment"> * Bytes 6-32:          (Determined by byte 5.)</span>
+00563 <span class="comment"> *  </span>
+00564 <span class="comment"> *</span>
+00565 <span class="comment"> * Non-printable characters are given in hex.  Text is given in quotes.</span>
+00566 <span class="comment"> * IP and MAC addresses are given in standard (UN*X) conventions.  Sections</span>
+00567 <span class="comment"> * are comma separated.</span>
+00568 <span class="comment"> *</span>
+00569 <span class="comment"> * esp, remaining_len and s trace the state of the constructed buffer.</span>
+00570 <span class="comment"> * s will be defined if there is something to return, and it will point</span>
+00571 <span class="comment"> * to the end of the constructed buffer.</span>
+00572 <span class="comment"> *</span>
+00573 <span class="comment"> *</span>
+00574 <span class="comment"> * ASSUME  "Text" means printable characters.</span>
+00575 <span class="comment"> *</span>
+00576 <span class="comment"> * XXX  Must the snmpEngineID always have a minimum length of 12?</span>
+00577 <span class="comment"> *      (Cf. part 2 of the TC definition.)</span>
+00578 <span class="comment"> * XXX  Does not enforce upper-bound of 32 bytes.</span>
+00579 <span class="comment"> * XXX  Need a switch to decide whether to use DNS name instead of a simple</span>
+00580 <span class="comment"> *      IP address.</span>
+00581 <span class="comment"> *</span>
+00582 <span class="comment"> * FIX  Use something other than snprint_hexstring which doesn't add </span>
+00583 <span class="comment"> *      trailing spaces and (sometimes embedded) newlines...</span>
+00584 <span class="comment"> */</span>
+00585 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00586 <span class="keywordtype">char</span>           *
+00587 dump_snmpEngineID(<span class="keyword">const</span> u_char * estring, size_t * estring_len)
+00588 {
+00589 <span class="preprocessor">#define eb(b)   ( *(esp+b) &amp; 0xff )</span>
+00590 
+00591     <span class="keywordtype">int</span>             rval = SNMPERR_SUCCESS, gotviolation = 0, slen = 0;
+00592     u_int           remaining_len;
+00593 
+00594     <span class="keywordtype">char</span>            buf[SNMP_MAXBUF], *s = NULL, *t;
+00595     <span class="keyword">const</span> u_char   *esp = estring;
+00596 
+00597     <span class="keyword">struct </span>in_addr  iaddr;
+00598 
+00599 
+00600 
+00601     <span class="comment">/*</span>
+00602 <span class="comment">     * Sanity check.</span>
+00603 <span class="comment">     */</span>
+00604     <span class="keywordflow">if</span> (!estring || (*estring_len &lt;= 0)) {
+00605         QUITFUN(SNMPERR_GENERR, dump_snmpEngineID_quit);
+00606     }
+00607     remaining_len = *estring_len;
+00608     memset(buf, 0, SNMP_MAXBUF);
+00609 
+00610 
+00611 
+00612     <span class="comment">/*</span>
+00613 <span class="comment">     * Test first bit.  Return immediately with a hex string, or</span>
+00614 <span class="comment">     * begin by formatting the enterprise ID.</span>
+00615 <span class="comment">     */</span>
+00616     <span class="keywordflow">if</span> (!(*esp &amp; 0x80)) {
+00617         snprint_hexstring(buf, SNMP_MAXBUF, esp, remaining_len);
+00618         s = strchr(buf, <span class="charliteral">'\0'</span>);
+00619         s -= 1;
+00620         <span class="keywordflow">goto</span> dump_snmpEngineID_quit;
+00621     }
+00622 
+00623     s = buf;
+00624     s += sprintf(s, <span class="stringliteral">"enterprise %d, "</span>, ((*(esp + 0) &amp; 0x7f) &lt;&lt; 24) |
+00625                  ((*(esp + 1) &amp; 0xff) &lt;&lt; 16) |
+00626                  ((*(esp + 2) &amp; 0xff) &lt;&lt; 8) | ((*(esp + 3) &amp; 0xff)));
+00627     <span class="comment">/*</span>
+00628 <span class="comment">     * XXX  Ick. </span>
+00629 <span class="comment">     */</span>
+00630 
+00631     <span class="keywordflow">if</span> (remaining_len &lt; 5) {    <span class=
+"comment">/* XXX  Violating string. */</span>
+00632         <span class="keywordflow">goto</span> dump_snmpEngineID_quit;
+00633     }
+00634 
+00635     esp += 4;                   <span class="comment">/* Incremented one more in the switch below. */</span>
+00636     remaining_len -= 5;
+00637 
+00638 
+00639 
+00640     <span class="comment">/*</span>
+00641 <span class="comment">     * Act on the fifth byte.</span>
+00642 <span class="comment">     */</span>
+00643     <span class="keywordflow">switch</span> ((int) *esp++) {
+00644     <span class="keywordflow">case</span> 1:                    <span class="comment">/* IPv4 address. */</span>
+00645 
+00646         <span class="keywordflow">if</span> (remaining_len &lt; 4)
+00647             <span class="keywordflow">goto</span> dump_snmpEngineID_violation;
+00648         memcpy(&amp;iaddr.s_addr, esp, 4);
+00649 
+00650         <span class="keywordflow">if</span> (!(t = inet_ntoa(iaddr)))
+00651             <span class="keywordflow">goto</span> dump_snmpEngineID_violation;
+00652         s += sprintf(s, <span class="stringliteral">"%s"</span>, t);
+00653 
+00654         esp += 4;
+00655         remaining_len -= 4;
+00656         <span class="keywordflow">break</span>;
+00657 
+00658     <span class="keywordflow">case</span> 2:                    <span class="comment">/* IPv6 address. */</span>
+00659 
+00660         <span class="keywordflow">if</span> (remaining_len &lt; 16)
+00661             <span class="keywordflow">goto</span> dump_snmpEngineID_violation;
+00662 
+00663         s += sprintf(s,
+00664                      <span class="stringliteral">"%02X%02X %02X%02X %02X%02X %02X%02X::"</span>
+00665                      <span class="stringliteral">"%02X%02X %02X%02X %02X%02X %02X%02X"</span>,
+00666                      eb(0), eb(1), eb(2), eb(3),
+00667                      eb(4), eb(5), eb(6), eb(7),
+00668                      eb(8), eb(9), eb(10), eb(11),
+00669                      eb(12), eb(13), eb(14), eb(15));
+00670 
+00671         esp += 16;
+00672         remaining_len -= 16;
+00673         <span class="keywordflow">break</span>;
+00674 
+00675     <span class="keywordflow">case</span> 3:                    <span class="comment">/* MAC address. */</span>
+00676 
+00677         <span class="keywordflow">if</span> (remaining_len &lt; 6)
+00678             <span class="keywordflow">goto</span> dump_snmpEngineID_violation;
+00679 
+00680         s += sprintf(s, <span class="stringliteral">"%02X:%02X:%02X:%02X:%02X:%02X"</span>,
+00681                      eb(0), eb(1), eb(2), eb(3), eb(4), eb(5));
+00682 
+00683         esp += 6;
+00684         remaining_len -= 6;
+00685         <span class="keywordflow">break</span>;
+00686 
+00687     <span class="keywordflow">case</span> 4:                    <span class="comment">/* Text. */</span>
+00688 
+00689         <span class="comment">/*</span>
+00690 <span class="comment">         * Doesn't exist on all (many) architectures </span>
+00691 <span class="comment">         */</span>
+00692         <span class="comment">/*</span>
+00693 <span class="comment">         * s += snprintf(s, remaining_len+3, "\"%s\"", esp); </span>
+00694 <span class="comment">         */</span>
+00695         s += sprintf(s, <span class="stringliteral">"\"%s\""</span>, esp);
+00696         <span class="keywordflow">goto</span> dump_snmpEngineID_quit;
+00697         <span class="keywordflow">break</span>;
+00698      <span class="comment">/*NOTREACHED*/</span> <span class="keywordflow">case</span> 5:    <span class=
+"comment">/* Octets. */</span>
+00699 
+00700         snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
+00701                           esp, remaining_len);
+00702         s = strchr(buf, <span class="charliteral">'\0'</span>);
+00703         s -= 1;
+00704         <span class="keywordflow">goto</span> dump_snmpEngineID_quit;
+00705         <span class="keywordflow">break</span>;
+00706        <span class="comment">/*NOTREACHED*/</span> dump_snmpEngineID_violation:
+00707     <span class="keywordflow">case</span> 0:                    <span class="comment">/* Violation of RESERVED, </span>
+00708 <span class="comment">                                 * *   -OR- of expected length.</span>
+00709 <span class="comment">                                 */</span>
+00710         gotviolation = 1;
+00711         s += sprintf(s, <span class="stringliteral">"!!! "</span>);
+00712 
+00713     <span class="keywordflow">default</span>:                   <span class="comment">/* Unknown encoding. */</span>
+00714 
+00715         <span class="keywordflow">if</span> (!gotviolation) {
+00716             s += sprintf(s, <span class="stringliteral">"??? "</span>);
+00717         }
+00718         snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
+00719                           esp, remaining_len);
+00720         s = strchr(buf, <span class="charliteral">'\0'</span>);
+00721         s -= 1;
+00722 
+00723         <span class="keywordflow">goto</span> dump_snmpEngineID_quit;
+00724 
+00725     }                           <span class="comment">/* endswitch */</span>
+00726 
+00727 
+00728 
+00729     <span class="comment">/*</span>
+00730 <span class="comment">     * Cases 1-3 (IP and MAC addresses) should not have trailing</span>
+00731 <span class="comment">     * octets, but perhaps they do.  Throw them in too.  XXX</span>
+00732 <span class="comment">     */</span>
+00733     <span class="keywordflow">if</span> (remaining_len &gt; 0) {
+00734         s += sprintf(s, <span class="stringliteral">" (??? "</span>);
+00735 
+00736         snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
+00737                           esp, remaining_len);
+00738         s = strchr(buf, <span class="charliteral">'\0'</span>);
+00739         s -= 1;
+00740 
+00741         s += sprintf(s, <span class="stringliteral">")"</span>);
+00742     }
+00743 
+00744 
+00745 
+00746   dump_snmpEngineID_quit:
+00747     <span class="keywordflow">if</span> (s) {
+00748         slen = s - buf + 1;
+00749         s = calloc(1, slen);
+00750         memcpy(s, buf, (slen) - 1);
+00751     }
+00752 
+00753     memset(buf, 0, SNMP_MAXBUF);        <span class="comment">/* XXX -- Overkill? XXX: Yes! */</span>
+00754 
+00755     <span class="keywordflow">return</span> s;
+00756 
+00757 <span class="preprocessor">#undef eb</span>
+00758 }                               <span class="comment">/* end dump_snmpEngineID() */</span>
+00759 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_TESTING_CODE */</span>
+00760 
+00761 
+00766 marker_t
+<a name="l00767" id="l00767"></a><a class="code" href="group__util.html#ga15">00767</a> <a class="code" href=
+"group__util.html#ga15">atime_newMarker</a>(<span class="keywordtype">void</span>)
+00768 {
+00769     marker_t        pm = (marker_t) calloc(1, <span class="keyword">sizeof</span>(<span class=
+"keyword">struct</span> timeval));
+00770     gettimeofday((<span class="keyword">struct</span> timeval *) pm, 0);
+00771     <span class="keywordflow">return</span> pm;
+00772 }
+00773 
+00777 <span class="keywordtype">void</span>
+<a name="l00778" id="l00778"></a><a class="code" href="group__util.html#ga16">00778</a> <a class="code" href=
+"group__util.html#ga16">atime_setMarker</a>(marker_t pm)
+00779 {
+00780     <span class="keywordflow">if</span> (!pm)
+00781         <span class="keywordflow">return</span>;
+00782 
+00783     gettimeofday((<span class="keyword">struct</span> timeval *) pm, 0);
+00784 }
+00785 
+00786 
+00790 <span class="keywordtype">long</span>
+<a name="l00791" id="l00791"></a><a class="code" href="group__util.html#ga17">00791</a> <a class="code" href=
+"group__util.html#ga17">atime_diff</a>(marker_t first, marker_t second)
+00792 {
+00793     <span class="keyword">struct </span>timeval *tv1, *tv2, diff;
+00794 
+00795     tv1 = (<span class="keyword">struct </span>timeval *) first;
+00796     tv2 = (<span class="keyword">struct </span>timeval *) second;
+00797 
+00798     diff.tv_sec = tv2-&gt;tv_sec - tv1-&gt;tv_sec - 1;
+00799     diff.tv_usec = tv2-&gt;tv_usec - tv1-&gt;tv_usec + 1000000;
+00800 
+00801     <span class="keywordflow">return</span> (diff.tv_sec * 1000 + diff.tv_usec / 1000);
+00802 }
+00803 
+00807 u_long
+<a name="l00808" id="l00808"></a><a class="code" href="group__util.html#ga18">00808</a> <a class="code" href=
+"group__util.html#ga18">uatime_diff</a>(marker_t first, marker_t second)
+00809 {
+00810     <span class="keyword">struct </span>timeval *tv1, *tv2, diff;
+00811 
+00812     tv1 = (<span class="keyword">struct </span>timeval *) first;
+00813     tv2 = (<span class="keyword">struct </span>timeval *) second;
+00814 
+00815     diff.tv_sec = tv2-&gt;tv_sec - tv1-&gt;tv_sec - 1;
+00816     diff.tv_usec = tv2-&gt;tv_usec - tv1-&gt;tv_usec + 1000000;
+00817 
+00818     <span class="keywordflow">return</span> (((u_long) diff.tv_sec) * 1000 + diff.tv_usec / 1000);
+00819 }
+00820 
+00825 u_long
+<a name="l00826" id="l00826"></a><a class="code" href="group__util.html#ga19">00826</a> <a class="code" href=
+"group__util.html#ga19">uatime_hdiff</a>(marker_t first, marker_t second)
+00827 {
+00828     <span class="keyword">struct </span>timeval *tv1, *tv2, diff;
+00829     u_long          res;
+00830 
+00831     tv1 = (<span class="keyword">struct </span>timeval *) first;
+00832     tv2 = (<span class="keyword">struct </span>timeval *) second;
+00833 
+00834     diff.tv_sec = tv2-&gt;tv_sec - tv1-&gt;tv_sec - 1;
+00835     diff.tv_usec = tv2-&gt;tv_usec - tv1-&gt;tv_usec + 1000000;
+00836 
+00837     res = ((u_long) diff.tv_sec) * 100 + diff.tv_usec / 10000;
+00838     <span class="keywordflow">return</span> res;
+00839 }
+00840 
+00845 <span class="keywordtype">int</span>
+<a name="l00846" id="l00846"></a><a class="code" href="group__util.html#ga20">00846</a> <a class="code" href=
+"group__util.html#ga20">atime_ready</a>(marker_t pm, <span class="keywordtype">int</span> deltaT)
+00847 {
+00848     marker_t        now;
+00849     <span class="keywordtype">long</span>            diff;
+00850     <span class="keywordflow">if</span> (!pm)
+00851         <span class="keywordflow">return</span> 0;
+00852 
+00853     now = <a class="code" href="group__util.html#ga15">atime_newMarker</a>();
+00854 
+00855     diff = <a class="code" href="group__util.html#ga17">atime_diff</a>(pm, now);
+00856     free(now);
+00857     <span class="keywordflow">if</span> (diff &lt; deltaT)
+00858         <span class="keywordflow">return</span> 0;
+00859 
+00860     <span class="keywordflow">return</span> 1;
+00861 }
+00862 
+00867 <span class="keywordtype">int</span>
+<a name="l00868" id="l00868"></a><a class="code" href="group__util.html#ga21">00868</a> <a class="code" href=
+"group__util.html#ga21">uatime_ready</a>(marker_t pm, <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> deltaT)
+00869 {
+00870     marker_t        now;
+00871     u_long          diff;
+00872     <span class="keywordflow">if</span> (!pm)
+00873         <span class="keywordflow">return</span> 0;
+00874 
+00875     now = <a class="code" href="group__util.html#ga15">atime_newMarker</a>();
+00876 
+00877     diff = <a class="code" href="group__util.html#ga18">uatime_diff</a>(pm, now);
+00878     free(now);
+00879     <span class="keywordflow">if</span> (diff &lt; deltaT)
+00880         <span class="keywordflow">return</span> 0;
+00881 
+00882     <span class="keywordflow">return</span> 1;
+00883 }
+00884 
+00885 
+00886         <span class="comment">/*</span>
+00887 <span class="comment">         * Time-related utility functions</span>
+00888 <span class="comment">         */</span>
+00889 
+00893 <span class="keywordtype">int</span>
+<a name="l00894" id="l00894"></a><a class="code" href="group__util.html#ga22">00894</a> <a class="code" href=
+"group__util.html#ga22">marker_tticks</a>(marker_t pm)
+00895 {
+00896     <span class="keywordtype">int</span>             res;
+00897     marker_t        now = <a class="code" href="group__util.html#ga15">atime_newMarker</a>();
+00898 
+00899     res = <a class="code" href="group__util.html#ga17">atime_diff</a>(pm, now);
+00900     free(now);
+00901     <span class="keywordflow">return</span> res / 10;            <span class=
+"comment">/* atime_diff works in msec, not csec */</span>
+00902 }
+00903 
+00904 <span class="keywordtype">int</span>
+00905 timeval_tticks(<span class="keyword">struct</span> timeval *tv)
+00906 {
+00907     <span class="keywordflow">return</span> <a class="code" href="group__util.html#ga22">marker_tticks</a>((marker_t) tv);
+00908 }
+00909 
+<a name="l00922" id="l00922"></a><a class="code" href="group__util.html#ga24">00922</a> <span class=
+"keywordtype">char</span> *<a class="code" href="group__util.html#ga24">netsnmp_getenv</a>(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *name)
+00923 {
+00924 <span class="preprocessor">#ifndef WIN32</span>
+00925   <span class="keywordflow">return</span> (getenv(name));
+00926 <span class="preprocessor">#else</span>
+00927   <span class="keywordtype">char</span> *temp = NULL;  
+00928   HKEY hKey;
+00929   <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> * key_value = NULL;
+00930   DWORD key_value_size = 0;
+00931   DWORD key_value_type = 0;
+00932 
+00933   DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"netsnmp_getenv called with name: %s\n"</span>,name));
+00934 
+00935   <span class="keywordflow">if</span> (!(name))
+00936     <span class="keywordflow">return</span> NULL;
+00937   
+00938   <span class="comment">/* Try environment variable first */</span> 
+00939   temp = getenv(name);
+00940   <span class="keywordflow">if</span> (temp)
+00941     DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"netsnmp_getenv will return from ENV: %s\n"</span>,temp));
+00942   
+00943   <span class="comment">/* Next try HKCU */</span>
+00944   <span class="keywordflow">if</span> (temp == NULL)
+00945   {
+00946     <span class="keywordflow">if</span> (RegOpenKeyExA(
+00947           HKEY_CURRENT_USER, 
+00948           <span class="stringliteral">"SOFTWARE\\Net-SNMP"</span>, 
+00949           0, 
+00950           KEY_QUERY_VALUE, 
+00951           &amp;hKey) == ERROR_SUCCESS) {   
+00952       
+00953       <span class="keywordflow">if</span> (RegQueryValueExA(
+00954             hKey, 
+00955             name, 
+00956             NULL, 
+00957             &amp;key_value_type, 
+00958             NULL,               <span class="comment">/* Just get the size */</span>
+00959             &amp;key_value_size) == ERROR_SUCCESS) {
+00960 
+00961         <span class="keywordflow">if</span> (key_value)
+00962           <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(key_value);
+00963 
+00964         <span class="comment">/* Allocate memory needed +1 to allow RegQueryValueExA to NULL terminate the</span>
+00965 <span class="comment">         * string data in registry is missing one (which is unlikely).</span>
+00966 <span class="comment">         */</span>
+00967         key_value = (<span class="keywordtype">char</span> *) malloc((<span class="keyword">sizeof</span>(<span class=
+"keywordtype">char</span>) * key_value_size)+<span class="keyword">sizeof</span>(<span class="keywordtype">char</span>));
+00968         
+00969         <span class="keywordflow">if</span> (RegQueryValueExA(
+00970               hKey, 
+00971               name, 
+00972               NULL, 
+00973               &amp;key_value_type, 
+00974               key_value, 
+00975               &amp;key_value_size) == ERROR_SUCCESS) {
+00976         }
+00977         temp = key_value;
+00978       }
+00979       RegCloseKey(hKey);
+00980       <span class="keywordflow">if</span> (temp)
+00981         DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"netsnmp_getenv will return from HKCU: %s\n"</span>,temp));
+00982     }
+00983   }
+00984 
+00985   <span class="comment">/* Next try HKLM */</span>
+00986   <span class="keywordflow">if</span> (temp == NULL)
+00987   {
+00988     <span class="keywordflow">if</span> (RegOpenKeyExA(
+00989           HKEY_LOCAL_MACHINE, 
+00990           <span class="stringliteral">"SOFTWARE\\Net-SNMP"</span>, 
+00991           0, 
+00992           KEY_QUERY_VALUE, 
+00993           &amp;hKey) == ERROR_SUCCESS) {   
+00994       
+00995       <span class="keywordflow">if</span> (RegQueryValueExA(
+00996             hKey, 
+00997             name, 
+00998             NULL, 
+00999             &amp;key_value_type, 
+01000             NULL,               <span class="comment">/* Just get the size */</span>
+01001             &amp;key_value_size) == ERROR_SUCCESS) {
+01002 
+01003         <span class="keywordflow">if</span> (key_value)
+01004           <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(key_value);
+01005 
+01006         <span class="comment">/* Allocate memory needed +1 to allow RegQueryValueExA to NULL terminate the</span>
+01007 <span class="comment">         * string data in registry is missing one (which is unlikely).</span>
+01008 <span class="comment">         */</span>
+01009         key_value = (<span class="keywordtype">char</span> *) malloc((<span class="keyword">sizeof</span>(<span class=
+"keywordtype">char</span>) * key_value_size)+<span class="keyword">sizeof</span>(<span class="keywordtype">char</span>));
+01010         
+01011         <span class="keywordflow">if</span> (RegQueryValueExA(
+01012               hKey, 
+01013               name, 
+01014               NULL, 
+01015               &amp;key_value_type, 
+01016               key_value, 
+01017               &amp;key_value_size) == ERROR_SUCCESS) {
+01018         }
+01019         temp = key_value;
+01020 
+01021       }
+01022       RegCloseKey(hKey);
+01023       <span class="keywordflow">if</span> (temp)
+01024         DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"netsnmp_getenv will return from HKLM: %s\n"</span>,temp));
+01025     }
+01026   }
+01027   
+01028   <span class="keywordflow">if</span> (temp) {
+01029     setenv(name, temp, 1);
+01030     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(temp);
+01031   }
+01032 
+01033   DEBUGMSGTL((<span class="stringliteral">"read_config"</span>, <span class=
+"stringliteral">"netsnmp_getenv returning: %s\n"</span>,getenv(name)));
+01034 
+01035   <span class="keywordflow">return</span>(getenv(name));
+01036 <span class="preprocessor">#endif</span>
+01037 }
+01038 
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:02 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

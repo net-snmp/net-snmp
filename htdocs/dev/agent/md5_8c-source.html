@@ -1,0 +1,577 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>md5.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * ** **************************************************************************</span>
+00003 <span class="comment"> * ** md5.c -- Implementation of MD5 Message Digest Algorithm                 **</span>
+00004 <span class="comment"> * ** Updated: 2/16/90 by Ronald L. Rivest                                    **</span>
+00005 <span class="comment"> * ** (C) 1990 RSA Data Security, Inc.                                        **</span>
+00006 <span class="comment"> * ** **************************************************************************</span>
+00007 <span class="comment"> */</span>
+00008 
+00009 <span class="comment">/*</span>
+00010 <span class="comment"> * ** To use MD5:</span>
+00011 <span class="comment"> * **   -- Include md5.h in your program</span>
+00012 <span class="comment"> * **   -- Declare an MDstruct MD to hold the state of the digest computation.</span>
+00013 <span class="comment"> * **   -- Initialize MD using MDbegin(&amp;MD)</span>
+00014 <span class="comment"> * **   -- For each full block (64 bytes) X you wish to process, call</span>
+00015 <span class="comment"> * **          MDupdate(&amp;MD,X,512)</span>
+00016 <span class="comment"> * **      (512 is the number of bits in a full block.)</span>
+00017 <span class="comment"> * **   -- For the last block (less than 64 bytes) you wish to process,</span>
+00018 <span class="comment"> * **          MDupdate(&amp;MD,X,n)</span>
+00019 <span class="comment"> * **      where n is the number of bits in the partial block. A partial</span>
+00020 <span class="comment"> * **      block terminates the computation, so every MD computation should</span>
+00021 <span class="comment"> * **      terminate by processing a partial block, even if it has n = 0.</span>
+00022 <span class="comment"> * **   -- The message digest is available in MD.buffer[0] ... MD.buffer[3].</span>
+00023 <span class="comment"> * **      (Least-significant byte of each word should be output first.)</span>
+00024 <span class="comment"> * **   -- You can print out the digest using MDprint(&amp;MD)</span>
+00025 <span class="comment"> */</span>
+00026 
+00027 <span class="comment">/*</span>
+00028 <span class="comment"> * Implementation notes:</span>
+00029 <span class="comment"> * ** This implementation assumes that ints are 32-bit quantities.</span>
+00030 <span class="comment"> * ** If the machine stores the least-significant byte of an int in the</span>
+00031 <span class="comment"> * ** least-addressed byte (eg., VAX and 8086), then LOWBYTEFIRST should be</span>
+00032 <span class="comment"> * ** set to TRUE.  Otherwise (eg., SUNS), LOWBYTEFIRST should be set to</span>
+00033 <span class="comment"> * ** FALSE.  Note that on machines with LOWBYTEFIRST FALSE the routine</span>
+00034 <span class="comment"> * ** MDupdate modifies has a side-effect on its input array (the order of bytes</span>
+00035 <span class="comment"> * ** in each word are reversed).  If this is undesired a call to MDreverse(X) can</span>
+00036 <span class="comment"> * ** reverse the bytes of X back into order after each call to MDupdate.</span>
+00037 <span class="comment"> */</span>
+00038 
+00039 <span class="comment">/*</span>
+00040 <span class="comment"> * code uses WORDS_BIGENDIAN defined by configure now  -- WH 9/27/95 </span>
+00041 <span class="comment"> */</span>
+00042 
+00043 <span class="comment">/*</span>
+00044 <span class="comment"> * Compile-time includes </span>
+00045 <span class="comment"> */</span>
+00046 
+00047 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00048 
+00049 <span class="preprocessor">#ifndef DISABLE_MD5</span>
+00050 
+00051 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00052 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00053 <span class="preprocessor">#if HAVE_STRING_H</span>
+00054 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00055 <span class="preprocessor">#else</span>
+00056 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00057 <span class="preprocessor">#endif</span>
+00058 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00059 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00060 <span class="preprocessor">#endif</span>
+00061 
+00062 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00063 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00064 <span class="preprocessor">#endif</span>
+00065 
+00066 <span class="preprocessor">#include &lt;net-snmp/utilities.h&gt;</span>
+00067 <span class="preprocessor">#include &lt;net-snmp/library/md5.h&gt;</span>
+00068 
+00069 <span class="comment">/*</span>
+00070 <span class="comment"> * Compile-time declarations of MD5 ``magic constants''.</span>
+00071 <span class="comment"> */</span>
+00072 <span class="preprocessor">#define I0  0x67452301          </span><span class=
+"comment">/* Initial values for MD buffer */</span>
+00073 <span class="preprocessor">#define I1  0xefcdab89</span>
+00074 <span class="preprocessor">#define I2  0x98badcfe</span>
+00075 <span class="preprocessor">#define I3  0x10325476</span>
+00076 <span class="preprocessor">#define fs1  7                  </span><span class="comment">/* round 1 shift amounts */</span>
+00077 <span class="preprocessor">#define fs2 12</span>
+00078 <span class="preprocessor">#define fs3 17</span>
+00079 <span class="preprocessor">#define fs4 22</span>
+00080 <span class="preprocessor">#define gs1  5                  </span><span class="comment">/* round 2 shift amounts */</span>
+00081 <span class="preprocessor">#define gs2  9</span>
+00082 <span class="preprocessor">#define gs3 14</span>
+00083 <span class="preprocessor">#define gs4 20</span>
+00084 <span class="preprocessor">#define hs1  4                  </span><span class="comment">/* round 3 shift amounts */</span>
+00085 <span class="preprocessor">#define hs2 11</span>
+00086 <span class="preprocessor">#define hs3 16</span>
+00087 <span class="preprocessor">#define hs4 23</span>
+00088 <span class="preprocessor">#define is1  6                  </span><span class="comment">/* round 4 shift amounts */</span>
+00089 <span class="preprocessor">#define is2 10</span>
+00090 <span class="preprocessor">#define is3 15</span>
+00091 <span class="preprocessor">#define is4 21</span>
+00092 
+00093 
+00094 <span class="comment">/*</span>
+00095 <span class="comment"> * Compile-time macro declarations for MD5.</span>
+00096 <span class="comment"> * ** Note: The ``rot'' operator uses the variable ``tmp''.</span>
+00097 <span class="comment"> * ** It assumes tmp is declared as unsigned int, so that the &gt;&gt;</span>
+00098 <span class="comment"> * ** operator will shift in zeros rather than extending the sign bit.</span>
+00099 <span class="comment"> */</span>
+00100 <span class="preprocessor">#define f(X,Y,Z)             ((X&amp;Y) | ((~X)&amp;Z))</span>
+00101 <span class="preprocessor">#define g(X,Y,Z)             ((X&amp;Z) | (Y&amp;(~Z)))</span>
+00102 <span class="preprocessor">#define h(X,Y,Z)             (X^Y^Z)</span>
+00103 <span class="preprocessor">#define i_(X,Y,Z)            (Y ^ ((X) | (~Z)))</span>
+00104 <span class="preprocessor">#define rot(X,S)             (tmp=X,(tmp&lt;&lt;S) | (tmp&gt;&gt;(32-S)))</span>
+00105 <span class="preprocessor">#define ff(A,B,C,D,i,s,lp)   A = rot((A + f(B,C,D) + X[i] + lp),s) + B</span>
+00106 <span class="preprocessor">#define gg(A,B,C,D,i,s,lp)   A = rot((A + g(B,C,D) + X[i] + lp),s) + B</span>
+00107 <span class="preprocessor">#define hh(A,B,C,D,i,s,lp)   A = rot((A + h(B,C,D) + X[i] + lp),s) + B</span>
+00108 <span class="preprocessor">#define ii(A,B,C,D,i,s,lp)   A = rot((A + i_(B,C,D) + X[i] + lp),s) + B</span>
+00109 
+00110 <span class="preprocessor">#ifdef STDC_HEADERS</span>
+00111 <span class="preprocessor">#define Uns(num) num##U</span>
+00112 <span class="preprocessor">#else</span>
+00113 <span class="preprocessor">#define Uns(num) num</span>
+00114 <span class="preprocessor">#endif                          </span><span class="comment">/* STDC_HEADERS */</span>
+00115 
+00116 <span class="keywordtype">void</span>            MDreverse(<span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> *);
+00117 <span class="keyword">static</span> <span class="keywordtype">void</span>     MDblock(MDptr, <span class=
+"keywordtype">unsigned</span> <span class="keywordtype">int</span> *);
+00118 
+00119 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00120 <span class="comment">/*</span>
+00121 <span class="comment"> * MDprint(MDp)</span>
+00122 <span class="comment"> * ** Print message digest buffer MDp as 32 hexadecimal digits.</span>
+00123 <span class="comment"> * ** Order is from low-order byte of buffer[0] to high-order byte of buffer[3].</span>
+00124 <span class="comment"> * ** Each byte is printed with high-order hexadecimal digit first.</span>
+00125 <span class="comment"> * ** This is a user-callable routine.</span>
+00126 <span class="comment"> */</span>
+00127 <span class="keywordtype">void</span>
+00128 MDprint(MDptr MDp)
+00129 {
+00130     <span class="keywordtype">int</span>             i, j;
+00131     <span class="keywordflow">for</span> (i = 0; i &lt; 4; i++)
+00132         <span class="keywordflow">for</span> (j = 0; j &lt; 32; j = j + 8)
+00133             printf(<span class="stringliteral">"%02x"</span>, (MDp-&gt;buffer[i] &gt;&gt; j) &amp; 0xFF);
+00134     printf(<span class="stringliteral">"\n"</span>);
+00135     fflush(stdout);
+00136 }
+00137 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_TESTING_CODE */</span>
+00138 
+00139 <span class="comment">/*</span>
+00140 <span class="comment"> * MDbegin(MDp)</span>
+00141 <span class="comment"> * ** Initialize message digest buffer MDp. </span>
+00142 <span class="comment"> * ** This is a user-callable routine.</span>
+00143 <span class="comment"> */</span>
+00144 <span class="keywordtype">void</span>
+00145 MDbegin(MDptr MDp)
+00146 {
+00147     <span class="keywordtype">int</span>             i;
+00148     MDp-&gt;buffer[0] = I0;
+00149     MDp-&gt;buffer[1] = I1;
+00150     MDp-&gt;buffer[2] = I2;
+00151     MDp-&gt;buffer[3] = I3;
+00152     <span class="keywordflow">for</span> (i = 0; i &lt; 8; i++)
+00153         MDp-&gt;count[i] = 0;
+00154     MDp-&gt;done = 0;
+00155 }
+00156 
+00157 <span class="comment">/*</span>
+00158 <span class="comment"> * MDreverse(X)</span>
+00159 <span class="comment"> * ** Reverse the byte-ordering of every int in X.</span>
+00160 <span class="comment"> * ** Assumes X is an array of 16 ints.</span>
+00161 <span class="comment"> * ** The macro revx reverses the byte-ordering of the next word of X.</span>
+00162 <span class="comment"> */</span>
+00163 <span class="preprocessor">#define revx { t = (*X &lt;&lt; 16) | (*X &gt;&gt; 16); \</span>
+00164 <span class=
+"preprocessor">               *X++ = ((t &amp; 0xFF00FF00) &gt;&gt; 8) | ((t &amp; 0x00FF00FF) &lt;&lt; 8); }</span>
+00165 
+00166 <span class="keywordtype">void</span>
+00167 MDreverse(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *X)
+00168 {
+00169     <span class="keyword">register</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> t;
+00170     revx;
+00171     revx;
+00172     revx;
+00173     revx;
+00174     revx;
+00175     revx;
+00176     revx;
+00177     revx;
+00178     revx;
+00179     revx;
+00180     revx;
+00181     revx;
+00182     revx;
+00183     revx;
+00184     revx;
+00185     revx;
+00186 }
+00187 
+00188 <span class="comment">/*</span>
+00189 <span class="comment"> * MDblock(MDp,X)</span>
+00190 <span class="comment"> * ** Update message digest buffer MDp-&gt;buffer using 16-word data block X.</span>
+00191 <span class="comment"> * ** Assumes all 16 words of X are full of data.</span>
+00192 <span class="comment"> * ** Does not update MDp-&gt;count.</span>
+00193 <span class="comment"> * ** This routine is not user-callable. </span>
+00194 <span class="comment"> */</span>
+00195 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00196 MDblock(MDptr MDp, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *X)
+00197 {
+00198     <span class="keyword">register</span> <span class="keywordtype">unsigned</span> <span class=
+"keywordtype">int</span> tmp, A, B, C, D;      <span class="comment">/* hpux sysv sun */</span>
+00199 <span class="preprocessor">#ifdef WORDS_BIGENDIAN</span>
+00200     MDreverse(X);
+00201 <span class="preprocessor">#endif</span>
+00202     A = MDp-&gt;buffer[0];
+00203     B = MDp-&gt;buffer[1];
+00204     C = MDp-&gt;buffer[2];
+00205     D = MDp-&gt;buffer[3];
+00206 
+00207     <span class="comment">/*</span>
+00208 <span class="comment">     * Update the message digest buffer </span>
+00209 <span class="comment">     */</span>
+00210     ff(A, B, C, D, 0, fs1, Uns(3614090360));    <span class="comment">/* Round 1 */</span>
+00211     ff(D, A, B, C, 1, fs2, Uns(3905402710));
+00212     ff(C, D, A, B, 2, fs3, Uns(606105819));
+00213     ff(B, C, D, A, 3, fs4, Uns(3250441966));
+00214     ff(A, B, C, D, 4, fs1, Uns(4118548399));
+00215     ff(D, A, B, C, 5, fs2, Uns(1200080426));
+00216     ff(C, D, A, B, 6, fs3, Uns(2821735955));
+00217     ff(B, C, D, A, 7, fs4, Uns(4249261313));
+00218     ff(A, B, C, D, 8, fs1, Uns(1770035416));
+00219     ff(D, A, B, C, 9, fs2, Uns(2336552879));
+00220     ff(C, D, A, B, 10, fs3, Uns(4294925233));
+00221     ff(B, C, D, A, 11, fs4, Uns(2304563134));
+00222     ff(A, B, C, D, 12, fs1, Uns(1804603682));
+00223     ff(D, A, B, C, 13, fs2, Uns(4254626195));
+00224     ff(C, D, A, B, 14, fs3, Uns(2792965006));
+00225     ff(B, C, D, A, 15, fs4, Uns(1236535329));
+00226     gg(A, B, C, D, 1, gs1, Uns(4129170786));    <span class="comment">/* Round 2 */</span>
+00227     gg(D, A, B, C, 6, gs2, Uns(3225465664));
+00228     gg(C, D, A, B, 11, gs3, Uns(643717713));
+00229     gg(B, C, D, A, 0, gs4, Uns(3921069994));
+00230     gg(A, B, C, D, 5, gs1, Uns(3593408605));
+00231     gg(D, A, B, C, 10, gs2, Uns(38016083));
+00232     gg(C, D, A, B, 15, gs3, Uns(3634488961));
+00233     gg(B, C, D, A, 4, gs4, Uns(3889429448));
+00234     gg(A, B, C, D, 9, gs1, Uns(568446438));
+00235     gg(D, A, B, C, 14, gs2, Uns(3275163606));
+00236     gg(C, D, A, B, 3, gs3, Uns(4107603335));
+00237     gg(B, C, D, A, 8, gs4, Uns(1163531501));
+00238     gg(A, B, C, D, 13, gs1, Uns(2850285829));
+00239     gg(D, A, B, C, 2, gs2, Uns(4243563512));
+00240     gg(C, D, A, B, 7, gs3, Uns(1735328473));
+00241     gg(B, C, D, A, 12, gs4, Uns(2368359562));
+00242     hh(A, B, C, D, 5, hs1, Uns(4294588738));    <span class="comment">/* Round 3 */</span>
+00243     hh(D, A, B, C, 8, hs2, Uns(2272392833));
+00244     hh(C, D, A, B, 11, hs3, Uns(1839030562));
+00245     hh(B, C, D, A, 14, hs4, Uns(4259657740));
+00246     hh(A, B, C, D, 1, hs1, Uns(2763975236));
+00247     hh(D, A, B, C, 4, hs2, Uns(1272893353));
+00248     hh(C, D, A, B, 7, hs3, Uns(4139469664));
+00249     hh(B, C, D, A, 10, hs4, Uns(3200236656));
+00250     hh(A, B, C, D, 13, hs1, Uns(681279174));
+00251     hh(D, A, B, C, 0, hs2, Uns(3936430074));
+00252     hh(C, D, A, B, 3, hs3, Uns(3572445317));
+00253     hh(B, C, D, A, 6, hs4, Uns(76029189));
+00254     hh(A, B, C, D, 9, hs1, Uns(3654602809));
+00255     hh(D, A, B, C, 12, hs2, Uns(3873151461));
+00256     hh(C, D, A, B, 15, hs3, Uns(530742520));
+00257     hh(B, C, D, A, 2, hs4, Uns(3299628645));
+00258     ii(A, B, C, D, 0, is1, Uns(4096336452));    <span class="comment">/* Round 4 */</span>
+00259     ii(D, A, B, C, 7, is2, Uns(1126891415));
+00260     ii(C, D, A, B, 14, is3, Uns(2878612391));
+00261     ii(B, C, D, A, 5, is4, Uns(4237533241));
+00262     ii(A, B, C, D, 12, is1, Uns(1700485571));
+00263     ii(D, A, B, C, 3, is2, Uns(2399980690));
+00264     ii(C, D, A, B, 10, is3, Uns(4293915773));
+00265     ii(B, C, D, A, 1, is4, Uns(2240044497));
+00266     ii(A, B, C, D, 8, is1, Uns(1873313359));
+00267     ii(D, A, B, C, 15, is2, Uns(4264355552));
+00268     ii(C, D, A, B, 6, is3, Uns(2734768916));
+00269     ii(B, C, D, A, 13, is4, Uns(1309151649));
+00270     ii(A, B, C, D, 4, is1, Uns(4149444226));
+00271     ii(D, A, B, C, 11, is2, Uns(3174756917));
+00272     ii(C, D, A, B, 2, is3, Uns(718787259));
+00273     ii(B, C, D, A, 9, is4, Uns(3951481745));
+00274 
+00275     MDp-&gt;buffer[0] += A;
+00276     MDp-&gt;buffer[1] += B;
+00277     MDp-&gt;buffer[2] += C;
+00278     MDp-&gt;buffer[3] += D;
+00279 <span class="preprocessor">#ifdef WORDS_BIGENDIAN</span>
+00280     MDreverse(X);
+00281 <span class="preprocessor">#endif</span>
+00282 }
+00283 
+00284 <span class="comment">/*</span>
+00285 <span class="comment"> * MDupdate(MDp,X,count)</span>
+00286 <span class="comment"> * ** Input: MDp -- an MDptr</span>
+00287 <span class="comment"> * **        X -- a pointer to an array of unsigned characters.</span>
+00288 <span class="comment"> * **        count -- the number of bits of X to use.</span>
+00289 <span class="comment"> * **                 (if not a multiple of 8, uses high bits of last byte.)</span>
+00290 <span class="comment"> * ** Update MDp using the number of bits of X given by count.</span>
+00291 <span class="comment"> * ** This is the basic input routine for an MD5 user.</span>
+00292 <span class="comment"> * ** The routine completes the MD computation when count &lt; 512, so</span>
+00293 <span class="comment"> * ** every MD computation should end with one call to MDupdate with a</span>
+00294 <span class="comment"> * ** count less than 512.  A call with count 0 will be ignored if the</span>
+00295 <span class="comment"> * ** MD has already been terminated (done != 0), so an extra call with count</span>
+00296 <span class="comment"> * ** 0 can be given as a ``courtesy close'' to force termination if desired.</span>
+00297 <span class="comment"> * ** Returns : 0 if processing succeeds or was already done;</span>
+00298 <span class="comment"> * **          -1 if processing was already done</span>
+00299 <span class="comment"> * **          -2 if count was too large</span>
+00300 <span class="comment"> */</span>
+00301 <span class="keywordtype">int</span>
+00302 MDupdate(MDptr MDp, <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *X, <span class=
+"keywordtype">unsigned</span> <span class="keywordtype">int</span> count)
+00303 {
+00304     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    i, tmp, bit, byte, mask;
+00305     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>   XX[64];
+00306     <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  *p;
+00307     <span class="comment">/*</span>
+00308 <span class="comment">     * return with no error if this is a courtesy close with count</span>
+00309 <span class="comment">     * ** zero and MDp-&gt;done is true.</span>
+00310 <span class="comment">     */</span>
+00311     <span class="keywordflow">if</span> (count == 0 &amp;&amp; MDp-&gt;done)
+00312         <span class="keywordflow">return</span> 0;
+00313     <span class="comment">/*</span>
+00314 <span class="comment">     * check to see if MD is already done and report error </span>
+00315 <span class="comment">     */</span>
+00316     <span class="keywordflow">if</span> (MDp-&gt;done) {
+00317         <span class="keywordflow">return</span> -1;
+00318     }
+00319     <span class="comment">/*</span>
+00320 <span class="comment">     * if (MDp-&gt;done) { fprintf(stderr,"\nError: MDupdate MD already done."); return; }</span>
+00321 <span class="comment">     */</span>
+00322     <span class="comment">/*</span>
+00323 <span class="comment">     * Add count to MDp-&gt;count </span>
+00324 <span class="comment">     */</span>
+00325     tmp = count;
+00326     p = MDp-&gt;count;
+00327     <span class="keywordflow">while</span> (tmp) {
+00328         tmp += *p;
+00329         *p++ = tmp;
+00330         tmp = tmp &gt;&gt; 8;
+00331     }
+00332     <span class="comment">/*</span>
+00333 <span class="comment">     * Process data </span>
+00334 <span class="comment">     */</span>
+00335     <span class="keywordflow">if</span> (count == 512) {         <span class=
+"comment">/* Full block of data to handle */</span>
+00336         MDblock(MDp, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *) X);
+00337     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (count &gt; 512)     <span class=
+"comment">/* Check for count too large */</span>
+00338         <span class="keywordflow">return</span> -2;
+00339     <span class="comment">/*</span>
+00340 <span class="comment">     * { fprintf(stderr,"\nError: MDupdate called with illegal count value %d.",count);</span>
+00341 <span class="comment">     * return;</span>
+00342 <span class="comment">     * }</span>
+00343 <span class="comment">     */</span>
+00344     <span class="keywordflow">else</span> {                      <span class=
+"comment">/* partial block -- must be last block so finish up */</span>
+00345         <span class="comment">/*</span>
+00346 <span class="comment">         * Find out how many bytes and residual bits there are </span>
+00347 <span class="comment">         */</span>
+00348         <span class="keywordtype">int</span>             copycount;
+00349         byte = count &gt;&gt; 3;
+00350         bit = count &amp; 7;
+00351         copycount = byte;
+00352         <span class="keywordflow">if</span> (bit)
+00353             copycount++;
+00354         <span class="comment">/*</span>
+00355 <span class="comment">         * Copy X into XX since we need to modify it </span>
+00356 <span class="comment">         */</span>
+00357         memset(XX, 0, <span class="keyword">sizeof</span>(XX));
+00358         memcpy(XX, X, copycount);
+00359 
+00360         <span class="comment">/*</span>
+00361 <span class="comment">         * Add padding '1' bit and low-order zeros in last byte </span>
+00362 <span class="comment">         */</span>
+00363         mask = ((<span class="keywordtype">unsigned</span> long) 1) &lt;&lt; (7 - bit);
+00364         XX[byte] = (XX[byte] | mask) &amp; ~(mask - 1);
+00365         <span class="comment">/*</span>
+00366 <span class="comment">         * If room for bit count, finish up with this block </span>
+00367 <span class="comment">         */</span>
+00368         <span class="keywordflow">if</span> (byte &lt;= 55) {
+00369             <span class="keywordflow">for</span> (i = 0; i &lt; 8; i++)
+00370                 XX[56 + i] = MDp-&gt;count[i];
+00371             MDblock(MDp, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *) XX);
+00372         } <span class="keywordflow">else</span> {                <span class=
+"comment">/* need to do two blocks to finish up */</span>
+00373             MDblock(MDp, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *) XX);
+00374             <span class="keywordflow">for</span> (i = 0; i &lt; 56; i++)
+00375                 XX[i] = 0;
+00376             <span class="keywordflow">for</span> (i = 0; i &lt; 8; i++)
+00377                 XX[56 + i] = MDp-&gt;count[i];
+00378             MDblock(MDp, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *) XX);
+00379         }
+00380         <span class="comment">/*</span>
+00381 <span class="comment">         * Set flag saying we're done with MD computation </span>
+00382 <span class="comment">         */</span>
+00383         MDp-&gt;done = 1;
+00384     }
+00385     <span class="keywordflow">return</span> 0;
+00386 }
+00387 
+00388 <span class="comment">/*</span>
+00389 <span class="comment"> * MDchecksum(data, len, MD5): do a checksum on an arbirtrary amount of data </span>
+00390 <span class="comment"> */</span>
+00391 <span class="keywordtype">int</span>
+00392 MDchecksum(u_char * data, size_t len, u_char * mac, size_t maclen)
+00393 {
+00394     MDstruct        md;
+00395     MDstruct       *MD = &amp;md;
+00396     <span class="keywordtype">int</span>             rc = 0;
+00397 
+00398     MDbegin(MD);
+00399     <span class="keywordflow">while</span> (len &gt;= 64) {
+00400         rc = MDupdate(MD, data, 64 * 8);
+00401         <span class="keywordflow">if</span> (rc)
+00402             <span class="keywordflow">goto</span> check_end;
+00403         data += 64;
+00404         len -= 64;
+00405     }
+00406     rc = MDupdate(MD, data, len * 8);
+00407     <span class="keywordflow">if</span> (rc)
+00408         <span class="keywordflow">goto</span> check_end;
+00409 
+00410     <span class="comment">/*</span>
+00411 <span class="comment">     * copy the checksum to the outgoing data (all of it that is requested). </span>
+00412 <span class="comment">     */</span>
+00413     MDget(MD, mac, maclen);
+00414 
+00415   check_end:
+00416     memset(&amp;md, 0, <span class="keyword">sizeof</span>(md));
+00417     <span class="keywordflow">return</span> rc;
+00418 }
+00419 
+00420 
+00421 <span class="comment">/*</span>
+00422 <span class="comment"> * MDsign(data, len, MD5): do a checksum on an arbirtrary amount</span>
+00423 <span class="comment"> * of data, and prepended with a secret in the standard fashion </span>
+00424 <span class="comment"> */</span>
+00425 <span class="keywordtype">int</span>
+00426 MDsign(u_char * data, size_t len, u_char * mac, size_t maclen,
+00427        u_char * secret, size_t secretlen)
+00428 {
+00429 <span class="preprocessor">#define HASHKEYLEN 64</span>
+00430 
+00431     MDstruct        MD;
+00432     u_char          K1[HASHKEYLEN];
+00433     u_char          K2[HASHKEYLEN];
+00434     u_char          extendedAuthKey[HASHKEYLEN];
+00435     u_char          buf[HASHKEYLEN];
+00436     size_t          i;
+00437     u_char         *cp, *newdata = 0;
+00438     <span class="keywordtype">int</span>             rc = 0;
+00439 
+00440     <span class="comment">/*</span>
+00441 <span class="comment">     * memset(K1,0,HASHKEYLEN);</span>
+00442 <span class="comment">     * memset(K2,0,HASHKEYLEN);</span>
+00443 <span class="comment">     * memset(buf,0,HASHKEYLEN);</span>
+00444 <span class="comment">     * memset(extendedAuthKey,0,HASHKEYLEN);</span>
+00445 <span class="comment">     */</span>
+00446 
+00447     <span class="keywordflow">if</span> (secretlen != 16 || secret == NULL || mac == NULL || data == NULL ||
+00448         len &lt;= 0 || maclen &lt;= 0) {
+00449         <span class="comment">/*</span>
+00450 <span class="comment">         * DEBUGMSGTL(("md5","MD5 signing not properly initialized")); </span>
+00451 <span class="comment">         */</span>
+00452         <span class="keywordflow">return</span> -1;
+00453     }
+00454 
+00455     memset(extendedAuthKey, 0, HASHKEYLEN);
+00456     memcpy(extendedAuthKey, secret, secretlen);
+00457     <span class="keywordflow">for</span> (i = 0; i &lt; HASHKEYLEN; i++) {
+00458         K1[i] = extendedAuthKey[i] ^ 0x36;
+00459         K2[i] = extendedAuthKey[i] ^ 0x5c;
+00460     }
+00461 
+00462     MDbegin(&amp;MD);
+00463     rc = MDupdate(&amp;MD, K1, HASHKEYLEN * 8);
+00464     <span class="keywordflow">if</span> (rc)
+00465         <span class="keywordflow">goto</span> update_end;
+00466 
+00467     i = len;
+00468     <span class="keywordflow">if</span> (((<span class="keywordtype">unsigned</span> int) data) % <span class=
+"keyword">sizeof</span>(long) != 0) {
+00469         <span class="comment">/*</span>
+00470 <span class="comment">         * this relies on the ability to use integer math and thus we</span>
+00471 <span class="comment">         * must rely on data that aligns on 32-bit-word-boundries </span>
+00472 <span class="comment">         */</span>
+00473         <a class="code" href="group__util.html#ga5">memdup</a>(&amp;newdata, data, len);
+00474         cp = newdata;
+00475     } <span class="keywordflow">else</span> {
+00476         cp = data;
+00477     }
+00478 
+00479     <span class="keywordflow">while</span> (i &gt;= 64) {
+00480         rc = MDupdate(&amp;MD, cp, 64 * 8);
+00481         <span class="keywordflow">if</span> (rc)
+00482             <span class="keywordflow">goto</span> update_end;
+00483         cp += 64;
+00484         i -= 64;
+00485     }
+00486 
+00487     rc = MDupdate(&amp;MD, cp, i * 8);
+00488     <span class="keywordflow">if</span> (rc)
+00489         <span class="keywordflow">goto</span> update_end;
+00490 
+00491     memset(buf, 0, HASHKEYLEN);
+00492     MDget(&amp;MD, buf, HASHKEYLEN);
+00493 
+00494     MDbegin(&amp;MD);
+00495     rc = MDupdate(&amp;MD, K2, HASHKEYLEN * 8);
+00496     <span class="keywordflow">if</span> (rc)
+00497         <span class="keywordflow">goto</span> update_end;
+00498     rc = MDupdate(&amp;MD, buf, 16 * 8);
+00499     <span class="keywordflow">if</span> (rc)
+00500         <span class="keywordflow">goto</span> update_end;
+00501 
+00502     <span class="comment">/*</span>
+00503 <span class="comment">     * copy the sign checksum to the outgoing pointer </span>
+00504 <span class="comment">     */</span>
+00505     MDget(&amp;MD, mac, maclen);
+00506 
+00507   update_end:
+00508     memset(buf, 0, HASHKEYLEN);
+00509     memset(K1, 0, HASHKEYLEN);
+00510     memset(K2, 0, HASHKEYLEN);
+00511     memset(extendedAuthKey, 0, HASHKEYLEN);
+00512     memset(&amp;MD, 0, <span class="keyword">sizeof</span>(MD));
+00513 
+00514     <span class="keywordflow">if</span> (newdata)
+00515         free(newdata);
+00516     <span class="keywordflow">return</span> rc;
+00517 }
+00518 
+00519 <span class="keywordtype">void</span>
+00520 MDget(MDstruct * MD, u_char * buf, size_t buflen)
+00521 {
+00522     <span class="keywordtype">int</span>             i, j;
+00523 
+00524     <span class="comment">/*</span>
+00525 <span class="comment">     * copy the checksum to the outgoing data (all of it that is requested). </span>
+00526 <span class="comment">     */</span>
+00527     <span class="keywordflow">for</span> (i = 0; i &lt; 4 &amp;&amp; i * 4 &lt; (int) buflen; i++)
+00528         <span class="keywordflow">for</span> (j = 0; j &lt; 4 &amp;&amp; i * 4 + j &lt; (int) buflen; j++)
+00529             buf[i * 4 + j] = (MD-&gt;buffer[i] &gt;&gt; j * 8) &amp; 0xff;
+00530 }
+00531 
+00532 <span class="comment">/*</span>
+00533 <span class="comment"> * ** End of md5.c</span>
+00534 <span class="comment"> * ****************************(cut)****************************************</span>
+00535 <span class="comment"> */</span>
+00536 
+00537 <span class="preprocessor">#endif </span><span class="comment">/* DISABLE_MD5 */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,828 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>ipv6IcmpMIB</b>
+MIB object, which is defined within the <b>IPV6-ICMP-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.56</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#ipv6IfIcmpTable">ipv6IfIcmpTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="ipv6IfIcmpTable" /><h3>Table ipv6IfIcmpTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>ipv6IfIcmpTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>IPV6-ICMP-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.56.1.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+IPv6 ICMP statistics. This table contains statistics
+of ICMPv6 messages that are received and sourced by
+the entity.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="ipv6IfIcmpEntry" />Row Description</td>
+<td>
+<pre>
+An ICMPv6 statistics entry containing
+objects at a particular IPv6 interface.
+
+Note that a receiving interface is
+the interface to which a given ICMPv6 message
+is addressed which may not be necessarily
+the input interface for the message.
+
+Similarly,  the sending interface is
+the interface that sources a given
+ICMP message which is usually but not
+necessarily the output interface for the message.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>ipv6IfIcmpTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6IfIndex" />
+1
+<br /><b>ipv6IfIndex</b>
+
+</td><td>
+  INTEGER32
+
+ <br>
+ <a href="#Ipv6IfIndex">Ipv6IfIndex</a>
+
+  </td><td>NoAccess</td>
+<td>
+<p>
+Note: this object is based on the <a href="#Ipv6IfIndex"> Ipv6IfIndex TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A unique non-zero value identifying
+the particular IPv6 interface.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other ipv6IfIcmpTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInMsgs" />
+1
+<br /><b>ipv6IfIcmpInMsgs</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of ICMP messages received
+by the interface which includes all those
+counted by ipv6IfIcmpInErrors. Note that this
+interface is the interface to which the
+ICMP messages were addressed which may not be
+necessarily the input interface for the messages.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInErrors" />
+2
+<br /><b>ipv6IfIcmpInErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP messages which the interface
+received but determined as having ICMP-specific
+errors (bad ICMP checksums, bad length, etc.).
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInDestUnreachs" />
+3
+<br /><b>ipv6IfIcmpInDestUnreachs</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Destination Unreachable
+messages received by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInAdminProhibs" />
+4
+<br /><b>ipv6IfIcmpInAdminProhibs</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP destination
+unreachable/communication administratively
+prohibited messages received by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInTimeExcds" />
+5
+<br /><b>ipv6IfIcmpInTimeExcds</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Time Exceeded messages
+received by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInParmProblems" />
+6
+<br /><b>ipv6IfIcmpInParmProblems</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Parameter Problem messages
+received by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInPktTooBigs" />
+7
+<br /><b>ipv6IfIcmpInPktTooBigs</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Packet Too Big messages
+received by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInEchos" />
+8
+<br /><b>ipv6IfIcmpInEchos</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Echo (request) messages
+received by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInEchoReplies" />
+9
+<br /><b>ipv6IfIcmpInEchoReplies</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Echo Reply messages received
+by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInRouterSolicits" />
+10
+<br /><b>ipv6IfIcmpInRouterSolicits</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Router Solicit messages
+received by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInRouterAdvertisements" />
+11
+<br /><b>ipv6IfIcmpInRouterAdvertisements</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Router Advertisement messages
+received by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInNeighborSolicits" />
+12
+<br /><b>ipv6IfIcmpInNeighborSolicits</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Neighbor Solicit messages
+received by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInNeighborAdvertisements" />
+13
+<br /><b>ipv6IfIcmpInNeighborAdvertisements</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Neighbor Advertisement
+messages received by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInRedirects" />
+14
+<br /><b>ipv6IfIcmpInRedirects</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of Redirect messages received
+by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInGroupMembQueries" />
+15
+<br /><b>ipv6IfIcmpInGroupMembQueries</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMPv6 Group Membership Query
+messages received by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInGroupMembResponses" />
+16
+<br /><b>ipv6IfIcmpInGroupMembResponses</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMPv6 Group Membership Response messages
+received by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpInGroupMembReductions" />
+17
+<br /><b>ipv6IfIcmpInGroupMembReductions</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMPv6 Group Membership Reduction messages
+received by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutMsgs" />
+18
+<br /><b>ipv6IfIcmpOutMsgs</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of ICMP messages which this
+interface attempted to send.  Note that this counter
+includes all those counted by icmpOutErrors.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutErrors" />
+19
+<br /><b>ipv6IfIcmpOutErrors</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP messages which this interface did
+not send due to problems discovered within ICMP
+such as a lack of buffers.  This value should not
+include errors discovered outside the ICMP layer
+such as the inability of IPv6 to route the resultant
+datagram.  In some implementations there may be no
+types of error which contribute to this counter's
+value.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutDestUnreachs" />
+20
+<br /><b>ipv6IfIcmpOutDestUnreachs</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Destination Unreachable
+messages sent by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutAdminProhibs" />
+21
+<br /><b>ipv6IfIcmpOutAdminProhibs</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Number of ICMP dest unreachable/communication
+administratively prohibited messages sent.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutTimeExcds" />
+22
+<br /><b>ipv6IfIcmpOutTimeExcds</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Time Exceeded messages sent
+by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutParmProblems" />
+23
+<br /><b>ipv6IfIcmpOutParmProblems</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Parameter Problem messages
+sent by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutPktTooBigs" />
+24
+<br /><b>ipv6IfIcmpOutPktTooBigs</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Packet Too Big messages sent
+by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutEchos" />
+25
+<br /><b>ipv6IfIcmpOutEchos</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Echo (request) messages sent
+by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutEchoReplies" />
+26
+<br /><b>ipv6IfIcmpOutEchoReplies</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Echo Reply messages sent
+by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutRouterSolicits" />
+27
+<br /><b>ipv6IfIcmpOutRouterSolicits</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Router Solicitation messages
+sent by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutRouterAdvertisements" />
+28
+<br /><b>ipv6IfIcmpOutRouterAdvertisements</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Router Advertisement messages
+sent by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutNeighborSolicits" />
+29
+<br /><b>ipv6IfIcmpOutNeighborSolicits</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Neighbor Solicitation
+messages sent by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutNeighborAdvertisements" />
+30
+<br /><b>ipv6IfIcmpOutNeighborAdvertisements</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMP Neighbor Advertisement
+messages sent by the interface.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutRedirects" />
+31
+<br /><b>ipv6IfIcmpOutRedirects</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of Redirect messages sent. For
+a host, this object will always be zero,
+since hosts do not send redirects.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutGroupMembQueries" />
+32
+<br /><b>ipv6IfIcmpOutGroupMembQueries</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMPv6 Group Membership Query
+messages sent.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutGroupMembResponses" />
+33
+<br /><b>ipv6IfIcmpOutGroupMembResponses</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMPv6 Group Membership Response
+messages sent.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="ipv6IfIcmpOutGroupMembReductions" />
+34
+<br /><b>ipv6IfIcmpOutGroupMembReductions</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of ICMPv6 Group Membership Reduction
+messages sent.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="Ipv6IfIndex">Ipv6IfIndex</td><td>INTEGER32</td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp IPV6-ICMP-MIB::ipv6IcmpMIB</b></p>
+<pre>
++--<a href="#ipv6IcmpMIB">ipv6IcmpMIB</a>(56)
+   |
+   +--<a href="#ipv6IcmpMIBObjects">ipv6IcmpMIBObjects</a>(1)
+   |  |
+   |  +--<a href="#ipv6IfIcmpTable">ipv6IfIcmpTable</a>(1)
+   |     |
+   |     +--<a href="#ipv6IfIcmpEntry">ipv6IfIcmpEntry</a>(1)
+   |        |
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInMsgs">ipv6IfIcmpInMsgs</a>(1)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInErrors">ipv6IfIcmpInErrors</a>(2)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInDestUnreachs">ipv6IfIcmpInDestUnreachs</a>(3)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInAdminProhibs">ipv6IfIcmpInAdminProhibs</a>(4)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInTimeExcds">ipv6IfIcmpInTimeExcds</a>(5)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInParmProblems">ipv6IfIcmpInParmProblems</a>(6)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInPktTooBigs">ipv6IfIcmpInPktTooBigs</a>(7)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInEchos">ipv6IfIcmpInEchos</a>(8)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInEchoReplies">ipv6IfIcmpInEchoReplies</a>(9)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInRouterSolicits">ipv6IfIcmpInRouterSolicits</a>(10)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInRouterAdvertisements">ipv6IfIcmpInRouterAdvertisements</a>(11)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInNeighborSolicits">ipv6IfIcmpInNeighborSolicits</a>(12)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInNeighborAdvertisements">ipv6IfIcmpInNeighborAdvertisements</a>(13)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInRedirects">ipv6IfIcmpInRedirects</a>(14)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInGroupMembQueries">ipv6IfIcmpInGroupMembQueries</a>(15)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInGroupMembResponses">ipv6IfIcmpInGroupMembResponses</a>(16)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpInGroupMembReductions">ipv6IfIcmpInGroupMembReductions</a>(17)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutMsgs">ipv6IfIcmpOutMsgs</a>(18)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutErrors">ipv6IfIcmpOutErrors</a>(19)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutDestUnreachs">ipv6IfIcmpOutDestUnreachs</a>(20)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutAdminProhibs">ipv6IfIcmpOutAdminProhibs</a>(21)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutTimeExcds">ipv6IfIcmpOutTimeExcds</a>(22)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutParmProblems">ipv6IfIcmpOutParmProblems</a>(23)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutPktTooBigs">ipv6IfIcmpOutPktTooBigs</a>(24)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutEchos">ipv6IfIcmpOutEchos</a>(25)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutEchoReplies">ipv6IfIcmpOutEchoReplies</a>(26)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutRouterSolicits">ipv6IfIcmpOutRouterSolicits</a>(27)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutRouterAdvertisements">ipv6IfIcmpOutRouterAdvertisements</a>(28)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutNeighborSolicits">ipv6IfIcmpOutNeighborSolicits</a>(29)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutNeighborAdvertisements">ipv6IfIcmpOutNeighborAdvertisements</a>(30)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutRedirects">ipv6IfIcmpOutRedirects</a>(31)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutGroupMembQueries">ipv6IfIcmpOutGroupMembQueries</a>(32)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutGroupMembResponses">ipv6IfIcmpOutGroupMembResponses</a>(33)
+   |        +-- -R-- Counter   <a href="#ipv6IfIcmpOutGroupMembReductions">ipv6IfIcmpOutGroupMembReductions</a>(34)
+   |
+   +--<a href="#ipv6IcmpConformance">ipv6IcmpConformance</a>(2)
+      |
+      +--<a href="#ipv6IcmpCompliances">ipv6IcmpCompliances</a>(1)
+      |  |
+      |  +--<a href="#ipv6IcmpCompliance">ipv6IcmpCompliance</a>(1)
+      |
+      +--<a href="#ipv6IcmpGroups">ipv6IcmpGroups</a>(2)
+         |
+         +--<a href="#ipv6IcmpGroup">ipv6IcmpGroup</a>(1)
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

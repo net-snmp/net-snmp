@@ -1,0 +1,206 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>NET-SNMP Tutorial -- Demon</title>
+  </head>
+
+  <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
+    <center><h1>NET-SNMP Tutorial -- Demon</h1></center>
+<hr>
+    <h1>*** WARNING WARNING WARNING ***</h1>
+    <p>
+      <b>The AgentX support in net-snmp versions prior to 5.1 is beta
+      level quality.  Although many people have used it successfully,
+      we strongly recommend AgentX sub-agent developers use 5.1.2 or higher.</b>
+    <h1>Sub-Agent Demon tutorial</h1>
+    <p>
+      First off, you need to write a mib module first before you can
+      do this part of the tutorial.  We assume you have read and
+      completed the <a href="../mib_module/index.html">mib module
+      portion</a> of the toolkit tutorial.  The AgentX library support
+      we offer provides an easy-to-use interface that allows the same
+      mib module API to be used in either the core agent or in a
+      agentx subagent, and thus your code can be designed to operate
+      in either mode [no re-writing required!].
+
+    <p> When you're first
+      testing your code, we do recommend compiling it directly into
+      the main agent even if you're going to use AgentX later.
+      Compiling it directly into the master agent often makes
+      debugging a little bit easier and takes the AgentX protocol out
+      of the mix just to be sure.  Once it's working right in the
+      master agent, then it's easy to simply remove the support from
+      the master agent and make a subagent instead [and, again, the
+      nifty thing is that the mib API code doesn't need to change]
+
+    <p>
+      For example purposes, we'll refer to some example MIB objects
+      and code: the <a
+      href="../mib_module/NET-SNMP-TUTORIAL-MIB.txt">NET-SNMP-TUTORIAL-MIB</a>
+      MIB, and the <a href="nstAgentSubagentObject.c">example mib
+      module</a> and it's <a href="nstAgentSubagentObject.h">header
+      file</a>.
+
+    <p>
+      There are two ways to compile a mib module into a subagent.
+      You can do it yourself, described in detail below, or you can
+      take your mib module and attempt to make a quick-and-dirty
+      subagent automatically using the net-snmp-config script:
+    <ul>
+<pre>
+<i> ignore the warnings that the script generates due to un-prototyped init_ functions</i>
+
+% <b> net-snmp-config --compile-subagent mysubagent nstAgentSubagentObject.c</b>
+generating the tmporary code file: netsnmptmp.12259.c
+checking for init_nstAgentSubagentObject in nstAgentSubagentObject.c
+init_nstAgentSubagentObject(void)
+running: gcc  -Dlinux -I. -I/usr/local/include -o nstAgentSubagentObject netsnmptmp.12259.c  nstAgentSubagentObject.c -L/usr/local/lib  -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp
+netsnmptmp.12259.c: In function `main':
+netsnmptmp.12259.c:26: warning: implicit declaration of function `init_nstAgentSubagentObject'
+removing the tmporary code file: netsnmptmp.12259.c
+subagent program nstAgentSubagentObject created
+</pre>
+    </ul>
+    <p>
+      If all goes well, this should have produced a <b>mysubagent</b>
+      binary file (like the script output above chose).  You can then
+      start the snmpd master agent (if you didn't do so in the <a
+      href="../mib_module/index.html">previous example</a> and then
+      start your subagent test it's results.
+    <p>
+      When you run the net-snmp snmpd master agent, in your snmpd.conf
+      file you must put a line that says "master agentx" to turn on
+      the AgentX master agent support.  If you haven't done this you'll have
+      to stop the agent, add the configuration line, and restart the
+      snmpd master agent before the below example will work.  [note
+      that the previous example didn't have you did this, since it
+      wasn't relying on AgentX support]
+    <pre>
+<ul>
+<i> before you start the subagent, you should get an error</i>
+
+% <b>snmpget localhost NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0 = No Such Object available on this agent at this OID
+
+<i> Start the subagent [as root], which should attach to the master and offer the mib data in question</i>
+% <b>./mysubagent &</b>
+
+<i> now the request should return valid data</i>
+% <b>snmpget localhost NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0 = INTEGER: 2
+
+% <b>snmpget localhost NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0 = INTEGER: 2
+
+% <b>snmpset localhost NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0 = 5</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0 = INTEGER: 5
+
+% <b>snmpget localhost NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0 = INTEGER: 5
+    </pre>
+</ul>
+    <h2>Instrumenting your own code with agentx subagent support</h2>
+    <p>
+      It's probably more likely that you want to compile in your new
+      code into a previously existing application, and the
+      auto-building of the subagent using the net-snmp-config command
+      isn't appropriate.
+    <p>
+      Lets take the previous example and implement it in our own
+      process which attaches to the master agent using the AgentX
+      protocol.  This is easier than you might think, as we provide
+      libraries to do the work for you.  We merely compile it
+      ourselves this time, outside the main net-snmp package and put a
+      main() wrapper around it.  Functionally, this is all the
+      <b>net-snmp-config --compile-subagent</b> script is doing for
+      you above.
+    <p>
+      First, the example files you'll need:
+      <center><table border=1>
+	<tr bgcolor="#d0d0ff"><th>File</th><th>Description</th></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="../demoapp/Makefile">Makefile</a></td><td>A simple makefile 
+	used to build the demon</td>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="example-demon.c">example-demon.c</a></td><td>The
+	main() code for our demon</td></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="nstAgentSubagentObject.c">nstAgentSubagentObject.c</a></td><td>The
+	nstAgentSubagentObject.c mib C code file</td></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="nstAgentSubagentObject.h">nstAgentSubagentObject.h</a></td><td>The
+	nstAgentSubagentObject.h mib code header file</td></tr>
+      </table></center>
+    <p>
+      Build the example demon using the Makefile, as shown below.
+      Note that to compile it, the Makefile uses the net-snmp-config
+      command to generate a list of needed compilation flags and
+      compilation libraries.  You might run the following commands in
+      a shell to see what type of output they provide:
+<ul><pre>
+% <b>make example-demon</b>
+gcc -I. `net-snmp-config --cflags`   -c -o example-demon.o example-demon.c
+gcc -I. `net-snmp-config --cflags`   -c -o nstAgentSubagentObject.o nstAgentSubagentObject.c
+gcc -o example-demon example-demon.o nstAgentSubagentObject.o  `net-snmp-config --agent-libs`
+</pre></ul>
+    <p>
+      Then, fire up the net-snmp snmpd master agent if you haven't
+      yet.  In your snmpd.conf file you must put a line that says
+      "master agentx" to turn on the master agent support, so do this
+      before running snmpd.  If you have the mysubagent application
+      shown above still running, make sure you kill it first as this
+      subagent will conflict with that one.
+    <p>
+      You should then be able to run your new program
+      (<b>example-demon</b>) and access the data housed within it.  A
+      good test is to do is to ensure that you can't access your data
+      before starting it, and that you can after starting it.  An
+      example of all of this is shown below (which looks almost
+      exactly like the above "auto-built" example):
+<ul>
+<pre>
+<i> before you start the subagent, you should get an error</i>
+
+% <b>snmpget localhost NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0 = No Such Object available on this agent at this OID
+
+<i> Start the subagent [as root], which should attach to the master and offer the mib data in question</i>
+% <b>./example-demon &</b>
+
+<i> now the request should return valid data</i>
+% <b>snmpget localhost NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0 = INTEGER: 2
+
+% <b>snmpget localhost NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0 = INTEGER: 2
+
+% <b>snmpset localhost NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0 = 5</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0 = INTEGER: 5
+
+% <b>snmpget localhost NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0</b>
+NET-SNMP-TUTORIAL-MIB::nstAgentSubagentObject.0 = INTEGER: 5
+    </pre>
+</ul>
+    <h2>Debugging</h2>
+    <p>
+      If you're having problems, it's helpful to pass -Dagentx on the
+      command line to the snmpd master agent to get it to spew out a
+      bunch of debugging information about it's agentx transactions.
+      Note that normally the agent will print this debugging
+      information to it's normal log file, so you might add the -f and
+      -L flags to make it print to the screen instead.
+    <hr>
+    <address><a href="mailto:Wes Hardaker <hardaker@users.sourceforge.net>"></a></address>
+<!-- Created: Fri Nov  5 14:28:37 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Thu Sep  2 22:13:06 EDT 2004
+<!-- hhmts end -->
+  </body>
+</html>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

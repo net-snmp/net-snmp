@@ -1,0 +1,419 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>netsnmp_iterator_info_s Struct Reference<br />
+  <small>[<a class="el" href="group__table__iterator.html">table_iterator: The table iterator helper is designed to simplify the
+  task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be
+  accessed externally.</a>,&nbsp;<a class="el" href="group__table__iterator.html">table_iterator: The table iterator helper is
+  designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid
+  sorted form and must be accessed externally.</a>]</small></h1>Holds iterator information containing functions which should be
+  called by the iterator_handler to loop over your data set and sort it in a SNMP specific manner. <a href=
+  "#_details">More...</a>
+
+  <p><code>#include &lt;<a class="el" href="table__iterator_8h-source.html">table_iterator.h</a>&gt;</code></p>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Data Fields</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">Netsnmp_First_Data_Point *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__iterator__info__s.html#o0">get_first_data_point</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Responsible for: returning the first set of "index" data, a loop-context pointer, and optionally a
+      data context pointer. <a href="#o0"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">Netsnmp_Next_Data_Point *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__iterator__info__s.html#o1">get_next_data_point</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Given the previous loop context, this should return the next loop context, assiocated index set and
+      optionally a data context. <a href="#o1"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">Netsnmp_Make_Data_Context *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__iterator__info__s.html#o2">make_data_context</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">If a data context wasn't supplied by the get_first_data_point or get_next_data_point functions and
+      the make_data_context pointer is defined, it will be called to convert a loop context into a data context. <a href=
+      "#o2"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">Netsnmp_Free_Loop_Context *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__iterator__info__s.html#o3">free_loop_context</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">A function which should free the loop context. <a href="#o3"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">Netsnmp_Free_Data_Context *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__iterator__info__s.html#o4">free_data_context</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Frees a data context. <a href="#o4"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">Netsnmp_Free_Loop_Context *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__iterator__info__s.html#o5">free_loop_context_at_end</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">Frees a loop context at the end of the entire iteration sequence. <a href="#o5"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">void *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href="structnetsnmp__iterator__info__s.html#o6">myvoid</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">This can be used by client handlers to store any information they need. <a href=
+      "#o6"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o7" doxytag=
+      "netsnmp_iterator_info_s::flags" id="o7"></a> int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>flags</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__iterator__info__s.html#o8">table_reginfo</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">A pointer to the netsnmp_table_registration_info object this iterator is registered along with.
+      <a href="#o8"></a><br /></td>
+    </tr>
+  </table>
+  <hr />
+  <a name="_details" id="_details"></a>
+
+  <h2>Detailed Description</h2>Holds iterator information containing functions which should be called by the iterator_handler to
+  loop over your data set and sort it in a SNMP specific manner.
+
+  <p>The netsnmp_iterator_info typedef can be used instead of directly calling this struct if you would prefer.</p>
+
+  <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00067">67</a> of file <a class="el" href=
+  "table__iterator_8h-source.html">table_iterator.h</a>.</p>
+  <hr />
+
+  <h2>Field Documentation</h2><a class="anchor" name="o4" doxytag="netsnmp_iterator_info_s::free_data_context" id="o4"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">Netsnmp_Free_Data_Context* <a class="el" href=
+            "structnetsnmp__iterator__info__s.html#o4">netsnmp_iterator_info_s::free_data_context</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Frees a data context.</p>
+
+        <p>This will be called at any time a data context needs to be freed. This may be at the same time as a correspondng loop
+        context is freed, or much much later. Multiple data contexts may be kept in existence at any time.</p>
+
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00096">96</a> of file <a class="el" href=
+        "table__iterator_8h-source.html">table_iterator.h</a>.</p>
+
+        <p>Referenced by <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o3" doxytag="netsnmp_iterator_info_s::free_loop_context" id="o3"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">Netsnmp_Free_Loop_Context* <a class="el" href=
+            "structnetsnmp__iterator__info__s.html#o3">netsnmp_iterator_info_s::free_loop_context</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>A function which should free the loop context.</p>
+
+        <p>This function is called at *each* iteration step, which is not-optimal for speed purposes. The use of
+        free_loop_context_at_end instead is strongly encouraged. This can be set to NULL to avoid its usage.</p>
+
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00089">89</a> of file <a class="el" href=
+        "table__iterator_8h-source.html">table_iterator.h</a>.</p>
+
+        <p>Referenced by <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o5" doxytag="netsnmp_iterator_info_s::free_loop_context_at_end" id="o5"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">Netsnmp_Free_Loop_Context* <a class="el" href=
+            "structnetsnmp__iterator__info__s.html#o5">netsnmp_iterator_info_s::free_loop_context_at_end</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Frees a loop context at the end of the entire iteration sequence.</p>
+
+        <p>Generally, this would free the loop context allocated by the get_first_data_point function (which would then be
+        updated by each call to the get_next_data_point function). It is not called until the get_next_data_point function
+        returns a NULL</p>
+
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00104">104</a> of file <a class="el" href=
+        "table__iterator_8h-source.html">table_iterator.h</a>.</p>
+
+        <p>Referenced by <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o0" doxytag="netsnmp_iterator_info_s::get_first_data_point" id="o0"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">Netsnmp_First_Data_Point* <a class="el" href=
+            "structnetsnmp__iterator__info__s.html#o0">netsnmp_iterator_info_s::get_first_data_point</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Responsible for: returning the first set of "index" data, a loop-context pointer, and optionally a data context
+        pointer.</p>
+
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00071">71</a> of file <a class="el" href=
+        "table__iterator_8h-source.html">table_iterator.h</a>.</p>
+
+        <p>Referenced by <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o1" doxytag="netsnmp_iterator_info_s::get_next_data_point" id="o1"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">Netsnmp_Next_Data_Point* <a class="el" href=
+            "structnetsnmp__iterator__info__s.html#o1">netsnmp_iterator_info_s::get_next_data_point</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>Given the previous loop context, this should return the next loop context, assiocated index set and optionally a data
+        context.</p>
+
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00076">76</a> of file <a class="el" href=
+        "table__iterator_8h-source.html">table_iterator.h</a>.</p>
+
+        <p>Referenced by <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o2" doxytag="netsnmp_iterator_info_s::make_data_context" id="o2"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">Netsnmp_Make_Data_Context* <a class="el" href=
+            "structnetsnmp__iterator__info__s.html#o2">netsnmp_iterator_info_s::make_data_context</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>If a data context wasn't supplied by the get_first_data_point or get_next_data_point functions and the
+        make_data_context pointer is defined, it will be called to convert a loop context into a data context.</p>
+
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00082">82</a> of file <a class="el" href=
+        "table__iterator_8h-source.html">table_iterator.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o6" doxytag="netsnmp_iterator_info_s::myvoid" id="o6"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">void* <a class="el" href=
+            "structnetsnmp__iterator__info__s.html#o6">netsnmp_iterator_info_s::myvoid</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>This can be used by client handlers to store any information they need.</p>
+
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00108">108</a> of file <a class="el" href=
+        "table__iterator_8h-source.html">table_iterator.h</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o8" doxytag="netsnmp_iterator_info_s::table_reginfo" id="o8"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href=
+            "structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a>* <a class="el" href=
+            "structnetsnmp__iterator__info__s.html#o8">netsnmp_iterator_info_s::table_reginfo</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>A pointer to the netsnmp_table_registration_info object this iterator is registered along with.</p>
+
+        <p>Definition at line <a class="el" href="table__iterator_8h-source.html#l00114">114</a> of file <a class="el" href=
+        "table__iterator_8h-source.html">table_iterator.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="table__iterator_8c-source.html#l00138">netsnmp_register_table_iterator()</a>, and
+        <a class="el" href="table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr />
+  The documentation for this struct was generated from the following file:
+
+  <ul>
+    <li><a class="el" href="table__iterator_8h-source.html">table_iterator.h</a></li>
+  </ul>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

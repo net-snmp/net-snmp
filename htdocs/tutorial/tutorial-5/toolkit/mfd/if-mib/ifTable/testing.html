@@ -1,0 +1,129 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>MFD : ifTable testing</title>
+  </head>
+
+  <body bgcolor="#ffffff">
+    <h1>MFD : ifTable testing</h1>
+    <p>
+      If you have not been compiling as you went along, try and compile
+      now.
+    </p>
+    <table><tr><td width=20></td><td><code>$</code></td><td bgcolor=CCCCCC>
+            <code><font color=blue>
+                make -f ifTable_Makefile</font>
+            </code></td></tr>
+    </table>
+    <p>
+      After running make, you should have an executable named
+      <var>ifTable</var>. 
+    </p>
+    <!-- ========================================================= -->
+    <h2>Starting the agent</h2>
+    <p>
+      You can run the <var>ifTable</var> agent as a regular SNMP agent,
+      or as an AgentX sub-agent. The default is to run as a sub-agent. While
+      testing, the <i>-f</i> (do not fork into background) and <i>-L</i> (log
+      to stderr) options are recommended.
+    </p>
+    <table><tr>
+          <td width=20></td>
+          <td>AgentX Sub-agent:</td>
+          <td bgcolor=CCCCCC><code><font color=blue>ifTable -f -L</font></td>
+        </tr><tr>
+          <td></td>
+          <td>Standard SNMP Agent:</td>
+          <td bgcolor=CCCCCC><code><font color=blue>ifTable -M -f -L [udp[:port]]</font></td>
+    </table>
+    <p>
+      Note that running the sub-agent application as a master agent
+      will runwithout any access control. All SNMPv1 and SNMPv2c
+      requests will be accepted, regardless of the community string.
+    </p><p>
+      For that reason, when testing I run as a regular user (not root), 
+      and only bind to the localhost interface, like so:
+    </p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+$<font color=blue>./ifTable -f -L -DifTable -M localhost:1161</font>
+2004-04-21 21:51:47 ifTable:init_ifTable: Registering ifTable as a mibs-for-dummies table.
+2004-04-21 21:51:48 ifTable: using linux 2.2 kernel /proc/net/dev
+            </pre></td></tr></table>
+    <!-- ========================================================= -->
+    <h3>Querying the agent</h3>
+    <p>
+      A simple <var>snmpwalk</var> will quickly test the module:
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+$<font color=blue>snmpwalk -v1 localhost:1161 ifTable</font>
+IF-MIB::ifIndex.1 = INTEGER: 1
+IF-MIB::ifIndex.2 = INTEGER: 2
+IF-MIB::ifIndex.3 = INTEGER: 3
+IF-MIB::ifDescr.1 = STRING: 
+IF-MIB::ifDescr.2 = STRING: 
+IF-MIB::ifDescr.3 = STRING: 
+IF-MIB::ifType.1 = INTEGER: softwareLoopback(24)
+IF-MIB::ifType.2 = INTEGER: ethernetCsmacd(6)
+IF-MIB::ifType.3 = INTEGER: tunnel(131)
+IF-MIB::ifPhysAddress.1 = STRING: 0:0:0:0:0:0
+IF-MIB::ifPhysAddress.2 = STRING: 0:30:65:cd:a3:c8
+IF-MIB::ifPhysAddress.3 = STRING: 0:0:0:0:0:0
+IF-MIB::ifInOctets.1 = Counter32: 51368348
+IF-MIB::ifInOctets.2 = Counter32: 2666605618
+IF-MIB::ifInOctets.3 = Counter32: 0
+IF-MIB::ifInUcastPkts.1 = Counter32: 415774
+IF-MIB::ifInUcastPkts.2 = Counter32: 13971039
+IF-MIB::ifInUcastPkts.3 = Counter32: 0
+IF-MIB::ifInDiscards.1 = Counter32: 0
+IF-MIB::ifInDiscards.2 = Counter32: 0
+IF-MIB::ifInDiscards.3 = Counter32: 0
+IF-MIB::ifInErrors.1 = Counter32: 0
+IF-MIB::ifInErrors.2 = Counter32: 0
+IF-MIB::ifInErrors.3 = Counter32: 0
+IF-MIB::ifOutOctets.1 = Counter32: 51370076
+IF-MIB::ifOutOctets.2 = Counter32: 879325033
+IF-MIB::ifOutOctets.3 = Counter32: 0
+IF-MIB::ifOutUcastPkts.1 = Counter32: 415798
+IF-MIB::ifOutUcastPkts.2 = Counter32: 8046959
+IF-MIB::ifOutUcastPkts.3 = Counter32: 0
+IF-MIB::ifOutDiscards.1 = Counter32: 0
+IF-MIB::ifOutDiscards.2 = Counter32: 0
+IF-MIB::ifOutDiscards.3 = Counter32: 0
+IF-MIB::ifOutErrors.1 = Counter32: 0
+IF-MIB::ifOutErrors.2 = Counter32: 0
+IF-MIB::ifOutErrors.3 = Counter32: 0
+IF-MIB::ifSpecific.3 = No more variables left in this MIB View (It is past the end of the MIB tree)
+</pre></td></tr></table>
+    <p>
+      If you ran the agent with debugging, you should see something
+      like this:
+    </p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+$<font color=blue>./ifTable -f -L -DifTable -M localhost:1161</font>
+2004-04-21 21:51:47 ifTable:init_ifTable: Registering ifTable as a mibs-for-dummies table.
+2004-04-21 21:51:48 ifTable: using linux 2.2 kernel /proc/net/dev
+            </pre></td></tr></table>
+    <!-- ========================================================= -->
+    <p></p>
+    <font size=+1>
+      Next: TBD |
+      <a href="data_get.html">Back: Data get</a> |
+      <a href="../index.html">Up: IF-MIB Tutorials</a>
+    </font>
+      <!-- ========================================================= -->
+      <!-- ========================================================= -->
+    <hr>
+    rstory at freesnmp dot com<br>
+Version $Revision$
+<!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
+<!-- hhmts start -->
+Last modified: Thu Apr 22 22:10:27 EDT 2004
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+  </body>
+</html>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,783 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>acconfig.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00002 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00003 <span class="comment"> * that may apply:</span>
+00004 <span class="comment"> */</span>
+00005 <span class="comment">/*</span>
+00006 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00007 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00008 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00009 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00010 <span class="comment"> */</span>
+00011 
+00012 <span class="preprocessor">#ifndef NET_SNMP_CONFIG_H</span>
+00013 <span class="preprocessor">#define NET_SNMP_CONFIG_H</span>
+00014 
+00015 <span class="comment">/* config.h:  a general config file */</span>
+00016 
+00017 <span class="comment">/* Default (SNMP) version number for the tools to use */</span>
+00018 <span class="preprocessor">#define DEFAULT_SNMP_VERSION 3</span>
+00019 
+00020 <span class="comment">/* don't change these values! */</span>
+00021 <span class="preprocessor">#define SNMPV1      0xAAAA       </span><span class="comment">/* readable by anyone */</span>
+00022 <span class="preprocessor">#define SNMPV2ANY   0xA000       </span><span class=
+"comment">/* V2 Any type (includes NoAuth) */</span>
+00023 <span class="preprocessor">#define SNMPV2AUTH  0x8000       </span><span class=
+"comment">/* V2 Authenticated requests only */</span>
+00024 
+00025 <span class="comment">/* default list of mibs to load */</span>
+00026 
+00027 <span class="preprocessor">#define DEFAULT_MIBS "IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB"</span>
+00028 
+00029 <span class="comment">/* default location to look for mibs to load using the above tokens</span>
+00030 <span class="comment">   and/or those in the MIBS envrionment variable*/</span>
+00031 <span class="preprocessor">#undef DEFAULT_MIBDIRS</span>
+00032 
+00033 <span class="comment">/* default mib files to load, specified by path. */</span>
+00034 <span class="preprocessor">#undef DEFAULT_MIBFILES</span>
+00035 
+00036 <span class="comment">/* should we compile to use special opaque types: float, double,</span>
+00037 <span class="comment">   counter64, i64, ui64, union? */</span>
+00038 <span class="preprocessor">#undef OPAQUE_SPECIAL_TYPES</span>
+00039 
+00040 <span class="comment">/* comment the next line if you are compiling with libsnmp.h </span>
+00041 <span class="comment">   and are not using the UC-Davis SNMP library. */</span>
+00042 <span class="preprocessor">#define UCD_SNMP_LIBRARY 1</span>
+00043 
+00044 <span class="comment">/* define if you want to compile support for both authentication and</span>
+00045 <span class="comment">   privacy support. */</span>
+00046 <span class="preprocessor">#undef SCAPI_AUTHPRIV</span>
+00047 
+00048 <span class="comment">/* define if you are using the MD5 code ...*/</span>
+00049 <span class="preprocessor">#undef USE_INTERNAL_MD5</span>
+00050 
+00051 <span class="comment">/* define if you are using the codeS11 library ...*/</span>
+00052 <span class="preprocessor">#undef USE_PKCS</span>
+00053 
+00054 <span class="comment">/* add in recent CMU library extensions (not complete) */</span>
+00055 <span class="preprocessor">#undef CMU_COMPATIBLE</span>
+00056 
+00057 <span class="comment">/* add in recent resource lock functions (not complete) */</span>
+00058 <span class="preprocessor">#undef _REENTRANT</span>
+00059 
+00060 <span class="comment">/* debugging stuff */</span>
+00061 <span class="comment">/* if defined, we optimize the code to exclude all debugging calls. */</span>
+00062 <span class="preprocessor">#undef SNMP_NO_DEBUGGING</span>
+00063 <span class="comment">/* ignore the -D flag and always print debugging information */</span>
+00064 <span class="preprocessor">#define SNMP_ALWAYS_DEBUG 0</span>
+00065 
+00066 <span class="comment">/* reverse encoding BER packets is both faster and more efficient in space. */</span>
+00067 <span class="preprocessor">#define USE_REVERSE_ASNENCODING       1</span>
+00068 <span class="preprocessor">#define DEFAULT_ASNENCODING_DIRECTION 1 </span><span class=
+"comment">/* 1 = reverse, 0 = forwards */</span>
+00069 
+00070 <span class="comment">/* PERSISTENT_DIRECTORY: If defined, the library is capabile of saving</span>
+00071 <span class="comment">   persisant information to this directory in the form of configuration</span>
+00072 <span class="comment">   lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */</span>
+00073 <span class="preprocessor">#define PERSISTENT_DIRECTORY "/var/snmp"</span>
+00074 
+00075 <span class="comment">/* PERSISTENT_MASK: the umask permissions to set up persistent files with */</span>
+00076 <span class="preprocessor">#define PERSISTENT_MASK 077</span>
+00077 
+00078 <span class="comment">/* AGENT_DIRECTORY_MODE: the mode the agents should use to create</span>
+00079 <span class="comment">   directories with. Since the data stored here is probably sensitive, it</span>
+00080 <span class="comment">   probably should be read-only by root/administrator. */</span>
+00081 <span class="preprocessor">#define AGENT_DIRECTORY_MODE 0700</span>
+00082 
+00083 <span class="comment">/* MAX_PERSISTENT_BACKUPS:</span>
+00084 <span class="comment"> *   The maximum number of persistent backups the library will try to</span>
+00085 <span class="comment"> *   read from the persistent cache directory.  If an application fails to</span>
+00086 <span class="comment"> *   close down successfully more than this number of times, data will be lost.</span>
+00087 <span class="comment"> */</span>
+00088 <span class="preprocessor">#define MAX_PERSISTENT_BACKUPS 10</span>
+00089 
+00090 @TOP@
+00091 
+00092 <span class="comment">/* define if you are embedding perl in the main agent */</span>
+00093 <span class="preprocessor">#undef NETSNMP_EMBEDDED_PERL</span>
+00094 
+00095 <span class="comment">/* define the system type include file here */</span>
+00096 <span class="preprocessor">#define SYSTEM_INCLUDE_FILE &lt;net-snmp/system/generic.h&gt;</span>
+00097 
+00098 <span class="comment">/* define the machine (cpu) type include file here */</span>
+00099 <span class="preprocessor">#define MACHINE_INCLUDE_FILE &lt;net-snmp/machine/generic.h&gt;</span>
+00100 
+00101 <span class="comment">/* define the UDP buffer defaults undefined means use the OS buffers</span>
+00102 <span class="comment"> * by default */</span>
+00103 <span class="preprocessor">#undef DEFAULT_SERVER_SEND_BUF</span>
+00104 <span class="preprocessor">#undef DEFAULT_SERVER_RECV_BUF</span>
+00105 <span class="preprocessor">#undef DEFAULT_CLIENT_SEND_BUF</span>
+00106 <span class="preprocessor">#undef DEFAULT_CLIENT_RECV_BUF</span>
+00107 
+00108 <span class="comment">/* SNMPLIBDIR contains important files */</span>
+00109 <span class="preprocessor">#undef SNMPLIBPATH</span>
+00110 <span class="preprocessor">#undef SNMPSHAREPATH</span>
+00111 <span class="preprocessor">#undef SNMPCONFPATH</span>
+00112 <span class="preprocessor">#undef SNMPDLMODPATH</span>
+00113 
+00114 <span class="comment">/* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's</span>
+00115 <span class="comment">   place.  (stdin is closed so that sh scripts won't wait for it) */</span>
+00116 <span class="preprocessor">#undef LOGFILE</span>
+00117 
+00118 <span class="comment">/* default system contact */</span>
+00119 <span class="preprocessor">#undef SYS_CONTACT</span>
+00120 
+00121 <span class="comment">/* system location */</span>
+00122 <span class="preprocessor">#undef SYS_LOC</span>
+00123 
+00124 <span class="comment">/* Use libwrap to handle allow/deny hosts? */</span>
+00125 <span class="preprocessor">#undef USE_LIBWRAP</span>
+00126 
+00127 <span class="comment">/* Use dmalloc to do malloc debugging? */</span>
+00128 <span class="preprocessor">#undef HAVE_DMALLOC_H</span>
+00129 
+00130 <span class="comment">/* location of UNIX kernel */</span>
+00131 <span class="preprocessor">#define KERNEL_LOC "/vmunix"</span>
+00132 
+00133 <span class="comment">/* location of mount table list */</span>
+00134 <span class="preprocessor">#define ETC_MNTTAB "/etc/mnttab"</span>
+00135 
+00136 <span class="comment">/* location of swap device (ok if not found) */</span>
+00137 <span class="preprocessor">#undef DMEM_LOC</span>
+00138 
+00139 <span class="comment">/* Command to generate ps output, the final column must be the process</span>
+00140 <span class="comment">   name withOUT arguments */</span>
+00141 <span class="preprocessor">#define PSCMD "/bin/ps"</span>
+00142 
+00143 <span class="comment">/* Where is the uname command */</span>
+00144 <span class="preprocessor">#define UNAMEPROG "/bin/uname"</span>
+00145 
+00146 <span class="comment">/* pattern for temporary file names */</span>
+00147 <span class="preprocessor">#define NETSNMP_TEMP_FILE_PATTERN "/tmp/snmpdXXXXXX"</span>
+00148 
+00149 <span class="comment">/* testing code sections. */</span>
+00150 <span class="preprocessor">#undef SNMP_TESTING_CODE </span>
+00151 
+00152 <span class="comment">/* If you don't have root access don't exit upon kmem errors */</span>
+00153 <span class="preprocessor">#undef NO_ROOT_ACCESS</span>
+00154 
+00155 <span class="comment">/* If we don't want to use kmem. */</span>
+00156 <span class="preprocessor">#undef NO_KMEM_USAGE</span>
+00157 
+00158 <span class="comment">/* If you don't want the agent to report on variables it doesn't have data for */</span>
+00159 <span class="preprocessor">#undef NO_DUMMY_VALUES</span>
+00160 
+00161 <span class="comment">/* Define if statfs takes 2 args and the second argument has</span>
+00162 <span class="comment">   type struct fs_data. [Ultrix] */</span>
+00163 <span class="preprocessor">#undef STAT_STATFS_FS_DATA</span>
+00164 
+00165 <span class="comment">/* Define if the TCP timer constants in &lt;netinet/tcp_timer.h&gt;</span>
+00166 <span class="comment">   depend on the integer variable `hz'.  [FreeBSD 4.x] */</span>
+00167 <span class="preprocessor">#undef TCPTV_NEEDS_HZ</span>
+00168 
+00169 @BOTTOM@
+00170 
+00171 <span class="comment">/* define if you have type int32_t */</span>
+00172 <span class="preprocessor">#undef HAVE_INT32_T</span>
+00173 
+00174 <span class="comment">/* define if you have type uint32_t */</span>
+00175 <span class="preprocessor">#undef HAVE_UINT32_T</span>
+00176 
+00177 <span class="comment">/* define if you have type u_int32_t */</span>
+00178 <span class="preprocessor">#undef HAVE_U_INT32_T</span>
+00179 
+00180 <span class="comment">/* define if you have type int64_t */</span>
+00181 <span class="preprocessor">#undef HAVE_INT64_T</span>
+00182 
+00183 <span class="comment">/* define if you have type uint64_t */</span>
+00184 <span class="preprocessor">#undef HAVE_UINT64_T</span>
+00185 
+00186 <span class="comment">/* define if you have type u_int64_t */</span>
+00187 <span class="preprocessor">#undef HAVE_U_INT64_T</span>
+00188 
+00189 <span class="comment">/* define if you have getdevs() */</span>
+00190 <span class="preprocessor">#undef HAVE_GETDEVS</span>
+00191 
+00192 <span class="comment">/* define if you have devstat_getdevs() */</span>
+00193 <span class="preprocessor">#undef HAVE_DEVSTAT_GETDEVS</span>
+00194 
+00195 <span class="comment">/* define if you have &lt;netinet/in_pcb.h&gt; */</span>
+00196 <span class="preprocessor">#undef HAVE_NETINET_IN_PCB_H</span>
+00197 
+00198 <span class="comment">/* define if you have &lt;sys/disklabel.h&gt; */</span>
+00199 <span class="preprocessor">#undef HAVE_SYS_DISKLABEL_H</span>
+00200 
+00201 <span class="comment">/* define if you are using linux and /proc/net/dev has the compressed</span>
+00202 <span class="comment">   field, which exists in linux kernels 2.2 and greater. */</span>
+00203 <span class="preprocessor">#undef PROC_NET_DEV_HAS_COMPRESSED</span>
+00204 
+00205 <span class="comment">/* define rtentry to ortentry on SYSV machines (alphas) */</span>
+00206 <span class="preprocessor">#undef RTENTRY</span>
+00207 
+00208 <span class="comment">/* Use BSD 4.4 routing table entries? */</span>
+00209 <span class="preprocessor">#undef RTENTRY_4_4</span>
+00210 
+00211 <span class="comment">/* Does struct sigaction have a sa_sigaction field? */</span>
+00212 <span class="preprocessor">#undef STRUCT_SIGACTION_HAS_SA_SIGACTION</span>
+00213 
+00214 <span class="comment">/* Does struct tm have a tm_gmtoff field? */</span>
+00215 <span class="preprocessor">#undef STRUCT_TM_HAS_TM_GMTOFFF</span>
+00216 
+00217 <span class="comment">/* Does struct sockaddr have a sa_len field? */</span>
+00218 <span class="preprocessor">#undef STRUCT_SOCKADDR_HAS_SA_LEN</span>
+00219 
+00220 <span class="comment">/* Does struct sockaddr have a sa_family2 field? */</span>
+00221 <span class="preprocessor">#undef STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_FAMILY2</span>
+00222 
+00223 <span class="comment">/* Does struct in6_addr have a s6_un.sa6_ladd field? */</span>
+00224 <span class="preprocessor">#undef STRUCT_IN6_ADDR_HAS_S6_UN_SA6_LADDR</span>
+00225 
+00226 <span class="comment">/* rtentry structure tests */</span>
+00227 <span class="preprocessor">#undef RTENTRY_RT_NEXT</span>
+00228 <span class="preprocessor">#undef STRUCT_RTENTRY_HAS_RT_DST</span>
+00229 <span class="preprocessor">#undef STRUCT_RTENTRY_HAS_RT_UNIT</span>
+00230 <span class="preprocessor">#undef STRUCT_RTENTRY_HAS_RT_USE</span>
+00231 <span class="preprocessor">#undef STRUCT_RTENTRY_HAS_RT_REFCNT</span>
+00232 <span class="preprocessor">#undef STRUCT_RTENTRY_HAS_RT_HASH</span>
+00233 
+00234 <span class="comment">/* ifnet structure tests */</span>
+00235 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_BAUDRATE</span>
+00236 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_BAUDRATE_IFS_VALUE</span>
+00237 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_SPEED</span>
+00238 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_TYPE</span>
+00239 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_IMCASTS</span>
+00240 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_IQDROPS</span>
+00241 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC</span>
+00242 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_NOPROTO</span>
+00243 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_OMCASTS</span>
+00244 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_XNAME</span>
+00245 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_OBYTES</span>
+00246 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_IBYTES</span>
+00247 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_ADDRLIST</span>
+00248 
+00249 <span class="comment">/* tcpstat.tcps_rcvmemdrop */</span>
+00250 <span class="preprocessor">#undef STRUCT_TCPSTAT_HAS_TCPS_RCVMEMDROP</span>
+00251 
+00252 <span class="comment">/* udpstat.udps_discard */</span>
+00253 <span class="preprocessor">#undef STRUCT_UDPSTAT_HAS_UDPS_DISCARD</span>
+00254 
+00255 <span class="comment">/* udpstat.udps_discard */</span>
+00256 <span class="preprocessor">#undef STRUCT_UDPSTAT_HAS_UDPS_NOPORT</span>
+00257 
+00258 <span class="comment">/* udpstat.udps_discard */</span>
+00259 <span class="preprocessor">#undef STRUCT_UDPSTAT_HAS_UDPS_NOPORTBCAST</span>
+00260 
+00261 <span class="comment">/* udpstat.udps_discard */</span>
+00262 <span class="preprocessor">#undef STRUCT_UDPSTAT_HAS_UDPS_FULLSOCK</span>
+00263 
+00264 <span class="comment">/* arphd.at_next */</span>
+00265 <span class="preprocessor">#undef STRUCT_ARPHD_HAS_AT_NEXT</span>
+00266 
+00267 <span class="comment">/* ifaddr.ifa_next */</span>
+00268 <span class="preprocessor">#undef STRUCT_IFADDR_HAS_IFA_NEXT</span>
+00269 
+00270 <span class="comment">/* ifnet.if_mtu */</span>
+00271 <span class="preprocessor">#undef STRUCT_IFNET_HAS_IF_MTU</span>
+00272 
+00273 <span class="comment">/* swdevt.sw_nblksenabled */</span>
+00274 <span class="preprocessor">#undef STRUCT_SWDEVT_HAS_SW_NBLKSENABLED</span>
+00275 
+00276 <span class="comment">/* nlist.n_value */</span>
+00277 <span class="preprocessor">#undef STRUCT_NLIST_HAS_N_VALUE</span>
+00278 
+00279 <span class="comment">/* ipstat structure tests */</span>
+00280 <span class="preprocessor">#undef STRUCT_IPSTAT_HAS_IPS_CANTFORWARD</span>
+00281 <span class="preprocessor">#undef STRUCT_IPSTAT_HAS_IPS_CANTFRAG</span>
+00282 <span class="preprocessor">#undef STRUCT_IPSTAT_HAS_IPS_DELIVERED</span>
+00283 <span class="preprocessor">#undef STRUCT_IPSTAT_HAS_IPS_FRAGDROPPED</span>
+00284 <span class="preprocessor">#undef STRUCT_IPSTAT_HAS_IPS_FRAGTIMEOUT</span>
+00285 <span class="preprocessor">#undef STRUCT_IPSTAT_HAS_IPS_LOCALOUT</span>
+00286 <span class="preprocessor">#undef STRUCT_IPSTAT_HAS_IPS_NOPROTO</span>
+00287 <span class="preprocessor">#undef STRUCT_IPSTAT_HAS_IPS_NOROUTE</span>
+00288 <span class="preprocessor">#undef STRUCT_IPSTAT_HAS_IPS_ODROPPED</span>
+00289 <span class="preprocessor">#undef STRUCT_IPSTAT_HAS_IPS_OFRAGMENTS</span>
+00290 <span class="preprocessor">#undef STRUCT_IPSTAT_HAS_IPS_REASSEMBLED</span>
+00291 
+00292 <span class="comment">/* vfsstat.f_frsize */</span>
+00293 <span class="preprocessor">#undef STRUCT_STATVFS_HAS_F_FRSIZE</span>
+00294 
+00295 <span class="comment">/* vfsstat.f_files */</span>
+00296 <span class="preprocessor">#undef STRUCT_STATVFS_HAS_F_FILES</span>
+00297 
+00298 <span class="comment">/* statfs inode structure tests*/</span>
+00299 <span class="preprocessor">#undef STRUCT_STATFS_HAS_F_FILES</span>
+00300 <span class="preprocessor">#undef STRUCT_STATFS_HAS_F_FFREE</span>
+00301 <span class="preprocessor">#undef STRUCT_STATFS_HAS_F_FAVAIL</span>
+00302 
+00303 <span class="comment">/* des_ks_struct.weak_key */</span>
+00304 <span class="preprocessor">#undef STRUCT_DES_KS_STRUCT_HAS_WEAK_KEY</span>
+00305 
+00306 <span class="comment">/* ifnet needs to have _KERNEL defined */</span>
+00307 <span class="preprocessor">#undef IFNET_NEEDS_KERNEL</span>
+00308 
+00309 <span class="comment">/* sysctl works to get boottime, etc... */</span>
+00310 <span class="preprocessor">#undef CAN_USE_SYSCTL</span>
+00311 
+00312 <span class="comment">/* type check for in_addr_t */</span>
+00313 <span class="preprocessor">#undef in_addr_t</span>
+00314 
+00315 <span class="comment">/* define if SIOCGIFADDR exists in sys/ioctl.h */</span>
+00316 <span class="preprocessor">#undef SYS_IOCTL_H_HAS_SIOCGIFADDR</span>
+00317 
+00318 <span class="comment">/* define if your compiler (processor) defines __FUNCTION__ for you */</span>
+00319 <span class="preprocessor">#undef HAVE_CPP_UNDERBAR_FUNCTION_DEFINED</span>
+00320 
+00321 <span class="comment">/* Mib-2 tree Info */</span>
+00322 <span class="comment">/* These are the system information variables. */</span>
+00323 
+00324 <span class="preprocessor">#define VERS_DESC   "unknown"             </span><span class=
+"comment">/* overridden at run time */</span>
+00325 <span class="preprocessor">#define SYS_NAME    "unknown"             </span><span class=
+"comment">/* overridden at run time */</span>
+00326 
+00327 <span class="comment">/* comment out the second define to turn off functionality for any of</span>
+00328 <span class="comment">   these: (See README for details) */</span>
+00329 
+00330 <span class="comment">/*   proc PROCESSNAME [MAX] [MIN] */</span>
+00331 <span class="preprocessor">#define PROCMIBNUM 2</span>
+00332 
+00333 <span class="comment">/*   exec/shell NAME COMMAND      */</span>
+00334 <span class="preprocessor">#define SHELLMIBNUM 8</span>
+00335 
+00336 <span class="comment">/*   swap MIN                     */</span>
+00337 <span class="preprocessor">#define MEMMIBNUM 4</span>
+00338 
+00339 <span class="comment">/*   disk DISK MINSIZE            */</span>
+00340 <span class="preprocessor">#define DISKMIBNUM 9</span>
+00341 
+00342 <span class="comment">/*   load 1 5 15                  */</span>
+00343 <span class="preprocessor">#define LOADAVEMIBNUM 10</span>
+00344 
+00345 <span class="comment">/* which version are you using? This mibloc will tell you */</span>
+00346 <span class="preprocessor">#define VERSIONMIBNUM 100</span>
+00347 
+00348 <span class="comment">/* Reports errors the agent runs into */</span>
+00349 <span class="comment">/* (typically its "can't fork, no mem" problems) */</span>
+00350 <span class="preprocessor">#define ERRORMIBNUM 101</span>
+00351 
+00352 <span class="comment">/* The sub id of EXTENSIBLEMIB returned to queries of</span>
+00353 <span class="comment">   .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 */</span>
+00354 <span class="preprocessor">#define AGENTID 250</span>
+00355 
+00356 <span class="comment">/* This ID is returned after the AGENTID above.  IE, the resulting</span>
+00357 <span class="comment">   value returned by a query to sysObjectID is</span>
+00358 <span class="comment">   EXTENSIBLEMIB.AGENTID.???, where ??? is defined below by OSTYPE */</span>
+00359 
+00360 <span class="preprocessor">#define HPUX9ID 1</span>
+00361 <span class="preprocessor">#define SUNOS4ID 2 </span>
+00362 <span class="preprocessor">#define SOLARISID 3</span>
+00363 <span class="preprocessor">#define OSFID 4</span>
+00364 <span class="preprocessor">#define ULTRIXID 5</span>
+00365 <span class="preprocessor">#define HPUX10ID 6</span>
+00366 <span class="preprocessor">#define NETBSD1ID 7</span>
+00367 <span class="preprocessor">#define FREEBSDID 8</span>
+00368 <span class="preprocessor">#define IRIXID 9</span>
+00369 <span class="preprocessor">#define LINUXID 10</span>
+00370 <span class="preprocessor">#define BSDIID 11</span>
+00371 <span class="preprocessor">#define OPENBSDID 12</span>
+00372 <span class="preprocessor">#define WIN32ID 13</span>
+00373 <span class="preprocessor">#define HPUX11ID 14</span>
+00374 <span class="preprocessor">#define UNKNOWNID 255</span>
+00375 
+00376 <span class="preprocessor">#ifdef hpux9</span>
+00377 <span class="preprocessor">#define OSTYPE HPUX9ID</span>
+00378 <span class="preprocessor">#endif</span>
+00379 <span class="preprocessor">#ifdef hpux10</span>
+00380 <span class="preprocessor">#define OSTYPE HPUX10ID</span>
+00381 <span class="preprocessor">#endif</span>
+00382 <span class="preprocessor">#ifdef hpux11</span>
+00383 <span class="preprocessor">#define OSTYPE HPUX11ID</span>
+00384 <span class="preprocessor">#endif</span>
+00385 <span class="preprocessor">#ifdef sunos4</span>
+00386 <span class="preprocessor">#define OSTYPE SUNOS4ID</span>
+00387 <span class="preprocessor">#endif</span>
+00388 <span class="preprocessor">#ifdef solaris2</span>
+00389 <span class="preprocessor">#define OSTYPE SOLARISID</span>
+00390 <span class="preprocessor">#endif</span>
+00391 <span class="preprocessor">#if defined(osf3) || defined(osf4) || defined(osf5)</span>
+00392 <span class="preprocessor">#define OSTYPE OSFID</span>
+00393 <span class="preprocessor">#endif</span>
+00394 <span class="preprocessor">#ifdef ultrix4</span>
+00395 <span class="preprocessor">#define OSTYPE ULTRIXID</span>
+00396 <span class="preprocessor">#endif</span>
+00397 <span class="preprocessor">#ifdef netbsd1</span>
+00398 <span class="preprocessor">#define OSTYPE NETBSD1ID</span>
+00399 <span class="preprocessor">#endif</span>
+00400 <span class="preprocessor">#if defined(__FreeBSD__)</span>
+00401 <span class="preprocessor">#define OSTYPE FREEBSDID</span>
+00402 <span class="preprocessor">#endif</span>
+00403 <span class="preprocessor">#if defined(irix6) || defined(irix5)</span>
+00404 <span class="preprocessor">#define OSTYPE IRIXID</span>
+00405 <span class="preprocessor">#endif</span>
+00406 <span class="preprocessor">#ifdef linux</span>
+00407 <span class="preprocessor">#define OSTYPE LINUXID</span>
+00408 <span class="preprocessor">#endif</span>
+00409 <span class="preprocessor">#if defined(bsdi2) || defined(bsdi3) || defined(bsdi4)</span>
+00410 <span class="preprocessor">#define OSTYPE BSDIID</span>
+00411 <span class="preprocessor">#endif</span>
+00412 <span class="preprocessor">#ifdef openbsd2</span>
+00413 <span class="preprocessor">#define OSTYPE OPENBSDID</span>
+00414 <span class="preprocessor">#endif</span>
+00415 <span class="preprocessor">#ifdef WIN32</span>
+00416 <span class="preprocessor">#define OSTYPE WIN32ID</span>
+00417 <span class="preprocessor">#endif</span>
+00418 <span class="comment">/* unknown */</span>
+00419 <span class="preprocessor">#ifndef OSTYPE</span>
+00420 <span class="preprocessor">#define OSTYPE UNKNOWNID</span>
+00421 <span class="preprocessor">#endif</span>
+00422 
+00423 <span class="comment">/* The enterprise number has been assigned by the IANA group.   */</span>
+00424 <span class="comment">/* Optionally, this may point to the location in the tree your  */</span>
+00425 <span class="comment">/* company/organization has been allocated.                     */</span>
+00426 <span class="comment">/* The assigned enterprise number for the NET_SNMP MIB modules. */</span>
+00427 <span class="preprocessor">#define ENTERPRISE_OID                  8072</span>
+00428 <span class="preprocessor">#define ENTERPRISE_MIB                  1,3,6,1,4,1,8072</span>
+00429 <span class="preprocessor">#define ENTERPRISE_DOT_MIB              1.3.6.1.4.1.8072</span>
+00430 <span class="preprocessor">#define ENTERPRISE_DOT_MIB_LENGTH       7</span>
+00431 
+00432 <span class="comment">/* The assigned enterprise number for sysObjectID. */</span>
+00433 <span class="preprocessor">#define SYSTEM_MIB              1,3,6,1,4,1,8072,3,2,OSTYPE</span>
+00434 <span class="preprocessor">#define SYSTEM_DOT_MIB          1.3.6.1.4.1.8072.3.2.OSTYPE</span>
+00435 <span class="preprocessor">#define SYSTEM_DOT_MIB_LENGTH   10</span>
+00436 
+00437 <span class="comment">/* The assigned enterprise number for notifications. */</span>
+00438 <span class="preprocessor">#define NOTIFICATION_MIB                1,3,6,1,4,1,8072,4</span>
+00439 <span class="preprocessor">#define NOTIFICATION_DOT_MIB            1.3.6.1.4.1.8072.4</span>
+00440 <span class="preprocessor">#define NOTIFICATION_DOT_MIB_LENGTH     8</span>
+00441 
+00442 <span class="comment">/* this is the location of the ucdavis mib tree.  It shouldn't be</span>
+00443 <span class="comment">   changed, as the places it is used are expected to be constant</span>
+00444 <span class="comment">   values or are directly tied to the UCD-SNMP-MIB. */</span>
+00445 <span class="preprocessor">#define UCDAVIS_OID             2021</span>
+00446 <span class="preprocessor">#define UCDAVIS_MIB             1,3,6,1,4,1,2021</span>
+00447 <span class="preprocessor">#define UCDAVIS_DOT_MIB         1.3.6.1.4.1.2021</span>
+00448 <span class="preprocessor">#define UCDAVIS_DOT_MIB_LENGTH  7</span>
+00449 
+00450 <span class="comment">/* this is the location of the net-snmp mib tree.  It shouldn't be</span>
+00451 <span class="comment">   changed, as the places it is used are expected to be constant</span>
+00452 <span class="comment">   values or are directly tied to the UCD-SNMP-MIB. */</span>
+00453 <span class="preprocessor">#define NETSNMP_OID             8072</span>
+00454 <span class="preprocessor">#define NETSNMP_MIB             1,3,6,1,4,1,8072</span>
+00455 <span class="preprocessor">#define NETSNMP_DOT_MIB         1.3.6.1.4.1.8072</span>
+00456 <span class="preprocessor">#define NETSNMP_DOT_MIB_LENGTH  7</span>
+00457 
+00458 <span class="comment">/* how long to wait (seconds) for error querys before reseting the error trap.*/</span>
+00459 <span class="preprocessor">#define ERRORTIMELENGTH 600 </span>
+00460 
+00461 <span class="comment">/* Exec command to fix PROC problems */</span>
+00462 <span class="comment">/* %s will be replaced by the process name in error */</span>
+00463 
+00464 <span class="comment">/* #define PROCFIXCMD "/usr/bin/perl /local/scripts/fixproc %s" */</span>
+00465 
+00466 <span class="comment">/* Exec command to fix EXEC problems */</span>
+00467 <span class="comment">/* %s will be replaced by the exec/script name in error */</span>
+00468 
+00469 <span class="comment">/* #define EXECFIXCMD "/usr/bin/perl /local/scripts/fixproc %s" */</span>
+00470 
+00471 <span class="comment">/* Should exec output Cashing be used (speeds up things greatly), and</span>
+00472 <span class="comment">   if so, After how many seconds should the cache re-newed?  Note:</span>
+00473 <span class="comment">   Don't define CASHETIME to disable cashing completely */</span>
+00474 
+00475 <span class="preprocessor">#define EXCACHETIME 30</span>
+00476 <span class="preprocessor">#define CACHEFILE ".snmp-exec-cache"</span>
+00477 <span class="preprocessor">#define MAXCACHESIZE (200*80)   </span><span class="comment">/* roughly 200 lines max */</span>
+00478 
+00479 <span class="preprocessor">#define MAXDISKS 50                      </span><span class=
+"comment">/* can't scan more than this number */</span>
+00480 
+00481 <span class="comment">/* misc defaults */</span>
+00482 
+00483 <span class="comment">/* default of 100 meg minimum if the minimum size is not specified in</span>
+00484 <span class="comment">   the config file */</span>
+00485 <span class="preprocessor">#define DEFDISKMINIMUMSPACE 100000</span>
+00486 
+00487 <span class="preprocessor">#define DEFMAXLOADAVE 12.0      </span><span class=
+"comment">/* default maximum load average before error */</span>
+00488 
+00489 <span class="comment">/* Because of sleep(1)s, this will also be time to wait (in seconds) for exec</span>
+00490 <span class="comment">   to finish */</span>
+00491 <span class="preprocessor">#define MAXREADCOUNT 100   </span><span class=
+"comment">/* max times to loop reading output from execs. */</span>
+00492 
+00493 <span class="comment">/* The original CMU code had this hardcoded as = 1 */</span>
+00494 <span class="preprocessor">#define SNMPBLOCK 1       </span><span class=
+"comment">/* Set if snmpgets should block and never timeout */</span>
+00495 
+00496 <span class="comment">/* How long to wait before restarting the agent after a snmpset to</span>
+00497 <span class="comment">   EXTENSIBLEMIB.VERSIONMIBNUM.VERRESTARTAGENT.  This is</span>
+00498 <span class="comment">   necessary to finish the snmpset reply before restarting. */</span>
+00499 <span class="preprocessor">#define RESTARTSLEEP 5</span>
+00500 
+00501 <span class="comment">/* Number of community strings to store */</span>
+00502 <span class="preprocessor">#define NUM_COMMUNITIES 5</span>
+00503 
+00504 <span class="comment">/* UNdefine to allow specifying zero-length community string */</span>
+00505 <span class="comment">/* #define NO_ZEROLENGTH_COMMUNITY 1 */</span>
+00506 
+00507 <span class="comment">/* #define EXIT_ON_BAD_KLREAD  */</span>
+00508 <span class="comment">/* define to exit the agent on a bad kernel read */</span>
+00509 
+00510 <span class="preprocessor">#define LASTFIELD -1      </span><span class="comment">/* internal define */</span>
+00511 
+00512 <span class="comment">/* configure options specified */</span>
+00513 <span class="preprocessor">#define CONFIGURE_OPTIONS ""</span>
+00514 
+00515 <span class="comment">/* got socklen_t? */</span>
+00516 <span class="preprocessor">#undef HAVE_SOCKLEN_T</span>
+00517 
+00518 <span class="comment">/* got in_addr_t? */</span>
+00519 <span class="preprocessor">#undef HAVE_IN_ADDR_T</span>
+00520 
+00521 <span class="comment">/* got ssize_t? */</span>
+00522 <span class="preprocessor">#undef HAVE_SSIZE_T</span>
+00523 
+00524 <span class="preprocessor">#ifndef HAVE_STRCHR</span>
+00525 <span class="preprocessor">#ifdef HAVE_INDEX</span>
+00526 <span class="preprocessor"># define strchr index</span>
+00527 <span class="preprocessor"># define strrchr rindex</span>
+00528 <span class="preprocessor">#endif</span>
+00529 <span class="preprocessor">#endif</span>
+00530 
+00531 <span class="preprocessor">#ifndef HAVE_INDEX</span>
+00532 <span class="preprocessor">#ifdef HAVE_STRCHR</span>
+00533 <span class="preprocessor"># define index strchr</span>
+00534 <span class="preprocessor"># define rindex strrchr</span>
+00535 <span class="preprocessor">#endif</span>
+00536 <span class="preprocessor">#endif</span>
+00537 
+00538 <span class="preprocessor">#ifndef HAVE_MEMCPY</span>
+00539 <span class="preprocessor">#ifdef HAVE_BCOPY</span>
+00540 <span class="preprocessor"># define memcpy(d, s, n) bcopy ((s), (d), (n))</span>
+00541 <span class="preprocessor"># define memmove(d, s, n) bcopy ((s), (d), (n))</span>
+00542 <span class="preprocessor"># define memcmp bcmp</span>
+00543 <span class="preprocessor">#endif</span>
+00544 <span class="preprocessor">#endif</span>
+00545 
+00546 <span class="preprocessor">#ifndef HAVE_MEMMOVE</span>
+00547 <span class="preprocessor">#ifdef HAVE_MEMCPY</span>
+00548 <span class="preprocessor"># define memmove memcpy</span>
+00549 <span class="preprocessor">#endif</span>
+00550 <span class="preprocessor">#endif</span>
+00551 
+00552 <span class="preprocessor">#ifndef HAVE_BCOPY</span>
+00553 <span class="preprocessor">#ifdef HAVE_MEMCPY</span>
+00554 <span class="preprocessor"># define bcopy(s, d, n) memcpy ((d), (s), (n))</span>
+00555 <span class="preprocessor"># define bzero(p,n) memset((p),(0),(n))</span>
+00556 <span class="preprocessor"># define bcmp memcmp</span>
+00557 <span class="preprocessor">#endif</span>
+00558 <span class="preprocessor">#endif</span>
+00559 
+00560 <span class="comment">/* If you have openssl 0.9.7 or above, you likely have AES support. */</span>
+00561 <span class="preprocessor">#undef USE_OPENSSL</span>
+00562 <span class=
+"preprocessor">#if defined(USE_OPENSSL) &amp;&amp; defined(HAVE_OPENSSL_AES_H) &amp;&amp; defined(HAVE_AES_CFB128_ENCRYPT)</span>
+00563 <span class="preprocessor">#define HAVE_AES 1</span>
+00564 <span class="preprocessor">#endif</span>
+00565 
+00566 <span class="comment">/* define random functions */</span>
+00567 
+00568 <span class="preprocessor">#ifndef HAVE_RANDOM</span>
+00569 <span class="preprocessor">#ifdef HAVE_LRAND48</span>
+00570 <span class="preprocessor">#define random lrand48</span>
+00571 <span class="preprocessor">#define srandom(s) srand48(s)</span>
+00572 <span class="preprocessor">#else</span>
+00573 <span class="preprocessor">#ifdef HAVE_RAND</span>
+00574 <span class="preprocessor">#define random rand</span>
+00575 <span class="preprocessor">#define srandom(s) srand(s)</span>
+00576 <span class="preprocessor">#endif</span>
+00577 <span class="preprocessor">#endif</span>
+00578 <span class="preprocessor">#endif</span>
+00579 
+00580 <span class="comment">/* define signal if DNE */</span>
+00581 
+00582 <span class="preprocessor">#ifndef HAVE_SIGNAL</span>
+00583 <span class="preprocessor">#ifdef HAVE_SIGSET</span>
+00584 <span class="preprocessor">#define signal(a,b) sigset(a,b)</span>
+00585 <span class="preprocessor">#endif</span>
+00586 <span class="preprocessor">#endif</span>
+00587 
+00588 <span class="comment">/* define if you have librpm and libdb */</span>
+00589 <span class="preprocessor">#undef HAVE_LIBDB</span>
+00590 <span class="preprocessor">#undef HAVE_LIBRPM</span>
+00591 
+00592 <span class="comment">/* define if you have pkginfo */</span>
+00593 <span class="preprocessor">#undef HAVE_PKGINFO</span>
+00594 
+00595 <span class="comment">/* define if you have gethostbyname */</span>
+00596 <span class="preprocessor">#undef HAVE_GETHOSTBYNAME</span>
+00597 
+00598 <span class="comment">/* define if you have getservbyname */</span>
+00599 <span class="preprocessor">#undef HAVE_GETSERVBYNAME</span>
+00600 
+00601 <span class="comment">/* printing system */</span>
+00602 <span class="preprocessor">#undef HAVE_LPSTAT</span>
+00603 <span class="preprocessor">#undef LPSTAT_PATH</span>
+00604 <span class="preprocessor">#undef HAVE_PRINTCAP</span>
+00605 
+00606 <span class="comment">/*  Pluggable transports.  */</span>
+00607 
+00608 <span class="comment">/*  This is defined if support for the UDP/IP transport domain is</span>
+00609 <span class="comment">    available.   */</span>
+00610 <span class="preprocessor">#undef SNMP_TRANSPORT_UDP_DOMAIN</span>
+00611 
+00612 <span class="comment">/*  This is defined if support for the "callback" transport domain is</span>
+00613 <span class="comment">    available.   */</span>
+00614 <span class="preprocessor">#undef SNMP_TRANSPORT_CALLBACK_DOMAIN</span>
+00615 
+00616 <span class="comment">/*  This is defined if support for the TCP/IP transport domain is</span>
+00617 <span class="comment">    available.  */</span>
+00618 <span class="preprocessor">#undef SNMP_TRANSPORT_TCP_DOMAIN</span>
+00619 
+00620 <span class="comment">/*  This is defined if support for the Unix transport domain</span>
+00621 <span class="comment">    (a.k.a. "local IPC") is available.  */</span>
+00622 <span class="preprocessor">#undef SNMP_TRANSPORT_UNIX_DOMAIN</span>
+00623 
+00624 <span class="comment">/*  This is defined if support for the AAL5 PVC transport domain is</span>
+00625 <span class="comment">    available.  */</span>
+00626 <span class="preprocessor">#undef SNMP_TRANSPORT_AAL5PVC_DOMAIN</span>
+00627 
+00628 <span class="comment">/*  This is defined if support for the IPX transport domain is</span>
+00629 <span class="comment">    available.  */</span>
+00630 <span class="preprocessor">#undef SNMP_TRANSPORT_IPX_DOMAIN</span>
+00631 
+00632 <span class="comment">/*  This is defined if support for the UDP/IPv6 transport domain is</span>
+00633 <span class="comment">    available.  */</span>
+00634 <span class="preprocessor">#undef SNMP_TRANSPORT_UDPIPV6_DOMAIN</span>
+00635 
+00636 <span class="comment">/*  This is defined if support for the TCP/IPv6 transport domain is</span>
+00637 <span class="comment">    available.  */</span>
+00638 <span class="preprocessor">#undef SNMP_TRANSPORT_TCPIPV6_DOMAIN</span>
+00639 
+00640 <span class="comment">/* define this if the USM security module is available */</span>
+00641 <span class="preprocessor">#undef SNMP_SECMOD_USM</span>
+00642 
+00643 <span class="comment">/* define this if the KSM (kerberos based snmp) security module is available */</span>
+00644 <span class="preprocessor">#undef SNMP_SECMOD_KSM</span>
+00645 
+00646 <span class="comment">/* define this if we're using the new MIT crypto API */</span>
+00647 <span class="preprocessor">#undef MIT_NEW_CRYPTO</span>
+00648 
+00649 <span class="comment">/* define if you want to build with reentrant/threaded code (incomplete)*/</span>
+00650 <span class="preprocessor">#undef NS_REENTRANT</span>
+00651 
+00652 <span class="comment">/* define if you want to build MFD module rewrites*/</span>
+00653 <span class="preprocessor">#undef NETSNMP_ENABLE_MFD_REWRITES</span>
+00654 
+00655 <span class="comment">/* on aix, if you have perfstat */</span>
+00656 <span class="preprocessor">#undef HAVE_PERFSTAT</span>
+00657 
+00658 <span class="comment">/* Not-to-be-compiled macros for use by configure only */</span>
+00659 <span class="preprocessor">#define config_require(x)</span>
+00660 <span class="preprocessor">#define config_exclude(x)</span>
+00661 <span class="preprocessor">#define config_arch_require(x,y)</span>
+00662 <span class="preprocessor">#define config_parse_dot_conf(w,x,y,z)</span>
+00663 <span class="preprocessor">#define config_add_mib(x)</span>
+00664 <span class="preprocessor">#define config_belongs_in(x)</span>
+00665   
+00666 <span class="preprocessor">#if defined (WIN32) || defined (mingw32) || defined (cygwin)</span>
+00667 <span class="preprocessor">#define ENV_SEPARATOR ";"</span>
+00668 <span class="preprocessor">#define ENV_SEPARATOR_CHAR ';'</span>
+00669 <span class="preprocessor">#else</span>
+00670 <span class="preprocessor">#define ENV_SEPARATOR ":"</span>
+00671 <span class="preprocessor">#define ENV_SEPARATOR_CHAR ':'</span>
+00672 <span class="preprocessor">#endif</span>
+00673 
+00674 <span class="comment">/*</span>
+00675 <span class="comment"> * this must be before the system/machine includes, to allow them to</span>
+00676 <span class="comment"> * override and turn off inlining. To do so, they should do the</span>
+00677 <span class="comment"> * following:</span>
+00678 <span class="comment"> *</span>
+00679 <span class="comment"> *    #undef NETSNMP_ENABLE_INLINE</span>
+00680 <span class="comment"> *    #define NETSNMP_ENABLE_INLINE 0</span>
+00681 <span class="comment"> *</span>
+00682 <span class="comment"> * A user having problems with their compiler can also turn off</span>
+00683 <span class="comment"> * the use of inline by defining NETSNMP_NO_INLINE via their cflags:</span>
+00684 <span class="comment"> *</span>
+00685 <span class="comment"> *    -DNETSNMP_NO_INLINE</span>
+00686 <span class="comment"> *</span>
+00687 <span class="comment"> * Header and source files should only test against NETSNMP_USE_INLINE:</span>
+00688 <span class="comment"> *</span>
+00689 <span class="comment"> *   #ifdef NETSNMP_USE_INLINE</span>
+00690 <span class="comment"> *   NETSNMP_INLINE function(int parm) { return parm -1; }</span>
+00691 <span class="comment"> *   #endif</span>
+00692 <span class="comment"> *</span>
+00693 <span class="comment"> * Functions which should be static, regardless of whether or not inline</span>
+00694 <span class="comment"> * is available or enabled should use the NETSNMP_STATIC_INLINE macro,</span>
+00695 <span class="comment"> * like so:</span>
+00696 <span class="comment"> *</span>
+00697 <span class="comment"> *    NETSNMP_STATIC_INLINE function(int parm) { return parm -1; }</span>
+00698 <span class="comment"> *</span>
+00699 <span class="comment"> * NOT like this:</span>
+00700 <span class="comment"> *</span>
+00701 <span class="comment"> *    static NETSNMP_INLINE function(int parm) { return parm -1; }</span>
+00702 <span class="comment"> *</span>
+00703 <span class="comment"> */</span>
+00704 <span class="preprocessor">#undef NETSNMP_BROKEN_INLINE</span>
+00705 <span class="preprocessor">#ifdef NETSNMP_BROKEN_INLINE</span>
+00706 <span class="preprocessor">#   define NETSNMP_ENABLE_INLINE 0</span>
+00707 <span class="preprocessor">#else</span>
+00708 <span class="preprocessor">#   define NETSNMP_ENABLE_INLINE 1</span>
+00709 <span class="preprocessor">#endif</span>
+00710 
+00711 <span class="preprocessor">#include SYSTEM_INCLUDE_FILE</span>
+00712 <span class="preprocessor">#include MACHINE_INCLUDE_FILE</span>
+00713 
+00714 <span class="preprocessor">#if NETSNMP_ENABLE_INLINE &amp;&amp; !defined(NETSNMP_NO_INLINE)</span>
+00715 <span class="preprocessor">#   define NETSNMP_USE_INLINE 1</span>
+00716 <span class="preprocessor">#   ifndef NETSNMP_INLINE</span>
+00717 <span class="preprocessor">#      define NETSNMP_INLINE inline</span>
+00718 <span class="preprocessor">#   endif</span>
+00719 <span class="preprocessor">#   ifndef NETSNMP_STATIC_INLINE</span>
+00720 <span class="preprocessor">#      define NETSNMP_STATIC_INLINE static inline</span>
+00721 <span class="preprocessor">#   endif</span>
+00722 <span class="preprocessor">#else</span>
+00723 <span class="preprocessor">#   define NETSNMP_INLINE </span>
+00724 <span class="preprocessor">#   define NETSNMP_STATIC_INLINE static</span>
+00725 <span class="preprocessor">#endif</span>
+00726 
+00727 <span class="preprocessor">#ifndef NETSNMP_IMPORT</span>
+00728 <span class="preprocessor">#  define NETSNMP_IMPORT extern</span>
+00729 <span class="preprocessor">#endif</span>
+00730 
+00731 <span class=
+"preprocessor">#if defined(HAVE_NLIST) &amp;&amp; defined(STRUCT_NLIST_HAS_N_VALUE) &amp;&amp; !defined(DONT_USE_NLIST) &amp;&amp; !defined(NO_KMEM_USAGE)</span>
+00732 <span class="preprocessor">#define CAN_USE_NLIST</span>
+00733 <span class="preprocessor">#endif</span>
+00734 
+00735 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00736 <span class="preprocessor">#define DMALLOC_FUNC_CHECK</span>
+00737 <span class="preprocessor">#endif</span>
+00738 
+00739 <span class="preprocessor">#undef INET6</span>
+00740 <span class="preprocessor">#undef LOCAL_SMUX</span>
+00741 
+00742 <span class="comment">/* define if agentx transport is to use domain sockets only */</span>
+00743 <span class="preprocessor">#undef AGENTX_DOM_SOCK_ONLY</span>
+00744 
+00745 <span class="preprocessor">#undef HEIMDAL</span>
+00746 
+00747 <span class="preprocessor">#endif </span><span class="comment">/* NET_SNMP_CONFIG_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:55 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

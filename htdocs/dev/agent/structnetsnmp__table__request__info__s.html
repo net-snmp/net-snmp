@@ -1,0 +1,209 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>netsnmp_table_request_info_s Struct Reference</h1>The table request info structure. <a href="#_details">More...</a>
+
+  <p><code>#include &lt;<a class="el" href="table_8h-source.html">table.h</a>&gt;</code></p>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <br />
+
+        <h2>Data Fields</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">unsigned int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__table__request__info__s.html#o0">colnum</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">0 if OID not long enough <a href="#o0"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top">unsigned int&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__table__request__info__s.html#o1">number_indexes</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">0 if failure to parse any <a href="#o1"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="el" href=
+      "structvariable__list.html">netsnmp_variable_list</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><a class="el" href=
+      "structnetsnmp__table__request__info__s.html#o2">indexes</a></td>
+    </tr>
+
+    <tr>
+      <td class="mdescLeft">&nbsp;</td>
+
+      <td class="mdescRight">contents freed by helper upon exit <a href="#o2"></a><br /></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o3" doxytag=
+      "netsnmp_table_request_info_s::index_oid" id="o3"></a> oid&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>index_oid</b> [MAX_OID_LEN]</td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o4" doxytag=
+      "netsnmp_table_request_info_s::index_oid_len" id="o4"></a> size_t&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>index_oid_len</b></td>
+    </tr>
+
+    <tr>
+      <td class="memItemLeft" nowrap="nowrap" align="right" valign="top"><a class="anchor" name="o5" doxytag=
+      "netsnmp_table_request_info_s::reg_info" id="o5"></a> <a class="el" href=
+      "structnetsnmp__table__registration__info__s.html">netsnmp_table_registration_info</a> *&nbsp;</td>
+
+      <td class="memItemRight" valign="bottom"><b>reg_info</b></td>
+    </tr>
+  </table>
+  <hr />
+  <a name="_details" id="_details"></a>
+
+  <h2>Detailed Description</h2>The table request info structure.
+
+  <p>Definition at line <a class="el" href="table_8h-source.html#l00102">102</a> of file <a class="el" href=
+  "table_8h-source.html">table.h</a>.</p>
+  <hr />
+
+  <h2>Field Documentation</h2><a class="anchor" name="o0" doxytag="netsnmp_table_request_info_s::colnum" id="o0"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">unsigned int <a class="el" href=
+            "structnetsnmp__table__request__info__s.html#o0">netsnmp_table_request_info_s::colnum</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>0 if OID not long enough</p>
+
+        <p>Definition at line <a class="el" href="table_8h-source.html#l00104">104</a> of file <a class="el" href=
+        "table_8h-source.html">table.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="table_8c-source.html#l00772">netsnmp_table_build_oid()</a>, <a class="el" href=
+        "table_8c-source.html#l00806">netsnmp_table_build_oid_from_index()</a>, <a class="el" href=
+        "table__data_8c-source.html#l00313">netsnmp_table_data_helper_handler()</a>, <a class="el" href=
+        "table__dataset_8c-source.html#l00419">netsnmp_table_data_set_helper_handler()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, and <a class="el" href=
+        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o2" doxytag="netsnmp_table_request_info_s::indexes" id="o2"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top"><a class="el" href="structvariable__list.html">netsnmp_variable_list</a>*
+            <a class="el" href="structnetsnmp__table__request__info__s.html#o2">netsnmp_table_request_info_s::indexes</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>contents freed by helper upon exit</p>
+
+        <p>Definition at line <a class="el" href="table_8h-source.html#l00108">108</a> of file <a class="el" href=
+        "table_8h-source.html">table.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="table__iterator_8c-source.html#l00171">netsnmp_insert_iterator_context()</a>,
+        <a class="el" href="table__data_8c-source.html#l00562">netsnmp_insert_table_row()</a>, <a class="el" href=
+        "table_8c-source.html#l00772">netsnmp_table_build_oid()</a>, <a class="el" href=
+        "table__iterator_8c-source.html#l00309">netsnmp_table_iterator_helper_handler()</a>, <a class="el" href=
+        "table_8c-source.html#l00846">netsnmp_update_indexes_from_variable_list()</a>, <a class="el" href=
+        "table_8c-source.html#l00835">netsnmp_update_variable_list_from_index()</a>, and <a class="el" href=
+        "table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table><a class="anchor" name="o1" doxytag="netsnmp_table_request_info_s::number_indexes" id="o1"></a>
+
+  <table class="mdTable" width="100%" cellpadding="2" cellspacing="0">
+    <tr>
+      <td class="mdRow">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td class="md" nowrap="nowrap" valign="top">unsigned int <a class="el" href=
+            "structnetsnmp__table__request__info__s.html#o1">netsnmp_table_request_info_s::number_indexes</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table cellspacing="5" cellpadding="0" border="0">
+    <tr>
+      <td>&nbsp;</td>
+
+      <td>
+        <p>0 if failure to parse any</p>
+
+        <p>Definition at line <a class="el" href="table_8h-source.html#l00106">106</a> of file <a class="el" href=
+        "table_8h-source.html">table.h</a>.</p>
+
+        <p>Referenced by <a class="el" href="table_8c-source.html#l00145">table_helper_handler()</a>.</p>
+      </td>
+    </tr>
+  </table>
+  <hr />
+  The documentation for this struct was generated from the following file:
+
+  <ul>
+    <li><a class="el" href="table_8h-source.html">table.h</a></li>
+  </ul>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:03 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

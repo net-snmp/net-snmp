@@ -1,0 +1,64 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <center><h1>UCD-SNMP Tutorial -- Toolkit</h1></center>
+    <hr>
+    <p>
+      <b>Note:</b>  Much of this tutorial requires <a
+	href="ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
+	so make sure you get it before running the commands found in
+	this tutorial.</b> 
+      <p><b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
+      href="/tutorial-5">is available</a> as well.  The commands is
+      the ucd-snmp specific tutorial will not work as expected if you
+      are using net-snmp and not ucd-snmp.
+      <br><br>
+    <hr>
+    <p>
+      The examples found below should give you enough of a starting
+      point to begin developing simple programs using the ucd-snmp
+      libraries.  Here are the files that we are going to talk about
+      and generate:
+      <table border=1>
+	<tr bgcolor="#d0d0ff"><th>File</th><th>Description</th></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="demoapp/Makefile">Makefile</a></td><td>A simple makefile 
+	used to build the projects</td>
+	<tr bgcolor="#d0d0ff"><td>
+	  <a href="demoapp/snmpdemoapp.c">snmpdemoapp.c</a></td><td>The sample
+	application code</td></tr>
+	<tr bgcolor="#d0d0ff"><td>
+	  <a href="asyncapp/asyncapp.c">asyncapp.c</a></td><td>The asynchronous
+	application code</td></tr>
+	<tr bgcolor="#d0d0ff"><td>
+	    <a href="mib_module/UCD-SNMP-TUTORIAL-MIB.txt">UCD-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be writing
+	code for</td></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="mib_module/ustScalarSet.h">ustScalarSet.h</a></td><td>The mib module's header file</td></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+	href="mib_module/ustScalarSet.c">ustScalarSet.c</a></td><td>The mib module's C source code</td></tr>
+	<tr bgcolor="#d0d0ff"><td><a
+		href="demon/ustMain.c">ustMain.c</a></td><td>The
+	      main() code for a demon we'll be writing</td></tr>
+      </table>
+    <p><b>Note:</b> of these demonstrations required ucd-snmp-4.1 or
+      higher.
+    <h3>Sections</h3>
+    <ol>
+      <li>Programming a <a href="demoapp/index.html">simple application</a>.</li>
+      <li>Programming a <a href="asyncapp/index.html">asynchronous application</a>.</li>
+      <li>Programming a <a href="mib_module/index.html">mib module</a> to serve
+      information described by an SNMP MIB.</li>
+      <li>Compiling the mib module above to be used as a <a href="dlmod/index.html">dynamically loaded shared object.</a>
+      <li>Writing a <a href="demon/index.html">subagent program</a> to attach to the master SNMP
+	agent using the mib module from above.</li>
+    </ol>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Fri Nov  5 11:36:21 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Mon Mar 25 08:39:54 PST 2002
+<!-- hhmts end -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

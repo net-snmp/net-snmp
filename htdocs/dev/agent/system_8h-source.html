@@ -1,0 +1,205 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>system.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef SNMP_SYSTEM_H</span>
+00002 <span class="preprocessor">#define SNMP_SYSTEM_H</span>
+00003 
+00004 <span class="preprocessor">#ifndef NET_SNMP_CONFIG_H</span>
+00005 <span class="preprocessor">#error "Please include &lt;net-snmp/net-snmp-config.h&gt; before this file"</span>
+00006 <span class="preprocessor">#endif</span>
+00007 
+00008 <span class="preprocessor">#ifdef __cplusplus</span>
+00009 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00010 <span class="preprocessor">#endif</span>
+00011 
+00012 <span class="comment">/* Portions of this file are subject to the following copyrights.  See</span>
+00013 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00014 <span class="comment"> * that may apply:</span>
+00015 <span class="comment"> */</span>
+00016 <span class="comment">/***********************************************************</span>
+00017 <span class="comment">        Copyright 1993 by Carnegie Mellon University</span>
+00018 
+00019 <span class="comment">                      All Rights Reserved</span>
+00020 
+00021 <span class="comment">Permission to use, copy, modify, and distribute this software and its</span>
+00022 <span class="comment">documentation for any purpose and without fee is hereby granted,</span>
+00023 <span class="comment">provided that the above copyright notice appear in all copies and that</span>
+00024 <span class="comment">both that copyright notice and this permission notice appear in</span>
+00025 <span class="comment">supporting documentation, and that the name of CMU not be</span>
+00026 <span class="comment">used in advertising or publicity pertaining to distribution of the</span>
+00027 <span class="comment">software without specific, written prior permission.</span>
+00028 
+00029 <span class="comment">CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING</span>
+00030 <span class="comment">ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL</span>
+00031 <span class="comment">CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR</span>
+00032 <span class="comment">ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,</span>
+00033 <span class="comment">WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,</span>
+00034 <span class="comment">ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS</span>
+00035 <span class="comment">SOFTWARE.</span>
+00036 <span class="comment">******************************************************************/</span>
+00037 <span class="comment">/*</span>
+00038 <span class="comment"> * portions Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00039 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00040 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00041 <span class="comment"> */</span>
+00042 
+00043 
+00044     <span class="comment">/*</span>
+00045 <span class="comment">     * function to create a daemon. Will fork and call setsid().</span>
+00046 <span class="comment">     *</span>
+00047 <span class="comment">     * Returns: -1 : fork failed</span>
+00048 <span class="comment">     *           0 : No errors</span>
+00049 <span class="comment">     */</span>
+00050     <span class="keywordtype">int</span> netsnmp_daemonize(<span class=
+"keywordtype">int</span> quit_immediately, <span class="keywordtype">int</span> stderr_log);
+00051 
+00052     <span class="comment">/*</span>
+00053 <span class="comment">     * Definitions for the system dependent library file</span>
+00054 <span class="comment">     */</span>
+00055 <span class="preprocessor">#ifndef MSVC_PERL</span>
+00056 <span class="preprocessor">#ifdef WIN32</span>
+00057 
+00058 <span class="preprocessor">#ifndef HAVE_DIRENT_H </span><span class=
+"comment">/* MingGW has dirent.h but also defines WIN32 */</span>
+00059     <span class="comment">/*</span>
+00060 <span class="comment">     * structure of a directory entry </span>
+00061 <span class="comment">     */</span>
+00062     <span class="keyword">typedef</span> <span class="keyword">struct </span>direct {
+00063         <span class="keywordtype">long</span>            d_ino;  <span class=
+"comment">/* inode number (not used by MS-DOS) */</span>
+00064         <span class="keywordtype">int</span>             d_namlen;       <span class="comment">/* Name length */</span>
+00065         <span class="keywordtype">char</span>            d_name[257];    <span class="comment">/* file name */</span>
+00066     } _DIRECT;
+00067 
+00068     <span class="comment">/*</span>
+00069 <span class="comment">     * structure for dir operations </span>
+00070 <span class="comment">     */</span>
+00071     <span class="keyword">typedef</span> <span class="keyword">struct </span>_dir_struc {
+00072         <span class="keywordtype">char</span>           *start;  <span class="comment">/* Starting position */</span>
+00073         <span class="keywordtype">char</span>           *curr;   <span class="comment">/* Current position */</span>
+00074         <span class="keywordtype">long</span>            size;   <span class="comment">/* Size of string table */</span>
+00075         <span class="keywordtype">long</span>            nfiles; <span class=
+"comment">/* number if filenames in table */</span>
+00076         <span class="keyword">struct </span>direct   dirstr; <span class=
+"comment">/* Directory structure to return */</span>
+00077     } DIR;
+00078 
+00079     DIR            *opendir(<span class="keyword">const</span> <span class="keywordtype">char</span> *filename);
+00080     <span class="keyword">struct </span>direct  *readdir(DIR * dirp);
+00081     <span class="keywordtype">int</span>             closedir(DIR * dirp);
+00082 <span class="preprocessor">#endif </span><span class="comment">/* HAVE_DIRENT_H */</span>
+00083 
+00084 <span class="preprocessor">#ifndef HAVE_GETTIMEOFDAY</span>
+00085     <span class="keywordtype">int</span>             gettimeofday(<span class=
+"keyword">struct</span> timeval *, <span class="keyword">struct</span> timezone *tz);
+00086 <span class="preprocessor">#endif</span>
+00087 <span class="preprocessor">#ifndef HAVE_STRCASECMP</span>
+00088     <span class="keywordtype">int</span>             strcasecmp(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *s1, <span class="keyword">const</span> <span class="keywordtype">char</span> *s2);
+00089 <span class="preprocessor">#endif</span>
+00090 <span class="preprocessor">#ifndef HAVE_STRNCASECMP</span>
+00091     <span class="keywordtype">int</span>             strncasecmp(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *s1, <span class="keyword">const</span> <span class="keywordtype">char</span> *s2, size_t n);
+00092 <span class="preprocessor">#endif</span>
+00093 
+00094     <span class="keywordtype">char</span>           *winsock_startup(<span class="keywordtype">void</span>);
+00095     <span class="keywordtype">void</span>            winsock_cleanup(<span class="keywordtype">void</span>);
+00096 
+00097 <span class="preprocessor">#define SOCK_STARTUP winsock_startup()</span>
+00098 <span class="preprocessor">#define SOCK_CLEANUP winsock_cleanup()</span>
+00099 
+00100 <span class="preprocessor">#else                           </span><span class="comment">/* !WIN32 */</span>
+00101 
+00102 <span class="preprocessor">#define SOCK_STARTUP</span>
+00103 <span class="preprocessor">#define SOCK_CLEANUP</span>
+00104 
+00105 <span class="preprocessor">#endif                          </span><span class="comment">/* WIN32 */</span>
+00106 <span class="preprocessor">#endif                          </span><span class="comment">/* MSVC_PERL */</span>
+00107 
+00108 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>     <span class=
+"comment">/* For definition of in_addr_t */</span>
+00109 
+00110     in_addr_t       get_myaddr(<span class="keywordtype">void</span>);
+00111     <span class="keywordtype">long</span>            get_uptime(<span class="keywordtype">void</span>);
+00112 
+00113 <span class="preprocessor">#ifndef HAVE_STRDUP</span>
+00114     <span class="keywordtype">char</span>           *strdup(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *);
+00115 <span class="preprocessor">#endif</span>
+00116 <span class="preprocessor">#ifndef HAVE_SETENV</span>
+00117     <span class="keywordtype">int</span>             setenv(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *, <span class=
+"keywordtype">int</span>);
+00118 <span class="preprocessor">#endif</span>
+00119 
+00120     <span class="keywordtype">int</span>             calculate_time_diff(<span class="keyword">struct</span> timeval *,
+00121                                         <span class="keyword">struct</span> timeval *);
+00122     u_int           calculate_sectime_diff(<span class="keyword">struct</span> timeval *now,
+00123                                            <span class="keyword">struct</span> timeval *then);
+00124 
+00125 <span class="preprocessor">#ifndef HAVE_STRCASESTR</span>
+00126     <span class="keywordtype">char</span>           *strcasestr(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *);
+00127 <span class="preprocessor">#endif</span>
+00128 <span class="preprocessor">#ifndef HAVE_STRTOL</span>
+00129     <span class="keywordtype">long</span>            strtol(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, <span class="keywordtype">char</span> **, <span class="keywordtype">int</span>);
+00130 <span class="preprocessor">#endif</span>
+00131 <span class="preprocessor">#ifndef HAVE_STRTOUL</span>
+00132     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   strtoul(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keywordtype">char</span> **, <span class=
+"keywordtype">int</span>);
+00133 <span class="preprocessor">#endif</span>
+00134 <span class="preprocessor">#ifndef HAVE_STRTOK_R</span>
+00135     <span class="keywordtype">char</span>           *strtok_r(<span class="keywordtype">char</span> *, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, <span class="keywordtype">char</span> **);
+00136 <span class="preprocessor">#endif</span>
+00137 <span class="preprocessor">#ifndef HAVE_SNPRINTF</span>
+00138     <span class="keywordtype">int</span>             snprintf(<span class="keywordtype">char</span> *, size_t, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *, ...);
+00139 <span class="preprocessor">#endif</span>
+00140 
+00141     <span class="keywordtype">int</span>             mkdirhier(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *pathname, mode_t mode,
+00142                               <span class="keywordtype">int</span> skiplast);
+00143 <span class="preprocessor">#ifndef HAVE_STRLCPY</span>
+00144     size_t            strlcpy(<span class="keywordtype">char</span> *, <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *, size_t);
+00145 <span class="preprocessor">#endif</span>
+00146 
+00147     <span class="keywordtype">int</span>             netsnmp_os_prematch(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *ospmname,
+00148                                         <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *ospmrelprefix);
+00149 
+00150 <span class="preprocessor">#ifdef __cplusplus</span>
+00151 }
+00152 <span class="preprocessor">#endif</span>
+00153 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_SYSTEM_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:02 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

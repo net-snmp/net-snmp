@@ -1,0 +1,136 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML>
+<HEAD>
+<TITLE>Extending the UCD agent - simple tables</TITLE>
+</HEAD>
+<BODY>
+<H1> Simple tables </H1>
+
+Having considered the simplest style of module implementation,
+we now turn our attention to the next style - a <I>simple table</I>.
+The tabular nature of these is immediately apparent from the
+MIB definition file, but the qualifier <I>simple</I> deserves a word of
+explanation.
+<BR>
+  A simple table, in this context, has four characteristics:
+<OL>
+<LI> It is indexed by a single integer value;
+<LI> Such indices run from 1 to a determinable maximum;
+<LI> All indices within this range are valid;
+<LI> The data for a particular index can be retrieved directly<BR>
+		(e.g. by indexing into an underlying data structure).
+</OL>
+
+  If any of the conditions are not met, then the table is not a pure
+<I>simple</I> one, and the techniques described here are not applicable.
+The next section of this guide will cover the more general case.
+(In fact, it may be possible to use the bulk of the techniques
+covered here, though special handling will be needed to cope with
+the invalid assumption or assumptions).
+Note that <CODE>mib2c</CODE> assumes that all tables are simple.
+<P>
+  As with the scalar case, the variable routine needs to provide two
+basic functions - request validation and data retrieval.
+
+
+<H2>Validation</H2>
+
+  This is provided by the shared utility routine <CODE>header_simple_table</CODE>
+As with the scalar header routine, this takes the same parameters
+as the main variable routine, with one addition - the maximum
+valid index. <CODE>Mib2c</CODE> generates a dummy token for this,
+which must be replaced by the appropriate value.
+<BR>
+  As with the header routine, it also returns an indication of
+whether the request was valid, as well as setting up the return
+parameters with the matching OID information, and defaults for
+var_len and write_method.
+<BR>
+<FONT SIZE=-1>Note that in releases prior to 3.6, this job was
+performed by the routine <CODE>checkmib</CODE>. However, the return
+values of this were the reverse of those for <CODE>generic_header</CODE>
+and <CODE>header_simple_table</CODE>.
+A version of <CODE>checkmib</CODE> is still available for compatability
+purposes, but you are encouraged to use <CODE>header_simple_table</CODE>
+instead.
+</FONT><P>
+The basic code fragment 
+(see <CODE>ucd-snmp/disk.c</CODE>)
+is therefore of the form:
+
+<PRE>
+	unsigned char *
+	var_extensible_disk(vp, name, length, exact, var_len, write_method)
+	{
+	    if (header_simple_table(vp,name,length,exact,var_len,write_method,numdisks)
+					== MATCH_FAILED)
+		return(NULL);
+
+	    <I>[ etc, etc, etc ]</I>
+
+	}
+</PRE>
+
+Note that the maximum index value parameter does not have to be a permanently
+fixed constant.  It specifies the maximum valid index at the time the request
+is processed, and a subsequent request may have a different maximum.
+<BR>
+An example of this can be seen in <CODE>mibII/sysORTable.c</CODE> where the table
+is held purely internally to the agent code, including its size (and hence
+the maximum valid index).  This maximum could also be retrieved via a
+system call, or via a kernel data variable.
+
+
+<H2>Data Retrieval</H2>
+
+As with the scalar case, the other required function is to retrieve
+the data requested.  However, given the definition of a <I>simple table</I>
+this is simply a matter of using the single, integer index sub-identifier
+to index into an existing data structure.
+  This index will always be the last index of the OID returned
+by <CODE>header_simple_table</CODE>, so can be obtained as
+<CODE>name[*length-1]</CODE>.
+<BR>
+  A good example of this type of table can be seen in <CODE>ucd-snmp/disk.c</CODE>
+<P>
+  With some modules, this underlying table may be relatively large,
+or only accessible via a slow or cumbersome interface.  The
+implementation described so far may prove unacceptably slow,
+particularly when walking a MIB tree requires the table to be
+loaded afresh for each variable requested.
+<P>
+  In these circumstances, 
+a useful technique is to cache the table when it is first read in,
+and use that cache for subsequent requests.
+  This can be done by having a separate routine to read in the table.
+This uses two static variables, one a structure or array for the data
+itself, and the other an additional timestamp to indicate when the table was last
+loaded.  When a call is made to this routine to "read" the table,
+it can first check whether the cached table is "new enough".
+If so, it can return immediately, and the system will use the cached data.
+<BR>
+Only if the cached version is sufficiently old that it's probably out
+of date, is it necessary to retrieve the current data, updating the
+cached version and the timestamp value.
+<BR>
+This is particularly useful if the data itself is relatively static,
+such as a list of mounted filesystems.
+There is an example of this technique in the Host Resources
+implementation.
+<P>
+As with the scalar case, <CODE>mib2c</CODE> simply provides placeholder
+dummy return values.  It's up to the programmer to fill in the details.
+<P>
+The <A HREF=07-table2.html>next part</A> concludes the examination
+of the detailed implementation by looking at more general tables.
+<P><HR>
+Copyright 1999 - D.T.Shield.
+Not to be distributed without the explicit permission of the author.
+</BODY>
+</HTML>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

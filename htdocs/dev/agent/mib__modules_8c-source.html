@@ -1,0 +1,177 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>
+  </div>
+
+  <h1>mib_modules.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * wrapper to call all the mib module initialization functions </span>
+00003 <span class="comment"> */</span>
+00004 
+00005 <span class="preprocessor">#include &lt;net-snmp/agent/mib_module_config.h&gt;</span>
+00006 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00007 <span class="preprocessor">#if HAVE_STRING_H</span>
+00008 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00009 <span class="preprocessor">#else</span>
+00010 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00011 <span class="preprocessor">#endif</span>
+00012 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00013 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00014 <span class="preprocessor">#endif</span>
+00015 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00016 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+00017 <span class="preprocessor">#endif</span>
+00018 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00019 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00020 <span class="preprocessor"># ifdef WIN32</span>
+00021 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00022 <span class="preprocessor"># else</span>
+00023 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00024 <span class="preprocessor"># endif</span>
+00025 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00026 <span class="preprocessor">#else</span>
+00027 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00028 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00029 <span class="preprocessor"># else</span>
+00030 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00031 <span class="preprocessor"># endif</span>
+00032 <span class="preprocessor">#endif</span>
+00033 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00034 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00035 <span class="preprocessor">#endif</span>
+00036 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00037 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00038 <span class="preprocessor">#endif</span>
+00039 
+00040 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00041 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00042 <span class="preprocessor">#endif</span>
+00043 
+00044 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00045 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00046 <span class="preprocessor">#include "m2m.h"</span>
+00047 
+00048 <span class="preprocessor">#include "mibgroup/struct.h"</span>
+00049 <span class="preprocessor">#include &lt;net-snmp/agent/mib_modules.h&gt;</span>
+00050 <span class="preprocessor">#include &lt;net-snmp/agent/table.h&gt;</span>
+00051 <span class="preprocessor">#include &lt;net-snmp/agent/table_iterator.h&gt;</span>
+00052 <span class="preprocessor">#include "mib_module_includes.h"</span>
+00053 <span class="preprocessor">#ifdef USING_AGENTX_SUBAGENT_MODULE</span>
+00054 <span class="preprocessor">#include "mibgroup/agentx/subagent.h"</span>
+00055 <span class="preprocessor">#endif</span>
+00056 
+00057 <span class="keyword">struct </span>module_init_list *initlist = NULL;
+00058 <span class="keyword">struct </span>module_init_list *noinitlist = NULL;
+00059 
+00060 
+00061 <span class="keywordtype">void</span>
+00062 add_to_init_list(<span class="keywordtype">char</span> *module_list)
+00063 {
+00064     <span class="keyword">struct </span>module_init_list *newitem, **list;
+00065     <span class="keywordtype">char</span>           *cp;
+00066     <span class="keywordtype">char</span>           *st;
+00067 
+00068     <span class="keywordflow">if</span> (module_list == NULL) {
+00069         <span class="keywordflow">return</span>;
+00070     } <span class="keywordflow">else</span> {
+00071         cp = (<span class="keywordtype">char</span> *) module_list;
+00072     }
+00073 
+00074     <span class="keywordflow">if</span> (*cp == <span class="charliteral">'-'</span> || *cp == <span class=
+"charliteral">'!'</span>) {
+00075         cp++;
+00076         list = &amp;noinitlist;
+00077     } <span class="keywordflow">else</span> {
+00078         list = &amp;initlist;
+00079     }
+00080 
+00081     cp = strtok_r(cp, <span class="stringliteral">", :"</span>, &amp;st);
+00082     <span class="keywordflow">while</span> (cp) {
+00083         newitem = (<span class="keyword">struct </span>module_init_list *) calloc(1, <span class=
+"keyword">sizeof</span>(*initlist));
+00084         newitem-&gt;module_name = strdup(cp);
+00085         newitem-&gt;next = *list;
+00086         *list = newitem;
+00087         cp = strtok_r(NULL, <span class="stringliteral">", :"</span>, &amp;st);
+00088     }
+00089 }
+00090 
+00091 <span class="keywordtype">int</span>
+00092 should_init(<span class="keyword">const</span> <span class="keywordtype">char</span> *module_name)
+00093 {
+00094     <span class="keyword">struct </span>module_init_list *listp;
+00095 
+00096     <span class="comment">/*</span>
+00097 <span class="comment">     * a definitive list takes priority </span>
+00098 <span class="comment">     */</span>
+00099     <span class="keywordflow">if</span> (initlist) {
+00100         listp = initlist;
+00101         <span class="keywordflow">while</span> (listp) {
+00102             <span class="keywordflow">if</span> (strcmp(listp-&gt;module_name, module_name) == 0) {
+00103                 DEBUGMSGTL((<span class="stringliteral">"mib_init"</span>, <span class=
+"stringliteral">"initializing: %s\n"</span>,
+00104                             module_name));
+00105                 <span class="keywordflow">return</span> DO_INITIALIZE;
+00106             }
+00107             listp = listp-&gt;next;
+00108         }
+00109         DEBUGMSGTL((<span class="stringliteral">"mib_init"</span>, <span class=
+"stringliteral">"skipping:     %s\n"</span>, module_name));
+00110         <span class="keywordflow">return</span> DONT_INITIALIZE;
+00111     }
+00112 
+00113     <span class="comment">/*</span>
+00114 <span class="comment">     * initialize it only if not on the bad list (bad module, no bone) </span>
+00115 <span class="comment">     */</span>
+00116     <span class="keywordflow">if</span> (noinitlist) {
+00117         listp = noinitlist;
+00118         <span class="keywordflow">while</span> (listp) {
+00119             <span class="keywordflow">if</span> (strcmp(listp-&gt;module_name, module_name) == 0) {
+00120                 DEBUGMSGTL((<span class="stringliteral">"mib_init"</span>, <span class=
+"stringliteral">"skipping:     %s\n"</span>,
+00121                             module_name));
+00122                 <span class="keywordflow">return</span> DONT_INITIALIZE;
+00123             }
+00124             listp = listp-&gt;next;
+00125         }
+00126     }
+00127     DEBUGMSGTL((<span class="stringliteral">"mib_init"</span>, <span class=
+"stringliteral">"initializing: %s\n"</span>, module_name));
+00128 
+00129     <span class="comment">/*</span>
+00130 <span class="comment">     * initialize it </span>
+00131 <span class="comment">     */</span>
+00132     <span class="keywordflow">return</span> DO_INITIALIZE;
+00133 }
+00134 
+00135 <span class="keywordtype">void</span>
+00136 init_mib_modules(<span class="keywordtype">void</span>)
+00137 {
+00138 <span class="preprocessor">#ifdef USING_IF_MIB_DATA_ACCESS_INTERFACE_MODULE</span>
+00139     netsnmp_access_interface_init();
+00140 <span class="preprocessor">#endif</span>
+00141 <span class="preprocessor">#  include "mib_module_inits.h"</span>
+00142 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:57 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

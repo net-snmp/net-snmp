@@ -1,0 +1,115 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>baby_steps.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * $Id$</span>
+00003 <span class="comment"> */</span>
+00004 <span class="preprocessor">#ifndef BABY_STEPS_H</span>
+00005 <span class="preprocessor">#define BABY_STEPS_H</span>
+00006 
+00007 <span class="preprocessor">#ifdef __cplusplus</span>
+00008 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00009 <span class="preprocessor">#endif</span>
+00010 
+00011 <span class="preprocessor">#include &lt;net-snmp/agent/agent_handler.h&gt;</span>
+00012 
+00013     <span class="comment">/*</span>
+00014 <span class="comment">     * Flags for baby step modes</span>
+00015 <span class="comment">     */</span>
+00016 <span class="preprocessor">#define BABY_STEP_NONE                  0</span>
+00017 <span class="preprocessor">#define BABY_STEP_PRE_REQUEST           (0x1 &lt;&lt;  1)</span>
+00018 <span class="preprocessor">#define BABY_STEP_OBJECT_LOOKUP         (0x1 &lt;&lt;  2)</span>
+00019 <span class="preprocessor">#define BABY_STEP_CHECK_VALUE           (0x1 &lt;&lt;  3)</span>
+00020 <span class="preprocessor">#define BABY_STEP_ROW_CREATE            (0x1 &lt;&lt;  4)</span>
+00021 <span class="preprocessor">#define BABY_STEP_UNDO_SETUP            (0x1 &lt;&lt;  5)</span>
+00022 <span class="preprocessor">#define BABY_STEP_SET_VALUE             (0x1 &lt;&lt;  6)</span>
+00023 <span class="preprocessor">#define BABY_STEP_CHECK_CONSISTENCY     (0x1 &lt;&lt;  7)</span>
+00024 <span class="preprocessor">#define BABY_STEP_UNDO_SET              (0x1 &lt;&lt;  8)</span>
+00025 <span class="preprocessor">#define BABY_STEP_COMMIT                (0x1 &lt;&lt;  9)</span>
+00026 <span class="preprocessor">#define BABY_STEP_UNDO_COMMIT           (0x1 &lt;&lt; 10)</span>
+00027 <span class="preprocessor">#define BABY_STEP_IRREVERSIBLE_COMMIT   (0x1 &lt;&lt; 11)</span>
+00028 <span class="preprocessor">#define BABY_STEP_UNDO_CLEANUP          (0x1 &lt;&lt; 12)</span>
+00029 <span class="preprocessor">#define BABY_STEP_POST_REQUEST          (0x1 &lt;&lt; 13)</span>
+00030 
+00031 <span class="preprocessor">#define BABY_STEP_ALL                   (0xffffffff)</span>
+00032 
+00033 
+00034 <span class="preprocessor">#define BABY_STEP_CHECK_OBJECT          BABY_STEP_CHECK_VALUE</span>
+00035 <span class="preprocessor">#define BABY_STEP_SET_VALUES            BABY_STEP_SET_VALUE</span>
+00036 <span class="preprocessor">#define BABY_STEP_UNDO_SETS             BABY_STEP_UNDO_SET</span>
+00037 
+00045     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_baby_steps_modes_s {
+00046        u_int       registered;
+00047        u_int       completed;
+00048     } netsnmp_baby_steps_modes;
+00049 
+00050 <span class="keywordtype">void</span>                 netsnmp_baby_steps_init(<span class="keywordtype">void</span>);
+00051 
+00052 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *<a class="code" href=
+"group__baby__steps.html#ga0">netsnmp_baby_steps_handler_get</a>(u_long modes);
+00053 
+00069 <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_baby_steps_access_methods_s {
+00070       
+00071    <span class="comment">/*</span>
+00072 <span class="comment">    * baby step modes</span>
+00073 <span class="comment">    */</span>
+00074    Netsnmp_Node_Handler *pre_request;
+00075    Netsnmp_Node_Handler *object_lookup;
+00076    Netsnmp_Node_Handler *get_values;
+00077    Netsnmp_Node_Handler *object_syntax_checks;
+00078    Netsnmp_Node_Handler *row_creation;
+00079    Netsnmp_Node_Handler *undo_setup;
+00080    Netsnmp_Node_Handler *set_values;
+00081    Netsnmp_Node_Handler *consistency_checks;
+00082    Netsnmp_Node_Handler *commit;
+00083    Netsnmp_Node_Handler *undo_sets;
+00084    Netsnmp_Node_Handler *undo_cleanup;
+00085    Netsnmp_Node_Handler *undo_commit;
+00086    Netsnmp_Node_Handler *irreversible_commit;
+00087    Netsnmp_Node_Handler *post_request;
+00088 
+00089    <span class="keywordtype">void</span>                 *my_access_void;
+00090 
+00091 } netsnmp_baby_steps_access_methods;
+00092 
+00093     <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> * <a class="code" href=
+"group__baby__steps.html#ga3">netsnmp_baby_steps_access_multiplexer_get</a>(
+00094         netsnmp_baby_steps_access_methods *);
+00095 
+00096     <span class="keywordtype">int</span> netsnmp_baby_step_mode2flag( u_int mode );
+00097 
+00102 <span class="preprocessor">#define netsnmp_get_baby_steps_handler netsnmp_baby_steps_handler_get</span>
+00103 <span class="preprocessor">#define netsnmp_init_baby_steps_helper netsnmp_baby_steps_handler_init</span>
+00104 
+00105 
+00106 <span class="preprocessor">#ifdef __cplusplus</span>
+00107 }
+00108 <span class="preprocessor">#endif</span>
+00109 <span class="preprocessor">#endif </span><span class="comment">/* baby_steps */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

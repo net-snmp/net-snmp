@@ -1,0 +1,51 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<HTML>
+<HEAD>
+<TITLE>Guide to extending the UCD SNMP agent</TITLE>
+</HEAD>
+<BODY>
+<H1>Extending the UCD-SNMP agent</H1>
+
+This series of documents describe the procedure
+for writing code to extend the functionality of the
+UCD-SNMP network management agent.
+We would be very interested in comment and feedback about
+how useful you find this description,
+and ways in which it could be improved.
+<P>
+The information is designed to be read in order - the structure being:
+<OL>
+<LI><A HREF="01-intro.html">Overview & Introduction</A>
+<LI><A HREF="02-mib.html">MIB files, and how they relate to the agent implementation</A>
+<LI><A HREF="03-header.html">Header files</A>
+<LI><A HREF="04-basic-code.html">The basic structure of module implementation code</A>
+<LI><A HREF="05-nontable.html">The details of non-table based implementations</A>
+<LI><A HREF="06-table1.html">The details of simple table based implementations</A>
+<LI><A HREF="07-table2.html">The details of more general table based implementations</A>
+<LI><A HREF="08-writing.html">How to implement SET-able variables</A>
+</OL>
+While the document is intended to be generally self-contained,
+it does occasionally refer to code files shipped with the main UCD
+distribution (in particular the example module), and it may prove
+useful to have these files available for reference.
+<P>
+The 5.0 release line includes a new agent architecture, with
+a new <A HREF=../new-agent/group__handler.html>handler-based API</A>.
+While the traditional UCD-SNMP API described here can also be used,
+the new approach provides a number of additional facilities.
+<HR>
+There's also a 
+<A HREF=CheckList.html>step-by-step checklist</A>
+that you can use if adding your MIB module doesn't
+seem to be working.
+<HR>
+All feedback should be directed to the author
+<A HREF="mailto: D.T.Shield@csc.liv.ac.uk">Dave Shield</A>
+</BODY>
+</HTML>
+<!--#include virtual="/sfbutton.html" -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

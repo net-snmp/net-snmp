@@ -1,0 +1,70 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000002.html">agent</a>
+  </div>
+
+  <h1>scalar.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * scalar.h </span>
+00003 <span class="comment"> */</span>
+00004 <span class="preprocessor">#ifndef NETSNMP_SCALAR_H</span>
+00005 <span class="preprocessor">#define NETSNMP_SCALAR_H</span>
+00006 
+00007 <span class="preprocessor">#ifdef __cplusplus</span>
+00008 <span class="keyword">extern</span> <span class="stringliteral">"C"</span> {
+00009 <span class="preprocessor">#endif</span>
+00010 
+00011 <span class="comment">/*</span>
+00012 <span class="comment"> * The scalar helper is designed to simplify the task of adding simple</span>
+00013 <span class="comment"> * scalar objects to the mib tree.</span>
+00014 <span class="comment"> */</span>
+00015 
+00016 <span class="comment">/*</span>
+00017 <span class="comment"> * GETNEXTs are auto-converted to a GET.</span>
+00018 <span class="comment"> * * non-valid GETs are dropped.</span>
+00019 <span class="comment"> * * The client can assume that if you're called for a GET, it shouldn't</span>
+00020 <span class="comment"> * * have to check the oid at all.  Just answer.</span>
+00021 <span class="comment"> */</span>
+00022 
+00023 <span class="keywordtype">int</span> <a class="code" href="group__scalar.html#ga1">netsnmp_register_scalar</a>(<a class=
+"code" href="structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo);
+00024 <span class="keywordtype">int</span> <a class="code" href=
+"group__scalar.html#ga2">netsnmp_register_read_only_scalar</a>(<a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo);
+00025 
+00026 <span class="preprocessor">#define SCALAR_HANDLER_NAME "scalar"</span>
+00027 
+00028 <a class="code" href="structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *<a class="code" href=
+"group__scalar.html#ga0">netsnmp_get_scalar_handler</a>(<span class="keywordtype">void</span>);
+00029 
+00030 Netsnmp_Node_Handler netsnmp_scalar_helper_handler;
+00031 
+00032 <span class="preprocessor">#ifdef __cplusplus</span>
+00033 }
+00034 <span class="preprocessor">#endif</span>
+00035 
+00036 <span class="preprocessor">#endif </span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:59 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

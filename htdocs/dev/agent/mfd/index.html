@@ -1,0 +1,144 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>MIBs For Dummies : ifXTable</title>
+  </head>
+
+  <body>
+    <h1>MIBs For Dummies : ifXTable</h1>
+    This document details the steps I took to implement the new ifXTable
+    using the new MIBs For Dummies (MFD) configuration file.
+<P>
+      <em>NOTE: this tutorial is based on the code generated in the main CVS
+        line. If you generate code from a 5.1 release, your results may vary.</em>
+<P>
+      <!-- ========================================================= -->
+    <h1>Running mib2c</h1>
+    The first step is to generate the code. Create a new directory somewhere
+    and run: <P>
+    <table><tr><td width=20></td><td><code>$</code></td><td bgcolor=CCCCCC>
+            <code><font color=blue>mib2c -c mfd-top.m2c ifXTable</font></code>
+          </td></tr></table>
+    <P>
+    When finished, you should have several files:<P>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+-rw-rw-r--    1 rstory       2.7K Oct 23 14:35 ifXTable.c
+-rw-rw-r--    1 rstory        10K Oct 23 14:35 ifXTable_data_access.c
+-rw-rw-r--    1 rstory       4.2K Oct 23 14:35 ifXTable_data_access.h
+-rw-rw-r--    1 rstory        45K Oct 23 14:35 ifXTable_data_get.c
+-rw-rw-r--    1 rstory       3.8K Oct 23 14:35 ifXTable_data_get.h
+-rw-rw-r--    1 rstory        20K Oct 23 14:35 ifXTable_data_set.c
+-rw-rw-r--    1 rstory       9.8K Oct 23 14:35 ifXTable_data_set.h
+-rw-rw-r--    1 rstory       2.8K Oct 23 14:35 ifXTable_enums.h
+-rw-rw-r--    1 rstory       6.8K Oct 23 14:35 ifXTable.h
+-rw-rw-r--    1 rstory        38K Oct 23 14:35 ifXTable_interface.c
+-rw-rw-r--    1 rstory       2.1K Oct 23 14:35 ifXTable_interface.h
+-rw-rw-r--    1 rstory       2.1K Oct  8 18:13 ifXTable_Makefile
+-rw-rw-r--    1 rstory       1.2K Oct 23 14:35 ifXTable_oids.h
+-rw-rw-r--    1 rstory       5.8K Oct 23 14:35 ifXTable-README-FIRST.txt
+-rw-rw-r--    1 rstory        35K Oct 23 14:35 ifXTable-README-ifXTable.txt
+-rw-rw-r--    1 rstory       3.9K Oct  8 17:27 ifXTable_subagent.c
+</pre></td></tr></table>
+<P>
+      You should read <var>ifXTable-README-FIRST.txt</var> for a basic overview
+      of MFD.
+<P>
+      The basic steps outlined in <var>ifXTable-README-ifXTable.txt</var> were
+      used to write this tutorial. Keeping in mind that one of the best (and
+      worst) things about the MFD code is that it is very flexible, let's take
+      a peek at it.
+<p>
+      <!-- ========================================================= -->
+    <h2>mib2c settings</h2>
+    <ul><li><var>m2c_table_settable</var> is set based on the information
+        from the MIB, and correctly indicates that the table has some
+        read-write objects. If you are implementing a table that has
+        read-write object, but only want to support read-only access
+        to the table, set this variable to 0 and regenerate the code.
+      <li><var>m2c_table_dependencies</var> indicates whether or not extra
+        code will be generated to handle
+        <a href="/tutorial/terms.html#depend">dependencies</a> between
+        this table and another table or scalar object. It defaults to 0 unless
+        a table has external indexes. <var>ifXTable</var> is an
+        <a href="/tutorial/terms.html#augment">augmentation</a> table,
+        so it does have an external index. At this point, I'm not sure
+        whether or not we'll need the dependency checking, so we'll
+        leave it enabled.
+      <li><var>m2c_table_row_creation</var> indicates whether or not extra
+        code will be generated to support
+        <a href="/tutorial/terms.html#rowcreate">row creation</a>. The
+        default is to 0 unless the table contains colums with a
+        <a href="/tutorial/terms.html#max-access">MAX-ACCESS</a> of
+        <var>read-create</var>. The <var>ifXTable</var> does not, so
+        row-creation will have to wait for another tutorial.
+      <li><var>m2c_context_reg</var> defines the variable type that
+        will be used as the <var>ifXTable</var>
+        <a href="/tutorial/mfd/index.html#tablecontext">table context</a>.
+        This pointer is for our use, to keep any data we'd like to
+        have access to during the various processing phases. The default
+        is to use a <a href="/tutorial/data_list.html">netsnmp_data_list</a>,
+        and that should be sufficient for our needs.
+      <li><var>m2c_data_context</var> defines the variable type that
+        will be used as the <var>ifXTable</var>
+        <a href="/tutorial/mfd/index.html#datacontext">data context</a>.
+        The default is to generate a structure with space for all the columns
+        in the table. However, since we are getting our data from an external
+        source, we can make use of existing structure. Since there are
+        multiple existing structures, we'll define a new on which contains
+        everything we'll need. We'll call it <var>ifXTable_linux</var>.
+      <li><var>m2c_data_allocate</var> determines whether or not to generate
+        extra code for data contexts which need to allocate memory. We don't
+        need to allocate memory, so the default of 0 is fine.
+      <li><var>m2c_data_init</var> determine whether or not to generate extra
+        code to initialize the data context. Again, we don't need this, so
+        the default of 0 is fine.
+      <li><var>m2c_table_access</var> determines which that method that the
+        generated code will use to find the <var>data context</var> for a row.
+        The only available method right now is <var>unsorted-external</var>,
+        so we'll use that.
+      <li><var>m2c_include_examples</var> determine whether or not example
+        code should be generated. Since this tutorial is an example, we'll
+        turn off examples.
+    </ul>
+
+    So we want to make a few adjustments to the generated code. Create a file
+    called <var>default-table-ifXTable.m2d</var> in the directory where you are
+    generating code, with the following contents:<p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><font color=blue><pre>
+## use our custom structure
+@eval $m2c_data_context = "struct ifXTable_linux"@
+## turn off examples
+@eval $m2c_include_examples = 0@
+</pre></font></td></tr></table>
+<P>
+      Now, re-run mib2c.<P>
+    <table><tr><td width=20></td><td><code>$</code></td><td bgcolor=CCCCCC>
+            <code><font color=blue>mib2c -c mfd-top.m2c ifXTable</font></code>
+          </td></tr></table>
+    <P>
+      So now we're ready to go, right? Hold on there cowboy, not so fast.
+      This code is a template. Improvements and fixes are likely to be
+      made in the template code, and it would probably be a good idea to
+      make our live easier when that happens. Create an archive of the
+      freshly generated code somewhere safe, so when new template code
+      is available, we can <var>diff</var> our custom code against the
+      original templates. This will make migration a lot easier.
+<p>
+      <a href="data_access.html">Next: data access</a>
+      <!-- ========================================================= -->
+    <hr>
+    rstory at freesnmp dot com<br>
+Version $Revision$
+<!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
+<!-- hhmts start -->
+Last modified: Wed Oct 29 10:25:11 EST 2003
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+  </body>
+</html>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

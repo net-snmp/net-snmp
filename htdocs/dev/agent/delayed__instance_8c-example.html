@@ -1,0 +1,295 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <h1>delayed_instance.c</h1>This example implements the netSnmpExampleSleeper object.
+
+  <p>It demonstrates 2 things:</p>
+
+  <ul>
+    <li>The instance helper, which is a way of registering an exact OID such that GENEXT requests are handled entirely by the
+    helper.</li>
+  </ul>
+
+  <ul>
+    <li>how to implement objects which normally would block the agent as it waits for external events in such a way that the
+    agent can continue responding to other requests while this implementation waits.</li>
+  </ul>
+
+  <ul>
+    <li>Added bonus: normally the nsTransactionTable is empty, since there aren't any outstanding requests generally. When
+    accessed, this module will create some however. Try setting netSnmpExampleSleeper.0 to 10 and then accessing it (use "snmpget
+    -t 15 ..." to access it), and then walk the nsTransactionTable from another shell to see that not only is the walk not
+    blocked, but that the nsTransactionTable is not empty.</li>
+  </ul>
+
+  <div class="fragment">
+    <pre class="fragment">
+<span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+<span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+<span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+
+<span class="preprocessor">#include "delayed_instance.h"</span>
+
+<span class="keyword">static</span> u_long   delay_time = 1;
+
+<span class="keywordtype">void</span>
+init_delayed_instance(<span class="keywordtype">void</span>)
+{
+    <span class="keyword">static</span> oid      my_delayed_oid[] =
+        { 1, 3, 6, 1, 4, 1, 8072, 2, 1, 2, 0 };
+    <span class="comment">/*</span>
+<span class="comment">     * delayed handler test</span>
+<span class="comment">     */</span>
+    <a name="_a8" id="_a8"></a><a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *my_test;
+
+    my_test =
+        netsnmp_create_handler_registration(<span class="stringliteral">"delayed_instance_example"</span>,
+                                            delayed_instance_handler,
+                                            my_delayed_oid,
+                                            OID_LENGTH(my_delayed_oid),
+                                            HANDLER_CAN_RWRITE);
+
+    <a name="a9" id="a9"></a><a class="code" href="group__instance.html#ga1">netsnmp_register_instance</a>(my_test);
+}
+
+<span class="preprocessor">#define DELAYED_INSTANCE_SET_NAME "test_delayed"</span>
+
+<span class="keywordtype">int</span>
+delayed_instance_handler(<a name="_a10" id="_a10"></a><a class="code" href=
+"structnetsnmp__mib__handler__s.html">netsnmp_mib_handler</a> *handler,
+                         <a class="code" href=
+"structnetsnmp__handler__registration__s.html">netsnmp_handler_registration</a> *reginfo,
+                         <a name="_a11" id="_a11"></a><a class="code" href=
+"structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo,
+                         <a name="_a12" id="_a12"></a><a class="code" href=
+"structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests)
+{
+
+    DEBUGMSGTL((<span class="stringliteral">"delayed_instance"</span>, <span class=
+"stringliteral">"Got request, mode = %d:\n"</span>,
+                reqinfo-&gt;<a name="a13" id="a13"></a><a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a>));
+
+    <span class="keywordflow">switch</span> (reqinfo-&gt;<a class="code" href=
+"structnetsnmp__agent__request__info__s.html#o0">mode</a>) {
+        <span class="comment">/*</span>
+<span class="comment">         * here we merely mention that we'll answer this request</span>
+<span class="comment">         * later.  we don't actually care about the mode type in this</span>
+<span class="comment">         * example, but for certain cases you may, so I'll leave in the</span>
+<span class="comment">         * otherwise useless switch and case statements </span>
+<span class="comment">         */</span>
+
+    <span class="keywordflow">default</span>:
+        <span class="comment">/*</span>
+<span class="comment">         * mark this variable as something that can't be handled now.</span>
+<span class="comment">         * We'll answer it later. </span>
+<span class="comment">         */</span>
+        requests-&gt;<a name="a14" id="a14"></a><a class="code" href="structnetsnmp__request__info__s.html#o5">delegated</a> = 1;
+
+        <span class="comment">/*</span>
+<span class="comment">         * register an alarm to update the results at a later</span>
+<span class="comment">         * time.  Normally, we might have to query something else</span>
+<span class="comment">         * (like an external request sent to a different network</span>
+<span class="comment">         * or system socket, etc), but for this example we'll do</span>
+<span class="comment">         * something really simply and just insert an alarm for a</span>
+<span class="comment">         * certain period of time </span>
+<span class="comment">         */</span>
+        <a name="a15" id="a15"></a><a class="code" href=
+"group__snmp__alarm.html#ga14">snmp_alarm_register</a>(delay_time, <span class="comment">/* seconds */</span>
+                            0,  <span class="comment">/* dont repeat. */</span>
+                            return_delayed_response,    <span class="comment">/* the function</span>
+<span class="comment">                                                         * to call */</span>
+                            <span class="comment">/*</span>
+<span class="comment">                             * here we create a "cache" of useful</span>
+<span class="comment">                             * information that we'll want later</span>
+<span class="comment">                             * on.  This argument is passed back</span>
+<span class="comment">                             * to us in the callback function for</span>
+<span class="comment">                             * an alarm </span>
+<span class="comment">                             */</span>
+                            (<span class="keywordtype">void</span> *)
+                            <a name="a16" id="a16"></a><a class="code" href=
+"group__handler.html#ga23">netsnmp_create_delegated_cache</a>(handler,
+                                                           reginfo,
+                                                           reqinfo,
+                                                           requests,
+                                                           NULL));
+        <span class="keywordflow">break</span>;
+
+    }
+
+    <span class="keywordflow">return</span> SNMP_ERR_NOERROR;
+}
+
+<span class="keywordtype">void</span>
+return_delayed_response(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> clientreg, <span class=
+"keywordtype">void</span> *clientarg)
+{
+    <span class="comment">/*</span>
+<span class="comment">     * extract the cache from the passed argument </span>
+<span class="comment">     */</span>
+    netsnmp_delegated_cache *cache = (netsnmp_delegated_cache *) clientarg;
+
+    <a class="code" href="structnetsnmp__request__info__s.html">netsnmp_request_info</a> *requests;
+    <a class="code" href="structnetsnmp__agent__request__info__s.html">netsnmp_agent_request_info</a> *reqinfo;
+    u_long         *delay_time_cache = NULL;
+
+    <span class="comment">/*</span>
+<span class="comment">     * here we double check that the cache we created earlier is still</span>
+<span class="comment">     * * valid.  If not, the request timed out for some reason and we</span>
+<span class="comment">     * * don't need to keep processing things.  Should never happen, but</span>
+<span class="comment">     * * this double checks. </span>
+<span class="comment">     */</span>
+    cache = <a name="a17" id="a17"></a><a class="code" href="group__handler.html#ga24">netsnmp_handler_check_cache</a>(cache);
+
+    <span class="keywordflow">if</span> (!cache) {
+        <a name="a18" id="a18"></a><a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"illegal call to return delayed response\n"</span>);
+        <span class="keywordflow">return</span>;
+    }
+
+    <span class="comment">/*</span>
+<span class="comment">     * re-establish the previous pointers we are used to having </span>
+<span class="comment">     */</span>
+    reqinfo = cache-&gt;reqinfo;
+    requests = cache-&gt;requests;
+
+    DEBUGMSGTL((<span class="stringliteral">"delayed_instance"</span>,
+                <span class="stringliteral">"continuing delayed request, mode = %d\n"</span>,
+                cache-&gt;reqinfo-&gt;mode));
+
+    <span class="comment">/*</span>
+<span class="comment">     * mention that it's no longer delegated, and we've now answered</span>
+<span class="comment">     * the query (which we'll do down below). </span>
+<span class="comment">     */</span>
+    requests-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o5">delegated</a> = 0;
+
+    <span class="keywordflow">switch</span> (cache-&gt;reqinfo-&gt;mode) {
+        <span class="comment">/*</span>
+<span class="comment">         * registering as an instance means we don't need to deal with</span>
+<span class="comment">         * getnext processing, so we don't handle it here at all.</span>
+<span class="comment">         * </span>
+<span class="comment">         * However, since the instance handler already reset the mode</span>
+<span class="comment">         * back to GETNEXT from the faked GET mode, we need to do the</span>
+<span class="comment">         * same thing in both cases.  This should be fixed in future</span>
+<span class="comment">         * versions of net-snmp hopefully. </span>
+<span class="comment">         */</span>
+
+    <span class="keywordflow">case</span> MODE_GET:
+    <span class="keywordflow">case</span> MODE_GETNEXT:
+        <span class="comment">/*</span>
+<span class="comment">         * return the currend delay time </span>
+<span class="comment">         */</span>
+        <a name="a19" id="a19"></a><a class="code" href=
+"group__snmp__client.html#ga18">snmp_set_var_typed_value</a>(cache-&gt;requests-&gt;requestvb,
+                                 ASN_INTEGER,
+                                 (u_char *) &amp; delay_time,
+                                 <span class="keyword">sizeof</span>(delay_time));
+        <span class="keywordflow">break</span>;
+
+    <span class="keywordflow">case</span> MODE_SET_RESERVE1:
+        <span class="comment">/*</span>
+<span class="comment">         * check type </span>
+<span class="comment">         */</span>
+        <span class="keywordflow">if</span> (requests-&gt;<a name="a20" id="a20"></a><a class="code" href=
+"structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a name="a21" id="a21"></a><a class="code" href=
+"structvariable__list.html#o3">type</a> != ASN_INTEGER) {
+            <span class="comment">/*</span>
+<span class="comment">             * not an integer.  Bad dog, no bone. </span>
+<span class="comment">             */</span>
+            <a name="a22" id="a22"></a><a class="code" href=
+"group__snmp__agent.html#ga79">netsnmp_set_request_error</a>(reqinfo, requests,
+                                      SNMP_ERR_WRONGTYPE);
+            <span class="comment">/*</span>
+<span class="comment">             * we don't need the cache any longer </span>
+<span class="comment">             */</span>
+            <a name="a23" id="a23"></a><a class="code" href="group__handler.html#ga25">netsnmp_free_delegated_cache</a>(cache);
+            <span class="keywordflow">return</span>;
+        }
+        <span class="keywordflow">break</span>;
+
+    <span class="keywordflow">case</span> MODE_SET_RESERVE2:
+        <span class="comment">/*</span>
+<span class="comment">         * store old value for UNDO support in the future. </span>
+<span class="comment">         */</span>
+        <a name="a24" id="a24"></a><a class="code" href="group__util.html#ga5">memdup</a>((u_char **) &amp; delay_time_cache,
+               (u_char *) &amp; delay_time, <span class="keyword">sizeof</span>(delay_time));
+
+        <span class="comment">/*</span>
+<span class="comment">         * malloc failed </span>
+<span class="comment">         */</span>
+        <span class="keywordflow">if</span> (delay_time_cache == NULL) {
+            <a class="code" href="group__snmp__agent.html#ga79">netsnmp_set_request_error</a>(reqinfo, requests,
+                                      SNMP_ERR_RESOURCEUNAVAILABLE);
+            <a class="code" href="group__handler.html#ga25">netsnmp_free_delegated_cache</a>(cache);
+            <span class="keywordflow">return</span>;
+        }
+
+        <span class="comment">/*</span>
+<span class="comment">         * Add our temporary information to the request itself.</span>
+<span class="comment">         * This is then retrivable later.  The free function</span>
+<span class="comment">         * passed auto-frees it when the request is later</span>
+<span class="comment">         * deleted.  </span>
+<span class="comment">         */</span>
+        <a name="a25" id="a25"></a><a class="code" href="group__handler.html#ga27">netsnmp_request_add_list_data</a>(requests,
+                                      netsnmp_create_data_list
+                                      (DELAYED_INSTANCE_SET_NAME,
+                                       delay_time_cache, free));
+        <span class="keywordflow">break</span>;
+
+    <span class="keywordflow">case</span> MODE_SET_ACTION:
+        <span class="comment">/*</span>
+<span class="comment">         * update current value </span>
+<span class="comment">         */</span>
+        delay_time = *(requests-&gt;<a class="code" href="structnetsnmp__request__info__s.html#o0">requestvb</a>-&gt;<a name=
+"a26" id="a26"></a><a class="code" href="structvariable__list.html#o4">val</a>.integer);
+        DEBUGMSGTL((<span class="stringliteral">"testhandler"</span>, <span class=
+"stringliteral">"updated delay_time -&gt; %d\n"</span>,
+                    delay_time));
+        <span class="keywordflow">break</span>;
+
+    <span class="keywordflow">case</span> MODE_SET_UNDO:
+        <span class="comment">/*</span>
+<span class="comment">         * ack, something somewhere failed.  We reset back to the</span>
+<span class="comment">         * previously old value by extracting the previosuly</span>
+<span class="comment">         * stored information back out of the request </span>
+<span class="comment">         */</span>
+        delay_time =
+            *((u_long *) <a name="a27" id="a27"></a><a class="code" href=
+"group__handler.html#ga29">netsnmp_request_get_list_data</a>(requests,
+                                                       DELAYED_INSTANCE_SET_NAME));
+        <span class="keywordflow">break</span>;
+
+    <span class="keywordflow">case</span> MODE_SET_COMMIT:
+    <span class="keywordflow">case</span> MODE_SET_FREE:
+        <span class="comment">/*</span>
+<span class="comment">         * the only thing to do here is free the old memdup'ed</span>
+<span class="comment">         * value, but it's auto-freed by the datalist recovery, so</span>
+<span class="comment">         * we don't have anything to actually do here </span>
+<span class="comment">         */</span>
+        <span class="keywordflow">break</span>;
+    }
+
+    <span class="comment">/*</span>
+<span class="comment">     * free the information cache </span>
+<span class="comment">     */</span>
+    <a class="code" href="group__handler.html#ga25">netsnmp_free_delegated_cache</a>(cache);
+}
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:55 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,1056 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000005.html">snmplib</a>
+  </div>
+
+  <h1>snmp_client.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * snmp_client.c - a toolkit of common functions for an SNMP client.</span>
+00003 <span class="comment"> *</span>
+00004 <span class="comment"> */</span>
+00005 <span class="comment">/* Portions of this file are subject to the following copyright(s).  See</span>
+00006 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00007 <span class="comment"> * that may apply:</span>
+00008 <span class="comment"> */</span>
+00009 <span class="comment">/**********************************************************************</span>
+00010 <span class="comment">        Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University</span>
+00011 
+00012 <span class="comment">                      All Rights Reserved</span>
+00013 
+00014 <span class="comment">Permission to use, copy, modify, and distribute this software and its</span>
+00015 <span class="comment">documentation for any purpose and without fee is hereby granted,</span>
+00016 <span class="comment">provided that the above copyright notice appear in all copies and that</span>
+00017 <span class="comment">both that copyright notice and this permission notice appear in</span>
+00018 <span class="comment">supporting documentation, and that the name of CMU not be</span>
+00019 <span class="comment">used in advertising or publicity pertaining to distribution of the</span>
+00020 <span class="comment">software without specific, written prior permission.</span>
+00021 
+00022 <span class="comment">CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING</span>
+00023 <span class="comment">ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL</span>
+00024 <span class="comment">CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR</span>
+00025 <span class="comment">ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,</span>
+00026 <span class="comment">WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,</span>
+00027 <span class="comment">ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS</span>
+00028 <span class="comment">SOFTWARE.</span>
+00029 <span class="comment">******************************************************************/</span>
+00030 <span class="comment">/*</span>
+00031 <span class="comment"> * Portions of this file are copyrighted by:</span>
+00032 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00033 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00034 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00035 <span class="comment"> */</span>
+00036 
+00042 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00043 
+00044 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00045 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+00046 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00047 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00048 <span class="preprocessor">#endif</span>
+00049 <span class="preprocessor">#if HAVE_STRING_H</span>
+00050 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00051 <span class="preprocessor">#else</span>
+00052 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00053 <span class="preprocessor">#endif</span>
+00054 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00055 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+00056 <span class="preprocessor">#endif</span>
+00057 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00058 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00059 <span class="preprocessor"># ifdef WIN32</span>
+00060 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00061 <span class="preprocessor"># else</span>
+00062 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00063 <span class="preprocessor"># endif</span>
+00064 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00065 <span class="preprocessor">#else</span>
+00066 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00067 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00068 <span class="preprocessor"># else</span>
+00069 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00070 <span class="preprocessor"># endif</span>
+00071 <span class="preprocessor">#endif</span>
+00072 <span class="preprocessor">#if HAVE_SYS_PARAM_H</span>
+00073 <span class="preprocessor">#include &lt;sys/param.h&gt;</span>
+00074 <span class="preprocessor">#endif</span>
+00075 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00076 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00077 <span class="preprocessor">#endif</span>
+00078 <span class="preprocessor">#if HAVE_ARPA_INET_H</span>
+00079 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+00080 <span class="preprocessor">#endif</span>
+00081 <span class="preprocessor">#if HAVE_SYS_SELECT_H</span>
+00082 <span class="preprocessor">#include &lt;sys/select.h&gt;</span>
+00083 <span class="preprocessor">#endif</span>
+00084 
+00085 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00086 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00087 <span class="preprocessor">#endif</span>
+00088 
+00089 <span class="preprocessor">#if HAVE_WINSOCK_H</span>
+00090 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00091 <span class="preprocessor">#endif</span>
+00092 
+00093 <span class="preprocessor">#include &lt;net-snmp/types.h&gt;</span>
+00094 
+00095 <span class="preprocessor">#include &lt;net-snmp/library/snmp_api.h&gt;</span>
+00096 <span class="preprocessor">#include &lt;net-snmp/library/snmp_client.h&gt;</span>
+00097 <span class="preprocessor">#include &lt;net-snmp/library/snmp_secmod.h&gt;</span>
+00098 <span class="preprocessor">#include &lt;net-snmp/library/mib.h&gt;</span>
+00099 
+00100 
+00101 <span class="preprocessor">#ifndef BSD4_3</span>
+00102 <span class="preprocessor">#define BSD4_2</span>
+00103 <span class="preprocessor">#endif</span>
+00104 
+00105 <span class="preprocessor">#ifndef FD_SET</span>
+00106 
+00107 <span class="keyword">typedef</span> <span class="keywordtype">long</span>    fd_mask;
+00108 <span class="preprocessor">#define NFDBITS (sizeof(fd_mask) * NBBY)        </span><span class=
+"comment">/* bits per mask */</span>
+00109 
+00110 <span class="preprocessor">#define FD_SET(n, p)    ((p)-&gt;fds_bits[(n)/NFDBITS] |= (1 &lt;&lt; ((n) % NFDBITS)))</span>
+00111 <span class=
+"preprocessor">#define FD_CLR(n, p)    ((p)-&gt;fds_bits[(n)/NFDBITS] &amp;= ~(1 &lt;&lt; ((n) % NFDBITS)))</span>
+00112 <span class=
+"preprocessor">#define FD_ISSET(n, p)  ((p)-&gt;fds_bits[(n)/NFDBITS] &amp; (1 &lt;&lt; ((n) % NFDBITS)))</span>
+00113 <span class="preprocessor">#define FD_ZERO(p)      memset((p), 0, sizeof(*(p)))</span>
+00114 <span class="preprocessor">#endif</span>
+00115 
+00116 <span class="comment">/*</span>
+00117 <span class="comment"> * Prototype definitions </span>
+00118 <span class="comment"> */</span>
+00119 <span class="keyword">static</span> <span class="keywordtype">int</span>      snmp_synch_input(<span class=
+"keywordtype">int</span> op, <a class="code" href="structsnmp__session.html">netsnmp_session</a> * session,
+00120                                  <span class="keywordtype">int</span> reqid, <a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *pdu, <span class="keywordtype">void</span> *magic);
+00121 
+00122 <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *
+00123 snmp_pdu_create(<span class="keywordtype">int</span> command)
+00124 {
+00125     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *pdu;
+00126 
+00127     pdu = (<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *) calloc(1, <span class=
+"keyword">sizeof</span>(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>));
+00128     <span class="keywordflow">if</span> (pdu) {
+00129         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o0">version</a> = SNMP_DEFAULT_VERSION;
+00130         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o1">command</a> = command;
+00131         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o6">errstat</a> = SNMP_DEFAULT_ERRSTAT;
+00132         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o7">errindex</a> = SNMP_DEFAULT_ERRINDEX;
+00133         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o10">securityModel</a> = SNMP_DEFAULT_SECMODEL;
+00134         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o13">transport_data</a> = NULL;
+00135         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o14">transport_data_length</a> = 0;
+00136         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o32">securityNameLen</a> = 0;
+00137         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o28">contextNameLen</a> = 0;
+00138         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o8">time</a> = 0;
+00139         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o2">reqid</a> = snmp_get_next_reqid();
+00140         pdu-&gt;<a class="code" href="structsnmp__pdu.html#o3">msgid</a> = snmp_get_next_msgid();
+00141     }
+00142     <span class="keywordflow">return</span> pdu;
+00143 
+00144 }
+00145 
+00146 
+00147 <span class="comment">/*</span>
+00148 <span class="comment"> * Add a null variable with the requested name to the end of the list of</span>
+00149 <span class="comment"> * variables for this pdu.</span>
+00150 <span class="comment"> */</span>
+00151 <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *
+00152 snmp_add_null_var(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu, <span class=
+"keyword">const</span> oid * name, size_t name_length)
+00153 {
+00154     <span class="keywordflow">return</span> snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, NULL, 0);
+00155 }
+00156 
+00157 
+00158 <span class="keyword">static</span> <span class="keywordtype">int</span>
+00159 snmp_synch_input(<span class="keywordtype">int</span> op,
+00160                  <a class="code" href="structsnmp__session.html">netsnmp_session</a> * session,
+00161                  <span class="keywordtype">int</span> reqid, <a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *pdu, <span class="keywordtype">void</span> *magic)
+00162 {
+00163     <span class="keyword">struct </span>synch_state *state = (<span class="keyword">struct </span>synch_state *) magic;
+00164     <span class="keywordtype">int</span>             rpt_type;
+00165 
+00166     <span class="keywordflow">if</span> (reqid != state-&gt;reqid &amp;&amp; pdu &amp;&amp; pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o1">command</a> != SNMP_MSG_REPORT) {
+00167         <span class="keywordflow">return</span> 0;
+00168     }
+00169 
+00170     state-&gt;waiting = 0;
+00171 
+00172     <span class="keywordflow">if</span> (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+00173         <span class="keywordflow">if</span> (pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o1">command</a> == SNMP_MSG_REPORT) {
+00174             rpt_type = snmpv3_get_report_type(pdu);
+00175             <span class="keywordflow">if</span> (SNMPV3_IGNORE_UNAUTH_REPORTS ||
+00176                 rpt_type == SNMPERR_NOT_IN_TIME_WINDOW) {
+00177                 state-&gt;waiting = 1;
+00178             }
+00179             state-&gt;pdu = NULL;
+00180             state-&gt;status = STAT_ERROR;
+00181             session-&gt;<a class="code" href="structsnmp__session.html#o14">s_snmp_errno</a> = rpt_type;
+00182             SET_SNMP_ERROR(rpt_type);
+00183         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o1">command</a> == SNMP_MSG_RESPONSE) {
+00184             <span class="comment">/*</span>
+00185 <span class="comment">             * clone the pdu to return to snmp_synch_response </span>
+00186 <span class="comment">             */</span>
+00187             state-&gt;pdu = snmp_clone_pdu(pdu);
+00188             state-&gt;status = STAT_SUCCESS;
+00189             session-&gt;<a class="code" href="structsnmp__session.html#o14">s_snmp_errno</a> = SNMPERR_SUCCESS;
+00190         }
+00191     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (op == NETSNMP_CALLBACK_OP_TIMED_OUT) {
+00192         state-&gt;pdu = NULL;
+00193         state-&gt;status = STAT_TIMEOUT;
+00194         session-&gt;<a class="code" href="structsnmp__session.html#o14">s_snmp_errno</a> = SNMPERR_TIMEOUT;
+00195         SET_SNMP_ERROR(SNMPERR_TIMEOUT);
+00196     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (op == NETSNMP_CALLBACK_OP_DISCONNECT) {
+00197         state-&gt;pdu = NULL;
+00198         state-&gt;status = STAT_ERROR;
+00199         session-&gt;<a class="code" href="structsnmp__session.html#o14">s_snmp_errno</a> = SNMPERR_ABORT;
+00200         SET_SNMP_ERROR(SNMPERR_ABORT);
+00201     }
+00202 
+00203     <span class="keywordflow">return</span> 1;
+00204 }
+00205 
+00206 
+00207 <span class="comment">/*</span>
+00208 <span class="comment"> * Clone an SNMP variable data structure.</span>
+00209 <span class="comment"> * Sets pointers to structure private storage, or</span>
+00210 <span class="comment"> * allocates larger object identifiers and values as needed.</span>
+00211 <span class="comment"> *</span>
+00212 <span class="comment"> * Caller must make list association for cloned variable.</span>
+00213 <span class="comment"> *</span>
+00214 <span class="comment"> * Returns 0 if successful.</span>
+00215 <span class="comment"> */</span>
+00216 <span class="keywordtype">int</span>
+00217 snmp_clone_var(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * var, <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * newvar)
+00218 {
+00219     <span class="keywordflow">if</span> (!newvar || !var)
+00220         <span class="keywordflow">return</span> 1;
+00221 
+00222     memmove(newvar, var, <span class="keyword">sizeof</span>(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a>));
+00223     newvar-&gt;<a class="code" href="structvariable__list.html#o0">next_variable</a> = 0;
+00224     newvar-&gt;<a class="code" href="structvariable__list.html#o1">name</a> = 0;
+00225     newvar-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string = 0;
+00226     newvar-&gt;<a class="code" href="structvariable__list.html#o8">data</a> = 0;
+00227     newvar-&gt;<a class="code" href="structvariable__list.html#o9">dataFreeHook</a> = 0;
+00228     newvar-&gt;<a class="code" href="structvariable__list.html#o10">index</a> = 0;
+00229 
+00230     <span class="comment">/*</span>
+00231 <span class="comment">     * Clone the object identifier and the value.</span>
+00232 <span class="comment">     * Allocate memory iff original will not fit into local storage.</span>
+00233 <span class="comment">     */</span>
+00234     <span class="keywordflow">if</span> (snmp_set_var_objid(newvar, var-&gt;<a class="code" href=
+"structvariable__list.html#o1">name</a>, var-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a>))
+00235         <span class="keywordflow">return</span> 1;
+00236 
+00237     <span class="comment">/*</span>
+00238 <span class="comment">     * need a pointer and a length to copy a string value. </span>
+00239 <span class="comment">     */</span>
+00240     <span class="keywordflow">if</span> (var-&gt;<a class="code" href=
+"structvariable__list.html#o4">val</a>.string &amp;&amp; var-&gt;<a class="code" href=
+"structvariable__list.html#o5">val_len</a>) {
+00241         <span class="keywordflow">if</span> (var-&gt;<a class="code" href=
+"structvariable__list.html#o4">val</a>.string != &amp;var-&gt;<a class="code" href="structvariable__list.html#o7">buf</a>[0]) {
+00242             <span class="keywordflow">if</span> (var-&gt;<a class="code" href=
+"structvariable__list.html#o5">val_len</a> &lt;= <span class="keyword">sizeof</span>(var-&gt;<a class="code" href=
+"structvariable__list.html#o7">buf</a>))
+00243                 newvar-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string = newvar-&gt;<a class="code"
+href="structvariable__list.html#o7">buf</a>;
+00244             <span class="keywordflow">else</span> {
+00245                 newvar-&gt;<a class="code" href=
+"structvariable__list.html#o4">val</a>.string = (u_char *) malloc(var-&gt;<a class="code" href=
+"structvariable__list.html#o5">val_len</a>);
+00246                 <span class="keywordflow">if</span> (!newvar-&gt;<a class="code" href=
+"structvariable__list.html#o4">val</a>.string)
+00247                     <span class="keywordflow">return</span> 1;
+00248             }
+00249             memmove(newvar-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string, var-&gt;<a class="code"
+href="structvariable__list.html#o4">val</a>.string, var-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a>);
+00250         } <span class="keywordflow">else</span> {                <span class=
+"comment">/* fix the pointer to new local store */</span>
+00251             newvar-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string = newvar-&gt;<a class="code"
+href="structvariable__list.html#o7">buf</a>;
+00252         }
+00253     } <span class="keywordflow">else</span> {
+00254         newvar-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string = 0;
+00255         newvar-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a> = 0;
+00256     }
+00257 
+00258     <span class="keywordflow">return</span> 0;
+00259 }
+00260 
+00261 
+00262 <span class="comment">/*</span>
+00263 <span class="comment"> * Possibly make a copy of source memory buffer.</span>
+00264 <span class="comment"> * Will reset destination pointer if source pointer is NULL.</span>
+00265 <span class="comment"> * Returns 0 if successful, 1 if memory allocation fails.</span>
+00266 <span class="comment"> */</span>
+00267 <span class="keywordtype">int</span>
+00268 snmp_clone_mem(<span class="keywordtype">void</span> **dstPtr, <span class="keywordtype">void</span> *srcPtr, <span class=
+"keywordtype">unsigned</span> len)
+00269 {
+00270     *dstPtr = 0;
+00271     <span class="keywordflow">if</span> (srcPtr) {
+00272         *dstPtr = malloc(len + 1);
+00273         <span class="keywordflow">if</span> (!*dstPtr) {
+00274             <span class="keywordflow">return</span> 1;
+00275         }
+00276         memmove(*dstPtr, srcPtr, len);
+00277         <span class="comment">/*</span>
+00278 <span class="comment">         * this is for those routines that expect 0-terminated strings!!!</span>
+00279 <span class="comment">         * someone should rather have called strdup</span>
+00280 <span class="comment">         */</span>
+00281         ((<span class="keywordtype">char</span> *) *dstPtr)[len] = 0;
+00282     }
+00283     <span class="keywordflow">return</span> 0;
+00284 }
+00285 
+00286 
+00287 <span class="comment">/*</span>
+00288 <span class="comment"> * Walks through a list of varbinds and frees and allocated memory,</span>
+00289 <span class="comment"> * restoring pointers to local buffers</span>
+00290 <span class="comment"> */</span>
+00291 <span class="keywordtype">void</span>
+00292 snmp_reset_var_buffers(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * var)
+00293 {
+00294     <span class="keywordflow">while</span> (var) {
+00295         <span class="keywordflow">if</span> (var-&gt;<a class="code" href=
+"structvariable__list.html#o1">name</a> != var-&gt;<a class="code" href="structvariable__list.html#o6">name_loc</a>) {
+00296             <span class="keywordflow">if</span>(NULL != var-&gt;<a class="code" href=
+"structvariable__list.html#o1">name</a>)
+00297                 free(var-&gt;<a class="code" href="structvariable__list.html#o1">name</a>);
+00298             var-&gt;<a class="code" href="structvariable__list.html#o1">name</a> = var-&gt;<a class="code" href=
+"structvariable__list.html#o6">name_loc</a>;
+00299             var-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a> = 0;
+00300         }
+00301         <span class="keywordflow">if</span> (var-&gt;<a class="code" href=
+"structvariable__list.html#o4">val</a>.string != var-&gt;<a class="code" href="structvariable__list.html#o7">buf</a>) {
+00302             free(var-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string);
+00303             var-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string = var-&gt;<a class="code" href=
+"structvariable__list.html#o7">buf</a>;
+00304             var-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a> = 0;
+00305         }
+00306         var = var-&gt;<a class="code" href="structvariable__list.html#o0">next_variable</a>;
+00307     }
+00308 }
+00309 
+00310 <span class="comment">/*</span>
+00311 <span class="comment"> * Creates and allocates a clone of the input PDU,</span>
+00312 <span class="comment"> * but does NOT copy the variables.</span>
+00313 <span class="comment"> * This function should be used with another function,</span>
+00314 <span class="comment"> * such as _copy_pdu_vars.</span>
+00315 <span class="comment"> *</span>
+00316 <span class="comment"> * Returns a pointer to the cloned PDU if successful.</span>
+00317 <span class="comment"> * Returns 0 if failure.</span>
+00318 <span class="comment"> */</span>
+00319 <span class="keyword">static</span>
+00320 <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *
+00321 _clone_pdu_header(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu)
+00322 {
+00323     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *newpdu;
+00324     <span class="keyword">struct </span>snmp_secmod_def *sptr;
+00325 
+00326     newpdu = (<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *) malloc(<span class=
+"keyword">sizeof</span>(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>));
+00327     <span class="keywordflow">if</span> (!newpdu)
+00328         <span class="keywordflow">return</span> 0;
+00329     memmove(newpdu, pdu, <span class="keyword">sizeof</span>(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>));
+00330 
+00331     <span class="comment">/*</span>
+00332 <span class="comment">     * reset copied pointers if copy fails </span>
+00333 <span class="comment">     */</span>
+00334     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o17">variables</a> = 0;
+00335     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o20">enterprise</a> = 0;
+00336     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o18">community</a> = 0;
+00337     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o29">securityEngineID</a> = 0;
+00338     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o31">securityName</a> = 0;
+00339     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o25">contextEngineID</a> = 0;
+00340     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o27">contextName</a> = 0;
+00341     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o13">transport_data</a> = 0;
+00342 
+00343     <span class="comment">/*</span>
+00344 <span class="comment">     * copy buffers individually. If any copy fails, all are freed. </span>
+00345 <span class="comment">     */</span>
+00346     <span class="keywordflow">if</span> (snmp_clone_mem((<span class=
+"keywordtype">void</span> **) &amp;newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o20">enterprise</a>, pdu-&gt;<a class=
+"code" href="structsnmp__pdu.html#o20">enterprise</a>,
+00347                        <span class="keyword">sizeof</span>(oid) * pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o21">enterprise_length</a>) ||
+00348         snmp_clone_mem((<span class="keywordtype">void</span> **) &amp;newpdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o18">community</a>, pdu-&gt;<a class="code" href="structsnmp__pdu.html#o18">community</a>,
+00349                        pdu-&gt;<a class="code" href="structsnmp__pdu.html#o19">community_len</a>) ||
+00350         snmp_clone_mem((<span class="keywordtype">void</span> **) &amp;newpdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o25">contextEngineID</a>,
+00351                        pdu-&gt;<a class="code" href="structsnmp__pdu.html#o25">contextEngineID</a>, pdu-&gt;<a class="code"
+href="structsnmp__pdu.html#o26">contextEngineIDLen</a>)
+00352         || snmp_clone_mem((<span class="keywordtype">void</span> **) &amp;newpdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o29">securityEngineID</a>,
+00353                           pdu-&gt;<a class="code" href="structsnmp__pdu.html#o29">securityEngineID</a>, pdu-&gt;<a class=
+"code" href="structsnmp__pdu.html#o30">securityEngineIDLen</a>)
+00354         || snmp_clone_mem((<span class="keywordtype">void</span> **) &amp;newpdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o27">contextName</a>, pdu-&gt;<a class="code" href="structsnmp__pdu.html#o27">contextName</a>,
+00355                           pdu-&gt;<a class="code" href="structsnmp__pdu.html#o28">contextNameLen</a>)
+00356         || snmp_clone_mem((<span class="keywordtype">void</span> **) &amp;newpdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o31">securityName</a>,
+00357                           pdu-&gt;<a class="code" href="structsnmp__pdu.html#o31">securityName</a>, pdu-&gt;<a class="code"
+href="structsnmp__pdu.html#o32">securityNameLen</a>)
+00358         || snmp_clone_mem((<span class="keywordtype">void</span> **) &amp;newpdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o13">transport_data</a>,
+00359                           pdu-&gt;<a class="code" href="structsnmp__pdu.html#o13">transport_data</a>,
+00360                           pdu-&gt;<a class="code" href="structsnmp__pdu.html#o14">transport_data_length</a>)) {
+00361         snmp_free_pdu(newpdu);
+00362         <span class="keywordflow">return</span> 0;
+00363     }
+00364     <span class="keywordflow">if</span> ((sptr = find_sec_mod(newpdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o10">securityModel</a>)) != NULL &amp;&amp;
+00365         sptr-&gt;pdu_clone != NULL) {
+00366         <span class="comment">/*</span>
+00367 <span class="comment">         * call security model if it needs to know about this </span>
+00368 <span class="comment">         */</span>
+00369         (*sptr-&gt;pdu_clone) (pdu, newpdu);
+00370     }
+00371 
+00372     <span class="keywordflow">return</span> newpdu;
+00373 }
+00374 
+00375 <span class="keyword">static</span>
+00376 <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *
+00377 _copy_varlist(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * var,      <span class=
+"comment">/* source varList */</span>
+00378               <span class="keywordtype">int</span> errindex,     <span class=
+"comment">/* index of variable to drop (if any) */</span>
+00379               <span class="keywordtype">int</span> copy_count)
+00380 {                               <span class="comment">/* !=0 number variables to copy */</span>
+00381     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *newhead, *newvar, *oldvar;
+00382     <span class="keywordtype">int</span>             ii = 0;
+00383 
+00384     newhead = NULL;
+00385     oldvar = NULL;
+00386 
+00387     <span class="keywordflow">while</span> (var &amp;&amp; (copy_count-- &gt; 0)) {
+00388         <span class="comment">/*</span>
+00389 <span class="comment">         * Drop the specified variable (if applicable) </span>
+00390 <span class="comment">         */</span>
+00391         <span class="keywordflow">if</span> (++ii == errindex) {
+00392             var = var-&gt;<a class="code" href="structvariable__list.html#o0">next_variable</a>;
+00393             <span class="keywordflow">continue</span>;
+00394         }
+00395 
+00396         <span class="comment">/*</span>
+00397 <span class="comment">         * clone the next variable. Cleanup if alloc fails </span>
+00398 <span class="comment">         */</span>
+00399         newvar = (<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *)
+00400             malloc(<span class="keyword">sizeof</span>(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a>));
+00401         <span class="keywordflow">if</span> (snmp_clone_var(var, newvar)) {
+00402             <span class="keywordflow">if</span> (newvar)
+00403                 free((<span class="keywordtype">char</span> *) newvar);
+00404             snmp_free_varbind(newhead);
+00405             <span class="keywordflow">return</span> 0;
+00406         }
+00407 
+00408         <span class="comment">/*</span>
+00409 <span class="comment">         * add cloned variable to new list  </span>
+00410 <span class="comment">         */</span>
+00411         <span class="keywordflow">if</span> (0 == newhead)
+00412             newhead = newvar;
+00413         <span class="keywordflow">if</span> (oldvar)
+00414             oldvar-&gt;<a class="code" href="structvariable__list.html#o0">next_variable</a> = newvar;
+00415         oldvar = newvar;
+00416 
+00417         var = var-&gt;<a class="code" href="structvariable__list.html#o0">next_variable</a>;
+00418     }
+00419     <span class="keywordflow">return</span> newhead;
+00420 }
+00421 
+00422 
+00423 <span class="comment">/*</span>
+00424 <span class="comment"> * Copy some or all variables from source PDU to target PDU.</span>
+00425 <span class="comment"> * This function consolidates many of the needs of PDU variables:</span>
+00426 <span class="comment"> * Clone PDU : copy all the variables.</span>
+00427 <span class="comment"> * Split PDU : skip over some variables to copy other variables.</span>
+00428 <span class="comment"> * Fix PDU   : remove variable associated with error index.</span>
+00429 <span class="comment"> *</span>
+00430 <span class="comment"> * Designed to work with _clone_pdu_header.</span>
+00431 <span class="comment"> *</span>
+00432 <span class="comment"> * If drop_err is set, drop any variable associated with errindex.</span>
+00433 <span class="comment"> * If skip_count is set, skip the number of variable in pdu's list.</span>
+00434 <span class="comment"> * While copy_count is greater than zero, copy pdu variables to newpdu.</span>
+00435 <span class="comment"> *</span>
+00436 <span class="comment"> * If an error occurs, newpdu is freed and pointer is set to 0.</span>
+00437 <span class="comment"> *</span>
+00438 <span class="comment"> * Returns a pointer to the cloned PDU if successful.</span>
+00439 <span class="comment"> * Returns 0 if failure.</span>
+00440 <span class="comment"> */</span>
+00441 <span class="keyword">static</span>
+00442 <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *
+00443 _copy_pdu_vars(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu,        <span class=
+"comment">/* source PDU */</span>
+00444                <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *newpdu,     <span class=
+"comment">/* target PDU */</span>
+00445                <span class="keywordtype">int</span> drop_err,    <span class=
+"comment">/* !=0 drop errored variable */</span>
+00446                <span class="keywordtype">int</span> skip_count,  <span class=
+"comment">/* !=0 number of variables to skip */</span>
+00447                <span class="keywordtype">int</span> copy_count)
+00448 {                               <span class="comment">/* !=0 number of variables to copy */</span>
+00449     <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *var, *oldvar;
+00450     <span class="keywordtype">int</span>             ii, copied, drop_idx;
+00451 
+00452     <span class="keywordflow">if</span> (!newpdu)
+00453         <span class="keywordflow">return</span> 0;               <span class=
+"comment">/* where is PDU to copy to ? */</span>
+00454 
+00455     <span class="keywordflow">if</span> (drop_err)
+00456         drop_idx = pdu-&gt;<a class="code" href="structsnmp__pdu.html#o7">errindex</a> - skip_count;
+00457     <span class="keywordflow">else</span>
+00458         drop_idx = 0;
+00459 
+00460     var = pdu-&gt;<a class="code" href="structsnmp__pdu.html#o17">variables</a>;
+00461     <span class="keywordflow">while</span> (var &amp;&amp; (skip_count-- &gt; 0))   <span class=
+"comment">/* skip over pdu variables */</span>
+00462         var = var-&gt;<a class="code" href="structvariable__list.html#o0">next_variable</a>;
+00463 
+00464     oldvar = 0;
+00465     ii = 0;
+00466     copied = 0;
+00467     <span class="keywordflow">if</span> (pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o9">flags</a> &amp; UCD_MSG_FLAG_FORCE_PDU_COPY)
+00468         copied = 1;             <span class="comment">/* We're interested in 'empty' responses too */</span>
+00469 
+00470     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o17">variables</a> = _copy_varlist(var, drop_idx, copy_count);
+00471     <span class="keywordflow">if</span> (newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o17">variables</a>)
+00472         copied = 1;
+00473 
+00474 <span class="preprocessor">#if ALSO_TEMPORARILY_DISABLED</span>
+00475     <span class="comment">/*</span>
+00476 <span class="comment">     * Error if bad errindex or if target PDU has no variables copied </span>
+00477 <span class="comment">     */</span>
+00478     <span class="keywordflow">if</span> ((drop_err &amp;&amp; (ii &lt; pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o7">errindex</a>))
+00479 <span class="preprocessor">#if TEMPORARILY_DISABLED</span>
+00480         <span class="comment">/*</span>
+00481 <span class="comment">         * SNMPv3 engineID probes are allowed to be empty.</span>
+00482 <span class="comment">         * See the comment in snmp_api.c for further details </span>
+00483 <span class="comment">         */</span>
+00484         || copied == 0
+00485 <span class="preprocessor">#endif</span>
+00486         ) {
+00487         snmp_free_pdu(newpdu);
+00488         <span class="keywordflow">return</span> 0;
+00489     }
+00490 <span class="preprocessor">#endif</span>
+00491     <span class="keywordflow">return</span> newpdu;
+00492 }
+00493 
+00494 
+00495 <span class="comment">/*</span>
+00496 <span class="comment"> * Creates (allocates and copies) a clone of the input PDU.</span>
+00497 <span class="comment"> * If drop_err is set, don't copy any variable associated with errindex.</span>
+00498 <span class="comment"> * This function is called by snmp_clone_pdu and snmp_fix_pdu.</span>
+00499 <span class="comment"> *</span>
+00500 <span class="comment"> * Returns a pointer to the cloned PDU if successful.</span>
+00501 <span class="comment"> * Returns 0 if failure.</span>
+00502 <span class="comment"> */</span>
+00503 <span class="keyword">static</span>
+00504 <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *
+00505 _clone_pdu(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu, <span class="keywordtype">int</span> drop_err)
+00506 {
+00507     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *newpdu;
+00508     newpdu = _clone_pdu_header(pdu);
+00509     newpdu = _copy_pdu_vars(pdu, newpdu, drop_err, 0, 10000);   <span class="comment">/* skip none, copy all */</span>
+00510 
+00511     <span class="keywordflow">return</span> newpdu;
+00512 }
+00513 
+00514 
+00515 <span class="comment">/*</span>
+00516 <span class="comment"> * This function will clone a full varbind list</span>
+00517 <span class="comment"> *</span>
+00518 <span class="comment"> * Returns a pointer to the cloned PDU if successful.</span>
+00519 <span class="comment"> * Returns 0 if failure</span>
+00520 <span class="comment"> */</span>
+00521 <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *
+00522 snmp_clone_varbind(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * varlist)
+00523 {
+00524     <span class="keywordflow">return</span> _copy_varlist(varlist, 0, 10000);    <span class=
+"comment">/* skip none, copy all */</span>
+00525 }
+00526 
+00527 <span class="comment">/*</span>
+00528 <span class="comment"> * This function will clone a PDU including all of its variables.</span>
+00529 <span class="comment"> *</span>
+00530 <span class="comment"> * Returns a pointer to the cloned PDU if successful.</span>
+00531 <span class="comment"> * Returns 0 if failure</span>
+00532 <span class="comment"> */</span>
+00533 <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *
+00534 snmp_clone_pdu(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu)
+00535 {
+00536     <span class="keywordflow">return</span> _clone_pdu(pdu, 0);  <span class="comment">/* copies all variables */</span>
+00537 }
+00538 
+00539 
+00540 <span class="comment">/*</span>
+00541 <span class="comment"> * This function will clone a PDU including some of its variables.</span>
+00542 <span class="comment"> *</span>
+00543 <span class="comment"> * If skip_count is not zero, it defines the number of variables to skip.</span>
+00544 <span class="comment"> * If copy_count is not zero, it defines the number of variables to copy.</span>
+00545 <span class="comment"> *</span>
+00546 <span class="comment"> * Returns a pointer to the cloned PDU if successful.</span>
+00547 <span class="comment"> * Returns 0 if failure.</span>
+00548 <span class="comment"> */</span>
+00549 <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *
+00550 snmp_split_pdu(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu, <span class=
+"keywordtype">int</span> skip_count, <span class="keywordtype">int</span> copy_count)
+00551 {
+00552     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *newpdu;
+00553     newpdu = _clone_pdu_header(pdu);
+00554     newpdu = _copy_pdu_vars(pdu, newpdu, 0,     <span class="comment">/* don't drop any variables */</span>
+00555                             skip_count, copy_count);
+00556 
+00557     <span class="keywordflow">return</span> newpdu;
+00558 }
+00559 
+00560 
+00561 <span class="comment">/*</span>
+00562 <span class="comment"> * If there was an error in the input pdu, creates a clone of the pdu</span>
+00563 <span class="comment"> * that includes all the variables except the one marked by the errindex.</span>
+00564 <span class="comment"> * The command is set to the input command and the reqid, errstat, and</span>
+00565 <span class="comment"> * errindex are set to default values.</span>
+00566 <span class="comment"> * If the error status didn't indicate an error, the error index didn't</span>
+00567 <span class="comment"> * indicate a variable, the pdu wasn't a get response message, or there</span>
+00568 <span class="comment"> * would be no remaining variables, this function will return 0.</span>
+00569 <span class="comment"> * If everything was successful, a pointer to the fixed cloned pdu will</span>
+00570 <span class="comment"> * be returned.</span>
+00571 <span class="comment"> */</span>
+00572 <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *
+00573 snmp_fix_pdu(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu, <span class=
+"keywordtype">int</span> command)
+00574 {
+00575     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a>    *newpdu;
+00576 
+00577     <span class="keywordflow">if</span> ((pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o1">command</a> != SNMP_MSG_RESPONSE)
+00578         || (pdu-&gt;<a class="code" href="structsnmp__pdu.html#o6">errstat</a> == SNMP_ERR_NOERROR)
+00579         || (0 == pdu-&gt;<a class="code" href="structsnmp__pdu.html#o17">variables</a>)
+00580         || (pdu-&gt;<a class="code" href="structsnmp__pdu.html#o7">errindex</a> &lt;= 0)) {
+00581         <span class="keywordflow">return</span> 0;               <span class=
+"comment">/* pre-condition tests fail */</span>
+00582     }
+00583 
+00584     newpdu = _clone_pdu(pdu, 1);        <span class="comment">/* copies all except errored variable */</span>
+00585     <span class="keywordflow">if</span> (!newpdu)
+00586         <span class="keywordflow">return</span> 0;
+00587     <span class="keywordflow">if</span> (!newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o17">variables</a>) {
+00588         snmp_free_pdu(newpdu);
+00589         <span class="keywordflow">return</span> 0;               <span class=
+"comment">/* no variables. "should not happen" */</span>
+00590     }
+00591     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o1">command</a> = command;
+00592     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o2">reqid</a> = snmp_get_next_reqid();
+00593     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o3">msgid</a> = snmp_get_next_msgid();
+00594     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o6">errstat</a> = SNMP_DEFAULT_ERRSTAT;
+00595     newpdu-&gt;<a class="code" href="structsnmp__pdu.html#o7">errindex</a> = SNMP_DEFAULT_ERRINDEX;
+00596 
+00597     <span class="keywordflow">return</span> newpdu;
+00598 }
+00599 
+00600 
+00601 <span class="comment">/*</span>
+00602 <span class="comment"> * Returns the number of variables bound to a PDU structure</span>
+00603 <span class="comment"> */</span>
+00604 <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>
+00605 snmp_varbind_len(<a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu)
+00606 {
+00607     <span class="keyword">register</span> <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *vars;
+00608     <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>   retVal = 0;
+00609     <span class="keywordflow">if</span> (pdu)
+00610         <span class="keywordflow">for</span> (vars = pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o17">variables</a>; vars; vars = vars-&gt;<a class="code" href=
+"structvariable__list.html#o0">next_variable</a>) {
+00611             retVal++;
+00612         }
+00613 
+00614     <span class="keywordflow">return</span> retVal;
+00615 }
+00616 
+00617 <span class="comment">/*</span>
+00618 <span class="comment"> * Add object identifier name to SNMP variable.</span>
+00619 <span class="comment"> * If the name is large, additional memory is allocated.</span>
+00620 <span class="comment"> * Returns 0 if successful.</span>
+00621 <span class="comment"> */</span>
+00622 
+00623 <span class="keywordtype">int</span>
+00624 snmp_set_var_objid(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * vp,
+00625                    <span class="keyword">const</span> oid * objid, size_t name_length)
+00626 {
+00627     size_t          len = <span class="keyword">sizeof</span>(oid) * name_length;
+00628 
+00629     <span class="keywordflow">if</span> (vp-&gt;<a class="code" href=
+"structvariable__list.html#o1">name</a> != vp-&gt;<a class="code" href=
+"structvariable__list.html#o6">name_loc</a> &amp;&amp; vp-&gt;<a class="code" href=
+"structvariable__list.html#o1">name</a> != NULL &amp;&amp;
+00630         vp-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a> &gt; (<span class=
+"keyword">sizeof</span>(vp-&gt;<a class="code" href="structvariable__list.html#o6">name_loc</a>) / <span class=
+"keyword">sizeof</span>(oid))) {
+00631         <span class="comment">/*</span>
+00632 <span class="comment">         * Probably previously-allocated "big storage".  Better free it</span>
+00633 <span class="comment">         * else memory leaks possible.  </span>
+00634 <span class="comment">         */</span>
+00635         free(vp-&gt;<a class="code" href="structvariable__list.html#o1">name</a>);
+00636     }
+00637 
+00638     <span class="comment">/*</span>
+00639 <span class="comment">     * use built-in storage for smaller values </span>
+00640 <span class="comment">     */</span>
+00641     <span class="keywordflow">if</span> (len &lt;= <span class="keyword">sizeof</span>(vp-&gt;<a class="code" href=
+"structvariable__list.html#o6">name_loc</a>)) {
+00642         vp-&gt;<a class="code" href="structvariable__list.html#o1">name</a> = vp-&gt;<a class="code" href=
+"structvariable__list.html#o6">name_loc</a>;
+00643     } <span class="keywordflow">else</span> {
+00644         vp-&gt;<a class="code" href="structvariable__list.html#o1">name</a> = (oid *) malloc(len);
+00645         <span class="keywordflow">if</span> (!vp-&gt;<a class="code" href="structvariable__list.html#o1">name</a>)
+00646             <span class="keywordflow">return</span> 1;
+00647     }
+00648     <span class="keywordflow">if</span> (objid)
+00649         memmove(vp-&gt;<a class="code" href="structvariable__list.html#o1">name</a>, objid, len);
+00650     vp-&gt;<a class="code" href="structvariable__list.html#o2">name_length</a> = name_length;
+00651     <span class="keywordflow">return</span> 0;
+00652 }
+00653 
+00669 <span class="keywordtype">int</span>
+<a name="l00670" id="l00670"></a><a class="code" href="group__snmp__client.html#ga18">00670</a> <a class="code" href=
+"group__snmp__client.html#ga18">snmp_set_var_typed_value</a>(<a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> * newvar, u_char type,
+00671                          <span class="keyword">const</span> u_char * val_str, size_t val_len)
+00672 {
+00673     newvar-&gt;<a class="code" href="structvariable__list.html#o3">type</a> = type;
+00674     <span class="keywordflow">return</span> snmp_set_var_value(newvar, val_str, val_len);
+00675 }
+00676 
+00677 <span class="keywordtype">int</span>
+00678 count_varbinds(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * var_ptr)
+00679 {
+00680     <span class="keywordtype">int</span>             count = 0;
+00681 
+00682     <span class="keywordflow">for</span> (; var_ptr != NULL; var_ptr = var_ptr-&gt;<a class="code" href=
+"structvariable__list.html#o0">next_variable</a>)
+00683         count++;
+00684 
+00685     <span class="keywordflow">return</span> count;
+00686 }
+00687 
+00688 <span class="keywordtype">int</span>
+00689 count_varbinds_of_type(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * var_ptr, u_char type)
+00690 {
+00691     <span class="keywordtype">int</span>             count = 0;
+00692 
+00693     <span class="keywordflow">for</span> (; var_ptr != NULL; var_ptr = var_ptr-&gt;<a class="code" href=
+"structvariable__list.html#o0">next_variable</a>)
+00694         <span class="keywordflow">if</span> (var_ptr-&gt;<a class="code" href=
+"structvariable__list.html#o3">type</a> == type)
+00695             count++;
+00696 
+00697     <span class="keywordflow">return</span> count;
+00698 }
+00699 
+00700 <a class="code" href="structvariable__list.html">netsnmp_variable_list</a> *
+00701 find_varbind_of_type(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * var_ptr, u_char type)
+00702 {
+00703     <span class="keywordflow">for</span> (; var_ptr != NULL &amp;&amp; var_ptr-&gt;<a class="code" href=
+"structvariable__list.html#o3">type</a> != type;
+00704          var_ptr = var_ptr-&gt;<a class="code" href="structvariable__list.html#o0">next_variable</a>);
+00705 
+00706     <span class="keywordflow">return</span> var_ptr;
+00707 }
+00708 
+00709 <span class="comment">/*</span>
+00710 <span class="comment"> * Add some value to SNMP variable.</span>
+00711 <span class="comment"> * If the value is large, additional memory is allocated.</span>
+00712 <span class="comment"> * Returns 0 if successful.</span>
+00713 <span class="comment"> */</span>
+00714 
+00715 <span class="keywordtype">int</span>
+00716 snmp_set_var_value(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * newvar,
+00717                    <span class="keyword">const</span> u_char * val_str, size_t val_len)
+00718 {
+00719     <span class="comment">/*</span>
+00720 <span class="comment">     * xxx-rks: why the unconditional free? why not use existing</span>
+00721 <span class="comment">     * memory, if val_len &lt; newvar-&gt;val_len ?</span>
+00722 <span class="comment">     */</span>
+00723     <span class="keywordflow">if</span> (newvar-&gt;<a class="code" href=
+"structvariable__list.html#o4">val</a>.string &amp;&amp; newvar-&gt;<a class="code" href=
+"structvariable__list.html#o4">val</a>.string != newvar-&gt;<a class="code" href="structvariable__list.html#o7">buf</a>) {
+00724         free(newvar-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string);
+00725     }
+00726 
+00727     newvar-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string = 0;
+00728     newvar-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a> = 0;
+00729 
+00730     <span class="comment">/*</span>
+00731 <span class="comment">     * need a pointer and a length to copy a string value. </span>
+00732 <span class="comment">     */</span>
+00733     <span class="keywordflow">if</span> (val_str &amp;&amp; val_len) {
+00734         <span class="keywordflow">if</span> (val_len &lt;= <span class="keyword">sizeof</span>(newvar-&gt;<a class="code"
+href="structvariable__list.html#o7">buf</a>))
+00735             newvar-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string = newvar-&gt;<a class="code"
+href="structvariable__list.html#o7">buf</a>;
+00736         <span class="keywordflow">else</span> {
+00737             newvar-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string = (u_char *) malloc(val_len);
+00738             <span class="keywordflow">if</span> (!newvar-&gt;<a class="code" href=
+"structvariable__list.html#o4">val</a>.string)
+00739                 <span class="keywordflow">return</span> 1;
+00740         }
+00741         memmove(newvar-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string, val_str, val_len);
+00742         newvar-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a> = val_len;
+00743     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (val_str) {
+00744         <span class="comment">/*</span>
+00745 <span class="comment">         * NULL STRING != NULL ptr </span>
+00746 <span class="comment">         */</span>
+00747         newvar-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string = newvar-&gt;<a class="code" href=
+"structvariable__list.html#o7">buf</a>;
+00748         newvar-&gt;<a class="code" href="structvariable__list.html#o4">val</a>.string[0] = <span class=
+"charliteral">'\0'</span>;
+00749         newvar-&gt;<a class="code" href="structvariable__list.html#o5">val_len</a> = 0;
+00750     }
+00751     <span class="keywordflow">return</span> 0;
+00752 }
+00753 
+00754 <span class="keywordtype">void</span>
+00755 snmp_replace_var_types(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * vbl, u_char old_type,
+00756                        u_char new_type)
+00757 {
+00758     <span class="keywordflow">while</span> (vbl) {
+00759         <span class="keywordflow">if</span> (vbl-&gt;<a class="code" href=
+"structvariable__list.html#o3">type</a> == old_type) {
+00760             <a class="code" href="group__snmp__client.html#ga18">snmp_set_var_typed_value</a>(vbl, new_type, NULL, 0);
+00761         }
+00762         vbl = vbl-&gt;<a class="code" href="structvariable__list.html#o0">next_variable</a>;
+00763     }
+00764 }
+00765 
+00766 <span class="keywordtype">void</span>
+00767 snmp_reset_var_types(<a class="code" href="structvariable__list.html">netsnmp_variable_list</a> * vbl, u_char new_type)
+00768 {
+00769     <span class="keywordflow">while</span> (vbl) {
+00770         <a class="code" href="group__snmp__client.html#ga18">snmp_set_var_typed_value</a>(vbl, new_type, NULL, 0);
+00771         vbl = vbl-&gt;<a class="code" href="structvariable__list.html#o0">next_variable</a>;
+00772     }
+00773 }
+00774 
+00775 <span class="keywordtype">int</span>
+00776 snmp_synch_response_cb(<a class="code" href="structsnmp__session.html">netsnmp_session</a> * ss,
+00777                        <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu,
+00778                        <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> **response, snmp_callback pcb)
+00779 {
+00780     <span class="keyword">struct </span>synch_state lstate, *state;
+00781     snmp_callback   cbsav;
+00782     <span class="keywordtype">void</span>           *cbmagsav;
+00783     <span class="keywordtype">int</span>             numfds, count;
+00784     fd_set          fdset;
+00785     <span class="keyword">struct </span>timeval  timeout, *tvp;
+00786     <span class="keywordtype">int</span>             block;
+00787 
+00788     memset((<span class="keywordtype">void</span> *) &amp;lstate, 0, <span class="keyword">sizeof</span>(lstate));
+00789     state = &amp;lstate;
+00790     cbsav = ss-&gt;<a class="code" href="structsnmp__session.html#o11">callback</a>;
+00791     cbmagsav = ss-&gt;<a class="code" href="structsnmp__session.html#o12">callback_magic</a>;
+00792     ss-&gt;<a class="code" href="structsnmp__session.html#o11">callback</a> = pcb;
+00793     ss-&gt;<a class="code" href="structsnmp__session.html#o12">callback_magic</a> = (<span class=
+"keywordtype">void</span> *) state;
+00794 
+00795     <span class="keywordflow">if</span> ((state-&gt;reqid = snmp_send(ss, pdu)) == 0) {
+00796         snmp_free_pdu(pdu);
+00797         state-&gt;status = STAT_ERROR;
+00798     } <span class="keywordflow">else</span>
+00799         state-&gt;waiting = 1;
+00800 
+00801     <span class="keywordflow">while</span> (state-&gt;waiting) {
+00802         numfds = 0;
+00803         FD_ZERO(&amp;fdset);
+00804         block = SNMPBLOCK;
+00805         tvp = &amp;timeout;
+00806         timerclear(tvp);
+00807         snmp_select_info(&amp;numfds, &amp;fdset, tvp, &amp;block);
+00808         <span class="keywordflow">if</span> (block == 1)
+00809             tvp = NULL;         <span class="comment">/* block without timeout */</span>
+00810         count = select(numfds, &amp;fdset, 0, 0, tvp);
+00811         <span class="keywordflow">if</span> (count &gt; 0) {
+00812             snmp_read(&amp;fdset);
+00813         } <span class="keywordflow">else</span>
+00814             <span class="keywordflow">switch</span> (count) {
+00815             <span class="keywordflow">case</span> 0:
+00816                 snmp_timeout();
+00817                 <span class="keywordflow">break</span>;
+00818             <span class="keywordflow">case</span> -1:
+00819                 <span class="keywordflow">if</span> (errno == EINTR) {
+00820                     <span class="keywordflow">continue</span>;
+00821                 } <span class="keywordflow">else</span> {
+00822                     snmp_errno = SNMPERR_GENERR;    <span class="comment">/*MTCRITICAL_RESOURCE */</span>
+00823                     <span class="comment">/*</span>
+00824 <span class="comment">                     * CAUTION! if another thread closed the socket(s)</span>
+00825 <span class="comment">                     * waited on here, the session structure was freed.</span>
+00826 <span class="comment">                     * It would be nice, but we can't rely on the pointer.</span>
+00827 <span class="comment">                     * ss-&gt;s_snmp_errno = SNMPERR_GENERR;</span>
+00828 <span class="comment">                     * ss-&gt;s_errno = errno;</span>
+00829 <span class="comment">                     */</span>
+00830                     snmp_set_detail(strerror(errno));
+00831                 }
+00832                 <span class="comment">/*</span>
+00833 <span class="comment">                 * FALLTHRU </span>
+00834 <span class="comment">                 */</span>
+00835             <span class="keywordflow">default</span>:
+00836                 state-&gt;status = STAT_ERROR;
+00837                 state-&gt;waiting = 0;
+00838             }
+00839     }
+00840     *response = state-&gt;pdu;
+00841     ss-&gt;<a class="code" href="structsnmp__session.html#o11">callback</a> = cbsav;
+00842     ss-&gt;<a class="code" href="structsnmp__session.html#o12">callback_magic</a> = cbmagsav;
+00843     <span class="keywordflow">return</span> state-&gt;status;
+00844 }
+00845 
+00846 <span class="keywordtype">int</span>
+00847 snmp_synch_response(<a class="code" href="structsnmp__session.html">netsnmp_session</a> * ss,
+00848                     <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu, <a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> **response)
+00849 {
+00850     <span class="keywordflow">return</span> snmp_synch_response_cb(ss, pdu, response, snmp_synch_input);
+00851 }
+00852 
+00853 <span class="keywordtype">int</span>
+00854 snmp_sess_synch_response(<span class="keywordtype">void</span> *sessp,
+00855                          <a class="code" href="structsnmp__pdu.html">netsnmp_pdu</a> *pdu, <a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> **response)
+00856 {
+00857     <a class="code" href="structsnmp__session.html">netsnmp_session</a> *ss;
+00858     <span class="keyword">struct </span>synch_state lstate, *state;
+00859     snmp_callback   cbsav;
+00860     <span class="keywordtype">void</span>           *cbmagsav;
+00861     <span class="keywordtype">int</span>             numfds, count;
+00862     fd_set          fdset;
+00863     <span class="keyword">struct </span>timeval  timeout, *tvp;
+00864     <span class="keywordtype">int</span>             block;
+00865 
+00866     ss = snmp_sess_session(sessp);
+00867     memset((<span class="keywordtype">void</span> *) &amp;lstate, 0, <span class="keyword">sizeof</span>(lstate));
+00868     state = &amp;lstate;
+00869     cbsav = ss-&gt;<a class="code" href="structsnmp__session.html#o11">callback</a>;
+00870     cbmagsav = ss-&gt;<a class="code" href="structsnmp__session.html#o12">callback_magic</a>;
+00871     ss-&gt;<a class="code" href="structsnmp__session.html#o11">callback</a> = snmp_synch_input;
+00872     ss-&gt;<a class="code" href="structsnmp__session.html#o12">callback_magic</a> = (<span class=
+"keywordtype">void</span> *) state;
+00873 
+00874     <span class="keywordflow">if</span> ((state-&gt;reqid = snmp_sess_send(sessp, pdu)) == 0) {
+00875         snmp_free_pdu(pdu);
+00876         state-&gt;status = STAT_ERROR;
+00877     } <span class="keywordflow">else</span>
+00878         state-&gt;waiting = 1;
+00879 
+00880     <span class="keywordflow">while</span> (state-&gt;waiting) {
+00881         numfds = 0;
+00882         FD_ZERO(&amp;fdset);
+00883         block = SNMPBLOCK;
+00884         tvp = &amp;timeout;
+00885         timerclear(tvp);
+00886         snmp_sess_select_info(sessp, &amp;numfds, &amp;fdset, tvp, &amp;block);
+00887         <span class="keywordflow">if</span> (block == 1)
+00888             tvp = NULL;         <span class="comment">/* block without timeout */</span>
+00889         count = select(numfds, &amp;fdset, 0, 0, tvp);
+00890         <span class="keywordflow">if</span> (count &gt; 0) {
+00891             snmp_sess_read(sessp, &amp;fdset);
+00892         } <span class="keywordflow">else</span>
+00893             <span class="keywordflow">switch</span> (count) {
+00894             <span class="keywordflow">case</span> 0:
+00895                 snmp_sess_timeout(sessp);
+00896                 <span class="keywordflow">break</span>;
+00897             <span class="keywordflow">case</span> -1:
+00898                 <span class="keywordflow">if</span> (errno == EINTR) {
+00899                     <span class="keywordflow">continue</span>;
+00900                 } <span class="keywordflow">else</span> {
+00901                     snmp_errno = SNMPERR_GENERR;    <span class="comment">/*MTCRITICAL_RESOURCE */</span>
+00902                     <span class="comment">/*</span>
+00903 <span class="comment">                     * CAUTION! if another thread closed the socket(s)</span>
+00904 <span class="comment">                     * waited on here, the session structure was freed.</span>
+00905 <span class="comment">                     * It would be nice, but we can't rely on the pointer.</span>
+00906 <span class="comment">                     * ss-&gt;s_snmp_errno = SNMPERR_GENERR;</span>
+00907 <span class="comment">                     * ss-&gt;s_errno = errno;</span>
+00908 <span class="comment">                     */</span>
+00909                     snmp_set_detail(strerror(errno));
+00910                 }
+00911                 <span class="comment">/*</span>
+00912 <span class="comment">                 * FALLTHRU </span>
+00913 <span class="comment">                 */</span>
+00914             <span class="keywordflow">default</span>:
+00915                 state-&gt;status = STAT_ERROR;
+00916                 state-&gt;waiting = 0;
+00917             }
+00918     }
+00919     *response = state-&gt;pdu;
+00920     ss-&gt;<a class="code" href="structsnmp__session.html#o11">callback</a> = cbsav;
+00921     ss-&gt;<a class="code" href="structsnmp__session.html#o12">callback_magic</a> = cbmagsav;
+00922     <span class="keywordflow">return</span> state-&gt;status;
+00923 }
+00924 
+00925 
+00926 <span class="keyword">const</span> <span class="keywordtype">char</span>     *error_string[19] = {
+00927     <span class="stringliteral">"(noError) No Error"</span>,
+00928     <span class="stringliteral">"(tooBig) Response message would have been too large."</span>,
+00929     <span class="stringliteral">"(noSuchName) There is no such variable name in this MIB."</span>,
+00930     <span class="stringliteral">"(badValue) The value given has the wrong type or length."</span>,
+00931     <span class="stringliteral">"(readOnly) The two parties used do not have access to use the specified SNMP PDU."</span>,
+00932     <span class="stringliteral">"(genError) A general failure occured"</span>,
+00933     <span class="stringliteral">"noAccess"</span>,
+00934     <span class="stringliteral">"wrongType (The set datatype does not match the data type the agent expects)"</span>,
+00935     <span class="stringliteral">"wrongLength (The set value has an illegal length from what the agent expects)"</span>,
+00936     <span class="stringliteral">"wrongEncoding"</span>,
+00937     <span class="stringliteral">"wrongValue (The set value is illegal or unsupported in some way)"</span>,
+00938     <span class=
+"stringliteral">"noCreation (That table does not support row creation or that object can not ever be created)"</span>,
+00939     <span class="stringliteral">"inconsistentValue (The set value is illegal or unsupported in some way)"</span>,
+00940     <span class="stringliteral">"resourceUnavailable (This is likely a out-of-memory failure within the agent)"</span>,
+00941     <span class="stringliteral">"commitFailed"</span>,
+00942     <span class="stringliteral">"undoFailed"</span>,
+00943     <span class="stringliteral">"authorizationError (access denied to that object)"</span>,
+00944     <span class="stringliteral">"notWritable (That object does not support modification)"</span>,
+00945     <span class="stringliteral">"inconsistentName (That object can not currently be created)"</span>
+00946 };
+00947 
+00948 <span class="keyword">const</span> <span class="keywordtype">char</span>     *
+00949 snmp_errstring(<span class="keywordtype">int</span> errstat)
+00950 {
+00951     <span class="keywordflow">if</span> (errstat &lt;= MAX_SNMP_ERR &amp;&amp; errstat &gt;= SNMP_ERR_NOERROR) {
+00952         <span class="keywordflow">return</span> error_string[errstat];
+00953     } <span class="keywordflow">else</span> {
+00954         <span class="keywordflow">return</span> <span class="stringliteral">"Unknown Error"</span>;
+00955     }
+00956 }
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:00 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

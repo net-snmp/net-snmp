@@ -1,0 +1,1606 @@
+<head>
+  <title>MIB information for mta</title>
+<style type="text/css">
+<!--
+h2{background:#bbeebb}
+h3{background:#ccccee}
+-->
+</style>
+</head>
+<body bgcolor="#ffffff">
+<h2>INTRODUCTION</h2>
+<ul>
+<p>
+This is a summary of information regarding objects below the <b>mta</b>
+MIB object, which is defined within the <b>MTA-MIB</b> MIB
+document as <b>.1.3.6.1.2.1.28</b>.
+</p>
+</ul>
+<h2>TABLE OF CONTENTS</h2>
+<ul>
+<h3><a href="#objects_Current">Current Objects</a></h3>
+<ul>
+<li><a href="#scalar_current">Scalars</a></li>
+  <li><a href="#mtaTable">mtaTable</a></li>
+  <li><a href="#mtaGroupTable">mtaGroupTable</a></li>
+  <li><a href="#mtaGroupAssociationTable">mtaGroupAssociationTable</a></li>
+  <li><a href="#mtaGroupErrorTable">mtaGroupErrorTable</a></li>
+</ul>
+<h3><a href="#objects_Deprecated">Deprecated Objects</a></h3>
+<ul>
+<li><a href="#scalar_notcurrent">Deprecated Scalars</a></li>
+</ul>
+<h3><a href="#notifications">Notifications</a></h3>
+<h3><a href="#textconventions">Textual Conventions</a></h3>
+<h3><a href="#treeview">Tree-based view</a></h3>
+</ul>
+<a name="objects_Current" />
+<a name="scalar_current" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+<a name="mtaTable" /><h3>Table mtaTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mtaTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>MTA-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.28.1</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The table holding information specific to an MTA.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mtaEntry" />Row Description</td>
+<td>
+<pre>
+The entry associated with each MTA.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mtaTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="applIndex" />
+1
+<br /><b>applIndex</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+An index to uniquely identify the network service
+application. This attribute is the index used for
+lexicographic ordering of the table.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mtaTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mtaReceivedMessages" />
+1
+<br /><b>mtaReceivedMessages</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of messages received since MTA initialization.
+This includes messages transmitted to this MTA from other
+MTAs as well as messages that have been submitted to the
+MTA directly by end-users or applications.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaStoredMessages" />
+2
+<br /><b>mtaStoredMessages</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of messages currently stored in the MTA.
+This includes messages that are awaiting transmission to
+some other MTA or are waiting for delivery to an end-user
+or application.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaTransmittedMessages" />
+3
+<br /><b>mtaTransmittedMessages</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of messages transmitted since MTA initialization.
+This includes messages that were transmitted to some other
+MTA or are waiting for delivery to an end-user or
+application.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaReceivedVolume" />
+4
+<br /><b>mtaReceivedVolume</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total volume of messages received since MTA
+initialization, measured in kilo-octets.  This volume should
+include all transferred data that is logically above the mail
+transport protocol level.  For example, an SMTP-based MTA
+should use the number of kilo-octets in the message header
+and body, while an X.400-based MTA should use the number of
+kilo-octets of P2 data.  This includes messages transmitted
+to this MTA from other MTAs as well as messages that have
+been submitted to the MTA directly by end-users or
+applications.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaStoredVolume" />
+5
+<br /><b>mtaStoredVolume</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total volume of messages currently stored in the MTA,
+measured in kilo-octets.  This volume should include all
+stored data that is logically above the mail transport
+protocol level.  For example, an SMTP-based MTA should
+use the number of kilo-octets in the message header and
+body, while an X.400-based MTA would use the number of
+kilo-octets of P2 data.  This includes messages that are
+awaiting transmission to some other MTA or are waiting
+for delivery to an end-user or application.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaTransmittedVolume" />
+6
+<br /><b>mtaTransmittedVolume</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total volume of messages transmitted since MTA
+initialization, measured in kilo-octets.  This volume should
+include all transferred data that is logically above the mail
+transport protocol level.  For example, an SMTP-based MTA
+should use the number of kilo-octets in the message header
+and body, while an X.400-based MTA should use the number of
+kilo-octets of P2 data.  This includes messages that were
+transmitted to some other MTA or are waiting for delivery
+to an end-user or application.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaReceivedRecipients" />
+7
+<br /><b>mtaReceivedRecipients</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of recipients specified in all messages
+received since MTA initialization.  Recipients this MTA
+has no responsibility for, i.e. inactive envelope
+recipients or ones referred to in message headers,
+should not be counted even if information about such
+recipients is available.  This includes messages
+transmitted to this MTA from other MTAs as well as
+messages that have been submitted to the MTA directly
+by end-users or applications.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaStoredRecipients" />
+8
+<br /><b>mtaStoredRecipients</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of recipients specified in all messages
+currently stored in the MTA.  Recipients this MTA has no
+responsibility for, i.e. inactive envelope recipients or
+ones referred to in message headers, should not be
+counted.  This includes messages that are awaiting
+transmission to some other MTA or are waiting for
+delivery to an end-user or application.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaTransmittedRecipients" />
+9
+<br /><b>mtaTransmittedRecipients</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of recipients specified in all messages
+transmitted since MTA initialization.  Recipients this
+MTA had no responsibility for, i.e. inactive envelope
+recipients or ones referred to in message headers,
+should not be counted.  This includes messages that were
+transmitted to some other MTA or are waiting for
+delivery to an end-user or application.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaSuccessfulConvertedMessages" />
+10
+<br /><b>mtaSuccessfulConvertedMessages</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of messages that have been successfully
+converted from one form to another since MTA
+initialization.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaFailedConvertedMessages" />
+11
+<br /><b>mtaFailedConvertedMessages</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of messages for which an unsuccessful
+attempt was made to convert them from one form to
+another since MTA initialization.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaLoopsDetected" />
+12
+<br /><b>mtaLoopsDetected</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A message loop is defined as a situation where the MTA
+decides that a given message will never be delivered to
+one or more recipients and instead will continue to
+loop endlessly through one or more MTAs.  This variable
+counts the number of times the MTA has detected such a
+situation since MTA initialization. Note that the
+mechanism MTAs use to detect loops (e.g., trace field
+counting, count of references to this MTA in a trace
+field, examination of DNS or other directory information,
+etc.), the level at which loops are detected (e.g., per
+message, per recipient, per directory entry, etc.), and
+the handling of a loop once it is detected (e.g., looping
+
+messages are held, looping messages are bounced or sent
+to the postmaster, messages that the MTA knows will loop
+won't be accepted, etc.) vary widely from one MTA to the
+next and cannot be inferred from this variable.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="mtaGroupTable" /><h3>Table mtaGroupTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mtaGroupTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>MTA-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.28.2</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The table holding information specific to each MTA group.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mtaGroupEntry" />Row Description</td>
+<td>
+<pre>
+The entry associated with each MTA group.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mtaGroupTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="applIndex" />
+1
+<br /><b>applIndex</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+An index to uniquely identify the network service
+application. This attribute is the index used for
+lexicographic ordering of the table.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupIndex" />
+1
+<br /><b>mtaGroupIndex</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The index associated with a group for a given MTA.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mtaGroupTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mtaGroupReceivedMessages" />
+2
+<br /><b>mtaGroupReceivedMessages</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of messages received to this group since
+group creation.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupRejectedMessages" />
+3
+<br /><b>mtaGroupRejectedMessages</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of messages rejected by this group since
+group creation.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupStoredMessages" />
+4
+<br /><b>mtaGroupStoredMessages</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of messages currently stored in this
+group's queue.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupTransmittedMessages" />
+5
+<br /><b>mtaGroupTransmittedMessages</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of messages transmitted by this group since
+group creation.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupReceivedVolume" />
+6
+<br /><b>mtaGroupReceivedVolume</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total volume of messages received to this group since
+group creation, measured in kilo-octets.  This volume
+should include all transferred data that is logically above
+the mail transport protocol level.  For example, an
+SMTP-based MTA should use the number of kilo-octets in the
+message header and body, while an X.400-based MTA should use
+the number of kilo-octets of P2 data.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupStoredVolume" />
+7
+<br /><b>mtaGroupStoredVolume</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total volume of messages currently stored in this
+group's queue, measured in kilo-octets.  This volume should
+include all stored data that is logically above the mail
+transport protocol level.  For example, an SMTP-based
+MTA should use the number of kilo-octets in the message
+header and body, while an X.400-based MTA would use the
+number of kilo-octets of P2 data.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupTransmittedVolume" />
+8
+<br /><b>mtaGroupTransmittedVolume</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total volume of messages transmitted by this group
+since group creation, measured in kilo-octets.  This
+volume should include all transferred data that is logically
+above the mail transport protocol level.  For example, an
+SMTP-based MTA should use the number of kilo-octets in the
+message header and body, while an X.400-based MTA should use
+the number of kilo-octets of P2 data.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupReceivedRecipients" />
+9
+<br /><b>mtaGroupReceivedRecipients</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of recipients specified in all messages
+received to this group since group creation.
+Recipients this MTA has no responsibility for should not
+be counted.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupStoredRecipients" />
+10
+<br /><b>mtaGroupStoredRecipients</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of recipients specified in all messages
+currently stored in this group's queue.  Recipients this
+MTA has no responsibility for should not be counted.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupTransmittedRecipients" />
+11
+<br /><b>mtaGroupTransmittedRecipients</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of recipients specified in all messages
+transmitted by this group since group creation.
+Recipients this MTA had no responsibility for should not
+be counted.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupOldestMessageStored" />
+12
+<br /><b>mtaGroupOldestMessageStored</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TimeInterval">TimeInterval</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeInterval"> TimeInterval TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Time since the oldest message in this group's queue was
+placed in the queue.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupInboundAssociations" />
+13
+<br /><b>mtaGroupInboundAssociations</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of current associations to the group, where the
+group is the responder.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupOutboundAssociations" />
+14
+<br /><b>mtaGroupOutboundAssociations</b>
+
+</td><td>
+  GAUGE
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of current associations to the group, where the
+group is the initiator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupAccumulatedInboundAssociations" />
+15
+<br /><b>mtaGroupAccumulatedInboundAssociations</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of associations to the group since
+group creation, where the MTA was the responder.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupAccumulatedOutboundAssociations" />
+16
+<br /><b>mtaGroupAccumulatedOutboundAssociations</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of associations from the group since
+group creation, where the MTA was the initiator.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupLastInboundActivity" />
+17
+<br /><b>mtaGroupLastInboundActivity</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TimeInterval">TimeInterval</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeInterval"> TimeInterval TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Time since the last time that this group had an active
+inbound association for purposes of message reception.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupLastOutboundActivity" />
+18
+<br /><b>mtaGroupLastOutboundActivity</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TimeInterval">TimeInterval</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeInterval"> TimeInterval TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Time since the last time that this group had a
+successful outbound association for purposes of
+message delivery.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupRejectedInboundAssociations" />
+19
+<br /><b>mtaGroupRejectedInboundAssociations</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number of inbound associations the group has
+rejected, since group creation.  Rejected associations
+are not counted in the accumulated association totals.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupFailedOutboundAssociations" />
+20
+<br /><b>mtaGroupFailedOutboundAssociations</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The total number associations where the group was the
+initiator and association establishment has failed,
+since group creation.  Failed associations are
+not counted in the accumulated association totals.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupInboundRejectionReason" />
+21
+<br /><b>mtaGroupInboundRejectionReason</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The failure reason, if any, for the last association this
+group refused to respond to. If no association attempt
+
+has been made since the MTA was initialized the value
+should be 'never'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupOutboundConnectFailureReason" />
+22
+<br /><b>mtaGroupOutboundConnectFailureReason</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The failure reason, if any, for the last association attempt
+this group initiated. If no association attempt has been
+made since the MTA was initialized the value should be
+'never'.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupScheduledRetry" />
+23
+<br /><b>mtaGroupScheduledRetry</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TimeInterval">TimeInterval</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeInterval"> TimeInterval TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+The amount of time until this group is next scheduled to
+attempt to make an association.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupMailProtocol" />
+24
+<br /><b>mtaGroupMailProtocol</b>
+
+</td><td>
+  OBJECTID
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+An identification of the protocol being used by this group.
+For an group employing OSI protocols, this will be the
+Application Context.    For Internet applications, OID
+values of the form {applTCPProtoID port} or {applUDPProtoID
+port} are used for TCP-based and UDP-based protocols,
+respectively. In either case 'port' corresponds to the
+primary port number being used by the protocol. The
+usual IANA procedures may be used to register ports for
+new protocols. applTCPProtoID and applUDPProtoID are
+defined in the NETWORK-SERVICES-MIB, RFC 2788.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupName" />
+25
+<br /><b>mtaGroupName</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A descriptive name for the group. If this group connects to
+a single remote MTA this should be the name of that MTA. If
+
+this in turn is an Internet MTA this should be the domain
+name.  For an OSI MTA it should be the string encoded
+distinguished name of the managed object using the format
+defined in RFC 2253.  For X.400(1984) MTAs which do not
+have a Distinguished Name, the RFC 2156 syntax
+'mta in globalid' used in X400-Received: fields can be
+used.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupSuccessfulConvertedMessages" />
+26
+<br /><b>mtaGroupSuccessfulConvertedMessages</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of messages that have been successfully
+converted from one form to another in this group
+since group creation.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupFailedConvertedMessages" />
+27
+<br /><b>mtaGroupFailedConvertedMessages</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+The number of messages for which an unsuccessful
+attempt was made to convert them from one form to
+another in this group since group creation.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupDescription" />
+28
+<br /><b>mtaGroupDescription</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A description of the group's purpose.  This information is
+intended to identify the group in a status display.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupURL" />
+29
+<br /><b>mtaGroupURL</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#URLString">URLString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#URLString"> URLString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+A URL pointing to a description of the group.  This
+information is intended to identify and briefly describe
+the group in a status display.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupCreationTime" />
+30
+<br /><b>mtaGroupCreationTime</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TimeInterval">TimeInterval</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeInterval"> TimeInterval TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Time since this group was first created.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupHierarchy" />
+31
+<br /><b>mtaGroupHierarchy</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Describes how this group fits into the hierarchy. A
+positive value is interpreted as an mtaGroupIndex
+value for some other group whose variables include
+those of this group (and usually others). A negative
+value is interpreted as a group collection code: Groups
+with common negative hierarchy values comprise one
+particular breakdown of MTA activity as a whole. A
+zero value means that this MIB implementation doesn't
+implement hierarchy indicators and thus the overall
+group hierarchy cannot be determined.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupOldestMessageId" />
+32
+<br /><b>mtaGroupOldestMessageId</b>
+
+</td><td>
+  OCTETSTR
+
+ <br>
+ <a href="#SnmpAdminString">SnmpAdminString</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#SnmpAdminString"> SnmpAdminString TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Message ID of the oldest message in the group's queue.
+Whenever possible this should be in the form of an
+RFC 822 msg-id; X.400 may convert X.400 message
+identifiers to this form by following the rules laid
+out in RFC2156.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupLoopsDetected" />
+33
+<br /><b>mtaGroupLoopsDetected</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+A message loop is defined as a situation where the MTA
+decides that a given message will never be delivered to
+one or more recipients and instead will continue to
+loop endlessly through one or more MTAs.  This variable
+counts the number of times the MTA has detected such a
+situation in conjunction with something associated with
+
+this group since group creation.  Note that the
+mechanism MTAs use to detect loops (e.g., trace field
+counting, count of references to this MTA in a trace
+field, examination of DNS or other directory information,
+etc.), the level at which loops are detected (e.g., per
+message, per recipient, per directory entry, etc.), and
+the handling of a loop once it is detected (e.g., looping
+messages are held, looping messages are bounced or sent
+to the postmaster, messages that the MTA knows will loop
+won't be accepted, etc.) vary widely from one MTA to the
+next and cannot be inferred from this variable.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupLastOutboundAssociationAttempt" />
+34
+<br /><b>mtaGroupLastOutboundAssociationAttempt</b>
+
+</td><td>
+  INTEGER
+
+ <br>
+ <a href="#TimeInterval">TimeInterval</a>
+
+  </td><td>ReadOnly</td>
+<td>
+<p>
+Note: this object is based on the <a href="#TimeInterval"> TimeInterval TEXTUAL-CONVENTION</a>.
+</p>
+<pre>
+Time since the last time that this group attempted
+to make an outbound association for purposes of
+message delivery.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="mtaGroupAssociationTable" /><h3>Table mtaGroupAssociationTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mtaGroupAssociationTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>MTA-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.28.3</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The table holding information regarding the associations
+for each MTA group.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mtaGroupAssociationEntry" />Row Description</td>
+<td>
+<pre>
+The entry holding information regarding the associations
+for each MTA group.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mtaGroupAssociationTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="applIndex" />
+1
+<br /><b>applIndex</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+An index to uniquely identify the network service
+application. This attribute is the index used for
+lexicographic ordering of the table.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupIndex" />
+1
+<br /><b>mtaGroupIndex</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The index associated with a group for a given MTA.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupAssociationIndex" />
+1
+<br /><b>mtaGroupAssociationIndex</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Reference into association table to allow correlation of
+this group's active associations with the association table.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mtaGroupAssociationTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+</table>
+</ul>
+<a name="mtaGroupErrorTable" /><h3>Table mtaGroupErrorTable</h3>
+<ul>
+  <table border=2 bgcolor="#dddddd">
+  <tr><td bgcolor="#bbbbbb">Table Name</td><td>mtaGroupErrorTable</td></tr>
+  <tr><td bgcolor="#bbbbbb">In MIB</td><td>MTA-MIB</td></tr>
+  <tr><td bgcolor="#bbbbbb">Registered at OID</td><td>.1.3.6.1.2.1.28.5</td></tr>
+  <tr><td bgcolor="#bbbbbb">Table Description</td>
+<td>
+<pre>
+The table holding information regarding accumulated errors
+for each MTA group.
+</pre>
+</td>
+</tr>
+<tr><td bgcolor="#bbbbbb"><a name="mtaGroupErrorEntry" />Row Description</td>
+<td>
+<pre>
+The entry holding information regarding accumulated
+errors for each MTA group.
+</pre>
+</td>
+</tr>
+  </table>
+
+  <h4>mtaGroupErrorTable Indexes:</h4>
+
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="applIndex" />
+1
+<br /><b>applIndex</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+An index to uniquely identify the network service
+application. This attribute is the index used for
+lexicographic ordering of the table.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupIndex" />
+1
+<br /><b>mtaGroupIndex</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+The index associated with a group for a given MTA.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaStatusCode" />
+4
+<br /><b>mtaStatusCode</b>
+
+</td><td>
+  INTEGER
+
+
+  </td><td>NoAccess</td>
+<td>
+<pre>
+An index capable of representing an Enhanced Mail System
+Status Code.  Enhanced Mail System Status Codes are
+defined in RFC 1893.  These codes have the form
+
+    class.subject.detail
+
+Here 'class' is either 2, 4, or 5 and both 'subject' and
+'detail'  are integers in the range 0..999. Given a status
+code the corresponding index value is defined to be
+((class * 1000) + subject) * 1000 + detail.  Both SMTP
+error response codes and X.400 reason and diagnostic codes
+can be mapped into these codes, resulting in a namespace
+
+capable of describing most error conditions a mail system
+encounters in a generic yet detailed way.
+</pre>
+</td>
+  </tr>
+</table>
+
+  <h4>Other mtaGroupErrorTable Columns:</h4>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>Description</th></tr>
+  <tr>
+  <td>
+<a name="mtaGroupInboundErrorCount" />
+1
+<br /><b>mtaGroupInboundErrorCount</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Count of the number of errors of a given type that have
+been accumulated in association with a particular group
+while processing incoming messages. In the case of SMTP
+
+these will typically be errors reporting by an SMTP
+server to the remote client; in the case of X.400
+these will typically be errors encountered while
+processing an incoming message.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupInternalErrorCount" />
+2
+<br /><b>mtaGroupInternalErrorCount</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Count of the number of errors of a given type that have
+been accumulated in association with a particular group
+during internal MTA processing.
+</pre>
+</td>
+  </tr>
+  <tr>
+  <td>
+<a name="mtaGroupOutboundErrorCount" />
+3
+<br /><b>mtaGroupOutboundErrorCount</b>
+
+</td><td>
+  COUNTER
+
+
+  </td><td>ReadOnly</td>
+<td>
+<pre>
+Count of the number of errors of a given type that have
+been accumulated in association with a particular group's
+outbound connection activities. In the case of an SMTP
+client these will typically be errors reported while
+attempting to contact or while communicating with the
+remote SMTP server. In the case of X.400 these will
+typically be errors encountered while constructing
+or attempting to deliver an outgoing message.
+</pre>
+</td>
+  </tr>
+</table>
+</ul>
+<a name="objects_Deprecated" />
+  <hr />
+  <h1><font color="red">DEPRECATED OR OBSOLETE OR HISTORIC OBJECTS</font></h1>
+  <hr />
+<a name="scalar_notcurrent" />
+<h2>SCALAR OBJECTS</h2>
+<ul>
+<table border=2 bgcolor="#dddddd">
+<tr bgcolor="#bbbbbb"><th>Name</th><th>Type</th><th>Access</th><th>OID</th><th>Description</th></tr>
+</table>
+</ul>
+
+<h2>TABLE OBJECTS</h2>
+
+<br>
+<a name="notifications" />
+<h2>NOTIFICATIONS</h2>
+<ul>
+<p>
+</ul>
+
+
+<br>
+<a name="textconventions" />
+<h2>TEXTUAL CONVENTIONS</h2>
+<ul>
+<p>
+These TEXTUAL-CONVENTIONS are used in other parts of the document
+above.  They are SNMP's way of defining a datatype that is used
+repeatedly by other MIB objects.  Any implementation implementing
+objects that use one of these definitions must follow its DESCRIPTION
+clause as well as the DESCRIPTION clause of the object itself.
+</p>
+<table border=2 bgcolor="#dddddd"><tr bgcolor="bbbbbb"><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><a name="URLString">URLString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="SnmpAdminString">SnmpAdminString</td><td>OCTETSTR</td><td><pre></pre></td></tr>
+<tr><td><a name="TimeInterval">TimeInterval</td><td>INTEGER</td><td><pre></pre></td></tr>
+</table></ul>
+
+<a name="treeview" />
+<h2>TREE VIEW</h2>
+<p>Tree view generated by running: <b>snmptranslate -Tp MTA-MIB::mta</b></p>
+<pre>
++--<a href="#mta">mta</a>(28)
+   |
+   +--<a href="#mtaTable">mtaTable</a>(1)
+   |  |
+   |  +--<a href="#mtaEntry">mtaEntry</a>(1)
+   |     |  Index: applIndex
+   |     |
+   |     +-- -R-- Counter   <a href="#mtaReceivedMessages">mtaReceivedMessages</a>(1)
+   |     +-- -R-- Gauge     <a href="#mtaStoredMessages">mtaStoredMessages</a>(2)
+   |     +-- -R-- Counter   <a href="#mtaTransmittedMessages">mtaTransmittedMessages</a>(3)
+   |     +-- -R-- Counter   <a href="#mtaReceivedVolume">mtaReceivedVolume</a>(4)
+   |     +-- -R-- Gauge     <a href="#mtaStoredVolume">mtaStoredVolume</a>(5)
+   |     +-- -R-- Counter   <a href="#mtaTransmittedVolume">mtaTransmittedVolume</a>(6)
+   |     +-- -R-- Counter   <a href="#mtaReceivedRecipients">mtaReceivedRecipients</a>(7)
+   |     +-- -R-- Gauge     <a href="#mtaStoredRecipients">mtaStoredRecipients</a>(8)
+   |     +-- -R-- Counter   <a href="#mtaTransmittedRecipients">mtaTransmittedRecipients</a>(9)
+   |     +-- -R-- Counter   <a href="#mtaSuccessfulConvertedMessages">mtaSuccessfulConvertedMessages</a>(10)
+   |     +-- -R-- Counter   <a href="#mtaFailedConvertedMessages">mtaFailedConvertedMessages</a>(11)
+   |     +-- -R-- Counter   <a href="#mtaLoopsDetected">mtaLoopsDetected</a>(12)
+   |
+   +--<a href="#mtaGroupTable">mtaGroupTable</a>(2)
+   |  |
+   |  +--<a href="#mtaGroupEntry">mtaGroupEntry</a>(1)
+   |     |  Index: applIndex, mtaGroupIndex
+   |     |
+   |     +-- ---- INTEGER   <a href="#mtaGroupIndex">mtaGroupIndex</a>(1)
+   |     |        Range: 1..2147483647
+   |     +-- -R-- Counter   <a href="#mtaGroupReceivedMessages">mtaGroupReceivedMessages</a>(2)
+   |     +-- -R-- Counter   <a href="#mtaGroupRejectedMessages">mtaGroupRejectedMessages</a>(3)
+   |     +-- -R-- Gauge     <a href="#mtaGroupStoredMessages">mtaGroupStoredMessages</a>(4)
+   |     +-- -R-- Counter   <a href="#mtaGroupTransmittedMessages">mtaGroupTransmittedMessages</a>(5)
+   |     +-- -R-- Counter   <a href="#mtaGroupReceivedVolume">mtaGroupReceivedVolume</a>(6)
+   |     +-- -R-- Gauge     <a href="#mtaGroupStoredVolume">mtaGroupStoredVolume</a>(7)
+   |     +-- -R-- Counter   <a href="#mtaGroupTransmittedVolume">mtaGroupTransmittedVolume</a>(8)
+   |     +-- -R-- Counter   <a href="#mtaGroupReceivedRecipients">mtaGroupReceivedRecipients</a>(9)
+   |     +-- -R-- Gauge     <a href="#mtaGroupStoredRecipients">mtaGroupStoredRecipients</a>(10)
+   |     +-- -R-- Counter   <a href="#mtaGroupTransmittedRecipients">mtaGroupTransmittedRecipients</a>(11)
+   |     +-- -R-- INTEGER   <a href="#mtaGroupOldestMessageStored">mtaGroupOldestMessageStored</a>(12)
+   |     |        Textual Convention: <a href="#TimeInterval">TimeInterval</a>
+   |     |        Range: 0..2147483647
+   |     +-- -R-- Gauge     <a href="#mtaGroupInboundAssociations">mtaGroupInboundAssociations</a>(13)
+   |     +-- -R-- Gauge     <a href="#mtaGroupOutboundAssociations">mtaGroupOutboundAssociations</a>(14)
+   |     +-- -R-- Counter   <a href="#mtaGroupAccumulatedInboundAssociations">mtaGroupAccumulatedInboundAssociations</a>(15)
+   |     +-- -R-- Counter   <a href="#mtaGroupAccumulatedOutboundAssociations">mtaGroupAccumulatedOutboundAssociations</a>(16)
+   |     +-- -R-- INTEGER   <a href="#mtaGroupLastInboundActivity">mtaGroupLastInboundActivity</a>(17)
+   |     |        Textual Convention: <a href="#TimeInterval">TimeInterval</a>
+   |     |        Range: 0..2147483647
+   |     +-- -R-- INTEGER   <a href="#mtaGroupLastOutboundActivity">mtaGroupLastOutboundActivity</a>(18)
+   |     |        Textual Convention: <a href="#TimeInterval">TimeInterval</a>
+   |     |        Range: 0..2147483647
+   |     +-- -R-- Counter   <a href="#mtaGroupRejectedInboundAssociations">mtaGroupRejectedInboundAssociations</a>(19)
+   |     +-- -R-- Counter   <a href="#mtaGroupFailedOutboundAssociations">mtaGroupFailedOutboundAssociations</a>(20)
+   |     +-- -R-- String    <a href="#mtaGroupInboundRejectionReason">mtaGroupInboundRejectionReason</a>(21)
+   |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- String    <a href="#mtaGroupOutboundConnectFailureReason">mtaGroupOutboundConnectFailureReason</a>(22)
+   |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- INTEGER   <a href="#mtaGroupScheduledRetry">mtaGroupScheduledRetry</a>(23)
+   |     |        Textual Convention: <a href="#TimeInterval">TimeInterval</a>
+   |     |        Range: 0..2147483647
+   |     +-- -R-- ObjID     <a href="#mtaGroupMailProtocol">mtaGroupMailProtocol</a>(24)
+   |     +-- -R-- String    <a href="#mtaGroupName">mtaGroupName</a>(25)
+   |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- Counter   <a href="#mtaGroupSuccessfulConvertedMessages">mtaGroupSuccessfulConvertedMessages</a>(26)
+   |     +-- -R-- Counter   <a href="#mtaGroupFailedConvertedMessages">mtaGroupFailedConvertedMessages</a>(27)
+   |     +-- -R-- String    <a href="#mtaGroupDescription">mtaGroupDescription</a>(28)
+   |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- String    <a href="#mtaGroupURL">mtaGroupURL</a>(29)
+   |     |        Textual Convention: <a href="#URLString">URLString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- INTEGER   <a href="#mtaGroupCreationTime">mtaGroupCreationTime</a>(30)
+   |     |        Textual Convention: <a href="#TimeInterval">TimeInterval</a>
+   |     |        Range: 0..2147483647
+   |     +-- -R-- INTEGER   <a href="#mtaGroupHierarchy">mtaGroupHierarchy</a>(31)
+   |     |        Range: -2147483648..2147483647
+   |     +-- -R-- String    <a href="#mtaGroupOldestMessageId">mtaGroupOldestMessageId</a>(32)
+   |     |        Textual Convention: <a href="#SnmpAdminString">SnmpAdminString</a>
+   |     |        Size: 0..255
+   |     +-- -R-- Counter   <a href="#mtaGroupLoopsDetected">mtaGroupLoopsDetected</a>(33)
+   |     +-- -R-- INTEGER   <a href="#mtaGroupLastOutboundAssociationAttempt">mtaGroupLastOutboundAssociationAttempt</a>(34)
+   |              Textual Convention: <a href="#TimeInterval">TimeInterval</a>
+   |              Range: 0..2147483647
+   |
+   +--<a href="#mtaGroupAssociationTable">mtaGroupAssociationTable</a>(3)
+   |  |
+   |  +--<a href="#mtaGroupAssociationEntry">mtaGroupAssociationEntry</a>(1)
+   |     |  Index: applIndex, mtaGroupIndex, mtaGroupAssociationIndex
+   |     |
+   |     +-- -R-- INTEGER   <a href="#mtaGroupAssociationIndex">mtaGroupAssociationIndex</a>(1)
+   |              Range: 1..2147483647
+   |
+   +--<a href="#mtaConformance">mtaConformance</a>(4)
+   |  |
+   |  +--<a href="#mtaGroups">mtaGroups</a>(1)
+   |  |  |
+   |  |  +--<a href="#mtaRFC2249Group">mtaRFC2249Group</a>(4)
+   |  |  +--<a href="#mtaRFC2249AssocGroup">mtaRFC2249AssocGroup</a>(5)
+   |  |  +--<a href="#mtaRFC2249ErrorGroup">mtaRFC2249ErrorGroup</a>(6)
+   |  |  +--<a href="#mtaRFC2789Group">mtaRFC2789Group</a>(7)
+   |  |  +--<a href="#mtaRFC2789AssocGroup">mtaRFC2789AssocGroup</a>(8)
+   |  |  +--<a href="#mtaRFC2789ErrorGroup">mtaRFC2789ErrorGroup</a>(9)
+   |  |  +--<a href="#mtaRFC1566Group">mtaRFC1566Group</a>(10)
+   |  |  +--<a href="#mtaRFC1566AssocGroup">mtaRFC1566AssocGroup</a>(11)
+   |  |
+   |  +--<a href="#mtaCompliances">mtaCompliances</a>(2)
+   |     |
+   |     +--<a href="#mtaCompliance">mtaCompliance</a>(1)
+   |     +--<a href="#mtaAssocCompliance">mtaAssocCompliance</a>(2)
+   |     +--<a href="#mtaRFC2249Compliance">mtaRFC2249Compliance</a>(5)
+   |     +--<a href="#mtaRFC2249AssocCompliance">mtaRFC2249AssocCompliance</a>(6)
+   |     +--<a href="#mtaRFC2249ErrorCompliance">mtaRFC2249ErrorCompliance</a>(7)
+   |     +--<a href="#mtaRFC2249FullCompliance">mtaRFC2249FullCompliance</a>(8)
+   |     +--<a href="#mtaRFC2789Compliance">mtaRFC2789Compliance</a>(9)
+   |     +--<a href="#mtaRFC2789AssocCompliance">mtaRFC2789AssocCompliance</a>(10)
+   |     +--<a href="#mtaRFC2789ErrorCompliance">mtaRFC2789ErrorCompliance</a>(11)
+   |     +--<a href="#mtaRFC2789FullCompliance">mtaRFC2789FullCompliance</a>(12)
+   |
+   +--<a href="#mtaGroupErrorTable">mtaGroupErrorTable</a>(5)
+      |
+      +--<a href="#mtaGroupErrorEntry">mtaGroupErrorEntry</a>(1)
+         |  Index: applIndex, mtaGroupIndex, mtaStatusCode
+         |
+         +-- -R-- Counter   <a href="#mtaGroupInboundErrorCount">mtaGroupInboundErrorCount</a>(1)
+         +-- -R-- Counter   <a href="#mtaGroupInternalErrorCount">mtaGroupInternalErrorCount</a>(2)
+         +-- -R-- Counter   <a href="#mtaGroupOutboundErrorCount">mtaGroupOutboundErrorCount</a>(3)
+         +-- ---- INTEGER   <a href="#mtaStatusCode">mtaStatusCode</a>(4)
+                  Range: 4000000..5999999
+</pre>

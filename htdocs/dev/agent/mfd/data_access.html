@@ -1,0 +1,364 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>MIBs For Dummies : ifXTable data access</title>
+  </head>
+
+  <body>
+    <h1>MIBs For Dummies : ifXTable data access</h1>
+    Now, on to the editing. Let's take a look at <var>ifXTable.h</var>. In
+    particular, the data context.
+<p>
+    <h2>Defining our data context</h2>
+    We specified our own structure for the data context, so the generated
+    code simply typedefs that structure.
+      If we were using a prexisting structure, we would just make sure that
+      the header that defines the <var>ifXTable_linux</var> structure was
+      included in (or before) the <var>ifXTable.h</var> header. But since
+      this is a new structure, just for us, we'll just define it here. I'm
+      just going to use the same data structures that the <var>ifTable</var>
+      implementation uses for the Linux kernel. So:<p>
+    <table><tr>
+          <td width=20></td>
+          <td><bold>Generated code</bold></td>
+          <td width=20></td>
+          <td><bold>Modified code</bold></td>
+        </tr><tr>
+          <td></td>
+          <td bgcolor=CCCCCC><pre>
+    /*
+     * data context
+     */
+    typedef struct ifXTable_linux ifXTable_data;
+</pre></td>
+          <td></td><td bgcolor=CCCCCC><pre>
+    /*
+     * data context
+     */<font color=red>
+    typedef struct ifXTable_linux {</font><font color=blue>
+       char             Name[16];
+       struct ifnet     ifnet;
+       struct in_ifaddr in_ifaddr;
+#if STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
+       struct timeval  now;
+#endif
+     } ifXTable_data;</font>
+</pre></td>
+        </tr>
+      </table>
+    </table>
+    <p>
+      <!-- ========================================================= -->
+    <h2>Defining our loop context</h2>
+    Now that we have a data context for passing around the data, we need
+    to define our loop context. That's in <var>ifXTable_data_access.h</var>.
+    The loop context has one basic purpose: to all us to keep track of where
+    we are while we are iterating over our data. Since the <var>ifTable</var>
+    has a simple integer index, and the routines that Net-SNMP already has
+    are based on an integer parameter, we need to add an integer. We'll also
+    add an integer for the maximum interface, so we'll know when we are
+    finished.<p>
+    <table><tr>
+          <td width=20></td>
+          <td><bold>Generated code</bold></td>
+          <td width=20></td>
+          <td><bold>Modified code</bold></td>
+        </tr><tr>
+          <td></td>
+          <td bgcolor=CCCCCC><pre>
+    typedef struct ifXTable_loop_context_s {
+    } ifXTable_loop_context;
+</pre></td>
+          <td></td>
+          <td bgcolor=CCCCCC><pre>          
+    typedef struct ifXTable_loop_context_s {<font color=blue>
+       int current; /* current position in list */
+       int max; /* max item in list */</font>
+    } ifXTable_loop_context;
+</pre></td>
+        </tr>
+      </table>
+<p>
+      Thinking ahead to the get_first and get_next loops, we need to return
+      a <var>table context</var> pointer with the current index. The
+      loop doesn't care about the actual data until the correct
+      index is found. So instead of allocating a new <var>table context</var>
+      and getting the date for every index, we can re-use a
+      <var>table context</var>. Using a global would be a bad idea (just
+      in case the agent is doing multiple simultaneous loops), so the 
+      <var>loop context</var> is an excellent place to keep an extra
+      <var>table context</var>.<p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+    typedef struct ifXTable_loop_context_s {
+       int current; /* current position in list */
+       int max; /* max item in list */
+       <font color=blue>
+       ifXTable_ctx *ctx; /* table context pointer */</font>
+    } ifXTable_loop_context;
+</pre></td>
+        </tr>
+      </table>
+<p>
+      <!-- ========================================================= -->
+    <h2>Initialization</h2>
+    When the agent starts up and initializes, the <var>ifXTable_loop_init_data</var>
+    function will be called to allow us to do any initilization for our
+    data access functions. We don't have any, so we'll just leave the function
+    body empty.
+<p>
+      <!-- ========================================================= -->
+    <h2>Preparing for the loop</h2>
+    Before the agent iterates over the <var>datastore</var>, the
+    <var>ifXTable_loop_init_context</var> to allow you to allocate and initilize
+    a loop context. We need to do two things:
+    <ul><li>initialize our current position to 0
+      <li>get the maximum interface number
+    </ul><p>
+      We could allocate our table context here too, but we'll delay
+      the allocation until later, when we acutally need it.
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifXTable_loop_init_context(ifXTable_registration_ptr ifXTable_reg,
+                       ifXTable_ref_loop * loop_ref)
+{
+    DEBUGMSGT(("ifXTable:trace", ">%s\n", __FUNCTION__));
+
+    /*
+     * allocate memory for new structure
+     */
+    loop_ref->itr_ctx = SNMP_MALLOC_TYPEDEF(ifXTable_loop_context);
+    if (NULL == loop_ref->itr_ctx)
+        return MFD_ERROR;
+
+    /*
+     * TODO:
+     * set loop context
+     */<font color=blue>
+    loop_ref->itr_ctx->current = 0;
+    loop_ref->itr_ctx->max = Interface_Scan_Get_Count();
+</font>
+    return MFD_SUCCESS;
+}
+</pre></td>
+        </tr>
+      </table>
+      <!-- ========================================================= -->
+    <h2>The Loop</h2>
+
+    <h3>ifXTable_loop_get_first</h3>
+    The <var>get_first</var> function, as the name implies, returns the
+    index for the first item in the <var>datastore</var>. Note that the
+    primary idea behind the <var>unsorted-external</var> access method is that
+    the <var>datastore</var> does not need to be in any particular order. The
+    agent will iterate over all the items in the <var>datastore</var> and
+    use the index returned in the <var>table context</var> to find the correct
+    item.<p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifXTable_loop_get_first(ifXTable_registration_ptr ifXTable_reg,
+                   ifXTable_ref_loop * loop_ref,
+                   ifXTable_ref_ctx * ctx_ref)
+{
+    DEBUGMSGT(("ifXTable:trace", ">%s\n", __FUNCTION__));
+<font color=blue>
+    /*
+     * in get first, the current position should already
+     * be 0 (freshly calloc'd memory).
+     */
+    netsnmp_assert(loop_ref->itr_ctx->current == 0);
+    netsnmp_assert(NULL == ctx_ref->ctx);
+
+    /*
+     * current is initialized to 0, but the first item will
+     * always be 1, so we can just call get_next.
+     */
+</font><font color=red>
+    return ifXTable_loop_get_next(ifXTable_reg, loop_ref, ctx_ref);</font>
+}
+</pre></td>
+        </tr>
+      </table>
+    <h3>ifXTable_loop_get_next</h3>
+    In <var>get_next</var> we need to:
+    <ul><li>advance to the next item in the data store
+      <li>make sure we haven't reached the end of the <var>datastore</var>
+      <li>make sure the <var>table context</var> we return is the one
+        in our <var>loop context</var>. We may need to allocate a new one.
+        (You'll see why in the <var>save_position</var> routine.)
+      <li>update the index in the <var>table_context</var>
+    </ul><p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifXTable_loop_get_next(ifXTable_registration_ptr ifXTable_reg,
+                  ifXTable_ref_loop * loop_ref, ifXTable_ref_ctx * ctx_ref)
+{
+    DEBUGMSGT(("ifXTable:trace", ">%s\n", __FUNCTION__));
+
+    netsnmp_assert(ctx_ref && ctx_ref->ctx);
+<font color=blue>
+    /*
+     * have we gone past the end of the table?
+     */
+    if(++loop_ref->itr_ctx->current > loop_ref->itr_ctx->max)
+        return MFD_END_OF_DATA;
+
+    /*
+     * if save_pos was called or this is the first call, the loop_ref
+     * context hasn't been allocated. allocate a new one...
+     */
+    if(NULL == loop_ref->itr_ctx->ctx) {
+        loop_ref->itr_ctx->ctx = ctx_ref->ctx =
+            ifXTable_allocate_ctx();
+    }
+
+    /*
+     * update the table index
+     */
+    ctx_ref->ctx->tbl_idx.ifIndex = loop_ref->itr_ctx->current;
+</font>
+    return MFD_SUCCESS;
+}
+</pre></td>
+        </tr>
+      </table>
+      <!-- ========================================================= -->
+    <h2>Saving the current position</h2>
+    While the agent is iterating over the <var>datastore</var>, it keeps
+    track of the best candidate it has found. Whenever the current item is
+    the best candidate so far, the <var>ifXTable_loop_save_position</var> function
+    is called to duplicate the current <var>loop context</var>.
+ <p>
+      Whenever possilbe, to reduce the number of memory allocations, the agent
+      will call this  function with <var>reuse</var> set to 1, indicating
+      that you may reuse the <var>loop context</var> referred to by
+      <var>loop_save</var>, whey may point to a previously saved context.
+    <p>
+      Since we have already set the table index for the current item in the
+      <var>table context</var> we allocated for the <var>loop context</var>,
+      we can take it for the saved context. A new one will be allocated in
+      <var>get_next</var>, if needed.<p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifXTable_loop_save_position(ifXTable_registration_ptr ifXTable_reg,
+                       ifXTable_ref_loop * loop_ref,
+                       ifXTable_ref_loop * loop_save, int reuse)
+{
+    DEBUGMSGT(("ifXTable:trace", ">%s\n", __FUNCTION__));
+<font color=blue>
+    /*
+     * allocate new loop context, unless we can reuse a previous pointer
+     */
+    if ((0 == reuse) || (NULL == loop_save->itr_ctx))
+        loop_save->itr_ctx = SNMP_MALLOC_TYPEDEF(ifXTable_loop_context);
+    if (NULL == loop_save->itr_ctx) {
+        snmp_log(LOG_ERR, "could not allocate memory\n");
+        return SNMP_ERR_GENERR;
+    }
+
+    if(reuse && loop_save->itr_ctx->ctx) {
+        ifXTable_ctx * tmp_ctx = loop_save->itr_ctx->ctx;
+        loop_save->itr_ctx->ctx = loop_ref->itr_ctx->ctx;
+        loop_ref->itr_ctx->ctx = tmp_ctx;
+    }
+    else {
+        /*
+         * take existing table context pointer
+         */
+        loop_save->itr_ctx->ctx = loop_ref->itr_ctx->ctx;
+        loop_ref->itr_ctx->ctx = NULL; /* delay reallocating til later */
+    }
+    loop_save->itr_ctx->current = loop_ref->itr_ctx->current;
+</font>
+    return MFD_SUCCESS;
+}
+</pre></td>
+        </tr>
+      </table>
+      <!-- ========================================================= -->
+    <h2>Returning the data context</h2>
+    When the agent finds the item it is lookin for, it will call the
+    <var>get_data</var> function to update the <var>data context</var> for
+    the item associated with the specified <var>loop context</var>. Here
+    we'll take the <var>table context</var> from the <var>loop context</var>
+    again, and then call the Net-SNMP interface function to populate the
+    <var>data context</var>.<p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifXTable_loop_get_data(ifXTable_registration_ptr ifXTable_reg,
+                  ifXTable_ref_loop * loop_ref, ifXTable_ref_ctx * ctx_ref)
+{
+    DEBUGMSGT(("ifXTable:trace", ">%s\n", __FUNCTION__));
+
+    netsnmp_assert((NULL != loop_ref) && (NULL != loop_ref->itr_ctx));
+    netsnmp_assert(NULL != ctx_ref);
+    netsnmp_assert(NULL != ctx_ref->ctx);
+<font color=blue>
+    /*
+     * take the table context from the loop context
+     */
+    ctx_ref->ctx = loop_ref->itr_ctx->ctx;
+    loop_ref->itr_ctx->ctx = NULL;
+
+    /*
+     * copy data to the data context
+     */
+    Interface_Scan_By_Index(loop_ref->itr_ctx->current,
+                            ctx_ref->ctx->data.Name,
+                            &ctx_ref->ctx->data.ifnet,
+                            &ctx_ref->ctx->data.in_ifaddr);
+</font>
+    return MFD_SUCCESS;
+}
+</pre></td>
+        </tr>
+      </table>
+      <!-- ========================================================= -->
+    <h2>Cleaning up after the loop</h2>
+    Once the agent is finished looping over the <var>datastore</var>, it will
+    call the <var>cleanup_context</var> so that you can release any allocated
+    memory. If the <var>table context</var> wasn't taken by another
+    function, we need to free it here.<p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC><pre>
+int
+ifXTable_loop_cleanup_context(ifXTable_registration_ptr ifXTable_reg,
+                          ifXTable_ref_loop * loop_ref)
+{
+    DEBUGMSGT(("ifXTable:trace", ">%s\n", __FUNCTION__));
+
+    netsnmp_assert(NULL != loop_ref->itr_ctx);
+<font color=blue>
+    /*
+     * release the table context, if it wasn't taken
+     */
+    if(NULL != loop_ref->itr_ctx->ctx)
+        ifXTable_release_context(loop_ref->itr_ctx->ctx);
+</font>
+    /*
+     * free loop context
+     */
+    free(loop_ref->itr_ctx);
+
+    return MFD_SUCCESS;
+}
+</pre></td>
+        </tr>
+      </table>
+      <!-- ========================================================= -->
+      <!-- ========================================================= -->
+      <!-- ========================================================= -->
+    <hr>
+    rstory at freesnmp dot com<br>
+Version $Revision$
+<!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
+<!-- hhmts start -->
+Last modified: Sat Nov  1 19:34:12 EST 2003
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+  </body>
+</html>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

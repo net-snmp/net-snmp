@@ -1,0 +1,307 @@
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>SNMPVACM</h1>Section: Net-SNMP (1)<br />
+    Updated: 30 May 2003<br />
+    <a href="#index">Index</a> <a href="../index.html">Return to Main Contents</a>
+    <hr />
+    <a name="lbAB" id="lbAB"> </a>
+
+    <h2>NAME</h2>snmpvacm - creates and maintains View-based Access Control entries on a remote entity. <a name="lbAC" id="lbAC">
+    </a>
+
+    <h2>SYNOPSIS</h2><b>snmpvacm</b> [COMMON OPTIONS] <b>createSec2Group</b> MODEL SECURITYNAME GROUPNAME<br />
+    <b>snmpvacm</b> [COMMON OPTIONS] <b>deleteSec2Group</b> MODEL SECURITYNAME<br />
+    <b>snmpvacm</b> [COMMON OPTIONS] <b>createView</b> [-Ce] NAME SUBTREE MASK<br />
+    <b>snmpvacm</b> [COMMON OPTIONS] <b>deleteView</b> NAME SUBTREE<br />
+    <b>snmpvacm</b> [COMMON OPTIONS] <b>createAccess</b> GROUPNAME [CONTEXTPREFIX] MODEL LEVEL CONTEXTMATCH READVIEW WRITEVIEW
+    NOTIFYVIEW<br />
+    <b>snmpvacm</b> [COMMON OPTIONS] <b>deleteAccess</b> GROUPNAME [CONTEXTPREFIX] MODEL LEVEL
+
+    <p><a name="lbAD" id="lbAD"> </a></p>
+
+    <h2>DESCRIPTION</h2><b>snmpvacm</b> is an SNMP application that can be used to do simple maintenance on the View-based
+    Control Module (VACM) tables of an SNMP agent. The SNMPv3 VACM specifications (see RFC2575) define assorted tables to specify
+    groups of users, MIB views, and authorised access settings. These <b>snmpvacm</b> commands effectively create or delete rows
+    in the appropriate one of these tables, and match the equivalent configure directives which are documented in the <i><a href=
+    "snmpd.conf.html">snmpd.conf</a>(5)</i> man page.
+
+    <p>A fuller explanation of how these operate can be found in the project FAQ. <a name="lbAE" id="lbAE"> </a></p>
+
+    <h2>SUB-COMMANDS</h2>
+
+    <p><a name="lbAF" id="lbAF"> </a></p>
+
+    <h3>createSec2Group MODEL SECURITYNAME GROUPNAME</h3>
+
+    <p>Create an entry in the SNMPv3 security name to group table. This table allows a single access control entry to be applied
+    to a number of users (or 'principals'), and is indexed by the security model and security name values.</p>
+
+    <p>MODEL</p>
+
+    <dl compact="compact">
+      <dd>An integer representing the security model, taking one of the following values:<br />
+      1 - reserved for SNMPv1<br />
+      2 - reserved for SNMPv2c<br />
+      3 - User-based Security Model (USM)</dd>
+    </dl>
+
+    <p>SECURITYNAME</p>
+
+    <dl compact="compact">
+      <dd>A string representing the security name for a principal (represented in a security-model-independent format). For
+      USM-based requests, the security name is the same as the username.</dd>
+    </dl>
+
+    <p>GROUPNAME</p>
+
+    <dl compact="compact">
+      <dd>A string identifying the group that this entry (i.e. security name/model pair) should belong to. This group name will
+      then be referenced in the access table (see <b>createAccess</b> below).</dd>
+    </dl>
+
+    <p><a name="lbAG" id="lbAG"> </a></p>
+
+    <h3>deleteSec2Group MODEL SECURITYNAME</h3>
+
+    <p>Delete an entry from the SNMPv3 security name to group table, thus removing access control settings for the given
+    principal. The entry to be removed is indexed by the MODEL and SECURITYNAME values, which should match those used in the
+    corresponding <b>createSec2Group</b> command (or equivalent).</p>
+
+    <p><a name="lbAH" id="lbAH"> </a></p>
+
+    <h3>createView [-Ce] NAME SUBTREE MASK</h3>
+
+    <p>Create an entry in the SNMPv3 MIB view table. A MIB view consists of a family of view subtrees which may be individually
+    included in or (occasionally) excluded from the view. Each view subtree is defined by a combination of an OID subtree
+    together with a bit string mask. The view table is indexed by the view name and subtree OID values.</p>
+
+    <p>[-Ce]</p>
+
+    <dl compact="compact">
+      <dd>An optional flag to indicate that this view subtree should be excluded from the named view. If not specified, the
+      default is to include the subtree in the view. When constructing a view from a mixture of included and excluded subtrees,
+      the excluded subtrees should be defined first - particularly if the named view is already referenced in one or more access
+      entries.</dd>
+    </dl>
+
+    <p>NAME</p>
+
+    <dl compact="compact">
+      <dd>A string identifying a particular MIB view, of which this OID subtree/mask forms part (possibly the only part).</dd>
+    </dl>
+
+    <p>SUBTREE</p>
+
+    <dl compact="compact">
+      <dd>The OID defining the root of the subtree to add to (or exclude from) the named view.</dd>
+    </dl>
+
+    <p>MASK</p>
+
+    <dl compact="compact">
+      <dd>A bit mask indicating which sub-identifiers of the associated subtree OID should be regarded as significant.</dd>
+    </dl><a name="lbAI" id="lbAI"> </a>
+
+    <h3>deleteView NAME SUBTREE</h3>Delete an entry from the SNMPv3 view table, thus removing the subtree from the given MIB
+    view. Removing the final (or only) subtree will result in the deletion of the view. The entry to be removed is indexed by the
+    NAME and SUBTREE values, which should match those used in the corresponding <b>createView</b> command (or equivalent).
+
+    <p>When removing subtrees from a mixed view (i.e. containing both included and excluded subtrees), the included subtrees
+    should be removed first.</p>
+
+    <p><a name="lbAJ" id="lbAJ"> </a></p>
+
+    <h3>createAccess GROUPNAME [CONTEXTPREFIX] MODEL LEVEL CONTEXTMATCH READVIEW WRITEVIEW NOTIFYVIEW</h3>Create an entry in the
+    SNMPv3 access table, thus allowing a certain level of access to particular MIB views for the principals in the specified
+    group (given suitable security model and levels in the request). The access table is indexed by the group name, context
+    prefix, security model and security level values.
+
+    <p>GROUPNAME</p>
+
+    <dl compact="compact">
+      <dd>The name of the group that this access entry applies to (as set up by a <b>createSec2Group</b> command, or
+      equivalent)</dd>
+    </dl>
+
+    <p>CONTEXTPREFIX</p>
+
+    <dl compact="compact">
+      <dd>A string representing a context name (or collection of context names) which this access entry applies to. The
+      interpretation of this string depends on the value of the CONTEXTMATCH field (see below).</dd>
+
+      <dd>If omitted, this will default to the null context "".</dd>
+    </dl>
+
+    <p>MODEL</p>
+
+    <dl compact="compact">
+      <dd>An integer representing the security model, taking one of the following values:<br />
+      1 - reserved for SNMPv1<br />
+      2 - reserved for SNMPv2c<br />
+      3 - User-based Security Model (USM)</dd>
+    </dl>
+
+    <p>LEVEL</p>
+
+    <dl compact="compact">
+      <dd>An integer representing the minimal security level, taking one of the following values:<br />
+      1 - noAuthNoPriv<br />
+      2 - authNoPriv<br />
+      3 - authPriv</dd>
+
+      <dd>This access entry will be applied to requests of this level or higher (where authPriv is higher than authNoPriv which
+      is in turn higher than noAuthNoPriv).</dd>
+    </dl>
+
+    <p>CONTEXTMATCH</p>
+
+    <dl compact="compact">
+      <dd>Indicates how to interpret the CONTEXTPREFIX value. If this field has the value '1' (representing 'exact') then the
+      context name of a request must match the CONTEXTPREFIX value exactly for this access entry to be applicable to that
+      request.</dd>
+
+      <dd>If this field has the value '2' (representing 'prefix') then the initial substring of the context name of a request
+      must match the CONTEXTPREFIX value for this access entry to be applicable to that request. This provides a simple form of
+      wildcarding.</dd>
+    </dl>
+
+    <p>READVIEW</p>
+
+    <dl compact="compact">
+      <dd>The name of the MIB view (as set up by <b>createView</b> or equivalent) defining the MIB objects for which this request
+      may request the current values.</dd>
+
+      <dd>If there is no view with this name, then read access is not granted.</dd>
+    </dl>
+
+    <p>WRITEVIEW</p>
+
+    <dl compact="compact">
+      <dd>The name of the MIB view (as set up by <b>createView</b> or equivalent) defining the MIB objects for which this request
+      may potentially SET new values.</dd>
+
+      <dd>If there is no view with this name, then read access is not granted.</dd>
+    </dl>
+
+    <p>NOTIFYVIEW</p>
+
+    <dl compact="compact">
+      <dd>The name of the MIB view (as set up by <b>createView</b> or equivalent) defining the MIB objects which may be included
+      in notification request.</dd>
+
+      <dd>Note that this aspect of access control is not currently supported.</dd>
+    </dl><a name="lbAK" id="lbAK"> </a>
+
+    <h3>deleteAccess GROUPNAME [CONTEXTPREFIX] MODEL LEVEL</h3>Delete an entry from the SNMPv3 access table, thus removing the
+    specified access control settings. The entry to be removed is indexed by the group name, context prefix, security model and
+    security level values, which should match those used in the corresponding <b>createAccess</b> command (or equivalent).
+    <a name="lbAL" id="lbAL"> </a>
+
+    <h2>EXAMPLES</h2>
+
+    <p>Given a pre-existing user <i>dave</i> (which could be set up using the <i><a href="snmpusm.html">snmpusm</a>(1)</i>
+    command), we could configure full read-write access to the whole OID tree using the commands:</p>
+
+    <dl compact="compact">
+      <dd>snmpvacm localhost createSec2Group 3 dave RWGroup</dd>
+
+      <dd>snmpvacm localhost createView all .1 80</dd>
+
+      <dd>snmpvacm localhost createAccess RWGroup 3 1 1 all all none</dd>
+    </dl>
+
+    <p>This creates a new security group named "RWGroup" containing the SNMPv3 user "dave", a new view "all" containing the full
+    OID tree based on <i><a href=".iso.html">.iso</a>(1)</i> , and then allows those users in the group "RWGroup" (i.e. "dave")
+    both read- and write-access to the view "all" (i.e. the full OID tree) when using authenticated SNMPv3 requests.</p>
+
+    <p>As a second example, we could set up read-only access to a portion of the OID tree using the commands:</p>
+
+    <dl compact="compact">
+      <dd>snmpvacm localhost createSec2Group 3 wes ROGroup</dd>
+
+      <dd>snmpvacm localhost createView sysView system fe</dd>
+
+      <dd>snmpvacm localhost createAccess ROGroup 3 0 1 sysView none none</dd>
+    </dl>
+
+    <p>This creates a new security group named "ROGroup" containing the (pre-existing) user "wes", a new view "sysView"
+    containing just the OID tree based on <i><a href=".iso.html">.iso</a>(1)<a href=".org.html">.org</a>(3)<a href=
+    ".dod.html">.dod</a>(6)<a href=".inet.html">.inet</a>(1)<a href=".mgmt.html">.mgmt</a>(2)<a href=
+    ".mib-2.html">.mib-2</a>(1)<a href=".system.html">.system</a>(1)</i> , and then allows those users in the group "ROGroup"
+    (i.e. "wes") read-access, but not write-access to the view "sysView" (i.e. the system group).</p>
+
+    <p><a name="lbAM" id="lbAM"> </a></p>
+
+    <h2>EXIT STATUS</h2>
+
+    <p>The following exit values are returned:</p>
+
+    <p>0 - Successful completion</p>
+
+    <p>1 - A usage syntax error (which displays a suitable usage message) or a request timeout.</p>
+
+    <p>2 - An error occurred while executing the command (which also displays a suitable error message).</p>
+
+    <p><a name="lbAN" id="lbAN"> </a></p>
+
+    <h2>LIMITATIONS</h2>
+
+    <p>This utility does not support the configuration of new community strings, so is only of use for setting up new access
+    control for SNMPv3 requests. It can be used to amend the access settings for existing community strings, but not to set up
+    new ones.</p>
+
+    <p>The use of numeric parameters for <b>secLevel</b> and <b>contextMatch</b> parameters is less than intuitive. These
+    commands do not provide the full flexibility of the equivalent config file directives.</p>
+
+    <p>There is (currently) no equivalent to the one-shot configure directives <i>rouser</i> and <i>rwuser.</i></p>
+
+    <p><a name="lbAO" id="lbAO"> </a></p>
+
+    <h2>SEE ALSO</h2><a href="snmpcmd.html">snmpcmd</a>(1), <a href="snmpusm.html">snmpusm</a>(1), <a href=
+    "snmpd.conf.html">snmpd.conf</a>(5), <a href="snmp.conf.html">snmp.conf</a>(5), RFC 2575, Net-SNMP project FAQ
+    <hr />
+    <a name="index" id="index"> </a>
+
+    <h2>Index</h2>
+
+    <dl>
+      <dt><a href="#lbAB">NAME</a></dt>
+
+      <dt><a href="#lbAC">SYNOPSIS</a></dt>
+
+      <dt><a href="#lbAD">DESCRIPTION</a></dt>
+
+      <dt><a href="#lbAE">SUB-COMMANDS</a></dt>
+
+      <dd>
+        <dl>
+          <dt><a href="#lbAF">createSec2Group MODEL SECURITYNAME GROUPNAME</a></dt>
+
+          <dt><a href="#lbAG">deleteSec2Group MODEL SECURITYNAME</a></dt>
+
+          <dt><a href="#lbAH">createView [-Ce] NAME SUBTREE MASK</a></dt>
+
+          <dt><a href="#lbAI">deleteView NAME SUBTREE</a></dt>
+
+          <dt><a href="#lbAJ">createAccess GROUPNAME [CONTEXTPREFIX] MODEL LEVEL CONTEXTMATCH READVIEW WRITEVIEW
+          NOTIFYVIEW</a></dt>
+
+          <dt><a href="#lbAK">deleteAccess GROUPNAME [CONTEXTPREFIX] MODEL LEVEL</a></dt>
+        </dl>
+      </dd>
+
+      <dt><a href="#lbAL">EXAMPLES</a></dt>
+
+      <dt><a href="#lbAM">EXIT STATUS</a></dt>
+
+      <dt><a href="#lbAN">LIMITATIONS</a></dt>
+
+      <dt><a href="#lbAO">SEE ALSO</a></dt>
+    </dl>
+    <hr />
+    This document was created by <a href="http://localhost/cgi-bin/man/man2html">man2html</a>, using the manual pages.<br />
+    Time: 01:51:43 GMT, October 29, 2004
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,74 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>check_varbind.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef SNMP_CHECK_VARBIND_H</span>
+00002 <span class="preprocessor">#define SNMP_CHECK_VARBIND_H</span>
+00003 
+00004 <span class="preprocessor">#ifdef __cplusplus</span>
+00005 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00006 <span class="preprocessor">#endif</span>
+00007 
+00008     <span class="comment">/*</span>
+00009 <span class="comment">     * Assorted convience routines to check the contents of a</span>
+00010 <span class="comment">     * netsnmp_variable_list instance.</span>
+00011 <span class="comment">     */</span>
+00012 
+00013     <span class="keywordtype">int</span> netsnmp_check_vb_type(<span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *var, <span class="keywordtype">int</span> type);
+00014     <span class="keywordtype">int</span> netsnmp_check_vb_size(<span class="keyword">const</span> <a class="code" href=
+"structvariable__list.html">netsnmp_variable_list</a> *var, size_t size );
+00015     <span class="keywordtype">int</span> netsnmp_check_vb_size_range(<span class="keyword">const</span> <a class="code"
+href="structvariable__list.html">netsnmp_variable_list</a> *var,
+00016                                     size_t low, size_t high );
+00017 
+00018     <span class="keywordtype">int</span> netsnmp_check_vb_type_and_size(<span class="keyword">const</span> <a class="code"
+href="structvariable__list.html">netsnmp_variable_list</a> *var,
+00019                                     <span class="keywordtype">int</span> type, size_t size);
+00020 
+00021     <span class="keywordtype">int</span> netsnmp_check_vb_int_range(<span class="keyword">const</span> <a class="code"
+href="structvariable__list.html">netsnmp_variable_list</a> *var, <span class="keywordtype">int</span> low,
+00022                                    <span class="keywordtype">int</span> high);
+00023 
+00024     <span class="keywordtype">int</span> netsnmp_check_vb_truthvalue(<span class="keyword">const</span> <a class="code"
+href="structvariable__list.html">netsnmp_variable_list</a> *var);
+00025 
+00026     <span class="keywordtype">int</span> netsnmp_check_vb_rowstatus_value(<span class="keyword">const</span> <a class=
+"code" href="structvariable__list.html">netsnmp_variable_list</a> *var);
+00027     <span class="keywordtype">int</span> netsnmp_check_vb_rowstatus(<span class="keyword">const</span> <a class="code"
+href="structvariable__list.html">netsnmp_variable_list</a> *var, <span class="keywordtype">int</span> old_val);
+00028 
+00029     <span class="keywordtype">int</span> netsnmp_check_vb_storagetype(<span class="keyword">const</span> <a class="code"
+href="structvariable__list.html">netsnmp_variable_list</a> *var, <span class="keywordtype">int</span> old_val);
+00030 
+00031 
+00032 <span class="preprocessor">#ifdef __cplusplus</span>
+00033 }
+00034 <span class="preprocessor">#endif</span>
+00035 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_CHECK_VARBIND_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:46:56 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

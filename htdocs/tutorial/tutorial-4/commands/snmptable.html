@@ -1,0 +1,65 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+    <h1>UCD-SNMP Tutorial -- snmptable</h1>
+    <p>
+      <b>Note:</b>  Much of this tutorial requires <a
+	href="ftp://ftp.sourceforge.net/pub/sourceforge/n/ne/net-snmp/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
+	so make sure you get it before running the commands found in
+	this tutorial.</b> 
+      <p><b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
+      href="/tutorial-5">is available</a> as well.  The commands is
+      the ucd-snmp specific tutorial will not work as expected if you
+      are using net-snmp and not ucd-snmp.
+      <br><br>
+    <hr>
+    <p>
+      The <b>snmptable</b> command nicely displays a SNMP table for
+      you in an easy to read column based fashion.  Consider the
+      sysORTable, which you saw all the data from in the last
+      section.  It's hard to get a good feel about the correlation of
+      data when its displayed in a long list, like the output of
+      snmpwalk gives you.  Instead, snmptable nicely formats it for
+      you (though sometimes it can be a bit wide, like in this example):
+<pre>
+<ul>
+% <b>snmptable test.net-snmp.org demopublic sysORTable</b>
+SNMP table: system.sysORTable
+
+ sysORIndex                                                                                                                                      sysORID                                                                     sysORDescr  sysORUpTime
+          1                                                                                             .iso.org.dod.internet.snmpV2.snmpModules.snmpMIB                                            The Mib module for SNMPv2 entities. 0:0:00:00.00
+          2                                         .iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBConformance.vacmMIBGroups.vacmBasicGroup                                      View-based Access Control Model for SNMP. 0:0:00:00.00
+          3 .iso.org.dod.internet.snmpV2.snmpModules.snmpFrameworkMIB.snmpFrameworkMIBConformance.snmpFrameworkMIBCompliances.snmpFrameworkMIBCompliance                                          The SNMP Management Architecture MIB. 0:0:00:00.00
+          4                            .iso.org.dod.internet.snmpV2.snmpModules.snmpMPDMIB.snmpMPDMIBConformance.snmpMPDMIBCompliances.snmpMPDCompliance                                The MIB for Message Processing and Dispatching. 0:0:00:00.00
+          5                                     .iso.org.dod.internet.snmpV2.snmpModules.snmpUsmMIB.usmMIBConformance.usmMIBCompliances.usmMIBCompliance The management information definitions for the SNMP User-based Security Model. 0:0:00:00.00
+</pre>
+But you can adjust the width of the table
+<pre>
+% <b>snmptable -w 80 ucd-snmp.ucadvis.edu demopublic sysORTable</b>
+SNMP table: system.sysORTable
+
+ sysORIndex                                                                                                                                      sysORID
+          1                                                                                             .iso.org.dod.internet.snmpV2.snmpModules.snmpMIB
+          2                                         .iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBConformance.vacmMIBGroups.vacmBasicGroup
+          3 .iso.org.dod.internet.snmpV2.snmpModules.snmpFrameworkMIB.snmpFrameworkMIBConformance.snmpFrameworkMIBCompliances.snmpFrameworkMIBCompliance
+          4                            .iso.org.dod.internet.snmpV2.snmpModules.snmpMPDMIB.snmpMPDMIBConformance.snmpMPDMIBCompliances.snmpMPDCompliance
+          5                                     .iso.org.dod.internet.snmpV2.snmpModules.snmpUsmMIB.usmMIBConformance.usmMIBCompliances.usmMIBCompliance
+
+SNMP table: system.sysORTable, part 2
+
+                                                                     sysORDescr  sysORUpTime
+                                            The Mib module for SNMPv2 entities. 0:0:00:00.00
+                                      View-based Access Control Model for SNMP. 0:0:00:00.00
+                                          The SNMP Management Architecture MIB. 0:0:00:00.00
+                                The MIB for Message Processing and Dispatching. 0:0:00:00.00
+ The management information definitions for the SNMP User-based Security Model. 0:0:00:00.00
+</pre>
+    <hr>
+    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+<!-- Created: Thu Nov  4 15:05:29 PST 1999 -->
+<!-- hhmts start -->
+Last modified: Mon Aug  2 10:56:24 EDT 2004
+<!-- hhmts end -->
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

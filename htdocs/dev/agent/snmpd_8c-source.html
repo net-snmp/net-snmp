@@ -1,0 +1,1436 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000003.html">agent</a>
+  </div>
+
+  <h1>snmpd.c</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * snmpd.c</span>
+00003 <span class="comment"> */</span>
+00007 <span class="comment">/* Portions of this file are subject to the following copyrights.  See</span>
+00008 <span class="comment"> * the Net-SNMP's COPYING file for more details and other copyrights</span>
+00009 <span class="comment"> * that may apply:</span>
+00010 <span class="comment"> */</span>
+00011 <span class="comment">/*</span>
+00012 <span class="comment"> * Copyright 1988, 1989 by Carnegie Mellon University</span>
+00013 <span class="comment"> * </span>
+00014 <span class="comment"> * All Rights Reserved</span>
+00015 <span class="comment"> * </span>
+00016 <span class="comment"> * Permission to use, copy, modify, and distribute this software and its </span>
+00017 <span class="comment"> * documentation for any purpose and without fee is hereby granted, </span>
+00018 <span class="comment"> * provided that the above copyright notice appear in all copies and that</span>
+00019 <span class="comment"> * both that copyright notice and this permission notice appear in </span>
+00020 <span class="comment"> * supporting documentation, and that the name of CMU not be</span>
+00021 <span class="comment"> * used in advertising or publicity pertaining to distribution of the</span>
+00022 <span class="comment"> * software without specific, written prior permission.  </span>
+00023 <span class="comment"> * </span>
+00024 <span class="comment"> * CMU DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING</span>
+00025 <span class="comment"> * ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL</span>
+00026 <span class="comment"> * CMU BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR</span>
+00027 <span class="comment"> * ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,</span>
+00028 <span class="comment"> * WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,</span>
+00029 <span class="comment"> * ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS</span>
+00030 <span class="comment"> * SOFTWARE.</span>
+00031 <span class="comment"> * *****************************************************************</span>
+00032 <span class="comment"> */</span>
+00033 <span class="comment">/*</span>
+00034 <span class="comment"> * Copyright &copy; 2003 Sun Microsystems, Inc. All rights reserved.</span>
+00035 <span class="comment"> * Use is subject to license terms specified in the COPYING file</span>
+00036 <span class="comment"> * distributed with the Net-SNMP package.</span>
+00037 <span class="comment"> */</span>
+00038 <span class="preprocessor">#include &lt;net-snmp/net-snmp-config.h&gt;</span>
+00039 
+00040 <span class="preprocessor">#if HAVE_IO_H</span>
+00041 <span class="preprocessor">#include &lt;io.h&gt;</span>
+00042 <span class="preprocessor">#endif</span>
+00043 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+00044 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+00045 <span class="preprocessor">#if HAVE_STRING_H</span>
+00046 <span class="preprocessor">#include &lt;string.h&gt;</span>
+00047 <span class="preprocessor">#else</span>
+00048 <span class="preprocessor">#include &lt;strings.h&gt;</span>
+00049 <span class="preprocessor">#endif</span>
+00050 <span class="preprocessor">#if HAVE_STDLIB_H</span>
+00051 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+00052 <span class="preprocessor">#endif</span>
+00053 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00054 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+00055 <span class="preprocessor">#endif</span>
+00056 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+00057 <span class="preprocessor">#if HAVE_NETINET_IN_H</span>
+00058 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+00059 <span class="preprocessor">#endif</span>
+00060 <span class="preprocessor">#if HAVE_ARPA_INET_H</span>
+00061 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+00062 <span class="preprocessor">#endif</span>
+00063 <span class="preprocessor">#if TIME_WITH_SYS_TIME</span>
+00064 <span class="preprocessor"># ifdef WIN32</span>
+00065 <span class="preprocessor">#  include &lt;sys/timeb.h&gt;</span>
+00066 <span class="preprocessor"># else</span>
+00067 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00068 <span class="preprocessor"># endif</span>
+00069 <span class="preprocessor"># include &lt;time.h&gt;</span>
+00070 <span class="preprocessor">#else</span>
+00071 <span class="preprocessor"># if HAVE_SYS_TIME_H</span>
+00072 <span class="preprocessor">#  include &lt;sys/time.h&gt;</span>
+00073 <span class="preprocessor"># else</span>
+00074 <span class="preprocessor">#  include &lt;time.h&gt;</span>
+00075 <span class="preprocessor"># endif</span>
+00076 <span class="preprocessor">#endif</span>
+00077 <span class="preprocessor">#if HAVE_SYS_SELECT_H</span>
+00078 <span class="preprocessor">#include &lt;sys/select.h&gt;</span>
+00079 <span class="preprocessor">#endif</span>
+00080 <span class="preprocessor">#if HAVE_SYS_SOCKET_H</span>
+00081 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+00082 <span class="preprocessor">#elif HAVE_WINSOCK_H</span>
+00083 <span class="preprocessor">#include &lt;winsock.h&gt;</span>
+00084 <span class="preprocessor">#endif</span>
+00085 <span class="preprocessor">#if HAVE_NET_IF_H</span>
+00086 <span class="preprocessor">#include &lt;net/if.h&gt;</span>
+00087 <span class="preprocessor">#endif</span>
+00088 <span class="preprocessor">#if HAVE_INET_MIB2_H</span>
+00089 <span class="preprocessor">#include &lt;inet/mib2.h&gt;</span>
+00090 <span class="preprocessor">#endif</span>
+00091 <span class="preprocessor">#if HAVE_SYS_IOCTL_H</span>
+00092 <span class="preprocessor">#include &lt;sys/ioctl.h&gt;</span>
+00093 <span class="preprocessor">#endif</span>
+00094 <span class="preprocessor">#if HAVE_SYS_FILE_H</span>
+00095 <span class="preprocessor">#include &lt;sys/file.h&gt;</span>
+00096 <span class="preprocessor">#endif</span>
+00097 <span class="preprocessor">#ifdef HAVE_FCNTL_H</span>
+00098 <span class="preprocessor">#include &lt;fcntl.h&gt;</span>
+00099 <span class="preprocessor">#endif</span>
+00100 <span class="preprocessor">#if HAVE_SYS_WAIT_H</span>
+00101 <span class="preprocessor">#include &lt;sys/wait.h&gt;</span>
+00102 <span class="preprocessor">#endif</span>
+00103 <span class="preprocessor">#include &lt;signal.h&gt;</span>
+00104 <span class="preprocessor">#ifdef HAVE_SYS_PARAM_H</span>
+00105 <span class="preprocessor">#include &lt;sys/param.h&gt;</span>
+00106 <span class="preprocessor">#endif</span>
+00107 <span class="preprocessor">#if HAVE_PROCESS_H              </span><span class="comment">/* Win32-getpid */</span>
+00108 <span class="preprocessor">#include &lt;process.h&gt;</span>
+00109 <span class="preprocessor">#endif</span>
+00110 <span class="preprocessor">#if HAVE_LIMITS_H</span>
+00111 <span class="preprocessor">#include &lt;limits.h&gt;</span>
+00112 <span class="preprocessor">#endif</span>
+00113 <span class="preprocessor">#if HAVE_PWD_H</span>
+00114 <span class="preprocessor">#include &lt;pwd.h&gt;</span>
+00115 <span class="preprocessor">#endif</span>
+00116 <span class="preprocessor">#if HAVE_GRP_H</span>
+00117 <span class="preprocessor">#include &lt;grp.h&gt;</span>
+00118 <span class="preprocessor">#endif</span>
+00119 
+00120 <span class="preprocessor">#ifndef PATH_MAX</span>
+00121 <span class="preprocessor"># ifdef _POSIX_PATH_MAX</span>
+00122 <span class="preprocessor">#  define PATH_MAX _POSIX_PATH_MAX</span>
+00123 <span class="preprocessor"># else</span>
+00124 <span class="preprocessor">#  define PATH_MAX 255</span>
+00125 <span class="preprocessor"># endif</span>
+00126 <span class="preprocessor">#endif</span>
+00127 
+00128 <span class="preprocessor">#ifndef FD_SET</span>
+00129 <span class="keyword">typedef</span> <span class="keywordtype">long</span>    fd_mask;
+00130 <span class="preprocessor">#define NFDBITS (sizeof(fd_mask) * NBBY)        </span><span class=
+"comment">/* bits per mask */</span>
+00131 <span class="preprocessor">#define FD_SET(n, p)    ((p)-&gt;fds_bits[(n)/NFDBITS] |= (1 &lt;&lt; ((n) % NFDBITS)))</span>
+00132 <span class=
+"preprocessor">#define FD_CLR(n, p)    ((p)-&gt;fds_bits[(n)/NFDBITS] &amp;= ~(1 &lt;&lt; ((n) % NFDBITS)))</span>
+00133 <span class=
+"preprocessor">#define FD_ISSET(n, p)  ((p)-&gt;fds_bits[(n)/NFDBITS] &amp; (1 &lt;&lt; ((n) % NFDBITS)))</span>
+00134 <span class="preprocessor">#define FD_ZERO(p)      memset((p), 0, sizeof(*(p)))</span>
+00135 <span class="preprocessor">#endif</span>
+00136 
+00137 <span class="preprocessor">#if HAVE_DMALLOC_H</span>
+00138 <span class="preprocessor">#include &lt;dmalloc.h&gt;</span>
+00139 <span class="preprocessor">#endif</span>
+00140 
+00141 <span class="preprocessor">#include &lt;net-snmp/net-snmp-includes.h&gt;</span>
+00142 <span class="preprocessor">#include &lt;net-snmp/agent/net-snmp-agent-includes.h&gt;</span>
+00143 
+00144 <span class="preprocessor">#include "m2m.h"</span>
+00145 <span class="preprocessor">#include &lt;net-snmp/agent/mib_module_config.h&gt;</span>
+00146 
+00147 <span class="preprocessor">#include "snmpd.h"</span>
+00148 <span class="preprocessor">#include "mibgroup/struct.h"</span>
+00149 <span class="preprocessor">#include &lt;net-snmp/agent/mib_modules.h&gt;</span>
+00150 
+00151 <span class="preprocessor">#include "mibgroup/util_funcs.h"</span>
+00152 
+00153 <span class="preprocessor">#include &lt;net-snmp/agent/agent_trap.h&gt;</span>
+00154 
+00155 <span class="preprocessor">#include &lt;net-snmp/agent/table.h&gt;</span>
+00156 <span class="preprocessor">#include &lt;net-snmp/agent/table_iterator.h&gt;</span>
+00157 <span class="preprocessor">#include "mib_module_includes.h"</span>
+00158 
+00159 <span class="comment">/*</span>
+00160 <span class="comment"> * Include winservice.h to support Windows Service</span>
+00161 <span class="comment"> */</span>
+00162 <span class="preprocessor">#ifdef WIN32</span>
+00163 <span class="preprocessor">#include &lt;windows.h&gt;</span>
+00164 <span class="preprocessor">#include &lt;tchar.h&gt;</span>
+00165 <span class="preprocessor">#include &lt;net-snmp/library/winservice.h&gt;</span>
+00166 
+00167 <span class="preprocessor">#define WIN32SERVICE</span>
+00168 
+00169 <span class="preprocessor">#endif</span>
+00170 
+00171 <span class="comment">/*</span>
+00172 <span class="comment"> * Globals.</span>
+00173 <span class="comment"> */</span>
+00174 <span class="preprocessor">#ifdef USE_LIBWRAP</span>
+00175 <span class="preprocessor">#include &lt;tcpd.h&gt;</span>
+00176 <span class="preprocessor">#endif                          </span><span class="comment">/* USE_LIBWRAP */</span>
+00177 
+00178 <span class="preprocessor">#define TIMETICK         500000L</span>
+00179 
+00180 <span class="keywordtype">int</span>             snmp_dump_packet;
+00181 <span class="keywordtype">int</span>             running = 1;
+00182 <span class="keywordtype">int</span>             reconfig = 0;
+00183 <span class="keywordtype">int</span>             Facility = LOG_DAEMON;
+00184 
+00185 <span class="preprocessor">#ifdef WIN32SERVICE</span>
+00186 <span class="comment">/*</span>
+00187 <span class="comment"> * SNMP Agent Status </span>
+00188 <span class="comment"> */</span>
+00189 <span class="preprocessor">#define AGENT_RUNNING 1</span>
+00190 <span class="preprocessor">#define AGENT_STOPPED 0</span>
+00191 <span class="keywordtype">int</span>             agent_status = AGENT_STOPPED;
+00192 LPTSTR          app_name = _T(<span class="stringliteral">"Net-SNMP Agent"</span>);     <span class=
+"comment">/* Application Name */</span>
+00193 <span class="preprocessor">#else</span>
+00194 <span class="keywordtype">char</span>           *app_name = <span class="stringliteral">"snmpd"</span>;
+00195 <span class="preprocessor">#endif</span>
+00196 
+00197 <span class="keyword">extern</span> <span class="keywordtype">char</span>   **argvrestartp;
+00198 <span class="keyword">extern</span> <span class="keywordtype">char</span>    *argvrestart;
+00199 <span class="keyword">extern</span> <span class="keywordtype">char</span>    *argvrestartname;
+00200 
+00201 <span class="preprocessor">#define NUM_SOCKETS     32</span>
+00202 
+00203 <span class="preprocessor">#ifdef USING_SMUX_MODULE</span>
+00204 <span class="keyword">static</span> <span class="keywordtype">int</span>      sdlist[NUM_SOCKETS], sdlen = 0;
+00205 <span class="preprocessor">#endif                          </span><span class="comment">/* USING_SMUX_MODULE */</span>
+00206 
+00207 <span class="comment">/*</span>
+00208 <span class="comment"> * Prototypes.</span>
+00209 <span class="comment"> */</span>
+00210 <span class="keywordtype">int</span>             snmp_read_packet(<span class="keywordtype">int</span>);
+00211 <span class="keywordtype">int</span>             snmp_input(<span class="keywordtype">int</span>, <a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> *, <span class="keywordtype">int</span>, <a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *,
+00212                            <span class="keywordtype">void</span> *);
+00213 <span class="keyword">static</span> <span class="keywordtype">void</span>     usage(<span class=
+"keywordtype">char</span> *);
+00214 <span class="keyword">static</span> <span class="keywordtype">void</span>     SnmpTrapNodeDown(<span class=
+"keywordtype">void</span>);
+00215 <span class="keyword">static</span> <span class="keywordtype">int</span>      receive(<span class=
+"keywordtype">void</span>);
+00216 <span class="preprocessor">#ifdef WIN32SERVICE</span>
+00217 <span class="keywordtype">void</span>            StopSnmpAgent(<span class="keywordtype">void</span>);
+00218 <span class="keywordtype">int</span>             SnmpDaemonMain(<span class="keywordtype">int</span> argc, TCHAR * argv[]);
+00219 <span class="keywordtype">int</span> __cdecl     _tmain(<span class="keywordtype">int</span> argc, TCHAR * argv[]);
+00220 <span class="preprocessor">#else</span>
+00221 <span class="keywordtype">int</span>             main(<span class="keywordtype">int</span>, <span class=
+"keywordtype">char</span> **);
+00222 <span class="preprocessor">#endif</span>
+00223 
+00224 <span class="comment">/*</span>
+00225 <span class="comment"> * These definitions handle 4.2 systems without additional syslog facilities.</span>
+00226 <span class="comment"> */</span>
+00227 <span class="preprocessor">#ifndef LOG_CONS</span>
+00228 <span class="preprocessor">#define LOG_CONS        0       </span><span class=
+"comment">/* Don't bother if not defined... */</span>
+00229 <span class="preprocessor">#endif</span>
+00230 <span class="preprocessor">#ifndef LOG_PID</span>
+00231 <span class="preprocessor">#define LOG_PID         0       </span><span class=
+"comment">/* Don't bother if not defined... */</span>
+00232 <span class="preprocessor">#endif</span>
+00233 <span class="preprocessor">#ifndef LOG_LOCAL0</span>
+00234 <span class="preprocessor">#define LOG_LOCAL0      0</span>
+00235 <span class="preprocessor">#endif</span>
+00236 <span class="preprocessor">#ifndef LOG_LOCAL1</span>
+00237 <span class="preprocessor">#define LOG_LOCAL1      0</span>
+00238 <span class="preprocessor">#endif</span>
+00239 <span class="preprocessor">#ifndef LOG_LOCAL2</span>
+00240 <span class="preprocessor">#define LOG_LOCAL2      0</span>
+00241 <span class="preprocessor">#endif</span>
+00242 <span class="preprocessor">#ifndef LOG_LOCAL3</span>
+00243 <span class="preprocessor">#define LOG_LOCAL3      0</span>
+00244 <span class="preprocessor">#endif</span>
+00245 <span class="preprocessor">#ifndef LOG_LOCAL4</span>
+00246 <span class="preprocessor">#define LOG_LOCAL4      0</span>
+00247 <span class="preprocessor">#endif</span>
+00248 <span class="preprocessor">#ifndef LOG_LOCAL5</span>
+00249 <span class="preprocessor">#define LOG_LOCAL5      0</span>
+00250 <span class="preprocessor">#endif</span>
+00251 <span class="preprocessor">#ifndef LOG_LOCAL6</span>
+00252 <span class="preprocessor">#define LOG_LOCAL6      0</span>
+00253 <span class="preprocessor">#endif</span>
+00254 <span class="preprocessor">#ifndef LOG_LOCAL7</span>
+00255 <span class="preprocessor">#define LOG_LOCAL7      0</span>
+00256 <span class="preprocessor">#endif</span>
+00257 <span class="preprocessor">#ifndef LOG_DAEMON</span>
+00258 <span class="preprocessor">#define LOG_DAEMON      0</span>
+00259 <span class="preprocessor">#endif</span>
+00260 
+00261 
+00262 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00263 usage(<span class="keywordtype">char</span> *prog)
+00264 {
+00265 <span class="preprocessor">#ifdef WIN32SERVICE</span>
+00266     printf(<span class="stringliteral">"\nUsage:  %s [-register] [-quiet] [OPTIONS] [LISTENING ADDRESSES]"</span>,
+00267            prog);
+00268     printf(<span class="stringliteral">"\n        %s [-unregister] [-quiet]"</span>, prog);
+00269 <span class="preprocessor">#else</span>
+00270     printf(<span class="stringliteral">"\nUsage:  %s [OPTIONS] [LISTENING ADDRESSES]"</span>, prog);
+00271 <span class="preprocessor">#endif</span>
+00272     printf(<span class="stringliteral">"\n"</span>);
+00273     printf(<span class="stringliteral">"\n\tVersion:  %s\n"</span>, netsnmp_get_version());
+00274     printf(<span class="stringliteral">"\tWeb:      http://www.net-snmp.org/\n"</span>);
+00275     printf(<span class="stringliteral">"\tEmail:    net-snmp-coders@lists.sourceforge.net\n"</span>);
+00276     printf(<span class="stringliteral">"\n  -a\t\t\tlog addresses\n"</span>);
+00277     printf(<span class="stringliteral">"  -A\t\t\tappend to the logfile rather than truncating it\n"</span>);
+00278     printf(<span class="stringliteral">"  -c FILE\t\tread FILE as a configuration file\n"</span>);
+00279     printf(<span class="stringliteral">"  -C\t\t\tdo not read the default configuration files\n"</span>);
+00280     printf(<span class="stringliteral">"  -d\t\t\tdump sent and received SNMP packets\n"</span>);
+00281     printf(<span class="stringliteral">"  -D\t\t\tturn on debugging output\n"</span>);
+00282     printf(<span class="stringliteral">"  -f\t\t\tdo not fork from the shell\n"</span>);
+00283 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00284     printf(<span class="stringliteral">"  -g GID\t\tchange to this numeric gid after opening\n"</span>
+00285            <span class="stringliteral">"\t\t\t  transport endpoints\n"</span>);
+00286 <span class="preprocessor">#endif</span>
+00287     printf(<span class="stringliteral">"  -h, --help\t\tdisplay this usage message\n"</span>);
+00288     printf(<span class="stringliteral">"  -H\t\t\tdisplay configuration file directives understood\n"</span>);
+00289     printf(<span class="stringliteral">"  -I [-]INITLIST\tlist of mib modules to initialize (or not)\n"</span>);
+00290     printf(<span class="stringliteral">"\t\t\t  (run snmpd with -Dmib_init for a list)\n"</span>);
+00291     printf(<span class="stringliteral">"  -L &lt;LOGOPTS&gt;\t\ttoggle options controlling where to log to\n"</span>);
+00292     snmp_log_options_usage(<span class="stringliteral">"\t"</span>, stdout);
+00293     printf(<span class="stringliteral">"  -m MIBLIST\t\tuse MIBLIST instead of the default MIB list\n"</span>);
+00294     printf(<span class=
+"stringliteral">"  -M DIRLIST\t\tuse DIRLIST as the list of locations\n\t\t\t  to look for MIBs\n"</span>);
+00295     printf(<span class="stringliteral">"  -p FILE\t\tstore process id in FILE\n"</span>);
+00296     printf(<span class="stringliteral">"  -q\t\t\tprint information in a more parsable format\n"</span>);
+00297     printf(<span class="stringliteral">"  -r\t\t\tdo not exit if files only accessible to root\n"</span>
+00298            <span class="stringliteral">"\t\t\t  cannot be opened\n"</span>);
+00299 <span class="preprocessor">#ifdef WIN32SERVICE</span>
+00300     printf(<span class="stringliteral">"  -register\t\tregister as a Windows service\n"</span>);
+00301     printf(<span class="stringliteral">"  \t\t\t  (followed by -quiet to prevent message popups)\n"</span>);
+00302     printf(<span class="stringliteral">"  \t\t\t  (followed by the startup parameter list)\n"</span>);
+00303     printf(<span class=
+"stringliteral">"  \t\t\t  Note that some parameters are not relevant when running as a service\n"</span>);
+00304 <span class="preprocessor">#endif</span>
+00305 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00306     printf(<span class="stringliteral">"  -u UID\t\tchange to this uid (numeric or textual) after\n"</span>
+00307            <span class="stringliteral">"\t\t\t  opening transport endpoints\n"</span>);
+00308 <span class="preprocessor">#endif</span>
+00309 <span class="preprocessor">#ifdef WIN32SERVICE</span>
+00310     printf(<span class="stringliteral">"  -unregister\t\tunregister as a Windows service\n"</span>);
+00311     printf(<span class="stringliteral">"  \t\t\t  (followed -quiet to prevent message popups)\n"</span>);
+00312 <span class="preprocessor">#endif</span>
+00313     printf(<span class="stringliteral">"  -v, --version\t\tdisplay version information\n"</span>);
+00314     printf(<span class="stringliteral">"  -V\t\t\tverbose display\n"</span>);
+00315 <span class="preprocessor">#if defined(USING_AGENTX_SUBAGENT_MODULE)|| defined(USING_AGENTX_MASTER_MODULE)</span>
+00316     printf(<span class="stringliteral">"  -x ADDRESS\t\tuse ADDRESS as AgentX address\n"</span>);
+00317 <span class="preprocessor">#endif</span>
+00318 <span class="preprocessor">#ifdef USING_AGENTX_SUBAGENT_MODULE</span>
+00319     printf(<span class="stringliteral">"  -X\t\t\trun as an AgentX subagent rather than as an\n"</span>
+00320            <span class="stringliteral">"\t\t\t  SNMP master agent\n"</span>);
+00321 <span class="preprocessor">#endif</span>
+00322 
+00323     printf(<span class="stringliteral">"\nDeprecated options:\n"</span>);
+00324     printf(<span class="stringliteral">"  -l FILE\t\tuse -Lf &lt;FILE&gt; instead\n"</span>);
+00325     printf(<span class="stringliteral">"  -P\t\t\tuse -p instead\n"</span>);
+00326     printf(<span class="stringliteral">"  -s\t\t\tuse -Lsd instead\n"</span>);
+00327     printf(<span class="stringliteral">"  -S d|i|0-7\t\tuse -Ls &lt;facility&gt; instead\n"</span>);
+00328 
+00329     printf(<span class="stringliteral">"\n"</span>);
+00330     exit(1);
+00331 }
+00332 
+00333 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00334 version(<span class="keywordtype">void</span>)
+00335 {
+00336     printf(<span class="stringliteral">"\nNET-SNMP version:  %s\n"</span>, netsnmp_get_version());
+00337     printf(<span class="stringliteral">"Web:               http://www.net-snmp.org/\n"</span>);
+00338     printf(<span class="stringliteral">"Email:             net-snmp-coders@lists.sourceforge.net\n\n"</span>);
+00339     exit(0);
+00340 }
+00341 
+00342 RETSIGTYPE
+00343 SnmpdShutDown(<span class="keywordtype">int</span> a)
+00344 {
+00345 <span class="preprocessor">#ifdef WIN32SERVICE</span>
+00346     <span class="keyword">extern</span> <a class="code" href="structsnmp__session.html">netsnmp_session</a> *main_session;
+00347 <span class="preprocessor">#endif</span>
+00348     running = 0;
+00349 <span class="preprocessor">#ifdef WIN32SERVICE</span>
+00350     <span class="comment">/*</span>
+00351 <span class="comment">     * In case of windows, select() in receive() function will not return </span>
+00352 <span class="comment">     * on signal. Thats why following function is called, which closes the </span>
+00353 <span class="comment">     * socket descriptors and causes the select() to return</span>
+00354 <span class="comment">     */</span>
+00355     snmp_close(main_session);
+00356 <span class="preprocessor">#endif</span>
+00357 }
+00358 
+00359 <span class="preprocessor">#ifdef SIGHUP</span>
+00360 RETSIGTYPE
+00361 SnmpdReconfig(<span class="keywordtype">int</span> a)
+00362 {
+00363     reconfig = 1;
+00364     signal(SIGHUP, SnmpdReconfig);
+00365 }
+00366 <span class="preprocessor">#endif</span>
+00367 
+00368 <span class="preprocessor">#ifdef SIGUSR1</span>
+00369 <span class="keyword">extern</span> <span class="keywordtype">void</span>     dump_registry(<span class=
+"keywordtype">void</span>);
+00370 RETSIGTYPE
+00371 SnmpdDump(<span class="keywordtype">int</span> a)
+00372 {
+00373     dump_registry();
+00374     signal(SIGUSR1, SnmpdDump);
+00375 }
+00376 <span class="preprocessor">#endif</span>
+00377 
+00378 RETSIGTYPE
+00379 SnmpdCatchRandomSignal(<span class="keywordtype">int</span> a)
+00380 {
+00381     <span class="comment">/* Disable all logs and log the error via syslog */</span>
+00382     snmp_disable_log();
+00383     snmp_enable_syslog();
+00384     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"Exiting on signal %d\n"</span>, a);
+00385     snmp_disable_syslog();
+00386     exit(1);
+00387 }
+00388 
+00389 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00390 SnmpTrapNodeDown(<span class="keywordtype">void</span>)
+00391 {
+00392     <a class="code" href="group__agent__trap.html#ga43">send_easy_trap</a>(SNMP_TRAP_ENTERPRISESPECIFIC, 2);
+00393     <span class="comment">/*</span>
+00394 <span class="comment">     * XXX  2 - Node Down #define it as NODE_DOWN_TRAP </span>
+00395 <span class="comment">     */</span>
+00396 }
+00397 
+00398 <span class="keyword">static</span> <span class="keywordtype">void</span>
+00399 setup_log(<span class="keywordtype">int</span> restart, <span class="keywordtype">int</span> dont_zero, <span class=
+"keywordtype">int</span> stderr_log, <span class="keywordtype">int</span> syslog_log, 
+00400           <span class="keywordtype">char</span> *logfile)
+00401 {
+00402     <span class="keyword">static</span> <span class="keywordtype">char</span> logfile_s[PATH_MAX + 1] = { 0 };
+00403     <span class="keyword">static</span> <span class="keywordtype">int</span> dont_zero_s  = 0;
+00404     <span class="keyword">static</span> <span class="keywordtype">int</span> stderr_log_s = 0;
+00405     <span class="keyword">static</span> <span class="keywordtype">int</span> syslog_log_s = 0;
+00406 
+00407     <span class="keywordflow">if</span> (restart == 0) {
+00408         <span class="keywordflow">if</span> (logfile != NULL) {
+00409             strncpy(logfile_s, logfile, PATH_MAX);
+00410         }
+00411         dont_zero_s  = dont_zero;
+00412         stderr_log_s = stderr_log;
+00413         syslog_log_s = syslog_log;
+00414     }
+00415 
+00416     <span class="keywordflow">if</span> (stderr_log_s) {
+00417         snmp_enable_stderrlog();
+00418     } <span class="keywordflow">else</span> {
+00419         snmp_disable_stderrlog();
+00420     }
+00421 
+00422     <span class="keywordflow">if</span> (logfile_s[0]) {
+00423         snmp_enable_filelog(logfile_s, dont_zero_s);
+00424     }
+00425 
+00426     <span class="keywordflow">if</span> (syslog_log_s) {
+00427         snmp_enable_syslog_ident(app_name, Facility);
+00428     }
+00429 }
+00430 
+00431 <span class="comment">/*******************************************************************-o-******</span>
+00432 <span class="comment"> * main - Non Windows</span>
+00433 <span class="comment"> * SnmpDaemonMain - Windows to support windows service</span>
+00434 <span class="comment"> *</span>
+00435 <span class="comment"> * Parameters:</span>
+00436 <span class="comment"> *       argc</span>
+00437 <span class="comment"> *      *argv[]</span>
+00438 <span class="comment"> *      </span>
+00439 <span class="comment"> * Returns:</span>
+00440 <span class="comment"> *      0       Always succeeds.  (?)</span>
+00441 <span class="comment"> *</span>
+00442 <span class="comment"> *</span>
+00443 <span class="comment"> * Setup and start the agent daemon.</span>
+00444 <span class="comment"> *</span>
+00445 <span class="comment"> * Also successfully EXITs with zero for some options.</span>
+00446 <span class="comment"> */</span>
+00447 <span class="keywordtype">int</span>
+00448 <span class="preprocessor">#ifdef WIN32SERVICE</span>
+00449 SnmpDaemonMain(<span class="keywordtype">int</span> argc, TCHAR * argv[])
+00450 #<span class="keywordflow">else</span>
+00451 main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[])
+00452 #endif
+00453 {
+00454     <span class="keywordtype">char</span>            options[128] = <span class=
+"stringliteral">"aAc:CdD::fhHI:l:L:m:M:p:P:qrsS:UvV-:"</span>;
+00455     <span class="keywordtype">int</span>             arg, i, ret;
+00456     <span class="keywordtype">int</span>             dont_fork = 0;
+00457     <span class="keywordtype">int</span>             dont_zero_log = 0;
+00458     <span class="keywordtype">int</span>             stderr_log = 0, syslog_log = 0;
+00459     <span class="keywordtype">int</span>             uid = 0, gid = 0;
+00460     <span class="keywordtype">int</span>             agent_mode = -1;
+00461     <span class="keywordtype">char</span>            logfile[PATH_MAX + 1] = { 0 };
+00462     <span class="keywordtype">char</span>           *cptr, **argvptr;
+00463     <span class="keywordtype">char</span>           *pid_file = NULL;
+00464     <span class="keywordtype">char</span>            option_compatability[] = <span class="stringliteral">"-Le"</span>;
+00465 <span class="preprocessor">#if HAVE_GETPID</span>
+00466     <span class="keywordtype">int</span> fd;
+00467     FILE           *PID;
+00468 <span class="preprocessor">#endif</span>
+00469 
+00470 <span class="preprocessor">#ifdef LOGFILE</span>
+00471     strncpy(logfile, LOGFILE, PATH_MAX);
+00472 <span class="preprocessor">#endif</span>
+00473 
+00474 <span class="preprocessor">#ifdef NO_ROOT_ACCESS</span>
+00475     <span class="comment">/*</span>
+00476 <span class="comment">     * Default to no.  </span>
+00477 <span class="comment">     */</span>
+00478     <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_APPLICATION_ID, 
+00479                            NETSNMP_DS_AGENT_NO_ROOT_ACCESS, 1);
+00480 <span class="preprocessor">#endif</span>
+00481     <span class="comment">/*</span>
+00482 <span class="comment">     * Default to NOT running an AgentX master.  </span>
+00483 <span class="comment">     */</span>
+00484     <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_APPLICATION_ID, 
+00485                            NETSNMP_DS_AGENT_AGENTX_MASTER, 0);
+00486     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+00487                        NETSNMP_DS_AGENT_AGENTX_TIMEOUT, -1);
+00488     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+00489                        NETSNMP_DS_AGENT_AGENTX_RETRIES, -1);
+00490 
+00491     netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+00492                        NETSNMP_DS_AGENT_CACHE_TIMEOUT, 5);
+00493     <span class="comment">/*</span>
+00494 <span class="comment">     * Add some options if they are available.  </span>
+00495 <span class="comment">     */</span>
+00496 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00497     strcat(options, <span class="stringliteral">"g:u:"</span>);
+00498 <span class="preprocessor">#endif</span>
+00499 <span class="preprocessor">#if defined(USING_AGENTX_SUBAGENT_MODULE)|| defined(USING_AGENTX_MASTER_MODULE)</span>
+00500     strcat(options, <span class="stringliteral">"x:"</span>);
+00501 <span class="preprocessor">#endif</span>
+00502 <span class="preprocessor">#ifdef USING_AGENTX_SUBAGENT_MODULE</span>
+00503     strcat(options, <span class="stringliteral">"X"</span>);
+00504 <span class="preprocessor">#endif</span>
+00505 
+00506     <span class="comment">/*</span>
+00507 <span class="comment">     * This is incredibly ugly, but it's probably the simplest way</span>
+00508 <span class="comment">     *  to handle the old '-L' option as well as the new '-Lx' style</span>
+00509 <span class="comment">     */</span>
+00510     <span class="keywordflow">for</span> (i=0; i&lt;argc; i++) {
+00511         <span class="keywordflow">if</span> (!strcmp(argv[i], <span class="stringliteral">"-L"</span>))
+00512             argv[i] = option_compatability;            
+00513     }
+00514 
+00515     snmp_log_syslogname(app_name);
+00516 
+00517     <span class="comment">/*</span>
+00518 <span class="comment">     * Now process options normally.  </span>
+00519 <span class="comment">     */</span>
+00520     <span class="keywordflow">while</span> ((arg = getopt(argc, argv, options)) != EOF) {
+00521         <span class="keywordflow">switch</span> (arg) {
+00522         <span class="keywordflow">case</span> <span class="charliteral">'-'</span>:
+00523             <span class="keywordflow">if</span> (strcasecmp(optarg, <span class="stringliteral">"help"</span>) == 0) {
+00524                 usage(argv[0]);
+00525             }
+00526             <span class="keywordflow">if</span> (strcasecmp(optarg, <span class="stringliteral">"version"</span>) == 0) {
+00527                 version();
+00528             }
+00529 
+00530             handle_long_opt(optarg);
+00531             <span class="keywordflow">break</span>;
+00532 
+00533         <span class="keywordflow">case</span> <span class="charliteral">'a'</span>:
+00534             log_addresses++;
+00535             <span class="keywordflow">break</span>;
+00536 
+00537         <span class="keywordflow">case</span> <span class="charliteral">'A'</span>:
+00538             dont_zero_log = 1;
+00539             <span class="keywordflow">break</span>;
+00540 
+00541         <span class="keywordflow">case</span> <span class="charliteral">'c'</span>:
+00542             <span class="keywordflow">if</span> (optarg != NULL) {
+00543                 netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
+00544                                       NETSNMP_DS_LIB_OPTIONALCONFIG, optarg);
+00545             } <span class="keywordflow">else</span> {
+00546                 usage(argv[0]);
+00547             }
+00548             <span class="keywordflow">break</span>;
+00549 
+00550         <span class="keywordflow">case</span> <span class="charliteral">'C'</span>:
+00551             <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_LIBRARY_ID, 
+00552                                    NETSNMP_DS_LIB_DONT_READ_CONFIGS, 1);
+00553             <span class="keywordflow">break</span>;
+00554 
+00555         <span class="keywordflow">case</span> <span class="charliteral">'d'</span>:
+00556             snmp_set_dump_packet(++snmp_dump_packet);
+00557             <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_APPLICATION_ID, 
+00558                                    NETSNMP_DS_AGENT_VERBOSE, 1);
+00559             <span class="keywordflow">break</span>;
+00560 
+00561         <span class="keywordflow">case</span> <span class="charliteral">'D'</span>:
+00562             debug_register_tokens(optarg);
+00563             snmp_set_do_debugging(1);
+00564             <span class="keywordflow">break</span>;
+00565 
+00566         <span class="keywordflow">case</span> <span class="charliteral">'f'</span>:
+00567             dont_fork = 1;
+00568             <span class="keywordflow">break</span>;
+00569 
+00570 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00571         <span class="keywordflow">case</span> <span class="charliteral">'g'</span>:
+00572             <span class="keywordflow">if</span> (optarg != NULL) {
+00573                 netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+00574                                    NETSNMP_DS_AGENT_GROUPID, atoi(optarg));
+00575             } <span class="keywordflow">else</span> {
+00576                 usage(argv[0]);
+00577             }
+00578             <span class="keywordflow">break</span>;
+00579 <span class="preprocessor">#endif</span>
+00580 
+00581         <span class="keywordflow">case</span> <span class="charliteral">'h'</span>:
+00582             usage(argv[0]);
+00583             <span class="keywordflow">break</span>;
+00584 
+00585         <span class="keywordflow">case</span> <span class="charliteral">'H'</span>:
+00586             <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_APPLICATION_ID, 
+00587                                    NETSNMP_DS_AGENT_NO_ROOT_ACCESS, 1);
+00588             <a class="code" href="group__library.html#ga21">init_agent</a>(<span class=
+"stringliteral">"snmpd"</span>);        <span class="comment">/* register our .conf handlers */</span>
+00589             init_mib_modules();
+00590             <a class="code" href="group__library.html#ga51">init_snmp</a>(<span class="stringliteral">"snmpd"</span>);
+00591             fprintf(stderr, <span class="stringliteral">"Configuration directives understood:\n"</span>);
+00592             read_config_print_usage(<span class="stringliteral">"  "</span>);
+00593             exit(0);
+00594 
+00595         <span class="keywordflow">case</span> <span class="charliteral">'I'</span>:
+00596             <span class="keywordflow">if</span> (optarg != NULL) {
+00597                 add_to_init_list(optarg);
+00598             } <span class="keywordflow">else</span> {
+00599                 usage(argv[0]);
+00600             }
+00601             <span class="keywordflow">break</span>;
+00602 
+00603         <span class="keywordflow">case</span> <span class="charliteral">'l'</span>:
+00604             printf(<span class="stringliteral">"Warning: -l option is deprecated, use -Lf &lt;file&gt; instead\n"</span>);
+00605             <span class="keywordflow">if</span> (optarg != NULL) {
+00606                 <span class="keywordflow">if</span> (strlen(optarg) &gt; PATH_MAX) {
+00607                     fprintf(stderr,
+00608                             <span class="stringliteral">"%s: logfile path too long (limit %d chars)\n"</span>,
+00609                             argv[0], PATH_MAX);
+00610                     exit(1);
+00611                 }
+00612                 strncpy(logfile, optarg, PATH_MAX);
+00613             } <span class="keywordflow">else</span> {
+00614                 usage(argv[0]);
+00615             }
+00616             <span class="keywordflow">break</span>;
+00617 
+00618         <span class="keywordflow">case</span> <span class="charliteral">'L'</span>:
+00619             <span class="comment">/*</span>
+00620 <span class="comment">            stderr_log = 1;</span>
+00621 <span class="comment">             */</span>
+00622             <span class="keywordflow">if</span>  (snmp_log_options( optarg, argc, argv ) &lt; 0 ) {
+00623                 usage(argv[0]);
+00624             }
+00625             <span class="keywordflow">break</span>;
+00626 
+00627         <span class="keywordflow">case</span> <span class="charliteral">'m'</span>:
+00628             <span class="keywordflow">if</span> (optarg != NULL) {
+00629                 setenv(<span class="stringliteral">"MIBS"</span>, optarg, 1);
+00630             } <span class="keywordflow">else</span> {
+00631                 usage(argv[0]);
+00632             }
+00633             <span class="keywordflow">break</span>;
+00634 
+00635         <span class="keywordflow">case</span> <span class="charliteral">'M'</span>:
+00636             <span class="keywordflow">if</span> (optarg != NULL) {
+00637                 setenv(<span class="stringliteral">"MIBDIRS"</span>, optarg, 1);
+00638             } <span class="keywordflow">else</span> {
+00639                 usage(argv[0]);
+00640             }
+00641             <span class="keywordflow">break</span>;
+00642 
+00643         <span class="keywordflow">case</span> <span class="charliteral">'P'</span>:
+00644             printf(<span class="stringliteral">"Warning: -P option is deprecated, use -p instead\n"</span>);
+00645         <span class="keywordflow">case</span> <span class="charliteral">'p'</span>:
+00646             <span class="keywordflow">if</span> (optarg != NULL) {
+00647                 pid_file = optarg;
+00648             } <span class="keywordflow">else</span> {
+00649                 usage(argv[0]);
+00650             }
+00651             <span class="keywordflow">break</span>;
+00652 
+00653         <span class="keywordflow">case</span> <span class="charliteral">'q'</span>:
+00654             snmp_set_quick_print(1);
+00655             <span class="keywordflow">break</span>;
+00656 
+00657         <span class="keywordflow">case</span> <span class="charliteral">'r'</span>:
+00658             netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID, 
+00659                                       NETSNMP_DS_AGENT_NO_ROOT_ACCESS);
+00660             <span class="keywordflow">break</span>;
+00661 
+00662         <span class="keywordflow">case</span> <span class="charliteral">'s'</span>:
+00663             printf(<span class="stringliteral">"Warning: -s option is deprecated, use -Lsd instead\n"</span>);
+00664             syslog_log = 1;
+00665             <span class="keywordflow">break</span>;
+00666 
+00667         <span class="keywordflow">case</span> <span class="charliteral">'S'</span>:
+00668             printf(<span class=
+"stringliteral">"Warning: -S option is deprecated, use -Ls &lt;facility&gt; instead\n"</span>);
+00669             <span class="keywordflow">if</span> (optarg != NULL) {
+00670                 <span class="keywordflow">switch</span> (*optarg) {
+00671                 <span class="keywordflow">case</span> <span class="charliteral">'d'</span>:
+00672                 <span class="keywordflow">case</span> <span class="charliteral">'D'</span>:
+00673                     Facility = LOG_DAEMON;
+00674                     <span class="keywordflow">break</span>;
+00675                 <span class="keywordflow">case</span> <span class="charliteral">'i'</span>:
+00676                 <span class="keywordflow">case</span> <span class="charliteral">'I'</span>:
+00677                     Facility = LOG_INFO;
+00678                     <span class="keywordflow">break</span>;
+00679                 <span class="keywordflow">case</span> <span class="charliteral">'0'</span>:
+00680                     Facility = LOG_LOCAL0;
+00681                     <span class="keywordflow">break</span>;
+00682                 <span class="keywordflow">case</span> <span class="charliteral">'1'</span>:
+00683                     Facility = LOG_LOCAL1;
+00684                     <span class="keywordflow">break</span>;
+00685                 <span class="keywordflow">case</span> <span class="charliteral">'2'</span>:
+00686                     Facility = LOG_LOCAL2;
+00687                     <span class="keywordflow">break</span>;
+00688                 <span class="keywordflow">case</span> <span class="charliteral">'3'</span>:
+00689                     Facility = LOG_LOCAL3;
+00690                     <span class="keywordflow">break</span>;
+00691                 <span class="keywordflow">case</span> <span class="charliteral">'4'</span>:
+00692                     Facility = LOG_LOCAL4;
+00693                     <span class="keywordflow">break</span>;
+00694                 <span class="keywordflow">case</span> <span class="charliteral">'5'</span>:
+00695                     Facility = LOG_LOCAL5;
+00696                     <span class="keywordflow">break</span>;
+00697                 <span class="keywordflow">case</span> <span class="charliteral">'6'</span>:
+00698                     Facility = LOG_LOCAL6;
+00699                     <span class="keywordflow">break</span>;
+00700                 <span class="keywordflow">case</span> <span class="charliteral">'7'</span>:
+00701                     Facility = LOG_LOCAL7;
+00702                     <span class="keywordflow">break</span>;
+00703                 <span class="keywordflow">default</span>:
+00704                     fprintf(stderr, <span class="stringliteral">"invalid syslog facility: -S%c\n"</span>,*optarg);
+00705                     usage(argv[0]);
+00706                 }
+00707             } <span class="keywordflow">else</span> {
+00708                 fprintf(stderr, <span class="stringliteral">"no syslog facility specified\n"</span>);
+00709                 usage(argv[0]);
+00710             }
+00711             <span class="keywordflow">break</span>;
+00712 
+00713         <span class="keywordflow">case</span> <span class="charliteral">'U'</span>:
+00714             netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID, 
+00715                                       NETSNMP_DS_AGENT_LEAVE_PIDFILE);
+00716             <span class="keywordflow">break</span>;
+00717 
+00718 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00719         <span class="keywordflow">case</span> <span class="charliteral">'u'</span>:
+00720             <span class="keywordflow">if</span> (optarg != NULL) {
+00721                 <span class="keywordtype">char</span>           *ecp;
+00722                 <span class="keywordtype">int</span>             uid;
+00723 
+00724                 uid = strtoul(optarg, &amp;ecp, 10);
+00725                 <span class="keywordflow">if</span> (*ecp) {
+00726 <span class="preprocessor">#if HAVE_GETPWNAM &amp;&amp; HAVE_PWD_H</span>
+00727                     <span class="keyword">struct </span>passwd  *info;
+00728                     info = getpwnam(optarg);
+00729                     <span class="keywordflow">if</span> (info) {
+00730                         uid = info-&gt;pw_uid;
+00731                     } <span class="keywordflow">else</span> {
+00732 <span class="preprocessor">#endif</span>
+00733                         fprintf(stderr, <span class="stringliteral">"Bad user id: %s\n"</span>, optarg);
+00734                         exit(1);
+00735 <span class="preprocessor">#if HAVE_GETPWNAM &amp;&amp; HAVE_PWD_H</span>
+00736                     }
+00737 <span class="preprocessor">#endif</span>
+00738                 }
+00739                 netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID, 
+00740                                    NETSNMP_DS_AGENT_USERID, uid);
+00741             } <span class="keywordflow">else</span> {
+00742                 usage(argv[0]);
+00743             }
+00744             <span class="keywordflow">break</span>;
+00745 <span class="preprocessor">#endif</span>
+00746 
+00747         <span class="keywordflow">case</span> <span class="charliteral">'v'</span>:
+00748             version();
+00749 
+00750         <span class="keywordflow">case</span> <span class="charliteral">'V'</span>:
+00751             <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_APPLICATION_ID, 
+00752                                    NETSNMP_DS_AGENT_VERBOSE, 1);
+00753             <span class="keywordflow">break</span>;
+00754 
+00755 <span class="preprocessor">#if defined(USING_AGENTX_SUBAGENT_MODULE)|| defined(USING_AGENTX_MASTER_MODULE)</span>
+00756         <span class="keywordflow">case</span> <span class="charliteral">'x'</span>:
+00757             <span class="keywordflow">if</span> (optarg != NULL) {
+00758                 netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, 
+00759                                       NETSNMP_DS_AGENT_X_SOCKET, optarg);
+00760             } <span class="keywordflow">else</span> {
+00761                 usage(argv[0]);
+00762             }
+00763             <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_APPLICATION_ID, 
+00764                                    NETSNMP_DS_AGENT_AGENTX_MASTER, 1);
+00765             <span class="keywordflow">break</span>;
+00766 <span class="preprocessor">#endif</span>
+00767 
+00768         <span class="keywordflow">case</span> <span class="charliteral">'X'</span>:
+00769 <span class="preprocessor">#if defined(USING_AGENTX_SUBAGENT_MODULE)</span>
+00770             agent_mode = SUB_AGENT;
+00771 <span class="preprocessor">#else</span>
+00772             fprintf(stderr, <span class="stringliteral">"%s: Illegal argument -X:"</span>
+00773                             <span class="stringliteral">"AgentX support not compiled in.\n"</span>, argv[0]);
+00774             usage(argv[0]);
+00775             exit(1);
+00776 <span class="preprocessor">#endif</span>
+00777             <span class="keywordflow">break</span>;
+00778 
+00779         <span class="keywordflow">default</span>:
+00780             usage(argv[0]);
+00781             <span class="keywordflow">break</span>;
+00782         }
+00783     }
+00784 
+00785     <span class="keywordflow">if</span> (optind &lt; argc) {
+00786         <span class="comment">/*</span>
+00787 <span class="comment">         * There are optional transport addresses on the command line.  </span>
+00788 <span class="comment">         */</span>
+00789         DEBUGMSGTL((<span class="stringliteral">"snmpd/main"</span>, <span class=
+"stringliteral">"optind %d, argc %d\n"</span>, optind, argc));
+00790         <span class="keywordflow">for</span> (i = optind; i &lt; argc; i++) {
+00791             <span class="keywordtype">char</span> *c, *astring;
+00792             <span class="keywordflow">if</span> ((c = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
+00793                                            NETSNMP_DS_AGENT_PORTS))) {
+00794                 astring = malloc(strlen(c) + 2 + strlen(argv[i]));
+00795                 <span class="keywordflow">if</span> (astring == NULL) {
+00796                     fprintf(stderr, <span class="stringliteral">"malloc failure processing argv[%d]\n"</span>, i);
+00797                     exit(1);
+00798                 }
+00799                 sprintf(astring, <span class="stringliteral">"%s,%s"</span>, c, argv[i]);
+00800                 netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, 
+00801                                       NETSNMP_DS_AGENT_PORTS, astring);
+00802                 <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(astring);
+00803             } <span class="keywordflow">else</span> {
+00804                 netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, 
+00805                                       NETSNMP_DS_AGENT_PORTS, argv[i]);
+00806             }
+00807         }
+00808         DEBUGMSGTL((<span class="stringliteral">"snmpd/main"</span>, <span class="stringliteral">"port spec: %s\n"</span>,
+00809                     netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
+00810                                           NETSNMP_DS_AGENT_PORTS)));
+00811     }
+00812 
+00813     setup_log(0, dont_zero_log, stderr_log, syslog_log, logfile);
+00814 
+00815     <span class="comment">/*</span>
+00816 <span class="comment">     * Initialize a argv set to the current for restarting the agent.   </span>
+00817 <span class="comment">     */</span>
+00818     argvrestartp = (<span class="keywordtype">char</span> **)malloc((argc + 2) * <span class=
+"keyword">sizeof</span>(<span class="keywordtype">char</span> *));
+00819     argvptr = argvrestartp;
+00820     <span class="keywordflow">for</span> (i = 0, ret = 1; i &lt; argc; i++) {
+00821         ret += strlen(argv[i]) + 1;
+00822     }
+00823     argvrestart = (<span class="keywordtype">char</span> *) malloc(ret);
+00824     argvrestartname = (<span class="keywordtype">char</span> *) malloc(strlen(argv[0]) + 1);
+00825     <span class="keywordflow">if</span> (!argvrestartp || !argvrestart || !argvrestartname) {
+00826         fprintf(stderr, <span class="stringliteral">"malloc failure processing argvrestart\n"</span>);
+00827         exit(1);
+00828     }
+00829     strcpy(argvrestartname, argv[0]);
+00830     <span class="keywordflow">if</span> (agent_mode == -1) {
+00831         <span class="keywordflow">if</span> (strstr(argvrestartname, <span class=
+"stringliteral">"agentxd"</span>) != NULL) {
+00832             <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_APPLICATION_ID, 
+00833                                    NETSNMP_DS_AGENT_ROLE, SUB_AGENT);
+00834         } <span class="keywordflow">else</span> {
+00835             <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_APPLICATION_ID, 
+00836                                    NETSNMP_DS_AGENT_ROLE, MASTER_AGENT);
+00837         }
+00838     } <span class="keywordflow">else</span> {
+00839         <a class="code" href="group__default__store.html#ga8">netsnmp_ds_set_boolean</a>(NETSNMP_DS_APPLICATION_ID, 
+00840                                NETSNMP_DS_AGENT_ROLE, agent_mode);
+00841     }
+00842 
+00843     <span class="keywordflow">for</span> (cptr = argvrestart, i = 0; i &lt; argc; i++) {
+00844         strcpy(cptr, argv[i]);
+00845         *(argvptr++) = cptr;
+00846         cptr += strlen(argv[i]) + 1;
+00847     }
+00848     *cptr = 0;
+00849     *argvptr = NULL;
+00850 
+00851 <span class="preprocessor">#ifdef BUFSIZ</span>
+00852     setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
+00853 <span class="preprocessor">#endif</span>
+00854     <span class="comment">/*</span>
+00855 <span class="comment">     * Initialize the world.  Detach from the shell.  Create initial user.  </span>
+00856 <span class="comment">     */</span>
+00857     <span class="keywordflow">if</span>(!dont_fork) {
+00858         <span class="keywordtype">int</span> quit = ! netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+00859                                             NETSNMP_DS_AGENT_QUIT_IMMEDIATELY);
+00860         ret = netsnmp_daemonize(quit, stderr_log);
+00861         <span class="comment">/*</span>
+00862 <span class="comment">         * xxx-rks: do we care if fork fails? I think we should...</span>
+00863 <span class="comment">         */</span>
+00864         <span class="keywordflow">if</span>(ret != 0)
+00865             Exit(1);                <span class="comment">/*  Exit logs exit val for us  */</span>
+00866     }
+00867 
+00868     SOCK_STARTUP;
+00869     <a class="code" href="group__library.html#ga21">init_agent</a>(<span class=
+"stringliteral">"snmpd"</span>);        <span class="comment">/* do what we need to do first. */</span>
+00870     init_mib_modules();
+00871 
+00872     <span class="comment">/*</span>
+00873 <span class="comment">     * start library </span>
+00874 <span class="comment">     */</span>
+00875     <a class="code" href="group__library.html#ga51">init_snmp</a>(<span class="stringliteral">"snmpd"</span>);
+00876 
+00877     <span class="keywordflow">if</span> ((ret = init_master_agent()) != 0) {
+00878         <span class="comment">/*</span>
+00879 <span class="comment">         * Some error opening one of the specified agent transports.  </span>
+00880 <span class="comment">         */</span>
+00881         Exit(1);                <span class="comment">/*  Exit logs exit val for us  */</span>
+00882     }
+00883 <span class="preprocessor">#ifdef SIGTERM</span>
+00884     DEBUGMSGTL((<span class="stringliteral">"signal"</span>, <span class=
+"stringliteral">"registering SIGTERM signal handler\n"</span>));
+00885     signal(SIGTERM, SnmpdShutDown);
+00886 <span class="preprocessor">#endif</span>
+00887 <span class="preprocessor">#ifdef SIGINT</span>
+00888     DEBUGMSGTL((<span class="stringliteral">"signal"</span>, <span class=
+"stringliteral">"registering SIGINT signal handler\n"</span>));
+00889     signal(SIGINT, SnmpdShutDown);
+00890 <span class="preprocessor">#endif</span>
+00891 <span class="preprocessor">#ifdef SIGHUP</span>
+00892     DEBUGMSGTL((<span class="stringliteral">"signal"</span>, <span class=
+"stringliteral">"registering SIGHUP signal handler\n"</span>));
+00893     signal(SIGHUP, SnmpdReconfig);
+00894 <span class="preprocessor">#endif</span>
+00895 <span class="preprocessor">#ifdef SIGUSR1</span>
+00896     DEBUGMSGTL((<span class="stringliteral">"signal"</span>, <span class=
+"stringliteral">"registering SIGUSR1 signal handler\n"</span>));
+00897     signal(SIGUSR1, SnmpdDump);
+00898 <span class="preprocessor">#endif</span>
+00899 <span class="preprocessor">#ifdef SIGPIPE</span>
+00900     DEBUGMSGTL((<span class="stringliteral">"signal"</span>, <span class=
+"stringliteral">"registering SIGPIPE signal handler\n"</span>));
+00901     signal(SIGPIPE, SIG_IGN);   <span class="comment">/* 'Inline' failure of wayward readers */</span>
+00902 <span class="preprocessor">#endif</span>
+00903 <span class="preprocessor">#ifdef SIGXFSZ</span>
+00904     signal(SIGXFSZ, SnmpdCatchRandomSignal);
+00905 <span class="preprocessor">#endif</span>
+00906 
+00907     <span class="comment">/*</span>
+00908 <span class="comment">     * Store persistent data immediately in case we crash later.  </span>
+00909 <span class="comment">     */</span>
+00910     snmp_store(<span class="stringliteral">"snmpd"</span>);
+00911 
+00912     <span class="comment">/*</span>
+00913 <span class="comment">     * Send coldstart trap if possible.  </span>
+00914 <span class="comment">     */</span>
+00915     <a class="code" href="group__agent__trap.html#ga43">send_easy_trap</a>(0, 0);
+00916 
+00917 <span class="preprocessor">#if HAVE_GETPID</span>
+00918     <span class="keywordflow">if</span> (pid_file != NULL) {
+00919         <span class="comment">/*</span>
+00920 <span class="comment">         * unlink the pid_file, if it exists, prior to open.  Without</span>
+00921 <span class="comment">         * doing this the open will fail if the user specified pid_file</span>
+00922 <span class="comment">         * already exists.</span>
+00923 <span class="comment">         */</span>
+00924         unlink(pid_file);
+00925         fd = open(pid_file, O_CREAT | O_EXCL | O_WRONLY, 0600);
+00926         <span class="keywordflow">if</span> (fd == -1) {
+00927             snmp_log_perror(pid_file);
+00928             <span class="keywordflow">if</span> (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00929                                         NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+00930                 exit(1);
+00931             }
+00932         } <span class="keywordflow">else</span> {
+00933             <span class="keywordflow">if</span> ((PID = fdopen(fd, <span class="stringliteral">"w"</span>)) == NULL) {
+00934                 snmp_log_perror(pid_file);
+00935                 exit(1);
+00936             } <span class="keywordflow">else</span> {
+00937                 fprintf(PID, <span class="stringliteral">"%d\n"</span>, (<span class="keywordtype">int</span>) getpid());
+00938                 fclose(PID);
+00939             }
+00940             close(fd);
+00941         }
+00942     }
+00943 <span class="preprocessor">#endif</span>
+00944 
+00945 <span class="preprocessor">#if HAVE_UNISTD_H</span>
+00946 <span class="preprocessor">#ifdef HAVE_SETGID</span>
+00947     <span class="keywordflow">if</span> ((gid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
+00948                                   NETSNMP_DS_AGENT_GROUPID)) != 0) {
+00949         DEBUGMSGTL((<span class="stringliteral">"snmpd/main"</span>, <span class=
+"stringliteral">"Changing gid to %d.\n"</span>, gid));
+00950         <span class="keywordflow">if</span> (setgid(gid) == -1
+00951 <span class="preprocessor">#ifdef HAVE_SETGROUPS</span>
+00952             || setgroups(1, (gid_t *)&amp;gid) == -1
+00953 <span class="preprocessor">#endif</span>
+00954             ) {
+00955             snmp_log_perror(<span class="stringliteral">"setgid failed"</span>);
+00956             <span class="keywordflow">if</span> (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00957                                         NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+00958                 exit(1);
+00959             }
+00960         }
+00961     }
+00962 <span class="preprocessor">#endif</span>
+00963 <span class="preprocessor">#ifdef HAVE_SETUID</span>
+00964     <span class="keywordflow">if</span> ((uid = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, 
+00965                                   NETSNMP_DS_AGENT_USERID)) != 0) {
+00966         DEBUGMSGTL((<span class="stringliteral">"snmpd/main"</span>, <span class=
+"stringliteral">"Changing uid to %d.\n"</span>, uid));
+00967         <span class="keywordflow">if</span> (setuid(uid) == -1) {
+00968             snmp_log_perror(<span class="stringliteral">"setuid failed"</span>);
+00969             <span class="keywordflow">if</span> (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00970                                         NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
+00971                 exit(1);
+00972             }
+00973         }
+00974     }
+00975 <span class="preprocessor">#endif</span>
+00976 <span class="preprocessor">#endif</span>
+00977 
+00978     <span class="comment">/*</span>
+00979 <span class="comment">     * We're up, log our version number.  </span>
+00980 <span class="comment">     */</span>
+00981     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_INFO, <span class=
+"stringliteral">"NET-SNMP version %s\n"</span>, netsnmp_get_version());
+00982 <span class="preprocessor">#ifdef WIN32SERVICE</span>
+00983     agent_status = AGENT_RUNNING;
+00984 <span class="preprocessor">#endif</span>
+00985     netsnmp_addrcache_initialise();
+00986 
+00987     <span class="comment">/*</span>
+00988 <span class="comment">     * Forever monitor the dest_port for incoming PDUs.  </span>
+00989 <span class="comment">     */</span>
+00990     DEBUGMSGTL((<span class="stringliteral">"snmpd/main"</span>, <span class=
+"stringliteral">"We're up.  Starting to process data.\n"</span>));
+00991     <span class="keywordflow">if</span> (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+00992                                 NETSNMP_DS_AGENT_QUIT_IMMEDIATELY))
+00993         receive();
+00994 <span class="preprocessor">#include "mib_module_shutdown.h"</span>
+00995     DEBUGMSGTL((<span class="stringliteral">"snmpd/main"</span>, <span class=
+"stringliteral">"sending shutdown trap\n"</span>));
+00996     SnmpTrapNodeDown();
+00997     DEBUGMSGTL((<span class="stringliteral">"snmpd/main"</span>, <span class="stringliteral">"Bye...\n"</span>));
+00998     <a class="code" href="group__library.html#ga53">snmp_shutdown</a>(<span class="stringliteral">"snmpd"</span>);
+00999 <span class="preprocessor">#ifdef SHUTDOWN_AGENT_CLEANLY </span><span class="comment">/* broken code */</span>
+01000     <span class="comment">/* these attempt to free all known memory, but result in double frees */</span>
+01001     shutdown_master_agent();
+01002     shutdown_agent();
+01003 <span class="preprocessor">#endif</span>
+01004 
+01005     <span class="keywordflow">if</span> (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+01006                                 NETSNMP_DS_AGENT_LEAVE_PIDFILE) &amp;&amp;
+01007         (pid_file != NULL)) {
+01008         unlink(pid_file);
+01009     }
+01010 <span class="preprocessor">#ifdef WIN32SERVICE</span>
+01011     agent_status = AGENT_STOPPED;
+01012 <span class="preprocessor">#endif</span>
+01013 
+01014     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(argvrestartname);
+01015     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(argvrestart);
+01016     <a class="code" href="group__util.html#ga36">SNMP_FREE</a>(argvrestartp);
+01017     <span class="keywordflow">return</span> 0;
+01018 }                               <span class="comment">/* End main() -- snmpd */</span>
+01019 
+01020 <span class="comment">/*******************************************************************-o-******</span>
+01021 <span class="comment"> * receive</span>
+01022 <span class="comment"> *</span>
+01023 <span class="comment"> * Parameters:</span>
+01024 <span class="comment"> *      </span>
+01025 <span class="comment"> * Returns:</span>
+01026 <span class="comment"> *      0       On success.</span>
+01027 <span class="comment"> *      -1      System error.</span>
+01028 <span class="comment"> *</span>
+01029 <span class="comment"> * Infinite while-loop which monitors incoming messges for the agent.</span>
+01030 <span class="comment"> * Invoke the established message handlers for incoming messages on a per</span>
+01031 <span class="comment"> * port basis.  Handle timeouts.</span>
+01032 <span class="comment"> */</span>
+01033 <span class="keyword">static</span> <span class="keywordtype">int</span>
+01034 receive(<span class="keywordtype">void</span>)
+01035 {
+01036     <span class="keywordtype">int</span>             numfds;
+01037     fd_set          readfds, writefds, exceptfds;
+01038     <span class="keyword">struct </span>timeval  timeout, *tvp = &amp;timeout;
+01039     <span class="keywordtype">int</span>             count, block, i;
+01040 <span class="preprocessor">#ifdef  USING_SMUX_MODULE</span>
+01041     <span class="keywordtype">int</span>             sd;
+01042 <span class="preprocessor">#endif                          </span><span class="comment">/* USING_SMUX_MODULE */</span>
+01043 
+01044     <span class="comment">/*</span>
+01045 <span class="comment">     * Loop-forever: execute message handlers for sockets with data</span>
+01046 <span class="comment">     */</span>
+01047     <span class="keywordflow">while</span> (running) {
+01048         <span class="keywordflow">if</span> (reconfig) {
+01049             reconfig = 0;
+01050             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_INFO, <span class=
+"stringliteral">"Reconfiguring daemon\n"</span>);
+01051             <span class="comment">/*  Stop and restart logging.  This allows logfiles to be</span>
+01052 <span class="comment">                rotated etc.  */</span>
+01053             snmp_disable_log();
+01054             setup_log(1, 0, 0, 0, NULL);
+01055             <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_INFO, <span class=
+"stringliteral">"NET-SNMP version %s restarted\n"</span>,
+01056                      netsnmp_get_version());
+01057             update_config();
+01058             <a class="code" href="group__agent__trap.html#ga43">send_easy_trap</a>(SNMP_TRAP_ENTERPRISESPECIFIC, 3);
+01059         }
+01060 
+01061         <span class="keywordflow">for</span> (i = 0; i &lt; NUM_EXTERNAL_SIGS; i++) {
+01062             <span class="keywordflow">if</span> (external_signal_scheduled[i]) {
+01063                 external_signal_scheduled[i]--;
+01064                 external_signal_handler[i](i);
+01065             }
+01066         }
+01067 
+01068         <span class="comment">/*</span>
+01069 <span class="comment">         * default to sleeping for a really long time</span>
+01070 <span class="comment">         */</span>
+01071         tvp = &amp;timeout;
+01072         tvp-&gt;tv_sec = LONG_MAX;
+01073         tvp-&gt;tv_usec = 0;
+01074 
+01075         numfds = 0;
+01076         FD_ZERO(&amp;readfds);
+01077         FD_ZERO(&amp;writefds);
+01078         FD_ZERO(&amp;exceptfds);
+01079         block = 0;
+01080         snmp_select_info(&amp;numfds, &amp;readfds, tvp, &amp;block);
+01081         <span class="keywordflow">if</span> (block == 1) {
+01082             tvp = NULL;         <span class="comment">/* block without timeout */</span>
+01083         }
+01084 
+01085 <span class="preprocessor">#ifdef  USING_SMUX_MODULE</span>
+01086         <span class="keywordflow">if</span> (smux_listen_sd &gt;= 0) {
+01087             FD_SET(smux_listen_sd, &amp;readfds);
+01088             numfds =
+01089                 smux_listen_sd &gt;= numfds ? smux_listen_sd + 1 : numfds;
+01090             <span class="keywordflow">for</span> (i = 0; i &lt; sdlen; i++) {
+01091                 FD_SET(sdlist[i], &amp;readfds);
+01092                 numfds = sdlist[i] &gt;= numfds ? sdlist[i] + 1 : numfds;
+01093             }
+01094         }
+01095 <span class="preprocessor">#endif                          </span><span class="comment">/* USING_SMUX_MODULE */</span>
+01096 
+01097         <span class="keywordflow">for</span> (i = 0; i &lt; external_readfdlen; i++) {
+01098             FD_SET(external_readfd[i], &amp;readfds);
+01099             <span class="keywordflow">if</span> (external_readfd[i] &gt;= numfds)
+01100                 numfds = external_readfd[i] + 1;
+01101         }
+01102         <span class="keywordflow">for</span> (i = 0; i &lt; external_writefdlen; i++) {
+01103             FD_SET(external_writefd[i], &amp;writefds);
+01104             <span class="keywordflow">if</span> (external_writefd[i] &gt;= numfds)
+01105                 numfds = external_writefd[i] + 1;
+01106         }
+01107         <span class="keywordflow">for</span> (i = 0; i &lt; external_exceptfdlen; i++) {
+01108             FD_SET(external_exceptfd[i], &amp;exceptfds);
+01109             <span class="keywordflow">if</span> (external_exceptfd[i] &gt;= numfds)
+01110                 numfds = external_exceptfd[i] + 1;
+01111         }
+01112 
+01113     reselect:
+01114         DEBUGMSGTL((<span class="stringliteral">"snmpd/select"</span>, <span class=
+"stringliteral">"select( numfds=%d, ..., tvp=%p)\n"</span>,
+01115                     numfds, tvp));
+01116         <span class="keywordflow">if</span>(tvp)
+01117             DEBUGMSGTL((<span class="stringliteral">"timer"</span>, <span class=
+"stringliteral">"tvp %d.%d\n"</span>, tvp-&gt;tv_sec, tvp-&gt;tv_usec));
+01118         count = select(numfds, &amp;readfds, &amp;writefds, &amp;exceptfds, tvp);
+01119         DEBUGMSGTL((<span class="stringliteral">"snmpd/select"</span>, <span class=
+"stringliteral">"returned, count = %d\n"</span>, count));
+01120 
+01121         <span class="keywordflow">if</span> (count &gt; 0) {
+01122 
+01123 <span class="preprocessor">#ifdef USING_SMUX_MODULE</span>
+01124             <span class="comment">/*</span>
+01125 <span class="comment">             * handle the SMUX sd's </span>
+01126 <span class="comment">             */</span>
+01127             <span class="keywordflow">if</span> (smux_listen_sd &gt;= 0) {
+01128                 <span class="keywordflow">for</span> (i = 0; i &lt; sdlen; i++) {
+01129                     <span class="keywordflow">if</span> (FD_ISSET(sdlist[i], &amp;readfds)) {
+01130                         <span class="keywordflow">if</span> (smux_process(sdlist[i]) &lt; 0) {
+01131                             <span class="keywordflow">for</span> (; i &lt; (sdlen - 1); i++) {
+01132                                 sdlist[i] = sdlist[i + 1];
+01133                             }
+01134                             sdlen--;
+01135                         }
+01136                     }
+01137                 }
+01138                 <span class="comment">/*</span>
+01139 <span class="comment">                 * new connection </span>
+01140 <span class="comment">                 */</span>
+01141                 <span class="keywordflow">if</span> (FD_ISSET(smux_listen_sd, &amp;readfds)) {
+01142                     <span class="keywordflow">if</span> ((sd = smux_accept(smux_listen_sd)) &gt;= 0) {
+01143                         sdlist[sdlen++] = sd;
+01144                     }
+01145                 }
+01146             }
+01147 <span class="preprocessor">#endif                          </span><span class="comment">/* USING_SMUX_MODULE */</span>
+01148 
+01149             snmp_read(&amp;readfds);
+01150 
+01151             <span class="keywordflow">for</span> (i = 0; count &amp;&amp; (i &lt; external_readfdlen); i++) {
+01152                 <span class="keywordflow">if</span> (FD_ISSET(external_readfd[i], &amp;readfds)) {
+01153                     DEBUGMSGTL((<span class="stringliteral">"snmpd/select"</span>, <span class=
+"stringliteral">"readfd[%d] = %d\n"</span>,
+01154                                 i, external_readfd[i]));
+01155                     external_readfdfunc[i] (external_readfd[i],
+01156                                             external_readfd_data[i]);
+01157                     FD_CLR(external_readfd[i], &amp;readfds);
+01158                     count--;
+01159                 }
+01160             }
+01161             <span class="keywordflow">for</span> (i = 0; count &amp;&amp; (i &lt; external_writefdlen); i++) {
+01162                 <span class="keywordflow">if</span> (FD_ISSET(external_writefd[i], &amp;writefds)) {
+01163                     DEBUGMSGTL((<span class="stringliteral">"snmpd/select"</span>, <span class=
+"stringliteral">"writefd[%d] = %d\n"</span>,
+01164                                 i, external_writefd[i]));
+01165                     external_writefdfunc[i] (external_writefd[i],
+01166                                              external_writefd_data[i]);
+01167                     FD_CLR(external_writefd[i], &amp;writefds);
+01168                     count--;
+01169                 }
+01170             }
+01171             <span class="keywordflow">for</span> (i = 0; count &amp;&amp; (i &lt; external_exceptfdlen); i++) {
+01172                 <span class="keywordflow">if</span> (FD_ISSET(external_exceptfd[i], &amp;exceptfds)) {
+01173                     DEBUGMSGTL((<span class="stringliteral">"snmpd/select"</span>, <span class=
+"stringliteral">"exceptfd[%d] = %d\n"</span>,
+01174                                 i, external_exceptfd[i]));
+01175                     external_exceptfdfunc[i] (external_exceptfd[i],
+01176                                               external_exceptfd_data[i]);
+01177                     FD_CLR(external_exceptfd[i], &amp;exceptfds);
+01178                     count--;
+01179                 }
+01180             }
+01181 
+01182         } <span class="keywordflow">else</span>
+01183             <span class="keywordflow">switch</span> (count) {
+01184             <span class="keywordflow">case</span> 0:
+01185                 snmp_timeout();
+01186                 <span class="keywordflow">break</span>;
+01187             <span class="keywordflow">case</span> -1:
+01188                 DEBUGMSGTL((<span class="stringliteral">"snmpd/select"</span>, <span class=
+"stringliteral">"  errno = %d\n"</span>, errno));
+01189                 <span class="keywordflow">if</span> (errno == EINTR) {
+01190                     <span class="comment">/*</span>
+01191 <span class="comment">                     * likely that we got a signal. Check our special signal</span>
+01192 <span class="comment">                     * flags before retrying select.</span>
+01193 <span class="comment">                     */</span>
+01194                     <span class="keywordflow">if</span> (running &amp;&amp; !reconfig) {
+01195                         <span class="keywordflow">goto</span> reselect;
+01196                     }
+01197                     <span class="keywordflow">continue</span>;
+01198                 } <span class="keywordflow">else</span> {
+01199                     snmp_log_perror(<span class="stringliteral">"select"</span>);
+01200                 }
+01201                 <span class="keywordflow">return</span> -1;
+01202             <span class="keywordflow">default</span>:
+01203                 <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_ERR, <span class=
+"stringliteral">"select returned %d\n"</span>, count);
+01204                 <span class="keywordflow">return</span> -1;
+01205             }                   <span class="comment">/* endif -- count&gt;0 */</span>
+01206 
+01207         <span class="comment">/*</span>
+01208 <span class="comment">         * run requested alarms </span>
+01209 <span class="comment">         */</span>
+01210         run_alarms();
+01211 
+01212         netsnmp_check_outstanding_agent_requests();
+01213 
+01214     }                           <span class="comment">/* endwhile */</span>
+01215 
+01216     <a class="code" href="group__snmp__logging.html#ga39">snmp_log</a>(LOG_INFO, <span class=
+"stringliteral">"Received TERM or STOP signal...  shutting down...\n"</span>);
+01217     <span class="keywordflow">return</span> 0;
+01218 
+01219 }                               <span class="comment">/* end receive() */</span>
+01220 
+01221 
+01222 
+01223 <span class="comment">/*******************************************************************-o-******</span>
+01224 <span class="comment"> * snmp_input</span>
+01225 <span class="comment"> *</span>
+01226 <span class="comment"> * Parameters:</span>
+01227 <span class="comment"> *       op</span>
+01228 <span class="comment"> *      *session</span>
+01229 <span class="comment"> *       requid</span>
+01230 <span class="comment"> *      *pdu</span>
+01231 <span class="comment"> *      *magic</span>
+01232 <span class="comment"> *      </span>
+01233 <span class="comment"> * Returns:</span>
+01234 <span class="comment"> *      1               On success      -OR-</span>
+01235 <span class="comment"> *      Passes through  Return from alarmGetResponse() when </span>
+01236 <span class="comment"> *                        USING_V2PARTY_ALARM_MODULE is defined.</span>
+01237 <span class="comment"> *</span>
+01238 <span class="comment"> * Call-back function to manage responses to traps (informs) and alarms.</span>
+01239 <span class="comment"> * Not used by the agent to process other Response PDUs.</span>
+01240 <span class="comment"> */</span>
+01241 <span class="keywordtype">int</span>
+01242 snmp_input(<span class="keywordtype">int</span> op,
+01243            <a class="code" href="structsnmp__session.html">netsnmp_session</a> * session,
+01244            <span class="keywordtype">int</span> reqid, <a class="code" href=
+"structsnmp__pdu.html">netsnmp_pdu</a> *pdu, <span class="keywordtype">void</span> *magic)
+01245 {
+01246     <span class="keyword">struct </span>get_req_state *state = (<span class="keyword">struct </span>get_req_state *) magic;
+01247 
+01248     <span class="keywordflow">if</span> (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+01249         <span class="keywordflow">if</span> (pdu-&gt;<a class="code" href=
+"structsnmp__pdu.html#o1">command</a> == SNMP_MSG_GET) {
+01250             <span class="keywordflow">if</span> (state-&gt;type == EVENT_GET_REQ) {
+01251                 <span class="comment">/*</span>
+01252 <span class="comment">                 * this is just the ack to our inform pdu </span>
+01253 <span class="comment">                 */</span>
+01254                 <span class="keywordflow">return</span> 1;
+01255             }
+01256         }
+01257     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (op == NETSNMP_CALLBACK_OP_TIMED_OUT) {
+01258         <span class="keywordflow">if</span> (state-&gt;type == ALARM_GET_REQ) {
+01259             <span class="comment">/*</span>
+01260 <span class="comment">             * Need a mechanism to replace obsolete SNMPv2p alarm </span>
+01261 <span class="comment">             */</span>
+01262         }
+01263     }
+01264     <span class="keywordflow">return</span> 1;
+01265 
+01266 }                               <span class="comment">/* end snmp_input() */</span>
+01267 
+01268 
+01269 
+01270 <span class="comment">/*</span>
+01271 <span class="comment"> * Windows Service Related functions </span>
+01272 <span class="comment"> */</span>
+01273 <span class="preprocessor">#ifdef WIN32SERVICE</span>
+01274 <span class="comment">/************************************************************</span>
+01275 <span class="comment">* main function for Windows</span>
+01276 <span class="comment">* Parse command line arguments for startup options,</span>
+01277 <span class="comment">* to start as service or console mode application in windows.</span>
+01278 <span class="comment">* Invokes appropriate startup functions depending on the </span>
+01279 <span class="comment">* parameters passed</span>
+01280 <span class="comment">*************************************************************/</span>
+01281 <span class="keywordtype">int</span>
+01282     __cdecl
+01283 _tmain(<span class="keywordtype">int</span> argc, TCHAR * argv[])
+01284 {
+01285     <span class="comment">/*</span>
+01286 <span class="comment">     * Define Service Name and Description, which appears in windows SCM </span>
+01287 <span class="comment">     */</span>
+01288     LPCTSTR         lpszServiceName = app_name;      <span class="comment">/* Service Registry Name */</span>
+01289     LPCTSTR         lpszServiceDisplayName = _T(<span class="stringliteral">"Net-SNMP Agent"</span>);       <span class=
+"comment">/* Display Name */</span>
+01290     LPCTSTR         lpszServiceDescription =
+01291 <span class="preprocessor">#ifdef IFDESCR</span>
+01292         _T(<span class=
+"stringliteral">"SNMPv2c / SNMPv3 command responder from Net-SNMP. Supports MIB objects for IP,ICMP,TCP,UDP, and network interface sub-layers."</span>);
+01293 <span class="preprocessor">#else</span>
+01294         _T(<span class="stringliteral">"SNMPv2c / SNMPv3 command responder from Net-SNMP"</span>);
+01295 <span class="preprocessor">#endif</span>
+01296     InputParams     InputOptions;
+01297 
+01298 
+01299     <span class="keywordtype">int</span>             nRunType = RUN_AS_CONSOLE;
+01300     <span class="keywordtype">int</span>             quiet = 0;
+01301     
+01302     nRunType = ParseCmdLineForServiceOption(argc, argv, &amp;quiet);
+01303 
+01304     <span class="keywordflow">switch</span> (nRunType) {
+01305     <span class="keywordflow">case</span> REGISTER_SERVICE:
+01306         <span class="comment">/*</span>
+01307 <span class="comment">         * Register As service </span>
+01308 <span class="comment">         */</span>
+01309         InputOptions.Argc = argc;
+01310         InputOptions.Argv = argv;
+01311         exit (RegisterService(lpszServiceName,
+01312                         lpszServiceDisplayName,
+01313                         lpszServiceDescription, &amp;InputOptions, quiet));
+01314         <span class="keywordflow">break</span>;
+01315     <span class="keywordflow">case</span> UN_REGISTER_SERVICE:
+01316         <span class="comment">/*</span>
+01317 <span class="comment">         * Unregister service </span>
+01318 <span class="comment">         */</span>
+01319         exit (UnregisterService(lpszServiceName, quiet));
+01320         <span class="keywordflow">break</span>;
+01321     <span class="keywordflow">case</span> RUN_AS_SERVICE:
+01322         <span class="comment">/*</span>
+01323 <span class="comment">         * Run as service </span>
+01324 <span class="comment">         */</span>
+01325         <span class="comment">/*</span>
+01326 <span class="comment">         * Register Stop Function </span>
+01327 <span class="comment">         */</span>
+01328         RegisterStopFunction(StopSnmpAgent);
+01329         <span class="keywordflow">return</span> RunAsService(SnmpDaemonMain);
+01330         <span class="keywordflow">break</span>;
+01331     <span class="keywordflow">default</span>:
+01332         <span class="comment">/*</span>
+01333 <span class="comment">         * Run in console mode </span>
+01334 <span class="comment">         */</span>
+01335         <span class="keywordflow">return</span> SnmpDaemonMain(argc, argv);
+01336         <span class="keywordflow">break</span>;
+01337     }
+01338 }
+01339 
+01340 <span class="comment">/*</span>
+01341 <span class="comment"> * To stop Snmp Agent daemon</span>
+01342 <span class="comment"> * This portion is still not working</span>
+01343 <span class="comment"> */</span>
+01344 <span class="keywordtype">void</span>
+01345 StopSnmpAgent(<span class="keywordtype">void</span>)
+01346 {
+01347     <span class="comment">/*</span>
+01348 <span class="comment">     * Shut Down Agent </span>
+01349 <span class="comment">     */</span>
+01350     SnmpdShutDown(1);
+01351 
+01352     <span class="comment">/*</span>
+01353 <span class="comment">     * Wait till agent is completely stopped </span>
+01354 <span class="comment">     */</span>
+01355 
+01356     <span class="keywordflow">while</span> (agent_status != AGENT_STOPPED) {
+01357         Sleep(100);
+01358     }
+01359 }
+01360 
+01361 <span class="preprocessor">#endif </span><span class="comment">/*WIN32SERVICE*/</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:01 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

@@ -1,0 +1,169 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>snmp_logging.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="preprocessor">#ifndef SNMP_LOGGING_H</span>
+00002 <span class="preprocessor">#define SNMP_LOGGING_H</span>
+00003 
+00004 <span class="preprocessor">#ifdef __cplusplus</span>
+00005 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00006 <span class="preprocessor">#endif</span>
+00007 
+00008 <span class="preprocessor">#if HAVE_SYSLOG_H</span>
+00009 <span class="preprocessor">#include &lt;syslog.h&gt;</span>
+00010 <span class="preprocessor">#endif</span>
+00011 <span class="preprocessor">#if HAVE_STDARG_H</span>
+00012 <span class="preprocessor">#include &lt;stdarg.h&gt;</span>
+00013 <span class="preprocessor">#else</span>
+00014 <span class="preprocessor">#include &lt;varargs.h&gt;</span>
+00015 <span class="preprocessor">#endif</span>
+00016 
+00017 <span class="preprocessor">#ifndef LOG_ERR</span>
+00018 <span class="preprocessor">#define LOG_EMERG       0       </span><span class="comment">/* system is unusable */</span>
+00019 <span class="preprocessor">#define LOG_ALERT       1       </span><span class=
+"comment">/* action must be taken immediately */</span>
+00020 <span class="preprocessor">#define LOG_CRIT        2       </span><span class="comment">/* critical conditions */</span>
+00021 <span class="preprocessor">#define LOG_ERR         3       </span><span class="comment">/* error conditions */</span>
+00022 <span class="preprocessor">#define LOG_WARNING     4       </span><span class="comment">/* warning conditions */</span>
+00023 <span class="preprocessor">#define LOG_NOTICE      5       </span><span class=
+"comment">/* normal but significant condition */</span>
+00024 <span class="preprocessor">#define LOG_INFO        6       </span><span class="comment">/* informational */</span>
+00025 <span class="preprocessor">#define LOG_DEBUG       7       </span><span class="comment">/* debug-level messages */</span>
+00026 <span class="preprocessor">#endif</span>
+00027 
+00028     <span class="keyword">struct </span>snmp_log_message {
+00029         <span class="keywordtype">int</span>             priority;
+00030         <span class="keyword">const</span> <span class="keywordtype">char</span>     *msg;
+00031     };
+00032 
+00033 <span class="preprocessor">#ifndef DEFAULT_LOG_ID</span>
+00034 <span class="preprocessor">#define DEFAULT_LOG_ID "net-snmp"</span>
+00035 <span class="preprocessor">#endif</span>
+00036 
+00037     <span class="keywordtype">void</span>            init_snmp_logging(<span class="keywordtype">void</span>);
+00038     <span class="keywordtype">int</span>             <a class="code" href=
+"group__snmp__logging.html#ga11">snmp_get_do_logging</a>(<span class="keywordtype">void</span>);
+00039     <span class="keywordtype">void</span>            snmp_disable_syslog(<span class="keywordtype">void</span>);
+00040     <span class="keywordtype">void</span>            snmp_disable_filelog(<span class="keywordtype">void</span>);
+00041     <span class="keywordtype">void</span>            snmp_disable_stderrlog(<span class="keywordtype">void</span>);
+00042     <span class="keywordtype">void</span>            snmp_disable_calllog(<span class="keywordtype">void</span>);
+00043     <span class="keywordtype">void</span>            snmp_disable_log(<span class="keywordtype">void</span>);
+00044     <span class="keywordtype">void</span>            snmp_enable_syslog(<span class="keywordtype">void</span>);
+00045     <span class="keywordtype">void</span>            snmp_enable_syslog_ident(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *ident,
+00046                                              <span class="keyword">const</span> <span class=
+"keywordtype">int</span>   facility);
+00047     <span class="keywordtype">void</span>            snmp_enable_filelog(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *logfilename,
+00048                                         <span class="keywordtype">int</span> dont_zero_log);
+00049     <span class="keywordtype">void</span>            snmp_enable_stderrlog(<span class="keywordtype">void</span>);
+00050     <span class="keywordtype">void</span>            snmp_enable_calllog(<span class="keywordtype">void</span>);
+00051 
+00052 <span class="preprocessor">#if HAVE_STDARG_H</span>
+00053     <span class="keywordtype">int</span>             <a class="code" href=
+"group__snmp__logging.html#ga39">snmp_log</a>(<span class="keywordtype">int</span> priority, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *format, ...);
+00054 <span class="preprocessor">#else</span>
+00055     <span class="keywordtype">int</span>             <a class="code" href=
+"group__snmp__logging.html#ga39">snmp_log</a>(va_alist);
+00056 <span class="preprocessor">#endif</span>
+00057     <span class="keywordtype">int</span>             snmp_vlog(<span class="keywordtype">int</span> priority, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *format,
+00058                               va_list ap);
+00059     <span class="comment">/*</span>
+00060 <span class="comment">     * 0 - successful message formatting </span>
+00061 <span class="comment">     */</span>
+00062     <span class="comment">/*</span>
+00063 <span class="comment">     * -1 - Could not format log-string </span>
+00064 <span class="comment">     */</span>
+00065     <span class="comment">/*</span>
+00066 <span class="comment">     * -2 - Could not allocate memory for log-message </span>
+00067 <span class="comment">     */</span>
+00068     <span class="comment">/*</span>
+00069 <span class="comment">     * -3 - Log-message too long! </span>
+00070 <span class="comment">     */</span>
+00071 
+00072     <span class="keywordtype">void</span>            snmp_log_perror(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *s);
+00073 
+00074 
+00075 <span class="preprocessor">#define NETSNMP_LOGHANDLER_STDOUT       1</span>
+00076 <span class="preprocessor">#define NETSNMP_LOGHANDLER_STDERR       2</span>
+00077 <span class="preprocessor">#define NETSNMP_LOGHANDLER_FILE         3</span>
+00078 <span class="preprocessor">#define NETSNMP_LOGHANDLER_SYSLOG       4</span>
+00079 <span class="preprocessor">#define NETSNMP_LOGHANDLER_CALLBACK     5</span>
+00080 <span class="preprocessor">#define NETSNMP_LOGHANDLER_NONE         6</span>
+00081 
+00082     <span class="keywordtype">int</span> snmp_log_options(<span class="keywordtype">char</span> *optarg, <span class=
+"keywordtype">int</span> argc, <span class="keywordtype">char</span> *<span class="keyword">const</span> *argv);
+00083     <span class="keywordtype">void</span> snmp_log_options_usage(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *lead, FILE *outf);
+00084     <span class="keywordtype">char</span> *snmp_log_syslogname(<span class="keywordtype">char</span> *syslogname);
+00085     <span class="keyword">typedef</span> <span class="keyword">struct </span>netsnmp_log_handler_s netsnmp_log_handler; 
+00086     <span class="keyword">typedef</span> int (NetsnmpLogHandler)(netsnmp_log_handler*, int, <span class=
+"keyword">const</span> <span class="keywordtype">char</span> *);
+00087 
+00088     NetsnmpLogHandler log_handler_stdouterr;
+00089     NetsnmpLogHandler log_handler_file;
+00090     NetsnmpLogHandler log_handler_syslog;
+00091     NetsnmpLogHandler log_handler_callback;
+00092     NetsnmpLogHandler log_handler_null;
+00093 
+00094     <span class="keyword">struct </span>netsnmp_log_handler_s {
+00095         <span class="keywordtype">int</span>     enabled;
+00096         <span class="keywordtype">int</span>     priority;
+00097         <span class="keywordtype">int</span>     pri_max;
+00098         <span class="keywordtype">int</span>     type;
+00099         <span class="keyword">const</span> <span class="keywordtype">char</span> *token;              <span class=
+"comment">/* Also used for filename */</span>
+00100 
+00101         NetsnmpLogHandler       *handler;
+00102 
+00103         <span class="keywordtype">int</span>     imagic;         <span class=
+"comment">/* E.g. file descriptor, syslog facility */</span>
+00104         <span class="keywordtype">void</span>   *magic;          <span class="comment">/* E.g. Callback function */</span>
+00105 
+00106         netsnmp_log_handler     *next, *prev;
+00107     };
+00108 
+00109 netsnmp_log_handler *get_logh_head( <span class="keywordtype">void</span> );
+00110 netsnmp_log_handler *netsnmp_register_loghandler( <span class="keywordtype">int</span> type, <span class=
+"keywordtype">int</span> pri );
+00111 netsnmp_log_handler *netsnmp_find_loghandler( <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token );
+00112 <span class="keywordtype">int</span> netsnmp_add_loghandler(    netsnmp_log_handler *logh );
+00113 <span class="keywordtype">int</span> netsnmp_remove_loghandler( netsnmp_log_handler *logh );
+00114 <span class="keywordtype">int</span> netsnmp_enable_loghandler( <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token );
+00115 <span class="keywordtype">int</span> netsnmp_disable_loghandler( <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token );
+00116 <span class="preprocessor">#ifdef __cplusplus</span>
+00117 }
+00118 <span class="preprocessor">#endif</span>
+00119 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMP_LOGGING_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:00 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

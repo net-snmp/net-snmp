@@ -1,0 +1,312 @@
+<!--#set var="section" value="development" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+  <div class="qindex">
+    <a class="qindex" href="index.html">Main&nbsp;Page</a> | <a class="qindex" href="modules.html">Modules</a> | <a class=
+    "qindex" href="annotated.html">Data&nbsp;Structures</a> | <a class="qindex" href="files.html">File&nbsp;List</a> | <a class=
+    "qindex" href="functions.html">Data&nbsp;Fields</a> | <a class="qindex" href="pages.html">Related&nbsp;Pages</a> | <a class=
+    "qindex" href="examples.html">Examples</a>
+  </div>
+
+  <div class="nav">
+    <a class="el" href="dir_000000.html">include</a>&nbsp;/&nbsp;<a class="el" href=
+    "dir_000001.html">net-snmp</a>&nbsp;/&nbsp;<a class="el" href="dir_000006.html">library</a>
+  </div>
+
+  <h1>snmpusm.h</h1>
+
+  <div class="fragment">
+    <pre class="fragment">
+00001 <span class="comment">/*</span>
+00002 <span class="comment"> * snmpusm.h</span>
+00003 <span class="comment"> *</span>
+00004 <span class="comment"> * Header file for USM support.</span>
+00005 <span class="comment"> */</span>
+00006 
+00007 <span class="preprocessor">#ifndef SNMPUSM_H</span>
+00008 <span class="preprocessor">#define SNMPUSM_H</span>
+00009 
+00010 <span class="preprocessor">#ifdef __cplusplus</span>
+00011 <span class="keyword">extern</span>          <span class="stringliteral">"C"</span> {
+00012 <span class="preprocessor">#endif</span>
+00013 
+00014 <span class="preprocessor">#define WILDCARDSTRING "*"</span>
+00015 
+00016     <span class="comment">/*</span>
+00017 <span class="comment">     * General.</span>
+00018 <span class="comment">     */</span>
+00019 <span class="preprocessor">#define USM_MAX_ID_LENGTH               1024    </span><span class=
+"comment">/* In bytes. */</span>
+00020 <span class="preprocessor">#define USM_MAX_SALT_LENGTH             128     </span><span class=
+"comment">/* In BITS. */</span>
+00021 <span class="preprocessor">#define USM_DES_SALT_LENGTH             64      </span><span class=
+"comment">/* In BITS. */</span>
+00022 <span class="preprocessor">#define USM_AES_SALT_LENGTH             128     </span><span class=
+"comment">/* In BITS. */</span>
+00023 <span class="preprocessor">#define USM_MAX_KEYEDHASH_LENGTH        128     </span><span class=
+"comment">/* In BITS. */</span>
+00024 
+00025 <span class="preprocessor">#define USM_TIME_WINDOW                 150</span>
+00026 <span class="preprocessor">#define USM_MD5_AND_SHA_AUTH_LEN        12      </span><span class="comment">/* bytes */</span>
+00027 <span class="preprocessor">#define USM_MAX_AUTHSIZE                USM_MD5_AND_SHA_AUTH_LEN</span>
+00028 
+00029 <span class="preprocessor">#define USM_SEC_MODEL_NUMBER            3</span>
+00030 
+00031     <span class="comment">/*</span>
+00032 <span class="comment">     * Structures.</span>
+00033 <span class="comment">     */</span>
+00034     <span class="keyword">struct </span>usmStateReference {
+00035         <span class="keywordtype">char</span>           *usr_name;
+00036         size_t          usr_name_length;
+00037         u_char         *usr_engine_id;
+00038         size_t          usr_engine_id_length;
+00039         oid            *usr_auth_protocol;
+00040         size_t          usr_auth_protocol_length;
+00041         u_char         *usr_auth_key;
+00042         size_t          usr_auth_key_length;
+00043         oid            *usr_priv_protocol;
+00044         size_t          usr_priv_protocol_length;
+00045         u_char         *usr_priv_key;
+00046         size_t          usr_priv_key_length;
+00047         u_int           usr_sec_level;
+00048     };
+00049 
+00050 
+00051     <span class="comment">/*</span>
+00052 <span class="comment">     * struct usmUser: a structure to represent a given user in a list </span>
+00053 <span class="comment">     */</span>
+00054     <span class="comment">/*</span>
+00055 <span class="comment">     * Note: Any changes made to this structure need to be reflected in</span>
+00056 <span class="comment">     * the following functions: </span>
+00057 <span class="comment">     */</span>
+00058 
+00059     <span class="keyword">struct </span>usmUser;
+00060     <span class="keyword">struct </span>usmUser {
+00061         u_char         *engineID;
+00062         size_t          engineIDLen;
+00063         <span class="keywordtype">char</span>           *name;
+00064         <span class="keywordtype">char</span>           *secName;
+00065         oid            *cloneFrom;
+00066         size_t          cloneFromLen;
+00067         oid            *authProtocol;
+00068         size_t          authProtocolLen;
+00069         u_char         *authKey;
+00070         size_t          authKeyLen;
+00071         oid            *privProtocol;
+00072         size_t          privProtocolLen;
+00073         u_char         *privKey;
+00074         size_t          privKeyLen;
+00075         u_char         *userPublicString;
+00076         <span class="keywordtype">int</span>             userStatus;
+00077         <span class="keywordtype">int</span>             userStorageType;
+00078        <span class="comment">/* these are actually DH * pointers but only if openssl is avail. */</span>
+00079         <span class="keywordtype">void</span>           *usmDHUserAuthKeyChange;
+00080         <span class="keywordtype">void</span>           *usmDHUserPrivKeyChange;
+00081         <span class="keyword">struct </span>usmUser *next;
+00082         <span class="keyword">struct </span>usmUser *prev;
+00083     };
+00084 
+00085 
+00086 
+00087     <span class="comment">/*</span>
+00088 <span class="comment">     * Prototypes.</span>
+00089 <span class="comment">     */</span>
+00090     <span class="keyword">struct </span>usmStateReference *usm_malloc_usmStateReference(<span class=
+"keywordtype">void</span>);
+00091 
+00092     <span class="keywordtype">void</span>            usm_free_usmStateReference(<span class=
+"keywordtype">void</span> *old);
+00093 
+00094     <span class="keywordtype">int</span>             usm_set_usmStateReference_name(<span class=
+"keyword">struct</span> usmStateReference
+00095                                                    *ref, <span class="keywordtype">char</span> *name,
+00096                                                    size_t name_len);
+00097 
+00098     <span class="keywordtype">int</span>             usm_set_usmStateReference_engine_id(<span class=
+"keyword">struct</span>
+00099                                                         usmStateReference
+00100                                                         *ref,
+00101                                                         u_char * engine_id,
+00102                                                         size_t
+00103                                                         engine_id_len);
+00104 
+00105     <span class="keywordtype">int</span>             usm_set_usmStateReference_auth_protocol(<span class=
+"keyword">struct</span>
+00106                                                             usmStateReference
+00107                                                             *ref,
+00108                                                             oid *
+00109                                                             auth_protocol,
+00110                                                             size_t
+00111                                                             auth_protocol_len);
+00112 
+00113     <span class="keywordtype">int</span>             usm_set_usmStateReference_auth_key(<span class="keyword">struct</span>
+00114                                                        usmStateReference
+00115                                                        *ref,
+00116                                                        u_char * auth_key,
+00117                                                        size_t
+00118                                                        auth_key_len);
+00119 
+00120     <span class="keywordtype">int</span>             usm_set_usmStateReference_priv_protocol(<span class=
+"keyword">struct</span>
+00121                                                             usmStateReference
+00122                                                             *ref,
+00123                                                             oid *
+00124                                                             priv_protocol,
+00125                                                             size_t
+00126                                                             priv_protocol_len);
+00127 
+00128     <span class="keywordtype">int</span>             usm_set_usmStateReference_priv_key(<span class="keyword">struct</span>
+00129                                                        usmStateReference
+00130                                                        *ref,
+00131                                                        u_char * priv_key,
+00132                                                        size_t
+00133                                                        priv_key_len);
+00134 
+00135     <span class="keywordtype">int</span>             usm_set_usmStateReference_sec_level(<span class=
+"keyword">struct</span>
+00136                                                         usmStateReference
+00137                                                         *ref,
+00138                                                         <span class="keywordtype">int</span> sec_level);
+00139 
+00140 <span class="preprocessor">#ifdef SNMP_TESTING_CODE</span>
+00141     <span class="keywordtype">void</span>            emergency_print(u_char * field, u_int length);
+00142 <span class="preprocessor">#endif</span>
+00143 
+00144     <span class="keywordtype">int</span>             asn_predict_int_length(<span class=
+"keywordtype">int</span> type, <span class="keywordtype">long</span> number,
+00145                                            size_t len);
+00146 
+00147     <span class="keywordtype">int</span>             asn_predict_length(<span class=
+"keywordtype">int</span> type, u_char * ptr,
+00148                                        size_t u_char_len);
+00149 
+00150     <span class="keywordtype">int</span>             usm_set_salt(u_char * iv,
+00151                                  size_t * iv_length,
+00152                                  u_char * priv_salt,
+00153                                  size_t priv_salt_length,
+00154                                  u_char * msgSalt);
+00155 
+00156     <span class="keywordtype">int</span>             usm_parse_security_parameters(u_char * secParams,
+00157                                                   size_t remaining,
+00158                                                   u_char * secEngineID,
+00159                                                   size_t * secEngineIDLen,
+00160                                                   u_int * boots_uint,
+00161                                                   u_int * time_uint,
+00162                                                   <span class="keywordtype">char</span> *secName,
+00163                                                   size_t * secNameLen,
+00164                                                   u_char * signature,
+00165                                                   size_t *
+00166                                                   signature_length,
+00167                                                   u_char * salt,
+00168                                                   size_t * salt_length,
+00169                                                   u_char ** data_ptr);
+00170 
+00171     <span class="keywordtype">int</span>             usm_check_and_update_timeliness(u_char * secEngineID,
+00172                                                     size_t secEngineIDLen,
+00173                                                     u_int boots_uint,
+00174                                                     u_int time_uint,
+00175                                                     <span class="keywordtype">int</span> *error);
+00176 
+00177     SecmodOutMsg    usm_secmod_generate_out_msg;
+00178     SecmodOutMsg    usm_secmod_generate_out_msg;
+00179     SecmodInMsg     usm_secmod_process_in_msg;
+00180     <span class="keywordtype">int</span>             usm_generate_out_msg(<span class=
+"keywordtype">int</span>, u_char *, size_t, <span class="keywordtype">int</span>, <span class="keywordtype">int</span>,
+00181                                          u_char *, size_t, <span class="keywordtype">char</span> *, size_t,
+00182                                          <span class="keywordtype">int</span>, u_char *, size_t, <span class=
+"keywordtype">void</span> *,
+00183                                          u_char *, size_t *, u_char **,
+00184                                          size_t *);
+00185     <span class="keywordtype">int</span>             usm_rgenerate_out_msg(<span class=
+"keywordtype">int</span>, u_char *, size_t, <span class="keywordtype">int</span>, <span class="keywordtype">int</span>,
+00186                                           u_char *, size_t, <span class="keywordtype">char</span> *, size_t,
+00187                                           <span class="keywordtype">int</span>, u_char *, size_t, <span class=
+"keywordtype">void</span> *,
+00188                                           u_char **, size_t *, size_t *);
+00189 
+00190     <span class="keywordtype">int</span>             usm_process_in_msg(<span class=
+"keywordtype">int</span>, size_t, u_char *, <span class="keywordtype">int</span>, <span class="keywordtype">int</span>,
+00191                                        u_char *, size_t, u_char *,
+00192                                        size_t *, <span class="keywordtype">char</span> *, size_t *,
+00193                                        u_char **, size_t *, size_t *,
+00194                                        <span class="keywordtype">void</span> **, <a class="code" href=
+"structsnmp__session.html">netsnmp_session</a> *, u_char);
+00195 
+00196     <span class="keywordtype">int</span>             usm_check_secLevel(<span class=
+"keywordtype">int</span> level, <span class="keyword">struct</span> usmUser *user);
+00197     <span class="keyword">struct </span>usmUser *usm_get_userList(<span class="keywordtype">void</span>);
+00198     <span class="keyword">struct </span>usmUser *usm_get_user(u_char * engineID, size_t engineIDLen,
+00199                                  <span class="keywordtype">char</span> *name);
+00200     <span class="keyword">struct </span>usmUser *usm_get_user_from_list(u_char * engineID,
+00201                                            size_t engineIDLen, <span class="keywordtype">char</span> *name,
+00202                                            <span class="keyword">struct</span> usmUser *userList,
+00203                                            <span class="keywordtype">int</span> use_default);
+00204     <span class="keyword">struct </span>usmUser *usm_add_user(<span class="keyword">struct</span> usmUser *user);
+00205     <span class="keyword">struct </span>usmUser *usm_add_user_to_list(<span class="keyword">struct</span> usmUser *user,
+00206                                          <span class="keyword">struct</span> usmUser *userList);
+00207     <span class="keyword">struct </span>usmUser *usm_free_user(<span class="keyword">struct</span> usmUser *user);
+00208     <span class="keyword">struct </span>usmUser *usm_create_user(<span class="keywordtype">void</span>);
+00209     <span class="keyword">struct </span>usmUser *usm_create_initial_user(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *name,
+00210                                             <span class="keyword">const</span> oid * authProtocol,
+00211                                             size_t authProtocolLen,
+00212                                             <span class="keyword">const</span> oid * privProtocol,
+00213                                             size_t privProtocolLen);
+00214     <span class="keyword">struct </span>usmUser *usm_cloneFrom_user(<span class="keyword">struct</span> usmUser *from,
+00215                                        <span class="keyword">struct</span> usmUser *to);
+00216     <span class="keyword">struct </span>usmUser *usm_remove_user(<span class="keyword">struct</span> usmUser *user);
+00217     <span class="keyword">struct </span>usmUser *usm_remove_user_from_list(<span class=
+"keyword">struct</span> usmUser *user,
+00218                                               <span class="keyword">struct</span> usmUser **userList);
+00219     <span class="keywordtype">char</span>           *get_objid(<span class=
+"keywordtype">char</span> *line, oid ** optr, size_t * len);
+00220     <span class="keywordtype">void</span>            usm_save_users(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token, <span class="keyword">const</span> <span class="keywordtype">char</span> *type);
+00221     <span class="keywordtype">void</span>            usm_save_users_from_list(<span class=
+"keyword">struct</span> usmUser *user,
+00222                                              <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token,
+00223                                              <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *type);
+00224     <span class="keywordtype">void</span>            usm_save_user(<span class=
+"keyword">struct</span> usmUser *user, <span class="keyword">const</span> <span class="keywordtype">char</span> *token,
+00225                                   <span class="keyword">const</span> <span class="keywordtype">char</span> *type);
+00226     SNMPCallback    usm_store_users;
+00227     <span class="keyword">struct </span>usmUser *usm_read_user(<span class="keywordtype">char</span> *line);
+00228     <span class="keywordtype">void</span>            usm_parse_config_usmUser(<span class=
+"keyword">const</span> <span class="keywordtype">char</span> *token,
+00229                                              <span class="keywordtype">char</span> *line);
+00230 
+00231     <span class="keywordtype">void</span>            usm_set_password(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token, <span class="keywordtype">char</span> *line);
+00232     <span class="keywordtype">void</span>            usm_set_user_password(<span class=
+"keyword">struct</span> usmUser *user,
+00233                                           <span class="keyword">const</span> <span class=
+"keywordtype">char</span> *token, <span class="keywordtype">char</span> *line);
+00234     <span class="keywordtype">void</span>            init_usm(<span class="keywordtype">void</span>);
+00235     <span class="keywordtype">void</span>            init_usm_conf(<span class="keyword">const</span> <span class=
+"keywordtype">char</span> *app);
+00236     <span class="keywordtype">int</span>             init_usm_post_config(<span class=
+"keywordtype">int</span> majorid, <span class="keywordtype">int</span> minorid,
+00237                                          <span class="keywordtype">void</span> *serverarg, <span class=
+"keywordtype">void</span> *clientarg);
+00238     <span class="keywordtype">int</span>             deinit_usm_post_config(<span class=
+"keywordtype">int</span> majorid, <span class="keywordtype">int</span> minorid, <span class="keywordtype">void</span> *serverarg,
+00239                                            <span class="keywordtype">void</span> *clientarg);
+00240     <span class="keywordtype">void</span>            clear_user_list(<span class="keywordtype">void</span>);
+00241 
+00242 <span class="preprocessor">#ifdef __cplusplus</span>
+00243 }
+00244 <span class="preprocessor">#endif</span>
+00245 <span class="preprocessor">#endif                          </span><span class="comment">/* SNMPUSM_H */</span>
+</pre>
+  </div>
+  <hr size="1" />
+
+  <address style="align: right;">
+    <small><!--#include virtual="/sfbutton.html" --><br />
+    Generated on Thu Oct 28 21:47:02 2004 for net-snmp by&nbsp; <a href="http://www.doxygen.org/index.html"><img src=
+    "doxygen.png" alt="doxygen" align="middle" border="0" /></a> 1.3.9.1</small>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+

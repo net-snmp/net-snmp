@@ -1,0 +1,327 @@
+<!--#set var="section" value="tutorial" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Net-SNMP Tutorial -- snmpd</title>
+  </head>
+
+  <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
+    <!-- ========================================================= -->
+    <h1>Net-SNMP Tutorial -- snmpd</h1>
+    <p>
+      This is a basic tutorial for configuring the Net-SNMP <i>snmpd</i> daemon.
+      Note the word <i>basic</i>. This tutorial covers the use of
+      <i>snmpconf</i> to create a configuration file (snmpd.conf) for
+      <i>snmpd</i>. Note that <i>snmpconf</i> only understands a subset of
+      the tokens that snmpd offers, so it is possible that some tokens will
+      remain undocumented. Consult the 
+      <a href="http://www.net-snmp.org/man/snmpd.conf.html">snmpd.conf man page</a>
+      for more information on those tokens.
+    </p><p>
+      The following sections are available:
+    <ul>
+      <li><a href="#location">Location, location, location</a>
+      <li><a href="#existing">Understanding an existing configuration file</a>
+      <li><a href="#basic">Basic setup with snmpconf</a>
+      <li><a href="#v3users">SNMPv3 user setup</a>
+      <li><a href="#common">Common options not covered by snmpconf</a>
+      <li><a href="#test">Simple testing</a>
+      <li><a href="#qnd">Quick and dirty, for the impatient</a>
+      <li><a href="snmpd-troubleshooting.html">Troubleshooting</a>
+    </ul>
+    </p>
+    <p>&nbsp</p><hr width=80%><p>&nbsp</p>
+    <!-- ========================================================= -->
+    <a name="location"><h2>Location, location, location</h2></a>
+    One of the most important things you need to know is where to find or
+    create the snmpd.conf configuration file. The best way to find out is
+    by using the debug output of the agent:
+    <table><tr><td width=20></td><td bgcolor=CCCCCC>
+            <code><pre>$ <font color=blue>snmpd -Dread_config -H 2>&1 | grep "config path" | sort -u</font>
+read_config: config path used:/usr/local/etc/snmp:/usr/local/share/snmp:/usr/local/lib/snmp:/home/rstory/.snmp:/var/net-snmp
+          </pre></td></tr></table>
+    <p></p>
+    Now that you know what the search path is, you should check for any
+    existing configuration files. Again, the best way is to ask snmpd:
+    <table><tr><td width=20></td><td bgcolor=CCCCCC>
+            <code><pre>$ <font color=blue>snmpd -Dread_config -H 2>&1 | grep "Reading" | sort -u</font>
+read_config: Reading configuration /usr/local/share/snmp/snmpd.conf
+          </pre></td></tr></table>
+    <p></p><p>
+      If no existing file exists, <i>snmpconf</i> will help create one for
+      you.
+    </p>
+    <p></p>
+    <p>&nbsp</p><hr width=80%><p>&nbsp</p>
+    <!-- ========================================================= -->
+    <a name="existing"><h2>Understanding an existing configuration file</h2></a>
+    If you discover an existing configuration file, open it with your favorite
+    text editor. If it appears well commented, then you can use the
+    <a href="http://www.net-snmp.org/man/snmpd.conf.html">snmpd.conf man page</a>
+    as a reference to understand the existing configuration. If it does not
+    appear to be well commented, you can use <i>snmpconf</i> to comment
+    it for you, like so:
+    <table><tr><td width=20></td><td bgcolor=CCCCCC>
+            <code>$ <font color=blue>snmpconf -R <font color=red>FILENAME</font>
+                -a -f snmpd.conf</font>
+          </td></tr></table>
+    <p></p><p>
+      This command will create a copy of the existing configuration file
+      <i>FILENAME</i> as snmpd.conf in the current working directory. The
+      copy will have comments documenting the tokens that <i>snmpconf</i>
+      understands.
+    </p>
+    <p></p>
+    <p>&nbsp</p><hr width=80%><p>&nbsp</p>
+    <!-- ========================================================= -->
+    <a name="basic"><h2>Basic setup with snmpconf</h2></a>
+    <p>
+      The Net-SNMP agent comes with a perl script to aid with configuration.
+      This script, <i>snmpconf</i>, helps configure some of the basic
+      configuration options offered by <i>snmpd</i>. The options are
+      grouped together by functionality. The <i>-G</i> option to
+      <i>snmpconf</i> will report the available groups.
+    </p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC>
+            <code><pre>$ <font color=blue>snmpconf -G</font>
+Known GROUPs of tokens:
+
+  system_setup
+  basic_setup
+  monitoring_services
+  access_control
+  trapsinks
+</pre></td></tr></table>
+
+    <table><tr><td width=20></td><td><td bgcolor=CCCCCC>
+            <pre>$ <font color=blue>$ snmpconf -r none -g basic_setup</font>
+************************************************
+*** Beginning basic system information setup ***
+************************************************
+Do you want to configure the information returned in the system MIB group
+(contact info, etc)? (default = y):<font color=blue>[RETURN]</font>
+</pre><td>
+Notes:<br>This step is optional, but recommended.
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+Configuring: syslocation
+Description:
+  The [typically physical] location of the system.
+    Note that setting this value here means that when trying to
+    perform an snmp SET operation to the sysLocation.0 variable will make
+    the agent return the "notWritable" error code.  IE, including
+    this token in the snmpd.conf file will disable write access to
+    the variable.
+    arguments:  location_string
+
+The location of the system: <font color=blue>telephone closet, 3rd floor</font>
+
+Finished Output: syslocation  telephone closet, 3rd floor
+</pre><td>
+Notes:<br>This one is pretty self-explanatory.
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+Configuring: syscontact
+Description:
+  The contact information for the administrator
+    Note that setting this value here means that when trying to
+    perform an snmp SET operation to the sysContact.0 variable will make
+    the agent return the "notWritable" error code.  IE, including
+    this token in the snmpd.conf file will disable write access to
+    the variable.
+    arguments:  contact_string
+
+The contact information: <font color=blue>bill x704</font>
+
+Finished Output: syscontact  bill x704
+</pre><td>
+Notes:<br>The conctact information can be just about whatever you want: a
+phone number, extension, mail box or email address.
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+Do you want to properly set the value of the sysServices.0 OID
+(if you don't know, just say no)? (default = y): <font color=blue>n</font>
+
+</pre><td>
+Notes:<br>Unless you already know what the sysServices OID does, it is
+probably best to skip it and use the default.
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+Do you want to allow SNMPv3 read-write user based access
+(default = y):<font color=blue>[RETURN]</font>
+</pre><td>
+<br>
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+Configuring: rwuser
+Description:
+  a SNMPv3 read-write user
+    arguments:  user [noauth|auth|priv] [restriction_oid]
+
+The SNMPv3 user that should have read-write access: <font color=blue>fred</font>
+The minimum security level required for that user
+[noauth|auth|priv, default = auth]: <font color=blue>auth</font>
+The OID that this community should be restricted to
+[if appropriate]:<font color=blue>[RETURN]</font>
+
+Finished Output: rwuser  fred ?
+Do another rwuser line? (default = y):<font color=blue>n</font>
+</pre><td>
+Notes:<br>fred can read or write any object that the agent supports
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+Do you want to allow SNMPv3 read-only user based access (default = y):
+
+Configuring: rouser
+Description:
+  a SNMPv3 read-only user
+    arguments:  user [noauth|auth|priv] [restriction_oid]
+
+Enter the SNMPv3 user that should have read-only access to the system: <font color=blue>sally</font>
+The minimum security level required for that user
+[noauth|auth|priv, default = auth]: <font color=blue>auth</font>
+The OID that this community should be restricted to
+[if appropriate]: <font color=blue>.1.3.6.1.4.1.8072</font>
+
+Finished Output: rouser  sally auth .1.3.6.1.4.1.8072
+Do another rouser line? (default = y): n
+</pre><td>
+Notes:<br>sally can only read objects in the netSnmp branch of the agent
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+Do you want to allow SNMPv1/v2c read-write community access (default = y):
+
+Configuring: rwcommunity
+Description:
+  a SNMPv1/SNMPv2c read-write access community name
+    arguments:  community [default|hostname|network/bits] [oid]
+
+Enter the community name to add read-write access for: <font color=blue>private</font>
+The hostname or network address to accept this community name from
+[RETURN for all]:<font color=blue>127.0.0.1</font>
+The OID that this community should be restricted to
+[RETURN for no-restriction]: <font color=blue>RETURN</font>
+
+Finished Output: rwcommunity  private 127.0.0.1 .1.3.6.1.2.1.1
+Do another rwcommunity line? (default = y): n
+</pre><td>
+Notes:<br>Anyone with shell access on the host can use the community string
+<i>private</i> to write to any object in the system tree. (<b>Not
+recommended</b>)
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+Do you want to allow SNMPv1/v2c read-only community access (default = y): y
+
+Configuring: rocommunity
+Description:
+  a SNMPv1/SNMPv2c read-only access community name
+    arguments:  community [default|hostname|network/bits] [oid]
+
+The community name to add read-only access for: <font color=blue>public</font>
+The hostname or network address to accept this community name from
+[RETURN for all]: <font color=blue>[RETURN]</font>
+The OID that this community should be restricted to
+[RETURN for no-restriction]: <font color=blue>.1.3.6.1.2.1.1</font>
+
+Finished Output: rocommunity  public .1.3.6.1.2.1.1 .1.3.6.1.2.1.1
+Do another rocommunity line? (default = y): <font color=blue>n</font>
+</pre><td>
+Notes:<br>Anyone using the commonly used community string <i>public</i>
+can read any object in the system branch of the tree
+</td></tr><tr><td width=20></td><td><td bgcolor=CCCCCC><pre>
+The following files were created:
+
+  snmpd.conf
+
+These files should be moved to /usr/local/share/snmp if you
+want them used by everyone on the system.  In the future, if you add
+the -i option to the command line I'll copy them there automatically for you.
+
+Or, if you want them for your personal use only, copy them to
+/home/rks/.snmp .  In the future, if you add the -p option to the
+command line I'll copy them there automatically for you.
+</pre><td>
+Notes:<br><b>&lt== PAY ATTENTION</b><br>This file is not automatically
+installed. You must copy it in to the correct location.
+</td></tr></table>
+    <p></p><p>
+      That last notes is worth repeating, as is is often overlooked:
+    <ul>
+      <li><font size=+2 color=red><b>This file is not automatically
+        installed. You must copy it in to the correct location.</b></font>
+    </ul>
+    <p>
+      See the <a href="#location">location</a> section to determine the
+      correct location.
+    </p><p>
+      Another important note: the <i>rouser, rwuser, rwcommunity</i>
+      and <i>rocommunity</i> options found in the snmpd.conf configuration
+      file are only half of the setup required for SNMPv3 users. The other
+      half of the setup invovles setting up the SNMPv3 authentication and
+      password parameters, which go in the persistent snmpd.conf file (usually
+      found in /var/net-snmp/snmpd.conf).  This file must be edited while
+      the agent is not running, or any changes will be overwritten when the
+      agent exits. See the next section for more details.
+    </p><p></p>
+    <p>&nbsp</p><hr width=80%><p>&nbsp</p>
+    <!-- ========================================================= -->
+    <a name="v3users"><h2>SNMPv3 user setup</h2></a>
+    <p>
+      If you choose not to set up any SNMPv3 users, you can skip this section.
+    </p><p>
+      <i>This section under contruction. Please see the
+        <a href="http://www.net-snmp.org/man/snmpusm.html">snmpusm</a> man
+        page for information on setting up SNMPv3 users.</i>
+    </p><p></p>
+    <p>&nbsp</p><hr width=80%><p>&nbsp</p>
+    <!-- ========================================================= -->
+    <a name="common"><h2>Common options not covered by snmpconf</h2></a>
+    <p>
+      Some common tokens that you might want to add to the configuration
+      file generated by <i>snmpconf</i> include:
+    </p>
+    <ul>
+      <li><b>VACM access control</b>:<br>
+        The <i>rouser, rwuser, rwcommunity</i> and <i>rocommunity</i>
+        access control options are simply wrappers around the more flexible
+        (and thus complex) VACM access control tokens
+        <i>com2sec, view, group,</i> and <i>access</i>. More information
+        about these tokens can be found in the
+        <a href="http://www.net-snmp.org/man/snmpd.conf.html">snmpd.conf man page</a>
+        and the
+        <a href="http://www.net-snmp.org/tutorial-5/demon/vacm/">VACM</a> page.
+      <li>... TBD ... <br>
+    </ul>
+    <p>&nbsp</p><hr width=80%><p>&nbsp</p>
+    <!-- ========================================================= -->
+    <a name="test"><h2>Simple testing</h2></a>
+    <p>
+      If you want to simplify configuration (eg while testing), you can ignore
+      the default configuration files and specify your configuration on the
+      command line. Here is an example that can be used to run a freshly build
+      agent from the source directory, without root access:
+    </p>
+    <table><tr><td width=20></td><td bgcolor=CCCCCC>
+            <code>agent/snmpd -r -f -L -C --rocommunity="test 127.0.0.1" udp:1161</code>
+          </td></tr></table>
+    <p>&nbsp</p><hr width=80%><p>&nbsp</p>
+    <!-- ========================================================= -->
+    <a name="qnd"><h2>Quick and dirty, for the impatient</h2></a>
+    If you just want a cut-and-paste answer to get your agent up and running
+    as quick a possible, the simplest configuration file that we can recommned
+    is this:
+    <table><tr><td width=20></td><td bgcolor=CCCCCC>
+            <code>rocommunity default .1.3.6.1.2.1.1</font>
+          </td></tr></table>
+    <p>&nbsp</p><hr width=80%><p>&nbsp</p>
+    <!-- ========================================================= -->
+    <font size=+1>
+      <!-- <a href="snmptrapd.html">Next: Configuring snmptrapd</a> | -->
+      <a href="../..">Back to Top</a>
+    </font>
+    <hr>
+    rstory at freesnpm dot com<br>
+<!-- Created: Sun Aug 29 17:35:46 EDT 2004 -->
+<!-- hhmts start -->
+Last modified: Sun Aug 29 22:34:57 EDT 2004
+<!-- hhmts end -->
+<!--#include virtual="/sfbutton.html" -->
+  </body>
+</html>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+
