@@ -78,6 +78,8 @@ SOFTWARE.
 #include <sys/sysctl.h>
 #endif
 
+#include <string.h>
+
 #include "asn1.h"
 #include "snmp_api.h"
 #include "system.h"
@@ -380,11 +382,11 @@ long get_uptime (void)
     int kmem;
     static struct nlist nl[] = {
 #if !defined(hpux)
-	    { "_boottime" },
+	    { (char*)"_boottime" },
 #else
 	    { "boottime" },
 #endif
-	    { "" }
+	    { (char*)"" }
 	};
 
     if ((kmem = open("/dev/kmem", 0)) < 0)
@@ -481,7 +483,7 @@ int setenv(char *name,
     if (overwrite == 0) {
 	if (getenv(name)) return 0;
     }
-    cp = malloc(strlen(name)+strlen(value)+2);
+    cp = (char*)malloc(strlen(name)+strlen(value)+2);
     if (cp == NULL) return -1;
     sprintf(cp, "%s=%s", name, value);
     ret = putenv(cp);
