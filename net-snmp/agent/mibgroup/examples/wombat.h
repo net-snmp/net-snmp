@@ -6,12 +6,7 @@
 #define _MIBGROUP_WOMBAT_H
 
 extern void	init_wombat(void);
-extern u_char	* var_wombat(struct variable *vp,
-	   oid *name,
-	   int *length,
-	   int exact,
-	   int *var_len,
-	   WriteMethod **write_method);
+extern FindVarMethod var_wombat;
 
 /* config file parsing routines */
 extern void wombat_free_config (void);

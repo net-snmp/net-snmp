@@ -646,7 +646,11 @@ var_ipRouteEntry(struct variable *vp,
 		    but I don't have a suitable system to test this on */
 	    long_return = 0;
 #else /*  NEED_KLGETSA */
+  #ifndef linux
 	    if ( ((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.s_addr == 0 )
+  #else
+	    if (rthead[RtIndex]->rt_dst.sa_data == 0)
+  #endif
 		long_return = 0;	/* Default route */
 	    else {
 #ifndef linux
@@ -1156,7 +1160,7 @@ static void Route_Scan_Reload (void)
 	    return;
 	  }
 
-	while (fgets (line, sizeof line, in))
+	while (fgets (line, sizeof(line), in))
 	  {
 	    struct rtentry rtent;
 	    char rtent_name [32];

@@ -19,7 +19,7 @@ IMPORTS
 
 
 ipFwAccTable OBJECT-TYPE
-	SYNTAX IpFwAccEntry
+	SYNTAX SEQUENCE OF IpFwAccEntry
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
@@ -47,8 +47,8 @@ IpFwAccTable ::= SEQUENCE {
 	ipFwAccProto		INTEGER,
 	ipFwAccBidir		INTEGER,
 	ipFwAccDir		INTEGER,
-	ipFwAccBytes		INTEGER,
-	ipFwAccPackets		INTEGER,
+	ipFwAccBytes		Counter,
+	ipFwAccPackets		Counter,
 	ipFwAccNrSrcPorts	INTEGER,
 	ipFwAccNrDstPorts	INTEGER,
 	ipFwAccSrcIsRange	INTEGER,
@@ -166,7 +166,7 @@ ipFwAccDir OBJECT-TYPE
 	::= { ipFwAccEntry 10 }
 
 ipFwAccBytes OBJECT-TYPE
-	SYNTAX INTEGER
+	SYNTAX Counter
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
@@ -175,7 +175,7 @@ ipFwAccBytes OBJECT-TYPE
 	::= { ipFwAccEntry 11 }
 
 ipFwAccPackets OBJECT-TYPE
-	SYNTAX INTEGER
+	SYNTAX Counter
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION

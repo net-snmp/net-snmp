@@ -195,7 +195,7 @@ void processFileArgs(char *fileName)
   fp = fopen(fileName, "r");
   if (fp == NULL)
     return;
-  while (fgets(buf, 256, fp)){
+  while (fgets(buf, sizeof(buf), fp)){
     linenumber++;
     if (strlen(buf) > 256){
       fprintf(stderr, "Line too long on line %d of %s\n",

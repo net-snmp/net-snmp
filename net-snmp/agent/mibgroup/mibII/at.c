@@ -328,15 +328,14 @@ var_atEntry(struct variable *vp,
       DEBUGMSGTL(("mibII/at", "var_atEntry: %s %d\n", c_oid, exact));
     }
     memset (&Lowentry, 0, sizeof (Lowentry));
-    memcpy( (char *)current,(char *)vp->name, (int)vp->namelen * sizeof(oid));
-    if (*length == AT_NAME_LENGTH) /* Assume that the input name is the lowest */
-      memcpy( (char *)lowest,(char *)name, AT_NAME_LENGTH * sizeof(oid));
+    memcpy( (char *)current,(char *)vp->name, vp->namelen * sizeof(oid));
+    lowest[0] = 1024;
     for (NextAddr.ipAddr = (u_long)-1, NextAddr.ifIdx = 255, req_type = GET_FIRST;
 	 ;
 	 NextAddr.ipAddr = entry.ipNetToMediaNetAddress,
 	 NextAddr.ifIdx = current [AT_IFINDEX_OFF],
 	 req_type = GET_NEXT) {
-      if (getMibstat(MIB_IP_NET, &entry, sizeof(mib2_ipNetToMediaEntry_t),
+	if (getMibstat(MIB_IP_NET, &entry, sizeof(mib2_ipNetToMediaEntry_t),
 		 req_type, &AT_Cmp, &NextAddr) != 0)
 		break;
       	current[AT_IFINDEX_OFF] = Interface_Index_By_Name (entry.ipNetToMediaIfIndex.o_bytes, entry.ipNetToMediaIfIndex.o_length);
@@ -350,13 +349,8 @@ var_atEntry(struct variable *vp,
 		break;	/* no need to search further */
 	    }
 	} else {
-	  if (Lowentry.ipNetToMediaNetAddress == entry.ipNetToMediaNetAddress) break;
-	  if (snmp_oid_compare(current, AT_NAME_LENGTH, name, *length) > 0
-	      && (NextAddr.ipAddr == (u_long)-1
-		  || snmp_oid_compare(current, AT_NAME_LENGTH, lowest, AT_NAME_LENGTH) < 0)) {
-/*
-		  || (snmp_oid_compare(name, AT_NAME_LENGTH, lowest, AT_NAME_LENGTH) == 0))){
-*/
+	    if (snmp_oid_compare(current, AT_NAME_LENGTH, name, *length) > 0
+	      && snmp_oid_compare(current, AT_NAME_LENGTH, lowest, AT_NAME_LENGTH) < 0) {
 		/*
 		 * if new one is greater than input and closer to input than
 		 * previous lowest, and is not equal to it, save this one as the "next" one.
@@ -369,23 +363,27 @@ var_atEntry(struct variable *vp,
     }
     DEBUGMSGTL(("mibII/at", "... Found = %d\n", Found));
     if (Found == 0)
-      return(NULL);
+	return(NULL);
     memcpy( (char *)name,(char *)lowest, AT_NAME_LENGTH * sizeof(oid));
     *length = AT_NAME_LENGTH;
     *write_method = 0;
     switch(vp->magic){
-	case ATIFINDEX:
+	case IPMEDIAIFINDEX:
 	    *var_len = sizeof long_return;
 	    long_return = Interface_Index_By_Name(Lowentry.ipNetToMediaIfIndex.o_bytes,
 						  Lowentry.ipNetToMediaIfIndex.o_length);
 	    return (u_char *)&long_return;
-	case ATPHYSADDRESS:
+	case IPMEDIAPHYSADDRESS:
 	    *var_len = Lowentry.ipNetToMediaPhysAddress.o_length;
 	    (void)memcpy(return_buf, Lowentry.ipNetToMediaPhysAddress.o_bytes, *var_len);
 	    return (u_char *)return_buf;
-	case ATNETADDRESS:
+	case IPMEDIANETADDRESS:
 	    *var_len = sizeof long_return;
 	    long_return = Lowentry.ipNetToMediaNetAddress;
+	    return (u_char *)&long_return;
+	case IPMEDIATYPE:
+	    *var_len = sizeof long_return;
+	    long_return = Lowentry.ipNetToMediaType;
 	    return (u_char *)&long_return;
 	default:
 	    ERROR_MSG("");
@@ -448,7 +446,7 @@ static void ARP_Scan_Init (void)
 		arptab_current = 0;
 		return;
 	}
-	for (n = -1; fgets (line, sizeof line, in); n++)
+	for (n = -1; fgets (line, sizeof(line), in); n++)
 		;
 	fclose (in);
 	in = fopen ("/proc/net/arp", "r");
@@ -461,7 +459,7 @@ static void ARP_Scan_Init (void)
 	else
 		at = NULL;
 	for (i = 0; i < arptab_size; i++) {
-		while (line == fgets (line, sizeof line, in) &&
+		while (line == fgets (line, sizeof(line), in) &&
 			11 != sscanf (line, "%d.%d.%d.%d 0x%*x 0x%x %x:%x:%x:%x:%x:%x",
 			&za, &zb, &zc, &zd, &at[i].at_flags,
 			&ze, &zf, &zg, &zh, &zi, &zj))

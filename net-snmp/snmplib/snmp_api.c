@@ -92,6 +92,7 @@ SOFTWARE.
 #include "int64.h"
 #include "read_config.h"
 #include "snmp_debug.h"
+#include "snmp_client.h"
 
 static void init_snmp_session (void);
 
@@ -700,6 +701,7 @@ snmp_sess_close(void *sessp)
 	snmp_free(sesp->srcParty);
 	snmp_free(sesp->peername);
 	snmp_free(sesp->community);
+	snmp_synch_reset(sesp);
 	free((char *)sesp);
     }
 
@@ -1259,7 +1261,7 @@ snmp_parse(struct snmp_session *session,
 	    case ASN_IPADDRESS:
 	    case ASN_OPAQUE:
 	    case ASN_NSAP:
-		if (vp->val_len < 32){
+		if (vp->val_len < sizeof(vp->buf)){
 		    vp->val.string = (u_char *)vp->buf;
 		    vp->usedBuf = TRUE;
 		} else {
@@ -1427,8 +1429,8 @@ snmp_sess_async_send(void *sessp,
         /* not supported in SNMPv1 and SNMPsec */
 	if ((pdu->version == SNMP_VERSION_1) ||
                 (pdu->version == SNMP_VERSION_sec)) {
-	    snmp_errno = SNMPERR_V1_IN_V2;
-	    session->s_snmp_errno = SNMPERR_V1_IN_V2;
+	    snmp_errno = SNMPERR_V2_IN_V1;
+	    session->s_snmp_errno = SNMPERR_V2_IN_V1;
 	    return 0;
 	}
         /* initialize defaulted PDU fields */
@@ -2248,7 +2250,7 @@ snmp_add_var(struct snmp_pdu *pdu,
         break;
 
       case 'o':
-        tint = MAX_OID_LEN;
+        tint = sizeof(buf) / sizeof(oid);
         read_objid(value, (oid *)buf, &tint);
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID, buf,
                               sizeof(oid)*tint);

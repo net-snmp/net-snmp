@@ -219,13 +219,18 @@ void read_config(char *filename,
   curfilename = filename;
   
   if ((ifile = fopen(filename, "r")) == NULL) {
-    DEBUGMSGTL(("read_config", "%s: %s\n", filename, strerror(errno)));
+    if (errno != ENOENT) {
+      perror(filename);
+    }
+    else {
+      DEBUGMSGTL(("read_config", "%s: %s\n", filename, strerror(errno)));
+    }
     return;
   } else {
     DEBUGMSGTL(("read_config", "Reading configuration %s\n", filename));
   }
 
-  while (fgets(line, STRINGMAX, ifile) != NULL) 
+  while (fgets(line, sizeof(line), ifile) != NULL) 
     {
       lptr = line_handler;
       linecount++;
@@ -337,7 +342,7 @@ read_config_files (int when)
   
   if (config_errors) {
     fprintf(stderr, "snmpd: errors in config file - abort.\n");
-    exit(1);
+/*    exit(1); */
   }
 }
 

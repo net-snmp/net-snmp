@@ -63,7 +63,7 @@ snmpProxyMIB MODULE-IDENTITY
    REVISION    "9707140000Z"
    DESCRIPTION
        "The initial revision."
-   ::= { snmpModules 17 }
+   ::= { snmpModules 14 }
 
 snmpProxyObjects        OBJECT IDENTIFIER ::= { snmpProxyMIB 1 }
 snmpProxyConformance    OBJECT IDENTIFIER ::= { snmpProxyMIB 3 }

@@ -44,10 +44,9 @@ config_add_mib(IPFWACC-MIB)
 
 /* function definitions */
 
-  /* extern void	init_ipfwacc void;*/
+  /* extern void	init_ipfwacc __P(void);*/
 
-extern FindVarMethod var_ipfwacc;
-
+extern unsigned char	*var_ipfwacc __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, unsigned char *, unsigned char, int, unsigned char *, oid *, int)) ));
 
 /* Only load this structure when this .h file is called in the snmp_vars.c 
    file in tha agent subdirectory of the source tree */
@@ -68,8 +67,8 @@ struct variable2 ipfwacc_variables[] = {
     { IPFWACCPROTO,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPROTO}},
     { IPFWACCBIDIR,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCBIDIR}},
     { IPFWACCDIR,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCDIR}},
-    { IPFWACCBYTES,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCBYTES}},
-    { IPFWACCPACKETS,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPACKETS}},
+    { IPFWACCBYTES,  ASN_COUNTER, RONLY, var_ipfwacc, 1, {IPFWACCBYTES}},
+    { IPFWACCPACKETS,  ASN_COUNTER, RONLY, var_ipfwacc, 1, {IPFWACCPACKETS}},
     { IPFWACCNSRCPRTS,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCNSRCPRTS}},
     { IPFWACCNDSTPRTS,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCNDSTPRTS}},
     { IPFWACCSRCISRNG,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCSRCISRNG}},
@@ -88,7 +87,7 @@ struct variable2 ipfwacc_variables[] = {
 
 /* now load this mib into the agents mib table */
 
-config_load_mib(1.3.6.1.4.1.2021.13.1.1, 9 , ipfwacc_variables)
+config_load_mib(1.3.6.1.4.1.2021.13.1, 9 , ipfwacc_variables)
 
 #endif /* IN_SNMP_VARS_C */
 #endif /* _MIBGROUP_IPFWACC_H */

@@ -120,18 +120,20 @@ intpr(int interval)
 	int ifindex;
 	struct _if_info {
 	    char name[128];
+	    char ip[128], route[128];
 	    int mtu;
 	    int ipkts, ierrs, opkts, oerrs, operstatus, outqueue;
 	    u_long netmask;
 	    struct in_addr ifip, ifroute;
 	} *if_table, *cur_if;
+	int max_name = 0, max_ip = 0, max_route = 0, i;
 
 	if (interval) {
 		sidewaysintpr((unsigned)interval);
 		return;
 	}
 	var = getvarbyname(Session, oid_cfg_nnets, sizeof(oid_cfg_nnets) / sizeof(oid));
-	if (var) {
+	if (var && var->val.integer) {
 	    cfg_nnets = *var->val.integer;
 	    snmp_free_var(var);
 	}
@@ -140,10 +142,6 @@ intpr(int interval)
 	    return;
 	}
 	DEBUGMSGTL (("netstat:if", "cfg_nnets = %d\n", cfg_nnets));
-	printf("%-7.7s %-4.4s %-15.15s %-15.15s %8.8s %5.5s %8.8s %5.5s %5.5s",
-		"Name", "Mtu", "Network", "Address", "Ipkts", "Ierrs",
-		"Opkts", "Oerrs", "Queue");
-	putchar('\n');
 
 	memset (curifip, 0, sizeof (curifip));
 	if_table = (struct _if_info *) calloc (cfg_nnets, sizeof (*if_table));
@@ -188,6 +186,14 @@ intpr(int interval)
 		    }
 		}
 		cur_if->ifroute.s_addr = cur_if->ifip.s_addr & cur_if->netmask;
+		if (cur_if->ifroute.s_addr)
+			strcpy(cur_if->route, netname (cur_if->ifroute, 0));
+		else strcpy(cur_if->route, "none");
+		if ((i = strlen(cur_if->route)) > max_route) max_route = i;
+		if (cur_if->ifip.s_addr)
+			strcpy(cur_if->ip, routename (cur_if->ifip));
+		else strcpy(cur_if->ip, "none");
+		if ((i = strlen(cur_if->ip)) > max_ip) max_ip = i;
 
 		snmp_free_pdu (response);
 
@@ -252,6 +258,7 @@ intpr(int interval)
 			    var->val_len = sizeof(cur_if->name) - 1;
 			memmove (cur_if->name, var->val.string, var->val_len);
 			cur_if->name [var->val_len] = 0;
+			if ((i = strlen(cur_if->name)+1) > max_name) max_name = i;
 			break;
 		    case IFOPERSTATUS:
 			cur_if->operstatus = *var->val.integer; break;
@@ -260,27 +267,29 @@ intpr(int interval)
 
 		snmp_free_pdu (response);
 
-		cur_if->name[6] = '\0';
-                cp = (char *) strchr(cur_if->name, ' ');
-                if ( cp != NULL )
-                  *cp = '\0';
 		if (intrface != NULL && strcmp(cur_if->name, intrface) != 0) {
 			cur_if->name [0] = 0;
 			continue;
 		}
 		if (cur_if->operstatus != MIB_IFSTATUS_UP) {
-			cp = (char *) strchr(cur_if->name, '\0');
+			cp = strchr(cur_if->name, '\0');
 			*cp++ = '*';
 			*cp = '\0';
 		}
 	}
 
+	printf("%*.*s %5.5s %*.*s %*.*s %9.9s %5.5s %9.9s %5.5s %5.5s",
+		-max_name, max_name, "Name", "Mtu",
+		-max_route, max_route, "Network",
+		-max_ip, max_ip, "Address", "Ipkts", "Ierrs",
+		"Opkts", "Oerrs", "Queue");
+	putchar('\n');
 	for (ifnum = 0, cur_if = if_table; ifnum < cfg_nnets; ifnum++, cur_if++) {
 		if (cur_if->name [0] == 0) continue;
-		printf("%-7.7s %4d ", cur_if->name, cur_if->mtu);
-		printf("%-15.15s ", cur_if->ifroute.s_addr ? netname (cur_if->ifroute, 0) : "none");
-		printf("%-15.15s ", cur_if->ifip.s_addr ? routename (cur_if->ifip) : "none");
-		printf("%8d %5d %8d %5d %5d",
+		printf("%-*.*s %5d ", max_name, max_name, cur_if->name, cur_if->mtu);
+		printf("%-*.*s ", max_route, max_route, cur_if->route);
+		printf("%-*.*s ", max_ip, max_ip, cur_if->ip);
+		printf("%9d %5d %9d %5d %5d",
 		    cur_if->ipkts, cur_if->ierrs,
 		    cur_if->opkts, cur_if->oerrs,
 		    cur_if->outqueue);
@@ -304,17 +313,19 @@ intpro(int interval)
 	int ifindex;
 	struct _if_info {
 	    char name[128];
+	    char ip[128], route[128];
 	    unsigned long ioctets, ierrs, ooctets, oerrs, operstatus, outqueue;
 	    u_long netmask;
 	    struct in_addr ifip, ifroute;
 	} *if_table, *cur_if;
+	int max_name = 0, max_route = 0, max_ip = 0, i;
 
 	if (interval) {
 		sidewaysintpr((unsigned)interval);
 		return;
 	}
 	var = getvarbyname(Session, oid_cfg_nnets, sizeof(oid_cfg_nnets) / sizeof(oid));
-	if (var) {
+	if (var && var->val.integer) {
 	    cfg_nnets = *var->val.integer;
 	    snmp_free_var(var);
 	}
@@ -323,9 +334,6 @@ intpro(int interval)
 	    return;
 	}
 	DEBUGMSGTL (("netstat:if", "cfg_nnets = %d\n", cfg_nnets));
-	printf("%-7.7s %-15.15s %-15.15s %12.12s %12.12s ",
-		"Name", "Network", "Address", "Ioctets", "Ooctets");
-	putchar('\n');
 
 	memset (curifip, 0, sizeof (curifip));
 	if_table = (struct _if_info *) calloc (cfg_nnets, sizeof (*if_table));
@@ -370,6 +378,14 @@ intpro(int interval)
 		    }
 		}
 		cur_if->ifroute.s_addr = cur_if->ifip.s_addr & cur_if->netmask;
+		if (cur_if->ifroute.s_addr)
+			strcpy(cur_if->route, netname (cur_if->ifroute, 0));
+		else strcpy(cur_if->route, "none");
+		if ((i = strlen(cur_if->route)) > max_route) max_route = i;
+		if (cur_if->ifip.s_addr)
+			strcpy(cur_if->ip, routename (cur_if->ifip));
+		else strcpy(cur_if->ip, "none");
+		if ((i = strlen(cur_if->ip)) > max_ip) max_ip = i;
 
 		snmp_free_pdu (response);
 
@@ -416,6 +432,7 @@ intpro(int interval)
 			    var->val_len = sizeof(cur_if->name) - 1;
 			memmove (cur_if->name, var->val.string, var->val_len);
 			cur_if->name [var->val_len] = 0;
+			if ((i = strlen(cur_if->name)+1) > max_name) max_name = i;
 			break;
 		    case IFOPERSTATUS:
 			cur_if->operstatus = *var->val.integer; break;
@@ -424,10 +441,6 @@ intpro(int interval)
 
 		snmp_free_pdu (response);
 
-		cur_if->name[6] = '\0';
-                cp = (char *) strchr(cur_if->name, ' ');
-                if ( cp != NULL )
-                  *cp = '\0';
 		if (intrface != NULL && strcmp(cur_if->name, intrface) != 0) {
 			cur_if->name [0] = 0;
 			continue;
@@ -439,11 +452,16 @@ intpro(int interval)
 		}
 	}
 
+	printf("%*.*s %*.*s %*.*s %12.12s %12.12s ",
+		-max_name, max_name, "Name",
+		-max_route, max_route, "Network",
+		-max_ip, max_ip, "Address", "Ioctets", "Ooctets");
+	putchar('\n');
 	for (ifnum = 0, cur_if = if_table; ifnum < cfg_nnets; ifnum++, cur_if++) {
 		if (cur_if->name [0] == 0) continue;
-		printf("%-7.7s ", cur_if->name);
-		printf("%-15.15s ", cur_if->ifroute.s_addr ? netname (cur_if->ifroute, 0) : "none");
-		printf("%-15.15s ", cur_if->ifip.s_addr ? routename (cur_if->ifip) : "none");
+		printf("%*.*s ", -max_name, max_name, cur_if->name);
+		printf("%*.*s ", -max_route, max_route, cur_if->route);
+		printf("%*.*s ", -max_ip, max_ip, cur_if->ip);
 		printf("%12lu %12lu",
 		    cur_if->ioctets,
 		    cur_if->ooctets);
@@ -470,7 +488,7 @@ u_char	signalled;			/* set if alarm goes off "early" */
  * timing precision is not considered important.
  */
 
-#if (defined(WIN32) || defined(cygwin32))
+#if (defined(WIN32) || defined(cygwin))
 static int sav_int;
 static time_t timezup;
 static void
@@ -539,7 +557,7 @@ timerPause(void)
 #endif
 }
 
-#endif /* !WIN32 && !cygwin32 */
+#endif /* !WIN32 && !cygwin */
 
 /*
  * Print a running summary of interface statistics.

@@ -63,6 +63,9 @@
 
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
+#if HAVE_SYS_QUEUE_H
+#include <sys/queue.h>
+#endif
 #if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
 #endif
@@ -576,7 +579,7 @@ static void UDP_Scan_Init(void)
 
     pp = &udp_inpcb_list;
     
-    while (line == fgets (line, 256, in))
+    while (line == fgets (line, sizeof(line), in))
       {
 	struct inpcb pcb, *nnew;
 	unsigned int state, lport;
@@ -653,7 +656,7 @@ linux_read_udp_stat (struct udp_mib *udpstat)
   if (! in)
     return;
 
-  while (line == fgets (line, 1024, in))
+  while (line == fgets (line, sizeof(line), in))
     {
       if (4 == sscanf (line, "Udp: %lu %lu %lu %lu\n",
 			&udpstat->UdpInDatagrams, &udpstat->UdpNoPorts,

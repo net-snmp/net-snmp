@@ -100,8 +100,6 @@
 	 *
 	 *********************/
 
-#if !defined(CAN_USE_SYSCTL) || !defined(IPCTL_STATS)
-
 #ifdef linux
 static void linux_read_ip_stat (struct ip_mib *);
 #endif
@@ -249,6 +247,7 @@ header_ip(struct variable *vp,
 
 
 
+#if !defined(CAN_USE_SYSCTL) || !defined(IPCTL_STATS)
 #ifndef solaris2
 #ifndef linux
 #ifndef HAVE_SYS_TCPIPSTATS_H
@@ -426,7 +425,7 @@ var_ip(struct variable *vp,
     static struct kna tcpipstats;
     int i;
 
-    if (header_icmp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
+    if (header_ip(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
 
     /*
@@ -1013,7 +1012,7 @@ linux_read_ip_stat (struct ip_mib *ipstat)
   if (! in)
     return;
 
-  while (line == fgets (line, 1024, in))
+  while (line == fgets (line, sizeof(line), in))
     {
       if (19 == sscanf (line,   
 "Ip: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
@@ -1032,40 +1031,6 @@ linux_read_ip_stat (struct ip_mib *ipstat)
 
 #else /* CAN_USE_SYSCTL && IPCTL_STATS */
 
-void init_ip(void)
-{
-	;
-}
-
-static int
-header_ip(struct variable *vp,
-	  oid *name,
-	  int *length,
-	  int exact,
-	  int *var_len,
-	  WriteMethod **write_method)
-{
-#define IP_NAME_LENGTH	8
-    oid newname[MAX_OID_LEN];
-    int result;
-
-
-    DEBUGMSGTL(("mibII/ip", "var_ip: "));
-    DEBUGMSGOID(("mibII/ip", name, *length));
-    DEBUGMSG(("mibII/ip", " %d\n", exact));
-
-    memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
-    newname[IP_NAME_LENGTH] = 0;
-    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
-    if ((exact && (result != 0)) || (!exact && (result >= 0)))
-        return(MATCH_FAILED);
-    memcpy(name, newname, ((int)vp->namelen + 1) * sizeof(oid));
-    *length = vp->namelen + 1;
-
-    *write_method = 0;
-    *var_len = sizeof(long);	/* default to 'long' results */
-    return(MATCH_SUCCEEDED);
-}
 
 u_char *
 var_ip(struct variable *vp,
