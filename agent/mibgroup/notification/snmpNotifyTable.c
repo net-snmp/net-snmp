@@ -251,6 +251,7 @@ notifyTable_unregister_notifications(int major, int minor,
             SNMP_FREE(nptr);
         }
     }
+    return(0);
 }
 
 /*
