@@ -126,7 +126,7 @@ usage (void)
   fprintf(stderr, "  deleteAccess  GROUPNAME [CONTEXTPREFIX] SECURITYMODEL SECURITYLEVEL\n");
   fprintf(stderr, "  createSec2Group  MODEL SECURITYNAME  GROUPNAME\n");
   fprintf(stderr, "  deleteSec2Group  MODEL SECURITYNAME\n");
-  fprintf(stderr, "  createView  [-e] NAME SUBTREE MASK\n");
+  fprintf(stderr, "  createView  [-Ce] NAME SUBTREE MASK\n");
   fprintf(stderr, "  deleteView  NAME SUBTREE\n"); 
 }
 

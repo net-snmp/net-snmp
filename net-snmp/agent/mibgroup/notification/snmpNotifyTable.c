@@ -186,8 +186,9 @@ notifyTable_register_notifications(int major, int minor,
     if (ss->version == SNMP_VERSION_3) {
         pptr->secModel = ss->securityModel;
         pptr->secLevel = ss->securityLevel;
-        memdup((void *) &pptr->secName, (void *) ss->securityName,
-               ss->securityNameLen+1);
+        pptr->secName = (u_char *)malloc(ss->securityNameLen+1);
+        memcpy((void *) pptr->secName, (void *) ss->securityName,
+               ss->securityNameLen);
         pptr->secName[ss->securityNameLen] = 0;
     } else {
         pptr->secModel = ss->version == SNMP_VERSION_1 ?
@@ -195,8 +196,9 @@ notifyTable_register_notifications(int major, int minor,
         pptr->secLevel = SNMP_SEC_LEVEL_NOAUTH;
         pptr->secName = NULL;
         if (ss->community && (ss->community_len > 0)) {
-            memdup((void *) &pptr->secName, (void *) ss->community,
-                   ss->community_len+1);
+            pptr->secName = (u_char *)malloc(ss->community_len+1);
+            memcpy((void *) pptr->secName, (void *) ss->community,
+                   ss->community_len);
             pptr->secName[ss->community_len] = 0;
         }
     }

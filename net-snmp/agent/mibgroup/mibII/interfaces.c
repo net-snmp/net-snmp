@@ -627,10 +627,10 @@ var_ifEntry(struct variable *vp,
     /* XXX */
     return NULL;
   case IFADMINSTATUS:
-    long_return = if_msg.ifm_flags & IFF_RUNNING ? 1 : 2;
+    long_return = if_msg.ifm_flags & IFF_UP ? 1 : 2;
     return (u_char *) &long_return;
   case IFOPERSTATUS:
-    long_return = if_msg.ifm_flags & IFF_UP ? 1 : 2;
+    long_return = if_msg.ifm_flags & IFF_RUNNING ? 1 : 2;
     return (u_char *) &long_return;
     /* ifLastChange */
   case IFINOCTETS:
@@ -801,10 +801,10 @@ var_ifEntry(struct variable *vp,
 		*var_len = 0;
 	    return(u_char *) return_buf;
 	case IFADMINSTATUS:
-	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
+	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFOPERSTATUS:
-	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
+	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFLASTCHANGE:
 #if defined(STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC) && !(defined(freebsd2) && __FreeBSD_version < 199607)
@@ -1014,10 +1014,10 @@ var_ifEntry(struct variable *vp,
 		    *var_len = 0;
 		return(u_char *) return_buf;
 	case IFADMINSTATUS:
-	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
+	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFOPERSTATUS:
-	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
+	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFLASTCHANGE:
 	  if ( hp_fd != -1 )
@@ -1995,10 +1995,10 @@ var_ifEntry(struct variable *vp,
 			return cp;
 	}
 	case IFADMINSTATUS:
-		long_return = ifmd.ifmd_flags & IFF_RUNNING ? 1 : 2;
+		long_return = ifmd.ifmd_flags & IFF_UP ? 1 : 2;
 		return (u_char *) &long_return;
 	case IFOPERSTATUS:
-		long_return = ifmd.ifmd_flags & IFF_UP ? 1 : 2;
+		long_return = ifmd.ifmd_flags & IFF_RUNNING ? 1 : 2;
 		return (u_char *) &long_return;
 	case IFLASTCHANGE:
 		if (ifmd.ifmd_data.ifi_lastchange.tv_sec == 0 &&

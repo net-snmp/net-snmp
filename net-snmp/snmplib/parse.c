@@ -3533,7 +3533,7 @@ unload_all_mibs()
         free_enums( &ptc->enums );
         free_ranges( &ptc->ranges );
         free(ptc->descriptor);
-        free(ptc->hint);
+        if (ptc->hint) free(ptc->hint);
     }
     memset(tclist, 0, MAXTC * sizeof(struct tc));
 
