@@ -104,6 +104,7 @@
 
 #define SNMPLIBPATH "\\USR\\LIB"
 #define SNMPSHAREPATH "\\USR"
+#define SNMPCONFPATH "\\USR"
 
 /* SNMPPATH contains (more) important files */
 
