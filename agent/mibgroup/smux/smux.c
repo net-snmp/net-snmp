@@ -1334,7 +1334,7 @@ smux_parse_var(u_char *varbind,
 		objid_len = MAX_OID_LEN;
 		asn_parse_objid(var_val, &len, vartype, 
 				smux_objid, &objid_len);
-		*varlength = objid_len;
+		*varlength = objid_len*sizeof(oid);
 		return (u_char *)smux_objid;
 		break;
             case SNMP_NOSUCHOBJECT:
