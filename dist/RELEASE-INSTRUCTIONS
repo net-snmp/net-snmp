@@ -23,6 +23,9 @@ tag name.
     of making releases, but only one is used now.  It pulls the
     "Ext-VERSION-NUMBERS-HERE" tag apart and runs things based on the
     information.  It probably needs to be rewritten.  Probably in perl.
+  - if you don't have cvs2cl installed, you can get it from
+       http://www.red-bean.com/cvs2cl/
+
 
 ***************************************************************************
 TESTING:
@@ -74,8 +77,8 @@ RELEASING:
      before.
 
   1) First, create the appropriate NEWS file segments.  I usually do
-     this by making a preliminary ChangeLog addition file (see the step
-     below for doing this).
+     this by making a preliminary ChangeLog addition file (see step 5
+     below for how to generate the ChangeLog).
 
   2) update the README file, if needed.
 
@@ -139,13 +142,13 @@ RELEASING:
      [if you did this before above, do it again if you made any
      changes to the CVS tree since creating the last revision]
 
-       cvs2cl -b -r -f ChangeLog.add --no-wrap -S
+       cvs2cl.pl -b -r -f ChangeLog.add --no-wrap -S
        perl dist/changelogfix < ChangeLog.add > ChangeLog.reallyadd
 
      Note that if you're on a branch, add the -f option to cvs2cl
      like:
 
-       cvs2cl -b -r -f ChangeLog.add -F V4-2-patches --no-wrap -S
+       cvs2cl.pl -b -r -f ChangeLog.add -F V4-2-patches --no-wrap -S
 
      Edit the ChangeLog file and insert the appropriate portion of the
      ChangeLog.reallyadd file.  You can usually find the point where
