@@ -580,6 +580,9 @@ _init_snmp (void)
     ds_set_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE,
                    DEFAULT_ASNENCODING_DIRECTION);
 #endif
+    /* Default to MIB::node style output */
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 2);
+
 }
 
 /*
