@@ -167,13 +167,12 @@ sub displaytable {
     my $tablename = shift;
     my %config = @_;
     my $clauses = $config{'-clauses'};
-    my $sortfn = $config{'-sort'};
     my $dolink = $config{'-dolink'};
     my $datalink = $config{'-datalink'};
     my $beginhook = $config{'-beginhook'};
     my $endhook = $config{'-endhook'};
     my $selectwhat = $config{'-select'};
-    my $printonly = $config{'-printonly'};
+#    my $printonly = $config{'-printonly'};
     $selectwhat = "*" if (!defined($selectwhat));
     my $tableparms = $config{'-tableparms'} || $displaytable::tableparms;
     my $headerparms = $config{'-headerparms'} || $displaytable::headerparms;
@@ -241,9 +240,7 @@ sub displaytable {
 #	    print "setting up: $cmd<br>\n";
 	}
 	if ($doheader) {
-	    if (defined($sortfn) && ref($sortfn) eq "CODE") {
-		@keys = (sort $sortfn keys(%$data));
-	    } elsif ($config{'-selectorder'} && 
+	    if ($config{'-selectorder'} && 
 		     ref($config{'-selectorder'}) eq "ARRAY") {
 		@keys = @{$config{'-selectorder'}};
 	    } elsif ($config{'-selectorder'}) {
@@ -315,10 +312,6 @@ sub displaytable {
 	    &$beginhook($dbh, $tablename, $data);
 	}
 	if ($edited) {
-#	    print "updating ", join(", ", 
-#				     getquery($q, $data, \@editkeys, @valuekeys)), ":",
-#	    join(", ",getvalues($data, @editkeys)), "<br>\n";
-	    
 	    my $ret = $uph->execute(getquery($q, $data, \@editkeys, @valuekeys), 
 				    getvalues($data, @editkeys));
 #	    print "ret: $ret, $DBI::errstr<br>\n";
@@ -334,7 +327,9 @@ sub displaytable {
 					     @{$config{'-editable'}});
 		    print "<input type=text name=\"$ukey\" value=\"$data->{$key}\">";
 		} else {
-		    if ($data->{$key} ne "") {
+		    if ($config{'-printer'}) {
+			&{$config{'-printer'}}($key, $data->{$key}, $data);
+		    } elsif ($data->{$key} ne "") {
 			print $data->{$key};
 		    } else {
 			print "&nbsp";
@@ -398,3 +393,150 @@ sub getquery {
     return @ret;
 }
 1;
+__END__
+=head1 NAME
+
+SNMP - The Perl5 'SNMP' Extension Module v3.1.0 for the UCD SNMPv3 Library
+
+=head1 SYNOPSIS
+
+ use DBI;
+ use displaytable;
+
+ $dbh = DBI->connect(...);
+ $numshown = displaytable($dbh, 'tablename', [options]);
+
+=head1 DESCRIPTION
+
+The displaytable and displaygraph functions format the output of a DBI
+database query into an html or graph output.
+
+=head1 DISPLAYTABLE OPTIONS
+
+=over 4
+
+=item -select => VALUE
+
+Selects a set of columns, or functions to be displayed in the resulting table.
+
+Example: -select => 'column1, column2'
+
+Default: *
+
+=item -title => VALUE
+
+Use VALUE as the title of the table.
+
+=item -notitle => 1
+
+Don't print a title for the table.
+
+=item -noheaders => 1
+
+Don't print a header row at the top of the table.
+
+=item -selectorder => 1
+
+=item -selectorder => [qw(column1 column2)]
+
+Defines the order of the columns.  A value of 1 will use the order of
+the -select statement by textually parsing it's comma seperated list.
+If an array is passed containing the column names, that order will be
+used.
+
+Example: 
+
+  -select => distinct(column1) as foo, -selectorder => [qw(foo)]
+
+=item -maxrows => NUM
+
+Limits the number of display lines to NUM.
+
+=item -tableparms => PARAMS
+
+=item -headerparms => PARAMS
+
+The parameters to be used for formating the table contents and the
+header contents.
+
+Defaults:
+
+  -tableparms  => "border=1 bgcolor='#c0c0e0'"
+
+  -headerparms => "border=1 bgcolor='#b0e0b0'"
+
+=item -dolink => \&FUNC
+
+If passed, FUNC(name) will be called on the tablename or header.  The
+function should return a web url that the header/table name should be
+linked to.
+
+=item -datalink => \&FUNC
+
+Identical to -dolink, but called for the data portion of the table.
+Arguments are the column name and the data element for that column.
+
+=item -printer => \&FUNC
+
+Calls FUNC(COLUMNNAME, COLUMNDATA, DATA) to print the data from each
+column.  COLUMNDATA is the data itself, and DATA is a reference to the
+hash for the entire row (IE, COLUMNDATA = $DATA->{$COLUMNNAME}).
+
+=item -beginhook => \&FUNC
+
+=item -endhook => \&FUNC
+
+displaytable will call these functions at the beginning and end of the
+printing of a row.  Useful for inserting new columns at the beginning
+or end of the table.  When the headers to the table are being printed,
+they will be called like FUNC($dbh, TABLENAME).  When the data is
+being printed, they will be called like FUNC($dbh, TABLENAME, DATA),
+which DATA is a reference to the hash containing the row data.
+
+Example: 
+
+  -endhook => sub { 
+      my ($d, $t, $data) = @_; 
+      if (defined($data)) { 
+	  print "<td>",(100 * $data->{'column1'} / $data->{'column2'}),"</td>";
+      } else { 
+	  print "<td>Percentage</td>"; 
+      } 
+  }
+
+=item -clauses => sql_clauses
+
+Adds clauses to the sql expression.
+
+Example: -clauses => "where column1 = 'value' limit 10 order by column2"
+
+=item -xlat => xlattable
+
+Translates column headers and the table name by looking in a table for
+the appropriate translation.  Essentially uses:
+
+  SELECT newname FROM xlattable where oldname = ?
+
+to translate everything.
+
+=item -editable => [qw(INDEX_COLUMNS)]
+
+=item -CGI      => CGI_REFERENCE
+
+If both of these are passed as arguments, the table is printed in
+editable format.  The INDEX_COLUMNS should be a list of columns that
+can be used to uniquely identify a row.  They will be the non-editable
+columns shown in the table.  Everything else will be editable.  The
+form and the submit button written by the rest of the script must loop
+back to the same displaytable clause for the edits to be committed to
+the database.  CGI_REFERENCE should be a reference to the CGI object
+used to query web parameters from ($CGI_REFERENCE = new CGI);
+
+
+=back
+
+=head1 Author
+
+wjhardaker@ucdavis.edu
+
+=cut
