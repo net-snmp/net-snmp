@@ -17,6 +17,7 @@ sub InitMakeParams {
     my %Params = (
 		  NAME         => 'SNMP',
 		  dist         => { SUFFIX => "gz", COMPRESS => "gzip -9f"},
+		  MAN4PODS => { 'SNMP.pm' => '$(INST_MAN3DIR)/SNMP.3' },
 		  XSPROTOARG   => '-noprototypes', 	# XXX remove later?
 		  VERSION_FROM => 'SNMP.pm',
 		  realclean        => { FILES => 'host' },
