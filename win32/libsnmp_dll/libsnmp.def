@@ -152,6 +152,9 @@ EXPORTS
 	snmp_sess_close
 	snmp_sess_error
 	snmp_sess_synch_response
+	snmp_mib_toggle_options
+	snmp_mib_toggle_options_usage
+	read_config_print_usage
 	Mib			DATA
 	tree_head		DATA
 	snmp_errno		DATA
