@@ -4731,6 +4731,9 @@ add_mibdir(const char *dirname)
             fclose(ip);
         return (count);
     }
+    else
+        snmp_log(LOG_ERR,"cannot open MIB directory %s\n", dirname);
+
     return (-1);
 }
 
