@@ -12,9 +12,9 @@ OTHERINSTALL=localinstall
 # local info
 #
 SNMPCONFPATH=@SNMPCONFPATH@
-PERLSCRIPTS=snmpcheck tkmib mib2c fixproc ipf-mod.pl rsnmp snmpconf
+PERLSCRIPTS=snmpcheck tkmib mib2c fixproc ipf-mod.pl snmpconf
 SCRIPTSMADEFORPERL=snmpcheck.made tkmib.made mib2c.made fixproc.made \
-	ipf-mod.pl.made rsnmp.made snmpconf.made traptoemail.made
+	ipf-mod.pl.made snmpconf.made traptoemail.made
 PERLPROG=@PERLPROG@
 DATASRCS=mib2c.conf mib2c.iterate.conf mib2c.create-dataset.conf \
 	mib2c.array-user.conf
@@ -68,13 +68,6 @@ fixproc.made: $(srcdir)/fixproc
 	  $(PERLPROG) -p -e 's%^#!.*/perl.*%#!$(PERLPROG)%' ${srcdir}/fixproc > fixproc.made; \
 	else \
 	  touch fixproc.made; \
-        fi
-
-rsnmp.made: $(srcdir)/rsnmp
-	if test "x$(PERLPROG)" != "x" ; then \
-	  $(PERLPROG) -p -e 's%^#!.*/perl.*%#!$(PERLPROG)%; s#/usr/local/share#$(datadir)#g;' ${srcdir}/rsnmp > rsnmp.made; \
-	else \
-	  touch rsnmp.made; \
         fi
 
 snmpconf.made: $(srcdir)/snmpconf
