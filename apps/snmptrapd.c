@@ -669,7 +669,7 @@ static void free_trap2_fmt(void)
 void usage(void)
 {
     fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-D] [-p #] [-P] [-o file] [-s] [-f] [-l [d0-7]] [-e] [-d] [-n] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
-    fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+    fprintf(stderr,"UCD-SNMP version: %s\n", VersionInfo);
     fprintf(stderr, "\n\
   -h        Print this help message and exit\n\
   -H        Read what can show up in config file\n\
@@ -782,7 +782,7 @@ int main(int argc, char *argv[])
     while ((arg = getopt(argc, argv, "VdnqD:p:m:M:Po:O:esSafl:Hu:c:CF:T:")) != EOF){
 	switch(arg) {
 	case 'V':
-            fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+            fprintf(stderr,"UCD-SNMP version: %s\n", VersionInfo);
             exit(0);
             break;
 	case 'd':
@@ -981,7 +981,7 @@ int main(int argc, char *argv[])
 	time (&timer);
 	tm = localtime (&timer);
         snmp_log(LOG_INFO,
-                 "%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Started.\n",
+                 "%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-SNMP version %s Started.\n",
                  tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
                  tm->tm_hour, tm->tm_min, tm->tm_sec,
                  VersionInfo);
@@ -1026,13 +1026,30 @@ int main(int argc, char *argv[])
 		time_t timer;
 		time (&timer);
 		tm = localtime (&timer);
-		printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Reconfigured.\n",
+		printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-SNMP version %s Reconfigured.\n",
 		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 		       tm->tm_hour, tm->tm_min, tm->tm_sec,
 		       VersionInfo);
+		
+                /*
+                 * If we are logging to a file, receipt of SIGHUP also
+                 * indicates the the log file should be closed and re-opened.
+                 * This is useful for users that want to rotate logs in a more
+                 * predictable manner.
+                 */
+                if (logfile) {
+                    snmp_enable_filelog(logfile, 1);
+		}
+
+                snmp_log(LOG_INFO,
+                         "%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-SNMP version %s Reconfigured.\n",
+                         tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+                         tm->tm_hour, tm->tm_min, tm->tm_sec,
+                         VersionInfo);
 	    }
-	    if (Syslog)
+	    if (Syslog) {
 		syslog(LOG_INFO, "Snmptrapd reconfiguring");
+	    }
 	    update_config();
             if (trap1_fmt_str_remember) {
                 free_trap1_fmt();
@@ -1074,7 +1091,7 @@ int main(int argc, char *argv[])
 	time_t timer;
 	time (&timer);
 	tm = localtime (&timer);
-	printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s Stopped.\n",
+	printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-SNMP version %s Stopped.\n",
 	       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 	       tm->tm_hour, tm->tm_min, tm->tm_sec,
 	       VersionInfo);
