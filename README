@@ -52,7 +52,7 @@ AVAILABILITY
     Download:
       - http://download.sourceforge.net/net-snmp/
     Web page:
-      - http://net-snmp.sourceforge.net/
+      - http://www.netsnmp.org/
     Project page:
       - http://sourceforge.net/projects/net-snmp/
 
@@ -66,7 +66,7 @@ AVAILABILITY
 
 WEB PAGES
 
-  http://net-snmp.sourceforge.net/
+  http://www.netsnmp.org/
   http://sourceforge.net/projects/net-snmp/
 
   Make sure you check out the logo there, which is created using
@@ -147,7 +147,7 @@ AGENT EXTENSIBILITY
   re-run configure and re-compile (or link against its libraries).  No
   modification of the distributed source files are necessary.  See the
   following files for details on how to go about this:
-  http://net-snmp.sourcerforge.net/tutorial/toolkit/, AGENT.txt,
+  http://www.netsnmp.org/tutorial/toolkit/, AGENT.txt,
   agent/mibgroup/examples/example.c, and agent/mibgroup/examples/example.h.
 
   Also, see the local/mib2c program and its README file for help in
