@@ -944,6 +944,9 @@ dnl On some platforms (Irix) libnsl and libsocket should not be used.
 AC_CHECK_FUNC(gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME),
 	AC_CHECK_LIB(nsl, gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME)
 	LIBS="${LIBS} -lnsl"))
+AC_CHECK_FUNC(gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME),
+	AC_CHECK_LIB(socket, gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME)
+	LIBS="${LIBS} -lsocket"))
 AC_CHECK_FUNC(getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME),
 	AC_CHECK_LIB(socket, getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME)
 	LIBS="${LIBS} -lsocket"))

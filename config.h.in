@@ -983,6 +983,15 @@
 /* configure options specified */
 #define CONFIGURE_OPTIONS ""
 
+#ifdef svr5
+/* using CCS "cc", "configure" does not find this item */
+#define HAVE_MEMCPY 1
+
+/* lie about this next define to avoid sa_len and sa_family MACROS !! */
+#define STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_FAMILY2 1
+
+#endif /* svr5 */
+
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
 # define strchr index

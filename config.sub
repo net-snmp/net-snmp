@@ -695,6 +695,9 @@ case $os in
 	-svr4*)
 		os=-sysv4
 		;;
+	-svr5*)
+		os=-svr5
+		;;
 	-unixware*)
 		os=-sysv4.2uw
 		;;
