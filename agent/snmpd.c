@@ -503,7 +503,11 @@ void send_easy_trap (int trap,
   
 static void usage(char *prog)
 {
-  printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-q] [-D] [-p NUM] [-L] [-l LOGFILE]\n",prog);
+  printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-q] [-D] [-p NUM] [-L] [-l LOGFILE]",prog);
+#if HAVE_UNISTD_H
+  printf(" [-u uid] [-g gid]");
+#endif
+  printf("\n");
   printf("\n\tVersion:  %s\n",VersionInfo);
   printf("\tAuthor:   Wes Hardaker\n");
   printf("\tEmail:    ucd-snmp-coders@ucd-snmp.ucdavis.edu\n");
@@ -521,6 +525,10 @@ static void usage(char *prog)
   printf("-L\t\tPrint warnings/messages to stdout/err rather than a logfile\n");
   printf("-A\t\tAppend to the logfile rather than truncating it.\n");
   printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
+#if HAVE_UNISTD_H
+  printf("-g \t\tChange to this gid after opening port\n");
+  printf("-u \t\tChange to this uid after opening port\n");
+#endif
   printf("\t\t(By default LOGFILE=%s)\n",
 #ifdef LOGFILE
          LOGFILE
@@ -638,6 +646,7 @@ main(int argc, char *argv[])
         char           *pid_file = NULL;
         FILE           *PID;
         int             dont_zero_log = 0;
+        int             uid=0, gid=0;
 
 	logfile[0]		= 0;
 	optconfigfile		= NULL;
@@ -717,6 +726,16 @@ main(int argc, char *argv[])
                 case 'A':
                     dont_zero_log = 1;
                     break;
+#if HAVE_UNISTD_H
+		case 'u':
+                    if (++arg == argc) usage(argv[0]);
+                    uid = atoi(argv[arg]);
+                    break;
+		case 'g':
+                    if (++arg == argc) usage(argv[0]);
+                    gid = atoi(argv[arg]);
+                    break;
+#endif
                 case 'h':
                     usage(argv[0]);
                     break;
@@ -863,6 +882,24 @@ main(int argc, char *argv[])
  
     printf("\n");
     fflush(stdout);
+
+ #if HAVE_UNISTD_H
+    if (gid) {
+/*      snmp_log(LOG_DEBUG, "Changing gid to %d.\n", gid); */
+      if (setgid(gid)==-1) {
+          log_perror("setgid failed: ");
+          exit(1);
+      }
+    }
+    if (uid) {
+/*      snmp_log(LOG_DEBUG, "Changing uid to %d.\n", uid); */
+      if(setuid(uid)==-1) {
+          log_perror("setuid failed: ");
+          exit(1);
+      }
+    }
+#endif
+
 
     memset(addrCache, 0, sizeof(addrCache));
     /* 
