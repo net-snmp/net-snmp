@@ -15,6 +15,11 @@
  */
 
 /*
+ * UCD-SNMP config details 
+ */
+#include <net-snmp/net-snmp-config.h>
+
+/*
  * Standard includes 
  */
 #include <stdlib.h>
@@ -29,22 +34,18 @@
 #include <sys/pstat.h>
 #include <sys/dk.h>
 
-/*
- * UCD-SNMP config details 
- */
-#include <config.h>
 
 /*
  * Includes needed for all modules 
  */
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
 #include "mibdefs.h"
-#include "mibincl.h"
 
 /*
  * Utility functions for UCD-SNMP 
  */
 #include "util_funcs.h"
-#include <snmp_alarm.h>
 
 /*
  * Header file for this module 
@@ -230,7 +231,7 @@ init_vmstat_hpux(void)
     /*
      * registering underneath 
      */
-    oid             vmstat_variables_oid[] = { EXTENSIBLEMIB, 11 };
+    oid             vmstat_variables_oid[] = { UCDAVIS_MIB, 11 };
 
     /*
      * register ourselves with the agent to handle our mib tree 

@@ -1,4 +1,4 @@
-#include <config.h>             /* local SNMP configuration details */
+#include <net-snmp/net-snmp-config.h>
 #if HAVE_STRING_H
 #include <string.h>
 #endif
@@ -12,16 +12,9 @@
 #include <dmalloc.h>
 #endif
 
-#include "mibincl.h"            /* Standard set of SNMP includes */
-#include "util_funcs.h"         /* utility function declarations */
-#include "read_config.h"        /* if the module uses run-time */
-                                        /*
-                                         * configuration controls
-                                         */
-#include "auto_nlist.h"         /* if the module needs to read */
-                                       /*
-                                        * kernel data structures
-                                        */
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/agent/auto_nlist.h>
 #include "memory.h"             /* the module-specific header */
 #include "memory_hpux.h"        /* the module-specific header */
 
@@ -98,7 +91,7 @@ init_memory_hpux(void)
      * Define the OID pointer to the top of the mib tree that we're
      * registering underneath 
      */
-    oid             mem_variables_oid[] = { EXTENSIBLEMIB, MEMMIBNUM };
+    oid             mem_variables_oid[] = { UCDAVIS_MIB, MEMMIBNUM };
 
     /*
      * register ourselves with the agent to handle our mib tree 
