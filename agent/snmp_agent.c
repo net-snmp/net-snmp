@@ -873,8 +873,10 @@ wrap_up_request(struct agent_snmp_session *asp, int status) {
         asp->pdu->command  = SNMP_MSG_RESPONSE;
         asp->pdu->errstat  = asp->status;
         asp->pdu->errindex = asp->index;
-        if (! snmp_send( asp->session, asp->pdu ))
+        if (! snmp_send( asp->session, asp->pdu )) {
             snmp_free_pdu(asp->pdu);
+            asp->pdu = NULL;
+        }
         snmp_increment_statistic(STAT_SNMPOUTPKTS);
         snmp_increment_statistic(STAT_SNMPOUTGETRESPONSES);
         asp->pdu = NULL;
