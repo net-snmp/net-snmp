@@ -211,6 +211,8 @@ void print_mib(FILE *);
 void print_mib_tree(FILE *, struct tree *);
 int  get_mib_parse_error_count(void);
 int  snmp_get_token(FILE *fp, char *token, int maxtlen);
+struct tree *
+find_best_tree_node(const char *name, struct tree *tree_top, u_int *match);
 
 #ifdef __cplusplus
 }

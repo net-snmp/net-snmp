@@ -45,6 +45,7 @@ EXPORTS
 	get_module_node
 	get_node
 	find_node
+	find_best_tree_node
 	get_symbol
 	get_tree
 	read_module
