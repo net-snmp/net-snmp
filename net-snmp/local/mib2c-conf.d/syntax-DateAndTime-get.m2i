@@ -18,10 +18,10 @@
    netsnmp_assert( (NULL != ${node}_len_ptr) && ((* ${node}_len_ptr) >= 11));
 
    /*
-    * TODO:
-    * get the date data from your context pointer.
+    * TODO:231:o: |-> copy $node data.
+    * get the date from your context pointer.
     */
-   return MFD_SKIP; /* TODO: remove this once you've set data */
+   return MFD_SKIP; /* TODO:234:M: |-> Remove SKIP once you've set $node data */
 
    year = 0; /* 0..65536 */
    month = 0; /* 1..12 */

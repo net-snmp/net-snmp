@@ -11,6 +11,10 @@
 /**
  * check dependencies
  *
+ * This is useful for for tables which have dependencies between columns
+ * (or rows, or tables). For example, two columns allocating a percentage
+ * of something add up 100%.
+ *
  * Should you need different behavior depending on which columns were
  * set, rowreq_ctx->column_set_flags will indicate which writeable columns were
  * set. The definitions for the FLAG_* bits can be found in
@@ -36,14 +40,8 @@ ${context}_check_dependencies(${context}_rowreq_ctx *rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO:
-     * check that all new value are legal.
-     *
-     * This is useful for for tables which have dependencies
-     * between columns (or rows, or tables).
-     *
-     * For example, two columns allocating a percentage of something
-     * should add up to 100%.
+     * TODO:470:o: Check $context row dependencies.
+     * check that all new value are legal and consistent with each other
      */
 ## }
 @foreach $node nonindex@
@@ -56,7 +54,7 @@ ${context}_check_dependencies(${context}_rowreq_ctx *rowreq_ctx)
 @end@ # for each
 ## {
     return rc;
-}
+} /* ${context}_check_dependencies */
 
 ##
 ########################################################################

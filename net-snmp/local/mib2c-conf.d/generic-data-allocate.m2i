@@ -8,6 +8,9 @@
 @end@
 ########################################################################
 ##
+/* ---------------------------------------------------------------------
+ * TODO:200:r: Implement $context data context functions.
+ */
 /*
  * ${context}_allocate_data
  *
@@ -17,7 +20,7 @@ ${context}_data *
 ${context}_allocate_data(void)
 {
     /*
-     * allocate memory for the context
+     * TODO:201:r: |-> allocate memory for the $context data context.
      */
 @if $m2c_data_context != "generated"@
     /** this might not be right for $m2c_data_context */
@@ -32,7 +35,7 @@ ${context}_allocate_data(void)
     }
 
     return rtn;
-}
+} /* ${context}_allocate_data */
 
 /*
  * ${context}_release_data
@@ -45,10 +48,10 @@ ${context}_release_data(${context}_data *data)
     DEBUGMSGTL(("verbose:${context}:${context}_release_data","called\n"));
 
     /*
-     * release memory for the context
+     * TODO:202:r: |-> release memory for the $context data context.
      */
     free(data);
-}
+} /* ${context}_release_data */
 
 ##
 ########################################################################

@@ -69,8 +69,9 @@
     @if $m2c_table_row_creation == 1@
       @if "x$gto_flag_req" ne "x"@
     /*
-     * required rows for row creation
-     * TODO: update, if necessary. default is writable cols w/out defaults.
+     * TODO:405:r: Review $context.uc_REQUIRED_COLS macro.
+     * OR together all the required rows for row creation.
+     * default is writable cols w/out defaults.
      */
 #define $context.uc_REQUIRED_COLS ($gto_flag_req)
     

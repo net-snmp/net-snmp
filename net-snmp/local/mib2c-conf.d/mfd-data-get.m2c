@@ -97,6 +97,9 @@
 
 /** @defgroup data_get data_get: Routines to get data
  *
+ * TODO:230:M: Implement $context get routines.
+ * TODO:240:M: Implement $context mapping routines (if any).
+ *
  * These routine are used to get the value for individual objects. The
  * row context is passed, along with a pointer to the memory where the
  * value should be copied.
