@@ -130,6 +130,7 @@ handle_agentx_response( int operation,
     struct request_list *req, *oldreq;
     int  free_cback = 1;
     int i, type, index;
+    int oldstatus;
     struct subtree          *retry_sub;
     char buf[SPRINT_MAX_LEN];
 
@@ -179,6 +180,7 @@ handle_agentx_response( int operation,
     }
 
 
+    oldstatus = asp->status;
     asp->status = pdu->errstat;
     if ( pdu->errstat != AGENTX_ERR_NOERROR ) {
 		/*
@@ -267,20 +269,24 @@ handle_agentx_response( int operation,
 		break;
 
 	    case FREE:
-		asp->mode = FINISHED_FAILURE;
+		asp->mode   = FINISHED_FAILURE;
+		asp->status = oldstatus;
 		break;
 
 	    case FINISHED_SUCCESS:	/* I.e. a 'successful' COMMIT pass */
 		if ( asp->status != SNMP_ERR_NOERROR ) {
-			asp->mode = FINISHED_FAILURE;
+			asp->mode   = FINISHED_FAILURE;
 			asp->status = SNMP_ERR_COMMITFAILED;
 		}
 		break;
 
 	    case FINISHED_FAILURE:	/* I.e. a 'successful' UNDO pass */
 		if ( asp->status != SNMP_ERR_NOERROR ) {
-			asp->mode = FINISHED_FAILURE;
+			asp->mode   = FINISHED_FAILURE;
 			asp->status = SNMP_ERR_UNDOFAILED;
+		}
+		else {
+			asp->status = oldstatus;
 		}
 		break;
 	}
