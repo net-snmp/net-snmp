@@ -371,6 +371,20 @@ SnmpdDump(int a)
 }
 #endif
 
+RETSIGTYPE
+SnmpdCatchRandomSignal(int a)
+{
+    /* Disable all logs and log the error via syslog */
+    snmp_disable_log();
+    snmp_enable_syslog();
+#if HAVE_STRING_H
+    snmp_log(LOG_ERR, "Exiting on signal %d: %s\n", a, strsignal(a));
+#else
+    snmp_log(LOG_ERR, "Exiting on signal %d\n", a);
+#endif
+    snmp_disable_syslog();
+    exit(1);
+}
 
 static void
 SnmpTrapNodeDown(void)
@@ -883,6 +897,9 @@ main(int argc, char *argv[])
 #ifdef SIGPIPE
     DEBUGMSGTL(("signal", "registering SIGPIPE signal handler\n"));
     signal(SIGPIPE, SIG_IGN);   /* 'Inline' failure of wayward readers */
+#endif
+#ifdef SIGXFSZ
+    signal(SIGXFSZ, SnmpdCatchRandomSignal);
 #endif
 
     /*
