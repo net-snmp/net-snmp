@@ -25,6 +25,7 @@ sub InitMakeParams {
     chomp($Params{'LIBS'});
     $Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags`;
     chomp($Params{'CCFLAGS'});
+    $Params{'CCFLAGS'} .= " " . $Config{'ccflags'};
 
     if ($opts->{'insource'} eq "true") {
 	$Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ " . $Params{'LIBS'};

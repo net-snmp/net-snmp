@@ -40,6 +40,7 @@ sub InitMakeParams {
 	if (!$ENV{'NETSNMP_CCFLAGS'}) {
 	    $Params{'CCFLAGS'} = `$opts->{'nsconfig'} --cflags`;
 	    chomp($Params{'CCFLAGS'});
+	    $Params{'CCFLAGS'} .= " " . $Config{'ccflags'};
 	} else {
 	    $Params{'CCFLAGS'} = $ENV{'NETSNMP_CCFLAGS'};
 	}
