@@ -103,7 +103,7 @@ ds_get_int(int storeid, int which) {
 }
 
 int
-ds_set_string(int storeid, int which, char *value) {
+ds_set_string(int storeid, int which, const char *value) {
 
   if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
       storeid < 0 || which < 0)

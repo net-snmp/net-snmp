@@ -49,7 +49,7 @@ int ds_set_boolean(int storeid, int which, int value);
 int ds_get_boolean(int storeid, int which);
 int ds_set_int(int storeid, int which, int value);
 int ds_get_int(int storeid, int which);
-int ds_set_string(int storeid, int which, char *value);
+int ds_set_string(int storeid, int which, const char *value);
 char *ds_get_string(int storeid, int which);
 int ds_register_config(u_char type, const char *ftype, const char *token,
                        int storeid, int which);
