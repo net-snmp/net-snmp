@@ -179,12 +179,20 @@ else
 		;;
             --cflags)
 	        shift
+	        if test "x$1" = "x" ; then
+	            echo "You must specify the extra cflags"
+	            exit 1
+	        fi
 	        cflags=$1
 	        echo "setting extra cflags: $cflags"
 	        shift
 		;;
             --ldflags)
 	        shift
+	        if test "x$1" = "x" ; then
+	            echo "You must specify the extra ldflags"
+	            exit 1
+	        fi
 	        ldflags=$1
 	        echo "setting extra ldflags: $ldflags"
 	        shift
