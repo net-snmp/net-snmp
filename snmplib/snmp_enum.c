@@ -3,6 +3,7 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#include <stdio.h>
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -13,6 +14,9 @@
 #include <dmalloc.h>
 #endif
 #include <sys/types.h>
+
+#include <net-snmp/types.h>
+#include <net-snmp/config_api.h>
 
 #include <net-snmp/library/snmp_enum.h>
 #include <net-snmp/library/tools.h>
@@ -29,7 +33,7 @@ unsigned int    current_min_num;
 struct snmp_enum_list_str *sliststorage;
 
 int
-init_snmp_enum(void)
+init_snmp_enum(const char *type)
 {
     int             i;
 
@@ -51,11 +55,13 @@ init_snmp_enum(void)
 
     if (!sliststorage)
         sliststorage = NULL;
+
+    register_config_handler(type, "enum", se_read_conf, NULL, NULL);
     return SE_OK;
 }
 
 int
-se_store_list(struct snmp_enum_list *new_list,
+se_store_in_list(struct snmp_enum_list *new_list,
               unsigned int major, unsigned int minor)
 {
     int             ret = SE_OK;
@@ -74,6 +80,114 @@ se_store_list(struct snmp_enum_list *new_list,
     snmp_enum_lists[major][minor] = new_list;
 
     return ret;
+}
+
+void
+se_read_conf(const char *word, char *cptr)
+{
+    int major, minor;
+    int value;
+    char *cp, *cp2;
+    char e_name[BUFSIZ];
+    char e_enum[  BUFSIZ];
+
+    if (!cptr || *cptr=='\0')
+        return;
+
+    /*
+     * Extract the first token
+     *   (which should be the name of the list)
+     */
+    cp = copy_nword(cptr, e_name, sizeof(e_name));
+    cp = skip_white(cp);
+    if (!cp || *cp=='\0')
+        return;
+
+
+    /*
+     * Add each remaining enumeration to the list,
+     *   using the appropriate style interface
+     */
+    if (sscanf(e_name, "%d:%d", &major, &minor) == 2) {
+        /*
+         *  Numeric major/minor style
+         */
+        while (1) {
+            cp = copy_nword(cp, e_enum, sizeof(e_enum));
+            if (sscanf(e_enum, "%d:", &value) != 1) {
+                break;
+            }
+            cp2 = e_enum;
+            while (*(cp2++) != ':')
+                ;
+            se_add_pair(major, minor, cp2, value);
+            if (!cp)
+                break;
+        }
+    } else {
+        /*
+         *  Named enumeration
+         */
+        while (1) {
+            cp = copy_nword(cp, e_enum, sizeof(e_enum));
+            if (sscanf(e_enum, "%d:", &value) != 1) {
+                break;
+            }
+            cp2 = e_enum;
+            while (*(cp2++) != ':')
+                ;
+            se_add_pair_to_slist(e_name, cp2, value);
+            if (!cp)
+                break;
+        }
+    }
+}
+
+void
+se_store_enum_list(struct snmp_enum_list *new_list,
+                   char *token, char *type)
+{
+    struct snmp_enum_list *listp = new_list;
+    char line[2048];
+    char buf[512];
+    int  len = 0;
+
+    snprintf(line, sizeof(line), "enum %s", token);
+    while (listp) {
+        snprintf(buf, sizeof(buf), " %d:%s", listp->value, listp->label);
+        /*
+         * Calculate the space left in the buffer.
+         * If this is not sufficient to include the next enum,
+         *   then save the line so far, and start again.
+         */
+	len = sizeof(line) - strlen(line);
+	if (strlen(buf) > len) {
+	    read_config_store(type, line);
+            snprintf(line, sizeof(line), "enum %s", token);
+	    len = sizeof(line);
+	}
+
+	strncat(line, buf, len);
+        listp = listp->next;
+    }
+
+    /*
+     * If there's anything left, then save that.
+     * But don't bother saving an empty 'overflow' line.
+     */
+    if (len != sizeof(line))
+	read_config_store(type, line);
+
+    return;
+}
+
+void
+se_store_list(unsigned int major, unsigned int minor, char *type)
+{
+    char token[32];
+
+    snprintf(token, sizeof(token), "%d:%d", major, minor);
+    se_store_enum_list(se_find_list(major, minor), token, type);
 }
 
 struct snmp_enum_list *
@@ -163,7 +277,7 @@ se_add_pair(unsigned int major, unsigned int minor, char *label, int value)
     int             created = (list) ? 1 : 0;
     int             ret = se_add_pair_to_list(&list, label, value);
     if (!created)
-        se_store_list(list, major, minor);
+        se_store_in_list(list, major, minor);
     return ret;
 }
 
@@ -278,6 +392,23 @@ se_clear_slist(const char *listname)
 {
     struct snmp_enum_list *list = se_find_slist(listname);
     se_clear_list(&list);
+}
+
+void
+se_store_slist(const char *listname, char *type)
+{
+    struct snmp_enum_list *list = se_find_slist(listname);
+    se_store_enum_list(list, listname, type);
+}
+
+int
+se_store_slist_callback(int majorID, int minorID,
+                        void *serverargs, void *clientargs)
+{
+    char *appname = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+                                          NETSNMP_DS_LIB_APPTYPE);
+    se_store_slist((char *)clientargs, appname);
+    return SNMPERR_SUCCESS;
 }
 
 void
