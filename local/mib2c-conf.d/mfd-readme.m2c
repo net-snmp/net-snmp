@@ -78,27 +78,28 @@ introduction to some of the general concepts you should be familar with.
     later on in this help.
 
 
-    The Index Context
-    -----------------
-    The index context structure is generated with storage for all the
+    The MIB Context
+    ---------------
+    The MIB context structure is generated with storage for all the
     indexes of a table. This data will be used when searching for the
     correct row to process for a request.
 
 
-    The Table Context
-    -----------------
+    The Row Request Context
+    -----------------------
     Each table will have a unique data structure for holding data during
-    the processing of a particular row. The table context contains the
-    data context, the index context, then undo context (for settable
-    tables) andother data. There is also a netsnmp_data_list, which can
+    the processing of a particular row. The row request context contains
+    the registration context (that you supply during initilization),
+    the data context, the MIB context, the undo context (for settable
+    tables) and other data. There is also a netsnmp_data_list, which can
     be used to temporary storage during processing.
 
 
     The Table Registration Pointer
     ------------------------------
-    During initilization, you may provide a pointer to arbitrary data
-    for you own use. This pointer will be set in the data context, and
-    is passed as a parameter to several functions. It is not required,
+    During initilization, you may provide a pointer to arbitrary data for
+    you own use. This pointer will be saved in the row request context,
+    and is passed as a parameter to several functions. It is not required,
     and is provided as a way for you to access table specific data in
     the generated code.
 
@@ -141,26 +142,33 @@ These are miscellaneous auto-generated code files you generally
 shouldn't edit.  They contain code that ties your code together with
 the Net-SNMP agent.
 ------------------------------------------------------------------------
+@if $m2c_create_fewer_files == 1@
   File    : ${name}.c
   Purpose : Initilization for the entire module set, including the
             SNMP tables.
 
+@end@
   File    : ${name}.h
   Purpose : Header file for the module set.  Includes config_require
             macros to auto-load the other code pieces when compiled
             into the agent.
 
+@if $m2c_create_fewer_files != 1@
   File    : ${name}_oids.h
   Purpose : C #define definitions of the tables, columns, and OIDs
 
   File    : ${name}_enums.h
   Purpose : C #define definitions of the enumerated type values for
             each column of each table that requires them.
+@else@
+  File    : ${name}_constants.h
+  Purpose : C #define definitions of the tables, columns, OIDs, enumerated
+            type values for each column of each table that requires them.
+@end@
 
   File    : ${name}_interface.c
-  Purpose : MFD interface to Net-SNMP.  This auto-generated code ties
-            the functions you will fill out and edit to the code that
-            the agent needs.
+  Purpose : MFD interface to Net-SNMP.  This auto-generated code ties the
+            functions you will fill out to the code that the agent needs.
 
 ########################################################################
 @foreach $table table@
@@ -177,12 +185,8 @@ ${context} README
 
   Your code will be called when the snmp agent receives requests for
   the ${context} table.  The agent will start by looking for the right
-  row in your existing data to operate on, if one exists.  It does
-  this by comparing the index values for each row for the row that it
-  is looking for.  The indexes are described in the next segment
-  below, and the looping constructs and requirements are further
-  below.  You're expected to have data which is unique to each set of
-  indexes.
+  row in your existing data to operate on, if one exists.
+
 
   Configuration Variables
   ------------------------------------------------------------
@@ -292,14 +296,13 @@ ${context} README
     ------------------------------------------------------------------
     This variable determines which data interface will be use to generate
     code for looking up data for a given index. The default is the
-    'unsorted-external' access code, which handles the common case where
-    the data for the table is kept external to the agent and is not sorted
-    by the MIB indexes.
+    'container-cached' access code, which caches the data in a netsnmp-
+    container (usually a sorted array).
 
     Available options can be determined by checking for mib2c configuration
     files that begin with 'mfd-access-*'.
 
-    Syntax: @eval $@m2c_table_access = "unsorted-external'@
+    Syntax: @eval $@m2c_table_access = '$m2c_table_access'@
 
  
     m2c_include_examples (currently '$m2c_include_examples')
@@ -330,8 +333,8 @@ ${context} README
      $node:
         Syntax:      $node.syntax
         DataType:    $node.perltype
-        C-code type: $node.type
-
+        ASN type:    $node.type
+        C-code type: $m2c_decl
 @end@ # foreach
 
   You should know how to set all these values from your data context,
@@ -349,10 +352,10 @@ ${context} File Overview
 File: ${name}_data_access.[c|h]
 ------------------------------------------------------------------------
   The ${name}_data_access file contains the interface to your data in
-  its raw format.  These functions are used to locate the row for a
-  particular request.
+  its raw format.  These functions are used to build the row cache or 
+  locate the row (depending on the table access method).
 
-  Set index context
+  Set MIB context
   -----------------
   TODO : Set MIB index values
   FUNC : ${context}_indexes_set
@@ -362,7 +365,11 @@ File: ${name}_data_access.[c|h]
 @    include mfd-access-${m2c_table_access}-defines.m2i@
 
 
+@if $m2c_create_fewer_files != 1@
 File: ${name}_enums.h
+@else@
+File: ${name}_constants.h
+@end@
 ------------------------------------------------------------------------
   This file contains macros for mapping enumeration values when the
   enumerated values defined by the MIB do not match the values used
@@ -371,25 +378,33 @@ File: ${name}_enums.h
   Review this file to see if any values need to be updated.
 
 
+@if $m2c_create_fewer_files != 1@
 File: ${name}_data_get.c
+@else@
+File: ${name}.c; GET support
+@end@
 ------------------------------------------------------------------------
 @    if ("$m2c_data_allocate" eq "yes") && ("$m2c_data_context" ne "generated")@
   Allocate data context
   ---------------------
-  TODO : XXXXXXXXXXX
-  FUNC : ${table}_
+  TODO : allocate memory for a data context
+  FUNC : ${context}_allocate_data
 
-  Since an existing data structure is being used for the data context,
+  This function will be called to allocate memory for a data context
+  when a new row request context is being created, or to create an
+  undo context while processing a set request.
 
+  Release data context
   -------
-  TODO : 
-  FUNC : ${table}_
+  TODO : release memory allocated for a data context
+  FUNC : ${context}_release_data
 
-  Since an existing data structure is being used for the data context,
+  This function will be called to release any resources held by a
+  data or undo context. It will be called when a row request context
+  is released, or during cleanup after a set request.
 
 
 @    end@
-
 @    foreach $node index@
 @        include m2c_setup_node.m2i@
 @        if ($m2c_skip_mapping != 1)@
@@ -430,14 +445,17 @@ File: ${name}_data_get.c
   Since this column has enumerated BITS, you should update or replace the
   IS_SET_* macros to properly determine whether or not a particular bit
   should be set.
-@      end@
 
+@      end@
 @   end@
 
 
+@if $m2c_create_fewer_files != 1@
 File: ${name}_data_set.c
+@else@
+File: ${name}.c; SET support
+@end@
 ------------------------------------------------------------------------
-  Purpose : User interface to MIB data 
 
 @if $m2c_table_settable == 0@
   This table does not support set requests.
@@ -540,7 +558,7 @@ File: ${name}_data_set.c
   FUNC : ${node}_check_value
 
   The generated code will automatically validate incoming requests against
-  all the requirements specified byt the syntax of the MIB. However, it is
+  all the requirements specified by the syntax of the MIB. However, it is
   often the case that additional requirements are specified in the
   description of a MIB object. Those type of validations should be checked
   in this function.
@@ -600,6 +618,189 @@ File: ${name}_data_set.c
 ${context} Reference
 ------------------------------------------------------------------------
 
+Function flow
+----------------------------------------------------
+To give you the general idea of how the functions flow works, this
+example flow is from a complete table implementation.
+
+NOTE: Depending on your configuration, some of the functions used in the
+      examples below  may not have been generated for the
+      ${context} table.
+
+      Conversely, the examples below may not include some functions that
+      were generated for the ${context} table.
+
+To watch the flow of the ${context} table, use the
+following debug tokens:
+
+        snmp_agent
+        helper:table:req
+        ${context}
+        verbose:${context}
+        internal:${context}
+
+e.g.
+        snmpd -f -Le -D${context},verbose:${context},internal:${context}
+
+
+@if $m2c_create_fewer_files == 1@
+@   eval $tmp_mfd_rm_set = "xxx.c"@
+@   eval $tmp_mfd_rm_get = "xxx.c"@
+@else@
+@   eval $tmp_mfd_rm_set = "xxx_data_set.c"@
+@   eval $tmp_mfd_rm_get = "xxx_data_get.c"@
+@end@
+Initialization
+--------------------------------
+init_xxxTable: called                           xxx.c
+   initialize_table_xxxTable                    xxx.c
+      _xxxTable_initialize_interface            xxx_interface.c
+         xxxTable_init_data                     xxx_data_access.c
+      _xxxTable_container_init                  xxx_interface.c
+         xxxTable_container_init                xxx_data_access.c
+
+
+GET Request
+--------------------------------
+_cache_load                                     xxx_interface.c
+   xxxTable_cache_load                          xxx_data_access.c
+      xxxTable_allocate_rowreq_ctx              xxx_interface.c
+         xxxTable_allocate_data                 $tmp_mfd_rm_get
+         xxxTable_rowreq_ctx_init               $tmp_mfd_rm_get
+      xxxTable_indexes_set                      $tmp_mfd_rm_get
+         xxxTable_indexes_set_tbl_idx           $tmp_mfd_rm_get
+
+xxxTable_pre_request                              
+
+_mfd_xxxTable_object_lookup                     xxx_interface.c
+   xxxTable_row_prep                            xxx_data_access.c
+
+_mfd_xxxTable_get_values                        xxx_interface.c
+   _mfd_xxxTable_get_column                     xxx_interface.c
+      ipAddressIfIndex_get                      $tmp_mfd_rm_get
+
+xxxTable_post_request
+
+
+GETNEXT Request
+--------------------------------
+_cache_load                                     ...
+xxxTable_pre_request                            ...
+_mfd_xxxTable_object_lookup                     ...
+_mfd_xxxTable_get_values                        ...
+xxxTable_post_request                           ...
+
+
+SET Request: success
+--------------------------------
+_cache_load                                     ...
+xxxTable_pre_request
+_mfd_xxxTable_object_lookup                     ...
+
+_mfd_xxxTable_check_objects                     xxx_interface.c
+   _xxxTable_check_column                       xxx_interface.c
+      ipAddressIfIndex_check_value              $tmp_mfd_rm_set
+
+_mfd_xxxTable_undo_setup                        xxx_interface.c
+   xxxTable_allocate_data                       ...
+   xxxTable_undo_setup                          xxx_interface.c
+      _xxxTable_undo_setup_column               xxx_interface.c
+         ipAddressIfIndex_undo_setup            $tmp_mfd_rm_set
+
+_mfd_xxxTable_set_values                        xxx_interface.c
+   _xxxTable_set_column                         xxx_interface.c
+      ipAddressIfIndex_set                      $tmp_mfd_rm_set
+
+_mfd_xxxTable_check_dependencies                xxx_interface.c
+   xxxTable_check_dependencies                  $tmp_mfd_rm_set
+
+_mfd_xxxTable_commit                            xxx_interface.c
+   xxxTable_commit                              $tmp_mfd_rm_set
+
+_mfd_xxxTable_undo_cleanup                      xxx_interface.c
+   xxxTable_undo_cleanup                        $tmp_mfd_rm_set
+      xxxTable_release_data                     ...
+
+xxxTable_post_request                           ...
+
+
+SET Request: row creation
+--------------------------------
+_cache_load                                     ...
+xxxTable_pre_request
+
+_mfd_xxxTable_object_lookup                     ...
+   xxxTable_index_from_oid                      xxx_interface.c
+   xxxTable_allocate_rowreq_ctx                 ...
+      ...
+   _xxxTable_check_indexes                      xxx_interface.c
+      ipAddressAddrType_check_index             $tmp_mfd_rm_set
+         ipAddressAddr_check_index              $tmp_mfd_rm_set
+      xxxTable_validate_index                   $tmp_mfd_rm_set
+
+_mfd_xxxTable_check_objects                     ...
+   _xxxTable_check_column                       ...
+      ipAddressIfIndex_check_value              ...
+   _xxxTable_check_column                       ...
+      ipAddressRowStatus_check_value
+
+_mfd_xxxTable_undo_setup                        ...
+_mfd_xxxTable_set_values                        ...
+_mfd_xxxTable_check_dependencies                ...
+_mfd_xxxTable_commit                            ...
+_mfd_xxxTable_undo_cleanup                      ...
+xxxTable_post_request                           ...
+
+
+SET Resuest: value error
+--------------------------------
+_cache_load                                     ...
+xxxTable_pre_request                            ...
+_mfd_xxxTable_object_lookup                     ...
+
+_mfd_xxxTable_check_objects                     ...
+   _xxxTable_check_column                       ...
+      ipAddressIfIndex_check_value              ...
+      ERROR:"ifIndex value not supported"
+
+xxxTable_post_request                           ...
+
+
+SET Request: commit failure
+--------------------------------
+_cache_load                                     ...
+xxxTable_pre_request                            ...
+_mfd_xxxTable_object_lookup                     ...
+_mfd_xxxTable_check_objects                     ...
+_mfd_xxxTable_undo_setup                        ...
+_mfd_xxxTable_set_values                        ...
+_mfd_xxxTable_check_dependencies                ...
+
+_mfd_xxxTable_commit                            ...
+   xxxTable_commit                              ...
+   ERROR: bad rc -1
+
+_mfd_xxxTable_undo_commit                       xxx_interface.c
+   xxxTable_undo_commit                         $tmp_mfd_rm_set
+
+_mfd_xxxTable_undo_values                       xxx_interface.c
+   _xxxTable_undo_column                        xxx_interface.c
+      ipAddressIfIndex_undo                     $tmp_mfd_rm_set
+
+_mfd_xxxTable_undo_cleanup                      ...
+xxxTable_post_request                           ...
+
+
+Row release (user initiated)
+--------------------------------
+ipAddressTable_release_rowreq_ctx               xxx_interface.c
+   ipAddressTable_rowreq_ctx_cleanup            $tmp_mfd_rm_get
+   ipAddressTable_release_data                  $tmp_mfd_rm_get
+
+
+
+Table / column details
+----------------------------------------------------
 @    include details-table.m2i@
 
 @    foreach $node column@
