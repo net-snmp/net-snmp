@@ -599,6 +599,7 @@ int snmp_input(int op,
 void usage(void)
 {
     fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
+    fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
     fprintf(stderr, "\
   -h        Print this help message and exit\n\
   -H        Read what can show up in config file\n\

@@ -1174,7 +1174,7 @@ init_mib (void)
     DEBUGMSGTL(("init_mib","Seen MIBS: Looking in '%s' for mib files ...\n",env_var));
     entry = strtok( env_var, ENV_SEPARATOR );
     while ( entry ) {
-        if (strcmp (entry, "ALL") == 0) {
+        if (strcasecmp(entry, DEBUG_ALWAYS_TOKEN) == 0) {
             read_all_mibs();
         }
         else if (strstr (entry, "/") != 0) {
