@@ -1,0 +1,32 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER that the agent responds properly to a kill -HUP
+
+#
+# Begin test
+#
+
+# standard V1 configuration: testcomunnity
+. ./Sv1config
+
+STARTAGENT
+
+# add a agent configuration line that wouldn't have been there when
+# the started up.
+CONFIGAGENT syslocation not-anywhere-in-particular
+
+# kill -HUP the agent to get it to re-read the .conf file.
+sleep 1
+kill -HUP `cat $SNMP_SNMPD_PID_FILE`
+sleep 1
+
+# And see if it has the new value.
+CAPTURE "snmpget $SNMP_FLAGS -v 1 localhost testcommunity system.sysLocation.0"
+
+STOPAGENT
+
+CHECK "not-anywhere-in-particular"
+
+FINISHED
