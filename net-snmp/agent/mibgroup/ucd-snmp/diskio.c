@@ -71,6 +71,12 @@ static int ps_numdisks;			/* number of disks in system, may change while running
 #if defined (freebsd4) || defined(freebsd5)
 #include <sys/dkstat.h>
 #include <devstat.h>
+#include <net-snmp/utilities.h>
+
+#include <math.h>
+/* sampling interval, in seconds */
+#define DISKIO_SAMPLE_INTERVAL 5
+
 #endif                          /* freebsd */
 
 #ifdef linux
@@ -90,6 +96,11 @@ static mach_port_t masterPort;		/* to communicate with I/O Kit	*/
 
 static char     type[20];
 void            diskio_parse_config(const char *, char *);
+
+#if defined (freebsd4) || defined(freebsd5)
+void		devla_getstats(unsigned int regno, void *dummy);
+#endif
+
 FILE           *file;
 
          /*********************
@@ -132,6 +143,9 @@ init_diskio(void)
         {DISKIO_NWRITTEN, ASN_COUNTER, RONLY, var_diskio, 1, {4}},
         {DISKIO_READS, ASN_COUNTER, RONLY, var_diskio, 1, {5}},
         {DISKIO_WRITES, ASN_COUNTER, RONLY, var_diskio, 1, {6}},
+	{DISKIO_LA1, ASN_INTEGER, RONLY, var_diskio, 1, {9}},
+        {DISKIO_LA5, ASN_INTEGER, RONLY, var_diskio, 1, {10}},
+        {DISKIO_LA15, ASN_INTEGER, RONLY, var_diskio, 1, {11}}
     };
 
     /*
@@ -182,6 +196,13 @@ init_diskio(void)
     ps_numdisks = 0;
     ps_disk = NULL;
 #endif
+
+#if defined (freebsd4) || defined(freebsd5)
+	devla_getstats(0, NULL);
+	/* collect LA data regularly */
+	snmp_alarm_register(DISKIO_SAMPLE_INTERVAL, SA_REPEAT, devla_getstats, NULL);
+#endif
+
 }
 
 void
@@ -393,6 +414,86 @@ var_diskio(struct variable * vp,
 #endif                          /* bsdi */
 
 #if defined(freebsd4) || defined(freebsd5)
+
+/* disk load average patch by Rojer */
+
+struct dev_la {
+        struct timeval prev;
+        double la1,la5,la15;
+        char name[DEVSTAT_NAME_LEN+5];
+        };
+
+static struct dev_la *devloads = NULL;
+static int ndevs = 0;
+
+double devla_timeval_diff(struct timeval *t1, struct timeval *t2) {
+
+        double dt1 = (double) t1->tv_sec + (double) t1->tv_usec * 0.000001;
+        double dt2 = (double) t2->tv_sec + (double) t2->tv_usec * 0.000001;
+
+        return dt2-dt1;
+
+        }
+
+void devla_getstats(unsigned int regno, void *dummy) {
+
+        static struct statinfo *lastat = NULL;
+        int i;
+        double busy_time, busy_percent;
+        static double expon1, expon5, expon15;
+        char current_name[DEVSTAT_NAME_LEN+5];
+
+        if (lastat == NULL) {
+                lastat = (struct statinfo *) malloc(sizeof(struct statinfo));
+                lastat->dinfo = (struct devinfo *) malloc(sizeof(struct devinfo));
+                }
+
+        bzero(lastat->dinfo, sizeof(struct devinfo));
+
+        if ((getdevs(lastat)) == -1) {
+                ERROR_MSG("can't do getdevs()\n");
+                return;
+                }
+
+        if (ndevs != 0) {
+                for (i=0; i < ndevs; i++) {
+                        snprintf(current_name, sizeof(current_name), "%s%d",
+                                lastat->dinfo->devices[i].device_name, lastat->dinfo->devices[i].unit_number);
+                        if (strcmp(current_name, devloads[i].name)) {
+                                ndevs = 0;
+                                free(devloads);
+                                }
+                        }
+                }
+
+        if (ndevs == 0) {
+                ndevs = lastat->dinfo->numdevs;
+                devloads = (struct dev_la *) malloc(ndevs * sizeof(struct dev_la));
+                bzero(devloads, ndevs * sizeof(struct dev_la));
+                for (i=0; i < ndevs; i++) {
+                        memcpy(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time, sizeof(struct timeval));
+                        snprintf(devloads[i].name, sizeof(devloads[i].name), "%s%d",
+                                lastat->dinfo->devices[i].device_name, lastat->dinfo->devices[i].unit_number);
+                        }
+                expon1  = exp(-(((double)DISKIO_SAMPLE_INTERVAL) / ((double)60)));
+                expon5  = exp(-(((double)DISKIO_SAMPLE_INTERVAL) / ((double)300)));
+                expon15 = exp(-(((double)DISKIO_SAMPLE_INTERVAL) / ((double)900)));
+                }
+
+        for (i=0; i<ndevs; i++) {
+                busy_time = devla_timeval_diff(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time);
+                busy_percent = busy_time * 100 / DISKIO_SAMPLE_INTERVAL;
+                devloads[i].la1 = devloads[i].la1 * expon1 + busy_percent * (1 - expon1);
+/*		fprintf(stderr, "(%d) %s: update la1=%.2lf%%\n", i, devloads[i].name, expon1); */
+                devloads[i].la5 = devloads[i].la5 * expon5 + busy_percent * (1 - expon5);
+                devloads[i].la15 = devloads[i].la15 * expon15 + busy_percent * (1 - expon15);
+                memcpy(&devloads[i].prev, &lastat->dinfo->devices[i].busy_time, sizeof(struct timeval));
+                }
+
+        }
+
+/* end of disk LA patch */
+
 static int      ndisk;
 static struct statinfo *stat;
 FILE           *file;
@@ -473,6 +574,15 @@ var_diskio(struct variable * vp,
         return (u_char *) & long_ret;
     case DISKIO_WRITES:
         long_ret = (signed long) stat->dinfo->devices[indx].num_writes;
+        return (u_char *) & long_ret;
+    case DISKIO_LA1:
+	long_ret = devloads[indx].la1;
+	return (u_char *) & long_ret;
+    case DISKIO_LA5:
+        long_ret = devloads[indx].la5;
+        return (u_char *) & long_ret;
+    case DISKIO_LA15:
+        long_ret = devloads[indx].la15;
         return (u_char *) & long_ret;
 
     default:
