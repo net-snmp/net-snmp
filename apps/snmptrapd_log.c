@@ -419,6 +419,7 @@ realloc_handle_time_fmt (u_char **buf, size_t *buf_len, size_t *out_len,
       */
 {
   time_t        time_val;           /* the time value to output */
+  unsigned long	time_ul;	    /* u_long time/timeticks */
   struct tm *   parsed_time;        /* parsed version of current time */
   u_char	*safe_bfr = NULL;
   char          fmt_cmd = options->cmd; /* the format command to use */
@@ -431,41 +432,43 @@ realloc_handle_time_fmt (u_char **buf, size_t *buf_len, size_t *out_len,
 
   /*  Get the time field to output.  */
   if (is_up_time_cmd(fmt_cmd)) {
-    time_val = pdu->time;
+    time_ul = pdu->time;
   } else {
+    /*  Note: a time_t is a signed long.  */
     time(&time_val);
+    time_ul = (unsigned long)time_val;
   }
 
   /*  Handle output in Unix time format.  */
   if (fmt_cmd == CHR_CUR_TIME) {
-    sprintf(safe_bfr, "%ld", (long)time_val);
+    sprintf(safe_bfr, "%lu", time_ul);
   } else if (fmt_cmd == CHR_UP_TIME && !options->alt_format) {
-    sprintf(safe_bfr, "%ld", (long)time_val);
+    sprintf(safe_bfr, "%lu", (long)time_ul);
   } else if (fmt_cmd == CHR_UP_TIME) {
-    int centisecs, seconds, minutes, hours, days;
+    unsigned int centisecs, seconds, minutes, hours, days;
 
-    centisecs = time_val % 100;
-    time_val /= 100;
-    days = time_val / (60 * 60 * 24);
-    time_val %= (60 * 60 * 24);
+    centisecs = time_ul % 100;
+    time_ul /= 100;
+    days = time_ul / (60 * 60 * 24);
+    time_ul %= (60 * 60 * 24);
 
-    hours = time_val / (60 * 60);
-    time_val %= (60 * 60);
+    hours = time_ul / (60 * 60);
+    time_ul %= (60 * 60);
 
-    minutes = time_val / 60;
-    seconds = time_val % 60;
+    minutes = time_ul / 60;
+    seconds = time_ul % 60;
 
     switch (days) {
     case 0:
-      sprintf(safe_bfr, "%d:%02d:%02d.%02d",
+      sprintf(safe_bfr, "%u:%02u:%02u.%02u",
 	      hours, minutes, seconds, centisecs);
       break;
     case 1:
-      sprintf(safe_bfr, "1 day, %d:%02d:%02d.%02d",
+      sprintf(safe_bfr, "1 day, %u:%02u:%02u.%02u",
 	      hours, minutes, seconds, centisecs);
       break;
     default:
-      sprintf(safe_bfr, "%d days, %d:%02d:%02d.%02d",
+      sprintf(safe_bfr, "%u days, %u:%02u:%02u.%02u",
 	      days, hours, minutes, seconds, centisecs);
     }
   } else {
@@ -1126,6 +1129,10 @@ realloc_format_plain_trap (u_char **buf, size_t *buf_len, size_t *out_len,
   struct in_addr	*agent_inaddr = (struct in_addr *)pdu->agent_addr;
   struct hostent *       host;                  /* host name */
   struct variable_list * vars;                  /* variables assoc with trap */
+
+  if (buf == NULL) {
+    return 0;
+  }
 
   /* 
    * Print the current time. Since we don't know how long the buffer is,
