@@ -286,7 +286,6 @@ MainLoop();
 sub insertresult {
     my $oid = shift;
     my $val = shift;
-    $oid = $OID if ($oid eq "OID");
     $output->insert('end', $oid, "oid:$oid");
     $output->tagBind("oid:$oid", '<1>', [sub{shift; 
 					     my $oid = shift;
@@ -294,7 +293,7 @@ sub insertresult {
 					     my $tag = SNMP::translateObj($oid);
 					     showInfo($tag);},$oid]);
     $output->insert('end', " = ");
-    my $mib = $SNMP::MIB{format_oid("$oid",'numeric')};
+    my $mib = $SNMP::MIB{"$oid"};
     $output->insert('end', $val, "value:$oid");
     if ($mib->{'access'} =~ /(Write|Create)/) {
 	$output->tagConfigure("value:$oid", -foreground => $writecolor);
@@ -304,7 +303,7 @@ sub insertresult {
 						   snmpsetmaybebegin($oid, $value);
 						   findANode($oid);
 						   my $tag = SNMP::translateObj($oid);
-						   showInfo($tag);},format_oid($oid,'full'), $val]);
+						   showInfo($tag);},$oid, $val]);
     }
     $output->insert('end', "\n");
 }
@@ -414,7 +413,7 @@ sub snmpsetmaybebegin {
 sub snmpsetbegin_addvar {
     my ($vars, $place, $oid, $val) = @_;
     $oid = $OID if ($oid eq "OID");
-    my $mib = $SNMP::MIB{format_oid("$oid",'numeric')};
+    my $mib = $SNMP::MIB{"$oid"};
     my $var = new SNMP::Varbind([$oid, '', $val, $mib->{'type'} || 'INTEGER']);
     push @$vars,$var;
     my $frame = $place->Frame();
@@ -522,7 +521,7 @@ sub snmptable {
     }
     for(my $i=0;$i <= $#index; $i++) {
 	for(my $k=0;$k <= $#tags;$k++) {
-	    my $mib = $SNMP::MIB{format_oid("$tboids{$index[$i]}{$tags[$k]}",'numeric')};
+	    my $mib = $SNMP::MIB{"$tboids{$index[$i]}{$tags[$k]}"};
 	    if ($mib->{'access'} =~ /(Write|Create)/) {
 		$output->put($i+2,$k+2,$output->Button(-fg => $writecolor, -pady => $tmpbd, -padx => $tmpbd, -text => $tb{$index[$i]}{$tags[$k]}, -command => [\&snmpsetmaybebegin, $tboids{$index[$i]}{$tags[$k]}, $tb{$index[$i]}{$tags[$k]}], -padx => 0, -pady => 0));
 	    } else {
@@ -680,7 +679,7 @@ sub showChildren {
 	}
     } else {
 	$oid = ".$oid";
-	my $mib = $SNMP::MIB{format_oid($oid,'numeric')};
+	my $mib = $SNMP::MIB{$oid};
 	if (defined($mib)) {
 	    my $children = $$mib{'children'}; 
 	    if (ref($children) eq "ARRAY") {
@@ -700,10 +699,10 @@ sub showChildren {
 sub updateInfo {
     $OID = shift;
     my $oid = $OID;
-    my $mib = $SNMP::MIB{format_oid("$oid",'numeric')};
+    my $mib = $SNMP::MIB{"$oid"};
     if (!defined($mib->{'description'}) || $mib->{'description'} eq "") {
 	$oid =~ s/[.0-9]+$//;
-	$mib = $SNMP::MIB{format_oid("$oid",'numeric')};
+	$mib = $SNMP::MIB{"$oid"};
     }
     if (defined($mib)) {
 	if ($mib->{'label'} =~ /Table$/) {
@@ -941,7 +940,7 @@ sub format_oid {
 	$oid = SNMP::translateObj($oid) if ($oid =~ /^[\d\.]*$/);
 	$oid =~ s/.*\.([a-zA-Z]\w+)\.(.*)/$1.$2/;
 	if ($type eq 'module') {
-	    $oid = $SNMP::MIB{format_oid($oid,'numeric')}->{'moduleID'} . "::" . $oid;
+	    $oid = $SNMP::MIB{$oid}->{'moduleID'} . "::" . $oid;
 	}
 	return $oid;
     } elsif ($type eq 'module') {

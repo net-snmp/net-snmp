@@ -14,7 +14,7 @@ while ($#ARGV > -1 && $ARGV[0] =~ /^-/) {
     $_ = shift @ARGV;
     usage if (/-h/);
     $hostname = shift if (/-H/);
-    $sqluser = shift if (/-u/);
+    $user = shift if (/-u/);
     $pass = shift if (/-p/);
     $admin = 1 if (/-a/);
     $verbose = 1 if (/-v/);
@@ -28,7 +28,7 @@ die "group $group is a reserved group name, you can't use it.  Sorry." if ($grou
 
 die "no group specified" if (!defined($group));
 
-( $dbh = DBI->connect("DBI:mysql:database=$dbname;host=$hostname", $sqluser, $pass))
+( $dbh = DBI->connect("DBI:mysql:database=$dbname;host=$hostname", $user, $pass))
     or die "\tConnect not ok: $DBI::errstr\n";
 
 DO("insert into usergroups(user, groupname, isadmin) values('$user', '$group', " . (($admin) ? "'Y'" : "'N'") . ")");
