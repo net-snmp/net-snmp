@@ -768,7 +768,7 @@ read_config_store(const char *type, const char *line)
     DEBUGMSGTL(("read_config","storing: %s\n",line));
     fclose(fout);
   } else {
-    DEBUGMSGTL(("read_config","open failure"));
+    snmp_log(LOG_ERR, "read_config_store open failure on %s", filep);
   }
 #ifdef PERSISTENT_MASK
   umask(oldmask);
@@ -824,8 +824,13 @@ snmp_save_persistent(const char *type)
       if (stat(fileold, &statbuf) != 0) {
         DEBUGMSGTL(("snmp_save_persistent"," saving old config file: %s -> %s.\n", file, fileold));
         if (rename(file, fileold)) {
-          unlink(file);/* moving it failed, try nuking it, as leaving
-                          it around is very bad. */
+          snmp_log(LOG_ERR, "Cannot rename %s to %s", file, fileold);
+          /*
+           * moving it failed, try nuking it, as leaving
+           * it around is very bad.
+           */
+          if (unlink(file) == -1)
+              snmp_log(LOG_ERR, "Cannot unlink %s", file);
         }
         break;
       }
@@ -875,7 +880,8 @@ snmp_clean_persistent(const char *type)
       file[ sizeof(file)-1 ] = 0;
       if (stat(file, &statbuf) == 0) {
         DEBUGMSGTL(("snmp_clean_persistent"," removing old config file: %s\n", file));
-        unlink(file);
+        if (unlink(file) == -1)
+            snmp_log(LOG_ERR, "Cannot unlink %s", file);
       }
     }
   }
