@@ -35,8 +35,8 @@ sub InitMakeParams {
 	if ($opts->{'insource'} eq "true") {
 	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ -L../../agent/.libs -L../../agent/ -L../../agent/helpers/.libs -L../../agent/helpers/ " . $Params{'LIBS'};
 	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
-	} else {
-	    $Params{'PREREQ_PM'} = {'NetSNMP::OID' => '0.1'};
+#	} else {
+#	    $Params{'PREREQ_PM'} = {'NetSNMP::OID' => '0.1'};
 	}
 	$Params{'CCFLAGS'} =~ s/ -W[-\w]+//g; # ignore developer warnings
 	if ($Params{'LIBS'} eq "" || $Params{'CCFLAGS'} eq "") {
