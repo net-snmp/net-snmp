@@ -309,15 +309,16 @@ agentx_master_handler(
             snmp_log(LOG_WARNING, "unsupported mode for agentx/master called\n");
             return SNMP_ERR_NOERROR;
     }
-    pdu->version     = AGENTX_VERSION_1;
-    pdu->reqid       = snmp_get_next_transid();
-    pdu->transid     = reqinfo->asp->pdu->transid;
-    pdu->sessid      = ax_session->sessid;
 
     if (!pdu || !ax_session) {
         set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
         return SNMP_ERR_NOERROR;
     }
+
+    pdu->version     = AGENTX_VERSION_1;
+    pdu->reqid       = snmp_get_next_transid();
+    pdu->transid     = reqinfo->asp->pdu->transid;
+    pdu->sessid      = ax_session->sessid;
 
     while (request) {
 
