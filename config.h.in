@@ -488,6 +488,9 @@
 /* Define if you have the <sys/param.h> header file.  */
 #undef HAVE_SYS_PARAM_H
 
+/* Define if you have the <sys/pool.h> header file.  */
+#undef HAVE_SYS_POOL_H
+
 /* Define if you have the <sys/proc.h> header file.  */
 #undef HAVE_SYS_PROC_H
 
