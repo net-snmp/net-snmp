@@ -1,7 +1,7 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
-*5.0.4*
+*5.0.5*
 
  New:
     - Support for OpenSSL 0.9.7
@@ -22,6 +22,17 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - Many other perl module related fixes.
     - net-snmp-config --ldflags properly supplies -L flags
     - misc make test fixes and improvements.
+
+*5.0.4*
+
+   During the testing for release 5.0.4, a release candidate was uploaded
+   to Sourceforge and marked as hidden. For variouse reasons, the release
+   was delayed and further changes and fixes were made.  However, the 
+   release candidate files still appeared on the public FTP server and our
+   mirrors. To avoid the confusion that could occur to users who may have
+   downloaded this release candidate, we are bumping the revision number
+   to 5.0.5.  If you downloaded net-snmp-5.0.4.tar.gz, please upgrade
+   to net-snmp-5.0.5.tar.gz.
 
 *5.0.3*
 
