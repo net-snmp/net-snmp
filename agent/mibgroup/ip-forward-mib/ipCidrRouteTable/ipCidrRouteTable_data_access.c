@@ -125,7 +125,7 @@ ipCidrRouteTable_container_init(netsnmp_container ** container_ptr_ptr,
      * by the MFD helper.
      */
     // testing - set higher for release; conf token too...
-    cache->timeout = 3;        /* seconds */
+    cache->timeout = 30;        /* seconds */
 }
 
 /**
