@@ -263,7 +263,7 @@ static int take_snapshot(struct cpu_stat_snapshot *css)
 	          (ksp->ks_data_size != sizeof cs) || 
 	          (kstat_read(kstat_fd, ksp, &cs) == -1))
 		{
-		  snmp_log(LOG_ERR, "vmstat_solaris2 (take_snapshot): could not read cs structure.");
+		  snmp_log(LOG_ERR, "vmstat_solaris2 (take_snapshot): could not read cs structure.\n");
 		  return(-1);
 		}
 	      
@@ -322,19 +322,20 @@ static void update_stats(unsigned int registrationNumber, void *clientarg)
     {
       if (kid == -1)
         {
-          snmp_log(LOG_WARNING, "vmstat_solaris2 (update_stats): Could not update kstat chain.");
+          snmp_log(LOG_WARNING, "vmstat_solaris2 (update_stats): Could not update kstat chain.\n");
         }
       else
         {
 	  /* On some machines this floods the logfile, thus commented out */
-          /* snmp_log(LOG_INFO, "vmstat_solaris2 (update_stats): Kstat chain changed."); */
+          /* snmp_log(LOG_INFO, "vmstat_solaris2 (update_stats): Kstat chain ch
+anged."); */
         }
     }
                  
   /* Take the current snapshot */
   if (take_snapshot(&snapshot[0]) == -1)
     {
-      snmp_log(LOG_WARNING, "vmstat_solaris2 (update_stats): Something went wrong with take_snapshot.");
+      snmp_log(LOG_WARNING, "vmstat_solaris2 (update_stats): Something went wrong with take_snapshot.\n");
       return;
     }
   
@@ -347,11 +348,11 @@ static void update_stats(unsigned int registrationNumber, void *clientarg)
         {
           if (snapshot[0].css_cpus > snapshot[1].css_cpus)
             {
-              snmp_log(LOG_NOTICE, "vmstat_solaris2 (update_stats): Cool ! Number of CPUs increased, must be hot-pluggable.");
+              snmp_log(LOG_NOTICE, "vmstat_solaris2 (update_stats): Cool ! Number of CPUs increased, must be hot-pluggable.\n");
             }
           else
             {
-              snmp_log(LOG_NOTICE, "vmstat_solaris2 (update_stats): Lost at least one CPU, RIP.");
+              snmp_log(LOG_NOTICE, "vmstat_solaris2 (update_stats): Lost at least one CPU, RIP.\n");
             }
 	  /* Make all snapshots but the current one invalid */
           number_of_snapshots = 1;
