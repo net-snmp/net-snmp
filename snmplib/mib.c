@@ -600,7 +600,7 @@ sprint_gauge(char *buf,
 	     const char *units)
 {
     if (var->type != ASN_GAUGE){
-	sprintf(buf, "Wrong Type (should be Gauge): ");
+	sprintf(buf, "Wrong Type (should be Gauge32 or Unsigned32): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
@@ -608,7 +608,7 @@ sprint_gauge(char *buf,
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
 	sprintf(buf, "%lu", *var->val.integer);
     else
-	sprintf(buf, "Gauge: %lu", *var->val.integer);
+	sprintf(buf, "Gauge32: %lu", *var->val.integer);
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
 }
@@ -621,12 +621,15 @@ sprint_counter(char *buf,
 	       const char *units)
 {
     if (var->type != ASN_COUNTER){
-	sprintf(buf, "Wrong Type (should be Counter): ");
+	sprintf(buf, "Wrong Type (should be Counter32): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
     }
-    sprintf(buf, "%lu", *var->val.integer);
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
+	sprintf(buf, "%lu", *var->val.integer);
+    else
+	sprintf(buf, "Counter32: %lu", *var->val.integer);
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
 }
@@ -641,6 +644,12 @@ sprint_networkaddress(char *buf,
     int x, len;
     u_char *cp;
 
+    if (var->type != ASN_IPADDRESS){
+	sprintf(buf, "Wrong Type (should be NetworkAddress): ");
+	buf += strlen(buf);
+	sprint_by_type(buf, var, NULL, NULL, NULL);
+	return;
+    }
     if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	sprintf(buf, "Network Address: ");
 	buf += strlen(buf);
@@ -665,7 +674,7 @@ sprint_ipaddress(char *buf,
     u_char *ip;
 
     if (var->type != ASN_IPADDRESS){
-	sprintf(buf, "Wrong Type (should be Ipaddress): ");
+	sprintf(buf, "Wrong Type (should be IpAddress): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
@@ -705,7 +714,7 @@ sprint_bitstring(char *buf,
     char *enum_string;
 
     if (var->type != ASN_BIT_STR && var->type != ASN_OCTET_STR){
-	sprintf(buf, "Wrong Type (should be BIT STRING): ");
+	sprintf(buf, "Wrong Type (should be BITS): ");
 	buf += strlen(buf);
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
@@ -1252,7 +1261,7 @@ init_mib (void)
     tree_top = (struct tree *)calloc(1,sizeof(struct tree));
     /* XX error check ? */
     if (tree_top) {
-        tree_top->label = strdup("(top");
+        tree_top->label = strdup("(top)");
         tree_top->child_list = tree_head;
     }
 }
@@ -1297,6 +1306,9 @@ set_function(struct tree *subtree)
 	    case TYPE_INTEGER:
 		subtree->printer = sprint_integer;
 		break;
+	    case TYPE_INTEGER32:
+		subtree->printer = sprint_integer;
+		break;
 	    case TYPE_NETADDR:
 		subtree->printer = sprint_networkaddress;
 		break;
@@ -1327,8 +1339,11 @@ set_function(struct tree *subtree)
 	    case TYPE_COUNTER64:
 		subtree->printer = sprint_counter64;
 		break;
-	    case TYPE_UINTEGER:
+	    case TYPE_UINTEGER32:
 		subtree->printer = sprint_uinteger;
+		break;
+	    case TYPE_UNSIGNED32:
+		subtree->printer = sprint_gauge;
 		break;
 	    case TYPE_OTHER:
 	    default:
@@ -1760,7 +1775,9 @@ _get_symbol(oid *objid,
             objid += numids;
             objidlen -= numids;
 	    break;
-	case TYPE_UINTEGER:
+	case TYPE_INTEGER32:
+	case TYPE_UINTEGER32:
+	case TYPE_UNSIGNED32:
 	case TYPE_GAUGE:
 	case TYPE_INTEGER:
 	    if (tp->enums) {
@@ -1965,15 +1982,17 @@ print_tree_node(FILE *f,
 	case TYPE_INTEGER:	cp = "INTEGER"; break;
 	case TYPE_NETADDR:	cp = "NetworkAddress"; break;
 	case TYPE_IPADDR:	cp = "IpAddress"; break;
-	case TYPE_COUNTER:	cp = "Counter"; break;
-	case TYPE_GAUGE:	cp = "Gauge"; break;
+	case TYPE_COUNTER:	cp = "Counter32"; break;
+	case TYPE_GAUGE:	cp = "Gauge32"; break;
 	case TYPE_TIMETICKS:	cp = "TimeTicks"; break;
 	case TYPE_OPAQUE:	cp = "Opaque"; break;
 	case TYPE_NULL:		cp = "NULL"; break;
 	case TYPE_COUNTER64:	cp = "Counter64"; break;
-	case TYPE_BITSTRING:	cp = "BIT STRING"; break;
+	case TYPE_BITSTRING:	cp = "BITS"; break;
 	case TYPE_NSAPADDRESS:	cp = "NsapAddress"; break;
-	case TYPE_UINTEGER:	cp = "UInteger32"; break;
+	case TYPE_UINTEGER32:	cp = "UInteger32"; break;
+	case TYPE_UNSIGNED32:	cp = "Unsigned32"; break;
+	case TYPE_INTEGER32:	cp = "Integer32"; break;
 	default:		cp = NULL; break;
 	}
 #if SNMP_TESTING_CODE
@@ -2251,6 +2270,9 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	if (!tp) break;
 	switch (tp->type) {
 	case TYPE_INTEGER:
+	case TYPE_INTEGER32:
+	case TYPE_UINTEGER32:
+	case TYPE_UNSIGNED32:
 	    /* Isolate the next entry */
 	    cp2 = strchr( cp, '.' );
 	    if (cp2) *cp2++ = '\0';
