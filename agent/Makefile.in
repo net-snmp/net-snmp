@@ -125,6 +125,7 @@ libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${LMIBOBJS}
 	$(RANLIB) libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION)
 
 embedperlinstall:
+	  @$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir)
 	  @$(INSTALL) $(srcdir)/snmp_perl.pl $(snmplibdir)/snmp_perl.pl
 	  @echo "install:  installed $$i in $(snmplibdir)"
 
