@@ -854,10 +854,6 @@ main(int argc, char *argv[])
     signal(SIGTERM, SnmpdShutDown);
     signal(SIGINT, SnmpdShutDown);
         
- 
-    printf("\n");
-    fflush(stdout);
-
 #if HAVE_UNISTD_H
     if (gid) {
       DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
@@ -1090,7 +1086,7 @@ snmp_check_parse( struct snmp_session *session,
 	     for ( var_ptr = pdu->variables ;
 	           var_ptr != NULL ; var_ptr=var_ptr->next_variable ) {
                     sprint_objid (buf, var_ptr->name, var_ptr->name_length);
-                    fprintf (stdout, "    -- %s\n", buf);
+                    snmp_log(LOG_DEBUG, "    -- %s\n", buf);
 	     }
 	}
     	return 1;
