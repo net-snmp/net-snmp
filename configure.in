@@ -2,7 +2,8 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(agent/extensible/extensible.c)
 AC_CONFIG_HEADER(config.h)
 
-AC_ARG_ENABLE(debugging,[  --enable-debugging      Outputs extra debugging information],AC_DEFINE(DODEBUG))
+AC_ARG_ENABLE(debugging,[  --enable-debugging      Outputs extra debugging information.],AC_DEFINE(DODEBUG))
+AC_ARG_WITH(defaults,[  --with-defaults         Use defaults for prompted values.],defaults="yes",defaults="no")
 
 dnl Checks for programs.
 AC_CHECK_PROGS(CC,cc gcc c89,cc)
@@ -16,6 +17,15 @@ AC_PATH_PROG(PSPROG,ps)
 AC_CHECK_PROGS(SED,sed gsed)
 
 AC_AIX
+
+dnl CPPFLAGS
+if test "x$GCC" = "xyes" -a "x$CPP" = "x$CC -E"; then
+  dnl extra cpp flags for gnu c compiler to allow .in file extensions.
+  EXTRACPPFLAGS="-x c"
+else
+  EXTRACPPFLAGS=""
+fi
+AC_SUBST(EXTRACPPFLAGS,$EXTRACPPFLAGS)
 
 dnl system check
 AC_CANONICAL_SYSTEM
@@ -52,7 +62,7 @@ if test $i = "unknown"; then
 fi
 ])
 
-AC_DEFINE_UNQUOTED(KERNEL_LOC,$ac_cv_KERNEL_LOC)
+AC_DEFINE_UNQUOTED(KERNEL_LOC,"$ac_cv_KERNEL_LOC")
 
 dnl Check for /dev/dmem or /dev/drum location
 AC_CACHE_CHECK(for location of swap device,ac_cv_DMEM_LOC,
@@ -77,7 +87,7 @@ else
 fi
 ])
 
-AC_DEFINE(DMEM_LOC,$ac_cv_DMEM_LOC)
+AC_DEFINE_UNQUOTED(DMEM_LOC,"$ac_cv_DMEM_LOC")
 
 dnl Checks for libraries.
 dnl Replace `main' with a function in -lX11:
@@ -231,6 +241,7 @@ AC_CHECK_FUNCS(gethostname gettimeofday select socket strtol)
 
 AC_CACHE_CHECK(if you have run configure before, ac_cv_have_warned,
 [
+if test "x$defaults" = "xno"; then
 cat << EOF
 
 	 ************** Configuration Section **************
@@ -250,6 +261,9 @@ EOF
 read tmpinput
 ac_cv_have_warned="yes"
 echo $ac_n "disabling above prompt for future runs...  $ac_c"
+else
+  ac_cv_have_warned="no"
+fi
 ])
 
 ME=`whoami`
