@@ -311,6 +311,21 @@ nsb-make()
 
 nsb-default-paths()
 {
+   #
+   # System specific additions
+   #
+   case `uname -s` in
+
+   Darwin)
+      # the version of apple's gcc on the sf cf munges -E output in
+      # a way that breaks mib config_require, so use cpp..
+      export CPP=${CPP:=cpp}
+      ;;
+
+   *)
+      ;;
+   esac
+
    if [ -z "$NSB_VERSION" ]; then
       NSB_VERSION="unknown-version"
    fi
