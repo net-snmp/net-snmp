@@ -742,22 +742,24 @@ write_snmpNotifyRowStatus(int      action,
             vp = vars;
 
 
-            StorageNew = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
-            memdup((u_char **) &(StorageNew->snmpNotifyName), 
-                   vp->val.string,
-                   vp->val_len);
-            StorageNew->snmpNotifyNameLen = vp->val_len;
-            vp = vp->next_variable;
+            if (set_value != RS_DESTROY) {
+                StorageNew = SNMP_MALLOC_STRUCT(snmpNotifyTable_data);
+                memdup((u_char **) &(StorageNew->snmpNotifyName), 
+                       vp->val.string,
+                       vp->val_len);
+                StorageNew->snmpNotifyNameLen = vp->val_len;
+                vp = vp->next_variable;
 
 
-            /* default values */
-            StorageNew->snmpNotifyStorageType = ST_NONVOLATILE;
-            StorageNew->snmpNotifyType = SNMPNOTIFYTYPE_TRAP;
-            StorageNew->snmpNotifyTagLen = 0;
-            StorageNew->snmpNotifyTag = (char *)malloc(1); /* bogus pointer */
+                /* default values */
+                StorageNew->snmpNotifyStorageType = ST_NONVOLATILE;
+                StorageNew->snmpNotifyType = SNMPNOTIFYTYPE_TRAP;
+                StorageNew->snmpNotifyTagLen = 0;
+                StorageNew->snmpNotifyTag = (char *)malloc(1); /* bogus pointer */
 
-            StorageNew->snmpNotifyRowStatus = set_value;
-            snmp_free_var(vars);
+                StorageNew->snmpNotifyRowStatus = set_value;
+                snmp_free_var(vars);
+            }
           }
           
 
@@ -792,12 +794,14 @@ write_snmpNotifyRowStatus(int      action,
                StorageTmp->snmpNotifyRowStatus = *((long *) var_val);
              } else {
                /* destroy...  extract it for now */
-               hciptr =
-                 header_complex_find_entry(snmpNotifyTableStorage,
-                                           StorageTmp);
-               StorageDel = (struct snmpNotifyTable_data *)
-                 header_complex_extract_entry((struct header_complex_index **)&snmpNotifyTableStorage,
-                                              hciptr);
+                 if (StorageTmp) {
+                     hciptr =
+                         header_complex_find_entry(snmpNotifyTableStorage,
+                                                   StorageTmp);
+                     StorageDel = (struct snmpNotifyTable_data *)
+                         header_complex_extract_entry((struct header_complex_index **)&snmpNotifyTableStorage,
+                                                      hciptr);
+                 }
              }
           break;
 

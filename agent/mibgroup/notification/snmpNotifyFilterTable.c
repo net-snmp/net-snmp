@@ -563,20 +563,22 @@ write_snmpNotifyFilterRowStatus(int      action,
             }
             vp = vars;
 
-            StorageNew = SNMP_MALLOC_STRUCT(snmpNotifyFilterTable_data);
-            memdup((u_char **) &(StorageNew->snmpNotifyFilterProfileName), 
-                   (u_char *) vp->val.string, vp->val_len);
-            StorageNew->snmpNotifyFilterProfileNameLen = vp->val_len;
-            vp = vp->next_variable;
-            memdup((u_char **) &(StorageNew->snmpNotifyFilterSubtree), 
-                   (u_char *) vp->val.objid, vp->val_len);
-            StorageNew->snmpNotifyFilterSubtreeLen = vp->val_len/sizeof(oid);
+            if (set_value != RS_DESTROY) {
+                StorageNew = SNMP_MALLOC_STRUCT(snmpNotifyFilterTable_data);
+                memdup((u_char **) &(StorageNew->snmpNotifyFilterProfileName), 
+                       (u_char *) vp->val.string, vp->val_len);
+                StorageNew->snmpNotifyFilterProfileNameLen = vp->val_len;
+                vp = vp->next_variable;
+                memdup((u_char **) &(StorageNew->snmpNotifyFilterSubtree), 
+                       (u_char *) vp->val.objid, vp->val_len);
+                StorageNew->snmpNotifyFilterSubtreeLen = vp->val_len/sizeof(oid);
 
-            StorageNew->snmpNotifyFilterMask = (char *)calloc(1,1);
-            StorageNew->snmpNotifyFilterMaskLen = 0;
-            StorageNew->snmpNotifyFilterType = SNMPNOTIFYFILTERTYPE_INCLUDED;
-            StorageNew->snmpNotifyFilterStorageType = ST_NONVOLATILE;
-            StorageNew->snmpNotifyFilterRowStatus = set_value;
+                StorageNew->snmpNotifyFilterMask = (char *)calloc(1,1);
+                StorageNew->snmpNotifyFilterMaskLen = 0;
+                StorageNew->snmpNotifyFilterType = SNMPNOTIFYFILTERTYPE_INCLUDED;
+                StorageNew->snmpNotifyFilterStorageType = ST_NONVOLATILE;
+                StorageNew->snmpNotifyFilterRowStatus = set_value;
+            }
             /* XXX: free, zero vars, no longer needed? */
           }
           
@@ -612,12 +614,14 @@ write_snmpNotifyFilterRowStatus(int      action,
                StorageTmp->snmpNotifyFilterRowStatus = *((long *) var_val);
              } else {
                /* destroy...  extract it for now */
-               hciptr =
-                 header_complex_find_entry(snmpNotifyFilterTableStorage,
-                                           StorageTmp);
-               StorageDel = (struct snmpNotifyFilterTable_data *)
-                 header_complex_extract_entry((struct header_complex_index **)&snmpNotifyFilterTableStorage,
-                                              hciptr);
+                 if (StorageTmp) {
+                     hciptr =
+                         header_complex_find_entry(snmpNotifyFilterTableStorage,
+                                                   StorageTmp);
+                     StorageDel = (struct snmpNotifyFilterTable_data *)
+                         header_complex_extract_entry((struct header_complex_index **)&snmpNotifyFilterTableStorage,
+                                                      hciptr);
+                 }
              }
           break;
 

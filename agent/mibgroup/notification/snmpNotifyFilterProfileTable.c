@@ -477,15 +477,18 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
               return SNMP_ERR_INCONSISTENTNAME;
             }
 
-            StorageNew = SNMP_MALLOC_STRUCT(snmpNotifyFilterProfileTable_data);
-            memdup((u_char **) &(StorageNew->snmpTargetParamsName), 
-                   vars->val.string,
-                   vars->val_len);
-            StorageNew->snmpTargetParamsNameLen = vars->val_len;
-            StorageNew->snmpNotifyFilterProfileStorType = ST_NONVOLATILE;
+            if (set_value != RS_DESTROY) {
+                StorageNew =
+                    SNMP_MALLOC_STRUCT(snmpNotifyFilterProfileTable_data);
+                memdup((u_char **) &(StorageNew->snmpTargetParamsName), 
+                       vars->val.string,
+                       vars->val_len);
+                StorageNew->snmpTargetParamsNameLen = vars->val_len;
+                StorageNew->snmpNotifyFilterProfileStorType = ST_NONVOLATILE;
 
-            StorageNew->snmpNotifyFilterProfileRowStatus = set_value;
-            snmp_free_var(vars);
+                StorageNew->snmpNotifyFilterProfileRowStatus = set_value;
+                snmp_free_var(vars);
+            }
           }
           
 
@@ -519,13 +522,16 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
                old_value = StorageTmp->snmpNotifyFilterProfileRowStatus;
                StorageTmp->snmpNotifyFilterProfileRowStatus = *((long *) var_val);
              } else {
-               /* destroy...  extract it for now */
-               hciptr =
-                 header_complex_find_entry(snmpNotifyFilterProfileTableStorage,
-                                           StorageTmp);
-               StorageDel = (struct snmpNotifyFilterProfileTable_data *)
-                 header_complex_extract_entry((struct header_complex_index **)&snmpNotifyFilterProfileTableStorage,
-                                              hciptr);
+                 /* destroy...  extract it for now */
+                 if (StorageTmp) {
+                     hciptr =
+                         header_complex_find_entry(snmpNotifyFilterProfileTableStorage,
+                                                   StorageTmp);
+                     StorageDel = (struct snmpNotifyFilterProfileTable_data *)
+                         header_complex_extract_entry((struct header_complex_index **)&snmpNotifyFilterProfileTableStorage,
+                                                      hciptr);
+                 }
+                 
              }
           break;
 
