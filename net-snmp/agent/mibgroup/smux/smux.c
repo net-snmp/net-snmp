@@ -184,6 +184,7 @@ smux_accept(int sd)
 	int count;
 	int len;
 
+        fd = accept(smux_sd, (struct sockaddr *)&in_socket, &len);
 	if (fd < 0) {
 		perror("[smux_accept] accept failed");
 		return;
