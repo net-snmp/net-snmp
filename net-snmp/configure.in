@@ -469,6 +469,16 @@ if test "x$ac_cv_PTR_TO_VOID" = "xno"; then
   AC_DEFINE(void,char)
 fi
 
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#define KERNEL
+#define _KERNEL
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#include <net/route.h>
+], rtentry, rt_dst, no)
+
 dnl checking for 4.3 vs 4.4 rtentry.
 AC_CACHE_CHECK(type of rtentry structure,ac_cv_RTENTRY_TYPE,
 [
@@ -484,7 +494,7 @@ AC_TRY_COMPILE([
 #include <net/route.h>
 ],[
 
-#if defined(irix6) || defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
+#ifndef STRUCT_RTENTRY_HAS_RT_DST
 #define rt_dst rt_nodes->rn_key
 #endif
 
@@ -562,6 +572,47 @@ if test "x$ac_cv_struct_rtentry_rt_next" = "xyes"; then
 fi
 
 fi
+
+dnl Check struct rtentry for various things.
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#define KERNEL
+#define _KERNEL
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#include <net/route.h>
+], rtentry, rt_unit)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#define KERNEL
+#define _KERNEL
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#include <net/route.h>
+], rtentry, rt_refcnt)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#define KERNEL
+#define _KERNEL
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#include <net/route.h>
+], rtentry, rt_hash)
+
+AC_CHECK_STRUCT_FOR([
+#include <sys/types.h>
+#define KERNEL
+#define _KERNEL
+#include <sys/socket.h>
+#undef KERNEL
+#undef _KERNEL
+#include <net/route.h>
+], rtentry, rt_use)
 
 dnl Check tcpstat for tcpstat.tcp_rcvmemdrop
 AC_CHECK_STRUCT_FOR([

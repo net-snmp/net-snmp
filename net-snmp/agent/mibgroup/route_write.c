@@ -44,8 +44,11 @@
 #include "ip.h"
 #include "route_write.h"
 
-#if defined(irix6) || defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
+#ifndef STRUCT_RTENTRY_HAS_RT_DST
 #define rt_dst rt_nodes->rn_key
+#endif
+#ifndef STRUCT_RTENTRY_HAS_RT_HASH
+#define rt_hash rt_pad1
 #endif
 
 #ifdef irix6
@@ -137,7 +140,7 @@ u_short  flags;
 }
 
 
-#if defined(irix6) || defined(osf3) || defined(netbsd1) || defined(freebsd2) || defined(bsdi2)
+#ifndef STRUCT_RTENTRY_HAS_RT_DST
 #undef rt_dst
 #endif
 
