@@ -88,12 +88,8 @@ RETSIGTYPE update_config(int a)
   signal(SIGHUP,update_config);
 }
 
-int tree_compare(const void *a, const void *b)
+int tree_compare(const struct subtree *ap, const struct subtree *bp)
 {
-  struct subtree *ap, *bp;
-  ap = (struct subtree *) a;
-  bp = (struct subtree *) b;
-
   return snmp_oid_compare(ap->name,ap->namelen,bp->name,bp->namelen);
 }
 
