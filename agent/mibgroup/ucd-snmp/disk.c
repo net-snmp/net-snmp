@@ -403,12 +403,14 @@ unsigned char *var_extensible_disk(struct variable *vp,
       return((u_char *) (&long_ret));
     case ERRORMSG:
       if (iserror)
+      {
 	if (disks[disknum].minimumspace >= 0)
 	  sprintf(errmsg,"%s: less than %d free (= %d)",disks[disknum].path,
                   disks[disknum].minimumspace, (int) avail);
 	else
 	  sprintf(errmsg,"%s: less than %d%% free (= %d%%)",disks[disknum].path,
 		  disks[disknum].minpercent, percent);
+      }
       else
         errmsg[0] = 0;
       *var_len = strlen(errmsg);
