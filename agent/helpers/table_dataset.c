@@ -558,7 +558,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
              *  doesn't include such an object, then the row won't have been created,
              *  and the writable check will also have been skipped.  Again - check here.
              */
-            if (!data || data->writable == 0) {
+            if (data && data->writable == 0) {
                 netsnmp_set_request_error(reqinfo, request,
                                           SNMP_ERR_NOTWRITABLE);
                 continue;
@@ -604,6 +604,11 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                                               SNMP_ERR_WRONGVALUE);
                     continue;
                 }
+            }
+            if (!data ) {
+                netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_ERR_NOTWRITABLE);
+                continue;
             }
 
             /*
