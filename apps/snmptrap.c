@@ -79,6 +79,7 @@ SOFTWARE.
 #include "snmp_impl.h"
 #include "system.h"
 #include "snmp_parse_args.h"
+#include "snmpv3.h"
 
 oid objid_enterprise[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
 oid objid_sysdescr[]   = {1, 3, 6, 1, 2, 1, 1, 1, 0};
@@ -150,6 +151,50 @@ int main(int argc, char *argv[])
     session.callback_magic = NULL;
     if (session.remote_port == SNMP_DEFAULT_REMPORT)
 	session.remote_port = SNMP_TRAP_PORT;
+
+    if (session.version == SNMP_VERSION_3 && !inform) {
+        /* for traps, we use ourselves as the authoritative engine
+           which is really stupid since command line apps don't have a
+           notion of a persistent engine.  Hence, our boots and time
+           values are probably always really wacked with respect to what
+           a manager would like to see.
+
+           The following should be enough to:
+
+           1) prevent the library from doing discovery for engineid & time.
+           2) use our engineid instead of the remote engineid for
+              authoritative & privacy related operations.
+           3) The remote engine must be configured with users for our engineID.
+
+           -- Wes */
+
+        /* setup the engineID based on IP addr.  Need a different
+           algorthim here.  This will cause problems with agents on the
+           same machine sending traps. */
+        setup_engineID(NULL, NULL);
+
+        /* pick our own engineID */
+        if (session.securityEngineIDLen == 0 ||
+            session.securityEngineID == NULL) {
+            session.securityEngineID =
+                snmpv3_generate_engineID(&session.securityEngineIDLen);
+        }
+        if (session.contextEngineIDLen == 0 ||
+            session.contextEngineID == NULL) {
+            session.contextEngineID =
+                snmpv3_generate_engineID(&session.contextEngineIDLen);
+        }
+
+        /* set boots and time, which will cause problems if this
+           machine ever reboots and a remote trap receiver has cached our
+           boots and time...  I'll cause a not-in-time-window report to
+           be sent back to this machine. */
+        if (session.engineBoots == 0)
+            session.engineBoots = 1;
+        if (session.engineTime == 0)             /* not really correct, */
+            session.engineTime = get_uptime();   /* but it'll work. Sort of. */
+    }
+
     ss = snmp_open(&session);
     if (ss == NULL){
       /* diagnose snmp_open errors with the input struct snmp_session pointer */
