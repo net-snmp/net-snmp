@@ -844,7 +844,7 @@ _mfd_${context}_check_dependencies(netsnmp_mib_handler *handler,
 NETSNMP_STATIC_INLINE int
 ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx )
 {
-    int rc;
+    int rc = SNMP_ERR_NOERROR;
 
     DEBUGTRACE;
 
@@ -867,7 +867,7 @@ $example_start
 $example_end
 @end@
 
-    return SNMP_ERR_NOERROR;
+    return rc;
 }
 
 @end@
