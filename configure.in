@@ -727,6 +727,17 @@ if test "x$ac_cv_PTR_TO_VOID" = "xno"; then
   AC_DEFINE(void,char)
 fi
 
+dnl check if compiler pre-processor defines __FUNCTION__
+AC_CACHE_CHECK(if __FUNCTION__ is defined,ac_cv_HAVE_CPP_UNDERBAR_FUNCTION_DEFINED,
+[
+AC_TRY_COMPILE(,[
+    char *cp = __FUNCTION__;
+], ac_cv_HAVE_CPP_UNDERBAR_FUNCTION_DEFINED=yes, ac_cv_HAVE_CPP_UNDERBAR_FUNCTION_DEFINED=no)])
+
+if test "x$ac_cv_HAVE_CPP_UNDERBAR_FUNCTION_DEFINED" = "xyes"; then
+  AC_DEFINE(HAVE_CPP_UNDERBAR_FUNCTION_DEFINED)
+fi
+
 AC_CHECK_STRUCT_FOR([
 #include <sys/types.h>
 #define KERNEL
