@@ -147,5 +147,9 @@ libsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    ${TOBJS}
 # internal test objects
 #
 parse:  mib.o parse.c
-	$(CC) $(CFLAGS) -DTEST parse.c mib.o -o parse
+	$(CC) $(CFLAGS) -DTEST parse.c -o parse \
+		`$(top_srcdir)/net-snmp-config --libs`
 
+test_binary_array: test_binary_array.c
+	$(CC) $(CFLAGS) test_binary_array.c  -o $@ \
+		`$(top_srcdir)/net-snmp-config --libs`
