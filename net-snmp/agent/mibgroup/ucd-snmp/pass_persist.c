@@ -46,11 +46,11 @@ struct persist_pipe_type {
   int fdIn, fdOut;
   int pid;
 } *persist_pipes = ( struct persist_pipe_type * ) NULL;
-static int init_persist_pipes();
-static int close_persist_pipe(int index);
-static int open_persist_pipe(int index, char *command);
-static int destruct_persist_pipes();
-static int write_persist_pipe( int index, char *data );
+static int init_persist_pipes __P((void));
+static int close_persist_pipe __P((int index));
+static int open_persist_pipe __P((int index, char *command));
+static void destruct_persist_pipes __P((void));
+static int write_persist_pipe __P(( int index, char *data ));
 
 /* the relocatable extensible commands variables */
 struct variable2 extensible_persist_passthru_variables[] = {
@@ -112,7 +112,6 @@ void pass_persist_parse_config(word,cptr)
 #else
           pass_persist_compare
 #endif
-
       );
     persistpassthrus = (struct extensible *) etmp[0];
     ptmp = (struct extensible *) etmp[0];
@@ -158,7 +157,7 @@ unsigned char *var_extensible_pass_persist(vp, name, length, exact, var_len, wri
 {
 
   oid newname[30];
-  int i, j, rtest=0, fd, newlen, last;
+  int i, j, rtest=0, newlen, last;
   static long long_ret;
   static char buf[300], buf2[300];
   static oid  objid[30];
@@ -424,7 +423,7 @@ int pass_persist_compare(a, b)
  *   - Returns 1 on success, 0 on failure.
  *   - Initializes all FILE pointers to NULL to indicate "closed"
  */
-static int init_persist_pipes()
+static int init_persist_pipes __P((void))
 {
   int i;
 
@@ -451,13 +450,13 @@ static int init_persist_pipes()
  * Destruct our persistant pipes
  *
  */
-static int destruct_persist_pipes()
+static void destruct_persist_pipes __P((void))
 {
   int i;
 
   /* Return if there are no pipes */
   if ( ! persist_pipes ) {
-    return 0;
+    return;
   }
 
   for( i = 0; i <= numpersistpassthrus; i++ ) {
@@ -466,11 +465,12 @@ static int destruct_persist_pipes()
 
   free( persist_pipes );
   persist_pipes = (struct persist_pipe_type *) 0;
-
 }
 
 /* returns 0 on failure, 1 on success */
-static int open_persist_pipe(int index, char *command)
+static int open_persist_pipe(index, command)
+  int index;
+  char *command;
 {
   static int recurse = 0;  /* used to allow one level of recursion */
 
@@ -533,11 +533,18 @@ static int open_persist_pipe(int index, char *command)
 }
 
 /* Generic handler */
-void sigpipe_handler ( int sig, siginfo_t *sip, void *uap ) {
+void sigpipe_handler (sig, sip, uap )
+  int sig;
+  siginfo_t *sip;
+  void *uap;
+{
   return;
 }
 
-static int write_persist_pipe( int index, char *data ) {
+static int write_persist_pipe( index, data )
+  int index;
+  char *data;
+{
   struct sigaction sa, osa;
   int wret = 0, werrno = 0;
 
@@ -573,7 +580,9 @@ static int write_persist_pipe( int index, char *data ) {
   return 1;
 }
 
-static int close_persist_pipe(int index) {
+static int close_persist_pipe(index)
+  int index;
+{
 
   /* Check and nix every item */
   if( persist_pipes[index].fOut ) {
