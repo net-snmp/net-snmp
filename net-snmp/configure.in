@@ -279,7 +279,7 @@ AC_AIX
 AC_C_CONST
 
 AC_MSG_CHECKING(for developer flags)
-if test "x$developer" != "xno" -o -f $srcdir/remove-files; then
+if test "x$developer" != "xno" -a -f $srcdir/remove-files; then
   dnl turn on the developer flag when taken from a CVS checkout (not a release)
   developer="yes"
 fi
