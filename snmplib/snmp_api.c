@@ -5994,7 +5994,7 @@ netsnmp_variable_list *
 snmp_pdu_add_variable(netsnmp_pdu *pdu,
                       oid * name,
                       size_t name_length,
-                      u_char type, u_char * value, size_t len)
+                      u_char type, const u_char * value, size_t len)
 {
     return snmp_varlist_add_variable(&pdu->variables, name, name_length,
                                      type, value, len);
@@ -6160,7 +6160,7 @@ snmp_add_var(netsnmp_pdu *pdu,
     int             check =
         !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
     u_char         *buf = NULL;
-    u_char         *buf_ptr = NULL;
+    const u_char   *buf_ptr = NULL;
     size_t          buf_len = 0, value_len = 0, tint;
     long            ltmp;
     struct tree    *tp;
