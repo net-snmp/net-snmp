@@ -252,10 +252,10 @@ Note:  A temporary location of c:\temp\net-snmp is used.
 2.  Copy the following files to c:\temp\net-snmp\html:
 
     cd (source dir)
-    copy "win32\dist\htmlhelp\Configuration Overview.html" c:\temp\net-snmp\html\
-    copy "win32\dist\htmlhelp\Developer FAQ.html" c:\temp\net-snmp\html\
+    copy "win32\dist\htmlhelp\Configuration_Overview.html" c:\temp\net-snmp\html\
+    copy "win32\dist\htmlhelp\Developer_FAQ.html" c:\temp\net-snmp\html\
     copy "win32\dist\htmlhelp\FAQ.html" c:\temp\net-snmp\html\
-    copy "win32\dist\htmlhelp\Help Caveats.html" c:\temp\net-snmp\html\
+    copy "win32\dist\htmlhelp\Help_Caveats.html" c:\temp\net-snmp\html\
     copy "win32\dist\htmlhelp\Introduction.html" c:\temp\net-snmp\html\
     copy "win32\dist\htmlhelp\Net-SNMP.hhc" c:\temp\net-snmp\html\
     copy "win32\dist\htmlhelp\Net-SNMP.hhp" c:\temp\net-snmp\html\

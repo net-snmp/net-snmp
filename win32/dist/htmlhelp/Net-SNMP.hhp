@@ -10,12 +10,12 @@ Title=Net-SNMP 5.1.1
 
 
 [FILES]
-Configuration Overview.html
+Configuration_Overview.html
 EXAMPLE.conf.win32.html
-Help Caveats.html
+Help_Caveats.html
 Introduction.html
 FAQ.html
-Developer FAQ.html
+Developer_FAQ.html
 man1-mib2c.1.html
 man1-snmpbulkget.1.html
 man1-snmpbulkwalk.1.html
