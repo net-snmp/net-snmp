@@ -177,7 +177,7 @@ struct timeval Now;
 
 void init_syslog(void);
 
-void update_config (int a);
+void update_config (void);
 
 #ifdef WIN32
 void openlog(const char *app, int options, int fac) {
@@ -615,6 +615,8 @@ void usage(void)
   -l [d0-7 ]  Set syslog Facility to log daemon[d], log local 0(default) [1-7]\n\
   -d        Dump input/output packets\n\
   -a        Ignore Authentication Failture traps.\n\
+  -c CONFFILE Read CONFFILE as a configuration file.
+  -C        Don't read the default configuration files.
   -m <MIBS>     Use MIBS list instead of the default mib list.\n\
   -M <MIBDIRS>  Use MIBDIRS as the location to look for mibs.\n\
   -O <OUTOPTS>  Toggle various options controlling output display\n");
@@ -674,7 +676,7 @@ int main(int argc, char *argv[])
     /*
      * usage: snmptrapd [-D] [-u PIDFILE] [-p #] [-P] [-s] [-l [d0-7]] [-d] [-e] [-a]
      */
-    while ((arg = getopt(argc, argv, "VdqRD:p:m:M:PO:esSafl:Hu:")) != EOF){
+    while ((arg = getopt(argc, argv, "VdqRD:p:m:M:PO:esSafl:Hu:c:C")) != EOF){
 	switch(arg) {
 	case 'V':
             fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -757,11 +759,20 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Configuration directives understood:\n");
 	    read_config_print_usage("  ");
             exit(0);
+
 #if HAVE_GETPID
         case 'u':
           pid_file = optarg;
           break;
 #endif
+
+        case 'c':
+            ds_set_string(DS_LIBRARY_ID, DS_LIB_OPTIONALCONFIG, optarg);
+            break;
+
+        case 'C':
+            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS, 1);
+            break;
 
 	default:
 	    fprintf(stderr,"invalid option: -%c\n", arg);
@@ -780,38 +791,8 @@ int main(int argc, char *argv[])
 
     /* Initialize the world. Create initial user */
     usm_set_reportErrorOnUnknownID(1);
-    init_snmpv3("snmptrapd");	/* register the v3 handlers */
-    init_snmp_alarm();
-
-    register_mib_handlers();/* snmplib .conf handlers */
-    read_premib_configs();	/* read pre-mib-reading .conf handlers */
-
-#ifdef TESTING
-    print_config_handlers();
-#endif
-
-    /* create the initial and template users */
-    user = usm_create_initial_user("initial", usmHMACMD5AuthProtocol,
-				   USM_LENGTH_OID_TRANSFORM,
-				   usmDESPrivProtocol,
-				   USM_LENGTH_OID_TRANSFORM);
-    userListPtr = usm_add_user(user);
-    user = usm_create_initial_user("templateMD5", usmHMACMD5AuthProtocol,
-				   USM_LENGTH_OID_TRANSFORM,
-				   usmDESPrivProtocol,
-				   USM_LENGTH_OID_TRANSFORM);
-    userListPtr = usm_add_user(user);
-    user = usm_create_initial_user("templateSHA", usmHMACSHA1AuthProtocol,
-				   USM_LENGTH_OID_TRANSFORM,
-				   usmDESPrivProtocol,
-				   USM_LENGTH_OID_TRANSFORM);
-    userListPtr = usm_add_user(user);
-
-    if (userListPtr == NULL) /* user already existed */
-      usm_free_user(user);
-
-    init_mib();
-    update_config(0);	/* read in config files and register HUP */
+    ds_set_string(DS_LIBRARY_ID, DS_LIB_APPTYPE, "snmptrapd");
+    init_snmp("snmptrapd");
 
 #ifndef WIN32
     /* fork the process to the background if we are not printing to stdout */
@@ -919,8 +900,8 @@ int main(int argc, char *argv[])
 		       VersionInfo);
 	    }
 	    if (Syslog)
-		syslog(LOG_INFO, "Snmptrapd reconfigured");
-	    update_config(0);
+		syslog(LOG_INFO, "Snmptrapd reconfiguring");
+	    update_config();
 	    reconfig = 0;
 	}
 	numfds = 0;
@@ -985,29 +966,10 @@ init_syslog(void)
  * trap deamon is running detatched from the console.
  *
  */
-void update_config(int a)
+void update_config(void)
 {
-#if 0
-  if (!dontReadConfigFiles) {  /* don't read if -C present on command line */
-#endif
-
+    free_config();
     read_configs();
-
-#if 0
-  }
-#endif
-
-  /* read all optional config files */
-  /* last is -c from command line */
-  /* always read this one even if -C is present (ie both -c and -C) */
-
-#if 0
-  if (optconfigfile != NULL) {
-    read_config_with_type (optconfigfile, "snmptrapd");
-  }
-#endif
-  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
-                      NULL);
 }
 
 
