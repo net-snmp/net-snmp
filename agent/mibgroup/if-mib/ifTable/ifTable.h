@@ -94,7 +94,7 @@ extern          "C" {
          * ifPhysAddress(6)/PhysAddress/ASN_OCTET_STR/char(char)//L/A/w/e/r/d/h
          */
 #define ifPhysAddress ifentry->paddr
-#define ifPhysAddress_len ifentry->paddr_len /* # of char elements, not bytes */
+#define ifPhysAddress_len ifentry->paddr_len    /* # of char elements, not bytes */
 
         /*
          * ifAdminStatus(7)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
@@ -180,111 +180,111 @@ extern          "C" {
 #endif
 
 #ifdef USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE
-       /*
-        * ifXTable stuff
-        */
-       /*
-        * ifName(1)/DisplayString/ASN_OCTET_STR/char(char)//L/A/w/e/R/d/H
-        */
+        /*
+         * ifXTable stuff
+         */
+        /*
+         * ifName(1)/DisplayString/ASN_OCTET_STR/char(char)//L/A/w/e/R/d/H
+         */
 #define ifName ifentry->name
 
-       /*
-        * ifInMulticastPkts(2)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
-        */
-       u_long          ifInMulticastPkts;
+        /*
+         * ifInMulticastPkts(2)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+        u_long          ifInMulticastPkts;
 
-       /*
-        * ifInBroadcastPkts(3)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
-        */
-       u_long          ifInBroadcastPkts;
+        /*
+         * ifInBroadcastPkts(3)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+        u_long          ifInBroadcastPkts;
 
-       /*
-        * ifOutMulticastPkts(4)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
-        */
-       u_long          ifOutMulticastPkts;
+        /*
+         * ifOutMulticastPkts(4)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+        u_long          ifOutMulticastPkts;
 
-       /*
-        * ifOutBroadcastPkts(5)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
-        */
-       u_long          ifOutBroadcastPkts;
+        /*
+         * ifOutBroadcastPkts(5)/COUNTER/ASN_COUNTER/u_long(u_long)//l/A/w/e/r/d/h
+         */
+        u_long          ifOutBroadcastPkts;
 
-       /*
-        * ifHCInOctets(6)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
-        */
+        /*
+         * ifHCInOctets(6)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
+         */
 #define ifHCInOctets ifentry->stats.ibytes
 
-       /*
-        * ifHCInUcastPkts(7)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
-        */
+        /*
+         * ifHCInUcastPkts(7)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
+         */
 #define ifHCInUcastPkts ifentry->stats.iucast
 
-       /*
-        * ifHCInMulticastPkts(8)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
-        */
+        /*
+         * ifHCInMulticastPkts(8)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
+         */
 #define ifHCInMulticastPkts ifentry->stats.imcast
 
-       /*
-        * ifHCInBroadcastPkts(9)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
-        */
+        /*
+         * ifHCInBroadcastPkts(9)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
+         */
 #define ifHCInBroadcastPkts ifentry->stats.ibcast
 
-       /*
-        * ifHCOutOctets(10)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
-        */
+        /*
+         * ifHCOutOctets(10)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
+         */
 #define ifHCOutOctets ifentry->stats.obytes
 
-       /*
-        * ifHCOutUcastPkts(11)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
-        */
+        /*
+         * ifHCOutUcastPkts(11)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
+         */
 #define ifHCOutUcastPkts ifentry->stats.oucast
 
-       /*
-        * ifHCOutMulticastPkts(12)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
-        */
+        /*
+         * ifHCOutMulticastPkts(12)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
+         */
 #define ifHCOutMulticastPkts ifentry->stats.omcast
 
-       /*
-        * ifHCOutBroadcastPkts(13)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
-        */
+        /*
+         * ifHCOutBroadcastPkts(13)/COUNTER64/ASN_COUNTER64/U64(U64)//l/A/w/e/r/d/h
+         */
 #define ifHCOutBroadcastPkts ifentry->stats.obcast
 
-       /*
-        * ifLinkUpDownTrapEnable(14)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
-        */
-       u_long          ifLinkUpDownTrapEnable;
+        /*
+         * ifLinkUpDownTrapEnable(14)/INTEGER/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
+         */
+        u_long          ifLinkUpDownTrapEnable;
 
-       /*
-        * ifHighSpeed(15)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h
-        */
-       u_long          ifHighSpeed;
+        /*
+         * ifHighSpeed(15)/GAUGE/ASN_GAUGE/u_long(u_long)//l/A/w/e/r/d/h
+         */
+        u_long          ifHighSpeed;
 
-       /*
-        * ifPromiscuousMode(16)/TruthValue/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
-        */
-       u_long          ifPromiscuousMode;
+        /*
+         * ifPromiscuousMode(16)/TruthValue/ASN_INTEGER/long(u_long)//l/A/W/E/r/d/h
+         */
+        u_long          ifPromiscuousMode;
 
-       /*
-        * ifConnectorPresent(17)/TruthValue/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
-        */
-       u_long          ifConnectorPresent;
+        /*
+         * ifConnectorPresent(17)/TruthValue/ASN_INTEGER/long(u_long)//l/A/w/E/r/d/h
+         */
+        u_long          ifConnectorPresent;
 
-       /*
-        * ifAlias(18)/DisplayString/ASN_OCTET_STR/char(char)//L/A/W/e/R/d/H
-        */
-       char            ifAlias[64];
-       size_t          ifAlias_len;    /* # of char elements, not bytes */
+        /*
+         * ifAlias(18)/DisplayString/ASN_OCTET_STR/char(char)//L/A/W/e/R/d/H
+         */
+        char            ifAlias[64];
+        size_t          ifAlias_len;    /* # of char elements, not bytes */
 
-       /*
-        * ifCounterDiscontinuityTime(19)/TimeStamp/ASN_TIMETICKS/u_long(u_long)//l/A/w/e/r/d/h
-        */
-       u_long          ifCounterDiscontinuityTime;
+        /*
+         * ifCounterDiscontinuityTime(19)/TimeStamp/ASN_TIMETICKS/u_long(u_long)//l/A/w/e/r/d/h
+         */
+        u_long          ifCounterDiscontinuityTime;
 #endif                          /* USING_IF_MIB_IFXTABLE_IFXTABLE_MODULE */
 
 
-       /*
-        * some data kept externally 
-        */
-       netsnmp_interface_entry *ifentry;
+        /*
+         * some data kept externally 
+         */
+        netsnmp_interface_entry *ifentry;
     } ifTable_data;
 
 
@@ -352,7 +352,7 @@ extern          "C" {
         /*
          * TODO:131:o: |   |-> Add useful data to ifTable rowreq context.
          */
-       char known_missing;
+        char            known_missing;
 
         /*
          * storage for future expansion

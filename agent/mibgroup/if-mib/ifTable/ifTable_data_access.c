@@ -129,8 +129,8 @@ ifTable_container_init(netsnmp_container ** container_ptr_ptr,
      * don't release resources
      */
     cache->flags |=
-        (NETSNMP_CACHE_DONT_AUTO_RELEASE | NETSNMP_CACHE_DONT_FREE_EXPIRED |
-         NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD |NETSNMP_CACHE_PRELOAD |
+        (NETSNMP_CACHE_DONT_AUTO_RELEASE | NETSNMP_CACHE_DONT_FREE_EXPIRED
+         | NETSNMP_CACHE_DONT_FREE_BEFORE_LOAD | NETSNMP_CACHE_PRELOAD |
          NETSNMP_CACHE_AUTO_RELOAD | NETSNMP_CACHE_DONT_INVALIDATE_ON_SET);
 }                               /* ifTable_container_init */
 
@@ -139,36 +139,36 @@ ifTable_container_init(netsnmp_container ** container_ptr_ptr,
  *
  */
 static void
-_check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
+_check_interface_entry_for_updates(ifTable_rowreq_ctx * rowreq_ctx,
                                    netsnmp_container * ifcontainer)
 {
-    char oper_changed = 0;
-    
+    char            oper_changed = 0;
+
     /*
      * check for matching entry. We can do this directly, since
      * both containers use the same index.
      */
-    netsnmp_interface_entry *ifentry = CONTAINER_FIND(ifcontainer, rowreq_ctx);
-    if(NULL == ifentry) {
+    netsnmp_interface_entry *ifentry =
+        CONTAINER_FIND(ifcontainer, rowreq_ctx);
+    if (NULL == ifentry) {
         /*
          * if this is the first time we detected that this interface is
          * missing, set admin/oper status down, and set last change.
          */
-        if (! rowreq_ctx->known_missing) {
-            DEBUGMSGTL(("ifTable:access","updating missing entry\n"));
+        if (!rowreq_ctx->known_missing) {
+            DEBUGMSGTL(("ifTable:access", "updating missing entry\n"));
             rowreq_ctx->known_missing = 1;
             rowreq_ctx->data.ifAdminStatus = IFADMINSTATUS_DOWN;
             if (rowreq_ctx->data.ifOperStatus != IFOPERSTATUS_DOWN)
                 oper_changed = 1;
             rowreq_ctx->data.ifOperStatus = IFOPERSTATUS_DOWN;
         }
-    }
-    else {
-        DEBUGMSGTL(("ifTable:access","updating existing entry\n"));
-        
+    } else {
+        DEBUGMSGTL(("ifTable:access", "updating existing entry\n"));
+
         netsnmp_assert(strcmp(rowreq_ctx->data.ifName,
                               ifentry->name) == 0);
-        
+
         /*
          * if the interface was missing, but came back, clear the
          * missing flag and set the discontinuity time. (if an os keeps
@@ -184,15 +184,16 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
         /*
          * Check for changes, then update
          */
-        if((! (ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE)) &&
-           (rowreq_ctx->data.ifOperStatus != ifentry->oper_status))
+        if ((!(ifentry->ns_flags & NETSNMP_INTERFACE_FLAGS_HAS_LASTCHANGE))
+            && (rowreq_ctx->data.ifOperStatus != ifentry->oper_status))
             oper_changed = 1;
-        netsnmp_access_interface_entry_copy(rowreq_ctx->data.ifentry, ifentry);
-        
+        netsnmp_access_interface_entry_copy(rowreq_ctx->data.ifentry,
+                                            ifentry);
+
         /*
          * remove entry from ifcontainer
          */
-        CONTAINER_REMOVE(ifcontainer,ifentry);
+        CONTAINER_REMOVE(ifcontainer, ifentry);
         netsnmp_access_interface_entry_free(ifentry);
     }
 
@@ -201,36 +202,34 @@ _check_interface_entry_for_updates(ifTable_rowreq_ctx *rowreq_ctx,
      */
     if (oper_changed)
         rowreq_ctx->data.ifLastChange = netsnmp_get_agent_uptime();
-    
+
 }
 
 /**
  * add new entry
  */
 static void
-_add_new_interface(netsnmp_interface_entry *ifentry,
+_add_new_interface(netsnmp_interface_entry * ifentry,
                    netsnmp_container * container)
 {
     ifTable_rowreq_ctx *rowreq_ctx;
-    
-    DEBUGMSGTL(("ifTable:access","creating new entry\n"));
-    
+
+    DEBUGMSGTL(("ifTable:access", "creating new entry\n"));
+
     /*
      * allocate an row context and set the index(es), then add it to
      * the container
      */
     rowreq_ctx = ifTable_allocate_rowreq_ctx(ifentry);
-    if( (NULL != rowreq_ctx) &&
-        ( MFD_SUCCESS == ifTable_indexes_set(rowreq_ctx, ifentry->index))) {
+    if ((NULL != rowreq_ctx) &&
+        (MFD_SUCCESS == ifTable_indexes_set(rowreq_ctx, ifentry->index))) {
         CONTAINER_INSERT(container, rowreq_ctx);
-    }
-    else {
-        if(rowreq_ctx) {
+    } else {
+        if (rowreq_ctx) {
             snmp_log(LOG_ERR, "error setting index while loading "
                      "ifTable cache.\n");
             ifTable_release_rowreq_ctx(rowreq_ctx);
-        }
-        else {
+        } else {
             snmp_log(LOG_ERR, "memory allocation failed while loading "
                      "ifTable cache.\n");
             netsnmp_access_interface_entry_free(ifentry);
@@ -272,7 +271,7 @@ int
 ifTable_cache_load(netsnmp_container * container)
 {
     ifTable_rowreq_ctx *rowreq_ctx;
-    netsnmp_container * ifcontainer;
+    netsnmp_container *ifcontainer;
 
     DEBUGMSGTL(("verbose:ifTable:ifTable_cache_load", "called\n"));
 
@@ -282,36 +281,35 @@ ifTable_cache_load(netsnmp_container * container)
      * set the index(es) [and data, optionally] and insert into
      * the container.
      */
-        /*
+    /*
      * ifTable gets its data from the netsnmp_interface API.
-         */
+     */
     ifcontainer =
         netsnmp_access_interface_container_load(NULL,
                                                 NETSNMP_ACCESS_INTERFACE_INIT_NOFLAGS);
-    if(NULL == ifcontainer)
-        return MFD_RESOURCE_UNAVAILABLE; /* msg already logged */
+    if (NULL == ifcontainer)
+        return MFD_RESOURCE_UNAVAILABLE;        /* msg already logged */
 
-        /*
+    /*
      * we just got a fresh copy of interface data. compare it to
      * what we've already got, and make any adjustements...
-         */
-    CONTAINER_FOR_EACH(container,
-                       (netsnmp_container_obj_func*)_check_interface_entry_for_updates,
-                       ifcontainer);
+     */
+    CONTAINER_FOR_EACH(container, (netsnmp_container_obj_func *)
+                       _check_interface_entry_for_updates, ifcontainer);
 
-        /*
+    /*
      * now add any new interfaces
-         */
+     */
     CONTAINER_FOR_EACH(ifcontainer,
-                       (netsnmp_container_obj_func*)_add_new_interface,
+                       (netsnmp_container_obj_func *) _add_new_interface,
                        container);
 
-        /*
+    /*
      * free the container. we've either claimed each ifentry, or released it,
      * so the dal function doesn't need to clear the container.
-         */
+     */
     netsnmp_access_interface_container_free(ifcontainer,
-                                            NETSNMP_ACCESS_INTERFACE_FREE_DONT_CLEAR );
+                                            NETSNMP_ACCESS_INTERFACE_FREE_DONT_CLEAR);
 
     DEBUGMSGT(("verbose:ifTable:ifTable_cache_load",
                "%d records\n", CONTAINER_SIZE(container)));
@@ -329,8 +327,8 @@ ifTable_cache_load(netsnmp_container * container)
  *  need to do any processing before that, do it here.
  *
  * @note
- *  The MFD helper will take care of releasing all the
- *  row contexts, so you don't need to worry about that.
+ *  The MFD helper will take care of releasing all the row contexts.
+ *
  */
 void
 ifTable_cache_free(netsnmp_container * container)
