@@ -5,10 +5,15 @@
 export CVS_RSH=ssh
 TAG=
 WO=0
+DEST=
 
+if [ "x$1" = "x-u" ]; then
+    DEST=$2
+    shift 2
+fi
 
 if [ $# -eq 0 ]; then
-    DIR=.
+    DIR=$PWD
 else
     if [ $# -ne 1 ]; then
         echo "usage: $0 <working directory>"
@@ -16,6 +21,13 @@ else
     fi
     DIR=$1
 fi
+
+if [ -z ${DIR##*/} ];then
+   DIR=${DIR%/*}
+fi
+SUBD=${DIR##*/}
+PARENT=${DIR%*$SUBD}
+#echo "$DIR = $PARENT + $SUBD"
 
 if [ ! -d $DIR ]; then
     echo "no such directory '$DIR'"
@@ -38,17 +50,18 @@ if [ ! -f $DIR/CVS/Root ]; then
 fi
 
 if [ -f $DIR/CVS/Tag ]; then
-    TAG="-r `cat $DIR/CVS/Tag | cut -c 2-`"
+    TAG=`cat $DIR/CVS/Tag | cut -c 2-`
+    CMDTAG="-r $TAG"
 fi
 
 REP="`cat $DIR/CVS/Repository`"
 ROOT="`cat $DIR/CVS/Root`"
 
-if [ "x$DIR" = "x." ]; then
-    COMMAND="cvs -q -z3 -d $ROOT update -P -d $TAG"
-else
-    COMMAND="cvs -q -z3 -d $ROOT co $TAG -d $DIR $REP"
-fi
+cd $DIR
+#echo $PWD
+#    COMMAND="cvs -q -z3 -d $ROOT co $TAG -d $DIR $REP"
+
+COMMAND="cvs -q -z3 -d $ROOT update -P -d $CMDTAG"
 
 if [ ! -w $DIR/CVS ]; then
     if [ -O $DIR/CVS ]; then
@@ -68,3 +81,16 @@ if [ $WO -eq 1 ]; then
     chmod -R a-w $DIR
 fi
 
+if [ ! -z $DEST ]; then
+    if [ -z $TAG ]; then
+        TAG=MAIN
+    fi
+
+    cd ..
+#    echo $PWD
+    SOURCE=$REP-cvs-$TAG
+    tar cf /tmp/$SOURCE.tar $SUBD
+    gzip -f --best /tmp/$SOURCE.tar
+    scp /tmp/$SOURCE.tar.gz $DEST
+    rm -f tmp/$SOURCE*
+fi
