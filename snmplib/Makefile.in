@@ -99,113 +99,106 @@ makefileindepend: nosysdepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-acl.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
-acl.o: ../s/generic.h ../m/generic.h 
-acl.o:  asn1.h acl.h
-acl_parse.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
-acl_parse.o: ../s/generic.h ../m/generic.h 
-acl_parse.o:   asn1.h
-acl_parse.o: acl.h party.h context.h snmp_api.h snmp_impl.h snmp.h mib.h
-asn1.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+agentx.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
+agentx.o: ../s/generic.h ../m/generic.h 
+agentx.o:   asn1.h
+agentx.o: snmp_api.h snmp_impl.h snmp.h snmp_client.h agentx.h
+agentx_client.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
+agentx_client.o: ../s/generic.h ../m/generic.h 
+agentx_client.o:   asn1.h
+agentx_client.o: snmp_api.h snmp_impl.h snmp_client.h snmp.h agentx.h
+asn1.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 asn1.o: ../s/generic.h ../m/generic.h 
 asn1.o:   asn1.h
-asn1.o: snmp_api.h snmp_impl.h  
-callback.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+asn1.o: snmp_api.h snmp_impl.h 
+callback.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 callback.o: ../s/generic.h ../m/generic.h 
-callback.o:  tools.h callback.h asn1.h snmp_api.h
-callback.o: snmp_debug.h
-context.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
-context.o: ../s/generic.h ../m/generic.h 
-context.o:  asn1.h context.h
-context_parse.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
-context_parse.o: ../s/generic.h ../m/generic.h 
-context_parse.o:  asn1.h context.h system.h
-context_parse.o: snmp_api.h snmp_impl.h snmp.h mib.h
-int64.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+callback.o:   tools.h
+callback.o: callback.h asn1.h snmp_api.h snmp_debug.h
+default_store.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
+default_store.o: ../s/generic.h ../m/generic.h 
+default_store.o:  asn1.h snmp_api.h snmp_debug.h tools.h
+default_store.o: read_config.h default_store.h
+int64.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 int64.o: ../s/generic.h ../m/generic.h 
-int64.o:   asn1.h int64.h
-keytools.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+int64.o:  asn1.h int64.h
+keytools.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 keytools.o: ../s/generic.h ../m/generic.h 
-keytools.o: asn1.h snmp_api.h md5.h scapi.h keytools.h tools.h
-keytools.o: transform_oids.h
-lcd_time.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+keytools.o:   asn1.h snmp_api.h
+keytools.o: md5.h scapi.h keytools.h tools.h snmp_debug.h transform_oids.h
+lcd_time.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 lcd_time.o: ../s/generic.h ../m/generic.h 
-lcd_time.o:   asn1.h
-lcd_time.o: snmp_api.h snmpusm.h lcd_time.h snmp_debug.h tools.h
+lcd_time.o:   asn1.h snmp_api.h
+lcd_time.o: snmpusm.h lcd_time.h snmp_debug.h tools.h scapi.h
 lcd_time.o: transform_oids.h
-md5.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+md5.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 md5.o: ../s/generic.h ../m/generic.h 
 md5.o:   md5.h
-mib.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+mib.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 mib.o: ../s/generic.h ../m/generic.h 
-mib.o:   asn1.h snmp_api.h mib.h
-mib.o: snmp.h snmp_impl.h parse.h int64.h system.h read_config.h snmp_debug.h
-parse.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+mib.o:  asn1.h snmp_api.h mib.h snmp.h snmp_impl.h
+mib.o: parse.h int64.h system.h read_config.h snmp_debug.h default_store.h
+parse.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 parse.o: ../s/generic.h ../m/generic.h 
 parse.o:  system.h 
-parse.o:  parse.h asn1.h mib.h snmp_api.h snmp_debug.h
-party.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
-party.o: ../s/generic.h ../m/generic.h 
-party.o:  asn1.h party.h
-party_parse.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
-party_parse.o: ../s/generic.h ../m/generic.h 
-party_parse.o:  asn1.h mib.h party.h system.h
-party_parse.o: snmp_api.h snmp_impl.h snmp.h
-read_config.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+parse.o:   parse.h asn1.h mib.h
+parse.o: snmp_api.h snmp_debug.h default_store.h
+read_config.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 read_config.o: ../s/generic.h ../m/generic.h 
 read_config.o:  asn1.h mib.h parse.h system.h
 read_config.o: snmp_api.h snmp_debug.h snmp_impl.h read_config.h tools.h
-scapi.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+scapi.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 scapi.o: ../s/generic.h ../m/generic.h 
-scapi.o:   md5.h asn1.h
-scapi.o: tools.h snmp_api.h snmpusm.h keytools.h snmp_debug.h scapi.h
-scapi.o: transform_oids.h
-snmp.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+scapi.o:  md5.h asn1.h tools.h snmp_api.h snmpusm.h
+scapi.o: keytools.h snmp_debug.h scapi.h callback.h snmp_impl.h
+scapi.o:  transform_oids.h
+snmp.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 snmp.o: ../s/generic.h ../m/generic.h 
-snmp.o:   asn1.h snmp.h
-snmp.o: snmp_api.h snmp_impl.h mib.h
-snmp_api.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+snmp.o:  asn1.h snmp.h snmp_api.h snmp_impl.h mib.h
+snmp_alarm.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
+snmp_alarm.o: ../s/generic.h ../m/generic.h 
+snmp_alarm.o:  asn1.h snmp_api.h snmp_debug.h tools.h
+snmp_alarm.o: default_store.h callback.h snmp_alarm.h
+snmp_api.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 snmp_api.o: ../s/generic.h ../m/generic.h 
 snmp_api.o:   asn1.h snmp.h
-snmp_api.o: snmp_api.h snmp_client.h snmp_impl.h parse.h party.h mib.h
-snmp_api.o: context.h system.h int64.h snmpv3.h read_config.h snmp_debug.h
-snmp_api.o: snmpusm.h tools.h keytools.h lcd_time.h callback.h
-snmp_api.o: transform_oids.h
-snmp_auth.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+snmp_api.o: snmp_api.h snmp_client.h snmp_impl.h parse.h mib.h system.h
+snmp_api.o: int64.h snmpv3.h read_config.h snmp_debug.h snmpusm.h tools.h
+snmp_api.o: keytools.h lcd_time.h callback.h snmp_alarm.h default_store.h
+snmp_api.o: agentx.h transform_oids.h
+snmp_auth.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 snmp_auth.o: ../s/generic.h ../m/generic.h 
 snmp_auth.o:  asn1.h snmp.h snmp_api.h snmp_impl.h
-snmp_auth.o: party.h context.h mib.h md5.h acl.h system.h tools.h scapi.h
-snmp_auth.o: transform_oids.h
-snmp_client.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+snmp_auth.o: mib.h md5.h system.h tools.h scapi.h
+snmp_client.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 snmp_client.o: ../s/generic.h ../m/generic.h 
-snmp_client.o:   asn1.h
-snmp_client.o: snmp.h snmp_api.h snmp_impl.h snmp_client.h party.h context.h
-snmp_client.o: view.h acl.h mib.h
-snmp_debug.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+snmp_client.o:  asn1.h snmp.h snmp_api.h snmp_impl.h
+snmp_client.o: snmp_client.h mib.h
+snmp_debug.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 snmp_debug.o: ../s/generic.h ../m/generic.h 
-snmp_debug.o:   asn1.h
-snmp_debug.o: mib.h snmp_api.h snmp_debug.h snmp_impl.h
-snmpusm.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+snmp_debug.o:   asn1.h mib.h
+snmp_debug.o: snmp_api.h read_config.h snmp_debug.h snmp_impl.h
+snmp_log.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
+snmp_log.o: ../s/generic.h ../m/generic.h 
+snmp_log.o:   snmp_log.h
+snmpusm.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 snmpusm.o: ../s/generic.h ../m/generic.h 
-snmpusm.o:  asn1.h snmp_api.h snmp_debug.h
-snmpusm.o: callback.h tools.h keytools.h snmp.h read_config.h snmpv3.h
-snmpusm.o: snmp-tc.h lcd_time.h snmpusm.h transform_oids.h
-snmpv3.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+snmpusm.o:   asn1.h snmp_api.h
+snmpusm.o: snmp_debug.h callback.h tools.h keytools.h snmp.h read_config.h
+snmpusm.o: snmpv3.h snmp-tc.h lcd_time.h scapi.h snmpusm.h transform_oids.h
+snmpv3.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 snmpv3.o: ../s/generic.h ../m/generic.h 
 snmpv3.o:  system.h asn1.h snmpv3.h snmpusm.h snmp.h
 snmpv3.o: snmp_api.h snmp_impl.h read_config.h lcd_time.h scapi.h tools.h
-snmpv3.o: snmp_debug.h callback.h transform_oids.h
-system.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+snmpv3.o: snmp_debug.h callback.h default_store.h transform_oids.h
+system.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 system.o: ../s/generic.h ../m/generic.h 
 system.o:  asn1.h snmp_api.h system.h
-tools.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+tools.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 tools.o: ../s/generic.h ../m/generic.h 
-tools.o:   asn1.h
-tools.o: snmp_api.h snmp_debug.h tools.h
-vacm.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+tools.o:   asn1.h snmp_api.h
+tools.o: snmp_debug.h tools.h mib.h scapi.h
+vacm.o: ../config.h ../mib_module_config.h ../s/hpux.h ../s/sysv.h
 vacm.o: ../s/generic.h ../m/generic.h 
-vacm.o:  asn1.h snmp.h snmp_api.h vacm.h
-vacm.o: snmp_debug.h
-view.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
-view.o: ../s/generic.h ../m/generic.h 
-view.o:  asn1.h view.h
+vacm.o:   asn1.h snmp.h
+vacm.o: snmp_api.h vacm.h snmp_debug.h
