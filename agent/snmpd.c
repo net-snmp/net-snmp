@@ -164,7 +164,6 @@ int             deny_severity = LOG_WARNING;
 #endif                          /* USE_LIBWRAP */
 
 #define TIMETICK         500000L
-#define ONE_SEC         1000000L
 
 int             snmp_dump_packet;
 int             running = 1;
@@ -384,6 +383,10 @@ main(int argc, char *argv[])
      */
     netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
 			   NETSNMP_DS_AGENT_AGENTX_MASTER, 0);
+    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                       NETSNMP_DS_AGENT_AGENTX_TIMEOUT, -1);
+    netsnmp_ds_set_int(NETSNMP_DS_APPLICATION_ID,
+                       NETSNMP_DS_AGENT_AGENTX_RETRIES, -1);
 
     /*
      * Add some options if they are available.  
