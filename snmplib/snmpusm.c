@@ -2459,6 +2459,8 @@ usm_process_in_msg(int msgProcModel,    /* (UNUSED) */
                 DEBUGMSGTL(("usm", "%s\n",
                             "Failed to increment statistic."));
             }
+	    snmp_log(LOG_WARNING, "Authentication failed for %s\n",
+				user->name);
             return SNMPERR_USM_AUTHENTICATIONFAILURE;
         }
 
