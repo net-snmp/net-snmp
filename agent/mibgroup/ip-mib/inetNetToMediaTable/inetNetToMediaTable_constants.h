@@ -15,7 +15,7 @@ extern          "C" {
     /*
      * column number definitions for table inetNetToMediaTable 
      */
-#define INETNETTOMEDIATABLE_OID              1,3,6,1,2,1,4,34
+#define INETNETTOMEDIATABLE_OID              1,3,6,1,2,1,4,35
 #define COLUMN_INETNETTOMEDIAIFINDEX		1
 #define COLUMN_INETNETTOMEDIANETADDRESSTYPE		2
 #define COLUMN_INETNETTOMEDIANETADDRESS		3
