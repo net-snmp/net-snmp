@@ -38,11 +38,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/user.h>
 #include <sys/proc.h>
 #include <sys/types.h>
-#ifdef mips
-#include <sys/dmap.h>
-#include <machine/pte.h>
-#include <xti.h>
-#endif
+/*
+  #include <machine/pte.h>
+  */
 #include <sys/vm.h>
 #include <netinet/in.h>
 #include <syslog.h>
@@ -138,8 +136,8 @@ static struct nlist nl[] = {
 	{ "_ifnet" },
 	{ "_tcpstat" },
 	{ "_tcb" },
-	{ "_arptab_size" }, 
-	{ "_arptab" },      
+	{ "arptab_size" }, 
+	{ "arptab" },      
 	{ "_in_ifaddr" },
 	{ "_boottime" },
 	{ "_proc" },
@@ -243,17 +241,16 @@ init_snmp()
     ERROR("nlist");
     exit(1);
   }
-#else
-  nlist("/vmunix",nl);
-#endif
   for(ret = 0; nl[ret].n_name != NULL; ret++) {
     if (nl[ret].n_type == 0) {
       fprintf(stderr, "nlist err:  %s not found\n",nl[ret].n_name);
     }
   }
+#else
+  nlist("/vmunix",nl);
+#endif
   init_kmem("/dev/kmem"); 
   init_routes();
-  init_wes();
 }
 
 #define CMUMIB 1, 3, 6, 1, 4, 1, 3
@@ -644,32 +641,7 @@ struct variable2 eventnotifytab_variables[] = {
         {EVENTNOTIFYTABSTATUS, INTEGER, RWRITE, var_eventnotifytab, 1, {4 }},
 };
 
-#include "wes/mibdefs.h"
-#include "wes/wes.h"
-#include "wes/wes_vars.h"
 struct subtree subtrees[] = {
-  {{WESMIB, PROCMIBNUM}, 7, (struct variable *)wes_proc_variables,
-   sizeof(wes_proc_variables)/sizeof(*wes_proc_variables),
-   sizeof(*wes_proc_variables)},
-  {{WESMIB, SHELLMIBNUM}, 7, (struct variable *)wes_extensible_variables,
-   sizeof(wes_extensible_variables)/sizeof(*wes_extensible_variables),
-   sizeof(*wes_extensible_variables)},
-#ifdef hpux
-  {{WESMIB, MEMMIBNUM}, 7, (struct variable *)wes_mem_variables,
-   sizeof(wes_mem_variables)/sizeof(*wes_mem_variables),
-   sizeof(*wes_mem_variables)},
-#endif
-  {{WESMIB, LOCKDMIBNUM}, 7, (struct variable *)wes_lockd_variables,
-   sizeof(wes_lockd_variables)/sizeof(*wes_lockd_variables),
-   sizeof(*wes_lockd_variables)},
-#ifdef hpux
-  {{WESMIB, DISKMIBNUM}, 7, (struct variable *)wes_disk_variables,
-   sizeof(wes_disk_variables)/sizeof(*wes_disk_variables),
-   sizeof(*wes_disk_variables)},
-#endif
-  {{WESMIB, VERSIONMIBNUM}, 7, (struct variable *)wes_version_variables,
-   sizeof(wes_version_variables)/sizeof(*wes_version_variables),
-   sizeof(*wes_version_variables)},
     {{MIB, 1}, 7, (struct variable *)system_variables,
 	 sizeof(system_variables)/sizeof(*system_variables),
 	 sizeof(*system_variables)},
@@ -691,12 +663,6 @@ struct subtree subtrees[] = {
     {{MIB, 7}, 7, (struct variable *)udp_variables,
 	 sizeof(udp_variables)/sizeof(*udp_variables),
 	 sizeof(*udp_variables)},
-  {{1,3,6,1,4,1,11,2,13,1,2,1},12,(struct variable *)wes_hptrap_variables,
-   sizeof(wes_hptrap_variables)/sizeof(*wes_hptrap_variables),
-   sizeof(*wes_hptrap_variables)},
-  {{1,3,6,1,4,1,11,2,13,2},10,(struct variable *)wes_hp_variables,
-   sizeof(wes_hp_variables)/sizeof(*wes_hp_variables),
-   sizeof(*wes_hp_variables)},
 #ifdef testing
     {{HOSTTIMETAB}, 10, (struct variable *)hosttimetab_variables,
 	 sizeof(hosttimetab_variables) / sizeof(*hosttimetab_variables),
@@ -949,11 +915,15 @@ compare_tree(name1, len1, name2, len2)
 }
 
 
+#ifdef hpux
+char version_descr[128] = "HP-UX";
+#else
+char version_descr[128] = "Unknown";
+#endif
 
-char version_descr[128] = "HP-UX A.09.05";
-char sysContact[128] = "support@ece.ucdavis.edu";
+char sysContact[128] = "Unknown";
 char sysName[128] = "Unknown";
-char sysLocation[128] = "UCDavis Electrical Engineering Department";
+char sysLocation[128] = "Unknown";
 
 #ifdef hpux
 oid version_id[] = {1, 3, 6, 1, 4, 1, 11, 2, 3, 2, 5};
@@ -2560,11 +2530,7 @@ union {
     /*
      *  We don't deal with Zombies and the like...
      */
-#ifdef mips
-    if (proc->p_stat == SZOMB || proc->p_type){
-#else
     if (proc->p_stat == SZOMB || proc->p_flag & (SSYS | SWEXIT)){
-#endif
 	strcpy((char *)buf, "");
 	return strlen(buf);
     }
@@ -2582,16 +2548,11 @@ union {
     /*
      *  Is our target proc in core??
      */
-#ifdef mips
-    if ((proc->p_sched) == 0){
-	lseek(swap, (long)(proc->p_cdmap->dm_ptdaddr), 0);
-#else
     if ((proc->p_flag & SLOAD) == 0){
-	lseek(swap, (long)dtob(proc->p_swaddr), 0);
-#endif
       /*
        *  Not in core -- poke (peek, actually [hopefully]) around swap for u. struct 
        */
+	lseek(swap, (long)dtob(proc->p_swaddr), 0);
 
 	if (read(swap, (char *)user.upages, size) != size) {
 	        ERROR("");
@@ -2725,25 +2686,15 @@ union {
     }
 #endif sunV3
 
-#ifdef mips
-    if ((proc->p_sched) == 0 || argaddr == 0){
-#else
     if ((proc->p_flag & SLOAD) == 0 || argaddr == 0){
-#endif
-#if defined(mips)
-        vstodb(0, CLSIZE, proc->p_smap, &db, 1);
-#elif !defined(ibm032) || !defined(BSD4_3)
+#if !defined(ibm032) || !defined(BSD4_3)
 	vstodb(0, CLSIZE, &u.u_smap, &db, 1);
 #else
-     	vstodb(CLSIZE, CLSIZE, &u.u_smap, &db, 1);
+	vstodb(CLSIZE, CLSIZE, &u.u_smap, &db, 1);
 #endif
 
-#ifdef mips
 	lseek(swap, (long)dtob(db.db_base), 0);
-#else
-	lseek(swap, (long)dtob(db.db_base), 0);
-#endif
-        if (read(swap, (char *)&argspac, sizeof(argspac)) != sizeof(argspac)) {
+ 	if (read(swap, (char *)&argspac, sizeof(argspac)) != sizeof(argspac)) {
 	  ERROR("");
 	}
     } else {
@@ -2847,11 +2798,7 @@ vstodb(vsbase, vssize, dmp, dbp, rev)
 	blk = dmmin;
 	vsbase = ctod(vsbase);
 	vssize = ctod(vssize);
-#ifdef mips
-	if (vsbase < 0 || vsbase + vssize > dmp->dm_cnt) {
-#else
 	if (vsbase < 0 || vsbase + vssize > dmp->dm_size) {
-#endif
 	    ERROR("vstodb\n");
 	    return(0);
 	}

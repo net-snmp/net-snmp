@@ -26,6 +26,9 @@ SOFTWARE.
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#ifndef hpux
+#include <sys/sockio.h>
+#endif
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <nlist.h>

@@ -1,11 +1,54 @@
-This package contains a port of the cmu snmp v2.1.2 package for hp-ux
-700 series 9.0.5 computers.  No additional changes or modifications
-were made other than those changes necissary for porting.  I
-personally use a modified version of this code with limited
-extensibility supported, which I will release shortly after this
-release.
+This package contains a port of the cmu snmp v2.1.2.1 package for
+hp-ux 700 series 9.0.5 OS computers.  Note that version 2.1.2.1 did
+NOT work out of the box.  I had to hack snmplib/parse.c to get it to
+correctly read the mib.txt file without seg-faulting.  Having now
+looked at the code in parse.c, I fail to see how it worked under
+2.1.2.  Actually, it would probably work fine providing you either had
+a zero length mib.txt file and/or had no DESCRIPTION fields in it.
+Below is my short change log:
 
-I know it compiles and works, but I haven't tested quiet everything.
+hardaker 14 Dec 94 15:43:23
+    Initial CMU snmp code, version 2.1.2
+
+hardaker 14 Dec 94 16:55:13
+    HP-UX port of the CMU code
+
+hardaker 14 Dec 94 17:02:37
+    Added hpux.c (random/srandom interfaces)
+
+hardaker  8 Mar 95 16:09:02
+    New release of CMU's 2.1.2.1 code:
+      -- See README for specific details
+      -- snmpset,snmpgetnext added
+      -- -q flag added "quick print"
+      -- bug fixes
+      -- Man pages updated
+
+hardaker  9 Mar 95 13:22:29
+    CMU 2.1.2 -> 2.1.2.1 Merge.
+
+hardaker 10 Mar 95 13:19:22
+    #include <socketio.h> is not needed on HPUX
+
+hardaker 10 Mar 95 13:30:21
+  Major hacking to parse() to work at all.
+    -- Now I don't unstand why it ever successfully parsed the mib.txt file.
+    -- get_token was constantly called to read DESCRIPTION strings into
+       a char array of either 64 (MAXTOKEN) or 4096 (MAXQUOTESTR) in
+       length.  MANY of the DESCRIPTION strings are longer than this.
+    -- Hacked parseQuotedString to make sure returned are strings < MAXQUOTESTR
+
+hardaker 10 Mar 95 13:34:30
+    Added /etc as another path to search when looking for mib.txt
+
+hardaker 13 Mar 95 16:20:58
+    2.1.2.1 port to hp-ux.
+
+I personally use a modified version of this code with limited
+extensibility supported, which I will release if enough people bug me
+and once it evolves into a more usable form.
+
+I know it compiles and works, but I haven't quiet tested everything.
 If you find something which breaks, you can either fix it and send me
 a patch or tell me and I'll attempt to fix it myself.
                                                                 _____

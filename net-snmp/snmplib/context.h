@@ -71,6 +71,7 @@ context_getEntry(/* oid *contextID, int contextIDLen */);
  * Returns NULL if that entry does not exist.
  */
 
+int
 context_scanInit();
 /*
  * Initialized the scan routines so that they will begin at the
