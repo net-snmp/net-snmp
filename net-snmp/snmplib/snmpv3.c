@@ -203,7 +203,7 @@ setup_engineID(u_char **eidp, const char *text)
    * Determine length of the engineID string.
    */
   if (text) {
-    len = 5+strlen(text)+1;	/* 5 leading bytes+text+null char. */
+    len = 5+strlen(text);	/* 5 leading bytes+text. */
 
   } else {
     len = 5 + 4;		/* 5 leading bytes + four byte IPv4 address */
@@ -235,7 +235,7 @@ setup_engineID(u_char **eidp, const char *text)
    */
   if (text) {
     bufp[4] = 4;
-    sprintf((char *)bufp+5,text);
+    strcpy((char *)bufp+5,text);
 
   } else {
     bufp[4] = 1;
