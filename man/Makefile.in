@@ -31,6 +31,9 @@ TARGETS = $(MAN5G) $(MAN1G) $(MAN3G)
 
 all: $(TARGETS)
 
+snmpcmd.1: snmpcmd.1.def ../sedscript
+	$(SED) -f ../sedscript < $(srcdir)/snmpcmd.1.def > snmpcmd.1
+
 snmpd.conf.5: snmpd.conf.5.def ../sedscript
 	$(SED) -f ../sedscript < $(srcdir)/snmpd.conf.5.def > snmpd.conf.5
 

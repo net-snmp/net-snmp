@@ -19,525 +19,347 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPCMD 1 "07 Nov 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPCMD 1 "28 Mar 2001"
 .UC 4
 .SH NAME
-snmpcmd - commands to communicate with a network entity using SNMP Requests.
+snmpcmd - commmands to communicate with a network entity using SNMP Requests.
 .SH SYNOPSIS
-.B snmpcmd
-[OPTIONS] AGENT [PARAMETERS]
+snmpcmd
+[-h|-H|-V]
+.br
+[-v (1 | 2c | 3) ]
+.br
+[-O <OUTOPTS> ] [-I <INOPTS> ]
+.br
+[-P <PARSEROPTS> ]
+.br
+[-m mibs] [-M mibdirs]
+.br
+[-d] [-D <TOKEN[,TOKEN,...]> ]
+.br
+[-r retries] [-t timeout] [-p port] [-T UDP|TCP]
+.br
+[-c community]
+.br
+[-e engineid] [-Z boots time] [-n contextname]
+.br
+[-l seclevel] [-u secname]
+.br
+[-a authproto] [-A authpasswd] [-x privproto] [-X privpasswd]
+.br
+agent [community]
+commandparams
 .SH DESCRIPTION
-This manual page describes the common options for the SNMP commands:
-.BR snmpbulkget ", " snmpbulkwalk ", "  snmpdelta ", " snmpget ", "
-.BR snmpgetnext ", " snmpnetstat ", " snmpset ", " snmpstatus ", "
-.BR snmptable ", " snmptest ", " snmptrap ", " snmpusm ", " snmpwalk ".  "
+This manual page describes the common part of the parameters for
+the SNMP commands:
+.IR snmpbulkget ,
+.IR snmpbulkwalk ,
+.IR snmpdelta ,
+.IR snmpget ,
+.IR snmpgetnext ,
+.IR snmpnetstat ,
+.IR snmpset ,
+.IR snmpstatus ,
+.IR snmptable ,
+.IR snmptest ,
+.IR snmptrap ,
+.IR snmpusm ,
+.IR snmpwalk .
 The command line applications use the SNMP protocol to communicate
-with an SNMP capable network entity, an agent.  Individual
-applications typically (but not necessarily) take additional
-parameters that are given after the agent specification.  These
-parameters are documented in the manual pages for each application.
-
-.SH OPTIONS
-.TP
-.BI -a " authProtocol"
-Set the authentication protocol (MD5|SHA) used for authenticated SNMPv3
-messages.
-.TP
-.BI -A " authPassword"
-Set the authentication pass phrase used for authenticated SNMPv3
-messages.
-.TP
-.BI -c " community"
-Set the community string for SNMPv1/v2c transactions.
-.TP
-.B -d
-Dump (in hexadecimal) the sent and received SNMP packets.
-.TP
-.B -D \fITOKEN[,...]
-Turn on debugging output for the given
-.IR "TOKEN" "(s)."
-Try
-.IR ALL
-for extremely verbose output.
-.TP
-.BI -e " engineID"
-Set the authoritative (security) engineID used for SNMPv3 REQUEST
-messages.  This is the engineID of the agent or proxy (e.g.,
-800000020109840301). (will be discovered if not supplied)
-.TP
-.BI -E " engineID"
-Set the context engineID used for SNMPv3 REQUEST messages scopedPdu.
+with an SNMP capable network entity, an agent.
+The applications may provide additional
+.IR commandparams
+that are specified after the
+.IR agent
+and authentication controls specified here.
+.IP "-h"
+prints the applications help message
+.IP "-H"
+display the configuration file directives understood be the command
+.IP "-V"
+prints the applications version string
+.IP "-v 1 | 2c | 3"
+specifies the protocol version to use: 1 (RFC 1155-1157), 2c (RFC 1901-1908),
+or 3 (RFC 2571-2574)
+The default is -v 1
+.IP "-P wWecduR"
+specifies MIB parsing options. See MIB PARSING OPTIONS below.
+.IP "-O nEebqfsSvXT"
+specifies output printing options. See OUTPUT OPTIONS below.
+.IP "-I Rbr"
+specifies input parsing options. See INPUT OPTIONS below.
+.IP "-m mibs"
+specifies a colon separated list of MIB modules to load for this application.
+This overrides the environment variable MIBS.
+.br
+The special keyword "all" is used to specify all modules in all directories
+when searching for MIB files.
+Every file whose name does not begin with "."
+will be parsed as if it were a MIB file.
+.IP "-M mibdirs"
+specifies a colon separated list of directories to search for MIBs.
+This overrides the environment variable MIBDIRS.
+.IP "-d"
+request the application to dump all SNMP packets sent and received
+.IP "-D <TOKEN[,TOKEN,...]> "
+request debugging output.  The comma separated TOKENs list
+specifies what type of debugging information you which to view.  Only
+debugging information about those TOKEN types will be shown to you.
+Only the beginning of the token needs to match.  In other words,
+specifying 
+.B -DmibII
+will print debugging output for debugging symbols
+.I mibII
+as well as 
+.I mibII/system.
+.IP
+The special keyword "all" will display all debugging
+output.
+.IP
+The special keyword "trace" will display source code tracing output.
+.IP "-r retries"
+specifies the number of retries to be used in the requests. The default
+is 5.
+.IP "-t timeout"
+specifies the timeout between retries. The default is 1.
+.IP "-p port"
+specifies the port to communicate with at the agent. The default is 161,
+except for snmptrap, which defaults to 162.
+.IP "-T UDP|TCP"
+specifies the transport type to use.  By default, UDP is used unless
+TCP is specified here.
+.IP "-c community"
+specifies the v1/v2c community for the transaction.
+.IP "-e engineid"
+sets the authoritative(security) engineID used for SNMP v3 Request messages.
+This is the engineID of the agent or proxy (e.g., 800000020109840301). (will 
+be discovered if not supplied)
+.IP "-E engineid"
+sets the context engineID used for SNMP v3 Request messages scopedPdu.
 This is the engineID of the agent (e.g., 800000020109840301). (will be
 authoritative engineID if not specified)
-.TP
-.B -h
-Display a brief usage message and then exit.
-.TP
-.B -H
-Display a list of configuration file directives understood by the
-command and then exit.
-.TP
-.BI -I " brR"
-Specifies input parsing options. See 
-.B INPUT OPTIONS 
-below.
-.TP
-.BI -l " secLevel"
-Set the securityLevel used for SNMPv3 messages
-(noAuthNoPriv|authNoPriv|authPriv).  Appropriate pass phrase(s) must
-provided when using any level higher than noAuthNoPriv.
-.TP
-.BI -m " MIBLIST"
-Specifies a colon separated list of MIB modules to load for this
-application.  This overrides the environment variable MIBS.
-.IP
-The special keyword
-.I ALL
-is used to specify all modules in all directories when searching for MIB
-files.  Every file whose name does not begin with "." will be parsed as
-if it were a MIB file.
-.TP
-.BI -M " DIRLIST"
-Specifies a colon separated list of directories to search for MIBs.
-This overrides the environment variable MIBDIRS.
-.TP
-.BI -n " contextName"
-Set the destination contextName used for SNMPv3 messages.  The default
+.IP "-Z boots,time"
+sets the engineBoots and engineTime used for authenticated SNMP v3 messages.
+This will initialize the local notion of the agents boots/time with an
+authenticated value stored in the LCD. (will be discovered if not supplied)
+.IP "-n contextname"
+sets the destination contextName used for SNMP v3 messages. Default 
 contextName is the empty string "".
-.TP
-.BI -O " nEebqQfsSvXT"
-Specifies output printing options. See 
-.B OUTPUT OPTIONS
-below.
-.TP
-.BI -P " cdeRuwW"
-Specifies MIB parsing options.  See
-.B MIB PARSING OPTIONS
-below.
-.TP
-.BI -r " retries"
-Specifies the number of retries to be used in the requests. The default
-is 5.
-.TP
-.BI -t " timeout"
-Specifies the timeout in seconds between retries. The default is 1.
-.TP
-.BI -u " secName"
-Set the securityName used for authenticated SNMPv3 messages.
-.TP
-.B -v \fI1\fR | \fI2c\fR | \fI3
-Specifies the protocol version to use: 1 (RFCs 1155-1157), 2c (RFCs 1901-1908),
-or 3 (RFCs 2571-2574).  The default is version 1.
-.TP
-.B -V
-Display version information for the application and then exit.
-.TP
-.BI -x " privProtocol"
-Set the privacy protocol (DES) used for encrypted SNMPv3 messages.
-.TP
-.BI -X " privPassword"
-Set the privacy pass phrase used for encrypted SNMPv3 messages.
-.TP
-.BI -Z " boots,time"
-Set the engineBoots and engineTime used for authenticated SNMPv3
-messages.  This will initialize the local notion of the agents
-boots/time with an authenticated value stored in the LCD. (will be
-discovered if not supplied)
+.IP "-l seclevel"
+sets the securityLevel used for SNMP v3 messages 
+(noAuthNoPriv|authNoPriv|authPriv). Appropriate pass phrase(s) must provided
+when using any level higher than noAuthNoPriv.
+.IP "-u secname"
+sets the securityName used for authenticated SNMP v3 messages.
+.IP "-a authproto"
+sets the authentication protocol (MD5|SHA) used for authenticated SNMP v3 messages.
+.IP "-A authpasswd"
+sets the authentication pass phrase used for authenticated SNMP v3 messages.
+.IP "-x privproto"
+sets the privacy protocol (DES) used for encrypted SNMP v3 messages.
+.IP "-X privpasswd"
+sets the privacy pass phrase used for encrypted SNMP v3 messages.
 .PP
-The string
-.I AGENT
-specifies the remote SNMP entity with which to communicate.  The format
-of this parameter is defined in the
-.B AGENT SPECIFICATION
-section below.
-.SH AGENT SPECIFICATION
 The
-.I AGENT
-specification takes the form:
-.IP
-[<transport-specifier>:]<transport-address>
+.I agent
+specification may be either a host name or an internet address
+specified in "dot notation".
 .PP
-At its simplest, the
-.I AGENT
-specification may consist of a hostname, or an IPv4 address in the
-standard "dotted quad" notation.  In this case, communication will be
-attempted using UDP/IPv4 to port 161 of the given host.  Otherwise,
-the <transport-address> part of the specification is parsed according
-to the following table:
-.RS 4
-.TP 28
-.BR "<transport-specifier>"
-.BR "<transport-address> format"
-.IP "udp" 28
-hostname[:port]
-.I or
-IPv4-address[:port]
-.IP "tcp" 28
-hostname[:port]
-.I or
-IPv4-address[:port]
-.IP "unix" 28
-pathname
-.IP "ipx" 28
-[network]:node[/port]
-.TP 28 
-.IR "" "aal5pvc " or " pvc"
-[interface.][VPI.]VCI
-.IP "udp6 or udpv6 or udpipv6" 28
-hostname[:port]
-.I or
-IPv6-address:port
-.I or
- '['IPv6-address']'[:port]
-.IP "tcp6 or tcpv6 or tcpipv6"
-hostname[:port]
-.I or
-IPv6-address:port
-.I or
- '['IPv6-address']'[:port]
-.RE
+The version 1, or version 2c,
+.I community
+specifies the community name for the transaction with the remote system.
+If a \fIsnmp.conf\fR file specifies a \fIdefCommunity\fR this is not a
+positional parameter. You should use the \fI-c community\fR form anyway.
 .PP
-Note that <transport-specifier> strings are case-insensitive so that,
-for example, "tcp" and "TCP" are equivalent.  Here are some examples,
-along with their interpretation:
-.TP 24
-.IR "hostname:161"
-perform query using UDP/IPv4 datagrams to
-.I hostname
-on port
-.IR 161 .
-The ":161" is redundant here since that is the default SNMP port in
-any case.
-.TP 24
-.IR "udp:hostname"
-identical to the previous specification.  The "udp:" is redundant here
-since UDP/IPv4 is the default transport.
-.TP 24
-.IR "TCP:hostname:1161"
-connect to
-.I hostname
-on port
-.I 1161
-using TCP/IPv4 and perform query over that connection.
-.TP 24
-.IR "ipx::00D0B7AAE308"
-perform query using IPX datagrams to node number 
-.I 00D0B7AAE308
-on the default network, and using the default IPX port of 36879 (900F
-hexadecimal), as suggested in RFC 1906.
-.TP 24
-.IR "ipx:0AE43409:00D0B721C6C0/1161"
-perform query using IPX datagrams to port
-.I 1161
-on node number
-.I 00D0B721C6C0
-on network number
-.IR 0AE43409 .
-.TP 24
-.IR "unix:/tmp/local-agent"
-connect to the Unix domain socket 
-.IR /tmp/local-agent ,
-and perform the query over that connection.
-.TP 24
-.IR "/tmp/local-agent"
-identical to the previous specification, since the Unix domain is the
-default transport iff the first character of the <transport-address>
-is a '/'.
-.TP 24
-.IR "AAL5PVC:100"
-perform the query using AAL5 PDUs sent on the permanent virtual
-circuit with VPI=0 and VCI=100 (decimal) on the first ATM adapter in the
-machine.
-.TP 24
-.IR "PVC:1.10.32"
-perform the query using AAL5 PDUs sent on the permanent virtual
-circuit with VPI=10 (decimal) and VCI=32 (decimal) on the second ATM
-adapter in the machine.  Note that "PVC" is a synonym for "AAL5PVC".
-.TP 24
-.IR "udp6:hostname:10161"
-perform the query using UDP/IPv6 datagrams to port
-.I 10161
-on
-.I hostname
-(which will be looked up as an AAAA record).
-.TP 24
-.IR "UDP6:[fe80::2d0:b7ff:fe21:c6c0]"
-perform the query using UDP/IPv6 datagrams to port 161 at address
-.IR fe80::2d0:b7ff:fe21:c6c0 .
-.TP 24
-.IR "tcpipv6:[::1]:1611"
-connect to port 1611 on the local host
-.IR "" ( ::1 
-in IPv6 parlance) using TCP/IPv6 and perform query over that connection.
-.PP
-Note that not all the transport domains listed above will always be
-available; for instance, hosts with no IPv6 support will not be able
-to use udp6 transport addresses, and attempts to do so will result in
-the error "Unknown host".  Likewise, since AAL5 PVC support is only
-currently available on Linux, it will fail with the same error on
-other platforms.
 .SH "MIB PARSING OPTIONS"
-The Net-SNMP MIB parser mostly adheres to the Structure of Management
-Information (SMI).  As that specification has changed through time, and
-in recognition of the (ahem) diversity in compliance expressed in MIB
-files, additional options provide more flexibility in reading MIB files.
-.TP
-.B "-Pw"
+The UCD parser mostly adheres to
+the Structure of Management Information (SMI).
+As that specification has changed through time,
+and in recognition of the
+diversity in compliance expressed in MIB files, 
+additional options provide more flexibility in reading MIB files.
+.IP "-Pw"
 Show some warning messages in resolving the MIB files.
 Can be also set with the configuration token "mibWarningLevel".
-.TP
-.B "-PW"
+.IP "-PW"
 Show additional warning messages.
 Can be also set with the configuration token "mibWarningLevel".
-.TP
-.B "-Pe"
-Do not show MIB errors.
+.IP "-Pe"
+Don't show MIB errors.
 Can be also set with the configuration token "showMibErrors".
-.TP
-.B "-Pc"
+.IP "-Pc"
 Allow ASN.1 comment to extend to the end of the MIB source line.
 This overcomes some problems with manually maintained MIB files.
 Can be also set with the configuration token "strictCommentTerm".
-.TP
-.B "-Pd"
+.IP "-Pd"
 Collect the DESCRIPTION information into the parsed hierarchy.
 This increases the memory used by the size of each DESCRIPTION clause.
-.TP
-.B "-Pu"
+.IP "-Pu"
 Allow underline characters in symbols.
 Can be also set with the configuration token "mibAllowUnderline".
-.TP
-.B "-PR"
+.IP "-PR"
 Replace MIB objects using the last read MIB file.
-.B WARNING:
-Setting this option may result in an incorrect hierarchy.
+WARNING: Setting this option may result in an incorrect hierarchy.
 Can be also set with the configuration token "mibReplaceWithLatest".
 .PP
 .SH "OUTPUT OPTIONS"
 Output display can be controlled by passing various parameters to the
-.B -O
-flag.  The following examples should demonstrate this.
+-O flag.  The following examples should demonstrate this.
 .PP
 The default output looks as follows:
 .br
-snmpget -c public -v 1 localhost system.sysUpTime.0
+snmpget -c public localhost system.sysUpTime.0
 .br
 system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63        
-.TP
-.B -Oq
-Removes the equal sign and type information:
+.IP -Oq
+removes the equal sign and type information,
 .br
 system.sysUpTime.0 1:15:09:27.63
-.TP
-.TP
-.B -OQ
-Removes the equal sign and type information:
-.br
-system.sysUpTime.0 = 1:15:09:27.63
-.TP
-.B -Of
-Gives you the complete OID:
+.IP -Of
+gives you the complete OID
 .br
  .iso.org.dod.internet.mgmt.mib-2.system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
-.TP
-.B -Os
-Deletes all but the last symbolic part of the OID:
+.IP -Os
+deletes all by the last symbolic part of the OID
 .br
 sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
-.TP
-.B -OS
-A variation on
-.B -Os
-that adds the name of the MIB that defined the object:
+.IP -OS
+is a variant of this, adding the name of the MIB that defined this
+object
 .br
 SNMPv2-MIB::sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
+.IP -On
+prints the OID numerically
 .br
-(from release 5.0, this is now the default output format)
-.TP
-.B -Ou
-Prints the OID in the UCD-style (inherited from the original CMU code)
-removing a series of "standard" prefixes (if relevant).
-.br
-system.sysUpTime.0 = Timeticks: (14096763) 1 day, 15:09:27.63
-.TP
-.B -On
-Prints the OID numerically:
+snmpget -On -c public localhost system.sysUpTime.0
 .br
  .1.3.6.1.2.1.1.3.0 = Timeticks: (14096763) 1 day, 15:09:27.63
-.TP
-.B -Oe
-Removes the symbolic labels from enumerations:
+.IP -Oe
+removes the symbolic labels from enumerations:
 .br
-snmpget -c public -v 1 localhost ip.ipForwarding.0
+snmpget -c public localhost ip.ipForwarding.0
 .br
-ip.ipForwarding.0 = INTEGER: forwarding(1)
+ip.ipForwarding.0 = forwarding(1)
 .br
-snmpget -c public -v 1 -Oe localhost ip.ipForwarding.0
+snmpget -c public -Oe localhost ip.ipForwarding.0
 .br
-ip.ipForwarding.0 = INTEGER: 1
-.TP
-.B -Ob
+ip.ipForwarding.0 = 1
+.IP -Ob
 When OIDs contain a index to a table,
 they are broken into the displayable pieces and shown to you.  For
-example the OID vacmSecurityModel.0.3.119.101.115 is nicely broken
-down by default and the string hidden in the OID is shown to you as
+example the oid vacmSecurityModel.0.3.119.101.115 is nicely broken
+down by default and the string hidden in the oid is shown to you as
 vacmSecurityModel.0."wes".
-The
-.B -Ob
-option disables this feature and displays it as
+The -Ob option diables this feature and displays it as
 vacmSecurityModel.0.3.119.101.115 again.
-.TP
-.B -OE
+.IP -OE
 This modifies the index strings to include a \\ to escape the quotes,
 to allow them to be reused in shell commands, such as
 vacmSecurityModel.0.\\"wes\\"
-.TP
-.B -OX
-This modifies the output of index OIDs, to look more "program like".
+.IP -OX
+This modifies the output of index oids, to look more "program like".
 If you take an entry from the IPV6-MIB::ipv6RouteTable, it is indexed with
 an IPv6 address and two integers, and if you are used to IPv6 addresses
-you will know that decimal OIDs are not the preferred notation. Compare:
+you will know that decimal oids are not the preferred notation. Compare
 .br
-snmpgetnext -OS host IPV6-MIB:ipv6RouteTable
+$ snmpgetnext -OS host IPV6-MIB:ipv6RouteTable
 .br
-IPV6-MIB::ipv6RouteIfIndex.63.254.1.0.255.0.0.0.0.0.0.0.0.0.0.0.64.1 = INTEGER: 2
+IPV6-MIB::ipv6RouteIfIndex.63.254.1.0.255.0.0.0.0.0.0.0.0.0.0.0.64.1 = 2
 .br
-snmpgetnext -OSX host IPV6-MIB:ipv6RouteTable
+$ snmpgetnext -OSX host IPV6-MIB:ipv6RouteTable
 .br
-IPV6-MIB::ipv6RouteIfIndex[3ffe:100:ff00:0:0:0:0:0][64][1] = INTEGER: 2
-.TP
-.B -OT
+IPV6-MIB::ipv6RouteIfIndex[3ffe:100:ff00:0:0:0:0:0][64][1] = 2
+.IP -OT
 If hexadecimal code is printed, this will also print any printable
 characters after the hexadecimal codes.
-.TP
-.B -Ov
+.IP -Ov
 Output only the variable value, not the OID:
 .br
-snmpget -c public -v 1 -Ov localhost ip.ipForwarding.0
+snmpget -c public -Ov localhost ip.ipForwarding.0
 .br
-INTEGER: forwarding(1)
-.TP
-.B -OU
-Don't print the UNITS suffix at the end of the value.
-.TP
-.B -Ot
-Output timeticks values as raw numbers:
+forwarding(1)
+.IP -Ot
+Output timeticks values as raw numbers.
 .br
-system.sysUpTime.0 = 14096763
+$ snmpget -Ot -c public localhost system.sysUpTime.0
+system.sysUpTime.0 = 206996857
 .PP
 Note that most of these options can be turned on or off by default by
-tuning the snmp.conf file.  See the
-.I snmp.conf(5)
-manual page for details.
+tuning the snmp.conf file.  See the snmp.conf(5) manual page for
+details.
 .SH "INPUT OPTIONS"
-The
-.B -I
-flag specifies various options that control how your input to
+The -I flag specifies various options that control how your input to
 the program is parsed.  By default, all input parsing methods are
-used: First the OID is parsed regularly, then
-.B -IR
-is used, then
-.B -Ib
+used: First the oid is parsed regularly, then -IR is used, then -Ib
 is used, unless one of the following flags is specified which will
 force it to only use one method.
-.TP
-.B -IR
-The
-.B -IR
-flag specifies random access lookup, so that if the entire OID path is
-not specified, it will search for a node in the MIB tree with the given
-name.  Normally, you'd have to specify the vacmSecurityModel OID above
-as .iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmSecurityToGroupTable.vacmSecurityToGroupEntry.vacmSecurityModel.0."wes",
-but the use of the
-.B -IR
-flag allows you to shorten that to just vacmSecurityModel.0."wes".
+.IP -IR
+The -IR flag specifies random access lookup, so that if the entire OID 
+path is not specified, it will search for a node in the mib tree with
+your name.  Normally, you'd have to specify the vacmSecurityModel oid
+above as
+ .iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmSecurityToGroupTable.vacmSecurityToGroupEntry.vacmSecurityModel.0."wes", 
+but the use of the -IR flag allows you to shorten that to just
+vacmSecurityModel.0."wes".
 (Though this OID really needs to be quoted - 'vacmSecurityModel.0."wes"' - to
 prevent the shell from swallowing the double quotes).
 .IP
-Additionally, see the
-.B RANDOM ACCESS MIBS
-section below.
-.TP
-.B -Ib
-The
-.B -Ib
-flag indicates that the expression you gave it is actually a regular
-expression that should be used to search for the best match possible in
-the MIB tree.  This would allow you to specify the node
-vacmSecurityModel MIB node as something as generic as vacmsecuritymodel
-(since case insensitive searches are done) or vacm.*model.  Note that
-multiple matches are obviously possible (.* matches everything), and the
-best result is currently calculated as the one that matches the closest
-to the beginning of the node name and the highest in the tree.  A
-current side effect of this option is that you can't specify indexes or
-multiple nodes, since the '.' is treated as part of the regular
-expression.
-.TP
-.B -Iu
-Use the traditional UCD-style input approach of assuming that OIDs
-are rooted at the 'mib-2' point in the tree (unless they start with
-an explicit '.')   If random access lookup is in effect (which is
-the default for most commands), then this will only affect OIDs
-specified with a leading numberic subidentifier (and no initial '.')
-Thus an input of "snmpcmd ... 1" would refer to 'iso' (from v5.0
-onwards) while "snmpcmd -Iu ... 1" would refer to 'system'.
-.TP
-.B -Ir
+Additionally, see the RANDOM ACCESS MIBS section below.
+.IP -Ib
+The -Ib flag indicates that the expression you gave it is actually a
+regular expression that should be used to search for the best match
+possible in the mib tree.  This would allow you to specify the node
+vacmSecurityModel MIB node as something as generic as
+vacmsecuritymodel (since case insensitive searches are done) or
+vacm.*model.  Note that multiple matches are obviously possible (.*
+matches everything), and the best result is currently calculated as
+the one that matches the closest to the beginning of the node name and
+the highest in the tree.  A current side effect of this option is that 
+you can't specify indexes or multiple nodes, since the '.' is treated
+as part of the regular expression.
+.IP -Ir
 By default, indices into tables and values to be assigned to objects
-are checked against range and type specified in the MIB.  The
-.B -Ir
-flag disables this check.  This flag is mostly useful when you are
-testing an agent.  For normal operation it is useful to get your
-requests checked before they are sent to the remote agent (the
-diagnostic that the library can provide is also much more precise).
+are checked against range and type specified in the MIB.
+The -Ir flag disables this check.
+This flag is mostly useful when you are testing an agent.
+For normal operation it is useful to get your requests checked
+before they are sent to the remote agent (the diagnostic
+that the library can provide is also much more precise).
 .SH "RANDOM ACCESS MIBS"
-In previous releases of the UCD-SNMP package (and if using the
-.B -Iu
-option), an object identifier such as system.sysDescr.0 will be
-lookup in a single "well known" place, built into the SNMP library (or
+Normally, an object identifier such as system.sysDescr.0 will be
+lookup in a single "wellknown" place, built into the SNMP library (or
 specified by the P@REFIX environment variable).  The standard place
 is: .iso.org.dod.internet.mgmt.mib-2.  The identifier may alternatively be
-a complete object identifier, this is designated by a leading "dot"
-if using UCD-input style, and is the first thing tried otherwise.
+a complete object identifier, this is designated by a leading "dot".
 To simplify the specification of object identifiers the library
 supports random access to the identifiers in the MIBs. This is
-requested by the
-.B -IR
-option to the SNMP applications.  Additionally,
-.B -Os
-prints OIDs in this manner.  Using this, system.sysDescr.0 may
+requested by the -IR option to the SNMP applications.  Additionally,
+-Os prints oids in this manner.  Using this, system.sysDescr.0 may
 also be entered as sysDescr.0.  To search only a single MIB for the
 identifier (if it appears in more than one), specify it as
-SNMPv2-MIB::sysDescr.0. (use
-.B -OS
-to print output OIDs in this manner, though this is the default as
-from v5.0). This notation will also ensure
-that the specified MIB is loaded, i.e. it need not be mentioned in the
-.B -m
-option (or MIBS environment variable).
+SNMPv2-MIB::sysDescr.0. (use -OS to print output oids in this
+manner). This notation will also make sure that the specified MIB is
+loaded, i.e. it need not be mentioned in the -m option (or MIBS
+environment variable).
 .SH "ENVIRONMENT VARIABLES"
 .IP P@REFIX
-The standard prefix for object identifiers (if using UCD-style output).
+The standard prefix for object identifiers.
 Defaults to .iso.org.dod.internet.mgmt.mib-2
 .IP MIBS
 The list of MIBs to load. Defaults to
 SNMPv2-TC:SNMPv2-MIB:IF-MIB:IP-MIB:TCP-MIB:UDP-MIB:SNMP-VACM-MIB.
-Overridden by the
-.B -m
-option.
+Overridden by the -m option
 .IP MIBDIRS
 The list of directories to search for MIBs. Defaults to PREFIX/share/snmp/mibs.
-Overridden by the
-.B -M
-option.
+Overridden by the -M option
+.IP SUFFIX
+If this variable is set, the applications acts as if the -s option is specified.
 .SH FILES
 .IP PREFIX/share/snmp/snmpd.conf
-Agent configuration file. See
-.IR snmpd.conf(5) .
+Agent configuration file. See snmpd.conf(5)
 .IP PREFIX/share/snmp/snmp.conf
 .IP ~/.snmp/snmp.conf
-Application configuration files. See 
-.IR snmp.conf(5) .
+Application configuration files. See snmp.conf(5)
 .SH "SEE ALSO"
 snmpget(1), snmpgetnext(1), snmpset(1),
 snmpbulkget(1), snmpbulkwalk(1), snmpwalk(1),
