@@ -1211,7 +1211,7 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
          */
         if ((asp->pdu->command == SNMP_MSG_SET) &&
             (asp->pdu->version == SNMP_VERSION_1)) {
-            switch (status) {
+            switch (asp->status) {
                 case SNMP_ERR_WRONGVALUE:
                 case SNMP_ERR_WRONGENCODING:
                 case SNMP_ERR_WRONGTYPE:
