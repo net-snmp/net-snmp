@@ -67,7 +67,7 @@
 @    foreach $a $b range $node@
 @      eval $m2c_node_maxlen = max($m2c_node_maxlen,$b)@
 @    end@
-@  elsif $node.type eq ASN_OBJECT_ID@
+@  elsif "$node.type" eq "ASN_OBJECT_ID"@
 @    eval $m2c_node_maxlen = 128@
 @  else@ #ranges
 @    eval $m2c_node_maxlen = 65535@
@@ -79,7 +79,10 @@
 ## VAR_VAL_PTR : pointer to variable value.
 ## VAR_REF     : variable reference. (pointer to pointer to variable value)
 ##*/
-@  eval $m2c_node_var_val_ptr = "($m2c_decl *)var->val.string"@
+@  if "x$m2c_node_var_name" eq "x"@
+@    eval $m2c_node_var_name="var->"@
+@  end@
+@  eval $m2c_node_var_val_ptr = "($m2c_decl *)${m2c_node_var_name}val.string"@
 @  eval $m2c_node_param_name = "${node}_ptr"@
 ##
 @  if $m2c_node_needlength == 1@
@@ -87,10 +90,10 @@
 @    eval $m2c_node_param_ref = "$m2c_decl **${node}_ptr_ptr, size_t * ${node}_len_ptr"@
 @    eval $m2c_node_param_val = "$m2c_decl *${node}_ptr, size_t ${node}_len"@
 ##
-@    eval $m2c_node_var_ref = "($m2c_decl **)&var->val.string, &var->val_len"@
-@    eval $m2c_node_var_val = "$m2c_node_var_val_ptr, var->val_len"@
+@    eval $m2c_node_var_ref = "($m2c_decl **)&${m2c_node_var_name}val.string, &${m2c_node_var_name}val_len"@
+@    eval $m2c_node_var_val = "$m2c_node_var_val_ptr, ${m2c_node_var_name}val_len"@
 @  else@
-@    eval $m2c_node_var_ref = "($m2c_decl *)var->val.string"@
+@    eval $m2c_node_var_ref = "($m2c_decl *)${m2c_node_var_name}val.string"@
 @    eval $m2c_node_var_val = "*($m2c_node_var_val_ptr)"@
 ##
 @    eval $m2c_node_param_ref = "$m2c_decl * ${node}_ptr"@
@@ -126,7 +129,7 @@
 @end@
 ########################################################################
 ##
-@eval $m2c_node_summary="$node/$node.syntax/$node.type/$node.decl($m2c_decl)"@
+@eval $m2c_node_summary="$node($node.subid)/$node.syntax/$node.type/$node.decl($m2c_decl)/"@
 @if $node.needlength == 0@
 @   eval $m2c_node_summary="$m2c_node_summary/l"@
 @else@
