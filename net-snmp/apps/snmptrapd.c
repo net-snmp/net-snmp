@@ -677,32 +677,44 @@ static void free_trap2_fmt(void)
 
 void usage(void)
 {
-    fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-D] [-p #] [-P] [-o file] [-s] [-f] [-l [d0-7]] [-e] [-d] [-n] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
-    fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
-    fprintf(stderr, "\n\
-  -h        Print this help message and exit\n\
-  -H        Read what can show up in config file\n\
-  -V        Print version and exit\n\
-  -q        Quick print mib display\n\
-  -D[TOKEN,...] turn on debugging output, optionally by the list of TOKENs.\n\
-  -p <addr> Local address to listen from\n\
-  -P        Print to standard error\n\
-  -F \"...\" Use custom format for logging to standard error\n\
-  -o file   Print to the specified file\n\
-  -u PIDFILE create PIDFILE with process id\n\
-  -e        Print Event # (rising/falling alarm], etc.\n\
-  -s        Log syslog\n\
-  -f        Stay in foreground (don't fork)\n\
-  -l [d0-7 ]  Set syslog Facility to log daemon[d], log local 0(default) [1-7]\n\
-  -d        Dump input/output packets\n\
-  -n        Use numeric addresses instead of attempting host name lookups (no DNS)\n\
-  -a        Ignore Authentication Failture traps.\n\
-  -c CONFFILE Read CONFFILE as a configuration file.\n\
-  -C        Don't read the default configuration files.\n\
-  -m <MIBS>     Use MIBS list instead of the default mib list.\n\
-  -M <MIBDIRS>  Use MIBDIRS as the location to look for mibs.\n\
-  -O <OUTOPTS>  Toggle various options controlling output display\n");
-  snmp_out_toggle_options_usage("\t\t  ", stderr);
+    fprintf(stderr,"Usage: snmptrapd [OPTIONS] [ADDRESSES]\n");
+//"[-h|-H|-V] [-D] [-p #] [-P] [-o file] [-s] [-f] [-l [d0-7]] [-e] [-d] [-n] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
+    fprintf(stderr, "\n\tVersion:  %s\n",VersionInfo);
+    fprintf(stderr, "\tWeb:      http://www.net-snmp.org/\n");
+    fprintf(stderr, "\tEmail:    net-snmp-coders@lists.sourceforge.net\n");
+    fprintf(stderr, "\n");
+    fprintf(stderr, "  -a\t\t\tignore authentication failture traps\n");
+    fprintf(stderr, "  -c FILE\t\tread FILE as a configuration file\n");
+    fprintf(stderr, "  -C\t\t\tdo not read the default configuration files\n");
+    fprintf(stderr, "  -d\t\t\tdump sent and received SNMP packets\n");
+    fprintf(stderr, "  -D\t\t\tturn on debugging output\n");
+    fprintf(stderr, "  -e\t\t\tprint event # (rising/falling alarm, etc.)\n");
+    fprintf(stderr, "  -f\t\t\tdo not fork from the shell\n");
+    fprintf(stderr, "  -F FORMAT\t\tuse specified format for logging to standard error\n");
+    fprintf(stderr, "  -h, --help\t\tdisplay this usage message\n");
+    fprintf(stderr, "  -H\t\t\tdisplay configuration file directives understood\n");
+    fprintf(stderr, "  -l d|0-7\t\tset syslog facility to LOG_DAEMON (d)\n\t\t\t  or LOG_LOCAL[0-7] (default LOG_LOCAL0)\n");
+    fprintf(stderr, "  -m MIBLIST\t\tuse MIBLIST instead of the default MIB list\n");
+    fprintf(stderr, "  -M DIRLIST\t\tuse DIRLIST as the list of locations\n\t\t\t  to look for MIBs\n");
+    fprintf(stderr, "  -n\t\t\tuse numeric addresses instead of attempting\n\t\t\t  hostname lookups (no DNS)\n");
+    fprintf(stderr, "  -o FILE\t\toutput to FILE\n");
+    fprintf(stderr, "  -P\t\t\tprint to standard error\n");
+    fprintf(stderr, "  -s\t\t\tlog to syslog\n");
+#if HAVE_GETPID
+    fprintf(stderr, "  -u FILE\t\tstore process id in FILE\n");
+#endif
+    fprintf(stderr, "  -v, --version\t\tdisplay version information\n");
+    fprintf(stderr, "  -O <OUTOPTS>\t\ttoggle options controlling output display\n");
+    snmp_out_toggle_options_usage("\t\t\t", stderr);
+}
+
+static void
+version(void)
+{
+    printf("\nVersion:           %s\n",VersionInfo);
+    printf("Web:               http://www.net-snmp.org/\n");
+    printf("Email:             net-snmp-coders@lists.sourceforge.net\n\n");
+    exit(0);
 }
 
 RETSIGTYPE term_handler(int sig)
@@ -752,28 +764,23 @@ snmptrapd_close_sessions(struct snmp_session *sess_list)
   }
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
+    char options[128] = "ac:CdD::efF:hHl:m:M:no:PqsSvO:";
     struct snmp_session *sess_list = NULL, *ss = NULL;
     snmp_transport *transport = NULL;
-    int	arg;
+    int	arg, i = 0;
     int count, numfds, block;
     fd_set fdset;
     struct timeval timeout, *tvp;
     int dofork=1;
-    char *cp, *listen_ports = default_port;
+    char *cp, *listen_ports = NULL;
     char *trap1_fmt_str_remember = NULL;
     int agentx_subagent = 1;
 #if HAVE_GETPID
-	FILE           *PID;
-        char *pid_file = NULL;
-#endif
-
-#ifdef notused
-    in_addr_t myaddr;
-    oid src[MAX_OID_LEN], dst[MAX_OID_LEN], context[MAX_OID_LEN];
-    int srclen, dstlen, contextlen;
-    char ctmp[300];
+    FILE *PID;
+    char *pid_file = NULL;
 #endif
 
     /* register our configuration handlers now so -H properly displays them */
@@ -801,39 +808,152 @@ int main(int argc, char *argv[])
 #else
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
 #endif
-    /*
-     * usage: snmptrapd [-D] [-u PIDFILE] [-p #] [-P] [-s] [-l [d0-7]] [-d] [-e] [-a]
-     */
-    while ((arg = getopt(argc, argv, "VdnqD:p:m:M:Po:O:esSafl:Hu:c:CF:")) != EOF){
-	switch(arg) {
-	case 'V':
-            fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
-            exit(0);
+
+    /*  Add some options if they are available.  */
+#if HAVE_GETPID
+     strcat(options, "u:");
+#endif
+
+    /*  Initial scan for "--help" and "--version".  */
+    
+    for (i = 0; i < argc; i++) {
+	if (strcmp(argv[i], "--help") == 0) {
+	    usage();
+	    exit(0);
+	} else if (strcmp(argv[i], "--version") == 0) {
+	    version();
+	    exit(0);
+	}
+    }
+
+    /*  Now process options normally.  */
+
+    while ((arg = getopt(argc, argv, options)) != EOF) {
+	switch (arg) {
+	case 'a':
+	    dropauth = 1;
+	    break;
+
+        case 'c':
+	    if (optarg == NULL) {
+		ds_set_string(DS_LIBRARY_ID, DS_LIB_OPTIONALCONFIG, optarg);
+	    } else {
+		usage();
+		exit(1);
+	    }
             break;
+
+        case 'C':
+            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS, 1);
+            break;
+
 	case 'd':
 	    snmp_set_dump_packet(1);
 	    break;
-	case 'q':
-	    fprintf(stderr, "Warning: -q option is deprecated - use -Oq\n");
-	    snmp_set_quick_print(1);
-	    break;
+
 	case 'D':
             debug_register_tokens(optarg);
             snmp_set_do_debugging(1);
 	    break;
-        case 'p':
-            listen_ports = optarg;
-            break;
+
+	case 'e':
+	    Event++;
+	    break;
+
+        case 'f':
+	    dofork = 0;
+	    break;
+
+	case 'F':
+	    if (optarg != NULL) {
+		trap1_fmt_str_remember = optarg;
+	    } else {
+		usage();
+		exit(1);
+	    }
+	    break;
+
+	case 'h':
+	    usage();
+	    exit(0);
+
+        case 'H':
+            init_snmp("snmptrapd");
+            fprintf(stderr, "Configuration directives understood:\n");
+	    read_config_print_usage("  ");
+            exit(0);
+
+	case 'l':
+	    if (optarg != NULL) {
+		switch (*optarg) {
+		case 'd':
+		case 'D':
+		    Facility = LOG_DAEMON; break;
+		case '0':
+		    Facility = LOG_LOCAL0; break;
+		case '1':
+		    Facility = LOG_LOCAL1; break;
+		case '2':
+		    Facility = LOG_LOCAL2; break;
+		case '3':
+		    Facility = LOG_LOCAL3; break;
+		case '4':
+		    Facility = LOG_LOCAL4; break;
+		case '5':
+		    Facility = LOG_LOCAL5; break;
+		case '6':
+		    Facility = LOG_LOCAL6; break;
+		case '7':
+		    Facility = LOG_LOCAL7; break;
+		default:
+		    fprintf(stderr,"invalid syslog facility: -l %c\n",*optarg);
+		    usage();
+		    exit(1);
+		}
+	    } else {
+		fprintf(stderr, "no syslog facility specified\n");
+		usage();
+		exit(1);
+	    }
+	    break;
+
 	case 'm':
-	    setenv("MIBS", optarg, 1);
+	    if (optarg != NULL) {
+		setenv("MIBS", optarg, 1);
+	    } else {
+		usage();
+		exit(1);
+	    }
 	    break;
+
 	case 'M':
-	    setenv("MIBDIRS", optarg, 1);
+	    if (optarg != NULL) {
+		setenv("MIBDIRS", optarg, 1);
+	    } else {
+		usage();
+		exit(1);
+	    }
 	    break;
+
+        case 'n':
+            ds_set_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP, 1);
+            break;
+
+        case 'o':
+	    Print++;
+	    if (optarg != NULL) {
+		logfile = optarg;
+		snmp_enable_filelog(optarg, 0);
+	    } else {
+		usage();
+		exit(1);
+	    }
+            break;
+
 	case 'O':
 	    cp = snmp_out_toggle_options(optarg);
 	    if (cp != NULL) {
-		fprintf(stderr, "Unknow output option passed to -O: %c\n", *cp);
+		fprintf(stderr, "Unknown output option passed to -O: %c\n", *cp);
 		usage();
 		exit(1);
 	    }
@@ -844,97 +964,71 @@ int main(int argc, char *argv[])
 	    Print++;
 	    break;
 
-        case 'o':
-	    Print++;
-            logfile = optarg;
-            snmp_enable_filelog(optarg, 0);
-            break;
-            
-	case 'e':
-	    Event++;
+	case 'q':
+	    fprintf(stderr, "Warning: -q option is deprecated - use -Oq\n");
+	    snmp_set_quick_print(1);
 	    break;
+
 	case 's':
 	    Syslog++;
 	    break;
+
 	case 'S':
 	    fprintf(stderr, "Warning: -S option is deprecated - use -OS\n");
 	    snmp_set_suffix_only(2);
 	    break;
-	case 'a':
-	    dropauth = 1;
-	    break;
-        case 'f':
-	    dofork = 0;
-	    break;
-	case 'l':
-	    switch(*optarg) {
-	    case 'd':
-		Facility = LOG_DAEMON; break;
-	    case '0':
-		Facility = LOG_LOCAL0; break;
-	    case '1':
-		Facility = LOG_LOCAL1; break;
-	    case '2':
-		Facility = LOG_LOCAL2; break;
-	    case '3':
-		Facility = LOG_LOCAL3; break;
-	    case '4':
-		Facility = LOG_LOCAL4; break;
-	    case '5':
-		Facility = LOG_LOCAL5; break;
-	    case '6':
-		Facility = LOG_LOCAL6; break;
-	    case '7':
-		Facility = LOG_LOCAL7; break;
-	    default:
-		fprintf(stderr,"invalid  syslog facility: -l %c\n", *optarg);
-		usage();
-		exit (1);
-		break;
-	    }
-	    break;
-        case 'H':
-            init_snmp("snmptrapd");
-            fprintf(stderr, "Configuration directives understood:\n");
-	    read_config_print_usage("  ");
-            exit(0);
 
 #if HAVE_GETPID
         case 'u':
-          pid_file = optarg;
-          break;
-#endif
-
-        case 'c':
-            ds_set_string(DS_LIBRARY_ID, DS_LIB_OPTIONALCONFIG, optarg);
-            break;
-
-        case 'C':
-            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS, 1);
-            break;
-
-        case 'n':
-            ds_set_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP, 1);
-            break;
-
-	case 'F':
-	    trap1_fmt_str_remember = optarg;
+	    if (optarg != NULL) {
+		pid_file = optarg;
+	    } else {
+		usage();
+		exit(1);
+	    }
 	    break;
+#endif
+	case 'v':
+	    version();
+            exit(0);
+            break;
 
 	default:
 	    fprintf(stderr,"invalid option: -%c\n", arg);
 	    usage();
-	    exit (1);
+	    exit(1);
 	    break;
 	}
     }
 
-    if (optind != argc) {
-	usage();
-	exit(1);
+    if (optind < argc) {
+	/*  There are optional transport addresses on the command line.  */
+	for (i = optind; i < argc; i++) {
+	    char *astring;
+	    if (listen_ports != NULL) {
+		astring = malloc(strlen(listen_ports) + 2 + strlen(argv[i]));
+		if (astring == NULL) {
+		    fprintf(stderr, "malloc failure processing argv[%d]\n", i);
+		    exit(1);
+		}
+		sprintf(astring, "%s,%s", listen_ports, argv[i]);
+		free(listen_ports);
+		listen_ports = astring;
+	    } else {
+		listen_ports = strdup(argv[i]);
+		if (listen_ports == NULL) {
+		    fprintf(stderr, "malloc failure processing argv[%d]\n", i);
+		    exit(1);
+		}
+	    }
+	}
+    } else {
+	listen_ports = default_port;
     }
 
-    if (!Print) Syslog = 1;
+    if (!Print) {
+	Syslog = 1;
+    }
 
     /* we're an agentx subagent? */
     if (agentx_subagent) {
@@ -1040,7 +1134,7 @@ int main(int argc, char *argv[])
 	  snmptrapd_close_sessions(sess_list);
 	  snmp_transport_free(transport);
 	  if (Syslog) {
-	    snmp_log(LOG_ERR,"couldn't open snmp - %m");
+	    snmp_log(LOG_ERR, "couldn't open snmp - %m");
 	  }
 	  SOCK_CLEANUP;
 	  exit(1);
