@@ -316,7 +316,7 @@ void detect_hrproc(void)
     }
 
     i = 0;
-    while (fgets(tmpbuf, BUFSIZ, fp) && i < MAX_NUM_HRPROC) {
+    while (fgets(tmpbuf, BUFSIZ, fp)) {
         if ( !strncmp( tmpbuf, "vendor_id", 9)) {
 	    /* Stomp on trailing newline... */
             cp = &tmpbuf[strlen(tmpbuf)-1];
@@ -342,6 +342,10 @@ void detect_hrproc(void)
             strncat( proc_descriptions[i], cp,
                      BUFSIZ-strlen(proc_descriptions[i]));
             i++;
+            if (i >= MAX_NUM_HRPROC) {
+                i--;
+                break;
+            }
         }
     }
     HRP_max_index = i;
