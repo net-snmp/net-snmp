@@ -269,3 +269,32 @@ exec .EXTENSIBLEDOTMIB.50 shelltest /bin/sh /tmp/shtest
 # exec .EXTENSIBLEDOTMIB.51 ps /bin/ps 
 # exec .EXTENSIBLEDOTMIB.52 top /usr/local/bin/top
 # exec .EXTENSIBLEDOTMIB.53 mailq /usr/bin/mailq
+
+# ----------------------------------------------------------------------
+
+#
+# Pass through control.
+# 
+
+# Usage:
+#   pass MIBOID EXEC-COMMAND
+#
+# This will pass total control of the mib underneath the MIBOID
+# portion of the mib to the EXEC-COMMAND.  
+# 
+# Example:  (see the script for details)
+#
+
+pass .EXTENSIBLEDOTMIB.60 /bin/sh PREFIX/local/passtest
+
+# % snmpwalk localhost public .EXTENSIBLEDOTMIB.60
+# local.60.1 = "life the universe and everything"
+# local.60.2.1 = 42
+# local.60.2.2 = OID: 42.42.42
+# local.60.3 = Timeticks: (363136200) 42 days, 0:42:42
+# local.60.4 = IpAddress: 127.0.0.1
+# local.60.5 = 42
+# local.60.6 = Gauge: 42
+
+# For specific usage information, see the man/snmpd.conf.5 manual page
+# as well as the local/passtest script used in the above example.

@@ -38,7 +38,7 @@ If this entry is SNMPset to the integer value of 1, a program or
 script will get executed with the table entry name from above as the
 argument.  The program to be executed is configured in the config.h
 file at compile time.
-.SH DIRECTIVES
+.SS Directives
 .IP "proc NAME"
 .IP "proc NAME MAX"
 .IP "proc NAME MAX MIN"
@@ -96,12 +96,55 @@ unspecified, they default to a value of DEFMAXLOADAVE.
 Sets the community string in slot N to be STRING.  N must be less than
 or equal to the hard coded value of NUM_COMMUNITIES.  The default
 NUM_COMMUNITIES names are set in the source code of the agent in the
-file "agent/snmp_agent.c".
-.SH "ERRORS"
+file "config.h".
+.SS "Errors"
 .PP
 Any errors in obtaining the above information are reported via the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORFLAG flag and the
 EXTENSIBLEDOTMIB.LOADAVEMIBNUM.ERRORMSG text-string description.
+.SH "PASS-THROUGH"
+.IP "pass MIBOID EXEC"
+Passes entire control of MIBOID to the EXEC program.  The EXEC program
+is called in one of the following ways:
+.IP "EXEC -g MIBOID"
+.IP "EXEC -n MIBOID"
+.IP "EXEC -s MIBOID TYPE VALUE"
+The first and second call lines match to SNMP get and getnext
+requests.  It is expected that the EXEC program will take the
+arguments passed to it and return the appropriate response through
+stdout.  The first line of stdout should be the mib OID of the
+returning value.  The second line should be the TYPE of value
+returned, where TYPE is one of
+.B string, integer, objectid, timeticks, ipaddress, counter, 
+or
+.B gague.
+The third line of stdout should be the VALUE of the returned mib OID.
+.RS
+.IP "Example EXEC output:"
+  .1.3.6.1.4.100
+.br
+  integer
+.br
+  42
+.RE
+.IP
+To indicate that the script is unable to comply with the request due
+to an end-of-mib condition or an invalid request, simple exit and
+return no output.
+.IP 
+For SNMP set requests, the third method above is used.  The TYPE
+passed to the EXEC program is one of: 
+.B integer, counter, gauge, timeticks, ipaddress, objid,
+or 
+.B string,
+indicating the type of value passed in the next argument.
+.IP
+Return nothing to stdout, and the set will assumed to have been
+successful.  Otherwise, return one of the following error strings to
+signal an error:
+.B not-writable, 
+or 
+.B wrong-type.
 .SH "EXAMPLE"
 See the example.conf file for a more detailed example of how the above
 information is used in real examples.
