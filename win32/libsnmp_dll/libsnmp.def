@@ -394,8 +394,8 @@ EXPORTS
 	netsnmp_remove_loghandler
 	netsnmp_register_loghandler
 	get_logh_head
-	dbg_tokens				DATA
-	debug_num_tokens		DATA
+	dbg_tokens
+	debug_num_tokens
 	create_winpipe_transport
 	get_temp_file_pattern
 	netsnmp_strdup
