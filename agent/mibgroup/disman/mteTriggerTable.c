@@ -387,6 +387,8 @@ parse_simple_monitor(const char *token, char *line)
     StorageNew->mteTriggerBooleanStartup = MTETRIGGERBOOLEANSTARTUP_TRUE;
     StorageNew->mteTriggerThresholdStartup =
         MTETRIGGERTHRESHOLDSTARTUP_RISINGORFALLING;
+    StorageNew->mteTriggerExistenceTest[0] = 0;
+
     /*
      * owner = snmpd.conf, why not? 
      */
