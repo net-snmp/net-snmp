@@ -57,6 +57,8 @@
     int ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref );
 @    end@ // nonindex
 
+@    include generic-table-indexes-set.m2i@
+
 @end@ // table
 
 @if $m2c_mark_boundary == 1@
@@ -120,6 +122,8 @@
 @        end@
 @        include generic-value-map-func.m2i@
 @    end@ # foreach column
+
+@    include generic-table-indexes-set.m2i@
 
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
