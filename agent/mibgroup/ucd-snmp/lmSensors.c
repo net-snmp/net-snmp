@@ -273,20 +273,24 @@ _sensor_load(clock_t t)
                 (data->mapping == SENSORS_NO_MAPPING) &&
                 !sensors_get_label(*chip, data->number, &label) &&
                 !sensors_get_feature(*chip, data->number, &val)) {
-                int             type;
+                int             type = -1;
                 float           mul;
                 _sensor_array  *array;
 
-                if (strstr(label, "temp")) {
-                    type = 0;
-                    mul = 1000.0;
-                } else if (strstr(label, "fan")) {
-                    type = 1;
-                    mul = 1.0;
-                } else if (strstr(label, "V")) {
+
+                if (strstr(label, "V")) {
                     type = 2;
                     mul = 1000.0;
-                } else {
+                }
+                if (strstr(label, "fan") || strstr(label, "Fan")) {
+                    type = 1;
+                    mul = 1.0;
+                }
+                if (strstr(label, "temp") || strstr(label, "Temp")) {
+                    type = 0;
+                    mul = 1000.0;
+                }
+                if (type == -1) {
                     type = 3;
                     mul = 1000.0;
                 }
