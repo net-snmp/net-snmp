@@ -15,9 +15,9 @@ snmplibdir = $(prefix)/lib/snmp
 
 INSTALL = @INSTALL@
 
-TARG=	snmpd
+TARG=	 snmpd
 USELIBS= ../snmplib/libsnmp.a
-LIBS=	@LIBS@ $(USELIBS)
+LIBS=	 $(USELIBS) @LIBS@
 LDFLAGS= @LDFLAGS@ 
 OSFLAGS=
 
