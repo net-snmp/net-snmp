@@ -1697,7 +1697,7 @@ _get_symbol(oid *objid,
 	case TYPE_INTEGER:
 	    if (tp->enums) {
 		struct enum_list *ep = tp->enums;
-		while (ep && ep->value != *objid) ep = ep->next;
+		while (ep && ep->value != (int)(*objid)) ep = ep->next;
 		if (ep) sprintf(buf, "%s.", ep->label);
 		else sprintf(buf, "%lu.", *objid);
 	    }
@@ -2212,7 +2212,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 		struct range_list *rp = tp->ranges;
 		int ok = 0;
 		while (!ok && rp)
-		    if (rp->low <= subid && subid <= rp->high) ok = 1;
+		    if ((rp->low <= (int)subid) && ((int)subid <= rp->high)) ok = 1;
 		    else rp = rp->next;
 		if (!ok) goto bad_id;
 	    }
