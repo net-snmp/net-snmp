@@ -21,7 +21,7 @@ my $generic = 'specific';
 ######################  1  #############################
 # Fire up a trap session.
 my $s1 =
-    new SNMP::Session (DestHost=>$agent_host,Community=>$comm,RemotePort=>$trap_port);
+    new SNMP::Session (DestHost=>$agent_host,Version=>1,Community=>$comm,RemotePort=>$trap_port);
 ok(defined($s1));
 
 ##########################  2  ####################################
