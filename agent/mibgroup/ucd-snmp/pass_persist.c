@@ -120,7 +120,8 @@ pass_persist_parse_config(const char *token, char *cptr)
         strncpy((*ppass)->command, cptr, tcptr - cptr);
         (*ppass)->command[tcptr - cptr] = 0;
     }
-    strcpy((*ppass)->name, (*ppass)->command);
+    strncpy((*ppass)->name, (*ppass)->command, sizeof((*ppass)->name));
+    (*ppass)->name[ sizeof((*ppass)->name)-1 ] = 0;
     (*ppass)->next = NULL;
 
     register_mib("pass_persist",
