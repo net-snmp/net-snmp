@@ -4482,23 +4482,25 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback)
 
            } else switch(fd_count) {
               case 0:
+		 SPAGAIN;
+		 ENTER;
+		 SAVETMPS;
                  snmp_timeout();
                  if (!timerisset(ctvp)) {
                     if (SvTRUE(perl_callback)) {
-                       dSP;
-                       ENTER;
-                       SAVETMPS;
                        /* sv_2mortal(perl_callback); */
                        cb = __push_cb_args(perl_callback, NULL);
                        __call_callback(cb, G_DISCARD);
-                       FREETMPS;
-                       LEAVE;
                        ctvp->tv_sec = -1;
 
                     } else {
+                       FREETMPS;
+                       LEAVE;
                        goto done;
                     }
                  }
+                 FREETMPS;
+                 LEAVE;
                  break;
               case -1:
                  if (errno == EINTR) {
