@@ -126,6 +126,12 @@ ds_set_string(int storeid, int which, const char *value) {
   DEBUGMSGTL(("ds_set_string","Setting %d:%d = %s\n", storeid, which,
               (value ? value : "(null)")));
 
+  /*
+   * Is some silly person calling us with our own pointer?
+   */
+  if (ds_strings[storeid][which] == value)
+    return SNMPERR_SUCCESS;
+
   if (ds_strings[storeid][which] != NULL)
     free(ds_strings[storeid][which]);
 
