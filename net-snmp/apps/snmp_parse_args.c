@@ -75,7 +75,7 @@ snmp_parse_args_usage(outf)
   FILE *outf;
 {
   fprintf(outf,
-        "[-v 1|2c|2p] [-h] [-H] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
+        "[-v 1|2c|2p] [-h] [-H] [-d] [-q] [-R] [-D[TOKEN,...]] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
 }
 
 void
@@ -93,7 +93,7 @@ snmp_parse_args_descriptions(outf)
   fprintf(outf, "  -s\t\tprint only last element of object identifiers.\n");
   fprintf(outf, "  -S\t\tmodule id plus last element of object identifiers.\n");
   fprintf(outf, "  -R\t\tuse \"random access\" to the mib tree.\n");
-  fprintf(outf, "  -D\t\tturn on debugging output.\n");
+  fprintf(outf, "  -D[TOKEN,...]\t\tturn on debugging output, optionally by the list of TOKENs.\n");
   fprintf(outf, "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
   fprintf(outf, "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
   fprintf(outf, "  -p <P>\tuse port P instead of the default port.\n");
@@ -151,6 +151,7 @@ snmp_parse_args(argc, argv, session)
         break;
 
       case 'D':
+        debug_register_tokens(&argv[arg][2]);
         snmp_set_do_debugging(1);
         break;
         
