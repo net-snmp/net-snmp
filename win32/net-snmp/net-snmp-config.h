@@ -883,7 +883,10 @@ typedef unsigned short mode_t;
 
 #ifdef __cplusplus
 }
+#else
+/* only redefine inline if !__cplusplus */
+#   define inline
 #endif
 
-#define inline
+
 #endif /* NET_SNMP_CONFIG_H */
