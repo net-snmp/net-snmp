@@ -16,7 +16,7 @@
 #include <machine/param.h>
 #endif
 #if HAVE_SYS_VMMETER_H
-#ifndef bsdi2
+#if !defined(bsdi2) && !defined(netbsd1)
 #include <sys/vmmeter.h>
 #endif
 #endif
