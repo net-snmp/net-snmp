@@ -183,7 +183,7 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
 		const char *localOpts, void (*proc)(int, char *const *, int))
 {
     static char	   *sensitive[4] = { NULL, NULL, NULL, NULL };
-    int             arg, sp = 0, zero_sensitive = 1;
+    int             arg, sp = 0, zero_sensitive = 1, testcase = 0;
     char           *cp;
     char           *Apsz = NULL;
     char           *Xpsz = NULL;
@@ -482,10 +482,13 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
             break;
 
         case 'a':
+#ifndef DISABLE_MD5
             if (!strcasecmp(optarg, "MD5")) {
                 session->securityAuthProto = usmHMACMD5AuthProtocol;
                 session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
-            } else if (!strcasecmp(optarg, "SHA")) {
+            } else
+#endif
+                if (!strcasecmp(optarg, "SHA")) {
                 session->securityAuthProto = usmHMACSHA1AuthProtocol;
                 session->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
             } else {
@@ -497,16 +500,23 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
             break;
 
         case 'x':
+            testcase = 0;
+#ifndef DISABLE_DES
             if (!strcasecmp(optarg, "DES")) {
+                testcase = 1;
                 session->securityPrivProto = usmDESPrivProtocol;
                 session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+            }
+#endif
 #ifdef HAVE_AES
-            } else if (!strcasecmp(optarg, "AES128") ||
-                       !strcasecmp(optarg, "AES")) {
+            if (!strcasecmp(optarg, "AES128") ||
+                !strcasecmp(optarg, "AES")) {
+                testcase = 1;
                 session->securityPrivProto = usmAESPrivProtocol;
                 session->securityPrivProtoLen = USM_PRIV_PROTO_AES_LEN;
+            }
 #endif
-            } else {
+            if (testcase == 0) {
                 fprintf(stderr,
                       "Invalid privacy protocol specified after -x flag: %s\n",
                         optarg);
@@ -603,9 +613,6 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
 #ifndef DISABLE_SNMPV1
             if (session->version == NETSNMP_DS_SNMP_VERSION_1)  /* bogus value.  version 1 actually = 0 */
                 session->version = SNMP_VERSION_1;
-#else
-            snmp_log(LOG_ERR, "Can't determine a valid SNMP version for the session\n");
-            return(-2);
 #endif
         }
     }
@@ -625,13 +632,20 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
                 snmp_duplicate_objid(def, session->securityAuthProtoLen);
         }
         if (session->securityAuthProto == NULL) {
+#ifndef DISABLE_MD5
             /*
-             * assume MD5 
+             * assume MD5
              */
             session->securityAuthProto =
                 snmp_duplicate_objid(usmHMACMD5AuthProtocol,
                                      USM_AUTH_PROTO_MD5_LEN);
             session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
+#else
+            session->securityAuthProto =
+                snmp_duplicate_objid(usmHMACSHA1AuthProtocol,
+                                     USM_AUTH_PROTO_SHA_LEN);
+            session->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
+#endif
         }
         if (generate_Ku(session->securityAuthProto,
                         session->securityAuthProtoLen,
@@ -659,10 +673,18 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
             /*
              * assume DES 
              */
+#ifndef DISABLE_DES
             session->securityPrivProto =
                 snmp_duplicate_objid(usmDESPrivProtocol,
                                      USM_PRIV_PROTO_DES_LEN);
             session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+#else
+            session->securityPrivProto =
+                snmp_duplicate_objid(usmAESPrivProtocol,
+                                     USM_PRIV_PROTO_AES_LEN);
+            session->securityPrivProtoLen = USM_PRIV_PROTO_AES_LEN;
+#endif
+
         }
         if (generate_Ku(session->securityAuthProto,
                         session->securityAuthProtoLen,

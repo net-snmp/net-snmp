@@ -462,9 +462,15 @@ hash_engineID(u_char * engineID, u_int engineID_len)
     /*
      * Hash engineID into a list index.
      */
+#ifndef DISABLE_MD5
     rval = sc_hash(usmHMACMD5AuthProtocol,
                    sizeof(usmHMACMD5AuthProtocol) / sizeof(oid),
                    engineID, engineID_len, buf, &buf_len);
+#else
+    rval = sc_hash(usmHMACSHA1AuthProtocol,
+                   sizeof(usmHMACSHA1AuthProtocol) / sizeof(oid),
+                   engineID, engineID_len, buf, &buf_len);
+#endif
     QUITFUN(rval, hash_engineID_quit);
 
     for (bufp = buf; (bufp - buf) < (int) buf_len; bufp += 4) {

@@ -1,6 +1,12 @@
 #!/bin/sh
 
+# XXX: auto-switch to a supported protocol instead.
+SKIPIF DISABLE_MD5
+SKIPIF DISABLE_DES
+
 CONFIGAGENT createUser initial MD5 initial_test_pass_auth DES
 CONFIGAGENT createUser templateMD5 MD5 templateMD5_test_pass_auth DES
-CONFIGAGENT rwuser initial
+CONFIGAGENT rwuser initial noauth
 CONFIGAGENT rwuser newtestuser
+
+NOAUTHTESTARGS="-l nanp -u initial -v 3"

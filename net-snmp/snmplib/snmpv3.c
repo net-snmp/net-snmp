@@ -100,9 +100,12 @@ static int      getHwAddress(const char *networkDevice, char *addressOut);
 void
 snmpv3_authtype_conf(const char *word, char *cptr)
 {
+#ifndef DISABLE_MD5
     if (strcasecmp(cptr, "MD5") == 0)
         defaultAuthType = usmHMACMD5AuthProtocol;
-    else if (strcasecmp(cptr, "SHA") == 0)
+    else
+#endif
+        if (strcasecmp(cptr, "SHA") == 0)
         defaultAuthType = usmHMACSHA1AuthProtocol;
     else
         config_perror("Unknown authentication type");
@@ -125,15 +128,24 @@ get_default_authtype(size_t * len)
 void
 snmpv3_privtype_conf(const char *word, char *cptr)
 {
-    if (strcasecmp(cptr, "DES") == 0)
+    int testcase = 0;
+
+#ifndef DISABLE_DES
+    if (strcasecmp(cptr, "DES") == 0) {
+        testcase = 1;
         defaultPrivType = usmDESPrivProtocol;
+    }
+#endif
+
 #if HAVE_AES
     /* XXX AES: assumes oid length == des oid length */
-    else if (strcasecmp(cptr, "AES128") == 0 ||
-             strcasecmp(cptr, "AES") == 0)
+    if (strcasecmp(cptr, "AES128") == 0 ||
+        strcasecmp(cptr, "AES") == 0) {
+        testcase = 1;
         defaultPrivType = usmAES128PrivProtocol;
+    }
 #endif
-    else
+    if (testcase == 0)
         config_perror("Unknown privacy type");
     defaultPrivTypeLen = SNMP_DEFAULT_PRIV_PROTOLEN;
     DEBUGMSGTL(("snmpv3", "set default privacy type: %s\n", cptr));
@@ -143,7 +155,11 @@ const oid      *
 get_default_privtype(size_t * len)
 {
     if (defaultPrivType == NULL) {
+#ifndef DISABLE_DES
         defaultPrivType = usmDESPrivProtocol;
+#else
+        defaultPrivType = usmAESPrivProtocol;
+#endif
         defaultPrivTypeLen = USM_LENGTH_OID_TRANSFORM;
     }
     if (len)
@@ -194,6 +210,7 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
                char **Xpsz, int argc, char *const *argv)
 {
     char           *cp = optarg;
+    int testcase;
     optarg++;
     /*
      * Support '... -3x=value ....' syntax
@@ -309,10 +326,13 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
         break;
 
     case 'a':
+#ifndef DISABLE_MD5
         if (!strcasecmp(optarg, "MD5")) {
             session->securityAuthProto = usmHMACMD5AuthProtocol;
             session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
-        } else if (!strcasecmp(optarg, "SHA")) {
+        } else
+#endif
+            if (!strcasecmp(optarg, "SHA")) {
             session->securityAuthProto = usmHMACSHA1AuthProtocol;
             session->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
         } else {
@@ -324,16 +344,23 @@ snmpv3_options(char *optarg, netsnmp_session * session, char **Apsz,
         break;
 
     case 'x':
+        testcase = 0;
+#ifndef DISABLE_DES
         if (!strcasecmp(optarg, "DES")) {
             session->securityPrivProto = usmDESPrivProtocol;
             session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+            testcase = 1;
+        }
+#endif
 #ifdef HAVE_AES
-        } else if (!strcasecmp(optarg, "AES128") ||
-                   strcasecmp(optarg, "AES")) {
+        if (!strcasecmp(optarg, "AES128") ||
+            strcasecmp(optarg, "AES")) {
             session->securityPrivProto = usmAES128PrivProtocol;
             session->securityPrivProtoLen = USM_PRIV_PROTO_AES128_LEN;
+            testcase = 1;
+        }
 #endif
-        } else {
+        if (testcase == 0) {
             fprintf(stderr,
                     "Invalid privacy protocol specified after -3x flag: %s\n",
                     optarg);
@@ -696,6 +723,7 @@ usm_parse_create_usmUser(const char *token, char *line)
     u_char          userKey[SNMP_MAXBUF_SMALL], *tmpp;
     size_t          userKeyLen = SNMP_MAXBUF_SMALL;
     size_t          ret;
+    int             testcase;
 
     newuser = usm_create_user();
 
@@ -749,10 +777,13 @@ usm_parse_create_usmUser(const char *token, char *line)
     /*
      * READ: Authentication Type 
      */
+#ifndef DISABLE_MD5
     if (strncmp(cp, "MD5", 3) == 0) {
         memcpy(newuser->authProtocol, usmHMACMD5AuthProtocol,
                sizeof(usmHMACMD5AuthProtocol));
-    } else if (strncmp(cp, "SHA", 3) == 0) {
+    } else
+#endif
+        if (strncmp(cp, "SHA", 3) == 0) {
         memcpy(newuser->authProtocol, usmHMACSHA1AuthProtocol,
                sizeof(usmHMACSHA1AuthProtocol));
     } else {
@@ -843,16 +874,23 @@ usm_parse_create_usmUser(const char *token, char *line)
     /*
      * READ: Privacy Type 
      */
+    testcase = 0;
+#ifndef DISABLE_DES
     if (strncmp(cp, "DES", 3) == 0) {
         memcpy(newuser->privProtocol, usmDESPrivProtocol,
                sizeof(usmDESPrivProtocol));
+        testcase = 1;
+    }
+#endif
 #ifdef HAVE_AES
-    } else if (strncmp(cp, "AES128", 3) == 0 ||
+    if (strncmp(cp, "AES128", 3) == 0 ||
                strncmp(cp, "AES", 3) == 0) {
         memcpy(newuser->privProtocol, usmAESPrivProtocol,
                sizeof(usmAESPrivProtocol));
+        testcase = 1;
+    }
 #endif
-    } else {
+    if (testcase == 0) {
         config_perror("Unknown privacy protocol");
         usm_free_user(newuser);
         return;

@@ -191,10 +191,13 @@ main(int argc, char **argv)
     /*
      * Convert and error check transform_type.
      */
+#ifndef DISABLE_MD5
     if (!strcmp(transform_type_input, "md5")) {
         transform_type = usmHMACMD5AuthProtocol;
 
-    } else if (!strcmp(transform_type_input, "sha1")) {
+    } else
+#endif
+        if (!strcmp(transform_type_input, "sha1")) {
         transform_type = usmHMACSHA1AuthProtocol;
 
     } else {
@@ -207,8 +210,12 @@ main(int argc, char **argv)
 
     if (verbose) {
         fprintf(stderr, "Hash:\t\t%s\n",
+#ifndef DISABLE_MD5
                 (transform_type == usmHMACMD5AuthProtocol)
-                ? "usmHMACMD5AuthProtocol" : "usmHMACSHA1AuthProtocol");
+                ? "usmHMACMD5AuthProtocol" :
+#else
+                "usmHMACSHA1AuthProtocol");
+#endif
     }
 
 
