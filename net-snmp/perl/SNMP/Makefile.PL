@@ -87,7 +87,7 @@ sub find_files {
 sub GetTestInfo {
     my $sep = ($^O =~ /win32/i ? '\\' : '/');
     my $info_file = "t${sep}snmptest.cmd";
-    my $snmpd_path1 = "${sep}usr${sep}local${sep}ssbin";
+    my $snmpd_path1 = "${sep}usr${sep}local${sep}sbin";
     my $snmpd_path2 = "${sep}usr${sep}sbin";
     my $snmpd_path3 = "${sep}usr${sep}bin";
     open(H, ">$info_file") || die "Error: could not open file '$info_file'($!)";
