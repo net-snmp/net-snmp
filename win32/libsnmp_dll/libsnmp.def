@@ -186,15 +186,15 @@ EXPORTS
 	strncasecmp
 	strcasecmp
 	init_snmp_alarm
-	ds_register_premib
-	ds_register_config
-	ds_set_boolean
-	ds_get_boolean
-	ds_toggle_boolean
-	ds_set_int
-	ds_get_int
-	ds_set_string
-	ds_get_string
+	netsnmp_ds_register_premib
+	netsnmp_ds_register_config
+	netsnmp_ds_set_boolean
+	netsnmp_ds_get_boolean
+	netsnmp_ds_toggle_boolean
+	netsnmp_ds_set_int
+	netsnmp_ds_get_int
+	netsnmp_ds_set_string
+	netsnmp_ds_get_string
 	snmp_pdu_add_variable
 	snmp_varlist_add_variable
 	encode_keychange
@@ -283,6 +283,7 @@ EXPORTS
 	usm_store_users
 	snmp_store
 	atime_diff
+	uatime_hdiff
 	atime_newMarker
 	atime_setMarker
 	atime_ready
@@ -344,6 +345,11 @@ EXPORTS
 	getopt
 	optarg
 	optind
+	usmNoAuthProtocol
+	usmHMACMD5AuthProtocol
+	usmHMACSHA1AuthProtocol
+	usmNoPrivProtocol
+	usmDESPrivProtocol
 	Mib                     DATA
 	tree_head               DATA
 	snmp_errno              DATA
