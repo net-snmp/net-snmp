@@ -266,18 +266,16 @@ SectionEnd
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} \
                "The Base Components provide basic means for interrogating SNMP devices. These \
-               include the command generator applications, a short list of Management \
+               include the command-line client applications, a short list of Management \
                Information Base MIB files, and a user-friendly Help subsystem"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} \
-               "Install the Agent Services if this computer provides information to a remote \
-               management system."
+               "The Agent Services provide information to a remote management system."
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} \
-               "Install the Notification/Trap Services if this computer should receives solicited \
-               or unsolicited SNMP messages."
+               "The Notification/Trap Services receive SNMP notifications traps and informs) \
+               from other SNMP agents."
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} \
-               "Install the Perl SNMP Modules if this computer will run Perl programs that need to \
-               use the SNMP protocol. See Start Here - Installation in the Net-SNMP Help file for \
-               instructions on installing the Perl PPD package"
+               "The Perl SNMP Modules can be used if this computer will be used to \
+               run or develop Perl-based SNMP programs (e.g. 'mib2c' or 'snmpconf')
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function CreateSnmpConf
