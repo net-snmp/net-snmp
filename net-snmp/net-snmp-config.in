@@ -158,19 +158,21 @@ else
 
     --compile-subagent)
       shift
-      outname=$1
-      shift
-      if test $1 = "--norm" ; then
+      if test "x$1" != "x"; then
+        outname=$1
+        shift
+      fi
+      if test "$1" = "--norm" ; then
         norm=1
 	shift
       fi
-      if test $1 = "--cflags" ; then
+      if test "$1" = "--cflags" ; then
         shift
 	cflags=$1
 	echo "setting extra cflags: $cflags"
 	shift
       fi
-      if test $1 = "--ldflags" ; then
+      if test "$1" = "--ldflags" ; then
         shift
 	ldflags=$1
 	echo "setting extra ldflags: $ldflags"
@@ -192,6 +194,27 @@ else
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 EOF
+
+    # If we were only given a single filename
+    # (and no explicit output name)
+    # then use that as the base of the output name
+    #
+    # If we weren't even given that, then bomb out
+    if test "x$1" = "x"; then
+      if test "x$outname" = "x"; then
+        echo "No MIB module codefile specified"
+        rm -f $tmpfile
+        exit 1
+      else
+        cfiles=$outname
+        outname=`basename $cfiles | sed 's/\.[co]$//'`
+        if test -f $outname.h; then
+          if grep "init_$outname" $outname.h; then
+            echo "  #include \"$outname.h\"" >> $tmpfile
+          fi
+        fi
+      fi
+    fi
 
     # add include files
     while test "$1" != ""; do
