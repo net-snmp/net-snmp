@@ -214,6 +214,9 @@
 /* Define if you have the dlopen function.  */
 #undef HAVE_DLOPEN
 
+/* Define if you have the eval_pv function.  */
+#undef HAVE_EVAL_PV
+
 /* Define if you have the execv function.  */
 #undef HAVE_EXECV
 
@@ -285,6 +288,9 @@
 
 /* Define if you have the nlist function.  */
 #undef HAVE_NLIST
+
+/* Define if you have the perl_eval_pv function.  */
+#undef HAVE_PERL_EVAL_PV
 
 /* Define if you have the rand function.  */
 #undef HAVE_RAND
