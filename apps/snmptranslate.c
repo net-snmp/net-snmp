@@ -27,7 +27,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
-#define DEPRECATED_CLI_OPTIONS
 
 #include <net-snmp/net-snmp-config.h>
 
@@ -124,66 +123,11 @@ int main(int argc, char *argv[])
     /*
      * usage: snmptranslate name
      */
-    snmp_out_toggle_options(n_opt);
-#ifndef DEPRECATED_CLI_OPTIONS
-    while ((arg = getopt(argc, argv, "VhndrRwWptafsSm:M:D:P:T:O:I:")) != EOF){
-#else
     while ((arg = getopt(argc, argv, "Vhm:M:w:D:P:T:O:I:")) != EOF){
-#endif
 	switch(arg) {
 	case 'h':
 	    usage();
             exit(1);
-
-#ifndef DEPRECATED_CLI_OPTIONS
-	case 'n':
-	    fprintf(stderr, "Warning: -n option is deprecated - use -On\n");
-	    snmp_out_toggle_options(n_opt);
-	    break;	     
-	case 'd':
-	    fprintf(stderr, "Warning: -d option is deprecated - use -Td\n");
-	    description = 1;
-	    snmp_set_save_descriptions(1);
-	    break;
-	case 'r':
-	case 'R':
-	    fprintf(stderr, "Warning: -%c option is deprecated - use -IR\n", arg);
-	    snmp_set_random_access(1);
-	    break;
-        case 'w':
-	    fprintf(stderr, "Warning: -w option is deprecated - use -Pw\n");
-            snmp_set_mib_warnings(1);
-            break;
-        case 'W':
-	    fprintf(stderr, "Warning: -W option is deprecated - use -PW\n");
-            snmp_set_mib_warnings(2);
-            break;
-        case 'p':
-	    fprintf(stderr, "Warning: -p option is deprecated - use -Tp\n");
-            print = 1;
-            break;
-	case 't':
-	    fprintf(stderr, "Warning: -t option is deprecated - use -Tt\n");
-            print = 3;
-            print_oid_report_enable_suffix();
-            break;
-        case 'a':
-	    fprintf(stderr, "Warning: -a option is deprecated - use -Ta\n");
-            print = 2;
-            break;
-	case 'f':
-	    fprintf(stderr, "Warning: -f option is deprecated - use -Of\n");
-	    snmp_set_full_objid(1);
-	    break;
-	case 's':
-	    fprintf(stderr, "Warning: -s option is deprecated - use -Os\n");
-	    snmp_set_suffix_only(1);
-	    break;
-	case 'S':
-	    fprintf(stderr, "Warning: -S option is deprecated - use -OS\n");
-	    snmp_set_suffix_only(2);
-	    break;
-#endif /* DEPRECATED_CLI_OPTIONS */
 
         case 'm':
             setenv("MIBS", optarg, 1);
@@ -191,15 +135,6 @@ int main(int argc, char *argv[])
         case 'M':
             setenv("MIBDIRS", optarg, 1);
             break;
-#ifdef DEPRECATED_CLI_OPTIONS
-	case 'w':
-	    width = atoi(optarg);
-	    if (width <= 0) {
-		fprintf(stderr, "Invalid width specification: %s\n", optarg);
-		exit (1);
-	    }
-	    break;
-#endif
 	case 'D':
             debug_register_tokens(optarg);
 	    snmp_set_do_debugging(1);
