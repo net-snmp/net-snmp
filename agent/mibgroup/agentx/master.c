@@ -22,8 +22,10 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 #include <errno.h>
-
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
@@ -46,6 +48,30 @@
 #include "snmp_logging.h"
 #include "read_config.h"
 #include "agent_read_config.h"
+
+#ifdef USE_LIBWRAP
+#include "tcpd.h"
+#endif  /* USE_LIBWRAP */
+
+int
+agentx_pre_parse(struct snmp_session *session, snmp_ipaddr from)
+{
+#ifdef USE_LIBWRAP
+  struct sockaddr_in *fromIp = (struct sockaddr_in *)&from;
+  const char *addr_string = inet_ntoa(fromIp->sin_addr);
+
+  if (addr_string == NULL) {
+    addr_string = STRING_UNKNOWN;
+  }
+  
+  if (hosts_ctl("snmpd", STRING_UNKNOWN, addr_string, STRING_UNKNOWN) == 0) {
+    snmp_log(deny_severity, "AgentX connection from %s REFUSED\n",addr_string);
+    return 0;
+  }
+
+#endif
+  return 1;
+}
 
 
 void parse_master_extensions(const char *token, 
@@ -127,26 +153,28 @@ void real_init_master(void)
     sess.local_port = AGENTX_PORT;         /* Indicate server & set default port */
     sess.remote_port = 0;
     sess.callback = handle_master_agentx_packet;
-    session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build,
-                            agentx_check_packet );
+    session = snmp_open_ex(&sess, agentx_pre_parse, agentx_parse, NULL,
+			   agentx_build, agentx_check_packet);
 
-    if ( session == NULL && sess.s_errno == EADDRINUSE ) {
+    if (session == NULL && sess.s_errno == EADDRINUSE) {
 		/*
 		 * Could be a left-over socket (now deleted)
 		 * Try again
 		 */
-        session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build,
-                            agentx_check_packet );
+        session = snmp_open_ex(&sess, agentx_pre_parse, agentx_parse, NULL,
+			       agentx_build, agentx_check_packet);
     }
 
-    if ( session == NULL ) {
-      /* diagnose snmp_open errors with the input struct snmp_session pointer */
-	snmp_sess_perror("init_master", &sess);
-	if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
-	    exit(1);
+    if (session == NULL) {
+      /*  Diagnose snmp_open errors with the input struct snmp_session
+	  pointer.  */
+      snmp_sess_perror("init_master", &sess);
+      if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
+	exit(1);
+      }
     }
 
-    DEBUGMSGTL(("agentx/master","initializing...   DONE\n"));
+    DEBUGMSGTL(("agentx/master", "initializing...   DONE\n"));
 }
 
 u_char *
