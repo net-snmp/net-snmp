@@ -62,23 +62,23 @@ $AnyData::Storage::SNMP::debugre = $opts{'R'} if ($opts{'R'});
     || die "\tConnection problem: $DBI::errstr\n";
 $AnyData::Storage::SNMP::debugre = $opts{'R'} if ($opts{'R'});
 
-$prompt = "snmpsh> ";
+$prompt = "netsh> ";
 
-if (-f "$ENV{'HOME'}/.snmpshrc") {
-    source_file("$ENV{'HOME'}/.snmpshrc");
+if (-f "$ENV{'HOME'}/.snmp/netshrc") {
+    source_file("$ENV{'HOME'}/.snmp/netshrc");
 }
 
 if ($#ARGV >= 0) {
     # command line command
-    snmpsh(join(" ",@ARGV));
+    netsh(join(" ",@ARGV));
 } else {
     # interactive shell
     $ENV{'PERL_RL'}='o=0' if (!exists($ENV{'PERL_RL'}));
     # the ornaments are too ugly
-    $term = new Term::ReadLine 'snmpsh';
+    $term = new Term::ReadLine 'netsh';
     while($cmd = $term->readline($prompt)) {
 	last if ($cmd eq "exit" || $cmd eq "quit" || $cmd eq "q");
-	snmpsh($cmd, \%conf);
+	netsh($cmd, \%conf);
     }
 }
 
@@ -95,7 +95,7 @@ sub source_file {
 		}
 		$_ = $lines;
 	    }
-	    snmpsh($_);
+	    netsh($_);
 	}
     } else {
 	print STDERR "no such file: $_[0]\n";
@@ -113,7 +113,7 @@ sub my_export {
     $insh->execute(@_);
 }
 
-sub snmpsh {
+sub netsh {
     my $stmt = shift;
     chomp($stmt);
     next if ($stmt =~ /^\s*$/);
@@ -179,7 +179,7 @@ sub snmpsh {
 	    $stmt =~ s/\\(\d+)/$ARGS[$1-1]/g;
 #	    print "running $stmt\n";
 	    ($name, $args) = ($stmt =~ /^(\w+)\s*(.*)$/);
-	    snmpsh($stmt);
+	    netsh($stmt);
 	}
 	return;
     }
@@ -254,7 +254,7 @@ sub snmpsh {
     
     if ($stmt =~ /^diff\s+(.*)/) {
 	$running_watch = 2;
-	snmpsh($1);
+	netsh($1);
 	$running_watch = 0;
 	return;
     }
@@ -273,7 +273,7 @@ sub snmpsh {
 	$SIG{'INT'} = sub { $running_watch = 0; };
 	while($running_watch) {
 	    print $clear;
-	    snmpsh($cmd);
+	    netsh($cmd);
 	    sleep($delay);
 	}
 	$SIG{'TERM'} = \&exit;
@@ -381,7 +381,7 @@ sub snmpsh {
 
 sub auto_snmp {
     my $node = $SNMP::MIB{$_[0]};
-#    print STDERR "snmpsh::fetch_snmp $_[0] $node->{label}\n";
+#    print STDERR "netsh::fetch_snmp $_[0] $node->{label}\n";
     my $indexes = $node->{parent}{indexes};
     if ($#$indexes > -1) {
 #	print STDERR "column\n";
@@ -405,7 +405,7 @@ sub auto_snmp {
 sub AUTOLOAD {
     my $nodename = $AUTOLOAD;
     $nodename =~ s/.*:://;
-    print STDERR "snmpsh::AUTOLOAD $AUTOLOAD $nodename\n";
+    print STDERR "netsh::AUTOLOAD $AUTOLOAD $nodename\n";
     if ($SNMP::MIB{$nodename}) {
 	eval << "END";
         sub $AUTOLOAD {
