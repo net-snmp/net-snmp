@@ -207,6 +207,48 @@ remove_agent_caps_list(struct snmp_session *session, struct snmp_pdu *pdu)
 }
 
 int
+agentx_notify(struct snmp_session *session, struct snmp_pdu *pdu)
+{
+    struct snmp_session *sp;
+    struct variable_list *var;
+    int got_sysuptime = 0;
+    struct timeval now;
+    extern oid sysuptime_oid[], snmptrap_oid[];
+    extern size_t sysuptime_oid_len, snmptrap_oid_len;
+
+    sp = find_agentx_session( session, pdu->sessid );
+    if ( sp == NULL )
+        return AGENTX_ERR_NOT_OPEN;
+
+    var = pdu->variables;
+    if (!var)
+	return AGENTX_ERR_PROCESSING_ERROR;
+
+    if ( snmp_oid_compare( var->name, var->name_length, 
+		sysuptime_oid, sysuptime_oid_len) == 0 ) {
+	got_sysuptime = 1;
+	var = var->next_variable;
+    }
+
+    if (!var || snmp_oid_compare( var->name, var->name_length, 
+			snmptrap_oid, snmptrap_oid_len) != 0 )
+	return AGENTX_ERR_PROCESSING_ERROR;
+
+		/*
+		 *  If sysUptime isn't the first varbind, don't worry.  
+		 *     send_trap_vars() will add it if necessary.
+		 *
+		 *  Note that if this behaviour is altered, it will
+		 *     be necessary to add sysUptime here,
+		 *     as this is valid AgentX syntax.
+		 */
+
+    send_trap_vars( -1, -1, pdu->variables );
+    return AGENTX_ERR_NOERROR;
+}
+
+
+int
 agentx_ping_response(struct snmp_session *session, struct snmp_pdu *pdu)
 {
     struct snmp_session *sp;
@@ -258,6 +300,10 @@ handle_master_agentx_packet(int operation,
 
 	case AGENTX_MSG_REMOVE_AGENT_CAPS:
 		asp->status = remove_agent_caps_list( session, pdu );
+		break;
+
+	case AGENTX_MSG_NOTIFY:
+		asp->status = agentx_notify( session, pdu );
 		break;
 
 	case AGENTX_MSG_PING:
