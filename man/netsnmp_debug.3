@@ -1,4 +1,4 @@
-.TH "debug: print out debugging information about the handler chain being called." 3 "27 Aug 2002" "net-snmp" \" -*- nroff -*-
+.TH "debug: print out debugging information about the handler chain being called." 3 "5 Oct 2002" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -37,11 +37,29 @@ injectHandler debug mibII/system
 and then run snmpwalk on the 'system' group. 
 .SH "FUNCTION DOCUMENTATION"
 .PP 
+.SS "void debug_print_requests (netsnmp_request_info * requests)"
+.PP
+.PP
+For internal use only.
+.PP
+Definition at line 51 of file debug_handler.c.
+.PP
+Referenced by netsnmp_debug_helper().
+.PP
+.SS "int netsnmp_debug_helper (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
+.PP
+.PP
+For internal use only.
+.PP
+Definition at line 81 of file debug_handler.c.
 .SS "netsnmp_mib_handler* netsnmp_get_debug_handler (void)"
 .PP
 returns a debug handler that can be injected into a given handler chain.
 .PP
 Definition at line 44 of file debug_handler.c.
+.PP
+Referenced by netsnmp_init_debug_helper().
+.PP
 .SS "void netsnmp_init_debug_helper (void)"
 .PP
 initializes the debug helper which then registers a debug handler as a run-time injectable handler for configuration file use.

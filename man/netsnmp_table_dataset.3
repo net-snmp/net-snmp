@@ -1,4 +1,4 @@
-.TH "table_dataset: Helps you implement a table with automatted storage." 3 "27 Aug 2002" "net-snmp" \" -*- nroff -*-
+.TH "table_dataset: Helps you implement a table with automatted storage." 3 "5 Oct 2002" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -111,6 +111,18 @@ It handles all MIB requests including GETs, GETNEXTs and SETs. It's possible to 
 NOTE NOTE NOTE: This helper isn't complete and is likely to change somewhat over time. Specifically, the way it stores data internally may change drastically. 
 .SH "FUNCTION DOCUMENTATION"
 .PP 
+.SS "void netsnmp_config_parse_add_row (const char * token, char * line)"
+.PP
+.PP
+For internal use only.
+.PP
+Definition at line 852 of file table_dataset.c.
+.SS "void netsnmp_config_parse_table_set (const char * token, char * line)"
+.PP
+.PP
+For internal use only.
+.PP
+Definition at line 745 of file table_dataset.c.
 .SS "netsnmp_table_data_set* netsnmp_create_table_data_set (const char * table_name)"
 .PP
 Create a netsnmp_table_data_set structure given a table_data definition.
@@ -120,6 +132,9 @@ Create a netsnmp_table_data_set structure given a table_data definition.
 \fBdata_set.c\fP.
 .PP
 Definition at line 63 of file table_dataset.c.
+.PP
+Referenced by netsnmp_config_parse_table_set().
+.PP
 .SS "netsnmp_table_data_set* netsnmp_extract_table_data_set (netsnmp_request_info * request)\fC [inline]\fP"
 .PP
 extracts a netsnmp_table_data_set pointer from a given request.
@@ -135,6 +150,9 @@ Definition at line 161 of file table_dataset.c.
 Given a netsnmp_table_data_set definition, create a handler for it.
 .PP
 Definition at line 75 of file table_dataset.c.
+.PP
+Referenced by netsnmp_register_table_data_set().
+.PP
 .SS "int netsnmp_mark_row_column_writable (netsnmp_table_row * row, int column, int writable)"
 .PP
 marks a given column in a row as writable or not.
@@ -144,6 +162,9 @@ marks a given column in a row as writable or not.
 \fBdata_set.c\fP.
 .PP
 Definition at line 185 of file table_dataset.c.
+.PP
+Referenced by netsnmp_config_parse_add_row(), and netsnmp_table_data_set_create_row_from_defaults().
+.PP
 .SS "void netsnmp_register_auto_data_table (netsnmp_table_data_set * table_set, char * registration_name)"
 .PP
 registers a table_dataset so that the 'add_row' snmpd.conf token can be used to add data to this table.
@@ -159,6 +180,9 @@ If registration_name is NULL then the name used when the table was created will 
 \fBdata_set.c\fP.
 .PP
 Definition at line 729 of file table_dataset.c.
+.PP
+Referenced by netsnmp_config_parse_table_set().
+.PP
 .SS "int netsnmp_register_table_data_set (netsnmp_handler_registration * reginfo, netsnmp_table_data_set * data_set, netsnmp_table_registration_info * table_info)"
 .PP
 register a given data_set at a given oid (specified in the netsnmp_handler_registration pointer).
@@ -170,6 +194,9 @@ The reginfo->handler->access_method *may* be null if the call doesn't ever want 
 \fBdata_set.c\fP.
 .PP
 Definition at line 101 of file table_dataset.c.
+.PP
+Referenced by netsnmp_config_parse_table_set().
+.PP
 .SS "int netsnmp_set_row_column (netsnmp_table_row * row, unsigned int column, int type, const char * value, size_t value_len)"
 .PP
 sets a given column in a row with data given a type, value, and length.
@@ -181,11 +208,17 @@ Data is memdup'ed by the function.
 \fBdata_set.c\fP.
 .PP
 Definition at line 221 of file table_dataset.c.
+.PP
+Referenced by netsnmp_config_parse_add_row(), and netsnmp_table_data_set_create_row_from_defaults().
+.PP
 .SS "netsnmp_table_row* netsnmp_table_data_set_clone_row (netsnmp_table_row * row)"
 .PP
 clones a dataset row, including all data.
 .PP
 Definition at line 321 of file table_dataset.c.
+.PP
+Referenced by netsnmp_table_data_set_helper_handler().
+.PP
 .SS "netsnmp_table_row* netsnmp_table_data_set_create_row_from_defaults (netsnmp_table_data_set_storage * defrow)"
 .PP
 creates a new row from an existing defined default set.
@@ -196,6 +229,9 @@ Definition at line 355 of file table_dataset.c.
 Finds a column within a given storage set, given the pointer to the start of the storage set list.
 .PP
 Definition at line 149 of file table_dataset.c.
+.PP
+Referenced by netsnmp_extract_table_data_set_column(), netsnmp_mark_row_column_writable(), netsnmp_set_row_column(), netsnmp_table_data_set_helper_handler(), and netsnmp_table_set_add_default_row().
+.PP
 .SS "int netsnmp_table_data_set_helper_handler (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
 .PP
 implements the table data helper.
@@ -214,6 +250,9 @@ Call this repeatly for each index.
 \fBdata_set.c\fP.
 .PP
 Definition at line 913 of file table_dataset.c.
+.PP
+Referenced by netsnmp_config_parse_table_set().
+.PP
 .SS "void netsnmp_table_dataset_add_row (netsnmp_table_data_set * table, netsnmp_table_row * row)\fC [inline]\fP"
 .PP
 adds a new row to a dataset table.
@@ -223,11 +262,17 @@ adds a new row to a dataset table.
 \fBdata_set.c\fP.
 .PP
 Definition at line 922 of file table_dataset.c.
+.PP
+Referenced by netsnmp_table_data_set_helper_handler().
+.PP
 .SS "void netsnmp_table_dataset_delete_all_data (netsnmp_table_data_set_storage * data)\fC [inline]\fP"
 .PP
 deletes all the data from this node and beyond in the linked list.
 .PP
 Definition at line 958 of file table_dataset.c.
+.PP
+Referenced by netsnmp_table_dataset_delete_row(), and netsnmp_table_dataset_remove_and_delete_row().
+.PP
 .SS "netsnmp_table_data_set_storage* netsnmp_table_dataset_delete_data (netsnmp_table_data_set_storage * data)\fC [inline]\fP"
 .PP
 deletes a single dataset table data.
@@ -235,16 +280,25 @@ deletes a single dataset table data.
 returns the (possibly still good) next pointer of the deleted data object. 
 .PP
 Definition at line 945 of file table_dataset.c.
+.PP
+Referenced by netsnmp_table_dataset_delete_all_data().
+.PP
 .SS "void netsnmp_table_dataset_delete_row (netsnmp_table_row * row)\fC [inline]\fP"
 .PP
 deletes all the data from this node and beyond in the linked list.
 .PP
 Definition at line 968 of file table_dataset.c.
+.PP
+Referenced by netsnmp_table_data_set_helper_handler().
+.PP
 .SS "void netsnmp_table_dataset_remove_and_delete_row (netsnmp_table_data_set * table, netsnmp_table_row * row)\fC [inline]\fP"
 .PP
 removes a row from the table and then deletes it (and all it's data).
 .PP
 Definition at line 992 of file table_dataset.c.
+.PP
+Referenced by netsnmp_table_data_set_helper_handler().
+.PP
 .SS "void netsnmp_table_dataset_remove_row (netsnmp_table_data_set * table, netsnmp_table_row * row)\fC [inline]\fP"
 .PP
 removes a row from the table, but doesn't delete/free anything.
@@ -255,6 +309,9 @@ Definition at line 981 of file table_dataset.c.
 adds a new row to a dataset table.
 .PP
 Definition at line 932 of file table_dataset.c.
+.PP
+Referenced by netsnmp_table_data_set_helper_handler().
+.PP
 .SS "int netsnmp_table_set_add_default_row (netsnmp_table_data_set * table_set, unsigned int column, int type, int writable, void * default_value, size_t default_value_len)"
 .PP
 adds a new default row to a table_set.
@@ -264,6 +321,9 @@ Arguments should be the table_set, column number, variable type and finally a 1 
 returns SNMPERR_SUCCESS or SNMPERR_FAILURE 
 .PP
 Definition at line 277 of file table_dataset.c.
+.PP
+Referenced by netsnmp_config_parse_table_set().
+.PP
 .SS "void netsnmp_table_set_multi_add_default_row (va_dcl)"
 .PP
 adds multiple data column definitions to each row.
