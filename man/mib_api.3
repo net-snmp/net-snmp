@@ -80,8 +80,9 @@ Note that
 must first be called to add the directory containing the file with the
 module definition, if this is not in the standard path.
 .br
-By default, only the standard MIB-II module (RFC1213) will be loaded,
-though this can be overridden by setting the environmental variable
+By default, the following mib modules will be loaded:  IP-MIB, IF-MIB,
+TCP-MIB, UDP-MIB, SNMPv2-MIB, RFC1213-MIB, UCD-SNMP-MIB.
+This can be overridden by setting the environmental variable
 .I MIBS
 to a (colon-separated) list of modules to load.
 If
@@ -180,14 +181,15 @@ Note that there is no corresponding routine
 .TP 10
 MIBDIRS
 A colon separated list of directories to search for MIB modules.
-Default: /usr/local/lib/snmp/mibs
+Default: PREFIX/lib/snmp/mibs
 .TP 10
-MIBFILE
+MIBFILES
 A colon separated list of files to load.
-Default: mib.txt:/usr/local/lib/snmp/mib.txt:/etc/mib.txt
+Default: (none)
 .TP 10
 MIBS
 A colon separated list of MIB modules to load.
-Default: RFC1213-MIB.
+Default: IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:SNMPv2-MIB:RFC1213-MIB:UCD-S
+NMP-MIB.
 .SH "SEE ALSO"
 snmp_api(3)
