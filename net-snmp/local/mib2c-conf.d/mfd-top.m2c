@@ -174,7 +174,7 @@ void initialize_table_$table(void);
 void
 init_$name(void)
 {
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
   /* here we initialize all the tables we're planning on supporting */
   @foreach $table table@
@@ -198,7 +198,7 @@ initialize_table_$table(void)
     ${context}_registration_ptr user_context;
     u_long flags;
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     /*
      * if you'd like to pass in a pointer to some data for this
@@ -266,7 +266,7 @@ int
 ${context}_pre_request( ${context}_registration_ptr reg,
                         netsnmp_data_list *data_list, u_long id)
 {
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     /*
      * TODO:
@@ -293,7 +293,7 @@ int
 ${context}_post_request(${context}_registration_ptr reg,
                         netsnmp_data_list *data_list, u_long id)
 {
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     /*
      * TODO:

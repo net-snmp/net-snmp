@@ -29,7 +29,7 @@ ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
 {
     int rc;
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != ctx );
@@ -100,7 +100,7 @@ ${context}_undo_setup( ${context}_ctx *ctx )
 {
     int rc;
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != ctx );
@@ -130,7 +130,7 @@ ${context}_commit( ${context}_ctx *ctx )
 {
     int rc;
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != ctx );
@@ -166,7 +166,7 @@ ${context}_irreversible_commit( ${context}_ctx *ctx )
 {
     int rc;
 
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+    DEBUGTRACE;
 
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != ctx );

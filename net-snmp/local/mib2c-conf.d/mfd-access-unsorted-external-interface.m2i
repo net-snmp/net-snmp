@@ -18,7 +18,7 @@ static int
 _${table}_loop_init_context( $mfd_aue_wrap_param_decl,
                         ${table}_ref_loop *ref)
 {
-   DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
+   DEBUGTRACE;
 
    netsnmp_assert(NULL != $mfd_aue_wrap_param);
    
@@ -33,7 +33,7 @@ static int
 _${table}_loop_cleanup_context( $mfd_aue_wrap_param_decl,
                             ${table}_ref_loop *ref)
 {
-   DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
+   DEBUGTRACE;
 
    return ${table}_loop_cleanup_context($mfd_aue_wrap_param->user_ctx, ref);
 }
@@ -46,7 +46,7 @@ static int
 _${table}_loop_save_position( $mfd_aue_wrap_param_decl, ${table}_ref_loop *ref,
                          ${table}_ref_loop *ref_copy, int reuse)
 {
-   DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
+   DEBUGTRACE;
 
    return ${table}_loop_save_position($mfd_aue_wrap_param->user_ctx, ref,
                                  ref_copy, reuse);
@@ -62,7 +62,7 @@ _${table}_loop_get_first_wrapper($mfd_aue_wrap_param_decl,
                            ${table}_ref_ctx * ctx_ref)
 {
     int rc;
-    DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
+    DEBUGTRACE;
 
     rc = ${table}_loop_get_first($mfd_aue_wrap_param->user_ctx, loop_ref,
                                  ctx_ref);
@@ -93,7 +93,7 @@ _${table}_loop_get_next_wrapper($mfd_aue_wrap_param_decl,
                           ${table}_ref_ctx * ctx_ref)
 {
     int rc;
-    DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
+    DEBUGTRACE;
 
     rc = ${table}_loop_get_next($mfd_aue_wrap_param->user_ctx, loop_ref,
                                 ctx_ref);
@@ -126,7 +126,7 @@ _${table}_loop_get_data_wrapper($mfd_aue_wrap_param_decl,
     ${table}_ctx *orig_ctx = ctx_ref->ctx;
     int rc;
 
-    DEBUGMSGT(("mfd:table:trace:${name}", ">%s\n", __FUNCTION__));
+    DEBUGTRACE;
 
     return ${table}_loop_get_data($mfd_aue_wrap_param->user_ctx, loop_ref, ctx_ref);
 }
@@ -140,7 +140,7 @@ _${table}_container_init(${context}_interface_ctx *if_ctx)
 {
     netsnmp_container *c;
 
-    DEBUGMSGT(("mfd:table:trace:${name}",">%s",__FUNCTION__));
+    DEBUGTRACE;
     
     c = netsnmp_container_iterator_get(/** registration */
         if_ctx,
