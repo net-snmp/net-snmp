@@ -33,8 +33,6 @@ get_agentx_transID( int reqID, snmp_ipaddr *address )
     return reqID;	/* It'll do for now */
 }
 
-#ifdef notused
-
 void init_master(void)
 {
     struct snmp_session sess, *session=&sess;
@@ -68,8 +66,6 @@ void init_master(void)
     set_parse( session, agentx_parse );
     set_build( session, agentx_build );
 }
-
-#endif /* notused */
 
 u_char *
 agentx_var(struct variable *vp,
