@@ -503,8 +503,8 @@ write_mteTriggerBooleanObjectsOwner(int action,
          */
         tmpvar = StorageTmp->mteTriggerBooleanObjectsOwner;
         tmplen = StorageTmp->mteTriggerBooleanObjectsOwnerLen;
-        memdup((u_char **) & StorageTmp->mteTriggerBooleanObjectsOwner,
-               var_val, var_val_len);
+        StorageTmp->mteTriggerBooleanObjectsOwner =
+            netsnmp_strdup_and_null(var_val, var_val_len);
         StorageTmp->mteTriggerBooleanObjectsOwnerLen = var_val_len;
         break;
 
@@ -593,8 +593,8 @@ write_mteTriggerBooleanObjects(int action,
          */
         tmpvar = StorageTmp->mteTriggerBooleanObjects;
         tmplen = StorageTmp->mteTriggerBooleanObjectsLen;
-        memdup((u_char **) & StorageTmp->mteTriggerBooleanObjects, var_val,
-               var_val_len);
+        StorageTmp->mteTriggerBooleanObjects =
+            netsnmp_strdup_and_null(var_val, var_val_len);
         StorageTmp->mteTriggerBooleanObjectsLen = var_val_len;
         break;
 
@@ -684,8 +684,8 @@ write_mteTriggerBooleanEventOwner(int action,
          */
         tmpvar = StorageTmp->mteTriggerBooleanEventOwner;
         tmplen = StorageTmp->mteTriggerBooleanEventOwnerLen;
-        memdup((u_char **) & StorageTmp->mteTriggerBooleanEventOwner,
-               var_val, var_val_len);
+        StorageTmp->mteTriggerBooleanEventOwner =
+            netsnmp_strdup_and_null(var_val, var_val_len);
         StorageTmp->mteTriggerBooleanEventOwnerLen = var_val_len;
         break;
 
@@ -774,8 +774,8 @@ write_mteTriggerBooleanEvent(int action,
          */
         tmpvar = StorageTmp->mteTriggerBooleanEvent;
         tmplen = StorageTmp->mteTriggerBooleanEventLen;
-        memdup((u_char **) & StorageTmp->mteTriggerBooleanEvent, var_val,
-               var_val_len);
+        StorageTmp->mteTriggerBooleanEvent =
+            netsnmp_strdup_and_null(var_val, var_val_len);
         StorageTmp->mteTriggerBooleanEventLen = var_val_len;
         break;
 
