@@ -1543,6 +1543,7 @@ parse_objecttype(fp, name)
             break;
         case LABEL:
         case OCTETSTR:
+        case KW_OPAQUE:
             /* ignore the "constrained octet string" for now */
             if (nexttype == LEFTPAREN) {
                 nexttype = get_token(fp, nexttoken,MAXTOKEN);
@@ -1574,7 +1575,6 @@ parse_objecttype(fp, name)
         case NETADDR:
         case IPADDR:
         case TIMETICKS:
-        case KW_OPAQUE:
         case NUL:
         case NSAPADDRESS:
         case COUNTER64:
