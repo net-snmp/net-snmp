@@ -201,6 +201,7 @@ snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
     memcpy(&(t->local[0]), (u_char *)&(addr->sap_addr.itf), 2);
     memcpy(&(t->local[2]), (u_char *)&(addr->sap_addr.vpi), 2);
     memcpy(&(t->local[4]), (u_char *)&(addr->sap_addr.vci), 4);
+    t->local_length = 8;
 
     if (bind(t->sock, (struct sockaddr *)addr,
 	     sizeof(struct sockaddr_atmpvc)) < 0) {
@@ -218,6 +219,7 @@ snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
     memcpy(&(t->remote[0]), (u_char *)&(addr->sap_addr.itf), 2);
     memcpy(&(t->remote[2]), (u_char *)&(addr->sap_addr.vpi), 2);
     memcpy(&(t->remote[4]), (u_char *)&(addr->sap_addr.vci), 4);
+    t->remote_length = 8;
 
     if (connect(t->sock, (struct sockaddr *)addr,
 		sizeof(struct sockaddr_atmpvc)) < 0) {

@@ -299,6 +299,7 @@ snmp_transport		*snmp_unix_transport	(struct sockaddr_un *addr,
     }
     memcpy(t->remote, addr->sun_path, strlen(addr->sun_path));
     t->remote_length = strlen(addr->sun_path);
+
     rc = connect(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr_un));
     if (rc != 0) {
       DEBUGMSGTL(("snmp_unix_transport",
