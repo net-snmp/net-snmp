@@ -1,4 +1,4 @@
-#############################################################  -*- c -*-
+########################################################################
 ## generic include for XXX. Do not use directly.
 ##
 ## $Id$
@@ -16,7 +16,7 @@
     This code was generated based on the following assumptions or settings:
 
     1) The raw data for this table is UNSORTED.
-    @if $mfd_readme_verbose == 1@
+    @if $mfd_readme_verbose != 0@
 
        UNSORTED data is data that is not kept in the same order as the way
        SNMP expects the index(es) for the table to be kept. [It could very
@@ -32,7 +32,7 @@
     @end@
 
     2) The raw data for this table is EXTERNAL.
-    @if $mfd_readme_verbose == 1@
+    @if $mfd_readme_verbose != 0@
 
        EXTERNAL data is data that is owned by some other process,
        device, file or mechanism.  The agent must use some interface to
@@ -47,7 +47,7 @@
     @end@
 
     3) The raw data for this table is TRANSIENT.
-    @if $mfd_readme_verbose == 1@
+    @if $mfd_readme_verbose != 0@
 
        TRANSIENT data is data that may be overwritten by another funtion
        or process. For example, many OS functions return data in a
@@ -59,9 +59,24 @@
     @end@
 
 
-  XXX: insert master loop description here, possible including a state
-  transition diagram showing MFD master code on the left and user
-  function calls on the right?
+  The unsorted external data access code works by calling a few simple
+  functions to get the index value for each row. Once the agent determines
+  which row is needed to process an incoming request, another function
+  is called to retrieve the data for that row.
+
+  A simplified version of the pseudo-code looks like this:
+
+     ${table}_init_loop_ctx(loop)
+     ${table}_get_first(loop,data)
+     while( no_error ) {
+        if( best_match(data, key)
+           ${table}_save_position(loop,pos);
+        ${table}_get_next(loop,data)
+     }
+     ${table}_get_data(pos,data)
+     ${table}_cleanup_loop_ctx(loop)
+
+  We will talk about each individual step below.
 
 
 ########################################################################
@@ -69,23 +84,24 @@
   -----------------------------
     TODO : typedef ${table}_loop_ctx
     WHERE: ${table}_data_access.h
-    @if $mfd_readme_verbose == 1@
 
+    @if $mfd_readme_verbose != 0@
     Since the actual loop is in the MFD handler, a loop contex parameter
     is provided to help you keep track of where you are in between calls
     to functions that you wrote and the master MFD handler calls. The
     structure of this context is user defineable, and is defined in the
     file ${table}_data_access.h.
 
-    The funtion call are actually passed a reference to the loop
-    context, to allow the loop context to be allocated memory. Here are
-    some simple examples for various data formats.
-
-    EG, if your data is stored in a linked list, the obvious thing you
+    E.G., if your data is stored in a linked list, the obvious thing you
     want to know from one function call to the next is your current
     position in the linked list.  Thus the easiest context to use is a
     pointer within the linked list.  For an array, the current index to
     that array would be easiest.
+
+    The funtion calls are actually passed a reference to the loop
+    context, to allow the loop context to be allocated memory. Here are
+    some simple examples definitions for various data formats. These
+    definitions are used in examples later on.
 
       Linked list
       -----------
@@ -105,22 +121,18 @@
 
   @end@
 
-
 ########################################################################
   Initialization
   --------------
     TODO : Initialization
     FUNC : ${table}_init_data
     WHERE: ${table}_data_access.c
-    @if $mfd_readme_verbose == 1@
 
+    @if $mfd_readme_verbose != 0@
     The ${table}_init_data function will be called during startup to
     allow for any initialization needed for the data access routines.
 
-    XXX: registration location should be documented?
-
     @end@
-
 
 ########################################################################
   Preparing for the loop
@@ -129,7 +141,7 @@
     FUNC : ${table}_init_loop_ctx
     WHERE: ${table}_data_access.c
 
-    @if $mfd_readme_verbose == 1@
+    @if $mfd_readme_verbose != 0@
     Before the loop begins within the master MFD handler, your
     init_loop_ctx function will be called. The first parameter is the
     netsnmp_mfd_registration structure created during
@@ -143,23 +155,22 @@
 
       Linked list
       -----------
-          ref->itc = my_table_head_ptr;
+          ref->itr_ctx = my_table_head_ptr;
 
       Array
       -----
           /* instead of actually allocating memory, just use the pointer */
           /* as an integer */
-          (integer)(ref->itc) = 0;
+          (integer)(ref->itr_ctx) = 0;
 
       File
       ----
-          ref->itc = SNMP_MALLOC_TYPEDEF(${table}_loop_ctx);
+          ref->itr_ctx = SNMP_MALLOC_TYPEDEF(${table}_loop_ctx);
           /* error checking here */
-          ref->itc->file_name = (char*) reg->mfd_user_ctx;
-          ref->itc->f = fopen( ref->itc->file_name, "r+" );
+          ref->itr_ctx->file_name = (char*) reg->mfd_user_ctx;
+          ref->itr_ctx->f = fopen( ref->itr_ctx->file_name, "r+" );
 
   @end@
-
 
 ########################################################################
   The Loop
@@ -168,25 +179,34 @@
     FUNC : ${table}_get_first
     WHERE: ${table}_data_access.c
 
-    @if $mfd_readme_verbose == 1@
-    This function returns the first data item in the data set.
+    @if $mfd_readme_verbose != 0@
+    This function returns the first ${table}_data in the data set.
+    Note that during the loop, the only important thing is the indexes.
+    If access to your data is cheap/fast (e.g. you have a pointer to a
+    structure in memory), it would make sense to update the data here.
+    If, however, the accessing the data invovles more work (e.g. parsing
+    some other existing data, or peforming calculates to derive the data),
+    then you should limit yourslef to setting the indexes. Extracting the
+    can be put off until the desired row is found See the notes on
+    ${table}_get_data().
 
-    XXX: define "data item"
+    This function should update the table index (ctx_ref->ctx->tbl_idx)
+    values for the raw data (ctx_ref->ctx->data).
 
       Linked list
       -----------
-          ctx_ref->ctx->data = loop_ref->itc;
+          ctx_ref->ctx->data = loop_ref->itr_ctx;
 
       Array
       -----
           /* assuming registration has array of pointers */
-          ctx_ref->ctx->data = reg->mfd_user_ctx[(integer)(ref->itc)];
+          ctx_ref->ctx->data = reg->mfd_user_ctx[(integer)(ref->itr_ctx)];
 
       File
       ----
-          fgets(loop_ref->itc->line, sizeof(loop_ref->itc->line),
-                loop_ref->itc->f);
-          ctx_ref->ctx->data = loop_ref->itc->line;
+          fgets(loop_ref->itr_ctx->line, sizeof(loop_ref->itr_ctx->line),
+                loop_ref->itr_ctx->f);
+          ctx_ref->ctx->data = loop_ref->itr_ctx->line;
 
     @end@
 
@@ -194,28 +214,29 @@
     FUNC : ${table}_get_next
     WHERE: ${table}_data_access.c
 
-    @if $mfd_readme_verbose == 1@
-    This function returns the next data item in the data set.
+    @if $mfd_readme_verbose != 0@
+    This function returns the next data item in the data set. The same
+    caveat applies here as did above. The indexes are the important parts
+    during loop processing.
 
       Linked list
       -----------
-          loop_ref->itc = loop_ref->itc->next;
-          ctx_ref->ctx->data = loop_ref->itc;
+          loop_ref->itr_ctx = loop_ref->itr_ctx->next;
+          ctx_ref->ctx->data = loop_ref->itr_ctx;
 
       Array
       -----
-          ++((integer)(ref->itc));
+          ++((integer)(ref->itr_ctx));
           /* assuming registration has array of pointers */
-          ctx_ref->ctx->data = reg->mfd_user_ctx[(integer)(ref->itc)];
+          ctx_ref->ctx->data = reg->mfd_user_ctx[(integer)(ref->itr_ctx)];
 
       File
       ----
-          fgets(loop_ref->itc->line, sizeof(loop_ref->itc->line),
-                loop_ref->itc->f);
-          ctx_ref->ctx->data = loop_ref->itc->line;
+          fgets(loop_ref->itr_ctx->line, sizeof(loop_ref->itr_ctx->line),
+                loop_ref->itr_ctx->f);
+          ctx_ref->ctx->data = loop_ref->itr_ctx->line;
 
     @end@
-
 
 ########################################################################
   Updating the Index
@@ -230,15 +251,14 @@
 
     @end@
 
-
 ########################################################################
   Saving a position in the loop
   -----------------------------
     TODO : Saving a position in the loop
     FUNC : ${table}_save_position
     WHERE: ${table}_data_access.c
-    @if $mfd_readme_verbose == 1@
 
+    @if $mfd_readme_verbose != 0@
     During the loop, the save_position function will be called when the index
     for the index for the raw data is the best match for a particular request.
     All loop context data (loop_ref) should be duplicated and saved. If the
@@ -247,21 +267,19 @@
 
     @end@
 
-
 ########################################################################
   Returning Data For an Index
   ---------------------------
     TODO : copy transient raw data to generated structure
     FUNC : ${table}_get_data
     WHERE: ${table}_data_access.c
-    @if $mfd_readme_verbose == 1@
 
+    @if $mfd_readme_verbose != 0@
     After the loop has finished, and the best match for the requested index
     has been found, the get_data function will be called to get a new data
     context from the current data context.
 
     @end@
-
 
 ########################################################################
   Cleaning up after the loop
@@ -270,7 +288,7 @@
     FUNC : ${table}_cleanup_loop_ctx
     WHERE: ${table}_data_access.c
 
-    @if $mfd_readme_verbose == 1@
+    @if $mfd_readme_verbose != 0@
     After the loop ends, the cleanup_loop_ctx function will be
     called. The first parameter is the netsnmp_mfd_registration
     structure created during initialization. If you stored any temporary
@@ -291,9 +309,10 @@
 
       File
       ----
-          free(ref->itc);
+          free(ref->itr_ctx);
 
     @end@
+
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
