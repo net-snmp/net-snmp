@@ -18,25 +18,38 @@ getopts('hd:tR:u:l:v:a:A:x:X:p:c:t:r:',\%opts);
 
 usage() if ($#ARGV == -1 || $opts{'h'});
 
-$params .= ";ad_SNMP_Version=$opts{'v'}" if ($opts{'v'});
-$params .= ";ad_SNMP_SecName=$opts{'u'}" if ($opts{'u'});
-$params .= ";ad_SNMP_AuthProto=$opts{'a'}" if ($opts{'a'});
-$params .= ";ad_SNMP_AuthPass=$opts{'A'}" if ($opts{'A'});
-$params .= ";ad_SNMP_PrivProto=$opts{'x'}" if ($opts{'x'});
-$params .= ";ad_SNMP_PrivPass=$opts{'X'}" if ($opts{'X'});
-$params .= ";ad_SNMP_RemotePort=$opts{'p'}" if ($opts{'p'});
-$params .= ";ad_SNMP_Timeout=$opts{'t'}" if ($opts{'t'});
-$params .= ";ad_SNMP_Retries=$opts{'r'}" if ($opts{'r'});
-$params .= ";ad_SNMP_Community=$opts{'c'}" if ($opts{'c'});
-$params .= ";ad_SNMP_SecLevel=$opts{'l'}" if ($opts{'l'});
+my %parammap = {
+    'v' => 'Version',
+    'u' => 'SecName',
+    'a' => 'AuthProto',
+    'A' => 'AuthPass',
+    'x' => 'PrivProto',
+    'X' => 'PrivPass',
+    'p' => 'RemotePort',
+    't' => 'Timeout',
+    'r' => 'Retries',
+    'c' => 'Community',
+    'l' => 'SecLevel'
+    };
 
-$params .= ";ad_SNMP_DestHost=" . shift @ARGV;
+foreach my $x (keys(%opts)) {
+    if ($parammap{$x}) {
+	$params .= ";ad_SNMP_$parammap{$x}=$x";
+    }
+    push @sessparams,$parammap{$x},$x;
+}
+
+my $host = shift @ARGV;
+$params .= ";ad_SNMP_DestHost=" . $host;
+push @sessparms,'DestHost', $host;
 
 # connect to the DBI interface
 $AnyData::Storage::SNMP::debugre = $opts{'R'} if ($opts{'R'});
 ($dbh = DBI->connect("dbi:AnyData:ad_default=SNMP$params"))
     || die "\tConnection problem: $DBI::errstr\n";
 $AnyData::Storage::SNMP::debugre = $opts{'R'} if ($opts{'R'});
+
+$prompt = "snmpsh> ";
 
 if (-f "$ENV{'HOME'}/.snmpshrc") {
     open(I, "$ENV{'HOME'}/.snmpshrc");
@@ -48,15 +61,11 @@ if (-f "$ENV{'HOME'}/.snmpshrc") {
 
 if ($#ARGV >= 0) {
     # command line command
-    if ($ARGV[0] =~ /(select|delete|update|insert|show)/) {
-	doit(join(" ",@ARGV));
-    } else {
-	usage();
-    }
+    doit(join(" ",@ARGV));
 } else {
     # interactive shell
     $term = new Term::ReadLine 'snmpsh';
-    while($cmd = $term->readline("snmpsh> ")) {
+    while($cmd = $term->readline($prompt)) {
 	last if ($cmd eq "exit" || $cmd eq "quit" || $cmd eq "q");
 	doit($cmd, \%conf);
     }
@@ -64,6 +73,9 @@ if ($#ARGV >= 0) {
 
 sub doit {
     my $stmt = shift;
+    chomp($stmt);
+    next if ($stmt =~ /^\s*$/);
+    next if ($stmt =~ /^\s*#/);
     my ($name, $args) = ($stmt =~ /^(\w+)\s*(.*)$/);
 
     #eval
@@ -74,24 +86,38 @@ sub doit {
     }
 
     #define alias
-    if ($name eq "alias") {
+#    print "doing [$multi_alias]: $stmt\n";
+    if ($name eq "alias" || $multi_alias) {
+	if ($multi_alias) {
+	    if ($stmt =~ /^\s*\}\s*$/) {
+		$prompt = $oprompt;
+		$multi_alias = 0;
+		return;
+	    }
+	    push @{$aliases{$current_alias}},$stmt;
+	    return;
+	}
 	$stmt =~ s/^alias\s+//;
 	if ($args eq "") {
 	    foreach $i (sort keys(%aliases)) {
-		print "alias $i $aliases{$i}\n";
+		display_alias($i);
 	    }
 	    return;
 	}
 	($name, $args) = ($stmt =~ /^(\w+)\s*(.*)$/);
 	if ($args eq "") {
-	    if (exists $aliases{$name}) {
-		print "alias $name $aliases{$name}\n";
-	    } else {
-		print "no alias defined for \"$name\"\n";
-	    }
+	    display_alias($name);
 	    return;
 	}
 #	print "alias: $name $args\n";
+	if ($args eq "{") {
+	    $oprompt = $prompt;
+	    $prompt = "define $name> ";
+	    $current_alias = $name;
+	    $multi_alias = 1;
+	    $aliases{$name} = [];
+	    return;
+	}
 	$aliases{$name} = $args;
 	return;
     }
@@ -99,16 +125,37 @@ sub doit {
     #eval aliases
     while (exists $aliases{$name}) {
 #	print "modified: $stmt -> ";
-	my @ARGS = split(/\s+/,$args);
-	$stmt = $aliases{$name};
-#	print "$stmt -> ";
-	$stmt =~ s/\\(\d+)/$ARGS[$1-1]/g;
-#	print "$stmt\n";
-	($name, $args) = ($stmt =~ /^(\w+)\s*(.*)$/);
+	my $statements;
+	if (ref($aliases{$name}) eq "ARRAY") {
+	    $statements = $aliases{$name};
+	} else {
+	    $statements = [$aliases{$name}];
+	}
+	foreach my $stmt (@$statements) {
+	    my @ARGS = split(/\s+/,$args);
+	    #print "$stmt -> ";
+	    $stmt =~ s/\\(\d+)/$ARGS[$1-1]/g;
+#	    print "running $stmt\n";
+	    ($name, $args) = ($stmt =~ /^(\w+)\s*(.*)$/);
+	    doit($stmt);
+	}
+	return;
     }
 
-    chomp($stmt);
     $stmt =~ s/;*$//; # get rid of trailing semicolons
+    $stmt =~ s/^\s*//; # get rid of leading spaces
+
+    my $subfn;
+
+    if ($stmt =~ s/^printf\s+(\".*\")\s*(.*)/$2/) {
+	if ($2 eq "") {
+	    print eval $1;
+	    return;
+	}
+	$subfn = \&my_printf;
+	$stmt = $2;
+	$printfmt = $1;
+    }
 
     # special show columns statement
     if ($stmt =~ /^show columns from (\w+)$/) {
@@ -133,30 +180,106 @@ sub doit {
     }
 
     # we have an SQL statement.  process it.
-    $sth = $dbh->prepare($stmt);
-    $sth->execute();
-    if ($stmt =~ /^select/) {
-	my $table;
-	while($row = $sth->fetchrow_arrayref) {
-	    if ($opts{'t'}) {
-		print STDERR join($opts{'d'},@$row),"\n";
-	    } elsif (!$table) {
-		$table = Text::FormatTable->new('|r' x ($#$row+1) . "|");
+    if ($stmt =~ /^(select|insert|update|delete)/) {
+	$sth = $dbh->prepare($stmt);
+	$sth->execute();
+	if ($stmt =~ /^select/) {
+	    my $table;
+	    while($row = $sth->fetchrow_arrayref) {
+		if (ref($subfn) eq "CODE") {
+#		print "fmt: $printfmt\n";
+#		print "args:",join(",",@$row),"\n";
+		    &$subfn($printfmt,@$row);
+		} elsif ($opts{'t'}) {
+		    print STDERR join($opts{'d'},@$row),"\n";
+		} elsif (!$table) {
+		    $table = Text::FormatTable->new('|r' x ($#$row+1) . "|");
+		    $table->rule('-');
+		    $table->head(@{$sth->{NAME}});
+		    $table->rule('-');
+		    $table->row(@$row);
+		} else {
+		    $table->row(@$row);
+		}
+	    }
+	    if ($table) {
 		$table->rule('-');
-		$table->head(@{$sth->{NAME}});
-		$table->rule('-');
-		$table->row(@$row);
-	    } else {
-		$table->row(@$row);
+		print $table->render();
 	    }
 	}
-	if ($table) {
-	    $table->rule('-');
-	    print $table->render();
-	}
+	$sth->finish();
+	return;
     }
-    $sth->finish();
+
+    # retriaeve just one variable and display it
+    if ($stmt =~ /^(get|)\s*([^\s]+)\s*[^=]/) {
+	my $sess = make_session();
+	if ($sess) {
+	    my @results = split(/[,\s]+/,$stmt);
+	    my $resultsv = new SNMP::VarList();
+	    # expression stolen from the main perl SNMP module
+	    map {  my ($tag, $iid) = 
+		       (/^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+		   push @$resultsv, [$tag, $iid] } @results;
+	    $sess->get($resultsv)  || 
+		print STDERR "opps: $sess->{ErrorNum} $sess->{ErrString}\n";
+  	    @results = ();
+	    map { push @results, $_->[2] } @$resultsv;
+	    if (ref($subfn) eq "CODE") {
+		&$subfn($printfmt,@results);
+	    } else {
+		print join(" ", @results),"\n";
+	    }
+	} else {
+	    print STDERR "could not establish a SNMP session to $host\n";
+	}
+	return;
+    }
+
+    # set something
+    if ($stmt =~ /^(set|)\s*([^\s]+)\s=\s(.*)$/) {
+	my $sess = make_session();
+	if ($sess) {
+	    $sess->set([$2,undef,$1]) || 
+		print STDERR "opps: $sess->{ErrorNum} $sess->{ErrString}\n";
+	} else {
+	    print STDERR "could not establish a SNMP session to $host\n";
+	}
+	return;
+    }
+
 }
+
+sub my_printf {
+    my @args = @_;
+#    print "begin: $args[0]\n";
+    $args[0] = eval $args[0];
+#    print "result: $args[0]\n";
+    printf(@args);
+}
+
+sub display_alias {
+    my $name = shift;
+    if (exists $aliases{$name}) {
+	if (ref($aliases{$name}) eq "ARRAY") {
+	    print "alias $name {\n";
+	    map { print "  $_\n"; } @{$aliases{$name}};
+	    print "}\n";
+	} else {
+	    print "alias $name $aliases{$name}\n";
+	}
+    } else {
+	print "no alias defined for \"$name\"\n";
+    }
+}
+
+sub make_session {
+    if (!$sess) {
+	$sess = new SNMP::Session(@sessparms);
+    }
+    return $sess;
+}
+
 
 sub usage {
     print STDERR "
