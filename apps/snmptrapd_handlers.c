@@ -843,12 +843,18 @@ int   forward_handler( netsnmp_pdu           *pdu,
 {
     netsnmp_session session, *ss;
     netsnmp_pdu *pdu2;
+    char buf[BUFSIZ], *cp;
 
     DEBUGMSGTL(( "snmptrapd", "forward_handler (%s)\n", handler->token));
 
     snmp_sess_init( &session );
-    session.peername = handler->token;
-    session.remote_port = SNMP_TRAP_PORT;
+    if (strchr( handler->token, ':') == NULL) {
+        snprintf( buf, BUFSIZ, "%s:%d", handler->token, SNMP_TRAP_PORT);
+        cp = buf;
+    } else {
+        cp = handler->token;
+    }
+    session.peername = cp;
     session.version  = pdu->version;
     ss = snmp_open( &session );
 
