@@ -289,8 +289,8 @@ void
 usage(void)
 {
 #ifdef WIN32SERVICE
-    fprintf(stderr, "\nUsage:  snmptrapd [-register] [OPTIONS] [LISTENING ADDRESSES]");
-    fprintf(stderr, "\n        snmptrapd -unregister");
+    fprintf(stderr, "\nUsage:  snmptrapd [-register] [-quiet] [OPTIONS] [LISTENING ADDRESSES]");
+    fprintf(stderr, "\n        snmptrapd [-unregister] [-quiet]");
 #else
     fprintf(stderr, "Usage: snmptrapd [OPTIONS] [LISTENING ADDRESSES]\n");
 #endif
@@ -323,12 +323,14 @@ usage(void)
 #endif
 #ifdef WIN32SERVICE
     fprintf(stderr, "  -register\t\tregister as a Windows service\n");
+    fprintf(stderr, "  \t\t\t  (followed by -quiet to prevent message popups)\n");
     fprintf(stderr, "  \t\t\t  (followed by the startup parameter list)\n");
     fprintf(stderr, "  \t\t\t  Note that some parameters are not relevant when running as a service\n");
 #endif
     fprintf(stderr, "  -t\t\t\tPrevent traps from being logged to syslog\n");
 #ifdef WIN32SERVICE
     fprintf(stderr, "  -unregister\t\tunregister as a Windows service\n");
+    fprintf(stderr, "  \t\t\t  (followed -quiet to prevent message popups)\n");
 #endif
     fprintf(stderr, "  -v, --version\t\tdisplay version information\n");
     fprintf(stderr,
@@ -1158,9 +1160,10 @@ _tmain(int argc, TCHAR * argv[])
 #endif
     InputParams     InputOptions;
 
-
     int             nRunType = RUN_AS_CONSOLE;
-    nRunType = ParseCmdLineForServiceOption(argc, argv);
+    int             quiet = 0;
+
+    nRunType = ParseCmdLineForServiceOption(argc, argv, &quiet);
 
     switch (nRunType) {
     case REGISTER_SERVICE:
@@ -1169,16 +1172,15 @@ _tmain(int argc, TCHAR * argv[])
          */
         InputOptions.Argc = argc;
         InputOptions.Argv = argv;
-        RegisterService(lpszServiceName,
+        exit (RegisterService(lpszServiceName,
                         lpszServiceDisplayName,
-                        lpszServiceDescription, &InputOptions);
-        exit(0);
+                        lpszServiceDescription, &InputOptions, quiet));
         break;
     case UN_REGISTER_SERVICE:
         /*
          * Unregister service 
          */
-        UnregisterService(lpszServiceName);
+        exit (UnregisterService(lpszServiceName, quiet));
         exit(0);
         break;
     case RUN_AS_SERVICE:

@@ -22,6 +22,16 @@ extern "C"
 #define RUN_AS_SERVICE 2
 #define RUN_AS_CONSOLE 3
 
+
+  /*
+   * Error levels returned when registering or unregistering the service
+  */
+#define SERVICE_ERROR_NONE 0            
+#define SERVICE_ERROR_SCM_OPEN 1                /* Can not open SCM */
+#define SERVICE_ERROR_CREATE_SERVICE 2          /* Can not create service */
+#define SERVICE_ERROR_CREATE_REGISTRY_ENTRIES 3 /* Can not create registry entries */
+#define SERVICE_ERROR_OPEN_SERVICE 4            /* Can not open service (service does not exist) */
+ 
   /*
    * Define Message catalog ID
    * MessageId: DISPLAY_MSG
@@ -60,19 +70,19 @@ extern "C"
   /*
    * To register application as windows service with SCM 
    */
-  VOID RegisterService (LPCTSTR lpszServiceName,
+  int RegisterService (LPCTSTR lpszServiceName,
 			LPCTSTR lpszServiceDisplayName,
-			LPCTSTR lpszServiceDescription, InputParams * StartUpArg);
+			LPCTSTR lpszServiceDescription, InputParams * StartUpArg, int quiet);
 
   /*
    * To unregister service 
    */
-  VOID UnregisterService (LPCSTR lpszServiceName);
+  int UnregisterService (LPCSTR lpszServiceName, int quiet);
 
   /*
    * To parse command line for startup option 
    */
-  INT ParseCmdLineForServiceOption (INT argc, TCHAR * argv[]);
+  INT ParseCmdLineForServiceOption (INT argc, TCHAR * argv[], int *quiet);
 
   /*
    * To write to windows event log 
@@ -82,7 +92,7 @@ extern "C"
   /*
    * To display generic windows error 
    */
-  VOID DisplayError (LPCTSTR pszTitle);
+  VOID DisplayError (LPCTSTR pszTitle, int quite);
 
   /*
    * To update windows service status to SCM 

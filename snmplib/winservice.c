@@ -90,10 +90,10 @@ static VOID (*StopFunction) (VOID) = 0L;
      * Input - Service Name, Service Display Name,Service Description and
      * Service startup arguments
      */
-VOID
+int
 RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 		 LPCTSTR lpszServiceDescription,
-		 InputParams * StartUpArg) /* Startup argument to the service */
+		 InputParams * StartUpArg, int quiet) /* Startup argument to the service */
 {
   TCHAR szServicePath[MAX_PATH];	/* To hold module File name */
   TCHAR MsgErrorString[MAX_STR_SIZE];	/* Message or Error string */
@@ -107,6 +107,7 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
   HKEY hParamKey = NULL;	/* To store startup parameters */
   DWORD dwData;			/* Type of logging supported */
   DWORD i, j;			/* Loop variables */
+  int exitStatus = 0;
   GetModuleFileName (NULL, szServicePath, MAX_PATH);
   TRY
   {
@@ -117,7 +118,8 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
     hSCManager = OpenSCManager (NULL, NULL, SC_MANAGER_CREATE_SERVICE);
     if (hSCManager == NULL)
       {
-	DisplayError (_T ("Can't open SCM"));
+	DisplayError (_T ("Can't open SCM"), quiet);
+        exitStatus = SERVICE_ERROR_SCM_OPEN;
 	LEAVE;
       }
 
@@ -141,7 +143,8 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
       {
 	_stprintf (MsgErrorString, "%s %s",
 		   _T ("Can't Create Service"), lpszServiceDisplayName);
-	DisplayError (MsgErrorString);
+	DisplayError (MsgErrorString, quiet);
+        exitStatus = SERVICE_ERROR_CREATE_SERVICE;
 	LEAVE;
       }
 
@@ -161,7 +164,8 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
       {
 	_stprintf (MsgErrorString, "%s %s",
 		   _T ("Unable to create registry entries"), lpszServiceDisplayName);
-	DisplayError (MsgErrorString);
+	DisplayError (MsgErrorString, quiet);
+        exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
 	LEAVE;
       }
 
@@ -205,7 +209,8 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 	    _stprintf (MsgErrorString, "%s %s",
 		       _T ("Unable to create registry entries"),
 		       lpszServiceDisplayName);
-	    DisplayError (MsgErrorString);
+            DisplayError (MsgErrorString, quiet);
+            exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
 	    LEAVE;
 	  }
 
@@ -222,7 +227,8 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 		_stprintf (MsgErrorString, "%s %s",
 			   _T ("Unable to create registry entries"),
 			   lpszServiceDisplayName);
-		DisplayError (MsgErrorString);
+		DisplayError (MsgErrorString, quiet);
+                exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
 		LEAVE;
 	      };
 	  }
@@ -243,8 +249,9 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 		_stprintf (MsgErrorString, "%s %s",
 			   _T ("Unable to create registry entries"),
 			   lpszServiceDisplayName);
-		DisplayError (MsgErrorString);
-		LEAVE;
+		DisplayError (MsgErrorString, quiet);
+                exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
+                LEAVE;
 	      }
 
 	    /*
@@ -254,7 +261,12 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 	    /*
 	     * Loop through arguments 
 	     */
-	    for (i = 2, j = 1; i < StartUpArg->Argc; i++, j++)
+            if (quiet) /* Make sure we don't store -quiet arg */
+              i = 3;
+            else
+              i = 2;
+
+	    for (j = 1; i < StartUpArg->Argc; i++, j++)
 	      {
 		_stprintf (szRegKey, "%s%d", _T ("Param"), j);
 
@@ -270,7 +282,8 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
 		    _stprintf (MsgErrorString, "%s %s",
 			       _T ("Unable to create registry entries"),
 			       lpszServiceDisplayName);
-		    DisplayError (MsgErrorString);
+		    DisplayError (MsgErrorString, quiet);
+                    exitStatus = SERVICE_ERROR_CREATE_REGISTRY_ENTRIES;
 		    LEAVE;
 		  };
 	      }
@@ -310,14 +323,15 @@ RegisterService (LPCTSTR lpszServiceName, LPCTSTR lpszServiceDisplayName,
     if (hParamKey)
       RegCloseKey (hParamKey);
   }
+  return (exitStatus);
 }
 
     /*
      * Unregister the service with the  Windows SCM 
      * Input - ServiceName
      */
-VOID
-UnregisterService (LPCSTR lpszServiceName)
+int
+UnregisterService (LPCSTR lpszServiceName, int quiet)
 {
   TCHAR MsgErrorString[MAX_STR_SIZE];	/* Message or Error string */
   SC_HANDLE hSCManager = NULL;	/* SCM handle */
@@ -326,6 +340,7 @@ UnregisterService (LPCSTR lpszServiceName)
   TCHAR szRegAppLogKey[] =
     "SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\";
   TCHAR szRegKey[512];
+  int exitStatus = 0;
 /*  HKEY hKey = NULL;		?* Key to registry entry */
   TRY
   {
@@ -335,7 +350,8 @@ UnregisterService (LPCSTR lpszServiceName)
     hSCManager = OpenSCManager (NULL, NULL, SC_MANAGER_CREATE_SERVICE);
     if (hSCManager == NULL)
       {
-	MessageBox (NULL, _T ("Can't open SCM"), g_szAppName, MB_ICONHAND);
+        DisplayError (_T ("Can't open SCM"), quiet);
+        exitStatus = SERVICE_ERROR_SCM_OPEN;       
 	LEAVE;
       }
 
@@ -347,7 +363,8 @@ UnregisterService (LPCSTR lpszServiceName)
       {
 	_stprintf (MsgErrorString, "%s %s", _T ("Can't open service"),
 		   lpszServiceName);
-	MessageBox (NULL, MsgErrorString, g_szAppName, MB_ICONHAND);
+	DisplayError (MsgErrorString, quiet);
+        exitStatus = SERVICE_ERROR_OPEN_SERVICE;       
 	LEAVE;
       }
 
@@ -403,6 +420,7 @@ UnregisterService (LPCSTR lpszServiceName)
     if (hSCManager)
       CloseServiceHandle (hSCManager);
   }
+  return (exitStatus);
 }
 
     /*
@@ -447,9 +465,10 @@ WriteToEventLog (WORD wType, LPCTSTR pszFormat, ...)
      * Return: Type indicating the option specified
      */
 INT
-ParseCmdLineForServiceOption (int argc, TCHAR * argv[])
+ParseCmdLineForServiceOption (int argc, TCHAR * argv[], int *quiet)
 {
   int nReturn = RUN_AS_CONSOLE;	/* Defualted to run as console */
+
   if (argc >= 2)
     {
 
@@ -471,6 +490,18 @@ ParseCmdLineForServiceOption (int argc, TCHAR * argv[])
 	  nReturn = RUN_AS_SERVICE;
 	}
     }
+
+  if (argc >= 3)
+  {
+    /*
+     * third argument present 
+     */
+    if (lstrcmpi (_T ("-quiet"), argv[2]) == 0)
+    {
+      *quiet = 1;	
+    }
+  }
+  
   return nReturn;
 }
 
@@ -479,7 +510,7 @@ ParseCmdLineForServiceOption (int argc, TCHAR * argv[])
      * message, along with a title passed as a parameter.
      */
 VOID
-DisplayError (LPCTSTR pszTitle)
+DisplayError (LPCTSTR pszTitle, int quiet)
 {
   LPVOID pErrorMsg;
 
@@ -497,7 +528,12 @@ DisplayError (LPCTSTR pszTitle)
 
   else
     {
-      MessageBox (NULL, pErrorMsg, pszTitle, MB_ICONHAND);
+      if (quiet) {
+        fprintf(stderr,"%s\n",pErrorMsg);
+      }
+      else {
+        MessageBox (NULL, pErrorMsg, pszTitle, MB_ICONHAND);
+      }
     }
   LocalFree (pErrorMsg);
 }
