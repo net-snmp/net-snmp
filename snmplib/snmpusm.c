@@ -3076,7 +3076,7 @@ usm_set_password(const char *token, char *line)
   size_t	  engineIDLen;
   struct usmUser *user;
 
-  cp = copy_word(line, nameBuf);
+  cp = copy_nword(line, nameBuf, sizeof(nameBuf));
   if (cp == NULL) {
     config_perror("invalid name specifier");
     return;

@@ -367,7 +367,7 @@ void read_config(const char *filename,
       /* check blank line or # comment */
       if ((cptr = skip_white(cptr)))
 	{
-          cptr = copy_word(cptr,token);
+          cptr = copy_nword(cptr,token, sizeof(token));
           if (token[0] == '[') {
               token[strlen(token)-1] = '\0';
               lptr = read_config_get_handlers(&token[1]);
@@ -387,7 +387,7 @@ void read_config(const char *filename,
                   continue;
               } else {
                   /* the rest of this line only applies. */
-                  cptr = copy_word(cptr,token);
+                  cptr = copy_nword(cptr,token, sizeof(token));
               }
           } else {
               lptr = line_handler;
@@ -923,27 +923,41 @@ char *skip_token(char *ptr)
   return (ptr);
 }
 
-/* copy_word
-   copies the next 'token' from 'from' into 'to'.
+/* copy_nword
+   copies the next 'token' from 'from' into 'to', maximum len-1 characters
    currently a token is anything seperate by white space
    or within quotes (double or single) (i.e. "the red rose" 
    is one token, \"the red rose\" is three tokens)
    a '\' character will allow a quote character to be treated
    as a regular character 
    It returns a pointer to first non-white space after the end of the token
-   being copied or to 0 if we reach the end.*/
+   being copied or to 0 if we reach the end/
+   Note: partially copied words (greater than len) still returns a !NULL ptr
+   Note: partially copied words are, however, null terminated
+ */
 
-char *copy_word(char *from, char *to)
+char *copy_nword(char *from, char *to, int len)
 {
   char quote;
   if ( (*from == '\"') || (*from =='\'') ){
     quote = *(from++);
     while ( (*from != quote) && (*from != 0) ) {
       if ((*from == '\\') && (*(from+1) != 0)) {
-	*to++ = *(from+1);
+        if ( len > 0 ) { /* don't copy beyond len bytes */
+	  *to++ = *(from+1);
+          if ( --len == 0 )
+	    *(to-1) = '\0';  /* null protect the last spot */
+	}
 	from = from +2;
+      } else {
+        if ( len > 0 ) { /* don't copy beyond len bytes */
+	  *to++ = *from++;
+          if ( --len == 0 )
+	    *(to-1) = '\0';  /* null protect the last spot */
+	}
+        else
+            from++;
       }
-      else  *to++ = *from++;
     }
     if (*from == 0) {
       DEBUGMSGTL(("read_config_copy_word",
@@ -953,16 +967,40 @@ char *copy_word(char *from, char *to)
   else {
     while (*from != 0 && !isspace(*from)) {
       if ((*from == '\\') && (*(from+1) != 0)) {
-	*to++ = *(from+1);
+        if ( len > 0 ) { /* don't copy beyond len bytes */
+	  *to++ = *(from+1);
+          if ( --len == 0 )
+	    *(to-1) = '\0';  /* null protect the last spot */
+	}
 	from = from +2;
+      } else {
+        if ( len > 0 ) { /* don't copy beyond len bytes */
+	  *to++ = *from++;
+          if ( --len == 0 )
+	    *(to-1) = '\0';  /* null protect the last spot */
+	}
+        else
+            from++;
       }
-      else  *to++ = *from++;
     }
   }
-  *to = 0;
+  if ( len > 0)
+      *to = 0;
   from = skip_white(from);
   return(from);
-}  /* copy_word */
+}  /* copy_nword */
+
+
+static int have_warned = 0;
+char *copy_word(char *from, char *to)
+{
+  if (!have_warned) {
+    snmp_log(LOG_INFO, "copy_word() called.  Use copy_nword() instead.\n");
+    have_warned = 1;
+  }
+  return copy_nword(from, to, SPRINT_MAX_LEN);
+}
+
 
 /* read_config_save_octet_string(): saves an octet string as a length
    followed by a string of hex */
@@ -1047,7 +1085,7 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
     /* malloc string space if needed (including NULL terminator) */
     if (*str == NULL) {
       char buf[SNMP_MAXBUF];
-      readfrom = copy_word(readfrom, buf);
+      readfrom = copy_nword(readfrom, buf, sizeof(buf));
 
       *len = strlen(buf);
       if (*len > 0 && ((cptr = (u_char *) malloc(*len + 1)) == NULL))
@@ -1056,7 +1094,7 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
       if (cptr)
         memcpy(cptr, buf, (*len+1));
     } else {
-      readfrom = copy_word(readfrom, (char *)*str);
+      readfrom = copy_nword(readfrom, (char *)*str, *len);
     }
   }
 
@@ -1101,7 +1139,7 @@ char *read_config_read_objid(char *readfrom, oid **objid, size_t *len) {
   } else {
       /* qualify the string for read_objid */
       char buf[SPRINT_MAX_LEN];
-      copy_word(readfrom, buf);
+      copy_nword(readfrom, buf, sizeof(buf));
 
       if (!read_objid(buf, *objid, len)) {
         DEBUGMSGTL(("read_config_read_objid","Invalid OID"));

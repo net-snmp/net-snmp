@@ -210,7 +210,7 @@ ds_handle_config(const char *token, char *line) {
 
       case ASN_OCTET_STR:
         if (*line == '"') {
-            copy_word(line, buf);
+            copy_nword(line, buf, sizeof(buf));
             ds_set_string(drsp->storeid, drsp->which, buf);
         } else {
             ds_set_string(drsp->storeid, drsp->which, line);

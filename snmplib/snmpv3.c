@@ -422,12 +422,12 @@ usm_parse_create_usmUser(const char *token, char *line) {
   newuser = usm_create_user();
 
   /* READ: Security Name */
-  cp = copy_word(line, buf);
+  cp = copy_nword(line, buf, sizeof(buf));
 
   /* might be a -e ENGINEID argument */
   if (strcmp(buf,"-e") == 0) {
       /* get the specified engineid from the line */
-      cp = copy_word(cp, buf);
+      cp = copy_nword(cp, buf, sizeof(buf));
       ret2 = hex_to_binary(buf, (u_char *)buf2);
       if (ret2 <= 0) {
           usm_free_user(newuser);
@@ -436,7 +436,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
       }
       newuser->engineIDLen = ret2;
       memdup(&newuser->engineID, (u_char *)buf2, newuser->engineIDLen);
-      cp = copy_word(cp, buf);
+      cp = copy_nword(cp, buf, sizeof(buf));
   } else {
       newuser->engineID = snmpv3_generate_engineID(&ret);
       if ( ret == 0 ) {
@@ -473,7 +473,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
     usm_free_user(newuser);
     return;
   }
-  cp = copy_word(cp, buf);
+  cp = copy_nword(cp, buf, sizeof(buf));
   /* And turn it into a localized key */
   ret = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
 		    (u_char *)buf, strlen(buf),
@@ -516,7 +516,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
     memdup(&newuser->privKey, newuser->authKey, newuser->authKeyLen);
     newuser->privKeyLen = newuser->authKeyLen;
   } else {
-    cp = copy_word(cp, buf);
+    cp = copy_nword(cp, buf, sizeof(buf));
     /* And turn it into a localized key */
     ret = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
                       (u_char *)buf, strlen(buf),
