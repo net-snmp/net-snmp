@@ -561,6 +561,7 @@ register_mib_table_row(const char *moduleName,
   oid ubound = 0;
   int rc, x;
   u_char *v;
+  size_t saved_namelen = 0;
 
   for(x = 0; x < numvars; x++) {
     struct variable *vr = (struct variable *)((char *)var+(x*varsize));
@@ -612,6 +613,7 @@ register_mib_table_row(const char *moduleName,
     memcpy(subtree->label, moduleName, strlen(moduleName)+1);
 
     /* reset variable namelen */
+    saved_namelen = vr->namelen;
     vr->namelen = 0;
 
     if (var) {
@@ -640,6 +642,7 @@ register_mib_table_row(const char *moduleName,
     DEBUGMSGOID(("register_mib", subtree->name, subtree->namelen));
     DEBUGMSG(("register_mib", ")\n"));
     rc = load_subtree(subtree);
+    vr->namelen = saved_namelen;
     if ((rc != MIB_REGISTERED_OK)) {
       DEBUGMSGTL(("register_mib", "register_mib_table_row: load failed (%d)\n",
 		  rc));
