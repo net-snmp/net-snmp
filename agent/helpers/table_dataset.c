@@ -575,7 +575,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                 }
             } else {
                 /*
-                 * now column definition found.  error out 
+                 * no column definition found.  error out 
                  */
                 netsnmp_set_request_error(reqinfo, request,
                                           SNMP_ERR_NOTWRITABLE);
@@ -668,10 +668,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
              */
             if (newrowstash->state != STATE_ACTION) {
                 newrowstash->state = STATE_ACTION;
-                if (newrowstash->deleted) {
-                    if (row)
-                        netsnmp_table_dataset_remove_row(datatable, row);
-                } else if (newrowstash->created) {
+		if (newrowstash->created) {
                     netsnmp_table_dataset_add_row(datatable, newrow);
                 } else {
                     netsnmp_table_dataset_replace_row(datatable,
@@ -686,18 +683,14 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
              */
             if (newrowstash->state != STATE_UNDO) {
                 newrowstash->state = STATE_UNDO;
-                if (newrowstash->deleted) {
-                    if (row)
-                        netsnmp_table_dataset_remove_and_delete_row
-                            (datatable, row);
-                } else if (newrowstash->created) {
-                    netsnmp_table_dataset_add_row(datatable, row);
+                if (newrowstash->created) {
+                    netsnmp_table_dataset_remove_and_delete_row(datatable, newrow);
                 } else {
                     netsnmp_table_dataset_replace_row(datatable,
                                                       newrow, row);
+                    netsnmp_table_dataset_delete_row(newrow);
                 }
             }
-            netsnmp_table_dataset_delete_row(newrow);
             break;
 
         case MODE_SET_COMMIT:
@@ -705,7 +698,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                 newrowstash->state = STATE_COMMIT;
                 netsnmp_table_dataset_delete_row(row);
                 if (newrowstash->deleted) {
-                    netsnmp_table_dataset_delete_row(newrow);
+                    netsnmp_table_dataset_remove_and_delete_row(datatable, newrow);
                 }
             }
             break;
