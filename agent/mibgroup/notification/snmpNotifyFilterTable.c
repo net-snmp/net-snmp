@@ -535,17 +535,6 @@ write_snmpNotifyFilterRowStatus(int      action,
             if (set_value == RS_ACTIVE || set_value == RS_NOTINSERVICE)
               return SNMP_ERR_INCONSISTENTVALUE;
     
-
-            /* destroying a non-existent row is actually legal */
-            if (set_value == RS_DESTROY) {
-              return SNMP_ERR_NOERROR;
-            }
-
-
-            /* illegal creation values */
-            if (set_value == RS_ACTIVE || set_value == RS_NOTINSERVICE) {
-              return SNMP_ERR_INCONSISTENTVALUE;
-            }
           } else {
             /* row exists.  Check for a valid state change */
             if (set_value == RS_CREATEANDGO || set_value == RS_CREATEANDWAIT) {
@@ -561,7 +550,8 @@ write_snmpNotifyFilterRowStatus(int      action,
 
         case RESERVE2:
           /* memory reseveration, final preparation... */
-          if (StorageTmp == NULL) {
+          if (StorageTmp == NULL &&
+              (set_value == RS_CREATEANDGO || set_value == RS_CREATEANDWAIT)) {
             /* creation */
             vars = NULL;
 
@@ -612,7 +602,9 @@ write_snmpNotifyFilterRowStatus(int      action,
              the UNDO case */
              
 
-             if (StorageTmp == NULL) {
+             if (StorageTmp == NULL&&
+                 (set_value == RS_CREATEANDGO ||
+                  set_value == RS_CREATEANDWAIT)) {
                /* row creation, so add it */
                if (StorageNew != NULL)
                  snmpNotifyFilterTable_add(StorageNew);
@@ -623,12 +615,14 @@ write_snmpNotifyFilterRowStatus(int      action,
                StorageTmp->snmpNotifyFilterRowStatus = *((long *) var_val);
              } else {
                /* destroy...  extract it for now */
-               hciptr =
-                 header_complex_find_entry(snmpNotifyFilterTableStorage,
-                                           StorageTmp);
-               StorageDel = (struct snmpNotifyFilterTable_data *)
-                 header_complex_extract_entry((struct header_complex_index **)&snmpNotifyFilterTableStorage,
-                                              hciptr);
+                 if (StorageTmp) {
+                     hciptr =
+                         header_complex_find_entry(snmpNotifyFilterTableStorage,
+                                                   StorageTmp);
+                     StorageDel = (struct snmpNotifyFilterTable_data *)
+                         header_complex_extract_entry((struct header_complex_index **)&snmpNotifyFilterTableStorage,
+                                                      hciptr);
+                 }
              }
           break;
 
@@ -637,11 +631,13 @@ write_snmpNotifyFilterRowStatus(int      action,
 
         case UNDO:
              /* Back out any changes made in the ACTION case */
-             if (StorageTmp == NULL) {
+             if (StorageTmp == NULL &&
+                 (set_value == RS_CREATEANDGO ||
+                  set_value == RS_CREATEANDWAIT)) {
                /* row creation, so remove it again */
                hciptr =
                  header_complex_find_entry(snmpNotifyFilterTableStorage,
-                                           StorageTmp);
+                                           StorageNew);
                StorageDel = (struct snmpNotifyFilterTable_data *)
                  header_complex_extract_entry((struct header_complex_index **)&snmpNotifyFilterTableStorage,
                                               hciptr);
@@ -649,7 +645,8 @@ write_snmpNotifyFilterRowStatus(int      action,
              } else if (StorageDel != NULL) {
                /* row deletion, so add it again */
                snmpNotifyFilterTable_add(StorageDel);
-             } else {
+               StorageDel = NULL;
+             } else if (set_value != RS_DESTROY) {
                StorageTmp->snmpNotifyFilterRowStatus = old_value;
              }
           break;

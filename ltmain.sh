@@ -56,7 +56,7 @@ modename="$progname"
 PROGRAM=ltmain.sh
 PACKAGE=libtool
 VERSION=1.4
-TIMESTAMP=" (1.922 2001/04/25 00:05:37)"
+TIMESTAMP=" (1.920 2001/04/24 23:26:18)"
 
 default_mode=
 help="Try \`$progname --help' for more information."
@@ -4284,11 +4284,7 @@ relink_command=\"$relink_command\""
 	    if test "$finalize" = yes && test -z "$run"; then
 	      tmpdir="/tmp"
 	      test -n "$TMPDIR" && tmpdir="$TMPDIR"
-              tmpdir=`mktemp -d $tmpdir/libtool-XXXXXX 2> /dev/null`
-              if test $? = 0 ; then :
-              else
-                tmpdir="$tmpdir/libtool-$$"
-              fi
+	      tmpdir="$tmpdir/libtool-$$"
 	      if $mkdir -p "$tmpdir" && chmod 700 "$tmpdir"; then :
 	      else
 		$echo "$modename: error: cannot create temporary directory \`$tmpdir'" 1>&2

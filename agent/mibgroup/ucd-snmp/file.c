@@ -38,6 +38,10 @@
 #include "agent_read_config.h"
 #include "util_funcs.h"
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #define MAXFILE   20
 
 struct filestat fileTable[MAXFILE];

@@ -187,7 +187,6 @@ static void optProc(int argc, char *const *argv, int opt)
 		break;
 	    default:
 		fprintf(stderr, "Bad -C options: %c\n", opt);
-		usage();
 		exit(1);
 	    }
 	}
@@ -546,7 +545,10 @@ int main(int argc, char *argv[])
 	  } else {
 	    printvalue = (float)value;
 	    sprintf(valueStr, " /%d sec: ", period);
-            printU64(valueStr+strlen(valueStr), &c64value);
+	    if (vip->type == ASN_COUNTER64)
+	      printU64(valueStr+strlen(valueStr), &c64value);
+	    else
+	      sprintf(valueStr+strlen(valueStr), "%u", value);
 	  }
 
 	  if (!peaks){

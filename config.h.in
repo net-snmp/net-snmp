@@ -289,6 +289,9 @@
 /* Define if you have the setgid function.  */
 #undef HAVE_SETGID
 
+/* Define if you have the setgroups function.  */
+#undef HAVE_SETGROUPS
+
 /* Define if you have the setitimer function.  */
 #undef HAVE_SETITIMER
 
@@ -480,6 +483,9 @@
 
 /* Define if you have the <netinet/ip6.h> header file.  */
 #undef HAVE_NETINET_IP6_H
+
+/* Define if you have the <netinet/ip_icmp.h> header file.  */
+#undef HAVE_NETINET_IP_ICMP_H
 
 /* Define if you have the <netinet/ip_var.h> header file.  */
 #undef HAVE_NETINET_IP_VAR_H
@@ -735,6 +741,9 @@
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
+
+/* Define if you have the <utmpx.h> header file.  */
+#undef HAVE_UTMPX_H
 
 /* Define if you have the <utsname.h> header file.  */
 #undef HAVE_UTSNAME_H
@@ -1170,6 +1179,9 @@
 
 /* define this if we're using the new MIT crypto API */
 #undef MIT_NEW_CRYPTO
+
+/* define if you want to build with reentrant/threaded code */
+#undef NS_REENTRANT
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)

@@ -95,6 +95,9 @@ SOFTWARE.
 #if HAVE_LIMITS_H
 #include <limits.h>
 #endif
+#if HAVE_PWD_H
+#include <pwd.h>
+#endif
 
 #ifndef PATH_MAX
 # ifdef _POSIX_PATH_MAX
@@ -183,7 +186,6 @@ extern char  *argvrestartname;
 
 #ifdef USING_SMUX_MODULE
 static int sdlist[NUM_SOCKETS], sdlen = 0;
-int smux_listen_sd;
 #endif /* USING_SMUX_MODULE */
 
 /*
@@ -475,7 +477,24 @@ main(int argc, char *argv[])
 #if HAVE_UNISTD_H
                 case 'u':
                   if (++arg == argc) usage(argv[0]);
-                  ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID,atoi(argv[arg]));
+		  { char *ecp;
+		    int uid;
+		    uid = strtoul(argv[arg], &ecp, 10);
+		    if (*ecp) {
+#if HAVE_GETPWNAM && HAVE_PWD_H
+		      struct passwd *info;
+		      info = getpwnam(argv[arg]);
+		      if (info) uid = info->pw_uid;
+		      else {
+#endif
+			fprintf(stderr, "Bad user id: %s\n", argv[arg]);
+			exit(1);
+#if HAVE_GETPWNAM && HAVE_PWD_H
+		      }
+#endif
+		    }
+		  ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, uid);
+		}
                   break;
                 case 'g':
                   if (++arg == argc) usage(argv[0]);
@@ -631,7 +650,11 @@ main(int argc, char *argv[])
 #ifdef HAVE_SETGID
 	if ((gid = ds_get_int(DS_APPLICATION_ID, DS_AGENT_GROUPID)) != 0) {
 		DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
-		if (setgid(gid)==-1) {
+		if (setgid(gid)==-1
+#ifdef HAVE_SETGROUPS
+		 || setgroups(1, &gid)==-1
+#endif
+		) {
 			snmp_log_perror("setgid failed");
 			if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
 			    exit(1);

@@ -928,6 +928,7 @@ sub is_in_subtree {
 
 sub format_oid {
     my ($oid, $type) = @_;
+    $oid =~ s/\.$//;
     $type = $displayoidas if ($type eq "");
 
     if ($type eq 'numeric') {
