@@ -324,8 +324,9 @@ nsop_get_indexes(oid1)
                 out_len = 0;
                 if (index->isimplied)
                     vbdata.type ^= ASN_PRIVATE;
-                __snprint_value (buf, buf_len, &vbdata, indexnode,
-                                 vbdata.type, 0);
+                out_len =
+                    __snprint_value (buf, buf_len, &vbdata, indexnode,
+                                     vbdata.type, 0);
 /*
                 sprint_realloc_value(&buf, &buf_len, &out_len,
                                      1, name, name_len, &vbdata);
