@@ -201,8 +201,8 @@ Section "Net-SNMP Agent Service" SEC02
   File "share\snmp\snmpconf-data\snmpd-data\snmpconf-config"
   File "share\snmp\snmpconf-data\snmpd-data\system"
   File "share\snmp\snmpconf-data\snmpd-data\trapsinks"
-  SetOutPath "$INSTDIR\etc\snmp"
-  File "etc\snmp\snmpd.conf"
+  ;SetOutPath "$INSTDIR\etc\snmp"
+  ;File "etc\snmp\snmpd.conf"
   
   ; If we are on an NT system then install the service batch files.
   Call IsNT
@@ -231,8 +231,8 @@ Section "Net-SNMP Trap Service" SEC03
   File "share\snmp\snmpconf-data\snmptrapd-data\authentication"
   File "share\snmp\snmpconf-data\snmptrapd-data\logging"
   File "share\snmp\snmpconf-data\snmptrapd-data\runtime"
-  SetOutPath "$INSTDIR\etc\snmp"
-  File "etc\snmp\snmptrapd.conf"
+  ;SetOutPath "$INSTDIR\etc\snmp"
+  ;File "etc\snmp\snmptrapd.conf"
   
   ; If we are on an NT system then install the service batch files.
   Call IsNT
@@ -339,16 +339,30 @@ Function CreateAgentBats
   
   FileOpen $0 "registeragent.bat" "w"
   IfErrors cleanup
-  FileWrite $0 "$\"$INSTDIR\bin\snmpd.exe$\" -register -C \
-               -c $\"$R0/etc/snmp/snmpd.conf$\" \
-               -Lf $\"$R0/log/snmpd.log$\"$\r$\n"
-  FileWrite $0 "pause"
-  
+  FileWrite $0 "@echo off $\r$\n \
+		set cmdline=$\"$INSTDIR\bin\snmpd.exe$\" -register $\r$\n\
+		set additionaloptions= -C -c $\"$R0/etc/snmp/snmpd.conf$\" \
+		-Lf $\"$R0/log/snmpd.log$\"$\r$\n"
+
+  FileWrite $0 "echo Registering snmpd as a service using the following additional options: $\r$\n \
+		echo . $\r$\n \
+		echo %additionaloptions% $\r$\n \
+		$\r$\n"
+
+  FileWrite $0 "echo . $\r$\n \
+		%cmdline% %additionaloptions% $\r$\n \
+		echo . $\r$\n \
+		echo For information on running snmpd.exe and snmptrapd.exe as a Windows $\r$\n \
+		echo service, see 'How to Register the Net-SNMP Agent and Trap Daemon as $\r$\n \
+		echo Windows services' in README.win32. $\r$\n \
+		echo . $\r$\n \
+		pause"
+
   ClearErrors
   FileOpen $1 "unregisteragent.bat" "w"
   IfErrors cleanup
-  FileWrite $1 "$\"$INSTDIR\bin\snmpd.exe$\" -unregister$\r$\n"
-  FileWrite $1 "pause"
+  FileWrite $1 "@echo off $\r$\n \
+		$\"$INSTDIR\bin\snmpd.exe$\" -unregister"
 
   cleanup:
   FileClose $0
@@ -370,17 +384,32 @@ Function CreateTrapdBats
   
   FileOpen $0 "registertrapd.bat" "w"
   IfErrors cleanup
-  FileWrite $0 "$\"$INSTDIR\bin\snmptrapd.exe$\" -register -C \
-               -c $\"$R0/etc/snmp/snmptrapd.conf$\" \
-               -Lf $\"$R0/log/snmptrapd.log$\"$\r$\n"
-  FileWrite $0 "pause"
+  IfErrors cleanup
+  FileWrite $0 "@echo off $\r$\n \
+		set cmdline=$\"$INSTDIR\bin\snmptrapd.exe$\" -register $\r$\n\
+		set additionaloptions= -C -c $\"$R0/etc/snmp/snmptrapd.conf$\" \
+		-Lf $\"$R0/log/snmptrapd.log$\"$\r$\n"
+
+  FileWrite $0 "echo Registering snmptrapd as a service using the following additional options: $\r$\n \
+		echo . $\r$\n \
+		echo %additionaloptions% $\r$\n \
+		$\r$\n"
+
+  FileWrite $0 "echo . $\r$\n \
+		%cmdline% %additionaloptions% $\r$\n \
+		echo . $\r$\n \
+		echo For information on running snmpd.exe and snmptrapd.exe as a Windows $\r$\n \
+		echo service, see 'How to Register the Net-SNMP Agent and Trap Daemon as $\r$\n \
+		echo Windows services' in README.win32. $\r$\n \
+		echo . $\r$\n \
+		pause"
 
   ClearErrors
   FileOpen $1 "unregistertrapd.bat" "w"
   IfErrors cleanup
-  FileWrite $1 "$\"$INSTDIR\bin\snmptrapd.exe$\" -unregister$\r$\n"
-  FileWrite $1 "pause"
-
+  FileWrite $1 "@echo off $\r$\n \
+		$\"$INSTDIR\bin\snmptrapd.exe$\" -unregister"
+		
   cleanup:
   FileClose $0
   FileClose $1
@@ -570,7 +599,7 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\authentication"
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\logging"
   Delete "$INSTDIR\share\snmp\snmpconf-data\snmptrapd-data\runtime"
-  Delete "$INSTDIR\share\snmp\snmp.conf"
+  ;Delete "$INSTDIR\share\snmp\snmp.conf"
   Delete "$INSTDIR\share\snmp\mibs\AGENTX-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\DISMAN-EVENT-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\DISMAN-SCHEDULE-MIB.txt"
@@ -631,10 +660,8 @@ Section Uninstall
   Delete "$INSTDIR\share\snmp\mibs\UCD-SNMP-MIB-OLD.txt"
   Delete "$INSTDIR\share\snmp\mibs\UDP-MIB.txt"
   Delete "$INSTDIR\share\snmp\mibs\.index"
-  Delete "$INSTDIR\share\snmp\snmpd.conf"
-  Delete "$INSTDIR\etc\snmp\snmp.conf"
-  Delete "$INSTDIR\etc\snmp\snmpd.conf"
-  Delete "$INSTDIR\etc\snmp\snmptrapd.conf"
+  ;Delete "$INSTDIR\share\snmp\snmpd.conf"
+  ;Delete "$INSTDIR\etc\snmp\snmp.conf"
   Delete "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk"
   Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
   Delete "$SMPROGRAMS\$ICONS_GROUP\README.lnk"
@@ -642,7 +669,9 @@ Section Uninstall
   Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk"
   Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Register Trap Service.lnk"
   Delete "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Trap Service.lnk"
-
+  Delete "$INSTDIR\snmp\persist\snmpd.conf"
+  Delete "$INSTDIR\snmp\persist\snmptrapd.conf"
+  
   RMDir "$SMPROGRAMS\$ICONS_GROUP\Service"
   RMDir "$SMPROGRAMS\$ICONS_GROUP"
   RMDir "$INSTDIR\perl\x86"
