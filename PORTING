@@ -8,6 +8,17 @@ ucd-snmp-coders-request@ucd-snmp.ucdavis.edu with a subject line of
 subscribe.  This is a mailing list to discuss all oft the coding
 aspects of the project.
 
+Additionally, you should probably be developing against the latest
+snapshot of the source code, which can be obtained through the
+ucd-snmp cvs server.  Details can be found at
+http://ucd-snmp.ucdavis.edu/developer.html.
+
+If you send patches to us, it would greatly help us if you sent them
+to us based on the current checked out copy from CVS.  To do this,
+send us the output of "cvs diff -c" run in the top level ucd-snmp
+source tree after you have modified the files that will fix the
+problem or add the feature you're submitting the patch for.
+
 Quite a while back I started using the GNU autoconf testing suite to
 greatly enhance portability.  Because of this porting to new
 architectures is much easier than before.  However, new people porting
