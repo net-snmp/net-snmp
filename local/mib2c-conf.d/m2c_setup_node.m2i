@@ -12,8 +12,18 @@
 ########################################################################
 ## fix some declarations
 ########################################################################
-##   use longs for enums (w/out length)
 @  if $node.enums == 1@
+##
+##   for a TC, prefix definition w/syntax to reduce collisions
+##
+@    if $node.syntax ne $node.perltype@
+@       eval $m2c_de_pfx = "${m2c_const_pfx}$node.syntax"@
+@    else@
+@       eval $m2c_de_pfx = "${m2c_const_pfx}$node"@
+@    end@
+##
+##   use longs for enums (w/out length)
+##
 @    eval $m2c_decl = "u_long"@
 @    eval $m2c_node_needlength = 0@
 @    if "$node.perltype" eq "BITS"@
