@@ -83,7 +83,6 @@ AC_ARG_WITH(openssl,
       AC_ADD_SEARCH_PATH($withval)
       tryopenssl=yes
     fi,
-    AC_ADD_SEARCH_PATH(/usr/local/ssl)
 )
 
 AC_ARG_ENABLE(privacy,
