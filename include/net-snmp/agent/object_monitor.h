@@ -67,7 +67,7 @@ extern          "C" {
         unsigned int    event;
 
    /** registered oid */
-        netsnmp_oid_array_header monitored_object;
+        netsnmp_index   monitored_object;
 
    /** priority */
         int             priority;
