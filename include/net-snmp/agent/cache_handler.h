@@ -1,5 +1,5 @@
-#ifndef CACHE_H
-#define CACHE_H
+#ifndef NETSNMP_CACHE_H
+#define NETSNMP_CACHE_H
 
 /*
  * This caching helper provides a generalised (SNMP-manageable) caching
@@ -25,12 +25,14 @@ extern          "C" {
         /*
 	 * For operation of the data caches
 	 */
+        int      flags;
         int      enabled;
         int      valid;
         int      timeout;	/* Length of time the cache is valid (in s) */
         marker_t timestamp;	/* When the cache was last loaded */
 
         NetsnmpCacheLoad *load_cache;
+        NetsnmpCacheLoad *reload_cache;
         NetsnmpCacheFree *free_cache;
         void             *magic;	/* You never know when it might
                                                      not come in useful .... */
@@ -55,7 +57,14 @@ extern          "C" {
 
     Netsnmp_Node_Handler netsnmp_cache_helper_handler;
 
+#define NETSNMP_CACHE_DONT_INVALIDATE_ON_SET                0x0001
+#define NETSNMP_CACHE_DONT_FREE_EXPIRED                     0x0002
+/*
+#define NETSNMP_CACHE_                                      0x0004
+#define NETSNMP_CACHE_                                      0x0008
+*/
+
 #ifdef __cplusplus
 };
 #endif
-#endif
+#endif /* NETSNMP_CACHE_H */

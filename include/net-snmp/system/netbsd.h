@@ -32,7 +32,7 @@
  * fixups for broken AC_CHECK_IFNET_FOR() 
  */
 /*
- * Remove when fixed in configure.in 
+ * XXX - Remove when fixed in configure.in 
  */
 #undef STRUCT_IFNET_HAS_IF_BAUDRATE
 #define STRUCT_IFNET_HAS_IF_BAUDRATE 1

@@ -276,8 +276,20 @@ tarclean:
 	  ${srcdir}/agent/mibgroup/versiontag Ext clean ; \
 	fi
 
+checks:
+	$(MAKE) -k makefilecheck commentcheck
+
+# always exit 1, since I can't figure out how to invert grep rc
 commentcheck:
-	grep -n // `find $(srcdir) -name \*.\[ch\]` | grep -v tp:// | grep -v /win32/
+	@echo "Checking for C++ style comments..."
+	@grep -n -E "([^:]|^)//" `find . -path './win32' -prune -o -name \*.\[ch\]`
+	@exit 1
+
+# always exit 1, since I can't figure out how to invert grep rc
+makefilecheck:
+	@echo "Checking for non-portable Makefile constructs..."
+	@grep -n "\.c=" `find . -name "Makefile.*"` && exit 1
+	@exit 1
 
 dist: version tag tar
 
