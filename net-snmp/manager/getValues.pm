@@ -16,8 +16,9 @@ my $key = "lookup";
 
 sub getValues {
     my $dbh = shift;
-    my (@vars2, $tmp, $cursor, $row, $results, $i);
-    @vars = @_;
+    my (@vars2, $tmp, $cursor, $row, %results, $i, $cursor);
+    my ($varcol, $valcol, $key) = ($varcol, $valcol, $key);
+    my @vars = @_;
     while($#vars >= 0) {
 	$i = shift @vars;
 	$tmp = shift @vars;
