@@ -1,13 +1,13 @@
 #
 # Makefile for snmpd
 #
-DLMODDIR=	/usr/local/lib/snmp/dlmod
+DLMODDIR=	$(libdir)/snmp/dlmod
 TARG=	 dlmod_mib.so example.so
 USELIBS= $(top_srcdir)/snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
-LIBS=	 -L$(top_srcdir)/snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
+LIBS=#	 -L$(top_srcdir)/snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 
 CPPFLAGS=@CPPFLAGS@ -I$(top_srcdir) -I$(top_srcdir)/snmplib \
-	-I..  -I. -I../mibgroup  -I../mibgroup/misc
+	-I.  -I.. -I../.. -I$(top_srcdir)/agent/mibgroup  -I$(top_srcdir)/agent/mibgroup/misc
 
 CC = @CC@ $(CPPFLAGS)
 
@@ -29,8 +29,8 @@ example.so: $(EXAMPLE_OBJS)
 clean:
 	rm -f *.o ${TARG}
 
-install:  installdirs
-	@$(INSTALL) $(TARG) $(DLMODDIR) ; echo "install:  installed $(TARG) in $(sbindir) "
+install:  all installdirs
+	@$(INSTALL) $(TARG) $(DLMODDIR) ; echo "install:  installed $(TARG) in $(DLMODDIR) "
 
 installdirs:
 	@$(SHELL) $(top_srcdir)/mkinstalldirs $(DLMODDIR)
