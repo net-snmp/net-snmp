@@ -1,0 +1,116 @@
+
+#----------------------------------------------------------------------
+#
+# Utility functions
+#
+
+nsb-info()
+{
+   if [ $NSB_QUIET -ne 1 ]; then
+      echo $@
+   fi
+}
+
+nsb-prompt()
+{
+   echo $@
+   read nsb-prompt-dummy
+}
+
+#----------------------------------------------------------------------
+#
+nsb-get-config()
+{
+   echo "configure --prefix=usr/local --disable-privacy --with-defaults --with-sys-contact=\"root\" --with-mib-modules=\"host disman/event-mib\""
+}
+
+nsb-sysname()
+{
+   echo `uname -mrs | tr ' ' _`
+}
+
+nsb-zip()
+{
+   if [ $# -ne 3 ]; then
+      echo "usage: $0 release build-directory dest-dir"
+      exit
+   fi
+
+   release=$1
+   build-dir=$2
+   dest-dir=$3
+
+   platform=`nsb-sysname`
+   build=$build-dir/$platform
+
+   if [ ! -d $build ]; then
+      echo "$build directory does not exist!"
+      exit;
+   fi
+
+   if [ ! -d $build/usr ]; then
+      echo "install directory $build/usr directory does not exist!"
+      exit;
+   fi
+
+   cd $build
+
+   rm -f $dest-dir/$release-$platform.tar
+   nsb-info "tar cf $dest-dir/$release-$platform.tar usr"
+   tar cf $dest-dir/$release-$platform.tar usr
+
+   nsb-info "gzip --best $dest-dir/$release-$platform.tar"
+   gzip --best $dest-dir/$release-$platform.tar
+
+   if [ $NSB_QUIET -ne 1 ]; then
+      ls -lt $dest-dir
+   fi
+}
+
+nsb-build()
+{
+
+   if [ $# -ne 3 ]; then
+      echo "usage: $0 release src-dir build-directory dest-dir"
+      exit
+   fi
+
+   release=$1
+   src-dir=$2
+   build-dir=$3
+   dest-dir=$4
+
+   if [ ! -d $src-dir/$release ]; then
+      echo "$src-dir/$release does not exist!"
+      exit
+   fi
+
+   platform=`nsb-sysname`
+   build=$build-dir/$platform
+
+   if [ ! -d $build ]; then
+      mkdir $HOME/build/$platform
+      if [ ! -d $build ]; then
+         echo "$build directory does not exist!"
+         exit;
+      fi
+   fi
+
+   nsb-info "Changing directories to $build"
+   cd $build
+
+   if [ ! -h $build/src  ]; then
+      ln -s $HOME/src/$release src
+   fi
+
+   nsb-info "Configuring..."
+   `nsb-config`
+   nsb-prompt "press enter to continue"
+
+   nsb-info "Building..."
+   date > make.out
+   make 2>&1 | tee -a make.out
+   nsb-prompt "press enter to continue and check for errors"
+
+   grep -v "^/bin/sh" make.out | less"
+}
