@@ -556,12 +556,12 @@ AC_MSG_CACHE_ADD(Net-SNMP Version:           $VERSION)
 dnl super type checking
 AC_MSG_CHECKING(for developer gcc flags)
 if test "x$developer" = "xyes" -a "x$ac_cv_prog_gcc" = "xyes"; then
-  devflags="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-char-subscripts"
-  CFLAGS="$CFLAGS $devflags"
+  DEVFLAGS="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-char-subscripts"
 else
-  devflags="none"
+  DEVFLAGS="none"
 fi
-AC_MSG_RESULT($devflags)
+AC_MSG_RESULT($DEVFLAGS)
+AC_SUBST(DEVFLAGS)
 
 dnl system check
 AC_CANONICAL_SYSTEM
