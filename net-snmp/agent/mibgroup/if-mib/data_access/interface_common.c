@@ -6,6 +6,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include "mibII/mibII_common.h"
+#include "if-mib/ifTable/ifTable_constants.h"
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/data_access/interface.h>
@@ -351,4 +352,37 @@ netsnmp_access_interface_entry_copy(netsnmp_interface_entry * lhs,
     lhs->if_paddr_len = rhs->if_paddr_len;
     
     return 0;
+}
+
+void
+netsnmp_access_interface_entry_guess_speed(netsnmp_interface_entry *entry)
+{
+    if (entry->if_type == IANAIFTYPE_ETHERNETCSMACD)
+        entry->if_speed = 10000000;
+    else if (entry->if_type == IANAIFTYPE_SOFTWARELOOPBACK)
+        entry->if_speed = 10000000;
+    else if (entry->if_type == IANAIFTYPE_ISO88025TOKENRING)
+        entry->if_speed = 4000000;
+    else
+        entry->if_speed = 0;
+}
+
+void
+netsnmp_access_interface_entry_overrides(netsnmp_interface_entry *entry)
+{
+    if(entry->if_descr && (strlen(entry->if_descr) > 255))
+        entry->if_descr[255] = 0;
+
+#if 1
+#warning "xxx-rks: interface overrides"
+#else
+    for (if_ptr = conf_list; if_ptr; if_ptr = if_ptr->next)
+        if (!strcmp(if_ptr->name, ifname))
+            break;
+    
+    if (if_ptr) {
+        ifentry->if_type = if_ptr->type;
+        ifentry->if_speed = if_ptr->speed;
+    }
+#endif
 }
