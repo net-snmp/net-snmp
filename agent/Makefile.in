@@ -85,14 +85,14 @@ installdirs:
 
 
 dependlocal: 
-	makedepend $(CPPFLAGS) $(srcdir)/*.c
+	makedepend $(CPPFLAGS) -o.lo $(srcdir)/*.c
 
 depend: dependlocal
 	cd mibgroup; $(MAKE) depend; cd ..
 
 nosysdepend:
 	cd mibgroup; $(MAKE) nosysdepend; cd ..
-	makedepend $(CPPFLAGS) *.c
+	makedepend $(CPPFLAGS) -o.lo *.c
 	perl -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile
 
 makefileindepend: nosysdepend

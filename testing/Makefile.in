@@ -42,12 +42,12 @@ installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir) $(bindir)
 
 dependlocal: 
-	makedepend $(CPPFLAGS) $(srcdir)/*.c
+	makedepend $(CPPFLAGS) -o.lo $(srcdir)/*.c
 
 depend: dependlocal
 
 nosysdepend: 
-	makedepend $(CPPFLAGS) *.c
+	makedepend $(CPPFLAGS) -o.lo *.c
 	perl -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile
 
 makefileindepend: nosysdepend

@@ -91,10 +91,10 @@ clean:
 	rm -rf .libs
 
 depend: 
-	makedepend $(CPPFLAGS) $(srcdir)/*.c
+	makedepend $(CPPFLAGS) -o.lo $(srcdir)/*.c
 
 nosysdepend:
-	makedepend $(CPPFLAGS) *.c
+	makedepend $(CPPFLAGS) -o.lo *.c
 	perl -n -i.bak $(top_srcdir)/makenosysdepend.pl Makefile
 
 makefileindepend: nosysdepend
