@@ -13,7 +13,7 @@ fi
 
 dnl overflow problems with hpux's sh
 
-if test `arch` = "hpux"; then
+if test `arch` = "hppa" -a -x /bin/ksh; then
   (typeset) >/dev/null 2>&1
   if test $? != 0; then
     echo feeding configure to /bin/ksh to avoid hpux /bin/sh problems
