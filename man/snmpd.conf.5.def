@@ -1,4 +1,4 @@
-.TH SNMPD.CONF 5 "08 Feb 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMPD.CONF 5 "28 Feb 2003" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 SYSCONFDIR/snmp/snmpd.conf - configuration file for the Net-SNMP SNMP agent.
@@ -140,6 +140,15 @@ To enable AgentX support in the SNMP master agent, put the following
 line in your snmpd.conf file:
 .IP "master agentx"
 See README.agentx for further details.
+.IP "AgentXSocket addr"
+This defines the address the master agent listens at.
+The default is /var/agentx/master. Another possibility is localhost:705
+.IP "AgentXTimeout addr"
+Defines the timeout period for an AgentX request.
+Default is 1 second.
+.IP "AgentXRetries addr"
+Defines the number of retries for an AgentX request.
+Default is 5 retries.
 .SH SMUX SUB-AGENTS
 To enable and SMUX based sub-agent, such as
 .IR gated ,
