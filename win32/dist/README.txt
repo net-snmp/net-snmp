@@ -158,7 +158,7 @@ CONFIGURATION
 
   To run snmpconf, use the following command line.
 
-  snmpconf.pl -c "%SNMPSHAREPATH%\snmpconf-data" -I "%SNMPCONFPATH%"
+     snmpconf -I
 
 
 BUILD INFORMATION

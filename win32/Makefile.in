@@ -485,9 +485,12 @@ install ::
         @-Copy win32\bin\$(CFG)\*.exe $(PREFIX_DOS)\bin > NUL:
 
 	@-echo Copying (local) scripts to $(PREFIX_DOS)\bin
-	@-Copy win32\bin\$(CFG)\snmpconf.pl $(PREFIX_DOS)\bin > NUL:
-	@-Copy win32\bin\$(CFG)\mib2c.pl $(PREFIX_DOS)\bin > NUL:
-	@-Copy win32\bin\$(CFG)\traptoemail.pl $(PREFIX_DOS)\bin > NUL:
+	@-Copy win32\bin\$(CFG)\snmpconf $(PREFIX_DOS)\bin > NUL:
+	@-Copy win32\local\snmpconf.bat $(PREFIX_DOS)\bin > NUL:
+	@-Copy win32\bin\$(CFG)\mib2c $(PREFIX_DOS)\bin > NUL:
+	@-Copy win32\local\mib2c.bat $(PREFIX_DOS)\bin > NUL:
+	@-Copy win32\bin\$(CFG)\traptoemail $(PREFIX_DOS)\bin > NUL:
+	@-Copy win32\local\traptoemail.bat $(PREFIX_DOS)\bin > NUL:
 
 	@-echo Copying snmpconf files to $(PREFIX_DOS)\share\snmp\snmpconf-data\snmp-data
         @-Copy local\snmpconf.dir\snmp-data\*.* $(PREFIX_DOS)\share\snmp\snmpconf-data\snmp-data > NUL:

@@ -79,6 +79,11 @@ Copy mibs\*.txt %INSTALL_BASE%\share\snmp\mibs > NUL:
 echo Copying compiled programs to %INSTALL_BASE%\bin
 Copy win32\bin\%progVer%\*.exe %INSTALL_BASE%\bin > NUL:
 Copy local\snmpconf %INSTALL_BASE%\bin > NUL:
+Copy local\snmpconf.bat %INSTALL_BASE%\bin > NUL:
+Copy local\mib2c %INSTALL_BASE%\bin > NUL:
+Copy local\mib2c.bat %INSTALL_BASE%\bin > NUL:
+Copy local\traptoemail %INSTALL_BASE%\bin > NUL:
+Copy local\traptoemail.bat %INSTALL_BASE%\bin > NUL:
 
 echo Copying snmpconf files to %INSTALL_BASE%\share\snmp\snmpconf-data\snmp-data
 Copy local\snmpconf.dir\snmp-data\*.* %INSTALL_BASE%\share\snmp\snmpconf-data\snmp-data > NUL:
