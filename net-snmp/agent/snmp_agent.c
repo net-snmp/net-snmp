@@ -57,7 +57,7 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp_vars.h"
 #if USING_MIBII_SNMP_MIB_MODULE
-#include "mibgroup/snmp_mib.h"
+#include "mibgroup/mibII/snmp_mib.h"
 #endif
 #include "snmpd.h"
 #include "mibgroup/struct.h"
