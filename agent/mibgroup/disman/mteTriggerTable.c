@@ -19,6 +19,7 @@
 #include "snmp_api.h"
 #include "snmp_agent.h"
 #include "snmp_client.h"
+#include "snmp_transport.h"
 #include "header_complex.h"
 #include "mteTriggerTable.h"
 #include "mteTriggerBooleanTable.h"
@@ -128,17 +129,17 @@ void init_mteTriggerTable(void) {
 
 
   /* place any other initialization junk you need here */
-  se_add_pair_to_slist(strdup("mteBooleanOperators"), strdup("!="),
+  se_add_pair_to_slist("mteBooleanOperators", strdup("!="),
                        MTETRIGGERBOOLEANCOMPARISON_UNEQUAL);
-  se_add_pair_to_slist(strdup("mteBooleanOperators"), strdup("=="),
+  se_add_pair_to_slist("mteBooleanOperators", strdup("=="),
                        MTETRIGGERBOOLEANCOMPARISON_EQUAL);
-  se_add_pair_to_slist(strdup("mteBooleanOperators"), strdup("<"),
+  se_add_pair_to_slist("mteBooleanOperators", strdup("<"),
                        MTETRIGGERBOOLEANCOMPARISON_LESS);
-  se_add_pair_to_slist(strdup("mteBooleanOperators"), strdup("<="),
+  se_add_pair_to_slist("mteBooleanOperators", strdup("<="),
                        MTETRIGGERBOOLEANCOMPARISON_LESSOREQUAL);
-  se_add_pair_to_slist(strdup("mteBooleanOperators"), strdup(">"),
+  se_add_pair_to_slist("mteBooleanOperators", strdup(">"),
                        MTETRIGGERBOOLEANCOMPARISON_GREATER);
-  se_add_pair_to_slist(strdup("mteBooleanOperators"), strdup(">="),
+  se_add_pair_to_slist("mteBooleanOperators", strdup(">="),
                        MTETRIGGERBOOLEANCOMPARISON_GREATEROREQUAL);
 
   DEBUGMSGTL(("mteTriggerTable", "done.\n"));
@@ -249,6 +250,7 @@ mteTriggerTable_add(struct mteTriggerTable_data *thedata) {
 void
 parse_mteTriggerTable(const char *token, char *line) {
   size_t tmpint;
+  oid *tmpoid = NULL;
   struct mteTriggerTable_data *StorageTmp = SNMP_MALLOC_STRUCT(mteTriggerTable_data);
 
   DEBUGMSGTL(("mteTriggerTable", "parsing config...  "));
@@ -480,8 +482,17 @@ parse_mteTriggerTable(const char *token, char *line) {
       line = read_config_read_data(ASN_INTEGER, line, &StorageTmp->pdu_version, &tmpint);
       line = read_config_read_data(ASN_INTEGER, line, &StorageTmp->pdu_securityModel, &tmpint);
       line = read_config_read_data(ASN_INTEGER, line, &StorageTmp->pdu_securityLevel, &tmpint);
+      line = read_config_read_data(ASN_OBJECT_ID, line, &tmpoid, &tmpint);
+      if (!snmp_transport_support(tmpoid, tmpint, &StorageTmp->pdu_tDomain,
+				 &StorageTmp->pdu_tDomainLen)) {
+	config_perror("unsupported transport domain for mteTriggerEntry");
+	return;
+      }
+      if (tmpoid != NULL) {
+	free(tmpoid);
+      }
 
-      /* can be NULL? */
+      /*  can be NULL?  Yes.  */
       line = read_config_read_data(ASN_OCTET_STR, line,
                                    &(StorageTmp->pdu_transport),
                                    &StorageTmp->pdu_transportLen);
@@ -599,6 +610,7 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg, void *clientarg
         cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_version, &tmpint);
         cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_securityModel, &tmpint);
         cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_securityLevel, &tmpint);
+	cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &StorageTmp->pdu_tDomain, &StorageTmp->pdu_tDomainLen);
         cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_transport, &StorageTmp->pdu_transportLen);
         cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_community, &StorageTmp->pdu_community_len);
         cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_securityName, &StorageTmp->pdu_securityNameLen);
@@ -1001,6 +1013,9 @@ write_mteTriggerValueID(int      action,
         case COMMIT:
              /* Things are working well, so it's now safe to make the change
              permanently.  Make sure that anything done here can't fail! */
+
+	  /*  XXX: if the valueID has actually changed, shouldn't we dump any
+	      previous values, as these are from a different object?  */
      SNMP_FREE(tmpvar);
           break;
   }
@@ -1796,16 +1811,21 @@ write_mteTriggerEntryStatus(int      action,
                   StorageTmp->pdu_version       = pdu->version;
                   StorageTmp->pdu_securityModel = pdu->securityModel;
                   StorageTmp->pdu_securityLevel = pdu->securityLevel;
-                  memcpy(&StorageTmp->pdu_transport, &pdu->transport_data,
-                         pdu->transport_data_length);
+		  StorageTmp->pdu_tDomain       = pdu->tDomain;
+		  StorageTmp->pdu_tDomainLen    = pdu->tDomainLen;
+		  if (pdu->transport_data != NULL) {
+		    StorageTmp->pdu_transport =
+		      malloc(pdu->transport_data_length);
+		    memcpy(StorageTmp->pdu_transport, pdu->transport_data,
+			   pdu->transport_data_length);
+		  }
                   StorageTmp->pdu_transportLen = pdu->transport_data_length;
                   if (pdu->community) {
                       StorageTmp->pdu_community =
                           calloc(1,pdu->community_len+1);
-                      memdup(&StorageTmp->pdu_community, pdu->community,
+                      memcpy(StorageTmp->pdu_community, pdu->community,
                              pdu->community_len);
                       StorageTmp->pdu_community_len = pdu->community_len;
-                      StorageTmp->pdu_community[pdu->community_len] = '\0';
                   } else {
                       StorageTmp->pdu_community = NULL;
                       StorageTmp->pdu_community_len = 0;
@@ -1813,11 +1833,9 @@ write_mteTriggerEntryStatus(int      action,
                   if (pdu->securityName) {
                       StorageTmp->pdu_securityName =
                           calloc(1,pdu->securityNameLen+1);
-                      memdup((u_char **) &StorageTmp->pdu_securityName,
-                             pdu->securityName,
+                      memcpy(StorageTmp->pdu_securityName, pdu->securityName,
                              pdu->securityNameLen);
                       StorageTmp->pdu_securityNameLen = pdu->securityNameLen;
-                      StorageTmp->pdu_securityName[pdu->securityNameLen] = '\0';
                   } else {
                       StorageTmp->pdu_securityName = NULL;
                       StorageTmp->pdu_securityNameLen = 0;
@@ -1849,7 +1867,8 @@ send_mte_trap(struct mteTriggerTable_data *item,
     static struct variable_list mteHotContextName_var;
     static struct variable_list mteHotOID_var;
     static struct variable_list mteHotValue_var;
-                    
+    static struct variable_list mteFailedReason_var;
+
     /* trap */
     var_trap.next_variable = &mteHotTrigger_var;
     var_trap.name = objid_snmptrap;
@@ -1882,21 +1901,32 @@ send_mte_trap(struct mteTriggerTable_data *item,
     mteHotContextName_var.val.string = item->mteTriggerContextName;
     mteHotContextName_var.val_len = item->mteTriggerContextNameLen;
 
-    /* mteHotOID */
-    mteHotOID_var.next_variable = &mteHotValue_var;
+    /*  mteHotOID -- set next_variable field below.  */
     mteHotOID_var.name = mteHotOID;
     mteHotOID_var.name_length = sizeof(mteHotOID)/sizeof(oid);
     mteHotOID_var.type = ASN_OBJECT_ID;
     mteHotOID_var.val.objid = name_oid;
     mteHotOID_var.val_len = sizeof(oid)*name_oid_len;
 
-    /* mteHotValue */
-    mteHotValue_var.next_variable = NULL;
-    mteHotValue_var.name = mteHotValue;
-    mteHotValue_var.name_length = sizeof(mteHotValue)/sizeof(oid);
-    mteHotValue_var.type = ASN_INTEGER;
-    mteHotValue_var.val.integer = value;
-    mteHotValue_var.val_len = sizeof(value);
+    if (trap_oid == mteTriggerFailure || trap_oid == mteEventSetFailure) {
+      /*  mteFailedReason  */
+      mteHotOID_var.next_variable = &mteFailedReason_var;
+      mteFailedReason_var.next_variable = NULL;
+      mteFailedReason_var.name = mteFailedReason;
+      mteFailedReason_var.name_length = sizeof(mteFailedReason)/sizeof(oid);
+      mteFailedReason_var.type = ASN_INTEGER;
+      mteFailedReason_var.val.integer = value;
+      mteFailedReason_var.val_len = sizeof(value);
+    } else {
+      /*  mteHotValue  */
+      mteHotOID_var.next_variable = &mteHotValue_var;
+      mteHotValue_var.next_variable = NULL;
+      mteHotValue_var.name = mteHotValue;
+      mteHotValue_var.name_length = sizeof(mteHotValue)/sizeof(oid);
+      mteHotValue_var.type = ASN_INTEGER;
+      mteHotValue_var.val.integer = value;
+      mteHotValue_var.val_len = sizeof(value);
+    }
 
     /* add in traps from main table */
     mte_add_objects(&var_trap, item, item->mteTriggerObjectsOwner,
@@ -1937,8 +1967,10 @@ mte_get_response(struct mteTriggerTable_data *item, struct snmp_pdu *pdu) {
     pdu->version = item->pdu_version;
     pdu->securityModel = item->pdu_securityModel;
     pdu->securityLevel = item->pdu_securityLevel;
-    memdup((u_char **) &pdu->transport_data, (u_char *) &item->pdu_transport,
-           item->pdu_transportLen);
+    pdu->tDomain = item->pdu_tDomain;
+    pdu->tDomainLen = item->pdu_tDomainLen;
+    memdup((u_char **)&pdu->transport_data, item->pdu_transport,
+	   item->pdu_transportLen);
     pdu->transport_data_length = item->pdu_transportLen;
     memdup(&pdu->community, item->pdu_community,
            item->pdu_community_len);
@@ -1949,8 +1981,10 @@ mte_get_response(struct mteTriggerTable_data *item, struct snmp_pdu *pdu) {
     memdup((u_char **) &pdu->securityName, item->pdu_securityName,
            item->pdu_securityNameLen);
     pdu->securityNameLen = item->pdu_securityNameLen;
-    DEBUGMSGTL(("mteTriggerTable","accessing locally as %s\n",
-                item->pdu_securityName));
+    DEBUGMSGTL(("mteTriggerTable",
+		"accessing locally with secName \"%s\" community \"%s\"\n",
+                item->pdu_securityName?(char *)item->pdu_securityName:"[NIL]",
+		item->pdu_community?(char *)item->pdu_community:"[NIL]"));
         
     if (item->mteTriggerTargetTagLen == 0) {
         asp = init_agent_snmp_session(NULL, pdu);
@@ -1995,6 +2029,32 @@ mte_get_response(struct mteTriggerTable_data *item, struct snmp_pdu *pdu) {
 }
 
 
+/*  Return 1 if `type' is an integer type; specifically, to quote RFC 2981,
+    p. 13, "anything that ends up encoded for transmission (that is, in BER,
+    not ASN.1) as an integer".  Return 0 for all other types.  */
+
+int mte_is_integer_type(unsigned char type)
+{
+  switch(type) {
+  case ASN_INTEGER:	
+  case ASN_COUNTER:
+  case ASN_GAUGE:
+  case ASN_TIMETICKS:
+  case ASN_UINTEGER:
+  case ASN_COUNTER64:
+#ifdef OPAQUE_SPECIAL_TYPES
+  case ASN_OPAQUE_COUNTER64:
+  case ASN_OPAQUE_U64:
+  case ASN_OPAQUE_I64:
+#endif /* OPAQUE_SPECIAL_TYPES */
+    return 1;
+  default:
+    return 0;
+  }
+}
+
+
+
 void
 mte_run_trigger(unsigned int clientreg, void *clientarg) {
 
@@ -2006,7 +2066,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
 
     oid *next_oid;
     size_t next_oid_len;
-    long *value, *old_value;
+    long *value, *old_value, x;
     struct last_state *laststate;
     char lastbool=0, boolresult=0, lastthresh=0;
 
@@ -2047,7 +2107,26 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
         next_oid = response->variables->name;
         next_oid_len = response->variables->name_length;
 
-        /* clone the value */
+	/*  Send a "bad type" notification if the type of the target object is 
+	    non-INTEGER and the test type is either `boolean' or `threshold'
+	    (which want to do arithmetic).  */
+	if (((item->mteTriggerTest[0] & MTETRIGGERTEST_BOOLEAN) || 
+	     (item->mteTriggerTest[0] & MTETRIGGERTEST_THRESHOLD)) &&
+	    response->errstat == SNMPERR_SUCCESS &&
+	    !mte_is_integer_type(response->variables->type)) {
+	  long failure = MTE_FAILURE_BADTYPE;
+	  send_mte_trap(item, mteTriggerFailure,
+			sizeof(mteTriggerFailure)/sizeof(oid),
+			next_oid, next_oid_len, &failure,
+			NULL, NULL, "failure: bad type");
+	  snmp_free_pdu(response);
+	  continue;
+	}
+
+        /*  Clone the value.  XXX: What happens if it's an unsigned type? Or a
+	    64-bit type, or an OCTET STRING for the sake of argument.  Do
+	    everything in 64-bit arithmetic perhaps?  Generate "bad type"
+	    notifications for non-INTEGER cases (except for existence).  */
         if (response->errstat == SNMPERR_SUCCESS &&
             response->variables->val.integer)
             memdup((unsigned char **) &value,
@@ -2056,9 +2135,9 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
         else
             value = NULL;
 
-        sprint_variable(buf, next_oid , next_oid_len,
-                        response->variables);
-        DEBUGMSGTL(("mteTriggerTable","receveived %s\n", buf));
+        sprint_variable(buf, next_oid , next_oid_len, response->variables);
+        DEBUGMSGTL(("mteTriggerTable","received %s (type %d)\n", buf,
+		    response->variables->type));
 
         /* see if we have old values for this */
         laststate = header_complex_get_from_oid(item->hc_storage_old,
@@ -2108,33 +2187,42 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
             }
         }
 
-        /* deal with boolean tests */
-        if (item->mteTriggerTest[0] & MTETRIGGERTEST_BOOLEAN &&
-            value) {
-        
+        /*  Deal with boolean tests.  XXX: this doesn't appear to handle
+	    sampleType = delta(2) cases?  */
+        if ((item->mteTriggerTest[0] & MTETRIGGERTEST_BOOLEAN) && 
+	    ((item->mteTriggerSampleType == MTETRIGGERSAMPLETYPE_ABSOLUTEVALUE
+	      && value) ||
+	     (item->mteTriggerSampleType == MTETRIGGERSAMPLETYPE_DELTAVALUE
+	      && value && old_value))) {
+	    if (item->mteTriggerSampleType==MTETRIGGERSAMPLETYPE_DELTAVALUE) {
+	        x = *((long *)value) - *((long *)old_value);
+	    } else {
+	        x = *((long *)value);
+	    }       
+
             switch(item->mteTriggerBooleanComparison) {
                 case MTETRIGGERBOOLEANCOMPARISON_UNEQUAL:
-                    boolresult = (*value != item->mteTriggerBooleanValue);
+                    boolresult = (x != item->mteTriggerBooleanValue);
                     break;
                 
                 case MTETRIGGERBOOLEANCOMPARISON_EQUAL:
-                    boolresult = (*value == item->mteTriggerBooleanValue);
+                    boolresult = (x == item->mteTriggerBooleanValue);
                     break;
                 
                 case MTETRIGGERBOOLEANCOMPARISON_LESS:
-                    boolresult = (*value < item->mteTriggerBooleanValue);
+                    boolresult = (x < item->mteTriggerBooleanValue);
                     break;
                 
                 case MTETRIGGERBOOLEANCOMPARISON_LESSOREQUAL:
-                    boolresult = (*value <= item->mteTriggerBooleanValue);
+                    boolresult = (x <= item->mteTriggerBooleanValue);
                     break;
                 
                 case MTETRIGGERBOOLEANCOMPARISON_GREATER:
-                    boolresult = (*value > item->mteTriggerBooleanValue);
+                    boolresult = (x > item->mteTriggerBooleanValue);
                     break;
                 
                 case MTETRIGGERBOOLEANCOMPARISON_GREATEROREQUAL:
-                    boolresult = (*value >= item->mteTriggerBooleanValue);
+                    boolresult = (x >= item->mteTriggerBooleanValue);
                     break;
                 
                 default:
@@ -2150,20 +2238,27 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
                 send_mte_trap(item, mteTriggerFired,
                               sizeof(mteTriggerFired)/sizeof(oid),
                               next_oid, next_oid_len,
-                              value, item->mteTriggerBooleanObjectsOwner,
+                              &x, item->mteTriggerBooleanObjectsOwner,
                               item->mteTriggerBooleanObjects, "boolean: true");
             }
         
+	    DEBUGMSGTL(("mteTriggerTable", "value: %d %ld %lu x: %d %ld %lu\n",
+			*value, *value, *value, x, x, x));
+
             DEBUGMSGTL(("mteTriggerTable",
-                        "boolean result: value=%d %s configured=%d = %d\n",
-                        *value,
+                        "boolean result: x=%d %s configured=%d = %d\n",
+                        x,
                         se_find_label_in_slist("mteBooleanOperators",
                                                item->mteTriggerBooleanComparison),
                         item->mteTriggerBooleanValue, boolresult));
         }
 
         /* deal with threshold tests */
-        if (value && item->mteTriggerTest[0] & MTETRIGGERTEST_THRESHOLD) {
+        if ((item->mteTriggerTest[0] & MTETRIGGERTEST_THRESHOLD) &&
+	    ((item->mteTriggerSampleType == MTETRIGGERSAMPLETYPE_ABSOLUTEVALUE
+	      && value) ||
+	     (item->mteTriggerSampleType == MTETRIGGERSAMPLETYPE_DELTAVALUE
+	      && value && old_value))) {
             /* XXX: correct intepretation of mteTriggerThresholdStartup? */
             /* only fires when passed and just set to active?  What
                about a newly discovered node that is past a
@@ -2231,6 +2326,9 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
                                          header_complex_find_entry(item->hc_storage_old, (void *) laststate));
             last_state_clean(laststate);
         }
+
+	/*  We are now done with the response PDU.  */
+	snmp_free_pdu(response);
     } while (item->mteTriggerValueIDWildcard == MTETRIGGERVALUEIDWILDCARD_TRUE);
 
     /* loop through old values for DNE cases */
