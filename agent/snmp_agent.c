@@ -103,6 +103,7 @@ int             deny_severity = LOG_WARNING;
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
 #include <net-snmp/agent/mib_module_config.h>
+#include <net-snmp/agent/mib_modules.h>
 
 #ifdef USING_AGENTX_PROTOCOL_MODULE
 #include "agentx/protocol.h"
@@ -1010,7 +1011,7 @@ init_master_agent(void)
 #endif
 #ifdef USING_SMUX_MODULE
     if(should_init("smux"))
-    real_init_smux();
+        real_init_smux();
 #endif
 
     /*
