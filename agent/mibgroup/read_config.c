@@ -49,9 +49,9 @@ extern char communities[NUM_COMMUNITIES][COMMUNITY_MAX_LEN];
 extern char sysContact[];
 extern char sysLocation[];
 
+extern int create_v1_trap_session __P((char *, char *));
 extern int snmp_enableauthentraps;
-extern char *snmp_trapsink;
-extern char *snmp_trapcommunity;
+char *snmp_trapcommunity = "public";
 
 extern struct myproc *procwatch;         /* moved to proc.c */
 extern int numprocs;                     /* ditto */
@@ -69,7 +69,7 @@ int minimumswap;
 char dontReadConfigFiles;
 char *optconfigfile;
 
-void init_read_config()
+void init_read_config __P((void))
 {
   update_config(0);
   signal(SIGHUP,update_config);
@@ -340,8 +340,10 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
 	    else
 	      snmp_enableauthentraps = i;
 	  } else if (!strncasecmp(word, "trapsink", 8)) {
-	    snmp_trapsink = malloc (strlen (cptr));
-	    copy_word(cptr, snmp_trapsink);
+	    cptr[strlen(cptr)-1] = 0;
+	    if (create_v1_trap_session(cptr, snmp_trapcommunity) == 0) {
+	      fprintf(stderr, "cannot create trapsink: %s\n", cptr);
+	    }
 	  } else if (!strncasecmp(word, "trapcomm", 8)) {
 	    snmp_trapcommunity = malloc (strlen(cptr));
 	    copy_word(cptr, snmp_trapcommunity);
