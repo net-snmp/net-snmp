@@ -1,37 +1,37 @@
 HOST-RESOURCES-TYPES DEFINITIONS ::= BEGIN
 
 IMPORTS
-    MODULE-IDENTITY, OBJECT-IDENTITY        FROM SNMPv2-SMI
-    hrMIBAdminInfo, hrStorage, hrDevice     FROM HOST-RESOURCES-MIB;
+  MODULE-IDENTITY, OBJECT-IDENTITY        FROM SNMPv2-SMI
+  hrMIBAdminInfo, hrStorage, hrDevice     FROM HOST-RESOURCES-MIB;
 
 hostResourcesTypesModule MODULE-IDENTITY
-    LAST-UPDATED "200003060000Z"    -- 6 March, 2000
-    ORGANIZATION "IETF Host Resources MIB Working Group"
-    CONTACT-INFO
-        "Steve Waldbusser
-        Postal: Lucent Technologies, Inc.
-                1213 Innsbruck Dr.
-                Sunnyvale, CA 94089
-                USA
-        Phone: 650-318-1251
-        Fax:   650-318-1633
-        Email: waldbusser@ins.com
+  LAST-UPDATED "200003060000Z"    -- 6 March, 2000
+  ORGANIZATION "IETF Host Resources MIB Working Group"
+  CONTACT-INFO
+      "Steve Waldbusser
+      Postal: Lucent Technologies, Inc.
+              1213 Innsbruck Dr.
+              Sunnyvale, CA 94089
+              USA
+      Phone: 650-318-1251
+      Fax:   650-318-1633
+      Email: waldbusser@ins.com
 
-        In addition, the Host Resources MIB mailing list is dedicated
-        to discussion of this MIB. To join the mailing list, send a
-        request message to hostmib-request@andrew.cmu.edu. The mailing
-        list address is hostmib@andrew.cmu.edu."
-    DESCRIPTION
-        "This MIB module registers type definitions for
-        storage types, device types, and file system types.
+      In addition, the Host Resources MIB mailing list is dedicated
+      to discussion of this MIB. To join the mailing list, send a
+      request message to hostmib-request@andrew.cmu.edu. The mailing
+      list address is hostmib@andrew.cmu.edu."
+  DESCRIPTION
+      "This MIB module registers type definitions for
+      storage types, device types, and file system types.
 
-        After the initial revision, this module will be
-        maintained by IANA."
-    REVISION "200003060000Z"    -- 6 March 2000
-    DESCRIPTION
-        "The original version of this module, published as RFC
-        2790."
-    ::= { hrMIBAdminInfo 4 }
+      After the initial revision, this module will be
+      maintained by IANA."
+  REVISION "200003060000Z"    -- 6 March 2000
+  DESCRIPTION
+      "The original version of this module, published as RFC
+      2790."
+  ::= { hrMIBAdminInfo 4 }
 
 -- Registrations for some storage types, for use with hrStorageType
 hrStorageTypes          OBJECT IDENTIFIER ::= { hrStorage 1 }
@@ -217,6 +217,7 @@ hrDeviceNonVolatileMemory OBJECT-IDENTITY
     STATUS current
     DESCRIPTION
         "The device type identifier used for a non-volatile memory
+
         storage device."
     ::= { hrDeviceTypes 21 }
 

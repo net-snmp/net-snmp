@@ -27,6 +27,7 @@ snmpUsmMIB MODULE-IDENTITY
                   phone:      +1-301-854-6889
 
                   Co-editor   Uri Blumenthal
+
                               IBM T. J. Watson Research
                   postal:     30 Saw Mill River Pkwy,
                               Hawthorne, NY 10532
@@ -52,7 +53,6 @@ snmpUsmMIB MODULE-IDENTITY
 
     REVISION     "9711200000Z"            -- 20 Nov 1997, midnight
     DESCRIPTION  "Initial version, published as RFC2274"
-
     ::= { snmpModules 15 }
 
 -- Administrative assignments ****************************************
@@ -116,9 +116,7 @@ usmDESPrivProtocol OBJECT-IDENTITY
                  "
     ::= { snmpPrivProtocols 2 }
 
-
 -- Textual Conventions ***********************************************
-
 
 KeyChange ::=     TEXTUAL-CONVENTION
    STATUS         current
@@ -171,6 +169,7 @@ KeyChange ::=     TEXTUAL-CONVENTION
                 portion of the keyNew component is L octets or less,
            - the random component is appended to the value of the
              temporary variable, and the result is input to the
+
              hash algorithm H to produce a digest value;
            - this digest value, truncated if necessary to be the same
              length as the unused portion of the keyNew, is XOR-ed
@@ -246,12 +245,9 @@ KeyChange ::=     TEXTUAL-CONVENTION
          "
     SYNTAX       OCTET STRING
 
-
 -- Statistics for the User-based Security Model **********************
 
-
 usmStats         OBJECT IDENTIFIER ::= { usmMIBObjects 1 }
-
 
 usmStatsUnsupportedSecLevels OBJECT-TYPE
     SYNTAX       Counter32
@@ -412,6 +408,7 @@ usmUserEntry     OBJECT-TYPE
     ::= { usmUserTable 1 }
 
 UsmUserEntry ::= SEQUENCE
+
     {
         usmUserEngineID         SnmpEngineID,
         usmUserName             SnmpAdminString,
@@ -460,6 +457,7 @@ usmUserSecurityName OBJECT-TYPE
     MAX-ACCESS   read-only
     STATUS       current
     DESCRIPTION "A human readable string representing the user in
+
                  Security Model independent format.
 
                  The default transformation of the User-based Security
@@ -604,6 +602,7 @@ usmUserAuthKeyChange OBJECT-TYPE
                  then the SET succeeded and the new key is active.
                  If you do not get a response, then you can issue a
                  GET(usmUserPublic) and check if the value is equal
+
                  to the randomValue you did send in the SET. If so, then
                  the key change succeeded and the new key is active
                  (probably the response got lost). If not, then the SET
@@ -700,6 +699,7 @@ usmUserPrivKeyChange OBJECT-TYPE
                  The associated secret key is the user's secret
                  privacy key (privKey). The associated hash
                  algorithm is the algorithm used by the user's
+
                  usmUserAuthProtocol.
 
                  When creating a new user, it is an 'inconsistentName'
@@ -852,7 +852,6 @@ usmMIBCompliance MODULE-COMPLIANCE
         OBJECT           usmUserPrivProtocol
         MIN-ACCESS       read-only
         DESCRIPTION     "Write access is not required."
-
     ::= { usmMIBCompliances 1 }
 
 -- Units of compliance
