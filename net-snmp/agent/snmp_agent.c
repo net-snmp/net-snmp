@@ -689,7 +689,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
         }
       }
     } else {
-        if (hosts_ctl("snmp", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
+        if (hosts_ctl("snmpd", STRING_UNKNOWN, STRING_UNKNOWN, STRING_UNKNOWN)){
             snmp_log(allow_severity, "Connection from <UNKNOWN>\n");
             addr_string = strdup("<UNKNOWN>");
         } else {
