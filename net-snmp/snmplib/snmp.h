@@ -221,6 +221,45 @@ SOFTWARE.
 
 /* PDU types in SNMPv2u, SNMPv2*, and SNMPv3 */
 #define REPORT_RSP_MSG	    SNMP_MSG_REPORT
+
+/* since CMU V1.5 */
+
+#define SNMP_PDU_GET	    SNMP_MSG_GET
+#define SNMP_PDU_GETNEXT    SNMP_MSG_GETNEXT
+#define SNMP_PDU_RESPONSE   SNMP_MSG_RESPONSE
+#define SNMP_PDU_SET        SNMP_MSG_SET
+#define SNMP_PDU_GETBULK    SNMP_MSG_GETBULK
+#define SNMP_PDU_INFORM     SNMP_MSG_INFORM
+#define SNMP_PDU_V2TRAP     SNMP_MSG_TRAP2
+#define SNMP_PDU_REPORT     SNMP_MSG_REPORT
+
+#define SNMP_TRAP_AUTHENTICATIONFAILURE SNMP_TRAP_AUTHFAIL
+
+#define SMI_INTEGER     ASN_INTEGER
+#define SMI_STRING      ASN_OCTET_STR
+#define SMI_OBJID       ASN_OBJECT_ID
+#define SMI_NULLOBJ     ASN_NULL
+#define SMI_IPADDRESS   ASN_IPADDRESS
+#define SMI_COUNTER32	    ASN_COUNTER
+#define SMI_GAUGE32	    ASN_GAUGE
+#define SMI_UNSIGNED32 SMI_GAUGE32
+#define SMI_TIMETICKS   ASN_TIMETICKS
+#define SMI_OPAQUE ASN_OPAQUE
+#define SMI_COUNTER64   ASN_COUNTER64
+
+char *uptime_string (u_long, char *);
+int mib_TxtToOid (char *, oid **, int *);
+int mib_OidToTxt (oid *, int , char *, int );
+
+struct snmp_pdu;
+char *snmp_pdu_type (struct snmp_pdu *);
+
+struct snmp_session;
+u_char * snmp_parse (struct snmp_session *session,
+    struct snmp_pdu *pdu,
+    u_char *data,
+    int length);
+
 #endif /* CMU_COMPATIBLE */
 
 void xdump (u_char *, int, char *);

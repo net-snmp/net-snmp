@@ -78,22 +78,22 @@
 
 #ifdef UCD_SNMP_LIBRARY
 
-#include <snmp/asn1.h>
-#include <snmp/snmp_api.h>
-#include <snmp/snmp_impl.h>
-#include <snmp/snmp_client.h>
-#include <snmp/mib.h>
-#include <snmp/parse.h>
-#include <snmp/snmp.h>
-#include <snmp/system.h>
-#include <snmp/int64.h>
-#include <snmp/version.h>
+#include <ucd-snmp/asn1.h>
+#include <ucd-snmp/snmp_api.h>
+#include <ucd-snmp/snmp_impl.h>
+#include <ucd-snmp/snmp_client.h>
+#include <ucd-snmp/mib.h>
+#include <ucd-snmp/parse.h>
+#include <ucd-snmp/snmp.h>
+#include <ucd-snmp/system.h>
+#include <ucd-snmp/int64.h>
+#include <ucd-snmp/version.h>
 
 #ifdef USE_V2PARTY_PROTOCOL
-#include <snmp/party.h>
-#include <snmp/context.h>
-#include <snmp/view.h>
-#include <snmp/acl.h>
+#include <ucd-snmp/party.h>
+#include <ucd-snmp/context.h>
+#include <ucd-snmp/view.h>
+#include <ucd-snmp/acl.h>
 #endif /* USE_V2PARTY_PROTOCOL */
 
 #else
@@ -103,28 +103,23 @@
 #include <netinet/in.h>
 #endif
 
-/* These come first */
 #include <snmp/asn1.h>
 #include <snmp/snmp_error.h>
 #include <snmp/mibii.h>
 #include <snmp/snmp_extra.h>
 #include <snmp/snmp_dump.h>
 
-/* I didn't touch this */
 #include <snmp/snmp_session.h>
 
-/* The various modules */
 #include <snmp/snmp_vars.h>
 #include <snmp/snmp_pdu.h>
 #include <snmp/snmp_msg.h>
 
-/* Other functions */
 #include <snmp/snmp_coexist.h>
 #include <snmp/version.h>
 #include <snmp/snmp_api_error.h>
 #include <snmp/mini-client.h>
 
-/* Other stuff I didn't touch */
 #include <snmp/snmp_impl.h>
 #include <snmp/snmp_api.h>
 #include <snmp/snmp_client.h>
@@ -159,7 +154,6 @@
 #define snmp_set_do_debugging(X)
 #define snmp_set_full_objid(X)
 #define snmp_set_suffix_only(X)
-#define uptime_string uptime_str
 
 #define VersionInfo snmp_Version
 #define get_node read_objid
