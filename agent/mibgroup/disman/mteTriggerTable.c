@@ -392,6 +392,12 @@ parse_simple_monitor(const char *token, char *line)
     while (cp && *cp == '-') {
         cp = copy_nword(cp, buf, sizeof(buf));
         switch (buf[1]) {
+       case 't':
+           /*
+            * Threshold toggle
+            */
+           StorageNew->mteTriggerTest[0] = MTETRIGGERTEST_THRESHOLD;
+           break;
         case 'r':
             if (cp) {
                 cp = copy_nword(cp, buf, sizeof(buf));
@@ -498,39 +504,57 @@ parse_simple_monitor(const char *token, char *line)
     StorageNew->mteTriggerValueID = snmp_duplicate_objid(obuf, obufLen);
     StorageNew->mteTriggerValueIDLen = obufLen;
 
-    /*
-     * if nothing beyond here, it's an existence test 
-     */
-    if (!cp) {
-        StorageNew->mteTriggerTest[0] = MTETRIGGERTEST_EXISTENCE;
-        mteTriggerTable_add(StorageNew);
-        return;
-    }
+    if (StorageNew->mteTriggerTest[0] == MTETRIGGERTEST_THRESHOLD) {
+       /*
+        * it's a threshold
+        * grab 'low' and 'high' params
+        */
+        if (!cp) {
+            config_perror("no lower threshold value specified");
+       }
+       cp = copy_nword(cp, buf, sizeof(buf));
+       StorageNew->mteTriggerThresholdFalling = strtol(buf, NULL, 0);
 
-    /*
-     * assume boolean (need to deal with threshold statements) 
-     */
-    cp = copy_nword(cp, buf, sizeof(buf));
-    if ((StorageNew->mteTriggerBooleanComparison =
-         se_find_value_in_slist("mteBooleanOperators", buf)) == -1) {
-        config_perror("illegal boolean operator");
-        return;
-    }
-
-    /*
-     * XXX: add threshold 
-     */
-    StorageNew->mteTriggerTest[0] = MTETRIGGERTEST_BOOLEAN;
-    if (!cp) {
-        config_perror("no comparison value specified");
+        if (!cp) {
+            config_perror("no upper threshold value specified");
+       }
+       cp = copy_nword(cp, buf, sizeof(buf));
+       StorageNew->mteTriggerThresholdRising = strtol(buf, NULL, 0);
+    } else {
         /*
-         * XXX: free StorageNew 
+         * if nothing beyond here, it's an existence test 
          */
-        return;
-    }
+        if (!cp) {
+            StorageNew->mteTriggerTest[0] = MTETRIGGERTEST_EXISTENCE;
+            mteTriggerTable_add(StorageNew);
+            return;
+        }
 
-    cp = copy_nword(cp, buf, sizeof(buf));
-    StorageNew->mteTriggerBooleanValue = strtol(buf, NULL, 0);
+        /*
+         * assume boolean (need to deal with threshold statements) 
+         */
+        cp = copy_nword(cp, buf, sizeof(buf));
+        if ((StorageNew->mteTriggerBooleanComparison =
+             se_find_value_in_slist("mteBooleanOperators", buf)) == -1) {
+            config_perror("illegal boolean operator");
+            return;
+        }
+
+        /*
+         * XXX: add threshold 
+         */
+        StorageNew->mteTriggerTest[0] = MTETRIGGERTEST_BOOLEAN;
+        if (!cp) {
+            config_perror("no comparison value specified");
+            /*
+             * XXX: free StorageNew 
+             */
+            return;
+        }
+
+        cp = copy_nword(cp, buf, sizeof(buf));
+        StorageNew->mteTriggerBooleanValue = strtol(buf, NULL, 0);
+    }
     mteTriggerTable_add(StorageNew);
     mte_enable_trigger(StorageNew);
 
@@ -3541,8 +3565,8 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                 *value > item->mteTriggerThresholdFalling)
                 new_last_state->lastthreshold = MTE_THRESHOLD_HIGH;
             else if (lastthresh == MTE_THRESHOLD_HIGH &&
-                     *value <= item->mteTriggerThresholdRising &&
-                     *value < item->mteTriggerThresholdFalling)
+                     *value < item->mteTriggerThresholdRising &&
+                     *value <= item->mteTriggerThresholdFalling)
                 new_last_state->lastthreshold = MTE_THRESHOLD_LOW;
             else if (lastthresh == MTE_THRESHOLD_BEGIN) {
                 if (*value >= item->mteTriggerThresholdRising)
