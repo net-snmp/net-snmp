@@ -96,10 +96,10 @@ main.o:  ./../../snmplib/asn1.h ./../../snmplib/mib.h
 main.o: ./../../snmplib/snmp.h ./../../snmplib/snmp_api.h
 main.o: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_client.h
 main.o: ./../../snmplib/party.h ./../../snmplib/context.h
-main.o: ./../../snmplib/view.h ./../../snmplib/acl.h netstat.h
+main.o: ./../../snmplib/view.h ./../../snmplib/acl.h ../../version.h
+main.o: netstat.h
 route.o: ../../config.h ../../mib_module_config.h
 route.o: ../../agent/mibgroup/struct.h 
-route.o:   main.h
-route.o: ./../../snmplib/asn1.h ./../../snmplib/snmp.h
+route.o: main.h ./../../snmplib/asn1.h ./../../snmplib/snmp.h
 route.o: ./../../snmplib/snmp_impl.h ./../../snmplib/snmp_api.h
 route.o: ./../../snmplib/snmp_client.h ./../../snmplib/mib.h netstat.h
