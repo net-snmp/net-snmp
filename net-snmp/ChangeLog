@@ -1,5 +1,4032 @@
 -------------------------------------------------------------------------------
 
+Changes: V4.1.2 -> V4.2
+
+2000-12-04 15:30  hardaker
+
+	- (NEWS, README): updates.
+	
+2000-12-04 14:48  marz
+
+	ensure mibload.t uses correct MIBDIR for testing
+	
+2000-12-04 11:05  hardaker
+
+	- (AGENT.txt, FAQ, README): convert url's to www.netsnmp.org.
+	
+2000-12-04 08:45  hardaker
+
+	- (NEWS): agentx note changes.
+	
+2000-12-03 07:29  nba
+
+	- snmptrapd_log.c: fox missing leading zeroes for %.2d like formats.
+		Add an alternate format for up-time displays.
+	
+2000-12-02 18:22  marz
+
+	found the uninitialized data bug...must have been in there dormant for a while, other test fixes - good to go!
+	
+2000-12-01 16:36  hardaker
+
+	- (agent/snmpd.c): reference sourceforge.
+	
+2000-12-01 16:35  hardaker
+
+	- (AGENT.txt): reference sourceforge.
+	
+2000-12-01 16:34  hardaker
+
+	- (TODO): reference net-snmp-coders.
+	
+2000-12-01 16:34  hardaker
+
+	- (README): update.
+	
+2000-12-01 16:33  hardaker
+
+	- (bug-report, agent/mibgroup/versiontag): remove the bug report script.
+	
+2000-12-01 16:31  hardaker
+
+	- (PORTING): reference sourceforge.
+	
+2000-12-01 16:23  hardaker
+
+	- (man/snmptrapd.conf.5.def): mention the fact that snmpv3 traps are
+	  the same as snmpv2 traps.
+	
+2000-12-01 16:23  hardaker
+
+	- (NEWS): update.
+	
+2000-12-01 15:31  hardaker
+
+	- (README): update.
+	
+2000-12-01 15:16  hardaker
+
+	- (snmpd.conf.5.def): update for proxy support.
+	
+2000-12-01 14:36  hardaker
+
+	- (FAQ): update a few things.
+	
+2000-12-01 14:28  nba
+
+	- mib.c: diagnose wrong quoting in indices
+	
+2000-12-01 14:23  nba
+
+	- parse.c: add RFC-1213 as an aliase for RFC1213-MIB (used in many mibs)
+	
+2000-12-01 14:19  nba
+
+	- smux.c: reformat some debug messages for readability
+	
+2000-12-01 14:17  nba
+
+	- interfaces.c: fix ifType values for Linux
+	
+2000-12-01 14:14  nba
+
+	- subagent.c: supply a missing return value
+	
+2000-12-01 10:04  hardaker
+
+	- (snmpconf): quote things with spaces in them.
+	
+2000-12-01 09:49  hardaker
+
+	- (snmpconf.1): quick man page for snmpconf.
+	
+2000-12-01 09:15  hardaker
+
+	- (local/snmpconf.dir/snmpd.conf/monitor): cleanups.
+	
+2000-12-01 09:14  hardaker
+
+	- (snmplib/parse.c): change no-parent log message into a warning.
+	
+2000-12-01 09:11  hardaker
+
+	- (agent/mibgroup/agentx/README.agentx): update from Dave.
+	
+2000-12-01 09:10  hardaker
+
+	- (FAQ): update from Dave.
+	
+2000-12-01 07:59  hardaker
+
+	- (agent/agent_trap.c): Patch from Dave Shield:
+	  - support v2->v1 trap conversion.
+	
+2000-12-01 07:56  hardaker
+
+	- (configure, configure.in): typo.
+	
+2000-12-01 07:42  marz
+
+	additional fixes to support targetted builds of perl/SNMP using -NET-SNMP-PATH (and white space removal as my emacs kindly does that for me?)
+	
+2000-11-30 14:06  nba
+
+	- getopt.h, snmp_parse_args.h: extern "C" bracketing
+	
+2000-11-30 14:04  nba
+
+	- snmpd.conf.5.def: fix formatting of smuxpeer token
+	
+2000-11-30 10:31  hardaker
+
+	- (FAQ): Update from Dave.
+	
+2000-11-30 10:18  hardaker
+
+	- (master_request.c): Patch from Dave Shield to fix bad sets for agentx.
+	
+2000-11-30 09:19  hardaker
+
+	- (ov/README): minor corrections, probably still incorrect.
+	
+2000-11-30 09:18  hardaker
+
+	- (local/Makefile.in, snmpconf, acl, basic_setup, monitor, operation,
+	  system, trapsinks):
+	  - grouping support.
+	  - sort-of-quiet output support.
+	  - operation mode support (setting user, group, ports...)
+	
+2000-11-30 09:13  hardaker
+
+	- (snmplib/read_config.c): save a warning header at the top of the
+	  persistent data file.
+	
+2000-11-30 09:11  hardaker
+
+	- (agent/mibgroup/tunnel/tunnel.c): Cleanup patch from Frank Strauss.
+	
+2000-11-30 09:10  hardaker
+
+	- (agent/snmpd.c): set DS_AGENT_NO_ROOT_ACCESS in -H help output.
+	
+2000-11-30 09:08  hardaker
+
+	- (configure, configure.in): mention the TUNNEL-MIB support.
+	
+2000-11-29 18:21  slif
+
+	Update e-mail address for Slifcak
+	
+2000-11-29 11:34  marz
+
+	fixed order of function checking so that vsnprintf is not found in libdb (BSD db) by mistake
+	
+2000-11-29 05:18  marz
+
+	partial submit to get perl/SNMP tests to pass and update the docs somewhat - still getting cores in notify.t. had to change create_user_from_session to update an existing user incase 2 sessions are started with the same user
+	
+2000-11-28 18:00  marz
+
+	partial submit to get perl/SNMP tests to pass and update the docs somewhat - still getting cores in notify.t. had to change create_user_from_session to update an existing user incase 2 sessions are started with the same user
+	
+2000-11-27 14:37  hardaker
+
+	- (local/snmpconf.dir/snmpd.conf/basic_setup): basic setup series of questions.
+	
+2000-11-27 14:36  hardaker
+
+	- (local/snmpconf.dir/snmpd.conf/acl): typos.
+	
+2000-11-27 14:36  hardaker
+
+	- (local/snmpconf):
+	  - add support for "groups" of items.
+	  - don't use IO::Dir, as its not in the standard perl module distributions.
+	
+2000-11-27 14:34  hardaker
+
+	- (agent/mibgroup/ucd-snmp/dlmod.h): remove unneeded variable reference.
+	
+2000-11-27 14:33  hardaker
+
+	- (agent/snmp_agent.c): Patch from John Naylon:
+	  - fix auto-set support for the agent (and plug a memory leak).
+	
+2000-11-27 13:42  nba
+
+	- snmp.conf.5.def: document tokens extendedIndex and noRangeCheck
+	
+2000-11-27 13:41  nba
+
+	- parse.c: fix a C++ style comment
+	
+2000-11-24 15:14  nba
+
+	- memory_freebsd2.c, vmstat_netbsd1.c: minor fixes for NetBSD 1.5, OPenBSD 2.6
+	
+2000-11-22 13:48  hardaker
+
+	- (mibgroup/ucd-snmp/dlmod.c): Patch from Sean Harding:
+	  - don't export an internal variable.
+	
+2000-11-21 15:17  nba
+
+	- mib.c: fix parsing of oid like 99.13.\"guf\"8
+	
+2000-11-19 13:03  nba
+
+	- SNMP.xs, mib2c.vartypes.conf: The recent specialisation of the Integer
+		types in the parser created problems for the perl module and in turn
+		for mib2c. Sorry for not catching this before pre2 :-(
+	
+2000-11-19 12:58  nba
+
+	- fixes to ./configure --with-defaults --enable-mini-agent; make install
+		and run the tools under cygwin. Haven't tried the agent yet :-)
+	
+2000-11-18 07:14  hardaker
+
+	- (version.h bug-report sedscript.in): version tag ( 4.2.pre2 )
+	
+2000-11-18 07:12  hardaker
+
+	- (T049snmpv3inform): v3 inform test added.
+	
+2000-11-17 11:01  nba
+
+	- mib.c, snmp_api.c: better error messages for bad snmpset calls and bad
+		indices. Also fix a bug with quoted indices.
+	
+2000-11-17 10:32  hardaker
+
+	- (tests/T050snmpv3trap): test for snmpv3 traps.
+	
+2000-11-17 10:30  hardaker
+
+	- (snmptrapd.c): fix cases where the format strings are specified.
+	
+2000-11-17 10:26  nba
+
+	- IANAifType-MIB.txt: update from IANA
+	
+2000-11-17 08:32  hardaker
+
+	- (master_request.c): Patch from Dave Shield:
+	  - fix memory leaks.
+	  - fix agentx problems with bad sets.
+	
+2000-11-16 17:55  hardaker
+
+	- (snmplib/snmpv3.c): added a space in a debugging output statement.
+	
+2000-11-16 17:54  hardaker
+
+	- (snmplib/read_config.c): simple debugging statement added.
+	
+2000-11-16 17:54  hardaker
+
+	- (snmplib/snmp_api.c): set DS_LIB_APPTYPE if it hasn't been set yet.
+	
+2000-11-16 17:52  hardaker
+
+	- (testing/eval_tools.sh): add CONFIGTRAPD.
+	
+2000-11-16 17:50  hardaker
+
+	- (snmplib/mib.c, testing/tests/T112agentxsetfail,
+	  testing/tests/T122proxysetfail):
+	  - support -Ir for "dont check range/type values" (letter r subject to debate).
+	
+2000-11-16 17:25  hardaker
+
+	- (callback.c): better debugging output to display a callback count when done.
+	
+2000-11-16 16:52  hardaker
+
+	- (T113agentxtrap): A new test to test trap support from agentx subagents.
+	
+2000-11-16 16:50  hardaker
+
+	- (T058agentauthtrap): sleep some and only perform one get request.
+	
+2000-11-16 16:49  hardaker
+
+	- (T054agentv2ctrap): sleep a bit and only send one snmp set request.
+	
+2000-11-16 15:47  nba
+
+	- getopt.c: quell compiler warnings
+	
+2000-11-16 15:31  nba
+
+	- parse.[ch], mib.c, snmp_api.c: rename TYPE_UINTEGER32 back to TYPE_UINTEGER
+	
+2000-11-16 15:16  nba
+
+	- snmptrapd.c, snmptrapd.conf: new config directives format1 and format2 to
+		set log formats for TRAP1 and TRAP2 pdus.
+	
+2000-11-16 13:50  nba
+
+	- snmp_api.c: add functionality to check value types in addition to ranges
+		for snmpset and snmptrap.
+	
+2000-11-16 13:47  nba
+
+	- parse.c: Fix DEFVAL parsing for  OBJECT IDENTIFIER or BITS values
+		(i.e. DEFVAL { { 0 0 } } etc)
+	
+2000-11-16 11:39  hardaker
+
+	- (T058agentauthtrap): add a greater timeout to the get request.
+	
+2000-11-16 11:35  hardaker
+
+	- (example.c):
+	  - send a v2c trap using its own data, not the system_mib's.
+	  - more debugging statements.
+	
+2000-11-16 11:34  hardaker
+
+	- (T053agentv1trap, T054agentv2ctrap, T058agentauthtrap):
+	  - new tests for traps sent by the agent.
+	
+2000-11-16 09:56  hardaker
+
+	- (target.c): Don't delete READONLY trap sessions.
+	
+2000-11-15 16:37  hardaker
+
+	- (testing/tests/T052snmpv2cinform): test inform sending/receiving.
+	
+2000-11-15 16:37  hardaker
+
+	- (apps/snmptrap.c, man/snmptrap.1): support -Ci for sending informs.
+	
+2000-11-15 15:48  hardaker
+
+	- (snmptrapd_log.c): use SNMP_MAXBUF instead of a local length definition.
+	
+2000-11-15 14:18  nba
+
+	- Makefile.in: fix make'ing in remote directory
+	
+2000-11-15 14:11  nba
+
+	- main.c: update to use getopt for argument parsing.
+	
+2000-11-15 14:10  nba
+
+	- snmp_agent.c: fix a confusing indentation.
+	
+2000-11-15 14:09  nba
+
+	- agent_trap.c: make sure community is \0-terminated in targetParamsTable
+	
+2000-11-15 14:03  nba
+
+	- snmptrapd_log: fix a buffer that is way too short for a trap with just a
+		single parameter. Fix a bad limit test in str_append.
+	
+2000-11-15 14:00  nba
+
+	- snmptranslate.c: fix a stupid perror for snmp_perror
+	
+2000-11-15 13:58  nba
+
+	- parse.[ch], mib.c: enhance the parser to distinguish INTEGER, Integer32,
+		Unsigned32, UInteger32.
+	
+2000-11-15 13:55  nba
+
+	snmp_api.c: remove an unused variable
+	
+2000-11-15 07:49  hardaker
+
+	- (snmp_vars.c, subagent.c): Patch from Lawrence Greenfield:
+	  - Don't make init_agent()/subagent_pre_init() exit but return an
+	    error condition instead.
+	
+2000-11-12 08:08  hardaker
+
+	- (ucdDemoPublic.c): add NULL to end of demo string and check for len=0.
+	
+2000-11-12 04:45  nba
+
+	snmp_api.c: Make sure the noRangeCheck token is a boolean
+	
+2000-11-12 04:41  nba
+
+	- mib.c: give the tree-top a name to protect error message when looking up .foo
+	
+2000-11-12 04:36  nba
+
+	- snmptranslate.c: use config_perror for a better error message
+	
+2000-11-12 04:34  nba
+
+	- proxy.c: remove some unused variables.
+	
+2000-11-12 04:33  nba
+
+	-agent_traps.c: Move a conditionally used variable
+	
+2000-11-12 04:32  nba
+
+	Fix a bogus #ifdef
+	
+2000-11-10 09:18  hardaker
+
+	- (configure, configure.in): apply patch #102224 from jbpn for cross-compiling.
+	
+2000-11-10 08:56  hardaker
+
+	- (testing/TESTCONF.sh, testing/eval_tools.sh, testing/tests/T051snmpv2ctrap):
+	 - first pass at a testing script to test trap functionality.
+	   - which even uncovered a bug.
+	
+2000-11-10 08:55  hardaker
+
+	- (apps/snmptrapd.c):
+	  - fork if file logging or syslogging, but not printing.
+	  - don't close open file descriptors.  There shouldn't be any.
+	
+2000-11-10 08:53  hardaker
+
+	- (apps/snmptrapd_log.c): properly null terminate log strings.
+	
+2000-11-09 16:40  hardaker
+
+	- (configure.in): attempt to implement a --with-rsaref flag.
+	
+2000-11-09 15:32  hardaker
+
+	- (README, perl/SNMP/README): mention Karl.
+	
+2000-11-09 15:31  hardaker
+
+	- (NEWS, perl/SNMP/README): mention Karl.
+	
+2000-11-09 14:56  hardaker
+
+	- (examples/bulkwalk.pl, t/bulkwalk.t): patch from Karl Schilke:
+	  - support bulk requests.
+	
+2000-11-09 14:53  hardaker
+
+	- (MANIFEST, README, SNMP.pm, SNMP.xs): patch from Karl Schilke:
+	  - support bulk requests.
+	
+2000-11-08 23:33  hardaker
+
+	- (read_config.c): fix -H output.
+	
+2000-11-08 23:02  hardaker
+
+	- (snmp_agent.c): make agent_check_and_process() call run_alarms().
+	
+2000-11-08 22:45  hardaker
+
+	- (diskio.c): fix OID.
+	
+2000-11-08 17:06  hardaker
+
+	- (SNMP.pm, SNMP.xs): patch from Mark Cavage for default value support.
+	
+2000-11-08 17:03  hardaker
+
+	- (mib.c, parse.c, parse.h): minimal DEFVAL parsing support.
+	
+2000-11-08 16:20  hardaker
+
+	- (config.h.in, configure): check for librsaref, etc, if needed.
+	
+2000-11-07 15:15  hardaker
+
+	- (config.h.in, configure, configure.in, agent/agent_read_config.c,
+	  agent/snmpd.c):
+	  - uid/gid changes.
+	
+2000-11-07 15:10  hardaker
+
+	- (SNMP.xs): fix TYPE_NOTIF -> TYPE_NOTIFTYPE.
+	
+2000-11-07 11:30  hardaker
+
+	- (SNMP/SNMP.pm, SNMP/SNMP.xs): Patch from Joe Clarke:
+	  - implement best-guess (-Ib) parsing.
+	  - access to trap varbinds.
+	  - range access.
+	
+2000-11-07 11:00  hardaker
+
+	- (.cvsignore): ignore build created files.
+	
+2000-11-07 10:58  hardaker
+
+	- (README, SNMP.pm, SNMP.xs): patch from Karl Schilke:
+	  - implement a finish() call.
+	
+2000-11-07 10:54  hardaker
+
+	- (SNMP/SNMP.xs): patch from Karl Schilke:
+	  - multiple callback patch for perl/SNMP/SNMP.xs.
+	
+2000-11-07 10:48  hardaker
+
+	- (read_config.c): log an error message if the optional config file DNE.
+	
+2000-11-07 10:41  hardaker
+
+	- (SNMP.pm): fix iid parsing with respect to mib nodes with a - in it.
+	
+2000-11-07 10:29  hardaker
+
+	- (if_fields.h, interfaces.c, ipMedia.c, ipRoute.c, tcp.c, tcpTable.c,
+	  udp.c, udpTable.c): Patch from Bert Driehuis:
+	  - mibJJ fixes [FreeBSD/other BSD's].
+	
+2000-11-07 10:13  hardaker
+
+	- (agent/agent_read_config.c, agent/ds_agent.h, agent/snmpd.c,
+	  man/snmpd.1.def, man/snmpd.conf.5.def): Patch from Harrie Hazewinkel:
+	  - implement uid/gid changes after startup for the agent.
+	
+2000-11-07 08:33  hardaker
+
+	- (target.c): a better sanity check for session deletion.
+	
+2000-11-07 07:24  hardaker
+
+	- (target.c): Patch from Dave to sanity check param->updateTime.
+	
+2000-11-06 11:00  hardaker
+
+	- (md5.c): check to see that MDsign() data lies on a 32 byte boundry.
+	  - its possible some compilers will choke on this hack.
+	  - fixes bug #12175.
+	
+2000-11-03 17:54  hardaker
+
+	- (mib2c): sort OIDs properly.
+	
+2000-11-03 16:44  hardaker
+
+	- (example.c): Patch from Harrie Hazewinkel:
+	  - fix mib registrations for duplicate OIDs being used for the trap examples.
+	
+2000-11-03 15:31  hardaker
+
+	- (snmpd.c): second patch from dougwarz in bug #117273 to fix smux problems.
+	  - Um, applied correctly this time (I hope).
+	
+2000-11-03 15:29  hardaker
+
+	- (snmpd.c): second patch from dougwarz in bug #117273 to fix smux problems.
+	
+2000-11-02 22:19  nba
+
+	Clean up some unused variables etc.
+	
+2000-11-02 22:16  nba
+
+	- Makefile.in: fix some $(srcdir) references when running outside source
+	
+2000-11-02 22:15  nba
+
+	- snmptrapd.c: fix the format string for format_trap
+	
+2000-11-02 22:14  nba
+
+	- Makefile.in: remove some duplicates from file lists
+	
+2000-11-02 22:12  nba
+
+	Document the -OX output option
+	
+2000-11-02 22:11  nba
+
+	Document the sysservices token
+	
+2000-11-02 16:17  hardaker
+
+	- (agent/mibgroup/ucd_snmp.h): add ucd-snmp/proxy.
+	
+2000-11-02 16:16  hardaker
+
+	- (agent/mibgroup/versiontag): change cvs archive site and package name.
+	
+2000-11-02 13:23  hardaker
+
+	- (smux.c): Patch 102239 from dougwarz to fix a previously bad smux.c patch.
+	
+2000-11-01 16:36  hardaker
+
+	- (version.h bug-report sedscript.in): version tag ( 4.2.pre1 )
+	
+2000-11-01 16:14  hardaker
+
+	- (T120proxyget, T121proxyset, T122proxysetfail): proxy test suite.
+	
+2000-11-01 16:08  hardaker
+
+	- (agent/mibgroup/ucd-snmp/proxy.c, agent/mibgroup/ucd-snmp/proxy.h):
+	  - minimal SET support for the proxy code.
+	
+2000-11-01 10:22  hardaker
+
+	- (T112agentxsetfail): test for agentx sets that should fail properly.
+	
+2000-10-31 14:30  nba
+
+	- tcpTable.c: remove an unnescessary #include
+	
+2000-10-31 14:28  nba
+
+	- smux.c: fix wrong variable length
+	
+2000-10-31 14:25  nba
+
+	- protocol.c: fix some suspicious looking code
+	
+2000-10-31 14:21  nba
+
+	- man/snmpd.conf: fix a typo
+	
+2000-10-31 12:41  nba
+
+	- mib.c: add -OX output format, for just another way of printing indices
+	
+2000-10-31 12:27  nba
+
+	- interface.c: add "interface" config for unguessable interface type/speed
+	
+2000-10-31 12:25  nba
+
+	- apps/*: make sure we report any errindex/errcode in the response
+	
+2000-10-31 12:04  nba
+
+	- protocol.c: clean up unused variables.
+	
+2000-10-31 10:13  hardaker
+
+	- (smux.c): patch #1 from bug #117273 applied to fix smux socket problems.
+	
+2000-10-31 09:24  hardaker
+
+	- (SNMP.xs): print counter64's as unsigned.
+	
+2000-10-31 07:54  hardaker
+
+	- (agent_trap.c, agent_trap.h, subagent.c, snmpNotifyTable.c,
+	  snmpNotifyTable.h): Patch from Dave:
+	  - fix notifications from agentx subagents.
+	
+2000-10-30 22:03  hardaker
+
+	- (smux.c): fix bug #119786: make smux reuse socket address.
+	
+2000-10-30 21:42  hardaker
+
+	- (eval_tools.sh, tests/T110agentxget, tests/T111agentxset):
+	  - fix bug #382
+	  - fix agentx non-root tests to use -x /tmp/blah/agentx_socket.
+	
+2000-10-30 13:45  hardaker
+
+	- (snmpd.1.def): fix a typo pointed out by Chris Pepper.
+	
+2000-10-30 11:46  hardaker
+
+	- (tests/T111agentxset): test script for AgentX set support.
+	
+2000-10-30 11:43  hardaker
+
+	- (tests/T110agentxget): header changed to include the word GET.
+	
+2000-10-30 11:13  nba
+
+	- ucd-snmp/vmstat_*, memory_freebsd2.c, dlmod.c: Make ssRawCpu objects Counters,
+		and add support for *BSD (including OpenBSD)
+	
+2000-10-30 11:07  nba
+
+	- Clean up unused variables.
+	
+2000-10-30 11:04  hardaker
+
+	- (testing/tests/T101agentx, testing/tests/T110agentxget):
+	  - renamed the agentx test script.
+	
+2000-10-30 11:03  hardaker
+
+	- (testing/eval_tools.sh): don't add -c CONFIGFILE if it doesn't exist.
+	
+2000-10-30 10:39  hardaker
+
+	- (agent/snmpd.c): error when parsing -X for non-agentx builds.
+	
+2000-10-27 11:29  hardaker
+
+	- (apps/snmptrapd.c): add -o flag to log to a particular file.
+	
+2000-10-27 10:41  hardaker
+
+	- (snmplib/snmp_api.c): use mkstemp if available.
+	
+2000-10-27 10:40  hardaker
+
+	- (config.h.in, configure, configure.in): Search for mkstemp().
+	
+2000-10-27 10:08  hardaker
+
+	- (FAQ): update linux kernel list to include 2.2.
+	
+2000-10-26 17:51  hardaker
+
+	- (eval_tools.sh): make SKIPIFNOT check the mib module list too.
+	
+2000-10-26 17:48  hardaker
+
+	- (tests/T101agentx): AgentX subagent test for simple get retrieval.
+	
+2000-10-25 17:44  hardaker
+
+	- (snmpd.c): Add -X option to snmpd to run as a subagent.
+	
+2000-10-25 17:06  hardaker
+
+	- (read_config.c): fix for cases whene debugging is always off.
+	
+2000-10-17 15:30  hardaker
+
+	- (config.h.in): autoheader run
+	
+2000-10-16 03:13  daves
+
+	- (agentx/master.c): Specify the length of the (pseudo-)answer to a request.
+		This allows it to be cached correctly for multi-pass SET handling.
+	
+2000-10-16 03:11  daves
+
+	- (agentx/subagent.c): Don't overwrite saved mode information
+		This should help with (some of) the SET handling problems.
+	
+2000-10-16 01:56  daves
+
+	- (agentx/master_request.c): Don't free callback data structure.
+		This holds information that needs to persist across multi-pass requests.
+		I realise that this introduces a memory leak, but this isn't the
+		correct place to handle this.
+	
+2000-10-12 14:52  hardaker
+
+	- (snmpd.c): add -I to the help output.
+	
+2000-10-12 14:24  hardaker
+
+	- (agent/dlmods/*): remove obsolete versions
+	
+2000-10-12 14:08  hardaker
+
+	- (configure): update.
+	
+2000-10-12 14:01  hardaker
+
+	- (acconfig.h, config.h.in, configure.in): Patch from Matt Braithwaite:
+	  - udp configuration changes to check for misc structure definitions.
+	
+2000-10-12 13:48  hardaker
+
+	- (TUNNEL-MIB.txt): TUNNEL-MIB definition.
+	
+2000-10-12 13:48  hardaker
+
+	- (tunnel.h): config_add_mib(TUNNEL-MIB).
+	
+2000-10-12 13:47  hardaker
+
+	- (tunnel.h, tunnel.c, tunnel.h): Patch from Frank Strauss:
+	  - implement the TUNNEL-MIB.
+	
+2000-10-10 14:33  mslifcak
+
+	Fix unlink_tree for "top level" tree nodes.
+	
+2000-10-10 11:02  hardaker
+
+	- (Makefile.in): reverse library link ordering again...
+	
+2000-10-10 09:03  mslifcak
+
+	Remove relative path to include system.h.
+	
+2000-10-10 06:53  mslifcak
+
+	Remove unneeded decl of vsnprintf without stdarg/varargs decl of va_list.
+	
+2000-10-10 05:15  mslifcak
+
+	Apply patch for DEC Alpha EV6, supplied by Shumon Huque<shuque@isc.upenn.edu>
+	
+2000-10-09 17:06  mslifcak
+
+	patch to fix leading zero error introduced by changes for shutdown_mib.
+	
+2000-10-09 15:51  hardaker
+
+	- (dlmod.c): minor debugging output additions.
+	
+2000-10-09 15:51  hardaker
+
+	- (Makefile.in): move auto_nlist to libucdmibs.
+	
+2000-10-09 11:43  hardaker
+
+	- (FAQ, README): add new mirror.
+	
+2000-10-09 10:26  mslifcak
+
+	Move config- and store-related cleanup from shutdown_mib to snmp_shutdown.
+	
+2000-10-09 02:36  daves
+
+	- (mibII/interfaces.c): Qualify an individual interface type test symbol
+		(Qn: should any/all of the others be qualified as well?)
+	
+2000-10-06 08:56  mslifcak
+
+	Support for shutdown_mib - clearing the MIB trees and configured registrations.
+	
+2000-10-06 05:33  mslifcak
+
+	Plug memory leak for ucd-supplied setenv on Win32 platform.
+	
+2000-10-06 04:58  mslifcak
+
+	Remove unused variables.
+	
+2000-10-05 23:45  nba
+
+	- mib.c: fix silly bug in new oid parser, when leaving the tree and going
+		into sub-ids we know nothing about
+	
+2000-10-05 16:03  hardaker
+
+	- (Makefile.in): Patch from Harrie Hazewinkel:
+	  - fix library dependency order.
+	
+2000-10-04 17:59  hardaker
+
+	- (Makefile.in): install "extending" snmpconf file.
+	
+2000-10-04 17:58  hardaker
+
+	- (extending): add snmpconf support for extending the agent (pass, exec, ...)
+	
+2000-10-04 17:58  hardaker
+
+	- (monitor): misc updates and add "file" watching.
+	
+2000-10-04 17:57  hardaker
+
+	- (acl): don't specify line specifications for default snmpconf usage.
+	
+2000-10-04 14:50  nba
+
+	- FAQ: fix a confusion between "omit" and "include"
+	
+2000-10-04 13:25  hardaker
+
+	- (pass_persist.c): opaques in pass_persist.
+	
+2000-10-04 10:35  hardaker
+
+	- (pass.c): support opaque return types.
+	
+2000-10-04 07:15  mslifcak
+
+	Fix parsing problem for -Pc option; reported by Christian Mautner.
+	
+2000-10-04 07:02  mslifcak
+
+	qualify new i/f types.
+	
+2000-10-04 06:52  mslifcak
+
+	qualify symbols for new i/f types.
+	
+2000-10-04 06:51  mslifcak
+
+	Terminate list to compile (add a comma).
+	
+2000-10-04 00:18  nba
+
+	- snmptable.c: index columnt (-Ci) width not properly computed when using
+		GETBULK
+	
+2000-10-03 18:19  hardaker
+
+	- (agent_registry.c, agent_registry.h, snmpd.c): Patch from John Naylon:
+	  - add a passback argument to register_readfd() callbacks.
+	
+2000-10-03 18:17  hardaker
+
+	- (Makefile.in): Patch from Harrie Hazewinkel:
+	  - move auto_nlist.o/lo to libucdagent since some mib-modules need it.
+	
+2000-10-03 18:07  hardaker
+
+	- (smux.c): Patch from Jochen Friedrich:
+	  - fix getnext requests to subagents.
+	
+2000-10-03 17:26  hardaker
+
+	- (mibJJ/interfaces.c): Patch from Frank Strauss:
+	  - better iftype guessing.
+	
+2000-10-03 17:24  hardaker
+
+	- (interfaces.c): Patch from Frank Strauss:
+	  - better iftype guessing.
+	
+2000-10-03 16:52  hardaker
+
+	- (smux.c): Patch from Doug Warzecha:
+	  - fix oid parsing in traps.
+	
+2000-10-03 16:23  hardaker
+
+	- (example.c, example.h): example of coding a v2 trap from someone who
+	  I have very sadly forgotten.  I've been looking for that message for
+	  a while to properly attribute this patch.  Sigh.
+	
+2000-10-03 16:21  hardaker
+
+	- (snmp_agent.c): Patch from Douglas Warzecha:
+	  - snmpd returns wrong error index on SNMPv1 request (BUG#375).
+	
+2000-10-03 09:12  mslifcak
+
+	Fix null deref of ss->community, reported by Jim Pickering.
+	
+2000-10-03 08:03  mslifcak
+
+	Casting to fix problems building with aCC
+	Thanks to Markku Laukkanen <pky@moremagic.com>
+	
+2000-10-03 05:59  mslifcak
+
+	Remove chdir to undo fix for (BUG#298)
+	
+2000-10-02 21:41  nba
+
+	- mib.c: Escape " and \ in text strings.
+	
+2000-10-02 21:39  nba
+
+	- snmp_logging.c: #include <netinet/in.h>
+	
+2000-10-02 21:38  nba
+
+	- Makefile.in: fix a missing $(srcdir) during make install of mib2c
+		configuration files
+	
+2000-10-02 21:37  nba
+
+	- snmpset.c: Do a exit(2) for failure in setting the variable.
+	
+2000-10-02 21:36  nba
+
+	- hr_swrun.c: add a safeguard for very long argument lists.
+	
+2000-10-02 21:34  nba
+
+	- hr_disk.c: Add a name pattern that matches x86 IDE disks for Solaris.
+	
+2000-10-02 21:33  nba
+
+	- kernel_sunos5.c: make the buffer for SIOCGIFCONF dynamic.
+	
+2000-10-02 11:41  hardaker
+
+	- (Makefile.in): install snmpusm.h.
+	
+2000-10-02 10:48  hardaker
+
+	- (snmpconf):
+	  - new options for installing created files.
+	  - more comments in the code.
+	  - allow reading a .conf directly to writing for auto-commenting .conf files.
+	  - misc.
+	
+2000-10-02 10:47  hardaker
+
+	- (agent/mibgroup/Makefile.in, agent/Makefile.in): make depend-less.
+	
+2000-10-02 09:35  hardaker
+
+	- (snmp_agent.c): protect against 0 byte statP mallocs.
+	
+2000-10-02 09:14  hardaker
+
+	- (interfaces.c): Patch from Ted Rule:
+	  - fix interfaces.c for variable length number formatting in /proc/net/dev.
+	
+2000-10-01 16:40  mslifcak
+
+	Per Niels recommendation, chdir to PERSISTENT_DIRECTORY (re: bug #298)
+	
+2000-09-30 08:57  mslifcak
+
+	Fix DEBUGMSGTL not found error for builds without dlmod support.
+	Thanks to simon@zid.tuwein.ac.at
+	
+2000-09-30 08:50  mslifcak
+
+	Fix some kernel symbols - thanks to simon@zid.tuwien.ac.at
+	
+2000-09-29 14:35  hardaker
+
+	- (*/Makefile.in): make depend + .o -> .lo fixes.
+	
+2000-09-29 14:27  hardaker
+
+	- (makefileindepend.pl): skip empty depend lines.
+	
+2000-09-29 14:09  hardaker
+
+	- (snmpconf): drop duplicate lines from read in snmpd.conf files.
+	
+2000-09-29 13:46  hardaker
+
+	- (snmpconf): sort unknown directives by filetype (whoops).
+	
+2000-09-29 13:42  hardaker
+
+	- (monitor): minor wording adjustments.
+	
+2000-09-29 13:42  hardaker
+
+	- (snmpconf): print more information/comments to the screen.
+	
+2000-09-29 11:31  hardaker
+
+	- (var_struct.h): increase registration name length to 32 from 16 (Bug #172)
+	
+2000-09-29 11:12  hardaker
+
+	- (snmp_api.c): incorrect val length passed to parse_unsigned_int (Bug #339).
+	
+2000-09-29 11:01  hardaker
+
+	- (snmp_api.c): fix Bug#353 for hostnames that look like "5w".
+	  - don't interprete them as an ip-port.
+	
+2000-09-29 10:39  hardaker
+
+	- (snmp_alarm.c): Patch from jbpn@cambridgebroadband.com:
+	  - There is a peculiarity in the snmp_alarm_unregister function in
+	    snmplib/snmp_alarm.c which can cause a segmentation fault. (Bug #367)
+	
+2000-09-29 10:34  hardaker
+
+	- (snmpTargetParamsEntry.c): Patch from John Naylon:
+	  - fix use of NULL timestamp pointer in new row creation (Bug #346)
+	
+2000-09-28 14:38  nba
+
+	- mib_api.3: add a few functions to the header
+	
+2000-09-28 14:14  nba
+
+	- snmptrap.c: remove an extraneous snmp_free_pdu
+	
+2000-09-28 14:13  nba
+
+	- man/: add man entries for many library functions (pointing to snmp_api.3)
+	
+2000-09-28 11:09  mslifcak
+
+	remove second copy of sys/socket.h
+	
+2000-09-28 11:08  mslifcak
+
+	For building on Ultrix V4.x
+	
+2000-09-27 12:59  hardaker
+
+	- (dlmod.h): add the UCD-DLMOD-MIB to the default load list.
+	
+2000-09-27 12:55  hardaker
+
+	- (config.h.in, configure, configure.in, ucd_snmp.h, dlmod.c):
+	  - include ucd-snmp/dlmod by default.
+	  - build code only if dlopen is found.
+	
+2000-09-27 08:31  hardaker
+
+	- (auto_nlist.c): Patch from Harrie Hazewinkel:
+	  - don't print kernel based warning messages when -r, etc, is specified.
+	
+2000-09-26 16:07  hardaker
+
+	- (displaytable.pm): minor bug fixes.
+	
+2000-09-26 14:21  hardaker
+
+	- (displaytable.pm, manager.pm):
+	  - displatable supports -mark/-onmarked.
+	  - user's oncall schedule is modifiable via the web.
+	
+2000-09-26 13:17  mslifcak
+
+	For Win32 API: Declare strtoul, vsnprintf; Enable reverse BER encoding.
+	
+2000-09-26 13:15  mslifcak
+
+	Include system.h (vsnprintf decl)
+	
+2000-09-26 13:14  mslifcak
+
+	Fix unsigned comparison.
+	
+2000-09-26 13:14  mslifcak
+
+	Fix unsigned comparisons.
+	
+2000-09-26 13:13  mslifcak
+
+	Fix signed comparison; Remove unused var.
+	
+2000-09-26 13:12  mslifcak
+
+	Include getopt.h (optarg decl); Remove unused var.
+	
+2000-09-26 13:11  mslifcak
+
+	Match Initialise_Table args 3,4 declarations with definitions.
+	
+2000-09-26 12:58  hardaker
+
+	- (interfaces.c): make the adminstatus RONLY.
+	
+2000-09-26 10:21  hardaker
+
+	- (mib2c): chomp($1) is illegal.
+	
+2000-09-26 03:04  mslifcak
+
+	Explicitly build path to CACHEFILE, as not all C compilers support "##".
+	
+2000-09-25 17:49  hardaker
+
+	- (displaytable.pm): Wes actually documented something?  you must be kidding!
+	
+2000-09-25 16:56  mslifcak
+
+	chdir just before sending coldstart trap, to allow for paths to be
+	resolved.
+	
+2000-09-25 15:08  hardaker
+
+	- (displaytable.pm): minor graphing changes
+	
+2000-09-25 09:35  mslifcak
+
+	case insensitive token search (use strcasecmp).
+	
+2000-09-22 06:03  nba
+
+	 -mibs/: MIB updates
+	
+2000-09-22 05:55  nba
+
+	- mibs/: MIB updates
+	
+2000-09-22 05:52  nba
+
+	- snmp_api.c: support setting of BITS variables
+	
+2000-09-22 05:50  nba
+
+	- snmpstatus.c: show error object
+	
+2000-09-22 04:29  nba
+
+	- snmpusm.c: issue error message with object
+	
+2000-09-22 04:28  nba
+
+	- system.h: provide prototypes for strtol, strtoul, snprintf, vsnprintf
+	
+2000-09-22 04:27  nba
+
+	- vacm_vars.c: protect against overrun of strings
+	
+2000-09-21 16:17  nba
+
+	- apps/: display failed object when one is identified by pdu->errindex
+	
+2000-09-21 15:59  hardaker
+
+	- (Makefile.in, snmpdf.1): document the snmpdf command.
+	
+2000-09-21 15:50  nba
+
+	- snmptable: use GETBULK to collect data when protocol allows it. Add
+		-CB options to fall back to GETNEXT.
+	
+2000-09-21 15:38  nba
+
+	- mib.c: rewrite index handling in object ids, to allow symbolic enums.
+		Add Daves suggested -Ov output. Also enhace -Td output to
+		destinguish OBJECT-TYPE from TRAP-TYPE, MODULE-IDENTITY etc.
+	
+2000-09-21 15:31  hardaker
+
+	- (snmpdf.c): use the UCD-SNMP-MIB's dskTable if the
+	  HOST-RESOURCES-MIB is empty or if -Cu is specified on the command line.
+	
+2000-09-21 15:28  nba
+
+	- parse.c: add ability to collect VARIABLES/OBJECTS for TRAP-TYPE
+		and NOTIFICATION-TYPE. Ignore files that does not have DEFINITIONS
+		as their second token. Enhance -Td output accordingly.
+	
+2000-09-21 15:22  nba
+
+	- snmplib: add snprintf, strtol, strtoul for systems that don't have them
+	
+2000-09-21 15:10  hardaker
+
+	- (mib.h): add fake struct definition for enums
+	
+2000-09-21 14:16  nba
+
+	file strtoul.c was initially added on branch V4-1-1-patches.
+	
+2000-09-21 14:16  nba
+
+	file strtol.c was initially added on branch V4-1-1-patches.
+	
+2000-09-21 14:16  nba
+
+	file snprintf.c was initially added on branch V4-1-1-patches.
+	
+2000-09-21 06:16  hardaker
+
+	- (mib.c, mib.h): make sprint* non-static (bug #132).
+	
+2000-09-21 00:25  hardaker
+
+	- (snmp_alarm.c): Patch from John Naylon:
+	  - fix bug #360 where a client might remove a alarm registration
+	    during a call to the alarm function and invalidate the pointer
+	    being used by the calling function.
+	
+2000-09-21 00:22  hardaker
+
+	- (configure, configure.in): --disable-shared by default in cvs checkouts.
+	
+2000-09-20 17:31  hardaker
+
+	- (snmpconf): space indent tokens if # prepended.
+	
+2000-09-20 17:30  hardaker
+
+	- (snmpTargetAddrEntry.c, snmpTargetParamsEntry.c): null internal help lines.
+	
+2000-09-20 17:29  hardaker
+
+	- (Makefile.in, monitor): disk, proc, and load checks.
+	
+2000-09-20 17:28  hardaker
+
+	- (authopts): fix valid answers for auth and priv types.
+	
+2000-09-20 17:27  hardaker
+
+	- (vacm_vars.c, usmUser.c, snmpv3.c): NULL out help messages for .conf
+	  tokens that are either internal or no longer the standard way of
+	  doing things.
+	
+2000-09-20 17:26  hardaker
+
+	- (configure, configure.in): export SNMPCONFPATH to Makefiles
+	
+2000-09-20 17:25  hardaker
+
+	- (EXAMPLE.conf.def): minor correction of table name.  More errors exist.
+	
+2000-09-20 16:46  hardaker
+
+	- (Makefile.in, debugging, mibs, output): more snmp.conf snmpconf config files.
+	
+2000-09-20 15:17  hardaker
+
+	- (Makefile.in, authopts): snmp.conf support for basic authentication options.
+	
+2000-09-20 14:55  hardaker
+
+	- (snmpconf):
+	 - don't force reading of /usr/local/share/snmpd.conf.
+	 - don't print unknown directive comment headers if there aren't any.
+	
+2000-09-20 14:45  hardaker
+
+	- (snmpconf): space things out on the screen a bit better.
+	
+2000-09-20 14:44  hardaker
+
+	- (trapsinks): add port number option to trapsink directives.
+	
+2000-09-20 14:35  hardaker
+
+	- (Makefile.in, snmpconf): install snmpconf and its various support files.
+	
+2000-09-20 14:20  hardaker
+
+	- (snmp_api.c, snmp_api.h): do reverse v3 header encoding with a static buffer.
+	
+2000-09-20 11:37  hardaker
+
+	- (snmpconf): misc updates and improvements.
+	
+2000-09-20 08:54  hardaker
+
+	- (snmp_api.c): Fix dynamic array  problem pointed out by Jochen Kmietsch.
+	
+2000-09-20 02:05  daves
+
+	- (agentx/protocol.c): Don't include context strings on PDUs that shouldn't have them
+		(Thanks to Pedro Pereira for identifying this)
+	
+2000-09-19 17:07  hardaker
+
+	- (acl, system, trapsinks): initial snmpconf description files.
+	
+2000-09-19 17:06  hardaker
+
+	- (snmpconf): read older configuration files in and merge with new results.
+	
+2000-09-19 14:40  hardaker
+
+	- (snmp_api.c): print pdu type on debugging dump output.
+	
+2000-09-19 14:15  hardaker
+
+	- (asn1.c, snmp.c): reverse encoding support for specialized opaque
+	  datatypes (float, double, etc).
+	
+2000-09-19 14:15  hardaker
+
+	- (aclocal.m4): document macros a bit more for submission to the
+	  autoconf macro library.
+	
+2000-09-19 08:30  mslifcak
+
+	Fix bug #295 reported by John Whitney johnw@aiinet.com
+	
+2000-09-18 14:59  hardaker
+
+	- (snmp_vars.h, snmpd.h): Patch from Harrie Hazewinkel:
+	  - move getStatPtr definition to proper .h file.
+	
+2000-09-18 14:55  mslifcak
+
+	Fix bug #347 reported by das_deniz@yahoo.com: make sbin install dir
+	
+2000-09-14 09:05  hardaker
+
+	- (agent_read_config.c, snmpd.conf.5.def): Patch from Harrie Hazewinkel:
+	  - add a port specification snmpd.conf token.
+	
+2000-09-14 08:52  hardaker
+
+	- (agent_trap.c): ignore output of gethostbyname for trap session adding.
+	
+2000-09-13 15:06  hardaker
+
+	- (snmpconf): new utility to generate .conf files by prompting the
+	  user with questions.
+	
+2000-09-08 13:07  hardaker
+
+	- (proxy.c): Patch from Scott Lipcon:
+	  - fix proxy support for null length strings.
+	
+2000-09-07 10:12  hardaker
+
+	- (config.h.in, configure, configure.in):
+	 - fix openssl checks.
+	 - run autoheader.
+	
+2000-09-05 13:35  mslifcak
+
+	Minor touchups to build on Win32 platform.
+	
+2000-09-05 13:34  mslifcak
+
+	Welcome the newest ucd-snmp applications to the Win32 builds.
+	
+2000-09-04 15:19  nba
+
+	- read_config.c: restart errorcount when reloading config
+	
+2000-09-04 15:12  nba
+
+	- snmpnetstat.1: align man page with program
+	
+2000-09-04 15:10  nba
+
+	- ipAddr.c: remove a bad ntohl for OpenBSD
+	
+2000-09-04 15:09  nba
+
+	- mibincl.h, {tc,ud}p{,Table}.c: ensure just one include of socket.h
+		to make unprotected include file in Ultrix happy
+	
+2000-09-04 15:05  nba
+
+	- configure.in: make --without-libwrap work
+	
+2000-09-01 15:14  hardaker
+
+	- (vmstat_solaris2.c, vmstat_solaris2.h): Patch from Jochen Kmietsch:
+	  - updated code.
+	
+2000-09-01 11:54  hardaker
+
+	- (snmptrapd.c): Scott Lipcon noted that snmptrapd doesn't support -T.
+	
+2000-08-30 13:28  nba
+
+	- parse.c: fix loop in syntax error in DEFVAL clause. Also fix reading
+		of .index file with filenames containing blanks.
+	
+2000-08-28 13:43  marz
+
+	minor syntax glitch in POD docs
+	
+2000-08-24 01:55  daves
+
+	- (apps/snmptable.c): Fix bug with displaying header-less indexed tables
+		(Thanks to Ernie Miller)
+	
+2000-08-19 11:29  mslifcak
+
+	Apply patch from <Christoph.Mammitzsch@tu-clausthal.de>
+	to fix sign in asn_rbuild_unsigned_int .
+	
+2000-08-18 04:18  mslifcak
+
+	restore previous version; openbsd, solaris, linux build ok.
+	
+2000-08-18 03:44  mslifcak
+
+	remove unused printf argument passed to snmp_log.
+	
+2000-08-18 03:20  mslifcak
+
+	fix bug 253 with patch supplied by Jeffrey Honig <jch@bsdi.com>
+	
+2000-08-18 02:52  mslifcak
+
+	fix bug 318 - test 9 and 10 explicitly create the test user.
+	
+2000-08-17 13:42  mslifcak
+
+	The battle to trim newlines correctly continues...reduce length by one.
+	
+2000-08-16 15:04  hardaker
+
+	- (snmp_api.c, snmpusm.c): fix various encryption/decryption problems.
+	
+2000-08-16 15:03  hardaker
+
+	- (scapi.c): fix padding size in encryption.
+	
+2000-08-16 14:48  hardaker
+
+	- (scapi.c): set plaintext length at the end of sc_decrypt.
+	
+2000-08-15 05:08  mslifcak
+
+	Fix bug 284 with a short explanation about snmp.conf.
+	
+2000-08-15 03:00  mslifcak
+
+	Fix bug 283 - umask 022, make install. Thanks to csaba.toth@szk.bke.hu
+	
+2000-08-15 00:09  nba
+
+	- snmptest.c: overhaul input_variable, kill newline
+	
+2000-08-14 22:05  nba
+
+	- aclocal.m4, configure.in: fixes for configure --silent
+	
+2000-08-14 17:27  hardaker
+
+	- (Makefile.top, configure, configure.in):
+	  - --enable-silent-libtool to make Niels smile.
+	
+2000-08-14 17:17  hardaker
+
+	- (snmpv3.c, snmpv3.h): implement a new (default) engineID type based
+	  on a random number, and a timestamp.
+	  - I think it won't invalidate existing installations (heh).
+	
+2000-08-14 16:47  hardaker
+
+	- (read_config.c):
+	  - if -Dread_config, then print even no-help tokens and a * for PREMIB ones.
+	
+2000-08-14 14:51  nba
+
+	- (many): portability fixes for OpenBSD 2.6, FreeBSD 4.1, Ultrix 4.5
+	
+2000-08-14 11:33  hardaker
+
+	- (keytools.c): Patch from Yigal Hochberg:
+	  - remove unused context variables.
+	
+2000-08-14 11:29  hardaker
+
+	- (scapi.c): Patch from Yigal Hochberg:
+	  - remove duplicate keylength check.
+	
+2000-08-11 13:09  hardaker
+
+	- (snmp_api.c): optimize reverse encoding of varbindlists.
+	
+2000-08-11 08:55  hardaker
+
+	- (README.mib2c): Patch from Jan Alfred Sandven:
+	  - typos.
+	
+2000-08-11 06:05  nba
+
+	- apps/*: snmpapp -V should not give the usage message too.
+	
+2000-08-11 00:44  nba
+
+	- snmptrapd.8: fix typo. Thanks to G. Allen Morris III <gam3@acm.org>
+	
+2000-08-10 23:23  nba
+
+	- parse.c: predefine ObjectSyntax, ApplicationSyntax, SimpleSyntax and
+		ObjectName
+	
+2000-08-10 16:20  hardaker
+
+	- (Makefile.in, mib2c):
+	  - make mib2c look in $(snmplibdir) for .conf files.
+	  - install mib2c and .conf files.
+	
+2000-08-10 14:33  hardaker
+
+	- (default_store.h, snmp_api.c): dynamically decide to reverse/forward encode.
+	
+2000-08-10 14:31  hardaker
+
+	- (extensible.c): fix CR termination.
+	
+2000-08-10 14:25  hardaker
+
+	- (acconfig.h, config.h.in): define reverse encoding on by default.
+	
+2000-08-10 13:02  mslifcak
+
+	fix bug 252 for configure and sys/socket.h on BSD/OS 4.2
+	
+2000-08-10 09:07  hardaker
+
+	- (asn1.c, asn1.h, snmp.c, snmp.h, snmp_api.c, snmp_api.h, snmpusm.c,
+	  snmpusm.h, snmpv3.c):
+	  - implement reverse encoded messages.
+	    - TODO: clean up, run-time determination of weather to use it or not.
+	
+2000-08-09 15:40  mslifcak
+
+	Fix bug 331 with patch in part provided by John Naylon <jbpn@cambridgebroadband.com>
+	
+2000-08-09 15:27  mslifcak
+
+	no // comment, in deference to non-ANSI-C compilers.
+	
+2000-08-09 07:21  nba
+
+	- hr_swrun.c: fix the RunPath for swapped out Linux process
+	
+2000-08-09 07:21  nba
+
+	- hr_print.c: fix a debug token
+	
+2000-08-09 04:44  nba
+
+	- main.c: fix parsing of -v
+	
+2000-08-09 01:13  daves
+
+	- (mibJJ/ipRoute.h): Omit route_write for now
+	
+2000-08-09 00:58  daves
+
+	- (mibJJ/*): Experimental re-write of mibII
+		(Pilot error when trying to commit the changes earlier - sorry!)
+	
+2000-08-08 10:06  hardaker
+
+	- (extensible.c): strip newlines.
+	
+2000-08-08 08:51  hardaker
+
+	- (snmp_parse_args.c): Patch from Scott Lipcon: start optind at 1 not 0.
+	  -
+	
+2000-08-08 06:36  mslifcak
+
+	Fix bug #295 (free *secStateRef before allocating another one).
+	
+2000-08-08 06:05  mslifcak
+
+	fix bug #298 reported and patch supplied by Conrad Link <clink@ml.com>
+	
+2000-08-08 04:59  nba
+
+	- snmp_api.c: fix a busy loop when alarm queue is active without any
+		outstanding requests
+	
+2000-08-08 04:47  nba
+
+	- snmpset.1: cannot set counters
+	
+2000-08-08 04:42  mslifcak
+
+	Fixed (BUG#332) using patch submitted by John Naylon <jbpn@cambridgebroadband.com>
+	Also consolidated comments about the four send PDU functions.
+	
+2000-08-07 06:59  mslifcak
+
+	Fix leak in reportable errors found by John Naylon <jbpn@cambridgebroadband.com>
+	
+2000-08-07 05:48  nba
+
+	file add_module_replacement.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 05:48  nba
+
+	file read_objid.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file snmp_set_save_descriptions.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file snmp_set_mib_warnings.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file read_module_node.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file read_module.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file read_all_mibs.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file read_mib.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file print_variable.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file print_value.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file print_objid.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file print_description.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file print_mib.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file init_mib_internals.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file init_mib.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file get_module_node.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-07 02:49  nba
+
+	file add_mibdir.3 was initially added on branch V4-1-1-patches.
+	
+2000-08-04 17:13  hardaker
+
+	- (configure, configure.in): add in the notification group by default.
+	
+2000-08-04 17:08  hardaker
+
+	- (notification.h): notification mib wrapper.
+	
+2000-08-04 17:06  hardaker
+
+	- (snmp_parse_args.c):
+	 - initialize optind before calling getopt.
+	 - debugging output.
+	
+2000-08-04 16:56  hardaker
+
+	- (proxy.c): properly set the first (unused) argument to snmp_parse_args().
+	
+2000-08-04 16:53  hardaker
+
+	- (agent_trap.c, snmpNotifyTable.h, snmpTargetAddrEntry.c,
+	  snmpTargetAddrEntry.h, snmpTargetParamsEntry.c,
+	  snmpTargetParamsEntry.h, target.c):
+	  - if using the snmpNotificationTable, insert non-v1 trap sinks into it.
+	
+2000-08-04 05:26  daves
+
+	- (mibgroup/mibJJ.h mibgroup/mibJJ/*): Experimental re-write of mibII
+	
+2000-08-04 05:21  daves
+
+	- (mibgroup/util_funcs.[ch]): New 'cached table' routines
+	
+2000-08-03 08:37  mslifcak
+
+	Fix bug #325 identified by John Naylon <jbpn@cambridgebroadband.com>
+	
+2000-08-03 01:24  nba
+
+	file IP-FORWARD-MIB.txt was initially added on branch V4-1-1-patches.
+	
+2000-08-03 01:24  nba
+
+	file INET-ADDRESS-MIB.txt was initially added on branch V4-1-1-patches.
+	
+2000-08-03 01:24  nba
+
+	file IF-INVERTED-STACK-MIB.txt was initially added on branch V4-1-1-patches.
+	
+2000-08-03 01:24  nba
+
+	file HCNUM-TC.txt was initially added on branch V4-1-1-patches.
+	
+2000-08-02 07:06  mslifcak
+
+	Silent running grep results.
+	
+2000-08-02 06:10  mslifcak
+
+	Fix BUG #291 : allow "255.255.255.255" for text input to ASN_IPADDRESS
+	
+2000-08-02 05:20  mslifcak
+
+	Fix (BUG#323) : free PDU when snmp_send fails.
+	
+2000-08-02 05:06  mslifcak
+
+	Add -p option once to snmpd args.
+	Find MIBDIRS in source tree.
+	Fix condition to set PATH.
+	
+2000-08-01 23:30  nba
+
+	- ip.c: One more #if solaris
+	
+2000-08-01 23:19  nba
+
+	- ip.c: A bad #if ... the proper define to test for Solaris is solaris2
+	
+2000-08-01 16:40  hardaker
+
+	- (snmp_parse_args.c): remove unused usage() typedef.
+	
+2000-08-01 16:40  hardaker
+
+	- (proxy.c, proxy.h): -Wall warning fixes.
+	
+2000-08-01 16:39  hardaker
+
+	- (FAQ): mention newer versions of Solaris.
+	
+2000-08-01 16:37  hardaker
+
+	- (TESTCONF.sh, TESTCONF.sh.in): revert to non-configed TESTCONF.
+	
+2000-08-01 16:31  hardaker
+
+	- (Makefile.top): make un-quiet.
+	
+2000-08-01 10:23  hardaker
+
+	- (snmp-ucd.sh): fix bug #297 (don't kill grep and init script invocations).
+	
+2000-08-01 04:45  mslifcak
+
+	Fix bug found by Yigal Hochberg <hochberg@dmhsoftware.com>
+	
+2000-08-01 03:30  daves
+
+	- (agent/snmp_vars.c): Fix building of complete OID
+		(work with the name originally registered,
+		 not any subsequent division boundaries)
+	
+2000-07-31 20:09  mslifcak
+
+	Remove duplicate fopen from shell_command.
+	
+2000-07-31 18:58  mslifcak
+
+	(TESTCONF.sh.in) - set MIBDIRS to sibling of the testing directory.
+	(RUNTESTS) - allow binaries to be in the "-D bindir" directory.
+	
+2000-07-31 15:25  mslifcak
+
+	Dont adjust PATH if SNMP_PATH is set.
+	Dont add port spec to SNMP_FLAGS if one is already specified.
+	
+2000-07-31 13:49  mslifcak
+
+	Remove test directories for skipped tests.
+	Keep test directories for failed tests.
+	Keep test directories for passed tests when "RUNTESTS -s" is specified.
+	Search config.h at the root of the build tree.
+	
+2000-07-31 11:32  mslifcak
+
+	Merge from automake-1.4: Add for Rhapsody, OpenStep, Cray-T3, SX-4, SX-5
+	
+2000-07-31 11:31  mslifcak
+
+	Merge from automake-1.4: Add for Rhapsody, OpenStep
+	
+2000-07-30 17:38  hardaker
+
+	- (snmpNotifyTable.c, snmpNotifyTable.h, target.c, target.h):
+	  - implement untested filtering function callback for target searches.
+	  - delete unused function.
+	  - misc warning fixes.
+	
+2000-07-30 17:07  hardaker
+
+	- (snmpNotifyFilterProfileTable.c, snmpNotifyFilterProfileTable.h,
+	  snmpNotifyFilterTable.c, snmpNotifyFilterTable.h):
+	  - more notification table implementations for filtering.
+	    - Framework complete, functionality is not.
+	
+2000-07-30 17:05  hardaker
+
+	- (header_complex.c, header_complex.h):
+	  - handle implied objects.
+	  - implement header_complex_get() for simple data retrievals.
+	
+2000-07-28 06:15  mslifcak
+
+	Cleanup include headers to fix bug #307. Thanks to sandven@research.att.com.
+	
+2000-07-27 15:19  hardaker
+
+	- (configure, configure.in): Patch from Vinay Mohta:
+	  - access_hosts() requires an argument so fake one.
+	
+2000-07-27 15:00  hardaker
+
+	- (interfaces.c): Patch from Mattias Barthel:
+	  - fix for interfaces without an attached IP address.
+	
+2000-07-27 14:55  hardaker
+
+	- (vmstat_solaris2.c, vmstat_solaris2.h): Patch from Jochen Kmietsch:
+	  - support raw values.
+	
+2000-07-27 08:25  hardaker
+
+	- (snmpusm.c): print errors to stderr.
+	
+2000-07-27 06:20  nba
+
+	- parse.c: Fix a missing initization when one MIB holds MODULE-COMPLIANCE
+		for another
+	
+2000-07-27 01:35  nba
+
+	- snmp_api.c: Fix pdu->community being overwritten with session->community
+		Thanks to Dana P. Cook <dcook@cabletron.com>
+	
+2000-07-26 22:28  mslifcak
+
+	Update for win32 build: remove unused variables and unpublished method.
+	
+2000-07-26 08:53  hardaker
+
+	- (mib2c.storage.conf): misc changes and improvements.
+	
+2000-07-26 08:53  hardaker
+
+	- (tkmib): Patch from Bert Driehuis:
+	  - translateObj hack.
+	
+2000-07-26 08:49  hardaker
+
+	- (tkmib): Patch from Bert Driehuis:
+	  - remove beginning newline in description clauses.
+	
+2000-07-21 14:00  hardaker
+
+	- (setupdb, snmptosql): only delete history rows once every hour or so.
+	  - too CPU intensive for large tables.
+	
+2000-07-21 12:59  hardaker
+
+	- (setupdb, snmptosql): record and display sysUpTime and others.
+	
+2000-07-21 12:57  hardaker
+
+	- (manager.pm): graphing works again.
+	
+2000-07-21 12:57  hardaker
+
+	- (displaytable.pm): comments, legends, and max/min work again.
+	
+2000-07-17 11:00  hardaker
+
+	- (vmstat_solaris2.h): config_require kernel_sunos5.
+	
+2000-07-12 09:29  hardaker
+
+	- (snmpv3.c): copy key length as well as the key when using the same
+	  privacy key as the auth key.
+	
+2000-07-11 13:34  marz
+
+	added ranges field to SNMP::MIB hash
+	
+2000-07-11 10:05  hardaker
+
+	- (mib.c): Patch from Robert Story:
+	  - make null PREFIX variable possible so non-dot-leading oids are accepted.
+	
+2000-07-11 09:22  hardaker
+
+	- (snmp_agent.c, snmptrapd.c, snmp_api.c, snmp_api.h, snmpusm.c, snmpusm.h):
+	  - make the session pointers indicate weather or not they are
+	    "authoritative", meaning weather they should be learning engineIDs
+	    or reporting on them.
+	  - pass the received-packet session pointer into snmpv3_parse and
+	    usm_proccess_in_msg() to use this flag.
+	  - set isAuthoratative = true in the agent, and unknown in the snmptrapd.
+	
+2000-07-11 08:32  hardaker
+
+	- (snmpv3.c): make the createUser token accept an engineid (-e ARG) to use.
+	
+2000-07-07 01:37  daves
+
+	- (mibII/interfaces.c): Recognise Token Ring interfaces under Linux
+	
+2000-07-06 17:19  hardaker
+
+	- (read_config.c): print generic strings when saving persistent data
+	  where possible.  (IE, check for printable characters before printing hex).
+	
+2000-07-06 17:05  hardaker
+
+	- (TESTCONF.sh, TESTCONF.sh.in): moved TESTCONF.sh to TESTCONF.sh.in
+	  and have the MIBS path variable built by configure since it knows
+	  where the root level source directory is.
+	
+2000-07-06 17:04  hardaker
+
+	- (configure, configure.in, header_complex.c, snmpNotifyTable.c,
+	  asn1.h, snmp_api.c):
+	  - implement IMPLIED index handling.
+	  - make the created USM entries set the storageType and RowStatus
+	    appropriately.
+	
+2000-07-06 17:02  hardaker
+
+	- (snmp_api.h): better comments on a couple of function definitions.
+	
+2000-07-05 07:50  mslifcak
+
+	fix (BUG#290) gracefully handle some PDUs that have no variables.
+	
+2000-07-05 06:46  mslifcak
+
+	[no log message]
+	
+2000-07-04 10:21  hardaker
+
+	- (snmp_vars.c, snmptrapd.c, snmp_api.c, snmp_api.h, snmpusm.c, snmpusm.h):
+	  - remove last remnants of the "initial" user.
+	  - make engineid reports from the usm happen based on the report flag
+	    in the message flag.
+	    - Note: this is a big issue with the SNMPv3 protocol specs.  The
+	      specifications note that you send a report if you are
+	      "authoritative", but don't describe how to know if you are
+	      authoritative or not.  For situations like proxies and
+	      notification receivers, where you are sometimes authoritative
+	      and other times you're not, this is problematic.  The SNMPv3
+	      ASIs do not pass in enough information to determine this and the
+	      WG has proclaimed that the ASIs are not meant to be used as an
+	      API, but the initial work done by NAI and TISLabs attempted to
+	      implement the USM such that it would be a "reference" release
+	      and hence we followed the specifications to the letter and used
+	      the ASIs as APIs just to see if we could.  We could previously
+	      only because we were always either authoritative or
+	      non-authoritative.  Since beginning to work on proxy and the
+	      notification mib, this is no longer possible.  For the record, I
+	      am hereby changing the initial reference release in such a
+	      manner as it no longer conforms exactly to the SNMPv3 ASIs.  So
+	      as not to confuse anyone, this is an entirely theoretical issue
+	      with respect to the SNMPv3 specification and is perfectly legal
+	      to do.  Though I could easily go on, I'll step off my soap box now.
+	
+2000-07-03 10:10  hardaker
+
+	- (agent_callbacks.h, agent_trap.c, agent_trap.h, snmpNotifyTable.c,
+	  snmpTargetAddrEntry.c, snmpTargetAddrEntry.h,
+	  snmpTargetParamsEntry.c, snmpTargetParamsEntry.h, target.c):
+	  - Add a new callback for sending traps.
+	    - Make the notification mib use it.
+	  - make the target mib generate more persistent sessions.
+	  - Make the notification mib always ask the target mib for a session
+	    list, which is now cached directly by the target mib.
+	
+2000-07-03 08:38  mslifcak
+
+	fix (BUG#262) - (some) statements that cannot be reached.
+	
+2000-07-03 07:55  mslifcak
+
+	fix (BUG#287)
+	
+2000-07-03 06:11  mslifcak
+
+	fix bug # 289
+	
+2000-06-30 04:45  mslifcak
+
+	simplify memory allocation in read_config_read_{octet_string, objid}
+	
+2000-06-30 00:47  nba
+
+	- read_config.c: Fix a missing initialization for keywords without help
+	
+2000-06-28 23:37  nba
+
+	- IF-MIB.txt: upgrade to RFC 2863
+	
+2000-06-28 00:58  nba
+
+	- interfaces.c, configure: Irix 6.5 has ifi_baudrate.ifs_value
+	
+2000-06-27 01:34  nba
+
+	- main.c: better option parsing.
+	
+2000-06-27 01:34  nba
+
+	- snmpv3.c: do case insensitive matching of option values.
+	
+2000-06-27 00:33  nba
+
+	- snmptranslate.1: document that -w is also for -Td
+	
+2000-06-27 00:30  nba
+
+	- various man page nit-picking
+	
+2000-06-27 00:28  nba
+
+	- snmptable.c: fixes and usage message for -Ch and -CH
+	
+2000-06-26 23:43  nba
+
+	- Makefile.in, *MIB.txt: update to current RFC version
+	
+2000-06-26 23:42  nba
+
+	- Makefile.mib, mibfetch, smistrip: tools to extract MIBs from RFC
+		documents.
+	
+2000-06-26 23:40  nba
+
+	- parse.c, mib.[ch], snmptranslate.c: add parsing of CHOICE and checks for
+		OBJECT-GROUP and AGENT-CAPABILITIES. This allows us to parse
+		complete MIB extracts from RFC documents.
+	
+2000-06-26 23:38  nba
+
+	- Makefile.top: make libtool silent, so we can see those warnings
+	
+2000-06-26 23:37  nba
+
+	- snmpTargetAddrEntry.c: do a cast to kill a warning
+	
+2000-06-26 23:32  nba
+
+	- agent_trap.c: Fix a leak when request is blocked by VACM and no trap
+		is sent.
+	
+2000-06-26 11:56  mslifcak
+
+	fix (BUG#233)
+	
+2000-06-23 06:42  mslifcak
+
+	replace malloc/memset 0 with calloc.
+	
+2000-06-23 01:08  daves
+
+	- (mibII/kernel_linux.[ch], mibII/ip.c): Added support for ipRoutingDiscards
+		(Thanks to Bryan Blackman)
+	
+2000-06-22 17:09  mslifcak
+
+	remove extra include errormib.h
+	
+2000-06-22 16:50  mslifcak
+
+	Fix bug #276 - close most file descriptors before exec'ing command.
+	
+2000-06-22 15:59  mslifcak
+
+	fgets: use sizeof(buf) in lieu of compiler constant STRMAX.
+	
+2000-06-22 15:53  mslifcak
+
+	Use fewer large static buffers.  pass_persist uses bigger buffers now.
+	
+2000-06-21 14:59  hardaker
+
+	- (manager.pm, snmptosql): record and report sysUpTime.
+	
+2000-06-21 14:31  hardaker
+
+	- (snmptosql): minor sql caching speed optimizations.
+	
+2000-06-21 13:33  hardaker
+
+	- (snmptosql): Ack.  Don't delete stuff from the history table that frequently.
+	
+2000-06-21 12:51  hardaker
+
+	- (snmptosql): better error description support.
+	
+2000-06-21 12:46  hardaker
+
+	- (manager.pm, snmptosql): collect sysDescr, sysObjectId, & versionTag.
+	
+2000-06-21 12:46  hardaker
+
+	- (displaytable.pm): add -selectorder.
+	
+2000-06-21 12:25  hardaker
+
+	- (snmpNotifyTable.c): Uh, only if not deleted.
+	
+2000-06-21 12:23  hardaker
+
+	- (snmpNotifyTable.c): change createAndGo/createAndWait states to active/NIS.
+	
+2000-06-20 20:01  mslifcak
+
+	Declare top_builddir to avoid annoying /libtool not found message.
+	
+2000-06-20 17:30  mslifcak
+
+	Dont assume ANSI C-preprocessor (replace "##" concatenation with sprintf).
+	
+2000-06-20 15:37  mslifcak
+
+	Win32 MS-VC++ build fixups.
+	
+2000-06-20 15:37  mslifcak
+
+	Encapsulate local variable "x" to the scope where needed.
+	
+2000-06-20 15:36  mslifcak
+
+	Remove unused var "newvar".
+	
+2000-06-20 15:36  mslifcak
+
+	Use int vs ulong for array indexing variables to avoid signed/unsigned mismatch.
+	
+2000-06-20 15:34  mslifcak
+
+	Remove unused vars struct tm, time_t.
+	
+2000-06-20 15:34  mslifcak
+
+	Remove unused var "initlist".
+	
+2000-06-20 15:33  mslifcak
+
+	Declare strncasecmp in system.h ; Remove unused var "status".
+	
+2000-06-20 15:31  mslifcak
+
+	Remove unused vars.
+	
+2000-06-20 15:30  mslifcak
+
+	Declare optarg in getopt.h.
+	
+2000-06-20 14:00  hardaker
+
+	- (mib2c.storage.conf): misc minor changes.
+	
+2000-06-20 13:59  hardaker
+
+	- (.cvsignore, snmpNotifyTable.c, snmpNotifyTable.h):
+	  - SNMP-NOTIFICATION-MIB's snmpNotifyTable implemented:
+	    - uses the SNMP-TARGET-MIB to get its addresses from.
+	    - uses header_complex to handle the data.
+	    - much todo:
+	      - dynamic target/notification mib updating without kill -HUP needed.
+	        - this will be a real pain.
+	      - fix v3 related traps still (same usm bug I've been meaning to fix).
+	      - the rest of the SNMP-NOTIFICATION-MIB tables.
+	
+2000-06-20 13:53  hardaker
+
+	- (snmpTargetAddrEntry.c, snmpTargetAddrEntry.h,
+	  snmpTargetParamsEntry.c, snmpTargetParamsEntry.h):
+	- generic target session creation
+	- misc other minor fixes.
+	
+2000-06-20 13:51  hardaker
+
+	- (target.h, target.c, target.h): generic target session creation
+	  based on entries in the SNMP-TARGET-MIB table.
+	
+2000-06-20 13:50  hardaker
+
+	- (header_complex.c): remove Michael's horriblely wrong "fixes".
+	
+2000-06-20 13:48  hardaker
+
+	- (agent_trap.c, agent_trap.h): add remove_trap_session().
+	
+2000-06-20 13:46  hardaker
+
+	- (read_config.c): deal with 0-length persistent strings better.
+	
+2000-06-19 12:32  mslifcak
+
+	Check more alloc failures.
+	
+2000-06-19 12:15  mslifcak
+
+	(protocol.c) Use sizeof(oid), not 4!
+	(client.c) Add _all_ of OID value for agentx_register and agentx_unregister.
+	
+2000-06-19 11:41  mslifcak
+
+	 Removed sizeof(u_char) and unnecessary (unsigned) casts to malloc params.
+	
+2000-06-19 03:04  nba
+
+	Prototype fixup.
+	
+2000-06-19 03:01  nba
+
+	s/conifg/config/ .... Hrrrmmmpf
+	
+2000-06-19 02:58  nba
+
+	- makenosysdepend.pl Makefile.in: object files are now named .lo ...
+	
+2000-06-16 16:01  hardaker
+
+	- (snmpTargetAddrEntry.h): add the SNMPv2-TM mib to the default list.
+	
+2000-06-16 16:01  hardaker
+
+	- (snmpTargetAddrEntry.c, snmpTargetParamsEntry.c): fix incorrect OIDs.
+	
+2000-06-15 06:45  marz
+
+	fat fingers
+	
+2000-06-15 06:42  marz
+
+	add defaults to daemon search path...recalc t/snmptest.cmd everytime per makefile.PL is run
+	
+2000-06-14 16:15  hardaker
+
+	- (manager.pm): fix user preferences.  Columns are optionally
+	  displayable again.
+	
+2000-06-14 16:15  hardaker
+
+	- (snmptosql): fix history deletion.
+	
+2000-06-12 16:43  hardaker
+
+	- (snmpd.conf.5.def): document trapsess.
+	
+2000-06-12 16:39  hardaker
+
+	- (agent_read_config.c, agent_trap.c, agent_trap.h):
+	  - new snmpd.conf token for trap sessions: "trapsess".
+	    - uses snmp_parse_args so any type of trap can be sent with it
+	      modified by any of the parameters that are documented in snmpcmd(1).
+	    - v3 traps don't work due to the same USM problems found in the
+	      recent proxy submissions (my next target).
+	    - -Ci in the argument specifies informs should be used.
+	
+2000-06-12 16:18  hardaker
+
+	- (master_request.c): re-enable freeing of master request.
+	
+2000-06-12 16:17  hardaker
+
+	- (acconfig.h, config.h.in): save exec data to /var/ucd-snmp.
+	  - could cause problems for non-root runs.  Untested.
+	
+2000-06-12 14:12  hardaker
+
+	- (snmptrapd_log.c): Patch from Markku Laukkanen:
+	  - remove ending commas in enum list.
+	
+2000-06-12 10:36  hardaker
+
+	- (setupdb, setupuser, snmptosql): use "Table"s instead of "Entry"s.
+	
+2000-06-12 10:33  hardaker
+
+	- (manager.pm): save mib descriptions for display purposes (again).
+	
+2000-06-12 10:29  hardaker
+
+	- (manager.pm): remove debugging statements.
+	
+2000-06-12 10:27  hardaker
+
+	- (manager.pm): properly sort displayed table columns again.
+	
+2000-06-07 13:23  hardaker
+
+	- (snmp_config.5.def, read_config.c, read_config.h):
+	  - the TYPE.conf parser now accepts tokens from a different .conf
+	    file TYPE if a special "[TYPE]" keyword is inserted into the
+	    .conf file.  See snmp_config(5) for a better description.
+	
+2000-06-07 13:22  hardaker
+
+	- (acconfig.h, config.h.in, configure, configure.in):
+	  - map strtoul to atoi if the function isn't found.
+	
+2000-06-06 14:26  hardaker
+
+	- (INSTALL, green.gif, manager.pm, red.gif, setupauth, setupdb,
+	  setupnewhost, setupuser, snmptosql, snmptosqltable, sqltohtml):
+	  - management cleanup and installation instructions written.
+	  - should be mostly complete (ie, barely functional) for the alpha testers.
+	
+2000-06-06 08:03  hardaker
+
+	- (snmptosql): host name changes -> varchar(64)
+	
+2000-06-06 08:02  hardaker
+
+	- (manager.pm): many minor fixes and changes.
+	
+2000-06-06 08:02  hardaker
+
+	- (displaytable.pm): allow table title setting.
+	
+2000-06-02 11:41  hardaker
+
+	- (.cvsignore): add *.made.
+	
+2000-06-02 11:40  hardaker
+
+	- (Makefile.in, fixproc, ipf-mod.pl, mib2c, tkmib):
+	  - make (and install) perl scripts differently, without modifying the orig.
+	
+2000-06-01 16:47  hardaker
+
+	- (snmptosql): typos.
+	
+2000-06-01 16:44  hardaker
+
+	- (snmptosql):
+	  - debugging to STDERR.
+	  - auto deletion of old historical data.
+	
+2000-06-01 16:44  hardaker
+
+	- (manager.pm): beginnings of a nicer real interface.
+	
+2000-06-01 16:43  hardaker
+
+	- (getValues.pm): some variables were global and hence persistent and
+	  were messing things up.
+	
+2000-06-01 14:48  hardaker
+
+	- (snmpd.c): store persistent data immediately after init'ing to
+	  ensure we update counters and stuff that must change (eg, engineBoots).
+	
+2000-05-31 16:22  hardaker
+
+	- (snmpd.1.def): describe -I.
+	
+2000-05-31 15:52  hardaker
+
+	- (configure, configure.in, mib_modules.c, mib_modules.h, snmpd.c):
+	  - new -I switch to snmpd to do dynamic determinaton of which mib
+	    modules to initialize (and hence which mib tree sections to support).
+	
+2000-05-31 15:50  hardaker
+
+	- (default_store.c, default_store.h): default store routines for void pointers.
+	 - which I immediately decided to do something different for what I
+	   originally implemented it for, so its not being used yet.
+	
+2000-05-31 05:59  daves
+
+	- (mibII/ip.[ch]): Allow IP support without the At/ipNetToMedia module
+	
+2000-05-30 17:11  hardaker
+
+	- (proxy.c, proxy.h): simple proxy support.
+	  - maps one oid inside the agent to a possibly-different oid on a target.
+	  - uses snmp_parse_args() so it takes standard command line config options.
+	  - no set support.
+	  - no kill -HUP support.
+	  - no SNMPv3 support (sigh).
+	
+2000-05-30 15:06  nba
+
+	file IANA-LANGUAGE-MIB.txt was initially added on branch V4-1-1-patches.
+	
+2000-05-30 15:06  nba
+
+	file IANA-ADDRESS-FAMILY-NUMBERS-MIB.txt was initially added on branch V4-1-1-patches.
+	
+2000-05-30 15:06  nba
+
+	file DISMAN-SCHEDULE-MIB.txt was initially added on branch V4-1-1-patches.
+	
+2000-05-30 15:06  nba
+
+	file AGENTX-MIB.txt was initially added on branch V4-1-1-patches.
+	
+2000-05-30 07:47  mslifcak
+
+	Fix problem identified by V. Grenet : new method snmp_oid_min_compare
+	
+2000-05-30 01:31  nba
+
+	file mibfetch was initially added on branch V4-1-1-patches.
+	
+2000-05-30 01:31  nba
+
+	file smistrip was initially added on branch V4-1-1-patches.
+	
+2000-05-30 01:31  nba
+
+	file Makefile.mib was initially added on branch V4-1-1-patches.
+	
+2000-05-26 09:24  daves
+
+	- (mibII/sysORTable.c mibII/system_mib.c):
+	  - Use new time utility routines to simplify processing
+	  - Update sysORLastChange when adding/removing entries
+	
+2000-05-26 09:23  daves
+
+	- (util_funcs.[ch]): New time-diff utility routines
+	
+2000-05-26 08:46  daves
+
+	- (snmpd.c snmp_agent.c mibII/var_route.c): Use 'mibincl.h' header
+	
+2000-05-26 07:48  daves
+
+	- (agent_registry.[ch] agentx/client.[ch]
+	   agentx/master_request.c agentx/subagent.c):
+	   - Support for MIB region timeouts
+	
+2000-05-26 07:46  daves
+
+	- (snmp.h snmp_api.c snmp_client.c): Support for per-request timeout handling
+	
+2000-05-26 07:45  daves
+
+	- (agentx/protocol.c): Minor error in AgentX packet dump
+	
+2000-05-25 10:07  hardaker
+
+	- (memory.c): Patch from Ragnar Kjørstad:
+	  - fixed linux problem: wrong params getting returned.
+	
+2000-05-25 05:38  mslifcak
+
+	Fix use of bin2asc to not always show "string"; use snmp_oid_compare, too.
+	See bug #234 for details.
+	
+2000-05-25 03:39  daves
+
+	- (mibII/interfaces.c): Consolidate header handling.
+	
+2000-05-25 03:31  daves
+
+	- (mibII/interfaces.c): Correct confusing comment
+	
+2000-05-25 01:53  daves
+
+	- (configure.in configure): Replace use of 'cut' with equivalent 'sed' calls
+	
+2000-05-25 01:30  daves
+
+	- (configure.in aclocal.m4 configure):
+	  - Direct certain checks to the appropriate file descriptor (see BUG#247)
+	
+2000-05-22 16:22  hardaker
+
+	- (apps/.cvsignore): add more stuff to ignore.
+	
+2000-05-22 16:21  hardaker
+
+	- (Makefile.in, snmp_parse_args.c, snmp_parse_args.h, snmpbulkget.c,
+	  snmpbulkwalk.c, snmpdelta.c, snmpdf.c, snmpget.c, snmpgetnext.c,
+	  snmpset.c, snmpstatus.c, snmptable.c, snmptest.c, snmptrap.c,
+	  snmpusm.c, snmpvacm.c, snmpwalk.c, Makefile.in, snmp_parse_args.c,
+	  snmp_parse_args.h):
+	  - moved snmp_parse_args to the library, as I promised to do ages ago.
+	    - no longer calls usage() directly, but returns -1 if you should.
+	
+2000-05-22 05:47  daves
+
+	- (snmplib/tools.[ch]): Routine for comparing two markers.
+	
+2000-05-22 05:42  daves
+
+	- (local/mib2c): Generate multiple tables in one code file
+	
+2000-05-17 10:28  hardaker
+
+	- (vacm_vars.c, vacm_vars.h, vacm.c, vacm.h): Patch from Arne Oesleboe:
+	  - writable vacm mib support.
+	  - other misc vacm fixes.
+	
+2000-05-17 10:26  hardaker
+
+	- (snmpusm.c): Patch from Arne Oesleboe:
+	  - Don't segfault on an unknown command, instead print a warning..
+	
+2000-05-17 10:25  hardaker
+
+	- (snmpvacm.c): Patch from Arne Oesleboe:
+	  - added a new command: snmpvacm.
+	
+2000-05-17 09:25  hardaker
+
+	- (agent_read_config.c): mention the port number on the trapsink help line.
+	
+2000-05-17 09:20  hardaker
+
+	- (snmptrapd.c): use standardized buffer sizes
+	
+2000-05-17 09:13  hardaker
+
+	- (Makefile.in, snmptrapd.c, snmptrapd_log.c, snmptrapd.8): Patch from
+	  Jeff Cours:
+	  - customized formatting of trap output.
+	
+2000-05-17 09:11  hardaker
+
+	- (README): add Jeff and Arne.
+	
+2000-05-17 08:15  hardaker
+
+	- (mib.c): *correctly* associate escapeQuotes with the right default_store bool.
+	
+2000-05-17 08:11  hardaker
+
+	- (snmp.conf.5.def): document escapeQuotes.
+	
+2000-05-17 08:09  hardaker
+
+	- (snmpcmd.1, default_store.h, mib.c): new option -OE:
+	  - shell backslash escape quotations marks for cutting and pasting
+	    onto another snmp command line.
+	
+2000-05-15 09:24  daves
+
+	- (mibII/{ip,icmp,tcp,udp,kernel_linux}.[ch]):
+	  -  Pull Linux MIB-II statistics gathering into a single routine.
+	  -  Cache MIB-II statistics on all architectures.
+	
+2000-05-15 08:53  hardaker
+
+	- (ucd_snmp.h, vmstat_bsdi4.c, vmstat_bsdi4.h): Patch from Bert Driehuis:
+	  - vmstat support for bsdi4.
+	
+2000-05-15 03:06  daves
+
+	- (snmp_agent.c): Re-remove redundant PDU clone
+		(It reappeared during a recent change)
+	
+2000-05-15 03:00  daves
+
+	- (agent_registry.[ch] agentx/master_admin.c): Implement missing routine 'unregister_mib_context'
+	
+	- (agent_registry.[ch] agent_index.[ch]): Move 'fd' registry handling back to agent_registry
+	
+	- (agentx/client.c): Recognise new code file for index handling
+	
+2000-05-12 10:15  hardaker
+
+	- (snmp_agent.c): Um, default to port 161.  Opps.
+	
+2000-05-12 09:00  daves
+
+	- (agent_registry.[ch] var_struct.h agentx/master_admin.c):
+	  - Preparation for per-MIB region timeout, and context support
+	
+2000-05-12 08:45  daves
+
+	- (kernel_sunos5.c): Recognise Solaris ATM LAN Emulation interfaces
+		Thanks to Jay Young
+	
+2000-05-12 08:13  daves
+
+	- (agent_index.[ch] agent_registry.[ch] Makefile.in agentx/master_admin.c):
+	  - Split index handling out from the MIB registry.
+	
+2000-05-12 07:02  daves
+
+	- (kernel_sunos5.c): Add support for recognising QuadFastEther interface
+	
+2000-05-12 06:57  daves
+
+	- (apps/snmptable.c): Fix problem with missing separator (with -Ci -Cf)
+		Thanks to Xavier FOURNET
+	
+2000-05-12 04:02  daves
+
+	- (snmp_agent.c): Remove redundant PDU clone
+		I'm sure this was put in for a reason, but I can't remember what.
+		It doesn't seem to be needed now, and just leaks memory.
+		Here's hoping.....
+	
+2000-05-12 03:11  daves
+
+	- (agent/snmpd.c): Catch (and ignore) SIGPIPE signals.
+		Disappearing subagents therefor appear as normal I/O failures
+	
+2000-05-12 02:24  daves
+
+	- (agentx/protocol.c):
+	  - Implement opaque-encoded float & double types
+	  - Bring packet dump in line with the main library style
+	  - Add packet dump capability for outgoing PDUs
+	
+2000-05-10 16:52  hardaker
+
+	- (snmpd.1.def): document -p.
+	
+2000-05-10 16:43  hardaker
+
+	- (snmp_agent.c): always use the default transport mapping, not the last one.
+	
+2000-05-10 16:25  hardaker
+
+	- (ds_agent.h, snmp_agent.c, snmpd.c): implement multiple transport
+	  mappings via -p [transport:]port[@address].
+	
+2000-05-10 11:08  mslifcak
+
+	fix udpstat --> tcpstat
+	
+2000-05-10 07:59  daves
+
+	- (agentx/master_request, agentx/master_admin.c):
+	  - Handle subagent disappearing without warning
+	
+2000-05-10 07:57  daves
+
+	- (agent/snmp_agent.c snmplib/snmp_api.h):
+	  - Provide a mechanism to handle asynchronous send failures.
+	
+2000-05-10 06:13  daves
+
+	- (snmp_api.h): Logical NOT? Bitwise NOT? Who'll notice the difference anyway!
+	
+2000-05-10 05:34  daves
+
+	- (agentx/master_request.c): Handle non-responsive subagents
+	
+2000-05-10 05:33  daves
+
+	- (agent_registry.c mibII/sysORTable.c): Don't assume subsession link is valid
+	
+2000-05-10 05:29  daves
+
+	- (snmp_api.h): Definitions for session closedown handling
+	
+2000-05-09 14:42  mslifcak
+
+	also clean Win32 binary objects, and core files.
+	
+2000-05-09 14:34  mslifcak
+
+	touch up the "clean" rule.
+	
+2000-05-09 11:32  mslifcak
+
+	until Dave's version wins, need snmp_varlist_add_variable to build Win32 agent.
+	
+2000-05-09 11:31  mslifcak
+
+	fix some Win32 builds (signals? we don't need no steenking signals!)
+	
+2000-05-09 11:30  mslifcak
+
+	Remove trailing CR [0x0d] from one line.
+	
+2000-05-09 08:50  hardaker
+
+	- (Makefile.top, Makefile.in, Makefile.in): fix link time problems
+	  with aCC (or any other unknown compiler).
+	
+2000-05-09 08:47  hardaker
+
+	- (Makefile.top, Makefile.in, Makefile.in): fix link time problems
+	  with aCC (or any other unknown compiler).
+	
+2000-05-09 07:43  daves
+
+	- (agentx/master_request.c): Send out re-delegated requests
+		(and fix a problem with specifying the end-of-range value)
+	
+2000-05-09 07:40  daves
+
+	- (agentx/subagent.c): Fix handling of error response generation
+		(by analogy with recent changes to snmp_agent.c)
+	
+2000-05-09 07:34  daves
+
+	- (snmp_agent.c): Handle AgentX "end-of-range" indication.
+		(This is not the cleanest way of doing things,
+		 but works for now.  We can tidy up later).
+	
+2000-05-09 07:16  daves
+
+	- (snmp_vars.c): Use MIB registry 'start' values
+		(rather than the original name registered)
+		This handles subsequent part of 'split' ranges properly.
+	
+2000-05-08 11:08  hardaker
+
+	- (Makefile.in): I can't believe the last checkin even compiled (luck).
+	
+2000-05-08 11:03  hardaker
+
+	- (Makefile.in): fix library list.
+	
+2000-05-05 09:56  hardaker
+
+	- (diskio.c): Patch from Bert Driehuis:
+	  - disk io support for BSD/OS.
+	
+2000-05-05 09:54  hardaker
+
+	- (at.c): Patch from Bert Driehuis:
+	  - fix a zero byte malloc bug (mostly noticed with -lefence).
+	
+2000-05-05 09:43  hardaker
+
+	- (configure, configure.in): Patch from Albert Chin-A-Young:
+	  - --with-libwrap improvements.
+	
+2000-05-05 09:00  daves
+
+	- (agentx/subagent.c agentx/master_request.c):
+	  - Significant improvements to AgentX processing
+		(Thanks to Reiner Beninga)
+	
+2000-05-05 08:58  daves
+
+	- (snmplib/snmp_api.[ch] snmplib/snmp_client.c agent/snmp_agent.[ch]):
+	  - Minor changes to assist with AgentX development
+		(These may not be absolutely necessary, but they get things working again!)
+	
+2000-05-04 16:21  hardaker
+
+	- (configure, configure.in): minor unimportant --without-openssl fix.
+	
+2000-05-04 16:19  hardaker
+
+	- (configure, configure.in): Patch from John L. Villalovos:
+	  - allow --without-openssl to work.
+	
+2000-05-04 16:15  hardaker
+
+	- (Makefile.in): add the DISMAN-SCRIPT-MIB.txt
+	
+2000-05-04 16:01  hardaker
+
+	- (Makefile.in): Patch from Albert Chin-A-Young:
+	  - install UCD-DISKIO-MIB.txt.
+	
+2000-05-04 15:21  hardaker
+
+	- (displaytable.pm, manager.pm): make purdy graphs with history tables.
+	
+2000-05-04 08:26  daves
+
+	- (snmplib/snmp_client.[ch]): New routine 'snmp_clone_varbind()'
+			(From a suggestion by Reiner Beninga)
+	
+2000-05-04 08:24  daves
+
+	- (snmplib/snmp_api.c): Various minor fixes
+		(Thanks to Reiner Beninga)
+	
+2000-05-04 01:29  daves
+
+	- (snmp_agent.[ch]): Handle index/status information separately from PDU.
+		Also means that delegated requests have access to variable indexes
+			(Based on a suggestion from Reiner Beninga)
+	
+2000-05-04 01:00  daves
+
+	- (ucd-snmp/proc.c): Initialize newly malloced structure
+		(Thanks to Jeff Wilson - see BUG #231)
+	
+2000-05-03 09:06  daves
+
+	- (snmp_agent.[ch] agentx/master_admin.c):
+	  - Clone PDU within init_agent_snmp_session.
+	    New routine 'free_agent_snmp_session'
+		(Thanks to Reiner Beninga)
+	
+2000-05-03 08:17  daves
+
+	- (snmp_agent.c): When returning an error response,
+		use a clean copy of the original request PDU.
+	
+2000-05-03 08:14  daves
+
+	- (snmp_agent.[ch]): Routine to handle variables individually
+		(Thanks to Reiner Beninga)
+	
+2000-05-03 04:37  daves
+
+	- (snmp_agent.c): Check accessibility of exact requests before processing
+		(and remove redundant 'generic' SET handling)
+	
+2000-05-02 09:56  hardaker
+
+	- (manager.pm): lots of small changes.
+	
+2000-05-01 11:34  nba
+
+	- mib.c: fix printing of BITS variables
+	
+2000-05-01 06:55  marz
+
+	 applied patch from Steve Pheran Snodgrass to fix incompatibility with perl5.6 ref stringification
+	
+2000-04-29 07:46  hardaker
+
+	- (config.h.in, configure.in, agent_registry.c): Patch from Frank Strauss:
+	  - use sigaction when available.
+	
+2000-04-28 16:22  hardaker
+
+	- (snmptosql): fix -m/-M the wrong way.
+	
+2000-04-28 16:15  hardaker
+
+	- (snmptosql):
+	 - do history saving better (different table).
+	 - -m/-M mib loading options (which don't appear to be working right yet).
+	
+2000-04-28 07:36  hardaker
+
+	- (agent_registry.c, snmpd.c): Patch from Frank Strauss:
+	  - fix signal handling.
+	
+2000-04-27 14:58  hardaker
+
+	- (Makefile.in, snmpdf.c): implement a remote df command via snmp
+	  - (needs the host resources mib working on the remote system).
+	
+2000-04-27 10:57  hardaker
+
+	- (Makefile.top, config.h.in, configure, configure.in): rpm is now
+	  requiring yet another library: libpopt.
+	
+2000-04-26 15:20  hardaker
+
+	- (Makefile.top): run libtool --finish without -n (go ahead and do the cmds)
+	
+2000-04-26 15:19  hardaker
+
+	- (Makefile.top, configure, configure.in, agent/Makefile.in):
+	  - more libtool fixes (.so versioning, properly install...)
+	
+2000-04-26 14:18  hardaker
+
+	- (*/.cvsignore, */Makefile.in, Makefile.top, aclocal.m4, configure,
+	  configure.in, ltconfig, ltmain.sh):
+	  - use libtool for building.
+	    - Certainly, I must have broke something in the process. (make depend, eg)
+	
+2000-04-26 14:15  hardaker
+
+	- (*/.cvsignore, */Makefile.in, Makefile.top, aclocal.m4, configure,
+	  configure.in, ltconfig, ltmain.sh):
+	  - use libtool for building.
+	    - Certainly, I must have broke something in the process. (make depend, eg)
+	
+2000-04-26 08:11  hardaker
+
+	- (FAQ): new secondary slogan.
+	
+2000-04-26 07:22  hardaker
+
+	- (snmp_api.c, snmpusm.c): Attempt to parse the PDU when a report is
+	  being sent so that the requestid can be used in the outgoing report.
+	  This should fix a problem where SNMP Research's Emante agent is
+	  doing engineID discovery probes based on the request_id (which is a
+	  fairly poor choice as the message_id would be a better one to match
+	  on in general and is the only possible thing to use in cases where
+	  the report is encrypted).
+	
+2000-04-25 13:08  hardaker
+
+	- (FAQ): mention that the perl module is included with the source.
+	
+2000-04-25 08:24  hardaker
+
+	- (snmp_api.c): misc -Ddump fixes.
+	
+2000-04-25 08:02  hardaker
+
+	- (snmptable.c): check for end of mib view exceptions (v2c, v3).
+	
+2000-04-24 11:27  hardaker
+
+	- (snmp_api.c): -D support for those "older" protocols that shouldn't
+	  be used anymore (v1, v2c).
+	
+2000-04-24 10:36  hardaker
+
+	- (asn1.c, default_store.h, mib.c, snmp.c, snmp_api.c, snmp_auth.c,
+	  snmp_debug.c, snmp_debug.h, snmpusm.c):
+	  - timestamps can be printed as a numeric number only (-Ot).
+	  - more configurable packet dumping code for both send and receive.
+	    - uses new -D tokens: dumph (headers), dumpx (hex), dumpv
+	      (values).  dumpx_ and dumpv_ (note the _s) make it eat space
+	      (and newline) before the segment in question.  Try -Ddump then
+	      -Ddumph,dumpv_ to see examples.
+	    - todo:
+	      - better horizontally formated information (probably using "%NUMs").
+	      - USM is called after pdu building (makes sense but is backwards
+	        visually in the dumped packet).
+	      - option to strip datatype token (ie Integer:).
+	
+2000-04-24 09:37  hardaker
+
+	- (version.h bug-report sedscript.in): version tag ( 4.2.pre0 )
+	
+2000-04-24 09:13  hardaker
+
+	- (version.h bug-report sedscript.in): version tag ( EXT.4.2.pre0 )
+	
+2000-04-21 14:13  hardaker
+
+	- (snmpwalk.c): fix GET call for an snmpwalk. (was using a GETNEXT PDU, ack).
+	
+2000-04-21 10:41  hardaker
+
+	- (snmpv3.c): more u_long -> size_t for engineID len.
+	
+2000-04-21 08:18  hardaker
+
+	- (mib.c): fix fprint_description to check for null subtrees.
+	
+2000-04-21 08:17  hardaker
+
+	- (snmpv3.c, snmpv3.h): use size_t for engineid lengths.
+	
+2000-04-19 11:02  marz
+
+	changed mode_t typedef to agree with what ActiveState perl uses (anyone have a problem with this?)
+	
+2000-04-19 10:59  marz
+
+	added Marc Lehman patch to ensure alloc/dealloc use same mechanism (perl vs. system default)
+	
+2000-04-19 08:26  hardaker
+
+	- (snmp_agent.c): agent_check_and_process() always block if caller requested it.
+	
+2000-04-19 04:34  mslifcak
+
+	move static decl to .c;minor casting about to support aCC
+	
+2000-04-18 11:11  mslifcak
+
+	Synch devel branch with patches branch.
+	
+2000-04-18 11:07  mslifcak
+
+	Define optarg for apps use; Define vacm_is_configured for agent use.
+	
+2000-04-18 07:57  hardaker
+
+	- (vmstat.c, vmstat.h, UCD-SNMP-MIB.txt): Patch from Mizuki Honda:
+	  - implement raw cpu usage numbers.
+	
+2000-04-18 03:18  daves
+
+	- (man/snmptable.1 apps/snmptable.c):
+	  - Command-specific '-C' options for snmptable
+	
+2000-04-18 02:01  daves
+
+	- (apps/snmp_parse_args.c): Handle previous form of -Z option as well
+	
+2000-04-17 15:36  hardaker
+
+	- (snmp_parse_args.c): fix -Z if args are wrong.
+	
+2000-04-17 15:32  hardaker
+
+	- (snmp_parse_args.c, snmpcmd.1): fix -Z to use a ','.
+	
+2000-04-17 15:06  hardaker
+
+	- (mta_sendmail.c, mta_sendmail.h): Patch from Christoph Mammitzsch:
+	  - update on the sendmail module.
+	
+2000-04-17 15:00  hardaker
+
+	- (vmstat.c): Patch from John L. Villalovos:
+	  - fix ssCpuSystem, ssCpuUser, ssCpuIdle.
+	
+2000-04-17 14:18  hardaker
+
+	- (Makefile.top, Makefile.in): properly use LN_S for linking snmpinform.
+	
+2000-04-17 13:45  hardaker
+
+	- (snmpusm.c, snmpv3.c, snmpv3.h): engineID changes for better aCC support.
+	
+2000-04-17 13:44  hardaker
+
+	- (.cvsignore): ignore snmpinform.
+	
+2000-04-17 09:58  hardaker
+
+	- (snmp_agent.c): fix row creation.
+	
+2000-04-17 07:25  daves
+
+	- (auto_nlist.c snmpd.c agentx/master.c): Don't exit on failure with '-r'
+	
+2000-04-14 15:07  hardaker
+
+	- (snmp_parse_args.c, snmpdelta.c, snmpget.c, snmpgetnext.c,
+	  snmpstatus.c, snmpcmd.1, snmpget.1, default_store.h, mib.c):
+	  - move -If to -Cf and invert behaviour.
+	
+2000-04-14 15:06  hardaker
+
+	- (configure, configure.in): remove debugging output (opps).
+	
+2000-04-14 09:03  hardaker
+
+	- (versioinfo.c): alright.  Who made versionClearCache RONLY?
+	
+2000-04-13 05:49  nba
+
+	- snmptranslate.1: decument the -w width option
+	
+2000-04-12 12:05  mslifcak
+
+	hide user's hostname; prompt before sending e-mail; prompt to save as file.
+	
+2000-04-12 11:22  mslifcak
+
+	fix %f(%s)
+	
+2000-04-12 09:29  hardaker
+
+	- (snmpcmd.1): document -If.
+	
+2000-04-12 09:17  hardaker
+
+	- (snmp_parse_args.c): put ++ back in that accidentically got checked in.
+	
+2000-04-12 09:16  hardaker
+
+	- (snmpset.c): put space back in usage line.
+	
+2000-04-12 09:12  hardaker
+
+	- (snmp_parse_args.c, snmpdelta.c, snmpget.c, snmpgetnext.c,
+	  snmpset.c, snmpstatus.c, default_store.h, mib.c):
+	  - Add a new option -If to specify fixing of PDUs.
+	    - Anyone know a better place to put this option?
+	  - Applications don't do this by default anymore, and you can't in snmpset.
+	
+2000-04-12 07:38  hardaker
+
+	- (vacm_vars.c, vacm.c, vacm.h): fix to allow no v1/v2c requests when
+	  configured for just v3.
+	
+2000-04-12 06:50  mslifcak
+
+	fix MSVC build for encode_keychange, and add more symbols for release builds
+	
+2000-04-12 05:32  nba
+
+	- parse.c: correct parsing of sub-types textual conventions. Allow parsing
+		of MACRO invocations for standard symbols
+	
+2000-04-12 05:31  nba
+
+	- parse.[ch], snmptranslate.c: allow specification of with for -Tp
+	
+2000-04-12 05:30  nba
+
+	- HOST-RESOURCES-MIB.txt, HOST-RESOURCES-TYPES.txt: align with published
+		RFC 2790
+	
+2000-04-11 15:33  hardaker
+
+	- (configure, configure.in): make config_add_mib() actually look for
+	  the mib in $srcdir/mibs/blah and install it if found.
+	
+2000-04-11 15:21  hardaker
+
+	- (snmpv3.c, snmpv3.h): make macaddr engineid setup not linux
+	  specific, but #defines are checked instead.
+	
+2000-04-11 15:20  hardaker
+
+	- (snmp_logging.h): remove old callback typedef no longer needed.
+	
+2000-04-11 14:38  hardaker
+
+	- (snmpv3.c, snmpv3.h): Patch from John L. Villalovos:
+	  - enable engineID to be set from MACAddr.
+	
+2000-04-11 09:51  hardaker
+
+	- (mta_sendmail.c, mta_sendmail.h): New module from Christoph Mammitzsch:
+	  - implements the MTA-MIB for monitoring sendmail.
+	
+2000-04-11 09:50  hardaker
+
+	- (MTA-MIB.txt, NETWORK-SERVICES-MIB.txt): new mibs for new modules.
+	
+2000-04-11 03:25  daves
+
+	- (agent/snmp_agent.c): Save/restore original statP value for SET handling.
+	
+2000-04-11 02:35  daves
+
+	- (agent/snmp_agent.c): Report failures from ACTION phase of SET correctly.
+	
+2000-04-11 01:57  daves
+
+	- (agentx/master_request.c): Dynamically resize subagent requests
+		(Thanks to Reiner Beninga)
+	
+2000-04-10 05:08  daves
+
+	- (snmp_agent.c agentx/master_request.c): Fix multi-subagent requests
+		(Thanks to Reiner Beninga)
+	
+2000-04-07 12:25  hardaker
+
+	- (snmptrap.c, snmpusm.c):
+	  - fix snmpv3 traps to be authoritative from the client side, not the
+	    receiver side.  snmpv3 informs stay as is.  Unfortunately, for
+	    command line apps this doesn't make a whole lot of sense but is
+	    right in terms of how the protocol works and this is hence
+	    somewhat of a hack.
+	
+2000-04-07 07:50  daves
+
+	- (agent/snmp_agent.c): Handle v2 exception types in v1 queries
+	
+2000-04-07 07:16  hardaker
+
+	- (snmptrapd.c, read_config.c, snmpv3.c):
+	  - allow NULL help lines for config directives and use it to hide
+	    internal directives used for persistent storage.
+	
+2000-04-06 15:31  hardaker
+
+	- (snmp_api.c, snmp_api.h):
+	  - turn backwards compatibility macros back into functions so
+	    default_store.h dependencies go away again.
+	  - create a flag to not probe for engineIDs durning sess_open().
+	
+2000-04-06 07:20  daves
+
+	- (snmplib/snmp_api.c): Fix mishandled Counter64 parsing
+	
+2000-04-06 03:36  daves
+
+	- (agent/snmpd.c): Fix usage message alignment.
+	
+2000-04-06 03:31  daves
+
+	- (man/snmpd.1.def): Document the AgentX socket command-line option
+	
+2000-04-05 08:41  hardaker
+
+	- (FAQ2HTML): it's been sitting in my personal src tree for > 2 years.
+	
+2000-04-05 08:38  hardaker
+
+	- (mibincl.h, usmUser.c, snmptrapd.c, lcd_time.c, scapi.c, snmp_api.c,
+	  snmpusm.c, snmpusm.h, snmpv3.c):
+	  - make snmptrapd handle v3 users properly, (and shutdown properly as well).
+	  - a more generic user storage routine added to snmpusm.c and used in
+	    usmUser.c with a side effect of needing callback.h above snmpusm.h.
+	
+2000-04-05 08:27  hardaker
+
+	- (rsnmp): -> /usr/bin/perl
+	
+2000-04-05 08:24  hardaker
+
+	- (.cvsignore): misc minor additions to /
+	
+2000-04-04 11:03  daves
+
+	- (agent/snmp_agent.c): Ensure unimplemented objects return 'noSuchObject'
+	
+2000-04-03 14:57  mslifcak
+
+	Initialize statP.
+	
+2000-04-03 09:12  daves
+
+	- (agent/snmp_agent.c): Ensure a v1 SET returns a v1 error status.
+	
+2000-04-03 08:32  hardaker
+
+	- (ChangeLog): Year was "100" for 2000 (noticed by Jay Riddell):
+	
+2000-04-03 07:53  daves
+
+	- (agent/snmp_agent.c): Ensure SETs fail if one varbind does.
+	
+2000-03-31 07:25  daves
+
+	- (agent/snmp_vars.c): Fix to report 'noSuchObject' in certain circumstances
+	
+2000-03-31 07:13  daves
+
+	- (snmplib/snmp_api.c): Don't repeat the first four bytes in a PDU dump
+	
+2000-03-31 07:04  daves
+
+	- (snmplib/snmp_logging.c): Handle logging empty strings (e.g. a null indent)
+	
+2000-03-30 00:15  daves
+
+	- (agent/snmp_agent.c): Initialise timeout structure properly
+		(Thanks to ashipman@erggroup.com)
+	
+2000-03-27 10:32  mslifcak
+
+	remove trailing newline from hrSWRunName values.
+	
+2000-03-24 09:09  mslifcak
+
+	to sync with patches branch.
+	
+2000-03-24 05:07  nba
+
+	- snmptrapd.c: correctly free the reponse if sending it fails
+	
+2000-03-24 04:22  mslifcak
+
+	xx_synch_response: avoid freeing PDU twice.
+	
+2000-03-23 23:29  nba
+
+	- snmpcmd.1, snmptrap.1, snmptrap.c, Makefile.in: Install and document
+		snmpinform.
+	
+2000-03-23 09:58  mslifcak
+
+	Enqueue only complete request_list entry; Reduce scoping of callback vars.
+	
+2000-03-23 03:02  nba
+
+	file snmpinform.1 was initially added on branch V4-1-1-patches.
+	
+2000-03-22 08:13  mslifcak
+
+	printf ?
+	
+2000-03-21 11:12  mslifcak
+
+	modify F. Strauss' patch per N. Baggesen's suggestion: remove export-dynamic.
+	
+2000-03-21 09:14  mslifcak
+
+	more smooth sailing with Win32 .DLL . DLLEXPORT, anyone ?
+	
+2000-03-21 09:07  mslifcak
+
+	win32 build check: no sigaction, SIGCLD defined.
+	
+2000-03-21 08:47  daves
+
+	- (ds_agent.h snmpd.c mibgroup/agentx/{master,subagent}.c):
+	  -  Command-line option for specifying AgentX port
+	     (based on patch from Frank Strauss)
+	
+2000-03-21 08:38  daves
+
+	- (snmp_api.c): Support 'host:port' representation of peernames
+	
+2000-03-21 04:05  daves
+
+	- (snmp_agent.c): Missing new-line on debug output
+	
+2000-03-21 02:52  daves
+
+	- (mibII/{tcp,udp,ip,icmp}*) Continuing mibII code cleanup
+	
+2000-03-20 11:14  mslifcak
+
+	Comment -C -- do not use this flag.
+	
+2000-03-17 15:32  hardaker
+
+	- (header_complex.c): sizeof(x)*(len+1) not sizeof(x)*len+1
+	
+2000-03-16 00:10  nba
+
+	- configure, hr_print.c: detect system printers (SysV/lpstat, *BSD/cgetnext,
+		Linux/printcap)
+	
+2000-03-15 18:30  mslifcak
+
+	Second part : all members of struct snmp_index are pointers.
+	
+2000-03-15 15:07  mslifcak
+
+	Fix memory leak with unregister_index.
+	
+2000-03-15 15:07  mslifcak
+
+	Fix memory leak when cleaning up trap variables.
+	
+2000-03-15 08:48  daves
+
+	- (snmp_api.c snmp_client.c): Initialise varbind data hook elsewhere as well.
+	
+2000-03-15 07:57  daves
+
+	- (agentx/master_request.c): Fix infinite loop problem when walking subagent.
+	
+2000-03-15 06:09  daves
+
+	- (agent/snmp_agent.c): Avoid calling read routine for each SET handling pass.
+		N.B:  This hasn't been tested with AgentX subagents yet
+	
+2000-03-15 06:07  daves
+
+	- (snmplib/snmp_api.[ch]): Provide hook for internal varbind-related data
+	
+2000-03-15 05:22  daves
+
+	- (agent/var_struct.h): Use a single magic number for MIB registry name lengths.
+	
+2000-03-15 01:51  daves
+
+	- (snmplib/system.h): Don't declare gettimeofday() if the system provides it.
+		(Fix provided by Ron Mevissen)
+	
+2000-03-14 07:57  daves
+
+	- (agent/snmp_agent.c): Don't overwrite saved status when checking access.
+	
+2000-03-14 07:52  daves
+
+	- (agent/snmp_agent.c): Return a response, even if the request failed.
+	
+2000-03-13 15:32  nba
+
+	- ipfwacc.h: fix the MIB name
+	
+2000-03-10 12:48  hardaker
+
+	- (configure): autoconf run
+	
+2000-03-10 11:09  hardaker
+
+	- (Makefile.dlmod): Patch from Frank Strauss:
+	  - dlmod build Makefile example.  Needs incorperation with main configure.
+	
+2000-03-10 11:02  hardaker
+
+	- (agent_registry.c): better signal check from Michael Slifcak
+	
+2000-03-10 10:59  hardaker
+
+	- (UCD-DLMOD-MIB.txt): typo found by Michael Slifcak.
+	
+2000-03-10 10:54  hardaker
+
+	- (dlmod.c, dlmod.h, snmpd.conf.5.def, UCD-DLMOD-MIB.txt): Patch from
+	  Frank Strauss:
+	  - Reimplementation of the dlmod mib module:
+	    o mibgroup/misc/dlmod + dlmods/dlmod_mib -> mibgroup/ucd-snmp/dlmod
+	    o fixed registration (ucdavis.ucdExperimental.14 instead of ucdavis.14)
+	    o added configure stuff for HAVE_SNPRINTF, which was used by dlmod.c
+	    o removed `_dynamic_' prefixes from init/deinit functions
+	    o made dlmodIndex not-accessible (only implementation, not definition)
+	    o removed the asn_parse_XXX stuff
+	    o made entries with state `error' able to accept state `load'
+	    o made the wombat example usable as static and dynamic module
+	    o added simple config_parse functionality to the wombat example
+	
+2000-03-10 10:52  hardaker
+
+	- (agent_registry.c, agent_registry.h, snmpd.c): Patch from Frank Strauss:
+	  - signal registry system implemented (needs to be redone allowing
+	    multiple callbacks and handlers for all signals).
+	  - arbitrary file descriptor/socket registration.
+	    - this is not the way it should be done (use sessions instead).
+	
+2000-03-10 10:44  hardaker
+
+	- (Makefile.in, Makefile.top, acconfig.h, config.h.in, configure.in,
+	  Makefile.in, Makefile.in, Makefile.in, Makefile.in, Makefile.in):
+	  Patch from Frank Strauss:
+	  - clean up shared library usage.
+	
+2000-03-10 10:16  hardaker
+
+	- (config.h.in): autoheader re-arranged some stuff.
+	
+2000-03-07 11:58  mslifcak
+
+	more touchups to allow UnixWare build to complete.
+	
+2000-03-07 11:21  hardaker
+
+	- (default_store.h): make MAX_SUBIDS larger and a multiple of 8.
+	
+2000-03-07 10:13  mslifcak
+
+	Introduce --enable-mini-agent to configure agent (snmpv3, no mibII interfaces).
+	
+2000-03-07 09:03  mslifcak
+
+	assume "snmpapp" if no arg passed to init_snmpv3.
+	
+2000-03-07 08:58  mslifcak
+
+	remove init_mib() call - not appropriate here.
+	
+2000-03-07 08:35  mslifcak
+
+	Let the aix4 patch work.
+	
+2000-03-07 07:08  mslifcak
+
+	trim fat from recent check-ins.
+	
+2000-03-06 20:01  mslifcak
+
+	cleaned up SCO UnixWare build.
+	
+2000-03-06 16:40  mslifcak
+
+	start support for SCO UnixWare 5 as svr5.
+	
+2000-03-06 10:56  hardaker
+
+	- (default_store.h, snmp_api.c): Patch from Robert Story:
+	  - don't check ranges if not requested.
+	
+2000-03-06 10:55  hardaker
+
+	- (snmp_agent.c, snmp_agent.h, snmpd.c): Patch from Robert Story:
+	  - fix exit()ing behaviour in the libucdagent library.
+	
+2000-03-06 10:36  hardaker
+
+	- (snmptrapd.c): Patch from Robert Story:
+	  - -n prints numeric IP addrs.
+	
+2000-03-06 10:25  hardaker
+
+	- (callback.h, snmp_logging.c, snmp_logging.h): Idea from ashipman@erggroup.com:
+	  - callback function (using callback.h) added for external logging.
+	
+2000-03-05 05:25  marz
+
+	fix to preserve trailing multi component instance id's at the end of
+	symbolic mib names(e.g., foo.6.7) when doing translateObj.
+	
+2000-03-04 11:34  nba
+
+	- configure.in, configure: support --without-openssl, even if OpenSSL
+		is available
+	
+2000-03-04 11:30  nba
+
+	- agent/(various): globalize the kvm_t *kd variable
+	
+2000-03-04 11:26  nba
+
+	- mib_modules.c, hr_storage.c: pre-processor # should be in column 1
+	
+2000-03-04 11:17  nba
+
+	- inet.c, inet6.c: survive -v 2c exception replies
+	
+2000-03-04 11:17  nba
+
+	- snmp_api.c: remove a superfluous & in front of an array
+	
+2000-03-04 11:15  nba
+
+	- ucd_snmp.h, {memory,vmstat}_netbsd1.[ch]: support for NetBSD
+	
+2000-03-04 11:14  nba
+
+	- hr_disk.c: fixes for NetBSD
+	
+2000-03-04 11:10  nba
+
+	- versioninfo.c: don't return the trailing newline
+	
+2000-03-04 11:08  nba
+
+	- hr_swrun.c: fix process size for FreeBSD 3 and NetBSD
+	
+2000-03-04 11:05  nba
+
+	- agent_trap.h: fix a wrong prototype
+	
+2000-03-04 11:04  nba
+
+	- snmptable.c: fix problems printing table name and headers when using
+		-OS format
+	
+2000-03-02 11:50  nba
+
+	- snmp_api.c: fix address length info for tcp connect
+	
+2000-03-02 11:48  nba
+
+	- loadave.c: fix for AIX 4
+	
+2000-03-02 08:30  daves
+
+	- (mib2/ip.[ch] mib2/ipAddr.[ch]): First stab at tidying up mib2 support.
+	
+2000-03-01 13:23  hardaker
+
+	- (snmptosql): fix dynamic table testing for creation needed.
+	
+2000-03-01 13:22  hardaker
+
+	- (manager.pm, ucd-snmp.pm): Opps.  Wrong name.  ucd-snmp.pm -> manager.pm.
+	
+2000-03-01 13:21  hardaker
+
+	- (ucd-snmp.pm): turned sqltohtml into an apache module. 2x speed improvement.
+	
+2000-03-01 08:32  mslifcak
+
+	fix bug 180 for cygwin build with _REENTRANT; per ashipman@erggroup.com
+	
+2000-02-29 14:30  mslifcak
+
+	Invoke snmp_sess_send from within snmp_read to avoid mutex deadlocks.
+	
+2000-02-28 14:25  nba
+
+	- snmpd.h, smux.c: don't initialize smux master in sub agent
+	
+2000-02-28 14:16  nba
+
+	- snmp_vars.c: use SUB_AGENT symbol
+	
+2000-02-28 14:12  nba
+
+	- mib.c: sprint_by_type should handle ASN_BIT_STR
+	
+2000-02-28 14:10  nba
+
+	- snmp_parse_args.c: correctly call the -I options input options
+	
+2000-02-28 10:47  mslifcak
+
+	fix bug #176 (AIX 4 - use knlist in lieu of nlist)
+	
+2000-02-24 17:17  mslifcak
+
+	apply patch to fix bug no. 177.
+	
+2000-02-24 13:31  hardaker
+
+	- (default_store.h, read_config.c, snmp_api.c): new snmp.conf keyword
+	  to force the parser to ignore unknown tokens.
+	
+2000-02-24 03:59  mslifcak
+
+	document UNSIGNED32 and COUNTER32 ('u' and 'c') in snmpset (gratis ashipman@erggroup.com)
+	
+2000-02-24 03:56  mslifcak
+
+	add support for COUNTER32 to snmp_add_var; document UNSIGNED32 and COUNTER32
+	('u' and 'c') in snmptrap (gratis ashipman@erggroup.com)
+	
+2000-02-23 23:06  nba
+
+	- pass.c, pass_persist.c: fix setting of octet strings.
+	
+2000-02-23 02:09  nba
+
+	- mt_support.h: a bad ; in the C++ bracketing
+	
+2000-02-23 02:09  nba
+
+	- system.c: remove some superfluous indirections in strcasecmp
+	
+2000-02-23 02:07  nba
+
+	- vmstat_solaris.c: make sure we agree with the prototype of getpagesize!
+	
+2000-02-22 15:31  nba
+
+	- pass_persist.h: declare init_pass_persist
+	
+2000-02-22 09:57  mslifcak
+
+	prune two more symbols not used by auto_nlist for Solaris-built MIB modules.
+	
+2000-02-21 16:17  mslifcak
+
+	Apply R. Story's patch for mkdirhier and strncasecmp on win32
+	
+2000-02-21 07:39  mslifcak
+
+	fix bug 171 (thanks to Larry Parmelee).
+	
+2000-02-21 05:56  mslifcak
+
+	remove free after snmp_close (don't free twice!)
+	
+2000-02-21 04:58  mslifcak
+
+	Added description in SH_NAME for several man-pages (c/o ragnark)
+	
+2000-02-18 12:14  mslifcak
+
+	refer the .so macro to man3; adjust Makefile.in to use the renamed file.
+	
+2000-02-17 05:17  mslifcak
+
+	include pass_persist in the required list.
+	
+2000-02-17 02:00  daves
+
+	- (configure* ucd-snmp/vmstat_solaris2.c):
+	  - Provide missing 'getpagesize' routine for Solaris 2.4
+	    (Thanks to Ragnar Kjørstad)
+	
+2000-02-16 20:17  mslifcak
+
+	include mibincl.h in hr_system.c to fix bug #159.
+	
+2000-02-16 16:35  mslifcak
+
+	remove auto_nlist of unused "swaplist" symbol.
+	
+2000-02-16 15:17  mslifcak
+
+	patch suggested by Rick Beaman <beaman@mediaone.net>
+	
+2000-02-16 14:58  mslifcak
+
+	remove unused vars
+	
+2000-02-16 14:57  mslifcak
+
+	test lengths before allocating memory; use new VACMSTRINGLEN constant.
+	
+2000-02-16 08:18  mslifcak
+
+	include time.h once
+	
+2000-02-16 08:02  mslifcak
+
+	restore #if HAVE...IN_PCB_H
+	
+2000-02-15 23:47  nba
+
+	- configure.in, ipch.[ch]: initial stabs at Linux ipv6 support. A lot is
+		lacking in the kernel statistics though.
+	
+2000-02-15 23:40  nba
+
+	- (many): configure check for netinet/ip6.h
+	
+2000-02-15 23:34  nba
+
+	- hr_filesys.c: MNTTYPE defines for FreeBSD-3 and BSDI-4, and moving the
+		return value for Ext2FS to the newly defined OID.
+	
+2000-02-15 23:24  nba
+
+	- freebsd3.h: some kernel symbols not to be used for FreeBSD 3
+	
+2000-02-15 23:23  nba
+
+	- snmptable.c: give a sensible output for an empty table.
+	
+2000-02-15 23:22  nba
+
+	- vacm*: buffer length checking!
+	
+2000-02-15 23:20  nba
+
+	- hr_storage.c: return memory size in pages.
+	
+2000-02-15 23:17  nba
+
+	- ucd_snmp.h, memory_freebsd2.h: make it work for FreeBSD-3 too
+	
+2000-02-15 23:16  nba
+
+	- snmp_agent.c: one more place to send a AUTHFAIL trap
+	
+2000-02-15 23:15  nba
+
+	- agent_registry.c: fix a return for SNMPv1/Counter64 case
+	
+2000-02-15 02:12  daves
+
+	- (apps/snmp_parse_args.c): Omit deprecated options from optarg handling.
+	
+2000-02-11 15:48  hardaker
+
+	- (manager/*): /usr/local/bin/perl -> /usr/bin/perl
+	
+2000-02-11 15:47  hardaker
+
+	- (makedepend.in): /usr/local/bin/perl -> /usr/bin/perl
+	
+2000-02-11 15:38  hardaker
+
+	- (rsnmp): perl5 -> perl
+	
+2000-02-11 15:17  hardaker
+
+	- (man/Makefile.in): install snmp_trap_api.3
+	
+2000-02-11 14:20  hardaker
+
+	- (local/Makefile.in): last minute makefile touchup
+	
+2000-02-11 14:03  hardaker
+
+	- (NEWS): update for 4.1.1
+	
+2000-02-11 13:47  hardaker
+
+	- (ChangeLog): Update for 4.1.1
+	
+2000-02-11 13:29  hardaker
+
+	- (version.h bug-report sedscript.in): version tag ( 4.1.1 )
+	
+2000-02-11 12:53  hardaker
+
+	- (T016snmpv2cgetfail, T017snmpv2ctov1getfail): update for Timeout for v2c.
+	
+2000-02-11 12:49  hardaker
+
+	- (local/Makefile.in): don't cp for snmpcheck
+	
+2000-02-11 12:44  hardaker
+
+	- (local/Makefile.in): fix for seperate build path
+	
+2000-02-11 12:30  hardaker
+
+	- (sysORTable.h): Patch from Niels Baggesen:
+	  - compiler warning fix.
+	
+2000-02-11 12:29  hardaker
+
+	- (snmp_agent.c): patch from Niels:
+	  - don't send autherror responses for v2c.
+	  - send authFailure trap.
+	
+2000-02-11 12:22  hardaker
+
+	- (acconfig.h, config.h.in): change perl path to /usr/bin.
+	
+2000-02-11 06:58  hardaker
+
+	- (acconfig.h, config.h.in): Dont define PROCFIXCMD and EXECFIXCMD by default.
+	
+2000-02-10 11:14  mslifcak
+
+	fix for older platforms to use pass_persist; not included by default.
+	
+2000-02-10 10:33  mslifcak
+
+	[no log message]
+	
+2000-02-10 10:32  hardaker
+
+	- (hr_swinst.c): minor fixes pointed out by Michael.
+	
+2000-02-10 10:28  hardaker
+
+	- (snmpv3.c): fix setup engineID buffer overflow found by Mike Baer.
+	
+2000-02-10 08:39  nba
+
+	- man/*: set the dates on the pages to reflect the revision date
+	
+2000-02-10 08:13  mslifcak
+
+	fix varargs decl/defn of snmp_log
+	
+2000-02-10 08:00  mslifcak
+
+	typedef int ssize_t (one line added) for build on SunOS 4.
+	
+2000-02-10 07:54  hardaker
+
+	- (FAQ): mention the tutorial.
+	
+2000-02-10 07:14  daves
+
+	- (FAQ): Explicit examples of sending traps by hand
+	
+2000-02-10 04:41  daves
+
+	- (snmplib/{snmp_api,snmp_client}.c apps/snmpnetstat/inet6.c):
+	  -  Comment unused code more informatively as to why it is omitted.
+	
+2000-02-09 13:53  hardaker
+
+	- (eval_tools.sh, T023snmpv3getMD5DES, T024snmpv3getSHA1, T025snmpv3getSHADES):
+	  - skip ssl tests we can't perform.
+	
+2000-02-09 13:51  mslifcak
+
+	include sys/param.h to get PATH_MAX on FreeBSD.
+	
+2000-02-09 13:38  hardaker
+
+	- (Sv3SHADESconfig, T024snmpv3getSHA1, T025snmpv3getSHADES):
+	  - make SHA tests actually work.
+	
+2000-02-09 13:32  hardaker
+
+	- (Sv3configsha): sha config support
+	
+2000-02-09 13:31  hardaker
+
+	- (T003snmpv1getfail, T016snmpv2cgetfail, T017snmpv2ctov1getfail,
+	  T018snmpv1tov2cgetfail): fix for proper ACM error outputs.
+	
+2000-02-09 13:30  mslifcak
+
+	Define SNMP_MAXPATH, and use it.
+	
+2000-02-09 13:30  hardaker
+
+	- (T024snmpv3getSHA1 T025snmpv3getSHADES): new tests
+	
+2000-02-09 13:16  hardaker
+
+	- (UCD-SNMP-MIB.txt): mention a new ucdExperimental registration (wavlan).
+	
+2000-02-09 13:16  hardaker
+
+	- (agent_callbacks.h, agent_registry.c, agent_registry.h,
+	  snmp_agent.c, vacm_vars.c):
+	  - fix posible acm DoS problems by checking access tables early on.
+	
+2000-02-09 11:38  hardaker
+
+	- (hr_swinst.c): patch from redhat for better RPM support.
+	
+2000-02-09 10:43  hardaker
+
+	- (configure.in): change mode to autoconf.
+	
+2000-02-09 10:41  hardaker
+
+	- (Makefile.in): fix rsnmp build.  Really.  I mean it.
+	
+2000-02-09 10:41  hardaker
+
+	- (hr_filesys.c, hr_storage.c): Patch from Andy HOOD:
+	  - Solaris patches.
+	
+2000-02-09 10:37  hardaker
+
+	- (Makefile.in):
+	  - fix rsnmp.made.
+	  - use $(MAKE).
+	
+2000-02-09 08:41  hardaker
+
+	- (vmstat_solaris2.c, vmstat_solaris2.h): Update from Jochen Kmietsch
+	
+2000-02-07 11:49  marz
+
+	oops missing important fix for win32 build - fd_set must be same size as in winsock
+	
+2000-02-07 11:18  mslifcak
+
+	Undo last change; on Sun, additional platform info was not obtained;
+	the proper solution would be to remove the second token (hostname).
+	
+2000-02-07 10:43  mslifcak
+
+	Keep customer's nodename out of the published 'uname' information.
+	
+2000-02-07 07:20  hardaker
+
+	- (PORTING): Michael likes diff -u.
+	
+2000-02-06 06:11  nba
+
+	- read_config.c: Fix one final ':' to ENV_SEPARATOR_CHAR
+	
+2000-02-05 17:39  hardaker
+
+	- (snmpv3.c): correct some awful text -> engineID creation mistakes.
+	
+2000-02-05 08:37  hardaker
+
+	- (snmptrapd.c): fix wrapped line continuation in usage message.
+	
+2000-02-05 06:56  marz
+
+	fix version  number
+	
+2000-02-04 18:55  marz
+
+	weird delay in creation of pid files
+	
+2000-02-04 18:21  marz
+
+	brain-o
+	
+-------------------------------------------------------------------------------
+
 Changes: V4.1 -> V4.1.1
 
 marz  5 Feb 00 06:56:43
