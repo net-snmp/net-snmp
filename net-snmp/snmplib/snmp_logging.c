@@ -38,6 +38,8 @@
 #include <varargs.h>
 #endif
 
+#include "asn1.h"
+#include "default_store.h"
 #include "snmp_logging.h"
 #define LOGLENGTH 1024
 
@@ -45,6 +47,13 @@ static int do_syslogging=0;
 static int do_filelogging=0;
 static int do_stderrlogging=1;
 static FILE *logfile;
+
+void
+init_snmp_logging(void) {
+  ds_register_premib(ASN_BOOLEAN, "snmp", "dontLogTimestamp", DS_LIBRARY_ID,
+                     DS_LIB_DONT_LOG_TIMESTAMP);
+}
+
 
 
 static char *
@@ -143,7 +152,11 @@ void
 snmp_log_filelog (int priority, const char *string)
 {
   if (do_filelogging) {
-    fprintf(logfile, "%s %s", sprintf_stamp(NULL), string);
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_LOG_TIMESTAMP)) {
+      fprintf(logfile, "%s", string);
+    } else {
+      fprintf(logfile, "%s %s", sprintf_stamp(NULL), string);
+    }
   }
 }
 
@@ -152,7 +165,11 @@ void
 snmp_log_stderrlog (int priority, const char *string)
 {
   if (do_stderrlogging) {
-    fprintf(stderr, "%s %s", sprintf_stamp(NULL), string);
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_LOG_TIMESTAMP)) {
+      fprintf(stderr, "%s", string);
+    } else {
+      fprintf(stderr, "%s %s", sprintf_stamp(NULL), string);
+    }
   }
 }
 

@@ -26,6 +26,7 @@ extern "C" {
 
 #endif
 
+void init_snmp_logging(void);
 void snmp_disable_syslog(void);
 void snmp_disable_filelog(void);
 void snmp_disable_stderrlog(void);
