@@ -107,6 +107,7 @@ EXPORTS
 	snmp_synch_response
 	snmp_duplicate_objid
 	snmp_increment_statistic
+	snmp_increment_statistic_by
 	snmp_get_statistic
 	init_snmp
 	snmp_shutdown
