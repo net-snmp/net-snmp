@@ -492,7 +492,7 @@ main(argc, argv)
     /* open the logfile if necessary */
     if (logfile[0]) {
       close(1);
-      open(logfile,O_WRONLY|O_CREAT,0644);
+      open(logfile,O_WRONLY|O_CREAT|O_TRUNC,0644);
       close(2);
       dup(1);
       close(0);
