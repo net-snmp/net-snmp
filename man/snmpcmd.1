@@ -266,7 +266,6 @@ machine.
 perform the query using AAL5 PDUs sent on the permanent virtual
 circuit with VPI=10 (decimal) and VCI=32 (decimal) on the second ATM
 adapter in the machine.  Note that "PVC" is a synonym for "AAL5PVC".
-.PP
 .TP 24
 .IR "udp6:hostname:10161"
 perform the query using UDP/IPv6 datagrams to port
@@ -275,11 +274,11 @@ on
 .I hostname
 (which will be looked up as an AAAA record).
 .TP 24
-.IR "udp6:fe80::2d0:b7ff:fe21:c6c0"
+.IR "UDP6:fe80::2d0:b7ff:fe21:c6c0"
 perform the query using UDP/IPv6 datagrams to port 161 at address
 .IR fe80::2d0:b7ff:fe21:c6c0 .
 .TP 24
-.IR "TCPIPv6:::1"
+.IR "tcpipv6:::1"
 connect to port 161 on the local host
 .IR "" ( ::1 
 in IPv6 parlance) using TCP/IPv6 and perform query over that connection.
