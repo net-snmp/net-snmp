@@ -34,6 +34,7 @@ init_kmem(file)
     exit(1);
   }
   fcntl(mem,F_SETFD,1);
+#ifndef __alpha
 #ifdef hpux
   swap = open("/dev/dmem",O_RDONLY);
 #else
@@ -45,6 +46,7 @@ init_kmem(file)
     exit(1);
   }
   fcntl(swap,F_SETFD,1);
+#endif
 }
 
 
@@ -93,7 +95,9 @@ klookup(off, target, siz)
   klseek(off);
   if (siz != klread(target, siz)) {
     ERROR("klread\n");
+#ifdef EXIT_ON_BAD_KLREAD
     exit(-1);
+#endif
     return(NULL);
   }
 

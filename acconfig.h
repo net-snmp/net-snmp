@@ -40,6 +40,8 @@ sure to end it in -1.*/
 #define VERS_DESC   "HP-UX 9.0.5"
 #elif defined(ultrix)
 #define VERS_DESC   "Ultrix 4.2"
+#elif defined(osf)
+#define VERS_DESC   "OSF1"
 #else
 #define VERS_DESC   "SunOS 4.1.4"
 #endif
@@ -82,7 +84,7 @@ sure to end it in -1.*/
 /* Command to generate ps output, the final column must be the process
    name withOUT arguments */
 
-#if defined(hpux) || defined(SYSV)
+#if defined(hpux) || defined(SYSV) || defined(alpha)
 #define PSCMD "/bin/ps -e"
 #else
 #define PSCMD "/bin/ps -axc"
@@ -123,6 +125,9 @@ sure to end it in -1.*/
 #define SNMPBLOCK 0       /* Set to 1 if you want snmpgets to block and never
                              timeout.  Original CMU code had this
                              hardcoded into the code as = 1 */
+
+/* #define EXIT_ON_BAD_KLREAD  */
+/* define to exit the agent on a bad kernel read */
 
 #define LASTFIELD -1      /* internal define */
 

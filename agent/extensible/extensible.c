@@ -2,8 +2,11 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <nlist.h>
+#ifndef __alpha
 #include <machine/param.h>
 #include <sys/vmmeter.h>
+#else
+#endif
 #include <sys/conf.h>
 #include <sys/param.h>
 #ifdef hpux
@@ -13,7 +16,7 @@
 #include <sys/fs.h>
 #include <mtab.h>
 #endif
-#ifdef sun
+#if defined(sun) || defined(__alpha)
 #include <ufs/fs.h>
 #endif
 #include <sys/stat.h>
