@@ -43,6 +43,8 @@
 #include <dlfcn.h>
 #include "dlmod.h"
 
+static long long_return;
+
 static struct dlmod *dlmods = NULL;
 static int          dlmod_next_index = 1;
 static char         dlmod_path[1024];
@@ -302,9 +304,9 @@ dlmod_free_config (void)
 static int
 header_dlmod(struct variable *vp,
 	     oid *name,
-	     int *length,
+	     zise_t *length,
 	     int exact,
-	     int *var_len,
+	     zise_t *var_len,
 	     WriteMethod **write_method)
 {
 #define DLMOD_NAME_LENGTH 10
@@ -350,7 +352,8 @@ var_dlmod(struct variable *vp,
     /* this is where we do the value assignments for the mib results. */
     switch (vp->magic) {
     case DLMODNEXTINDEX:
-	return (unsigned char *)&dlmod_next_index;
+        long_return = dlmod_next_index;
+	return (unsigned char *)&long_return;
     default:
 	DEBUGMSGTL(("dlmod", "unknown sub-id %d in var_dlmod\n", vp->magic));
     }
@@ -452,7 +455,8 @@ var_dlmodEntry(struct variable *vp,
 	return dlm->error;
     case DLMODSTATUS:
 	*write_method = write_dlmodStatus;
-	return (unsigned char *) &dlm->status;
+	long_return = dlm->status;
+	return (unsigned char *) &long_return;
     default:
 	DEBUGMSGTL(("dlmod", "unknown sub-id %d in var_dlmodEntry\n",
 		    vp->magic));
