@@ -9482,6 +9482,8 @@ new_with_out_transport_list=`echo $with_out_transports | sed 's/,/ /g;'`
 #
 if test "x$PARTIALTARGETOS" = "xcygwin"; then
   transport_default_list="UDP TCP Callback"
+elif test "x$PARTIALTARGETOS" = "xmingw32"; then
+  transport_default_list="UDP TCP Callback"
 else
   transport_default_list="UDP TCP Unix Callback"
 fi
@@ -9527,6 +9529,11 @@ echo "$as_me: error: IPX support unavailable for this platform (Linux only)" >&2
     fi
     if test "x$i" = "xUnix"; then
       if test "x$PARTIALTARGETOS" = "xcygwin"; then
+        echo
+        { { echo "$as_me:$LINENO: error: Unix domain protocol support unavailable for this platform" >&5
+echo "$as_me: error: Unix domain protocol support unavailable for this platform" >&2;}
+   { (exit 1); exit 1; }; }
+      elif test "x$PARTIALTARGETOS" = "xcygwin"; then
         echo
         { { echo "$as_me:$LINENO: error: Unix domain protocol support unavailable for this platform" >&5
 echo "$as_me: error: Unix domain protocol support unavailable for this platform" >&2;}
@@ -15668,6 +15675,7 @@ done
         ;;
 esac
 # WIN32
+# (mingw32 must link winsock explicitly)
 
 for ac_header in winsock.h
 do
@@ -15805,7 +15813,17 @@ if test `eval echo '${'$as_ac_Header'}'` = yes; then
   cat >>confdefs.h <<_ACEOF
 #define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
- AGENTLIBS="${AGENTLIBS} -liphlpapi"
+
+	AGENTLIBS="${AGENTLIBS} -liphlpapi"
+	case $target_os in
+		mingw*)
+			LIBS="${LIBS} -lwsock32"
+			AGENTLIBS="${AGENTLIBS} -lwsock32"
+			;;
+		*)
+			;;
+	esac
+
 fi
 
 done
