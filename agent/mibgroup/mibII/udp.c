@@ -96,6 +96,7 @@ init_udp(void)
     /*
      * register ourselves with the agent as a group of scalars...
      */
+    DEBUGMSGTL(("mibII/udpScalar", "Initialising UDP scalar group\n"));
     reginfo = netsnmp_create_handler_registration("udp", udp_handler,
 		    udp_oid, OID_LENGTH(udp_oid), HANDLER_CAN_RONLY);
     netsnmp_register_scalar_group(reginfo, UDPINDATAGRAMS, UDPOUTDATAGRAMS);
@@ -186,7 +187,8 @@ udp_handler(netsnmp_mib_handler          *handler,
             netsnmp_agent_request_info   *reqinfo,
             netsnmp_request_info         *requests)
 {
-    netsnmp_request_info *request;
+    netsnmp_request_info  *request;
+    netsnmp_variable_list *requestvb;
     long     ret_value = -1;
     oid      subid;
     int      type = ASN_COUNTER;
@@ -207,12 +209,19 @@ udp_handler(netsnmp_mib_handler          *handler,
      * 
      *
      */
+    DEBUGMSGTL(("mibII/udpScalar", "Handler - mode %s\n",
+                    se_find_label_in_slist("agent_mode", reqinfo->mode)));
     switch (reqinfo->mode) {
     case MODE_GET:
         for (request=requests; request; request=request->next) {
-            subid = request->requestvb->name[OID_LENGTH(udp_oid)];  /* XXX */
-            switch (subid) {
+            requestvb = request->requestvb;
+            subid = requestvb->name[OID_LENGTH(udp_oid)];  /* XXX */
+            DEBUGMSGTL(( "mibII/udpScalar", "oid: "));
+            DEBUGMSGOID(("mibII/udpScalar", requestvb->name,
+                                            requestvb->name_length));
+            DEBUGMSG((   "mibII/udpScalar", "\n"));
 
+            switch (subid) {
 #ifdef USES_SNMP_DESIGNED_UDPSTAT
     case UDPINDATAGRAMS:
         ret_value = udpstat.udpInDatagrams;
@@ -359,8 +368,10 @@ udp_load(netsnmp_cache *cache, void *vmagic)
     int             ret;
     int             magic = (int) vmagic;
     
-    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) < 0)
+    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) < 0) {
+        DEBUGMSGTL(("mibII/udpScalar", "Failed to load UDP object %d (hpux11)\n", magic));
         return (-1);            /* error */
+    }
 
     switch (magic) {
     case UDPINDATAGRAMS:
@@ -387,6 +398,8 @@ udp_load(netsnmp_cache *cache, void *vmagic)
     ret_value = get_mib_info(fd, &p);
     close_mib(fd);
 
+    DEBUGMSGTL(("mibII/udpScalar", "%s UDP object %d (hpux11)\n",
+               (ret < 0 ? "Failed to load" : "Loaded"),  magic));
     return (ret_value);         /* 0: ok, < 0: error */
 }
 #else                           /* hpux11 */
@@ -398,7 +411,13 @@ udp_load(netsnmp_cache *cache, void *vmagic)
 
     ret_value = linux_read_udp_stat(&udpstat);
 
-    udp_valid = (ret_value == 0);
+    if ( ret_value < 0 ) {
+        udp_valid = 0;
+        DEBUGMSGTL(("mibII/udpScalar", "Failed to load UDP scalar Group (linux)\n"));
+    } else {
+        udp_valid = 1;
+        DEBUGMSGTL(("mibII/udpScalar", "Loaded UDP scalar Group (linux)\n"));
+    }
     return ret_value;
 }
 #else                           /* linux */
@@ -417,10 +436,13 @@ udp_load(netsnmp_cache *cache, void *vmagic)
     if (magic == UDPNOPORTS) {
         if (getMibstat
             (MIB_IP, &ipstat, sizeof(mib2_ip_t), GET_FIRST,
-             &Get_everything, NULL) < 0)
+             &Get_everything, NULL) < 0) {
+            DEBUGMSGTL(("mibII/udpScalar", "Failed to load UDP object %d (solaris)\n", magic));
             return -1;
-        else
+        } else {
+            DEBUGMSGTL(("mibII/udpScalar", "Loaded UDP object %d (solaris)\n", magic));
             return ipstat.udpNoPorts;
+        }
     }
 
     /*
@@ -429,7 +451,13 @@ udp_load(netsnmp_cache *cache, void *vmagic)
     ret_value = getMibstat(MIB_UDP, &udpstat, sizeof(mib2_udp_t),
                            GET_FIRST, &Get_everything, NULL);
 
-    udp_valid = (ret_value == 0);
+    if ( ret_value < 0 ) {
+        udp_valid = 0;
+        DEBUGMSGTL(("mibII/udpScalar", "Failed to load UDP scalar Group (solaris)\n"));
+    } else {
+        udp_valid = 1;
+        DEBUGMSGTL(("mibII/udpScalar", "Loaded UDP scalar Group (solaris)\n"));
+    }
     return ret_value;
 }
 #else                           /* solaris2 */
@@ -441,7 +469,13 @@ udp_load(netsnmp_cache *cache, void *vmagic)
 
     ret_value = GetUdpStatistics(&udpstat);
 
-    udp_valid = (ret_value == 0);
+    if ( ret_value < 0 ) {
+        udp_valid = 0;
+        DEBUGMSGTL(("mibII/udpScalar", "Failed to load UDP scalar Group (win32)\n"));
+    } else {
+        udp_valid = 1;
+        DEBUGMSGTL(("mibII/udpScalar", "Loaded UDP scalar Group (win32)\n"));
+    }
     return ret_value;
 }
 #else                           /* WIN32 */
@@ -455,7 +489,13 @@ udp_load(netsnmp_cache *cache, void *vmagic)
 
     ret_value = sysctl(sname, 4, &udpstat, &len, 0, 0);
 
-    udp_valid = (ret_value == 0);
+    if ( ret_value < 0 ) {
+        udp_valid = 0;
+        DEBUGMSGTL(("mibII/udpScalar", "Failed to load UDP scalar Group (sysctl)\n"));
+    } else {
+        udp_valid = 1;
+        DEBUGMSGTL(("mibII/udpScalar", "Loaded UDP scalar Group (sysctl)\n"));
+    }
     return ret_value;
 }
 #else		/* (defined(CAN_USE_SYSCTL) && defined(UDPCTL_STATS)) */
@@ -467,7 +507,13 @@ udp_load(netsnmp_cache *cache, void *vmagic)
 
     ret_value = sysmp(MP_SAGET, MPSA_TCPIPSTATS, &udpstat, sizeof(udpstat));
 
-    udp_valid = (ret_value == 0);
+    if ( ret_value < 0 ) {
+        udp_valid = 0;
+        DEBUGMSGTL(("mibII/udpScalar", "Failed to load UDP scalar Group (tcpipstats)\n"));
+    } else {
+        udp_valid = 1;
+        DEBUGMSGTL(("mibII/udpScalar", "Loaded UDP scalar Group (tcpipstats)\n"));
+    }
     return ret_value;
 }
 #else				/* HAVE_SYS_TCPIPSTATS_H */
@@ -480,7 +526,13 @@ udp_load(netsnmp_cache *cache, void *vmagic)
     if (auto_nlist(UDPSTAT_SYMBOL, (char *)&udpstat, sizeof(udpstat)))
         ret_value = 0;
 
-    udp_valid = (ret_value == 0);
+    if ( ret_value < 0 ) {
+        udp_valid = 0;
+        DEBUGMSGTL(("mibII/udpScalar", "Failed to load UDP scalar Group (udpstat)\n"));
+    } else {
+        udp_valid = 1;
+        DEBUGMSGTL(("mibII/udpScalar", "Loaded UDP scalar Group (udpstat)\n"));
+    }
     return ret_value;
 }
 #else				/* UDPSTAT_SYMBOL */
@@ -489,7 +541,8 @@ udp_load(netsnmp_cache *cache, void *vmagic)
 {
     long ret_value = -1;
 
-    udp_valid = (ret_value == 0);
+    udp_valid = 0;
+    DEBUGMSGTL(("mibII/udpScalar", "Failed to load UDP scalar Group (null)\n"));
     return ret_value;
 }
 #endif				/* UDPSTAT_SYMBOL */
