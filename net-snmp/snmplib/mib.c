@@ -7,6 +7,10 @@
  * Added print_oid_report* functions.
  *
  */
+/* Portions of this file are subject to the following copyrights.  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /**********************************************************************
 	Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University
 
