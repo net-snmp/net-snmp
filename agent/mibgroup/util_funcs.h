@@ -6,7 +6,7 @@
 
 #include "struct.h"
 
-#define MATCH_FAILED	1
+#define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
 
 void Exit (int);
