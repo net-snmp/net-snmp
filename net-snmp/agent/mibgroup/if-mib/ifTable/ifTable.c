@@ -598,58 +598,6 @@ ifPhysAddress_get(ifTable_rowreq_ctx * rowreq_ctx,
  * The net-snmp type is ASN_INTEGER. The C type decl is long (u_long)
  */
 /**
- * map a value from it's original native format the the MIB format.
- *
- * @retval MFD_SUCCESS         : success
- * @retval MFD_ERROR           : Any other error
- *
- * @note parameters follow the memset convention (dest, src).
- *
- * @note generation and use of this function can be turned off by re-running
- * mib2c after adding the following line to the file
- * default-node-ifAdminStatus.m2d :
- *   @eval $m2c_node_skip_mapping = 1@
- *
- * @remark
- *  If the values for your data type don't exactly match the
- *  possible values defined by the mib, you should map them here.
- *  Otherwise, just do a direct copy.
- */
-int
-ifAdminStatus_map(u_long * mib_ifAdminStatus_ptr, u_long raw_ifAdminStatus)
-{
-    netsnmp_assert(NULL != mib_ifAdminStatus_ptr);
-
-    DEBUGTRACE;
-
-    /*
-     * TODO:
-     * value mapping
-     */
-    /** TODO: update INTERNAL_* macros defined in the header */
-    switch (raw_ifAdminStatus) {
-    case INTERNAL_IFADMINSTATUS_DOWN:
-        *mib_ifAdminStatus_ptr = IFADMINSTATUS_DOWN;
-        break;
-
-    case INTERNAL_IFADMINSTATUS_TESTING:
-        *mib_ifAdminStatus_ptr = IFADMINSTATUS_TESTING;
-        break;
-
-    default:
-        snmp_log(LOG_ERR, "couldn't map value %d for ifAdminStatus",
-                 "(assuming UP)\n", raw_ifAdminStatus);
-
-    case INTERNAL_IFADMINSTATUS_UP:
-        *mib_ifAdminStatus_ptr = IFADMINSTATUS_UP;
-        break;
-
-    }
-
-    return MFD_SUCCESS;
-}
-
-/**
  * Extract the current value of the ifAdminStatus data.
  *
  * Set a value using the data context for the row.
@@ -676,15 +624,7 @@ ifAdminStatus_get(ifTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * set (* ifAdminStatus_ptr ) from rowreq_ctx->data->
      */
-    /*
-     * TODO:
-     * value mapping
-     */
-    if (MFD_SUCCESS !=
-        ifAdminStatus_map(&(*ifAdminStatus_ptr),
-                          rowreq_ctx->data->if_admin_status)) {
-        return MFD_ERROR;
-    }
+    (*ifAdminStatus_ptr) = rowreq_ctx->data->if_admin_status;
 
     return MFD_SUCCESS;
 }
@@ -705,59 +645,6 @@ ifAdminStatus_get(ifTable_rowreq_ctx * rowreq_ctx,
  * It's syntax is INTEGER (based on perltype INTEGER)
  * The net-snmp type is ASN_INTEGER. The C type decl is long (u_long)
  */
-/**
- * map a value from it's original native format the the MIB format.
- *
- * @retval MFD_SUCCESS         : success
- * @retval MFD_ERROR           : Any other error
- *
- * @note parameters follow the memset convention (dest, src).
- *
- * @note generation and use of this function can be turned off by re-running
- * mib2c after adding the following line to the file
- * default-node-ifOperStatus.m2d :
- *   @eval $m2c_node_skip_mapping = 1@
- *
- * @remark
- *  If the values for your data type don't exactly match the
- *  possible values defined by the mib, you should map them here.
- *  Otherwise, just do a direct copy.
- */
-int
-ifOperStatus_map(u_long * mib_ifOperStatus_ptr, u_long raw_ifOperStatus)
-{
-    netsnmp_assert(NULL != mib_ifOperStatus_ptr);
-
-    DEBUGTRACE;
-
-    /*
-     * TODO:
-     * value mapping
-     */
-    /** TODO: update INTERNAL_* macros defined in the header */
-    switch (raw_ifOperStatus) {
-    case INTERNAL_IFOPERSTATUS_UP:
-    case INTERNAL_IFOPERSTATUS_DOWN:
-        *mib_ifOperStatus_ptr = IFOPERSTATUS_DOWN;
-        break;
-
-    case INTERNAL_IFOPERSTATUS_TESTING:
-        *mib_ifOperStatus_ptr = IFOPERSTATUS_TESTING;
-        break;
-
-    default:
-        snmp_log(LOG_ERR, "couldn't map value %d for ifOperStatus"
-                 "(assuming UP)\n", raw_ifOperStatus);
-        /** fall through */
-        
-        *mib_ifOperStatus_ptr = IFOPERSTATUS_UP;
-        break;
-
-    }
-
-    return MFD_SUCCESS;
-}
-
 /**
  * Extract the current value of the ifOperStatus data.
  *
@@ -785,15 +672,7 @@ ifOperStatus_get(ifTable_rowreq_ctx * rowreq_ctx,
      * TODO:
      * set (* ifOperStatus_ptr ) from rowreq_ctx->data->
      */
-    /*
-     * TODO:
-     * value mapping
-     */
-    if (MFD_SUCCESS !=
-        ifOperStatus_map(&(*ifOperStatus_ptr),
-                         rowreq_ctx->data->if_oper_status)) {
-        return MFD_ERROR;
-    }
+    (*ifOperStatus_ptr) = rowreq_ctx->data->if_oper_status;
 
     return MFD_SUCCESS;
 }
@@ -1721,38 +1600,6 @@ ifAdminStatus_set(ifTable_rowreq_ctx * rowreq_ctx, u_long raw_ifAdminStatus)
 {
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
-
-    /*
-     * TODO:
-     * reverse value mapping
-     *
-     * If the values for your data type don't exactly match the
-     * possible values defined by the mib, you should map them here.
-     */
-    /***************************************************/
-    /***             START EXAMPLE CODE              ***/
-    /***---------------------------------------------***/
-    switch (raw_ifAdminStatus) {
-    case IFADMINSTATUS_DOWN:
-        raw_ifAdminStatus = INTERNAL_IFADMINSTATUS_DOWN;
-        break;
-
-    case IFADMINSTATUS_TESTING:
-        raw_ifAdminStatus = INTERNAL_IFADMINSTATUS_TESTING;
-        break;
-
-    default:
-        snmp_log(LOG_ERR, "couldn't map value %d for ifAdminStatus "
-                 "(assuming UP)\n", raw_ifAdminStatus);
-        /** fall through */
-
-    case IFADMINSTATUS_UP:
-        raw_ifAdminStatus = INTERNAL_IFADMINSTATUS_UP;
-        break;
-    }
-    /***---------------------------------------------***/
-    /***              END  EXAMPLE CODE              ***/
-    /***************************************************/
 
     /*
      * TODO:
