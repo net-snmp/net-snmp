@@ -8,6 +8,7 @@
 config_require(util_funcs)
 config_add_mib(SNMP-VIEW-BASED-ACM-MIB) 
 
+void init_vacm_vars __P((void));
 void vacm_free_security __P((void));
 void vacm_free_group __P((void));
 void vacm_free_access __P((void));

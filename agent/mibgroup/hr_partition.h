@@ -5,8 +5,9 @@
 #ifndef _MIBGROUP_HRPART_H
 #define _MIBGROUP_HRPART_H
 
-extern void	init_hrpartition();
-extern u_char	*var_hrpartition();
+extern void	init_hrpartition __P((void));
+extern void	Init_HR_Partition __P((void));
+extern u_char	*var_hrpartition  __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 
 #define	HRPART_INDEX		1

@@ -13,6 +13,8 @@
 
 #include "host_res.h"
 #include "hr_partition.h"
+#include "hr_filesys.h"
+#include "hr_disk.h"
 
 
 #include <sys/stat.h>
@@ -36,10 +38,11 @@ static char HRP_savedName[100];
 	 *
 	 *********************/
 
-void  Init_HR_Partition();
-int   Get_Next_HR_Partition();
+void  Init_HR_Partition __P((void));
+int   Get_Next_HR_Partition __P((void));
 extern int   HRD_index;
-void  Save_HR_Partition();
+void  Save_HR_Partition __P((int, int));
+int header_hrpartition __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
@@ -51,12 +54,12 @@ header_hrpartition(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
 #define HRPART_DISK_NAME_LENGTH		11
 #define HRPART_ENTRY_NAME_LENGTH	12
     oid newname[MAX_NAME_LEN];
-    int part_idx, LowDiskIndex, LowPartIndex = -1;
+    int part_idx, LowDiskIndex=-1, LowPartIndex = -1;
     int result;
     char c_oid[MAX_NAME_LEN];
 
@@ -161,7 +164,7 @@ var_hrpartition(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
     int  part_idx;
     static char string[100];
@@ -208,7 +211,7 @@ var_hrpartition(vp, name, length, exact, var_len, write_method)
 static int HRP_index;
 
 void
-Init_HR_Partition()
+Init_HR_Partition __P((void))
 {
    (void)Get_Next_HR_Disk();
 
@@ -216,7 +219,7 @@ Init_HR_Partition()
 }
 
 int
-Get_Next_HR_Partition()
+Get_Next_HR_Partition __P((void))
 {
     if ( HRD_index == -1 )
 	return -1;

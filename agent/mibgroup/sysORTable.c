@@ -25,7 +25,10 @@
 #endif
 
 #include "mibincl.h"
+#include "../../snmplib/system.h"
 #include "sysORTable.h"
+#include "struct.h"
+#include "util_funcs.h"
 
 extern struct timeval starttime;
 
@@ -33,7 +36,6 @@ extern struct timeval starttime;
 #define MATCH_SUCCEEDED	0
 
 struct timeval sysOR_lastchange;
-static int numenrties;
 static struct sysORTable *table=NULL;
 static int numEntries=0;
 

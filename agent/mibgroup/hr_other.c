@@ -13,15 +13,15 @@
 #endif
 
 
-void  Init_HR_CPU();
-int   Get_Next_HR_CPU();
-char *describe_cpu();
+void  Init_HR_CPU __P((void));
+int   Get_Next_HR_CPU __P((void));
+char *describe_cpu __P((int));
 
-void  Init_HR_CoProc();
-int   Get_Next_HR_CoProc();
-char *describe_coproc();
+void  Init_HR_CoProc __P((void));
+int   Get_Next_HR_CoProc __P((void));
+char *describe_coproc __P((int));
 
-void	init_hr_other( )
+void	init_hr_other  __P((void))
 {
     init_device[ HRDEV_PROC ] = &Init_HR_CPU;	
     next_device[ HRDEV_PROC ] = &Get_Next_HR_CPU;
@@ -36,13 +36,13 @@ void	init_hr_other( )
 static int done_CPU;
 
 void
-Init_HR_CPU()
+Init_HR_CPU __P((void))
 {
    done_CPU = 0;
 }
 
 int
-Get_Next_HR_CPU()
+Get_Next_HR_CPU __P((void))
 {
 			/* Assumes a single CPU system
 				I think it's safe to assume at least one! */
@@ -91,13 +91,13 @@ describe_cpu( idx )
 static int done_coProc;
 
 void
-Init_HR_CoProc()
+Init_HR_CoProc __P((void))
 {
    done_coProc = 0;
 }
 
 int
-Get_Next_HR_CoProc()
+Get_Next_HR_CoProc __P((void))
 {
 			/* How to identify the presence of a co-processor ? */
 

@@ -103,6 +103,7 @@ typedef long    fd_mask;
 #include "mibgroup/snmp_mib.h"
 #include "snmp_client.h"
 #include "snmpd.h"
+#include "var_struct.h"
 #include "read_config.h"
 #include "mibgroup/struct.h"
 #include "mibgroup/util_funcs.h"
@@ -144,6 +145,7 @@ char *reverse_bytes __P((char *, int));
 void usage __P((char *));
 int main __P((int, char **));
 int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+RETSIGTYPE SnmpTrapNodeDown __P((int));
 
 char *sprintf_stamp (now)
     time_t *now;

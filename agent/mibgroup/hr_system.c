@@ -29,9 +29,10 @@
 	 *
 	 *********************/
 
-static int get_load_dev();
-static int count_users();
-extern int count_processes();
+static int get_load_dev __P((void));
+static int count_users __P((void));
+extern int count_processes __P((void));
+extern int header_hrsys __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
 
 	/*********************
@@ -57,7 +58,7 @@ header_hrsys(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
 #define HRSYS_NAME_LENGTH	9
     oid newname[MAX_NAME_LEN];
@@ -96,7 +97,7 @@ var_hrsys(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
     static char string[100];
     time_t	now;
