@@ -61,6 +61,13 @@
 /* PERSISTENT_MASK: the umask permissions to set up the persistent files with */
 #define PERSISTENT_MASK 077
 
+/* MAX_PERSISTENT_BACKUPS:
+ *   The maximum number of persistent backups the library will try to
+ *   read from the persistent cache directory.  If an application fails to
+ *   close down successfully more than this number of times, data will be lost.
+ */
+#define MAX_PERSISTENT_BACKUPS 10
+
 @TOP@
 
 /* define the system type include file here */
