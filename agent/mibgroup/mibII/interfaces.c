@@ -1806,12 +1806,12 @@ header_interfaces(struct variable *vp,
     DEBUGMSGOID(("mibII/interfaces", name, *length));
     DEBUGMSG(("mibII/interfaces", " %d\n", exact));
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
     newname[INTERFACES_NAME_LENGTH] = 0;
     result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return MATCH_FAILED;
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy(name, newname, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
@@ -1844,7 +1844,7 @@ header_ifEntry(struct variable *vp,
     printf ("var_ifEntry: %s %d\n", c_oid, exact);
 #endif
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy(newname, vp->name, (int)vp->namelen * sizeof(oid));
     /* find "next" interface */
     len = sizeof count;
     if (sysctl(count_oid, 5, &count, &len, (void *)0, (size_t)0) < 0)
@@ -1864,7 +1864,7 @@ header_ifEntry(struct variable *vp,
     }
 
 
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy(name, newname, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */

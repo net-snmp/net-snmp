@@ -1201,7 +1201,7 @@ static void Route_Scan_Reload (void)
 	    if (rtsize >= rtallocate) {
 	      rthead = (struct rtentry **) realloc((char *)rthead, 
 				   2 * rtallocate * sizeof(struct rtentry *));
-	      bzero((char *) &rthead[rtallocate], rtallocate 
+	      memset(&rthead[rtallocate], 0, rtallocate 
 		    		   * sizeof(struct rtentry *));
 	      rtallocate *= 2;
 	    }

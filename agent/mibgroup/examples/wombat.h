@@ -5,8 +5,13 @@
 #ifndef _MIBGROUP_WOMBAT_H
 #define _MIBGROUP_WOMBAT_H
 
-extern void	init_wombat();
-extern u_char	*var_wombat();
+extern void	init_wombat(void);
+extern u_char	* var_wombat(struct variable *vp,
+	   oid *name,
+	   int *length,
+	   int exact,
+	   int *var_len,
+	   WriteMethod **write_method);
 
 /* config file parsing routines */
 extern void wombat_free_config (void);

@@ -8,8 +8,13 @@
 
 #include "mibdefs.h"
 
-extern void	init_dummy();
-extern u_char	*var_dummy();
+extern void	init_dummy(void);
+extern u_char	* var_dummy(struct variable *vp,
+	  oid *name,
+	  int *length,
+	  int exact,
+	  int *var_len,
+	  WriteMethod **write_method);
 
 /* config file parsing routines */
 extern void dummy_free_config (void);
