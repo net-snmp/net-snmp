@@ -14,27 +14,30 @@ TABLE OF CONTENTS
   Introduction
 * Supported Architectures
   Availability
+  Web Page
 * Installation
   Copying And Copyrights
 * Frequently Asked Questions
+  Helping Out
 * Code Update Announcements / Mailing List(S)
   Extensibility
   Example Usage 
   Configuration
   Snmpv1 Vs. Snmpv2
-  Thanks
   Submitting Bug Reports
+  Thanks
   Closing
 
   * = Required Reading.
 
 INTRODUCTION
 
-  This package contains a port and modified code of the CMU 2.1.2.1
-  snmp agent.  It has been modified to allow extensibility quickly
-  and easily.  It is far from the best and most configurable system;
-  but hey: it's free and getting better.
-  
+  This package was originally based on the CMU 2.1.2.1 snmp code.  It
+  has been greatly modified, restructured, enhanced and fixed.  It
+  hardly looks the same at all as anything that CMU has ever
+  released.  However, it maintains all the original API functions for
+  complete backwards compatibility.
+
 SUPPORTED ARCHITECTURES
 
   Please see the FAQ for this information.
@@ -54,6 +57,10 @@ AVAILABILITY
   ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
   ftp://ftp.win.or.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
 
+WEB PAGE
+
+  http://www.ece.ucdavis.edu/ucd-snmp.
+  
 INSTALLATION
 
   See the INSTALL file distributed with this package.
@@ -65,6 +72,11 @@ COPYING AND COPYRIGHTS
 FREQUENTLY ASKED QUESTIONS
 
   See the FAQ file distributed with this package.
+
+HELPING OUT
+
+  This is a project worked on by people around the net.  We'd love
+  your help, but please read the PORTING file first.
 
 CODE UPDATE ANNOUNCEMENTS / MAILING LIST(S)
 
@@ -107,7 +119,7 @@ EXTENSIBILITY
   You can also extend the agent by writing C code directly.  The agent
   is extremely modular in nature and you need only create new files,
   re-run configure and re-compile.  No modification of the distributed
-  source files is necessary.  See the following files in the
+  source files are necessary.  See the following files in the
   agent/mibgroup directory for details: README, wombat.c, wombat.h,
   example.c, example.h.
 
@@ -126,28 +138,26 @@ CONFIGURATION
 
   See man/snmpd.conf.5 and the EXAMPLE.conf file mentioned above.
 
-SNMPv1 vs. SNMPv2
+SUBMITTING BUG REPORTS
 
-  Typically, we doubt you want people to look at most of your mib tree.
-  By defining GLOBALSECURITY in the config.h file, you can restrict
-  access to any of the mibs implemented in this package to this
-  security type.  I define mine to SNMPV2AUTH, for authenticated
-  requests only.  I then define the SECURITYEXCEPTIONS to allow .100
-  requests, since HP Openview can only use SNMPv1 protocols.  The CMU
-  code does not support encryption due to export regulation in the
-  United States, so it is not possible to restrict access to encrypted
-  transmissions.
+  The best way to submit a bug report is to use the enclosed
+  "bug-report" script.  Please run the script on the architecture you
+  are having problems with, as it automatically mails us with uname
+  output for our usage.
 
-  If you don't understand anything we have said here, select the
-  default security model of SNMPV1 when prompted by the configure
-  script and you shouldn't have problems.
+  Please submit all bug reports and patches to
+  ucd-snmp-coders@ece.ucdavis.edu.  *Please* include what version of
+  the ucd-snmp package you are using and what architecture(s) you're
+  using, as well as detailed information about exactly what is wrong.
+  If you intend to submit a patch as well, please read the PORTING
+  file before you do so.  Thanks!
 
 THANKS
 
   The following people have contributed various patches and
   improvements.  To them we owe our deepest thanks (and you do too!):
 
-  Original Author:
+  Original Author & Project Leader:
 
     Wes Hardaker <wjhardaker@ucdavis.edu>
 
@@ -158,6 +168,7 @@ THANKS
     Giovanni S. Marzot <gmarzot@baynetworks.com>
     Niels Baggesen <recnba@mediator.uni-c.dk>
     Simon Leinen <simon@limmat.switch.ch>
+    David T. Perkins <dperkins@dsperkins.com>
     Mike Perik <mikep@crt.com>
     Sanjai Narain <narain@thumper.bellcore.com>
     francus@metsny.delphi.com
@@ -178,31 +189,17 @@ THANKS
   We've probably forgotten people on this list.  Let us know if you've
   contributed code and we've left you out.
 
-SUBMITTING BUG REPORTS
-
-  The best way to submit a bug report is to use the enclosed
-  "bug-report" script.  Please run the script on the architecture you
-  are having problems with, as it automatically mails us with uname
-  output for our usage.
-
-  Please submit all bug reports and patches to
-  ucd-snmp-coders@ece.ucdavis.edu.  *Please* include what version of
-  the ucd-snmp package you are using and what architecture(s) you're
-  using, as well as detailed information about exactly what is wrong.
-  If you intend to submit a patch as well, please read the PORTING
-  file before you do so.  Thanks!
-
 CLOSING
 
-  we love patches.  Send some to us!  But before you do, please see
+  We love patches.  Send some to us!  But before you do, please see
   the 'PORTING' file for information on helping us out with the
-  process of integrating your patches.
+  process of integrating your patches (regardless of weather its a new 
+  feature implementation or a new port).
 
   Also, We're interested if anyone actually uses/likes/hates/whatever
   this package...  Mail us a note and let us know what you think of it!
 
-  Have fun,
+  Have fun and may it make your life easier,
 
     Wes Hardaker
     ucd-snmp-coders@ece.ucdavis.edu
-
