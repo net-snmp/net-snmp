@@ -73,10 +73,11 @@
 #define VERUPDATECONFIG 11
 #define VERRESTARTAGENT 12
 
+#ifdef hpux
 #define HPCONF 1
 #define HPRECONFIG 2
 #define HPFLAG 3
 #define HPLOGMASK 4
 #define HPSTATUS 6
 #define HPTRAP 101
-
+#endif
