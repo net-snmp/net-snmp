@@ -592,6 +592,10 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	/*  Map other <community, transport-address> pairs to security names
 	    here.  */
 
+	if (sn == NULL) {
+	  snmp_increment_statistic(STAT_SNMPINBADCOMMUNITYNAMES);
+	}
+
     } else if (find_sec_mod(pdu->securityModel)) {
       /* any legal defined v3 security model */
       DEBUGMSG (("mibII/vacm_vars",
