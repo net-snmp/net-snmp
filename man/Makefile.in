@@ -3,16 +3,13 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 @SET_MAKE@
 
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-mandir = $(prefix)/man
+mandir = @mandir@
 man1dir = $(mandir)/man1
 man3dir = $(mandir)/man3
 man5dir = $(mandir)/man5
 man8dir = $(mandir)/man8
-bindir = $(exec_prefix)/bin
-libdir = $(exec_prefix)/lib
-snmplibdir = $(prefix)/lib/snmp
+libdir = @libdir@
+snmplibdir = $(libdir)/snmp
 
 INSTALL = @INSTALL@
 

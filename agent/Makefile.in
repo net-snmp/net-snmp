@@ -7,11 +7,9 @@ VPATH = @srcdir@
 @SET_MAKE@
 
 prefix = @prefix@
-exec_prefix = @exec_prefix@
-bindir = $(exec_prefix)/bin
-libdir = $(exec_prefix)/lib
-etcdir = $(exec_prefix)/etc
-snmplibdir = $(prefix)/lib/snmp
+libdir = @libdir@
+sbindir = @sbindir@
+snmplibdir = $(libdir)/snmp
 
 INSTALL = @INSTALL@
 
@@ -56,10 +54,10 @@ clean:
 	cd mibgroup; make clean
 
 install:  installdirs
-	@$(INSTALL) $(TARG) $(etcdir) ; echo "install:  installed $(TARG) in $(etcdir) "
+	@$(INSTALL) $(TARG) $(sbindir) ; echo "install:  installed $(TARG) in $(sbindir) "
 
 installdirs:
-	@$(SHELL) $(srcdir)/../mkinstalldirs $(etcdir) $(snmplibdir) 
+	@$(SHELL) $(srcdir)/../mkinstalldirs $(sbindir) $(snmplibdir) 
 
 dependlocal: 
 	makedepend $(CPPFLAGS) $(srcdir)/*.c

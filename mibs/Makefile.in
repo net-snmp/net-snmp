@@ -7,11 +7,8 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 @SET_MAKE@
 
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-bindir = $(exec_prefix)/bin
-libdir = $(exec_prefix)/lib
-snmplibdir = $(prefix)/lib/snmp
+libdir = @libdir@
+snmplibdir = $(libdir)/snmp
 mibdir = $(snmplibdir)/mibs
 
 INSTALL = @INSTALL@
