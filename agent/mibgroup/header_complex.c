@@ -65,21 +65,7 @@ header_complex_generate_varoid(struct variable_list *var) {
 
    returns 1 if an error is encountered, or 0 if successful.
 */
-static int _header_complex_parse_oid(oid *oidIndex, size_t oidLen,
-                         struct variable_list *data);
-int
-header_complex_parse_oid(oid *oidIndex, size_t oidLen,
-                         struct variable_list *data)
-{
-    int rc;
-    memset(data, 0, sizeof(*data));
-    rc = _header_complex_parse_oid(oidIndex, oidLen, data);
-    if (rc == SNMPERR_GENERR)
-        snmp_free_varbind(data);
-    return (rc);
-}
-
-static int _header_complex_parse_oid(oid *oidIndex, size_t oidLen,
+int header_complex_parse_oid(oid *oidIndex, size_t oidLen,
                          struct variable_list *data)
 {
   struct variable_list *var = data;
@@ -193,10 +179,15 @@ header_complex(struct header_complex_index *datalist,
     *var_len = sizeof (long);
 
   for(nptr = datalist; nptr != NULL && found == NULL; nptr = nptr->next) {
-    memcpy(indexOid, vp->name, vp->namelen * sizeof(oid));
-    memcpy(indexOid + vp->namelen, nptr->name,
-           nptr->namelen * sizeof(oid));
-    len = vp->namelen + nptr->namelen;
+    if (vp) {
+        memcpy(indexOid, vp->name, vp->namelen * sizeof(oid));
+        memcpy(indexOid + vp->namelen, nptr->name,
+               nptr->namelen * sizeof(oid));
+        len = vp->namelen + nptr->namelen;
+    } else {
+        memcpy(indexOid, nptr->name, nptr->namelen * sizeof(oid));
+        len = nptr->namelen;
+    }
     result = snmp_oid_compare(name, *length, indexOid, len);
     DEBUGMSGTL(("header_complex", "Checking: "));
     DEBUGMSGOID(("header_complex", indexOid, len));
@@ -217,10 +208,15 @@ header_complex(struct header_complex_index *datalist,
     }
   }
   if (found) {
-      memcpy(name, vp->name, vp->namelen * sizeof(oid));
-      memcpy(name + vp->namelen, found->name,
-             found->namelen * sizeof(oid));
-      *length = vp->namelen + found->namelen;
+      if (vp) {
+          memcpy(name, vp->name, vp->namelen * sizeof(oid));
+          memcpy(name + vp->namelen, found->name,
+                 found->namelen * sizeof(oid));
+          *length = vp->namelen + found->namelen;
+      } else {
+          memcpy(name, found->name, found->namelen * sizeof(oid));
+          *length = found->namelen;
+      }
       return found->data;
   }
     
