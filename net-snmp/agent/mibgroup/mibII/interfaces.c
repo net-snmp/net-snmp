@@ -214,9 +214,6 @@ static unsigned long LastLoad = 0;        /* ET in secs at last table load */
 
 extern struct timeval starttime;
 
-static void     parse_interface_config(const char *, char *);
-static void     free_interface_config(void);
-
 struct variable3 interfaces_variables[] = {
     {IFNUMBER, ASN_INTEGER, RONLY, var_interfaces, 1, {1}},
 #if !defined(NETSNMP_ENABLE_MFD_REWRITES)
@@ -1359,8 +1356,15 @@ Interface_Scan_Init(void)
     FILE           *devin;
     int             i, fd;
     conf_if_list   *if_ptr;
+    /*
+     * scanline_2_2:
+     *  [               IN                        ]
+     *   byte pkts errs drop fifo frame cmprs mcst |
+     *  [               OUT                               ]
+     *   byte pkts errs drop fifo colls carrier compressed
+     */
 #ifdef SCNuMAX
-    uintmax_t       rec_pkt, rec_oct, rec_err, rec_drop, rec_mcast;
+    uintmax_t       rec_pkt, rec_oct, rec_err, rec_drop;
     uintmax_t       snd_pkt, snd_oct, snd_err, snd_drop, coll;
     const char     *scan_line_2_2 =
         "%"   SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX
