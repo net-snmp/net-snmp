@@ -64,15 +64,16 @@ validanswer 1 ^(1|yes|true|0|no|false)$
 token suffixPrinting
 info Shorten OIDs printed to the screen
 info possible values:
-info -  0:  Normal.  OIDs are displayed like:
+info -  0:  UCD-style.  OIDs are displayed like:
 info -        system.sysUpTime.0
 info -  1:  deletes all by the last symbolic part of the OID:
 info -        system.sysUpTime.0 becomes sysUpTime.0
 info -  2:  is  a  variant  of this, adding the name of the MIB
 info -      that defined this object:
 info -        system.sysUpTime.0 becomes SNMPv2-MIB::sysUpTime.0
-info  command line equivelent: 1 = -Os, 2 = -OS
+info -      (This is the default with net-snmp v5)
+info  command line equivelent: 0 = -Ou,  1 = -Os, 2 = -OS
 info  arguments: (1|2)
 question 1 Shorten OIDs (0|1|2)
-validanswer 1 ^(1|2)$
+validanswer 1 ^(0|1|2)$
 
