@@ -1023,7 +1023,7 @@ init_mib (void)
     char  *env_var, *entry;
     PrefixListPtr pp = &mib_prefixes[0];
     
-    if (tree_head) return;  /* was: if (Mib) */
+    if (Mib) return;
     
     /* Initialise the MIB directory/ies */
 
