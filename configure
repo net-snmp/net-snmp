@@ -3557,7 +3557,7 @@ cat >> $CONFIG_STATUS <<\EOF
 fi; done
 
 
-
+echo timestamp > stamp-h
 exit 0
 EOF
 chmod +x $CONFIG_STATUS
