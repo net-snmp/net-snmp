@@ -518,7 +518,7 @@ unregister_mibs_by_session (struct snmp_session *ss)
 
       next_child = child->children;
       if (( (ss->flags & SNMP_FLAGS_SUBSESSION) && child->session == ss ) ||
-          (!(ss->flags & SNMP_FLAGS_SUBSESSION) &&
+          (!(ss->flags & SNMP_FLAGS_SUBSESSION) && child->session &&
                                       child->session->subsession == ss )) {
               unload_subtree( child, prev );
               free_subtree( child );
