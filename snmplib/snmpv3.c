@@ -137,8 +137,8 @@ snmpv3_privtype_conf(const char *word, char *cptr)
 oid *
 get_default_privtype(size_t *len)
 {
-  if (defaultAuthType == NULL) {
-    defaultAuthType = usmDESPrivProtocol;
+  if (defaultPrivType == NULL) {
+    defaultPrivType = usmDESPrivProtocol;
     defaultPrivTypeLen = USM_LENGTH_OID_TRANSFORM;
   }
   if (len)
