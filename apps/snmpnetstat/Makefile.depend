@@ -32,6 +32,9 @@
 ./if.lo: ../../include/net-snmp/library/snmpUnixDomain.h
 ./if.lo:  ../../include/net-snmp/library/snmpUDPDomain.h
 ./if.lo: ../../include/net-snmp/library/snmpTCPDomain.h
+./if.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
+./if.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
+./if.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./if.lo: ../../include/net-snmp/library/ucd_compat.h
 ./if.lo: ../../include/net-snmp/pdu_api.h ../../include/net-snmp/mib_api.h
 ./if.lo: ../../include/net-snmp/library/mib.h
@@ -93,6 +96,9 @@
 ./inet.lo: ../../include/net-snmp/library/snmpUnixDomain.h
 ./inet.lo: ../../include/net-snmp/library/snmpUDPDomain.h
 ./inet.lo: ../../include/net-snmp/library/snmpTCPDomain.h
+./inet.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
+./inet.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
+./inet.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./inet.lo: ../../include/net-snmp/library/ucd_compat.h
 ./inet.lo: ../../include/net-snmp/pdu_api.h ../../include/net-snmp/mib_api.h
 ./inet.lo: ../../include/net-snmp/library/mib.h
@@ -148,6 +154,9 @@
 ./main.lo: ../../include/net-snmp/library/snmpUnixDomain.h
 ./main.lo: ../../include/net-snmp/library/snmpUDPDomain.h
 ./main.lo: ../../include/net-snmp/library/snmpTCPDomain.h
+./main.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
+./main.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
+./main.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./main.lo: ../../include/net-snmp/library/ucd_compat.h
 ./main.lo: ../../include/net-snmp/pdu_api.h ../../include/net-snmp/mib_api.h
 ./main.lo: ../../include/net-snmp/library/mib.h
@@ -204,6 +213,9 @@
 ./route.lo: ../../include/net-snmp/library/snmpUnixDomain.h
 ./route.lo: ../../include/net-snmp/library/snmpUDPDomain.h
 ./route.lo: ../../include/net-snmp/library/snmpTCPDomain.h
+./route.lo: ../../include/net-snmp/library/snmpUDPIPv6Domain.h
+./route.lo: ../../include/net-snmp/library/snmpTCPIPv6Domain.h
+./route.lo: ../../include/net-snmp/library/snmpIPXDomain.h
 ./route.lo: ../../include/net-snmp/library/ucd_compat.h
 ./route.lo: ../../include/net-snmp/pdu_api.h ../../include/net-snmp/mib_api.h
 ./route.lo: ../../include/net-snmp/library/mib.h

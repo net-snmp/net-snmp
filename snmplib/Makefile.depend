@@ -87,6 +87,9 @@
 ./check_varbind.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./check_varbind.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./check_varbind.lo: ../include/net-snmp/library/snmpTCPDomain.h
+./check_varbind.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
+./check_varbind.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
+./check_varbind.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./check_varbind.lo: ../include/net-snmp/library/ucd_compat.h
 ./check_varbind.lo: ../include/net-snmp/pdu_api.h
 ./check_varbind.lo: ../include/net-snmp/mib_api.h
@@ -143,6 +146,9 @@
 ./container_binary_array.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./container_binary_array.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./container_binary_array.lo: ../include/net-snmp/library/snmpTCPDomain.h
+./container_binary_array.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
+./container_binary_array.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
+./container_binary_array.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./container_binary_array.lo: ../include/net-snmp/library/ucd_compat.h
 ./container_binary_array.lo: ../include/net-snmp/pdu_api.h
 ./container_binary_array.lo: ../include/net-snmp/mib_api.h
@@ -202,6 +208,9 @@
 ./container.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./container.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./container.lo: ../include/net-snmp/library/snmpTCPDomain.h
+./container.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
+./container.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
+./container.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./container.lo: ../include/net-snmp/library/ucd_compat.h
 ./container.lo: ../include/net-snmp/pdu_api.h ../include/net-snmp/mib_api.h
 ./container.lo: ../include/net-snmp/library/mib.h
@@ -314,7 +323,7 @@
 ./keytools.lo: ../include/net-snmp/library/data_list.h
 ./keytools.lo: ../include/net-snmp/library/oid_stash.h
 ./keytools.lo: ../include/net-snmp/library/check_varbind.h
-./keytools.lo: ../include/net-snmp/version.h 
+./keytools.lo: ../include/net-snmp/version.h
 ./keytools.lo: ../include/net-snmp/library/scapi.h
 ./keytools.lo: ../include/net-snmp/library/keytools.h
 ./keytools.lo: ../include/net-snmp/library/transform_oids.h
@@ -1036,7 +1045,10 @@
 ./snmp_transport.lo: ../include/net-snmp/library/snmp_transport.h
 ./snmp_transport.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./snmp_transport.lo: ../include/net-snmp/library/snmpTCPDomain.h
+./snmp_transport.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./snmp_transport.lo: ../include/net-snmp/library/snmpUnixDomain.h
+./snmp_transport.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
+./snmp_transport.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
 ./snmpUDPDomain.lo: ../include/net-snmp/net-snmp-config.h
 ./snmpUDPDomain.lo: ../include/net-snmp/system/linux.h
 ./snmpUDPDomain.lo: ../include/net-snmp/system/sysv.h
@@ -1280,6 +1292,9 @@
 ./ucd_compat.lo: ../include/net-snmp/library/snmpUnixDomain.h
 ./ucd_compat.lo: ../include/net-snmp/library/snmpUDPDomain.h
 ./ucd_compat.lo: ../include/net-snmp/library/snmpTCPDomain.h
+./ucd_compat.lo: ../include/net-snmp/library/snmpUDPIPv6Domain.h
+./ucd_compat.lo: ../include/net-snmp/library/snmpTCPIPv6Domain.h
+./ucd_compat.lo: ../include/net-snmp/library/snmpIPXDomain.h
 ./ucd_compat.lo: ../include/net-snmp/library/ucd_compat.h
 ./ucd_compat.lo: ../include/net-snmp/config_api.h
 ./ucd_compat.lo: ../include/net-snmp/library/read_config.h
