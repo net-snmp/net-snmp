@@ -709,6 +709,9 @@
 /* Define if you have the crypto library (-lcrypto).  */
 #undef HAVE_LIBCRYPTO
 
+/* Define if you have the efence library (-lefence).  */
+#undef HAVE_LIBEFENCE
+
 /* Define if you have the elf library (-lelf).  */
 #undef HAVE_LIBELF
 
