@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>Configuration Overview</title>
+</head>
+<body>
+<h1>Overview</h1>
+Start by reading the <span style="font-weight: bold;">snmp_config</span>
+manual page that describes how the
+Net-SNMP configuration files operate and
+how they all work together.&nbsp; Note:&nbsp; When using Windows, all
+configuration files should be placed in the (install
+folder)\etc\snmp folder.<br>
+<br>
+<span style="font-weight: bold;">Note:&nbsp; The Net-SNMP configuration
+files generally contain sensitive
+information such as passphrases and community strings so permissions
+should be set to restrict who can read the files.</span><br
+ style="font-weight: bold;">
+<br>
+A Perl script called snmpconf is included which can be used to
+create configuration files.&nbsp; Full documentation on using snmpconf
+is available in the 'Applications' section.<br>
+<br>
+To run snmpconf, use the following command line:<br>
+<br>
+<span style="font-family: monospace;">snmpconf -i<br>
+</span><br>
+The following environment variables are defined during installation:<br>
+<ul>
+  <li>SNMPCONFPATH=(install folder)/etc/snmp</li>
+  <li>SNMPSHAREPATH=(install folder)/share/snmp</li>
+</ul>
+<div style="margin-left: 40px;"></div>
+If Net-SNMP is installed in a folder other than the default <span
+ style="font-weight: bold;">c:\usr</span>, the above environment
+variables must match, and the <span style="font-weight: bold;">snmp.conf</span>
+file must contain a definition for <span style="font-weight: bold;">mibdirs</span>,
+<span style="font-weight: bold;">persistentDir </span>and <span
+ style="font-weight: bold;">tempFilePattern</span>.&nbsp; For example,
+if Net-SNMP was installed in <span style="font-weight: bold;">c:\net-snmp</span>:<br>
+<br>
+<div style="margin-left: 40px; font-family: monospace;">mibdirs
+c:/net-snmp/share/snmp/mibs<br>
+persistentDir c:/net-snmp/snmp/persist<br>
+tempFilePattern c:/net-snmp/temp/snmpdXXXXXX<br>
+</div>
+<br>
+<span style="font-weight: bold;">Note: All paths contained in
+configuration files must use forward
+slashes (Unix convention), NOT back
+slashes.</span><br>
+<br>
+</body>
+</html>

@@ -1,0 +1,17 @@
+Some notes for the AIX port
+===========================
+
+It's been reported that the applications segfault on AIX. The reported
+fix was to disable shared libraries:
+
+   ./configure --disable-shared
+
+There is also a quoting problem on AIX, so  you will need to fix the quotes
+in include/net-snmp/net-snmp-config.h after running configure. For example,
+change
+
+  #define CONFIGURE_OPTIONS ""'--disable-shared'""
+
+to
+
+  #define CONFIGURE_OPTIONS "'--disable-shared'"

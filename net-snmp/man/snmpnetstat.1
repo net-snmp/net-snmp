@@ -147,10 +147,11 @@ When
 is also present, show per-protocol routing statistics instead of 
 the routing tables.
 .PP
-.B \interval
 When  snmpnetstat is invoked with an interval argument, it
 displays a running count of statistics related to  network
-interfaces. _interval_ is the number of seconds between
+interfaces.
+.I interval
+is the number of seconds between
 reporting of statistics.
 .PP
 .I The Active Sockets Display (default)
@@ -166,7 +167,8 @@ according   to  the  data  bases
 .IR /etc/networks,
 respectively.  If a symbolic  name  for  an
 address  is unknown, or if the
-.B \-n option is specified, the
+.B \-n
+option is specified, the
 address is printed numerically, according to  the  address
 family.  For more information regarding the Internet ``dot
 format,'' refer  to
@@ -207,7 +209,7 @@ interfaces.   This  display  consists  of a column for the
 primary interface and a column summarizing information for
 all  interfaces.   The  primary  interface may be replaced
 with another interface with the
-.I\ -I
+.B \-I
 option.  The first line
 of each screen of information contains a summary since the
 system was last rebooted.  Subsequent lines of output show
@@ -217,7 +219,7 @@ values accumulated over the preceding interval.
 .I Single Protocol
 .PP
 When a protocol is specified with the
-.I\ -P
+.B \-P
 option, the
 information displayed is similar to that in the
 default display for active sockets, except the

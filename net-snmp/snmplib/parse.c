@@ -130,7 +130,7 @@ struct subid_s {
     char           *label;
 };
 
-#define MAXTC   1024
+#define MAXTC   4096
 struct tc {                     /* textual conventions */
     int             type;
     int             modid;
@@ -572,9 +572,9 @@ static struct node *parse_macro(FILE *, char *);
 static void     parse_imports(FILE *);
 static struct node *parse(FILE *, struct node *);
 
-static int      read_module_internal(const char *);
-static void     read_module_replacements(const char *);
-static void     read_import_replacements(const char *,
+static int     read_module_internal(const char *);
+static int     read_module_replacements(const char *);
+static int     read_import_replacements(const char *,
                                          struct module_import *);
 
 static void     new_module(const char *, const char *);
@@ -1677,7 +1677,6 @@ do_linkup(struct module *mp, struct node *np)
             continue;
         tp = find_tree_node(mip->label, mip->modid);
         if (!tp) {
-            if (mip->modid != -1)
                 snmp_log(LOG_WARNING,
                          "Did not find '%s' in module %s (%s)\n",
                          mip->label, module_name(mip->modid, modbuf),
@@ -3506,9 +3505,12 @@ parse_imports(FILE * fp)
              * Recursively read any pre-requisite modules
              */
             if (read_module_internal(token) == MODULE_NOT_FOUND) {
+		int found = 0;
                 for (; old_i < import_count; ++old_i) {
-                    read_import_replacements(token, &import_list[old_i]);
+                    found += read_import_replacements(token, &import_list[old_i]);
                 }
+		if (!found)
+		    print_module_not_found(token);
             }
         }
         type = get_token(fp, token, MAXTOKEN);
@@ -3603,7 +3605,7 @@ module_name(int modid, char *cp)
             return (cp);
         }
 
-    DEBUGMSGTL(("parse-mibs", "Module %d not found\n", modid));
+    if (modid != -1) DEBUGMSGTL(("parse-mibs", "Module %d not found\n", modid));
     sprintf(cp, "#%d", modid);
     return (cp);
 }
@@ -3637,7 +3639,7 @@ add_module_replacement(const char *old_module,
     module_map_head = mcp;
 }
 
-static void
+static int
 read_module_replacements(const char *name)
 {
     struct module_compatability *mcp;
@@ -3651,16 +3653,13 @@ read_module_replacements(const char *name)
                          mcp->new_module, name, File);
 	    }
             (void) read_module(mcp->new_module);
-            return;
+            return 1;
         }
     }
-    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
-			       NETSNMP_DS_LIB_MIB_ERRORS)) {
-        print_module_not_found(name);
-    }
+    return 0;
 }
 
-static void
+static int
 read_import_replacements(const char *old_module_name,
                          struct module_import *identifier)
 {
@@ -3692,7 +3691,7 @@ read_import_replacements(const char *old_module_name,
 		}
                 (void) read_module(mcp->new_module);
                 identifier->modid = which_module(mcp->new_module);
-                return;         /* finished! */
+                return 1;         /* finished! */
             }
         }
     }
@@ -3700,7 +3699,7 @@ read_import_replacements(const char *old_module_name,
     /*
      * If no exact match, load everything relevant
      */
-    read_module_replacements(old_module_name);
+    return read_module_replacements(old_module_name);
 }
 
 
@@ -3748,10 +3747,6 @@ read_module_internal(const char *name)
             return MODULE_LOADED_OK;
         }
 
-    if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 	
-			   NETSNMP_DS_LIB_MIB_WARNINGS) > 1) {
-        snmp_log(LOG_WARNING, "Module %s not found\n", name);
-    }
     return MODULE_NOT_FOUND;
 }
 
@@ -3830,7 +3825,8 @@ struct tree    *
 read_module(const char *name)
 {
     if (read_module_internal(name) == MODULE_NOT_FOUND)
-        read_module_replacements(name);
+        if (!read_module_replacements(name))
+	    print_module_not_found(name);
     return tree_head;
 }
 
@@ -4561,6 +4557,12 @@ snmp_get_token(FILE * fp, char *token, int maxtlen)
     return get_token(fp, token, maxtlen);
 }
 
+/* For Win32 platforms, the directory does not maintain a last modification
+ * date that we can compare with the modification date of the .index file.
+ * Therefore there is no way to know whether any .index file is valid.
+ * This is the reason for the #if !(defined(WIN32) || defined(cygwin))
+ * in the add_mibdir function
+ */
 int
 add_mibdir(const char *dirname)
 {

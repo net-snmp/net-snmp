@@ -2,7 +2,7 @@
 
 #include <net-snmp/version.h>
 
-static const char *VersionInfo = NetSnmpVersionInfo;
+#define VersionInfo NetSnmpVersionInfo
 
 #else
 

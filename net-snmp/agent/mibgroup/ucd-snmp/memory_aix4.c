@@ -45,7 +45,7 @@
 #define MAXSTRSIZE	80
 
 int             minimumswap;
-static char     errmsg[300];
+static char     errmsg[1024];
 
 static FindVarMethod var_extensible_mem;
 static long     getFreeSwap(void);
