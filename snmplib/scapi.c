@@ -509,6 +509,7 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 	 * Sanity check.
 	 */
 #if	!defined(SCAPI_AUTHPRIV)
+		snmp_log(LOG_ERR, "Encryption support not enabled.\n");
 		return SNMPERR_SC_NOT_CONFIGURED;
 #endif
 
@@ -617,6 +618,7 @@ sc_encrypt_quit:
 {
 #	if USE_INTERNAL_MD5
 	{
+		snmp_log(LOG_ERR, "Encryption support not enabled.\n");
 		DEBUGMSGTL(("scapi","Encrypt function not defined.\n"));
 		return SNMPERR_SC_GENERAL_FAILURE;
 	}
@@ -728,6 +730,7 @@ sc_decrypt_quit:
 #else   /* USE OPEN_SSL */
 {
 #if	!defined(SCAPI_AUTHPRIV)
+		snmp_log(LOG_ERR, "Encryption support not enabled.\n");
 		return SNMPERR_SC_NOT_CONFIGURED;
 #else
 #	if USE_INTERNAL_MD5
