@@ -403,6 +403,9 @@ getStatPtr(
     if ( tp != NULL && prev != NULL &&
        snmp_oid_compare( tp->name, tp->namelen, name, *namelen ) > 0 )
               tp = prev;
+    if ( tp == NULL && prev != NULL )
+      tp = prev;
+         
 /*
     tp = find_subtree_previous(name, *namelen, NULL);
     if ( tp->next &&
