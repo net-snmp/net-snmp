@@ -64,6 +64,7 @@ TABLE OF CONTENTS
  AGENT
    What MIBs are supported?
    What protocols are supported?
+   How do I configure the agent?
    How do I add a MIB to the agent?
    What's the difference between 'exec', 'sh' and 'pass'?
    What's the difference between AgentX, SMUX and proxied SNMP?
@@ -93,7 +94,7 @@ TABLE OF CONTENTS
    The system uptime (sysUpTime) returned is wrong!
    The Host Resources information is wrong (and/or doesn't even compile)!
  CODING
-   How do I compile with 'gcc' instead of 'cc'?
+   How do I compile with 'cc' instead of 'gcc'?
    But gcc doesn't compile it successfully on my new Solaris system. Why not?
    How do I write C code to integrate with the agent?
    How does the agent fetch the value of a variable from the system?
@@ -134,7 +135,12 @@ Where can I get it?
 ------------------
 
 WWW:
-  - http://download.sourceforge.net/net-snmp/
+  Download:
+    - http://download.sourceforge.net/net-snmp/
+  Web page:
+    - http://net-snmp.sourceforge.net/
+  Project page:
+    - http://sourceforge.net/projects/net-snmp/
 
 FTP:
   - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
@@ -155,7 +161,7 @@ What documentation is available?
 	EXAMPLE.conf
 	man pages for the individual tools, files and the API
 	A guide for extending the agent
-	A Tutorial at http://ucd-snmp.ucdavis.edu/tutorial
+	A Tutorial at http://net-snmp.sourceforge.net/tutorial/
 
       Most of this documentation (plus archives of the mailing lists)
 	 is also available on our web page:
@@ -270,9 +276,11 @@ How do I find out about new releases?
 
   	net-snmp-announce@lists.sourceforge.net
 
-  To be added to (or removed from) this list, send a message
-  to the address 'net-snmp-announce-request@lists.sourceforge.net'
-  with a subject line of 'subscribe' (or 'unsubscribe' as appropriate).
+  To be added to (or removed from) this list, visit
+  http://lists.sourceforge.net/mailman/listinfo/net-snmp-announce.  Or
+  you can send a message to the address
+  'net-snmp-announce-request@lists.sourceforge.net' with a subject
+  line of 'subscribe' (or 'unsubscribe' as appropriate).
 
   Major code revisions may be announced more widely (e.g. on the
   SNMP mailing lists, or comp.protocols.snmp) but this list is the most
@@ -291,11 +299,13 @@ How can I find out what other people are doing?
 
   	net-snmp-users@lists.sourceforge.net
 
-  To be added to (or removed from) this list, send a message
-  to the address 'net-snmp-request@lists.sourceforge.net'
-  with a subject line of 'subscribe' (or 'unsubscribe' as appropriate).
+  To be added to (or removed from) this list, visit
+  http://lists.sourceforge.net/mailman/listinfo/net-snmp-users.  Or
+  you can send a message to the address
+  'net-snmp-users-request@lists.sourceforge.net' with a subject line
+  of 'subscribe' (or 'unsubscribe' as appropriate).
 
-  To find out what the coders are doing, and to help them out, please
+  To find out what the developers are doing, and to help them out, please
   read the PORTING file enclosed with the package.
 
 
@@ -303,20 +313,26 @@ How can I find out what other people are doing?
 How do I submit a patch or bug report?
 -------------------------------------
 
-    There is a script that you can use to submit a bug report.
-  This allow you to describe the problem you're having, and
-  includes various pieces of information about your system
-  that are useful in trying to track down the problem.
+  All bug reports should be submitted to the bug database through the
+  interface found at http://sourceforge.net/bugs/?group_id=12694.  Be
+  sure to include the version of the package that you've been working
+  with, the output of the command 'uname -a', the precise command that
+  triggers the problem and a copy of the output it produces.
 
-    Alternatively, you can send a message to
+    All patches should be submitted to the patch manager at
+  http://sourceforge.net/patch/?group_id=12694.  If possible, submit a
+  bug report describing the patch as well (referencing it by its patch
+  number) since patch manager doesn't contain a decent description
+  field.
 
-	'net-snmp-coders@lists.sourceforge.net'
+    There is also a support database at
+  http://sourceforge.net/patch/?group_id=12694 where "I need help
+  with" questions can be submitted.  Be advised that the people
+  answering these kinds of questions are doing so out of the goodness
+  of their hearts, as this is an otherwise unsupported package.
 
-  containing a description of the problem, and as much other
-  relevant details as you can. Useful information includes the
-  version of the package that you've been working with, the output
-  of the command 'uname -a', the precise command that triggers the
-  problem and a copy of the output it produces.
+    You can also mail the net-snmp-users@lists.sourceforge.net list
+  with your questions and see if anyone there can help you.
 
     We can't promise to be able to solve the problem, but we'll
   certainly try and help.  Please *don't* mail both the coders
@@ -325,7 +341,6 @@ How do I submit a patch or bug report?
   helpfully as we can.  Duplicated messages simply increase the
   load on these (already busy) lists, and are likely to annoy,
   rather than encourage a sympathetic response.
-
 
     If you're trying to port the package to a new system, the output
   of the command 'make -k' is a good starting indicator of where
@@ -477,14 +492,29 @@ How do I add a MIB to the tools?
   In essence,
 
 	cp MY-MIB.txt /usr/local/share/snmp/mibs
+
+          or
+
+        mkdir $HOME/.snmp
+        mkdir $HOME/.snmp/mibs
+	cp MY-MIB.txt $HOME/.snmp/mibs
+
+  And then,
+
 	export MIBS=+MY-MIB
 
-  The first command copies the file defining the new MIB to the expected
-  location for MIB files.  This defaults to /usr/local/share/snmp/mibs
-  (or PREFIX/share/snmp/mibs if the the suite was installed into a
-  different base location).   Some ready-packaged distributions (such
-  as Linux RPM packages) may look for MIB files in a different location,
-  such as /etc/snmp/mibs - put the new file in this dirctory instead.
+          or alternatively:
+
+        echo "mibs +MY-MIB" >> $HOME/.snmp/snmp.conf
+
+  The first command copies the file defining the new MIB to a
+  expected location for MIB files.  This defaults to
+  /usr/local/share/snmp/mibs (or PREFIX/share/snmp/mibs if the the
+  suite was installed into a different base location).  Some
+  ready-packaged distributions (such as Linux RPM packages) may look
+  for MIB files in a different location, such as /etc/snmp/mibs - put
+  the new file in this dirctory instead.  It will also look for mibs
+  in your personal $HOME/.snmp/mibs directory.
 
   The second command tells the tools to load in this new MIB file as well
   as the default set.   Note that the tools do *not* load every MIB found
@@ -492,6 +522,7 @@ How do I add a MIB to the tools?
   there is a large collection of MIB files.  If you do want the tools to
   load all the MIB files, set the environmental variable MIBS to the special
   value "ALL".
+
      Note that the value for this variable is the name of the MIB module,
   *not* the name of the MIB file.   These are typically the same (apart
   from the .txt suffix), but if in doubt, check the contents of the file.
@@ -526,7 +557,8 @@ Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
 
 	snmpwalk localhost public ucdavis.version
   
-
+  If you still can't see any information, keep reading.  The next few
+  questions will probably help you.
 
 Requests always seem to timeout, and don't give me anything back.  Why?
 ----------------------------------------------------------------------
@@ -572,7 +604,9 @@ I can see the system group, but nothing else.  Why?
   came with it.  (But of course, a non-UCD agent is unlikely to implement
   the 'ucdavis' sub-tree, so the examples above won't work anyway!)
 
-
+  As a quick fix, you might create a new snmpd.conf configuration file
+  that gives you the access control you need.  Run snmpconf -g
+  basic_setup and follow its instructions.
 
 Requesting an object fails with "sub-identifier not found"  Why?
 ---------------------------------------------------------------
@@ -745,6 +779,10 @@ How do I send traps and notifications?
   Generating traps from within the agent is covered in the AGENT and
   CODING sections.
 
+  You should also read the snmptrap tutorial at
+  http://net-snmp.sourceforge.net/tutorial/commands/snmptrap.html
+  which will help you understand everything you need to know about traps.
+
 
 
 How do I handle traps and notifications?
@@ -755,7 +793,7 @@ How do I handle traps and notifications?
 
 	snmptrapd -s -l7	(log to 'LOCAL7')
 
- printed to standard output
+  printed to standard output
 
 	snmptrapd -f -P
 
@@ -772,7 +810,8 @@ How do I handle traps and notifications?
   'coldStart' trap.  See the co-existence RFC (RFC 2576) for details
   of mapping SNMPv1 traps to SNMPv2 OIDs.
 
-    There's a tutorial with more details on the web site.
+    There's a tutorial with more details on the web site
+    (http://net-snmp.sourceforge.net/tutorial/commands/snmptrap.html).
   
 
 
@@ -787,24 +826,24 @@ How do I use SNMPv3?
 
     An authenticated request would specify a username and pass phrase:
 
-	snmpget -v 3 -l authNoPriv -u dave -A "Open the Door!"
+	snmpget -v 3 -l authNoPriv -u dave -A "Open the Door"
 				localhost sysUpTime.0
 
     A fully secure request would also specify the privacy pass phrase:
 
-	snmpget -v 3 -l authPriv -u dave -A "Open the Door!"
-			-X "Bet you can't see me!"  localhost sysUpTime.0
+	snmpget -v 3 -l authPriv -u dave -A "Open the Door"
+			-X "Bet you can't see me"  localhost sysUpTime.0
 
 
   In practise, most of these would probably be set via configuration
-  directives in a personal snmp.conf file (note, *not* the agent's
-  snmpd.conf file).  The equivalent settings for the third example
-  would be:
+  directives in a personal $HOME/.snmp/snmp.conf file (note, *not* the
+  agent's snmpd.conf file).  The equivalent settings for the third
+  example would be:
 
 	defSecurityName		dave
 	defSecurityLevel	authPriv
-	defAuthPassphrase	"Open the Door!"
-	defPrivPassphrase	"Bet you can't see me!"
+	defAuthPassphrase	"Open the Door"
+	defPrivPassphrase	"Bet you can't see me"
 
 
   For how to configure the agent to respond to SNMPv3 requests, see
@@ -846,6 +885,9 @@ How can I monitor my systems (disk, memory, etc)?
   http://www.afn.org/~jam/software/cricket/   If anyone has something
   similar for MRTG, please let us know.
 
+    The net-snmp package contains a web based manager itself that
+  runs on top of a mysql database, but it is extremely beta in
+  nature.  See the manager/README file for details.
 
 
 Applications complain about entries in your example 'snmp.conf' file.  Why?
@@ -879,7 +921,8 @@ OK, what should I put in snmp.conf?
   snmp.conf file.  See 'snmpget -H' and/or the snmp.conf(5) man page
   for more details.
 
-
+    You can also use the "snmpconf" command to help you generate your
+  snmp.conf configuration file (just run it and answer its questions).
 
 
 PERL
@@ -907,6 +950,7 @@ How do I install the Perl SNMP module?
   Assuming you have a reasonably new (and properly configured) perl system,
   this should be simply:
 
+        cd perl/SNMP
 	perl Makefile.PL
 	    (press RETURN when prompted for host and community)
 	make
@@ -923,7 +967,8 @@ But compiling this fails! Why?
   library.  It's important to use the correct version of the module, that
   corresponds to the version of the library you have installed.  If you're
   working with the main UCD distribution, the appropriate version of the
-  perl module is shipped as part of this.
+  perl module is shipped as part of this, but you *must* have
+  run "make install" on the main UCD distribution *first*.
 
   If you're working with a ready-installed version of the library, make
   sure you obtain a compatible version of the perl module.
@@ -934,10 +979,9 @@ I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
 ------------------------------------------------------------
 
   That's probably because the SNMP perl module hasn't been installed.
-  It's not part of the standard distribution, nor is it installed by
-  default in RedHat linux (for example).
-    You'll need to get it from CPAN, and install it yourself
-  (see the first question in this section).
+  It's not part of the standard perl distribution, nor is it installed
+  by default in RedHat linux (for example).
+    You'll need to install it.  See the previous two questions.
 
 
 
@@ -1159,7 +1203,9 @@ How can I get more information about these MIB file problems?
   There are other '-P' options to control various aspects of MIB parsing.
   See the 'snmptranslate(1)' and 'snmpcmd(1)' man pages for more details.
 
-
+  (see the
+  http://net-snmp.sourceforge.net/tutorial/commands/snmptranslate.html
+  web page as well)
 
 What's this about "too many imported symbols"?
 ---------------------------------------------
@@ -1207,9 +1253,19 @@ What protocols are supported?
 
   The agent supports all three versions of SNMP (v1, v2c and v3), over both
   UDP and TCP transports, as well as a SMUX (RFC 1227) master agent, and
-  AgentX (RFC ??? ) in both master and subagent roles.
+  AgentX (RFC 2257 ) in both master and subagent roles.
   support.
 
+
+How do I configure the agent?
+----------------------------
+
+  Read the snmpd.conf manual page for full details on how to do this.
+
+  You can also run the "snmpconf" perl script to help you create this
+  file.
+
+  You might start off with snmpconf -g basic_setup to get you going.
 
 
 How do I add a MIB to the agent?
@@ -1322,10 +1378,11 @@ What's the difference between AgentX, SMUX and proxied SNMP?
   within another application.
     See the file 'agent/mibgroup/agentx/README' for details.
 
-  Note that support for these three extension mechanisms is not configured
-  in by default.  You will need to run configure with the option
+  Note that support for the SMUX and AgentX extension mechanisms are
+  not configured in by default.  You will need to run configure with
+  the option
 
-		--with-mib-modules=agentx,smux,ucd-snmp/proxy
+		--with-mib-modules=agentx,smux
 
   (or whichever of these you wish to support).
 
@@ -1404,6 +1461,9 @@ How can I stop other people getting at my agent?
 	- Configuring TCP wrapper support ("--with-libwrap")
 		This uses the TCP 'libwrap' library (available separately)
 		to allow/deny access via /etc/hosts.{allow,deny}
+
+  For strict security you should use only SNMPv3, which is the secure
+  form of the protocol.
 
 
 
@@ -1585,10 +1645,13 @@ The 'createUser' line disappears when I start the agent.  Why?
 -------------------------------------------------------------
 
     That's deliberate.   The agent removes the (human-readable) 'createUser'
-  directive, and replaces it with an equivalent 'usmUser'.  This contains
-  the same information, but in a form that's only meaningful internally.
-  This means that the password is not longer available in a readable form.
-
+  directive, and replaces it with an equivalent 'usmUser'.  This
+  contains the same information, but in a form that's only meaningful
+  internally.  This means that the password is not longer available in
+  a readable form.  Additionally, the password has been converted to a
+  key that can only be used to access the local machine.  If someone
+  stole the new usmUser line on this machine, they could not use that
+  information to access any of your other agents.
 
 
 What's the difference between /var/ucd-snmp and /usr/local/share/snmp?
@@ -1671,6 +1734,8 @@ Why can't I see values in the UCDavis 'extensible' or 'disk' trees?
   monitor, it will not report anything.  See the snmpd.conf manual page
   and the EXAMPLE.conf file for details on configuring the agent.
 
+  Optionally, run snmpconf -g monitoring to help you set up this
+  section of the snmpd.conf file.
 
 
 Why can't I see values in the UCDavis 'memory' or 'vmstat' trees?
@@ -1803,8 +1868,8 @@ The agent is complaining about 'snmpd.conf'.  Where is this?
   It doesn't exist in the distribution as shipped.  You need to
   create it to reflect your local requirement.
     To get started, you can either just create this as an empty file,
-  or try copying the EXAMPLE.conf file which will use some of the UCD
-  extensions.  See the snmpd.conf(5) manual page for further details.
+  or run snmpconf to help you create one.
+    See the snmpd.conf(5) manual page for further details.
 
 
 
@@ -1848,12 +1913,10 @@ The Host Resources information is wrong (and/or doesn't even compile)!
 CODING
 ======
 
-How do I compile with 'gcc' instead of 'cc'?
+How do I compile with 'cc' instead of 'gcc'?
 -------------------------------------------
 
-  Set the environmental variable 'CC' to have the value 'gcc' before
-  running the configure script.
-
+  Run configure with --with-cc=cc
 
 
 But gcc doesn't compile it successfully on my new Solaris system. Why not?
@@ -2029,6 +2092,9 @@ Why is the project workspace empty under Visual C++?
 Why are packets requesting the same information larger with UC-Davis SNMP ?
 -------------------------------------------------------------------------
 
+    This shouldn't happen with version 4.2 or later, but for older
+  version the following still applies:
+
     Some users note that UCD-SNMP applications always generate larger PDUs
   than other SNMP packages, even if the information requested is the same.
   Further, there are some agents that refuse PDUs from UCD-SNMP applications
@@ -2038,20 +2104,7 @@ Why are packets requesting the same information larger with UC-Davis SNMP ?
   using the long form of length encoding.  Some agents use the short form
   of length encoding only, and do not understand the long form.
 
-  If you think that this is a problem, you can add this line to snmp_api.c :
-
-  #define USE_ASN_SHORT_LEN 1
-
-  and re-compile.  This will build an alternate PDU assembly method which
-  will attempt to use the short form length encoding when possible.
-  Caution:  Using the alternate method imposes a performance penalty,
-  as the packet contents are first assembled using long form,
-  then memory is shuffled to generate smaller length encodings.
-
-  Note that at this time no short form length encoding is possible
-  for SNMPv3 PDUs.
-
-
+    Get version 4.2 or higher to user th shorter encoding lengths.
 
 What ASN.1 parser is used?
 -------------------------
