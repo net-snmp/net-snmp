@@ -265,15 +265,18 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 	     * If either of the first two passes returns an error, another
 	     * pass is made so that any reserved resources can be freed.
 	     */
-	      parse_var_op_list(data, length, out_data, *out_length,
+              errstat = parse_var_op_list(data, length, out_data, *out_length,
 				&dummyindex, pi, COMMIT);
 	      parse_var_op_list(data, length, out_data, *out_length,
-				&dummyindex, pi, ACTION);
-	      if (create_identical(startData, out_auth, startLength, 0L, 0L, pi)){
+				&dummyindex, pi,
+                                (errstat == SNMP_ERR_NOERROR) ? ACTION : FREE);
+              if (errstat == SNMP_ERR_NOERROR) {
+                if (create_identical(startData, out_auth, startLength, 0L, 0L, pi)){
 		  *out_length = pi->packet_end - out_auth;
 		  return 1;
-	      }
-	      return 0;
+                }
+                return 0;
+              }
 	} else {
 	      parse_var_op_list(data, length, out_data, *out_length,
 				&dummyindex, pi, FREE);
@@ -473,6 +476,7 @@ ERROR("Not Writable");
 				     var_val_len, statP, var_name,
 				     var_name_len);
 		if (err != SNMP_ERR_NOERROR){
+                  return err;
 		    if (pi->version != SNMP_VERSION_2)
 			return SNMP_ERR_BADVALUE;
 		    else
