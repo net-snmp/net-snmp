@@ -18,6 +18,7 @@ struct register_parameters {
    int     range_subid;
    oid     range_ubound;
    int     timeout;
+   u_char  flags;
 };
 
 #define MIB_REGISTERED_OK		 0
@@ -42,6 +43,7 @@ int register_mib_priority(const char *, struct variable *, size_t, size_t, oid *
 int register_mib_range(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, struct snmp_session *);
 int register_mib_context(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, struct snmp_session *, const char*, int, int);
 
+int register_mib_table_row(const char *, struct variable *, size_t, size_t, oid *, size_t, int, int, struct snmp_session *, const char *, int, int);
 int unregister_mib (oid *, size_t);
 int unregister_mib_priority (oid *, size_t, int);
 int unregister_mib_range (oid *, size_t, int, int, oid);

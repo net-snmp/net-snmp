@@ -12,6 +12,9 @@
 
 #define UCD_REGISTRY_OID_MAX_LEN	128
 
+/* subtree flags */
+#define FULLY_QUALIFIED_INSTANCE    0x01 
+
 struct subtree {
     oid			name[UCD_REGISTRY_OID_MAX_LEN];
 					/* objid prefix of registered subtree */
