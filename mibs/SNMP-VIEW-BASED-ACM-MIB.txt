@@ -58,7 +58,6 @@ snmpVacmMIB       MODULE-IDENTITY
 
     REVISION     "9711200000Z"            -- 20 Nov 1997, midnight
     DESCRIPTION  "Initial version, published as RFC2275"
-
     ::= { snmpModules 16 }
 
 -- Administrative assignments ****************************************
@@ -258,6 +257,7 @@ vacmAccessTable  OBJECT-TYPE
                        - the set with identical vacmAccessContextPrefix
                        - the set of entries with vacmAccessContextMatch
                          value of 'prefix' and matching
+
                          vacmAccessContextPrefix
                       intersected with the union of these two sets:
                        - the set of entries with identical
@@ -354,6 +354,7 @@ vacmAccessSecurityLevel OBJECT-TYPE
 
                  If multiple entries are equally indexed except for
                  this vacmAccessSecurityLevel index, then the entry
+
                  which has the highest value for
                  vacmAccessSecurityLevel is selected.
                 "
@@ -402,6 +403,7 @@ vacmAccessWriteViewName OBJECT-TYPE
     STATUS       current
     DESCRIPTION "The value of an instance of this object identifies
                  the MIB view of the SNMP context to which this
+
                  conceptual row authorizes write access.
 
                  The identified MIB view is that one for which the
@@ -546,6 +548,7 @@ vacmViewTreeFamilyTable OBJECT-TYPE
                  to a single subtree.
 
                  When creating or changing MIB views, an SNMP Command
+
                  Generator application should utilize the
                  vacmViewSpinLock to try to avoid collisions. See
                  DESCRIPTION clause of vacmViewSpinLock.
@@ -642,6 +645,7 @@ vacmViewTreeFamilyMask OBJECT-TYPE
 
                  Thus, the OBJECT IDENTIFIER X of an object instance
                  is contained in a family of view subtrees if, for
+
                  each sub-identifier of the value of
                  vacmViewTreeFamilySubtree, either:
 
@@ -690,6 +694,7 @@ vacmViewTreeFamilyStorageType OBJECT-TYPE
     DESCRIPTION "The storage type for this conceptual row.
 
                  Conceptual rows having the value 'permanent' need not
+
                  allow write-access to any columnar objects in the row.
                 "
     DEFVAL      { nonVolatile }
