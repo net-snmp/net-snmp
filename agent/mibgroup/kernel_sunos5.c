@@ -238,7 +238,7 @@ getKstatInt(const char *classname, const char *statname,
     if (kstat_fd == 0) {
 	kstat_fd = kstat_open();
 	if (kstat_fd == 0) {
-	    snmp_log(LOG_ERR, "kstat_open(): failed\n");
+	    snmp_log_perror("kstat_open");
 	}
     }
     if ((ksc = kstat_fd) == NULL) {
@@ -318,7 +318,7 @@ getKstat(const char *statname, const char *varname, void *value)
     if (kstat_fd == 0) {
 	kstat_fd = kstat_open();
 	if (kstat_fd == 0) {
-	    snmp_log(LOG_ERR, "kstat_open(): failed\n");
+	    snmp_log_perror("kstat_open");
 	}
     }
     if ((ksc = kstat_fd) == NULL) {
@@ -472,7 +472,7 @@ getKstatString(const char *statname, const char *varname,
     if (kstat_fd == 0) {
         kstat_fd = kstat_open();
         if (kstat_fd == 0) {
-            snmp_log(LOG_ERR, "kstat_open(): failed\n");
+            snmp_log_perror("kstat_open");
         }
     }
     if ((ksc = kstat_fd) == NULL) {
