@@ -9,13 +9,14 @@
 #ifndef NET_SNMP_CMU_COMPAT_H
 #define NET_SNMP_CMU_COMPAT_H
 
+
 	/* ============================
 	 *
 	 * Enumerations and definitions
 	 *
 	 * ============================ */
 
-#include <net-snmp/definition.h>
+#include <net-snmp/definitions.h>
 
 		/* From parse.h */
 #define ACCESS_READONLY		MIB_ACCESS_READONLY
