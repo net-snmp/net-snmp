@@ -25,6 +25,34 @@ NSB_PERL=
 NSB_FLOW=
 DATE=`date +%y%m%d_%H%M`
 
+if [ -z $NSB_MAKE ];then
+   echo "Searching for GNU make (set NSB_MAKE to skip this step)"
+   for p in `echo $PATH | tr ':' ' '`
+   do
+      #echo $p
+      if [ -x $p/make ];then
+         dummy=`$p/make --version 2>&1 | grep GNU`
+         if [ $? -eq 0 ];then
+	    echo "using $p/make ($dummy)"
+            NSB_MAKE=$p/make
+            break
+         fi
+      fi
+      if [ -x $p/gmake ];then
+         dummy=`$p/gmake --version 2>&1 | grep GNU`
+         if [ $? -eq 0 ];then
+	    echo "using $p/gmake ($dummy)"
+            NSB_MAKE=$p/gmake
+            break
+         fi
+      fi
+   done
+   if [ -z $NSB_MAKE ];then
+      echo "ERROR: GNU make not found. Set NSB_MAKE to your make executable."
+      exit
+   fi
+fi
+
 #----------------------------------------------------------------------
 #
 # Utility functions
@@ -216,8 +244,8 @@ nsb-make()
 
    nsb_make_OUTPUT=nsb-make-$target.$DATE
    nsb-info "Making $target... (log is $nsb_make_OUTPUT)"
-   #make touchit 2>&1 | tee $nsb_make_OUTPUT
-   make start-flag $target $parms end-flag 2>&1 | tee -a $nsb_make_OUTPUT
+   #$NSB_MAKE touchit 2>&1 | tee $nsb_make_OUTPUT
+   $NSB_MAKE start-flag $target $parms end-flag 2>&1 | tee -a $nsb_make_OUTPUT
    # checking $? would only get us the rc from tee, which is useless
 
    nsb-info "Checking for errors..."
@@ -277,7 +305,7 @@ nsb-build()
         nsb-info "rm -fR nsb-* $dest_dir 2>&1 > /dev/null"
         rm -fR nsb-* $dest_dir 2>&1 > /dev/null
         if [ -f Makefile ]; then
-            make distclean
+            $NSB_MAKE distclean
             nsb_build_rc=$?
             if [ $nsb_build_rc -ne 0 ]; then
                 nsb-abort "Error during makedistclean (rc=$nsb_build_rc)"
