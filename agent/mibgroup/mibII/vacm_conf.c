@@ -502,7 +502,8 @@ vacm_parse_simple(const char *token, char *confline)
         /*
          * com2sec anonymousSecNameNUM    ADDRESS  COMMUNITY 
          */
-        sprintf(secname, "anonymousSecName%03d", num);
+        sprintf(secname, "comm%.27s", community);
+        sprintf(viewname,"viewComm%.23s",community);
         snprintf(line, sizeof(line), "%s %s '%s'",
                  secname, addressname, community);
         line[ sizeof(line)-1 ] = 0;
@@ -523,12 +524,12 @@ vacm_parse_simple(const char *token, char *confline)
          * group   anonymousGroupNameNUM  any      anonymousSecNameNUM 
          */
         snprintf(line, sizeof(line),
-                 "anonymousGroupName%03d v1 %s", num, secname);
+                 "grp%.28s v1 %s", secname, secname);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "group", line));
         vacm_parse_group("group", line);
         snprintf(line, sizeof(line),
-                 "anonymousGroupName%03d v2c %s", num, secname);
+                 "grp%.28s v2c %s", secname, secname);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "group", line));
         vacm_parse_group("group", line);
@@ -541,7 +542,8 @@ vacm_parse_simple(const char *token, char *confline)
         /*
          * com2sec6 anonymousSecNameNUM    ADDRESS  COMMUNITY 
          */
-        sprintf(secname, "anonymousSecName%03d", num);
+        sprintf(secname, "comm%.27s", community);
+        sprintf(viewname,"viewComm%.23s",community);
         snprintf(line, sizeof(line), "%s %s '%s'",
                  secname, addressname, community);
         line[ sizeof(line)-1 ] = 0;
@@ -555,12 +557,12 @@ vacm_parse_simple(const char *token, char *confline)
          * group   anonymousGroupNameNUM  any      anonymousSecNameNUM 
          */
         snprintf(line, sizeof(line),
-                 "anonymousGroupName%03d v1 %s", num, secname);
+                 "grp%.28s v1 %s", secname, secname);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "group", line));
         vacm_parse_group("group", line);
         snprintf(line, sizeof(line),
-                 "anonymousGroupName%03d v2c %s", num, secname);
+                 "grp%.28s v2c %s", secname, secname);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "group", line));
         vacm_parse_group("group", line);
@@ -568,6 +570,7 @@ vacm_parse_simple(const char *token, char *confline)
     } else
 #endif /* support for community based SNMP */
     {
+        sprintf(viewname,"viewUSM%.24s",community);
         strncpy(secname, community, sizeof(secname));
         secname[ sizeof(secname)-1 ] = 0;
 
@@ -578,7 +581,7 @@ vacm_parse_simple(const char *token, char *confline)
          * group   anonymousGroupNameNUM  any      anonymousSecNameNUM 
          */
         snprintf(line, sizeof(line),
-                 "anonymousGroupName%03d %s %s", num, model, secname);
+                 "grp%.28s %s %s", secname, model, secname);
         line[ sizeof(line)-1 ] = 0;
         DEBUGMSGTL((token, "passing: %s %s\n", "group", line));
         vacm_parse_group("group", line);
@@ -590,7 +593,6 @@ vacm_parse_simple(const char *token, char *confline)
     /*
      * view    anonymousViewNUM       included OID 
      */
-    sprintf(viewname, "anonymousView%03d", num);
     snprintf(line, sizeof(line), "%s included %s", viewname, theoid);
     line[ sizeof(line)-1 ] = 0;
     DEBUGMSGTL((token, "passing: %s %s\n", "view", line));
@@ -603,8 +605,8 @@ vacm_parse_simple(const char *token, char *confline)
      * access  anonymousGroupNameNUM  "" MODEL AUTHTYPE prefix anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] 
      */
     snprintf(line, sizeof(line),
-            "anonymousGroupName%03d  \"\" %s %s prefix %s %s %s",
-            num, model, authtype, viewname, rw, rw);
+            "grp%.28s  \"\" %s %s prefix %s %s %s",
+            secname, model, authtype, viewname, rw, rw);
     line[ sizeof(line)-1 ] = 0;
     DEBUGMSGTL((token, "passing: %s %s\n", "access", line));
     vacm_parse_access("access", line);
