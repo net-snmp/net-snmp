@@ -30,14 +30,23 @@ constant(char *name, int len, int arg)
     return 0;
 }
 
-
-
+netsnmp_oid *
+nso_newarrayptr(oid *name, size_t name_len) 
+{
+    netsnmp_oid *RETVAL;
+    RETVAL = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
+    RETVAL->name = RETVAL->namebuf;
+    RETVAL->len = name_len;
+    memcpy(RETVAL->name, name, name_len * sizeof(oid));
+    return RETVAL;
+}
 
 MODULE = NetSNMP::OID		PACKAGE = NetSNMP::OID		PREFIX=nso_
 
 netsnmp_oid *
 nso_newptr(char *initstring)
     CODE:
+        fprintf(stderr, "here: %s\n", initstring);
         RETVAL = SNMP_MALLOC_TYPEDEF(netsnmp_oid);
         RETVAL->name = RETVAL->namebuf;
         RETVAL->len = sizeof(RETVAL->namebuf)/sizeof(RETVAL->namebuf[0]);
