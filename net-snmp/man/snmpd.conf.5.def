@@ -1,6 +1,6 @@
 .TH SNMPD.CONF 1 "21 Feb 1996"
 .ds )H U.C. Davis, ECE Dept.
-.ds ]W V3.0.1
+.ds ]W VVERSIONINFO
 .UC 4
 .SH NAME
 snmpd.conf       - configuration file for the ucd-snmp SNMP agent.
@@ -14,12 +14,30 @@ operates.  These files may contain any of the directives found in the
 DIRECTIVES section below.  The information pertaining to the
 configuration of the agent is reported in the EXTENSIBLE-MIB, as
 defined by the EXTENSIBLE-MIB section below.
+.PP
+These files must be found in the PREFIX/lib/snmp directory.  Neither
+of these files are required for the agent to operate and report mib
+entries defined by rfc-1156.
 .SH EXTENSIBLE-MIB
 .PP
 The ucd-snmp SNMP agent reports its information through queries to the
-EXTENSIBLEDOTMIB section of the mib tree.  This section of the mib
-tree is divided up as follows:
-.IP "(This section of the manual unfinished.)"
+EXTENSIBLEDOTMIB section of the mib tree.  Every mib in this section
+has the following sub-tables to it.
+.IP ".MIBINDEX -- index"
+This is the table's index numbers for each of the DIRECTIVES listed below.
+.IP ".ERRORNAME -- name"
+The name of the given table entry.  This should be unique, but is not
+required to be.
+.IP ".ERRORFLAG -- errorFlag"
+This is a flag returning either the integer value 1 or 0 if an error
+is detected for this table entry.
+.IP ".ERRORMSG -- errorMsg"
+This is a DISPLAY-STRING describing any error triggering the errorFlag above.
+.IP ".ERRORFIX -- errorFix"
+If this entry is SNMPset to the integer value of 1, a program or
+script will get executed with the table entry name from above as the
+argument.  The program to be executed is configured in the config.h
+file at compile time.
 .SH DIRECTIVES
 .IP "proc NAME"
 .IP "proc NAME MAX"
@@ -84,6 +102,9 @@ file "agent/snmp_agent.c".
 Any errors in obtaining the above information are reported via the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORFLAG flag and the
 EXTENSIBLEDOTMIB.LOADAVEMIBNUM.ERRORMSG text-string description.
+.SH "EXAMPLE"
+See the example.conf file for a more detailed example of how the above
+information is used in real examples.
 .SH "RE-READING snmpd.conf"
 The ucd-snmp agent can be forced to re-read its configuration file.
 It can be told to do so by one of two ways:
@@ -92,4 +113,4 @@ An snmpset of integer(1) to EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERUPDATECONFIG.
 .IP 2.
 A "kill -HUP" signal sent to the snmpd agent process.
 .SH "SEE ALSO"
-snmpd(1).
+snmpd(1), EXAMPLE.conf.

@@ -23,10 +23,13 @@ MAN3 = snmp_api.3
 MAN5 = variables.5 snmpd.conf.5
 MAN8 = snmptrapd.8
 
-all: snmpd.conf.5
+all: snmpd.conf.5 snmpd.1
 
 snmpd.conf.5: snmpd.conf.5.def ../sedscript
-	cat snmpd.conf.5.def | $(SED) -f ../sedscript > snmpd.conf.5
+	cat snmpd.conf.5.def | $(SED) -f ../sedscript | $(SED) -e "s#PREFIX#$(prefix)#g" > snmpd.conf.5
+
+snmpd.1: snmpd.1.def ../sedscript
+	cat snmpd.1.def | $(SED) -f ../sedscript | $(SED) -e "s#PREFIX#$(prefix)#g" > snmpd.1
 	
 install:  installdirs $(MAN1) $(MAN3) $(MAN5) $(MAN8)
 	@for i in $(MAN1) ; do $(INSTALL) $$i $(man1dir) ; echo "install:  installed $$i in $(man1dir)" ; done
