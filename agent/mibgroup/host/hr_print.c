@@ -166,7 +166,7 @@ var_hrprint(struct variable *vp,
 	    long_return = 0;	/* Null string */
 	    return (u_char *)&long_return;
 	default:
-	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrprint\n", vp->magic));
+	    DEBUGMSGTL(("host/hr_print", "unknown sub-id %d in var_hrprint\n", vp->magic));
     }
     return NULL;
 }
@@ -268,7 +268,7 @@ Get_Next_HR_Print (void)
 
 const char *describe_printer(int idx)
 {
-    DEBUGMSGTL(("snmpd", "describe p: %d/%d %s\n", HRP_index, idx, HRP_name[HRP_index-1]));
+    DEBUGMSGTL(("host/hr_print", "describe p: %d/%d %s\n", HRP_index, idx, HRP_name[HRP_index-1]));
     return HRP_name[HRP_index-1];
 }
 
