@@ -198,7 +198,7 @@ netsnmp_tdomain_init(void)
     netsnmp_aal5pvc_ctor();
 #endif
 #ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
-    snmp_udp6_ctor();
+    netsnmp_udp6_ctor();
 #endif
 #ifdef SNMP_TRANSPORT_TCPIPV6_DOMAIN
     netsnmp_tcp6_ctor();
@@ -211,7 +211,7 @@ static void
 netsnmp_tdomain_dump(void)
 {
     netsnmp_tdomain *d;
-    int             i = 0;
+    int i = 0;
 
     DEBUGMSGTL(("tdomain", "domain_list -> "));
     for (d = domain_list; d != NULL; d = d->next) {
@@ -220,7 +220,7 @@ netsnmp_tdomain_dump(void)
         DEBUGMSG(("tdomain", ", \""));
         for (i = 0; d->prefix[i] != NULL; i++) {
             DEBUGMSG(("tdomain", "%s%s", d->prefix[i],
-                      (d->prefix[i + 1]) ? "/" : ""));
+		      (d->prefix[i + 1]) ? "/" : ""));
         }
         DEBUGMSG(("tdomain", "\" } -> "));
     }
