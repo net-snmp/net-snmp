@@ -98,7 +98,8 @@ typedef long	fd_mask;
 #define FD_ZERO(p)	memset((p), 0, sizeof(*(p)))
 #endif
 
-#define PARTY_MIB_BASE	".1.3.6.1.6.3.3.1.3.127.0.0.1.1"
+#define PARTY_MIB_BASE	 ".1.3.6.1.6.3.3.1.3.127.0.0.1.1"
+#define CONTEXT_MIB_BASE ".1.3.6.1.6.3.3.1.4.127.0.0.1.1"
 
 _CRTIMP extern int errno;
 
@@ -629,7 +630,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
     }
     twoIndex = pp2->partyIndex;
 
-    if (!read_objid(PARTY_MIB_BASE, context, contextlen)){
+    if (!read_objid(CONTEXT_MIB_BASE, context, contextlen)){
 	snmp_errno = SNMPERR_BAD_CONTEXT;
 	snmp_set_detail(PARTY_MIB_BASE);
 	return -1;
