@@ -139,7 +139,7 @@ handle_long_opt(const char *myoptarg)
         if (cp2)
             *cp2 = ' ';
     }
-    snmp_config(cp);
+    netsnmp_config(cp);
     free(cp);
 }
 
@@ -200,7 +200,7 @@ snmp_parse_args(int argc,
         return(-2);
 
       case 'Y':
-        snmp_config_remember(optarg);
+        netsnmp_config_remember(optarg);
         break;
     
       case 'm':

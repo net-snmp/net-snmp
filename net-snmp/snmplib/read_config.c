@@ -384,14 +384,14 @@ snmp_config_when(char *line, int when) {
     /* use the original string instead since strtok messed up the original */
     line = skip_white(line + (cptr - buf) + strlen(cptr) + 1);
     
-    return(run_config_handler(lptr, cptr, line, EITHER_CONFIG));
+    return(run_config_handler(lptr, cptr, line, when));
 }
 
 int
-snmp_config(char *line) {
+netsnmp_config(char *line) {
     int ret = SNMP_ERR_NOERROR;
     DEBUGMSGTL(("snmp_config", "remembering line \"%s\"\n", line));
-    snmp_config_remember(line); /* always remember it so it's read
+    netsnmp_config_remember(line); /* always remember it so it's read
                                    processed after a free_config()
                                    call */
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_HAVE_READ_CONFIG)) {
@@ -402,7 +402,7 @@ snmp_config(char *line) {
 }
 
 void
-snmp_config_remember_in_list(char *line, struct read_config_memory **mem) {
+netsnmp_config_remember_in_list(char *line, struct read_config_memory **mem) {
     if (mem == NULL)
         return;
 
@@ -415,41 +415,54 @@ snmp_config_remember_in_list(char *line, struct read_config_memory **mem) {
 }
 
 void
-snmp_config_process_memory_list(struct read_config_memory *mem, int when) {
+netsnmp_config_remember_free_list(struct read_config_memory **mem) {
+    struct read_config_memory **tmpmem;
+    while(*mem) {
+        SNMP_FREE((*mem)->line);
+        tmpmem = &((*mem)->next);
+        free(*mem);
+        *mem = NULL;
+        mem = tmpmem;
+    }
+}
+
+void
+netsnmp_config_process_memory_list(struct read_config_memory **memp, int when,
+                                int clear) {
+
+    struct read_config_memory *mem;
+
+    if (!memp)
+        return;
+
+    mem = *memp;
+            
     while(mem) {
         DEBUGMSGTL(("read_config","processing memory: %s\n",mem->line));
         snmp_config_when(mem->line, when);
         mem = mem->next;
     }
-}
-
-void
-snmp_config_remember_free_list(struct read_config_memory *mem) {
-    struct read_config_memory *tmpmem;
-    while(mem) {
-        SNMP_FREE(mem->line);
-        tmpmem = mem->next;
-        free(mem);
-        mem = tmpmem;
-    }
+    
+    if (clear)
+        netsnmp_config_remember_free_list(memp);
 }
 
 /* default storage location implementation */
 static struct read_config_memory *memorylist = NULL;
 
 void
-snmp_config_remember(char *line) {
-    snmp_config_remember_in_list(line, &memorylist);
+netsnmp_config_remember(char *line) {
+    netsnmp_config_remember_in_list(line, &memorylist);
 }
 
 void
-snmp_config_process_memories(void) {
-    snmp_config_process_memory_list(memorylist, EITHER_CONFIG);
+netsnmp_config_process_memories(void) {
+    netsnmp_config_process_memory_list(&memorylist, EITHER_CONFIG, 1);
 }
 
 void
-snmp_config_process_memories_when(int when) {
-    snmp_config_process_memory_list(memorylist, when);
+netsnmp_config_process_memories_when(int when, int clear) {
+    netsnmp_config_process_memory_list(&memorylist, when, clear);
 }
 
 /*******************************************************************-o-******
@@ -597,7 +610,7 @@ read_configs (void)
       }
   }
 
-  snmp_config_process_memories_when(NORMAL_CONFIG);
+  netsnmp_config_process_memories_when(NORMAL_CONFIG, 1);
 
   ds_set_boolean(DS_LIBRARY_ID, DS_LIB_HAVE_READ_CONFIG, 1);
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
@@ -612,7 +625,7 @@ read_premib_configs (void)
   if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS))
     read_config_files(PREMIB_CONFIG);
 
-  snmp_config_process_memories_when(PREMIB_CONFIG);
+  netsnmp_config_process_memories_when(PREMIB_CONFIG, 0);
 
   ds_set_boolean(DS_LIBRARY_ID, DS_LIB_HAVE_READ_PREMIB_CONFIG, 1);
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
