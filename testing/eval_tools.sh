@@ -57,6 +57,19 @@ $*
 GRONK
 }
 
+CAN_USLEEP() {
+   if [ "$SNMP_CAN_USLEEP" = 0 -o "$SNMP_CAN_USLEEP" = 0 ] ; then
+     return $SNMP_CAN_USLEEP
+   fi
+   sleep .1 > /dev/null 2>&1
+   if [ $? = 0 ] ; then
+     SNMP_CAN_USLEEP=1
+   else
+     SNMP_CAN_USLEEP=0
+   fi
+   export SNMP_CAN_USLEEP
+}
+
 
 #------------------------------------ -o-
 #
@@ -166,7 +179,7 @@ KNORG
 #------------------------------------ -o-
 # Delay to let processes settle
 DELAY() {
-    if [ $SNMP_SLEEP -ne 0 ] ; then
+    if [ "$SNMP_SLEEP" != "0" ] ; then
 	sleep $SNMP_SLEEP
     fi
 }
@@ -202,13 +215,64 @@ CHECK() {	# <pattern_to_match>
     return $rval
 }
 
+CHECKFILE() {
+    file=$1
+    if [ "x$file" = "x" ] ; then
+        file=$junkoutputfile
+    fi
+    shift
+    myoldjunkoutputfile="$junkoutputfile"
+    junkoutputfile="$file"
+    CHECK $*
+    junkoutputfile="$myoldjunkoutputfile"
+}
 
 CHECKTRAPD() {
-    oldjunkoutpufile=$junkoutputfile
-    junkoutputfile=$SNMP_SNMPTRAPD_LOG_FILE
-    CHECK $*
-    junkoutputfile=$oldjunkoutputfile
+    CHECKFILE $SNMP_SNMPTRAPD_LOG_FILE $@
 }
+
+CHECKAGENT() {
+    CHECKGAENT $SNMP_SNMPD_LOG_FILE $@
+}
+
+WAITFORAGENT() {
+    WAITFOR "$@" $SNMP_SNMPD_LOG_FILE
+}
+
+WAITFORTRAPD() {
+    WAITFOR "$@" $SNMP_SNMPTRAPD_LOG_FILE
+}
+
+WAITFOR() {
+    sleeptime=$SNMP_SLEEP
+    oldsleeptime=$SNMP_SLEEP
+    if [ "$1" != "" ] ; then
+	CAN_USLEEP
+	if [ $SNMP_CAN_USLEEP = 1 ] ; then
+	  sleeptime=`expr $SNMP_SLEEP '*' 10`
+          SNMP_SLEEP=.1
+	else 
+	  SNMP_SLEEP=1
+	fi
+        while [ $sleeptime > 0 ] ; do
+	  if [ "$2" = "" ] ; then
+            CHECK "$@"
+          else
+	    CHECKFILE "$2" "$1"
+	  fi
+          if [ "$snmp_last_test_result" -gt 0 ] ; then
+	      SNMP_SLEEP=$oldsleeptime
+	      return 0;
+	  fi
+          DELAY
+          sleeptime=`expr $sleeptime - 1`
+        done
+    else
+        if [ $SNMP_SLEEP -ne 0 ] ; then
+	    sleep $SNMP_SLEEP
+        fi
+    fi
+}    
 
 #------------------------------------ -o-
 # Returns: Count of matched lines.
@@ -265,6 +329,13 @@ STARTPROG() {
     DELAY
 }
 
+STARTPROGNOSLEEP() {
+    sleepxxx=$SNMP_SLEEP
+    SNMP_SLEEP=0
+    STARTPROG
+    SNMP_SLEEP=$sleepxxx
+}
+
 #------------------------------------ -o-
 STARTAGENT() {
     COMMAND="snmpd $SNMP_FLAGS -r -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE $AGENT_FLAGS"
@@ -272,7 +343,8 @@ STARTAGENT() {
     LOG_FILE=$SNMP_SNMPD_LOG_FILE
     PORT_SPEC="$SNMP_SNMPD_PORT"
 
-    STARTPROG
+    STARTPROGNOSLEEP
+    WAITFORAGENT "NET-SNMP version"
 }
 
 #------------------------------------ -o-
@@ -282,7 +354,8 @@ STARTTRAPD() {
     LOG_FILE=$SNMP_SNMPTRAPD_LOG_FILE
     PORT_SPEC="$SNMP_SNMPTRAPD_PORT"
 
-    STARTPROG
+    STARTPROGNOSLEEP
+    WAITFORTRAPD "NET-SNMP version"
 }
 
 
@@ -300,10 +373,18 @@ STOPPROG() {
     fi
 }
 
+STOPPROGNOSLEEP() {
+    sleepxxx=$SNMP_SLEEP
+    SNMP_SLEEP=0
+    STOPPROG "$1"
+    SNMP_SLEEP=$sleepxxx
+}
+
 #------------------------------------ -o-
 #
 STOPAGENT() {
-    STOPPROG $SNMP_SNMPD_PID_FILE
+    STOPPROGNOSLEEP $SNMP_SNMPD_PID_FILE
+    WAITFORAGENT "shutting down"
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "Agent Output:"
 	echo "$seperator [stdout]"
@@ -317,7 +398,8 @@ STOPAGENT() {
 #------------------------------------ -o-
 #
 STOPTRAPD() {
-    STOPPROG $SNMP_SNMPTRAPD_PID_FILE
+    STOPPROGNOSLEEP $SNMP_SNMPTRAPD_PID_FILE
+    WAITFORTRAPD "Stopped"
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "snmptrapd Output:"
 	echo "$seperator [stdout]"
