@@ -335,7 +335,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
   }
   newuser->authKeyLen =
     sc_get_properlength(newuser->authProtocol, newuser->authProtocolLen);
-  newuser->authKey = malloc(newuser->authKeyLen);
+  newuser->authKey = (u_char *) malloc(newuser->authKeyLen);
   ret = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
 		     newuser->engineID, newuser->engineIDLen,
 		     userKey, userKeyLen,
@@ -377,7 +377,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
     }
     newuser->privKeyLen =
       sc_get_properlength(newuser->privProtocol, newuser->privProtocolLen);
-    newuser->privKey = malloc(newuser->privKeyLen);
+    newuser->privKey = (u_char *) malloc(newuser->privKeyLen);
     ret = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
                        newuser->engineID, newuser->engineIDLen,
                        userKey, userKeyLen,
