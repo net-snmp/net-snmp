@@ -1587,8 +1587,7 @@ fprint_value(FILE *f,
 char *
 dump_oid_to_string(oid *objid,
 	   size_t objidlen,
-	   char *buf,
-	   size_t buflen)
+	   char *buf)
 {
   /* if any subidentifier might be printable, dump it as printable. */
   if (buf)
@@ -1605,7 +1604,8 @@ dump_oid_to_string(oid *objid,
 	  *cp++ = (char)tst;
 	  kk++;
 	}
-	else if ((jj > 0) && (*(cp-1) != '.')) {
+	else {
+	  if (jj == 0) { *cp++ = '"'; jj = 1; }
 	  *cp++ = '.';
 	  kk++;
 	}
@@ -1652,13 +1652,28 @@ _get_symbol(oid *objid,
 		buflen = (size_t)*objid;
 		if ( (1+buflen) > objidlen)
 		    goto finish_it;
-		buf = dump_oid_to_string(objid + 1, objidlen - 1,
-		    buf, buflen);
-		*buf++ = '\0'; /* XXX avoid trailing dot, but continue ? */
+		buf = dump_oid_to_string(objid + 1, buflen, buf);
+		*buf++ = '.';
+		*buf = '\0';
 		objid += (1+buflen);
 		objidlen -= (1+buflen);
 		break;
+	    case TYPE_INTEGER:
+                sprintf(buf, "%lu.", *objid++);
+                while(*buf)
+                    buf++;
+		objidlen--;
+                break;
+            case TYPE_OBJID:
+                buflen = (size_t)*objid;
+		if ( (1+buflen) > objidlen)
+		    goto finish_it;
+                _get_symbol(objid + 1, buflen, NULL, buf, NULL);
+		objidlen -= buflen+1;
+                objid += (1+buflen);
+                break;
 	    default:
+                goto finish_it;
 		break;
 	    }
 	    in_dices = in_dices->next;
