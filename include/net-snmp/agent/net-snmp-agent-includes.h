@@ -1,6 +1,7 @@
-/* A simple helpful wrapper to include lots of agent specific include
- * files for people wanting to embed and snmp agent into an external
- * application
+/*
+ * A simple helpful wrapper to include lots of agent specific include
+ * * files for people wanting to embed and snmp agent into an external
+ * * application
  */
 #ifndef NET_SNMP_AGENT_INCLUDES_H
 #define NET_SNMP_AGENT_INCLUDES_H
@@ -17,4 +18,4 @@
 
 #include <net-snmp/agent/mib_module_config.h>
 
-#endif /* NET_SNMP_AGENT_INCLUDES_H */
+#endif                          /* NET_SNMP_AGENT_INCLUDES_H */

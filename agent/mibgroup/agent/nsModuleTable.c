@@ -16,7 +16,7 @@ initialize_table_nsModuleTable(void)
         { 1, 3, 6, 1, 4, 1, 8072, 1, 2, 1 };
     netsnmp_table_registration_info *table_info;
     netsnmp_handler_registration *my_handler;
-    netsnmp_iterator_info  *iinfo;
+    netsnmp_iterator_info *iinfo;
 
     /*
      * create the table structure itself 
@@ -31,7 +31,8 @@ initialize_table_nsModuleTable(void)
     my_handler = netsnmp_create_handler_registration("nsModuleTable",
                                                      nsModuleTable_handler,
                                                      nsModuleTable_oid,
-                                                     OID_LENGTH(nsModuleTable_oid),
+                                                     OID_LENGTH
+                                                     (nsModuleTable_oid),
                                                      HANDLER_CAN_RWRITE);
 
     if (!my_handler || !table_info || !iinfo)
@@ -40,10 +41,9 @@ initialize_table_nsModuleTable(void)
     /***************************************************
      * Setting up the table's definition
      */
-    netsnmp_table_helper_add_indexes(table_info,
-                                     ASN_OCTET_STR, /* context name */
-                                     ASN_OBJECT_ID, /* reg point */
-                                     ASN_INTEGER,   /* priority */
+    netsnmp_table_helper_add_indexes(table_info, ASN_OCTET_STR, /* context name */
+                                     ASN_OBJECT_ID,     /* reg point */
+                                     ASN_INTEGER,       /* priority */
                                      0);
 
     table_info->min_column = 4;
@@ -94,19 +94,19 @@ init_nsModuleTable(void)
     and return the put_index_data variable at the end of the function.
 */
 typedef struct context_tree_ptr_s {
-   struct subtree *tree;
-   subtree_context_cache *context_ptr;
+    struct subtree *tree;
+    subtree_context_cache *context_ptr;
 } context_tree_ptr;
 
 netsnmp_variable_list *
 nsModuleTable_get_first_data_point(void **my_loop_context,
                                    void **my_data_context,
-                                   netsnmp_variable_list *put_index_data,
+                                   netsnmp_variable_list * put_index_data,
                                    netsnmp_iterator_info *otherstuff)
 {
 
     struct variable_list *vptr;
-    u_long ultmp;
+    u_long          ultmp;
     context_tree_ptr *ctree;
 
     ctree = SNMP_MALLOC_TYPEDEF(context_tree_ptr);
@@ -121,12 +121,14 @@ nsModuleTable_get_first_data_point(void **my_loop_context,
                        strlen(ctree->context_ptr->context_name));
 
     vptr = vptr->next_variable;
-    snmp_set_var_value(vptr, (u_char *) ctree->context_ptr->first_subtree->name,
-                       ctree->context_ptr->first_subtree->namelen*sizeof(oid));
+    snmp_set_var_value(vptr,
+                       (u_char *) ctree->context_ptr->first_subtree->name,
+                       ctree->context_ptr->first_subtree->namelen *
+                       sizeof(oid));
 
     ultmp = ctree->context_ptr->first_subtree->priority;
     vptr = vptr->next_variable;
-    snmp_set_var_value(vptr, (u_char *) &ultmp, sizeof(ultmp));
+    snmp_set_var_value(vptr, (u_char *) & ultmp, sizeof(ultmp));
 
     return put_index_data;
 }
@@ -147,8 +149,8 @@ nsModuleTable_get_next_data_point(void **my_loop_context,
 {
 
     struct variable_list *vptr;
-    context_tree_ptr *ctree = (context_tree_ptr *) *my_loop_context;
-    u_long ultmp;
+    context_tree_ptr *ctree = (context_tree_ptr *) * my_loop_context;
+    u_long          ultmp;
 
     if (ctree->tree->next)
         ctree->tree = ctree->tree->next;
@@ -168,31 +170,31 @@ nsModuleTable_get_next_data_point(void **my_loop_context,
 
     vptr = vptr->next_variable;
     snmp_set_var_value(vptr, (u_char *) ctree->tree->name,
-                       ctree->tree->namelen*sizeof(oid));
+                       ctree->tree->namelen * sizeof(oid));
 
     ultmp = ctree->tree->priority;
     vptr = vptr->next_variable;
-    snmp_set_var_value(vptr, (u_char *) &ultmp, sizeof(ultmp));
+    snmp_set_var_value(vptr, (u_char *) & ultmp, sizeof(ultmp));
 
     return put_index_data;
 }
 
 /** handles requests for the nsModuleTable table, if anything else needs to be done */
 int
-nsModuleTable_handler(netsnmp_mib_handler* handler,
-                      netsnmp_handler_registration * reginfo,
-                      netsnmp_agent_request_info * reqinfo,
-                      netsnmp_request_info * requests)
+nsModuleTable_handler(netsnmp_mib_handler *handler,
+                      netsnmp_handler_registration *reginfo,
+                      netsnmp_agent_request_info *reqinfo,
+                      netsnmp_request_info *requests)
 {
 
     netsnmp_table_request_info *table_info;
     netsnmp_request_info *request;
     netsnmp_variable_list *var;
     struct subtree *tree;
-    u_long ultmp;
-    u_char modes[1];
+    u_long          ultmp;
+    u_char          modes[1];
 
-    for(request = requests; request; request = request->next) {
+    for (request = requests; request; request = request->next) {
         var = request->requestvb;
         if (request->processed != 0)
             continue;
@@ -210,8 +212,9 @@ nsModuleTable_handler(netsnmp_mib_handler* handler,
          * return data for the columns of the nsModuleTable table in
          * question 
          */
-        tree = (struct subtree *) netsnmp_extract_iterator_context(request);
-        if ( tree == NULL) {
+        tree =
+            (struct subtree *) netsnmp_extract_iterator_context(request);
+        if (tree == NULL) {
             if (reqinfo->mode == MODE_GET) {
                 netsnmp_set_request_error(reqinfo, request,
                                           SNMP_NOSUCHINSTANCE);
@@ -253,23 +256,29 @@ nsModuleTable_handler(netsnmp_mib_handler* handler,
                 if (tree->reginfo->handlerName)
                     snmp_set_var_typed_value(var, ASN_OCTET_STR,
                                              tree->reginfo->handlerName,
-                                             strlen(tree->reginfo->handlerName));
+                                             strlen(tree->reginfo->
+                                                    handlerName));
                 else
                     snmp_set_var_typed_value(var, ASN_OCTET_STR, "", 0);
                 break;
 
             case COLUMN_NSMODULEMODES:
-                /* basically, these BITS needs to be inverted in order */
+                /*
+                 * basically, these BITS needs to be inverted in order 
+                 */
                 modes[0] =
-                    ((HANDLER_CAN_GETANDGETNEXT & tree->reginfo->modes) << 7) |
-                    ((HANDLER_CAN_SET           & tree->reginfo->modes) << 5) |
-                    ((HANDLER_CAN_GETBULK       & tree->reginfo->modes) << 3);
+                    ((HANDLER_CAN_GETANDGETNEXT & tree->reginfo->
+                      modes) << 7) | ((HANDLER_CAN_SET & tree->reginfo->
+                                       modes) << 5) | ((HANDLER_CAN_GETBULK
+                                                        & tree->reginfo->
+                                                        modes) << 3);
                 snmp_set_var_typed_value(var, ASN_BIT_STR, modes, 1);
                 break;
 
             case COLUMN_NSMODULETIMEOUT:
                 ultmp = tree->timeout;
-                snmp_set_var_typed_value(var, ASN_INTEGER, (u_char *) &ultmp,
+                snmp_set_var_typed_value(var, ASN_INTEGER,
+                                         (u_char *) & ultmp,
                                          sizeof(u_long));
                 break;
 

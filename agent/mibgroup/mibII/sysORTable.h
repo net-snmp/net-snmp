@@ -7,29 +7,31 @@
 
 config_require(util_funcs)
 
-struct sysORTable {
-   char *OR_descr;
-   oid  *OR_oid;
-   size_t  OR_oidlen;
-   struct timeval OR_uptime;
-   netsnmp_session *OR_sess;
-   struct sysORTable *next;
-};
+     struct sysORTable {
+         char           *OR_descr;
+         oid            *OR_oid;
+         size_t          OR_oidlen;
+         struct timeval  OR_uptime;
+         netsnmp_session *OR_sess;
+         struct sysORTable *next;
+     };
 
-struct register_sysOR_parameters {
-   oid  *name;
-   int   namelen;
-   const char *descr;
-};
+     struct register_sysOR_parameters {
+         oid            *name;
+         int             namelen;
+         const char     *descr;
+     };
 
-extern void     init_sysORTable (void);
-extern FindVarMethod var_sysORTable;
-extern FindVarMethod var_sysORLastChange;
-extern int      register_sysORTable (oid *, size_t, const char *);
-extern int    unregister_sysORTable (oid *, size_t);
-extern int      register_sysORTable_sess (oid *, size_t, const char *, netsnmp_session *);
-extern int    unregister_sysORTable_sess (oid *, size_t, netsnmp_session *);
-extern void   unregister_sysORTable_by_session (netsnmp_session *);
+     extern void     init_sysORTable(void);
+     extern FindVarMethod var_sysORTable;
+     extern FindVarMethod var_sysORLastChange;
+     extern int      register_sysORTable(oid *, size_t, const char *);
+     extern int      unregister_sysORTable(oid *, size_t);
+     extern int      register_sysORTable_sess(oid *, size_t, const char *,
+                                              netsnmp_session *);
+     extern int      unregister_sysORTable_sess(oid *, size_t,
+                                                netsnmp_session *);
+     extern void     unregister_sysORTable_by_session(netsnmp_session *);
 
 #define	SYSORTABLEINDEX		        1
 #define	SYSORTABLEID		        2
@@ -50,5 +52,5 @@ extern void   unregister_sysORTable_by_session (netsnmp_session *);
 #else
 #define REGISTER_SYSOR_ENTRY(x,y)
 #define REGISTER_SYSOR_TABLE(x,y)
-#endif /* USING_MIBII_SYSORTABLE_MODULE */
-#endif /* _MIBGROUP_SYSORTABLE_H */
+#endif                          /* USING_MIBII_SYSORTABLE_MODULE */
+#endif                          /* _MIBGROUP_SYSORTABLE_H */

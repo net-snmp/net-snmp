@@ -2,7 +2,7 @@
 #define SNMP_SYSTEM_H
 
 #ifdef __cplusplus
-extern "C" {
+extern          "C" {
 #endif
 
 /***********************************************************
@@ -26,85 +26,88 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
-/*
- * Definitions for the system dependent library file
- */
+    /*
+     * Definitions for the system dependent library file
+     */
 #ifdef WIN32
 
-/* structure of a directory entry */
-typedef struct direct 
-{
-	long	d_ino;		/* inode number (not used by MS-DOS) */
-	int	d_namlen;		/* Name length */
-	char	d_name[257];/* file name */
-} _DIRECT;
+    /*
+     * structure of a directory entry 
+     */
+    typedef struct direct {
+        long            d_ino;  /* inode number (not used by MS-DOS) */
+        int             d_namlen;       /* Name length */
+        char            d_name[257];    /* file name */
+    } _DIRECT;
 
-/* structure for dir operations */
-typedef struct _dir_struc
-{
-	char	*start;			/* Starting position */
-	char	*curr;			/* Current position */
-	long	size;			/* Size of string table */
-	long	nfiles;			/* number if filenames in table */
-	struct direct dirstr;	/* Directory structure to return */
-} DIR;
+    /*
+     * structure for dir operations 
+     */
+    typedef struct _dir_struc {
+        char           *start;  /* Starting position */
+        char           *curr;   /* Current position */
+        long            size;   /* Size of string table */
+        long            nfiles; /* number if filenames in table */
+        struct direct   dirstr; /* Directory structure to return */
+    } DIR;
 
-DIR *opendir (const char *filename);
-struct direct *readdir (DIR *dirp);
-int closedir (DIR *dirp);
+    DIR            *opendir(const char *filename);
+    struct direct  *readdir(DIR * dirp);
+    int             closedir(DIR * dirp);
 
 #ifndef HAVE_GETTIMEOFDAY
-int gettimeofday (struct timeval *, struct timezone *tz);
+    int             gettimeofday(struct timeval *, struct timezone *tz);
 #endif
 #ifndef HAVE_STRCASECMP
-int strcasecmp(const char *s1, const char *s2);
+    int             strcasecmp(const char *s1, const char *s2);
 #endif
 #ifndef HAVE_STRNCASECMP
-int strncasecmp(const char *s1, const char *s2, size_t n);
+    int             strncasecmp(const char *s1, const char *s2, size_t n);
 #endif
 
-char * winsock_startup (void);
-void winsock_cleanup (void);
+    char           *winsock_startup(void);
+    void            winsock_cleanup(void);
 
 #define SOCK_STARTUP winsock_startup()
 #define SOCK_CLEANUP winsock_cleanup()
 
-#else /* !WIN32 */
+#else                           /* !WIN32 */
 
 #define SOCK_STARTUP
 #define SOCK_CLEANUP
 
-#endif /* WIN32 */
+#endif                          /* WIN32 */
 
-in_addr_t get_myaddr (void);
-long get_uptime (void);
+    in_addr_t       get_myaddr(void);
+    long            get_uptime(void);
 
 #ifndef HAVE_STRDUP
-char *strdup (const char *);
+    char           *strdup(const char *);
 #endif
 #ifndef HAVE_SETENV
-int setenv (const char *, const char *, int);
+    int             setenv(const char *, const char *, int);
 #endif
- 
-int calculate_time_diff(struct timeval *, struct timeval *);
+
+    int             calculate_time_diff(struct timeval *,
+                                        struct timeval *);
 
 #ifndef HAVE_STRCASESTR
-char *strcasestr(const char *, const char *);
+    char           *strcasestr(const char *, const char *);
 #endif
 #ifndef HAVE_STRTOL
-long strtol(const char *, char **, int);
+    long            strtol(const char *, char **, int);
 #endif
 #ifndef HAVE_STRTOUL
-unsigned long strtoul(const char *, char **, int);
+    unsigned long   strtoul(const char *, char **, int);
 #endif
 #ifndef HAVE_SNPRINTF
-int snprintf(char *, size_t, const char *, ...);
+    int             snprintf(char *, size_t, const char *, ...);
 #endif
 
-int mkdirhier(const char *pathname, mode_t mode, int skiplast);
+    int             mkdirhier(const char *pathname, mode_t mode,
+                              int skiplast);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* SNMP_SYSTEM_H */
+#endif                          /* SNMP_SYSTEM_H */

@@ -1,6 +1,6 @@
 #include "generic.h"
 
-typedef int ssize_t;
+typedef int     ssize_t;
 
 #undef IP_FORWARDING_SYMBOL
 #define IP_FORWARDING_SYMBOL "ip_forwarding"

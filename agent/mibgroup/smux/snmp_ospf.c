@@ -1,4 +1,6 @@
-/* $Id$ */
+/*
+ * $Id$ 
+ */
 
 /*
  * Smux module authored by Rohit Dube.
@@ -49,9 +51,10 @@
 #include "smux.h"
 #include "snmp_ospf.h"
 
-static oid max_ospf_mib[] = {1, 3, 6, 1, 2, 1, 14, 14, 1, 6, 0};
-static oid min_ospf_mib[] = {1, 3, 6, 1, 2, 1, 14, 1, 1, 0, 0, 0, 0};
-extern u_char smux_type;
+static oid      max_ospf_mib[] = { 1, 3, 6, 1, 2, 1, 14, 14, 1, 6, 0 };
+static oid      min_ospf_mib[] =
+    { 1, 3, 6, 1, 2, 1, 14, 1, 1, 0, 0, 0, 0 };
+extern u_char   smux_type;
 
 struct variable13 ospf_variables[] = {
     {ospfRouterId, ASN_IPADDRESS, RWRITE, var_ospf, 3, {1, 1, 1}},
@@ -65,7 +68,8 @@ struct variable13 ospf_variables[] = {
     {ospfOriginateNewLsas, ASN_COUNTER, RONLY, var_ospf, 3, {1, 1, 9}},
     {ospfRxNewLsas, ASN_COUNTER, RONLY, var_ospf, 3, {1, 1, 10, 0}},
     {ospfExtLsdbLimit, ASN_INTEGER, RWRITE, var_ospf, 3, {1, 1, 11}},
-    {ospfMulticastExtensions, ASN_INTEGER, RWRITE, var_ospf, 3, {1, 1, 12}},
+    {ospfMulticastExtensions, ASN_INTEGER, RWRITE, var_ospf, 3,
+     {1, 1, 12}},
     {ospfAreaId, ASN_IPADDRESS, RONLY, var_ospf, 3, {2, 1, 1}},
     {ospfAuthType, ASN_INTEGER, RWRITE, var_ospf, 3, {2, 1, 2}},
     {ospfImportAsExtern, ASN_INTEGER, RWRITE, var_ospf, 3, {2, 1, 3}},
@@ -111,23 +115,29 @@ struct variable13 ospf_variables[] = {
     {ospfIfRtrDeadInterval, ASN_INTEGER, RWRITE, var_ospf, 3, {7, 1, 10}},
     {ospfIfPollInterval, ASN_INTEGER, RWRITE, var_ospf, 3, {7, 1, 11}},
     {ospfIfState, ASN_INTEGER, RONLY, var_ospf, 3, {7, 1, 12}},
-    {ospfIfDesignatedRouter, ASN_IPADDRESS, RONLY, var_ospf, 3, {7, 1, 13}},
-    {ospfIfBackupDesignatedRouter, ASN_IPADDRESS, RONLY, var_ospf, 3, {7, 1, 14}},
+    {ospfIfDesignatedRouter, ASN_IPADDRESS, RONLY, var_ospf, 3,
+     {7, 1, 13}},
+    {ospfIfBackupDesignatedRouter, ASN_IPADDRESS, RONLY, var_ospf, 3,
+     {7, 1, 14}},
     {ospfIfEvents, ASN_COUNTER, RONLY, var_ospf, 3, {7, 1, 15}},
     {ospfIfAuthKey, ASN_OCTET_STR, RWRITE, var_ospf, 3, {7, 1, 16}},
     {ospfIfStatus, ASN_INTEGER, RWRITE, var_ospf, 3, {7, 1, 17}},
-    {ospfIfMulticastForwarding, ASN_INTEGER, RWRITE, var_ospf, 3, {7, 1, 18}},
+    {ospfIfMulticastForwarding, ASN_INTEGER, RWRITE, var_ospf, 3,
+     {7, 1, 18}},
     {ospfIfMetricIpAddress, ASN_IPADDRESS, RONLY, var_ospf, 3, {8, 1, 1}},
-    {ospfIfMetricAddressLessIf, ASN_INTEGER, RONLY, var_ospf, 3, {8, 1, 2}},
+    {ospfIfMetricAddressLessIf, ASN_INTEGER, RONLY, var_ospf, 3,
+     {8, 1, 2}},
     {ospfIfMetricTOS, ASN_INTEGER, RONLY, var_ospf, 3, {8, 1, 3}},
     {ospfIfMetricValue, ASN_INTEGER, RWRITE, var_ospf, 3, {8, 1, 4}},
     {ospfIfMetricStatus, ASN_INTEGER, RWRITE, var_ospf, 3, {8, 1, 5}},
     {ospfVirtIfAreaId, ASN_IPADDRESS, RONLY, var_ospf, 3, {9, 1, 1}},
     {ospfVirtIfNeighbor, ASN_IPADDRESS, RONLY, var_ospf, 3, {9, 1, 2}},
     {ospfVirtIfTransitDelay, ASN_INTEGER, RWRITE, var_ospf, 3, {9, 1, 3}},
-    {ospfVirtIfRetransInterval, ASN_INTEGER, RWRITE, var_ospf, 3, {9, 1, 4}},
+    {ospfVirtIfRetransInterval, ASN_INTEGER, RWRITE, var_ospf, 3,
+     {9, 1, 4}},
     {ospfVirtIfHelloInterval, ASN_INTEGER, RWRITE, var_ospf, 3, {9, 1, 5}},
-    {ospfVirtIfRtrDeadInterval, ASN_INTEGER, RWRITE, var_ospf, 3, {9, 1, 6}},
+    {ospfVirtIfRtrDeadInterval, ASN_INTEGER, RWRITE, var_ospf, 3,
+     {9, 1, 6}},
     {ospfVirtIfState, ASN_INTEGER, RONLY, var_ospf, 3, {9, 1, 7}},
     {ospfVirtIfEvents, ASN_COUNTER, RONLY, var_ospf, 3, {9, 1, 8}},
     {ospfVirtIfAuthKey, ASN_OCTET_STR, RWRITE, var_ospf, 3, {9, 1, 9}},
@@ -155,105 +165,118 @@ struct variable13 ospf_variables[] = {
     {ospfExtLsdbSequence, ASN_INTEGER, RONLY, var_ospf, 3, {12, 1, 4}},
     {ospfExtLsdbAge, ASN_INTEGER, RONLY, var_ospf, 3, {12, 1, 5}},
     {ospfExtLsdbChecksum, ASN_INTEGER, RONLY, var_ospf, 3, {12, 1, 6}},
-    {ospfExtLsdbAdvertisement, ASN_OCTET_STR, RONLY, var_ospf, 3, {12, 1, 7}},
-    {ospfAreaAggregateAreaID, ASN_IPADDRESS, RONLY, var_ospf, 3, {14, 1, 1}},
-    {ospfAreaAggregateLsdbType, ASN_INTEGER, RONLY, var_ospf, 3, {14, 1, 2}},
+    {ospfExtLsdbAdvertisement, ASN_OCTET_STR, RONLY, var_ospf, 3,
+     {12, 1, 7}},
+    {ospfAreaAggregateAreaID, ASN_IPADDRESS, RONLY, var_ospf, 3,
+     {14, 1, 1}},
+    {ospfAreaAggregateLsdbType, ASN_INTEGER, RONLY, var_ospf, 3,
+     {14, 1, 2}},
     {ospfAreaAggregateNet, ASN_IPADDRESS, RONLY, var_ospf, 3, {14, 1, 3}},
-    {ospfAreaAggregateMask, ASN_IPADDRESS, RWRITE, var_ospf, 3, {14, 1, 4}},
-    {ospfAreaAggregateStatus, ASN_INTEGER, RWRITE, var_ospf, 3, {14, 1, 5}},
+    {ospfAreaAggregateMask, ASN_IPADDRESS, RWRITE, var_ospf, 3,
+     {14, 1, 4}},
+    {ospfAreaAggregateStatus, ASN_INTEGER, RWRITE, var_ospf, 3,
+     {14, 1, 5}},
     {ospfAreaAggregateEffect, ASN_INTEGER, RWRITE, var_ospf, 3, {14, 1, 6}}
 };
 
-oid ospf_variables_oid[] = { MIB, 14 };
+oid             ospf_variables_oid[] = { MIB, 14 };
 
-void init_snmp_ospf( void )
+void
+init_snmp_ospf(void)
 {
-    REGISTER_MIB("smux/snmp_ospf", ospf_variables, variable13, ospf_variables_oid);
+    REGISTER_MIB("smux/snmp_ospf", ospf_variables, variable13,
+                 ospf_variables_oid);
 }
 
-u_char *
+u_char         *
 var_ospf(struct variable *vp,
-	 oid *name,
-	 int *length,
-	 int exact,
-	 int *var_len,
-	 WriteMethod **write_method)
+         oid * name,
+         int *length, int exact, int *var_len, WriteMethod ** write_method)
 {
-	u_char *var;
-	int result;
+    u_char         *var;
+    int             result;
 
-    DEBUGMSGTL(("smux/snmp_ospf", "[var_ospf] var len %d, oid requested Len %d-",
-	*var_len, *length));
+    DEBUGMSGTL(("smux/snmp_ospf",
+                "[var_ospf] var len %d, oid requested Len %d-", *var_len,
+                *length));
     DEBUGMSGOID(("smux/snmp_ospf", name, *length));
-    DEBUGMSG(("smux/snmp_ospf","\n"));
-        
-	/* 
-	 * Pass on the request to Gated.
-	 * If the request sent out was a get next, check to see if
-	 * it lies in the ospf range. If it doesn't, return NULL.
-	 * In either case, make sure that errors are checked on the
-	 * returned packets.
-	 */
+    DEBUGMSG(("smux/snmp_ospf", "\n"));
 
-	/* No writes for now */
-	*write_method = NULL;
+    /*
+     * Pass on the request to Gated.
+     * If the request sent out was a get next, check to see if
+     * it lies in the ospf range. If it doesn't, return NULL.
+     * In either case, make sure that errors are checked on the
+     * returned packets.
+     */
 
-	/*
-	 * Donot allow access to the peer stuff as it crashes gated.
-	 * However A GetNext on the last 23.3.1.9 variable will force gated into
-	 * the peer stuff and cause it to crash.
-	 * The only way to fix this is to either solve the Gated problem, or 
-	 * remove the peer variables from Gated itself and cause it to return
-	 * NULL at the crossing. Currently doing the later.
-	 */
+    /*
+     * No writes for now 
+     */
+    *write_method = NULL;
 
-	/* Reject GET and GETNEXT for anything above ospfifconf range */
-	result = snmp_oid_compare(name, *length, max_ospf_mib, 
-		         sizeof(max_ospf_mib)/sizeof(u_int));
+    /*
+     * Donot allow access to the peer stuff as it crashes gated.
+     * However A GetNext on the last 23.3.1.9 variable will force gated into
+     * the peer stuff and cause it to crash.
+     * The only way to fix this is to either solve the Gated problem, or 
+     * remove the peer variables from Gated itself and cause it to return
+     * NULL at the crossing. Currently doing the later.
+     */
 
-	if (result >= 0) {
-                DEBUGMSGTL(("smux/snmp_ospf", "Over shot\n"));
-		return NULL;
-	}
+    /*
+     * Reject GET and GETNEXT for anything above ospfifconf range 
+     */
+    result = snmp_oid_compare(name, *length, max_ospf_mib,
+                              sizeof(max_ospf_mib) / sizeof(u_int));
 
-	/* for GETs we need to be in the ospf range so reject anything below */
-	result = snmp_oid_compare(name, *length, min_ospf_mib, 
-			 sizeof(min_ospf_mib)/sizeof(u_int));
-	if (exact && (result < 0)) {
-                DEBUGMSGTL(("smux/snmp_ospf",
-                            "Exact but doesn't match length %d, size %d\n",
-                            *length, sizeof(min_ospf_mib)));
-		return NULL;
-	}
+    if (result >= 0) {
+        DEBUGMSGTL(("smux/snmp_ospf", "Over shot\n"));
+        return NULL;
+    }
 
-	/* 
-	 * On return, 'var' points to the value returned which is of length
-	 * '*var_len'. 'name' points to the new (same as the one passed in for 
-	 * GETs) oid which has 'length' suboids.
-	 * 'smux_type' contains the type of the variable.
-	 */
-	var = smux_snmp_process(exact, name, length, var_len);
+    /*
+     * for GETs we need to be in the ospf range so reject anything below 
+     */
+    result = snmp_oid_compare(name, *length, min_ospf_mib,
+                              sizeof(min_ospf_mib) / sizeof(u_int));
+    if (exact && (result < 0)) {
+        DEBUGMSGTL(("smux/snmp_ospf",
+                    "Exact but doesn't match length %d, size %d\n",
+                    *length, sizeof(min_ospf_mib)));
+        return NULL;
+    }
 
-    DEBUGMSGTL(("smux/snmp_ospf", "[var_ospf] var len %d, oid obtained Len %d-",
-	*var_len, *length));
+    /*
+     * On return, 'var' points to the value returned which is of length
+     * '*var_len'. 'name' points to the new (same as the one passed in for 
+     * GETs) oid which has 'length' suboids.
+     * 'smux_type' contains the type of the variable.
+     */
+    var = smux_snmp_process(exact, name, length, var_len);
+
+    DEBUGMSGTL(("smux/snmp_ospf",
+                "[var_ospf] var len %d, oid obtained Len %d-", *var_len,
+                *length));
     DEBUGMSGOID(("smux/snmp_ospf", name, *length));
-    DEBUGMSG(("smux/snmp_ospf","\n"));
+    DEBUGMSG(("smux/snmp_ospf", "\n"));
 
-	vp->type = smux_type;
+    vp->type = smux_type;
 
-	/* XXX Need a mechanism to return errors in gated's responses */
+    /*
+     * XXX Need a mechanism to return errors in gated's responses 
+     */
 
-	if (var == NULL)
-		return NULL;
+    if (var == NULL)
+        return NULL;
 
-	/* 
-	 * Any resullt returned should be within the ospf tree.
-	 * ospf_mib - static u_int ospf_mib[] = {1, 3, 6, 1, 2, 1, 14};
-	 */
-	if (memcmp(ospf_mib, name, sizeof(ospf_mib)) != 0) {
-		return NULL;
-	}
-	else {
-		return var;
-	}
+    /*
+     * Any resullt returned should be within the ospf tree.
+     * ospf_mib - static u_int ospf_mib[] = {1, 3, 6, 1, 2, 1, 14};
+     */
+    if (memcmp(ospf_mib, name, sizeof(ospf_mib)) != 0) {
+        return NULL;
+    } else {
+        return var;
+    }
 }

@@ -4,8 +4,12 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 
-/* uncomment if you don't have in_addr_t in netinet/in.h */
-/* typedef u_int in_addr_t; */
+/*
+ * uncomment if you don't have in_addr_t in netinet/in.h 
+ */
+/*
+ * typedef u_int in_addr_t; 
+ */
 
 #ifndef IN_UCD_SNMP_SOURCE
 #include <ucd-snmp/asn1.h>
@@ -35,4 +39,4 @@
 #include "read_config.h"
 #include "tools.h"
 #include "system.h"
-#endif /* IN_UCD_SNMP_SOURCE */
+#endif                          /* IN_UCD_SNMP_SOURCE */

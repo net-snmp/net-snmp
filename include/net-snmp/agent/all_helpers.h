@@ -9,13 +9,17 @@
 #include <net-snmp/agent/read_only.h>
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/bulk_to_next.h>
-/* #include <net-snmp/agent/set_helper.h> */
+/*
+ * #include <net-snmp/agent/set_helper.h> 
+ */
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_data.h>
 #include <net-snmp/agent/table_dataset.h>
 #include <net-snmp/agent/table_iterator.h>
-/* #include <net-snmp/agent/table_array.h> */
+/*
+ * #include <net-snmp/agent/table_array.h> 
+ */
 
-void netsnmp_init_helpers(void);
+void            netsnmp_init_helpers(void);
 
-#endif /* ALL_HANDLERS_H */
+#endif                          /* ALL_HANDLERS_H */

@@ -4,4 +4,3 @@
 #undef bsdlike
 #undef MBSTAT_SYMBOL
 #undef TOTAL_MEMORY_SYMBOL
-

@@ -8,8 +8,7 @@
 #include "mibdefs.h"
 #include <regex.h>
 
-struct logmatchstat
-{
+struct logmatchstat {
     char            filename[256];
     char            regEx[256];
     char            name[256];
@@ -24,14 +23,17 @@ struct logmatchstat
     int             thisIndex;
     int             frequency;
 };
-void init_logmatch(void);
+void            init_logmatch(void);
 
 
-/* config logmatch parsing routines */
-void      logmatch_free_config (void);
-void      logmatch_parse_config (const char *, char *);
-void      updateLogmatch_Scheduled(unsigned int, struct logmatchstat * );
-extern    FindVarMethod var_logmatch_table;
+/*
+ * config logmatch parsing routines 
+ */
+void            logmatch_free_config(void);
+void            logmatch_parse_config(const char *, char *);
+void            updateLogmatch_Scheduled(unsigned int,
+                                         struct logmatchstat *);
+extern FindVarMethod var_logmatch_table;
 
 
 
@@ -52,21 +54,4 @@ extern    FindVarMethod var_logmatch_table;
 #define LOGMATCH_ERROR      100
 #define LOGMATCH_MSG        101
 
-#endif /* _MIBGROUP_LOGMATCH_H */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif                          /* _MIBGROUP_LOGMATCH_H */

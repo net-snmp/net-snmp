@@ -7,6 +7,6 @@
 
 #include "mibdefs.h"
 
-void init_memory_solaris2(void);
+void            init_memory_solaris2(void);
 
-#endif /* _MIBGROUP_MEMORY_SOLARIS2_H */
+#endif                          /* _MIBGROUP_MEMORY_SOLARIS2_H */

@@ -1,7 +1,7 @@
 /*
  * tunnel.h --
  *
- *	Interface of the TUNNEL-MIB implementation.
+ *      Interface of the TUNNEL-MIB implementation.
  *
  * Copyright (c) 2000 Frank Strauss <strauss@ibr.cs.tu-bs.de>
  *
@@ -25,15 +25,15 @@
 #ifndef _MIBGROUP_TUNNEL_H
 #define _MIBGROUP_TUNNEL_H
 
-void init_tunnel(void);
-void deinit_tunnel(void);
+void            init_tunnel(void);
+void            deinit_tunnel(void);
 
-unsigned char *var_tunnelIfEntry(struct variable *, oid *, size_t *,
-				 int, size_t *,
-				 WriteMethod **write_method);
+unsigned char  *var_tunnelIfEntry(struct variable *, oid *, size_t *,
+                                  int, size_t *,
+                                  WriteMethod ** write_method);
 
-unsigned char *var_tunnelConfigEntry(struct variable *, oid *, size_t *,
-				     int, size_t *,
-				     WriteMethod **write_method);
+unsigned char  *var_tunnelConfigEntry(struct variable *, oid *, size_t *,
+                                      int, size_t *,
+                                      WriteMethod ** write_method);
 
-#endif /* _MIBGROUP_TUNNEL_H */
+#endif                          /* _MIBGROUP_TUNNEL_H */

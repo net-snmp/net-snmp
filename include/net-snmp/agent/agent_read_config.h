@@ -6,20 +6,21 @@
 #define _AGENT_READ_CONFIG_H
 
 #ifdef __cplusplus
-extern "C" {
+extern          "C" {
 #endif
 
-void init_agent_read_config (const char *);
-void update_config (void);
-void snmpd_register_config_handler (const char *,
-                                    void (*parser)(const char *, char *),
-                                    void (*releaser) (void),
-                                    const char *);
-void snmpd_unregister_config_handler (const char *);
-void snmpd_store_config (const char *);
+    void            init_agent_read_config(const char *);
+    void            update_config(void);
+    void            snmpd_register_config_handler(const char *,
+                                                  void (*parser) (const
+                                                                  char *,
+                                                                  char *),
+                                                  void (*releaser) (void),
+                                                  const char *);
+    void            snmpd_unregister_config_handler(const char *);
+    void            snmpd_store_config(const char *);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* _AGENT_READ_CONFIG_H */
+#endif                          /* _AGENT_READ_CONFIG_H */

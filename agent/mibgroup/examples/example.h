@@ -3,7 +3,9 @@
  *
  */
 
-/* Don't include ourselves twice */
+/*
+ * Don't include ourselves twice 
+ */
 #ifndef _MIBGROUP_EXAMPLE_H
 #define _MIBGROUP_EXAMPLE_H
 
@@ -22,11 +24,11 @@ config_require(util_funcs)
      * Function prototypes are provided for the callback routine ('FindVarMethod')
      *  and writeable object methods ('WriteMethod').
      */
-extern void		init_example(void);
-extern FindVarMethod	var_example;
-extern WriteMethod	write_exampleint;
-extern WriteMethod	write_exampletrap;
-extern WriteMethod	write_exampletrap2;
+     extern void     init_example(void);
+     extern FindVarMethod var_example;
+     extern WriteMethod write_exampleint;
+     extern WriteMethod write_exampletrap;
+     extern WriteMethod write_exampletrap2;
 
 
     /*
@@ -45,13 +47,13 @@ extern WriteMethod	write_exampletrap2;
      */
 
 #define	EXAMPLESTRING		1
-#define EXAMPLEINTEGER		21  
+#define EXAMPLEINTEGER		21
 #define	EXAMPLEOBJECTID         22
 #define EXAMPLETIMETICKS	3
 #define	EXAMPLEIPADDRESS        4
-#define EXAMPLECOUNTER		5  
+#define EXAMPLECOUNTER		5
 #define	EXAMPLEGAUGE            6
 #define	EXAMPLETRIGGERTRAP      7
 #define	EXAMPLETRIGGERTRAP2     8
 
-#endif /* _MIBGROUP_EXAMPLE_H */
+#endif                          /* _MIBGROUP_EXAMPLE_H */

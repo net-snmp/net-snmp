@@ -10,15 +10,13 @@
 config_require(mibII/interfaces mibII/ipAddr mibII/at mibII/var_route mibII/route_write)
 config_arch_require(solaris2, kernel_sunos5)
 config_arch_require(linux, mibII/kernel_linux)
-
 #include "var_route.h"
 #include "route_write.h"
-
-extern void	init_ip (void);
+extern void     init_ip(void);
 extern FindVarMethod var_ip;
 
 #ifdef USING_MIBII_AT_MODULE
-#include "at.h"		/* for var_atEntry() */
+#include "at.h"                 /* for var_atEntry() */
 #endif
 
 
@@ -68,4 +66,4 @@ extern FindVarMethod var_ip;
 #define IPMEDIANETADDRESS	2
 #define IPMEDIATYPE		3
 
-#endif /* _MIBGROUP_IP_H */
+#endif                          /* _MIBGROUP_IP_H */

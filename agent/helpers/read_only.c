@@ -29,35 +29,38 @@
  *  handler chain.
  */
 netsnmp_mib_handler *
-netsnmp_get_read_only_handler(void) {
+netsnmp_get_read_only_handler(void)
+{
     return netsnmp_create_handler("read_only", netsnmp_read_only_helper);
 }
 
 /** @internal Implements the read_only handler */
 int
-netsnmp_read_only_helper(
-    netsnmp_mib_handler               *handler,
-    netsnmp_handler_registration      *reginfo,
-    netsnmp_agent_request_info        *reqinfo,
-    netsnmp_request_info              *requests) {
+netsnmp_read_only_helper(netsnmp_mib_handler *handler,
+                         netsnmp_handler_registration *reginfo,
+                         netsnmp_agent_request_info *reqinfo,
+                         netsnmp_request_info *requests)
+{
 
     DEBUGMSGTL(("helper:read_only", "Got request\n"));
 
-    switch(reqinfo->mode) {
-        
-        case MODE_SET_RESERVE1:
-        case MODE_SET_RESERVE2:
-        case MODE_SET_ACTION:
-        case MODE_SET_COMMIT:
-        case MODE_SET_FREE:
-        case MODE_SET_UNDO:
-            netsnmp_set_all_requests_error(reqinfo, requests, SNMP_ERR_NOTWRITABLE);
-            return SNMP_ERR_NOERROR;
-            
-        default:
-            return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
+    switch (reqinfo->mode) {
+
+    case MODE_SET_RESERVE1:
+    case MODE_SET_RESERVE2:
+    case MODE_SET_ACTION:
+    case MODE_SET_COMMIT:
+    case MODE_SET_FREE:
+    case MODE_SET_UNDO:
+        netsnmp_set_all_requests_error(reqinfo, requests,
+                                       SNMP_ERR_NOTWRITABLE);
+        return SNMP_ERR_NOERROR;
+
+    default:
+        return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+                                         requests);
     }
-    return SNMP_ERR_GENERR; /* should never get here */
+    return SNMP_ERR_GENERR;     /* should never get here */
 }
 
 /** initializes the read_only helper which then registers a read_only
@@ -65,7 +68,8 @@ netsnmp_read_only_helper(
  *  use.
  */
 void
-netsnmp_init_read_only_helper(void) 
+netsnmp_init_read_only_helper(void)
 {
-    netsnmp_register_handler_by_name("read_only", netsnmp_get_read_only_handler());
+    netsnmp_register_handler_by_name("read_only",
+                                     netsnmp_get_read_only_handler());
 }

@@ -2,7 +2,9 @@
 
 #define CHECK_RT_FLAGS 1
 
-/* udp_inpcb list symbol */
+/*
+ * udp_inpcb list symbol 
+ */
 #undef INP_NEXT_SYMBOL
 #define INP_NEXT_SYMBOL inp_list.le_next
 

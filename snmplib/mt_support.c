@@ -1,5 +1,7 @@
 
-/* mt_support.c - multi-thread resource locking support */
+/*
+ * mt_support.c - multi-thread resource locking support 
+ */
 /*
  * Author: Markku Laukkanen
  * Created: 6-Sep-1999
@@ -13,119 +15,128 @@
 #include <net-snmp/library/mt_support.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern          "C" {
 #endif
 
 #ifdef NS_REENTRANT
 
-static
-mutex_type s_res[MT_MAX_IDS][MT_LIB_MAXIMUM];  /* locking structures */
+    static
+    mutex_type      s_res[MT_MAX_IDS][MT_LIB_MAXIMUM];  /* locking structures */
 
-static mutex_type * _mt_res(int groupID, int resourceID)
-{
-    if (groupID < 1) return 0;
-    if (groupID >= MT_MAX_IDS) return 0;
-    if (resourceID < 1) return 0;
-    if (resourceID >= MT_LIB_MAXIMUM) return 0;
-    return (&s_res[groupID][resourceID]);
-}
-
-static
-int snmp_res_init_mutex(mutex_type * mutex)
-{    
-    int rc = 0;
+    static mutex_type *_mt_res(int groupID, int resourceID) {
+        if (groupID < 1)
+            return 0;
+        if (groupID >= MT_MAX_IDS)
+            return 0;
+        if (resourceID < 1)
+            return 0;
+        if (resourceID >= MT_LIB_MAXIMUM)
+            return 0;
+        return (&s_res[groupID][resourceID]);
+    }
+    static
+    int             snmp_res_init_mutex(mutex_type * mutex) {
+        int             rc = 0;
 #if HAVE_PTHREAD_H
-    rc = pthread_mutex_init(mutex, MT_MUTEX_INIT_DEFAULT);
+        rc = pthread_mutex_init(mutex, MT_MUTEX_INIT_DEFAULT);
 #elif defined(WIN32)
-    InitializeCriticalSection(mutex);
+        InitializeCriticalSection(mutex);
 #endif
 
-    return rc;
-}
+        return rc;
+    }
 
-int snmp_res_init(void)
-{    
-    int ii, jj;
-    int rc = 0;
-    mutex_type *mutex;
+    int             snmp_res_init(void) {
+        int             ii, jj;
+        int             rc = 0;
+        mutex_type     *mutex;
 
-  for (jj = 0; (0 == rc) && (jj < MT_MAX_IDS); jj++)
-  for (ii = 0; (0 == rc) && (ii < MT_LIB_MAXIMUM); ii++)
-  {
-    mutex = _mt_res(jj, ii);
-    if (!mutex) continue;
-    rc = snmp_res_init_mutex( mutex );
-  }
+        for (jj = 0; (0 == rc) && (jj < MT_MAX_IDS); jj++)
+            for (ii = 0; (0 == rc) && (ii < MT_LIB_MAXIMUM); ii++) {
+                mutex = _mt_res(jj, ii);
+                if (!mutex)
+                    continue;
+                rc = snmp_res_init_mutex(mutex);
+            }
 
-    return rc;
-}
+        return rc;
+    }
 
-int snmp_res_destroy_mutex(int groupID, int resourceID)
-{    
-    int rc = 0;
-    mutex_type *mutex = _mt_res(groupID, resourceID);
-    if (!mutex) return EFAULT;
-
-#if HAVE_PTHREAD_H
-    rc = pthread_mutex_destroy(mutex);
-#elif defined(WIN32)
-    DeleteCriticalSection(mutex);
-#endif
-
-    return rc;
-}
-    
-int snmp_res_lock(int groupID, int resourceID)
-{
-    int rc = 0;
-    mutex_type *mutex = _mt_res(groupID, resourceID);
-    if (!mutex) return EFAULT;
+    int             snmp_res_destroy_mutex(int groupID, int resourceID) {
+        int             rc = 0;
+        mutex_type     *mutex = _mt_res(groupID, resourceID);
+        if (!mutex)
+            return EFAULT;
 
 #if HAVE_PTHREAD_H
-    rc = pthread_mutex_lock(mutex);
+        rc = pthread_mutex_destroy(mutex);
 #elif defined(WIN32)
-    EnterCriticalSection(mutex);
+        DeleteCriticalSection(mutex);
 #endif
 
-    return rc;
-}
+        return rc;
+    }
 
-int snmp_res_unlock(int groupID, int resourceID)
-{
-    int rc = 0;
-    mutex_type *mutex = _mt_res(groupID, resourceID);
-    if (!mutex) return EFAULT;
+    int             snmp_res_lock(int groupID, int resourceID) {
+        int             rc = 0;
+        mutex_type     *mutex = _mt_res(groupID, resourceID);
+        if (!mutex)
+            return EFAULT;
 
 #if HAVE_PTHREAD_H
-    rc = pthread_mutex_unlock(mutex);
+        rc = pthread_mutex_lock(mutex);
 #elif defined(WIN32)
-    LeaveCriticalSection(mutex);
+        EnterCriticalSection(mutex);
 #endif
 
-    return rc;
-}
+        return rc;
+    }
+
+    int             snmp_res_unlock(int groupID, int resourceID) {
+        int             rc = 0;
+        mutex_type     *mutex = _mt_res(groupID, resourceID);
+        if (!mutex)
+            return EFAULT;
+
+#if HAVE_PTHREAD_H
+        rc = pthread_mutex_unlock(mutex);
+#elif defined(WIN32)
+        LeaveCriticalSection(mutex);
+#endif
+
+        return rc;
+    }
 
 
-#else  /* !NS_REENTRANT */
+#else                           /* !NS_REENTRANT */
 
 #ifdef WIN32
 
-/* Provide "do nothing" targets for Release (.DLL) builds. */
+    /*
+     * Provide "do nothing" targets for Release (.DLL) builds. 
+     */
 #undef snmp_res_init
 #undef snmp_res_lock
 #undef snmp_res_unlock
 #undef snmp_res_destroy_mutex
 
-int snmp_res_init(void) { return 0; }
-int snmp_res_lock(int groupID, int resourceID) { return 0; }
-int snmp_res_unlock(int groupID, int resourceID) { return 0; }
-int snmp_res_destroy_mutex(int groupID, int resourceID) { return 0; }
-#endif /* !WIN32 */
+    int             snmp_res_init(void) {
+        return 0;
+    }
+    int             snmp_res_lock(int groupID, int resourceID) {
+        return 0;
+    }
+    int             snmp_res_unlock(int groupID, int resourceID) {
+        return 0;
+    }
+    int             snmp_res_destroy_mutex(int groupID, int resourceID) {
+        return 0;
+    }
+#endif                          /* !WIN32 */
 
-#endif /* !NS_REENTRANT */
+#endif                          /* !NS_REENTRANT */
 
 
 #ifdef __cplusplus
 };
 #endif
-

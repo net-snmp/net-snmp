@@ -2,26 +2,32 @@
 #define AGENTX_PROTOCOL_H
 
 #ifdef __cplusplus
-extern "C" {
+extern          "C" {
 #endif
-/*
- *  Definitions for Agent Extensibility Protocol (RFC 2257)
- *
- */
+    /*
+     *  Definitions for Agent Extensibility Protocol (RFC 2257)
+     *
+     */
 
 #define AGENTX_PORT	705
 #define AGENTX_SOCKET	"/var/agentx/master"
 
-/* AgentX versions */
-/* Use values distinct from those used to represent SNMP versions */
+    /*
+     * AgentX versions 
+     */
+    /*
+     * Use values distinct from those used to represent SNMP versions 
+     */
 
-#define AGENTX_VERSION_BASE	192		/* Binary: 11xxxxxx */
+#define AGENTX_VERSION_BASE	192     /* Binary: 11xxxxxx */
 #define AGENTX_VERSION_1	(AGENTX_VERSION_BASE | 0x1)
 
 #define IS_AGENTX_VERSION(v)	(((v)&AGENTX_VERSION_BASE) == AGENTX_VERSION_BASE)
 
 
-/* PDU types in AgentX */
+    /*
+     * PDU types in AgentX 
+     */
 #define AGENTX_MSG_OPEN       ((u_char)1)
 #define AGENTX_MSG_CLOSE      ((u_char)2)
 #define AGENTX_MSG_REGISTER   ((u_char)3)
@@ -42,7 +48,9 @@ extern "C" {
 #define AGENTX_MSG_RESPONSE    ((u_char)18)
 
 
-/* Error codes from RFC 2257 */
+    /*
+     * Error codes from RFC 2257 
+     */
 #define AGENTX_ERR_OPEN_FAILED          (256)
 #define AGENTX_ERR_NOT_OPEN             (257)
 #define AGENTX_ERR_INDEX_WRONG_TYPE     (258)
@@ -54,17 +62,23 @@ extern "C" {
 #define AGENTX_ERR_UNKNOWN_REGISTRATION (264)
 #define AGENTX_ERR_UNKNOWN_AGENTCAPS    (265)
 
-/* added in 1999 revision */
+    /*
+     * added in 1999 revision 
+     */
 #define AGENTX_ERR_NOERROR		SNMP_ERR_NOERROR
 #define AGENTX_ERR_PARSE_FAILED         (266)
 #define AGENTX_ERR_REQUEST_DENIED       (267)
 #define AGENTX_ERR_PROCESSING_ERROR     (268)
 
-/* Message processing models */
+    /*
+     * Message processing models 
+     */
 #define AGENTX_MP_MODEL_AGENTXv1        (257)
 
 
-/* PDU Flags - see also 'UCD_MSG_FLAG_xxx' in snmp.h */
+    /*
+     * PDU Flags - see also 'UCD_MSG_FLAG_xxx' in snmp.h 
+     */
 #define AGENTX_MSG_FLAG_INSTANCE_REGISTER     0x01
 #define AGENTX_MSG_FLAG_NEW_INSTANCE          0x02
 #define AGENTX_MSG_FLAG_ANY_INSTANCE          0x04
@@ -73,19 +87,24 @@ extern "C" {
 
 #define AGENTX_MSG_FLAGS_MASK                 0xff
 
-/* Session Flags - see also 'UCD_FLAGS_xxx' in snmp.h */
+    /*
+     * Session Flags - see also 'UCD_FLAGS_xxx' in snmp.h 
+     */
 #define AGENTX_FLAGS_NETWORK_BYTE_ORDER       AGENTX_MSG_FLAG_NETWORK_BYTE_ORDER
 
 
 
-int agentx_build(netsnmp_session *, netsnmp_pdu *, u_char *, size_t *);
-int agentx_realloc_build(netsnmp_session *session, netsnmp_pdu *pdu,
-			 u_char **buf, size_t *buf_len, size_t *out_len);
-int agentx_parse(netsnmp_session *, netsnmp_pdu *, u_char *, size_t);
-int agentx_check_packet(u_char *, size_t);
+    int             agentx_build(netsnmp_session *, netsnmp_pdu *,
+                                 u_char *, size_t *);
+    int             agentx_realloc_build(netsnmp_session * session,
+                                         netsnmp_pdu *pdu, u_char ** buf,
+                                         size_t * buf_len,
+                                         size_t * out_len);
+    int             agentx_parse(netsnmp_session *, netsnmp_pdu *,
+                                 u_char *, size_t);
+    int             agentx_check_packet(u_char *, size_t);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* AGENTX_PROTOCOL_H */
+#endif                          /* AGENTX_PROTOCOL_H */

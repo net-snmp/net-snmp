@@ -26,11 +26,11 @@
 #include <net-snmp/library/getopt.h>
 
 #ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>			/* for in_addr_t */
+#include <netinet/in.h>         /* for in_addr_t */
 #endif
 #include <net-snmp/library/system.h>
 #include <net-snmp/library/tools.h>
-#include <net-snmp/library/asn1.h>		/* for counter64 */
+#include <net-snmp/library/asn1.h>      /* for counter64 */
 #include <net-snmp/library/int64.h>
 
 #include <net-snmp/library/mt_support.h>
@@ -44,4 +44,4 @@
 
 #include <net-snmp/version.h>
 
-#endif /* NET_SNMP_UTILITIES_H */
+#endif                          /* NET_SNMP_UTILITIES_H */
