@@ -230,7 +230,7 @@ var_ipRouteEntry(struct variable *vp,
   struct rt_msghdr *rtp, *saveRtp=0;
   register int Save_Valid, result;
   static int saveNameLen=0, saveExact=0;
-  static oid saveName[14], Current[14];
+  static oid saveName[MAX_OID_LEN], Current[MAX_OID_LEN];
   u_char *cp; u_char *ap;
   oid *op;
 #if 0
@@ -319,7 +319,8 @@ var_ipRouteEntry(struct variable *vp,
     /*
      *  Save in the 'cache'
      */
-    memcpy( (char *) saveName,(char *) name, *length * sizeof(oid));
+    memcpy( (char *) saveName,(char *) name,
+            SNMP_MIN(*length, MAX_OID_LEN) * sizeof(oid));
     saveName[9] = '\0';
     saveNameLen = *length;
     saveExact = exact;
@@ -520,7 +521,7 @@ var_ipRouteEntry(struct variable *vp,
      */
     register int Save_Valid, result, RtIndex;
     static int saveNameLen=0, saveExact=0, saveRtIndex=0;
-    static oid saveName[14], Current[14];
+    static oid saveName[MAX_OID_LEN], Current[MAX_OID_LEN];
     u_char *cp;
     oid *op;
 #if NEED_KLGETSA
@@ -599,7 +600,7 @@ var_ipRouteEntry(struct variable *vp,
 	/*
 	 *  Save in the 'cache'
 	 */
-	memcpy( (char *) saveName,(char *) name, *length * sizeof(oid));
+	memcpy( (char *) saveName,(char *) name, SNMP_MIN(*length,MAX_OID_LEN) * sizeof(oid));
 	saveName[9] = 0;
 	saveNameLen = *length;
 	saveExact = exact;
@@ -1295,7 +1296,7 @@ var_ipRouteEntry(struct variable *vp,
      */
     register int Save_Valid, result, RtIndex;
     static int saveNameLen=0, saveExact=0, saveRtIndex=0, rtsize = 0;
-    static oid saveName[14], Current[14];
+    static oid saveName[MAX_OID_LEN], Current[MAX_OID_LEN];
     u_char *cp;
     oid *op;
     DWORD status = NO_ERROR;
@@ -1384,7 +1385,8 @@ var_ipRouteEntry(struct variable *vp,
 	/*
 	 *  Save in the 'cache'
 	 */
-	memcpy( (char *) saveName,(char *) name, *length * sizeof(oid));
+	memcpy( (char *) saveName,(char *) name,
+                SNMP_MIN(*length,MAX_OID_LEN) * sizeof(oid));
 	saveName[9] = 0;
 	saveNameLen = *length;
 	saveExact = exact;
@@ -1632,7 +1634,7 @@ var_ipRouteEntry(struct variable *vp,
 	struct snmprt *rt;
 	static struct snmprt *savert;
 	static int saveNameLen, saveExact;
-	static oid saveName[14], Current[14];
+	static oid saveName[MAX_OID_LEN], Current[MAX_OID_LEN];
 
 #if 0
 	/*
@@ -1687,7 +1689,8 @@ var_ipRouteEntry(struct variable *vp,
 		/*
 		 *  Save in the 'cache'
 		 */
-		memcpy(saveName, name, *length * sizeof(oid));
+		memcpy(saveName, name,
+                       SNMP_MIN(*length,MAX_OID_LEN) * sizeof(oid));
 		saveName[9] = 0;
 		saveNameLen = *length;
 		saveExact = exact;
