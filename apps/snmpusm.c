@@ -458,6 +458,12 @@ main(int argc, char *argv[])
         }
 
         command = CMD_CLONEFROM;
+        setup_oid(usmUserStatus, &name_length,
+                  ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
+        longvar = RS_CREATEANDGO;
+        snmp_pdu_add_variable(pdu, usmUserStatus, name_length,
+                              ASN_INTEGER, (u_char *) & longvar,
+                              sizeof(longvar));
         setup_oid(usmUserCloneFrom, &name_length,
                   ss->contextEngineID, ss->contextEngineIDLen, argv[arg]);
 
