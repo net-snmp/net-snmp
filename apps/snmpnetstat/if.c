@@ -477,7 +477,7 @@ timerSet(int interval_seconds)
 }
 /* you can do better than this ! */
 static void
-timerPause()
+timerPause(void)
 {
 	time_t now;
 	while (time(&now) < timezup)
