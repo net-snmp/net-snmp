@@ -7,6 +7,12 @@
 #undef HAVE_SOCKET
 #undef HAVE_SIGNAL
 
+/* Define if you have the gettimeofday function.  */
+/* Only when compiling Perl module                */
+#ifdef MINGW_PERL
+#define HAVE_GETTIMEOFDAY 1
+#endif
+
 /* Define if you have the gethostbyname function.  */
 #define HAVE_GETHOSTBYNAME 1
 
