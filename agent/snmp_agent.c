@@ -48,8 +48,8 @@ SOFTWARE.
 #endif
 
 #include "asn1.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
+#include "snmp_impl.h"
 #include "snmp.h"
 #include "acl.h"
 #include "party.h"
@@ -62,26 +62,17 @@ SOFTWARE.
 #include "snmp_agent.h"
 #include "read_config.h"
 #include "mib_module_config.h"
+#include "mibgroup/vacm_vars.h"
 
 static int create_identical __P((u_char *, u_char *, int, long, long, struct packet_info *));
 static int parse_var_op_list __P((u_char *, int, u_char *, int, long *, struct packet_info *, int));
-static int snmp_access __P((u_short, int, int));
 static int snmp_vars_inc;
-static int get_community __P((u_char *, int));
 static int bulk_var_op_list __P((u_char *, int, u_char *, int, int, int, long *, struct packet_info *));
 static int create_toobig __P((u_char *, int, long, struct packet_info *));
 static int goodValue __P((u_char, int, u_char, int));
 static void setVariable __P((u_char *, u_char, int, u_char *, int));
 static void dump_var __P((oid *, int, int, void *, int));
 
-
-char	communities[NUM_COMMUNITIES][COMMUNITY_MAX_LEN] = {
-    "public", 
-    "private",
-    "regional",
-    "proxy",
-    "core"
-};
 
 static void dump_var (var_name, var_name_len, statType, statP, statLen)
     oid *var_name;
@@ -121,12 +112,24 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
     len = length;
     (void)asn_parse_header(data, &len, &type);
 
+    pi->source.sin_addr.s_addr = sourceip;
     if (type == (ASN_SEQUENCE | ASN_CONSTRUCTOR)){
         /* authenticates message and returns length if valid */
 	pi->community_len = COMMUNITY_MAX_LEN;
         data = snmp_comstr_parse(data, &length,
 			       pi->community, &pi->community_len,
                                (long *) &pi->version);
+	switch (pi->version) {
+	case SNMP_VERSION_1:
+	    pi->mp_model = SNMP_MP_MODEL_SNMPv1;
+	    pi->sec_model = SNMP_SEC_MODEL_SNMPv1;
+	    break;
+	case SNMP_VERSION_2c:
+	    pi->mp_model = SNMP_MP_MODEL_SNMPv2c;
+	    pi->sec_model = SNMP_SEC_MODEL_SNMPv2c;
+	    break;
+	}
+	pi->sec_level = SNMP_SEC_LEVEL_NOAUTH;
     } else if (type == (ASN_CONTEXT | ASN_CONSTRUCTOR | 1)){
         pi->srcPartyLength = sizeof(pi->srcParty)/sizeof(oid);
         pi->dstPartyLength = sizeof(pi->dstParty)/sizeof(oid);
@@ -150,24 +153,6 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 	ERROR_MSG("bad authentication");
 #ifdef USING_SNMP_MODULE       
 	snmp_inasnparseerrors++;
-#endif
-	return 0;
-    }
-    if (pi->version == SNMP_VERSION_1 || pi->version == SNMP_VERSION_2c){
-	pi->community_id = get_community(pi->community, pi->community_len);
-	if (pi->community_id == -1) {
-#ifdef USING_SNMP_MODULE       
-	    snmp_inbadcommunitynames++;
-#endif
-	    send_easy_trap(4);
-	    return 0;
-	}
-    } else if (pi->version == SNMP_VERSION_2p){
-	pi->community_id = 0;
-    } else {
-	ERROR_MSG("Bad Version");
-#ifdef USING_SNMP_MODULE       
-	snmp_inbadversions++;
 #endif
 	return 0;
     }
@@ -571,8 +556,7 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	/* now attempt to retrieve the variable on the local entity */
 	statP = getStatPtr(var_name, &var_name_len, &statType, &statLen, &acl,
 			   exact, &write_method, pi, &noSuchObject);
-	if (pi->version == SNMP_VERSION_1 && statP == NULL
-	      && (pi->pdutype != SET_REQ_MSG || !write_method)){
+	if (statP == NULL) {
 	    if (verbose) fprintf (stdout, "    >> noSuchName\n");
 	    else {
 		char buf [256];
@@ -584,19 +568,17 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 
 	/* Effectively, check if this variable is read-only or read-write
 	   (in the MIB sense). */
-	if (pi->pdutype == SET_REQ_MSG && pi->version == SNMP_VERSION_1
-	      && !snmp_access(acl, pi->community_id, rw)){
-	    if (verbose) fprintf (stdout, "    >> noSuchName (read-only)\n");
-	    ERROR_MSG("read-only? (ignoring)");
-	    return SNMP_ERR_NOSUCHNAME;
-	}
-	if (pi->pdutype == SET_REQ_MSG &&
-            (pi->version == SNMP_VERSION_2p ||
-             pi->version == SNMP_VERSION_2c) && 
-            !snmp_access(acl, pi->community_id, rw)){
-	    if (verbose) fprintf (stdout, "    >> notWritable\n");
-	    ERROR_MSG("Not Writable");
-	    return SNMP_ERR_NOTWRITABLE;
+	if (!vacm_in_view(pi, var_name, var_name_len)) {
+	    if (pi->version == SNMP_VERSION_1 || pi->pdutype != SET_REQ_MSG) {
+		if (verbose) fprintf (stdout, "    >> noSuchName (read-only)\n");
+		ERROR_MSG("read-only? (ignoring)");
+		return SNMP_ERR_NOSUCHNAME;
+	    }
+	    else {
+		if (verbose) fprintf (stdout, "    >> notWritable\n");
+		ERROR_MSG("Not Writable");
+		return SNMP_ERR_NOTWRITABLE;
+	    }
 	}
 
 	/* Its bogus to check here on getnexts - the whole packet shouldn't
@@ -1104,42 +1086,6 @@ create_toobig(snmp_out, snmp_length, reqid, pi)
 }
 
 static int
-snmp_access(acl, community, rw)
-    u_short 	acl;
-    int		community;
-    int		rw;
-{
-    /*
-     * Each group has 2 bits, the more significant one is for read access,
-     * the less significant one is for write access.
-     */
-
-    community <<= 1;	/* multiply by two to shift two bits at a time */
-    if (rw == READ){
-	return (acl & (2 << community));    /* return the correct bit */
-    } else {
-	return (acl & (1 << community));
-    }
-}
-
-static int
-get_community(community, community_len)
-    u_char	*community;
-    int		community_len;
-{
-    int	count;
-
-    for(count = 0; count < NUM_COMMUNITIES; count++){
-	if ((community_len == strlen(communities[count])
-	     && !memcmp(communities[count], community, community_len)))
-	    break;
-    }
-    if (count == NUM_COMMUNITIES)
-	return -1;
-    return count + 1;
-}
-
-static int
 goodValue(inType, inLen, actualType, actualLen)
     u_char	inType, actualType;
     int		inLen, actualLen;
@@ -1185,32 +1131,4 @@ setVariable(var_val, var_val_type, var_val_len, statP, statLen)
 	    asn_parse_bitstring(var_val, &buffersize, &var_val_type, statP, &statLen);
 	    break;
     }
-}
-
-void snmp_agent_parse_config(word,cptr)
-  char *word;
-  char *cptr;
-{
-  char tmpbuf[1024];
-  int i;
-    
-  i = atoi(cptr);
-  if (i > 0 && i <= NUM_COMMUNITIES) {
-    cptr = skip_not_white(cptr);
-    cptr = skip_white(cptr);
-    if (cptr != NULL) {
-      if (((int) strlen(cptr)) < COMMUNITY_MAX_LEN) {
-        copy_word(cptr,communities[i-1]);
-      } else {
-        sprintf(tmpbuf,"community name (#%d) \"%s\" too long", i, cptr);
-        config_perror(tmpbuf);
-      }
-    } else {
-      config_perror("no community name found");
-    }
-  } else {
-    sprintf(tmpbuf,"community number invalid:  %d, must be > 0 and < %d", i,
-            NUM_COMMUNITIES+1);
-    config_perror(tmpbuf);
-  }
 }

@@ -25,7 +25,6 @@
 #include "extensible.h"
 #include "util_funcs.h"
 #include "read_config.h"
-#include "../../snmplib/snmp_api.h"
 #include "../../snmplib/system.h"
 
 struct extensible *passthrus=NULL;

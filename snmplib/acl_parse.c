@@ -41,8 +41,9 @@
 #include "acl.h"
 #include "party.h"
 #include "context.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
+#include "snmp_impl.h"
+#include "snmp.h"
 #include "mib.h"
 
 #define TRUE 1
@@ -226,8 +227,8 @@ read_acl_database(filename)
 	if (!ap)
 	    ap = acl_createEntry(target, subject, res);
 	ap->aclPriveleges = priveleges;
-	ap->aclStorageType = 2; /* volatile */
-	ap->aclStatus = ACLACTIVE;
+	ap->aclStorageType = SNMP_STORAGE_VOLATILE;
+	ap->aclStatus = SNMP_ROW_ACTIVE;
 #define ACLCOMPLETE_MASK              0x3F
 	/* all collumns - from acl_vars.c XXX */
 	ap->aclBitMask = ACLCOMPLETE_MASK;

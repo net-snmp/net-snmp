@@ -12,7 +12,7 @@ struct config_line {
 };
 
 void init_read_config __P((void));
-int read_config __P((char *));
+void read_config __P((char *));
 void free_config __P((void));
 RETSIGTYPE update_config __P((int));
 int pass_compare __P((void *, void *));

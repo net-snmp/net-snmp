@@ -113,7 +113,6 @@
 #else
 #define setPerrorstatus(x) perror(x)
 #endif
-#include "../../snmplib/snmp_api.h"
 #include "../../snmplib/system.h"
 
 int numdisks;

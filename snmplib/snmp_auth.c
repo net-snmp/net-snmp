@@ -78,6 +78,7 @@ SOFTWARE.
 
 #include "asn1.h"
 #include "snmp.h"
+#include "snmp_api.h"
 #include "snmp_impl.h"
 #include "party.h"
 #include "context.h"
@@ -85,7 +86,6 @@ SOFTWARE.
 #include "md5.h"
 #include "acl.h"
 #include "system.h"
-#include "snmp_api.h"
 
 static void md5Digest __P((u_char *, int, u_char *));
 
@@ -210,10 +210,14 @@ int		pass;       /* IN - which pass */
     if (type == (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR)){
 	/* noAuth */
 	pi->version = SNMP_VERSION_2p;
-
+	pi->sec_model = SNMP_SEC_MODEL_SNMPv2p;
+	pi->sec_level = SNMP_SEC_LEVEL_NOAUTH;
     } else if (type == (ASN_CONTEXT | ASN_CONSTRUCTOR | 2)){
 	/* AuthInformation */
 	pi->version = SNMP_VERSION_2p;
+        pi->mp_model = SNMP_MP_MODEL_SNMPv2p;
+	pi->sec_model = SNMP_SEC_MODEL_SNMPv2p;
+	pi->sec_level = SNMP_SEC_LEVEL_AUTHNOPRIV;
 	ismd5 = 1;
 
 	digestStart = data;
@@ -291,6 +295,7 @@ int		pass;       /* IN - which pass */
 	return NULL;
     if ((pass & FIRST_PASS) && (srcp->partyAuthProtocol == SNMPV2MD5AUTHPROT)){
 	/* RFC1446, Pg 18, 3.2.1 */
+	pi->sec_level = SNMP_SEC_LEVEL_AUTHPRIV;
 	if (!ismd5){
 	    /* snmpStatsBadAuths++ */
 	    return NULL;

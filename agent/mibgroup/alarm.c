@@ -53,8 +53,8 @@ SOFTWARE.
 #endif
 #include <sys/socket.h>
 #include <asn1.h>
-#include <snmp_impl.h>
 #include <snmp_api.h>
+#include <snmp_impl.h>
 #include <snmp_client.h>
 #include "party.h"
 #include "context.h"

@@ -14,14 +14,6 @@
 #define ACLSTORAGETYPE	5
 #define ACLSTATUS	6
 
-#define ACLNONEXISTENT        0
-#define ACLACTIVE             1
-#define ACLNOTINSERVICE       2
-#define ACLNOTREADY           3
-#define ACLCREATEANDGO        4
-#define ACLCREATEANDWAIT      5
-#define ACLDESTROY            6
-
 #define ACLPRIVELEGESGET		1
 #define ACLPRIVELEGESGETNEXT		2
 #define ACLPRIVELEGESGETRESPONSE	4

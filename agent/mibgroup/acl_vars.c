@@ -12,8 +12,12 @@
 # endif
 #endif
 
+#include <sys/types.h>
+#include <netinet/in.h>
+
 #include "asn1.h"
 #include "snmp.h"
+#include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_vars.h"
 #include "party.h"
@@ -44,7 +48,7 @@ acl_rowCreate(target, subject, resources)
 
     ap = acl_createEntry(target, subject, resources);
     ap->aclBitMask = 0;
-    ap->reserved->aclStatus = ACLNONEXISTENT;
+    ap->reserved->aclStatus = SNMP_ROW_NONEXISTENT;
 
     ap->aclBitMask = ap->reserved->aclBitMask =
 	ACLTARGET_MASK | ACLSUBJECT_MASK;
@@ -121,10 +125,10 @@ write_acl(action, var_val, var_val_type, var_val_len, statP, name, length)
 	rp = ap->reserved;
 	/* create default vals here in reserve area */
 	rp->aclPriveleges = ACLPRIVELEGESGET | ACLPRIVELEGESGETNEXT;
-	rp->aclStatus = ACLACTIVE;
+	rp->aclStatus = SNMP_ROW_ACTIVE;
 	rp->aclBitMask = ACLCOMPLETE_MASK;
     } else if (action == COMMIT){
-	if (ap->aclStatus == ACLNONEXISTENT){
+	if (ap->aclStatus == SNMP_ROW_NONEXISTENT){
 	    /* commit the default vals */
 	    /* This haapens at most once per entry because the status is set to
 	       valid after the first pass.  After that, this commit code
@@ -139,7 +143,7 @@ write_acl(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    ap->aclBitMask = rp->aclBitMask;
 	}
     } else if (action == FREE){
-	if (ap && ap->aclStatus == ACLNONEXISTENT){
+	if (ap && ap->aclStatus == SNMP_ROW_NONEXISTENT){
 	    acl_rowDelete(tg->partyIndex, su->partyIndex, 1);
 	    ap = rp = NULL;
 	}
@@ -172,13 +176,13 @@ write_acl(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    rp->aclStatus = val;
 	    rp->aclBitMask |= ACLSTATUS_MASK;
 	} else if (action == RESERVE2){
-	    if ((rp->aclStatus == ACLACTIVE)
+	    if ((rp->aclStatus == SNMP_ROW_ACTIVE)
 		&& (rp->aclBitMask != ACLCOMPLETE_MASK))
 		return SNMP_ERR_INCONSISTENTVALUE;
 	    /* tried to set incomplete row valid */
 	} else if (action == COMMIT){
 	    ap->aclStatus = rp->aclStatus;
-	} else if (action == ACTION && ap->aclStatus == ACLDESTROY){
+	} else if (action == ACTION && ap->aclStatus == SNMP_ROW_DESTROY){
 		acl_rowDelete(ap->aclTarget, ap->aclSubject, ap->aclResources);
 	}
 	break;

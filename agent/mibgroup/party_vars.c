@@ -29,6 +29,7 @@
 
 #include "asn1.h"
 #include "snmp.h"
+#include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_vars.h"
 #include "../../snmplib/system.h"
@@ -81,7 +82,7 @@ party_rowCreate(partyID, partyIDLen)
 	return NULL;
     pp = party_createEntry(partyID, partyIDLen);
     pp->partyBitMask = 0;
-    pp->partyStatus = pp->reserved->partyStatus = PARTYNONEXISTENT;
+    pp->partyStatus = pp->reserved->partyStatus = SNMP_ROW_NONEXISTENT;
 
     pp->partyBitMask = pp->reserved->partyBitMask =
 	PARTYINDEX_MASK | PARTYSTATUS_MASK;
@@ -157,10 +158,10 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
 	rp->partyPrivPrivateLen = 0;
 	rp->partyPrivPublicLen = 0;
 	rp->partyStorageType = 2; /* volatile */
-	rp->partyStatus = PARTYACTIVE;
+	rp->partyStatus = SNMP_ROW_ACTIVE;
 	rp->partyBitMask = PARTYCOMPLETE_MASK ^ PARTYLOCAL_MASK; /* XXX */
     } else if (action == COMMIT){
-	if (pp->partyStatus == PARTYNONEXISTENT){
+	if (pp->partyStatus == SNMP_ROW_NONEXISTENT){
 	    /* commit the default vals */
 	    /* This happens at most once per entry because the status is set to
 	       valid after the first pass.  After that, this commit code
@@ -191,7 +192,7 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    
 	}
     } else if (action == FREE){
-	if (pp && pp->partyStatus == PARTYNONEXISTENT){
+	if (pp && pp->partyStatus == SNMP_ROW_NONEXISTENT){
 	    party_rowDelete(index, indexlen);
 	    pp = rp = NULL;
 	}
@@ -461,26 +462,26 @@ write_party(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    rp->partyStatus = val;
 	    rp->partyBitMask |= PARTYSTATUS_MASK;
 	} else if (action == RESERVE2){
-	    if (((rp->partyStatus == PARTYCREATEANDGO)
-		|| (rp->partyStatus == PARTYCREATEANDWAIT))
-		&& (pp->partyStatus != PARTYNONEXISTENT))
+	    if (((rp->partyStatus == SNMP_ROW_CREATEANDGO)
+		|| (rp->partyStatus == SNMP_ROW_CREATEANDWAIT))
+		&& (pp->partyStatus != SNMP_ROW_NONEXISTENT))
 		return SNMP_ERR_INCONSISTENTVALUE;
-	    if (((rp->partyStatus == PARTYACTIVE)
-		|| (rp->partyStatus == PARTYNOTINSERVICE))
-		&& (pp->partyStatus == PARTYNONEXISTENT))
+	    if (((rp->partyStatus == SNMP_ROW_ACTIVE)
+		|| (rp->partyStatus == SNMP_ROW_NOTINSERVICE))
+		&& (pp->partyStatus == SNMP_ROW_NONEXISTENT))
 		return SNMP_ERR_INCONSISTENTVALUE;
-	    if (((rp->partyStatus == PARTYACTIVE)
-		 || (rp->partyStatus == PARTYNOTINSERVICE))
+	    if (((rp->partyStatus == SNMP_ROW_ACTIVE)
+		 || (rp->partyStatus == SNMP_ROW_NOTINSERVICE))
 		&& (rp->partyBitMask != PARTYCOMPLETE_MASK))
 		return SNMP_ERR_INCONSISTENTVALUE;
 	    /* tried to set incomplete row valid */
 	} else if (action == COMMIT){
-	    if (rp->partyStatus == PARTYCREATEANDGO)
-		rp->partyStatus = PARTYACTIVE;
-	    if (rp->partyStatus == PARTYCREATEANDWAIT)
-		rp->partyStatus = PARTYNOTINSERVICE;
+	    if (rp->partyStatus == SNMP_ROW_CREATEANDGO)
+		rp->partyStatus = SNMP_ROW_ACTIVE;
+	    if (rp->partyStatus == SNMP_ROW_CREATEANDWAIT)
+		rp->partyStatus = SNMP_ROW_NOTINSERVICE;
 	    pp->partyStatus = rp->partyStatus;
-	} else if (action == ACTION && pp->partyStatus == PARTYDESTROY){
+	} else if (action == ACTION && pp->partyStatus == SNMP_ROW_DESTROY){
 	    /* delete all related acl entries */
 #if 0
 	    acl_scanInit();
@@ -668,9 +669,9 @@ var_party(vp, name, length, exact, var_len, write_method)
       case PARTYSTORAGETYPE:
 	return (u_char *)&pp->partyStorageType;
       case PARTYSTATUS:
-	if (pp->partyStatus == PARTYNOTINSERVICE
+	if (pp->partyStatus == SNMP_ROW_NOTINSERVICE
 	    && pp->partyBitMask != PARTYCOMPLETE_MASK){
-	    long_return = PARTYNOTREADY;
+	    long_return = SNMP_ROW_NOTREADY;
 	    return (u_char *)&long_return;
 	}
 	return (u_char *)&pp->partyStatus;

@@ -72,7 +72,6 @@
 #endif
 #include "mibincl.h"
 #include "../../snmplib/system.h"
-#include "../../snmplib/snmp_api.h"
 
 #if defined(osf4) || defined(aix4) || defined(hpux10)
 /* these are undefed to remove a stupid warning on osf compilers

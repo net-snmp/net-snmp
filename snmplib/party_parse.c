@@ -44,13 +44,13 @@
 #include <io.h>
 #endif
 
-
 #include "asn1.h"
 #include "mib.h"
 #include "party.h"
 #include "system.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
+#include "snmp_impl.h"
+#include "snmp.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -443,8 +443,8 @@ read_party_database(filename)
 	    memmove(rp->partyPrivPrivate, privPrivate, 16);
 	    pp->partyPrivPrivateLen =
 		rp->partyPrivPrivateLen = 16;
-	    pp->partyStorageType = 2; /* volatile */
-	    pp->partyStatus = rp->partyStatus = PARTYACTIVE;
+	    pp->partyStorageType = SNMP_STORAGE_VOLATILE;
+	    pp->partyStatus = rp->partyStatus = SNMP_ROW_ACTIVE;
 #define PARTYCOMPLETE_MASK              65535
 	    /* all collumns - from party_vars.c XXX */
 	    pp->partyBitMask = rp->partyBitMask = PARTYCOMPLETE_MASK;

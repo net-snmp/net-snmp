@@ -73,8 +73,8 @@ SOFTWARE.
 
 #include "asn1.h"
 #include "snmp.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
+#include "snmp_impl.h"
 #include "snmp_client.h"
 #include "party.h"
 #include "context.h"
@@ -493,7 +493,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
 	pp1->partyAuthPrivateLen = rp->partyAuthPrivateLen = 0;
 	pp1->partyPrivPrivateLen = rp->partyPrivPrivateLen = 0;
 	pp1->partyStorageType = 2; /* volatile */
-	pp1->partyStatus = rp->partyStatus = PARTYACTIVE;
+	pp1->partyStatus = rp->partyStatus = SNMP_ROW_ACTIVE;
 #define PARTYCOMPLETE_MASK              65535
 	/* all collumns - from party_vars.c XXX */
 	pp1->partyBitMask = rp->partyBitMask = PARTYCOMPLETE_MASK;
@@ -532,7 +532,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
 	pp2->partyAuthPrivateLen = rp->partyAuthPrivateLen = 0;
 	pp2->partyPrivPrivateLen = rp->partyPrivPrivateLen = 0;
 	pp2->partyStorageType = 2; /* volatile */
-	pp2->partyStatus = rp->partyStatus = PARTYACTIVE;
+	pp2->partyStatus = rp->partyStatus = SNMP_ROW_ACTIVE;
 #define PARTYCOMPLETE_MASK              65535
 	/* all collumns - from party_vars.c XXX */
 	pp2->partyBitMask = rp->partyBitMask = PARTYCOMPLETE_MASK;
@@ -560,7 +560,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
 	cxp->contextLocalTime = CURRENTTIME;
 	cxp->contextProxyContextLen = 0;
 	cxp->contextStorageType = 2;
-	cxp->contextStatus = rxp->contextStatus = CONTEXTACTIVE;
+	cxp->contextStatus = rxp->contextStatus = SNMP_ROW_ACTIVE;
 #define CONTEXTCOMPLETE_MASK              0x03FF
 	/* all collumns - from context_vars.c XXX */
 	cxp->contextBitMask = rxp->contextBitMask = CONTEXTCOMPLETE_MASK;
@@ -572,7 +572,7 @@ ms_party_init(destaddr, src, srclen, dst, dstlen, context, contextlen)
 	ap = acl_createEntry(oneIndex, twoIndex, cxindex);
 	ap->aclPriveleges = 132;
 	ap->aclStorageType = 2; /* volatile */
-	ap->aclStatus = ACLACTIVE;
+	ap->aclStatus = SNMP_ROW_ACTIVE;
 #define ACLCOMPLETE_MASK              0x3F
 	/* all collumns - from acl_vars.c XXX */
 	ap->aclBitMask = ACLCOMPLETE_MASK;

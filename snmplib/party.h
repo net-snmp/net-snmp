@@ -39,15 +39,6 @@
 #define PARTYSTATUS		17
 
 
-#define PARTYNONEXISTENT 	0
-#define PARTYACTIVE		1
-#define PARTYNOTINSERVICE	2
-#define PARTYNOTREADY		3
-#define PARTYCREATEANDGO	4
-#define PARTYCREATEANDWAIT	5
-#define PARTYDESTROY		6
-
-
 #define DOMAINSNMPUDP 1
 /* extern oid snmpUdpDomain; */
 /* no others defined yet */

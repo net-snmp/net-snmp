@@ -12,8 +12,12 @@
 # endif
 #endif
 
+#include <sys/types.h>
+#include <netinet/in.h>
+
 #include "asn1.h"
 #include "snmp.h"
+#include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_vars.h"
 

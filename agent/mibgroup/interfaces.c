@@ -13,6 +13,7 @@
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
+#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -117,10 +118,9 @@
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"
-#include "snmp_api.h"
 #include "auto_nlist.h"
 
-void Interface_Scan_Init();
+void Interface_Scan_Init __P((void));
 
 static int Interface_Scan_Get_Count __P((void));
 
@@ -131,7 +131,7 @@ static const u_char * if_list_end;
 static size_t if_list_size = 0;
 
 void
-init_interfaces ()
+init_interfaces __P((void))
 {
 }
 
@@ -328,7 +328,7 @@ Interface_Scan_By_Index (index, if_msg, if_name, sifa)
 }
 
 static int
-Interface_Scan_Get_Count ()
+Interface_Scan_Get_Count __P((void))
 {
   u_char *cp;
   struct if_msghdr *ifp;
@@ -351,7 +351,7 @@ Interface_Scan_Get_Count ()
 }
 
 void
-Interface_Scan_Init()
+Interface_Scan_Init __P((void))
 {
   int name[] = {CTL_NET,PF_ROUTE,0,0,NET_RT_IFLIST,0};
   size_t size;
@@ -464,7 +464,11 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
     long_return = (u_long) if_msg.ifm_data.ifi_omcasts;
     return (u_char *) &long_return;
   case IFOUTDISCARDS:
+#ifdef if_odrops
     long_return = (u_long) if_msg.ifm_data.ifi_odrops;
+#else
+    long_return = 0;
+#endif
     return (u_char *) &long_return;
   case IFOUTERRORS:
     long_return = (u_long) if_msg.ifm_data.ifi_oerrors;
@@ -1155,7 +1159,7 @@ static int saveIndex=0;
 static char saveName[16];
 
 void
-Interface_Scan_Init()
+Interface_Scan_Init __P((void))
 {
 #ifdef linux
     char line [128], fullname [20], ifname_buf [20], *ifname, *ptr;
@@ -1495,7 +1499,7 @@ struct in_ifaddr *Retin_ifaddr;
 
 static int Interface_Count=0;
 
-int Interface_Scan_Get_Count __P((void))
+static int Interface_Scan_Get_Count __P((void))
 {
 
 	if (!Interface_Count) {
@@ -1608,7 +1612,7 @@ u_char *EtherAddr;
 #ifdef freebsd2
 static struct in_ifaddr *in_ifaddraddr;
 
-Address_Scan_Init()
+Address_Scan_Init __P((void))
 {
     auto_nlist(IFADDR_SYMBOL, (char *)&in_ifaddraddr, sizeof(in_ifaddraddr));
 }
@@ -1658,7 +1662,7 @@ struct in_ifaddr *Retin_ifaddr;
 
 #else /* solaris2 */
 
-static int Interface_Scan_Get_Count()
+static int Interface_Scan_Get_Count __P((void))
 {
 	int i, sd;
 

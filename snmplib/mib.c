@@ -798,6 +798,8 @@ init_mib __P((void))
     char *prefix;
     char  *env_var, *entry, path[300];
 
+    if (Mib) return;
+
 	/* Initialise the MIB directory/ies */
 
     env_var = getenv("MIBDIRS");

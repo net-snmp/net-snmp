@@ -45,8 +45,9 @@
 #include "asn1.h"
 #include "context.h"
 #include "system.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
+#include "snmp_impl.h"
+#include "snmp.h"
 #include "mib.h"
 
 #define TRUE 1
@@ -212,8 +213,8 @@ read_context_database(filename)
 	    cxp->contextSrcPartyIndex = srcParty;
 	    memmove(cxp->contextProxyContext, proxyId, proxyIdLen * sizeof(oid));
 	    cxp->contextProxyContextLen = proxyIdLen;
-	    cxp->contextStorageType = 2;
-	    cxp->contextStatus = rp->contextStatus = CONTEXTACTIVE;
+	    cxp->contextStorageType = SNMP_STORAGE_VOLATILE;
+	    cxp->contextStatus = rp->contextStatus = SNMP_ROW_ACTIVE;
 #define CONTEXTCOMPLETE_MASK              0x03FF
 	    /* all collumns - from context_vars.c XXX */
 	    cxp->contextBitMask = rp->contextBitMask = CONTEXTCOMPLETE_MASK;

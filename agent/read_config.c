@@ -1,5 +1,6 @@
 #include <config.h>
 
+#include <sys/types.h>
 #if STDC_HEADERS
 #include <string.h>
 #include <stdlib.h>
@@ -10,6 +11,7 @@
 #endif
 #include <signal.h>
 #include <ctype.h>
+#include <errno.h>
 
 #include <sys/time.h>
 #if HAVE_NETINET_IN_H
@@ -34,13 +36,16 @@
 extern int subtree_size;  /* in read_config.c */
 extern int subtree_malloc_size;  /* in read_config.c */
 
-int minimumswap;
 char dontReadConfigFiles;
 char *optconfigfile;
+int config_errors;
+
+static int is_parent __P((oid *, int, oid *));
+static struct subtree* insert_in_children_list __P((struct subtree *, struct subtree *));
+void load_subtree __P((struct subtree *));
 
 struct config_line config_handlers[] = {
 #include "mibgroup/mib_module_dot_conf.h"
-  {"community", snmp_agent_parse_config, NULL},
   {"authtrapenable", snmpd_parse_config_authtrap, NULL},
   {"trapsink", snmpd_parse_config_trapsink, NULL},
   {"trapcommunity", snmpd_parse_config_trapcommunity, NULL}
@@ -55,7 +60,7 @@ void init_read_config __P((void))
 int linecount;
 char *curfilename;
 
-int read_config(filename)
+void read_config(filename)
   char *filename;
 {
 
@@ -68,7 +73,8 @@ int read_config(filename)
   curfilename = filename;
   
   if ((ifile = fopen(filename, "r")) == NULL) {
-    return(1);
+    fprintf(stderr, "snmpd: %s: %s\n", filename, strerror(errno));
+    return;
   }
 
   while (fgets(line, STRMAX, ifile) != NULL) 
@@ -96,14 +102,14 @@ int read_config(filename)
               }
             }
             if (i < sizeof(config_handlers)) {
-              sprintf(tmpbuf,"Unknown token:  %s.", word);
+              sprintf(tmpbuf,"Unknown token: %s.", word);
               config_perror(tmpbuf);
             }
           }
 	}
     }
   fclose(ifile);
-  return(0);
+  return;
 }
 
 void
@@ -135,7 +141,7 @@ int a;
     read_config (configfile);
 
     if ((envconfpath = getenv("SNMPCONFPATH"))) {
-      envconfpath = strdup(envconfpath);  /* prevent actually writting in env */
+      envconfpath = strdup(envconfpath);  /* prevent actually writing in env */
       cptr1 = cptr2 = envconfpath;
       i = 1;
       while (i && *cptr2 != 0) {
@@ -161,6 +167,10 @@ int a;
   if (optconfigfile != NULL) {
     read_config (optconfigfile);
   }
+  if (config_errors) {
+    fprintf(stderr, "snmpd: errors in config file - abort.\n");
+    exit(1);
+  }
 
   signal(SIGHUP,update_config);
 }
@@ -169,6 +179,7 @@ void config_perror(string)
   char *string;
 {
   fprintf(stderr, "snmpd: %s: line %d: %s\n", curfilename, linecount, string);
+  config_errors++;
 }
 
 /* skip all white spaces and return 1 if found something either end of
@@ -211,7 +222,7 @@ int tree_compare(a, b)
   return compare(ap->name,ap->namelen,bp->name,bp->namelen);
 }
 
-int is_parent(name1, len1, name2)
+static int is_parent(name1, len1, name2)
     register oid	    *name1, *name2;
     register int	    len1;
 {
@@ -231,7 +242,7 @@ int is_parent(name1, len1, name2)
 }
 
 
-struct subtree*
+static struct subtree*
 insert_in_children_list( eldest, new_tree )
     struct subtree *eldest;	/* The eldest child in the list of potential
 					siblings (or ancestors) */

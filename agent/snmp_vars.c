@@ -77,6 +77,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "mibgroup/mib_module_includes.h"
 #include "read_config.h"
 #include "mib_module_config.h"
+#include "mibgroup/vacm_vars.h"
 
 #include "snmpd.h"
 #include "party.h"
@@ -436,17 +437,10 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 		    if (access &&
                         (
 #ifdef USING_VIEW_VARS_MODULE
-                          ((pi->version == SNMP_VERSION_2p) &&
-                           !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
+                         (pi->version == SNMP_VERSION_2p &&
+                          !in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
 #endif
-                         ((pi->version == SNMP_VERSION_1 ||
-                           pi->version == SNMP_VERSION_2c) &&
-                          (((cvp->acl & 0xAFFC) == SNMPV2ANY) ||
-                            (cvp->acl & 0xAFFC) == SNMPV2AUTH)) ||
-                          ((pi->version == SNMP_VERSION_2p) &&
-                          ((cvp->acl & 0xAFFC) == SNMPV2AUTH) &&
-                          (pi->srcp->partyAuthProtocol == NOAUTH ||
-                           pi->dstp->partyAuthProtocol == NOAUTH)))) {
+                         !vacm_in_view(pi, name, *namelen)) ) {
                       access = NULL;
 			*write_method = NULL;
 			/*

@@ -31,7 +31,6 @@
 #include "util_funcs.h"
 #include "read_config.h"
 #include "../../snmplib/system.h"
-#include "snmp_api.h"
 
 
 	/*********************
