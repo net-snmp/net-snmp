@@ -808,7 +808,9 @@ main(int argc, char *argv[])
             if (fork() != 0) {
                 /* Parent. */
                 exit(0);
-            } else {
+            }
+#ifndef WIN32
+            else {
                 /* Child. */
 
                 /* Avoid keeping any directory in use. */
@@ -832,9 +834,10 @@ main(int argc, char *argv[])
                     dup(0);
                 }
             }
+#endif /* !WIN32 */
         }
     }
-#endif
+#endif /* HAVE_FORK */
 
     SOCK_STARTUP;
     init_agent("snmpd");        /* do what we need to do first. */
