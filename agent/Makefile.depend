@@ -1010,6 +1010,7 @@
 ./snmp_agent.lo: ../include/net-snmp/agent/table_iterator.h
 ./snmp_agent.lo: ../include/net-snmp/agent/mib_module_config.h snmpd.h
 ./snmp_agent.lo: mibgroup/struct.h mibgroup/util_funcs.h mibgroup/struct.h
+./snmp_agent.lo: ../include/net-snmp/agent/mib_modules.h
 ./snmp_agent.lo: ./mibgroup/agentx/protocol.h ./mibgroup/agentx/master.h
 ./snmp_agent.lo: ./mibgroup/smux/smux.h
 ./snmpd.lo: ../include/net-snmp/net-snmp-config.h

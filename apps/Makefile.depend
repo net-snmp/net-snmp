@@ -1087,7 +1087,7 @@
 ./snmptrapd_handlers.lo: ../include/net-snmp/agent/table_dataset.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/agent/table_iterator.h
 ./snmptrapd_handlers.lo: ../include/net-snmp/agent/mib_module_config.h
-./snmptrapd_handlers.lo: ../agent/mibgroup/utilities/execute.h
+./snmptrapd_handlers.lo: ./../agent/mibgroup/utilities/execute.h
 ./snmptrapd_handlers.lo: snmptrapd_handlers.h snmptrapd_log.h
 ./snmptrapd_log.lo: ../include/net-snmp/net-snmp-config.h
 ./snmptrapd_log.lo: ../include/net-snmp/system/linux.h
