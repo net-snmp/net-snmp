@@ -519,28 +519,6 @@ Get_Next_HR_FileSys(void)
     return ++HRFS_index;
 #else
     const char    **cpp;
-    /*
-     * XXX - According to RFC 1514, hrFSIndex must
-     *   "remain constant at least from one re-initialization
-     *    of the agent to the next re-initialization."
-     *
-     *  This simple-minded counter doesn't handle filesystems
-     *    being un-mounted and re-mounted.
-     *  Options for fixing this include:
-     *       - keeping a history of previous indices used
-     *       - calculating the index from filesystem
-     *              specific information
-     *
-     *  Note: this index is also used as hrStorageIndex
-     *     which is assumed to be less than HRS_TYPE_FS_MAX
-     *     This assumption may well be broken if the second
-     *     option above is followed.  Consider indexing the
-     *     non-filesystem-based storage entries first in this
-     *     case, and assume hrStorageIndex > HRS_TYPE_FS_MIN
-     *     (for file-system based storage entries)
-     *
-     *  But at least this gets us started.
-     */
 
     if (fp == NULL)
         return -1;
@@ -557,6 +535,18 @@ Get_Next_HR_FileSys(void)
     for (cpp = HRFS_ignores; *cpp != NULL; ++cpp)
         if (!strcmp(HRFS_entry->HRFS_type, *cpp))
             return Get_Next_HR_FileSys();
+
+    /*
+     * Try and ensure that index values are persistent
+     *   at least within a single run of the agent
+     */
+    HRFS_index = se_find_value_in_slist("filesys", HRFS_entry->HRFS_name );
+    if (HRFS_index == SE_DNE) {
+        HRFS_index = se_find_free_value_in_slist("filesys");
+        if (HRFS_index == SE_DNE) { HRFS_index = 1; }
+        se_add_pair_to_slist( "filesys",
+                              strdup( HRFS_entry->HRFS_name ), HRFS_index);
+    }
 
     return HRFS_index++;
 #endif                          /* HAVE_GETFSSTAT */
