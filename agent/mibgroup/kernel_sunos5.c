@@ -743,13 +743,16 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	ifp->ifSpeed = 10000000; 	/* Best guess */
 	ifp->ifType = 1;
 	switch (ifrp->ifr_name[0]) {
-	case 'l': /* le / lo */
+	case 'l': /* le / lo / lane (ATM LAN Emulation) */
 		if (ifrp->ifr_name[1] == 'o') {
 			ifp->ifSpeed = 127000000;
 			ifp->ifType = 24;
 		} else if (ifrp->ifr_name[1] == 'e') {
 			ifp->ifSpeed = 10000000;
 			ifp->ifType = 6;
+		} else if (ifrp->ifr_name[1] == 'a') {
+			ifp->ifSpeed = 155000000;
+			ifp->ifType = 37;
 		}
 		break;
 	case 'h': /* hme */
