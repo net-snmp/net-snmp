@@ -27,12 +27,13 @@ extern "C" {
 #define ACCESSSTORAGE	8
 #define ACCESSSTATUS	9
 
-#define VIEWNAME	1
-#define VIEWSUBTREE	2
-#define VIEWMASK	3
-#define VIEWTYPE	4
-#define VIEWSTORAGE	5
-#define VIEWSTATUS	6
+#define VACMVIEWSPINLOCK 1
+#define VIEWNAME	2
+#define VIEWSUBTREE	3
+#define VIEWMASK	4
+#define VIEWTYPE	5
+#define VIEWSTORAGE	6
+#define VIEWSTATUS	7
 
 #define VACM_MAX_STRING 32
 #define VACMSTRINGLEN   34  /* VACM_MAX_STRING + 2 */
@@ -148,7 +149,18 @@ struct vacm_securityEntry *vacm_createSecurityEntry (const char *);
 struct vacm_securityEntry *vacm_getSecurityEntry (const char *);
 void vacm_scanSecurityInit (void);
 struct vacm_securityEntry *vacm_scanSecurityEntry (void);
-int vacm_is_configured(void);
+
+void vacm_save(const char *token, const char *type);
+void vacm_save_view(struct vacm_viewEntry *view, const char *token, const char *type);
+void vacm_save_access(struct vacm_accessEntry *access, const char *token, const char *type);
+void vacm_save_group(struct vacm_groupEntry *access, const char *token, const char *type);
+
+void vacm_parse_config_view(const char *token, char *line);
+void vacm_parse_config_group(const char *token, char *line);
+void vacm_parse_config_access(const char *token, char *line);
+
+int store_vacm(int majorID, int minorID, void *serverarg, void *clientarg);
+
 
 #ifdef __cplusplus
 }

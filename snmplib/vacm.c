@@ -51,10 +51,207 @@
 #include "snmp_api.h"
 #include "vacm.h"
 #include "snmp_debug.h"
+#include "snmp-tc.h"
+#include "read_config.h"
+#include "default_store.h"
 
 static struct vacm_viewEntry *viewList = NULL, *viewScanPtr = NULL;
 static struct vacm_accessEntry *accessList = NULL, *accessScanPtr = NULL;
 static struct vacm_groupEntry *groupList = NULL, *groupScanPtr = NULL;
+
+void
+vacm_save(const char *token, const char *type)
+{
+  struct vacm_viewEntry *vptr;
+  struct vacm_accessEntry *aptr;
+  struct vacm_groupEntry *gptr;
+  
+  for (vptr = viewList; vptr != NULL; vptr = vptr->next) {
+    if (vptr->viewStorageType == ST_NONVOLATILE)
+      vacm_save_view(vptr, token, type);
+  }
+        
+  for (aptr = accessList; aptr != NULL; aptr = aptr->next) {
+    if (aptr->storageType == ST_NONVOLATILE)
+      vacm_save_access(aptr, token, type);
+  }
+      
+  for (gptr = groupList; gptr != NULL; gptr = gptr->next) {
+    if (gptr->storageType == ST_NONVOLATILE)
+      vacm_save_group(gptr, token, type);
+  }
+}
+
+/* vacm_save_view(): saves a view entry to the persistent cache */
+void
+vacm_save_view(struct vacm_viewEntry *view, const char *token, const char *type)
+{
+  char line[4096];
+  char *cptr;
+
+  memset(line, 0, sizeof(line));
+  sprintf(line, "%s%s %d %d %d ", token,"View", view->viewStatus, view->viewStorageType, view->viewType);
+  cptr = &line[strlen(line)]; /* the NULL */
+  
+  cptr = read_config_save_octet_string(cptr, (u_char *)view->viewName+1,
+                                              view->viewName[0]+1);
+  *cptr++ = ' ';
+  cptr = read_config_save_objid(cptr, view->viewSubtree, view->viewSubtreeLen);
+  *cptr++ = ' ';
+  cptr = read_config_save_octet_string(cptr, (u_char *)view->viewMask,
+											view->viewMaskLen);
+    
+  read_config_store(type, line);
+}
+
+void
+vacm_parse_config_view(const char *token, char *line)
+{
+  struct vacm_viewEntry view;
+  struct vacm_viewEntry *vptr;
+  char *viewName=(char *)&view.viewName;
+  oid *viewSubtree=(oid *)&view.viewSubtree;
+  u_char *viewMask;
+  size_t len;
+  
+  view.viewStatus=atoi(line); 
+  line=skip_token(line);
+  view.viewStorageType=atoi(line);
+  line=skip_token(line);
+  view.viewType=atoi(line);
+  line=skip_token(line);
+  line = read_config_read_octet_string(line, (u_char **)&viewName,&len);
+  view.viewSubtreeLen=MAX_OID_LEN;
+  line = read_config_read_objid(line, (oid **)&viewSubtree,&view.viewSubtreeLen);
+
+  vptr=vacm_createViewEntry(view.viewName,view.viewSubtree,view.viewSubtreeLen);
+  if(!vptr)
+	return;
+
+  vptr->viewStatus=view.viewStatus;
+  vptr->viewStorageType=view.viewStorageType;
+  vptr->viewType=view.viewType;
+  viewMask=(u_char *)vptr->viewMask;
+  line = read_config_read_octet_string(line,(u_char **)&viewMask,&vptr->viewMaskLen); 
+}
+
+/* vacm_save_access(): saves an access entry to the persistent cache */
+void
+vacm_save_access(struct vacm_accessEntry *access, const char *token, const char *type)
+{
+  char line[4096];
+  char *cptr;
+
+  memset(line, 0, sizeof(line));
+  sprintf(line, "%s%s %d %d %d %d %d ", token,"Access", access->status, access->storageType, access->securityModel
+								  , access->securityLevel, access->contextMatch);
+  cptr = &line[strlen(line)]; /* the NULL */
+  cptr = read_config_save_octet_string(cptr, (u_char *)access->groupName+1,
+                                       access->groupName[0]+1);
+  *cptr++ = ' ';                                       
+  cptr = read_config_save_octet_string(cptr, (u_char *)access->contextPrefix+1,
+                                       access->contextPrefix[0]+1);
+  
+  *cptr++ = ' ';                                       
+  cptr = read_config_save_octet_string(cptr, (u_char *)access->readView,
+                                       strlen(access->readView)+1);
+  *cptr++ = ' ';                                       
+  cptr = read_config_save_octet_string(cptr, (u_char *)access->writeView,
+                                       strlen(access->writeView)+1);
+  *cptr++ = ' ';                                       
+  cptr = read_config_save_octet_string(cptr, (u_char *)access->notifyView,
+                                       strlen(access->notifyView)+1);
+
+  read_config_store(type, line);									  
+}
+
+void
+vacm_parse_config_access(const char *token, char *line)
+{
+  struct vacm_accessEntry access;
+  struct vacm_accessEntry *aptr;
+  char *contextPrefix=(char *)&access.contextPrefix;
+  char *groupName=(char *)&access.groupName;
+  char *readView,*writeView,*notifyView;
+  size_t len;
+    
+  access.status=atoi(line);
+  line=skip_token(line);
+  access.storageType=atoi(line);
+  line=skip_token(line);
+  access.securityModel=atoi(line);
+  line=skip_token(line);
+  access.securityLevel=atoi(line);
+  line=skip_token(line);
+  access.contextMatch=atoi(line);
+  line=skip_token(line);
+  line = read_config_read_octet_string(line, (u_char **)&groupName,&len);  
+  line = read_config_read_octet_string(line, (u_char **)&contextPrefix,&len);  
+  
+  aptr=vacm_createAccessEntry(access.groupName,access.contextPrefix,
+							access.securityModel,access.securityLevel);
+  if(!aptr)
+	return;
+  
+  aptr->status=access.status;  
+  aptr->storageType=access.storageType;  
+  aptr->securityModel=access.securityModel;  
+  aptr->securityLevel=access.securityLevel;  
+  aptr->contextMatch=access.contextMatch;
+  readView=(u_char *)aptr->readView;
+  line = read_config_read_octet_string(line,(u_char **)&readView,&len);  
+  writeView=(u_char *)aptr->writeView;
+  line = read_config_read_octet_string(line,(u_char **)&writeView,&len);     
+  notifyView=(u_char *)aptr->notifyView;
+  line = read_config_read_octet_string(line,(u_char **)&notifyView,&len);     
+}
+
+/* vacm_save_group(): saves a group entry to the persistent cache */
+void
+vacm_save_group(struct vacm_groupEntry *group, const char *token, const char *type)
+{
+  char line[4096];
+  char *cptr;
+
+  memset(line, 0, sizeof(line));
+  sprintf(line, "%s%s %d %d %d ", token,"Group", group->status, group->storageType, group->securityModel);
+  cptr = &line[strlen(line)]; /* the NULL */
+  
+  cptr = read_config_save_octet_string(cptr, (u_char *)group->securityName+1,
+                                       group->securityName[0]+1);
+  *cptr++ = ' ';
+  cptr = read_config_save_octet_string(cptr, (u_char *)group->groupName,
+                                       strlen(group->groupName)+1);
+  
+  read_config_store(type, line);
+}
+
+void
+vacm_parse_config_group(const char *token, char *line)
+{
+  struct vacm_groupEntry group;
+  struct vacm_groupEntry *gptr;
+  char *securityName=(char *)&group.securityName;
+  char *groupName;
+  size_t len;
+  
+  group.status=atoi(line);
+  line=skip_token(line);
+  group.storageType=atoi(line);
+  line=skip_token(line);
+  group.securityModel=atoi(line);
+  line=skip_token(line);
+  line = read_config_read_octet_string(line, (u_char **)&securityName,&len);
+    
+  gptr=vacm_createGroupEntry(group.securityModel,group.securityName);
+  if(!gptr)
+	return;
+	
+  gptr->status=group.status;
+  gptr->storageType=group.storageType;    
+  groupName=(u_char *)gptr->groupName;
+  line = read_config_read_octet_string(line, (u_char **)&groupName,&len);  
+}
 
 struct vacm_viewEntry *
 vacm_getViewEntry(const char *viewName,
@@ -124,7 +321,7 @@ vacm_createViewEntry(const char *viewName,
 		     size_t viewSubtreeLen)
 {
     struct vacm_viewEntry *vp, *lp, *op = NULL;
-    int cmp, glen;
+    int cmp,cmp2, glen;
 
     glen = (int)strlen(viewName);
     if (glen < 0 || glen >= VACM_MAX_STRING)
@@ -146,6 +343,8 @@ vacm_createViewEntry(const char *viewName,
     lp = viewList;
     while (lp) {
 	cmp = memcmp(lp->viewName, vp->viewName, glen+1);
+	cmp2= memcmp(lp->viewSubtree,viewSubtree,sizeof(oid)*viewSubtreeLen);
+	if (cmp==0 && cmp2>0) break;
 	if (cmp > 0) break;
 	if (cmp < 0) goto next;
 	
@@ -453,12 +652,16 @@ void vacm_destroyAllAccessEntries (void)
     }
 }
 
-/* returns 1 if vacm has *any* configuration entries in it (regardless
-   of weather or not there is enough to make a decision based on it),
-   else return 0 */
-int vacm_is_configured(void) {
-    if (viewList == NULL && accessList == NULL && groupList == NULL)
-        return 0;
-    return 1;
+int
+store_vacm(int majorID, int minorID, void *serverarg, void *clientarg)
+{
+/* figure out our application name */
+  char *appname = (char *) clientarg;
+  if (appname == NULL)
+      appname = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
+
+  /* save the VACM MIB */
+  vacm_save("vacm",appname);
+  return SNMPERR_SUCCESS;
 }
 
