@@ -744,6 +744,8 @@ struct subtree subtrees[] = {
 };
 
 extern int in_view();
+extern struct subtree *find_extensible();
+
 /*
  * getStatPtr - return a pointer to the named variable, as well as it's
  * type, length, and access control list.
