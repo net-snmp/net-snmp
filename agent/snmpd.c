@@ -513,11 +513,6 @@ main(int argc, char *argv[])
 	*cptr = 0;
 	*argvptr = NULL;
 
-#ifndef WIN32
-	/* move to safe, known dir */
-	(void) chdir("/");
-#endif
-
 	/* 
 	 * Open the logfile if necessary.
 	 */
@@ -586,6 +581,11 @@ main(int argc, char *argv[])
 
     /* store persistent data immediately in case we crash later */
     snmp_store("snmpd");
+
+#ifndef WIN32
+	/* move to safe, known dir */
+	(void) chdir("/");
+#endif
 
     /* send coldstart trap via snmptrap(1) if possible */
     send_easy_trap (0, 0);
