@@ -101,6 +101,8 @@ typedef long    fd_mask;
 #include "mibgroup/snmp_mib.h"
 #include "snmp_client.h"
 #include "snmpd.h"
+#include "mibgroup/read_config.h"
+#include "mibgroup/util_funcs.h"
 
 extern int  errno;
 extern char *version_descr;
@@ -424,6 +426,10 @@ struct trap_sink {
     struct snmp_session *sesp;
     struct trap_sink *next;
 } *sinks = NULL;
+
+int snmp_enableauthentraps = 2;		/* default: 2 == disabled */
+char *snmp_trapsink;
+char *snmp_trapcommunity = "public";
 
 int create_v1_trap_session (sink, com)
     char *sink, *com;
@@ -966,3 +972,38 @@ snmp_input(op, session, reqid, pdu, magic)
     }
     return 1;
 }
+    
+void snmpd_parse_config_authtrap(word, cptr)
+  char *word;
+  char *cptr;
+{
+  int i;
+  
+  i = atoi(cptr);
+  if (i < 1 || i > 2)
+    config_perror("authtrapenable must be 1 or 2");
+  else
+    snmp_enableauthentraps = i;
+}
+
+void snmpd_parse_config_trapsink(word,cptr)
+  char *word;
+  char *cptr;
+{
+  char tmpbuf[1024];
+  
+  cptr[strlen(cptr)-1] = 0;
+  if (create_v1_trap_session(cptr, snmp_trapcommunity) == 0) {
+    sprintf(tmpbuf,"cannot create trapsink: %s", cptr);
+    config_perror(tmpbuf);
+  }
+}
+
+void snmpd_parse_config_trapcommunity(word,cptr)
+  char *word;
+  char *cptr;
+{
+  snmp_trapcommunity = malloc (strlen(cptr));
+  copy_word(cptr, snmp_trapcommunity);
+}
+

@@ -9,6 +9,11 @@ config_require(read_config util_funcs)
 void	init_loadave __P((void));
 unsigned char *var_extensible_loadave __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
+/* config file parsing routines */
+void loadave_parse_config __P((char *, char *));
+void loadave_free_config __P((void));
+config_parse_dot_conf("load", loadave_parse_config, loadave_free_config);
+
 #include "mibdefs.h"
 
 #define LOADAVE 3

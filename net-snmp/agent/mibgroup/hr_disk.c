@@ -175,7 +175,6 @@ var_hrdisk(vp, name, length, exact, var_len, write_method)
     int     (**write_method)();
 {
     int  disk_idx;
-    static char *string[100];
 
     disk_idx = header_hrdisk(vp, name, length, exact, var_len, write_method);
     if ( disk_idx == MATCH_FAILED )

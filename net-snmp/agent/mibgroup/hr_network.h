@@ -8,6 +8,7 @@
 extern void	init_hrnet();
 extern u_char	*var_hrnet();
 
+config_require(interfaces);
 
 #define	HRNET_IFINDEX		1
 

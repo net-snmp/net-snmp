@@ -33,6 +33,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
