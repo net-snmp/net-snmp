@@ -179,7 +179,7 @@ init_example(void)
      *  Also set a default value for the string object.  Note that the
      *   example integer variable was initialised above.
      */
-    strncpy(example_str, EXAMPLE_STR_LEN, EXAMPLE_STR_DEFAULT);
+    strncpy(example_str, EXAMPLE_STR_DEFAULT, EXAMPLE_STR_LEN);
 
     snmpd_register_config_handler("exampleint",
                                   example_parse_config_exampleint,
