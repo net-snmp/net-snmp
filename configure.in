@@ -141,7 +141,7 @@ AC_ARG_WITH(opaque-special-types,
                                   SNMP normally cannot handle
                                   floating numbers, nor large 64 bit
                                   integers well.  By default, the
-                                  ucd-snmp package compiles in
+                                  net-snmp package compiles in
                                   support for these extra datatypes
                                   (in a legal way)])
 
@@ -343,8 +343,8 @@ AC_ARG_WITH(enterprise-oid,
 AC_ARG_WITH(enterprise-sysoid,
 [
   --with-enterprise-sysoid           The sysObjectID of the system group
-                                     (default .1.6.1.4.1.2021... = 
-                                      "enterprise.ucd-snmp...")],[
+                                     (default .1.6.1.4.1.8072... = 
+                                      "enterprise.net-snmp...")],[
   sys_oid=`echo "$withval" | sed 's/\./\,/g'`
   AC_DEFINE_UNQUOTED(SYSTEM_MIB, $sys_oid)
   sys_dot_oid="$withval"
@@ -353,7 +353,7 @@ AC_ARG_WITH(enterprise-sysoid,
   AC_DEFINE_UNQUOTED(SYSTEM_DOT_MIB_LENGTH, $sysoid_len)
   AC_MSG_RESULT($withval)
 ],[
-  AC_MSG_RESULT(using default "enterprise.ucd-snmp...")
+  AC_MSG_RESULT(using default "enterprise.net-snmp...")
 ])
 
 AC_ARG_WITH(enterprise-notification-oid,
@@ -467,7 +467,7 @@ AC_C_CONST
 AC_C_INLINE
 
 dnl get version number.
-AC_MSG_CHECKING(for ucd-snmp version number)
+AC_MSG_CHECKING(for net-snmp version number)
 VERSION=`cat $srcdir/version.h | sed 's/";//;s/.*"//;s/pre/0./;'`
 changequote(, )
 RELEASEVERSION=`echo $VERSION | sed 's/^\([0-9]\)\.\([0-9]\)/\1:\2:0/'`
@@ -2285,9 +2285,9 @@ at the prompt below) the agent will use stdout and stderr instead.
 Location to write logfile],$defaultlog,1)
 
 if test -d /var; then
-  defaultstore="/var/ucd-snmp"
+  defaultstore="/var/net-snmp"
 else
-  defaultstore="/etc/ucd-snmp"
+  defaultstore="/etc/net-snmp"
 fi
   
 AC_PROMPT_USER(PERSISTENT_DIRECTORY,[
