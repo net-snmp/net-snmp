@@ -984,7 +984,6 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
              */
             snmp_log(LOG_INFO, "Creating directory: %s\n", buf);
 #ifdef WIN32
-            CreateDirectory(buf, NULL);
             if (CreateDirectory(buf, NULL) == 0)
 #else
             if (mkdir(buf, mode) == -1)
