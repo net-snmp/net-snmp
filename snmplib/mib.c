@@ -1482,11 +1482,11 @@ sprint_value(buf, objid, objidlen, variable)
     struct tree    *subtree = tree_head;
 
     if (variable->type == SNMP_NOSUCHOBJECT)
-	sprintf(buf, "No Such Object available on this agent\n");
+	sprintf(buf, "No Such Object available on this agent");
     else if (variable->type == SNMP_NOSUCHINSTANCE)
-	sprintf(buf, "No Such Instance currently exists\n");
+	sprintf(buf, "No Such Instance currently exists");
     else if (variable->type == SNMP_ENDOFMIBVIEW)
-	sprintf(buf, "No more variables left in this MIB View\n");
+	sprintf(buf, "No more variables left in this MIB View");
     else {
 	subtree = get_symbol(objid, objidlen, subtree, tempbuf);
 	if (subtree->printer)
