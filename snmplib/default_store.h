@@ -24,6 +24,7 @@ extern "C" {
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0
 #define DS_LIB_SECLEVEL      1
+#define DS_LIB_SNMPVERSION   2
 
 /* library strings */
 #define DS_LIB_SECNAME         0

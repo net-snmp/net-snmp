@@ -486,7 +486,7 @@ snmp_sess_init(struct snmp_session *session)
     session->remote_port = SNMP_DEFAULT_REMPORT;
     session->timeout = SNMP_DEFAULT_TIMEOUT;
     session->retries = SNMP_DEFAULT_RETRIES;
-    session->version = SNMP_VERSION_1;
+    session->version = SNMP_DEFAULT_VERSION;
 }
 
 
@@ -660,6 +660,11 @@ _sess_copy( struct snmp_session *in_session)
     }
     session->community = ucp;	/* replace pointer with pointer to new data */
 
+    if (session->version == SNMP_DEFAULT_VERSION) {
+      session->version = ds_get_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION);
+      /* copy it back to the incoming session as well */
+      in_session->version = session->version;
+    }
     if (session->securityLevel <= 0)
       session->securityLevel = ds_get_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL);
 
