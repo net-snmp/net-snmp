@@ -318,9 +318,9 @@ sub output_files {
 	    }
 	    print O "\n\n\n";
 	}
-	if ($#unknown > -1) {
+	if ($#{$unknown{$ft}} > -1) {
 	    print O "#\n# Unknown directives read in from other files by snmpconf\n#\n";
-	    foreach my $unknown (@unknown) {
+	    foreach my $unknown (@{$unknown{$ft}}) {
 		print O $unknown,"\n";
 	    }
 	}
@@ -364,7 +364,7 @@ sub read_config {
 	if (defined($tokenmap{$token})) {
 	    push @{$tokenmap{$token}{'results'}},$_;
 	} else {
-	    push @unknown,$_;
+	    push @{$unknown{$filetype}},$_;
 	}
     }
 }
