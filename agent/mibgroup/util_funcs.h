@@ -10,6 +10,7 @@ void Exit __P((int));
 int shell_command __P((struct extensible *));
 int exec_command __P((struct extensible *));
 int get_exec_output __P((struct extensible *));
+int get_exec_pipes __P((char *cmd, int *fdIn, int *fdOut, int *pid));
 int clear_cache __P((int, u_char *, u_char, int, u_char *, oid *,int));
 RETSIGTYPE restart_doit __P((int));
 int restart_hook __P((int, u_char *, u_char, int, u_char *, oid *,int));
