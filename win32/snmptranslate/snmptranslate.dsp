@@ -84,6 +84,10 @@ LINK32=link.exe
 # Name "snmptranslate - Win32 Debug"
 # Begin Source File
 
+SOURCE=..\..\snmplib\getopt.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\apps\snmptranslate.c
 # End Source File
 # End Target
