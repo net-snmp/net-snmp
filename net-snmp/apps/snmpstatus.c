@@ -98,9 +98,10 @@ void snmp_v2_setup __P((struct snmp_session*, char *, char *, char *, char *, u_
 void
 usage __P((void))
 {
-    fprintf(stderr, "Usage: snmpstatus -v 1 [-q] hostname community               or:\n");
-    fprintf(stderr, "Usage: snmpstatus [-v 2] [-q] hostname noAuth                or:\n");
-    fprintf(stderr, "Usage: snmpstatus [-v 2] [-q] hostname srcParty dstParty context\n");
+  fprintf(stderr,"Usage:\n  snmpstatus ");
+  snmp_parse_args_usage(stderr);
+  fprintf(stderr,"\n\n");
+  snmp_parse_args_descriptions(stderr);
 }
 
 char *uptime_string(timeticks, buf)
