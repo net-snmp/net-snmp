@@ -162,25 +162,25 @@ To print multiple pieces to a single line in one call, use:
 /*****************************************************************/
 /********************Start public  macros ************************/
 
-#define DEBUGMSG(x)        (_DBG_IF_ ? debugmsg x :0)
-#define DEBUGMSGT(x)       (_DBG_IF_ ? __DBGMSGT(x) :0)
-#define DEBUGTRACE         (_DBG_IF_ ? __DBGTRACE :0)
-#define DEBUGMSGL(x)       (_DBG_IF_ ? __DBGMSGL(x) :0)
-#define DEBUGMSGTL(x)      (_DBG_IF_ ? __DBGMSGTL(x) :0)
-#define DEBUGMSGOID(x)     (_DBG_IF_ ? __DBGMSGOID(x) :0)
-#define DEBUGMSGHEX(x)     (_DBG_IF_ ? __DBGMSGHEX(x) :0)
-#define DEBUGMSGHEXTLI(x)  (_DBG_IF_ ? __DBGMSGHEXTLI(x) :0)
-#define DEBUGINDENT()      (_DBG_IF_ ? __DBGINDENT() :0)
-#define DEBUGINDENTADD(x)  (_DBG_IF_ ? __DBGINDENTADD(x) :0)
-#define DEBUGINDENTMORE()  (_DBG_IF_ ? __DBGINDENTMORE() :0)
-#define DEBUGINDENTLESS()  (_DBG_IF_ ? __DBGINDENTLESS() :0)
-#define DEBUGPRINTINDENT(token) (_DBG_IF_ ? __DBGPRINTINDENT(token) :0)
+#define DEBUGMSG(x)        if (_DBG_IF_) {debugmsg x;}
+#define DEBUGMSGT(x)       if (_DBG_IF_) {__DBGMSGT(x);}
+#define DEBUGTRACE         if (_DBG_IF_) {__DBGTRACE;}
+#define DEBUGMSGL(x)       if (_DBG_IF_) {__DBGMSGL(x);}
+#define DEBUGMSGTL(x)      if (_DBG_IF_) {__DBGMSGTL(x);}
+#define DEBUGMSGOID(x)     if (_DBG_IF_) {__DBGMSGOID(x);}
+#define DEBUGMSGHEX(x)     if (_DBG_IF_) {__DBGMSGHEX(x);}
+#define DEBUGMSGHEXTLI(x)  if (_DBG_IF_) {__DBGMSGHEXTLI(x);}
+#define DEBUGINDENT()      if (_DBG_IF_) {__DBGINDENT();}
+#define DEBUGINDENTADD(x)  if (_DBG_IF_) {__DBGINDENTADD(x);}
+#define DEBUGINDENTMORE()  if (_DBG_IF_) {__DBGINDENTMORE();}
+#define DEBUGINDENTLESS()  if (_DBG_IF_) {__DBGINDENTLESS();}
+#define DEBUGPRINTINDENT(token) if (_DBG_IF_) {__DBGPRINTINDENT(token);}
 
 
-#define DEBUGDUMPHEADER(token,x) (_DBG_IF_ ? __DBGDUMPHEADER(token,x) :0)
+#define DEBUGDUMPHEADER(token,x) if (_DBG_IF_) {__DBGDUMPHEADER(token,x);}
 
 #define DEBUGDUMPSETUP(token,buf,len) \
-                                 (_DBG_IF_ ? __DBGDUMPSETUP(token,buf,len) :0)
+                                 if (_DBG_IF_) {__DBGDUMPSETUP(token,buf,len);}
 
 #else /* SNMP_NO_DEBUGGING := enable streamlining of the code */
 
