@@ -457,6 +457,9 @@ free_tree(Tree)
     if (Tree->label)
         free(Tree->label);
 
+    if (Tree->number_modules > 1 )
+        free(Tree->module_list);
+
     free_tree(Tree->child_list);
     free (Tree);
 }
@@ -622,6 +625,8 @@ init_tree_roots()
     tp->hint = NULL;
     tp->label = Strdup("joint-iso-ccitt");
     tp->modid = base_modid;
+    tp->number_modules = 1;
+    tp->module_list = &(tp->modid);
     tp->subid = 2;
     tp->tc_index = -1;
     tp->type = 0;
@@ -643,6 +648,8 @@ init_tree_roots()
     tp->hint = NULL;
     tp->label = Strdup("ccitt");
     tp->modid = base_modid;
+    tp->number_modules = 1;
+    tp->module_list = &(tp->modid);
     tp->subid = 0;
     tp->tc_index = -1;
     tp->type = 0;
@@ -663,6 +670,8 @@ init_tree_roots()
     tp->enums = NULL;
     tp->hint = NULL;
     tp->modid = base_modid;
+    tp->number_modules = 1;
+    tp->module_list = &(tp->modid);
     tp->label = Strdup("iso");
     tp->subid = 1;
     tp->tc_index = -1;
@@ -686,12 +695,21 @@ find_tree_node( name, modid )
     int   modid;
 {
     struct tree *tp, *headtp;
+    int count, *int_p;
 
     headtp = tbuckets[NBUCKET(name_hash(name))];
     for ( tp = headtp ; tp ; tp=tp->next ) {
-        if ( !strcmp(tp->label, name) && 
-		((tp->modid == modid) || (modid == -1)))
-            return(tp);
+        if ( !strcmp(tp->label, name) ) {
+
+            if ( modid == -1 )	/* Any module */
+                return(tp);
+
+            for (int_p = tp->module_list, count=0 ;
+                       count < tp->number_modules ;
+                       ++count, ++int_p )
+                if ( *int_p == modid )
+                    return(tp);
+        }
     }
 
     return(NULL);
@@ -795,6 +813,7 @@ do_subtree(root, nodes)
     register struct node *np, **headp;
     struct node *oldnp = NULL, *child_list = NULL, *childp = NULL;
     int hash;
+    int *int_p;
 
     tp = root;
     headp = &nbuckets[NBUCKET(name_hash(tp->label))];
@@ -830,6 +849,16 @@ do_subtree(root, nodes)
             else tp = tp->next_peer;
         if (tp) {
 	    if (strcmp (tp->label, np->label) == 0) {
+		    /* Update list of modules */
+                int_p = Malloc((tp->number_modules+1) * sizeof(int));
+                bcopy((char *)tp->module_list, (char *)int_p,
+			((tp->number_modules)*sizeof(int)) );
+                int_p[tp->number_modules] = np->modid;
+                if (tp->number_modules > 1 )
+                   free(tp->module_list);
+                ++tp->number_modules;
+                tp->module_list = int_p;
+		    /* Handle children */
 		do_subtree(tp, nodes);
 		continue;
             }
@@ -837,7 +866,7 @@ do_subtree(root, nodes)
                 !strncmp( tp->label, ANON, ANON_LEN)) {
                 anon_tp = tp;	/* Need to merge these two trees later */
             }
-	    if (mib_warnings)
+	    else if (mib_warnings)
 		fprintf (stderr, "Warning: %s.%ld is both %s and %s\n",
 			root->label, np->subid, tp->label, np->label);
 	}
@@ -847,6 +876,8 @@ do_subtree(root, nodes)
         tp->label = np->label;
         np->label = NULL;
         tp->modid = np->modid;
+        tp->number_modules = 1;
+        tp->module_list = &(tp->modid);
         tp->subid = np->subid;
         tp->tc_index = np->tc_index;
         tp->type = translation_table[np->type];
@@ -2450,6 +2481,7 @@ main(argc, argv)
     char *argv[];
 {
     int i;
+    struct tree *tp;
     mib_warnings = 2;
 
     init_mib();
@@ -2460,7 +2492,8 @@ main(argc, argv)
 	for ( i=1 ; i<argc ; i++ )
 	    read_mib( argv[i] );
 
-    print_subtree( stdout, tree_head, 0 );
+    for ( tp = tree_head ; tp ; tp=tp->next_peer )
+        print_subtree( stdout, tp, 0 );
     free_tree( tree_head );
 
     return 0;
