@@ -2,6 +2,12 @@
 
 Just a quick note on porting and sending me patches:
 
+First off, you probably should subscribe to
+ucd-snmp-coders@ece.ucdavis.edu by sending a message to
+ucd-snmp-coders-request@ece.ucdavis.edu with a subject line of
+subscribe.  This is a mailing list to discuss all oft the coding
+aspects of the project.
+
 Quite a while back I started using the GNU autoconf testing suite to
 greatly enhance portability.  Because of this porting to new
 architectures is much easier than before.  However, new people porting
@@ -54,7 +60,8 @@ In source code:
 In configure.in:
   AC_CHECK_STRUCT_FOR([
 #include lines
-], structure, member)
+], STRUCTURE, MEMBER)
+   ^^^^^^^^^  ^^^^^^  (change)
 
 In acconfig.h:
   #undef STRUCT_STRUCTURE_HAS_MEMBER
