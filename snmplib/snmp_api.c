@@ -64,6 +64,8 @@ SOFTWARE.
 #include "snmp.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
+#include "party.h"
+#include "context.h"
 
 #define PACKET_LENGTH	8000
 
@@ -666,6 +668,9 @@ snmp_parse(session, pdu, data, length)
     int community_length = 128;
     struct internal_variable_list *vp = NULL;
     oid	    objid[MAX_NAME_LEN];
+    struct partyEntry *srcp, *dstp;
+    struct contextEntry *cxp;
+
 
     len = length;
     (void)asn_parse_header(data, &len, &type);
@@ -717,14 +722,16 @@ snmp_parse(session, pdu, data, length)
     if (data == NULL)
 	return -1;
 
-    /* the calling sequence for has_access is wrong - fix it or nuke it XXX */
-    /* should the following be for version 2?  If so make it so, if not,
-     * nuke it.
-     */
+    if (((srcp = party_getEntry(pdu->srcParty, pdu->srcPartyLen)) == NULL)
+        || ((dstp = party_getEntry(pdu->dstParty, pdu->dstPartyLen)) == NULL)
+        || ((cxp = context_getEntry(pdu->context, pdu->contextLen)) == NULL))
+      return -1;
+
     if (version == SNMP_SECURITY_1
-	&& !has_access(msg_type, pdu->srcParty, pdu->srcPartyLen,
-		       pdu->dstParty, pdu->dstPartyLen))
+	&& !has_access(msg_type, srcp->partyIndex, dstp->partyIndex,
+                    cxp->contextIndex))
 	return -1;
+
     pdu->command = msg_type;
     if (pdu->command != TRP_REQ_MSG){
 	data = asn_parse_int(data, &length, &type, &pdu->reqid,
