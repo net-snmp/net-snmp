@@ -211,14 +211,14 @@ int snmpTargetParams_addParamName(
 {
   int    len;
   if (cptr == 0) {
-    DEBUGP("ERROR snmpTargetParamsEntry: no param name in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargetParamsEntry: no param name in config string\n"));
     return(0);
   }
   else {
     len = strlen(cptr);    
     /* spec check for string 1-32 */
     if (len < 1 || len > 32)  {
-      DEBUGP("ERROR snmpTargetParamsEntry: param name out of range in config string\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargetParamsEntry: param name out of range in config string\n"));
       return(0);
     }
     entry->paramName = (char *)malloc(sizeof(char) * (len + 1));
@@ -234,16 +234,16 @@ int snmpTargetParams_addMPModel(
      char   *cptr)
 {
   if (cptr == 0) {
-    DEBUGP("ERROR snmpTargetParamsEntry: no mp model in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargetParamsEntry: no mp model in config string\n"));
     return(0);
   }
   else if (!(isdigit(*cptr))) {
-    DEBUGP("ERROR snmpTargeParamsEntry: mp model is not digit in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargeParamsEntry: mp model is not digit in config string\n"));
     return(0);
   }
   /* spec check MP Model >= 0 */
   else if ( (entry->mpModel = (int)strtol(cptr, (char **)NULL, 0)) < 0) {
-    DEBUGP("ERROR snmpTargeParamsEntry: mp model out of range in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargeParamsEntry: mp model out of range in config string\n"));
     return(0);
   }
   return(1);
@@ -255,16 +255,16 @@ int snmpTargetParams_addSecModel(
      char   *cptr)
 {
   if (cptr == 0) {
-    DEBUGP("ERROR snmpTargetParamsEntry: no sec model in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargetParamsEntry: no sec model in config string\n"));
     return(0);
   }
   else if (!(isdigit(*cptr))) {
-    DEBUGP("ERROR snmpTargeParamsEntry: security model is not digit in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargeParamsEntry: security model is not digit in config string\n"));
     return(0);
   }
   /* spec check Sec. Model > 0 */
   else if ( (entry->secModel = (int)strtol(cptr, (char **)NULL, 0)) <= 0) {
-      DEBUGP("ERROR snmpTargetParamsEntry: security model out of range in config string\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargetParamsEntry: security model out of range in config string\n"));
       return(0);
   }
   return(1);
@@ -277,7 +277,7 @@ int snmpTargetParams_addSecName(
 {
   int    len;
   if (cptr == 0) {
-    DEBUGP("ERROR snmpTargetParamsEntry: no security name in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargetParamsEntry: no security name in config string\n"));
     return(0);
   }
   else {
@@ -295,16 +295,16 @@ int snmpTargetParams_addSecLevel(
      char   *cptr)
 {
   if (cptr == 0) {
-    DEBUGP("ERROR snmpTargetParamsEntry: no security level in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargetParamsEntry: no security level in config string\n"));
     return(0);
   }
   else if (!(isdigit(*cptr)))  {
-    DEBUGP("ERROR snmpTargeParamsEntry: security level is not digit in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargeParamsEntry: security level is not digit in config string\n"));
     return(0);
    }
   /* no spec range check, but noAuthNoPriv is 1 so... */
   else if ( (entry->secLevel = (int)strtol(cptr, (char **)NULL, 0)) <= 0 ) {
-    DEBUGP("ERROR snmpTargeParamsEntry: security level is not greater than 0 in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargeParamsEntry: security level is not greater than 0 in config string\n"));
     return(0);
   }
   return(1);
@@ -316,11 +316,11 @@ int snmpTargetParams_addStorageType(
      char   *cptr)
 {
   if (cptr == 0) {
-    DEBUGP("ERROR snmpTargetParamsEntry: no storage type in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargetParamsEntry: no storage type in config string\n"));
     return(0);
   }
   else if (!(isdigit(*cptr))) {
-    DEBUGP("ERROR snmpTargeParamsEntry: storage type is not digit in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargeParamsEntry: storage type is not digit in config string\n"));
     return(0);
   }
   /* check that storage type is a possible value */
@@ -330,11 +330,11 @@ int snmpTargetParams_addStorageType(
 	    (entry->storageType != SNMP_STORAGE_NONVOLATILE)  &&
 	    (entry->storageType != SNMP_STORAGE_PERMANENT) && 
 	    (entry->storageType != SNMP_STORAGE_READONLY) )  {
-    DEBUGP("ERROR snmpTargeParamsEntry: storage type is not a valid value of");
-    DEBUGP(" other(%d), volatile(%d), nonvolatile(%d), permanent(%d), or ",
+    DEBUGMSGTL(("snmpTargetParamsEntry", "ERROR snmpTargeParamsEntry: storage type is not a valid value of"));
+    DEBUGMSG(("snmpTargetParamsEntry", " other(%d), volatile(%d), nonvolatile(%d), permanent(%d), or ",
 	   SNMP_STORAGE_OTHER, SNMP_STORAGE_VOLATILE, SNMP_STORAGE_NONVOLATILE,
-	   SNMP_STORAGE_PERMANENT);
-    DEBUGP("readonly(%d) in config string.\n", SNMP_STORAGE_READONLY);
+	   SNMP_STORAGE_PERMANENT));
+    DEBUGMSGTL(("snmpTargetParamsEntry","readonly(%d) in config string.\n", SNMP_STORAGE_READONLY));
 
     return(0);
   }
@@ -347,11 +347,11 @@ int snmpTargetParams_addRowStatus(
      char   *cptr)
 {
   if (cptr == 0) {
-    DEBUGP("ERROR snmpTargetParamsEntry: no row status in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargetParamsEntry: no row status in config string\n"));
     return(0);
   }
   else if (!(isdigit(*cptr)))  {
-    DEBUGP("ERROR snmpTargeParamsEntry: row status is not digit in config string\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","ERROR snmpTargeParamsEntry: row status is not digit in config string\n"));
     return(0);
   }
   /* check that row status is a valid value */
@@ -359,9 +359,9 @@ int snmpTargetParams_addRowStatus(
 	     != SNMP_ROW_ACTIVE) &&
 	    (entry->rowStatus != SNMP_ROW_NOTINSERVICE) &&
 	    (entry->rowStatus != SNMP_ROW_NOTREADY) ) {
-    DEBUGP("ERROR snmpTargetParamsEntry: Row Status is not a valid value of ");
-    DEBUGP("active(%d), notinservice(%d), or notready(%d) in config string.\n",
-	   SNMP_ROW_ACTIVE, SNMP_ROW_NOTINSERVICE, SNMP_ROW_NOTREADY);
+    DEBUGMSGTL(("snmpTargetParamsEntry", "ERROR snmpTargetParamsEntry: Row Status is not a valid value of "));
+    DEBUGMSG(("snmpTargetParamsEntry", "active(%d), notinservice(%d), or notready(%d) in config string.\n",
+	   SNMP_ROW_ACTIVE, SNMP_ROW_NOTINSERVICE, SNMP_ROW_NOTREADY));
 
     return(0);
   }
@@ -416,7 +416,7 @@ void snmpd_parse_config_targetParams(
 	  newEntry->paramName, newEntry->mpModel,  newEntry->secModel, 
 	  newEntry->secName,   newEntry->secLevel, newEntry->storageType,
 	  newEntry->rowStatus);
-  DEBUGP(buff);
+  DEBUGMSGTL(("snmpTargetParamsEntry", buff));
 
   snmpTargetParamTable_addToList(newEntry, &aPTable);
 } /* snmpd_parse_config_target */
@@ -557,18 +557,18 @@ write_snmpTargetParamsMPModel(
 
   /* check incoming variable */
   if (var_val_type != ASN_INTEGER) {
-      DEBUGP("write to snmpTargetParamsMPModel : not ASN_INTEGER\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsMPModel : not ASN_INTEGER\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > (size = sizeof(long_ret))) {
-      DEBUGP("write to snmpTargetParamsMPModel : bad length\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsMPModel : bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   size = sizeof(long_ret);
   asn_parse_int(var_val, &bigsize, &var_val_type, &long_ret, size);
   /* spec check range */
   if (long_ret < 0) {
-    DEBUGP("write to snmpTargetParamsMPModel : MP Model out of range\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsMPModel : MP Model out of range\n"));
     return SNMP_ERR_INCONSISTENTVALUE;
   }
 
@@ -576,17 +576,17 @@ write_snmpTargetParamsMPModel(
   snmpTargetParamsOID[snmpTargetParamsOIDLen-1] = SNMPTARGETPARAMSMPMODELCOLUMN;
   if ((temp_struct = search_snmpTargetParamsTable(snmpTargetParamsOID, snmpTargetParamsOIDLen, 
 				     name, &name_len, 1)) == 0 ) {
-    DEBUGP("write to snmpTargetParamsMPModel : BAD OID\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsMPModel : BAD OID\n"));
     return SNMP_ERR_NOSUCHNAME;
   }
   /* row exists, check if it is changeable */
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
-    DEBUGP("write to snmpTargetParamMPModel : row is read only\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamMPModel : row is read only\n"));
     return SNMP_ERR_READONLY;
   }
   /* check if row is active */
   if (temp_struct->rowStatus == SNMP_ROW_ACTIVE) {
-    DEBUGP("write to snmpTargetParamsMPModel : This change not allowed in active row.\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsMPModel : This change not allowed in active row.\n"));
     return SNMP_ERR_INCONSISTENTVALUE;
   }
   /* Finally, we're golden, should we save value? */
@@ -618,18 +618,18 @@ write_snmpTargetParamsSecurityModel(
 
   /* check incoming variable */
   if (var_val_type != ASN_INTEGER) {
-      DEBUGP("write to snmpTargetParamsSecurityModel : not ASN_INTEGER\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityModel : not ASN_INTEGER\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > (size = sizeof(long_ret))) {
-      DEBUGP("write to snmpTargetParamsSecurityModel : bad length\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityModel : bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   size = sizeof(long_ret);
   asn_parse_int(var_val, &bigsize, &var_val_type, &long_ret, size);
   /* spec check range */
   if (long_ret <= 0)  {
-    DEBUGP("write to snmpTargetParamsSecModel : Security Model out of range\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecModel : Security Model out of range\n"));
     return SNMP_ERR_INCONSISTENTVALUE;
   }
 
@@ -637,17 +637,17 @@ write_snmpTargetParamsSecurityModel(
   snmpTargetParamsOID[snmpTargetParamsOIDLen-1] = SNMPTARGETPARAMSSECURITYMODELCOLUMN;
   if ((temp_struct = search_snmpTargetParamsTable(snmpTargetParamsOID, snmpTargetParamsOIDLen, 
 				     name, &name_len, 1)) == 0 ) {
-    DEBUGP("write to snmpTargetParamSecurityModel : BAD OID!\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamSecurityModel : BAD OID!\n"));
       return SNMP_ERR_NOSUCHNAME;
   }
   /* row exists, check if it is changeable */
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
-    DEBUGP("write to snmpTargetParamSecurityModel : row is read only\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamSecurityModel : row is read only\n"));
     return SNMP_ERR_READONLY;
   }
   /* check if row active */
   if (temp_struct->rowStatus == SNMP_ROW_ACTIVE) {
-    DEBUGP("write to snmpTargetParamSecurityModel : This change not allowed in active row.\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamSecurityModel : This change not allowed in active row.\n"));
     return SNMP_ERR_INCONSISTENTVALUE;
   }
 
@@ -681,11 +681,11 @@ write_snmpTargetParamsSecurityName(
 
   /* check incoming variable */
   if (var_val_type != ASN_OCTET_STR) {
-      DEBUGP("write to snmpTargetParamsSecurityName : not ASN_OCTET_STR\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityName : not ASN_OCTET_STR\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > (size = sizeof(string))) {
-      DEBUGP("write to snmpTargetParamsSecurityName : bad length\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityName : bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
 
@@ -693,7 +693,7 @@ write_snmpTargetParamsSecurityName(
   size = sizeof(string);
   asn_parse_string(var_val, &bigsize, &var_val_type, string, &size);
   if (size > 255 || size < 0) {
-    DEBUGP("write to snmpTargetParamsSecurityName : bad length\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityName : bad length\n"));
     return SNMP_ERR_WRONGLENGTH;
   }
 
@@ -701,17 +701,17 @@ write_snmpTargetParamsSecurityName(
   snmpTargetParamsOID[snmpTargetParamsOIDLen-1] = SNMPTARGETPARAMSSECURITYNAMECOLUMN;
   if ((temp_struct = search_snmpTargetParamsTable(snmpTargetParamsOID, snmpTargetParamsOIDLen, 
 				     name, &name_len, 1)) == 0 ) {
-    DEBUGP("write to snmpTargetParamsSecurityName : BAD OID!\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityName : BAD OID!\n"));
     return SNMP_ERR_NOSUCHNAME;
   }
   /* row exists, check if it is changeable */
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
-    DEBUGP("write to snmpTargetParamsSecurityName : row is read only\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityName : row is read only\n"));
     return SNMP_ERR_READONLY;
   }
   /* check if row active */
   if (temp_struct->rowStatus == SNMP_ROW_ACTIVE) {
-    DEBUGP("write to snmpTargetParamsSecurityName : This change not allowed in active row.\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityName : This change not allowed in active row.\n"));
     return SNMP_ERR_INCONSISTENTVALUE;
   }
 
@@ -747,18 +747,18 @@ write_snmpTargetParamsSecurityLevel(
  
   /* check incoming variable */
   if (var_val_type != ASN_INTEGER) {
-      DEBUGP("write to snmpTargetParamsSecurityLevel : not ASN_INTEGER\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityLevel : not ASN_INTEGER\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > (size = sizeof(long_ret))) {
-      DEBUGP("write to snmpTargetParamsSecurityLevel : bad length\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityLevel : bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   size = sizeof(long_ret);
   asn_parse_int(var_val, &bigsize, &var_val_type, &long_ret, size);
   /* spec check, no spec check, but noAuthNoPriv is 1 so... */
   if (long_ret <= 0 )  {
-    DEBUGP("write to snmpTargeParamsSecurityLevel: security level is not noAuthNoPriv(1) or higher\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargeParamsSecurityLevel: security level is not noAuthNoPriv(1) or higher\n"));
     return SNMP_ERR_INCONSISTENTVALUE;
   }
 
@@ -766,17 +766,17 @@ write_snmpTargetParamsSecurityLevel(
   snmpTargetParamsOID[snmpTargetParamsOIDLen-1] = SNMPTARGETPARAMSSECURITYLEVELCOLUMN;
   if ((temp_struct = search_snmpTargetParamsTable(snmpTargetParamsOID, snmpTargetParamsOIDLen, 
 				     name, &name_len, 1)) == 0 ) {
-    DEBUGP("write to snmpTargetParamsSecurityLevel : BAD OID!\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityLevel : BAD OID!\n"));
     return SNMP_ERR_NOSUCHNAME;
   }
   /* row exists, check if it is changeable */
   if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
-    DEBUGP("write to snmpTargetParamsSecurityLevel : row is read only\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityLevel : row is read only\n"));
     return SNMP_ERR_READONLY;
   }
   /* check if row active */
   if (temp_struct->rowStatus == SNMP_ROW_ACTIVE) {
-    DEBUGP("write to snmpTargetParamsSecurityLevel : This change not allowed in active row.\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsSecurityLevel : This change not allowed in active row.\n"));
     return SNMP_ERR_INCONSISTENTVALUE;
   }
 
@@ -809,11 +809,11 @@ write_snmpTargetParamsStorageType(
   struct targetParamTable_struct *temp_struct;
 
   if (var_val_type != ASN_INTEGER) {
-      DEBUGP("write to snmpTargetParamsStorageType not ASN_INTEGER\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsStorageType not ASN_INTEGER\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > (size = sizeof(long_ret))) {
-      DEBUGP("write to snmpTargetParamsStorageType: bad length\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsStorageType: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   size = sizeof(long_ret);
@@ -821,9 +821,9 @@ write_snmpTargetParamsStorageType(
   
   if ( (long_ret != SNMP_STORAGE_OTHER) && (long_ret != SNMP_STORAGE_VOLATILE) &&
        (long_ret != SNMP_STORAGE_NONVOLATILE) )  {
-    DEBUGP("write to snmpTargetParamsStorageType : attempted storage type not a valid");
-    DEBUGP("  value of other(%d), volatile(%d), or nonvolatile(%d)\n", 
-	   SNMP_STORAGE_OTHER, SNMP_STORAGE_VOLATILE, SNMP_STORAGE_NONVOLATILE);
+    DEBUGMSGTL(("snmpTargetParamsEntry", "write to snmpTargetParamsStorageType : attempted storage type not a valid"));
+    DEBUGMSG(("snmpTargetParamsEntry", "  value of other(%d), volatile(%d), or nonvolatile(%d)\n", 
+	   SNMP_STORAGE_OTHER, SNMP_STORAGE_VOLATILE, SNMP_STORAGE_NONVOLATILE));
     return SNMP_ERR_INCONSISTENTVALUE;
   }
 
@@ -831,13 +831,13 @@ write_snmpTargetParamsStorageType(
   snmpTargetParamsOID[snmpTargetParamsOIDLen-1] = SNMPTARGETPARAMSSTORAGETYPECOLUMN;
   if ((temp_struct = search_snmpTargetParamsTable(snmpTargetParamsOID, snmpTargetParamsOIDLen, 
 				     name, &name_len, 1)) == 0 ) {
-    DEBUGP("write to snmpTargetParamStorageType : BAD OID\n");
+    DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamStorageType : BAD OID\n"));
     return SNMP_ERR_NOSUCHNAME;
   }
   if ( (temp_struct->storageType == SNMP_STORAGE_PERMANENT) || 
        (temp_struct->storageType == SNMP_STORAGE_READONLY) )  {
-    DEBUGP("write to snmpTargetParamsStorageType : row has unchangeable storage status: %d\n",
-	   temp_struct->storageType);
+    DEBUGMSGTL(("snmpTargetParamsEntry", "write to snmpTargetParamsStorageType : row has unchangeable storage status: %d\n",
+	   temp_struct->storageType));
     return SNMP_ERR_INCONSISTENTVALUE;
   }
 
@@ -902,11 +902,11 @@ write_snmpTargetParamsRowStatus(
   struct targetParamTable_struct *temp_struct; /*also treated as boolean for row lookup*/
 
   if (var_val_type != ASN_INTEGER) {
-      DEBUGP("write to snmpTargetParamsRowStatus not ASN_INTEGER\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsRowStatus not ASN_INTEGER\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > (size = sizeof(long_ret))) {
-      DEBUGP("write to snmpTargetParamsRowStatus: bad length\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamsRowStatus: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   size = sizeof(long_ret);
@@ -929,13 +929,13 @@ write_snmpTargetParamsRowStatus(
   else {  /* row exists */
     /* check if it is changeable */
     if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
-      DEBUGP("write to snmpTargetParamRowStatus : row is read only\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamRowStatus : row is read only\n"));
       return SNMP_ERR_READONLY;
     }
     /* check if row is to be destroyed (note: it is ok to destroy notReady row!) */
     else if (long_ret == SNMP_ROW_DESTROY)  {
       if (temp_struct->storageType == SNMP_STORAGE_PERMANENT) {
-	DEBUGP("write to snmpTargetParamRowStatus : unable to destroy permanent row\n");
+	DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamRowStatus : unable to destroy permanent row\n"));
 	return SNMP_ERR_INCONSISTENTVALUE;
       }
       else  {
@@ -944,7 +944,7 @@ write_snmpTargetParamsRowStatus(
     }
     /* check if row is new and can be changed from notready yet */
     else if (temp_struct->rowStatus == SNMP_ROW_NOTREADY) {
-      DEBUGP("write to snmpTargeParamRowStatus : unable to change from NOTREADY\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargeParamRowStatus : unable to change from NOTREADY\n"));
       return SNMP_ERR_INCONSISTENTVALUE;
     }  
     /* we now know the row status can be set, check for two valid settings left*/
@@ -954,7 +954,7 @@ write_snmpTargetParamsRowStatus(
     }
     /* not a valid setting */
     else  {
-      DEBUGP("write to snmpTargetParamRowStatus : Bad value for set\n");
+      DEBUGMSGTL(("snmpTargetParamsEntry","write to snmpTargetParamRowStatus : Bad value for set\n"));
       return SNMP_ERR_INCONSISTENTVALUE;
     }
   } /* if row exist */
@@ -965,8 +965,8 @@ write_snmpTargetParamsRowStatus(
       
     case CREATE :
       if (snmpTargetParams_createNewRow(name, name_len) == 0) {
-	DEBUGP("write to snmpTargetParamsRowStatus : ");
-	DEBUGP("failed new row creation, bad OID/index value \n");
+	DEBUGMSGTL(("snmpTargetParamsEntry", "write to snmpTargetParamsRowStatus : "));
+	DEBUGMSG(("snmpTargetParamsEntry","failed new row creation, bad OID/index value \n"));
 	return SNMP_ERR_GENERR;
       }
       break;

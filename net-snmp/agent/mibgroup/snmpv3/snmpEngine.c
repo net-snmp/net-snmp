@@ -109,11 +109,11 @@ write_engineBoots(
   int engineIDBufLen = 0;
 
   if (var_val_type != ASN_INTEGER){
-      DEBUGP("write to engineBoots not ASN_INTEGER\n");
+      DEBUGMSGTL(("snmpEngine","write to engineBoots not ASN_INTEGER\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > sizeof(long_ret)){
-      DEBUGP("write to engineBoots: bad length\n");
+      DEBUGMSGTL(("snmpEngine","write to engineBoots: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   long_ret = *((long *) var_val);
@@ -151,11 +151,11 @@ write_engineTime(
   int engineIDBufLen = 0;
 
   if (var_val_type != ASN_INTEGER){
-      DEBUGP("write to engineTime not ASN_INTEGER\n");
+      DEBUGMSGTL(("snmpEngine","write to engineTime not ASN_INTEGER\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > sizeof(long_ret)){
-      DEBUGP("write to engineTime: bad length\n");
+      DEBUGMSGTL(("snmpEngine","write to engineTime: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   long_ret = *((long *) var_val);

@@ -78,7 +78,7 @@ var_sysORTable(struct variable *vp,
   if (header_simple_table(vp, name, length, exact, var_len, write_method, numEntries))
     return NULL;
 
-  DEBUGP("sysORTable -- ");
+  DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- "));
   for(i = 1, ptr=table; ptr != NULL && i < name[*length-1];
       ptr = ptr->next, i++) {
     DEBUGMSGTL(("mibII/sysORTable", "sysORTable -- %d != %d\n",i,name[*length-1]));

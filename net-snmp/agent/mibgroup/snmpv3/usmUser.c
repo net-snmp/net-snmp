@@ -117,36 +117,36 @@ usm_parse_oid(oid *oidIndex, int oidLen,
 
   /* first check the validity of the oid */
   if (oidLen <= 0 || oidIndex < 0) {
-    DEBUGP("parse_oid: null oid or zero length oid passed in\n");
+    DEBUGMSGTL(("usmUser","parse_oid: null oid or zero length oid passed in\n"));
     return 1;
   }
   engineIDL = *oidIndex;		/* initial engineID length */
   if (oidLen < engineIDL + 2) {
-    DEBUGP("parse_oid: invalid oid length: less than the engineIDLen\n");
+    DEBUGMSGTL(("usmUser","parse_oid: invalid oid length: less than the engineIDLen\n"));
     return 1;
   }
   nameL = oidIndex[engineIDL+1];	/* the initial name length */
   if (oidLen != engineIDL + nameL + 2) {
-    DEBUGP("parse_oid: invalid oid length: length is not exact\n");
+    DEBUGMSGTL(("usmUser","parse_oid: invalid oid length: length is not exact\n"));
     return 1;
   }
 
   /* its valid, malloc the space and store the results */
   if (engineID == NULL || name == NULL) {
-    DEBUGP("parse_oid: null storage pointer passed in.\n");
+    DEBUGMSGTL(("usmUser","parse_oid: null storage pointer passed in.\n"));
     return 1;
   }
 
   *engineID = (unsigned char *) malloc(engineIDL*sizeof(unsigned char));
   if (*engineID == NULL) {
-    DEBUGP("parse_oid: malloc of the engineID failed\n");
+    DEBUGMSGTL(("usmUser","parse_oid: malloc of the engineID failed\n"));
     return 1;
   }
   *engineIDLen = engineIDL;
 
   *name = (unsigned char *) malloc((nameL+1)*sizeof(unsigned char));
   if (*name == NULL) {
-    DEBUGP("parse_oid: malloc of the name failed\n");
+    DEBUGMSGTL(("usmUser","parse_oid: malloc of the name failed\n"));
     return 1;
   }
   *nameLen = nameL;
@@ -273,12 +273,12 @@ var_usmUser(
           pptr = nptr, nptr = nptr->next) {
         indexOid = usm_generate_OID(vp->name, vp->namelen, nptr, &len);
         result = snmp_oid_compare(name, *length, indexOid, len);
-        DEBUGP("usmUser: Checking user: %s - ", nptr->name);
+        DEBUGMSGTL(("usmUser", "Checking user: %s - ", nptr->name));
         for(i = 0; i < nptr->engineIDLen; i++)
-          DEBUGP(" %x",nptr->engineID[i]);
-        DEBUGP(" - %d \n  -> OID: ", result);
-        DEBUGPOID(indexOid, len);
-        DEBUGP("\n");
+          DEBUGMSG(("usmUser", " %x",nptr->engineID[i]));
+        DEBUGMSG(("usmUser"," - %d \n  -> OID: ", result));
+        DEBUGMSGOID(("usmUser", indexOid, len));
+        DEBUGMSG(("usmUser","\n"));
         if (exact) {
           if (result == 0) {
             free(indexOid);
@@ -309,12 +309,12 @@ var_usmUser(
       indexOid = usm_generate_OID(vp->name, vp->namelen, uptr, &len);
       *length = len;
       memmove(name, indexOid, len*sizeof(oid));
-      DEBUGP("usmUser: Found user: %s - ", uptr->name);
+      DEBUGMSGTL(("usmUser", "Found user: %s - ", uptr->name));
       for(i = 0; i < uptr->engineIDLen; i++)
-        DEBUGP(" %x",uptr->engineID[i]);
-      DEBUGP("\n  -> OID: ");
-      DEBUGPOID(indexOid, len);
-      DEBUGP("\n");
+        DEBUGMSG(("usmUser", " %x",uptr->engineID[i]));
+      DEBUGMSG(("usmUser","\n  -> OID: "));
+      DEBUGMSGOID(("usmUser", indexOid, len));
+      DEBUGMSG(("usmUser","\n"));
     } else {
       indexOid = NULL;
     }
@@ -439,11 +439,11 @@ write_usmUserSpinLock(
   static long long_ret;
 
   if (var_val_type != ASN_INTEGER){
-      DEBUGP("write to usmUserSpinLock not ASN_INTEGER\n");
+      DEBUGMSGTL(("usmUser","write to usmUserSpinLock not ASN_INTEGER\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > sizeof(long_ret)){
-      DEBUGP("write to usmUserSpinLock: bad length\n");
+      DEBUGMSGTL(("usmUser","write to usmUserSpinLock: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   long_ret = *((long *) var_val);
@@ -498,11 +498,11 @@ write_usmUserCloneFrom(
   int size;
   
   if (var_val_type != ASN_OBJECT_ID){
-      DEBUGP("write to usmUserCloneFrom not ASN_OBJECT_ID\n");
+      DEBUGMSGTL(("usmUser","write to usmUserCloneFrom not ASN_OBJECT_ID\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > sizeof(objid)){
-      DEBUGP("write to usmUserCloneFrom: bad length\n");
+      DEBUGMSGTL(("usmUser","write to usmUserCloneFrom: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   if (action == COMMIT){
@@ -584,11 +584,11 @@ write_usmUserAuthProtocol(
   int size;
 
   if (var_val_type != ASN_OBJECT_ID){
-      DEBUGP("write to usmUserAuthProtocol not ASN_OBJECT_ID\n");
+      DEBUGMSGTL(("usmUser","write to usmUserAuthProtocol not ASN_OBJECT_ID\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > sizeof(objid)){
-      DEBUGP("write to usmUserAuthProtocol: bad length\n");
+      DEBUGMSGTL(("usmUser","write to usmUserAuthProtocol: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   if (action == COMMIT){
@@ -676,12 +676,12 @@ write_usmUserAuthKeyChange(
     fname = fnOwnAuthKey;
   
   if (var_val_type != ASN_OCTET_STR) {
-    DEBUGP("write to %s not ASN_OCTET_STR\n", fname);
+    DEBUGMSGTL(("usmUser","write to %s not ASN_OCTET_STR\n", fname));
     return SNMP_ERR_WRONGTYPE;
   }
 
   if (var_val_len > sizeof(string)) {
-    DEBUGP("write to %s: bad length\n", fname);
+    DEBUGMSGTL(("usmUser","write to %s: bad length\n", fname));
     return SNMP_ERR_WRONGLENGTH;
   }
 
@@ -692,16 +692,16 @@ write_usmUserAuthKeyChange(
     }
 
     /* Change the key. */
-    DEBUGP("%s: changing auth key for user %s\n", fname, uptr->secName);
+    DEBUGMSGTL(("usmUser","%s: changing auth key for user %s\n", fname, uptr->secName));
 
     if (decode_keychange(uptr->authProtocol, uptr->authProtocolLen,
                          uptr->authKey, uptr->authKeyLen,
                          var_val, var_val_len,
                          buf, &buflen) != SNMPERR_SUCCESS) {
-      DEBUGP("%s: ... failed\n", fname);
+      DEBUGMSGTL(("usmUser","%s: ... failed\n", fname));
         return SNMP_ERR_GENERR;
     }
-    DEBUGP("%s: ... succeeded\n", fname);
+    DEBUGMSGTL(("usmUser","%s: ... succeeded\n", fname));
     SNMP_FREE(uptr->authKey);
     memdup(&uptr->authKey, buf, buflen);
     uptr->authKeyLen = buflen;
@@ -727,11 +727,11 @@ write_usmUserPrivProtocol(
   int size;
 
   if (var_val_type != ASN_OBJECT_ID){
-      DEBUGP("write to usmUserPrivProtocol not ASN_OBJECT_ID\n");
+      DEBUGMSGTL(("usmUser","write to usmUserPrivProtocol not ASN_OBJECT_ID\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > sizeof(objid)){
-      DEBUGP("write to usmUserPrivProtocol: bad length\n");
+      DEBUGMSGTL(("usmUser","write to usmUserPrivProtocol: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   if (action == COMMIT){
@@ -795,12 +795,12 @@ write_usmUserPrivKeyChange(
     fname = fnOwnPrivKey;
   
   if (var_val_type != ASN_OCTET_STR) {
-    DEBUGP("write to %s not ASN_OCTET_STR\n", fname);
+    DEBUGMSGTL(("usmUser","write to %s not ASN_OCTET_STR\n", fname));
     return SNMP_ERR_WRONGTYPE;
   }
 
   if (var_val_len > sizeof(string)) {
-    DEBUGP("write to %s: bad length\n", fname);
+    DEBUGMSGTL(("usmUser","write to %s: bad length\n", fname));
     return SNMP_ERR_WRONGLENGTH;
   }
 
@@ -811,16 +811,16 @@ write_usmUserPrivKeyChange(
     }
 
     /* Change the key. */
-    DEBUGP("%s: changing priv key for user %s\n", fname, uptr->secName);
+    DEBUGMSGTL(("usmUser","%s: changing priv key for user %s\n", fname, uptr->secName));
 
     if (decode_keychange(uptr->authProtocol, uptr->authProtocolLen,
                          uptr->privKey, uptr->privKeyLen,
                          var_val, var_val_len,
                          buf, &buflen) != SNMPERR_SUCCESS) {
-      DEBUGP("%s: ... failed\n", fname);
+      DEBUGMSGTL(("usmUser","%s: ... failed\n", fname));
         return SNMP_ERR_GENERR;
     }
-    DEBUGP("%s: ... succeeded\n", fname);
+    DEBUGMSGTL(("usmUser","%s: ... succeeded\n", fname));
     SNMP_FREE(uptr->privKey);
     memdup(&uptr->privKey, buf, buflen);
     uptr->privKeyLen = buflen;
@@ -845,11 +845,11 @@ write_usmUserPublic(
   struct usmUser *uptr;
 
   if (var_val_type != ASN_OCTET_STR){
-      DEBUGP("write to usmUserPublic not ASN_OCTET_STR\n");
+      DEBUGMSGTL(("usmUser","write to usmUserPublic not ASN_OCTET_STR\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > sizeof(string)){
-      DEBUGP("write to usmUserPublic: bad length\n");
+      DEBUGMSGTL(("usmUser","write to usmUserPublic: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   if (action == COMMIT) {
@@ -865,8 +865,8 @@ write_usmUserPublic(
     }
     memcpy(uptr->userPublicString, var_val, var_val_len);
     uptr->userPublicString[var_val_len] = 0;
-    DEBUGP("setting public string: %d - %s\n", var_val_len,
-           uptr->userPublicString);
+    DEBUGMSG(("usmUser", "setting public string: %d - %s\n", var_val_len,
+              uptr->userPublicString));
   }
   return SNMP_ERR_NOERROR;
 }  /* end write_usmUserPublic() */
@@ -886,11 +886,11 @@ write_usmUserStorageType(
   struct usmUser *uptr;
   
   if (var_val_type != ASN_INTEGER){
-      DEBUGP("write to usmUserStorageType not ASN_INTEGER\n");
+      DEBUGMSGTL(("usmUser","write to usmUserStorageType not ASN_INTEGER\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > sizeof(long_ret)){
-      DEBUGP("write to usmUserStorageType: bad length\n");
+      DEBUGMSGTL(("usmUser","write to usmUserStorageType: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   if (action == COMMIT){
@@ -948,11 +948,11 @@ write_usmUserStatus(
   struct usmUser *uptr;
 
   if (var_val_type != ASN_INTEGER){
-      DEBUGP("write to usmUserStatus not ASN_INTEGER\n");
+      DEBUGMSGTL(("usmUser","write to usmUserStatus not ASN_INTEGER\n"));
       return SNMP_ERR_WRONGTYPE;
   }
   if (var_val_len > sizeof(long_ret)){
-      DEBUGP("write to usmUserStatus: bad length\n");
+      DEBUGMSGTL(("usmUser","write to usmUserStatus: bad length\n"));
       return SNMP_ERR_WRONGLENGTH;
   }
   if (action == COMMIT){

@@ -404,8 +404,9 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	if (sp == NULL) return 0;
 	sn = sp->securityName;
     } else if (pdu->securityModel == SNMP_SEC_MODEL_USM) {
-      DEBUGP ("vacm_in_view: ver=%d, model=%d, secName=%s\n",
-              pdu->version, pdu->securityModel, pdu->securityName);
+      DEBUGMSG (("mibII/vacm_vars",
+                 "vacm_in_view: ver=%d, model=%d, secName=%s\n",
+                 pdu->version, pdu->securityModel, pdu->securityName));
       sn = pdu->securityName;
     } else {
 	sn = NULL;
