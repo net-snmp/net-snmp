@@ -717,19 +717,13 @@ init_tree_roots()
 
     /* build root node */
     tp = (struct tree *) xmalloc(sizeof(struct tree));
-    tp->parent = NULL;
-    tp->next_peer = NULL;
-    tp->child_list = NULL;
-    tp->enums = NULL;
-    tp->hint = NULL;
+    memset(tp, 0, sizeof(struct tree));
     tp->label = xstrdup("joint-iso-ccitt");
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
     tp->subid = 2;
     tp->tc_index = -1;
-    tp->type = 0;
-    tp->description = NULL;
     set_function(tp);		/* from mib.c */
     hash = NBUCKET(name_hash(tp->label));
     tp->next = tbuckets[hash];
@@ -740,19 +734,13 @@ init_tree_roots()
 
     /* build root node */
     tp = (struct tree *) xmalloc(sizeof(struct tree));
-    tp->parent = NULL;
+    memset(tp, 0, sizeof(struct tree));
     tp->next_peer = lasttp;
-    tp->child_list = NULL;
-    tp->enums = NULL;
-    tp->hint = NULL;
     tp->label = xstrdup("ccitt");
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
-    tp->subid = 0;
     tp->tc_index = -1;
-    tp->type = 0;
-    tp->description = NULL;
     set_function(tp);		/* from mib.c */
     hash = NBUCKET(name_hash(tp->label));
     tp->next = tbuckets[hash];
@@ -763,19 +751,14 @@ init_tree_roots()
 
     /* build root node */
     tp = (struct tree *) xmalloc(sizeof(struct tree));
-    tp->parent = NULL;
+    memset(tp, 0, sizeof(struct tree));
     tp->next_peer = lasttp;
-    tp->child_list = NULL;
-    tp->enums = NULL;
-    tp->hint = NULL;
     tp->modid = base_modid;
     tp->number_modules = 1;
     tp->module_list = &(tp->modid);
     tp->label = xstrdup("iso");
     tp->subid = 1;
     tp->tc_index = -1;
-    tp->type = 0;
-    tp->description = NULL;
     set_function(tp);		/* from mib.c */
     hash = NBUCKET(name_hash(tp->label));
     tp->next = tbuckets[hash];
@@ -2351,7 +2334,7 @@ new_module (name , file)
 	if ( !strcmp(mp->name, name)) {
 	    DEBUGP("Module %s already noted\n", name);
 			/* Not the same file */
-	    if ( strcmp(mp->file, file)) {
+	    if (strcmp(mp->file, file)) {
                 fprintf(stderr, "Warning: Module %s in both %s and %s\n",
 			name, mp->file, file);
 
