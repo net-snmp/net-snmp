@@ -213,8 +213,8 @@ init_smux(void)
 
 	DEBUGMSGTL(("smux_init","sdlen in smux_init: %d\n", sdlen));
 #endif
-	snmp_log(LOG_DEBUG, "[smux_init] done; smux_sd is %d, smux_port is %d\n", smux_sd,
-		 ntohs(lo_socket.sin_port));
+	DEBUGMSGTL(("smux_init", "[smux_init] done; smux_sd is %d, smux_port is %d\n", smux_sd,
+		 ntohs(lo_socket.sin_port)));
 
 	return SMUXOK;
 }

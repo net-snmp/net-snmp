@@ -164,7 +164,7 @@ debugging_hook(int action,
   long tmp=0;
 
   if (var_val_type != ASN_INTEGER) {
-    snmp_log(LOG_DEBUG, "Wrong type != int\n");
+    DEBUGMSGTL(("versioninfo", "Wrong type != int\n"));
     return SNMP_ERR_WRONGTYPE;
   }
   tmp = *((long *) var_val);

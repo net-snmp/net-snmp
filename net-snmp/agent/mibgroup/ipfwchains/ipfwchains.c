@@ -124,14 +124,14 @@ u_char * var_ipfwchains(
     __u64 cnt, cntkb, cntmb, cntgb;         
 
     if ( (!chainnames_initialized) || (name[*length-1]==1) ){
- snmp_log(LOG_DEBUG, "ipfwchains: Initialising chaintable...\n");
+ DEBUGMSGTL(("ipfwchains", "ipfwchains: Initialising chaintable...\n"));
 	chainnames = ipfwc_get_chainnames(&num_chains);
 	if (chainnames==NULL) return NULL;
 	chainnames_initialized = 1;
     }
 
     if (!checkmib(vp,name,length,exact,var_len,write_method,num_chains)){
-        snmp_log(LOG_DEBUG, "ipfwchains: Match failed...\n");
+        DEBUGMSGTL(("ipfwchains", "ipfwchains: Match failed...\n"));
    	return NULL;
     }
 
@@ -210,14 +210,14 @@ u_char * var_ipfwrules(
 
 /*    if ( (!rules_initialized) ||( (name[*length-1]==1)&&(name[*length-2]==1)) ){ */
     if (  (name[*length-1]==1)&&(name[*length-2]==1) ) { 
- snmp_log(LOG_DEBUG, "ipfwchains: Initialising ruletable...\n");
+ DEBUGMSGTL(("ipfwchains", "ipfwchains: Initialising ruletable...\n"));
         rules = ipfwc_get_rules(&num_rules,0);
         if (rules==NULL) return NULL;
         rules_initialized = 1;
     }
 
     if (!checkmib(vp,name,length,exact,var_len,write_method,num_rules)){
-        snmp_log(LOG_DEBUG, "ipfwchains: Match failed...\n");
+        DEBUGMSGTL(("ipfwchains", "ipfwchains: Match failed...\n"));
         return NULL;
     }
 
@@ -229,7 +229,7 @@ u_char * var_ipfwrules(
                 *var_len = strlen(rules[name[*length-1]-1].chain[0].label);
                 return (u_char *) rules[name[*length-1]-1].chain[0].label; 
         case IPFWRPKTS:
-	 snmp_log(LOG_DEBUG, "ipfwchains: case IPFWRPKTS\n");
+	 DEBUGMSGTL(("ipfwchains", "ipfwchains: case IPFWRPKTS\n"));
                 cnt = rules[name[*length-1]-1].packets;
                         if (cnt > 99999) {
                                 cntkb = (cnt + 500) / 1000;
@@ -285,7 +285,7 @@ u_char * var_ipfwrules(
                	 	strcat(buf, mask_to_dotted(&(rules[name[*length-1]-1].ipfw.ipfw.fw_smsk)));
                 	strcat(string_value,buf);
         		}
-	 snmp_log(LOG_DEBUG, "ipfwchains: %s\n",string_value);
+	 DEBUGMSGTL(("ipfwchains", "ipfwchains: %s\n",string_value));
 		*var_len = strlen(string_value);
 		return (u_char *) string_value;  
         case IPFWRDESTINATION:
@@ -298,7 +298,7 @@ u_char * var_ipfwrules(
                         strcat(buf, mask_to_dotted(&(rules[name[*length-1]-1].ipfw.ipfw.fw_dmsk)));
                         strcat(string_value,buf);
                         }
-                snmp_log(LOG_DEBUG, "ipfwchains: %s\n",string_value);
+                DEBUGMSGTL(("ipfwchains", "ipfwchains: %s\n",string_value));
                 *var_len = strlen(string_value);
                 return (u_char *) string_value;      
         case IPFWRPORTS:
