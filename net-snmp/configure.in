@@ -905,7 +905,7 @@ for i in $new_with_security; do
   hfile="snmp"$i".h"
 
   # make sure support exists for it
-  if test -f $srcdir"/snmplib/"$cfile -a -f $srcdir"/snmplib/"$hfile; then
+  if test -f $srcdir"/snmplib/"$cfile -a -f $srcdir"/include/net-snmp/"$hfile; then
     :
   else
     echo
