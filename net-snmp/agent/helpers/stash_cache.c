@@ -16,6 +16,9 @@
 #include <dmalloc.h>
 #endif
 
+extern NetsnmpCacheLoad _netsnmp_stash_cache_load;
+extern NetsnmpCacheFree _netsnmp_stash_cache_free;
+ 
 /** @defgroup stash_cache stash_cache: automatically caches data for certain handlers.
  *  This handler caches data in an optimized way which may aleviate
  *  the need for the lower level handlers to perform as much
@@ -44,14 +47,22 @@ netsnmp_mib_handler *
 netsnmp_get_bare_stash_cache_handler(void)
 {
     netsnmp_mib_handler *handler;
-    netsnmp_stash_cache_info *cinfo;
+    netsnmp_cache       *cinfo;
 
-    cinfo = netsnmp_get_new_stash_cache();
+    cinfo = netsnmp_cache_create( 30, _netsnmp_stash_cache_load,
+                                 _netsnmp_stash_cache_free, NULL, 0 );
+
     if (!cinfo)
         return NULL;
 
-    handler = netsnmp_create_handler("stash_cache", netsnmp_stash_cache_helper);
+    handler = netsnmp_cache_handler_get( cinfo );
     if (!handler) {
+        free(cinfo);
+        return NULL;
+    }
+
+    handler->next = netsnmp_create_handler("stash_cache", netsnmp_stash_cache_helper);
+    if (!handler->next) {
         free(cinfo);
         return NULL;
     }
@@ -68,8 +79,8 @@ netsnmp_mib_handler *
 netsnmp_get_stash_cache_handler(void)
 {
     netsnmp_mib_handler *handler = netsnmp_get_bare_stash_cache_handler();
-    if (handler) {
-        handler->next = netsnmp_get_stash_to_next_handler();
+    if (handler && handler->next) {
+        handler->next->next = netsnmp_get_stash_to_next_handler();
     }
     return handler;
 }
@@ -89,27 +100,20 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
                            netsnmp_agent_request_info *reqinfo,
                            netsnmp_request_info *requests)
 {
-    netsnmp_mib_handler      *h;
+    netsnmp_cache            *cache;
     netsnmp_stash_cache_info *cinfo;
-    netsnmp_oid_stash_node *cnode;
-    netsnmp_variable_list *cdata;
-    netsnmp_request_info *request;
-    int ret;
+    netsnmp_oid_stash_node   *cnode;
+    netsnmp_variable_list    *cdata;
+    netsnmp_request_info     *request;
 
     DEBUGMSGTL(("helper:stash_cache", "Got request\n"));
 
-    cinfo = (netsnmp_stash_cache_info *) handler->myvoid;
-    if (!cinfo) {
-        cinfo = netsnmp_get_new_stash_cache();
-        handler->myvoid = cinfo;
-    }
+    cache = netsnmp_cache_reqinfo_extract( reqinfo, reginfo->handlerName );
+    cinfo = (netsnmp_stash_cache_info *) cache->magic;
 
     switch (reqinfo->mode) {
 
     case MODE_GET:
-        if ((ret = netsnmp_stash_cache_update(handler, reginfo,
-                                              reqinfo, requests, cinfo)))
-            return ret;
         DEBUGMSGTL(("helper:stash_cache", "Processing GET request\n"));
         for(request = requests; request; request = request->next) {
             cdata =
@@ -128,9 +132,6 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
         break;
 
     case MODE_GETNEXT:
-        if ((ret = netsnmp_stash_cache_update(handler, reginfo,
-                                              reqinfo, requests, cinfo)))
-            return ret;
         DEBUGMSGTL(("helper:stash_cache", "Processing GETNEXT request\n"));
         for(request = requests; request; request = request->next) {
             cnode =
@@ -164,44 +165,42 @@ netsnmp_stash_cache_helper(netsnmp_mib_handler *handler,
 /** updates a given cache depending on whether it needs to or not.
  */
 int
-netsnmp_stash_cache_update(netsnmp_mib_handler *handler,
-                           netsnmp_handler_registration *reginfo,
-                           netsnmp_agent_request_info *reqinfo,
-                           netsnmp_request_info *requests,
-                           netsnmp_stash_cache_info *cinfo)
+_netsnmp_stash_cache_load( netsnmp_cache *cache, void *magic )
 {
+    netsnmp_mib_handler          *handler  = cache->handler;
+    netsnmp_handler_registration *reginfo  = cache->reginfo;
+    netsnmp_agent_request_info   *reqinfo  = cache->reqinfo;
+    netsnmp_request_info         *requests = cache->requests;
+    netsnmp_stash_cache_info     *cinfo    = (netsnmp_stash_cache_info*) magic;
     int old_mode;
     int ret;
-    if (!cinfo->cache_time ||
-        atime_ready(cinfo->cache_time, 1000*cinfo->cache_length)) {
-        DEBUGMSGTL(("stash_cache",
-                    "(re)filling cache (done every %d seconds)\n",
-                    cinfo->cache_length));
-        /* free the old */
-        netsnmp_oid_stash_free(&cinfo->cache,
-                               (NetSNMPStashFreeNode *) snmp_free_var);
 
-        /* change modes to the GET_STASH mode */
-        old_mode = reqinfo->mode;
-        reqinfo->mode = MODE_GET_STASH;
-        netsnmp_agent_add_list_data(reqinfo,
-                                    netsnmp_create_data_list(STASH_CACHE_NAME,
-                                                             &cinfo->cache,
-                                                             NULL));
-
-        /* have the next handler fill stuff in and switch modes back */
-        ret = netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
-        reqinfo->mode = old_mode;
-
-        /* update the cache time */
-        if (cinfo->cache_time) {
-            atime_setMarker(cinfo->cache_time);
-        } else {
-            cinfo->cache_time = atime_newMarker();
-        }
-        return ret;
+    if (!cinfo) {
+        cinfo = netsnmp_get_new_stash_cache();
+        cache->magic = cinfo;
     }
-    return SNMP_ERR_NOERROR;
+
+    /* change modes to the GET_STASH mode */
+    old_mode = reqinfo->mode;
+    reqinfo->mode = MODE_GET_STASH;
+    netsnmp_agent_add_list_data(reqinfo,
+                                netsnmp_create_data_list(STASH_CACHE_NAME,
+                                                         &cinfo->cache, NULL));
+
+    /* have the next handler fill stuff in and switch modes back */
+    ret = netsnmp_call_next_handler(handler->next, reginfo, reqinfo, requests);
+    reqinfo->mode = old_mode;
+
+    return ret;
+}
+
+void
+_netsnmp_stash_cache_free( netsnmp_cache *cache, void *magic )
+{
+    netsnmp_stash_cache_info *cinfo = (netsnmp_stash_cache_info*) magic;
+    netsnmp_oid_stash_free(&cinfo->cache,
+                          (NetSNMPStashFreeNode *) snmp_free_var);
+    return;
 }
 
 /** initializes the stash_cache helper which then registers a stash_cache
