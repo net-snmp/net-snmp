@@ -15,7 +15,7 @@
 #endif
 
 #include "../mibincl.h"
-#include "../../../snmplib/system.h"
+#include "system.h"
 #include "util_funcs.h"
 
 #include "snmp_mib.h"

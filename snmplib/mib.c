@@ -64,6 +64,10 @@ SOFTWARE.
 #include <winsock.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "asn1.h"
 #include "snmp_api.h"
 #include "mib.h"

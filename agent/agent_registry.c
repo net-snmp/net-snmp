@@ -21,6 +21,10 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "mibincl.h"
 #include "default_store.h"
 #include "ds_agent.h"
@@ -30,6 +34,11 @@
 
 #include "snmpd.h"
 #include "mibgroup/struct.h"
+#include "mibgroup/mib_module_includes.h"
+
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+#include "agentx/subagent.h"
+#endif
 
 
 struct subtree *subtrees;
@@ -38,6 +47,7 @@ int tree_compare(const struct subtree *ap, const struct subtree *bp)
 {
   return snmp_oid_compare(ap->name,ap->namelen,bp->name,bp->namelen);
 }
+
 
 
 	/*

@@ -34,6 +34,10 @@
 #include <paths.h>
 #include <limits.h>
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "mibincl.h"
 #include "util_funcs.h"
 #include "auto_nlist.h"

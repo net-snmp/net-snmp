@@ -46,6 +46,20 @@ if test "x$enable_debugging" = "xno"; then
     AC_DEFINE(SNMP_NO_DEBUGGING)
 fi
 
+AC_ARG_WITH(dmalloc,
+[  --with-dmalloc=PATH             Use dmalloc library (www.dmalloc.com)],
+    if test "x$withval" = "xyes"; then
+      AC_ADD_SEARCH_PATH(/usr/local)
+      LIBS="$LIBS -ldmalloc"
+      AC_DEFINE(HAVE_DMALLOC_H)
+    elif "x$withval" != "x"; then
+      AC_ADD_SEARCH_PATH($withval)
+      LIBS="$LIBS -ldmalloc"
+      AC_DEFINE(HAVE_DMALLOC_H)
+    fi
+)
+AC_SUBST(HAVE_DMALLOC_H)
+
 AC_ARG_WITH(openssl,
 [  --with-openssl=PATH             Look for openssl in PATH/lib.],
     if test "x$withval" != "yes"; then

@@ -63,6 +63,10 @@ SOFTWARE.
 #include <arpa/inet.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif

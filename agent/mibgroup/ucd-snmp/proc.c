@@ -36,6 +36,10 @@
 # endif
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "mibincl.h"
 #include "struct.h"
 #include "proc.h"
@@ -48,7 +52,7 @@
 #include "read_config.h"
 #include "agent_read_config.h"
 #include "mib_module_config.h"
-#include "../../../snmplib/system.h"
+#include "system.h"
 
 static struct myproc *get_proc_instance (struct myproc *, oid);
 struct myproc *procwatch = NULL;

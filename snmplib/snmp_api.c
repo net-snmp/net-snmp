@@ -90,6 +90,10 @@ SOFTWARE.
 #include <locale.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "asn1.h"
 #include "snmp.h"
 #define SNMP_NEED_REQUEST_LIST

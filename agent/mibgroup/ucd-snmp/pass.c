@@ -31,6 +31,10 @@
 # include <sys/wait.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "mibincl.h"
 #include "struct.h"
 #include "pass.h"
@@ -38,7 +42,7 @@
 #include "util_funcs.h"
 #include "read_config.h"
 #include "agent_read_config.h"
-#include "../../../snmplib/system.h"
+#include "system.h"
 
 struct extensible *passthrus=NULL;
 int numpassthrus=0;

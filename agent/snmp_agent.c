@@ -49,6 +49,10 @@ SOFTWARE.
 #endif
 #include <errno.h>
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "asn1.h"
 #define SNMP_NEED_REQUEST_LIST
 #include "snmp_api.h"

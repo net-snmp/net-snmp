@@ -24,6 +24,10 @@
 #include <strings.h>
 #endif
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
+
 #include "asn1.h"
 #include "snmp_api.h"
 #ifdef USE_OPENSSL
@@ -44,8 +48,8 @@
 
 int (*kmt_hash) (
 	const int	  mode,		void  	 **context,
-	const u_int8_t	 *data,		const int  data_len,     
-	u_int8_t	**digest,	size_t	  *digest_len);
+	const u_char	 *data,		const int  data_len,     
+	u_char		**digest,	size_t	  *digest_len);
 
 /*******************************************************************-o-******
  * generate_Ku
@@ -485,7 +489,7 @@ decode_keychange(	oid	*hashtype,	u_int  hashtype_len,
 	size_t		 properlength = 0;
 	u_int		 nbytes  = 0;
 
-	u_int8_t	*bufp,
+	u_char		*bufp,
 			 tmp_buf[SNMP_MAXBUF];
         size_t           tmp_buf_len = SNMP_MAXBUF;
 	void		*context = NULL;
