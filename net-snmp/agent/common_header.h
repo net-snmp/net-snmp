@@ -88,7 +88,9 @@
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
 #endif
+#ifdef HAVE_NET_ROUTE_H_
 #include <net/route.h>
+#endif
 #include <netinet/in_systm.h>
 #if HAVE_SYS_HASHING_H
 #include <sys/hashing.h>
