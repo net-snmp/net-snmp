@@ -1025,7 +1025,7 @@ snmpTagListValid(const char *tagList, const size_t tagListLen)
     size_t i = 0;
     int inTag = 0;
 
-    static inline int is_delim(const char c) {
+    static int is_delim(const char c) {
 	return (c == 0x020 || c == 0x09 || c == 0x0d || c == 0x0b);
     }
 
