@@ -6,7 +6,6 @@ IMPORTS
     snmpModules,
     Counter32,
     Integer32
-
         FROM SNMPv2-SMI
 
     TEXTUAL-CONVENTION,
@@ -29,50 +28,65 @@ IMPORTS
         FROM SNMPv2-CONF;
 
 snmpTargetMIB MODULE-IDENTITY
-    LAST-UPDATED "9808040000Z"
+    LAST-UPDATED "200210140000Z"
     ORGANIZATION "IETF SNMPv3 Working Group"
     CONTACT-INFO
         "WG-email:   snmpv3@lists.tislabs.com
          Subscribe:  majordomo@lists.tislabs.com
                      In message body:  subscribe snmpv3
 
-         Chair:      Russ Mundy
-
-                     Trusted Information Systems
-         Postal:     3060 Washington Rd
-                     Glenwood MD 21738
+         Co-Chair:   Russ Mundy
+                     Network Associates Laboratories
+         Postal:     15204 Omega Drive, Suite 300
+                     Rockville, MD 20850-4601
                      USA
          EMail:      mundy@tislabs.com
-         Phone:      +1-301-854-6889
+         Phone:      +1 301-947-7107
+
+         Co-Chair:   David Harrington
+                     Enterasys Networks
+         Postal:     35 Industrial Way
+                     P. O. Box 5004
+                     Rochester, New Hampshire 03866-5005
+                     USA
+         EMail:      dbh@enterasys.com
+         Phone:      +1 603-337-2614
 
          Co-editor:  David B. Levi
-                     SNMP Research, Inc.
-         Postal:     3001 Kimberlin Heights Road
-                     Knoxville, TN 37920-9716
-         EMail:      levi@snmp.com
-         Phone:      +1 423 573 1434
+                     Nortel Networks
+         Postal:     3505 Kesterwood Drive
+                     Knoxville, Tennessee 37918
+         EMail:      dlevi@nortelnetworks.com
+         Phone:      +1 865 686 0432
 
          Co-editor:  Paul Meyer
                      Secure Computing Corporation
          Postal:     2675 Long Lake Road
-                     Roseville, MN 55113
+
+                     Roseville, Minnesota 55113
          EMail:      paul_meyer@securecomputing.com
          Phone:      +1 651 628 1592
 
          Co-editor:  Bob Stewart
-                     Cisco Systems, Inc.
-         Postal:     170 West Tasman Drive
-                     San Jose, CA 95134-1706
-         EMail:      bstewart@cisco.com
-         Phone:      +1 603 654 2686"
+                     Retired"
     DESCRIPTION
         "This MIB module defines MIB objects which provide
          mechanisms to remotely configure the parameters used
-         by an SNMP entity for the generation of SNMP messages."
-    REVISION    "9808040000Z"
+         by an SNMP entity for the generation of SNMP messages.
+
+         Copyright (C) The Internet Society (2002). This
+         version of this MIB module is part of RFC 3413;
+         see the RFC itself for full legal notices.
+        "
+    REVISION    "200210140000Z"             -- 14 October 2002
+    DESCRIPTION "Fixed DISPLAY-HINTS for UTF-8 strings, fixed hex
+                 value of LF characters, clarified meaning of zero
+                 length tag values, improved tag list examples.
+                 Published as RFC 3413."
+    REVISION    "199808040000Z"             -- 4 August 1998
     DESCRIPTION "Clarifications, published as
-                 RFC2573."
-    REVISION    "9707140000Z"
+                 RFC 2573."
+    REVISION    "199707140000Z"             -- 14 July 1997
     DESCRIPTION "The initial revision, published as RFC2273."
     ::= { snmpModules 12 }
 
@@ -80,7 +94,7 @@ snmpTargetObjects       OBJECT IDENTIFIER ::= { snmpTargetMIB 1 }
 snmpTargetConformance   OBJECT IDENTIFIER ::= { snmpTargetMIB 3 }
 
 SnmpTagValue ::= TEXTUAL-CONVENTION
-    DISPLAY-HINT "255a"
+    DISPLAY-HINT "255t"
     STATUS       current
     DESCRIPTION
         "An octet string containing a tag value.
@@ -97,6 +111,7 @@ SnmpTagValue ::= TEXTUAL-CONVENTION
          point from 0x00000000 to 0x7fffffff.
 
          The use of control codes should be avoided, and certain
+
          control codes are not allowed as described below.
 
          For code points not directly supported by user
@@ -126,12 +141,17 @@ SnmpTagValue ::= TEXTUAL-CONVENTION
 
              -  An ASCII carriage return (CR) character (0x0D).
 
-             -  An ASCII line feed (LF) character (0x0B).
+             -  An ASCII line feed (LF) character (0x0A).
 
          Delimiter characters are used to separate tag values
          in a tag list.  An object of this type may only
          contain a single tag value, and so delimiter
          characters are not allowed in a value of this type.
+
+         Note that a tag value of 0 length means that no tag is
+         defined.  In other words, a tag value of 0 length would
+         never match anything in a tag list, and would never
+         select any table entries.
 
          Some examples of valid tag values are:
 
@@ -146,7 +166,7 @@ SnmpTagValue ::= TEXTUAL-CONVENTION
     SYNTAX       OCTET STRING (SIZE (0..255))
 
 SnmpTagList ::= TEXTUAL-CONVENTION
-    DISPLAY-HINT "255a"
+    DISPLAY-HINT "255t"
     STATUS       current
     DESCRIPTION
         "An octet string containing a list of tag values.
@@ -186,9 +206,10 @@ SnmpTagList ::= TEXTUAL-CONVENTION
 
              -  An ASCII carriage return (CR) character (0x0D).
 
-             -  An ASCII line feed (LF) character (0x0B).
+             -  An ASCII line feed (LF) character (0x0A).
 
          Delimiter characters are used to separate tag values
+
          in a tag list.  Only a single delimiter character may
          occur between two tag values.  A tag value may not
          have a zero length.  These constraints imply certain
@@ -202,11 +223,11 @@ SnmpTagList ::= TEXTUAL-CONVENTION
 
          Some examples of valid tag lists are:
 
-             - An empty string
+             - ''                        -- an empty list
 
-             - 'acme router'
+             - 'acme'                    -- list of one tag
 
-             - 'host managerStation'
+             - 'host router bridge'      -- list of several tags
 
          Note that although a tag value may not have a length of
          zero, an empty string is still valid.  This indicates
@@ -232,7 +253,6 @@ snmpTargetSpinLock OBJECT-TYPE
     DESCRIPTION
         "This object is used to facilitate modification of table
          entries in the SNMP-TARGET-MIB module by multiple
-
          managers.  In particular, it is useful when modifying
          the value of the snmpTargetAddrTagList object.
 
@@ -329,13 +349,13 @@ snmpTargetAddrTimeout OBJECT-TYPE
          for a response may actually be derived from the value
          of this object.  The method for deriving the actual time
          interval is implementation dependent.  One such method
-
          is to derive the expected round trip time based on a
          particular retransmission algorithm and on the number
          of timeouts which have occurred.  The type of message may
          also be considered when deriving expected round trip
          times for retransmissions.  For example, if a message is
          being sent with a securityLevel that indicates both
+
          authentication and privacy, the derived value may be
          increased to compensate for extra processing time spent
          during authentication and encryption processing."
@@ -381,7 +401,9 @@ snmpTargetAddrStorageType OBJECT-TYPE
     MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
-        "The storage type for this conceptual row."
+        "The storage type for this conceptual row.
+         Conceptual rows having the value 'permanent' need not
+         allow write-access to any columnar objects in the row."
     DEFVAL { nonVolatile }
     ::= { snmpTargetAddrEntry 8 }
 
@@ -474,7 +496,6 @@ snmpTargetParamsSecurityModel OBJECT-TYPE
           choose to return an inconsistentValue error if an
           attempt is made to set this variable to a value
           for a security model which the implementation does
-
           not support."
     ::= { snmpTargetParamsEntry 3 }
 
@@ -502,7 +523,9 @@ snmpTargetParamsStorageType OBJECT-TYPE
     MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
-        "The storage type for this conceptual row."
+        "The storage type for this conceptual row.
+         Conceptual rows having the value 'permanent' need not
+         allow write-access to any columnar objects in the row."
     DEFVAL { nonVolatile }
     ::= { snmpTargetParamsEntry 6 }
 
@@ -523,12 +546,12 @@ snmpTargetParamsRowStatus OBJECT-TYPE
          column is 'notReady'.
 
          In particular, a newly created row cannot be made
-
          active until the corresponding
          snmpTargetParamsMPModel,
          snmpTargetParamsSecurityModel,
          snmpTargetParamsSecurityName,
          and snmpTargetParamsSecurityLevel have all been set.
+
          The following objects may not be modified while the
          value of this object is active(1):
              - snmpTargetParamsMPModel
@@ -572,11 +595,12 @@ snmpTargetGroups      OBJECT IDENTIFIER ::=
                                         { snmpTargetConformance 2 }
 
 --
-
 --
 -- Compliance statements
+
 --
 --
+
 snmpTargetCommandResponderCompliance MODULE-COMPLIANCE
     STATUS      current
     DESCRIPTION
@@ -622,6 +646,7 @@ snmpTargetResponseGroup OBJECT-GROUP
     ::= { snmpTargetGroups 2 }
 
 snmpTargetCommandResponderGroup OBJECT-GROUP
+
     OBJECTS {
         snmpUnavailableContexts,
         snmpUnknownContexts

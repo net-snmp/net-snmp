@@ -6,19 +6,29 @@ IMPORTS
     snmpModules, Counter32                  FROM SNMPv2-SMI;
 
 snmpMPDMIB MODULE-IDENTITY
-    LAST-UPDATED "9905041636Z"              -- 4 April 1999
+    LAST-UPDATED "200210140000Z"
     ORGANIZATION "SNMPv3 Working Group"
     CONTACT-INFO "WG-EMail:   snmpv3@lists.tislabs.com
-                  Subscribe:  majordomo@lists.tislabs.com
-                              In message body:  subscribe snmpv3
+                  Subscribe:  snmpv3-request@lists.tislabs.com
 
-                  Chair:      Russ Mundy
-                              TIS Labs at Network Associates
-                  postal:     3060 Washington Road
-                              Glenwood, MD 21738
+                  Co-Chair:   Russ Mundy
+                              Network Associates Laboratories
+                  postal:     15204 Omega Drive, Suite 300
+                              Rockville, MD 20850-4601
                               USA
+
                   EMail:      mundy@tislabs.com
-                  phone:      +1 301-854-6889
+                  phone:      +1 301-947-7107
+
+                  Co-Chair &
+                  Co-editor:  David Harrington
+                              Enterasys Networks
+                  postal:     35 Industrial Way
+                              P. O. Box 5005
+                              Rochester NH 03866-5005
+                              USA
+                  EMail:      dbh@enterasys.com
+                  phone:      +1 603-337-2614
 
                   Co-editor:  Jeffrey Case
                               SNMP Research, Inc.
@@ -28,36 +38,34 @@ snmpMPDMIB MODULE-IDENTITY
                   EMail:      case@snmp.com
                   phone:      +1 423-573-1434
 
-                  Co-editor   Dave Harrington
-                              Cabletron Systems, Inc.
-                  postal:     Post Office Box 5005
-                              MailStop: Durham
-                              35 Industrial Way
-                              Rochester, NH 03867-5005
-                              USA
-                  EMail:      dbh@ctron.com
-                  phone:      +1 603-337-7357
-
                   Co-editor:  Randy Presuhn
                               BMC Software, Inc.
-                  postal:     965 Stewart Drive
-                              Sunnyvale, CA 94086
+                  postal:     2141 North First Street
+                              San Jose, CA 95131
                               USA
                   EMail:      randy_presuhn@bmc.com
-                  phone:      +1 408-616-3100
+                  phone:      +1 408-546-1006
 
                   Co-editor:  Bert Wijnen
-                              IBM T. J. Watson Research
+                              Lucent Technologies
                   postal:     Schagen 33
                               3461 GL Linschoten
                               Netherlands
-                  EMail:      wijnen@vnet.ibm.com
-                  phone:      +31 348-432-794
+                  EMail:      bwijnen@lucent.com
+                  phone:      +31 348-680-485
                  "
-    DESCRIPTION  "The MIB for Message Processing and Dispatching"
-    REVISION     "9905041636Z"              -- 4 April 1999
+    DESCRIPTION  "The MIB for Message Processing and Dispatching
+
+                  Copyright (C) The Internet Society (2002). This
+                  version of this MIB module is part of RFC 3412;
+                  see the RFC itself for full legal notices.
+                 "
+    REVISION     "200210140000Z"            -- 14 October 2002
+    DESCRIPTION  "Updated addresses, published as RFC 3412."
+    REVISION     "199905041636Z"            -- 4 May 1999
     DESCRIPTION  "Updated addresses, published as RFC 2572."
-    REVISION     "9709300000Z"              -- 30 September 1997
+
+    REVISION     "199709300000Z"            -- 30 September 1997
     DESCRIPTION  "Original version, published as RFC 2272."
     ::= { snmpModules 11 }
 
@@ -115,10 +123,8 @@ snmpMPDMIBGroups      OBJECT IDENTIFIER ::= {snmpMPDMIBConformance 2}
 snmpMPDCompliance MODULE-COMPLIANCE
     STATUS       current
     DESCRIPTION "The compliance statement for SNMP entities which
-
                  implement the SNMP-MPD-MIB.
                 "
-
     MODULE    -- this module
         MANDATORY-GROUPS { snmpMPDGroup }
     ::= { snmpMPDMIBCompliances 1 }

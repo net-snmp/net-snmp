@@ -12,46 +12,69 @@ IMPORTS
     snmpAuthProtocols, snmpPrivProtocols  FROM SNMP-FRAMEWORK-MIB;
 
 snmpUsmMIB MODULE-IDENTITY
-    LAST-UPDATED "9901200000Z"            -- 20 Jan 1999, midnight
+    LAST-UPDATED "200210160000Z"            -- 16 Oct 2002, midnight
     ORGANIZATION "SNMPv3 Working Group"
     CONTACT-INFO "WG-email:   snmpv3@lists.tislabs.com
                   Subscribe:  majordomo@lists.tislabs.com
                               In msg body:  subscribe snmpv3
 
                   Chair:      Russ Mundy
-                              Trusted Information Systems
-                  postal:     3060 Washington Rd
-                              Glenwood MD 21738
+                              Network Associates Laboratories
+                  postal:     15204 Omega Drive, Suite 300
+                              Rockville, MD 20850-4601
                               USA
                   email:      mundy@tislabs.com
-                  phone:      +1-301-854-6889
+
+                  phone:      +1 301-947-7107
+
+                  Co-Chair:   David Harrington
+                              Enterasys Networks
+                  Postal:     35 Industrial Way
+                              P. O. Box 5004
+                              Rochester, New Hampshire 03866-5005
+                              USA
+                  EMail:      dbh@enterasys.com
+                  Phone:      +1 603-337-2614
 
                   Co-editor   Uri Blumenthal
-
-                              IBM T. J. Watson Research
-                  postal:     30 Saw Mill River Pkwy,
-                              Hawthorne, NY 10532
+                              Lucent Technologies
+                  postal:     67 Whippany Rd.
+                              Whippany, NJ 07981
                               USA
-                  email:      uri@watson.ibm.com
-                  phone:      +1-914-784-7964
+                  email:      uri@lucent.com
+                  phone:      +1-973-386-2163
 
                   Co-editor:  Bert Wijnen
-                              IBM T. J. Watson Research
+                              Lucent Technologies
                   postal:     Schagen 33
                               3461 GL Linschoten
                               Netherlands
-                  email:      wijnen@vnet.ibm.com
-                  phone:      +31-348-432-794
+                  email:      bwijnen@lucent.com
+                  phone:      +31-348-480-685
                  "
     DESCRIPTION  "The management information definitions for the
                   SNMP User-based Security Model.
+
+                  Copyright (C) The Internet Society (2002). This
+                  version of this MIB module is part of RFC 3414;
+                  see the RFC itself for full legal notices.
                  "
 --  Revision history
 
-    REVISION     "9901200000Z"            -- 20 Jan 1999, midnight
+    REVISION     "200210160000Z"          -- 16 Oct 2002, midnight
+    DESCRIPTION  "Changes in this revision:
+                  - Updated references and contact info.
+                  - Clarification to usmUserCloneFrom DESCRIPTION
+                    clause
+                  - Fixed 'command responder' into 'command generator'
+                    in last para of DESCRIPTION clause of
+                    usmUserTable.
+                  This revision published as RFC3414.
+                 "
+    REVISION     "199901200000Z"          -- 20 Jan 1999, midnight
     DESCRIPTION  "Clarifications, published as RFC2574"
 
-    REVISION     "9711200000Z"            -- 20 Nov 1997, midnight
+    REVISION     "199711200000Z"          -- 20 Nov 1997, midnight
     DESCRIPTION  "Initial version, published as RFC2274"
     ::= { snmpModules 15 }
 
@@ -98,6 +121,7 @@ usmDESPrivProtocol OBJECT-IDENTITY
     REFERENCE    "- Data Encryption Standard, National Institute of
                     Standards and Technology.  Federal Information
                     Processing Standard (FIPS) Publication 46-1.
+
                     Supersedes FIPS Publication 46,
                     (January, 1977; reaffirmed January, 1988).
 
@@ -169,7 +193,6 @@ KeyChange ::=     TEXTUAL-CONVENTION
                 portion of the keyNew component is L octets or less,
            - the random component is appended to the value of the
              temporary variable, and the result is input to the
-
              hash algorithm H to produce a digest value;
            - this digest value, truncated if necessary to be the same
              length as the unused portion of the keyNew, is XOR-ed
@@ -339,6 +362,7 @@ usmUserTable     OBJECT-TYPE
                  follow this procedure:
 
                    1)  GET(usmUserSpinLock.0) and save in sValue.
+
                    2)  SET(usmUserSpinLock.0=sValue,
                            usmUserCloneFrom=templateUser,
                            usmUserStatus=createAndWait)
@@ -389,7 +413,7 @@ usmUserTable     OBJECT-TYPE
                  SNMP-VIEW-BASED-ACM-MIB.
 
                  The use of usmUserSpinlock is to avoid conflicts with
-                 another SNMP command responder application which may
+                 another SNMP command generator application which may
                  also be acting on the usmUserTable.
                 "
     ::= { usmUser 2 }
@@ -408,7 +432,6 @@ usmUserEntry     OBJECT-TYPE
     ::= { usmUserTable 1 }
 
 UsmUserEntry ::= SEQUENCE
-
     {
         usmUserEngineID         SnmpEngineID,
         usmUserName             SnmpAdminString,
@@ -457,7 +480,6 @@ usmUserSecurityName OBJECT-TYPE
     MAX-ACCESS   read-only
     STATUS       current
     DESCRIPTION "A human readable string representing the user in
-
                  Security Model independent format.
 
                  The default transformation of the User-based Security
@@ -486,9 +508,11 @@ usmUserCloneFrom OBJECT-TYPE
 
                  Cloning also causes the initial values of the secret
                  authentication key (authKey) and the secret encryption
+
                  key (privKey) of the new user to be set to the same
-                 value as the corresponding secret of the clone-from
-                 user.
+                 values as the corresponding secrets of the clone-from
+                 user to allow the KeyChange process to occur as
+                 required during user creation.
 
                  The first time an instance of this object is set by
                  a management operation (either at or after its
@@ -533,6 +557,7 @@ usmUserAuthProtocol OBJECT-TYPE
                  the value of the usmNoAuthProtocol.
 
                  If a set operation tries to change the value of an
+
                  existing instance of this object to any value other
                  than usmNoAuthProtocol, then an 'inconsistentValue'
                  error must be returned.
@@ -602,7 +627,6 @@ usmUserAuthKeyChange OBJECT-TYPE
                  then the SET succeeded and the new key is active.
                  If you do not get a response, then you can issue a
                  GET(usmUserPublic) and check if the value is equal
-
                  to the randomValue you did send in the SET. If so, then
                  the key change succeeded and the new key is active
                  (probably the response got lost). If not, then the SET
@@ -679,6 +703,7 @@ usmUserPrivProtocol OBJECT-TYPE
                  words, if usmUserPrivProtocol is set to anything else
                  than usmNoPrivProtocol, then the corresponding instance
                  of usmUserAuthProtocol cannot have a value of
+
                  usmNoAuthProtocol. If it does, then an
                  'inconsistentValue' error must be returned.
                 "
@@ -699,7 +724,6 @@ usmUserPrivKeyChange OBJECT-TYPE
                  The associated secret key is the user's secret
                  privacy key (privKey). The associated hash
                  algorithm is the algorithm used by the user's
-
                  usmUserAuthProtocol.
 
                  When creating a new user, it is an 'inconsistentName'
@@ -728,6 +752,7 @@ usmUserOwnPrivKeyChange OBJECT-TYPE
                  notable difference: in order for the Set operation
                  to succeed, the usmUserName of the operation
                  requester must match the usmUserName that indexes
+
                  the row which is targeted by this operation.
                  In addition, the USM security model must be
                  used for this operation.
@@ -825,6 +850,7 @@ usmUserStatus    OBJECT-TYPE
                  other objects in this conceptual row can be modified,
                  except for usmUserOwnAuthKeyChange and
                  usmUserOwnPrivKeyChange. For these 2 objects, the
+
                  value of usmUserStatus MUST be active.
                 "
     ::= { usmUserEntry 13 }
