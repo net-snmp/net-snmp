@@ -20,18 +20,8 @@
 config_require(ip-forward-mib/data_access/route_common)
 #if defined( linux )
 config_require(ip-forward-mib/data_access/route_linux);
-#elif defined ( solaris )
-config_require(ip-forward-mib/data_access/route_solaris);
-#elif defined ( hpux )
-config_require(ip-forward-mib/data_access/route_hpux);
-#elif defined ( bsd )
-config_require(ip-forward-mib/data_access/route_bsd);
 #else
-/*
- * couldn't determine the correct file!
- * require a bogus file to generate an error.
- */
-configure_require(ip-forward-mib/data_access/route_unknown-arch);
+#error "the route data access library is not available for this platform."
 #endif
 
 /** need interface for ifIndex */
