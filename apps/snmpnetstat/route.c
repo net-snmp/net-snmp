@@ -31,8 +31,13 @@ SOFTWARE.
  * is provided ``as is'' without express or implied warranty.
  */
 
-#include <stdio.h>
+#ifdef SVR4
+#include <string.h>
+#else
 #include <strings.h>
+#endif
+
+#include <stdio.h>
 #include <ctype.h>
 
 #include <sys/param.h>
@@ -133,7 +138,11 @@ routepr()
 	    rp->set_proto = 0;
 	    for(vp = response->variables; vp; vp = vp->next_variable){
 		if (vp->name_length != 14 ||
+#ifdef SVR4
+		    memcmp((char *)vp->name, (char *)oid_rttable, sizeof(oid_rttable))){
+#else
 		    bcmp((char *)vp->name, (char *)oid_rttable, sizeof(oid_rttable))){
+#endif
 		    continue;	/* if it isn't in this subtree, just continue */
 		}
 
@@ -164,7 +173,11 @@ routepr()
 		type = vp->name[9];
 		switch ((char)type){
 		    case RTDEST:
+#ifdef SVR4
+			memmove((char *)&rp->destination, (char *)vp->val.string, sizeof(u_long));
+#else
 			bcopy((char *)vp->val.string, (char *)&rp->destination, sizeof(u_long));
+#endif
 			rp->set_destination = 1;
 			break;
 		    case RTIFINDEX:
@@ -172,7 +185,11 @@ routepr()
 			rp->set_interface = 1;
 			break;
 		    case RTNEXTHOP:
+#ifdef SVR4
+			memmove((char *)&rp->gateway, (char *)vp->val.string, sizeof(u_long));
+#else
 			bcopy((char *)vp->val.string, (char *)&rp->gateway, sizeof(u_long));
+#endif
 			rp->set_gateway = 1;
 			break;
 		    case RTTYPE:
@@ -249,13 +266,21 @@ get_ifname(name, index)
     Iflist = ip;
     ip->index = index;
     pdu = snmp_pdu_create(GET_REQ_MSG);
+#ifdef SVR4
+    memmove((char *)varname, (char *)oid_ifdescr, sizeof(oid_ifdescr));
+#else
     bcopy((char *)oid_ifdescr, (char *)varname, sizeof(oid_ifdescr));
+#endif
     varname[10] = (oid)index;
     snmp_add_null_var(pdu, varname, sizeof(oid_ifdescr)/sizeof(oid) + 1);
     status = snmp_synch_response(Session, pdu, &response);
     if (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR){
 	vp = response->variables;
+#ifdef SVR4
+	memmove(ip->name, (char *)vp->val.string, vp->val_len);
+#else
 	bcopy((char *)vp->val.string, ip->name, vp->val_len);
+#endif
 	ip->name[vp->val_len] = '\0';
     } else {
 	sprintf(ip->name, "if%d", index);
@@ -272,12 +297,15 @@ routename(in)
 	struct hostent *hp;
 	static char domain[MAXHOSTNAMELEN + 1];
 	static int first = 1;
-	char *index();
 
 	if (first) {
 		first = 0;
 		if (gethostname(domain, MAXHOSTNAMELEN) == 0 &&
+#ifdef SVR4
+		    (cp = strchr(domain, '.')))
+#else
 		    (cp = index(domain, '.')))
+#endif
 			(void) strcpy(domain, cp + 1);
 		else
 			domain[0] = 0;
@@ -287,7 +315,11 @@ routename(in)
 		hp = gethostbyaddr((char *)&in, sizeof (struct in_addr),
 			AF_INET);
 		if (hp) {
+#ifdef SVR4
+			if ((cp = strchr(hp->h_name, '.')) &&
+#else
 			if ((cp = index(hp->h_name, '.')) &&
+#endif
 			    !strcmp(cp + 1, domain))
 				*cp = 0;
 			cp = hp->h_name;
@@ -407,7 +439,11 @@ getvarbyname(sp, name, len)
     if (status == STAT_SUCCESS){
 	if (response->errstat == SNMP_ERR_NOERROR){
 	    for(var = response->variables; var; var = var->next_variable){
+#ifdef SVR4
+		if (var->name_length == len && !memcmp(name, var->name, len * sizeof(oid)))
+#else
 		if (var->name_length == len && !bcmp(name, var->name, len * sizeof(oid)))
+#endif
 		    break;	/* found our match */
 	    }
 	    if (var != NULL){

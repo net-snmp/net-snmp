@@ -31,7 +31,12 @@ SOFTWARE.
  * is provided ``as is'' without express or implied warranty.
  */
 
+#ifdef SVR4
+#include <string.h>
+#else
 #include <strings.h>
+#endif
+
 #include <stdio.h>
 
 #include <sys/param.h>
@@ -198,7 +203,11 @@ protopr(){
 	}
 	vp = response->variables;
 	if (vp->name_length != 20 ||
+#ifdef SVR4
+	    memcmp((char *)vp->name, (char *)oid_tcpconntable, sizeof(oid_tcpconntable))){
+#else
 	    bcmp((char *)vp->name, (char *)oid_tcpconntable, sizeof(oid_tcpconntable))){
+#endif
 		break;
 	}
 	
@@ -207,8 +216,13 @@ protopr(){
 
 	instance = vp->name + 10;
 	for(tp = tcpconn; tp != NULL; tp = tp->next){
+#ifdef SVR4
+	    if (!memcmp((char *)instance, (char *)tp->instance,
+		sizeof(tp->instance)))
+#else
 	    if (!bcmp((char *)instance, (char *)tp->instance,
 		sizeof(tp->instance)))
+#endif
 		    break;
 	}
 	if (tp == NULL){
@@ -221,9 +235,17 @@ protopr(){
 		tp->next = newp;
 	    }
 	    tp = newp;
+#ifdef SVR4
+	    memset((char *)tp, NULL, sizeof(*tp));
+#else
 	    bzero((char *)tp, sizeof(*tp));
+#endif
 	    tp->next = NULL;
+#ifdef SVR4
+	    memmove((char *)tp->instance, (char *)instance, sizeof(tp->instance));
+#else
 	    bcopy((char *)instance, (char *)tp->instance, sizeof(tp->instance));
+#endif
 	}
 
 	if (vp->name[ENTRY] == TCPCONN_STATE){
@@ -233,7 +255,11 @@ protopr(){
 	}
 
 	if (vp->name[ENTRY] == TCPCONN_LOCADDR){
+#ifdef SVR4
+	    memmove((char *)&tp->localAddress, (char *)vp->val.string, sizeof(u_long));
+#else
 	    bcopy((char *)vp->val.string, (char *)&tp->localAddress, sizeof(u_long));
+#endif
 	    tp->locAddrSet = 1;
 
 	}
@@ -245,7 +271,11 @@ protopr(){
 	}
 
 	if (vp->name[ENTRY] == TCPCONN_REMADDR){
+#ifdef SVR4
+	    memmove((char *)&tp->remoteAddress, (char *)vp->val.string, sizeof(u_long));
+#else
 	    bcopy((char *)vp->val.string, (char *)&tp->remoteAddress, sizeof(u_long));
+#endif
 	    tp->remAddrSet = 1;
 
 	}
@@ -300,7 +330,11 @@ udp_stats()
     int count;
     struct stat_table *sp = udp_stattab;
 
+#ifdef SVR4
+    memmove((char *)varname, (char *)oid_udpstats, sizeof(oid_udpstats));
+#else
     bcopy((char *)oid_udpstats, (char *)varname, sizeof(oid_udpstats));
+#endif
     varname_len = sizeof(oid_udpstats) / sizeof(oid);
     udpentry = varname + 7;
     printf("udp:\n");
@@ -329,7 +363,11 @@ tcp_stats()
     int count;
     struct stat_table *sp = tcp_stattab;
 
+#ifdef SVR4
+    memmove((char *)varname, (char *)oid_tcpstats, sizeof(oid_tcpstats));
+#else
     bcopy((char *)oid_tcpstats, (char *)varname, sizeof(oid_tcpstats));
+#endif
     varname_len = sizeof(oid_tcpstats) / sizeof(oid);
     tcpentry = varname + 7;
     printf("tcp:\n");
@@ -358,7 +396,11 @@ ip_stats()
     int count;
     struct stat_table *sp = ip_stattab;
 
+#ifdef SVR4
+    memmove((char *)varname, (char *)oid_ipstats, sizeof(oid_ipstats));
+#else
     bcopy((char *)oid_ipstats, (char *)varname, sizeof(oid_ipstats));
+#endif
     varname_len = sizeof(oid_ipstats) / sizeof(oid);
     ipentry = varname + 7;
     printf("ip:\n");
@@ -387,7 +429,11 @@ icmp_stats()
     int count, first;
     struct stat_table *sp;
 
+#ifdef SVR4
+    memmove((char *)varname, (char *)oid_icmpstats, sizeof(oid_icmpstats));
+#else
     bcopy((char *)oid_icmpstats, (char *)varname, sizeof(oid_icmpstats));
+#endif
     varname_len = sizeof(oid_icmpstats) / sizeof(oid);
     icmpentry = varname + 7;
     printf("icmp:\n");
@@ -451,11 +497,15 @@ inetprint(in, port, proto)
 	char *proto;
 {
 	struct servent *sp = 0;
-	char line[80], *cp, *index();
+	char line[80], *cp;
 	int width;
 
 	sprintf(line, "%.*s.", 16, inetname(*in));
+#ifdef SVR4
+	cp = strchr(line, '\0');
+#else
 	cp = index(line, '\0');
+#endif
 	if (!nflag && port)
 		sp = getservbyport((int)port, proto);
 	if (sp || port == 0)
@@ -485,7 +535,11 @@ inetname(in)
 	if (first && !nflag) {
 		first = 0;
 		if (gethostname(domain, MAXHOSTNAMELEN) == 0 &&
+#ifdef SVR4
+		    (cp = strchr(domain, '.')))
+#else
 		    (cp = index(domain, '.')))
+#endif
 			(void) strcpy(domain, cp + 1);
 		else
 			domain[0] = 0;
@@ -503,7 +557,11 @@ inetname(in)
 		if (cp == 0) {
 			hp = gethostbyaddr((char *)&in, sizeof (in), AF_INET);
 			if (hp) {
+#ifdef SVR4
+				if ((cp = strchr(hp->h_name, '.')) &&
+#else
 				if ((cp = index(hp->h_name, '.')) &&
+#endif
 				    !strcmp(cp + 1, domain))
 					*cp = 0;
 				cp = hp->h_name;

@@ -26,6 +26,7 @@ SOFTWARE.
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/sockio.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <nlist.h>

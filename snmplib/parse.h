@@ -25,7 +25,7 @@ SOFTWARE.
 
 #define MAXLABEL	64	/* maximum characters in a label */
 #define MAXTOKEN	64	/* maximum characters in a token */
-#define MAXQUOTESTR	512	/* maximum characters in a quoted string */
+#define MAXQUOTESTR	4096	/* maximum characters in a quoted string */
 
 
 

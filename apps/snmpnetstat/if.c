@@ -31,6 +31,12 @@ SOFTWARE.
  * is provided ``as is'' without express or implied warranty.
  */
 
+#ifdef SVR4
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -97,13 +103,16 @@ intpr(interval)
 	    cfg_nnets = *var->val.integer;
 	else
 	    return;
+#ifdef SVR4
+	memmove((char *)varname, (char *)oid_ifname, sizeof(oid_ifname));
+#else
 	bcopy((char *)oid_ifname, (char *)varname, sizeof(oid_ifname));
+#endif
 	varname_len = sizeof(oid_ifname) / sizeof(oid);
 	ifentry = varname + 9;
 	instance = varname + 10;
 	for (ifnum = 1; ifnum <= cfg_nnets; ifnum++) {
 		register char *cp;
-		char *index();
 
 		*name = mtu = 0;
 		ipkts = ierrs = opkts = oerrs = operstatus = collisions = 0;
@@ -111,7 +120,11 @@ intpr(interval)
 		*ifentry = IFNAME;
 		var = getvarbyname(Session, varname, varname_len);
 		if (var){
+#ifdef SVR4
+		    memmove(name, (char *)var->val.string, var->val_len);
+#else
 		    bcopy((char *)var->val.string, name, var->val_len);
+#endif
 		    name[var->val_len] = 0;
 		}
 		*ifentry = IFMTU;
@@ -151,7 +164,11 @@ intpr(interval)
 		if (interface != 0 &&
 		    strcmp(name, interface) != 0)
 			continue;
+#ifdef SVR4
+		cp = strchr(name, '\0');
+#else
 		cp = index(name, '\0');
+#endif
 		if (operstatus != MIB_IFSTATUS_UP)
 			*cp++ = '*';
 		*cp = '\0';
@@ -190,12 +207,11 @@ sidewaysintpr(interval)
 	register int line;
 	struct iftot *lastif, *sum, *interesting, ifnow, *now = &ifnow;
 	int oldmask;
-	int catchalarm();
+	void catchalarm();
 	struct variable_list *var;
 	oid varname[MAX_NAME_LEN], *instance, *ifentry;
 	int varname_len;
 	int ifnum, cfg_nnets;
-	char *index();
 
 	lastif = iftot;
 	sum = iftot + MAXIF - 1;
@@ -206,7 +222,11 @@ sidewaysintpr(interval)
 	    cfg_nnets = *var->val.integer;
 	else
 	    return;
+#ifdef SVR4
+	memmove((char *)varname, (char *)oid_ifname, sizeof(oid_ifname));
+#else
 	bcopy((char *)oid_ifname, (char *)varname, sizeof(oid_ifname));
+#endif
 	varname_len = sizeof(oid_ifname) / sizeof(oid);
 	for (ifnum = 1, ip = iftot; ifnum <= cfg_nnets; ifnum++) {
 		char *cp;
@@ -215,12 +235,20 @@ sidewaysintpr(interval)
 		varname[10] = ifnum;
 		var = getvarbyname(Session, varname, varname_len);
 		if (var){
+#ifdef SVR4
+		    memmove(ip->ift_name + 1, (char *)var->val.string, var->val_len);
+#else
 		    bcopy((char *)var->val.string, ip->ift_name + 1, var->val_len);
+#endif
 		}
 		if (interface && strcmp(ip->ift_name + 1, interface) == 0)
 			interesting = ip;
 		ip->ift_name[15] = '\0';
+#ifdef SVR4
+		cp = strchr(ip->ift_name, '\0');
+#else
 		cp = index(ip->ift_name, '\0');
+#endif
 		sprintf(cp, ")");
 		ip++;
 		if (ip >= iftot + MAXIF - 2)
@@ -257,12 +285,20 @@ loop:
 	sum->ift_op = 0;
 	sum->ift_oe = 0;
 	sum->ift_co = 0;
+#ifdef SVR4
+	memmove((char *)varname, (char *)oid_ifinucastpkts, sizeof(oid_ifinucastpkts));
+#else
 	bcopy((char *)oid_ifinucastpkts, (char *)varname, sizeof(oid_ifinucastpkts));
+#endif
 	varname_len = sizeof(oid_ifinucastpkts) / sizeof(oid);
 	ifentry = varname + 9;
 	instance = varname + 10;
 	for (ifnum = 1, ip = iftot; ifnum <= cfg_nnets && ip < lastif; ip++, ifnum++) {
+#ifdef SVR4
+		memset((char *)now, NULL, sizeof(*now));
+#else
 		bzero((char *)now, sizeof(*now));
+#endif
 		*instance = ifnum;
 		*ifentry = INUCASTPKTS;
 		var = getvarbyname(Session, varname, varname_len);
@@ -318,11 +354,19 @@ loop:
 	putchar('\n');
 	fflush(stdout);
 	line++;
+#ifdef SVR4
+	sighold(SIGALRM);
+	if (! signalled) {
+		sigpause(0);
+	}
+	sigrelse(SIGALRM);
+#else
 	oldmask = sigblock(sigmask(SIGALRM));
 	if (! signalled) {
 		sigpause(0);
 	}
 	sigsetmask(oldmask);
+#endif
 	signalled = NO;
 	(void)alarm(interval);
 	if (line == 21)
@@ -335,6 +379,7 @@ loop:
  * Called if an interval expires before sidewaysintpr has completed a loop.
  * Sets a flag to not wait for the alarm.
  */
+void
 catchalarm()
 {
 	signalled = YES;
