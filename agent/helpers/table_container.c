@@ -48,20 +48,10 @@ typedef struct container_table_data_s {
      * mutex_type                lock;
      */
 
-   /** do we want to group rows with the same index
-    * together when calling callbacks? */
-    char            group_rows;
-
    /* what type of key do we want? */
    char            key_type;
 
 } container_table_data;
-
-static int
-_container_table_handler(netsnmp_mib_handler *handler,
-                         netsnmp_handler_registration *reginfo,
-                         netsnmp_agent_request_info *agtreq_info,
-                         netsnmp_request_info *requests);
 
 /** @defgroup table_container table_container: Helps you implement a table when data can be found via a netsnmp_container.
  *  @ingroup table
@@ -145,6 +135,12 @@ _container_table_handler(netsnmp_mib_handler *handler,
  * @{
  */
 
+static int
+_container_table_handler(netsnmp_mib_handler *handler,
+                         netsnmp_handler_registration *reginfo,
+                         netsnmp_agent_request_info *agtreq_info,
+                         netsnmp_request_info *requests);
+
 /**********************************************************************
  **********************************************************************
  *                                                                    *
@@ -154,23 +150,18 @@ _container_table_handler(netsnmp_mib_handler *handler,
  *                                                                    *
  **********************************************************************
  **********************************************************************/
-/** register specified callbacks for the specified table/oid. If the
-    group_rows parameter is set, the row related callbacks will be
-    called once for each unique row index. Otherwise, each callback
-    will be called only once, for all objects.
+/** register specified callbacks for the specified table/oid.
 */
-int
-netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
-                                 netsnmp_table_registration_info *tabreg,
-                                 netsnmp_container *container,
-                                 char key_type, char group_rows)
+netsnmp_mib_handler *
+netsnmp_container_table_handler_get(netsnmp_table_registration_info *tabreg,
+                                    netsnmp_container *container, char key_type)
 {
-    netsnmp_mib_handler *handler;
     container_table_data *tad;
+    netsnmp_mib_handler *handler;
 
-    if ((NULL == reginfo) || (NULL == reginfo->handler) || (NULL == tabreg)) {
+    if (NULL == tabreg) {
         snmp_log(LOG_ERR, "bad param in netsnmp_container_table_register\n");
-        return SNMPERR_GENERR;
+        return NULL;
     }
 
     tad = SNMP_MALLOC_TYPEDEF(container_table_data);
@@ -181,31 +172,47 @@ netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
         if(handler) free(handler); /* SNMP_FREE wasted on locals */
         snmp_log(LOG_ERR,
                  "malloc failure in netsnmp_container_table_register\n");
-        return SNMPERR_GENERR;
+        return NULL;
     }
 
     tad->tblreg_info = tabreg;  /* we need it too, but it really is not ours */
-    tad->group_rows = group_rows; /* not implemented yet. use row_merge */
     if(key_type)
         tad->key_type = key_type;
     else
         tad->key_type = TABLE_CONTAINER_KEY_NETSNMP_INDEX;
 
-    if (NULL==container) {
-        container = netsnmp_container_find(reginfo->handlerName);
-        if(NULL == container)
-            container = netsnmp_container_find("table_container");
-    }
+    if(NULL == container)
+        container = netsnmp_container_find("table_container");
     tad->table = container;
 
     if (NULL==container->compare)
         container->compare = netsnmp_compare_netsnmp_index;
     if (NULL==container->ncompare)
         container->ncompare = netsnmp_ncompare_netsnmp_index;
-
+    
     handler->myvoid = (void*)tad;
     handler->flags |= MIB_HANDLER_AUTO_NEXT;
-    netsnmp_inject_handler(reginfo, handler);
+    
+    return handler;
+}
+
+int
+netsnmp_container_table_register(netsnmp_handler_registration *reginfo,
+                                 netsnmp_table_registration_info *tabreg,
+                                 netsnmp_container *container, char key_type )
+{
+    netsnmp_mib_handler *handler;
+
+    if ((NULL == reginfo) || (NULL == reginfo->handler) || (NULL == tabreg)) {
+        snmp_log(LOG_ERR, "bad param in netsnmp_container_table_register\n");
+        return SNMPERR_GENERR;
+    }
+
+    if (NULL==container)
+        container = netsnmp_container_find(reginfo->handlerName);
+
+    handler = netsnmp_container_table_handler_get(tabreg, container, key_type);
+    netsnmp_inject_handler(reginfo, handler );
 
     return netsnmp_register_table(reginfo, tabreg);
 }
@@ -311,7 +318,8 @@ _data_lookup(netsnmp_handler_registration *reginfo,
      */
     tblreq_info = netsnmp_extract_table_info(request);
     /** the table_helper_handler should enforce column boundaries. */
-    netsnmp_assert(tblreq_info->colnum <= tad->tblreg_info->max_column);
+    netsnmp_assert((NULL != tblreq_info) &&
+                   (tblreq_info->colnum <= tad->tblreg_info->max_column));
     
     if ((agtreq_info->mode == MODE_GETNEXT) ||
         (agtreq_info->mode == MODE_GETBULK)) {
@@ -355,15 +363,16 @@ _data_lookup(netsnmp_handler_registration *reginfo,
 
         _set_key( tad, request, tblreq_info, &key, &index );
         row = CONTAINER_FIND(tad->table, key);
-        if ((NULL == row) &&
-            ((agtreq_info->mode != MODE_SET_RESERVE1) || /* get */
-             (reginfo->modes & HANDLER_CAN_NOT_CREATE))) { /* no create */
+        if (NULL == row) {
             /*
              * not results found. For a get, that is an error
              */
             DEBUGMSGTL(("table_container", "no row found\n"));
-            netsnmp_set_request_error(agtreq_info, request,
-                                      SNMP_NOSUCHINSTANCE);
+            if((agtreq_info->mode != MODE_SET_RESERVE1) || /* get */
+               (reginfo->modes & HANDLER_CAN_NOT_CREATE)) { /* no create */
+                netsnmp_set_request_error(agtreq_info, request,
+                                          SNMP_NOSUCHINSTANCE);
+            }
         }
     } /** GET/SET */
     
@@ -393,7 +402,7 @@ _container_table_handler(netsnmp_mib_handler *handler,
                          netsnmp_request_info *requests)
 {
     int             rc = SNMP_ERR_NOERROR;
-    int             oldmode;
+    int             oldmode, need_processing = 0;
     netsnmp_request_info *request;
     container_table_data *tad;
 
@@ -439,6 +448,10 @@ _container_table_handler(netsnmp_mib_handler *handler,
              */
             _data_lookup(reginfo, agtreq_info, requests, tad);
 
+            if(request->processed)
+                continue;
+
+            ++need_processing;
         } /** for ( ... requests ... ) */
     }
     
@@ -447,20 +460,27 @@ _container_table_handler(netsnmp_mib_handler *handler,
      * xxx-rks: again, this should be handled further up.
      */
     if ((oldmode == MODE_GETNEXT) && (handler->next)) {
-        handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
-        agtreq_info->mode = MODE_GET;
-            
         /*
-         * Now we've done our processing. call handler below us
+         * tell agent handlder not to auto call next handler
          */
-        rc = netsnmp_call_next_handler(handler, reginfo, agtreq_info, requests);
-        if (rc != SNMP_ERR_NOERROR) {
-            DEBUGMSGTL(("table_container", "next handler returned %d\n", rc));
-        }
+        handler->flags |= MIB_HANDLER_AUTO_NEXT_OVERRIDE_ONCE;
 
-        /* reverse the previously saved mode if we were a getnext */
-        agtreq_info->mode = oldmode;
-    }    
+        /*
+         * if we found rows to process, pretend to be a get request
+         * and call handler below us.
+         */
+        if(need_processing > 0) {
+            agtreq_info->mode = MODE_GET;
+            rc = netsnmp_call_next_handler(handler, reginfo, agtreq_info,
+                                           requests);
+            if (rc != SNMP_ERR_NOERROR) {
+                DEBUGMSGTL(("table_container",
+                            "next handler returned %d\n", rc));
+            }
+
+            agtreq_info->mode = oldmode; /* restore saved mode */
+        }
+    }
 
     return rc;
 }
