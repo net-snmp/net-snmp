@@ -1,0 +1,782 @@
+#!/usr/local/bin/perl5  -w
+
+use strict 'refs';
+require Net::Ping;
+require Term::ReadKey;
+
+#defaults
+$mibident=".2";
+$miberrflag=".100";
+$miberrmsg=".101";
+$mibfix=".102";
+$mibheadsht=".1.3.6.1.4";
+$mibheadall="$mibheadsht.10";
+$mibclearcache="$mibheadall.100.10";
+@miblist=(".1",".3",".4",".6",".7",".101");
+@fixitlist=(".1",".3");
+$errlog="/net/tyfon/1/OV/log/ece-log";
+$andlog=0;
+$snmppath="/usr/local/etc";
+$eraseline="                                                                           \r";
+$fixit=0;  # this should be 0 not -1, but is necissary till getc(STDIN) works
+$rescanWhen = 300;
+$display = $ENV{'DISPLAY'};
+$hidden = 0;
+$pinghost = 1;
+#
+#  Mib Package:  Each mib has a mib number attached and can check/fix itself;
+#
+
+package Mib;
+
+sub new {
+    my $tmp = shift;
+    my $self = {};
+    $self->{'HostId'} = shift;
+    $self->{'Host'} = $self->{'HostId'}->{'Name'};
+    $self->{'Mib'} = shift;
+    $self->{'Frame'} = shift;
+    bless $self;
+}
+
+sub getmibnum {
+    my $self = shift;
+    return ($self->{'Mib'});
+}
+
+sub check {
+    my $self = shift;
+    my $tmp = [];
+    if (! $::display) {
+	printf "%sChecking %s: %s\r", $::eraseline,$self->{'Host'},
+	$self->{'Mib'};
+    }
+    open(OUT,"$::snmppath/snmpwalk $self->{'Host'} ecemgr eceagent ececontext $self->{'Mib'}$::miberrflag|");
+    while (<OUT>) {
+	($result) = /= ([0-9]+)/;
+	if ($result > 0)
+	{
+	    ($mibloc) = /\.([0-9]+) /;
+	    push(@{$tmp},FixProblem::new("",$self->{'HostId'}, $self->{'Mib'},
+					 $mibloc,$self->{'Frame'}));
+	    if (! $::display) {
+		printf("%s%-8.8s  %-12.12s  %2d -- %-37.37s",$::eraseline,
+		       $self->{'Host'},$tmp->[0]->{'ErrName'},
+		       $result,$tmp->[0]->{'ErrMsg'});
+		if ($tmp->[0]->canfix() && $::fixit == 0) {
+		    printf(" / Fix? ");
+		    $ans = Term::ReadKey::ReadKey(0);
+		    if ("$ans" eq "y" || "$ans" eq "Y") {
+			printf("\b\b\b\b\b\b\b\b");
+			$tmp->[0]->fix($mibloc);     # fix now if curses
+		    } else {
+			print $ans;
+			printf("\nChecking %s: %s\r",$self->{'Host'}, 
+			       $self->{'Mib'});
+		    }
+		} elsif ($::fixit > 0) {
+		    $tmp->[0]->fix($mibloc);     # fix now if curses
+		}
+		shift @{$tmp};
+	    }
+	}
+    }
+    close(OUT);
+    return(@{$tmp});
+}
+
+#
+#  Problem Package: A problem comes into existence when found.  It may
+#  or may not know how to fix itself (Problem/FixProblem).
+#
+
+package Problem;
+
+sub new{
+    my $tmp = shift;
+    my $hostId = shift;
+    my $mib = shift;
+    my $self = new Mib ($hostId,$mib);
+    $self->{'MibLocation'} = shift;
+    $tmp = shift;
+    $_ = `$::snmppath/snmpget $self->{'Host'} ecemgr eceagent ececontext $self->{'Mib'}$::mibident.$self->{'MibLocation'}`;
+    ($self->{'ErrName'}) = /\"([^\"]*)\"/;
+    $_ = `$::snmppath/snmpget $self->{'Host'} ecemgr eceagent ececontext $self->{'Mib'}$::miberrmsg.$self->{'MibLocation'}`;
+    ($self->{'ErrMsg'}) = /\"([^\"]*)\"/;
+    if ($::display) {
+	$self->{'Frame'} = $tmp->Frame();
+	$self->{'Frame'}->pack();
+	$self->{'Desc'} = 
+	    $self->{'Frame'}->Button(-text => sprintf("%-12.12s %-42.42s",
+						     $self->{'ErrName'},
+						     $self->{'ErrMsg'}),
+				     -font => "6x13",
+				     -highlightcolor => "#ffffff",
+				     -highlightthickness => 0,
+				     -borderwidth => 0,
+				     -relief => "flat",
+				     -bd => 0, -padx => 0, -pady => 0,
+				     -activeforeground => 'red',
+				     -activebackground => '#C9C9C9',
+				     -background => '#E0C9C9',
+				     -command => [\&selectme,$self]);
+	$self->{'Desc'}->pack(-fill => "x",-expand => 1,-side=>"left"); # 
+	$tmp->toplevel->deiconify();
+	$tmp->toplevel->raise();
+    }
+    bless $self;
+    return $self;
+}
+
+sub haveseen {
+    my $self = shift;
+    $self->{'Desc'}->configure(-background => '#C9C9C9');
+}
+
+sub selectme {
+    my $self = shift;
+    if ($main::hidden) {
+      main::makeappear();
+	return;
+    }
+    if (exists $self->{'Selected'}) {
+      main::deselectitem($self);
+	delete $self->{'Selected'};
+    } else {
+      main::selectitem($self);
+	$self->{'Desc'}->configure(-foreground => "red");
+	$self->{'Selected'} = 1;
+    }
+    $self->haveseen();
+}
+
+sub deselectme {
+    my $self = shift;
+    $self->{'Desc'}->configure(-foreground => "black");
+    delete $self->{'Selected'};
+}
+
+sub check {
+    my $self = shift;
+    if ($::display) {
+      main::setstatus("Checking $self->{'Host'} -- $self->{'ErrName'}");
+    }
+    else {
+	printf("Checking \b\b\b\b\b\b\b\b\b");
+    }
+    $_ = `$::snmppath/snmpget $self->{'Host'} ecemgr eceagent ececontext $self->{'Mib'}$::miberrflag.$self->{'MibLocation'}`;
+    ($result) = /= ([0-9]+)/;
+    if ($result == 0) {
+	$self->deleteme();
+    }
+  main::setstatus("idle");
+    return $result;
+}
+
+sub fix {
+# Don't fix and/or unable to
+    my $self = shift;
+  main::setmsg("Don't know how to fix $self->{'ErrName'}");
+}
+
+sub rsh {
+    my $self = shift;
+    if ($::display) {
+	system "xterm -e rsh $self->{'HostId'}->{'Name'} -l root &";
+    }
+}
+
+sub deleteme {
+    my $self = shift;
+    my $host = $self->{'HostId'};
+    $host->deleteProb($self);
+}
+
+sub deleteself {
+    my $self = shift;
+    if ($::display) {
+	$self->{'Desc'}->destroy();
+	$self->{'Frame'}->destroy();
+	if ($self->{'Selected'}) {
+	  main::deselectitem($self);
+	}
+    }
+}
+
+sub canfix {
+    return 0;
+}
+
+package FixProblem;
+
+@ISA = qw( Problem );
+
+sub new {
+    my $tmp = shift;
+    my $hostId = shift;
+    my $mib = shift;
+    my $mibloc = shift;
+    my $frame = shift;
+    my $self = new Problem ($hostId,$mib,$mibloc,$frame);
+    $_ = $mib;
+    ($mymib) = /(\.[0-9]+)$/;
+    if (grep(/$mymib/,@::fixitlist) && ($::fixit >= 0)) {
+	bless $self;		# Make it a FixProblem if fixable
+    }
+    return $self;               # else just return a Problem
+}
+
+sub canfix {
+    return 1;
+}
+
+sub fix {
+    my $self = shift;
+    my $mibloc = shift;
+    if ($::display) {
+      main::setstatus(sprintf("Fixing %s:  %s",
+			      $self->{'Host'}, $self->{'ErrName'}));
+    } 
+    else {
+	printf(" / Fixing...\b\b\b\b\b\b\b\b\b");
+    }
+    system("$::snmppath/snmpset $self->{'Host'} ecemgr eceagent ececontext $self->{'Mib'}$::mibfix.$self->{'MibLocation'} integer 1 > /dev/null 2>&1");
+    system("$::snmppath/snmpset $self->{'Host'} ecemgr eceagent ececontext $::mibclearcache integer 1 > /dev/null 2>&1");
+    if ($::display) {
+	main::setstatus("Sleeping");
+    }
+    else {
+	printf("Sleeping \b\b\b\b\b\b\b\b\b");
+    }
+    sleep(2);
+    if ($::display) {
+	main::setstatus("Checking");
+    }
+    else {
+	printf("Checking\b\b\b\b\b\b\b\b");
+    }
+    if ($self->check() != 0) {
+	if (! $::display) {
+	    printf("*failed*  \n");
+	} else {
+	    main::setmsg("Failed to fix $self->{'ErrName'} on $self->{'Host'}");
+	}
+    }
+    else {
+	if ($::display) {
+#	    $self->{'HostId'}->deleteProb($self);
+	    main::setmsg("Fixed $self->{'ErrName'} on $self->{'Host'}");
+	} 
+	else {
+	    printf("Fixed     \n");
+	}
+    }
+  main::setstatus("Idle");
+}
+
+#
+#  Host Package:  Each object is a host which can check itself and display
+#                 the results
+#
+package Host;
+
+sub new {
+    my $self = {};
+    my $tmp = shift;
+    $self->{'Name'} = shift;
+    $self->{'Mibs'} = [];
+    $self->{'Problems'} = [];
+    bless $self;
+    if ($::display) {
+	$self->{'MainFrame'} = $::HostFrame->Frame();
+	if (!$::hidden) {
+	    $self->{'MainFrame'}->configure(-relief =>"sunken",-borderwidth=>2);
+	}
+	$self->{'ProbFrame'} = $self->{'MainFrame'}->Frame();
+	$self->{'hostlabel'} = 
+	    $self->{'MainFrame'}->Button(-text => sprintf("%-9.9s",
+							    $self->{'Name'}),
+					 -highlightthickness=>0,
+					 -bd => 0, -padx => 0, -pady => 0,
+					 -command =>[\&selectme,$self],
+					 -activeforeground => 'red',
+					 -activebackground => '#C9C9C9',
+					 -width => 9,
+					 -anchor => "w",
+					 -relief => "flat");
+	$self->{'hostlabel'}->pack(-side=>"left",-ipadx=>1,
+				   -padx=> 1,-pady =>1);
+	$self->{'ProbFrame'}->pack(-side=>"left",-ipadx=>1,
+				   -padx=> 1,-pady =>1);
+	$self->{'MainFrame'}->pack( #-padx => 2,-pady =>2, 
+				   -fill => "x", -expand => 1);
+    } 
+    foreach $mibx ( @::miblist ) {
+	push(@{$self->{'Mibs'}},
+	     new Mib ($self,"$::mibheadall$mibx",
+		      $self->{'ProbFrame'}));
+    }
+    return $self;
+}
+
+sub rsh {
+    my $self = shift;
+    if ($::display) {
+	system "xterm -e rsh $self->{'Name'} -l root &";
+    }
+}
+
+sub selectme {
+    my $self = shift;
+    if ($main::hidden) {
+      main::makeappear();
+	return;
+    }
+    if (exists $self->{'Selected'}) {
+      main::deselectitem($self);
+	delete $self->{'Selected'};
+    } else {
+      main::selectitem($self);
+	$self->{'hostlabel'}->configure(-foreground => "red");
+	$self->{'Selected'} = 1;
+    }
+}
+
+sub deselectme {
+    my $self = shift;
+    $self->{'hostlabel'}->configure(-foreground => "black");
+    delete $self->{'Selected'};
+}
+
+sub fix {
+    my $self = shift;
+    if (! exists $self->{'Down'}) {
+	foreach $i (@{$self->{'Problems'}}) {
+	    printf("%d - %s\n",$i->canfix(),ref($i));
+	    if ($i->canfix() && ref($i) ne Host) {
+		$i->fix();
+	    }
+	}
+    }
+}
+
+sub seenall {
+    my $self = shift;
+    foreach $i (@{$self->{'Problems'}}) {
+	if (ref($i) ne Host) {
+	    $i->haveseen();
+	}
+    }
+}
+
+sub canfix {
+    return 1;
+}
+
+sub check {
+    my $self = shift;
+    $self->{'noDelete'} = 1;
+    $self->deleteProbs();
+    delete $self->{'noDelete'};
+    if ($::display) {
+	$self->{'hostlabel'}->configure(-text => $self->{'Name'},-width=>9);
+    }
+    delete $self->{'Down'};
+  main::setstatus("pinging $self->{'Name'}");
+    if (!($::pinghost) || Net::Ping::pingecho($self->{'Name'},2)) {
+	foreach $i (@{$self->{'Mibs'}}) {
+	    if (ref($i) ne Mib) {
+		print "$i is a ref($i) not a Mib\n";
+	    } else 
+	    {
+	      main::setstatus("Checking $self->{'Name'}:  " . $i->getmibnum());
+		push(@{$self->{'Problems'}},$i->check());
+	    }
+	}
+    } else {
+	push(@{$self->{'Problems'}},$self);
+	$self->{'Down'} = 1;
+	if ($::display) {
+	    $self->{'hostlabel'}->configure(-text => 
+					sprintf("%-9.9s down",$self->{'Name'}),
+					-width => 14);
+	}
+    }
+  main::setstatus("Idle");
+    if ($#{$self->{'Problems'}} == -1) {
+	$self->deleteme();
+    }
+}
+
+sub deleteme {
+    my $self = shift;
+    $self->deleteProbs();
+    if ($self->{'Selected'}) {
+      main::deselectitem($self);
+    }
+    if ($::display) {
+	$self->{'hostlabel'}->destroy();
+	$self->{'ProbFrame'}->destroy();
+	$self->{'MainFrame'}->destroy();
+	Tk->update();
+    }
+  main::deletehost($self->{'Name'});
+}
+
+sub deleteProbs {
+    my $self = shift;
+    foreach $i (@{$self->{'Problems'}}) {
+	if (ref($i) eq Host) {
+	    delete $self->{'Problems'};
+	    return;
+	}
+	if (ref($i) ne Problem && ref($i) ne FixProblem) {
+	    print "i:  $i is a ", ref($i), "\n";
+	    next;
+	}
+	$self->deleteProb($i);
+    }
+}
+
+sub deleteProb {
+    my $self = shift;
+    my $child = shift;
+    for ($k = 0; $k <= $#{$self->{'Problems'}}; $k++) {
+	if (ref($self->{'Problems'}->[$k]) eq Problem ||
+	    ref($self->{'Problems'}->[$k]) eq FixProblem ) {
+	    if ($self->{'Problems'}->[$k]->{'Mib'} eq $child->{'Mib'} && 
+	    $self->{'Problems'}->[$k]->{'MibLocation'} eq
+	    $child->{'MibLocation'}) {
+		splice(@{$self->{'Problems'}},$k,1);
+		$child->deleteself();
+		if ($#{$self->{'Problems'}} == -1 && 
+		    !exists$self->{'noDelete'}) {
+		    $self->deleteme();
+		}
+		last;
+	    }
+	} else {
+	    print "    not: ",$self->{'Problems'}->[$k],"/",
+	    ref($self->{'Problems'}->[$k]),"\n";
+	}
+    }
+}
+
+package main;
+
+#
+# Read arguments
+#
+
+if ($#ARGV != -1) {
+    while ($_ = $ARGV[0], /^-/) {
+	shift;
+	/^-a/ && ($andlog = 1);
+	/^-n/ && ($fixit = -1);
+	/^-y/ && ($fixit = 1);
+	/^-x/ && ($display = 0);
+	/^-H/ && ($hidden = 1);
+	/^-h/ && &display_help(); 
+    }
+}
+
+#
+# If necessary check the ece-log file for problems
+#
+
+if ($andlog || $#ARGV == -1) {
+    open(LOG,$errlog);
+    while (<LOG>) {
+	@fields = split;
+	@tmp = grep(/$fields[0]/,@ARGV);
+	if ($#tmp == -1) { #  && $fields[1] ne "down") {
+	    $ARGV[$#ARGV + 1] = $fields[0];
+	}
+    }
+    close(LOG);
+}
+
+#
+# Check all the found hosts 
+#
+
+if ($display) {
+    use Tk;
+#    $tk_strictMotif = 1;
+    $top = MainWindow->new();
+    $top->bind('all',"<Control-q>",[\&quit]);
+    $top->bind('all',"<Control-h>",[\&makehidden]);
+    $top->bind('all',"<Control-s>",[\&seenall]);
+    Tk->option('add','*highlightthickness','0');        #wish this worked
+    Tk->option('add','*highlightbackground','#C9C9C9');
+    Tk->option('add','*background','#C9C9C9');
+    Tk->option('add','*font','6x13');
+    $HostFrame = $top->Frame();
+    $MenuFrame = $top->Frame(-relief => "raised",-borderwidth => 2);
+    $MenuFrame->pack(-fill => "x",-expand => 1);
+    $statusBar = $top->Frame(-relief => "raised",-borderwidth => 2);
+    $status = $statusBar->Label(-text => "initializing",-anchor =>"e");
+    $statusl = $statusBar->Label(-text => "Status:  ", -anchor => "w");
+    $msgBar = $top->Frame(-relief => "raised",-borderwidth => 2);
+    $msg = $msgBar->Label(-text => "",-anchor =>"e");
+    $msgl = $msgBar->Label(-text => "Note:  ", -anchor => "w");
+    
+    $botFrame = $top->Frame();
+    $butFrame = $top->Frame();
+    $entryhost = "";
+    $NewHost = $botFrame->Entry(-textvariable => \$entryhost,-width=>20,
+				-highlightthickness=>0,
+				-relief => "sunken");
+    $NewHost->bind("<Return>",sub {newHost("$entryhost");
+			       $NewHost->delete(0,length($entryhost));});
+    $BotLabel = $botFrame->Label(-text => "Check New Host:  ",
+			    -anchor => "w");
+    $CmdsMenuBut = $MenuFrame->Menubutton(-text => "Cmds");
+    $CmdsMenu = $CmdsMenuBut->Menu(-tearoff => 1);
+    $CmdsMenuBut->configure(-menu => $CmdsMenu);
+    $CmdsMenuBut->pack(-side => "left");
+    $CmdsMenuBut->command(-label => "Check Hosts", -command => [\&rescanhosts]);
+    $CmdsMenuBut->command(-label => "Check Log", -command => [\&scanlog]);
+    $CmdsMenuBut->command(-label => "Fix All", -command => [\&fixall]);
+    $CmdsMenuBut->command(-label => "Seen All", -command => [\&seenall]);
+    $CmdsMenuBut->separator();
+    $CmdsMenuBut->command(-label => "Hide", -command => [\&makehidden]);
+    $CmdsMenuBut->command(-label => "Quit", -command => [\&quit]);
+    $PrefsMenuBut = $MenuFrame->Menubutton(-text => "Prefs");
+    $PrefsMenu = $PrefsMenuBut->Menu(-tearoff => 1);
+    $PrefsMenuBut->configure(-menu => $PrefsMenu);
+    $PrefsMenuBut->pack(-side => "left");
+    $PrefsMenuBut->cascade(-label => "Rescan");
+    $RescanPrefsBut = $PrefsMenu->Menu();
+    $PrefsMenuBut->entryconfigure("Rescan",-menu => $RescanPrefsBut);
+    $AutoRescan = 1;
+    if ($AutoRescan) {
+      $afterId = Tk::after($rescanWhen*1000,[\&autorescan]);
+    }
+    $RescanPrefsBut->checkbutton(-label =>"Auto Rescan",
+			       -variable =>\$AutoRescan,
+			       -command => sub {if ($AutoRescan) {
+				   $afterId = 
+				     Tk::after($rescanWhen*1000,[\&autorescan])
+				   } else {
+				     Tk::after("cancel",$afterId);
+				   }});
+    $AutoCheckLog = 1;
+    $RescanPrefsBut->checkbutton(-label =>"Checks Log",
+			       -variable =>\$AutoCheckLog);
+    $AutoCheckHosts = 0;
+    $RescanPrefsBut->checkbutton(-label =>"Checks Hosts",
+			       -variable =>\$AutoCheckHosts);
+    $RescanWhenHidden = 1;
+    $RescanPrefsBut->checkbutton(-label =>"Only When Hidden ",
+			       -variable =>\$RescanWhenHidden);
+    $PrefsMenuBut->checkbutton(-label => "Ping Host First", 
+			       -variable => \$pinghost);
+    $statusl->pack(-fill => "x", -expand => 1, -side =>"left");
+    $status->pack(-fill => "x", -expand => 1, -side =>"left");
+    $msgl->pack(-fill => "x", -expand => 1, -side => "left");
+    $msg->pack(-fill => "x", -expand => 1, -side => "left");
+    $statusBar->pack(-fill => "x", -expand => 1);
+    $msgBar->pack(-fill => "x", -expand => 1);
+    $HostFrame->pack(-fill => "x",-expand => 1);
+    $butFrame->pack(-fill => "x",-expand => 1);
+    $botFrame->pack(-fill => "x",-expand => 1);
+    $FixBut = $butFrame->Button(-text => "Fix",-command=>[sub{print "hi\n"}],
+				-highlightthickness=>0,
+				-state => "disabled");
+    $FixBut->pack(-side => "left",-padx => 4,-pady => 2,-ipadx => 2,
+		   -ipady => 2);
+    $RshBut = $butFrame->Button(-text => "Rsh",-command=>[sub{print "hi\n"}],
+				-highlightthickness=>0,
+				-state => "disabled");
+    $RshBut->pack(-side => "left",-padx => 4,-pady => 2,-ipadx => 2,
+		   -ipady => 2);
+    $DelBut = $butFrame->Button(-text => "Del", -highlightthickness=>0,
+				 -state => "disabled");
+    $DelBut->pack(-side => "left",-padx => 4,-pady => 2,-ipadx => 2,
+		   -ipady => 2);
+    $ChkBut = $butFrame->Button(-text => "Chk", -highlightthickness=>0,
+				 -state => "disabled");
+    $ChkBut->pack(-side => "left",-padx => 4,-pady => 2,-ipadx => 2,
+		   -ipady => 2);
+    $BotLabel->pack(-fill => "x",-expand => 1,-side=>"left");
+    $NewHost->pack(-side=>"left");
+    &makehidden() if ($hidden);
+    Tk->update();
+    foreach $host ( @ARGV ) {
+	newHost($host);
+    }
+    $status->configure(-text => "Idle");
+    $selected = 0;
+    MainLoop;
+}
+else {
+    select(STDOUT);
+    $| = 1;
+    if ($::fixit == 0) {
+	Term::ReadKey::ReadMode(3);
+    }
+    foreach $host ( @ARGV ) {
+	newHost($host);
+    }
+    printf("$eraseline");
+}
+
+sub newHost {
+    my $name = shift;
+    if (!exists $chost{"$name"}) {
+	$chost{"$name"} = new Host ($name);
+	if ($::display) { Tk->update(); }
+	$chost{"$name"}->check;
+    } else {
+	setmsg("$name all ready exists");
+    }
+}
+
+sub deletehost {
+    my $name = shift;
+    delete $chost{"$name"};
+}
+
+sub setstatus {
+    my $arg = shift;
+    if ($display) {
+	$status->configure(-text => $arg);
+	Tk->update();
+    }
+}
+
+sub setmsg {
+    my $arg = shift;
+    if ($display) {
+	$msg->configure(-text => $arg);
+	Tk->update();
+    }
+}
+
+sub deselectitem {
+    $obj = shift;
+    $obj->deselectme();
+    $FixBut->configure(-state => "disabled");
+    $RshBut->configure(-state => "disabled");
+    $DelBut->configure(-state => "disabled");
+    $ChkBut->configure(-state => "disabled");
+    $selected = 0;
+}
+
+sub selectitem {
+    if ($selected) {
+	$selected->deselectme();
+    }
+    $selected = shift;
+    if (ref($selected) ne Host || !exists $selected->{'Down'}) {
+	$RshBut->configure(-state => "normal", -command => ['rsh',$selected]);
+    } else {
+	$RshBut->configure(-state => "disabled");
+    }
+    $DelBut->configure(-state => "normal", -command => ['deleteme',$selected]);
+    $ChkBut->configure(-state => "normal", -command => ['check',$selected]);
+    if ($selected->canfix() && !exists $selected->{'Down'}) {
+	$FixBut->configure(-state => "normal", 
+			   -command => ['fix',$selected]);
+    } else {
+	$FixBut->configure(-state => "disabled");
+    }
+    if ($hidden == 1) {
+	makeappear();
+    }
+}
+
+sub makehidden {
+    Tk->pack("forget",$MenuFrame,$statusBar,$msgBar,$butFrame,
+	     $botFrame);
+    flatten();
+    $hidden=1;
+}
+
+sub makeappear {
+    Tk->pack("forget",$HostFrame);
+    Tk->pack($MenuFrame,$statusBar,$msgBar,$HostFrame,$butFrame, 
+	     $botFrame, -expand => 1, -fill => "x");
+    reliefen();
+    $hidden=0;
+}
+
+sub quit {
+    $top->destroy();
+    exit();
+}
+
+sub scanlog {
+    open(LOG,$errlog);
+    while (<LOG>) {
+	@fields = split;
+	@tmp = grep(/$fields[0]/,@ARGV);
+	if ($#tmp == -1 && !exists $chost->{$fields[0]}) {
+	    newHost($fields[0]);
+	}
+    }
+    close(LOG);
+}
+
+sub rescanhosts {
+    foreach $i (keys(%chost)) {
+	$chost{$i}->check();
+    }
+}
+
+sub autorescan {
+    $afterId = Tk::after($rescanWhen*1000,[\&autorescan]);
+    if ($RescanWhenHidden && !$hidden) {return;}
+    if ($AutoCheckHosts) {
+	rescanhosts();
+    }
+    if ($AutoCheckLog) {
+	scanlog();
+    }
+}
+
+sub flatten {
+    foreach $i (keys(%chost)) {
+	$chost{$i}->{'MainFrame'}->configure(-relief => "flat",-borderwidth=>0);
+    }
+}
+
+sub reliefen {
+    foreach $i (keys(%chost)) {
+	$chost{$i}->{'MainFrame'}->configure(-relief =>"sunken",-borderwidth=>2);
+    }
+}
+
+sub fixall {
+    foreach $i (keys(%chost)) {
+	$chost{$i}->fix();
+    }
+}
+
+sub seenall {
+    foreach $i (keys(%chost)) {
+	$chost{$i}->seenall();
+    }
+}
+
+sub display_help {
+    print "
+Usage:  snmpcheck [-x] [-n|y] [-h] [-H] [[-a] HOSTS] 
+
+  -h\tDisplay this message.
+  -a\tcheck error log file AND hosts specified on command line.
+  HOSTS\tcheck these hosts for problems.
+
+X Options:
+  -x\tforces ascii base if \$DISPLAY set (instead of tk).
+  -H\tstart in hidden mode.  (hides user interface)
+
+Ascii Options:
+  -n\tDon't ever try and fix the problems found.  Just list.
+  -y\tAlways fix problems found.
+
+";
+    exit(0);
+
+}

@@ -24,9 +24,12 @@ SOFTWARE.
  */
 #include <unistd.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#ifdef sun
 #include <sys/sockio.h>
+#endif
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <nlist.h>

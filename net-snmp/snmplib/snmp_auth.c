@@ -327,9 +327,17 @@ snmp_auth_build(data, length, sid, slen, version, messagelen)
     int             *length;
     u_char          *sid;
     int             *slen;
-    long            *version;
+    int            *version;
     int             messagelen;
 {
+  /* version is an 'int' (CMU had it as a long, but was passing in a *int.  
+     Grrr.) assign version to verfix and pass in that to asn_build_int 
+     instead which expects a long  
+     -- WH */
+
+  long verfix;
+  verfix = *version;
+
     data = asn_build_sequence(data, length, (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), messagelen + *slen + 5);
     if (data == NULL){
         ERROR("buildheader");
@@ -337,7 +345,7 @@ snmp_auth_build(data, length, sid, slen, version, messagelen)
     }
     data = asn_build_int(data, length,
             (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-            (long *)version, sizeof(*version));
+            (long *) &verfix, sizeof(verfix));
     if (data == NULL){
         ERROR("buildint");
         return NULL;

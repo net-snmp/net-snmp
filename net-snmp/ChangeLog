@@ -1,0 +1,204 @@
+Changes since V3.0.1
+
+hardaker 21 Sep 95 09:27:18
+    (snmplib/md5.c) Forgot to include sys/types.h for u_long definition.
+
+-------------------------------------------------------------------------------
+
+Changes since V3.0.1
+
+hardaker 26 Jul 95 16:31:41
+    - Added a new #define: EXIT_ON_BAD_KLREAD to config.h
+      If defined, and an error occurs while reading the kernel contents,
+      the agent will exit.  This was the default.  I wanted it to
+      continue.
+    
+    - Port to dec-alpha/OSF 3.1
+      - alpha's long is 8 bytes, not 4.
+      - should be (mostly) 64 bit clean now.
+      - cleaned up a LOT of bugs CMU code in the process.
+
+hardaker 28 Jul 95 14:23:41
+    Yet more problems fixed in the alpha port.
+      -- more int -> long checking.
+
+hardaker 31 Jul 95 16:27:47
+    - snmpcheck changes:
+      - terminal (ascii) based supported fixed.
+        - Detects presence of a DISPLAY variable.
+        - Now requires the Term::Readkey package.
+        - asks users weather to fix problems
+      - raises and deiconifies when new problems are found
+      - sets the background color of new problems to pinkish
+      - new preference:  ping host?
+      - global key bindings:
+          ctrl-q = quit; ctrl-h = hide; ctrl-s = seen all
+
+hardaker  1 Sep 95 11:57:52
+    - Fixed alpha's kernel lookups:
+      * CMU code was passing ints into lseek (needs long).
+
+hardaker 18 Sep 95 16:09:25
+    Minor mods to README file.
+
+hardaker 18 Sep 95 16:13:49
+    Minor bug:
+      (sh_count_procs) check if returned file descriptor > 0 before continuing
+
+-------------------------------------------------------------------------------
+
+Changes since V3.0
+
+hardaker 16 Jun 95 10:13:53
+    Removed 'gmake' -> 'make' in agent/Makefile
+
+hardaker 16 Jun 95 10:15:42
+    House cleaning
+      - Compiles cleanly on hpux/gcc
+    	(except one include file error I don't have control over.)
+      - Change VERSION_ID -> VERSIONID to avoid conflicts with HP's includes.
+
+hardaker 16 Jun 95 14:13:53
+    House Cleaning:
+      Took out gcc/ansi requirement for the agent.
+      perror() is called more frequently for log archival
+    
+    New Bug/Haven't solved:
+      HP-UX:  if agent/*.c and agent/extensible/*.c are built with gcc,
+    	  DisplayStrings return garbage.  No clue as to why.
+
+hardaker 16 Jun 95 14:20:48
+    House Cleaning:
+      Missed a VERSION_ID
+
+hardaker 21 Jun 95 09:11:27
+    Changed another "empty" error message in the CMU code to a real warning.
+
+hardaker 21 Jun 95 09:15:31
+    Bug Fix:
+      Stopped returning a pointer to a non-static char array...  (-> static char)
+      Passing wrong pointer to seterrorstatus() in setPerrorstatus()
+    
+    Feature:
+      Added a setable mib entry to the version mib to re-read the config file(s).
+
+hardaker 21 Jun 95 09:18:37
+    ece-mib.def:
+    Bug Fix:
+      Loadave mib:  Integer -> DisplayString
+      versionClearCache:  -> read-write (was read-only)
+    
+    Feature:
+      Added a setable mib entry to the version mib to re-read the config file(s).
+
+hardaker 21 Jun 95 09:19:17
+    Changed default CC to cc again.
+
+hardaker 21 Jun 95 09:20:23
+    snmplib:
+      Bug fix:  fdset -> (int *) fdset in select call.
+
+hardaker 10 Jul 95 11:27:00
+    Two new command line options:
+      -l LOGFILE       Outputs stderr/out to LOGFILE (overrides config.h def)
+      -L               Do NOT write to a log file (overrides config.h)
+
+hardaker 10 Jul 95 12:29:32
+    - More perror()s converted to set the snmp error status flag on the agent.
+    - error status flag is now prioritized.  perrors get the highest so
+      other errors won't override them if they happen at a later time.
+    - Added the beginnings of a restart mib to the version mib of the
+      agent.  Setting this writable mib to one will cause it to exec
+      itself again (for remote restart/updates).
+
+hardaker 10 Jul 95 12:30:19
+    Minor comment change in config.h
+
+hardaker 14 Jul 95 15:12:40
+    - Finished the restart mib.  This is a setable sub-mib of the version
+      mib, default to VERSION.12(.1).  If snmp-set to '1', it will restart
+      the agent.
+    
+      *  A side effect of this is that it restarts 3 times or so, since it
+         never returns a responce to the program generating the request.
+         If said program tries to resend the request (which most do), it
+         will AGAIN restart the agent...  oh well.
+
+hardaker 14 Jul 95 15:15:31
+    - snmpcheck (tk-perl-b4 script) is pretty stable at this point.  I
+      lost curses support, and need to re-add it still, so it is still
+      beta.  It does expect a log file of problems to exist (point it to
+      /dev/null), and needs to know the locations of the mibs to check
+      (which aren't configured by 'make'), so it needs some work.
+      However, it will query an agent, check its problems based on the
+      status of the error flag (or return code) being >1 and report them
+      with neat GUI-buttons and stuff (oh wow).  No documentation on it though.
+
+-------------------------------------------------------------------------------
+
+Changes since 3-0A1:
+
+hardaker  2 Jun 95 16:23:46
+    - version update
+
+hardaker  5 Jun 95 12:44:46
+    - agent/extensible/Makefile:
+        --  no longer requires GNU make
+        --  etags no longer run by default
+    
+    - SunOS additions:
+        -- loadaverage checking MIB enabled
+        -- disk checking MIB enabled
+
+hardaker  9 Jun 95 10:21:07
+    - Added a SNMPBLOCK option to the config.h file.  Supposedily setting
+      this to zero (now the default) will allow snmp requests to time out.
+      Haven't tested it throughly.
+        -- Contributed by Sanjai Narain <narain@thumper.bellcore.com>
+
+hardaker  9 Jun 95 10:21:51
+    - Correctly ordered the mib table list.
+      --  Need to write a dynamic checker/re-orderer.
+
+hardaker  9 Jun 95 10:23:35
+    - Correct usage for snmpwalk is now possible.  IE, snmpwalk target
+      .1.3.6.1 will now browse the entire tree.
+      -- Still fails on relocatable extensible mibs and will until I
+         write a dynamic tree builder.
+
+hardaker  9 Jun 95 14:08:15
+    - Changed test -x to test -f in snmplib/Makefile.  Not all OSes
+      (ie ultrix) handle this.
+
+hardaker 12 Jun 95 10:35:38
+    - local/trapnotif:
+      -- uses snmpv2 now (correctly)
+
+hardaker 12 Jun 95 10:37:46
+    - Reports all errors through the error mib now instead of through perror().
+    - Cleaned up error handling.  Shouldn't handle errors nicely if system
+      errors occur when scanning an extensible mib.
+
+hardaker 14 Jun 95 11:24:20
+    agent:
+    - Mib table is now qsorted at run time and the extensible variables are
+      sorted in at this time.  This brings the agent up to correct
+      SNMPwalk/getnext protocols.  You can now walk the entire tree
+      including the extensible sections and it won't stop.
+      * This has an added bonus of checking the mib table
+        (agent/snmp_vars.c) for correct order.  I have added things to the
+        wrong location too many times and caused the agent to function
+        incorrectly.  Major win.
+
+hardaker 14 Jun 95 12:56:49
+    - Cleaned up/Added more documentation to config.h
+    - GLOBALSECURITY now uses the left most four bits in the MIB acl.
+      This is more compatible with the CMU code than using the left most
+      2, which was done previously.
+
+
+hardaker 14 Jun 95 13:43:38
+    - Added more documentation to the README file.
+    - Created a mailing list to handle announcements
+      (ucd-snmp-announce@ece.ucdavis.edu)
+

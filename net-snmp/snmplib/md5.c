@@ -36,11 +36,16 @@
 */
 #define TRUE  1
 #define FALSE 0
-#define LOWBYTEFIRST FALSE 
+#if defined(hpux) || defined(SYSV) || defined(sun)
+#define LOWBYTEFIRST FALSE
+#else
+#define LOWBYTEFIRST TRUE
+#endif
 
 /* Compile-time includes 
 */
 #include <stdio.h>
+#include <sys/types.h>
 #include "md5.h"
 
 /* Compile-time declarations of MD5 ``magic constants''.
@@ -96,6 +101,8 @@ MDptr MDp;
   for (i=0;i<4;i++)
     for (j=0;j<32;j=j+8)
       printf("%02x",(MDp->buffer[i]>>j) & 0xFF);
+  printf("\n");
+  fflush(stdout);
 }
 
 /* MDbegin(MDp)
@@ -272,7 +279,7 @@ unsigned int count;
       for (i=0;i<=byte;i++)   XX[i] = X[i];
       for (i=byte+1;i<64;i++) XX[i] = 0;
       /* Add padding '1' bit and low-order zeros in last byte */
-      mask = 1 << (7 - bit);
+      mask = ((u_long)1) << (7 - bit);
       XX[byte] = (XX[byte] | mask) & ~( mask - 1);
       /* If room for bit count, finish up with this block */
       if (byte <= 55)
