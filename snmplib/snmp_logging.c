@@ -50,8 +50,8 @@ static FILE *logfile;
 
 void
 init_snmp_logging(void) {
-  ds_register_premib(ASN_BOOLEAN, "snmp", "dontLogTimestamp", DS_LIBRARY_ID,
-                     DS_LIB_DONT_LOG_TIMESTAMP);
+  ds_register_premib(ASN_BOOLEAN, "snmp", "logTimestamp", DS_LIBRARY_ID,
+                     DS_LIB_LOG_TIMESTAMP);
 }
 
 
@@ -152,10 +152,10 @@ void
 snmp_log_filelog (int priority, const char *string)
 {
   if (do_filelogging) {
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_LOG_TIMESTAMP)) {
-      fprintf(logfile, "%s", string);
-    } else {
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_LOG_TIMESTAMP)) {
       fprintf(logfile, "%s %s", sprintf_stamp(NULL), string);
+    } else {
+      fprintf(logfile, "%s", string);
     }
   }
 }
@@ -165,10 +165,10 @@ void
 snmp_log_stderrlog (int priority, const char *string)
 {
   if (do_stderrlogging) {
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_LOG_TIMESTAMP)) {
-      fprintf(stderr, "%s", string);
-    } else {
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_LOG_TIMESTAMP)) {
       fprintf(stderr, "%s %s", sprintf_stamp(NULL), string);
+    } else {
+      fprintf(stderr, "%s", string);
     }
   }
 }
