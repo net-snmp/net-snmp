@@ -384,7 +384,6 @@ int main(int argc, char *argv[])
   }
 
   SOCK_STARTUP;
-  snmp_synch_setup(&session);
   ss = snmp_open(&session);
   if (ss == NULL){
     snmp_perror("snmpdelta");

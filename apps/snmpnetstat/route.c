@@ -462,8 +462,7 @@ rt_stats(void)
 
 /*
  * Request a variable with a GET REQUEST message on the given
- * session.  The session must have been opened as a synchronous
- * session (synch_setup_session()).  If the variable is found, a
+ * session.  If the variable is found, a
  * pointer to a struct variable_list object will be returned.
  * Otherwise, NULL is returned.  The caller must free the returned
  * variable_list object when done with it.

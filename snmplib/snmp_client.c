@@ -97,7 +97,6 @@ typedef long	fd_mask;
 #define PARTY_MIB_BASE	 ".1.3.6.1.6.3.3.1.3.127.0.0.1.1"
 #define CONTEXT_MIB_BASE ".1.3.6.1.6.3.3.1.4.127.0.0.1.1"
 
-
 int
 snmp_synch_input (int, struct snmp_session *, int, struct snmp_pdu *, void *);
 
@@ -443,18 +442,27 @@ snmp_synch_response(struct snmp_session *ss,
 		    struct snmp_pdu *pdu,
 		    struct snmp_pdu **response)
 {
-    struct synch_state *state = ss->snmp_synch_state;
+    struct synch_state lstate, *state;
+    snmp_callback cbsav;
+    void * cbmagsav;
     int numfds, count;
     fd_set fdset;
     struct timeval timeout, *tvp;
     int block;
 
+    memset((void *)&lstate, 0, sizeof(lstate));
+    state = &lstate;
+    cbsav = ss->callback;
+    cbmagsav = ss->callback_magic;
+    ss->callback = snmp_synch_input;
+    ss->callback_magic = (void *)state;
+
     if ((state->reqid = snmp_send(ss, pdu)) == 0){
-	*response = NULL;
 	snmp_free_pdu(pdu);
-	return STAT_ERROR;
+	state->status = STAT_ERROR;
     }
-    state->waiting = 1;
+    else
+	state->waiting = 1;
 
     while(state->waiting){
 	numfds = 0;
@@ -488,11 +496,13 @@ snmp_synch_response(struct snmp_session *ss,
 	    /* FALLTHRU */
 	    default:
 		snmp_free_pdu(pdu);
-		*response = NULL;
-		return STAT_ERROR;
+		state->status = STAT_ERROR;
+		state->waiting = 0;
 	}
     }
     *response = state->pdu;
+    ss->callback = cbsav;
+    ss->callback_magic = cbmagsav;
     return state->status;
 }
 
@@ -502,21 +512,28 @@ snmp_sess_synch_response(void *sessp,
 			 struct snmp_pdu **response)
 {
     struct snmp_session *ss;
-    struct synch_state *state;
+    struct synch_state lstate, *state;
+    snmp_callback cbsav;
+    void * cbmagsav;
     int numfds, count;
     fd_set fdset;
     struct timeval timeout, *tvp;
     int block;
 
     ss = snmp_sess_session(sessp);
-    state = ss->snmp_synch_state;
+    memset((void *)&lstate, 0, sizeof(lstate));
+    state = &lstate;
+    cbsav = ss->callback;
+    cbmagsav = ss->callback_magic;
+    ss->callback = snmp_synch_input;
+    ss->callback_magic = (void *)state;
 
     if ((state->reqid = snmp_sess_send(sessp, pdu)) == 0){
-	*response = NULL;
 	snmp_free_pdu(pdu);
-	return STAT_ERROR;
+	state->status = STAT_ERROR;
     }
-    state->waiting = 1;
+    else
+	state->waiting = 1;
 
     while(state->waiting){
 	numfds = 0;
@@ -550,31 +567,16 @@ snmp_sess_synch_response(void *sessp,
 	    /* FALLTHRU */
 	    default:
 		snmp_free_pdu(pdu);
-		*response = NULL;
-		return STAT_ERROR;
+		state->status = STAT_ERROR;
+		state->waiting = 0;
 	}
     }
     *response = state->pdu;
+    ss->callback = cbsav;
+    ss->callback_magic = cbmagsav;
     return state->status;
 }
 
-void snmp_synch_reset(struct snmp_session *session)
-{
-    if (session && session->snmp_synch_state) {
-       free((char*)session->snmp_synch_state);
-       session->snmp_synch_state = 0;
-    }
-}
-
-void
-snmp_synch_setup(struct snmp_session *session)
-{
-    struct synch_state *rp = (struct synch_state *)calloc(1,sizeof(struct synch_state));
-    session->snmp_synch_state = rp;
-
-    session->callback = snmp_synch_input;
-    session->callback_magic = (void *)rp;
-}
 
 const char *error_string[19] = {
     "(noError) No Error",
