@@ -542,9 +542,6 @@ extern "C" {
 /* sysctl works to get boottime, etc... */
 #undef CAN_USE_SYSCTL
 
-/* type check for in_addr_t */
-#define in_addr_t u_long
-
 /* define if your compiler (processor) defines __FUNCTION__ for you */
 #undef HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
 
