@@ -100,7 +100,7 @@ header_complex_parse_oid(oid *oidIndex, size_t oidLen,
 
         for(i = 0; i < itmp; i++)
           var->val.string[i] = (u_char) *oidIndex++;
-        var->val.string[itmp] = NULL;
+        var->val.string[itmp] = '\0';
         oidLen -= itmp;
 
         DEBUGMSGTL(("header_complex_parse_oid",
