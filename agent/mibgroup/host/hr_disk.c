@@ -425,7 +425,7 @@ Save_HR_Disk_General (void)
     strcpy( HRD_savedModel,  HRD_info.dki_dname );   
 #endif
 #ifdef HAVE_LINUX_HDREG_H
-    strcpy( HRD_savedModel,  HRD_info.model );   
+    strcpy( HRD_savedModel,  (const char *)HRD_info.model );   
 #endif
 #ifdef DIOCGDINFO
     strcpy( HRD_savedModel,  dktypenames[HRD_info.d_type]);

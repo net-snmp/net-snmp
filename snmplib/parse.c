@@ -3239,7 +3239,7 @@ static char indent[256];
 static void print_mib_leaves(FILE *f, struct tree *tp)
 { struct tree *ntp;
   char *ip = indent+strlen(indent)-1;
-  char last = *ip;
+  char plastindent = *ip;
 
   *ip = '+';
   if (tp->type == 0)
@@ -3275,7 +3275,7 @@ static void print_mib_leaves(FILE *f, struct tree *tp)
     if (tp->enums)		typ = "EnumVal  ";
     fprintf(f, "%s-- %s %s %s(%ld)\n", indent, acc, typ, tp->label, tp->subid);
   }
-  *ip = last;
+  *ip = plastindent;
   strcat(indent, "  |");
 
   { int i, count = 0;

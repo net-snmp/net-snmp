@@ -597,7 +597,7 @@ var_ipRouteEntry(struct variable *vp,
 	    return(u_char *) &(sa->sin_addr.s_addr);
 #else
 #ifdef linux
-            return rthead[RtIndex]->rt_dst.sa_data;
+            return (u_char *)rthead[RtIndex]->rt_dst.sa_data;
 #else
 	    return(u_char *) &((struct sockaddr_in *) &rthead[RtIndex]->rt_dst)->sin_addr.s_addr;
 #endif
