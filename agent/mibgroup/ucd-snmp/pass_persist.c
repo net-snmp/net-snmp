@@ -363,10 +363,9 @@ setPassPersist(int action,
                   (int) ((utmp & 0xff)));
           break;
         case ASN_OCTET_STR:
-          itmp = sizeof(buf);
-          memset(buf2,(0),itmp);
+	  itmp = sizeof(buf2);
+	  memset(buf2, 0, itmp);
           memcpy(buf2, var_val, var_val_len);
-          buf2[var_val_len] = 0;
           if (bin2asc(buf2, itmp) == (int)itmp)
               sprintf(buf,"string %s",buf2);
           else
