@@ -758,7 +758,7 @@ do_external(char *cmd, struct hostent *host,
     snmp_set_quick_print(oldquick);
 }
 
-#define EXECUTE_FORMAT	"%b\n%B\n%V\n%v\n"
+#define EXECUTE_FORMAT	"%B\n%b\n%V\n%v\n"
 
 int   command_handler( netsnmp_pdu           *pdu,
                        netsnmp_transport     *transport,
