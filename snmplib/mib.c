@@ -2475,8 +2475,8 @@ sprint_value(char *buf,
 	     struct variable_list *variable)
 {
     size_t buflen = SPRINT_MAX_LEN, outlen = 0;
-    sprint_realloc_variable((u_char **)&buf, &buflen, &outlen, 0,
-	objid, objidlen, variable);
+    sprint_realloc_value((u_char **)&buf, &buflen, &outlen, 0,
+                         objid, objidlen, variable);
 }
 
 int
