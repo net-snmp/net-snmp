@@ -148,7 +148,7 @@ header_ip(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_ip: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("mibII/ip", "var_ip: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -839,7 +839,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_ipAddrEntry: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("mibII/ip", "var_ipAddrEntry: %s %d\n", c_oid, exact));
     }
     memset (&Lowentry, 0, sizeof (Lowentry));
     memcpy( (char *)current,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -874,7 +874,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	}
       }
     }
-    DEBUGP ("... Found = %d\n", Found);
+    DEBUGMSGTL(("mibII/ip", "... Found = %d\n", Found));
     if (Found == 0)
       return(NULL);
     memcpy( (char *)name,(char *)lowest, IP_ADDRNAME_LENGTH * sizeof(oid));
@@ -971,12 +971,11 @@ header_ip(vp, name, length, exact, var_len, write_method)
 #define IP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
     int result;
-#ifdef DODEBUG
-    char c_oid[MAX_NAME_LEN];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_ip: %s %d\n", c_oid, exact);
-#endif
+
+    DEBUGMSGTL(("mibII/ip", "var_ip: "));
+    DEBUGMSGOID(("mibII/ip", name, *length));
+    DEBUGMSG(("mibII/ip", " %d\n", exact));
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[IP_NAME_LENGTH] = 0;

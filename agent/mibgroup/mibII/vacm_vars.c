@@ -305,11 +305,11 @@ int vacm_in_view (pi, name, namelen)
     char *sn;
 
     if (pi->sec_model == SNMP_SEC_MODEL_SNMPv1 || pi->sec_model == SNMP_SEC_MODEL_SNMPv2c) {
-	DEBUGP ("vacm_in_view: ver=%d, source=%.8x, community=%s\n", pi->version, pi->source.sin_addr.s_addr, pi->community);
+	DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: ver=%d, source=%.8x, community=%s\n", pi->version, pi->source.sin_addr.s_addr, pi->community));
 
 	/* allow running without snmpd.conf */
 	if (sp == NULL) {
-	    DEBUGP("vacm_in_view: accepted with no com2sec entries\n");
+	    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: accepted with no com2sec entries\n"));
 	    switch (pi->pdutype) {
 	    case SNMP_MSG_GET:
 	    case SNMP_MSG_GETNEXT:
@@ -334,10 +334,10 @@ int vacm_in_view (pi, name, namelen)
     }
 
     if (sn == NULL) return 0;
-    DEBUGP ("vacm_in_view: securityName == %s\n", sn);
+    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: securityName == %s\n", sn));
     gp = vacm_getGroupEntry(pi->sec_model, sn);
     if (gp == NULL) return 0;
-    DEBUGP ("vacm_in_view: groupName == %s\n", gp->groupName);
+    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: groupName == %s\n", gp->groupName));
     ap = vacm_getAccessEntry(gp->groupName, "", pi->sec_model, pi->sec_level);
     if (ap == NULL) return 0;
     switch (pi->pdutype) {
@@ -358,10 +358,10 @@ int vacm_in_view (pi, name, namelen)
 	fprintf(stderr,"bad msg type in vacm_in_view: %d\n", pi->pdutype);
 	vn = ap->readView;
     }
-    DEBUGP ("vacm_in_view: viewName == %s\n", vn);
+    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: viewName == %s\n", vn));
     vp = vacm_getViewEntry (vn, name, namelen);
     if (vp == NULL) return 0;
-    DEBUGP("vacm_in_view: viewType == %d\n", vp->viewType);
+    DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: viewType == %d\n", vp->viewType));
     if (vp->viewType == SNMP_VIEW_EXCLUDED) return 0;
     return 1;
 }

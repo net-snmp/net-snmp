@@ -82,7 +82,7 @@ header_snmp(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_snmp: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("mibII/snmp_mib", "var_snmp: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -241,9 +241,7 @@ write_snmp (action, var_val, var_val_type, var_val_len, statP, name, name_len)
 
     asn_parse_int(var_val, &bigsize, &var_val_type, &intval, sizeof (intval));
     if (intval != 1 && intval != 2) {
-#ifdef DEBUG	    
-	printf("not valid %x\n", intval);
-#endif
+        DEBUGMSGTL(("mibII/snmp_mib", "not valid %x\n", intval));
 	return SNMP_ERR_WRONGVALUE;
     }
 

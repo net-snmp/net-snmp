@@ -382,10 +382,10 @@ send_trap_pdu(pdu)
   struct trap_sink *sink = sinks;
 
   if ((snmp_enableauthentraps == 1) && sink != NULL) {
-    DEBUGP("sending v2 trap pdu...\n");
+    DEBUGMSGTL(("snmpd", "sending v2 trap pdu...\n"));
     while (sink) {
       if (sink->ses.version == SNMP_VERSION_2c) {
-        DEBUGP(" found v2 session...\n");
+        DEBUGMSGTL(("snmpd", " found v2 session...\n"));
         mypdu = snmp_clone_pdu(pdu);
         if (snmp_send(sink->sesp, mypdu) == 0) {
           snmp_perror ("snmpd: send_trap_pdu");
@@ -396,7 +396,7 @@ send_trap_pdu(pdu)
       }
       sink = sink->next;
     }
-    DEBUGP("  done\n");
+    DEBUGMSGTL(("snmpd", "  done\n"));
   }
 }
 
@@ -485,7 +485,7 @@ agentBoots_conf(word, cptr)
   char *cptr;
 {
   agentBoots = atoi(cptr)+1;
-  DEBUGP("agentBoots: %d\n",agentBoots);
+  DEBUGMSGTL(("snmpd", "agentBoots: %d\n",agentBoots));
 }
 
 RETSIGTYPE
@@ -499,9 +499,9 @@ SnmpdShutDown(a)
 #include "mib_module_shutdown.h"
   sprintf(line, "agentBoots %d", agentBoots);
   snmpd_store_config(line);
-  DEBUGP("sending shutdown trap\n");
+  DEBUGMSGTL(("snmpd", "sending shutdown trap\n"));
   SnmpTrapNodeDown(a);
-  DEBUGP("Bye...\n");
+  DEBUGMSGTL(("snmpd", "Bye...\n"));
   exit(1);
 }
 
@@ -558,6 +558,7 @@ main(argc, argv)
 		    snmp_set_quick_print(1);
 		    break;
 		case 'D':
+                    debug_register_tokens(&argv[arg][2]);
 		    snmp_set_do_debugging(1);
 		    break;
                 case 'p':

@@ -144,7 +144,7 @@ header_hrstore(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_hrstore: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_storage", "var_hrstore: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -177,7 +177,7 @@ header_hrstoreEntry(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_hrstoreEntry: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_storage", "var_hrstoreEntry: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -186,13 +186,13 @@ header_hrstoreEntry(vp, name, length, exact, var_len, write_method)
     Init_HR_Store();
     for ( ;; ) {
         storage_idx = Get_Next_HR_Store();
-        DEBUGP("(index %d ....", storage_idx);
+        DEBUGMSG(("host/hr_storage", "(index %d ....", storage_idx));
         if ( storage_idx == -1 )
 	    break;
 	newname[HRSTORE_ENTRY_NAME_LENGTH] = storage_idx;
         if (snmp_get_do_debugging()) {
           sprint_objid (c_oid, newname, *length);
-          DEBUGP("%s\n", c_oid);
+          DEBUGMSGTL(("host/hr_storage", "%s\n", c_oid));
         }
         result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
@@ -211,7 +211,7 @@ header_hrstoreEntry(vp, name, length, exact, var_len, write_method)
     }
 
     if ( LowIndex == -1 ) {
-        DEBUGP ("... index out of range\n");
+        DEBUGMSGTL(("host/hr_storage", "... index out of range\n"));
         return(MATCH_FAILED);
     }
 
@@ -222,7 +222,7 @@ header_hrstoreEntry(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("... get storage stats %s\n", c_oid);
+      DEBUGMSGTL(("host/hr_storage", "... get storage stats %s\n", c_oid));
     }
     return LowIndex;
 }

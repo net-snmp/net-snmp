@@ -267,7 +267,7 @@ snmpd_store_config(line)
     fprintf(OUT,line);
     if (line[strlen(line)] != '\n')
       fprintf(OUT,"\n");
-    DEBUGP("storing: %s\n",line);
+    DEBUGMSGTL(("agent_read_config", "storing: %s\n",line));
   } else {
     snmp_perror("snmpd");
   }

@@ -134,7 +134,7 @@ header_hrswinst(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_hrswinst: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_swinst", "var_hrswinst: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -167,7 +167,7 @@ header_hrswInstEntry(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_hrswInstEntry: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_swinst", "var_hrswInstEntry: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -176,13 +176,13 @@ header_hrswInstEntry(vp, name, length, exact, var_len, write_method)
     Init_HR_SWInst();
     for ( ;; ) {
         swinst_idx = Get_Next_HR_SWInst();
-        DEBUGP ("(index %d ....", swinst_idx);
+        DEBUGMSG(("host/hr_swinst", "(index %d ....", swinst_idx));
         if ( swinst_idx == -1 )
 	    break;
 	newname[HRSWINST_ENTRY_NAME_LENGTH] = swinst_idx;
         if (snmp_get_do_debugging()) {
           sprint_objid (c_oid, newname, *length);
-          DEBUGP ("%s\n", c_oid);
+          DEBUGMSGTL(("host/hr_swinst", "%s\n", c_oid));
         }
         result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
@@ -202,7 +202,7 @@ header_hrswInstEntry(vp, name, length, exact, var_len, write_method)
 
     End_HR_SWInst();
     if ( LowIndex == -1 ) {
-        DEBUGP ("... index out of range\n");
+        DEBUGMSGTL(("host/hr_swinst", "... index out of range\n"));
         return(MATCH_FAILED);
     }
 
@@ -213,7 +213,7 @@ header_hrswInstEntry(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("... get installed S/W stats %s\n", c_oid);
+      DEBUGMSGTL(("host/hr_swinst", "... get installed S/W stats %s\n", c_oid));
     }
     return LowIndex;
 }

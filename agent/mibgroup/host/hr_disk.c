@@ -175,7 +175,7 @@ header_hrdisk(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP("var_hrdisk: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_disk", "var_hrdisk: %s %d\n", c_oid, exact));
     }
     
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -204,7 +204,7 @@ header_hrdisk(vp, name, length, exact, var_len, write_method)
     }
 
     if ( LowIndex == -1 ) {
-      DEBUGP("... index out of range\n");
+      DEBUGMSGTL(("host/hr_disk", "... index out of range\n"));
       return(MATCH_FAILED);
     }
 
@@ -216,7 +216,7 @@ header_hrdisk(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP("... get disk stats %s\n", c_oid);
+      DEBUGMSGTL(("host/hr_disk", "... get disk stats %s\n", c_oid));
     }
     
     return LowIndex;
@@ -363,8 +363,8 @@ Get_Next_HR_Disk __P((void))
 			    disk_device_id[      HRD_type_index ] + HRD_index,
 			    disk_device_full[    HRD_type_index ] );
 
-	    DEBUGP("Get_Next_HR_Disk: %s (%d/%d)\n",
-		string, HRD_type_index, HRD_index );
+	    DEBUGMSGTL(("host/hr_disk", "Get_Next_HR_Disk: %s (%d/%d)\n",
+                        string, HRD_type_index, HRD_index ));
 	
 	    fd = open( string, O_RDONLY  );
 	    if (fd != -1 ) {

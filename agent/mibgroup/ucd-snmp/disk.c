@@ -195,12 +195,12 @@ void disk_parse_config(word,cptr)
     while ((mntent = getmntent (mntfp)))
       if (strcmp (disks[numdisks].path, mntent->mnt_dir) == 0) {
         copy_word (mntent->mnt_fsname, disks[numdisks].device);
-        DEBUGP("Disk:  %s\n",mntent->mnt_fsname);
+        DEBUGMSGTL(("ucd-snmp/disk", "Disk:  %s\n",mntent->mnt_fsname));
         break;
       }
       else {
-        DEBUGP("  %s != %s\n", disks[numdisks].path,
-                mntent->mnt_dir);
+        DEBUGMSGTL(("ucd-snmp/disk", "  %s != %s\n", disks[numdisks].path,
+                    mntent->mnt_dir));
       }
     endmntent(mntfp);
     if (disks[numdisks].device[0] != 0) {
@@ -213,7 +213,7 @@ void disk_parse_config(word,cptr)
       if (strcmp (disks[numdisks].path, mnttab.mnt_mountp) == 0)
         break;
       else {
-        DEBUGP("  %s != %s\n", disks[numdisks].path, mnttab.mnt_mountp);
+        DEBUGMSGTL(("ucd-snmp/disk", "  %s != %s\n", disks[numdisks].path, mnttab.mnt_mountp));
       }
     fclose (mntfp);
     if (i == 0) {

@@ -91,7 +91,7 @@ header_hrdevice(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_hrdevice: %s %d\n", c_oid, exact);
+      DEBUGMSGTL(("host/hr_device", "var_hrdevice: %s %d\n", c_oid, exact));
     }
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
@@ -119,7 +119,7 @@ header_hrdevice(vp, name, length, exact, var_len, write_method)
     Init_Device();
     for ( ;; ) {
         dev_idx = Get_Next_Device();
-        DEBUGP("(index %d ....", dev_idx);
+        DEBUGMSG(("host/hr_device", "(index %d ....", dev_idx));
         if ( dev_idx == -1 )
 	    break;
 	if ( LowType != -1 && LowType < (dev_idx>>HRDEV_TYPE_SHIFT))
@@ -127,7 +127,7 @@ header_hrdevice(vp, name, length, exact, var_len, write_method)
 	newname[HRDEV_ENTRY_NAME_LENGTH] = dev_idx;
         if (snmp_get_do_debugging()) {
           sprint_objid (c_oid, newname, *length);
-          DEBUGP("%s\n", c_oid);
+          DEBUGMSGTL(("host/hr_device", "%s\n", c_oid));
         }
         result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
@@ -149,7 +149,7 @@ header_hrdevice(vp, name, length, exact, var_len, write_method)
     }
 
     if ( LowIndex == -1 ) {
-        DEBUGP("... index out of range\n");
+        DEBUGMSGTL(("host/hr_device", "... index out of range\n"));
         return(MATCH_FAILED);
     }
 
@@ -161,7 +161,7 @@ header_hrdevice(vp, name, length, exact, var_len, write_method)
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP("... get device stats %s\n", c_oid);
+      DEBUGMSGTL(("host/hr_device", "... get device stats %s\n", c_oid));
     }
     return LowIndex;
 }
