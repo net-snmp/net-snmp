@@ -1535,7 +1535,7 @@ _${context}_container_init_persistence( netsnmp_container * container )
 {
     int rc;
 
-    register_config_handler(row_token, row_token,
+    register_config_handler(NULL, row_token,
                             _${context}_container_row_restore, NULL, NULL);
     rc = snmp_register_callback( SNMP_CALLBACK_LIBRARY,
                                      SNMP_CALLBACK_STORE_DATA,
@@ -1550,15 +1550,27 @@ _${context}_container_init_persistence( netsnmp_container * container )
 static int
 _${context}_container_save_rows(int majorID, int minorID, void *serverarg, void *clientarg)
 {
-    char *appname = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
-                                          NETSNMP_DS_LIB_APPTYPE);
+    char sep[] =
+        "##############################################################";
+    char buf[] =
+        "#\n"
+        "# $context persistent data\n"
+        "#";
+    char *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+                                       NETSNMP_DS_LIB_APPTYPE);
+
+    read_config_store((char*)type, sep);
+    read_config_store((char*)type, buf);
 
     /*
      * save all rows
      */
     CONTAINER_FOR_EACH((netsnmp_container*)clientarg,
                        (netsnmp_container_obj_func*)_${context}_container_row_save,
-                       appname);
+                       type);
+
+    read_config_store((char*)type, sep);
+    read_config_store((char*)type, "\n");
 
     /*
      * never fails 
@@ -1684,7 +1696,7 @@ _${context}_container_row_save(
     /*
      * store the line
      */
-    sprintf(pos, "%c\n", LINE_TERM_CHAR);
+    sprintf(pos, "%c", LINE_TERM_CHAR);
     read_config_store((char*)type, buf);
 
     DEBUGMSGTL(("internal:${context}:_${context}_container_row_save",
