@@ -16,8 +16,8 @@
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "mib.h"
-#include "var_struct.h"
 #include "snmp_vars.h"
+#include "var_struct.h"
 #include "../../snmplib/system.h"
 #include "snmp_debug.h"
 
