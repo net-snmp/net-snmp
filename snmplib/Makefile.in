@@ -96,6 +96,7 @@ INSTALLUCDHEADERS= asn1.h \
 
 # libraries
 INSTALLLIBS=libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
+INSTALLUCDLIBS=libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 
 #
 # Things to build
@@ -151,6 +152,11 @@ all: standardall
 libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    ${TOBJS}
 	$(LIB_LD_CMD) libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) ${TOBJS}
 	$(RANLIB) libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
+
+libsnmp.$(LIB_EXTENSION)$(LIB_VERSION):    ${TOBJS}
+	$(LIB_LD_CMD) libsnmp.$(LIB_EXTENSION)$(LIB_VERSION) ${TOBJS}
+	$(RANLIB) libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
+
 
 #
 # internal test objects

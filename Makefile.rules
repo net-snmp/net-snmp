@@ -8,7 +8,7 @@
 
 # the standard items to build: libraries, bins, and sbins
 STANDARDTARGETS     =$(INSTALLLIBS) $(INSTALLBINPROGS) $(INSTALLSBINPROGS)
-STANDARDCLEANTARGETS=$(INSTALLLIBS) $(INSTALLBINPROGS) $(INSTALLSBINPROGS)
+STANDARDCLEANTARGETS=$(INSTALLLIBS) $(INSTALLBINPROGS) $(INSTALLSBINPROGS) $(INSTALLUCDLIBS)
 
 standardall: subdirs $(STANDARDTARGETS)
 
@@ -21,7 +21,10 @@ subdirs:
 	        done \
 	fi
 
-install: installlocalheaders installlocallibs installlocalbin installlocalsbin installsubdirs $(OTHERINSTALL)
+install: installlocalheaders @installucdheaders@ \
+         installlocallibs    @installucdlibs@    \
+         installlocalbin      installlocalsbin   \
+         installsubdirs      $(OTHERINSTALL)
 
 installprogs: installbin installsbin
 
@@ -115,6 +118,18 @@ installlocallibs: $(INSTALLLIBS)
 		it="$(INSTALLLIBS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(libdir) ; \
                 $(INSTALL) $(INSTALLLIBS) $(libdir) ;              \
+	        for i in $$it ; do    \
+	                echo "installing $$i in $(libdir)"; \
+	                $(RANLIB) $(libdir)/$$i ; \
+	        done ; \
+		$(LIB_LDCONFIG_CMD) ; \
+	fi
+
+installucdlibs: $(INSTALLUCDLIBS)
+	@if test "$(INSTALLUCDLIBS)" != ""; then \
+		it="$(INSTALLUCDLIBS)" ; \
+		$(SHELL) $(top_srcdir)/mkinstalldirs $(libdir) ; \
+                $(INSTALL) $(INSTALLUCDLIBS) $(libdir) ;              \
 	        for i in $$it ; do    \
 	                echo "installing $$i in $(libdir)"; \
 	                $(RANLIB) $(libdir)/$$i ; \
