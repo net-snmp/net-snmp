@@ -225,12 +225,6 @@ Note:  A temporary location of /tmp/net-snmp is used.
     split across two lines such as the Variables link at the bottom of 
     man8-snmptrapd.8.html.
 
-    You may have to bold the commands listed in the SYNOPSIS section for:
-
-    snmpnetstat
-    snmpdelta
-    snmpdf
-
 11. If new man pages are added or removed, the Table of Contents (Net-SNMP.hhc) and
     project file (Net-SNMP.hhp) need to be updated by hand.
 
