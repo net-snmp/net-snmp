@@ -180,11 +180,10 @@ extern char  *argvrestartname;
 
 #define NUM_SOCKETS	32
 
-#ifdef USING_SD_HANDLERS
-static int	  sdlist[NUM_SOCKETS],
-		  sdlen = 0;
-int		(*sd_handlers[NUM_SOCKETS]) (int);
-#endif
+#ifdef USING_SMUX_MODULE
+static int sdlist[NUM_SOCKETS], sdlen = 0;
+int smux_listen_sd;
+#endif /* USING_SMUX_MODULE */
 
 /*
  * Prototypes.
@@ -615,6 +614,9 @@ receive(void)
     struct timeval	sched,   *svp = &sched,
 			now,     *nvp = &now;
     int count, block;
+#ifdef	USING_SMUX_MODULE
+	int i, j, sd;
+#endif	/* USING_SMUX_MODULE */
 
 
     /*
@@ -649,6 +651,18 @@ receive(void)
         snmp_select_info(&numfds, &fdset, tvp, &block);
         if (block == 1)
             tvp = NULL; /* block without timeout */
+
+#ifdef	USING_SMUX_MODULE
+		if (smux_listen_sd >= 0) {
+			FD_SET(smux_listen_sd, &fdset);
+			numfds = smux_listen_sd >= numfds ? smux_listen_sd + 1 : numfds;
+			for (i = 0; i < sdlen; i++) {
+				FD_SET(sdlist[i], &fdset);
+				numfds = sdlist[i] >= numfds ? sdlist[i] + 1 : numfds;
+			}
+		}
+#endif	/* USING_SMUX_MODULE */
+
 	count = select(numfds, &fdset, 0, 0, tvp);
 
 	if (count > 0){
@@ -668,6 +682,29 @@ receive(void)
 		snmp_log(LOG_ERR, "select returned %d\n", count);
 		return -1;
 	}  /* endif -- count>0 */
+
+#ifdef	USING_SMUX_MODULE
+		/* handle the SMUX sd's */
+		if (smux_listen_sd >= 0) {
+			for (i = 0; i < sdlen; i++) {
+				if (FD_ISSET(sdlist[i], &fdset)) {
+					if (smux_process(sdlist[i]) < 0) {
+						for (; i < (sdlen - 1); i++) {
+							sdlist[i] = sdlist[i+1];
+						}
+						sdlen--;
+					}
+				}
+			}
+			/* new connection */
+			if (FD_ISSET(smux_listen_sd, &fdset)) {
+				if ((sd = smux_accept(smux_listen_sd)) >= 0) {
+					sdlist[sdlen++] = sd;
+				}
+			}
+		}
+#endif	/* USING_SMUX_MODULE */
+
 
 
         /*
