@@ -158,7 +158,7 @@ if [ "x$do_tests" = "x" ]; then
 	    *)
 		num=`expr $num + 1`
 		if [ "x$interactive" != "xyes" -a "x$test_nums" = "x" ]; then
-		    echo -n "$num:  "
+		    ECHO "$num:  "
 		    eval_onescript.sh $testfile
 		fi
 		all_tests="$all_tests $num"
@@ -175,7 +175,7 @@ if [ "x$do_tests" = "x" ]; then
 
     if [ "x$interactive" != "xyes" ]; then
 	if [ "x$test_nums" = "x" ]; then
-	    echo -n "Enter test numbers [all]: "
+	    ECHO "Enter test numbers [all]: "
 	    read inp
 	else
 	    if [ "x$test_nums" = "xall" ]; then
@@ -212,13 +212,13 @@ for testfile in $do_tests; do
 	SNMP_HEADERONLY=yes
 	export SNMP_HEADERONLY
 
-        echo -n "$num:  "
+        ECHO "$num:  "
 	eval_onescript.sh $testfile
 
 	unset SNMP_HEADERONLY
 	export SNMP_HEADERONLY
 
-	echo -n "  Run test #$num (y/n) [y]? "
+	ECHO "  Run test #$num (y/n) [y]? "
 	read inp
 	if [ "x$inp" = "xn" ]; then
 	    dothisone=no
@@ -226,7 +226,7 @@ for testfile in $do_tests; do
     fi
   
     if [ "x$dothisone" = "xyes" ]; then
-	echo -n "  $num:  "
+	ECHO "  $num:  "
 	eval_onescript.sh $testfile
 	if [ $? = 0 ]; then
 	    success_count=`expr $success_count + 1`
