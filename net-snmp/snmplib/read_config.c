@@ -124,7 +124,7 @@ register_config_handler(const char *type_param,
 {
   struct config_files **ctmp = &config_files;
   struct config_line **ltmp;
-  char *type = type_param;
+  const char *type = type_param;
 
   if ( type == NULL )
     type = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
@@ -203,7 +203,7 @@ unregister_config_handler(const char *type_param,
 {
   struct config_files **ctmp = &config_files;
   struct config_line **ltmp, *ltmp2;
-  char *type = type_param;
+  const char *type = type_param;
 
   if ( type == NULL )
     type = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
