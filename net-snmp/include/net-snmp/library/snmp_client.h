@@ -51,14 +51,14 @@ int snmp_set_var_objid (netsnmp_variable_list *vp,
                     const oid *objid, size_t name_length);
 int snmp_set_var_typed_value(netsnmp_variable_list *newvar, u_char type,
                              const u_char *val_str, size_t val_len);
-void snmp_replace_var_types(netsnmp_variable_list *vbl, int old_type,
-                            int new_type);
+void snmp_replace_var_types(netsnmp_variable_list *vbl, u_char old_type,
+                            u_char new_type);
 void snmp_reset_var_buffers( netsnmp_variable_list * var );
-void snmp_reset_var_types(netsnmp_variable_list *vbl, int new_type);
+void snmp_reset_var_types(netsnmp_variable_list *vbl, u_char new_type);
 int count_varbinds( netsnmp_variable_list *var_ptr );
-int count_varbinds_of_type( netsnmp_variable_list *var_ptr, int type );
+int count_varbinds_of_type( netsnmp_variable_list *var_ptr, u_char type );
 netsnmp_variable_list *find_varbind_of_type( netsnmp_variable_list *var_ptr,
-                                            int type );
+                                            u_char type );
 
 netsnmp_variable_list* snmp_add_null_var (netsnmp_pdu *, oid *, size_t);
 netsnmp_pdu	*snmp_pdu_create (int);
