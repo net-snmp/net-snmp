@@ -45,6 +45,9 @@ SOFTWARE.
 #include <stdlib.h>
 #endif
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 
 #include "asn1.h"
 #include "snmp_api.h"
