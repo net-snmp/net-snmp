@@ -246,9 +246,11 @@ u_char *var_extensible_pass(struct variable *vp,
         sprintf(passthru->command,"%s -n %s",passthru->name,buf);
       DEBUGMSGTL(("ucd-snmp/pass", "pass-running:  %s\n",passthru->command));
       /* valid call.  Exec and get output */
-      if ((fd = get_exec_output(passthru))) {
+      if ((fd = get_exec_output(passthru))) { 
         file = fdopen(fd,"r");
         if (fgets(buf,sizeof(buf),file) == NULL) {
+	  /* to enable creation*/
+	  *write_method = setPass;
           *var_len = 0;
           fclose(file);
           wait_on_exec(passthru);
