@@ -58,6 +58,7 @@ struct range_list {
 struct index_list {
     struct index_list *next;
     char *ilabel;
+    char isimplied;
 };
 
 /*

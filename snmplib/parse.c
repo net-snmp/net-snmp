@@ -198,6 +198,7 @@ static int anonymous = 0;
 #define FROM        72
 #define CAPABILITIES 73
 #define MACRO       74
+#define IMPLIED     75
 
 struct tok {
     const char *name;                 /* token name */
@@ -278,6 +279,7 @@ static struct tok tokens[] = {
     { "FROM", sizeof ("FROM")-1, FROM },
     { "AGENT-CAPABILITIES", sizeof ("AGENT-CAPABILITIES")-1, CAPABILITIES },
     { "MACRO", sizeof ("MACRO")-1, MACRO },
+    { "IMPLIED", sizeof ("IMPLIED")-1, IMPLIED },
     { NULL }
 };
 
@@ -3183,6 +3185,7 @@ static struct index_list *
 getIndexes(FILE *fp, struct index_list **retp) {
   int type;
   char token[MAXTOKEN];
+  char nextIsImplied = 0;
 
   struct index_list *mylist = NULL;
   struct index_list **mypp = &mylist;
@@ -3201,8 +3204,12 @@ getIndexes(FILE *fp, struct index_list **retp) {
       *mypp = (struct index_list *) calloc(1, sizeof(struct index_list));
       if (*mypp) {
         (*mypp)->ilabel = strdup(token);
+        (*mypp)->isimplied = nextIsImplied;
         mypp = &(*mypp)->next;
+        nextIsImplied = 0;
       }
+    } else if (type == IMPLIED) {
+        nextIsImplied = 1;
     }
     type = get_token(fp, token, MAXTOKEN);
   }
