@@ -129,8 +129,6 @@ else
           prompt=yes
 	  echo "Enter authentication pass-phrase: "
 	  read apassphrase
-      else
-	  shift
       fi
       if test "x$apassphrase" = "x" ; then
           echo "You must specify an authentication pass-phrase"
