@@ -265,9 +265,7 @@ register_mib(moduleName, var, varsize, numvars, mibloc, mibloclen)
   char c_oid[MAX_NAME_LEN];
 
   subtree = (struct subtree *) malloc(sizeof(struct subtree));
-  memset(subtree, 0, sizeof(subtree));
-  subtree->children = 0;
-  subtree->next = 0;
+  memset(subtree, 0, sizeof(struct subtree));
 
   if (snmp_get_do_debugging()) {
     sprint_objid(c_oid, mibloc, mibloclen);
@@ -454,9 +452,9 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 	            *type = cvp->type;
 		    *acl = cvp->acl;
 		    if (found)
-			*noSuchObject = FALSE;
+                      *noSuchObject = FALSE;
 		    else
-			*noSuchObject = TRUE;
+                      *noSuchObject = TRUE;
 		    return NULL;
 		}
 	    }
