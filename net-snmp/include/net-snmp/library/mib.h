@@ -119,31 +119,10 @@ void init_mib (void);
 void shutdown_mib (void);
 void print_variable (const oid *, size_t, struct variable_list *);
 void fprint_variable (FILE *, const oid *, size_t, struct variable_list *);
-void sprint_variable (char *, const oid *, size_t, struct variable_list *);
-
-int sprint_realloc_variable(u_char **buf, size_t *buf_len,
-			    size_t *out_len, int allow_realloc,
-			    const oid *objid, size_t objidlen,
-			    struct variable_list *variable);
-
-int sprint_realloc_objid   (u_char **buf, size_t *buf_len,
-			    size_t *out_len, int allow_realloc, 
-			    const oid *objid, size_t objidlen);
-
-int
-sprint_realloc_by_type(u_char **buf, size_t *buf_len, size_t *out_len,
-		       int allow_realloc,
-		       struct variable_list *var,
-		       struct enum_list *enums,
-		       const char *hint,
-		       const char *units);
-
 void print_value (oid *, size_t, struct variable_list *);
 void fprint_value (FILE *, oid *, size_t, struct variable_list *);
-void sprint_value (char *, oid *, size_t, struct variable_list *);
 void print_objid (oid *, size_t);
 void fprint_objid (FILE *, oid *, size_t);
-char *sprint_objid (char *, oid *, size_t);
 void print_description (oid *, size_t, int);
 void fprint_description (FILE *, oid *, size_t, int);
 int get_module_node (const char *, const char *, oid *, size_t *);
@@ -155,61 +134,37 @@ struct tree *get_tree (oid *, size_t, struct tree *);
 struct tree *get_tree_head (void);
 void  set_function (struct tree *);
 
-void sprint_hexstring (char *, const u_char *, size_t);
-void sprint_asciistring(char *buf, const u_char *cp, size_t len);
-
-void sprint_by_type (char *, struct variable_list *, struct enum_list *,
-                     const char *, const char *);
-void sprint_octet_string (char *, struct variable_list *, struct enum_list *,
-                          const char *, const char *);
-void sprint_opaque (char *, struct variable_list *, struct enum_list *,
-                    const char *, const char *);
-void sprint_object_identifier (char *, struct variable_list *,
-                               struct enum_list *, const char *, const char *);
-void sprint_timeticks (char *, struct variable_list *, struct enum_list *,
-                       const char *, const char *);
-void sprint_hinted_integer (char *, long, const char *, const char *);
-void sprint_integer (char *, struct variable_list *, struct enum_list *,
-                     const char *, const char *);
-void sprint_uinteger (char *, struct variable_list *, struct enum_list *,
-                      const char *, const char *);
-void sprint_gauge (char *, struct variable_list *, struct enum_list *,
-                   const char *, const char *);
-void sprint_counter (char *, struct variable_list *, struct enum_list *,
-                     const char *, const char *);
-void sprint_networkaddress (char *, struct variable_list *,
-                            struct enum_list *, const char *, const char *);
-void sprint_ipaddress (char *, struct variable_list *, struct enum_list *,
-                       const char *, const char *);
-void sprint_null (char *, struct variable_list *, struct enum_list *,
-                  const char *, const char *);
-void sprint_bitstring (char *, struct variable_list *, struct enum_list *,
-                       const char *, const char *);
-void sprint_nsapaddress (char *, struct variable_list *, struct enum_list *,
-                         const char *, const char *);
-void sprint_counter64 (char *, struct variable_list *, struct enum_list *,
-                       const char *, const char *);
-void sprint_unknowntype (char *, struct variable_list *, struct enum_list *,
-                         const char *, const char *);
-void sprint_badtype (char *, struct variable_list *, struct enum_list *,
-                     const char *, const char *);
-#ifdef OPAQUE_SPECIAL_TYPES
-void sprint_float (char *, struct variable_list *, struct enum_list *,
-                   const char *, const char *);
-void sprint_double (char *, struct variable_list *, struct enum_list *,
-                    const char *, const char *);
-#endif
-
 int parse_one_oid_index(oid **oidStart, size_t *oidLen,
-						struct variable_list *data, int complete);
-int parse_oid_indexes(oid *oidIndex, size_t oidLen, struct variable_list *data);
+			struct variable_list *data, int complete);
+int parse_oid_indexes(oid *oidIndex, size_t oidLen,struct variable_list *data);
 int build_oid_noalloc(oid *in, size_t in_len, size_t *out_len,
-											oid *prefix, size_t prefix_len,
-											struct variable_list *indexes);
+		      oid *prefix, size_t prefix_len,
+		      struct variable_list *indexes);
 int build_oid(oid **out, size_t *out_len, oid *prefix, size_t prefix_len,
               struct variable_list *indexes);
 int build_oid_segment(struct variable_list *var);
     
+
+int sprint_realloc_variable	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 const oid *objid, size_t objidlen,
+				 struct variable_list *variable);
+
+int sprint_realloc_objid	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc, 
+				 const oid *objid, size_t objidlen);
+
+int sprint_realloc_value	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 oid *objid, size_t objidlen,
+				 struct variable_list *variable);
+
+int sprint_realloc_by_type	(u_char **buf, size_t *buf_len,
+				 size_t *out_len, int allow_realloc,
+				 struct variable_list *var,
+				 struct enum_list *enums,
+				 const char *hint, const char *units);
+
 int sprint_realloc_hexstring	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
 				 const u_char *, size_t);
