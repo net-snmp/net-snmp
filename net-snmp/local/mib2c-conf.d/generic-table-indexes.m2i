@@ -12,7 +12,7 @@
  * This structure is used to represent the index for a table.
  */
 @eval $m2c_gi_others = (count_indexes($table) - 1)@
-typedef struct ${table}_idx {
+typedef struct ${table}_mib_index_s {
 
 @foreach $node index@
 @    include m2c_setup_node.m2i@
@@ -29,7 +29,7 @@ typedef struct ${table}_idx {
 
 @end@ # foreach
 
-} ${table}_idx;
+} ${table}_mib_index;
 
 ##
 ########################################################################
