@@ -6,36 +6,23 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <stdio.h>
 #if HAVE_STRING_H
 #include <string.h>
 #else
 #include <strings.h>
 #endif
-#include <sys/socket.h>
-#if HAVE_SYS_SOCKIO_H
-#include <sys/sockio.h>
-#endif
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
+#include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
 #else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
+#include <netinet/in.h>
+#include <netdb.h>
 #endif
 
 #include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "snmp_client.h"
 #include "mib.h"
-#include "snmp.h"
-#include "system.h"
+#include "snmp_api.h"
 #include "read_config.h"
 #include "snmp_debug.h"
 
