@@ -1,0 +1,26 @@
+#!/bin/sh
+
+#
+# test snmpv1 get support by reading a variable
+#
+
+. ../eval_tools.sh
+
+HEADER for failure of SNMPv1 get with wrong community
+
+#
+# Begin test
+#
+
+# standard V1 configuration: testcomunnity
+. ./Sv1config
+
+STARTAGENT
+
+CAPTURE "snmpget $SNMP_SNMPD_PORT -v 1 localhost notavalidcommunity system.sysUpTime.0"
+
+STOPAGENT
+
+CHECK "No Response from"
+
+FINISHED

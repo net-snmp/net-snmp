@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER for failure of SNMPv1 get against SNMPv2c agent
+
+#
+# Begin test
+#
+
+# standard V2C configuration: testcomunnity
+. ./Sv2cconfig
+
+STARTAGENT
+
+CAPTURE "snmpget $SNMP_SNMPD_PORT -v 1 localhost notavalidcommunity system.sysUpTime.0"
+
+STOPAGENT
+
+CHECK "Timeout: No Response from"
+
+FINISHED
