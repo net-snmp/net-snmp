@@ -1524,7 +1524,7 @@ u_char *EtherAddr;
 #endif
 #endif
 
-        memset(arpcom.ac_enaddr,(0), sizeof(arpcom.ac_enaddr));
+        memset(&arpcom.ac_enaddr,(0), sizeof(arpcom.ac_enaddr));
         memset(EtherAddr,(0), sizeof(arpcom.ac_enaddr));
 
 	if (saveIndex != Index) {	/* Optimization! */
