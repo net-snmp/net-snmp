@@ -19,9 +19,6 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_SYS_UN_H
-#include <sys/un.h>
-#endif
 #include <atm.h>
 
 #include "asn1.h"
@@ -33,7 +30,7 @@
 
 
 const oid ucdSnmpAAL5PVCDomain[9] = { UCDAVIS_MIB, 251, 3 };
-
+static snmp_tdomain aal5pvcDomain;
 
 
 /*  Return a string representing the address in data, or else the "far end"
@@ -231,4 +228,47 @@ snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
   t->f_fmtaddr   = snmp_aal5pvc_fmtaddr;
 
   return t;
+}
+
+
+
+snmp_transport	*snmp_aal5pvc_create		(const char *string, int local)
+{
+  struct sockaddr_atmpvc addr;
+  
+  if (string != NULL) {
+    addr.sap_family = AF_ATMPVC;
+
+    if (sscanf(string, "%hd.%hd.%d", &(addr.sap_addr.itf),
+	       &(addr.sap_addr.vpi), &(addr.sap_addr.vci)) == 3) {
+      return snmp_aal5pvc_transport(&addr, local);
+    } else if (sscanf(string, "%hd.%d",
+		      &(addr.sap_addr.vpi), &(addr.sap_addr.vci)) == 2) {
+      addr.sap_addr.itf = 0;
+      return snmp_aal5pvc_transport(&addr, local);
+    } else if (sscanf(string, "%d",
+		      &(addr.sap_addr.vci)) == 1) {
+      addr.sap_addr.itf = 0;
+      addr.sap_addr.vpi = 0;
+      return snmp_aal5pvc_transport(&addr, local);
+    } else {
+      return NULL;
+    }
+  } else {
+    return NULL;
+  }
+}
+
+
+
+void		snmp_aal5pvc_ctor		(void)
+{
+  aal5pvcDomain.name        = ucdSnmpAAL5PVCDomain;
+  aal5pvcDomain.name_length = sizeof(ucdSnmpAAL5PVCDomain)/sizeof(oid);
+  aal5pvcDomain.f_create    = snmp_aal5pvc_create;
+  aal5pvcDomain.prefix      = calloc(3, sizeof(char *));
+  aal5pvcDomain.prefix[0]   = "aal5pvc";
+  aal5pvcDomain.prefix[1]   = "pvc";
+
+  snmp_tdomain_register(&aal5pvcDomain);
 }

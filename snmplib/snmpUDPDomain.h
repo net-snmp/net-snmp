@@ -4,6 +4,13 @@
 #include "snmp_transport.h"
 #include "asn1.h"
 
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
 snmp_transport	*snmp_udp_transport	(struct sockaddr_in *addr,
 					 int local);
 
@@ -27,5 +34,8 @@ int		snmp_udp_getSecName	(void *opaque, int olength,
 					 const char *community,
 					 int community_len, char **secname);
 
+/*  "Constructor" for transport domain object.  */
+
+void		snmp_udp_ctor		(void);
 
 #endif/*_SNMPUDPDOMAIN_H*/

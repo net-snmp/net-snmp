@@ -42,7 +42,7 @@
 #define INADDR_NONE	-1
 #endif
 
-
+static snmp_tdomain udpDomain;
 
 /*  Return a string representing the address in data, or else the "far end"
     address if data is NULL.  */
@@ -594,4 +594,29 @@ int		snmp_udp_getSecName	(void *opaque, int olength,
     free(ztcommunity);
   }
   return 1;
+}
+
+
+
+snmp_transport	*snmp_udp_create	       (const char *string, int local)
+{
+  struct sockaddr_in addr;
+
+  if (snmp_sockaddr_in(&addr, string, 0)) {
+    return snmp_udp_transport(&addr, local);
+  } else {
+    return NULL;
+  }
+}
+
+
+void		snmp_udp_ctor			(void)
+{
+  udpDomain.name        = snmpUDPDomain;
+  udpDomain.name_length = sizeof(snmpUDPDomain)/sizeof(oid);
+  udpDomain.f_create	= snmp_udp_create;
+  udpDomain.prefix	= calloc(2, sizeof(char *));
+  udpDomain.prefix[0] 	= "udp";
+
+  snmp_tdomain_register(&udpDomain);
 }
