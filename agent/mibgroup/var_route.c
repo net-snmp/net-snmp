@@ -736,7 +736,12 @@ static void Route_Scan_Reload()
   /*
    *  Sort it!
    */
-  qsort((char *) rthead, rtsize, sizeof(rthead[0]), qsort_compare);
+  qsort((char *) rthead, rtsize, sizeof(rthead[0]),
+#ifdef __STDC__
+      (int (*)(const void *, const void *))qsort_compare
+#else
+        qsort_compare
+#endif
 }
 
 #else
