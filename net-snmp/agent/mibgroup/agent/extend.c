@@ -229,18 +229,33 @@ extend_free_cache(netsnmp_cache *cache, void *magic)
          *************************/
 
 void
-_free_extension( netsnmp_extend *extension )
+_free_extension( netsnmp_extend *extension, extend_registration_block *ereg )
 {
+    netsnmp_extend *eptr  = NULL;
+    netsnmp_extend *eprev = NULL;
+
     if (!extension)
         return;
 
-/* Unlink from 'ehead' list ? */
+    if (ereg) {
+        /* Unlink from 'ehead' list */
+        for (eptr=ereg->ehead; eptr; eptr=eptr->next) {
+            if (eptr == extension)
+                break;
+            eprev = eptr;
+        }
+        if (eprev)
+            eprev->next = eptr->next;
+        else
+            ereg->ehead = eptr->next;
+    }
+
+    netsnmp_table_data_remove_and_delete_row( ereg->dinfo, extension->row);
     SNMP_FREE( extension->token );
     SNMP_FREE( extension->cache );
     SNMP_FREE( extension->command );
     SNMP_FREE( extension->args  );
     SNMP_FREE( extension->input );
-    SNMP_FREE( extension->row );
     SNMP_FREE( extension );
     return;
 }
@@ -267,7 +282,7 @@ _new_extension( char *exec_name, int exec_flags, extend_registration_block *ereg
 
     row = netsnmp_create_table_data_row();
     if (!row || !extension->cache) {
-        _free_extension( extension );
+        _free_extension( extension, ereg );
         SNMP_FREE( row );
         return NULL;
     }
@@ -364,6 +379,7 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
     netsnmp_extend             *extension;
     extend_registration_block  *eptr;
     int  i;
+    int  need_to_validate = 0;
 
     for ( request=requests; request; request=request->next ) {
         if (request->processed)
@@ -374,7 +390,8 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
         DEBUGMSGTL(( "nsExtendTable:config", "varbind: "));
         DEBUGMSGOID(("nsExtendTable:config", request->requestvb->name,
                                              request->requestvb->name_length));
-        DEBUGMSG((   "nsExtendTable:config", "\n"));
+        DEBUGMSG((   "nsExtendTable:config", " (%s)\n",
+                      se_find_label_in_slist("agent_mode", reqinfo->mode)));
 
         switch (reqinfo->mode) {
         case MODE_GET:
@@ -613,18 +630,7 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                                                   SNMP_ERR_INCONSISTENTVALUE);
                         return SNMP_ERR_INCONSISTENTVALUE;
                     }
-                    eptr = _find_extension_block( request->requestvb->name,
-                                                  request->requestvb->name_length );
-                    extension = _new_extension( table_info->indexes->val.string,
-                                                0, eptr );
-                    if (!extension) {  /* failed */
-                        netsnmp_set_request_error(reqinfo, request,
-                                                  SNMP_ERR_RESOURCEUNAVAILABLE);
-                        return SNMP_ERR_RESOURCEUNAVAILABLE;
-                    }
-                    netsnmp_insert_table_row( request, extension->row );
                     break;
-
                 case RS_DESTROY:
                     break;
                 default:
@@ -643,15 +649,43 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
 
         case MODE_SET_RESERVE2:
             switch (table_info->colnum) {
+            case COLUMN_EXTCFG_STATUS:
+                i = *request->requestvb->val.integer;
+                switch (i) {
+                case RS_CREATEANDGO:
+                case RS_CREATEANDWAIT:
+                    eptr = _find_extension_block( request->requestvb->name,
+                                                  request->requestvb->name_length );
+                    extension = _new_extension( table_info->indexes->val.string,
+                                                0, eptr );
+                    if (!extension) {  /* failed */
+                        netsnmp_set_request_error(reqinfo, request,
+                                                  SNMP_ERR_RESOURCEUNAVAILABLE);
+                        return SNMP_ERR_RESOURCEUNAVAILABLE;
+                    }
+                    netsnmp_insert_table_row( request, extension->row );
+                }
+            }
+            break;
+
+        case MODE_SET_FREE:
+            switch (table_info->colnum) {
+            case COLUMN_EXTCFG_STATUS:
+                i = *request->requestvb->val.integer;
+                switch (i) {
+                case RS_CREATEANDGO:
+                case RS_CREATEANDWAIT:
+                    eptr = _find_extension_block( request->requestvb->name,
+                                                  request->requestvb->name_length );
+                    _free_extension( extension, eptr );
+                }
+            }
+            break;
+
+        case MODE_SET_ACTION:
+            switch (table_info->colnum) {
             case COLUMN_EXTCFG_COMMAND:
                 extension->old_command = extension->command;
-               /*
-                extension->command     = calloc( 
-                    request->requestvb->val_len +1, 1);
-                memcpy(extension->command,
-                    request->requestvb->val.string,
-                    request->requestvb->val_len);
-                */
                 extension->command = netsnmp_strdup_and_null(
                     request->requestvb->val.string,
                     request->requestvb->val_len);
@@ -668,10 +702,17 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                     request->requestvb->val.string,
                     request->requestvb->val_len);
                 break;
+            case COLUMN_EXTCFG_STATUS:
+                i = *request->requestvb->val.integer;
+                switch (i) {
+                case RS_ACTIVE:
+                case RS_CREATEANDGO:
+                    need_to_validate = 1;
+                }
+                break;
             }
             break;
 
-        case MODE_SET_FREE:
         case MODE_SET_UNDO:
             switch (table_info->colnum) {
             case COLUMN_EXTCFG_COMMAND:
@@ -695,21 +736,16 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                     extension->old_input = NULL;
                 }
                 break;
-            }
-            break;
-
-        case MODE_SET_ACTION:
-            switch (table_info->colnum) {
             case COLUMN_EXTCFG_STATUS:
                 i = *request->requestvb->val.integer;
-                if (( i == RS_ACTIVE || i == RS_CREATEANDGO ) &&
-                    !(extension && extension->command &&
-                      extension->command[0] == '/' /* &&
-                      is_executable(extension->command) */)) {
-                    netsnmp_set_request_error(reqinfo, request,
-                                              SNMP_ERR_INCONSISTENTVALUE);
-                    return SNMP_ERR_INCONSISTENTVALUE;
+                switch (i) {
+                case RS_CREATEANDGO:
+                case RS_CREATEANDWAIT:
+                    eptr = _find_extension_block( request->requestvb->name,
+                                                  request->requestvb->name_length );
+                    _free_extension( extension, eptr );
                 }
+                break;
             }
             break;
 
@@ -736,10 +772,20 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
 
             case COLUMN_EXTCFG_STATUS:
                 i = *request->requestvb->val.integer;
-                if ( i == RS_ACTIVE || i == RS_CREATEANDGO ) {
+                switch (i) {
+                case RS_ACTIVE:
+                case RS_CREATEANDGO:
                     extension->flags |= NS_EXTEND_FLAGS_ACTIVE;
-                } else {
+                    break;
+                case RS_NOTINSERVICE:
+                case RS_CREATEANDWAIT:
                     extension->flags &= ~NS_EXTEND_FLAGS_ACTIVE;
+                    break;
+                case RS_DESTROY:
+                    eptr = _find_extension_block( request->requestvb->name,
+                                                  request->requestvb->name_length );
+                    _free_extension( extension, eptr );
+                    break;
                 }
             }
             break;
@@ -749,6 +795,32 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
             return SNMP_ERR_GENERR;
         }
     }
+
+    /*
+     * If we're marking a given row as active,
+     *  then we need to check that it's ready.
+     */
+    if (need_to_validate) {
+        for ( request=requests; request; request=request->next ) {
+            if (request->processed)
+                continue;
+            table_info = netsnmp_extract_table_info( request );
+            extension  = (netsnmp_extend*)netsnmp_extract_table_row_data( request );
+            switch (table_info->colnum) {
+            case COLUMN_EXTCFG_STATUS:
+                i = *request->requestvb->val.integer;
+                if (( i == RS_ACTIVE || i == RS_CREATEANDGO ) &&
+                    !(extension && extension->command &&
+                      extension->command[0] == '/' /* &&
+                      is_executable(extension->command) */)) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_INCONSISTENTVALUE);
+                    return SNMP_ERR_INCONSISTENTVALUE;
+                }
+            }
+        }
+    }
+
     return SNMP_ERR_NOERROR;
 }
 
