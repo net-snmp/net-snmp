@@ -78,7 +78,7 @@
   Returns either the length or SNMPERR_GENERR for an unknown hashing type.
 */
 int
-sc_get_properlength(oid *hashtype, u_int hashtype_len)
+sc_get_properlength(const oid *hashtype, u_int hashtype_len)
 {
   DEBUGTRACE;
   /*
@@ -203,7 +203,7 @@ _SCAPI_NOT_CONFIGURED
  * ASSUMED that the number of hash bits is a multiple of 8.
  */
 int
-sc_generate_keyed_hash(	oid	*authtype,	size_t authtypelen,
+sc_generate_keyed_hash(	const oid *authtype,	size_t authtypelen,
 			u_char	*key,		u_int  keylen,
 			u_char	*message,	u_int  msglen,
 			u_char	*MAC,		size_t *maclen)
@@ -316,7 +316,7 @@ _SCAPI_NOT_CONFIGURED
 */
 
 int
-sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
+sc_hash(const oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
         u_char *MAC, size_t *MAC_len)
 #if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
 {
@@ -396,7 +396,7 @@ _SCAPI_NOT_CONFIGURED
  * length of the hash transform output.
  */
 int
-sc_check_keyed_hash(	oid	*authtype,	size_t authtypelen,
+sc_check_keyed_hash(	const oid *authtype,	size_t authtypelen,
 			u_char	*key,		u_int keylen,
 			u_char	*message,	u_int msglen,
 			u_char	*MAC,		u_int maclen)
@@ -488,7 +488,7 @@ _SCAPI_NOT_CONFIGURED
  * successful return.
  */
 int
-sc_encrypt(	oid    *privtype,	size_t privtypelen,
+sc_encrypt(	const oid *privtype,	size_t privtypelen,
 		u_char *key,		u_int  keylen,
 		u_char *iv,		u_int  ivlen,
 		u_char *plaintext,	u_int  ptlen,
@@ -659,7 +659,7 @@ sc_encrypt_quit:
  * successful return.
  */
 int
-sc_decrypt(	oid    *privtype,	size_t privtypelen,
+sc_decrypt(	const oid *privtype,	size_t privtypelen,
 		u_char *key,		u_int  keylen,
 		u_char *iv,		u_int  ivlen,
 		u_char *ciphertext,	u_int  ctlen,

@@ -77,7 +77,7 @@
  *	 (Punt this check to the cmdline apps?  XXX)
  */
 int
-generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
+generate_Ku(	const oid *hashtype,	u_int  hashtype_len,
 		u_char	*P,		size_t  pplen,
 		u_char	*Ku,		size_t *kulen)
 #if defined(USE_INTERNAL_MD5) || defined(USE_OPENSSL)
@@ -227,7 +227,7 @@ _KEYTOOLS_NOT_AVAILABLE
  *	what is spec'ed for the textual convention.
  */
 int
-generate_kul(	oid	*hashtype,	u_int  hashtype_len,
+generate_kul(	const oid *hashtype,	u_int  hashtype_len,
 		u_char	*engineID,	size_t  engineID_len,
 		u_char	*Ku,		size_t  ku_len,
 		u_char	*Kul,		size_t *kul_len)
@@ -335,7 +335,7 @@ _KEYTOOLS_NOT_AVAILABLE
  * XXX FIX:     Does not handle keys larger than the hash algorithm used.
  */
 int
-encode_keychange(	oid	*hashtype,	u_int  hashtype_len,
+encode_keychange(	const oid *hashtype,	u_int  hashtype_len,
 			u_char	*oldkey,	size_t  oldkey_len,
 			u_char	*newkey,	size_t  newkey_len,
 			u_char	*kcstring,	size_t *kcstring_len)
@@ -464,7 +464,7 @@ _KEYTOOLS_NOT_AVAILABLE
 
 /* XXX:  if the newkey is not long enough, it should be freed and remalloced */
 int
-decode_keychange(	oid	*hashtype,	u_int  hashtype_len,
+decode_keychange(	const oid *hashtype,	u_int  hashtype_len,
 			u_char	*oldkey,	size_t  oldkey_len,
 			u_char	*kcstring,	size_t  kcstring_len,
 			u_char	*newkey,	size_t *newkey_len)

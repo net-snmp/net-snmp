@@ -23,21 +23,21 @@ extern "C" {
 /*
  * Prototypes.h
  */
-int	generate_Ku (	oid	*hashtype,	u_int  hashtype_len,
+int	generate_Ku (		const oid *hashtype,	u_int  hashtype_len,
 				u_char	*P,		size_t  pplen,
 				u_char	*Ku,		size_t *kulen);
 
-int	generate_kul (	oid	*hashtype,	u_int  hashtype_len,
+int	generate_kul (	  	const oid *hashtype,	u_int  hashtype_len,
 				u_char	*engineID,	size_t  engineID_len,
 				u_char	*Ku,		size_t  ku_len,
 				u_char	*Kul,		size_t *kul_len);
 
-int	encode_keychange (	oid	*hashtype,	u_int  hashtype_len,
+int	encode_keychange ( 	const oid *hashtype,	u_int  hashtype_len,
 				u_char	*oldkey,	size_t  oldkey_len,
 				u_char	*newkey,	size_t  newkey_len,
 				u_char	*kcstring,	size_t *kcstring_len);
 
-int	decode_keychange (	oid	*hashtype,	u_int  hashtype_len,
+int	decode_keychange (	const oid *hashtype,	u_int  hashtype_len,
 				u_char	*oldkey,	size_t  oldkey_len,
 				u_char	*kcstring,	size_t  kcstring_len,
 				u_char	*newkey,	size_t *newkey_len);
