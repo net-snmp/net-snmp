@@ -34,8 +34,8 @@ typedef struct newrow_stash_s {
    int created;
 } newrow_stash;
 
-/** @defgroup table_dataset table_dataset: Helps you implement a table with datamatted storage.
- *  @ingroup handler
+/** @defgroup table_dataset table_dataset: Helps you implement a table with automatted storage.
+ *  @ingroup table_data
  *
  *  This handler helps you implement a table where all the data is
  *  expected to be stored within the agent itself and not in some

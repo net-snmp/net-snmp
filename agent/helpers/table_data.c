@@ -17,6 +17,21 @@
 #include <dmalloc.h>
 #endif
 
+/** @defgroup table_data table_data: Helps you implement a table with datamatted storage.
+ *  @ingroup handler
+ *
+ *  This helper helps you implement a table where all the indexes are
+ *  expected to be stored within the agent itself and not in some
+ *  external storage location.  It can be used to store a list of
+ *  rows, where a row consists of the indexes to the table and a
+ *  generic data pointer.  You can then implement a subhandler which
+ *  is passed the exact row definition and data it must return data
+ *  for or accept data for.  Complex GETNEXT handling is greatly
+ *  simplified in this case.
+ *
+ *  @{
+ */
+
 /**
  * generates the index portion of an table oid from a varlist.
  */
@@ -431,7 +446,7 @@ netsnmp_table_data_build_result(netsnmp_handler_registration *reginfo,
     return SNMPERR_SUCCESS; /* WWWXXX: check for bounds */
 }
 
-/** clones a dataset row. */
+/** clones a data row. DOES NOT CLONE THE CONTAINED DATA. */
 netsnmp_table_row *
 netsnmp_table_data_clone_row(netsnmp_table_row *row) 
 {
@@ -456,5 +471,4 @@ netsnmp_table_data_clone_row(netsnmp_table_row *row)
     return newrow;
 }
     
-
-        
+/* @} */
