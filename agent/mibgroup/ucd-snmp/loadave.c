@@ -117,6 +117,9 @@
 #ifdef dynix
 #include <sys/mc_vmparam.h>
 #endif
+#if defined(hpux10) || defined(hpux11)
+#include <sys/pstat.h>
+#endif
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -224,6 +227,9 @@ try_getloadavg(double *r_ave, size_t s_ave)
 #ifdef aix4
     int             favenrun[3];
 #endif
+#if defined(hpux10) || defined(hpux11)
+  struct pst_dynamic pst_buf;
+#endif
 
 
 #ifdef HAVE_GETLOADAVG
@@ -245,6 +251,12 @@ try_getloadavg(double *r_ave, size_t s_ave)
         return (-1);
     for (i = 0; i < s_ave; i++)
         *(pave + i) = FIX_TO_DBL(favenrun[i]);
+#elif defined(hpux10) || defined(hpux11)
+    if (pstat_getdynamic(&pst_buf, sizeof(struct pst_dynamic), 1, 0) < 0)
+        return(-1);
+    r_ave[0] = pst_buf.psd_avg_1_min;
+    r_ave[1] = pst_buf.psd_avg_5_min;
+    r_ave[2] = pst_buf.psd_avg_15_min;
 #elif !defined(cygwin)
 #ifdef CAN_USE_NLIST
 #if aix4
