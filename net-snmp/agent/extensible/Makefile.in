@@ -1,5 +1,8 @@
 
-CC = cc -g
+# May need an ANSI compiler for extensible.c depending on whether or
+# not SECURITYEXCEPTIONS is defined in config.h 
+
+CC = gcc -g 
 
 OBJS = misc.o read_config.o extensible.o hpmibs.o proc.o exec.o versioninfo.o 
 SRCS:=$(subst .o,.c,$(OBJS))
@@ -17,6 +20,7 @@ versioninfo.o: mibdefs.h mibincl.h ../../config.h struct.h versioninfo.c
 proc.o: ../../config.h struct.h mibdefs.h mibincl.h proc.c
 exec.o: ../../config.h struct.h mibdefs.h mibincl.h exec.c
 
+# Warning:  ugly make hack
 tmp.make:
 	if [ -d CVS ]; then \
 	perl -e 'open(X,"cvs status -v versioninfo.c|"); $$ver = "";\
