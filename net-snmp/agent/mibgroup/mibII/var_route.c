@@ -716,7 +716,7 @@ var_ipRouteEntry(struct variable * vp,
     mib2_ipRouteEntry_t Lowentry, Nextentry, entry;
     int             Found = 0;
     req_e           req_type;
-    uint32_t        ipaddr_return;
+    static uint32_t ipaddr_return;
 
     /*
      * fill in object part of name for current (less sizeof instance part) 
