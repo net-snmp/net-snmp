@@ -2105,6 +2105,8 @@ AC_CHECK_FUNCS(mkstemp)
 AC_CHECK_FUNCS(getpwnam getgrnam setgid setuid setgroups)
 # High resolution alarm support
 AC_CHECK_FUNCS(setitimer)
+# functions to support setting the clock.
+AC_CHECK_FUNCS(mktime stime)
 
 AC_MSG_CHECKING([[for SIOCGIFADDR in sys/ioctl.h]])
 AC_CACHE_VAL(cv_sys_ioctl_h_has_SIOCGIFADDR,
