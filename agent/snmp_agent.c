@@ -51,12 +51,13 @@ SOFTWARE.
 #include "snmp_groupvars.h"
 #include "extensible/extproto.h"
 
+extern int snmp_dump_packet;
 void	send_trap();
 void	send_easy_trap();
 int	create_identical();
 int	parse_var_op_list();
 int	snmp_access();
-static int snmp_outgetresponses_inc;
+static int snmp_vars_inc;
 static int get_community();
 static int bulk_var_op_list();
 static int create_toobig();
@@ -113,14 +114,14 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 				  pi->context, &pi->contextLength,
 				  FIRST_PASS);
     } else {
+        snmp_inbadversions++;
         ERROR("unknown auth header type");
-        return NULL;
+        return 0;
     }
 
     if (data == NULL){
 	ERROR("bad authentication");
-	/* send auth fail trap */
-	send_easy_trap (4);
+	snmp_inasnparseerrors++;
 	return 0;
     }
     if (pi->version == SNMP_VERSION_1){
@@ -146,21 +147,31 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 
     switch (pi->pdutype) {
     case GET_REQ_MSG:
+	snmp_ingetrequests++;
+	break;
     case BULK_REQ_MSG:
-	snmp_ingetrequests++;   break;
+	snmp_ingetrequests++;
+	break;
     case GETNEXT_REQ_MSG:
-	snmp_ingetnexts++;      break;
+	snmp_ingetnexts++;
+	break;
     case SET_REQ_MSG:
-	snmp_insetrequests++;   break;
+	snmp_insetrequests++;
+	break;
+    case GET_RSP_MSG:
+        snmp_ingetresponses++;
+	return 0;
+    case TRP_REQ_MSG:
+    case TRP2_REQ_MSG:
+        snmp_intraps++;
+	return 0;
+    default:
+        snmp_inasnparseerrors++;
+	return 0;
     }
 
     /* no outgoing variables seen: */
-    snmp_outgetresponses_inc = 0;
-
-    if (pi->pdutype != GET_REQ_MSG && pi->pdutype != GETNEXT_REQ_MSG
-	&& pi->pdutype != SET_REQ_MSG && pi->pdutype != BULK_REQ_MSG){
-	return 0;
-    }
+    snmp_vars_inc = 0;
 
     if (pi->version == SNMP_VERSION_2){
         /*
@@ -243,6 +254,26 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 	return 0;
     }
 
+    if (snmp_dump_packet) {
+	fprintf (stdout, "    ");
+	switch (pi->pdutype) {
+	case GET_REQ_MSG:
+	    fprintf (stdout, "GET");
+	    break;
+	case GETNEXT_REQ_MSG:
+	    fprintf (stdout, "GETNEXT");
+	    break;
+	case BULK_REQ_MSG:
+	    fprintf (stdout, "GETBULK non-rep = %ld, max-rep = %ld",
+		     errstat, errindex);
+	    break;
+	case SET_REQ_MSG:
+	    fprintf (stdout, "SET");
+	    break;
+	}
+	fprintf (stdout, "\n");
+    }
+
     /* create the requid, errstatus, errindex for the output packet */
     out_reqid = asn_build_sequence(out_header, out_length,
 				 (u_char)GET_RSP_MSG, 0);
@@ -302,6 +333,8 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
               if (errstat == SNMP_ERR_NOERROR) {
                 if (create_identical(startData, out_auth, startLength, 0L, 0L, pi)){
 		  *out_length = pi->packet_end - out_auth;
+		  snmp_outgetresponses++;
+		  snmp_intotalsetvars += snmp_vars_inc;
 		  return 1;
                 }
                 return 0;
@@ -345,15 +378,16 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 	       to be fixed. */
 	    if (pi->version == SNMP_VERSION_2)
 		pi->packet_end = out_auth + packet_len;
-	    snmp_intotalreqvars++;
-	    snmp_outgetresponses += snmp_outgetresponses_inc;
+	    snmp_intotalreqvars += snmp_vars_inc;
+	    snmp_outgetresponses++;
 	    break;
 	case SNMP_ERR_TOOBIG:
 	    snmp_intoobigs++;
 	    if (pi->version == SNMP_VERSION_2){
 		create_toobig(out_auth, *out_length, reqid, pi);
 		break;
-	    } /* else FALLTHRU */
+	    }
+	    goto reterr;
 	case SNMP_ERR_NOACCESS:
 	case SNMP_ERR_WRONGTYPE:
 	case SNMP_ERR_WRONGLENGTH:
@@ -461,14 +495,22 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 				 &var_val_len, &var_val, (int *)&length);
 	if (data == NULL)
 	    return PARSE_ERROR;
+
+	if (snmp_dump_packet && action == RESERVE1) {
+	    char buf [256];
+	    sprint_objid (buf, var_name, var_name_len);
+	    fprintf (stdout, "    -- %s\n", buf);
+	}
+
 	/* now attempt to retrieve the variable on the local entity */
 	statP = getStatPtr(var_name, &var_name_len, &statType, &statLen, &acl,
 			   exact, &write_method, pi, &noSuchObject);
 	if (pi->version != SNMP_VERSION_2 && statP == NULL
 	      && (pi->pdutype != SET_REQ_MSG || !write_method)){
+	    if (snmp_dump_packet) fprintf (stdout, "    >> noSuchName\n");
             print_mib_oid(var_name,var_name_len);
             printf(" -- ");
-	    printf("OID Doesn't exist");
+	    printf("OID Doesn't exist\n");
 	    return SNMP_ERR_NOSUCHNAME; 
 	}
 
@@ -476,11 +518,13 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	   (in the MIB sense). */
 	if (pi->pdutype == SET_REQ_MSG && pi->version != SNMP_VERSION_2
 	      && !snmp_access(acl, pi->community_id, rw)){
+	    if (snmp_dump_packet) fprintf (stdout, "    >> noSuchName (read-only)\n");
 	    ERROR("read-only? (ignoring)");
 	    return SNMP_ERR_NOSUCHNAME;
 	}
 	if (pi->pdutype == SET_REQ_MSG && pi->version == SNMP_VERSION_2
 	      && !snmp_access(acl, pi->community_id, rw)){
+	    if (snmp_dump_packet) fprintf (stdout, "    >> notWritable\n");
 	    ERROR("Not Writable");
 	    return SNMP_ERR_NOTWRITABLE;
 	}
@@ -543,7 +587,7 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	}
 
 	(*index)++;
-	snmp_outgetresponses_inc++;
+	snmp_vars_inc++;
     }
     if (pi->pdutype != SET_REQ_MSG){
 	/* save a pointer to the end of the packet */
@@ -644,6 +688,13 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
 				 &var_val_len, &var_val, (int *)&length);
 	if (data == NULL)
 	    return PARSE_ERROR;
+
+	if (snmp_dump_packet) {
+	    char buf [256];
+	    sprint_objid (buf, var_name, var_name_len);
+	    fprintf (stdout, "    non-rep -- %s\n", buf);
+	}
+
 	/* now attempt to retrieve the variable on the local entity */
 	statP = getStatPtr(var_name, &var_name_len, &statType, &statLen, &acl,
 			   FALSE, &write_method, pi, &noSuchObject);
@@ -664,7 +715,7 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
 	}
 	(*index)++;
 	non_repeaters--;
-	snmp_outgetresponses_inc++;
+	snmp_vars_inc++;
     }
 
     repeaterStart = out_data;
@@ -681,6 +732,13 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
 				 (int *)&length);
 	if (data == NULL)
 	    return PARSE_ERROR;
+
+	if (snmp_dump_packet) {
+	    char buf [256];
+	    sprint_objid (buf, var_name, var_name_len);
+	    fprintf (stdout, "    rep -- %s\n", buf);
+	}
+
 	/* now attempt to retrieve the variable on the local entity */
 	statP = getStatPtr(rl->name, &rl->length, &statType, &statLen,
 			   &acl, FALSE, &write_method, pi, &noSuchObject);

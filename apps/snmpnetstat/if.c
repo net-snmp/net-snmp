@@ -35,6 +35,11 @@ SOFTWARE.
 
 #if STDC_HEADERS
 #include <string.h>
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
 #include <sys/types.h>
@@ -64,6 +69,8 @@ extern	char *routename(), *netname();
 extern	struct snmp_session *Session;
 extern	struct variable_list *getvarbyname();
 
+static void sidewaysintpr();
+
 oid oid_ifname[] =		{1, 3, 6, 1, 2, 1, 2, 2, 1, 2, 1};
 static oid oid_ifinucastpkts[] ={1, 3, 6, 1, 2, 1, 2, 2, 1,11, 1};
 static oid oid_cfg_nnets[] =	{1, 3, 6, 1, 2, 1, 2, 1, 0};
@@ -87,6 +94,7 @@ static oid oid_ipadentaddr[] =	{1, 3, 6, 1, 2, 1, 4,20, 1, 1, 0, 0, 0, 0};
 /*
  * Print a description of the network interfaces.
  */
+void
 intpr(interval)
 	int interval;
 {
@@ -284,6 +292,7 @@ u_char	signalled;			/* set if alarm goes off "early" */
  * collected over that interval.  Assumes that interval is non-zero.
  * First line printed at top of screen is always cumulative.
  */
+void
 sidewaysintpr(interval)
 	unsigned interval;
 {

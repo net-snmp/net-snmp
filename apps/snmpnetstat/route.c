@@ -64,6 +64,8 @@ extern	struct snmp_session *Session;
 extern	struct variable_list *getvarbyname();
 extern	int print_errors;
 
+void get_ifname();
+void routepr();
 
 struct route_entry {
     oid	    instance[4];
@@ -101,6 +103,7 @@ static oid oid_ipnoroutes[] = {1, 3, 6, 1, 2, 1, 4, 12, 0};
 /*
  * Print routing tables.
  */
+void
 routepr()
 {
 	struct route_entry route, *rp = &route;
@@ -233,6 +236,7 @@ struct iflist {
     struct iflist *next;
 } *Iflist = NULL;
 
+void
 get_ifname(name, index)
     char *name;
     int index;
@@ -304,7 +308,7 @@ routename(in)
 	else {
 #define C(x)	((x) & 0xff)
 		in.s_addr = ntohl(in.s_addr);
-		sprintf(line, "%u.%u.%u.%u", C(in.s_addr >> 24),
+		sprintf(line, "%lu.%lu.%lu.%lu", C(in.s_addr >> 24),
 			C(in.s_addr >> 16), C(in.s_addr >> 8), C(in.s_addr));
 	}
 	return (line);
@@ -372,6 +376,7 @@ netname(in, mask)
 /*
  * Print routing statistics
  */
+void
 rt_stats()
 {
 	struct variable_list *var;
@@ -379,7 +384,7 @@ rt_stats()
 	printf("routing:\n");
 	var = getvarbyname(Session, oid_ipnoroutes, sizeof(oid_ipnoroutes) / sizeof(oid));
 	if (var){
-	    printf("\t%u destination%s found unreachable\n",
+	    printf("\t%lu destination%s found unreachable\n",
 		*var->val.integer, plural((int)*var->val.integer));
 	} else {
 	    printf("\tCouldn't get ipOutNoRoutes variable\n");

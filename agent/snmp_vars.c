@@ -272,8 +272,6 @@ static int Interface_Scan_Get_Count();
 static int Interface_Scan_By_Index();
 static int Interface_Get_Ether_By_Index();
 
-#define  KNLookup(nl_which, buf, s)   (klookup(nl[nl_which].n_value, buf, s))
-
 
 #define N_IPSTAT	0
 #define N_IPFORWARDING	1
@@ -432,17 +430,17 @@ init_snmp()
   char kvm_errbuf[4096];
 
   if((kernel = kvm_openfiles(KERNEL_LOC, NULL, NULL, O_RDONLY, kvm_errbuf)) == NULL) {
-      ERROR("kvm_openfiles");
+      perror("kvm_openfiles");
       exit(1);
   }
   if ((ret = kvm_nlist(kernel, nl)) == -1) {
-      ERROR("kvm_nlist");
+      perror("kvm_nlist");
       exit(1);
   }
   kvm_close(kernel);
 #else
   if ((ret = nlist(KERNEL_LOC,nl)) == -1) {
-    ERROR("nlist");
+    perror("nlist");
     exit(1);
   }
 #endif
@@ -460,6 +458,24 @@ init_snmp()
   init_routes();
   init_extensible();
 }
+
+static int KNLookup(nl_which, buf, s)
+    int nl_which;
+    char *buf;
+    int s;
+{   struct nlist *nlp = &nl[nl_which];
+
+    if (nlp->n_value == 0) {
+        fprintf (stderr, "Accessing non-nlisted variable: %s\n", nlp->n_name);
+	nlp->n_value = -1;	/* only one error message ... */
+	return 0;
+    }
+    if (nlp->n_value == -1)
+        return 0;
+
+    return klookup(nlp->n_value, buf, s);
+}
+
 
 #define CMUMIB 1, 3, 6, 1, 4, 1, 3
 #define       CMUUNIXMIB  CMUMIB, 2, 2
@@ -1352,6 +1368,7 @@ var_snmp(vp, name, length, exact, var_len, write_method)
 	    long_return = snmp_intotalreqvars;
       	    break;
 	case SNMPINTOTALSETVARS:
+	    long_return = snmp_intotalsetvars;
       	    break;
 	case SNMPINGETREQUESTS:
 	    long_return = snmp_ingetrequests;
@@ -1363,28 +1380,37 @@ var_snmp(vp, name, length, exact, var_len, write_method)
 	    long_return = snmp_insetrequests;
       	    break;
 	case SNMPINGETRESPONSES:
+	    long_return = snmp_ingetresponses;
       	    break;
 	case SNMPINTRAPS:
+	    long_return = snmp_intraps;
       	    break;
 	case SNMPOUTTOOBIGS:
+	    long_return = snmp_outtoobigs;
       	    break;
 	case SNMPOUTNOSUCHNAMES:
 	    long_return = snmp_outnosuchnames;
       	    break;
 	case SNMPOUTBADVALUES:
+	    long_return = snmp_outbadvalues;
       	    break;
 	case SNMPOUTGENERRS:
+	    long_return = snmp_outgenerrs;
       	    break;
 	case SNMPOUTGETREQUESTS:
+	    long_return = snmp_outgetrequests;
       	    break;
 	case SNMPOUTGETNEXTS:
+	    long_return = snmp_outgetnexts;
       	    break;
 	case SNMPOUTSETREQUESTS:
+	    long_return = snmp_outsetrequests;
       	    break;
 	case SNMPOUTGETRESPONSES:
 	    long_return = snmp_outgetresponses;
       	    break;
 	case SNMPOUTTRAPS:
+	    long_return = snmp_outtraps;
       	    break;
 	case SNMPENABLEAUTHENTRAPS:
 	    *write_method = write_snmp;

@@ -120,12 +120,11 @@ int Interface_Scan_Next(short *Index, char *Name, struct ifnet *Retifnet,
 			struct in_ifaddr *Retin_ifaddr);
 #endif
 
-static	    Route_Scan_Reload();
+static void Route_Scan_Reload();
 
 static RTENTRY **rthead=0;
 static int rtsize=0, rtallocate=0;
 
-#define  KNLookup(nl_which, buf, s)   (klookup(nl[nl_which].n_value, buf, s))
 
 static struct nlist nl[] = {
 #define N_RTHOST	0
@@ -151,6 +150,24 @@ static struct nlist nl[] = {
 };
 
 extern write_rte();
+
+static int
+KNLookup(nl_which, buf, s)
+    int nl_which;
+    char *buf;
+    int s;
+{   struct nlist *nlp = &nl[nl_which];
+
+    if (nlp->n_value == 0) {
+	fprintf (stderr, "Accessing non-nlisted variable: %s\n", nlp->n_name);
+	nlp->n_value = -1;
+	return 0;
+    }
+    if (nlp->n_value == -1)
+	return 0;
+    return klookup(nl[nl_which].n_value, buf, s);
+}
+
 
 void
 string_append_int (s, val)
@@ -485,6 +502,7 @@ int		(**write_method)(); /* OUT - pointer to function to set variable, otherwise
 
 #endif /* solaris2 - var_IProute */
 
+void
 init_routes(){
   int ret;
 #if HAVE_KVM_OPENFILES
@@ -492,11 +510,11 @@ init_routes(){
   char kvm_errbuf[4096];
 
   if((kernel = kvm_openfiles(KERNEL_LOC, NULL, NULL, O_RDONLY, kvm_errbuf)) == NULL) {
-      ERROR("kvm_openfiles");
+      perror("kvm_openfiles");
       exit(1);
   }
   if ((ret = kvm_nlist(kernel, nl)) == -1) {
-      ERROR("kvm_nlist");
+      perror("kvm_nlist");
       exit(1);
   }
   kvm_close(kernel);
@@ -594,7 +612,7 @@ struct radix_node *pt;
 }
 #endif
 
-static Route_Scan_Reload()
+static void Route_Scan_Reload()
 {
 #if defined(RTENTRY_4_4)
   struct radix_node_head head, *rt_table[AF_MAX+1];
@@ -805,7 +823,7 @@ static Route_Scan_Reload()
 	qsort((char *)rthead,rtsize,sizeof(rthead[0]),qsort_compare);
 }
 #else
-static Route_Scan_Reload()
+static void Route_Scan_Reload()
 {
 }
 #endif
