@@ -36,6 +36,8 @@
 # Variables:  (* = exported)
 #  *SNMP_BASEDIR:  	  the source base directory for tests
 #  *SNMP_UPDIR:  	  directory above where the test binaries live (-D option)
+#  *SNMP_PATH	## yes, PATH is already setup
+#  *SNMP_VERBOSE	## 0=silent, 1=warnings, 2=more
 
 # Usage mess.  (No, it works.)
 #
@@ -50,12 +52,18 @@ usage() {
     exit 0
 }
 
-# defaults
-# Fix path starting from this script's base.
-SNMP_BASEDIR=`dirname $0` ; export SNMP_BASEDIR
-cd $SNMP_BASEDIR
-SNMP_UPDIR=..
+SNMP_BASEDIR=`dirname $0`
+
+### Check for the configuration script.
+##if [ ! -s "${SNMP_BASEDIR}/TESTCONF.sh"  ] ; then 
+##  echo "No TESTCONF.sh in \"$SNMP_BASEDIR\" ; exiting"
+##  exit 0
+##fi
+
+ORIGDIR=`pwd`		## this script may be invoked with relative path
+SNMP_UPDIR=..		## building from the source tree
 interactive=no
+SNMP_VERBOSE=0
 
 while [ -n "$1" ]; do
     case "$1" in
@@ -69,11 +77,9 @@ while [ -n "$1" ]; do
 	    ;;
 	-v)
 	    SNMP_VERBOSE=1
-	    export SNMP_VERBOSE
 	    ;;
 	-V)
 	    SNMP_VERBOSE=2
-	    export SNMP_VERBOSE
 	    ;;
 	-s)
 	    SNMP_SAVE_TMPDIR="yes"
@@ -103,10 +109,63 @@ while [ -n "$1" ]; do
 done
 
 
-PATH=.:..:${SNMP_UPDIR}/apps:${SNMP_UPDIR}/agent:$PATH
-export PATH
-#echo $PATH
+# Find executables in source first, then build, then existing PATH.
+## Add to PATH if a binary is found.
+
+cd $SNMP_UPDIR
+SNMP_UPDIR=`pwd`
+bf=snmpget
+if [ -f "$bf" ] ; then
+   PATH=$SNMP_UPDIR:$PATH
+else
+   bf=apps/snmpget
+   if [ -f "$bf" ] ; then
+      PATH=$SNMP_UPDIR/apps:$PATH
+   fi
+fi
+bf=agent/snmpd
+if [ -f "$bf" ] ; then
+   PATH=$SNMP_UPDIR/agent:$PATH
+fi
+
+bf=config.h
+if [ ! -s "$bf" ] ; then
+   echo "No \"$bf\" in $SNMP_UPDIR . Some tests will be skipped"
+fi
+unset bf
+
+# Run from the test scripts directory.
+cd $ORIGDIR ; cd ${SNMP_BASEDIR}
+SNMP_BASEDIR=`pwd`
+
+# Setup for the next test run.
+rm -f core tests/core
+
+PATH=${SNMP_BASEDIR}:$PATH
 SNMP_PATH=yes
+
+export PATH
+export SNMP_BASEDIR
+export SNMP_PATH
+export SNMP_UPDIR
+export SNMP_VERBOSE
+
+#
+# Distinguished expectations.
+#
+if [ $SNMP_VERBOSE -gt 0 ]; then
+    echo ${SNMP_UPDIR}/testing
+    echo path is $PATH
+    echo top of build is $SNMP_UPDIR
+    echo source testing is $SNMP_BASEDIR
+    which snmpget
+    which snmpgetnext
+    which snmpusm
+    which snmpd
+    if [ $? -ne 0  ] ; then 
+        exit 0
+    fi
+fi
 
 #
 # Source the testing configuration file
