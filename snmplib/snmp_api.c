@@ -3321,9 +3321,13 @@ _sess_read(void *sessp,
     if ( sp->flags & SNMP_FLAGS_STREAM_SOCKET ) {
       if (!isp->newpkt)
         length = recv(isp->sd, (char *)packet, PACKET_LENGTH, 0);
-    } else
+    } else {
         length = recvfrom(isp->sd, (char *)packet, PACKET_LENGTH, 0,
 		      (struct sockaddr *)&from, &fromlength);
+        if (from.sa_family == AF_UNSPEC)
+            from.sa_family = AF_INET; /* bad bad bad OS, no bone! */
+    }
+
     if (length == -1) {
 	sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
 	sp->s_errno = errno;
