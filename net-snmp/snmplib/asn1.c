@@ -1372,7 +1372,7 @@ asn_build_float(data, datalength, type, floatp, floatsize)
     fu.intVal = htonl(fu.intVal);	
 
     *datalength -= floatsize;
-    bcopy((char *)(&(fu.c[0])), (char *)data, (int)floatsize);
+    memcpy(data, &fu.c[0], floatsize);
 
     data += floatsize;
     return data;
@@ -1432,7 +1432,7 @@ asn_parse_double(data, datalength, type, doublep, doublesize)
 	return NULL;
     }
     *datalength -= (int)asn_length + (bufp - data);
-    bcopy((char *)bufp, (char *)(&(fu.c[0])), (int)asn_length);
+    memcpy(&fu.c[0], bufp, asn_length);
 
    /* correct for endian differences */
 
@@ -1484,7 +1484,7 @@ asn_build_double(data, datalength, type, doublep, doublesize)
     fu.intVal[0] = htonl(fu.intVal[1]);	
     fu.intVal[1] = tmp;
     *datalength -= doublesize;
-    bcopy((char *)(&(fu.c[0])), (char *)data, (int)doublesize);
+    memcpy(data, &fu.c[0], doublesize);
 
     data += doublesize;
     return data;
