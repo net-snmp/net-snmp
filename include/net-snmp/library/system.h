@@ -1,6 +1,10 @@
 #ifndef SNMP_SYSTEM_H
 #define SNMP_SYSTEM_H
 
+#ifndef NET_SNMP_CONFIG_H
+#error "Please include <net-snmp/net-snmp-config.h> before this file"
+#endif
+
 #ifdef __cplusplus
 extern          "C" {
 #endif
@@ -31,10 +35,20 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 /*
- * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * portions Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms specified in the COPYING file
  * distributed with the Net-SNMP package.
  */
+
+
+    /*
+     * function to create a daemon. Will fork and call setsid().
+     *
+     * Returns: -1 : fork failed
+     *           0 : No errors
+     */
+    int netsnmp_daemonize(int quit_immediately, int stderr_log);
+
     /*
      * Definitions for the system dependent library file
      */
