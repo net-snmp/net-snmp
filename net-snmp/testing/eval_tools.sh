@@ -149,7 +149,7 @@ EXECUTING: $*
 KNORG
 
 	fi
-	( $* 2>&1 ) > $junkoutputfile
+	( $* 2>&1 ) > $junkoutputfile 2>&1
 
 	if [ $SNMP_VERBOSE -gt 1 ]; then
 		echo "Command Output: "
@@ -216,7 +216,10 @@ STARTAGENT() {
 	echo "agent config: "
 	cat $SNMP_CONFIG_FILE
     fi
-    COMMANDARGS="$SNMP_FLAGS -r -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE -C -c $SNMP_CONFIG_FILE $AGENT_FLAGS"
+    COMMANDARGS="$SNMP_FLAGS -r -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE $AGENT_FLAGS"
+    if test -f $SNMP_CONFIG_FILE; then
+      COMMANDARGS="$COMMANDARGS -C -c $SNMP_CONFIG_FILE"
+    fi
 #    VERBOSE_OUT 2 "starting agent: snmpd $SNMP_FLAGS -r -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE -C -c $SNMP_CONFIG_FILE"
    if [ $SNMP_VERBOSE -gt 0 ]; then
 	echo "running: snmpd $COMMANDARGS"
