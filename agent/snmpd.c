@@ -98,6 +98,9 @@ SOFTWARE.
 #if HAVE_PWD_H
 #include <pwd.h>
 #endif
+#if HAVE_GRP_H
+#include <grp.h>
+#endif
 
 #ifndef PATH_MAX
 # ifdef _POSIX_PATH_MAX
