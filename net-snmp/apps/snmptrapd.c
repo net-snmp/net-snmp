@@ -37,8 +37,14 @@ SOFTWARE.
 #include <strings.h>
 #endif
 #include <sys/types.h>
+#if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
 #include <sys/socket.h>
+#endif
 #if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
@@ -46,28 +52,32 @@ SOFTWARE.
 #include <netinet/in.h>
 #endif
 #include <stdio.h>
-#if TIME_WITH_SYS_TIME
+#if HAVE_SYS_TIME_H
 # include <sys/time.h>
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
+# if TIME_WITH_SYS_TIME
 #  include <time.h>
 # endif
+#else
+# include <time.h>
 #endif
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
+#if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
+#if HAVE_NETDB_H
 #include <netdb.h>
+#endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -164,6 +174,14 @@ struct timeval Now;
 void init_syslog(void);
 
 void update_config (int a);
+
+#ifdef WIN32
+void openlog(const char *app, int options, int fac) {
+}
+
+void syslog(int level, const char *fmt, ...) {
+}
+#endif
 
 const char *
 trap_description(int trap)
@@ -296,6 +314,7 @@ void do_external(char *cmd,
 		 struct hostent *host,
 		 struct snmp_pdu *pdu)
 {
+#ifndef WIN32
   struct variable_list tmpvar, *vars;
   struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
   static oid trapoids[10] = {1,3,6,1,6,3,1,1,5};
@@ -380,6 +399,7 @@ void do_external(char *cmd,
     }
   }
   snmp_set_quick_print(oldquick);
+#endif	/* WIN32 */
 }
 
 int snmp_input(int op,
@@ -597,7 +617,11 @@ int main(int argc, char *argv[])
     /* register our configuration handlers now so -H properly displays them */
     register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"oid|\"default\" program [args ...] ");
 
+#ifdef WIN32
+    setvbuf (stdout, NULL, _IONBF, BUFSIZ);
+#else
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
+#endif
     /*
      * usage: snmptrapd [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-d] [-e] [-S] [-a]
      */
@@ -770,6 +794,7 @@ int main(int argc, char *argv[])
     init_mib();
     update_config(0);	/* read in config files and register HUP */
 
+#ifndef WIN32
     /* fork the process to the background if we are not printing to stdout */
     if (!Print && dofork) {
       int fd, fdnum;
@@ -802,6 +827,7 @@ int main(int argc, char *argv[])
 		_exit(0);
       }
     }
+#endif	/* WIN32 */
 
     if (Syslog) {
 	/* open syslog */
@@ -819,7 +845,7 @@ int main(int argc, char *argv[])
     }
 
 
-    memset(session, 0, sizeof(struct snmp_session));
+    snmp_sess_init(session);
     session->peername = SNMP_DEFAULT_PEERNAME; /* Original code had NULL here */
     session->version = SNMP_DEFAULT_VERSION;
 
@@ -834,17 +860,21 @@ int main(int argc, char *argv[])
     session->callback_magic = NULL; 
     session->authenticator = NULL;
 
+    SOCK_STARTUP;
     ss = snmp_open( session );
     if (ss == NULL){
         snmp_sess_perror("snmptrapd", session);
         if (Syslog) {
 	    syslog(LOG_ERR,"couldn't open snmp - %m");
 	}
+	SOCK_CLEANUP;
 	exit(1);
     }
 
     signal(SIGTERM, term_handler);
+#ifdef SIGHUP
     signal(SIGHUP, term_handler);
+#endif
     signal(SIGINT, term_handler);
 
     while (running) {
@@ -885,6 +915,7 @@ int main(int argc, char *argv[])
 	       tm->tm_hour, tm->tm_min, tm->tm_sec,
 	       VersionInfo);
     }
+    SOCK_CLEANUP;
     return 0;
 }
 
@@ -930,11 +961,13 @@ void update_config(int a)
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG,
                       NULL);
 
+#ifdef SIGHUP
   signal(SIGHUP, update_config);
+#endif
 }
 
 
-#ifndef HAVE_GETDTABLESIZE
+#if !defined(HAVE_GETDTABLESIZE) && !defined(WIN32)
 #include <sys/resource.h>
 int getdtablesize(void)
 {
