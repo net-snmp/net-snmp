@@ -63,6 +63,7 @@ SRCS =  all_helpers.c \
 	row_merge.c \
 	serialize.c \
 	stash_cache.c \
+	stash_to_next.c \
 	table_array.c \
 	table_container.c \
 	table_iterator.c \
@@ -87,6 +88,7 @@ OBJS =  all_helpers.o \
 	row_merge.o \
 	serialize.o \
 	stash_cache.o \
+	stash_to_next.o \
 	table_array.o \
 	table_container.o \
 	table_iterator.o \
@@ -111,6 +113,7 @@ LOBJS = all_helpers.lo \
 	row_merge.lo \
 	serialize.lo \
 	stash_cache.lo \
+	stash_to_next.lo \
 	table_array.lo \
 	table_container.lo \
 	table_iterator.lo \
