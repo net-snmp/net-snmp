@@ -65,7 +65,8 @@
 
 struct snmp_index {
     struct variable_list	*varbind;	/* or pointer to var_list ? */
-    struct snmp_session		*session;	/* NULL implies unused  ? */
+    int				 allocated;
+    struct snmp_session		*session;
     struct snmp_index		*next_oid;
     struct snmp_index		*prev_oid;
     struct snmp_index		*next_idx;
@@ -207,9 +208,11 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 	if ( flags & ALLOCATE_ANY_INDEX ) {
             for(idxptr2 = idxptr ; idxptr2 != NULL;
 		 prev_idx_ptr = idxptr2, idxptr2 = idxptr2->next_idx) {
-		if (flags == ALLOCATE_ANY_INDEX && idxptr2->session == NULL) {
+
+		if (flags == ALLOCATE_ANY_INDEX && !(idxptr2->allocated)) {
 		    if ((rv = snmp_clone_varbind(idxptr2->varbind)) != NULL) {
 			idxptr2->session = ss;
+			idxptr2->allocated = 1;
 		    }
 		    return rv;
 		}
@@ -237,9 +240,17 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 		    break;
 	    }
 	    if (res2 == 0) {
-		if (idxptr2->session != NULL) {
-		    /*  No good: the index is in used by another subagent.  */
+		if (idxptr2->allocated) {
+		    /*  No good: the index is in use.  */
 		    return NULL;
+		} else {
+		    /*  Okay, it's unallocated, we can just claim ownership
+			here.  */
+		    if ((rv = snmp_clone_varbind(idxptr2->varbind)) != NULL) {
+			idxptr2->session = ss;
+			idxptr2->allocated = 1;
+		    }
+		    return rv;
 		}
 	    }
 	}
@@ -290,6 +301,7 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 	    return NULL;
 	}
 	new_index->session = ss;
+	new_index->allocated = 1;
 
 	if ( varbind->type == ASN_OCTET_STR && flags == ALLOCATE_THIS_INDEX )
 	    new_index->varbind->val.string[new_index->varbind->val_len] = 0;
@@ -449,8 +461,10 @@ unregister_index_by_session(struct snmp_session *ss)
     struct snmp_index *idxptr, *idxptr2;
     for(idxptr = snmp_index_head ; idxptr != NULL; idxptr = idxptr->next_oid)
 	for(idxptr2 = idxptr ; idxptr2 != NULL; idxptr2 = idxptr2->next_idx)
-	    if ( idxptr2->session == ss )
+	    if (idxptr2->session == ss) {
+		idxptr2->allocated = 0;
 		idxptr2->session = NULL;
+	    }
 }
 
 
@@ -490,8 +504,9 @@ unregister_index(struct variable_list *varbind, int remember, struct snmp_sessio
 	if ( res2 <= 0 )
 	    break;
     }
-    if ( res2 != 0 )
+    if (res2 != 0 || (res2 == 0 && !idxptr2->allocated)) {
 	return INDEX_ERR_NOT_ALLOCATED;
+    }
     if ( ss != idxptr2->session )
 	return INDEX_ERR_WRONG_SESSION;
 
@@ -501,8 +516,9 @@ unregister_index(struct variable_list *varbind, int remember, struct snmp_sessio
 		 *	it in situ.  This allows differentiation
 		 *	between ANY_INDEX and NEW_INDEX
 		 */
-    if ( remember ) {
-	idxptr2->session = NULL;	/* Unused index */
+    if ( remember ) {	
+	idxptr2->allocated = 0;		/* Unused index */
+	idxptr2->session = NULL;
 	return SNMP_ERR_NOERROR;
     }
 		/*
@@ -549,18 +565,20 @@ void dump_idx_registry( void )
         for( idxptr2 = idxptr ; idxptr2 != NULL; idxptr2 = idxptr2->next_idx) {
 	    switch( idxptr2->varbind->type ) {
 		case ASN_INTEGER:
-		    printf("    %ld for session %08p\n",
-			   *idxptr2->varbind->val.integer, idxptr2->session);
+		    printf("    %ld for session %08p, allocated %d\n",
+			   *idxptr2->varbind->val.integer, idxptr2->session,
+			   idxptr2->allocated);
 		    break;
 		case ASN_OCTET_STR:
-		    printf("    \"%s\" for session %08p\n",
-			   idxptr2->varbind->val.string, idxptr2->session);
+		    printf("    \"%s\" for session %08p, allocated %d\n",
+			   idxptr2->varbind->val.string, idxptr2->session,
+			   idxptr2->allocated);
 		    break;
 		case ASN_OBJECT_ID:
 		    sprint_objid(end_oid, idxptr2->varbind->val.objid,
 				idxptr2->varbind->val_len/sizeof(oid));
-		    printf("    %s for session %08p\n",
-			   end_oid, idxptr2->session);
+		    printf("    %s for session %08p, allocated %d\n",
+			   end_oid, idxptr2->session, idxptr2->allocated);
 		    break;
 		default:
 		    printf("unsupported type (%d/0x%02x)\n",
