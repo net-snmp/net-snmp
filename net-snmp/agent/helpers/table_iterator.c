@@ -218,6 +218,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     void           *callback_loop_context = NULL;
     void           *callback_data_context = NULL;
     ti_cache_info *ti_info = NULL;
+    int             request_count = 0;
     
     iinfo = (netsnmp_iterator_info *) handler->myvoid;
     if (!iinfo || !reginfo || !reqinfo)
@@ -279,6 +280,12 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
     if (reqinfo->mode == MODE_GET ||
         reqinfo->mode == MODE_GETNEXT ||
         reqinfo->mode == MODE_SET_RESERVE1) {
+        /*
+         * Count the number of request in the list,
+         *   so that we'll know when we're finished
+         */
+        for(request = requests ; request; request = request->next)
+            request_count++;
         notdone = 1;
         while(notdone) {
             notdone = 0;
@@ -342,6 +349,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                                                       myname, myname_len,
                                                       callback_data_context,
                                                       callback_loop_context, iinfo);
+                            request_count--;   /* One less to look for */
                         } else {
                             if (iinfo->free_data_context && callback_data_context) {
                                 (iinfo->free_data_context)(callback_data_context,
@@ -385,6 +393,9 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                     }
                 }
 
+                /* Is there any point in carrying on? */
+                if (!request_count)
+                    break;
                 /* get the next search possibility */
                 if (iinfo->free_loop_context) {
                     (iinfo->free_loop_context) (callback_loop_context, iinfo);
