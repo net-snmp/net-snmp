@@ -4,6 +4,14 @@
 
 top_builddir	= ..
 
+# use GNU vpath, if available, to only set a path for source and headers
+# VPATH will pick up objects too, which is bad if you are sharing a
+# source dir...
+@GNU_vpath@ %.h $(srcdir)
+@GNU_vpath@ %.c $(srcdir)
+# fallback to regular VPATH for non-gnu...
+@NON_GNU_VPATH@ $(srcdir)
+
 #
 # what to install
 #
@@ -67,9 +75,9 @@ HELPERLIB	= helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 LOCAL_LIBS	= 
 LIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @AGENTLIBS@
 OUR_AGENT_LIBS	= $(INSTALLLIBS) $(HELPERLIB) @WRAPLIBS@ $(LIBS) @DLLIBS@
-CPPFLAGS	= -I../include -I$(top_srcdir)/include \
-		  -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
-		  -I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup @CPPFLAGS@
+CPPFLAGS	= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
+		  $(SNMPLIB_INCLUDES) @CPPFLAGS@ 
+
 
 #
 # Objects
