@@ -14,4 +14,5 @@ rm -f agent/mibgroup/versiontag
 rm -f ISSUES
 rm -f makenosysdepend.pl
 rm -f makefileindepend.pl
-
+rm -f dist/RELEASE-INSTRUCTIONS
+rm -f dist/changelogfix
