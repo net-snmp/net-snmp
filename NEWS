@@ -11,6 +11,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - new snmpd.conf tokens:  includeAllDisks
     - snmptrapd's new -t switch can be used to disable syslog.
       (useful for a no-output snmptrapd with only traphandle support)
+    - snmptable sports 3 new options: fixed width, max-repeaters, left-justify.
+      (see snmptable -h for details)
     - the UCD-DISKIO-MIB will now work on linux.
 
  Fixes:
