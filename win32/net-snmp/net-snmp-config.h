@@ -161,6 +161,9 @@ extern "C" {
 /* Where is the uname command */
 #define UNAMEPROG "/bin/uname"
 
+/* pattern for temporary file names */
+#define NETSNMP_TEMP_FILE_PATTERN "/tmp/snmpdXXXXXX"
+
 /* testing code sections. */
 /* #undef SNMP_TESTING_CODE */
 
@@ -362,6 +365,9 @@ extern "C" {
 
 /* Define if you have the <string.h> header file.  */
 #define HAVE_STRING_H 1
+
+/* Define to 1 if you have the `system' function. */
+#define HAVE_SYSTEM 1
 
 /* Define if you have the <sys/conf.h> header file.  */
 #undef HAVE_SYS_CONF_H
