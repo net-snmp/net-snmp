@@ -106,6 +106,7 @@ SOFTWARE.
 #include "lcd_time.h"
 #include "callback.h"
 #include "snmp_alarm.h"
+#include "snmp_logging.h"
 #include "default_store.h"
 
 static void init_snmp_session (void);
@@ -322,7 +323,7 @@ snmp_perror(const char *prog_string)
     int xerr;
     xerr = snmp_errno; /*MTCRITICAL_RESOURCE*/
     str = snmp_api_errstring(xerr);
-    fprintf(stderr,"%s: %s\n",prog_string, str);
+    snmp_log(LOG_ERR,"%s: %s\n",prog_string, str);
 }
 
 void
@@ -2551,7 +2552,6 @@ snmp_parse(struct snmp_session *pss,
 
     if ( pdu == NULL ) {
 	    action = DUMP_PACKET;
-	    printf("\n");
 	    pdu = (struct snmp_pdu *)calloc(1,sizeof( struct snmp_pdu ));
     }
     rc = _snmp_parse(pss,pdu,data,length,action);
@@ -2788,7 +2788,7 @@ snmp_pdu_dparse(struct snmp_pdu *pdu, u_char  *data, size_t *length, int action)
                             vp->val.bitstring, &vp->val_len, action);
         break;
       default:
-        fprintf(stderr,"bad type returned (%x)\n", vp->type);
+        snmp_log(LOG_ERR,"bad type returned (%x)\n", vp->type);
         badtype = 1;
         break;
     }
@@ -2997,14 +2997,13 @@ _sess_async_send(void *sessp,
 	return 0;
     }
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)){
-	printf("\nSending %u bytes to %s:%hu\n", length,
+	snmp_log(LOG_DEBUG, "\nSending %u bytes to %s:%hu\n", length,
 	       inet_ntoa(pduIp->sin_addr), ntohs(pduIp->sin_port));
 	xdump(packet, length, "");
 	if ( isp->hook_parse )
 	    isp->hook_parse( session, NULL, packet, length );
 	else
 	    snmp_parse( session, NULL, packet, length );
-        printf("\n");
     }
 
     /* send the message */
@@ -3242,14 +3241,13 @@ _sess_read(void *sessp,
     }
 
     if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)){
-	printf("\nReceived %d bytes from %s:%hu\n", length,
+	snmp_log(LOG_DEBUG, "\nReceived %d bytes from %s:%hu\n", length,
 	       inet_ntoa(fromIp->sin_addr), ntohs(fromIp->sin_port));
 	xdump(packet, length, "");
 	if ( isp->hook_parse )
 	    isp->hook_parse( sp, NULL, packet, length );
 	else
 	    snmp_parse( sp, NULL, packet, length );
-        printf("\n");
         if ( isp->hook_pre ) {
           if ( isp->hook_pre( sp, from ) == 0 )
             return -1;
@@ -3550,14 +3548,13 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
   }
   pduIp = (struct sockaddr_in *)&(rp->pdu->address);
   if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)){
-    printf("\nResending %d bytes to %s:%hu\n", length,
+    snmp_log(LOG_DEBUG, "\nResending %d bytes to %s:%hu\n", length,
 	   inet_ntoa(pduIp->sin_addr), ntohs(pduIp->sin_port));
     xdump(packet, length, "");
     if ( isp->hook_parse )
 	isp->hook_parse( sp, NULL, packet, length );
     else
 	snmp_parse( sp, NULL, packet, length );
-    printf("\n");
   }
 
     addr_size = snmp_socket_length(rp->pdu->address.sa_family);

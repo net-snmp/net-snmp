@@ -550,7 +550,7 @@ void config_perror(const char *string)
 
 void config_pwarn(const char *string)
 {
-  fprintf(stderr, "snmpd: %s: line %d: %s\n", curfilename, linecount, string);
+  fprintf(stderr, "%s: line %d: %s\n", curfilename, linecount, string);
 }
 
 /* skip all white spaces and return 1 if found something either end of
