@@ -122,7 +122,7 @@ snmp_parse_args(argc, argv, session)
       case 'v':
         if (!strcmp(argv[++arg],"1")) {
           session->version = SNMP_VERSION_1;
-        } else if (!strcasecmp(argv[arg],"2h")) {
+        } else if (strcasecmp(argv[arg],"2p") && strcasecmp(argv[arg],"2h")) {
           session->version = SNMP_VERSION_2_HISTORIC;
         } else if (!strcmp(argv[arg],"2")) {
           session->version = SNMP_VERSION_2;
