@@ -11,6 +11,14 @@
 extern "C" {
 #endif
 
+#define VACM_SUCCESS       0
+#define VACM_NOSECNAME     1
+#define VACM_NOGROUP       2
+#define VACM_NOACCESS      3
+#define VACM_NOVIEW        4
+#define VACM_NOTINVIEW     5
+#define VACM_NOSUCHCONTEXT 6
+
 #define SECURITYMODEL	1
 #define SECURITYNAME	2
 #define SECURITYGROUP	3
@@ -50,6 +58,8 @@ struct vacm_groupEntry {
     struct vacm_groupEntry *next;
 };
 
+#define CONTEXT_MATCH_EXACT  1
+#define CONTEXT_MATCH_PREFIX 2
 struct vacm_accessEntry {
     char	groupName[VACMSTRINGLEN];
     char	contextPrefix[VACMSTRINGLEN];
