@@ -420,7 +420,7 @@ init_snmp_session (void)
 void
 snmp_sess_init(struct snmp_session *session)
 {
-extern int init_mib_internals();
+extern int init_mib_internals(void);
 
     init_snmp_session();
     init_mib_internals();
