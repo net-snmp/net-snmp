@@ -193,7 +193,17 @@ _snarf_route_entry(netsnmp_route_entry *route_entry,
     
     netsnmp_assert(NULL != route_entry);
     netsnmp_assert(NULL != container);
-    
+
+    /*
+     * per  inetCidrRouteType:
+
+                Routes which do not result in traffic forwarding or 
+                rejection should not be displayed even if the  
+                implementation keeps them stored internally.
+    */
+    if (route_entry->rt_type == 0) /* set when route not up */
+        return;
+
     /*
      * allocate an row context and set the index(es), then add it to
      * the container
@@ -208,6 +218,7 @@ _snarf_route_entry(netsnmp_route_entry *route_entry,
           route_entry->rt_nexthop_type,
           route_entry->rt_nexthop, route_entry->rt_nexthop_len))) {
         CONTAINER_INSERT(container, rowreq_ctx);
+        rowreq_ctx->inetCidrRouteStatus = ROWSTATUS_ACTIVE;
     }
     else {
         if(rowreq_ctx) {
