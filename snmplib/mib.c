@@ -2260,7 +2260,7 @@ snmp_out_toggle_options(char *options)
         case 'S':
 	    snmp_set_suffix_only(2);
 	    break;
-	     case 'T':
+	case 'T':
 	     ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT);
 	     break;
         default:
