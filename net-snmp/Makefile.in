@@ -93,8 +93,11 @@ perlmodules:
 	done
 
 clean:
-	for i in $(PERLMODULES) $(SUBDIRS) $(TESTDIRS); do \
+	for i in $(SUBDIRS) $(TESTDIRS); do \
         ( cd $$i ; $(MAKE) clean ) ; \
+	done
+	for i in $(PERLMODULES); do \
+        ( cd perl/$$i ; $(MAKE) clean ) ; \
 	done
 	rm -f EXAMPLE.conf sedscript ucd-snmp.txt
 
