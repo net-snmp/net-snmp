@@ -677,6 +677,12 @@ struct subtree subtrees[] = {
     {{MIB, 7}, 7, (struct variable *)udp_variables,
 	 sizeof(udp_variables)/sizeof(*udp_variables),
 	 sizeof(*udp_variables)},
+  {{1,3,6,1,4,1,11,2,13,1,2,1},12,(struct variable *)wes_hptrap_variables,
+   sizeof(wes_hptrap_variables)/sizeof(*wes_hptrap_variables),
+   sizeof(*wes_hptrap_variables)},
+  {{1,3,6,1,4,1,11,2,13,2},10,(struct variable *)wes_hp_variables,
+   sizeof(wes_hp_variables)/sizeof(*wes_hp_variables),
+   sizeof(*wes_hp_variables)},
 #ifdef testing
     {{HOSTTIMETAB}, 10, (struct variable *)hosttimetab_variables,
 	 sizeof(hosttimetab_variables) / sizeof(*hosttimetab_variables),
