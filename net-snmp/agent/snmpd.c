@@ -348,11 +348,15 @@ char *reverse_bytes(buf,num)
   return(outbuf);
 }
 
+char **argvrestartp;
+char *argvrestart;
+char *argvrestartname;
+
 main(argc, argv)
     int	    argc;
     char    *argv[];
 {
-    int	arg;
+    int	arg,i;
     int sd, sdlist[32], portlist[32], sdlen = 0, index;
     struct sockaddr_in	me;
     int port_flag = 0, ret;
@@ -362,6 +366,7 @@ main(argc, argv)
     int on=1;
     int dont_fork=0;
     char logfile[300];
+    char *cptr, **argvptr;
 
     logfile[0] = NULL;
 #ifdef LOGFILE
@@ -403,6 +408,24 @@ main(argc, argv)
 	    continue;
 	}
     }
+    /* initialize a argv set to the current for restarting the agent */
+    argvrestartp = (char **) malloc((argc+2) * sizeof (char *));
+    argvptr = argvrestartp;
+    for(i=0, ret = 1; i < argc; i++) {
+      ret += strlen(argv[i])+1;
+    }
+    argvrestart = (char *) malloc((ret));
+    argvrestartname = (char *) malloc(strlen(argv[0]));
+    strcpy(argvrestartname,argv[0]);
+    for(cptr = argvrestart,i = 0; i < argc; i++) {
+      strcpy(cptr,argv[i]);
+      *(argvptr++) = cptr;
+      cptr += strlen(argv[i]) + 1;
+    }
+    *cptr = NULL;
+    *argvptr = NULL;
+
+    /* open the logfile if necessary */
     if (logfile[0]) {
       close(1);
       open(LOGFILE,O_WRONLY|O_TRUNC|O_CREAT,0644);

@@ -331,6 +331,8 @@ update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   return SNMP_ERR_NOERROR;
 }
 
+extern char **argvrestartp, *argvrestartname;
+
 restart_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      action;
    u_char   *var_val;
@@ -349,7 +351,7 @@ restart_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   }
   asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
   if (tmp == 1 && action == COMMIT) {
-    execl("/etc/ece-snmpd","/etc/ece-snmpd",NULL);
+    execv(argvrestartname,argvrestartp);
     setPerrorstatus("execv");
   } 
   return SNMP_ERR_NOERROR;
