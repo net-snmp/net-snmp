@@ -57,9 +57,10 @@ installlocalheaders:
 			header_dstdir=$(INSTALL_PREFIX)$(includedir) ; \
 			header_name=$$i ; \
 			header_dst=$$header_dstdir/$$header_name ; \
-			if test ! -e $$header_dst -o $$header_src -nt $$header_dst ; then \
-				$(INSTALL_DATA) $$header_src $$header_dstdir ; \
+			( cmp $$header_src $$header_dst >/dev/null 2>&1 ) ; \
+			if test $$? != 0 ; then \
 				echo "installing $$i in $$header_dstdir" ; \
+				$(INSTALL_DATA) $$header_src $$header_dstdir ; \
 			fi; \
 	        done \
 	fi
@@ -72,7 +73,8 @@ installlocalheaders:
 			header_dstdir=$(INSTALL_PREFIX)$(includedir) ; \
 			header_name=`basename $$i` ; \
 			header_dst=$$header_dstdir/$$header_name ; \
-			if test ! -e $$header_dst -o $$header_src -nt $$header_dst ; then \
+			( cmp $$header_src $$header_dst >/dev/null 2>&1 ) ; \
+			if test $$? != 0 ; then \
 				$(INSTALL_DATA) $$header_src $$header_dstdir ; \
 				echo "installing $$i in $$header_dstdir" ; \
 			fi; \
@@ -87,7 +89,8 @@ installlocalheaders:
 			header_dstdir=$(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR) ; \
 			header_name=$$i ; \
 			header_dst=$$header_dstdir/$$header_name ; \
-			if test ! -e $$header_dst -o $$header_src -nt $$header_dst ; then \
+			( cmp $$header_src $$header_dst >/dev/null 2>&1 ) ; \
+			if test $$? != 0 ; then \
 				$(INSTALL_DATA) $$header_src $$header_dstdir ; \
 				echo "installing $$i in $$header_dstdir" ; \
 			fi; \
@@ -102,7 +105,8 @@ installlocalheaders:
 			header_dstdir=$(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2) ; \
 			header_name=$$i ; \
 			header_dst=$$header_dstdir/$$header_name ; \
-			if test ! -e $$header_dst -o $$header_src -nt $$header_dst ; then \
+			( cmp $$header_src $$header_dst >/dev/null 2>&1 ) ; \
+			if test $$? != 0 ; then \
 				$(INSTALL_DATA) $$header_src $$header_dstdir ; \
 				echo "installing $$i in $$header_dstdir" ; \
 			fi; \
@@ -117,7 +121,8 @@ installlocalheaders:
 			header_dstdir=$(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR) ; \
 			header_name=`basename $$i` ; \
 			header_dst=$$header_dstdir/$$header_name ; \
-			if test ! -e $$header_dst -o $$header_src -nt $$header_dst ; then \
+			( cmp $$header_src $$header_dst >/dev/null 2>&1 ) ; \
+			if test $$? != 0 ; then \
 				$(INSTALL_DATA) $$header_src $$header_dstdir ; \
 				echo "installing $$i in $$header_dstdir" ; \
 			fi; \
@@ -134,7 +139,8 @@ installucdheaders:
 			header_dstdir=$(INSTALL_PREFIX)$(ucdincludedir) ; \
 			header_name=$$i ; \
 			header_dst=$$header_dstdir/$$header_name ; \
-			if test ! -e $$header_dst -o $$header_src -nt $$header_dst ; then \
+			( cmp $$header_src $$header_dst >/dev/null 2>&1 ) ; \
+			if test $$? != 0 ; then \
 				$(INSTALL_DATA) $$header_src $$header_dstdir ; \
 				echo "installing $$i in $$header_dstdir" ; \
 			fi; \
