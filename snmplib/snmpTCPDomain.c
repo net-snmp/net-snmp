@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 #include <sys/types.h>
-#include <fcntl.h>
 #include <errno.h>
 
 #if HAVE_STRING_H
@@ -24,6 +23,9 @@
 #endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
+#if HAVE_FCNTL_H
+#include <fcntl.h>
 #endif
 
 #include "asn1.h"
