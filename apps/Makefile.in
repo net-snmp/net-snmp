@@ -12,7 +12,7 @@ TARG		= snmpget snmpgetnext snmpset snmpusm			\
 SBINTARG	= snmptrapd
 SUBDIRS		= snmpnetstat
 
-USELIBS		= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
+USELIBS		= ../snmplib/libsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 LOCAL_LIBS	= -L../snmplib 
 LIBS		= $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 
