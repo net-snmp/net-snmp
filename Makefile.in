@@ -22,7 +22,7 @@ TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bi
 SUBDIRS = snmplib agent apps local ov man
 INSTALLDIRS = $(SUBDIRS)
 
-all:	mib.txt sedscript EXAMPLE.conf subdirs
+all:	mib.txt ucd-snmp.txt sedscript EXAMPLE.conf subdirs
 
 sedscript: sedscript.in config.h agent/extensible/mibdefs.h
 	$(CPP) -DPREFIX=$(prefix) sedscript.in | sed 's/REMOVEME//g;s# /#/#g;s/ #/#/g;' > sedscript
@@ -39,7 +39,7 @@ install:    subdirs installdirs
         ( cd $$i ; $(MAKE) install ) \
 	done
 	@$(INSTALL) mib.txt $(snmplibdir) ; echo "install:  installed mib.txt in $(snmplibdir)"
-	@$(INSTALL) ece-mib.txt $(mibdir) ; echo "install:  installed ece-mib.txt in $(mibdir)"
+	@$(INSTALL) ucd-snmp.txt $(mibdir) ; echo "install:  installed ucd-snmp.txt in $(mibdir)"
 
 installdirs:
 	@$(SHELL) $(srcdir)/mkinstalldirs $(snmplibdir) $(mibdir)
@@ -56,7 +56,7 @@ clean:
 	for i in $(SUBDIRS) ; do \
         ( cd $$i ; $(MAKE) clean ) \
 	done
-	rm -f mib.txt EXAMPLE.conf sedscript ece-mib.txt
+	rm -f mib.txt EXAMPLE.conf sedscript ucd-snmp.txt
 
 distclean: clean configclean
 
@@ -84,13 +84,13 @@ Makefile: Makefile.in config.status
 	$(SHELL) ./config.status
 
 config.status: configure
-	$(srcdir)/config.status
+	$(srcdir)/config.status --recheck
 
 mib.txt: mibII.txt
 	cat mibII.txt > mib.txt
 
-ece-mib.txt: ece-mib.def sedscript
-	cat ece-mib.def | $(SED) -f sedscript > ece-mib.txt
+ucd-snmp.txt: ece-mib.def sedscript
+	cat ece-mib.def | $(SED) -f sedscript > ucd-snmp.txt
 
 EXAMPLE.conf: sedscript EXAMPLE.conf.def
 	$(SED) -f sedscript EXAMPLE.conf.def > EXAMPLE.conf
