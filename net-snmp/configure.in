@@ -191,9 +191,9 @@ AC_ARG_WITH(out_mib_modules,
 
   Optional modules for C coders to look at and/or include as extension examples:
   
+    examples/ucdDemoPublic: SNMPv3 interoperability testing mib.
     examples/example:       example C code extension.
     examples/wombat:        template file similar to example.])
-    examples/ucdDemoPublic: SNMPv3 interoperability testing mib.
 
 dnl
 dnl otherwise prompted information
