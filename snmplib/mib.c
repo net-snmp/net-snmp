@@ -1101,7 +1101,7 @@ init_mib (void)
     homepath=getenv("HOME");
 
     if (homepath) {
-      while(cp_home = strstr(env_var, "$HOME")) {
+      while((cp_home = strstr(env_var, "$HOME"))) {
         new_mibdirs = (char *) malloc(strlen(env_var) - strlen("$HOME") +
                                       strlen(homepath)+1);
         *cp_home = 0; /* null out the spot where we stop copying */
