@@ -335,8 +335,8 @@ long getMisc(int what)
 
       /* swapin and swapout are in pages, MIB wants kB/s, we sleep(1) so we just need to get kB */
       /* getpagesize() returns pagesize in bytes */
-      swapin_avg = ((swapin_avg * getpagesize()) / 1024);
-      swapout_avg = ((swapout_avg * getpagesize()) / 1024);
+      swapin_avg = swapin_avg * (getpagesize() / 1024);
+      swapout_avg = swapout_avg * (getpagesize() / 1024);
 
       /* Then divide by number of CPUs, discarding fractions */
       swapin_avg /= num_cpu;
