@@ -197,17 +197,35 @@
 /* Define if you have the <sys/time.h> header file.  */
 #undef HAVE_SYS_TIME_H
 
+/* Define if you have the <sys/vm.h> header file.  */
+#undef HAVE_SYS_VM_H
+
+/* Define if you have the <sys/vmmac.h> header file.  */
+#undef HAVE_SYS_VMMAC_H
+
 /* Define if you have the <sys/vmmeter.h> header file.  */
 #undef HAVE_SYS_VMMETER_H
 
+/* Define if you have the <sys/vmparam.h> header file.  */
+#undef HAVE_SYS_VMPARAM_H
+
+/* Define if you have the <sys/vmsystm.h> header file.  */
+#undef HAVE_SYS_VMSYSTM_H
+
 /* Define if you have the <syslog.h> header file.  */
 #undef HAVE_SYSLOG_H
+
+/* Define if you have the <ufs/ffs/fs.h> header file.  */
+#undef HAVE_UFS_FFS_FS_H
 
 /* Define if you have the <ufs/fs.h> header file.  */
 #undef HAVE_UFS_FS_H
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
+
+/* Define if you have the <vm/vm.h> header file.  */
+#undef HAVE_VM_VM_H
 
 /* Define if you have the <xti.h> header file.  */
 #undef HAVE_XTI_H
