@@ -10,6 +10,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
         algorithms may be completely disable at compile time.
         (configure using one or both of --disable-des --disable-md5)
         (This requires you have OpenSSL to support SHA1 and AES instead)
+      - Diffie-Helman key negotianion (perfect-forward-secrecy)
+        (RFC2786) has been implemented in both the agent and in snmpusm.
 
     snmptrapd:
       - Embedded perl support for trap handlers (much faster).
