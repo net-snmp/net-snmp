@@ -3218,10 +3218,10 @@ _sess_read(void *sessp,
 	snmp_log(LOG_DEBUG, "\nReceived %d bytes from %s:%hu\n", length,
 	       inet_ntoa(fromIp->sin_addr), ntohs(fromIp->sin_port));
 	xdump(packet, length, "");
-        if ( isp->hook_pre ) {
-          if ( isp->hook_pre( sp, from ) == 0 )
-            return -1;
-        }
+    }
+    if ( isp->hook_pre ) {
+      if ( isp->hook_pre( sp, from ) == 0 )
+	return -1;
     }
 
     pdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
