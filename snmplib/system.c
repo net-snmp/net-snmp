@@ -119,7 +119,7 @@ long get_uptime(){
     struct timeval boottime, now, diff;
 #ifndef CAN_USE_SYSCTL
     int kmem;
-    staticstruct nlist nl[] = {
+    static struct nlist nl[] = {
 	    { "_boottime" },
 	    { "" }
 	};
