@@ -125,8 +125,8 @@ intpr(interval)
 		"Opkts", "Oerrs", "Queue");
 	putchar('\n');
 
-	memset (&curifip, 0, sizeof (curifip));
-	if_table = calloc (cfg_nnets, sizeof (*if_table));
+	memset (curifip, 0, sizeof (curifip));
+	if_table = (struct _if_info *) calloc (cfg_nnets, sizeof (*if_table));
 	cur_if = if_table;
 
 	for (ifnum = 1; ifnum <= cfg_nnets; ifnum++) {
