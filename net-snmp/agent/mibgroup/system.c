@@ -321,8 +321,6 @@ writeSystem(action, var_val, var_val_type, var_val_len, statP, name, name_len)
     return SNMP_ERR_NOERROR;
 } /* end of writeSystem */
 
-
-
 	/*********************
 	 *
 	 *  Internal implementation functions - None
