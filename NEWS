@@ -27,6 +27,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - the agent looks for .conf files in both the lib/ and share/ directories.
     - more improvements/options to snmptable.
     - new vmstat module to report vmstat related information under linux.
+    - a perl based mib2c translator to convert mib sections to C code templates.
 
  Fixes:
     - The code was run through purify for memory leaks and a few were found.
