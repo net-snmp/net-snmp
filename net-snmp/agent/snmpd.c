@@ -421,7 +421,7 @@ SnmpDaemonMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    char            options[128] = "aAc:CdD::fhHI:l:LP:qrsS:UvV-:";
+    char            options[128] = "aAc:CdD::fhHI:l:L:P:qrsS:UvV-:";
     int             arg, i, ret;
     int             dont_fork = 0;
     int             dont_zero_log = 0;
@@ -571,7 +571,12 @@ main(int argc, char *argv[])
             break;
 
         case 'L':
+	    /*
             stderr_log = 1;
+	     */
+	    if  (snmp_log_options( optarg, argc, argv ) < 0 ) {
+                usage(argv[0]);
+            }
             break;
 
         case 'P':
