@@ -18,6 +18,11 @@
 netsnmp_cache       *cache_head = NULL;
 long                 caching_enabled       = 1;
 long                 cache_default_timeout = 5;		/* in seconds */
+int                  cache_outstanding_valid = 0;
+
+#define CACHE_RELEASE_FREQUENCY	60	/* Check for expired caches every 60s */
+
+void release_cached_resources( unsigned int regNo, void *clientargs );
 
 /** @defgroup cache_handler cache_handler: Maintains a cache of data for use by lower level handlers.
  *  @ingroup utilities
@@ -140,6 +145,16 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
                 goto done;	/* XXX - or return ? */
             }
             cache->valid = 1;
+
+            /*
+             * If we didn't previously have any valid caches outstanding,
+             *   then schedule a pass of the auto-release routine.
+             */
+            if (!cache_outstanding_valid) {
+                snmp_alarm_register(CACHE_RELEASE_FREQUENCY,
+                                    0, release_cached_resources, NULL);
+                cache_outstanding_valid = 1;
+            }
             if (cache->timestamp)
        	        atime_setMarker(cache->timestamp);
 	    else
@@ -183,3 +198,43 @@ done:
                                    requests);
 }
 
+
+
+/** run regularly to automatically release cached resources.
+ */
+void
+release_cached_resources( unsigned int regNo, void *clientargs ) {
+    netsnmp_cache *cache = NULL;
+    long cache_timeout;
+
+    cache_outstanding_valid = 0;
+    DEBUGMSGTL(("helper:cache_handler", "running auto-release\n"));
+    for (cache=cache_head; cache; cache=cache->next) {
+        if (cache->valid) {
+            /*
+             * Check to see if this cache has timed out.
+             * If so, release the cached resources.
+             * Otherwise, note that we still have at
+             *   least one active cache.
+             */
+            cache_timeout = cache->timeout;
+            if (cache_timeout == 0)
+                cache_timeout = cache_default_timeout;
+            if (!cache->timestamp ||
+                 atime_ready(cache->timestamp, 1000*cache_timeout)) {
+                cache->free_cache(cache, cache->magic);
+                cache->valid = 0;
+            } else {
+                cache_outstanding_valid = 1;
+            }
+        }
+    }
+    /*
+     * If there are any caches still valid & active,
+     *   then schedule another pass.
+     */
+    if (cache_outstanding_valid) {
+        snmp_alarm_register(CACHE_RELEASE_FREQUENCY,
+                            0, release_cached_resources, NULL);
+    }
+}
