@@ -181,12 +181,11 @@ extern int      snmpv3_options(char *optarg, netsnmp_session * session,
                                char **Apsz, char **Xpsz, int argc,
                                char *const *argv);
 int
-snmp_parse_args(int argc,
-                char *const *argv,
-                netsnmp_session * session, const char *localOpts,
-                void (*proc) (int, char *const *, int))
+snmp_parse_args(int argc, char **argv, netsnmp_session *session, 
+		const char *localOpts, void (*proc)(int, char *const *, int))
 {
-    int             arg;
+    static char	   *sensitive[4] = { NULL, NULL, NULL, NULL };
+    int             arg, sp = 0, zero_sensitive = 1;
     char           *cp;
     char           *Apsz = NULL;
     char           *Xpsz = NULL;
@@ -201,6 +200,14 @@ snmp_parse_args(int argc,
     if (localOpts)
         strcat(Opts, localOpts);
 
+    if (strcmp(argv[0], "snmpd-trapsess") == 0 ||
+	strcmp(argv[0], "snmpd-proxy")    == 0) {
+	/*  Don't worry about zeroing sensitive parameters as they are not
+	    on the command line anyway (called from internal config-line
+	    handler).  */
+	zero_sensitive = 0;
+    }
+
     /*
      * get the options 
      */
@@ -211,16 +218,14 @@ snmp_parse_args(int argc,
 
     optind = 1;
     while ((arg = getopt(argc, argv, Opts)) != EOF) {
-        DEBUGMSGTL(("snmp_parse_args", "handling (#%d): %c\n", optind,
-                    arg));
+        DEBUGMSGTL(("snmp_parse_args", "handling (#%d): %c\n", optind, arg));
         switch (arg) {
         case '-':
             if (strcasecmp(optarg, "help") == 0) {
                 return (-1);
             }
             if (strcasecmp(optarg, "version") == 0) {
-                fprintf(stderr, "NET-SNMP version: %s\n",
-                        netsnmp_get_version());
+                fprintf(stderr,"NET-SNMP version: %s\n",netsnmp_get_version());
                 return (-2);
             }
 
@@ -228,8 +233,7 @@ snmp_parse_args(int argc,
             break;
 
         case 'V':
-            fprintf(stderr, "NET-SNMP version: %s\n",
-                    netsnmp_get_version());
+            fprintf(stderr, "NET-SNMP version: %s\n", netsnmp_get_version());
             return (-2);
 
         case 'h':
@@ -259,8 +263,8 @@ snmp_parse_args(int argc,
         case 'O':
             cp = snmp_out_toggle_options(optarg);
             if (cp != NULL) {
-                fprintf(stderr,
-                        "Unknown output option passed to -O: %c.\n", *cp);
+                fprintf(stderr, "Unknown output option passed to -O: %c.\n", 
+			*cp);
                 return (-1);
             }
             break;
@@ -269,7 +273,7 @@ snmp_parse_args(int argc,
             cp = snmp_in_toggle_options(optarg);
             if (cp != NULL) {
                 fprintf(stderr, "Unknown input option passed to -I: %c.\n",
-                        *cp);
+			*cp);
                 return (-1);
             }
             break;
@@ -337,8 +341,7 @@ snmp_parse_args(int argc,
         case 't':
             session->timeout = atoi(optarg) * 1000000L;
             if (session->timeout < 0 || !isdigit(optarg[0])) {
-                fprintf(stderr,
-                        "Invalid timeout in seconds after -t flag.\n");
+                fprintf(stderr, "Invalid timeout in seconds after -t flag.\n");
                 return (-1);
             }
             break;
@@ -346,26 +349,35 @@ snmp_parse_args(int argc,
         case 'r':
             session->retries = atoi(optarg);
             if (session->retries < 0 || !isdigit(optarg[0])) {
-                fprintf(stderr,
-                        "Invalid number of retries after -r flag.\n");
+                fprintf(stderr, "Invalid number of retries after -r flag.\n");
                 return (-1);
             }
             break;
 
         case 'c':
-            Cpsz = optarg;
+	    if (zero_sensitive) {
+		if ((sensitive[sp] = strdup(optarg)) != NULL) {
+		    Cpsz = sensitive[sp];
+		    memset(optarg, '\0', strlen(optarg));
+		    sp++;
+		} else {
+		    fprintf(stderr, "malloc failure processing -c flag.\n");
+		    return -1;
+		}
+	    } else {
+		Cpsz = optarg;
+	    }
             break;
 
         case '3':
-            if (snmpv3_options(optarg, session, &Apsz, &Xpsz, argc, argv) <
-                0) {
+	    /*  TODO: This needs to zero things too.  */
+            if (snmpv3_options(optarg, session, &Apsz, &Xpsz, argc, argv) < 0){
                 return (-1);
             }
             break;
 
         case 'L':
-            if (snmp_log_options(optarg, argc, argv) <
-                0) {
+            if (snmp_log_options(optarg, argc, argv) < 0) {
                 return (-1);
             }
             break;
@@ -375,8 +387,7 @@ snmp_parse_args(int argc,
         case 'Z':
             session->engineBoots = strtoul(optarg, NULL, 10);
             if (session->engineBoots == 0 || !isdigit(optarg[0])) {
-                fprintf(stderr,
-                        "Need engine boots value after -Z flag.\n");
+                fprintf(stderr, "Need engine boots value after -Z flag.\n");
                 return (-1);
             }
             cp = strchr(optarg, ',');
@@ -394,18 +405,16 @@ snmp_parse_args(int argc,
             break;
 
         case 'e':{
-                size_t          ebuf_len = 32, eout_len = 0;
-                u_char         *ebuf = (u_char *) malloc(ebuf_len);
+                size_t ebuf_len = 32, eout_len = 0;
+                u_char *ebuf = (u_char *)malloc(ebuf_len);
 
                 if (ebuf == NULL) {
-                    fprintf(stderr,
-                            "malloc failure processing -e flag.\n");
+                    fprintf(stderr, "malloc failure processing -e flag.\n");
                     return (-1);
                 }
                 if (!snmp_hex_to_binary
                     (&ebuf, &ebuf_len, &eout_len, 1, optarg)) {
-                    fprintf(stderr,
-                            "Bad engine ID value after -e flag.\n");
+                    fprintf(stderr, "Bad engine ID value after -e flag.\n");
                     free(ebuf);
                     return (-1);
                 }
@@ -415,18 +424,16 @@ snmp_parse_args(int argc,
             }
 
         case 'E':{
-                size_t          ebuf_len = 32, eout_len = 0;
-                u_char         *ebuf = (u_char *) malloc(ebuf_len);
+                size_t ebuf_len = 32, eout_len = 0;
+                u_char *ebuf = (u_char *)malloc(ebuf_len);
 
                 if (ebuf == NULL) {
-                    fprintf(stderr,
-                            "malloc failure processing -E flag.\n");
+                    fprintf(stderr, "malloc failure processing -E flag.\n");
                     return (-1);
                 }
-                if (!snmp_hex_to_binary
-                    (&ebuf, &ebuf_len, &eout_len, 1, optarg)) {
-                    fprintf(stderr,
-                            "Bad engine ID value after -E flag.\n");
+                if (!snmp_hex_to_binary(&ebuf, &ebuf_len,
+					&eout_len, 1, optarg)) {
+                    fprintf(stderr, "Bad engine ID value after -E flag.\n");
                     free(ebuf);
                     return (-1);
                 }
@@ -441,8 +448,20 @@ snmp_parse_args(int argc,
             break;
 
         case 'u':
-            session->securityName = optarg;
-            session->securityNameLen = strlen(optarg);
+	    if (zero_sensitive) {
+		if ((sensitive[sp] = strdup(optarg)) != NULL) {
+		    session->securityName = sensitive[sp];
+		    session->securityNameLen = strlen(sensitive[sp]);
+		    memset(optarg, '\0', strlen(optarg));
+		    sp++;
+		} else {
+		    fprintf(stderr, "malloc failure processing -u flag.\n");
+		    return -1;
+		}
+	    } else {
+		session->securityName = optarg;
+		session->securityNameLen = strlen(optarg);
+	    }
             break;
 
         case 'l':
@@ -498,18 +517,40 @@ snmp_parse_args(int argc,
 #endif
             } else {
                 fprintf(stderr,
-                        "Invalid privacy protocol specified after -x flag: %s\n",
+                      "Invalid privacy protocol specified after -x flag: %s\n",
                         optarg);
                 return (-1);
             }
             break;
 
         case 'A':
-            Apsz = optarg;
+	    if (zero_sensitive) {
+		if ((sensitive[sp] = strdup(optarg)) != NULL) {
+		    Apsz = sensitive[sp];
+		    memset(optarg, '\0', strlen(optarg));
+		    sp++;
+		} else {
+		    fprintf(stderr, "malloc failure processing -A flag.\n");
+		    return -1;
+		}
+	    } else {
+		Apsz = optarg;
+	    }
             break;
 
         case 'X':
-            Xpsz = optarg;
+	    if (zero_sensitive) {
+		if ((sensitive[sp] = strdup(optarg)) != NULL) {
+		    Xpsz = sensitive[sp];
+		    memset(optarg, '\0', strlen(optarg));
+		    sp++;
+		} else {
+		    fprintf(stderr, "malloc failure processing -X flag.\n");
+		    return -1;
+		}
+	    } else {
+		Xpsz = optarg;
+	    }
             break;
 #endif                          /* SNMPV3_CMD_OPTIONS */
 
@@ -642,17 +683,18 @@ snmp_parse_args(int argc,
      */
 
     if (session->version == SNMP_VERSION_1 ||
-        session->version == SNMP_VERSION_2c) {
+	session->version == SNMP_VERSION_2c) {
         if (Cpsz == NULL) {
             Cpsz = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 					 NETSNMP_DS_LIB_COMMUNITY);
-        }
-        if (Cpsz == NULL) {
-            fprintf(stderr, "No community name specified.\n");
-            return (-1);
-        }
-        session->community = (unsigned char *) Cpsz;
+	    if (Cpsz == NULL) {
+		fprintf(stderr, "No community name specified.\n");
+		return (-1);
+	    }
+	}
+        session->community = (unsigned char *)Cpsz;
         session->community_len = strlen(Cpsz);
     }
+
     return optind;
 }
