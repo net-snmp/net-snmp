@@ -9,7 +9,7 @@ HEADER SNMPv3 get using initial/MD5DES of system.sysUpTime.0
 #
 
 # standard V3 configuration for initial user
-. ./Sv3config
+. ./Sv3DESconfig
 
 STARTAGENT
 
