@@ -147,6 +147,8 @@ init_snmp __P((void))
   init_kmem("/dev/kmem"); 
 #endif
 
+  init_read_config();
+  
 #include "mibgroup/mib_module_inits.h"
 }
 
