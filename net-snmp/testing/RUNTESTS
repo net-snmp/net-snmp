@@ -36,7 +36,7 @@ Usage: `basename $0` [-a] [-S SLEEPTIME] [-h] [-i] [-v] [-V] [-s] [-XM]
             response from the agent.
   -A FLAGS  Extra flags to pass to the agent.
   -s        Don't erase the runtime data directory for successful tests
-  -XM        Don't prefer MIB files near here
+  -XM       Don't set MIBDIRS environment unless absolutely necessary
   -x        Turn on SH output debugging for tests.
   -P TRANS  Specify on which transport domain to run the tests.Default is udp.
 
