@@ -34,6 +34,25 @@ static int   debug_num_tokens=0;
 static char *debug_tokens[MAX_DEBUG_TOKENS];
 static int   debug_print_everything=0;
 
+/* indent debugging:  provide a space padded section to return an indent for */
+static int debugindent=0;
+#define INDENTMAX 80
+static char debugindentchars[] = "                                                                                ";
+
+char *
+debug_indent(void) {
+  return debugindentchars;
+}
+
+void
+debug_indent_add(int amount) {
+  if (debugindent+amount >= 0 && debugindent+amount < 80) {
+    debugindentchars[debugindent] = ' ';
+    debugindent += amount;
+    debugindentchars[debugindent] = NULL;
+  }
+}
+
 void
 #ifdef STDC_HEADERS
 DEBUGP(const char *first, ...)
@@ -77,6 +96,7 @@ void debug_config_turn_on_debugging(char *configtoken, char *line) {
 
 void
 snmp_debug_init(void) {
+  debugindentchars[0] = NULL; // zero out the debugging indent array.
   register_premib_handler("snmp","doDebugging",
                           debug_config_turn_on_debugging, NULL,
                           "(1|0)");
@@ -168,6 +188,14 @@ debugmsg_oid(const char *token, oid *theoid, size_t len) {
   
   sprint_objid(c_oid, theoid, len);
   debugmsg(token, c_oid);
+}
+
+void
+debugmsg_hex(const char *token, u_char *thedata, size_t len) {
+  char buf[SPRINT_MAX_LEN];
+  
+  sprint_hexstring(buf, thedata, len);
+  debugmsg(token, buf);
 }
 
 void

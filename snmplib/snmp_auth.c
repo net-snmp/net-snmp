@@ -84,6 +84,7 @@ SOFTWARE.
 #include "md5.h"
 #include "system.h"
 #include "tools.h"
+#include "snmp_debug.h"
 #include "scapi.h"
 
 /*
@@ -140,7 +141,9 @@ snmp_comstr_dparse(u_char *data,
 
     /* First field is the version.
      */
+    DEBUGDUMPHEADER("dump_recv", "Parsing SNMP version\n");
     data = asn_dparse_int(data, length, &type, &ver, sizeof(ver), action);
+    DEBUGINDENTLESS();
     *version = ver;
     if (data == NULL){
         ERROR_MSG("bad parse of version");
@@ -148,7 +151,9 @@ snmp_comstr_dparse(u_char *data,
     }
 
     /* second field is the community string for SNMPv1 & SNMPv2c */
+    DEBUGDUMPHEADER("dump_recv", "Parsing community string\n");
     data = asn_dparse_string(data, length, &type, psid, slen, action);
+    DEBUGINDENTLESS();
     if (data == NULL){
         ERROR_MSG("bad parse of community");
         return NULL;
