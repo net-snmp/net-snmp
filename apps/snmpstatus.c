@@ -105,6 +105,7 @@ void usage(void)
   snmp_parse_args_descriptions(stderr);
 }
 
+#ifndef CMU_COMPATIBLE
 char *uptime_string(u_long timeticks,
 		    char *buf)
 {
@@ -129,6 +130,7 @@ char *uptime_string(u_long timeticks,
     }
     return buf;
 }
+#endif /* !CMU_COMPATIBLE */
 
 int main(int argc, char *argv[])
 {

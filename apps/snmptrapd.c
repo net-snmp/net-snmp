@@ -178,6 +178,7 @@ trap_description(int trap)
     }
 }
 
+#ifndef CMU_COMPATIBLE
 char *
 uptime_string(u_long timeticks, char *buf)
 {
@@ -202,6 +203,7 @@ uptime_string(u_long timeticks, char *buf)
     }
     return buf;
 }
+#endif /* !CMU_COMPATIBLE */
 
 struct snmp_pdu *
 snmp_clone_pdu2(struct snmp_pdu *pdu,
