@@ -223,10 +223,11 @@ unregister_config_handler(const char *type_param,
   }
   if (strcmp((*ltmp)->config_token,token) == 0) {
     /* found it at the top of the list */
-    (*ctmp)->start = (*ltmp)->next;
+    ltmp2 = (*ltmp)->next;
     free((*ltmp)->config_token);
     SNMP_FREE((*ltmp)->help);
     free(*ltmp);
+    (*ctmp)->start = ltmp2;
     return;
   }
   while ((*ltmp)->next != NULL && strcmp((*ltmp)->next->config_token,token)) {
