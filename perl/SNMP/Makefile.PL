@@ -29,14 +29,21 @@ sub InitMakeParams {
 	$sep = '\\';
 	# XXX fix me
     } else {
-	$Params{'LIBS'}    = `net-snmp-config --libs`;
-	$Params{'CCFLAGS'} = `net-snmp-config --cflags`;
+	$nsconfig="net-snmp-config"; # in path by default
+	GetOptions("NET-SNMP-CONFIG=s" => \$nsconfig,
+		   "NET-SNMP-IN-SOURCE=s" => \$insource);
+	$Params{'LIBS'}    = `$nsconfig --libs`;
+	$Params{'CCFLAGS'} = `$nsconfig --cflags`;
+	if ($insource eq "true") {
+	    $Params{'LIBS'} = "-L../../snmplib/.libs -L../../snmplib/ " . $Params{'LIBS'};
+	    $Params{'CCFLAGS'} = "-I../../include " . $Params{'CCFLAGS'};
+	}
 	$Params{'CCFLAGS'} =~ s/ -W[-\w]+//g; # ignore developer warnings
-	$prefix            = `net-snmp-config --prefix`;
+	$prefix            = `$nsconfig --prefix`;
 	chomp($prefix);
 	$sep = '/';
 	if ($Params{'LIBS'} eq "" || $Params{'CCFLAGS'} eq "") {
-	    die "You need to install net-snmp first";
+	    die "You need to install net-snmp first (I can't find net-snmp-config)";
 	}
     }
 
