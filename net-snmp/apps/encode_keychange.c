@@ -213,9 +213,9 @@ main(int argc, char **argv)
 #ifndef DISABLE_MD5
                 (transform_type == usmHMACMD5AuthProtocol)
                 ? "usmHMACMD5AuthProtocol" :
-#else
-                "usmHMACSHA1AuthProtocol");
 #endif
+                "usmHMACSHA1AuthProtocol"
+            );
     }
 
 
