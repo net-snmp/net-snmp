@@ -470,7 +470,7 @@ sprint_realloc_octet_string(u_char ** buf, size_t * buf_len,
 
             while (repeat && cp < ecp) {
                 value = 0;
-                if (code != 'a') {
+                if (code != 'a' && code != 't') {
                     for (x = 0; x < width; x++) {
                         value = value * 256 + *cp++;
                     }
