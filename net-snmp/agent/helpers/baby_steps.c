@@ -135,8 +135,10 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
     }
 
     /*
-     * NOTE: if you update this chart, please update the version in
-     *       local/mib2c-conf.d/parent-set.m2i while you're at it.
+     * NOTE: if you update this chart, please update the versions in
+     *       local/mib2c-conf.d/parent-set.m2i
+     *       agent/mibgroup/helpers/baby_steps.c
+     * while you're at it.
      */
     /*
      ***********************************************************************
