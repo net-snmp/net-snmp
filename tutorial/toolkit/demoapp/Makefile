@@ -11,15 +11,23 @@ CFLAGS=-I/usr/local/include -g
 
 OBJS1=snmpdemoapp.o
 OBJS2=ustMain.o ustScalarSet.o
-TARGETS=ustMain snmpdemoapp
+OBJS3=asyncapp.o
+TARGETS=ustMain snmpdemoapp asyncdemo
+# for Solaris
+#SYSLIBS=-lsocket -lnsl -lkstat
+# for BSD
+#SYSLIBS=-lkvm
 
 all: $(TARGETS)
 
 snmpdemoapp: $(OBJS1)
-	cc -o snmpdemoapp $(OBJS1) -lsnmp
+	cc -o snmpdemoapp $(OBJS1) -lsnmp $(SYSLIBS)
+
+asyncapp: $(OBJS3)
+	cc -o asyncapp $(OBJS3) -lsnmp $(SYSLIBS)
 
 ustMain: $(OBJS2)
-	cc -o ustMain $(OBJS2) -lsnmp -lucdagent -lucdmibs
+	cc -o ustMain $(OBJS2) -lucdagent -lucdmibs -lsnmp $(SYSLIBS)
 
 clean:
 	rm $(OBJS2) $(OBJS2) $(TARGETS)

@@ -12,7 +12,7 @@
       <b>You MUST use the <a
       href="http://ucd-snmp.ucdavis.edu/developer.html">current
       development version</a> of the ucd-snmp toolkit for this to work
-      properly.  This will not work perfectly with 4.1.2 or earlier.
+      properly.  This will not work perfectly with 4.1.2 or earlier.</b>
     <p>
       <b>The AgentX support in the ucd-snmp package is still alpha
       level quality.  Although many people have used it successfully,
@@ -85,18 +85,18 @@ cc -o ustMain ustMain.o ustScalarSet.o -lsnmp -lucdagent -lucdmibs
       Then run snmpwalk to ensure that the current running demon is
       missing the code we've just built and that it doesn't exist:
       <pre>
-% snmpwalk localhost democommunity ucdavis.13
+% <b>snmpwalk localhost democommunity ucdavis.13</b>
       </pre>
     <p>
       Then run the application we just built:
       <pre>
-% ./ustMain
+% <b>./ustMain</b>
       </pre>
     <p>
       That should attach to the running agent and make it now respond
       to our same query above, but with results this time:
       <pre>
-% snmpwalk localhost democommunity ucdavis.13
+% <b>snmpwalk localhost democommunity ucdavis.13</b>
       </pre>
     <hr>
     <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
