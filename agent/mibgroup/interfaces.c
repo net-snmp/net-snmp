@@ -9,13 +9,13 @@
 #if STDC_HEADERS
 #include <stdlib.h>
 #endif
+#include <sys/param.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
-#include <sys/param.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 
 #if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
