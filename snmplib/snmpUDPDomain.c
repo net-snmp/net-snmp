@@ -366,10 +366,10 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
     addr->sin_addr.s_addr = htonl(INADDR_ANY);
     addr->sin_family = AF_INET;
     if (remote_port > 0) {
-        addr->sin_port = htons(remote_port);
+        addr->sin_port = htons((u_short)remote_port);
     } else if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
 				  NETSNMP_DS_LIB_DEFAULT_PORT) > 0) {
-        addr->sin_port = htons(netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+        addr->sin_port = htons((u_short)netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
 						 NETSNMP_DS_LIB_DEFAULT_PORT));
     } else {
         addr->sin_port = htons(SNMP_PORT);
@@ -396,7 +396,7 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
             if (atoi(cp) != 0) {
                 DEBUGMSGTL(("netsnmp_sockaddr_in",
                             "port number suffix :%d\n", atoi(cp)));
-                addr->sin_port = htons(atoi(cp));
+                addr->sin_port = htons((u_short)atoi(cp));
             }
         }
 
@@ -407,7 +407,7 @@ netsnmp_sockaddr_in(struct sockaddr_in *addr,
              */
             DEBUGMSGTL(("netsnmp_sockaddr_in", "totally numeric: %d\n",
                         atoi(peername)));
-            addr->sin_port = htons(atoi(peername));
+            addr->sin_port = htons((u_short)atoi(peername));
         } else if (inet_addr(peername) != INADDR_NONE) {
             /*
              * It looks like an IP address.  
