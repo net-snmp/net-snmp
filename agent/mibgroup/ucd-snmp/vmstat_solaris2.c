@@ -388,6 +388,8 @@ take_snapshot(struct cpu_stat_snapshot *css)
                 /*
                  * We need a for-loop for the CPU values 
                  */
+		cs.cpu_sysinfo.cpu[CPU_WAIT] = cs.cpu_sysinfo.wait[W_IO] +
+		                               cs.cpu_sysinfo.wait[W_PIO];
                 for (i = 0; i < CPU_STATES; i++) {
                     css->css_cpu[i] +=
                         (unsigned long long) cs.cpu_sysinfo.cpu[i];
@@ -771,7 +773,8 @@ var_extensible_vmstat(struct variable *vp,
          */
     default:
         snmp_log(LOG_ERR,
-                 "vmstat_solaris2: Error in request, no match found.\n");
+                 "vmstat_solaris2: Error in request, no match for %d.\n",
+		 vp->magic);
     }
     return (NULL);
 }                               /* *var_extensible_vmstat ends here */
