@@ -32,6 +32,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       perl DBI interface to map SQL commands to SNMP.  Included is a
       "snmpsh" shell where SQL commands can be typed, aliases created,
       etc.
+    - Much of the code is getting documented with "doxygen" style
+      documentation.  Run "make docs" if you have doxygen installed.
 
 *4.2.3*
  New:
