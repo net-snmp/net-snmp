@@ -292,8 +292,11 @@ u_char *snmp_build_var_op (u_char *, oid *, size_t *, u_char, size_t, u_char *,
 
 
 #ifdef USE_REVERSE_ASNENCODING
-u_char *snmp_rbuild_var_op (u_char *, oid *, size_t *, u_char, size_t, u_char *,
-                            size_t *);
+int snmp_realloc_rbuild_var_op  (u_char **pkt, size_t *pkt_len,
+				 size_t *offset, int allow_realloc,
+				 const oid *name, size_t *name_len,
+                                 u_char value_type,
+				 u_char *value, size_t value_length);
 #endif
 
 #ifdef __cplusplus
