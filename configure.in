@@ -1037,11 +1037,18 @@ dnl rpm-4.0.x needs rpmio.
 AC_CHECK_LIB(rpmio, Fopen, [_rpmlibs="-lrpmio $_rpmlibs"],,$_rpmlibs)
 
 dnl now check for rpm using the appropriate libraries.
-AC_CHECK_LIB(rpm, rpmdbOpen,[
+AC_CHECK_LIB(rpm, rpmGetFilesystemList,[
   AC_DEFINE(HAVE_LIBRPM)
   LIBS="-lrpm $_rpmlibs $LIBS"
   CFLAGS="$CFLAGS -I/usr/include/rpm"
-],,$_rpmlibs)
+],[
+  dnl rpm-4.0.3 librpmdb actually contains what we need.
+  AC_CHECK_LIB(rpmdb, rpmdbOpen,[
+    AC_DEFINE(HAVE_LIBRPM)
+    LIBS="-lrpmdb -lrpm $_rpmlibs $LIBS"
+    CFLAGS="$CFLAGS -I/usr/include/rpm"
+  ],,-lrpm $_rpmlibs)
+])
 
 dnl Replace `main' with a function in -lkstat:
 AC_CHECK_LIB(kstat, kstat_lookup)
