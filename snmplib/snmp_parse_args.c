@@ -299,6 +299,7 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
             break;
 
         case 'v':
+            session->version = -1;
 #ifndef DISABLE_SNMPV1
             if (!strcmp(optarg, "1")) {
                 session->version = SNMP_VERSION_1;
@@ -311,7 +312,8 @@ snmp_parse_args(int argc, char **argv, netsnmp_session *session,
 #endif
             if (!strcasecmp(optarg, "3")) {
                 session->version = SNMP_VERSION_3;
-            } else {
+            }
+            if (session->version == -1) {
                 fprintf(stderr,
                         "Invalid version specified after -v flag: %s\n",
                         optarg);
