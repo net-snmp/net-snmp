@@ -107,11 +107,11 @@ RELEASING:
 
      b) Make the doxygen extracted manual pages.
 
+        !!! Edit version number in doxygen.conf file.
         $ make docs
 
-     c) Copy the doxygen extracted manual pages to the man directory.
-        You'll have to then check these and commit them (possibly adding
-        any new ones that have been modified since then).
+        (This copy the doxygen extracted manual pages to the man
+        directory.  You'll have to then check these and commit them)
         Don't forget to update Makefile.in for any new manual pages.
 
         $ make mancp
