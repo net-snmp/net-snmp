@@ -127,7 +127,7 @@ TABLE OF CONTENTS
    What about a failed dependency on 'libcrypto'?  Where can I get that?
    Why is the project workspace empty under Visual C++?
    Why does 'make test' skip five tests?
-   Why does 'make test' complain "cannot open /tmp/snmp-test...*pid*"?
+   Why does 'make test' complain about a pid file?
  CODING
    How do I write C code to integrate with the agent?
    How does the agent fetch the value of a variable from the system?
@@ -187,9 +187,9 @@ Where can I get it?
     - http://www.net-snmp.org/project/
   Mirrors (note that sourceforge download servers are mirrored themselves):
     - US:          ftp://ftp.freesnmp.com/mirrors/net-snmp/
-    - Bulgaria:    http://rtfm.uni-svishtov.bg/net-snmp/ (appears to be out of date)
-    - Japan:       ftp://ftp.ayamura.org/pub/net-snmp/ (may only work inside Japan)
-    - Germany:     ftp://ftp.mpg.goe.ni.schule.de/pub/internet/net-snmp/ (unknown host)
+    - Bulgaria:    http://rtfm.uni-svishtov.bg/net-snmp/    (appears to be out of date)
+    - Japan:       ftp://ftp.ayamura.org/pub/net-snmp/      (may only work inside Japan)
+    - Germany:     ftp://ftp.mpg.goe.ni.schule.de/pub/internet/net-snmp/  (unknown host)
     - Greece:      ftp://ftp.ntua.gr/pub/net/snmp/net-snmp/
 
   The old ucd-snmp.ucdavis.edu web site and ftp server is now
@@ -202,7 +202,7 @@ What documentation is available?
 
 	This FAQ (!)
 	README and individual READMEs for various platforms
-        README.thread (discussed threading issues)
+	README.thread (discusses threading issues)
 	INSTALL
 	PORTING
 	EXAMPLE.conf
@@ -271,7 +271,7 @@ What operating systems does it run on?
 
 	* HP-UX (10.20 to 9.01 and 11.0 -- see README.hpux11)
 	* Ultrix (4.5 to 4.2)
-	* Solaris SPARC/ULTRA (2.8 to 2.3) Intel (2.9) and SunOS (4.1.4 to 4.1.2)
+	* Solaris SPARC/ULTRA (2.8 to 2.3), Intel (2.9) and SunOS (4.1.4 to 4.1.2)
 	* OSF (4.0, 3.2)
 	* NetBSD (1.5alpha to 1.0)
 	* FreeBSD (4.1 to 2.2)
@@ -282,7 +282,7 @@ What operating systems does it run on?
 	* Irix (6.5 to 5.1)
 	* OS X (10.1.1 and 10.1.2)
 	* Dynix/PTX 4.4
-        * QNX 6.2.1A
+	* QNX 6.2.1A
 
   We have also been informed about a port to the Stratus VOS.
   See http://ftp.stratus.com/vos/network/network.html for details.
@@ -531,10 +531,9 @@ Where can I find more information about network management?
   There are a number of sites with network management information on
   the World Wide Web. Three of the most useful are
 
-      http://netman.cit.buffalo.edu/index.html (no longer available)
-      http://www.simpleweb.org/
+      http://www.snmpweb.org/
       http://www.snmplink.org/
-      http://wwwsnmp.cs.utwente.nl/ (use simpleweb above)
+      http://www.mibdepot.com/
 
   There are two Usenet newsgroups which are relevant.
 	'comp.dcom.net-management'
@@ -1201,10 +1200,10 @@ How can I monitor my systems (disk, memory, etc)?
   can be set up to monitor disk, memory and cpu activity at
   http://www.net-snmp.org/tutorial-5/mrtg/index.html
 
-    The net-snmp package contains a web based manager itself that
-  runs on top of a mysql database, but it is extremely beta in
-  nature.  See the manager/README file for details. (no longer there
-  and has been replaced by net-policy (http://net-policy.sourceforge.net))
+    There is also a web-based network configuration system "Net-Policy",
+  based upon SNMP.  This is not strictly connected to the Net-SNMP project,
+  but a number of the core developers are also involved with that system.
+  See http://net-policy.sourceforge.net for more details.
 
 
 
@@ -1669,7 +1668,7 @@ What MIBs are supported?
 	- UCD agent extensions
 		(processes, disks, memory, load average,
 		 shell commands, error handling)
-	- Host Resources (RFC 1514 and 2790) 
+	- Host Resources (RFC 1514 and 2790)
 	- SNMPv3 MIBS (RFCs 2571-6)
 
   The SNMPv2 Party and Manager-to-Manager MIBs (RFCs 1447 & 1451) have been
@@ -2495,14 +2494,17 @@ What do the CPU statistics mean - is this the load average?
   available via the loadTable, and is supported on all architectures.
 
 
+
 How do I get percentage CPU utilization using ssCpuRawIdle?
 -----------------------------------------------------------
 
-  This one of the deprecated "raw counters" mentioned in the previous
-  question.  You need to take two readings of this object and look
-  at the difference between them.  That difference divided by the
-  total number of 'ticks' betwenn the two readings (probably 0.01
-  seconds) will give you the percentage utilization.
+  This one of the "raw counters" mentioned in the previous entry.
+  You need to take two readings of this object and look at the
+  difference between them.  That difference divided by the total
+  number of 'ticks' between the two readings (where one tick is
+  probably 0.01 seconds) will give you the percentage utilization
+  over that period.
+
 
 
 What about multi-processor systems?
@@ -2511,7 +2513,7 @@ What about multi-processor systems?
     Sorry - the CPU statistics (both original percentages, and the
   newer raw statistics) both refer to the system as a whole.  There
   is currently no way to access individual statistics for a particular
-  processor (except Solaris - see below).
+  processor (except on Solaris systems - see below).
 
     Note that although the Host Resources table includes a hrProcessorTable,
   the current implementation suffers from two major flaws.  Firstly, it
@@ -2709,7 +2711,8 @@ But gcc doesn't compile it successfully on my new Solaris system. Why not?
           s/__STDC__ - 0 == 0/!defined (__STRICT_ANSI__)/g
 +         s/__STDC__ - 0 == 1/defined (__STRICT_ANSI__)/g
 
-  NOTE: this appears to have been resolved.
+  NOTE: This appears to have been resolved.
+
 
 
 On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf"?
@@ -2774,39 +2777,44 @@ Why is the project workspace empty under Visual C++?
   The latest version of WinZip is reported to unpack this correctly.
 
 
+
 Why does 'make test' skip five tests?
 -----------------------------------
 
     You mean T053agentv1trap, T054agentv2ctrap, T055agentv1mintrap,
   T056agentv2cmintrap and T113agentxtrap?
 
-    These tests rely upon functionality in NET-SNMP-EXAMPLES-MIB which
-  is not implemented by default.  As part of your `configure`
-  invocation, include '--with-mib-modules="examples/example".
+    These tests rely upon functionality in the NET-SNMP-EXAMPLES-MIB
+  which is not implemented in the default agent configuration.  To
+  include these tests, invoke the `configure` script to include
+      '--with-mib-modules="examples/example".
 
 
-Why does 'make test' complain "cannot open /tmp/snmp-test...*pid*"?
--------------------------------------------------------------------
+
+Why does 'make test' complain about a pid file?
+-----------------------------------------------
 
     Typically it says something like:
 
     cat:  cannot open /tmp/snmp-test-1-8694/*pid*
 
-    It's trying to tell you the port is blocked because another copy
-  of the agent (other than a legitimate production copy) is running.
-  If you type 'ps -ef' you will notice an orphaned process like:
+    It's trying to tell you the port is blocked - typically because
+  another copy of the agent is still running, left over from from a
+  previous testing run.
+
+  If you type 'ps -ef' you should notice an orphaned process like:
 
   snmpd -d -r -U -P /tmp/snmp-test-5-27295/snmpd.pid...
 
   Kill this process.
 
-  This could be happening for several reasons including:  
+  This could be happening for several reasons including:
 
     1.  You are trying to do concurrent runs of 'make test'.
 
-    2.  On a slow machine, the agent might be too slow to come up.  Try
-      changing the value of the variable SNMP_SLEEP in RUNTESTS from
-      1 to 3 or 5.
+    2.  On a slow machine, the agent might be taking too long to
+      start up. Try changing the value of the variable SNMP_SLEEP
+      in testing/RUNTESTS from 1 to something higher - say 3 or 5.
 
 
 
