@@ -132,8 +132,6 @@ typedef long    fd_mask;
 #include "lcd_time.h"
 #include "mibgroup/util_funcs.h"
 
-#include "transform_oids.h"
-
 #include "snmp_agent.h"
 #include "agent_trap.h"
 #include "ds_agent.h"
