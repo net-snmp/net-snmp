@@ -331,6 +331,31 @@ main(int argc, char *argv[])
 		    snmp_set_quick_print(1);
 		    break;
 
+                case 'T':
+                    if (argv[arg][2] != '\0') 
+                        cptr = &argv[arg][2];
+                    else if (++arg>argc) {
+                        fprintf(stderr,"Need UDP or TCP after -T flag.\n");
+                        usage(argv[0]);
+                        exit(1);
+                    } else {
+                        cptr = argv[arg];
+                    }
+                    if (strcasecmp(cptr,"TCP") == 0) {
+                        ds_set_int(DS_APPLICATION_ID, DS_AGENT_FLAGS,
+                                   ds_get_int(DS_APPLICATION_ID, DS_AGENT_FLAGS)
+                                   | SNMP_FLAGS_STREAM_SOCKET);
+                    } else if (strcasecmp(cptr,"UDP") == 0) {
+                        /* default, do nothing */
+                    } else {
+                        fprintf(stderr,
+                                "Unknown transport \"%s\" after -T flag.\n",
+                                cptr);
+                        usage(argv[0]);
+                        exit(1);
+                    }
+                    break;
+
 		case 'D':
                     debug_register_tokens(&argv[arg][2]);
 		    snmp_set_do_debugging(1);
