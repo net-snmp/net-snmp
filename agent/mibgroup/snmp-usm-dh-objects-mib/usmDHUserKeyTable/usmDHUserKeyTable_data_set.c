@@ -29,8 +29,11 @@ usmDHUserCheckValue(struct usmUser *user, int for_auth_key,
     char *current_value;
     size_t current_value_len;
     
+    DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserCheckValue",
+                "called\n"));
     usmDHGetUserKeyChange(user, for_auth_key,
                           &current_value, &current_value_len);
+
     if (!current_value)
         return MFD_ERROR;
 
@@ -52,6 +55,8 @@ usmDHSetKey(struct usmUser *user, int for_auth_key,
     char *key;
     size_t key_len;
 
+    DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHSetKey",
+                "called\n"));
     /* XXX: mem leaks on errors abound */
 
     dh = usmDHGetUserDHptr(user, for_auth_key);
@@ -90,6 +95,7 @@ usmDHSetKey(struct usmUser *user, int for_auth_key,
 
         return MFD_SUCCESS;
     }
+
     return MFD_ERROR;
 }
 
@@ -345,6 +351,7 @@ usmDHUserKeyTable_irreversible_commit(usmDHUserKeyTable_rowreq_ctx *
     /*
      * TODO:495:o: Irreversible usmDHUserKeyTable commit.
      */
+    user = rowreq_ctx->data;
     flags = rowreq_ctx->column_set_flags;
     
     if (flags & FLAG_USMDHUSERAUTHKEYCHANGE ||
@@ -556,9 +563,9 @@ usmDHUserAuthKeyChange_undo_setup(usmDHUserKeyTable_rowreq_ctx *
      */
     /*
      * copy usmDHUserAuthKeyChange and usmDHUserAuthKeyChange_len data
-     * set rowreq_ctx->undo->usmDHUserAuthKeyChange from rowreq_ctx->data.usmDHUserAuthKeyChange
+     * set rowreq_ctx->undo->usmDHUserAuthKeyChange from rowreq_ctx->data->usmDHUserAuthKeyChange
      */
-    undouser = *(rowreq_ctx->undo);
+    undouser = rowreq_ctx->undo;
 
     undouser->authKeyLen = rowreq_ctx->data->authKeyLen;
     memdup(&undouser->authKey, rowreq_ctx->data->authKey,
@@ -593,7 +600,7 @@ usmDHUserAuthKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set usmDHUserAuthKeyChange value.
-     * set usmDHUserAuthKeyChange value in rowreq_ctx->data.
+     * set usmDHUserAuthKeyChange value in rowreq_ctx->data
      */
     usmDHSetKey(rowreq_ctx->data, 1,
            usmDHUserAuthKeyChange_val_ptr,
@@ -623,9 +630,9 @@ usmDHUserAuthKeyChange_undo(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
      */
     /*
      * copy usmDHUserAuthKeyChange and usmDHUserAuthKeyChange_len data
-     * set rowreq_ctx->data.usmDHUserAuthKeyChange from rowreq_ctx->undo->usmDHUserAuthKeyChange
+     * set rowreq_ctx->data->usmDHUserAuthKeyChange from rowreq_ctx->undo->usmDHUserAuthKeyChange
      */
-    undouser = *(rowreq_ctx->undo);
+    undouser = rowreq_ctx->undo;
 
     undouser->authKeyLen = rowreq_ctx->data->authKeyLen;
     SNMP_FREE(rowreq_ctx->data->authKey);
@@ -754,7 +761,7 @@ usmDHUserOwnAuthKeyChange_undo_setup(usmDHUserKeyTable_rowreq_ctx *
      */
     /*
      * copy usmDHUserOwnAuthKeyChange and usmDHUserOwnAuthKeyChange_len data
-     * set rowreq_ctx->undo->usmDHUserOwnAuthKeyChange from rowreq_ctx->data.usmDHUserOwnAuthKeyChange
+     * set rowreq_ctx->undo->usmDHUserOwnAuthKeyChange from rowreq_ctx->data->usmDHUserOwnAuthKeyChange
      */
     return usmDHUserAuthKeyChange_undo_setup(rowreq_ctx);
 }                               /* usmDHUserOwnAuthKeyChange_undo_setup */
@@ -785,7 +792,7 @@ usmDHUserOwnAuthKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set usmDHUserOwnAuthKeyChange value.
-     * set usmDHUserOwnAuthKeyChange value in rowreq_ctx->data.
+     * set usmDHUserOwnAuthKeyChange value in rowreq_ctx->data
      */
     return usmDHUserAuthKeyChange_set(rowreq_ctx,
            usmDHUserOwnAuthKeyChange_val_ptr,
@@ -812,7 +819,7 @@ usmDHUserOwnAuthKeyChange_undo(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
      */
     /*
      * copy usmDHUserOwnAuthKeyChange and usmDHUserOwnAuthKeyChange_len data
-     * set rowreq_ctx->data.usmDHUserOwnAuthKeyChange from rowreq_ctx->undo->usmDHUserOwnAuthKeyChange
+     * set rowreq_ctx->data->usmDHUserOwnAuthKeyChange from rowreq_ctx->undo->usmDHUserOwnAuthKeyChange
      */
     return usmDHUserAuthKeyChange_undo(rowreq_ctx);
 }                               /* usmDHUserOwnAuthKeyChange_undo */
@@ -936,9 +943,9 @@ usmDHUserPrivKeyChange_undo_setup(usmDHUserKeyTable_rowreq_ctx *
      */
     /*
      * copy usmDHUserPrivKeyChange and usmDHUserPrivKeyChange_len data
-     * set rowreq_ctx->undo->usmDHUserPrivKeyChange from rowreq_ctx->data.usmDHUserPrivKeyChange
+     * set rowreq_ctx->undo->usmDHUserPrivKeyChange from rowreq_ctx->data->usmDHUserPrivKeyChange
      */
-    undouser = *(rowreq_ctx->undo);
+    undouser = rowreq_ctx->undo;
 
     undouser->privKeyLen = rowreq_ctx->data->privKeyLen;
     memdup(&undouser->privKey, rowreq_ctx->data->privKey,
@@ -963,6 +970,7 @@ usmDHUserPrivKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
                            char *usmDHUserPrivKeyChange_val_ptr,
                            size_t usmDHUserPrivKeyChange_val_ptr_len)
 {
+
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserPrivKeyChange_set",
                 "called\n"));
 
@@ -972,7 +980,7 @@ usmDHUserPrivKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set usmDHUserPrivKeyChange value.
-     * set usmDHUserPrivKeyChange value in rowreq_ctx->data.
+     * set usmDHUserPrivKeyChange value in rowreq_ctx->data
      */
     usmDHSetKey(rowreq_ctx->data, 0,
            usmDHUserPrivKeyChange_val_ptr,
@@ -1002,11 +1010,11 @@ usmDHUserPrivKeyChange_undo(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
      */
     /*
      * copy usmDHUserPrivKeyChange and usmDHUserPrivKeyChange_len data
-     * set rowreq_ctx->data.usmDHUserPrivKeyChange from rowreq_ctx->undo->usmDHUserPrivKeyChange
+     * set rowreq_ctx->data->usmDHUserPrivKeyChange from rowreq_ctx->undo->usmDHUserPrivKeyChange
      */
-    undouser = *(rowreq_ctx->undo);
+    undouser = rowreq_ctx->undo;
 
-    /* uncopy priv key */
+    /** uncopy priv key */
     undouser->privKeyLen = rowreq_ctx->data->privKeyLen;
     SNMP_FREE(rowreq_ctx->data->privKey);
     rowreq_ctx->data->privKey = undouser->privKey;
@@ -1134,7 +1142,7 @@ usmDHUserOwnPrivKeyChange_undo_setup(usmDHUserKeyTable_rowreq_ctx *
      */
     /*
      * copy usmDHUserOwnPrivKeyChange and usmDHUserOwnPrivKeyChange_len data
-     * set rowreq_ctx->undo->usmDHUserOwnPrivKeyChange from rowreq_ctx->data.usmDHUserOwnPrivKeyChange
+     * set rowreq_ctx->undo->usmDHUserOwnPrivKeyChange from rowreq_ctx->data->usmDHUserOwnPrivKeyChange
      */
     return usmDHUserPrivKeyChange_undo_setup(rowreq_ctx);
 }                               /* usmDHUserOwnPrivKeyChange_undo_setup */
@@ -1165,7 +1173,7 @@ usmDHUserOwnPrivKeyChange_set(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx,
 
     /*
      * TODO:461:M: |-> Set usmDHUserOwnPrivKeyChange value.
-     * set usmDHUserOwnPrivKeyChange value in rowreq_ctx->data.
+     * set usmDHUserOwnPrivKeyChange value in rowreq_ctx->data
      */
     return usmDHUserPrivKeyChange_set(rowreq_ctx,
            usmDHUserOwnPrivKeyChange_val_ptr,
@@ -1192,7 +1200,7 @@ usmDHUserOwnPrivKeyChange_undo(usmDHUserKeyTable_rowreq_ctx * rowreq_ctx)
      */
     /*
      * copy usmDHUserOwnPrivKeyChange and usmDHUserOwnPrivKeyChange_len data
-     * set rowreq_ctx->data.usmDHUserOwnPrivKeyChange from rowreq_ctx->undo->usmDHUserOwnPrivKeyChange
+     * set rowreq_ctx->data->usmDHUserOwnPrivKeyChange from rowreq_ctx->undo->usmDHUserOwnPrivKeyChange
      */
     return usmDHUserPrivKeyChange_undo(rowreq_ctx);
 }                               /* usmDHUserOwnPrivKeyChange_undo */

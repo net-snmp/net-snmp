@@ -78,7 +78,7 @@ config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_
      * TODO:110:r: |-> Review usmDHUserKeyTable data context structure.
      * This structure is used to represent the data for usmDHUserKeyTable.
      */
-    typedef struct usmUser *usmDHUserKeyTable_data;
+    typedef struct usmUser usmDHUserKeyTable_data;
 
 
     /*
@@ -137,7 +137,7 @@ config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_
 
         usmDHUserKeyTable_mib_index tbl_idx;
 
-        usmDHUserKeyTable_data data;
+        usmDHUserKeyTable_data *data;
         usmDHUserKeyTable_undo_data *undo;
         unsigned int    column_set_flags;       /* flags for set columns */
 
@@ -178,6 +178,10 @@ config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_
     int            
         usmDHUserKeyTable_post_request(usmDHUserKeyTable_registration_ptr
                                        user_context);
+
+    usmDHUserKeyTable_data *usmDHUserKeyTable_allocate_data(void);
+    void            usmDHUserKeyTable_release_data(usmDHUserKeyTable_data *
+                                                   data);
 
     int            
         usmDHUserKeyTable_check_dependencies(usmDHUserKeyTable_rowreq_ctx *
