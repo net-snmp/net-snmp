@@ -119,7 +119,7 @@ while($#ARGV >= 0) {
 	       "UNSIGNED32", "u_long",
 	       "UINTEGER", "u_long",
 	       "OBJECTID", "oid",
-	       "COUNTER64", "counter64",
+	       "COUNTER64", "U64",
 	       "COUNTER", "u_long",
 	       "IPADDR", "u_long",
 	       "BITS", "char",
@@ -158,6 +158,12 @@ $vars{'example_end'} =
 
 # loop through mib nodes, remembering stuff.
 setup_data($mibnode);
+
+if(($ENV{HOME}) && (-f "$ENV{HOME}/.snmp/mib2c.conf")) {
+  $fh = open_conf("$ENV{HOME}/.snmp/mib2c.conf");
+  process();
+  $fh->close;
+}
 
 my $defaults = find_conf("default-$configfile",1);
 if (-f "$defaults" ) {
@@ -631,7 +637,7 @@ sub process {
 		$currenttable = $oldtable;
 	      }
 	    }
-	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+(column|index|nonindex)\s*\@/) {
+	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+(column|index|internalindex|externalindex|nonindex)\s*\@/) {
 	    my ($var, $type) = ($1, $2);
 	    my $startpos = $fh->tell();
 	    my $column;
@@ -743,6 +749,7 @@ sub setup_data {
 	       my $node = $SNMP::MIB{$index} || 
 		   die "can't find info about index $index in table $tablename\n";
 	       push @{$tables{$tablename}{'index'}}, $index;
+	       push @{$tables{$tablename}{'externalindex'}}, $index;
                $indexes = "$indexes $index"
 	   }
            my $columns = $entry->[0]{children};
@@ -750,7 +757,9 @@ sub setup_data {
 	foreach my $index (@{$entry->[0]{'indexes'}}) {
 	    my $node = $SNMP::MIB{$index} || 
 		die "can't find info about index $index in table $tablename\n";
+            next if ( $indexes =~ /$index/ );
 	    push @{$tables{$tablename}{'index'}}, $index;
+	    push @{$tables{$tablename}{'internalindex'}}, $index;
             $indexes = "$indexes $index"
 	}
 	foreach my $col (sort { $a->{'subID'} <=> $b->{'subID'} } @$columns) {
@@ -848,9 +857,27 @@ sub table_is_writable {
     return $result;
 }
 
+sub table_has_create {
+    my $table = shift;
+    my $column;
+    my $result = 0;
+    foreach $column (@{$tables{$table}{'column'}}) {
+      if($SNMP::MIB{$column}{access} =~ /(Create)/) {
+        $result = 1;
+        last;
+      }
+    }
+    return $result;
+}
+
 sub count_indexes {
     my $table = shift;
     return $#{$tables{$table}{'index'}} + 1;
+}
+
+sub count_external_indexes {
+    my $table = shift;
+    return $#{$tables{$table}{'externalindex'}} + 1;
 }
 
 sub count_notifications {
