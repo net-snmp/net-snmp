@@ -954,7 +954,7 @@ init_mib __P((void))
     if ( env_var == NULL ) {
         env_var = strdup(DEFAULT_MIBDIRS);
     } else if ( *env_var == '+' ) {
-      entry = malloc(strlen(DEFAULT_MIBDIRS)+strlen(env_var)+1);
+      entry = (char *)malloc(strlen(DEFAULT_MIBDIRS)+strlen(env_var)+2);
       sprintf(entry, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR, env_var+1);
       env_var = entry;
     }
@@ -979,7 +979,7 @@ init_mib __P((void))
     }
     else {
 	if ( *env_var == '+' ) {
-	    entry = malloc(strlen(DEFAULT_MIBS)+strlen(env_var)+1);
+	    entry = (char *)malloc(strlen(DEFAULT_MIBS)+strlen(env_var)+2);
 	    sprintf(entry, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR, env_var+1);
 	    env_var = entry;
 	}
@@ -1004,7 +1004,7 @@ init_mib __P((void))
     }
 #ifdef DEFAULT_MIBFILES
     else if ( *env_var == '+') {
-      entry = malloc(strlen(DEFAULT_MIBFILES)+strlen(env_var)+1);
+      entry = (char *)malloc(strlen(DEFAULT_MIBFILES)+strlen(env_var)+2);
       sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR, env_var+1);
       env_var = entry;
     }
