@@ -148,9 +148,9 @@ netsnmp_register_table_array(netsnmp_handler_registration *reginfo,
 {
     table_array_data * tad = SNMP_MALLOC_TYPEDEF(table_array_data);
     tad->tblreg_info = tabreg; /* we need it too, but it really is not ours */
-    tad->array = netsnmp_Initialise_oid_array( sizeof(void*) );
+    tad->array = netsnmp_initialize_oid_array( sizeof(void*) );
     /* netsnmp_mutex_init(&tad->lock); */
-    tad->changing = netsnmp_Initialise_oid_array( sizeof(void*) );
+    tad->changing = netsnmp_initialize_oid_array( sizeof(void*) );
     tad->cb = cb;
 
     reginfo->handler->myvoid = tad;
@@ -203,13 +203,13 @@ netsnmp_table_array_get_by_index(netsnmp_handler_registration *reginfo,
 
     /* netsnmp_mutex_lock(&tad->lock);*/
 
-    if(tad->changing && netsnmp_Get_oid_data_count(tad->changing)) {
-        rtn = netsnmp_Get_oid_data( tad->changing, hdr, 1 );
+    if(tad->changing && netsnmp_get_oid_data_count(tad->changing)) {
+        rtn = netsnmp_get_oid_data( tad->changing, hdr, 1 );
         if(!rtn)
-            rtn = netsnmp_Get_oid_data( tad->array, hdr, 1 );
+            rtn = netsnmp_get_oid_data( tad->array, hdr, 1 );
     }
     else {
-        rtn = netsnmp_Get_oid_data( tad->array, hdr, 1 );
+        rtn = netsnmp_get_oid_data( tad->array, hdr, 1 );
     }
 
     /* netsnmp_mutex_unlock(&tad->lock);*/
@@ -243,9 +243,9 @@ netsnmp_table_array_get_subset(netsnmp_handler_registration *reginfo,
 
     /* I really really don't want to merge two tables. so just freak
        out if this is called during a set. */
-    assert( !tad->changing || netsnmp_Get_oid_data_count(tad->changing) == 0);
+    assert( !tad->changing || netsnmp_get_oid_data_count(tad->changing) == 0);
 
-    rtn = (const netsnmp_oid_array_header**)netsnmp_Get_oid_data_subset( tad->array, hdr, len );
+    rtn = (const netsnmp_oid_array_header**)netsnmp_get_oid_data_subset( tad->array, hdr, len );
 
     /* netsnmp_mutex_unlock(&tad->lock);*/
 
@@ -373,7 +373,7 @@ static void
 release_netsnmp_array_groups( void * vp )
 {
     oid_array a = (oid_array)vp;
-    netsnmp_For_each_oid_data( a, release_netsnmp_array_group, NULL, 0 );
+    netsnmp_for_each_oid_data( a, release_netsnmp_array_group, NULL, 0 );
 }
 
 inline netsnmp_oid_array_header *
@@ -387,13 +387,13 @@ find_next_row( netsnmp_table_request_info *tblreq_info, table_array_data *tad)
      */
     if (tblreq_info->colnum < tad->tblreg_info->min_column) {
         tblreq_info->colnum = tad->tblreg_info->min_column;
-        row = netsnmp_Get_oid_data( tad->array, NULL, 0 );
+        row = netsnmp_get_oid_data( tad->array, NULL, 0 );
     }
     else {
         index.idx = tblreq_info->index_oid;
         index.idx_len = tblreq_info->index_oid_len;
 
-        row = netsnmp_Get_oid_data( tad->array, &index, 0 );
+        row = netsnmp_get_oid_data( tad->array, &index, 0 );
 
         /*
          * we don't have a row, but we might be at the end of a
@@ -410,7 +410,7 @@ find_next_row( netsnmp_table_request_info *tblreq_info, table_array_data *tad)
                 tblreq_info->colnum = 0;
             
             if(tblreq_info->colnum != 0)
-                row = netsnmp_Get_oid_data( tad->array, NULL, 0 );
+                row = netsnmp_get_oid_data( tad->array, NULL, 0 );
         }
     }
 
@@ -525,7 +525,7 @@ process_get_requests(netsnmp_handler_registration  *reginfo,
             index.idx = tblreq_info->index_oid;
             index.idx_len = tblreq_info->index_oid_len;
 
-            row = netsnmp_Get_oid_data( tad->array, &index, 1 );
+            row = netsnmp_get_oid_data( tad->array, &index, 1 );
             if(!row) {
                 DEBUGMSGTL(("helper:table_array:get", "no row found\n"));
                 netsnmp_set_request_error(agtreq_info, current, SNMP_ERR_NOSUCHNAME);
@@ -596,7 +596,7 @@ group_requests( netsnmp_agent_request_info *agtreq_info, netsnmp_request_info * 
          */
         index.idx = tblreq_info->index_oid;
         index.idx_len = tblreq_info->index_oid_len;
-        tmp = netsnmp_Get_oid_data( netsnmp_array_group_tbl, &index, 1);
+        tmp = netsnmp_get_oid_data( netsnmp_array_group_tbl, &index, 1);
         if(tmp) {
             DEBUGMSGTL(("helper:table_array:group", "    existing group:"));
             DEBUGMSGOID(("helper:table_array:group", index.idx,index.idx_len));
@@ -623,7 +623,7 @@ group_requests( netsnmp_agent_request_info *agtreq_info, netsnmp_request_info * 
         /*
          * search for row
          */
-        row = g->old_row = netsnmp_Get_oid_data( tad->array, &index, 1 );
+        row = g->old_row = netsnmp_get_oid_data( tad->array, &index, 1 );
         if(!g->old_row){
             if(! tad->cb->create_row) {
                 netsnmp_set_request_error(agtreq_info, current, SNMP_ERR_NOSUCHNAME);
@@ -644,7 +644,7 @@ group_requests( netsnmp_agent_request_info *agtreq_info, netsnmp_request_info * 
         g->index.idx = row->idx;
         g->index.idx_len = row->idx_len;
 
-        netsnmp_Add_oid_data( netsnmp_array_group_tbl, g );
+        netsnmp_add_oid_data( netsnmp_array_group_tbl, g );
 
     } /** for( current ... ) */
 }
@@ -685,18 +685,18 @@ process_set_group( netsnmp_oid_array_header* o, void *c )
         if(ag->old_row) {
             /** remove or replace */
             if(ag->new_row) {
-                netsnmp_Replace_oid_data(ag->table,ag->new_row);
+                netsnmp_replace_oid_data(ag->table,ag->new_row);
             }
             else {
-                netsnmp_Remove_oid_data(ag->table,ag->old_row,NULL);
+                netsnmp_remove_oid_data(ag->table,ag->old_row,NULL);
             }
         }
         else {
             /** insert new row */
-            netsnmp_Add_oid_data(ag->table,ag->new_row);
+            netsnmp_add_oid_data(ag->table,ag->new_row);
         }
         
-        netsnmp_Add_oid_data(context->tad->changing,ag->new_row);
+        netsnmp_add_oid_data(context->tad->changing,ag->new_row);
         if(context->tad->cb->set_action)
             context->tad->cb->set_action( ag );
         break;
@@ -710,7 +710,7 @@ process_set_group( netsnmp_oid_array_header* o, void *c )
             context->tad->cb->delete_row(ag->old_row);
             ag->old_row = NULL;
         }
-        netsnmp_Remove_oid_data(context->tad->changing,ag->new_row,NULL);
+        netsnmp_remove_oid_data(context->tad->changing,ag->new_row,NULL);
         break;
         
     case MODE_SET_FREE: /** FINAL CHANCE ON FAILURE */
@@ -727,17 +727,17 @@ process_set_group( netsnmp_oid_array_header* o, void *c )
         if(ag->new_row) {
             /** remove or replace */
             if(ag->old_row) {
-                netsnmp_Replace_oid_data(ag->table,ag->old_row);
+                netsnmp_replace_oid_data(ag->table,ag->old_row);
             }
             else {
-                netsnmp_Remove_oid_data(ag->table,ag->new_row,NULL);
+                netsnmp_remove_oid_data(ag->table,ag->new_row,NULL);
             }
         }
         else {
             /** there better be an old row! */
             assert(ag->old_row != NULL);
             /** insert old row */
-            netsnmp_Add_oid_data(ag->table,ag->old_row);
+            netsnmp_add_oid_data(ag->table,ag->old_row);
         }
         /** status already set - don't change it now */
         if(context->tad->cb->set_undo)
@@ -773,7 +773,7 @@ process_set_requests( netsnmp_agent_request_info *agtreq_info,
         (agtreq_info, handler_name);
     if(netsnmp_array_group_tbl == NULL) {
         netsnmp_data_list *tmp;
-        netsnmp_array_group_tbl = netsnmp_Initialise_oid_array( sizeof(void*) );
+        netsnmp_array_group_tbl = netsnmp_initialize_oid_array( sizeof(void*) );
 
         DEBUGMSGTL(("helper:table_array", "Grouping requests by oid\n"));
 
@@ -793,7 +793,7 @@ process_set_requests( netsnmp_agent_request_info *agtreq_info,
     context.agtreq_info = agtreq_info;
     context.tad = tad;
     context.status = SNMP_ERR_NOERROR;
-    netsnmp_For_each_oid_data( netsnmp_array_group_tbl, process_set_group, &context, 0 );
+    netsnmp_for_each_oid_data( netsnmp_array_group_tbl, process_set_group, &context, 0 );
 
     return context.status;
 }
