@@ -300,14 +300,12 @@ test_genKu_again:
         if (!bequiet)
           fprintf(stdout, "\n");
 
-#ifdef HAVE_LIBKMT
 	if (hashtype == usmHMACMD5AuthProtocol) {
 		hashtype	=  usmHMACSHA1AuthProtocol;
 		hashname	= "usmHMACSHA1AuthProtocol.";
 		properlength	= BYTESIZE(SNMP_TRANS_AUTHLEN_HMACSHA1);
 		goto test_genKu_again;
 	}
-#endif
 
 	return failcount;
 
@@ -459,28 +457,24 @@ test_genkul_again_local:
 	/* Create localized key using the other hash transform, but from
 	 * the same master key.
 	 */
-#ifdef HAVE_LIBKMT
 	if (hashtype_kul == usmHMACMD5AuthProtocol) {
 		hashtype_kul	=  usmHMACSHA1AuthProtocol;
 		hashname_kul	= "usmHMACSHA1AuthProtocol";
 		properlength	= BYTESIZE(SNMP_TRANS_AUTHLEN_HMACSHA1);
 		goto test_genkul_again_local;
 	}
-#endif
 
 	SUCCESS(testname);
 
 
 	/* Re-create the master key using the other hash transform.
 	 */
-#ifdef HAVE_LIBKMT
 	if (hashtype_Ku == usmHMACMD5AuthProtocol) {
 		hashtype_Ku	=  usmHMACSHA1AuthProtocol;
 		hashname_Ku	= "usmHMACSHA1AuthProtocol";
 		testname	= "Using HMACSHA1 to create master key.";
 		goto test_genkul_again_master;
 	}
-#endif
 
 	return failcount;
 
@@ -634,7 +628,6 @@ test_keychange_again:
 	 *
 	 * First clause is for Test #2, second clause is for (last) Test #3.
 	 */
-#ifdef HAVE_LIBKMT
 	if (hashtype == usmHMACMD5AuthProtocol) {
 		hashtype     =  usmHMACSHA1AuthProtocol;
 		hashname     = "usmHMACSHA1AuthProtocol (w/DES length kul's).";
@@ -648,7 +641,6 @@ test_keychange_again:
 		properlength	= BYTESIZE(SNMP_TRANS_AUTHLEN_HMACSHA1);
 		goto test_keychange_again;
 	}
-#endif
 
 	return failcount;
 

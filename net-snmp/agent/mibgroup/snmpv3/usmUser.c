@@ -11,12 +11,6 @@
 #include <strings.h>
 #endif
 
-#ifdef HAVE_KMT_H
-#	include <kmt.h>
-#endif
-#ifdef HAVE_KMT_ALGS_H
-#	include <kmt_algs.h>
-#endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif

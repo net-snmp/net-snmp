@@ -1,8 +1,5 @@
 /*
  * keytools.c
- *
- * FIX	Decide how to publicize simple (currently internal) hash functions
- *	from KMT.  Otherwise they must be pulled from the package directly.
  */
 
 #include <config.h>
@@ -46,11 +43,6 @@
 
 #include "transform_oids.h"
 
-int (*kmt_hash) (
-	const int	  mode,		void  	 **context,
-	const u_char	 *data,		const int  data_len,     
-	u_char		**digest,	size_t	  *digest_len);
-
 /*******************************************************************-o-******
  * generate_Ku
  *
@@ -64,8 +56,7 @@ int (*kmt_hash) (
  *      
  * Returns:
  *	SNMPERR_SUCCESS			Success.
- *	SNMPERR_GENERR			All errors, including KMT errs.
- *	SNMPERR_KT_NOT_AVAILABLE	When kmt_hash cannot be instantiated.
+ *	SNMPERR_GENERR			All errors.
  *
  *
  * Convert a passphrase into a master user key, Ku, according to the
@@ -84,8 +75,6 @@ int (*kmt_hash) (
  * NOTE  Passphrases less than USM_LENGTH_P_MIN characters in length
  *	 cause an error to be returned.
  *	 (Punt this check to the cmdline apps?  XXX)
- *
- * XXX	Should there be an option to store Ku in the KMT cache?  (!)
  */
 int
 generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
@@ -192,7 +181,7 @@ generate_Ku_quit:
 
 #else
 _KEYTOOLS_NOT_AVAILABLE
-#endif							/* HAVE_LIBKMT */
+#endif						/* internal or openssl */
 
 
 
@@ -212,8 +201,7 @@ _KEYTOOLS_NOT_AVAILABLE
  *      
  * Returns:
  *	SNMPERR_SUCCESS			Success.
- *	SNMPERR_GENERR			All errors, including KMT errs.
- *	SNMPERR_KT_NOT_AVAILABLE	When kmt_hash cannot be instantiated.
+ *	SNMPERR_GENERR			All errors.
  *
  *
  * Ku MUST be the proper length (currently fixed) for the given hashtype.
@@ -303,7 +291,7 @@ generate_kul_quit:
 
 #else
 _KEYTOOLS_NOT_AVAILABLE
-#endif							/* HAVE_LIBKMT */
+#endif						/* internal or openssl */
 
 
 
@@ -323,8 +311,7 @@ _KEYTOOLS_NOT_AVAILABLE
  *      
  * Returns:
  *	SNMPERR_SUCCESS			Success.
- *	SNMPERR_GENERR			All errors, including KMT errs.
- *	SNMPERR_KT_NOT_AVAILABLE	When kmt_hash cannot be instantiated.
+ *	SNMPERR_GENERR			All errors.
  *
  *
  * Uses oldkey and acquired random bytes to encode newkey into kcstring
@@ -440,7 +427,7 @@ encode_keychange_quit:
 
 #else
 _KEYTOOLS_NOT_AVAILABLE
-#endif							/* HAVE_LIBKMT */
+#endif						/* internal or openssl */
 
 
 
@@ -460,8 +447,7 @@ _KEYTOOLS_NOT_AVAILABLE
  *      
  * Returns:
  *	SNMPERR_SUCCESS			Success.
- *	SNMPERR_GENERR			All errors, including KMT errs.
- *	SNMPERR_KT_NOT_AVAILABLE	When kmt_hash cannot be instantiated.
+ *	SNMPERR_GENERR			All errors.
  *
  *
  * Decodes a string of bits encoded according to the KeyChange TC described
@@ -559,5 +545,5 @@ decode_keychange_quit:
 
 #else
 _KEYTOOLS_NOT_AVAILABLE
-#endif							/* HAVE_LIBKMT */
+#endif						/* internal or openssl */
 

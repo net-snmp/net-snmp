@@ -796,12 +796,6 @@
 /* define if your compiler (processor) defines __FUNCTION__ for you */
 #undef HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
 
-/* KMT is not very portable and requires these typedefs to be in
-   existance to use their header files */
-#undef u_int8_t
-#undef u_int16_t
-#undef u_int32_t
-
 /* mib pointer to the top of the extensible tree.  This has been
  assigned to UCDavis by the iana group.  Optionally, point this to the
  location in the tree your company/organization has been allocated. */
