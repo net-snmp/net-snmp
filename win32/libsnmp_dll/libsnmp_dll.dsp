@@ -97,7 +97,19 @@ SOURCE=..\..\snmplib\callback.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\check_varbind.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\cmu_compat.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\container.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\container_binary_array.c
 # End Source File
 # Begin Source File
 
@@ -134,10 +146,6 @@ SOURCE=..\..\snmplib\mib.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\mt_support.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\oid_array.c
 # End Source File
 # Begin Source File
 
