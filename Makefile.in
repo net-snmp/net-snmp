@@ -49,6 +49,8 @@ testdirs:
 
 distall: ${srcdir}/configure ${srcdir}/config.h 
 
+docs: doxygen.conf
+	doxygen doxygen.conf
 
 install:    all installdirs
 	for i in $(INSTALLDIRS) ; do	\
