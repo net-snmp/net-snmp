@@ -62,6 +62,8 @@ char            version_descr[SYS_STRING_LEN] = VERS_DESC;
 char            sysContact[SYS_STRING_LEN] = SYS_CONTACT;
 char            sysName[SYS_STRING_LEN] = SYS_NAME;
 char            sysLocation[SYS_STRING_LEN] = SYS_LOC;
+oid             sysObjectID[MAX_OID_LEN];
+int             sysObjectIDLength;
 oid             version_sysoid[] = { SYSTEM_MIB };
 
 char            oldversion_descr[SYS_STRING_LEN];
@@ -86,6 +88,25 @@ int             header_system(struct variable *, oid *, size_t *, int,
 	 *  snmpd.conf config parsing
 	 *
 	 *********************/
+
+void
+system_parse_config_sysdescr(const char *token, char *cptr)
+{
+    char            tmpbuf[1024];
+
+    if (strlen(cptr) >= sizeof(version_descr)) {
+        snprintf(tmpbuf,
+                 sizeof(tmpbuf),
+                 "sysdescr token too long (must be < %d):\n\t%s",
+                 sizeof(version_descr),
+                 cptr);
+        config_perror(tmpbuf);
+    } else if (strcmp(cptr, "\"\"") == 0) {
+        version_descr[0] = '\0';
+    } else {
+        strcpy(version_descr, cptr);
+    }
+}
 
 void
 system_parse_config_sysloc(const char *token, char *cptr)
@@ -235,6 +256,22 @@ system_parse_config_sysServices(const char *token, char *cptr)
     sysServicesConfiged = 1;
 }
 
+void system_parse_config_sysObjectID(const char *token, char *cptr)
+{
+    char tmpbuf[1024];
+
+    sysObjectIDLength = MAX_OID_LEN;
+    if (!read_objid(cptr, sysObjectID, &sysObjectIDLength)) {
+        snprintf(tmpbuf,
+                 sizeof(tmpbuf),
+                 "sysobjectid token not a parsable OID:\n\t%s",
+                 cptr);
+        config_perror(tmpbuf);
+        memcpy(sysObjectID, version_sysoid, sizeof(version_sysoid));
+        sysObjectIDLength = OID_LENGTH(version_sysoid);
+    }
+}
+
 
         /*********************
 	 *
@@ -341,6 +378,10 @@ init_system_mib(void)
 #endif                          /* HAVE_UNAME */
 #endif                          /* HAVE_GETHOSTNAME */
 
+    /* default sysObjectID */
+    memcpy(sysObjectID, version_sysoid, sizeof(version_sysoid));
+    sysObjectIDLength = OID_LENGTH(version_sysoid);
+
     /*
      * register ourselves with the agent to handle our mib tree 
      */
@@ -356,6 +397,9 @@ init_system_mib(void)
     /*
      * register our config handlers 
      */
+    snmpd_register_config_handler("sysdescr",
+                                  system_parse_config_sysdescr, NULL,
+                                  "description");
     snmpd_register_config_handler("syslocation",
                                   system_parse_config_sysloc, NULL,
                                   "location");
@@ -372,6 +416,9 @@ init_system_mib(void)
     snmpd_register_config_handler("sysservices",
                                   system_parse_config_sysServices, NULL,
                                   "NUMBER");
+    snmpd_register_config_handler("sysobjectid",
+                                  system_parse_config_sysObjectID, NULL,
+                                  "OID");
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
                            system_store, NULL);
 
@@ -405,8 +452,8 @@ var_system(struct variable *vp,
         *var_len = strlen(version_descr);
         return (u_char *) version_descr;
     case VERSIONID:
-        *var_len = sizeof(version_sysoid);
-        return (u_char *) version_sysoid;
+        *var_len = sysObjectIDLength * sizeof(sysObjectID[0]);
+        return (u_char *)sysObjectID;
     case UPTIME:
         ulret = netsnmp_get_agent_uptime();
         return ((u_char *) & ulret);
