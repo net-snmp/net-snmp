@@ -69,8 +69,8 @@ SOFTWARE.
 #endif
 
 #include "asn1.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
+#include "snmp_impl.h"
 #include "snmp_client.h"
 #include "snmp.h"
 #include "mib.h"

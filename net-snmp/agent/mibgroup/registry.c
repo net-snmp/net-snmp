@@ -4,6 +4,7 @@
  */
 
 #include <config.h>
+#include <sys/types.h>
 #if STDC_HEADERS
 #include <stdlib.h>
 #endif
@@ -12,7 +13,6 @@
 #endif
 
 #include "mibincl.h"
-#include "snmp_api.h"
 #include "registry.h"
 #include "../../snmplib/system.h"
 
@@ -60,17 +60,18 @@
 
 extern int subtree_size;
 extern struct subtree *subtrees;
+static struct subtree *header_registry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 #define MATCH_FAILED	-1
 
-struct subtree *
+static struct subtree *
 header_registry(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
     oid     *name;	    /* IN/OUT - input name requested, output name found */
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 #define REGISTRY_NAME_LENGTH	10
     oid newname[MAX_NAME_LEN];
@@ -135,7 +136,7 @@ var_registry(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
   struct subtree *index;
     if ((index =
@@ -163,7 +164,3 @@ var_registry(vp, name, length, exact, var_len, write_method)
 	 *
 	 *********************/
 
-void calculate_wombat()
-{
-  return;
-}

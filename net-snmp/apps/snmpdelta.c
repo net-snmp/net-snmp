@@ -66,8 +66,8 @@
 #include <ctype.h>
 
 #include "asn1.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
+#include "snmp_impl.h"
 #include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"

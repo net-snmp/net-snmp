@@ -79,6 +79,9 @@ SOFTWARE.
 #else
 #include <varargs.h>
 #endif
+
+#include "asn1.h"
+#include "snmp_api.h"
 #include "system.h"
 
 #define NUM_NETWORKS    32   /* max number of interfaces to check */

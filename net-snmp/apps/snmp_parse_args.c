@@ -47,8 +47,8 @@
 #endif
 
 #include "asn1.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
+#include "snmp_impl.h"
 #include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
@@ -69,7 +69,7 @@ snmp_parse_args_usage(outf)
   FILE *outf;
 {
   fprintf(outf,
-        "[-v 1|2c|2p] [-h] [-d] [-q] [-D] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
+        "[-v 1|2c|2p] [-h] [-d] [-q] [-R] [-D] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
 }
 
 void
@@ -82,6 +82,7 @@ snmp_parse_args_descriptions(outf)
   fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
   fprintf(outf, "  -q\t\tquick print output for easier parsing ability.\n");
+  fprintf(outf, "  -R\t\tuse \"random access\" to the mib tree.\n");
   fprintf(outf, "  -D\t\tturn on debugging output.\n");
   fprintf(outf, "  -p <P>\tuse port P instead of the default port.\n");
   fprintf(outf, "  -t <T>\tset the request timeout to T.\n");

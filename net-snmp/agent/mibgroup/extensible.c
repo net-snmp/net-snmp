@@ -166,7 +166,7 @@ void extensible_parse_config(word,cptr)
     for(tcptr=cptr; *tcptr != 0 && *tcptr != '#' && *tcptr != ';';
         tcptr++);
     strncpy((*pptmp)->command,cptr,tcptr-cptr);
-    (*pptmp)->command[tcptr-cptr-1] = 0;
+    (*pptmp)->command[tcptr-cptr] = 0;
     (*pptmp)->next = NULL;
   }
   if ((*pptmp)->miblen > 0) {

@@ -151,8 +151,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #define CACHE_TIME (120)	    /* Seconds */
 
 #include "asn1.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
+#include "snmp_impl.h"
 #include "mib.h"
 #include "snmp.h"
 #include "../snmp_vars.h"
@@ -461,11 +461,11 @@ static char*  route_symbols[] = {
 #ifdef USE_SYSCTL_ROUTE_DUMP
 
 void
-init_var_route()
+init_var_route __P((void))
 {
 }
 
-static void Route_Scan_Reload()
+static void Route_Scan_Reload __P((void))
 {
   size_t size = 0;
   int name[] = { CTL_NET, PF_ROUTE, 0, 0, NET_RT_DUMP, 0 };
@@ -948,7 +948,7 @@ struct radix_node *pt;
 }
 #endif /* RTENTRY_4_4 */
 
-static void Route_Scan_Reload()
+static void Route_Scan_Reload __P((void))
 {
 #if defined(RTENTRY_4_4)
   struct radix_node_head head, *rt_table[AF_MAX+1];
@@ -1069,7 +1069,7 @@ static void Route_Scan_Reload()
 #else
 
 #if HAVE_SYS_MBUF_H
-static void Route_Scan_Reload()
+static void Route_Scan_Reload __P((void))
 {
 	struct mbuf **routehash, mb;
 	register struct mbuf *m;

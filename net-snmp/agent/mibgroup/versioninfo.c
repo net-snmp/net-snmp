@@ -1,5 +1,6 @@
 #include <config.h>
 
+#include <sys/types.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -19,7 +20,6 @@
 #include "versioninfo.h"
 #include "util_funcs.h"
 #include "read_config.h"
-#include "../../snmplib/snmp_api.h"
 #include "../../snmplib/system.h"
 
 #include "version.h"

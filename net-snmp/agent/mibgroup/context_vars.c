@@ -17,9 +17,11 @@
 #  include <time.h>
 # endif
 #endif
+#include <netinet/in.h>
 
 #include "asn1.h"
 #include "snmp.h"
+#include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_vars.h"
 #include "system.h"
@@ -63,7 +65,7 @@ context_rowCreate(contextID, contextIDLen)
 	return NULL;
     cp = context_createEntry(contextID, contextIDLen);
     cp->contextBitMask = 0;
-    cp->contextStatus = cp->reserved->contextStatus = CONTEXTNONEXISTENT;
+    cp->contextStatus = cp->reserved->contextStatus = SNMP_ROW_NONEXISTENT;
 
     cp->contextBitMask = cp->reserved->contextBitMask =
 	CONTEXTINDEX_MASK | CONTEXTSTATUS_MASK;
@@ -142,10 +144,10 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
 	rp->contextPrivPrivateLen = 0;
 	rp->contextPrivPublicLen = 0;
 	rp->contextStorageType = 2; /* volatile */
-	rp->contextStatus = CONTEXTACTIVE;
+	rp->contextStatus = SNMP_ROW_ACTIVE;
 	rp->contextBitMask = CONTEXTCOMPLETE_MASK ^ CONTEXTLOCAL_MASK; /* XXX */
     } else if (action == COMMIT){
-	if (cp->contextStatus == CONTEXTNONEXISTENT){
+	if (cp->contextStatus == SNMP_ROW_NONEXISTENT){
 	    /* commit the default vals */
 	    /* This hacpens at most once per entry because the status is set to
 	       valid after the first pass.  After that, this commit code
@@ -176,7 +178,7 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    
 	}
     } else if (action == FREE){
-	if (cp && cp->contextStatus == CONTEXTNONEXISTENT){
+	if (cp && cp->contextStatus == SNMP_ROW_NONEXISTENT){
 	    context_rowDelete(index, indexlen);
 	    cp = rp = NULL;
 	}
@@ -446,26 +448,26 @@ write_context(action, var_val, var_val_type, var_val_len, statP, name, length)
 	    rp->contextStatus = val;
 	    rp->contextBitMask |= CONTEXTSTATUS_MASK;
 	} else if (action == RESERVE2){
-	    if (((rp->contextStatus == CONTEXTCREATEANDGO)
-		|| (rp->contextStatus == CONTEXTCREATEANDWAIT))
-		&& (cp->contextStatus != CONTEXTNONEXISTENT))
+	    if (((rp->contextStatus == SNMP_ROW_CREATEANDGO)
+		|| (rp->contextStatus == SNMP_ROW_CREATEANDWAIT))
+		&& (cp->contextStatus != SNMP_ROW_NONEXISTENT))
 		return SNMP_ERR_INCONSISTENTVALUE;
-	    if (((rp->contextStatus == CONTEXTACTIVE)
-		|| (rp->contextStatus == CONTEXTNOTINSERVICE))
-		&& (cp->contextStatus == CONTEXTNONEXISTENT))
+	    if (((rp->contextStatus == SNMP_ROW_ACTIVE)
+		|| (rp->contextStatus == SNMP_ROW_NOTINSERVICE))
+		&& (cp->contextStatus == SNMP_ROW_NONEXISTENT))
 		return SNMP_ERR_INCONSISTENTVALUE;
-	    if (((rp->contextStatus == CONTEXTACTIVE)
-		 || (rp->contextStatus == CONTEXTNOTINSERVICE))
+	    if (((rp->contextStatus == SNMP_ROW_ACTIVE)
+		 || (rp->contextStatus == SNMP_ROW_NOTINSERVICE))
 		&& (rp->contextBitMask != CONTEXTCOMPLETE_MASK))
 		return SNMP_ERR_INCONSISTENTVALUE;
 	    /* tried to set incomplete row valid */
 	} else if (action == COMMIT){
-	    if (rp->contextStatus == CONTEXTCREATEANDGO)
-		rp->contextStatus = CONTEXTACTIVE;
-	    if (rp->contextStatus == CONTEXTCREATEANDWAIT)
-		rp->contextStatus = CONTEXTNOTINSERVICE;
+	    if (rp->contextStatus == SNMP_ROW_CREATEANDGO)
+		rp->contextStatus = SNMP_ROW_ACTIVE;
+	    if (rp->contextStatus == SNMP_ROW_CREATEANDWAIT)
+		rp->contextStatus = SNMP_ROW_NOTINSERVICE;
 	    cp->contextStatus = rp->contextStatus;
-	} else if (action == ACTION && cp->contextStatus == CONTEXTDESTROY){
+	} else if (action == ACTION && cp->contextStatus == SNMP_ROW_DESTROY){
 	    /* delete all related acl entries */
 	    acl_scanInit();
 	    ap = acl_scanNext();
@@ -624,9 +626,9 @@ var_context(vp, name, length, exact, var_len, write_method)
       case CONTEXTSTORAGETYPE:
 	return (u_char *)&cp->contextStorageType;
       case CONTEXTSTATUS:
-	if (cp->contextStatus == CONTEXTNOTINSERVICE
+	if (cp->contextStatus == SNMP_ROW_NOTINSERVICE
 	    && cp->contextBitMask != CONTEXTCOMPLETE_MASK){
-	    long_return = CONTEXTNOTREADY;
+	    long_return = SNMP_ROW_NOTREADY;
 	    return (u_char *)&long_return;
 	}
 	return (u_char *)&cp->contextStatus;
