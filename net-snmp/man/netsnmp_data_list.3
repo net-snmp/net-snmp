@@ -1,4 +1,4 @@
-.TH "generic linked-list data handling with a string as a key." 3 "2 Sep 2003" "net-snmp" \" -*- nroff -*-
+.TH "generic linked-list data handling with a string as a key." 3 "17 Oct 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -7,27 +7,35 @@ generic linked-list data handling with a string as a key. \-
 
 .in +1c
 .ti -1c
-.RI "void \fBnetsnmp_free_list_data\fP (netsnmp_data_list *node)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_free_list_data\fP (netsnmp_data_list *node)"
 .br
 .RI "\fIfrees the data and a name at a given data_list node.\fP"
 .ti -1c
-.RI "void \fBnetsnmp_free_all_list_data\fP (netsnmp_data_list *head)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_free_all_list_data\fP (netsnmp_data_list *head)"
 .br
 .RI "\fIfrees all data and nodes in a list.\fP"
 .ti -1c
-.RI "netsnmp_data_list * \fBnetsnmp_create_data_list\fP (const char *name, void *data, Netsnmp_Free_List_Data *beer)"
+.RI "NETSNMP_INLINE netsnmp_data_list * \fBnetsnmp_create_data_list\fP (const char *name, void *data, Netsnmp_Free_List_Data *beer)"
 .br
 .RI "\fIadds creates a data_list node given a name, data and a free function ptr.\fP"
 .ti -1c
-.RI "void \fBnetsnmp_add_list_data\fP (netsnmp_data_list **head, netsnmp_data_list *node)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_add_list_data\fP (netsnmp_data_list **head, netsnmp_data_list *node)"
+.br
+.RI "\fIdepreciated: use \fBnetsnmp_data_list_add_node()\fP\fP"
+.ti -1c
+.RI "NETSNMP_INLINE void \fBnetsnmp_data_list_add_node\fP (netsnmp_data_list **head, netsnmp_data_list *node)"
 .br
 .RI "\fIadds data to a datalist\fP"
 .ti -1c
-.RI "void * \fBnetsnmp_get_list_data\fP (netsnmp_data_list *head, const char *name)"
+.RI "NETSNMP_INLINE netsnmp_data_list * \fBnetsnmp_data_list_add_data\fP (netsnmp_data_list **head, const char *name, void *data, Netsnmp_Free_List_Data *beer)"
+.br
+.RI "\fIadds data to a datalist\fP"
+.ti -1c
+.RI "NETSNMP_INLINE void * \fBnetsnmp_get_list_data\fP (netsnmp_data_list *head, const char *name)"
 .br
 .RI "\fIreturns a data_list node's data for a given name within a data_list\fP"
 .ti -1c
-.RI "netsnmp_data_list * \fBnetsnmp_get_list_node\fP (netsnmp_data_list *head, const char *name)"
+.RI "NETSNMP_INLINE netsnmp_data_list * \fBnetsnmp_get_list_node\fP (netsnmp_data_list *head, const char *name)"
 .br
 .RI "\fIreturns a data_list node for a given name within a data_list\fP"
 .ti -1c
@@ -53,27 +61,14 @@ generic linked-list data handling with a string as a key. \-
 .in -1c
 .SH "FUNCTION DOCUMENTATION"
 .PP 
-.SS "void netsnmp_add_list_data (netsnmp_data_list ** head, netsnmp_data_list * node)\fC [inline]\fP"
+.SS "NETSNMP_INLINE void netsnmp_add_list_data (netsnmp_data_list ** head, netsnmp_data_list * node)"
 .PP
-adds data to a datalist
+depreciated: use \fBnetsnmp_data_list_add_node()\fP
 .PP
-\fBParameters: \fP
-.in +1c
-.TP
-\fB\fIhead\fP\fP
-a pointer to the head node of a data_list 
-.TP
-\fB\fInode\fP\fP
-a node to stash in the data_list 
+Definition at line 77 of file data_list.c.
 .PP
-\fBReturns: \fP
-.in +1c
-a pointer to the data cached at that node 
-.PP
-Definition at line 76 of file data_list.c.
-.PP
-Referenced by netsnmp_read_data_callback(), netsnmp_register_auto_data_table(), netsnmp_register_handler_by_name(), netsnmp_register_save_list(), and netsnmp_request_add_list_data().
-.SS "netsnmp_data_list* netsnmp_create_data_list (const char * name, void * data, Netsnmp_Free_List_Data * beer)\fC [inline]\fP"
+Referenced by netsnmp_data_list_add_node(), netsnmp_read_data_callback(), netsnmp_register_auto_data_table(), netsnmp_register_handler_by_name(), netsnmp_register_save_list(), and netsnmp_request_add_list_data().
+.SS "NETSNMP_INLINE netsnmp_data_list* netsnmp_create_data_list (const char * name, void * data, Netsnmp_Free_List_Data * beer)"
 .PP
 adds creates a data_list node given a name, data and a free function ptr.
 .PP
@@ -97,8 +92,50 @@ Definition at line 57 of file data_list.c.
 .PP
 References SNMP_MALLOC_TYPEDEF.
 .PP
-Referenced by netsnmp_cache_helper_handler(), netsnmp_register_auto_data_table(), netsnmp_register_handler_by_name(), netsnmp_register_save_list(), netsnmp_set_data_cache(), netsnmp_stash_cache_update(), and netsnmp_table_data_set_helper_handler().
-.SS "void netsnmp_free_all_list_data (netsnmp_data_list * head)\fC [inline]\fP"
+Referenced by netsnmp_cache_helper_handler(), netsnmp_data_list_add_data(), netsnmp_read_data_callback(), netsnmp_register_auto_data_table(), netsnmp_register_handler_by_name(), netsnmp_register_save_list(), netsnmp_set_data_cache(), netsnmp_stash_cache_update(), and netsnmp_table_data_set_helper_handler().
+.SS "NETSNMP_INLINE netsnmp_data_list* netsnmp_data_list_add_data (netsnmp_data_list ** head, const char * name, void * data, Netsnmp_Free_List_Data * beer)"
+.PP
+adds data to a datalist
+.PP
+\fBParameters: \fP
+.in +1c
+.TP
+\fB\fIhead\fP\fP
+a pointer to the head node of a data_list 
+.TP
+\fB\fIname\fP\fP
+the name of the node to cache the data. 
+.TP
+\fB\fIdata\fP\fP
+the data to be stored under that name 
+.TP
+\fB\fIbeer\fP\fP
+A function that can free the data pointer (in the future) 
+.PP
+\fBReturns: \fP
+.in +1c
+a newly created data_list node which was inserted in the list 
+.PP
+Definition at line 120 of file data_list.c.
+.PP
+References netsnmp_create_data_list().
+.SS "NETSNMP_INLINE void netsnmp_data_list_add_node (netsnmp_data_list ** head, netsnmp_data_list * node)"
+.PP
+adds data to a datalist
+.PP
+\fBParameters: \fP
+.in +1c
+.TP
+\fB\fIhead\fP\fP
+a pointer to the head node of a data_list 
+.TP
+\fB\fInode\fP\fP
+a node to stash in the data_list 
+.PP
+Definition at line 103 of file data_list.c.
+.PP
+References netsnmp_add_list_data().
+.SS "NETSNMP_INLINE void netsnmp_free_all_list_data (netsnmp_data_list * head)"
 .PP
 frees all data and nodes in a list.
 .PP
@@ -113,7 +150,7 @@ Definition at line 39 of file data_list.c.
 References netsnmp_free_list_data(), and SNMP_FREE.
 .PP
 Referenced by netsnmp_clear_handler_list(), and netsnmp_free_request_data_sets().
-.SS "void netsnmp_free_list_data (netsnmp_data_list * node)\fC [inline]\fP"
+.SS "NETSNMP_INLINE void netsnmp_free_list_data (netsnmp_data_list * node)"
 .PP
 frees the data and a name at a given data_list node.
 .PP
@@ -130,7 +167,7 @@ Definition at line 23 of file data_list.c.
 References SNMP_FREE.
 .PP
 Referenced by netsnmp_free_all_list_data(), netsnmp_free_request_data_set(), and netsnmp_remove_list_node().
-.SS "void* netsnmp_get_list_data (netsnmp_data_list * head, const char * name)\fC [inline]\fP"
+.SS "NETSNMP_INLINE void* netsnmp_get_list_data (netsnmp_data_list * head, const char * name)"
 .PP
 returns a data_list node's data for a given name within a data_list
 .PP
@@ -147,10 +184,10 @@ the name to find
 .in +1c
 a pointer to the data cached at that node 
 .PP
-Definition at line 103 of file data_list.c.
+Definition at line 156 of file data_list.c.
 .PP
 Referenced by netsnmp_read_data_callback(), and netsnmp_request_get_list_data().
-.SS "netsnmp_data_list* netsnmp_get_list_node (netsnmp_data_list * head, const char * name)\fC [inline]\fP"
+.SS "NETSNMP_INLINE netsnmp_data_list* netsnmp_get_list_node (netsnmp_data_list * head, const char * name)"
 .PP
 returns a data_list node for a given name within a data_list
 .PP
@@ -167,7 +204,7 @@ the name to find
 .in +1c
 a pointer to the data_list node 
 .PP
-Definition at line 119 of file data_list.c.
+Definition at line 172 of file data_list.c.
 .PP
 Referenced by netsnmp_table_iterator_helper_handler().
 .SS "void netsnmp_read_data_callback (const char * token, char * line)"
@@ -178,9 +215,9 @@ register_app_config_handler('token', netsnmp_read_data_callback, XXX)
 .PP
 where INFO_POINTER is a pointer to a netsnmp_data_list_saveinfo object containing apporpriate registration information 
 .PP
-Definition at line 267 of file data_list.c.
+Definition at line 320 of file data_list.c.
 .PP
-References netsnmp_add_list_data(), and netsnmp_get_list_data().
+References netsnmp_add_list_data(), netsnmp_create_data_list(), and netsnmp_get_list_data().
 .PP
 Referenced by netsnmp_register_save_list().
 .SS "void netsnmp_register_save_list (netsnmp_data_list ** datalist, const char * type, const char * token, Netsnmp_Save_List_Data * data_list_save_ptr, Netsnmp_Read_List_Data * data_list_read_ptr, Netsnmp_Free_List_Data * data_list_free_ptr)"
@@ -208,7 +245,7 @@ a function pointer which can read the remainder of a saved line and return the a
 \fB\fIdata_list_free_ptr\fP\fP
 a function pointer which will be passed to the data node for freeing it in the future when/if the list/node is cleaned up or destroyed. 
 .PP
-Definition at line 166 of file data_list.c.
+Definition at line 219 of file data_list.c.
 .PP
 References netsnmp_add_list_data(), netsnmp_create_data_list(), netsnmp_read_data_callback(), netsnmp_save_all_data_callback(), and SNMP_MALLOC_TYPEDEF.
 .SS "int netsnmp_remove_list_node (netsnmp_data_list ** realhead, const char * name)"
@@ -228,7 +265,7 @@ the name to find and remove
 .in +1c
 0 on successful find-and-delete, 1 otherwise. 
 .PP
-Definition at line 135 of file data_list.c.
+Definition at line 188 of file data_list.c.
 .PP
 References netsnmp_free_list_data().
 .SS "int netsnmp_save_all_data (netsnmp_data_list * head, const char * type, const char * token, Netsnmp_Save_List_Data * data_list_save_ptr)"
@@ -237,7 +274,7 @@ intended to be called as a callback during persistent save operations.
 .PP
 See the netsnmp_save_all_data_callback for where this is typically used. 
 .PP
-Definition at line 232 of file data_list.c.
+Definition at line 285 of file data_list.c.
 .PP
 Referenced by netsnmp_save_all_data_callback().
 .SS "int netsnmp_save_all_data_callback (int major, int minor, void * serverarg, void * clientarg)"
@@ -250,7 +287,7 @@ snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA, netsnmp_
 .PP
 where INFO_POINTER is a pointer to a netsnmp_data_list_saveinfo object containing apporpriate registration information 
 .PP
-Definition at line 215 of file data_list.c.
+Definition at line 268 of file data_list.c.
 .PP
 References netsnmp_save_all_data().
 .PP

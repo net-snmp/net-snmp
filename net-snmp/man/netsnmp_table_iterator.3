@@ -1,4 +1,4 @@
-.TH "table_iterator: The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally." 3 "2 Sep 2003" "net-snmp" \" -*- nroff -*-
+.TH "table_iterator: The table iterator helper is designed to simplify the task of writing a table handler for the net-snmp agent when the data being accessed is not in an oid sorted form and must be accessed externally." 3 "17 Oct 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -81,7 +81,7 @@ Typedefs the \fBnetsnmp_iterator_info_s\fP struct into netsnmp_iterator_info.
 .PP
 extracts the table_iterator specific data from a request
 .PP
-Definition at line 118 of file table_iterator.c.
+Definition at line 129 of file table_iterator.c.
 .PP
 References netsnmp_request_get_list_data().
 .PP
@@ -90,7 +90,7 @@ Referenced by netsnmp_multiplexer_helper_handler().
 .PP
 returns a netsnmp_mib_handler object for the table_iterator helper
 .PP
-Definition at line 89 of file table_iterator.c.
+Definition at line 100 of file table_iterator.c.
 .PP
 References netsnmp_create_handler(), and netsnmp_table_iterator_helper_handler().
 .PP
@@ -99,14 +99,14 @@ Referenced by netsnmp_register_table_iterator().
 .PP
 registers a table after attaching it to a table_iterator helper
 .PP
-Definition at line 105 of file table_iterator.c.
+Definition at line 116 of file table_iterator.c.
 .PP
 References netsnmp_get_table_iterator_handler(), netsnmp_inject_handler(), netsnmp_register_table(), and netsnmp_iterator_info_s::table_reginfo.
 .SS "int netsnmp_table_iterator_helper_handler (netsnmp_mib_handler * handler, netsnmp_handler_registration * reginfo, netsnmp_agent_request_info * reqinfo, netsnmp_request_info * requests)"
 .PP
 implements the table_iterator helper
 .PP
-Definition at line 197 of file table_iterator.c.
+Definition at line 208 of file table_iterator.c.
 .PP
 References netsnmp_iterator_info_s::flags, netsnmp_iterator_info_s::free_data_context, netsnmp_iterator_info_s::free_loop_context, netsnmp_iterator_info_s::free_loop_context_at_end, netsnmp_iterator_info_s::get_first_data_point, netsnmp_iterator_info_s::get_next_data_point, netsnmp_call_next_handler(), netsnmp_extract_stash_cache(), netsnmp_extract_table_info(), netsnmp_find_table_registration_info(), netsnmp_free_request_data_sets(), netsnmp_get_list_node(), netsnmp_oid_stash_add_data(), netsnmp_request_add_list_data(), netsnmp_request_get_list_data(), SNMP_FREE, SNMP_MALLOC_TYPEDEF, snmp_oid_compare(), and netsnmp_iterator_info_s::table_reginfo.
 .PP
