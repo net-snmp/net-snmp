@@ -967,6 +967,7 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
         break;
 
       case TYPE_GAUGE:
+      case TYPE_UNSIGNED32:
         vars->type = ASN_GAUGE;
         goto UINT;
       case TYPE_COUNTER:
@@ -976,7 +977,6 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
         vars->type = ASN_TIMETICKS;
         goto UINT;
       case TYPE_UINTEGER:
-      case TYPE_UNSIGNED32:
         vars->type = ASN_UINTEGER;
 UINT:
         vars->val.integer = (long *)malloc(sizeof(long));
