@@ -179,12 +179,14 @@ view_oid(oid * it, size_t * len, const char *viewName, char *viewSubtree)
         exit(1);
     }
 
-    *len = itIndex + 1 + strlen(viewName) + c_oid_length;
+    *len = itIndex + 2 + strlen(viewName) + c_oid_length;
 
     it[itIndex++] = strlen(viewName);
     for (i = 0; i < (int) strlen(viewName); i++)
         it[itIndex++] = viewName[i];
 
+    
+    it[itIndex++] = c_oid_length;
     for (i = 0; i < (int) c_oid_length; i++)
         it[itIndex++] = c_oid[i];
 
