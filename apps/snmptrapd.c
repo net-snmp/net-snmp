@@ -104,6 +104,7 @@ int deny_severity	 = LOG_WARNING;
 #endif
 
 #define DS_APP_NUMERIC_IP  8 /* must not conflict with agent's DS booleans */
+/* #define DS_APP_DONT_LOG 9 defined in notification_log.h */
 
 #ifndef BSD4_3
 #define BSD4_2
