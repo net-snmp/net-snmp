@@ -202,11 +202,14 @@ init_extensible(void)
                            extensible_unregister, NULL);
 }
 
+extern int pass_compare(const void *a, const void *b);
+
 void
 extensible_parse_config(const char *token, char *cptr)
 {
     struct extensible *ptmp, **pp;
     char           *tcptr;
+    int            scount;
 
     /*
      * allocate and clear memory structure 
@@ -223,12 +226,15 @@ extensible_parse_config(const char *token, char *cptr)
          */
         for (pp = &relocs, numrelocs++; *pp; pp = &((*pp)->next));
         (*pp) = ptmp;
+        pp = &relocs; scount = numrelocs;
+
     } else {
         /*
          * it goes in with the general extensible table 
          */
         for (pp = &extens, numextens++; *pp; pp = &((*pp)->next));
         (*pp) = ptmp;
+        pp = &extens; scount = numextens;
     }
 
     /*
@@ -277,6 +283,28 @@ extensible_parse_config(const char *token, char *cptr)
                      sizeof(extensible_relocatable_variables) /
                      sizeof(*extensible_relocatable_variables),
                      ptmp->miboid, ptmp->miblen);
+    }
+
+    if (scount > 1) {
+        int i;
+        struct extensible **etmp = (struct extensible **)
+            malloc(((sizeof(struct extensible *)) * scount));
+        if (etmp == NULL)
+            return;                 /* XXX memory alloc error */
+        for (i = 0, ptmp = *pp;
+             i < scount && ptmp != 0; i++, ptmp = ptmp->next)
+            etmp[i] = ptmp;
+        qsort(etmp, scount, sizeof(struct extensible *),
+              pass_compare);
+        *pp = (struct extensible *) etmp[0];
+        ptmp = (struct extensible *) etmp[0];
+
+        for (i = 0; i < scount - 1; i++) {
+            ptmp->next = etmp[i + 1];
+            ptmp = ptmp->next;
+        }
+        ptmp->next = NULL;
+        free(etmp);
     }
 }
 
