@@ -2,6 +2,7 @@
 .gdbinit
 Makefile
 encode_keychange
+snmpbulkget
 snmpbulkwalk
 snmpdelta
 snmpget
