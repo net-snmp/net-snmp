@@ -3,6 +3,7 @@
 require Tk::Table;
 require Tk::HList;
 require Tk::FileSelect;
+require Tk::Dialog;
 
 $host = 'localhost';
 $community = 'public';
@@ -40,13 +41,31 @@ $FileMenuBut = $MenuFrame->Menubutton(-text => "File",
 
 $MibMenuBut = $MenuFrame->Menubutton(-text => "Mib",
 				      -menuitems =>
-      [[Button => "Load a New Mib File", -command => [\&loadNewMibFile]],
-       [Button => "Load a New Mib Module", -command => [\&loadNewMibModule]]
+      [[Button => "Find a mib node", 
+	-command => sub { my $var;
+			  entryBox("Find a Mib Node", 
+				   "Enter a mib node name to search for:",
+				   \$var, \&findANode );}],
+       [Button => "Load a New Mib File", -command => [\&loadNewMibFile]],
+       [Button => "Load a New Mib Module", 
+	-command => sub { my $var;
+			  entryBox("Load a Module", 
+				   "Enter a SNMP MIB module name to load:",
+				   \$var, \&loadIt);}]
        ])->pack(-side => 'left');
 
 $OptMenuBut = $MenuFrame->Menubutton(-text => "Options",
 				     -menuitems =>
-      [[Cascade => "~Display"]
+      [[Cascade => "~Display"],
+       [Button => "Time between graph polls", 
+	-command => sub { entryBox("graph polls", "Time between graph polls:", 
+				    \$graphtime);}],
+       [Button => "Port number", 
+	-command => sub { entryBox("Port Number", "SNMP Port number to use:", 
+				    \$port);}],
+       [Button => "Community Name", 
+	-command => sub { entryBox("Community Name", "Community name to use:", 
+				    \$community);}]
        ])->pack(-side => 'left');
         
 $tmp = $OptMenuBut->cget(-menu);
@@ -70,37 +89,31 @@ $mibTextOID = $sFrame->Label(-text => '');
 $mibTextOID->pack(-side => 'right');
 
 $dispFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
-#$dispFrame->pack(-side => 'top', -fill =>'x');
 $dispFrame->pack(-side => 'top', -fill =>'x');
-# my $f1 = $dispFrame->Frame(-relief => 'raised', -borderwidth => $tmpbd);
-# $f1->pack(-side => 'left', -fill => 'y');
-# my $f2 = $dispFrame->Frame();
-# $f2->pack(-side => 'left', -fill => 'both');
 for($i=0;$i<= $#displayInfo;$i++) {
     createRow($i);
     optionalWidget($i,$OptMenuWidgets);
 }
     
-my $tmpFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
-$tmpFrame->pack(-side => 'top', -fill =>'x');
-$tmpFrame->Label(-text => 'Description:', -anchor => 'w')->pack(-side => 'top',
+$descrFrame=$top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
+$descrFrame->pack(-side => 'top', -fill =>'x');
+$descrFrame->Label(-text => 'Description:', -anchor => 'w')->pack(-side => 'top',
 								-fill => 'x');
-$descr = $tmpFrame->Scrolled(qw(Text -width 80 -height 4));
+$descr = $descrFrame->Scrolled(qw(Text -width 80 -height 4));
 $descr->pack(-side => 'top', -fill => 'x');
 
 $bFrame = $top->Frame(-relief => 'raised', -borderwidth => $tmpbd);
 $bFrame->pack(-side => 'top', -fill => 'x');
 $hostEntry = $bFrame->Entry(-textvariable => \$host, -width => 12);
 $hostEntry->pack(-side => 'left');
-$commEntry = $bFrame->Entry(-textvariable => \$community, -width => 12);
-$commEntry->pack(-side => 'left');
-$portEntry = $bFrame->Entry(-textvariable => \$port, -width => 12);
-$portEntry->pack(-side => 'left');
 $bFrame->Button(-text => 'graph', -command => \&snmpgraph)->pack(-side => 'right');
 $bFrame->Button(-text => 'table', -command => \&snmptable)->pack(-side => 'right');
 $bFrame->Button(-text => 'walk', -command => \&snmpwalk)->pack(-side => 'right');
 $bFrame->Button(-text => 'getnext', -command => \&snmpgetnext)->pack(-side => 'right');
 $bFrame->Button(-text => 'get', -command => \&snmpget)->pack(-side => 'right');
+$stopBut = $bFrame->Button(-text => 'stop', -command => sub { stop(1) },
+			   -state => 'disabled');
+$stopBut->pack(-side => 'right');
 $oFrame = $top->Frame(-borderwidth => $tmpbd, -relief => 'raised');
 $oFrame->pack(-side => 'top', -fill => 'both');
 $output = $oFrame->Scrolled(qw(Text -width 80 -height 14));
@@ -129,6 +142,7 @@ sub snmpsetup {
 				 RemotePort => $port,
 				 UseLongNames => 1, Timeout => 5000000);
     my $var = new SNMP::Varbind([$oid]);
+    stop(0);
     initText();
     return ($oid, $sess, $var);
 }
@@ -190,7 +204,7 @@ sub snmpwalk {
     (my $oid, my $sess, my $var) = snmpsetup();
     $status->configure(-text => "walking:  $host $community $oid");
     $top->update();
-    while (!$sess->{ErrorStr}) {
+    while (!$sess->{ErrorStr} && !$stopit) {
 	my $val = $sess->getnext($var);
 	last if (!defined($var->tag) ||
 		 $sess->{ErrorStr} ||
@@ -204,6 +218,7 @@ sub snmpwalk {
     } else {
 	$status->configure(-text => "");
     }
+    stop(1);
 }
 
 sub snmptable {
@@ -211,7 +226,7 @@ sub snmptable {
     $status->configure(-text => "collecting data:  $host $community $oid");
     $top->update();
     my (@tb, @tags, @index);
-    while (!$sess->{ErrorStr}) {
+    while (!$sess->{ErrorStr} && !$stopit) {
 	my $val = $sess->getnext($var);
 	last if (!defined($var->tag) ||
 		 $sess->{ErrorStr} ||
@@ -242,6 +257,7 @@ sub snmptable {
 	}
     }
     $status->configure(-text => "");
+    stop(1);
 }
 
 sub snmpgraph {
@@ -263,7 +279,7 @@ sub updateGraph() {
     my $tag = SNMP::translateObj($graphoid,0);
     my $var = new SNMP::Varbind([$oid]);
     $graphsess->{ErrorStr} = "";    
-    while (!$graphsess->{ErrorStr}) {
+    while (!$graphsess->{ErrorStr} && !$stopit) {
 	my $val = $graphsess->getnext($var);
 	last if ($graphsess->{ErrorStr} ||
 		 !defined($var->tag) ||
@@ -333,8 +349,25 @@ sub showInfo {
     $last = $oid;
 }
 	
+sub showAllChildren {
+    my $id = shift;
+    $id =~ s/^\.//;
+    my @pieces = split(/\./,$id);
+    my $i;
+#    showChildren("1");
+    for($i = 0; $i <= $#pieces; $i++) {
+	my $a = join(".", @pieces[0..$i]);
+	if (!($hlist->infoChildren($a))) {
+	    showChildren(join(".", $a));
+	}
+    }
+    $hlist->see($id);
+    $hlist->selectionClear($hlist->selectionGet);
+    $hlist->selectionSet($id);
+}
 sub showChildren {
     $OID = shift;
+    $OID =~ s/^\.//;
     my $oid = $OID;
     $mibOID->configure(-textvariable => \$OID);
     if ($hlist->infoChildren($oid)) {
@@ -446,17 +479,74 @@ sub loadNewMibModule {
 }
 
 sub loadIt {
-    my $tmp = shift;
     my $var = shift;
-    my $wid = shift;
-    $wid->destroy();
-    if ($$var ne "") {
-        my $ret = SNMP::loadModules($$var);
+    if ($var ne "") {
+        my $ret = SNMP::loadModules($var);
 	if ($ret) {
 	    showChildren("1.3.6.1");
 	    showChildren("1.3.6.1");
+	    return 1;
 	} else {
-	    $status->configure(-text => "Failed reading module $$var");
+	    $status->configure(-text => "Failed reading module $var");
+	    return 0;
 	}
+    }
+    return 0;
+}
+
+sub stop {
+    $stopit = shift;
+    if ($stopit) {
+	$stopBut->configure(-state => 'disabled');
+    } else {
+	$stopBut->configure(-state => 'normal');
+    }
+}
+
+sub entryBox {
+    my $title = shift;
+    my $text = shift;
+    my $var = shift;
+    my $callback = shift;
+    my $top = MainWindow->new();
+    my $newvar = $$var if defined($var);
+    $top->title($title);
+    my $f = $top->Frame();
+    $f->pack(-side => 'top');
+    $f->Label(-text => $text)->pack(-side => 'left');
+    my $e = $f->Entry(-textvariable => \$newvar);
+    $e->pack(-side => 'left');
+    $f = $top->Frame();
+    $f->pack(-side => 'bottom');
+    my $b = $f->Button(-text => 'Ok', 
+		       -command => [sub { my $w = shift;
+					  my $v1 = shift;
+					  my $v2 = shift;
+					  my $call = shift;
+					  my $ret = 1;
+					  $$v1 = $$v2 if defined($v1);
+					  $ret = $call->($$v2) 
+					      if defined($call);
+					  $w->destroy() if ($ret);}, $top, $var,
+				    \$newvar, $callback]);
+    $b->pack(-side => 'left');
+    $e->bind('<Return>',[$b,'invoke']);
+    $b = $f->Button(-text => 'Cancel', -command => [sub { my $w = shift;
+							  $w->destroy();}, $top
+						    ]);
+    $b->pack(-side => 'right');
+    $e->bind('<Escape>',[$b,'invoke']);
+    
+}
+
+sub findANode {     
+    my $val = shift;
+    my $tag = SNMP::translateObj($val);
+    if ($tag) {
+	showAllChildren($tag);
+	return 1;
+    } else {
+	$top->Dialog(-text => "$val not found")->Show();
+	return 0;
     }
 }
