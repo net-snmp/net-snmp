@@ -170,8 +170,8 @@ AGENT EXTENSIBILITY
   re-run configure and re-compile (or link against its libraries).  No
   modification of the distributed source files are necessary.  See the
   following files for details on how to go about this:
-  http://www.net-snmp.org/tutorial/toolkit/, AGENT.txt,
-  agent/mibgroup/examples/example.c, and agent/mibgroup/examples/example.h.
+  http://www.net-snmp.org/tutorial-5/toolkit/,
+  agent/mibgroup/examples/*.c
 
   Also, see the local/mib2c program and its README file for help in
   turning a textual mib description into a C code template.
@@ -180,7 +180,7 @@ AGENT EXTENSIBILITY
   agent can run as both a master agent and a subagent.  Additionally,
   a toolkit is provided that enables users of it to easily embed a
   agentx client into external applications.  See the tutorial at
-  http://www.net-snmp.org/tutorial/toolkit/ for an example of how
+  http://www.net-snmp.org/tutorial-5/toolkit/ for an example of how
   go about doing this.
 
 CONFIGURATION

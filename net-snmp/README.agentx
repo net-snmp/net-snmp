@@ -38,7 +38,7 @@ or when the agent is invoked as an AgentX subagent (i.e. via the name
 'agentxd' or with the '-X' flag).
 
   See the main project web page for an examples of a simple stand-alone
-subagent.  (http://www.net-snmp.org/tutorial/toolkit/)
+subagent.  (http://www.net-snmp.org/tutorial-5/toolkit/)
 
 
   Please report any problems experienced to the ucd-snmp-coders list.
