@@ -119,6 +119,8 @@ SOFTWARE.
 
     int             calculate_time_diff(struct timeval *,
                                         struct timeval *);
+    u_int           calculate_sectime_diff(struct timeval *now,
+                                           struct timeval *then);
 
 #ifndef HAVE_STRCASESTR
     char           *strcasestr(const char *, const char *);
