@@ -3313,13 +3313,7 @@ snmp_sess_read(void *sessp,
 	    break;
 	  }
 	}
-    } else if (pdu->command == SNMP_MSG_GET
-	       || pdu->command == SNMP_MSG_GETNEXT
-	       || pdu->command == SNMP_MSG_TRAP
-	       || pdu->command == SNMP_MSG_SET
-	       || pdu->command == SNMP_MSG_GETBULK
-	       || pdu->command == SNMP_MSG_INFORM
-	       || pdu->command == SNMP_MSG_TRAP2){
+    } else {
 	if (sp->callback)
 	    sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid, pdu,
 		     sp->callback_magic);
