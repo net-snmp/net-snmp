@@ -1517,13 +1517,14 @@ _sprint_objid(char *buf,
 	    char modbuf[256];
 	    char *mod = module_name(subtree->modid, modbuf);
 	    size_t len = strlen(mod);
-	    if ((int)len >= cp-tempbuf) {
-		memmove(tempbuf+len+1, cp, strlen(cp)+1);
-		cp = tempbuf+len+1;
+	    if ((int)len+1 >= cp-tempbuf) {
+		memmove(tempbuf+len+2, cp, strlen(cp)+1);
+		cp = tempbuf+len+2;
 	    }
-	    cp -= len+1;
+	    cp -= len+2;
 	    memcpy(cp, mod, len);
 	    cp[len] = ':';
+	    cp[len+1] = ':';
 	}
     }
     else if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID)) {
@@ -2205,6 +2206,7 @@ get_node(const char *name,
 	memcpy(module,name,(size_t)(cp-name));
 	module[cp-name] = 0;
 	cp++;		/* cp now point to the subidentifier */
+	if (*cp == ':') cp++;
 
 			/* 'cp' and 'name' *do* go that way round! */
 	res = get_module_node( cp, module, objid, objidlen );
