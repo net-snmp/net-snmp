@@ -101,14 +101,6 @@ extern          "C" {
 
 #endif                          /* ifAdminStatus_ENUMS */
 
-    /*
-     * TODO:
-     * value mapping (set notes at top of file)
-     */
-#define INTERNAL_IFADMINSTATUS_UP  1
-#define INTERNAL_IFADMINSTATUS_DOWN  2
-#define INTERNAL_IFADMINSTATUS_TESTING  3
-
 /*************************************************************
  * constants for enums for the MIB node
  * ifOperStatus (INTEGER / ASN_INTEGER)
@@ -125,15 +117,6 @@ extern          "C" {
 
 
 #endif                          /* ifOperStatus_ENUMS */
-
-    /*
-     * TODO:
-     * value mapping (set notes at top of file)
-     */
-#define INTERNAL_IFOPERSTATUS_UP  1
-#define INTERNAL_IFOPERSTATUS_DOWN  2
-#define INTERNAL_IFOPERSTATUS_TESTING  3
-
 
 
 
