@@ -625,9 +625,9 @@ if test "x$filebase" = "x$last"; then
     filebase="generic"
 fi
 ac_cv_MACHINE_INCLUDE_FILE="net-snmp/machine/$filebase.h"
-AC_MSG_RESULT($ac_cv_MACHINE_INCLUDE_FILE)
 
 changequote([, ])
+AC_MSG_RESULT($ac_cv_MACHINE_INCLUDE_FILE)
 AC_DEFINE_UNQUOTED(MACHINE_INCLUDE_FILE, "$ac_cv_MACHINE_INCLUDE_FILE")
 
 AC_PATH_PROG(CCPATH,$CC)
@@ -1048,8 +1048,8 @@ done
 dnl
 dnl Do hairy agent module processing.
 dnl
-changequote(, )
 AC_MSG_CHECKING(for and configuring mib modules to use)
+changequote(, )
 
 mibdir="agent/mibgroup"
 module_list=""
@@ -1096,12 +1096,14 @@ for i in $test_modules
   fi
 done
 
-AC_MSG_RESULT($new_module_list.)
 changequote([, ])
+AC_MSG_RESULT($new_module_list.)
 AC_MSG_CACHE_ADD(Agent MIB code:            $new_module_list)
-changequote(, )
 
 AC_MSG_CHECKING(for and configuring mib modules pieces to use)
+FD=AC_FD_MSG
+changequote(, )
+
 while test "x$new_module_list" != "x"; do
   for i in $new_module_list
     do
@@ -1125,9 +1127,13 @@ while test "x$new_module_list" != "x"; do
 	  for j in $new_list
 	    do
 	    if test ! -f $srcdir/$mibdir/$j.h; then
+              changequote([, ])
 	      AC_MSG_ERROR(mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir)
+              changequote(, )
 	    elif echo " $new_with_out_mib_modules " | grep " $j " > /dev/null; then
+              changequote([, ])
 	      AC_MSG_WARN(mib module "$i" requires module "$j" but you told me to compile without it)
+              changequote(, )
 	    elif echo " $module_list $new_list_two $new_module_list " | grep " $j " > /dev/null; then
 	      :
 	    else
@@ -1152,7 +1158,9 @@ while test "x$new_module_list" != "x"; do
 	    done
 	fi
       else
+        changequote([, ])
 	AC_MSG_ERROR(module files $i.h or $i.c could not be found in $srcdir/$mibdir)
+        changequote(, )
       fi
       module_list="$module_list $i"
       echo '#include "'"mibgroup/$i.h"'"' >> $mibdir/mib_module_includes.h
@@ -1175,14 +1183,16 @@ while test "x$new_module_list" != "x"; do
 	fi
       fi
       if grep config_load_mib $srcdir/$mibdir/$i.h > /dev/null 2>&1; then
+        changequote([, ])
       	AC_MSG_WARN(mib module "$i" uses the "config_load_mib" directive, which is no longer supported.  It probably won't work.)
+        changequote(, )
       fi
       grep config_parse_dot_conf $srcdir/$mibdir/$i.h | sed 's@.*config_parse_dot_conf(\([^)]*\), *\([^),]*\), *\([^),]*\), *\([^),]*\)).*@register_config_handler("snmpd",\1, \2, \3, \4);@' >> $mibdir/mib_module_dot_conf.h
       sym="`echo ${i} | sed 's/[^a-zA-Z0-9_]/_/g' | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`"
       echo "/* Define if compiling with the ${i} module files.  */" >> include/net-snmp/agent/mib_module_config.h
       echo "#define USING_${sym}_MODULE 1" >> include/net-snmp/agent/mib_module_config.h
       echo " " >> include/net-snmp/agent/mib_module_config.h
-      echo $ac_n " $i$ac_c" >&AC_FD_MSG
+      echo $ac_n " $i$ac_c" >&$FD
     fi
   done
   new_module_list="$new_list_two"
@@ -1360,12 +1370,12 @@ AC_ARG_WITH(libwrap,
 		     int allow_severity = 0;
 		     int deny_severity  = 0;
 		    ],[hosts_access((void *)0)],
-
+        [
 	    AC_MSG_RESULT(yes)
 	    AC_DEFINE(USE_LIBWRAP)
 	    test "$with_libwrap" != no -a "$with_libwrap" != yes && WRAPLIBS="-L$with_libwrap/lib"
-	    WRAPLIBS="$WRAPLIBS -lwrap",
-
+	    WRAPLIBS="$WRAPLIBS -lwrap"],
+        [
 	    AC_MSG_RESULT(no)
 	    dnl Linux RedHat 6.1 won't link libwrap without libnsl
 	    AC_CHECK_FUNC(yp_get_default_domain, ,
@@ -1383,7 +1393,8 @@ AC_ARG_WITH(libwrap,
 
 			AC_MSG_RESULT(no)
 			AC_MSG_ERROR(Asked to use libwrap but I couldn't find it.))
-	    CPPFLAGS=${_cppflags})
+        ])
+    CPPFLAGS=${_cppflags}
     LDFLAGS=${_ldflags}
     LIBS=${_libs}
   fi
