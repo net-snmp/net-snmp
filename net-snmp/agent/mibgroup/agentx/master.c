@@ -90,7 +90,6 @@ real_init_master(void)
             cp1 = cp2+1;
 	}
     
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
         if (sess.peername[0] == '/') {
             /*
              *  If this is a Unix pathname,
@@ -106,7 +105,6 @@ real_init_master(void)
                          sess.peername);
             }
         }
-#endif
     
         /*
          *  Otherwise, let 'snmp_open' interpret the string.
@@ -142,7 +140,7 @@ real_init_master(void)
             }
         }
 
-#ifdef SNMP_TRANSPORT_UNIX_DOMAIN
+
     /*
      * Apply any settings to the ownership/permissions of the AgentX socket
      */
@@ -166,7 +164,7 @@ real_init_master(void)
             agentx_sock_group = -1;
         chown(sess.peername, agentx_sock_user, agentx_sock_group);
     }
-#endif
+
         /*
          * If we've processed the last (or only) socket, then we're done.
          */

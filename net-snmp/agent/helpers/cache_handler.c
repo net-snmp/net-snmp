@@ -122,8 +122,8 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
 
     cache = (netsnmp_cache *) handler->myvoid;
     if (!caching_enabled || !cache || !cache->enabled) {
-        DEBUGMSG(("helper:cache_handler", " caching disabled, "
-                    "cache not found or cache is disabled\n"));
+        DEBUGMSGTL(("helper:cache_handler", "caching disabled, "
+                    "cache not found or cache is disabled"));
         goto done;
     }
 
@@ -143,18 +143,14 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
             /*
              * If we've got a valid cache, then release it before reloading
              */
-            if (cache->reload_cache && cache->valid) {
-                ret = cache->reload_cache(cache, cache->magic);
+            if (cache->valid) {
+                cache->free_cache(cache, cache->magic);
+                cache->valid = 0;
             }
-            else {
-                if (cache->valid && cache->free_cache)
-                    cache->free_cache(cache, cache->magic);
-                ret = cache->load_cache(cache, cache->magic);
-            }
+            ret = cache->load_cache(cache, cache->magic);
             if (ret < 0) {
                 DEBUGMSG(("helper:cache_handler", " load failed (%d)\n",
                           ret));
-                cache->valid = 0;
                 goto done;      /* XXX - or return ? */
             }
             cache->valid = 1;
@@ -195,8 +191,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     case MODE_SET_UNDO:
         break;
     case MODE_SET_COMMIT:
-        if (cache->valid &&
-            !(cache->flags & NETSNMP_CACHE_DONT_INVALIDATE_ON_SET) ) {
+        if (cache->valid /* && some flag ? */ ) {
             cache->free_cache(cache, cache->magic);
             cache->valid = 0;
         }
@@ -236,8 +231,7 @@ release_cached_resources(unsigned int regNo, void *clientargs)
                 cache_timeout = cache_default_timeout;
             if (!cache->timestamp ||
                 atime_ready(cache->timestamp, 1000 * cache_timeout)) {
-                if(! (cache->flags & NETSNMP_CACHE_DONT_FREE_EXPIRED))
-                    cache->free_cache(cache, cache->magic);
+                cache->free_cache(cache, cache->magic);
                 cache->valid = 0;
             } else {
                 cache_outstanding_valid = 1;

@@ -1,12 +1,3 @@
---
---
---
---  CHANGE SPACES TO TABS
---
---
---
-
-
 NET-SNMP-EXAMPLES-MIB DEFINITIONS ::= BEGIN
 
 --
@@ -17,7 +8,7 @@ IMPORTS
     MODULE-IDENTITY, OBJECT-TYPE, Integer32 FROM SNMPv2-SMI
     SnmpAdminString                         FROM SNMP-FRAMEWORK-MIB
     netSnmp                                 FROM NET-SNMP-MIB
-    RowStatus, StorageType, DisplayString   FROM SNMPv2-TC
+    RowStatus, StorageType                  FROM SNMPv2-TC
     InetAddressType, InetAddress            FROM INET-ADDRESS-MIB
 ;
 
@@ -215,125 +206,6 @@ netSnmpHostRowStatus OBJECT-TYPE
     STATUS       current
     DESCRIPTION "The status of this conceptual row."
     ::= { netSnmpHostsEntry 5 }
-
-
---
--- Tables used in the MFD tutorial examples
---   (agent/mibgroup/examples/mfd/rfc)
---
-
-nsetMFDTables        OBJECT IDENTIFIER ::= { netSnmpExampleTables 3 }
-
-netSnmpRFCTable OBJECT-TYPE
-    SYNTAX      SEQUENCE OF NetSnmpRFCEntry
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-	"This table contains information about IETF Working Group
-         RFCs.
-
-	 This example table is implemented in the files found in
-	 agent/mibgroup/examples/mfd/rfc directory."
-    ::= { nsetMFDTables 1 }
-
-netSnmpRFCEntry OBJECT-TYPE
-    SYNTAX      NetSnmpRFCEntry
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-	"A row describing a given IETF RFC."
-    INDEX   { nsRFCNum }
-    ::= {netSnmpRFCTable 1 }
-
-NetSnmpRFCEntry ::= SEQUENCE {
-        nsRFCNum             Integer32,
-	nsRFCTitle           DisplayString,
-        nsRFCAuthorCount     Integer32
-}
-
-nsRFCNum OBJECT-TYPE
-    SYNTAX      Integer32 (1..2147483647))
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-	"The RFC number for this row."
-    ::= { netSnmpRFCEntry 1 }
-
-nsRFCTitle OBJECT-TYPE
-    SYNTAX      DisplayString
-    MAX-ACCESS  read-write
-    STATUS      current
-    DESCRIPTION
-	"The RFC title for this row. The title must begin and end with
-        a single quote ().
-
-        The arbitrary requirement for quotes provides an example of a
-        descriptions clauses that imposes restrictions that mib2c
-        can not handle automatically."
-    ::= { netSnmpRFCEntry 2 }
-
-nsRFCAuthorCount OBJECT-TYPE
-    SYNTAX      Integer32
-    MAX-ACCESS  read-only
-    STATUS      current
-    DESCRIPTION
-	"The RFC number for this row."
-    ::= { netSnmpRFCEntry 3 }
-
---
--- Another MFD example
---
-
-netSnmpRFCAuthorTable OBJECT-TYPE
-    SYNTAX      SEQUENCE OF NetSnmpRFCAuthorEntry
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-	"This table contains information about IETF Working Group
-         RFC Authors.
-
-	 This example table is implemented in the files found in
-	 agent/mibgroup/examples/mfd/rfc directory."
-    ::= { nsetMFDTables 2 }
-
-netSnmpRFCAuthorEntry OBJECT-TYPE
-    SYNTAX      NetSnmpRFCAuthorEntry
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-	"A row describing a given working group chair"
-    INDEX   { nsRFCNum, nsRFCAuthorName }
-    ::= {netSnmpRFCAuthorTable 1 }
-
-NetSnmpRFCAuthorEntry ::= SEQUENCE {
-	nsRFCAuthorName            SnmpAdminString,
-	nsRFCAuthorEmail           DisplayString,
-	nsRFCAuthorRowStatus       RowStatus
-}
-
-nsRFCAuthorName OBJECT-TYPE
-    SYNTAX      SnmpAdminString (SIZE(1..64))
-    MAX-ACCESS  read-create
-    STATUS      current
-    DESCRIPTION
-	"The name of this RFC author."
-    ::= { netSnmpRFCAuthorEntry 1 }
-
-nsRFCAuthorEmail OBJECT-TYPE
-    SYNTAX      DisplayString
-    MAX-ACCESS  read-create
-    STATUS      current
-    DESCRIPTION
-	"The email address of this RFC author."
-    ::= { netSnmpRFCAuthorEntry 2 }
-
-nsRFCAuthorRowStatus OBJECT-TYPE
-    SYNTAX      RowStatus
-    MAX-ACCESS  read-create
-    STATUS      current
-    DESCRIPTION
-	"The RowStatus for this row."
-    ::= { netSnmpRFCAuthorEntry 3 }
 
 
 --
