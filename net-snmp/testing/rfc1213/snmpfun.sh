@@ -53,9 +53,10 @@ get_snmpv3_variable()
 
 get_snmp_table()
 {
-	test_start "Access table $2.0 by SNMPv$1..."
-	CAPTURE "snmptable -v $1 -c test $myport $2"
-	if [ $? != 0 ];then
+	test_start "Access table $2 by SNMPv$1..."
+	CAPTURE "snmpgetnext -Of -v $1 -c test $myport $2"
+        CHECKFILE "\.$d\."
+        if [ "$snmp_last_test_result" = 0 ] ; then
 		test_finish FAIL
 	else
 		test_finish PASS
@@ -66,8 +67,9 @@ get_snmp_table()
 get_snmpv3_table()
 {
   	test_start "Access table $2 by SNMPv3..."
-	CAPTURE "snmptable -v 3 -u testrwuser $TEST_AUTHPRIV_PARMS $myport $2"
-	if [ $? != 0 ];then
+	CAPTURE "snmpgetnext -Of -v 3 -u testrwuser $TEST_AUTHPRIV_PARMS $myport $2"
+        CHECKFILE "\.$d\."
+        if [ "$snmp_last_test_result" = 0 ] ; then
 		test_finish FAIL
 	else
 		test_finish PASS
