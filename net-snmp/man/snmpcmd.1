@@ -180,30 +180,39 @@ attempted using UDP/IPv4 to port 161 of the given host.  Otherwise,
 the <transport-address> part of the specification is parsed according
 to the following table:
 .RS 4
-.TP 24
+.TP 28
 .BR "<transport-specifier>"
 .BR "<transport-address> format"
-.IP "udp" 24
+.IP "udp" 28
 hostname[:port]
 .I or
 IPv4-address[:port]
-.IP "tcp" 24
+.IP "tcp" 28
 hostname[:port]
 .I or
 IPv4-address[:port]
-.IP "unix" 24
+.IP "unix" 28
 pathname
-.IP "ipx" 24
+.IP "ipx" 28
 [network]:node[/port]
-.IP "aal5pvc" 24
+.TP 28 
+.IR "" "aal5pvc " or " pvc"
 [interface.][VPI.]VCI
-.IP "udp6" 24
+.TP 28
+.IR "" "udp6 " or " udpv6 " or " udpipv6"
+hostname[:port]
+.I or
+IPv6-address[:port]
+.TP 28
+.IR "" "tcp6 " or " tcpv6 " or " tcpipv6"
 hostname[:port]
 .I or
 IPv6-address[:port]
 .RE
 .PP
-Here are some examples, along with their interpretation:
+Note that <transport-specifier> strings are case-insensitive so that,
+for example, "tcp" and "TCP" are equivalent.  Here are some examples,
+along with their interpretation:
 .TP 24
 .IR "hostname:161"
 perform query using UDP/IPv4 datagrams to
@@ -222,9 +231,7 @@ connect to
 .I hostname
 on port
 .I 1161
-using TCP/IPv4 and perform query over that connection.  Note that
-<transport-specifier> strings are case-insensitive, so "tcp" and "TCP"
-are equivalent.
+using TCP/IPv4 and perform query over that connection.
 .TP 24
 .IR "ipx::00D0B7AAE308"
 perform query using IPX datagrams to node number 
@@ -271,6 +278,11 @@ on
 .IR "udp6:fe80::2d0:b7ff:fe21:c6c0"
 perform the query using UDP/IPv6 datagrams to port 161 at address
 .IR fe80::2d0:b7ff:fe21:c6c0 .
+.TP 24
+.IR "TCPIPv6:::1"
+connect to port 161 on the local host
+.IR "" ( ::1 
+in IPv6 parlance) using TCP/IPv6 and perform query over that connection.
 .PP
 Note that not all the transport domains listed above will always be
 available; for instance, hosts with no IPv6 support will not be able
