@@ -1175,13 +1175,11 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
     }
 
     *oid_len = (prefix ? n_subid + 5 : n_subid);
-#ifndef solaris2
     DEBUGINDENTLESS();
     DEBUGPRINTINDENT("dumpv_recv");
     DEBUGMSG(("dumpv_recv", "OID: "));
     DEBUGMSGOID(("dumpv_recv", oid_buf, *oid_len));
     DEBUGMSG(("dumpv_recv", "\n"));
-#endif
     return buf_ptr;
 }
 
