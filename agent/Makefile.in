@@ -132,7 +132,7 @@ agent_registry.o: ./agent_read_config.h ./var_struct.h ./../snmplib/snmp.h
 agent_registry.o: ./../snmplib/mib.h ./../snmplib/snmp_debug.h
 agent_registry.o: ./../snmplib/snmp_logging.h 
 agent_registry.o:  ./../snmplib/read_config.h
-agent_registry.o: ./../snmplib/tools.h m2m.h snmp_vars_m2m.h snmpd.h
+agent_registry.o: ./../snmplib/tools.h m2m.h snmpd.h
 agent_registry.o: mibgroup/struct.h mibgroup/mib_module_includes.h
 agent_registry.o: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
 agent_registry.o: mibgroup/host.h mibgroup/target.h
@@ -191,7 +191,7 @@ snmp_vars.o: ./var_struct.h ./../snmplib/snmp.h ./../snmplib/mib.h
 snmp_vars.o: ./../snmplib/snmp_debug.h ./../snmplib/snmp_logging.h
 snmp_vars.o: ./../snmplib/read_config.h ./../snmplib/tools.h
 snmp_vars.o: ./../snmplib/snmpv3.h ./../snmplib/snmpusm.h m2m.h
-snmp_vars.o: snmp_vars_m2m.h ../snmplib/system.h kernel.h snmp_vars.h
+snmp_vars.o: ../snmplib/system.h kernel.h snmp_vars.h
 snmp_vars.o: mibgroup/struct.h mibgroup/mib_module_includes.h
 snmp_vars.o: mibgroup/mibII.h mibgroup/ucd_snmp.h mibgroup/snmpv3mibs.h
 snmp_vars.o: mibgroup/host.h mibgroup/target.h
