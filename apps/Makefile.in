@@ -9,7 +9,7 @@ TARG		= snmpget snmpgetnext snmpset snmpusm			\
 			snmpwalk snmpbulkwalk snmptable			\
 			snmptrap snmpbulkget				\
 			snmptranslate snmpstatus snmpdelta snmptest	\
-			encode_keychange snmpdf
+			encode_keychange snmpdf snmpvacm
 
 SBINTARG	= snmptrapd
 SUBDIRS		= snmpnetstat
@@ -60,8 +60,8 @@ snmptable:    snmptable.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
 snmptest:    snmptest.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
 	$(LINK) -o $@ snmptest.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmptrapd:    snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) $(USELIBS)
-	$(LINK) -o $@ snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+snmptrapd:    snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) snmptrapd_log.$(OSUFFIX) $(USELIBS)
+	$(LINK) -o $@ snmptrapd.$(OSUFFIX) snmptrapd_handlers.$(OSUFFIX) snmptrapd_log.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptrap:    snmptrap.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
 	$(LINK) -o $@ snmptrap.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
@@ -73,6 +73,9 @@ snmpset:    snmpset.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
 
 snmpusm:    snmpusm.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
 	$(LINK) -o $@ snmpusm.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
+
+snmpvacm:    snmpvacm.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
+	$(LINK) -o $@ snmpvacm.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpgetnext:    snmpgetnext.$(OSUFFIX) $(PARSEOBJS) $(USELIBS)
 	$(LINK) -o $@ snmpgetnext.$(OSUFFIX) $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
@@ -247,6 +250,12 @@ snmptrapd_handlers.o:  ./../snmplib/getopt.h
 snmptrapd_handlers.o:  ./../snmplib/asn1.h
 snmptrapd_handlers.o: ./../snmplib/mib.h ./../snmplib/snmp_api.h
 snmptrapd_handlers.o: ./../snmplib/read_config.h ./../snmplib/snmp_debug.h
+snmptrapd_log.o: ../m/generic.h  
+snmptrapd_log.o:  ./../snmplib/asn1.h
+snmptrapd_log.o: ./../snmplib/snmp_api.h ./../snmplib/snmp_impl.h
+snmptrapd_log.o: ./../snmplib/mib.h
+snmptrapd_log.o: ./../snmplib/snmp.h 
+snmptrapd_log.o: ./../snmplib/tools.h
 snmpusm.o: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
 snmpusm.o:  ./../snmplib/getopt.h
 snmpusm.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
@@ -256,6 +265,15 @@ snmpusm.o: snmp_parse_args.h ./../snmplib/int64.h ./../snmplib/tools.h
 snmpusm.o: ./../snmplib/keytools.h ./../snmplib/snmp-tc.h
 snmpusm.o: ./../snmplib/transform_oids.h ./../snmplib/snmpv3.h
 snmpusm.o: ./../snmplib/default_store.h
+snmpvacm.o: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h ../m/generic.h
+snmpvacm.o:  ./../snmplib/getopt.h
+snmpvacm.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
+snmpvacm.o: ./../snmplib/snmp_impl.h ./../snmplib/snmp_client.h
+snmpvacm.o: ./../snmplib/mib.h ./../snmplib/snmp.h ./../snmplib/system.h
+snmpvacm.o: snmp_parse_args.h ./../snmplib/int64.h ./../snmplib/tools.h
+snmpvacm.o: ./../snmplib/keytools.h ./../snmplib/snmp-tc.h
+snmpvacm.o: ./../snmplib/transform_oids.h ./../snmplib/snmpv3.h
+snmpvacm.o: ./../snmplib/default_store.h
 snmpwalk.o: ../config.h ../s/linux.h ../s/sysv.h ../s/generic.h
 snmpwalk.o: ../m/generic.h  
 snmpwalk.o:  ./../snmplib/getopt.h

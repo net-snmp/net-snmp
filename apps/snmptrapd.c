@@ -134,6 +134,8 @@ int dropauth = 0;
 int running = 1;
 int reconfig = 0;
 
+char * log_fmt_str = (char *) NULL; /* how to format logging to stdout */
+
 /*
  * These definitions handle 4.2 systems without additional syslog facilities.
  */
@@ -180,6 +182,15 @@ struct timeval Now;
 void init_syslog(void);
 
 void update_config (void);
+
+extern unsigned long format_plain_trap (char * bfr,
+					unsigned long len,
+					struct snmp_pdu * pdu);
+
+extern unsigned long format_trap (char * bfr,
+				  unsigned long len,
+				  char * format_str,
+				  struct snmp_pdu * pdu);
 
 #ifdef WIN32
 void openlog(const char *app, int options, int fac) {
@@ -416,6 +427,8 @@ int snmp_input(int op,
 	       struct snmp_pdu *pdu,
 	       void *magic)
 {
+#define LCL_OUT_BFR_LEN 1000
+    char out_bfr[LCL_OUT_BFR_LEN];
     struct variable_list *vars;
     struct sockaddr_in *pduIp   = (struct sockaddr_in *)&(pdu->address);
     char buf[64], oid_buf [SPRINT_MAX_LEN], *cp;
@@ -447,43 +460,11 @@ int snmp_input(int op,
 		trapOid[trapOidLen++] = pdu->specific_type;
 	    }
 	    if (Print && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
-		time (&timer);
-		tm = localtime (&timer);
-                printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s] ",
-		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
-		       tm->tm_hour, tm->tm_min, tm->tm_sec,
-                       host ? host->h_name : inet_ntoa(agentIp->sin_addr),
-                       inet_ntoa(agentIp->sin_addr));
-		if (agentIp->sin_addr.s_addr != pduIp->sin_addr.s_addr) {
-			if( ds_get_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP) )
-				host = NULL;
-			else
-		    host = gethostbyaddr ((char *)&pduIp->sin_addr,
-					  sizeof (pduIp->sin_addr), AF_INET);
-		    printf("(via %s [%s]) ",
-			    host ? host->h_name : inet_ntoa(pduIp->sin_addr),
-			    inet_ntoa(pduIp->sin_addr));
-		}
-		printf(" %s:\n",
- 		       sprint_objid (oid_buf, pdu->enterprise, pdu->enterprise_length));
-		if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
-		    sprint_objid(oid_buf, trapOid, trapOidLen);
-		    cp = strrchr(oid_buf, '.');
-		    if (cp) cp++;
-		    else cp = oid_buf;
-		    printf("\t%s Trap (%s) Uptime: %s\n",
-			   trap_description(pdu->trap_type), cp,
-			   uptime_string(pdu->time, buf));
-		}
-		else
-		    printf("\t%s Trap (%ld) Uptime: %s\n",
-			   trap_description(pdu->trap_type), pdu->specific_type,
-			   uptime_string(pdu->time, buf));
-		for(vars = pdu->variables; vars; vars = vars->next_variable) {
-		    printf ("\t");
-		    print_variable(vars->name, vars->name_length, vars);
-		}
-                printf("\n");
+	        if ((log_fmt_str == (char *) NULL) || (log_fmt_str[0] == '\0'))
+	            (void) format_plain_trap (out_bfr, LCL_OUT_BFR_LEN, pdu);
+	        else
+		    (void) format_trap (out_bfr, LCL_OUT_BFR_LEN, log_fmt_str, pdu);
+	        printf ("%s", out_bfr);
 	    }
 	    if (Syslog && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 	    	varbufidx=0;
@@ -536,18 +517,11 @@ int snmp_input(int op,
 	    host = gethostbyaddr ((char *)&pduIp->sin_addr,
 				  sizeof (pduIp->sin_addr), AF_INET);
 	    if (Print) {
-		time (&timer);
-		tm = localtime (&timer);
-                printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d %s [%s]:\n",
-		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
-		       tm->tm_hour, tm->tm_min, tm->tm_sec,
-                       host ? host->h_name : inet_ntoa(pduIp->sin_addr),
-                       inet_ntoa(pduIp->sin_addr));
-		for (vars = pdu->variables; vars; vars = vars->next_variable) {
-		    printf("\t");
-		    print_variable(vars->name, vars->name_length, vars);
-		}
-		printf("\n");
+	        (void) format_trap (out_bfr, 
+				    LCL_OUT_BFR_LEN, 
+				    "%.4y-%.2m-%.2d %.2h:%.2n:%.2s %h [%i]:\n%v\n",
+				    pdu);
+	        printf ("%s", out_bfr);
 	    }
 	    if (Syslog) {
 	    	varbufidx=0;
@@ -608,6 +582,7 @@ int snmp_input(int op,
 	fprintf(stderr, "Timeout: This shouldn't happen!\n");
     }
     return 1;
+#undef LCL_OUT_BFR_LEN
 }
 
 
@@ -623,6 +598,7 @@ void usage(void)
   -D[TOKEN,...] turn on debugging output, optionally by the list of TOKENs.\n\
   -p <port> Local port to listen from\n\
   -P        Print to standard output\n\
+  -F \"...\" Use custom format for logging to standard output\n\
   -u PIDFILE create PIDFILE with process id\n\
   -e        Print Event # (rising/falling alarm], etc.\n\
   -s        Log syslog\n\
@@ -696,7 +672,7 @@ int main(int argc, char *argv[])
     /*
      * usage: snmptrapd [-D] [-u PIDFILE] [-p #] [-P] [-s] [-l [d0-7]] [-d] [-e] [-a]
      */
-    while ((arg = getopt(argc, argv, "VdnqRD:p:m:M:PO:esSafl:Hu:c:C")) != EOF){
+    while ((arg = getopt(argc, argv, "VdnqRD:p:m:M:PO:esSafl:Hu:c:CF:")) != EOF){
 	switch(arg) {
 	case 'V':
             fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -797,6 +773,10 @@ int main(int argc, char *argv[])
         case 'n':
             ds_set_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP, 1);
             break;
+
+	case 'F':
+	    log_fmt_str = optarg;
+	    break;
 
 	default:
 	    fprintf(stderr,"invalid option: -%c\n", arg);
