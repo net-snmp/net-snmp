@@ -441,7 +441,7 @@ read_config_files (int when)
   }
   
   if (config_errors) {
-    fprintf(stderr, "ucd-snmp: errors in config file - abort.\n");
+    snmp_log(LOG_ERR, "ucd-snmp: %d errors in config file\n", config_errors);
 /*    exit(1); */
   }
 }
@@ -455,10 +455,10 @@ void read_config_print_usage(const char *lead)
     lead = "";
 
   for(ctmp = config_files; ctmp != NULL; ctmp = ctmp->next) {
-    fprintf(stderr, "%sIn %s.conf and %s.local.conf:\n", lead, ctmp->fileHeader,
+    snmp_log(LOG_INFO, "%sIn %s.conf and %s.local.conf:\n", lead, ctmp->fileHeader,
             ctmp->fileHeader);
     for(ltmp = ctmp->start; ltmp != NULL; ltmp = ltmp->next) {
-      fprintf(stderr, "%s%s%-15s %s\n", lead, lead, ltmp->config_token,
+      snmp_log(LOG_INFO, "%s%s%-15s %s\n", lead, lead, ltmp->config_token,
               ltmp->help);
     }
   }
@@ -555,7 +555,7 @@ void config_perror(const char *string)
 
 void config_pwarn(const char *string)
 {
-  fprintf(stderr, "%s: line %d: %s\n", curfilename, linecount, string);
+  snmp_log(LOG_WARNING, "%s: line %d: %s\n", curfilename, linecount, string);
 }
 
 /* skip all white spaces and return 1 if found something either end of
