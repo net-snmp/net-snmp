@@ -4,6 +4,7 @@
 #include "mibgroup/snmpv3mibs.h"
 #include "mibgroup/smux.h"
 #include "mibgroup/mibII/system_mib.h"
+#include "mibgroup/mibII/snmp_mib.h"
 #include "mibgroup/mibII/vacm_vars.h"
 #include "mibgroup/target.h"
 #include "mibgroup/ucd-snmp/proc.h"

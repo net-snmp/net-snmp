@@ -89,6 +89,10 @@ SOURCE=..\..\agent\mibgroup\mibII\system_mib.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\mibgroup\mibII\snmp_mib.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\mibgroup\mibII\vacm_vars.c
 # End Source File
 # End Group
