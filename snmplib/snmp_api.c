@@ -1,3 +1,7 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /******************************************************************
 	Copyright 1989, 1991, 1992 by Carnegie Mellon University
 
@@ -19,6 +23,12 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 /** @defgroup library The Net-SNMP library
  *  @{
@@ -4020,6 +4030,14 @@ _snmp_parse(void *sessp,
     default:
         ERROR_MSG("unsupported snmp message version");
         snmp_increment_statistic(STAT_SNMPINBADVERSIONS);
+
+        /*
+         * need better way to determine OS independent
+         * INT32_MAX value, for now hardcode
+         */
+        if (pdu->version < 0 || pdu->version > 2147483647) {
+            snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+        }
         session->s_snmp_errno = SNMPERR_BAD_VERSION;
         break;
     }
