@@ -524,6 +524,10 @@ _init_snmp (void)
     }
 #endif
     ds_set_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT, s_port);
+#ifdef USE_REVERSE_ASNENCODING
+    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE,
+                   DEFAULT_ASNENCODING_DIRECTION);
+#endif
 }
 
 /*
@@ -550,6 +554,8 @@ void
 register_default_handlers(void) {
   ds_register_config(ASN_BOOLEAN, "snmp","dumpPacket",
                      DS_LIBRARY_ID, DS_LIB_DUMP_PACKET);
+  ds_register_config(ASN_BOOLEAN, "snmp","reverseEncodeBER",
+                     DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE);
   ds_register_config(ASN_INTEGER, "snmp","defaultPort",
                      DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT);
   ds_register_config(ASN_OCTET_STR, "snmp","defCommunity",
@@ -590,7 +596,6 @@ init_snmp(const char *type)
 
   snmp_debug_init(); /* should be done first, to turn on debugging ASAP */
   if ( type != NULL )
-    ds_set_string(DS_LIBRARY_ID, DS_LIB_APPTYPE, type);
   init_callbacks();
   init_snmp_logging();
   snmp_init_statistics();
@@ -1679,9 +1684,13 @@ snmpv3_build(struct snmp_session	*session,
 
   DEBUGDUMPSECTION("send", "SNMPv3 Message");
 #ifdef USE_REVERSE_ASNENCODING
-  ret = snmpv3_packet_rbuild(pdu, packet, out_length, NULL, 0);
-#else
-  ret = snmpv3_packet_build(pdu, packet, out_length, NULL, 0);
+  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
+      ret = snmpv3_packet_rbuild(pdu, packet, out_length, NULL, 0);
+  } else {
+#endif
+      ret = snmpv3_packet_build(pdu, packet, out_length, NULL, 0);
+#ifdef USE_REVERSE_ASNENCODING
+  }
 #endif
   DEBUGINDENTLESS();
   if (-1 != ret) {
@@ -2237,83 +2246,90 @@ _snmp_build(struct snmp_session *session,
 
         DEBUGMSGTL(("snmp_send","Building SNMPv%d message...\n", (1 + pdu->version)));
 #ifdef USE_REVERSE_ASNENCODING
-        DEBUGDUMPSECTION("send", "PDU");
-        cp = snmp_pdu_rbuild(pdu, packet, out_length);
-        if (cp == NULL)
-            return -1;
+        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
+            DEBUGDUMPSECTION("send", "PDU");
+            cp = snmp_pdu_rbuild(pdu, packet, out_length);
+            if (cp == NULL)
+                return -1;
 
-        DEBUGDUMPHEADER("send", "Community String");
-        cp = asn_rbuild_string(cp, out_length,
-                               (u_char)
-                               (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
-                               pdu->community, pdu->community_len);
-        DEBUGINDENTLESS();
-        if (cp == NULL)
-            return -1;
+            DEBUGDUMPHEADER("send", "Community String");
+            cp = asn_rbuild_string(cp, out_length,
+                                   (u_char)
+                                   (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
+                                   pdu->community, pdu->community_len);
+            DEBUGINDENTLESS();
+            if (cp == NULL)
+                return -1;
 
         
         /* store the version field */
-        DEBUGDUMPHEADER("send", "SNMP Version Number");
+            DEBUGDUMPHEADER("send", "SNMP Version Number");
 
-        version = pdu->version;
-        cp = asn_rbuild_int(cp, out_length,
-                            (u_char)
-                            (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-                            (long *) &version, sizeof(version));
-        DEBUGINDENTLESS();
-        if (cp == NULL)
-            return -1;
+            version = pdu->version;
+            cp = asn_rbuild_int(cp, out_length,
+                                (u_char)
+                                (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+                                (long *) &version, sizeof(version));
+            DEBUGINDENTLESS();
+            if (cp == NULL)
+                return -1;
 
         /* build the final sequence */
-        if (pdu->version == SNMP_VERSION_1)
-            DEBUGDUMPSECTION("send", "SNMPv1 Message");
-        else
-            DEBUGDUMPSECTION("send", "SNMPv2c Message");
-        cp = asn_rbuild_sequence(cp, out_length,
-                                 (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
-                                 packet - cp);
+            if (pdu->version == SNMP_VERSION_1)
+                DEBUGDUMPSECTION("send", "SNMPv1 Message");
+            else
+                DEBUGDUMPSECTION("send", "SNMPv2c Message");
+            cp = asn_rbuild_sequence(cp, out_length,
+                                     (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+                                     packet - cp);
 
-        if (cp == NULL)
-            return -1;
+            if (cp == NULL)
+                return -1;
 
-        return 0;
+            return 0;
+        } else {
 
-#else /* !USE_REVERSE_ASNENCODING */
-        /* Save current location and build SEQUENCE tag and length
-           placeholder for SNMP message sequence
-          (actual length will be inserted later) */
-        cp = asn_build_sequence(packet, out_length,
-                                (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
-                                0);
-        if (cp == NULL)
-            return -1;
-        h0e = cp;
+#endif /* USE_REVERSE_ASNENCODING */
+            /* Save current location and build SEQUENCE tag and length
+               placeholder for SNMP message sequence
+               (actual length will be inserted later) */
+            cp = asn_build_sequence(packet, out_length,
+                                    (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR),
+                                    0);
+            if (cp == NULL)
+                return -1;
+            h0e = cp;
 
-        if (pdu->version == SNMP_VERSION_1)
-            DEBUGDUMPSECTION("send", "SNMPv1 Message");
-        else
-            DEBUGDUMPSECTION("send", "SNMPv2c Message");
+            if (pdu->version == SNMP_VERSION_1)
+                DEBUGDUMPSECTION("send", "SNMPv1 Message");
+            else
+                DEBUGDUMPSECTION("send", "SNMPv2c Message");
         
-        /* store the version field */
-        DEBUGDUMPHEADER("send", "SNMP Version Number");
+            /* store the version field */
+            DEBUGDUMPHEADER("send", "SNMP Version Number");
 
-        version = pdu->version;
-        cp = asn_build_int(cp, out_length,
-                    (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
-                    (long *) &version, sizeof(version));
-        DEBUGINDENTLESS();
-        if (cp == NULL)
-            return -1;
+            version = pdu->version;
+            cp = asn_build_int(cp, out_length,
+                               (u_char)
+                               (ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
+                               (long *) &version, sizeof(version));
+            DEBUGINDENTLESS();
+            if (cp == NULL)
+                return -1;
 
-        /* store the community string */
-        DEBUGDUMPHEADER("send", "Community String");
-        cp = asn_build_string(cp, out_length,
-                    (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
-                    pdu->community, pdu->community_len);
-        DEBUGINDENTLESS();
-        if (cp == NULL)
-            return -1;
-        break;
+            /* store the community string */
+            DEBUGDUMPHEADER("send", "Community String");
+            cp = asn_build_string(cp, out_length,
+                                  (u_char) (ASN_UNIVERSAL | ASN_PRIMITIVE |
+                                            ASN_OCTET_STR),
+                                  pdu->community, pdu->community_len);
+            DEBUGINDENTLESS();
+            if (cp == NULL)
+                return -1;
+            break;
+
+#ifdef USE_REVERSE_ASNENCODING
+        }
 #endif /* USE_REVERSE_ASNENCODING */
 
     case SNMP_VERSION_2p:
@@ -3631,11 +3647,15 @@ _sess_async_send(void *sessp,
 	result = isp->hook_build(session, pdu, packet, &length);
     else {
 #ifdef USE_REVERSE_ASNENCODING
-	result = snmp_build(session, pdu, packet+length-1, &length);
-        packet = packet + length;
-        length = PACKET_LENGTH - length;
-#else
-	result = snmp_build(session, pdu, packet, &length);
+        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
+            result = snmp_build(session, pdu, packet+length-1, &length);
+            packet = packet + length;
+            length = PACKET_LENGTH - length;
+        } else {
+#endif
+            result = snmp_build(session, pdu, packet, &length);
+#ifdef USE_REVERSE_ASNENCODING
+        }
 #endif
     }
     if (result < 0){
@@ -4354,12 +4374,17 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
 	result = isp->hook_build(sp, rp->pdu, packet, &length);
   else {
 #ifdef USE_REVERSE_ASNENCODING
-	result = snmp_build(sp, rp->pdu, packet+length-1, &length);
-        packet = packet + length;
-        length = PACKET_LENGTH - length;
-#else
-	result = snmp_build(sp, rp->pdu, packet, &length);
+        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
+            result = snmp_build(sp, rp->pdu, packet+length-1, &length);
+            packet = packet + length;
+            length = PACKET_LENGTH - length;
+        } else {
 #endif
+            result = snmp_build(sp, rp->pdu, packet, &length);
+#ifdef USE_REVERSE_ASNENCODING
+        }
+#endif
+            
   }
   if (result < 0){
     /* this should never happen */
