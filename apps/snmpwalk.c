@@ -69,16 +69,7 @@ SOFTWARE.
 #include <arpa/inet.h>
 #endif
 
-#include <net-snmp/asn1.h>
-#include <net-snmp/snmp_api.h>
-#include <net-snmp/snmp_client.h>
-#include <net-snmp/mib.h>
-#include <net-snmp/snmp.h>
-#include <net-snmp/snmp_impl.h>
-#include <net-snmp/system.h>
-#include <net-snmp/default_store.h>
-#include <net-snmp/snmp_parse_args.h>
-#include <net-snmp/getopt.h>
+#include <net-snmp/net-snmp-includes.h>
 
 #define DS_WALK_INCLUDE_REQUESTED	1
 #define DS_WALK_PRINT_STATISTICS	2
