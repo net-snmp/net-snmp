@@ -360,7 +360,7 @@ main(int argc, char *argv[])
                     if (argv[arg][2] != '\0') 
                         cptr = &argv[arg][2];
                     else if (++arg>argc) {
-                        fprintf(stderr,"Need UDP or TCP after -T flag.\n");
+                        fprintf(stderr,"%s: Need UDP or TCP after -T flag.\n", argv[0]);
                         usage(argv[0]);
                         exit(1);
                     } else {
@@ -374,8 +374,8 @@ main(int argc, char *argv[])
                         /* default, do nothing */
                     } else {
                         fprintf(stderr,
-                                "Unknown transport \"%s\" after -T flag.\n",
-                                cptr);
+                                "%s: Unknown transport \"%s\" after -T flag.\n",
+                                argv[0], cptr);
                         usage(argv[0]);
                         exit(1);
                     }
@@ -416,7 +416,7 @@ main(int argc, char *argv[])
 #if defined(USING_AGENTX_SUBAGENT_MODULE)
                   agent_mode = SUB_AGENT;
 #else
-                  fprintf(stderr,"Illegal argument -X: AgentX support not compiled in.\n");
+                  fprintf(stderr,"%s: Illegal argument -X: AgentX support not compiled in.\n", argv[0]);
                   usage(argv[0]);
                   exit(1);
 #endif
@@ -433,7 +433,7 @@ main(int argc, char *argv[])
                   pid_file = argv[arg];
 
                 case 'a':
-                      log_addresses++;
+		  log_addresses++;
                   break;
 
                 case 'V':
@@ -506,12 +506,16 @@ main(int argc, char *argv[])
                   }
 
                 default:
-                  printf("invalid option: %s\n", argv[arg]);
+                  fprintf(stderr, "%s: Invalid option: %s\n", argv[0], argv[arg]);
                   usage(argv[0]);
                   break;
               }
               continue;
             }
+	    else {
+	      fprintf(stderr, "%s: Bad argument: %s\n", argv[0], argv[arg]);
+	      exit(1);
+	    }
 	}  /* end-for */
 
 	/* 
