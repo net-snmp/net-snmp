@@ -214,6 +214,8 @@ Init_HR_Print (void)
     else {
 	HRP_maxnames = 5;
 	HRP_name = (char **)calloc(HRP_maxnames, sizeof( char *));
+        if (!HRP_name)
+            return;
     }
   
 #if HAVE_LPSTAT
@@ -244,6 +246,8 @@ Init_HR_Print (void)
 		char **tmp;
 		HRP_maxnames += 5;
 		tmp = (char **)calloc(HRP_maxnames, sizeof(char *));
+                if (!tmp)
+                   goto finish;
 		memcpy(tmp, HRP_name, HRP_names*sizeof(char *));
 		HRP_name = tmp;
 	    }
@@ -253,6 +257,7 @@ Init_HR_Print (void)
 		free(buf);
 #endif
 	}
+finish:
 #if HAVE_LPSTAT
 	pclose(p);
 #elif HAVE_CGETNEXT

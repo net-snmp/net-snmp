@@ -86,6 +86,10 @@ snmptrapd_traphandle(const char *token, char *line)
   if (*ttmp == NULL) {
     /* it doesn't, so allocate a new one. */
     *ttmp = (struct traphandle *) malloc(sizeof(struct traphandle));
+    if (!*ttmp) {
+        config_perror("malloc failed");
+        return;
+    }
     memset(*ttmp, 0, sizeof(struct traphandle));
   } else {
     if ((*ttmp)->exec)

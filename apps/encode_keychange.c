@@ -141,6 +141,10 @@ main(int argc, char **argv)
  	local_progname = argv[0];
 	local_passphrase_filename = (char *)malloc(sizeof(PASSPHRASE_DIR) +
 					   sizeof(PASSPHRASE_FILE) + 4);
+        if (!local_passphrase_filename) {
+            fprintf(stderr, "%s: out of memory!", local_progname);
+            exit(-1);
+        }
 	sprintf(local_passphrase_filename, "%s/%s",
 					   PASSPHRASE_DIR, PASSPHRASE_FILE);
 
@@ -528,7 +532,8 @@ get_user_passphrases(void)
 		len = strlen(buf);
 		if ( buf[len-1] == '\n' )	buf[--len] = '\0';
 		oldpass = (char *)calloc(1,len+1);
-		memcpy(oldpass, buf, len+1);
+		if (oldpass)
+		    memcpy(oldpass, buf, len+1);
 	}
 							/* Read 2nd line. */
 	if ( !fgets(buf, sizeof(buf), fp) ) {		
@@ -541,7 +546,8 @@ get_user_passphrases(void)
 		len = strlen(buf);
 		if ( buf[len-1] == '\n' )	buf[--len] = '\0';
 		newpass = (char *)calloc(1,len+1);
-		memcpy(newpass, buf, len+1);
+		if (newpass)
+		    memcpy(newpass, buf, len+1);
 	}
 
 	if ( oldpass && newpass )	goto get_user_passphrases_quit;
@@ -725,7 +731,8 @@ snmp_getpassphrase(const char *prompt, int bvisible)
 	if ( buffer[len-1] == '\n' )	buffer[--len] = '\0';
 
 	bufp = (char *)calloc(1,len+1);
-	memcpy(bufp, buffer, len+1);
+	if (bufp)
+	    memcpy(bufp, buffer, len+1);
 
 	SNMP_ZERO(buffer, SNMP_MAXBUF);
 

@@ -1663,6 +1663,10 @@ handle_mibdirs_conf(const char *token,
 
     if (confmibdir) {
         ctmp = (char *)malloc(strlen(confmibdir) + strlen(line) + 1);
+        if (!ctmp) {
+            DEBUGMSGTL(("read_config:initmib", "mibdir conf malloc failed"));
+            return;
+        }
         if (*line == '+')
             line++;
         sprintf(ctmp,"%s%c%s",confmibdir, ENV_SEPARATOR_CHAR, line);
@@ -1682,6 +1686,10 @@ handle_mibs_conf(const char *token,
 
     if (confmibs) {
         ctmp = (char *)malloc(strlen(confmibs) + strlen(line) + 1);
+        if (!ctmp) {
+            DEBUGMSGTL(("read_config:initmib", "mibs conf malloc failed"));
+            return;
+        }
         if (*line == '+')
             line++;
         sprintf(ctmp,"%s%c%s",confmibs, ENV_SEPARATOR_CHAR, line);
@@ -1870,7 +1878,10 @@ init_mib (void)
     }
     if (*env_var == '+') {
 	entry = (char *)malloc(strlen(DEFAULT_MIBDIRS)+strlen(env_var)+2);
-	sprintf(entry, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR, env_var+1);
+        if (!entry) 
+            DEBUGMSGTL(("init_mib", "env mibdir malloc failed"));
+        else
+	    sprintf(entry, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR, env_var+1);
 	free(env_var);
 	env_var = entry;
     }
@@ -1883,7 +1894,10 @@ init_mib (void)
         new_mibdirs = (char *) malloc(strlen(env_var) - strlen("$HOME") +
                                       strlen(homepath)+1);
         *cp_home = 0; /* null out the spot where we stop copying */
-        sprintf(new_mibdirs, "%s%s%s", env_var, homepath,
+        if (!new_mibdirs)
+            DEBUGMSGTL(("init_mib", "home mibdir malloc failed"));
+        else
+            sprintf(new_mibdirs, "%s%s%s", env_var, homepath,
                 cp_home + strlen("$HOME"));
         /* swap in the new value and repeat */
         free(env_var);
@@ -1915,7 +1929,10 @@ init_mib (void)
     }
     if (*env_var == '+') {
 	entry = (char *)malloc(strlen(DEFAULT_MIBS)+strlen(env_var)+2);
-	sprintf(entry, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR, env_var+1);
+        if (!entry)
+            DEBUGMSGTL(("init_mib", "env mibs malloc failed"));
+        else
+	    sprintf(entry, "%s%c%s", DEFAULT_MIBS, ENV_SEPARATOR_CHAR, env_var+1);
 	free(env_var);
 	env_var = entry;
     }
@@ -1942,7 +1959,10 @@ init_mib (void)
 	if (*env_var == '+') {
 #ifdef DEFAULT_MIBFILES
 	    entry = (char *)malloc(strlen(DEFAULT_MIBFILES)+strlen(env_var)+2);
-	    sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
+            if (!entry)
+                DEBUGMSGTL(("init_mib", "env mibfiles malloc failed"));
+            else
+	        sprintf(entry, "%s%c%s", DEFAULT_MIBFILES, ENV_SEPARATOR_CHAR,
 		    env_var+1);
 	    free(env_var);
 	    env_var = entry;
@@ -1974,13 +1994,18 @@ init_mib (void)
         prefix = Standard_Prefix;
 
     Prefix = (char*)malloc(strlen(prefix)+2);
-    strcpy(Prefix, prefix);
+    if (!Prefix)
+        DEBUGMSGTL(("init_mib", "Prefix malloc failed"));
+    else
+        strcpy(Prefix, prefix);
 
     DEBUGMSGTL(("init_mib","Seen PREFIX: Looking in '%s' for prefix ...\n", Prefix));
 
     /* remove trailing dot */
-    env_var = &Prefix[strlen(Prefix) - 1];
-    if (*env_var == '.') *env_var = '\0';
+    if (Prefix) {
+        env_var = &Prefix[strlen(Prefix) - 1];
+        if (*env_var == '.') *env_var = '\0';
+    }
 
     pp->str = Prefix;	/* fixup first mib_prefix entry */
     /* now that the list of prefixes is built, save each string length. */
@@ -3606,6 +3631,8 @@ get_node(const char *name,
 		 *	"module:subidentifier"
 		 */
 	module = (char *)malloc((size_t)(cp-name+1));
+        if (!module)
+            return SNMPERR_GENERR;
 	memcpy(module,name,(size_t)(cp-name));
 	module[cp-name] = 0;
 	cp++;		/* cp now point to the subidentifier */

@@ -677,6 +677,10 @@ main(int argc, char *argv[])
 	}
 	argvrestart = (char *) malloc(ret);
 	argvrestartname = (char *) malloc(strlen(argv[0]) + 1);
+        if (!argvrestartp || !argvrestart || !argvrestartname) {
+            fprintf(stderr, "malloc failure processing argvrestart\n");
+            exit(1);
+        }
 	strcpy(argvrestartname, argv[0]);
         if (agent_mode == -1) {
             if ( strstr(argvrestartname, "agentxd") != NULL )
