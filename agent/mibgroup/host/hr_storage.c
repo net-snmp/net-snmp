@@ -493,6 +493,9 @@ var_hrstore(struct variable *vp,
 			long_return = physmem * (pagesize / 1024);
 			break;
 		case HRS_TYPE_SWAP:
+#if NO_DUMMY_VALUES
+			return NULL;
+#endif
 			break;
 #endif
 		case HRS_TYPE_MBUF:
