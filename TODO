@@ -12,3 +12,7 @@ V3.1
 V3.2
   Pass off extensibles
   snmpset'able variables
+
+??? (3.1?)
+  Define snmpv1 parties in the configuration file, acl.conf, and
+    view.conf rather than being hard compiled in
