@@ -115,4 +115,5 @@ tar:
 
 dist: version tag tar
 
-
+FAQ.html:
+	local/FAQ2HTML FAQ
