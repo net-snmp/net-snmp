@@ -841,7 +841,7 @@ usm_generate_out_msg (
 	if (usm_check_secLevel_vs_protocols(
 		theSecLevel,
 		theAuthProtocol, theAuthProtocolLength,
-		theAuthProtocol, theAuthProtocolLength) == 1)
+		thePrivProtocol, thePrivProtocolLength) == 1)
 	{
 		DEBUGMSGTL(("usm","Unsupported Security Level\n"));
 		usm_free_usmStateReference (secStateRef);
