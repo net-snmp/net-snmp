@@ -37,6 +37,9 @@ SOFTWARE.
 #  include <time.h>
 # endif
 #endif
+#if STDC_HEADERS
+#include <string.h>
+#endif
 #include "asn1.h"
 #include "snmp.h"
 #include "snmp_impl.h"
@@ -620,12 +623,16 @@ int Suffix;
 
 init_mib()
 {
-    char *file, *getenv(), *prefix;
+    char *file, *getenv(), *prefix, mibpath[300];
 
     Mib = 0;
     file = getenv("MIBFILE");
     if (file)
 	Mib = read_mib(file);
+    if (!Mib) {
+      sprintf(mibpath,"%s/mib.txt",SNMPLIBPATH);
+      Mib = read_mib(mibpath);
+    }
     if (!Mib)
 	Mib = read_mib("mib.txt");
     if (!Mib)

@@ -35,6 +35,9 @@
 #if HAVE_SYS_FIXPOINT_H
 #include <sys/fixpoint.h>
 #endif
+#if STDC_HEADERS
+#include <string.h>
+#endif
 
 #include "mibincl.h"
 #include "mibdefs.h"
@@ -757,7 +760,7 @@ init_extensible() {
   
   struct extensible extmp;
   int ret,pagesize,i;
-
+  char configfile[300];
 
   minimumswap = DEFAULTMINIMUMSWAP;
   for (i=0; i<=2;i++)
@@ -775,10 +778,10 @@ init_extensible() {
 
   /* read config file(s) */
   /* read the config files */
-  read_config (CONFIGFILE,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
-#ifdef CONFIGFILETWO
-  read_config (CONFIGFILETWO,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
-#endif  
+  sprintf(configfile,"%s/snmpd.conf",SNMPLIBPATH);
+  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
+  sprintf(configfile,"%s/snmpd.local.conf",SNMPLIBPATH);
+  read_config (configfile,&procwatch,&numprocs,&relocs,&numrelocs,&extens,&numextens,&minimumswap,disks,&numdisks,maxload);
   
   /* set default values of system stuff */
   strcpy(extmp.command,"/bin/uname -a");

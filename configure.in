@@ -23,6 +23,13 @@ case "$target_os" in
 solaris2*) CPPFLAGS="$CPPFLAGS -I/usr/ucbinclude -I/usr/include" ; LDFLAGS="-L/usr/ucblib $LDFLAGS" ;;
 esac
 
+dnl Set SNMPLIBPATH
+if test "x$prefix" = "xNONE"; then
+AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$ac_default_prefix/lib/snmp")
+else
+AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$prefix/lib/snmp")
+fi
+
 dnl Check for kernel location
 AC_MSG_CHECKING(for location of sytem kernel)
 if test -f /vmunix; then
@@ -182,7 +189,7 @@ ac_cv_have_warned="yes"
 
 ME=`whoami`
 if test -f /etc/resolv.conf; then
-  LOC=`cat /etc/resolv.conf | grep domain | awk '{print $NF}'`
+  LOC=`cat /etc/resolv.conf | grep '^domain' | tail -1 | awk '{print $NF}'`
 else
   LOC="@no.where"
 fi
@@ -238,9 +245,6 @@ AC_DEFINE_UNQUOTED(EXTENSIBLEMIB,$ac_cv_user_prompt_EXTENSIBLEMIB)
 EXTENSIBLECOUNT=`echo $ac_cv_user_prompt_EXTENSIBLEMIB | sed -e 's/\,/ /g' | wc -w`
 AC_DEFINE_UNQUOTED(EXTENSIBLENUM,$EXTENSIBLECOUNT)
 AC_MSG_RESULT($ac_cv_user_prompt_EXTENSIBLEMIB)
-
-AC_PROMPT_USER(CONFIGFILE,Config File Location,"/etc/ece-snmpd.conf",1)
-AC_PROMPT_USER(CONFIGFILETWO,Second Config File Location,"/etc/ece-snmpd.local.conf",1)
 
 AC_PROMPT_USER(GLOBALSECURITY,[
 

@@ -49,6 +49,9 @@ SOFTWARE.
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
+#if STDC_HEADERS
+#include <string.h>
+#endif
 
 #include "snmp.h"
 #include "asn1.h"
@@ -371,7 +374,7 @@ extern char *VersionInfo;
 void usage(prog)
 char *prog;
 {
-  printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-q] [-L] [-l LOGFILE]\n",prog);
+  printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-q] [-p NUM] [-L] [-l LOGFILE]\n",prog);
   printf("\n\tVersion:  %s\n",VersionInfo);
   printf("\tAuthor:   hardaker@ece.ucdavis.edu\n");
   printf("\n-h\t\tThis usage message.\n");
@@ -380,6 +383,7 @@ char *prog;
   printf("-a\t\tLog addresses.\n");
   printf("-d\t\tDump sent and received UDP SNMP packets\n");
   printf("-q\t\tPrint information in a more parsable format (quick-print)\n");
+  printf("-p NUM\t\tRun on port NUM instead of the default:  161\n");
   printf("-L\t\tPrint warnings/messages to stdout/err rather than a logfile\n");
   printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
   printf("\t\t(By default LOGFILE=%s)\n",
@@ -406,7 +410,7 @@ main(argc, argv)
     u_long myaddr;
     int on=1;
     int dont_fork=0;
-    char logfile[300];
+    char logfile[300], miscfile[300];
     char *cptr, **argvptr;
 
     logfile[0] = NULL;
@@ -496,20 +500,24 @@ main(argc, argv)
       exit(0);
     init_snmp();
     init_mib();
+    sprintf(miscfile,"%s/party.conf",SNMPLIBPATH);
     if (read_party_database("/etc/party.conf") > 0){
-	fprintf(stderr, "Couldn't read party database from /etc/party.conf\n");
+	fprintf(stderr, "Couldn't read party database from %s\n",miscfile);
 	exit(0);
     }
+    sprintf(miscfile,"%s/context.conf",SNMPLIBPATH);
     if (read_context_database("/etc/context.conf") > 0){
-	fprintf(stderr, "Couldn't read context database from /etc/context.conf\n");
+	fprintf(stderr, "Couldn't read context database from %s\n",miscfile);
 	exit(0);
     }
-    if (read_acl_database("/etc/acl.conf") > 0){
-	fprintf(stderr, "Couldn't read acl database from /etc/acl.conf\n");
+    sprintf(miscfile,"%s/acl.conf",SNMPLIBPATH);
+    if (read_acl_database(miscfile) > 0){
+	fprintf(stderr, "Couldn't read acl database from %s\n",miscfile);
 	exit(0);
     }
-    if (read_view_database("/etc/view.conf") > 0){
-	fprintf(stderr, "Couldn't read view database from /etc/view.conf\n");
+    sprintf(miscfile,"%s/view.conf",SNMPLIBPATH);
+    if (read_view_database(miscfile) > 0){
+	fprintf(stderr, "Couldn't read view database from %s\n",miscfile);
 	exit(0);
     }
     
