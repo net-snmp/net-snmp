@@ -45,18 +45,32 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
 {
     FILE           *devin;
     char            line[256];
-    const char     *scan_line_2_2 =
     /*
      *   byte pkts errs drop fifo  frame cmprs mcst|byte pkts errs drop fifo  colls carrier compressed
      */
-        "%llu %llu %llu %llu %*llu %*llu %*llu %llu %llu %llu %llu %llu %*llu %llu";
+#ifdef SCNuMAX
+    uintmax_t       rec_pkt, rec_oct, rec_err, rec_drop, rec_mcast;
+    uintmax_t       snd_pkt, snd_oct, snd_err, snd_drop, coll;
+    const char     *scan_line_2_2 =
+        "%"   SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX
+        " %*" SCNuMAX " %*" SCNuMAX " %*" SCNuMAX " %*" SCNuMAX
+        " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %"  SCNuMAX
+        " %*" SCNuMAX " %"  SCNuMAX;
     const char     *scan_line_2_0 =
-        "%llu %llu %*llu %*llu %*llu %llu %llu %*llu %*llu %llu";
+        "%"   SCNuMAX " %"  SCNuMAX " %*" SCNuMAX " %*" SCNuMAX
+        " %*" SCNuMAX " %"  SCNuMAX " %"  SCNuMAX " %*" SCNuMAX
+        " %*" SCNuMAX " %"  SCNuMAX;
+#else
+    unsigned long   rec_pkt, rec_oct, rec_err, rec_drop;
+    unsigned long   snd_pkt, snd_oct, snd_err, snd_drop, coll;
+    const char     *scan_line_2_2 =
+        "%lu %lu %lu %lu %*lu %*lu %*lu %*lu %lu %lu %lu %lu %*lu %lu";
+    const char     *scan_line_2_0 =
+        "%lu %lu %*lu %*lu %*lu %lu %lu %*lu %*lu %lu";
+#endif
     static const char     *scan_line_to_use = NULL;
     static char     scan_expected;
     int             scan_count, fd;
-    uintmax_t       rec_pkt, rec_oct, rec_err, rec_drop, rec_mcast;
-    uintmax_t       snd_pkt, snd_oct, snd_err, snd_drop, coll;
     netsnmp_interface_entry *entry = NULL;
 
     DEBUGMSGTL(("access:interface:container:arch", "load (flags %p)\n",
