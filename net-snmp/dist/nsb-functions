@@ -3,6 +3,16 @@
 # $Id$
 # Author: Robert Story <rstory@freesnmp.com>
 
+#----------------------------------------------------------------------
+#
+# source user config
+if [ -f $HOME/.snmp/nsb-rc
+   source $HOME/.snmp/nsb-rc
+fi
+
+
+#----------------------------------------------------------------------
+#
 nsb-sysname()
 {
    echo `uname -mrs | tr ' /' '__'`
