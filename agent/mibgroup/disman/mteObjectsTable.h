@@ -24,7 +24,7 @@ struct mteObjectsTable_data {
     size_t   mteObjectsIDLen;
     long    mteObjectsIDWildcard;
     long    mteObjectsEntryStatus;
-
+    int storagetype;
 };
 
 /* enum definitions from the covered mib sections */
@@ -42,7 +42,8 @@ void parse_mteObjectsTable(const char *, char *);
 SNMPCallback store_mteObjectsTable;
 void mte_add_objects(struct variable_list *, struct mteTriggerTable_data *,
                      const char *, const char *, oid *, size_t);
-
+int mte_add_object_to_table(const char *owner, const char *objname,
+                            oid *oidname, size_t oidname_len, int iswild);
 WriteMethod write_mteObjectsID;
 WriteMethod write_mteObjectsIDWildcard;
 WriteMethod write_mteObjectsEntryStatus;

@@ -190,6 +190,8 @@ write_mteTriggerExistenceTest(int      action,
               fprintf(stderr, "write to mteTriggerExistenceTest not ASN_BIT_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -262,6 +264,8 @@ write_mteTriggerExistenceStartup(int      action,
               fprintf(stderr, "write to mteTriggerExistenceStartup not ASN_BIT_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -334,6 +338,8 @@ write_mteTriggerExistenceObjectsOwner(int      action,
               fprintf(stderr, "write to mteTriggerExistenceObjectsOwner not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -406,6 +412,8 @@ write_mteTriggerExistenceObjects(int      action,
               fprintf(stderr, "write to mteTriggerExistenceObjects not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -478,6 +486,8 @@ write_mteTriggerExistenceEventOwner(int      action,
               fprintf(stderr, "write to mteTriggerExistenceEventOwner not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -550,6 +560,8 @@ write_mteTriggerExistenceEvent(int      action,
               fprintf(stderr, "write to mteTriggerExistenceEvent not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 

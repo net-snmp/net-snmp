@@ -161,6 +161,8 @@ write_mteTriggerDeltaDiscontinuityID(int      action,
               fprintf(stderr, "write to mteTriggerDeltaDiscontinuityID not ASN_OBJECT_ID\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -215,7 +217,6 @@ write_mteTriggerDeltaDiscontinuityIDWildcard(int      action,
 {
   static int tmpvar;
   struct mteTriggerTable_data *StorageTmp = NULL;
-  static size_t tmplen;
   size_t newlen=name_len - (sizeof(mteTriggerDeltaTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -233,6 +234,8 @@ write_mteTriggerDeltaDiscontinuityIDWildcard(int      action,
               fprintf(stderr, "write to mteTriggerDeltaDiscontinuityIDWildcard not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -283,7 +286,6 @@ write_mteTriggerDeltaDiscontinuityIDType(int      action,
 {
   static int tmpvar;
   struct mteTriggerTable_data *StorageTmp = NULL;
-  static size_t tmplen;
   size_t newlen=name_len - (sizeof(mteTriggerDeltaTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -301,6 +303,8 @@ write_mteTriggerDeltaDiscontinuityIDType(int      action,
               fprintf(stderr, "write to mteTriggerDeltaDiscontinuityIDType not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
