@@ -75,7 +75,7 @@
 #include <net-snmp/net-snmp-includes.h>
 
 #define MAX_ARGS 256
-#define DS_APP_DONT_FIX_PDUS 0
+#define NETSNMP_DS_APP_DONT_FIX_PDUS 0
 
 const char     *SumFile = "Sum";
 
@@ -141,7 +141,8 @@ optProc(int argc, char *const *argv, int opt)
         while (*optarg) {
             switch ((opt = *optarg++)) {
             case 'f':
-                ds_toggle_boolean(DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS);
+                netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID,
+					  NETSNMP_DS_APP_DONT_FIX_PDUS);
                 break;
             case 'p':
                 period = atoi(argv[optind++]);
@@ -696,8 +697,8 @@ main(int argc, char *argv[])
                 /*
                  * retry if the errored variable was successfully removed 
                  */
-                if (!ds_get_boolean
-                    (DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS)) {
+                if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+					    NETSNMP_DS_APP_DONT_FIX_PDUS)) {
                     pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
                     snmp_free_pdu(response);
                     response = NULL;

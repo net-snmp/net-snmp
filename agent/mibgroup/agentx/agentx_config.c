@@ -42,7 +42,7 @@ agentx_parse_master(const char *token, char *cptr)
         sprintf(buf, "master '%s' unrecognised", cptr);
         config_perror(buf);
     } else
-        ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_AGENTX_MASTER, i);
+        netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_AGENTX_MASTER, i);
 }
 #endif                          /* USING_AGENTX_MASTER_MODULE */
 
@@ -50,7 +50,7 @@ void
 agentx_parse_agentx_socket(const char *token, char *cptr)
 {
     DEBUGMSGTL(("agentx/config", "port spec: %s\n", cptr));
-    ds_set_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET, cptr);
+    netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET, cptr);
 }
 
 void
@@ -64,7 +64,7 @@ init_agentx_config(void)
      *   whether or not to run as an AgentX master.
      */
 #ifdef USING_AGENTX_MASTER_MODULE
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) == MASTER_AGENT)
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) == MASTER_AGENT)
         snmpd_register_config_handler("master",
                                       agentx_parse_master, NULL,
                                       "specify 'agentx' for AgentX support");

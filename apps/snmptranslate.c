@@ -254,7 +254,8 @@ main(int argc, char *argv[])
                 exit(1);
             }
             exit(0);
-        } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REGEX_ACCESS)) {
+        } else if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+					  NETSNMP_DS_LIB_REGEX_ACCESS)) {
             if (0 == get_wild_node(current_name, name, &name_length)) {
                 fprintf(stderr,
                         "Unable to find a matching object identifier for \"%s\"\n",

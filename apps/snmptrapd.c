@@ -103,9 +103,9 @@ int             allow_severity = LOG_INFO;
 int             deny_severity = LOG_WARNING;
 #endif
 
-#define DS_APP_NUMERIC_IP  8    /* must not conflict with agent's DS booleans */
+#define NETSNMP_DS_APP_NUMERIC_IP  8    /* must not conflict with agent's DS booleans */
 /*
- * #define DS_APP_DONT_LOG 9 defined in notification_log.h 
+ * #define NETSNMP_DS_APP_DONT_LOG 9 defined in notification_log.h 
  */
 
 #ifndef BSD4_3
@@ -454,9 +454,11 @@ snmp_input(int op,
 
             num_received++;
 
-            if (!ds_get_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP)) {
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+					NETSNMP_DS_APP_NUMERIC_IP)) {
                 host = gethostbyaddr((char *) pdu->agent_addr, 4, AF_INET);
             }
+
             if (pdu->trap_type == SNMP_TRAP_ENTERPRISESPECIFIC) {
                 memcpy(trapOid, pdu->enterprise, sizeof(oid) * trapOidLen);
                 if (trapOid[trapOidLen - 1] != 0) {
@@ -572,7 +574,8 @@ snmp_input(int op,
         } else if (pdu->command == SNMP_MSG_TRAP2 ||
                    pdu->command == SNMP_MSG_INFORM) {
             num_received++;
-            if (!ds_get_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP)) {
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+					NETSNMP_DS_APP_NUMERIC_IP)) {
                 /*
                  * Right, apparently a name lookup is wanted.  This is only
                  * reasonable for the UDP and TCP transport domains (we
@@ -640,7 +643,8 @@ snmp_input(int op,
                     rbuf[o_len] = '\0';
                 }
 
-                if (!ds_get_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP)) {
+                if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+					    NETSNMP_DS_APP_NUMERIC_IP)) {
                     /*
                      * Right, apparently a name lookup is wanted.  This is only
                      * reasonable for the UDP and TCP transport domains (we
@@ -983,8 +987,8 @@ main(int argc, char *argv[])
 
         case 'c':
             if (optarg != NULL) {
-                ds_set_string(DS_LIBRARY_ID, DS_LIB_OPTIONALCONFIG,
-                              optarg);
+                netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
+				      NETSNMP_DS_LIB_OPTIONALCONFIG, optarg);
             } else {
                 usage();
                 exit(1);
@@ -992,7 +996,8 @@ main(int argc, char *argv[])
             break;
 
         case 'C':
-            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS, 1);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+				   NETSNMP_DS_LIB_DONT_READ_CONFIGS, 1);
             break;
 
         case 'd':
@@ -1095,7 +1100,8 @@ main(int argc, char *argv[])
             break;
 
         case 'n':
-            ds_set_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP, 1);
+            netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
+				   NETSNMP_DS_APP_NUMERIC_IP, 1);
             break;
 
         case 'o':
@@ -1206,14 +1212,16 @@ main(int argc, char *argv[])
         /*
          * make us a agentx client. 
          */
-        ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, 1);
+        netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_ROLE, 1);
     }
 #endif
 
     /*
      * don't fail if we can't do agentx (ie, socket not there, or not root) 
      */
-    ds_toggle_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS);
+    netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID, 
+			      NETSNMP_DS_AGENT_NO_ROOT_ACCESS);
 
     /*
      * initialize the agent library 
@@ -1241,7 +1249,8 @@ main(int argc, char *argv[])
         trap2_fmt_str = strdup(trap1_fmt_str_remember);
     }
 
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_QUIT_IMMEDIATELY)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+			       NETSNMP_DS_AGENT_QUIT_IMMEDIATELY)) {
         /*
          * just starting up to process specific configuration and then
          * shutting down immediately. 

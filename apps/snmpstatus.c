@@ -100,7 +100,7 @@ oid             objid_ipOutRequests[] = { 1, 3, 6, 1, 2, 1, 4, 10, 0 };
 size_t          length_ipOutRequests =
     sizeof(objid_ipOutRequests) / sizeof(oid);
 
-#define DS_APP_DONT_FIX_PDUS 0
+#define NETSNMP_DS_APP_DONT_FIX_PDUS 0
 
 static void
 optProc(int argc, char *const *argv, int opt)
@@ -110,7 +110,8 @@ optProc(int argc, char *const *argv, int opt)
         while (*optarg) {
             switch (*optarg++) {
             case 'f':
-                ds_toggle_boolean(DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS);
+                netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID, 
+					  NETSNMP_DS_APP_DONT_FIX_PDUS);
                 break;
             default:
                 fprintf(stderr, "Unknown flag passed to -C: %c\n",
@@ -239,7 +240,8 @@ main(int argc, char *argv[])
             /*
              * retry if the errored variable was successfully removed 
              */
-            if (!ds_get_boolean(DS_APPLICATION_ID, DS_APP_DONT_FIX_PDUS)) {
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+					NETSNMP_DS_APP_DONT_FIX_PDUS)) {
                 pdu = snmp_fix_pdu(response, SNMP_MSG_GET);
                 snmp_free_pdu(response);
                 response = NULL;

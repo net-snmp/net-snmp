@@ -187,7 +187,7 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
 
     if (operation == NETSNMP_CALLBACK_OP_DISCONNECT) {
         int             period =
-            ds_get_int(DS_APPLICATION_ID, DS_AGENT_AGENTX_PING_INTERVAL);
+            netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL);
         DEBUGMSGTL(("agentx/subagent",
                     "transport disconnect indication\n"));
         /*
@@ -632,9 +632,9 @@ subagent_open_master_session(void)
     sess.retries = SNMP_DEFAULT_RETRIES;
     sess.timeout = SNMP_DEFAULT_TIMEOUT;
     sess.flags |= SNMP_FLAGS_STREAM_SOCKET;
-    if (ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET)) {
+    if (netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET)) {
         sess.peername =
-            ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET);
+            netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_X_SOCKET);
     } else {
         sess.peername = AGENTX_SOCKET;
     }
@@ -651,7 +651,7 @@ subagent_open_master_session(void)
          * Diagnose snmp_open errors with the input
          * netsnmp_session pointer.  
          */
-        if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS)) {
+        if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
             netsnmp_sess_log_error(LOG_WARNING,
                                    "Error: Failed to connect to the agentx master agent",
                                    &sess);
@@ -702,13 +702,13 @@ subagent_pre_init(void)
     /*
      * set up callbacks to initiate master agent pings for this session 
      */
-    ds_register_config(ASN_INTEGER,
-                       ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE),
+    netsnmp_ds_register_config(ASN_INTEGER,
+                       netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_APPTYPE),
                        "agentxPingInterval",
-                       DS_APPLICATION_ID, DS_AGENT_AGENTX_PING_INTERVAL);
+                       NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL);
 
 
-    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != SUB_AGENT) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_ROLE) != SUB_AGENT) {
         return 0;
     }
 
@@ -717,7 +717,7 @@ subagent_pre_init(void)
      * * to try to connect to master or setup a ping alarm if it couldn't
      * * succeed 
      */
-    if (ds_get_int(DS_APPLICATION_ID, DS_AGENT_AGENTX_PING_INTERVAL) > 0)
+    if (netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL) > 0)
         agentx_reopen_session(0, NULL);
     else                        /* if no ping interval was set up, just try to connect once */
         subagent_open_master_session();
@@ -783,7 +783,7 @@ subagent_register_ping_alarm(int majorID, int minorID,
 
     netsnmp_session *ss = (netsnmp_session *) clientarg;
     int             ping_interval =
-        ds_get_int(DS_APPLICATION_ID, DS_AGENT_AGENTX_PING_INTERVAL);
+        netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_AGENTX_PING_INTERVAL);
 
     if (!ping_interval)         /* don't do anything if not setup properly */
         return 0;
