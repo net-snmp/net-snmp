@@ -528,7 +528,22 @@ sub count_tables {
     return $#k + 1;
 }
 
+sub count_columns {
+    my $table = shift;
+    return $#{$tables{$table}{'column'}} + 1;
+}
+
+sub count_indexes {
+    my $table = shift;
+    return $#{$tables{$table}{'index'}} + 1;
+}
+
 sub count_notifications {
     my @k = keys(%notifications);
     return $#k + 1;
+}
+
+sub count_varbinds {
+    my $notify = shift;
+    return $#{$notifyvars{$notify}} + 1;
 }
