@@ -45,5 +45,5 @@
 
 void
 init_mib_modules(void) {
-  #include "mib_module_inits.h"
+#  include "mib_module_inits.h"
 }
