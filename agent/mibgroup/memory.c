@@ -195,13 +195,13 @@ void init_memory()
 {
 #ifndef linux
   int pagesize;
- auto_nlist(PHYSMEM_SYMBOL,0,0)
- auto_nlist(TOTAL_MEMORY_SYMBOL,0,0)
- auto_nlist(MBSTAT_SYMBOL,0,0)
- auto_nlist(SWDEVT_SYMBOL,0,0)
- auto_nlist(FSWDEVT_SYMBOL,0,0)
- auto_nlist(NSWAPFS_SYMBOL,0,0)
- auto_nlist(NSWAPDEV_SYMBOL,0,0)
+ auto_nlist(PHYSMEM_SYMBOL,0,0);
+ auto_nlist(TOTAL_MEMORY_SYMBOL,0,0);
+ auto_nlist(MBSTAT_SYMBOL,0,0);
+ auto_nlist(SWDEVT_SYMBOL,0,0);
+ auto_nlist(FSWDEVT_SYMBOL,0,0);
+ auto_nlist(NSWAPFS_SYMBOL,0,0);
+ auto_nlist(NSWAPDEV_SYMBOL,0,0);
 
 #ifndef bsdi2
   if (auto_nlist(NSWAPDEV_SYMBOL,(int *) &nswapdev, sizeof(nswapdev)) == 0)
@@ -248,7 +248,7 @@ int getswap(rettype)
   struct extensible ex;
   int i, fd;
   
-  if (auto_nlist(SWDEVT_SYMOBL,(int *) swdevt, sizeof(struct swdevt)*nswapdev)
+  if (auto_nlist(SWDEVT_SYMBOL,(int *) swdevt, sizeof(struct swdevt)*nswapdev)
       == 0)
     return(0);
   for (i=0; i < nswapdev; i++) {

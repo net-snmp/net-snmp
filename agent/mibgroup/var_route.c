@@ -451,7 +451,7 @@ static int rtsize=0, rtallocate=0;
 
 #if !(defined(linux) || defined(solaris2))
 #define NUM_ROUTE_SYMBOLS 2
-static char  route_symbols[] = {
+static char*  route_symbols[] = {
   RTHOST_SYMBOL,
   RTNET_SYMBOL
 };

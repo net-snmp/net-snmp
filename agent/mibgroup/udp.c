@@ -487,7 +487,7 @@ static void UDP_Scan_Init()
 #ifndef linux
     auto_nlist(UDB_SYMBOL, (char *)&udp_inpcb, sizeof(udp_inpcb));
 #if !(defined(freebsd2) || defined(netbsd1))
-    udp_prev = (struct inpcb *) udp_nl[N_UDB].n_value;
+    udp_prev = (struct inpcb *) auto_nlist_value(UDB_SYMBOL);
 #endif
 #else /* linux */
     FILE *in;
@@ -566,13 +566,13 @@ struct inpcb *RetInPcb;
 #if defined(freebsd2)
 	if ((udp_inpcb.inp_list.le_next == NULL) ||
 	    (udp_inpcb.inp_list.le_next ==
-             (struct inpcb *) udp_nl[N_UDB].n_value)) {
+             (struct inpcb *) auto_nlist_value(UDB_SYMBOL))) {
 #else
 #if defined(netbsd1)
 	if ((udp_inpcb.inp_queue.cqe_next == NULL) ||
-	    (udp_inpcb.inp_queue.cqe_next == (struct inpcb *) udp_nl[N_UDB].n_value)) {
+	    (udp_inpcb.inp_queue.cqe_next == (struct inpcb *) auto_nlist_value(UDB_SYMBOL))) {
 #else
-	if (udp_inpcb.inp_next == (struct inpcb *) udp_nl[N_UDB].n_value) {
+	if (udp_inpcb.inp_next == (struct inpcb *) auto_nlist_value(UDB_SYMBOL)) {
 #endif
 #endif
 	    return(0);	    /* "EOF" */

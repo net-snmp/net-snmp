@@ -11,10 +11,8 @@
 struct autonlist *nlists = 0;
 
 int
-auto_nlist(string, var, size)
+auto_nlist_value(string)
   char *string;
-  char *var;
-  int size;
 {
   struct autonlist **ptr, *it;
   int cmp;
@@ -43,14 +41,30 @@ auto_nlist(string, var, size)
       sprintf(it->symbol,"_%s",string);
       init_nlist(it->nl);
     }
-    if (it->nl[0].n_type == 0)
+    if (it->nl[0].n_type == 0) {
       DEBUGP("nlist err:  neither %s nor _%s found.\n",string);
-    else
+      return( -1 );
+    } else {
       DEBUGP("nlist:  found symbol %s.\n",it->symbol);
+      return( it->nl[0].n_value );
+    }
   }
-  if (it->nl[0].n_type != 0) {
+  else
+    return( it->nl[0].n_value );
+}
+
+int
+auto_nlist(string, var, size)
+  char *string;
+  char *var;
+  int size;
+{
+  int result;
+
+  result = auto_nlist_value(string);
+  if (result!= -1) {
     if (var != 0)
-      return klookup(it->nl[0].n_value, var, size);
+      return klookup(result, var, size);
     else
       return 1;
   }

@@ -21,10 +21,10 @@
 #define PHYSMEM_SYMBOL "physmem"
 #define TOTAL_MEMORY_SYMBOL "total"
 #define MBSTAT_SYMBOL "mbstat"
-#define SWDEVT_SYBOL "swdevt"
-#define FSWDEVT_SYBOL "fswdevt"
-#define NSWAPFS_SYBOL "nswapfs"
-#define NSWAPDEV_SYBOL "nswapdev"
+#define SWDEVT_SYMBOL "swdevt"
+#define FSWDEVT_SYMBOL "fswdevt"
+#define NSWAPFS_SYMBOL "nswapfs"
+#define NSWAPDEV_SYMBOL "nswapdev"
 
 /* process nlist symbols. */
 #define NPROC_SYMBOL "nproc"
@@ -35,7 +35,7 @@
 
 /* tcp.c nlist symbols */
 #define TCPSTAT_SYMBOL "tcpstat"
-#define TCP_SYMBOL "tcp"
+#define TCP_SYMBOL "tcb"
 
 /* upd.c nlist symbols */
 #define UDPSTAT_SYMBOL "udpstat"

@@ -267,7 +267,7 @@ var_hrstore(vp, name, length, exact, var_len, write_method)
 			auto_nlist(TOTAL_MEMORY_SYMBOL, (char *)&memory_totals, sizeof (struct vmtotal));
 			break;
 		case HRS_TYPE_MBUF:
-			auto_nlist(MBUFSTAT_SYMBOL, (char *)&mbstat, sizeof (struct mbstat));
+			auto_nlist(MBSTAT_SYMBOL, (char *)&mbstat, sizeof (struct mbstat));
 			break;
 		default:
 			break;

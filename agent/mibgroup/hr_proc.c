@@ -136,7 +136,7 @@ var_hrproc(vp, name, length, exact, var_len, write_method)
 	return NULL;
 
 #ifndef linux
-    auto_nlist(LOADAVE_SYMBOL, (char*) avenrun, sizeof(avenrun)) == 0 )
+    if (auto_nlist(LOADAVE_SYMBOL, (char*) avenrun, sizeof(avenrun)) == 0 )
 	return NULL;
 #endif
 
