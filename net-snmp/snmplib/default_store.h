@@ -2,6 +2,10 @@
 #ifndef DEFAULT_STORE_H
 #define DEFAULT_STORE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define DS_MAX_IDS 3
 #define DS_MAX_SUBIDS 10
 
@@ -46,5 +50,9 @@ int ds_register_config(u_char type, const char *ftype, const char *token,
                        int storeid, int which);
 int ds_register_premib(u_char type, const char *ftype, const char *token,
                        int storeid, int which);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* DEFAULT_STORE_H */

@@ -1,6 +1,10 @@
 #ifndef SNMP_ALARM_H
 #define SNMP_ALARM_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef void (SNMPAlarmCallback)(unsigned int clientreg, void *clientarg);
 
 #define SA_REPEAT 0x01
@@ -32,5 +36,8 @@ void run_alarms(void);
 RETSIGTYPE alarm_handler(int a);
 void set_an_alarm(void);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SNMP_ALARM_H */

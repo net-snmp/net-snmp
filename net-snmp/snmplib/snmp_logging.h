@@ -1,5 +1,10 @@
-#ifndef SNMP_LOGGING
-#define SNMP_LOGGING
+#ifndef SNMP_LOGGING_H
+#define SNMP_LOGGING_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
@@ -34,4 +39,9 @@ void log_stderrlog(int priority, const char *format, ...);
 void snmp_log(int priority, const char *format, ...);
 void vlog(int priority, const char *format, va_list ap);
 void log_perror(const char *s);
+
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* SNMP_LOGGING_H */

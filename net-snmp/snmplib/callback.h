@@ -3,6 +3,10 @@
 #ifndef CALLBACK_H
 #define CALLBACK_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAX_CALLBACK_IDS    2
 #define MAX_CALLBACK_SUBIDS 3
 
@@ -29,5 +33,9 @@ void init_callbacks(void);
 int snmp_register_callback(int major, int minor, SNMPCallback *new_callback,
                            void *arg);
 int snmp_call_callbacks(int major, int minor, void *caller_arg);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CALLBACK_H */
