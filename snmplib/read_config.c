@@ -766,18 +766,25 @@ read_configs(void)
      * do this even when the normal above wasn't done 
      */
     if (optional_config && type) {
+      char           *newp, *cp;
+      newp = strdup(optional_config);      /* strtok messes it up */
+      cp = strtok(newp, ",");
+      while (cp) {
         struct stat     statbuf;
-        if (stat(optional_config, &statbuf)) {
+        if (stat(cp, &statbuf)) {
             DEBUGMSGTL(("read_config",
                         "Optional File \"%s\" does not exist.\n",
-                        optional_config));
-            snmp_log_perror(optional_config);
+                        cp));
+            snmp_log_perror(cp);
         } else {
             DEBUGMSGTL(("read_config",
                         "Reading optional config file: \"%s\"\n",
-                        optional_config));
-            read_config_with_type(optional_config, type);
+                        cp));
+            read_config_with_type(cp, type);
         }
+        cp = strtok(NULL, ",");
+      }
+      free(newp);
     }
 
     netsnmp_config_process_memories_when(NORMAL_CONFIG, 1);
