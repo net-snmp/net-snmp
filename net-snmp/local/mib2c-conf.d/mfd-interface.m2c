@@ -156,7 +156,7 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
     netsnmp_table_registration_info *tbl_info = &${context}_if_ctx.tbl_info;
     netsnmp_handler_registration *reginfo;
     netsnmp_mib_handler *handler;
-    int    mfd_modes;
+    int    mfd_modes = 0;
 
     DEBUGMSGTL(("internal:_${context}_initialize_interface","called\n"));
 
