@@ -1481,10 +1481,10 @@ Interface_Scan_Init(void)
         if (line[strlen(line) - 1] == '\n')
             line[strlen(line) - 1] = '\0';
 
-        while (*ifstart == ' ')
+        while (*ifstart && *ifstart == ' ')
             ifstart++;
 
-        if ((stats = strrchr(ifstart, ':')) == NULL) {
+        if (!*ifstart || ((stats = strrchr(ifstart, ':')) == NULL)) {
             snmp_log(LOG_ERR,
                      "/proc/net/dev data format error, line ==|%s|", line);
             continue;
