@@ -158,5 +158,109 @@ AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(gethostname gettimeofday select socket strtol)
 
+AC_CACHE_VAL(ac_cv_have_warned,
+[
+cat << EOF
+
+	 ************** Configuration Section **************
+
+	You are about to be prompted by a series of questions.  Answer
+them carefully, as they determine how the snmp agent and related
+applications are to function.
+
+	After the configure script finishes, you can browse the newly
+created config.h file for further - less important - parameters to
+modify.  Be careful if you re-run configure though since config.h will
+be over written.
+
+-Press return to continue-
+EOF
+
+read tmpinput
+ac_cv_have_warned="yes"
+])
+
+ME=`whoami`
+if test -f /etc/resolv.conf; then
+  LOC=`cat /etc/resolv.conf | grep domain | awk '{print $NF}'`
+else
+  LOC="@no.where"
+fi
+
+AC_PROMPT_USER(SYS_CONTACT,[
+
+*** System Contact Information:
+
+	Describes who should be contacted about the host the agent is
+running on.  This information is available in the MIB-II tree.
+
+System Contact Information],$ME@$LOC,1)
+AC_PROMPT_USER(SYS_LOC,[
+
+*** System Location:
+
+	Describes the location of the system.  This information is
+available in the MIB-II tree.
+
+System Location],UCDavis Electrical Engineering Departement,1)
+
+AC_PROMPT_USER(LOGFILE,[
+
+*** Logfile location:
+
+	Enter the default location for the snmpd agent to dump
+information & errors to.  If not defined (enter the keyword \"none\"
+at the prompt below) the agent will use stdout and stderr instead.
+(Note: This value can be over-ridden using the command line)
+
+Location to write logfile],/usr/adm/snmpd.log,1)
+
+AC_MSG_CHECKING(Default Extensible Mib location)
+AC_CACHE_VAL(ac_cv_user_prompt_EXTENSIBLEMIB,
+[
+AC_PROMPT_USER_NO_DEFINE(EXTENSIBLEMIB,[
+
+*** Default Extensible Mib Location:
+
+	You need to pick a MIB location that will be the top of the
+extensible portion of the agent.  This should be the ASN identity
+assigned to your institution.  
+
+	If you don't have one:, make one up or use the default below.  
+
+Default Extensible Mib location],.1.3.6.1.4.10)
+
+ac_cv_user_prompt_EXTENSIBLEMIB=`echo $EXTENSIBLEMIB | sed -e 's/^\.//;s/\./,/g'`
+echo "setting Default Mib location...  \c"
+]) dnl
+
+AC_DEFINE_UNQUOTED(EXTENSIBLEMIB,$ac_cv_user_prompt_EXTENSIBLEMIB)
+EXTENSIBLECOUNT=`echo $ac_cv_user_prompt_EXTENSIBLEMIB | sed -e 's/\,/ /g' | wc -w`
+AC_DEFINE_UNQUOTED(EXTENSIBLENUM,$EXTENSIBLECOUNT)
+AC_MSG_RESULT($ac_cv_user_prompt_EXTENSIBLEMIB)
+
+AC_PROMPT_USER(CONFIGFILE,Config File Location,"/etc/ece-snmpd.conf",1)
+AC_PROMPT_USER(CONFIGFILETWO,Second Config File Location,"/etc/ece-snmpd.local.conf",1)
+
+AC_PROMPT_USER(GLOBALSECURITY,[
+
+*** SNMP Security/Authentication:
+
+	You may pick one of two types of SNMP authentication to use
+for this agent.  Only the extensible section is affected by the
+following choices.  This will be handled better in version 3.2 and
+above.  Note that to use anything other than SNMPV1 the configuration
+files must be set up properly for SNMPV2 usage.
+
+	(Encryption is not supported because of U.S. cryptography laws)
+
+SNMPV1       Any type of snmp transmission can access the extensible tree.
+SNMPV2ANY    Any type of snmpV2 transmissions can access the extensible tree.
+SNMPV2AUTH   Only authenticated V2 transmissions can access the extensible tree.
+
+	If you don't understand any of the above sentences: pick SNMPV1.
+
+What type of security to use],SNMPV2AUTH)
+
 AC_OUTPUT(snmplib/Makefile Makefile snmptcl/Makefile agent/Makefile apps/Makefile apps/snmpnetstat/Makefile agent/extensible/Makefile)
 
