@@ -13,14 +13,22 @@
  * If the values for your data type don't exactly match the
  * possible values defined by the mib, you should map them here.
  */
-##&& ($node.syntax ne $node.perltype) 
-@    if ("$node.perltype" eq "INTEGER") && ($node.enums == 1)@
+@if ($node.enums == 1)@
 $example_start
+@    if ("$node.perltype" eq "BITS")@
+    $m2c_ctx_rh = 0;
+@      foreach $e $v enum@
+@          include m2c_setup_enum.m2i@
+    if ($m2c_node_srh & $m2c_ename) {
+        $m2c_ctx_rh |= INTERNAL_$m2c_iname;
+    }
+@      end@ # for each
+@  elsif ("$node.perltype" eq "INTEGER")@
     switch($m2c_node_srh) {
 @    foreach $e $v enum@
 @        include m2c_setup_enum.m2i@
         case $m2c_ename:
-             $m2c_node_srh = INTERNAL_$m2c_iname;
+             $m2c_ctx_rh = INTERNAL_$m2c_iname;
              break;
 
 @    end@ # foreach
@@ -29,8 +37,8 @@ $example_start
                  return SNMP_ERR_GENERR;
     }
 $example_end
-
-@end@    
+@  end@ # integers/bits
+@end@ # enums
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
