@@ -196,8 +196,8 @@ gen_code()
     if [ ! -z "$files" ]; then
        rm -f $files > /dev/null 2>&1 
     fi
-    echo "mib2c -c $UPDATE_CONF $UPDATE_MIB2C_OPTS $UPDATE_OID"
-    mib2c -c $UPDATE_CONF $UPDATE_MIB2C_OPTS $UPDATE_OID
+    echo "mib2c $@ -c $UPDATE_CONF $UPDATE_MIB2C_OPTS $UPDATE_OID"
+    mib2c $@ -c $UPDATE_CONF $UPDATE_MIB2C_OPTS $UPDATE_OID
     if [ $? -ne 0 ]; then
         die "bad rc $rc from mib2 while generation new code."
     fi
@@ -305,7 +305,7 @@ if [ -f .M2C-UPDATE-MERGE-FAILED ]; then
 fi
 
 save_diff
-gen_code
+gen_code $@
 check_new
 merge_code
 copy_merged
