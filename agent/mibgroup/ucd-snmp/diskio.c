@@ -44,7 +44,7 @@ static time_t   cache_time = 0;
 #ifdef solaris2
 #include <kstat.h>
 
-#define MAX_DISKS 20
+#define MAX_DISKS 128
 
 static kstat_ctl_t *kc;
 static kstat_t *ksp;
