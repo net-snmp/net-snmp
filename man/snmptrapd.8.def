@@ -84,6 +84,20 @@ Specifies the syslog facility to use when logging to syslog.  'd' means
 .B LOG_DAEMON
 and 0 through 7 mean 
 .BR LOG_LOCAL0 " through " LOG_LOCAL7 ".  " LOG_LOCAL0 " is the default."
+.br
+This option is being deprecated, and '-Ls FACILITY' should be used instead.
+.TP
+.B -L[efos]
+Specify where logging output should be directed (standard error or output,
+to a file or via syslog).  See LOGGING OPTIONS in snmpcmd(5) for details.
+.br
+This option deprecates the
+.B -l
+.B -o
+.B -P
+and
+.B -s
+options.
 .TP
 .BR -m " \fIMIBLIST"
 Specifies a colon separated list of MIB modules to load for this
@@ -103,9 +117,21 @@ Log formatted incoming traps to
 Upon receipt of a SIGHUP, the daemon will close and re-open
 the log file.  This feature is useful when rotating the log file with
 other utilities such as logrotate.
+.br
+This option is being deprecated, and '-Lf FILE' should be used instead.
+.TP
+.BI -p " FILE"
+Save the process ID of the trap daemon in
+.IR FILE "."
+.br
+This option deprecates the
+.B -u
+option.
 .TP
 .B -P
 Print formatted incoming traps to stderr.
+.br
+This option is being deprecated, and '-Le' should be used instead.
 .TP
 .B -s
 Log formatted incoming traps to syslog.  These syslog messages are
@@ -114,11 +140,20 @@ sent with a level of
 and facility as determined by the
 .BR -l " flag (" LOG_LOCAL0 
 by default).  This is the default unless the
-.BR -o " or " -P
+.BR -o ", " -P " or " -L
 flag is used.
+.br
+This option is being deprecated, and '-Ls FACILITY' should be used instead.
+.TP
+.BR -S " d|0-7"
+Specifies the syslog facility to use when logging to syslog. See
+.BR -l
+for details.
+.br
+This option is being deprecated, and '-Ls FACILITY' should be used instead.
 .TP
 .BI -t
-Don't log traps to syslog.  This disables logging to syslog.  This is
+Do not log traps to syslog.  This disables logging to syslog.  This is
 useful if you want the snmptrapd application to
 .B only
 run traphandle hooks and not to log any traps to any location.
@@ -126,6 +161,8 @@ run traphandle hooks and not to log any traps to any location.
 .BI -u " FILE"
 Save the process ID of the trap daemon in
 .IR FILE "."
+.br
+This option is being deprecated, and '-p FILE' should be used instead.
 .TP
 .B -v, --version
 Print version information for the trap daemon and then exit.
