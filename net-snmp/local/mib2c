@@ -393,6 +393,10 @@ sub process_vars {
 #   @foreach $RANGE_START, $RANGE_END range NODE@
 #     repeat iterate over code until @end@ setting $RANGE_START and $RANGE_END
 #     to the legal accepted range set for a given mib NODE.
+#   @foreach $var stuff a b c d@
+#     repeat iterate over values a, b, c, d as assigned generically
+#     (ie, the values are taken straight from the list with no
+#     mib-expansion, etc).
 #   @eval $VAR = expression@
 #     evaluates expression and assigns the results to $VAR.  This is
 #     not a full perl eval, but sort of a "psuedo" eval useful for
@@ -659,12 +663,12 @@ sub process {
 		last if (/\@\s*enddefine\s*@/);
 		push @{$defines{$it}}, $_;
 	    }
-	} elsif (/\@\s*calldefine\s*(.*)@/) {
+	} elsif (/\@\s*calldefine\s+(\w+)@/) {
 	    if ($#{$defines{$1}} == -1) {
 		warn "called a define of $1 which didn't exist\n";
 		warn "$currentfile:$currentline [$_]\n";
 	    } else {
-		push @process_lines, @{$defines{$1}};
+		unshift @process_lines, @{$defines{$1}};
 	    }
       	} elsif (/\@\s*run (.*)\@/) { #                                    RUN
 	    my $arg = $1;
@@ -856,6 +860,20 @@ sub process {
 	      foreach $table (@thekeys) {
 		  $return = do_a_loop($stash, \$vars{$var}, $table, 
 				      \$currenttable, $table);
+	      }
+	    }
+            m2c_die("foreach did not end with \@end@ ($return)") if($return ne "end");
+	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+stuff\s*(.*)\@/) {
+	    my $var = $1;
+	    my $stuff = $2;
+	    my @stuff = split(/[,\s]+/, $stuff);
+	    my $stash = do_tell();
+	    if ($#stuff == -1) {
+	      $return = skippart();
+	    } else {
+	      foreach $st (@stuff) {
+		  $return = do_a_loop($stash, \$vars{$var}, $st,
+				      \$currentstuff, $st);
 	      }
 	    }
             m2c_die("foreach did not end with \@end@ ($return)") if($return ne "end");
