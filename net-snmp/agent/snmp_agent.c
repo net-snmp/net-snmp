@@ -1747,18 +1747,14 @@ handle_set(struct agent_snmp_session  *asp) {
                 break;
 
             case MODE_SET_COMMIT:
-                if ( asp->status != SNMP_ERR_NOERROR ) {
-                    asp->status    = SNMP_ERR_COMMITFAILED;
+                if (asp->status != SNMP_ERR_NOERROR) {
                     asp->mode = FINISHED_FAILURE;
-                }
-                else
+                } else {
                     asp->mode = FINISHED_SUCCESS;
+		}
                 break;
 
             case MODE_SET_UNDO:
-                if (asp->status != SNMP_ERR_NOERROR )
-                    asp->status = SNMP_ERR_UNDOFAILED;
-
                 asp->mode = FINISHED_FAILURE;
                 break;
 
@@ -1769,12 +1765,19 @@ handle_set(struct agent_snmp_session  *asp) {
     }
     
     if (asp->mode != FINISHED_SUCCESS && asp->mode != FINISHED_FAILURE) {
-        DEBUGMSGTL(("agent_set","doing set mode = %d\n",asp->mode));
-        status = handle_var_requests( asp );
-        if (status != SNMP_ERR_NOERROR && asp->status == SNMP_ERR_NOERROR)
-            asp->status = status;
-        DEBUGMSGTL(("agent_set","did set mode = %d, status = %d\n",
-                    asp->mode, asp->status));
+        DEBUGMSGTL(("agent_set", "doing set mode = %d\n", asp->mode));
+        status = handle_var_requests(asp);
+        DEBUGMSGTL(("agent_set", "did set mode = %d, status = %d\n",
+                    asp->mode, status));
+        if (status != SNMP_ERR_NOERROR && asp->status == SNMP_ERR_NOERROR) {
+	    if (asp->mode == MODE_SET_COMMIT) {
+		asp->status = SNMP_ERR_COMMITFAILED;
+	    } else if (asp->mode == MODE_SET_UNDO) {
+		asp->status = SNMP_ERR_UNDOFAILED;
+	    } else {
+		asp->status = status;
+	    }
+	}
     }
     return asp->status;
 }
