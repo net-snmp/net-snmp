@@ -9,6 +9,16 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #include <signal.h>
 #include <nlist.h>
 #if HAVE_MACHINE_PARAM_H
@@ -32,6 +42,9 @@
 #if HAVE_UFS_FS_H
 #include <ufs/fs.h>
 #else
+#if HAVE_UFS_UFS_DINODE_H
+#include <ufs/ufs/dinode.h>
+#endif
 #if HAVE_UFS_FFS_FS_H
 #include <ufs/ffs/fs.h>
 #endif

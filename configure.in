@@ -62,12 +62,18 @@ if test "x$GCC" = "xyes" -a "x$CPP" = "x$CC -E"; then
 else
   EXTRACPPFLAGS=""
 fi
+
 dnl Solaris extra cpp flags.
 if test "x$GCC" != "xyes"; then
   case $target_os in
     solaris*) EXTRACPPFLAGS="$EXTRACPPFLAGS -Xs" ;;
   esac
 fi
+
+dnl BSDI3 needs the BSDI2 define.
+case $target_os in
+  bsdi3*) CFLAGS="$CFLAGS -Dbsdi3"
+esac
 
 AC_SUBST(EXTRACPPFLAGS)
 AC_MSG_RESULT($EXTRACPPFLAGS)
@@ -259,7 +265,7 @@ AC_CHECK_HEADERS(sys/conf.h netinet/in_var.h netinet/in_pcb.h netinet/if_ether.h
 dnl NetBSD required headers
 AC_CHECK_HEADERS(arpa/inet.h kvm.h)
 dnl BSDi2 headers
-AC_CHECK_HEADERS(sys/mount.h vm/swap_pager.h)
+AC_CHECK_HEADERS(sys/mount.h vm/swap_pager.h ufs/ufs/dinode.h)
 dnl irix headers
 AC_CHECK_HEADERS(sys/hashing.h sys/tcpipstats.h)
 dnl from smux stuff
