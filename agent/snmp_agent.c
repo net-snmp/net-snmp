@@ -132,6 +132,8 @@ agent_check_and_process(int block) {
   int fakeblock=0;
   
   tvp =  &timeout;
+  tvp->tv_sec  = 0;
+  tvp->tv_usec = 0;
 
   numfds = 0;
   FD_ZERO(&fdset);
