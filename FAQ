@@ -107,22 +107,24 @@ What operating systems does it run on?
 -------------------------------------
 
 	* HP-UX 9.07, 9.05, 9.03, 9.01 on HPPA 1.1 systems
-	* HP-UX 10.10, 10.01 on HPPA 1.1 systems
-	* Ultrix 4.4, 4.3, 4.2 on DEC MIPS systems
-	* Solaris 2.5.1, 2.5, 2.4, 2.3 on Sun SPARC systems
+	* HP-UX 10.20, 10.10, 10.01 on HPPA 1.1 systems
+	* Ultrix 4.5, 4.4, 4.3, 4.2 on DEC MIPS systems
+	* Solaris 2.6, 2.5.1, 2.5, 2.4, 2.3 on Sun SPARC systems
 	* Solaris 2.5 on x86 systems
 	* SunOS 4.1.4, 4.1.3, 4.1.3, 4.1.2 on Sun SPARC systems
-	* OSF 3.2, 4.0 on DEC Alpha systems
-	* NetBSD 1.2, 1.1, 1.0 on all? systems
-	* FreeBSD 2.x on all? systems
+	* OSF 4.0, 3.2 on DEC Alpha systems
+	* NetBSD 1.3alpha, 1.2.1, 1.2, 1.1, 1.0 on all? systems
+	* FreeBSD 3.0, 2.2.2, 2.2 on all? systems
 	* BSDi 2.1 on all? systems
-	* Linux 2.*, 1.3 on all? systems
-        * AIX 4.1.5 on all? systems
+	* Linux 2.1, 2.0, 1.3 on all? systems
+        * AIX 4.1.5, 3.2.5 on all? systems
 
   The applications (though not necessarily the agent) run on the
   following systems:
 
         * Irix 6.2
+        * Windows95
+        * Windows NT
 
 
 What happens if mine isn't listed?
@@ -491,9 +493,9 @@ Why aren't my mib files read in any more?
   and recompiling the tools.
 
     The environmental variable 'MIBS' will be taken as a list of
-  module names (separated by colons) to be read in, instead of the
-  default list.  Note that any modules these rely on will be read in
-  automatically, without needing to be listed explicitly.
+  module names (separated by colons) to be read in, instead of (or as
+  well as) the default list.  Note that any modules these rely on will
+  be read in automatically, without needing to be listed explicitly.
 
     The environment variable 'MIBFILES' will be taken as a list of
   filenames, containing MIB modules to be read in (in addition to those
@@ -513,6 +515,21 @@ Why aren't my mib files read in any more?
   containing MIB files. 
 
   See the 'mib_api(3)' man page for more details.
+
+
+I'm getting answers, but they're all numbers. Why?
+-------------------------------------------------
+
+  This is actually the same as the previous question.  Because the tools
+  no longer read in every MIB module they can find, it is quite possible
+  for results from an agent to refer to modules that have not been loaded
+  (particularly with GETNEXT requests, or when walking a tree).
+     The tools will report the answer quite correctly, but won't translate
+  identifiers and enumerations into readable strings.  To fix this, use
+  the environmental variables MIBS or MIBFILES to read in the relevant
+  module files.
+    This does assume you have these files installed properly.  There's not
+  a great deal we can do if you haven't.
 
 
 What's this about a "party database", when I try to send a query?
@@ -546,6 +563,8 @@ Why can't I see values in the <INSERT ENTERPRISE HERE> tree?
   of the tree - e.g:
 
 	.iso.org.dod.internet.private.enterprises.ucdavis
+
+  Note the initial dot - this is important!
 
   Alternatively, you can define the environmental variable PREFIX,
   to specify where to start looking for ( non-fully specified) objects.
@@ -675,6 +694,8 @@ I'm using the Perl SNMP module, and get something about "bad free"?
   This problem has also been fixed in the most recent release of the
   UCD SNMP tools.  In general, if you experience any problem like this,
   try checking to see if there's a newer release first.
+    In particular, the recent changes in the way MIB files are parsed
+  requires Perl SNMP-1.6 or later.
 
 
 I can't load any of the mib files, and they seem to be missing
@@ -775,8 +796,9 @@ Sometimes I seem to get the wrong answers.  Why?
 
 
   Some systems may return the correct information for these values.
-  Systems that are known to have corrected some of these values are as follows:
+  Systems that are believed to have corrected some of these are as follows:
 
 	*  FreeBSD & BSDi provide correct interface statistics
-	*  Solaris & HP-UX provide correct statistics throughout
-	*  Linux is likely to provide correct statistics throughout
+	*  Solaris, Linux & HP-UX provide correct statistics throughout
+		(though Solaris may need a kernel patch to
+		 support interface octet counts).
