@@ -273,17 +273,7 @@ var_hrfilesys(struct variable *vp,
 	    *var_len = strlen(string);
 	    return (u_char *) string;
 	case HRFSYS_RMOUNT:
-#if HAVE_GETFSSTAT
-#if defined(MFSNAMELEN)
-	    if (!strcmp(HRFS_entry->HRFS_type, MOUNT_NFS))
-#else
-	    if (HRFS_entry->HRFS_type == MOUNT_NFS)
-#endif
-#elif defined(MNTTYPE_NFS)
-	    if (!strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS))
-#else
-	    if (0)
-#endif
+	    if (Check_HR_FileSys_NFS())
 	        sprintf(string, HRFS_entry->HRFS_name);
 	    else
 		string[0] = '\0';
@@ -291,6 +281,9 @@ var_hrfilesys(struct variable *vp,
 	    return (u_char *) string;
 
 	case HRFSYS_TYPE:
+	    if (Check_HR_FileSys_NFS())
+	        fsys_type_id[fsys_type_len-1] = 14;
+            else {
 			/*
 			 * Not sufficient to identity the file
 			 *   type precisely, but it's a start.
@@ -384,17 +377,10 @@ var_hrfilesys(struct variable *vp,
 	    else if (!strcmp( mnt_type, MNTTYPE_NTFS))
 			fsys_type_id[fsys_type_len-1] = 9;
 #endif
-#ifdef MNTTYPE_EXT2FS
-	    else if (!strcmp( mnt_type, MNTTYPE_EXT2FS))
-			fsys_type_id[fsys_type_len-1] = 23;
-#endif
-#ifdef MNTTYPE_NTFS
-	    else if (!strcmp( mnt_type, MNTTYPE_NTFS))
-			fsys_type_id[fsys_type_len-1] = 9;
-#endif
 	    else
 			fsys_type_id[fsys_type_len-1] = 1;	/* Other */
 #endif /* HAVE_GETFSSTAT */
+            }
 
             *var_len = sizeof(fsys_type_id);
 	    return (u_char *)fsys_type_id;
@@ -474,7 +460,17 @@ const char *HRFS_ignores[] = {
 #ifdef MNTTYPE_PROC
 	MNTTYPE_PROC,
 #endif
+#ifdef MNTTYPE_AUTOFS
+	MNTTYPE_AUTOFS,
+#endif
 	"autofs",
+#ifdef linux
+	"devpts",
+	"shm",
+#endif
+#ifdef solaris2
+	"fd",
+#endif
 	0
 };
 
@@ -528,6 +524,46 @@ Get_Next_HR_FileSys (void)
 
     return HRFS_index++;
 #endif /* HAVE_GETFSSTAT */
+}
+
+/*
+ * this function checks whether the current file system (info can be found
+ * in HRFS_entry) is a NFS file system
+ * HRFS_entry must be valid prior to calling this function
+ * returns 1 if NFS file system, 0 otherwise
+ */
+int
+Check_HR_FileSys_NFS (void)
+{
+#if HAVE_GETFSSTAT
+#if defined(MFSNAMELEN)
+    if (!strcmp(HRFS_entry->HRFS_type, MOUNT_NFS))
+#else
+    if (HRFS_entry->HRFS_type == MOUNT_NFS)
+#endif
+#else /* HAVE_GETFSSTAT */
+    if ( HRFS_entry->HRFS_type != NULL && (
+#if defined(MNTTYPE_NFS)
+	!strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS) ||
+#else
+	!strcmp( HRFS_entry->HRFS_type, "nfs") ||
+#endif
+#if defined(MNTTYPE_NFS3)
+	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS3) ||
+#endif
+#if defined(MNTTYPE_LOFS)
+	    !strcmp( HRFS_entry->HRFS_type, MNTTYPE_LOFS) ||
+#endif
+	    /*
+	     * MVFS is Rational ClearCase's view file system
+	     * it is similiar to NFS file systems in that it is mounted
+	     * locally or remotely from the ClearCase server
+	     */
+	    !strcmp( HRFS_entry->HRFS_type, "mvfs")))
+#endif /* HAVE_GETFSSTAT */
+	return 1;	/* NFS file system */
+
+    return 0;		/* no NFS file system */
 }
 
 void
@@ -658,7 +694,7 @@ Get_FSIndex(char *dev)
     return 0;
 }
 
-int
+long
 Get_FSSize(char *dev)
 {
     struct HRFS_statfs statfs_buf;
@@ -671,7 +707,19 @@ Get_FSSize(char *dev)
 	    End_HR_FileSys();
 
 	    if (HRFS_statfs( HRFS_entry->HRFS_mount, &statfs_buf) != -1 )
-	        return (statfs_buf.f_blocks*statfs_buf.f_bsize)/1024;
+ 		/*
+ 		 * with large file systems the following calculation produces
+ 		 * an overflow:
+ 		 * (statfs_buf.f_blocks*statfs_buf.f_bsize)/1024
+ 		 *
+ 		 * assumption: f_bsize is either 512 or a multiple of 1024
+ 		 * in case of 512 (f_blocks/2) is returned
+ 		 * otherwise (f_blocks*(f_bsize/1024)) is returned
+ 		 */
+ 		if (statfs_buf.f_bsize == 512)
+ 		    return (statfs_buf.f_blocks/2);
+	        else
+	            return (statfs_buf.f_blocks*statfs_buf.f_bsize)/1024;
 	    else
 		return -1;
 	}
