@@ -381,8 +381,7 @@ while test "x$new_module_list" != "x"; do
 	      AC_MSG_ERROR(mib module "$i" requires module "$j" but $j.h or $j.c could not be found in $srcdir/$mibdir)
 	    elif echo " $with_out_mib_modules " | grep " $j " > /dev/null; then
 	      AC_MSG_WARN(mib module "$i" requires module "$j" but you told me to compile without it)
-	    fi
-	    if echo " $module_list $new_list_two $new_module_list " | grep " $j " > /dev/null; then
+	    elif echo " $module_list $new_list_two $new_module_list " | grep " $j " > /dev/null; then
 	      :
 	    else
 	      new_list_two="$new_list_two $j"
