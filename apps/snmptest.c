@@ -232,7 +232,7 @@ main(argc, argv)
 		    }
 		}
 	    } else if (status == STAT_TIMEOUT){
-		printf("No Response from %s\n", session.peername);
+		printf("Timeout: No Response from %s\n", session.peername);
 	    } else {    /* status == STAT_ERROR */
               snmp_perror("snmptest");
 	    }
