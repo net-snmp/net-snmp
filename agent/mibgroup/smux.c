@@ -56,8 +56,8 @@
 #define FD_COPY(f, t)   bcopy(f, t, sizeof(*(f)))
 #endif
 
-#include "snmp.h"
 #include "asn1.h"
+#include "snmp.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
 #include "smux.h"
@@ -102,10 +102,8 @@ static u_char *smux_parse_var __P(u_char *, int *, oid *, int *, int *);
 static int smux_build __P(u_char, int, oid *, int *, u_char *, int *);
 
 int 
-init_smux()
+init_smux __P((void))
 {
-	struct servent *sp;
-	int i;
 	struct sockaddr_in lo_socket;
 	int one = 1;
 
@@ -167,7 +165,7 @@ init_smux()
 }
 
 
-int
+void
 smux_select(tvp)
 	struct timeval *tvp;
 {
@@ -175,7 +173,6 @@ smux_select(tvp)
 	struct sockaddr_in in_socket;
 	int count;
 	int len;
-	int i;
 
 	/* Copy the next to current */
 	FD_COPY(&ifds, &rfds);
@@ -220,7 +217,7 @@ smux_select(tvp)
 				 * Implications?
 				 */
 				setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, 
-					   &smux_rcv_timeout, 
+					   (char *)&smux_rcv_timeout, 
 					   sizeof(smux_rcv_timeout));
 	
 				gated_sd = fd;
@@ -255,7 +252,6 @@ smux_process(fd)
 	u_char data[SMUXMAXPKTSIZE], *ptr;
 	u_char type;
 	int error;
-	int result;
 
 	length = recv(fd, data, SMUXMAXPKTSIZE, 0);
 	if (length < 0) {
@@ -316,7 +312,7 @@ smux_process(fd)
  * decision to send a query to gated is made by just looking at the gated
  * descriptor.
  */
-u_char *
+static u_char *
 smux_open_process(ptr, len)
 	u_char *ptr;
 	int *len;
@@ -325,7 +321,6 @@ smux_open_process(ptr, len)
 	u_long version;
 	oid oid_name[MAX_OID_LEN];
 	int oid_name_len;
-	int i;
 	u_char descr[SMUXMAXSTRLEN];
 	int descr_len;
 
@@ -380,7 +375,7 @@ smux_open_process(ptr, len)
  * XXX - Bells and Whistles:
  * Need to catch signal when snmpd goes down and send close pdu to gated 
  */
-u_char *
+static u_char *
 smux_close_process(fd, ptr, len)
 	int fd;
 	u_char *ptr;
@@ -395,7 +390,7 @@ smux_close_process(fd, ptr, len)
 		ptr++;
 	}
 
-	printf("Gated gone - message %d\n", down);
+	printf("Gated gone - message %ld\n", down);
 
 	FD_CLR(fd, &ifds);
 	FD_CLR(fd, &sfds);
@@ -404,7 +399,7 @@ smux_close_process(fd, ptr, len)
 	return NULL;
 }
 
-u_char *
+static u_char *
 smux_rreq_process(sd, ptr, len)
 	int sd;
 	u_char *ptr;
@@ -415,7 +410,6 @@ smux_rreq_process(sd, ptr, len)
 	oid oid_name[MAX_OID_LEN];
 	int oid_name_len;
 	u_char type;
-	int i;
 
 	oid_name_len = MAX_OID_LEN;
 	ptr = asn_parse_objid(ptr, len, &type, oid_name, &oid_name_len); 
@@ -448,7 +442,7 @@ smux_rreq_process(sd, ptr, len)
 	return ptr;
 }
 
-u_char *
+static u_char *
 smux_sout_process(ptr, len)
 	u_char *ptr;
 	int *len;
@@ -542,7 +536,7 @@ smux_snmp_process(exact, objid, len, return_len)
 
 
 /* XXX need to do sanity checking */
-u_char *
+static u_char *
 smux_parse(rsp, objid, oidlen, return_len)
 	u_char *rsp;
 	oid *objid;
@@ -585,7 +579,7 @@ smux_parse(rsp, objid, oidlen, return_len)
 }
 
 
-u_char *
+static u_char *
 smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
 	u_char *varbind;
 	int *varbindlength;
@@ -721,10 +715,10 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
 	
 
 /* XXX This is a bad hack - do not want to muck with ucd code */
-int
+static int
 smux_build(type, reqid, objid, oidlen, packet, length)
 	u_char type;
-	int reqid;
+	long reqid;
 	oid *objid;
 	int *oidlen;
 	u_char *packet;
@@ -732,8 +726,8 @@ smux_build(type, reqid, objid, oidlen, packet, length)
 {
 	u_char *ptr, *save1, *save2, *save3;
 	int len, len1, len2, len3;
-	int errstat = 0;
-	int errindex = 0;
+	long errstat = 0;
+	long errindex = 0;
 
 	/* leave space for Seq and length */
 	save1 = packet;
@@ -818,6 +812,7 @@ smux_build(type, reqid, objid, oidlen, packet, length)
 
 }
 
+static void
 print_fdbits (fdp)
         fd_set *fdp;
 {
@@ -825,11 +820,12 @@ print_fdbits (fdp)
         int num = howmany(FD_SETSIZE, NFDBITS);
 
         for (i=0; i<num; i++) {
-                printf ("%d ", fdp->fds_bits[i]);
+                printf ("%ld ", fdp->fds_bits[i]);
         }
         printf ("\n");
 }
 
+static void
 print_oid(o, l)
 	oid *o;
 	int l;
@@ -837,6 +833,6 @@ print_oid(o, l)
 	int i;
 
 	for (i=0; i<l; i++) {
-		printf(".%d", *(o+i));
+		printf(".%ld", *(o+i));
 	}
 }
