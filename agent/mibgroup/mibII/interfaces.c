@@ -1297,14 +1297,12 @@ Interface_Scan_Init (void)
         while (*ifstart == ' ') ifstart++;
 
         if ( (stats = strrchr(ifstart, ':')) == NULL ) {
-                snmp_log(LOG_ERR,"/proc/net/dev data format error, line
-==|%s|",line);
+                snmp_log(LOG_ERR,"/proc/net/dev data format error, line ==|%s|",line);
                 continue;
         }
         if ( (scan_line_to_use == scan_line_2_2) &&
                 ( (stats-line) < 6 ) ) {
-                snmp_log(LOG_ERR,"/proc/net/dev data format error, line
-==|%s|",line);
+                snmp_log(LOG_ERR,"/proc/net/dev data format error, line ==|%s|",line);
         }
 
         *stats++ = 0;
@@ -1319,8 +1317,7 @@ Interface_Scan_Init (void)
 &snd_err, &coll) != 5)) {
           if ( (scan_line_to_use == scan_line_2_2) &&
                 !strstr(line,"No statistics available") )
-                snmp_log(LOG_ERR,"/proc/net/dev data format error, line
-==|%s|",line);
+                snmp_log(LOG_ERR,"/proc/net/dev data format error, line ==|%s|",line);
           continue;
         }
 	
