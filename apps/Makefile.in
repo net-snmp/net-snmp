@@ -104,7 +104,7 @@ install: installdirs subdirs $(TARG)
 	@for i in $(SBINTARG) ; do $(INSTALL) $$i $(sbindir) ; echo "install:  installed $$i in $(sbindir)" ; done
 
 installdirs:
-	@$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir) $(bindir)
+	@$(SHELL) $(srcdir)/../mkinstalldirs $(snmplibdir) $(bindir) $(sbindir)
 
 
 dependlocal: 
