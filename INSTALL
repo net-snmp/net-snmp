@@ -29,7 +29,9 @@ QUICK INSTRUCTIONS
 
   3) make
 
-  4) as root:  make install
+  4) Run the next two commands as root:
+  5) umask 022   # <-- zero-two-two
+  6) make install
 
 Note: By default, everything will be installed in /usr/local.
       (see below for more instructions)
