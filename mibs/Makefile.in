@@ -2,6 +2,8 @@
 # Makefile to install mib files.
 #
 
+top_builddir=..
+
 V1MIBS	= RFC1155-SMI.txt RFC1213-MIB.txt
 
 V2MIBS = SNMPv2-CONF.txt SNMPv2-SMI.txt SNMPv2-TC.txt SNMPv2-TM.txt \

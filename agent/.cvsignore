@@ -4,3 +4,6 @@
 Makefile
 mib.txt
 snmpd
+.libs
+*.lo
+*.la
