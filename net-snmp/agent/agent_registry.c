@@ -413,8 +413,6 @@ free_subtree(struct subtree *st)
   struct subtree *ret = NULL;
   if (st->variables != NULL)
     free(st->variables);
-  if (st->children != NULL)
-    free_subtree(st->children);
   if (st->next != NULL)
     ret = st->next;
   free(st);
