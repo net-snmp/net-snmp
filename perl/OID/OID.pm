@@ -98,7 +98,9 @@ sub new {
     }
     SNMP::init_snmp("perl");
     my $ptr = NetSNMP::OID::newptr($arg);
-    return newwithptr($type, $ptr);
+    if ($ptr) {
+      return newwithptr($type, $ptr);
+    }
 }
 
 sub newwithptr {
