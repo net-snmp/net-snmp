@@ -1,6 +1,37 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.2*
+
+  New:
+    - Top level of the mib parser has been restructured
+      - no longer uses a default mib.txt file.
+      - reads the imports clauses of mibs to load other required mibs.
+      - No longer loads everything it can find.  Instead it uses
+        environmental variables MIBS and MIBDIRS to decide what to
+        load.
+      - new man page: mib_api.3
+    - The agent has been completely restructured (modularized) to
+      allow for easier extension via C code and requires no
+      modification of the ucd-snmp distributed source code to add in
+      new C coded mib modules.  See the README file in the
+      agent/mibgroup subdirectory for details.  Modules are added and/or
+      removed via configure options.
+    - agent can send traps to multiple trap destinations.
+    - configure can be run outside the default source directory.
+    - Optional modules:  SMUX support to talk with a running gated.
+    - All configure prompted questions can be set on the command line instead.
+
+  Fixes:
+    - Memory leaks.
+    - code is now prototyped and many related bugs have been found.
+      (an ANSI compiler is still optional.)
+    - Many others.
+
+  Ported:
+    - linux-2.*
+    - mips-sgi-irix6.3  (agent needs 2 mib-modules removed still)
+
 *3.1.3*
 
   New:
