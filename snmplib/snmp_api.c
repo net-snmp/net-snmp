@@ -295,6 +295,7 @@ static const char *api_errors[-SNMPERR_MAX + 1] = {
     "Bad variable type",        /* SNMPERR_VAR_TYPE */
     "Out of memory (malloc failure)",   /* SNMPERR_MALLOC */
     "Kerberos related error",   /* SNMPERR_KRB5 */
+    "Protocol error",		/* SNMPERR_PROTOCOL */
 };
 
 static const char *secLevelName[] = {
@@ -371,36 +372,35 @@ strerror(int err)
 }
 #endif
 
-#define DEBUGPRINTPDUTYPE(token, type) \
-    switch(type) { \
-      case SNMP_MSG_GET: \
-        DEBUGDUMPSECTION(token, "PDU-GET"); \
-        break; \
-      case SNMP_MSG_GETNEXT: \
-        DEBUGDUMPSECTION(token, "PDU-GETNEXT"); \
-        break; \
-      case SNMP_MSG_RESPONSE: \
-        DEBUGDUMPSECTION(token, "PDU-RESPONSE"); \
-        break; \
-      case SNMP_MSG_SET: \
-        DEBUGDUMPSECTION(token, "PDU-SET"); \
-        break; \
-      case SNMP_MSG_GETBULK: \
-        DEBUGDUMPSECTION(token, "PDU-GETBULK"); \
-        break; \
-      case SNMP_MSG_INFORM: \
-        DEBUGDUMPSECTION(token, "PDU-INFORM"); \
-        break; \
-      case SNMP_MSG_TRAP2: \
-        DEBUGDUMPSECTION(token, "PDU-TRAP2"); \
-        break; \
-      case SNMP_MSG_REPORT: \
-        DEBUGDUMPSECTION(token, "PDU-REPORT"); \
-        break; \
-      default: \
-        DEBUGDUMPSECTION(token, "PDU-UNKNOWN"); \
-        break; \
+const char *
+snmp_pdu_type(int type)
+{
+    static char unknown[20];
+    switch(type) {
+    case SNMP_MSG_GET:
+        return "GET";
+    case SNMP_MSG_GETNEXT:
+        return "GETNEXT";
+    case SNMP_MSG_RESPONSE:
+        return "RESPONSE";
+    case SNMP_MSG_SET:
+        return "SET";
+    case SNMP_MSG_GETBULK:
+        return "GETBULK";
+    case SNMP_MSG_INFORM:
+        return "INFORM";
+    case SNMP_MSG_TRAP2:
+        return "TRAP2";
+    case SNMP_MSG_REPORT:
+        return "REPORT";
+    default:
+        snprintf(unknown, sizeof(unknown), "?0x%2X?", type);
+	return unknown;
     }
+}
+
+#define DEBUGPRINTPDUTYPE(token, type) \
+    DEBUGDUMPSECTION(token, snmp_pdu_type(type))
 
 long
 snmp_get_next_reqid(void)
@@ -496,19 +496,21 @@ const char     *
 snmp_api_errstring(int snmp_errnumber)
 {
     const char     *msg = "";
-    static char     msg_buf[256];
+    static char     msg_buf[SPRINT_MAX_LEN];
     if (snmp_errnumber >= SNMPERR_MAX && snmp_errnumber <= SNMPERR_GENERR) {
         msg = api_errors[-snmp_errnumber];
     } else if (snmp_errnumber != SNMPERR_SUCCESS) {
-        msg = "Unknown Error";
+        msg = NULL;
     }
-    if (snmp_detail_f) {
-        snprintf(msg_buf, 256, "%s (%s)", msg, snmp_detail);
+    if (!msg)
+	snprintf(msg_buf, sizeof(msg_buf), "Unknown error: %d", snmp_errnumber);
+    else if (snmp_detail_f) {
+        snprintf(msg_buf, sizeof(msg_buf), "%s (%s)", msg, snmp_detail);
         snmp_detail_f = 0;
     } else {
-        strncpy(msg_buf, msg, 256);
+        strncpy(msg_buf, msg, sizeof(msg_buf));
     }
-    msg_buf[255] = '\0';
+    msg_buf[sizeof(msg_buf)-1] = '\0';
 
     return (msg_buf);
 }
@@ -535,12 +537,18 @@ snmp_error(netsnmp_session * psess,
     strcpy(buf, "");
     snmp_errnumber = psess->s_snmp_errno;
     if (snmp_errnumber >= SNMPERR_MAX && snmp_errnumber <= SNMPERR_GENERR) {
-        strncpy(buf, api_errors[-snmp_errnumber], 256);
+	if (snmp_detail_f) {
+            snprintf(buf, sizeof(buf), "%s (%s)", api_errors[-snmp_errnumber],
+		    snmp_detail);
+	    snmp_detail_f = 0;
+	}
+	else
+	    strncpy(buf, api_errors[-snmp_errnumber], sizeof(buf));
     } else {
         if (snmp_errnumber)
-            snprintf(buf, 256, "Unknown Error %d", snmp_errnumber);
+            snprintf(buf, sizeof(buf), "Unknown Error %d", snmp_errnumber);
     }
-    buf[255] = '\0';
+    buf[sizeof(buf)-1] = '\0';
 
     /*
      * append a useful system errno interpretation. 
@@ -549,10 +557,10 @@ snmp_error(netsnmp_session * psess,
         const char* error = strerror(psess->s_errno);
         if(error == NULL)
             error = "Unknown Error";
-        snprintf (&buf[strlen(buf)], 256-strlen(buf),
+        snprintf (&buf[strlen(buf)], sizeof(buf)-strlen(buf),
                  " (%s)", error);
     }
-    buf[255] = '\0';
+    buf[sizeof(buf)-1] = '\0';
     *p_str = strdup(buf);
 }
 
@@ -4178,6 +4186,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
     data = asn_parse_header(data, length, &msg_type);
     if (data == NULL)
         return -1;
+    DEBUGMSGTL(("dumpv_recv","    Command %s\n", snmp_pdu_type(msg_type)));
     pdu->command = msg_type;
     pdu->flags &= (~UCD_MSG_FLAG_RESPONSE_PDU);
 
