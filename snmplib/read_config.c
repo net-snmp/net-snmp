@@ -585,6 +585,10 @@ read_config_store(const char *type, const char *line)
 #ifdef PERSISTENT_MASK
   oldmask = umask(PERSISTENT_MASK);
 #endif
+  if (mkdirhier(filep, AGENT_DIRECTORY_MODE, 1)) {
+      snmp_log(LOG_ERR, "Failed to create the persistent directory for %s\n",
+               file);
+  }
   if ((fout = fopen(filep, "a")) != NULL) {
     fprintf(fout,line);
     if (line[strlen(line)] != '\n')
