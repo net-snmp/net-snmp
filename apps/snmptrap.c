@@ -151,6 +151,7 @@ int main(int argc, char *argv[])
 	session.remote_port = SNMP_TRAP_PORT;
     ss = snmp_open(&session);
     if (ss == NULL){
+      /* diagnose snmp_open errors with the input struct snmp_session pointer */
         snmp_sess_perror("snmptrap", &session);
         SOCK_CLEANUP;
         exit(1);
