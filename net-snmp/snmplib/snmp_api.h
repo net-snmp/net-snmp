@@ -78,6 +78,7 @@ struct snmp_pdu {
     long    reqid;	/* Request id - note: not incremented on retries */
     long    msgid;      /* Message id for V3 messages 
                          * note: incremented for each retry */
+    long    sessid;     /* Session id for AgentX messages */
     long    errstat;	/* Error status (non_repeaters in GetBulk) */
     long    errindex;	/* Error index (max_repetitions in GetBulk) */
     u_long  time;	/* Uptime */
@@ -133,6 +134,13 @@ struct snmp_pdu {
     char    *securityName;	/* on behalf of this principal */
     size_t  securityNameLen;	/* Length of securityName. */
 
+	/*
+	 * AgentX fields
+	 *	(also uses SNMPv1 community field)
+	 */
+    int	    priority;
+    int	    range_subid;
+
     void * securityStateRef;
 };
 
@@ -157,6 +165,7 @@ struct snmp_session {
 
     int     s_errno;        /* copy of system errno */
     int     s_snmp_errno;   /* copy of library errno */
+    long    sessid;         /* Session id - AgentX only */
 
 	/*
 	 * SNMPv1 & SNMPv2c fields
