@@ -32,6 +32,93 @@ else
     --exec-prefix)
       echo @exec_prefix@
       ;;
+    --compile-subagent)
+      shift
+      outname=$1
+      shift
+      tmpfile=netsnmptmp.$$.c
+      if test -f $tmpfile; then
+	echo "Ack.  Can't create $tmpfile: already exists"
+	exit 1
+      fi
+      echo "generating the tmporary code file: $tmpfile"
+      rm -f $tmp
+      cat > $tmpfile <<EOF
+#include <net-snmp/net-snmp-config.h>
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif /* HAVE_SIGNAL_H */
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
+static int keep_running;
+
+RETSIGTYPE
+stop_server(int a) {
+    keep_running = 0;
+}
+
+int
+main (int argc, char **argv) {
+  /* print log errors to stderr */
+  snmp_enable_stderrlog();
+ /* we are a subagent */
+  ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, 1);
+
+  /* initialize the agent library */
+  init_agent("$outname");
+
+  /* initialize your mib code here */
+EOF
+
+    # add init routines
+    while test "$1" != ""; do
+      cfiles="$cfiles $1"
+      name=`basename $1 | sed 's/\.c$//'`
+      if grep "init_$name" $1 ; then
+        echo "  init_${name}();" >> $tmpfile
+      fi
+      shift
+    done
+
+    # finish file
+    cat >> $tmpfile <<EOF
+
+  /* ustMain will be used to read ustMain.conf files. */
+  init_snmp("$outname");
+
+  /* In case we recevie a request to stop (kill -TERM or kill -INT) */
+  keep_running = 1;
+#ifdef SIGTERM
+  signal(SIGTERM, stop_server);
+#endif
+#ifdef SIGINT
+  signal(SIGINT, stop_server);
+#endif
+
+  /* main loop here... */
+  while(keep_running) {
+    agent_check_and_process(1);
+  }
+
+  /* at shutdown time */
+  snmp_shutdown("$outname");
+  exit(0);
+}
+
+EOF
+      if test "$?" != 0 -o ! -f "$tmpfile" ; then
+        echo "Ack.  Can't create $tmpfile."
+	exit 1
+      fi
+      prefix=@prefix@
+      cmd="@CC@ @CFLAGS@ -o $outname $tmpfile $cfiles @LDFLAGS@ @AGENTLIBS@ -I@includedir@ -L@exec_prefix@/lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp"
+      echo "running: $cmd"
+      `$cmd`
+      echo "removing the tmporary code file: $tmpfile"
+      rm -f $tmp
+      ;;
+
     *)
       echo "unknown option $1"
       usage="yes"
@@ -43,8 +130,17 @@ if test "x$usage" = "xyes"; then
   echo ""
   echo "Usage:"
   echo "  net-snmp-config [--cflags] [--agent-libs] [--libs] [--version]"
+  echo "                  [--compile-subagent outputname mibmodule1.c [...]]"
   echo ""
-  echo "You can then compile agent subagents using something like:"
-  echo '  cc -o mysubagent mysubagent.c `net-snmp-config --agent-libs`'
+  echo "    --version         displays the net-snmp version number"
+  echo ""
+  echo "  These options produce the various compilation flags needed when"
+  echo "  building external SNMP applications:"
+  echo "    --cflags          lists additional compilation flags needed"
+  echo "    --libs            lists additional libraries needed for programs"
+  echo "    --agent-libs      lists additional libraries needed for subagents"
+  echo ""
+  echo "  Automatted subagent building (produces an outputname binary file):"
+  echo "    --compile-subagent outputname mibmodule1.c [...]]"
   echo ""
 fi  
