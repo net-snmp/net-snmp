@@ -49,13 +49,23 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
  * initialization
  */
 void
-interface_common_init(void)
+netsnmp_access_interface_init(void)
 {
+    netsnmp_container * ifcontainer;
+
     snmpd_register_config_handler("interface", _parse_interface_config,
                                   _free_interface_config,
                                   "name type speed");
 
     netsnmp_access_interface_arch_init();
+
+    /*
+     * load once to set up ifIndexes
+     */
+    ifcontainer = netsnmp_access_interface_container_load(NULL, 0);
+    if(NULL != ifcontainer)
+        netsnmp_access_interface_container_free(ifcontainer, 0);
+
 }
 
 /**---------------------------------------------------------------------*/
