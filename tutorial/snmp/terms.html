@@ -8,10 +8,10 @@
     <h1>SNMP Terminology</h1>
     This document details some of the terminology that might be new to those
     who are not familiar with SNMP.
-    <P>
+    <p>
       It's not very comprehensive right now, but we hope to flush it out real
       soon now.
-    <P>
+    </p>
 
       <!-- ========================================================= -->
     <h2>Basic SNMP Terminology</h2>
@@ -31,7 +31,7 @@
         text documents that define Managed Information Bases, or MIBs. A
         MIB defines a set of data objects and the format for those objects.
         Each data object is identified by a unique Object Identifier, or OID.
-        <p>
+        </p>
       <li><a name="oid">OID</a> : An Object Identifier<p>
         An OID is a
         series of integers that uniquely identify a data object. OIDs can
@@ -41,22 +41,89 @@
         a little harder for us humans. A MIB can be used to convert the
         number to the names used in the MIB. The above OID translates to:
         <code>.iso.org.dod.internet.mgmt.mib-2.system.sysName.0</code><br>
-        <p>
+        </p>
       <li><a name="pdu">PDU</a> : A Protocol Data Unit<p>
         A PDU is simply
         a data packet. The SNMP specifications define the format for
         each supported PDU type. SNMP PDUs contain various header fields
         (which depend on the protocol version being used and the PDU
         type), and variable bindings (varbinds).
-        <p>
-      <li><a name="varbind">varbinds</a> : Variable bindings<P>
+        </p>
+      <li><a name="varbind">varbinds</a> : Variable bindings<p>
         A Variable binding, or varbind, is an OID for an object, and the
           data value associated with that object.
-        <p>
-      <li><a name="get">GET request</a><P>
-        A GET request PDU 
+        </p>
+      <li><a name="get">GET request</a><p>
+        A GET request PDU ...
+        </p>
+      <li><a name="getnext">GETNEXT request</a><p>
+        ...
+        </p>
+      <li><a name="set">SET request</a><p>
+          ...
+        </p>
+      <li><a name="notification">Notifications</a><p>
+          A notification is an unsolicted message from a SNMP agent or device
+          that is sent to a notification receiver (aka Network Managment
+          System (NMS) or Element Management System (EMS)). Notifications
+          generally indicate a status change on the device. It could be
+          information about the change, or a message to indicate an alarm
+          condition.
+          SNMP defines two types of notifications: traps and informs.
+        </p>
+      <li><a name="trap">Traps</a><p>
+          A SNMP trap is an unsolicited message sent to a notification
+          receiver. Unlike messages sent to a SNMP agent, traps are not
+          confirmed by the receiver. If it is critical that a Network
+          Management System (NMS) be able to detect when a message is
+          lost, then the device must provide a method for detecting
+          lost messages, such as a log table or sequence numbers. If
+          the device supports informs, critical notifications should be
+          sent using informs.
+        </p>
+      <li><a name="informs">Informs</a><p>
+          A SNMP inform is an unsolicited message sent to a notification
+          receiver. It was not introduced into the protocol until SNMP
+          version 2c, so it is not availabe in devices that only support
+          SNMP version 1. Unlike SNMP traps, informs are confirmed
+          messages, and thus are more appropriate for critical notifications.
+        </p>
     </ul>
     
+      <!-- ========================================================= -->
+    <h2> SNMP Related Terminology</h2>
+
+    <ul>
+      <li><a name="subagent"></a>
+        <p>
+          A SNMP subagent is a process which uses a protocol other than
+          SNMP to communicate with a master agent. The subagent does not
+          directly communicate with SNMP client, instead it relies on the
+          master agent to handle the protocol details of SNMP. One of the
+          primary advantages of subagents is that they can be added or
+          removed dynamically, and new agents can be developed with any
+          changes to the master agent. The two most commonly used protocols
+          for subagents are <a href="#AgentX">AgentX</a> and
+          <a href="#SMUX">SMUX</a>.
+      <li><a name="AgentX"></a>
+        <p>
+          AgentX is an agent extension protocol. An AgentX master agent
+          acts as a central communication center for one or more AgentX
+          <a href="#subagent">sub-agents</a>. The
+          <a href="http://www.ietf.org">IETF</a> document
+          defining AgentX is
+          <a href="http://www.apps.ietf.org/rfc/rfc2741.html">RFC 2741</a>.
+        </p>
+      <li><a name="SMUX"></a>
+        <p>
+          SMUX is an agent extension protocol. It started on the
+          <a href="http://www.ietf.org">IETF</a> standards track, but was
+          superceded by later work (eg AgentX), and the document defining it
+          (<a href="http://www.apps.ietf.org/rfc/rfc1227.html">RFC 1227</a>)
+          was moved to <i>historic</i> status.
+        </p>
+    </ul>
+
     <!-- ========================================================= -->
     <h2>MIB Terminology</h2>
 
@@ -65,6 +132,31 @@
         <p>
       <li><a name="augment">Augmentation</a> table
         <p>
+    </ul>
+
+    <!-- ========================================================= -->
+    <h2>Network/Socket Terminology</h2>
+
+    <ul>
+      <li><a name="udp">UDP</a>
+        <p>
+          UDP, or User Datagram Protocol, is a network packet protocol, defined
+          in <a href="http://www.apps.ietf.org/rfc/rfc768.html">RFC 768</a>. UDP
+          is a <i>connectionless</i> protocol, which means that the packet is
+          sent, and no confirmation is received from the other side (like sending
+          a letter in the mail). This makes it less resource intensive, but also
+          less reliable, than TCP connections.
+        </p>
+      <li><a name="tcp">TCP</a>
+        <p>
+          TCP, or Transmission Control Protocol, is a network packet protocol,
+          defined in
+          <a href="http://www.apps.ietf.org/rfc/rfc793.html">RFC 793</a>. TCP
+          is a <i>connection oriented</i> protocol, which means that the
+          sender and receiver communicate to try and ensure the packet is
+          delivered (like sending a fax). This makes it more resource intensive,
+          but also more reliable than UDP packets.
+        </p>
     </ul>
 
     <!-- ========================================================= -->
@@ -126,7 +218,7 @@
 Version $Revision$
 <!-- Created: Fri Oct 24 10:41:49 EDT 2003 -->
 <!-- hhmts start -->
-Last modified: Thu Dec  4 13:26:38 EST 2003
+Last modified: Sun Aug 29 22:27:53 EDT 2004
 <!-- hhmts end -->
 <!--#include virtual="/sfbutton.html" -->
   </body>
