@@ -227,7 +227,17 @@ snmp_transport		*snmp_udp_transport	(struct sockaddr_in *addr,
     /*  This session is inteneded as a server, so we must bind on to the given
 	IP address, which may include an interface address, or could be
 	INADDR_ANY, but certainly includes a port number.  */
-    
+
+    t->local = malloc(6);
+    if (t->local == NULL) {
+      snmp_transport_free(t);
+      return NULL;
+    }
+    memcpy(t->local, (u_char *)&(addr->sin_addr.s_addr), 4);
+    t->local[4] = (addr->sin_port & 0xff00) >> 8;
+    t->local[5] = (addr->sin_port & 0x00ff) >> 0;
+    t->local_length = 6;
+
     rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr));
     if (rc != 0) {
       snmp_udp_close(t);
@@ -240,11 +250,16 @@ snmp_transport		*snmp_udp_transport	(struct sockaddr_in *addr,
     /*  This is a client session.  Save the address in the transport-specific
 	data pointer for later use by snmp_udp_send.  */
 
-    t->data = malloc(sizeof(struct sockaddr_in));
-    if (t->data == NULL) {
+    t->data   = malloc(sizeof(struct sockaddr_in));
+    t->remote = malloc(6);
+    if (t->data == NULL || t->remote == NULL) {
       snmp_transport_free(t);
       return NULL;
     }
+    memcpy(t->remote, (u_char *)&(addr->sin_addr.s_addr), 4);
+    t->remote[4] = (addr->sin_port & 0xff00) >> 8;
+    t->remote[5] = (addr->sin_port & 0x00ff) >> 0;
+    t->remote_length = 6;
     memcpy(t->data, addr, sizeof(struct sockaddr_in));
     t->data_length = sizeof(struct sockaddr_in);
   }

@@ -243,6 +243,15 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
 	INADDR_ANY, but will always include a port number.  */
     
     t->flags |= SNMP_TRANSPORT_FLAG_LISTEN;
+    t->local = malloc(6);
+    if (t->local == NULL) {
+      snmp_transport_free(t);
+      return NULL;
+    }
+    memcpy(t->local, (u_char *)&(addr->sin_addr.s_addr), 4);
+    t->local[4] = (addr->sin_port & 0xff00) >> 8;
+    t->local[5] = (addr->sin_port & 0x00ff) >> 0;
+    t->local_length = 6;
 
     /*  We should set SO_REUSEADDR too.  */
     
@@ -278,6 +287,16 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
       return NULL;
     }
   } else {
+    t->remote = malloc(6);
+    if (t->remote == NULL) {
+      snmp_transport_free(t);
+      return NULL;
+    }
+    memcpy(t->remote, (u_char *)&(addr->sin_addr.s_addr), 4);
+    t->remote[4] = (addr->sin_port & 0xff00) >> 8;
+    t->remote[5] = (addr->sin_port & 0x00ff) >> 0;
+    t->remote_length = 6;
+
     /*  This is a client-type session, so attempt to connect to the far end.
 	We don't go non-blocking here because it's not obvious what you'd then
 	do if you tried to do snmp_sends before the connection had completed.
