@@ -23,8 +23,8 @@ use SNMP;
 SNMP::init_snmp("AnyData::SNMP");
 
 sub new {
-    DEBUG("calling AnyData::Storage::SNMP new\n");
-    DEBUG("new storage: ",Dumper(\@_),"\n");
+#    DEBUG("calling AnyData::Storage::SNMP new\n");
+#    DEBUG("new storage: ",Dumper(\@_),"\n");
     my $class = shift;
     my $self  = shift || {};
     $self->{open_mode} = 'c';
@@ -214,7 +214,7 @@ sub file2str {
 	if ($#{$self->{'sess'}} == 0 && $self->{'silence_single_host'}) {
 	    $self->{'hostname'} = '';
 	} else {
-	    $self->{'hostname'} = $sess->{'sess'}[0]{'DestHost'};
+	    $self->{'hostname'} = $self->{'sess'}[0]{'DestHost'};
 	}
     }
 
@@ -235,7 +235,7 @@ sub file2str {
 	    shift @{$self->{'sess'}};
 	    delete($self->{'lastnode'});
 	    @$cols = ();
-	    $self->{'hostname'} = $sess->{'sess'}[0]{'DestHost'} if($self->{'hostname'})
+	    $self->{'hostname'} = $self->{'sess'}[0]{'DestHost'} if($self->{'hostname'});
 	    goto restart;
 	}
 	return undef;
@@ -328,18 +328,22 @@ sub push_row {
     }
 
     # add in values to varbind columns passed in from incoming parameters
-    map {
-	my $num = $self->{'col_nums'}{$_};
-	DEBUG("types: $_ -> $num -> ", $self->{'col_types'}[$num], 
+    my @newvars;
+    foreach my $v (@vars) {
+	my $num = $self->{'col_nums'}{$v};
+	DEBUG("types: $v -> $num -> ", $self->{'col_types'}[$num], 
 	      " -> val=", $values->[$num], "\n");
+	next if (!defined($values->[$num]));
 	# build varbind: column-oid, instance-id, value type, value
-	$_ = [$_, $values->[1], $values->[$num],
-	      $self->{'col_types'}[$num]];
-    } @vars;
+	push @newvars, [$v, $values->[1], $values->[$num],
+			$self->{'col_types'}[$num]];
+    };
 
     # create the varbindlist
-    my $vblist = new SNMP::VarList(@vars);
-    
+#    print STDERR Dumper(\@newvars);
+    my $vblist = new SNMP::VarList(@newvars);
+
+#    print STDERR Dumper($vblist);
     DEBUG("set: ", Dumper($vblist));
     $self->{'sess'} = $self->make_session() if (!$self->{'sess'});
     if (!$self->{'sess'}[0]) {
@@ -374,6 +378,7 @@ sub make_iid {
 
     # XXX: implied
 
+#    print STDERR "INDEXES: ", Dumper($vals),"\n";
     foreach my $index (@$indexes) {
 	warn "A null index value was found, which I doubt is correct." if (!defined($vals->[$self->{col_nums}{$index}]));
 	my $val = $vals->[$self->{col_nums}{$index}];
@@ -418,4 +423,5 @@ sub DEBUGIT {
     print STDERR "$info->[3]: ";
     print STDERR @_;
 }
+
 1;
