@@ -714,7 +714,7 @@ read_app_config_store(const char *line)
 void
 snmp_save_persistent(const char *type)
 {
-  char file[512], fileold[512];
+  char file[512], fileold[SPRINT_MAX_LEN];
   struct stat statbuf;
   int j;
 
@@ -733,6 +733,9 @@ snmp_save_persistent(const char *type)
       }
     }
   }
+  /* save a warning header to the top of the new file */
+  sprintf(fileold, "#\n# net-snmp (or ucd-snmp) persistent data file.\n#\n# DO NOT STORE CONFIGURATION ENTRIES HERE.\n# Please save normal configuration tokens for %s in SNMPCONFPATH/%s.conf.\n# Only \"createUser\" tokens should be placed here by %s administrators.\n#\n", type, type, type);
+  read_config_store(type, fileold);
 }
 
 
