@@ -21,6 +21,7 @@
 
 #include <net-snmp/types.h>
 #include <net-snmp/library/int64.h>
+#include <net-snmp/library/snmp_debug.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -189,7 +190,7 @@ incrByU32(U64 * pu64, unsigned int u32)
         pu64->high++;
 }
 
-/*
+/**
  * pu64out = pu64one - pu64two 
  */
 void
@@ -202,6 +203,37 @@ u64Subtract(const U64 * pu64one, const U64 * pu64two, U64 * pu64out)
         pu64out->low = pu64one->low - pu64two->low;
         pu64out->high = pu64one->high - pu64two->high;
     }
+}
+
+/**
+ * pu64out += pu64one
+ */
+void
+u64Incr(U64 * pu64out, const U64 * pu64one)
+{
+    pu64out->high += pu64one->high;
+    incrByU32(pu64out, pu64one->low);
+}
+
+/**
+ * pu64out += (pu64one - pu64two)
+ */
+void
+u64UpdateCounter(U64 * pu64out, const U64 * pu64one, const U64 * pu64two)
+{
+    U64 tmp;
+    u64Subtract(pu64one, pu64two, &tmp);
+    u64Incr(pu64out, &tmp);
+}
+
+/**
+ * pu64one = pu64two 
+ */
+void
+u64Copy(U64 * pu64one, const U64 * pu64two)
+{
+    pu64one->high = pu64two->high;
+    pu64one->low =  pu64two->low;
 }
 
 /** zeroU64 - set an unsigned 64-bit number to zero
@@ -235,6 +267,65 @@ isZeroU64(const U64 * pu64)
         return (FALSE);
 
 }                               /* isZeroU64 */
+
+/**
+ * check the old and new values of a counter64 for 32bit wrapping
+ *
+ * @param adjust : set to 1 to auto-increment new_val->high
+ *                 if a 32bit wrap is detected.
+ *
+ *@Note:
+ * The old and new values must be be from within a time period
+ * which would only allow the 32bit portion of the counter to
+ * wrap once. i.e. if the 32bit portion of the counter could
+ * wrap every 60 seconds, the old and new values should be compared
+ * at least every 59 seconds (though I'd recommend at least every
+ * 50 seconds to allow for timer inaccuracies).
+ *
+ * @retval 64 : 64bit wrap
+ * @retval 32 : 32bit wrap
+ * @retval  0 : did not wrap
+ * @retval -1 : bad parameter
+ * @retval -2 : unexpected high value (changed by more than 1)
+ */
+int
+netsnmp_c64_check_for_32bit_wrap(struct counter64 *old_val,
+                                 struct counter64 *new_val,
+                                 int adjust)
+{
+    if( (NULL == old_val) || (NULL == new_val) )
+        return -1;
+
+    DEBUGMSGTL(("9:c64:check_wrap", "check wrap 0x%0x.0x%0x 0x%0x.0x%0x\n",
+                old_val->high, old_val->low, new_val->high, new_val->low));
+    
+    /*
+     * check for wraps
+     */
+    if ((new_val->low >= old_val->low) &&
+        (new_val->high == old_val->high)) {
+        DEBUGMSGTL(("9:c64:check_wrap", "no wrap\n"));
+        return 0;
+    }
+
+    /*
+     * low wrapped. did high change?
+     */
+    if (new_val->high == old_val->high) {
+        DEBUGMSGTL(("c64:check_wrap", "32 bit wrap\n"));
+        if (adjust)
+            ++new_val->high;
+        return 32;
+    }
+    else if ((new_val->high == (old_val->high + 1)) ||
+             ((0 == new_val->high) && (0xffffffff == old_val->high))) {
+        DEBUGMSGTL(("c64:check_wrap", "64 bit wrap\n"));
+        return 64;
+    }
+
+    return -2;
+}
+
 
 void
 printU64(char *buf,     /* char [I64CHARSZ+1]; */
