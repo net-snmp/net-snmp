@@ -955,7 +955,7 @@ SNMP - The Perl5 'SNMP' Extension Module v3.1.0 for the UCD SNMPv3 Library
  do {
     $val = $sess->getnext($vb);
     print "@{$vb}\n";
- until ($sess->{ErrorNum});
+ } until ($sess->{ErrorNum});
  ...
  $SNMP::save_descriptions = 1;
  SNMP::initMib(); # assuming mib is not already loaded
