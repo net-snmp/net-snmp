@@ -114,6 +114,9 @@ var_ipRouteEntry(struct variable *vp,
     u_char         *cp;
     u_char         *ap;
     oid            *op;
+
+    *write_method = write_rte;
+
 #if 0
   /** 
   ** this optimisation fails, if there is only a single route avail.
@@ -219,7 +222,6 @@ var_ipRouteEntry(struct variable *vp,
     }
 #endif                          /* 0 */
 
-    *write_method = write_rte;
     *var_len = sizeof(long_return);
 
     switch (vp->magic) {
@@ -430,6 +432,9 @@ var_ipRouteEntry(struct variable * vp,
     struct ifnet    rt_ifnet;
     struct in_ifaddr rt_ifnetaddr;
 #endif
+
+    *write_method = write_rte;
+
     /** 
      ** this optimisation fails, if there is only a single route avail.
      ** it is a very special case, but better leave it out ...
@@ -520,7 +525,6 @@ var_ipRouteEntry(struct variable * vp,
         *length = 14;
     }
 
-    *write_method = write_rte;
     *var_len = sizeof(long_return);
 
     switch (vp->magic) {
@@ -716,6 +720,9 @@ var_ipRouteEntry(struct variable * vp,
     mib2_ipRouteEntry_t Lowentry, Nextentry, entry;
     int             Found = 0;
     req_e           req_type;
+    static uint32_t ipaddr_return;
+
+    *write_method = write_rte;
 
     /*
      * fill in object part of name for current (less sizeof instance part) 
@@ -774,7 +781,6 @@ var_ipRouteEntry(struct variable * vp,
     memcpy((char *) name, (char *) lowest,
            IP_ROUTENAME_LENGTH * sizeof(oid));
     *length = IP_ROUTENAME_LENGTH;
-    *write_method = write_rte;
     *var_len = sizeof(long_return);
 
     switch (vp->magic) {
@@ -1778,6 +1784,8 @@ var_ipRouteEntry(struct variable * vp,
     static int      saveNameLen, saveExact;
     static oid      saveName[14], Current[14];
 
+    *write_method = write_rte;
+
 #if 0
     /*
      *      OPTIMIZATION:
@@ -1847,7 +1855,6 @@ var_ipRouteEntry(struct variable * vp,
         *length = 14;
     }
 
-    *write_method = write_rte;
     *var_len = sizeof long_return;
 
     switch (vp->magic) {
