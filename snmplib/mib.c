@@ -57,7 +57,7 @@ char *sprint_objid __P((char *, oid *, int));
 
 static void sprint_by_type __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static parse_subtree __P((struct tree *, char *, oid *, int *));
-static void set_functions __P((struct tree *));
+       void set_function __P((struct tree *));		/* used by parse.c */
 static int lc_cmp __P((char *, char *));
 static char *uptimeString __P((u_long, char *));
 static void sprint_hexstring __P((char *, u_char *, int));
@@ -83,7 +83,6 @@ static void sprint_badtype __P((char *, struct variable_list *, struct enum_list
 static struct tree *get_symbol __P((oid *, int, struct tree *, char *));
 static struct tree *get_tree __P((oid *, int, struct tree *));
 static char *get_description __P((oid *, int));
-static struct tree *find_node __P((char *, struct tree *));
 
 static int quick_print = 0;
 
@@ -793,35 +792,61 @@ unsigned char EXPERIMENTAL_MIB_text[] = ".iso.org.dod.internet.experimental";
 unsigned char PRIVATE_MIB_text[] = ".iso.org.dod.internet.private";
 unsigned char PARTY_MIB_text[] = ".iso.org.dod.internet.snmpParties";
 unsigned char SECRETS_MIB_text[] = ".iso.org.dod.internet.snmpSecrets";
-struct tree *Mib;
+extern struct tree *tree_head;
 
 char Standard_Prefix[] = ".1.3.6.1.2.1.";
 char Prefix[128];
 int Suffix;
 
+extern void    init_mib_internals ();	/* from parse.c */
+extern char*   which_module __P((int));	/* from parse.c */
+
 void
 init_mib __P((void))
 {
     char *file, *prefix, mibpath[300];
+    char  *env_var, *entry, path[300];
 
-    Mib = NULL;
-    file = getenv("MIBFILE");
-    if (file)
-	Mib = read_mib(file);
-    if (!Mib) {
-      sprintf(mibpath,"%s/mib.txt",SNMPLIBPATH);
-      Mib = read_mib(mibpath);
+	/* Initialise the MIB directory/ies */
+
+    env_var = getenv("MIBDIRS");
+    if ( env_var == NULL ) {
+        sprintf(path, "%s/mibs", SNMPLIBPATH );
+	env_var = &path;
     }
-    if (!Mib)
-	Mib = read_mib("mib.txt");
-    if (!Mib)
-	Mib = read_mib("/usr/local/lib/mib.txt");
-    if (!Mib)
-	Mib = read_mib("/etc/mib.txt");
-    if (!Mib){
-	fprintf(stderr, "Couldn't find mib file\n");
-	exit(2);
+    entry = strtok( env_var, ":" );
+    while ( entry ) {
+        add_mibdir(entry);
+        entry = strtok( NULL, ":");
     }
+
+    init_mib_internals();
+
+	/* Read in any modules or mibs requested */
+
+    env_var = getenv("MIBS");
+    if ( env_var == NULL ) {
+        strcpy(path, "RFC1213-MIB");
+	env_var = &path;
+    }
+    entry = strtok( env_var, ":" );
+    while ( entry ) {
+        read_module(entry);
+        entry = strtok( NULL, ":");
+    }
+
+    env_var = getenv("MIBFILE");
+    if ( env_var == NULL ) {
+        strcpy(path, "mib.txt:/usr/local/lib/mib.txt:/etc/mib.txt");
+	env_var = &path;
+    }
+    entry = strtok( env_var, ":" );
+    while ( entry ) {
+        read_mib(entry);
+        entry = strtok( NULL, ":");
+    }
+
+
     prefix = getenv("PREFIX");
     if (!prefix)
         prefix = Standard_Prefix;
@@ -834,21 +859,19 @@ init_mib __P((void))
 	Suffix = TRUE;
     else
 	Suffix = FALSE;
-    set_functions(Mib);
 }
 
 void
 print_mib (fp)
     FILE *fp;
 {
-    print_subtree (fp, Mib, 0);
+    print_subtree (fp, tree_head, 0);
 }
 
-static void
-set_functions(subtree)
+void
+set_function(subtree)
     struct tree *subtree;
 {
-    for(; subtree; subtree = subtree->next_peer){
 	switch(subtree->type){
 	    case TYPE_OBJID:
 		subtree->printer = sprint_object_identifier;
@@ -897,8 +920,6 @@ set_functions(subtree)
 		subtree->printer = sprint_unknowntype;
 		break;
 	}
-	set_functions(subtree->child_list);
-    }
 }
 
 #ifdef testing
@@ -916,7 +937,7 @@ main(argc, argv)
 
     init_mib();
     if (argc < 2)
-	print_subtree(stdout, Mib, 0);
+	print_subtree(stdout, tree_head, 0);
     variable.type = ASN_INTEGER;
     variable.val.integer = 3;
     variable.val_len = 4;
@@ -938,7 +959,7 @@ int read_objid(input, output, out_len)
     oid *output;
     int	*out_len;   /* number of subid's in "output" */
 {
-    struct tree *root = Mib;
+    struct tree *root = tree_head;
     oid *op = output;
     char buf[512];
 
@@ -963,42 +984,6 @@ int read_objid(input, output, out_len)
     return (1);
 }
 
-#ifdef notdef
-int read_objid(input, output, out_len)
-    char *input;
-    oid *output;
-    int	*out_len;   /* number of subid's in "output" */
-{
-    struct tree *root = Mib;
-    oid *op = output;
-    int i;
-
-    if (*input == '.')
-	input++;
-    else {
-	root = find_rfc1213_mib(root);
-	for (i = 0; i < sizeof (RFC1213_MIB)/sizeof(oid); i++) {
-	    if ((*out_len)-- > 0)
-		*output++ = RFC1213_MIB[i];
-	    else {
-		fprintf(stderr, "object identifier too long\n");
-		return (0);
-	    }
-	}
-    }
-
-    if (root == NULL){
-	fprintf(stderr, "Mib not initialized.  Exiting.\n");
-	exit(1);
-    }
-    if ((*out_len =
-	 parse_subtree(root, input, output, out_len)) == 0)
-	return (0);
-    *out_len += output - op;
-
-    return (1);
-}
-#endif
 
 static int
 parse_subtree(subtree, input, output, out_len)
@@ -1089,7 +1074,7 @@ sprint_objid(buf, objid, objidlen)
     int	    objidlen;	/* number of subidentifiers */
 {
     char    tempbuf[2048], *cp;
-    struct tree    *subtree = Mib;
+    struct tree    *subtree = tree_head;
 
     *tempbuf = '.';	/* this is a fully qualified name */
     get_symbol(objid, objidlen, subtree, tempbuf + 1);
@@ -1162,7 +1147,7 @@ sprint_variable(buf, objid, objidlen, variable)
     struct  variable_list *variable;
 {
     char    tempbuf[2048];
-    struct tree    *subtree = Mib;
+    struct tree    *subtree = tree_head;
 
     sprint_objid(buf, objid, objidlen);
     buf += strlen(buf);
@@ -1211,7 +1196,7 @@ sprint_value(buf, objid, objidlen, variable)
     struct  variable_list *variable;
 {
     char    tempbuf[2048];
-    struct tree    *subtree = Mib;
+    struct tree    *subtree = tree_head;
 
     if (variable->type == SNMP_NOSUCHOBJECT)
 	sprintf(buf, "No Such Object available on this agent\n");
@@ -1342,7 +1327,7 @@ get_description(objid, objidlen)
     oid     *objid;
     int     objidlen;   /* number of subidentifiers */
 {
-    struct tree    *subtree = Mib;
+    struct tree    *subtree = tree_head;
 
     subtree = get_tree(objid, objidlen, subtree);
     if (subtree)
@@ -1364,34 +1349,24 @@ print_description(objid, objidlen)
         printf("No description\n");
 }
 
-static struct tree *
-find_node(name, subtree)
-    char *name;
-    struct tree *subtree;
-{
-    struct tree *tp, *ret;
-
-    for(tp = subtree; tp; tp = tp->next_peer){
-	if (!strcasecmp(name, tp->label))
-	    return tp;
-	ret = find_node(name, tp->child_list);
-	if (ret)
-	    return ret;
-    }
-    return 0;
-}
-
 
 int
-get_node(name, objid, objidlen)
+get_module_node(name, module, objid, objidlen)
     char *name;
+    char *module;
     oid *objid;
     int *objidlen;
 {
+    int modid;
     struct tree *tp;
     oid newname[64], *op;
 
-    tp = find_node(name, Mib);
+    if ( !strcmp(module, "ANY") )
+        modid = -1;
+    else
+        modid = which_module( module );
+
+    tp = find_tree_node(name, modid);
     if (tp){
 	for(op = newname + 63; op >= newname; op--){
 	    *op = tp->subid;
@@ -1409,4 +1384,15 @@ get_node(name, objid, objidlen)
     }
 
     
+}
+
+
+int
+get_node(name, objid, objidlen)
+    char *name;
+    oid *objid;
+    int *objidlen;
+{
+    return( get_module_node( name, "ANY", objid, objidlen ));
+
 }
