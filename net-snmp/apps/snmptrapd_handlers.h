@@ -50,4 +50,10 @@ netsnmp_trapd_handler *netsnmp_add_traphandler(Netsnmp_Trap_Handler handler,
                         oid *trapOid, int trapOidLen);
 netsnmp_trapd_handler *netsnmp_get_traphandler(oid *trapOid, int trapOidLen);
 
+const char *trap_description(int trap);
+void do_external(char *cmd, struct hostent *host,
+            netsnmp_pdu *pdu, netsnmp_transport *transport);
+int snmp_input(int op, netsnmp_session *session,
+           int reqid, netsnmp_pdu *pdu, void *magic);
+
 #endif                          /* SNMPTRAPD_HANDLERS_H */
