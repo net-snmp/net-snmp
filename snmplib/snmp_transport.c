@@ -26,6 +26,9 @@
 #ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
 #include "snmpAAL5PVCDomain.h"
 #endif
+#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+#include "snmpUDPIPv6Domain.h"
+#endif
 #include "snmp_api.h"
 #include "snmp_debug.h"
 #include "snmp_logging.h"
@@ -176,6 +179,9 @@ void			snmp_tdomain_init	(void)
 #endif
 #ifdef SNMP_TRANSPORT_AAL5PVC_DOMAIN
   snmp_aal5pvc_ctor();
+#endif
+#ifdef SNMP_TRANSPORT_UDPIPV6_DOMAIN
+  snmp_udp6_ctor();
 #endif
   snmp_tdomain_dump();
 }

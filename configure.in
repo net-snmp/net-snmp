@@ -226,25 +226,25 @@ AC_ARG_WITH(out_transports,
 
   Available SNMP transport modules are:
 
-        UDP                       support for SNMP over UDP/IP.  This
-                                    transport is always compiled in.
-        TCP                       support for SNMP over TCP/IP.  This
-                                    transport is compiled in by default, but
-                                    may be ommitted.
-        Unix                      support for SNMP over Unix domain
-                                    protocols.  This transport is compiled in
-                                    by default except on Win32 platforms, and
-                                    may be omitted.
-        Callback                  support for SNMP over an internal locally
-                                    connected pair of snmp_sessions.
-        AAL5PVC                   support for SNMP over AAL5 PVCs.  This
-                                    transport is presently only available for
-                                    Linux, is never compiled in by default
-                                    and may be omitted.
-        IPX                       support for SNMP over IPX per RFC 1420.
-                                    This transport is presently only available
-                                    for Linux, is never compiled in by default
-                                    and may be omitted.
+    UDP         support for SNMP over UDP/IP.
+                This transport is always compiled in.
+    UDPIPv6	support for SNMP over UDP/IPv6.
+    		This transport is available for Linux, Solaris,
+		FreeBSD.
+		It is never compiled in by default.
+    TCP         support for SNMP over TCP/IP.
+    		This transport is compiled in by default, but may be ommitted.
+    Unix        support for SNMP over Unix domain protocols.
+    		This transport is compiled in by default except on Win32
+		platforms, and may be omitted.
+    Callback    support for SNMP over an internal locally connected pair
+    		of snmp_sessions.
+    AAL5PVC     support for SNMP over AAL5 PVCs.
+    		This transport is presently only available for Linux,
+		is never compiled in by default and may be omitted.
+    IPX         support for SNMP over IPX per RFC 1420.
+                This transport is presently only available for Linux,
+		is never compiled in by default and may be omitted.
 ])
 
 dnl
@@ -1497,6 +1497,7 @@ AC_CHECK_FUNCS(rpmGetPath)
 
 AC_CHECK_FUNCS(getloadavg)
 AC_CHECK_FUNCS(kvm_openfiles nlist knlist)
+AC_CHECK_FUNCS(getaddrinfo getipnodebyname)
 dnl BSDi2 functions differ
 AC_CHECK_FUNCS(statvfs statfs)
 AC_CHECK_FUNCS(getdtablesize)
