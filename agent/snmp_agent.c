@@ -3009,7 +3009,7 @@ _request_set_error(netsnmp_request_info *request, int mode, int error_value)
         break;                  /* never get here */
 
     default:
-        if (request->status < 0) {
+        if (error_value < 0) {
             /*
              * illegal local error code.  translate to generr 
              */
