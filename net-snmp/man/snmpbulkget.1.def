@@ -59,7 +59,7 @@ manual page.
 .SH EXAMPLE
 The command:
 .PP
-snmpbulkget -v2c -Cn1 -Cr5 -Os zeus public system ifTable
+snmpbulkget -v2c -Cn1 -Cr5 -Os -c public zeus system ifTable
 .PP
 will retrieve the variable system.sysDescr.0 (which is the
 lexicographically next object to system) and the first 5 objects in
