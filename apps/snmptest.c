@@ -357,13 +357,16 @@ input_variable(struct variable_list *vp)
 
     if (command == SNMP_MSG_SET || command == SNMP_MSG_INFORM
 	|| command == SNMP_MSG_TRAP2){
-	printf("Type [i|s|x|d|n|o|t|a]: ");
+	printf("Type [i|u|s|x|d|n|o|t|a]: ");
 	fflush(stdout);
 	fgets(buf, sizeof(buf), stdin);
 	ch = *buf;
 	switch(ch){
 	    case 'i':
 		vp->type = ASN_INTEGER;
+		break;
+	    case 'u':
+		vp->type = ASN_UNSIGNED;
 		break;
 	    case 's':
 		vp->type = ASN_OCTET_STR;
@@ -387,7 +390,7 @@ input_variable(struct variable_list *vp)
 		vp->type = ASN_IPADDRESS;
 		break;
 	    default:
-		printf("bad type \"%c\", use \"i\", \"s\", \"x\", \"d\", \"n\", \"o\", \"t\", or \"a\".\n", *buf);
+		printf("bad type \"%c\", use \"i\", \"u\", \"s\", \"x\", \"d\", \"n\", \"o\", \"t\", or \"a\".\n", *buf);
 		return -1;
 	}
 getValue:
@@ -397,6 +400,11 @@ getValue:
 	    case ASN_INTEGER:
 		vp->val.integer = (long *)malloc(sizeof(long));
 		*(vp->val.integer) = atoi(buf);
+		vp->val_len = sizeof(long);
+		break;
+	    case ASN_UNSIGNED:
+		vp->val.integer = (long *)malloc(sizeof(long));
+		*(vp->val.integer) = strtoul(buf, NULL, 0);
 		vp->val_len = sizeof(long);
 		break;
 	    case ASN_OCTET_STR:
