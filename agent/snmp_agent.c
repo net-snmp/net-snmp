@@ -911,9 +911,10 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
     asp->treecache_num = -1;
     asp->treecache_len = 0;
     asp->vbcount = count_varbinds(asp->pdu->variables);
-    asp->requests =
-        (netsnmp_request_info *) calloc(asp->vbcount,
-                                        sizeof(netsnmp_request_info));
+    if(asp->vbcount) /* efence doesn't like 0 size allocs */
+        asp->requests =
+            (netsnmp_request_info *) calloc(asp->vbcount,
+                                            sizeof(netsnmp_request_info));
 
     return asp;
 }
