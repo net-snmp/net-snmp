@@ -216,7 +216,7 @@ char	_debugx[1024];	/* Space to sprintf() into - used by sprint_objid(). */
 #endif	/* DEBUGGING */
 
 void
-__libraries_init()
+__libraries_init(char *appname)
     {
         static int have_inited = 0;
 
@@ -225,8 +225,7 @@ __libraries_init()
         have_inited = 1;
 
         snmp_set_quick_print(1);
-        /* ds_set_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS,1);*/
-        init_snmp("perlmod");
+        init_snmp(appname);
     
         ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS, 1);
         ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
@@ -2471,9 +2470,9 @@ snmp_sys_uptime()
 	RETVAL
 
 void
-init_snmp()
+init_snmp(char *appname)
     CODE:
-        __libraries_init();
+        __libraries_init(appname);
 
 
 SnmpSession *
@@ -2490,7 +2489,7 @@ snmp_new_session(version, community, peer, lport, retries, timeout)
 	   SnmpSession *ss = NULL;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
-           __libraries_init();
+           __libraries_init("perl");
            
 	   if (!strcmp(version, "1")) {
 		session.version = SNMP_VERSION_1;
@@ -2548,7 +2547,7 @@ snmp_new_v3_session(version, peer, retries, timeout, sec_name, sec_level, sec_en
 	   SnmpSession *ss = NULL;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
-           __libraries_init();
+           __libraries_init("perl");
 
 	   if (version == 3) {
 		session.version = SNMP_VERSION_3;
@@ -4614,7 +4613,7 @@ snmp_mib_node_TIEHASH(class,key,tp=0)
         IV tp
 	CODE:
 	{
-            __libraries_init();
+            __libraries_init("perl");
            if (!tp) tp = (IV)__tag2oid(key, NULL, NULL, NULL, NULL,0);
            if (tp) {
               ST(0) = sv_newmortal();
