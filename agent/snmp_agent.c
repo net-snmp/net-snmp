@@ -922,6 +922,15 @@ handle_snmp_packet(int op, struct snmp_session *session, int reqid,
 	if ( asp->mode == RESERVE1 ) {
             snmp_increment_statistic(STAT_SNMPINGETREQUESTS);
 	    asp->exact   = FALSE;
+
+	    if (asp->pdu->errindex < 0) {
+		asp->pdu->errindex = 0;
+	    }
+
+	    if (asp->pdu->errstat < 0) {
+		asp->pdu->errstat = 0;
+	    }
+
 		    /*
 		     * Limit max repetitions to something reasonable
 		     *	XXX: We should figure out what will fit somehow...
