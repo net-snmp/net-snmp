@@ -458,8 +458,6 @@ static void
 Check_HRSW_cache(void *xxx)
 {
     SWI_t *swi = (SWI_t *)xxx;
-    int offset;
-    int ix;
 
     /* Make sure cache is up-to-date */
     if (swi->swi_recs != NULL) {
@@ -471,22 +469,39 @@ Check_HRSW_cache(void *xxx)
     }
 
     /* Get header offsets */
-    ix = 0;
-    for(offset = rpmdbFirstRecNum(swi->swi_rpmdb), ix = 0;
-	offset != 0;
-	offset = rpmdbNextRecNum(swi->swi_rpmdb, offset), ix++)
-    {
-	if (ix >= swi->swi_maxrec) {
-	    swi->swi_maxrec += 256;
-	    if (swi->swi_recs == NULL) {
-		swi->swi_recs = (int *) malloc(swi->swi_maxrec * sizeof(int));
-	    } else {
-		swi->swi_recs = (int *) realloc(swi->swi_recs, swi->swi_maxrec * sizeof(int));
+    {	int ix = 0;
+	int offset;
+
+#if defined(RPMDBI_PACKAGES)
+	rpmdbMatchIterator mi = NULL;
+	Header h;
+	mi = rpmdbInitIterator(swi->swi_rpmdb, RPMDBI_PACKAGES, NULL, 0);
+	while ((h = rpmdbNextIterator(mi)) != NULL) {
+	    offset = rpmdbGetIteratorOffset(mi);
+#else
+	for (offset = rpmdbFirstRecNum(swi->swi_rpmdb);
+	    offset != 0;
+	    offset = rpmdbNextRecNum(swi->swi_rpmdb, offset))
+	{
+#endif
+
+	    if (ix >= swi->swi_maxrec) {
+		swi->swi_maxrec += 256;
+		swi->swi_recs = (swi->swi_recs == NULL)
+		    ? (int *) malloc(swi->swi_maxrec * sizeof(int))
+		    : (int *) realloc(swi->swi_recs, swi->swi_maxrec * sizeof(int));
 	    }
+	    swi->swi_recs[ix++] = offset;
+
+#if !defined(RPMDBI_PACKAGES)
 	}
-	swi->swi_recs[ix] = offset;
+#else
+	}
+	rpmdbFreeIterator(mi);
+#endif
+
+	swi->swi_nrec = ix;
     }
-    swi->swi_nrec = ix;
 }
 #endif	/* HAVE_LIBRPM */
 
@@ -556,7 +571,17 @@ Save_HR_SW_info (int ix)
 	char *n, *v, *r;
 
 	offset = swi->swi_recs[ix-1];
+
+#if defined(RPMDBI_PACKAGES)
+    {   rpmdbMatchIterator mi;
+	mi = rpmdbInitIterator(swi->swi_rpmdb, RPMDBI_PACKAGES, &offset, sizeof(offset));
+	if ((h = rpmdbNextIterator(mi)) != NULL) h = headerLink(h);
+	rpmdbFreeIterator(mi);
+    }
+#else
 	h = rpmdbGetRecord(swi->swi_rpmdb, offset);
+#endif
+
 	if (h == NULL)
 	    return;
 	if (swi->swi_h != NULL)
