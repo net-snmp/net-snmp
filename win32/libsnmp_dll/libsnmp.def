@@ -239,6 +239,7 @@ EXPORTS
 	config_perror
 	copy_word
 	calculate_time_diff
+	vacm_is_configured
 	vacm_createGroupEntry
 	vacm_destroyGroupEntry
 	vacm_destroyAllGroupEntries
