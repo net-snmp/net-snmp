@@ -151,3 +151,5 @@ void print_subtree __P((FILE *, struct tree *, int));
 void print_ascii_dump_tree __P((FILE *, struct tree *, int));
  /* backwards compatability */
 struct tree *find_node __P((char *, struct tree*));
+void snmp_set_mib_warnings __P((int));
+void snmp_set_save_descriptions __P((int));
