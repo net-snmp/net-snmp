@@ -1,8 +1,20 @@
 /*
  * agent_registry.c
+ */
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/** @defgroup agent_registry Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc
+ *   @ingroup agent
  *
- * Maintain a registry of MIB subtrees, together
- *   with related information regarding mibmodule, sessions, etc
+ * @{
  */
 
 #define IN_SNMP_VARS_C
@@ -810,6 +822,7 @@ netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev, const char *
 
     if (prev != NULL) {         /* non-leading entries are easy */
         prev->children = sub->children;
+        invalidate_lookup_cache(context);
         return;
     }
     /*
@@ -826,7 +839,6 @@ netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev, const char *
 	    netsnmp_subtree_replace_first(sub->next, context);
 	}
 
-        return;
     } else {
         for (ptr = sub->prev; ptr; ptr = ptr->children)
             ptr->next = sub->children;
@@ -836,10 +848,39 @@ netsnmp_subtree_unload(netsnmp_subtree *sub, netsnmp_subtree *prev, const char *
 	if (sub->prev == NULL) {
 	    netsnmp_subtree_replace_first(sub->children, context);
 	}
-        return;
     }
+    invalidate_lookup_cache(context);
 }
 
+/**
+ * Unregisters an OID that has an associated context name value. 
+ * Typically used when a module has multiple contexts defined.  The parameters
+ * priority, range_subid, and range_ubound should be used in conjunction with
+ * agentx, see RFC 2741, otherwise these values should always be 0.
+ *
+ * @param name  the specific OID to unregister if it conatins the associated
+ *              context.
+ *
+ * @param len   the length of the OID, use  OID_LENGTH macro.
+ *
+ * @param priority  a value between 1 and 255, used to achieve a desired
+ *                  configuration when different sessions register identical or
+ *                  overlapping regions.  Subagents with no particular
+ *                  knowledge of priority should register with the default
+ *                  value of 127.
+ *
+ * @param range_subid  permits specifying a range in place of one of a subtree
+ *                     sub-identifiers.  When this value is zero, no range is
+ *                     being specified.
+ *
+ * @param range_ubound  the upper bound of a sub-identifier's range.
+ *                      This field is present only if range_subid is not 0.
+ *
+ * @param context  a context name that has been created
+ *
+ * @return 
+ * 
+ */
 int
 unregister_mib_context(oid * name, size_t len, int priority,
                        int range_subid, oid range_ubound,
@@ -1797,3 +1838,5 @@ unregister_signal(int sig)
 }
 
 #endif                          /* !WIN32 */
+
+/**  }@ */

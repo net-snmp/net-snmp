@@ -53,6 +53,9 @@ ucdavis MODULE-IDENTITY
          email:    net-snmp-coders@lists.sourceforge.net
         "
     DESCRIPTION
+	"Added ssCpuRawSoftIRQ for Linux (2.6) and forgotten raw swap counters."
+    REVISION	 "200404070000Z"
+    DESCRIPTION
 	"Deprecate the non-raw objects."
     REVISION	 "200209050000Z"
     DESCRIPTION
@@ -1075,7 +1078,7 @@ ssIORawSent OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "Number of requests sent to a block device"
+        "Number of blocks sent to a block device"
     ::= { systemStats 57 }
 
 ssIORawReceived OBJECT-TYPE
@@ -1083,7 +1086,7 @@ ssIORawReceived OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "Number of requests received from a block device"
+        "Number of blocks received from a block device"
     ::= { systemStats 58 }
 
 ssRawInterrupts OBJECT-TYPE
@@ -1101,6 +1104,30 @@ ssRawContexts OBJECT-TYPE
     DESCRIPTION
         "Number of context switches"
     ::= { systemStats 60 }
+
+ssCpuRawSoftIRQ OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Soft IRQ CPU time. This is for Linux 2.6"
+    ::= { systemStats 61 }
+
+ssRawSwapIn OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of blocks swapped in"
+    ::= { systemStats 62 }
+
+ssRawSwapOut OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Number of blocks swapped out"
+    ::= { systemStats 63 }
 
 -- possibly used in the future:
 --

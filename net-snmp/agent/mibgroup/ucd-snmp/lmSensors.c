@@ -139,7 +139,7 @@ var_lmSensorsTable(struct variable *vp,
     static unsigned char string[SPRINT_MAX_LEN];
     int             i;
 
-    int             s_index = name[*length - 1] - 1;
+    int             s_index;
     int             s_type = -1;
     int             n_sensors;
 
@@ -189,6 +189,7 @@ var_lmSensorsTable(struct variable *vp,
     if (s_type < 0)
         return NULL;
 
+    s_index = name[*length - 1] - 1;
     s = sensor_array[s_type].sensor[s_index];
 
     switch (vp->magic) {

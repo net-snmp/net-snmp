@@ -282,7 +282,7 @@ int
 input_variable(netsnmp_variable_list * vp)
 {
     char            buf[256];
-    int             val_len;
+    size_t          val_len;
     u_char          value[256], ch;
     oid             name[MAX_OID_LEN];
 

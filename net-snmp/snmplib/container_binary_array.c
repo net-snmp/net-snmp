@@ -165,7 +165,7 @@ netsnmp_binary_array_initialize(void)
     t->max_size = 0;
     t->count = 0;
     t->dirty = 0;
-    t->data_size = 4;
+    t->data_size = sizeof(void*);
     t->data = NULL;
 
     return t;
@@ -287,7 +287,7 @@ netsnmp_binary_array_remove(netsnmp_container *c, const void *key, void **save)
      * if entry was last item, just decrement count
      */
     --t->count;
-    if (index != t->count) {
+    if (index != (int)t->count) {
         /*
          * otherwise, shift array down
          */

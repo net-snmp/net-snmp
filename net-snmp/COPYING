@@ -1,4 +1,4 @@
-Various copyrights apply to this package, listed in 4 separate parts
+Various copyrights apply to this package, listed in 5 separate parts
 below.  Please make sure that you read all the parts.  Up until 2001,
 the project was based at UC Davis, and the first part covers all code
 written during this time.  From 2001 onwards, the project has been
@@ -150,7 +150,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---- Part 5: Sparta, Inc copyright notice (BSD) -----
 
-Copyright (c) 2003, Sparta, Inc
+Copyright (c) 2003-2004, Sparta, Inc
 All rights reserved.
  
 Redistribution and use in source and binary forms, with or without
@@ -163,10 +163,9 @@ modification, are permitted provided that the following conditions are met:
    notice, this list of conditions and the following disclaimer in the
    documentation and/or other materials provided with the distribution.
  
-*  Neither the name of the Networks Associates Technology, Inc nor the
-   names of its contributors may be used to endorse or promote
-   products derived from this software without specific prior written
-   permission.
+*  Neither the name of Sparta, Inc nor the names of its contributors may
+   be used to endorse or promote products derived from this software
+   without specific prior written permission.
  
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS
 IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,

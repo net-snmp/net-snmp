@@ -1,3 +1,7 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /******************************************************************
 	Copyright 1989, 1991, 1992 by Carnegie Mellon University
 
@@ -19,6 +23,12 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright Copyright 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 
 /** @defgroup library The Net-SNMP library
  *  @{
@@ -704,6 +714,8 @@ register_default_handlers(void)
 		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
     netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "persistentDir",
 	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PERSISTENT_DIR);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "tempFilePattern",
+	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_TEMP_FILE_PATTERN);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noDisplayHint",
 	              NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_DISPLAY_HINT);
     netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "16bitIDs",
@@ -717,9 +729,8 @@ init_snmp_enums(void)
 {
     se_add_pair_to_slist("asntypes", strdup("integer"), ASN_INTEGER);
     se_add_pair_to_slist("asntypes", strdup("counter"), ASN_COUNTER);
-    se_add_pair_to_slist("asntypes", strdup("gauge"), ASN_GAUGE);
+    se_add_pair_to_slist("asntypes", strdup("uinteger"), ASN_GAUGE);
     se_add_pair_to_slist("asntypes", strdup("timeticks"), ASN_TIMETICKS);
-    se_add_pair_to_slist("asntypes", strdup("uinteger"), ASN_UINTEGER);
     se_add_pair_to_slist("asntypes", strdup("counter64"), ASN_COUNTER64);
     se_add_pair_to_slist("asntypes", strdup("octet_str"), ASN_OCTET_STR);
     se_add_pair_to_slist("asntypes", strdup("ipaddress"), ASN_IPADDRESS);
@@ -727,7 +738,6 @@ init_snmp_enums(void)
     se_add_pair_to_slist("asntypes", strdup("nsap"), ASN_NSAP);
     se_add_pair_to_slist("asntypes", strdup("object_id"), ASN_OBJECT_ID);
     se_add_pair_to_slist("asntypes", strdup("null"), ASN_NULL);
-    se_add_pair_to_slist("asntypes", strdup("bit_str"), ASN_BIT_STR);
 #ifdef OPAQUE_SPECIAL_TYPES
     se_add_pair_to_slist("asntypes", strdup("opaque_counter64"),
                          ASN_OPAQUE_COUNTER64);
@@ -742,14 +752,15 @@ init_snmp_enums(void)
 
 
 
-/*******************************************************************-o-******
- * init_snmp
+/**
+ * Calls the functions to do config file loading and  mib module parsing
+ * in the correct order.
  *
- * Parameters:
- *      *type   Label for the config file "type" used by calling entity.
+ * @param type label for the config file "type"
  *
- * Call appropriately the functions to do config file loading and
- * mib module parsing in the correct order.
+ * @return void
+ *
+ * @see init_agent
  */
 void
 init_snmp(const char *type)
@@ -811,14 +822,13 @@ snmp_store(const char *type)
 }
 
 
-/*
- * snmp_shutdown(const char *type):
+/**
+ * Shuts down the application, saving any needed persistent storage,
+ * and appropriate clean up.
  * 
- * Parameters:
- * *type   Label for the config file "type" used by calling entity.
- * 
- * Does the appropriate shutdown calls for the library, saving
- * persistent data, clean up, etc...
+ * @param type Label for the config file "type" used
+ *
+ * @return void
  */
 void
 snmp_shutdown(const char *type)
@@ -831,6 +841,11 @@ snmp_shutdown(const char *type)
     shutdown_mib();
 #endif /* DISABLE_MIB_LOADING */
     unregister_all_config_handlers();
+    netsnmp_container_free_list();
+    clear_sec_mod();
+    clear_snmp_enum();
+    netsnmp_clear_tdomain_list();
+    clear_callback();
     netsnmp_ds_shutdown();
 }
 
@@ -1697,7 +1712,8 @@ snmp_sess_close(void *sessp)
         return 0;
     }
 
-    if ((sptr = find_sec_mod(slp->session->securityModel)) != NULL &&
+    if (slp->session != NULL &&
+        (sptr = find_sec_mod(slp->session->securityModel)) != NULL &&
         sptr->session_close != NULL) {
         (*sptr->session_close) (slp->session);
     }
@@ -3976,10 +3992,19 @@ _snmp_parse(void *sessp,
                  * handle reportable errors 
                  */
                 switch (result) {
+                case SNMPERR_USM_AUTHENTICATIONFAILURE:
+		  {
+                    int res = session->s_snmp_errno;
+                    session->s_snmp_errno = result;
+                    if (session->callback) {
+                       session->callback(NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE,
+                            session, pdu->reqid, pdu, session->callback_magic);
+                    }
+                    session->s_snmp_errno = res;
+                  }  
                 case SNMPERR_USM_UNKNOWNENGINEID:
                 case SNMPERR_USM_UNKNOWNSECURITYNAME:
                 case SNMPERR_USM_UNSUPPORTEDSECURITYLEVEL:
-                case SNMPERR_USM_AUTHENTICATIONFAILURE:
                 case SNMPERR_USM_NOTINTIMEWINDOW:
                 case SNMPERR_USM_DECRYPTIONERROR:
 
@@ -4020,6 +4045,14 @@ _snmp_parse(void *sessp,
     default:
         ERROR_MSG("unsupported snmp message version");
         snmp_increment_statistic(STAT_SNMPINBADVERSIONS);
+
+        /*
+         * need better way to determine OS independent
+         * INT32_MAX value, for now hardcode
+         */
+        if (pdu->version < 0 || pdu->version > 2147483647) {
+            snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+        }
         session->s_snmp_errno = SNMPERR_BAD_VERSION;
         break;
     }
@@ -4130,7 +4163,12 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
          * fallthrough 
          */
 
-    default:
+    case SNMP_MSG_GET:
+    case SNMP_MSG_GETNEXT:
+    case SNMP_MSG_GETBULK:
+    case SNMP_MSG_TRAP2:
+    case SNMP_MSG_INFORM:
+    case SNMP_MSG_SET:
         /*
          * PDU is not an SNMPv1 TRAP 
          */
@@ -4167,6 +4205,12 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
         if (data == NULL) {
             return -1;
         }
+	break;
+
+    default:
+        snmp_log(LOG_ERR, "Bad PDU type received: 0x%.2x\n", pdu->command);
+        snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+        return -1;
     }
 
     /*
@@ -4218,7 +4262,7 @@ snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data, size_t * length)
             vp->val_len = sizeof(long);
             asn_parse_int(var_val, &len, &vp->type,
                           (long *) vp->val.integer,
-                          sizeof(vp->val.integer));
+                          sizeof(*vp->val.integer));
             break;
         case ASN_COUNTER:
         case ASN_GAUGE:
@@ -4771,11 +4815,19 @@ snmp_free_pdu(netsnmp_pdu *pdu)
      *
      * Note that this does not pick up dual-frees where the
      *   memory is set to random junk, which is probably more serious.
-     */
+     *
+     * rks: while this is a good idea, there are two problems.
+     *         1) agentx sets command to 0 in some cases
+     *         2) according to Wes, a bad decode of a v3 message could
+     *            result in a 0 at this offset.
+     *      so I'm commenting it out until a better solution is found.
+     *      note that I'm leaving the memset, below....
+     *
     if (pdu->command == 0) {
         snmp_log(LOG_WARNING, "snmp_free_pdu probably called twice\n");
         return;
     }
+     */
     if ((sptr = find_sec_mod(pdu->securityModel)) != NULL &&
         sptr->pdu_free != NULL) {
         (*sptr->pdu_free) (pdu);
@@ -6130,7 +6182,7 @@ netsnmp_oid_find_prefix(const oid * in_name1, size_t len1,
         return -1;
 
     min_size = SNMP_MIN(len1, len2);
-    for(i = 0; i < min_size; i++) {
+    for(i = 0; i < (int)min_size; i++) {
         if (in_name1[i] != in_name2[i])
             return i + 1;
     }
@@ -6220,7 +6272,12 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
     case ASN_IPADDRESS:
     case ASN_COUNTER:
         if (value) {
-            if (vars->val_len == sizeof(int)) {
+            if (largeval) {
+                snmp_log(LOG_ERR,"bad size for integer-like type (%d)\n",
+                         vars->val_len);
+                snmp_free_var(vars);
+                return (0);
+            } else if (vars->val_len == sizeof(int)) {
                 val_int = (const int *) value;
                 *(vars->val.integer) = (long) *val_int;
             } else {
@@ -6277,17 +6334,35 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
     case ASN_OPAQUE_I64:
 #endif                          /* OPAQUE_SPECIAL_TYPES */
     case ASN_COUNTER64:
+        if (largeval) {
+            snmp_log(LOG_ERR,"bad size for counter 64 (%d)\n",
+                     vars->val_len);
+            snmp_free_var(vars);
+            return (0);
+        }
         vars->val_len = sizeof(struct counter64);
         memmove(vars->val.counter64, value, vars->val_len);
         break;
 
 #ifdef OPAQUE_SPECIAL_TYPES
     case ASN_OPAQUE_FLOAT:
+        if (largeval) {
+            snmp_log(LOG_ERR,"bad size for opaque float (%d)\n",
+                     vars->val_len);
+            snmp_free_var(vars);
+            return (0);
+        }
         vars->val_len = sizeof(float);
         memmove(vars->val.floatVal, value, vars->val_len);
         break;
 
     case ASN_OPAQUE_DOUBLE:
+        if (largeval) {
+            snmp_log(LOG_ERR,"bad size for opaque double (%d)\n",
+                     vars->val_len);
+            snmp_free_var(vars);
+            return (0);
+        }
         vars->val_len = sizeof(double);
         memmove(vars->val.doubleVal, value, vars->val_len);
         break;
@@ -6544,7 +6619,7 @@ snmp_add_var(netsnmp_pdu *pdu,
                                       ASN_OBJECT_ID, buf,
                                       sizeof(oid) * tint);
             } else {
-                result = snmp_errno;
+                result = snmp_errno;    /*MTCRITICAL_RESOURCE */
             }
         }
         break;
@@ -6656,7 +6731,7 @@ snmp_add_var(netsnmp_pdu *pdu,
             if (ix >= (int) tint) {
                 tint = ix + 1;
             }
-            if (ix >= buf_len && !snmp_realloc(&buf, &buf_len)) {
+            if (ix >= (int)buf_len && !snmp_realloc(&buf, &buf_len)) {
                 result = SNMPERR_MALLOC;
                 break;
             }

@@ -26,13 +26,18 @@ ok(defined($s1));
 
 ##########################  2  ####################################
 # test v1 trap
-$res = $s1->trap(enterprise => $enterprise, agent=>$agent_host, generic=>$generic,[[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+if (defined($s1)) {
+  $res = $s1->trap(enterprise => $enterprise, agent=>$agent_host, generic=>$generic,[[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+}
 ok($res =~ /^0 but true/);
 
 ########################### 3 #############################
 # test with wrong varbind
-$res = $s1->trap([[$bad_name, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
-#print("res is $res\n");
+undef $res;
+if (defined($s1)) {
+  $res = $s1->trap([[$bad_name, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+  #print("res is $res\n");
+}
 ok(!defined($res));
 #########################################################
 
@@ -44,13 +49,19 @@ my $s2 =
 ok(defined($s2));
 #########################  5  ###########################
 # test v2 trap
-$res = $s2->trap(uptime=>200, trapoid=>'coldStart',[[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
-#print("res is $res\n");
+undef $res;
+if (defined($s2)) {
+  $res = $s2->trap(uptime=>200, trapoid=>'coldStart',[[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+  #print("res is $res\n");
+}
 ok($res =~ /^0 but true/);
 ##########################  6  ##########################
 # no trapoid and uptime given. Should take defaults...
-my $ret = $s2->trap([[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
-#print("res is $ret\n");
+my $ret;
+if (defined($s2)) {
+  $ret = $s2->trap([[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+  #print("res is $ret\n");
+}
 ok(defined($ret));
 
 #########################################################
@@ -62,7 +73,9 @@ my $s3 = new SNMP::Session(Version=>3, DestHost=> $agent_host, RemotePort=>$trap
 ok(defined($s3));
 
 ########################  8  ###########################
-$res = $s3->inform(uptime=>111, trapoid=>'coldStart', [[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+if (defined($s3)) {
+  $res = $s3->inform(uptime=>111, trapoid=>'coldStart', [[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+}
 ok($res =~ /^0 but true/);
 
 #################### 9 #####################
@@ -71,8 +84,12 @@ $s3 = new SNMP::Session(Version=>3, DestHost=> $agent_host, RemotePort=>$trap_po
 ok(defined($s3));
 
 ########################  10  ###########################
-$res = $s3->inform(uptime=>111, trapoid=>'coldStart', [[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
-print "res = $res\n";
+undef $res;
+if (defined($s3)) {
+    $res = $s3->inform(uptime=>111, trapoid=>'coldStart', [[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+    print "res = $res\n";
+}
+  
 ok($res =~ /^0 but true/);
 
-    snmptest_cleanup();
+snmptest_cleanup();

@@ -507,9 +507,13 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                  *  user-provided handlers to override the dataset handler
                  *  if this proves necessary.
                  */
-                if (requests->requestvb->type == ASN_NULL ||
-                    requests->requestvb->type == SNMP_NOSUCHINSTANCE) {
-                    requests->requestvb->type = ASN_PRIV_RETRY;
+                if (request->requestvb->type == ASN_NULL ||
+                    request->requestvb->type == SNMP_NOSUCHINSTANCE) {
+                    request->requestvb->type = ASN_PRIV_RETRY;
+                }
+                    /* XXX - Move on to the next object */
+                if (request->requestvb->type == SNMP_NOSUCHOBJECT) {
+                    request->requestvb->type = ASN_PRIV_RETRY;
                 }
             }
             reqinfo->mode = oldmode;
@@ -621,6 +625,19 @@ netsnmp_table_data_clone_row(netsnmp_table_row *row)
     }
 
     return newrow;
+}
+
+int
+netsnmp_table_data_num_rows(netsnmp_table_data *table)
+{
+    int i=0;
+    netsnmp_table_row *row;
+    if (!table)
+        return 0;
+    for (row = table->first_row; row; row = row->next) {
+        i++;
+    }
+    return i;
 }
 
 /*
