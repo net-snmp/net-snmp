@@ -1,11 +1,9 @@
-This sub-group of the UCD agent is a 'mature beta' implementation of
-the AgentX agent extensibility protocol, as described in RFC 2741.
-
-  This is a reasonably full implementation, in as much as it 
-supports all the protocol operations described in this document.
-The core functionality has received a reasonable amount of exposure,
-and is believed to be more or less stable in normal use.   It will
-now also handle the non-graceful termination of subagents - returning
+  This is a reasonably full implementation of the AgentX agent
+extensibility protocol (RFC 2741) in as much as it supports all
+the protocol operations described in this document.  The core
+functionality has received a reasonable amount of exposure, and
+is believed to be more or less stable in normal use.   It will
+also handle the non-graceful termination of subagents - returning
 a 'genErr' error for three successive requests before unregistering
 the unresponsive subagent.
 
@@ -28,14 +26,9 @@ and may well not be fully functional.   Many of the omissions
 of the earlier release (Contexts, use of GetBulk, the AgentX MIB)
 are still missing from this version.
 
-While the implementation is not yet suitable for mission-critical
-production systems, it should prove sufficiently reliable for
-general-purpose use.
-
 
   AgentX support is now included in the agent by default, but needs
-to be explicitly enabled before use.  (This *is* still beta code
-after all).  Activate this using by putting a line
+to be explicitly enabled before use.  Activate it using by putting a line
 
 		master	agentx
 
@@ -48,6 +41,6 @@ or when the agent is invoked as an AgentX subagent (i.e. via the name
 subagent.  (http://www.net-snmp.org/tutorial-5/toolkit/)
 
 
-  Please report any problems experienced to the ucd-snmp-coders list.
+  Please report any problems experienced to the net-snmp-coders list.
 
 Dave
