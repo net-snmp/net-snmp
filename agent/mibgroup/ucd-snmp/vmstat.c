@@ -120,10 +120,10 @@ void init_vmstat(void)
     {CPUUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUUSER}},
     {CPUSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUSYSTEM}},
     {CPUIDLE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUIDLE}},
-    {CPURAWUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWUSER}},
-    {CPURAWNICE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWNICE}},
-    {CPURAWSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWSYSTEM}},
-    {CPURAWIDLE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
+    {CPURAWUSER, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWUSER}},
+    {CPURAWNICE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWNICE}},
+    {CPURAWSYSTEM, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWSYSTEM}},
+    {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
 /* Future use: */
 /*
     {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
@@ -207,33 +207,34 @@ unsigned vmstat (int iindex)
   drsys= *(cpu_sys);
   dridl= (*(cpu_idl));
 
-  if (iindex == swapin) {
+  switch (iindex) {
+  case swapin:
     return (*(pswpin)*4*hz+divo2)/ddiv;
-  } else if (iindex == swapout) {
+  case swapout:
     return (*(pswpout)*4*hz+divo2)/ddiv;
-  } else if (iindex == iosent) {
+  case iosent:
     return (*(pgpgin)*hz+divo2)/ddiv;
-  } else if (iindex == ioreceive) {
+  case ioreceive:
     return (*(pgpgout)*hz+divo2)/ddiv;
-  } else if (iindex == sysinterrupts) {
+  case sysinterrupts:
     return (*(inter)*hz+divo2)/ddiv;
-  } else if (iindex == syscontext) {
+  case syscontext:
     return (*(ctxt)*hz+divo2)/ddiv;
-  } else if (iindex == cpuuser) {
+  case cpuuser:
     return (100*duse/ddiv);
-  } else if (iindex == cpusystem) {
+  case cpusystem:
     return (100*dsys/ddiv);
-  } else if (iindex == cpuidle) {
+  case cpuidle:
     return (100*didl/ddiv);
-  } else if (iindex == cpurawuser) {
+  case cpurawuser:
     return druse;
-  } else if (iindex == cpurawnice) {
+  case cpurawnice:
     return drnic;
-  } else if (iindex == cpurawsystem) {
+  case cpurawsystem:
     return drsys;
-  } else if (iindex == cpurawidle) {
+  case cpurawidle:
     return dridl;
-  } else {
+  default:
     return -1;
   }
 }
