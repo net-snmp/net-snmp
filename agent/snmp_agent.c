@@ -251,7 +251,7 @@ save_set_cache(netsnmp_agent_session *asp)
     return ptr;
 }
 
-void
+int
 get_set_cache(netsnmp_agent_session *asp)
 {
     agent_set_cache *ptr, *prev = NULL;
@@ -279,10 +279,11 @@ get_set_cache(netsnmp_agent_session *asp)
                 }
             }
             free(ptr);
-            return;
+            return SNMP_ERR_NOERROR;
         }
         prev = ptr;
     }
+    return SNMP_ERR_GENERR;
 }
 
 int
@@ -903,7 +904,7 @@ init_agent_snmp_session(netsnmp_session * session, netsnmp_pdu *pdu)
     asp->status = SNMP_ERR_NOERROR;
     asp->index = 0;
     asp->oldmode = 0;
-    asp->treecache_num = -1;
+    asp->treecache_num = 0;
     asp->treecache_len = 0;
     asp->vbcount = count_varbinds(asp->pdu->variables);
     asp->requests =
@@ -2563,7 +2564,9 @@ handle_pdu(netsnmp_agent_session *asp)
     case SNMP_MSG_INTERNAL_SET_COMMIT:
     case SNMP_MSG_INTERNAL_SET_FREE:
     case SNMP_MSG_INTERNAL_SET_UNDO:
-        get_set_cache(asp);
+        status = get_set_cache(asp);
+        if (status != SNMP_ERR_NOERROR)
+            return status;
         break;
 
     case SNMP_MSG_GET:
