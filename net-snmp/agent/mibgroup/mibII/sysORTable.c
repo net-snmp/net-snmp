@@ -126,7 +126,7 @@ var_sysORTable(struct variable *vp,
 }
 
 
-void register_sysORTable(oid *oidin,
+int register_sysORTable(oid *oidin,
 			 size_t oidlen,
 			 const char *descr)
 {
@@ -141,25 +141,40 @@ void register_sysORTable(oid *oidin,
   while(*ptr != NULL)
     ptr = &((*ptr)->next);
   *ptr = (struct sysORTable *) malloc(sizeof(struct sysORTable));
+  if ( *ptr == NULL ) {
+	return -1;
+  }
   (*ptr)->OR_descr = (char *) malloc(strlen(descr)+1);
+  if ( (*ptr)->OR_descr == NULL ) {
+	free( *ptr );
+	return -1;
+  }
   strcpy((*ptr)->OR_descr, descr);
   (*ptr)->OR_oidlen = oidlen;
   (*ptr)->OR_oid = (oid *) malloc(sizeof(oid)*oidlen);
+  if ( (*ptr)->OR_oid == NULL ) {
+	free( *ptr );
+	free( (*ptr)->OR_descr );
+	return -1;
+  }
   memcpy((*ptr)->OR_oid, oidin, sizeof(oid)*oidlen);
   gettimeofday(&((*ptr)->OR_uptime), NULL);
   (*ptr)->next = NULL;
   numEntries++;
 
   if ( agent_role == SUB_AGENT )
-     agentx_add_agentcaps( agentx_session, oidin, oidlen, descr);
+     agentx_add_agentcaps( agentx_session, oidin, oidlen, (char *)descr);
+
+  return 0;
 }
 
 
-void unregister_sysORTable(oid *oidin,
+int unregister_sysORTable(oid *oidin,
 			 size_t oidlen)
 {
   char c_oid[SPRINT_MAX_LEN];
   struct sysORTable **ptr=&table, *prev=NULL;
+  int found = -1;
 
   if (snmp_get_do_debugging()) {
     sprint_objid (c_oid, oidin, oidlen);
@@ -177,6 +192,7 @@ void unregister_sysORTable(oid *oidin,
       free( (*ptr)->OR_oid );
       free( (*ptr) );
       numEntries--;
+      found = 0;
       break;
     }
     prev = *ptr;
@@ -185,4 +201,6 @@ void unregister_sysORTable(oid *oidin,
 
   if ( agent_role == SUB_AGENT )
      agentx_remove_agentcaps( agentx_session, oidin, oidlen);
+
+  return found;
 }

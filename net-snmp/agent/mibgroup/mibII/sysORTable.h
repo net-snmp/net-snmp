@@ -18,8 +18,8 @@ struct sysORTable {
 extern void     init_sysORTable (void);
 extern FindVarMethod var_sysORTable;
 extern FindVarMethod var_sysORLastChange;
-extern void     register_sysORTable (oid *, size_t, const char *);
-extern void   unregister_sysORTable (oid *, size_t);
+extern int      register_sysORTable (oid *, size_t, const char *);
+extern int    unregister_sysORTable (oid *, size_t);
 
 #define	SYSORTABLEINDEX		        1
 #define	SYSORTABLEID		        2
