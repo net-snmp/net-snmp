@@ -218,7 +218,7 @@ var_icmp(struct variable *vp,
      *	Get the ICMP statistics from the kernel...
      */
     if (sysmp (MP_SAGET, MPSA_TCPIPSTATS, &tcpipstats, sizeof tcpipstats) == -1) {
-	log_perror ("sysmp(MP_SAGET)(MPSA_TCPIPSTATS)");
+	snmp_log_perror ("sysmp(MP_SAGET)(MPSA_TCPIPSTATS)");
     }
 #define icmpstat tcpipstats.icmpstat
 
