@@ -60,7 +60,7 @@
 
 
 struct snmp_index {
-    struct variable_list	varbind;	/* or pointer to var_list ? */
+    struct variable_list	*varbind;	/* or pointer to var_list ? */
     struct snmp_session		*session;	/* NULL implies unused  ? */
     struct snmp_index		*next_oid;
     struct snmp_index		*prev_oid;
@@ -832,14 +832,14 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
     for( idxptr = snmp_index_head ; idxptr != NULL;
 			 prev_oid_ptr = idxptr, idxptr = idxptr->next_oid) {
 	if ((res = snmp_oid_compare(varbind->name, varbind->name_length,
-					idxptr->varbind.name,
-					idxptr->varbind.name_length)) <= 0 )
+					idxptr->varbind->name,
+					idxptr->varbind->name_length)) <= 0 )
 		break;
     }
 
 		/*  Found the OID - now look at the registered indices */
     if ( res == 0 && idxptr ) {
-	if ( varbind->type != idxptr->varbind.type )
+	if ( varbind->type != idxptr->varbind->type )
 	    return NULL;		/* wrong type */
 
 			/*
@@ -856,7 +856,7 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 		 prev_idx_ptr = idxptr2, idxptr2 = idxptr2->next_idx) {
 		if ( flags == ALLOCATE_ANY_INDEX && idxptr2->session == NULL ) {
 		    idxptr2->session = ss ;
-		    return &idxptr2->varbind;
+		    return idxptr2->varbind;
 		}
 	    }
 	}
@@ -865,16 +865,16 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 		 prev_idx_ptr = idxptr2, idxptr2 = idxptr2->next_idx) {
 	        switch ( varbind->type ) {
 		    case ASN_INTEGER:
-			res2 = (*varbind->val.integer - *idxptr2->varbind.val.integer);
+			res2 = (*varbind->val.integer - *idxptr2->varbind->val.integer);
 			break;
 		    case ASN_OCTET_STR:
-			i = SNMP_MIN(varbind->val_len, idxptr2->varbind.val_len);
-			res2 = memcmp(varbind->val.string, idxptr2->varbind.val.string, i);
+			i = SNMP_MIN(varbind->val_len, idxptr2->varbind->val_len);
+			res2 = memcmp(varbind->val.string, idxptr2->varbind->val.string, i);
 			break;
 		    case ASN_OBJECT_ID:
 			res2 = snmp_oid_compare(varbind->val.objid, varbind->val_len/sizeof(oid),
-					idxptr2->varbind.val.objid,
-					idxptr2->varbind.val_len/sizeof(oid));
+					idxptr2->varbind->val.objid,
+					idxptr2->varbind->val_len/sizeof(oid));
 			break;
 		    default:
 	    		return NULL;		/* wrong type */
@@ -920,14 +920,21 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 	new_index = (struct snmp_index *)calloc( 1, sizeof( struct snmp_index ));
 	if (new_index == NULL)
 	    return NULL;
-	if (snmp_clone_var( varbind, &new_index->varbind ) != 0 ) {
+
+        if (0 == snmp_varlist_add_variable(&new_index->varbind,
+		      varbind->name, 
+		      varbind->name_length,
+		      varbind->type,
+		      varbind->val.string,
+		      varbind->val_len)) {
+/*	if (snmp_clone_var( varbind, new_index->varbind ) != 0 ) */
 	    free( new_index );
 	    return NULL;
 	}
 	new_index->session = ss;
 
 	if ( varbind->type == ASN_OCTET_STR && flags == ALLOCATE_THIS_INDEX )
-	    new_index->varbind.val.string[new_index->varbind.val_len] = 0;
+	    new_index->varbind->val.string[new_index->varbind->val_len] = 0;
 
 		/*
 		 * If we've been given a value, then we can use that, but
@@ -937,56 +944,55 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 		 */
 	if ( flags & ALLOCATE_ANY_INDEX ) {
 	    if ( prev_idx_ptr ) {
-		    snmp_free_var(new_index->varbind);
-		if ( snmp_clone_var( &prev_idx_ptr->varbind, &new_index->varbind ) != 0 ) {
+		if ( snmp_clone_var( prev_idx_ptr->varbind, new_index->varbind ) != 0 ) {
 		    free( new_index );
 		    return NULL;
 		}
 	    }
 	    else
-		new_index->varbind.val.string = new_index->varbind.buf;
+		new_index->varbind->val.string = new_index->varbind->buf;
 
 	    switch ( varbind->type ) {
 		case ASN_INTEGER:
 		    if ( prev_idx_ptr ) {
-			(*new_index->varbind.val.integer)++; 
+			(*new_index->varbind->val.integer)++; 
 		    }
 		    else
-			*(new_index->varbind.val.integer) = 1;
-		    new_index->varbind.val_len = sizeof(long);
+			*(new_index->varbind->val.integer) = 1;
+		    new_index->varbind->val_len = sizeof(long);
 		    break;
 		case ASN_OCTET_STR:
 		    if ( prev_idx_ptr ) {
-			i =  new_index->varbind.val_len-1;
-			while ( new_index->varbind.buf[ i ] == 'z' ) {
-			    new_index->varbind.buf[ i ] = 'a';
+			i =  new_index->varbind->val_len-1;
+			while ( new_index->varbind->buf[ i ] == 'z' ) {
+			    new_index->varbind->buf[ i ] = 'a';
 			    i--;
 			    if ( i < 0 ) {
-				i =  new_index->varbind.val_len;
-			        new_index->varbind.buf[ i ] = 'a';
-			        new_index->varbind.buf[ i+1 ] = 0;
+				i =  new_index->varbind->val_len;
+			        new_index->varbind->buf[ i ] = 'a';
+			        new_index->varbind->buf[ i+1 ] = 0;
 			    }
 			}
-			new_index->varbind.buf[ i ]++;
+			new_index->varbind->buf[ i ]++;
 		    }
 		    else
-		        strcpy((char *)new_index->varbind.buf, "aaaa");
-		    new_index->varbind.val_len = strlen((char *)new_index->varbind.buf);
+		        strcpy((char *)new_index->varbind->buf, "aaaa");
+		    new_index->varbind->val_len = strlen((char *)new_index->varbind->buf);
 		    break;
 		case ASN_OBJECT_ID:
 		    if ( prev_idx_ptr ) {
-			i =  prev_idx_ptr->varbind.val_len/sizeof(oid) -1;
-			while ( new_index->varbind.val.objid[ i ] == 255 ) {
-			    new_index->varbind.val.objid[ i ] = 1;
+			i =  prev_idx_ptr->varbind->val_len/sizeof(oid) -1;
+			while ( new_index->varbind->val.objid[ i ] == 255 ) {
+			    new_index->varbind->val.objid[ i ] = 1;
 			    i--;
-			    if ( i == 0 && new_index->varbind.val.objid[0] == 2 ) {
-			        new_index->varbind.val.objid[ 0 ] = 1;
-				i =  new_index->varbind.val_len/sizeof(oid);
-			        new_index->varbind.val.objid[ i ] = 0;
-				new_index->varbind.val_len += sizeof(oid);
+			    if ( i == 0 && new_index->varbind->val.objid[0] == 2 ) {
+			        new_index->varbind->val.objid[ 0 ] = 1;
+				i =  new_index->varbind->val_len/sizeof(oid);
+			        new_index->varbind->val.objid[ i ] = 0;
+				new_index->varbind->val_len += sizeof(oid);
 			    }
 			}
-			new_index->varbind.val.objid[ i ]++;
+			new_index->varbind->val.objid[ i ]++;
 		    }
 		    else {
 			/* If the requested OID name is small enough,
@@ -995,9 +1001,9 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 			 */
 		        if ( (varbind->name_length+1) * sizeof(oid) <= 40 ) {
 			    for ( i = 0 ; i < (int)varbind->name_length ; i++ )
-			        new_index->varbind.val.objid[i] = varbind->name[i];
-			    new_index->varbind.val.objid[varbind->name_length] = 1;
-			    new_index->varbind.val_len =
+			        new_index->varbind->val.objid[i] = varbind->name[i];
+			    new_index->varbind->val.objid[varbind->name_length] = 1;
+			    new_index->varbind->val_len =
 					(varbind->name_length+1) * sizeof(oid);
 		        }
 		        else {
@@ -1005,9 +1011,9 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 			    i = 40/sizeof(oid);
 			    if ( i > 4 )
 				i = 4;
-			    new_index->varbind.val_len = i * (sizeof(oid));
+			    new_index->varbind->val_len = i * (sizeof(oid));
 			    for (i-- ; i>=0 ; i-- )
-			        new_index->varbind.val.objid[i] = 1;
+			        new_index->varbind->val.objid[i] = 1;
 		        }
 		    }
 		    break;
@@ -1048,7 +1054,7 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 	    else
 	        snmp_index_head = new_index;
 	}
-    return &new_index->varbind;
+    return new_index->varbind;
 }
 
 	/*
@@ -1101,20 +1107,20 @@ unregister_index(struct variable_list *varbind, int remember, struct snmp_sessio
     for( idxptr = snmp_index_head ; idxptr != NULL;
 			 prev_oid_ptr = idxptr, idxptr = idxptr->next_oid) {
 	if ((res = snmp_oid_compare(varbind->name, varbind->name_length,
-					idxptr->varbind.name,
-					idxptr->varbind.name_length)) <= 0 )
+					idxptr->varbind->name,
+					idxptr->varbind->name_length)) <= 0 )
 		break;
     }
 
     if ( res != 0 )
 	return INDEX_ERR_NOT_ALLOCATED;
-    if ( varbind->type != idxptr->varbind.type )
+    if ( varbind->type != idxptr->varbind->type )
 	return INDEX_ERR_WRONG_TYPE;
 
     for(idxptr2 = idxptr ; idxptr2 != NULL;
 		prev_idx_ptr = idxptr2, idxptr2 = idxptr2->next_idx) {
-	i = SNMP_MIN(varbind->val_len, idxptr2->varbind.val_len);
-	res2 = memcmp(varbind->val.string, idxptr2->varbind.val.string, i);
+	i = SNMP_MIN(varbind->val_len, idxptr2->varbind->val_len);
+	res2 = memcmp(varbind->val.string, idxptr2->varbind->val.string, i);
 	if ( res2 <= 0 )
 	    break;
     }
@@ -1130,7 +1136,6 @@ unregister_index(struct variable_list *varbind, int remember, struct snmp_sessio
 		 *	between ANY_INDEX and NEW_INDEX
 		 */
     if ( remember ) {
-	snmp_free_var( idxptr2->varbind );
 	idxptr2->session = NULL;	/* Unused index */
 	return SNMP_ERR_NOERROR;
     }
@@ -1187,25 +1192,25 @@ void dump_registry( void )
     if ( snmp_index_head )
 	printf("\nIndex Allocations:\n");
     for( idxptr = snmp_index_head ; idxptr != NULL; idxptr = idxptr->next_oid) {
-	sprint_objid(start_oid, idxptr->varbind.name, idxptr->varbind.name_length);
+	sprint_objid(start_oid, idxptr->varbind->name, idxptr->varbind->name_length);
 	printf("%s indexes:\n", start_oid);
         for( idxptr2 = idxptr ; idxptr2 != NULL; idxptr2 = idxptr2->next_idx) {
-	    switch( idxptr2->varbind.type ) {
+	    switch( idxptr2->varbind->type ) {
 		case ASN_INTEGER:
 		    printf("    %c %ld %c\n",
 			( idxptr2->session ? ' ' : '(' ),
-			  *idxptr2->varbind.val.integer,
+			  *idxptr2->varbind->val.integer,
 			( idxptr2->session ? ' ' : ')' ));
 		    break;
 		case ASN_OCTET_STR:
 		    printf("    %c %s %c\n",
 			( idxptr2->session ? ' ' : '(' ),
-			  idxptr2->varbind.val.string,
+			  idxptr2->varbind->val.string,
 			( idxptr2->session ? ' ' : ')' ));
 		    break;
 		case ASN_OBJECT_ID:
-		    sprint_objid(end_oid, idxptr2->varbind.val.objid,
-				idxptr2->varbind.val_len/sizeof(oid));
+		    sprint_objid(end_oid, idxptr2->varbind->val.objid,
+				idxptr2->varbind->val_len/sizeof(oid));
 		    printf("    %c %s %c\n",
 			( idxptr2->session ? ' ' : '(' ),
 			  end_oid,
@@ -1213,7 +1218,7 @@ void dump_registry( void )
 		    break;
 		default:
 		    printf("unsupported type (%d)\n",
-				idxptr2->varbind.type);
+				idxptr2->varbind->type);
 	    }
 	}
     }
@@ -1226,16 +1231,16 @@ struct snmp_session main_sess, *main_session=&main_sess;
 void
 test_string_register( int n, char *cp )
 {
-    varbind.name[4] = n;
-    if (register_string_index(varbind.name, varbind.name_length, cp) == NULL)
+    varbind->name[4] = n;
+    if (register_string_index(varbind->name, varbind.name_length, cp) == NULL)
 	printf("allocating %s failed\n", cp);
 }
 
 void
 test_int_register( int n, int val )
 {
-    varbind.name[4] = n;
-    if (register_int_index( varbind.name, varbind.name_length, val ) == -1 )
+    varbind->name[4] = n;
+    if (register_int_index( varbind->name, varbind.name_length, val ) == -1 )
 	printf("allocating %d/%d failed\n", n, val);
 }
 
@@ -1244,15 +1249,15 @@ test_oid_register( int n, int subid )
 {
     struct variable_list *res;
 
-    varbind.name[4] = n;
+    varbind->name[4] = n;
     if ( subid != -1 ) {
-        varbind.val.objid[5] = subid;
-	res = register_oid_index(varbind.name, varbind.name_length,
-		    varbind.val.objid,
-		    varbind.val_len/sizeof(oid) );
+        varbind->val.objid[5] = subid;
+	res = register_oid_index(varbind->name, varbind.name_length,
+		    varbind->val.objid,
+		    varbind->val_len/sizeof(oid) );
     }
     else
-	res = register_oid_index(varbind.name, varbind.name_length, NULL, 0);
+	res = register_oid_index(varbind->name, varbind.name_length, NULL, 0);
 
     if (res == NULL )
 	printf("allocating %d/%d failed\n", n, subid);
@@ -1266,7 +1271,7 @@ main( int argc, char argv[] )
     
     memset( &varbind, 0, sizeof(struct variable_list));
     snmp_set_var_objid( &varbind, name, 5 );
-    varbind.type = ASN_OCTET_STR;
+    varbind->type = ASN_OCTET_STR;
 		/*
 		 * Test index structure linking:
 		 *	a) sorted by OID
@@ -1328,10 +1333,10 @@ main( int argc, char argv[] )
     test_oid_register( 130, -1 );	/* empty */
     test_oid_register( 130, -1 );	/* append */
 
-    varbind.val_len = varbind.name_length*sizeof(oid);
-    memcpy( varbind.buf, varbind.name, varbind.val_len);
-    varbind.val.objid = (oid*) varbind.buf;
-    varbind.val_len += sizeof(oid);
+    varbind->val_len = varbind.name_length*sizeof(oid);
+    memcpy( varbind->buf, varbind.name, varbind.val_len);
+    varbind->val.objid = (oid*) varbind.buf;
+    varbind->val_len += sizeof(oid);
 
     test_oid_register( 130, 255 );	/* append exact */
     test_oid_register( 130, -1 );	/* minor rollover */
@@ -1340,16 +1345,16 @@ main( int argc, char argv[] )
     test_oid_register( 130, 100 );	/* exact duplicate */
     printf("done\n");
 
-    varbind.val.objid = (oid*)varbind.buf;
+    varbind->val.objid = (oid*)varbind.buf;
     for ( i=0; i<6; i++ )
-	varbind.val.objid[i]=255;
-    varbind.val.objid[0]=1;
+	varbind->val.objid[i]=255;
+    varbind->val.objid[0]=1;
     test_oid_register( 130, 255 );	/* set up rollover  */
     test_oid_register( 130, -1 );	/* medium rollover */
 
     for ( i=0; i<6; i++ )
-	varbind.val.objid[i]=255;
-    varbind.val.objid[0]=2;
+	varbind->val.objid[i]=255;
+    varbind->val.objid[0]=2;
     test_oid_register( 130, 255 );	/* set up rollover  */
     test_oid_register( 130, -1 );	/* major rollover */
 
