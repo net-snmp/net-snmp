@@ -131,7 +131,31 @@ a sensible entry might be
 snmpd supports the View-Based Access Control Model (vacm)
 as defined in RFC 2275.
 To this end, it recognizes the following keywords in the configuration
-file: \fIcom2sec\fR, \fIgroup\fR, \fIaccess\fR, and \fIview\fR.
+file: \fIcom2sec\fR, \fIgroup\fR, \fIaccess\fR, and \fIview\fR as well 
+as some easier-to-use wrapper directives: \fIrocommunity\fR,
+\fIrwcommunity\fR, \fIrouser\fR, \fIrwuser\fR.
+.IP "rocommunity COMMUNITY [SOURCE] [OID]"
+.IP "rwcommunity COMMUNITY [SOURCE] [OID]"
+These create read-only and read-write communities that can be used to
+access the agent.  They are a quick method of using the following
+\fIcom2sec\fR, \fIgroup\fR, \fIaccess\fR, and \fIview\fR directive lines.  They are
+not as efficient either, as groups aren't created so the tables are
+possibly larger.  In other words: don't use these if you have complex
+situations to set up.
+.IP
+The format of the SOURCE is token is described in the \fIcom2sec\fR
+directive section below.  The OID token restricts access for that
+community to everything below that given OID.
+.IP "rouser USER [noauth|auth|priv] [OID]"
+.IP "rwuser USER [noauth|auth|priv] [OID]"
+Creates a SNMPv3 USM user in the VACM access configuration tables.
+Again, its more efficient (and powerful) to use the combined
+\fIcom2sec\fR, \fIgroup\fR, \fIaccess\fR, and \fIview\fR directives instead.
+.IP
+The minimum level of authentication and privacy the user must use is
+specified by the first token (which defaults to "auth").  The OID
+parameter restricts access for that user to everything below the given 
+OID.
 .IP "com2sec NAME SOURCE COMMUNITY"
 This directive specifies the mapping from a source/community pair to
 a security name. SOURCE can be a hostname, a subnet, or the word
