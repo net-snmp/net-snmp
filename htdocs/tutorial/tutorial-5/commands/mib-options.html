@@ -108,6 +108,36 @@ Cannot adopt OID in CISCO-RHINO-MIB: ciscoAtmSwitchInvalidCellHeader ::= { cisco
     <p>So, there you have it.  A complete example for how to get your
     own <i>insert-spiffy-mib-here</i> loaded into the net-snmp tools.
 
+
+      <h2>Yes, but how do I make it happen all the time?</h2>
+      <p>Good question.  And of course, we have multiple options for you.
+      We support a number of ways of doing this.</p>
+
+    <p>Note to <a href="http://www.ethereal.com/">Ethereal</a> users:
+    One of these methods is how you would have to do it for Ethereal
+    since it won't support the -m and -M options discussed above.</p>
+    <ul>
+      <li> First, you can put the following lines in a snmp.conf
+      file.  This file can be placed in a system-wide location (EG,
+      <i>/usr/local/share/snmp.conf</i>) or in a personal file (EG,
+      $HOME/.snmp/snmp.conf):
+
+	<pre>
+mibs +CISCO-RHINO-MIB
+mibs +SOME-OTHER-SPIFFY-MIB
+	</pre>
+      </li>
+
+      <li>You can also use the MIBS environment variable to specify
+      things (example assumes a /bin/sh style shell):
+	<pre>
+          MIBS=+CISCO-RHINO-MIB:SOME-OTHER-SPIFFY-MIB
+          export MIBS
+	</pre>
+      </li>
+    </ul>
+
+    <br />
     <p>Please note the following sections of the FAQ as well:
     <ul>
       <li><a
@@ -123,7 +153,7 @@ Cannot adopt OID in CISCO-RHINO-MIB: ciscoAtmSwitchInvalidCellHeader ::= { cisco
     <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
 <!-- Created: Thu Nov  4 15:38:15 PST 1999 -->
 <!-- hhmts start -->
-Last modified: Thu Jul 12 23:13:44 PDT 2001
+Last modified: Thu Mar 24 22:14:11 PST 2005
 <!-- hhmts end -->
   </body>
 </html>
