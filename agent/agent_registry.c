@@ -1489,28 +1489,42 @@ void (* external_signal_handler[NUM_EXTERNAL_SIGS])(int);
  *       below for every single that might be handled by register_signal().
  */
 
-void agent_SIGCHLD_handler(void) { external_signal_scheduled[SIGCHLD] = 1; }
-
-int register_signal(int sig, void (*func)(int)) {
-    static struct sigaction act;
-
-    external_signal_handler[sig] = func;
-    switch (sig) {
-    case SIGCHLD:
-#if HAVE_SIGNAL
-	signal(SIGCHLD, (void *)agent_SIGCHLD_handler);
-#else
-	act.sa_handler = agent_SIGCHLD_handler;
-	sigemptyset(&act.sa_mask);
-	act.sa_flags = 0;
-	sigaction(SIGCHLD, &act, NULL);
+void agent_SIGCHLD_handler(void)
+{
+#if STRUCT_SIGACTION_HAS_SA_SIGACTION
+  external_signal_scheduled[SIGCLD] = 1;
 #endif
+}
+
+int register_signal(int sig, void (*func)(int))
+{
+
+    switch (sig) {
+#if defined(SIGCLD)
+    case SIGCLD:
+  #if HAVE_SIGNAL
+	signal(SIGCLD, (void *)agent_SIGCHLD_handler);
+  #else
+  #if STRUCT_SIGACTION_HAS_SA_SIGACTION
+	{
+		static struct sigaction act;
+		act.sa_handler = agent_SIGCHLD_handler;
+		sigemptyset(&act.sa_mask);
+		act.sa_flags = 0;
+		sigaction(SIGCLD, &act, NULL);
+	}
+  #endif
+  #endif
 	break;
+#endif
     default:
 	snmp_log(LOG_CRIT,
 		 "register_signal: signal %d cannot be handled\n", sig);
 	return SIG_REGISTRATION_FAILED;
     }
+
+    external_signal_handler[sig] = func;
+
     DEBUGMSGTL(("register_signal", "registered signal %d\n", sig));
     return SIG_REGISTERED_OK;
 }
