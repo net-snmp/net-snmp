@@ -150,7 +150,7 @@ void init_hr_disk(void)
     Add_HR_Disk_entry ( "/dev/rdsk/c201d%cs%c", '0', '6', '0', '0', '4' );
 #endif
 #endif
-#ifdef solaris
+#ifdef solaris2
     Add_HR_Disk_entry ( "/dev/rdsk/c0t%cd0s%c", '0', '6', '0', '0', '7' );
 #endif
 #ifdef freebsd2
@@ -341,6 +341,7 @@ Init_HR_Disk(void)
 {
     HRD_type_index = 0;
     HRD_index = -1;
+    DEBUGMSGTL(("host/hr_disk","Init_Disk\n"));
 }
 
 int
@@ -354,9 +355,13 @@ Get_Next_HR_Disk (void)
 
     HRD_index++;
     (void*) time( &now );
+    DEBUGMSGTL(("host/hr_disk","Next_Disk type %d of %d\n",
+			 HRD_type_index, HR_number_disk_types));
     while ( HRD_type_index < HR_number_disk_types ) {
 	max_disks = disk_device_last[    HRD_type_index ] -
 		    disk_device_id[      HRD_type_index ] +1;
+        DEBUGMSGTL(("host/hr_disk","Next_Disk max %d of type %d\n",
+			 max_disks, HRD_type_index ));
 
 	while ( HRD_index < max_disks ) {
 	    iindex = (HRD_type_index << HRDISK_TYPE_SHIFT) + HRD_index;
