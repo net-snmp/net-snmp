@@ -45,6 +45,8 @@ struct mteTriggerTable_data {
     size_t   mteTriggerDeltaDiscontinuityIDLen;
     long    mteTriggerDeltaDiscontinuityIDWildcard;
     long    mteTriggerDeltaDiscontinuityIDType;
+    unsigned long prevDiscoTicks;
+    unsigned long prevUptimeTicks;
 
    /* existence table */
     char   *mteTriggerExistenceTest;
@@ -147,6 +149,9 @@ struct last_state {
 #define MTETRIGGERSAMPLETYPE_ABSOLUTEVALUE       1
 #define MTETRIGGERSAMPLETYPE_DELTAVALUE          2
 
+
+/*  What's wrong with using the regular TruthValue definitions TV_TRUE 
+    and TV_FALSE (snmp-tc.h) which are up to 77% shorter?  */
 
 #define MTETRIGGERVALUEIDWILDCARD_TRUE           1
 #define MTETRIGGERVALUEIDWILDCARD_FALSE          2
