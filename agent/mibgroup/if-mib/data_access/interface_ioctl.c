@@ -12,8 +12,15 @@
 #include <net-snmp/data_access/interface.h>
 #include "if-mib/data_access/interface.h"
 
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_ARP_H
+#include <net/if_arp.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
 
 /**
  * ioctl wrapper
@@ -119,43 +126,60 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
             memcpy(ifentry->paddr, ifrq.ifr_hwaddr.sa_data, IFHWADDRLEN);
 
             /*
-             * does this just work on linux? I hope not!
-             * someone holler at me if so. -rstory
+             * arphrd defines vary greatly. ETHER seems to be the only common one
              */
-#ifdef ARPHRD_LOOPBACK
+#ifdef ARPHRD_ETHER
             switch (ifrq.ifr_hwaddr.sa_family) {
             case ARPHRD_ETHER:
                 ifentry->type = 6;
                 break;
+#if defined(ARPHRD_TUNNEL) || defined(ARPHRD_IPGRE) || defined(ARPHRD_SIT)
+#ifdef ARPHRD_TUNNEL
             case ARPHRD_TUNNEL:
             case ARPHRD_TUNNEL6:
+#endif
 #ifdef ARPHRD_IPGRE
             case ARPHRD_IPGRE:
 #endif
+#ifdef ARPHRD_SIT
             case ARPHRD_SIT:
+#endif
                 ifentry->type = 131;
                 break;          /* tunnel */
+#endif
+#ifdef ARPHRD_SLIP
             case ARPHRD_SLIP:
             case ARPHRD_CSLIP:
             case ARPHRD_SLIP6:
             case ARPHRD_CSLIP6:
                 ifentry->type = 28;
                 break;          /* slip */
+#endif
+#ifdef ARPHRD_PPP
             case ARPHRD_PPP:
                 ifentry->type = 23;
                 break;          /* ppp */
+#endif
+#ifdef ARPHRD_LOOPBACK
             case ARPHRD_LOOPBACK:
                 ifentry->type = 24;
                 break;          /* softwareLoopback */
+#endif
+#ifdef ARPHRD_FDDI
             case ARPHRD_FDDI:
                 ifentry->type = 15;
                 break;
+#endif
+#ifdef ARPHRD_ARCNET
             case ARPHRD_ARCNET:
                 ifentry->type = 35;
                 break;
+#endif
+#ifdef ARPHRD_LOCALTLK
             case ARPHRD_LOCALTLK:
                 ifentry->type = 42;
                 break;
+#endif
 #ifdef ARPHRD_HIPPI
             case ARPHRD_HIPPI:
                 ifentry->type = 47;
@@ -167,10 +191,14 @@ netsnmp_access_interface_ioctl_physaddr_get(int fd,
                 break;
 #endif
                 /*
-                 * XXX: more if_arp.h:ARPHDR_xxx to IANAifType mappings... 
+                 * XXX: more if_arp.h:ARPHRD_xxx to IANAifType mappings... 
                  */
-            }
-#endif
+            default:
+                DEBUGMSGTL(("access:interface:ioctl", "unknown entry type %d\n",
+                            ifrq.ifr_hwaddr.sa_family));
+            } /* switch */
+#endif /* ARPHRD_LOOPBACK */
+
         }
     }
 
