@@ -173,7 +173,6 @@ write_mteTriggerBooleanComparison(int      action,
 {
   static int tmpvar;
   struct mteTriggerTable_data *StorageTmp = NULL;
-  static size_t tmplen;
   size_t newlen=name_len - (sizeof(mteTriggerBooleanTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -191,6 +190,8 @@ write_mteTriggerBooleanComparison(int      action,
               fprintf(stderr, "write to mteTriggerBooleanComparison not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -241,7 +242,6 @@ write_mteTriggerBooleanValue(int      action,
 {
   static int tmpvar;
   struct mteTriggerTable_data *StorageTmp = NULL;
-  static size_t tmplen;
   size_t newlen=name_len - (sizeof(mteTriggerBooleanTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -259,6 +259,8 @@ write_mteTriggerBooleanValue(int      action,
               fprintf(stderr, "write to mteTriggerBooleanValue not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -309,7 +311,6 @@ write_mteTriggerBooleanStartup(int      action,
 {
   static int tmpvar;
   struct mteTriggerTable_data *StorageTmp = NULL;
-  static size_t tmplen;
   size_t newlen=name_len - (sizeof(mteTriggerBooleanTable_variables_oid)/sizeof(oid) + 3 - 1);
 
 
@@ -327,6 +328,8 @@ write_mteTriggerBooleanStartup(int      action,
               fprintf(stderr, "write to mteTriggerBooleanStartup not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -395,6 +398,8 @@ write_mteTriggerBooleanObjectsOwner(int      action,
               fprintf(stderr, "write to mteTriggerBooleanObjectsOwner not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -467,6 +472,8 @@ write_mteTriggerBooleanObjects(int      action,
               fprintf(stderr, "write to mteTriggerBooleanObjects not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -539,6 +546,8 @@ write_mteTriggerBooleanEventOwner(int      action,
               fprintf(stderr, "write to mteTriggerBooleanEventOwner not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -611,6 +620,8 @@ write_mteTriggerBooleanEvent(int      action,
               fprintf(stderr, "write to mteTriggerBooleanEvent not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 

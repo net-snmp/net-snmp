@@ -24,8 +24,8 @@ struct mteTriggerTable_data {
     char   *mteTriggerTest;
     size_t  mteTriggerTestLen;
     long    mteTriggerSampleType;
-    oid     *mteTriggerValueID;
-    size_t   mteTriggerValueIDLen;
+    oid    *mteTriggerValueID;
+    size_t  mteTriggerValueIDLen;
     long    mteTriggerValueIDWildcard;
     char   *mteTriggerTargetTag;
     size_t  mteTriggerTargetTagLen;
@@ -103,6 +103,7 @@ struct mteTriggerTable_data {
     size_t  mteTriggerThresholdDeltaFallingEventLen;
 
    /* internal variables */
+   int storageType;
    unsigned int alarmreg;
    int lastboolresult;
    int started;
@@ -191,6 +192,8 @@ struct last_state {
 void   init_mteTriggerTable(void);
 FindVarMethod var_mteTriggerTable;
 void parse_mteTriggerTable(const char *, char *);
+void parse_simple_monitor(const char *, char *);
+void parse_default_monitors(const char *, char *);
 SNMPCallback store_mteTriggerTable;
 struct snmp_pdu *mte_get_response(struct mteTriggerTable_data *,
                                   struct snmp_pdu *);

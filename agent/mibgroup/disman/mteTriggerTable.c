@@ -24,6 +24,9 @@
 #include "snmp_client.h"
 #include "snmp_transport.h"
 #include "header_complex.h"
+#include "default_store.h"
+#include "ds_agent.h"
+#include "snmp_api.h"
 #include "mteTriggerTable.h"
 #include "mteTriggerBooleanTable.h"
 #include "mteTriggerDeltaTable.h"
@@ -32,6 +35,7 @@
 #include "mteObjectsTable.h"
 #include "snmp-tc.h"
 #include "snmp_enum.h"
+#include "snmp_parse_args.h"
 
 
 /* 
@@ -124,10 +128,14 @@ void init_mteTriggerTable(void) {
 
   /* register our config handler(s) to deal with registrations */
   snmpd_register_config_handler("mteTriggerTable", parse_mteTriggerTable, NULL,
-                                "HELP STRING");
+                                NULL);
 
-
-
+  snmpd_register_config_handler("monitor", parse_simple_monitor, NULL,
+                                "[options] monitor_expression [see \"man snmpd.conf\"]");
+  snmpd_register_config_handler("defaultMonitors", parse_default_monitors, NULL,
+                                "yes|no");
+  ds_register_config(ASN_OCTET_STR, "snmpd", "agentSecName",
+                     DS_APPLICATION_ID, DS_AGENT_INTERNAL_SECNAME);
 
   /* we need to be called back later to store our data */
   snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
@@ -223,6 +231,7 @@ create_mteTriggerTable_data(void) {
     StorageNew->mteTriggerThresholdDeltaFallingEventOwner = strdup("");
     StorageNew->mteTriggerThresholdDeltaFallingEvent = strdup("");
     StorageNew->lastboolresult = -1;
+    StorageNew->storageType = ST_NONVOLATILE;
     StorageNew->prevDiscoTicks = 0;
     StorageNew->prevUptimeTicks = 0;
     return StorageNew;
@@ -252,6 +261,192 @@ mteTriggerTable_add(struct mteTriggerTable_data *thedata) {
 
   DEBUGMSGTL(("mteTriggerTable", "done.\n"));
   return SNMPERR_SUCCESS;
+}
+
+
+#define MTE_PROCESS_LINE(line) \
+  snprintf(buf, SPRINT_MAX_LEN, "-u %s %s", mte_default_user, line); \
+  parse_simple_monitor("monitor", buf);
+
+void
+parse_default_monitors(const char *token, char *line) {
+    char buf[SPRINT_MAX_LEN];
+    char *mte_default_user =
+        ds_get_string(DS_APPLICATION_ID, DS_AGENT_INTERNAL_SECNAME);
+
+    if (strncmp(line,"yes",3) == 0) {
+
+        DEBUGMSGTL(("mteTriggerTable", "registering default monitors\n"));
+
+        if (mte_default_user == NULL) {
+            config_perror("You must specify a user name first using the agentSecName token\n");
+            return;
+        }
+
+        /* we don't include many additional objects here as most of
+           the error messages are complete with the needed
+           information */
+        MTE_PROCESS_LINE("-o prNames -o prErrMessage \"process table\" prErrorFlag != 0");
+        MTE_PROCESS_LINE("-o memErrorName -o memSwapErrorMsg \"memory\" memSwapError != 0");
+        MTE_PROCESS_LINE("-o extNames -o extOutput \"extTable\" extResult != 0");
+        MTE_PROCESS_LINE("-o dskPath -o dskErrorMsg \"dskTable\" dskErrorFlag != 0");
+        MTE_PROCESS_LINE("-o laNames -o laErrMessage  \"laTable\" laErrorFlag != 0");
+        MTE_PROCESS_LINE("-o fileName -o fileErrorMsg  \"fileTable\" fileErrorFlag != 0");
+        /* this one is not *all* that useful, because the error is
+           only kept for 30 seconds at most.  Maybe scan it every 30
+           seconds, but I'm not doing so without seeking other peoples
+           opinions first. */
+        MTE_PROCESS_LINE("-o snmperrErrMessage  \"snmperrs\" snmperrErrorFlag != 0");
+    }
+}
+
+static int monitor_call_count = 0;
+void
+parse_simple_monitor(const char *token, char *line) {
+    char buf[SPRINT_MAX_LEN], *cp, ebuf[SPRINT_MAX_LEN];
+    oid obuf[MAX_OID_LEN];
+    size_t obufLen;
+    struct mteTriggerTable_data *StorageNew;
+    
+    monitor_call_count++;
+    
+    StorageNew = create_mteTriggerTable_data();
+    StorageNew->storageType = ST_READONLY;
+    StorageNew->mteTriggerEnabled = MTETRIGGERENABLED_TRUE;
+    StorageNew->mteTriggerEntryStatus = RS_ACTIVE;
+    StorageNew->mteTriggerValueIDWildcard = MTETRIGGERVALUEIDWILDCARD_TRUE;
+    StorageNew->mteTriggerBooleanStartup = MTETRIGGERBOOLEANSTARTUP_TRUE;
+    StorageNew->mteTriggerThresholdStartup =
+        MTETRIGGERTHRESHOLDSTARTUP_RISINGORFALLING;
+    StorageNew->mteTriggerExistenceStartup = strdup(" ");
+    StorageNew->mteTriggerExistenceStartup[0] =
+        MTETRIGGEREXISTENCESTARTUP_PRESENT;
+    /* owner = snmpd.conf, why not? */
+    StorageNew->mteOwner = strdup("snmpd.conf");
+    StorageNew->mteOwnerLen = strlen(StorageNew->mteOwner);
+    StorageNew->pdu_version       = SNMP_VERSION_3;
+    StorageNew->pdu_securityModel = SNMP_SEC_MODEL_USM;
+    StorageNew->pdu_securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
+
+    cp = line;
+    
+    while(cp && *cp == '-') {
+        cp = copy_nword(cp, buf, sizeof(buf));
+        switch(buf[1]) {
+            case 'r':
+                if (cp) {
+                    cp = copy_nword(cp, buf, sizeof(buf));
+                    StorageNew->mteTriggerFrequency = strtoul(buf, NULL, 0);
+                } else {
+                    config_perror("No parameter after -r given\n");
+                    /* XXX: free StorageNew */
+                    return;
+                }
+                break;
+            case 'u':
+                if (cp) {
+                    cp = copy_nword(cp, buf, sizeof(buf));
+                    StorageNew->pdu_securityName = strdup(buf);
+                    StorageNew->pdu_securityNameLen = strlen(buf);
+                } else {
+                    config_perror("No parameter after -u given\n");
+                    /* XXX: free StorageNew */
+                    return;
+                }
+                break;
+            case 'o':
+                /* oid */
+                cp = copy_nword(cp, buf, sizeof(buf));
+                obufLen = MAX_OID_LEN;
+                if (!snmp_parse_oid(buf, obuf, &obufLen)) {
+                    sprintf(ebuf, "unable to parse oid: %s",buf);
+                    config_perror(ebuf);
+                    /* XXX: free StorageNew */
+                    return;
+                }
+                sprintf(buf, "snmpd.conf%d", monitor_call_count);
+                mte_add_object_to_table("snmpd.conf", buf, obuf, obufLen, 1);
+
+                if (StorageNew->mteTriggerObjectsOwnerLen == 0) {
+                    StorageNew->mteTriggerObjectsOwner = strdup("snmpd.conf");
+                    StorageNew->mteTriggerObjectsOwnerLen =
+                        strlen("snmpd.conf");
+                }
+
+                if (StorageNew->mteTriggerObjectsLen == 0) {
+                    StorageNew->mteTriggerObjects = strdup(buf);
+                    StorageNew->mteTriggerObjectsLen = strlen(buf);
+                }
+                break;
+        }
+    }
+
+    if (StorageNew->pdu_securityNameLen == 0) {
+        char *mte_default_user =
+            ds_get_string(DS_APPLICATION_ID, DS_AGENT_INTERNAL_SECNAME);
+        if (mte_default_user) {
+            StorageNew->pdu_securityName = strdup(mte_default_user);
+            StorageNew->pdu_securityNameLen = strlen(mte_default_user);
+        } else {
+            config_perror("-u USER parameter required\n");
+            /* XXX: free StorageNew */
+            return;
+        }
+    }
+
+    /* name */
+    cp = copy_nword(cp, buf, sizeof(buf));
+    if (!cp) {
+        config_perror("illegal monitor: no name specified");
+        /* XXX: free StorageNew */
+        return;
+    }
+        
+    StorageNew->mteTriggerName = strdup(buf);
+    StorageNew->mteTriggerNameLen = strlen(StorageNew->mteTriggerName);
+
+    /* oid */
+    cp = copy_nword(cp, buf, sizeof(buf));
+    obufLen = MAX_OID_LEN;
+    if (!snmp_parse_oid(buf, obuf, &obufLen)) {
+        sprintf(ebuf, "unable to parse oid: %s",buf);
+        config_perror(ebuf);
+        /* XXX: free StorageNew */
+        return;
+    }
+    StorageNew->mteTriggerValueID = snmp_duplicate_objid(obuf, obufLen);
+    StorageNew->mteTriggerValueIDLen = obufLen;
+
+    /* if nothing beyond here, it's an existence test */
+    if (!cp) {
+        StorageNew->mteTriggerTest[0] = MTETRIGGERTEST_EXISTENCE;
+        mteTriggerTable_add(StorageNew);
+        return;
+    }
+
+    /* assume boolean (need to deal with threshold statements) */
+    cp = copy_nword(cp, buf, sizeof(buf));
+    if ((StorageNew->mteTriggerBooleanComparison =
+         se_find_value_in_slist("mteBooleanOperators",buf)) == -1){
+        config_perror("illegal boolean operator");
+        return;
+    }
+
+    /* XXX: add threshold */
+    StorageNew->mteTriggerTest[0] = MTETRIGGERTEST_BOOLEAN;
+    if (!cp) {
+        config_perror("no comparison value specified");
+        /* XXX: free StorageNew */
+        return;
+    }
+
+    cp = copy_nword(cp, buf, sizeof(buf));
+    StorageNew->mteTriggerBooleanValue = strtol(buf, NULL, 0);
+    mteTriggerTable_add(StorageNew);
+    mte_enable_trigger(StorageNew);
+
+    DEBUGMSGTL(("mteTriggerTable", "added simple monitor: %s\n",
+                StorageNew->mteTriggerName));
 }
 
 
@@ -520,6 +715,7 @@ parse_mteTriggerTable(const char *token, char *line) {
           return;
       }
   }
+  StorageTmp->storageType = ST_NONVOLATILE; /* the only type stored */
 
   mteTriggerTable_add(StorageTmp);
     
@@ -553,83 +749,81 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg, void *clientarg
     StorageTmp = (struct mteTriggerTable_data *) hcindex->data;
 
 
-/*   XXX:  if (StorageTmp->mteTriggerTableStorageType == ST_NONVOLATILE) { */
-
+    if (StorageTmp->storageType == ST_NONVOLATILE) {
 
         memset(line,0,sizeof(line));
         strcat(line, "mteTriggerTable ");
         cptr = line + strlen(line);
 
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteOwner, &StorageTmp->mteOwnerLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerName, &StorageTmp->mteTriggerNameLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerComment, &StorageTmp->mteTriggerCommentLen);
+        cptr = read_config_store_data(ASN_BIT_STR, cptr, &StorageTmp->mteTriggerTest, &StorageTmp->mteTriggerTestLen);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerSampleType, &tmpint);
+        cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &StorageTmp->mteTriggerValueID, &StorageTmp->mteTriggerValueIDLen);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerValueIDWildcard, &tmpint);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerTargetTag, &StorageTmp->mteTriggerTargetTagLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerContextName, &StorageTmp->mteTriggerContextNameLen);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerContextNameWildcard, &tmpint);
+        cptr = read_config_store_data(ASN_UNSIGNED, cptr, &StorageTmp->mteTriggerFrequency, &tmpint);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerObjectsOwner, &StorageTmp->mteTriggerObjectsOwnerLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerObjects, &StorageTmp->mteTriggerObjectsLen);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerEnabled, &tmpint);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerEntryStatus, &tmpint);
 
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteOwner, &StorageTmp->mteOwnerLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerName, &StorageTmp->mteTriggerNameLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerComment, &StorageTmp->mteTriggerCommentLen);
-    cptr = read_config_store_data(ASN_BIT_STR, cptr, &StorageTmp->mteTriggerTest, &StorageTmp->mteTriggerTestLen);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerSampleType, &tmpint);
-    cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &StorageTmp->mteTriggerValueID, &StorageTmp->mteTriggerValueIDLen);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerValueIDWildcard, &tmpint);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerTargetTag, &StorageTmp->mteTriggerTargetTagLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerContextName, &StorageTmp->mteTriggerContextNameLen);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerContextNameWildcard, &tmpint);
-    cptr = read_config_store_data(ASN_UNSIGNED, cptr, &StorageTmp->mteTriggerFrequency, &tmpint);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerObjectsOwner, &StorageTmp->mteTriggerObjectsOwnerLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerObjects, &StorageTmp->mteTriggerObjectsLen);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerEnabled, &tmpint);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerEntryStatus, &tmpint);
+        /* delta table */
+        cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &StorageTmp->mteTriggerDeltaDiscontinuityID, &StorageTmp->mteTriggerDeltaDiscontinuityIDLen);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerDeltaDiscontinuityIDWildcard, &tmpint);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerDeltaDiscontinuityIDType, &tmpint);
 
-    /* delta table */
-    cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &StorageTmp->mteTriggerDeltaDiscontinuityID, &StorageTmp->mteTriggerDeltaDiscontinuityIDLen);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerDeltaDiscontinuityIDWildcard, &tmpint);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerDeltaDiscontinuityIDType, &tmpint);
+        /* existence table */
+        cptr = read_config_store_data(ASN_BIT_STR, cptr, &StorageTmp->mteTriggerExistenceTest, &StorageTmp->mteTriggerExistenceTestLen);
+        cptr = read_config_store_data(ASN_BIT_STR, cptr, &StorageTmp->mteTriggerExistenceStartup, &StorageTmp->mteTriggerExistenceStartupLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerExistenceObjectsOwner, &StorageTmp->mteTriggerExistenceObjectsOwnerLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerExistenceObjects, &StorageTmp->mteTriggerExistenceObjectsLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerExistenceEventOwner, &StorageTmp->mteTriggerExistenceEventOwnerLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerExistenceEvent, &StorageTmp->mteTriggerExistenceEventLen);
 
-    /* existence table */
-    cptr = read_config_store_data(ASN_BIT_STR, cptr, &StorageTmp->mteTriggerExistenceTest, &StorageTmp->mteTriggerExistenceTestLen);
-    cptr = read_config_store_data(ASN_BIT_STR, cptr, &StorageTmp->mteTriggerExistenceStartup, &StorageTmp->mteTriggerExistenceStartupLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerExistenceObjectsOwner, &StorageTmp->mteTriggerExistenceObjectsOwnerLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerExistenceObjects, &StorageTmp->mteTriggerExistenceObjectsLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerExistenceEventOwner, &StorageTmp->mteTriggerExistenceEventOwnerLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerExistenceEvent, &StorageTmp->mteTriggerExistenceEventLen);
-
-    /* boolean table */
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerBooleanComparison, &tmpint);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerBooleanValue, &tmpint);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerBooleanStartup, &tmpint);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerBooleanObjectsOwner, &StorageTmp->mteTriggerBooleanObjectsOwnerLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerBooleanObjects, &StorageTmp->mteTriggerBooleanObjectsLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerBooleanEventOwner, &StorageTmp->mteTriggerBooleanEventOwnerLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerBooleanEvent, &StorageTmp->mteTriggerBooleanEventLen);
+        /* boolean table */
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerBooleanComparison, &tmpint);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerBooleanValue, &tmpint);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerBooleanStartup, &tmpint);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerBooleanObjectsOwner, &StorageTmp->mteTriggerBooleanObjectsOwnerLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerBooleanObjects, &StorageTmp->mteTriggerBooleanObjectsLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerBooleanEventOwner, &StorageTmp->mteTriggerBooleanEventOwnerLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerBooleanEvent, &StorageTmp->mteTriggerBooleanEventLen);
     
-    /* threshold table */
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerThresholdStartup, &tmpint);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerThresholdRising, &tmpint);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerThresholdFalling, &tmpint);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerThresholdDeltaRising, &tmpint);
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerThresholdDeltaFalling, &tmpint);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdObjectsOwner, &StorageTmp->mteTriggerThresholdObjectsOwnerLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdObjects, &StorageTmp->mteTriggerThresholdObjectsLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdRisingEventOwner, &StorageTmp->mteTriggerThresholdRisingEventOwnerLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdRisingEvent, &StorageTmp->mteTriggerThresholdRisingEventLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdFallingEventOwner, &StorageTmp->mteTriggerThresholdFallingEventOwnerLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdFallingEvent, &StorageTmp->mteTriggerThresholdFallingEventLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdDeltaRisingEventOwner, &StorageTmp->mteTriggerThresholdDeltaRisingEventOwnerLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdDeltaRisingEvent, &StorageTmp->mteTriggerThresholdDeltaRisingEventLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdDeltaFallingEventOwner, &StorageTmp->mteTriggerThresholdDeltaFallingEventOwnerLen);
-    cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdDeltaFallingEvent, &StorageTmp->mteTriggerThresholdDeltaFallingEventLen);
+        /* threshold table */
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerThresholdStartup, &tmpint);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerThresholdRising, &tmpint);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerThresholdFalling, &tmpint);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerThresholdDeltaRising, &tmpint);
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->mteTriggerThresholdDeltaFalling, &tmpint);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdObjectsOwner, &StorageTmp->mteTriggerThresholdObjectsOwnerLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdObjects, &StorageTmp->mteTriggerThresholdObjectsLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdRisingEventOwner, &StorageTmp->mteTriggerThresholdRisingEventOwnerLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdRisingEvent, &StorageTmp->mteTriggerThresholdRisingEventLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdFallingEventOwner, &StorageTmp->mteTriggerThresholdFallingEventOwnerLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdFallingEvent, &StorageTmp->mteTriggerThresholdFallingEventLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdDeltaRisingEventOwner, &StorageTmp->mteTriggerThresholdDeltaRisingEventOwnerLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdDeltaRisingEvent, &StorageTmp->mteTriggerThresholdDeltaRisingEventLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdDeltaFallingEventOwner, &StorageTmp->mteTriggerThresholdDeltaFallingEventOwnerLen);
+        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->mteTriggerThresholdDeltaFallingEvent, &StorageTmp->mteTriggerThresholdDeltaFallingEventLen);
 
-    /* local internal variables */
-    cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->have_copied_auth_info, &tmpint);
-    if (StorageTmp->have_copied_auth_info) {
-        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_version, &tmpint);
-        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_securityModel, &tmpint);
-        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_securityLevel, &tmpint);
-	cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &StorageTmp->pdu_tDomain, &StorageTmp->pdu_tDomainLen);
-        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_transport, &StorageTmp->pdu_transportLen);
-        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_community, &StorageTmp->pdu_community_len);
-        cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_securityName, &StorageTmp->pdu_securityNameLen);
-    }
+        /* local internal variables */
+        cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->have_copied_auth_info, &tmpint);
+        if (StorageTmp->have_copied_auth_info) {
+            cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_version, &tmpint);
+            cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_securityModel, &tmpint);
+            cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_securityLevel, &tmpint);
+            cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &StorageTmp->pdu_tDomain, &StorageType->pdu_tDomainLen);
+            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_transport, &StorageTmp->pdu_transportLen);
+            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_community, &StorageTmp->pdu_community_len);
+            cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_securityName, &StorageTmp->pdu_securityNameLen);
+        }
 
-    snmpd_store_config(line);
-/*   } */
+        snmpd_store_config(line);
+    } 
   }
   DEBUGMSGTL(("mteTriggerTable", "done.\n"));
   return SNMPERR_SUCCESS;
@@ -779,6 +973,8 @@ write_mteTriggerComment(int      action,
               fprintf(stderr, "write to mteTriggerComment not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -851,6 +1047,8 @@ write_mteTriggerTest(int      action,
               fprintf(stderr, "write to mteTriggerTest not ASN_BIT_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -922,6 +1120,8 @@ write_mteTriggerSampleType(int      action,
               fprintf(stderr, "write to mteTriggerSampleType not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -990,6 +1190,8 @@ write_mteTriggerValueID(int      action,
               fprintf(stderr, "write to mteTriggerValueID not ASN_OBJECT_ID\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -1064,6 +1266,8 @@ write_mteTriggerValueIDWildcard(int      action,
               fprintf(stderr, "write to mteTriggerValueIDWildcard not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -1132,6 +1336,8 @@ write_mteTriggerTargetTag(int      action,
               fprintf(stderr, "write to mteTriggerTargetTag not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -1204,6 +1410,8 @@ write_mteTriggerContextName(int      action,
               fprintf(stderr, "write to mteTriggerContextName not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -1275,6 +1483,8 @@ write_mteTriggerContextNameWildcard(int      action,
               fprintf(stderr, "write to mteTriggerContextNameWildcard not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -1342,6 +1552,8 @@ write_mteTriggerFrequency(int      action,
               fprintf(stderr, "write to mteTriggerFrequency not ASN_UNSIGNED\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -1413,6 +1625,8 @@ write_mteTriggerObjectsOwner(int      action,
               fprintf(stderr, "write to mteTriggerObjectsOwner not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -1485,6 +1699,8 @@ write_mteTriggerObjects(int      action,
               fprintf(stderr, "write to mteTriggerObjects not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -1556,6 +1772,8 @@ write_mteTriggerEnabled(int      action,
               fprintf(stderr, "write to mteTriggerEnabled not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
+          if (StorageTmp->storageType != ST_NONVOLATILE)
+              return SNMP_ERR_NOTWRITABLE;
           break;
 
 
@@ -1677,6 +1895,8 @@ write_mteTriggerEntryStatus(int      action,
 		    columns of the table and not just this one?  */
                 return SNMP_ERR_INCONSISTENTVALUE;
             }
+            if (StorageTmp->storageType != ST_NONVOLATILE)
+                return SNMP_ERR_NOTWRITABLE;
           }
           break;
 
@@ -1874,80 +2094,59 @@ send_mte_trap(struct mteTriggerTable_data *item,
               long *value, const char *objowner, const char *objname,
               const char *reason) {
     static oid objid_snmptrap[] = { 1,3,6,1,6,3,1,1,4,1,0}; /* snmpTrapIOD.0 */
-    static struct variable_list var_trap;
-    static struct variable_list mteHotTrigger_var;
-    static struct variable_list mteHotTargetName_var;
-    static struct variable_list mteHotContextName_var;
-    static struct variable_list mteHotOID_var;
-    static struct variable_list mteHotValue_var;
-    static struct variable_list mteFailedReason_var;
 
-    /* trap */
-    var_trap.next_variable = &mteHotTrigger_var;
-    var_trap.name = objid_snmptrap;
-    var_trap.name_length = sizeof(objid_snmptrap)/sizeof(oid);
-    var_trap.type = ASN_OBJECT_ID;
-    var_trap.val.objid = trap_oid;
-    var_trap.val_len = trap_oid_len*sizeof(oid);
-            
+    struct variable_list *var_list = NULL;
+
+    /* snmpTrap oid */
+    snmp_varlist_add_variable(&var_list, objid_snmptrap,
+                              sizeof(objid_snmptrap)/sizeof(oid),
+                              ASN_OBJECT_ID, (u_char *) trap_oid,
+                              trap_oid_len*sizeof(oid));
+
     /* mteHotTrigger */
-    mteHotTrigger_var.next_variable = &mteHotTargetName_var;
-    mteHotTrigger_var.name = mteHotTrigger;
-    mteHotTrigger_var.name_length = sizeof(mteHotTrigger)/sizeof(oid);
-    mteHotTrigger_var.type = ASN_OCTET_STR;
-    mteHotTrigger_var.val.string = item->mteTriggerName;
-    mteHotTrigger_var.val_len = item->mteTriggerNameLen;
+    snmp_varlist_add_variable(&var_list, mteHotTrigger,
+                              sizeof(mteHotTrigger)/sizeof(oid),
+                              ASN_OCTET_STR, (u_char *) item->mteTriggerName,
+                              item->mteTriggerNameLen);
 
     /* mteHotTargetName */
-    mteHotTargetName_var.next_variable = &mteHotContextName_var;
-    mteHotTargetName_var.name = mteHotTargetName;
-    mteHotTargetName_var.name_length = sizeof(mteHotTargetName)/sizeof(oid);
-    mteHotTargetName_var.type = ASN_OCTET_STR;
-    mteHotTargetName_var.val.string = item->mteTriggerTargetTag; /*XXX: targetName,not tag */
-    mteHotTargetName_var.val_len = item->mteTriggerTargetTagLen; /*XXX */
-            
-    /* mteHotContextName */
-    mteHotContextName_var.next_variable = &mteHotOID_var;
-    mteHotContextName_var.name = mteHotContextName;
-    mteHotContextName_var.name_length = sizeof(mteHotContextName)/sizeof(oid);
-    mteHotContextName_var.type = ASN_OCTET_STR;
-    mteHotContextName_var.val.string = item->mteTriggerContextName;
-    mteHotContextName_var.val_len = item->mteTriggerContextNameLen;
+    snmp_varlist_add_variable(&var_list, mteHotTargetName,
+                              sizeof(mteHotTargetName)/sizeof(oid),
+                              ASN_OCTET_STR,
+                              (u_char *) item->mteTriggerTargetTag,  /*XXX: targetName,not tag */
+                              item->mteTriggerTargetTagLen); /*XXX */
 
-    /*  mteHotOID -- set next_variable field below.  */
-    mteHotOID_var.name = mteHotOID;
-    mteHotOID_var.name_length = sizeof(mteHotOID)/sizeof(oid);
-    mteHotOID_var.type = ASN_OBJECT_ID;
-    mteHotOID_var.val.objid = name_oid;
-    mteHotOID_var.val_len = sizeof(oid)*name_oid_len;
+    /* mteHotContextName */
+    snmp_varlist_add_variable(&var_list, mteHotContextName,
+                              sizeof(mteHotContextName)/sizeof(oid),
+                              ASN_OCTET_STR,
+                              (u_char *) item->mteTriggerContextName,
+                              item->mteTriggerContextNameLen);
+
+    snmp_varlist_add_variable(&var_list, mteHotOID,
+                              sizeof(mteHotOID)/sizeof(oid),
+                              ASN_OBJECT_ID, (u_char *) name_oid,
+                              sizeof(oid)*name_oid_len);
 
     if (trap_oid == mteTriggerFailure || trap_oid == mteEventSetFailure) {
       /*  mteFailedReason  */
-      mteHotOID_var.next_variable = &mteFailedReason_var;
-      mteFailedReason_var.next_variable = NULL;
-      mteFailedReason_var.name = mteFailedReason;
-      mteFailedReason_var.name_length = sizeof(mteFailedReason)/sizeof(oid);
-      mteFailedReason_var.type = ASN_INTEGER;
-      mteFailedReason_var.val.integer = value;
-      mteFailedReason_var.val_len = sizeof(value);
+        snmp_varlist_add_variable(&var_list, mteFailedReason,
+                                  sizeof(mteFailedReason)/sizeof(oid),
+                                  ASN_INTEGER, (u_char *) value, sizeof(value));
     } else {
       /*  mteHotValue  */
-      mteHotOID_var.next_variable = &mteHotValue_var;
-      mteHotValue_var.next_variable = NULL;
-      mteHotValue_var.name = mteHotValue;
-      mteHotValue_var.name_length = sizeof(mteHotValue)/sizeof(oid);
-      mteHotValue_var.type = ASN_INTEGER;
-      mteHotValue_var.val.integer = value;
-      mteHotValue_var.val_len = sizeof(value);
+        snmp_varlist_add_variable(&var_list, mteHotValue,
+                                  sizeof(mteHotValue)/sizeof(oid),
+                                  ASN_INTEGER, (u_char *) value, sizeof(value));
     }
 
     /* add in traps from main table */
-    mte_add_objects(&var_trap, item, item->mteTriggerObjectsOwner,
+    mte_add_objects(var_list, item, item->mteTriggerObjectsOwner,
                     item->mteTriggerObjects,
                     name_oid + item->mteTriggerValueIDLen,
                     name_oid_len - item->mteTriggerValueIDLen);
     /* add in traps from sub table */
-    mte_add_objects(&var_trap, item, objowner, objname,
+    mte_add_objects(var_list, item, objowner, objname,
                     name_oid + item->mteTriggerValueIDLen,
                     name_oid_len - item->mteTriggerValueIDLen);
 
@@ -1956,7 +2155,8 @@ send_mte_trap(struct mteTriggerTable_data *item,
     DEBUGMSGOID(("mteTriggerTest:send_mte_trap", name_oid, name_oid_len));
     DEBUGMSG(("mteTriggerTest:send_mte_trap"," = %ld\n", *value));
     
-    send_v2trap(&var_trap);
+    send_v2trap(var_list);
+    snmp_free_varbind(var_list);
 }
 
 void
@@ -2035,10 +2235,13 @@ mte_get_response(struct mteTriggerTable_data *item, struct snmp_pdu *pdu) {
         /* remote target list */
         /* XXX */
     }
-    sprint_variable(buf, response->variables->name,
-                    response->variables->name_length,
-                    response->variables);
-    DEBUGMSGTL(("mteTriggerTable","got a variable: %s\n", buf));
+    if (response->variables)
+        sprint_variable(buf, response->variables->name,
+                        response->variables->name_length,
+                        response->variables);
+    else
+        strcpy(buf,"empty");
+    DEBUGMSGTL(("mteTriggerTable","got a variables: %s\n", buf));
     snmp_free_pdu(pdu);
     return response;
 }
