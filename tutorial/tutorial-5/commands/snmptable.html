@@ -1,22 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>UCD-SNMP Tutorial -- snmptable</title>
+    <title>Net-SNMP Tutorial -- snmptable</title>
   </head>
 
   <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
-    <h1>UCD-SNMP Tutorial -- snmptable</h1>
-    <p>
-      <b>Note:</b>  Much of this tutorial requires <a
-	href="ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
-	so make sure you get it before running the commands found in
-	this tutorial.</b> 
-      <b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
-      href="/tutorial-5">is available</a> as well.  The commands is
-      the ucd-snmp specific tutorial will not work as expected if you
-      are using net-snmp and not ucd-snmp.
-      <br><br>
-    <hr>
+    <h1>Net-SNMP Tutorial -- snmptable</h1>
     <p>
       The <b>snmptable</b> command nicely displays a SNMP table for
       you in an easy to read column based fashion.  Consider the
@@ -27,7 +16,7 @@
       you (though sometimes it can be a bit wide, like in this example):
 <pre>
 <ul>
-% <b>snmptable ucd-snmp.ucdavis.edu demopublic sysORTable</b>
+% <b>snmptable -v 1 -c demopublic test.net-snmp.org sysORTable</b>
 SNMP table: system.sysORTable
 
  sysORIndex                                                                                                                                      sysORID                                                                     sysORDescr  sysORUpTime
@@ -39,7 +28,7 @@ SNMP table: system.sysORTable
 </pre>
 But you can adjust the width of the table
 <pre>
-% <b>snmptable -w 80 ucd-snmp.ucadvis.edu demopublic sysORTable</b>
+% <b>snmptable -w 80 net-snmp.ucadvis.edu demopublic sysORTable</b>
 SNMP table: system.sysORTable
 
  sysORIndex                                                                                                                                      sysORID
@@ -62,7 +51,7 @@ SNMP table: system.sysORTable, part 2
     <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
 <!-- Created: Thu Nov  4 15:05:29 PST 1999 -->
 <!-- hhmts start -->
-Last modified: Mon Mar 25 08:39:39 PST 2002
+Last modified: Wed Aug  2 07:54:15 PDT 2000
 <!-- hhmts end -->
   </body>
 </html>

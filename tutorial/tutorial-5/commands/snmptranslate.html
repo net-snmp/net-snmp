@@ -1,41 +1,30 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>UCD-SNMP Tutorial -- snmptranslate</title>
+    <title>NET-SNMP Tutorial -- snmptranslate</title>
   </head>
 
   <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
-    <h1>UCD-SNMP Tutorial -- snmptranslate</h1>
-    <p>
-      <b>Note:</b>  Much of this tutorial requires <a
-	href="ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
-	so make sure you get it before running the commands found in
-	this tutorial.</b> 
-      <b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
-      href="/tutorial-5">is available</a> as well.  The commands is
-      the ucd-snmp specific tutorial will not work as expected if you
-      are using net-snmp and not ucd-snmp.
-      <br><br>
-    <hr>
+    <h1>NET-SNMP Tutorial -- snmptranslate</h1>
     <p>
       The <b>snmptranslate</b> tool is a very powerful tool that
       allows you to browse the MIB tree in various ways from the
       command line.
     <p>
-      In its simplest form, it merely translates a textual oid into a
-      numerical one:
+      In its simplest form, it merely looks up an OID and spits it
+      back out in textual form:
 <pre>
 <ul>
-% <b>snmptranslate system.sysUpTime.0</b>
-.1.3.6.1.2.1.1.3.0
+% <b>snmptranslate .1.3.6.1.2.1.1.3.0</b>
+SNMPv2-MIB::sysUpTime.0
 </ul>
 </pre>
     <p>
-      It can also translate into textual as well, by adding the -On
-      flag to its options
+      It can also translate into numerical results as well, by adding
+      the -On flag to its options
 <pre>
 <ul>
-% <b>snmptranslate -On .1.3.6.1.2.1.1.3.0</b>
+% <b>snmptranslate -On SNMPv2-MIB::system.sysUpTime.0</b>
 system.sysUpTime.0
 </ul>
 </pre>
@@ -46,50 +35,42 @@ system.sysUpTime.0
 
 <pre>
 <ul>
+% <b>snmptranslate .iso.3.6.1.private.enterprises.2021.2.1.prNames.0</b>
+NET-SNMP-MIB::prNames.0
 % <b>snmptranslate -On .iso.3.6.1.private.enterprises.2021.2.1.prNames.0</b>
-enterprises.ucdavis.procTable.prEntry.prNames.0
+.1.3.6.1.4.1.2021.2.1.2.0
 </ul>
 </pre>
     <p>
       Note how the oid was abbreviated for you?  You can change this
-      behaviour as well with -Of (most useful with the -On flag too):
+      behaviour as well with -Of:
 <pre>
 <ul>
-% <b>snmptranslate -Ofn .iso.3.6.1.private.enterprises.2021.2.1.prNames.0</b>
+% <b>snmptranslate -Of .iso.3.6.1.private.enterprises.2021.2.1.prNames.0</b>
 .iso.org.dod.internet.private.enterprises.ucdavis.procTable.prEntry.prNames.0
 </ul>
 </pre>
     <p>
-      The last two commands started with '.' in the beginning of the
-      oid.  This is because they were a fully qualified OID starting
-      from the very root of the tree (.1 == .iso).
-    <p>
-      The first three commands make use of the default prefix that
-      assumes if you don't start with a '.' at the beginning you want
-      a sub section of the <i>mib2</i> tree.  You can change the
-      default prefix by setting the environmental variable
-      <i>PREFIX</i> to be the one you would rather use.
-    <p>
       The problem with the above commands is that you have to remember
-      the entire OID for what you're looking for, even with the nice
-      prefix.  Now, we wouldn't be a very good package if we didn't
-      provide some sort of random lookup function right?  Well, the
-      good news is that we do.  <i>-IR</i> nicely does this for us, and
-      searches the MIB tree for the node you want:
+      the entire OID for what you're looking for.  Now, we wouldn't be
+      a very good package if we didn't provide some sort of random-access
+      lookup function right?  Well, the good news is that we do.
+      <i>-IR</i> nicely does this for us, and searches the MIB tree
+      for the node you want:
 <pre>
 <ul>
-% <b>snmptranslate -On sysUpTime.0</b>
+% <b>snmptranslate sysUpTime.0</b>
 Invalid object identifier: sysUpTime.0
-% <b>snmptranslate -On -IR sysUpTime.0</b>
-system.sysUpTime.0
+% <b>snmptranslate -IR sysUpTime.0</b>
+SNMPv2-MIB::sysUpTime.0
 </ul>
 </pre>
-    <p> Finally, starting with version 4.1, it'll even try to do regex
-    pattern matching to find the exact node you want given only a
-    piece of its name by using the -Ib (best match) option:
+    <p> Finally, it'll even try to do regex pattern matching to find
+    the exact node you want given only a piece of its name by using
+    the -Ib (best match) option:
 <pre>
 <ul>
-% <b>snmptranslate -On -Ib 'sys.*ime'</b>
+% <b>snmptranslate -Ib 'sys.*ime'</b>
 system.sysUpTime
 </pre>
 </ul>
@@ -98,18 +79,18 @@ system.sysUpTime
 
 <pre>
 <ul>
-% <b>snmptranslate -On -TB 'vacm.*table'</b>
-.iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmContextTable
-.iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmSecurityToGroupTable
-.iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmAccessTable
-.iso.org.dod.internet.snmpV2.snmpModules.snmpVacmMIB.vacmMIBObjects.vacmMIBViews.vacmViewTreeFamilyTable
+% <b>snmptranslate -TB 'vacm.*table'</b>
+SNMP-VIEW-BASED-ACM-MIB::vacmViewTreeFamilyTable
+SNMP-VIEW-BASED-ACM-MIB::vacmAccessTable
+SNMP-VIEW-BASED-ACM-MIB::vacmSecurityToGroupTable
+SNMP-VIEW-BASED-ACM-MIB::vacmContextTable
 </pre>
 </ul>
     <p> To get extended information about a mib node, use the -Td
     (description) flag:
 <pre>
 <ul>
-% <b>snmptranslate -Td -Ib 'sys.*ime'</b>
+% <b>snmptranslate -On -Td -Ib 'sys.*ime'</b>
 .1.3.6.1.2.1.1.3
 sysUpTime OBJECT-TYPE
   -- FROM	SNMPv2-MIB, RFC1213-MIB
@@ -125,7 +106,7 @@ sysUpTime OBJECT-TYPE
     diagram of a section of the mib tree, check out the -Tp flag:
 <pre>
 <ul>
-% <b>snmptranslate -Tp system</b>
+% <b>snmptranslate -Tp -IR system</b>
 +--system(1)
    |
    +-- -R-- String    sysDescr(1)
@@ -161,7 +142,7 @@ sysUpTime OBJECT-TYPE
     <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
 <!-- Created: Thu Nov  4 14:22:55 PST 1999 -->
 <!-- hhmts start -->
-Last modified: Mon Mar 25 08:39:39 PST 2002
+Last modified: Thu Mar  7 14:03:25 PST 2002
 <!-- hhmts end -->
   </body>
 </html>

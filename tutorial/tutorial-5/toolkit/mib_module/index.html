@@ -1,22 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>UCD-SNMP Tutorial -- MIB Module</title>
+    <title>Net-SNMP Tutorial -- MIB Module</title>
   </head>
 
   <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
-    <p>
-      <b>Note:</b>  Much of this tutorial requires <a
-	href="ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
-	so make sure you get it before running the commands found in
-	this tutorial.</b> 
-      <b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
-      href="/tutorial-5">is available</a> as well.  The commands is
-      the ucd-snmp specific tutorial will not work as expected if you
-      are using net-snmp and not ucd-snmp.
-      <br><br>
-    <hr>
-    <h1>UCD-SNMP Tutorial -- MIB Module</h1>
+    <h1>Net-SNMP Tutorial -- MIB Module</h1>
     <p>
       Here we discuss how to write a simple mib module, to extend the
       agent using C code.
@@ -27,7 +16,7 @@
       <table border=1>
 	<tr bgcolor="#d0d0ff"><th>File</th><th>Description</th></tr>
 	<tr bgcolor="#d0d0ff"><td><a
-	href="UCD-SNMP-TUTORIAL-MIB.txt">UCD-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be writing
+	href="Net-SNMP-TUTORIAL-MIB.txt">Net-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be writing
 	code for</td>
 	<tr bgcolor="#d0d0ff"><td><a
 	href="ustScalarSet.h">ustScalarSet.h</a></td><td>The mib module's header file</td>
@@ -37,7 +26,7 @@
       </center>
     <p>
       This example builds the C code necessary to implement the <a
-      href="UCD-SNMP-TUTORIAL-MIB.txt">UCD-SNMP-TUTORIAL-MIB</a> MIB.
+      href="Net-SNMP-TUTORIAL-MIB.txt">Net-SNMP-TUTORIAL-MIB</a> MIB.
       The majority of the code was written using the mib2c program,
       not discussed here.
     <p>
@@ -52,13 +41,13 @@
       timer.
     <p>
       To use it, get the <a
-      href="ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz">ucd-snmp
+      href="ftp://test.net-snmp.org/net-snmp.tar.gz">net-snmp
       source code</a> and extract it.  Then download the 
       <a href="ustScalarSet.h">ustScalarSet.h</a> and
       <a href="ustScalarSet.c">ustScalarSet.c</a> that make up the
-      code for the mib module.  Place them in the ucd-snmp source
+      code for the mib module.  Place them in the net-snmp source
       directory under the agent/mibgroups sub-directory.  Configure
-      the ucd-snmp package to include them when it is compiled by
+      the net-snmp package to include them when it is compiled by
       adding an argument to the configure script:
     <pre>
 % <b>./configure --with-mib-modules=ustScalarSet</b>
@@ -107,7 +96,7 @@
     <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
 <!-- Created: Fri Nov  5 12:09:03 PST 1999 -->
 <!-- hhmts start -->
-Last modified: Mon Mar 25 08:40:58 PST 2002
+Last modified: Fri Aug 11 08:54:08 PDT 2000
 <!-- hhmts end -->
   </body>
 </html>

@@ -9,16 +9,11 @@
 <hr>
     <h1>*** WARNING WARNING WARNING ***</h1>
     <p>
-      <b>Note:</b>  Much of this tutorial requires <a
-	href="ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
-	so make sure you get it before running the commands found in
-	this tutorial.</b> 
-      <b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
-      href="/tutorial-5">is available</a> as well.  The commands is
-      the ucd-snmp specific tutorial will not work as expected if you
-      are using net-snmp and not ucd-snmp.
-      <br><br>
-    <hr>
+      <b>You MUST use the <a
+      href="http://net-snmp.sourceforge.net/developer.html">current
+      development version</a> of the net-snmp toolkit for this to work
+      properly.  This will not work perfectly with 4.1.2 or earlier.</b>
+    <p>
       <b>The AgentX support in the net-snmp package is still beta
       level quality.  Although many people have used it successfully,
       we're not confident enough yet to say that its bug free (and in
@@ -40,7 +35,7 @@
 	href="../demoapp/Makefile">Makefile</a></td><td>A simple makefile 
 	used to build the projects</td>
 	<tr bgcolor="#d0d0ff"><td>
-	      <a href="../mib_module/UCD-SNMP-TUTORIAL-MIB.txt">UCD-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be serving</td></tr>
+	      <a href="../mib_module/Net-SNMP-TUTORIAL-MIB.txt">Net-SNMP-TUTORIAL-MIB.txt</a></td><td>The MIB we'll be serving</td></tr>
 	<tr bgcolor="#d0d0ff"><td><a
 	href="../mib_module/ustScalarSet.h">ustScalarSet.h</a></td><td>The mib module's header file (same)</td></tr>
 	<tr bgcolor="#d0d0ff"><td><a
@@ -110,7 +105,7 @@ cc -o ustMain ustMain.o ustScalarSet.o -L/usr/local/lib -lucdagent -lucdmibs -ls
     <address><a href="mailto:Wes Hardaker <hardaker@users.sourceforge.net>"></a></address>
 <!-- Created: Fri Nov  5 14:28:37 PST 1999 -->
 <!-- hhmts start -->
-Last modified: Mon Mar 25 08:40:35 PST 2002
+Last modified: Tue Aug  1 16:56:50 PDT 2000
 <!-- hhmts end -->
   </body>
 </html>

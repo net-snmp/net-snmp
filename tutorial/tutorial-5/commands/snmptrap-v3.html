@@ -2,21 +2,10 @@
 <html>
   <head>
     <title>blah<head>
-<title>UCD-SNMP Tutorial -- TRAPs vs INFORMs for SNMPv3</title>
+<title>Net-SNMP Tutorial -- TRAPs vs INFORMs for SNMPv3</title>
 </head>
   <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
-<h1>UCD-SNMP Tutorial -- TRAPs vs INFORMs for SNMPv3</h1>
-    <p>
-      <b>Note:</b>  Much of this tutorial requires <a
-	href="ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz">ucd-snmp-4.2.2</a>!,
-	so make sure you get it before running the commands found in
-	this tutorial.</b> 
-      <b>Note:</b>  A new tutorial for net-snmp 5.0 and above <a
-      href="/tutorial-5">is available</a> as well.  The commands is
-      the ucd-snmp specific tutorial will not work as expected if you
-      are using net-snmp and not ucd-snmp.
-      <br><br>
-    <hr>
+<h1>Net-SNMP Tutorial -- TRAPs vs INFORMs for SNMPv3</h1>
 
 <p>
 <h2>Prerequisite reading:</h2>
@@ -88,7 +77,7 @@ database.  You do this as follows:
 <p>
 <ol>
 <li> Stop any currently running snmptrapd
-<li> edit /var/ucd-snmp/snmptrapd.conf to insert the following line:
+<li> edit /var/net-snmp/snmptrapd.conf to insert the following line:
 <pre>
   createUser myuser MD5 mypassword DES myotherpassword
 </pre>
@@ -122,12 +111,12 @@ users in your remote user database with a bit more care and need to
 create one for every engineID you wish to send traps from.  This means
 that if you want to have 100 snmp agents send snmpv3 traps to your
 trap receiver, you need 100 createUser directives in your
-/var/ucd-snmp/snmptrapd.conf file.
+/var/net-snmp/snmptrapd.conf file.
 <p>
 So, try the following:
 <ol>
 <li> Stop any currently running snmptrapd
-<li> edit /var/ucd-snmp/snmptrapd.conf to insert the following line:
+<li> edit /var/net-snmp/snmptrapd.conf to insert the following line:
 <pre>
   createUser -e 0x0102030405 myuser MD5 mypassword DES myotherpassword
 </pre>
@@ -153,7 +142,7 @@ I'll reiterate that here.
 <hr>
 <!-- Created: Wed Oct 31 08:20:33 PST 2001 -->
 <!-- hhmts start -->
-Last modified: Mon Mar 25 08:39:39 PST 2002
+Last modified: Wed Oct 31 11:50:28 PST 2001
 <!-- hhmts end -->
   </body>
 </html>
