@@ -57,7 +57,7 @@ snmptest:    snmptest.o $(PARSEOBJS) $(USELIBS)
 snmptrapd:    snmptrapd.o snmptrapd_handlers.o $(USELIBS)
 	${CC} -o $@ snmptrapd.o snmptrapd_handlers.o $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
-snmptrap:    snmptrap.o $(TRAPSPECIAL) $(PARSEOBJS) $(USELIBS)
+snmptrap:    snmptrap.o $(PARSEOBJS) $(USELIBS)
 	${CC} -o $@ snmptrap.o $(PARSEOBJS) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmpset:    snmpset.o $(PARSEOBJS) $(USELIBS)

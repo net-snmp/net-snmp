@@ -394,7 +394,7 @@ snmp_set_var_objid (struct variable_list *vp,
 
 int
 snmp_set_var_value(struct variable_list *newvar,
-                    char *val_str, size_t val_len)
+                    u_char *val_str, size_t val_len)
 {
     if (newvar->val.string &&
         newvar->val.string != newvar->buf)
