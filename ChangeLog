@@ -34306,4 +34306,4 @@ hardaker 14 Jun 95 13:43:38
 
 # generated using:
 #  cvs2cl -b -r -f ChangeLog.add -F V4-2-patches --no-wrap -S
-#  perl ../changelogfix < ChangeLog.add > ChangeLog.reallyadd
+#  perl dist/changelogfix < ChangeLog.add > ChangeLog.reallyadd
