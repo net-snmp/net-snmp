@@ -166,9 +166,11 @@ set_an_alarm(void) {
       nexttime = 1;
 
 #ifndef WIN32
+#ifdef SIGALRM
     alarm(nexttime);
     DEBUGMSGTL(("snmp_alarm_set_an_alarm","setting an alarm for %d seconds from now\n",nexttime));
     signal(SIGALRM, alarm_handler);
+#endif /* SIGALRM */
 #endif
 
   } else {

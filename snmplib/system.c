@@ -394,7 +394,9 @@ in_addr_t get_myaddr (void)
             continue;
         in_addr = (struct sockaddr_in *)&ifrp->ifr_addr;
         if ((ifreq.ifr_flags & IFF_UP)
+#ifdef IFF_RUNNING
           && (ifreq.ifr_flags & IFF_RUNNING)
+#endif /* IFF_RUNNING */
           && !(ifreq.ifr_flags & IFF_LOOPBACK)
           && in_addr->sin_addr.s_addr != LOOPBACK){
 #ifdef SYS_IOCTL_H_HAS_SIOCGIFADDR
