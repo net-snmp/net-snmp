@@ -4537,7 +4537,8 @@ snmp_set_replace_newer(val)
 	int val
 	CODE:
 	{
-	   netsnmp_ds_toggle_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIB_REPLACE);
+            netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                                   NETSNMP_DS_LIB_MIB_REPLACE, val);
 	}
 
 void
