@@ -44,7 +44,10 @@ editing win32/config.h.  Note that the install instructions below
 should be adjusted when changes are made to paths.
 
 To build the libraries and applications, open the workspace file
-"win32\win32.dsw" from VC++.  Note there is a Debug version and Release
+"win32\win32.dsw" from VC++.  If you use Version 6.0, answer "yes"
+to convert the workspace and project files from 5.0 to 6.0 format.
+
+Note there is a Debug version and Release
 version for each subproject.  Due to the way the libraries are
 organized, there are exactly two library versions that work :
 
@@ -59,6 +62,35 @@ there is no further use for the files in the win32\lib directory.
 The Debug product .exe files have "_d" appended to the basename
 of the applications.  This is so the Debug and Release versions
 of an application can be built and tested separately.
+
+Runtime libraries
+-----------------
+
+Note that the library must be built using the same options as the
+application which it will be linked with. In particular, the run-time
+libraries must match (Project settings, C/C++ tab, 'Code Generation'
+category).
+
+For example, linking in an snmplib built to use the Multithreaded DLL
+runtime library to an application configured for the Debug
+Multithreaded DLL runtime library results in a link error along the
+lines of 'defaultlib "MSVCRT" conflicts with use of other libs'.   If
+you receive a similair message, check that the projects settings
+between library and application match up.
+
+Debug Information
+-----------------
+
+Note that VC++ 6.0 has new options for for debugging information -
+the 'Program Database'.  This option is set in the Project settings,
+C/C++ tab, 'General' category, and is turned on by default during the
+conversion of the project files. This option is not for use with a
+library, as it embeds debug information into the library that
+references an external file that will not be available to the linking
+application. If you get an error message along the lines of
+'debugging information not available in file vc60.pdb, make sure the
+library debug option is set to 'C7 compatible'.
+
 
 To build the Release versions:
 Click Build->Batch Build. Uncheck all Debug and libsnmp versions.
