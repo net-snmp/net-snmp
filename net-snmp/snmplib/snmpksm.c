@@ -369,12 +369,14 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     size_t          blocksize, encrypted_length;
     unsigned char  *encrypted_data = NULL;
     int             zero = 0, i;
-    u_char         *seqBegin, *cksum_pointer, *endp = *parms->wholeMsg;
+    u_char         *cksum_pointer, *endp = *parms->wholeMsg;
     krb5_cksumtype  cksumtype = CKSUMTYPE_RSA_MD5_DES;
     krb5_checksum   pdu_checksum;
-    u_char         *wholeMsg = *parms->wholeMsg;
+    u_char         **wholeMsg = parms->wholeMsg;
+    size_t	   *offset = parms->wholeMsgOffset, seq_offset;
     struct ksm_secStateRef *ksm_state = (struct ksm_secStateRef *)
         parms->secStateRef;
+    int rc;
 
     DEBUGMSGTL(("ksm", "Starting KSM processing\n"));
 
@@ -610,17 +612,17 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
             goto error;
         }
 
-        seqBegin = wholeMsg;
+	*offset = 0;
 
-        wholeMsg = asn_realloc_rbuild_string(wholeMsg, parms->wholeMsgLen,
-                                             parms->wholeMsgOffset, 1,
+        rc = asn_realloc_rbuild_string(wholeMsg, parms->wholeMsgLen,
+                                             offset, 1,
                                              (u_char) (ASN_UNIVERSAL |
                                                        ASN_PRIMITIVE |
                                                        ASN_OCTET_STR),
                                              encrypted_data,
                                              encrypted_length);
 
-        if (!wholeMsg) {
+        if (rc == 0) {
             DEBUGMSGTL(("ksm", "Building encrypted payload failed.\n"));
             retval = SNMPERR_TOO_LONG;
             goto error;
@@ -638,9 +640,6 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
             retval = SNMPERR_TOO_LONG;
             goto error;
         }
-
-        wholeMsg -= parms->scopedPduLen;
-        *parms->wholeMsgLen -= parms->scopedPduLen;
     }
 
     /*
@@ -651,30 +650,30 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
 
     DEBUGMSGTL(("ksm", "KSM: scopedPdu added to payload\n"));
 
-    seqBegin = wholeMsg;
+    seq_offset = *offset;
 
-    wholeMsg = asn_realloc_rbuild_int(wholeMsg, parms->wholeMsgLen,
-                                      parms->wholeMsgOffset, 1,
+    rc = asn_realloc_rbuild_int(wholeMsg, parms->wholeMsgLen,
+                                      offset, 1,
                                       (u_char) (ASN_UNIVERSAL |
                                                 ASN_PRIMITIVE |
                                                 ASN_INTEGER),
                                       (long *) &zero, sizeof(zero));
 
-    if (!wholeMsg) {
+    if (rc == 0) {
         DEBUGMSGTL(("ksm", "Building ksm security parameters failed.\n"));
         retval = SNMPERR_TOO_LONG;
         goto error;
     }
 
-    wholeMsg = asn_realloc_rbuild_string(wholeMsg, parms->wholeMsgLen,
-                                         parms->wholeMsgOffset, 1,
+    rc = asn_realloc_rbuild_string(wholeMsg, parms->wholeMsgLen,
+                                         offset, 1,
                                          (u_char) (ASN_UNIVERSAL |
                                                    ASN_PRIMITIVE |
                                                    ASN_OCTET_STR),
                                          (u_char *) outdata.data,
                                          outdata.length);
 
-    if (!wholeMsg) {
+    if (rc == 0) {
         DEBUGMSGTL(("ksm", "Building ksm AP_REQ failed.\n"));
         retval = SNMPERR_TOO_LONG;
         goto error;
@@ -730,26 +729,25 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
      * we remember where that is, and we'll fill it in later.
      */
 
-    *parms->wholeMsgLen -= pdu_checksum.length;
-    wholeMsg -= pdu_checksum.length;
-    memset(wholeMsg + 1, 0, pdu_checksum.length);
+    *offset += pdu_checksum.length;
+    memset(*wholeMsg + *parms->wholeMsgLen - *offset, 0, pdu_checksum.length);
 
-    cksum_pointer = wholeMsg + 1;
+    cksum_pointer = *wholeMsg + *parms->wholeMsgLen - *offset;
 
-    wholeMsg = asn_realloc_rbuild_header(wholeMsg, parms->wholeMsgLen,
+    rc = asn_realloc_rbuild_header(wholeMsg, parms->wholeMsgLen,
                                          parms->wholeMsgOffset, 1,
                                          (u_char) (ASN_UNIVERSAL |
                                                    ASN_PRIMITIVE |
                                                    ASN_OCTET_STR),
                                          pdu_checksum.length);
 
-    if (!wholeMsg) {
+    if (rc == 0) {
         DEBUGMSGTL(("ksm", "Building ksm security parameters failed.\n"));
         retval = SNMPERR_TOO_LONG;
         goto error;
     }
 
-    wholeMsg = asn_realloc_rbuild_int(wholeMsg, parms->wholeMsgLen,
+    rc = asn_realloc_rbuild_int(wholeMsg, parms->wholeMsgLen,
                                       parms->wholeMsgOffset, 1,
                                       (u_char) (ASN_UNIVERSAL |
                                                 ASN_PRIMITIVE |
@@ -757,32 +755,32 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
                                       (long *) &cksumtype,
                                       sizeof(cksumtype));
 
-    if (!wholeMsg) {
+    if (rc == 0) {
         DEBUGMSGTL(("ksm", "Building ksm security parameters failed.\n"));
         retval = SNMPERR_TOO_LONG;
         goto error;
     }
 
-    wholeMsg = asn_realloc_rbuild_sequence(wholeMsg, parms->wholeMsgLen,
+    rc = asn_realloc_rbuild_sequence(wholeMsg, parms->wholeMsgLen,
                                            parms->wholeMsgOffset, 1,
                                            (u_char) (ASN_SEQUENCE |
                                                      ASN_CONSTRUCTOR),
-                                           seqBegin - wholeMsg);
+                                           *offset - seq_offset);
 
-    if (!wholeMsg) {
+    if (rc == 0) {
         DEBUGMSGTL(("ksm", "Building ksm security parameters failed.\n"));
         retval = SNMPERR_TOO_LONG;
         goto error;
     }
 
-    wholeMsg = asn_realloc_rbuild_header(wholeMsg, parms->wholeMsgLen,
+    rc = asn_realloc_rbuild_header(wholeMsg, parms->wholeMsgLen,
                                          parms->wholeMsgOffset, 1,
                                          (u_char) (ASN_UNIVERSAL |
                                                    ASN_PRIMITIVE |
                                                    ASN_OCTET_STR),
-                                         seqBegin - wholeMsg);
+                                         *offset - seq_offset);
 
-    if (!wholeMsg) {
+    if (rc == 0) {
         DEBUGMSGTL(("ksm", "Building ksm security parameters failed.\n"));
         retval = SNMPERR_TOO_LONG;
         goto error;
@@ -801,17 +799,17 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
         goto error;
     }
 
-    wholeMsg -= parms->globalDataLen;
-    *parms->wholeMsgLen -= parms->globalDataLen;
-    memcpy(wholeMsg + 1, parms->globalData, parms->globalDataLen);
+    *offset += parms->globalDataLen;
+    memcpy(*wholeMsg + *parms->wholeMsgLen - *offset,
+	   parms->globalData, parms->globalDataLen);
 
-    wholeMsg = asn_realloc_rbuild_sequence(wholeMsg, parms->wholeMsgLen,
-                                           parms->wholeMsgOffset, 1,
+    rc = asn_realloc_rbuild_sequence(wholeMsg, parms->wholeMsgLen,
+                                           offset, 1,
                                            (u_char) (ASN_SEQUENCE |
                                                      ASN_CONSTRUCTOR),
-                                           endp - wholeMsg);
+                                           *offset);
 
-    if (!wholeMsg) {
+    if (rc == 0) {
         DEBUGMSGTL(("ksm", "Building master packet sequence.\n"));
         retval = SNMPERR_TOO_LONG;
         goto error;
@@ -854,16 +852,17 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     }
 #ifdef MIT_NEW_CRYPTO
 
-    input.data = (char *) (wholeMsg + 1);
-    input.length = endp - wholeMsg,
+    input.data = (char *) (*wholeMsg + *parms->wholeMsgLen - *offset);
+    input.length = *offset;
         retcode = krb5_c_make_checksum(kcontext, cksumtype, subkey,
                                        KSM_KEY_USAGE_CHECKSUM, &input,
                                        &pdu_checksum);
 
 #else                           /* MIT_NEW_CRYPTO */
 
-    retcode = krb5_calculate_checksum(kcontext, cksumtype, wholeMsg + 1,
-                                      endp - wholeMsg,
+    retcode = krb5_calculate_checksum(kcontext, cksumtype, *wholeMsg +
+				      *parms->wholeMsgLen - *offset,
+                                      *offset,
                                       (krb5_pointer) subkey->contents,
                                       subkey->length, &pdu_checksum);
 
@@ -882,7 +881,7 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
     memcpy(cksum_pointer, pdu_checksum.contents, pdu_checksum.length);
 
     DEBUGMSGTL(("ksm", "KSM: Writing checksum of %d bytes at offset %d\n",
-                pdu_checksum.length, cksum_pointer - (wholeMsg + 1)));
+                pdu_checksum.length, cksum_pointer - (*wholeMsg + 1)));
 
     DEBUGMSGTL(("ksm", "KSM: Checksum:"));
 
