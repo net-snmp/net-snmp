@@ -1,5 +1,5 @@
 /*
- * table_data_set.h 
+ * table_iterator.h 
  */
 #ifndef _TABLE_DATA_SET_HANDLER_H_
 #define _TABLE_DATA_SET_HANDLER_H_
@@ -117,11 +117,6 @@ extern          "C" {
                                                      int writable);
     NETSNMP_INLINE netsnmp_table_data_set
         *netsnmp_extract_table_data_set(netsnmp_request_info *request);
-    netsnmp_table_row
-        *netsnmp_table_data_set_get_first_row(netsnmp_table_data_set *table);
-    netsnmp_table_row
-        *netsnmp_table_data_set_get_next_row(netsnmp_table_data_set *table,
-                                             netsnmp_table_row *row);
     void            netsnmp_config_parse_table_set(const char *token,
                                                    char *line);
     void            netsnmp_config_parse_add_row(const char *token,
@@ -155,7 +150,7 @@ extern          "C" {
                                                      *table_set,
                                                      char
                                                      *registration_name);
-    int netsnmp_table_dataset_num_rows(netsnmp_table_data_set *table);
+    int netsnmp_table_data_num_rows(netsnmp_table_data *table);
 
 #if HAVE_STDARG_H
     void           

@@ -19,5 +19,5 @@ Netsnmp_Node_Handler mteEventNotificationTable_handler;
 #define COLUMN_MTEEVENTNOTIFICATIONOBJECTSOWNER		2
 #define COLUMN_MTEEVENTNOTIFICATIONOBJECTS		3
 
-extern netsnmp_table_data_set *mteEventNotif_table_set;
+extern netsnmp_table_data2_set *mteEventNotif_table_set2;
 #endif                          /* MTEEVENTNOTIFICATIONTABLE_H */
