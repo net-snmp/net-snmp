@@ -13,7 +13,7 @@ HEADER SNMPv3 getnext using initial of system.sysUpTime.0
 
 STARTAGENT
 
-CAPTURE "snmpgetnext $SNMP_SNMPD_PORT -v 3 -l nanp -u initial -n xxx localhost system.sysUpTime"
+CAPTURE "snmpgetnext $SNMP_FLAGS -v 3 -l nanp -u initial -n xxx localhost system.sysUpTime"
 
 STOPAGENT
 
