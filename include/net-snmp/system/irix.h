@@ -44,6 +44,6 @@ extern const char *inet_ntoa();
 #define STREAM_NEEDS_KERNEL_ISLANDS
 
 #ifndef __GNUC__
-#undef inline
-#define inline
+#  undef NETSNMP_ENABLE_INLINE
+#  define NETSNMP_ENABLE_INLINE 0
 #endif
