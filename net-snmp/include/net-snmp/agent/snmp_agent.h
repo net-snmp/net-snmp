@@ -189,6 +189,8 @@ extern          "C" {
                                               netsnmp_pdu *, int);
     int             netsnmp_allocate_globalcacheid(void);
 
+    int netsnmp_remove_delegated_requests_for_session(netsnmp_session *sess);
+
     /*
      * Register and de-register agent NSAPs.  
      */
@@ -200,21 +202,6 @@ extern          "C" {
     void            netsnmp_deregister_agent_nsap(int handle);
 
     inline void
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         netsnmp_agent_add_list_data(netsnmp_agent_request_info *agent,
                                     netsnmp_data_list *node);
 
@@ -222,32 +209,9 @@ extern          "C" {
                                                 *agent, const char *name);
 
     inline void
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
             netsnmp_free_agent_data_set(netsnmp_agent_request_info *agent);
 
     inline void
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
            netsnmp_free_agent_data_sets(netsnmp_agent_request_info *agent);
     inline void    
         netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari);

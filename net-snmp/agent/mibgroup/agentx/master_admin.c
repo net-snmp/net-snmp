@@ -138,6 +138,20 @@ close_agentx_session(netsnmp_session * session, int sessid)
 	if (session->myvoid != NULL) {
 	  free(session->myvoid);
 	}
+        /*
+         * The following is necessary to avoid locking up the agent when
+         * a sugagent dies during a set request. We must clean up the
+         * requests, so that the delegated request will be completed and
+         * further requests can be processed
+         */
+        netsnmp_remove_delegated_requests_for_session(session);
+        if (session->subsession != NULL) {
+            netsnmp_session *subsession = session->subsession, *tmpsub;
+            for(; subsession; subsession = subsession->next) {
+                netsnmp_remove_delegated_requests_for_session(subsession);
+            }
+        }
+                
         return AGENTX_ERR_NOERROR;
     }
 
