@@ -1,10 +1,11 @@
 top_builddir=..
 
-SCRIPTS=snmpcheck tkmib
-PERLSCRIPTS=snmpcheck tkmib mib2c fixproc ipf-mod.pl rsnmp
+SCRIPTS=snmpcheck tkmib mib2c
+PERLSCRIPTS=snmpcheck tkmib fixproc ipf-mod.pl rsnmp
 SCRIPTSMADEFORPERL=snmpcheck.made tkmib.made mib2c.made fixproc.made \
 	ipf-mod.pl.made rsnmp.made
 PERLPROG=@PERLPROG@
+DATASRCS=mib2c.conf mib2c.storage.conf mib2c.vartypes.conf
 
 all: $(SCRIPTSMADEFORPERL)
 
@@ -31,7 +32,7 @@ tkmib.made: $(srcdir)/tkmib
 
 mib2c.made: $(srcdir)/mib2c
 	if test "x$(PERLPROG)" != "x"; then \
-	  $(PERLPROG) -p -e 's@^#!.*/perl.*@#!$(PERLPROG)@' ${srcdir}/mib2c > mib2c.made; \
+	  $(PERLPROG) -p -e 's@^#!.*/perl.*@#!$(PERLPROG)@;s@/usr/local/share/snmp@$(snmplibdir)@;' ${srcdir}/mib2c > mib2c.made; \
 	else \
 	  touch mib2c.made; \
         fi
@@ -61,6 +62,7 @@ rsnmp.made: $(srcdir)/rsnmp
 
 install:
 	@if test "x$(PERLPROG)" != "x"; then \
-	  for i in $(SCRIPTS) ; do $(INSTALL) $$i.made $(bindir)/$$i ; echo "install:  installed $$i in $(bindir)" ; done \
+	  for i in $(SCRIPTS) ; do $(INSTALL) $$i.made $(bindir)/$$i ; echo "install:  installed $$i in $(bindir)" ; done; \
+	  for i in $(DATASRCS) ; do $(INSTALL) $$i $(snmplibdir)/$$i ; echo "install:  installed $$i in $(snmplibdir)" ; done \
 	fi
 
