@@ -302,11 +302,14 @@ write_mteObjectsID(int      action,
                       &newlen, 1, NULL, NULL)) == NULL)
       return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
 
+  if (StorageTmp && StorageTmp->storagetype == ST_READONLY) {
+      return SNMP_ERR_NOTWRITABLE;
+  }
 
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_OBJECT_ID){
-              fprintf(stderr, "write to mteObjectsID not ASN_OBJECT_ID\n");
+              snmp_log(LOG_ERR, "write to mteObjectsID not ASN_OBJECT_ID\n");
               return SNMP_ERR_WRONGTYPE;
           }
           break;
@@ -373,11 +376,14 @@ write_mteObjectsIDWildcard(int      action,
                       &newlen, 1, NULL, NULL)) == NULL)
       return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
 
+  if (StorageTmp && StorageTmp->storagetype == ST_READONLY) {
+      return SNMP_ERR_NOTWRITABLE;
+  }
 
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_INTEGER){
-              fprintf(stderr, "write to mteObjectsIDWildcard not ASN_INTEGER\n");
+              snmp_log(LOG_ERR, "write to mteObjectsIDWildcard not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
           break;
@@ -445,13 +451,15 @@ write_mteObjectsEntryStatus(int      action,
                    &name[sizeof(mteObjectsTable_variables_oid)/sizeof(oid) + 3 - 1], 
                    &newlen, 1, NULL, NULL);
   
-
-  
-
   if (var_val_type != ASN_INTEGER || var_val == NULL){
-    fprintf(stderr, "write to mteObjectsEntryStatus not ASN_INTEGER\n");
+    snmp_log(LOG_ERR, "write to mteObjectsEntryStatus not ASN_INTEGER\n");
     return SNMP_ERR_WRONGTYPE;
   }
+
+  if (StorageTmp && StorageTmp->storagetype == ST_READONLY) {
+      return SNMP_ERR_NOTWRITABLE;
+  }
+      
   set_value = *((long *) var_val);
 
 

@@ -816,7 +816,7 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg, void *clientarg
             cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_version, &tmpint);
             cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_securityModel, &tmpint);
             cptr = read_config_store_data(ASN_INTEGER, cptr, &StorageTmp->pdu_securityLevel, &tmpint);
-            cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &StorageTmp->pdu_tDomain, &StorageType->pdu_tDomainLen);
+            cptr = read_config_store_data(ASN_OBJECT_ID, cptr, &StorageTmp->pdu_tDomain, &StorageTmp->pdu_tDomainLen);
             cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_transport, &StorageTmp->pdu_transportLen);
             cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_community, &StorageTmp->pdu_community_len);
             cptr = read_config_store_data(ASN_OCTET_STR, cptr, &StorageTmp->pdu_securityName, &StorageTmp->pdu_securityNameLen);
@@ -970,7 +970,7 @@ write_mteTriggerComment(int      action,
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_OCTET_STR){
-              fprintf(stderr, "write to mteTriggerComment not ASN_OCTET_STR\n");
+              snmp_log(LOG_ERR, "write to mteTriggerComment not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
           if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -1044,7 +1044,7 @@ write_mteTriggerTest(int      action,
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_BIT_STR){
-              fprintf(stderr, "write to mteTriggerTest not ASN_BIT_STR\n");
+              snmp_log(LOG_ERR, "write to mteTriggerTest not ASN_BIT_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
           if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -1117,7 +1117,7 @@ write_mteTriggerSampleType(int      action,
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_INTEGER){
-              fprintf(stderr, "write to mteTriggerSampleType not ASN_INTEGER\n");
+              snmp_log(LOG_ERR, "write to mteTriggerSampleType not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
           if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -1187,7 +1187,7 @@ write_mteTriggerValueID(int      action,
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_OBJECT_ID){
-              fprintf(stderr, "write to mteTriggerValueID not ASN_OBJECT_ID\n");
+              snmp_log(LOG_ERR, "write to mteTriggerValueID not ASN_OBJECT_ID\n");
               return SNMP_ERR_WRONGTYPE;
           }
           if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -1263,7 +1263,7 @@ write_mteTriggerValueIDWildcard(int      action,
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_INTEGER){
-              fprintf(stderr, "write to mteTriggerValueIDWildcard not ASN_INTEGER\n");
+              snmp_log(LOG_ERR, "write to mteTriggerValueIDWildcard not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
           if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -1333,7 +1333,7 @@ write_mteTriggerTargetTag(int      action,
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_OCTET_STR){
-              fprintf(stderr, "write to mteTriggerTargetTag not ASN_OCTET_STR\n");
+              snmp_log(LOG_ERR, "write to mteTriggerTargetTag not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
           if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -1407,7 +1407,7 @@ write_mteTriggerContextName(int      action,
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_OCTET_STR){
-              fprintf(stderr, "write to mteTriggerContextName not ASN_OCTET_STR\n");
+              snmp_log(LOG_ERR, "write to mteTriggerContextName not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
           if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -1480,7 +1480,7 @@ write_mteTriggerContextNameWildcard(int      action,
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_INTEGER){
-              fprintf(stderr, "write to mteTriggerContextNameWildcard not ASN_INTEGER\n");
+              snmp_log(LOG_ERR, "write to mteTriggerContextNameWildcard not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
           if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -1549,7 +1549,7 @@ write_mteTriggerFrequency(int      action,
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_UNSIGNED){
-              fprintf(stderr, "write to mteTriggerFrequency not ASN_UNSIGNED\n");
+              snmp_log(LOG_ERR, "write to mteTriggerFrequency not ASN_UNSIGNED\n");
               return SNMP_ERR_WRONGTYPE;
           }
           if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -1622,7 +1622,7 @@ write_mteTriggerObjectsOwner(int      action,
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_OCTET_STR){
-              fprintf(stderr, "write to mteTriggerObjectsOwner not ASN_OCTET_STR\n");
+              snmp_log(LOG_ERR, "write to mteTriggerObjectsOwner not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
           if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -1696,7 +1696,7 @@ write_mteTriggerObjects(int      action,
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_OCTET_STR){
-              fprintf(stderr, "write to mteTriggerObjects not ASN_OCTET_STR\n");
+              snmp_log(LOG_ERR, "write to mteTriggerObjects not ASN_OCTET_STR\n");
               return SNMP_ERR_WRONGTYPE;
           }
           if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -1769,7 +1769,7 @@ write_mteTriggerEnabled(int      action,
   switch ( action ) {
         case RESERVE1:
           if (var_val_type != ASN_INTEGER){
-              fprintf(stderr, "write to mteTriggerEnabled not ASN_INTEGER\n");
+              snmp_log(LOG_ERR, "write to mteTriggerEnabled not ASN_INTEGER\n");
               return SNMP_ERR_WRONGTYPE;
           }
           if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -1848,7 +1848,7 @@ write_mteTriggerEntryStatus(int      action,
   
 
   if (var_val_type != ASN_INTEGER || var_val == NULL){
-    fprintf(stderr, "write to mteTriggerEntryStatus not ASN_INTEGER\n");
+    snmp_log(LOG_ERR, "write to mteTriggerEntryStatus not ASN_INTEGER\n");
     return SNMP_ERR_WRONGTYPE;
   }
   set_value = *((long *) var_val);
