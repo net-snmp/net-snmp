@@ -1026,11 +1026,6 @@ t        *     d) any other global handlers
 		reply->command = SNMP_MSG_RESPONSE;
 		reply->errstat = 0;
 		reply->errindex = 0;
-		memdup((u_char **)&reply->transport_data, pdu->transport_data,
-		  	pdu->transport_data_length);
-		reply->transport_data_length = pdu->transport_data_length;
-		reply->tDomain = pdu->tDomain;
-		reply->tDomainLen = pdu->tDomainLen;
 		if (!snmp_send(session, reply)) {
 		    snmp_sess_perror("snmptrapd: Couldn't respond to inform pdu",
                                     session);
