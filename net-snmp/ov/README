@@ -27,5 +27,5 @@ UCD-Computer:         OV Computer Class additions
   -  Copy to /etc/opt/OV/share/symbols/C/
 
 bitmaps/*:        Bitmaps/Icons for ovw
-  -  Copy the contents of the directory to /etc/opt/OV/share/bitmaps/C/
+  -  Copy the contents of the directory to /etc/opt/OV/share/bitmaps/C/computer/
 
