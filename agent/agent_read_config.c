@@ -61,6 +61,9 @@
 #include <winsock.h>
 #endif
 #if HAVE_SYS_STREAM_H
+#   ifdef sysv5UnixWare7
+#      define _KMEMUSER 1   /* <sys/stream.h> needs this for queue_t */
+#   endif
 #include <sys/stream.h>
 #endif
 #if HAVE_NET_ROUTE_H
