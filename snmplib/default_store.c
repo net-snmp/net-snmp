@@ -38,7 +38,7 @@ char *ds_strings[DS_MAX_IDS][DS_MAX_SUBIDS];  /* bit vector storage. */
 int
 ds_set_boolean(int storeid, int which, int value) {
 
-  if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
+  if (storeid >= DS_MAX_IDS || which >= DS_MAX_SUBIDS ||
       storeid < 0 || which < 0)
     return SNMPERR_GENERR;
     
@@ -56,7 +56,7 @@ ds_set_boolean(int storeid, int which, int value) {
 int
 ds_toggle_boolean(int storeid, int which) {
 
-  if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
+  if (storeid >= DS_MAX_IDS || which >= DS_MAX_SUBIDS ||
       storeid < 0 || which < 0)
     return SNMPERR_GENERR;
     
@@ -74,7 +74,7 @@ ds_toggle_boolean(int storeid, int which) {
 
 int
 ds_get_boolean(int storeid, int which) {
-  if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
+  if (storeid >= DS_MAX_IDS || which >= DS_MAX_SUBIDS ||
       storeid < 0 || which < 0)
     return SNMPERR_GENERR;
 
@@ -83,7 +83,7 @@ ds_get_boolean(int storeid, int which) {
 
 int
 ds_set_int(int storeid, int which, int value) {
-  if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
+  if (storeid >= DS_MAX_IDS || which >= DS_MAX_SUBIDS ||
       storeid < 0 || which < 0)
     return SNMPERR_GENERR;
 
@@ -95,7 +95,7 @@ ds_set_int(int storeid, int which, int value) {
 
 int
 ds_get_int(int storeid, int which) {
-  if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
+  if (storeid >= DS_MAX_IDS || which >= DS_MAX_SUBIDS ||
       storeid < 0 || which < 0)
     return SNMPERR_GENERR;
 
@@ -105,7 +105,7 @@ ds_get_int(int storeid, int which) {
 int
 ds_set_string(int storeid, int which, const char *value) {
 
-  if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
+  if (storeid >= DS_MAX_IDS || which >= DS_MAX_SUBIDS ||
       storeid < 0 || which < 0)
     return SNMPERR_GENERR;
     
@@ -125,7 +125,7 @@ ds_set_string(int storeid, int which, const char *value) {
 
 char *
 ds_get_string(int storeid, int which) {
-  if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
+  if (storeid >= DS_MAX_IDS || which >= DS_MAX_SUBIDS ||
       storeid < 0 || which < 0)
     return NULL;
 
@@ -185,7 +185,7 @@ ds_register_config(u_char type, const char *ftype, const char *token,
                    int storeid, int which) {
   struct ds_read_config *drsp;
 
-  if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
+  if (storeid >= DS_MAX_IDS || which >= DS_MAX_SUBIDS ||
       storeid < 0 || which < 0 || token == NULL)
     return SNMPERR_GENERR;
 
@@ -225,7 +225,7 @@ ds_register_premib(u_char type, const char *ftype, const char *token,
                    int storeid, int which) {
   struct ds_read_config *drsp;
 
-  if (storeid > DS_MAX_IDS || which > DS_MAX_SUBIDS ||
+  if (storeid >= DS_MAX_IDS || which >= DS_MAX_SUBIDS ||
       storeid < 0 || which < 0 || token == NULL)
     return SNMPERR_GENERR;
 
