@@ -311,10 +311,10 @@ netsnmp_callback_close(netsnmp_transport *t)
     netsnmp_callback_info *mystuff = (netsnmp_callback_info *) t->data;
     DEBUGMSGTL(("transport_callback", "hook_close enter\n"));
 
-    rc = close(mystuff->pipefds[0]);
-    rc = close(mystuff->pipefds[1]);
+    rc  = close(mystuff->pipefds[0]);
+    rc |= close(mystuff->pipefds[1]);
 
-    netsnmp_transport_remove_from_list(&trlist, t);
+    rc |= netsnmp_transport_remove_from_list(&trlist, t);
 
     DEBUGMSGTL(("transport_callback", "hook_close exit\n"));
     return rc;
