@@ -249,6 +249,10 @@ down by default and the string hidden in the oid is shown to you as
 vacmSecurityModel.0."wes".
 The -Ob option diables this feature and displays it as
 vacmSecurityModel.0.3.119.101.115 again.
+.IP -OE
+Esape quotation marks with a '\\' when OIDs are broken into sections as
+described above.  This is useful when you're planning on cutting and
+pasting the oid back onto a shell command line that will need them quoted.
 .PP
 Note that most of these options can be turned on or off by default by
 tuning the snmp.conf file.  See the snmp.conf(5) manual page for

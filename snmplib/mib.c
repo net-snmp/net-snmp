@@ -1005,6 +1005,9 @@ snmp_out_toggle_options(char *options)
         case 'b':
             ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
             break;
+        case 'E':
+            ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES);
+            break;
 	case 'q':
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
 	    break;
@@ -1097,6 +1100,8 @@ register_mib_handlers (void)
     ds_register_config(ASN_BOOLEAN, "snmp","printNumericOids",
                        DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS);
     ds_register_config(ASN_BOOLEAN, "snmp","dontBreakdownOids",
+                       DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
+    ds_register_config(ASN_BOOLEAN, "snmp","escapeQuotes",
                        DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
     ds_register_config(ASN_BOOLEAN, "snmp","quickPrinting",
                        DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
@@ -1735,11 +1740,19 @@ dump_oid_to_string(oid *objid,
         if ((tst > 254) || (!isprint(tst)))
             tst = (oid)'.';
           
-        if (alen == 0) *cp++ = quotechar;
+        if (alen == 0) {
+            if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
+                *cp++ = '\\';
+            *cp++ = quotechar;
+        }
         *cp++ = (char)tst;
         alen++;
     }
-    if (alen) *cp++ = quotechar;
+    if (alen) {
+        if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
+            *cp++ = '\\';
+        *cp++ = quotechar;
+    }
     *cp = '\0';
     buf = cp;
   }
@@ -1798,7 +1811,12 @@ _get_symbol(oid *objid,
                 if (numids > objidlen)
                     goto finish_it;
 		if (numids == 1) {
-		    *buf++ = '"'; *buf++ = '"';
+                    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
+                        *buf++ = '\\';
+		    *buf++ = '"';
+                    if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_ESCAPE_QUOTES))
+                        *buf++ = '\\';
+                    *buf++ = '"';
 		}
 		else
 		    buf = dump_oid_to_string(objid+1, numids-1, buf, '"');
