@@ -102,7 +102,6 @@ typedef long	fd_mask;
 #define PARTY_MIB_BASE	 ".1.3.6.1.6.3.3.1.3.127.0.0.1.1"
 #define CONTEXT_MIB_BASE ".1.3.6.1.6.3.3.1.4.127.0.0.1.1"
 
-_CRTIMP extern int errno;
 
 int
 snmp_synch_input (int, struct snmp_session *, int, struct snmp_pdu *, void *);
@@ -202,7 +201,7 @@ snmp_fix_pdu(struct snmp_pdu *pdu,
 {
     struct variable_list *var, *newvar;
     struct snmp_pdu *newpdu;
-    int index, copied = 0;
+    int varindex, copied = 0;
 
     if (pdu->command != SNMP_MSG_RESPONSE || pdu->errstat == SNMP_ERR_NOERROR || pdu->errindex <= 0)
 	return NULL;
@@ -235,12 +234,12 @@ snmp_fix_pdu(struct snmp_pdu *pdu,
 	memmove(newpdu->context, pdu->context, sizeof(oid)*pdu->contextLen);
     }
     var = pdu->variables;
-    index = 1;
-    if (pdu->errindex == index){	/* skip first variable */
+    varindex = 1;
+    if (pdu->errindex == varindex){	/* skip first variable */
       if (var == NULL)
         return NULL;
       var = var->next_variable;
-      index++;
+      varindex++;
     }
     if (var != NULL){
 	newpdu->variables = newvar = (struct variable_list *)malloc(sizeof(struct variable_list));
@@ -258,7 +257,7 @@ snmp_fix_pdu(struct snmp_pdu *pdu,
 
 	while(var->next_variable){
 	    var = var->next_variable;
-	    if (++index == pdu->errindex)
+	    if (++varindex == pdu->errindex)
 		continue;
 	    newvar->next_variable = (struct variable_list *)malloc(sizeof(struct variable_list));
 	    newvar = newvar->next_variable;
@@ -275,7 +274,7 @@ snmp_fix_pdu(struct snmp_pdu *pdu,
 	    copied++;
 	}
     }
-    if (index < pdu->errindex || copied == 0){
+    if (varindex < pdu->errindex || copied == 0){
 	snmp_free_pdu(newpdu);
 	return NULL;
     }
