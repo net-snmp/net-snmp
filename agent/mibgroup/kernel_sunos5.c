@@ -831,6 +831,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	case 'h': /* hme (SBus card) */
 	case 'e': /* eri (PCI card) */
 	case 'b': /* be */
+	case 'd': /* dmfe -- found on netra X1 */
 	    if (!ifp->ifSpeed) ifp->ifSpeed = 100000000;
 	    ifp->ifType = 6;
 	    break;
