@@ -1698,8 +1698,11 @@ _get_symbol(oid *objid,
 		goto finish_it;
 		break;
 	    }
-	    in_dices = in_dices->next;
-	}
+	} else {
+            /* ack.  Can't find an index in the mib tree.  bail */
+            goto finish_it;
+        }
+        in_dices = in_dices->next;
     }
 
 finish_it:
