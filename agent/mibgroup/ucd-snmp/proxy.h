@@ -7,6 +7,7 @@ struct simple_proxy {
     size_t          name_len;
     oid             base[MAX_OID_LEN];
     size_t          base_len;
+    char           *context;
     netsnmp_session *sess;
     struct simple_proxy *next;
 };
