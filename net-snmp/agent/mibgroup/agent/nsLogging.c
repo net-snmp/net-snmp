@@ -88,7 +88,7 @@ get_first_logging_entry(void **loop_context, void **data_context,
     snmp_set_var_value(index, (u_char*)&logh_head->priority,
 		                 sizeof(logh_head->priority));
     if ( logh_head->token )
-        snmp_set_var_value(index->next_variable, (u_char*)logh_head->token,
+        snmp_set_var_value(index->next_variable, (const u_char*)logh_head->token,
 		                                   strlen(logh_head->token));
     else
         snmp_set_var_value(index->next_variable, NULL, 0);
@@ -111,7 +111,7 @@ get_next_logging_entry(void **loop_context, void **data_context,
     snmp_set_var_value(index, (u_char*)&logh->priority,
 		                 sizeof(logh->priority));
     if ( logh->token )
-        snmp_set_var_value(index->next_variable, (u_char*)logh->token,
+        snmp_set_var_value(index->next_variable, (const u_char*)logh->token,
 		                                   strlen(logh->token));
     else
         snmp_set_var_value(index->next_variable, NULL, 0);

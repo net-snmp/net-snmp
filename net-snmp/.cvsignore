@@ -1,5 +1,3 @@
-*.made
-.index
 .software.db.sh
 Change[Ll]og\.*
 EXAMPLE.conf
@@ -17,11 +15,7 @@ ece-mib.txt
 lib
 libtool
 make.out
-mib.txt
-mib_module_config.h
 net-snmp-config
+net-snmp-config-x
 sedscript
-targets
-ucd-snmp-config.h
-ucd-snmp.txt
 autom4te.cache

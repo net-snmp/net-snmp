@@ -1409,12 +1409,11 @@ unsigned int getIfSpeed(int fd, struct ifreq ifr){
 * see ftp://ftp.scyld.com/pub/diag/mii-diag.c
 */
 	ushort *data = (ushort *)(&ifr.ifr_data);
-	unsigned int *data32 = (unsigned int *)(&ifr.ifr_data);
 	unsigned phy_id;
 	unsigned char new_ioctl_nums = 0;
 	int mii_reg, i;
 	ushort mii_val[32];
-	ushort bmcr, bmsr, new_bmsr, nway_advert, lkpar;
+	ushort bmcr, bmsr, nway_advert, lkpar;
 	const unsigned int media_speeds[] = {10000000, 10000000, 100000000, 100000000, 10000000, 0};	
 /* It corresponds to "10baseT", "10baseT-FD", "100baseTx", "100baseTx-FD", "100baseT4", "Flow-control", 0, */
 

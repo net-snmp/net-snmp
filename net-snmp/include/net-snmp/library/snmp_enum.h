@@ -76,7 +76,7 @@ extern          "C" {
      * Persistent enumeration lists
      */
     void            se_store_enum_list(struct snmp_enum_list *new_list,
-                                       char *token, char *type);
+                                       const char *token, char *type);
     void            se_store_list(unsigned int major, unsigned int minor, char *type);
     void            se_store_slist(const char *listname, char *type);
     int             se_store_slist_callback(int majorID, int minorID,

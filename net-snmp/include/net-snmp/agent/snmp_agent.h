@@ -214,6 +214,9 @@ extern          "C" {
         netsnmp_set_all_requests_error(netsnmp_agent_request_info *reqinfo,
                                        netsnmp_request_info *requests,
                                        int error_value);
+    int
+        netsnmp_request_set_error_all(netsnmp_request_info *requests,
+                                       int error_value);
     
     /** deprecated, use netsnmp_request_set_error instead */
     int             netsnmp_set_request_error(netsnmp_agent_request_info

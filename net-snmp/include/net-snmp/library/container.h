@@ -214,6 +214,7 @@ extern "C" {
                                      netsnmp_container *new_index);
 
 
+    netsnmp_factory *netsnmp_container_get_factory(const char *type);
     /*
      * commone comparison routines
      */

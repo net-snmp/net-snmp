@@ -871,9 +871,9 @@ realloc_handle_trap_fmt(u_char ** buf, size_t * buf_len, size_t * out_len,
     char            fmt_cmd = options->cmd;     /* what we're outputting */
     u_char         *temp_buf = NULL;
     size_t          tbuf_len = 64, tout_len = 0;
-    char           *sep = separator;
-    char           *default_sep = "\t";
-    char           *default_alt_sep = ", ";
+    const char           *sep = separator;
+    const char           *default_sep = "\t";
+    const char           *default_alt_sep = ", ";
 
     if ((temp_buf = (u_char *) calloc(tbuf_len, 1)) == NULL) {
         return 0;
@@ -1575,7 +1575,7 @@ realloc_format_trap(u_char ** buf, size_t * buf_len, size_t * out_len,
                 memset(separator, 0, i);
                 next_chr = format_str[++fmt_idx];
                 if (!realloc_handle_backslash
-                    (&separator, &i, &j, 0, next_chr)) {
+                    ((u_char **)&separator, &i, &j, 0, next_chr)) {
                     return 0;
                 }
             } else {

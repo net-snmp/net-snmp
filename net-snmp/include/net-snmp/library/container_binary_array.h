@@ -17,6 +17,7 @@ extern          "C" {
     /*
      * get an container which uses an binary_array for storage
      */
+    void netsnmp_container_binary_array_init(void);
     netsnmp_container *   netsnmp_container_get_binary_array(void);
     int netsnmp_container_get_binary_array_noalloc(netsnmp_container *c);
 
