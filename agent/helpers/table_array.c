@@ -630,7 +630,10 @@ process_set_group(netsnmp_index *o, void *c)
          * if not a new row, save undo info
          */
         if (ag->row_created == 0) {
-            ag->undo_info = context->tad->cb->duplicate_row(ag->existing_row);
+            if (context->tad->cb->duplicate_row)
+                ag->undo_info = context->tad->cb->duplicate_row(ag->existing_row);
+            else
+                ag->undo_info = NULL;
             if (NULL == ag->undo_info) {
                 rc = SNMP_ERR_RESOURCEUNAVAILABLE;
                 break;
@@ -707,11 +710,13 @@ process_set_group(netsnmp_index *o, void *c)
 
         /** no more use for undo_info, so free it */
         if (ag->row_created == 1) {
-            context->tad->cb->delete_row(ag->existing_row);
+            if (context->tad->cb->delete_row)
+                context->tad->cb->delete_row(ag->existing_row);
             ag->existing_row = NULL;
         }
         else {
-            context->tad->cb->delete_row(ag->undo_info);
+            if (context->tad->cb->delete_row)
+                context->tad->cb->delete_row(ag->undo_info);
             ag->undo_info = NULL;
         }
         break;
