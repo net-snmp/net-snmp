@@ -13,9 +13,9 @@ HEADER SNMPv3 user creation and usage using snmpusm
 
 STARTAGENT
 
-CAPTURE "snmpusm $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial -n xxx udp:localhost:$SNMP_SNMPD_PORT create newtestuser templateMD5"
-CAPTURE "snmpusm $SNMP_FLAGS -v 3 -a MD5 -A templateMD5_test_pass_auth -l anp -u newtestuser -n xxx -Ca udp:localhost:$SNMP_SNMPD_PORT passwd templateMD5_test_pass_auth newtestpass"
-CAPTURE "snmpget -On $SNMP_FLAGS -v 3 -a MD5 -A newtestpass -l anp -u newtestuser -n xxx udp:localhost:$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
+CAPTURE "snmpusm $SNMP_FLAGS -v 3 -a MD5 -A initial_test_pass_auth -l anp -u initial udp:localhost:$SNMP_SNMPD_PORT create newtestuser templateMD5"
+CAPTURE "snmpusm $SNMP_FLAGS -v 3 -a MD5 -A templateMD5_test_pass_auth -l anp -u newtestuser -Ca udp:localhost:$SNMP_SNMPD_PORT passwd templateMD5_test_pass_auth newtestpass"
+CAPTURE "snmpget -On $SNMP_FLAGS -v 3 -a MD5 -A newtestpass -l anp -u newtestuser udp:localhost:$SNMP_SNMPD_PORT .1.3.6.1.2.1.1.3.0"
 
 STOPAGENT
 
