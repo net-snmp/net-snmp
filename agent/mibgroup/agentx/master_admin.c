@@ -182,7 +182,7 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
     oid ubound = 0;
     u_long flags = 0;
 
-    DEBUGMSGTL(("agentx:register","in register_agentx_list\n"));
+    DEBUGMSGTL(("agentx/master","in register_agentx_list\n"));
     
     sp = find_agentx_session( session, pdu->sessid );
     if ( sp == NULL )
@@ -193,11 +193,13 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 		* TODO: registration timeout
 		*	registration context
 		*/ 
-    if ( pdu->range_subid )
-	ubound = pdu->variables->val.objid[ pdu->range_subid-1 ];
+    if (pdu->range_subid) {
+	ubound = pdu->variables->val.objid[pdu->range_subid - 1];
+    }
 
-    if(pdu->flags & AGENTX_MSG_FLAG_INSTANCE_REGISTER)
+    if (pdu->flags & AGENTX_MSG_FLAG_INSTANCE_REGISTER) {
       flags = FULLY_QUALIFIED_INSTANCE;
+    }
 
     switch (register_mib_context(buf, (struct variable *)agentx_varlist,
 			 sizeof(agentx_varlist[0]), 1,
@@ -206,19 +208,18 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 			 (char *)pdu->community, pdu->time,
 			 flags)) {
 
-	case MIB_REGISTERED_OK:
-				DEBUGMSGTL(("agentx:register",
-                                            "registered ok\n"));
-				return AGENTX_ERR_NOERROR;
-	case MIB_DUPLICATE_REGISTRATION:
-				DEBUGMSGTL(("agentx:register",
-                                            "duplicate registration\n"));
-				return AGENTX_ERR_DUPLICATE_REGISTRATION;
-	case MIB_REGISTRATION_FAILED:
-	default:
-				DEBUGMSGTL(("agentx:register",
-                                            "failed registration\n"));
-				return AGENTX_ERR_REQUEST_DENIED;
+    case MIB_REGISTERED_OK:
+	DEBUGMSGTL(("agentx/master", "registered ok\n"));
+	return AGENTX_ERR_NOERROR;
+
+    case MIB_DUPLICATE_REGISTRATION:
+	DEBUGMSGTL(("agentx/master", "duplicate registration\n"));
+	return AGENTX_ERR_DUPLICATE_REGISTRATION;
+
+    case MIB_REGISTRATION_FAILED:
+    default:
+	DEBUGMSGTL(("agentx/master", "failed registration\n"));
+	return AGENTX_ERR_REQUEST_DENIED;
     }
 }
 
