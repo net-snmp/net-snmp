@@ -416,7 +416,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                                                       reqinfo, reqtmp);
                             reqtmp->requestvb = NULL;
                             reqtmp->processed = 0;
-                            if (vb->val.string != ASN_NULL) {
+                            if (vb->type != ASN_NULL) { /* XXX, not all */
                                 netsnmp_oid_stash_add_data(cinfo, myname,
                                                            myname_len, vb);
                             } else {
@@ -561,6 +561,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
             reqinfo->mode = MODE_GET;
         }
     } else if (reqinfo->mode == MODE_GET_STASH) {
+        netsnmp_free_request_data_sets(reqtmp);
         SNMP_FREE(reqtmp);
     }
 
