@@ -34,13 +34,13 @@ ALLHEADERS=\
 
 #INSTALLHEADERS=asn1.h snmp_api.h snmp_client.h snmp_impl.h snmp.h parse.h mib.h
 
-#all but md5.h and vacm.h are copied to the installed include directory
+#all but md5.h, vacm.h, and libsnmp.h are copied to the installed
+#include directory
 INSTALLHEADERS=\
 	acl.h \
 	asn1.h \
 	context.h \
 	int64.h \
-	libsnmp.h \
 	mib.h \
 	parse.h \
 	party.h \
