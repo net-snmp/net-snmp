@@ -535,6 +535,18 @@ handle_next_pass(struct agent_snmp_session  *asp)
 	return status;
 }
 
+	/*
+	 *  Private structure to save the results of a getStatPtr call.
+	 *  This data can then be used to avoid repeating this call on
+	 *  subsequent SET handling passes.
+	 */
+struct saved_var_data {
+    WriteMethod *write_method;
+    u_char	statType;
+    size_t	statLen;
+    u_short	acl;
+};
+
 
 int
 handle_var_list(struct agent_snmp_session  *asp)
@@ -544,6 +556,7 @@ handle_var_list(struct agent_snmp_session  *asp)
     u_char *statP;
     size_t  statLen;
     u_short acl;
+    struct saved_var_data *saved;
     WriteMethod *write_method;
     AddVarMethod *add_method;
     int	    noSuchObject;
@@ -559,7 +572,18 @@ handle_var_list(struct agent_snmp_session  *asp)
     
 	count++;
 statp_loop:
-	statP = getStatPtr(  varbind_ptr->name,
+	if ( asp->rw == WRITE && varbind_ptr->data != NULL ) {
+		/*
+		 * Restore results from an earlier 'getStatPtr' call
+		 */
+	    saved = (struct saved_var_data *) varbind_ptr->data;
+	    write_method = saved->write_method;
+	    statType     = saved->statType;
+	    statLen      = saved->statLen;
+	    acl          = saved->acl;
+	}
+	else
+	    statP = getStatPtr(  varbind_ptr->name,
 			   &varbind_ptr->name_length,
 			   &statType, &statLen, &acl,
 			   asp->exact, &write_method, asp->pdu, &noSuchObject);
@@ -625,12 +649,25 @@ statp_loop:
 		/*  FINALLY we can act on SET requests ....*/
 	    if ( asp->rw == WRITE ) {
 	        if ( write_method != NULL ) {
+		    if ( varbind_ptr->data == NULL ) {
+			saved = (struct saved_var_data *)malloc(sizeof(struct saved_var_data));
+			if ( saved == NULL ) {
+			    statType = SNMP_ERR_GENERR;
+			    goto write_error;
+			}
+	    		saved->write_method = write_method;
+	    		saved->statType     = statType;
+	    		saved->statLen      = statLen;
+	    		saved->acl          = acl;
+			varbind_ptr->data = (void *)saved;
+		    }
 		    statType = (*write_method)(asp->mode,
                                                varbind_ptr->val.string,
                                                varbind_ptr->type,
                                                varbind_ptr->val_len, statP,
                                                varbind_ptr->name,
                                                varbind_ptr->name_length);
+write_error:
                     if (statType != SNMP_ERR_NOERROR) {
                       asp->pdu->errstat = statType;
                       asp->pdu->errindex = count;
