@@ -23,7 +23,7 @@ UCD-SNMP Specific Information
 
 Warning:  
 
-As of V3.1.3 the configuration files are now looked for in
+As of V3.0.3 the configuration files are now looked for in
 $(prefix)/lib/snmp, where ($prefix) is defined as the value passed to
 the --prefix argument of the configure script, or /usr/local if
 undefined.  If you used to keep these files in /etc, please move them
