@@ -1659,36 +1659,37 @@ fprint_value(FILE *f,
     fprintf(f, "%s\n", tempbuf);
 }
 
+
+/*
+ * Append a quoted printable string to buffer "buf"
+ * that represents a range of sub-identifiers "objid".
+ *
+ * Display '.' for all non-printable sub-identifiers.
+ * If successful, "buf" points past the appended string.
+ */
 char *
 dump_oid_to_string(oid *objid,
 	   size_t objidlen,
 	   char *buf)
 {
-  /* if any subidentifier might be printable, dump it as printable. */
   if (buf)
-  { int ii, jj, kk;
+  { int ii, alen;
     char *scp;
     char *cp = buf + (strlen(buf));
-    scp = cp; kk = 0;
-    for (ii= 0, jj = 0; ii < (int)objidlen; ii++)
+    scp = cp;
+    for (ii= 0, alen = 0; ii < (int)objidlen; ii++)
     {
-	oid tst = objid[ii];
-	if (tst > 254) continue;
-	if (isprint(tst)) {
-	  if (jj == 0) { *cp++ = '"'; jj = 1; }
-	  *cp++ = (char)tst;
-	  kk++;
-	}
-	else {
-	  if (jj == 0) { *cp++ = '"'; jj = 1; }
-	  *cp++ = '.';
-	  kk++;
-	}
+        oid tst = objid[ii];
+        if ((tst > 254) || (!isprint(tst)))
+            tst = (oid)'.';
+          
+        if (alen == 0) *cp++ = '"';
+        *cp++ = (char)tst;
+        alen++;
     }
-    if (jj) { *cp++ = '"'; }
-    if (kk < 2) cp = scp;
+    if (alen) *cp++ = '"';
     *cp = '\0';
-	buf = cp;
+    buf = cp;
   }
 
   return buf;
@@ -2221,7 +2222,8 @@ void clear_tree_flags(register struct tree *tp)
     for (; tp; tp = tp->next_peer)
     {
         tp->reported = 0;
-        clear_tree_flags(tp->child_list); /*RECURSE*/
+        if (tp->child_list)
+            clear_tree_flags(tp->child_list); /*RECURSE*/
     }
 }
 
