@@ -87,8 +87,16 @@ EXPORTS
 	snmp_get_quick_print
 	snmp_set_do_debugging
 	snmp_get_do_debugging
+	disable_filelog	
+	disable_stderrlog	
+	disable_log	
+	enable_filelog	
+	enable_stderrlog	
+	snmp_log	
+	log_perror	
 	DEBUGP
 	snmp_perror	
+	snmp_sess_perror	
 	snmp_add_null_var
 	snmp_pdu_create
 	snmp_fix_pdu
