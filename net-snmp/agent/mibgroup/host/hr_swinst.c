@@ -109,7 +109,7 @@ typedef struct {
  
 } SWI_t;
 
-static SWI_t _myswi = { NULL, NULL, 0 };	/* XXX static for now */
+static SWI_t _myswi = { NULL, "", 0 };	/* XXX static for now */
 
 int header_hrswinst (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
 int header_hrswInstEntry (struct variable *,oid *, size_t *, int, size_t *, WriteMethod **);
@@ -193,10 +193,15 @@ void init_hr_swinst(void)
 	swi->swi_directory = strdup(path);
     }
 #else
+#  ifdef _PATH_HRSW_directory
     if (swi->swi_directory == NULL) {
 	swi->swi_directory = _PATH_HRSW_directory;
     }
     strcpy(swi->swi_name, "[installed name]");	/* default name */
+#  else
+    /* XXX SunOS4 package directory is ?? -MJS */
+    return; /* packages not known - don't register */
+#  endif
 #endif
 
     REGISTER_MIB("host/hr_swinst", hrswinst_variables, variable4, hrswinst_variables_oid);
