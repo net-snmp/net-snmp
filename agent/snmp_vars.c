@@ -36,13 +36,16 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include <config.h>
 #include "common_header.h"
+#include "extensible/extproto.h"
+#include "mibgroup/mib_module_includes.h"
 
 #include "party.h"
 #include "context.h"
 #include "acl.h"
 #include "view.h"
+#include "snmpd.h"
 
-
+int compare_tree __P((oid *, int, oid *, int));
 extern struct subtree subtrees_old[];
 
 /*
@@ -139,7 +142,8 @@ init_nlist(nl)
   }
 }
 
-init_snmp()
+void
+init_snmp __P((void))
 {
   init_kmem("/dev/kmem"); 
 
@@ -256,7 +260,7 @@ struct subtree subtrees_old[] = {
 #include "mibgroup/snmpv2_subtrees.h"
 };
 
-extern int in_view();
+extern int in_view __P((oid *, int, int));
 
 int subtree_old_size() {
   return (sizeof(subtrees_old)/ sizeof(struct subtree));
@@ -281,7 +285,7 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     int		*len;	    /* OUT - length of matched variable */
     u_short	*acl;	    /* OUT - access control list */
     int		exact;	    /* IN - TRUE if exact match wanted */
-    int	       (**write_method)(); /* OUT - pointer to function called to set variable, otherwise 0 */
+    int	       (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
     struct packet_info *pi; /* IN - relevant auth info re PDU */
     int		*noSuchObject;
 {

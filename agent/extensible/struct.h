@@ -28,6 +28,7 @@ struct myproc
   struct myproc *next;
 };
 
+/*
 struct mibinfo 
 {
    int numid;
@@ -35,6 +36,7 @@ struct mibinfo
    char *name;
    void (*handle) ();
 };
+*/
 
 
 struct diskpart

@@ -59,6 +59,7 @@ SOFTWARE.
 #endif
 #include <sys/socket.h>
 #include <netdb.h>
+
 #include "asn1.h"
 #include "snmp.h"
 #include "snmp_impl.h"
@@ -195,12 +196,21 @@ struct snmp_pdu *SavedPdu = NULL;
 struct internal_variable_list *SavedVars = NULL;
 
 static int snmp_dump_packet = 0;
+
+static char *api_errstring __P((int));
+static void free_request_list __P((struct request_list *));
+void shift_array __P((u_char *, int, int));
+static int snmp_build __P((struct snmp_session *, struct snmp_pdu *, u_char *, int *));
+static int snmp_parse __P((struct snmp_session *, struct internal_snmp_pdu *, u_char *, int));
+static void snmp_free_internal_pdu __P((struct snmp_pdu *));
+
 void snmp_set_dump_packet(val)
     int val;
 {
     snmp_dump_packet = val;
 }
-int snmp_get_dump_packet()
+
+int snmp_get_dump_packet __P((void))
 {
     return snmp_dump_packet;
 }
@@ -222,7 +232,8 @@ api_errstring(snmp_errnumber)
  * Gets initial request ID for all transactions.
  */
 static void
-init_snmp(){
+init_snmp __P((void))
+{
     struct timeval tv;
 
     gettimeofday(&tv, (struct timezone *)0);
@@ -1092,7 +1103,7 @@ snmp_free_pdu(pdu)
 /*
  * Frees the pdu and any malloc'd data associated with it.
  */
-void
+static void
 snmp_free_internal_pdu(pdu)
     struct snmp_pdu *pdu;
 {
@@ -1138,7 +1149,7 @@ snmp_read(fdset)
     struct sockaddr_in	from;
     int length, fromlength;
     struct snmp_pdu *pdu;
-    struct request_list *rp, *orp;
+    struct request_list *rp, *orp = NULL;
 
     for(slp = Sessions; slp; slp = slp->next){
 	if (FD_ISSET(slp->internal->sd, fdset)){
@@ -1164,7 +1175,7 @@ snmp_read(fdset)
 	    }
 	    memset (pdu, 0, sizeof(*pdu));
 	    pdu->address = from;
-	    if (snmp_parse(sp, pdu, packet, length) != SNMP_ERR_NOERROR){
+	    if (snmp_parse(sp, (struct internal_snmp_pdu *)pdu, packet, length) != SNMP_ERR_NOERROR){
 		fprintf(stderr, "Unrecognizable or unauthentic packet received\n");
 		snmp_free_internal_pdu(pdu);
 		return;
@@ -1176,7 +1187,6 @@ snmp_read(fdset)
 			if (sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid,
 					 pdu, sp->callback_magic) == 1){
 			    /* successful, so delete request */
-/* Begin Modif PVA GTMH 10/12/96 */
 			    if (isp->requests == rp){
 				/* first in list */
 				isp->requests = rp->next_request;
@@ -1189,15 +1199,12 @@ snmp_read(fdset)
 			    }
 			    snmp_free_pdu(rp->pdu);
 			    free((char *)rp);
-/* End Modif PVA GTMH 10/12/96 */
 			    /* there shouldn't be any more requests with the
 			       same reqid */
 			    break;
 			}
 		    }
-/* Begin Modif PVA GTMH 10/12/96 */
 		    orp = rp;
-/* End Modif PVA GTMH 10/12/96 */
 		}
 	    } else if (pdu->command == GET_REQ_MSG
 		       || pdu->command == GETNEXT_REQ_MSG
@@ -1320,7 +1327,8 @@ snmp_select_info(numfds, fdset, timeout, block)
  *  callback for the session is used to alert the user of the timeout.
  */
 void
-snmp_timeout(){
+snmp_timeout __P((void))
+{
     struct session_list *slp;
     struct snmp_session *sp;
     struct snmp_internal_session *isp;

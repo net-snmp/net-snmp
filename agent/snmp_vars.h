@@ -25,9 +25,9 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 
-#include "mibgroup/mib_module_includes.h"
+struct nlist;
 
-int KNLookup();
+int KNLookup __P((struct nlist *, int, char *, int));
 
 extern long long_return;
 extern u_char return_buf[];
@@ -42,7 +42,7 @@ struct variable {
     char	    type;	    /* type of variable */
 /* See important comment in snmp_vars.c relating to acl */
     u_short	    acl;	    /* access control list for variable */
-    u_char	    *(*findVar)();  /* function that finds variable */
+    u_char	    *(*findVar)__P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *,int)) ));  /* function that finds variable */
     u_char	    namelen;	    /* length of above */
     oid		    name[32];	    /* object identifier of variable */
 };

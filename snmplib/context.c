@@ -1,5 +1,10 @@
 #include <config.h>
 
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#endif
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
@@ -24,6 +29,7 @@ static struct contextEntry *cache[2];
 static int cachePtr;
 static int NextIndex = 1;
 
+
 struct contextEntry *
 context_getEntry(contextID, contextIDLen)
     oid *contextID;
@@ -34,35 +40,20 @@ context_getEntry(contextID, contextIDLen)
     /* do I need a cache of two contexts??? */
     cp = cache[0];
     if (cp && contextIDLen == cp->contextIdentityLen
-#ifdef SVR4
 	&& !memcmp((char *)cp->contextIdentity, (char *)contextID,
 		     contextIDLen * sizeof(oid))){
-#else
-	&& !bcmp((char *)cp->contextIdentity, (char *)contextID,
-		     contextIDLen * sizeof(oid))){
-#endif
 	return cp;
     }
     cp = cache[1];
     if (cp && contextIDLen == cp->contextIdentityLen
-#ifdef SVR4
 	&& !memcmp((char *)cp->contextIdentity, (char *)contextID,
 		     contextIDLen * sizeof(oid))){
-#else
-	&& !bcmp((char *)cp->contextIdentity, (char *)contextID,
-		     contextIDLen * sizeof(oid))){
-#endif
 	return cp;
     }
     for(cp = List; cp; cp = cp->next){
         if (contextIDLen == cp->contextIdentityLen
-#ifdef SVR4
 	    && !memcmp((char *)cp->contextIdentity, (char *)contextID,
 		     contextIDLen * sizeof(oid))){
-#else
-	    && !bcmp((char *)cp->contextIdentity, (char *)contextID,
-		     contextIDLen * sizeof(oid))){
-#endif
 	    cachePtr ^= 1;
 	    cache[cachePtr] = cp;
 	    return cp;
@@ -72,13 +63,13 @@ context_getEntry(contextID, contextIDLen)
 }
 
 void
-context_scanInit()
+context_scanInit __P((void))
 {
   ScanPtr = List;
 }
 
 struct contextEntry *
-context_scanNext()
+context_scanNext __P((void))
 {
     struct contextEntry *returnval;
 
@@ -96,27 +87,14 @@ context_createEntry(contextID, contextIDLen)
     struct contextEntry *cp;
 
     cp = (struct contextEntry *)malloc(sizeof(struct contextEntry));
-#ifdef SVR4
-    memset((char *)cp, NULL, sizeof(struct contextEntry));
-#else
-    bzero((char *)cp, sizeof(struct contextEntry));
-#endif
+    memset((char *)cp, 0, sizeof(struct contextEntry));
 
-#ifdef SVR4
     memmove((char *)cp->contextIdentity, (char *)contextID,
 	  contextIDLen * sizeof(oid));
-#else
-    bcopy((char *)contextID, (char *)cp->contextIdentity,
-	  contextIDLen * sizeof(oid));
-#endif
     cp->contextIdentityLen = contextIDLen;
     cp->contextIndex = NextIndex++;
     cp->reserved = (struct contextEntry *)malloc(sizeof(struct contextEntry));
-#ifdef SVR4
-    memset((char *)cp->reserved, NULL, sizeof(struct contextEntry));
-#else
-    bzero((char *)cp->reserved, sizeof(struct contextEntry));
-#endif
+    memset((char *)cp->reserved, 0, sizeof(struct contextEntry));
 
     cp->next = List;
     List = cp;
@@ -128,28 +106,18 @@ context_destroyEntry(contextID, contextIDLen)
     oid *contextID;
     int contextIDLen;
 {
-    struct contextEntry *cp, *lastcp;
+    struct contextEntry *cp, *lastcp = NULL;
 
     if (List->contextIdentityLen == contextIDLen
-#ifdef SVR4
 	&& !memcmp((char *)List->contextIdentity, (char *)contextID,
 		 contextIDLen * sizeof(oid))){
-#else
-	&& !bcmp((char *)List->contextIdentity, (char *)contextID,
-		 contextIDLen * sizeof(oid))){
-#endif
 	cp = List;
 	List = List->next;
     } else {
 	for(cp = List; cp; cp = cp->next){
 	    if (cp->contextIdentityLen == contextIDLen
-#ifdef SVR4
 		&& !memcmp((char *)cp->contextIdentity, (char *)contextID,
 			 contextIDLen * sizeof(oid)))
-#else
-		&& !bcmp((char *)cp->contextIdentity, (char *)contextID,
-			 contextIDLen * sizeof(oid)))
-#endif
 		break;
 	    lastcp = cp;
 	}

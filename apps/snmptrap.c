@@ -70,18 +70,22 @@ SOFTWARE.
 #include <sys/sysctl.h>
 #endif
 
-#include "snmp.h"
 #include "asn1.h"
-#include "mib.h"
 #include "snmp_impl.h"
 #include "snmp_api.h"
 #include "snmp_client.h"
+#include "mib.h"
+#include "snmp.h"
 #include "party.h"
 #include "system.h"
 
 extern int  errno;
-int ascii_to_binary();
-int hex_to_binary();
+int main __P((int, char **));
+int ascii_to_binary __P((u_char *, u_char *));
+int hex_to_binary __P((u_char *, u_char *));
+int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+u_long parse_address __P((char *));
+void snmp_add_var __P((struct snmp_pdu *, oid *, int, char, char *));
 
 #define NUM_NETWORKS	16   /* max number of interfaces to check */
 
@@ -95,7 +99,7 @@ struct nlist nl[] = {
 };
 
 void
-usage()
+usage __P((void))
 {
     fprintf(stderr, "usage:\n");
     fprintf(stderr, "snmptrap -v 1 manager community enterprise-oid agent trap-type specific-type uptime [ var ]...\n");
@@ -105,11 +109,11 @@ usage()
 }
 
 int snmp_input(operation, session, reqid, pdu, magic)
-int operation;
-struct snmp_session *session;
-int reqid;
-struct snmp_pdu *pdu;
-void *magic;
+    int operation;
+    struct snmp_session *session;
+    int reqid;
+    struct snmp_pdu *pdu;
+    void *magic;
 {
   return 1;
 }

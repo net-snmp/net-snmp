@@ -54,12 +54,12 @@ SOFTWARE.
 #include <sys/select.h>
 #endif
 
-#include "mib.h"
 #include "asn1.h"
-#include "snmp.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
 #include "snmp_client.h"
+#include "mib.h"
+#include "snmp.h"
+#include "snmp_impl.h"
 #include "party.h"
 #include "context.h"
 #include "view.h"
@@ -83,6 +83,9 @@ typedef long	fd_mask;
 
 extern int errno;
 struct synch_state snmp_synch_state;
+
+int
+snmp_synch_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
 
 struct snmp_pdu *
 snmp_pdu_create(command)
@@ -110,9 +113,7 @@ snmp_pdu_create(command)
  * Add a null variable with the requested name to the end of the list of
  * variables for this pdu.
  */
-/* Modif PVA GTmH 21/05/96 return pointer to added variable */
 struct variable_list* snmp_add_null_var(pdu, name, name_length)
-/* End Modif PVA GTmH 21/05/96 return pointer to added variable */
     struct snmp_pdu *pdu;
     oid *name;
     int name_length;
@@ -135,9 +136,7 @@ struct variable_list* snmp_add_null_var(pdu, name, name_length)
     vars->type = ASN_NULL;
     vars->val.string = NULL;
     vars->val_len = 0;
-/* Modif PVA GTmH 21/05/96 return pointer to added variable */
     return vars;
-/* End Modif PVA GTmH 21/05/96 return pointer to added variable */
 }
 
 int

@@ -1,5 +1,9 @@
 #include <config.h>
-
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#endif
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
@@ -27,7 +31,9 @@
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
+
 #include "asn1.h"
+#include "mib.h"
 #include "context.h"
 #include "system.h"
 
@@ -37,6 +43,8 @@
 #define IDENTITY_STATE  1
 #define VIEW_STATE	2
 #define PROXY_STATE  	3
+
+static void error_exit __P((char *, int, char *));
 
 static void error_exit(str, linenumber, filename)
     char *str;
@@ -151,20 +159,12 @@ read_context_database(filename)
 		cxp->contextLocal = 2; /* FALSE */
 	    }
 	    cxp->contextViewIndex = view;
-#ifdef SVR4
 	    memmove(cxp->contextLocalEntity, entity, entityLen);
-#else
-	    bcopy(entity, cxp->contextLocalEntity, entityLen);
-#endif
 	    cxp->contextLocalEntityLen = entityLen;
 	    cxp->contextLocalTime = time;
 	    cxp->contextDstPartyIndex = dstParty;
 	    cxp->contextSrcPartyIndex = srcParty;
-#ifdef SVR4
 	    memmove(cxp->contextProxyContext, proxyId, proxyIdLen * sizeof(oid));
-#else
-	    bcopy(proxyId, cxp->contextProxyContext, proxyIdLen * sizeof(oid));
-#endif
 	    cxp->contextProxyContextLen = proxyIdLen;
 	    cxp->contextStorageType = 2;
 	    cxp->contextStatus = rp->contextStatus = CONTEXTACTIVE;

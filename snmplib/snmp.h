@@ -75,6 +75,8 @@ SOFTWARE.
 #define SNMP_TRAP_EGPNEIGHBORLOSS	(0x5)
 #define SNMP_TRAP_ENTERPRISESPECIFIC	(0x6)
 
-void xdump();
-u_char *snmp_parse_var_op();
-u_char *snmp_build_var_op();
+void xdump __P((u_char *, int, char *));
+u_char *snmp_parse_var_op __P((u_char *, oid *, int *, u_char *, int *,
+                               u_char **, int *));
+u_char *snmp_build_var_op __P((u_char *, oid *, int *, u_char, int, u_char *,
+                               int *));

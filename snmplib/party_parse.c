@@ -1,5 +1,10 @@
 #include <config.h>
 
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#endif
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
@@ -23,7 +28,12 @@
 /* needed for htonl funcs */
 #include <netinet/in.h>
 #endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
 #include "asn1.h"
+#include "mib.h"
 #include "party.h"
 #include "system.h"
 
@@ -41,6 +51,9 @@
 #if  0
 static oid noProxy[] = {1, 3, 6, 1, 2, 1, 20, 1, 3, 1};
 #endif
+
+static void error_exit __P((char *, int, char *));
+int update_clock __P((char *, int, u_long));
 
 static void error_exit(str, linenumber, filename)
     char *str;
@@ -265,30 +278,17 @@ read_party_database(filename)
 	    pp->partyTDomain = rp->partyTDomain = domain;
 	    addr = htonl(addr);
 	    port = htons(port);
-#ifdef SVR4
 	    memmove(pp->partyTAddress, (char *)&addr, sizeof(addr));
 	    memmove(pp->partyTAddress + 4, (char *)&port, sizeof(port));
 	    memmove(rp->partyTAddress, pp->partyTAddress, 6);
-#else
-	    bcopy((char *)&addr, pp->partyTAddress, sizeof(addr));
-	    bcopy((char *)&port, pp->partyTAddress + 4, sizeof(port));
-	    bcopy(pp->partyTAddress, rp->partyTAddress, 6);
-#endif
 	    pp->partyTAddressLen = rp->partyTAddressLen = 6;
 #if 0
 /* nuke this??? XXX */
 	    if (proxy == NOPROXY){
-#ifdef SVR4
 		memmove((char *)pp->partyProxyFor, (char *)noProxy,
 		      sizeof(noProxy));
 		memmove((char *)rp->partyProxyFor, (char *)noProxy,
 		      sizeof(noProxy));
-#else
-		bcopy((char *)noProxy, (char *)pp->partyProxyFor,
-		      sizeof(noProxy));
-		bcopy((char *)noProxy, (char *)rp->partyProxyFor,
-		      sizeof(noProxy));
-#endif
 		pp->partyProxyForLen = rp->partyProxyForLen =
 		    sizeof(noProxy)/sizeof(oid);
 	    } else {
@@ -300,40 +300,22 @@ read_party_database(filename)
 	    pp->partyAuthClock = rp->partyAuthClock = clock;
 	    pp->tv.tv_sec = pp->partyAuthClock;
 	    if ((pp->partyAuthPublicLen = authPublicLength) != 0){
-#ifdef SVR4
 		memmove(pp->partyAuthPublic, (char *)authPublic,
 		      authPublicLength);
 		memmove(rp->partyAuthPublic, (char *)authPublic,
 		      authPublicLength);
-#else
-		bcopy((char *)authPublic, pp->partyAuthPublic,
-		      authPublicLength);
-		bcopy((char *)authPublic, rp->partyAuthPublic,
-		      authPublicLength);
-#endif
 	    }
 	    pp->partyAuthLifetime = rp->partyAuthLifetime = lifetime;
 	    pp->partyPrivProtocol = rp->partyPrivProtocol = priv;
 	    if ((pp->partyPrivPublicLen = privPublicLength) != 0){
-#ifdef SVR4
 		memmove(pp->partyPrivPublic, (char *)privPublic,
 		      privPublicLength);
 		memmove(rp->partyPrivPublic, (char *)privPublic,
 		      privPublicLength);
-#else
-		bcopy((char *)privPublic, pp->partyPrivPublic,
-		      privPublicLength);
-		bcopy((char *)privPublic, rp->partyPrivPublic,
-		      privPublicLength);
-#endif
 	    }
 	    myaddr = get_myaddr();
 	    if ((rp->partyTDomain == DOMAINSNMPUDP)
-#ifdef SVR4
 		&& !memcmp((char *)&myaddr, rp->partyTAddress, 4)){
-#else
-		&& !bcmp((char *)&myaddr, rp->partyTAddress, 4)){
-#endif
 		/* party is local */
 		/* 1500 should be constant in snmp_impl.h */
 		pp->partyMaxMessageSize = rp->partyMaxMessageSize = 1500;
@@ -343,22 +325,12 @@ read_party_database(filename)
 		    rp->partyMaxMessageSize = maxmessagesize;
 		pp->partyLocal = 2; /* FALSE */
 	    }
-#ifdef SVR4
 	    memmove(pp->partyAuthPrivate, authPrivate, 16);
 	    memmove(rp->partyAuthPrivate, authPrivate, 16);
-#else
-	    bcopy(authPrivate, pp->partyAuthPrivate, 16);
-	    bcopy(authPrivate, rp->partyAuthPrivate, 16);
-#endif
 	    pp->partyAuthPrivateLen =
 		rp->partyAuthPrivateLen = 16;
-#ifdef SVR4
 	    memmove(pp->partyPrivPrivate, privPrivate, 16);
 	    memmove(rp->partyPrivPrivate, privPrivate, 16);
-#else
-	    bcopy(privPrivate, pp->partyPrivPrivate, 16);
-	    bcopy(privPrivate, rp->partyPrivPrivate, 16);
-#endif
 	    pp->partyPrivPrivateLen =
 		rp->partyPrivPrivateLen = 16;
 	    pp->partyStorageType = 2; /* volatile */

@@ -17,10 +17,6 @@
 
 char *VersionInfo="3.1.4.pre2";
 
-int clear_cache();
-int update_hook();
-int restart_hook();
-
 unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
@@ -32,7 +28,7 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
 /* IN - TRUE if an exact match was requested. */
     int			*var_len;
 /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)();
+    int			(**write_method) __P((int, u_char *,u_char, int, u_char *, oid *, int));
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 

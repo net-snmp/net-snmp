@@ -3,6 +3,8 @@
  *
  */
 
+#include <ctype.h>
+
 #include "../common_header.h"
 #include "system.h"
 
@@ -22,8 +24,9 @@ char sysLocation[128] = SYS_LOC;
 oid version_id[] = {EXTENSIBLEMIB,AGENTID,OSTYPE};
 int version_id_len = sizeof(version_id)/sizeof(version_id[0]);
 
-int writeVersion();
-int writeSystem();
+int writeVersion __P((int, u_char *,u_char, int, u_char *,oid*, int));
+int writeSystem __P((int, u_char *,u_char, int, u_char *,oid*, int));
+int header_system __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
 
 	/*********************
@@ -42,7 +45,7 @@ header_system(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
 #define SYSTEM_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -81,7 +84,7 @@ var_system(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
 {
     if (header_system(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;

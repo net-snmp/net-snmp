@@ -57,21 +57,24 @@ SOFTWARE.
 #include <arpa/inet.h>
 #endif
 
-#include "snmp.h"
-#include "mib.h"
 #include "asn1.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
 #include "snmp_client.h"
+#include "mib.h"
+#include "snmp.h"
+#include "snmp_impl.h"
 #include "party.h"
 #include "context.h"
 #include "view.h"
 #include "acl.h"
 
+int main __P((int, char **));
+
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
 void
-usage(){
+usage __P((void))
+{
     fprintf(stderr, "Usage: snmpwalk -v 1 [-q] hostname community [objectID]      or:\n");
     fprintf(stderr, "Usage: snmpwalk [-v 2] [-q] hostname noAuth [objectID]       or:\n");
     fprintf(stderr, "Usage: snmpwalk [-v 2] [-q] hostname srcParty dstParty context [objectID]\n");
@@ -99,7 +102,7 @@ main(argc, argv)
     int dest_port = 0;
     oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
     int srclen = 0, dstlen = 0, contextlen = 0;
-    u_long	srcclock, dstclock;
+    u_long	srcclock = 0, dstclock = 0;
     int clock_flag = 0;
     struct partyEntry *pp;
     struct contextEntry *cxp;
@@ -283,7 +286,7 @@ main(argc, argv)
 	}
     }
 
-    memset((char *)&session, NULL, sizeof(struct snmp_session));
+    memset(&session, 0, sizeof(struct snmp_session));
     session.peername = hostname;
     if (port_flag)
 	session.remote_port = dest_port;

@@ -44,11 +44,11 @@ struct aclEntry {
     struct aclEntry *next;
 };
 
-u_char *var_acl();
-int write_acl();
+
+void acl_destroyEntry __P((int, int, int));
 
 struct aclEntry *
-acl_getEntry(/* int target, int subject, int resources */);
+acl_getEntry __P((int target, int subject, int resources ));
 /*
  * Returns a pointer to the aclEntry with the
  * same target and subject and resources.
@@ -56,7 +56,7 @@ acl_getEntry(/* int target, int subject, int resources */);
  */
 
 void
-acl_scanInit();
+acl_scanInit __P((void));
 /*
  * Initialized the scan routines so that they will begin at the
  * beginning of the list of aclEntries.
@@ -65,7 +65,7 @@ acl_scanInit();
 
 
 struct aclEntry *
-acl_scanNext();
+acl_scanNext __P((void));
 /*
  * Returns a pointer to the next aclEntry.
  * These entries are returned in no particular order,
@@ -76,11 +76,11 @@ acl_scanNext();
  */
 
 struct aclEntry *
-acl_createEntry(/* int target, int subject, int resources */);
+acl_createEntry __P((int target, int subject, int resources));
 /*
  * Creates a aclEntry with the given index
  * and returns a pointer to it.
  * The status of this entry is created as invalid.
  */
 
-int read_acl_database();
+int read_acl_database __P((char *));

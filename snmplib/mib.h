@@ -253,11 +253,16 @@ struct	mib_egpNeighEntry {
 #define MIB_EGPNEIGHSTATE_UP		4
 #define MIB_EGPNEIGHSTATE_CEASE		5
 
-void print_mib();
-int read_objid();
-void init_mib();
-void print_variable();
-void print_objid();
-char *sprint_objid();
-void print_description();
-int get_node();
+struct variable_list;
+
+void print_mib __P((FILE *));
+int read_objid __P((char *, oid *, int *));
+void init_mib __P((void));
+void print_variable __P((oid *, int, struct variable_list *));
+void sprint_variable __P((char *, oid *, int, struct variable_list *));
+void print_value __P((oid *, int, struct variable_list *));
+void sprint_value __P((char *, oid *, int, struct variable_list *));
+void print_objid __P((oid *, int));
+char *sprint_objid __P((char *, oid *, int));
+void print_description __P((oid *, int));
+int get_node __P((char *, oid *, int *));

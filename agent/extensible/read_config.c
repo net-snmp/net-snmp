@@ -26,15 +26,11 @@
 #include <malloc.h>
 #endif
 #include <math.h>
-#include <snmp.h>
 #include <asn1.h>
 #include <snmp_impl.h>
+#include <snmp.h>
 #include <ctype.h>
 #include "extproto.h"
-
-char *skip_white();
-char *skip_not_white();
-void copy_word();
 
 /* communities from agent/snmp_agent.c */
 extern char communities[NUM_COMMUNITIES][COMMUNITY_MAX_LEN];
@@ -188,7 +184,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
 #if HAVE_GETMNTENT
 #if HAVE_SETMNTENT
               mntfp = setmntent(ETC_MNTTAB, "r");
-	      disk[*numdisks].device[0] = NULL;
+	      disk[*numdisks].device[0] = 0;
               while ((mntent = getmntent (mntfp)))
 		if (strcmp (disk[*numdisks].path, mntent->mnt_dir) == 0) {
                   copy_word (mntent->mnt_fsname, disk[*numdisks].device);
@@ -202,7 +198,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
                 }
 #endif
               endmntent(mntfp);
-              if (disk[*numdisks].device[0] != NULL) {
+              if (disk[*numdisks].device[0] != 0) {
                 /* dummy clause for else below */
                 *numdisks += 1;  /* but inc numdisks here after test */
               }

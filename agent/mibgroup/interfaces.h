@@ -5,9 +5,15 @@
 #ifndef _MIBGROUP_INTERFACES_H
 #define _MIBGROUP_INTERFACES_H
 
-extern void	init_interfaces();
-extern u_char	*var_interfaces();
-extern u_char	*var_ifEntry();
+struct in_ifaddr;
+struct ifnet;
+
+int Interface_Scan_Get_Count __P((void));
+int Interface_Index_By_Name __P((char *, int));
+
+extern void	init_interfaces __P((void));
+extern u_char	*var_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
+extern u_char	*var_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 #define IFNUMBER        0
 #define IFINDEX         1

@@ -1,12 +1,15 @@
 /* include file for event module */
 
-extern int eventFreeSpace();
-extern u_char *var_eventnextindex();
-extern u_char *var_eventtab();
-extern u_char *var_eventnotifyvars();
-extern u_char *var_eventnotifytab();
-extern void eventGenerate();
-extern void eventTimer();
+struct variable;
+struct timeval;
+
+extern int eventFreeSpace __P((void));
+extern u_char *var_eventnextindex __P((struct variable*, oid *, int *,int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern u_char *var_eventtab __P((struct variable*, oid *, int *,int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern u_char *var_eventnotifyvars __P((struct variable*, oid *, int *,int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern u_char *var_eventnotifytab __P((struct variable*, oid *, int *,int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern void eventGenerate __P((int, int, void *));
+extern void eventTimer __P((struct timeval *));
 
 #define MAX_COMMUNITY_LEN 128
 

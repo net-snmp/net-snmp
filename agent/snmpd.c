@@ -80,11 +80,11 @@ typedef long    fd_mask;
 #define FD_ZERO(p)      memset((p), 0, sizeof(*(p)))
 #endif
 
-#include "snmp.h"
 #include "asn1.h"
 #include "snmp_impl.h"
 #include "system.h"
 #include "snmp_api.h"
+#include "snmp.h"
 #include "m2m.h"
 #include "party.h"
 #include "alarm.h"
@@ -96,6 +96,7 @@ typedef long    fd_mask;
 #include "mibgroup/snmp.h"
 #include "extensible/extproto.h"
 #include "snmp_client.h"
+#include "snmpd.h"
 
 extern int  errno;
 int snmp_dump_packet = 0;
@@ -117,11 +118,18 @@ struct addrCache {
 static struct addrCache addrCache[ADDRCACHE];
 static int lastAddrAge = 0;
 
-extern int snmp_agent_parse();
-extern void init_snmp();
+extern void init_snmp __P((void));
 
-int receive();
-int snmp_read_packet();
+int receive __P((int *, int));
+int snmp_read_packet __P((int));
+char *sprintf_stamp __P((time_t *));
+int agent_party_init __P((u_long, u_short, char *));
+struct snmp_session *create_v1_trap_session __P((struct snmp_session*, char *, char *));
+void send_v1_trap __P((struct snmp_session *, int));
+char *reverse_bytes __P((char *, int));
+void usage __P((char *));
+int main __P((int, char **));
+int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
 
 char *sprintf_stamp (now)
     time_t *now;
@@ -405,7 +413,7 @@ agent_party_init(myaddr, dest_port, view)
 
 static struct snmp_session trap_session, *trap_sesp = NULL;
 
-struct snmp_session *create_trap_session (ses, sink, com)
+struct snmp_session *create_v1_trap_session (ses, sink, com)
     struct snmp_session *ses;
     char *sink, *com;
 {
@@ -427,7 +435,7 @@ struct snmp_session *create_trap_session (ses, sink, com)
 }
 
 void
-send_trap (ss, trap)
+send_v1_trap (ss, trap)
     struct snmp_session *ss;
     int trap;
 {   struct snmp_pdu *pdu;
@@ -451,14 +459,14 @@ send_easy_trap (trap)
 {
     if ((snmp_enableauthentraps == 1 || trap != 4) && snmp_trapsink != NULL) {
         if (trap_sesp == NULL) {
-	    trap_sesp = create_trap_session (&trap_session, snmp_trapsink,
+	    trap_sesp = create_v1_trap_session (&trap_session, snmp_trapsink,
 	                                     snmp_trapcommunity);
 	    if (trap_sesp == NULL) {
 		snmp_enableauthentraps = 2;
 		return;
 	    }
 	}
-	send_trap (trap_sesp, trap);
+	send_v1_trap (trap_sesp, trap);
     }
 }
   

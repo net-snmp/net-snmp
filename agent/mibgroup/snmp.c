@@ -74,7 +74,7 @@ header_snmp(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 #define SNMP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -115,7 +115,7 @@ var_snmp(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     if (header_snmp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
@@ -232,7 +232,8 @@ write_snmp (action, var_val, var_val_type, var_val_len, statP, name, name_len)
    oid      *name;
    int      name_len;
 {
-    int bigsize = 4, intval;
+    int bigsize = 4;
+    long intval;
 
     if (var_val_type != INTEGER){
 	ERROR("not integer");

@@ -51,7 +51,7 @@ static void linux_read_ip_stat ();
 	 *
 	 *********************/
 
-extern void init_routes();
+extern void init_routes __P((void));
 
 void	init_ip( )
 {
@@ -70,7 +70,7 @@ header_ip(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 #define IP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -114,7 +114,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     static struct ipstat ipstat;
 #ifdef hpux
@@ -270,7 +270,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     static struct ip_mib ipstat;
 
@@ -320,7 +320,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     register int	*length;    /* IN/OUT - length of input and output oid's */
     int			exact;	    /* IN - TRUE if an exact match was requested. */
     int			*var_len;   /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     /*
      * object identifier is of form:
@@ -446,7 +446,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     mib2_ip_t ipstat;
     u_char *ret = (u_char *)&long_return;	/* Successful completion */
@@ -543,7 +543,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     register int	*length;    /* IN/OUT - length of input and output oid's */
     int			exact;	    /* IN - TRUE if an exact match was requested. */
     int			*var_len;   /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     /*
      * object identifier is of form:
