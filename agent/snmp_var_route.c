@@ -222,7 +222,7 @@ int ret;
 #endif
 }
 
-#if defined(mips)
+#if defined(mips) || defined(hpux)
 
 static Route_Scan_Reload()
 {
