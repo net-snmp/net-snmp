@@ -21,12 +21,16 @@ usage()
 
 #set -x
 
-if [ ! -f nsb-functions ];then
+
+if [ -f nsb-functions ];then
+   source nsb-functions
+elif [ -f $HOME/bin/nsb-functions ]; then
+   source $HOME/bin/nsb-functions
+else
    echo "Cannot find nsb-functions"
    exit 1
 fi
 
-source nsb-functions
 
 ########################################################################
 ########################################################################
@@ -67,6 +71,6 @@ fi
 
 ########################################################################
 ########################################################################
-
+fBUILDD=$BUILDD/`nsb-sysname`
 nsb-prompt "press enter to build $SRCD in $BUILDD, and install in $INSTALLD"
-nsb-build $VERSION $SRCD $BUILDD/`nsb-sysname` $INSTALLD
+nsb-build $VERSION $SRCD $BUILDD $INSTALLD
