@@ -738,6 +738,7 @@ realloc_handle_trap_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
 	  free(obuf);
 	}
 	free(temp_buf);
+	return 0;
       }
 
       ptr = strrchr((char *)obuf, '.');
