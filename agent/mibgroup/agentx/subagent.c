@@ -431,12 +431,16 @@ subagent_pre_init( void )
 
     snmp_sess_init( &sess );
     sess.version = AGENTX_VERSION_1;
-    sess.peername = strdup(AGENTX_SOCKET);
     sess.retries = SNMP_DEFAULT_RETRIES;
     sess.timeout = SNMP_DEFAULT_TIMEOUT;
     sess.flags  |= SNMP_FLAGS_STREAM_SOCKET;
-     
-    sess.local_port = 0;	/* client */
+    if ( ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET))
+	sess.peername = strdup(ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET));
+    else
+	sess.peername = strdup(AGENTX_SOCKET);
+ 
+    sess.local_port  = 0;		/* client */
+    sess.remote_port = AGENTX_PORT;	/* default port */
     sess.callback = handle_agentx_packet;
     sess.authenticator = NULL;
     main_session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build,

@@ -45,14 +45,28 @@ void init_master(void)
     DEBUGMSGTL(("agentx/master","initializing...\n"));
     snmp_sess_init( &sess );
     sess.version  = AGENTX_VERSION_1;
-    if (mkdirhier(AGENTX_SOCKET, AGENT_DIRECTORY_MODE, 1)) {
-        snmp_log(LOG_ERR, "Failed to create the directory for the agentX socket: %s\n",
-                 AGENTX_SOCKET);
-    }
-    sess.peername = strdup(AGENTX_SOCKET);
     sess.flags  |= SNMP_FLAGS_STREAM_SOCKET;
+    if ( ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET) )
+	sess.peername = strdup(ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET));
+    else
+	sess.peername = strdup(AGENTX_SOCKET);
 
-    sess.local_port = 1;         /* server */
+    if ( sess.peername[0] == '/' ) {
+			/*
+			 *  If this is a Unix pathname,
+			 *  try and create the directory first.
+			 */
+	if (mkdirhier(sess.peername, AGENT_DIRECTORY_MODE, 1)) {
+	    snmp_log(LOG_ERR,
+		"Failed to create the directory for the agentX socket: %s\n",
+                 sess.peername);
+	}
+    }
+			/*
+			 *  Otherwise, let 'snmp_open' interpret the string.
+			 */
+    sess.local_port  = AGENTX_PORT;         /* Indicate server & set default port */
+    sess.remote_port = 0;
     sess.callback = handle_master_agentx_packet;
     session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build,
                             agentx_check_packet );
