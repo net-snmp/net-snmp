@@ -7,13 +7,17 @@
 #include <machine/param.h>
 #include <sys/vmmeter.h>
 #include <sys/conf.h>
-#include <sys/swap.h>
 #include <sys/param.h>
+#ifdef HPUX
+#include <sys/swap.h>
 #include <sys/fs.h>
+#include <mtab.h>
+#else
+#include <fstab.h>
+#endif
 #include <sys/stat.h>
 #include <errno.h>
 #include <fstab.h>
-#include <mtab.h>
 #include "../../snmplib/asn1.h"
 #include "../../snmplib/snmp_impl.h"
 #include "../snmp_vars.h"
@@ -23,13 +27,16 @@
 
 #include "wes.h"
 
+struct myproc *get_proc_instance();
+struct extensible *get_exten_instance();
+
 static struct myproc *procwatch=NULL;
 static struct exstensible *extens=NULL;
 int minimumswap;
 int numprocs, numextens;
 static int pageshift;           /* log base 2 of the pagesize */
 
-unsigned char *checkmib(vp,name,length,exact,var_len,write_method,newname,max)
+int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
     register struct variable *vp;
     register oid	*name;
     register int	*length;
@@ -74,6 +81,7 @@ unsigned char *checkmib(vp,name,length,exact,var_len,write_method,newname,max)
   bcopy((char *)newname, (char *)name, (*length) * sizeof(oid));
   *write_method = 0;
   *var_len = sizeof(long);   /* default */
+  return(1);
 }
 
 unsigned char *var_wes_proc(vp, name, length, exact, var_len, write_method)
@@ -196,7 +204,6 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
         else
           shell_command(exten);
         return((u_char *) (&exten->result));
-        return((u_char *) (&long_ret));
       case ERRORMSG:   /* first line of text returned from the process */
         if (exten->type == EXECPROC)
           exec_command(exten);
@@ -209,6 +216,8 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
   }
   return NULL;
 }
+
+#ifdef HPUX
 
 #define pagetok(size) ((size) << pageshift)
 #define NL_TOTAL 0
@@ -377,8 +386,12 @@ unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
   }
 }
 
+#endif
+
 static int numdisks;
 struct diskpart disks[MAXDISKS];
+
+#ifdef HPUX
 
 unsigned char *var_wes_disk(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
@@ -475,6 +488,8 @@ unsigned char *var_wes_disk(vp, name, length, exact, var_len, write_method)
       return((u_char *) (errmsg));
   }
 }
+
+#endif
 
 #define NOERR 0
 #define LOCKDBROKE 1
@@ -598,10 +613,10 @@ init_wes() {
   int ret,pagesize,i;
 
   
-#ifdef mips
-  strcpy(extmp.command,"/bin/uname -m -n -r -s -v");
-#else
+#ifdef HPUX
   strcpy(extmp.command,"/bin/uname -m -n -r -s -v -i");
+#else 
+  strcpy(extmp.command,"/bin/uname -m -n -r -s -v");
 #endif
   /* setup defaults */
   extmp.type = EXECPROC;
@@ -629,6 +644,7 @@ init_wes() {
 
   /* nlist stuff */
 
+#ifdef HPUX
   if ((ret = nlist("/hp-ux",nl)) == -1) {
     ERROR("nlist");
     exit(1);
@@ -653,5 +669,6 @@ init_wes() {
     pagesize >>= 1;
   }
   pageshift -= 10;
+#endif
 }
 
