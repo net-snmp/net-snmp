@@ -30,7 +30,7 @@
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
 #endif
-#if HAVE_NET_IN_VAR_H
+#if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
 #if HAVE_NETINET_IN_VAR_H
