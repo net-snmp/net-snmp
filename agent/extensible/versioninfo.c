@@ -4,6 +4,8 @@
 #include "mibincl.h"
 #include "wes.h"
 
+static char *VersionInfo="Ext-2-3-1";
+
 unsigned char *var_wes_version(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
@@ -24,8 +26,8 @@ unsigned char *var_wes_version(vp, name, length, exact, var_len, write_method)
   register int interface;
   struct myproc *proc;
   long long_ret;
-  char errmsg[300];
-
+  char errmsg[300], *cptr;
+  time_t curtime;
 
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
     return(NULL);
@@ -34,12 +36,22 @@ unsigned char *var_wes_version(vp, name, length, exact, var_len, write_method)
     case MIBINDEX:
       long_ret = newname[8];
       return((u_char *) (&long_ret));
+    case VERTAG:
+      sprintf(errmsg,VersionInfo);
+      *var_len = strlen(errmsg);
+      return((u_char *) errmsg); 
     case VERDATE:
       sprintf(errmsg,"$Date$");
       *var_len = strlen(errmsg);
-      return((u_char *) errmsg);
+      return((u_char *) errmsg); 
     case VERCDATE:
-      sprintf(errmsg,ctime);
+#ifdef hpux
+      curtime = time();
+#else
+      curtime = time(NULL);
+#endif
+      cptr = ctime(&curtime);
+      sprintf(errmsg,cptr);
       *var_len = strlen(errmsg);
       return((u_char *) errmsg);
     case VERIDENT:

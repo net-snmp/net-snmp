@@ -69,6 +69,7 @@
 
 /* Version info mib */
 #define VERSIONMIBNUM 100
+#define VERTAG 2
 #define VERDATE 3
 #define VERCDATE 4
 #define VERIDENT 5

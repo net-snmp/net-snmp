@@ -66,6 +66,7 @@ struct variable2 wes_disk_variables[] = {
 
 struct variable2 wes_version_variables[] = {
   {MIBINDEX, INTEGER, RONLY, var_wes_version, 1, {MIBINDEX}},
+  {VERTAG, STRING, RONLY, var_wes_version, 1, {VERTAG}},
   {VERDATE, STRING, RONLY, var_wes_version, 1, {VERDATE}},
   {VERCDATE, STRING, RONLY, var_wes_version, 1, {VERCDATE}},
   {VERIDENT, STRING, RONLY, var_wes_version, 1, {VERIDENT}}
