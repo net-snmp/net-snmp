@@ -538,7 +538,7 @@ write_snmpNotifyFilterProfileRowStatus(int      action,
                /* row creation, so remove it again */
                hciptr =
                  header_complex_find_entry(snmpNotifyFilterProfileTableStorage,
-                                           StorageTmp);
+                                           StorageNew);
                StorageDel = (struct snmpNotifyFilterProfileTable_data *)
                  header_complex_extract_entry((struct header_complex_index **)&snmpNotifyFilterProfileTableStorage,
                                               hciptr);
