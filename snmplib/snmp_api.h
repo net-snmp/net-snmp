@@ -41,6 +41,14 @@ struct variable_list;
 struct timeval;
 struct synch_state;
 
+	/* Temporary fix to socket address definition problem */
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+
 typedef struct sockaddr  snmp_ipaddr;		/* was struct sockaddr_in */
 #define USM_AUTH_KU_LEN     32
 #define USM_PRIV_KU_LEN     32
