@@ -195,7 +195,11 @@ write_ucdDemoPublicString(
       return SNMP_ERR_WRONGLENGTH;
   }
   if (action == COMMIT) {
-      strcpy(publicString, var_val);
+      if (var_val_len != 0) {
+          strcpy(publicString, var_val);
+          publicString[var_val_len] = '\0';
+      } else
+          publicString[0] = '\0';
   }
   return SNMP_ERR_NOERROR;
 }
