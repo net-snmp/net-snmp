@@ -76,27 +76,11 @@ LIB32=link.exe -lib
 # Name "libsnmp - Win32 Debug"
 # Begin Source File
 
-SOURCE=..\..\snmplib\acl.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\acl_parse.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\snmplib\asn1.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\snmplib\callback.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\context.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\context_parse.c
 # End Source File
 # Begin Source File
 
@@ -129,14 +113,6 @@ SOURCE=..\..\snmplib\mib.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\parse.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\party.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\party_parse.c
 # End Source File
 # Begin Source File
 
@@ -189,10 +165,6 @@ SOURCE=..\..\snmplib\tools.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\vacm.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\snmplib\view.c
 # End Source File
 # End Target
 # End Project

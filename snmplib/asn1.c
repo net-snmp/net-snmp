@@ -159,7 +159,7 @@ asn_dparse_int(u_char *data,
 
     if ( action == DUMP_PACKET ) {
         printf("\t");
-	for ( i = 0 ; i < asn_length ; i++ )
+	for ( i = 0 ; i < (int)asn_length ; i++ )
 	     printf(" %.2x", *(bufp+i));
     }
 
@@ -234,7 +234,7 @@ asn_dparse_unsigned_int(u_char *data,
 
     if ( action == DUMP_PACKET ) {
 	printf("\t");
-	for ( i = 0 ; i < asn_length ; i++ )
+	for ( i = 0 ; i < (int)asn_length ; i++ )
 	     printf(" %.2x", *(bufp+i));
     }
 
@@ -440,10 +440,10 @@ asn_dparse_string(u_char *data,
     if ( action == DUMP_PACKET ) {
 	if ( asn_length != 0 )
 	    printf("\t");
-	for ( i = 0 ; i < asn_length ; i++ )
+	for ( i = 0 ; i < (int)asn_length ; i++ )
 	     printf(" %.2x", *(bufp+i));
 	printf("\t = %c", '"');
-	for ( i = 0 ; i < asn_length ; i++ )
+	for ( i = 0 ; i < (int)asn_length ; i++ )
 	     printf(" %c", *(bufp+i));
 	printf("%c\n", '"');
     }
@@ -813,7 +813,7 @@ asn_dparse_objid(u_char *data,
 
     if ( action == DUMP_PACKET ) {
 	printf("\t");
-	for ( i = 0 ; i < asn_length ; i++ )
+	for ( i = 0 ; i < (int)asn_length ; i++ )
 	     printf(" %.2x", *(bufp+i));
 	printf("\n");
     }
@@ -1114,7 +1114,7 @@ asn_dparse_bitstring(u_char *data,
 
     if ( action == DUMP_PACKET ) {
 	printf("\t");
-	for ( i = 0 ; i < asn_length ; i++ )
+	for ( i = 0 ; i < (int)asn_length ; i++ )
 	     printf(" %.2x", *(bufp+i));
 	printf("\n");
     }
@@ -1255,7 +1255,7 @@ asn_dparse_unsigned_int64(u_char *data,
 
     if ( action == DUMP_PACKET ) {
 	printf("\t");
-	for ( i = 0 ; i < asn_length ; i++ )
+	for ( i = 0 ; i < (int)asn_length ; i++ )
 	     printf(" %.2x", *(bufp+i));
     }
 
@@ -1470,7 +1470,7 @@ asn_dparse_signed_int64(u_char *data,
 
   if ( action == DUMP_PACKET ) {
 	printf("\t");
-	for ( i = 0 ; i < asn_length ; i++ )
+	for ( i = 0 ; i < (int)asn_length ; i++ )
 	     printf(" %.2x", *(bufp+i));
   }
 
@@ -1642,7 +1642,7 @@ asn_dparse_float(u_char *data,
 
     if ( action == DUMP_PACKET ) {
 	printf("\t");
-	for ( i = 0 ; i < asn_length ; i++ )
+	for ( i = 0 ; i < (int)asn_length ; i++ )
 	     printf(" %.2x", *(bufp+i));
 	printf("\t = %f\n", fu.longVal);
     }
@@ -1793,7 +1793,7 @@ asn_dparse_double(u_char *data,
 
     if ( action == DUMP_PACKET ) {
 	printf("\t");
-	for ( i = 0 ; i < asn_length ; i++ )
+	for ( i = 0 ; i < (int)asn_length ; i++ )
 	     printf(" %.2x", *(bufp+i));
 	printf("\t = %f\n", fu.doubleVal);
     }

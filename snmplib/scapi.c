@@ -60,6 +60,7 @@
 #include "scapi.h"
 #include "callback.h"
 #include "snmp_impl.h"
+#include "system.h"
 
 #include "transform_oids.h"
 

@@ -27,6 +27,7 @@
 #include "read_config.h"
 #include "default_store.h"
 #include "read_config.h"
+#include "system.h"
 
 struct ds_read_config *ds_configs = NULL;
 
