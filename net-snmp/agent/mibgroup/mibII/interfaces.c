@@ -336,8 +336,8 @@ header_ifEntry(struct variable *vp,
 {
 #define IFENTRY_NAME_LENGTH	10
     oid             newname[MAX_OID_LEN];
-    short           interface;
-    int             result, found = 0;
+    register int    interface;
+    int             result, count;
 
     DEBUGMSGTL(("mibII/interfaces", "var_ifEntry: "));
     DEBUGMSGOID(("mibII/interfaces", name, *length));
@@ -348,18 +348,16 @@ header_ifEntry(struct variable *vp,
     /*
      * find "next" interface 
      */
-    Interface_Scan_Init();
-    while (Interface_Scan_Next(&interface, NULL, NULL, NULL)) {
+     count = Interface_Scan_Get_Count();
+     for (interface = 1; interface <= count; interface++) {
         newname[IFENTRY_NAME_LENGTH] = (oid) interface;
         result =
             snmp_oid_compare(name, *length, newname,
                              (int) vp->namelen + 1);
-        if ((exact && (result == 0)) || (!exact && (result < 0))) {
-            found = 1;
+        if ((exact && (result == 0)) || (!exact && (result < 0)))
             break;
-        }
     }
-    if (0 == found) {
+    if (interface > count) {
         DEBUGMSGTL(("mibII/interfaces", "... index out of range\n"));
         return MATCH_FAILED;
     }
