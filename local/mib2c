@@ -167,7 +167,9 @@ close(DOTC);
 print "  depth: $depth\n";
 print "  Number of Lines Created:\n";
 system("wc -l $outputName.c $outputName.h");
-print "Done.\n";
+print "Done.\n\n";
+print "NOTE: the code that has been created for you is merely a starting template.\n";
+print "      You will have to modify it in order to make it work properly.\n";
 
 #============================================
 #
