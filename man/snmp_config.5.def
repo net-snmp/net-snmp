@@ -13,8 +13,8 @@ First off, there are numerous places that configuration files can be
 found and read from.  By default, the applications look for
 configuration files in the following 3 directories, in order:
 DATADIR/snmp, LIBDIR/snmp, and $HOME/.snmp.  In each of these
-directories, it looks for files with the extension of both .conf
-and .local.conf (reading the second on last).  In this manner, there are 6 
+directories, it looks for files with the extension of both conf
+and local.conf (reading the second on last).  In this manner, there are 6 
 default places a configuration file can exist for any given
 configuration file type.
 .PP
