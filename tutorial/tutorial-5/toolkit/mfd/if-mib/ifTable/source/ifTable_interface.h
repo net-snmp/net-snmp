@@ -63,6 +63,11 @@ extern          "C" {
     int             ifTable_index_from_oid(netsnmp_index * oid_idx,
                                            ifTable_mib_index * mib_idx);
 
+    /*
+     * access to certain internals. use with caution!
+     */
+    void            ifTable_valid_columns_set(netsnmp_column_info * vc);
+
 
 #ifdef __cplusplus
 };

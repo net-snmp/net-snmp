@@ -267,6 +267,12 @@ _ifTable_initialize_interface(ifTable_registration_ptr reg_ptr,
     netsnmp_register_table(reginfo, tbl_info);
 }
 
+void
+ifTable_valid_columns_set(netsnmp_column_info * vc)
+{
+    ifTable_if_ctx.tbl_info.valid_columns = vc;
+}
+
 /**
  * @internal
  * convert the index component stored in the context to an oid
