@@ -156,7 +156,7 @@ AGENT EXTENSIBILITY
   re-run configure and re-compile.  No modification of the distributed
   source files are necessary.  See the following files in the
   agent/mibgroup directory for details and examples: README,
-  examples/wombat.c, examples/wombat.h, examples/example.c,
+  examples/example.c,
   examples/example.h.  Also, see the local/mib2c program and its
   README file for help in turning a textual mib description into a C
   code template.
@@ -206,7 +206,7 @@ CLOSING
 
   We love patches.  Send some to us!  But before you do, please see
   the 'PORTING' file for information on helping us out with the
-  process of integrating your patches (regardless of weather its a new
+  process of integrating your patches (regardless of whether its a new
   feature implementation or a new port).
 
   Also, We're interested if anyone actually uses/likes/hates/whatever
