@@ -20,6 +20,7 @@
 #define LEAVE goto labelFIN
 #define FINALLY do { \
 labelFIN: \
+	; \
 } while(0); if(1)
 
 #else
