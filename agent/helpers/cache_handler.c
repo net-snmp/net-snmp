@@ -15,10 +15,8 @@
 #include <dmalloc.h>
 #endif
 
-netsnmp_cache  *cache_head = NULL;
-long            caching_enabled = 1;
-long            cache_default_timeout = 5;      /* in seconds */
-int             cache_outstanding_valid = 0;
+static netsnmp_cache  *cache_head = NULL;
+static int             cache_outstanding_valid = 0;
 
 #define CACHE_RELEASE_FREQUENCY 60      /* Check for expired caches every 60s */
 
@@ -34,6 +32,85 @@ void            release_cached_resources(unsigned int regNo,
  *  @{
  */
 
+/** get cache head
+ *
+ * unadvertised function to get cache head. You really should not
+ * do this, since the internal storage mechanism might change.
+ */
+netsnmp_cache *
+netsnmp_cache_get_head(void)
+{
+    return cache_head;
+}
+
+/** find existing cache
+ */
+netsnmp_cache *
+netsnmp_cache_find_by_oid(oid * rootoid, int rootoid_len)
+{
+    netsnmp_cache  *cache;
+
+    for (cache = cache_head; cache; cache = cache->next) {
+        if (0 == netsnmp_oid_equals(cache->rootoid, cache->rootoid_len,
+                                    rootoid, rootoid_len))
+            return cache;
+    }
+    
+    return NULL;
+}
+
+/** returns a cache
+ */
+netsnmp_cache *
+netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
+                     NetsnmpCacheFree * free_hook,
+                     oid * rootoid, int rootoid_len)
+{
+    netsnmp_cache  *cache = NULL;
+
+    cache = SNMP_MALLOC_TYPEDEF(netsnmp_cache);
+    if (NULL == cache) {
+        snmp_log(LOG_ERR,"malloc error in netsnmp_cache_get\n");
+        return NULL;
+    }
+    cache->timeout = timeout;
+    cache->load_cache = load_hook;
+    cache->free_cache = free_hook;
+    cache->enabled = 1;
+    
+    /*
+     * Add the registered OID information, and tack
+     * this onto the list for cache SNMP management
+     *
+     * Note that this list is not ordered.
+     *    table_iterator rules again!
+     */
+    cache->rootoid = snmp_duplicate_objid(rootoid, rootoid_len);
+    cache->rootoid_len = rootoid_len;
+    cache->next = cache_head;
+    if (cache_head)
+        cache_head->prev = cache;
+    cache_head = cache;
+
+    return cache;
+}
+
+/** returns a cache handler that can be injected into a given handler chain.  
+ */
+netsnmp_mib_handler *
+netsnmp_cache_handler_get(netsnmp_cache* cache)
+{
+    netsnmp_mib_handler *ret = NULL;
+
+    ret = netsnmp_create_handler("cache_handler",
+                                 netsnmp_cache_helper_handler);
+    if (ret) {
+        ret->flags |= MIB_HANDLER_AUTO_NEXT;
+        ret->myvoid = (void *) cache;
+    }
+    return ret;
+}
+
 /** returns a cache handler that can be injected into a given handler chain.  
  */
 netsnmp_mib_handler *
@@ -47,30 +124,24 @@ netsnmp_get_cache_handler(int timeout, NetsnmpCacheLoad * load_hook,
     ret = netsnmp_create_handler("cache_handler",
                                  netsnmp_cache_helper_handler);
     if (ret) {
-        cache = SNMP_MALLOC_TYPEDEF(netsnmp_cache);
-        if (cache) {
-            cache->timeout = timeout;
-            cache->load_cache = load_hook;
-            cache->free_cache = free_hook;
-            cache->enabled = 1;
-
-            /*
-             * Add the registered OID information, and tack
-             * this onto the list for cache SNMP management
-             *
-             * Note that this list is not ordered.
-             *    table_iterator rules again!
-             */
-            cache->rootoid = snmp_duplicate_objid(rootoid, rootoid_len);
-            cache->rootoid_len = rootoid_len;
-            cache->next = cache_head;
-            if (cache_head)
-                cache_head->prev = cache;
-            cache_head = cache;
-        }
+        cache = netsnmp_cache_create(timeout, load_hook, free_hook,
+                                     rootoid, rootoid_len);
         ret->myvoid = (void *) cache;
     }
     return ret;
+}
+
+/** functionally the same as calling netsnmp_register_handler() but also
+ * injects a cache handler at the same time for you. */
+int
+netsnmp_cache_handler_register(netsnmp_handler_registration * reginfo,
+                               netsnmp_cache* cache)
+{
+    netsnmp_mib_handler *handler = NULL;
+    handler = netsnmp_cache_handler_get(cache);
+
+    netsnmp_inject_handler(reginfo, handler);
+    return netsnmp_register_handler(reginfo);
 }
 
 /** functionally the same as calling netsnmp_register_handler() but also
@@ -121,11 +192,19 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
                  reginfo->rootoid_len));
 
     cache = (netsnmp_cache *) handler->myvoid;
-    if (!caching_enabled || !cache || !cache->enabled) {
-        DEBUGMSGTL(("helper:cache_handler", "caching disabled, "
-                    "cache not found or cache is disabled"));
-        goto done;
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_NO_CACHING) ||
+        !cache || !cache->enabled) {
+        DEBUGMSG(("helper:cache_handler", " caching disabled, "
+                    "cache not found or cache is disabled\n"));
+        return SNMP_ERR_NOERROR;
     }
+
+    /*
+     * only touch cache once per pdu request
+     */
+    if(cache->valid && netsnmp_agent_get_list_data(reqinfo, CACHE_NAME))
+        return SNMP_ERR_NOERROR;
 
     switch (reqinfo->mode) {
 
@@ -137,13 +216,14 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
          */
         cache_timeout = cache->timeout;
         if (cache_timeout == 0)
-            cache_timeout = cache_default_timeout;
+            cache_timeout = netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                               NETSNMP_DS_AGENT_CACHE_TIMEOUT);
         if (!cache->valid || !cache->timestamp ||
             atime_ready(cache->timestamp, 1000 * cache_timeout)) {
             /*
              * If we've got a valid cache, then release it before reloading
              */
-            if (cache->valid) {
+            if (cache->valid && cache->free_cache) {
                 cache->free_cache(cache, cache->magic);
                 cache->valid = 0;
             }
@@ -151,7 +231,8 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
             if (ret < 0) {
                 DEBUGMSG(("helper:cache_handler", " load failed (%d)\n",
                           ret));
-                goto done;      /* XXX - or return ? */
+                cache->valid = 0;
+                return SNMP_ERR_NOERROR;
             }
             cache->valid = 1;
 
@@ -202,13 +283,17 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
                  reqinfo->mode);
     }
 
-  done:
-    return netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
+    return SNMP_ERR_NOERROR;
 }
 
 
 
 /** run regularly to automatically release cached resources.
+ * xxx - method to prevent cache from expiring while a request
+ *     is being processed (e.g. delegated request). proposal:
+ *     set a flag, which would be cleared when request finished
+ *     (which could be acomplished by a dummy data list item in
+ *     agent req info & custom free function).
  */
 void
 release_cached_resources(unsigned int regNo, void *clientargs)
@@ -228,7 +313,9 @@ release_cached_resources(unsigned int regNo, void *clientargs)
              */
             cache_timeout = cache->timeout;
             if (cache_timeout == 0)
-                cache_timeout = cache_default_timeout;
+                cache_timeout =
+                    netsnmp_ds_get_int(NETSNMP_DS_APPLICATION_ID,
+                                       NETSNMP_DS_AGENT_CACHE_TIMEOUT);
             if (!cache->timestamp ||
                 atime_ready(cache->timestamp, 1000 * cache_timeout)) {
                 cache->free_cache(cache, cache->magic);

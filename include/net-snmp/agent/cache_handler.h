@@ -1,5 +1,5 @@
-#ifndef CACHE_H
-#define CACHE_H
+#ifndef NETSNMP_CACHE_HANDLER_H
+#define NETSNMP_CACHE_HANDLER_H
 
 /*
  * This caching helper provides a generalised (SNMP-manageable) caching
@@ -55,7 +55,18 @@ extern          "C" {
 
     Netsnmp_Node_Handler netsnmp_cache_helper_handler;
 
+    netsnmp_cache *
+    netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
+                         NetsnmpCacheFree * free_hook,
+                         oid * rootoid, int rootoid_len);
+    netsnmp_mib_handler *
+    netsnmp_cache_handler_get(netsnmp_cache* cache);
+
+    netsnmp_cache * netsnmp_cache_find_by_oid(oid * rootoid,
+                                              int rootoid_len);
+
+
 #ifdef __cplusplus
 };
 #endif
-#endif
+#endif /* NETSNMP_CACHE_HANDLER_H */
