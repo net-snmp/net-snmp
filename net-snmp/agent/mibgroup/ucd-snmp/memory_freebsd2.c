@@ -141,7 +141,6 @@ void swapmode(void)
 
 #define NSWDEV_SYMBOL     "nswdev"
 #define DMMAX_SYMBOL      "dmmax"
-#define SWAPLIST_SYMBOL   "swaplist"
 #define SWDEVT_SYMBOL     "swdevt"
 
 void swapmode(void)
@@ -151,7 +150,6 @@ void swapmode(void)
     int i, idiv, n;
     struct swdevt *sw;
     long blocksize;
-    struct rlist *swaplist;
     static kvm_t *kd = NULL;
     struct kvm_swap kswap[16];
 
@@ -160,7 +158,6 @@ void swapmode(void)
 
     auto_nlist(NSWDEV_SYMBOL, (char *)&nswdev, sizeof (nswdev));
     auto_nlist(DMMAX_SYMBOL, (char *)&dmmax, sizeof (dmmax));
-    auto_nlist(SWAPLIST_SYMBOL, (char *)&swaplist, sizeof (swaplist));
 
     sw = (struct swdevt *)malloc(nswdev * sizeof(*sw));
     if (sw == NULL) return;
