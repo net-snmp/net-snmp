@@ -14,7 +14,9 @@
 #if HAVE_SYS_VMMETER_H
 #include <sys/vmmeter.h>
 #endif
+#if HAVE_SYS_CONF_H
 #include <sys/conf.h>
+#endif
 #include <sys/param.h>
 #if HAVE_SYS_SWAP_H
 #include <sys/swap.h>
