@@ -264,24 +264,37 @@ sub oidlength {
 # Mib components, $var must first expand to a mib node name:
 #
 #   $var.uc            -- all upper case version of $var
-#   $var.objectID      -- dotted full OID
-#   $var.commaoid      -- comma separated OID for array init
-#   $var.subid         -- last number component of oid
+#
+#   $var.objectID      -- dotted, fully-qualified, and numeric OID
+#   $var.commaoid      -- comma separated numeric OID for array initialization
 #   $var.oidlength     -- length of the oid
-#   $var.perltype      -- node's perl SYNTAX
-#   $var.type          -- node's ASN_XXX type
+#   $var.subid         -- last number component of oid
+#   $var.module        -- MIB name that the object comes from
+#   $var.parent        -- contains the label of the parent node of $var.
+#
+#   $var.isscalar      -- returns 1 if var contains the name of a scalar
+#   $var.iscolumn      -- returns 1 if var contains the name of a column
+#   $var.children      -- returns 1 if var has children
+#
+#   $var.perltype      -- node's perl SYNTAX ($SNMP::MIB{node}{'syntax'})
+#   $var.type          -- node's ASN_XXX type (Net-SNMP specific #define)
+#   $var.decl          -- C data type (char, u_long, ...)
+#
+#   $var.readable      -- 1 if it's readable, 0 if not
 #   $var.settable      -- 1 if it's writable, 0 if not
 #   $var.noaccess      -- 1 if not-accessible, 0 if not
 #   $var.accessible    -- 1 if accessible, 0 if not
 #   $var.hasdefval     -- 1 if a DEFVAL was defined, 0 if not
-#   $var.defval        -- node's defval
+#
+#   $var.hasdefval     -- returns 1 if var has a DEFVAL clause
+#   $var.defval        -- node's DEFVAL
+#   $var.hashint       -- returns 1 if var has a HINT clause
+#   $var.hint          -- node's HINT
+#   $var.ranges        -- returns 1 if var has a value range defined
+#   $var.enums         -- returns 1 if var has enums defined for it.
 #   $var.access        -- node's access type
 #   $var.status        -- node's status
 #   $var.syntax        -- node's syntax
-#   $var.decl          -- C data type
-#   $var.isscalar      -- returns 1 if var contains the name of a scalar
-#   $var.iscolumn      -- returns 1 if var contains the name of a column
-#   $var.parent        -- contains the label of the parent node of $var.
 
 sub process_vars {
     my $it = shift;
