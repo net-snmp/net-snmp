@@ -82,6 +82,11 @@ if (!defined($oid)) {
 }
 
 $mib = $SNMP::MIB{$oid};
+if ($mib->{'label'} eq "mib-2") {
+    print STDERR "Couldn\'t find mib node $oid\n";
+    print STDERR "(Note, this should be a MIB object, not a file)\n";
+    exit(1);
+}
 $_ = $commaoid = $fulloid = $mib->{'objectID'};
 if (!defined ($fulloid)) {
     print STDERR "Couldn\'t find mib reference: $oid\n";
