@@ -14,20 +14,29 @@ IMPORTS
             FROM SNMPv2-SMI
         DisplayString
             FROM SNMPv2-TC
-	ucdavis
+	ucdavis, ucdExperimental
 	    FROM UCD-SNMP-MIB;
 
 
-ipFwAcc OBJECT-TYPE
-	SYNTAX IpFwAcc
+ipFwAccTable OBJECT-TYPE
+	SYNTAX IpFwAccEntry
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
-		"The accounting rules of the IP firewall"
+		"A table with the accounting rules of the IP firewall"
 	INDEX { ipFwAccIndex }
 	::= { ucdExperimental 1 }
 
-IpFwAcc ::= SEQUENCE {
+ipFwAccEntry OBJECT-TYPE
+      SYNTAX IpFwAccEntry
+      ACCESS not-accessible
+      STATUS mandatory
+      DESCRIPTION
+              "An accounting rule of the IP firewall"
+      INDEX { ipFwAccIndex }
+      ::= { ipFwAccTable 1 }
+
+IpFwAccTable ::= SEQUENCE {
 	ipFwAccIndex		INTEGER,
 	ipFwAccSrcAddr		IpAddress,
 	ipFwAccSrcNetMask	IpAddress,
@@ -62,7 +71,7 @@ ipFwAccIndex OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Reference index for each firewall rule."
-	::= { ipFwAcc 1 }
+	::= { ipFwAccEntry 1 }
 
 ipFwAccSrcAddr OBJECT-TYPE
 	SYNTAX IpAddress
@@ -70,7 +79,7 @@ ipFwAccSrcAddr OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The source address in the firewall rule."
-	::= { ipFwAcc 2 }
+	::= { ipFwAccEntry 2 }
 
 ipFwAccSrcNetMask OBJECT-TYPE
 	SYNTAX IpAddress
@@ -78,7 +87,7 @@ ipFwAccSrcNetMask OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The netmask of the source address in the firewall rule."
-	::= { ipFwAcc 3 }
+	::= { ipFwAccEntry 3 }
 
 ipFwAccDstAddr OBJECT-TYPE
 	SYNTAX IpAddress
@@ -86,7 +95,7 @@ ipFwAccDstAddr OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The destination address in the firewall rule."
-	::= { ipFwAcc 4 }
+	::= { ipFwAccEntry 4 }
 
 ipFwAccDstNetMask OBJECT-TYPE
 	SYNTAX IpAddress
@@ -94,7 +103,7 @@ ipFwAccDstNetMask OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The netmask of the destination address in the firewall rule."
-	::= { ipFwAcc 5 }
+	::= { ipFwAccEntry 5 }
 
 ipFwAccViaName OBJECT-TYPE
 	SYNTAX DisplayString
@@ -104,7 +113,7 @@ ipFwAccViaName OBJECT-TYPE
 		"The name of the interface to which the rule applies. If no
 		interface is associated with the present rule, this should
 		contain a dash (-) ."
-	::= { ipFwAcc 6 }
+	::= { ipFwAccEntry 6 }
 
 ipFwAccViaAddr OBJECT-TYPE
 	SYNTAX IpAddress
@@ -115,7 +124,7 @@ ipFwAccViaAddr OBJECT-TYPE
 		Using this parameter makes sense when multiple addresses are
 		associated to the same physical interface. If not defined
 		for the current rule this should be set to 0."
-	::= { ipFwAcc 7 }
+	::= { ipFwAccEntry 7 }
 
 ipFwAccProto OBJECT-TYPE
 	SYNTAX INTEGER {
@@ -129,7 +138,7 @@ ipFwAccProto OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The protocol(s) to which the rule applies."
-	::= { ipFwAcc 8 }
+	::= { ipFwAccEntry 8 }
 
 ipFwAccBidir OBJECT-TYPE
 	SYNTAX INTEGER {
@@ -141,7 +150,7 @@ ipFwAccBidir OBJECT-TYPE
 	DESCRIPTION
 		"Whether the rule works in both directions (i.e. with the
 		source and destination parts swapped) or not."
-	::= { ipFwAcc 9 }
+	::= { ipFwAccEntry 9 }
 
 ipFwAccDir OBJECT-TYPE
 	SYNTAX INTEGER {
@@ -154,7 +163,7 @@ ipFwAccDir OBJECT-TYPE
 	DESCRIPTION
 		"Whether the rule applies to packets entering or exiting the
 		kernel."
-	::= { ipFwAcc 10 }
+	::= { ipFwAccEntry 10 }
 
 ipFwAccBytes OBJECT-TYPE
 	SYNTAX INTEGER
@@ -163,7 +172,7 @@ ipFwAccBytes OBJECT-TYPE
 	DESCRIPTION
 		"The number of bytes that matched this rule since the last
 		reset of the counters."
-	::= { ipFwAcc 11 }
+	::= { ipFwAccEntry 11 }
 
 ipFwAccPackets OBJECT-TYPE
 	SYNTAX INTEGER
@@ -172,7 +181,7 @@ ipFwAccPackets OBJECT-TYPE
 	DESCRIPTION
 		"The number of packets that matched this rule since the last
 		reset of the counters."
-	::= { ipFwAcc 12 }
+	::= { ipFwAccEntry 12 }
 
 ipFwAccNrSrcPorts OBJECT-TYPE
 	SYNTAX INTEGER
@@ -180,7 +189,7 @@ ipFwAccNrSrcPorts OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The number of ports that refer to the source address."
-	::= { ipFwAcc 13 }
+	::= { ipFwAccEntry 13 }
 
 ipFwAccNrDstPorts OBJECT-TYPE
 	SYNTAX INTEGER 
@@ -188,7 +197,7 @@ ipFwAccNrDstPorts OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The number of ports that refer to the destination address."
-	::= { ipFwAcc 14 }
+	::= { ipFwAccEntry 14 }
 
 ipFwAccSrcIsRange OBJECT-TYPE
 	SYNTAX INTEGER {
@@ -200,7 +209,7 @@ ipFwAccSrcIsRange OBJECT-TYPE
 	DESCRIPTION
 		"Interpret the first two ports of the source part as
 		the upper and lower limit of an interval or not."
-	::= { ipFwAcc 15 }
+	::= { ipFwAccEntry 15 }
 
 ipFwAccDstIsRange OBJECT-TYPE
 	SYNTAX INTEGER {
@@ -212,7 +221,7 @@ ipFwAccDstIsRange OBJECT-TYPE
 	DESCRIPTION
 		"Interpret the first two ports of the destination part as
 		the upper and lower limit of an interval or not."
-	::= { ipFwAcc 16 }
+	::= { ipFwAccEntry 16 }
 
 ipFwAccPort1 OBJECT-TYPE
 	SYNTAX INTEGER
@@ -220,7 +229,7 @@ ipFwAccPort1 OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Port number 1."
-	::= { ipFwAcc 17 }
+	::= { ipFwAccEntry 17 }
 
 ipFwAccPort2 OBJECT-TYPE
 	SYNTAX INTEGER
@@ -228,7 +237,7 @@ ipFwAccPort2 OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Port number 2."
-	::= { ipFwAcc 18 }
+	::= { ipFwAccEntry 18 }
 
 ipFwAccPort3 OBJECT-TYPE
 	SYNTAX INTEGER
@@ -236,7 +245,7 @@ ipFwAccPort3 OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Port number 3."
-	::= { ipFwAcc 19 }
+	::= { ipFwAccEntry 19 }
 
 ipFwAccPort4 OBJECT-TYPE
 	SYNTAX INTEGER
@@ -244,7 +253,7 @@ ipFwAccPort4 OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Port number 4."
-	::= { ipFwAcc 20 }
+	::= { ipFwAccEntry 20 }
 
 ipFwAccPort5 OBJECT-TYPE
 	SYNTAX INTEGER
@@ -252,7 +261,7 @@ ipFwAccPort5 OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Port number 5."
-	::= { ipFwAcc 21 }
+	::= { ipFwAccEntry 21 }
 
 ipFwAccPort6 OBJECT-TYPE
 	SYNTAX INTEGER 
@@ -260,7 +269,7 @@ ipFwAccPort6 OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Port number 6."
-	::= { ipFwAcc 22 }
+	::= { ipFwAccEntry 22 }
 
 ipFwAccPort7 OBJECT-TYPE
 	SYNTAX INTEGER
@@ -268,7 +277,7 @@ ipFwAccPort7 OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Port number 7."
-	::= { ipFwAcc 23 }
+	::= { ipFwAccEntry 23 }
 
 ipFwAccPort8 OBJECT-TYPE
 	SYNTAX INTEGER
@@ -276,7 +285,7 @@ ipFwAccPort8 OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Port number 8."
-	::= { ipFwAcc 24 }
+	::= { ipFwAccEntry 24 }
 
 ipFwAccPort9 OBJECT-TYPE
 	SYNTAX INTEGER
@@ -284,7 +293,7 @@ ipFwAccPort9 OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Port number 9."
-	::= { ipFwAcc 25 }
+	::= { ipFwAccEntry 25 }
 
 ipFwAccPort10 OBJECT-TYPE
 	SYNTAX INTEGER
@@ -292,6 +301,6 @@ ipFwAccPort10 OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Port number 10."
-	::= { ipFwAcc 26 }
+	::= { ipFwAccEntry 26 }
 
 END
