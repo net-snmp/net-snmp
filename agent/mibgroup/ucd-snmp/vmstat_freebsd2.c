@@ -78,6 +78,8 @@ void init_vmstat_freebsd2(void)
     {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
     {CPURAWKERNEL, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWKERNEL}},
     {CPURAWINTR, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWINTR}},
+    {SYSRAWINTERRUPTS, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SYSRAWINTERRUPTS}},
+    {SYSRAWCONTEXT, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {SYSRAWCONTEXT}},
 /* Future use: */
 /*
   {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
@@ -249,6 +251,12 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 	return((u_char *) (&long_ret));
     case CPURAWINTR:
 	long_ret = cpu_new[CP_INTR];
+	return((u_char *) (&long_ret));
+    case SYSRAWINTERRUPTS:
+	long_ret = mem_new.v_intr;
+	return((u_char *) (&long_ret));
+    case SYSRAWCONTEXT:
+	long_ret = mem_new.v_swtch;
 	return((u_char *) (&long_ret));
 /* reserved for future use */
 /*
