@@ -313,6 +313,23 @@ engineID_conf(char *word, char *cptr)
   DEBUGMSGTL(("snmpv3","initialized engineID with: %s\n",cptr));
 }
 
+void
+version_conf(char *word, char *cptr)
+{
+  if (strcmp(cptr,"1") == 0) {
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, SNMP_VERSION_1);
+  } else if (strcmp(cptr,"2c") == 0) {
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, SNMP_VERSION_2c);
+  } else if (strcmp(cptr,"3") == 0) {
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, SNMP_VERSION_3);
+  } else {
+    config_perror("unknown version specification");
+    return;
+  }
+  DEBUGMSGTL(("snmpv3","set default version to %d\n",
+              ds_get_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION)));
+}
+
 /* engineID_old_conf(char *, char *):
 
    Reads a octet string encoded engineID into the oldEngineID and
@@ -375,6 +392,7 @@ init_snmpv3(const char *type) {
                      DS_LIB_AUTHPASSPHRASE);
   ds_register_config(ASN_OCTET_STR, "snmp", "defPrivPassphrase", DS_LIBRARY_ID,
                      DS_LIB_PRIVPASSPHRASE);
+  register_config_handler("snmp","defVersion", version_conf, NULL, "num");
 
   register_config_handler("snmp","defAuthType", snmpv3_authtype_conf, NULL,
                           "MD5|SHA");
