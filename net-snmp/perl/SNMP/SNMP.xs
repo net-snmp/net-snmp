@@ -4377,6 +4377,14 @@ snmp_translate_obj(var,mode,use_long,auto_init,best_guess)
         RETVAL
 
 void
+snmp_set_replace_newer(val)
+	int val
+	CODE:
+	{
+	   ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE);
+	}
+
+void
 snmp_set_save_descriptions(val)
 	int	val
 	CODE:
