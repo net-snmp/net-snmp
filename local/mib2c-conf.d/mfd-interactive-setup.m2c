@@ -1,4 +1,4 @@
-#############################################################  -*- c -*-
+#######################################################################
 ## generic include for XXX. Do not use directly.
 ##
 ## $Id$
@@ -104,6 +104,13 @@ data structure will be created with an element for each column.
 
 @      prompt $ans Select your choice : @
 @      if $ans == 2@
+
+
+Note: Do not enter a pointer type. Use the base structure name. For
+example, use 'struct widget', not 'struct widget *'. If you will be
+using pointer to the structure, select dynamic allocation in the
+next question.
+
 @        prompt $m2c_temp_data_context   Enter your DATA context : @
 @      end@
 
@@ -188,7 +195,7 @@ When accessing your data, is your data TRANSIENT?
 @      elsif $ans == 2@
 @        eval $m2c_temp_data_transient = 1@
 @      else@
-@        eval $m2c_temp_data_transient = 3@
+@        eval $m2c_temp_data_transient = 2@
 @      end@
 
 
