@@ -516,7 +516,7 @@ asn_parse_string(u_char *data,
 
     DEBUGIF("dumpv_recv") {
       char *buf = (char *)malloc(1+asn_length);
-      sprint_asciistring(buf, string, asn_length);
+      snprint_asciistring(buf, asn_length+1, string, asn_length);
       DEBUGMSG(("dumpv_recv", "  String:\t%s\n", buf));
       free (buf);
     }
@@ -573,7 +573,7 @@ asn_build_string(u_char *data,
     DEBUGDUMPSETUP("send", initdatap, data - initdatap + strlength);
     DEBUGIF("dumpv_send") {
       char *buf = (char *)malloc(1+strlength);
-      sprint_asciistring(buf, string, strlength);
+      snprint_asciistring(buf, strlength+1, string, strlength);
       DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
       free (buf);
     }
@@ -1331,7 +1331,7 @@ asn_rbuild_bitstring(u_char *data,
     DEBUGDUMPSETUP("send", data+1, initdatap - data);
     DEBUGIF("dumpv_send") {
       char *buf = (char *)malloc(2*strlength);
-      sprint_asciistring(buf, string, strlength);
+      snprint_asciistring(buf, 2*strlength, string, strlength);
       DEBUGMSG(("dumpv_send", "  Bitstring:\t%s\n", buf));
       free (buf);
     }
@@ -2159,7 +2159,7 @@ asn_rbuild_string (u_char *data,
             DEBUGMSG(("dumpv_send", "  String: [NULL]\n"));
         } else {
             char *buf = (char *)malloc(2*strlength);
-            sprint_asciistring(buf, string, strlength);
+            snprint_asciistring(buf, 2*strlength, string, strlength);
             DEBUGMSG(("dumpv_send", "  String:\t%s\n", buf));
             free (buf);
         }

@@ -97,7 +97,7 @@ DEBUGPOID(oid *theoid,
 	  size_t len)
 {
   char c_oid[SPRINT_MAX_LEN];
-  sprint_objid(c_oid,theoid,len);
+  snprint_objid(c_oid, sizeof(c_oid), theoid, len);
   DEBUGP(c_oid);
 }
 
@@ -201,7 +201,7 @@ void
 debugmsg_oid(const char *token, oid *theoid, size_t len) {
   char c_oid[SPRINT_MAX_LEN];
   
-  sprint_objid(c_oid, theoid, len);
+  snprint_objid(c_oid, sizeof(c_oid), theoid, len);
   debugmsg(token, c_oid);
 }
 
@@ -215,7 +215,7 @@ debugmsg_hex(const char *token, u_char *thedata, size_t len) {
       len = SPRINT_MAX_LEN/5;
       debugmsg(token, "[truncated hex:]");
   }
-  sprint_hexstring(buf, thedata, len);
+  snprint_hexstring(buf, sizeof(buf), thedata, len);
   debugmsg(token, buf);
 }
 
@@ -232,7 +232,7 @@ debugmsg_hextli(const char *token, u_char *thedata, size_t len) {
       /*XXnext two lines were DEBUGPRINTINDENT(token);*/
       sprintf(buf, "dumpx%s", token);
       debugmsg(buf, "%s: %s", token2, debug_indent());
-      sprint_hexstring(buf, thedata, incr);
+      snprint_hexstring(buf, sizeof(buf), thedata, incr);
       debugmsg(token2, buf);
     }
   }
