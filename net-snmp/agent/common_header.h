@@ -161,14 +161,10 @@
 /* jab2 debug */
 #include "snmp_vars.linux.h"
 /* jab2 debug */
-/*
-  #include "alarm.h"
-  #include "event.h"
-*/
-#if solaris2
-#include "kernel_sunos5.h"
-#endif
 #include "kernel.h"
+#ifdef USING_KERNEL_SUNOS5_MODULE
+#include "mibgroup/kernel_sunos5.h"
+#endif
 
 #ifdef hpux
 #undef OBJID
