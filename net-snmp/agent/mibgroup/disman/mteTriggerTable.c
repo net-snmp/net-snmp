@@ -33,6 +33,7 @@
 #include "mteTriggerDeltaTable.h"
 #include "mteTriggerExistenceTable.h"
 #include "mteTriggerThresholdTable.h"
+#include "mteEventTable.h"
 #include "mteObjectsTable.h"
 
 /*
@@ -3029,7 +3030,7 @@ mte_get_response(struct mteTriggerTable_data *item, netsnmp_pdu *pdu)
                          response->variables->name_length,
                          response->variables);
     else
-        strncpy(buf, sizeof(buf), "empty");
+        strcpy(buf, "empty");
     buf[sizeof(buf) - 1] = '\0';
     DEBUGMSGTL(("mteTriggerTable", "got a variables: %s\n", buf));
     return response;

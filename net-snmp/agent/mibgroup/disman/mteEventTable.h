@@ -10,6 +10,10 @@
  */
 void            init_mteEventTable(void);
 void            initialize_table_mteEventTable(void);
+void            run_mte_events(struct mteTriggerTable_data *item,
+	                       oid * name_oid, size_t name_oid_len,
+		               const char *eventobjowner, const char *eventobjname);
+
 Netsnmp_Node_Handler mteEventTable_handler;
 
 /*
