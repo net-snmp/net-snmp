@@ -11,16 +11,18 @@ REQUIREMENTS
     Apache (http://www.apache.org)
 
     The following perl modules (http://www.cpan.org):
-      mod_perl (will require apache changes, see http://perl.apache.org)
-      SNMP (from the ucd-snmp source tree: /perl/SNMP)
+      mod_perl
+      SNMP (from the net-snmp source tree: SRCTREE/perl/SNMP)
       CGI
       DBI
-      Data-ShowTable
-      Msql-Mysql-modules
+      DBD::mSQL
       PNGgraph
-      Net::SMTP
 
-  Setting up mysql:
+    You may need more modules depending on your perl version, so sorry
+    in advance if I missed some.
+
+  Building and setting up mysql (a summary of what is needed.  See the
+  mysql documentation for further details):
      ./configure
      make
      make install
@@ -41,15 +43,11 @@ SQL REQUIREMENTS
 
 INSTALLING THE PERL MODULES
 
-  (installation Makefile.PL needs to be written).
+  perl Makefile.PL
+  make
+  make install
 
-  Copy the following perl modules to the following locations:
-
-    manager.pm      -> APACHEROOT/lib/perl/ucdsnmp/manager.pm
-    getValues.pm    -> APACHEROOT/lib/perl/getValues.pm
-    displayTable.pm -> APACHEROOT/lib/perl/displayTable.pm
-
-  Copy the red.gif, and green.gif graphics files to
+  Copy the red.gif, and green.gif graphics files to your apache
   HTML-ROOT/graphics/.
 
 SETTING UP APACHE
@@ -62,11 +60,13 @@ SETTING UP APACHE
   users can be users of different groups of hosts, etc...  If this is
   not done, everyone will use the user name "guest".
 
-  At the bottom of your httpd.conf file put the following lines,
-  appropriately configuring the sql username, etc:
+  At the bottom of your httpd.conf file or in an apporpriate
+  VirtualHost directive put the following lines, appropriately
+  configuring the sql username, etc.  I strongly recommend turning on
+  SSL support for this as well.:
 
-    PerlModule ucd-snmp::manager
-    <Location /ucd-snmp>
+    PerlModule netsnmp::manager
+    <Location /manage>
          # put apache protection stuff here, like a password database etc!!!
          SetHandler perl-script
          PerlHandler ucdsnmp::manager
@@ -74,10 +74,17 @@ SETTING UP APACHE
          PerlSetVar dbname snmp
          PerlSetVar user SQLUSER
          PerlSetVar pass SQLPASSWORD
+
+	 # turn on password protection.  see apache htpasswd documentation.
+	 # comment these out for unauthenticated access (generally a bad idea)
+	 AuthType Basic
+         AuthName "SNMP manager access"
+         AuthUserFile /etc/httpd/conf/manager-passwd
+         require valid-user
+
     </Location>
 
    Restart apache after you've done the above.
-
 
 SETTING UP THE MYSQL UCD-SNMP DATABASES
 
@@ -138,7 +145,8 @@ SETTING UP SNMP AUTHORIZATION INFORMATION
 
     ./setupauth -u SQLUSER -p SQLPASSWORD -h SQLHOST -g agroup Community private
 
-  Further, hosts can be given specific parameters as well:
+  Further, hosts can be given specific parameters as well if they're
+  really special:
 
     ./setupauth -u SQLUSER -p SQLPASSWORD -h SQLHOST -m host Timeout 60000000
 
@@ -159,7 +167,7 @@ COLLECTING THE DATA
 USING THE SYSTEM
 
   Most of the things you'll need to do can be done from the web
-  interface that you've just set up as /ucd-snmp on some system in the 
+  interface that you've just set up as /manager on some system in the 
   step above.  Go to this web page to see what you can do.
 
 MONITORING HOSTS WITH IT (finally)
@@ -168,14 +176,16 @@ MONITORING HOSTS WITH IT (finally)
   your snmpd.conf file, put a line that says "proc sendmail".  This will 
   check to see if sendmail is running on your system.  Also put "disk /
   10%" which will require the disk has at least 10% of free space.
-  Restart the snmpd (or kill -HUP).
+  Restart the snmpd (or kill -HUP).  See the snmpd.conf manual page
+  for some details.
 
   Then, go to the above URL and click on the group name you want to
   add a host to and enter the host name in the dialog box near the
-  bottom of the page.  Click on the "setup group XXX" link at the
-  bottom of the group's page and click on all the check buttons (you
-  can turn them all on even if you're not really using them all) and
-  hit the submit button.
+  bottom of the page (assuming you're logged in as an administrator
+  user setup using the -a flag to setupuser above).  Click on the
+  "setup group XXX" link at the bottom of the group's page and click
+  on all the check buttons (you can turn them all on even if you're
+  not really using them all) and hit the submit button.
 
   Come back 10 minutes later, reload the group and click on the host
   name.  You should see pretty red/green lights if there is or isn't a
@@ -183,4 +193,6 @@ MONITORING HOSTS WITH IT (finally)
   it collected (including how many sendmail processes are running, an
   how much disk space is actually being used), etc.
 
+GRAPHING
 
+  To be written.
