@@ -163,9 +163,9 @@ typedef long    fd_mask;
 #include <windows.h>
 #include <tchar.h>
 #include <net-snmp/library/winservice.h>
-#ifndef __GNUC__
+
 #define WIN32SERVICE
-#endif
+
 #endif
 
 /*
@@ -1306,7 +1306,7 @@ _tmain(int argc, TCHAR * argv[])
     LPCTSTR         lpszServiceName = g_szAppName;      /* Service Registry Name */
     LPCTSTR         lpszServiceDisplayName = _T("Net-SNMP Agent");       /* Display Name */
     LPCTSTR         lpszServiceDescription =
-#ifdef HAVE_WIN32_PLATFORM_SDK
+#ifdef IFDESCR
         _T("SNMPv2c / SNMPv3 command responder from Net-SNMP. Supports MIB objects for IP,ICMP,TCP,UDP, and network interface sub-layers.");
 #else
         _T("SNMPv2c / SNMPv3 command responder from Net-SNMP");
