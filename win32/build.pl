@@ -178,7 +178,10 @@ if ($logging eq "enabled") {
     system("nmake /nologo perl > perlmake.out 2>&1") == 0 || die "Build error (see perlmake.out)";
 
     print "Testing Perl modules...\n";
+    $path_old = $ENV{PATH};
+    $ENV{PATH} = "$current_pwd\\bin\\" . ($debug eq "enabled" ? "debug" : "release" ) . ";$ENV{PATH}";
     system("nmake /nologo perl_test > perltest.out 2>&1"); # Don't die if all the tests don't pass..
+    $ENV{PATH} = $path_old;
   
     if ($perl_install eq "enabled") {
       print "Installing Perl modules...\n";
@@ -218,7 +221,11 @@ else {
     
     system("nmake /nologo perl_clean"); # If already cleaned, Makefile is gone so don't worry about errors!
     system("nmake /nologo perl") == 0 || die "Build error (see above)";
+
+    $path_old = $ENV{PATH};
+    $ENV{PATH} = "$current_pwd\\bin\\" . ($debug eq "enabled" ? "debug" : "release" ) . ";$ENV{PATH}";
     system("nmake /nologo perl_test"); # Don't die if all the tests don't pass..
+    $ENV{PATH} = $path_old;
     
     if ($perl_install eq "enabled") {      
       print "Installing Perl modules...\n";
