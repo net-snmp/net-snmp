@@ -229,12 +229,15 @@ main(int argc, char *argv[])
                     }
                     transport = snmp_sess_transport(snmp_sess_pointer(ss));
                     if (transport != NULL && transport->f_fmtaddr != NULL) {
-                        char           *s = transport->f_fmtaddr(transport,
+                        char *addr_string = transport->f_fmtaddr(transport,
                                                                  response->
                                                                  transport_data,
                                                                  response->
                                                                  transport_data_length);
-                        printf("from %s\n", s);
+                        if (addr_string != NULL) {
+                            printf("from %s\n", addr_string);
+                            free(addr_string);
+                        }
                     } else {
                         printf("from <UNKNOWN>\n");
                     }
