@@ -324,7 +324,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	return 0;
 
     default:
-        DEBUGMSGTL(("agentx/subagent","  -> unknown\n"));
+        DEBUGMSGTL(("agentx/subagent","  -> unknown (%d)\n", pdu->command ));
 	free( asp );
 	return 0;
     }
@@ -399,6 +399,22 @@ subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
   return 1;
 }
 
+static int
+subagent_register_for_traps(int majorID, int minorID, void *serverarg, void *clientarg) {
+  struct snmp_session *thesession = (struct snmp_session *) clientarg;
+  DEBUGMSGTL(("agentx/subagent","registering trap session....\n"));
+  if (thesession == NULL) {
+    DEBUGMSGTL(("agentx/subagent","No session to register\n"));
+    return 0;
+  }
+  if (add_trap_session( thesession, AGENTX_MSG_NOTIFY, AGENTX_VERSION_1) == 0){
+    DEBUGMSGTL(("agentx/subagent","Trap session registration failed\n"));
+    return 0;
+  }
+  DEBUGMSGTL(("agentx/subagent","Trap session registered OK\n"));
+  return 1;
+}
+
 void
 subagent_pre_init( void )
 {
@@ -431,8 +447,9 @@ subagent_pre_init( void )
 	exit(1);
     }
 
-    create_trap_session( NULL, NULL, AGENTX_VERSION_1, AGENTX_MSG_NOTIFY );
 
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
+                           subagent_register_for_traps, agentx_session);
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
                            subagent_shutdown, agentx_session);
     snmp_register_callback(SNMP_CALLBACK_APPLICATION,
