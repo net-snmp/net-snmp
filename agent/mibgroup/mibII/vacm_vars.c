@@ -483,7 +483,7 @@ void vacm_parse_simple(const char *token, char *confline) {
 
     /* sec->group mapping */
     /* group   anonymousGroupNameNUM  any      anonymousSecNameNUM */
-    sprintf(line,"anonymousGroupName%03d usm %s", num, secname);
+    sprintf(line,"anonymousGroupName%03d %s %s", num, model, secname);
     DEBUGMSGTL((token,"passing: %s %s\n", "group", line));
     vacm_parse_group("group",line);
   }
