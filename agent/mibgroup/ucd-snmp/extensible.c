@@ -114,6 +114,7 @@ int             strncasecmp(const char *s1, const char *s2, size_t n);
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/agent/auto_nlist.h>
+#include <net-snmp/agent/agent_callbacks.h>
 
 #include "struct.h"
 #include "extensible.h"
@@ -175,6 +176,9 @@ init_extensible(void)
                                   "[miboid] name program-or-script arguments");
     snmpd_register_config_handler("execfix", execfix_parse_config, NULL,
                                   "exec-or-sh-name program [arguments...]");
+    snmp_register_callback(SNMP_CALLBACK_APPLICATION,
+                           SNMPD_CALLBACK_PRE_UPDATE_CONFIG,
+                           extensible_unregister, NULL);
 }
 
 void
@@ -253,10 +257,19 @@ extensible_parse_config(const char *token, char *cptr)
     }
 }
 
+int
+extensible_unregister(int major, int minor,
+                      void *serverarg, void *clientarg)
+{
+    extensible_free_config();
+}
+
 void
 extensible_free_config(void)
 {
     struct extensible *etmp, *etmp2;
+    oid    tname[MAX_OID_LEN];
+    int    i;
 
     for (etmp = extens; etmp != NULL;) {
         etmp2 = etmp;
@@ -267,7 +280,22 @@ extensible_free_config(void)
     for (etmp = relocs; etmp != NULL;) {
         etmp2 = etmp;
         etmp = etmp->next;
-        unregister_mib(etmp2->miboid, etmp2->miblen);
+
+        /*
+         * The new modular API results in the column
+         *  objects being registered individually, so
+         *  they need to be unregistered individually too!
+         */
+        memset(tname, 0, MAX_OID_LEN*sizeof(oid));
+        memcpy(tname,  etmp2->miboid, etmp2->miblen*sizeof(oid));
+        for (i=1; i<4; i++) {
+            tname[etmp2->miblen] = i;
+            unregister_mib(tname, etmp2->miblen+1);
+        }
+        for (i=100; i<103; i++) {
+            tname[etmp2->miblen] = i;
+            unregister_mib(tname, etmp2->miblen+1);
+        }
         free(etmp2);
     }
 

@@ -22,6 +22,7 @@ config_require(utilities/execute)
      void            extensible_free_config(void);
      void            extensible_parse_config(const char *, char *);
      void            execfix_parse_config(const char *, char *);
+     int             extensible_unregister(int, int, void *, void *);
 
 #include "mibdefs.h"
 
