@@ -1432,7 +1432,7 @@ var_tcp6(register struct variable * vp,
 #if defined(__NetBSD__) && __NetBSD_Version__ >= 106250000	/*1.6Y*/
     if (!auto_nlist("tcbtable", (char *) &tcbtable, sizeof(tcbtable)))
         return NULL;
-    first = p = (caddr_t)udbtable.inpt_queue.cqh_first;
+    first = p = (caddr_t)tcbtable.inpt_queue.cqh_first;
 #elif !(defined(__FreeBSD__) && __FreeBSD__ >= 3) && !defined(darwin)
     if (!auto_nlist("tcb6", (char *) &tcb6, sizeof(tcb6)))
         return NULL;
