@@ -203,11 +203,6 @@ init_agent_read_config(const char *app)
     char buf[BUFSIZ];
 
     if (app != NULL) {
-#if defined(USING_AGENTX_SUBAGENT_MODULE)|| defined(USING_AGENTX_MASTER_MODULE)
-        snprintf(buf, BUFSIZ, "agentx:%s", app);
-        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
-			      NETSNMP_DS_LIB_APPTYPES, buf);
-#endif
         netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
 			      NETSNMP_DS_LIB_APPTYPE, app);
     } else {
