@@ -1443,6 +1443,7 @@ dnl Replace `main' with a function in -lkvm:
 AC_CHECK_LIB(kvm, kvm_read)
 dnl DYNAMIC MODULE SUPPORT
 AC_CHECK_LIB(dl, dlopen)
+AC_CHECK_FUNCS(dlopen)
 
 AC_CHECK_FUNCS(kvm_openfiles nlist knlist kvm_getprocs)
 AC_MSG_CHECKING(whether we need -ldevstat for diskio MIB)
@@ -1739,8 +1740,6 @@ AC_CHECK_FUNCS(tcgetattr)
 AC_CHECK_FUNCS(if_nameindex if_freenameindex)
 dnl solaris checks
 AC_CHECK_FUNCS(getpagesize)
-dnl DYNAMIC MODULE SUPPORT
-AC_CHECK_FUNCS(dlopen)
 AC_CHECK_FUNCS(mkstemp)
 AC_CHECK_FUNCS(getpwnam getgrnam setgid setuid setgroups)
 dnl High resolution alarm support

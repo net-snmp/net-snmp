@@ -360,7 +360,7 @@
 #ifdef linux
 #define OSTYPE LINUXID
 #endif
-#if defined(bsdi2) || defined(bsdi3)
+#if defined(bsdi2) || defined(bsdi3) || defined(bsdi4)
 #define OSTYPE BSDIID
 #endif
 #ifdef openbsd2
