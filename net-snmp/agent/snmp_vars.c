@@ -40,6 +40,18 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/sockio.h>
 #endif
 #include <sys/param.h>
+#if HAVE_NET_IF_DL_H
+#include <net/if_dl.h>
+#endif
+#if HAVE_SYS_SYSTCL_H
+#include <sys/sysctl.h>
+#endif
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_NET_IF_TYPES_H
+#include <net/if_types.h>
+#endif
 #if HAVE_SYS_DIR_H
 #include <sys/dir.h>
 #endif
@@ -160,9 +172,9 @@ extern  int swap, mem;
 extern char *Lookup_Device_Annotation();
 
 static int TCP_Count_Connections();
-static TCP_Scan_Init();
+static void TCP_Scan_Init();
 static int TCP_Scan_Next();
-static ARP_Scan_Init();
+static void ARP_Scan_Init();
 static int ARP_Scan_Next();
 static int Interface_Scan_Get_Count();
 static int Interface_Scan_By_Index();
@@ -1433,7 +1445,11 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    if (cp) long_return = atoi(cp);
 	    else
 #endif
+#ifdef freebsd2
+		long_return = ifnet.if_type;
+#else
 		long_return = 1;	/* OTHER */
+#endif
 	    return (u_char *) &long_return;
 	case IFMTU: {
 	    long_return = (long) ifnet.if_mtu;
@@ -1445,7 +1461,11 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    if (cp) long_return = atoi(cp);
 	    else
 #endif
+#ifdef freebsd2
+	    long_return = ifnet.if_baudrate;
+#else
 	    long_return = (u_long)  1;	/* OTHER */
+#endif
 	    return (u_char *) &long_return;
 	case IFPHYSADDRESS:
 #if 0
@@ -1460,6 +1480,10 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #endif
 		Interface_Get_Ether_By_Index(interface, return_buf);
 		*var_len = 6;
+	        if ((return_buf[0] == 0) && (return_buf[1] == 0) &&
+		    (return_buf[2] == 0) && (return_buf[3] == 0) &&
+		    (return_buf[4] == 0) && (return_buf[5] == 0))
+		    *var_len = 0;
 		return(u_char *) return_buf;
 	case IFADMINSTATUS:
 	    long_return = ifnet.if_flags & IFF_RUNNING ? 1 : 2;
@@ -1468,8 +1492,22 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = ifnet.if_flags & IFF_UP ? 1 : 2;
 	    return (u_char *) &long_return;
 	case IFLASTCHANGE:
-	    long_return = 0; /* XXX */
-	    return (u_char *) &long_return;
+#ifdef freebsd2
+          struct timeval now;
+
+          if ((ifnet.if_lastchange.tv_sec == 0 ) &&
+              (ifnet.if_lastchange.tv_usec == 0))
+            long_return = 0;
+          else {
+            gettimeofday(&now, (struct timezone *)0);
+            long_return = (u_long)
+              ((now.tv_sec - ifnet.if_lastchange.tv_sec) * 100
+               + (now.tv_usec - ifnet.if_lastchange.tv_usec) / 10000);
+          }
+#else
+          long_return = 0; /* XXX */
+#endif
+          return (u_char *) &long_return;
 	case IFINOCTETS:
 	    long_return = (u_long)  ifnet.if_ipackets * 308; /* XXX */
 	    return (u_char *) &long_return;
@@ -1477,15 +1515,27 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = (u_long)  ifnet.if_ipackets;
 	    return (u_char *) &long_return;
 	case IFINNUCASTPKTS:
+#ifdef freebsd2
+	    long_return = (u_long)  ifnet.if_imcasts;
+#else
 	    long_return = (u_long)  0; /* XXX */
+#endif
 	    return (u_char *) &long_return;
 	case IFINDISCARDS:
+#ifdef freebsd2
+	    long_return = (u_long)  ifnet.if_iqdrops;
+#else
 	    long_return = (u_long)  0; /* XXX */
+#endif
 	    return (u_char *) &long_return;
 	case IFINERRORS:
 	    return (u_char *) &ifnet.if_ierrors;
 	case IFINUNKNOWNPROTOS:
+#ifdef freebsd2
+	    long_return = (u_long)  ifnet.if_noproto;
+#else
 	    long_return = (u_long)  0; /* XXX */
+#endif
 	    return (u_char *) &long_return;
 	case IFOUTOCTETS:
 	    long_return = (u_long)  ifnet.if_opackets * 308; /* XXX */
@@ -1494,7 +1544,11 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	    long_return = (u_long)  ifnet.if_opackets;
 	    return (u_char *) &long_return;
 	case IFOUTNUCASTPKTS:
+#ifdef freebsd2
+	    long_return = (u_long)  ifnet.if_omcasts;
+#else
 	    long_return = (u_long)  0; /* XXX */
+#endif
 	    return (u_char *) &long_return;
 	case IFOUTDISCARDS:
 	    return (u_char *) &ifnet.if_snd.ifq_drops;
@@ -1680,6 +1734,9 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     oid			    current[16];
     static char		    PhysAddr[6], LowPhysAddr[6];
     u_long		    Addr, LowAddr;
+#ifdef freebsd2
+    u_short		    ifIndex, lowIfIndex;
+#endif
 
     /* fill in object part of name for current (less sizeof instance part) */
     bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
@@ -1687,9 +1744,16 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     LowAddr = -1;      /* Don't have one yet */
     ARP_Scan_Init();
     for (;;) {
-	if (ARP_Scan_Next(&Addr, PhysAddr) == 0) break;
-	/* IfIndex == 1 (ethernet?) XXX */
+#ifdef freebsd2
+	if (ARP_Scan_Next(&Addr, PhysAddr, &ifIndex) == 0)
+	    break;
+	current[10] = ifIndex;
+#else
+	if (ARP_Scan_Next(&Addr, PhysAddr) == 0)
+	    break;
 	current[10] = 1;
+#endif
+	/* IfIndex == 1 (ethernet?) XXX */
 	current[11] = 1;
 	cp = (u_char *)&Addr;
 	op = current + 12;
@@ -1702,6 +1766,9 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 	    if (compare(current, 16, name, *length) == 0){
 		bcopy((char *)current, (char *)lowest, 16 * sizeof(oid));
 		LowAddr = Addr;
+#ifdef freebsd2
+		lowIfIndex = ifIndex;
+#endif
 		bcopy(PhysAddr, LowPhysAddr, sizeof(PhysAddr));
 		break;	/* no need to search further */
 	    }
@@ -1714,11 +1781,15 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
 		 */
 		bcopy((char *)current, (char *)lowest, 16 * sizeof(oid));
 		LowAddr = Addr;
+#ifdef freebsd2
+		lowIfIndex = ifIndex;
+#endif
 		bcopy(PhysAddr, LowPhysAddr, sizeof(PhysAddr));
 	    }
 	}
     }
-    if (LowAddr == -1) return(NULL);
+    if (LowAddr == -1)
+	return(NULL);
 
     bcopy((char *)lowest, (char *)name, 16 * sizeof(oid));
     *length = 16;
@@ -1726,7 +1797,11 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     switch(vp->magic){
 	case ATIFINDEX:
 	    *var_len = sizeof long_return;
+#ifdef freebsd2
+	    long_return = lowIfIndex;
+#else
 	    long_return = 1; /* XXX */
+#endif
 	    return (u_char *)&long_return;
 	case ATPHYSADDRESS:
 	    *var_len = sizeof(LowPhysAddr);
@@ -2573,9 +2648,21 @@ var_udp(vp, name, length, exact, var_len, write_method)
 
     switch (vp->magic){
 	case UDPINDATAGRAMS:
+#ifdef freebsd2
+	    long_return = udpstat.udps_ipackets;
+	    return (u_char *) &long_return;
+#endif
 	case UDPNOPORTS:
+#ifdef freebsd2
+	    long_return = udpstat.udps_noport;
+	    return (u_char *) &long_return;
+#endif
 	case UDPOUTDATAGRAMS:
+#ifdef freebsd2
+	    long_return = udpstat.udps_opackets;
+#else
 	    long_return = 0;
+#endif
 	    return (u_char *) &long_return;
 	case UDPINERRORS:
 	    long_return = udpstat.udps_hdrops + udpstat.udps_badsum +
@@ -2984,6 +3071,11 @@ int     (**write_method)(); /* OUT - pointer to function to set variable, otherw
 #define inp_prev inp_queue.cqe_prev
 #endif
 
+#ifdef freebsd2
+#define inp_next inp_list.le_next
+#define inp_prev inp_list.le_prev
+#endif
+
 /*
  *	Print INTERNET connections
  */
@@ -3003,20 +3095,30 @@ Again:	/*
 
 	KNLookup( N_TCB, (char *)&cb, sizeof(struct inpcb));
 	inpcb = cb;
+#ifndef freebsd2
 	prev = (struct inpcb *) nl[N_TCB].n_value;
+#endif
 	/*
 	 *	Scan the control blocks
 	 */
+#ifdef freebsd2
+	while (inpcb.inp_next != NULL) {
+#else
 	while (inpcb.inp_next != (struct inpcb *) nl[N_TCB].n_value) {
+#endif
 		next = inpcb.inp_next;
 
 		klookup(next, (char *)&inpcb, sizeof (inpcb));
+#ifndef freebsd2
 		if (inpcb.inp_prev != prev) {	    /* ??? */
 			sleep(1);
 			goto Again;
 		}
+#endif
 		if (inet_lnaof(inpcb.inp_laddr) == INADDR_ANY) {
+#ifndef freebsd2
 			prev = next;
+#endif
 			continue;
 		}
 		klookup(inpcb.inp_ppcb, (char *)&tcpcb, sizeof (tcpcb));
@@ -3024,18 +3126,21 @@ Again:	/*
 		if ((tcpcb.t_state == TCPS_ESTABLISHED) ||
 		    (tcpcb.t_state == TCPS_CLOSE_WAIT))
 		    Established++;
+#ifndef freebsd2
 		prev = next;
+#endif
 	}
 	return(Established);
 }
 
-
 static struct inpcb inpcb, *prev;
 
-static TCP_Scan_Init()
+static void TCP_Scan_Init()
 {
     KNLookup( N_TCB, (char *)&inpcb, sizeof(inpcb));
+#ifndef freebsd2
     prev = (struct inpcb *) nl[N_TCB].n_value;
+#endif
 }
 
 static int TCP_Scan_Next(State, RetInPcb)
@@ -3045,28 +3150,41 @@ struct inpcb *RetInPcb;
 	register struct inpcb *next;
 	struct tcpcb tcpcb;
 
+#ifdef freebsd2
+	if (inpcb.inp_next == NULL) {
+#else
 	if (inpcb.inp_next == (struct inpcb *) nl[N_TCB].n_value) {
+#endif
 	    return(0);	    /* "EOF" */
 	}
 
 	next = inpcb.inp_next;
 
 	klookup(next, (char *)&inpcb, sizeof (inpcb));
+#ifndef freebsd2
 	if (inpcb.inp_prev != prev)	   /* ??? */
-		return(-1); /* "FAILURE" */
-
+          return(-1); /* "FAILURE" */
+#endif
 	klookup ( (int)inpcb.inp_ppcb, (char *)&tcpcb, sizeof (tcpcb));
 	*State = tcpcb.t_state;
 	*RetInPcb = inpcb;
+#ifndef freebsd2
 	prev = next;
+#endif
 	return(1);	/* "OK" */
 }
 
+#ifdef freebsd2
+static char *lim, *rtnext;
+static char *at = 0;
+#else
 static int arptab_size, arptab_current;
 static struct arptab *at=0;
-static ARP_Scan_Init()
+#endif /* freebsd2 */
+
+static void ARP_Scan_Init()
 {
-#ifndef netbsd1
+#if !defined (netbsd1) && !defined(freebsd2)
 	extern char *malloc();
 
 	if (!at) {
@@ -3076,14 +3194,42 @@ static ARP_Scan_Init()
 
 	KNLookup( N_ARPTAB, (char *)at, arptab_size * sizeof(struct arptab));
 	arptab_current = 0;
+#else
+#ifdef freebsd2
+	int mib[6];
+	size_t needed;
+
+	mib[0] = CTL_NET;
+	mib[1] = PF_ROUTE;
+	mib[2] = 0;
+	mib[3] = AF_INET;
+	mib[4] = NET_RT_FLAGS;
+	mib[5] = RTF_LLINFO;
+
+	if (at)
+		free(at);
+	if (sysctl(mib, 6, NULL, &needed, NULL, 0) < 0)
+		perror("route-sysctl-estimate");
+	if ((at = malloc(needed)) == NULL)
+		perror("malloc");
+	if (sysctl(mib, 6, at, &needed, NULL, 0) < 0)
+		perror("actual retrieval of routing table");
+	lim = at + needed;
+	rtnext = at;
+#endif /* freebsd2 */
 #endif
 }
 
+#ifdef freebsd2
+static int ARP_Scan_Next(IPAddr, PhysAddr, ifIndex)
+u_short *ifIndex;
+#else
 static int ARP_Scan_Next(IPAddr, PhysAddr)
+#endif
 u_long *IPAddr;
 char *PhysAddr;
 {
-#ifndef netbsd1
+#if !defined (netbsd1) && !defined (freebsd2)
 	register struct arptab *atab;
 
 	while (arptab_current < arptab_size) {
@@ -3099,6 +3245,25 @@ char *PhysAddr;
 	return(1);
 	}
 #endif
+#ifdef freebsd2
+	struct rt_msghdr *rtm;
+	struct sockaddr_inarp *sin;
+	struct sockaddr_dl *sdl;
+	extern int h_errno;
+
+	while (rtnext < lim) {
+		rtm = (struct rt_msghdr *)rtnext;
+		sin = (struct sockaddr_inarp *)(rtm + 1);
+		sdl = (struct sockaddr_dl *)(sin + 1);
+		rtnext += rtm->rtm_msglen;
+		if (sdl->sdl_alen) {
+			*IPAddr = sin->sin_addr.s_addr;
+			bcopy((char *) LLADDR(sdl), PhysAddr, sdl->sdl_alen);
+			*ifIndex = sdl->sdl_index;
+			return(1);
+		}
+	}
+#endif /* freebsd2 */
 	return(0);	    /* "EOF" */
 }
 
@@ -3211,7 +3376,7 @@ struct in_ifaddr *Retin_ifaddr;
 		    ia = in_ifaddr.ia_next;
 		}
 
-#ifndef netbsd1
+#if !defined(netbsd1) && !defined(freebsd2)
 		ifnet.if_addrlist = (struct ifaddr *)ia;     /* WRONG DATA TYPE; ONLY A FLAG */
 #endif
 /*		ifnet.if_addrlist = (struct ifaddr *)&ia->ia_ifa;   */  /* WRONG DATA TYPE; ONLY A FLAG */
@@ -3336,6 +3501,13 @@ u_char *EtherAddr;
 	    if (i != Index) return(-1);     /* Error, doesn't exist */
 	}
 
+#ifdef freebsd2
+	    if (saveifnet.if_type != IFT_ETHER)
+	    {
+		bzero(EtherAddr, sizeof(arpcom.ac_enaddr));
+		return(0);	/* Not an ethernet if */
+	    }
+#endif
 	/*
 	 *  the arpcom structure is an extended ifnet structure which
 	 *  contains the ethernet address.
@@ -3348,7 +3520,7 @@ u_char *EtherAddr;
 	    bzero(EtherAddr, sizeof(arpcom.ac_enaddr));
 
 	} else {
-#if defined(sunV3) || defined(sparc)
+#if defined(sunV3) || defined(sparc) || defined(freebsd2)
 	    bcopy((char *) &arpcom.ac_enaddr, EtherAddr, sizeof (arpcom.ac_enaddr));
 #endif
 #ifdef mips
