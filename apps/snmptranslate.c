@@ -68,6 +68,8 @@ SOFTWARE.
 
 #include "version.h"
 
+int show_all_matched_objects (FILE *, const char *, oid *, size_t *, int);
+
 void usage(void)
 {
   fprintf(stderr,
@@ -115,19 +117,23 @@ int main(int argc, char *argv[])
     int description = 0;
     int print = 0;
     int find_best = 0;
+    int find_all = 0;
     char n_opt[] = "n";
     
     /*
      * usage: snmptranslate name
      */
     snmp_oid_toggle_options(n_opt);
-    while ((arg = getopt(argc, argv, "VhndRrwWbpafsSm:M:D:P:tT:O:")) != EOF){
+    while ((arg = getopt(argc, argv, "VhndRrwWbBpafsSm:M:D:P:tT:O:")) != EOF){
 	switch(arg) {
 	case 'h':
 	    usage();
             exit(1);
 	case 'b':
             find_best = 1;
+            break;
+	case 'B':
+            find_all = 1;
             break;
 	case 'n':
 	    fprintf(stderr, "Warning: -n option is deprecated - use -On\n");
@@ -282,6 +288,14 @@ int main(int argc, char *argv[])
 	    fprintf(stderr, "Unknown object identifier: %s\n", current_name);
 	    exit(2);
 	}
+    } else if (find_all) {
+        if (0 == show_all_matched_objects(stdout, current_name,
+                                name, &name_length, description)) {
+            fprintf(stderr, "Unable to find a matching object identifier for \"%s\"\n",
+                   current_name);
+            exit(1);
+        }
+	    exit(0);
     } else if (find_best) {
         if (0 == get_wild_node(current_name, name, &name_length)) {
             fprintf(stderr, "Unable to find a matching object identifier for \"%s\"\n",
@@ -309,3 +323,32 @@ int main(int argc, char *argv[])
     }
     return (0);
 }
+
+/*
+ * Show all object identifiers that match the pattern.
+ */
+
+int show_all_matched_objects( FILE *fp,
+	const char *patmatch,
+	oid *name,
+	size_t *name_length,
+	int f_desc) /* non-zero if descriptions should be shown */
+{
+    int result, count = 0;
+	size_t savlen = *name_length;
+	clear_tree_flags(get_tree_head());
+
+	while (1) {
+		*name_length = savlen;
+		result = get_wild_node(patmatch, name, name_length);
+		if (!result) break;
+		count ++;
+
+		fprint_objid(fp, name, *name_length);
+		if (f_desc)
+			fprint_description(fp, name, *name_length);
+	}
+
+	return (count);
+}
+

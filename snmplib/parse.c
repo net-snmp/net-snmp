@@ -944,21 +944,35 @@ compute_match(const char *search_base, const char *key) {
 #endif
 }
 
+/*
+ * Find the tree node that best matches the pattern string.
+ * Use the "reported" flag such that only one match
+ * is attempted for every node.
+ *
+ * Warning! This function may recurse.
+ *
+ * Caller _must_ invoke clear_tree_flags before first call
+ * to this function.  This function may be called multiple times
+ * to ensure that the entire tree is traversed.
+ */
 
 struct tree *
-find_best_tree_node(const char *name, struct tree *tree_top, u_int *match)
+find_best_tree_node(const char *pattrn, struct tree *tree_top, u_int *match)
 {
     struct tree *tp, *best_so_far = NULL, *retptr;
-    u_int old_match=MAX_BAD, new_match;
+    u_int old_match=MAX_BAD, new_match=MAX_BAD;
 
-    if (!name || !*name)
+    if (!pattrn || !*pattrn)
 	return(NULL);
 
     if (!tree_top)
         tree_top = get_tree_head();
 
     for ( tp = tree_top ; tp ; tp=tp->next_peer ) {
-        new_match = compute_match(tp->label, name);
+        if (!tp->reported)
+            new_match = compute_match(tp->label, pattrn);
+        tp->reported = 1;
+
         if (new_match < old_match) {
             best_so_far = tp;
             old_match = new_match;
@@ -966,7 +980,7 @@ find_best_tree_node(const char *name, struct tree *tree_top, u_int *match)
         if (new_match == 0)
             break;  /* this is the best result we can get */
         if (tp->child_list) {
-            retptr = find_best_tree_node(name, tp->child_list, &new_match);
+            retptr = find_best_tree_node(pattrn, tp->child_list, &new_match);
             if (new_match < old_match) {
                 best_so_far = retptr;
                 old_match = new_match;
