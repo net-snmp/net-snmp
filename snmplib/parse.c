@@ -2349,6 +2349,10 @@ parse(fp, root)
             state = IN_MIB;
             if (mib_warnings) fprintf (stderr, "Parsing MIB: %s\n", name);
             current_module = which_module( name );
+            if ( current_module == -1 ) {
+              new_module(name, File);
+              current_module = which_module(name);
+            }
             while ((type = get_token (fp, token, MAXTOKEN)) != ENDOFFILE)
                 if (type == BEGIN) break;
             break;
