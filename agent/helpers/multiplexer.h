@@ -1,6 +1,7 @@
 /* The multiplexer helper */
 
-/** @name multiplexer @{ */
+/** @name multiplexer
+ *  @{ */
 
 /** @struct mib_handler_methods
  *  Defines the subhandlers to be called by the multiplexer helper

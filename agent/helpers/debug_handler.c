@@ -15,8 +15,8 @@
 #include <dmalloc.h>
 #endif
 
-/** @defgroup debug: print out debugging information about the handler
- *  chain being called.  This is a useful module for run-time
+/** @defgroup debug debug: print out debugging information about the handler chain being called.
+ *  This is a useful module for run-time
  *  debugging of requests as the pass this handler in a calling chain.
  *  All debugging output is done via the standard debugging routines
  *  with a token name of "helper:debug", so use the -Dhelper:debug
