@@ -5,7 +5,71 @@
  */
 
 #include "mib_module_config.h"
-#include "../common_header.h"
+
+#include <config.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#if HAVE_SYS_PROTOSW_H
+#include <sys/protosw.h>
+#endif
+
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#define _KERNEL 1
+#define _I_DEFINED_KERNEL
+#endif
+#include <net/if.h>
+#if HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+#ifdef _I_DEFINED_KERNEL
+#undef _KERNEL
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+#if HAVE_NETINET_IN_PCB_H
+#include <netinet/in_pcb.h>
+#endif
+
+
+#if defined(osf4) || defined(aix4) || defined(hpux10)
+/* these are undefed to remove a stupid warning on osf compilers
+   because they get redefined with a slightly different notation of the
+   same value.  -- Wes */
+#undef TCP_NODELAY
+#undef TCP_MAXSEG
+#endif
+#include <netinet/tcp.h>
+#if HAVE_NETINET_TCP_TIMER_H
+#include <netinet/tcp_timer.h>
+#endif
+#if HAVE_NETINET_TCP_VAR_H
+#include <netinet/tcp_var.h>
+#endif
+#if HAVE_NETINET_TCP_FSM_H
+#include <netinet/tcp_fsm.h>
+#endif
+#if HAVE_SYS_TCPIPSTATS_H
+#include <sys/tcpipstats.h>
+#endif
+
+
+
+#include "mibincl.h"
+#include <nlist.h>
+
+#ifdef hpux
+#undef OBJID
+#include <sys/mib.h>
+#include <netinet/mib_kern.h>
+#undef  OBJID
+#define OBJID                   ASN_OBJECT_ID
+#endif /* hpux */
+
+/* #include "../common_header.h" */
 #include "tcp.h"
 
 

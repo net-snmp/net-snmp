@@ -35,7 +35,17 @@ PERFORMANCE OF THIS SOFTWARE.
 #define IN_SNMP_VARS_C
 
 #include <config.h>
-#include "common_header.h"
+#include <sys/types.h>
+#include <sys/time.h>
+
+#include <nlist.h>
+
+#include "mib.h"
+#include "mibincl.h"
+#include "m2m.h"
+#include "snmp_vars_m2m.h"
+
+/* #include "common_header.h" */
 #include "mibgroup/mib_module_includes.h"
 #include "read_config.h"
 #include "mib_module_config.h"
