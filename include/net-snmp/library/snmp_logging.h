@@ -50,7 +50,12 @@ extern          "C" {
     void            snmp_enable_calllog(void);
 
 #if HAVE_STDARG_H
+# if !defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
     int             snmp_log(int priority, const char *format, ...);
+# else
+    int             snmp_log(int priority, const char *format, ...)
+                    	__attribute__ ((__format__ (__printf__, 2, 3)));
+# endif
 #else
     int             snmp_log(va_alist);
 #endif

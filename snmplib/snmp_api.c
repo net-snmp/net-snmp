@@ -3651,7 +3651,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
     }
     sptr = find_sec_mod(msg_sec_model);
     if (!sptr) {
-        snmp_log(LOG_WARNING, "unknown security model: %d\n",
+        snmp_log(LOG_WARNING, "unknown security model: %ld\n",
                  msg_sec_model);
         snmp_increment_statistic(STAT_SNMPUNKNOWNSECURITYMODELS);
         DEBUGINDENTLESS();
@@ -3736,7 +3736,7 @@ snmpv3_parse(netsnmp_pdu *pdu,
         ret_val = (*sptr->decode) (&parms);
     } else {
         DEBUGINDENTLESS();
-        snmp_log(LOG_WARNING, "security service %d can't decode packets\n",
+        snmp_log(LOG_WARNING, "security service %ld can't decode packets\n",
                  msg_sec_model);
         return (-1);
     }
