@@ -6,9 +6,9 @@ PREFIX_DOS=
 PERL=
 NMAKE=nmake /nologo
 
-all : libs apps snmptrapd snmpd
+all : libs apps snmptrapd snmpd local
 
-clean : apps_clean libs_clean snmptrapd_clean snmpd_clean
+clean : apps_clean libs_clean snmptrapd_clean snmpd_clean local_clean
 
 !IF "$(SDK)" == "true"
 snmpd : snmpdsdk_
@@ -36,6 +36,10 @@ libs_clean : libagent_clean libhelpers_clean libsnmp_clean netsnmpmibs_clean
 apps : snmpdf snmpset snmpusm snmptest snmptrap snmpvacm snmpwalk snmpdelta snmptable snmpstatus snmpbulkget snmpget snmpgetnext snmpbulkwalk snmptranslate encode_keychange snmpnetstat
 
 apps_clean : snmpdf_clean snmpset_clean snmpusm_clean snmptest_clean snmptrap_clean snmpvacm_clean snmpwalk_clean snmpdelta_clean snmptable_clean snmpstatus_clean snmpbulkget_clean snmpget_clean snmpgetnext_clean snmpbulkwalk_clean snmptranslate_clean encode_keychange_clean snmpnetstat_clean
+
+local : snmpconf mib2c traptoemail
+
+local_clean : snmpconf_clean mib2c_clean traptoemail_clean
 
 perl :
 !IF "$(LINKTYPE)" == "static"
@@ -239,6 +243,21 @@ snmpdsdk_ ::
 	$(NMAKE) all
 	cd ..
 
+snmpconf ::
+	cd local
+	$(NMAKE) snmpconf
+	cd ..
+
+mib2c ::
+	cd local
+	$(NMAKE) mib2c
+	cd ..
+
+traptoemail ::
+	cd local
+	$(NMAKE) traptoemail
+	cd ..
+
 ##############
 #
 # Clean
@@ -373,6 +392,21 @@ snmpdsdk_clean_ ::
 	$(NMAKE) clean
 	cd ..
 
+snmpconf_clean ::
+	cd local
+	$(NMAKE) snmpconf_clean
+	cd ..
+
+mib2c_clean ::
+	cd local
+	$(NMAKE) mib2c_clean
+	cd ..
+
+traptoemail_clean ::
+	cd local
+	$(NMAKE) traptoemail_clean
+	cd ..
+
 ##############
 
 help ::
@@ -393,6 +427,9 @@ help ::
         @-echo "                snmpvacm snmpwalk                             "
         @-echo "                                                              "
         @-echo "apps_clean      (clean all the apps)                          "
+        @-echo "                                                              "
+        @-echo "local           snmpconf, mib2c, traptoemail                  "
+        @-echo "local_clean     snmpconf_clean, mib2c_clean, traptoemail_clean"
         @-echo "                                                              "
         @-echo "snmptrapd       Trap daemon                                   "
         @-echo "snmptrapd_clean Trap daemon clean                             "
@@ -434,12 +471,19 @@ install ::
 
 	@-echo Copying compiled programs to $(PREFIX_DOS)\bin
         @-Copy win32\bin\$(CFG)\*.exe $(PREFIX_DOS)\bin > NUL:
-        @-Copy local\snmpconf $(PREFIX_DOS)\bin > NUL:
+
+	@-echo Copying (local) scripts to $(PREFIX_DOS)\bin
+	@-Copy win32\bin\$(CFG)\snmpconf.pl $(PREFIX_DOS)\bin > NUL:
+	@-Copy win32\bin\$(CFG)\mib2c.pl $(PREFIX_DOS)\bin > NUL:
+	@-Copy win32\bin\$(CFG)\traptoemail.pl $(PREFIX_DOS)\bin > NUL:
 
 	@-echo Copying snmpconf files to $(PREFIX_DOS)\share\snmp\snmpconf-data\snmp-data
         @-Copy local\snmpconf.dir\snmp-data\*.* $(PREFIX_DOS)\share\snmp\snmpconf-data\snmp-data > NUL:
         @-Copy local\snmpconf.dir\snmpd-data\*.* $(PREFIX_DOS)\share\snmp\snmpconf-data\snmpd-data > NUL:
         @-Copy local\snmpconf.dir\snmptrapd-data\*.* $(PREFIX_DOS)\share\snmp\snmpconf-data\snmptrapd-data > NUL:
+
+	@-echo Copying mib2c config files to $(PREFIX_DOS)\share\snmp
+        @-Copy local\mib2c*.conf $(PREFIX_DOS)\share\snmp > NUL:
 
 	@-echo Copying header files to $(PREFIX_DOS)\include
         @-copy win32\net-snmp\*.h $(PREFIX_DOS)\include\net-snmp > NUL:
