@@ -322,7 +322,8 @@ var_smux_write(int action,
     smux_reg       *rptr;
     u_char          buf[SMUXMAXPKTSIZE], *ptr, sout[3], type;
     int             reterr;
-    size_t          len, var_len, datalen, name_length, packet_len;
+    size_t          var_len, datalen, name_length, packet_len;
+    int             len;
     long            reqid, errsts, erridx;
     u_char          var_type, *dataptr;
 
@@ -532,7 +533,7 @@ smux_accept(int sd)
     struct sockaddr_in in_socket;
     struct timeval  tv;
     int             fail, fd, alen;
-    size_t          length, len;
+    int             length, len;
 
     alen = sizeof(struct sockaddr_in);
     /*
@@ -631,7 +632,7 @@ smux_accept(int sd)
 int
 smux_process(int fd)
 {
-    size_t          length;
+    int             length;
     u_char          data[SMUXMAXPKTSIZE];
 
     length = recv(fd, (char *) data, SMUXMAXPKTSIZE, 0);
