@@ -501,12 +501,12 @@ main(argc, argv)
     init_snmp();
     init_mib();
     sprintf(miscfile,"%s/party.conf",SNMPLIBPATH);
-    if (read_party_database("/etc/party.conf") > 0){
+    if (read_party_database(miscfile) > 0){
 	fprintf(stderr, "Couldn't read party database from %s\n",miscfile);
 	exit(0);
     }
     sprintf(miscfile,"%s/context.conf",SNMPLIBPATH);
-    if (read_context_database("/etc/context.conf") > 0){
+    if (read_context_database(miscfile) > 0){
 	fprintf(stderr, "Couldn't read context database from %s\n",miscfile);
 	exit(0);
     }
