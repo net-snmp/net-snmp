@@ -1196,10 +1196,6 @@ create_subtree_cache(struct agent_snmp_session  *asp) {
         /* count the varbinds */
         ++vbcount;
         
-        if (varbind_ptr->type != ASN_NULL &&  /* skip previously answered */
-            !(MODE_IS_SET(asp->pdu->command)))
-            continue;
-
         /* find the owning tree */
         tp = find_subtree(varbind_ptr->name, varbind_ptr->name_length, NULL,
                           asp->pdu->contextName); /* WWW: only v3 pdu's have */
