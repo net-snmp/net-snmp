@@ -1957,6 +1957,19 @@ netsnmp_delete_subtree_cache(netsnmp_agent_session *asp)
 }
 
 int
+netsnmp_check_requests_error(netsnmp_request_info *requests)
+{
+    /*
+     * find any errors marked in the requests 
+     */
+    while (requests) {
+        if (requests->status != SNMP_ERR_NOERROR)
+            return requests->status;
+    }
+    return SNMP_ERR_NOERROR;
+}
+
+int
 netsnmp_check_requests_status(netsnmp_agent_session *asp,
                               netsnmp_request_info *requests,
                               int look_for_specific)
