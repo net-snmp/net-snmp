@@ -7,13 +7,6 @@
 #include <net-snmp/net-snmp-config.h>
 #include "mibII_common.h"
 
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 #if HAVE_SYS_PROTOSW_H
 #include <sys/protosw.h>
 #endif
@@ -69,12 +62,15 @@
 	 *
 	 *********************/
 
-                        /*
-			 * FreeBSD4 will set this explicitly,
-			 * other system may not even need it at all
-			 * But it doesn't do any harm to define it globally
-			 */
-int  hertz = 1000;
+                /*
+                 * FreeBSD4 *does* need an explicit variable 'hz'
+                 *   since this appears in a system header file.
+                 * But only define it under FreeBSD, since it
+                 *   breaks other systems (notable AIX)
+                 */
+#if freebsd4
+int  hz = 1000;
+#endif
 
         /*********************
 	 *
@@ -124,7 +120,7 @@ init_tcp(void)
     auto_nlist(TCP_SYMBOL, 0, 0);
 #endif
 #if freebsd4
-    hertz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
+    hz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
 #endif
 #ifdef solaris2
     init_kernel_sunos5();
@@ -344,7 +340,11 @@ tcp_handler(netsnmp_mib_handler          *handler,
         ret_value = tcpstat.tcps_drops;
         break;
     case TCPCURRESTAB:
+#ifdef USING_MIBII_TCPTABLE_MODULE
         ret_value = TCP_Count_Connections();
+#else
+        ret_value = 0;
+#endif
         type = ASN_GAUGE;
         break;
     case TCPINSEGS:
@@ -470,7 +470,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
         continue;
 
 	    }
-	    snmp_set_var_typed_value(request->requestvb, type,
+	    snmp_set_var_typed_value(request->requestvb, (u_char)type,
 			             (u_char *)&ret_value, sizeof(ret_value));
 	}
         break;

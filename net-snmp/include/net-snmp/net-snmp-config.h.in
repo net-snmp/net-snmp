@@ -38,6 +38,9 @@
 /* define if you are using the MD5 code ...*/
 #undef USE_INTERNAL_MD5
 
+/* define if you are using the codeS11 library ...*/
+#undef USE_PKCS
+
 /* add in recent CMU library extensions (not complete) */
 #undef CMU_COMPATIBLE
 
@@ -1122,6 +1125,9 @@
 #ifdef openbsd2
 #define OSTYPE OPENBSDID
 #endif
+#ifdef WIN32
+#define OSTYPE WIN32ID
+#endif
 /* unknown */
 #ifndef OSTYPE
 #define OSTYPE UNKNOWNID
@@ -1216,6 +1222,9 @@
 
 /* got in_addr_t? */
 #undef HAVE_IN_ADDR_T
+
+/* got ssize_t? */
+#undef HAVE_SSIZE_T
 
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX
@@ -1354,7 +1363,7 @@
 #define config_parse_dot_conf(w,x,y,z)
 #define config_add_mib(x)
   
-#ifdef WIN32
+#if defined (WIN32) || defined (mingw32) || defined (cygwin)
 #define ENV_SEPARATOR ";"
 #define ENV_SEPARATOR_CHAR ';'
 #else
@@ -1406,6 +1415,10 @@
 #   define NETSNMP_INLINE 
 #   undef NETSNMP_STATIC_INLINE
 #   define NETSNMP_STATIC_INLINE static
+#endif
+
+#ifndef NETSNMP_IMPORT
+#  define NETSNMP_IMPORT extern
 #endif
 
 #if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST) && !defined(NO_KMEM_USAGE)

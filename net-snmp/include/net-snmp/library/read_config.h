@@ -133,6 +133,8 @@ extern          "C" {
     const char     *get_configuration_directory(void);
     void            set_persistent_directory(const char *dir);
     const char     *get_persistent_directory(void);
+    void            set_temp_file_pattern(const char *pattern);
+    const char     *get_temp_file_pattern(void);
     void            handle_long_opt(const char *myoptarg);
 
 #ifdef __cplusplus

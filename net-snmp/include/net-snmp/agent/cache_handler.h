@@ -1,5 +1,5 @@
-#ifndef CACHE_H
-#define CACHE_H
+#ifndef NETSNMP_CACHE_HANDLER_H
+#define NETSNMP_CACHE_HANDLER_H
 
 /*
  * This caching helper provides a generalised (SNMP-manageable) caching
@@ -58,4 +58,4 @@ extern          "C" {
 #ifdef __cplusplus
 };
 #endif
-#endif
+#endif /* NETSNMP_CACHE_HANDLER_H */

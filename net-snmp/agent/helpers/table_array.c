@@ -704,7 +704,11 @@ process_set_group(netsnmp_index *o, void *c)
             context->tad->cb->set_free(ag);
 
         /** no more use for undo_info, so free it */
-        if (ag->undo_info) {
+        if (ag->row_created == 1) {
+            context->tad->cb->delete_row(ag->existing_row);
+            ag->existing_row = NULL;
+        }
+        else {
             context->tad->cb->delete_row(ag->undo_info);
             ag->undo_info = NULL;
         }

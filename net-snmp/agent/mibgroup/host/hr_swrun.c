@@ -465,7 +465,7 @@ var_hrswrun(struct variable * vp,
             int exact, size_t * var_len, WriteMethod ** write_method)
 {
     int             pid = 0;
-    static char     string[256];
+    static char     string[1024];
 #ifdef HAVE_SYS_PSTAT_H
     struct pst_status proc_buf;
 #elif defined(solaris2)
@@ -488,7 +488,7 @@ var_hrswrun(struct variable * vp,
 #endif
 #ifdef linux
     FILE           *fp;
-    char            buf[256];
+    char            buf[1024];
     int             i;
 #endif
     char           *cp;
@@ -1131,6 +1131,8 @@ int
 Get_Next_HR_SWRun(void)
 {
     int             pid;
+    if (procdir == NULL)
+      return -1;
     procentry_p = readdir(procdir);
 
     if (procentry_p == NULL)
@@ -1350,7 +1352,7 @@ End_HR_SWRun(void)
 int
 count_processes(void)
 {
-#if !(defined(linux) || defined(cygwin)) || defined(hpux10) || defined(hpux11) || defined(solaris2) || HAVE_KVM_GETPROCS
+#if !(defined(linux) || defined(cygwin) || defined(hpux10) || defined(hpux11) || defined(solaris2) || HAVE_KVM_GETPROCS || defined(dynix))
     int             i;
 #endif
     int             total = 0;

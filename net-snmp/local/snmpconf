@@ -10,6 +10,7 @@ use Getopt::Std;
 use Term::ReadLine;
 use IO::File;
 use Data::Dumper;
+use File::Copy;
 
 # globals
 %tokenitems=qw(line 1 info 1 comment 1);
@@ -159,15 +160,32 @@ Print("\n\nThe following files were created:\n\n");
 foreach my $i (@didfiles) {
     if ($didfile{$i} ne "1") {
 	if ($opts{'i'} || $opts{'I'}) {
-	    $opts{'I'} = "/usr/local/share/snmp" if (!$opts{'I'});
-	    system("mv $opts{'I'}/$i $opts{'I'}/$i.bak") if (-f "$opts{'I'}/$i");
-	    system("mv $didfile{$i} $opts{'I'}");
-	    Print("  $didfile{$i} installed in $opts{'I'}\n");
+	  $opts{'I'} = "/usr/local/share/snmp" if (!$opts{'I'});
+	  
+	  move ("$opts{'I'}/$i", "$opts{'I'}/$i.bak") if (-f "$opts{'I'}/$i");
+	  if (move ("$didfile{$i}", "$opts{'I'}")) {
+	    print("  $didfile{$i} installed in $opts{'I'}\n");	    
+	  }
+	  else {
+  	    print "\nCould not move file $didfile{$i} to $opts{'I'}/$i: $!\n";
+	    print ("File $didfile{$i} left in current directory\n");
+	  }
 	} elsif ($opts{'p'}) {
-	    system("mv $ENV{HOME}/.snmp/$i $ENV{HOME}/.snmp/$i.bak");
-	    system("mv $i $ENV{HOME}/.snmp");
-	    Print("  $didfile{$i} installed in $ENV{HOME}/.snmp\n");
-	} else {
+	  if (! (-d "$ENV{HOME}/.snmp") && ! (mkdir ("$ENV{HOME}/.snmp"))) {
+	    print "\nCould not create $ENV{HOME}/.snmp directory: $!\n";
+	    print ("File $didfile{$i} left in current directory\n");
+	  }
+	  else {	    
+	    move ("$ENV{HOME}/.snmp/$i", "$ENV{HOME}/.snmp/$i.bak") if (-f "$ENV{HOME}/.snmp/$i");
+	    if (move ("$didfile{$i}", "$ENV{HOME}/.snmp")) {
+	      print("  $didfile{$i} installed in $ENV{HOME}/.snmp\n");
+	    }
+	    else {
+	      print "\nCould not move file $didfile{$i} to $ENV{HOME}/.snmp: $!\n";
+	      print ("File $didfile{$i} left in current directory\n");
+  	    }
+	  }
+  	} else {
 	    Print("  $didfile{$i} ",
 	    ($i ne $didfile{$i})?"[ from $i specifications]":" ","\n");
 	    if ($opts{'d'}) {
@@ -592,6 +610,7 @@ sub read_config {
 	}
 	$alllines{$_}++;
     }
+    close(I);
 }
 
 sub display_menu {

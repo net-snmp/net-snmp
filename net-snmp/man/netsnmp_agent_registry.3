@@ -1,0 +1,109 @@
+.TH "Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc" 3 "19 Mar 2004" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Maintain a registry of MIB subtrees, together with related information regarding mibmodule, sessions, etc \- 
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBlookup_cache_context_s\fP"
+.br
+.ti -1c
+.RI "struct \fBlookup_cache_s\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBnetsnmp_set_lookup_cache_size\fP (int newsize)"
+.br
+.RI "\fIset the lookup cache size for optimized agent registration performance.\fP"
+.ti -1c
+.RI "int \fBnetsnmp_get_lookup_cache_size\fP (void)"
+.br
+.RI "\fIretrieves the current value of the lookup cache size\fP"
+.ti -1c
+.RI "int \fBunregister_mib_context\fP (oid *name, size_t len, int priority, int range_subid, oid range_ubound, const char *context)"
+.br
+.RI "\fIUnregisters an OID that has an associated context name value.\fP"
+.ti -1c
+.RI "int \fBnetsnmp_acm_check_subtree\fP (netsnmp_pdu *pdu, oid *name, size_t namelen)"
+.br
+.RI "\fIchecks to see if everything within a given subtree is either: in view, not in view, or possibly both.\fP"
+.in -1c
+.SH "FUNCTION DOCUMENTATION"
+.PP 
+.SS "int netsnmp_acm_check_subtree (netsnmp_pdu * pdu, oid * name, size_t namelen)"
+.PP
+checks to see if everything within a given subtree is either: in view, not in view, or possibly both.
+.PP
+If the entire subtree is not-in-view we can use this information to skip calling the sub-handlers entirely. 
+.PP
+\fBReturns: \fP
+.in +1c
+0 if entire subtree is accessible, 5 if not and 7 if portions are both. 1 on error (illegal pdu version). 
+.PP
+Definition at line 1194 of file agent_registry.c.
+.PP
+References snmp_pdu::flags, snmp_call_callbacks(), and snmp_pdu::version.
+.SS "int netsnmp_get_lookup_cache_size (void)"
+.PP
+retrieves the current value of the lookup cache size
+.PP
+\fBReturns: \fP
+.in +1c
+the current lookup cache size 
+.PP
+Definition at line 1263 of file agent_registry.c.
+.PP
+Referenced by unregister_mib_context().
+.SS "void netsnmp_set_lookup_cache_size (int newsize)"
+.PP
+set the lookup cache size for optimized agent registration performance.
+.PP
+\fBParameters: \fP
+.in +1c
+.TP
+\fB\fInewsize\fP\fP
+set to the maximum size of a cache for a given context. Set to 0 to completely disable caching, or to -1 to set to the default cache size (8), or to a number of your chosing. The rough guide is that it should be equal to the maximum number of simultanious managers you expect to talk to the agent (M) times 80% (or so, he says randomly) the average number (N) of varbinds you expect to receive in a given request for a manager. ie, M times N. Bigger does NOT necessarily mean better. Certainly 16 should be an upper limit. 32 is the hard coded limit. 
+.PP
+Definition at line 1250 of file agent_registry.c.
+.PP
+References netsnmp_set_lookup_cache_size().
+.PP
+Referenced by netsnmp_set_lookup_cache_size(), and unregister_mib_context().
+.SS "int unregister_mib_context (oid * name, size_t len, int priority, int range_subid, oid range_ubound, const char * context)"
+.PP
+Unregisters an OID that has an associated context name value.
+.PP
+Typically used when a module has multiple contexts defined. The parameters priority, range_subid, and range_ubound should be used in conjunction with agentx, see RFC 2741, otherwise these values should always be 0.
+.PP
+\fBParameters: \fP
+.in +1c
+.TP
+\fB\fIname\fP\fP
+the specific OID to unregister if it conatins the associated context.
+.TP
+\fB\fIlen\fP\fP
+the length of the OID, use OID_LENGTH macro.
+.TP
+\fB\fIpriority\fP\fP
+a value between 1 and 255, used to achieve a desired configuration when different sessions register identical or overlapping regions. Subagents with no particular knowledge of priority should register with the default value of 127.
+.TP
+\fB\fIrange_subid\fP\fP
+permits specifying a range in place of one of a subtree sub-identifiers. When this value is zero, no range is being specified.
+.TP
+\fB\fIrange_ubound\fP\fP
+the upper bound of a sub-identifier's range. This field is present only if range_subid is not 0.
+.TP
+\fB\fIcontext\fP\fP
+a context name that has been created
+.PP
+\fBReturns: \fP
+.in +1c
+.PP
+Definition at line 885 of file agent_registry.c.
+.PP
+References netsnmp_get_lookup_cache_size(), netsnmp_oid_equals(), netsnmp_set_lookup_cache_size(), and snmp_call_callbacks().

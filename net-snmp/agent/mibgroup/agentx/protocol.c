@@ -612,7 +612,7 @@ agentx_realloc_build_header(u_char ** buf, size_t * buf_len,
     DEBUGMSG(("dumpv_send", "  Version:\t%d\n", (int) *(*buf + ilen)));
     DEBUGPRINTINDENT("dumpv_send");
     DEBUGMSG(("dumpv_send", "  Command:\t%d (%s)\n", pdu->command,
-              agentx_cmd(pdu->command)));
+              agentx_cmd((u_char)pdu->command)));
     DEBUGPRINTINDENT("dumpv_send");
     DEBUGMSG(("dumpv_send", "  Flags:\t%02x\n", (int) *(*buf + ilen + 2)));
 
@@ -843,7 +843,8 @@ _agentx_realloc_build(u_char ** buf, size_t * buf_len, size_t * out_len,
     case AGENTX_MSG_GETBULK:
         DEBUGDUMPHEADER("send", "GetBulk Non-Repeaters");
         if (!agentx_realloc_build_short
-            (buf, buf_len, out_len, allow_realloc, pdu->non_repeaters,
+            (buf, buf_len, out_len, allow_realloc, 
+            (u_short)pdu->non_repeaters,
              network_order)) {
             DEBUGINDENTLESS();
             DEBUGINDENTLESS();
@@ -853,7 +854,8 @@ _agentx_realloc_build(u_char ** buf, size_t * buf_len, size_t * out_len,
 
         DEBUGDUMPHEADER("send", "GetBulk Max-Repetitions");
         if (!agentx_realloc_build_short
-            (buf, buf_len, out_len, allow_realloc, pdu->max_repetitions,
+            (buf, buf_len, out_len, allow_realloc, 
+            (u_short)pdu->max_repetitions,
              network_order)) {
             DEBUGINDENTLESS();
             DEBUGINDENTLESS();
@@ -901,10 +903,12 @@ _agentx_realloc_build(u_char ** buf, size_t * buf_len, size_t * out_len,
         DEBUGINDENTLESS();
 
         if (!agentx_realloc_build_short
-            (buf, buf_len, out_len, allow_realloc, pdu->errstat,
+            (buf, buf_len, out_len, allow_realloc, 
+            (u_short)pdu->errstat,
              network_order)
             || !agentx_realloc_build_short(buf, buf_len, out_len,
-                                           allow_realloc, pdu->errindex,
+                                           allow_realloc, 
+                                           (u_short)pdu->errindex,
                                            network_order)) {
             DEBUGINDENTLESS();
             return 0;
@@ -1174,13 +1178,13 @@ agentx_parse_oid(u_char * data, size_t * length, int *inc,
     }
 
     *oid_len = (prefix ? n_subid + 5 : n_subid);
-#ifndef solaris2
+
     DEBUGINDENTLESS();
     DEBUGPRINTINDENT("dumpv_recv");
     DEBUGMSG(("dumpv_recv", "OID: "));
     DEBUGMSGOID(("dumpv_recv", oid_buf, *oid_len));
     DEBUGMSG(("dumpv_recv", "\n"));
-#endif
+
     return buf_ptr;
 }
 

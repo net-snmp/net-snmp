@@ -36,11 +36,23 @@ SUBDIRS		= snmpnetstat
 # build variables.
 #
 
+# USELIBS/USEAGENTLIBS are for dependencies
 USELIBS		= ../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) 
-USETRAPLIBS	= ../agent/libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) ../agent/libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION) ../agent/helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION) $(USELIBS)
+USEAGENTLIBS	= ../agent/libnetsnmpagent.$(LIB_EXTENSION)$(LIB_VERSION) ../agent/libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION) ../agent/helpers/libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION) $(USELIBS)
+
+#
+# link path in src dir
 LOCAL_LIBS	= -L../snmplib -L../agent -L../agent/helpers
 LIBS		= $(USELIBS) @LIBS@
-TRAPLIBS	= $(USETRAPLIBS) @AGENTLIBS@
+
+#
+# hack for compiling trapd when agent is disabled
+TRAPDWITHAGENT  = $(USETRAPLIBS) @AGENTLIBS@
+TRAPDWITHOUTAGENT = $(LIBS)
+
+# these will be set by configure to one of the above 2 lines
+TRAPLIBS	= @TRAPLIBS@ @WRAPLIBS@
+USETRAPLIBS	= @USETRAPLIBS@
 
 CPPFLAGS	= -I$(top_srcdir)/include -I../include \
 		  -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
@@ -89,7 +101,7 @@ snmptest$(EXEEXT):    snmptest.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptest.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 
 
 snmptrapd$(EXEEXT):    $(TRAPD_OBJECTS) $(USETRAPLIBS) $(INSTALLLIBS)
-	$(LINK) -o $@ $(TRAPD_OBJECTS) $(INSTALLLIBS) $(LOCAL_LIBS) ${LDFLAGS} ${TRAPLIBS} @WRAPLIBS@
+	$(LINK) -o $@ $(TRAPD_OBJECTS) $(INSTALLLIBS) $(LOCAL_LIBS) ${LDFLAGS} ${TRAPLIBS}
 
 snmptrap$(EXEEXT):    snmptrap.$(OSUFFIX) $(USELIBS)
 	$(LINK) -o $@ snmptrap.$(OSUFFIX) $(LOCAL_LIBS) ${LDFLAGS} ${LIBS} 

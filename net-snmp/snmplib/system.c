@@ -473,7 +473,7 @@ get_myaddr(void)
          */
         remote_in_addr.sin_family = AF_INET;
         remote_in_addr.sin_port = htons(IPPORT_ECHO);
-        remote_in_addr.sin_addr.s_addr = inet_addr("128.22.33.11");
+        remote_in_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
         result =
             connect(hSock, (LPSOCKADDR) & remote_in_addr,
                     sizeof(SOCKADDR));
@@ -537,7 +537,10 @@ winsock_startup(void)
     int             i;
     static char     errmsg[100];
 
-    VersionRequested = MAKEWORD(1, 1);
+	/* winsock 1: use MAKEWORD(1,1) */
+	/* winsock 2: use MAKEWORD(2,2) */
+
+    VersionRequested = MAKEWORD(1,1);
     i = WSAStartup(VersionRequested, &stWSAData);
     if (i != 0) {
         if (i == WSAVERNOTSUPPORTED)

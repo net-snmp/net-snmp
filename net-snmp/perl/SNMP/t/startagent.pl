@@ -1,7 +1,7 @@
 # common parameters used in SNMP::Session creation and tests
 $agent_host = 'localhost';
-$agent_port = 7000;
-$trap_port = 8000;
+$agent_port = 8765;
+$trap_port = 8764;
 $mibdir = '/usr/local/share/snmp/mibs';
 $comm = 'v1_private';
 $comm2 = 'v2c_private';
@@ -28,37 +28,63 @@ $bad_version = 7;
 
 local $snmpd_cmd;
 local $snmptrapd_cmd;
-
 my $line;
+
+if ($^O =~ /win32/i) {
+  require Win32::Process;
+}
 
 sub snmptest_cleanup {
     sleep 1; # strangely we need to wait for pid files to appear ??
     if ((-e "t/snmpd.pid") && (-r "t/snmpd.pid")) {
+        #warn "\nStopping agents for test script $0\n";
         # Making sure that any running agents are killed.
 	# warn "killing snmpd:", `cat t/snmpd.pid`, "\n";
-	system "kill `cat t/snmpd.pid` > /dev/null 2>&1";
+        if ($^O !~ /win32/i) {
+          system "kill `cat t/snmpd.pid` > /dev/null 2>&1";
+        }
+        else {
+          open(H, "<t/snmpd.pid");
+          my $pid = (<H>);
+          close (H);
+          if ($pid > 0) {
+            Win32::Process::KillProcess($pid, 0)
+          }
+        }
 	unlink "t/snmpd.pid";
     }
     if ((-e "t/snmptrapd.pid") && (-r "t/snmptrapd.pid")) {
         # Making sure that any running agents are killed.
 	# warn "killing snmptrap:", `cat t/snmptrapd.pid`, "\n";
-	system "kill `cat t/snmptrapd.pid` > /dev/null 2>&1";
+        if ($^O !~ /win32/i) {
+          system "kill `cat t/snmptrapd.pid` > /dev/null 2>&1";
+        }
+        else {
+          open(H, "<t/snmptrapd.pid");
+          my $pid = (<H>);
+          close (H);
+          if ($pid > 0) {
+            Win32::Process::KillProcess($pid, 0)
+          }
+        }
+          
 	unlink "t/snmptrapd.pid";
     }
 }
 snmptest_cleanup();
+
 #Open the snmptest.cmd file and get the info
 if (open(CMD, "<t/snmptest.cmd")) {
   while ($line = <CMD>) {
-    if ($line =~ /HOST\s*=>\s*(\S+)/) {
+    if ($line =~ /HOST\s*=>\s*(.*?)\s+$/) {
       $agent_host = $1;
-    } elsif ($line =~ /MIBDIR\s*=>\s*(\S+)/) {
+    } elsif ($line =~ /MIBDIR\s*=>\s*(.*?)\s+$/) {
       $mibdir = $1;
-    } elsif ($line =~ /AGENT_PORT\s*=>\s*(\S+)/) {
+    } elsif ($line =~ /AGENT_PORT\s*=>\s*(.*?)\s+$/) {
       $agent_port = $1;
-    } elsif ($line =~ /SNMPD\s*=>\s*(\S+)/) {
+    } elsif ($line =~ /SNMPD\s*=>\s*(.*?)\s+$/) {
       $snmpd_cmd = $1;
-    } elsif ($line =~ /SNMPTRAPD\s*=>\s*(\S+)/) {
+    } elsif ($line =~ /SNMPTRAPD\s*=>\s*(.*?)\s+$/) {
       $snmptrapd_cmd = $1;
     }
   } # end of while
@@ -67,7 +93,10 @@ if (open(CMD, "<t/snmptest.cmd")) {
   die ("Could not start agent. Couldn't find snmptest.cmd file\n");
 }
 
+#warn "\nStarting agents for test script $0\n";
+
 if ($^O !~ /win32/i) {
+  # Unix
   if ($snmpd_cmd) {
     if (-r $snmpd_cmd and -x $snmpd_cmd) {
       $basedir = `pwd`;
@@ -86,6 +115,27 @@ if ($^O !~ /win32/i) {
     }
   }
 }
+else {
+  # Windows
+  if ($snmpd_cmd) {
+      if (-r $snmpd_cmd) {
+        #print STDERR "start \"SNMPD\" /min \"$snmpd_cmd\" -r -Lf t/snmptest.log -C -c t/snmptest.conf -p t/snmpd.pid $agent_port > nul\n";
+      system "start \"SNMPD\" /min \"$snmpd_cmd\" -r -Lf t/snmptest.log -C -c t/snmptest.conf -p t/snmpd.pid $agent_port > nul";
+    } else {
+      warn("Couldn't run snmpd\n");
+    }
+  }
+  if ($snmptrapd_cmd) {
+    if (-r $snmptrapd_cmd) {
+      #print STDERR "start /min \"SNMPTRAPD\" \"$snmptrapd_cmd\" -Lf t/snmptrapdtest.log -p t/snmptrapd.pid -C -c t/snmptest.conf -C $trap_port > nul\n";
+      system "start /min \"SNMPTRAPD\" \"$snmptrapd_cmd\" -Lf t/snmptrapdtest.log -p t/snmptrapd.pid -C -c t/snmptest.conf -C $trap_port > nul";
+    } else {
+      warn("Couldn't run snmptrapd\n");
+    }
+  }
+  sleep 2; # Give programs time to start
+
+} 
 
 1;
 

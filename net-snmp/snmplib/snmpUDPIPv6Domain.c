@@ -19,6 +19,22 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+
+#define HAVE_IF_NAMETOINDEX
+#if HAVE_WINSOCK_H
+    /*
+     *  Windows IPv6 support is part of WinSock2 only
+     */
+#include <winsock2.h>
+#include <ws2tcpip.h>
+typedef unsigned char uint8_t;
+#undef  HAVE_IF_NAMETOINDEX
+
+extern int         inet_pton(int, const char*, void*);
+extern const char *inet_ntop(int, const void*, char*, size_t);
+const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
+#endif
+
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -237,14 +253,14 @@ netsnmp_udp6_transport(struct sockaddr_in6 *addr, int local)
      */
 
 #ifdef  SO_SNDBUF
-    if (setsockopt(t->sock, SOL_SOCKET, SO_SNDBUF, &udpbuf, sizeof(int)) != 0){
+    if (setsockopt(t->sock, SOL_SOCKET, SO_SNDBUF, (void *)&udpbuf, sizeof(int)) != 0){
         DEBUGMSGTL(("netsnmp_udp6", "couldn't set SO_SNDBUF to %d bytes: %s\n",
 		    udpbuf, strerror(errno)));
     }
 #endif                          /*SO_SNDBUF */
 
 #ifdef  SO_RCVBUF
-    if (setsockopt(t->sock, SOL_SOCKET, SO_RCVBUF, &udpbuf, sizeof(int)) != 0){
+    if (setsockopt(t->sock, SOL_SOCKET, SO_RCVBUF, (void *)&udpbuf, sizeof(int)) != 0){
         DEBUGMSGTL(("netsnmp_udp6", "couldn't set SO_RCVBUF to %d bytes: %s\n",
 		    udpbuf, strerror(errno)));
     }
@@ -401,12 +417,16 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
 	       *
 	       */
 	        char *scope_id;
-		unsigned int if_index = 0;
+#ifdef HAVE_IF_NAMETOINDEX
+	        unsigned int if_index = 0;
+#endif
                 *cp = '\0';
 		scope_id = strchr(peername + 1, '%');
 		if (scope_id != NULL) {
 		    *scope_id = '\0';
+#ifdef HAVE_IF_NAMETOINDEX
 		    if_index = if_nametoindex(scope_id + 1);
+#endif
 		}
                 if (*(cp + 1) == ':') {
                     if (atoi(cp + 2) != 0 &&
@@ -416,7 +436,9 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
                                     "IPv6 address with port suffix :%d\n",
                                     atoi(cp + 2)));
                         addr->sin6_port = htons(atoi(cp + 2));
-			addr->sin6_scope_id = if_index;
+#ifdef HAVE_IF_NAMETOINDEX
+                        addr->sin6_scope_id = if_index;
+#endif
                         goto resolved;
                     }
                 } else {
@@ -426,7 +448,9 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
                         DEBUGMSGTL(("netsnmp_sockaddr_in6",
                                     "IPv6 address with square brankets\n"));
                         addr->sin6_port = htons(SNMP_PORT);
-			addr->sin6_scope_id = if_index;
+#ifdef HAVE_IF_NAMETOINDEX
+                        addr->sin6_scope_id = if_index;
+#endif
                         goto resolved;
                     }
                 }
@@ -440,12 +464,16 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
         cp = strrchr(peername, ':');
         if (cp != NULL) {
 	    char *scope_id;
+#ifdef HAVE_IF_NAMETOINDEX
 	    unsigned int if_index = 0;
-            *cp = '\0';
+#endif
+	    *cp = '\0';
 	    scope_id = strchr(peername + 1, '%');
 	    if (scope_id != NULL) {
-	      *scope_id = '\0';
-	      if_index = if_nametoindex(scope_id + 1);
+	        *scope_id = '\0';
+#ifdef HAVE_IF_NAMETOINDEX
+	        if_index = if_nametoindex(scope_id + 1);
+#endif
 	    }
             if (atoi(cp + 1) != 0 &&
                 inet_pton(AF_INET6, peername,
@@ -454,7 +482,9 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
                             "IPv6 address with port suffix :%d\n",
                             atoi(cp + 1)));
                 addr->sin6_port = htons(atoi(cp + 1));
-		addr->sin6_scope_id = if_index;
+#ifdef HAVE_IF_NAMETOINDEX
+                addr->sin6_scope_id = if_index;
+#endif
                 goto resolved;
             }
 	    if (scope_id != NULL) {
@@ -845,6 +875,9 @@ masked_address_are_equal(int af, struct sockaddr_storage *from,
                       &((struct sockaddr_in6 *) from)->sin6_addr,
                       &((struct sockaddr_in6 *) mask)->sin6_addr,
                       &((struct sockaddr_in6 *) &ss)->sin6_addr);
+#ifndef IN6_ARE_ADDR_EQUAL
+#define IN6_ARE_ADDR_EQUAL(a,b) IN6_ADDR_EQUAL(a,b)
+#endif
         if (IN6_ARE_ADDR_EQUAL(&((struct sockaddr_in6 *) &ss)->sin6_addr,
                                &((struct sockaddr_in6 *) network)->
                                sin6_addr) == 1) {

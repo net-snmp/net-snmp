@@ -25,7 +25,6 @@ INCLUDESUBDIRHEADERS=all_helpers.h \
         table_data.h \
         table_dataset.h \
 	table_array.h \
-	table_mfd.h \
         table.h \
         table_iterator.h \
 	mode_end_call.h
@@ -56,7 +55,6 @@ SRCS =  all_helpers.c \
 	serialize.c \
 	stash_cache.c \
 	table_array.c \
-	table_mfd.c \
 	table_iterator.c \
 	table_data.c \
 	table_dataset.c \

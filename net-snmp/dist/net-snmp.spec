@@ -20,8 +20,9 @@
 #
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
-Version: cvs-main
-Release: 2
+Version: 5.1.1
+# update release for vendor release. (eg 1.rh9, 1.rh72, 1.ydl3, 1.ydl23)
+Release: 1
 URL: http://net-snmp.sourceforge.net/
 Copyright: BSDish
 Group: System Environment/Daemons
@@ -30,8 +31,7 @@ Prereq: openssl
 Obsoletes: cmu-snmp ucd-snmp ucd-snmp-utils
 BuildRoot: /tmp/%{name}-root
 Packager: The Net-SNMP Coders <http://sourceforge.net/projects/net-snmp/>
-# require perl til use of it on line 91 is removed
-Requires: perl
+BuildRequires: perl
 
 %description
 
@@ -68,20 +68,19 @@ protocol.  Both client and agent support modules are provided.
 %endif
 
 %prep
+%if %{embedded_perl} == 1 && %{perl_modules} == 0
+echo "'-with embedded_perl' requires '-with perl_modules'"
+exit 1
+%endif
 %setup -q
 
 %build
-CONFIG="--enable-shared"
-%if %{perl_modules}
-CONFIG="$CONFIG --with-perl-modules='PREFIX=$RPM_BUILD_ROOT/usr INSTALLDIRS=vendor'"
-%endif
-%if %{embedded_perl}
-CONFIG="$CONFIG --enable-embedded-perl"
-%endif
 %configure --with-defaults --with-sys-contact="Unknown" \
 	--with-mib-modules="host disman/event-mib smux" \
 	--with-sysconfdir="/etc/net-snmp"               \
-	$CONFIG \
+	--enable-shared \
+	%{?_with_perl_modules: --with-perl-modules="PREFIX=$RPM_BUILD_ROOT/usr INSTALLDIRS=vendor"} \
+	%{?_with_embedded_perl: --enable-embedded-perl} \
 	--with-cflags="$RPM_OPT_FLAGS"
 
 make

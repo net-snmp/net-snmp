@@ -2,6 +2,8 @@
  * tools.c
  */
 
+#define NETSNMP_TOOLS_C 1 /* dont re-define malloc wrappers here */
+
 #include <net-snmp/net-snmp-config.h>
 
 #include <ctype.h>
@@ -55,6 +57,48 @@
 #include <net-snmp/library/mib.h>
 #include <net-snmp/library/scapi.h>
 
+#ifdef WIN32
+/**
+ * This function is a wrapper for the strdup function.
+ */
+char * netsnmp_strdup( const char * ptr)
+{
+    return strdup(ptr);
+}
+/**
+ * This function is a wrapper for the calloc function.
+ */
+void * netsnmp_calloc(size_t nmemb, size_t size)
+{
+    return calloc(nmemb, size);
+}
+
+/**
+ * This function is a wrapper for the malloc function.
+ */
+void * netsnmp_malloc(size_t size)
+{
+    return malloc(size);
+}
+
+/**
+ * This function is a wrapper for the realloc function.
+ */
+void * netsnmp_realloc( void * ptr, size_t size)
+{
+    return realloc(ptr, size);
+}
+
+/**
+ * This function is a wrapper for the free function.
+ * It calls free only if the calling parameter has a non-zero value.
+ */
+void netsnmp_free( void * ptr)
+{
+    if (ptr)
+        free(ptr);
+}
+#endif /* WIN32 */
 
 /**
  * This function increase the size of the buffer pointed at by *buf, which is
@@ -489,7 +533,7 @@ dump_chunk(const char *debugtoken, const char *title, const u_char * buf,
  * XXX	Need a switch to decide whether to use DNS name instead of a simple
  *	IP address.
  *
- * FIX	Use something other than sprint_hexstring which doesn't add 
+ * FIX	Use something other than snprint_hexstring which doesn't add 
  *	trailing spaces and (sometimes embedded) newlines...
  */
 #ifdef SNMP_TESTING_CODE
@@ -524,7 +568,7 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
      * begin by formatting the enterprise ID.
      */
     if (!(*esp & 0x80)) {
-        sprint_hexstring(buf, esp, remaining_len);
+        snprint_hexstring(buf, SNMP_MAXBUF, esp, remaining_len);
         s = strchr(buf, '\0');
         s -= 1;
         goto dump_snmpEngineID_quit;
@@ -607,7 +651,8 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
         break;
      /*NOTREACHED*/ case 5:    /* Octets. */
 
-        sprint_hexstring(s, esp, remaining_len);
+        snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
+                          esp, remaining_len);
         s = strchr(buf, '\0');
         s -= 1;
         goto dump_snmpEngineID_quit;
@@ -624,7 +669,8 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
         if (!gotviolation) {
             s += sprintf(s, "??? ");
         }
-        sprint_hexstring(s, esp, remaining_len);
+        snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
+                          esp, remaining_len);
         s = strchr(buf, '\0');
         s -= 1;
 
@@ -641,7 +687,8 @@ dump_snmpEngineID(const u_char * estring, size_t * estring_len)
     if (remaining_len > 0) {
         s += sprintf(s, " (??? ");
 
-        sprint_hexstring(s, esp, remaining_len);
+        snprint_hexstring(s, (SNMP_MAXBUF - (s-buf)),
+                          esp, remaining_len);
         s = strchr(buf, '\0');
         s -= 1;
 

@@ -1,4 +1,4 @@
-.TH "debug: print out debugging information about the handler chain being called." 3 "13 Nov 2003" "net-snmp" \" -*- nroff -*-
+.TH "debug: print out debugging information about the handler chain being called." 3 "19 Mar 2004" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -36,7 +36,7 @@ More...
 
 .in +1c
 .ti -1c
-.RI "netsnmp_mib_handler * \fBnetsnmp_get_debug_handler\fP (void)"
+.RI "\fBnetsnmp_mib_handler\fP * \fBnetsnmp_get_debug_handler\fP (void)"
 .br
 .RI "\fIreturns a debug handler that can be injected into a given handler chain.\fP"
 .in -1c
@@ -55,7 +55,7 @@ injectHandler debug mibII/system
 and then run snmpwalk on the 'system' group. 
 .SH "FUNCTION DOCUMENTATION"
 .PP 
-.SS "netsnmp_mib_handler* netsnmp_get_debug_handler (void)"
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_get_debug_handler (void)"
 .PP
 returns a debug handler that can be injected into a given handler chain.
 .PP
@@ -85,6 +85,8 @@ call the initialization sequence for all handlers with init_ routines.
 Definition at line 34 of file all_helpers.c.
 .PP
 References netsnmp_init_bulk_to_next_helper(), netsnmp_init_debug_helper(), netsnmp_init_read_only_helper(), netsnmp_init_serialize(), and netsnmp_init_stash_cache_helper().
+.PP
+Referenced by init_agent().
 .SS "void netsnmp_init_read_only_helper (void)"
 .PP
 initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for configuration file use.

@@ -1,0 +1,87 @@
+.TH "netsnmp_handler_registration_s" 3 "19 Mar 2004" "net-snmp" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+netsnmp_handler_registration_s \- Root registration info. 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <agent_handler.h>\fP
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "char * \fBhandlerName\fP"
+.br
+.RI "\fIfor mrTable listings, and other uses\fP"
+.ti -1c
+.RI "char * \fBcontextName\fP"
+.br
+.RI "\fINULL = default context.\fP"
+.ti -1c
+.RI "oid * \fBrootoid\fP"
+.br
+.RI "\fIwhere are we registered at?\fP"
+.ti -1c
+.RI "\fBnetsnmp_mib_handler\fP * \fBhandler\fP"
+.br
+.RI "\fIhandler details\fP"
+.ti -1c
+.RI "int \fBpriority\fP"
+.br
+.RI "\fImore optional stuff\fP"
+.in -1c
+.SH "DETAILED DESCRIPTION"
+.PP 
+Root registration info.
+.PP
+The variables handlerName, contextName, and rootoid need to be allocated on the heap, when the registration structure is unregistered using \fBunregister_mib_context()\fP the code attempts to free them. 
+.PP
+\fBExamples: \fP
+.in +1c
+.PP
+\fBdelayed_instance.c\fP.
+.PP
+Definition at line 67 of file agent_handler.h.
+.SH "FIELD DOCUMENTATION"
+.PP 
+.SS "char* netsnmp_handler_registration_s::contextName"
+.PP
+NULL = default context.
+.PP
+Definition at line 72 of file agent_handler.h.
+.PP
+Referenced by netsnmp_handler_registration_dup(), netsnmp_handler_registration_free(), netsnmp_register_handler(), and netsnmp_register_handler_nocallback().
+.SS "\fBnetsnmp_mib_handler\fP* netsnmp_handler_registration_s::handler"
+.PP
+handler details
+.PP
+Definition at line 83 of file agent_handler.h.
+.PP
+Referenced by netsnmp_create_handler_registration(), netsnmp_find_handler_by_name(), netsnmp_find_table_array_handler(), netsnmp_handler_registration_dup(), netsnmp_handler_registration_free(), netsnmp_inject_handler_before(), netsnmp_register_handler(), netsnmp_register_handler_nocallback(), and netsnmp_table_container_register().
+.SS "char* netsnmp_handler_registration_s::handlerName"
+.PP
+for mrTable listings, and other uses
+.PP
+Definition at line 70 of file agent_handler.h.
+.PP
+Referenced by netsnmp_create_handler_registration(), netsnmp_handler_registration_dup(), netsnmp_handler_registration_free(), netsnmp_old_api_helper(), netsnmp_register_handler(), and netsnmp_table_iterator_helper_handler().
+.SS "int netsnmp_handler_registration_s::priority"
+.PP
+more optional stuff
+.PP
+Definition at line 89 of file agent_handler.h.
+.PP
+Referenced by netsnmp_handler_registration_dup(), netsnmp_register_handler(), and netsnmp_register_handler_nocallback().
+.SS "oid* netsnmp_handler_registration_s::rootoid"
+.PP
+where are we registered at?
+.PP
+Definition at line 77 of file agent_handler.h.
+.PP
+Referenced by netsnmp_cache_helper_handler(), netsnmp_create_handler_registration(), netsnmp_handler_registration_dup(), netsnmp_handler_registration_free(), netsnmp_old_api_helper(), netsnmp_register_cache_handler(), netsnmp_register_handler(), netsnmp_register_handler_nocallback(), netsnmp_register_read_only_scalar(), netsnmp_register_scalar(), netsnmp_row_merge_helper_handler(), netsnmp_table_build_oid(), netsnmp_table_build_oid_from_index(), netsnmp_table_data_build_result(), netsnmp_table_data_helper_handler(), netsnmp_table_iterator_helper_handler(), and table_helper_handler().
+
+.SH "AUTHOR"
+.PP 
+Generated automatically by Doxygen for net-snmp from the source code.

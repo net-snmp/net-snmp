@@ -134,6 +134,27 @@ extern netsnmp_subtree *subtrees;
 extern struct variable2 extensible_relocatable_variables[];
 extern struct variable2 extensible_passthru_variables[];
 
+/*
+ * the relocatable extensible commands variables 
+ */
+struct variable2 extensible_relocatable_variables[] = {
+    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_relocatable, 1,
+     {MIBINDEX}},
+    {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1,
+     {ERRORNAME}},
+    {SHELLCOMMAND, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1,
+     {SHELLCOMMAND}},
+    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_relocatable, 1,
+     {ERRORFLAG}},
+    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1,
+     {ERRORMSG}},
+    {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_relocatable, 1,
+     {ERRORFIX}},
+    {ERRORFIXCMD, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1,
+     {ERRORFIXCMD}}
+};
+
+
 void
 init_extensible(void)
 {
@@ -252,8 +273,10 @@ extensible_parse_config(const char *token, char *cptr)
     if (ptmp->miblen > 0) {
         register_mib(token,
                      (struct variable *) extensible_relocatable_variables,
-                     sizeof(struct variable2), 6, ptmp->miboid,
-                     ptmp->miblen);
+                     sizeof(struct variable2), 
+                     sizeof(extensible_relocatable_variables) /
+                     sizeof(*extensible_relocatable_variables),
+                     ptmp->miboid, ptmp->miblen);
     }
 }
 
@@ -262,6 +285,7 @@ extensible_unregister(int major, int minor,
                       void *serverarg, void *clientarg)
 {
     extensible_free_config();
+    return 0;
 }
 
 void
@@ -350,6 +374,11 @@ get_exec_by_name(char *name)
 
     for (etmp = extens; etmp != NULL && strcmp(etmp->name, name) != 0;
          etmp = etmp->next);
+
+    if(NULL == etmp)
+        for (etmp = relocs; etmp != NULL && strcmp(etmp->name, name) != 0;
+         etmp = etmp->next);
+
     return etmp;
 }
 
@@ -476,24 +505,6 @@ fixExecError(int action,
     return SNMP_ERR_WRONGTYPE;
 }
 
-/*
- * the relocatable extensible commands variables 
- */
-struct variable2 extensible_relocatable_variables[] = {
-    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_relocatable, 1,
-     {MIBINDEX}},
-    {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1,
-     {ERRORNAME}},
-    {SHELLCOMMAND, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1,
-     {SHELLCOMMAND}},
-    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_relocatable, 1,
-     {ERRORFLAG}},
-    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_relocatable, 1,
-     {ERRORMSG}},
-    {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_relocatable, 1,
-     {ERRORFIX}}
-};
-
 u_char         *
 var_extensible_relocatable(struct variable *vp,
                            oid * name,
@@ -603,6 +614,10 @@ var_extensible_relocatable(struct variable *vp,
         *write_method = fixExecError;
         long_return = 0;
         return ((u_char *) & long_return);
+
+    case ERRORFIXCMD:
+        *var_len = strlen(exten->fixcmd);
+        return ((u_char *) exten->fixcmd);
     }
     return NULL;
 }

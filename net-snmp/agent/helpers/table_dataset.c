@@ -292,7 +292,7 @@ netsnmp_table_set_add_default_row(netsnmp_table_data_set *table_set,
                                   size_t default_value_len)
 {
 
-    netsnmp_table_data_set_storage *new_col, *ptr;
+    netsnmp_table_data_set_storage *new_col, *ptr, *pptr;
 
     if (!table_set)
         return SNMPERR_GENERR;
@@ -320,9 +320,23 @@ netsnmp_table_set_add_default_row(netsnmp_table_data_set *table_set,
     if (table_set->default_row == NULL)
         table_set->default_row = new_col;
     else {
-        for (ptr = table_set->default_row; ptr->next; ptr = ptr->next) {
+        /* sort in order just because (needed for add_row support) */
+        for (ptr = table_set->default_row, pptr = NULL;
+             ptr;
+             pptr = ptr, ptr = ptr->next) {
+            if (ptr->column > column) {
+                new_col->next = ptr;
+                if (pptr)
+                    pptr->next = new_col;
+                else
+                    table_set->default_row = new_col;
+                return SNMPERR_SUCCESS;
+            }
         }
-        ptr->next = new_col;
+        if (pptr)
+            pptr->next = new_col;
+        else
+            snmp_log(LOG_ERR,"Shouldn't have gotten here: table_dataset/add_row");
     }
     return SNMPERR_SUCCESS;
 }
@@ -1078,7 +1092,7 @@ netsnmp_table_set_add_indexes(va_alist)
 #endif
 
     while ((type = va_arg(debugargs, int)) != 0) {
-        netsnmp_table_dataset_add_index(tset, type);
+        netsnmp_table_dataset_add_index(tset, (u_char)type);
     }
 
     va_end(debugargs);
