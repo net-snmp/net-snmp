@@ -410,9 +410,10 @@ setup_engineID(u_char **eidp, const char *text)
 }  /* end setup_engineID() */
 
 void
-usm_parse_create_usmUser(const char *token, char *line) {
+usm_parse_create_usmUser(const char *token, char *line)
+{
   char *cp;
-  char buf[SNMP_MAXBUF_MEDIUM], buf2[SNMP_MAXBUF_SMALL];
+  char buf[SNMP_MAXBUF_MEDIUM];
   struct usmUser *newuser;
   u_char	  userKey[SNMP_MAXBUF_SMALL];
   size_t	  userKeyLen = SNMP_MAXBUF_SMALL;
@@ -425,19 +426,30 @@ usm_parse_create_usmUser(const char *token, char *line) {
 
   /* might be a -e ENGINEID argument */
   if (strcmp(buf,"-e") == 0) {
-      /* get the specified engineid from the line */
+      size_t ebuf_len = 32, eout_len = 0;
+      u_char *ebuf = (u_char *)malloc(ebuf_len);
+
+      if (ebuf == NULL) {
+	  config_perror("malloc failure processing -e flag");
+	  usm_free_user(newuser);
+	  return;
+      }
+
+      /*  Get the specified engineid from the line.  */
       cp = copy_nword(cp, buf, sizeof(buf));
-      newuser->engineIDLen = hex_to_binary(buf, (u_char *)buf2);
-      if (newuser->engineIDLen <= 0) {
-          usm_free_user(newuser);
+      if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, buf)) {
           config_perror("invalid EngineID argument to -e");
+	  usm_free_user(newuser);
+	  free(ebuf);
           return;
       }
-      memdup(&newuser->engineID, (u_char *)buf2, newuser->engineIDLen);
+
+      newuser->engineID = ebuf;
+      newuser->engineIDLen = eout_len;
       cp = copy_nword(cp, buf, sizeof(buf));
   } else {
       newuser->engineID = snmpv3_generate_engineID(&ret);
-      if ( ret == 0 ) {
+      if (ret == 0) {
           usm_free_user(newuser);
           return;
       }
