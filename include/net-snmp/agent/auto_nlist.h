@@ -7,6 +7,9 @@
 extern          "C" {
 #endif
 
+#ifdef irix6
+#define nlist nlist64
+#endif
 
 #ifdef CAN_USE_NLIST
 int             auto_nlist(const char *, char *, int);

@@ -31,7 +31,19 @@
 
 /*
  * don't use this on irix 
+ * it has a prototype of inet_addr() which conflicts
+ * with <netinet/in.h>
  */
 #undef HAVE_ARPA_INET_H
 
+/*
+ * We need a prototype of inet_ntoa() then.
+ */
+extern const char *inet_ntoa();
+
 #define STREAM_NEEDS_KERNEL_ISLANDS
+
+#ifndef __GNUC__
+#undef inline
+#define inline
+#endif
