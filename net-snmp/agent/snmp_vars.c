@@ -140,6 +140,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
 #endif
 
+static char     done_init_agent = 0;
+
 /*
  * mib clients are passed a pointer to a oid buffer.  Some mib clients
  * * (namely, those first noticed in mibII/vacm.c) modify this oid buffer
@@ -252,6 +254,12 @@ init_agent(const char *app)
 {
     int             r = 0;
 
+    if(++done_init_agent > 1) {
+        snmp_log(LOG_WARNING, "ignoring extra call to init_agent (%d)\n", 
+                 done_init_agent);
+        return r;
+    }
+
     /*
      * get current time (ie, the time the agent started) 
      */
@@ -331,5 +339,7 @@ shutdown_agent(void) {
     clear_snmp_enum();
     clear_callback();
     clear_user_list();
+
+    done_init_agent = 0;
 }
 
