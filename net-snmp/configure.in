@@ -110,7 +110,7 @@ AC_ARG_WITH(opaque-special-types,
 
 AC_ARG_WITH(mibdirs,
 [  --with-mibdirs=\"dir1:dir2:\"     Default directories to look for mibs.
-                                    (Default: $HOME/.snmp/mibs:DATADIR/snmp/mibs)],
+                                    (Default: \$HOME/.snmp/mibs:DATADIR/snmp/mibs)],
     [DEFAULT_MIBDIRS="$with_mibdirs"
     AC_DEFINE_UNQUOTED(DEFAULT_MIBDIRS,"$with_mibdirs")])
 
@@ -196,19 +196,18 @@ AC_ARG_WITH(out_mib_modules,
   Optional mib modules that can be built into the agent include:
     host:                  host resources mib support.
                              (beta level code for linux, hpux, solaris, bsdi)
-    smux:                  smux sub-agent support.
-    misc/ipfwacc:          accounting rules IP firewall information.
-                             (only under linux)
+    smux:                  smux support to allow subagents to attach to snmpd.
+    misc/ipfwacc:          accounting rules IP firewall information (linux).
     ipfwchains/ipfwchains: firewall chains under ipfw for linux.
                            (Download separately from the ucd-snmp ftp site.)
-    target:                Support for the TARGET-MIB.
+    target:                Support for the SNMP WGs TARGET-MIB.
     ucd-snmp/pass_persist: Persistent pass scripts that stay around.
                            Not currently included by default solely because
                            it needs more testing.
-    vestinternett/diskio:  Table of io-devices and how much data they have
+    ucd-snmp/diskio:       Table of io-devices and how much data they have
                            read/written.  (only tested on Solaris)
 
-  AgentX support:  (warning: alpha code)
+  AgentX support:  (warning: beta code)
     agentx/client:         allows the agent to run as either a snmp agent
                            or as an agentX sub-agent.
     agentx/master:         makes the agent run as an agentX master agent
