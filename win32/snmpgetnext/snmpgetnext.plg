@@ -1,5 +1,5 @@
 --------------------Configuration: snmpgetnext - Win32 Debug--------------------
-Begining build with project "C:\usr\local\builds\ucd-snmp-3.3.pre8\win32\snmpgetnext\snmpgetnext.dsp", at root.
+Begining build with project "H:\builds\ucd-snmp-3.4.pre8\win32\snmpgetnext\snmpgetnext.dsp", at root.
 Active configuration is Win32 (x86) Console Application (based on Win32 (x86) Console Application)
 
 Project's tools are:
@@ -10,15 +10,17 @@ Project's tools are:
 			"Custom Build" with flags ""
 			"<Component 0xa>" with flags ""
 
-Creating temp file "C:\WINDOWS\TEMP\RSPE062.TMP" with contents </nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/snmpgetnext.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
-"C:\usr\local\builds\ucd-snmp-3.3.pre8\apps\snmpgetnext.c"
+Creating temp file "C:\WINDOWS\TEMP\RSPE312.TMP" with contents </nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/snmpgetnext.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
+"H:\builds\ucd-snmp-3.4.pre8\apps\snmp_parse_args.c"
+"H:\builds\ucd-snmp-3.4.pre8\apps\snmpgetnext.c"
 >
-Creating command line "cl.exe @C:\WINDOWS\TEMP\RSPE062.TMP" 
-Creating temp file "C:\WINDOWS\TEMP\RSPE063.TMP" with contents <libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/snmpgetnext.pdb" /debug /machine:I386 /nodefaultlib /out:"../bin/snmpgetnext.exe" /pdbtype:sept /libpath:"..\lib" 
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSPE312.TMP" 
+Creating temp file "C:\WINDOWS\TEMP\RSPE313.TMP" with contents <libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/snmpgetnext.pdb" /debug /machine:I386 /nodefaultlib /out:"../bin/snmpgetnext.exe" /pdbtype:sept /libpath:"..\lib" 
 ".\Debug\snmp_parse_args.obj"
 ".\Debug\snmpgetnext.obj">
-Creating command line "link.exe @C:\WINDOWS\TEMP\RSPE063.TMP" 
+Creating command line "link.exe @C:\WINDOWS\TEMP\RSPE313.TMP" 
 Compiling...
+snmp_parse_args.c
 snmpgetnext.c
 Linking...
 

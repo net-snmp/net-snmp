@@ -100,6 +100,10 @@ SOURCE=..\..\snmplib\hpux.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\int64.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\md5.c
 # End Source File
 # Begin Source File

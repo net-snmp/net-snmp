@@ -1,38 +1,81 @@
---------------------Configuration: libsnmp_dll - Win32 Debug--------------------
-Begining build with project "C:\usr\local\builds\ucd-snmp-3.3.pre8\win32\libsnmp_dll\libsnmp_dll.dsp", at root.
+--------------------Configuration: libsnmp_dll - Win32 Release--------------------
+Begining build with project "H:\builds\ucd-snmp-3.4.pre8\win32\libsnmp_dll\libsnmp_dll.dsp", at root.
 Active configuration is Win32 (x86) Dynamic-Link Library (based on Win32 (x86) Dynamic-Link Library)
 
 Project's tools are:
-			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fp"Debug/libsnmp_dll.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c "
-			"OLE Type Library Maker" with flags "/nologo /D "_DEBUG" /mktyplib203 /o NUL /win32 "
-			"Win32 Resource Compiler" with flags "/l 0x409 /d "_DEBUG" "
+			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Fp"Release/libsnmp_dll.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c "
+			"OLE Type Library Maker" with flags "/nologo /D "NDEBUG" /mktyplib203 /o NUL /win32 "
+			"Win32 Resource Compiler" with flags "/l 0x409 /d "NDEBUG" "
 			"Browser Database Maker" with flags "/nologo /o"..\lib/libsnmp_dll.bsc" "
-			"COFF Linker for 80x86" with flags "wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:windows /dll /pdb:none /debug /machine:I386 /nodefaultlib /def:".\libsnmp.def" /out:"..\lib\libsnmp.dll" /implib:"..\lib/libsnmp.lib" "
+			"COFF Linker for 80x86" with flags "wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:windows /dll /incremental:no /pdb:"..\lib/libsnmp.pdb" /machine:I386 /nodefaultlib /def:".\libsnmp.def" /out:"..\lib\libsnmp.dll" /implib:"..\lib/libsnmp.lib" "
 			"Custom Build" with flags ""
 			"<Component 0xa>" with flags ""
 
-Creating temp file "C:\WINDOWS\TEMP\RSP60C4.TMP" with contents <wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:windows /dll /pdb:none /debug /machine:I386 /nodefaultlib /def:".\libsnmp.def" /out:"..\lib\libsnmp.dll" /implib:"..\lib/libsnmp.lib" 
-".\Debug\acl.obj"
-".\Debug\acl_parse.obj"
-".\Debug\asn1.obj"
-".\Debug\context.obj"
-".\Debug\context_parse.obj"
-".\Debug\hpux.obj"
-".\Debug\md5.obj"
-".\Debug\mib.obj"
-".\Debug\parse.obj"
-".\Debug\party.obj"
-".\Debug\party_parse.obj"
-".\Debug\snmp.obj"
-".\Debug\snmp_api.obj"
-".\Debug\snmp_auth.obj"
-".\Debug\snmp_client.obj"
-".\Debug\system.obj"
-".\Debug\view.obj">
-Creating command line "link.exe @C:\WINDOWS\TEMP\RSP60C4.TMP" 
+Creating temp file "C:\WINDOWS\TEMP\RSP7062.TMP" with contents </nologo /MD /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /Fp"Release/libsnmp_dll.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\acl.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\acl_parse.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\asn1.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\context.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\context_parse.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\hpux.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\int64.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\md5.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\mib.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\parse.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\party.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\party_parse.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\snmp.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\snmp_api.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\snmp_auth.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\snmp_client.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\system.c"
+"H:\builds\ucd-snmp-3.4.pre8\snmplib\view.c"
+>
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP7062.TMP" 
+Creating temp file "C:\WINDOWS\TEMP\RSP7063.TMP" with contents <wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:windows /dll /incremental:no /pdb:"..\lib/libsnmp.pdb" /machine:I386 /nodefaultlib /def:".\libsnmp.def" /out:"..\lib\libsnmp.dll" /implib:"..\lib/libsnmp.lib" 
+".\Release\acl.obj"
+".\Release\acl_parse.obj"
+".\Release\asn1.obj"
+".\Release\context.obj"
+".\Release\context_parse.obj"
+".\Release\hpux.obj"
+".\Release\int64.obj"
+".\Release\md5.obj"
+".\Release\mib.obj"
+".\Release\parse.obj"
+".\Release\party.obj"
+".\Release\party_parse.obj"
+".\Release\snmp.obj"
+".\Release\snmp_api.obj"
+".\Release\snmp_auth.obj"
+".\Release\snmp_client.obj"
+".\Release\system.obj"
+".\Release\view.obj">
+Creating command line "link.exe @C:\WINDOWS\TEMP\RSP7063.TMP" 
+Compiling...
+acl.c
+acl_parse.c
+asn1.c
+context.c
+context_parse.c
+hpux.c
+int64.c
+md5.c
+mib.c
+parse.c
+party.c
+party_parse.c
+snmp.c
+snmp_api.c
+E:\DevStudio\VC\INCLUDE\varargs.h(70) : warning C4005: 'va_start' : macro redefinition
+E:\DevStudio\VC\INCLUDE\varargs.h(72) : warning C4005: 'va_end' : macro redefinition
+snmp_auth.c
+snmp_client.c
+system.c
+view.c
 Linking...
    Creating library ..\lib/libsnmp.lib and object ..\lib/libsnmp.exp
 
 
 
-libsnmp.dll - 0 error(s), 0 warning(s)
+libsnmp.dll - 0 error(s), 2 warning(s)

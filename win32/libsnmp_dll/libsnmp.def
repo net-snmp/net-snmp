@@ -61,6 +61,8 @@ EXPORTS
 	read_mib
 	read_all_mibs
 	add_mibdir
+	snmp_set_suffix_only
+	snmp_set_full_objid
 	snmp_set_mib_warnings
 	snmp_set_save_descriptions
 	add_module_replacement
@@ -96,6 +98,9 @@ EXPORTS
 	snmp_get_dump_packet
 	snmp_set_quick_print
 	snmp_get_quick_print
+    snmp_set_do_debugging
+    snmp_get_do_debugging
+	DEBUGP
 	snmp_perror	
 	snmp_add_null_var
 	snmp_pdu_create
@@ -115,7 +120,7 @@ EXPORTS
 	view_scanInit
 	view_scanNext
 	view_createEntry
-	Mib			DATA
+	Mib				DATA
 	tree_head		DATA
 	snmp_errno		DATA
 

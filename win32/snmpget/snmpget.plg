@@ -1,5 +1,5 @@
 --------------------Configuration: snmpget - Win32 Debug--------------------
-Begining build with project "C:\usr\local\builds\ucd-snmp-3.3.pre8\win32\snmpget\snmpget.dsp", at root.
+Begining build with project "H:\builds\ucd-snmp-3.4.pre8\win32\snmpget\snmpget.dsp", at root.
 Active configuration is Win32 (x86) Console Application (based on Win32 (x86) Console Application)
 
 Project's tools are:
@@ -10,18 +10,18 @@ Project's tools are:
 			"Custom Build" with flags ""
 			"<Component 0xa>" with flags ""
 
-Creating temp file "C:\WINDOWS\TEMP\RSP2252.TMP" with contents </nologo /MDd /W3 /GX /Z7 /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\snmpllib" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/snmpget.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
-"C:\usr\local\builds\ucd-snmp-3.3.pre8\apps\snmp_parse_args.c"
+Creating temp file "C:\WINDOWS\TEMP\RSPD0F1.TMP" with contents </nologo /MDd /W3 /GX /Z7 /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /I "..\snmpllib" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/snmpget.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
+"H:\builds\ucd-snmp-3.4.pre8\apps\snmp_parse_args.c"
 >
-Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP2252.TMP" 
-Creating temp file "C:\WINDOWS\TEMP\RSP2253.TMP" with contents </nologo /MDd /W3 /GX /Z7 /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/snmpget.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
-"C:\usr\local\builds\ucd-snmp-3.3.pre8\apps\snmpget.c"
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSPD0F1.TMP" 
+Creating temp file "C:\WINDOWS\TEMP\RSPD0F2.TMP" with contents </nologo /MDd /W3 /GX /Z7 /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/snmpget.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
+"H:\builds\ucd-snmp-3.4.pre8\apps\snmpget.c"
 >
-Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP2253.TMP" 
-Creating temp file "C:\WINDOWS\TEMP\RSP2254.TMP" with contents <libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/snmpget.pdb" /debug /machine:I386 /nodefaultlib /out:"../bin/snmpget.exe" /pdbtype:sept /libpath:"../lib" 
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSPD0F2.TMP" 
+Creating temp file "C:\WINDOWS\TEMP\RSPD0F3.TMP" with contents <libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/snmpget.pdb" /debug /machine:I386 /nodefaultlib /out:"../bin/snmpget.exe" /pdbtype:sept /libpath:"../lib" 
 ".\Debug\snmp_parse_args.obj"
 ".\Debug\snmpget.obj">
-Creating command line "link.exe @C:\WINDOWS\TEMP\RSP2254.TMP" 
+Creating command line "link.exe @C:\WINDOWS\TEMP\RSPD0F3.TMP" 
 Compiling...
 snmp_parse_args.c
 Compiling...
