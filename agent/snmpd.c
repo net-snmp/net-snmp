@@ -306,7 +306,7 @@ printf("\n\t\t[-h] [-v] [-f] [-a] [-d] [-V] [-P PIDFILE] [-q] [-D] [-p NUM] [-L]
 	printf("-A\t\tAppend to the logfile rather than truncating it.\n");
 	printf("-r\t\tDon't exit if root only accessible files can't be opened\n");
 	printf("-I [-]INITLIST\tList of mib modules to initialize (or not).\n");
-	printf("\t\t (run snmpd with -Dinit_mib for a list)\n");
+	printf("\t\t (run snmpd with -Dmib_init for a list)\n");
 	printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
 #ifdef LOGFILE
 	printf("\t\t(By default LOGFILE=%s)\n", LOGFILE);
