@@ -540,7 +540,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
             /*
              * * if data was found, make sure it has the column we want
              */
-#warning "xxx-rks: add suport for sparse tables"
+/* #warning "xxx-rks: add suport for sparse tables" */
 
             /*
              * build new oid
@@ -692,7 +692,7 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
 static void
 process_set_group(netsnmp_oid_array_header *o, void *c)
 {
-#warning "should we continue processing after an error??"
+/* #warning "should we continue processing after an error??" */
     set_context    *context = (set_context *) c;
     netsnmp_array_group *ag = (netsnmp_array_group *) o;
 
