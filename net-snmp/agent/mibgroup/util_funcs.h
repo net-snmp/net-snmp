@@ -4,6 +4,10 @@
 #ifndef _MIBGROUP_UTIL_FUNCS_H
 #define _MIBGROUP_UTIL_FUNCS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef IN_UCD_SNMP_SOURCE
 #include "struct.h"
 #else
@@ -45,5 +49,9 @@ mib_table_t     Initialise_Table(int, int, RELOAD, COMPARE);
 int             Search_Table(mib_table_t, void *, int);
 int             Add_Entry(mib_table_t, void *);
 void           *Retrieve_Table_Data(mib_table_t, int *);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif                          /* _MIBGROUP_UTIL_FUNCS_H */
