@@ -217,5 +217,5 @@ int create_winpipe_transport(int *pipefds)
 	return 0;
 }
 
+#endif /* WIN32 */
 
-#endif

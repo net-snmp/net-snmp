@@ -93,7 +93,7 @@ extern "C"
   /*
    * To Report current service status to SCM 
    */
-  static BOOL ReportCurrentServiceStatus ();
+  static BOOL ReportCurrentServiceStatus (VOID);
 
   /*
    * Service Main function,  Which will spawn a thread, and calls the
@@ -151,7 +151,7 @@ extern "C"
    * Service STOP function registration with this framewrok
    * * this function must be invoked before calling RunAsService
    */
-  VOID RegisterStopFunction (VOID (*StopFunc) ());
+  VOID RegisterStopFunction (VOID (*StopFunc) (VOID));
 
 #ifdef __cplusplus
 }
