@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. ../eval_tools.sh
+
+HEADER SNMPv1 getnext of system.sysUpTime
+
+#
+# Begin test
+#
+
+# standard V1 configuration: testcomunnity
+. ./Sv1config
+
+STARTAGENT
+
+CAPTURE "snmpgetnext $SNMP_SNMPD_PORT -v 1 localhost testcommunity system.sysUpTime"
+
+STOPAGENT
+
+CHECK "system.sysUpTime.0 ="
+
+FINISHED
