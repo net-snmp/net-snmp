@@ -1,4 +1,4 @@
-.TH "table_data: Helps you implement a table with datamatted storage." 3 "2 Sep 2003" "net-snmp" \" -*- nroff -*-
+.TH "table_data: Helps you implement a table with datamatted storage." 3 "17 Oct 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -38,7 +38,7 @@ More...
 .br
 .RI "\fIremoves and frees a row of data to a given table and returns the void *\fP"
 .ti -1c
-.RI "void \fBnetsnmp_table_data_replace_row\fP (netsnmp_table_data *table, netsnmp_table_row *origrow, netsnmp_table_row *newrow)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_table_data_replace_row\fP (netsnmp_table_data *table, netsnmp_table_row *origrow, netsnmp_table_row *newrow)"
 .br
 .RI "\fIswaps out origrow with newrow.\fP"
 .ti -1c
@@ -258,7 +258,7 @@ returns the row pointer itself on successful removing. or NULL on failure (bad a
 Definition at line 130 of file table_data.c.
 .PP
 Referenced by netsnmp_table_data_remove_and_delete_row(), and netsnmp_table_data_replace_row().
-.SS "void netsnmp_table_data_replace_row (netsnmp_table_data * table, netsnmp_table_row * origrow, netsnmp_table_row * newrow)\fC [inline]\fP"
+.SS "NETSNMP_INLINE void netsnmp_table_data_replace_row (netsnmp_table_data * table, netsnmp_table_row * origrow, netsnmp_table_row * newrow)"
 .PP
 swaps out origrow with newrow.
 .PP

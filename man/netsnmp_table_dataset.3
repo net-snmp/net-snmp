@@ -1,4 +1,4 @@
-.TH "table_dataset: Helps you implement a table with automatted storage." 3 "2 Sep 2003" "net-snmp" \" -*- nroff -*-
+.TH "table_dataset: Helps you implement a table with automatted storage." 3 "17 Oct 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -28,7 +28,7 @@ More...
 .br
 .RI "\fIextracts a netsnmp_table_data_set pointer from a given request\fP"
 .ti -1c
-.RI "netsnmp_table_data_set * \fBnetsnmp_extract_table_data_set\fP (netsnmp_request_info *request)"
+.RI "NETSNMP_INLINE netsnmp_table_data_set * \fBnetsnmp_extract_table_data_set\fP (netsnmp_request_info *request)"
 .br
 .RI "\fIextracts a netsnmp_table_data_set pointer from a given request\fP"
 .ti -1c
@@ -60,35 +60,35 @@ More...
 .br
 .RI "\fIregisters a table_dataset so that the 'add_row' snmpd.conf token can be used to add data to this table.\fP"
 .ti -1c
-.RI "void \fBnetsnmp_table_dataset_add_index\fP (netsnmp_table_data_set *table, u_char type)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_table_dataset_add_index\fP (netsnmp_table_data_set *table, u_char type)"
 .br
 .RI "\fIadds an index to the table.\fP"
 .ti -1c
-.RI "void \fBnetsnmp_table_dataset_add_row\fP (netsnmp_table_data_set *table, netsnmp_table_row *row)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_table_dataset_add_row\fP (netsnmp_table_data_set *table, netsnmp_table_row *row)"
 .br
 .RI "\fIadds a new row to a dataset table\fP"
 .ti -1c
-.RI "void \fBnetsnmp_table_dataset_replace_row\fP (netsnmp_table_data_set *table, netsnmp_table_row *origrow, netsnmp_table_row *newrow)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_table_dataset_replace_row\fP (netsnmp_table_data_set *table, netsnmp_table_row *origrow, netsnmp_table_row *newrow)"
 .br
 .RI "\fIadds a new row to a dataset table\fP"
 .ti -1c
-.RI "netsnmp_table_data_set_storage * \fBnetsnmp_table_dataset_delete_data\fP (netsnmp_table_data_set_storage *data)"
+.RI "NETSNMP_INLINE netsnmp_table_data_set_storage * \fBnetsnmp_table_dataset_delete_data\fP (netsnmp_table_data_set_storage *data)"
 .br
 .RI "\fIdeletes a single dataset table data.\fP"
 .ti -1c
-.RI "void \fBnetsnmp_table_dataset_delete_all_data\fP (netsnmp_table_data_set_storage *data)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_table_dataset_delete_all_data\fP (netsnmp_table_data_set_storage *data)"
 .br
 .RI "\fIdeletes all the data from this node and beyond in the linked list\fP"
 .ti -1c
-.RI "void \fBnetsnmp_table_dataset_delete_row\fP (netsnmp_table_row *row)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_table_dataset_delete_row\fP (netsnmp_table_row *row)"
 .br
 .RI "\fIdeletes all the data from this node and beyond in the linked list\fP"
 .ti -1c
-.RI "void \fBnetsnmp_table_dataset_remove_row\fP (netsnmp_table_data_set *table, netsnmp_table_row *row)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_table_dataset_remove_row\fP (netsnmp_table_data_set *table, netsnmp_table_row *row)"
 .br
 .RI "\fIremoves a row from the table, but doesn't delete/free anything\fP"
 .ti -1c
-.RI "void \fBnetsnmp_table_dataset_remove_and_delete_row\fP (netsnmp_table_data_set *table, netsnmp_table_row *row)"
+.RI "NETSNMP_INLINE void \fBnetsnmp_table_dataset_remove_and_delete_row\fP (netsnmp_table_data_set *table, netsnmp_table_row *row)"
 .br
 .RI "\fIremoves a row from the table and then deletes it (and all it's data)\fP"
 .ti -1c
@@ -120,7 +120,7 @@ Create a netsnmp_table_data_set structure given a table_data definition.
 Definition at line 74 of file table_dataset.c.
 .PP
 References netsnmp_create_table_data(), and SNMP_MALLOC_TYPEDEF.
-.SS "netsnmp_table_data_set* netsnmp_extract_table_data_set (netsnmp_request_info * request)\fC [inline]\fP"
+.SS "NETSNMP_INLINE netsnmp_table_data_set* netsnmp_extract_table_data_set (netsnmp_request_info * request)"
 .PP
 extracts a netsnmp_table_data_set pointer from a given request
 .PP
@@ -235,7 +235,7 @@ Definition at line 404 of file table_dataset.c.
 References netsnmp_call_next_handler(), netsnmp_create_data_list(), netsnmp_extract_table_info(), netsnmp_extract_table_row(), netsnmp_oid_stash_add_data(), netsnmp_oid_stash_get_data(), netsnmp_request_add_list_data(), netsnmp_strdup_and_null(), netsnmp_table_data_build_result(), netsnmp_table_data_set_clone_row(), netsnmp_table_data_set_find_column(), netsnmp_table_dataset_add_row(), netsnmp_table_dataset_delete_row(), netsnmp_table_dataset_remove_and_delete_row(), netsnmp_table_dataset_replace_row(), SNMP_FREE, and SNMP_MALLOC_TYPEDEF.
 .PP
 Referenced by netsnmp_get_table_data_set_handler().
-.SS "void netsnmp_table_dataset_add_index (netsnmp_table_data_set * table, u_char type)\fC [inline]\fP"
+.SS "NETSNMP_INLINE void netsnmp_table_dataset_add_index (netsnmp_table_data_set * table, u_char type)"
 .PP
 adds an index to the table.
 .PP
@@ -248,7 +248,7 @@ Call this repeatly for each index.
 Definition at line 924 of file table_dataset.c.
 .PP
 Referenced by netsnmp_table_set_add_indexes().
-.SS "void netsnmp_table_dataset_add_row (netsnmp_table_data_set * table, netsnmp_table_row * row)\fC [inline]\fP"
+.SS "NETSNMP_INLINE void netsnmp_table_dataset_add_row (netsnmp_table_data_set * table, netsnmp_table_row * row)"
 .PP
 adds a new row to a dataset table
 .PP
@@ -261,7 +261,7 @@ Definition at line 933 of file table_dataset.c.
 References netsnmp_table_data_add_row().
 .PP
 Referenced by netsnmp_table_data_set_helper_handler().
-.SS "void netsnmp_table_dataset_delete_all_data (netsnmp_table_data_set_storage * data)\fC [inline]\fP"
+.SS "NETSNMP_INLINE void netsnmp_table_dataset_delete_all_data (netsnmp_table_data_set_storage * data)"
 .PP
 deletes all the data from this node and beyond in the linked list
 .PP
@@ -270,7 +270,7 @@ Definition at line 969 of file table_dataset.c.
 References netsnmp_table_dataset_delete_data().
 .PP
 Referenced by netsnmp_table_dataset_delete_row(), and netsnmp_table_dataset_remove_and_delete_row().
-.SS "netsnmp_table_data_set_storage* netsnmp_table_dataset_delete_data (netsnmp_table_data_set_storage * data)\fC [inline]\fP"
+.SS "NETSNMP_INLINE netsnmp_table_data_set_storage* netsnmp_table_dataset_delete_data (netsnmp_table_data_set_storage * data)"
 .PP
 deletes a single dataset table data.
 .PP
@@ -281,7 +281,7 @@ Definition at line 956 of file table_dataset.c.
 References SNMP_FREE.
 .PP
 Referenced by netsnmp_table_dataset_delete_all_data().
-.SS "void netsnmp_table_dataset_delete_row (netsnmp_table_row * row)\fC [inline]\fP"
+.SS "NETSNMP_INLINE void netsnmp_table_dataset_delete_row (netsnmp_table_row * row)"
 .PP
 deletes all the data from this node and beyond in the linked list
 .PP
@@ -290,7 +290,7 @@ Definition at line 979 of file table_dataset.c.
 References netsnmp_table_data_delete_row(), and netsnmp_table_dataset_delete_all_data().
 .PP
 Referenced by netsnmp_table_data_set_helper_handler().
-.SS "void netsnmp_table_dataset_remove_and_delete_row (netsnmp_table_data_set * table, netsnmp_table_row * row)\fC [inline]\fP"
+.SS "NETSNMP_INLINE void netsnmp_table_dataset_remove_and_delete_row (netsnmp_table_data_set * table, netsnmp_table_row * row)"
 .PP
 removes a row from the table and then deletes it (and all it's data)
 .PP
@@ -299,14 +299,14 @@ Definition at line 1003 of file table_dataset.c.
 References netsnmp_table_data_remove_and_delete_row(), and netsnmp_table_dataset_delete_all_data().
 .PP
 Referenced by netsnmp_table_data_set_helper_handler().
-.SS "void netsnmp_table_dataset_remove_row (netsnmp_table_data_set * table, netsnmp_table_row * row)\fC [inline]\fP"
+.SS "NETSNMP_INLINE void netsnmp_table_dataset_remove_row (netsnmp_table_data_set * table, netsnmp_table_row * row)"
 .PP
 removes a row from the table, but doesn't delete/free anything
 .PP
 Definition at line 992 of file table_dataset.c.
 .PP
 References netsnmp_table_data_remove_and_delete_row().
-.SS "void netsnmp_table_dataset_replace_row (netsnmp_table_data_set * table, netsnmp_table_row * origrow, netsnmp_table_row * newrow)\fC [inline]\fP"
+.SS "NETSNMP_INLINE void netsnmp_table_dataset_replace_row (netsnmp_table_data_set * table, netsnmp_table_row * origrow, netsnmp_table_row * newrow)"
 .PP
 adds a new row to a dataset table
 .PP
