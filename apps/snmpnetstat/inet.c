@@ -33,30 +33,39 @@ SOFTWARE.
 
 #include <config.h>
 
-#if STDC_HEADERS
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 
 #include <stdio.h>
 
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
-#include <sys/socket.h>
-
+#endif
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#include "winstub.h"
+#else
+#include <sys/socket.h>
 #include <netdb.h>
+#endif
 
 #include "main.h"
 #include "asn1.h"
@@ -208,6 +217,8 @@ char *tcpstates[] = {
 };
 #define TCP_NSTATES 11
 
+int validUShortAssign( unsigned short *, int, char *);
+
 /*
  * Print a summary of connections related to an Internet
  * protocol (currently only TCP).  For TCP, also give state of connection.
@@ -217,7 +228,7 @@ protopr (char *name)
 {
     struct tcpconn_entry *tcpconn = NULL, *tcplast = NULL, *tp, *newtp;
     struct udp_entry *udpconn = NULL, *udplast = NULL, *up, *newup;
-    struct snmp_pdu *request=NULL, *response = NULL;
+    struct snmp_pdu *request = NULL, *response = NULL;
     struct variable_list *vp;
     oid *instance;
     int first, status;
@@ -274,7 +285,8 @@ protopr (char *name)
 	}
 
 	if (vp->name[TCP_ENTRY] == TCPCONN_LOCPORT){
-	    tp->localPort = *vp->val.integer;
+	    if (validUShortAssign( &tp->localPort, *vp->val.integer,
+			"TCPCONN_LOCPORT"))
 	    tp->locPortSet = 1;
 	}
 
@@ -284,7 +296,8 @@ protopr (char *name)
 	}
 
 	if (vp->name[TCP_ENTRY] == TCPCONN_REMPORT){
-	    tp->remotePort = *vp->val.integer;
+	    if (validUShortAssign( &tp->remotePort, *vp->val.integer,
+			"TCPCONN_REMPORT"))
 	    tp->remPortSet = 1;
 	}
     }
@@ -369,7 +382,8 @@ protopr (char *name)
 	}
 
 	if (vp->name[UDP_ENTRY] == UDP_LOCPORT){
-	    up->localPort = *vp->val.integer;
+	    if (validUShortAssign( &up->localPort, *vp->val.integer,
+			"UDP_LOCPORT"))
 	    up->locPortSet = 1;
 	}
     }
@@ -396,6 +410,20 @@ protopr (char *name)
     }
     if(newup) free(newup);
 
+}
+
+int
+validUShortAssign( unsigned short * pushort, int ival, char * errstr)
+{
+    u_long ulval = (u_long)ival;
+    if ((ival < 1) || (ival > 65535))
+    {
+	printf("Warning: %s value %ld (0x%lx) is not a port address\n",
+		errstr, ulval, ulval);
+	/*return 0;*/
+    }
+    *pushort = (unsigned short)ulval;
+    return 1;
 }
 
 
@@ -625,7 +653,7 @@ inetname(struct in_addr in)
 				if ((cp = (char *) strchr(hp->h_name, '.')) &&
 				    !strcmp(cp + 1, domain))
 					*cp = 0;
-				cp = hp->h_name;
+				cp = (char *)hp->h_name;
 			}
 		}
 	}

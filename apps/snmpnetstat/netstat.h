@@ -1,6 +1,6 @@
 extern int aflag, nflag;
 extern int print_errors;
-extern char *interface;
+extern char *intrface;
 extern struct snmp_session *Session;
 
 char *routename (struct in_addr);
