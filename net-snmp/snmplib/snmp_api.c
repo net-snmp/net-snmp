@@ -1168,9 +1168,7 @@ _sess_open(netsnmp_session *in_session)
     in_session->s_snmp_errno = 0;
     in_session->s_errno = 0;
 
-    if (Reqid == 0) {
-      _init_snmp();
-    }
+    _init_snmp();
 
     if ((slp = snmp_sess_copy(in_session)) == NULL) {
       return(NULL);
@@ -1285,9 +1283,7 @@ netsnmp_pdu * (*fcreate_pdu) (netsnmp_transport *, void *, size_t))
 {	
   struct session_list *slp;
 
-  if (Reqid == 0) {
-    _init_snmp();
-  }
+  _init_snmp();
 
   if (in_session == NULL || transport == NULL) {
     return NULL;
