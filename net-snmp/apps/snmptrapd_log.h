@@ -1,12 +1,14 @@
+#ifndef  _SNMPTRAPD_LOG_H
+#define  _SNMPTRAPD_LOG_H
 
-unsigned long format_plain_trap (char *,
-				 unsigned long,
-				 struct snmp_pdu *,
-				 struct _snmp_transport *);
+int realloc_format_trap      (u_char **buf, size_t *buf_len, size_t *out_len,
+			      int allow_realloc,
+			      const char *format_str, 
+			      struct snmp_pdu *pdu,
+			      struct _snmp_transport *transport);
 
-
-unsigned long format_trap (char *,
-			   unsigned long,
-			   const char *,
-			   struct snmp_pdu *,
-			   struct _snmp_transport *);
+int realloc_format_plain_trap(u_char **buf, size_t *buf_len, size_t *out_len,
+			      int allow_realloc,
+			      struct snmp_pdu *pdu, 
+			      struct _snmp_transport *transport);
+#endif/* _SNMPTRAPD_LOG_H */
