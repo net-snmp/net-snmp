@@ -92,6 +92,7 @@ void init_extend( void )
 
     snmpd_register_config_handler("exec2", extend_parse_config, NULL, NULL);
     snmpd_register_config_handler("sh2",   extend_parse_config, NULL, NULL);
+    snmpd_register_config_handler("execFix2", extend_parse_config, NULL, NULL);
 }
 
         /*************************
@@ -270,6 +271,11 @@ extend_parse_config(const char *token, char *cptr)
     flags = (NS_EXTEND_FLAGS_ACTIVE | NS_EXTEND_FLAGS_CONFIG);
     if (!strcmp( token, "sh2" ))
         flags |= NS_EXTEND_FLAGS_SHELL;
+    if (!strcmp( token, "execFix2" )) {
+        strcat( exec_name, "Fix" );
+        flags |= NS_EXTEND_FLAGS_WRITEABLE;
+        /* XXX - Check for shell... */
+    }
     extension = _new_extension( exec_name, flags );
     if (extension) {
         extension->command  = strdup( exec_command );
@@ -649,6 +655,12 @@ handle_nsExtendConfigTable(netsnmp_mib_handler          *handler,
                 extension->cache->timeout = i;
                 break;
 
+            case COLUMN_EXTCFG_RUNTYPE:
+                i = *request->requestvb->val.integer;
+                if ( i == 3 )
+                    (void)netsnmp_cache_check_and_reload( extension->cache );
+                break;
+
             case COLUMN_EXTCFG_EXECTYPE:
                 i = *request->requestvb->val.integer;
                 if ( i == NS_EXTEND_ETYPE_SHELL )
@@ -700,11 +712,29 @@ handle_nsExtendOutput1Table(netsnmp_mib_handler          *handler,
 
         switch (reqinfo->mode) {
         case MODE_GET:
-            if (!(extension->flags & NS_EXTEND_FLAGS_ACTIVE) ||
-               (netsnmp_cache_check_and_reload( extension->cache ) < 0 )) {;
+            if (!extension || !(extension->flags & NS_EXTEND_FLAGS_ACTIVE)) {
                 /*
-                 * If this row is inactive, or reloading the output
-                 * cache fails, then skip the output-related values
+                 * If this row is inactive, then skip it.
+                 */
+                netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_NOSUCHINSTANCE);
+                continue;
+            }
+            if (!(extension->flags & NS_EXTEND_FLAGS_WRITEABLE) &&
+                (netsnmp_cache_check_and_reload( extension->cache ) < 0 )) {
+                /*
+                 * If reloading the output cache of a 'run-on-read'
+                 * entry fails, then skip it.
+                 */
+                netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_NOSUCHINSTANCE);
+                continue;
+            }
+            if ((extension->flags & NS_EXTEND_FLAGS_WRITEABLE) &&
+                (netsnmp_cache_check_expired( extension->cache ) == 1 )) {
+                /*
+                 * If the output cache of a 'run-on-write'
+                 * entry has expired, then skip it.
                  */
                 netsnmp_set_request_error(reqinfo, request,
                                           SNMP_NOSUCHINSTANCE);
