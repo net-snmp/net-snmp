@@ -571,16 +571,42 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                 switch (*(request->requestvb->val.integer)) {
                 case RS_ACTIVE:
                 case RS_NOTINSERVICE:
-                case RS_NOTREADY:
                     /*
-                     * XXX: check legality 
+                     * Can only operate on pre-existing rows.
                      */
-                    if (!data) {
+                    if (newrowstash && newrowstash->created) {
                         netsnmp_set_request_error(reqinfo, request,
                                                   SNMP_ERR_INCONSISTENTVALUE);
                         continue;
                     }
                     break;
+
+                case RS_CREATEANDGO:
+                case RS_CREATEANDWAIT:
+                    /*
+                     * Can only operate on new rows.
+                     */
+                    if (data) {
+                        netsnmp_set_request_error(reqinfo, request,
+                                                  SNMP_ERR_INCONSISTENTVALUE);
+                        continue;
+                    }
+                    break;
+
+                case RS_DESTROY:
+                    /*
+                     * Can operate on new or pre-existing rows.
+                     */
+                    break;
+
+                case RS_NOTREADY:
+                default:
+                    /*
+                     * Not a valid value to Set 
+                     */
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_ERR_WRONGVALUE);
+                    continue;
                 }
             }
 
