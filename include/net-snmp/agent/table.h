@@ -78,7 +78,7 @@ int netsnmp_table_build_result(netsnmp_handler_registration *reginfo,
                        u_char *result, size_t result_len);
 int netsnmp_update_variable_list_from_index( netsnmp_table_request_info * );
 int netsnmp_update_indexes_from_variable_list( netsnmp_table_request_info *tri );
-netsnmp_table_registration_info *netsnmp_find_netsnmp_table_registration_info(netsnmp_handler_registration *reginfo);
+netsnmp_table_registration_info *netsnmp_find_table_registration_info(netsnmp_handler_registration *reginfo);
     
 unsigned int netsnmp_closest_column(unsigned int current, netsnmp_column_info *valid_columns);
 

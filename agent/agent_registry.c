@@ -782,7 +782,7 @@ unregister_mib_context( oid *name, size_t len, int priority,
 }
 
 int 
-unregister_mib_netsnmp_table_row(oid *name, size_t len, int priority,
+unnetsnmp_register_mib_table_row(oid *name, size_t len, int priority,
 			 int var_subid, oid range_ubound, const char *context)
 {
   struct subtree *list, *myptr;

@@ -1538,7 +1538,7 @@ void snmp_in_toggle_options_usage(const char *lead, FILE *outf)
 }
 
 void
-register_netsnmp_mib_handlers (void)
+register_mib_handlers (void)
 {
     register_prenetsnmp_mib_handler("snmp","mibdirs",
 			    handle_mibdirs_conf, NULL,

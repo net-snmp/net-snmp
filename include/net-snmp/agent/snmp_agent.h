@@ -167,7 +167,7 @@ netsnmp_free_agent_data_set(netsnmp_agent_request_info *agent);
 
 inline void
 netsnmp_free_agent_data_sets(netsnmp_agent_request_info *agent);
-inline void free_netsnmp_agent_request_info(netsnmp_agent_request_info *ari);
+inline void netsnmp_free_agent_request_info(netsnmp_agent_request_info *ari);
 
 #ifdef __cplusplus
 }

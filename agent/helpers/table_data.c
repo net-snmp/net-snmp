@@ -259,7 +259,7 @@ netsnmp_table_data_helper_handler(
     netsnmp_table_row *row;
     netsnmp_table_request_info *table_info;
     netsnmp_table_registration_info *table_reg_info =
-        netsnmp_find_netsnmp_table_registration_info(reginfo);
+        netsnmp_find_table_registration_info(reginfo);
     int result, regresult;
     
     for(request = requests; request; request = request->next) {
@@ -419,7 +419,7 @@ netsnmp_create_table_data_row(void)
 
 /** extracts the row being accessed passed from the table_data helper */
 netsnmp_table_row *
-netsnmp_extract_netsnmp_table_row(netsnmp_request_info *request) 
+netsnmp_extract_table_row(netsnmp_request_info *request) 
 {
     return (netsnmp_table_row *) netsnmp_request_get_list_data(request, TABLE_DATA_NAME);
 }
@@ -427,9 +427,9 @@ netsnmp_extract_netsnmp_table_row(netsnmp_request_info *request)
 /** extracts the data from the row being accessed passed from the
  * table_data helper */
 void *
-netsnmp_extract_netsnmp_table_row_data(netsnmp_request_info *request) 
+netsnmp_extract_table_row_data(netsnmp_request_info *request) 
 {
-    return (netsnmp_extract_netsnmp_table_row(request))->data;
+    return (netsnmp_extract_table_row(request))->data;
 }
 
 /** builds a result given a row, a varbind to set and the data */
