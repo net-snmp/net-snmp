@@ -199,6 +199,8 @@ struct snmp_internal_session {
     int (*hook_post) (struct snmp_session *, struct snmp_pdu*, int);
     int (*hook_build)(struct snmp_session *, struct snmp_pdu *,
 		      u_char *, size_t *);
+    int (*hook_realloc_build)(struct snmp_session *, struct snmp_pdu *,
+			      u_char **, size_t *, size_t *);
     int (*check_packet) (u_char *, size_t);
 
     u_char *packet;
@@ -730,6 +732,8 @@ struct snmp_session *snmp_open_ex (
   int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
   int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
   int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *),
+  int (*frbuild)(struct snmp_session *, struct snmp_pdu *, u_char **,
+		 size_t *, size_t *),
   int (*fcheck) (u_char *, size_t )
 )
 {
@@ -740,6 +744,7 @@ struct snmp_session *snmp_open_ex (
     slp->internal->hook_parse = fparse;
     slp->internal->hook_post = fpost_parse;
     slp->internal->hook_build = fbuild;
+    slp->internal->hook_realloc_build = frbuild;
     slp->internal->check_packet = fcheck;
 
     snmp_res_lock(MT_LIBRARY_ID, MT_LIB_SESSION);
@@ -1241,7 +1246,7 @@ int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int))
   struct session_list *slp;
   slp = (struct session_list *)snmp_sess_add_ex(in_session, transport,
 						fpre_parse, NULL, fpost_parse,
-						NULL, NULL);
+						NULL, NULL, NULL);
   if (slp == NULL) {
     return NULL;
   }
@@ -1263,6 +1268,8 @@ int (*fpre_parse) (struct snmp_session *, snmp_transport *, void *, int),
 int (*fparse) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t),
 int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int),
 int (*fbuild) (struct snmp_session *, struct snmp_pdu *, u_char *, size_t *),
+int (*frbuild)(struct snmp_session *, struct snmp_pdu *, u_char **,
+	       size_t *, size_t *),
 int (*fcheck) (u_char *, size_t))
 {	
   struct session_list *slp;
@@ -1286,6 +1293,7 @@ int (*fcheck) (u_char *, size_t))
   slp->internal->hook_parse   = fparse;
   slp->internal->hook_post    = fpost_parse;
   slp->internal->hook_build   = fbuild;
+  slp->internal->hook_realloc_build = frbuild;
   slp->internal->check_packet = fcheck;
 
   slp->session->rcvMsgMaxSize = transport->msgMaxSize;
@@ -1311,7 +1319,7 @@ int (*fpre_parse) (struct snmp_session *, snmp_transport *, void *, int),
 int (*fpost_parse) (struct snmp_session *, struct snmp_pdu *, int))
 {	
   return snmp_sess_add_ex(in_session, transport, fpre_parse, NULL,
-			  fpost_parse, NULL, NULL);
+			  fpost_parse, NULL, NULL, NULL);
 }
 
 
@@ -3945,7 +3953,12 @@ _sess_async_send(void *sessp,
   }
 
   /*  Build the message to send.  */
-  if (isp->hook_build) {
+  if (isp->hook_realloc_build) {
+    result = isp->hook_realloc_build(session, pdu,
+				     &pktbuf, &pktbuf_len, &offset);
+    packet = pktbuf;
+    length = offset;
+  } else if (isp->hook_build) {
     packet = pktbuf;
     length = pktbuf_len;
     result = isp->hook_build(session, pdu, pktbuf, &length);
@@ -4465,9 +4478,9 @@ _sess_read(void *sessp, fd_set *fdset)
 	new_transport->flags &= ~SNMP_TRANSPORT_FLAG_LISTEN;
 
 	nslp = (struct session_list *)snmp_sess_add_ex(sp, new_transport,
-				isp->hook_pre,
-				isp->hook_parse, isp->hook_post,
-				isp->hook_build, isp->check_packet);
+				isp->hook_pre, isp->hook_parse, 
+				isp->hook_post, isp->hook_build,
+				isp->hook_realloc_build, isp->check_packet);
 
 	if (nslp != NULL) {
 	  nslp->next = Sessions;
@@ -4912,7 +4925,13 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
   /*  Always increment msgId for resent messages.  */
   rp->pdu->msgid = rp->message_id = snmp_get_next_msgid();
 
-  if (isp->hook_build) {
+  if (isp->hook_realloc_build) {
+    result = isp->hook_realloc_build(sp, rp->pdu, 
+				     &pktbuf, &pktbuf_len, &offset);
+				     
+    packet = pktbuf;
+    length = offset;
+  } else if (isp->hook_build) {
     packet = pktbuf;
     length = pktbuf_len;
     result = isp->hook_build(sp, rp->pdu, pktbuf, &length);

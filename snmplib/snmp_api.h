@@ -642,6 +642,10 @@ struct snmp_session *snmp_open_ex (struct snmp_session *,
 				   int (*fbuild)     (struct snmp_session *,
 						      struct snmp_pdu *,
 						      u_char *, size_t *),
+				   int (*frbuild)    (struct snmp_session *,
+						      struct snmp_pdu *,
+						      u_char **, size_t *, 
+						      size_t *),
 				   int (*fcheck)     (u_char *, size_t));
 
 /* provided for backwards compatability.  Don't use these functions.
@@ -738,6 +742,8 @@ void	*snmp_sess_add_ex(struct snmp_session *, struct _snmp_transport *,
 					      snmp_pdu *, int), 
 			  int (*fbuild) (struct snmp_session *, struct
 					 snmp_pdu *, u_char *, size_t *), 
+			  int (*frbuild)(struct snmp_session *, struct
+				   snmp_pdu *, u_char **, size_t *, size_t *), 
 			  int (*fcheck) (u_char *, size_t));
 
 void   *snmp_sess_add	(struct snmp_session *, struct _snmp_transport *,
