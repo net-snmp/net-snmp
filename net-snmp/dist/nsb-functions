@@ -3,13 +3,21 @@
 # $Id$
 # Author: Robert Story <rstory@freesnmp.com>
 
+nsb-sysname()
+{
+   echo `uname -mrs | tr ' /' '__'`
+}
+
 #----------------------------------------------------------------------
 #
 # Utility vars
 #
 NSB_BUILD_DIR=${NSB_BUILD_DIR:=""}
+NSB_BUILD_PREF=${NSB_BUILD_PREF:="host"}
 NSB_SRC_DIR=${NSB_SRC_DIR:=""}
 NSB_INSTALL_DIR=${NSB_INSTALL_DIR:=""}
+NSB_PLATFORM=${NSB_PLATFORM:=`nsb-sysname`}
+NSB_HOST=${NSB_HOST:=`hostname -s`}
 NSB_QUIET=${NSB_QUIET:=0}
 NSB_PROMPT=${NSB_PROMPT:=0}
 NSB_CLEAN=${NSB_CLEAN:=1}
@@ -185,11 +193,6 @@ nsb-config-all()
    fi
 }
 
-nsb-sysname()
-{
-   echo `uname -mrs | tr ' /' '__'`
-}
-
 nsb-zip()
 {
    if [ $# -ne 3 ]; then
@@ -200,8 +203,7 @@ nsb-zip()
    build_dir=$2
    dest_dir=$3
 
-   platform=`nsb-sysname`
-   build=$build_dir/$platform
+   build=$build_dir/$NSB_PLATFORM
 
    if [ ! -d $build ]; then
       nsb-abort "$build directory does not exist!"
@@ -213,12 +215,12 @@ nsb-zip()
 
    cd $build
 
-   rm -f $dest_dir/$release-$platform.tar
-   nsb-info "tar cf $dest_dir/$release-$platform.tar usr"
-   tar cf $dest_dir/$release-$platform.tar usr
+   rm -f $dest_dir/$release-$NSB_PLATFORM.tar
+   nsb-info "tar cf $dest_dir/$release-$NSB_PLATFORM.tar usr"
+   tar cf $dest_dir/$release-$NSB_PLATFORM.tar usr
 
-   nsb-info "gzip --best $dest_dir/$release-$platform.tar"
-   gzip --best $dest_dir/$release-$platform.tar
+   nsb-info "gzip --best $dest_dir/$release-$NSB_PLATFORM.tar"
+   gzip --best $dest_dir/$release-$NSB_PLATFORM.tar
 
    if [ $NSB_QUIET -ne 1 ]; then
       ls -lt $dest_dir
@@ -304,8 +306,16 @@ nsb-default-paths()
       NSB_SRC_DIR=$HOME/src/net-snmp-$VERSION
    fi
    if [ -z "$NSB_BUILD_DIR" ]; then
-      NSB_BUILD_DIR=$HOME/build
+      if [ "x$NSB_BUILD_PREF" = "xhost" ]; then
+         NSB_BUILD_DIR=$HOME/build/$NSB_HOST
+      else
+         NSB_BUILD_DIR=$HOME/build/$NSB_PLATFORM
+      fi
+      if [ $NSB_SRC_DIR != $NSB_BUILD_DIR ];then
+         NSB_BUILD_DIR=$NSB_BUILD_DIR/$VERSION
+      fi
    fi
+
    if [ -z "$NSB_INSTALL_DIR" ]; then
       NSB_INSTALL_DIR=$NSB_BUILD_DIR/usr/local
    fi
@@ -326,7 +336,8 @@ nsb-build()
    shift 5
 
    nsb-flow build in $build_dir
-   nsb-flow `uname -a`
+   nsb-flow host $NSB_HOST
+   nsb-flow platform $NSB_PLATFORM
 
    if [ ! -d $src_dir ]; then
       nsb-abort "$src_dir does not exist!"
