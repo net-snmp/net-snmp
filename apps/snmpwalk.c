@@ -82,7 +82,7 @@ SOFTWARE.
 
 #define DS_WALK_INCLUDE_REQUESTED	1
 #define DS_WALK_PRINT_STATISTICS	2
-#define DS_WALK_CHECK_LEXICOGRAPHIC	3
+#define DS_WALK_DONT_CHECK_LEXICOGRAPHIC	3
 
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 int numprinted = 0;
@@ -97,7 +97,7 @@ void usage(void)
   fprintf(stderr, "\t\t  APPOPTS values:\n");
   fprintf(stderr,"\t\t      p: Print the number of variables found.\n");
   fprintf(stderr,"\t\t      i: Include the requested OID in the search range.\n");
-  fprintf(stderr,"\t\t      c: Check that the returned OID's are increasing.\n");
+  fprintf(stderr,"\t\t      c: Don't check that the returned OID's are increasing.\n");
 }
 
 void
@@ -138,7 +138,7 @@ static void optProc(int argc, char *const *argv, int opt)
 
 		    case 'c':
                         ds_toggle_boolean(DS_APPLICATION_ID,
-                                          DS_WALK_CHECK_LEXICOGRAPHIC);
+                                          DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
 			break;
                     default:
                         fprintf(stderr,
@@ -170,8 +170,8 @@ int main(int argc, char *argv[])
                        DS_APPLICATION_ID, DS_WALK_INCLUDE_REQUESTED);
     ds_register_config(ASN_BOOLEAN, "snmpwalk", "printStatistics",
                        DS_APPLICATION_ID, DS_WALK_PRINT_STATISTICS);
-    ds_register_config(ASN_BOOLEAN, "snmpwalk", "checkOrdering",
-                       DS_APPLICATION_ID, DS_WALK_CHECK_LEXICOGRAPHIC);
+    ds_register_config(ASN_BOOLEAN, "snmpwalk", "dontCheckOrdering",
+                       DS_APPLICATION_ID, DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
 
     /* get the common command line arguments */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
@@ -215,7 +215,8 @@ int main(int argc, char *argv[])
 
     running = 1;
 
-    check = ds_get_boolean(DS_APPLICATION_ID, DS_WALK_CHECK_LEXICOGRAPHIC);
+    check =
+        !ds_get_boolean(DS_APPLICATION_ID, DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
     if (ds_get_boolean(DS_APPLICATION_ID, DS_WALK_INCLUDE_REQUESTED)) {
         snmp_get_and_print(ss, root, rootlen);
     }

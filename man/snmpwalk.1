@@ -85,8 +85,11 @@ lets you do this.
 Upon completion, snmpwalk will print the number of variables found
 during the walk.
 .IP "-Cc"
-Check whether (and return an error if not) the returned OID's are increasing.
-Some agents (LaserJets are an example) returns OID's out of order, but can
-complete the walk anyway.
+Don't Check whether the returned OID's are increasing.  Some agents
+(LaserJets are an example) returns OID's out of order, but can
+complete the walk anyway.  Other agent's return OIDs that are out of
+order and can cause snmpwalk to loop infinitely until stopped.  By
+default, snmpwalk tries to detect this behavior and warns you when it
+hits an agent acting illegally.  Use -Cc to turn off this behavior.
 .SH "SEE ALSO"
 snmpcmd(1), variables(5).
