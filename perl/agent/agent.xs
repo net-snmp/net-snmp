@@ -285,6 +285,16 @@ init_master_agent()
 void    
 snmp_enable_stderrlog()    
 
+MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent PREFIX = na_
+
+void
+na_shutdown(me)
+    SV *me;
+    CODE:
+    {
+        snmp_shutdown("perl");
+    }
+
 MODULE = NetSNMP::agent  PACKAGE = NetSNMP::agent::netsnmp_handler_registration  PREFIX = nsahr_
 
 netsnmp_handler_registration *
@@ -529,7 +539,7 @@ nari_setValue(me, type, value)
           case ASN_OCTET_STR:
           case ASN_BIT_STR:
               snmp_set_var_typed_value(request->requestvb, type,
-                                       (u_char *) &value,
+                                       (u_char *) value,
                                        strlen(value)); /* XXX: null strs */
               RETVAL = 1;
               break;
@@ -566,7 +576,7 @@ nari_setOID(me, value)
         char *value;
     PREINIT:
 	oid myoid[MAX_OID_LEN];
-	size_t myoid_len;
+	size_t myoid_len = MAX_OID_LEN;
         netsnmp_request_info *request;
     CODE:
 	if (!snmp_parse_oid(value, myoid, &myoid_len)) {
