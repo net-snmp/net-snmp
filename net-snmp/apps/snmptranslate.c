@@ -102,6 +102,12 @@ main(argc, argv)
               case 'a':
                 print = 2;
                 break;
+	      case 'f':
+		snmp_set_full_objid(1);
+		break;
+	      case 's':
+		snmp_set_suffix_only(1);
+		break;
 	      default:
 		fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
 		break;
@@ -141,7 +147,6 @@ main(argc, argv)
 	printf("\n");
     }
     if (description){
-	printf("\n");
 	print_description(name, name_length);
     }
     return (0);
