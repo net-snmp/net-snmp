@@ -266,7 +266,7 @@ AC_ARG_WITH(out_transports,
                 FreeBSD.
                 It is never compiled in by default.
     TCP         support for SNMP over TCP/IP.
-                This transport is compiled in by default, but may be ommitted.
+                This transport is compiled in by default, but may be omitted.
     Unix        support for SNMP over Unix domain protocols.
                 This transport is compiled in by default except on Win32
                 platforms, and may be omitted.
