@@ -22,6 +22,7 @@ TODO list for the ucd-snmp-coders:
   Make read_objid and sprint_objid agree on which shorthands they accept.
   numeric to symbolic trap OID conversion.
   snmpset should check against MIB size if possible?
+  Better and more Consistant error messages returned by apps.
 
 Other Ideas:
   Make the mib parser figure out which of the above files it needs to
