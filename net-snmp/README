@@ -141,6 +141,22 @@ SNMPv1 vs. SNMPv2
   anything I have said here, change GLOBALSECURITY to SNMPV1 and you
   shouldn't have problems.
 
+THANKS
+
+  The following people have contributed various patches and
+  improvements.  To them I owe my deepest thanks (and you do too!):
+
+    Dan A. Dickey <ddickey@transition.com>
+    Dave Shield <D.T.Shield@csc.liv.ac.uk>
+    Giovanni S. Marzot <gmarzot@baynetworks.com>
+    Niels Baggesen <recnba@mediator.uni-c.dk>
+    Mike Perik <mikep@crt.com>
+    Sanjai Narain <narain@thumper.bellcore.com>
+    francus@metsny.delphi.com
+
+  I've probably forgotten people on this list.  Let me know if you've
+  contributed code and I've left you out.
+
 CLOSING
 
   Have fun,
