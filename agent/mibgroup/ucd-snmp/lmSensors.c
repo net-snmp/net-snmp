@@ -296,7 +296,7 @@ _sensor_load(clock_t t)
                 }
 
                 array = &sensor_array[type];
-                if (MAX_SENSORS >= array->n) {
+                if (MAX_SENSORS <= array->n) {
                     snmp_log(LOG_ERR, "too many sensors. ignoring %s\n", label);
                     break;
                 }
