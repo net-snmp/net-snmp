@@ -1,6 +1,25 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.3*
+
+  New:
+    - basic SNMPV2c support.  
+      - Not fully complete in all apps.  Not fully tested.  
+      - all apps require '-v 2' for v2c and '-v 2p' for the older party code.
+    - basic host-resources mib support for linux, and hpux.
+    - All environment variables can be set with a preceding '+' for
+        indicating additions to the default values.
+    - mib modules cleaned up more and can be added and removed more easily.
+    - mib modules have a new macro for callbacks when reading a .conf file.
+    - apps command line interfaces have merged together for standardization.
+    - the libsnmp library no longer forces printing of errors.
+
+  Ported:
+    - irix should be more complete.
+    - aix 4.1.5.
+    - fixes for hpux 10.20.
+
 *3.2*
 
   New:
