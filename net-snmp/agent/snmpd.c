@@ -409,11 +409,15 @@ main(int argc, char *argv[])
                   break;
 #endif
 
-#if defined(USING_AGENTX_SUBAGENT_MODULE)
                 case 'X':
+#if defined(USING_AGENTX_SUBAGENT_MODULE)
                   agent_mode = SUB_AGENT;
-                  break;
+#else
+                  fprintf(stderr,"Illegal argument -X: AgentX support not compiled in.\n");
+                  usage(argv[0]);
+                  exit(1);
 #endif
+                  break;
 
 		case 'r':
                     ds_toggle_boolean(DS_APPLICATION_ID,
