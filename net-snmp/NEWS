@@ -1,6 +1,18 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.2.1.rc3*
+ Fixes:
+   Ports:
+     - fix Win32 getenv crash
+     - fix compile error on Mac OS X
+
+*5.2.1.rc2*
+ Fixes:
+   agent:
+     - fix compile errors on some platforms introduced by fix for bug 1056760
+
+
 *5.2.1.rc1*
  Fixes:
    Building:
