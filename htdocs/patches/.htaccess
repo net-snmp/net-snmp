@@ -1,3 +1,3 @@
 # Redirect for transition from old site, and also to make life easier so people don't have to remember long URLS
 # For Redirect line, escape all &s
-RedirectMatch .* http://sourceforge.net/tracker/?group_id=12694\&atid=312694
+#RedirectMatch .* http://sourceforge.net/tracker/?group_id=12694\&atid=312694
