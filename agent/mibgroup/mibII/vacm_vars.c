@@ -117,7 +117,7 @@ init_vacm_vars (void)
 #endif
 }
 
-static struct vacm_securityEntry *securityFirst, *securityLast;
+static struct vacm_securityEntry *securityFirst =0, *securityLast =0;
 
 void vacm_parse_security (char *token, 
 			  char *param)
