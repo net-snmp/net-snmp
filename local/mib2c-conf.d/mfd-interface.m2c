@@ -258,7 +258,7 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
 @end@
                                                   );
     if(NULL == reginfo) {
-        snmp_log(LOG_ERR,"error registering tabel ${context}\n");
+        snmp_log(LOG_ERR,"error registering table ${context}\n");
         return;
     }
     reginfo->my_reg_void = &${context}_if_ctx;
@@ -450,7 +450,17 @@ _mfd_${context}_pre_request(netsnmp_mib_handler *handler,
                             netsnmp_agent_request_info *agtreq_info,
                             netsnmp_request_info *requests)
 {
-    return ${context}_pre_request(${context}_if_ctx.user_ctx);
+    int rc = ${context}_pre_request(${context}_if_ctx.user_ctx);
+    if (MFD_SUCCESS != rc) {
+        /*
+         * nothing we can do about it but log it
+         */
+        DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
+                    "${context}_undo_cleanup\n", rc));
+        netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
+    }
+    
+    return SNMP_ERR_NOERROR;
 }
 
 /**
@@ -463,7 +473,16 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
                              netsnmp_agent_request_info *agtreq_info,
                              netsnmp_request_info *requests)
 {
-    return ${context}_post_request(${context}_if_ctx.user_ctx);
+    int rc = ${context}_post_request(${context}_if_ctx.user_ctx);
+    if (MFD_SUCCESS != rc) {
+        /*
+         * nothing we can do about it but log it
+         */
+        DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
+                    "${context}_undo_cleanup\n", rc));
+    }
+
+    return SNMP_ERR_NOERROR;
 }
 
 ########################################################################
@@ -549,7 +568,7 @@ _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
         ${context}_row_prep(rowreq_ctx);
     }
 
-    return MFD_SUCCESS;
+    return SNMP_ERR_NOERROR;
 }
 
 ########################################################################
@@ -796,7 +815,7 @@ _mfd_${context}_check_objects(netsnmp_mib_handler *handler,
 
     } /* for results */
 
-    return rc;
+    return SNMP_ERR_NOERROR;
 }
 
 ##----------------------------------------------------------------------
@@ -863,13 +882,21 @@ _mfd_${context}_check_dependencies(netsnmp_mib_handler *handler,
                          netsnmp_agent_request_info *agtreq_info,
                          netsnmp_request_info *requests)
 {
+    int                    rc;
     ${context}_rowreq_ctx *rowreq_ctx =
                   netsnmp_container_table_extract_context(requests);
     DEBUGMSGTL(("internal:_mfd_${context}_check_dependencies","called\n"));
 
     netsnmp_assert(NULL != rowreq_ctx);
 
-    return ${context}_check_dependencies(rowreq_ctx);
+    rc = ${context}_check_dependencies(rowreq_ctx);
+    if(rc){
+        DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
+                    "${context}_check_dependencies\n", rc));
+        netsnmp_request_set_error_all(requests, rc);
+    }
+
+    return SNMP_ERR_NOERROR;
 }
 
 @end@ // dependencies
@@ -939,6 +966,7 @@ _mfd_${context}_undo_setup(netsnmp_mib_handler *handler,
                          netsnmp_agent_request_info *agtreq_info,
                          netsnmp_request_info *requests)
 {
+    int                    rc;
     ${context}_rowreq_ctx *rowreq_ctx =
                   netsnmp_container_table_extract_context(requests);
     netsnmp_assert(NULL != rowreq_ctx);
@@ -950,11 +978,19 @@ _mfd_${context}_undo_setup(netsnmp_mib_handler *handler,
     rowreq_ctx->undo = ${context}_allocate_data();
     if(NULL == rowreq_ctx->undo) {
         /** msg already logged */
-        return SNMP_ERR_RESOURCEUNAVAILABLE;
+        netsnmp_request_set_error_all(requests, SNMP_ERR_RESOURCEUNAVAILABLE);
+        return SNMP_ERR_NOERROR;
     }
 
 @end@
-    return ${context}_undo_setup(rowreq_ctx);
+    rc = ${context}_undo_setup(rowreq_ctx);
+    if (MFD_SUCCESS != rc)  {
+        DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
+                    "${context}_undo_setup\n", rc));
+        netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
+    }
+
+    return SNMP_ERR_NOERROR;
 }
 
 /**
@@ -981,6 +1017,13 @@ _mfd_${context}_undo_cleanup(netsnmp_mib_handler *handler,
      * call user cleanup
      */
     rc = ${context}_undo_cleanup(rowreq_ctx);
+    if (MFD_SUCCESS != rc) {
+        /*
+         * nothing we can do about it but log it
+         */
+        DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
+                    "${context}_undo_cleanup\n", rc));
+    }
 
 @if $m2c_undo_embed == 0@
     /*
@@ -996,7 +1039,7 @@ _mfd_${context}_undo_cleanup(netsnmp_mib_handler *handler,
      */
     rowreq_ctx->set_flags = 0;
 
-    return rc;
+    return SNMP_ERR_NOERROR;
 }
 
 /*----------------------------------------------------------------------
@@ -1074,12 +1117,14 @@ _mfd_${context}_set_values(netsnmp_mib_handler *handler,
         
         rc = _${context}_set_column(rowreq_ctx,
                                     requests->requestvb, tri->colnum);
-        if(MFD_SUCCESS != rc)
+        if(MFD_SUCCESS != rc)  {
+            DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
+                        "${context}_set_column\n", rc));
             netsnmp_set_request_error(agtreq_info, requests, rc);
-
+        }
     } /* for results */
 
-    return rc;
+    return SNMP_ERR_NOERROR;
 }
 
 /*----------------------------------------------------------------------
@@ -1097,10 +1142,20 @@ _mfd_${context}_commit(netsnmp_mib_handler *handler,
                          netsnmp_agent_request_info *agtreq_info,
                          netsnmp_request_info *requests)
 {
+    int                    rc;
     ${context}_rowreq_ctx *rowreq_ctx =
                   netsnmp_container_table_extract_context(requests);
+
     netsnmp_assert(NULL != rowreq_ctx);
-    return ${context}_commit(rowreq_ctx);
+    
+    rc = ${context}_commit(rowreq_ctx);
+    if (MFD_SUCCESS != rc) {
+        DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
+                    "${context}_commit\n", rc));
+        netsnmp_request_set_error_all(requests, SNMP_ERR_GENERR);
+    }
+
+    return SNMP_ERR_NOERROR;
 }
 
 int
@@ -1109,10 +1164,22 @@ _mfd_${context}_undo_commit(netsnmp_mib_handler *handler,
                          netsnmp_agent_request_info *agtreq_info,
                          netsnmp_request_info *requests)
 {
+    int                    rc;
     ${context}_rowreq_ctx *rowreq_ctx =
                   netsnmp_container_table_extract_context(requests);
+
     netsnmp_assert(NULL != rowreq_ctx);
-    return ${context}_undo_commit(rowreq_ctx);
+
+    rc = ${context}_undo_commit(rowreq_ctx);
+    if (MFD_SUCCESS != rc) {
+        /*
+         * nothing we can do about it but log it
+         */
+        DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
+                    "${context}_undo_commit\n", rc));
+    }
+
+    return SNMP_ERR_NOERROR;
 }
 
 /*----------------------------------------------------------------------
@@ -1159,10 +1226,10 @@ _mfd_${context}_undo_values(netsnmp_mib_handler *handler,
                          netsnmp_agent_request_info *agtreq_info,
                          netsnmp_request_info *requests)
 {
+    int                    rc;
     ${context}_rowreq_ctx *rowreq_ctx =
                   netsnmp_container_table_extract_context(requests);
     netsnmp_table_request_info * tri;
-    int                          rc = SNMP_ERR_NOERROR;
 
     DEBUGMSGTL(("internal:_mfd_${context}_undo_values","called\n"));
 
@@ -1176,11 +1243,18 @@ _mfd_${context}_undo_values(netsnmp_mib_handler *handler,
         if(NULL == tri)
             continue;
         
-        _${context}_undo_column(rowreq_ctx, requests->requestvb, tri->colnum);
-
+        rc = _${context}_undo_column(rowreq_ctx, requests->requestvb,
+                                     tri->colnum);
+        if (MFD_SUCCESS != rc) {
+            /*
+             * nothing we can do about it but log it
+             */
+            DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
+                        "${context}_undo_column\n", rc));
+        }
     } /* for results */
 
-    return rc;
+    return SNMP_ERR_NOERROR;
 }
 
 @   if $m2c_irreversible_commit == 1@
@@ -1199,10 +1273,20 @@ _mfd_${context}_irreversible_commit(netsnmp_mib_handler *handler,
                          netsnmp_agent_request_info *agtreq_info,
                          netsnmp_request_info *requests)
 {
+    int                    rc;
     ${context}_rowreq_ctx *rowreq_ctx =
                   netsnmp_container_table_extract_context(requests);
+    
     netsnmp_assert(NULL != rowreq_ctx);
-    return ${context}_irreversible_commit(rowreq_ctx);
+    
+    rc = ${context}_irreversible_commit(rowreq_ctx);
+    if (MFD_SUCCESS != rc) {
+        netsnmp_request_set_error_all(requests, SNMP_ERR_COMMITFAILED);
+        DEBUGMSGTL(("verbose:${context}:mfd","error %d from "
+                    "${context}_irreversible_commit\n", rc));
+    }
+    
+    return SNMP_ERR_NOERROR;
 }
 
 @end@
