@@ -1276,7 +1276,7 @@ module_list=""
 module_list_code=""
 new_with_mib_modules=`echo $with_mib_modules | sed 's/,/ /g;'`
 new_with_out_mib_modules=`echo $with_out_mib_modules | sed 's/,/ /g;'`
-new_module_list="mibII ucd_snmp snmpv3mibs notification target agent_mibs agentx agent_mibs utilities $new_with_mib_modules"
+new_module_list="mibII ucd_snmp snmpv3mibs notification target agent_mibs agentx utilities $new_with_mib_modules"
 default_mibs=IP-MIB:IF-MIB:TCP-MIB:UDP-MIB:HOST-RESOURCES-MIB:SNMPv2-MIB:RFC1213-MIB:NOTIFICATION-LOG-MIB
 
 if test "x$mini_agent" = "xyes"; then
