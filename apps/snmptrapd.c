@@ -1226,6 +1226,11 @@ main(int argc, char *argv[])
      */
     netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID, 
 			      NETSNMP_DS_AGENT_NO_ROOT_ACCESS);
+    /*
+     * ignore any warning messages.
+     */
+    netsnmp_ds_toggle_boolean(NETSNMP_DS_APPLICATION_ID, 
+			      NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS);
 
     /*
      * initialize the agent library 
