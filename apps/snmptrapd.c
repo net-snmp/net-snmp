@@ -88,6 +88,7 @@ SOFTWARE.
 #include "snmptrapd_handlers.h"
 #include "read_config.h"
 #include "snmp_debug.h"
+#include "snmp_logging.h"
 #include "snmpusm.h"
 #include "tools.h"
 #include "lcd_time.h"
