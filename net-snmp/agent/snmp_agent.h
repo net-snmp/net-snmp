@@ -15,6 +15,7 @@ struct agent_snmp_session {
     struct variable_list *start, *end;
     struct snmp_session  *session;
     struct snmp_pdu      *pdu;
+    struct snmp_pdu      *orig_pdu;
     int		rw;
     int		exact;
     int		status;

@@ -2901,6 +2901,7 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
     vp->val.string = NULL;
     vp->name_length = MAX_OID_LEN;
     vp->name = 0;
+    vp->index = 0;
     vp->data = 0;
     DEBUGDUMPSECTION("recv", "VarBind");
     data = snmp_parse_var_op(data, objid, &vp->name_length, &vp->type,
@@ -4090,7 +4091,7 @@ snmp_varlist_add_variable(struct variable_list **varlist,
       return NULL;
 
     vars->next_variable = 0; vars->name = 0; vars->val.string = 0;
-    vars->data = 0;
+    vars->data = 0; vars->index = 0;
 
     /* use built-in storage for smaller values */
     if (len <= sizeof(vars->buf)) {
