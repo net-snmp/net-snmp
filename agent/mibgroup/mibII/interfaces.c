@@ -134,7 +134,9 @@
 # if defined(CTL_NET) && !defined(freebsd2)
 #  ifdef PF_ROUTE
 #   ifdef NET_RT_IFLIST
-#    define USE_SYSCTL_IFLIST
+#    ifndef netbsd1
+#     define USE_SYSCTL_IFLIST
+#    endif
 #   endif
 #  endif
 # endif
