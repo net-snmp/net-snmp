@@ -59,6 +59,7 @@ SOFTWARE.
 #include <sys/select.h>
 #endif
 #include <stdio.h>
+#include <ctype.h>
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
@@ -76,9 +77,17 @@ SOFTWARE.
 #include "snmp.h"
 #include "snmp_impl.h"
 #include "system.h"
+#include "default_store.h"
 #include "snmp_parse_args.h"
+#include "getopt.h"
+
+#define DS_WALK_INCLUDE_REQUESTED		1
+#define DS_WALK_PRINT_STATISTICS		2
+#define DS_WALK_DONT_CHECK_LEXICOGRAPHIC	3
 
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
+int numprinted = 0;
+int reps = 10, non_reps = 0;
 
 void
 usage (void)
@@ -87,27 +96,116 @@ usage (void)
   snmp_parse_args_usage(stderr);
   fprintf(stderr," [<objectID>]\n\n");
   snmp_parse_args_descriptions(stderr);
+  fprintf(stderr, "  -C <APPOPTS>  Toggle various application specific behaviour:\n");
+  fprintf(stderr, "\t\t  APPOPTS values:\n");
+  fprintf(stderr,"\t\t      c: do not check that the returned OIDs are increasing\n");
+  fprintf(stderr,"\t\t      i: include the requested OID in the search range\n");
+  fprintf(stderr,"\t\t      n NUM: set non-repeaters to NUM\n");
+  fprintf(stderr,"\t\t      p: print the number of variables found\n");
+  fprintf(stderr,"\t\t      r NUM: set max-repeaters to NUM\n");
 }
 
-int main(int argc, char  *argv[])
+static void
+snmp_get_and_print(struct snmp_session *ss, oid *theoid, size_t theoid_len)
+{
+    struct snmp_pdu *pdu, *response;
+    struct variable_list *vars;
+    int status;
+    
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
+    snmp_add_null_var(pdu, theoid, theoid_len);
+
+    status = snmp_synch_response(ss, pdu, &response);
+    if (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR) {
+        for (vars = response->variables; vars; vars = vars->next_variable) {
+            numprinted++;
+            print_variable(vars->name, vars->name_length, vars);
+        }
+    }
+    if (response) {
+        snmp_free_pdu(response);
+    }
+}
+
+static
+void optProc(int argc, char *const *argv, int opt)
+{
+    char *endptr = NULL;
+
+    switch (opt) {
+    case 'C':
+	while (*optarg) {
+	    switch (*optarg++) {
+	    case 'c':
+		ds_toggle_boolean(DS_APPLICATION_ID,
+				  DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
+		break;
+
+	    case 'i':
+		ds_toggle_boolean(DS_APPLICATION_ID,
+				  DS_WALK_INCLUDE_REQUESTED);
+		break;
+
+	    case 'n':
+	    case 'r':
+		if (*(optarg - 1) == 'r') {
+		    reps     = strtol(optarg, &endptr, 0);
+		} else {
+		    non_reps = strtol(optarg, &endptr, 0);
+		}
+
+		if (endptr == optarg) {
+		    /*  No number given -- error.  */
+		    usage();
+		    exit(1);
+		} else {
+		    optarg = endptr;
+		    if (isspace(*optarg)) {
+			return;
+		    }
+		}
+		break;
+
+	    case 'p':
+		ds_toggle_boolean(DS_APPLICATION_ID,
+				  DS_WALK_PRINT_STATISTICS);
+		break;
+
+	    default:
+		fprintf(stderr,
+			"Unknown flag passed to -C: %c\n", optarg[-1]);
+		exit(1);
+	    }
+	}
+	break;
+    }
+}
+
+int main(int argc, char *argv[])
 {
     struct snmp_session  session, *ss;
-    struct snmp_pdu *pdu;
-    struct snmp_pdu *response;
+    struct snmp_pdu *pdu, *response;
     struct variable_list *vars;
-    int  arg;
-    oid  name[MAX_OID_LEN];
-    size_t  name_length;
-    oid  root[MAX_OID_LEN];
-    size_t  rootlen;
-    int  count;
-    int  running;
-    int  status;
-    int  reps = 100;
-    int  exitval = 0;
+    int    arg;
+    oid    name[MAX_OID_LEN];
+    size_t name_length;
+    oid    root[MAX_OID_LEN];
+    size_t rootlen;
+    int    count;
+    int    running;
+    int    status;
+    int    check;
+    int    exitval = 0;
+
+    ds_register_config(ASN_BOOLEAN, "snmpwalk", "includeRequested",
+                       DS_APPLICATION_ID, DS_WALK_INCLUDE_REQUESTED);
+    ds_register_config(ASN_BOOLEAN, "snmpwalk", "printStatistics",
+                       DS_APPLICATION_ID, DS_WALK_PRINT_STATISTICS);
+    ds_register_config(ASN_BOOLEAN, "snmpwalk", "dontCheckOrdering",
+                       DS_APPLICATION_ID, DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
 
     /* get the common command line arguments */
-    switch (arg = snmp_parse_args(argc, argv, &session, NULL, NULL)) {
+    switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
     case -2:
     	exit(0);
     case -1:
@@ -135,7 +233,7 @@ int main(int argc, char  *argv[])
 
     /* open an SNMP session */
     ss = snmp_open(&session);
-    if (ss == NULL){
+    if (ss == NULL) {
       /* diagnose snmp_open errors with the input struct snmp_session pointer */
       snmp_sess_perror("snmpbulkwalk", &session);
       SOCK_CLEANUP;
@@ -147,10 +245,17 @@ int main(int argc, char  *argv[])
     name_length = rootlen;
 
     running = 1;
-    while(running) {
+
+    check =
+        !ds_get_boolean(DS_APPLICATION_ID, DS_WALK_DONT_CHECK_LEXICOGRAPHIC);
+    if (ds_get_boolean(DS_APPLICATION_ID, DS_WALK_INCLUDE_REQUESTED)) {
+        snmp_get_and_print(ss, root, rootlen);
+    }
+    
+    while (running) {
       /* create PDU for GETBULK request and add object name to request */
       pdu = snmp_pdu_create(SNMP_MSG_GETBULK);
-      pdu->non_repeaters = 0;
+      pdu->non_repeaters   = non_reps;
       pdu->max_repetitions = reps;  /* fill the packet */
       snmp_add_null_var(pdu, name, name_length);
 
@@ -161,36 +266,49 @@ int main(int argc, char  *argv[])
           /* check resulting variables */
           for(vars = response->variables; vars; vars = vars->next_variable){
             if ((vars->name_length < rootlen) ||
-                (memcmp(root, vars->name, rootlen * sizeof(oid))!=0)){
-               /* not part of this subtree */  
+                (memcmp(root, vars->name, rootlen * sizeof(oid))!=0)) {
+              /* not part of this subtree */
               running = 0;
               continue;
             }
+            numprinted++;
             print_variable(vars->name, vars->name_length, vars);
-            if ((vars->type == SNMP_ENDOFMIBVIEW) ||
-                (vars->type == SNMP_NOSUCHOBJECT) ||
-                (vars->type == SNMP_NOSUCHINSTANCE)){
-              /* an exception value */
+            if ((vars->type != SNMP_ENDOFMIBVIEW) &&
+                (vars->type != SNMP_NOSUCHOBJECT) &&
+                (vars->type != SNMP_NOSUCHINSTANCE)){
+              /* not an exception value */
+	      if (check && snmp_oid_compare(name, name_length, vars->name,
+	      				    vars->name_length) >= 0) {
+		char name_buf[SPRINT_MAX_LEN], var_buf[SPRINT_MAX_LEN];
+		sprint_objid(name_buf, name, name_length);
+		sprint_objid(var_buf, vars->name, vars->name_length);
+		fprintf(stderr, "Error: OID not increasing: %s >= %s\n",
+			name_buf, var_buf);
+	        running = 0;
+		exitval = 1;
+	      }
+	      /*  Check if last variable, and if so, save for next request.  */
+	      if (vars->next_variable == NULL) {
+		  memmove(name, vars->name, vars->name_length * sizeof(oid));
+		  name_length = vars->name_length;
+	      }
+            } else {
+              /* an exception value, so stop */
               running = 0;
-            }
-            /* check if last variable, and if so, save for next request */
-            if (!vars->next_variable){
-              memmove(name, vars->name, vars->name_length * sizeof(oid));
-              name_length = vars->name_length;
-            }
+	    }
           }
         } else {
           /* error in response, print it */
           running = 0;
           if (response->errstat == SNMP_ERR_NOSUCHNAME){
-            printf("End of MIB.\n");
+            printf("End of MIB\n");
           } else {
             fprintf(stderr, "Error in packet.\nReason: %s\n",
-                   snmp_errstring(response->errstat));
+		    snmp_errstring(response->errstat));
             if (response->errindex != 0){
               fprintf(stderr, "Failed object: ");
               for(count = 1, vars = response->variables;
-                    vars && (count != response->errindex);
+                    vars && count != response->errindex;
                     vars = vars->next_variable, count++)
                 /*EMPTY*/;
               if (vars)
@@ -209,12 +327,22 @@ int main(int argc, char  *argv[])
         running = 0;
 	exitval = 1;
       }
-
       if (response)
         snmp_free_pdu(response);
     }
 
+    if (numprinted == 0 && status == STAT_SUCCESS) {
+        /* no printed successful results, which may mean we were
+           pointed at an only existing instance.  Attempt a GET, just
+           for get measure. */
+        snmp_get_and_print(ss, root, rootlen);
+    }
     snmp_close(ss);
+
+    if (ds_get_boolean(DS_APPLICATION_ID, DS_WALK_PRINT_STATISTICS)) {
+        printf("Variables found: %d\n", numprinted);
+    }
+
     SOCK_CLEANUP;
     return exitval;
 }
