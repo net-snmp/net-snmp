@@ -639,7 +639,8 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
     }
 
     if (units) {
-      return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+      return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
+	      snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
     }
     return 1;
   }
@@ -690,7 +691,8 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
   } 
 
   if (units) {
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
   }
   return 1;
 }
@@ -756,7 +758,8 @@ sprint_realloc_float(u_char **buf, size_t *buf_len,
   *out_len += strlen((*buf + *out_len));
 
   if (units) {
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
   }
   return 1;
 }
@@ -819,7 +822,8 @@ sprint_realloc_double(u_char **buf, size_t *buf_len,
   *out_len += strlen((*buf + *out_len));
 
   if (units) {
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
   }
   return 1;
 }
@@ -952,7 +956,8 @@ sprint_realloc_counter64(u_char **buf, size_t *buf_len, size_t *out_len,
 #endif
 
   if (units) {
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
   }
   return 1;
 }
@@ -1018,7 +1023,8 @@ sprint_realloc_opaque(u_char **buf, size_t *buf_len,
   }
 #endif
   if (units) {
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
   }
   return 1;
 }
@@ -1080,7 +1086,8 @@ sprint_realloc_object_identifier(u_char **buf, size_t *buf_len,
   }
 
   if (units) {
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
   }
   return 1;
 }
@@ -1152,7 +1159,8 @@ sprint_realloc_timeticks(u_char **buf, size_t *buf_len, size_t *out_len,
     return 0;
   }
   if (units) {
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
   }
   return 1;
 }
@@ -1204,20 +1212,27 @@ sprint_hinted_integer (char *buf,
 int
 sprint_realloc_hinted_integer (u_char **buf, size_t *buf_len, size_t *out_len,
 			       int allow_realloc,
-			       long val,
+			       long val, const char decimaltype,
 			       const char *hint,
 			       const char *units)
 {
-  char code, fmt[10] = "%l@", tmp[256];
+  char fmt[10] = "%l@", tmp[256];
   int shift, len;
 
-  code = hint[0];
   if (hint[1] == '-') {
     shift = atoi(hint+2);
   } else {
     shift = 0;
   }
-  fmt[2] = code;
+
+  if (hint[0] == 'd') {
+    /*  We might *actually* want a 'u' here.  */
+    fmt[2] = decimaltype;
+  } else {
+    /*  DISPLAY-HINT character is 'b', 'o', or 'x'.  */
+    fmt[2] = hint[0];
+  }
+
   sprintf(tmp, fmt, val);
   if (shift != 0) {
     len = strlen(tmp);
@@ -1307,9 +1322,11 @@ sprint_realloc_integer(u_char **buf, size_t *buf_len, size_t *out_len,
   if (enum_string == NULL ||
       ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM)) {
     if (hint) {
-      return sprint_realloc_hinted_integer(buf, buf_len, out_len,
-					   allow_realloc,
-					   *var->val.integer, hint, units);
+      if (!(sprint_realloc_hinted_integer(buf, buf_len, out_len,
+					 allow_realloc, *var->val.integer,
+					  'd', hint, units))) {
+	return 0;
+      }
     } else {
       char str[16];
       sprintf(str, "%ld", *var->val.integer);
@@ -1333,7 +1350,8 @@ sprint_realloc_integer(u_char **buf, size_t *buf_len, size_t *out_len,
   }
   
   if (units) {
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
   }
   return 1;
 }
@@ -1398,10 +1416,18 @@ sprint_realloc_uinteger(u_char **buf, size_t *buf_len, size_t *out_len,
 
   if (enum_string == NULL ||
       ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM)) {
-    char str[16];
-    sprintf(str, "%lu", *var->val.integer);
-    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
-      return 0;
+    if (hint) {
+      if (!(sprint_realloc_hinted_integer(buf, buf_len, out_len,
+					  allow_realloc, *var->val.integer,
+					  'u', hint, units))) {
+	return 0;
+      }
+    } else {	
+      char str[16];
+      sprintf(str, "%lu", *var->val.integer);
+      if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, str)) {
+	return 0;
+      }
     }
   } else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
     if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, enum_string)) {
@@ -1419,7 +1445,8 @@ sprint_realloc_uinteger(u_char **buf, size_t *buf_len, size_t *out_len,
   }
   
   if (units) {
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
   }
   return 1;
 }
@@ -1471,12 +1498,21 @@ sprint_realloc_gauge(u_char **buf, size_t *buf_len, size_t *out_len,
       return 0;
     }
   }
-  sprintf(tmp, "%lu", *var->val.integer);
-  if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, tmp)) {
+  if (hint) {
+    if (!sprint_realloc_hinted_integer(buf, buf_len, out_len,
+				       allow_realloc, *var->val.integer,
+				       'u', hint, units)) {
       return 0;
+    }
+  } else { 
+    sprintf(tmp, "%lu", *var->val.integer);
+    if (!snmp_strcat(buf, buf_len, out_len, allow_realloc, tmp)) {
+      return 0;
+    }
   }
   if (units) {
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
   }
   return 1;
 }
@@ -1533,7 +1569,8 @@ sprint_realloc_counter(u_char **buf, size_t *buf_len, size_t *out_len,
       return 0;
   }
   if (units) {
-    return snmp_strcat(buf, buf_len, out_len, allow_realloc, units);
+    return (snmp_strcat(buf, buf_len, out_len, allow_realloc, " ") &&
+	    snmp_strcat(buf, buf_len, out_len, allow_realloc, units));
   }
   return 1;
 }
