@@ -1,0 +1,350 @@
+
+GENERAL
+=======
+
+What is it?
+
+  - Various tools relating to the Simple Network Management Protocol
+    including:
+
+	* An extensible agent
+	* An SNMP library
+	* tools to request or set information from SNMP agents
+	* tools to generate and handle SNMP traps
+	* a version of the unix 'netstat' command using SNMP
+	* what else?
+
+Where can I get it?
+
+  - ftp://ftp.ece.ucdavis.edu/pub/snmp/ucd-snmp.tar.gz
+
+	This file will always point to the latest revision.
+	If you see newer revisions in the directory marked with
+	a '-A[1-9]' or '-B[1-9]' or similar, please note that
+	these are pre-release ports of the next release.
+
+What documentation is available?
+
+	This FAQ (!)
+	README
+	INSTALL
+	PORTING
+	EXAMPLE.conf
+	man pages for the individual tools, files and the API
+
+Are there binaries available?
+
+  - Nope, sorry.
+
+	The distribution ought to compile cleanly and run
+	on a range of systems (see the next answer).
+	See the file INSTALL for more details.
+
+What operating systems does it run on?
+
+	* HP-UX 9.05, 9.03, 9.01 on HPPA 1.1 systems
+	* HP-UX 10.10, 10.01 on HPPA 1.1 systems
+	* Ultrix 4.4, 4.3, 4.2 on DEC MIPS systems
+	* Solaris 2.5, 2.4, 2.3 on Sun SPARC systems
+	* SunOS 4.1.3, 4.1.3, 4.1.2 on Sun SPARC systems
+	* OSF 3.2 on DEC Alpha systems
+
+  [ The following need clarifying.]
+
+	* NetBSD 1.2, 1.1, 1.0 on all? systems
+	* FreeBSD 2.something on all? systems (possibly)
+	* maybe on BSDI systems (with a following wind)
+	* rumours about Linux
+
+What happens if mine isn't listed?
+
+  It's worth trying anyway, particularly if the system is based
+	around the BSD kernel.  If it seems to work correctly,
+	let us know so that we can update the list above.
+	If it doesn't work, let us know and we'll try to help.
+  Either way, try it and let us know how you get on (see below for how).
+	
+
+How do I find out about new releases?
+
+  There is a mailing list for these announcements
+  	ucd-snmp-announce@ece.ucdavis.edu
+  To be added to (or removed from) this list, send a message
+  to the address 'ucd-snmp-announce-request@ece.ucdavis.edu'
+  with a subject line of 'subscribe' (or 'unsubscribe' as appropriate).
+
+  Major code revisions may be announced more widely (e.g. on the
+	SNMP mailing lists, or comp.protocols.snmp) but this list is
+  the most reliable way to keep in touch with the status of this package.
+
+
+How can I find out what other people are doing?
+
+  There is a general purpose discussion list
+  	ucd-snmp@ece.ucdavis.edu
+  To be added to (or removed from) this list, send a message
+  to the address 'ucd-snmp-request@ece.ucdavis.edu'
+  with a subject line of 'subscribe' (or 'unsubscribe' as appropriate).
+
+  There's not a great deal of traffic at the moment, but you can
+  always try to do somehing about that!
+  
+
+How do I submit a patch or bug report?
+
+  - Send a message to 'ucd-snmp-coders@ece.ucdavis.edu' containing
+	a description of the problem, and as much other relevant
+	details as you can. Useful information includes the version
+	of the package that you've been working with, the output of
+	the command 'uname a', the precise command that you've used,
+	and a copy of the output it produces.
+
+	We can't promise to be able to solve the problem, but we'll
+	certainly try and help.
+
+   There is [will be?] a script that you can use to submit a bug
+	report that will provide much of this general information
+	automatically.
+
+
+   If you're trying to port the package to a new system, the output
+	of the command 'make -k' is a good start.
+
+   If you're reporting success on a new system, please let us know
+   both details of the hardware you're using, and what versions of
+   the operating system you've tried it on.  The entry 'host' in
+   the file 'config.status' will show this information.
+	Oh, and congratulations!
+
+
+Whats the difference between snmpv1 and snmpv2?
+
+  [Umm.  A bloody good question.
+  Where can I 'borrow' the answer from?
+  Here goes nothing:]
+
+
+  A full description is probably beyond the scope of this FAQ.
+	[pointer to somewhere?]
+  Very briefly, practical experience showed up various problems and
+  deficiencies with the original protocol and framewok (described in
+  RFCs 1155-1157 and known now as SNMPv1).
+  The revised framework that attempted to address these was (and is)
+  known as SNMPv2.  The changes that have been made are described in
+  RFCs 1901-1910 and include:
+
+	* new protocol packet types (what and why)
+		(Protocol and Transport mappings)
+	* new ways of defining information (MIB structure)
+		(SMI, Textual conventions, conformance statements)
+	* what else ?
+
+	* new mechanisms for administration and security
+	* mechanisms for remote configuration
+
+  Unfortunately, while much of these are generally accepted, there
+  is still some disagreement in these last two areas, security/admin
+  and remote configuration.  This has resulted in a number of
+  variants and alternative proposals:
+
+	SNMPv2c		Contains the new protocol and MIB structure elements,
+			using the existing v1 administration structure.
+			This is known as "Community-based SNMPv2".
+	SNMPv2 usec
+	SNMPv2*
+	SNMP-NG
+
+  [ Need a bit more about these perhaps? Or just drop it?]
+
+
+Which snmpv2 is supported in this package?
+
+  [Some SNMPv2 stuff is already supported.
+   need more details as to precisely what.]
+
+  - snmpv2c coming soon hopefully
+
+
+AGENT
+=====
+
+What MIBs are supported?
+
+  The following MIBs are supported (at least in part):
+
+	- MIB-2  General network statistics (RFC 1213)
+	- UCD agent extensions
+		(processes, disks, memory, load average,
+		 shell commands, error handling)
+	- HP OpenView		(HP-UX only)
+	- SNMPv2 
+
+
+How do I add a mib?
+
+  The agent and tools look in a predefined directory (PREFIX/lib/snmp/mibs)
+  and regard any file held there as defining a MIB or MIBs to be included.
+  Adding a new MIB is therefore as simple as placing the relevant file
+  in this directory.
+
+  Note, however, that this is purely concerned with the syntax and
+  OID translation of the obects within that MIB.  Simply adding a file
+  to this directory does not automatically extend the functionality
+  of the agent to include this MIB.  (Would that life were so simple).
+
+  However, if the agent to be queried supports the new MIB, then the
+  presence of this file is all that the query tools need to advantage
+
+
+
+How do I add functionality?
+
+  Some extra functionality is already provided - in particular
+  the ability to monitor a station for the presence, absence or
+  excess numbers of particular processes, or excessive use of disk
+  space or CPU.
+    More flexible control can be obtained by providing a command
+  (such as a shell script) to be run and report the necessary
+  information, or perform the required actions. Detailed information
+  and examples are provided in the snmpd(1) manual page, or the
+  EXAMPLE.conf file.
+ 
+
+
+How do I write C code to integrate with the agent?
+
+  At the moment, the only technique for integrating external C code
+  with the agent is to implement it within the agent itself.
+  The place to start looking is in the file 'agent/snmp_vars.c'
+  or contact the list 'ucd-snmp-coders@ece.ucdavis.edu' for advice.
+
+  It is hoped to implement some form of proxy mechanism (such as the
+  agentx protocols) once the specification for these have settled.
+
+
+
+When I run the agent it runs and then quits without staying around.
+
+  The normal operation of the agent is to 'fork' itself into the
+  background, detaching itself so that it will continue running even
+  when you log out, and freeing the command line for subseqent use.
+  This looks at first sight as if the agent has died, but using 'ps'
+  to show all processes should reveal that the agent is still running.
+
+  To prevent this behaviour, such as when attempting to debug the
+  agent, you can start it with the '-f' flag.  This suppresses the
+  fork, and the agent will run as a 'normal' command.
+
+
+
+
+
+PROBLEMS
+========
+
+
+What does "klread:  bad address" mean?
+
+  This means that the agent was unable to extract some of the
+  necessary information from the kernel structures.  This is
+  possibly due to:
+	- either looking in the wrong place for kernel information
+		(check the value of KERNEL_LOC)
+	- an error in the implementation of part of the MIB tree
+		for that architecture.  Try and identify which
+		OID is generating the error, and contact the
+		list 'ucd-snmp-coders@ece.ucdavis.edu'
+
+  [ What's this comment about 'debugging support', Wes? ]
+
+
+How about "Can't open /dev/kmem"?
+
+  This device is normally restricted to just being accessible by root
+  (or possibly by a special group such as 'kmem' or 'sys').  The agent
+  must be able to read this device to obtain the necessary information
+  about the running system.
+    Check that the agent was started by root, and is running with UID 0
+  (or suitable GID if appropriate)
+ 
+
+I cannot set any variables in the mib.
+
+  There are relatively few variables in the standard MIB tree that
+  are writeable, mostly regarding the status of various elements of the
+  system [Chek This, Dave!].  Few of these are currently settable in the agent.
+
+  The main variables that can be changes are purely those within the
+  'system' group, relating to general contact information.
+  
+
+snmpwalk of some.textual.notation doesn't work (eg, enterprises.ucDavis).
+
+  The tools assume that the names of variables will normally be within
+  the main 'mib-2' tree.  In order to access a variable elsewhere within
+  the MIB structure, it is necessary to specify the full path, i.e:
+
+	.iso.org.dod......
+
+  Alternatively, the tools could be recompiled to start searching from
+  a different value of PREFIX (though this is perhaps less desirable).
+
+
+Sometimes I seem to get the wrong answers.  Why?
+
+  Many of the variables in the basic MIB-2 tree require information
+  that is not easily available in the common Unix kernels.  In the
+  absence of anything better, the agent returns hardwired 'null'
+  values.  The items affected are:
+
+	interface.ifType		other(1)
+	interface.ifSpeed		1
+	interface.ifLastChange		0
+	interface.ifInNUCastPkts	0
+	interface.ifInDiscards		0
+	interface.ifInUnknownProtos	0
+	interface.ifOutNUCastPkts	0
+	interface.ifSpecific		Null OID
+
+	ip.ipInUnknownProtos		0
+	ip.ipInDiscards			0
+	ip.ipOutRequests		0
+	ip.ipOutDiscards		0
+	ip.ipFragOKs			0
+	ip.ipFragFails			0
+	ip.ipFragCreates		0
+	ip.ipRouteDiscards		0
+	ipAddrEntry.ipAdEntReasmMaxSize	-1
+	ipRouteEntry.ipRouteAge		0
+
+	tcp.tcpMaxConn			-1
+	tcp.tcpOutRsts			0
+
+	udp.udpInDatagrams		0
+	udp.udpNoPorts			0
+	udp.udpOutDatagrams		0
+
+
+  The following variables have 'likely guess' values, that are not
+  necessarily strictly accurate.
+
+
+	interface.ifInOctets		guess based on # of packets
+	interface.ifInUCastPkts		includes non-unicast packets
+	interface.ifOutOctets		guess based on # of packets
+	interface.ifOutUCastPkts	includes non-unicast packets
+
+	ip.ipInDelivers			Doesn't handle fragments properly
+	ip.ipReasmOKs			Assumes fragments are complete datagrams
+	ipRouteEntry.ipRouteProto	local(2) or icmp(4)
+
+	tcp.tcpRtoAlgorithm		vanJ(4)   (probably correct!)
+	tcp.tcpAttemptFails		} actually counting
+	tcp.tcpEstabResets		} something different
+
+  Some systems may return the correct information for these values.
+  Systems that are known to have corrected these values are as follows:
+
+	*  what???
+	*  HP-UX (when David gets his finger out!)
+
