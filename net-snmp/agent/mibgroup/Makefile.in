@@ -18,9 +18,9 @@ CPPFLAGS= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(MIBGROUP_INCLUDES) \
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
-OBJS = @module_list_o@
-LOBJS = @module_list_lo@
-SRCS = @module_list_c@
+OBJS  = @mib_module_list_o@
+LOBJS = @mib_module_list_lo@
+SRCS  = @mib_module_list_c@
 
 all: standardall $(LOBJS)
 
