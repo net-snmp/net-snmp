@@ -8,7 +8,6 @@
 @end@
 ########################################################################
 ##
-$example_start
     /** TODO: update/replace $node copy code? */
 @if $m2c_node_needlength == 0@
     $m2c_ctx_lh->$node = $m2c_ctx_rh->$node;
@@ -16,7 +15,6 @@ $example_start
     memcpy( $m2c_ctx_lh->$node, $m2c_ctx_rh->$node, $m2c_ctx_rh->${node}_len);
     $m2c_ctx_lh->${node}_len = $m2c_ctx_rh->${node}_len;
 @end@ # need length
-$example_end
 
 ##
 ########################################################################
