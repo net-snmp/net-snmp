@@ -25,8 +25,7 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
-#include <ctype.h>
-#ifdef HAVE_STDLIB_H
+#if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #if HAVE_UNISTD_H
@@ -41,11 +40,12 @@ SOFTWARE.
 #if HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
-#if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -57,33 +57,22 @@ SOFTWARE.
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#include <netdb.h>
 #include <stdio.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#if HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#else
+#include <netdb.h>
 #endif
-#if HAVE_SYS_SOCKIO_H
-#include <sys/sockio.h>
-#endif
-#include <sys/file.h>
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
-#if HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#if HAVE_SYS_SYSCTL_H
-#include <sys/sysctl.h>
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
 #endif
 
 #include "asn1.h"
 #include "snmp_api.h"
-#include "snmp_impl.h"
 #include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
+#include "snmp_impl.h"
 #include "system.h"
 #include "snmp_parse_args.h"
 
@@ -434,5 +423,5 @@ main(argc, argv)
     if (current_size != orig_size) malloc_list(2, histid1, histid2);
 #endif
     snmp_close(ss);
-    exit (0);
+    return (0);
 }
