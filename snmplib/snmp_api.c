@@ -3696,6 +3696,8 @@ snmp_varlist_add_variable(struct variable_list **varlist,
         break;
 
       case ASN_OBJECT_ID:
+      case ASN_PRIV_INCL_RANGE:
+      case ASN_PRIV_EXCL_RANGE:
         if (largeval) {
             vars->val.objid = (oid *)malloc(vars->val_len);
         }
