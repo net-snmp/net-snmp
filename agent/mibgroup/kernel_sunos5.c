@@ -162,7 +162,7 @@ extern "C" {
    walking the tables.  jbpn, 20020226.  */
 
 static void
-kernel_sunos5_cache_age(unsigned int reg, void *data)
+kernel_sunos5_cache_age(unsigned int regnumber, void *data)
 {
   int i = 0, period = (int)data;
   for (i = 0; i < MIBCACHE_SIZE; i++) {
