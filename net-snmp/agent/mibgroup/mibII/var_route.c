@@ -1331,14 +1331,14 @@ Route_Scan_Reload(void)
 static int
 qsort_compare(const void *v1, const void *v2)
 {
-    mib_ipRouteEnt * const *r1 = (mib_ipRouteEnt * const *) v1;
-    mib_ipRouteEnt * const *r2 = (mib_ipRouteEnt * const *) v2;
+    const mib_ipRouteEnt *r1 = (const mib_ipRouteEnt *) v1;
+    const mib_ipRouteEnt *r2 = (const mib_ipRouteEnt *) v2;
     /*
      *      Do the comparison
      */
-    if ((*r1)->Dest == (*r2)->Dest)
+    if (r1->Dest == r2->Dest)
         return (0);
-    if ((*r1)->Dest  > (*r2)->Dest)
+    if (r1->Dest  > r2->Dest)
         return (1);
     return (-1);
 }
