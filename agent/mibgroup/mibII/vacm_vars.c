@@ -144,6 +144,9 @@ init_vacm_vars (void)
   snmp_register_callback(SNMP_CALLBACK_APPLICATION,
                          SNMPD_CALLBACK_ACM_CHECK_INITIAL,
                          vacm_in_view_callback, NULL);
+  snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+                         SNMP_CALLBACK_POST_READ_CONFIG,
+                         vacm_warn_if_not_configured, NULL);
 }
 
 
@@ -496,6 +499,15 @@ void vacm_parse_simple(const char *token, char *confline) {
 }
 
 int
+vacm_warn_if_not_configured(int majorID, int minorID, void *serverarg,
+                            void *clientarg) {
+    if (!vacm_is_configured()) {
+        snmp_log(LOG_WARNING, "Warning: no access control information configured.\n  It's unlikely this agent can serve any useful purpose in this state.\n  Run \"snmpconf -g basic_setup\" to help you configure this agent.\n");
+    }
+    return SNMP_ERR_NOERROR;
+}
+
+int
 vacm_in_view_callback(int majorID, int minorID, void *serverarg,
                       void *clientarg) {
   struct view_parameters *view_parms = (struct view_parameters *) serverarg;
@@ -570,31 +582,25 @@ int vacm_in_view (netsnmp_pdu *pdu,
 #endif
 	    ) {
 	  if (!netsnmp_udp_getSecName(pdu->transport_data,
-				   pdu->transport_data_length,
-				   (char *)pdu->community, pdu->community_len, &sn) &&
-              !vacm_is_configured()) {
-	    /*  There are no com2sec entries.  */
-	    DEBUGMSGTL(("mibII/vacm_vars",
-			"vacm_in_view: accepted with no com2sec entries\n"));
-	    switch (pdu->command) {
-	    case SNMP_MSG_GET:
-	    case SNMP_MSG_GETNEXT:
-	    case SNMP_MSG_GETBULK:
-	      return 0;
-	    default:
-	      return 1;
-	    }
+                                      pdu->transport_data_length,
+                                      (char *)pdu->community,
+                                      pdu->community_len, &sn)) {
+              /*  There are no com2sec entries.  */
+	      sn = NULL;
 	  }
 	} else {
 	  /*  Map other <community, transport-address> pairs to security names
-	      here.  For now just let non-IPv4 transport always succeed.  */
-	  return 0;
-	}
+	      here.  For now just let non-IPv4 transport always succeed.
 
-	if (sn == NULL) {
-	  snmp_increment_statistic(STAT_SNMPINBADCOMMUNITYNAMES);
+              WHAAAATTTT.  No, we don't let non-IPv4 transports
+              succeed!  You must fix this to make it usable, sorry.
+              From a security standpoint this is insane. -- Wes
+          */
+            /** @todo alternate com2sec mappings for non v4 transports.
+                Should be implemented via registration */
+            sn = NULL;
 	}
-
+    
     } else if (find_sec_mod(pdu->securityModel)) {
       /* any legal defined v3 security model */
       DEBUGMSG (("mibII/vacm_vars",
@@ -605,6 +611,11 @@ int vacm_in_view (netsnmp_pdu *pdu,
 	sn = NULL;
     }
 
+    if (sn == NULL) {
+        snmp_increment_statistic(STAT_SNMPINBADCOMMUNITYNAMES);
+        return 1;
+    }
+    
     if (pdu->contextNameLen > CONTEXTNAMEINDEXLEN) {
 	DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: bad ctxt length %d\n",
 		    pdu->contextNameLen));
@@ -625,7 +636,6 @@ int vacm_in_view (netsnmp_pdu *pdu,
         return 6;
     }
 
-    if (sn == NULL) return 1;
     DEBUGMSGTL(("mibII/vacm_vars", "vacm_in_view: sn=%s", sn));
 
     gp = vacm_getGroupEntry(pdu->securityModel, sn);
