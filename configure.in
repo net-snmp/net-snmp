@@ -173,18 +173,6 @@ AC_ARG_WITH(logfile,
 [  --with-logfile=\"location\"       Default log file location for snmpd.],
     ac_cv_user_prompt_LOGFILE="$with_logfile")
 
-AC_ARG_WITH(libwrap,
-[  --with-libwrap[=LIBPATH]        Compile in libwrap (tcp_wrappers) support.],
-    if test "x$withval" != "x" -a -d "$withval"; then
-        WRAPLIBS="-L$withval -lwrap"
-    elif test "x$withval" = "xyes"; then
-        WRAPLIBS="-lwrap"
-    else
-        WRAPLIBS="$withval $LIBS"
-    fi
-    AC_DEFINE(USE_LIBWRAP)
-)
-
 dnl This can't be within AC_ARG_WITH.  I don't want to read autoconf m4
 dnl to find out why.
 AC_SUBST(WRAPLIBS)
@@ -234,7 +222,7 @@ dnl
 AC_ARG_WITH(defaults,
 [
 Miscellaneous:
-  --with-defaults                 Use defaults for prompted values.],
+  --with-defaults         Use defaults for prompted values.],
     defaults="yes",defaults="no")
 
 dnl Only define if specifically chosen as --without (ie, default to true). 
@@ -467,6 +455,9 @@ if test "x$with_shared" = "xyes"; then
     irix*)
 	SHLIB_LD_CMD="ld -shared -o"
 	CC_RUNTIME_ARG="-Wl,-rpath -Wl,$libdir"
+        if test "x$GCC" != "xyes"; then
+	    SHLIB_CFLAGS="-KPIC"
+	fi
 	;;
 
     netbsd* | openbsd*)
@@ -486,7 +477,10 @@ if test "x$with_shared" = "xyes"; then
 
     osf*)
 	CC_RUNTIME_ARG="-rpath $libdir"
-	SHLIB_LD_CMD="ld -shared -o"
+	SHLIB_LD_CMD="ld -shared -expect_unresolved \"*\" -o"
+        if test "x$GCC" != "xyes"; then
+	    SHLIB_CFLAGS=""
+	fi
 	;;
 	
     aix*)
@@ -889,38 +883,79 @@ dnl Checks for libraries.
 dnl AC_CHECK_LIB(des, main)
 AC_CHECK_LIB(elf, nlist)
 AC_CHECK_LIB(m, asin)
+
 dnl On some platforms (Irix) libnsl and libsocket should not be used.
-AC_CHECK_FUNCS(gethostbyname getservbyname)
-if test "x$ac_cv_func_gethostbyname" != "xyes"; then
-       AC_CHECK_LIB(nsl, gethostbyname)
-       if test "x$ac_cv_lib_nsl_gethostbyname" = "xyes"; then
-	    AC_DEFINE(HAVE_GETHOSTBYNAME)
-       fi
-fi
-if test "x$ac_cv_func_getservbyname" != "xyes"; then
-       AC_CHECK_LIB(socket, getservbyname)
-       if test "x$ac_cv_lib_socket_getservbyname" = "xyes"; then
-	    AC_DEFINE(HAVE_GETSERVBYNAME)
-       fi
-fi
+AC_CHECK_FUNC(gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME),
+	AC_CHECK_LIB(nsl, gethostbyname, AC_DEFINE(HAVE_GETHOSTBYNAME)
+	LIBS="${LIBS} -lnsl"))
+AC_CHECK_FUNC(getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME),
+	AC_CHECK_LIB(socket, getservbyname, AC_DEFINE(HAVE_GETSERVBYNAME)
+	LIBS="${LIBS} -lsocket"))
+
 dnl AC_CHECK_LIB(ucb, bzero)
 
+dnl check for tcp wrapper support
+_cppflags="${CPPFLAGS}"
+_ldflags="${LDFLAGS}"
+
+AC_ARG_WITH(libwrap,
+[  --with-libwrap[=LIBPATH]        Compile in libwrap (tcp_wrappers) support.],[
+  if test "$withval" != "no"; then
+    CPPFLAGS="${CPPFLAGS} -I$withval/include"
+    LDFLAGS="${LDFLAGS} -L$withval/lib"
+  fi
+])
+
+AC_CHECK_HEADER(tcpd.h,
+    AC_CHECK_LIB(wrap, main,
+	AC_DEFINE(USE_LIBWRAP) WRAPLIBS="-lwrap",
+	CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
+    CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
+
 dnl zlib is required for newer versions of rpm
-AC_CHECK_LIB(z, zlibVersion)
+_cppflags="${CPPFLAGS}"
+_ldflags="${LDFLAGS}"
+
+AC_ARG_WITH(zlib,
+[  --with-zlib[=DIR]       use libz in DIR],[
+  if test "$withval" != "no"; then
+    CPPFLAGS="${CPPFLAGS} -I$withval/include"
+    LDFLAGS="${LDFLAGS} -L$withval/lib"
+  fi
+])
+
+AC_CHECK_HEADER(zlib.h,
+    AC_CHECK_LIB(z, gzread, , CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
+    CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
+
 dnl
 dnl with rpm3 or higher, we need db1 to exist
 dnl
+
 AC_CHECK_LIB(db1, dbopen,[
   AC_DEFINE(HAVE_LIBDB)
   LIBS="-ldb1 $LIBS"
 ],,-lz)
 
 dnl Ok, -ldb1 may not exist, try -ldb
+_cppflags="${CPPFLAGS}"
+_ldflags="${LDFLAGS}"
+
+AC_ARG_WITH(db,
+[  --with-db[=DIR]         use db in DIR],[
+  if test "$withval" != "no"; then
+    CPPFLAGS="${CPPFLAGS} -I$withval/include"
+    LDFLAGS="${LDFLAGS} -L$withval/lib"
+  fi
+])
+
 if test "x$ac_cv_lib_db1_dbopen" = "xno"; then
-  AC_CHECK_LIB(db, dbopen,[
+  AC_CHECK_HEADER(db.h,
+    AC_CHECK_LIB(db, dbopen,[
     AC_DEFINE(HAVE_LIBDB)
     LIBS="-ldb $LIBS"
-  ],,-lz)
+  ], CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
+  CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
 fi
 
 dnl
