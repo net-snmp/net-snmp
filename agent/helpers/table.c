@@ -433,7 +433,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
             /*
              * var->name_length may have changed - check again 
              */
-            if (var->name_length <= oid_index_pos) { /* pos is 0 based */
+            if ((int)var->name_length <= oid_index_pos) { /* pos is 0 based */
                 DEBUGMSGTL(("helper:table", "    not enough for indexes\n"));
                 tbl_req_info->index_oid_len = 0; /** none available */
             } else {

@@ -125,7 +125,7 @@ netsnmp_register_mib_table_row(const char *moduleName,
         struct variable *vr =
             (struct variable *) ((char *) var + (i * varsize));
         netsnmp_handler_registration *r;
-        if ( var_subid > mibloclen ) {
+        if ( var_subid > (int)mibloclen ) {
             break;    /* doesn't make sense */
         }
         r = SNMP_MALLOC_TYPEDEF(netsnmp_handler_registration);
