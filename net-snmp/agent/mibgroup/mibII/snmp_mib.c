@@ -120,7 +120,7 @@ var_snmp(struct variable *vp,
     /* this is where we do the value assignments for the mib results. */
   if ( (vp->magic >= 1)
        && (vp->magic <= (STAT_SNMP_STATS_END - STAT_SNMP_STATS_START + 1)) ) {
-    long_ret = snmp_get_statistic(vp->magic + STAT_SNMP_STATS_START);
+    long_ret = snmp_get_statistic(vp->magic + STAT_SNMP_STATS_START - 1);
     return (unsigned char *) &long_ret;
   } else if (vp->magic == SNMPENABLEAUTHENTRAPS) {
     *write_method = write_snmp;
