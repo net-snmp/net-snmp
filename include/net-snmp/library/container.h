@@ -319,11 +319,10 @@ extern "C" {
             while(tmp->next)
                 tmp = tmp->next;
             while(tmp) {
-                rc = tmp->cfree(tmp);
+                tmp = tmp->prev;
+                rc = tmp->next->cfree(tmp->next);
                 if (rc)
                     snmp_log(LOG_ERR,"error on subcontainer cfree (%d)\n", rc);
-                tmp = tmp->prev;
-		SNMP_FREE(tmp->next);
             }
         }
 	rc = x->cfree(x);
