@@ -819,8 +819,6 @@ snmp_parse(session, pdu, data, length)
     int community_length = COMMUNITY_MAX_LEN;
     struct internal_variable_list *vp = NULL;
     oid objid[MAX_NAME_LEN];
-    u_char tmpstr[1024];
-
 
     /* get the message tag */
     len = length;
@@ -1047,7 +1045,7 @@ snmp_parse(session, pdu, data, length)
 		vp->usedBuf = TRUE;
 		vp->val_len = sizeof(double);
 		asn_parse_double(var_val, &len, &vp->type,
-		                         vp->val.floatVal,
+		                         vp->val.doubleVal,
 					 vp->val_len);
 		break;
 	    case ASN_OPAQUE_I64:

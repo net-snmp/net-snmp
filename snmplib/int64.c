@@ -218,7 +218,7 @@ printU64(pu64)
   U64 u64b;
 
 #define I64CHARSZ 21
-  static char aRes[I64CHARSZ+1], *cp;
+  static char aRes[I64CHARSZ+1];
   unsigned int u;
   int j;
 
@@ -244,7 +244,7 @@ printI64(pu64)
   U64 u64b;
 
 #define I64CHARSZ 21
-  static char aRes[I64CHARSZ+1], *cp;
+  static char aRes[I64CHARSZ+1];
   unsigned int u;
   int j, sign=0;
 

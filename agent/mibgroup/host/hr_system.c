@@ -112,7 +112,7 @@ var_hrsys(vp, name, length, exact, var_len, write_method)
 #ifdef linux
     FILE       *fp;
 #endif
-#ifdef NPROC_SYMBOL
+#if defined(NPROC_SYMBOL) && !defined(NR_TASKS)
     int		nproc;
 #endif
 

@@ -155,5 +155,7 @@ u_char	*asn_build_signed_int64 __P((u_char *, int *, u_char,
                                        struct counter64 *, int));
 u_char	*asn_build_float __P((u_char *, int *, u_char, float *,
                               int));
+u_char	*asn_parse_float __P((u_char *, int *, u_char *, float *, int));
 u_char	*asn_build_double __P((u_char *, int *, u_char, double *,
                                int));
+u_char	*asn_parse_double __P((u_char *, int *, u_char *, double *, int));

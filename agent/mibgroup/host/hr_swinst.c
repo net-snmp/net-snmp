@@ -339,7 +339,9 @@ var_hrswinst(vp, name, length, exact, var_len, write_method)
 static int HRSW_index;
 
 static DIR *dp = NULL;
+#ifndef HAVE_LIBRPM
 static struct dirent *de_p;
+#endif
 static char HRSW_name[100];
 
 
