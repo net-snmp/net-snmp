@@ -113,10 +113,6 @@ typedef struct counter64 unsigned64;
 #define ASN_APP_I64 (ASN_APPLICATION | 10)
 #define ASN_APP_U64 (ASN_APPLICATION | 11)
 #define ASN_APP_UNION (ASN_PRIVATE | 1)		/* or ASN_PRIV_UNION ? */
-#define ASN_PRIV_INCL_RANGE (ASN_PRIVATE | 2)
-#define ASN_PRIV_EXCL_RANGE (ASN_PRIVATE | 3)
-#define ASN_PRIV_DELEGATED  (ASN_PRIVATE | 4)
-#define IS_DELEGATED(x)   ((x) == ASN_PRIV_DELEGATED)
 
 /* value for Counter64 */
 #define ASN_OPAQUE_COUNTER64 (ASN_OPAQUE_TAG2 + ASN_APP_COUNTER64)
@@ -144,6 +140,13 @@ typedef struct counter64 unsigned64;
 #define ASN_OPAQUE_U64_MX_BER_LEN 12
 
 #endif /* OPAQUE_SPECIAL_TYPES */
+
+
+#define ASN_PRIV_INCL_RANGE (ASN_PRIVATE | 2)
+#define ASN_PRIV_EXCL_RANGE (ASN_PRIVATE | 3)
+#define ASN_PRIV_DELEGATED  (ASN_PRIVATE | 4)
+#define IS_DELEGATED(x)   ((x) == ASN_PRIV_DELEGATED)
+
 
 int	 asn_check_packet (u_char *, size_t);
 u_char	*asn_parse_int (u_char *, size_t *, u_char *, long *, size_t);
