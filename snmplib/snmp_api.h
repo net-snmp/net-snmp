@@ -835,7 +835,7 @@ void   snmp_sess_perror     (const char *prog_string, struct snmp_session *ss);
 #define  STAT_SNMPSILENTDROPS		     39
 #define  STAT_SNMPPROXYDROPS		     40
 #define  STAT_SNMP_STATS_START               STAT_SNMPINPKTS
-#define  STAT_SNMP_STATS_END                 STAT_SNMPOUTTRAPS
+#define  STAT_SNMP_STATS_END                 STAT_SNMPPROXYDROPS
 
 /* target mib counters */
 #define  STAT_SNMPUNAVAILABLECONTEXTS	     41
