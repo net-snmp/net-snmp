@@ -71,13 +71,13 @@ netsnmp_access_systemstats_container_arch_load(netsnmp_container* container,
     }
 
     /*
-     * skip header. make sure it's then length we expect...
+     * skip header, but make sure it's the length we expect...
      */
     fgets(line, sizeof(line), devin);
     len = strlen(line);
     if (224 != len) {
-        snmp_log(LOG_ERR, "unexpected header length. int /proc/net/snmp. "
-                 "%d != 224\n", len);
+        snmp_log(LOG_ERR, "unexpected header length in /proc/net/snmp."
+                 " %d != 224\n", len);
         return -4;
     }
 
