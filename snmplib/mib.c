@@ -2955,9 +2955,10 @@ get_symbol(oid *objid,
 	   struct tree *subtree,
 	   char *buf)
 {
-    int len = SPRINT_MAX_LEN, overflow = 0, outlen;
-    return _get_realloc_symbol(objid, objidlen, subtree, (u_char **)&buf, &len, &outlen, 0,
-	   &overflow, NULL, NULL);
+    int len = SPRINT_MAX_LEN, overflow = 0, outlen = 0;
+    return _get_realloc_symbol(objid, objidlen, subtree, (u_char **)&buf,
+                               &len, &outlen, 0,
+                               &overflow, NULL, NULL);
 }
 
 /*
