@@ -47,6 +47,7 @@ extern          "C" {
 
 
     netsnmp_cache* netsnmp_extract_cache_info(netsnmp_agent_request_info *);
+    int            netsnmp_cache_check_and_reload(netsnmp_cache * cache);
     int            netsnmp_cache_check_expired(netsnmp_cache *cache);
     int            netsnmp_cache_is_valid(    netsnmp_agent_request_info *);
     /** for backwards compat */

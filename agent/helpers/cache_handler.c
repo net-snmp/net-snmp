@@ -120,12 +120,14 @@ netsnmp_cache_create(int timeout, NetsnmpCacheLoad * load_hook,
      * Note that this list is not ordered.
      *    table_iterator rules again!
      */
-    cache->rootoid = snmp_duplicate_objid(rootoid, rootoid_len);
-    cache->rootoid_len = rootoid_len;
-    cache->next = cache_head;
-    if (cache_head)
-        cache_head->prev = cache;
-    cache_head = cache;
+    if (rootoid) {
+        cache->rootoid = snmp_duplicate_objid(rootoid, rootoid_len);
+        cache->rootoid_len = rootoid_len;
+        cache->next = cache_head;
+        if (cache_head)
+            cache_head->prev = cache;
+        cache_head = cache;
+    }
 
     return cache;
 }
@@ -225,6 +227,23 @@ netsnmp_cache_check_expired(netsnmp_cache *cache)
     return cache->expired;
 }
 
+/** Reload the cache if required */
+int
+netsnmp_cache_check_and_reload(netsnmp_cache * cache)
+{
+    if (!cache) {
+        DEBUGMSG(("helper:cache_handler", " no cache\n"));
+        return 0;	/* ?? or -1 */
+    }
+    if (!cache->valid || netsnmp_cache_check_expired(cache))
+        return _cache_load( cache );
+    else {
+        DEBUGMSG(("helper:cache_handler", " cached (%d)\n",
+                  cache->timeout));
+        return 0;
+    }
+}
+
 /** Is the cache valid for a given request? */
 int
 netsnmp_cache_is_valid(netsnmp_agent_request_info * reqinfo)
@@ -282,12 +301,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
         /*
          * call the load hook, and update the cache timestamp.
          */
-        if (!cache->valid || netsnmp_cache_check_expired(cache))
-            ret = _cache_load( cache );
-        else {
-            DEBUGMSG(("helper:cache_handler", " cached (%d)\n",
-                      cache->timeout));
-        }
+        netsnmp_cache_check_and_reload(cache);
         netsnmp_agent_add_list_data(reqinfo,
                                     netsnmp_create_data_list(CACHE_NAME,
                                                              cache, NULL));
@@ -333,7 +347,7 @@ _cache_free( netsnmp_cache *cache )
 static int
 _cache_load( netsnmp_cache *cache )
 {
-    int ret;
+    int ret = -1;
 
     /*
      * If we've got a valid cache, then release it before reloading
@@ -341,7 +355,8 @@ _cache_load( netsnmp_cache *cache )
     if (cache->valid )
         _cache_free(cache);
 
-    ret = cache->load_cache(cache, cache->magic);
+    if ( cache->load_cache)
+        ret = cache->load_cache(cache, cache->magic);
     if (ret < 0) {
         DEBUGMSG(("helper:cache_handler", " load failed (%d)\n",
                   ret));
