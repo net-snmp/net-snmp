@@ -292,7 +292,7 @@ _find_next_row(netsnmp_container *c,
             /*
              * don't set tblreq next_col unless we know there is one,
              * so we don't mess up table handler sparse table processing.
-             *.
+             */
             oid next_col = netsnmp_table_next_column(tblreq);
             if (0 != next_col) {
                 tblreq->colnum = next_col;
