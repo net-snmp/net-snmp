@@ -110,6 +110,10 @@ int setenv (const char *, const char *, int);
  
 int calculate_time_diff(struct timeval *, struct timeval *);
 
+#ifndef HAVE_STRCASESTR
+char *strcasestr(const char *, const char *);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
