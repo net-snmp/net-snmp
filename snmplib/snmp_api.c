@@ -312,6 +312,11 @@ static int snmp_parse_version (u_char *, size_t);
 static int snmp_resend_request (struct session_list *slp, 
 				struct request_list *rp, 
 				int incr_retries);
+static void register_default_handlers(void);
+static struct session_list *snmp_sess_copy( struct snmp_session *pss);
+int  snmp_get_errno(void);
+void snmp_synch_reset(struct snmp_session * notused);
+void snmp_synch_setup(struct snmp_session * notused);
 
 #ifndef HAVE_STRERROR
 const char *strerror(int err)
@@ -584,7 +589,7 @@ snmp_sess_init(struct snmp_session *session)
 }
 
 
-void
+static void
 register_default_handlers(void) {
   ds_register_config(ASN_BOOLEAN, "snmp","dumpPacket",
                      DS_LIBRARY_ID, DS_LIB_DUMP_PACKET);
@@ -966,7 +971,7 @@ _sess_copy( struct snmp_session *in_session)
     return( slp );
 }
 
-struct session_list *
+static struct session_list *
 snmp_sess_copy( struct snmp_session *pss)
 {
     struct session_list * psl;
@@ -3944,7 +3949,7 @@ snmp_read(fd_set *fdset)
 /* returns 0 if success, -1 if fail */
 /* MTR: can't lock here and at snmp_read */
 /* Beware recursive send maybe inside snmp_read callback function. */
-int
+static int
 _sess_read(void *sessp,
 	       fd_set *fdset)
 {

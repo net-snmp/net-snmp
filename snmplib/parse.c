@@ -462,6 +462,8 @@ static void free_enums(struct enum_list **);
 static struct range_list * copy_ranges(struct range_list *);
 static struct enum_list  * copy_enums(struct enum_list *);
 
+static u_int compute_match(const char *search_base, const char *key);
+
 /* backwards compatibility wrappers */
 void snmp_set_mib_errors(int err)
 {
@@ -1054,8 +1056,9 @@ find_tree_node(const char *name,
  */
 #define MAX_BAD 0xffffff
 
-u_int
-compute_match(const char *search_base, const char *key) {
+static u_int
+compute_match(const char *search_base, const char *key)
+{
 #if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
     int rc;
     regex_t parsetree;
@@ -3471,6 +3474,9 @@ read_module(const char *name)
 	read_module_replacements( name );
     return tree_head;
 }
+
+/* Prototype definition */
+void unload_module_by_ID(int modID, struct tree *tree_top);
 
 void
 unload_module_by_ID( int modID, struct tree *tree_top )

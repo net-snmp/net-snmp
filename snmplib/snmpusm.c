@@ -84,7 +84,13 @@ int
 usm_check_secLevel_vs_protocols(int level,
                                 oid *authProtocol, u_int authProtocolLen,
                                 oid *privProtocol, u_int privProtocolLen);
-  
+int
+usm_calc_offsets ( size_t  globalDataLen,
+        int secLevel, size_t secEngineIDLen, size_t secNameLen, size_t scopedPduLen,
+        u_long engineboots, long engine_time, size_t *theTotalLength, 
+        size_t *authParamsOffset, size_t *privParamsOffset, size_t *dataOffset,
+        size_t *datalen, size_t *msgAuthParmLen, size_t *msgPrivParmLen,
+        size_t *otstlen, size_t *seq_len, size_t *msgSecParmLen);
 /* 
  * Set a given field of the secStateRef.
  *

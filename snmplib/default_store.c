@@ -40,6 +40,8 @@ int ds_integers[DS_MAX_IDS][DS_MAX_SUBIDS];
 char ds_booleans[DS_MAX_IDS][DS_MAX_SUBIDS/8];  /* bit vector storage. */
 char *ds_strings[DS_MAX_IDS][DS_MAX_SUBIDS];
 void *ds_voids[DS_MAX_IDS][DS_MAX_SUBIDS];
+/* Prototype definitions */
+void ds_handle_config(const char *token, char *line);
 
 int
 ds_set_boolean(int storeid, int which, int value) {
