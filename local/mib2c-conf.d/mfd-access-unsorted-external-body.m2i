@@ -8,13 +8,16 @@
 @end@
 ########################################################################
 ##
-$example_start
-${table}_list * ${table}_head = NULL;
-$example_end
-
-/*
- * init_data is called during startup.
- * Allocate any resources you need for the data table.
+/**
+ * initialization for ${context} data access
+ *
+ * init_data is called during startup to allow you to
+ * allocate any resources you need for the data table.
+ *
+ * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
+ *
+ * @return SNMPERR_SUCCESS on success.
+ *         SNMP_ERR_GENERR for  unrecoverable error.
  */
 int
 ${table}_init_data(netsnmp_mfd_registration *reg)
@@ -24,10 +27,15 @@ ${table}_init_data(netsnmp_mfd_registration *reg)
 @ifconf ${table}_init_data.m2i@
 @   include ${table}_init_data.m2i@
 @else@
+@if $m2c_include_examples == 1@
 $example_start
-    /** alloc memory for our dummy list */
-    if(NULL == ${table}_head)
-        ${table}_head = SNMP_MALLOC_TYPEDEF(${table}_list);
+    /*
+     * if you are the sole writer for the file, you could
+     * open it here. However, as stated earlier, we are assuming
+     * the worst case, which in this case means that the file is
+     * written to by someone else, and might not even exist when
+     * we start up. So we can't do anything here.
+     */
 $example_end
 @end@
 
@@ -35,11 +43,19 @@ $example_end
 }
 
 @if $m2c_data_transient != 0@ # 
-/*
- * return ${table}_data from a data context
+/**
+ * set ${table}_data from a data context
+ *
+ * Once the loop iteration has completed and the best match has been
+ * found, this function will be called to copy the data to a newly
+ * created context.
+ *
+ * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
+ * @param loop_ref pointer to your loop reference.
+ * @param ctx_ref pointer to a context reference.
  */
 int
-${table}_get_data( netsnmp_mfd_registration *reg, ${table}_ref_loop *loop_ref,
+${table}_get_data( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
                            ${table}_ref_ctx *ctx_ref)
 {
     ${table}_ctx *orig_ctx = ctx_ref->ctx;
@@ -47,13 +63,9 @@ ${table}_get_data( netsnmp_mfd_registration *reg, ${table}_ref_loop *loop_ref,
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
     /*
-     * copy to a new context
+     * ctx_ref contains a freshly allocated context.
+     * copy index, then data.
      */
-    ctx_ref->ctx = ${table}_allocate_ctx(reg);
-    if(NULL == ctx_ref->ctx)
-        return SNMPERR_GENERR;
-
-    /* copy index */
     memcpy(&ctx_ref->ctx->tbl_idx, &loop_ref->itc->ctx.tbl_idx,
            sizeof(${table}_idx));
 
@@ -63,28 +75,41 @@ ${table}_get_data( netsnmp_mfd_registration *reg, ${table}_ref_loop *loop_ref,
            loop_ref->itc->ctx.oid_idx.oids,
            ctx_ref->ctx->oid_idx.len * sizeof(oid));
 
+    /*
+     * copy data to the context
+     */
+@if $m2c_include_examples == 1@
+
 $example_start
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
-    /** TODO: set ctx_ref->ctx->${m2c_data_item}$node
+    /** TODO: set ctx_ref->${m2c_data_item}$node
 @      if $m2c_data_transient == 1@ # short term
-     **       from loop_ref->pos (${table}_list) */
+     **       from loop_ref->line */
 @      else@
-     **       from orig_ctx->${m2c_data_item}$node */
+     **       from orig_${m2c_data_item}$node */
 @      end@
 @   end@
 $example_end
+@end@
 
    return SNMPERR_SUCCESS;
 }
 
 @end@
-/*
+
+@if $m2c_include_examples == 1@
+$example_start
+/**
  * Update the index for the current iterator position.
+ *
+ * This example routine updates the index for the current row. It is
+ * called by the get_first and get_next functions.
  */
-int
-${table}_update_idx( netsnmp_mfd_registration *reg, ${table}_ref_loop *loop_ref,
-                     ${table}_ref_ctx *ctx_ref)
+static int
+${table}_update_index( $mfd_aue_param_decl,
+                       ${table}_ref_loop *loop_ref,
+                       ${table}_ref_ctx *ctx_ref)
 {
     int rc;
 
@@ -93,29 +118,42 @@ ${table}_update_idx( netsnmp_mfd_registration *reg, ${table}_ref_loop *loop_ref,
 @ifconf ${table}_update_idx.m2i@
 @   include ${table}_update_idx.m2i@
 @else@
-$example_start
-    /*
-     * check for end of data
-     */
-    if(NULL == loop_ref->itc->pos)
-        return SNMPERR_NO_VARS;
-
+    
     /*
      * mfd wrappers just need the index for now.
-     * set the index structure to the values that correspond to this row.
      * reuse ctx.tbl_idx.
      */
     ctx_ref->ctx = &loop_ref->itc->ctx;
 
+    /*
+     * get a line (skip blank lines)
+     */
+    do {
+        if (!fgets(loop_ref->itc->line, sizeof(loop_ref->itc->line),
+                   loop_ref->itc->filep)) {
+            /* we're done */
+            fclose(loop_ref->itc->filep);
+            loop_ref->itc->filep = NULL;
+        }
+    } while (loop_ref->itc->filep && loop_ref->itc->line[0] == '\n');
+
+    /*
+     * check for end of data
+     */
+    if(NULL == loop_ref->itc->filep)
+        return SNMPERR_NO_VARS;
+
+             
 @foreach $node index@
 @    include m2c_setup_node.m2i@
-    /** TODO: set ctx_ref->tbl_idx->$node */
+    /* TODO: parse loop_ref->line to set ctx_ref->tbl_idx->$node */
 @end@
-$example_end
 @end@
 
     return rc;
 }
+$example_end
+@end@
 
 /***********************************************************************
  *
@@ -123,85 +161,149 @@ $example_end
  *
  ***********************************************************************/
 
-/*
- * 
+/**
+ * initialize the iterator loop context for a new iteration loop.
+ *
+ * This function will be called before the start of a new itertion over
+ * the data.
+ *
+ * Set the loop_context variable ref->itc to the first data point structure
+ * of your choice (from which you can find the next one).  This could
+ * be anything from the first node in a linked list, to an integer
+ * pointer containing the beginning of an array variable.
+ *
+ * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
+ * @param ref  Pointer to your loop reference.
+ *
+ * @return SNMPERR_SUCCESS on success.
+ *         SNMPERR_NO_VARS on an empty data set
+ *         SNMPERR_GENERR  on error.
  */
 int
-${table}_init_loop_ctx( netsnmp_mfd_registration *reg, ${table}_ref_loop *ref)
+${table}_init_loop_ctx( $mfd_aue_param_decl, ${table}_ref_loop *ref)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
-$example_start
     /*
-     * Set the my_loop_context variable to the first data point structure
-     * of your choice (from which you can find the next one).  This could
-     * be anything from the first node in a linked list, to an integer
-     * pointer containing the beginning of an array variable.
+     * allocate memory for new structure
      */
-    /** TODO: set real loop context */
     ref->itc = SNMP_MALLOC_TYPEDEF(${table}_loop_ctx);
     if(NULL == ref->itc)
         return SNMPERR_GENERR;
 
-    ref->itc->pos = ${table}_head;
-
     /*
-     * temp storage for indexes
+     * TODO: set loop context
      */
-    /** xxx-rks: do this w/out varbind clone/free? */
-    ref->itc->idx_vars = snmp_clone_varbind(reg->table_info->indexes);
-    if(NULL == ref->itc->idx_vars) {
-        SNMP_FREE(ref->itc);
-        return SNMPERR_GENERR;
+@if $m2c_include_examples == 1@
+$example_start
+    /*
+     * open our data file. If the mode is a set mode, open the file
+     * with a write lock. If you want to delay locking, you can wait
+     * until one of the later states.
+     */
+    if(MODE_IS_SET(mrc->request_mode)) {
+        ref->itc->locked = 1;
+    }
+    ref->itc->filep = fopen("/etc/dummy.conf",
+                            ref->itc->locked ? "r+" : "r");
+    if(NULL ==  ref->itc->filep) {
+        if(ref->itc->locked) {
+            /* try read only, maybe we could get write lock later? */
+            ref->itc->locked = 0;
+            ref->itc->filep = fopen("/etc/dummy.conf", "r");
+        }
+        return SNMP_ERR_GENERR; /* xxx-rks: resource unavailable? */
     }
 
     ref->itc->ctx.oid_idx.oids = ref->itc->ctx.oid_tmp;
 $example_end
+@end@
 
     return SNMPERR_SUCCESS;
 }
 
-/*
- * returns the first data point within the $table table data.
+/**
+ * clean up a loop reference
+ *
+ * This function will be called to release a loop reference once
+ * the iteration has completed.
+ *
+ * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
+ * @param ref  Pointer to your loop reference.
+ *
+ * @return SNMPERR_SUCCESS on success.
+ *         SNMPERR_GENERR  on error.
  */
 int
-${table}_cleanup_loop_ctx( netsnmp_mfd_registration *reg, ${table}_ref_loop *ref)
+${table}_cleanup_loop_ctx( $mfd_aue_param_decl, ${table}_ref_loop *ref)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
     
+@if $m2c_include_examples == 1@
 $example_start
     if(!ref->itc)
         return SNMPERR_GENERR;
 
+/*
+ * free index oid pointer
+ */
     if(ref->itc->ctx.oid_idx.oids != ref->itc->ctx.oid_tmp)
         free(ref->itc->ctx.oid_idx.oids);
  
     /*
-     * free varbind
+     * close file
      */
-    if(ref->itc->idx_vars)
-        snmp_free_varbind( ref->itc->idx_vars );
-
+    if(ref->itc->filep)
+        fclose(ref->itc->filep);
+    
     /*
      * free loop context
      */
     free(ref->itc);
 $example_end
-
+@end@
+    
     return SNMPERR_SUCCESS;
 }
 
-/*
+/**
+ * duplicate the current loop reference
  *
+ * During loop iteration, the iterator keeps track of the row that
+ * is the current best match. This function is called when the
+ * current row is a better match than any previous row.
+ * You should update the table index for the current row, along with
+ * any other pertinent data in your loop reference structure.
+ *
+@if $m2c_data_transient != 0@ # persistent
+ * Since your data is transient, we need to make a copy of it before
+ * the iterator moves on to the next row.
+ *
+@   if $m2c_data_transient == 1@ # short term
+* Since your data is semi-TRANSIENT data, you could just keep a pointer
+* to the data in the loop reference. The data should then be copied in
+* ${table}_get_data().
+@   else@ # $m2c_data_transient == 2@ # copy immediately
+* Since your data is TRANSIENT data, you should make a copy of it here.
+* One idea would be to copy it space allocated in the loop reference
+* structure. Another would be to simply have a pointer in the loop
+* reference structure, and allocate memory here.
+@   end@
+ *
+@end@
+ * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
+ * @param ref  Pointer to your loop reference.
+ *
+ * @return SNMPERR_SUCCESS on success.
+ *         SNMPERR_GENERR  on error.
  */
 int
-${table}_save_position(netsnmp_mfd_registration *reg,
+${table}_save_position($mfd_aue_param_decl,
                        ${table}_ref_loop *loop_ref,
                        ${table}_ref_loop *loop_save)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
-$example_start
     /*
      * allocate new loop context
      */
@@ -211,17 +313,22 @@ $example_start
         return SNMP_ERR_GENERR;
     }
 
-    /*
-     * save pos
-     */
-    loop_save->itc->pos = loop_ref->itc->pos;
-
+@if $m2c_include_examples == 1@
+$example_start
     /*
      * copy tbl_idx
      */
     memcpy(&loop_save->itc->ctx.tbl_idx, &loop_ref->itc->ctx.tbl_idx,
            sizeof(${table}_idx));
 
+    /*
+     * shouldn't need the locked flag or the filep pointer.
+     * (well, we *could* use it to do things a little differently;
+     * like if we know we had the file locked and wanted to save
+     * the current offset for writing back new values... but we are
+     * trying to keep this example simple.)
+     */
+ 
     /*
      * copy oid_idx
      */
@@ -236,62 +343,94 @@ $example_start
     /** semi-TRANSIENT data: will copy data when index found */
 @elsif $m2c_data_transient == 2@ # copy immediately
     /*
-     * TRANSIENT data: data is external and you have no control over it.
+     * TRANSIENT data: we are using a buffer in the loop ctx,
      * So we need to copy the data.
+     */
+    /*
+     * for this example, it would be cheap to just save line.
+     * but we'll assume worst case, and just go ahead and setup
+     * the individual data items...
      */
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
-    /** TODO: set ctx_ref->ctx->${m2c_data_item}$node
-     **       from loop_ref->pos (${table}_list) */
+    /** TODO: set ctx_ref->${m2c_data_item}$node
+     **       from loop_ref->line */
 @   end@
 @end@
 $example_end
-
+@end@ # example
+    
     return SNMPERR_SUCCESS;
 }
 
-/*
+/**
+ * get the first data index
  *
+ * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
+ * @param ref  Pointer to your loop reference.
+ * @param ref  Pointer to a context reference.
+ *
+ * @return SNMPERR_SUCCESS on success.
+ *         SNMPERR_GENERR  on error.
  */
 int
-${table}_get_first( netsnmp_mfd_registration *reg, ${table}_ref_loop *loop_ref,
+${table}_get_first( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
                     ${table}_ref_ctx *ctx_ref)
 {
     DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
 
-    /*
-     * use ctx in loop ref
-     */
-    ctx_ref->ctx = &loop_ref->itc->ctx;
-    
-$example_start
-    return ${table}_update_idx(reg, loop_ref, ctx_ref);
-$example_end
-}
-
-/*
- *
- */
-int
-${table}_get_next( netsnmp_mfd_registration *reg, ${table}_ref_loop *loop_ref,
-                        ${table}_ref_ctx *ctx_ref)
-{
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
-
+@if $m2c_include_examples == 1@
 $example_start
     /*
      * check for end of data
      */
-    if(NULL == loop_ref->itc->pos)
+    if(NULL == loop_ref->itc->filep)
         return SNMPERR_NO_VARS;
 
-    /*
-     * advance iterator
-     */
-    loop_ref->itc->pos = loop_ref->itc->pos->next;
-
-    return ${table}_update_idx(reg, loop_ref, ctx_ref);
+/*
+ * do actual read of data in update_index, since get and get_next do
+ * the same thing...
+ */
+    return ${table}_update_index(mrc, loop_ref, ctx_ref);
 $example_end
+@else@
+    return SNMPERR_SUCCESS;
+@end@ # example
+}
+
+/**
+ * get the next data index
+ *
+ * @param mfdr Pointer to the netsnmp_mfd_registration for the handler.
+ * @param ref  Pointer to your loop reference.
+ * @param ref  Pointer to a context reference.
+ *
+ * @return SNMPERR_SUCCESS on success.
+ *         SNMPERR_GENERR  on error.
+ */
+int
+${table}_get_next( $mfd_aue_param_decl, ${table}_ref_loop *loop_ref,
+                        ${table}_ref_ctx *ctx_ref)
+{
+    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
+
+@if $m2c_include_examples == 1@
+$example_start
+    /*
+     * check for end of data
+     */
+    if(NULL == loop_ref->itc->filep)
+        return SNMPERR_NO_VARS;
+
+/*
+ * do actual read of data in update_index, since get and get_next do
+ * the same thing...
+ */
+    return ${table}_update_index(mrc, loop_ref, ctx_ref);
+$example_end
+@else@
+    return SNMPERR_SUCCESS;
+@end@ # example
 }
 
 ##
