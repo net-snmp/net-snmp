@@ -52,9 +52,6 @@
 /* Define if using alloca.c.  */
 #undef C_ALLOCA
 
-/* Define if the closedir function returns void instead of int.  */
-#undef CLOSEDIR_VOID
-
 /* Define to empty if the keyword does not work.  */
 #undef const
 
@@ -97,9 +94,6 @@
 
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
 #undef TIME_WITH_SYS_TIME
-
-/* Define if the closedir function returns void instead of int.  */
-#undef VOID_CLOSEDIR
 
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
@@ -879,9 +873,6 @@
 
 /* define if you have getservbyname */
 #undef HAVE_GETSERVBYNAME
-
-/* Watch out for compilers that don't handle void properly. */
-#undef void
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)

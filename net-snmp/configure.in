@@ -126,6 +126,7 @@ AC_ARG_WITH(out_mib_modules,
     misc/ipfwacc:          accounting rules IP firewall information.
                              (only under linux)
     target:                Support for the TARGET-MIB.
+    ucd-snmp/pass_persist: Persistent pass scripts that stay around.  Not currently included by default solely because it needs 
 
   Optional modules for C coders to look at and/or include as extension examples:
   
@@ -817,23 +818,6 @@ fu_cv_sys_stat_fs_data=no)])
 AC_MSG_RESULT($fu_cv_sys_stat_fs_data)
 if test $fu_cv_sys_stat_fs_data = yes; then
   AC_DEFINE(STAT_STATFS_FS_DATA)
-fi
-
-dnl check if compiler accepts void pointers
-AC_CACHE_CHECK(if $CC allows pointers to void,ac_cv_PTR_TO_VOID,
-[
-AC_TRY_COMPILE([
-void generic_function(void *a)
-  void *a;
-{
-}
-],[
-char *cp;
-generic_function((void *) cp);
-], ac_cv_PTR_TO_VOID=yes, ac_cv_PTR_TO_VOID=no)])
-
-if test "x$ac_cv_PTR_TO_VOID" = "xno"; then
-  AC_DEFINE(void,char)
 fi
 
 dnl check if compiler pre-processor defines __FUNCTION__
