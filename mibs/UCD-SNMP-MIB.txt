@@ -126,8 +126,8 @@ unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
 --
 -- The NMRG OID for snmpTCPDomain is currently used by the code, but in case
 -- this is thought to be a Bad Idea, we define a private transport domain here
--- that we could use instead.  The Unix domain and AAL5 PVC domain are also
--- defined privately here.
+-- that we could use instead.  The Unix domain, AAL5 PVC domain and
+-- the IPv6 domains are also defined privately here (for now).
 
 ucdDomains		OBJECT IDENTIFIER ::= { ucdavis 251 }
 ucdSnmpTCPDomain	OBJECT IDENTIFIER ::= { ucdDomains 1 }
