@@ -6,7 +6,24 @@
 
 #include <config.h>
 
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
 #include "mibincl.h"
+#include "util_funcs.h"
 #include "dlmod.h"
 #include "dlmod_mib.h"
 
@@ -155,7 +172,8 @@ header_dlmodEntry(vp, name, length, exact, var_len, write_method)
 	for (dlmod_index = 1; dlmod_index < dlmod_next_index; dlmod_index++)  {
 		dlm = dlmod_get_by_index(dlmod_index);
 #if 1
-		fprintf(stderr, "dlmodEntry dlm: %x dlmod_index: %d\n", dlm, dlmod_index);
+		fprintf(stderr, "dlmodEntry dlm: %x dlmod_index: %d\n",
+                        (int) dlm, dlmod_index);
 #endif
 		if (dlm) {
 			newname[11] = dlmod_index;
@@ -193,7 +211,7 @@ header_dlmodEntry(vp, name, length, exact, var_len, write_method)
 
 	*var_len = sizeof(long);/* default to 'long' results */
 #if 1
-    fprintf(stderr, "dlmodEntry return dlm: %x\n", dlm);
+    fprintf(stderr, "dlmodEntry return dlm: %x\n", (int) dlm);
 #endif
 	return dlm;
 };
@@ -311,7 +329,6 @@ write_dlmodPath(action, var_val, var_val_type, var_val_len, statP, name, name_le
 	int             name_len;
 {
 	/* variables we may use later */
-	static long     long_ret;
 	static unsigned char string[1500];
 	int             size, bigsize = 1000;
 	struct dlmod *dlm;
