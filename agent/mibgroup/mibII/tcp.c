@@ -381,7 +381,7 @@ tcp_handler(netsnmp_mib_handler          *handler,
     case TCPRTOMAX:
     case TCPMAXCONN:
     case TCPCURRESTAB:
-        if (magic == TCPCURRESTAB)
+        if (subid == TCPCURRESTAB)
            type = ASN_GAUGE;
 	else
            type = ASN_INTEGER;
