@@ -39,6 +39,11 @@ SOFTWARE.
 #include <stdio.h>
 
 #include <sys/types.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -125,31 +130,18 @@ snmp_parse_var_op(u_char *data,
 		  u_char **var_val,
 		  size_t *listlength)
 {
-    return( snmp_dparse_var_op(data, var_name, var_name_len,
-			var_val_type, var_val_len, var_val, listlength, PARSE_PACKET));
-}
-u_char *
-snmp_dparse_var_op(u_char *data,
-		  oid *var_name,
-		  size_t *var_name_len,
-		  u_char *var_val_type,
-		  size_t *var_val_len,
-		  u_char **var_val,
-		  size_t *listlength,
-		  int action)
-{
     u_char	    var_op_type;
     size_t		    var_op_len = *listlength;
     u_char	    *var_op_start = data;
 
-    data = asn_dparse_header(data, &var_op_len, &var_op_type, action);
+    data = asn_parse_header(data, &var_op_len, &var_op_type);
     if (data == NULL){
 	ERROR_MSG("No header for variable");
 	return NULL;
     }
     if (var_op_type != (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR))
 	return NULL;
-    data = asn_dparse_objid(data, &var_op_len, &var_op_type, var_name, var_name_len, action);
+    data = asn_parse_objid(data, &var_op_len, &var_op_type, var_name, var_name_len);
     if (data == NULL){
 	ERROR_MSG("No OID for variable");
 	return NULL;
@@ -158,7 +150,7 @@ snmp_dparse_var_op(u_char *data,
 	return NULL;
     *var_val = data;	/* save pointer to this object */
     /* find out what type of object this is */
-    data = asn_dparse_header(data, &var_op_len, var_val_type, PARSE_PACKET);
+    data = asn_parse_header(data, &var_op_len, var_val_type);
     if (data == NULL){
 	ERROR_MSG("No header for value");
 	return NULL;
