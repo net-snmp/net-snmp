@@ -130,6 +130,7 @@ int main(int argc, char *argv[])
         usage();
         exit(1);
     default:
+        break;
     }
 
     if (arg >= argc) {

@@ -513,8 +513,10 @@ main(int argc, char *argv[])
 	*cptr = 0;
 	*argvptr = NULL;
 
+#ifndef WIN32
 	/* move to safe, known dir */
 	(void) chdir("/");
+#endif
 
 	/* 
 	 * Open the logfile if necessary.

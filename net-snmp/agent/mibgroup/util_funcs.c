@@ -871,8 +871,6 @@ int   Add_Entry( mib_table_t t, void* entry)
 void *Retrieve_Table_Data( mib_table_t t, int* max_idx)
 {
     struct internal_mib_table *table = (struct internal_mib_table *)t;
-    void *entry2;
-    int   res;
 
     if (!check_and_reload_table( table ))
 	return NULL;
