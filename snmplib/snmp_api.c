@@ -6182,6 +6182,59 @@ snmp_oid_compare(const oid * in_name1,
     return 0;
 }
 
+/** lexicographical compare two object identifiers and return the point where they differ
+ * 
+ * Caution: this method is called often by
+ *          command responder applications (ie, agent).
+ *
+ * @return -1 if name1 < name2, 0 if name1 = name2, 1 if name1 > name2 and offpt = len where name1 != name2
+ */
+int
+netsnmp_oid_compare_ll(const oid * in_name1,
+                       size_t len1, const oid * in_name2, size_t len2,
+                       size_t *offpt)
+{
+    register int    len;
+    register const oid *name1 = in_name1;
+    register const oid *name2 = in_name2;
+    int initlen;
+
+    /*
+     * len = minimum of len1 and len2 
+     */
+    if (len1 < len2)
+        initlen = len = len1;
+    else
+        initlen = len = len2;
+    /*
+     * find first non-matching OID 
+     */
+    while (len-- > 0) {
+        /*
+         * these must be done in seperate comparisons, since
+         * subtracting them and using that result has problems with
+         * subids > 2^31. 
+         */
+        if (*(name1) != *(name2)) {
+            *offpt = initlen - len;
+            if (*(name1) < *(name2))
+                return -1;
+            return 1;
+        }
+        name1++;
+        name2++;
+    }
+    /*
+     * both OIDs equal up to length of shorter OID 
+     */
+    *offpt = initlen - len;
+    if (len1 < len2)
+        return -1;
+    if (len2 < len1)
+        return 1;
+    return 0;
+}
+
 /** Compares 2 OIDs to determine if they are equal up until the shortest length.
  * @param in_name1 A pointer to the first oid.
  * @param len1     length of the first OID (in segments, not bytes)
