@@ -27,6 +27,24 @@
 #if HAVE_NETINET_IF_ETHER_H
 #include <netinet/if_ether.h>
 #endif
+#if HAVE_INET_MIB2_H
+#include <inet/mib2.h>
+#endif
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
+#if HAVE_NET_IF_DL_H
+#include <net/if_dl.h>
+#endif
+#if HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+#ifdef solaris2
+#include "kernel_sunos5.h"
+#endif
 
 
 #include "mibincl.h"
@@ -36,6 +54,7 @@
 
 #include "at.h"
 #include "interfaces.h"
+#include "../../snmplib/system.h"
 
 #if defined(HAVE_SYS_SYSCTL_H) && !defined(CAN_USE_SYSCTL)
 # if defined(RTF_LLINFO)
@@ -245,7 +264,7 @@ static int
 AT_Cmp(void *addr, void *ep)
 { mib2_ipNetToMediaEntry_t *mp = (mib2_ipNetToMediaEntry_t *) ep;
   int ret = -1;
-  DODEBUG("......... AT_Cmp %lx<>%lx %d<>%d (%.5s)\n",
+  DEBUGP("......... AT_Cmp %lx<>%lx %d<>%d (%.5s)\n",
 	  mp->ipNetToMediaNetAddress, ((if_ip_t *)addr)->ipAddr,
 	  ((if_ip_t*)addr)->ifIdx,Interface_Index_By_Name (mp->ipNetToMediaIfIndex.o_bytes, mp->ipNetToMediaIfIndex.o_length),
 	  mp->ipNetToMediaIfIndex.o_bytes);
@@ -255,7 +274,7 @@ AT_Cmp(void *addr, void *ep)
       Interface_Index_By_Name (mp->ipNetToMediaIfIndex.o_bytes, mp->ipNetToMediaIfIndex.o_length))
 	ret = 1;
   else ret = 0;
-  DODEBUG ("......... AT_Cmp returns %d\n", ret);
+  DEBUGP ("......... AT_Cmp returns %d\n", ret);
   return ret;
 }
 
@@ -286,7 +305,7 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, vp->name, vp->namelen);
-      DODEBUG("var_atEntry: %s %d\n", c_oid, exact);
+      DEBUGP("var_atEntry: %s %d\n", c_oid, exact);
     }
     memset (&Lowentry, 0, sizeof (Lowentry));
     bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
@@ -328,7 +347,7 @@ var_atEntry(struct variable *vp, oid *name, int *length, int exact,
 	    }
 	}
     }
-    DODEBUG("... Found = %d\n", Found);
+    DEBUGP("... Found = %d\n", Found);
     if (Found == 0)
       return(NULL);
     bcopy((char *)lowest, (char *)name, AT_NAME_LENGTH * sizeof(oid));

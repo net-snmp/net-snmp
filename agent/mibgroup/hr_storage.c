@@ -57,10 +57,10 @@
 #endif
 #include <sys/stat.h>
 
-#if HAVE_STRING_H
-#include <string.h>
-#else
+#if HAVE_STRINGS_H
 #include <strings.h>
+#else
+#include <string.h>
 #endif
 
 #define HRSTORE_MONOTONICALLY_INCREASING

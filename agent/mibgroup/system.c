@@ -33,7 +33,7 @@
 	 *
 	 *********************/
 
-char version_descr[128] = VERS_DESC;
+char version_descr[256] = VERS_DESC;
 char sysContact[128] = SYS_CONTACT;
 char sysName[128] = SYS_NAME;
 char sysLocation[128] = SYS_LOC;

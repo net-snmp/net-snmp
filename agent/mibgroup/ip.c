@@ -31,6 +31,13 @@
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
+#if HAVE_INET_MIB2_H
+#include <inet/mib2.h>
+#endif
+#ifdef solaris2
+#include "kernel_sunos5.h"
+#endif
+#include "../../snmplib/system.h"
 
 #include "mibincl.h"
 #include <nlist.h>

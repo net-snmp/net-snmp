@@ -45,9 +45,22 @@
 #ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#if HAVE_NETINET_IP_VAR_H
+#include <netinet/ip_var.h>
+#endif
 #if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
 #endif
+#if HAVE_INET_MIB2_H
+#include <inet/mib2.h>
+#endif
+#ifdef solaris2
+#include "kernel_sunos5.h"
+#endif
+#include "../../snmplib/system.h"
+
 
 
 #if defined(osf4) || defined(aix4) || defined(hpux10)
