@@ -2583,6 +2583,54 @@ read_module(const char *name)
     return tree_head;
 }
 
+void
+unload_module_by_ID( int modID, struct tree *tree_top )
+{
+    struct tree *tp, *prev, *next;
+
+    prev = NULL;
+    for ( tp=tree_top ; tp ; tp=next ) {
+	next = tp->next_peer;
+	if ( tp->modid == modID ) {	/* XXX - Need to search the full module list  */
+	    tp->modid = -1;		/* Mark for unloading */
+	    tp->number_modules--;
+	}
+	if ( tp->child_list )		/* Handle subtree first */
+	    unload_module_by_ID( modID, tp->child_list );
+		
+				/* Remove node if it's no longer needed */
+	if ( tp->number_modules == 0 && tp->child_list == NULL ) {
+	    if ( prev )
+		prev->next_peer = tp->next_peer;
+	    else
+		tp->parent->child_list = tp->next_peer;
+	    free_tree( tp );
+	}
+	else
+	    prev = tp;
+    }
+}
+
+int
+unload_module(const char *name)
+{
+    struct module *mp;
+    int modID = -1;
+
+    for ( mp=module_head ; mp ; mp=mp->next )
+	if ( !label_compare(mp->name, name)) {
+	    modID = mp->modid;
+	    break;
+	}
+
+    if ( modID == -1 ) {
+	DEBUGMSGTL(("unload-mib", "Module %s not found to unload\n", name));
+	return MODULE_NOT_FOUND;
+    }
+    unload_module_by_ID( modID, tree_head );
+    mp->no_imports = -1;	/* mark as unloaded */
+    return MODULE_LOADED_OK;	/* Well, you know what I mean! */
+}
 
 static void
 new_module (const char *name,
