@@ -18,30 +18,6 @@
  * SOFTWARE.
  ******************************************************************/
 
-/*
- * $Log$
- * Revision 5.0  2002/04/20 07:30:01  hardaker
- * cvs file version number change
- *
- * Revision 1.5  2002/04/20 07:07:36  hardaker
- * White space, oh glorious white space.
- * How great our though?
- * The code is fine.
- * We agree on functionality easily.
- * What really troubles us?
- * Something we can't see.
- * Something between the code.
- * We bow down to your magnificence,
- * For you are everywhere,
- * Between everything.
- * Pretty nothingness you are.
- *
- * Revision 1.4  2002/03/21 17:22:58  hardaker
- * change // coments to /* */ comments(bad bad bad)
-* *Revision 1.3 2002 / 02 / 08 15: 45: 09 dts12 * Use the new 'net-snmp-includes' single - include header files, *in place of the(uninstalled) 'mibincl.h'. * Wheeeee...... * *Revision 1.2 2002 / 01 / 04 20: 50: 31 hardaker * beginnings of ucd - snmp->net - snmp structural changes. * -config.h->include / net - snmp / net - snmp - config.h * -this, of course, changes just about every file in the repository. * *Revision 1.1 2001 / 05 / 09 19: 36: 13 slif * Include Alex Rozin 's Rmon. * *Revision 1.1 .2 .1 2001 / 04 / 20 13: 46:27 tali
-    * Begin of the history.Actually, there is only Ethernet
-    * statistics for alarm
-    &event debugging * /
 #include <stdlib.h>
 #include <sys/time.h>
 #include <unistd.h>
