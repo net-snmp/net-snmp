@@ -2048,7 +2048,6 @@ AC_MSG_RESULT($DEFAULT_MIBS)
 AC_MSG_CHECKING([whether we have to build PIC code])
 echo " $module_list " | grep " ucd-snmp/dlmod " >/dev/null
 if test $? -eq 0 ; then
-	DLLIBS="-ldl"
         LIB_CFLAGS="$LIB_CFLAGS $SHLIB_CFLAGS"
 	AC_MSG_RESULT(yes)
 else
