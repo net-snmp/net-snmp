@@ -1,5 +1,21 @@
-.TH "scalar: process scalars easily." 3 "17 Oct 2003" "net-snmp" \" -*- nroff -*-
+.TH "scalar: process scalars easily." 3 "28 Oct 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 scalar: process scalars easily. \- 
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "netsnmp_mib_handler * \fBnetsnmp_get_scalar_handler\fP (void)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_register_scalar\fP (netsnmp_handler_registration *reginfo)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_register_read_only_scalar\fP (netsnmp_handler_registration *reginfo)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_scalar_helper_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
+.br
+.in -1c

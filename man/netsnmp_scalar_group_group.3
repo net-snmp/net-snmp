@@ -1,5 +1,18 @@
-.TH "scalar_group: process groups of scalars." 3 "17 Oct 2003" "net-snmp" \" -*- nroff -*-
+.TH "scalar_group: process groups of scalars." 3 "28 Oct 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
 scalar_group: process groups of scalars. \- 
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "netsnmp_mib_handler * \fBnetsnmp_get_scalar_group_handler\fP (oid first, oid last)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_register_scalar_group\fP (netsnmp_handler_registration *reginfo, oid first, oid last)"
+.br
+.ti -1c
+.RI "int \fBnetsnmp_scalar_group_helper_handler\fP (netsnmp_mib_handler *handler, netsnmp_handler_registration *reginfo, netsnmp_agent_request_info *reqinfo, netsnmp_request_info *requests)"
+.br
+.in -1c
