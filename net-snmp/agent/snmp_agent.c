@@ -103,15 +103,21 @@ static void dump_var (
 }
 
 
-int
-handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
-                   struct snmp_pdu *pdu, void *magic)
+int getNextSessID()
+{
+    static int SessionID = 0;
+
+    return ++SessionID;
+}
+
+struct agent_snmp_session  *
+init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
 {
     struct agent_snmp_session  *asp;
-    int status, allDone, i;
-    struct variable_list *var_ptr, *var_ptr2;
 
     asp = malloc( sizeof( struct agent_snmp_session ));
+    if ( asp == NULL )
+	return NULL;
     asp->start = pdu->variables;
     asp->end   = pdu->variables;
     if ( asp->end != NULL )
@@ -123,7 +129,21 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
     asp->exact   = TRUE;
     asp->outstanding_requests = NULL;
     asp->next    = NULL;
+    asp->mode    = RESERVE1;
+    asp->status  = SNMP_ERR_NOERROR;
 
+    return asp;
+}
+
+int
+handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
+                   struct snmp_pdu *pdu, void *magic)
+{
+    struct agent_snmp_session  *asp;
+    int status, allDone, i;
+    struct variable_list *var_ptr, *var_ptr2;
+
+    asp = init_agent_snmp_session( session, pdu );
 
     switch (pdu->command) {
     case AGENTX_MSG_GET:
@@ -281,20 +301,7 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
     struct variable_list *var_ptr, *var_ptr2;
 
     if ( magic == NULL ) {
-        asp = malloc( sizeof( struct agent_snmp_session ));
-        asp->start = pdu->variables;
-        asp->end   = pdu->variables;
-        if ( asp->end != NULL )
-	    while ( asp->end->next_variable != NULL )
-	        asp->end = asp->end->next_variable;
-        asp->session = session;
-        asp->pdu     = pdu;
-        asp->rw      = READ;
-        asp->exact   = TRUE;
-        asp->outstanding_requests = NULL;
-        asp->next    = NULL;
-        asp->mode    = RESERVE1;
-        asp->status  = SNMP_ERR_NOERROR;
+	asp = init_agent_snmp_session( session, pdu );
     }
     else {
 	asp = (struct agent_snmp_session *)magic;
