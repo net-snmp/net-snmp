@@ -12,6 +12,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #define MAX_HOSTS_LINE 4096
 
@@ -164,6 +165,25 @@ netSnmpHostsTable_context_convert_function(void *loop_context,
     return datactx;
 }
 
+/** Create a data_context for non-existent rows that SETs are performed on.
+ *  return a void * pointer which will be passed to subsequent get_XXX
+ *  and set_XXX functions for data retrival and modification during
+ *  this SET request.
+ *
+ *  The indexs are encoded (in order) into the index_data pointer if it
+ *  would be helpful to use that information.
+ */
+void           *
+netSnmpHostsTable_create_data_context(netsnmp_variable_list * index_data)
+{
+    my_data_info *datactx = SNMP_MALLOC_TYPEDEF(my_data_info);
+    if (!datactx)
+        return NULL;
+    strncpy(datactx->hostname, index_data->val.string,
+            strlen(index_data->val.string));
+    return datactx;
+}
+
 void
 netSnmpHostsTable_data_free(void *data, netsnmp_iterator_info *iinfo)
 {
@@ -183,9 +203,12 @@ netSnmpHostsTable_loop_free(void *loopctx, netsnmp_iterator_info *iinfo)
    example, if this was a routing table you could publish the modified
    routes back into the kernel at this point.
 
+   rowStatus will be set to 1 if new, 0 if not or -1 if it should
+   be deleted.
+
    If you free the data yourself, make sure to *my_data_context = NULL */
 int
-netSnmpHostsTable_commit_row(void **my_data_context)
+netSnmpHostsTable_commit_row(void **my_data_context, int new_or_del)
 {
     /** Add any necessary commit code here */
     FILE *in, *out;
