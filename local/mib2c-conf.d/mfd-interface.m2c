@@ -330,13 +330,13 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
      * register table
      */
     netsnmp_register_table(reginfo, tbl_info);
-}
+} /* _${context}_initialize_interface */
 
 void
 ${context}_valid_columns_set(netsnmp_column_info *vc)
 {
     ${context}_if_ctx.tbl_info.valid_columns = vc;
-}
+} /* ${context}_valid_columns_set */
 
 @include generic-table-indexes-to-oid.m2i@
 @include generic-table-indexes-from-oid.m2i@
@@ -402,7 +402,7 @@ ${context}_allocate_rowreq_ctx($m2c_tmp)
 @end@
 
     return rowreq_ctx;
-}
+} /* ${context}_allocate_rowreq_ctx */
 
 /*
  * @internal
@@ -436,7 +436,7 @@ ${context}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx)
         free(rowreq_ctx->oid_idx.oids);
 
     SNMP_FREE(rowreq_ctx);
-}
+} /* ${context}_release_rowreq_ctx */
 
 ########################################################################
 ##
@@ -461,7 +461,7 @@ _mfd_${context}_pre_request(netsnmp_mib_handler *handler,
     }
     
     return SNMP_ERR_NOERROR;
-}
+} /* _mfd_${context}_pre_request */
 
 /**
  * @internal
@@ -491,7 +491,7 @@ _mfd_${context}_post_request(netsnmp_mib_handler *handler,
         rowreq_ctx->rowreq_flags &= ~MFD_ROW_CREATED;
 
     return SNMP_ERR_NOERROR;
-}
+} /* _mfd_${context}_post_request */
 
 ########################################################################
 ##
@@ -580,7 +580,7 @@ _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
     }
 
     return SNMP_ERR_NOERROR;
-}
+} /* _mfd_${context}_object_lookup */
 
 ########################################################################
 ##
@@ -651,7 +651,7 @@ rc = ${node}_get(rowreq_ctx, $m2c_node_var_ref );
     }
 
     return rc;
-}
+} /* _${context}_get_column */
 
 ########################################################################
 ##
@@ -723,7 +723,7 @@ _mfd_${context}_get_values(netsnmp_mib_handler *handler,
     } /* for results */
 
     return SNMP_ERR_NOERROR;
-}
+} /* _mfd_${context}_get_values */
 
 ########################################################################
 ##
@@ -794,7 +794,7 @@ _${context}_check_column( ${context}_rowreq_ctx *rowreq_ctx,
     }
 
     return rc;
-}
+} /* _${context}_check_column */
 
 ##----------------------------------------------------------------------
 int
@@ -830,7 +830,7 @@ _mfd_${context}_check_objects(netsnmp_mib_handler *handler,
     } /* for results */
 
     return SNMP_ERR_NOERROR;
-}
+} /* _mfd_${context}_check_objects */
 
 ##----------------------------------------------------------------------
 @if $m2c_table_row_creation == 1@
@@ -871,7 +871,7 @@ _${context}_check_indexes(${context}_rowreq_ctx * rowreq_ctx)
      * if individual parts look ok, check them as a whole
      */
     return ${context}_validate_index( rowreq_ctx->${context}_reg, rowreq_ctx );
-}
+} /* _${context}_check_indexes */
 @end@ # $m2c_table_row_creation
 
 
@@ -906,7 +906,7 @@ _mfd_${context}_check_dependencies(netsnmp_mib_handler *handler,
     }
 
     return SNMP_ERR_NOERROR;
-}
+} /* _mfd_${context}_check_dependencies */
 
 @end@ // dependencies
 /*----------------------------------------------------------------------
@@ -944,10 +944,9 @@ _${context}_undo_setup_column( ${context}_rowreq_ctx *rowreq_ctx, int column )
          snmp_log(LOG_ERR,"unknown column %d in _${context}_undo_setup_column\n", column);
          break;
     }
-        
 
     return rc;
-}
+} /* _${context}_undo_setup_column */
 
 
 ##----------------------------------------------------------------------
@@ -1014,7 +1013,7 @@ _mfd_${context}_undo_setup(netsnmp_mib_handler *handler,
     }
     
     return SNMP_ERR_NOERROR;
-}
+} /* _mfd_${context}_undo_setup */
 
 /**
  * @internal
@@ -1066,7 +1065,7 @@ _mfd_${context}_undo_cleanup(netsnmp_mib_handler *handler,
     rowreq_ctx->column_set_flags = 0;
 
     return SNMP_ERR_NOERROR;
-}
+} /* _mfd_${context}_undo_cleanup */
 
 /*----------------------------------------------------------------------
  *
@@ -1115,7 +1114,7 @@ _${context}_set_column( ${context}_rowreq_ctx *rowreq_ctx,
     }
     
     return rc;
-}
+} /* _${context}_set_column */
 
 ########################################################################
 ##
@@ -1153,7 +1152,7 @@ _mfd_${context}_set_values(netsnmp_mib_handler *handler,
     } /* for results */
 
     return SNMP_ERR_NOERROR;
-}
+} /* _mfd_${context}_set_values */
 
 /*----------------------------------------------------------------------
  *
@@ -1212,7 +1211,7 @@ _mfd_${context}_undo_commit(netsnmp_mib_handler *handler,
     }
 
     return SNMP_ERR_NOERROR;
-}
+} /* _mfd_${context}_commit */
 
 /*----------------------------------------------------------------------
  *
@@ -1251,7 +1250,7 @@ _${context}_undo_column( ${context}_rowreq_ctx *rowreq_ctx,
     }
 
     return rc;
-}
+} /* _${context}_undo_column */
 
 ########################################################################
 ##
@@ -1290,7 +1289,7 @@ _mfd_${context}_undo_values(netsnmp_mib_handler *handler,
     } /* for results */
 
     return SNMP_ERR_NOERROR;
-}
+} /* _mfd_${context}_undo_values */
 
 @   if $m2c_irreversible_commit == 1@
 /*----------------------------------------------------------------------
@@ -1324,7 +1323,7 @@ _mfd_${context}_irreversible_commit(netsnmp_mib_handler *handler,
     }
     
     return SNMP_ERR_NOERROR;
-}
+} /* _mfd_${context}_irreversible_commit */
 
 @end@
 @end@ # settable

@@ -12,18 +12,15 @@
 @include generic-ctx-get.m2i@
 @if $m2c_node_skip_mapping != 1@
     /*
-     * TODO:
-     * value mapping
+     * TODO:245:o: |-> Implement $context RowStatus mapping
 @if $mfd_code_verbose == 1@
      *
      * If the values for your data type don't exactly match the
      * possible values defined by the mib, you should map them here.
 @end@
      */
-$example_start
     /*
-     * TODO:
-     * update INTERNAL_* macros defined in the header
+     * update INTERNAL_* macros defined in the header, if neccessary
      */
     switch ($m2c_node_lh) {
 
@@ -58,7 +55,6 @@ $example_start
                  $m2c_node_lh);
         return SNMP_ERR_GENERR;
     }
-$example_end
 
 @end@
 @include generic-get-decl-bot.m2i@            

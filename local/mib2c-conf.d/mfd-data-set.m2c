@@ -114,6 +114,9 @@ int ${context}_check_dependencies(${context}_rowreq_ctx *ctx);
 ########################################################################
 @        include parent-set.m2i@
 ########################################################################
+/*
+ * TODO:420:r: Implement $context index validation.
+ */
 @    foreach $node externalindex@
 @        include m2c_setup_node.m2i@
 @        if $m2c_report_progress == 1@
@@ -139,14 +142,13 @@ ${context}_${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO:
+     * TODO:424:M: |-> Check $context external index $node.
      * check that index value in the table context (rowreq_ctx)
-     * for the external index $node is legal
+     * for the external index $node is legal.
      */
 
-    /* if everything looks ok, return MFD_SUCCESS */
-      return MFD_SUCCESS;
-}
+    return MFD_SUCCESS; /*  external index $node ok */
+} /* ${context}_${node}_check_index */
 
 @        end@ # m2c_table_row_creation
 @    end@ # foreach externalindex
@@ -176,18 +178,23 @@ ${node}_check_index( ${context}_rowreq_ctx *rowreq_ctx )
     netsnmp_assert(NULL != rowreq_ctx);
 
     /*
-     * TODO:
+     * TODO:426:M: |-> Check $context index $node.
      * check that index value in the table context (rowreq_ctx)
-     * for $node is legal
+     * for $node is legal.
      */
 
-    /* if everything looks ok, return MFD_SUCCESS */
-      return MFD_SUCCESS;
-}
+    return MFD_SUCCESS; /* $node index ok */
+} /* ${node}_check_index */
 
 @    end@ # foreach internalindex
 @  end@ # m2c_table_row_creation
 ########################################################################
+/*
+ * TODO:440:M: Implement $context node value checks.
+ * TODO:450:M: Implement $context undo functions.
+ * TODO:460:M: Implement $context set functions.
+ * TODO:480:M: Implement $context commit functions.
+ */
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
 @        if $node.settable == 0@

@@ -59,7 +59,7 @@ ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref )
     netsnmp_assert(NULL != rowreq_ctx);
 
 /*
- * TODO:
+ * TODO:231:o: |-> Extract the current value of the $node data.
 @if $m2c_node_needlength == 0@
  * set $m2c_node_lh from $m2c_data_item
 @else@
@@ -69,7 +69,7 @@ ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref )
 @    if ("$m2c_data_context" eq "generated") && ($m2c_node_skip_get != 1)@
 @        include generic-ctx-get.m2i@
 @    else@
-    return MFD_SKIP; /* TODO: remove this once you've set data */
+    return MFD_SKIP; /* TODO:235:M: |-> Remove SKIP once you've set $node data */
 @    end@
 ##   ------------------------------------------------------------------
 @    if $node.decl =~ /long/i@ #   ASN_INTEGER ASN_COUNTER ASN_GAUGE
@@ -92,7 +92,7 @@ ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref )
 @end@ # no syntax include
 
     return MFD_SUCCESS;
-}
+} /* ${node}_get */
 
 ##
 ########################################################################

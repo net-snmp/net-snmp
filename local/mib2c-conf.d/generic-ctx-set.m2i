@@ -9,7 +9,7 @@
 ########################################################################
 ##
     /*
-     * TODO:
+     * TODO:461:M: |-> Set $node value.
      * set $node value in ${m2c_data_item}
      */
 @if ($m2c_include_examples != 0) || ("$m2c_data_context" eq "generated")@

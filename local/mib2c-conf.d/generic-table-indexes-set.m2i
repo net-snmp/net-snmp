@@ -67,7 +67,7 @@ ${context}_indexes_set_tbl_idx(${context}_mib_index *tbl_idx$gtis_tmp)
 @end@ // for each column
 
     return MFD_SUCCESS;
-}
+} /* ${context}_indexes_set_tbl_idx */
 
 /**
  * @internal
@@ -105,7 +105,7 @@ ${context}_indexes_set(${context}_rowreq_ctx *rowreq_ctx$gtis_tmp)
     }
 
     return MFD_SUCCESS;
-}
+} /* ${context}_indexes_set */
 
 @end@ // m2c_processing_type eq 'c'
 ##

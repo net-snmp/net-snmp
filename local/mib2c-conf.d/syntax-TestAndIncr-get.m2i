@@ -10,7 +10,7 @@
 ##
 @include generic-get-decl.m2i@
 
-    return MFD_SKIP; /* TODO: remove this once you've set data */
+    return MFD_SKIP; /* TODO:235:M: Remove SKIP once you've set $node data */
 
 @include generic-ctx-get.m2i@
 @include generic-get-long.m2i@

@@ -160,19 +160,12 @@ ${context}_validate_index( ${context}_registration_ptr ${context}_reg,
     netsnmp_assert( NULL != rowreq_ctx );
 
     /*
-     * TODO:
-     * Validate incoming index(es)
-     */
-$example_start
-    /*
-     * TODO:
-     * update this code or row creation won't work
+     * TODO:430:M: |-> Validate potential $context index.
      */
     if(1) {
         snmp_log(LOG_WARNING,"invalid index for a new row in the "
                  "${context} table.\n");
         /*
-         * TODO:
          * determine failure type.
          *
          * If the index could not ever be created, return MFD_NOT_EVER
@@ -187,10 +180,9 @@ $example_start
             return MFD_CANNOT_CREATE_NOW;
         }
     }
-$example_end
 
     return rc;
-}
+} /* ${context}_validate_index */
 
 @end@ # row creation
 ##----------------------------------------------------------------------
@@ -233,9 +225,13 @@ ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != rowreq_ctx );
 
+    /*
+     * TODO:451:M: |-> Setup $context undo.
+     * set up $context undo information, in preparation for a set.
+     */
 
     return rc;
-}
+} /* ${context}_undo_setup */
 
 /**
  * Cleanup up context undo information.
@@ -264,9 +260,12 @@ ${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx)
     /** we should have a non-NULL pointer */
     netsnmp_assert( NULL != rowreq_ctx );
 
+    /*
+     * TODO:452:M: |-> Cleanup $context undo.
+     */
 
     return rc;
-}
+} /* ${context}_undo_cleanup */
 
 @end@ // ne generated
 ##----------------------------------------------------------------------
@@ -310,8 +309,11 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
     rowreq_ctx->column_set_flags = 0;
 
     /*
-     * TODO:
-     * commit data
+     * commit $context data
+     * 1) check the column's flag in save_flags to see if it was set.
+     * 2) clear the flag when you handle that column
+     * 3) set the column's flag in column_set_flags if it needs undo
+     *    processing in case of a failure.
      */
 ##$example_start
 @   foreach $node nonindex@
@@ -322,7 +324,7 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
     if (save_flags & FLAG_$node.uc) {
        save_flags &= ~FLAG_$node.uc; /* clear $node */
        /*
-        * TODO: commit colum $node
+        * TODO:482:o: |-> commit column $node.
         */
        rc = -1;
        if(-1 == rc) {
@@ -344,7 +346,7 @@ ${context}_commit( ${context}_rowreq_ctx *rowreq_ctx)
 ##$example_end
 
     return rc;
-}
+} /* ${context}_commit */
 
 /**
  * undo commit new values.
@@ -376,14 +378,17 @@ ${context}_undo_commit( ${context}_rowreq_ctx *rowreq_ctx)
     netsnmp_assert( NULL != rowreq_ctx );
 
     /*
-     * TODO:
-     * undo commit data
+     * TODO:485:M: |-> Undo $context commit.
+     * check the column's flag in rowreq_ctx->column_set_flags to see
+     * if it was set during commit, then undo it.
+     *
+     * eg: if (rowreq_ctx->column_set_flags & FLAG_$node.uc) {}
      */
 ##$example_start
 ##$example_end
 
     return rc;
-}
+} /* ${context}_undo_commit */
 
 @if $m2c_irreversible_commit == 1@
 ##----------------------------------------------------------------------
@@ -409,14 +414,13 @@ ${context}_irreversible_commit( ${context}_rowreq_ctx *rowreq_ctx)
     netsnmp_assert( NULL != rowreq_ctx );
 
     /*
-     * TODO:
-     * commit data here
+     * TODO:495:o: Irreversible $context commit.
      */
 ##$example_start
 ##$example_end
 
     return MFD_SUCCESS;
-}
+} /* ${context}_irreversible_commit */
 
 @end@ // irreversable commit
 ##
