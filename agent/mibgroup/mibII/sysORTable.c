@@ -148,3 +148,33 @@ void register_sysORTable(oid *oidin,
   (*ptr)->next = NULL;
   numEntries++;
 }
+
+
+void unregister_sysORTable(oid *oidin,
+			 size_t oidlen)
+{
+  char c_oid[SPRINT_MAX_LEN];
+  struct sysORTable **ptr=&table, *prev=NULL;
+
+  if (snmp_get_do_debugging()) {
+    sprint_objid (c_oid, oidin, oidlen);
+    DEBUGMSGTL(("mibII/sysORTable", "sysORTable unregistering: %s\n",c_oid));
+  }
+
+  while(*ptr != NULL) {
+    if ( snmp_oid_compare( oidin, oidlen, (*ptr)->OR_oid, (*ptr)->OR_oidlen) == 0 ) {
+      if ( prev = NULL )
+        table      = (*ptr)->next;
+      else 
+        prev->next = (*ptr)->next;
+
+      free( (*ptr)->OR_descr );
+      free( (*ptr)->OR_oid );
+      free( (*ptr) );
+      numEntries--;
+      break;
+    }
+    prev = *ptr;
+    ptr = &((*ptr)->next);
+  }
+}
