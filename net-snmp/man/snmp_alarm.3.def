@@ -138,7 +138,8 @@ for the snmp_alarm subsystem, leaving it available for other parts of
 the application.  This is done by making the following call:
 .PP
 .nf
-ds_set_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG, 1);
+netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+                       NETSNMP_DS_LIB_ALARM_DONT_USE_SIG, 1);
 .fi
 .PP
 before calling
