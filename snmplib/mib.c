@@ -89,7 +89,10 @@ static void sprint_counter64 __P((char *, struct variable_list *, struct enum_li
 static void sprint_unknowntype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static void sprint_badtype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
   
-static char *get_description __P((oid *, int));
+#ifdef OPAQUE_SPECIAL_TYPES
+static void sprint_float __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_double __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+#endif
 
 static int quick_print = 0;
 static int full_objid = 0;
@@ -1482,20 +1485,6 @@ found:
         return subtree;
 }
 
-static char *
-get_description(objid, objidlen)
-    oid     *objid;
-    int     objidlen;   /* number of subidentifiers */
-{
-    struct tree    *subtree = tree_head;
-
-    subtree = get_tree(objid, objidlen, subtree);
-    if (subtree)
-        return (subtree->description);
-    else
-        return NULL;
-}
-
 void
 print_description(objid, objidlen)
     oid     *objid;
@@ -1536,22 +1525,22 @@ fprint_description(f, objid, objidlen)
 	if (tp->hint) fprintf(f, "DISPLAY-HINT\t\"%s\"\n", tp->hint);
 	if (tp->units) fprintf(f, "UNITS\t\"%s\"\n", tp->units);
 	switch (tp->access) {
-	case ACCESS_READONLY:	cp = "read-only"; break;
-	case ACCESS_READWRITE:	cp = "read-write"; break;
-	case ACCESS_WRITEONLY:	cp = "write-only"; break;
-	case ACCESS_NOACCESS:	cp = "not-accessible"; break;
-	case ACCESS_NOTIFY:	cp = "accessible-for-notify"; break;
-	case ACCESS_CREATE:	cp = "read-create"; break;
+	case MIB_ACCESS_READONLY:	cp = "read-only"; break;
+	case MIB_ACCESS_READWRITE:	cp = "read-write"; break;
+	case MIB_ACCESS_WRITEONLY:	cp = "write-only"; break;
+	case MIB_ACCESS_NOACCESS:	cp = "not-accessible"; break;
+	case MIB_ACCESS_NOTIFY:	cp = "accessible-for-notify"; break;
+	case MIB_ACCESS_CREATE:	cp = "read-create"; break;
 	case 0:			cp = NULL; break;
 	default:		sprintf(str,"access_%d", tp->access); cp = str;
 	}
 	if (cp) fprintf(f, "MAX-ACCESS\t%s\n", cp);
 	switch (tp->status) {
-	case STATUS_MANDATORY:	cp = "mandatory"; break;
-	case STATUS_OPTIONAL:	cp = "optional"; break;
-	case STATUS_OBSOLETE:	cp = "obsolete"; break;
-	case STATUS_DEPRECATED: cp = "deprecated"; break;
-	case STATUS_CURRENT:	cp = "current"; break;
+	case MIB_STATUS_MANDATORY:	cp = "mandatory"; break;
+	case MIB_STATUS_OPTIONAL:	cp = "optional"; break;
+	case MIB_STATUS_OBSOLETE:	cp = "obsolete"; break;
+	case MIB_STATUS_DEPRECATED:	cp = "deprecated"; break;
+	case MIB_STATUS_CURRENT:	cp = "current"; break;
 	case 0:			cp = NULL; break;
 	default:		sprintf(str,"status_%d", tp->status); cp = str;
 	}

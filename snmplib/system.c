@@ -27,6 +27,9 @@ SOFTWARE.
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
@@ -466,4 +469,25 @@ strdup(src)
     strcpy(dst, src);
     return(dst);
 }
-#endif
+#endif	/* HAVE_STRDUP */
+
+#ifndef HAVE_SETENV
+int setenv(name, value, overwrite)
+    char *name;
+    char *value;
+    int overwrite;
+{
+    char *cp;
+    int ret;
+
+    if (overwrite == 0) {
+	if (getenv(name)) return 0;
+    }
+    cp = malloc(strlen(name)+strlen(value)+2);
+    if (cp == NULL) return -1;
+    sprintf(cp, "%s=%s", name, value);
+    ret = putenv(cp);
+    free(cp);
+    return ret;
+}
+#endif /* HAVE_SETENV */

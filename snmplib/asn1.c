@@ -1313,7 +1313,7 @@ asn_parse_float(data, datalength, type, floatp, floatsize)
 	return NULL;
     }
     *datalength -= (int)asn_length + (bufp - data);
-    bcopy((char *)bufp, (char *)(&(fu.c[0])), (int)asn_length);
+    memcpy(&fu.c[0], bufp, asn_length);
 
    /* correct for endian differences */
     fu.longVal = ntohl(fu.longVal);	

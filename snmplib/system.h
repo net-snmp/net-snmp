@@ -70,3 +70,6 @@ void DEBUGP __P((va_alist));
 #ifndef HAVE_STRDUP
 char *strdup __P((char *));
 #endif
+#ifndef HAVE_SETENV
+int setenv __P((char *, char *, int));
+#endif

@@ -126,18 +126,18 @@ struct module_compatability {
 #define TYPE_NSAPADDRESS    13
 #define TYPE_UINTEGER       14
 
-#define ACCESS_READONLY    18
-#define ACCESS_READWRITE   19
-#define	ACCESS_WRITEONLY   20
-#define ACCESS_NOACCESS    21
-#define ACCESS_NOTIFY      67
-#define ACCESS_CREATE      48
+#define MIB_ACCESS_READONLY    18
+#define MIB_ACCESS_READWRITE   19
+#define	MIB_ACCESS_WRITEONLY   20
+#define MIB_ACCESS_NOACCESS    21
+#define MIB_ACCESS_NOTIFY      67
+#define MIB_ACCESS_CREATE      48
 
-#define STATUS_MANDATORY   23
-#define STATUS_OPTIONAL    24
-#define STATUS_OBSOLETE    25
-#define STATUS_DEPRECATED  39
-#define STATUS_CURRENT     57
+#define MIB_STATUS_MANDATORY   23
+#define MIB_STATUS_OPTIONAL    24
+#define MIB_STATUS_OBSOLETE    25
+#define MIB_STATUS_DEPRECATED  39
+#define MIB_STATUS_CURRENT     57
 
 
 #define	ANON	"anonymous#"
