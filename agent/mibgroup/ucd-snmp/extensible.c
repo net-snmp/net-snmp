@@ -340,8 +340,8 @@ u_char *var_extensible_shell(struct variable *vp,
         else
           shell_command(exten);
         *var_len = strlen(exten->output);
-        if (exten->output[*var_len] == '\n')
-            exten->output[(*var_len)--] = '\0';
+        if (exten->output[*var_len-1] == '\n')
+            exten->output[--(*var_len)] = '\0';
         return((u_char *) (exten->output));
       case ERRORFIX:
         *write_method = fixExecError;
@@ -491,8 +491,8 @@ u_char *var_extensible_relocatable(struct variable *vp,
         strcpy(errmsg,exten->output);
       }
       *var_len = strlen(errmsg);
-      if (errmsg[*var_len] == '\n')
-          errmsg[(*var_len)--] = '\0';
+      if (errmsg[*var_len-1] == '\n')
+          errmsg[--(*var_len)] = '\0';
       return((u_char *) (errmsg));
     case ERRORFIX:
       *write_method = fixExecError;
