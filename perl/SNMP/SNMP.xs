@@ -1315,13 +1315,16 @@ void *cb_data;
       */
       old_numeric = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
       old_printfull = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID);
-      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1))) {
-         getlabel_flag |= USE_NUMERIC_OIDS;
-         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
-      }
       if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1))) {
          getlabel_flag |= USE_LONG_NAMES;
          netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
+      }
+      /* Setting UseNumeric forces UseLongNames on so check for UseNumeric
+         after UseLongNames (above) to make sure the final outcome of 
+         NETSNMP_DS_LIB_OID_OUTPUT_FORMAT is NETSNMP_OID_OUTPUT_NUMERIC */
+      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1))) {
+         getlabel_flag |= USE_NUMERIC_OIDS;
+         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
       }
 
       sv_bless(varlist_ref, gv_stashpv("SNMP::VarList",0));
@@ -3189,6 +3192,16 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
 	      old_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
                                               NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
 
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1))) {
+	         getlabel_flag |= USE_LONG_NAMES;
+
+	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                    NETSNMP_OID_OUTPUT_FULL);
+	      }
+              /* Setting UseNumeric forces UseLongNames on so check for UseNumeric
+                 after UseLongNames (above) to make sure the final outcome of 
+                 NETSNMP_DS_LIB_OID_OUTPUT_FORMAT is NETSNMP_OID_OUTPUT_NUMERIC */
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1))) {
 	         getlabel_flag |= USE_LONG_NAMES;
 	         getlabel_flag |= USE_NUMERIC_OIDS;
@@ -3196,13 +3209,6 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
 	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
                                     NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                     NETSNMP_OID_OUTPUT_NUMERIC);
-	      }
-	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1))) {
-	         getlabel_flag |= USE_LONG_NAMES;
-
-	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
-                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
-                                    NETSNMP_OID_OUTPUT_FULL);
 	      }
 
 	      if (SvIOK(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)) &&
@@ -3401,6 +3407,16 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 	      old_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
                                               NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
 
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1))) {
+	         getlabel_flag |= USE_LONG_NAMES;
+
+	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                    NETSNMP_OID_OUTPUT_FULL);
+	      }
+              /* Setting UseNumeric forces UseLongNames on so check for UseNumeric
+                 after UseLongNames (above) to make sure the final outcome of 
+                 NETSNMP_DS_LIB_OID_OUTPUT_FORMAT is NETSNMP_OID_OUTPUT_NUMERIC */
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1))) {
 	         getlabel_flag |= USE_LONG_NAMES;
 	         getlabel_flag |= USE_NUMERIC_OIDS;
@@ -3408,13 +3424,6 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
                                     NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                     NETSNMP_OID_OUTPUT_NUMERIC);
-	      }
-	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1))) {
-	         getlabel_flag |= USE_LONG_NAMES;
-
-	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
-                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
-                                    NETSNMP_OID_OUTPUT_FULL);
 	      }
 
 	      if (SvIOK(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)) &&
@@ -3624,6 +3633,16 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 	      */
 	      old_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
                                               NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1))) {
+	         getlabel_flag |= USE_LONG_NAMES;
+
+	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                    NETSNMP_OID_OUTPUT_FULL);
+	      }
+              /* Setting UseNumeric forces UseLongNames on so check for UseNumeric
+                 after UseLongNames (above) to make sure the final outcome of 
+                 NETSNMP_DS_LIB_OID_OUTPUT_FORMAT is NETSNMP_OID_OUTPUT_NUMERIC */
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1))) {
 	         getlabel_flag |= USE_LONG_NAMES;
 	         getlabel_flag |= USE_NUMERIC_OIDS;
@@ -3632,14 +3651,7 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
                                     NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
                                     NETSNMP_OID_OUTPUT_NUMERIC);
 	      }
-	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1))) {
-	         getlabel_flag |= USE_LONG_NAMES;
-
-	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
-                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
-                                    NETSNMP_OID_OUTPUT_FULL);
-	      }
-
+	      
 	      if(response && response->variables) {
               for(vars = response->variables;
                   vars;
