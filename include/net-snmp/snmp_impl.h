@@ -93,24 +93,6 @@ SOFTWARE.
 #define ASN_UNSIGNED64       (ASN_APPLICATION | 11)
 #endif /* OPAQUE_SPECIAL_TYPES */
 
-/* #define CMU_COMPATIBLE */
-#ifdef CMU_COMPATIBLE
-#define INTEGER	    ASN_INTEGER
-#define STRING	    ASN_OCTET_STR
-#define OBJID	    ASN_OBJECT_ID
-#define NULLOBJ	    ASN_NULL
-#define BITSTRING   ASN_BIT_STR  /* HISTORIC - don't use */
-#define IPADDRESS   ASN_IPADDRESS
-#define COUNTER	    ASN_COUNTER
-#define GAUGE	    ASN_GAUGE
-#define UNSIGNED    ASN_UNSIGNED
-#define TIMETICKS   ASN_TIMETICKS
-#define ASNT_OPAQUE ASN_OPAQUE
-#define NSAP	    ASN_NSAP
-#define COUNTER64   ASN_COUNTER64
-#define UINTEGER    ASN_UINTEGER
-#endif /* CMU_COMPATIBLE */
-
 /* changed to ERROR_MSG to eliminate conflict with other includes */
 #define ERROR_MSG(string)	snmp_set_detail(string)
 
