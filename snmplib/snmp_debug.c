@@ -28,7 +28,7 @@
 #include "snmp_debug.h"
 #include "snmp_impl.h"
 
-static int   dodebug = DODEBUG;
+static int   dodebug = SNMP_ALWAYS_DEBUG;
 static int   debug_num_tokens=0;
 static char *debug_tokens[MAX_DEBUG_TOKENS];
 static int   debug_print_everything=0;
