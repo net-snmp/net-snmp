@@ -85,7 +85,7 @@ struct variable2 mteTriggerTable_variables[] = {
     {MTETRIGGERCOMMENT, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2,
      {1, 3}},
 #define   MTETRIGGERTEST        6
-    {MTETRIGGERTEST, ASN_BIT_STR, RWRITE, var_mteTriggerTable, 2, {1, 4}},
+    {MTETRIGGERTEST, ASN_OCTET_STR, RWRITE, var_mteTriggerTable, 2, {1, 4}},
 #define   MTETRIGGERSAMPLETYPE  7
     {MTETRIGGERSAMPLETYPE, ASN_INTEGER, RWRITE, var_mteTriggerTable, 2,
      {1, 5}},
@@ -584,7 +584,7 @@ parse_mteTriggerTable(const char *token, char *line)
     }
 
     line =
-        read_config_read_data(ASN_BIT_STR, line,
+        read_config_read_data(ASN_OCTET_STR, line,
                               &StorageTmp->mteTriggerTest,
                               &StorageTmp->mteTriggerTestLen);
     if (StorageTmp->mteTriggerTest == NULL) {
@@ -692,7 +692,7 @@ parse_mteTriggerTable(const char *token, char *line)
      * existence table 
      */
     line =
-        read_config_read_data(ASN_BIT_STR, line,
+        read_config_read_data(ASN_OCTET_STR, line,
                               &StorageTmp->mteTriggerExistenceTest,
                               &StorageTmp->mteTriggerExistenceTestLen);
     if (StorageTmp->mteTriggerExistenceTest == NULL) {
@@ -701,7 +701,7 @@ parse_mteTriggerTable(const char *token, char *line)
     }
 
     line =
-        read_config_read_data(ASN_BIT_STR, line,
+        read_config_read_data(ASN_OCTET_STR, line,
                               &StorageTmp->mteTriggerExistenceStartup,
                               &StorageTmp->mteTriggerExistenceStartupLen);
     if (StorageTmp->mteTriggerExistenceStartup == NULL) {
@@ -1063,7 +1063,7 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg,
                                        &StorageTmp->mteTriggerComment,
                                        &StorageTmp->mteTriggerCommentLen);
             cptr =
-                read_config_store_data(ASN_BIT_STR, cptr,
+                read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->mteTriggerTest,
                                        &StorageTmp->mteTriggerTestLen);
             cptr =
@@ -1139,13 +1139,13 @@ store_mteTriggerTable(int majorID, int minorID, void *serverarg,
              * existence table 
              */
             cptr =
-                read_config_store_data(ASN_BIT_STR, cptr,
+                read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->
                                        mteTriggerExistenceTest,
                                        &StorageTmp->
                                        mteTriggerExistenceTestLen);
             cptr =
-                read_config_store_data(ASN_BIT_STR, cptr,
+                read_config_store_data(ASN_OCTET_STR, cptr,
                                        &StorageTmp->
                                        mteTriggerExistenceStartup,
                                        &StorageTmp->
@@ -1499,6 +1499,7 @@ write_mteTriggerComment(int action,
         }
         if (StorageTmp->storageType != ST_NONVOLATILE)
             return SNMP_ERR_NOTWRITABLE;
+
         break;
 
 
@@ -1580,8 +1581,8 @@ write_mteTriggerTest(int action,
 
     switch (action) {
     case RESERVE1:
-        if (var_val_type != ASN_BIT_STR) {
-            snmp_log(LOG_ERR, "write to mteTriggerTest not ASN_BIT_STR\n");
+        if (var_val_type != ASN_OCTET_STR) {
+            snmp_log(LOG_ERR, "write to mteTriggerTest not ASN_OCTET_STR\n");
             return SNMP_ERR_WRONGTYPE;
         }
         if (StorageTmp->storageType != ST_NONVOLATILE)
@@ -3336,6 +3337,9 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                               value, item->mteTriggerExistenceObjectsOwner,
                               item->mteTriggerExistenceObjects,
                               "existence: present");
+                run_mte_events(item, next_oid, next_oid_len,
+                               item->mteTriggerExistenceEventOwner,
+                               item->mteTriggerExistenceEvent);
                 senttrap = 1;
             }
 
@@ -3354,6 +3358,9 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                               value, item->mteTriggerExistenceObjectsOwner,
                               item->mteTriggerExistenceObjects,
                               "existence: changed");
+                run_mte_events(item, next_oid, next_oid_len,
+                               item->mteTriggerExistenceEventOwner,
+                               item->mteTriggerExistenceEvent);
                 senttrap = 1;
             }
         }
@@ -3437,6 +3444,9 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                               &x, item->mteTriggerBooleanObjectsOwner,
                               item->mteTriggerBooleanObjects,
                               "boolean: true");
+                run_mte_events(item, next_oid, next_oid_len,
+                               item->mteTriggerBooleanEventOwner,
+                               item->mteTriggerBooleanEvent);
                 senttrap = 1;
             }
 
@@ -3487,6 +3497,9 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                               item->mteTriggerThresholdObjectsOwner,
                               item->mteTriggerThresholdObjects,
                               "threshold: rising");
+                run_mte_events(item, next_oid, next_oid_len,
+                               item->mteTriggerThresholdRisingEventOwner,
+                               item->mteTriggerThresholdRisingEvent);
                 senttrap = 1;
             }
             if (((item->started == MTE_STARTED && laststate &&
@@ -3503,6 +3516,9 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
                               item->mteTriggerThresholdObjectsOwner,
                               item->mteTriggerThresholdObjects,
                               "threshold: falling");
+                run_mte_events(item, next_oid, next_oid_len,
+                               item->mteTriggerThresholdFallingEventOwner,
+                               item->mteTriggerThresholdFallingEvent);
                 senttrap = 1;
             }
 
