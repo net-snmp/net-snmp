@@ -6,9 +6,6 @@ extern "C" {
 #endif
 /*
  * parse.h
- *
- * Update: 1998-07-17 <jhy@gsu.edu>
- * Added prototypes for print_subtree_oid_report* functions.
  */
 /***********************************************************
         Copyright 1989 by Carnegie Mellon University
@@ -212,15 +209,7 @@ char *snmp_mib_toggle_options(char *options);
 void snmp_mib_toggle_options_usage(const char *lead, FILE *outf);
 void print_mib(FILE *);
 void print_mib_tree(FILE *, struct tree *);
-void print_subtree_oid_report (FILE *, struct tree *, int);
-void print_subtree_oid_report_enable_labeledoid (void);
-void print_subtree_oid_report_enable_oid (void);
-void print_subtree_oid_report_enable_suffix (void);
-void print_subtree_oid_report_enable_symbolic (void);
-void print_subtree_oid_report_disable_labeledoid (void);
-void print_subtree_oid_report_disable_oid (void);
-void print_subtree_oid_report_disable_suffix (void);
-void print_subtree_oid_report_disable_symbolic (void);
+
 #ifdef __cplusplus
 }
 #endif

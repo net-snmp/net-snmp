@@ -1255,7 +1255,7 @@ int read_objid(const char *input,
 
 
 /*
- * RECURSIVE helper function for read_objid
+ * RECURSIVE helper methods for read_objid
  * Returns:
  * < 0  the SNMPERR_ errorcode
  * = 0  input string is empty.
@@ -1846,6 +1846,22 @@ main(int argc, char* argv[])
 
 #endif /* testing */
 
+/*
+ * Update: 1998-07-17 <jhy@gsu.edu>
+ * Added print_oid_report* functions.
+ */
+static int print_subtree_oid_report_labeledoid = 0;
+static int print_subtree_oid_report_oid = 0;
+static int print_subtree_oid_report_symbolic = 0;
+static int print_subtree_oid_report_suffix = 0;
+
+/* These methods recurse. */
+static void print_parent_labeledoid(FILE *, struct tree *);
+static void print_parent_oid(FILE *, struct tree *);
+static void print_parent_label(FILE *, struct tree *);
+static void print_subtree_oid_report(FILE *, struct tree *, int);
+
+
 void
 print_oid_report (FILE *fp)
 {
@@ -1857,49 +1873,158 @@ print_oid_report (FILE *fp)
 void
 print_oid_report_enable_labeledoid (void)
 {
-    print_subtree_oid_report_enable_labeledoid ();
+    print_subtree_oid_report_labeledoid = 1;
 }
 
 void
 print_oid_report_enable_oid (void)
 {
-    print_subtree_oid_report_enable_oid ();
+    print_subtree_oid_report_oid = 1;
 }
 
 void
 print_oid_report_enable_suffix (void)
 {
-    print_subtree_oid_report_enable_suffix ();
+    print_subtree_oid_report_suffix = 1;
 }
 
 void
 print_oid_report_enable_symbolic (void)
 {
-    print_subtree_oid_report_enable_symbolic ();
+    print_subtree_oid_report_symbolic = 1;
 }
 
-void
-print_oid_report_disable_labeledoid (void)
+/*
+ * helper methods for print_subtree_oid_report()
+ * each one traverses back up the node tree
+ * until there is no parent.  Then, the label combination
+ * is output, such that the parent is displayed first.
+ *
+ * Warning: these methods are all recursive.
+ */
+
+static void
+print_parent_labeledoid(FILE *f,
+			struct tree *tp)
 {
-    print_subtree_oid_report_disable_labeledoid ();
+    if(tp)
+    {
+        if(tp->parent)
+        {
+            print_parent_labeledoid(f, tp->parent); /*RECURSE*/
+        }
+        fprintf(f, ".%s(%lu)", tp->label, tp->subid);
+    }
 }
 
-void
-print_oid_report_disable_oid (void)
+static void
+print_parent_oid(FILE *f,
+		 struct tree *tp)
 {
-     print_subtree_oid_report_disable_oid ();
+    if(tp)
+    {
+        if(tp->parent)
+        {
+            print_parent_oid(f, tp->parent); /*RECURSE*/
+        }
+        fprintf(f, ".%lu", tp->subid);
+    }
 }
 
-void
-print_oid_report_disable_suffix (void)
+static void
+print_parent_label(FILE *f,
+		   struct tree *tp)
 {
-    print_subtree_oid_report_disable_suffix ();
+    if(tp)
+    {
+        if(tp->parent)
+        {
+            print_parent_label(f, tp->parent); /*RECURSE*/
+        }
+        fprintf(f, ".%s", tp->label);
+    }
 }
 
+/*
+ * print_subtree_oid_report():
+ *
+ * This methods generates variations on the original print_subtree() report.
+ * Traverse the tree depth first, from least to greatest sub-identifier.
+ * Warning: this methods recurses and calls methods that recurse.
+ */
+
 void
-print_oid_report_disable_symbolic (void)
+print_subtree_oid_report(FILE *f,
+                         struct tree *tree,
+                         int count)
 {
-     print_subtree_oid_report_disable_symbolic ();
+    struct tree *tp;
+
+    count++;
+
+    /* sanity check */
+    if(!tree)
+    {
+        return;
+    }
+
+    /* initialize: no peers included in the report. */
+    for(tp = tree->child_list; tp; tp = tp->next_peer)
+    {
+        tp->reported = 0;
+    }
+
+    /*
+     * find the not reported peer with the lowest sub-identifier.
+     * if no more, break the loop and cleanup.
+     * set "reported" flag, and create report for this peer.
+     * recurse using the children of this peer, if any.
+     */
+    while (1)
+    {
+        register struct tree *ntp;
+
+        tp = 0;
+        for (ntp = tree->child_list; ntp; ntp = ntp->next_peer)
+        {
+            if (ntp->reported) continue;
+
+            if (!tp || (tp->subid > ntp->subid))
+                tp = ntp;
+        }
+        if (!tp) break;
+
+        tp->reported = 1;
+
+        if(print_subtree_oid_report_labeledoid)
+        {
+            print_parent_labeledoid(f, tp);
+            fprintf(f, "\n");
+        }
+        if(print_subtree_oid_report_oid)
+        {
+            print_parent_oid(f, tp);
+            fprintf(f, "\n");
+        }
+        if(print_subtree_oid_report_symbolic)
+        {
+            print_parent_label(f, tp);
+            fprintf(f, "\n");
+        }
+        if(print_subtree_oid_report_suffix)
+        {
+            int i;
+            for(i = 0; i < count; i++)
+                fprintf(f, "  ");
+            fprintf(f, "%s(%ld) type=%d", tp->label, tp->subid, tp->type);
+            if (tp->tc_index != -1) fprintf(f, " tc=%d", tp->tc_index);
+            if (tp->hint) fprintf(f, " hint=%s", tp->hint);
+            if (tp->units) fprintf(f, " units=%s", tp->units);
+
+            fprintf(f, "\n");
+        }
+        print_subtree_oid_report(f, tp, count); /*RECURSE*/
+    }
 }
 
 
