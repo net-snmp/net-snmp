@@ -1666,12 +1666,19 @@ check_getnext_results(netsnmp_agent_session  *asp) {
 		that this time the handler will be called in "inexact"
 		mode).  */
 
-	    if (special && !request->inclusive) {
-		DEBUGMSGTL(("snmp_agent", "request %d wasn't inclusive\n",
-			    request->index));
-                snmp_set_var_typed_value(request->requestvb, ASN_PRIV_RETRY,
-                                        NULL, 0);
-	    }
+	    if (special) {
+                if (!request->inclusive) {
+                    DEBUGMSGTL(("snmp_agent", "request %d wasn't inclusive\n",
+                                request->index));
+                    snmp_set_var_typed_value(request->requestvb, ASN_PRIV_RETRY,
+                                             NULL, 0);
+                } else if (request->requestvb->type == ASN_NULL) {
+                    /* it was inclusive, but no results.  Still retry this
+                       search. */
+                    snmp_set_var_typed_value(request->requestvb, ASN_PRIV_RETRY,
+                                             NULL, 0);
+                }
+            }
 
             /* out of range? */
             if (snmp_oid_compare(request->requestvb->name,
@@ -1946,13 +1953,16 @@ handle_pdu(netsnmp_agent_session  *asp)
             /* first pass */
             status = handle_var_requests(asp);
             if (status != SNMP_ERR_NOERROR) {
-                return status; /* should never really happen */
+                if (!inclusives)
+                    return status; /* should never really happen */
+                else
+                    asp->status = SNMP_ERR_NOERROR;
             }
 
             /* loop through our mib tree till we find an
                appropriate response to return to the caller. */
 
-            handle_getnext_loop(asp);
+            status = handle_getnext_loop(asp);
             break;
 
         case SNMP_MSG_SET:
