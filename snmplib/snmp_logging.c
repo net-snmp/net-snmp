@@ -209,7 +209,16 @@ snmp_enable_filelog(const char *logfilename, int dont_zero_log)
     logfile = fopen(logfilename, dont_zero_log ? "a" : "w");
     if (logfile) {
         do_filelogging = 1;
+#ifdef WIN32
+        /*
+         * Apparently, "line buffering" under Windows is
+         *  actually implemented as "full buffering".
+         *  Let's try turning off buffering completely.
+         */
+        setvbuf(logfile, NULL, _IONBF, BUFSIZ);
+#else
         setvbuf(logfile, NULL, _IOLBF, BUFSIZ);
+#endif
     } else
         do_filelogging = 0;
 }
