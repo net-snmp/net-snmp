@@ -311,7 +311,7 @@ ipAddressTable_indexes_set_tbl_idx(ipAddressTable_mib_index * tbl_idx,
      * TODO:
      * update, replace or delete, if needed.
      */
-    tbl_idx->ipAddressAddrType = ipAddressAddrType_val;
+    ipAddressAddrType_map(&tbl_idx->ipAddressAddrType, ipAddressAddrType_val);
 
     /*
      * ipAddressAddr(2)/InetAddress/ASN_OCTET_STR/char(char)//L/a/w/e/R/d/h 
