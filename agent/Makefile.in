@@ -33,6 +33,7 @@ INCLUDESUBDIRHEADERS=agent_read_config.h \
 	var_struct.h \
 	agent_handler.h \
 	net-snmp-agent-includes.h \
+	mib_modules.h \
 	agent_callbacks.h
 
 INSTALLBUILTSUBDIRHEADERS=../include/net-snmp/agent/mib_module_config.h \
@@ -44,7 +45,6 @@ OTHERUNINSTALL=@EMBEDPERLUNINSTALL@
 
 # XXX: need to install these  They're really UCD specific, however.
 BROKEINSTALL= \
-	mib_modules.h \
 	mibgroup/struct.h \
 	mibgroup/util_funcs.h \
 	mibgroup/mibincl.h \
