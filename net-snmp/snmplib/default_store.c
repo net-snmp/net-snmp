@@ -13,6 +13,9 @@
 #else
 #include <strings.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 
 #include "asn1.h"
 #include "snmp_api.h"

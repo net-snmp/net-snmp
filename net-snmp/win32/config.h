@@ -78,7 +78,7 @@
 #undef pid_t
 
 /* Define as the return type of signal handlers (int or void).  */
-#undef RETSIGTYPE
+#define RETSIGTYPE int
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be

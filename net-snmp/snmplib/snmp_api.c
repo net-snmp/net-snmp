@@ -921,9 +921,13 @@ snmp_sess_open(struct snmp_session *in_session)
 #ifndef UNIX_SOCKET_BASE_NAME
 #define UNIX_SOCKET_BASE_NAME  "/tmp/s."
 #endif
+
+#ifndef WIN32
             strcpy( isp->me.sa_data, UNIX_SOCKET_BASE_NAME );
             strcat( isp->me.sa_data, "XXXXXX" );
             mktemp( isp->me.sa_data );
+#endif
+
         }
     }
 

@@ -2,7 +2,9 @@
    of an application */
 
 #include <config.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <signal.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -24,6 +26,9 @@
 # else
 #  include <time.h>
 # endif
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 
 #include "asn1.h"
@@ -159,10 +164,13 @@ set_an_alarm(void) {
     if (nexttime <= 0) /* just in case some really should be run now
                           by freak timing accident. */
       nexttime = 1;
-    
+
+#ifndef WIN32
     alarm(nexttime);
     DEBUGMSGTL(("snmp_alarm_set_an_alarm","setting an alarm for %d seconds from now\n",nexttime));
     signal(SIGALRM, alarm_handler);
+#endif
+
   } else {
     DEBUGMSGTL(("snmp_alarm_set_an_alarm","no alarms found to handle\n"));
   }

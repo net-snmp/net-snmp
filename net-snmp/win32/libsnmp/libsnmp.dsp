@@ -100,6 +100,10 @@ SOURCE=..\..\snmplib\context_parse.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\default_store.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\keytools.c
 # End Source File
 # Begin Source File
@@ -145,6 +149,10 @@ SOURCE=..\..\snmplib\scapi.c
 # Begin Source File
 
 SOURCE=..\..\snmplib\snmp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\snmplib\snmp_alarm.c
 # End Source File
 # Begin Source File
 
