@@ -4946,7 +4946,7 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
   if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)) {
     if (transport->f_fmtaddr != NULL) {
       char *string = NULL;
-      string = transport->f_fmtaddr(NULL, rp->pdu->transport_data,
+      string = transport->f_fmtaddr(transport, rp->pdu->transport_data,
 				    rp->pdu->transport_data_length);
       if (string != NULL) {
 	snmp_log(LOG_DEBUG, "\nResending %d bytes to %s\n", length, string);
