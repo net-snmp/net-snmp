@@ -362,14 +362,21 @@ table_helper_handler(netsnmp_mib_handler *handler,
             DEBUGMSGTL(("helper:table", "  using existing tbl_req_info\n "));
         }
 
+        /*
+         * do we have a column?
+         */
         if (var->name_length > oid_column_pos) {
             /*
-             * oid is long enough to contain index info
+             * oid is long enough to contain COLUMN info
              */
+            DEBUGMSGTL(("helper:table", "  have at least a column (%d)\n",
+                           var->name[oid_column_pos]));
             if (var->name[oid_column_pos] < tbl_info->min_column) {
+                DEBUGMSGTL(("helper:table", "    but it's less than min (%d)\n",
+                               tbl_info->min_column));
                 if (reqinfo->mode == MODE_GETNEXT) {
                     /*
-                     * fix column, truncate useless index info 
+                     * fix column, truncate useless column info 
                      */
                     var->name_length = oid_column_pos;
                     tbl_req_info->colnum = tbl_info->min_column;
@@ -377,6 +384,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
                     out_of_range = 1;
             } else if (var->name[oid_column_pos] > tbl_info->max_column)
                 out_of_range = 1;
+            else
+                tbl_req_info->colnum = var->name[oid_column_pos];
 
             if (out_of_range) {
                 /*
@@ -384,7 +393,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                  * memory 
                  */
                 DEBUGMSGTL(("helper:table",
-                            "  oid is out of range. Not processed: "));
+                            "    oid is out of range. Not processed: "));
                 DEBUGMSGOID(("helper:table", var->name, var->name_length));
                 DEBUGMSG(("helper:table", "\n"));
 
@@ -404,24 +413,37 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 tbl_req_info->colnum =
                     netsnmp_closest_column(var->name[oid_column_pos],
                                            tbl_info->valid_columns);
+                DEBUGMSGTL(("helper:table", "    closest column is %d\n",
+                            tbl_req_info->colnum));
+                /*
+                 * xxx-rks: document why the continue...
+                 */
                 if (tbl_req_info->colnum == 0)
                     continue;
                 if (tbl_req_info->colnum != var->name[oid_column_pos]) {
+                    DEBUGMSGTL(("helper:table",
+                                "    which doesn't match req %d - truncating index info\n",
+                                   var->name[oid_column_pos]));
                     /*
                      * different column! truncate useless index info 
                      */
-                    var->name_length = oid_column_pos;
+                    var->name_length = oid_column_pos + 1; /* pos is 0 based */
                 }
             }
             /*
              * var->name_length may have changed - check again 
              */
-            if (var->name_length <= oid_column_pos) { /** none available */
-                tbl_req_info->index_oid_len = 0;
+            if (var->name_length <= oid_index_pos) { /* pos is 0 based */
+                DEBUGMSGTL(("helper:table", "    not enough for indexes\n"));
+                tbl_req_info->index_oid_len = 0; /** none available */
             } else {
-                tbl_req_info->colnum = var->name[oid_column_pos];
+                /*
+                 * oid is long enough to contain INDEX info
+                 */
                 tbl_req_info->index_oid_len =
                     var->name_length - oid_index_pos;
+                DEBUGMSGTL(("helper:table", "    have %d bytes of index\n",
+                            tbl_req_info->index_oid_len));
                 netsnmp_assert(tbl_req_info->index_oid_len < MAX_OID_LEN);
                 memcpy(tbl_req_info->index_oid, &var->name[oid_index_pos],
                        tbl_req_info->index_oid_len * sizeof(oid));
@@ -442,6 +464,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
              * at the minimum column. Set index oid len to 0 because we don't
              * have any index info in the OID.
              */
+            DEBUGMSGTL(("helper:table", "  no column/index in request\n"));
             tbl_req_info->index_oid_len = 0;
             tbl_req_info->colnum = tbl_info->min_column;
         }
@@ -462,7 +485,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
         /*
          * for each index type, try to extract the index from var->name
          */
-
+        DEBUGMSGTL(("helper:table", "  looking for %d indexes\n",
+                    tbl_info->number_indexes));
         for (tmp_idx = 0, vb = tbl_req_info->indexes;
              tmp_idx < tbl_info->number_indexes;
              ++tmp_idx, vb = vb->next_variable) {
@@ -501,6 +525,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 /*
                  * do not count incomplete indexes 
                  */
+                DEBUGMSGTL(("helper:table", "  got 1 (incomplete=%d)\n",
+                            incomplete));
                 if (incomplete)
                     continue;
                 ++tbl_req_info->number_indexes; /** got one ok */
@@ -511,6 +537,8 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 }
             }
         }                       /** for loop */
+        DEBUGMSGTL(("helper:table", "  found %d indexes\n",
+                    tbl_req_info->number_indexes));
 
         DEBUGIF("helper:table") {
             if (!cleaned_up) {
