@@ -31,6 +31,9 @@ extern          "C" {
  * #include <net-snmp/agent/table_array.h> 
  */
 
+#include <net-snmp/agent/mfd.h>
+
+
 void            netsnmp_init_helpers(void);
 
 #ifdef __cplusplus
