@@ -687,6 +687,9 @@ var_snmpTargetAddrEntry(
   case SNMPTARGETADDRRETRYCOUNT:
     *write_method = write_snmpTargetAddrRetryCount;
     break;
+  case SNMPTARGETADDRTIMEOUT:
+    *write_method = write_snmpTargetAddrTimeout;
+    break;
   case SNMPTARGETADDRTAGLIST:
     *write_method = write_snmpTargetAddrTagList;
     break;
@@ -946,37 +949,45 @@ write_snmpTargetAddrTimeout(
 {
   /* variables we may use later */
   static long                    long_ret;
-  size_t                         size;
   struct targetAddrTable_struct *temp_struct;
 
-  if (var_val_type != ASN_INTEGER) {
-      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTimeout not ASN_INTEGER\n"));
-      return SNMP_ERR_WRONGTYPE;
-  }
-  if (var_val_len > (size = sizeof(long_ret))) {
-      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTimeout: bad length\n"));
-      return SNMP_ERR_WRONGLENGTH;
-  }
-  long_ret = *((long *) var_val);
+  if (action == RESERVE1) {
+    if (var_val_type != ASN_INTEGER) {
+        DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTimeout not ASN_INTEGER\n"));
+        return SNMP_ERR_WRONGTYPE;
+    }
+    if (var_val_len > sizeof(long_ret)) {
+        DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTimeout: bad length\n"));
+        return SNMP_ERR_WRONGLENGTH;
+    }
+  } else if (action == RESERVE1) {
   
-  /* spec check range, no spec check */
-  
-  /* Find row in linked list and check pertinent status... */
-  snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTIMEOUTCOLUMN;
-  if ((temp_struct = search_snmpTargetAddrTable
-       (snmpTargetAddrOID, snmpTargetAddrOIDLen, 
-	name, &name_len, 1)) == 0 ) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTimeout : BAD OID\n"));
-    return SNMP_ERR_NOSUCHNAME;
-  }
-  /* row exists, check if it is changeable */
-  if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
-    DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTimeout : row is read only\n"));
-    return SNMP_ERR_NOTWRITABLE;
-  }
+    /* spec check range, no spec check */
+    
+    /* Find row in linked list and check pertinent status... */
+    snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTIMEOUTCOLUMN;
+    if ((temp_struct = search_snmpTargetAddrTable
+         (snmpTargetAddrOID, snmpTargetAddrOIDLen, 
+  	name, &name_len, 1)) == 0 ) {
+      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTimeout : BAD OID\n"));
+      return SNMP_ERR_NOSUCHNAME;
+    }
+    /* row exists, check if it is changeable */
+    if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
+      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTimeout : row is read only\n"));
+      return SNMP_ERR_NOTWRITABLE;
+    }
 
-  /* Finally, we're golden, should we save value? */
-  if (action == COMMIT)  {
+  } else if (action == COMMIT) {
+    /* Finally, we're golden, should we save value? */
+    snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRTIMEOUTCOLUMN;
+    if ((temp_struct = search_snmpTargetAddrTable
+         (snmpTargetAddrOID, snmpTargetAddrOIDLen, 
+  	name, &name_len, 1)) == 0 ) {
+      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrTimeout : BAD OID\n"));
+      return SNMP_ERR_NOSUCHNAME;
+    }
+    long_ret = *((long *) var_val);
     temp_struct->timeout = long_ret;
   }
 
