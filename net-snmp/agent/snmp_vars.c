@@ -367,9 +367,18 @@ search_subtree_vars(struct subtree *tp,
 		      if (snmp_oid_compare(name, *namelen, save, savelen) != 0) {
 			DEBUGMSGTL(("snmp_vars", "evil_client: "));
 			DEBUGMSGOID(("snmp_vars", save, savelen));
-			DEBUGMSG(("snmp_vars"," =>"));
-			DEBUGMSGOID(("snmp_vars", name, *namelen));
-			DEBUGMSG(("snmp_vars","\n"));
+			DEBUGMSG(("snmp_vars"," => "));
+
+			/*  In general this will cause a lot of UMRs, because
+			    the part of the OID from [savelen .. *namelen] is
+			    not valid.  */
+
+			/*  DEBUGMSGOID(("snmp_vars", name, *namelen));  */
+			
+			/*  This tells you just as much really.  */
+
+			DEBUGMSGOID(("snmp_vars", name, savelen));
+			DEBUGMSG(("snmp_vars"," [ + %u ]\n",*namelen-savelen));
                         memcpy(name, save, savelen*sizeof(oid));
                         *namelen = savelen;
                       }
