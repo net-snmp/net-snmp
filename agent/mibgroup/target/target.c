@@ -34,7 +34,7 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
     
     DEBUGMSGTL(("target_sessions","looking for: %s\n", taglist));
     for(cp = taglist; cp && numtags < MAX_TAGS;) {
-        cp = copy_word(cp, tags[numtags]);
+        cp = copy_nword(cp, tags[numtags], sizeof(tags[numtags]));
         DEBUGMSGTL(("target_sessions"," for: %d=%s\n", numtags,
                     tags[numtags]));
         numtags++;
@@ -64,7 +64,7 @@ get_target_sessions(char *taglist, TargetFilterFunction *filterfunct,
         if (targaddrs->tagList) {
             /* loop through tag list looking for requested tags */
             for(cp = targaddrs->tagList; cp; ) {
-                cp = copy_word(cp, buf);
+                cp = copy_nword(cp, buf, sizeof(buf));
                 for(i = 0; i < numtags; i++) {
                     if (strcmp(buf,tags[i]) == 0) {
                         /* found a valid target table entry */
