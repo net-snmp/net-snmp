@@ -176,6 +176,30 @@ ifTable_post_request(ifTable_registration_ptr user_context)
  */
 
 
+/*---------------------------------------------------------------------
+ * IF-MIB::ifEntry.ifIndex
+ * ifIndex is subid 1 of ifEntry.
+ * It's status is Current, and it's access level is ReadOnly.
+ * OID: .1.3.6.1.2.1.2.2.1.1
+ * Description:
+A unique value, greater than zero, for each interface.  It
+            is recommended that values are assigned contiguously
+            starting from 1.  The value for each interface sub-layer
+            must remain constant at least from one re-initialization of
+            the entity's network management system to the next re-
+            initialization.
+ *
+ * Attributes:
+ *   accessible 1     isscalar 0     enums  0      hasdefval 0
+ *   readable   1     iscolumn 1     ranges 1      hashint   1
+ *   settable   0
+ *   hint: d
+ *
+ * Ranges:  1 - 2147483647;
+ *
+ * It's syntax is InterfaceIndex (based on perltype INTEGER32)
+ * The net-snmp type is ASN_INTEGER. The C type decl is long (long)
+ */
 
 /**
  * set mib index(es)
@@ -638,12 +662,6 @@ The desired state of the interface.  The testing(3) state
  * The net-snmp type is ASN_INTEGER. The C type decl is long (u_long)
  */
 /**
- * map a value from it's original native format the the MIB format.
- *
- * we keep this value in mib format, so no mapping
- */
-
-/**
  * Extract the current value of the ifAdminStatus data.
  *
  * Set a value using the data context for the row.
@@ -709,12 +727,6 @@ The current operational state of the interface.  The
  * It's syntax is INTEGER (based on perltype INTEGER)
  * The net-snmp type is ASN_INTEGER. The C type decl is long (u_long)
  */
-/**
- * map a value from it's original native format the the MIB format.
- *
- * we keep this value in mib format, so no mapping
- */
-
 /**
  * Extract the current value of the ifOperStatus data.
  *
