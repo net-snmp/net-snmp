@@ -205,6 +205,18 @@ exec_command(struct extensible *ex)
     return (ex->result);
 }
 
+struct extensible *
+get_exten_instance(struct extensible *exten, size_t inst)
+{
+    int             i;
+
+    if (exten == NULL)
+        return (NULL);
+    for (i = 1; i != (int) inst && exten != NULL; i++)
+        exten = exten->next;
+    return (exten);
+}
+
 void
 wait_on_exec(struct extensible *ex)
 {

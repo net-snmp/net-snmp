@@ -330,18 +330,6 @@ extensible_free_config(void)
 }
 
 
-struct extensible *
-get_exten_instance(struct extensible *exten, size_t inst)
-{
-    int             i;
-
-    if (exten == NULL)
-        return (NULL);
-    for (i = 1; i != (int) inst && exten != NULL; i++)
-        exten = exten->next;
-    return (exten);
-}
-
 #define MAXMSGLINES 1000
 
 struct extensible *extens = NULL;       /* In exec.c */
