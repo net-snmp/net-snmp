@@ -4866,6 +4866,8 @@ _add_strings_to_oid(void *tp, char *cp,
                     } else if (pos != len)
                         goto bad_id;
 		}
+		else if (len == -1 && !in_dices->isimplied)
+		    objid[len_index] = pos;
             } else {
                 if (!in_dices->isimplied && len == -1) {
                     fcp = cp;
