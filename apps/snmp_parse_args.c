@@ -357,14 +357,14 @@ snmp_parse_args(int argc,
         break;
 
       case 'l':
-        if (!strcmp(optarg,"noAuthNoPriv") || !strcmp(optarg,"1") ||
-            !strcmp(optarg,"nanp")) {
+        if (!strcasecmp(optarg,"noAuthNoPriv") || !strcmp(optarg,"1") ||
+            !strcasecmp(optarg,"nanp")) {
           session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
-        } else if (!strcmp(optarg,"authNoPriv") || !strcmp(optarg,"2") ||
-            !strcmp(optarg,"anp")) {
+        } else if (!strcasecmp(optarg,"authNoPriv") || !strcmp(optarg,"2") ||
+            !strcasecmp(optarg,"anp")) {
           session->securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
-        } else if (!strcmp(optarg,"authPriv") || !strcmp(optarg,"3") ||
-            !strcmp(optarg,"ap")) {
+        } else if (!strcasecmp(optarg,"authPriv") || !strcmp(optarg,"3") ||
+            !strcasecmp(optarg,"ap")) {
           session->securityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
         } else {
           fprintf(stderr,"Invalid security level specified after -l flag: %s\n", optarg);
@@ -375,10 +375,10 @@ snmp_parse_args(int argc,
         break;
 
       case 'a':
-        if (!strcmp(optarg,"MD5")) {
+        if (!strcasecmp(optarg,"MD5")) {
           session->securityAuthProto = usmHMACMD5AuthProtocol;
           session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
-        } else if (!strcmp(optarg,"SHA")) {
+        } else if (!strcasecmp(optarg,"SHA")) {
           session->securityAuthProto = usmHMACSHA1AuthProtocol;
           session->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
         } else {
@@ -389,7 +389,7 @@ snmp_parse_args(int argc,
         break;
 
       case 'x':
-        if (!strcmp(optarg,"DES")) {
+        if (!strcasecmp(optarg,"DES")) {
           session->securityPrivProto = usmDESPrivProtocol;
           session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
         } else {

@@ -86,12 +86,12 @@ static size_t	 defaultPrivTypeLen	= 0;
 void
 snmpv3_authtype_conf(const char *word, char *cptr)
 {
-  if (strcmp(cptr,"MD5") == 0)
+  if (strcasecmp(cptr,"MD5") == 0)
     defaultAuthType = usmHMACMD5AuthProtocol;
-  else if (strcmp(cptr,"SHA") == 0)
+  else if (strcasecmp(cptr,"SHA") == 0)
     defaultAuthType = usmHMACMD5AuthProtocol;
   else
-    config_perror("unknown authentication type");
+    config_perror("Unknown authentication type");
   defaultAuthTypeLen = USM_LENGTH_OID_TRANSFORM;
   DEBUGMSGTL(("snmpv3","set default authentication type: %s\n", cptr));
 }
@@ -111,10 +111,10 @@ get_default_authtype(size_t *len)
 void
 snmpv3_privtype_conf(const char *word, char *cptr)
 {
-  if (strcmp(cptr,"DES") == 0)
+  if (strcasecmp(cptr,"DES") == 0)
     defaultPrivType = SNMP_DEFAULT_PRIV_PROTO;
   else
-    config_perror("unknown privacy type");
+    config_perror("Unknown privacy type");
   defaultPrivTypeLen = SNMP_DEFAULT_PRIV_PROTOLEN;
   DEBUGMSGTL(("snmpv3","set default privacy type: %s\n", cptr));
 }
@@ -146,14 +146,17 @@ snmpv3_secLevel_conf(const char *word, char *cptr)
 {
   char buf[1024];
   
-  if (strcmp(cptr,"noAuthNoPriv") == 0 || strcmp(cptr, "1") == 0)
+  if (strcasecmp(cptr,"noAuthNoPriv") == 0 || strcmp(cptr, "1") == 0
+	|| strcasecmp(cptr, "nanp") == 0)
     ds_set_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_NOAUTH);
-  else if (strcmp(cptr,"authNoPriv") == 0 || strcmp(cptr, "2") == 0)
+  else if (strcasecmp(cptr,"authNoPriv") == 0 || strcmp(cptr, "2") == 0
+	|| strcasecmp(cptr, "anp") == 0)
     ds_set_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_AUTHNOPRIV);
-  else if (strcmp(cptr,"authPriv") == 0 || strcmp(cptr, "3") == 0)
+  else if (strcasecmp(cptr,"authPriv") == 0 || strcmp(cptr, "3") == 0
+	|| strcasecmp(cptr, "ap") == 0)
     ds_set_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_AUTHPRIV);
   else {
-    sprintf(buf,"unknown security level: cptr");
+    sprintf(buf,"Unknown security level: %s", cptr);
     config_perror(buf);
   }
   DEBUGMSGTL(("snmpv3","default secLevel set to: %s = %d\n", cptr,
@@ -323,7 +326,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
     memcpy(newuser->authProtocol, usmHMACSHA1AuthProtocol,
            sizeof(usmHMACSHA1AuthProtocol));
   } else {
-    config_perror("unknown authentication protocol");
+    config_perror("Unknown authentication protocol");
     usm_free_user(newuser);
     return;
   }
@@ -367,7 +370,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
     memcpy(newuser->privProtocol, usmDESPrivProtocol,
            sizeof(usmDESPrivProtocol));
   } else {
-    config_perror("unknown privacy protocol");
+    config_perror("Unknown privacy protocol");
     usm_free_user(newuser);
     return;
   }
@@ -454,12 +457,12 @@ version_conf(const char *word, char *cptr)
 {
   if (strcmp(cptr,"1") == 0) {
     ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, SNMP_VERSION_1);
-  } else if (strcmp(cptr,"2c") == 0) {
+  } else if (strcasecmp(cptr,"2c") == 0) {
     ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, SNMP_VERSION_2c);
   } else if (strcmp(cptr,"3") == 0) {
     ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, SNMP_VERSION_3);
   } else {
-    config_perror("unknown version specification");
+    config_perror("Unknown version specification");
     return;
   }
   DEBUGMSGTL(("snmpv3","set default version to %d\n",
