@@ -4,6 +4,7 @@ use Getopt::Std;
 
 use DBI;
 use Term::ReadLine;
+use SNMP;
 
 $opts{'t'} = ! eval { require Text::FormatTable; };
 
@@ -47,7 +48,7 @@ if (-f "$ENV{'HOME'}/.snmpshrc") {
 
 if ($#ARGV >= 0) {
     # command line command
-    if ($ARGV[0] =~ /(select|delete|update|insert)/) {
+    if ($ARGV[0] =~ /(select|delete|update|insert|show)/) {
 	doit(join(" ",@ARGV));
     } else {
 	usage();
@@ -106,8 +107,32 @@ sub doit {
 	($name, $args) = ($stmt =~ /^(\w+)\s*(.*)$/);
     }
 
-    # we have an SQL statement.  process it.
+    chomp($stmt);
     $stmt =~ s/;*$//; # get rid of trailing semicolons
+
+    # special show columns statement
+    if ($stmt =~ /^show columns from (\w+)$/) {
+	my $mibnode = $SNMP::MIB{$1};
+	my $entrynode = $mibnode->{children}[0];
+	if (!defined($mibnode) || !defined($entrynode)) {
+	    print STDERR "no such table: $1\n";
+	    return;
+	}
+	if ($opts{'t'}) {
+	    map { print $_->{label},"\n"; } sort { $a->{subID} <=> $b->{subID}} @{$entrynode->{children}};
+	} else {
+	    $table = Text::FormatTable->new('|r|');
+	    $table->rule('-');
+	    $table->head('Column');
+	    $table->rule('-');
+	    map { $table->row($_->{label}); } sort { $a->{subID} <=> $b->{subID}} @{$entrynode->{children}};
+	    $table->rule('-');
+	    print $table->render();
+	}
+	return;
+    }
+
+    # we have an SQL statement.  process it.
     $sth = $dbh->prepare($stmt);
     $sth->execute();
     if ($stmt =~ /^select/) {
