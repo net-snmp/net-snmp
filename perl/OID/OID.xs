@@ -288,10 +288,11 @@ nsop_get_indexes(oid1)
                 if (nodecount == 3 &&
                     (strlen(tpnode->label) < 6 ||
                      strcmp(tpnode->label + strlen(tpnode->label) - 5,
-                           "Table")))
+                            "Table"))) {
                     /* we're not within a table.  bad logic, little choice */
                     RETVAL = NULL;
                     return;
+                }
             }
 
             if (tpe->augments && strlen(tpe->augments) > 0) {
@@ -316,7 +317,6 @@ nsop_get_indexes(oid1)
             oidp_len = oid1->len - nodecount;
 
             for(index = tpe->indexes; index; index = index->next) {
-                fprintf(stderr,"OID index: %s\n", index->ilabel);
                 /* XXX: NOT efficient! */
                 name_len = MAX_OID_LEN;
                 if (!snmp_parse_oid(index->ilabel, name, &name_len) ||
@@ -328,10 +328,10 @@ nsop_get_indexes(oid1)
                 }
                 vbdata.type = mib_to_asn_type(indexnode->type);
                 
-                if (vbdata.type == (u_char) -1)
+                if (vbdata.type == (u_char) -1) {
                     RETVAL = NULL;
                     return; /* XXX: not good.  half populated stack? */
-
+                }
                 if (index->isimplied)
                     vbdata.type |= ASN_PRIVATE;
                 /* possible memory leak: vbdata.data should be freed later */
