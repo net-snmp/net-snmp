@@ -114,6 +114,7 @@ TABLE OF CONTENTS
    Where should I put the files produced by 'mib2c'?
    Mib2c only handles a single table in my MIB. How can I fix this?
    Mib2c complains about a missing "mib reference" - what does this mean?
+   Mib2c complains about not having a "valid OID" - what does this mean?
    Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?
    How can I get the agent to generate a trap (or inform)?
    What if I'm using an AgentX sub-agent instead?
@@ -2471,6 +2472,21 @@ Mib2c complains about a missing "mib reference" - what does this mean?
   might be because it hasn't been installed, the name is wrong, or
   (most likely), because it isn't in the default list.  See the MIBS
   section for more details.
+
+
+
+Mib2c complains about not having a "valid OID" - what does this mean?
+---------------------------------------------------------------------
+
+    It probably means that you gave it the name of a MIB file (or
+  module), rather than the name of an object defined in that file.
+  If you've got a file 'MY-MIB.txt', defining the MIB module 'MY-MIB'
+  which contains a subtree based on the object 'myMib', then you
+  should invoke mib2c as
+            "mib2c .... myMib"
+  rather than
+            "mib2c .... MY-MIB.txt"
+  or        "mib2c .... MY-MIB"
 
 
 
