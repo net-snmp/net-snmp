@@ -19,21 +19,36 @@
 extern u_long num_received;
 u_long num_deleted = 0;
 
-u_long max_logged = 10;
-u_long max_age = 1440;
+u_long max_logged = 1000; /* goes against the mib default of infinite */
+u_long max_age = 1440;    /* 24 hours, which is the mib default */
 
 netsnmp_table_data_set *nlmLogTable;
 netsnmp_table_data_set *nlmLogVarTable;
 
 void
-check_log_size(void) 
+check_log_size(unsigned int clientreg, void *clientarg) 
 {
-    netsnmp_table_row *row, *deleterow, *tmprow;
+    netsnmp_table_row *row, *deleterow, *tmprow, *deletevarrow;
+    netsnmp_table_data_set_storage *data;
     u_long count = 0;
+    struct timeval now;
+    long tmpl;
+
+    gettimeofday(&now, NULL);
+    tmpl = netsnmp_timeval_uptime( &now );
 
     for(row = nlmLogTable->table->first_row; row; row = row->next) {
+        /* check max allowed count */
         count++;
         if (max_logged && count == max_logged)
+            break;
+        
+        /* check max age */
+
+        data = (netsnmp_table_data_set_storage *) row->data;
+        data = netsnmp_table_data_set_find_column(data, COLUMN_NLMLOGTIME);
+
+        if (max_age && tmpl > (*(data->data.integer) + max_age*100*60))
             break;
     }
 
@@ -45,6 +60,26 @@ check_log_size(void)
     for(deleterow = nlmLogTable->table->first_row, row = row->next; row;
         row = row->next) {
         DEBUGMSGTL(("notification_log", "deleting a log entry\n"));
+
+        /* delete contained varbinds */
+        for(deletevarrow = nlmLogVarTable->table->first_row;
+            deletevarrow;
+            deletevarrow = tmprow) {
+
+            tmprow = deletevarrow->next;
+
+            if (deleterow->index_oid_len ==
+                deletevarrow->index_oid_len - 1 &&
+                snmp_oid_compare(deleterow->index_oid,
+                                 deleterow->index_oid_len,
+                                 deletevarrow->index_oid,
+                                 deleterow->index_oid_len) == 0) {
+                netsnmp_table_dataset_remove_and_delete_row(nlmLogVarTable,
+                                                            deletevarrow);
+            }
+        }
+
+        /* delete the master row */
         tmprow = deleterow->next;
         netsnmp_table_dataset_remove_and_delete_row(nlmLogTable, deleterow);
         deleterow = tmprow;
@@ -69,6 +104,7 @@ initialize_table_nlmLogVariableTable(void)
      */
     table_set = netsnmp_create_table_data_set("nlmLogVariableTable");
     nlmLogVarTable = table_set;
+    nlmLogVarTable->table->store_indexes = 1;
 
     /***************************************************
      * Adding indexes
@@ -311,6 +347,10 @@ initialize_table_nlmLogTable(void)
                             ("nlmLogTable", nlmLogTable_handler,
                              nlmLogTable_oid, nlmLogTable_oid_len,
                              HANDLER_CAN_RWRITE), nlmLogTable, NULL);
+
+    /* hmm...  5 minutes seems like a reasonable time to check for out
+       dated notification logs right? */
+    snmp_alarm_register(300, SA_REPEAT, check_log_size, NULL);
 }
 
 int
@@ -325,7 +365,7 @@ notification_log_config_handler(
      * notifications must be possibly deleted from our archives.
      */
     if (reqinfo->mode == MODE_SET_COMMIT)
-        check_log_size();
+        check_log_size(0, NULL);
     return SNMP_ERR_NOERROR;
 }
 
@@ -505,7 +545,7 @@ log_notification(struct hostent *host, netsnmp_pdu *pdu,
     /* store the row */
     netsnmp_table_dataset_add_row(nlmLogTable, row);
 
-    check_log_size();
+    check_log_size(0, NULL);
     DEBUGMSGTL(("log_notification","done logging something\n"));
 }
 
