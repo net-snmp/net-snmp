@@ -546,7 +546,7 @@ ROWAPI_header_ControlEntry(struct variable * vp, oid * name,
         if (ctrl_index)
             hdr = ROWAPI_find(table_ptr, ctrl_index);
     } else {
-        if (index)
+        if (ctrl_index)
             hdr = ROWAPI_next(table_ptr, ctrl_index);
         else
             hdr = ROWAPI_first(table_ptr);
