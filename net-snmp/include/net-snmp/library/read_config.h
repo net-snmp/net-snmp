@@ -107,6 +107,9 @@ extern          "C" {
                                             char *dataptr, size_t * len);
     char           *read_config_store_data(int type, char *storeto,
                                            void *dataptr, size_t * len);
+    char           *read_config_store_data_prefix(char prefix, int type,
+                                                  char *storeto,
+                                                  void *dataptr, size_t len);
     void            read_config_store(const char *type, const char *line);
     void            read_app_config_store(const char *line);
     void            snmp_save_persistent(const char *type);

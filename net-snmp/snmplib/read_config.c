@@ -1483,6 +1483,7 @@ read_config_read_data(int type, char *readfrom, void *dataptr,
             readfrom = skip_token(readfrom);
             return readfrom;
 
+        case ASN_TIMETICKS:
         case ASN_UNSIGNED:
             uintp = (unsigned int *) dataptr;
             *uintp = strtoul(readfrom, NULL, 0);
@@ -1534,6 +1535,7 @@ read_config_read_memory(int type, char *readfrom,
         readfrom = skip_token(readfrom);
         return readfrom;
 
+    case ASN_TIMETICKS:
     case ASN_UNSIGNED:
         if (*len < sizeof(unsigned int))
             return NULL;
@@ -1568,13 +1570,25 @@ read_config_read_memory(int type, char *readfrom,
  * read_config_store_data():
  * stores data of a given type to a configuration line.
  * 
- * Returns: character pointer to the next token in the configuration line.
- * NULL if none left.
+ * Returns: character pointer to the end of the line.
  * NULL if an unknown type.
  */
 char           *
-read_config_store_data(int type, char *storeto, void *dataptr,
-                       size_t * len)
+read_config_store_data(int type, char *storeto, void *dataptr, size_t * len)
+{
+    return read_config_store_data_prefix(' ', type, storeto, dataptr, *len);
+}
+
+/*
+ * read_config_store_data_prefix():
+ * stores data of a given type to a configuration line.
+ * 
+ * Returns: character pointer to the end of the line.
+ * NULL if an unknown type.
+ */
+char           *
+read_config_store_data_prefix(char prefix, int type, char *storeto,
+                              void *dataptr, size_t len)
 {
     int            *intp;
     u_char        **charpp;
@@ -1585,28 +1599,29 @@ read_config_store_data(int type, char *storeto, void *dataptr,
         switch (type) {
         case ASN_INTEGER:
             intp = (int *) dataptr;
-            sprintf(storeto, " %d", *intp);
+            sprintf(storeto, "%c%d", prefix, *intp);
             return (storeto + strlen(storeto));
 
+        case ASN_TIMETICKS:
         case ASN_UNSIGNED:
             uintp = (unsigned int *) dataptr;
-            sprintf(storeto, " %u", *uintp);
+            sprintf(storeto, "%c%u", prefix, *uintp);
             return (storeto + strlen(storeto));
 
         case ASN_OCTET_STR:
         case ASN_BIT_STR:
-            *storeto++ = ' ';
+            *storeto++ = prefix;
             charpp = (u_char **) dataptr;
-            return read_config_save_octet_string(storeto, *charpp, *len);
+            return read_config_save_octet_string(storeto, *charpp, len);
 
         case ASN_OBJECT_ID:
-            *storeto++ = ' ';
+            *storeto++ = prefix;
             oidpp = (oid **) dataptr;
-            return read_config_save_objid(storeto, *oidpp, *len);
+            return read_config_save_objid(storeto, *oidpp, len);
 
         default:
-            DEBUGMSGTL(("read_config_store_data", "Fail: Unknown type: %d",
-                        type));
+            DEBUGMSGTL(("read_config_store_data_prefix",
+                        "Fail: Unknown type: %d", type));
             return NULL;
         }
     return NULL;
