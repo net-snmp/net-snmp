@@ -36,11 +36,11 @@ ${context}_index_from_oid(netsnmp_index *oid_idx,
 @        eval $m2c_node_var_name = "var_${node}."@
 @        include m2c_setup_node.m2i@
 @        if $m2c_node_needlength == 1@
-         if(var_${node}.val_len > sizeof(mib_index->$node))
+         if(var_${node}.val_len > sizeof(mib_idx->$node))
              err = SNMP_ERR_GENERR;
          else {
-             memcpy(mib_index->${node}, var_${node}.string, var_${node}.val_len);
-             mib_index->${node}_len = var_${node}.val_len;
+             memcpy(mib_idx->${node}, var_${node}.val.string, var_${node}.val_len);
+             mib_idx->${node}_len = var_${node}.val_len;
          }
 @        else@
     mib_idx->$node = $m2c_node_var_val;
