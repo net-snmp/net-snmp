@@ -57,6 +57,7 @@ extern          "C" {
 #define NETSNMP_DS_LIB_HAVE_READ_PREMIB_CONFIG 26       /* have the pre-mib parsing config tokens been processed */
 #define NETSNMP_DS_LIB_HAVE_READ_CONFIG    27   /* have the config tokens been processed */
 #define NETSNMP_DS_LIB_QUICKE_PRINT        28   
+#define NETSNMP_DS_LIB_DONT_PRINT_UNITS    29 /* don't print UNITS suffix */
 
     /*
      * library integers 
