@@ -259,6 +259,8 @@ handle_agentx_response(int op,
 	      DEBUGMSGTL(("agentx/master",
 			  "noSuchInstance doing getNext on FQI\n"));
 
+	      asp->inclusive = 1;
+
 	      retry_sub = find_subtree_next(vbp->name,vbp->name_length,NULL);
 
 	      if (retry_sub) {
@@ -276,6 +278,7 @@ handle_agentx_response(int op,
 
 	        retry_sub = find_subtree_next(vbp->name,vbp->name_length,NULL);
 
+		asp->inclusive = 1;
 	        if (retry_sub) {
 		    (void)snmp_set_var_objid(ax_vlist->variables[i], 
 				       retry_sub->start, retry_sub->start_len);
@@ -651,8 +654,13 @@ agentx_add_request(struct agent_snmp_session *asp,
 			      vbp->name, vbp->name_length, vbp->type,
 			      (u_char*)(vbp->val.string), vbp->val_len);
     } else {
-	DEBUGMSG(("agentx/master", "%s searchRange from ",
+	if (asp->inclusive) {
+	    DEBUGMSG(("agentx/master","OVERRIDE-INCLUSIVE searchRange from "));
+	    rangeType = ASN_PRIV_INCL_RANGE;
+	} else {
+	    DEBUGMSG(("agentx/master", "%s searchRange from ",
 		  (rangeType == ASN_PRIV_INCL_RANGE)?"INCLUSIVE":"EXCLUSIVE"));
+	}
 	DEBUGMSGOID(("agentx/master", vbp->name, vbp->name_length));
 	DEBUGMSG(("agentx/master", " to "));
 	DEBUGMSGOID(("agentx/master", sub->end, sub->end_len));
