@@ -42,7 +42,7 @@ struct variable2 file_table[] =
     {FILE_MSG,    ASN_OCTET_STR, RONLY, var_file_table, 1, {101}}
 };
 
-config_load_mib(EXTENSIBLEMIB.14.1, EXTENSIBLENUM+2, file_table);
+config_load_mib(EXTENSIBLEMIB.15.1, EXTENSIBLENUM+2, file_table);
 
 #endif
 #endif /* _MIBGROUP_FILE_H */
