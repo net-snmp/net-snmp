@@ -87,7 +87,7 @@ struct variable2 ipfwacc_variables[] = {
 
 /* now load this mib into the agents mib table */
 
-config_load_mib(1.3.6.1.4.1.2021.13.1, 9 , ipfwacc_variables)
+config_load_mib(1.3.6.1.4.1.2021.13.1.1, 9 , ipfwacc_variables)
 
 #endif /* IN_SNMP_VARS_C */
 #endif /* _MIBGROUP_IPFWACC_H */
