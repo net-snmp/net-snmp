@@ -10565,9 +10565,9 @@ rm -f conftest*
 fi
 
 echo "$ac_t""$ac_cv_type_socklen_t" 1>&6
-if test $ac_cv_type_socklen_t = no; then
+if test $ac_cv_type_socklen_t = yes; then
   cat >> confdefs.h <<\EOF
-#define socklen_t u_int
+#define HAVE_SOCKLEN_T 1
 EOF
 
 fi
@@ -10602,9 +10602,9 @@ rm -f conftest*
 fi
 
 echo "$ac_t""$ac_cv_type_in_addr_t" 1>&6
-if test $ac_cv_type_in_addr_t = no; then
+if test $ac_cv_type_in_addr_t = yes; then
   cat >> confdefs.h <<\EOF
-#define in_addr_t u_int
+#define HAVE_IN_ADDR_T 1
 EOF
 
 fi
