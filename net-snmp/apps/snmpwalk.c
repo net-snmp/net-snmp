@@ -206,8 +206,10 @@ main(argc, argv)
         }
       } else if (status == STAT_TIMEOUT){
         fprintf(stderr, "No Response from %s\n", session.peername);
+        running = 0;
       } else {    /* status == STAT_ERROR */
         snmp_perror("snmpwalk: An error occurred");
+        running = 0;
       }
       if (response)
         snmp_free_pdu(response);
