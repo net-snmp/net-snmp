@@ -1,7 +1,21 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /*
- * snmp_agent.h
+ * Portions of this file are copyrighted by:
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
+/*
+ * @file snmp_agent.h
  *
+ * @addtogroup agent
+ * @addtogroup table
  * External definitions for functions and variables in snmp_agent.c.
+ *
+ * @{
  */
 
 #ifndef SNMP_AGENT_H
@@ -31,16 +45,22 @@ extern          "C" {
 
     extern int      lastAddrAge;
 
+    /** @typedef struct netsnmp_request_info_s netsnmp_request_info
+     * Typedefs the netsnmp_request_info_s struct into
+     * netsnmp_request_info*/
+    /** @struct netsnmp_request_info_s
+     * The netsnmp request info structure.
+     */
     typedef struct netsnmp_request_info_s {
-       /*
-        * varbind (OID/value) for this request
-        */
+	/**
+	 * variable bindings
+ 	 */
         netsnmp_variable_list *requestvb;
 
-        /*
-         * can be used to pass information on a per-request basis from a
-         * helper to the later handlers 
-         */
+ 	/**
+ 	 * can be used to pass information on a per-request basis from a
+ 	 * helper to the later handlers 
+ 	 */
         netsnmp_data_list *parent_data;
 
        /*
@@ -48,7 +68,8 @@ extern          "C" {
         */
        struct netsnmp_agent_request_info_s *agent_req_info;
 
-        oid            *range_end;      /* don't free, reference to (struct tree)->end */
+ 	/** don't free, reference to (struct tree)->end */
+        oid            *range_end;
         size_t          range_end_len;
 
        /*
@@ -59,7 +80,8 @@ extern          "C" {
         int             inclusive;
 
         int             status;
-        int             index; /* index in original pdu */
+ 	/** index in original pdu */
+        int             index;
  
        /** get-bulk */
         int             repeat;
@@ -125,11 +147,20 @@ extern          "C" {
 #define MODE_BSTEP_UNDO_CLEANUP        SNMP_MSG_INTERNAL_UNDO_CLEANUP
 
 
+/** @typedef struct netsnmp_agent_request_info_s netsnmp_agent_request_info
+ * Typedefs the netsnmp_agent_request_info_s struct into
+ * netsnmp_agent_request_info
+ */
+
+/** @struct netsnmp_agent_request_info_s
+ * The agent transaction request structure
+ */
     typedef struct netsnmp_agent_request_info_s {
         int             mode;
         int             next_mode_ok;  /* only valid for baby step modes */
         int             next_mode_fail; /* not used yet (for 5.2) */
-/*        netsnmp_pdu    *pdu;    */ /* pdu contains authinfo, eg */
+ 	/** pdu contains authinfo, eg */
+/*        netsnmp_pdu    *pdu;    */
         struct netsnmp_agent_session_s *asp;    /* may not be needed */
         /*
          * can be used to pass information on a per-pdu basis from a
@@ -269,3 +300,4 @@ extern          "C" {
 }
 #endif
 #endif
+/** @} */
