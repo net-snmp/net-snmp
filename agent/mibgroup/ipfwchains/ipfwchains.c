@@ -103,9 +103,6 @@ static char *service_to_string(__u16, __u16);
 	 *********************/
 
 
-#define MATCH_FAILED	1
-#define MATCH_SUCCEEDED	0
-
 	/*********************
 	 *
 	 *  System specific implementation functions
