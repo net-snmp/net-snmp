@@ -465,7 +465,7 @@ var_hrswrun(struct variable * vp,
             int exact, size_t * var_len, WriteMethod ** write_method)
 {
     int             pid = 0;
-    static char     string[256];
+    static char     string[1024];
 #ifdef HAVE_SYS_PSTAT_H
     struct pst_status proc_buf;
 #elif defined(solaris2)
@@ -488,7 +488,7 @@ var_hrswrun(struct variable * vp,
 #endif
 #ifdef linux
     FILE           *fp;
-    char            buf[256];
+    char            buf[1024];
     int             i;
 #endif
     char           *cp;

@@ -630,7 +630,7 @@ Init_HR_Disk(void)
 int
 Get_Next_HR_Disk(void)
 {
-    char            string[100];
+    char            string[1024];
     int             fd, result;
     int             iindex;
     int             max_disks;
