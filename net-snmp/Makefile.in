@@ -68,8 +68,14 @@ EXAMPLE.conf: sedscript EXAMPLE.conf.def
 
 docs: docsdir mancp
 
-docsdir: doxygen.conf
+docsdir: docsdox docsmunge
+
+docsdox: doxygen.conf
 	srcdir=$(srcdir) doxygen $(srcdir)/doxygen.conf
+
+docsmunge:
+	find docs/html -name \*.html -exec perl -p -i -e 's/Generated on/<!--#include virtual=\"\/sfbutton.html\" --><br>Generated on\n/; s/<body/<body bgcolor=white/' {} \;
+
 
 mancp:
 	@for i in docs/man/man3/* ; do \
