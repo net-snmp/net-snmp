@@ -341,9 +341,9 @@ access	public	""	any	noauth	exact	all	none	none
 .IP "engineID STRING"
 The snmpd agent needs to be configured with an engineID to be able to
 respond to SNMPv3 messages.  With this configuration file line, the
-engineID will be configured from STRING.  The default value of the
-engineID is configured with the first IP address found for the
-hostname of the machine.
+engineID will be configured from STRING.  If this directive is omitted,
+the default value of the engineID is built from 2 fairly random elements:
+a random number and the current time in seconds.
 .IP "createUser [-e ENGINEID] username (MD5|SHA) authpassphrase [DES] [privpassphrase]"
 .IP
 MD5 and SHA are the authentication types to use.  The
