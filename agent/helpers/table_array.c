@@ -699,7 +699,7 @@ process_set_group(netsnmp_index *o, void *c)
             if (ag->row_deleted == 1) {
                 DEBUGMSGT((TABLE_ARRAY_NAME, "action: deleting row\n"));
                 if (CONTAINER_REMOVE(ag->table, ag->existing_row) != 0) {
-                    rc = SNMP_ERR_GENERR;
+                    rc = SNMP_ERR_COMMITFAILED;
                     break;
                 }
             }
@@ -709,7 +709,7 @@ process_set_group(netsnmp_index *o, void *c)
              */
             DEBUGMSGT((TABLE_ARRAY_NAME, "action: inserting row\n"));
             if (CONTAINER_INSERT(ag->table, ag->existing_row) != 0) {
-                rc = SNMP_ERR_GENERR;
+                rc = SNMP_ERR_COMMITFAILED;
                 break;
             }
         }
@@ -763,7 +763,7 @@ process_set_group(netsnmp_index *o, void *c)
                  */
                 DEBUGMSGT((TABLE_ARRAY_NAME, "undo: re-inserting row\n"));
                 if (CONTAINER_INSERT(ag->table, ag->existing_row) != 0) {
-                    rc = SNMP_ERR_GENERR;
+                    rc = SNMP_ERR_UNDOFAILED;
                     break;
                 }
             }
@@ -773,7 +773,7 @@ process_set_group(netsnmp_index *o, void *c)
              */
             DEBUGMSGT((TABLE_ARRAY_NAME, "undo: removing new row\n"));
             if (CONTAINER_REMOVE(ag->table, ag->existing_row) != 0) {
-                rc = SNMP_ERR_GENERR;
+                rc = SNMP_ERR_UNDOFAILED;
                 break;
             }
         }
@@ -809,7 +809,8 @@ process_set_group(netsnmp_index *o, void *c)
     }
     
     if (rc)
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN, ag->list->ri, rc);
+        netsnmp_set_request_error(context->agtreq_info,
+                                  ag->list->ri, rc);
                                                
 }
 
@@ -892,14 +893,6 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
                     mode_name[agtreq_info->mode]));
     }
 
-    /*
-     * 3.1.1
-     *
-     * This handler will be called 1 time for any type of GET
-     * request, but will be called multiple times for SET
-     * requests. We don't need to find each row for every
-     * pass of the SET processing, so we'll cache results.
-     */
     if (MODE_IS_SET(agtreq_info->mode)) {
         /*
          * netsnmp_mutex_lock(&tad->lock);
@@ -912,13 +905,21 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
     } else
         rc = process_get_requests(reginfo, agtreq_info, requests, tad);
 
+    if (rc != SNMP_ERR_NOERROR) {
+        DEBUGMSGTL(("table_array", "processing returned rc %d\n", rc));
+    }
+    
     /*
-     * Now we should have row pointers for each request. Call the
-     * next handler to process the row.
-     *
-     * rc = netsnmp_call_next_handler(handler, reginfo, agtreq_info, requests);
+     * Now we've done out processing. If there is another handler below us,
+     * call them.
      */
-
+    if (handler->next) {
+        rc = netsnmp_call_next_handler(handler, reginfo, agtreq_info, requests);
+        if (rc != SNMP_ERR_NOERROR) {
+            DEBUGMSGTL(("table_array", "next handler returned rc %d\n", rc));
+        }
+    }
+    
     return rc;
 }
 #endif /** DOXYGEN_SHOULD_SKIP_THIS */
