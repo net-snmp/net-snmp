@@ -184,8 +184,8 @@ static void send_v1_trap (struct snmp_session *ss,
 
     if (snmp_send (ss, pdu) == 0) {
         snmp_sess_perror ("snmpd: send_v1_trap", ss);
-        snmp_free_pdu(pdu);
     }
+    snmp_free_pdu(pdu);
 
     snmp_increment_statistic(STAT_SNMPOUTTRAPS);
 }
@@ -270,8 +270,8 @@ static void send_v2_trap (struct snmp_session *ss,
 
     if (snmp_send (ss, pdu) == 0) {
         snmp_sess_perror ("snmpd: send_v2_trap", ss);
-        snmp_free_pdu(pdu);
     }
+    snmp_free_pdu(pdu);
 
     snmp_increment_statistic(STAT_SNMPOUTTRAPS);
 
