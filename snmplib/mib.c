@@ -832,10 +832,10 @@ init_mib __P((void))
       strcat(path, env_var);
       env_var = path ;
     }
-    entry = strtok( env_var, ":" );
+    entry = strtok( env_var, ENV_SEPARATOR );
     while ( entry ) {
         add_mibdir(entry);
-        entry = strtok( NULL, ":");
+        entry = strtok( NULL, ENV_SEPARATOR);
     }
 
     init_mib_internals();
@@ -857,10 +857,10 @@ init_mib __P((void))
 	    strcat(path, env_var);
 	    env_var = path ;
 	}
-	entry = strtok( env_var, ":" );
+	entry = strtok( env_var, ENV_SEPARATOR );
 	while ( entry ) {
 	    read_module(entry);
-	    entry = strtok( NULL, ":");
+	    entry = strtok( NULL, ENV_SEPARATOR);
 	}
     }
 
@@ -884,10 +884,10 @@ init_mib __P((void))
 #endif
     
     if ( env_var != NULL ) {
-      entry = strtok( env_var, ":" );
+      entry = strtok( env_var, ENV_SEPARATOR );
       while ( entry ) {
         read_mib(entry);
-        entry = strtok( NULL, ":");
+        entry = strtok( NULL, ENV_SEPARATOR);
       }
     }
 
