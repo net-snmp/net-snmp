@@ -26,11 +26,10 @@ ipMIB MODULE-IDENTITY
          but excluding their management of IP routes."
     REVISION     "9103310000Z"
     DESCRIPTION
-        "The initial revision of this MIB module was part of MIB-
-         II."
+        "The initial revision of this MIB module was part of MIB-II."
     ::= { mib-2  48 }
 
-ip ::= { mib-2  4 }
+ip OBJECT IDENTIFIER ::= { mib-2  4 }
 
 ipForwarding OBJECT-TYPE
     SYNTAX     INTEGER {
@@ -211,7 +210,6 @@ ipReasmFails OBJECT-TYPE
          Note that this is not necessarily a count of discarded IP
          fragments since some algorithms (notably the algorithm in
          RFC 815) can lose track of the number of fragments by
-
          combining them as they are received."
     ::= { ip  16 }
 
@@ -258,7 +256,6 @@ ipAddrEntry OBJECT-TYPE
     STATUS     current
     DESCRIPTION
         "The addressing information for one of this entity's IP
-
          addresses."
     INDEX      { ipAdEntAddr }
     ::= { ipAddrTable  1 }
@@ -317,7 +314,6 @@ ipAdEntBcastAddr OBJECT-TYPE
     STATUS     current
     DESCRIPTION
         "The value of the least-significant bit in the IP broadcast
-
          address used for sending datagrams on the (logical)
          interface associated with the IP address of this entry.  For
          example, when the Internet standard all-ones broadcast
@@ -409,7 +405,6 @@ ipNetToMediaType OBJECT-TYPE
     STATUS     current
     DESCRIPTION
         "The type of mapping.
-
          Setting this object to the value invalid(2) has the effect
          of invalidating the corresponding entry in the
          ipNetToMediaTable.  That is, it effectively disassociates
@@ -434,7 +429,7 @@ ipRoutingDiscards OBJECT-TYPE
          space for other routing entries."
     ::= { ip  23 }
 
-icmp ::= { mib-2  5 }
+icmp OBJECT IDENTIFIER ::= { mib-2  5 }
 
 icmpInMsgs OBJECT-TYPE
     SYNTAX     Counter32
@@ -659,18 +654,17 @@ icmpOutAddrMaskReps OBJECT-TYPE
         "The number of ICMP Address Mask Reply messages sent."
     ::= { icmp  26 }
 
-ipMIBConformance ::= { ipMIB  2 }
+ipMIBConformance OBJECT IDENTIFIER ::= { ipMIB  2 }
 
-ipMIBCompliances ::= { ipMIBConformance  1 }
+ipMIBCompliances OBJECT IDENTIFIER ::= { ipMIBConformance  1 }
 
-ipMIBGroups ::= { ipMIBConformance  2 }
+ipMIBGroups OBJECT IDENTIFIER ::= { ipMIBConformance  2 }
 
 ipMIBCompliance MODULE-COMPLIANCE
     STATUS     current
     DESCRIPTION
         "The compliance statement for SNMPv2 entities which
          implement IP."
-
     MODULE           -- this module
     MANDATORY-GROUPS { ipGroup,  icmpGroup }
     ::= { ipMIBCompliances  1 }

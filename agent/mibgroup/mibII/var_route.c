@@ -175,6 +175,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"
+#include "snmp_logging.h"
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))

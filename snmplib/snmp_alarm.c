@@ -81,7 +81,7 @@ sa_update_entry(struct snmp_alarm *alrm) {
 
 void
 snmp_alarm_unregister(unsigned int clientreg) {
-  struct snmp_alarm *sa_ptr, *alrm;
+  struct snmp_alarm *sa_ptr, *alrm=NULL;
 
   if (thealarms == NULL)
     return;
@@ -103,7 +103,8 @@ snmp_alarm_unregister(unsigned int clientreg) {
   }
 
   /* Note:  do not free the clientarg, its the clients responsibility */
-  free(alrm);
+  if (alrm)
+    free(alrm);
 }
   
 
