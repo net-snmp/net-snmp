@@ -3,7 +3,7 @@
 #
 # A simple configuration file builder based on questions listed in
 # it's own configuration file.  It would certainly be easy to use this
-# for other programs as well.
+# for other (non-snmp) programs as well.
 #
 
 use Getopt::Std;
@@ -16,15 +16,25 @@ use Data::Dumper;
 %tokenitems=qw(line 1 info 1 comment 1);
 %arrayitems=qw(question 1 validanswer 1);
 
+#defaults
 $opts{'c'} = "/usr/local/share/snmp/snmpconf";
-getopts("dhfc:", \%opts);
+
+# read the argument string
+getopts("adhfc:pir:R:", \%opts);
 
 # display help
 if ($opts{'h'}) {
     print "$0 [-h] [-d] [-f] [-c config_directory] [FILETOCREATE...]\n";
-    print "  -c config_directory  use alternate configuration directory.\n";
-    print "  -f                   overwrite existing files without prompting\n";
-    print "  -d                   turn on debugging output\n";
+    print "  -c conf_dir  use alternate configuration directory.\n";
+    print "  -f           overwrite existing files without prompting\n";
+    print "  -d           turn on debugging output\n";
+    print "  -i           install created files into /usr/local/share/snmp.\n";
+    print "  -p           install created files into $ENV{HOME}/.snmp.\n";
+    print "  -a           Don't ask any questions, just read in current\n";
+    print "                   current .conf files and comment them\n";
+    print "  -f           Overwrite existing files without asking.\n";
+    print "  -r all|none  Read in all or none of the .conf files found.\n";
+    print "  -R file,...  Read in a particular list of .conf files.\n";
     exit;
 }
 
@@ -53,12 +63,30 @@ foreach my $i (qw(/usr/local/share/snmp /usr/local/etc/snmp .), "$ENV{HOME}/.snm
 # Ask the user if they want them to be read in and read them
 #
 if (keys(%knownfiles)) {
-    my @files = display_menu(-head => "The following configuration files were found:\n",
-			     -tail => "Would you like me to read them in?  Their content will be added to the\noutput files created by this session.\nValid answer examples: \"all\", \"none\",\"1,2,5\"\n",
-			     -multiple => 1,
-			     -question => 'Read in which',
-			     -defaultvalue => 'all',
-			     sort keys(%knownfiles));
+    my @files;
+    if (defined($opts{'r'})) {
+	if ($opts{'r'} eq "all" || $opts{'r'} eq "a") {
+	    @files = keys(%knownfiles);
+	} elsif ($opts{'r'} ne "none" && $opts{'r'} ne "n") {
+	    print "unknown argument to -r: $opts{'r'}\n";
+	    exit(1);
+	}
+    } elsif(defined($opts{'R'})) {
+	@files = split(/\s*,\s*/,$opts{'R'});
+	foreach my $i (@files) {
+	    my $x = $i;
+	    $x =~ s/.*\/([^\/]+)$/$1/;
+	    $knownfiles{$i} = $x;
+	}
+	print "reading: ", join(",",@files),"\n";
+    } else {
+	my @files = display_menu(-head => "The following configuration files were found:\n",
+				 -tail => "Would you like me to read them in?  Their content will be added to the\noutput files created by this session.\nValid answer examples: \"all\", \"none\",\"1,2,5\"\n",
+				 -multiple => 1,
+				 -question => 'Read in which',
+				 -defaultvalue => 'all',
+				 sort keys(%knownfiles));
+    }
     foreach my $i (@files) {
 	debug("reading $i\n");
 	read_config($i, $knownfiles{$i});
@@ -73,12 +101,16 @@ if ($#ARGV >= 0) {
 	if (!defined($filetypes{$i})) {
 	    warn "invalid file: $i\n";
 	} else {
-	    build_file($term, $i, $filetypes{$i});
+	    if ($opts{'a'}) {
+		$didfile{$i} = 1;
+	    } else {
+		build_file($term, $i, $filetypes{$i});
+	    }
 	}
     }
 } else {
     #
-    # select file type to operate on.
+    # ask user to select file type to operate on.
     #
     while(1) {
 	my $line = display_menu(-head => "Select file to create:\n",
@@ -91,21 +123,41 @@ if ($#ARGV >= 0) {
     }
 }
 
+#
+# Write out the results to the output files.
+#
 output_files(\%filetypes, $term);
-print "The following files were created:\n";
 
+
+#
+# Display the files that have been created for the user.
+#
+print "The following files were created:\n";
 foreach my $i (keys(%didfile)) {
     if ($didfile{$i} ne "1") {
-	print "  $didfile{$i} ",
-	($i ne $didfile{$i})?"[ from $i specifications]":" ","\n";
-	if ($opts{'d'}) {
-	    open(I,$didfile{$i});
-	    debug("    " . join("    ",<I>) . "\n");
-	    close(I);
+	if ($opts{'i'}) {
+	    system("mv /usr/local/share/snmp/$i /usr/local/share/snmp/$i.bak");
+	    system("mv $didfile{$i} /usr/local/share/snmp");
+	    print "  $didfile{$i} installed in /usr/local/share/snmp\n";
+	} elsif ($opts{'p'}) {
+	    system("mv $ENV{HOME}/.snmp/$i $ENV{HOME}/.snmp/$i.bak");
+	    system("mv $i $ENV{HOME}/.snmp");
+	    print "  $didfile{$i} installed in $ENV{HOME}/.snmp\n";
+	} else {
+	    print "  $didfile{$i} ",
+	    ($i ne $didfile{$i})?"[ from $i specifications]":" ","\n";
+	    if ($opts{'d'}) {
+		open(I,$didfile{$i});
+		debug("    " . join("    ",<I>) . "\n");
+		close(I);
+	    }
 	}
     }
 }
 
+#
+# build a particular type of file by operating on sections
+#
 sub build_file {
     my ($term, $filename, $fileconf) = @_;
     $didfile{$filename} = 1;
@@ -122,6 +174,9 @@ sub build_file {
     }
 }
 
+#
+# configure a particular section by operating on token types
+#
 sub do_section {
     my $confsect = shift;
     my @lines;
@@ -149,6 +204,9 @@ sub do_section {
     return;
 }
 
+#
+# Ask all the questions related to a particular line type
+#
 sub do_line {
     my $token = shift;
     my $confline = shift;
@@ -159,7 +217,10 @@ sub do_line {
     for($i=0; $i <= $#{$confline->{'question'}}; $i++) {
 	if (defined($confline->{'question'}[$i]) &&
 	    $confline->{'question'}[$i] ne "") {
-	    $answers[$i] = get_answer($term,$confline->{'question'}[$i] . ": ",
+	    my $q = $confline->{'question'}[$i];
+	    $q =~ s/\$(\d+)/$answers[$1]/g;
+	    debug("after: $term, $q, ",$confline->{'validanswer'}[$i],"\n");
+	    $answers[$i] = get_answer($term, $q,
 				      $confline->{'validanswer'}[$i]);
 	}
     }
@@ -191,6 +252,7 @@ sub do_line {
 
 #
 # read all sets of config files in the various subdirectories.
+#
 sub read_config_files {
     my $readdir = shift;
     my $filetypes = shift;
@@ -299,6 +361,9 @@ sub output_files {
 	}
 	$didfile{$ft} = $outputf;
 	open(O,">$outputf") || warn "couldn't write to $outputf\n";
+	print O "#" x 75,"\n";
+	print O "#\n# $ft\n";
+	print O "#\n#   - created by the snmpconf configuration program\n#\n";
 	foreach my $sect (@{$filetypes->{$ft}}) {
 	    my $secthelp = 0;
 	    foreach my $token (keys(%{$sect->{'thetokens'}})) {
