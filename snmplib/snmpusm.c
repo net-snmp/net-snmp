@@ -2814,6 +2814,9 @@ int
 usm_check_secLevel(int level, struct usmUser *user)
 {
 
+    if (user->userStatus != RS_ACTIVE)
+        return -1;
+
     DEBUGMSGTL(("comparex", "Comparing: %d %d ", usmNoPrivProtocol[0],
                 usmNoPrivProtocol[1]));
     DEBUGMSGOID(("comparex", usmNoPrivProtocol,
