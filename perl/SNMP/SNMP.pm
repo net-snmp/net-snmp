@@ -77,6 +77,7 @@ tie $SNMP::debug_internals, SNMP::DEBUG_INTERNALS;
 tie $SNMP::dump_packet, SNMP::DUMP_PACKET;
 tie %SNMP::MIB, SNMP::MIB;
 tie $SNMP::save_descriptions, SNMP::MIB::SAVE_DESCR;
+tie $SNMP::replace_newer, SNMP::MIB::REPLACE_NEWER;
 
 %SNMP::V3_SEC_LEVEL_MAP = (noAuthNoPriv => 1, authNoPriv => 2, authPriv =>3);
 
@@ -111,6 +112,9 @@ $save_descriptions = 0; #tied scalar to control saving descriptions during
                # mib parsing - must be set prior to mib loading
 $best_guess = 0;  # determine whether or not to enable best-guess regular
                   # expression object name translation
+$replace_newer = 0; # determine whether or not to tell the parser to replace
+                    # older MIB modules with newer ones when loading MIBs.
+                    # WARNING: This can cause an incorrect hierarchy.
 
 sub setMib {
 # loads mib from file name provided
@@ -1037,6 +1041,22 @@ sub FETCH { ${$_[0]}; }
 sub STORE { SNMP::_set_save_descriptions($_[1]); ${$_[0]} = $_[1]; }
 
 sub DELETE { SNMP::_set_save_descriptions(0); ${$_[0]} = 0; }
+
+package SNMP::MIB::REPLACE_NEWER;               # Controls MIB parsing
+
+sub TIESCALAR { my $class = shift; my $val; bless \$val, $class; }
+
+sub FETCH { ${$_[0]}; }
+
+sub STORE {
+    SNMP::_set_replace_newer($_[1]);
+    ${$_[0]} = $_[1];
+}
+
+sub DELETE {
+    SNMP::_set_replace_newer(0);
+    ${$_[0]} = 0;
+}
 
 package SNMP;
 END{SNMP::_sock_cleanup() if defined &SNMP::_sock_cleanup;}
