@@ -1578,7 +1578,7 @@ smux_trap_process(u_char *rsp, size_t *len)
 	}
 
 	/* parse the variable bindings */
-	do {
+	while (ptr && *len) {
 
 		/* get the objid and the asn1 coded value */
 		var_name_len = MAX_OID_LEN;
@@ -1682,7 +1682,7 @@ smux_trap_process(u_char *rsp, size_t *len)
 		snmptrap_ptr->type = vartype;
 		snmptrap_ptr->next_variable = NULL;
 
-	} while ((ptr!=NULL)&&(*len));
+	}
 
 	/* send the traps */
 	send_enterprise_trap_vars(trap, specific, (oid *)&sa_enterpriseoid, sa_enterpriseoid_len, snmptrap_head);
