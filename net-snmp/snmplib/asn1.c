@@ -744,13 +744,13 @@ asn_parse_length(u_char  *data,
 	    ERROR_MSG(ebuf);
 	    return NULL;
 	}
+	data++;
 	*length = 0;  /* protect against short lengths */
-
-	memmove(length, data + 1, lengthbyte);
-	*length = ntohl(*length);
-	*length >>= (8 * ((sizeof(u_long)) - lengthbyte));
-
-	return data + lengthbyte + 1;
+	while(lengthbyte--) {
+		*length <<= 8;
+		*length |= *data++;
+	}
+	return data;
     } else { /* short asnlength */
 	*length = (long)lengthbyte;
 	return data + 1;

@@ -79,7 +79,7 @@ struct snmp_pdu {
 	/*
 	 * Protocol-version independent fields
 	 */
-    int	    version;
+    long    version;
     int	    command;	/* Type of this PDU */
     long    reqid;	/* Request id - note: not incremented on retries */
     long    msgid;      /* Message id for V3 messages 
