@@ -16,9 +16,12 @@
  If you don't have an official one (like me), just make one up that
  doesn't overlap with other mibs you are using on the system */
 
-#define EXTENSIBLEMIB 1,3,6,1,4,10 /* location of the extensible mib tree */
-#define EXTENSIBLEDOTMIB 1.3.6.1.4.10 /* location of the extensible mib tree */
-#define EXTENSIBLENUM 6            /* count the above numbers */
+/* location of the extensible mib tree */
+#define EXTENSIBLEMIB 1,3,6,1,4,10
+/* location of the extensible mib tree */
+#define EXTENSIBLEDOTMIB 1.3.6.1.4.10
+/* count the above numbers */
+#define EXTENSIBLENUM 6
 
 /* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
    place.  (stdin is closed so that sh scripts won't wait for it) */
@@ -84,42 +87,51 @@ sure to end it in -1.*/
 /* comment out the second define to turn off functionality for any of
    these: (See README for details) */
 
-#define PROCMIBNUM 1              /*   proc PROCESSNAME [MAX] [MIN] */
+/*   proc PROCESSNAME [MAX] [MIN] */
+#define PROCMIBNUM 1
 #define USEPROCMIB
 
-#define SHELLMIBNUM 3             /*   exec/shell NAME COMMAND      */
+/*   exec/shell NAME COMMAND      */
+#define SHELLMIBNUM 3
 #define USESHELLMIB
 
-#define MEMMIBNUM 4               /*   swap MIN                     */
+/*   swap MIN                     */
+#define MEMMIBNUM 4
 #ifdef hpux9
 #define USEMEMMIB
 #endif
 
-#define DISKMIBNUM 6              /*   disk DISK MINSIZE            */
+/*   disk DISK MINSIZE            */
+#define DISKMIBNUM 6
 #define USEDISKMIB
 
-#define LOADAVEMIBNUM 7           /*   load 1 5 15                  */
+/*   load 1 5 15                  */
+#define LOADAVEMIBNUM 7
 #define USELOADAVEMIB
 
-#define VERSIONMIBNUM 100  /* which version are you using? */
-#define USEVERSIONMIB      /* This mibloc will tell you */
+/* which version are you using? This mibloc will tell you */
+#define VERSIONMIBNUM 100
+#define USEVERSIONMIB    
 
-#define ERRORMIBNUM 101     /* Reports errors the agent runs into */
-#define USEERRORMIB         /* (typically its "can't fork, no mem" problems) */
+/* Reports errors the agent runs into */
+/* (typically its "can't fork, no mem" problems) */
+#define ERRORMIBNUM 101
+#define USEERRORMIB    
 
-#define AGENTID 250  /* The sub id of EXENSIBLEMIB returned to queries of
-                        .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 */
+/* The sub id of EXENSIBLEMIB returned to queries of
+   .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID.0 */
+#define AGENTID 250
 
 /* This ID is returned after the AGENTID above.  IE, the resulting
    value returned by a query to sysObjectID is
    EXTENSIBLEMIB.AGENTID.???, where ??? is defined below by OSTYPE */
 
-#define HPUX9ID   1
-#define SUNOS4ID  2 
+#define HPUX9ID 1
+#define SUNOS4ID 2 
 #define SOLARISID 3
-#define OSF3ID    4
-#define ULTRIXID  5
-#define HPUX10ID  6
+#define OSF3ID 4
+#define ULTRIXID 5
+#define HPUX10ID 6
 #define NETBSD1ID 7
 #define UNKNOWNID 255
 
@@ -174,9 +186,9 @@ sure to end it in -1.*/
 
 /* misc defaults */
 
-#define DEFDISKMINIMUMSPACE 100000       /* default of 100 meg minimum
-                                            if the minimum size is not
-                                            specified in the config file */
+/* default of 100 meg minimum if the minimum size is not specified in
+   the config file */
+#define DEFDISKMINIMUMSPACE 100000
 
 #define DEFMAXLOADAVE 12.0      /* default maximum load average before error */
 
@@ -194,7 +206,8 @@ sure to end it in -1.*/
                              necessary to finish the snmpset reply
                              before restarting. */
 
-#define NUM_COMMUNITIES	5  /* Number of community strings to store */
+/* Number of community strings to store */
+#define NUM_COMMUNITIES	5
 
 /* #define EXIT_ON_BAD_KLREAD  */
 /* define to exit the agent on a bad kernel read */
