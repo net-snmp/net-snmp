@@ -6,7 +6,8 @@ need, but we haven't quite merged yet.
 *** This is currently alpha level code!!! ***
 
 Install steps:
-  0) INSTALL the DBI perl module (run: perl -MCPAN -e "install DBI")
+  0) install the DBI perl module (run: perl -MCPAN -e "install DBI")
+     and the DBD::File perl module (run: perl -MCPAN -e "install DBD::File")
 
   1) download, and install the modified AnyData perl modules from:
      http://www.net-snmp.org/AnyData-wes/AnyData-0.05.tar.gz
