@@ -31,6 +31,7 @@
 #endif
   if (should_init("loadave")) init_loadave();
   if (should_init("extensible")) init_extensible();
+  if (should_init("extend")) init_extend();
   if (should_init("errormib")) init_errormib();
   if (should_init("file")) init_file();
   if (should_init("dlmod")) init_dlmod();
@@ -51,12 +52,6 @@
   if (should_init("nsDebug")) init_nsDebug();
   if (should_init("nsCache")) init_nsCache();
   if (should_init("nsLogging")) init_nsLogging();
-
-#ifdef USING_AGENTX_MODULE
-#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
-  if (should_init("subagent")) init_subagent();
-#endif
-#endif
 
 #ifdef USING_HOST_MODULE
   if (should_init("hr_system")) init_hr_system();
@@ -98,14 +93,9 @@
 #endif
 
   if (should_init("vacm_context")) init_vacm_context();
-  if (should_init("vacm_conf")) init_vacm_conf();
 
 #ifdef USING_SMUX_MODULE
   if (should_init("smux")) init_smux();
-#endif
-
-#ifdef USING_AGENTX_MODULE
-  if (should_init("agentx_config")) init_agentx_config();
 #endif
 
 #ifdef USING_EXAMPLES_EXAMPLE_MODULE
