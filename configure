@@ -1632,7 +1632,7 @@ if test "x$with_shared" = "xyes"; then
 else
     SHLIB_EXTENSION="a"
     SHLIB_LD_CMD="ar cr"
-    SHLIB_LDCONFIG_CMD='$(RANLIB)'
+    SHLIB_LDCONFIG_CMD=":"
 fi
 
 
