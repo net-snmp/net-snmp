@@ -85,7 +85,7 @@ ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref )
 @    include generic-get-decl-bot.m2i@  // copy value out
 @end@ # no syntax include
 
-    return SNMP_ERR_NOERROR;
+    return MFD_SUCCESS;
 }
 
 ##
