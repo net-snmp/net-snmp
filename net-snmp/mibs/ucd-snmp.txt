@@ -19,7 +19,7 @@ ucdavis          OBJECT IDENTIFIER ::= { enterprises 2021 }
 -- processes      OBJECT IDENTIFIER ::= { ucdavis 1 }
 -- exec           OBJECT IDENTIFIER ::= { ucdavis 3 }
 -- memory         OBJECT IDENTIFIER ::= { ucdavis 4 }
--- lockd          OBJECT IDENTIFIER ::= { ucdavis LOCKDMIBNUM }
+-- lockd          OBJECT IDENTIFIER ::= { ucdavis 5 }
 -- disk           OBJECT IDENTIFIER ::= { ucdavis 6 }
 -- load           OBJECT IDENTIFIER ::= { ucdavis 7 }
 -- version        OBJECT IDENTIFIER ::= { ucdavis 100 }
@@ -169,7 +169,7 @@ extensibleCommand OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The command line to be executed."
-	::= { extensible SHELLCOMMAND }
+	::= { extensible 3 }
 
 extensibleResult OBJECT-TYPE
 	SYNTAX INTEGER
@@ -240,7 +240,7 @@ memTotalSwap OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total Swap Size."
-	::= { memory MEMTOTALSWAP }
+	::= { memory 3 }
 
 memAvailSwap OBJECT-TYPE
 	SYNTAX INTEGER
@@ -248,7 +248,7 @@ memAvailSwap OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Available Swap Space."
-	::= { memory MEMUSEDSWAP }
+	::= { memory 4 }
 
 memTotalReal OBJECT-TYPE
 	SYNTAX INTEGER
@@ -256,7 +256,7 @@ memTotalReal OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total Real/Physical Memory Size."
-	::= { memory MEMTOTALREAL }
+	::= { memory 5 }
 
 memAvailReal OBJECT-TYPE
 	SYNTAX INTEGER
@@ -264,7 +264,7 @@ memAvailReal OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Available Real/Physical Memory Space."
-	::= { memory MEMUSEDREAL }
+	::= { memory 6 }
 
 memTotalSwapTXT OBJECT-TYPE
 	SYNTAX INTEGER
@@ -272,7 +272,7 @@ memTotalSwapTXT OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total VM used by text."
-	::= { memory MEMTOTALSWAPTXT }
+	::= { memory 7 }
 
 memAvailSwapTXT OBJECT-TYPE
 	SYNTAX INTEGER
@@ -280,7 +280,7 @@ memAvailSwapTXT OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Active VM used by text."
-	::= { memory MEMUSEDSWAPTXT }
+	::= { memory 8 }
 
 memTotalRealTXT OBJECT-TYPE
 	SYNTAX INTEGER
@@ -288,7 +288,7 @@ memTotalRealTXT OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total Real/Physical Memory Size used by txt."
-	::= { memory MEMTOTALREALTXT }
+	::= { memory 9 }
 
 memAvailRealTXT OBJECT-TYPE
 	SYNTAX INTEGER
@@ -296,7 +296,7 @@ memAvailRealTXT OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Active Real/Physical Memory Space used by txt."
-	::= { memory MEMUSEDREALTXT }
+	::= { memory 10 }
 
 memTotalFree OBJECT-TYPE
 	SYNTAX INTEGER
@@ -304,7 +304,7 @@ memTotalFree OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total Available Memory"
-	::= { memory MEMTOTALFREE }
+	::= { memory 11 }
 
 memMinimumSwap OBJECT-TYPE
 	SYNTAX INTEGER
@@ -313,7 +313,7 @@ memMinimumSwap OBJECT-TYPE
 	DESCRIPTION
 		"Minimum amount of free swap.  Otherwise memErrorSwap
 		is set to 1 "
-	::= { memory MEMSWAPMINIMUM }
+	::= { memory 12 }
 
 memSwapError OBJECT-TYPE
 	SYNTAX INTEGER
@@ -338,7 +338,7 @@ lockd OBJECT-TYPE
 	DESCRIPTION
 		"Tests the functionality of the rpc.lockd/rpc.statd pair."
 	INDEX { lockdIndex }
-	::= { ucdavis LOCKDMIBNUM }
+	::= { ucdavis 5 }
 
 Lockd ::= SEQUENCE {
    lockdIndex   INTEGER,
