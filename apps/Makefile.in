@@ -15,7 +15,7 @@ snmplibdir = $(prefix)/lib/snmp
 
 INSTALL = @INSTALL@
 
-TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd snmpset snmpgetnext
+TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd snmpset snmpgetnext snmptrap
 USELIBS=  ../snmplib/libsnmp.a
 LIBS=	@LIBS@ $(USELIBS)
 
@@ -44,6 +44,9 @@ snmptest:    snmptest.o $(USELIBS)
 
 snmptrapd:    snmptrapd.o $(USELIBS)
 	${CC} -o $@ snmptrapd.o ${LDFLAGS} ${LIBS} 
+
+snmptrap:    snmptrap.o $(USELIBS)
+	${CC} -o $@ snmptrap.o ${LDFLAGS} ${LIBS} 
 
 snmpset:    snmpset.o $(USELIBS)
 	${CC} -o $@ snmpset.o ${LDFLAGS} ${LIBS} 
@@ -96,6 +99,10 @@ snmptranslate.o: ../config.h ../agent/extensible/struct.h
 snmptranslate.o:   ../snmplib/snmp.h
 snmptranslate.o: ../snmplib/asn1.h ../snmplib/snmp_impl.h
 snmptranslate.o: ../snmplib/snmp_api.h ../snmplib/snmp_client.h
+snmptrap.o: ../config.h ../agent/extensible/struct.h 
+snmptrap.o:  ../snmplib/snmp.h ../snmplib/asn1.h
+snmptrap.o: ../snmplib/snmp_impl.h ../snmplib/snmp_api.h
+snmptrap.o: ../snmplib/snmp_client.h ../snmplib/party.h
 snmptrapd.o: ../config.h ../agent/extensible/struct.h
 snmptrapd.o:  ../snmplib/snmp.h ../snmplib/asn1.h
 snmptrapd.o: ../snmplib/snmp_impl.h ../snmplib/snmp_api.h
