@@ -317,6 +317,7 @@
 #define LINUXID 10
 #define BSDIID 11
 #define OPENBSDID 12
+#define WIN32ID 13
 #define UNKNOWNID 255
 
 #ifdef hpux9

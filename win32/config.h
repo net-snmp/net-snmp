@@ -630,6 +630,7 @@ extern "C" {
 #define LINUXID 10
 #define BSDIID 11
 #define OPENBSDID 12
+#define WIN32ID 13
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -668,6 +669,7 @@ extern "C" {
 #ifdef openbsd2
 #define OSTYPE OPENBSDID
 #endif
+#define OSTYPE WIN32ID
 /* unknown */
 #ifndef OSTYPE
 #define OSTYPE UNKNOWNID
