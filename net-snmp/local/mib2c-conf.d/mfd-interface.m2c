@@ -114,8 +114,10 @@ static Netsnmp_Node_Handler _mfd_${context}_get_values;
 static Netsnmp_Node_Handler _mfd_${context}_check_objects;
 static Netsnmp_Node_Handler _mfd_${context}_undo_setup;
 static Netsnmp_Node_Handler _mfd_${context}_set_values;
+static Netsnmp_Node_Handler _mfd_${context}_undo_cleanup;
 static Netsnmp_Node_Handler _mfd_${context}_undo_values;
 static Netsnmp_Node_Handler _mfd_${context}_commit;
+static Netsnmp_Node_Handler _mfd_${context}_undo_commit;
 @      if $m2c_irreversible_commit == 1@
 static Netsnmp_Node_Handler _mfd_${context}_irreversible_commit;
 @      end@
@@ -187,6 +189,12 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
     access_multiplexer->object_lookup = _mfd_${context}_object_lookup;
     access_multiplexer->get_values = _mfd_${context}_get_values;
 
+    /*
+     * no wrappers yet
+     */
+    access_multiplexer->pre_request = _mfd_${context}_pre_request;
+    access_multiplexer->post_request = _mfd_${context}_post_request;
+
 ##
 @   if $m2c_table_settable@
 
@@ -195,15 +203,15 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
      */
     access_multiplexer->object_syntax_checks = _mfd_${context}_check_objects;
     access_multiplexer->undo_setup = _mfd_${context}_undo_setup;
+    access_multiplexer->undo_cleanup = _mfd_${context}_undo_cleanup;
     access_multiplexer->set_values = _mfd_${context}_set_values;
     access_multiplexer->undo_sets = _mfd_${context}_undo_values;
 
     /*
      * no wrappers yet
      */
-    access_multiplexer->pre_request = _mfd_${context}_pre_request;
-    access_multiplexer->post_request = _mfd_${context}_post_request;
     access_multiplexer->commit = _mfd_${context}_commit;
+    access_multiplexer->commit = _mfd_${context}_undo_commit;
 @   if $m2c_irreversible_commit == 1@
     access_multiplexer->irreversible_commit = _mfd_${context}_irreversible_commit;
 @   end@
@@ -386,12 +394,7 @@ ${context}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx)
     if(rowreq_ctx->data)
         ${context}_release_data(rowreq_ctx->data);
  
-@   if $m2c_table_settable@
-     if(rowreq_ctx->undo) 
-         ${context}_release_data(rowreq_ctx->undo);
-@   end@
 @end@ 
-
     /*
      * free index oid pointer
      */
@@ -706,8 +709,10 @@ _${context}_check_column( ${context}_rowreq_ctx *rowreq_ctx,
 @      include node-varbind-validate.m2i@
     if(SNMPERR_SUCCESS == rc) {
         rc = ${node}_check_value( rowreq_ctx, $m2c_node_var_val );
-        if(rc)
-        rc = SNMP_ERR_BADVALUE;
+        if((MFD_SUCCESS != rc) && (MFD_NOT_VALID_EVER != rc) &&
+           (MFD_NOT_VALID_NOW != rc))
+            snmp_log(LOG_ERR, "bad rc %d from ${node}_check_value\n", rc);
+            rc = SNMP_ERR_GENERR;
     }
         break;
 @   end@ # for each nonindex
@@ -853,20 +858,32 @@ ${context}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx )
     /*
      * copy data to undo
      */
-@if "$m2c_data_context" ne "generated"@
-$example_start
-@end@
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
 @        eval $m2c_ctx_lh = "${m2c_undo_item}${node}"@
 @        eval $m2c_ctx_lhs = "${m2c_undo_item}${node}_len"@
 @        include generic-ctx-copy.m2i@
 @    end@ # foreach nonindex
-@if "$m2c_data_context" ne "generated"@
-$example_end
-@end@
 
     return rc;
+}
+
+/**
+ * @internal
+ * Cleanup up undo context information.
+ */
+NETSNMP_STATIC_INLINE int
+${context}_undo_cleanup( ${context}_rowreq_ctx *rowreq_ctx )
+{
+    /*
+     * nothing to do for generated undo context
+     */
+    DEBUGMSGTL(("internal:${context}_undo_cleanup","called\n"));
+
+    /** we should have a non-NULL pointer */
+    netsnmp_assert( NULL != rowreq_ctx );
+
+    return SNMP_ERR_NOERROR;
 }
 
 @end@
@@ -884,6 +901,7 @@ _mfd_${context}_undo_setup(netsnmp_mib_handler *handler,
     ${context}_rowreq_ctx *rowreq_ctx =
                   netsnmp_container_table_extract_context(requests);
     netsnmp_assert(NULL != rowreq_ctx);
+
 @if $m2c_data_allocate == 1@
     /*
      * allocate context, if needed
@@ -896,6 +914,38 @@ _mfd_${context}_undo_setup(netsnmp_mib_handler *handler,
 
 @end@
     return ${context}_undo_setup(rowreq_ctx);
+}
+
+/**
+ * @internal
+ * undo setup
+ */
+int
+_mfd_${context}_undo_cleanup(netsnmp_mib_handler *handler,
+                             netsnmp_handler_registration *reginfo,
+                             netsnmp_agent_request_info *agtreq_info,
+                             netsnmp_request_info *requests)
+{
+    ${context}_rowreq_ctx *rowreq_ctx =
+                  netsnmp_container_table_extract_context(requests);
+    int rc;
+    
+    netsnmp_assert(NULL != rowreq_ctx);
+
+    /*
+     * call user cleanup
+     */
+    rc = ${context}_undo_cleanup(rowreq_ctx);
+
+@if $m2c_data_allocate == 1@
+    /*
+     * release undo context, if needed
+     */
+     if(rowreq_ctx->undo) 
+         ${context}_release_data(rowreq_ctx->undo);
+
+@end@
+    return rc;
 }
 
 /*----------------------------------------------------------------------
@@ -998,6 +1048,18 @@ _mfd_${context}_commit(netsnmp_mib_handler *handler,
                   netsnmp_container_table_extract_context(requests);
     netsnmp_assert(NULL != rowreq_ctx);
     return ${context}_commit(rowreq_ctx);
+}
+
+int
+_mfd_${context}_undo_commit(netsnmp_mib_handler *handler,
+                         netsnmp_handler_registration *reginfo,
+                         netsnmp_agent_request_info *agtreq_info,
+                         netsnmp_request_info *requests)
+{
+    ${context}_rowreq_ctx *rowreq_ctx =
+                  netsnmp_container_table_extract_context(requests);
+    netsnmp_assert(NULL != rowreq_ctx);
+    return ${context}_undo_commit(rowreq_ctx);
 }
 
 /*----------------------------------------------------------------------
