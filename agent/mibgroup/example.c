@@ -156,11 +156,11 @@ var_example(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method)();
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
   /* define any variables we might return as static! */
   static long long_ret;
-  static char *string[300];
+  static char string[300];
   static oid oid_ret[8];
   
   if (header_example(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )

@@ -65,9 +65,16 @@ Optional features to pass to configure for ucd-snmp:
   --with-mib-modules="list"       Compile with additional mib modules.
   --with-out-mib-modules="list"   Compile without these mib modules.
 
+Default mib modules compiled into the agent (which can be removed):
+
+  mibII                           support for the mib-II tree.
+  ucd_snmp                        ucd-snmp specific extensions.
+  v2party                         support for the snmpv2 party mib.
+
 Optional mib modules to include:
 
-  snmp_ospf snmp_rip2 snmp_bgp:   smux modules to talk with gated.
+  host:                           host resources mib support.
+  smux_gated:                     smux modules to talk with gated.
 
 Optional modules for C coders to look at and/or include as extension examples:
 
