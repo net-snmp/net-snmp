@@ -150,10 +150,12 @@ void init_hr_disk(void)
 #endif
 #elif defined(solaris2)
     Add_HR_Disk_entry ( "/dev/rdsk/c0t%cd0s%c", '0', '6', '0', '0', '7' );
-#elif defined(freebsd2)
-    Add_HR_Disk_entry ("/dev/wd%c%c", '0', '3', '\0', 'a', 'h');
+#elif defined(freebsd3)
     Add_HR_Disk_entry ("/dev/wd0s%c%c", '1', '4', '\0', 'a', 'h');
-#elif defined(netbsd1)
+    Add_HR_Disk_entry ("/dev/wd1s%c%c", '1', '4', '\0', 'a', 'h');
+    Add_HR_Disk_entry ("/dev/sd0s%c%c", '1', '4', '\0', 'a', 'h');
+    Add_HR_Disk_entry ("/dev/sd1s%c%c", '1', '4', '\0', 'a', 'h');
+#elif defined(freebsd2) || defined(netbsd1)
     Add_HR_Disk_entry ("/dev/wd%c%c", '0', '3', '\0', 'a', 'h');
     Add_HR_Disk_entry ("/dev/sd%c%c", '0', '3', '\0', 'a', 'h');
 #endif
@@ -373,14 +375,12 @@ Get_Next_HR_Disk (void)
 			 * This has a *major* impact on run
 			 *   times (by a factor of 10!)
 			 */
-#if 0
 	    if (( HRD_history[ iindex ] != 0 ) &&
 		(( now - HRD_history[ iindex ]) < 60 ))
 	    {
 			HRD_index++;
 			continue;
 	    }
-#endif
 
 		/* Construct the device name in "string" */
 	    sprintf(string, disk_device_strings[ HRD_type_index ], 
