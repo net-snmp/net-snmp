@@ -2825,7 +2825,7 @@ void
 snmp_init_mib_internals()
 	CODE:
         {
-	/*XYX REMOVE? snmp_init_mib_internals does nothing and is not called. *?
+	/*XYX REMOVE? snmp_init_mib_internals does nothing and is not called. */
         int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
         /* should test better to see if it has been done already */
