@@ -76,7 +76,7 @@
 #include <netinet6/ip6_var.h>
 #endif
 #endif
-#ifdef HAVE_NETINET_IN_PCB_H
+#if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>
 #endif
 #include <netinet/udp.h>
