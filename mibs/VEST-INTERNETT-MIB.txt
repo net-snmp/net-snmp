@@ -1,0 +1,114 @@
+VEST-INTERNETT-MIB DEFINITIONS ::= BEGIN
+
+--
+--  VEST-INTERNETT-MIB
+--    A private enterprise mib (enterprise #)
+--
+
+
+IMPORTS
+        enterprises
+	    FROM RFC1155-SMI
+        OBJECT-TYPE
+	    FROM RFC-1212
+	DisplayString
+	    FROM RFC1213-MIB
+	TruthValue
+	    FROM SNMPv2-TC
+	TRAP-TYPE
+	    FROM RFC-1215;
+
+-- numerical definitions:
+vestinternett           OBJECT IDENTIFIER ::= { enterprises 4579 }
+
+diskIOTable		OBJECT IDENTIFIER ::= { vestinternett 1 }
+diskIOEntry		OBJECT IDENTIFIER ::= { diskIOEntry 1 }
+
+diskIOIndex		OBJECT IDENTIFIER ::= { diskIOEntry 1 }
+diskIODevice		OBJECT IDENTIFIER ::= { diskIOEntry 2 }
+diskIONRead		OBJECT IDENTIFIER ::= { diskIOEntry 3 }
+diskIONWritten		OBJECT IDENTIFIER ::= { diskIOEntry 4 }
+diskIOReads		OBJECT IDENTIFIER ::= { diskIOEntry 5 }
+diskIOWrites		OBJECT IDENTIFIER ::= { diskIOEntry 6 }
+
+
+
+diskIOIndex ::= INTEGER (0..65535)
+
+diskIOTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF diskIOEntry
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"Table of io-devices and how much data they
+		have read/written"
+	::= { vestinternett 1 }
+
+diskIOEntry OBJECT-TYPE
+    SYNTAX diskIOEntry
+    ACCESS not-accessible
+    STATUS mandatory
+    DESCRIPTION
+        "An entry containing a device and its statistics."
+    INDEX      { diskIOIndex }
+    ::= { diskIOTable  1 }
+
+
+diskIOEntry ::= SEQUENCE {
+   diskIOIndex 		 diskIOIndex,
+   diskIODevice  	 DisplayString,
+   diskIONRead    	 COUNTER,
+   diskIONWritten    	 COUNTER,
+   diskIOReads  	 COUNTER,
+   diskIOWrites	   	COUNTER
+}
+
+diskIOIndex OBJECT-TYPE
+	SYNTAX diskIOIndex
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"Reference Index for each observed device."
+	::= { diskIOEntry 1 }
+
+diskIODevice OBJECT-TYPE
+	SYNTAX DisplayString  (SIZE (0..255))
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The device name we're counting/checking on."
+	::= { diskIOEntry 2 }
+
+diskIONRead OBJECT-TYPE
+	SYNTAX COUNTER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The number of bytes read from this device since boot."
+	::= { diskIOEntry 3 }
+
+diskIONWritten OBJECT-TYPE
+	SYNTAX COUNTER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The number of bytes written to this device since boot."
+	::= { diskIOEntry 4 }
+
+diskIOReads OBJECT-TYPE
+	SYNTAX COUNTER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The number of read accesses from this device since boot."
+	::= { diskIOEntry 5 }
+
+diskIONWrites OBJECT-TYPE
+	SYNTAX COUNTER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The number of write accesses to this device since boot."
+	::= { diskIOEntry 6 }
+
+END
