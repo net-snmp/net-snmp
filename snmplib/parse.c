@@ -304,6 +304,7 @@ static struct node *parse_compliance __P((FILE *, char *));
 static struct node *parse_moduleIdentity __P((FILE *, char *));
 static        void  parse_imports __P((FILE *));
 static struct node *parse __P((FILE *, struct node *));
+struct tree *find_node __P((char *, struct tree*)); /* backwards compatability */
 
        int  which_module __P((char *));		/* used by 'mib.c' */
 struct tree *find_tree_node __P((char *, int));	/* used by mib.c */
@@ -2565,4 +2566,12 @@ tossObjectIdentifier(fp)
         return OBJID;
     else
         return 0;
+}
+
+struct tree *
+find_node(name, subtree)
+  char *name;
+  struct tree *subtree;    /* Unused */
+{
+  return( find_tree_node( name, -1 ));
 }
