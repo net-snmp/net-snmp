@@ -818,12 +818,12 @@ else
           [lt_cv_dlopen="shl_load"],
       [AC_CHECK_LIB([dld], [shl_load],
             [lt_cv_dlopen="shl_load" lt_cv_dlopen_libs="-dld"],
-	[AC_CHECK_FUNC([dlopen],
-	      [lt_cv_dlopen="dlopen"],
 	  [AC_CHECK_LIB([dl], [dlopen],
 	        [lt_cv_dlopen="dlopen" lt_cv_dlopen_libs="-ldl"],
 	    [AC_CHECK_LIB([svld], [dlopen],
 	          [lt_cv_dlopen="dlopen" lt_cv_dlopen_libs="-lsvld"],
+	[AC_CHECK_FUNC([dlopen],
+	      [lt_cv_dlopen="dlopen"],
 	      [AC_CHECK_LIB([dld], [dld_link],
 	            [lt_cv_dlopen="dld_link" lt_cv_dlopen_libs="-dld"])
 	      ])
