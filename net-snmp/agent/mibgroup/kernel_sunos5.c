@@ -732,7 +732,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
       mib2_ifEntry_t *resp, size_t *length, int (*comp)(void *, void *), void *arg)
 {
     int 		i, ret, idx = 1;
-    int 		sd;
+    int 		ifsd;
     char 		buf[10240];
     struct ifconf 	ifconf;
     struct ifreq 	*ifrp;
@@ -741,11 +741,11 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
     int   		nentries = size/sizeof(mib2_ifEntry_t);
     found_e		result = NOT_FOUND;
 
-    if ((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    if ((ifsd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	return (-1);
     ifconf.ifc_buf = buf;
     ifconf.ifc_len = sizeof(buf);
-    if (ioctl(sd, SIOCGIFCONF, &ifconf) == -1) {
+    if (ioctl(ifsd, SIOCGIFCONF, &ifconf) == -1) {
  snmp_log(LOG_ERR, "cannot SIOCGIFCONF - increase buffer size\n");
 	ret = -1;
 	goto Return;
@@ -755,7 +755,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	 ((char *)ifrp < ((char *)ifconf.ifc_buf + ifconf.ifc_len)) && (i < nentries);
 	 i++, ifp++, ifrp++, idx++) {
         DEBUGMSGTL(("kernel_sunos5", "...... getif %s\n", ifrp->ifr_name));
-	if (ioctl(sd, SIOCGIFFLAGS, ifrp) < 0) {
+	if (ioctl(ifsd, SIOCGIFFLAGS, ifrp) < 0) {
 	    ret = -1;
 	    DEBUGMSGTL(("kernel_sunos5", "...... SIOCGIFFLAGS failed\n"));
 	    goto Return;
@@ -767,7 +767,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	ifp->ifAdminStatus = (ifrp->ifr_flags & IFF_RUNNING) ? 1 : 2;
 	ifp->ifOperStatus = (ifrp->ifr_flags & IFF_UP) ? 1 : 2;
 	ifp->ifLastChange = 0;		/* Who knows ...  */
-	if (ioctl(sd, SIOCGIFMTU, ifrp) < 0) {
+	if (ioctl(ifsd, SIOCGIFMTU, ifrp) < 0) {
 	    ret = -1;
 	    DEBUGMSGTL(("kernel_sunos5", "...... SIOCGIFMTU failed\n"));
 	    goto Return;
@@ -839,7 +839,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	 * There should be a more elegant solution using DLPI, but
 	 * "the margin is too small to put it here ..."
 	 */
-	if (ioctl(sd, SIOCGIFADDR, ifrp) < 0) {
+	if (ioctl(ifsd, SIOCGIFADDR, ifrp) < 0) {
 	    ret = -1;
 	    goto Return;
 	}
@@ -873,7 +873,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	*length = i * sizeof(mib2_ifEntry_t); /* Actual cache length */
     }
  Return:
-    close(sd);
+    close(ifsd);
     return (ret);	/* DONE */
 }
 
