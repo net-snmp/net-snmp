@@ -108,7 +108,7 @@ snmp_comstr_parse(u_char *data,
 		  size_t *length,
 		  u_char *psid,
 		  size_t *slen,
-		  int *version)
+		  long *version)
 {
     u_char   	type;
     long	ver;
@@ -179,7 +179,7 @@ snmp_comstr_build(	u_char	*data,
 			size_t	*length,
 			u_char	*psid,
 			size_t	*slen,
-			int	*version,
+			long	*version,
 			size_t	messagelen)
 {
     long	 verfix	 = *version;

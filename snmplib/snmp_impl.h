@@ -148,8 +148,8 @@ extern int snmp_errno;
  */
 #define FIRST_PASS	1
 #define	LAST_PASS	2
-u_char	*snmp_comstr_parse(u_char *, size_t *, u_char *, size_t *, int *);
-u_char	*snmp_comstr_build (u_char *, size_t *, u_char *, size_t *, int *, size_t);
+u_char	*snmp_comstr_parse(u_char *, size_t *, u_char *, size_t *, long *);
+u_char	*snmp_comstr_build (u_char *, size_t *, u_char *, size_t *, long *, size_t);
 
 int has_access (u_char, int, int, int);
 #ifdef __cplusplus
