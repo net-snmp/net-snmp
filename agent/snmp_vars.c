@@ -68,9 +68,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 #include "mibincl.h"
-#include "mib.h"
 #include "m2m.h"
 #include "snmp_vars_m2m.h"
+#include "../snmplib/system.h"
 
 /* #include "common_header.h" */
 #include "mibgroup/struct.h"
@@ -338,7 +338,6 @@ unregister_mib(mibloc, mibloclen)
   int mibloclen;
 {
   char buf[1024];
-  char buf2[1024];
   int i,j;
   sprint_objid (buf, mibloc, mibloclen);
   for(i=0; i < subtree_size; i++) {
@@ -389,7 +388,6 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
     register struct variable *vp;
     struct variable	compat_var, *cvp = &compat_var;
     register int	x;
-    struct subtree	*y;
     register u_char	*access = NULL;
     int			result;
     oid 		*suffix;
@@ -670,7 +668,7 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
     int			savelen = 0;
     u_char              result_type;
     u_short             result_acl;
-    u_char              *search_return;
+    u_char              *search_return=NULL;
 
     found = FALSE;
 

@@ -31,9 +31,6 @@
 #include "../snmp_agent.h"
 #include "../snmpd.h"
 
-extern struct extensible *passthrus;    /* In pass.c */
-extern int numpassthrus;                 /* ditto */
-
 extern int subtree_size;  /* in read_config.c */
 extern int subtree_malloc_size;  /* in read_config.c */
 
@@ -123,7 +120,6 @@ int a;
 {
   int i;
   char configfile[300];
-  struct extensible **etmp, *ptmp;
   char *envconfpath;
   char *cptr1, *cptr2;
 
@@ -339,23 +335,7 @@ static struct subtree root_subtrees[] = {
 void setup_tree __P((void))
 {
   extern struct subtree *subtrees,subtrees_old[];
-  struct subtree *sb;
-  int old_treesz;
   int i;
-#if defined(USING_EXTENSIBLE_MODULE) || defined(USING_PASS_MODULE)
-  static struct subtree *mysubtree;
-  struct extensible *exten;
-#ifdef USING_EXTENSIBLE_MODULE
-  extern int numrelocs;
-  extern struct extensible *relocs;
-  extern struct variable2 extensible_relocatable_variables[];
-#endif
-#ifdef USING_PASS_MODULE
-  extern int numpassthrus;
-  extern struct extensible *passthrus;
-  extern struct variable2 extensible_passthru_variables[];
-#endif
-#endif
     
   if ( subtrees == NULL ) {
 	subtrees =             &(root_subtrees[0]);
