@@ -206,8 +206,11 @@ AC_ARG_WITH(default-snmp-version,
 
 dnl we test this now and later as well.  we test it now so configure can die
 dnl early on with an error rather than waiting till the end of the script.
-if test "x$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != ""; then
-  if test "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "1" -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "2" -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "3"; then
+if test "x$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "x"; then
+  if test "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "1"
+       -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "2"
+       -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "2c"
+       -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "3"; then
     AC_MSG_ERROR(Illegal version number passed to --with-default-snmp-version)
   fi
 fi
@@ -2317,21 +2320,28 @@ fi
 
 AC_PROMPT_USER(DEFAULT_SNMP_VERSION,[
 
-*** System Contact Information:
+*** Default SNMP Version:
 
-	Starting with version 5.0, we give you the option at compile time to
-select what default SNMP protocol version number you wish to use.  In
-the past this was set to SNMP version 1, but we strongly suggest you
-consider switching to the more secure form of the protocol: SNMPv3.
-At this prompt you can select \"1\", \"2c\", or \"3\" as the default
+	Starting with version 5.0, you can choose the default version of
+SNMP to use when no version is given explicitly on the command line, or
+via the 'snmp.conf' file.  In the past this was set to SNMP version 1,
+but you can use this to switch to SNMPv3 if desired.  This will provide a
+more secure management environment (even without using authentication or
+encryption), but may break existing scripts that rely on the old behaviour.
+(Though such scripts will probably need to be tweaked to use the '-c'
+community flag anyway).
+   At this prompt you can select \"1\", \"2c\", or \"3\" as the default
 version for the command tools (snmpget, ...) to use.  This can always
-be configured at runtime as well using the -v flag to the tools, or by
-using the \"defVersion\" token in your snmp.conf file.
+be overridden at runtime using the -v flag to the tools, or by using
+the \"defVersion\" token in your snmp.conf file.
 
 Default SNMP Version Number To Use],3,unquoted)
 
 dnl we tested this above before the prompt, but the prompt may give a new value.
-if test "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "1" -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "2" -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "3"; then
+if test "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "1"
+     -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "2"
+     -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "2c"
+     -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "3"; then
   AC_MSG_ERROR(Illegal version number.  Only 1 2 and 3 are supported)
 fi
 
