@@ -2744,12 +2744,21 @@ get_token(fp, token, maxtlen)
     case '-':
 	ch_next = getc(fp);
 	if (ch_next == '-') {
+#ifdef MIB_COMMENT_IS_EOL_TERMINATED
+            /* Treat the rest of this line as a comment. */
+            last = ' '; /* skip last char next time. */
+            while ((ch_next != EOF) && (ch_next != '\n'))
+              ch_next = getc(fp);
+#else
+            /* Treat the rest of the line or until another '--' as a comment */
+            /* (this is the "technically" correct way to parse comments) */
 	    ch = ' ';
 	    ch_next = getc(fp);
 	    while (ch_next != EOF && ch_next != '\n' &&
 		(ch != '-' || ch_next != '-')) {
 		ch = ch_next; ch_next = getc(fp);
 	    }
+#endif
 	    if (ch_next == EOF) return ENDOFFILE;
 	    if (ch_next == '\n') Line++;
 	    return get_token (fp, token, maxtlen);

@@ -29,6 +29,11 @@
 /* comment the next line if you do not want SNMPv2 party-based auth. */
 #define USE_V2PARTY_PROTOCOL 1
 
+/* should "--" comments in mibs be a comment till the end of the line
+   or also until another "--", the latter being the technically
+   correct. */
+#undef MIB_COMMENT_IS_EOL_TERMINATED
+
 @TOP@
 
 /* define the system type include file here */
