@@ -1409,12 +1409,13 @@ agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, s
 		    end_oid_buf_len *= sizeof(oid);
 			/* 'agentx_parse_oid()' returns the number of sub_ids */
 
-		    if ( inc )
-			snmp_pdu_add_variable( pdu, oid_buffer, oid_buf_len,
+		    if (inc) {
+			snmp_pdu_add_variable(pdu, oid_buffer, oid_buf_len,
 				ASN_PRIV_INCL_RANGE, (u_char *)end_oid_buf, end_oid_buf_len);
-		    else
-			snmp_pdu_add_variable( pdu, oid_buffer, oid_buf_len,
+		    } else {
+			snmp_pdu_add_variable(pdu, oid_buffer, oid_buf_len,
 				ASN_PRIV_EXCL_RANGE, (u_char *)end_oid_buf, end_oid_buf_len);
+		    }
 		}
 
                 DEBUGINDENTLESS();
