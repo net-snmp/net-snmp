@@ -580,18 +580,12 @@ struct variable2 udp_variables[] = {
     {UDPOUTDATAGRAMS, COUNTER, RONLY, var_udp, 1, {4}}
 };
 
-#ifndef hpux
-#ifndef sparc
-#ifndef __alpha
-#ifndef netbsd1
+#ifdef NEVER
 struct variable2 process_variables[] = {
     {PROCESSSLOTINDEX, INTEGER, RONLY, var_process, 1, {1}},
     {PROCESSID, INTEGER, RONLY, var_process, 1, {2}},
     {PROCESSCOMMAND, STRING, RONLY, var_process, 1, {3}}
 };
-#endif
-#endif
-#endif
 #endif
 
 /*
@@ -1964,7 +1958,8 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     oid			    lowest[14];
     oid			    current[14], *op;
     u_char		    *cp;
-    int			    interface, lowinterface=0;
+    int			    lowinterface=0;
+    short                   interface;
     static struct ifnet ifnet, lowin_ifnet;
 #ifndef sunV3
     static struct in_ifaddr in_ifaddr, lowin_ifaddr;
@@ -3040,7 +3035,7 @@ Interface_Scan_Init()
 **  
 */
 int Interface_Scan_Next(Index, Name, Retifnet)
-int *Index;
+short *Index;
 char *Name;
 struct ifnet *Retifnet;
 {
@@ -3093,7 +3088,7 @@ struct ifnet *Retifnet;
 #endif
 
 int Interface_Scan_Next(Index, Name, Retifnet, Retin_ifaddr)
-int *Index;
+short *Index;
 char *Name;
 struct ifnet *Retifnet;
 struct in_ifaddr *Retin_ifaddr;
@@ -3164,7 +3159,7 @@ int Index;
 char *Name;
 struct ifnet *Retifnet;
 {
-	int i;
+        short i;
 
 	if (saveIndex != Index) {	/* Optimization! */
 	    Interface_Scan_Init();
@@ -3189,7 +3184,7 @@ char *Name;
 struct ifnet *Retifnet;
 struct in_ifaddr *Retin_ifaddr;
 {
-	int i;
+	short i;
 
 	if (saveIndex != Index) {	/* Optimization! */
 	    Interface_Scan_Init();
@@ -3219,9 +3214,9 @@ static int Interface_Scan_Get_Count()
 	if (!Interface_Count) {
 	    Interface_Scan_Init();
 #ifdef sunV3
-	    while (Interface_Scan_Next((int *)0, (char *)0, (struct ifnet *)0) != 0) {
+	    while (Interface_Scan_Next((short *)0, (char *)0, (struct ifnet *)0) != 0) {
 #else
-	    while (Interface_Scan_Next((int *)0, (char *)0, (struct ifnet *)0, (struct in_ifaddr *)0) != 0) {
+	    while (Interface_Scan_Next((short *)0, (char *)0, (struct ifnet *)0, (struct in_ifaddr *)0) != 0) {
 #endif
 		Interface_Count++;
 	    }
@@ -3234,7 +3229,7 @@ static int Interface_Get_Ether_By_Index(Index, EtherAddr)
 int Index;
 u_char *EtherAddr;
 {
-	int i;
+	short i;
 	struct arpcom arpcom;
 
 	if (saveIndex != Index) {	/* Optimization! */
@@ -3242,9 +3237,9 @@ u_char *EtherAddr;
 	    Interface_Scan_Init();
 
 #ifdef sunV3
-	    while (Interface_Scan_Next((int *)&i, (char *)0, (struct ifnet *)0) != 0) {
+	    while (Interface_Scan_Next((short *)&i, (char *)0, (struct ifnet *)0) != 0) {
 #else
-	    while (Interface_Scan_Next((int *)&i, (char *)0, (struct ifnet *)0, (struct in_ifaddr *)0) != 0) {
+	    while (Interface_Scan_Next((short *)&i, (char *)0, (struct ifnet *)0, (struct in_ifaddr *)0) != 0) {
 #endif
 		if (i == Index) break;
 	    }
@@ -3327,8 +3322,7 @@ int Len;
 
 #endif /* solaris2 */
 
-#if defined(mips) || defined(ibm032) || defined(sunV3)
-
+#ifdef NEVER
 
 /*
 **  Lets read the process table in blocks so as to 
