@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
 
         while(vlp) {
             size_t units;
-            unsigned long long hssize, hsused;
+            unsigned long hssize, hsused;
             char descr[SPRINT_MAX_LEN];
         
             pdu = snmp_pdu_create(SNMP_MSG_GET);
@@ -272,9 +272,11 @@ int main(int argc, char *argv[])
             vlp2 = vlp2->next_variable;
             hsused = vlp2->val.integer ? *(vlp2->val.integer) : 0;
 
-            printf("%-18s %15ld %15ld %15ld %4ld%%\n", descr,
-                   ((units)?(hssize*units/1024):hssize), hsused,
-                   hssize-hsused, (hssize)?(100*hsused/hssize):hsused);
+            printf("%-18s %15lu %15lu %15lu %4lu%%\n", descr,
+                   units ? hssize*(units/1024) : hssize,
+		   units ? hsused*(units/1024) : hsused,
+                   units ? (hssize-hsused)*(units/1024) : hssize-hsused,
+		   hssize ? 100*hsused/hssize : hsused);
 
             vlp = vlp->next_variable;
             snmp_free_pdu(response);
@@ -294,7 +296,7 @@ int main(int argc, char *argv[])
         vlp = collect(ss, pdu, base, base_length);
 
         while(vlp) {
-            unsigned int hssize, hsused;
+            unsigned long hssize, hsused;
             char descr[SPRINT_MAX_LEN];
         
             pdu = snmp_pdu_create(SNMP_MSG_GET);
@@ -322,9 +324,11 @@ int main(int argc, char *argv[])
             vlp2 = vlp2->next_variable;
             hsused = *(vlp2->val.integer);
 
-            printf("%-18s %15d %15d %15d %4d%%\n", descr,
-                   ((units)?(hssize*units/1024):hssize), hsused,
-                   hssize-hsused, (hssize)?(100*hsused/hssize):hsused);
+            printf("%-18s %15lu %15lu %15lu %4lu%%\n", descr,
+                   units ? hssize*(units/1024) : hssize,
+		   units ? hsused*(units/1024) : hsused,
+                   units ? (hssize-hsused)*(units/1024) : hssize-hsused,
+		   hssize ? 100*hsused/hssize : hsused);
 
             vlp = vlp->next_variable;
             snmp_free_pdu(response);
