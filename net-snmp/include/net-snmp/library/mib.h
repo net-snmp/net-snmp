@@ -200,11 +200,6 @@ int sprint_realloc_asciistring	(u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
 				 const u_char *cp, size_t len);
 
-int sprint_realloc_by_type	(u_char **buf, size_t *buf_len,
-				 size_t *out_len, int allow_realloc,
-				 struct variable_list *, struct enum_list *,
-				 const char *, const char *);
-
 int sprint_realloc_octet_string (u_char **buf, size_t *buf_len,
 				 size_t *out_len, int allow_realloc,
 				 struct variable_list *, struct enum_list *,
