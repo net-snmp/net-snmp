@@ -1,5 +1,62 @@
 -------------------------------------------------------------------------------
 
+Changes: V4.0 -> V4.0.1
+
+hardaker 23 Aug 99 16:44:27
+    - (Makefile.in): install the snmpusm.1 manual page.
+
+mslifcak 24 Aug 99 04:44:47
+    Clean CRs from read_config,snmp_logging; comment define USE_ASN_SHORT_LEN.
+
+mslifcak 24 Aug 99 05:11:13
+    Remove ASN_SHORT_LEN hack - known to dump core in agent.
+
+mslifcak 24 Aug 99 06:19:49
+    Add "." to PATH for RUNTESTS; Drop optreset to build most platforms
+
+mslifcak 24 Aug 99 10:25:53
+    -(testing/eval_tools) - let some (AIX) agents settle before firing requests.
+
+hardaker 24 Aug 99 12:48:21
+    - (vacm_vars.c): correct sysORTable entry.
+
+hardaker 24 Aug 99 13:36:35
+    - (snmpusm.c): check for null response pointer.
+
+hardaker 24 Aug 99 13:37:31
+    - (snmp_parse_args.c, default_store.h, snmp_api.c, snmpv3.c):
+      - provide defVersion token support in snmp.conf (sort of hackish).
+
+hardaker 24 Aug 99 13:41:18
+    - (TODO): remove snmpv3 support :-)
+
+mslifcak 24 Aug 99 14:05:39
+    -(top/Makefile.in) - remove more generated files with distclean rule.
+
+hardaker 24 Aug 99 14:15:40
+    - (all_system.h): remove.  again.
+
+mslifcak 24 Aug 99 14:17:33
+    -(host/hr_swrun;mibII/icmp,ip;ucd-snmp/disk,proc) log_perror --> snmp_log_perror
+
+mslifcak 24 Aug 99 15:14:18
+    -(smux.c) apply Nick Amato's patch: prevent SMUX close on parse or error.
+
+hardaker 24 Aug 99 15:59:42
+    - (snmp_api.c): remove version setting in snmp_api.c.  Not needed there.
+
+hardaker 24 Aug 99 16:01:55
+    - (NEWS): 4.0.1 update
+
+mslifcak 24 Aug 99 16:05:15
+    -(configure.*) move statement about ucdDemoPublic into comment field.
+
+mslifcak 24 Aug 99 16:49:22
+    -(testing/*) run tests when package is not installed, and when
+    the build tree is not the same as the source tree.
+
+-------------------------------------------------------------------------------
+
 Changes: V3.6.2 -> V4.0
 
 hardaker 14 Sep 98 09:11:57
@@ -2945,6 +3002,12 @@ mslifcak 23 Aug 99 14:02:51
 
 mslifcak 23 Aug 99 15:32:21
     HACK! fixup short length (first put correct community string in pdu-> ).
+
+hardaker 23 Aug 99 16:14:00
+    - (T028snmpv3getfail): snmpv3 get failure test.
+
+hardaker 23 Aug 99 16:14:00
+    - (INSTALL): remove version specific information
 
 -------------------------------------------------------------------------------
 
