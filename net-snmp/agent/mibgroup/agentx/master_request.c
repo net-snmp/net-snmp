@@ -46,6 +46,8 @@
 #include "var_struct.h"
 #include "mibII/sysORTable.h"
 
+extern int close_agentx_session(struct snmp_session *session, int sessid);
+
 #define VARLIST_ITERATION	10
 
 struct ax_variable_list {
@@ -115,6 +117,7 @@ handle_agentx_response( int operation,
     struct ax_variable_list *ax_vlist = (struct ax_variable_list *)magic;
     struct variable_list *vbp, *next;
     struct agent_snmp_session *asp  =  ax_vlist->asp;
+    struct snmp_session *ax_session;
     struct request_list *req;
     int i, type, index;
     struct ax_variable_list *retry_vlist;
@@ -125,6 +128,35 @@ handle_agentx_response( int operation,
 
     remove_outstanding_request( asp, pdu->reqid );
 
+    switch(operation) {
+	case TIMED_OUT:
+			/*
+			 * Multiple timed out requests probably
+			 *  indicate that the subagent has died.
+			 */
+		if ( SET_SNMP_STRIKE_FLAGS( session->flags )) {
+		    ax_session = session->subsession;
+				/*
+				 * XXX - Need to send a 'close' message
+				 *       to the subagent (even though
+				 *	 we don't think it's listening)
+				 */
+		    (void) close_agentx_session(ax_session, session->sessid);
+		    if ( ax_session->subsession == NULL ) {
+			snmp_close( ax_session );
+		    }
+		}
+
+		pdu->errstat  = SNMP_ERR_GENERR;
+		pdu->errindex = 0;
+		break;
+	case RECEIVED_MESSAGE:
+		/* This session is alive */
+		CLEAR_SNMP_STRIKE_FLAGS( session->flags );
+		break;
+	default:
+		return 0;
+    }
 
 
     asp->status = pdu->errstat;
