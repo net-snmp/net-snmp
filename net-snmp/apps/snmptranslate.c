@@ -195,6 +195,7 @@ int main(int argc, char *argv[])
                 }
                 break;
 	      case 'D':
+                debug_register_tokens(&argv[arg][2]);
 		snmp_set_do_debugging(1);
 		break;
               case 'V':
