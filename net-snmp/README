@@ -1,0 +1,17 @@
+This package contains a port of the cmu snmp v2.1.2 package for hp-ux
+700 series 9.0.5 computers.  No additional changes or modifications
+were made other than those changes necissary for porting.  I
+personally use a modified version of this code with limited
+extensibility supported, which I will release shortly after this
+release.
+
+I know it compiles and works, but I haven't tested quiet everything.
+If you find something which breaks, you can either fix it and send me
+a patch or tell me and I'll attempt to fix it myself.
+                                                                _____
+			        			       / ___ \
+Wes Hardaker		             		       	      / /   \/
+Department of Electrical and Computer Engineering            \--/     /\
+University of California at Davis	 __________________   \/     /--\
+Davis CA  95616                         /     Recycle      \    /\___/ /
+(hardaker@ece.ucdavis.edu)             / It's not too late! \   \_____/
