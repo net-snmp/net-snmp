@@ -60,7 +60,6 @@
 #include "asn1.h"
 #include "snmpv3.h"
 #include "callback.h"
-#include "snmpusm.h"
 #include "snmp.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
@@ -73,6 +72,7 @@
 #include "snmp_debug.h"
 #include "snmp_logging.h"
 #include "default_store.h"
+#include "snmpusm.h"
 
 #include "transform_oids.h"
 
@@ -372,7 +372,7 @@ setup_engineID(u_char **eidp, const char *text)
 void
 usm_parse_create_usmUser(const char *token, char *line) {
   char *cp;
-  char buf[SNMP_MAXBUF_MEDIUM];
+  char buf[SNMP_MAXBUF_MEDIUM], buf2[SNMP_MAXBUF_SMALL];
   struct usmUser *newuser;
   u_char	  userKey[SNMP_MAXBUF_SMALL];
   size_t	  userKeyLen = SNMP_MAXBUF_SMALL;
@@ -382,15 +382,30 @@ usm_parse_create_usmUser(const char *token, char *line) {
 
   /* READ: Security Name */
   cp = copy_word(line, buf);
+
+  /* might be a -e ENGINEID argument */
+  if (strcmp(buf,"-e") == 0) {
+      /* get the specified engineid from the line */
+      cp = copy_word(cp, buf);
+      newuser->engineIDLen = hex_to_binary(buf, buf2);
+      if (newuser->engineIDLen <= 0) {
+          usm_free_user(newuser);
+          config_perror("invalid EngineID argument to -e");
+          return;
+      }
+      memdup(&newuser->engineID, buf2, newuser->engineIDLen);
+      cp = copy_word(cp, buf);
+  } else {
+      newuser->engineID = snmpv3_generate_engineID(&ret);
+      if ( ret == 0 ) {
+          usm_free_user(newuser);
+          return;
+      }
+      newuser->engineIDLen = ret;
+  }
+  
   newuser->secName = strdup(buf);
   newuser->name = strdup(buf);
-
-  newuser->engineID = snmpv3_generate_engineID(&ret);
-  if ( ret == 0 ) {
-    usm_free_user(newuser);
-    return;
-  }
-  newuser->engineIDLen = ret;
 
   if (!cp)
     goto add; /* no authentication or privacy type */
