@@ -110,7 +110,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         SPAGAIN;
 
         if (i != 1) {
-            fprintf(stderr, "unhandled OID error.\n");
+            snmp_log(LOG_ERR, "unhandled OID error.\n");
             /* ack XXX */
         }
         tmparray[c++] = POPs;
@@ -150,7 +150,7 @@ int   perl_trapd_handler( netsnmp_pdu           *pdu,
         /* reference to code */
         perl_call_sv(SvRV(pcallback), G_DISCARD);
     } else {
-        fprintf(stderr, " tried to call a perl function but failed to understand its type: (ref = %x, svrok: %d, SVTYPE: %d)\n", pcallback, SvROK(pcallback), SvTYPE(pcallback));
+        snmp_log(LOG_ERR, " tried to call a perl function but failed to understand its type: (ref = %x, svrok: %d, SVTYPE: %d)\n", pcallback, SvROK(pcallback), SvTYPE(pcallback));
     }
 
     free(tmparray);

@@ -182,7 +182,7 @@ nso_newptr(initstring)
         RETVAL->name = RETVAL->namebuf;
         RETVAL->len = sizeof(RETVAL->namebuf)/sizeof(RETVAL->namebuf[0]);
         if (!snmp_parse_oid(initstring, (oid *) RETVAL->name, &RETVAL->len)) {
-/*             fprintf(stderr, "Can't parse: %s\n", initstring); */
+            snmp_log(LOG_ERR, "Can't parse: %s\n", initstring);
             RETVAL->len = 0;
             RETVAL = NULL;
         }
