@@ -16,7 +16,7 @@ MAN3 = snmp_agent_api.3 snmp_api.3 mib_api.3 snmp_sess_api.3 snmp_trap_api.3 \
 	shutdown_mib.3 \
 	print_mib.3 print_variable.3 print_value.3 print_objid.3 print_description.3 \
 	snmp_set_save_descriptions.3 \
-	get_module_node.3 read_objid.3 add_module_replacement.3
+	get_module_node.3
 
 MAN3G = read_config.3 default_store.3
 MAN5 = variables.5
