@@ -240,7 +240,7 @@ get_exec_output(struct extensible *ex)
 #ifdef EXCACHETIME
     char            cachefile[STRMAX];
     char            cache[MAXCACHESIZE];
-    size_t          cachebytes;
+    ssize_t         cachebytes;
     long            curtime;
     static char     lastcmd[STRMAX];
     int             cfd;
