@@ -187,6 +187,9 @@
 /* Does struct sigaction have a sa_sigaction field? */
 #undef STRUCT_SIGACTION_HAS_SA_SIGACTION
 
+/* Does struct tm have a tm_gmtoff field? */
+#undef STRUCT_TM_HAS_TM_GMTOFFF
+
 /* Does struct sockaddr have a sa_len field? */
 #undef STRUCT_SOCKADDR_HAS_SA_LEN
 
@@ -626,6 +629,7 @@
 #define config_arch_require(x,y)
 #define config_parse_dot_conf(w,x,y,z)
 #define config_add_mib(x)
+#define config_belongs_in(x)
   
 #if defined (WIN32) || defined (mingw32) || defined (cygwin)
 #define ENV_SEPARATOR ";"
