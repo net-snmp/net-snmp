@@ -64,6 +64,9 @@ SOFTWARE.
 #if HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#if HAVE_IO_H
+#include <io.h>
+#endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
@@ -1131,18 +1134,17 @@ _sess_open(struct snmp_session *in_session)
 #ifdef AF_UNIX
         else if ( isp->me.sa_family == AF_UNIX ) {
     		/* Need a unique socket name */
+			/* to avoid unlinking the server's socket */
+			/* when this client closes. */
 #ifndef UNIX_SOCKET_BASE_NAME
 #define UNIX_SOCKET_BASE_NAME  "/tmp/s."
 #endif
-    
-#ifndef WIN32
                 strcpy( isp->me.sa_data, UNIX_SOCKET_BASE_NAME );
                 strcat( isp->me.sa_data, "XXXXXX" );
 #ifdef HAVE_MKSTEMP
                 close(mkstemp( isp->me.sa_data ));
 #else
                 mktemp( isp->me.sa_data );
-#endif
 #endif
         }
 #endif /* AF_UNIX */
