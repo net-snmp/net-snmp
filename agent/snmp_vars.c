@@ -37,11 +37,18 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <config.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <stdio.h>
 
+#ifdef HAVE_NLIST_H
 #include <nlist.h>
+#endif
 
-#include "mib.h"
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
 #include "mibincl.h"
+#include "mib.h"
 #include "m2m.h"
 #include "snmp_vars_m2m.h"
 

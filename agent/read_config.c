@@ -1,9 +1,20 @@
 #include <config.h>
 
+#if STDC_HEADERS
+#include <string.h>
+#include <stdlib.h>
+#else
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#endif
 #include <signal.h>
 #include <ctype.h>
 
 #include <sys/time.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #include "m2m.h"
 #include "mibincl.h"
 
