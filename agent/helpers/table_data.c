@@ -406,7 +406,7 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                  * request too short 
                  */
                 netsnmp_set_request_error(reqinfo, request,
-                                          SNMP_ERR_NOSUCHNAME);
+                                          SNMP_NOSUCHINSTANCE);
                 break;
             } else if (NULL ==
                        (row =
@@ -425,7 +425,7 @@ netsnmp_table_data_helper_handler(netsnmp_mib_handler *handler,
                  * no such row 
                  */
                 netsnmp_set_request_error(reqinfo, request,
-                                          SNMP_ERR_NOSUCHNAME);
+                                          SNMP_NOSUCHINSTANCE);
                 break;
             } else {
                 valid_request = 1;
