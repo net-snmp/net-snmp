@@ -242,6 +242,19 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
 }
 
 int
+count_varbinds( struct snmp_pdu *pdu )
+{
+  int count = 0;
+  struct variable_list *var_ptr;
+  
+  for ( var_ptr = pdu->variables ; var_ptr != NULL ;
+		  	var_ptr = var_ptr->next_variable )
+	count++;
+
+  return count;
+}
+
+int
 handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
                    struct snmp_pdu *pdu, void *magic)
 {
@@ -451,6 +464,12 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	agent_session_list = asp;
     }
     else {
+	if ( status == SNMP_ERR_NOERROR ) {
+	    snmp_increment_statistic_by(
+		(asp->pdu->command == SNMP_MSG_SET ?
+			STAT_SNMPINTOTALSETVARS : STAT_SNMPINTOTALREQVARS ),
+	    	count_varbinds( asp->pdu ));
+	}
 	asp->pdu->command = SNMP_MSG_RESPONSE;
 	asp->pdu->errstat = status;
 	snmp_send( asp->session, asp->pdu );
