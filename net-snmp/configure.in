@@ -221,6 +221,12 @@ AC_ARG_WITH(out_mib_modules,
     examples/example:       example C code extension.])
 
 dnl
+dnl Catch common mistakes in configure options
+dnl
+AC_ARG_WITH(mib_module,,    AC_MSG_ERROR([ Invalid option. Use --with-mib-modules instead ])     )
+AC_ARG_WITH(out_mib_module,,AC_MSG_ERROR([ Invalid option. Use --with-out-mib-modules instead ]) )
+
+dnl
 dnl otherwise prompted information
 dnl
 AC_ARG_WITH(defaults,
