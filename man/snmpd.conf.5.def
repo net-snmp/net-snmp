@@ -791,6 +791,10 @@ Specifies additional object values to be delivered with in the
 resulting trap in addition to the normal trap objects.  This is useful
 for obtaining other columns in the table for the row that triggered
 the expression.  See the examples below for more details.
+.IP "-e EVENTNAME"
+Specifies an event name that describes what to do when the trigger is
+fired.  Currently, this must be the name of a notificationEvent event
+as described below.
 .RE
 .IP
 The following example configuration checks the hrSWRunPerfTable table
@@ -828,6 +832,35 @@ Threshold example:
 .nf
 .IP
 monitor -t -r 15 -o prNames -o prErrMessage "process table" prErrorFlag 0 1
+.fi
+.RE
+.IP "notificationEvent NAME NOTIFICATION [[-w] OID_OBJECT ...]"
+This will create a notification event, which can be fired by attaching
+it to a monitor using a monitor's -e switch and an identical NAME
+field.  The NOTIFICATION to be sent should be the OID of a
+notification.  Additional objects can be included, and by default the
+suffix of the row/object being monitored will be appended to the
+object identifier unless it's told not to be a wild-card object by
+prefixing it with the -w switch.  EG, if you're monitoring the ifTable
+and you want your trap to include the ifDescr object for the row that
+was discovered, don't add the -w switch and the .INDEX field will be
+appended.  If the OID is fully qualified (EG, "sysContact.0") and no
+instance suffix should be appended to it then add a -w switch before
+it.  See the linkUpDownNotifications token below for example usage of
+this token to send the linkUp and linkDown traps.
+.IP "linkUpDownNotifications yes"
+This will make the DISMAN-EVENT-MIB support watch the ifTable to
+determine when a network interface is taken up or down.  When this
+happens, a linkUp or linkDown notification will be triggered.  This is
+exactly equivalent to doing:
+.RS
+.IP
+.nf
+notificationEvent  linkUpTrap    linkUp   ifIndex ifAdminStatus ifOperStatus
+notificationEvent  linkDownTrap  linkDown ifIndex ifAdminStatus ifOperStatus
+
+monitor  -r 60 -e linkUpTrap   "Generate linkUp" ifOperStatus != 2
+monitor  -r 60 -e linkDownTrap "Generate linkDown" ifOperStatus == 2
 .fi
 .RE
 .IP "defaultMonitors yes"
