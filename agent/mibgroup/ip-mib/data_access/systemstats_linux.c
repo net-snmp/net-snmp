@@ -169,8 +169,8 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
             netsnmp_access_systemstats_entry_free(entry);
             return -4;
         }
-        /* entry->stats. = scan_vals[0]; /* Forwarding */
-        /* entry->stats. = scan_vals[1]; /* DefaultTTL */
+        /* entry->stats. = scan_vals[0]; / * Forwarding */
+        /* entry->stats. = scan_vals[1]; / * DefaultTTL */
         entry->stats.HCInReceives.low = scan_vals[2] & 0xffffffff;
         entry->stats.HCInReceives.high = scan_vals[2] >> 32;
         entry->stats.InHdrErrors = scan_vals[3];
@@ -185,7 +185,7 @@ _systemstats_v4(netsnmp_container* container, u_int load_flags)
         entry->stats.HCOutRequests.high = scan_vals[9] >> 32;
         entry->stats.OutDiscards = scan_vals[10];
         entry->stats.OutNoRoutes = scan_vals[11];
-        /* entry->stats. = scan_vals[12]; /* ReasmTimeout */
+        /* entry->stats. = scan_vals[12]; / * ReasmTimeout */
         entry->stats.ReasmReqds = scan_vals[13];
         entry->stats.ReasmOKs = scan_vals[14];
         entry->stats.ReasmFails = scan_vals[15];

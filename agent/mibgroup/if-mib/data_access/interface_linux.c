@@ -91,7 +91,6 @@ netsnmp_arch_interface_container_load(netsnmp_container* container,
     static char     scan_expected;
     int             scan_count, fd;
     netsnmp_interface_entry *entry = NULL;
-    struct ifreq ifrq;
 
     DEBUGMSGTL(("access:interface:container:arch", "load (flags %p)\n",
                 load_flags));
