@@ -795,6 +795,7 @@ netsnmp_agent_check_packet(netsnmp_session * session,
     if (addr_string != NULL) {
       if ( strncmp(addr_string, "callback", 8) != 0 ) {
           if( addr_string[0] == '[' ) { /* fix up ipv6 addr */
+              int i;
               for( i = 1; addr_string[i] != ']'; i++ ) {
                   addr_string[i-1] =  addr_string[i];
               }
