@@ -480,15 +480,18 @@ long get_uptime (void)
     u_long lbolt = 0;
 
     if (ksc) {
-    ks = kstat_lookup (ksc, "unix", -1, "system_misc");
-    if (ks) {
-    kid = kstat_read (ksc, ks, NULL);
-    if (kid != -1) {
-    named = kstat_data_lookup(ks, "lbolt");
-    if (named) {
-    lbolt = named->value.ul;
-    kstat_close(ksc);
-    }}}}
+	ks = kstat_lookup (ksc, "unix", -1, "system_misc");
+	if (ks) {
+	    kid = kstat_read (ksc, ks, NULL);
+	    if (kid != -1) {
+		named = kstat_data_lookup(ks, "lbolt");
+		if (named) {
+		    lbolt = named->value.ul;
+		}
+	    }
+	}
+	kstat_close(ksc);
+    }
     return lbolt;
 #endif /* solaris2 */
 
