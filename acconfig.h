@@ -250,7 +250,7 @@
 #define OSTYPE LINUXID
 #endif
 #if defined(bsdi2) || defined(bsdi3)
-#define OSTYPE IRIXID
+#define OSTYPE BSDIID
 #endif
 /* unknown */
 #ifndef OSTYPE
