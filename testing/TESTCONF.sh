@@ -48,7 +48,7 @@ fi
 
 if [ "x$SNMP_SAVE_TMPDIR" = "x" ]; then
     SNMP_SAVE_TMPDIR="no"
-    export SNMP_VERBOSE
+    export SNMP_SAVE_TMPDIR
 fi
 
 SNMP_TESTDIR="$SNMP_BASEDIR/tests"
@@ -61,7 +61,7 @@ export SNMP_PERSISTENT_FILE
 
 if [ "x$SNMP_FLAGS" = "x" ]; then
     SNMP_FLAGS="-d"
-    export SNMP_VERBOSE
+    export SNMP_FLAGS
 fi
 
 SNMP_FLAGS="$SNMP_FLAGS $SNMP_SNMPD_PORT"
