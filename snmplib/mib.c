@@ -4040,11 +4040,10 @@ fprint_description(FILE * f, oid * objid, size_t objidlen,
     while (objidlen > 1) {
         for (; subtree; subtree = subtree->next_peer) {
             if (*objid == subtree->subid) {
-		while (subtree->next_peer && subtree->next_peer->subid == *objid)
-		    subtree = subtree->next_peer;
+                while (subtree->next_peer && subtree->next_peer->subid == *objid)
+                    subtree = subtree->next_peer;
                 if (strncmp(subtree->label, ANON, ANON_LEN))
-                    sprintf(buf, " %s(%lu)", subtree->label,
-                            subtree->subid);
+                    sprintf(buf, " %s(%lu)", subtree->label, subtree->subid);
                 else
                     sprintf(buf, " %lu", subtree->subid);
                 len = strlen(buf);
@@ -4054,15 +4053,35 @@ fprint_description(FILE * f, oid * objid, size_t objidlen,
                 }
                 fprintf(f, "%s", buf);
                 pos += len;
+                objid++;
+                objidlen--;
                 break;
             }
         }
+        if (subtree)
+            subtree = subtree->child_list;
+        else
+            break;
+    }
+    while (objidlen > 1) {
+        sprintf(buf, " %lu", *objid);
+        len = strlen(buf);
+        if (pos + len + 2 > width) {
+            fprintf(f, "\n     ");
+            pos = 5;
+        }
+        fprintf(f, "%s", buf);
+        pos += len;
         objid++;
         objidlen--;
-        if (subtree)
-	    subtree = subtree->child_list;
     }
-    fprintf(f, " %lu }\n", *objid);
+    sprintf(buf, " %lu }", *objid);
+    len = strlen(buf);
+    if (pos + len + 2 > width) {
+        fprintf(f, "\n     ");
+        pos = 5;
+    }
+    fprintf(f, "%s\n", buf);
 }
 
 static void
@@ -4075,10 +4094,21 @@ print_tree_node(FILE * f, struct tree *tp, int width)
     if (tp) {
         module_name(tp->modid, str);
         fprintf(f, "  -- FROM\t%s", str);
+        pos = 16+strlen(str);
         for (i = 1, prevmod = tp->modid; i < tp->number_modules; i++) {
             if (prevmod != tp->module_list[i]) {
                 module_name(tp->module_list[i], str);
-                fprintf(f, ", %s", str);
+                len = strlen(str);
+                if (pos + len + 2 > width) {
+                    fprintf(f, ",\n  --\t\t");
+                    pos = 16;
+                }
+                else {
+                    fprintf(f, ", ");
+                    pos += 2;
+                }
+                fprintf(f, "%s", str);
+                pos += len;
             }
             prevmod = tp->module_list[i];
         }
