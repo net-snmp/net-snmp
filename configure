@@ -130,6 +130,7 @@ ac_help="$ac_help
 
   Optional modules for C coders to look at and/or include as extension examples:
   
+    examples/ucdDemoPublic: SNMPv3 interoperability testing mib.
     examples/example:       example C code extension.
     examples/wombat:        template file similar to example."
 ac_help="$ac_help
@@ -896,7 +897,6 @@ if test "${with_out_mib_modules+set}" = set; then
   :
 fi
 
-    examples/ucdDemoPublic: SNMPv3 interoperability testing mib.
 
 # Check whether --with-defaults or --without-defaults was given.
 if test "${with_defaults+set}" = set; then
