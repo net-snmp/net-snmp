@@ -828,6 +828,10 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 		    ifp->ifType = 37;
 	    }
 	    break;
+	case 'g': /* ge (gigabit ethernet card) */
+	    if (!ifp->ifSpeed) ifp->ifSpeed = 1000000000;
+	    ifp->ifType = 6;
+	    break;
 	case 'h': /* hme (SBus card) */
 	case 'e': /* eri (PCI card) */
 	case 'b': /* be */
