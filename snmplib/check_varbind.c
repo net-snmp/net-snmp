@@ -50,8 +50,8 @@ netsnmp_check_vb_max_size(const netsnmp_variable_list *var, size_t size )
 }
 
 NETSNMP_INLINE int
-netsnmp_check_vb_size_range(const netsnmp_variable_list *var,
-                            size_t low, size_t high )
+netsnmp_check_vb_range(const netsnmp_variable_list *var,
+                       size_t low, size_t high )
 {
     register int rc = SNMP_ERR_NOERROR;
 
@@ -63,6 +63,16 @@ netsnmp_check_vb_size_range(const netsnmp_variable_list *var,
     }
 
     return rc;
+}
+
+/*
+ * misnamed - here for backwards compatability
+ */
+NETSNMP_INLINE int
+netsnmp_check_vb_size_range(const netsnmp_variable_list *var,
+                            size_t low, size_t high )
+{
+    return netsnmp_check_vb_range(var, low, high);
 }
 
 NETSNMP_INLINE int
