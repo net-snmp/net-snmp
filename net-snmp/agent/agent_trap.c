@@ -101,6 +101,7 @@ size_t  sysuptime_oid_len 	      =	OID_LENGTH(sysuptime_oid);
 #define SNMP_AUTHENTICATED_TRAPS_DISABLED	2
 
 int	 snmp_enableauthentraps	= SNMP_AUTHENTICATED_TRAPS_DISABLED;
+int	 snmp_enableauthentrapsset = 0;
 char	*snmp_trapcommunity	= NULL;
 
 /* Prototypes */
@@ -564,16 +565,38 @@ void snmpd_parse_config_authtrap(const char *token,
     int i;
 
     i = atoi(cptr);
-    if ( i == 0 ) {
-	if ( !strcmp( cptr, "enable" ))
+    if (i == 0) {
+	if (strcmp(cptr, "enable") == 0) {
 	    i = SNMP_AUTHENTICATED_TRAPS_ENABLED;
-	else if ( !strcmp( cptr, "disable" ))
+	} else if (strcmp(cptr, "disable") == 0) {
 	    i = SNMP_AUTHENTICATED_TRAPS_DISABLED;
+	}
     }
-    if (i < 1 || i > 2)
+    if (i < 1 || i > 2) {
 	config_perror("authtrapenable must be 1 or 2");
-    else
+    } else {
+	if (strcmp(token, "pauthtrapenable") == 0) {
+	    if (snmp_enableauthentrapsset < 0) {
+		/*  This is bogus (and shouldn't happen anyway) -- the value
+		    of snmpEnableAuthenTraps.0 is already configured
+		    read-only.  */
+		snmp_log(LOG_WARNING, "ignoring attempted override of read-only snmpEnableAuthenTraps.0\n");
+		return;
+	    } else {
+		snmp_enableauthentrapsset++;
+	    }
+	} else {
+	    if (snmp_enableauthentrapsset > 0) {
+		/*  This is bogus (and shouldn't happen anyway) -- we already
+		    read a persistent value of snmpEnableAuthenTraps.0, which
+		    we should ignore in favour of this one.  */
+		snmp_log(LOG_WARNING, "ignoring attempted override of read-only snmpEnableAuthenTraps.0\n");
+		/*  Fall through and copy in this value.  */
+	    }
+	    snmp_enableauthentrapsset = -1;
+	}
 	snmp_enableauthentraps = i;
+    }
 }
 
 void snmpd_parse_config_trapsink(const char *token, 
