@@ -634,7 +634,10 @@ sparse_table_helper_handler(netsnmp_mib_handler *handler,
 
     if (reqinfo->mode == MODE_GETNEXT) {
         for(request = requests ; request; request = request->next) {
-            if (request->requestvb->type == SNMP_NOSUCHINSTANCE) {
+            if (request->requestvb->type == ASN_NULL && request->processed)
+                continue;
+            if (request->requestvb->type == ASN_NULL ||
+                request->requestvb->type == SNMP_NOSUCHINSTANCE) {
                 /*
                  * get next skipped this value for this column, we
                  * need to keep searching forward 
