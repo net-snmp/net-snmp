@@ -1,23 +1,194 @@
+This guide describes building with Microsoft C++ and with
+the gcc compiler from Cygwin.  As developers build with
+other Win32 environments, their notes will be included here.
+
+----
+Status as of 1-August-1999 for Win32 platforms
+
+NOTE: The daemon applications snmpd and snmptrapd are not
+build-able with MSVC++.  These are the only exceptions, however.
+
+All applications, including those just mentioned, build
+using the Cygwin environment under NT.  The NT machine
+where the applications run from does NOT need to have
+CygWin installed.
+
+The applications build and run fine.  The agent builds and runs,
+but there is no support for MIB-II, which means no
+interface or route information can be had from this agent.
+
+
+----
+The remainder of this guide has the following sections :
+
+Building with MS VC++
+Installing from MS VC++ build
+Building with Cygwin
+Installing with Cygwin
+
+
+----
+Building with MS VC++
+
 The win32 directory contains a Microsoft VC++ (5.0,6.0) workspace and
 project files to build both static and DLL versions of the UCD SNMP
-library as well as most of the applications (snmpd and snmptrapd not
-included). 
+library and the applications. Building with earlier compiler versions
+has not been attempted.  Success stories are welcomed.
 
 A manually generated config.h file has been provided for use with the
 win32 build since the basic win32 environment does not support autoconf.
 Note: the compiled in MIB path is \usr\mibs which may be changed by
-editting win32/config.h
+editing win32/config.h.  Note that the install instructions below
+should be adjusted when changes are made to paths.
 
-To build the libraries and applications, open the wokspace in VC++ and
-simply run 'Build' from the menu. The applications and DLL will be
-output to win32/bin and the lib files will be output to win32/lib.
+To build the libraries and applications, open the workspace file
+"win32.dsw" from VC++.  Note there is a Debug version and Release
+version for each subproject.  Due to the way the libraries are
+organized, there are exactly two library versions that work :
 
-Not sure how the above could be done using just 'nmake' from the DOS
-shell but it should be feasible.
+  1) libsnmp Debug ;  and 2) libsnmp_dll Release
 
-Also note: An alternate way to build UCD SNMP for win32 is to use
+The projects are arranged so that ALL of the usable products,
+the .lib, .dll, and .exe files, are written to the win32\bin
+directory.  The win32\lib directory is used only to build the
+the files in the win32\bin directory.  Once building is completed,
+there is no further use for the files in the win32\lib directory.
+
+The Debug product .exe files have "_d" appended to the basename
+of the applications.  This is so the Debug and Release versions
+of an application can be built and tested separately.
+
+To build the Release versions:
+Click Build->Batch Build. Uncheck all Debug and libsnmp versions.
+Make sure libsnmp_dll Release and all other Release versions
+are checked.  Rebuild All.  If the library DLL link fails, add
+missing function names to libsnmp_dll/libsnmp.def.
+
+To build the Debug versions:
+Click Build->Batch Build. Uncheck all Release and libsnmp_dll versions.
+Make sure libsnmp Debug and all other Debug versions
+are checked. Rebuild All.
+
+To build both Debug and Release versions:
+Click Build->Batch Build.  Check all versions.  Uncheck
+"libsnmp Release" and "libsnmp_dll Debug" versions only.
+Then click Release All.
+
+----
+Installing from MS VC++ build
+
+Create these subdirectories on the root directory of the
+volume you wish to hold the UC-Davis SNMP applications :
+
+  usr  , usr\bin , usr\mibs
+
+Copy mibs\*.txt to usr\mibs
+Copy win32\bin\*.* to usr\bin
+
+Installing is complete.  You may want to create a compressed
+archive of the \usr hierarchy.
+
+----
+Building with Cygwin
+
+An alternate way to build UCD SNMP for win32 is to use
 Cygnus's cygwin32 environment.  Make sure to get the 'full' version.
 The 'user' version does not contain the programs necessary to run
 the GNU configure mechanism, which is used to by UCD SNMP.  Information
 on the Cygnus cygwin32 environment is available on the web at :
 http://sourceware.cygnus.com/cygwin/.
+
+Get full.exe from Cygnus.  Some developers have used Cygwin BETA 20
+with success.  Install the cygwin environment.
+Unzip the UC-Davis SNMP tar file.  cd to the SNMP base directory.
+Create a subdirectory 'cyg' and cd to it. Then run the script
+attached to this guide.  The configure script will sense
+the Cygwin environment, build config.h and the Makefiles.
+
+The attached script will build the UC-Davis SNMP package
+and display any error lines in the build log, which is saved
+in "nohup.out".  Errors and warnings only are copied to "nerrs"
+for further review.
+
+----
+Installing with Cygwin
+
+From the "cyg" directory, type "make install".  This will
+populate a hierarchy that mimics the other platforms.
+A usr/local subdirectory has all of the installable files,
+except for usr/local/share/snmp/*.conf {snmpd.conf, snmp.conf}.
+snmpd.conf can be made using EXAMPLE.conf after reading the
+manual pages and FAQ.
+
+  usr/local/bin - most applications
+  usr/local/sbin  - snmpd,  snmptrapd
+  usr/local/share/snmp - place to store snmpd.conf, snmp.conf if desired
+  usr/local/share/snmp/mibs - the MIB files
+
+
+Installing is complete.  You may want to create a compressed
+archive of the \usr hierarchy.
+
+---
+Build script for use with Cygwin
+------------ cut here ----------------
+:
+PATH=/usr/local/bin:/usr/ccs/bin:/usr/bin:/bin
+export PATH
+#
+# Always configure.
+# some changes need to refresh the configuration.
+CSTRICT=
+CSTRICT="-Wwrite-strings -Wno-unused -Wno-char-subscripts"
+PEDAN="-pedantic"
+PEDAN=
+CFLAGS="-g -O2 -Wall -Wshadow -Wstrict-prototypes \
+               -Wpointer-arith -Wcast-qual -Wcast-align $CSTRICT $PEDAN"
+export CFLAGS
+
+if [ ! -f ./config.h ] ; then
+rm -f ucd-snmp-config.h  # insurance
+CC=gcc ../configure --with-sys-contact="System Administrator" \
+                    --with-sys-location="Location" \
+    --with-out-mib-modules="mibII" \
+    --with-mib-modules="smux target examples/example examples/wombat dummy/dummy mibII/system_mib mibII/vacm_vars" \
+                    --with-defaults
+fi
+
+#vi config.h
+#vi agent/Makefile
+#
+
+if [ "X"$1 != "Xno" ] ; then
+  ## Enable the next line if autoconf or autoheader aren't working.
+  make -k touchit
+  ## Clean up previous attempts; Remove old installs
+  nohup make clean
+  rm -fr usr
+fi
+
+rm -f nohup.out
+#
+## full build with install. usr subdir will be available to package
+nohup make install prefix=`pwd`/usr/local exec_prefix=`pwd`/usr/local
+#
+# check for errors, but not in system headers
+egrep "Error|warning" nohup.out > allerrs
+egrep -v "/usr/include" allerrs > nerrs
+#
+# show any errors. if user sees prompt, the build/install didn't find errors.
+egrep "Error" nerrs
+#
+# do optional verification of installation.
+# check recent install adds
+#
+------------ cut here ----------------
+
+
+Thanks to Niels Baggesen, Dave Shields, Robert Story, and Wes Hardaker
+for the information gleaned here for your use.
+
+Kindest Regards,
+-Mike Slifcak, Internet Security Systems, Inc.
+30-August-1999
+
