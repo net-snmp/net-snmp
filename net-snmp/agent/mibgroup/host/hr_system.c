@@ -279,9 +279,10 @@ count_users(void)
     setutent();
     while ((utmp_p = getutent()) != NULL) {
 #ifndef UTMP_HAS_NO_TYPE
-        if (utmp_p->ut_type == USER_PROCESS)
+        if (utmp_p->ut_type != USER_PROCESS)
+            continue;
 #endif
-        {
+#ifndef UTMP_HAS_NO_PID
             /* This block of code fixes zombie user PIDs in the
                utmp/utmpx file that would otherwise be counted as a
                current user */
@@ -290,8 +291,8 @@ count_users(void)
                 pututxline(utmp_p);
                 continue;
             }
+#endif
             ++total;
-        }
     }
     endutent();
     return total;
