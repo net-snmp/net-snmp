@@ -100,7 +100,7 @@ char copyright[] =
 #include <net-snmp/snmp_api.h>
 #include <net-snmp/snmp_impl.h>
 #include <net-snmp/snmp_client.h>
-#include "version.h"
+#include <net-snmp/version.h>
 #include <net-snmp/snmp_debug.h>
 #include <net-snmp/system.h>
 #include <net-snmp/default_store.h>
@@ -142,7 +142,7 @@ static struct protoent *getprotoent46(void);
 void usage(void)
 {
     fprintf(stderr, "Usage: snmpnetstat [options...] hostname [ community ] [interval]\n");
-    fprintf(stderr, "UCD-snmp version: %s\n", VersionInfo);
+    fprintf(stderr, "NET-SNMP version: %s\n", netsnmp_get_version());
     fprintf(stderr, "  -v [1 | 2c ]   SNMP version\n");
     fprintf(stderr, "  -V             display version number\n");
     fprintf(stderr, "  -p port        specify agent port number\n");
@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
     while ((arg = getopt(argc, argv, "VhdqD:p:t:c:v:aionrsP:I:")) != EOF) {
 	    switch(arg){
               case 'V':
-                fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+                fprintf(stderr,"NET-SNMP version: %s\n", netsnmp_get_version());
                 exit(0);
                 break;
 
