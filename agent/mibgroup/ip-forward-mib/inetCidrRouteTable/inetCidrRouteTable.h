@@ -27,7 +27,6 @@ extern          "C" {
     config_require(ip-forward-mib/data_access/route);
     config_require(ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_interface);
     config_require(ip-forward-mib/inetCidrRouteTable/inetCidrRouteTable_data_access);
-    config_exclude(mibII/ip);
 
     /*
      * OID, column number and enum definions for  
