@@ -58,6 +58,9 @@ SUPPORTED ARCHITECTURES
      sun4/4.1.4               (note:  NOT SOLARIS) (note: no swap)
      Dec5000/Ultrix 4.3                            (note: no swap)
 
+AVAILABILITY
+  ftp.ece.ucdavis.edu:/pub/snmp/ucd-snmp-3.0.tar.gz
+
 CODE UPDATES / MAILING LIST
 
   I hate broadcasting announce messages, so there is a mailing list
