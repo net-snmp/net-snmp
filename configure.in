@@ -24,6 +24,11 @@ AC_ARG_WITH(ldflags,
 [  --with-ldflags=LDFLAGS          use LDFLAGS as link time arguments to ld.],
     [LIBS=$with_ldflags; export LIBS])
 
+AC_ARG_ENABLE(silent-libtool,
+[  --enable-silent-libtool         Pass --silent to libtool.],
+	LIBTOOLFLAGS=--silent)
+AC_SUBST(LIBTOOLFLAGS)
+
 AC_ARG_ENABLE(mini_agent,
 [  --enable-mini-agent             Build a minimal agent.],
     mini_agent="yes",mini_agent="no")
