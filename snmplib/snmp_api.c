@@ -2772,7 +2772,10 @@ _snmp_parse(void * sessp,
 	    pdu2 = snmp_clone_pdu(pdu);
 	    pdu->flags = pdu2->flags = flags;
 	    snmpv3_make_report(pdu2, result);
-	    snmp_sess_send(sessp, pdu2);
+	    if (0 == snmp_sess_send(sessp, pdu2)) {
+	        snmp_free_pdu(pdu2);
+	        /* TODO: indicate error */
+	    }
 	  }
 	  break;
 	default:
