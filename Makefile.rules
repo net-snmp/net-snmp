@@ -17,13 +17,13 @@ objs: ${OBJS} ${LOBJS}
 subdirs:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
-		for i in $$it ; do       \
+		for i in $$it ; do \
 			echo "making all in `pwd`/$$i"; \
-	                ( cd $$i ; $(MAKE) ) ; \
-                        if test $$? != 0 ; then \
+			( cd $$i ; $(MAKE) ) ; \
+			if test $$? != 0 ; then \
 				exit 1 ; \
 			fi  \
-	        done \
+		done \
 	fi
 
 # installlibs handles local, ucd and subdir libs. need to do subdir libs
@@ -54,46 +54,46 @@ installlocalheaders:
 		echo creating directory $(includedir) ; \
 		it="$(INSTALLHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir) ; \
-	        for i in $$it ; do \
+		for i in $$it ; do \
 			$(INSTALL_DATA) $(top_srcdir)/include/net-snmp/$$i $(INSTALL_PREFIX)$(includedir) ; \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(includedir)" ; \
-	        done \
+			echo "installing $$i in $(INSTALL_PREFIX)$(includedir)" ; \
+		done \
 	fi
 	@if test "$(INSTALLBUILTHEADERS)" != "" ; then \
 		echo creating directory $(includedir) ; \
 		it="$(INSTALLBUILTHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir) ; \
-	        for i in $$it ; do \
+		for i in $$it ; do \
 			$(INSTALL_DATA) $$i $(INSTALL_PREFIX)$(includedir) ; \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(includedir)" ; \
-	        done \
+			echo "installing $$i in $(INSTALL_PREFIX)$(includedir)" ; \
+		done \
 	fi
 	@if test "$(INCLUDESUBDIRHEADERS)" != "" ; then \
 		echo creating directory $(includedir)/$(INCLUDESUBDIR) ; \
 		it="$(INCLUDESUBDIRHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR) ; \
-	        for i in $$it ; do \
+		for i in $$it ; do \
 			$(INSTALL_DATA) $(top_srcdir)/include/net-snmp/$(INCLUDESUBDIR)/$$i $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR) ; \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR)" ; \
-	        done \
+			echo "installing $$i in $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR)" ; \
+		done \
 	fi
 	@if test "$(INCLUDESUBDIRHEADERS2)" != "" ; then \
 		echo creating directory $(includedir)/$(INCLUDESUBDIR2) ; \
 		it="$(INCLUDESUBDIRHEADERS2)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2) ; \
-	        for i in $$it ; do \
+		for i in $$it ; do \
 			$(INSTALL_DATA) $(top_srcdir)/include/net-snmp/$(INCLUDESUBDIR2)/$$i $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2) ; \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2)" ; \
-	        done \
+			echo "installing $$i in $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2)" ; \
+		done \
 	fi
 	@if test "$(INSTALLBUILTSUBDIRHEADERS)" != "" ; then \
 		echo creating directory $(includedir)/$(INSTALLBUILTSUBDIR) ; \
 		it="$(INSTALLBUILTSUBDIRHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR) ; \
-	        for i in $$it ; do \
+		for i in $$it ; do \
 			$(INSTALL_DATA) $$i $(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR) ; \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR)" ; \
-	        done \
+			echo "installing $$i in $(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR)" ; \
+		done \
 	fi
 
 installucdheaders:
@@ -101,59 +101,59 @@ installucdheaders:
 		echo creating directory $(ucdincludedir) ; \
 		it="$(INSTALLUCDHEADERS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(ucdincludedir) ; \
-	        for i in $$it ; do \
+		for i in $$it ; do \
 			$(INSTALL_DATA) $(top_srcdir)/include/ucd-snmp/$$i $(INSTALL_PREFIX)$(ucdincludedir) ; \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(ucdincludedir)" ; \
-	        done \
+			echo "installing $$i in $(INSTALL_PREFIX)$(ucdincludedir)" ; \
+		done \
 	fi
 
 installsubdirheaders:
-       @if test "$(SUBDIRS)" != ""; then \
-               it="$(SUBDIRS)" ; \
-               for i in $$it ; do       \
-                       echo "making installheaders in `pwd`/$$i"; \
-                       ( cd $$i ; $(MAKE) installheaders) ;   \
-                        if test $$? != 0 ; then \
-                               exit 1 ; \
-                       fi  \
-               done \
-       fi
+	@if test "$(SUBDIRS)" != ""; then \
+		it="$(SUBDIRS)" ; \
+		for i in $$it ; do \
+			echo "making installheaders in `pwd`/$$i"; \
+			( cd $$i ; $(MAKE) installheaders) ;   \
+			if test $$? != 0 ; then \
+				exit 1 ; \
+			fi  \
+		done \
+	fi
 
 uninstallheaders:
 	@if test "$(INSTALLHEADERS)" != "" ; then \
 		it="$(INSTALLHEADERS)" ; \
-	        for i in $$it ; do \
+		for i in $$it ; do \
 			rm -f $(INSTALL_PREFIX)$(includedir)/$$i ; \
-	                echo "removing $$i from $(INSTALL_PREFIX)$(includedir)" ; \
-	        done \
+			echo "removing $$i from $(INSTALL_PREFIX)$(includedir)" ; \
+		done \
 	fi
 	@if test "$(INSTALLBUILTHEADERS)" != "" ; then \
 		it="$(INSTALLBUILTHEADERS)" ; \
-	        for i in $$it ; do \
+		for i in $$it ; do \
 			rm -f $(INSTALL_PREFIX)$(includedir)/`basename $$i` ; \
-	                echo "removing $$i from $(INSTALL_PREFIX)$(includedir)" ; \
-	        done \
+			echo "removing $$i from $(INSTALL_PREFIX)$(includedir)" ; \
+		done \
 	fi
 	@if test "$(INCLUDESUBDIRHEADERS)" != "" ; then \
 		it="$(INCLUDESUBDIRHEADERS)" ; \
-	        for i in $$it ; do \
+		for i in $$it ; do \
 			rm -f $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR)/$$i ; \
-	                echo "removing $$i from $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR)" ; \
-	        done \
+			echo "removing $$i from $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR)" ; \
+		done \
 	fi
 	@if test "$(INCLUDESUBDIRHEADERS2)" != "" ; then \
 		it="$(INCLUDESUBDIRHEADERS2)" ; \
-	        for i in $$it ; do \
+		for i in $$it ; do \
 			rm -f $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2)/$$i ; \
-	                echo "removing $$i from $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2)" ; \
-	        done \
+			echo "removing $$i from $(INSTALL_PREFIX)$(includedir)/$(INCLUDESUBDIR2)" ; \
+		done \
 	fi
 	@if test "$(INSTALLBUILTSUBDIRHEADERS)" != "" ; then \
 		it="$(INSTALLBUILTSUBDIRHEADERS)" ; \
-	        for i in $$it ; do \
+		for i in $$it ; do \
 			rm -f $(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR)/`basename $$i` ; \
-	                echo "removing $$i from $(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR)" ; \
-	        done \
+			echo "removing $$i from $(INSTALL_PREFIX)$(includedir)/$(INSTALLBUILTSUBDIR)" ; \
+		done \
 	fi
 
 #
@@ -167,11 +167,11 @@ installlocallibs: $(INSTALLLIBS)
 	@if test "$(INSTALLLIBS)" != ""; then \
 		it="$(INSTALLLIBS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(libdir) ; \
-                $(INSTALL) $(INSTALLLIBS) $(INSTALL_PREFIX)$(libdir) ;       \
-	        for i in $$it ; do    \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(libdir)"; \
-	                $(RANLIB) $(INSTALL_PREFIX)$(libdir)/$$i ; \
-	        done ; \
+		$(INSTALL) $(INSTALLLIBS) $(INSTALL_PREFIX)$(libdir) ; \
+		for i in $$it ; do \
+			echo "installing $$i in $(INSTALL_PREFIX)$(libdir)"; \
+			$(RANLIB) $(INSTALL_PREFIX)$(libdir)/$$i ; \
+		done ; \
 		$(LIB_LDCONFIG_CMD) ; \
 	fi
 
@@ -179,33 +179,33 @@ installucdlibs: $(INSTALLUCDLIBS)
 	@if test "$(INSTALLUCDLIBS)" != ""; then \
 		it="$(INSTALLUCDLIBS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(libdir) ; \
-                $(INSTALL) $(INSTALLUCDLIBS) $(INSTALL_PREFIX)$(libdir) ;    \
-	        for i in $$it ; do    \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(libdir)"; \
-	                $(RANLIB) $(INSTALL_PREFIX)$(libdir)/$$i ; \
-	        done ; \
+		$(INSTALL) $(INSTALLUCDLIBS) $(INSTALL_PREFIX)$(libdir) ; \
+		for i in $$it ; do \
+			echo "installing $$i in $(INSTALL_PREFIX)$(libdir)"; \
+			$(RANLIB) $(INSTALL_PREFIX)$(libdir)/$$i ; \
+		done ; \
 		$(LIB_LDCONFIG_CMD) ; \
 	fi
 
 installsubdirlibs:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
-		for i in $$it ; do       \
+		for i in $$it ; do \
 			echo "making installlibs in `pwd`/$$i"; \
-	                ( cd $$i ; $(MAKE) installlibs) ;   \
-                        if test $$? != 0 ; then \
+			( cd $$i ; $(MAKE) installlibs) ;   \
+			if test $$? != 0 ; then \
 				exit 1 ; \
 			fi  \
-	        done \
+		done \
 	fi
 
 uninstalllibs:
 	@if test "$(INSTALLLIBS)" != ""; then \
 		it="$(INSTALLLIBS)" ; \
-	        for i in $$it ; do   \
-		        $(UNINSTALL) $(INSTALL_PREFIX)$(libdir)/$$i ; \
-	                echo "removing $$i from $(INSTALL_PREFIX)$(libdir)"; \
-	        done \
+		for i in $$it ; do   \
+			$(UNINSTALL) $(INSTALL_PREFIX)$(libdir)/$$i ; \
+			echo "removing $$i from $(INSTALL_PREFIX)$(libdir)"; \
+		done \
 	fi
 
 #
@@ -219,31 +219,31 @@ installlocalbin: $(INSTALLBINPROGS)
 	@if test "$(INSTALLBINPROGS) $(INSTALLBINSCRIPTS)" != " "; then \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(bindir) ; \
 		it="$(INSTALLBINPROGS) $(INSTALLBINSCRIPTS)" ; \
-	        $(INSTALL) $(INSTALLBINPROGS) $(INSTALLBINSCRIPTS) $(INSTALL_PREFIX)$(bindir) ;              \
-	        for i in $$it ; do   \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(bindir)"; \
-	        done \
+		$(INSTALL) $(INSTALLBINPROGS) $(INSTALLBINSCRIPTS) $(INSTALL_PREFIX)$(bindir) ; \
+		for i in $$it ; do   \
+			echo "installing $$i in $(INSTALL_PREFIX)$(bindir)"; \
+		done \
 	fi
 
 installsubdirbin:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
-		for i in $$it ; do       \
+		for i in $$it ; do \
 			echo "making installbin in `pwd`/$$i"; \
-	                ( cd $$i ; $(MAKE) installbin) ;   \
-                        if test $$? != 0 ; then \
+			( cd $$i ; $(MAKE) installbin) ;   \
+			if test $$? != 0 ; then \
 				exit 1 ; \
 			fi  \
-	        done \
+		done \
 	fi
 
 uninstallbin:
 	@if test "$(INSTALLBINPROGS) $(INSTALLBINSCRIPTS)" != " "; then \
 		it="$(INSTALLBINPROGS) $(INSTALLBINSCRIPTS)" ; \
-	        for i in $$it ; do   \
-		        $(UNINSTALL) $(INSTALL_PREFIX)$(bindir)/$$i ; \
-	                echo "removing $$i from $(INSTALL_PREFIX)$(bindir)"; \
-	        done \
+		for i in $$it ; do   \
+			$(UNINSTALL) $(INSTALL_PREFIX)$(bindir)/$$i ; \
+			echo "removing $$i from $(INSTALL_PREFIX)$(bindir)"; \
+		done \
 	fi
 
 #
@@ -257,31 +257,31 @@ installlocalsbin: $(INSTALLSBINPROGS)
 	@if test "$(INSTALLSBINPROGS)" != ""; then \
 		it="$(INSTALLSBINPROGS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(INSTALL_PREFIX)$(sbindir) ; \
-	        $(INSTALL) $(INSTALLSBINPROGS) $(INSTALL_PREFIX)$(sbindir) ;  \
-	        for i in $$it ; do   \
-	                echo "installing $$i in $(INSTALL_PREFIX)$(sbindir)"; \
-	        done \
+		$(INSTALL) $(INSTALLSBINPROGS) $(INSTALL_PREFIX)$(sbindir) ;  \
+		for i in $$it ; do   \
+			echo "installing $$i in $(INSTALL_PREFIX)$(sbindir)"; \
+		done \
 	fi
 
 installsubdirsbin:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
-		for i in $$it ; do       \
+		for i in $$it ; do \
 			echo "making installsbin in `pwd`/$$i"; \
-	                ( cd $$i ; $(MAKE) installsbin) ;   \
-                        if test $$? != 0 ; then \
+			( cd $$i ; $(MAKE) installsbin) ;   \
+			if test $$? != 0 ; then \
 				exit 1 ; \
 			fi  \
-	        done \
+		done \
 	fi
 
 uninstallsbin:
 	@if test "$(INSTALLSBINPROGS)" != ""; then \
 		it="$(INSTALLSBINPROGS)" ; \
-	        for i in $$it ; do   \
-		        $(UNINSTALL) $(INSTALL_PREFIX)$(sbindir)/$$i ; \
-	                echo "removing $$i from $(INSTALL_PREFIX)$(sbindir)"; \
-	        done \
+		for i in $$it ; do   \
+			$(UNINSTALL) $(INSTALL_PREFIX)$(sbindir)/$$i ; \
+			echo "removing $$i from $(INSTALL_PREFIX)$(sbindir)"; \
+		done \
 	fi
 
 #
@@ -290,25 +290,25 @@ uninstallsbin:
 installsubdirs:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
-		for i in $$it ; do       \
+		for i in $$it ; do \
 			echo "making install in `pwd`/$$i"; \
-	                ( cd $$i ; $(MAKE) install) ;   \
-                        if test $$? != 0 ; then \
+			( cd $$i ; $(MAKE) install) ;   \
+			if test $$? != 0 ; then \
 				exit 1 ; \
 			fi  \
-	        done \
+		done \
 	fi
 
 uninstallsubdirs:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
-		for i in $$it ; do       \
+		for i in $$it ; do \
 			echo "making uninstall in `pwd`/$$i"; \
-	                ( cd $$i ; $(MAKE) uninstall) ;   \
-                        if test $$? != 0 ; then \
+			( cd $$i ; $(MAKE) uninstall) ;   \
+			if test $$? != 0 ; then \
 				exit 1 ; \
 			fi  \
-	        done \
+		done \
 	fi
 
 #
@@ -321,13 +321,13 @@ clean: cleansubdirs $(OTHERCLEANTODOS)
 cleansubdirs:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
-		for i in $$it ; do       \
+		for i in $$it ; do \
 			echo "making clean in `pwd`/$$i"; \
-	                ( cd $$i ; $(MAKE) clean) ;   \
-                        if test $$? != 0 ; then \
+			( cd $$i ; $(MAKE) clean) ;   \
+			if test $$? != 0 ; then \
 				exit 1 ; \
 			fi  \
-	        done \
+		done \
 	fi
 
 lint:
@@ -356,37 +356,37 @@ distdepend: nosysdepend distdependdirs
 dependdirs:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
-		for i in $$it ; do       \
+		for i in $$it ; do \
 			echo "making depend in `pwd`/$$i"; \
-	                ( cd $$i ; $(MAKE) depend) ;   \
-                        if test $$? != 0 ; then \
+			( cd $$i ; $(MAKE) depend) ;   \
+			if test $$? != 0 ; then \
 				exit 1 ; \
 			fi  \
-	        done \
+		done \
 	fi
 
 nosysdependdirs:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
-		for i in $$it ; do       \
+		for i in $$it ; do \
 			echo "making nosysdepend in `pwd`/$$i"; \
-	                ( cd $$i ; $(MAKE) nosysdepend) ;   \
-                        if test $$? != 0 ; then \
+			( cd $$i ; $(MAKE) nosysdepend) ;   \
+			if test $$? != 0 ; then \
 				exit 1 ; \
 			fi  \
-	        done \
+		done \
 	fi
 
 distdependdirs:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
-		for i in $$it ; do       \
+		for i in $$it ; do \
 			echo "making distdepend in `pwd`/$$i"; \
-	                ( cd $$i ; $(MAKE) distdepend) ;   \
-                        if test $$? != 0 ; then \
+			( cd $$i ; $(MAKE) distdepend) ;   \
+			if test $$? != 0 ; then \
 				exit 1 ; \
 			fi  \
-	        done \
+		done \
 	fi
 
 # These aren't real targets, let gnu's make know that.
