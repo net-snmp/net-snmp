@@ -55,6 +55,7 @@ SOFTWARE.
 #ifndef MSVC_PERL
 #ifdef WIN32
 
+#ifndef HAVE_DIRENT_H /* MingGW has dirent.h but also defines WIN32 */
     /*
      * structure of a directory entry 
      */
@@ -63,6 +64,7 @@ SOFTWARE.
         int             d_namlen;       /* Name length */
         char            d_name[257];    /* file name */
     } _DIRECT;
+#endif /* HAVE_DIRENT_H */
 
     /*
      * structure for dir operations 
