@@ -652,21 +652,28 @@ if test "x$ac_cv_func_getservbyname" != "xyes"; then
        fi
 fi
 dnl AC_CHECK_LIB(ucb, bzero)
+
+dnl
+dnl with rpm3 or higher, we need db1 to exist
+dnl
 AC_CHECK_LIB(rpm, rpmdbOpen,[
   AC_DEFINE(HAVE_LIBRPM)
   LIBS="$LIBS -lrpm -ldb1"
-  dnl zlib is required for newer versions of rpm
-  AC_CHECK_LIB(z, zlibVersion)
-],[
-  dnl Ok, -ldb1 may not exist, try -ldb
+],,-ldb1 -lz)
+
+dnl Ok, -ldb1 may not exist, try -ldb
+if test "x$ac_cv_lib_rpm_rpmdbOpen" = "xno"; then
+  unset ac_cv_lib_rpm_rpmdbOpen
   AC_CHECK_LIB(rpm, rpmdbOpen,[
     AC_DEFINE(HAVE_LIBRPM)
     LIBS="$LIBS -lrpm -ldb"
-    dnl zlib is required for newer versions of rpm
-    AC_CHECK_LIB(z, zlibVersion)
   ],,-ldb -lz)
-],-ldb1 -lz)
+fi
 
+dnl zlib is required for newer versions of rpm
+if test "x$ac_cv_lib_rpm_rpmdbOpen" = "xyes"; then
+  AC_CHECK_LIB(z, zlibVersion)
+fi
 dnl Replace `main' with a function in -lkstat:
 AC_CHECK_LIB(kstat, kstat_lookup)
 dnl Replace `main' with a function in -lkvm:
