@@ -24,6 +24,9 @@
 #  include <time.h>
 # endif
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
