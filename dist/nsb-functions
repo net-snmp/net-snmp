@@ -38,6 +38,7 @@ NSB_SKIP_CONFIG=${NSB_SKIP_CONFIG:=0}
 NSB_SKIP_BUILD=${NSB_SKIP_BUILD:=0}
 NSB_SKIP_TEST=${NSB_SKIP_TEST:=0}
 NSB_SKIP_INSTALL=${NSB_SKIP_INSTALL:=0}
+NSB_ERR_CTX_LINES=${NSB_ERR_CTX_LINES:=25}
 NSB_DIST_TRANSPORTS="UDP TCP Unix Callback"
 NSB_EXTRA_TRANSPORTS=""
 NSB_DIST_MODULES="host disman/event-mib smux"
@@ -310,7 +311,7 @@ nsb-make()
    if [ -s nsb-make-$target-errs.$NSB_DATE ]; then
       nsb-prompt "press enter to view errors"
       grep ':' $nsb_make_OUTPUT > nsb-make-$target-errs2.$NSB_DATE
-      cat nsb-make-$target-errs2.$NSB_DATE >&2
+      tail -n $NSB_ERR_CTX_LINES nsb-make-$target-errs2.$NSB_DATE >&2
       nsb-abort "Error(s) during make $target"
    fi
 
