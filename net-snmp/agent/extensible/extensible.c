@@ -972,10 +972,10 @@ init_extensible() {
 #ifndef bsdi2
   if (KNLookup(NL_NSWAPDEV,(int *) &nswapdev, sizeof(nswapdev))
       == NULL)
-    return(0);
+    return;
   if (KNLookup(NL_NSWAPFS,(int *) &nswapfs, sizeof(nswapfs))
       == NULL)
-    return(0);
+    return;
 #endif
   pagesize = 1 << PGSHIFT;
   pageshift = 0;
