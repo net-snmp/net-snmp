@@ -207,7 +207,7 @@ debugmsg_hextli(const char *token, u_char *thedata, size_t len) {
   /*XX tracing lines removed from this function DEBUGTRACE; */
   DEBUGIF(token) {
     for(incr = 16; len > 0; len -= incr, thedata += incr) {
-      if (len < incr) incr = len;
+      if ((int)len < incr) incr = len;
       /*XXnext two lines were DEBUGPRINTINDENT(token);*/
       debugmsgtoken(token, "%s", debug_indent());
       debugmsg(token, "%s", debug_indent());
