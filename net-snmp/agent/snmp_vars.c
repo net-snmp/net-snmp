@@ -106,9 +106,19 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
+#if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
+#define _KERNEL 1
+#define _I_DEFINED_KERNEL
+#endif
 #include <net/if.h>
+#ifdef _I_DEFINED_KERNEL
+#undef _KERNEL
+#endif
 #include <net/route.h>
 #include <netinet/in_systm.h>
+#if HAVE_SYS_HASHING_H
+#include <sys/hashing.h>
+#endif
 #if HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
 #endif
@@ -155,6 +165,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_KVM_H
 #include <kvm.h>
 #endif
+#endif
+#if HAVE_SYS_TCPIPSTATS_H
+#include <sys/tcpipstats.h>
 #endif
 
 #ifndef NULL
