@@ -288,7 +288,7 @@ snmp_transport	       *snmp_tdomain_transport	(const char *string, int local,
     for (i = 0; d->prefix[i] != NULL; i++) {
       if (strcasecmp(d->prefix[i], spec) == 0) {
 	DEBUGMSGTL(("tdomain", "specifier \"%s\" matched\n", spec));
-	t = d->f_create(addr, local);
+	t = d->f_create_from_tstring(addr, local);
 	free(mystring);
 	return t;
       }
@@ -313,15 +313,40 @@ snmp_transport	       *snmp_tdomain_transport	(const char *string, int local,
     for (i = 0; d->prefix[i] != NULL; i++) {
       if (strcmp(d->prefix[i], spec) == 0) {
 	DEBUGMSGTL(("tdomain", "specifier \"%s\" matched\n", spec));
-	t = d->f_create(addr, local);
+	t = d->f_create_from_tstring(addr, local);
 	free(mystring);
 	return t;
       }
     }
   }
 
-  snmp_log(LOG_ERR, "No support for requested transport domain \"%s\"", spec);
+  snmp_log(LOG_ERR, "No support for requested transport domain \"%s\"\n",spec);
   free(mystring);
+  return NULL;
+}
+
+
+snmp_transport	       *snmp_tdomain_transport_oid(const oid *dom,
+						   size_t dom_len,
+						   const u_char *o,
+						   size_t o_len, int local)
+{
+  snmp_tdomain *d;
+  int i;
+
+  DEBUGMSGTL(("tdomain", "domain \""));
+  DEBUGMSGOID(("tdomain", dom, dom_len));
+  DEBUGMSG(("tdomain", "\"\n"));
+
+  for (d = domain_list; d != NULL; d = d->next) {
+    for (i = 0; d->prefix[i] != NULL; i++) {
+      if (snmp_oid_compare(dom, dom_len, d->name, d->name_length) == 0) {
+	return d->f_create_from_ostring(o, o_len, local);
+      }
+    }
+  }
+
+  snmp_log(LOG_ERR, "No support for requested transport domain\n");
   return NULL;
 }
 

@@ -613,7 +613,7 @@ int		snmp_udp_getSecName	(void *opaque, int olength,
 
 
 
-snmp_transport	*snmp_udp_create	       (const char *string, int local)
+snmp_transport	*snmp_udp_create_tstring       (const char *string, int local)
 {
   struct sockaddr_in addr;
 
@@ -625,13 +625,30 @@ snmp_transport	*snmp_udp_create	       (const char *string, int local)
 }
 
 
+snmp_transport	*snmp_udp_create_ostring       (const u_char *o, size_t o_len,
+						int local)
+{
+  struct sockaddr_in addr;
+
+  if (o_len == 6) {
+    addr.sin_family = AF_INET;
+    memcpy((u_char *)&(addr.sin_addr.s_addr), o, 4);
+    addr.sin_port = (o[4] << 8) + o[5];
+    return snmp_udp_transport(&addr, local);
+  }
+  return NULL;
+}
+
+
 void		snmp_udp_ctor			(void)
 {
   udpDomain.name        = snmpUDPDomain;
   udpDomain.name_length = sizeof(snmpUDPDomain)/sizeof(oid);
-  udpDomain.f_create	= snmp_udp_create;
   udpDomain.prefix	= calloc(2, sizeof(char *));
   udpDomain.prefix[0] 	= "udp";
+
+  udpDomain.f_create_from_tstring = snmp_udp_create_tstring;
+  udpDomain.f_create_from_ostring = snmp_udp_create_ostring;
 
   snmp_tdomain_register(&udpDomain);
 }

@@ -326,7 +326,7 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
 
 
 
-snmp_transport	*snmp_tcp_create		(const char *string, int local)
+snmp_transport	*snmp_tcp_create_tstring	(const char *string, int local)
 {
   struct sockaddr_in addr;
 
@@ -339,13 +339,31 @@ snmp_transport	*snmp_tcp_create		(const char *string, int local)
 
 
 
+snmp_transport	*snmp_tcp_create_ostring       (const u_char *o, size_t o_len,
+						int local)
+{
+  struct sockaddr_in addr;
+
+  if (o_len == 6) {
+    addr.sin_family = AF_INET;
+    memcpy((u_char *)&(addr.sin_addr.s_addr), o, 4);
+    addr.sin_port = (o[4] << 8) + o[5];
+    return snmp_tcp_transport(&addr, local);
+  }
+  return NULL;
+}
+
+
+
 void		snmp_tcp_ctor			(void)
 {
   tcpDomain.name        = snmpTCPDomain;
   tcpDomain.name_length = sizeof(snmpTCPDomain)/sizeof(oid);
-  tcpDomain.f_create	= snmp_tcp_create;
   tcpDomain.prefix      = calloc(2, sizeof(char *));
   tcpDomain.prefix[0]   = "tcp";
+
+  tcpDomain.f_create_from_tstring = snmp_tcp_create_tstring;
+  tcpDomain.f_create_from_ostring = snmp_tcp_create_ostring;
 
   snmp_tdomain_register(&tcpDomain);
 }
