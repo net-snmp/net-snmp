@@ -124,6 +124,30 @@ snmp_parse_args_descriptions(FILE *outf)
 
 #define BUF_SIZE 512
 
+void
+handle_long_opt(const char *myoptarg) 
+{
+    char *cp, *cp2;
+    /* else it's a long option, so process it like name=value */
+    cp = malloc(strlen(myoptarg) + 3);
+    strcpy(cp, myoptarg);
+    cp2 = strchr(cp, '=');
+    if (!cp2 && !strchr(cp,' ')) {
+        /* well, they didn't specify an argument as far as we
+           can tell.  Give them a '1' as the argument (which
+           works for boolean tokens and a few others) and let
+           them suffer from there if it's not what they
+           wanted */
+        strcat(cp, " 1");
+    } else {
+        /* replace the '=' with a ' ' */
+        if (cp2)
+            *cp2 = ' ';
+    }
+    snmp_config(cp);
+    free(cp);
+}
+
 int
 snmp_parse_args(int argc, 
 		char *const *argv, 
@@ -139,7 +163,7 @@ snmp_parse_args(int argc,
 
   /* initialize session to default values */
   snmp_sess_init( session );
-  strcpy(Opts, "Y:VhHm:M:O:I:P:D:dv:r:t:c:Z:e:E:n:u:l:x:X:a:A:p:T:");
+  strcpy(Opts, "Y:VhHm:M:O:I:P:D:dv:r:t:c:Z:e:E:n:u:l:x:X:a:A:p:T:-:");
   if (localOpts) strcat(Opts, localOpts);
 
   /* get the options */
@@ -152,6 +176,18 @@ snmp_parse_args(int argc,
   while ((arg = getopt(argc, argv, Opts)) != EOF) {
     DEBUGMSGTL(("snmp_parse_args","handling (#%d): %c\n", optind, arg));
     switch(arg){
+      case '-':
+          if (strcasecmp(optarg, "help") == 0) {
+              return(-1);
+          }
+          if (strcasecmp(optarg, "version") == 0) {
+              fprintf(stderr,"NET-SNMP version: %s\n", netsnmp_get_version());
+              return(-2);
+          }
+
+          handle_long_opt(optarg);
+          break;
+
       case 'V':
         fprintf(stderr,"NET-SNMP version: %s\n", netsnmp_get_version());
         return(-2);
