@@ -119,7 +119,10 @@ int exec_command(ex)
   fclose(file);
   close(fd);
 #ifndef CACHETIME
-  while(wait3(&ex->result,WNOHANG,0) > 0);
+  if (ex->pid && waitpid(ex->pid,&ex->result,0) < 0) {
+    perror("waitpid():");
+  }
+  ex->pid = 0;
 #endif
   return(ex->result);
 }
@@ -158,7 +161,7 @@ int get_exec_output(ex)
       {
         perror("pipe");
       }
-    if ((fpid = fork()) == 0) 
+    if ((ex->pid = fork()) == 0) 
       {
         close(1);
         if (dup(fd[1]) != 1)
@@ -209,9 +212,10 @@ int get_exec_output(ex)
         close(cfd);
         close(fd[0]);
         /* wait for the child to finish */
-        if (waitpid(fpid,&ex->result,0) < 0) {
+        if (ex->pid && waitpid(ex->pid,&ex->result,0) < 0) {
           perror("waitpid():");
         }
+        ex->pid = 0;
         ex->result = WEXITSTATUS(ex->result);
         lastresult = ex->result;
 #else
