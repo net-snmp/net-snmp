@@ -249,6 +249,9 @@ var_atEntry(struct variable *vp,
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
 	    long_return = lowIfIndex;
 #else /* ARP_SCAN_FOUR_ARGUMENTS */
+#ifdef NO_DUMMY_VALUES
+	    return NULL;
+#endif
 	    long_return = 1; /* XXX */
 #endif /* ARP_SCAN_FOUR_ARGUMENTS */
 	    return (u_char *)&long_return;
