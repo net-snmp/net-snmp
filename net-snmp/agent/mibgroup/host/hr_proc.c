@@ -189,7 +189,7 @@ var_hrproc(struct variable *vp,
 			 * I'm also assuming a single processor
 			 */
 #if defined(ultrix) || defined(sun) || defined(__alpha)
-            long_return = (long) (FIX_TO_DBL(avenrun[i])*100.0);
+            long_return = (long) (FIX_TO_DBL(avenrun[0])*100.0);
 #else
 	    long_return = avenrun[0] * 100;	/* 1 minute average */
 #endif
