@@ -291,11 +291,6 @@ initialize_table_$context(void)
      * call interface initialization code
      */
     _${context}_initialize_interface(user_context, flags);
-
-    /*
-     * call data access initialization code
-     */
-    ${context}_init_data(user_context);
 }
 
 ########################################################################
