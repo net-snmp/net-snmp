@@ -431,7 +431,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
         oid   *nptr = request->requestvb->name;
         
         DEBUGMSGTL(("agentx/master","request for variable ("));
-        DEBUGMSGOID(("agent/master", nptr, nlen));
+        DEBUGMSGOID(("agentx/master", nptr, nlen));
         DEBUGMSG(("agentx/master", ")\n"));
         
         /*
@@ -443,7 +443,7 @@ agentx_master_handler(netsnmp_mib_handler *handler,
             if (snmp_oid_compare(nptr, nlen, request->subtree->start_a,
                                  request->subtree->start_len) < 0) {
                 DEBUGMSGTL(("agentx/master","inexact request preceeding region ("));
-                DEBUGMSGOID(("agent/master", request->subtree->start_a,
+                DEBUGMSGOID(("agentx/master", request->subtree->start_a,
                              request->subtree->start_len));
                 DEBUGMSG(("agentx/master", ")\n"));
                 nptr = request->subtree->start_a;
