@@ -289,7 +289,7 @@ var_system(struct variable *vp,
 #endif
               
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_system\n", vp->magic));
     }
     return NULL;
 }

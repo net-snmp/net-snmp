@@ -156,7 +156,7 @@ var_hrprint(struct variable *vp,
 	    long_return = 0;	/* Null string */
 	    return (u_char *)&long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrprint\n", vp->magic));
     }
     return NULL;
 }

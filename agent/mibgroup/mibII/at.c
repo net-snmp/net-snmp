@@ -264,7 +264,7 @@ var_atEntry(struct variable *vp,
 	    long_return = lowIfType;
 	    return (u_char *)&long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_atEntry\n", vp->magic));
    }
    return NULL;
 }
@@ -386,7 +386,7 @@ var_atEntry(struct variable *vp,
 	    long_return = Lowentry.ipNetToMediaType;
 	    return (u_char *)&long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_atEntry\n", vp->magic));
    }
    return NULL;
 }

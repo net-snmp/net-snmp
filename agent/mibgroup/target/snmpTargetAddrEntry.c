@@ -653,7 +653,7 @@ var_snmpTargetAddrEntry(
     return (unsigned char *) &long_ret;
     
   default:
-    ERROR_MSG("ERROR: snmpTargetAddrEntry: magic not found.\n");
+    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_snmpTargetAddrEntry\n", vp->magic));
   }
   return 0;
 }  /* var_snmpTargetAddrEntry */

@@ -148,7 +148,7 @@ write_snmp (int action,
     switch ( action ) {
 	case RESERVE1:			/* Check values for acceptability */
 	    if (var_val_type != ASN_INTEGER){
-		ERROR_MSG("not integer");
+	        DEBUGMSGTL(("mibII/snmp_mib", "%x not integer type", var_val_type));
 		return SNMP_ERR_WRONGTYPE;
 	    }
 	

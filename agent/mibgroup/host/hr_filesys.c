@@ -365,7 +365,7 @@ var_hrfilesys(struct variable *vp,
 	case HRFSYS_PARTDUMP:
 	    return when_dumped( HRFS_entry->HRFS_name, PART_DUMP, var_len );
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrfilesys\n", vp->magic));
     }
     return NULL;
 }

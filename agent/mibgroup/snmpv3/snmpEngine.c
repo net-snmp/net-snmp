@@ -101,7 +101,7 @@ var_snmpEngine(
       return (unsigned char *) &long_ret;
 
     default:
-      ERROR_MSG("");
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_snmpEngine\n", vp->magic));
   }
   return 0;
 }

@@ -187,7 +187,7 @@ var_hrsys(struct variable *vp,
 #endif
 	    return (u_char *)&long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrsys\n", vp->magic));
     }
     return NULL;
 }

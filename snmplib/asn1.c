@@ -175,7 +175,6 @@ asn_parse_int(u_char *data,
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
  */
     static const char *errpre = "parse int";
-    char ebuf[128];
     register u_char *bufp = data;
     u_long	    asn_length;
     register long   value = 0;
@@ -238,7 +237,6 @@ asn_parse_unsigned_int(u_char *data,
  * ASN.1 integer ::= 0x02 asnlength byte {byte}*
  */
     static const char *errpre = "parse uint";
-    char ebuf[128];
     register u_char *bufp = data;
     u_long	    asn_length;
     register u_long value = 0;
@@ -444,7 +442,6 @@ asn_parse_string(u_char *data,
 		 size_t *strlength)
 {
     static const char *errpre = "parse string";
-    char ebuf[128];
     u_char *bufp = data;
     u_long  asn_length;
 
@@ -1129,8 +1126,6 @@ asn_parse_bitstring(u_char *data,
  * bitstring ::= 0x03 asnlength unused {byte}*
  */
     static const char *errpre = "parse bitstring";
-    char ebuf[128];
-    
     register u_char *bufp = data;
     u_long	    asn_length;
 
@@ -1230,7 +1225,6 @@ asn_parse_unsigned_int64(u_char *data,
  */
     static const char *errpre = "parse uint64";
     const int uint64sizelimit = (4 * 2) + 1;
-    char ebuf[128];
     register u_char *bufp = data;
     u_long	    asn_length;
     register u_long low = 0, high = 0;

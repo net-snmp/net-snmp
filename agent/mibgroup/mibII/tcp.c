@@ -359,7 +359,7 @@ var_tcp(struct variable *vp,
 		return (u_char *) &long_return;
 #endif /* linux */
 	    default:
-		ERROR_MSG("");
+		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_tcp\n", vp->magic));
 	}
     return NULL;
 }
@@ -509,7 +509,7 @@ var_tcp(struct variable *vp,
 		return (u_char *) &long_return;
 #endif /* linux */
 	    default:
-		ERROR_MSG("");
+		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_tcp\n", vp->magic));
 	}
     return NULL;
 }
@@ -691,7 +691,7 @@ var_tcp(struct variable *vp,
       long_return = ipstat.tcpInErrs;
       return(u_char *) &long_return;
     default:
-      ERROR_MSG("");
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_tcp\n", vp->magic));
       return (NULL);
     }
 }
@@ -778,7 +778,7 @@ var_tcpEntry(struct variable *vp,
       long_return = Lowentry.tcpConnRemPort;
       return(u_char *) &long_return;
     default:
-      ERROR_MSG("");
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_tcpEntry\n", vp->magic));
       return (NULL);
     }
 }

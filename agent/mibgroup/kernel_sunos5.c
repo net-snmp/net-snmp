@@ -202,8 +202,8 @@ int getKstatInt(char *classname, char *statname, char *varname, int *value)
       break;
 #endif
     default:
-      fprintf(stderr, "non-integer type in kstat data: %s %s %s %d\n",
-	      classname, statname, varname, named->data_type);
+      DEBUGMSGTL(("kernel_sunos5", "non-integer type in kstat data: %s %s %s %d\n",
+	      classname, statname, varname, named->data_type));
       break;
     }
     kstat_close(ksc);
@@ -330,8 +330,8 @@ getKstat(const char *statname, const char *varname, void *value)
         DEBUGMSGTL(("kernel_sunos5", "value: %f\n", d->value.d));
 	break;
       default:
-	fprintf(stderr, "Unknown type in kstat data: %s %s %d\n",
-		statname, varname, d->data_type);
+	DEBUGMSGTL(("kernel_sunos5", "Unknown type in kstat data: %s %s %d\n",
+		statname, varname, d->data_type));
 	ret = -3;
 	goto Return;		/* Invalid data type */
       }
@@ -892,9 +892,9 @@ ip20comp(void *ifname, void *ipp)
 int
 ARP_Cmp_Addr(void *addr, void *ep)
 {
-  fprintf(stderr, "ARP: %lx <> %lx\n",
+  DEBUGMSGTL(("kernel_sunos5", "ARP: %lx <> %lx\n",
       ((mib2_ipNetToMediaEntry_t *)ep)->ipNetToMediaNetAddress,
-      *(IpAddress *)addr);
+      *(IpAddress *)addr));
   if (((mib2_ipNetToMediaEntry_t *)ep)->ipNetToMediaNetAddress ==
       *(IpAddress *)addr)
     return (0);

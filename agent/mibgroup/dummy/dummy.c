@@ -185,7 +185,7 @@ var_dummy(struct variable *vp,
 	    return (u_char *)&long_ret;
 
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_dummy\n", vp->magic));
     }
     return NULL;
 }

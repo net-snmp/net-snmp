@@ -279,7 +279,7 @@ var_hrdisk(struct variable *vp,
 	    long_return = HRD_savedCapacity;
 	    return (u_char *)&long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrdisk\n", vp->magic));
     }
     return NULL;
 }

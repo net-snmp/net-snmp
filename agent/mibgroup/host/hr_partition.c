@@ -233,7 +233,7 @@ var_hrpartition(struct variable *vp,
 	    long_return = Get_FSIndex( HRP_savedName );
 	    return (u_char *)&long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrpartition\n", vp->magic));
     }
     return NULL;
 }

@@ -458,7 +458,6 @@ sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
   rval = kmt_hash(KMT_CRYPT_MODE_ALL, &context, buf, buf_len, &MAC, MAC_len);
 
   if (rval != SNMPERR_SUCCESS) {
-    ERROR_MSG("sc_hash(): kmt_hash() did not return SNMPERR_SUCCESS.");
     return SNMPERR_SC_GENERAL_FAILURE;
   }
 

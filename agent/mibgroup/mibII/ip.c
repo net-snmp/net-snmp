@@ -284,7 +284,6 @@ var_ip(struct variable *vp,
 	case IPFORWARDING:
 #ifndef sparc	  
             auto_nlist(IP_FORWARDING_SYMBOL,(char *) &i, sizeof(i));
-	    fflush(stderr);
 	    if (i) {
 		long_return = 1;		/* GATEWAY */
 	    } else {
@@ -407,7 +406,7 @@ var_ip(struct variable *vp,
 	    long_return = 0;
 	    return (u_char *) &long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ip\n", vp->magic));
     }
     return NULL;
 }
@@ -462,7 +461,6 @@ var_ip(struct variable *vp,
 #else /* not (HAVE_SYS_SYSCTL_H && CTL_NET) */
 #ifndef sparc	  
             auto_nlist(IP_FORWARDING_SYMBOL,(char *) &i, sizeof(i));
-	    fflush(stderr);
 	    if (i) {
 		long_return = 1;		/* GATEWAY */
 	    } else {
@@ -540,7 +538,7 @@ var_ip(struct variable *vp,
           long_return = ipstat.ips_noroute;
           return (u_char *) &long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ip\n", vp->magic));
     }
 }
 
@@ -589,7 +587,7 @@ var_ip(struct variable *vp,
 	case IPFRAGFAILS: return (u_char *) &ipstat.IpFragFails;
 	case IPFRAGCREATES: return (u_char *) &ipstat.IpFragCreates;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ip\n", vp->magic));
     }
     return NULL;
 }
@@ -738,7 +736,7 @@ var_ipAddrEntry(struct variable *vp,
 	    long_return = -1;
 	    return(u_char *) &long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipAddrEntry\n", vp->magic));
     }
     return NULL;
 }
@@ -877,7 +875,7 @@ var_ip(struct variable *vp,
       	    break;
 	default:
 	    ret = NULL;		/* Failure */
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ip\n", vp->magic));
     }
     return (ret);
 }
@@ -978,7 +976,7 @@ var_ipAddrEntry(struct variable *vp,
 	    long_return = Lowentry.ipAdEntBcastAddr;
 	    return(u_char *) &long_return;	   
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipAddrEntry\n", vp->magic));
     }
     return NULL;
 }
@@ -1154,7 +1152,7 @@ var_ip(struct variable *vp,
 		return (u_char *) &long_return;
 
 	default:
-		ERROR_MSG("");
+		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ip\n", vp->magic));
 	}
 	return NULL;
 }
@@ -1366,7 +1364,7 @@ var_ipAddrEntry(struct variable *vp,
 		return (u_char *)&long_return;
 
 	default:
-		ERROR_MSG("");
+		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ipAddrEntry\n", vp->magic));
 	}
 	return NULL;
 }

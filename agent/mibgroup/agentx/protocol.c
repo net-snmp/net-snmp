@@ -44,6 +44,7 @@
 #include "snmp_impl.h"
 #include "snmp.h"
 #include "snmp_client.h"
+#include "snmp_debug.h"
 
 #include "agentx/protocol.h"
 
@@ -553,7 +554,7 @@ agentx_parse_oid( u_char *data, size_t *length, int *inc,
      u_char *buf_ptr = data;
 
      if ( *length < 4 ) {
-	ERROR_MSG("Incomplete Object ID");
+	DEBUGMSGTL(("agentx","Incomplete Object ID"));
 	return NULL;
      }
 
@@ -575,7 +576,7 @@ agentx_parse_oid( u_char *data, size_t *length, int *inc,
 
 
      if ( *length < 4*n_subid ) {
-	ERROR_MSG("Incomplete Object ID");
+	DEBUGMSGTL(("agentx","Incomplete Object ID"));
 	return NULL;     
      } 
      
@@ -607,17 +608,17 @@ agentx_parse_string( u_char *data, size_t *length,
      u_int len;
 
      if ( *length <= 4 ) {
-	ERROR_MSG("Incomplete string");
+	DEBUGMSGTL(("agentx","Incomplete string"));
 	return NULL;
      }
 
      len = agentx_parse_int( data, network_byte_order );
      if ( *length < len + 4 ) {
-	ERROR_MSG("Incomplete string");
+	DEBUGMSGTL(("agentx","Incomplete string"));
 	return NULL;
      }
      if ( len > *str_len ) {
-	ERROR_MSG("String too long");
+	DEBUGMSGTL(("agentx","String too long"));
 	return NULL;
      }
      memmove( string, data+4, len );
@@ -1038,7 +1039,7 @@ agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, s
 		break;
 
 	default:
-		ERROR_MSG("Unrecognised PDU type");
+		DEBUGMSGTL(("agentx","Unrecognised PDU type"));
 		return SNMPERR_UNKNOWN_PDU;
      }
      return SNMP_ERR_NOERROR;
@@ -1057,9 +1058,9 @@ agentx_parse(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, s
 int
 agentx_dump_int(u_char *data, u_int network_byte_order)
 {
-    u_int    value = agentx_parse_int( data, network_byte_order );;
-    printf("INTEGER %.2x %.2x %.2x %.2x = %d\n",
-		*data, *(data+1), *(data+2), *(data+3), value);
+    u_int    value = agentx_parse_int( data, network_byte_order );
+    DEBUGMSGTL(("agentx","INTEGER %.2x %.2x %.2x %.2x = %d\n",
+		*data, *(data+1), *(data+2), *(data+3), value));
 
     return value;
 }
@@ -1068,9 +1069,9 @@ agentx_dump_int(u_char *data, u_int network_byte_order)
 int
 agentx_dump_short(u_char *data, u_int network_byte_order)
 {
-    u_int    value = agentx_parse_short( data, network_byte_order );;
-    printf("SHORT %.2x %.2x = %d\n",
-		*data, *(data+1), value);
+    u_int    value = agentx_parse_short( data, network_byte_order );
+    DEBUGMSGTL(("agentx","SHORT %.2x %.2x = %d\n",
+		*data, *(data+1), value));
     
     return value;
 }
@@ -1085,36 +1086,36 @@ agentx_dump_oid( u_char *data, size_t *length, u_int network_byte_order)
      u_char *buf_ptr = data;
 
      if ( *length < 4 ) {
-	ERROR_MSG("Incomplete Object ID");
+	DEBUGMSGTL(("agentx","Incomplete Object ID"));
 	return NULL;
      }
 
      n_subid = data[0];
      prefix  = data[1];
 
-printf("OBJECT ID #subids = %d,  prefix = %d, inc = %d, (reserved %d)\n", data[1], data[0], data[2], data[3]);
+DEBUGMSGTL(("agentx","OBJECT ID #subids = %d,  prefix = %d, inc = %d, (reserved %d)\n", data[1], data[0], data[2], data[3]));
 
       buf_ptr += 4;
      *length -= 4;
 
      if ( n_subid == 0 ) {
-printf("\t NULL OID\n");
+DEBUGMSGTL(("agentx","\t NULL OID\n"));
 	return buf_ptr;
      }
 
 
      if ( *length < 4*n_subid ) {
-	ERROR_MSG("Incomplete Object ID");
+	DEBUGMSGTL(("agentx","Incomplete Object ID"));
 	return NULL;     
      } 
      
      if ( prefix ) {
-printf("\t [.1.3.6.1.%d]\n", prefix );
+DEBUGMSGTL(("agentx","\t [.1.3.6.1.%d]\n", prefix));
      }
 
 
      for ( i = 0  ; i<n_subid ; i++ ) {
-printf("\t ");
+DEBUGMSGTL(("agentx","\t "));
        	agentx_dump_int( buf_ptr, network_byte_order );
 	buf_ptr += 4;
 	*length -= 4;
@@ -1131,25 +1132,25 @@ agentx_dump_string( u_char *data, size_t *length, u_int network_byte_order)
      u_int len, i;
 
      if ( *length <= 4 ) {
-	ERROR_MSG("Incomplete string");
+	DEBUGMSGTL(("agentx","Incomplete string"));
 	return NULL;
      }
 
-printf("STRING\n\tlength = ");
+DEBUGMSGTL(("agentx","STRING\n\tlength = "));
      len = agentx_dump_int( data, network_byte_order );
      if ( *length < len + 4 ) {
-	ERROR_MSG("Incomplete string");
+	DEBUGMSGTL(("agentx","Incomplete string"));
 	return NULL;
      }
-printf("\t DATA ");
+DEBUGMSGTL(("agentx","\t DATA "));
      for ( i = 0 ; i < len ; i++ ) {
-	printf(" %.2x", data[4+i]);
+	DEBUGMSGTL(("agentx"," %.2x", data[4+i]));
      }
-printf("\n\t = %c", '"');
+DEBUGMSGTL(("agentx","\n\t = %c", '"'));
      for ( i = 0 ; i < len ; i++ ) {
-	printf(" %c", data[4+i]);
+	DEBUGMSGTL(("agentx"," %c", data[4+i]));
      }
-printf("%c\n", '"');
+DEBUGMSGTL(("agentx","%c\n", '"'));
 
      len += 3;	/* Extend the string length to include the padding */
      len >>= 2;
@@ -1166,18 +1167,18 @@ agentx_dump_varbind( u_char *data, size_t *length, u_int network_byte_order)
      u_char *bufp = data;
      u_int   type;
      
-printf("VARBIND\n\ttype = ");
+DEBUGMSGTL(("agentx","VARBIND\n\ttype = "));
      type = agentx_dump_short( bufp, network_byte_order );
-printf("padding %.2x %.2x)\n", *(bufp+2), *(bufp+3));
+DEBUGMSGTL(("agentx","padding %.2x %.2x)\n", *(bufp+2), *(bufp+3)));
      bufp    += 4;
      *length -= 4;
      
-printf("\t ");
+DEBUGMSGTL(("agentx","\t "));
      bufp = agentx_dump_oid( bufp, length, network_byte_order );
      if ( bufp == NULL )
 	    return NULL;
 
-printf("\t value = ");
+DEBUGMSGTL(("agentx","\t value = "));
      switch ( type ) {
 	case ASN_INTEGER:
 	case ASN_COUNTER:
@@ -1202,15 +1203,15 @@ printf("\t value = ");
 		
 	case ASN_COUNTER64:
 		if ( network_byte_order ) {
-		    printf("\t High ");
+		    DEBUGMSGTL(("agentx","\t High "));
 		    agentx_dump_int( bufp,   network_byte_order );
-		    printf("\t Low ");
+		    DEBUGMSGTL(("agentx","\t Low "));
 		    agentx_dump_int( bufp+4, network_byte_order );
 		}
 		else {
-		    printf("\t Low ");
+		    DEBUGMSGTL(("agentx","\t Low "));
 		    agentx_dump_int( bufp,   network_byte_order );
-		    printf("\t High ");
+		    DEBUGMSGTL(("agentx","\t High "));
 		    agentx_dump_int( bufp+4, network_byte_order );
 		}
 		bufp    += 8;
@@ -1222,10 +1223,10 @@ printf("\t value = ");
 	case SNMP_NOSUCHINSTANCE:
 	case SNMP_ENDOFMIBVIEW:
 		/* No data associated with these types */
-printf("null data \n");
+DEBUGMSGTL(("agentx","null data \n"));
 		break;
 	default:
-printf("unrecognised \n");
+DEBUGMSGTL(("agentx","unrecognised \n"));
 		return NULL;
      }
      return bufp;
@@ -1242,7 +1243,7 @@ agentx_dump_header(struct snmp_pdu *pdu, u_char *data, size_t *length)
 	return NULL;
      }
 
-printf("HEADER version = %d, command = %d, flags = %.2x, (reserved %d)\n", *bufp, *(bufp+1), *(bufp+2), *(bufp+3));
+DEBUGMSGTL(("agentx","HEADER version = %d, command = %d, flags = %.2x, (reserved %d)\n", *bufp, *(bufp+1), *(bufp+2), *(bufp+3)));
      pdu->version = AGENTX_VERSION_BASE | *bufp;
      bufp++;
      pdu->command = *bufp;
@@ -1251,16 +1252,16 @@ printf("HEADER version = %d, command = %d, flags = %.2x, (reserved %d)\n", *bufp
      bufp++;
      bufp++;
 
-printf("\t Session ID = ");
+DEBUGMSGTL(("agentx","\t Session ID = "));
      agentx_dump_int( bufp, pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
      bufp += 4;
-printf("\t Request ID = ");
+DEBUGMSGTL(("agentx","\t Request ID = "));
      agentx_dump_int( bufp, pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
      bufp += 4;
-printf("\t Message ID = ");
+DEBUGMSGTL(("agentx","\t Message ID = "));
      agentx_dump_int( bufp, pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
      bufp += 4;
-printf("\t Payload Length = ");
+DEBUGMSGTL(("agentx","\t Payload Length = "));
      payload = agentx_dump_int( bufp,
 				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
      bufp += 4;
@@ -1299,7 +1300,7 @@ agentx_dump(struct snmp_session *session, struct snmp_pdu *pdu, u_char *data, si
 		 *  ... and (not-un-common) context
 		 */
      if ( pdu->flags & 	AGENTX_MSG_FLAG_NON_DEFAULT_CONTEXT ) {
-printf("CONTEXT ");
+DEBUGMSGTL(("agentx","CONTEXT "));
 	bufp = agentx_dump_string( bufp, length,
 				pdu->flags &  AGENTX_FLAGS_NETWORK_BYTE_ORDER );
 	if ( bufp == NULL )
@@ -1309,7 +1310,7 @@ printf("CONTEXT ");
 
      switch ( pdu->command ) {
 	case AGENTX_MSG_OPEN:
-printf("OPEN T/Out = %d, (reserved %d %d %d)\n", *bufp, *(bufp+1), *(bufp+2), *(bufp+3));
+DEBUGMSGTL(("agentx","OPEN T/Out = %d, (reserved %d %d %d)\n", *bufp, *(bufp+1), *(bufp+2), *(bufp+3)));
 		bufp     += 4;
 		*length  -= 4;
 
@@ -1324,14 +1325,14 @@ printf("OPEN T/Out = %d, (reserved %d %d %d)\n", *bufp, *(bufp+1), *(bufp+2), *(
 		break;
 
 	case AGENTX_MSG_CLOSE:
-printf("CLOSE reason = %d, (reserved %d %d %d)\n", *bufp, *(bufp+1), *(bufp+2), *(bufp+3));
+DEBUGMSGTL(("agentx","CLOSE reason = %d, (reserved %d %d %d)\n", *bufp, *(bufp+1), *(bufp+2), *(bufp+3)));
 		bufp     += 4;
 		*length  -= 4;
 		break;
 
 	case AGENTX_MSG_REGISTER:
 	case AGENTX_MSG_UNREGISTER:
-printf("(Un)REGISTER T/Out = %d, priority = %d, range = %d, (reserved %d)\n", *bufp, *(bufp+1), *(bufp+2), *(bufp+3));
+DEBUGMSGTL(("agentx","(Un)REGISTER T/Out = %d, priority = %d, range = %d, (reserved %d)\n", *bufp, *(bufp+1), *(bufp+2), *(bufp+3)));
 		range_subid = *(bufp+2);
 		bufp     += 4;
 		*length -= 4;
@@ -1343,7 +1344,7 @@ printf("(Un)REGISTER T/Out = %d, priority = %d, range = %d, (reserved %d)\n", *b
 		    return SNMPERR_ASN_PARSE_ERR;
 
 		if ( range_subid ) {
-printf("\t range bound = ");
+DEBUGMSGTL(("agentx","\t range bound = "));
     			agentx_dump_int( bufp,
 				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
 			bufp    += 4;
@@ -1353,10 +1354,10 @@ printf("\t range bound = ");
 		break;
 
 	case AGENTX_MSG_GETBULK:
-printf("GETBULK non-rep = ");
+DEBUGMSGTL(("agentx","GETBULK non-rep = "));
 		agentx_dump_short( bufp,
 				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
-printf("\t max-rep = ");
+DEBUGMSGTL(("agentx","\t max-rep = "));
 		agentx_dump_short( bufp+2,
 				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
 		bufp    += 4;
@@ -1371,7 +1372,7 @@ printf("\t max-rep = ");
 			*  Keep going while we have data left
 			*/
 		while ( *length > 0 ) {
-printf("Search List \n");
+DEBUGMSGTL(("agentx","Search List \n"));
 		    bufp = agentx_dump_oid( bufp, length,
 				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
 		    if ( bufp == NULL )
@@ -1388,16 +1389,16 @@ printf("Search List \n");
 	case AGENTX_MSG_RESPONSE:
 
 					/* sysUpTime */
-printf("RESPONSE T/Out = ");
+DEBUGMSGTL(("agentx","RESPONSE T/Out = "));
 		agentx_dump_int( bufp,
 				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
 		bufp    += 4;
 		*length -= 4;
 		
-printf("\t Error status = ");
+DEBUGMSGTL(("agentx","\t Error status = "));
 		pdu->errstat   = agentx_dump_short( bufp,
 				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
-printf("\t Error index = ");
+DEBUGMSGTL(("agentx","\t Error index = "));
 		pdu->errindex  = agentx_dump_short( bufp+2,
 				pdu->flags & AGENTX_FLAGS_NETWORK_BYTE_ORDER );
 		bufp    += 4;
@@ -1426,13 +1427,13 @@ printf("\t Error index = ");
 	case AGENTX_MSG_CLEANUPSET:
 	case AGENTX_MSG_PING:
 
-printf("Empty packet\n");
+DEBUGMSGTL(("agentx","Empty packet\n"));
 		/* "Empty" packet */
 		break;
 
 
 	case AGENTX_MSG_ADD_AGENT_CAPS:
-printf("ADD AGENT CAPS \n");
+DEBUGMSGTL(("agentx","ADD AGENT CAPS \n"));
 		bufp = agentx_dump_oid( bufp, length,
 				pdu->flags &  AGENTX_FLAGS_NETWORK_BYTE_ORDER );
 		if ( bufp == NULL )
@@ -1444,7 +1445,7 @@ printf("ADD AGENT CAPS \n");
 		break;
 
 	case AGENTX_MSG_REMOVE_AGENT_CAPS:
-printf("REMOVE AGENT CAPS \n");
+DEBUGMSGTL(("agentx","REMOVE AGENT CAPS \n"));
 		bufp = agentx_dump_oid( bufp, length,
 				pdu->flags &  AGENTX_FLAGS_NETWORK_BYTE_ORDER );
 		if ( bufp == NULL )
@@ -1452,7 +1453,7 @@ printf("REMOVE AGENT CAPS \n");
 		break;
 
 	default:
-		ERROR_MSG("Unrecognised PDU type");
+		DEBUGMSGTL(("agentx","Unrecognised PDU type"));
 		return SNMPERR_UNKNOWN_PDU;
      }
      return SNMP_ERR_NOERROR;
@@ -1476,45 +1477,45 @@ testit( struct snmp_pdu *pdu1)
      	/* Encode this into a "packet" */
      len1 = BUFSIZ;
      if ( agentx_build( &sess, pdu1, packet1, &len1 ) < 0 ) {
-         printf( "First build failed" );
+         DEBUGMSGTL(("agentx","First build failed"));
 	 exit(1);
      }
 
-     printf( "First build succeeded:\n" );
+     DEBUGMSGTL(("agentx","First build succeeded:\n"));
      xdump( packet1, len1, "Ax1> ");
      
      	/* Unpack this into a PDU */
      len2 = len1;
      if ( agentx_parse( &pdu2, packet1, &len2, (u_char **)NULL ) < 0 ) {
-         printf( "First parse failed\n" );
+         DEBUGMSGTL(("agentx","First parse failed\n"));
 	 exit(1);
      }
-     printf( "First parse succeeded:\n" );
+     DEBUGMSGTL(("agentx","First parse succeeded:\n"));
      if ( len2 != 0 ) 
-         printf("Warning - parsed packet has %d bytes left\n", len2);
+         DEBUGMSGTL(("agentx","Warning - parsed packet has %d bytes left\n", len2));
 
      	/* Encode this into another "packet" */
      len2 = BUFSIZ;
      if ( agentx_build( &sess, &pdu2, packet2, &len2 ) < 0 ) {
-         printf( "Second build failed\n" );
+         DEBUGMSGTL(("agentx","Second build failed\n"));
 	 exit(1);
      }
 
-     printf( "Second build succeeded:\n" );
+     DEBUGMSGTL(("agentx","Second build succeeded:\n"));
      xdump( packet2, len2, "Ax2> ");
 
 	/* Compare the results */
      if ( len1 != len2 ) {
-     	printf("Error: first build (%d) is different to second (%d)\n",
-			len1, len2);
+     	DEBUGMSGTL(("agentx","Error: first build (%d) is different to second (%d)\n",
+			len1, len2));
 	exit(1);
      }
      if (memcmp( packet1, packet2, len1 ) != 0 ) {
-     	printf("Error: first build data is different to second\n");
+     	DEBUGMSGTL(("agentx","Error: first build data is different to second\n"));
 	exit(1);
      }
 
-     printf("OK\n");
+     DEBUGMSGTL(("agentx","OK\n"));
 }
 
 
