@@ -25,7 +25,7 @@ INSTALLDIRS = snmplib agent apps local man mibs
 all:	sedscript EXAMPLE.conf subdirs
 
 sedscript: sedscript.in config.h agent/mibgroup/mibdefs.h
-	$(CPP) -DPREFIX=$(prefix) $(srcdir)/sedscript.in | sed 's/REMOVEME//g;s# /#/#g;s/ #/#/g;' | egrep '^s[/#]' > sedscript
+	$(CPP) -DPREFIX=$(prefix) $(srcdir)/sedscript.in | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;' | egrep '^s[/#]' > sedscript
 
 subdirs:
 	for i in $(SUBDIRS) ; do \
