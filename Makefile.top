@@ -47,11 +47,12 @@ EXTRACPPFLAGS	= @EXTRACPPFLAGS@
 LDFLAGS		= @LDFLAGS@ 
 LIBTOOL		= @LIBTOOL@ @LIBTOOLFLAGS@
 EXEEXT		= @EXEEXT@
+SHVFLAGS	= @SHVFLAGS@
 
 # Misc Compiling Stuff
 CC	        = @CC@
 # version number is prefixed by a 0 for a better shared library version number
-LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) -rpath $(libdir) -release 0.$(VERSION) -o
+LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) -rpath $(libdir) $(SHVFLAGS) -o
 LIB_EXTENSION   = la
 LIB_VERSION     =
 LIB_LDCONFIG_CMD = $(LIBTOOL) --mode=finish $(libdir)
