@@ -159,6 +159,7 @@ sub oidlength {
 #   $var.commaoid      -- comma separated OID for array init
 #   $var.subid         -- last number component of oid
 #   $var.oidlength     -- length of the oid
+#   $var.perltype      -- node's perl SYNTAX
 #   $var.type          -- node's ASN_XXX type
 #   $var.settable      -- 1 if it's writable, 0 if not
 #   $var.noaccess      -- 1 if not-accessible, 0 if not
@@ -167,7 +168,7 @@ sub oidlength {
 #   $var.syntax        -- node's syntax
 #   $var.decl          -- C data type
 #   $var.isscalar      -- returns 1 if var contains the name of a scalar
-#   $var.istable       -- returns 1 if var contains the name of a column
+#   $var.iscolumn      -- returns 1 if var contains the name of a column
 #   $var.parent        -- contains the label of the parent node of $var.
 
 sub process_vars {
@@ -187,6 +188,8 @@ sub process_vars {
     $it =~ s/\$(\w+)\.(iscolumn)/($SNMP::MIB{$vars{$1}}{'parent'}{'label'} =~ \/Entry$\/) ? 1 : 0/eg;
     $it =~ s/\$(\w+)\.(isscalar)/($SNMP::MIB{$vars{$1}}{'parent'}{'label'} !~ \/Entry$\/ && $SNMP::MIB{$vars{$1}}{access}) ? 1 : 0/eg;
     $it =~ s/\$(\w+)\.(parent)/$SNMP::MIB{$vars{$1}}{'parent'}{'label'}/g;
+    # check for enums
+    $it =~ s/\$(\w+)\.(enums)/(%{$SNMP::MIB{$vars{$1}}{'enums'}} == 0) ? 0 : 1/eg;
     # normal variable substitions
     $it =~ s/\$\{(\w+)\}/$vars{$1}/g;
     $it =~ s/\$(\w+)/$vars{$1}/g;
@@ -310,9 +313,11 @@ sub process {
 		$vars{$var} = $scalar;
 		my $oldscalar = $currentscalar;
 		$currentscalar = $scalar;
+		$currentvar = $scalar;
 		process();
 		$vars{$var} = $oldvar;
 		$currentscalar = $oldscalar;
+		$currentvar = $scalar;
 	      }
 	    }
 	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+notifications*\s*\@/) {
@@ -386,9 +391,11 @@ sub process {
 		$vars{$var} = $column;
 		my $oldcolumn = $currentcolumn;
 		$currentcolumn = $column;
+		$currentvar = $column;
 		process();
 		$vars{$var} = $oldvar;
 		$currentcolumn = $oldcolumn;
+		$currentvar = $oldcolumn;
 	      }
 	    }
 	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+\$([^\@]+)\s+range\s+([^\@]+)\@/) {
@@ -418,15 +425,16 @@ sub process {
 	    my ($varvar, $varval, $type) = ($1, $2, $3);
 	    my $startpos = $fh->tell();
 	    my $enum;
-	    my @keys = sort { $SNMP::MIB{$currentcolumn}{'enums'}{$a} <=>
-				  $SNMP::MIB{$currentcolumn}{'enums'}{$b} } (keys(%{$SNMP::MIB{$currentcolumn}{'enums'}}));
+
+	    my @keys = sort { $SNMP::MIB{$currentvar}{'enums'}{$a} <=>
+				  $SNMP::MIB{$currentvar}{'enums'}{$b} } (keys(%{$SNMP::MIB{$currentvar}{'enums'}}));
 	    if ($#keys > -1) {
 		foreach $enum (@keys) {
 		    $fh->seek($startpos, 0); # go to top of section.
 		    my $oldvarvar = $vars{$varvar};
 		    my $oldvarval = $vars{$varval};
 		    $vars{$varvar} = $enum;
-		    $vars{$varval} = $SNMP::MIB{$currentcolumn}{'enums'}{$enum};
+		    $vars{$varval} = $SNMP::MIB{$currentvar}{'enums'}{$enum};
 		    process();
 		    $vars{$varvar} = $oldvarvar;
 		    $vars{$varval} = $oldvarval;
