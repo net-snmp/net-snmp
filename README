@@ -25,7 +25,6 @@ TABLE OF CONTENTS
   Agent Extensibility
   Example Agent Configuration and Usage 
   Configuration
-  Snmpv1 Vs. Snmpv2
   Submitting Bug Reports
   Closing
   Thanks
@@ -163,8 +162,8 @@ AGENT EXTENSIBILITY
 
   Note: This agent uses its own API for extensibility.  The IETF's
   agentx working group have developed a common API for subagent
-  extensibility, which we are working on providing support for in our
-  agent.
+  extensibility called AgentX, which we now have alpha level support
+  for (see configure --help).
 
 CONFIGURATION
 
