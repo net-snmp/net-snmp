@@ -446,7 +446,7 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
 #endif
 
 
-#if !(defined(linux) || defined(solaris))
+#if !(defined(linux) || defined(solaris2))
     if ( magic == IPFORWARDING ) {
 
 #if defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS)
