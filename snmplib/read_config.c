@@ -866,10 +866,10 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
     /* malloc data space if needed */
     if (*str == NULL) {
       if (*len == 0) {
-        /* null length string found */
-        cptr = NULL;
+        /* null length string found, malloc 1 bogus byte */
+        cptr = malloc(1);
 
-      } else if (*len > 0 && (str == NULL || (cptr = (u_char *)malloc(*len)) == NULL)) {
+      } else if (*len > 0 && (str == NULL || (cptr = (u_char *)malloc(*len+1)) == NULL)) {
         return NULL;
       }
       *str = cptr;
@@ -883,6 +883,7 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
       *cptr++ = (u_char) tmp;
       readfrom += 2;
     }
+    *cptr++ = '\0';
     readfrom = skip_white(readfrom);
   } else {
     /* Normal string */
@@ -1040,10 +1041,12 @@ char *read_config_store_data(int type, char *storeto, void *dataptr, size_t *len
       return (storeto + strlen(storeto));
       
     case ASN_OCTET_STR:
+      *storeto++ = ' ';
       charpp = (u_char **) dataptr;
       return read_config_save_octet_string(storeto, *charpp, *len);
 
     case ASN_OBJECT_ID:
+      *storeto++ = ' ';
       oidpp = (oid **) dataptr;
       return read_config_save_objid(storeto, *oidpp, *len);
 
