@@ -543,7 +543,7 @@ usm_parse_create_usmUser(const char *token, char *line) {
   }
 add:
   usm_add_user(newuser);
-  DEBUGMSGTL(("usmUser","created a new user %s at", newuser->secName));
+  DEBUGMSGTL(("usmUser","created a new user %s at ", newuser->secName));
   DEBUGMSGHEX(("usmUser", newuser->engineID, newuser->engineIDLen));
   DEBUGMSG(("usmUser", "\n"));
 }
