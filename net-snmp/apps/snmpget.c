@@ -77,7 +77,7 @@ SOFTWARE.
 #include "system.h"
 #include "snmp_parse_args.h"
 
-void main __P((int, char **));
+int main __P((int, char **));
 int failures;
 
 void
@@ -89,7 +89,7 @@ usage __P((void))
   snmp_parse_args_descriptions(stderr);
 }
 
-void
+int
 main (argc, argv)
     int  argc;
     char *argv[];
