@@ -267,25 +267,25 @@ oid ipv6icmp_variables_oid[] = {1,3,6,1,2,1,56,1};
 #endif
 
 struct variable4 ipv6udp_variables[] = {
-    {IPV6UDPLOCALADDRESS, ASN_OCTET_STR, RONLY, var_udp6, 3, {1, 1, 1}},
-    {IPV6UDPLOCALPORT, ASN_INTEGER, RONLY, var_udp6, 3, {1, 1, 2}},
-    {IPV6UDPIFINDEX, ASN_INTEGER, RONLY, var_udp6, 3, {1, 1, 3}}
+    {IPV6UDPLOCALADDRESS, ASN_OCTET_STR, RONLY, var_udp6, 2, {1, 1}},
+    {IPV6UDPLOCALPORT, ASN_INTEGER, RONLY, var_udp6, 2, {1, 2}},
+    {IPV6UDPIFINDEX, ASN_INTEGER, RONLY, var_udp6, 2, {1, 3}}
 };
-oid ipv6udp_variables_oid[] = {1,3,6,1,3,87,1};
+oid ipv6udp_variables_oid[] = {1,3,6,1,2,1,7,6};
 #if 0
     config_load_mib(1.3.6.1.3.87.1, 7, ipv6udp_variables)
     config_add_mib(IPV6-UDP-MIB)
 #endif
 
 struct variable4 ipv6tcp_variables[] = {
-    {IPV6TCPLOCALADDR, ASN_OCTET_STR, RONLY, var_tcp6, 3, {16, 1, 1}},
-    {IPV6TCPLOCALPORT, ASN_INTEGER, RONLY, var_tcp6, 3, {16, 1, 2}},
-    {IPV6TCPREMOTEADDR, ASN_OCTET_STR, RONLY, var_tcp6, 3, {16, 1, 3}},
-    {IPV6TCPREMOTEPORT, ASN_INTEGER, RONLY, var_tcp6, 3, {16, 1, 4}},
-    {IPV6TCPIFINDEX, ASN_INTEGER, RONLY, var_tcp6, 3, {16, 1, 5}},
-    {IPV6TCPCONNSTATE, ASN_INTEGER, RONLY, var_tcp6, 3, {16, 1, 6}},
+    {IPV6TCPLOCALADDR, ASN_OCTET_STR, RONLY, var_tcp6, 2, {1, 1}},
+    {IPV6TCPLOCALPORT, ASN_INTEGER, RONLY, var_tcp6, 2, {1, 2}},
+    {IPV6TCPREMOTEADDR, ASN_OCTET_STR, RONLY, var_tcp6, 2, {1, 3}},
+    {IPV6TCPREMOTEPORT, ASN_INTEGER, RONLY, var_tcp6, 2, {1, 4}},
+    {IPV6TCPIFINDEX, ASN_INTEGER, RONLY, var_tcp6, 2, {1, 5}},
+    {IPV6TCPCONNSTATE, ASN_INTEGER, RONLY, var_tcp6, 2, {1, 6}},
 };
-oid ipv6tcp_variables_oid[] = {1,3,6,1,3,86,1};
+oid ipv6tcp_variables_oid[] = {1,3,6,1,2,1,6,16};
 #if 0
     config_load_mib(1.3.6.1.3.86.1, 7, ipv6tcp_variables)
     config_add_mib(IPV6-TCP-MIB)
@@ -791,6 +791,7 @@ var_ifv6Entry(vp, name, length, exact, var_len, write_method)
       }
 #endif /*0*/
 
+#if HAVE_STRUCT_IN6_IFSTAT
     case IPV6IFSTATSINRCVS:
     case IPV6IFSTATSINHDRERRS:
     case IPV6IFSTATSTOOBIGERRS:
@@ -897,6 +898,7 @@ var_ifv6Entry(vp, name, length, exact, var_len, write_method)
 	}
 	return (u_char *)&long_return;
       }
+#endif	/* HAVE_STRUCT_IN6_IFSTAT */
     default:
 	break;
     }
@@ -934,6 +936,7 @@ var_icmpv6Entry(vp, name, length, exact, var_len, write_method)
 	return NULL;
 
     switch (vp->magic) {
+#if HAVE_STRUCT_ICMP6_IFSTAT
     case IPV6IFICMPINMSG:
     case IPV6IFICMPINERRORS:
     case IPV6IFICMPINDSTUNRCHS:
@@ -1082,6 +1085,7 @@ var_icmpv6Entry(vp, name, length, exact, var_len, write_method)
 	}
 	return (u_char *)&long_return;
       }
+#endif	/* HAVE_STRUCT_ICMP6_IFSTAT */
     default:
 	break;
     }
