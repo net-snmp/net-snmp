@@ -281,6 +281,16 @@ else
   AC_MSG_RESULT(no)
 fi
 
+if test "x$developer" != "xno" -a -f $srcdir/remove-files; then
+  dnl turn on the developer flag when taken from a CVS checkout (not a release)
+  developer="yes"
+fi
+
+dnl disable --enable-shared by default in cvs/developer cases.
+if test "x$developer" = "xyes"; then
+  AC_DISABLE_SHARED
+fi
+
 dnl libtool stuff for shared/static libraries.
 AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
@@ -320,13 +330,8 @@ VERSION=`cat $srcdir/version.h | sed 's/";//;s/.*"//;s/pre/0./;'`
 AC_SUBST(VERSION)
 AC_MSG_RESULT($VERSION)
 
-AC_MSG_CHECKING(for developer flags)
-if test "x$developer" != "xno" -a -f $srcdir/remove-files; then
-  dnl turn on the developer flag when taken from a CVS checkout (not a release)
-  developer="yes"
-fi
-
 dnl super type checking
+AC_MSG_CHECKING(for developer gcc flags)
 if test "x$developer" = "xyes" -a "x$ac_cv_prog_gcc" = "xyes"; then
   devflags="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-unused -Wno-char-subscripts"
   CFLAGS="$CFLAGS $devflags"
