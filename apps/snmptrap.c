@@ -173,8 +173,7 @@ int main(int argc, char *argv[])
 
     session.callback = snmp_input;
     session.callback_magic = NULL;
-    if (session.remote_port == SNMP_DEFAULT_REMPORT)
-	session.remote_port = SNMP_TRAP_PORT;
+    ds_set_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT, SNMP_TRAP_PORT);
 
     if (session.version == SNMP_VERSION_3 && !inform) {
         /* for traps, we use ourselves as the authoritative engine
