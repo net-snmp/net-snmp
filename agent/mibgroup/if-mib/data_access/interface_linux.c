@@ -46,7 +46,11 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
     FILE           *devin;
     char            line[256];
     /*
-     *   byte pkts errs drop fifo  frame cmprs mcst|byte pkts errs drop fifo  colls carrier compressed
+     * scanline_2_2:
+     *  [               IN                        ]
+     *   byte pkts errs drop fifo frame cmprs mcst |
+     *  [               OUT                               ]
+     *   byte pkts errs drop fifo colls carrier compressed
      */
 #ifdef SCNuMAX
     uintmax_t       rec_pkt, rec_oct, rec_err, rec_drop, rec_mcast;
