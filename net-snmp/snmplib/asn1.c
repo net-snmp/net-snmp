@@ -710,7 +710,8 @@ asn_build_objid(data, datalength, type, objid, objidlength)
 
     /* store the encoded OID value */
     for (i = 1, objid_val = first_objid_val, op = objid+2; i < objidlength;
-                i++, objid_val = *op++) {
+                i++) {
+      if (i != 1) objid_val = *op++;
         switch (objid_size[i]) {
         case 1:
             *data++ = (u_char)objid_val;
