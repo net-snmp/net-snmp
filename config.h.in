@@ -745,6 +745,9 @@
 /* Define if you have the <xti.h> header file.  */
 #undef HAVE_XTI_H
 
+/* Define if you have the RSAglue library (-lRSAglue).  */
+#undef HAVE_LIBRSAGLUE
+
 /* Define if you have the crypto library (-lcrypto).  */
 #undef HAVE_LIBCRYPTO
 
@@ -774,6 +777,9 @@
 
 /* Define if you have the popt library (-lpopt).  */
 #undef HAVE_LIBPOPT
+
+/* Define if you have the rsaref library (-lrsaref).  */
+#undef HAVE_LIBRSAREF
 
 /* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ
