@@ -3,7 +3,6 @@
  *
  */
 
-#include "../common_header.h"
 #include "wombat.h"
 
 
@@ -48,23 +47,6 @@
 	 *********************/
 
 
-static struct nlist wombat_nl[] = {
-#define N_WOMBATSTAT    0
-#define N_MIN_WOMBAT    1
-#define N_MAX_WOMBAT    2
-#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
-        { "_wombatstat"},
-        { "_wombat_min"},
-        { "_wombat_max"},
-#else
-        { "wombatstat"},
-        { "wombat_min"},
-        { "wombat_max"},
-#endif
-        { 0 },
-};
-
-
 void calculate_wombat();
 
 
@@ -77,7 +59,15 @@ void calculate_wombat();
 
 void	init_wombat( )
 {
-    init_nlist( wombat_nl );
+  /* the auto_nlist routine automatically looks up an nlist symbol in
+     the kernel and returns the value.  It does not have to be done in
+     the init_wombat() routine, but we've put it here for our
+     example. */
+    auto_nlist("wombatstat");
+};
+
+
+
 }
 
 /* function which scans a given snmpd.conf line for information */
