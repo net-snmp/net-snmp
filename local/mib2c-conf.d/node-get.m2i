@@ -9,6 +9,7 @@
 ########################################################################
 ##
 @include m2c_setup_node.m2i@
+@eval $m2c_node_realloc = 2@ // malloc
 /*
  * ${node}_get
  *
@@ -32,6 +33,9 @@ $m2c_node_get_comments
  *        the $node pointer.
  *        NOTE: DO NOT free the previous pointer.
  *        NOTE: The agent will release the memory you allocate.
+ *              If you call this function yourself, you are responsible
+ *              for checking if the pointer changed, and freeing the
+ *              previous memory.
 @end@
  *
  * @return MFD_SUCCESS         : success
@@ -75,10 +79,10 @@ ${node}_get( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_ref )
 @        exit@
 @    end@
 ##   ------------------------------------------------------------------
-@    if $m2c_node_skip_mapping != 1@
+@    if ($m2c_node_skip_mapping != 1) && ("$m2c_data_context" ne "generated")@
 @        include generic-value-map.m2i@
 @    end@
-@    include generic-get-decl-bot.m2i@            
+@    include generic-get-decl-bot.m2i@  // copy value out
 @end@ # no syntax include
 
     return SNMP_ERR_NOERROR;

@@ -11,6 +11,9 @@
 @if "x$mfd_readme_verbose" eq "x"@
 @   eval $mfd_readme_verbose = 1@
 @end@
+@if "x$m2c_code_verbose" eq "x"@
+@   eval $m2c_code_verbose = 0@
+@end@
 ########################################################################
 ## enum constants upper or lower case? (NODE_NAME vs node_name)
 @if "x$m2c_const_lc" eq "x"@

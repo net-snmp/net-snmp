@@ -13,9 +13,11 @@
     /*
      * TODO:
      * value mapping
+@if $mfd_code_verbose == 1@
      *
      * If the values for your data type don't exactly match the
      * possible values defined by the mib, you should map them here.
+@end@
      */
 $example_start
     /*

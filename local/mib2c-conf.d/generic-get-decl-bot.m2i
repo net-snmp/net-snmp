@@ -10,11 +10,9 @@
 ##
 @if $m2c_get_use_temp == 1@
     /* copy temporary value to passed parameter */
+    (* $m2c_node_param_ref_name) = $m2c_node_lh;
 @    if $m2c_node_needlength == 1@
-    (* ${node}_ptr_ptr) = $m2c_node_lh;
-     (*${node}_len_ptr) = $m2c_node_lhs;
-@    else@
-    (* ${node}_ptr) = $m2c_node_lh;
+    (* $m2c_node_param_ref_lname) = $m2c_node_lhs;
 @    end@
 @end@
 ##

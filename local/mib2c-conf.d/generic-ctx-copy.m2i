@@ -15,15 +15,15 @@
 @else@
      * copy $node data
 @end@
-     *  from '${m2c_ctx_rh}XXX to '${m2c_ctx_lh}XXX'
+     *  from '${m2c_ctx_rh} to '${m2c_ctx_lh}'
      */
 @if ($m2c_include_examples != 0) || ("$m2c_data_context" eq "generated")@
 @   if $m2c_node_needlength == 0@
-    ${m2c_ctx_lh}$node = ${m2c_ctx_rh}$node;
+    ${m2c_ctx_lh} = ${m2c_ctx_rh};
 @   else@
-    memcpy( ${m2c_ctx_lh}$node, ${m2c_ctx_rh}$node,
-            (${m2c_ctx_rh}${node}_len * sizeof(${m2c_ctx_lh}$node[0])));
-    ${m2c_ctx_lh}${node}_len = ${m2c_ctx_rh}${node}_len;
+    memcpy( ${m2c_ctx_lh}, ${m2c_ctx_rh},
+            (${m2c_ctx_rhs} * sizeof(${m2c_ctx_lh}[0])));
+    ${m2c_ctx_lhs} = ${m2c_ctx_rhs};
 @   end@ # need length
 @end@
 
