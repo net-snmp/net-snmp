@@ -118,6 +118,18 @@ int calculate_time_diff(struct timeval *, struct timeval *);
 #ifndef HAVE_STRCASESTR
 char *strcasestr(const char *, const char *);
 #endif
+#ifndef HAVE_STRTOL
+long strtol(const char *, char **, int);
+#endif
+#ifndef HAVE_STRTOUL
+unsigned long strtoul(const char *, char **, int);
+#endif
+#ifndef HAVE_SNPRINTF
+int snprintf(char *, size_t, const char *, ...);
+#endif
+#ifndef HAVE_VSNPRINTF
+int vsnprintf(char *, size_t, const char *, va_list);
+#endif
 
 int mkdirhier(const char *pathname, mode_t mode, int skiplast);
 
