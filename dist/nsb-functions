@@ -55,10 +55,10 @@ nsb-get-config()
    fi
    ngc_src=$1
    ngc_inst=$2
-   echo $ngc_src/configure --prefix=$ngc_inst --with-sys-location=Unknown \
+   echo $ngc_src/configure --with-sys-location=Unknown \
       --with-sys-contact='System Administrator' --disable-privacy \
       --with-defaults --with-mib-modules='host disman/event-mib'
-   $ngc_src/configure --prefix=$ngc_inst --with-sys-location=Unknown \
+   $ngc_src/configure --with-sys-location=Unknown \
       --with-sys-contact='System Administrator' --disable-privacy \
       --with-defaults --with-mib-modules='host disman/event-mib'
 }
