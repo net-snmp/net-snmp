@@ -4,12 +4,12 @@
  */
 
 #include <config.h>
-
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 
 #include "host_res.h"
+#include "util_funcs.h"
 #include "hr_proc.h"
 #include "auto_nlist.h"
 #include "agent_read_config.h"
@@ -43,8 +43,8 @@ void	init_hr_proc( )
 #endif
 }
 
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_hrproc(...

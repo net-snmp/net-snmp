@@ -192,8 +192,8 @@ static u_char * if_list = 0;
 static const u_char * if_list_end;
 static size_t if_list_size = 0;
 
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_ifEntry(...
@@ -602,8 +602,8 @@ static int Interface_Get_Ether_By_Index (int, u_char *);
 	 *********************/
 
 
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
+
+
 
 #ifdef linux
 typedef struct _conf_if_list {
@@ -1672,8 +1672,8 @@ Interface_Index_By_Name(char *Name,
 #include <net/if_mib.h>
 #include <net/route.h>
 
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
+
+
 
 static	char *physaddrbuf;
 static	int nphysaddrs;

@@ -4,7 +4,6 @@
  */
 
 #include <config.h>
-
 #include <sys/types.h>
 #include <sys/param.h>
 #if HAVE_SYS_VM_H
@@ -38,6 +37,7 @@
 #endif
 
 #include "host_res.h"
+#include "util_funcs.h"
 #include "hr_storage.h"
 #include "hr_filesys.h"
 #include "auto_nlist.h"
@@ -125,8 +125,8 @@ void init_hr_storeage (void)
     auto_nlist(MBSTAT_SYMBOL,0,0);
 }
 
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_hrstore(...

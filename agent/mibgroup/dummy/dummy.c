@@ -4,10 +4,10 @@
  */
 
 #include <config.h>
-
 #include "../mibincl.h"
 #include "../struct.h"
 #include "../../../snmplib/system.h"
+#include "util_funcs.h"
 #include "dummy.h"
 
 /*  
@@ -98,8 +98,8 @@ void dummy_free_config (void) {
 }
 
 
-#define MATCH_FAILED	1
-#define MATCH_SUCCEEDED	0
+
+
 
 /* header_dummy(...
    Arguments:

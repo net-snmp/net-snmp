@@ -155,8 +155,8 @@ void init_system_mib(void)
 
 }
 
-#define MATCH_FAILED	1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_system(...
