@@ -64,6 +64,8 @@ netsnmp_create_table_data_set(const char *table_name)
 {
     netsnmp_table_data_set *table_set =
         SNMP_MALLOC_TYPEDEF(netsnmp_table_data_set);
+    if (!table_set)
+        return NULL;
     table_set->table = netsnmp_create_table_data(table_name);
     return table_set;
 }
@@ -183,8 +185,12 @@ int
 netsnmp_mark_row_column_writable(netsnmp_table_row *row, int column,
                                  int writable)
 {
-    netsnmp_table_data_set_storage *data =
-        (netsnmp_table_data_set_storage *) row->data;
+    netsnmp_table_data_set_storage *data;
+
+    if (!row)
+        return SNMPERR_GENERR;
+
+    data = (netsnmp_table_data_set_storage *) row->data;
     data = netsnmp_table_data_set_find_column(data, column);
 
     if (!data) {
@@ -215,8 +221,12 @@ int
 netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column,
                        int type, const char *value, size_t value_len)
 {
-    netsnmp_table_data_set_storage *data =
-        (netsnmp_table_data_set_storage *) row->data;
+    netsnmp_table_data_set_storage *data;
+
+    if (!row)
+        return SNMPERR_GENERR;
+
+    data = (netsnmp_table_data_set_storage *) row->data;
     data = netsnmp_table_data_set_find_column(data, column);
 
     if (!data) {
@@ -273,6 +283,9 @@ netsnmp_table_set_add_default_row(netsnmp_table_data_set *table_set,
 
     netsnmp_table_data_set_storage *new_col, *ptr;
 
+    if (!table_set)
+        return SNMPERR_GENERR;
+
     /*
      * double check 
      */
@@ -310,7 +323,7 @@ netsnmp_table_data_set_clone_row(netsnmp_table_row *row)
     netsnmp_table_data_set_storage *data, **newrowdata;
     netsnmp_table_row *newrow = netsnmp_table_data_clone_row(row);
 
-    if (!newrow)
+    if (!row || !newrow)
         return NULL;
 
     data = (netsnmp_table_data_set_storage *) row->data;
@@ -374,6 +387,9 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
     size_t          suffix_len;
     netsnmp_oid_stash_node **stashp;
 
+    if (!handler)
+        return SNMPERR_GENERR;
+        
     DEBUGMSGTL(("netsnmp_table_data_set", "handler starting\n"));
     for (request = requests; request; request = request->next) {
         netsnmp_table_data_set *datatable =
@@ -722,6 +738,8 @@ netsnmp_register_auto_data_table(netsnmp_table_data_set *table_set,
 {
     data_set_tables *tables;
     tables = SNMP_MALLOC_TYPEDEF(data_set_tables);
+    if (!tables)
+        return;
     tables->table_set = table_set;
     if (!registration_name) {
         registration_name = table_set->table->name;
@@ -901,6 +919,8 @@ netsnmp_config_parse_add_row(const char *token, char *line)
 inline void
 netsnmp_table_dataset_add_index(netsnmp_table_data_set *table, u_char type)
 {
+    if (!table)
+        return;
     netsnmp_table_data_add_index(table->table, type);
 }
 
@@ -909,6 +929,8 @@ inline void
 netsnmp_table_dataset_add_row(netsnmp_table_data_set *table,
                               netsnmp_table_row *row)
 {
+    if (!table)
+        return;
     netsnmp_table_data_add_row(table->table, row);
 }
 
@@ -918,6 +940,8 @@ netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
                                   netsnmp_table_row *origrow,
                                   netsnmp_table_row *newrow)
 {
+    if (!table)
+        return;
     netsnmp_table_data_replace_row(table->table, origrow, newrow);
 }
 
@@ -964,6 +988,8 @@ inline void
 netsnmp_table_dataset_remove_row(netsnmp_table_data_set *table,
                                  netsnmp_table_row *row)
 {
+    if (!table)
+        return;
 
     netsnmp_table_data_remove_and_delete_row(table->table, row);
 }
@@ -973,9 +999,12 @@ inline void
 netsnmp_table_dataset_remove_and_delete_row(netsnmp_table_data_set *table,
                                             netsnmp_table_row *row)
 {
+    netsnmp_table_data_set_storage *data;
 
-    netsnmp_table_data_set_storage *data =
-        (netsnmp_table_data_set_storage *)
+    if (!table)
+        return;
+
+    data = (netsnmp_table_data_set_storage *)
         netsnmp_table_data_remove_and_delete_row(table->table, row);
 
     netsnmp_table_dataset_delete_all_data(data);
