@@ -182,44 +182,6 @@ static void sprint_asciistring(buf, cp, len)
     *buf = '\0';
 }
 
-#ifdef UNUSED
-int
-read_rawobjid(input, output, out_len)
-    char *input;
-    oid *output;
-    int	*out_len;
-{
-    char    buf[12], *cp;
-    oid	    *op = output;
-    u_long  subid;
-
-    while(*input != '\0'){
-	if (!isdigit(*input))
-	    break;
-	cp = buf;
-	while(isdigit(*input))
-	    *cp++ = *input++;
-	*cp = '\0';
-	subid = atoi(buf);
-	if(subid > MAX_SUBID){
-	    fprintf(stderr, "sub-identifier too large: %s\n", buf);
-	    return 0;
-	}
-	if((*out_len)-- <= 0){
-	    fprintf(stderr, "object identifier too long\n");
-	    return 0;
-	}
-	*op++ = subid;
-	if(*input++ != '.')
-	    break;
-    }
-    *out_len = op - output;
-    if (*out_len == 0)
-	return 0;
-    return 1;
-}
-
-#endif /* UNUSED */
 
 /*
   0
@@ -828,7 +790,7 @@ init_mib __UCD_P((void))
 	env_var = path;
     } else if ( *env_var == '+' ) {
       strcpy(path, DEFAULT_MIBDIRS);
-      *env_var = ':';
+      *env_var = ENV_SEPARATOR_CHAR;
       strcat(path, env_var);
       env_var = path ;
     }
@@ -853,7 +815,7 @@ init_mib __UCD_P((void))
     else {
 	if ( *env_var == '+' ) {
 	    strcpy(path, DEFAULT_MIBS);
-	    *env_var = ':';
+	    *env_var = ENV_SEPARATOR_CHAR;
 	    strcat(path, env_var);
 	    env_var = path ;
 	}
@@ -877,7 +839,7 @@ init_mib __UCD_P((void))
 #ifdef DEFAULT_MIBFILES
     else if ( *env_var == '+') {
       strcpy(path, DEFAULT_MIBFILES);
-      *env_var = ':';
+      *env_var = ENV_SEPARATOR_CHAR;
       strcat(path, env_var);
       env_var = path ;
     }
@@ -977,38 +939,6 @@ set_function(subtree)
 		break;
 	}
 }
-
-#ifdef testing
-int snmp_dump_packet = 0;
-int quick_print = 0;
-
-main(argc, argv)
-     int argc;
-     char *argv[];
-{
-    oid objid[64];
-    int objidlen = sizeof (objid);
-    int count;
-    struct variable variable;
-
-    init_mib();
-    if (argc < 2)
-	print_subtree(stdout, tree_head, 0);
-    variable.type = ASN_INTEGER;
-    variable.val.integer = 3;
-    variable.val_len = 4;
-    for (argc--; argc; argc--, argv++) {
-	objidlen = sizeof (objid);
-	printf("read_objid(%s) = %d\n",
-	       argv[1], read_objid(argv[1], objid, &objidlen));
-	for(count = 0; count < objidlen; count++)
-	    printf("%d.", objid[count]);
-	printf("\n");
-	print_variable(objid, objidlen, &variable);
-    }
-}
-
-#endif /* testing */
 
 int read_objid(input, output, out_len)
     char *input;
@@ -1196,6 +1126,18 @@ print_objid(objid, objidlen)
 }
 
 void
+fprint_objid(f, objid, objidlen)
+    FILE    *f;
+    oid	    *objid;
+    int	    objidlen;	/* number of subidentifiers */
+{
+    char    buf[256];
+
+    sprint_objid(buf, objid, objidlen);
+    fprintf(f, "%s\n", buf);
+}
+
+void
 sprint_variable(buf, objid, objidlen, variable)
     char *buf;
     oid     *objid;
@@ -1231,7 +1173,6 @@ sprint_variable(buf, objid, objidlen, variable)
     }
 }
 
-
 void
 print_variable(objid, objidlen, variable)
     oid     *objid;
@@ -1242,6 +1183,19 @@ print_variable(objid, objidlen, variable)
 
     sprint_variable(buf, objid, objidlen, variable);
     printf("%s\n", buf);
+}
+
+void
+fprint_variable(f, objid, objidlen, variable)
+    FILE    *f;
+    oid     *objid;
+    int	    objidlen;
+    struct  variable_list *variable;
+{
+    char    buf[2048];
+
+    sprint_variable(buf, objid, objidlen, variable);
+    fprintf(f, "%s\n", buf);
 }
 
 void
@@ -1280,6 +1234,19 @@ print_value(objid, objidlen, variable)
 
     sprint_value(tempbuf, objid, objidlen, variable);
     printf("%s\n", tempbuf);
+}
+
+void
+fprint_value(f, objid, objidlen, variable)
+    FILE    *f;
+    oid     *objid;
+    int	    objidlen;
+    struct  variable_list *variable;
+{
+    char    tempbuf[2048];
+
+    sprint_value(tempbuf, objid, objidlen, variable);
+    fprintf(f, "%s\n", tempbuf);
 }
 
 static struct tree *
@@ -1408,6 +1375,20 @@ print_description(objid, objidlen)
         printf("No description\n");
 }
 
+void
+fprint_description(f, objid, objidlen)
+    FILE    *f;
+    oid     *objid;
+    int     objidlen;   /* number of subidentifiers */
+{
+    char *desc = get_description(objid, objidlen);
+
+    if (desc && desc[0] != '\0')
+        fprintf(f, "Description: \"%s\"\n", desc);
+    else
+        fprintf(f, "No description\n");
+}
+
 
 int
 get_module_node(name, module, objid, objidlen)
@@ -1455,3 +1436,33 @@ get_node(name, objid, objidlen)
     return( get_module_node( name, "ANY", objid, objidlen ));
 
 }
+
+#ifdef testing
+
+main(argc, argv)
+     int argc;
+     char *argv[];
+{
+    oid objid[64];
+    int objidlen = sizeof (objid);
+    int count;
+    struct variable variable;
+
+    init_mib();
+    if (argc < 2)
+	print_subtree(stdout, tree_head, 0);
+    variable.type = ASN_INTEGER;
+    variable.val.integer = 3;
+    variable.val_len = 4;
+    for (argc--; argc; argc--, argv++) {
+	objidlen = sizeof (objid);
+	printf("read_objid(%s) = %d\n",
+	       argv[1], read_objid(argv[1], objid, &objidlen));
+	for(count = 0; count < objidlen; count++)
+	    printf("%d.", objid[count]);
+	printf("\n");
+	print_variable(objid, objidlen, &variable);
+    }
+}
+
+#endif /* testing */

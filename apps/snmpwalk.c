@@ -126,7 +126,7 @@ main(argc, argv)
       /* specified on the command line */
       rootlen = MAX_NAME_LEN;
       if (!read_objid(argv[arg], root, &rootlen)){
-        printf("Invalid object identifier: %s\n", argv[arg]);
+        fprintf(stderr, "Invalid object identifier: %s\n", argv[arg]);
         exit(1);
       }
     } else {
@@ -190,22 +190,22 @@ main(argc, argv)
           if (response->errstat == SNMP_ERR_NOSUCHNAME){
             printf("End of MIB\n");
           } else {
-            printf("Error in packet.\nReason: %s\n",
-            snmp_errstring(response->errstat));
+            fprintf(stderr, "Error in packet.\nReason: %s\n",
+		    snmp_errstring(response->errstat));
             if (response->errstat == SNMP_ERR_NOSUCHNAME){
-              printf("The request for this object identifier failed: ");
+              fprintf(stderr, "The request for this object identifier failed: ");
               for(count = 1, vars = response->variables;
                     vars && count != response->errindex;
                     vars = vars->next_variable, count++)
                 /*EMPTY*/;
               if (vars)
-                print_objid(vars->name, vars->name_length);
-              printf("\n");
+                fprint_objid(stderr, vars->name, vars->name_length);
+              fprintf(stderr, "\n");
             }
           }
         }
       } else if (status == STAT_TIMEOUT){
-        printf("No Response from %s\n", session.peername);
+        fprintf(stderr, "No Response from %s\n", session.peername);
       } else {    /* status == STAT_ERROR */
         snmp_perror("snmpwalk: An error occurred");
       }

@@ -128,12 +128,12 @@ main(argc, argv)
     name_length = MAX_NAME_LEN;
     if (random_access){
 	if (!get_node(current_name, name, &name_length)){
-	    printf("Unknown object descriptor %s\n", current_name);
+	    fprintf(stderr, "Unknown object descriptor %s\n", current_name);
 	    exit(2);
 	}
     } else {
 	if (!read_objid(current_name, name, &name_length)){
-	    printf("Invalid object identifier: %s\n", current_name);
+	    fprintf(stderr, "Invalid object identifier: %s\n", current_name);
 	}
     }
     if (tosymbolic){

@@ -243,7 +243,7 @@ event_input(vp)
 	|| !memcmp(vp->val.objid, unavailableAlarm, sizeof(unavailableAlarm)))
 	eventid = 3;
     else {
-	printf("unknown event\n");
+	fprintf(stderr, "unknown event\n");
 	eventid = 0;
     }
 
@@ -338,7 +338,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 	    }
 	    if (pdu->command == INFORM_REQ_MSG){
 		if (!(reply = snmp_clone_pdu2(pdu, GET_RSP_MSG))){
-		    printf("Couldn't clone PDU for response\n");
+		    fprintf(stderr, "Couldn't clone PDU for response\n");
 		    return 1;
 		}
 		reply->errstat = 0;
@@ -350,7 +350,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 	    }
 	}
     } else if (op == TIMED_OUT){
-	printf("Timeout: This shouldn't happen!\n");
+	fprintf(stderr, "Timeout: This shouldn't happen!\n");
     }
     return 1;
 }
@@ -513,7 +513,7 @@ main(argc, argv)
 		}
 		return 1;
 	    default:
-		printf("select returned %d\n", count);
+		fprintf(stderr, "select returned %d\n", count);
 		return 1;
 	}
     }
