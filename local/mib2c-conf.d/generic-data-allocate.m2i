@@ -1,5 +1,5 @@
-########################################################################
-## generic include for XXX. Don't use directly.
+#############################################################  -*- c -*-
+## generic include for XXX. Do not use directly.
 ##
 ## $Id$
 ########################################################################
@@ -52,52 +52,6 @@ ${context}_release_data(${table}_data *data)
      */
     free(data);
 }
-
-@if @m2c_table_writable == 1@
-/*
- * ${context}_create_undo
- *
- * Create an 
- */
-int
-${context}_create_undo_context( ${context}_ctx *ctx )
-{
-    int rc;
-
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
-
-    /** we should have a non-NULL pointer */
-    netsnmp_assert( NULL != ctx );
-
-    /*
-     * allocate context
-     */
-    ctx->undo = ${context}_allocate_data();
-    if(NULL == ctx->data) {
-        /** msg already logged */
-        return SNMP_ERR_RESOURCEUNAVAILABLE;
-    }
-
-    /*
-     * copy the data
-     */
-@if $m2c_data_allocate != "generated"@
-$example_start
-@end@
-@    foreach $node nonindex@
-@        include m2c_setup_node.m2i@
-@        eval $m2c_ctx_lh = "ctx->undo"@
-@        eval $m2c_ctx_rh = "ctx->data"@
-@        include generic-ctx-copy.m2i@
-@    end@ # foreach nonindex
-@if $m2c_data_allocate != "generated"@
-$example_end
-@end@
-
-    return SNMP_ERR_NOERROR;
-}
-
-@end@
 
 ##
 ########################################################################
