@@ -173,6 +173,10 @@ if test "x$tryopenssl" = "xdefaultyes"; then
       tryopenssl=yes
 fi
 
+AC_ARG_WITH(rpm,
+[  --without-rpm                  Don't include support for the RPM package
+                                 management system when building the host MIB
+                                 module.])
 
 AC_ARG_ENABLE(privacy,
 [  --disable-privacy               Don't compile in support for privacy.])
@@ -1453,7 +1457,8 @@ AC_ARG_WITH(libwrap,
 # rpm libraries only needed for the host resources mib software
 # installed tables (on linux in particular)
 #
-if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
+if test "x$with_rpm" != "xno" && \
+        echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
   # ARG.  RPM is a real pain.
   # FWIW librpm.la, librpmio.la, and libpopt.la have correct dependencies.
   _rpmlibs=""
@@ -1618,7 +1623,8 @@ AC_CHECK_HEADERS(dlfcn.h)
 AC_CHECK_HEADERS(search.h)
 
 # RPM subdirectory path (sigh)
-if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
+if test "x$with_rpm" != "xno" && \
+        echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
   AC_CHECK_HEADERS(rpmio.h,, [
      AC_CHECK_HEADERS(rpm/rpmio.h, CFLAGS="-I/usr/include/rpm $CFLAGS")
   ])
@@ -1786,7 +1792,8 @@ AC_CHECK_FUNCS(sigaction)
 AC_CHECK_FUNCS(snprintf strtoul)
 AC_CHECK_FUNCS(random lrand48 rand)
 AC_CHECK_FUNCS(execv system fork getpid strncasecmp sigalrm)
-if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
+if test "x$with_rpm" != "xno" && \
+        echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
   OLDLIBS=$LIBS
   LIBS=$AGENTLIBS
   AC_CHECK_FUNCS(rpmGetPath)
