@@ -187,6 +187,9 @@
 /* Define if you have the <xti.h> header file.  */
 #undef HAVE_XTI_H
 
+/* Define if you have the elf library (-lelf).  */
+#undef HAVE_LIBELF
+
 /* Define if you have the kstat library (-lkstat).  */
 #undef HAVE_LIBKSTAT
 
