@@ -130,7 +130,7 @@ system.sysUpTime.0 = Timeticks: (83467131) 9 days, 15:51:11.31
     <p> Here is a authenticated request:
 <pre>
 <ul>
-% <b>snmpgetnext -v 3 -n "" -u MD5User -a MD5 -A "The UCD Demo Password" -l authNoPriv test.net-snmp.org sysUpTime</b>
+% <b>snmpgetnext -v 3 -n "" -u MD5User -a MD5 -A "The Net-SNMP Demo Password" -l authNoPriv test.net-snmp.org sysUpTime</b>
 system.sysUpTime.0 = Timeticks: (83491735) 9 days, 15:55:17.35
 </ul>
 </pre>
@@ -138,7 +138,7 @@ system.sysUpTime.0 = Timeticks: (83491735) 9 days, 15:55:17.35
     <p> And finally, here is an authenticated and encrypted request:
 <pre>
 <ul>
-% <b>snmpgetnext -v 3 -n "" -u MD5DESUser -a MD5 -A "The UCD Demo Password" -x DES -X "The UCD Demo Password" -l authPriv test.net-snmp.org system</b>
+% <b>snmpgetnext -v 3 -n "" -u MD5DESUser -a MD5 -A "The Net-SNMP Demo Password" -x DES -X "The Net-SNMP Demo Password" -l authPriv test.net-snmp.org system</b>
 system.sysUpTime.0 = Timeticks: (83493111) 9 days, 15:55:31.11
 </ul>
 </pre>

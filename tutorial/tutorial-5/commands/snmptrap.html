@@ -20,7 +20,7 @@ The SNMPv1 trap is defined in the MIB file using the TRAP-TYPE macro,
 as in the following example
 <pre><ul>
 TRAP-TEST-MIB DEFINITIONS ::= BEGIN
-	IMPORTS ucdExperimental FROM Net-SNMP-MIB;
+	IMPORTS ucdExperimental FROM UCD-SNMP-MIB;
 
 demotraps OBJECT IDENTIFIER ::= { ucdExperimental 990 }
 
@@ -36,7 +36,7 @@ END
 This defines a single <i>enterprise specific</i> trap, that can be issued
 as follows
 <pre><ul>
-% <b>snmptrap -c public host TRAP-TEST-MIB::demotraps localhost 6 17 '' \
+% <b>snmptrap -v 1 -c public host TRAP-TEST-MIB::demotraps localhost 6 17 '' \
 	SNMPv2-MIB::sysLocation.0 s "Just here"</b>
 </ul></pre>
 and when received by <i>snmptrapd</i> is displayed as follows
@@ -50,7 +50,7 @@ The format of the SNMPv2 notification is somewhat different. The definition in
 the MIB file looks as follows
 <pre><ul>
 NOTIFICATION-TEST-MIB DEFINITIONS ::= BEGIN
-        IMPORTS ucdavis FROM Net-SNMP-MIB;
+        IMPORTS ucdavis FROM UCD-SNMP-MIB;
 
 demonotifs OBJECT IDENTIFIER ::= { ucdavis 991 }
 
@@ -136,7 +136,7 @@ traphandle NOTIFICATION-TEST-MIB::demo-notif /home/nba/bin/traps demo-notif
 the following <i>snmptrap</i> invocation, to issue a generic <i>Link down</i>
 trap,
 <pre><ul>
-% <b>snmptrap -c public localhost TRAP-TEST-MIB::demotraps localhost 2 0 '' \
+% <b>snmptrap -v 1 -c public localhost TRAP-TEST-MIB::demotraps localhost 2 0 '' \
 	IF-MIB::ifIndex i 1</b>
 </ul></pre>
 results in the following output from <i>snmptrapd</i>
@@ -160,7 +160,7 @@ trap: demo-notif localhost 127.0.0.1 SNMPv2-MIB::sysUpTime.0 = 1:19:02:06.33, SN
 <h2>Generating traps from the agent</h2>
 The agent is able to generate a few traps by itself.
 When starting up, it will generate a SNMPv2-MIB::coldStart trap,
-and when shutting down a Net-SNMP-MIB::ucdShutDown.
+and when shutting down a UCD-SNMP-MIB::ucdShutDown.
 <p>
 These traps are sent to managers specified in the <i>snmpd.conf</i>file,
 using the <i>trapsink</i> or <i>trap2sink</i> directive (SNMPv1 and SNMPv2

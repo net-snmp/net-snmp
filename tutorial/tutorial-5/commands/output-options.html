@@ -50,9 +50,9 @@ Usage: snmpget [options...] <hostname> [<objectID> ...]
 	the results using numerical order to textual OIDs:
 <pre>
 <ul>
-% <b>snmpgetnext -v 2c -v 1 -c demopublic test.net-snmp.org sysObjectID</b>
+% <b>snmpgetnext -v 2c -c demopublic test.net-snmp.org sysObjectID</b>
 system.sysObjectID.0 = OID: enterprises.ucdavis.ucdSnmpAgent.hpux10
-% <b>snmpgetnext -v 2c -On -v 1 -c demopublic test.net-snmp.org sysObjectID</b>
+% <b>snmpgetnext -v 2c -On -c demopublic test.net-snmp.org sysObjectID</b>
 .1.3.6.1.2.1.1.2.0 = OID: .1.3.6.1.4.1.2021.250.6
 </ul>
 </pre>
@@ -62,9 +62,9 @@ system.sysObjectID.0 = OID: enterprises.ucdavis.ucdSnmpAgent.hpux10
 	(this example will not work for you  the:
 <pre>
 <ul>
-% <b>snmpgetnext -v 2c -v 1 -c demopublic test.net-snmp.org snmpEnableAuthenTraps</b>
+% <b>snmpgetnext -v 2c -c demopublic test.net-snmp.org snmpEnableAuthenTraps</b>
 snmp.snmpEnableAuthenTraps.0 = disabled(2)
-% <b>snmpgetnext -v 2c -v 1 -c demopublic test.net-snmp.org snmpEnableAuthenTraps</b>
+% <b>snmpgetnext -v 2c -c demopublic test.net-snmp.org snmpEnableAuthenTraps</b>
 snmp.snmpEnableAuthenTraps.0 = 2
 </ul>
 </pre>
@@ -98,7 +98,7 @@ usmUserEntry OBJECT-TYPE
 	the above indexes out of the printed result:
 <pre>
 <ul>
-% <b>snmpgetnext -v 2c -v 1 -c demopublic test.net-snmp.org usmUserEntry</b>
+% <b>snmpgetnext -v 2c -c demopublic test.net-snmp.org usmUserEntry</b>
 .iso.org.dod.internet.snmpV2.snmpModules.snmpUsmMIB.usmMIBObjects.usmUser.usmUserTable.usmUserEntry.usmUserOwnPrivKeyChange."........."."MD5User" = ""
 </ul>
 </pre>
@@ -112,7 +112,7 @@ usmUserEntry OBJECT-TYPE
 	available to you as an option as well:
 <pre>
 <ul>
-% <b>snmpgetnext -Ob -v 2c -v 1 -c demopublic test.net-snmp.org usmUserEntry</b>
+% <b>snmpgetnext -Ob -v 2c -c demopublic test.net-snmp.org usmUserEntry</b>
 .iso.org.dod.internet.snmpV2.snmpModules.snmpUsmMIB.usmMIBObjects.usmUser.usmUserTable.usmUserEntry.usmUserOwnPrivKeyChange.9.128.0.7.229.1.169.237.235.161.7.77.68.53.85.115.101.114 = ""
 </ul>
 </pre>
@@ -125,7 +125,7 @@ usmUserEntry OBJECT-TYPE
 	require you to escape the quotes with a back slash:
 <pre>
 <ul>
-% <b>snmpget -v 2c -v 1 -c demopublic test.net-snmp.org usmUserOwnPrivKeyChange.9.128.0.7.229.1.169.237.235.161.\"MD5User\"</b>
+% <b>snmpget -v 2c -c demopublic test.net-snmp.org usmUserOwnPrivKeyChange.9.128.0.7.229.1.169.237.235.161.\"MD5User\"</b>
 .iso.org.dod.internet.snmpV2.snmpModules.snmpUsmMIB.usmMIBObjects.usmUser.usmUserTable.usmUserEntry.usmUserOwnPrivKeyChange."........."."MD5User" = ""
 </ul>
 </pre>
@@ -169,13 +169,13 @@ IPV6-MIB::ipv6RouteIfIndex[3ffe:100:ff00:0:0:0:0:0][64][1] = 2
 <pre>
 <ul>
 <p>
-% <b>snmpget -v 2c -v 1 -c demopublic test.net-snmp.org sysUpTime.0 ucdDemoUserList.0</b>
+% <b>snmpget -v 2c -c demopublic test.net-snmp.org sysUpTime.0 ucdDemoUserList.0</b>
 system.sysUpTime.0 = Timeticks: (586910990) 67 days, 22:18:29.90
 enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADESUser"
-% <b>snmpget -Os -v 2c -v 1 -c demopublic test.net-snmp.org sysUpTime.0 ucdDemoUserList.0</b>
+% <b>snmpget -Os -v 2c -c demopublic test.net-snmp.org sysUpTime.0 ucdDemoUserList.0</b>
 sysUpTime.0 = Timeticks: (586910990) 67 days, 22:18:29.90
 ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADESUser"
-% <b>snmpget -OS -v 2c -v 1 -c demopublic test.net-snmp.org sysUpTime.0 ucdDemoUserList.0</b>
+% <b>snmpget -OS -v 2c -c demopublic test.net-snmp.org sysUpTime.0 ucdDemoUserList.0</b>
 RFC1213-MIB::sysUpTime.0 = Timeticks: (586911833) 67 days, 22:18:38.33
 UCD-DEMO-MIB::ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADESUser"
 </ul>
@@ -187,7 +187,7 @@ UCD-DEMO-MIB::ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADES
 	always displays the full OID:
 <pre>
 <ul>
-% <b>snmpget -Of -v 2c -v 1 -c demopublic test.net-snmp.org sysUpTime.0 ucdDemoUserList.0</b>
+% <b>snmpget -Of -v 2c -c demopublic test.net-snmp.org sysUpTime.0 ucdDemoUserList.0</b>
 .iso.org.dod.internet.mgmt.mib-2.system.sysUpTime.0 = Timeticks: (741998862) 85 days, 21:06:28.62
 .iso.org.dod.internet.private.enterprises.ucdavis.ucdDemoMIB.ucdDemoMIBObjects.ucdDemoPublic.ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADESUser"
 </ul>
@@ -196,7 +196,7 @@ UCD-DEMO-MIB::ucdDemoUserList.0 = " noAuthUser MD5User MD5DESUser SHAUser SHADES
 	<P>  The -Ov flag outputs only the value, but not variable name
 <pre>
 <ul>
-% <b>snmpget -Ov -v 2c -v 1 -c demopublic test.net-snmp.org sysObjectID.0</b>
+% <b>snmpget -Ov -v 2c -c demopublic test.net-snmp.org sysObjectID.0</b>
 OID: enterprises.ucdavis.ucdSnmpAgent.hpux10
 </ul>
 </pre>
@@ -206,7 +206,7 @@ OID: enterprises.ucdavis.ucdSnmpAgent.hpux10
 	things like scripting languages:
 <pre>
 <ul>
-% <b>snmpget -Oq -v 2c -v 1 -c demopublic test.net-snmp.org sysObjectID.0</b>
+% <b>snmpget -Oq -v 2c -c demopublic test.net-snmp.org sysObjectID.0</b>
 system.sysObjectID.0 enterprises.ucdavis.ucdSnmpAgent.hpux10
 </ul>
 </pre>
@@ -220,7 +220,7 @@ system.sysObjectID.0 enterprises.ucdavis.ucdSnmpAgent.hpux10
 	into one statement:
 <pre>
 <ul>
-% <b>snmpget -Oqs -v 2c -v 1 -c demopublic test.net-snmp.org sysObjectID.0</b>
+% <b>snmpget -Oqs -v 2c -c demopublic test.net-snmp.org sysObjectID.0</b>
 sysObjectID.0 hpux10
 </ul>
 </pre>
@@ -229,7 +229,7 @@ sysObjectID.0 hpux10
 	syntax)
 <pre>
 <ul>
-% <b>interfaces=`snmpget -Oqv -v 2c -v 1 -c demopublic test.net-snmp.org ifNumber.0`</b>
+% <b>interfaces=`snmpget -Oqv -v 2c -c demopublic test.net-snmp.org ifNumber.0`</b>
 </ul>
 </pre>
 

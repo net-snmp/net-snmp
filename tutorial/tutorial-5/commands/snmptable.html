@@ -16,7 +16,7 @@
       you (though sometimes it can be a bit wide, like in this example):
 <pre>
 <ul>
-% <b>snmptable -v 1 -c demopublic test.net-snmp.org sysORTable</b>
+% <b>snmptable -v 2c -c demopublic test.net-snmp.org sysORTable</b>
 SNMP table: system.sysORTable
 
  sysORIndex                                                                                                                                      sysORID                                                                     sysORDescr  sysORUpTime
@@ -28,7 +28,7 @@ SNMP table: system.sysORTable
 </pre>
 But you can adjust the width of the table
 <pre>
-% <b>snmptable -v 1 -c demopublic -Cw 80 test.net-snmp.org sysORTable</b>
+% <b>snmptable -v 2c -c demopublic -Cw 80 test.net-snmp.org sysORTable</b>
 SNMP table: system.sysORTable
 
  sysORIndex                                                                                                                                      sysORID
