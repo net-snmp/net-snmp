@@ -262,7 +262,18 @@ register_mib(moduleName, var, varsize, numvars, mibloc, mibloclen)
   int mibloclen;
 {
   struct subtree *subtree;
+  char c_oid[MAX_NAME_LEN];
+
   subtree = (struct subtree *) malloc(sizeof(struct subtree));
+  memset(subtree, 0, sizeof(subtree));
+  subtree->children = 0;
+  subtree->next = 0;
+
+  if (snmp_get_do_debugging()) {
+    sprint_objid(c_oid, mibloc, mibloclen);
+    DEBUGP ("registering \"%s\" at %s\n", moduleName, c_oid);
+  }
+    
   memcpy(subtree->name, mibloc, mibloclen*sizeof(oid));
   memcpy(subtree->label, moduleName, strlen(moduleName)+1);
   subtree->namelen = (u_char) mibloclen;
