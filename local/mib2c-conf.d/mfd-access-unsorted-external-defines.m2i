@@ -728,8 +728,8 @@ ${context}_loop_get_data( $mfd_aue_param_decl, ${context}_ref_loop_ctx *loop_ctx
      */
 @   eval $m2c_ctx_lh = "rowreq_ctx_ref->$m2c_ctx_rh"@
 @   eval $m2c_ctx_lhs = "rowreq_ctx_ref->$m2c_ctx_rhs"@
-@   eval $m2c_ctx_rh = "loop_ctx_ref->loop_ctx->TODO_FIND_$node"@
-@   eval $m2c_ctx_rhs = "loop_ctx_ref->loop_ctx->TODO_FIND_${node}_len"@
+@   eval $m2c_ctx_rh = "loop_ctx_ref->loop_ctx->$node"@
+@   eval $m2c_ctx_rhs = "loop_ctx_ref->loop_ctx->${node}_len"@
 @   include generic-value-map.m2i@
     
 @   end@
