@@ -648,7 +648,7 @@ var_hrswrun(struct variable *vp,
 		    ++cp;
 	        ++cp;
 	    }
-	    long_return = atoi( cp );		/* rss */
+	    long_return = atoi( cp ) * getpagesize()/1024;		/* rss */
             fclose(fp);
 #else
 #if NO_DUMMY_VALUES
