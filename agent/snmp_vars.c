@@ -144,7 +144,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <netinet/icmp_var.h>
 #endif
 #include <nlist.h>
-#if SYS_PROTOSW_H
+#if HAVE_SYS_PROTOSW_H
 #include <sys/protosw.h>
 #endif
 #if HAVE_INET_MIB2_H
@@ -204,6 +204,8 @@ void Interface_Scan_Init(void);
 int Interface_Scan_Next(short *Index, char *Name, struct ifnet *Retifnet,
 			struct in_ifaddr *Retin_ifaddr);
 int compare_tree(oid *name1, int len1, oid *name2, int len2);
+#else
+void Interface_Scan_Init();
 #endif
 
 static int TCP_Count_Connections();
@@ -2881,8 +2883,11 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 	    case TCPRETRANSSEGS:
 		return (u_char *) &tcpstat.tcps_sndrexmitpack;
 	    case TCPINERRS:
-		long_return = tcpstat.tcps_rcvbadsum + tcpstat.tcps_rcvbadoff +
-		    tcpstat.tcps_rcvmemdrop + tcpstat.tcps_rcvshort;
+		long_return = tcpstat.tcps_rcvbadsum + tcpstat.tcps_rcvbadoff 
+#ifdef HAVE_TCPSTAT_TCPS_RCVMEMDROP
+                  + tcpstat.tcps_rcvmemdrop
+#endif
+                  + tcpstat.tcps_rcvshort;
 		return (u_char *) &long_return;
 	    case TCPOUTRSTS:
 		long_return = tcpstat.tcps_sndctrl - tcpstat.tcps_closed;
