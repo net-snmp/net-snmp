@@ -461,11 +461,7 @@ char **argvrestartp, *argvrestartname, *argvrestart;
 
 RETSIGTYPE restart_doit(int a)
 {
-  int i;
-  
-  /* close everything open */
-  for (i=0; i<= 2; i++)
-    close(i);
+    snmp_shutdown("snmpd");
 
   /* do the exec */
 #if HAVE_EXECV
