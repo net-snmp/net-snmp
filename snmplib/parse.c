@@ -3530,9 +3530,9 @@ parse(FILE *fp,
             }
             state = IN_MIB;
             current_module = which_module( name );
-	    oldgroups = objgroups;
-	    oldobjects = objects;
-	    oldnotifs = notifs;
+	    oldgroups = objgroups; objgroups = NULL;
+	    oldobjects = objects; objects = NULL;
+	    oldnotifs = notifs; notifs = NULL;
             if ( current_module == -1 ) {
                 new_module(name, File);
                 current_module = which_module(name);
