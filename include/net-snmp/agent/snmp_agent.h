@@ -157,8 +157,6 @@ extern          "C" {
  */
     typedef struct netsnmp_agent_request_info_s {
         int             mode;
-        int             next_mode_ok;  /* only valid for baby step modes */
-        int             next_mode_fail; /* not used yet (for 5.2) */
  	/** pdu contains authinfo, eg */
 /*        netsnmp_pdu    *pdu;    */
         struct netsnmp_agent_session_s *asp;    /* may not be needed */
