@@ -1917,7 +1917,7 @@ print_tree_node(FILE *f,
 		struct tree *tp)
 {
     const char *cp;
-    char str[32];
+    char str[MAXTOKEN];
     int i;
     if (tp) {
 	module_name(tp->modid, str);
