@@ -12,7 +12,7 @@
  */
 
 #ifndef SNMP_LOCKING_H
-#define SNMP_LOCKING__H
+#define SNMP_LOCKING_H
 
 #ifdef __cplusplus
 extern          "C" {
@@ -21,9 +21,8 @@ extern          "C" {
 #ifdef NS_REENTRANT
 
 #if HAVE_PTHREAD_H
-
 #include <pthread.h>
-    typedef pthread_mutex_t mutex_type;
+typedef pthread_mutex_t mutex_type;
 #ifdef pthread_mutexattr_default
 #define MT_MUTEX_INIT_DEFAULT pthread_mutexattr_default
 #else
@@ -31,17 +30,16 @@ extern          "C" {
 #endif
 
 #elif defined(WIN32) || defined(cygwin)
-
 #include <windows.h>
-    typedef CRITICAL_SECTION mutex_type;
-
+typedef CRITICAL_SECTION mutex_type;
 #else
                     error "There is no re-entrant support as defined."
-#endif
-    int             netsnmp_mutex_init(&mutex_type);
-    int             netsnmp_mutex_lock(&mutex_type);
-    int             netsnmp_mutex_unlock(&mutex_type);
-    int             netsnmp_mutex_destroy_mutex(&mutex_type);
+#endif  /*  HAVE_PTHREAD_H  */
+
+int	netsnmp_mutex_init(mutex_type *);
+int     netsnmp_mutex_lock(mutex_type *);
+int     netsnmp_mutex_unlock(mutex_type *);
+int     netsnmp_mutex_destroy_mutex(mutex_type *);
 
 #else                           /* !NS_REENTRANT */
 
@@ -55,4 +53,4 @@ extern          "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif                          /* SNMP_LOCKING__H */
+#endif /*  SNMP_LOCKING_H  */
