@@ -520,6 +520,7 @@ init_mib_internals (void)
     init_tree_roots();	/* Set up initial roots */
 		/* Relies on 'add_mibdir' having set up the modules */
 
+    File = strdup("");
 }
 
 static void
