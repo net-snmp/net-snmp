@@ -60,6 +60,8 @@
 #include "agentx/client.h"
 #endif
 
+static void register_mib_detach_node(struct subtree *s);
+
 subtree_context_cache *context_subtrees = NULL;
 
 subtree_context_cache *
