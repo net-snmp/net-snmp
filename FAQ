@@ -201,10 +201,31 @@ What operating systems does it run on?
 What happens if mine isn't listed?
 ---------------------------------
 
+  Try "configure --enable-mini-agent --with-defaults".
+        If you see any "invalid configuration" messages display,
+        the "uname" command results were not understood in either
+        config.guess or config.sub.  Search with "uname" and "svr5"
+        for hints as to what you might have to add to fix these
+        errors.
+
+        If all goes well, config.h will be built.  SYSTEM_INCLUDE_FILE
+        refers to the system-specific header file that is included
+        near the end of config.h.  The named file must exist;
+        It is a handy place to adjust compile constants when
+        navigating compiler errors.
+
+        If "make" fails because autoconf or autoheader cannot be
+        found, run "make -k touchit" to adjust timestamps.
+
+        To build the package and save the compile log, start a
+        Bourne-like shell and run "make > make.out 2>&1".  If you
+        are a C-shell user, you know what to do.
+
   It's worth trying anyway, particularly if the system is based
 	around the BSD kernel.  If it seems to work correctly,
 	let us know so that we can update the list above.
 	If it doesn't work, let us know and we'll try to help.
+
   If the agent almost compiles, but certain files in the
 	agents/mibgroup directory structure fail, you can try omitting
 	the relevant modules by re-running configure with the flag

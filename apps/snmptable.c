@@ -108,7 +108,24 @@ static size_t name_length;
 static oid root[MAX_OID_LEN];
 static size_t rootlen;
 static int localdebug;
+
+
 static int nonsequential = 1;
+
+#ifdef COMMENT
+Related to the use of the "nonsequential" [-C] flag:
+
+The -C option should NOT be used. It gives you the old, problematic
+behaviour of pre-4.1. Forget about it. It is just there as a safe-
+guard in case a problem shows up.
+
+You could get away with
+ snmptable -C host community table
+
+but again, -C should be forgotten.
+
+#endif
+
 
 void get_field_names (char *);
 void get_table_entries( struct snmp_session *ss );
