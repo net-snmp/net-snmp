@@ -95,6 +95,8 @@ netsnmp_log_handler *logh_priorities[LOG_DEBUG+1];
 
 static int      newline = 1;	 /* MTCRITICAL_RESOURCE */
 
+static char syslogname[64] = DEFAULT_LOG_ID;
+
 #ifndef HAVE_VSNPRINTF
                 /*
                  * Need to use the UCD-provided one 
@@ -371,8 +373,9 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
             int facility = decode_facility(optarg);
             if (facility == -1)  return -1;
             logh->pri_max = pri_max;
-            logh->token   = NULL;
+            logh->token   = strdup(snmp_log_syslogname(0));
             logh->magic   = (void *)facility;
+	    snmp_enable_syslog(); /* XXX */
 	}
         break;
 
@@ -397,6 +400,15 @@ snmp_log_options(char *optarg, int argc, char *const *argv)
         return -1;
     }
     return 0;
+}
+
+char *
+snmp_log_syslogname(char *pstr)
+{
+  if (pstr)
+    strncpy (syslogname, pstr, sizeof(syslogname));
+
+  return syslogname;
 }
 
 void
@@ -571,7 +583,7 @@ snmp_disable_log(void)
 void
 snmp_enable_syslog(void)
 {
-    snmp_enable_syslog_ident(DEFAULT_LOG_ID, LOG_DAEMON);
+    snmp_enable_syslog_ident(snmp_log_syslogname(0), LOG_DAEMON);
 }
 
 void
@@ -599,9 +611,7 @@ snmp_enable_syslog_ident(const char *ident, const int facility)
         enable = 0;
     }
 #else
-    if (ident == NULL)
-        ident = DEFAULT_LOG_ID;
-    openlog(ident, LOG_CONS | LOG_PID, facility);
+    openlog(snmp_log_syslogname(ident), LOG_CONS | LOG_PID, facility);
 #endif
 
     for (logh = logh_head; logh; logh = logh->next)
@@ -938,7 +948,7 @@ log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
     }
     event_msg[0] = string;
     event_msg[1] = NULL;
-    if (!ReportEvent(eventlog_h, etype, 0, 0, NULL, 1, 0, event_msg, NULL)) {
+    if (!ReportEvent(eventlog_h, etype, 0, 0x64, NULL, 1, 0, event_msg, NULL)) {
 	    /*
 	     * Hmmm.....
 	     * Maybe disable this handler, and log the error ?

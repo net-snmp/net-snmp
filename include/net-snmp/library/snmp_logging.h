@@ -81,6 +81,7 @@ extern          "C" {
 
     int snmp_log_options(char *optarg, int argc, char *const *argv);
     void snmp_log_options_usage(const char *lead, FILE *outf);
+    char *snmp_log_syslogname(char *syslogname);
     typedef struct netsnmp_log_handler_s netsnmp_log_handler; 
     typedef int (NetsnmpLogHandler)(netsnmp_log_handler*, int, const char *);
 

@@ -369,6 +369,7 @@ EXPORTS
 	snprint_variable
 	snmp_synch_reset
 	snmp_log_options
+	snmp_log_syslogname
 	netsnmp_clear_callback_list
 	netsnmp_clear_tdomain_list
 	clear_sec_mod
