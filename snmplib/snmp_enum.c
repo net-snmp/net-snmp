@@ -12,6 +12,7 @@
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
+#include <sys/types.h>
 
 #include <net-snmp/library/snmp_enum.h>
 #include <net-snmp/library/tools.h>
