@@ -305,7 +305,8 @@ writeSystem(int action,
 	    oid *name,
 	    size_t name_len)
 {
-    u_char *cp, *buf = NULL, *oldbuf = NULL;
+    u_char *cp;
+    char *buf = NULL, *oldbuf = NULL;
     int count;
 
     switch((char)name[7]){

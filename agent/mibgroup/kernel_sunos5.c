@@ -173,7 +173,39 @@ int getKstatInt(char *classname, char *statname, char *varname, int *value)
     if (kid == -1) return 0;
     named = kstat_data_lookup(ks, varname);
     if (named == NULL) return 0;
-    *value = named->value.ul;
+    switch (named->data_type) {
+#ifdef KSTAT_DATA_INT32		/* Solaris 2.6 and up */
+    case KSTAT_DATA_INT32:
+      *value = named->value.i32;
+      break;
+    case KSTAT_DATA_UINT32:
+      *value = named->value.ui32;
+      break;
+    case KSTAT_DATA_INT64:
+      *value = named->value.i64;
+      break;
+    case KSTAT_DATA_UINT64:
+      *value = named->value.ui64;
+      break;
+#else
+    case KSTAT_DATA_LONG:
+      *value = named->value.l;
+      break;
+    case KSTAT_DATA_ULONG:
+      *value = named->value.ul;
+      break;
+    case KSTAT_DATA_LONGLONG:
+      *value = named->value.ll;
+      break;
+    case KSTAT_DATA_ULONGLONG:
+      *value = named->value.ull;
+      break;
+#endif
+    default:
+      fprintf(stderr, "non-integer type in kstat data: %s %s %s %d\n",
+	      classname, statname, varname, named->data_type);
+      break;
+    }
     kstat_close(ksc);
     return 1;
 }
@@ -254,24 +286,39 @@ getKstat(const char *statname, const char *varname, void *value)
 	*(char *)v = (int)d->value.c;
 	DEBUGMSGTL(("kernel_sunos5", "value: %d\n", (int)d->value.c));
 	break;
+#ifdef KSTAT_DATA_INT32		/* Solaris 2.6 and up */
+      case KSTAT_DATA_INT32:
+	*(Counter *)v = d->value.i32;
+	DEBUGMSGTL(("kernel_sunos5", "value: %d\n", d->value.i32));
+	break;
+      case KSTAT_DATA_UINT32:
+	*(Counter *)v = d->value.ui32;
+	DEBUGMSGTL(("kernel_sunos5", "value: %u\n", d->value.ui32));
+	break;
+      case KSTAT_DATA_INT64:
+	*(Counter *)v = d->value.i64;
+	DEBUGMSGTL(("kernel_sunos5", "value: %ld\n", d->value.i64));
+	break;
+      case KSTAT_DATA_UINT64:
+	*(Counter *)v = d->value.ui64;
+	DEBUGMSGTL(("kernel_sunos5", "value: %lu\n", d->value.ui64));
+	break;
+#else
       case KSTAT_DATA_LONG:
-	*(long *)v = d->value.l;
+	*(Counter *)v = d->value.l;
 	DEBUGMSGTL(("kernel_sunos5", "value: %ld\n", d->value.l));
 	break;
       case KSTAT_DATA_ULONG:
-	*(ulong_t *)v = d->value.ul;
+	*(Counter *)v = d->value.ul;
 	DEBUGMSGTL(("kernel_sunos5", "value: %lu\n", d->value.ul));
 	break;
-#if KSTAT_DATA_LONGLONG != KSTAT_DATA_LONG
       case KSTAT_DATA_LONGLONG:
-	*(longlong_t *)v = d->value.ll;
-	DEBUGMSGTL(("kernel_sunos5", "value: %ld\n", (long)d->value.ll));
+	*(Counter *)v = d->value.ll;
+	DEBUGMSGTL(("kernel_sunos5", "value: %lld\n", (long)d->value.ll));
 	break;
-#endif
-#if KSTAT_DATA_ULONGLONG != KSTAT_DATA_ULONG
       case KSTAT_DATA_ULONGLONG:
-	*(u_longlong_t *)v = d->value.ull;
-	DEBUGMSGTL(("kernel_sunos5", "value: %lu\n", (unsigned long)d->value.ul));
+	*(Counter *)v = d->value.ull;
+	DEBUGMSGTL(("kernel_sunos5", "value: %llu\n", (unsigned long)d->value.ull));
 	break;
 #endif
       case KSTAT_DATA_FLOAT:
@@ -701,7 +748,7 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 		break;
 	}
 	if (!strchr (ifrp->ifr_name, ':')) {
-	    unsigned long l_tmp;
+	    Counter l_tmp;
 	    if (getKstat(ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) < 0) {
 		ret = -1;
 		goto Return;

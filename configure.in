@@ -705,12 +705,14 @@ if test "x$ac_cv_func_getservbyname" != "xyes"; then
 fi
 dnl AC_CHECK_LIB(ucb, bzero)
 
+dnl zlib is required for newer versions of rpm
+AC_CHECK_LIB(z, zlibVersion)
 dnl
 dnl with rpm3 or higher, we need db1 to exist
 dnl
 AC_CHECK_LIB(rpm, rpmdbOpen,[
   AC_DEFINE(HAVE_LIBRPM)
-  LIBS="$LIBS -lrpm -ldb1"
+  LIBS="-lrpm -ldb1 $LIBS"
 ],,-ldb1 -lz)
 
 dnl Ok, -ldb1 may not exist, try -ldb
@@ -718,14 +720,10 @@ if test "x$ac_cv_lib_rpm_rpmdbOpen" = "xno"; then
   unset ac_cv_lib_rpm_rpmdbOpen
   AC_CHECK_LIB(rpm, rpmdbOpen,[
     AC_DEFINE(HAVE_LIBRPM)
-    LIBS="$LIBS -lrpm -ldb"
+    LIBS="-lrpm -ldb $LIBS"
   ],,-ldb -lz)
 fi
 
-dnl zlib is required for newer versions of rpm
-if test "x$ac_cv_lib_rpm_rpmdbOpen" = "xyes"; then
-  AC_CHECK_LIB(z, zlibVersion)
-fi
 dnl Replace `main' with a function in -lkstat:
 AC_CHECK_LIB(kstat, kstat_lookup)
 dnl Replace `main' with a function in -lkvm:
@@ -832,6 +830,7 @@ AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol)
 AC_CHECK_FUNCS(strchr strdup memcpy memmove index bcopy)
 AC_CHECK_FUNCS(signal sigset sigblock sighold strerror setenv)
 AC_CHECK_FUNCS(random lrand48 rand)
+AC_CHECK_FUNCS(rpmGetPath)
 
 dnl
 dnl Check for /dev/random as well

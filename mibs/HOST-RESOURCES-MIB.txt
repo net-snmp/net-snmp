@@ -5,22 +5,24 @@ IMPORTS
         FROM RFC1155-SMI
     mib-2, DisplayString
         FROM RFC1213-MIB
+    DateAndTime			-- added by Niels.Baggesen@uni-c.dk
+	FROM SNMPv2-TC		-- added by Niels.Baggesen@uni-c.dk
     OBJECT-TYPE
         FROM RFC-1212;
 
-host ::= { mib-2  25 }
+host OBJECT IDENTIFIER ::= { mib-2  25 }
 
-hrSystem ::= { host  1 }
+hrSystem OBJECT IDENTIFIER ::= { host  1 }
 
-hrStorage ::= { host  2 }
+hrStorage OBJECT IDENTIFIER ::= { host  2 }
 
-hrDevice ::= { host  3 }
+hrDevice OBJECT IDENTIFIER ::= { host  3 }
 
-hrSWRun ::= { host  4 }
+hrSWRun OBJECT IDENTIFIER ::= { host  4 }
 
-hrSWRunPerf ::= { host  5 }
+hrSWRunPerf OBJECT IDENTIFIER ::= { host  5 }
 
-hrSWInstalled ::= { host  6 }
+hrSWInstalled OBJECT IDENTIFIER ::= { host  6 }
 
 Boolean ::=
     INTEGER {
@@ -34,8 +36,8 @@ KBytes ::=
 ProductID ::=
     OBJECT IDENTIFIER
 
-DateAndTime ::=
-    OCTET STRING
+-- DateAndTime ::=
+--     OCTET STRING
 
 InternationalDisplayString ::=
     OCTET STRING
@@ -115,23 +117,23 @@ hrSystemMaxProcesses OBJECT-TYPE
          that occur when this maximum is reached."
     ::= { hrSystem  7 }
 
-hrStorageTypes ::= { hrStorage  1 }
+hrStorageTypes OBJECT IDENTIFIER ::= { hrStorage  1 }
 
-hrStorageOther ::= { hrStorageTypes  1 }
+hrStorageOther OBJECT IDENTIFIER ::= { hrStorageTypes  1 }
 
-hrStorageRam ::= { hrStorageTypes  2 }
+hrStorageRam OBJECT IDENTIFIER ::= { hrStorageTypes  2 }
 
-hrStorageVirtualMemory ::= { hrStorageTypes  3 }
+hrStorageVirtualMemory OBJECT IDENTIFIER ::= { hrStorageTypes  3 }
 
-hrStorageFixedDisk ::= { hrStorageTypes  4 }
+hrStorageFixedDisk OBJECT IDENTIFIER ::= { hrStorageTypes  4 }
 
-hrStorageRemovableDisk ::= { hrStorageTypes  5 }
+hrStorageRemovableDisk OBJECT IDENTIFIER ::= { hrStorageTypes  5 }
 
-hrStorageFloppyDisk ::= { hrStorageTypes  6 }
+hrStorageFloppyDisk OBJECT IDENTIFIER ::= { hrStorageTypes  6 }
 
-hrStorageCompactDisc ::= { hrStorageTypes  7 }
+hrStorageCompactDisc OBJECT IDENTIFIER ::= { hrStorageTypes  7 }
 
-hrStorageRamDisk ::= { hrStorageTypes  8 }
+hrStorageRamDisk OBJECT IDENTIFIER ::= { hrStorageTypes  8 }
 
 hrMemorySize OBJECT-TYPE
     SYNTAX     KBytes
@@ -286,43 +288,43 @@ hrStorageAllocationFailures OBJECT-TYPE
          zero."
     ::= { hrStorageEntry  7 }
 
-hrDeviceTypes ::= { hrDevice  1 }
+hrDeviceTypes OBJECT IDENTIFIER ::= { hrDevice  1 }
 
-hrDeviceOther ::= { hrDeviceTypes  1 }
+hrDeviceOther OBJECT IDENTIFIER ::= { hrDeviceTypes  1 }
 
-hrDeviceUnknown ::= { hrDeviceTypes  2 }
+hrDeviceUnknown OBJECT IDENTIFIER ::= { hrDeviceTypes  2 }
 
-hrDeviceProcessor ::= { hrDeviceTypes  3 }
+hrDeviceProcessor OBJECT IDENTIFIER ::= { hrDeviceTypes  3 }
 
-hrDeviceNetwork ::= { hrDeviceTypes  4 }
+hrDeviceNetwork OBJECT IDENTIFIER ::= { hrDeviceTypes  4 }
 
-hrDevicePrinter ::= { hrDeviceTypes  5 }
+hrDevicePrinter OBJECT IDENTIFIER ::= { hrDeviceTypes  5 }
 
-hrDeviceDiskStorage ::= { hrDeviceTypes  6 }
+hrDeviceDiskStorage OBJECT IDENTIFIER ::= { hrDeviceTypes  6 }
 
-hrDeviceVideo ::= { hrDeviceTypes  10 }
+hrDeviceVideo OBJECT IDENTIFIER ::= { hrDeviceTypes  10 }
 
-hrDeviceAudio ::= { hrDeviceTypes  11 }
+hrDeviceAudio OBJECT IDENTIFIER ::= { hrDeviceTypes  11 }
 
-hrDeviceCoprocessor ::= { hrDeviceTypes  12 }
+hrDeviceCoprocessor OBJECT IDENTIFIER ::= { hrDeviceTypes  12 }
 
-hrDeviceKeyboard ::= { hrDeviceTypes  13 }
+hrDeviceKeyboard OBJECT IDENTIFIER ::= { hrDeviceTypes  13 }
 
-hrDeviceModem ::= { hrDeviceTypes  14 }
+hrDeviceModem OBJECT IDENTIFIER ::= { hrDeviceTypes  14 }
 
-hrDeviceParallelPort ::= { hrDeviceTypes  15 }
+hrDeviceParallelPort OBJECT IDENTIFIER ::= { hrDeviceTypes  15 }
 
-hrDevicePointing ::= { hrDeviceTypes  16 }
+hrDevicePointing OBJECT IDENTIFIER ::= { hrDeviceTypes  16 }
 
-hrDeviceSerialPort ::= { hrDeviceTypes  17 }
+hrDeviceSerialPort OBJECT IDENTIFIER ::= { hrDeviceTypes  17 }
 
-hrDeviceTape ::= { hrDeviceTypes  18 }
+hrDeviceTape OBJECT IDENTIFIER ::= { hrDeviceTypes  18 }
 
-hrDeviceClock ::= { hrDeviceTypes  19 }
+hrDeviceClock OBJECT IDENTIFIER ::= { hrDeviceTypes  19 }
 
-hrDeviceVolatileMemory ::= { hrDeviceTypes  20 }
+hrDeviceVolatileMemory OBJECT IDENTIFIER ::= { hrDeviceTypes  20 }
 
-hrDeviceNonVolatileMemory ::= { hrDeviceTypes  21 }
+hrDeviceNonVolatileMemory OBJECT IDENTIFIER ::= { hrDeviceTypes  21 }
 
 hrDeviceTable OBJECT-TYPE
     SYNTAX     SEQUENCE OF HrDeviceEntry
@@ -886,49 +888,49 @@ hrFSEntry OBJECT-TYPE
     INDEX      { hrFSIndex }
     ::= { hrFSTable  1 }
 
-hrFSTypes ::= { hrDevice  9 }
+hrFSTypes OBJECT IDENTIFIER ::= { hrDevice  9 }
 
-hrFSOther ::= { hrFSTypes  1 }
+hrFSOther OBJECT IDENTIFIER ::= { hrFSTypes  1 }
 
-hrFSUnknown ::= { hrFSTypes  2 }
+hrFSUnknown OBJECT IDENTIFIER ::= { hrFSTypes  2 }
 
-hrFSBerkeleyFFS ::= { hrFSTypes  3 }
+hrFSBerkeleyFFS OBJECT IDENTIFIER ::= { hrFSTypes  3 }
 
-hrFSSys5FS ::= { hrFSTypes  4 }
+hrFSSys5FS OBJECT IDENTIFIER ::= { hrFSTypes  4 }
 
-hrFSFat ::= { hrFSTypes  5 }
+hrFSFat OBJECT IDENTIFIER ::= { hrFSTypes  5 }
 
-hrFSHPFS ::= { hrFSTypes  6 }
+hrFSHPFS OBJECT IDENTIFIER ::= { hrFSTypes  6 }
 
-hrFSHFS ::= { hrFSTypes  7 }
+hrFSHFS OBJECT IDENTIFIER ::= { hrFSTypes  7 }
 
-hrFSMFS ::= { hrFSTypes  8 }
+hrFSMFS OBJECT IDENTIFIER ::= { hrFSTypes  8 }
 
-hrFSNTFS ::= { hrFSTypes  9 }
+hrFSNTFS OBJECT IDENTIFIER ::= { hrFSTypes  9 }
 
-hrFSVNode ::= { hrFSTypes  10 }
+hrFSVNode OBJECT IDENTIFIER ::= { hrFSTypes  10 }
 
-hrFSJournaled ::= { hrFSTypes  11 }
+hrFSJournaled OBJECT IDENTIFIER ::= { hrFSTypes  11 }
 
-hrFSiso9660 ::= { hrFSTypes  12 }
+hrFSiso9660 OBJECT IDENTIFIER ::= { hrFSTypes  12 }
 
-hrFSRockRidge ::= { hrFSTypes  13 }
+hrFSRockRidge OBJECT IDENTIFIER ::= { hrFSTypes  13 }
 
-hrFSNFS ::= { hrFSTypes  14 }
+hrFSNFS OBJECT IDENTIFIER ::= { hrFSTypes  14 }
 
-hrFSNetware ::= { hrFSTypes  15 }
+hrFSNetware OBJECT IDENTIFIER ::= { hrFSTypes  15 }
 
-hrFSAFS ::= { hrFSTypes  16 }
+hrFSAFS OBJECT IDENTIFIER ::= { hrFSTypes  16 }
 
-hrFSDFS ::= { hrFSTypes  17 }
+hrFSDFS OBJECT IDENTIFIER ::= { hrFSTypes  17 }
 
-hrFSAppleshare ::= { hrFSTypes  18 }
+hrFSAppleshare OBJECT IDENTIFIER ::= { hrFSTypes  18 }
 
-hrFSRFS ::= { hrFSTypes  19 }
+hrFSRFS OBJECT IDENTIFIER ::= { hrFSTypes  19 }
 
-hrFSDGCFS ::= { hrFSTypes  20 }
+hrFSDGCFS OBJECT IDENTIFIER ::= { hrFSTypes  20 }
 
-hrFSBFS ::= { hrFSTypes  21 }
+hrFSBFS OBJECT IDENTIFIER ::= { hrFSTypes  21 }
 
 HrFSEntry ::=
     SEQUENCE {

@@ -7,7 +7,7 @@
        TEXTUAL-CONVENTION                  FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "98060111123Z"      
+       LAST-UPDATED "99060911123Z"      
        ORGANIZATION "IANA"
        CONTACT-INFO
 
@@ -17,7 +17,7 @@
                            4676 Admiralty Way, Marina del Rey, CA 90292
 
                    Tel:    +1  310 822 1511
-                   E-Mail: iana@isi.edu"
+                   E-Mail: iana@iana.org"
        DESCRIPTION
                "The MIB module which defines the IANAifType textual
                convention, and thus the enumerated values of the
@@ -45,7 +45,7 @@
                IANA.)
 
                Requests for new values should be made to IANA via
-               email (iana@isi.edu).
+               email (iana@iana.org).
 
                The relationship between the assignment of ifType
                values and of OIDs to particular media-specific MIBs
@@ -203,7 +203,19 @@
 		   dcn (141),    -- Data Communications Network
 		   ipForward (142),    -- IP Forwarding Interface
 		   msdsl (143),       -- Multi-rate Symmetric DSL
-		   ieee1394 (144) -- IEEE1394 High Performance Serial Bus
+		   ieee1394 (144), -- IEEE1394 High Performance Serial Bus
+		   if-gsn (145),       --   HIPPI-6400 
+		   dvbRccMacLayer (146), -- DVB-RCC MAC Layer
+		   dvbRccDownstream (147),  -- DVB-RCC Downstream Channel
+		   dvbRccUpstream (148),  -- DVB-RCC Upstream Channel
+		   atmVirtual (149),   -- ATM Virtual Interface
+		   mplsTunnel (150),   -- MPLS Tunnel Virtual Interface
+		   srp (151),	-- Spatial Reuse Protocol	
+		   voiceOverAtm (152),  -- Voice Over ATM
+		   voiceOverFrameRelay (153),   -- Voice Over Frame Relay 
+		   idsl (154),		-- Digital Subscriber Loop over ISDN
+		   compositeLink (155),  -- Avici Composite Link Interface
+		   ss7SigLink (156)     -- SS7 Signaling Link 
 }
 
    END

@@ -1237,10 +1237,10 @@ Interface_Scan_Init (void)
     struct ifreq ifrq;
     struct ifnet **ifnetaddr_ptr;
     FILE *devin;
-    int a, b, c, d, e, i, fd;
+    int a, b, c, d, e, f, g, i, fd;
     extern conf_if_list *if_list;
     conf_if_list *if_ptr;
-    const char *scan_line_2_2="%[^:]: %*d %d %d %*d %*d %*d %*d %*d %*d %d %d %*d %*d %d";
+    const char *scan_line_2_2="%[^:]: %d %d %d %*d %*d %*d %*d %*d %d %d %d %*d %*d %d";
     const char *scan_line_2_0="%[^:]: %d %d %*d %*d %*d %d %d %*d %*d %d";
     const char *scan_line_to_use;
     
@@ -1301,8 +1301,12 @@ Interface_Scan_Init (void)
       {
 	struct ifnet *nnew;
 
-	if (6 != sscanf (line, scan_line_to_use,
-			 ifname_buf, &a, &b, &c, &d, &e))
+	if ((scan_line_to_use == scan_line_2_2 &&
+	    sscanf (line, scan_line_to_use,
+		    ifname_buf, &f, &a, &b, &g, &c, &d, &e) != 8) ||
+	    (scan_line_to_use == scan_line_2_0 && 
+	    sscanf (line, scan_line_to_use,
+		    ifname_buf, &a, &b, &c, &d, &e) != 6))
 	  continue;
 	
 	nnew = (struct ifnet *) malloc (sizeof (struct ifnet));	    
@@ -1319,6 +1323,12 @@ Interface_Scan_Init (void)
 
 	nnew->if_ipackets = a, nnew->if_ierrors = b, nnew->if_opackets = c,
 	nnew->if_oerrors = d, nnew->if_collisions = e;
+	if (scan_line_to_use == scan_line_2_2) {
+	  nnew->if_ibytes = f; nnew->if_obytes = g;
+	}
+	else {
+	  nnew->if_ibytes = 3*308; nnew->if_obytes = c*308;
+	}
 	
 	/* ifnames are given as ``   eth0'': split in ``eth'' and ``0'': */
 	for (ifname = ifname_buf; *ifname && *ifname == ' '; ifname++) ;

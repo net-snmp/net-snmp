@@ -121,8 +121,9 @@ log_syslog (int priority, va_alist)
 void
 vlog_toFILE(FILE *file, int priority, const char *format, va_list ap)
 {
-  fprintf(file, "log: %d: ", priority);
-  vfprintf(file, format[0]=='\n'?format+1:format, ap);
+  /* fprintf(file, "log: %d: ", priority); */
+  /* vfprintf(file, format[0]=='\n'?format+1:format, ap); */
+  vfprintf(file, format, ap);
   /*  Making sure error-message ends with a newline:
       if (format[strlen(format)-1]!='\n')
         fprintf(file, "\n"); */
