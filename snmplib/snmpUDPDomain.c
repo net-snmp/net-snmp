@@ -219,8 +219,8 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
 
     string = netsnmp_udp_fmtaddr(NULL, (void *)addr, 
 				 sizeof(struct sockaddr_in));
-    DEBUGMSGTL(("netsnmp_udp", "open %s %s\n", local ? "local" : "remote",
-                string));
+    DEBUGMSGTL(("netsnmp_udp", "open %s %s:%d\n", local ? "local" : "remote",
+                string, addr->sin_port));
     free(string);
 
     memset(t, 0, sizeof(netsnmp_transport));
