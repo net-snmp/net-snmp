@@ -35,6 +35,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #define IN_SNMP_VARS_C
 
 #include <config.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #include <sys/time.h>
 #include <stdio.h>
@@ -81,6 +84,9 @@ PERFORMANCE OF THIS SOFTWARE.
 
 int compare_tree __P((oid *, int, oid *, int));
 extern struct subtree subtrees_old[];
+
+int subtree_size;
+int subtree_malloc_size;
 
 /*
  *	Each variable name is placed in the variable table, without the
@@ -175,6 +181,8 @@ init_nlist(nl)
 #endif
 }
 
+struct subtree *subtrees;
+
 void
 init_snmp __P((void))
 {
@@ -182,8 +190,14 @@ init_snmp __P((void))
   init_kmem("/dev/kmem"); 
 #endif
 
+  subtree_size = subtree_old_size();
+  subtree_malloc_size = subtree_old_size();
+
+  subtrees = (struct subtree *)
+    malloc ((subtree_old_size())*sizeof(struct subtree));
+  memmove(subtrees, subtrees_old, subtree_old_size()*sizeof(struct subtree));
   init_read_config();
-  
+  sort_tree();
 #include "mibgroup/mib_module_inits.h"
 }
 
@@ -276,10 +290,6 @@ Export oid trapObjUnavailAlarmOid[] = {SNMPV2ALARMEVENTS, 3};
 Export int trapObjUnavailAlarmOidLen = sizeof(trapObjUnavailAlarmOidLen)/sizeof(oid);
 #endif
 
-
-struct subtree *subtrees;   /* this is now malloced in
-                                      mibgroup/extensible.c */
-
 struct subtree subtrees_old[] = {
 #include "mibgroup/mib_module_loads.h"
 };
@@ -288,8 +298,100 @@ struct subtree subtrees_old[] = {
 extern int in_view __P((oid *, int, int));
 #endif
 
-int subtree_old_size() {
+int subtree_old_size __P((void)) {
   return (sizeof(subtrees_old)/ sizeof(struct subtree));
+}
+
+void
+sort_tree __P((void)) {
+  qsort(subtrees, subtree_size, sizeof(struct subtree),
+#ifdef __STDC__
+        (int (*)(const void *, const void *)) tree_compare
+#else
+        tree_compare
+#endif
+    );
+}
+
+/* register_subtree(struct subtree *) */
+int
+register_subtree(stp)
+  struct subtree *stp;
+{
+
+  struct subtree *ptr;
+  char buf[1024];
+  sprint_objid (buf, stp->name, stp->namelen);
+ 
+  subtree_size++;
+  if (subtree_malloc_size < subtree_size) {
+    subtree_malloc_size = subtree_malloc_size*2;
+    subtrees = (struct subtree *) realloc(subtrees, subtree_malloc_size*
+                                          sizeof(struct subtree));
+    if (subtrees == 0) {
+#ifdef USING_ERRORMIB
+      setPerrorstatus("malloc failed");
+#else
+      perror("malloc");
+#endif
+      return -1;
+    }
+  }
+  ptr = subtrees;
+  ptr += (subtree_size-1);
+  memcpy(ptr,stp,sizeof(struct subtree));
+  sort_tree();
+  DEBUGP("registered mib slot %d:  %s\n", subtree_size, buf);
+  return subtree_size;
+}
+
+/* register_mib(struct variable *, int varsize, int numvars, oid mibloc,
+                int mibloclen)
+ */
+int
+register_mib(var, varsize, numvars, mibloc, mibloclen)
+  struct variable *var;
+  int varsize;
+  int numvars;
+  oid *mibloc;
+  int mibloclen;
+{
+  struct subtree subtree;
+  memcpy(subtree.name, mibloc, mibloclen*sizeof(oid));
+  subtree.namelen = (u_char) mibloclen;
+  subtree.variables = (struct variable *) malloc(varsize*numvars);
+  memcpy(subtree.variables, var, numvars*varsize);
+  subtree.variables_len = numvars;
+  subtree.variables_width = varsize;
+  return register_subtree(&subtree);
+}
+
+/* unregister_mib(oid mibloc, int mibloclen)
+ */
+int
+unregister_mib(mibloc, mibloclen)
+  oid *mibloc;
+  int mibloclen;
+{
+  char buf[1024];
+  char buf2[1024];
+  int i,j;
+  sprint_objid (buf, mibloc, mibloclen);
+  for(i=0; i < subtree_size; i++) {
+    if(compare_tree(subtrees[i].name, subtrees[i].namelen,
+                    mibloc, mibloclen) == 0) {
+      free(subtrees[i].variables);
+      /* I don't trust memmove to do this properly on every system */
+      for(j=i; j < subtree_size-1; j++) {
+        memcpy(&(subtrees[j]),&(subtrees[j+1]),sizeof(struct subtree));
+      }
+      subtree_size--;
+      DEBUGP("unregistered mib slot %d:  %s \n", i, buf);
+      return i;
+    }
+  }
+  DEBUGP("*** unable to unregister mib %s\n", buf);
+  return -1;
 }
 
 /*

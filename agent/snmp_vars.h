@@ -27,11 +27,6 @@ PERFORMANCE OF THIS SOFTWARE.
 
 struct nlist;
 
-int KNLookup __P((struct nlist *, int, char *, int));
-int compare __P((oid *, int, oid *, int));
-int subtree_old_size __P((void));
-void init_nlist __P((struct nlist *));
-
 extern long long_return;
 extern u_char return_buf[];
 
@@ -49,3 +44,10 @@ struct variable {
     u_char	    namelen;	    /* length of above */
     oid		    name[32];	    /* object identifier of variable */
 };
+
+int KNLookup __P((struct nlist *, int, char *, int));
+int compare __P((oid *, int, oid *, int));
+int subtree_old_size __P((void));
+void init_nlist __P((struct nlist *));
+int register_mib __P((struct variable *, int , int , oid *, int));
+int unregister_mib __P((oid *, int));

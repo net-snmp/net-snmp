@@ -21,6 +21,5 @@ char *skip_white __P((char *));
 char *skip_not_white __P((char *));
 void copy_word __P((char *, char *));
 int tree_compare __P((const void *, const void *));
-void setup_tree __P((void));
 
 #endif /* _MIBGROUP_READ_CONFIG_H */

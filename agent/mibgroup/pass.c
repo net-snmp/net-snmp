@@ -22,6 +22,7 @@
 #include "extensible.h"
 #include "util_funcs.h"
 #include "read_config.h"
+#include "snmp_api.h"
 
 struct extensible *passthrus=NULL;
 int numpassthrus=0;
@@ -36,8 +37,9 @@ void pass_parse_config(word,cptr)
   char *word;
   char *cptr;
 {
-  struct extensible **ppass = &passthrus;
+  struct extensible **ppass = &passthrus, **etmp, *ptmp;
   char *tcptr;
+  int i;
   
   if (*cptr == '.') cptr++;
   if (!isdigit(*cptr)) {
@@ -66,6 +68,37 @@ void pass_parse_config(word,cptr)
   }
   strcpy((*ppass)->name, (*ppass)->command);
   (*ppass)->next = NULL;
+
+  register_mib((struct variable *) extensible_passthru_variables,
+               sizeof(struct variable2),
+               1, (*ppass)->miboid, (*ppass)->miblen);
+
+  /* argggg -- pasthrus must be sorted */
+  if (numpassthrus > 0) {
+    etmp = (struct extensible **)
+      malloc(((sizeof(struct extensible *)) * numpassthrus));
+    for(i=0,ptmp = (struct extensible *) passthrus;
+        i < numpassthrus && ptmp != 0;
+        i++, ptmp = ptmp->next)
+      etmp[i] = ptmp;
+    qsort(etmp, numpassthrus, sizeof(struct extensible *),
+#ifdef __STDC__
+         (int (*)(const void *, const void *)) pass_compare
+#else
+	  pass_compare
+#endif
+          
+      );
+    passthrus = (struct extensible *) etmp[0];
+    ptmp = (struct extensible *) etmp[0];
+    
+    for(i=0; i < numpassthrus-1; i++) {
+      ptmp->next = etmp[i+1];
+      ptmp = ptmp->next;
+    }
+    ptmp->next = NULL;
+    free(etmp);
+  }
 }
 
 void pass_free_config __P((void)) {
@@ -74,6 +107,7 @@ void pass_free_config __P((void)) {
   for (etmp = passthrus; etmp != NULL;) {
     etmp2 = etmp;
     etmp = etmp->next;
+    unregister_mib(etmp2->miboid, etmp2->miblen);
     free(etmp2);
   }
   passthrus = NULL;
