@@ -123,7 +123,7 @@ struct variable2 smux_variables[] = {
 };
 
 void
-smux_parse_peer_auth(char *token, char *cptr)
+smux_parse_peer_auth(const char *token, char *cptr)
 {
 	smux_peer_auth *aptr;
 

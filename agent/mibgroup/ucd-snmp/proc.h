@@ -14,8 +14,8 @@ int sh_count_procs (char *);
 
 /* config file parsing routines */
 void proc_free_config (void);
-void proc_parse_config (char *, char *);
-void procfix_parse_config (char *, char *);
+void proc_parse_config (const char *, char *);
+void procfix_parse_config (const char *, char *);
 
 #include "mibdefs.h"
 

@@ -64,5 +64,5 @@ extern int init_smux (void);
 extern int smux_accept (int);
 extern u_char *smux_snmp_process (int, oid *, size_t *, size_t *, u_char *, int);
 extern int smux_process (int);
-extern void smux_parse_peer_auth (char *, char *);
+extern void smux_parse_peer_auth (const char *, char *);
 extern void smux_free_peer_auth (void);

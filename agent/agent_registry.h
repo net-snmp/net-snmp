@@ -48,6 +48,7 @@ struct variable_list* register_oid_index( oid *, size_t, oid *, size_t);
 struct variable_list* register_index( struct variable_list *, int, struct snmp_session*);
 int release_index( struct variable_list *);
 int remove_index( struct variable_list *, struct snmp_session*);
+int unregister_index(struct variable_list *, int, struct snmp_session *);
 
 void setup_tree (void);
 struct subtree *find_subtree (oid *, size_t, struct subtree *);

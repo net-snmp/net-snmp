@@ -56,7 +56,7 @@ int           store_snmpTargetAddrEntry(int majorID, int minorID,
                                         void *serverarg, void *clientarg);
 FindVarMethod var_snmpTargetAddrEntry;
 
-void snmpd_parse_config_targetAddr( char *, char *);
+void snmpd_parse_config_targetAddr(const char *, char *);
 
 WriteMethod write_snmpTargetAddrTDomain;
 WriteMethod write_snmpTargetAddrTAddress;

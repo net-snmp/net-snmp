@@ -13,7 +13,7 @@ extern FindVarMethod var_extensible_disk;
 
 /* config file parsing routines */
 void disk_free_config (void);
-void disk_parse_config (char *, char *);
+void disk_parse_config (const char *, char *);
 
 #include "mibdefs.h"
 

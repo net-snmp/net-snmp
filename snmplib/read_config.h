@@ -30,7 +30,7 @@ struct config_files {
 struct config_line {
    char			 *config_token;	/* Label for each line parser
                                            in the given file. */
-   void			(*parse_line) (char *, char *);
+   void			(*parse_line) (const char *, char *);
    void			(*free_func) (void);
    struct config_line	 *next;
    char			  config_time;	/* {NORMAL,PREMIB,EITHER}_CONFIG */
@@ -50,11 +50,11 @@ char *skip_token(char *);
 char *copy_word (char *, char *);
 void read_config_with_type (const char *, const char *);
 struct config_line *register_config_handler (const char *, const char *,
-                                             void (*parser)(char *, char *),
+                                             void (*parser)(const char *, char *),
                                              void (*releaser) (void),
                                              const char *);
 struct config_line *register_premib_handler (const char *, const char *,
-                                             void (*parser)(char *, char *),
+                                             void (*parser)(const char *, char *),
                                              void (*releaser) (void),
                                              const char *);
 void unregister_config_handler (const char *, const char *);

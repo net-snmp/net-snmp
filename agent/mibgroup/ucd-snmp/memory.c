@@ -179,7 +179,7 @@ void init_memory(void)
   }
 }
 
-void memory_parse_config(char *token, char *cptr)
+void memory_parse_config(const char *token, char *cptr)
 {
   minimumswap = atoi(cptr);
 }

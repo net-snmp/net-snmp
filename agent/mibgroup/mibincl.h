@@ -26,20 +26,20 @@
 #include <sys/socket.h>
 #endif
 
-#include "../../snmplib/asn1.h"
-#include "../../snmplib/snmp_api.h"
-#include "../../snmplib/snmp_impl.h"
+#include "asn1.h"
+#include "snmp_api.h"
+#include "snmp_impl.h"
 
-#include "../snmp_vars.h"
-#include "../agent_read_config.h"
-#include "../var_struct.h"
+#include "snmp_vars.h"
+#include "agent_read_config.h"
+#include "var_struct.h"
 
-#include "../../snmplib/snmp.h"
-#include "../../snmplib/mib.h"
-#include "../../snmplib/snmp_debug.h"
-#include "../../snmplib/snmp_logging.h"
-#include "../../snmplib/read_config.h"
-#include "../../snmplib/tools.h"
+#include "snmp.h"
+#include "mib.h"
+#include "snmp_debug.h"
+#include "snmp_logging.h"
+#include "read_config.h"
+#include "tools.h"
 #define u_char unsigned char
 #define u_short unsigned short
 

@@ -89,7 +89,7 @@ void init_pass(void)
 }
 
 
-void pass_parse_config(char *token, char* cptr)
+void pass_parse_config(const char *token, char* cptr)
 {
   struct extensible **ppass = &passthrus, **etmp, *ptmp;
   char *tcptr;

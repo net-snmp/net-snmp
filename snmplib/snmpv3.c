@@ -83,7 +83,7 @@ static oid	*defaultPrivType	= NULL;
 static size_t	 defaultPrivTypeLen	= 0;
 
 void
-snmpv3_authtype_conf(char *word, char *cptr)
+snmpv3_authtype_conf(const char *word, char *cptr)
 {
   if (strcmp(cptr,"MD5") == 0)
     defaultAuthType = usmHMACMD5AuthProtocol;
@@ -104,7 +104,7 @@ get_default_authtype(size_t *len)
 }
 
 void
-snmpv3_privtype_conf(char *word, char *cptr)
+snmpv3_privtype_conf(const char *word, char *cptr)
 {
   if (strcmp(cptr,"DES") == 0)
     defaultPrivType = usmDESPrivProtocol;
@@ -133,7 +133,7 @@ get_default_privtype(size_t *len)
  *	defSecurityLevel "noAuthNoPriv" | "authNoPriv" | "authPriv"
  */
 void
-snmpv3_secLevel_conf(char *word, char *cptr)
+snmpv3_secLevel_conf(const char *word, char *cptr)
 {
   char buf[1024];
   
@@ -291,7 +291,7 @@ setup_engineID(u_char **eidp, const char *text)
  *	engineBoots <num_boots>
  */
 void
-engineBoots_conf(char *word, char *cptr)
+engineBoots_conf(const char *word, char *cptr)
 {
   engineBoots = atoi(cptr)+1;
   DEBUGMSGTL(("snmpv3","engineBoots: %d\n",engineBoots));
@@ -310,14 +310,14 @@ engineBoots_conf(char *word, char *cptr)
  * string to initialize the engineID.  It's assumed to be human readable.
  */
 void
-engineID_conf(char *word, char *cptr)
+engineID_conf(const char *word, char *cptr)
 {
   setup_engineID(NULL, cptr);
   DEBUGMSGTL(("snmpv3","initialized engineID with: %s\n",cptr));
 }
 
 void
-version_conf(char *word, char *cptr)
+version_conf(const char *word, char *cptr)
 {
   if (strcmp(cptr,"1") == 0) {
     ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, SNMP_VERSION_1);
@@ -333,13 +333,13 @@ version_conf(char *word, char *cptr)
               ds_get_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION)));
 }
 
-/* engineID_old_conf(char *, char *):
+/* engineID_old_conf(const char *, char *):
 
    Reads a octet string encoded engineID into the oldEngineID and
    oldEngineIDLen pointers.
 */
 void
-oldengineID_conf(char *word, char *cptr)
+oldengineID_conf(const char *word, char *cptr)
 {
   read_config_read_octet_string(cptr, &oldEngineID, &oldEngineIDLength);
 }

@@ -12,7 +12,7 @@ extern FindVarMethod var_extensible_mem;
 extern void	init_memory_freebsd2 (void);
 
 /* config file parsing routines */
-void memory_parse_config (char *, char *);
+void memory_parse_config (const char *, char *);
 void memory_free_config (void);
 
 #define MEMTOTALSWAP 3

@@ -484,7 +484,7 @@ int snmpTargetAddr_addRowStatus(
 }  /* snmpTargetAddr_addRowStatus  */
 
 
-void snmpd_parse_config_targetAddr(char *token, char *char_ptr)
+void snmpd_parse_config_targetAddr(const char *token, char *char_ptr)
 {
   char  *cptr = char_ptr, buff[1024];
   struct targetAddrTable_struct *newEntry;

@@ -62,7 +62,7 @@ snmptrapd_get_traphandler(oid *name, size_t namelen)
 }
 
 void
-snmptrapd_traphandle(char *token, char *line)
+snmptrapd_traphandle(const char *token, char *line)
 {
   struct traphandle **ttmp;
   char buf[STRINGMAX];

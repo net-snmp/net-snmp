@@ -10,7 +10,7 @@ void	init_loadave (void);
 extern FindVarMethod var_extensible_loadave;
 
 /* config file parsing routines */
-void loadave_parse_config (char *, char *);
+void loadave_parse_config (const char *, char *);
 void loadave_free_config (void);
 int try_getloadavg(double *r_ave, size_t s_ave);
 
