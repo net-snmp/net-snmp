@@ -368,6 +368,25 @@ netsnmp_table_data_set_create_row_from_defaults
     return row;
 }
 
+
+newrow_stash   *
+netsnmp_table_data_set_create_newrowstash
+    (netsnmp_table_data_set     *datatable,
+     netsnmp_table_request_info *table_info)
+{
+    newrow_stash   *newrowstash = NULL;
+    netsnmp_table_row *newrow   = NULL;
+
+    newrowstash = SNMP_MALLOC_TYPEDEF(newrow_stash);
+    newrowstash->created = 1;
+    newrow = netsnmp_table_data_set_create_row_from_defaults
+                        (datatable->default_row);
+    newrow->indexes = snmp_clone_varbind(table_info->indexes);
+    newrowstash->newrow = newrow;
+
+    return newrowstash;
+}
+
 /** implements the table data helper.  This is the routine that takes
  *  care of all SNMP requests coming into the table. */
 int
@@ -385,7 +404,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_request_info *request;
     oid            *suffix;
     size_t          suffix_len;
-    netsnmp_oid_stash_node **stashp;
+    netsnmp_oid_stash_node **stashp = NULL;
 
     if (!handler)
         return SNMPERR_GENERR;
@@ -424,22 +443,25 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
 
             if (!newrowstash) {
                 if (!row) {
-                    if (!datatable->allow_creation) {
+                    if (datatable->allow_creation) {
+                        /*
+                         * entirely new row.  Create the row from the template 
+                         */
+                        newrowstash =
+                             netsnmp_table_data_set_create_newrowstash(
+                                                 datatable, table_info);
+                        newrow = newrowstash->newrow;
+                    } else if (datatable->rowstatus_column == 0) {
+                        /*
+                         * A RowStatus object may be used to control the
+                         *  creation of a new row.  But if this object
+                         *  isn't declared (and the table isn't marked as
+                         *  'auto-create'), then we can't create a new row.
+                         */
                         netsnmp_set_request_error(reqinfo, request,
                                                   SNMP_ERR_NOCREATION);
                         continue;
                     }
-                    /*
-                     * entirely new row.  Create the row from the template 
-                     */
-                    newrowstash = SNMP_MALLOC_TYPEDEF(newrow_stash);
-                    newrowstash->created = 1;
-                    newrow =
-                        netsnmp_table_data_set_create_row_from_defaults
-                        (datatable->default_row);
-                    newrow->indexes =
-                        snmp_clone_varbind(table_info->indexes);
-                    newrowstash->newrow = newrow;
                 } else {
                     /*
                      * existing row that needs to be modified 
@@ -493,7 +515,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
         case MODE_SET_RESERVE1:
             if (data) {
                 /*
-                 * modify existing 
+                 * Can we modify the existing row?
                  */
                 if (!data->writable) {
                     netsnmp_set_request_error(reqinfo, request,
@@ -502,12 +524,23 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                     netsnmp_set_request_error(reqinfo, request,
                                               SNMP_ERR_WRONGTYPE);
                 }
-            } else {
+            } else if (datatable->rowstatus_column == table_info->colnum) {
                 /*
-                 * no column definition found.  error out 
+                 * Otherwise, this is where we create a new row using
+                 * the RowStatus object (essentially duplicating the
+                 * steps followed earlier in the 'allow_creation' case)
                  */
-                netsnmp_set_request_error(reqinfo, request,
-                                          SNMP_ERR_NOTWRITABLE);
+                switch (*(request->requestvb->val.integer)) {
+                case RS_CREATEANDGO:
+                case RS_CREATEANDWAIT:
+                    newrowstash =
+                             netsnmp_table_data_set_create_newrowstash(
+                                                 datatable, table_info);
+                    newrow = newrowstash->newrow;
+                    row    = newrow;
+                    netsnmp_oid_stash_add_data(stashp, suffix, suffix_len,
+                                               newrowstash);
+                }
             }
             break;
 
@@ -516,11 +549,16 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
              * If the agent receives a SET request for an object in a non-existant
              *  row, then the RESERVE1 pass will create the row automatically.
              *
-             * But if that particular object is not writable, then the row 'data'
-             *  won't exist at that point, so the the check for the 'writable' flag
-             *  will be skipped. So we need to check for this possibility again here.
+             * But since the row doesn't exist at that point, the test for whether
+             *  the object is writable or not will be skipped.  So we need to check
+             *  for this possibility again here.
+             *
+             * Similarly, if row creation is under the control of the RowStatus
+             *  object (i.e. allow_creation == 0), but this particular request
+             *  doesn't include such an object, then the row won't have been created,
+             *  and the writable check will also have been skipped.  Again - check here.
              */
-            if (data && data->writable == 0) {
+            if (!data || data->writable == 0) {
                 netsnmp_set_request_error(reqinfo, request,
                                           SNMP_ERR_NOTWRITABLE);
                 continue;
@@ -532,7 +570,7 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                     /*
                      * Can only operate on pre-existing rows.
                      */
-                    if (newrowstash && newrowstash->created) {
+                    if (!newrowstash || newrowstash->created) {
                         netsnmp_set_request_error(reqinfo, request,
                                                   SNMP_ERR_INCONSISTENTVALUE);
                         continue;
@@ -542,9 +580,9 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
                 case RS_CREATEANDGO:
                 case RS_CREATEANDWAIT:
                     /*
-                     * Can only operate on new rows.
+                     * Can only operate on newly created rows.
                      */
-                    if (data && data->data.voidp) {
+                    if (!(newrowstash && newrowstash->created)) {
                         netsnmp_set_request_error(reqinfo, request,
                                                   SNMP_ERR_INCONSISTENTVALUE);
                         continue;
