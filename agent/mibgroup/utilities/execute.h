@@ -2,6 +2,7 @@
 #define _MIBGROUP_EXECUTE_H
 
 config_require(util_funcs)
+config_belongs_in(agent_module)
 
 int run_shell_command(char *command, char *input,
                       char *output,  int  *out_len);
