@@ -46,6 +46,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#ifndef DISABLE_MD5
+
 #include <stdio.h>
 #include <sys/types.h>
 #if HAVE_STRING_H
@@ -531,3 +533,5 @@ MDget(MDstruct * MD, u_char * buf, size_t buflen)
  * ** End of md5.c
  * ****************************(cut)****************************************
  */
+
+#endif /* DISABLE_MD5 */

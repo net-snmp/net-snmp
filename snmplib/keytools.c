@@ -129,9 +129,12 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
      */
 #ifdef USE_OPENSSL
 
+#ifndef DISABLE_MD5
     if (ISTRANSFORM(hashtype, HMACMD5Auth))
         EVP_DigestInit(ctx, EVP_md5());
-    else if (ISTRANSFORM(hashtype, HMACSHA1Auth))
+    else
+#endif
+        if (ISTRANSFORM(hashtype, HMACSHA1Auth))
         EVP_DigestInit(ctx, EVP_sha1());
     else {
         free(ctx);
@@ -148,7 +151,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
         }
 #ifdef USE_OPENSSL
         EVP_DigestUpdate(ctx, buf, USM_LENGTH_KU_HASHBLOCK);
-#else
+#elif USE_INTERNAL_MD5
         if (MDupdate(&MD, buf, USM_LENGTH_KU_HASHBLOCK * 8)) {
             rval = SNMPERR_USM_ENCRYPTIONERROR;
             goto md5_fin;
@@ -163,7 +166,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     /*
      * what about free() 
      */
-#else
+#elif USE_INTERNAL_MD5
     if (MDupdate(&MD, buf, 0)) {
         rval = SNMPERR_USM_ENCRYPTIONERROR;
         goto md5_fin;
@@ -172,7 +175,7 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
     MDget(&MD, Ku, *kulen);
   md5_fin:
     memset(&MD, 0, sizeof(MD));
-#endif                          /* USE_OPENSSL */
+#endif                          /* USE_INTERNAL_MD5 */
 
 
 #ifdef SNMP_TESTING_CODE
@@ -214,9 +217,12 @@ generate_Ku(const oid * hashtype, u_int hashtype_len,
      * Setup for the transform type.
      */
 
+#ifndef DISABLE_MD5
     if (ISTRANSFORM(hashtype, HMACMD5Auth))
         return pkcs_generate_Ku(CKM_MD5, P, pplen, Ku, kulen);
-    else if (ISTRANSFORM(hashtype, HMACSHA1Auth))
+    else
+#endif
+        if (ISTRANSFORM(hashtype, HMACSHA1Auth))
         return pkcs_generate_Ku(CKM_SHA_1, P, pplen, Ku, kulen);
     else {
         return (SNMPERR_GENERR);

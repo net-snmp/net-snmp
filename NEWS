@@ -3,9 +3,13 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *5.2*
  New:
-    Building:
+    For the security parnoid (EG, like Wes):
       - Insecure versions of SNMP may be completely disable at compile time.
-        (configure using both --disable-snmpv1 --disable-snmpv2c)
+        (configure using one or both of --disable-snmpv1 --disable-snmpv2c)
+      - Less secure versions of SNMPv3 authentication and encryption
+        algorithms may be completely disable at compile time.
+        (configure using one or both of --disable-des --disable-md5)
+        (This requires you have OpenSSL to support SHA1 and AES instead)
 
     snmptrapd:
       - Embedded perl support for trap handlers (much faster).
