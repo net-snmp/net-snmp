@@ -162,7 +162,7 @@ int
 usmDHUserKeyTable_cache_load(netsnmp_container * container)
 {
     usmDHUserKeyTable_rowreq_ctx *rowreq_ctx;
-    struct          usmUser *usmuser;
+    struct usmUser *usmuser;
     size_t          count = 0;
 
     DEBUGMSGTL(("verbose:usmDHUserKeyTable:usmDHUserKeyTable_cache_load",
@@ -174,15 +174,15 @@ usmDHUserKeyTable_cache_load(netsnmp_container * container)
      * set the index(es) [and data, optionally] and insert into
      * the container.
      */
-        /*
+    /*
      * Retrieve the first user from the USM DB
-         */
+     */
     usmuser = usm_get_userList();
     if (NULL == usmuser) {
         return MFD_SUCCESS;
-            }
+    }
 
-    for(; usmuser; usmuser = usmuser->next) {
+    for (; usmuser; usmuser = usmuser->next) {
         /*
          * TODO:352:M: |   |-> set indexes in new usmDHUserKeyTable rowreq context.
          * data context will be set from the param (unless NULL,

@@ -172,10 +172,10 @@ config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_
      *********************************************************************
      * function prototypes
      */
-    int            
+    int
         usmDHUserKeyTable_pre_request(usmDHUserKeyTable_registration_ptr
                                       user_context);
-    int            
+    int
         usmDHUserKeyTable_post_request(usmDHUserKeyTable_registration_ptr
                                        user_context);
 
@@ -183,12 +183,12 @@ config_require(snmp-usm-dh-objects-mib/usmDHUserKeyTable/usmDHUserKeyTable_data_
     void            usmDHUserKeyTable_release_data(usmDHUserKeyTable_data *
                                                    data);
 
-    int            
+    int
         usmDHUserKeyTable_check_dependencies(usmDHUserKeyTable_rowreq_ctx *
                                              rowreq_ctx);
     int             usmDHUserKeyTable_commit(usmDHUserKeyTable_rowreq_ctx *
                                              rowreq_ctx);
-    int            
+    int
         usmDHUserKeyTable_irreversible_commit(usmDHUserKeyTable_rowreq_ctx
                                               * rowreq_ctx);
 

@@ -35,7 +35,7 @@ extern          "C" {
      */
 
 
-    int            
+    int
         usmDHUserKeyTable_init_data(usmDHUserKeyTable_registration_ptr
                                     usmDHUserKeyTable_reg);
 
