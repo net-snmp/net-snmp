@@ -59,6 +59,9 @@
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #endif
+#ifdef linux
+#include "kernel_linux.h"
+#endif
 
 #include "system.h"
 #include "asn1.h"
@@ -74,17 +77,20 @@
 #include "icmp.h"
 #include "sysORTable.h"
 
+#ifndef MIB_STATS_CACHE_TIMEOUT
+#define MIB_STATS_CACHE_TIMEOUT	5
+#endif
+#ifndef ICMP_STATS_CACHE_TIMEOUT
+#define ICMP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
+#endif
+marker_t icmp_stats_cache_marker = NULL;
+
 	/*********************
 	 *
 	 *  Kernel & interface information,
 	 *   and internal forward declarations
 	 *
 	 *********************/
-
-#ifdef linux
-int linux_read_icmp_stat (struct icmp_mib *);
-#endif
-
 
 
 	/*********************
@@ -304,77 +310,47 @@ var_icmp(struct variable *vp,
 long
 read_icmp_stat( ICMP_STAT_STRUCTURE *icmpstat, int magic )
 {
-   long ret_value;
+   long ret_value = -1;
    int i;
 #if (defined(CAN_USE_SYSCTL) && defined(ICMPCTL_STATS))
    static int sname[4] = { CTL_NET, PF_INET, IPPROTO_ICMP, ICMPCTL_STATS };
    size_t len = sizeof( *icmpstat );
 #endif
 
+    if (  icmp_stats_cache_marker &&
+	(!atime_ready(icmp_stats_cache_marker, ICMP_STATS_CACHE_TIMEOUT*1000)))
+	return 0;
+
+    if (icmp_stats_cache_marker )
+	atime_setMarker( icmp_stats_cache_marker );
+    else
+	icmp_stats_cache_marker = atime_newMarker();
+
 
 #ifdef linux
-    return linux_read_icmp_stat(icmpstat);
+    ret_value = linux_read_icmp_stat(icmpstat);
 #endif
 
 #ifdef solaris2
-    return getMibstat(MIB_ICMP, icmpstat, sizeof(mib2_icmp_t), GET_FIRST, &Get_everything, NULL);
+    ret_value = getMibstat(MIB_ICMP, icmpstat, sizeof(mib2_icmp_t), GET_FIRST, &Get_everything, NULL);
 #endif
 
 #ifdef HAVE_SYS_TCPIPSTATS_H
-    return sysmp (MP_SAGET, MPSA_TCPIPSTATS, icmpstat, sizeof *icmpstat);
+    ret_value = sysmp (MP_SAGET, MPSA_TCPIPSTATS, icmpstat, sizeof *icmpstat);
 #endif
 
 #if defined(CAN_USE_SYSCTL) && defined(ICMPCTL_STATS)
-    return sysctl(sname, 4, icmpstat, &len, 0, 0);
+    ret_value = sysctl(sname, 4, icmpstat, &len, 0, 0);
 #endif
 
 #ifdef ICMPSTAT_SYMBOL
     if (auto_nlist(ICMPSTAT_SYMBOL, (char *)icmpstat, sizeof (*icmpstat)))
-	return 0;
+	ret_value = 0;
 #endif
 
-    return -1;
-
-}
-
-
-#ifdef linux
-/*
- * lucky days. since 1.1.16 the icmp statistics are avail by the proc
- * file-system.
- */
-
-int
-linux_read_icmp_stat (struct icmp_mib *icmpstat)
-{
-  FILE *in = fopen ("/proc/net/snmp", "r");
-  char line [1024];
-
-  memset ((char *) icmpstat,(0), sizeof (*icmpstat));
-
-  if (! in)
-    return -1;
-
-  while (line == fgets (line, sizeof(line), in))
-    {
-      if (26 == sscanf (line,
-"Icmp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-   &icmpstat->icmpInMsgs, &icmpstat->icmpInErrors, &icmpstat->icmpInDestUnreachs, 
-   &icmpstat->icmpInTimeExcds, &icmpstat->icmpInParmProbs, &icmpstat->icmpInSrcQuenchs,
-   &icmpstat->icmpInRedirects, &icmpstat->icmpInEchos, &icmpstat->icmpInEchoReps, 
-   &icmpstat->icmpInTimestamps, &icmpstat->icmpInTimestampReps, &icmpstat->icmpInAddrMasks,
-   &icmpstat->icmpInAddrMaskReps, &icmpstat->icmpOutMsgs, &icmpstat->icmpOutErrors,
-   &icmpstat->icmpOutDestUnreachs, &icmpstat->icmpOutTimeExcds, 
-   &icmpstat->icmpOutParmProbs, &icmpstat->icmpOutSrcQuenchs, &icmpstat->icmpOutRedirects,
-   &icmpstat->icmpOutEchos, &icmpstat->icmpOutEchoReps, &icmpstat->icmpOutTimestamps, 
-   &icmpstat->icmpOutTimestampReps, &icmpstat->icmpOutAddrMasks,
-   &icmpstat->icmpOutAddrMaskReps))
-	break;
+    if ( ret_value == -1 ) {
+	free( icmp_stats_cache_marker );
+	icmp_stats_cache_marker = NULL;
     }
-  fclose (in);
-  return 0;
+    return ret_value;
 }
-
-#endif /* linux */
-
-
