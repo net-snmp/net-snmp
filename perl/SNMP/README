@@ -1,4 +1,4 @@
-	      nThe Perl5 'SNMP' Extension Module v5.0
+	      The Perl5 'SNMP' Extension Module v5.0
 		      for the Net-SNMP Library
 
 Contents:
@@ -121,46 +121,107 @@ make
 make test
 make install
 
-Win32 (MSVC):
+Win32 (MSVC++)
 
-This package only builds on NT / 2000 as far as I know. These directions are
-for VC++ 5.0-6.0 with ActiveState Perl.  See below for Cygwin.
+This section covers installation of the Perl modules for Microsoft Visual 
+C++ 6.0 and Microsoft Microsoft Development Environment 2003/2003 
+(MSVC 7.0/7.1).  See the next sections for Cygwin and MinGW.
 
-Install the regex win32 package (gnu_regex.exe).  It is available from
-http://people.delphiforums.com/gjc/gnu_regex.html
+ActiveState Perl is required.  
 
-Run vcvars32.bat.
+Automatic building / testing with nmakeperl.bat:
 
-cd net-snmp\perl
-perl Makefile.PL CAPI=TRUE -NET-SNMP-IN-SOURCE=TRUE
-nmake
-nmake test
-nmake install
+1.  Ensure a static version of Net-SNMP has been compiled and installed.  Also
+    ensure the DLL version of snmplib has been compiled and installed.  The 
+    Perl modules will not function correctly without a shared snmplib library 
+    or DLL.
 
-Note:  The --NET-SNMP-IN-SOURCE=TRUE causes the Makefile to use the library files
-from the net-snmp source directory.  To specify the installed Net-SNMP directory,
-use:
+2.  Install the regex win32 package (gnu_regex.exe).  It is available from
 
-perl Makefile.PL CAPI=TRUE -NET-SNMP-PATH=c:\usr
+    http://people.delphiforums.com/gjc/gnu_regex.html
 
-OpenSSL note: see the net-snmp/README.win32 to compile libsnmp with
-              libeay32 and see that libeay.lib is in usr\lib
+    a.  Copy regex.h to the include folder of MSVC++
 
-for the older perl5.004_02 distribution by gsarathy
+        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
+                  Vc7\include\regex.h"
 
-cd net-snmp\perl
-perl Makefile.PL
-nmake
-nmake test
-nmake install
+    b.  Copy gnu_regex.lib to the lib folder of MSVC++
+
+        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
+                  Vc7\lib\gnu_regex.lib"
+
+    b.  Copy gnu_regex.dll to your %windir%\system32 folder
+
+        Example: "C:\winnt\system32\gnu_regex.dll"
+
+3.  Set the environment PATH to locate "nmake", "cl", and "link".
+    Visual Studio installs a VCVARS32.BAT batch file for this purpose.
+
+4.  Using a command prompt window, cd to the source base directory.
+
+5.  Invoke win32\nmakeperl.bat to build the Perl SNMP modules.  If you see 
+    errors, review the "nmake.out" file first.  If no errors there,
+    then the modules built correctly, but the tests did not rigourously
+    prove the mettle of the modules.  Review "nmaketest.out".  If the
+    first three sections mostly pass, the modules are well formed.
+
+    NOTE: If the tests fail, there may be a perl application left hanging.
+          Use the Task Manager to remove any stale perl or snmp*.exe process.
+
+6.  The final step is to invoke "nmake install".  If no errors occurred,
+    then the SNMP modules are available for use by your Perl programs.
 
 
-Win32 Testing Note:
+Manual building / testing:
 
-'nmake test' requires that an agent(snmpd) and trap receiver (snmptrapd)
-are running. Before running 'nmake test' start these servers using the
-config file provided (t/snmpd.conf). You will be asked for the test host
-and port numbers by Makefile.PL
+1.  Ensure a static version of Net-SNMP has been compiled and installed.  Also
+    ensure the DLL version of snmplib has been compiled and installed.  The 
+    Perl modules will not function correctly without a shared snmplib library 
+    or DLL.
+
+2.  Install the regex win32 package (gnu_regex.exe).  It is available from
+
+    http://people.delphiforums.com/gjc/gnu_regex.html
+
+    a.  Copy regex.h to the include folder of MSVC++
+
+        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
+                  Vc7\include\regex.h"
+
+    b.  Copy gnu_regex.lib to the lib folder of MSVC++
+
+        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
+                  Vc7\lib\gnu_regex.lib"
+
+    b.  Copy gnu_regex.dll to your %windir%\system32 folder
+
+        Example: "C:\winnt\system32\gnu_regex.dll"
+
+4.  Set the environment PATH to locate "nmake", "cl", and "link".
+    Visual Studio installs a VCVARS32.BAT for this purpose.
+
+3.  Using a command prompt window, cd to the perl directory.
+
+5.  Type: 
+
+      perl Makefile.PL CAPI=TRUE -NET-SNMP-IN-SOURCE=TRUE
+      nmake
+      nmake test
+      nmake install
+
+      Note: The --NET-SNMP-IN-SOURCE=TRUE causes the Makefile to use the 
+            library files from the net-snmp source directory.  To specify the
+            installed Net-SNMP directory, use:
+
+            perl Makefile.PL CAPI=TRUE -NET-SNMP-PATH=c:\Program Files\Net-SNMP
+
+      Note: To include OpenSSL, see the net-snmp/README.win32 to compile 
+            libsnmp with libeay32 and see that libeay.lib is in the lib folder,
+            or in the lib folder of the installed Net-SNMP if using 
+            -NET-SNMP-PATH.  For example, c:\Program Files\Net-SNMP\lib
+
+Note:  'nmake test' will automatically start and stop the agent(snmpd) and trap 
+       receiver (snmptrapd) while testing the SNMP module.  
 
 
 Win32 (Cygwin):
@@ -174,6 +235,89 @@ make install
 If you get an error saying your system can't compile, you are probably missing
 the regex library.  Install regex from 
 http://mirrors.sunsite.dk/cygwin/release/regex/regex-4.4-2-src.tar.bz2
+
+
+Win32 (MinGW):
+
+Note:  As of February 25th, 2004, the MinGW build of Net-SNMP does not
+       compile the DLL version of libsnmp.  Some modules will not function
+       correctly without a shared library / DLL.  The OID module does not
+       appear to work at all without the DLL, and some parts of other 
+       modules may not work.  For example, sharing configurations between
+       modules which is why the SNMP conf test fails.
+
+These directions are for MinGW 3.1.0 with MSYS 1.0.9 and ActiveState Perl.
+Compiling the Perl modules using a MinGW built Perl environment has not
+been tested.
+
+The main Net-SNMP package must be compiled with the regex library.  
+See Net-SNMP README.win32 for compiling with MinGW.
+
+The following additional software is required:
+
+ dmake:
+ http://www.cpan.org/authors/id/GSAR/dmake-4.1pl1-win32.zip  
+
+ ExtUtils-FakeConfig:
+ http://search.cpan.org/~mbarbon/ExtUtils-FakeConfig-0.05/
+
+Note:  A PPM package is available from ActiveState for ExtUtils-FakeConfig, but
+       it does not include the make_implib.pl script.  Downloading from CPAN
+       is recommended.
+
+Installing DMAKE and ExtUtils-FakeConfig:
+-----------------------------------------
+
+1.  Install DMAKE as described in the README.NOW contained in the DMAKE .ZIP 
+    file ensuring the DMAKE program can be found in the system path.
+
+2.  Extract ExtUtils-FakeConfig-0.05.zip to a temporary folder.
+
+3.  Add the MinGW bin folder to your system path.
+
+4.  Open a Windows command prompt (cmd) and cd into ExtUtils-FakeConfig-0.05 
+    and typet he following to build and install the ExtUtils-FakeConfig module:
+
+    perl Makefile.PL
+    dmake
+    dmake install
+
+5.  A Perl import library needs to be created using the ExtUtils-FakeConfig 
+    make_implib.pl script.  
+
+    For ActiveState Perl 5.6.x installed to c:\Perl, type the following on one
+    line:
+
+      perl script/make_implib.pl --output-dir=C:/Perl/lib/CORE 
+        --output-lib=libperl56.a --target=mingw c:/Perl/bin/Perl56.dll
+
+    For ActiveState Perl 5.8.x installed to c:\Perl, type the following on one 
+    line:
+
+      perl script/make_implib.pl --output-dir=C:/Perl/lib/CORE 
+        --output-lib=libperl58.a --target=mingw c:/Perl/bin/Perl58.dll
+
+
+Building the Perl module:
+-------------------------
+
+1.  Open an MSYS shell and cd into the net-snmp/Perl folder and type the 
+    following on one line:
+
+      perl -MConfig_m Makefile.PL -NET-SNMP-IN-SOURCE=true DEFINE=-DMINGW_PERL
+
+2.  Open a Windows command prompt (cmd) and cd into the net-snmp/perl folder 
+    and type:
+
+      dmake
+      dmake test
+      dmake install
+
+    Note:  'dmake test' will automatically start and stop the agent(snmpd) and 
+           trap receiver (snmptrapd) while testing the SNMP module.  
+
+3.  Remove the MinGW bin folder to your system path if it was not already in
+    your path for step 3.
 
 
 Operational Description:
@@ -664,6 +808,7 @@ Jef Peeraer
 Daniel Hagerty
 Karl "Rat" Schilke and Electric Lightwave, Inc.
 Perl5 Porters
+Alex Burger
 
 Apologies to any/all who's patch/feature/request was not mentioned or
 included - most likely it was lost when paying work intruded on my

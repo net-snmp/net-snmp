@@ -4,48 +4,52 @@
 *
 ***************************************************************************
 
-This guide describes building with Microsoft Visual C++ and
-with the gcc compiler from Cygwin.  As developers build with
-other Win32 environments, their notes will be included here.
+This guide describes building with Microsoft Visual C++ 6.0 and higher, with
+the gcc compiler from MinGW / MSYS, and with the gcc compiler from Cygwin.
+As developers build with other Win32 environments, their notes will be 
+included here.
 
 The remainder of this guide has the following sections :
 
-Status as of 30-Jan-2004 for Win32 platforms
-Visual C++ Overview
+Status as of 21-Feb-2004 for Win32 platforms
+Interactions with Other Vendor's Products
 Installing Platform SDK
-Building with MS VC++
-Building with OpenSSL with MS VC++
-Installing from MS VC++ build
-How To build the Perl SNMP modules using MSVC
-Extending the Agent with MS VC++
-How to Register Net-SNMP Agent as a Windows service
-Building with Cygwin
-Building with MinGW
+Microsoft Visual C++ - Overview
+Microsoft Visual C++ - Building
+Microsoft Visual C++ - Building the Perl SNMP modules
+Microsoft Visual C++ - Installing
+Microsoft Visual C++ - Building with OpenSSL
+Microsoft Visual C++ - Building your own applications with snmplib
+Microsoft Visual C++ - Extending the Agent
+Cygwin - Building
+MinGW - Building
+Configuring Net-SNMP
+How to Register the Net-SNMP Agent as a Windows service
 Notes on SET support for WIN32 ports
 Acknowledgements
 
 
 ***************************************************************************
 *
-* Status as of 30-Jan-2004 for Win32 platforms
+* Status as of 21-Feb-2004 for Win32 platforms
 *
 ***************************************************************************
 
-All applications build with MS VC++, gcc under Cygwin, and gcc under MinGW.
+All applications build with Microsoft Visual C++ 6.0, Microsoft Development
+Environment 2003/2003 (MSVC 7.0/7.1), gcc under Cygwin, and gcc under MinGW.  
 
   -  All of the applications work
      (snmpwalk, snmpget, snmpset, snmptrap, etc...)
   -  The system, snmp, ip, tcp, udp, icmp mibgroups function
          (when agent is built using the snmpdsdk project).
   -  The Net-SNMP agent runs as an AgentX master agent or as subagent
-         when the callback transport patch is compiled.
   -  smux is working
   -  The target, notification, disman/mte groups compile but are not tested
          
   -  Extending the agent to support enterprise-specific MIBs works
   -  Running the agent on a non-standard UDP or TCP port works
   -  Snmpd can be registered as a Windows NT/2000 service
-         (the procedure is included later in this document).
+     (the procedure is included later in this document).
   -  Snmptrapd cannot register as a Windows service.
 
 
@@ -58,11 +62,13 @@ The next subsection relates to items that are built using Visual Studio
      d) Debug versions build source browsing and debugging information.
      e) provide consistent include search paths
 
-  -  Building netsnmp.dll is not supported, as the DLL does not
-	prevent corruption of dynamically changing shared data.
+  -  Building netsnmp.dll is only supported for compiling libagent, 
+     libhelpers, libsnmp_dll and netsnmpmibs for use with the Perl module.
+     Using netsnmp.dll for other components is not supported as the DLL does
+     not prevent corruption of dynamically changing shared data.
 
   -  All Debug and Release targets linked with libsnmp project targets
-        build without errors, and are fully functional.
+     build without errors, and are fully functional.
 
 
 ***************************************************************************
@@ -71,47 +77,22 @@ The next subsection relates to items that are built using Visual Studio
 *
 ***************************************************************************
 
-  -  Running the Net-SNMP Agent or trap receiver on Windows 95 or Win3.1
-         is not supported.
+  -  Install scripts etc are written assuming Windows NT / 2000 or higher
 
-  -  The Net-SNMP agent and trap receiver will fail to start
-	if either cannot bind to their connect port
-	 (161 for agent, 162 for trap receiver).
+  -  Running the Net-SNMP Agent or trap receiver on Windows 95 or Win3.1
+     is not supported.
+
+  -  The Net-SNMP agent and trap receiver will fail to start if either 
+     cannot bind to their connect port (161 for agent, 162 for trap receiver).
 
   -  Running the Net-SNMP agent instead of the MS supplied one "works"
-         (at the loss of most of the functionality).
+     (at the loss of most of the functionality).
 
-  -  The Net-SNMP agent does not use the MS SNMP.dll,
-         therefore it cannot run as an extensible part of the MS agent.
+  -  The Net-SNMP agent does not use the MS SNMP.dll, therefore it cannot 
+     run as an extensible part of the MS agent.
 
   -  Snmptrapd does not "share" nor multiplex traps with SNMPTRAP.EXE,
-         a program that is available from Microsoft or ACE#COMM.
-
-
-***************************************************************************
-*
-* Visual C++ Overview
-*
-***************************************************************************
-
-There are two Win32 workspaces ('win32.dsw' and 'win32sdk.dsw'), containing
-more or less the same set of projects.  The former is for developers who
-have not installed the Platform SDK from Microsoft's MSDN SDK Update site.
-The latter is for those who have.   This only affects building the agent.
-
-There is one core development library ('libsnmp'),
-together with a number of utility projects for the individual executable
-commands ('snmpget', 'snmpwalk', etc...).  All of these projects require
-the .lib created by the libsnmp project.
-
-The agent requires the core library plus the other three
-library projects ('libagent', libhelpers' and either 'netsnmpmibs' or
-'netsnmpmibssdk' depending on which workspace is being used) together
-with the main agent project (either 'snmpd' or 'snmpdsdk').
-
-The final application project is the trap handler 'snmptrapd'.  This also
-requires the agent libraries ('libagent', 'libhelpers' and 'netsnmpmibs')
-as well as the core development library.
+     a program that is available from Microsoft or ACE#COMM.
 
 
 ***************************************************************************
@@ -120,16 +101,18 @@ as well as the core development library.
 *
 ***************************************************************************
 
-The core elements of the mibII group of the agent, use the "IP Helper API"
+The core elements of the mibII group of the agent use the "IP Helper API"
 which is part of Microsoft's "Core Platform SDK".  This is typically
 not installed by default, but can be downloaded from
+
 		http://msdn.microsoft.com/downloads/
+
 as follows:
 
     -  Using Internet Explorer (Netscape won't work), go to the above URL
     -  From the menu at the left, select
-		"Software Development Kits"
-		"Platform SDK"
+		"Downloads by Topic"
+		"More Topics"
     -  From the new window that appears, select "Core SDK".
     -  The full Core SDK is ~240Mb (expanding to ~560Mb on installation).
        In fact, the only portion that's required is the basic "Build
@@ -137,125 +120,306 @@ as follows:
        documentation, sample code and 64-bit elements.
 
     -  Once this package has installed, from the Start Menu run
-	"Programs ->Microsoft Platform SDK -> Visual Studio Registration
-	->Register PSDK directories with Visual Studio"
+       "Programs ->Microsoft Platform SDK -> Visual Studio Registration
+       ->Register PSDK directories with Visual Studio"
 
-See the Building section below in order to build the agent.
+If you are building Net-SNMP using Cygwin, go now to "Cygwin - Building".
+If you are building Net-SNMP using MinGW, go now to "MinGW - Building".
+Otherwise, see the Building section below in order to build the agent.
 
 
 ***************************************************************************
 *
-* Building with MS VC++
+* Microsoft Visual C++ - Overview
 *
 ***************************************************************************
 
-The win32 directory contains two Microsoft VC++ workspaces and project
-files to build static versions of the applications.
+There are two main Win32 workspaces ('win32.dsw' and 'win32sdk.dsw'), 
+containing more or less the same set of projects, plus 'libdll.dsw' which 
+contains a minimal set of projects for use with the Perl module only.  
 
-Both VC++ 6.0 and 7.0 have been tested.  Building with earlier Microsoft
+Win32.dsw is for developers who have not installed the Platform SDK from 
+Microsoft's MSDN SDK Update site.  Win32sdk.dsw is for those who have.   
+This only affects building the agent.
+
+Libdll.dsw compiles a DLL version of snmplib (netsnmp.dll) which should 
+only be used for the Perl module.  Using netsnmp.dll for other components 
+is not supported as the DLL does not prevent corruption of dynamically 
+changing shared data.  Although the same problem can occur using the Perl 
+modules, the Perl modules will not function correctly without a shared 
+snmplib library or DLL.
+
+There is one core development library ('libsnmp'), together with a number 
+of utility projects for the individual executable commands ('snmpget', 
+'snmpwalk', etc...).  All of these projects require the .lib created by 
+the libsnmp project.
+
+The agent requires the core library plus the other three library projects 
+('libagent', libhelpers' and either 'netsnmpmibs' or 'netsnmpmibssdk' 
+depending on which workspace is being used) together with the main agent 
+project (either 'snmpd' or 'snmpdsdk').
+
+The final application project is the trap handler 'snmptrapd'.  This also
+requires the agent libraries ('libagent', 'libhelpers' and 'netsnmpmibs')
+as well as the core development library.
+
+There is a Debug version and Release version for each subproject.  The Debug 
+product .exe files have "_d" appended to the basename of the applications.  
+This is so the Debug and Release versions of an application can be built and 
+tested separately.
+
+Both VC++ 6.0 and 7.1 have been tested.  Building with earlier Microsoft
 compiler versions has been dropped and is no longer supported.
+
+OpenSSL is required to support the encryption capabilities in SNMPv3
+and will also support MD5 authentication.
 
 Since the MSVC build environment does not use "configure" nor "make" to
 generate the various pathnames that the programs require, several header
 files and an install script are provided.
 
-The install script "win32\install-net-snmp.bat" should be run after a
-build is successful.  It copies the programs, MIB files, and development
-components to an install directory named in the INSTALL_BASE variable.
-
-The INSTALL_BASE variable must match the INSTALL_BASE compile constant
-defined in "win32\net-snmp\net-snmp-config.h", using these rules:
-
-1. All paths in install-net-snmp.bat use the "\" DOS pathname delimiter.
-
-   For example: set INSTALL_BASE="c:\Program Files\Net-SNMP".  
-
-
-2. All paths in net-snmp-config.h use the "/" UNIX pathname delimiter.
-   If a drive letter is not specified, the current drive letter is assumed.
-
-   For example: #define INSTALL_BASE "c:/Program Files/Net-SNMP".  
-
-
-To build the libraries and applications, open the workspace file
-"win32\win32.dsw" from VC++.
-
-Note there is a Debug version and Release version for each subproject.
-
-The projects are arranged so that ALL of the usable products,
-the .exe files, are written to the win32\bin
-directory.  The win32\lib directory is used only to build the
-the files in the win32\bin directory.  Once building is completed,
-there is no further use for the files in the win32\lib directory.
-
-The Debug product .exe files have "_d" appended to the basename
-of the applications.  This is so the Debug and Release versions
-of an application can be built and tested separately.
-
-
-Project Settings
-----------------
-
-Linking in an snmplib built to use the Multithreaded DLL
-runtime library to an application configured for the Debug
-Multithreaded DLL runtime library results in a link error along the
-lines of 'defaultlib "MSVCRT" conflicts with use of other libs'.   If
-you receive a similar message, check that the projects settings
-between library and application match up.
-
-To successfully build your existing project with Net-SNMP libraries,
-change the project settings FOR YOUR APPLICATION ONLY as follows:
-
-   1. In the Link section, Select "Additional Libraries".
-        Add netsnmp.lib for Release version.
-        Add netsnmp_d.lib for Debug version.
-
-   2. Remove all references to these libraries:
-        libsnmp*.lib msvcrt*.lib libc*.lib oldnames.lib
-
-   3. In the C++ section, Select "Code Generation".
-        For Release, select /MD or "MultiThreaded DLL".
-        For Debug, select /MDd or "Debug MultiThreaded DLL".
-
-   4. Make sure "Ignore all default libraries" is NOT SET.
-
-   5. Make sure "_MBCS" is included in your pre-processor defines.
-
-
+The projects are arranged so that ALL of the usable products, the .exe files,
+are written to the win32\bin directory.  The win32\lib directory is used only 
+to build the the files in the win32\bin directory.  Once building is 
+completed, there is no further use for the files in the win32\lib directory.
 
 Debug Information
 -----------------
 
-Note that VC++ 6.0 has options for debugging information -
-the 'Program Database'.  This option is set in the Project settings,
-C/C++ tab, 'General' category, and is turned on by default during the
-conversion of the project files. This option is not for use with a
-library, as it embeds debug information into the library that
-references an external file that will not be available to the linking
-application. If you get an error message along the lines of
-'debugging information not available in file vc60.pdb, make sure the
-library debug option is set to 'Program Database' or "/Zi".
-
-
-Building
---------
-
-The win32sdk.dsw workspace will build the agent that provides mib-II objects
-for network interface layers, and the IP, ICMP, TCP and UDP tables.  This
-workspace requires the Platform SDK to be installed.
-Use the win32.dsw workspace if you don't have or don't need these features.
-
-1. Open win32.dsw or win32sdk.dsw.  Click "Build->Batch Build..."  
-2. Set Release and/or Debug in 'Project configurations' to suit.
-3. Click "ReBuild All".
-4. When building is done, View the Output window, clip and
-   save to a text file if there is some information to share.
-5. Click "File->Close Workspace".
+Note that VC++ 6.0 has options for debugging information - the 'Program 
+Database'.  This option is set in the Project settings, C/C++ tab, 'General' 
+category, and is turned on by default during the conversion of the project 
+files. This option is not for use with a library, as it embeds debug 
+information into the library that references an external file that will 
+not be available to the linking application. If you get an error message 
+along the lines of 'debugging information not available in file vc60.pdb, 
+make sure the library debug option is set to 'Program Database' or "/Zi".
 
 
 ***************************************************************************
 *
-* Building with OpenSSL with MS VC++
+* Microsoft Visual C++ - Building
+*
+***************************************************************************
+
+The win32sdk.dsw workspace will build the agent that provides mib-II objects
+for network interface layers, and the IP, ICMP, TCP and UDP tables.  This
+workspace requires the Platform SDK to be installed.  Use the win32.dsw 
+workspace if you don't have or don't need these features.
+
+1.  If SNMPv3 encryption capabilities or MD5 authentication is required,
+    install the OpenSSL DLL and library file as described in the section 
+    'Microsoft Visual C++ - Building with OpenSSL" and then continue with 
+    step 2.
+2.  The default installation path is c:\usr.  This folder will contain all
+    the binaries, MIB files, configuration files etc.  To change the location,
+    the win32\net-snmp\net-snmp-config.h file needs to be modified by changing
+    the INSTALL_BASE variable. 
+
+    Note:
+  
+      All paths in net-snmp-config.h use the "/" UNIX pathname delimiter.
+      If a drive letter is not specified, the current drive letter is assumed.
+
+      For example: #define INSTALL_BASE "c:/Program Files/Net-SNMP".  
+
+3. Build the applications
+
+   MS VC++ 6.0:
+   ------------
+   a. Open win32.dsw or win32sdk.dsw.
+   b. Click "Build->Batch Build..."  
+   c. Set Release and/or Debug in 'Project configurations' to suit.
+   d. Click "ReBuild All".
+   e. When building is done, View the Output window, clip and
+      save to a text file if there is some information to share.
+   f. Click "File->Close Workspace".
+
+   MS VC++ 7.0+:
+   -------------
+   a.  Open win32.dsw or win32sdk.dsw.
+   b.  Click "Yes to All" to convert the workspace
+   c.  Click "Build->Configuration Manager" and select either Release or Debug for 
+       'Active Solution Configuration' and click "Close"
+   d.  Right-click the "libagent" project, and select "Rebuild"
+   e.  Right-click the "libhelpers" project, and select "Rebuild"
+   f.  Right-click the "snmplib" project, and select "Rebuild"
+   g.  Right-click the "netsnmpmibs(sdk)" project, and select "Rebuild"
+   h.  Click "Build->Batch Build..." 
+   i.  Set Release and/or Debug in 'Project configurations' to suit making
+       sure libagent, libhelpers, snmplib and netsnmpmibs are NOT selected.
+   j.  Click "Rebuild".
+   k.  When building is done, View the Output window, clip and
+       save to a text file if there is some information to share.
+   l.  Click "File->Close Solution".
+  
+4.  If the Perl modules are required, continue with the next section:
+    'Microsoft Visual C++ - Building the Perl SNMP modules'.
+
+    Otherwise, continue with the section: 
+    'Microsoft Visual C++ - Installing'
+
+
+***************************************************************************
+*
+* Microsoft Visual C++ - Building the Perl SNMP modules
+*
+***************************************************************************
+
+The Perl modules should be compiled against the DLL version of snmplib.
+Compiling against a static version is possible, but each module will
+load it's own copy of the MIB, and sharing data between modules will
+not be possible.  For example, the conf module tests will fail.
+
+1.  Complete the section 'Microsoft Visual C++ - Building'.  This will build
+    the static version of the applications.  
+
+    Note:  SNMPD.EXE and SNMPTRAPD.EXE are required for running the tests 
+           against the SNMP Perl module.
+
+2.  Make a backup of the existing net-snmp-config.h which contains settings
+    for a static build of Net-SNMP:
+
+    Copy win32\net-snmp\net-snmp-config.h to 
+    win32\net-snmp\static-config.h.
+
+3.  Open net-snmp/net-snmp-config.h using a text editor.
+
+4.  *Remove* the following line which is located near the bottom of the file:
+
+    #define NETSNMP_NO_DLL 1
+
+5.  Make a backup of the new net-snmp-config.h which contains settings
+    for a DLL build of Net-SNMP:
+
+    Copy win32\net-snmp\net-snmp-config.h to 
+    win32\net-snmp\dll-config.h.
+
+6. Build the DLL
+
+   MS VC++ 6.0:
+   ------------
+   a. Open libsdll.dsw.
+   b. Click "Build->Batch Build..."  
+   c. Set Release and/or Debug in 'Project configurations' to suit.
+   d. Click "Clean".  ** Do NOT skip this step. **
+   e. Click "Build->Batch Build..."  
+   f. Click "ReBuild All".
+   g. When building is done, View the Output window, clip and
+      save to a text file if there is some information to share.
+   h. Click "File->Close Workspace".
+
+   MS VC++ 7.0+:
+   -------------
+   a. Open libsdll.dsw.
+   b. Click "Yes to All" to convert the workspace
+   c. Click "Build->Batch Build..." 
+   d. Set Release and/or Debug in 'Project configurations' to suit.
+   e. Click "Clean".  ** Do NOT skip this step. **
+   f. Click "Build->Batch Build..." 
+   g. Click "Rebuild".
+   h. When building is done, View the Output window, clip and
+      save to a text file if there is some information to share.
+   i. Click "File->Close Solution".
+
+7.  Install Net-SNMP as described in the 'Microsoft Visual C++ - Installing'
+    section to install the applications, the DLL and the .lib files.
+
+8.  Continue with the Win32 section of the Perl README file located in 
+    perl\SNMP\README.
+
+
+***************************************************************************
+*
+* Microsoft Visual C++ - Installing
+*
+***************************************************************************
+
+The install script "win32\install-net-snmp.bat" should be run after a
+build is successful.  It copies the programs, MIB files, and development
+components to an install directory named in the INSTALL_BASE variable.
+
+1.  Complete the section 'Microsoft Visual C++ - Building'. 
+
+2.  Open win32\install-net-snmp.bat using a text editor.
+
+    The INSTALL_BASE variable must match the INSTALL_BASE compile constant
+    defined in "win32\net-snmp\net-snmp-config.h", using these rules:
+
+    a.  All paths in install-net-snmp.bat use the "\" DOS pathname delimiter.
+
+        Example: set INSTALL_BASE="c:\Program Files\Net-SNMP".  
+
+    b.  All paths in net-snmp-config.h use the "/" UNIX pathname delimiter.
+        If a drive letter is not specified, the current drive letter is 
+        assumed.
+
+        Example: #define INSTALL_BASE "c:/Program Files/Net-SNMP".  
+
+    Note: You may also modify "install-net-snmp.bat" in order to not install 
+          the linking libraries, or the header files.
+
+3.  Open a command prompt window.
+
+4.  Cd to the base directory where this file README.win32 is located.
+
+5.  Run win32\install-net-snmp.bat to install the programs.
+
+    ## sample output from install-net-snmp.bat
+    
+    NOTE: Directory already exist messages are normal. If you are
+          not building with OpenSSL, then DLL not found messages
+          are normal.
+    
+    C:\net-snmp-5.1.1>    win32\install-net-snmp
+    Remember to run this script from the base of the source directory.
+    Creating "c:\Program Files\Net-SNMP" sub-directories
+    A subdirectory or file c:\Program Files\Net-SNMP already exists.
+    A subdirectory or file c:\Program Files\Net-SNMP\bin already exists.
+    A subdirectory or file c:\Program Files\Net-SNMP\conf already exists.
+    A subdirectory or file c:\Program Files\Net-SNMP\share\snmp\snmpconf-data
+         already exists
+    A subdirectory or file c:\Program Files\Net-SNMP\share\snmp\snmpconf-data\
+         snmp-data already exists.
+    A subdirectory or file c:\Program Files\Net-SNMP\share\snmp\snmpconf-data\
+         snmpd-data already exists.
+    A subdirectory or file c:\Program Files\Net-SNMP\share\snmp\snmpconf-data\
+         snmptrapd-data already exists.
+    A subdirectory or file c:\Program Files\Net-SNMP\lib already exists.
+    A subdirectory or file c:\Program Files\Net-SNMP\mibs already exists.
+    A subdirectory or file c:\Program Files\Net-SNMP\include already exists.
+    A subdirectory or file c:\Program Files\Net-SNMP\include\net-snmp already 
+         exists
+    .
+    A subdirectory or file c:\Program Files\Net-SNMP\include\ucd-snmp already 
+         exists
+    .
+    Copying MIB files to "c:\Program Files\Net-SNMP"\mibs
+    Copying compiled programs to "c:\Program Files\Net-SNMP"\bin
+    Copying snmpconf files to "c:\Program Files\Net-SNMP"\share\snmp\snmpconf-
+         data\snmp-data
+    Copying link libraries to "c:\Program Files\Net-SNMP"\lib
+    Copying header files to "c:\Program Files\Net-SNMP"\include
+    Deleting debugging files from "c:\Program Files\Net-SNMP"
+    Copying DLL files to "c:\Program Files\Net-SNMP"
+    The system cannot find the file specified.
+    Done copying files to "c:\Program Files\Net-SNMP"
+    C:\net-snmp-5.1.1>
+    
+    ## END sample output from install-net-snmp.bat
+
+6.  Add the bin folder (c:\Program Files\Net-SNMP\bin in the above example) to
+    your system path.
+
+7.  Test the installation.  For a simple test to see if Net-SNMP is working, 
+    try:
+
+    snmptranslate -IR -Td linkDown
+
+
+***************************************************************************
+*
+* Microsoft Visual C++ - Building with OpenSSL
 *
 ***************************************************************************
 
@@ -288,160 +452,76 @@ can be built from the sources.  The sequence of actions are these:
 	#undef USE_INTERNAL_MD5
 	#define USE_OPENSSL 1
 
-
  5. Open Visual Studio, add the link line to the Project Settings.
-    Click Project->Settings.  Highlight the names of the application projects
-	(NOT the library projects). Select the Link section.  Add the next line
-    to the 'Object/Library Modules' list for Debug and Release versions
 
-	libeay32.lib
+   MS VC++ 6.0:
+   ------------
+   a.  Click Project->Settings.  
+   b.  Highlight the names of the application projects (NOT the library 
+       projects). 
+   c.  Select the Link section.
+   d.  Add the next line to the 'Object/Library Modules' list for Debug and 
+       Release versions:
 
+	 libeay32.lib
 
- 6. Build the Net-SNMP programs to use OpenSSL.
+   MS VC++ 7.0+:
+   -------------
+   a.  For each application project (NOT the library projects), click 
+       Project->Properties. 
+   b.  For Configuration, select 'Release'
+   c.  Click Linker and then Input
+   d.  Add to the 'Additional Dependencies' section:
 
- 7. Install the programs using win32\install-net-snmp.bat.
+         libeay32.lib 
 
+   e.  For Configuration, select 'Debug'
+   f.  Click Linker and then Input
+   g.  Add to the 'Additional Dependencies' section:
 
-***************************************************************************
-*
-* Installing from MS VC++ build
-*
-***************************************************************************
+         libeay32.lib 
 
-After the build is successful, open a command prompt window.
-Cd to the base directory where this file README.win32 is located.
-
-You may edit "install-net-snmp.bat" _before_ you invoke it,
-in order to not install the linking libraries, or the header files.
-
-Run win32\install-net-snmp.bat to install the programs on this computer.
-
-Some users may have better results compiling other packages that use
-the installed header files by removing the "mode_t" definition from
-net-snmp-config.h file in the installed directories.
-
-## sample output from install-net-snmp.bat
-
-NOTE: Directory already exist messages are normal. If you are
-      not building with OpenSSL, then DLL not found messages
-      are normal.
-
-C:\net-snmp-5.1.1>    win32\install-net-snmp
-Remember to run this script from the base of the source directory.
-Creating "c:\Program Files\Net-SNMP" sub-directories
-A subdirectory or file c:\Program Files\Net-SNMP already exists.
-A subdirectory or file c:\Program Files\Net-SNMP\bin already exists.
-A subdirectory or file c:\Program Files\Net-SNMP\conf already exists.
-A subdirectory or file c:\Program Files\Net-SNMP\lib already exists.
-A subdirectory or file c:\Program Files\Net-SNMP\mibs already exists.
-A subdirectory or file c:\Program Files\Net-SNMP\include already exists.
-A subdirectory or file c:\Program Files\Net-SNMP\include\net-snmp already exists
-.
-A subdirectory or file c:\Program Files\Net-SNMP\include\ucd-snmp already exists
-.
-Copying MIB files to "c:\Program Files\Net-SNMP"\mibs
-Copying compiled programs to "c:\Program Files\Net-SNMP"\bin
-Copying link libraries to "c:\Program Files\Net-SNMP"\lib
-Copying header files to "c:\Program Files\Net-SNMP"\include
-Deleting debugging files from "c:\Program Files\Net-SNMP"
-Copying DLL files to "c:\Program Files\Net-SNMP"
-The system cannot find the file specified.
-Done copying files to "c:\Program Files\Net-SNMP"
-C:\net-snmp-5.1.1>
-
-## END sample output from install-net-snmp.bat
+ 6. Continue with the section 'Microsoft Visual C++ - Building"
 
 
 ***************************************************************************
 *
-* How To build the Perl SNMP modules using MSVC
+* Microsoft Visual C++ - Building your own applications with snmplib
 *
 ***************************************************************************
 
- #### Preparation -- These are done one time ####
+Linking in an snmplib built to use the Multithreaded DLL runtime library to 
+an application configured for the Debug Multithreaded DLL runtime library 
+results in a link error along the lines of 'defaultlib "MSVCRT" conflicts 
+with use of other libs'.   If you receive a similar message, check that the
+projects settings between library and application match up.
 
-1. Open the Net-SNMP source, goto the win32 sub-directory
-1.1. Edit net-snmp/net-snmp-config.h and install-net-snmp.bat so that
-   the directories created by the .BAT file are the same as the ones
-   defined in the header file (DEFAULT_MIBDIRS, PERSISTENT_DIRECTORY,
-   SNMPSHAREPATH, and SNMPCONFPATH must be properly formed).
-   The nmakeperl.bat script must also point to the SNMPLIBPATH setting.
+To successfully build your existing project with Net-SNMP libraries,
+change the project settings FOR YOUR APPLICATION ONLY as follows:
 
-1.2. Cd to the net-snmp subdirectory.  copy net-snmp-config.h
-     to static-config.h.  Copy net-snmp-config.h to dll-config.h.
-     Remove the line in dll-config.h that defines NETSNMP_NO_DLL
+   1. In the Link section, Select "Additional Libraries".
+      Add netsnmp.lib for Release version.
+      Add netsnmp_d.lib for Debug version.
 
+   2. Remove all references to these libraries:
+      libsnmp*.lib msvcrt*.lib libc*.lib oldnames.lib
 
- #### Build and install statically linked programs ####
+   3. In the C++ section, Select "Code Generation".
+      For Release, select /MD or "MultiThreaded DLL".
+      For Debug, select /MDd or "Debug MultiThreaded DLL".
 
-2. Copy win32\net-snmp\static-config.h win32\net-snmp\net-snmp-config.h
-2.1. Using Visual Studio, open win32sdk.dsw (or win32.dsw).
-   MSVC++ .Net only:  Click 'Yes to All'
-   Click Build - Set Active Configuration (MSVC++ 6.0) and select Release
-     or
-   Click Build - Configuration Manager (MSVC++ .Net) and select Release for
-     the 'Active Solution Configuration'
-   Right Click 'libsnmp' and select Build
-   Click "Build->Batch Build...",
-   Enable all projects for Release then click "Rebuild (All)"
-   If there are no errors, then proceed to the next step.
+   4. Make sure "Ignore all default libraries" is NOT SET.
 
-2.2. Using a command prompt window, cd to the source base directory.
-   Type:  win32\install-net-snmp to install the programs.
+   5. Make sure "_MBCS" is included in your pre-processor defines.
 
-2.3. Using Visual Studio, Click Build->"Batch Build..."
-   Click Clean to remove the programs from the build directories.
-   Click "File->Close Workspace" (MSVC++ 6.0)
-     or 
-   Click "File->Close Solution" (MSVC++ .Net)
-
-
- #### Build and install dynamically linked libraries ####
-
-3. Copy win32\net-snmp\dll-config.h win32\net-snmp\net-snmp-config.h
-3.1. Using Visual Studio, open libsdll.dsw
-   MSVC++ .Net only:  Click 'Yes to All'
-   Click "Build->Batch Build...", 
-   Enable all projects for Rlease then click "Rebuild (All)"
-   The "locally defined symbol ... imported" warnings can be ignored.
-   If there are no errors, then proceed to the next step.
-
-3.2. Using a command prompt window, cd to the source base directory.
-   Type:  win32\install-net-snmp to install the programs.
-
-3.3. Using Visual Studio, Click Build->"Batch Build..."
-   Click Clean to remove the programs from the build directories.
-   Click "File->Close Workspace" (MSVC++ 6.0)
-     or 
-   Click "File->Close Solution" (MSVC++ .Net)
-
-
- #### Build and test Perl SNMP modules ####
-
-4. Using a command prompt window, cd to the source base directory.
-
-4.1. Set the environment PATH to locate "nmake", "cl", and "link".
-   Visual Studio installs a VCVARS32.BAT for this purpose.
-
-4.2. Invoke win32\nmakeperl.bat to build the Perl SNMP modules.
-   If you see errors, review the "nmake.out" file first.  If no errors there,
-   then the modules built correctly, but the tests did not rigourously
-   prove the mettle of the modules.  Review "nmaketest.out".  If the
-   first three sections mostly pass, the modules are well formed.
-
-NOTE: If the tests fail, there may be a perl application left hanging.
-  Use the Task Manager to remove any stale perl or snmp*.exe process,
-
-
- #### Install Perl SNMP modules ####
-
-5. The final step is to invoke "nmake install".  If no errors occurred,
-   then the SNMP modules are available for use by your Perl programs.
+Note: Some users may have better results compiling other packages that use
+      the installed header files by removing the "mode_t" definition from
+      net-snmp-config.h file in the installed directories.
 
 
 ***************************************************************************
 *
-* Extending the Agent with MS VC++
+* Microsoft Visual C++ - Extending the Agent
 *
 ***************************************************************************
 
@@ -460,64 +540,13 @@ using VC++:
 
         if (should_init("my")) init_my();
 
-
 That's all that is needed. Now go ahead and compile the 'netsnmpmibs'
 and 'snmpd' project. And things should work just fine.
 
 
 ***************************************************************************
 *
-* How to Register Net-SNMP Agent as a Windows service
-*
-***************************************************************************
-
- 1. If the Net-SNMP Agent is already registered, the existing program
-    must first be unregistered.  If you don't know the program's location,
-    either search for it with Windows Explorer, or invoke REGEDIT and
-    search the key using "Net-SNMP". Once it is found, Cd to the
-    program's directory, then type:
-	.\snmpd -unregister
-
- 2. View win32\net-snmp\net-snmp-config.h to know these directories:
-        MIB directory (DEFAULT_MIBDIRS),
-    "config" directory (SNMPCONFPATH), and
-    "engine" directory PERSISTENT_DIRECTORY).
-    These values take precedence when comprehending the on-line documentation.
-    For help remembering which configuration settings can be made, or
-    into which file a particular setting belongs, print then read the manual:
-    	.\snmpd -H > snmp.settings.txt
-
- 3. Copy "snmpd" to the "install" directory.
-    The configuration files snmpd.conf, and possibly snmp.conf, must
-    be properly formed and copied to the "config" directory.
-
- 4. Go to the "install" directory.
-    Invoke ".\snmpd -f -Le" , with no other command line parameters.
-
- 5. Test that the agent runs correctly from local and from remote
-    command generators.  Snmpwalk, snmpbulkwalk, and snmpget
-    are good for testing "snmpd".  When tests are completed,
-    stop the "snmpd" program.
-
- 6. Repeat steps 3, 4 and 5, until "snmpd" works as you intend.
-    Once the agent is working, Cd to the "install" directory, and type:
-	.\snmpd -register
-
- 7. Start the service:   net start "Net-SNMP Agent"
-
- 8. Run the tests you ran in step 5.  You should get similar results
-    as you did when you ran those tests.  If you did not, start over
-    from step 1.
-
- 9. Save your work, and reboot the system.  After the system restarts,
-    and you've logged in, run the tests you ran in steps 5 and 8.
-    The results should still compare favorably.
-
-
-
-***************************************************************************
-*
-* Building with Cygwin
+* Cygwin - Building
 *
 ***************************************************************************
 
@@ -535,10 +564,10 @@ The following configure options creates a working set of programs:
 This has been tested for Windows 98 and Windows NT 4.0.  In order for
 the process part of the host resources MIB to work under NT you will need
 to get hold of the PSAPI.DLL. This available under the download section
-of www.microsoft.com. The DLL is included with Windows 2000 and XP,
+of www.microsoft.com.  The DLL is included with Windows 2000 and XP,
 and is also part of the VC++ distribution.  The IPHLPAPI library is
 part of the "Microsoft Platform SDK", which is also available from
-www.microsoft.com.  See above for details.
+www.microsoft.com.  See the section "Installing Platform SDK" for details.
 
 Earlier releases of Cygwin may need to use the configure flag
 	--with-libs="-lregex -libphlpapi"
@@ -546,9 +575,10 @@ but this regular expression support has since been incorporated
 into the main Cygwin package, and it is no longer necessary to
 include it separately.
 
+
 ***************************************************************************
 *
-* Building with MinGW
+* MinGW - Building
 *
 ***************************************************************************
 
@@ -558,15 +588,106 @@ documentation can be downloaded from: http://www.mingw.org.
 
 Compiling net-snmp with MinGW requires GNU regex. A GNU regex package that
 builds under MinGW with MSyS is available at: 
-	http://www.boedog.com/net-snmp/gnu_regex/regex-0-12-mingw-r2.tar.gz
+
+        http://www.boedog.com/net-snmp/gnu_regex/regex-0-12-mingw-r2.tar.gz
 
 Build and install GNU regex following the instructions in the README.
+
 Configure net-snmp using the configure flag
+
 	--with-libs="-lregex "
+
 Run make to compile the package. 
+
+Run make install to install the package.
 
 The agent will not currently run as a service on Windows system that support
 services when built with MinGW. 
+
+
+***************************************************************************
+*
+* Configuring Net-SNMP
+*
+***************************************************************************
+
+Online documentation is available from the Net-SNMP home page at:
+
+http://www.net-snmp.org/#Documentation
+
+All configuration files should be placed in the INSTALL_BASE\conf folder.
+The INSTALL_BASE folder is defined in the win32\net-snmp\net-snmp-config.h
+file.  For example, c:\Program Files\Net-SNMP\conf.
+
+Included is a Perl script called snmpconf which can be used to create 
+configuration files.  Full documentation on using snmpconf is available from the
+Net-SNMP web site at the above link.
+
+To run snmpconf, you must specify the location of the snmpconf-data and conf 
+folders using the -c and -I switches.  For example, if you have installed 
+Net-SNMP in c:\Program Files\Net-SNMP, type (all on one line):
+
+  perl "C:\Program Files\net-snmp\bin\snmpconf" 
+    -c "C:\Program Files\net-snmp\share\snmp\snmpconf-data" 
+    -I "C:\Program Files\net-snmp\conf"
+
+
+***************************************************************************
+*
+* How to Register the Net-SNMP Agent as a Windows service
+*
+***************************************************************************
+
+ 1. If the Net-SNMP Agent is already registered, the existing program
+    must first be unregistered.  If you don't know the program's location,
+    either search for it with Windows Explorer, or invoke REGEDIT and
+    search the key using "Net-SNMP". Once it is found, Cd to the
+    program's directory, then type:
+	.\snmpd -unregister
+
+ 2. View win32\net-snmp\net-snmp-config.h to know these directories:
+
+    MIB directory (DEFAULT_MIBDIRS),
+    "config" directory (SNMPCONFPATH), and
+    "engine" directory PERSISTENT_DIRECTORY).
+
+    These values take precedence when comprehending the on-line documentation.
+
+    For help remembering which configuration settings can be made, or
+    into which file a particular setting belongs, print then read the manual:
+    	.\snmpd -H > snmp.settings.txt
+
+ 3. Make sure Net-SNMP is properly installed.  Refer to the "Microsoft Visual 
+    C++ - Installing" section.
+
+    The configuration files snmpd.conf, and possibly snmp.conf, must
+    be properly formed and copied to the "config" directory.  See the
+    "Configuring Net-SNMP" section for details.
+
+ 4. Go to the "install" directory.
+
+    Invoke ".\snmpd -f -Le" , with no other command line parameters.
+
+ 5. Test that the agent runs correctly from local and from remote
+    command generators.  Snmpwalk, snmpbulkwalk, and snmpget
+    are good for testing "snmpd".  When tests are completed,
+    stop the "snmpd" program.
+
+ 6. Repeat steps 3, 4 and 5, until "snmpd" works as you intend.
+
+    Once the agent is working, Cd to the "install" directory, and type:
+	.\snmpd -register
+
+ 7. Start the service:   net start "Net-SNMP Agent"
+
+ 8. Run the tests you ran in step 5.  You should get similar results
+    as you did when you ran those tests.  If you did not, start over
+    from step 1.
+
+ 9. Save your work, and reboot the system.  After the system restarts,
+    and you've logged in, run the tests you ran in steps 5 and 8.
+    The results should still compare favorably.
+
 
 ***************************************************************************
 *
