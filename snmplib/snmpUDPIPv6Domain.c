@@ -851,7 +851,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
 {
     char           *secName = NULL, *community = NULL, *source = NULL;
     char           *cp = NULL, *strnetwork = NULL, *strmask =
-        NULL, *strnetmask = NULL;
+        NULL;
     com2Sec6Entry  *e = NULL;
     struct sockaddr_in6 net, mask;
     struct sockaddr_in tmp;
@@ -1012,7 +1012,7 @@ netsnmp_udp6_parse_security(const char *token, char *param)
              * Nope, Must be a hostname.  
              */
             struct addrinfo hints, *ai, *res;
-            char            hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
+            char            hbuf[NI_MAXHOST];
             int             gai_error;
 
             memset(&hints, 0, sizeof(hints));
