@@ -24,7 +24,7 @@
 usage() { 
     cat << BLIK
 
-Usage: `basename $0` [-a] [-S SLEEPTIME] [-h] [-i] [-v] [-V] [-s]
+Usage: `basename $0` [-a] [-S SLEEPTIME] [-h] [-i] [-v] [-V] [-s] [-XM]
        [-T TESTNUMS] [-D bindir] [-S seconds] [-P <udp|tcp|udp6|tcp6|unix>]"
 
   -a        run all tests.
@@ -36,6 +36,7 @@ Usage: `basename $0` [-a] [-S SLEEPTIME] [-h] [-i] [-v] [-V] [-s]
             response from the agent.
   -A FLAGS  Extra flags to pass to the agent.
   -s        Don't erase the runtime data directory for successful tests
+  -XM        Don't prefer MIB files near here
   -x        Turn on SH output debugging for tests.
   -P TRANS  Specify on which transport domain to run the tests.Default is udp.
 
@@ -46,6 +47,8 @@ BLIK
 trap "exit 1;" 1 2 3 9 13 15 17
 
 SNMP_BASEDIR=`dirname $0`
+SNMP_PREFER_NEAR_MIBS=1	## prefer MIB files found in source hierarchy
+export SNMP_PREFER_NEAR_MIBS
 
 ### Check for the configuration script.
 ##if [ ! -s "${SNMP_BASEDIR}/TESTCONF.sh"  ] ; then 
@@ -117,6 +120,10 @@ while [ -n "$1" ]; do
 
 	-x)
 	    SH_DEBUG=1
+	    ;;
+
+	-XM)
+	    SNMP_PREFER_NEAR_MIBS=0
 	    ;;
 
     esac
@@ -220,6 +227,24 @@ fi
 rmdir $SNMP_TMPDIR
 unset SNMP_TMPDIR
 export SNMP_TMPDIR
+
+if [ "x$SNMP_PREFER_NEAR_MIBS" = "x0" ]; then
+    # try the compiled MIBDIRS directory first.
+    # if MIB files are not found, fallback to the source base
+
+    snmptranslate -On -IR sysDescr > /dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+        if [ "x$MIBDIRS" = "x" ]; then
+    	MIBDIRS=${SNMP_BASEDIR}/../mibs
+    	export MIBDIRS
+        fi
+    fi
+    snmptranslate -On -IR sysDescr > /dev/null 2>&1
+    if [ $? -ne 0 ] ; then
+        echo "Could not resolve sysDescr in $MIBDIRS. Exiting"
+        exit 1
+    fi
+fi ## SNMP_PREFER_NEAR_MIBS
 
 #
 # Switch to the testing directory, for ease of the client test packages.
