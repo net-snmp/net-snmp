@@ -104,6 +104,8 @@ extern          "C" {
     netsnmp_table_registration_info
         *netsnmp_find_table_registration_info(netsnmp_handler_registration
                                               *reginfo);
+    netsnmp_index * netsnmp_table_index_find_next_row(netsnmp_container *c,
+                                                      netsnmp_table_request_info *tblreq);
 
     unsigned int    netsnmp_closest_column(unsigned int current,
                                            netsnmp_column_info
