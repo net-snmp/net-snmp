@@ -7,6 +7,7 @@ top_builddir=../..
 INSTALLLIBS=libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 INCLUDESUBDIR=agent
 INCLUDESUBDIRHEADERS=all_helpers.h \
+	cache_handler.h \
 	instance.h \
 	scalar.h \
 	watcher.h \
@@ -36,6 +37,7 @@ CPPFLAGS=-I../../include -I$(top_srcdir)/include \
 	@CPPFLAGS@ $(LIB_CFLAGS)
 
 OBJS =  all_helpers.o \
+	cache_handler.o \
 	multiplexer.o \
 	read_only.o \
 	bulk_to_next.o \
@@ -55,6 +57,7 @@ OBJS =  all_helpers.o \
 	mode_end_call.o
 
 LOBJS = all_helpers.lo \
+	cache_handler.lo \
 	multiplexer.lo \
 	read_only.lo \
 	bulk_to_next.lo \
