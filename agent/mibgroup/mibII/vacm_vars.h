@@ -18,10 +18,10 @@ void vacm_parse_group __P((char *, char *));
 void vacm_parse_access __P((char *, char *));
 void vacm_parse_view __P((char *, char *));
 
-config_parse_dot_conf("com2sec", vacm_parse_security, vacm_free_security);
-config_parse_dot_conf("group", vacm_parse_group, vacm_free_group);
-config_parse_dot_conf("access", vacm_parse_access, vacm_free_access);
-config_parse_dot_conf("view", vacm_parse_view, vacm_free_view);
+config_parse_dot_conf("com2sec", vacm_parse_security, vacm_free_security,"name source community");
+config_parse_dot_conf("group", vacm_parse_group, vacm_free_group,"name v1|v2c|usm|any security");
+config_parse_dot_conf("access", vacm_parse_access, vacm_free_access,"name context model level prefx read write notify");
+config_parse_dot_conf("view", vacm_parse_view, vacm_free_view,"name type subtree [mask]");
 
 int vacm_in_view __P((struct packet_info *, oid *, int));
 

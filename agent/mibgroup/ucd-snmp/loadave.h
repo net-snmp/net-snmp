@@ -12,7 +12,7 @@ unsigned char *var_extensible_loadave __P((struct variable *, oid *, int *, int,
 /* config file parsing routines */
 void loadave_parse_config __P((char *, char *));
 void loadave_free_config __P((void));
-config_parse_dot_conf("load", loadave_parse_config, loadave_free_config);
+config_parse_dot_conf("load", loadave_parse_config, loadave_free_config,"max1 [max5] [max15]");
 
 #include "mibdefs.h"
 

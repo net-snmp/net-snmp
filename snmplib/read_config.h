@@ -19,6 +19,7 @@ struct config_files {
 
 struct config_line {
    char *config_token;
+   char *help;
    void (*parse_line) __P((char *, char *));
    void (*free_func) __P((void));
    struct config_line *next;
@@ -38,10 +39,13 @@ void copy_word __P((char *, char *));
 void read_config_with_type __P((char *, char *));
 struct config_line *register_config_handler __P((char *, char *,
                                                  void (*parser)(char *, char *),
-                                                 void (*releaser) (void)));
+                                                 void (*releaser) (void),
+                                                 char *));
 struct config_line *register_premib_handler __P((char *, char *,
                                                  void (*parser)(char *, char *),
-                                                 void (*releaser) (void)));
+                                                 void (*releaser) (void),
+                                                 char *));
 void unregister_config_handler __P((char *, char *));
+void read_config_print_usage(char *lead);
 
 #endif /* READ_CONFIG_H */
