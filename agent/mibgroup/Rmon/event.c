@@ -564,10 +564,10 @@ oa_bind_var(netsnmp_variable_list * prev,
 
 static void
 event_send_trap(CRTL_ENTRY_T * evptr, u_char is_rising,
-                u_int32_t alarm_index,
-                u_int32_t value, u_int32_t the_threshold,
+                u_int alarm_index,
+                u_int value, u_int the_threshold,
                 oid * alarmed_var, size_t alarmed_var_length,
-                u_int32_t sample_type)
+                u_int sample_type)
 {
     static oid      rmon1_trap_oid[] = { 1, 3, 6, 1, 2, 1, 16, 0, 0 };
     static oid      alarm_index_oid[] =
@@ -599,7 +599,7 @@ event_send_trap(CRTL_ENTRY_T * evptr, u_char is_rising,
     /*
      * build the var list 
      */
-    top = oa_bind_var(top, &alarm_index, ASN_INTEGER, sizeof(u_int32_t),
+    top = oa_bind_var(top, &alarm_index, ASN_INTEGER, sizeof(u_int),
                       alarm_index_oid, OID_LENGTH(alarm_index_oid));
 
     top =
@@ -607,13 +607,13 @@ event_send_trap(CRTL_ENTRY_T * evptr, u_char is_rising,
                     sizeof(oid) * alarmed_var_length, alarmed_var_oid,
                     OID_LENGTH(alarmed_var_oid));
 
-    top = oa_bind_var(top, &sample_type, ASN_INTEGER, sizeof(u_int32_t),
+    top = oa_bind_var(top, &sample_type, ASN_INTEGER, sizeof(u_int),
                       sample_type_oid, OID_LENGTH(sample_type_oid));
 
-    top = oa_bind_var(top, &value, ASN_INTEGER, sizeof(u_int32_t),
+    top = oa_bind_var(top, &value, ASN_INTEGER, sizeof(u_int),
                       value_oid, OID_LENGTH(value_oid));
 
-    top = oa_bind_var(top, &the_threshold, ASN_INTEGER, sizeof(u_int32_t),
+    top = oa_bind_var(top, &the_threshold, ASN_INTEGER, sizeof(u_int),
                       threshold_oid, OID_LENGTH(threshold_oid));
 
 
