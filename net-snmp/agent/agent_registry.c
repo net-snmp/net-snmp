@@ -679,6 +679,7 @@ netsnmp_register_mib(const char *moduleName,
     }
 
     if (res == MIB_REGISTERED_OK && perform_callback) {
+        memset(&reg_parms, 0x0, sizeof(reg_parms));
         reg_parms.name = mibloc;
         reg_parms.namelen = mibloclen;
         reg_parms.priority = priority;
@@ -708,6 +709,8 @@ register_mib_reattach_node(netsnmp_subtree *s)
         /*
          * only do registrations that are not the top level nodes 
          */
+        memset(&reg_parms, 0x0, sizeof(reg_parms));
+
         /*
          * XXX: do this better 
          */
@@ -718,6 +721,8 @@ register_mib_reattach_node(netsnmp_subtree *s)
         reg_parms.range_ubound = s->range_ubound;
         reg_parms.timeout = s->timeout;
         reg_parms.flags = s->flags;
+        if ((NULL != s->reginfo) && (NULL != s->reginfo->contextName))
+            reg_parms.contextName = s->reginfo->contextName;
         snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                             SNMPD_CALLBACK_REGISTER_OID, &reg_parms);
         s->flags |= SUBTREE_ATTACHED;
@@ -918,7 +923,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
                        const char *context)
 {
     netsnmp_subtree *list, *myptr;
-    netsnmp_subtree *prev, *child;       /* loop through children */
+    netsnmp_subtree *prev, *child, *next; /* loop through children */
     struct register_parameters reg_parms;
     int old_lookup_cache_val = netsnmp_get_lookup_cache_size();
     netsnmp_set_lookup_cache_size(0);
@@ -958,7 +963,8 @@ unregister_mib_context(oid * name, size_t len, int priority,
      *  This should also serve to register ranges.
      */
 
-    for (list = myptr->next; list != NULL; list = list->next) {
+    for (list = myptr->next; list != NULL; list = next) {
+        next = list->next; /* list gets freed sometimes; cache next */
         for (child = list, prev = NULL; child != NULL;
              prev = child, child = child->children) {
             if ((netsnmp_oid_equals(child->name_a, child->namelen,
@@ -974,6 +980,7 @@ unregister_mib_context(oid * name, size_t len, int priority,
     }
     netsnmp_subtree_free(myptr);
 
+    memset(&reg_parms, 0x0, sizeof(reg_parms));
     reg_parms.name = name;
     reg_parms.namelen = len;
     reg_parms.priority = priority;
@@ -1048,12 +1055,14 @@ netsnmp_unregister_mib_table_row(oid * name, size_t len, int priority,
     }
 
     name[var_subid - 1] = range_lbound;
+    memset(&reg_parms, 0x0, sizeof(reg_parms));
     reg_parms.name = name;
     reg_parms.namelen = len;
     reg_parms.priority = priority;
     reg_parms.range_subid = var_subid;
     reg_parms.range_ubound = range_ubound;
     reg_parms.flags = 0x00;     /*  this is okay I think  */
+    reg_parms.contextName = context;
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_UNREGISTER_OID, &reg_parms);
 
@@ -1104,6 +1113,7 @@ unregister_mibs_by_session(netsnmp_session * ss)
                     (!(!ss || ss->flags & SNMP_FLAGS_SUBSESSION) && child->session &&
                      child->session->subsession == ss)) {
 
+                    memset(&rp, 0x0, sizeof(rp));
                     rp.name = child->name_a;
 		    child->name_a = NULL;
                     rp.namelen = child->namelen;
@@ -1112,6 +1122,9 @@ unregister_mibs_by_session(netsnmp_session * ss)
                     rp.range_ubound = child->range_ubound;
                     rp.timeout = child->timeout;
                     rp.flags = child->flags;
+                    if ((NULL != child->reginfo) &&
+                        (NULL != child->reginfo->contextName))
+                        rp.contextName = child->reginfo->contextName;
 
                     if (child->reginfo != NULL) {
                         /*

@@ -348,6 +348,9 @@ while (<MAKE_IN>)
     if ($linktype eq "dynamic") {
       s/^.*#undef NETSNMP_USE_DLL.*/#define NETSNMP_USE_DLL 1/;
     }
+    if ($sdk == 1) {
+      s/^.*#undef HAVE_WIN32_PLATFORM_SDK.*/#define HAVE_WIN32_PLATFORM_SDK 1/;
+    }
     if ($openssl == 1) {
       s/^.*#undef USE_OPENSSL.*/#define USE_OPENSSL 1/;
     }

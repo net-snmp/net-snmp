@@ -149,6 +149,8 @@ netsnmp_transport_copy(netsnmp_transport *t)
 void
 netsnmp_transport_free(netsnmp_transport *t)
 {
+    if (NULL == t)
+        return;
 
     if (t->local != NULL) {
         SNMP_FREE(t->local);

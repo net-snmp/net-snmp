@@ -72,7 +72,7 @@ check_setup()
     do
         if [ ! -d $d ]; then
             echo "Creating missing directory $d"
-            mkdir $d
+            mkdir -p $d
             if [ $? -ne 0 ]; then
                 error "Could not create directory $d"
                 rc=0
