@@ -5303,7 +5303,6 @@ _sess_read(void *sessp, fd_set * fdset)
 		}
 		DEBUGMSGTL(("sess_read", "fd %d closed\n", transport->sock));
                 transport->f_close(transport);
-		free(rxbuf);
                 if (opaque != NULL) {
                     free(opaque);
                 }
