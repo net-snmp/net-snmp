@@ -21,8 +21,12 @@
 #define _KERNEL 1
 #define _I_DEFINED_KERNEL
 #endif
+#ifndef WIN32
 #include <sys/socket.h>
 #include <net/if.h>
+#else
+#include <winsock.h>
+#endif /* WIN32 */
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
 #endif
