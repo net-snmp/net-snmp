@@ -1,11 +1,11 @@
 SCRIPTS=snmpcheck tkmib
 SCRIPTSMADEFORPERL=snmpcheck.made tkmib.made mib2c.made fixproc.made \
-	ipf-mod.pl.made rsnmp
+	ipf-mod.pl.made rsnmp.made
 PERLPROG=@PERLPROG@
 
 all:
 	@if test "x$(PERLPROG)" != "x"; then \
-	  make $(SCRIPTSMADEFORPERL); \
+	  $(MAKE) $(SCRIPTSMADEFORPERL); \
 	fi
 
 snmpcheck: snmpcheck.def ../sedscript
