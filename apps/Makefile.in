@@ -19,6 +19,7 @@ TARG=	snmpwalk snmpbulkwalk snmptest snmptranslate snmpget snmptrapd snmpset snm
 SUBDIRS=  snmpnetstat
 USELIBS=  ../snmplib/libsnmp.a
 LIBS=	  $(USELIBS) @LIBS@
+TRAPSPECIAL=@trap_list_o@
 
 CFLAGS=@CFLAGS@
 CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib
@@ -54,8 +55,8 @@ snmptest:    snmptest.o $(USELIBS)
 snmptrapd:    snmptrapd.o $(USELIBS)
 	${CC} -o $@ snmptrapd.o ${LDFLAGS} ${LIBS} 
 
-snmptrap:    snmptrap.o ../agent/kernel_sunos5.o $(USELIBS)
-	${CC} -o $@ snmptrap.o ../agent/kernel_sunos5.o ${LDFLAGS} ${LIBS} 
+snmptrap:    snmptrap.o $(TRAPSPECIAL) $(USELIBS)
+	${CC} -o $@ snmptrap.o $(TRAPSPECIAL) ${LDFLAGS} ${LIBS} 
 
 snmpset:    snmpset.o $(USELIBS)
 	${CC} -o $@ snmpset.o ${LDFLAGS} ${LIBS} 
