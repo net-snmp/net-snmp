@@ -41,15 +41,30 @@ struct variable_list;
 struct timeval;
 struct synch_state;
 
-	/* Temporary fix to socket address definition problem */
-#if HAVE_WINSOCK_H
-#include <winsock.h>
-#endif
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
+	/*
+	 * Mimic size and alignment of 'struct sockaddr_storage' (see RFC 2553)
+	 * But retain field names of traditional 'struct sockaddr'
+	 */
 
-typedef struct sockaddr  snmp_ipaddr;		/* was struct sockaddr_in */
+#define _UCD_SS_MAXSIZE   92		/* <= sizeof( sockaddr_un ) */
+#define _UCD_SS_ALIGNSIZE (sizeof (long))
+
+#define _UCD_SS_PAD1SIZE  (_UCD_SS_ALIGNSIZE - sizeof( unsigned short ))
+#define _UCD_SS_PAD2SIZE  (_UCD_SS_MAXSIZE - \
+		(sizeof( unsigned short ) + _UCD_SS_PAD1SIZE + _UCD_SS_ALIGNSIZE ))
+
+typedef struct {
+#ifdef STRUCT_SOCKADDR_HAS_SA_LEN
+    unsigned char	sa_len;
+    unsigned char	sa_family;
+#else
+    unsigned short	sa_family;
+#endif
+    char		sa_data[ _UCD_SS_PAD1SIZE ];
+    long		sa_align;
+    char		sa_pad2[ _UCD_SS_PAD2SIZE ];
+} snmp_ipaddr;
+
 #define USM_AUTH_KU_LEN     32
 #define USM_PRIV_KU_LEN     32
 
