@@ -11,9 +11,6 @@
 ##
 ## Requirements
 ## ------------
-## $m2c_nvv_sizeof: variable name appropriate for a sizeof() call to
-##                  check variable length. If NULL, no size check
-##                  will be done.
 ##
 ########################################################################
 @if $m2c_mark_boundary == 1@
@@ -35,12 +32,15 @@ netsnmp_assert(rc == SNMP_ERR_NOERROR); /* paranoia */
 ##----------------------------------------------------------------------
 ## Check type
 ##----------------------------------------------------------------------
-## if not generated code or is OCTET_STR, length checks are up to user
-@   if ($m2c_node_needlength == 1) || ("x$m2c_nvv_sizeof" eq "x")@
+## if not generated code, length checks are up to user
+@   if "$m2c_data_context" ne "generated"@
     rc = netsnmp_check_vb_type( var, $node.type );
+@   elsif ($m2c_node_needlength == 1) || ("$node.perltype" eq "BITS")@
+    rc = netsnmp_check_vb_type_and_max_size( var, $node.type,
+        sizeof( $m2c_data_item$node ) );
 @   else@
     rc = netsnmp_check_vb_type_and_size( var, $node.type,
-        sizeof( $m2c_nvv_sizeof ) );
+        sizeof( $m2c_data_item$node ) );
 @   end@
 ##----------------------------------------------------------------------
 ## check ENUMS
@@ -80,11 +80,9 @@ netsnmp_assert(rc == SNMP_ERR_NOERROR); /* paranoia */
 ##----------------------------------------------------------------------
 @   elsif $node.ranges == 1@
 @      if ("$node.decl" eq "long") || ("$node.decl" eq "u_long")@
-@         eval $m2c_nvv_func = "netsnmp_check_vb_int_range"@
-##@         eval $m2c_nvv_rc = "SNMP_ERR_WRONGVALUE"@
+@         eval $m2c_nvv_func = "netsnmp_check_vb_range"@
 @      else@
 @         eval $m2c_nvv_func = "netsnmp_check_vb_size_range"@
-##@         eval $m2c_nvv_rc = "SNMP_ERR_WRONGLENGTH"@
 @      end@
     if(SNMPERR_SUCCESS == rc) {
     /* check that the value is in the defined range(s); inefficent
@@ -97,8 +95,6 @@ netsnmp_assert(rc == SNMP_ERR_NOERROR); /* paranoia */
         ; /* rc set in condition */
     }
    }
-@   else@
-    /* yyy-rks: anything else we can do here? */
 @   end@
 @end@ # not syntax specific
 ##
