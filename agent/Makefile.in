@@ -122,3 +122,4 @@ libnetsnmpmibs.$(LIB_EXTENSION)$(LIB_VERSION):    ${LMIBOBJS}
 
 snmp_vars.lo: @module_list_h@
 read_config.lo: @module_list_h@
+mib_modules.lo: mibgroup/mib_module_inits.h

@@ -25,7 +25,16 @@ install: installheaders installlibs installprogs $(OTHERINSTALL)
 
 installprogs: installbin installsbin
 
-installheaders:
+#
+# headers
+#
+# set INSTALLHEADERS to a list of things to install in each makefile.
+# set INSTALLSUBDIRHEADERS and INSTALLSUBDIR to subdirectory headers
+# set INSTALLSUBDIRHEADERS2 and INSTALLSUBDIR2 to more subdirectory headers
+#
+installheaders: installlocalheaders @installucdheaders@ installsubdirheaders
+
+installlocalheaders:
 	@if test "$(INSTALLHEADERS)" != "" ; then \
 		echo creating directory $(includedir) ; \
 		it="$(INSTALLHEADERS)" ; \
@@ -53,6 +62,8 @@ installheaders:
 	                echo "installing $$i in $(includedir)/$(INCLUDESUBDIR2)" ; \
 	        done \
 	fi
+
+installsubdirheaders:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
 		for i in $$it ; do       \
@@ -60,6 +71,8 @@ installheaders:
 	                ( cd $$i ; $(MAKE) installheaders) ;   \
 	        done \
 	fi
+
+installucdheaders:
 	@if test "$(INSTALLUCDHEADERS)" != "" ; then \
 		echo creating directory $(ucdincludedir) ; \
 		it="$(INSTALLUCDHEADERS)" ; \
@@ -70,7 +83,14 @@ installheaders:
 	        done \
 	fi
 
-installlibs: $(INSTALLLIBS)
+#
+# libraries
+#
+# set INSTALLLIBS to a list of things to install in each makefile.
+#
+installlibs: installlocallibs @installucdlibs@ installsubdirlibs
+
+installlocallibs: $(INSTALLLIBS)
 	@if test "$(INSTALLLIBS)" != ""; then \
 		it="$(INSTALLLIBS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(libdir) ; \
@@ -81,6 +101,8 @@ installlibs: $(INSTALLLIBS)
 	        done ; \
 		$(LIB_LDCONFIG_CMD) ; \
 	fi
+
+installsubdirlibs:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
 		for i in $$it ; do       \
@@ -89,7 +111,14 @@ installlibs: $(INSTALLLIBS)
 	        done \
 	fi
 
-installbin: $(INSTALLBINPROGS)
+#
+# normal bin binaries
+#
+# set INSTALLBINPROGS to a list of things to install in each makefile.
+#
+installbin: installlocalbin installsubdirbin
+
+installlocalbin: $(INSTALLBINPROGS)
 	@if test "$(INSTALLBINPROGS) $(INSTALLBINSCRIPTS)" != " "; then \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(bindir) ; \
 		it="$(INSTALLBINPROGS) $(INSTALLBINSCRIPTS)" ; \
@@ -98,6 +127,8 @@ installbin: $(INSTALLBINPROGS)
 	                echo "installing $$i in $(bindir)"; \
 	        done \
 	fi
+
+installsubdirbin:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
 		for i in $$it ; do       \
@@ -106,7 +137,14 @@ installbin: $(INSTALLBINPROGS)
 	        done \
 	fi
 
-installsbin: $(INSTALLSBINPROGS)
+#
+# sbin binaries
+#
+# set INSTALLSBINPROGS to a list of things to install in each makefile.
+#
+installsbin: installlocalsbin installsubdirsbin
+
+installlocalsbin: $(INSTALLSBINPROGS)
 	@if test "$(INSTALLSBINPROGS)" != ""; then \
 		it="$(INSTALLSBINPROGS)" ; \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(sbindir) ; \
@@ -115,6 +153,8 @@ installsbin: $(INSTALLSBINPROGS)
 	                echo "installing $$i in $(sbindir)"; \
 	        done \
 	fi
+
+installsubdirsbin:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
 		for i in $$it ; do       \
@@ -123,6 +163,9 @@ installsbin: $(INSTALLSBINPROGS)
 	        done \
 	fi
 
+#
+# general make install target for subdirs
+#
 installsubdirs:
 	@if test "$(SUBDIRS)" != ""; then \
 		it="$(SUBDIRS)" ; \
