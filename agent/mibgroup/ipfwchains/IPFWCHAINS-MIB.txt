@@ -16,6 +16,8 @@ IMPORTS
       ucdavis, ucdExperimental 
 	  FROM UCD-SNMP-MIB;
 
+ipfw OBJECT IDENTIFIER ::= { ucdExperimental 3 }
+
 
 ipfwChainTable OBJECT-TYPE
 	SYNTAX SEQUENCE OF IpfwChain
@@ -23,7 +25,7 @@ ipfwChainTable OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Table with the chains of the firewall"
-	::= { ucdExperimental 65 }
+	::= { ipfw }
 
 ipfwChain OBJECT-TYPE 
 	SYNTAX IpfwChain
@@ -99,7 +101,7 @@ ipfwRuleTable OBJECT-TYPE
         STATUS mandatory
         DESCRIPTION
                 "Table with the rules from the firewall"
-        ::= { ucdExperimental 66 }       
+        ::= { ipfw 2 }       
 
 ipfwRule OBJECT-TYPE
         SYNTAX IpfwRule
