@@ -120,6 +120,7 @@ void disk_free_config __UCD_P((void)) {
     disks[i].device[0] = 0;
     disks[i].path[0] = 0;
     disks[i].minimumspace = -1;
+    disks[i].minpercent = -1;
   }
 }
 
@@ -158,10 +159,18 @@ void disk_parse_config(word,cptr)
     cptr = skip_white(cptr);
     /* read optional minimum disk usage spec */
     if (cptr != NULL) {
-      disks[numdisks].minimumspace = atoi(cptr);
+      if (strchr(cptr, '%') == NULL) {
+        disk[*numdisks].minimumspace = atoi(cptr);
+        disk[*numdisks].minpercent = -1;
+      }
+      else {
+        disk[*numdisks].minimumspace = -1;
+        disk[*numdisks].minpercent = atoi(cptr);
+      }
     }
     else {
       disks[numdisks].minimumspace = DEFDISKMINIMUMSPACE;
+      disk[*numdisks].minpercent = -1;
     }
     /* find the device associated with the directory */
 #if HAVE_GETMNTENT
@@ -216,6 +225,7 @@ void disk_parse_config(word,cptr)
               disks[numdisks].path);
       config_perror(tmpbuf);
       disks[numdisks].minimumspace = -1;
+      disks[numdisks].minpercent = -1;
       disks[numdisks].path[0] = 0;
     }
 #if HAVE_FSTAB_H
@@ -243,7 +253,7 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
 {
 
   oid newname[30];
-  int disknum=0;
+  int percent, iserror, disknum=0;
 #if !defined(HAVE_SYS_STATVFS_H) && !defined(HAVE_STATFS)
   double totalblks, free, used, avail, availblks;
 #endif
@@ -286,6 +296,9 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
     case DISKMINIMUM:
       long_ret = disks[disknum].minimumspace;
       return((u_char *) (&long_ret));
+    case DISKMINPERCENT:
+      long_ret = disks[disknum].minpercent;
+      return((u_char *) (&long_ret));
   }
 #if defined(HAVE_SYS_STATVFS_H) || defined(HAVE_STATFS)
 #ifdef STAT_STATFS_FS_DATA
@@ -307,6 +320,10 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   vfs.f_bfree  = vfs.f_spare[1];
   vfs.f_bavail = vfs.f_spare[2];
 #endif
+  percent = vfs.f_bavail <= 0 ? 100 : (int) ((double) (vfs.f_blocks - vfs.f_bfree) /
+	    (double) (vfs.f_blocks - (vfs.f_bfree - vfs.f_bavail)) * 100.0 + 0.5);
+  iserror = (disks[disknum].minimumspace >= 0 ? vfs.f_bavail < disks[disknum].minimumspace :
+	    percent <= disks[disknum].minpercent) ? 1 : 0;
   switch (vp->magic) {
     case DISKTOTAL:
       long_ret = vfs.f_blocks;
@@ -318,17 +335,19 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
       long_ret = vfs.f_blocks - vfs.f_bfree;
       return((u_char *) (&long_ret));
     case DISKPERCENT:
-      long_ret = (int) (vfs.f_bavail <= 0 ? 100 :
-                        ((double) (vfs.f_blocks - vfs.f_bavail) / (double) vfs.f_blocks) * 100);
+      long_ret = percent;
       return ((u_char *) (&long_ret));
     case ERRORFLAG:
-      long_ret = (vfs.f_bavail < disks[disknum].minimumspace)
-        ? 1 : 0;
+      long_ret = iserror;
       return((u_char *) (&long_ret));
     case ERRORMSG:
-      if (vfs.f_bavail < disks[disknum].minimumspace) 
-        sprintf(errmsg,"%s: under %d left (= %d)",disks[disknum].path,
-                disks[disknum].minimumspace, (int) vfs.f_bavail);
+      if (iserror)
+	if (disks[disknum].minimumspace >= 0)
+	  sprintf(errmsg,"%s: under %d left (= %d)",disks[disknum].path,
+                  disks[disknum].minimumspace, (int) vfs.f_bavail);
+	else
+	  sprintf(errmsg,"%s: under %d%% left (= %d%%)",disks[disknum].path,
+		  disks[disknum].minpercent, percent);
       else
         errmsg[0] = 0;
       *var_len = strlen(errmsg);
@@ -356,6 +375,9 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
   used = totalblks - free;
   availblks = totalblks * (100 - filesys.fs_minfree) / 100;
   avail = availblks > used ? availblks - used : 0;
+  percent = availblks == 0 ? 100 : (int) ((double) used / (double) totalblks * 100.0 + 0.5);
+  iserror = (disks[disknum].minimumspace >= 0 ? avail * filesys.fs_fsize / 1024 <
+	    disks[disknum].minimumspace : percent <= disks[disknum].minpercent) ? 1 : 0;
   switch (vp->magic) {
     case DISKTOTAL:
       long_ret = (totalblks * filesys.fs_fsize / 1024);
@@ -367,17 +389,19 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
       long_ret = used * filesys.fs_fsize/1024;
       return((u_char *) (&long_ret));
     case DISKPERCENT:
-      long_ret = (double) (availblks == 0 ? 0 :
-                        ((double) used / (double) availblks) * 100);
+      long_ret = percent;
       return ((u_char *) (&long_ret));
     case ERRORFLAG:
-      long_ret = (avail * filesys.fs_fsize/1024 < disks[disknum].minimumspace)
-        ? 1 : 0;
+      long_ret = iserror;
       return((u_char *) (&long_ret));
     case ERRORMSG:
-      if (avail * filesys.fs_fsize/1024 < disks[disknum].minimumspace) 
-        sprintf(errmsg,"%s: under %d left (= %d)",disks[disknum].path,
-                disks[disknum].minimumspace, avail * filesys.fs_fsize/1024);
+      if (iserror)
+	if (disks[disknum].minimumspace >= 0)
+          sprintf(errmsg,"%s: under %d left (= %d)",disks[disknum].path,
+                  disks[disknum].minimumspace, avail * filesys.fs_fsize/1024);
+	else
+	  sprintf(errmsg,"%s: under %d%% left (= %d%%)",disks[disknum].path,
+		  disks[disknum].minpercent, percent);
       else
         errmsg[0] = 0;
       *var_len = strlen(errmsg);
@@ -387,4 +411,3 @@ unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_metho
 #endif
   return NULL;
 }
-

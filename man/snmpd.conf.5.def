@@ -93,11 +93,12 @@ The cache can be flushed by a snmp-set request of integer(1) to
 EXTENSIBLEDOTMIB.VERSIONMIBNUM.VERCLEARCACHE.
 .RE
 .IP "disk PATH"
-.IP "disk PATH MINSPACE"
+.IP "disk PATH [ MINSPACE | MINPERCENT % ]"
 .IP
 Checks the named disks mounted at PATH for available disk space.  If
-the diskspace is less than MINSPACE (kB) if specified, or
-DEFDISKMINIMUMSPACE (kB) if not specified, the associated entry in the
+the diskspace is less than MINSPACE (kB) if specified or less than
+MINPERCENT (%) if a % sign is specified, or DEFDISKMINIMUMSPACE (kB)
+if not specified, the associated entry in the
 EXTENSIBLEDOTMIB.DISKMIBNUM.ERRORFLAG mib table will be set to (1) and
 a descriptive error message will be returned to queries of
 EXTENSIBLEDOTMIB.DISKMIBNUM.ERRORMSG.
