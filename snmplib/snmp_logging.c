@@ -58,6 +58,7 @@
 static int do_syslogging=0;
 static int do_filelogging=0;
 static int do_stderrlogging=1;
+static int newline = 1;
 static FILE *logfile;
 
 void
@@ -164,11 +165,12 @@ void
 snmp_log_filelog (int priority, const char *string)
 {
   if (do_filelogging) {
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_LOG_TIMESTAMP)) {
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_LOG_TIMESTAMP) && newline) {
       fprintf(logfile, "%s %s", sprintf_stamp(NULL), string);
     } else {
       fprintf(logfile, "%s", string);
     }
+    newline = string[strlen(string)-1] == '\n';
   }
 }
 
@@ -177,11 +179,12 @@ void
 snmp_log_stderrlog (int priority, const char *string)
 {
   if (do_stderrlogging) {
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_LOG_TIMESTAMP)) {
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_LOG_TIMESTAMP) && newline) {
       fprintf(stderr, "%s %s", sprintf_stamp(NULL), string);
     } else {
       fprintf(stderr, "%s", string);
     }
+    newline = string[strlen(string)-1] == '\n';
   }
 }
 
