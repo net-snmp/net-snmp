@@ -57,11 +57,8 @@
 #include "auto_nlist.h"
 
 #ifdef hpux
-#undef OBJID
 #include <sys/mib.h>
 #include <netinet/mib_kern.h>
-#undef  OBJID
-#define OBJID                   ASN_OBJECT_ID
 #endif /* hpux */
 
 /* #include "../common_header.h" */

@@ -662,7 +662,7 @@ snmp_build(session, pdu, packet, out_length)
     h1e = cp;
     
     /* store fields in the PDU preceeding the variable-bindings sequence */    
-    if (pdu->command != TRP_REQ_MSG){
+    if (pdu->command != SNMP_MSG_TRAP){
         /* PDU is not an SNMPv1 trap */
 
         /* request id */
@@ -697,7 +697,7 @@ snmp_build(session, pdu, packet, out_length)
 
         /* agent-addr */
         cp = asn_build_string(cp, out_length,
-                (u_char)(IPADDRESS | ASN_PRIMITIVE),
+                (u_char)(ASN_IPADDRESS | ASN_PRIMITIVE),
                 (u_char *)&pdu->agent_addr.sin_addr.s_addr,
                               sizeof(pdu->agent_addr.sin_addr.s_addr));
         if (cp == NULL)
@@ -719,7 +719,7 @@ snmp_build(session, pdu, packet, out_length)
 
         /* timestamp  */
         cp = asn_build_unsigned_int(cp, out_length,
-                (u_char)(TIMETICKS | ASN_PRIMITIVE),
+                (u_char)(ASN_TIMETICKS | ASN_PRIMITIVE),
                 &pdu->time, sizeof(pdu->time));
         if (cp == NULL)
             return -1;
@@ -893,7 +893,7 @@ snmp_parse(session, pdu, data, length)
     pdu->command = msg_type;
 
     /* get the fields in the PDU preceeding the variable-bindings sequence */
-    if (pdu->command != TRP_REQ_MSG){
+    if (pdu->command != SNMP_MSG_TRAP){
         /* PDU is not an SNMPv1 TRAP */
 
         /* request id */
@@ -1000,10 +1000,10 @@ snmp_parse(session, pdu, data, length)
 			      (long *)vp->val.integer,
 			      sizeof(vp->val.integer));
 		break;
-	    case COUNTER:
-	    case GAUGE:
-	    case TIMETICKS:
-	    case UINTEGER:
+	    case ASN_COUNTER:
+	    case ASN_GAUGE:
+	    case ASN_TIMETICKS:
+	    case ASN_UINTEGER:
 		vp->val.integer = (long *)vp->buf;
 		vp->usedBuf = TRUE;
 		vp->val_len = sizeof(u_long);
@@ -1011,7 +1011,7 @@ snmp_parse(session, pdu, data, length)
 				       (u_long *)vp->val.integer,
 				       sizeof(vp->val.integer));
 		break;
-	    case COUNTER64:
+	    case ASN_COUNTER64:
 		vp->val.counter64 = (struct counter64 *)vp->buf;
 		vp->usedBuf = TRUE;
 		vp->val_len = sizeof(struct counter64);
@@ -1020,9 +1020,9 @@ snmp_parse(session, pdu, data, length)
 					 sizeof(*vp->val.counter64));
 		break;
 	    case ASN_OCTET_STR:
-	    case IPADDRESS:
-	    case ASNT_OPAQUE:
-	    case NSAP:
+	    case ASN_IPADDRESS:
+	    case ASN_OPAQUE:
+	    case ASN_NSAP:
 		if (vp->val_len < 32){
 		    vp->val.string = (u_char *)vp->buf;
 		    vp->usedBuf = TRUE;
@@ -1106,10 +1106,10 @@ snmp_send(session, pdu)
     }
 
     /* do validations for PDU types */
-    if ((pdu->command == GET_REQ_MSG) ||
-            (pdu->command == GET_RSP_MSG) ||
-            (pdu->command == GETNEXT_REQ_MSG) ||
-            (pdu->command == SET_REQ_MSG)) {
+    if ((pdu->command == SNMP_MSG_GET) ||
+            (pdu->command == SNMP_MSG_RESPONSE) ||
+            (pdu->command == SNMP_MSG_GETNEXT) ||
+            (pdu->command == SNMP_MSG_SET)) {
         /* all versions support these PDU types */
         /* initialize defaulted PDU fields */
 	if (pdu->reqid == SNMP_DEFAULT_REQID)
@@ -1118,11 +1118,11 @@ snmp_send(session, pdu)
 	    pdu->errstat = 0;
 	if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
 	    pdu->errindex = 0;
-        if (pdu->command == GET_RSP_MSG)
+        if (pdu->command == SNMP_MSG_RESPONSE)
             /* don't expect a response */
             expect_response = 0;
-    } else if ((pdu->command == INFORM_REQ_MSG) ||
-               (pdu->command == TRP2_REQ_MSG)) {
+    } else if ((pdu->command == SNMP_MSG_INFORM) ||
+               (pdu->command == SNMP_MSG_TRAP2)) {
         /* not supported in SNMPv1 and SNMPsec */
 	if ((session->version == SNMP_VERSION_1) ||
                 (session->version == SNMP_VERSION_sec)) {
@@ -1136,10 +1136,10 @@ snmp_send(session, pdu)
 	    pdu->errstat = 0;
 	if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
 	    pdu->errindex = 0;
-        if (pdu->command == TRP2_REQ_MSG)
+        if (pdu->command == SNMP_MSG_TRAP2)
             /* don't expect a response */
             expect_response = 0;
-    } else if (pdu->command == BULK_REQ_MSG) {
+    } else if (pdu->command == SNMP_MSG_GETBULK) {
         /* not supported in SNMPv1 and SNMPsec */
 	if ((session->version == SNMP_VERSION_1) ||
                 (session->version == SNMP_VERSION_sec)) {
@@ -1154,7 +1154,7 @@ snmp_send(session, pdu)
 	    return 0;
 	}
 	    
-    } else if (pdu->command == TRP_REQ_MSG) {
+    } else if (pdu->command == SNMP_MSG_TRAP) {
         if ((session->version != SNMP_VERSION_1) &&
             (session->version != SNMP_VERSION_sec)) {
           snmp_errno = SNMPERR_V2_IN_V1;
@@ -1259,8 +1259,8 @@ snmp_send(session, pdu)
 	return 0;
     }
     if (snmp_dump_packet){
-	printf("\nsending %d bytes to %s:\n", length,
-	       inet_ntoa(pdu->address.sin_addr));
+	printf("\nsending %d bytes to %s:%hd:\n", length,
+	       inet_ntoa(pdu->address.sin_addr), ntohs(pdu->address.sin_port));
 	xdump(packet, length, "");
         printf("\n");
     }
@@ -1402,8 +1402,8 @@ snmp_read(fdset)
 		continue;
 	    }
 	    if (snmp_dump_packet){
-		printf("\nreceived %d bytes from %s:\n", length,
-		       inet_ntoa(from.sin_addr));
+		printf("\nreceived %d bytes from %s:%hd:\n", length,
+		       inet_ntoa(from.sin_addr), ntohs(from.sin_port));
 		xdump(packet, length, "");
                 printf("\n");
 	    }
@@ -1422,7 +1422,7 @@ snmp_read(fdset)
 		return;
 	    }
 
-	    if (pdu->command == GET_RSP_MSG){
+	    if (pdu->command == SNMP_MSG_RESPONSE){
 		for(rp = isp->requests; rp; rp = rp->next_request){
 		    if (rp->request_id == pdu->reqid){
 			if (sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid,
@@ -1447,13 +1447,13 @@ snmp_read(fdset)
 		    }
 		    orp = rp;
 		}
-	    } else if (pdu->command == GET_REQ_MSG
-		       || pdu->command == GETNEXT_REQ_MSG
-		       || pdu->command == TRP_REQ_MSG
-		       || pdu->command == SET_REQ_MSG
-		       || pdu->command == BULK_REQ_MSG
-		       || pdu->command == INFORM_REQ_MSG
-		       || pdu->command == TRP2_REQ_MSG){
+	    } else if (pdu->command == SNMP_MSG_GET
+		       || pdu->command == SNMP_MSG_GETNEXT
+		       || pdu->command == SNMP_MSG_TRAP
+		       || pdu->command == SNMP_MSG_SET
+		       || pdu->command == SNMP_MSG_GETBULK
+		       || pdu->command == SNMP_MSG_INFORM
+		       || pdu->command == SNMP_MSG_TRAP2){
 		sp->callback(RECEIVED_MESSAGE, sp, pdu->reqid, pdu,
 			     sp->callback_magic);
 	    }
@@ -1626,8 +1626,8 @@ snmp_timeout __P((void))
 			abort();
 		    }
 		    if (snmp_dump_packet){
-			printf("\nsending %d bytes to %s:\n", length,
-			       inet_ntoa(rp->pdu->address.sin_addr));
+			printf("\nsending %d bytes to %s:%hd:\n", length,
+			       inet_ntoa(rp->pdu->address.sin_addr), ntohs(rp->pdu->address.sin_port));
 			xdump(packet, length, "");
 			printf("\n");
 		    }

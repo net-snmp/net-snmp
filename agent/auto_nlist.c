@@ -47,7 +47,7 @@ auto_nlist_value(string)
     it->nl[1].n_name = 0;
     init_nlist(it->nl);
     if (it->nl[0].n_type == 0) {
-      sprintf(it->symbol,"_%s",string);
+      sprintf(it->nl[0].n_name,"_%s",string);
       init_nlist(it->nl);
     }
     if (it->nl[0].n_type == 0) {

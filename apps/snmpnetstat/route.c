@@ -126,7 +126,7 @@ routepr()
 		"Flags", "Interface");
 
 
-	request = snmp_pdu_create(GETNEXT_REQ_MSG);
+	request = snmp_pdu_create(SNMP_MSG_GETNEXT);
 
 	snmp_add_null_var(request, oid_rtdest, sizeof(oid_rtdest)/sizeof(oid));
 	snmp_add_null_var(request, oid_rtmask, sizeof(oid_rtmask)/sizeof(oid));
@@ -176,7 +176,7 @@ routepr()
 		 */
 
 		if (request == NULL)
-		    request = snmp_pdu_create(GETNEXT_REQ_MSG);
+		    request = snmp_pdu_create(SNMP_MSG_GETNEXT);
 		snmp_add_null_var(request, vp->name, vp->name_length);
 
 		type = vp->name[9];
@@ -273,7 +273,7 @@ get_ifname(name, index)
     ip->next = Iflist;
     Iflist = ip;
     ip->index = index;
-    pdu = snmp_pdu_create(GET_REQ_MSG);
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
     memmove(varname, oid_ifdescr, sizeof(oid_ifdescr));
     varname[10] = (oid)index;
     snmp_add_null_var(pdu, varname, sizeof(oid_ifdescr)/sizeof(oid) + 1);
@@ -467,7 +467,7 @@ getvarbyname(sp, name, len)
     struct variable_list *var = NULL, *vp;
     int status;
 
-    request = snmp_pdu_create(GET_REQ_MSG);
+    request = snmp_pdu_create(SNMP_MSG_GET);
 
     snmp_add_null_var(request, name, len);
 

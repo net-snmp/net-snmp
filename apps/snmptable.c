@@ -234,7 +234,7 @@ void print_table __P(())
       width = 0;
     for (field = first_field; field < fields; field++) {
       width += column[field].width+1;
-      if (field != first_field && width > max_width) break;
+      if (field != first_field && width > max_width && max_width != 0) break;
       printf(column[field].fmt, column[field].label);
     }
     last_field = field;
@@ -327,7 +327,7 @@ void get_table_entries __P((void))
 
   while (running) {
     /* create PDU for GETNEXT request and add object name to request */
-    pdu = snmp_pdu_create(GETNEXT_REQ_MSG);
+    pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
     for (i = 1; i <= fields; i++) {
       name[rootlen] = i;
       snmp_add_null_var(pdu, name, name_length);

@@ -179,22 +179,22 @@ snmp_build_var_op(data, var_name, var_name_len, var_val_type, var_val_len,
 	    data = asn_build_int(data, listlength, var_val_type,
 		    (long *)var_val, var_val_len);
 	    break;
-	case GAUGE:
-	case COUNTER:
-	case TIMETICKS:
-	case UINTEGER:
+	case ASN_GAUGE:
+	case ASN_COUNTER:
+	case ASN_TIMETICKS:
+	case ASN_UINTEGER:
 	    data = asn_build_unsigned_int(data, listlength, var_val_type,
 					  (u_long *)var_val, var_val_len);
 	    break;
-	case COUNTER64:
+	case ASN_COUNTER64:
 	    data = asn_build_unsigned_int64(data, listlength, var_val_type,
 					   (struct counter64 *)var_val,
 					    var_val_len);
 	    break;
 	case ASN_OCTET_STR:
-	case IPADDRESS:
-	case ASNT_OPAQUE:
-        case NSAP:
+	case ASN_IPADDRESS:
+	case ASN_OPAQUE:
+        case ASN_NSAP:
 	    data = asn_build_string(data, listlength, var_val_type,
 		    var_val, var_val_len);
 	    break;

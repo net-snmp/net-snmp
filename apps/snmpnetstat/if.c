@@ -142,7 +142,7 @@ intpr(interval)
 	for (ifnum = 1; ifnum <= cfg_nnets; ifnum++) {
 		register char *cp;
 
-		request = snmp_pdu_create (GETNEXT_REQ_MSG);
+		request = snmp_pdu_create (SNMP_MSG_GETNEXT);
 		memmove (varname, oid_ipadentaddr, sizeof (oid_ipadentaddr));
 		varname_len = sizeof (oid_ipadentaddr) / sizeof (oid);
 		instance = varname + 9;
@@ -185,7 +185,7 @@ intpr(interval)
 		varname_len = sizeof(oid_ifname) / sizeof(oid);
 		ifentry = varname + 9;
 		instance = varname + 10;
-		request = snmp_pdu_create (GET_REQ_MSG);
+		request = snmp_pdu_create (SNMP_MSG_GET);
 
 		*instance = ifnum;
 		*ifentry = IFNAME;
@@ -323,7 +323,7 @@ intpro(interval)
 	for (ifnum = 1; ifnum <= cfg_nnets; ifnum++) {
 		register char *cp;
 
-		request = snmp_pdu_create (GETNEXT_REQ_MSG);
+		request = snmp_pdu_create (SNMP_MSG_GETNEXT);
 		memmove (varname, oid_ipadentaddr, sizeof (oid_ipadentaddr));
 		varname_len = sizeof (oid_ipadentaddr) / sizeof (oid);
 		instance = varname + 9;
@@ -366,7 +366,7 @@ intpro(interval)
 		varname_len = sizeof(oid_ifname) / sizeof(oid);
 		ifentry = varname + 9;
 		instance = varname + 10;
-		request = snmp_pdu_create (GET_REQ_MSG);
+		request = snmp_pdu_create (SNMP_MSG_GET);
 
 		*instance = ifnum;
 		*ifentry = IFNAME;

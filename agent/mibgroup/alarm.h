@@ -88,21 +88,21 @@ struct alarmEntry {
 #ifdef IN_SNMP_VARS_C
 
 struct variable2 alarmnextindex_variables[] = {
-    {ALARMNEXTINDEX, INTEGER, RONLY, var_alarmnextindex, 1, {0}}
+    {ALARMNEXTINDEX, ASN_INTEGER, RONLY, var_alarmnextindex, 1, {0}}
 };
 
 struct variable2 alarm_variables[] = {
-    {ALARMTABVARIABLE, OBJID, RWRITE, var_alarmtab, 1, {2 }},
-    {ALARMTABINTERVAL, INTEGER, RWRITE, var_alarmtab, 1, {3 }},
-    {ALARMTABSAMPLETYPE, INTEGER, RWRITE, var_alarmtab, 1, {4 }},
-    {ALARMTABVALUE, INTEGER, RONLY, var_alarmtab, 1, {5 }},
-    {ALARMTABSTARTUPALARM, INTEGER, RWRITE, var_alarmtab, 1, {6 }},
-    {ALARMTABRISINGTHRESH, INTEGER, RWRITE, var_alarmtab, 1, {7 }},
-    {ALARMTABFALLINGTHRESH, INTEGER, RWRITE, var_alarmtab, 1, {8 }},
-    {ALARMTABRISINGINDEX, INTEGER, RWRITE, var_alarmtab, 1, {9}},
-    {ALARMTABFALLINGINDEX, INTEGER, RWRITE, var_alarmtab, 1, {10 }},
-    {ALARMTABUNAVAILABLEINDEX, INTEGER, RWRITE, var_alarmtab, 1, {11 }},
-    {ALARMTABSTATUS, INTEGER, RWRITE, var_alarmtab, 1, {12 }}
+    {ALARMTABVARIABLE, ASN_OBJECT_ID, RWRITE, var_alarmtab, 1, {2 }},
+    {ALARMTABINTERVAL, ASN_INTEGER, RWRITE, var_alarmtab, 1, {3 }},
+    {ALARMTABSAMPLETYPE, ASN_INTEGER, RWRITE, var_alarmtab, 1, {4 }},
+    {ALARMTABVALUE, ASN_INTEGER, RONLY, var_alarmtab, 1, {5 }},
+    {ALARMTABSTARTUPALARM, ASN_INTEGER, RWRITE, var_alarmtab, 1, {6 }},
+    {ALARMTABRISINGTHRESH, ASN_INTEGER, RWRITE, var_alarmtab, 1, {7 }},
+    {ALARMTABFALLINGTHRESH, ASN_INTEGER, RWRITE, var_alarmtab, 1, {8 }},
+    {ALARMTABRISINGINDEX, ASN_INTEGER, RWRITE, var_alarmtab, 1, {9}},
+    {ALARMTABFALLINGINDEX, ASN_INTEGER, RWRITE, var_alarmtab, 1, {10 }},
+    {ALARMTABUNAVAILABLEINDEX, ASN_INTEGER, RWRITE, var_alarmtab, 1, {11 }},
+    {ALARMTABSTATUS, ASN_INTEGER, RWRITE, var_alarmtab, 1, {12 }}
 };
 
 config_load_mib( SNMPV2ALARMNEXTINDEX, 10, alarmnextindex_variables)

@@ -144,7 +144,7 @@ main(argc, argv)
     running = 1;
     while(running) {
       /* create PDU for GETBULK request and add object name to request */
-      pdu = snmp_pdu_create(BULK_REQ_MSG);
+      pdu = snmp_pdu_create(SNMP_MSG_GETBULK);
       pdu->non_repeaters = 0;
       pdu->max_repetitions = reps;  /* fill the packet */
       snmp_add_null_var(pdu, name, name_length);

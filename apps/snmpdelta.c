@@ -411,7 +411,7 @@ char **argv;
   end = current_name;
   sum = 0;
   while(1){
-    pdu = snmp_pdu_create(GET_REQ_MSG);
+    pdu = snmp_pdu_create(SNMP_MSG_GET);
 	
     if (deltat)
       snmp_add_null_var(pdu, sysUpTimeOid, sysUpTimeLen);
@@ -583,7 +583,7 @@ char **argv;
 	  SOCK_CLEANUP;
 	  exit(1);
 	}
-	if ((pdu = snmp_fix_pdu(response, GET_REQ_MSG)) != NULL)
+	if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL)
 	  goto retry;
       }
 	    

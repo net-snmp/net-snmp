@@ -171,7 +171,7 @@ snmp_synch_input(op, session, reqid, pdu, magic)
     if (reqid != state->reqid)
 	return 0;
     state->waiting = 0;
-    if (op == RECEIVED_MESSAGE && pdu->command == GET_RSP_MSG){
+    if (op == RECEIVED_MESSAGE && pdu->command == SNMP_MSG_RESPONSE){
 	/* clone the pdu */
 	state->pdu = snmp_clone_pdu(pdu);
 	state->status = STAT_SUCCESS;
@@ -204,7 +204,7 @@ snmp_fix_pdu(pdu, command)
     struct snmp_pdu *newpdu;
     int index, copied = 0;
 
-    if (pdu->command != GET_RSP_MSG || pdu->errstat == SNMP_ERR_NOERROR || pdu->errindex <= 0)
+    if (pdu->command != SNMP_MSG_RESPONSE || pdu->errstat == SNMP_ERR_NOERROR || pdu->errindex <= 0)
 	return NULL;
     /* clone the pdu */
     newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));

@@ -25,15 +25,15 @@ extern int   	Get_FSSize();	/* Temporary */
 #ifdef IN_SNMP_VARS_C
 
 struct variable4 hrfsys_variables[] = {
-    { HRFSYS_INDEX,     INTEGER, RONLY, var_hrfilesys, 2, {1,1}},
-    { HRFSYS_MOUNT,      STRING, RONLY, var_hrfilesys, 2, {1,2}},
-    { HRFSYS_RMOUNT,     STRING, RONLY, var_hrfilesys, 2, {1,3}},
-    { HRFSYS_TYPE,        OBJID, RONLY, var_hrfilesys, 2, {1,4}},
-    { HRFSYS_ACCESS,    INTEGER, RONLY, var_hrfilesys, 2, {1,5}},
-    { HRFSYS_BOOT,      INTEGER, RONLY, var_hrfilesys, 2, {1,6}},
-    { HRFSYS_STOREIDX,  INTEGER, RONLY, var_hrfilesys, 2, {1,7}},
-    { HRFSYS_FULLDUMP,   STRING, RONLY, var_hrfilesys, 2, {1,8}},
-    { HRFSYS_PARTDUMP,   STRING, RONLY, var_hrfilesys, 2, {1,9}},
+    { HRFSYS_INDEX,     ASN_INTEGER, RONLY, var_hrfilesys, 2, {1,1}},
+    { HRFSYS_MOUNT,      ASN_STRING, RONLY, var_hrfilesys, 2, {1,2}},
+    { HRFSYS_RMOUNT,     ASN_STRING, RONLY, var_hrfilesys, 2, {1,3}},
+    { HRFSYS_TYPE,    ASN_OBJECT_ID, RONLY, var_hrfilesys, 2, {1,4}},
+    { HRFSYS_ACCESS,    ASN_INTEGER, RONLY, var_hrfilesys, 2, {1,5}},
+    { HRFSYS_BOOT,      ASN_INTEGER, RONLY, var_hrfilesys, 2, {1,6}},
+    { HRFSYS_STOREIDX,  ASN_INTEGER, RONLY, var_hrfilesys, 2, {1,7}},
+    { HRFSYS_FULLDUMP,   ASN_STRING, RONLY, var_hrfilesys, 2, {1,8}},
+    { HRFSYS_PARTDUMP,   ASN_STRING, RONLY, var_hrfilesys, 2, {1,9}},
 };
 config_load_mib( MIB.25.3.8, 9, hrfsys_variables)
 

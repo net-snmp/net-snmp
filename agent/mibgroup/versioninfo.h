@@ -26,15 +26,15 @@ config_require(util_funcs)
 #ifdef IN_SNMP_VARS_C
 
 struct variable2 extensible_version_variables[] = {
-  {MIBINDEX, INTEGER, RONLY, var_extensible_version, 1, {MIBINDEX}},
-  {VERTAG, STRING, RONLY, var_extensible_version, 1, {VERTAG}},
-  {VERDATE, STRING, RONLY, var_extensible_version, 1, {VERDATE}},
-  {VERCDATE, STRING, RONLY, var_extensible_version, 1, {VERCDATE}},
-  {VERIDENT, STRING, RONLY, var_extensible_version, 1, {VERIDENT}},
-  {VERCLEARCACHE, INTEGER, RONLY, var_extensible_version, 1, {VERCLEARCACHE}},
-  {VERUPDATECONFIG, INTEGER, RWRITE, var_extensible_version, 1, {VERUPDATECONFIG}},
-  {VERRESTARTAGENT, INTEGER, RWRITE, var_extensible_version, 1, {VERRESTARTAGENT}},
-  {VERDEBUGGING, INTEGER, RWRITE, var_extensible_version, 1, {VERDEBUGGING}}
+  {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_version, 1, {MIBINDEX}},
+  {VERTAG, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERTAG}},
+  {VERDATE, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERDATE}},
+  {VERCDATE, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERCDATE}},
+  {VERIDENT, ASN_OCTET_STR, RONLY, var_extensible_version, 1, {VERIDENT}},
+  {VERCLEARCACHE, ASN_INTEGER, RONLY, var_extensible_version, 1, {VERCLEARCACHE}},
+  {VERUPDATECONFIG, ASN_INTEGER, RWRITE, var_extensible_version, 1, {VERUPDATECONFIG}},
+  {VERRESTARTAGENT, ASN_INTEGER, RWRITE, var_extensible_version, 1, {VERRESTARTAGENT}},
+  {VERDEBUGGING, ASN_INTEGER, RWRITE, var_extensible_version, 1, {VERDEBUGGING}}
 };
 
 config_load_mib(EXTENSIBLEMIB.VERSIONMIBNUM, EXTENSIBLENUM+1, extensible_version_variables)

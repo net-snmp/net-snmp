@@ -547,7 +547,7 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	digestEnd = data;
 
 	data = asn_build_unsigned_int(data, length,
-				      (u_char)(UINTEGER),
+				      (u_char)(ASN_UINTEGER),
 				      &dstp->partyAuthClock,
 				      sizeof(dstp->partyAuthClock));
 	if (data == NULL){
@@ -556,7 +556,7 @@ snmp_party_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 	}
 
 	data = asn_build_unsigned_int(data, length,
-				      (u_char)(UINTEGER),
+				      (u_char)(ASN_UINTEGER),
 				      &srcp->partyAuthClock,
 				      sizeof(srcp->partyAuthClock));
 	if (data == NULL){

@@ -20,13 +20,13 @@ extern u_char	*var_hrsys();
 #ifdef IN_SNMP_VARS_C
 
 struct variable2 hrsystem_variables[] = {
-    { HRSYS_UPTIME,  TIMETICKS, RONLY, var_hrsys, 1, {1}},
-    { HRSYS_DATE,       STRING, RONLY, var_hrsys, 1, {2}},
-    { HRSYS_LOAD_DEV,  INTEGER, RONLY, var_hrsys, 1, {3}},
-    { HRSYS_LOAD_PARAM, STRING, RONLY, var_hrsys, 1, {4}},
-    { HRSYS_USERS,       GAUGE, RONLY, var_hrsys, 1, {5}},
-    { HRSYS_PROCS,       GAUGE, RONLY, var_hrsys, 1, {6}},
-    { HRSYS_MAXPROCS,  INTEGER, RONLY, var_hrsys, 1, {7}}
+    { HRSYS_UPTIME,     ASN_TIMETICKS, RONLY, var_hrsys, 1, {1}},
+    { HRSYS_DATE,       ASN_OCTET_STR, RONLY, var_hrsys, 1, {2}},
+    { HRSYS_LOAD_DEV,     ASN_INTEGER, RONLY, var_hrsys, 1, {3}},
+    { HRSYS_LOAD_PARAM, ASN_OCTET_STR, RONLY, var_hrsys, 1, {4}},
+    { HRSYS_USERS,          ASN_GAUGE, RONLY, var_hrsys, 1, {5}},
+    { HRSYS_PROCS,          ASN_GAUGE, RONLY, var_hrsys, 1, {6}},
+    { HRSYS_MAXPROCS,     ASN_INTEGER, RONLY, var_hrsys, 1, {7}}
 };
 config_load_mib( MIB.25.1, 8, hrsystem_variables)
 

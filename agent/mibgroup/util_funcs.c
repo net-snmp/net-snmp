@@ -273,7 +273,7 @@ clear_cache(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   long tmp=0;
   int tmplen=1000;
 
-  if (var_val_type != INTEGER) {
+  if (var_val_type != ASN_INTEGER) {
     printf("Wrong type != int\n");
     return SNMP_ERR_WRONGTYPE;
   }
@@ -316,7 +316,7 @@ restart_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   long tmp=0;
   int tmplen=1000;
 
-  if (var_val_type != INTEGER) {
+  if (var_val_type != ASN_INTEGER) {
     printf("Wrong type != int\n");
     return SNMP_ERR_WRONGTYPE;
   }

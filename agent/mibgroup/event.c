@@ -731,7 +731,7 @@ eventSendTrap(event, eventType, generic)
 	vp->name = (oid *)malloc(sysUpTimeOidLen * sizeof(oid));
 	memcpy(vp->name, sysUpTimeOid, sysUpTimeOidLen * sizeof(oid));
 	vp->name_length = sysUpTimeOidLen;
-	vp->type = TIMETICKS;
+	vp->type = ASN_TIMETICKS;
 	uptime = get_uptime();
 	vp->val_len = sizeof(uptime);
 	vp->val.objid = (oid *)malloc(vp->val_len);
@@ -784,7 +784,7 @@ eventSendTrap(event, eventType, generic)
 	    break;
 	}
 
-	pdu = snmp_pdu_create(INFORM_REQ_MSG);
+	pdu = snmp_pdu_create(SNMP_MSG_INFORM);
 	memcpy(&pdu->address.sin_addr.s_addr, pp->partyTAddress, 4);
 	memcpy(&pdu->address.sin_port, pp->partyTAddress + 4, 2);
 	pdu->address.sin_port = 162;

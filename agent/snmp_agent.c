@@ -164,33 +164,33 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
     }
 
     switch (pi->pdutype) {
-    case GET_REQ_MSG:
+    case SNMP_MSG_GET:
 #ifdef USING_SNMP_MODULE       
 	snmp_ingetrequests++;
 #endif
 	break;
-    case BULK_REQ_MSG:
+    case SNMP_MSG_GETBULK:
 #ifdef USING_SNMP_MODULE       
 	snmp_ingetrequests++;
 #endif
 	break;
-    case GETNEXT_REQ_MSG:
+    case SNMP_MSG_GETNEXT:
 #ifdef USING_SNMP_MODULE       
 	snmp_ingetnexts++;
 #endif
 	break;
-    case SET_REQ_MSG:
+    case SNMP_MSG_SET:
 #ifdef USING_SNMP_MODULE       
 	snmp_insetrequests++;
 #endif
 	break;
-    case GET_RSP_MSG:
+    case SNMP_MSG_RESPONSE:
 #ifdef USING_SNMP_MODULE       
         snmp_ingetresponses++;
 #endif
 	return 0;
-    case TRP_REQ_MSG:
-    case TRP2_REQ_MSG:
+    case SNMP_MSG_TRAP:
+    case SNMP_MSG_TRAP2:
 #ifdef USING_SNMP_MODULE       
         snmp_intraps++;
 #endif
@@ -295,17 +295,17 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
     if (verbose) {
 	fprintf (stdout, "    ");
 	switch (pi->pdutype) {
-	case GET_REQ_MSG:
+	case SNMP_MSG_GET:
 	    fprintf (stdout, "GET");
 	    break;
-	case GETNEXT_REQ_MSG:
+	case SNMP_MSG_GETNEXT:
 	    fprintf (stdout, "GETNEXT");
 	    break;
-	case BULK_REQ_MSG:
+	case SNMP_MSG_GETBULK:
 	    fprintf (stdout, "GETBULK non-rep = %ld, max-rep = %ld",
 		     errstat, errindex);
 	    break;
-	case SET_REQ_MSG:
+	case SNMP_MSG_SET:
 	    fprintf (stdout, "SET");
 	    break;
 	}
@@ -314,7 +314,7 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 
     /* create the requid, errstatus, errindex for the output packet */
     out_reqid = asn_build_sequence(out_header, out_length,
-				 (u_char)GET_RSP_MSG, 0);
+				 (u_char)SNMP_MSG_RESPONSE, 0);
     if (out_reqid == NULL){
 	ERROR_MSG("");
 	return 0;
@@ -343,13 +343,13 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 	return 0;
     }
 
-    if (pi->pdutype == BULK_REQ_MSG)
+    if (pi->pdutype == SNMP_MSG_GETBULK)
 	errstat = bulk_var_op_list(data, length, out_data, *out_length,
 				    errstat, errindex, &errindex, pi);
     else
 	errstat = parse_var_op_list(data, length, out_data, *out_length,
 			    &errindex, pi, RESERVE1);
-    if (pi->pdutype == SET_REQ_MSG){
+    if (pi->pdutype == SNMP_MSG_SET){
 	if (errstat == SNMP_ERR_NOERROR)
 	    errstat = parse_var_op_list(data, length, out_data, *out_length,
 					&errindex, pi, RESERVE2);
@@ -388,7 +388,7 @@ snmp_agent_parse(data, length, out_data, out_length, sourceip)
 	case SNMP_ERR_NOERROR:
 	    /* re-encode the headers with the real lengths */
 	    *out_length = pi->packet_end - out_header;
-	    out_data = asn_build_sequence(out_header, out_length, GET_RSP_MSG,
+	    out_data = asn_build_sequence(out_header, out_length, SNMP_MSG_RESPONSE,
 					pi->packet_end - out_reqid);
 	    if (out_data != out_reqid){
 		ERROR_MSG("internal error: header");
@@ -511,11 +511,11 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
     int	    dummyLen;
     int	    noSuchObject;
 
-    if (pi->pdutype == SET_REQ_MSG)
+    if (pi->pdutype == SNMP_MSG_SET)
 	rw = WRITE;
     else
 	rw = READ;
-    if (pi->pdutype == GETNEXT_REQ_MSG){
+    if (pi->pdutype == SNMP_MSG_GETNEXT){
 	exact = FALSE;
     } else {
 	exact = TRUE;
@@ -569,7 +569,7 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	/* Effectively, check if this variable is read-only or read-write
 	   (in the MIB sense). */
 	if (!vacm_in_view(pi, var_name, var_name_len)) {
-	    if (pi->version == SNMP_VERSION_1 || pi->pdutype != SET_REQ_MSG) {
+	    if (pi->version == SNMP_VERSION_1 || pi->pdutype != SNMP_MSG_SET) {
 		if (verbose) fprintf (stdout, "    >> noSuchName (read-only)\n");
 		ERROR_MSG("read-only? (ignoring)");
 		return SNMP_ERR_NOSUCHNAME;
@@ -586,7 +586,7 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	   luckily no objects are set unreadable.  This can still be
 	   useful for sets to determine which are intrinsically writable */
 
-	if (pi->pdutype == SET_REQ_MSG){
+	if (pi->pdutype == SNMP_MSG_SET){
 	    if (write_method == NULL){
 		if (statP != NULL){
 		    /* see if the type and value is consistent with this
@@ -646,7 +646,7 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
 	(*index)++;
 	snmp_vars_inc++;
     }
-    if (pi->pdutype != SET_REQ_MSG){
+    if (pi->pdutype != SNMP_MSG_SET){
 	/* save a pointer to the end of the packet */
         pi->packet_end = out_data;
 
@@ -963,7 +963,7 @@ create_identical(snmp_in, snmp_out, snmp_length, errstat, errindex, pi)
 	return 0;
 
 #if 0
-    data = asn_build_header(headerPtr, &headerLength, GET_RSP_MSG,
+    data = asn_build_header(headerPtr, &headerLength, SNMP_MSG_RESPONSE,
 			    headerLength);
     if (data != reqidPtr)
 	return 0;
@@ -973,7 +973,7 @@ create_identical(snmp_in, snmp_out, snmp_length, errstat, errindex, pi)
      * this code as a long-term solution (we should re-encode the error/set
      * reply packet).
      */
-    *headerPtr = GET_RSP_MSG;
+    *headerPtr = SNMP_MSG_RESPONSE;
 #endif
     
     length = snmp_length;
@@ -1045,7 +1045,7 @@ create_toobig(snmp_out, snmp_length, reqid, pi)
     if (data == NULL)
 	return 0;
     headerPtr = data;
-    data = asn_build_sequence(data, &length, GET_RSP_MSG, 16);
+    data = asn_build_sequence(data, &length, SNMP_MSG_RESPONSE, 16);
     if (data == NULL)
 	return 0;
     reqidPtr = data;
@@ -1066,7 +1066,7 @@ create_toobig(snmp_out, snmp_length, reqid, pi)
 	return 0;
 
     pi->packet_end = data;
-    data = asn_build_sequence(headerPtr, &length, GET_RSP_MSG,
+    data = asn_build_sequence(headerPtr, &length, SNMP_MSG_RESPONSE,
 			      data - reqidPtr);
     if (data != reqidPtr)
 	return 0;
@@ -1109,19 +1109,19 @@ setVariable(var_val, var_val_type, var_val_len, statP, statLen)
 	case ASN_INTEGER:
 	    asn_parse_int(var_val, &buffersize, &var_val_type, (long *)statP, statLen);
 	    break;
-	case COUNTER:
-	case GAUGE:
-	case TIMETICKS:
+	case ASN_COUNTER:
+	case ASN_GAUGE:
+	case ASN_TIMETICKS:
 	    asn_parse_unsigned_int(var_val, &buffersize, &var_val_type, (u_long *)statP, statLen);
 	    break;
-	case COUNTER64:
+	case ASN_COUNTER64:
 	    asn_parse_unsigned_int64(var_val, &buffersize, &var_val_type,
 				     (struct counter64 *)statP, statLen);
 	    break;
 	case ASN_OCTET_STR:
-	case IPADDRESS:
-	case ASNT_OPAQUE:
-	case NSAP:
+	case ASN_IPADDRESS:
+	case ASN_OPAQUE:
+	case ASN_NSAP:
 	    asn_parse_string(var_val, &buffersize, &var_val_type, statP, &statLen);
 	    break;
 	case ASN_OBJECT_ID:

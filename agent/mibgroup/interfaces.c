@@ -84,11 +84,8 @@
 #include "mibincl.h"
 
 #ifdef hpux
-#undef OBJID
 #include <sys/mib.h>
 #include <netinet/mib_kern.h>
-#undef  OBJID
-#define OBJID                   ASN_OBJECT_ID
 #endif /* hpux */
 
 #ifdef HAVE_SYS_SYSCTL_H
@@ -900,9 +897,6 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 	 * Additional information about the interfaces is available under
 	 * HP-UX through the network management interface '/dev/netman'
 	 */
-#undef		OBJID
-	/* Re-instate the HP-UX definition of 'OBJID' */
-#define		OBJID(x,y)	((x)<<16) + (y)
     hp_ifEntry.ifIndex = interface;
     hp_nmparms.objid  = ID_ifEntry;
     hp_nmparms.buffer = &hp_ifEntry;
@@ -916,8 +910,6 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
           hp_fd = -1;         /* failed */
       }
     }
-#undef		OBJID
-#define		OBJID		ASN_OBJECT_ID
 
     switch (vp->magic){
 	case IFINDEX:

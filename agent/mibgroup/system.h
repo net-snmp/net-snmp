@@ -31,13 +31,13 @@ config_parse_dot_conf("syscontact",system_parse_config_syscon, NULL);
 #ifdef IN_SNMP_VARS_C
 
 struct variable2 system_variables[] = {
-    {VERSION_DESCR, STRING, RWRITE, var_system, 1, {1}},
-    {VERSIONID, OBJID, RONLY, var_system, 1, {2}},
-    {UPTIME, TIMETICKS, RONLY, var_system, 1, {3}},
-    {SYSCONTACT, STRING, RWRITE, var_system, 1, {4}},
-    {SYSTEMNAME, STRING, RWRITE, var_system, 1, {5}},
-    {SYSLOCATION, STRING, RWRITE, var_system, 1, {6}},
-    {SYSSERVICES, INTEGER, RONLY, var_system, 1, {7}}
+    {VERSION_DESCR, ASN_OCTET_STR, RWRITE, var_system, 1, {1}},
+    {VERSIONID, ASN_OBJECT_ID, RONLY, var_system, 1, {2}},
+    {UPTIME, ASN_TIMETICKS, RONLY, var_system, 1, {3}},
+    {SYSCONTACT, ASN_OCTET_STR, RWRITE, var_system, 1, {4}},
+    {SYSTEMNAME, ASN_OCTET_STR, RWRITE, var_system, 1, {5}},
+    {SYSLOCATION, ASN_OCTET_STR, RWRITE, var_system, 1, {6}},
+    {SYSSERVICES, ASN_INTEGER, RONLY, var_system, 1, {7}}
 };
 
 config_load_mib(MIB.1, 7, system_variables)

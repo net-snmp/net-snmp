@@ -82,31 +82,31 @@ extern u_char	*var_tcpEntry __P((struct variable *, oid *, int *, int, int *, in
 #ifdef IN_SNMP_VARS_C
 
 struct variable13 tcp_variables[] = {
-    {TCPRTOALGORITHM, INTEGER, RONLY, var_tcp, 1, {1}},
-    {TCPRTOMIN, INTEGER, RONLY, var_tcp, 1, {2}},
+    {TCPRTOALGORITHM, ASN_INTEGER, RONLY, var_tcp, 1, {1}},
+    {TCPRTOMIN, ASN_INTEGER, RONLY, var_tcp, 1, {2}},
 #ifndef sunV3
-    {TCPRTOMAX, INTEGER, RONLY, var_tcp, 1, {3}},
+    {TCPRTOMAX, ASN_INTEGER, RONLY, var_tcp, 1, {3}},
 #endif
-    {TCPMAXCONN, INTEGER, RONLY, var_tcp, 1, {4}},
+    {TCPMAXCONN, ASN_INTEGER, RONLY, var_tcp, 1, {4}},
 #ifndef sunV3
-    {TCPACTIVEOPENS, COUNTER, RONLY, var_tcp, 1, {5}},
-    {TCPPASSIVEOPENS, COUNTER, RONLY, var_tcp, 1, {6}},
-    {TCPATTEMPTFAILS, COUNTER, RONLY, var_tcp, 1, {7}},
-    {TCPESTABRESETS, COUNTER, RONLY, var_tcp, 1, {8}},
+    {TCPACTIVEOPENS, ASN_COUNTER, RONLY, var_tcp, 1, {5}},
+    {TCPPASSIVEOPENS, ASN_COUNTER, RONLY, var_tcp, 1, {6}},
+    {TCPATTEMPTFAILS, ASN_COUNTER, RONLY, var_tcp, 1, {7}},
+    {TCPESTABRESETS, ASN_COUNTER, RONLY, var_tcp, 1, {8}},
 #endif
-    {  TCPCURRESTAB, GAUGE, RONLY, var_tcp, 1, {9}},
+    {  TCPCURRESTAB, ASN_GAUGE, RONLY, var_tcp, 1, {9}},
 #ifndef sunV3
-    {TCPINSEGS, COUNTER, RONLY, var_tcp, 1, {10}},
-    {TCPOUTSEGS, COUNTER, RONLY, var_tcp, 1, {11} },
-    {TCPRETRANSSEGS, COUNTER, RONLY, var_tcp, 1, {12}},
+    {TCPINSEGS, ASN_COUNTER, RONLY, var_tcp, 1, {10}},
+    {TCPOUTSEGS, ASN_COUNTER, RONLY, var_tcp, 1, {11} },
+    {TCPRETRANSSEGS, ASN_COUNTER, RONLY, var_tcp, 1, {12}},
 #endif
-    {TCPCONNSTATE, INTEGER, RONLY, var_tcpEntry, 3, {13, 1, 1}},
-    {TCPCONNLOCALADDRESS, IPADDRESS, RONLY, var_tcpEntry, 3, {13, 1, 2}},
-    {TCPCONNLOCALPORT, INTEGER, RONLY, var_tcpEntry, 3, {13, 1, 3}},
-    {TCPCONNREMADDRESS, IPADDRESS, RONLY, var_tcpEntry, 3, {13, 1, 4}},
-    {TCPCONNREMPORT, INTEGER, RONLY, var_tcpEntry, 3, {13, 1, 5}},
-    {TCPINERRS, COUNTER, RONLY, var_tcp, 1, {14}},
-    {TCPOUTRSTS, COUNTER, RONLY, var_tcp, 1, {15}}
+    {TCPCONNSTATE, ASN_INTEGER, RONLY, var_tcpEntry, 3, {13, 1, 1}},
+    {TCPCONNLOCALADDRESS, ASN_IPADDRESS, RONLY, var_tcpEntry, 3, {13, 1, 2}},
+    {TCPCONNLOCALPORT, ASN_INTEGER, RONLY, var_tcpEntry, 3, {13, 1, 3}},
+    {TCPCONNREMADDRESS, ASN_IPADDRESS, RONLY, var_tcpEntry, 3, {13, 1, 4}},
+    {TCPCONNREMPORT, ASN_INTEGER, RONLY, var_tcpEntry, 3, {13, 1, 5}},
+    {TCPINERRS, ASN_COUNTER, RONLY, var_tcp, 1, {14}},
+    {TCPOUTRSTS, ASN_COUNTER, RONLY, var_tcp, 1, {15}}
 };
 
 config_load_mib(MIB.6, 7, tcp_variables)
