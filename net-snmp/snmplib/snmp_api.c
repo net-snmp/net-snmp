@@ -2583,37 +2583,11 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
   if (data == NULL)
     return -1;
   pdu->command = msg_type;
+  pdu->flags &= (~SNMP_MSG_FLAG_RESPONSE_PDU);
 
   /* get the fields in the PDU preceeding the variable-bindings sequence */
-  if (pdu->command != SNMP_MSG_TRAP){
-    /* PDU is not an SNMPv1 TRAP */
-
-    /* request id */
-    data = asn_parse_int(data, length, &type, &pdu->reqid,
-			 sizeof(pdu->reqid));
-    if (data == NULL) {
-      ERROR_MSG(strcat(strcpy(err, "parsing request-id: "), snmp_detail));
-      return -1;
-    }
-
-    /* error status (getbulk non-repeaters) */
-    data = asn_parse_int(data, length, &type, &pdu->errstat,
-			 sizeof(pdu->errstat));
-    if (data == NULL) {
-      ERROR_MSG(strcat(strcpy(err, "parsing error status: "), snmp_detail));
-      return -1;
-    }
-
-    /* error index (getbulk max-repetitions) */
-    data = asn_parse_int(data, length, &type, &pdu->errindex,
-			 sizeof(pdu->errindex));
-    if (data == NULL) {
-      ERROR_MSG(strcat(strcpy(err, "parsing error index: "), snmp_detail));
-      return -1;
-    }
-  } else {
-    /* an SNMPv1 trap PDU */
-
+  switch (pdu->command) {
+	case SNMP_MSG_TRAP:
     /* enterprise */
     pdu->enterprise_length = MAX_OID_LEN;
     data = asn_parse_objid(data, length, &type, objid,
@@ -2647,6 +2621,40 @@ snmp_pdu_parse(struct snmp_pdu *pdu, u_char  *data, size_t *length) {
 				  sizeof(pdu->time));
     if (data == NULL)
       return -1;
+
+		break;
+
+	case SNMP_MSG_RESPONSE:
+	case SNMP_MSG_REPORT:
+		pdu->flags |= SNMP_MSG_FLAG_RESPONSE_PDU;
+		/* fallthrough */
+
+	default:
+    /* PDU is not an SNMPv1 TRAP */
+
+    /* request id */
+    data = asn_parse_int(data, length, &type, &pdu->reqid,
+			 sizeof(pdu->reqid));
+    if (data == NULL) {
+      ERROR_MSG(strcat(strcpy(err, "parsing request-id: "), snmp_detail));
+      return -1;
+    }
+
+    /* error status (getbulk non-repeaters) */
+    data = asn_parse_int(data, length, &type, &pdu->errstat,
+			 sizeof(pdu->errstat));
+    if (data == NULL) {
+      ERROR_MSG(strcat(strcpy(err, "parsing error status: "), snmp_detail));
+      return -1;
+    }
+
+    /* error index (getbulk max-repetitions) */
+    data = asn_parse_int(data, length, &type, &pdu->errindex,
+			 sizeof(pdu->errindex));
+    if (data == NULL) {
+      ERROR_MSG(strcat(strcpy(err, "parsing error index: "), snmp_detail));
+      return -1;
+    }
   }
 
   /* get header for variable-bindings sequence */
@@ -3197,7 +3205,7 @@ snmp_sess_read(void *sessp,
 	return;
     }
 
-    if (pdu->command == SNMP_MSG_RESPONSE || pdu->command == SNMP_MSG_REPORT) {
+    if (pdu->flags & SNMP_MSG_FLAG_RESPONSE_PDU) {
 	/* call USM to free any securityStateRef supplied with the message */
 	if (pdu->securityStateRef) {
 	  usm_free_usmStateReference(pdu->securityStateRef);
