@@ -150,7 +150,7 @@ int read_config(filename, procp, numps, ppexten, numexs,minimumswap,disk,numdisk
           }
 	}
     }
-  close(ifile);
+  fclose(ifile);
   return(0);
 }
 
