@@ -16,6 +16,14 @@ Contents:
 
 Introduction:
 
+******************************NOTE NOTE NOTE**************************
+  This module now relies on many other modules.  Do not try to build
+  it independently, as it won't work.  Instead of running "perl
+  Makefile.PL" in this directory, run it in the net-snmp/perl
+  directory instead which has a global makefile used to build all the
+  sub-modules in their proper order.
+******************************NOTE NOTE NOTE**************************
+
 Note: The perl SNMP 5.0module which comes with net-snmp 5.0 and
 higher is different than previous versions in a number of ways.  Most
 importantly, it behaves like a proper net-snmp application and calls
@@ -24,8 +32,7 @@ use those defaults where appropriate automatically parse MIB files,
 etc.  This will likely affect your perl applications if you have, for
 instance, default values set up in your snmp.conf file (as the perl
 module will now make use of those defaults).  The docmuentation,
-however, has sadly not been updated yet (aside from this note), nor is
-the read_config default usage implementation fully complete.
+however, has sadly not been updated yet (aside from this note).
 
 This is the Perl5 'SNMP' extension module. The SNMP module provides a
 full featured, tri-lingual SNMP (SNMPv3, SNMPv2c, SNMPv1) API. The
@@ -95,8 +102,12 @@ installation's library or headers are not used by mistake, use the
 net-snmp-config command that knows about the net-snmp installation you
 want to use.)
 
+NOTE: build all the perl modules at once using the Makefile.PL in the
+net-snmp/perl directory rather than the one in this directory.
+
 Unix:
 
+cd net-snmp/perl
 perl Makefile.PL [-NET-SNMP-CONFIG="sh ../../net-snmp-config"] [-NET-SNMP-IN-SOURCE=true]
 make
 make test
@@ -109,9 +120,9 @@ fo VC++ 5.0-6.0 (I will be interested to hear of success with cygwin).
 
 First  run vcvars32.bat
 
-for ActiveState Perl  (tested with AS Perl5.005_03 (515))
+for ActiveState Perl  (not tested with the latest net-snmp 5.0 code)
 
-perl Makefile.PL CAPI=TRUE [-NET-SNMP-PATH=/usr]
+perl net-snmp/Makefile.PL CAPI=TRUE [-NET-SNMP-PATH=/usr]
 nmake
 nmake test
 nmake install
