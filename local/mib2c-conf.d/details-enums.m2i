@@ -51,6 +51,8 @@ $m2c_const_dcl $m2c_ename $m2c_const_del $v $m2c_const_sfx
 @         end@
 @      end@ # for each
 
+#endif /* ${m2c_de_pfx}_ENUMS */
+
 @      if "$node.perltype" eq "BITS"@
 $m2c_const_dcl $m2c_enum_mask $m2c_const_del ($m2c_mask)
     
@@ -63,14 +65,13 @@ $m2c_const_dcl $m2c_enum_mask $m2c_const_del ($m2c_mask)
 @         foreach $e $v enum@
 @            include m2c_setup_enum.m2i@
 @            if ("$node.perltype" ne "BITS")@
-$m2c_const_dcl INTERNAL_$m2c_iname $m2c_const_del $v $m2c_const_sfx
+$m2c_const_dcl INTERNAL_$context.uc_$m2c_iname $m2c_const_del $v $m2c_const_sfx
 @            else@
-$m2c_const_dcl INTERNAL_$m2c_iname $m2c_const_del (0x01 << $v) $m2c_const_sfx
+$m2c_const_dcl INTERNAL_$context.uc_$m2c_iname $m2c_const_del (0x01 << $v) $m2c_const_sfx
 @            end@
 @         end@ // foreach
 
 @     end@ // skip mapping / enums
-#endif /* ${m2c_de_pfx}_ENUMS */
 
 @end@ # ! syntax include
 ########################################################################

@@ -20,7 +20,7 @@ $example_start
 @      foreach $e $v enum@
 @          include m2c_setup_enum.m2i@
     if ($m2c_node_srh & $m2c_ename) {
-        $m2c_ctx_rh |= INTERNAL_$m2c_iname;
+        $m2c_ctx_rh |= INTERNAL_$context.uc_$m2c_iname;
     }
 @      end@ # for each
 @  elsif ("$node.perltype" eq "INTEGER")@
@@ -28,7 +28,7 @@ $example_start
 @    foreach $e $v enum@
 @        include m2c_setup_enum.m2i@
         case $m2c_ename:
-             $m2c_ctx_rh = INTERNAL_$m2c_iname;
+             $m2c_ctx_rh = INTERNAL_$context.uc_$m2c_iname;
              break;
 
 @    end@ # foreach
