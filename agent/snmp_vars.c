@@ -88,16 +88,16 @@ PERFORMANCE OF THIS SOFTWARE.
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b)) 
 #endif
 
-static int compare_tree __P((oid *, int, oid *, int));
+static int compare_tree (oid *, int, oid *, int);
 extern struct subtree subtrees_old[];
 
-static u_char *search_subtree_vars __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int *));
+static u_char *search_subtree_vars (struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int), struct packet_info *, int *);
 
-struct subtree *find_subtree_next __P((oid *, int, struct subtree *));
+struct subtree *find_subtree_next (oid *, int, struct subtree *);
 
-static u_char	*search_subtree __P((struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)), struct packet_info *, int *));
+static u_char	*search_subtree (struct subtree *, oid *, int *, u_char *, int *, u_short *, int, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int), struct packet_info *, int *);
 
-static int in_a_view __P((oid *, int *, struct packet_info *, struct variable *));
+static int in_a_view (oid *, int *, struct packet_info *, struct variable *);
 
 int subtree_size;
 int subtree_malloc_size;
@@ -161,7 +161,7 @@ u_char		return_buf[256]; /* nee 64 */
 
 
 void
-init_agent __P((void))
+init_agent (void)
 {
 #ifdef CAN_USE_NLIST
   init_kmem("/dev/kmem"); 
@@ -252,10 +252,10 @@ struct subtree subtrees_old[] = {
 };
 
 #ifdef USING_V2PARTY_VIEW_VARS_MODULE
-extern int in_view __P((oid *, int, int));
+extern int in_view (oid *, int, int);
 #endif
 
-int subtree_old_size __P((void)) {
+int subtree_old_size (void) {
   return (sizeof(subtrees_old)/ sizeof(struct subtree));
 }
 
@@ -263,13 +263,12 @@ int subtree_old_size __P((void)) {
                 int numvars, oid mibloc, int mibloclen)
  */
 void
-register_mib(moduleName, var, varsize, numvars, mibloc, mibloclen)
-  char *moduleName;
-  struct variable *var;
-  int varsize;
-  int numvars;
-  oid *mibloc;
-  int mibloclen;
+register_mib(char *moduleName,
+	     struct variable *var,
+	     int varsize,
+	     int numvars,
+	     oid *mibloc,
+	     int mibloclen)
 {
   struct subtree *subtree;
   char c_oid[MAX_NAME_LEN];
@@ -294,18 +293,16 @@ register_mib(moduleName, var, varsize, numvars, mibloc, mibloclen)
 /* unregister_mib(oid mibloc, int mibloclen)
  */
 void
-unregister_mib(name, len)
-  oid *name;
-  int len;
+unregister_mib(oid *name,
+	       int len)
 {
   unregister_mib_tree(name, len, subtrees);
 }
 
 struct subtree *
-unregister_mib_tree(name, len, subtree)
-  oid *name;
-  int len;
-  struct subtree *subtree;
+unregister_mib_tree(oid *name,
+		    int len,
+		    struct subtree *subtree)
 {
   struct subtree *myptr = NULL;
   int ret;
@@ -340,8 +337,7 @@ unregister_mib_tree(name, len, subtree)
 }
 
 struct subtree *
-free_subtree(st)
-  struct subtree *st;
+free_subtree(struct subtree *st)
 {
   struct subtree *ret = NULL;
   if (st->variables != NULL)
@@ -355,14 +351,18 @@ free_subtree(st)
 }
 
 /* in_a_view: determines if a given packet_info is allowed to see a
-   given name/namelen OID pointer */
+   given name/namelen OID pointer
+   name         IN - name of var, OUT - name matched
+   nameLen      IN -number of sub-ids in name, OUT - subid-is in matched name
+   pi           IN - relevant auth info re PDU 
+   cvp          IN - relevant auth info re mib module
+*/
 
 static int
-in_a_view(name, namelen, pi, cvp)
-  struct packet_info *pi;   /* IN - relevant auth info re PDU */
-  struct variable	*cvp; /* IN - relevant auth info re mib module */
-  oid		*name;	    /* IN - name of var, OUT - name matched */
-  int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
+in_a_view(oid *name,
+	  int *namelen,
+	  struct packet_info *pi,
+	  struct variable *cvp)
 {
   /* check for v1 and counter64s, since snmpv1 doesn't support it */
   if (pi->version == SNMP_VERSION_1 && cvp->type == ASN_COUNTER64)
@@ -404,19 +404,32 @@ in_a_view(name, namelen, pi, cvp)
  */
 static  int 		found;
 
+
+/* search_subtree_vars(...
+   arguments:
+   tp
+   name	     IN - name of var, OUT - name matched 
+   namelen   IN -number of sub-ids in name, OUT - subid-is in matched name 
+   type	     OUT - type of matched variable 
+   len	     OUT - length of matched variable 
+   acl       OUT - access control list 
+   exact     IN - TRUE if exact match wanted 
+   write_method
+   pi        IN - relevant auth info re PDU 
+   noSuchObject
+*/
+
 static u_char *
-search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
-	   noSuchObject)
-    struct subtree *tp;
-    oid		*name;	    /* IN - name of var, OUT - name matched */
-    int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
-    u_char	*type;	    /* OUT - type of matched variable */
-    int		*len;	    /* OUT - length of matched variable */
-    u_short	*acl;	    /* OUT - access control list */
-    int		exact;	    /* IN - TRUE if exact match wanted */
-    int	       (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-    struct packet_info *pi; /* IN - relevant auth info re PDU */
-    int		*noSuchObject;
+search_subtree_vars(struct subtree *tp,
+		    oid *name,
+		    int *namelen,
+		    u_char *type,
+		    int *len,
+		    u_short *acl,
+		    int exact,
+		    int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int),
+		    struct packet_info *pi,
+		    int *noSuchObject)
 {
     register struct variable *vp;
     struct variable	compat_var, *cvp = &compat_var;
@@ -501,19 +514,31 @@ search_subtree_vars(tp, name, namelen, type, len, acl, exact, write_method, pi,
 	    return NULL;
 }
 
+/* search_subtree
+   arguments:
+   sub_tp
+   name	     IN - name of var, OUT - name matched 
+   namelen   IN -number of sub-ids in name, OUT - subid-is in matched name 
+   type	     OUT - type of matched variable 
+   len	     OUT - length of matched variable 
+   acl       OUT - access control list 
+   exact     IN - TRUE if exact match wanted 
+   write_method
+   pi        IN - relevant auth info re PDU 
+   noSuchObject
+*/
+
 static u_char *
-search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
-	   noSuchObject)
-    struct subtree *sub_tp;
-    oid		*name;	    /* IN - name of var, OUT - name matched */
-    int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
-    u_char	*type;	    /* OUT - type of matched variable */
-    int		*len;	    /* OUT - length of matched variable */
-    u_short	*acl;	    /* OUT - access control list */
-    int		exact;	    /* IN - TRUE if exact match wanted */
-    int	       (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-    struct packet_info *pi; /* IN - relevant auth info re PDU */
-    int		*noSuchObject;
+search_subtree(struct subtree *sub_tp,
+	       oid *name,
+	       int *namelen,
+	       u_char *type,
+	       int *len,
+	       u_short *acl,
+	       int exact,
+	       int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int),
+	       struct packet_info *pi,
+	       int *noSuchObject)
 {
     struct subtree *tp;
 
@@ -525,8 +550,8 @@ search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
     int     this_len,     child_len,    compare_len;
     u_short this_acl,     child_acl;
     int     this_NoObj,   child_NoObj;
-    int     **this_write __P((int, u_char *, u_char, int, u_char *, oid *, int));
-    int     **child_write __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     **this_write (int, u_char *, u_char, int, u_char *, oid *, int);
+    int     **child_write (int, u_char *, u_char, int, u_char *, oid *, int);
  
 
     if ( sub_tp == NULL )
@@ -668,18 +693,29 @@ search_subtree(sub_tp, name, namelen, type, len, acl, exact, write_method, pi,
 	}
 }
 
+/* getStatPtr(...
+   arguments:
+   name	     IN - name of var, OUT - name matched 
+   namelen   IN -number of sub-ids in name, OUT - subid-is in matched name 
+   type	     OUT - type of matched variable 
+   len	     OUT - length of matched variable 
+   acl       OUT - access control list 
+   exact     IN - TRUE if exact match wanted 
+   write_method
+   pi        IN - relevant auth info re PDU 
+   noSuchObject
+*/
+
 u_char	*
-getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
-	   noSuchObject)
-    oid		*name;	    /* IN - name of var, OUT - name matched */
-    int		*namelen;   /* IN -number of sub-ids in name, OUT - subid-is in matched name */
-    u_char	*type;	    /* OUT - type of matched variable */
-    int		*len;	    /* OUT - length of matched variable */
-    u_short	*acl;	    /* OUT - access control list */
-    int		exact;	    /* IN - TRUE if exact match wanted */
-    int	       (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-    struct packet_info *pi; /* IN - relevant auth info re PDU */
-    int		*noSuchObject;
+getStatPtr(oid *name,
+	   int *namelen,
+	   u_char *type,
+	   int *len,
+	   u_short *acl,
+	   int exact,
+	   int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int),
+	   struct packet_info *pi,
+	   int *noSuchObject)
 {
     register struct subtree	*tp;
     oid			save[MAX_NAME_LEN];
@@ -739,9 +775,10 @@ getStatPtr(name, namelen, type, len, acl, exact, write_method, pi,
 */
 
 static int
-compare_tree(name1, len1, name2, len2)
-    register oid	    *name1, *name2;
-    register int	    len1, len2;
+compare_tree(oid *name1,
+	     int len1, 
+	     oid *name2, 
+	     int len2)
 {
     register int    len;
 
@@ -764,10 +801,9 @@ compare_tree(name1, len1, name2, len2)
     return 0;
 }
 
-struct subtree *find_subtree_next(name, len, subtree)
-  oid *name;
-  int len;
-  struct subtree *subtree;
+struct subtree *find_subtree_next(oid *name, 
+				  int len,
+				  struct subtree *subtree)
 {
   struct subtree *myptr = NULL;
   int ret;
@@ -795,10 +831,9 @@ struct subtree *find_subtree_next(name, len, subtree)
   return NULL;
 }
 
-struct subtree *find_subtree(name, len, subtree)
-  oid *name;
-  int len;
-  struct subtree *subtree;
+struct subtree *find_subtree(oid *name,
+			     int len,
+			     struct subtree *subtree)
 {
   struct subtree *myptr;
 

@@ -17,7 +17,8 @@
 #endif
 
 void
-init_v2party __P((void)) {
+init_v2party (void) 
+{
 #ifdef USING_MIBII_SYSORTABLE_MODULE
   static oid reg[] = {1,3,6,1,6,3,2};
   register_sysORTable(reg,7,"The Manager-to-Manager MIB module.");

@@ -7,7 +7,10 @@
 
 config_require(smux/smux)
 
-u_char  *var_bgp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+    u_char  *var_bgp (struct variable *, oid *, int *, int, int *, int
+		      (**write) (int, u_char *, u_char, int, u_char *, oid *,
+				 int));
+
 
 #define BGPVERSION			0
 #define BGPLOCALAS			1

@@ -77,11 +77,11 @@ SOFTWARE.
 #include "system.h"
 #include "snmp_parse_args.h"
 
-int main __P((int, char **));
+
 int failures;
 
 void
-usage __P((void))
+usage (void)
 {
   fprintf(stderr,"Usage:\n  snmpget ");
   snmp_parse_args_usage(stderr);
@@ -89,10 +89,7 @@ usage __P((void))
   snmp_parse_args_descriptions(stderr);
 }
 
-int
-main (argc, argv)
-    int  argc;
-    char *argv[];
+int main(int argc, char *argv[])
 {
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu;

@@ -54,13 +54,11 @@ int snmp_outtraps = 0;
 
 extern int snmp_enableauthentraps;
 
-static int header_snmp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-
-	/*********************
-	 *
-	 *  Initialisation & common implementation functions
-	 *
-	 *********************/
+/*********************
+ *
+ *  Initialisation & common implementation functions
+ *
+ *********************/
 
 /* define the structure we're going to ask the agent to register our
    information at */
@@ -100,7 +98,7 @@ struct variable2 snmp_variables[] = {
 oid snmp_variables_oid[] = { 1,3,6,1,2,1,11 };
 
 void
-init_snmp_mib() {
+init_snmp_mib(void) {
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("mibII/snmp", snmp_variables, variable2, snmp_variables_oid);
 }
@@ -108,14 +106,25 @@ init_snmp_mib() {
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_snmp(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 static int
-header_snmp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_snmp(struct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len,
+	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define SNMP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -150,13 +159,12 @@ header_snmp(vp, name, length, exact, var_len, write_method)
 
 
 u_char *
-var_snmp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_snmp(struct variable *vp,
+	 oid *name,
+	 int *length,
+	 int exact,
+	 int *var_len,
+	 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     if (header_snmp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
@@ -264,14 +272,13 @@ var_snmp(vp, name, length, exact, var_len, write_method)
  */
 
 int
-write_snmp (action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+write_snmp (int action,
+	    u_char *var_val,
+	    u_char var_val_type,
+	    int var_val_len,
+	    u_char *statP,
+	    oid *name,
+	    int name_len)
 {
     int bigsize = 4;
     long intval;
@@ -294,8 +301,8 @@ write_snmp (action, var_val, var_val_type, var_val_len, statP, name, name_len)
     return SNMP_ERR_NOERROR;
 }
 
-	/*********************
-	 *
-	 *  Internal implementation functions
-	 *
-	 *********************/
+/*********************
+ *
+ *  Internal implementation functions
+ *
+ *********************/

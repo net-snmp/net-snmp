@@ -104,7 +104,6 @@ typedef long	fd_mask;
 #define FD_ZERO(p)      memset((p), 0, sizeof(*(p)))
 #endif
 
-int main __P((int, char **));
 int Print = 0;
 int Syslog = 0;
 int Event = 0;
@@ -152,17 +151,10 @@ int Facility = LOG_LOCAL0;
 
 struct timeval Now;
 
-void init_syslog __P((void));
-char *trap_description __P((int));
-char *uptime_string __P((u_long, char *));
-struct snmp_pdu *snmp_clone_pdu2 __P((struct snmp_pdu *, int));
-void event_input __P((struct variable_list *));
-int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
-void usage __P((void));
+void init_syslog(void);
 
 char *
-trap_description(trap)
-    int trap;
+trap_description(int trap)
 {
     switch(trap){
 	case SNMP_TRAP_COLDSTART:
@@ -185,9 +177,7 @@ trap_description(trap)
 }
 
 char *
-uptime_string(timeticks, buf)
-    register u_long timeticks;
-    char *buf;
+uptime_string(u_long timeticks, char *buf)
 {
     int	seconds, minutes, hours, days;
 
@@ -212,9 +202,8 @@ uptime_string(timeticks, buf)
 }
 
 struct snmp_pdu *
-snmp_clone_pdu2(pdu, command)
-    struct snmp_pdu *pdu;
-    int command;
+snmp_clone_pdu2(struct snmp_pdu *pdu,
+		int command)
 {
     struct variable_list *var, *newvar;
     struct snmp_pdu *newpdu;
@@ -265,8 +254,7 @@ static oid fallingAlarm[] = {1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 2};
 static oid unavailableAlarm[] = {1, 3, 6, 1, 6, 3, 2, 1, 1, 3, 3};
 
 void
-event_input(vp)	
-    struct variable_list *vp;
+event_input(struct variable_list *vp)
 {
     int eventid;
     oid variable[MAX_NAME_LEN];
@@ -316,10 +304,9 @@ event_input(vp)
     
 }
 
-void do_external(cmd, host, pdu)
-  char *cmd;
-  struct hostent *host;
-  struct snmp_pdu *pdu;
+void do_external(char *cmd,
+		 struct hostent *host,
+		 struct snmp_pdu *pdu)
 {
   struct variable_list tmpvar, *vars;
   static oid trapoids[10] = {1,3,6,1,6,3,1,1,5};
@@ -395,12 +382,11 @@ void do_external(cmd, host, pdu)
   snmp_set_quick_print(oldquick);
 }
 
-int snmp_input(op, session, reqid, pdu, magic)
-    int op;
-    struct snmp_session *session;
-    int reqid;
-    struct snmp_pdu *pdu;
-    void *magic;
+int snmp_input(int op,
+	       struct snmp_session *session,
+	       int reqid,
+	       struct snmp_pdu *pdu,
+	       void *magic)
 {
     struct variable_list *vars;
     char buf[64], oid_buf [512];
@@ -545,16 +531,13 @@ int snmp_input(op, session, reqid, pdu, magic)
 }
 
 
-void usage __P((void))
+void usage(void)
 {
     fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d]\n");
 }
 
 
-int
-main(argc, argv)
-    int	    argc;
-    char    *argv[];
+int main(int argc, char *argv[])
 {
     struct snmp_session session, *ss;
     int	arg;
@@ -794,7 +777,7 @@ main(argc, argv)
 }
 
 void
-init_syslog __P((void))
+init_syslog(void)
 {
     /*
      * All messages will be logged to the local0 facility and will be sent to
@@ -806,7 +789,7 @@ init_syslog __P((void))
 
 #ifndef HAVE_GETDTABLESIZE
 #include <sys/resource.h>
-int getdtablesize()
+int getdtablesize(void)
 {
   struct rlimit rl;
   getrlimit(RLIMIT_NOFILE, &rl);

@@ -63,11 +63,11 @@
 	 *  Initialisation & common implementation functions
 	 *
 	 *********************/
-       void  Init_HR_SWRun __P((void));
-       int   Get_Next_HR_SWRun __P((void));
-       void  End_HR_SWRun __P((void));
-       int header_hrswrun __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
-       int header_hrswrunEntry __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+void  Init_HR_SWRun (void);
+int   Get_Next_HR_SWRun (void);
+void  End_HR_SWRun (void);
+int header_hrswrun (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
+int header_hrswrunEntry (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
 
 #ifndef linux
 static int LowProcIndex;
@@ -86,7 +86,7 @@ struct proc *proc_table;
 #endif
 int current_proc_entry;
 
-void	init_hr_swrun( )
+void init_hr_swrun(void)
 {
 #ifdef PROC_SYMBOL
   auto_nlist( PROC_SYMBOL,0,0 );
@@ -99,14 +99,25 @@ void	init_hr_swrun( )
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_hrswrun(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 int
-header_hrswrun(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+header_hrswrun(struct variable *vp,
+	       oid *name,
+	       int *length,
+	       int exact,
+	       int *var_len,
+	       int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
 #define HRSWRUN_NAME_LENGTH	9
     oid newname[MAX_NAME_LEN];
@@ -132,13 +143,12 @@ header_hrswrun(vp, name, length, exact, var_len, write_method)
 }
 
 int
-header_hrswrunEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+header_hrswrunEntry(struct variable *vp,
+		    oid *name,
+		    int *length,
+		    int exact,
+		    int *var_len,
+		    int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
 #define HRSWRUN_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -216,13 +226,12 @@ DEBUGMSG(("host/hr_swrun", "\n"));
 
 
 u_char	*
-var_hrswrun(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+var_hrswrun(struct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len,
+	    int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
     int pid=0;
     static char string[100];
@@ -556,7 +565,7 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
 static int nproc;
 
 void
-Init_HR_SWRun __P((void))
+Init_HR_SWRun (void)
 {
     int bytes;
     static time_t iwhen = 0;
@@ -626,7 +635,7 @@ Init_HR_SWRun __P((void))
 }
 
 int
-Get_Next_HR_SWRun __P((void))
+Get_Next_HR_SWRun (void)
 {
     while ( current_proc_entry < nproc ) {
 #ifdef hpux10
@@ -649,7 +658,7 @@ Get_Next_HR_SWRun __P((void))
 }
 
 void
-End_HR_SWRun __P((void))
+End_HR_SWRun (void)
 {
     current_proc_entry = nproc+1;
 }
@@ -660,7 +669,7 @@ DIR *procdir = NULL;
 struct dirent *procentry_p;
 
 void
-Init_HR_SWRun __P((void))
+Init_HR_SWRun (void)
 {
     if ( procdir != NULL )
         closedir( procdir );
@@ -668,7 +677,7 @@ Init_HR_SWRun __P((void))
 }
 
 int
-Get_Next_HR_SWRun __P((void))
+Get_Next_HR_SWRun (void)
 {
    int pid;
    procentry_p = readdir( procdir );
@@ -683,7 +692,7 @@ Get_Next_HR_SWRun __P((void))
 }
 
 void
-End_HR_SWRun __P((void))
+End_HR_SWRun (void)
 {
    if (procdir) closedir( procdir );
    procdir = NULL;
@@ -691,7 +700,7 @@ End_HR_SWRun __P((void))
 
 #endif
 
-int count_processes  __P((void))
+int count_processes (void)
 {
 #ifndef linux
     int i;

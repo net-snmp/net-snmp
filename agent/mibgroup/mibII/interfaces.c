@@ -138,10 +138,7 @@
 #include "../util_funcs.h"
 #include "auto_nlist.h"
 
-static int Interface_Scan_Get_Count __P((void));
-
-static int header_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
-static int header_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
+static int Interface_Scan_Get_Count (void);
 
 struct variable4 interfaces_variables[] = {
     {IFNUMBER, ASN_INTEGER, RONLY, var_interfaces, 1, {1}},
@@ -195,14 +192,25 @@ static size_t if_list_size = 0;
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_ifEntry(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 static int
-header_ifEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_ifEntry(struct variable *vp,
+	       oid *name,
+	       int *length,
+	       int exact,
+	       int *var_len,
+	       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define IFENTRY_NAME_LENGTH	10
     oid newname[MAX_NAME_LEN];
@@ -241,14 +249,26 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
     return interface;
 };
 
+
+/*
+  header_interfaces(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 static int
-header_interfaces(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_interfaces(struct variable *vp,
+		  oid *name,
+		  int *length,
+		  int exact,
+		  int *var_len,
+		  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define INTERFACES_NAME_LENGTH	8
   oid newname[MAX_NAME_LEN];
@@ -274,13 +294,12 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
 };
 
 u_char *
-var_interfaces(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int	   (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_interfaces(struct variable *vp,
+	       oid *name,
+	       int *length,
+	       int exact,
+	       int *var_len,
+	       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
   if (header_interfaces(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
     return NULL;
@@ -305,15 +324,14 @@ struct small_ifaddr
 
 extern const struct sockaddr * get_address (const void *, int, int);
 extern const struct in_addr * get_in_address (const void *, int, int);
-static int Interface_Scan_By_Index __P((int, struct if_msghdr *, char *, struct small_ifaddr *));
-static int Interface_Get_Ether_By_Index __P((int, u_char *));
+static int Interface_Scan_By_Index (int, struct if_msghdr *, char *, struct small_ifaddr *);
+static int Interface_Get_Ether_By_Index (int, u_char *);
 
 static int
-Interface_Scan_By_Index (index, if_msg, if_name, sifa)
-     int index;
-     struct if_msghdr *if_msg;
-     char *if_name;
-     struct small_ifaddr *sifa;
+Interface_Scan_By_Index (int index,
+			 struct if_msghdr *if_msg,
+			 char *if_name,
+			 struct small_ifaddr *sifa)
 {
   u_char *cp;
   struct if_msghdr *ifp;
@@ -390,7 +408,7 @@ Interface_Scan_By_Index (index, if_msg, if_name, sifa)
 }
 
 static int
-Interface_Scan_Get_Count __P((void))
+Interface_Scan_Get_Count (void)
 {
   u_char *cp;
   struct if_msghdr *ifp;
@@ -413,7 +431,7 @@ Interface_Scan_Get_Count __P((void))
 }
 
 void
-Interface_Scan_Init __P((void))
+Interface_Scan_Init (void)
 {
   int name[] = {CTL_NET,PF_ROUTE,0,0,NET_RT_IFLIST,0};
   size_t size;
@@ -452,13 +470,12 @@ Interface_Scan_Init __P((void))
 }
 
 u_char *
-var_ifEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    register oid	*name;
-    register int	*length;
-    int			exact;
-    int			*var_len;
-    int                 (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_ifEntry(struct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len,
+	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
   int interface;
   struct if_msghdr if_msg;
@@ -543,11 +560,10 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
   }
 }
 
-int Interface_Scan_Next(Index, Name, Retifnet, Retin_ifaddr)
-short *Index;
-char *Name;
-struct ifnet *Retifnet;
-struct in_ifaddr *Retin_ifaddr;
+int Interface_Scan_Next(short *Index,
+			char *Name,
+			struct ifnet *Retifnet,
+			struct in_ifaddr *Retin_ifaddr)
 {
   return 0;
 }
@@ -563,13 +579,9 @@ struct in_ifaddr *Retin_ifaddr;
 
 #ifndef HAVE_NET_IF_MIB_H
 
-static int header_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
-static int header_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
-extern u_char	*var_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
-
 #ifndef solaris2
-static int Interface_Scan_By_Index __P((int, char *, struct ifnet *, struct in_ifaddr *));
-static int Interface_Get_Ether_By_Index __P((int, u_char *));
+static int Interface_Scan_By_Index (int, char *, struct ifnet *, struct in_ifaddr *);
+static int Interface_Get_Ether_By_Index (int, u_char *);
 #endif
 
 	/*********************
@@ -595,13 +607,12 @@ struct ifnet *ifnetaddr_list;
 #endif /* linux */
 
 static int
-header_interfaces(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_interfaces(struct variable *vp,
+		  oid *name,
+		  int *length,
+		  int exact,
+		  int *var_len,
+		  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define INTERFACES_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -629,13 +640,12 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
 
 
 static int
-header_ifEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_ifEntry(struct variable *vp,
+	       oid *name,
+	       int *length,
+	       int exact,
+	       int *var_len,
+	       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define IFENTRY_NAME_LENGTH	10
     oid newname[MAX_NAME_LEN];
@@ -685,13 +695,12 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
 	 *********************/
 
 u_char	*
-var_interfaces(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_interfaces(struct variable *vp,
+	       oid *name,
+	       int *length,
+	       int exact,
+	       int *var_len,
+	       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     if (header_interfaces(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
@@ -711,13 +720,12 @@ var_interfaces(vp, name, length, exact, var_len, write_method)
 #ifndef hpux
 
 u_char *
-var_ifEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    register oid	*name;
-    register int	*length;
-    int			exact;
-    int			*var_len;
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_ifEntry(vstruct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len,
+	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     static struct ifnet ifnet;
     register int interface;
@@ -889,13 +897,12 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #else /* hpux */
 
 u_char *
-var_ifEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    register oid	*name;
-    register int	*length;
-    int			exact;
-    int			*var_len;
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_ifEntry(struct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len,
+	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     static struct ifnet ifnet;
     register int interface;
@@ -1062,13 +1069,12 @@ IF_cmp(void *addr, void *ep)
 }
 
 u_char *
-var_ifEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    register oid        *name;
-    register int        *length;
-    int                 exact;
-    int                 *var_len;
-    int                 (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_ifEntry(struct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len,
+	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     int        interface;
     mib2_ifEntry_t      ifstat;
@@ -1176,7 +1182,7 @@ static int saveIndex=0;
 static char saveName[16];
 
 void
-Interface_Scan_Init __P((void))
+Interface_Scan_Init (void)
 {
 #ifdef linux
     char line [128], fullname [20], ifname_buf [20], *ifname, *ptr;
@@ -1339,11 +1345,10 @@ Interface_Scan_Init __P((void))
 **  4.2 BSD doesn't have ifaddr
 **  
 */
-int Interface_Scan_Next(Index, Name, Retifnet, dummy)
-short *Index;
-char *Name;
-struct ifnet *Retifnet;
-struct in_ifaddr *dummy;
+int Interface_Scan_Next(short *Index
+			char *Name,
+			struct ifnet *Retifnet,
+			struct in_ifaddr *dummy)
 {
 	struct ifnet ifnet;
 	register char *cp;
@@ -1396,11 +1401,10 @@ struct in_ifaddr *dummy;
 #define if_next if_list.tqe_next
 #endif
 
-int Interface_Scan_Next(Index, Name, Retifnet, Retin_ifaddr)
-short *Index;
-char *Name;
-struct ifnet *Retifnet;
-struct in_ifaddr *Retin_ifaddr;
+int Interface_Scan_Next(short *Index,
+			char *Name,
+			struct ifnet *Retifnet,
+			struct in_ifaddr *Retin_ifaddr)
 {
 	struct ifnet ifnet;
 	struct in_ifaddr *ia, in_ifaddr;
@@ -1467,11 +1471,10 @@ struct in_ifaddr *Retin_ifaddr;
 
 #endif sunV3
 
-static int Interface_Scan_By_Index(Index, Name, Retifnet, Retin_ifaddr)
-int Index;
-char *Name;
-struct ifnet *Retifnet;
-struct in_ifaddr *Retin_ifaddr;
+static int Interface_Scan_By_Index(int Index,
+				   char *Name,
+				   struct ifnet *Retifnet,
+				   struct in_ifaddr *Retin_ifaddr)
 {
 	short i;
 
@@ -1486,7 +1489,7 @@ struct in_ifaddr *Retin_ifaddr;
 
 static int Interface_Count=0;
 
-static int Interface_Scan_Get_Count __P((void))
+static int Interface_Scan_Get_Count (void)
 {
 
 	if (!Interface_Count) {
@@ -1499,9 +1502,8 @@ static int Interface_Scan_Get_Count __P((void))
 }
 
 
-static int Interface_Get_Ether_By_Index(Index, EtherAddr)
-int Index;
-u_char *EtherAddr;
+static int Interface_Get_Ether_By_Index(int Index,
+					u_char *EtherAddr)
 {
 	short i;
 #if !(defined(linux) || defined(netbsd1) || defined(bsdi2) || defined(openbsd2))
@@ -1594,7 +1596,7 @@ u_char *EtherAddr;
 
 #else /* solaris2 */
 
-static int Interface_Scan_Get_Count __P((void))
+static int Interface_Scan_Get_Count (void)
 {
 	int i, sd;
 
@@ -1610,9 +1612,8 @@ static int Interface_Scan_Get_Count __P((void))
 }
 
 int
-Interface_Index_By_Name(Name, Len)
-char *Name;
-int Len;
+Interface_Index_By_Name(char *Name, 
+			int Len)
 {
 	int i, sd, ret;
 	char buf[1024];
@@ -1660,17 +1661,6 @@ int Len;
 #include <net/if_mib.h>
 #include <net/route.h>
 
-static int header_interfaces __P((struct variable *, oid *, int *, int, int *,
-			   int (**write) __P((int, u_char *, u_char, int,
-					      u_char *, oid *, int)) ));
-static int header_ifEntry __P((struct variable *, oid *, int *, int, int *,
-			int (**write) __P((int, u_char *, u_char, int, 
-					   u_char *, oid *, int)) ));
-u_char	*var_ifEntry __P((struct variable *, oid *, int *, int, 
-			  int *, 
-			  int (**write) __P((int, u_char *, u_char, int, 
-					     u_char *, oid *, int)) ));
-
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
 
@@ -1678,7 +1668,7 @@ static	char *physaddrbuf;
 static	int nphysaddrs;
 struct	sockaddr_dl **physaddrs;
 
-void	init_interfaces_setup()
+void init_interfaces_setup(void)
 {
 	int naddrs, ilen, bit;
 	static int mib[6] 
@@ -1790,13 +1780,12 @@ get_phys_address(int index, char **ap, int *len)
 }
 
 static int
-header_interfaces(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_interfaces(struct variable *vp,
+		  oid *name,
+		  int *length,
+		  int exact,
+		  int *var_len,
+		  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define INTERFACES_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -1823,13 +1812,12 @@ static int count_oid[5] = { CTL_NET, PF_LINK, NETLINK_GENERIC,
 			    IFMIB_SYSTEM, IFMIB_IFCOUNT };
 
 static int
-header_ifEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_ifEntry(struct variable *vp,
+	       oid *name,
+	       int *length,
+	       int exact,
+	       int *var_len,
+		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define IFENTRY_NAME_LENGTH	10
     oid newname[MAX_NAME_LEN];
@@ -1879,14 +1867,12 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
 }
 
 u_char	*
-var_interfaces(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *,
-				  oid *, int));
+var_interfaces(struct variable *vp,
+		oid *name,
+		int *length,
+		int exact,
+		int *var_len,
+		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     size_t len;
     int count;
@@ -1909,14 +1895,12 @@ var_interfaces(vp, name, length, exact, var_len, write_method)
 }
 
 u_char *
-var_ifEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    register oid	*name;
-    register int	*length;
-    int			exact;
-    int			*var_len;
-    int			(**write_method) __P((int, u_char *, u_char, int,
-					      u_char *, oid *, int));
+var_ifEntry(struct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len,
+	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 	int interface;
 	static int sname[6] = { CTL_NET, PF_LINK, NETLINK_GENERIC,

@@ -88,10 +88,10 @@
 
 #ifdef linux
 static void
-linux_read_icmp_stat __P((struct icmp_mib *));
+linux_read_icmp_stat (struct icmp_mib *);
 #endif
 
-extern int header_icmp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char*, oid *, int)) ));
+
 
 	/*********************
 	 *
@@ -149,14 +149,24 @@ void	init_icmp( )
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_icmp(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
 int
-header_icmp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_icmp(struct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len,
+	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define ICMP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -192,13 +202,12 @@ header_icmp(vp, name, length, exact, var_len, write_method)
 #ifdef HAVE_SYS_TCPIPSTATS_H
 
 u_char *
-var_icmp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_icmp(struct variable *vp,
+	 oid *name,
+	 int *length,
+	 int exact,
+	 int *var_len,
+	 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     register int i;
     static struct icmpstat icmpstat;
@@ -309,13 +318,12 @@ var_icmp(vp, name, length, exact, var_len, write_method)
 #else /* not HAVE_SYS_TCPIPSTATS_H */
 
 u_char *
-var_icmp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_icmp(struct variable *vp,
+	 oid *name,
+	 int *length,
+	 int exact,
+	 int *var_len,
+	 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     register int i;
     static struct icmpstat icmpstat;
@@ -436,13 +444,12 @@ var_icmp(vp, name, length, exact, var_len, write_method)
 #else /* linux */
 
 u_char *
-var_icmp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_icmp(struct variable *vp,
+	 oid *name,
+	 int *length,
+	 int exact,
+	 int *var_len,
+	 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     static struct icmp_mib icmpstat;
 
@@ -490,13 +497,12 @@ var_icmp(vp, name, length, exact, var_len, write_method)
 #else /* solaris2 */
 
 u_char *
-var_icmp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_icmp(struct variable *vp,
+	 oid *name,
+	 int *length,
+	 int exact,
+	 int *var_len,
+		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     mib2_icmp_t icmpstat;
 
@@ -611,8 +617,7 @@ var_icmp(vp, name, length, exact, var_len, write_method)
  */
 
 static void
-linux_read_icmp_stat (icmpstat)
-struct icmp_mib *icmpstat;
+linux_read_icmp_stat (struct icmp_mib *icmpstat)
 {
   FILE *in = fopen ("/proc/net/snmp", "r");
   char line [1024];

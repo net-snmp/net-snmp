@@ -25,7 +25,8 @@
 
 #include "version.h"
 
-void init_versioninfo(void) {
+void init_versioninfo(void) 
+{
 
 /* define the structure we're going to ask the agent to register our
    information at */
@@ -53,19 +54,12 @@ void init_versioninfo(void) {
 }
 
 
-unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid	*name;
-/* IN/OUT - input name requested, output name found */
-    register int	*length;
-/* IN/OUT - length of input and output oid's */
-    int			exact;
-/* IN - TRUE if an exact match was requested. */
-    int			*var_len;
-/* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *,u_char, int, u_char *, oid *, int));
-/* OUT - pointer to function to set variable, otherwise 0 */
+unsigned char *var_extensible_version(struct variable *vp,
+				      oid *name,
+				      int *length,
+				      int exact,
+				      int *var_len,
+				      int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 
   static long long_ret;
@@ -137,14 +131,13 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
 }
 
 int
-update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+update_hook(int action,
+	    u_char *var_val,
+	    u_char var_val_type,
+	    int var_val_len,
+	    u_char *statP,
+	    oid *name,
+	    int name_len)
 {
   long tmp=0;
   int tmplen=1000;
@@ -161,14 +154,13 @@ update_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 }
 
 int
-debugging_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+debugging_hook(int action,
+	       u_char *var_val,
+	       u_char var_val_type,
+	       int var_val_len,
+	       u_char *statP,
+	       oid *name,
+	       int name_len)
 {
   long tmp=0;
   int tmplen=1000;

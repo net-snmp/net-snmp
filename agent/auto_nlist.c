@@ -21,12 +21,14 @@
 #include "kernel.h"
 #include "../snmplib/system.h"
 
+#include "../snmplib/asn1.h"
+#include "../snmplib/snmp_api.h"
+
 struct autonlist *nlists = 0;
-static void init_nlist __P((struct nlist *));
+static void init_nlist (struct nlist *);
 
 long
-auto_nlist_value(string)
-  char *string;
+auto_nlist_value(char *string)
 {
   struct autonlist **ptr, *it=0;
   int cmp;
@@ -74,10 +76,9 @@ auto_nlist_value(string)
 }
 
 int
-auto_nlist(string, var, size)
-  char *string;
-  char *var;
-  int size;
+auto_nlist(char *string,
+	   char *var,
+	   int size)
 {
   long result;
   int ret;
@@ -97,8 +98,8 @@ auto_nlist(string, var, size)
 }
  
 static void
-init_nlist(nl)
-  struct nlist nl[];
+init_nlist(struct nlist nl[])
+ 
 {
 #ifdef CAN_USE_NLIST
   int ret;
@@ -136,12 +137,12 @@ init_nlist(nl)
 #endif
 }
 
-int KNLookup(nl, nl_which, buf, s)
-    struct nlist nl[];
-    int nl_which;
-    char *buf;
-    int s;
-{   struct nlist *nlp = &nl[nl_which];
+int KNLookup(struct nlist nl[],
+	     int nl_which,
+	     char *buf,
+	     int s)
+{ 
+    struct nlist *nlp = &nl[nl_which];
 
     if (nlp->n_value == 0) {
         fprintf (stderr, "Accessing non-nlisted variable: %s\n", nlp->n_name);
@@ -156,9 +157,8 @@ int KNLookup(nl, nl_which, buf, s)
 
 #ifdef TESTING
 void
-auto_nlist_print_tree(indent, ptr)
-  int indent;
-  struct autonlist *ptr;
+auto_nlist_print_tree(int indent,
+		      struct autonlist *ptr)
 {
   char buf[1024];
   if (indent == -2) {

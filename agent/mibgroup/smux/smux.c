@@ -74,7 +74,7 @@ u_char smux_type;
 
 extern int sdlist[];
 extern int sdlen;
-extern int (*sd_handlers[])__P((int));
+extern int (*sd_handlers[])(int);
 
 static int smux_mibs[SMUXMIBS];
 static int nfds;
@@ -96,20 +96,20 @@ static u_char debug_can[] = {
 };
 
 
-u_char *smux_snmp_process __P((int, oid *, int *, int *));
-int init_smux __P((void));
+u_char *smux_snmp_process (int, oid *, int *, int *);
+int init_smux (void);
 
-static u_char *smux_open_process __P((u_char *, int *));
-static u_char *smux_rreq_process __P((int, u_char *, int *));
-static u_char *smux_sout_process __P((u_char *, int *));
-static u_char *smux_close_process __P((int, u_char *, int *));
-static u_char *smux_parse __P((u_char *, oid *, int *, int *));
-static u_char *smux_parse_var __P((u_char *, int *, oid *, int *, int *));
-static int smux_build __P((u_char, u_long, oid *, int *, u_char *, int *));
-static void print_fdbits __P((fd_set *));
+static u_char *smux_open_process (u_char *, int *);
+static u_char *smux_rreq_process (int, u_char *, int *);
+static u_char *smux_sout_process (u_char *, int *);
+static u_char *smux_close_process (int, u_char *, int *);
+static u_char *smux_parse (u_char *, oid *, int *, int *);
+static u_char *smux_parse_var (u_char *, int *, oid *, int *, int *);
+static int smux_build (u_char, u_long, oid *, int *, u_char *, int *);
+static void print_fdbits (fd_set *);
 
 int 
-init_smux __P((void))
+init_smux (void)
 {
 	struct sockaddr_in lo_socket;
 	int one = 1;
@@ -176,8 +176,7 @@ init_smux __P((void))
 
 
 void
-smux_accept(sd)
-int sd;
+smux_accept(int sd)
 {
 	int fd;
 	struct sockaddr_in in_socket;
@@ -232,8 +231,7 @@ int sd;
 
 
 int
-smux_process(fd)
-	int fd;
+smux_process(int fd)
 {
 	int len, length;
 	u_char data[SMUXMAXPKTSIZE], *ptr;
@@ -292,9 +290,7 @@ smux_process(fd)
  * descriptor.
  */
 static u_char *
-smux_open_process(ptr, len)
-	u_char *ptr;
-	int *len;
+smux_open_process(u_char *ptr, int *len)
 {
 	u_char type;
 	u_long version;
@@ -353,10 +349,9 @@ smux_open_process(ptr, len)
  * Need to catch signal when snmpd goes down and send close pdu to gated 
  */
 static u_char *
-smux_close_process(fd, ptr, len)
-	int fd;
-	u_char *ptr;
-	int *len;
+smux_close_process(int fd,
+		   u_char *ptr,
+		   int *len)
 {
 	long down = 0;
 	int length = *len;
@@ -377,10 +372,9 @@ smux_close_process(fd, ptr, len)
 }
 
 static u_char *
-smux_rreq_process(sd, ptr, len)
-	int sd;
-	u_char *ptr;
-	int *len;
+smux_rreq_process(int sd,
+		  u_char *ptr,
+		  int *len)
 {
 	u_long priority;
 	u_long operation;
@@ -416,9 +410,8 @@ smux_rreq_process(sd, ptr, len)
 }
 
 static u_char *
-smux_sout_process(ptr, len)
-	u_char *ptr;
-	int *len;
+smux_sout_process(u_char *ptr,
+		  int *len)
 {
         DEBUGMSGTL(("smux/smux", "[smux_sout_process] will be implemented later\n"));
 	return NULL;
@@ -426,11 +419,10 @@ smux_sout_process(ptr, len)
 
 
 u_char *
-smux_snmp_process(exact, objid, len, return_len)
-	int exact;
-	oid *objid;
-	int *len;
-	int *return_len;
+smux_snmp_process(int exact,
+		  oid *objid,
+		  int *len,
+		  int *return_len)
 {
 	u_char  packet[SMUXMAXPKTSIZE]; 
 	u_char  result[SMUXMAXPKTSIZE];
@@ -502,11 +494,10 @@ smux_snmp_process(exact, objid, len, return_len)
 
 /* XXX need to do sanity checking */
 static u_char *
-smux_parse(rsp, objid, oidlen, return_len)
-	u_char *rsp;
-	oid *objid;
-	int *oidlen;
-	int *return_len;
+smux_parse(u_char *rsp,
+	   oid *objid,
+	   int *oidlen,
+	   int *return_len)
 {
 	int length = SMUXMAXPKTSIZE; 
 	u_char *ptr = rsp;
@@ -543,12 +534,11 @@ smux_parse(rsp, objid, oidlen, return_len)
 
 
 static u_char *
-smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
-	u_char *varbind;
-	int *varbindlength;
-	oid *objid;
-	int *oidlen;
-	int *varlength;
+smux_parse_var(u_char *varbind,
+	       int *varbindlength,
+	       oid *objid,
+	       int *oidlen,
+	       int *varlength)
 {
 	oid var_name[MAX_OID_LEN];
 	int var_name_len;
@@ -677,13 +667,12 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
 
 /* XXX This is a bad hack - do not want to muck with ucd code */
 static int
-smux_build(type, reqid, objid, oidlen, packet, length)
-	u_char type;
-	u_long reqid;
-	oid *objid;
-	int *oidlen;
-	u_char *packet;
-	int *length;
+smux_build(u_char type,
+	   u_long reqid,
+	   oid *objid,
+	   int *oidlen,
+	   u_char *packet,
+	   int *length)
 {
 	u_char *ptr, *save1, *save2, *save3;
 	int len, len1, len2, len3;
@@ -774,8 +763,7 @@ smux_build(type, reqid, objid, oidlen, packet, length)
 }
 
 static void
-print_fdbits (fdp)
-        fd_set *fdp;
+print_fdbits (fd_set *fdp)
 {
         int i;
         int num = howmany(FD_SETSIZE, NFDBITS);

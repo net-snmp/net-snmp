@@ -98,10 +98,8 @@
 #if !defined(CAN_USE_SYSCTL) || !defined(IPCTL_STATS)
 
 #ifdef linux
-static void linux_read_ip_stat __P((struct ip_mib *));
+static void linux_read_ip_stat (struct ip_mib *);
 #endif
-
-static int header_ip __P((struct variable*, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 	/*********************
 	 *
@@ -109,7 +107,7 @@ static int header_ip __P((struct variable*, oid *, int *, int, int *, int (**wri
 	 *
 	 *********************/
 
-extern void init_routes __P((void));
+extern void init_routes (void);
 
 
 /* define the structure we're going to ask the agent to register our
@@ -198,14 +196,25 @@ void init_ip()
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_ip(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 static int
-header_ip(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_ip(struct variable *vp,
+	  oid *name,
+	  int *length,
+	  int exact,
+	  int *var_len,
+	  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define IP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -244,13 +253,12 @@ header_ip(vp, name, length, exact, var_len, write_method)
 #ifndef HAVE_SYS_TCPIPSTATS_H
 
 u_char *
-var_ip(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_ip(struct variable *vp,
+       oid *name,
+       int *length,
+       int exact,
+       int *var_len,
+       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     static struct ipstat ipstat;
 #ifdef MIB_IP_COUNTER_SYMBOL
@@ -407,13 +415,12 @@ var_ip(vp, name, length, exact, var_len, write_method)
 #else /* HAVE_SYS_TCPIPSTATS_H */
 
 u_char *
-var_ip(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_ip(struct variable *vp,
+       oid *name,
+       int *length,
+       int exact,
+       int *var_len,
+       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     static struct kna tcpipstats;
     int i;
@@ -542,13 +549,12 @@ var_ip(vp, name, length, exact, var_len, write_method)
 #else /* linux */    
 
 u_char *
-var_ip(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_ip(struct variable *vp,
+       oid *name,
+       int *length,
+       int exact,
+       int *var_len,
+       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     static struct ip_mib ipstat;
 
@@ -591,18 +597,30 @@ var_ip(vp, name, length, exact, var_len, write_method)
 
 
 #ifdef freebsd2
-static void Address_Scan_Init __P((void));
-static int Address_Scan_Next __P((short *, struct in_ifaddr *));
+static void Address_Scan_Init (void);
+static int Address_Scan_Next (short *, struct in_ifaddr *);
 #endif
 
+
+/*
+  var_ipAddrEntry(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 u_char *
-var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    register oid	*name;	    /* IN/OUT - input name requested, output name found */
-    register int	*length;    /* IN/OUT - length of input and output oid's */
-    int			exact;	    /* IN - TRUE if an exact match was requested. */
-    int			*var_len;   /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_ipAddrEntry(struct variable *vp,
+		oid *name,
+		int *length,
+		int exact,
+		int *var_len,
+		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     /*
      * object identifier is of form:
@@ -729,7 +747,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 static struct in_ifaddr *in_ifaddraddr;
 
 static void
-Address_Scan_Init __P((void))
+Address_Scan_Init (void)
 {
     auto_nlist(IFADDR_SYMBOL, (char *)&in_ifaddraddr, sizeof(in_ifaddraddr));
 }
@@ -780,13 +798,12 @@ struct in_ifaddr *Retin_ifaddr;
 #else /* solaris2 */
 
 u_char *
-var_ip(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_ip(struct variable *vp,
+		oid *name,
+		int *length,
+		int exact,
+		int *var_len,
+		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     mib2_ip_t ipstat;
     u_char *ret = (u_char *)&long_return;	/* Successful completion */
@@ -877,13 +894,12 @@ IP_Cmp(void *addr, void *ep)
 }
 
 u_char *
-var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    register oid	*name;	    /* IN/OUT - input name requested, output name found */
-    register int	*length;    /* IN/OUT - length of input and output oid's */
-    int			exact;	    /* IN - TRUE if an exact match was requested. */
-    int			*var_len;   /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_ipAddrEntry(struct variable *vp,
+		oid *name,
+		int *length,
+		int exact,
+		int *var_len,
+		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     /*
      * object identifier is of form:
@@ -986,8 +1002,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
  */
 
 static void
-linux_read_ip_stat (ipstat)
-struct ip_mib *ipstat;
+linux_read_ip_stat (struct ip_mib *ipstat)
 {
   FILE *in = fopen ("/proc/net/snmp", "r");
   char line [1024];
@@ -1026,13 +1041,12 @@ void init_ip(void)
 #define MATCH_SUCCEEDED	0
 
 static int
-header_ip(vp, name, length, exact, var_len, write_method)
-	struct variable *vp;    /* IN - pointer to variable entry that points here */
-	oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_ip(struct variable *vp,
+	  oid *name,
+	  int *length,
+	  int exact,
+	  int *var_len,
+	  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define IP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -1057,14 +1071,12 @@ header_ip(vp, name, length, exact, var_len, write_method)
 }
 
 u_char *
-var_ip(vp, name, length, exact, var_len, write_method)
-	struct	variable *vp;
-	oid	*name;
-	int	*length;
-	int	 exact;
-	int	*var_len;
-	int   (**write_method) __P((int, u_char *, u_char, int, u_char *, 
-				    oid *, int));
+var_ip(struct variable *vp,
+       oid *name,
+       int *length,
+       int exact,
+       int *var_len,
+       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 	struct ipstat ipstat;
 	int i;
@@ -1308,14 +1320,12 @@ loop:
 }
 
 u_char *
-var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
-	struct	variable *vp;    /* IN - pointer to variable entry that points here */
-	oid	*name;		/* IN/OUT - input name requested, output name found */
-	int	*length;	/* IN/OUT - length of input and output oid's */
-	int	 exact;		/* IN - TRUE if an exact match was requested. */
-	int	*var_len;	/* OUT - length of variable or 0 if function returned. */
-	int   (**write_method) __P((int, u_char *, u_char, int, u_char *, 
-				    oid *, int));
+var_ipAddrEntry(struct variable *vp,
+		oid *name,
+		int *length,
+		int exact,
+		int *var_len,
+		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 	/*
 	 * object identifier is of form:

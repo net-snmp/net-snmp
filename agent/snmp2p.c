@@ -76,8 +76,6 @@ SOFTWARE.
 #include "mib.h"
 #include "snmpd.h"
 
-static int agent_party_init __P((in_addr_t, u_short, char *));
-
 /*
  * In: My ip address, View subtree
  * Initializes a noAuth/noPriv party pair, a context, 2 acl entries, and
@@ -87,10 +85,9 @@ static int agent_party_init __P((in_addr_t, u_short, char *));
  * party/context/acl/view, -1 if an error occurred.
  */
 static int
-agent_party_init(myaddr, dest_port, view)
-    in_addr_t myaddr;
-    u_short dest_port;
-    char *view;
+agent_party_init(in_addr_t myaddr,
+		 u_short dest_port,
+		 char *view)
 {
     in_addr_t addr;
     unsigned char *adp;
@@ -344,8 +341,7 @@ agent_party_init(myaddr, dest_port, view)
 
 
 void
-init_snmp2p( dest_port )
-    u_short dest_port;
+init_snmp2p(u_short dest_port)
 {
     in_addr_t myaddr;
     char miscfile[300];
@@ -388,7 +384,7 @@ init_snmp2p( dest_port )
 }
 
 void
-open_ports_snmp2p __P((void))
+open_ports_snmp2p (void)
 {
     struct partyEntry *pp;
     in_addr_t myaddr;

@@ -59,11 +59,11 @@
 #define	HRDEV_TYPE_SHIFT  8
 #define	HRDEV_TYPE_MASK 0xff
 
-typedef	void (*PFV) __P((void));
-typedef	int  (*PFI) __P((int));
-typedef	int  (*PFIV) __P((void));
-typedef	char* (*PFS) __P((int));
-typedef	oid* (*PFO) __P((int, int *));
+typedef	void (*PFV) (void);
+typedef	int  (*PFI) (int);
+typedef	int  (*PFIV) (void);
+typedef	char* (*PFS) (int);
+typedef	oid* (*PFO) (int, int *);
 
 extern PFV init_device[];	/* Routines for stepping through devices */
 extern PFIV next_device[];

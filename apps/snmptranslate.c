@@ -65,10 +65,7 @@ SOFTWARE.
 
 #include "version.h"
 
-int main __P((int, char **));
-
-void
-usage __P((void))
+void usage(void)
 {
   fprintf(stderr,
 	  "usage: snmptranslate [-V|-p|-a] [-w|-W] [-R] [-D] [-m <MIBS>] [-M <MIBDIRS] [-n] [-d] [-f|-s|-S] [<objectID>]\n\n");
@@ -119,10 +116,7 @@ usage __P((void))
   exit(1);
 }
 
-int
-main(argc, argv)
-    int	    argc;
-    char    *argv[];
+int main(int argc, char *argv[])
 {
     int	arg, count;
     char *current_name = NULL;

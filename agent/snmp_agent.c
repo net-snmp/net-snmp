@@ -70,22 +70,21 @@ SOFTWARE.
 #include "mibgroup/mibII/vacm_vars.h"
 #endif
 
-static int create_identical __P((u_char *, u_char *, int, long, long, struct packet_info *));
-static int parse_var_op_list __P((u_char *, int, u_char *, int, long *, struct packet_info *, int));
+static int create_identical (u_char *, u_char *, int, long, long, struct packet_info *);
+static int parse_var_op_list (u_char *, int, u_char *, int, long *, struct packet_info *, int);
 static int snmp_vars_inc;
-static int bulk_var_op_list __P((u_char *, int, u_char *, int, int, int, long *, struct packet_info *));
-static int create_toobig __P((u_char *, int, long, struct packet_info *));
-static int goodValue __P((u_char, int, u_char, int));
-static void setVariable __P((u_char *, u_char, int, u_char *, int));
-static void dump_var __P((oid *, int, int, void *, int));
+static int bulk_var_op_list (u_char *, int, u_char *, int, int, int, long *, struct packet_info *);
+static int create_toobig (u_char *, int, long, struct packet_info *);
+static int goodValue (u_char, int, u_char, int);
+static void setVariable (u_char *, u_char, int, u_char *, int);
+static void dump_var (oid *, int, int, void *, int);
 
 
-static void dump_var (var_name, var_name_len, statType, statP, statLen)
-    oid *var_name;
-    int var_name_len;
-    int statType;
-    void *statP;
-    int statLen;
+static void dump_var (oid *var_name,
+		      int var_name_len,
+		      int statType,
+		      void *statP,
+		      int statLen)
 {
     char buf [2560];
     struct variable_list temp_var;
@@ -98,12 +97,11 @@ static void dump_var (var_name, var_name_len, statType, statP, statLen)
 }
 
 int
-snmp_agent_parse(data, length, out_data, out_length, sourceip)
-    register u_char	*data;
-    int			length;
-    register u_char	*out_data;
-    int			*out_length;
-    u_long		sourceip;	/* possibly for authentication */
+snmp_agent_parse(u_char	*data,
+		 int length,
+		 u_char *out_data,
+		 int *out_length,
+		 u_long sourceip)	/* possibly for authentication */
 {
     struct packet_info packet, *pi = &packet;
     u_char	    type;
@@ -495,14 +493,13 @@ reterr:
  * If any error occurs, an error code is returned.
  */
 static int
-parse_var_op_list(data, length, out_data, out_length, index, pi, action)
-    register u_char	*data;
-    int			length;
-    register u_char	*out_data;
-    int			out_length;
-    register long	*index;
-    struct packet_info	*pi;
-    int			action;
+parse_var_op_list(u_char *data,
+		  int length,
+		  u_char *out_data,
+		  int out_length,
+		  long *index,
+		  struct packet_info *pi,
+		  int action)
 {
     u_char  type;
     oid	    var_name[MAX_NAME_LEN];
@@ -512,7 +509,7 @@ parse_var_op_list(data, length, out_data, out_length, index, pi, action)
     int	    statLen;
     u_short acl;
     int	    rw, exact, err;
-    int	    (*write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int	    (*write_method) (int, u_char *, u_char, int, u_char *, oid *, int);
     u_char  *headerP, *var_list_start;
     int	    dummyLen;
     int	    noSuchObject;
@@ -686,16 +683,14 @@ struct repeater {
  * If any error occurs, an error code is returned.
  */
 static int
-bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
-		 max_repetitions, index, pi)
-    register u_char	*data;
-    int			length;
-    register u_char	*out_data;
-    int			out_length;
-    int			non_repeaters;
-    int			max_repetitions;
-    register long	*index;
-    struct packet_info	*pi;
+bulk_var_op_list(u_char *data,
+		 int length,
+		 u_char *out_data,
+		 int out_length,
+		 int non_repeaters,
+		 int max_repetitions,
+		 long *index,
+		 struct packet_info *pi)
 {
     u_char  type;
     oid	    var_name[MAX_NAME_LEN];
@@ -704,7 +699,7 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
     register u_char *statP;
     int	    statLen;
     u_short acl;
-    int	    (*write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int	    (*write_method) (int, u_char *, u_char, int, u_char *, oid *, int);
     u_char  *headerP, *var_list_start;
     int	    dummyLen;
     u_char  *repeaterStart, *out_data_save;
@@ -901,12 +896,12 @@ bulk_var_op_list(data, length, out_data, out_length, non_repeaters,
  * Returns 1 upon success and 0 upon failure.
  */
 static int
-create_identical(snmp_in, snmp_out, snmp_length, errstat, errindex, pi)
-    u_char	    	*snmp_in;
-    u_char	    	*snmp_out;
-    int		    	snmp_length;
-    long	    	errstat, errindex;
-    struct packet_info 	*pi;
+create_identical(u_char *snmp_in,
+		 u_char *snmp_out,
+		 int snmp_length,
+		 long errstat,
+		 long errindex,
+		 struct packet_info *pi)
 {
     register u_char *data;
     u_char	    type;
@@ -1030,11 +1025,10 @@ create_identical(snmp_in, snmp_out, snmp_length, errstat, errindex, pi)
 }
 
 static int
-create_toobig(snmp_out, snmp_length, reqid, pi)
-    u_char	    	*snmp_out;
-    int		    	snmp_length;
-    long	    	reqid;
-    struct packet_info 	*pi;
+create_toobig(u_char *snmp_out,
+	      int snmp_length,
+	      long reqid,
+	      struct packet_info *pi)
 {
     register u_char *data;
     u_char	    type;
@@ -1094,9 +1088,10 @@ create_toobig(snmp_out, snmp_length, reqid, pi)
 }
 
 static int
-goodValue(inType, inLen, actualType, actualLen)
-    u_char	inType, actualType;
-    int		inLen, actualLen;
+goodValue(u_char inType, 
+	  int inLen,
+	  u_char actualType,
+	  int actualLen)
 {
     if (inLen > actualLen)
 	return FALSE;
@@ -1104,12 +1099,11 @@ goodValue(inType, inLen, actualType, actualLen)
 }
 
 static void
-setVariable(var_val, var_val_type, var_val_len, statP, statLen)
-    u_char  *var_val;
-    u_char  var_val_type;
-    int	    var_val_len;
-    u_char  *statP;
-    int	    statLen;
+setVariable(u_char *var_val,
+	    u_char var_val_type,
+	    int var_val_len,
+	    u_char *statP,
+	    int statLen)
 {
     int	    buffersize = 1000;
 

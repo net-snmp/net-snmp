@@ -67,9 +67,6 @@ SOFTWARE.
 
 #include "netstat.h"
 
-static u_long forgemask __P((u_long));
-static void domask __P((char *, u_long, u_long));
-
 struct route_entry {
     oid	    instance[4];
     struct in_addr  destination;
@@ -110,7 +107,7 @@ static oid oid_ipnoroutes[] =	{1, 3, 6, 1, 2, 1, 4, 12, 0};
  * Print routing tables.
  */
 void
-routepr()
+routepr(void)
 {
 	struct route_entry route, *rp = &route;
 	struct snmp_pdu *request, *response;
@@ -251,9 +248,7 @@ struct iflist {
 } *Iflist = NULL;
 
 void
-get_ifname(name, index)
-    char *name;
-    int index;
+get_ifname(char *name, int index)
 {
     struct snmp_pdu *pdu, *response;
     struct variable_list *vp;
@@ -290,8 +285,7 @@ get_ifname(name, index)
 }
 
 static u_long
-forgemask (a)
-	u_long a;
+forgemask (u_long a)
 {
 	u_long m;
 	if (IN_CLASSA(a))
@@ -304,9 +298,9 @@ forgemask (a)
 }
 
 static void
-domask(dst, addr, mask)
-	char *dst;
-	u_long addr, mask;
+domask(char *dst,
+       u_long addr, 
+       u_long mask)
 {
 	int b, i;
 	if (!mask || forgemask(addr) == mask) {
@@ -330,8 +324,7 @@ domask(dst, addr, mask)
 }
 
 char *
-routename(in)
-	struct in_addr in;
+routename(struct in_addr in)
 {
 	register char *cp;
 	static char line[MAXHOSTNAMELEN + 1];
@@ -374,9 +367,8 @@ routename(in)
  * The address is assumed to be that of a net or subnet, not a host.
  */
 char *
-netname(in, mask)
-	struct in_addr in;
-	u_long mask;
+netname(struct in_addr in,
+	u_long mask)
 {
 	char *cp = NULL;
 	static char line[MAXHOSTNAMELEN + 1];
@@ -434,7 +426,7 @@ netname(in, mask)
  * Print routing statistics
  */
 void
-rt_stats __P((void))
+rt_stats(void)
 {
 	struct variable_list *var;
 
@@ -458,10 +450,9 @@ rt_stats __P((void))
  * variable_list object when done with it.
  */
 struct variable_list *
-getvarbyname(sp, name, len)
-    struct snmp_session *sp;
-    oid	*name;
-    int len;
+getvarbyname(struct snmp_session *sp,
+	     oid *name,
+	     int len)
 {
     struct snmp_pdu *request, *response;
     struct variable_list *var = NULL, *vp;

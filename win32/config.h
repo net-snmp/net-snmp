@@ -454,9 +454,6 @@
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET
 
-/* define if sys/cdefs.h doesn't define the __P() macro */
-#undef SYS_CDEFS_DEFINES___P
-
 /* ifnet structure tests */
 #undef STRUCT_IFNET_HAS_IF_BAUDRATE
 #undef STRUCT_IFNET_HAS_IF_TYPE
@@ -743,22 +740,6 @@
 #define bsdlike
 #endif
 #endif
-
-#ifndef SYS_CDEFS_DEFINES___P
-#ifndef __P
-#ifdef STDC_HEADERS
-#define __P(params) params
-#else
-#define __P(params) ()
-#endif /* __STDC__ */
-#endif /* __P */
-#else /* SYS_CDEFS_DEFINES___P */
-#ifndef __P
-#ifdef HAVE_SYS_CDEFS_H
-#include <sys/cdefs.h>
-#endif /* HAVE_SYS_CDEFS_H */
-#endif /* __P */
-#endif /* SYS_CDEFS_DEFINES___P */
 
 #ifdef WIN32
 #define ENV_SEPARATOR ";"

@@ -46,9 +46,9 @@ static unsigned char rule[IPFWRULELEN]; /*Buffer for reading a line from
  * rules. No caching of rules is done.
  */
 
-static int readrule(number)
-    unsigned int number;
-{ int i,retval;
+static int readrule(unsigned int number)
+{ 
+  int i,retval;
   FILE* f= fopen("/proc/net/ip_acct","rt");
 
   if (!f)
@@ -80,9 +80,9 @@ static unsigned long ret_val; /* Used by var_ipfwacc to return ulongs */
  * this because stol returns a signed long. 
  */
 
-static inline void atoip (pos)
-  int pos;
-{ int i;
+static inline void atoip (int pos)
+{
+  int i;
 
   ret_val=0;
   for (i=0;i<32;i+=8)
@@ -99,7 +99,8 @@ static inline void atoip (pos)
 /* This function parses the flags field from the line in the buffer */
 
 static unsigned long int getflags ()
-{ unsigned long int flags; 
+{ 
+  unsigned long int flags; 
   int i=37; /* position in the rule */
 
   /* skipping via name */
@@ -120,9 +121,9 @@ static unsigned long int getflags ()
  * to skip after the "via addrress" field (including the flag field)
  */
 
-static void getnumeric(skip)
-  int skip;
-{ int i=37; /* position in the rule */
+static void getnumeric(int skip)
+{ 
+ int i=37; /* position in the rule */
  
   /* skipping via name */
   while (rule[i]!=' '&&i<IPFWRULELEN-12)
@@ -141,14 +142,14 @@ static void getnumeric(skip)
     ret_val=ret_val*10+rule[i]-'0';
 }
 
-unsigned char * var_ipfwacc(vp, name, length, exact, var_len, write_method)
-    struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, unsigned char *,unsigned char, int, unsigned char *,oid*, int));
-{ *write_method = 0;           /* assume it isnt writable for the time being */
+unsigned char * var_ipfwacc(struct variable *vp,
+			    oid *name,
+			    int *length,
+			    int exact,
+			    int *var_len,
+			    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))    
+{
+  *write_method = 0;           /* assume it isnt writable for the time being */
   *var_len = sizeof(ret_val);  /* assume an integer and change later if not */
 
   if (!checkmib(vp,name,length,exact,var_len,write_method,readrule(0)))

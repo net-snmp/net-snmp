@@ -114,7 +114,7 @@ static int pageshift;           /* log base 2 of the pagesize */
 
 #define DEFAULTMINIMUMSWAP 16000  /* kilobytes */
 
-void init_memory()
+void init_memory(void)
 {
 #ifndef linux
   int pagesize;
@@ -140,7 +140,7 @@ void init_memory()
   }
   pageshift -= 10;
 #endif
-
+  {      
   struct variable2 extensible_mem_variables[] = {
     {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_mem,1,{MIBINDEX}},
     {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_mem, 1, {ERRORNAME }},
@@ -171,17 +171,17 @@ void init_memory()
 
   snmpd_register_config_handler("swap", memory_parse_config,
                                 memory_free_config,"min-avail");
+  }
 }
 
-void memory_parse_config(word, cptr)
-  char *word;
-  char *cptr;
+void memory_parse_config(char *word, char *cptr)
 {
   minimumswap = atoi(cptr);
 }
 
-void memory_free_config __P((void)) {
-  minimumswap = DEFAULTMINIMUMSWAP;
+void memory_free_config (void) 
+{
+    minimumswap = DEFAULTMINIMUMSWAP;
 }
 
 #ifdef linux
@@ -216,7 +216,8 @@ static char buf[300];
 #define MAX_ROW 3	/* these are a little liberal for flexibility */
 #define MAX_COL 7
 
-unsigned** meminfo(void) {
+unsigned** meminfo(void) 
+{
     static unsigned *row[MAX_ROW + 1];		/* row pointers */
     static unsigned num[MAX_ROW * MAX_COL];	/* number storage */
     char *p;
@@ -242,6 +243,7 @@ unsigned** meminfo(void) {
 /*    row[i+1] = NULL;	terminate the row list, currently unnecessary */
     return row;					/* NULL return ==> error */
 }
+
 unsigned memory(int index)
 {
 	unsigned **mem = meminfo();
@@ -250,6 +252,7 @@ unsigned memory(int index)
         else
           return -1;
 }
+
 unsigned memswap(int index)
 {
 	unsigned **mem = meminfo();
@@ -268,8 +271,7 @@ unsigned memswap(int index)
 int nswapdev=10;            /* taken from <machine/space.h> */
 int nswapfs=10;            /* taken from <machine/space.h> */
 
-int getswap(rettype)
-  int rettype;
+int getswap(int rettype)
 {
   int spaceleft=0, spacetotal=0;
 
@@ -364,19 +366,12 @@ int getswap(rettype)
   return 0;
 }
 
-unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid	*name;
-/* IN/OUT - input name requested, output name found */
-    register int	*length;
-/* IN/OUT - length of input and output oid's */
-    int			exact;
-/* IN - TRUE if an exact match was requested. */
-    int			*var_len;
-/* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)__P((int, u_char *, u_char, int, u_char *, oid *, int));
-/* OUT - pointer to function to set variable, otherwise 0 */
+unsigned char *var_extensible_mem(struct variable *vp,
+				  oid *name,
+				  int *length,
+				  int exact,
+				  int *var_len,
+				  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 
 #ifndef linux

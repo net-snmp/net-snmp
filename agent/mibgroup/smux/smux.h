@@ -32,10 +32,10 @@
 #define SMUX_GETNEXT    (ASN_CONTEXT | ASN_CONSTRUCTOR | 1)
 #define SMUX_GETRSP     (ASN_CONTEXT | ASN_CONSTRUCTOR | 2)
 
-extern int init_smux __P((void));
-extern void smux_accept __P((int));
-extern u_char *smux_snmp_process __P((int, oid *, int *, int *));
-extern int smux_process __P((int));
+extern int init_smux (void);
+extern void smux_accept (int);
+extern u_char *smux_snmp_process (int, oid *, int *, int *);
+extern int smux_process (int);
 
 static u_int rt_mib[] = {1, 3, 6, 1, 2, 1, 4, 21};
 static u_int ft_mib[] = {1, 3, 6, 1, 2, 1, 4, 24};

@@ -79,13 +79,11 @@ char copyright[] =
 
 #include "netstat.h"
 
-int main __P((int, char **));
-
 #define NULLPROTOX	((struct protox *) 0)
 struct protox {
 	u_char	pr_wanted;		/* 1 if wanted, 0 otherwise */
-	void	(*pr_cblocks) __P((char *));	/* control blocks printing routine */
-	void	(*pr_stats) __P((void));	/* statistics printing routine */
+	void	(*pr_cblocks) (char *);	/* control blocks printing routine */
+	void	(*pr_stats) (void);	/* statistics printing routine */
 	char	*pr_name;		/* well-known name */
 } protox[] = {
 	{ 0,	protopr,    tcp_stats,	"tcp" },
@@ -107,18 +105,14 @@ char	*interface;
 struct snmp_session *Session;
 int print_errors = 0;
 
-void
-usage __P((void))
+void usage(void)
 {
     fprintf(stderr, "Usage: snmpnetstat [-v 1 | -v 2c] [-q] [-D] hostname community [-ainrs] [-P proto] [-I interface] [interval]      or:\n");
     fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] [-D] hostname noAuth [-ainrs] [-P proto] [-I interface] [interval]       or:\n");
     fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] [-D] hostname srcParty dstParty context [-ainrs] [-P proto] [-I interface] [interval]\n");
 }
 
-int
-main(argc, argv)
-	int argc;
-	char *argv[];
+int main(int argc, char *argv[])
 {
     char *hostname = NULL;
     struct protoent *p;
@@ -471,8 +465,7 @@ main(argc, argv)
 }
 
 char *
-plural(n)
-	int n;
+plural(int n)
 {
 
 	return (n != 1 ? "s" : "");
@@ -481,9 +474,8 @@ plural(n)
 /*
  * Find the protox for the given "well-known" name.
  */
-struct protox *
-knownname(name)
-	char *name;
+struct protox * 
+knownname(char *name)
 {
 	struct protox *tp;
 	
@@ -497,8 +489,7 @@ knownname(name)
  * Find the protox corresponding to name.
  */
 struct protox *
-name2protox(name)
-	char *name;
+name2protox(char *name)
 {
 	struct protox *tp;
 	char **alias;			/* alias from p->aliases */

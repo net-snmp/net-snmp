@@ -67,8 +67,8 @@ SOFTWARE.
 #define	YES	1
 #define	NO	0
 
-static void sidewaysintpr __P((unsigned int));
-RETSIGTYPE catchalarm __P((int));
+static void sidewaysintpr(unsigned int);
+RETSIGTYPE catchalarm(int);
 
 static oid oid_ifname[] =	{1, 3, 6, 1, 2, 1, 2, 2, 1, 2, 1};
 static oid oid_ifinucastpkts[] ={1, 3, 6, 1, 2, 1, 2, 2, 1,11, 1};
@@ -97,8 +97,7 @@ static oid oid_ipadentaddr[] =	{1, 3, 6, 1, 2, 1, 4,20, 1, 1, 0, 0, 0, 0};
  * Print a description of the network interfaces.
  */
 void
-intpr(interval)
-	int interval;
+intpr(int interval)
 {
 	oid varname[MAX_NAME_LEN], *instance, *ifentry;
 	int varname_len;
@@ -280,8 +279,7 @@ intpr(interval)
  * Print a description of the network interfaces.
  */
 void
-intpro(interval)
-	int interval;
+intpro(int interval)
 {
 	oid varname[MAX_NAME_LEN], *instance, *ifentry;
 	int varname_len;
@@ -457,8 +455,7 @@ u_char	signalled;			/* set if alarm goes off "early" */
  * First line printed at top of screen is always cumulative.
  */
 static void
-sidewaysintpr(interval)
-	unsigned interval;
+sidewaysintpr(unsigned int interval)
 {
 	register struct iftot *ip, *total;
 	register int line;
@@ -645,8 +642,7 @@ loop:
  * Sets a flag to not wait for the alarm.
  */
 RETSIGTYPE
-catchalarm(sig)
-    int sig;
+catchalarm(int sig)
 {
 	signalled = YES;
 }

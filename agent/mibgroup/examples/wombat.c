@@ -54,7 +54,7 @@
 	 *********************/
 
 
-void calculate_wombat();
+void calculate_wombat(void);
 
 
 	/*********************
@@ -64,7 +64,7 @@ void calculate_wombat();
 	 *********************/
 
 
-void	init_wombat( )
+void init_wombat(void)
 {
 
 /* define the structure we're going to ask the agent to register our
@@ -93,9 +93,8 @@ void	init_wombat( )
 
 /* function which scans a given snmpd.conf line for information */
 
-void wombat_parse_config(word,line)
-  char *word;
-  char *line;
+void wombat_parse_config(char *word,
+			 char *line)
 {
 }
 
@@ -103,21 +102,33 @@ void wombat_parse_config(word,line)
    and resets all values to defaults.  It called just before the agent
    re-reads all the .conf files. */
 
-void wombat_free_config __P((void)) {
+void wombat_free_config (void) 
+{
 }
 
 
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_wombat(...
+  Arguments:
+  vp	        IN      - pointer to variable entry that points here
+  name          IN/OUT  - IN/name requested, OUT/name found
+  length        IN/OUT  - length of IN/OUT oid's 
+  exact         IN      - TRUE if an exact match was requested
+  var_len       OUT     - length of variable or 0 if function returned
+  write_method  OUT     - pointer to function to set variable, otherwise 0
+  
+*/
+
 int
-header_wombat(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method)(); /* OUT - pointer to function to set variable, otherwise 0 */
+header_wombat(struct variable *vp,
+	      oid *name,
+	      int *length,
+	      int exact,
+	      int *var_len,
+	      int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define WOMBAT_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -150,13 +161,12 @@ header_wombat(vp, name, length, exact, var_len, write_method)
 	 *********************/
 
 u_char	*
-var_wombat(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method)();
+var_wombat(struct variable *vp,
+	   oid *name,
+	   int *length,
+	   int exact,
+	   int *var_len,
+	   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     if (header_wombat(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
@@ -178,7 +188,7 @@ var_wombat(vp, name, length, exact, var_len, write_method)
 	 *
 	 *********************/
 
-void calculate_wombat()
+void calculate_wombat(void)
 {
   return;
 }

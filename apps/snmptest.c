@@ -77,14 +77,11 @@ SOFTWARE.
 #include "system.h"
 #include "snmp_parse_args.h"
 
-int main __P((int, char **));
-
 int command = SNMP_MSG_GET;
 
-int input_variable __P((struct variable_list *));
+int input_variable (struct variable_list *);
 
-void
-usage __P((void))
+void usage(void)
 {
   fprintf(stderr,"Usage:\n  snmptest ");
   snmp_parse_args_usage(stderr);
@@ -92,10 +89,7 @@ usage __P((void))
   snmp_parse_args_descriptions(stderr);
 }
 
-int
-main(argc, argv)
-    int	    argc;
-    char    *argv[];
+int main(int argc, char *argv[])
 {
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu = NULL, *response, *copy = NULL;
@@ -258,8 +252,7 @@ main(argc, argv)
 }
 
 int
-input_variable(vp)
-    struct variable_list    *vp;
+input_variable(struct variable_list *vp)
 {
     char  buf[256];
     u_char value[256], ch;

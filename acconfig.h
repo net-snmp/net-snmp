@@ -98,9 +98,6 @@
 
 @BOTTOM@
 
-/* define if sys/cdefs.h doesn't define the __P() macro */
-#undef SYS_CDEFS_DEFINES___P
-
 /* define rtentry to ortentry on SYSV machines (alphas) */
 #undef RTENTRY
 
@@ -407,22 +404,6 @@
 #define config_add_mib(x)
   
 #include <mib_module_config.h>
-
-#ifndef SYS_CDEFS_DEFINES___P
-#ifndef __P
-#ifdef __STDC__
-#define __P(params) params
-#else
-#define __P(params) ()
-#endif /* __STDC__ */
-#endif /* __P */
-#else /* SYS_CDEFS_DEFINES___P */
-#ifndef __P
-#ifdef HAVE_SYS_CDEFS_H
-#include <sys/cdefs.h>
-#endif /* HAVE_SYS_CDEFS_H */
-#endif /* __P */
-#endif /* SYS_CDEFS_DEFINES___P */
 
 #ifdef WIN32
 #define ENV_SEPARATOR ";"

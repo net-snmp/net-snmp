@@ -146,22 +146,20 @@ struct trap_sink *sinks = NULL;
 static struct addrCache addrCache[ADDRCACHE];
 static int lastAddrAge = 0;
 
-static int receive __P((int *, int));
-int snmp_read_packet __P((int));
-int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
-static char *sprintf_stamp __P((time_t *));
-static int create_v1_trap_session __P((char *, char *));
-static int create_v2_trap_session __P((char *, char *));
-static void free_v1_trap_session __P((struct trap_sink *sp));
-static void free_v2_trap_session __P((struct trap_sink *sp));
-static void send_v1_trap __P((struct snmp_session *, int, int));
-static void send_v2_trap __P((struct snmp_session *, int, int, int));
-static void usage __P((char *));
-int main __P((int, char **));
-static RETSIGTYPE SnmpTrapNodeDown __P((int));
+static int receive (int *, int);
+int snmp_read_packet (int);
+int snmp_input (int, struct snmp_session *, int, struct snmp_pdu *, void *);
+static char *sprintf_stamp (time_t *);
+static int create_v1_trap_session (char *, char *);
+static int create_v2_trap_session (char *, char *);
+static void free_v1_trap_session (struct trap_sink *sp);
+static void free_v2_trap_session (struct trap_sink *sp);
+static void send_v1_trap (struct snmp_session *, int, int);
+static void send_v2_trap (struct snmp_session *, int, int, int);
 
-static char *sprintf_stamp (now)
-    time_t *now;
+static RETSIGTYPE SnmpTrapNodeDown (int);
+
+static char *sprintf_stamp (time_t *now)
 {
     time_t Now;
     struct tm *tm;
@@ -182,8 +180,8 @@ static char *sprintf_stamp (now)
 int snmp_enableauthentraps = 2;		/* default: 2 == disabled */
 char *snmp_trapcommunity = NULL;
 
-static int create_v1_trap_session (sink, com)
-    char *sink, *com;
+static int create_v1_trap_session (char *sink, 
+				   char *com)
 {
     struct trap_sink *new_sink =
       (struct trap_sink *) malloc (sizeof (*new_sink));
@@ -208,16 +206,15 @@ static int create_v1_trap_session (sink, com)
     return 0;
 }
 
-static void free_v1_trap_session (sp)
-    struct trap_sink *sp;
+static void free_v1_trap_session (struct trap_sink *sp)
 {
     snmp_close(sp->sesp);
     if (sp->ses.community) free(sp->ses.community);
     free (sp);
 }
 
-static int create_v2_trap_session (sink, com)
-    char *sink, *com;
+static int create_v2_trap_session (char *sink, 
+				   char *com)
 {
     struct trap_sink *new_sink =
       (struct trap_sink *) malloc (sizeof (*new_sink));
@@ -242,15 +239,14 @@ static int create_v2_trap_session (sink, com)
     return 0;
 }
 
-static void free_v2_trap_session (sp)
-    struct trap_sink *sp;
+static void free_v2_trap_session (struct trap_sink *sp)
 {
     snmp_close(sp->sesp);
     if (sp->ses.community) free(sp->ses.community);
     free (sp);
 }
 
-void snmpd_free_trapsinks __P((void))
+void snmpd_free_trapsinks (void)
 {
     struct trap_sink *sp = sinks;
     while (sp) {
@@ -270,9 +266,9 @@ void snmpd_free_trapsinks __P((void))
 static oid objid_enterprisetrap[] = {EXTENSIBLEMIB,251,0,0};
 static int length_enterprisetrap = sizeof(objid_enterprisetrap)/sizeof(objid_enterprisetrap[0]);
 
-static void send_v1_trap (ss, trap, specific)
-    struct snmp_session *ss;
-    int trap, specific;
+static void send_v1_trap (struct snmp_session *ss,
+			  int trap, 
+			  int specific)
 {
     struct snmp_pdu *pdu;
     struct timeval now, diff;
@@ -308,9 +304,10 @@ static void send_v1_trap (ss, trap, specific)
 #endif
 }
 
-static void send_v2_trap (ss, trap, specific, type)
-    struct snmp_session *ss;
-    int trap, specific, type;
+static void send_v2_trap (struct snmp_session *ss,
+			  int trap, 
+			  int specific, 
+			  int type)
 {
     struct snmp_pdu *pdu;
     struct variable_list *var;
@@ -374,8 +371,7 @@ static void send_v2_trap (ss, trap, specific, type)
 }
 
 void
-send_trap_pdu(pdu)
-    struct snmp_pdu *pdu;
+send_trap_pdu(struct snmp_pdu *pdu)
 {
   struct snmp_pdu *mypdu;
   
@@ -400,9 +396,8 @@ send_trap_pdu(pdu)
   }
 }
 
-void send_easy_trap (trap, specific)
-    int trap;
-    int specific;
+void send_easy_trap (int trap, 
+		     int specific)
 {
     struct trap_sink *sink = sinks;
 
@@ -433,8 +428,7 @@ char *argvrestartname;
 extern char *optconfigfile;
 extern char dontReadConfigFiles;
 
-static void usage(prog)
-char *prog;
+static void usage(char *prog)
 {
   printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-q] [-D] [-p NUM] [-L] [-l LOGFILE]\n",prog);
   printf("\n\tVersion:  %s\n",VersionInfo);
@@ -468,17 +462,15 @@ char *prog;
 static int agentBoots=0;
 
 void
-agentBoots_conf(word, cptr)
-  char *word;
-  char *cptr;
+agentBoots_conf(char *word, 
+		char *cptr)
 {
   agentBoots = atoi(cptr)+1;
   DEBUGMSGTL(("snmpd", "agentBoots: %d\n",agentBoots));
 }
 
 RETSIGTYPE
-SnmpdShutDown(a)
-  int a;
+SnmpdShutDown(int a)
 {
   char line[512];
   /* We've received a sigTERM.  Shutdown by calling mib-module
@@ -494,8 +486,7 @@ SnmpdShutDown(a)
 }
 
 static RETSIGTYPE
-SnmpTrapNodeDown(a)
-  int a;
+SnmpTrapNodeDown(int a)
 {
     send_easy_trap (6, 2); /* 2 - Node Down #define it as NODE_DOWN_TRAP */
 }
@@ -503,12 +494,10 @@ SnmpTrapNodeDown(a)
 #define NUM_SOCKETS     32
 static int sdlist[NUM_SOCKETS], sdlen = 0;
 static int portlist[NUM_SOCKETS];
-int (*sd_handlers[NUM_SOCKETS])__P((int));
+int (*sd_handlers[NUM_SOCKETS])(int);
 
 int
-main(argc, argv)
-    int	    argc;
-    char    *argv[];
+main(int argc, char *argv[])
 {
     int	arg,i;
     int ret;
@@ -675,8 +664,7 @@ main(argc, argv)
 }
 
 int
-open_port ( dest_port )
-     u_short dest_port;
+open_port (u_short dest_port)
 {
     int sd, index;
     struct sockaddr_in	me;
@@ -717,9 +705,8 @@ open_port ( dest_port )
 #define ONE_SEC         1000000L
 
 static int
-receive(sdlist, sdlen)
-    int sdlist[];
-    int sdlen;
+receive(int sdlist[], 
+	int sdlen)
 {
     int numfds, index;
     fd_set fdset;
@@ -809,8 +796,7 @@ receive(sdlist, sdlen)
 }
 
 int
-snmp_read_packet(sd)
-    int sd;
+snmp_read_packet(int sd)
 {
     struct sockaddr_in	from;
     int length, out_length, fromlength;
@@ -894,12 +880,11 @@ snmp_read_packet(sd)
 
 /* deals with replies from remote alarm variables, and from inform pdus */
 int
-snmp_input(op, session, reqid, pdu, magic)
-    int op;
-    struct snmp_session *session;
-    int reqid;
-    struct snmp_pdu *pdu;
-    void *magic;
+snmp_input(int op,
+	   struct snmp_session *session,
+	   int reqid,
+	   struct snmp_pdu *pdu,
+	   void *magic)
 {
     struct get_req_state *state = (struct get_req_state *)magic;
     
@@ -924,9 +909,8 @@ snmp_input(op, session, reqid, pdu, magic)
     return 1;
 }
     
-void snmpd_parse_config_authtrap(word, cptr)
-    char *word;
-    char *cptr;
+void snmpd_parse_config_authtrap(char *word, 
+				 char *cptr)
 {
     int i;
   
@@ -937,9 +921,8 @@ void snmpd_parse_config_authtrap(word, cptr)
 	snmp_enableauthentraps = i;
 }
 
-void snmpd_parse_config_trapsink(word, cptr)
-    char *word;
-    char *cptr;
+void snmpd_parse_config_trapsink(char *word, 
+				 char *cptr)
 {
     char tmpbuf[1024];
   
@@ -949,9 +932,8 @@ void snmpd_parse_config_trapsink(word, cptr)
     }
 }
 
-void snmpd_parse_config_trap2sink(word, cptr)
-    char *word;
-    char *cptr;
+void snmpd_parse_config_trap2sink(char *word, 
+				  char *cptr)
 {
     char tmpbuf[1024];
   
@@ -961,16 +943,15 @@ void snmpd_parse_config_trap2sink(word, cptr)
     }
 }
 
-void snmpd_parse_config_trapcommunity(word,cptr)
-    char *word;
-    char *cptr;
+void snmpd_parse_config_trapcommunity(char *word, 
+				      char *cptr)
 {
     if (snmp_trapcommunity) free(snmp_trapcommunity);
     snmp_trapcommunity = malloc (strlen(cptr));
     copy_word(cptr, snmp_trapcommunity);
 }
 
-void snmpd_free_trapcommunity __P((void))
+void snmpd_free_trapcommunity (void)
 {
     if (snmp_trapcommunity) {
 	free(snmp_trapcommunity);

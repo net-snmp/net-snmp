@@ -77,7 +77,6 @@ SOFTWARE.
 #include "system.h"
 #include "apps/snmp_parse_args.h"
 
-int main __P((int, char **));
 struct column {
   int width;
   char *label;
@@ -104,11 +103,11 @@ static int rootlen;
 static int localdebug;
 static struct snmp_session session;
 
-void get_field_names __P((void));
-void get_table_entries __P((void));
-void print_table __P((void));
+void get_field_names (void);
+void get_table_entries (void);
+void print_table (void);
 
-void usage __P((void))
+void usage(void)
 {
   fprintf(stderr,"Usage:\n  snmptable ");
   snmp_parse_args_usage(stderr);
@@ -124,10 +123,7 @@ void usage __P((void))
   exit(1);
 }
 
-int
-main(argc, argv)
-  int   argc;
-  char  *argv[];
+int main(int argc, char *argv[])
 {
   int   arg;
 #ifdef _DEBUG_MALLOC_INC
@@ -205,7 +201,7 @@ main(argc, argv)
   exit (0);
 }
 
-void print_table __P((void))
+void print_table (void)
 {
   int entry, field, first_field, last_field = 0, width, part = 0;
   char **dp;
@@ -256,7 +252,7 @@ void print_table __P((void))
   }
 }
 
-void get_field_names __P((void))
+void get_field_names(void)
 {
   char string_buf[1024];
   char *name_p;
@@ -306,7 +302,7 @@ void get_field_names __P((void))
   }
 }
 
-void get_table_entries __P((void))
+void get_table_entries(void)
 {
   int running = 1;
   struct snmp_session *ss;

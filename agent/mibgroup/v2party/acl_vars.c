@@ -37,12 +37,8 @@
 
 #define ACLCOMPLETE_MASK	0x3F /* all columns */
 
-struct aclEntry *acl_rowCreate __P((int, int, int));
-void acl_rowDelete __P((int, int, int));
-
 struct aclEntry *
-acl_rowCreate(target, subject, resources)
-    int target, subject, resources;
+acl_rowCreate(int target, int subject, int resources)
 {
     struct aclEntry *ap;
 
@@ -60,8 +56,7 @@ acl_rowCreate(target, subject, resources)
 }
 
 void
-acl_rowDelete(target, subject, resources)
-    int target, subject, resources;
+acl_rowDelete(int target, int subject, int resources)
 {
     acl_destroyEntry(target, subject, resources);
 }
@@ -72,14 +67,13 @@ acl_rowDelete(target, subject, resources)
  * If statP is NULL and ap is NULL, then neither this instance nor the variable exists.
  */
 int
-write_acl(action, var_val, var_val_type, var_val_len, statP, name, length)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      length;
+write_acl(int action,
+	u_char *var_val,
+	u_char var_val_type,
+	int var_val_len,
+	u_char *statP,
+	oid *name,
+	int length)
 {
     struct aclEntry *ap, *rp = NULL;
     int var, targetlen, subjectlen;
@@ -198,13 +192,12 @@ write_acl(action, var_val, var_val_type, var_val_len, statP, name, length)
 }
 
 u_char *
-var_acl(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;   /* IN - pointer to variable entry that points here */
-    register oid *name;      /* IN/OUT - input name requested, output name found */
-    register int *length;    /* IN/OUT - length of input and output oid's */
-    int          exact;      /* IN - TRUE if an exact match was requested. */
-    int          *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int          (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_acl(struct variable *vp,
+	oid *name,
+	int *length,
+	int exact,
+	int *var_len,
+	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN], *np;
     int newnamelen, lownamelen=0;

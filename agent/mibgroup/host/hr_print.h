@@ -5,8 +5,8 @@
 #ifndef _MIBGROUP_HRPRINT_H
 #define _MIBGROUP_HRPRINT_H
 
-extern void	init_hr_print __P((void));
-extern u_char	*var_hrprint  __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern void	init_hr_print (void);
+extern u_char	*var_hrprint  (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
 
 
 #define	HRPRINT_STATUS		1

@@ -109,7 +109,7 @@
 
 double maxload[3];
 
-void	init_loadave( )
+void init_loadave(void)
 {
 
 /* define the structure we're going to ask the agent to register our
@@ -135,9 +135,7 @@ void	init_loadave( )
                                 loadave_free_config, "max1 [max5] [max15]");
 }
 
-void loadave_parse_config(word,cptr)
-  char *word;
-  char *cptr;
+void loadave_parse_config(char *word, char* cptr)
 {
   int i;
   
@@ -151,7 +149,8 @@ void loadave_parse_config(word,cptr)
   }
 }
 
-void loadave_free_config __P((void)) {
+void loadave_free_config (void)
+{
   int i;
   
   for (i=0; i<=2;i++)
@@ -159,19 +158,12 @@ void loadave_free_config __P((void)) {
 }
 
   
-unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid	*name;
-/* IN/OUT - input name requested, output name found */
-    register int	*length;
-/* IN/OUT - length of input and output oid's */
-    int			exact;
-/* IN - TRUE if an exact match was requested. */
-    int			*var_len;
-/* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-/* OUT - pointer to function to set variable, otherwise 0 */
+unsigned char *var_extensible_loadave(struct variable *vp,
+				      oid *name,
+				      int *length,
+				      int exact,
+				      int *var_len,
+				      int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 
   static long long_ret;

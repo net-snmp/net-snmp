@@ -34,7 +34,7 @@ static oid      dlmod_name[16] = {1, 3, 6, 1, 4, 1, 2021, 14};
 static int      dlmod_name_len = 8;
 
 void
-init_dlmod_mib __P((void)) {
+init_dlmod_mib (void) {
 	register_mib("dlmod_mib", (struct variable *) dlmod_variables,
 		     sizeof(*dlmod_variables),
 		     sizeof(dlmod_variables) / sizeof(*dlmod_variables),
@@ -46,12 +46,12 @@ init_dlmod_mib __P((void)) {
 }
 
 void
-deinit_dlmod_mib __P((void)) {
+deinit_dlmod_mib (void) {
 	unregister_mib(dlmod_name, dlmod_name_len);
 }
 
 int
-dynamic_init_dlmod_mib __P((void)) {
+dynamic_init_dlmod_mib (void) {
 	init_dlmod_mib();
 #if 1
 	fprintf(stderr, "dynamic_init_dlmod_mib\n");
@@ -61,22 +61,30 @@ dynamic_init_dlmod_mib __P((void)) {
 }
 
 int
-dynamic_deinit_dlmod_mib __P((void)) {
+dynamic_deinit_dlmod_mib (void) {
 	deinit_dlmod_mib();
 	return 0;
 }
 
+/*
+  header_dlmod(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 static int
-header_dlmod(vp, name, length, exact, var_len, write_method)
-	register struct variable *vp;	/* IN - pointer to variable entry
-					 * that points here */
-	oid            *name;	/* IN/OUT - input name requested, output name
-				 * found */
-	int            *length;	/* IN/OUT - length of input and output oid's */
-	int             exact;	/* IN - TRUE if an exact match was requested. */
-	int            *var_len;/* OUT - length of variable or 0 if function
-				 * returned. */
-	int             (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_dlmod(struct variable *vp,
+	     oid *name,
+	     int *length,
+	     int exact,
+	     int *var_len,
+	     int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
 #define DLMOD_NAME_LENGTH	9	
 	oid             newname[MAX_NAME_LEN];
@@ -115,13 +123,12 @@ header_dlmod(vp, name, length, exact, var_len, write_method)
 
 
 unsigned char  *
-var_dlmod(vp, name, length, exact, var_len, write_method)
-	struct variable *vp;
-	oid            *name;
-	int            *length;
-	int             exact;
-	int            *var_len;
-	int             (**write_method) __P((int, unsigned char *, unsigned char, int, unsigned char *, oid *, int));
+var_dlmod(struct variable *vp,
+	  oid *name,
+	  int *length,
+	  int exact,
+	  int *var_len,
+	  int (**write_method) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int))
 {
 
 	/* variables we may use later */
@@ -147,17 +154,26 @@ var_dlmod(vp, name, length, exact, var_len, write_method)
 }
 
 
+/*
+  header_dlmodEntry(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
+
 static struct dlmod *
-header_dlmodEntry(vp, name, length, exact, var_len, write_method)
-	register struct variable *vp;	/* IN - pointer to variable entry
-					 * that points here */
-	oid            *name;	/* IN/OUT - input name requested, output name
-				 * found */
-	int            *length;	/* IN/OUT - length of input and output oid's */
-	int             exact;	/* IN - TRUE if an exact match was requested. */
-	int            *var_len;/* OUT - length of variable or 0 if function
-				 * returned. */
-	int             (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_dlmodEntry(struct variable *vp,
+		  oid *name,
+		  int *length,
+		  int exact,
+		  int *var_len,
+		  int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
 #define DLMODENTRY_NAME_LENGTH	11
 	oid	newname[MAX_NAME_LEN];
@@ -217,13 +233,12 @@ header_dlmodEntry(vp, name, length, exact, var_len, write_method)
 };
 
 unsigned char  *
-var_dlmodEntry(vp, name, length, exact, var_len, write_method)
-	struct variable *vp;
-	oid            *name;
-	int            *length;
-	int             exact;
-	int            *var_len;
-	int             (**write_method) __P((int, unsigned char *, unsigned char, int, unsigned char *, oid *, int));
+var_dlmodEntry(struct variable *vp,
+	       oid *name,
+	       int *length,
+	       int exact,
+	       int *var_len,
+	       int (**write_method) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int))
 {
 
 	/* variables we may use later */
@@ -267,14 +282,13 @@ var_dlmodEntry(vp, name, length, exact, var_len, write_method)
 }
 
 static int
-write_dlmodName(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-	int             action;
-	u_char         *var_val;
-	u_char          var_val_type;
-	int             var_val_len;
-	u_char         *statP;
-	oid            *name;
-	int             name_len;
+write_dlmodName(int action,
+		u_char *var_val,
+		u_char var_val_type,
+		int var_val_len,
+		u_char *statP,
+		oid *name,
+		int name_len)
 {
 	/* variables we may use later */
 	unsigned char string[1500];
@@ -319,14 +333,13 @@ write_dlmodName(action, var_val, var_val_type, var_val_len, statP, name, name_le
 }
 
 static int
-write_dlmodPath(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-	int             action;
-	u_char         *var_val;
-	u_char          var_val_type;
-	int             var_val_len;
-	u_char         *statP;
-	oid            *name;
-	int             name_len;
+write_dlmodPath(int action,
+		u_char *var_val,
+		u_char var_val_type,
+		int var_val_len,
+		u_char *statP,
+		oid *name,
+		int name_len)
 {
 	/* variables we may use later */
 	static unsigned char string[1500];
@@ -359,14 +372,13 @@ write_dlmodPath(action, var_val, var_val_type, var_val_len, statP, name, name_le
 }
 
 static int
-write_dlmodStatus(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-	int             action;
-	u_char         *var_val;
-	u_char          var_val_type;
-	int             var_val_len;
-	u_char         *statP;
-	oid            *name;
-	int             name_len;
+write_dlmodStatus(int action,
+		  u_char *var_val,
+		  u_char var_val_type,
+		  int var_val_len,
+		  u_char *statP,
+		  oid *name,
+		  int name_len)
 {
 	/* variables we may use later */
 	long dlm_status;
