@@ -27,8 +27,6 @@
 #include "snmp_vars.h"
 #include "smux.h"
 
-#ifdef SMUX
-
 static u_int max_rip_mib[] = {1, 3, 6, 1, 2, 1, 23, 3, 1, 9, 255, 255, 255, 255};
 static u_int min_rip_mib[] = {1, 3, 6, 1, 2, 1, 23, 1, 1, 0};
 extern u_char smux_type;
@@ -125,16 +123,3 @@ var_rip2(vp, name, length, exact, var_len, write_method)
 		return var;
 	}
 }
-#else  /* !SMUX */
-u_char *
-var_rip2(vp, name, length, exact, var_len, write_method)
-	register struct variable *vp;
-	register oid        *name;
-	register int        *length;
-	int                 exact;
-	int                 *var_len;
-	int                 (**write_method)();
-{
-	return NULL;
-}
-#endif /* SMUX */

@@ -27,8 +27,6 @@
 #include "snmp_vars.h"
 #include "smux.h"
 
-#ifdef SMUX
-
 static u_int max_bgp_mib[] = {1, 3, 6, 1, 2, 1, 15, 5, 1, 6, 255, 255, 255, 255};
 static u_int min_bgp_mib[] = {1, 3, 6, 1, 2, 1, 15, 1, 0};
 extern u_char smux_type;
@@ -125,18 +123,3 @@ var_bgp(vp, name, length, exact, var_len, write_method)
 		return var;
 	}
 }
-
-#else  /* !SMUX */
-
-u_char *
-var_bgp(vp, name, length, exact, var_len, write_method)
-	register struct variable *vp;
-	register oid        *name;
-	register int        *length;
-	int                 exact;
-	int                 *var_len;
-	int                 (**write_method)();
-{
-	return NULL;
-}
-#endif /* SMUX */
