@@ -979,6 +979,7 @@ extern "C" {
 #endif
 
 typedef unsigned short mode_t;
+typedef unsigned __int32 uint32_t;
 
 /*
  * this must be before the system/machine includes, to allow them to
