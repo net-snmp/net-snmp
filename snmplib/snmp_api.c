@@ -1030,7 +1030,7 @@ int	snmpv3_engineID_probe	(struct session_list *slp,
       it -- this must be done after the session is created and inserted in the
       list so that the response can handled correctly. */
 
-  if ((session->flags & SNMP_FLAGS_DONT_PROBE) != SNMP_FLAGS_DONT_PROBE)
+  if ((session->flags & SNMP_FLAGS_DONT_PROBE) == SNMP_FLAGS_DONT_PROBE)
       return 1;
 
   if (session->version == SNMP_VERSION_3) {
