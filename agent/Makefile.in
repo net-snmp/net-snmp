@@ -38,16 +38,16 @@ subdirs:
 getkstat: getkstat.o
 	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
 
-getkstat.o: kernel_sunos5.c
+getkstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETKSTAT_TEST -DKDEBUG -c $? 
 
 getmibstat: getmibstat.o
 	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
 
-getmibstat.o: kernel_sunos5.c
+getmibstat.o: mibgroup/kernel_sunos5.c
 	$(CC) $(CFLAGS) -o $@ -D_GETMIBSTAT_TEST -DKDEBUG -c $? 
 
-AGENTOBJS=snmpd.o kernel.o snmp_agent.o snmp_vars.o view_parse.o kernel_sunos5.o 
+AGENTOBJS=snmpd.o kernel.o snmp_agent.o snmp_vars.o view_parse.o
 
 snmpd:	${MIBOBJS} ${AGENTOBJS} ../snmplib/libsnmp.a
 	${CC} -o $@ ${AGENTOBJS} ${MIBOBJS} ${LDFLAGS} ${LIBS}  
