@@ -158,7 +158,6 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	if ( asp->mode != RESERVE1 )
 	    break;			/* Single pass */
         snmp_increment_statistic(STAT_SNMPINGETREQUESTS);
-	if (verbose) snmp_log(LOG_INFO, "    GET request\n");
 	status = handle_next_pass( asp );
 	asp->mode = RESERVE2;
 	break;
@@ -167,7 +166,6 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	if ( asp->mode != RESERVE1 )
 	    break;			/* Single pass */
         snmp_increment_statistic(STAT_SNMPINGETNEXTS);
-	if (verbose) snmp_log(LOG_INFO, "    GETNEXT request\n");
 	asp->exact   = FALSE;
 	status = handle_next_pass( asp );
 	asp->mode = RESERVE2;
@@ -185,7 +183,6 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	     */
 	if ( asp->mode == RESERVE1 ) {
             snmp_increment_statistic(STAT_SNMPINGETREQUESTS);
-	    if (verbose) snmp_log(LOG_INFO, "    GETBULK request\n");
 	    asp->exact   = FALSE;
 		    /*
 		     * Limit max repetitions to something reasonable
@@ -257,7 +254,6 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 	     */
 	if ( asp->mode == RESERVE1 ) {
             snmp_increment_statistic(STAT_SNMPINSETREQUESTS);
-	    if (verbose) snmp_log(LOG_INFO, "    SET request\n");
 	    asp->rw      = WRITE;
 
 	    status = handle_next_pass( asp );
@@ -323,13 +319,11 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 
     case SNMP_MSG_RESPONSE:
         snmp_increment_statistic(STAT_SNMPINGETRESPONSES);
-	if (verbose) snmp_log(LOG_INFO, "    RESPONSE request\n");
 	free( asp );
 	return 0;
     case SNMP_MSG_TRAP:
     case SNMP_MSG_TRAP2:
         snmp_increment_statistic(STAT_SNMPINTRAPS);
-	if (verbose) snmp_log(LOG_INFO, "    TRAP request\n");
 	free( asp );
 	return 0;
     default:
