@@ -62,7 +62,7 @@
 #endif
 
 static void register_mib_detach_node(netsnmp_subtree *s);
-static inline void invalidate_lookup_cache(const char *context);
+NETSNMP_STATIC_INLINE void invalidate_lookup_cache(const char *context);
 void netsnmp_set_lookup_cache_size(int newsize);
 int netsnmp_get_lookup_cache_size(void);
 
@@ -1223,7 +1223,7 @@ netsnmp_get_lookup_cache_size(void) {
     return lookup_cache_size;
 }
 
-static inline lookup_cache_context *
+NETSNMP_STATIC_INLINE lookup_cache_context *
 get_context_lookup_cache(const char *context) {
     lookup_cache_context *ptr;
     if (!context)
@@ -1246,7 +1246,7 @@ get_context_lookup_cache(const char *context) {
     return ptr;
 }
 
-static inline void
+NETSNMP_STATIC_INLINE void
 lookup_cache_add(const char *context,
                  netsnmp_subtree *next, netsnmp_subtree *previous) {
     lookup_cache_context *cptr;
@@ -1264,7 +1264,7 @@ lookup_cache_add(const char *context,
         cptr->currentpos = 0;
 }
 
-static inline void
+NETSNMP_STATIC_INLINE void
 lookup_cache_replace(lookup_cache *ptr,
                      netsnmp_subtree *next, netsnmp_subtree *previous) {
 
@@ -1272,7 +1272,7 @@ lookup_cache_replace(lookup_cache *ptr,
     ptr->previous = previous;
 }
 
-static inline lookup_cache *
+NETSNMP_STATIC_INLINE lookup_cache *
 lookup_cache_find(const char *context, oid *name, size_t name_len,
                   int *retcmp) {
     lookup_cache_context *cptr;
@@ -1298,7 +1298,7 @@ lookup_cache_find(const char *context, oid *name, size_t name_len,
     return ret;
 }
 
-static inline void
+NETSNMP_STATIC_INLINE void
 invalidate_lookup_cache(const char *context) {
     lookup_cache_context *cptr;
     if ((cptr = get_context_lookup_cache(context)) != NULL) {

@@ -115,32 +115,32 @@ extern          "C" {
     int             netsnmp_mark_row_column_writable(netsnmp_table_row
                                                      *row, int column,
                                                      int writable);
-    inline netsnmp_table_data_set
+    NETSNMP_INLINE netsnmp_table_data_set
         *netsnmp_extract_table_data_set(netsnmp_request_info *request);
     void            netsnmp_config_parse_table_set(const char *token,
                                                    char *line);
     void            netsnmp_config_parse_add_row(const char *token,
                                                  char *line);
-    inline void     netsnmp_table_dataset_add_index(netsnmp_table_data_set
+    NETSNMP_INLINE void netsnmp_table_dataset_add_index(netsnmp_table_data_set
                                                     *table, u_char type);
-    inline void     netsnmp_table_dataset_add_row(netsnmp_table_data_set
+    NETSNMP_INLINE void netsnmp_table_dataset_add_row(netsnmp_table_data_set
                                                   *table,
                                                   netsnmp_table_row *row);
-    inline void     netsnmp_table_dataset_remove_row(netsnmp_table_data_set
+    NETSNMP_INLINE void netsnmp_table_dataset_remove_row(netsnmp_table_data_set
                                                      *table,
                                                      netsnmp_table_row
                                                      *row);
-    inline void     netsnmp_table_dataset_delete_row(netsnmp_table_row
+    NETSNMP_INLINE void netsnmp_table_dataset_delete_row(netsnmp_table_row
                                                      *row);
-    inline void    
+    NETSNMP_INLINE void    
         netsnmp_table_dataset_remove_and_delete_row(netsnmp_table_data_set
                                                     *table,
                                                     netsnmp_table_row
                                                     *row);
-    inline void    
+    NETSNMP_INLINE void    
         netsnmp_table_dataset_delete_all_data
         (netsnmp_table_data_set_storage *data);
-    inline void    
+    NETSNMP_INLINE void    
         netsnmp_table_dataset_replace_row(netsnmp_table_data_set *table,
                                           netsnmp_table_row *origrow,
                                           netsnmp_table_row *newrow);
