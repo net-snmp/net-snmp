@@ -186,7 +186,7 @@ struct variable2 ipfwacc_variables[] = {
     { IPFWACCPORT10,  ASN_INTEGER, RONLY, var_ipfwacc, 1, {IPFWACCPORT10}}
 };
 
-oid ipfwacc_variables_oid[] = { 1,3,6,1,4,1,2021,13,1,1 };
+oid ipfwacc_variables_oid[] = { 1,3,6,1,4,1,2021,13,1,1,1 };
 
 void init_ipfwacc( void )
 {
