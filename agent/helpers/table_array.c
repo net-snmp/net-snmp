@@ -360,48 +360,6 @@ release_netsnmp_request_groups(void *vp)
     CONTAINER_FREE(c);
 }
 
-netsnmp_index *
-find_next_row(netsnmp_table_request_info *tblreq_info,
-              table_container_data * tad)
-{
-    netsnmp_index *row = NULL;
-    netsnmp_index index;
-
-    if (!tblreq_info || !tad)
-        return NULL;
-
-    /*
-     * below our minimum column?
-     */
-    if (tblreq_info->colnum < tad->tblreg_info->min_column) {
-        tblreq_info->colnum = tad->tblreg_info->min_column;
-        row = CONTAINER_FIRST(tad->table);
-    } else {
-        index.oids = tblreq_info->index_oid;
-        index.len = tblreq_info->index_oid_len;
-
-        row = CONTAINER_NEXT(tad->table, &index);
-
-        /*
-         * we don't have a row, but we might be at the end of a
-         * column, so try the next one.
-         */
-        if (!row) {
-            ++tblreq_info->colnum;
-            if (tad->tblreg_info->valid_columns) {
-                tblreq_info->colnum = netsnmp_closest_column
-                    (tblreq_info->colnum, tad->tblreg_info->valid_columns);
-            } else if (tblreq_info->colnum > tad->tblreg_info->max_column)
-                tblreq_info->colnum = 0;
-
-            if (tblreq_info->colnum != 0)
-                row = CONTAINER_FIRST(tad->table);
-        }
-    }
-
-    return row;
-}
-
 void
 build_new_oid(netsnmp_handler_registration *reginfo,
               netsnmp_table_request_info *tblreq_info,
@@ -486,7 +444,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
             /*
              * find the row
              */
-            row = find_next_row(tblreq_info, tad);
+            row = netsnmp_table_index_find_next_row(tad->table, tblreq_info);
             if (!row) {
                 /*
                  * no results found.
@@ -910,7 +868,7 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
     }
     
     /*
-     * Now we've done out processing. If there is another handler below us,
+     * Now we've done our processing. If there is another handler below us,
      * call them.
      */
     if (handler->next) {
