@@ -794,6 +794,8 @@ unregister_mibs_by_session (struct snmp_session *ss)
 {
   struct subtree *list, *list2;
   struct subtree *child, *prev, *next_child;
+  struct register_parameters rp;
+  oid namecopy[UCD_REGISTRY_OID_MAX_LEN] = { 0 };
 
   DEBUGMSGTL(("register_mib", "unregister_mibs_by_session(%08p)\n", ss));
 
@@ -806,8 +808,21 @@ unregister_mibs_by_session (struct snmp_session *ss)
       if (( (ss->flags & SNMP_FLAGS_SUBSESSION) && child->session == ss ) ||
           (!(ss->flags & SNMP_FLAGS_SUBSESSION) && child->session &&
                                       child->session->subsession == ss )) {
-              unload_subtree(child, prev);
-              free_subtree(child);
+
+	memcpy(namecopy, child->name, child->namelen*sizeof(oid));
+	rp.name         = namecopy;
+	rp.namelen      = child->namelen;
+	rp.priority     = child->priority;
+	rp.range_subid  = child->range_subid;
+	rp.range_ubound = child->range_ubound;
+	rp.timeout      = child->timeout;
+	rp.flags        = child->flags;
+
+	unload_subtree(child, prev);
+	free_subtree(child);
+
+	snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
+			    SNMPD_CALLBACK_UNREGISTER_OID, &rp);
       } else {
           prev = child;
       }
