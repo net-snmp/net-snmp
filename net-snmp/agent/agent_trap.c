@@ -713,8 +713,9 @@ static void trapOptProc(int argc, char *const *argv, int opt)
 
 
 void
-snmpd_parse_config_trapsess(const char *word, char *cptr) {
-    char *argv[MAX_ARGS];
+snmpd_parse_config_trapsess(const char *word, char *cptr)
+{
+    char *argv[MAX_ARGS], *cp = cptr, tmp[SPRINT_MAX_LEN];
     int argn, arg;
     struct snmp_session session, *ss;
 
@@ -723,21 +724,20 @@ snmpd_parse_config_trapsess(const char *word, char *cptr) {
 
     /* create the argv[] like array */
     argv[0] = strdup("snmpd-trapsess"); /* bogus entry for getopt() */
-    for(argn = 1; cptr && argn < MAX_ARGS; argn++) {
-	argv[argn] = strdup(cptr); /* more than enough room */
+    for(argn = 1; cp && argn < MAX_ARGS; argn++) {
+	cp = copy_nword(cp, tmp, SPRINT_MAX_LEN);
+	argv[argn] = strdup(tmp);
     }
 
     arg = snmp_parse_args(argn, argv, &session, "C:", trapOptProc);
-#ifdef XXX_BROKEN /* parse_args doesn't clone memory like it should */
-    do { free(argv[--argn]); } while (argn > 0);
-#endif
+    ss = snmp_open(&session);
 
-    if (session.remote_port == SNMP_DEFAULT_REMPORT)
-        session.remote_port = SNMP_TRAP_PORT;
-    ss = snmp_open (&session);
+    for (; argn > 0; argn--) {
+	free(argv[argn-1]);
+    }
 
     if (!ss) {
-        config_perror("snmpd: failed to parse this line or the remote trap receiver is down.  Pausible cause:");
+        config_perror("snmpd: failed to parse this line or the remote trap receiver is down.  Possible cause:");
         snmp_sess_perror("snmpd: snmpd_parse_config_trapsess()", &session);
         return;
     }
@@ -745,19 +745,24 @@ snmpd_parse_config_trapsess(const char *word, char *cptr) {
     if (ss->version == SNMP_VERSION_1) {
 	add_trap_session(ss, SNMP_MSG_TRAP, 0, SNMP_VERSION_1);
     } else {
-	add_trap_session( ss, traptype, (traptype==SNMP_MSG_INFORM), ss->version );
+	add_trap_session(ss, traptype, (traptype==SNMP_MSG_INFORM), ss->version);
     }
 }
 
 void
 snmpd_parse_config_trapcommunity(const char *word, char *cptr)
 {
-    if (snmp_trapcommunity) free(snmp_trapcommunity);
-    snmp_trapcommunity = (char *)malloc (strlen(cptr)+1);
-    copy_nword(cptr, snmp_trapcommunity, strlen(cptr)+1);
+    if (snmp_trapcommunity != NULL) {
+	free(snmp_trapcommunity);
+    }
+    snmp_trapcommunity = (char *)malloc(strlen(cptr)+1);
+    if (snmp_trapcommunity != NULL) {
+	copy_nword(cptr, snmp_trapcommunity, strlen(cptr)+1);
+    }
 }
 
-void snmpd_free_trapcommunity (void)
+void 
+snmpd_free_trapcommunity (void)
 {
     if (snmp_trapcommunity) {
 	free(snmp_trapcommunity);
