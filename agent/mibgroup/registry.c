@@ -59,7 +59,7 @@ extern struct subtree *subtrees;
 
 #define MATCH_FAILED	-1
 
-int
+struct subtree *
 header_registry(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;    /* IN - pointer to variable entry that points here */
     oid     *name;	    /* IN/OUT - input name requested, output name found */
@@ -72,13 +72,32 @@ header_registry(vp, name, length, exact, var_len, write_method)
     oid newname[MAX_NAME_LEN];
     int result,i;
     char c_oid[MAX_NAME_LEN];
-
+    struct subtree *mine = NULL;
+    
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
-      DEBUGP ("var_registry: %s %d\n", c_oid, exact);
+      DEBUGP ("var_registry: %s %d %d\n", c_oid, exact, *length);
+    }
+    if (*length < REGISTRY_NAME_LENGTH)
+      mine = subtrees;
+    else
+      mine = find_subtree_next(&(name[REGISTRY_NAME_LENGTH]),
+                               *length-REGISTRY_NAME_LENGTH,
+                               subtrees);
+    
+    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    if (mine != NULL) {
+      bcopy((char *)mine->name, (char *)(name+vp->namelen),
+            ((int)mine->namelen) * sizeof(oid));
+      *length = vp->namelen + mine->namelen;
     }
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    sprint_objid (c_oid, name, *length);
+    DEBUGP ("var_registry return: %s %d\n", c_oid, *length);
+
+    return mine;
+    
     for(i=0; i < subtree_size; i++) {
       newname[REGISTRY_NAME_LENGTH] = i+1;
       result = compare(name, *length, newname, (int)vp->namelen + 1);
@@ -87,7 +106,7 @@ header_registry(vp, name, length, exact, var_len, write_method)
     }
     if (i >= subtree_size) {
       DEBUGP ("... index out of range: %d > %d\n",i,subtree_size);
-      return(MATCH_FAILED);
+      return(NULL);
     }
     DEBUGP ("... doing %d\n", i);
     bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
@@ -95,7 +114,7 @@ header_registry(vp, name, length, exact, var_len, write_method)
 
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
-    return(i);
+    return(NULL);
 }
 
 
@@ -114,22 +133,19 @@ var_registry(vp, name, length, exact, var_len, write_method)
     int     *var_len;
     int     (**write_method)();
 {
-  int index;
+  struct subtree *index;
     if ((index =
          header_registry(vp, name, length, exact, var_len, write_method))
-        == MATCH_FAILED )
+        == NULL )
       return NULL;
 
     switch (vp->magic){
 	case REGISTRYINDEX:
-	    long_return = index+1;
-	    return (u_char *)&long_return;
+            *var_len = sizeof(oid)*(index->namelen);
+            return (u_char *) index->name;
         case REGISTRYNAME:
-            *var_len = strlen(subtrees[index].label);
-            return (u_char *) subtrees[index].label;
-        case REGISTRYOID:
-            *var_len = sizeof(oid)*(subtrees[index].namelen);
-            return (u_char *) subtrees[index].name;
+            *var_len = strlen(index->label);
+            return (u_char *) index->label;
         default:
             ERROR_MSG("");
     }
