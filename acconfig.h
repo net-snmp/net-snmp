@@ -29,6 +29,7 @@
 /* SNMPLIBDIR contains important files */
 
 #undef SNMPLIBPATH
+#undef SNMPSHAREPATH
 
 /* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
    place.  (stdin is closed so that sh scripts won't wait for it) */

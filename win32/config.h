@@ -79,7 +79,7 @@
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 #undef WORDS_BIGENDIAN
 
-#define SNMPLIBPATH "\\USR"
+#define SNMPSHAREPATH "\\USR"
 
 /* SNMPPATH contains (more) important files */
 
