@@ -86,7 +86,7 @@ void init_dummy(void)
 
 /* function which scans a given snmpd.conf line for information */
 
-void dummy_parse_config(char *word,
+void dummy_parse_config(char *token,
 			char *line)
 {
 }

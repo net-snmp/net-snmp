@@ -210,7 +210,7 @@ void read_config(char *filename,
 {
 
   FILE *ifile;
-  char line[STRINGMAX], word[STRINGMAX], tmpbuf[STRINGMAX];
+  char line[STRINGMAX], token[STRINGMAX], tmpbuf[STRINGMAX];
   char *cptr;
   int i, done;
   struct config_line *lptr;
@@ -236,24 +236,24 @@ void read_config(char *filename,
       /* check blank line or # comment */
       if ((cptr = skip_white(cptr)))
 	{
-          copy_word(cptr,word);
+          copy_word(cptr,token);
           cptr = skip_not_white(cptr);
           cptr = skip_white(cptr);
           if (cptr == NULL) {
-            sprintf(tmpbuf,"Blank line following %s token.", word);
+            sprintf(tmpbuf,"Blank line following %s token.", token);
             config_perror(tmpbuf);
           } else {
             for(lptr = line_handler, done=0;
                 lptr != NULL && !done;
                 lptr = lptr->next) {
-              if (!strcasecmp(word,lptr->config_token)) {
+              if (!strcasecmp(token,lptr->config_token)) {
                 if (when == EITHER_CONFIG || lptr->config_time == when)
-                  (*(lptr->parse_line))(word,cptr);
+                  (*(lptr->parse_line))(token,cptr);
                 done = 1;
               }
             }
             if (!done) {
-              sprintf(tmpbuf,"Unknown token: %s.", word);
+              sprintf(tmpbuf,"Unknown token: %s.", token);
               config_pwarn(tmpbuf);
             }
           }

@@ -72,7 +72,7 @@ deinit_dlmod (void)
 }
 
 static void 
-dlmod_parse_config(char *word,
+dlmod_parse_config(char *token,
 		   char *cptr)
 {
     char *dlm_name, *dlm_path;

@@ -95,7 +95,7 @@ void proc_free_config(void)
   numprocs = 0;
 }
 
-void proc_parse_config(char *word, char* cptr)
+void proc_parse_config(char *token, char* cptr)
 {
   /* skip past used ones */
   struct myproc **procp = &procwatch;

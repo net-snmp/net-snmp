@@ -64,7 +64,7 @@ void init_pass_persist(void)
                                 pass_persist_free_config,"miboid program");
 }
 
-void pass_persist_parse_config(char *word, char* cptr)
+void pass_persist_parse_config(char *token, char* cptr)
 {
   struct extensible **ppass = &persistpassthrus, **etmp, *ptmp;
   char *tcptr;
