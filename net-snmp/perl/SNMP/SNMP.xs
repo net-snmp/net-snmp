@@ -3302,10 +3302,20 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
                        type = __translate_asn_type(vars->type);
                     }
                     __get_label_iid(str_buf,&label,&iid,getlabel_flag);
-                    av_store(varbind, VARBIND_TAG_F,
-                             newSVpv(label, strlen(label)));
-                    av_store(varbind, VARBIND_IID_F,
-                             newSVpv(iid, strlen(iid)));
+                    if (label) {
+                        av_store(varbind, VARBIND_TAG_F,
+                                 newSVpv(label, strlen(label)));
+                    } else {
+                        av_store(varbind, VARBIND_TAG_F,
+                                 newSVpv("", 0));
+                    }
+                    if (iid) {
+                        av_store(varbind, VARBIND_IID_F,
+                                 newSVpv(iid, strlen(iid)));
+                    } else {
+                        av_store(varbind, VARBIND_IID_F,
+                                 newSVpv("", 0));
+                    }                        
                     __get_type_str(type, tmp_type_str);
                     tmp_sv = newSVpv(tmp_type_str, strlen(tmp_type_str));
                     av_store(varbind, VARBIND_TYPE_F, tmp_sv);
