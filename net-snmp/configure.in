@@ -108,6 +108,14 @@ AC_ARG_ENABLE(testing-code,
                                   be turned on for production use.  Ever.],
     AC_DEFINE(SNMP_TESTING_CODE))
 
+AC_ARG_ENABLE(reentrant,
+[  --enable-reentrant              Enables locking functions that protect
+                                  library resources in some multi-threading
+                                  environments.  This does not guarantee
+                                  thread-safe operation.
+                                  Currently an experimental setting.],
+    with_res_locks="yes",with_res_locks="no")
+
 AC_ARG_WITH(root-access,
 [
 Configuring the agent:
@@ -483,6 +491,28 @@ else
     SHLIB_EXTENSION="a"
     SHLIB_LD_CMD="ar cr"
     SHLIB_LDCONFIG_CMD=":"
+fi
+
+dnl
+dnl Maybe add library extensions for thread mutex locking.
+dnl
+
+if test "x$with_res_locks" = "xyes"; then
+
+    cat >> confdefs.h <<\EOF
+#define _REENTRANT 1
+EOF
+
+    case $target_os in
+
+    aix*)
+	CC_RUNTIME_ARG="$CC_RUNTIME_ARG -lpthreads"
+	;;
+
+    *)
+	;;
+
+    esac
 fi
 AC_SUBST(CC_RUNTIME_ARG)
 AC_SUBST(SHLIB_CFLAGS)
