@@ -25,6 +25,7 @@
 
 #include "asn1.h"
 #include "snmp_api.h"
+#include "snmp_client.h"
 #include "snmp_impl.h"
 #include "snmp.h"
 #include "system.h"
@@ -216,7 +217,7 @@ handle_master_agentx_packet(int operation,
     if ( magic )
         asp = (struct agent_snmp_session *)magic;
     else
-    	asp = init_agent_snmp_session(session, pdu );
+    	asp = init_agent_snmp_session(session, snmp_clone_pdu(pdu) );
 
     switch (pdu->command) {
         case AGENTX_MSG_OPEN:
