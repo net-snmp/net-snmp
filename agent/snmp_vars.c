@@ -280,6 +280,7 @@ search_subtree_vars(struct subtree *tp,
     oid			save[MAX_OID_LEN];
     size_t		savelen = 0;
 #endif
+    char		c_oid[SPRINT_MAX_LEN];
 
 	    if ( tp->variables == NULL )
 		return NULL;
@@ -322,8 +323,12 @@ search_subtree_vars(struct subtree *tp,
                     memcpy(save, name, *namelen);
                     savelen = *namelen;
 #endif
+	    	    sprint_objid(c_oid, cvp->name, cvp->namelen);
+	    	    DEBUGMSGTL(("snmp_vars", "Trying variable  %s....\n", c_oid));
 		    access = (*(vp->findVar))(cvp, name, namelen, exact,
 						  len, write_method);
+	    	    DEBUGMSGTL(("snmp_vars", "Returned %s\n",
+				(access==NULL) ? "(null)" : "something" ));
 #ifdef MIB_CLIENTS_ARE_EVIL
                     if (access == NULL) {
                       memcpy(name, save, savelen);
@@ -385,6 +390,7 @@ getStatPtr(
     u_char              result_type;
     u_short             result_acl;
     u_char        *search_return=NULL;
+    char		c_oid[SPRINT_MAX_LEN];
 
     found = FALSE;
 
@@ -393,12 +399,16 @@ getStatPtr(
 	savelen = *namelen;
     }
     *write_method = NULL;
+    sprint_objid(c_oid, name, *namelen);
+    DEBUGMSGTL(("snmp_vars", "Looking for %s....\n", c_oid));
     tp = find_subtree(name, *namelen, NULL);
     while ( search_return == NULL && tp != NULL ) {
+	sprint_objid(c_oid, tp->name, tp->namelen);
+	DEBUGMSGTL(("snmp_vars", "Trying tree  %s....\n", c_oid));
 	search_return = search_subtree_vars( tp, name, namelen, &result_type,
                                         len, &result_acl, exact, write_method,
                                         pdu, noSuchObject);
-	if ( search_return != NULL || (*write_method != NULL && exact))
+	if ( search_return != NULL || exact )
 	    break;
 	tp = tp->next;
     }
