@@ -698,7 +698,7 @@ eventSendTrap(event, eventType, generic)
 	uptime = get_uptime();
 	vp->val_len = sizeof(uptime);
 	vp->val.objid = (oid *)malloc(vp->val_len);
-	bcopy(uptime, vp->val.integer, vp->val_len);
+	bcopy(&uptime, vp->val.integer, vp->val_len);
 	vp->next_variable = NULL;
 	
 	vp->next_variable
