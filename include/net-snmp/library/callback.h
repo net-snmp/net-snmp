@@ -34,6 +34,7 @@ extern          "C" {
     struct snmp_gen_callback {
         SNMPCallback   *sc_callback;
         void           *sc_client_arg;
+        int             priority;
         struct snmp_gen_callback *next;
     };
 
@@ -41,6 +42,10 @@ extern          "C" {
      * function prototypes 
      */
     void            init_callbacks(void);
+
+    int             netsnmp_register_callback(int major, int minor,
+                                              SNMPCallback * new_callback,
+                                              void *arg, int priority);
     int             snmp_register_callback(int major, int minor,
                                            SNMPCallback * new_callback,
                                            void *arg);
