@@ -119,12 +119,13 @@ void init_extensible(void)
 {
 
   struct variable2 extensible_extensible_variables[] = {
-    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_shell, 1, {MIBINDEX}},
-    {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_shell, 1, {ERRORNAME}}, 
-    {SHELLCOMMAND, ASN_OCTET_STR, RONLY, var_extensible_shell, 1, {SHELLCOMMAND}}, 
-    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_shell, 1, {ERRORFLAG}},
-    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_shell, 1, {ERRORMSG}},
-    {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_shell, 1, {ERRORFIX }}
+    {MIBINDEX,     ASN_INTEGER,   RONLY,  var_extensible_shell, 1, {MIBINDEX}},
+    {ERRORNAME,    ASN_OCTET_STR, RONLY,  var_extensible_shell, 1, {ERRORNAME}}, 
+    {SHELLCOMMAND, ASN_OCTET_STR, RONLY,  var_extensible_shell, 1, {SHELLCOMMAND}}, 
+    {ERRORFLAG,    ASN_INTEGER,   RONLY,  var_extensible_shell, 1, {ERRORFLAG}},
+    {ERRORMSG,     ASN_OCTET_STR, RONLY,  var_extensible_shell, 1, {ERRORMSG}},
+    {ERRORFIX,     ASN_INTEGER,   RWRITE, var_extensible_shell, 1, {ERRORFIX}},
+    {ERRORFIXCMD,  ASN_OCTET_STR, RONLY,  var_extensible_shell, 1, {ERRORFIXCMD}}
   };
 
 /* Define the OID pointer to the top of the mib tree that we're
@@ -141,6 +142,8 @@ void init_extensible(void)
   snmpd_register_config_handler("sh", extensible_parse_config,
                                 extensible_free_config,
                                 "[miboid] name program-or-script arguments");
+  snmpd_register_config_handler("execfix", execfix_parse_config, NULL,
+                                "exec-or-sh-name program [arguments...]");
 }
 
 void extensible_parse_config(char *token, char* cptr)
@@ -197,6 +200,9 @@ void extensible_parse_config(char *token, char* cptr)
     (*pptmp)->command[tcptr-cptr] = 0;
     (*pptmp)->next = NULL;
   }
+#ifdef PROCFIXCMD
+  sprintf((*pptmp)->fixcmd, EXECFIXCMD, (*pptmp)->name);
+#endif
   if ((*pptmp)->miblen > 0) {
     register_mib(token, (struct variable *) extensible_relocatable_variables,
                  sizeof(struct variable2),
@@ -257,6 +263,37 @@ int numextens=0,numrelocs=0;                    /* ditto */
   
 */
 
+/* find a give entry in the linked list associated with a proc name */
+struct extensible *get_exec_by_name(char *name) {
+  struct extensible *etmp;
+
+  if (name == NULL)
+    return NULL;
+
+  for(etmp = extens; etmp != NULL && strcmp(etmp->name, name) != 0;
+        etmp = etmp->next);
+  return etmp;
+}
+   
+void execfix_parse_config(char *token, char* cptr) {
+  char tmpname[STRMAX];
+  struct extensible *execp;
+
+  /* don't allow two entries with the same name */
+  cptr = copy_word(cptr,tmpname);
+  if ((execp = get_exec_by_name(tmpname)) == NULL) {
+    config_perror("No exec entry registered for this exec name yet.");
+    return;
+  }
+
+  if (strlen(cptr) > sizeof(execp->fixcmd)) {
+    config_perror("fix command too long.");
+    return;
+  }
+
+  strcpy(execp->fixcmd, cptr);
+}
+
 unsigned char *var_extensible_shell(struct variable *vp,
 				    oid *name,
 				    int *length,
@@ -300,6 +337,10 @@ unsigned char *var_extensible_shell(struct variable *vp,
         *write_method = fixExecError;
         long_return = 0;
         return ((u_char *) &long_return);
+
+      case ERRORFIXCMD:
+        *var_len = strlen(exten->fixcmd);
+        return ((u_char *) exten->fixcmd);
     }
     return NULL;
   }
@@ -328,9 +369,8 @@ fixExecError(int action,
       return SNMP_ERR_WRONGTYPE;
     }
     asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
-#ifdef EXECFIXCMD
-    if (tmp == 1 && action == COMMIT) {
-      sprintf(ex.command,EXECFIXCMD,exten->name);
+    if (tmp == 1 && action == COMMIT && exten->fixcmd[0] != NULL) {
+      sprintf(ex.command, exten->fixcmd);
       if ((fd = get_exec_output(&ex))) {
         file = fdopen(fd,"r");
         while (fgets(ex.output,STRMAX,file) != NULL);
@@ -338,8 +378,7 @@ fixExecError(int action,
         close(fd);
         wait_on_exec(&ex);
       }
-    } 
-#endif
+    }
     return SNMP_ERR_NOERROR;
   }
   return SNMP_ERR_WRONGTYPE;

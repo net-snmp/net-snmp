@@ -17,6 +17,7 @@ int get_ps_output (struct extensible *);
 /* config file parsing routines */
 void proc_free_config (void);
 void proc_parse_config (char *, char *);
+void procfix_parse_config (char *, char *);
 
 #include "mibdefs.h"
 

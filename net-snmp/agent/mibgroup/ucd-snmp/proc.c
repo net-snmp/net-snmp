@@ -56,14 +56,15 @@ void init_proc(void)
 /* define the structure we're going to ask the agent to register our
    information at */
   struct variable2 extensible_proc_variables[] = {
-    {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_proc, 1, {MIBINDEX}},
-    {ERRORNAME, ASN_OCTET_STR, RONLY, var_extensible_proc, 1, {ERRORNAME}}, 
-    {PROCMIN, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCMIN}}, 
-    {PROCMAX, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCMAX}},
-    {PROCCOUNT, ASN_INTEGER, RONLY, var_extensible_proc, 1, {PROCCOUNT}},
-    {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_proc, 1, {ERRORFLAG}},
-    {ERRORMSG, ASN_OCTET_STR, RONLY, var_extensible_proc, 1, {ERRORMSG}},
-    {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_proc, 1, {ERRORFIX }}
+    {MIBINDEX,    ASN_INTEGER,   RONLY,  var_extensible_proc, 1, {MIBINDEX}},
+    {ERRORNAME,   ASN_OCTET_STR, RONLY,  var_extensible_proc, 1, {ERRORNAME}}, 
+    {PROCMIN,     ASN_INTEGER,   RONLY,  var_extensible_proc, 1, {PROCMIN}}, 
+    {PROCMAX,     ASN_INTEGER,   RONLY,  var_extensible_proc, 1, {PROCMAX}},
+    {PROCCOUNT,   ASN_INTEGER,   RONLY,  var_extensible_proc, 1, {PROCCOUNT}},
+    {ERRORFLAG,   ASN_INTEGER,   RONLY,  var_extensible_proc, 1, {ERRORFLAG}},
+    {ERRORMSG,    ASN_OCTET_STR, RONLY,  var_extensible_proc, 1, {ERRORMSG}},
+    {ERRORFIX,    ASN_INTEGER,   RWRITE, var_extensible_proc, 1, {ERRORFIX}},
+    {ERRORFIXCMD, ASN_OCTET_STR, RONLY,  var_extensible_proc, 1, {ERRORFIXCMD}}
   };
 
 /* Define the OID pointer to the top of the mib tree that we're
@@ -76,14 +77,15 @@ void init_proc(void)
 
   snmpd_register_config_handler("proc", proc_parse_config, proc_free_config,
                                 "process-name [max-num] [min-num]");
+  snmpd_register_config_handler("procfix", procfix_parse_config, NULL,
+                                "process-name program [arguments...]");
 }
 
 
 /* Define snmpd.conf reading routines first.  They get called
    automatically by the invocation of a macro in the proc.h file. */
 
-void proc_free_config(void)  
-{
+void proc_free_config(void) {
   struct myproc *ptmp, *ptmp2;
   
   for (ptmp = procwatch; ptmp != NULL;) {
@@ -95,10 +97,52 @@ void proc_free_config(void)
   numprocs = 0;
 }
 
+/* find a give entry in the linked list associated with a proc name */
+struct myproc *get_proc_by_name(char *name) {
+  struct myproc *ptmp;
+
+  if (name == NULL)
+    return NULL;
+
+  for(ptmp = procwatch; ptmp != NULL && strcmp(ptmp->name, name) != 0;
+        ptmp = ptmp->next);
+  return ptmp;
+}
+   
+void procfix_parse_config(char *token, char* cptr)
+{
+  char tmpname[STRMAX];
+  struct myproc *procp;
+
+  /* don't allow two entries with the same name */
+  cptr = copy_word(cptr,tmpname);
+  if ((procp = get_proc_by_name(tmpname)) == NULL) {
+    config_perror("No proc entry registered for this proc name yet.");
+    return;
+  }
+
+  if (strlen(cptr) > sizeof(procp->fixcmd)) {
+    config_perror("fix command too long.");
+    return;
+  }
+
+  strcpy(procp->fixcmd, cptr);
+}
+
+
 void proc_parse_config(char *token, char* cptr)
 {
-  /* skip past used ones */
+  char tmpname[STRMAX];
   struct myproc **procp = &procwatch;
+
+  /* don't allow two entries with the same name */
+  copy_word(cptr,tmpname);
+  if (get_proc_by_name(tmpname) != NULL) {
+    config_perror("Already have an entry for this process.");
+    return;
+  }
+
+  /* skip past used ones */
   while (*procp != NULL)
     procp = &((*procp)->next);
   
@@ -122,6 +166,9 @@ void proc_parse_config(char *token, char* cptr)
       (*procp)->max = 0;
       (*procp)->min = 0;
     }
+#ifdef PROCFIXCMD
+  sprintf((*procp)->fixcmd, PROCFIXCMD, (*procp)->name);
+#endif
   DEBUGMSGTL(("ucd-snmp/proc", "Read:  %s (%d) (%d)\n",
               (*procp)->name, (*procp)->max, (*procp)->min));
 }
@@ -197,6 +244,14 @@ unsigned char *var_extensible_proc(struct variable *vp,
         *write_method = fixProcError;
         long_return = fixproc.result;
         return ((u_char *) &long_return);
+      case ERRORFIXCMD:
+        if (proc->fixcmd) {
+          *var_len = strlen(proc->fixcmd);
+          return proc->fixcmd;
+        }
+        errmsg[0] = 0;
+        *var_len = 0;
+        return ((u_char *) errmsg);
     }
     return NULL;
   }
@@ -224,10 +279,10 @@ fixProcError(int action,
     }
     asn_parse_int(var_val,&tmplen,&var_val_type,&tmp,sizeof(int));
     if (tmp == 1 && action == COMMIT) {
-#ifdef PROCFIXCMD
-      sprintf(fixproc.command,PROCFIXCMD,proc->name);
-      exec_command(&fixproc);
-#endif
+      if (proc->fixcmd[0]) {
+        strcpy(fixproc.command, proc->fixcmd);
+        exec_command(&fixproc);
+      }
     } 
     return SNMP_ERR_NOERROR;
   }
