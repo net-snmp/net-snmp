@@ -1159,6 +1159,7 @@ fileName OBJECT-TYPE
 
 fileSize OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
@@ -1167,6 +1168,7 @@ fileSize OBJECT-TYPE
 
 fileMax	OBJECT-TYPE
     SYNTAX	Integer32
+    UNITS       "kB"
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
