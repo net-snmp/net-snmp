@@ -80,10 +80,8 @@ date_n_time ( time_t *when, size_t  *length)
 	/*
 	 * Timezone offset
 	 */
-#ifndef SYSV
-#ifndef aix4
+#if !defined(SYSV) && !defined(aix4) && !defined(aix5) && !defined(WIN32) && !defined(irix6)
 #define timezone tm_p->tm_gmtoff
-#endif
 #endif
     if ( timezone > 0 )
 	string[8] = '-';
