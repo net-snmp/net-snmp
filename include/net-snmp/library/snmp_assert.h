@@ -1,7 +1,7 @@
 #ifndef SNMP_ASSERT_H
 #define SNMP_ASSERT_H
 
-#ifdef NET_SNMP_USE_ASSERT
+#ifdef NETSNMP_USE_ASSERT
 #   include <assert.h>
 #else
 #   include <net-snmp/library/snmp_logging.h>
@@ -14,7 +14,7 @@
 
 #ifdef DEBUG
 
-#ifdef NET_SNMP_USE_ASSERT
+#ifdef NETSNMP_USE_ASSERT
 /*   void netsnmp_assert( int );*/
 #   define netsnmp_assert(x)  assert( x )
 #else
