@@ -16,8 +16,6 @@ CC		= @CC@ $(CPPFLAGS)
 
 MIBOBJS		= @mibgroup_list_o@ mib_modules.o
 
-PERSISTENT_DIRECTORY=@PERSISTENT_DIRECTORY@
-
 AGENTOBJS=snmpd.o kernel.o auto_nlist.o
 LIBAGENTOBJS=snmp_agent.o snmp_vars.o agent_read_config.o agent_registry.o \
 	agent_trap.o
@@ -70,7 +68,8 @@ install:  installdirs
 #	cd dlmods ; $(MAKE) install; cd ..
 
 installdirs:
-	@$(SHELL) $(srcdir)/../mkinstalldirs $(sbindir) $(snmplibdir) $(PERSISTENT_DIRECTORY) $(includedir) $(libdir)
+	@$(SHELL) $(srcdir)/../mkinstalldirs $(sbindir) $(snmplibdir) $(includedir) $(libdir)
+	@-$(SHELL) $(srcdir)/../mkinstalldirs $(persistentdir)
 
 
 dependlocal: 
