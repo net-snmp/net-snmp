@@ -289,6 +289,8 @@ get_ifname(char *name, int ifIndex)
     status = snmp_synch_response(Session, pdu, &response);
     if (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR){
 	vp = response->variables;
+        if (vp->val_len >= sizeof(ip->name))
+            vp->val_len = sizeof(ip->name) - 1;
         memmove(ip->name, vp->val.string, vp->val_len);
 	ip->name[vp->val_len] = '\0';
 	snmp_free_pdu(response);
