@@ -291,7 +291,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
             }
           } else if (!strncasecmp(word,"syscon",6)) {
             if (strlen(cptr) < 128) {
-              strcpy(sysContact,cptr,strlen(cptr)-1);
+              strcpy(sysContact,cptr);
               sysContact[strlen(sysContact)-1] = NULL;  /* chomp new line */
             } else
               fprintf(stderr,
@@ -299,7 +299,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
                       cptr);
           } else if (!strncasecmp(word,"sysloc",6)) {
             if (strlen(cptr) < 128) {
-              strcpy(sysLocation,cptr,strlen(cptr)-1);
+              strcpy(sysLocation,cptr);
               sysLocation[strlen(sysLocation)-1] = NULL; /* chomp new line */
             } else
               fprintf(stderr,
