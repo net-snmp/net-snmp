@@ -1,4 +1,4 @@
-.TH SNMP.CONF 5 "04 Dec 2002" VVERSIONINFO "Net-SNMP"
+.TH SNMP.CONF 5 "11 Dec 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 DATADIR/snmp/snmp.conf - configuration file for the Net-SNMP applications.
@@ -41,6 +41,9 @@ list read from the MIBs token.  Note that the value specified here can
 be overridden by the
 .B MIBFILES
 environment variable.
+.IP "persistentDir directory"
+The directory where snmpd and snmptrapd stores their persistent data
+files.
 .IP "defaultPort port"
 The default port number that all SNMP applications and daemons should use.
 .IP "defVersion (v1|v2c|v3)"
