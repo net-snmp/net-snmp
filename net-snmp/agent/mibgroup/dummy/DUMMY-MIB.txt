@@ -1,0 +1,64 @@
+DUMMY-MIB DEFINITIONS ::= BEGIN
+
+--
+--  Dummy Host Interface MIB.
+--
+
+IMPORTS
+        enterprises, OBJECT-TYPE 				
+	    FROM SNMPv2-SMI
+	DisplayString 				
+	    FROM SNMPv2-TC;
+
+-- private	  OBJECT IDENTIFIER ::= { internet 4 }
+-- enterprises    OBJECT IDENTIFIER ::= { private 1 }
+dynarc          OBJECT IDENTIFIER ::= { enterprises 3209 }
+-- processes      OBJECT IDENTIFIER ::= { dynarc 2 }
+-- exec           OBJECT IDENTIFIER ::= { dynarc 3 }
+
+
+
+dtmInterfaceInfo OBJECT-TYPE
+	SYNTAX DisplayString  (SIZE (0..255))
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"Information about the Dynarc DTM Host Interface."
+	::= { dynarc 1 }
+
+
+dtmInterfaceId OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"The interface identity."
+	::= { dynarc 2 }
+
+dtmNumberOfInterfaces OBJECT-TYPE
+	SYNTAX Processes
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"Number of interfaces on the system."
+	::= { dynarc 3 }
+
+dtmCapacity OBJECT-TYPE
+	SYNTAX Processes
+	ACCESS not-accessible
+	STATUS mandatory
+	DESCRIPTION
+		"A set of information on running programs/daemons."
+	::= { dynarc 4 }
+
+dtmSlotManagementScheme OBJECT-TYPE
+	SYNTAX INTEGER
+	ACCESS read-only
+	STATUS mandatory
+	DESCRIPTION
+		"A set of information on running programs/daemons."
+	::= { dynarc 5 }
+
+
+END
+
