@@ -195,7 +195,7 @@ sub translateObj {
    SNMP::init_snmp("perl");
    my $obj = shift;
    my $temp = shift;
-   my $include_module_name = shift;
+   my $include_module_name = shift || "0";
    my $long_names = $temp || $SNMP::use_long_names;
 
    return undef if not defined $obj;
