@@ -121,7 +121,7 @@ typedef struct _PrefixList {
  * Period is added where needed.  See use of Prefix in this module.
  */
 PrefixList mib_prefixes[] = {
-	{ &Standard_Prefix[0] }, // placeholder for Prefix data
+        { &Standard_Prefix[0] }, /* placeholder for Prefix data */
 	{ ".iso.org.dod.internet.mgmt.mib-2" },
 	{ ".iso.org.dod.internet.experimental" },
 	{ ".iso.org.dod.internet.private" },
