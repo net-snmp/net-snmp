@@ -61,6 +61,8 @@ TABLE OF CONTENTS
        the first two characters of the filename.  What's happening?
    Why aren't my mib files being read in?
    I'm getting answers, but they're all numbers. Why?
+   What does "Cannot find module (XXX-MIB)" mean?
+   What about "unlinked OID"?
    The parser doesn't handle comments properly. Why not?
    How do I replace MIB values with new ones ?
    How can I get more information about these MIB file problems?
@@ -1267,6 +1269,23 @@ What does "Cannot find module (XXX-MIB)" mean?
   likely that either the MIB files haven't been installed at all,
   or the library is looking in the wrong place.   See the previous
   two questions.
+
+
+
+What about "unlinked OID"?
+-------------------------
+
+    This means that the library has been able to find the MIB module,
+  and parse the individual objects defined in it, but is having problems
+  linking them together into a consistent tree.  In particular, it
+  can't find an object corresponding to the name within the braces
+  (i.e. the 'xxx' in '{xxx 99}').
+
+    This is probably due either to a typo in this name (remember that
+  names are case sensitive, so a reference to 'xxx' will *not* match
+  a definition of 'Xxx'), or else the name is defined in another MIB
+  file, and this dependency is missing from the IMPORT clause of this
+  MIB file.
 
 
 
