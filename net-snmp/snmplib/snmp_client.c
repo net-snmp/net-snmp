@@ -199,7 +199,7 @@ snmp_fix_pdu(pdu, command)
 	memmove(newpdu->enterprise, pdu->enterprise, pdu->enterprise_length);
     }
     if (pdu->community){
-	newpdu->community = malloc(pdu->community_len);
+	newpdu->community = (u_char *)malloc(pdu->community_len);
 	memmove(newpdu->community, pdu->community, pdu->community_len);
     }
     var = pdu->variables;
@@ -302,7 +302,7 @@ snmp_clone_pdu(pdu)
 	memmove(newpdu->enterprise, pdu->enterprise, pdu->enterprise_length);
     }
     if (pdu->community){
-	newpdu->community = malloc(pdu->community_len);
+	newpdu->community = (u_char *)malloc(pdu->community_len);
 	memmove(newpdu->community, pdu->community, pdu->community_len);
     }
     return newpdu;

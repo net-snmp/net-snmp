@@ -1,5 +1,6 @@
 
 extern int snmp_dump_packet;
+extern int verbose;
 
 extern int snmp_agent_parse __P((u_char *, int, u_char *, int *, u_long));
 extern void init_snmp __P((void));

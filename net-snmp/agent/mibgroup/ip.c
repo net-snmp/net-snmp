@@ -15,6 +15,7 @@
 	 *
 	 *********************/
 
+#ifndef linux
 static struct nlist ip_nl[] = {
 #define N_IPSTAT	0
 #define N_IPFORWARDING	1
@@ -40,10 +41,11 @@ static struct nlist ip_nl[] = {
 #endif
         { 0 },
 };
+#endif
 
 
 #ifdef linux
-static void linux_read_ip_stat ();
+static void linux_read_ip_stat __P((struct ip_mib *));
 #endif
 
 	/*********************
@@ -56,7 +58,9 @@ extern void init_routes __P((void));
 
 void init_ip()
 {
+#ifndef linux
     init_nlist( ip_nl );
+#endif
 }
 
 
@@ -122,7 +126,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
 #endif
     int i;
 
-    if (header_icmp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
+    if (header_ip(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
 
     /*
@@ -274,7 +278,7 @@ var_ip(vp, name, length, exact, var_len, write_method)
 {
     static struct ip_mib ipstat;
 
-    if (header_icmp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
+    if (header_ip(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
 
     linux_read_ip_stat (&ipstat);
@@ -361,7 +365,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 
 #endif
 
-#if !defined(linux) && !defined(freebsd2) && !defined(STRUCT_IFNET_HAS_IF_ADDRLIST)
+#ifdef STRUCT_IFNET_HAS_IF_ADDRLIST
       if ( ifnet.if_addrlist == 0 )
           continue;                   /* No address found for interface */
 #endif /* linux/freebsd2 */
@@ -417,9 +421,13 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	    return(u_char *) &long_return;
 	case IPADNETMASK:
 #ifndef sunV3
+#ifdef linux
+            return &((struct sockaddr_in *)&lowin_ifner.ia_subnetmask)->sin_addr.s_addr;
+#else
 	    long_return = ntohl(lowin_ifaddr.ia_subnetmask);
-#endif
 	    return(u_char *) &long_return;
+#endif
+#endif
 	case IPADBCASTADDR:
 	    
 #ifdef sunV3
