@@ -600,7 +600,7 @@ struct variable_list *snmp_pdu_add_variable (struct snmp_pdu *, oid *, size_t, u
 struct variable_list *snmp_varlist_add_variable(struct variable_list **varlist,
 	oid *name, size_t name_length, u_char type, u_char *value, size_t len);
 int snmp_add_var (struct snmp_pdu *, oid*, size_t, char, const char *);
-oid  *snmp_duplicate_objid(oid *objToCopy, size_t);
+oid  *snmp_duplicate_objid(const oid *objToCopy, size_t);
 u_int snmp_increment_statistic(int which);
 u_int snmp_increment_statistic_by(int which, int count);
 u_int snmp_get_statistic(int which);
