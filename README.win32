@@ -433,7 +433,10 @@ components to an install directory named in the INSTALL_BASE variable.
 
 OpenSSL is required to support the encryption capabilities in SNMPv3
 (and will also support MD5 authentication).  The win32 version of OpenSSL
-can be built from the sources.  The sequence of actions are these:
+can be built from the sources or you can download a pre-compiled version.
+
+Building from source:
+=====================
 
  1. Install an assembler.  If you do not have the M$ assembler installed (MASM)
     you can get a free one(NASM) from:
@@ -441,13 +444,14 @@ can be built from the sources.  The sequence of actions are these:
 	http://www.kernel.org/pub/software/devel/nasm
 
 
- 2. Obtain the OpenSSL source from the link below. Follow instructions in INSTALL.W32
+ 2. Obtain the OpenSSL source from the link below. Follow instructions in 
+    INSTALL.W32
 
 	ftp://ftp.openssl.org/source/
 
 
- 3. Once the OpenSSL libraries are built, you must copy them to the net-snmp
-    source tree:
+ 3. Once the OpenSSL libraries are built, you must copy them to the the MSVC 
+    directory:
 
     a.  Copy the inc32\openssl folder to the include folder of MSVC++
 
@@ -463,14 +467,38 @@ can be built from the sources.  The sequence of actions are these:
 
         Example: "C:\winnt\system32\libeay32.dll"
 
+Using a pre-compiled version
+============================
 
- 4. Edit the win32\net-snmp\net-snmp-config.h header file.  Change:
+ 1. Obtain the latest OpenSSL binary from the link below. 
+
+	http://www.slproweb.com/products/Win32OpenSSL.html
+
+ 2. Install the package to c:\OpenSSL.
+
+ 3. Copy the header and library files to the the MSVC directory:
+
+    a.  Copy the c:\OpenSSL\include\openssl folder to the include folder of 
+        MSVC++.
+
+        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
+                  Vc7\include\openssl\*.h"
+
+    b.  Copy c:\OpenSSL\lib\VC\libeay32.lib to the lib folder of MSVC++.
+
+        Example: "C:\Program Files\Microsoft Visual Studio .NET 2003\
+                  Vc7\lib\libeay32.lib"
+
+Project changes
+===============
+
+ 1. Edit the win32\net-snmp\net-snmp-config.h header file.  Change:
 	#define USE_INTERNAL_MD5 1
     to:
 	#undef USE_INTERNAL_MD5
 	#define USE_OPENSSL 1
 
- 5. Open Visual Studio, add the link line to the Project Settings.
+ 2. Open Visual Studio, add the link line to the Project Settings.
 
    MS VC++ 6.0:
    ------------
@@ -686,19 +714,28 @@ builds under MinGW with MSyS is available at:
 
 OpenSSL is required to support the encryption capabilities in SNMPv3
 (and will also support MD5 authentication).  A pre-compiled MinGW compatible 
-version of OpenSSL can be downloaded from:
+version of OpenSSL is available on the Internet.
 
-        http://gnuwin32.sourceforge.net/
+Follow these steps to install OpenSSL:
 
- 1. Extract openssl-0.9.7c-lib.zip (developer files) to c:\MinGW to install 
-    the header and library files.
+ 1. Obtain the latest OpenSSL binary from the link below. 
 
- 2. Extract libeay32.dll from openssl-0.9.7c-bin.zip (binary files) to your
-    %windir%\system32 folder.
+	http://www.slproweb.com/products/Win32OpenSSL.html
 
-        Example: "C:\winnt\system32\libeay32.dll"
+ 2. Install the package to c:\OpenSSL
 
- 3. Continue with the section 'MinGW - Building"
+ 3. Copy the header and library files to the the MinGW directory:
+
+    a.  Copy the c:\OpenSSL\include\openssl folder to the include folder in 
+        MinGW.
+
+        Example: "C:\MinGW\include\openssl\*.h"
+
+    b.  Copy c:\OpenSSL\lib\MinGW\libeay32.lib to the lib folder in Mingw.
+
+        Example: "C:\MinGW\lib\libeay32.lib"
+
+ 4. Continue with the section 'MinGW - Building"
 
 
 ***************************************************************************
