@@ -182,6 +182,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
       snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
 			  SNMPD_CALLBACK_INDEX_STOP, (void *)session);
       agentx_unregister_callbacks(session);
+      remove_trap_session(session);
       register_mib_detach();
       main_session = NULL;
       if (period != 0) {
@@ -451,21 +452,6 @@ subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
   return 1;
 }
 
-static int
-subagent_register_for_traps(int majorID, int minorID, void *serverarg, void *clientarg) {
-  struct snmp_session *thesession = (struct snmp_session *) clientarg;
-  DEBUGMSGTL(("agentx/subagent","registering trap session....\n"));
-  if (thesession == NULL) {
-    DEBUGMSGTL(("agentx/subagent","No session to register\n"));
-    return 0;
-  }
-  if (add_trap_session( thesession, AGENTX_MSG_NOTIFY, 1, AGENTX_VERSION_1) == 0){
-    DEBUGMSGTL(("agentx/subagent","Trap session registration failed\n"));
-    return 0;
-  }
-  DEBUGMSGTL(("agentx/subagent","Trap session registered OK\n"));
-  return 1;
-}
 
 
 /*  Register all the "standard" AgentX callbacks for the given session.  */
@@ -477,9 +463,6 @@ agentx_register_callbacks(struct snmp_session *s)
   snmp_register_callback(SNMP_CALLBACK_LIBRARY,
 			 SNMP_CALLBACK_POST_READ_CONFIG,
 			 subagent_register_ping_alarm, s);
-  snmp_register_callback(SNMP_CALLBACK_LIBRARY,
-			 SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
-			 subagent_register_for_traps, s);
   snmp_register_callback(SNMP_CALLBACK_LIBRARY,
 			 SNMP_CALLBACK_SHUTDOWN,
 			 subagent_shutdown, s);
@@ -510,9 +493,6 @@ agentx_unregister_callbacks(struct snmp_session *ss)
 			   SNMP_CALLBACK_POST_READ_CONFIG,
 			   subagent_register_ping_alarm, ss, 1);
   snmp_unregister_callback(SNMP_CALLBACK_LIBRARY,
-			   SNMP_CALLBACK_POST_PREMIB_READ_CONFIG,
-			   subagent_register_for_traps, ss, 1);
-  snmp_unregister_callback(SNMP_CALLBACK_LIBRARY,
 			   SNMP_CALLBACK_SHUTDOWN,
                            subagent_shutdown, ss, 1);
   snmp_unregister_callback(SNMP_CALLBACK_APPLICATION,
@@ -534,10 +514,11 @@ agentx_unregister_callbacks(struct snmp_session *ss)
 
 /*  Open a session to the master agent.  */
 int
-subagent_open_master_session(void) {
+subagent_open_master_session(void)
+{
     struct snmp_session sess;
 
-    DEBUGMSGTL(("agentx/subagent","opening session....\n"));
+    DEBUGMSGTL(("agentx/subagent", "opening session...\n"));
 
     if (main_session) {
         snmp_log(LOG_WARNING,
@@ -545,32 +526,44 @@ subagent_open_master_session(void) {
         return -1;
     }
     
-    snmp_sess_init( &sess );
+    snmp_sess_init(&sess);
     sess.version = AGENTX_VERSION_1;
     sess.retries = SNMP_DEFAULT_RETRIES;
     sess.timeout = SNMP_DEFAULT_TIMEOUT;
     sess.flags  |= SNMP_FLAGS_STREAM_SOCKET;
-    if ( ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET) )
+    if (ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET)) {
 	sess.peername = ds_get_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET);
-    else
+    } else {
 	sess.peername = AGENTX_SOCKET;
+    }
  
     sess.local_port  = 0;		/* client */
     sess.remote_port = AGENTX_PORT;	/* default port */
     sess.callback = handle_agentx_packet;
     sess.authenticator = NULL;
-    main_session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build,
-                                 agentx_check_packet );
+    main_session = snmp_open_ex(&sess, 0, agentx_parse, 0, agentx_build,
+                                 agentx_check_packet);
 
-    if ( main_session == NULL ) {
-      /* diagnose snmp_open errors with the input struct snmp_session pointer */
+    if (main_session == NULL) {
+	/*  Diagnose snmp_open errors with the input
+	    struct snmp_session pointer.  */
 	snmp_sess_perror("subagent_pre_init", &sess);
 	return -1;
     }
 
-    if ( agentx_open_session( main_session ) < 0 ) {
-	snmp_close( main_session );
+    if (agentx_open_session(main_session) < 0) {
+	snmp_close(main_session);
         main_session = NULL;
+	return -1;
+    }
+
+    if (add_trap_session(main_session, AGENTX_MSG_NOTIFY, 1,
+			 AGENTX_VERSION_1)) {
+	DEBUGMSGTL(("agentx/subagent"," trap session registered OK\n"));
+    } else {
+	DEBUGMSGTL(("agentx/subagent", "trap session registration failed\n"));
+	snmp_close(main_session);
+	main_session = NULL;
 	return -1;
     }
 
@@ -598,8 +591,9 @@ subagent_pre_init( void )
                        DS_APPLICATION_ID, DS_AGENT_AGENTX_PING_INTERVAL);
 
 
-    if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != SUB_AGENT )
+    if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != SUB_AGENT) {
 	return 0;
+    }
 
     if (subagent_open_master_session() != 0) {
 	if (ds_get_int(DS_APPLICATION_ID, DS_AGENT_AGENTX_PING_INTERVAL) > 0) {
@@ -607,7 +601,6 @@ subagent_pre_init( void )
 	}
         return -1;
     }
-
 
     DEBUGMSGTL(("agentx/subagent","initializing....  DONE\n"));
     
