@@ -281,7 +281,7 @@ information is reported by the 'system' table in the mibII tree.
 .IP "sysservices NUMBER"
 Sets the value of the system.sysServices.0 object.
 For a host, a good value is 72.
-.IP agentaddress [(udp|tcp):]port[@address][,...]
+.IP "agentaddress [(udp|tcp):]port[@address][,...]"
 Makes the agent list on the specified list of sockets instead of the
 default port, which is port 161.  Multiple ports can be separated by
 commas.  Transports can be specified by prepending the port number
@@ -297,7 +297,7 @@ associated with the localhost address.  Note that the
 flag changes the default transport mapping to use (in the
 above example, the default transport mapping is 
 .I udp.
-.IP agentgroup groupid
+.IP "agentgroup groupid"
 Change to this gid after opening port. The groupid may refer to a group
 by name or a number if the group number starts with '#'. For example,
 specifying
@@ -305,7 +305,7 @@ specifying
 will cause the agent to run as the snmp group or
 .I agentgroup #10
 will cause the agent to run as the group with groupid 10.
-.IP agentuser uid
+.IP "agentuser uid"
 Change to this uid after opening port. The userid may refer to a user
 by name or a number if the user number starts with '#'. For example,
 specifying

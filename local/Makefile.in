@@ -10,11 +10,12 @@ PERLPROG=@PERLPROG@
 DATASRCS=mib2c.conf mib2c.storage.conf mib2c.vartypes.conf
 CONFINSTALLDIR=$(snmplibdir)/snmpconf
 CONFDATASRC=snmpconf.dir
-CONFDIRS=snmpd.conf snmp.conf
+CONFDIRS=snmpd.conf snmp.conf snmptrapd.conf
 CONFFILES=snmpd.conf/system snmpd.conf/acl snmpd.conf/trapsinks \
 	snmpd.conf/monitor snmpd.conf/extending snmpd.conf/operation\
 	snmpd.conf/basic_setup \
-	snmp.conf/authopts snmp.conf/debugging snmp.conf/output snmp.conf/mibs
+	snmp.conf/authopts snmp.conf/debugging snmp.conf/output snmp.conf/mibs \
+	snmptrapd.conf/formatting snmptrapd.conf/traphandle
 
 all: $(SCRIPTSMADEFORPERL)
 

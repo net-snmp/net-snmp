@@ -263,6 +263,9 @@ var_udp(struct variable *vp,
 #ifdef STRUCT_UDPSTAT_HAS_UDPS_DISCARD
                    			      udpstat.udps_discard +
 #endif
+#ifdef STRUCT_UDPSTAT_HAS_UDPS_FULLSOCK
+                   			      udpstat.udps_fullsock +
+#endif
 					      udpstat.udps_badlen;
 				return (u_char *) &long_return;
 

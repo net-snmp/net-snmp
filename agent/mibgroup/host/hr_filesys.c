@@ -264,8 +264,10 @@ var_hrfilesys(struct variable *vp,
 #else
 	    if (HRFS_entry->HRFS_type == MOUNT_NFS)
 #endif
-#else
+#elif defined(MNTTYPE_NFS)
 	    if (!strcmp( HRFS_entry->HRFS_type, MNTTYPE_NFS))
+#else
+	    if (0)
 #endif
 	        sprintf(string, HRFS_entry->HRFS_name);
 	    else
@@ -385,6 +387,8 @@ var_hrfilesys(struct variable *vp,
 	case HRFSYS_ACCESS:
 #if HAVE_GETFSSTAT
 	    long_return = HRFS_entry->f_flags & MNT_RDONLY ? 2 : 1;
+#elif defined(cygwin)
+	    long_return = 1;
 #else
 	    if ( hasmntopt( HRFS_entry, "ro" ) != NULL )
 	        long_return = 2;	/* Read Only */

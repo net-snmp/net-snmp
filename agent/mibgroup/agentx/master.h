@@ -8,6 +8,7 @@ config_require(agentx/master_request)
 config_require(mibII/sysORTable)
 
 void init_master(void);
+void real_init_master(void);
 
 #endif /* _AGENTX_MASTER_H */
 

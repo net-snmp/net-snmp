@@ -219,7 +219,7 @@ notifyTable_register_notifications(int major, int minor,
     nptr->snmpNotifyTag = strdup(buf);
     nptr->snmpNotifyTagLen = strlen(buf);
     nptr->snmpNotifyType = confirm ?
-        SNMPNOTIFYTYPE_TRAP : SNMPNOTIFYTYPE_INFORM;
+        SNMPNOTIFYTYPE_INFORM : SNMPNOTIFYTYPE_TRAP;
     nptr->snmpNotifyStorageType = ST_READONLY;
     nptr->snmpNotifyRowStatus = RS_ACTIVE;
 
@@ -405,7 +405,7 @@ struct snmpNotifyTable_data *StorageTmp = NULL;
    * this assumes you have registered all your data properly
    */
   if ((StorageTmp = (struct snmpNotifyTable_data *)
-       header_complex(snmpNotifyTableStorage, vp,name,length,exact,
+       header_complex((struct header_complex_index *)snmpNotifyTableStorage, vp,name,length,exact,
                       var_len,write_method)) == NULL) {
       DEBUGMSGTL(("snmpNotifyTable", "no row: magic=%d...  \n", vp->magic));
       if (vp->magic == SNMPNOTIFYROWSTATUS) {
@@ -469,7 +469,7 @@ write_snmpNotifyTag(int      action,
 
   DEBUGMSGTL(("snmpNotifyTable", "write_snmpNotifyTag entering action=%d...  \n", action));
   if ((StorageTmp = (struct snmpNotifyTable_data *)
-       header_complex(snmpNotifyTableStorage, NULL,
+       header_complex((struct header_complex_index *)snmpNotifyTableStorage, NULL,
                       &name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1], 
                       &newlen, 1, NULL, NULL)) == NULL)
       return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
@@ -541,7 +541,7 @@ write_snmpNotifyType(int      action,
 
   DEBUGMSGTL(("snmpNotifyTable", "write_snmpNotifyType entering action=%d...  \n", action));
   if ((StorageTmp = (struct snmpNotifyTable_data *)
-       header_complex(snmpNotifyTableStorage, NULL,
+       header_complex((struct header_complex_index *)snmpNotifyTableStorage, NULL,
                       &name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1], 
                       &newlen, 1, NULL, NULL)) == NULL)
       return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
@@ -608,7 +608,7 @@ write_snmpNotifyStorageType(int      action,
 
   DEBUGMSGTL(("snmpNotifyTable", "write_snmpNotifyStorageType entering action=%d...  \n", action));
   if ((StorageTmp = (struct snmpNotifyTable_data *)
-       header_complex(snmpNotifyTableStorage, NULL,
+       header_complex((struct header_complex_index *)snmpNotifyTableStorage, NULL,
                       &name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1], 
                       &newlen, 1, NULL, NULL)) == NULL)
       return SNMP_ERR_NOSUCHNAME; /* remove if you support creation here */
@@ -682,7 +682,7 @@ write_snmpNotifyRowStatus(int      action,
 
   DEBUGMSGTL(("snmpNotifyTable", "write_snmpNotifyRowStatus entering action=%d...  \n", action));
   StorageTmp = (struct snmpNotifyTable_data *)
-    header_complex(snmpNotifyTableStorage, NULL,
+    header_complex((struct header_complex_index *)snmpNotifyTableStorage, NULL,
                    &name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1], 
                    &newlen, 1, NULL, NULL);
   
@@ -801,7 +801,7 @@ write_snmpNotifyRowStatus(int      action,
                  header_complex_find_entry(snmpNotifyTableStorage,
                                            StorageTmp);
                StorageDel = (struct snmpNotifyTable_data *)
-                 header_complex_extract_entry(&snmpNotifyTableStorage,
+                 header_complex_extract_entry((struct header_complex_index **)&snmpNotifyTableStorage,
                                               hciptr);
              }
           break;
@@ -817,7 +817,7 @@ write_snmpNotifyRowStatus(int      action,
                  header_complex_find_entry(snmpNotifyTableStorage,
                                            StorageTmp);
                StorageDel = (struct snmpNotifyTable_data *)
-                 header_complex_extract_entry(&snmpNotifyTableStorage,
+                 header_complex_extract_entry((struct header_complex_index **)&snmpNotifyTableStorage,
                                               hciptr);
                /* XXX: free it */
              } else if (StorageDel != NULL) {

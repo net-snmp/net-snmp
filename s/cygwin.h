@@ -1,6 +1,9 @@
 #include "generic.h"
+
 #undef HAVE_WINSOCK_H
 #undef bsdlike
+#undef MBSTAT_SYMBOL
+#undef TOTAL_MEMORY_SYMBOL
 
 #define	timerisset(tvp)		((tvp)->tv_sec || (tvp)->tv_usec)
 #define	timercmp(tvp, uvp, cmp)	\

@@ -362,7 +362,7 @@ var_example(struct variable *vp,
     case EXAMPLEIPADDRESS:
       /* ipaddresses get returned as a long.  ick */
       /* we're returning 127.0.0.1 */
-      long_ret = ((127 << (8*3)) + (0 << (8*2)) + (0 << (8*1)) + 1);
+      long_ret = ntohl(INADDR_LOOPBACK);
       return (u_char *) &long_ret;
       
     case EXAMPLECOUNTER:

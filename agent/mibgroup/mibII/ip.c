@@ -333,17 +333,11 @@ var_ip(struct variable *vp,
 				return NULL;
 #endif
 	case IPOUTNOROUTES:
-#if STRUCT_IPSTAT_HAS_IPS_CANTFORWARD
-				long_return = ipstat.ips_cantforward;
-			        return (u_char *) &long_return;
-#else
-#if STRUCT_IPSTAT_HAS_IPS_NOROUTE
-				long_return = ipstat.ips_noroute;
-			        return (u_char *) &long_return;
-#else
+            /* XXX: how to calculate this (counts dropped routes, not packets)?
+               ipstat.ips_cantforward isn't right, as it counts packets.
+               ipstat.ips_noroute is also incorrect.
+            */
 				return NULL;
-#endif
-#endif
 	case IPREASMTIMEOUT:
 				long_return = IPFRAGTTL;
 			        return (u_char *) &long_return;
