@@ -81,6 +81,8 @@ docsdir: docsdox docsmunge
 
 docsdox: doxygen.conf
 	srcdir=$(srcdir) doxygen $(srcdir)/doxygen.conf
+	-rm docs/man/man3/todo.3
+	-rm docs/man/man3/deprecated.3
 
 docsmunge:
 	find docs/html -name \*.html -exec perl -p -i -e 's/Generated on/<!--#include virtual=\"\/sfbutton.html\" --><br>Generated on\n/; s/<body/<body bgcolor=white/' {} \;
