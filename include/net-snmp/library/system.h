@@ -26,6 +26,11 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+/*
+ * Copyright © 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
     /*
      * Definitions for the system dependent library file
      */
@@ -110,6 +115,9 @@ SOFTWARE.
 
     int             mkdirhier(const char *pathname, mode_t mode,
                               int skiplast);
+#ifndef HAVE_STRLCPY
+    size_t            strlcpy(char *, const char *, size_t);
+#endif
 
 #ifdef __cplusplus
 }
