@@ -603,12 +603,11 @@ static void handle_trap_fmt (char * bfr,
       *    pdu     - information about this trap 
       */
 {
-#define LCL_SAFE_LEN 2000                       /* length of safe buffer */
   oid                    trap_oid[MAX_OID_LEN]; /* holds obj id for trap */
   unsigned long          trap_oid_len;          /* length of object ID */
   struct variable_list * vars;                  /* variables assoc with trap */
   char                   sprint_bfr[SPRINT_MAX_LEN]; /* string-building bfr */
-  char                   safe_bfr[LCL_SAFE_LEN]; /* string-building bfr */
+  char                   safe_bfr[SNMP_MAXBUF]; /* string-building bfr */
   char *                 out_ptr = safe_bfr;    /* points to str to output */
   unsigned long          safe_tail;             /* end of safe buffer */
   char                   fmt_cmd = options->cmd; /* what we're outputting */
@@ -657,21 +656,21 @@ static void handle_trap_fmt (char * bfr,
     case CHR_TRAP_VARS:
       safe_tail = 0;
       for (vars = pdu->variables;
-	   vars != (struct variable_list *) NULL;
+	   vars != (struct variable_list *) NULL && safe_tail < SNMP_MAXBUF;
 	   vars = vars->next_variable) {
 	if (options->alt_format)
-	  str_append (safe_bfr, &safe_tail, LCL_SAFE_LEN, ", ");
+	  str_append (safe_bfr, &safe_tail, SNMP_MAXBUF, ", ");
 	else
-	  str_append (safe_bfr, &safe_tail, LCL_SAFE_LEN, "\t");
+	  str_append (safe_bfr, &safe_tail, SNMP_MAXBUF, "\t");
 	sprint_variable (sprint_bfr, vars->name, vars->name_length, vars);
-	str_append (safe_bfr, &safe_tail, LCL_SAFE_LEN, sprint_bfr);
+	str_append (safe_bfr, &safe_tail, SNMP_MAXBUF, sprint_bfr);
       }
-      if (safe_tail < LCL_SAFE_LEN) {
+      if (safe_tail < SNMP_MAXBUF) {
 	safe_bfr[safe_tail] = '\0';
 	safe_tail++;
       }
       else
-	safe_bfr[safe_tail - 1] = '\0';
+          safe_bfr[safe_tail - 1] = '\0';
       break;
 
     /* don't know how to handle this command - write the character itself */
@@ -688,7 +687,6 @@ static void handle_trap_fmt (char * bfr,
   }
 
   return;
-#undef LCL_SAFE_LEN
 }
 
 static void dispatch_format_cmd (char * bfr,
