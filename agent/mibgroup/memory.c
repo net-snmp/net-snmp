@@ -347,6 +347,8 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
   struct vmtotal total;
 #endif
 
+  long_ret = 0;  /* set to 0 as default */
+
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
     return(NULL);
 #ifndef linux
@@ -433,6 +435,21 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 	long_ret = memory(meminfo_free);
 #else
       long_ret = pagetok(total.t_free);
+#endif
+      return((u_char *) (&long_ret));
+    case MEMCACHED:
+#ifdef linux
+	long_ret = memory(meminfo_cached);
+#endif
+      return((u_char *) (&long_ret));
+    case MEMBUFFER:
+#ifdef linux
+	long_ret = memory(meminfo_buffers);
+#endif
+      return((u_char *) (&long_ret));
+    case MEMSHARED:
+#ifdef linux
+	long_ret = memory(meminfo_shared);
 #endif
       return((u_char *) (&long_ret));
     case ERRORFLAG:
