@@ -120,12 +120,12 @@ intpr(int interval)
 	struct variable_list *var;
 	struct snmp_pdu *request, *response;
 	int status;
-	int ifindex;
+	int ifindex, oldindex = 0;
 	struct _if_info {
 	    char name[128];
 	    char ip[128], route[128];
 	    int mtu;
-	    int ipkts, ierrs, opkts, oerrs, operstatus, outqueue;
+	    unsigned int ipkts, ierrs, opkts, oerrs, operstatus, outqueue;
 	    u_long netmask;
 	    struct in_addr ifip, ifroute;
 	} *if_table, *cur_if;
@@ -172,9 +172,9 @@ intpr(int interval)
 		    break;
 		}
 		for (var = response->variables; var; var = var->next_variable) {
-                  if (snmp_get_do_debugging()) {
-		    print_variable (var->name, var->name_length, var);
-                  }
+		    if (snmp_get_do_debugging()) {
+			print_variable (var->name, var->name_length, var);
+		    }
 		    switch (var->name [9]) {
 		    case IFINDEX:
 			ifindex = *var->val.integer;
@@ -204,9 +204,9 @@ intpr(int interval)
 		varname_len = sizeof(oid_ifname) / sizeof(oid);
 		ifentry = varname + 9;
 		instance = varname + 10;
-		request = snmp_pdu_create (SNMP_MSG_GET);
+		request = snmp_pdu_create (SNMP_MSG_GETNEXT);
 
-		*instance = ifnum;
+		*instance = oldindex;
 		*ifentry = IFNAME;
 		snmp_add_null_var (request, varname, varname_len);
 		*ifentry = IFMTU;
@@ -264,6 +264,7 @@ intpr(int interval)
 		    case OUTNUCASTPKTS:
 			cur_if->opkts += *var->val.integer; break;
 		    case IFNAME:
+			oldindex = var->name[10];
 			if (var->val_len >= sizeof(cur_if->name))
 			    var->val_len = sizeof(cur_if->name) - 1;
 			memmove (cur_if->name, var->val.string, var->val_len);
@@ -299,7 +300,7 @@ intpr(int interval)
 		printf("%-*.*s %5d ", max_name, max_name, cur_if->name, cur_if->mtu);
 		printf("%-*.*s ", max_route, max_route, cur_if->route);
 		printf("%-*.*s ", max_ip, max_ip, cur_if->ip);
-		printf("%10d %5d %10d %5d %5d",
+		printf("%10u %5u %10u %5u %5u",
 		    cur_if->ipkts, cur_if->ierrs,
 		    cur_if->opkts, cur_if->oerrs,
 		    cur_if->outqueue);
@@ -320,7 +321,7 @@ intpro(int interval)
 	struct variable_list *var;
 	struct snmp_pdu *request, *response;
 	int status;
-	int ifindex;
+	int ifindex, oldindex;
 	struct _if_info {
 	    char name[128];
 	    char ip[128], route[128];
@@ -403,9 +404,9 @@ intpro(int interval)
 		varname_len = sizeof(oid_ifname) / sizeof(oid);
 		ifentry = varname + 9;
 		instance = varname + 10;
-		request = snmp_pdu_create (SNMP_MSG_GET);
+		request = snmp_pdu_create (SNMP_MSG_GETNEXT);
 
-		*instance = ifnum;
+		*instance = oldindex;
 		*ifentry = IFNAME;
 		snmp_add_null_var (request, varname, varname_len);
 		*ifentry = IFOPERSTATUS;
@@ -444,6 +445,7 @@ intpro(int interval)
 		    case OUTOCTETS:
 			cur_if->ooctets += *var->val.integer; break;
 		    case IFNAME:
+			oldindex = var->name[10];
 			if (var->val_len >= sizeof(cur_if->name))
 			    var->val_len = sizeof(cur_if->name) - 1;
 			memmove (cur_if->name, var->val.string, var->val_len);
@@ -488,12 +490,12 @@ intpro(int interval)
 
 #define	MAXIF	128
 struct	iftot {
-	char	ift_name[128];		/* interface name */
-	int	ift_ip;			/* input packets */
-	int	ift_ie;			/* input errors */
-	int	ift_op;			/* output packets */
-	int	ift_oe;			/* output errors */
-	int	ift_co;			/* collisions */
+	char		ift_name[128];		/* interface name */
+	unsigned int	ift_ip;			/* input packets */
+	unsigned int	ift_ie;			/* input errors */
+	unsigned int	ift_op;			/* output packets */
+	unsigned int	ift_oe;			/* output errors */
+	unsigned int	ift_co;			/* collisions */
 } iftot[MAXIF];
 
 u_char	signalled;			/* set if alarm goes off "early" */
