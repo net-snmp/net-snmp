@@ -444,7 +444,15 @@ sub netsh {
 		}
 
 		if ($opts{'t'}) {
-		    print join($opts{'d'},@$row),"\n";
+		    if ($opts{'d'} eq 'xml') {
+			print "  <row>\n";
+			for(my $xx = 0; $xx < $#{$sth->{NAME}}; $xx++) {
+			    print "    <$sth->{NAME}[$xx]>$row->[$xx]</$sth->{NAME}[$xx]>\n";
+			}
+			print "  </row>\n";
+		    } else {
+			print join($opts{'d'},@$row),"\n";
+		    }
 		} elsif (!$table) {
 		    $table = Text::FormatTable->new('|r' x ($#$row+1) . "|");
 		    $table->rule('-');
@@ -587,6 +595,7 @@ ARGUMENTS may include:
 
   -t         delimiter separated output, don't print pretty tables.
   -d DELIM   use DELIM as the delimiter.  A tab is the default delimiter.
+             'xml' is a special delimiter to produce xml output.
 
 ARGUMENTS also may include the following.  See the net-snmp snmpcmd
 manual page for details on what they mean:
@@ -614,7 +623,7 @@ netsh - A shell environment for interacting with networking devices
 
 =head1 SYNOPSIS
 
-netsh [snmpcmd arguments] hostname[,hostname...] [command]
+netsh [(subset of) snmpcmd arguments] hostname[,hostname...] [command]
 
 =head1 OPTIONAL PERL MODULES
 
