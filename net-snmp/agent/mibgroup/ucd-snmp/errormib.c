@@ -11,7 +11,11 @@
 #endif
 #include <signal.h>
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -106,6 +110,9 @@
 #endif
 #if HAVE_STRING_H
 #include <string.h>
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 
 #if HAVE_DMALLOC_H

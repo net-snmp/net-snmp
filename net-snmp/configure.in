@@ -1034,6 +1034,7 @@ AC_CHECK_FUNCS(setmntent gethostname uname gettimeofday select socket strtol)
 AC_CHECK_FUNCS(strchr strdup memcpy memmove index bcopy)
 AC_CHECK_FUNCS(signal sigset sigblock sighold strerror setenv vsnprintf)
 AC_CHECK_FUNCS(random lrand48 rand)
+AC_CHECK_FUNCS(execv system fork getpid strncasecmp sigalrm)
 AC_CHECK_FUNCS(rpmGetPath)
 
 AC_CHECK_FUNCS(getloadavg)

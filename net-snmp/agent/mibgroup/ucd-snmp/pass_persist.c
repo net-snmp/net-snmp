@@ -17,16 +17,6 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -115,12 +105,7 @@ void pass_persist_parse_config(char *token, char* cptr)
         i++, ptmp = ptmp->next)
       etmp[i] = ptmp;
     qsort(etmp, numpersistpassthrus, sizeof(struct extensible *),
-#ifdef __STDC__
-         (int (*)(const void *, const void *)) pass_persist_compare
-#else
-          pass_persist_compare
-#endif
-      );
+          pass_persist_compare);
     persistpassthrus = (struct extensible *) etmp[0];
     ptmp = (struct extensible *) etmp[0];
 
@@ -407,7 +392,7 @@ setPassPersist(int action,
   return SNMP_ERR_NOSUCHNAME;
 }
 
-int pass_persist_compare(void *a, void *b)
+int pass_persist_compare(const void *a, const void *b)
 {
   struct extensible **ap, **bp;
   ap = (struct extensible **) a;

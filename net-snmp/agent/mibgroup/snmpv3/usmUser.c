@@ -17,6 +17,9 @@
 #ifdef HAVE_KMT_ALGS_H
 #	include <kmt_algs.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 
 #include "mibincl.h"
 #include "snmpusm.h"
@@ -113,11 +116,11 @@ usm_generate_OID(oid *prefix, size_t prefixLen, struct usmUser *uptr,
     memmove(indexOid, prefix, prefixLen * sizeof (oid));
 
     indexOid[prefixLen] = uptr->engineIDLen;
-    for(i = 0; i < uptr->engineIDLen; i++)
+    for(i = 0; i < (int)uptr->engineIDLen; i++)
       indexOid[prefixLen+1+i] = (oid) uptr->engineID[i];
 
     indexOid[prefixLen + uptr->engineIDLen + 1] = strlen(uptr->name);
-    for(i = 0; i < strlen(uptr->name); i++)
+    for(i = 0; i < (int)strlen(uptr->name); i++)
       indexOid[prefixLen + uptr->engineIDLen + 2 + i] = (oid) uptr->name[i];
   }
   return indexOid;
@@ -149,12 +152,12 @@ usm_parse_oid(oid *oidIndex, size_t oidLen,
     return 1;
   }
   engineIDL = *oidIndex;		/* initial engineID length */
-  if (oidLen < engineIDL + 2) {
+  if ((int)oidLen < engineIDL + 2) {
     DEBUGMSGTL(("usmUser","parse_oid: invalid oid length: less than the engineIDLen\n"));
     return 1;
   }
   nameL = oidIndex[engineIDL+1];	/* the initial name length */
-  if (oidLen != engineIDL + nameL + 2) {
+  if ((int)oidLen != engineIDL + nameL + 2) {
     DEBUGMSGTL(("usmUser","parse_oid: invalid oid length: length is not exact\n"));
     return 1;
   }
@@ -302,7 +305,7 @@ var_usmUser(
         indexOid = usm_generate_OID(vp->name, vp->namelen, nptr, &len);
         result = snmp_oid_compare(name, *length, indexOid, len);
         DEBUGMSGTL(("usmUser", "Checking user: %s - ", nptr->name));
-        for(i = 0; i < nptr->engineIDLen; i++) {
+        for(i = 0; i < (int)nptr->engineIDLen; i++) {
           DEBUGMSG(("usmUser", " %x",nptr->engineID[i]));
         }
         DEBUGMSG(("usmUser"," - %d \n  -> OID: ", result));
@@ -335,7 +338,7 @@ var_usmUser(
       *length = len;
       memmove(name, indexOid, len*sizeof(oid));
       DEBUGMSGTL(("usmUser", "Found user: %s - ", uptr->name));
-      for(i = 0; i < uptr->engineIDLen; i++) {
+      for(i = 0; i < (int)uptr->engineIDLen; i++) {
         DEBUGMSG(("usmUser", " %x",uptr->engineID[i]));
       }
       DEBUGMSG(("usmUser","\n  -> OID: "));
@@ -473,7 +476,7 @@ write_usmUserSpinLock(
       return SNMP_ERR_WRONGLENGTH;
   }
   long_ret = *((long *) var_val);
-  if (long_ret != usmUserSpinLock)
+  if (long_ret != (long)usmUserSpinLock)
     return SNMP_ERR_INCONSISTENTVALUE;
   if (action == COMMIT) {
     if (usmUserSpinLock == 2147483647)

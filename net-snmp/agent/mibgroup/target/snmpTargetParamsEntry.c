@@ -14,6 +14,9 @@
 #endif
 #include <stdlib.h>
 #include <ctype.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 
 #include "mibincl.h"
 #include "snmpTargetParamsEntry.h"
@@ -89,14 +92,14 @@ void snmpTargetParamTable_addToList(
   else {
     /* get the 'OID' value of the new entry */
     newOIDLen = strlen(newEntry->paramName);
-    for(i=0; i < newOIDLen ;i++) {
+    for(i=0; i < (int)newOIDLen ;i++) {
       newOID[i] = newEntry->paramName[i];
     }
 
     /* search through the list for an equal or greater OID value */
     while (curr_struct != 0) {
       currOIDLen = strlen(curr_struct->paramName);
-      for(i=0; i < currOIDLen ;i++) {
+      for(i=0; i < (int)currOIDLen ;i++) {
 	currOID[i] = curr_struct->paramName[i];
       }
 
@@ -170,7 +173,7 @@ search_snmpTargetParamsTable(
    memcpy(newNum, baseName, baseNameLen*sizeof(oid));
   
    for( temp_struct = aPTable; temp_struct != 0; temp_struct = temp_struct->next) {
-     for(i=0; i < strlen(temp_struct->paramName) ;i++) {
+     for(i=0; i < (int)strlen(temp_struct->paramName) ;i++) {
        newNum[baseNameLen+i] = temp_struct->paramName[i];
      }
      myOIDLen = baseNameLen+strlen(temp_struct->paramName);

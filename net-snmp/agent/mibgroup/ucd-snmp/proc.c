@@ -5,6 +5,9 @@
 #include <sys/types.h>   /* helps define struct rlimit */
 #endif
 
+#if HAVE_IO_H  /* win32 */
+#include <io.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -26,7 +29,11 @@
 #include <netinet/in.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -34,6 +41,9 @@
 # else
 #  include <time.h>
 # endif
+#endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
 #endif
 
 #if HAVE_DMALLOC_H
@@ -53,6 +63,10 @@
 #include "agent_read_config.h"
 #include "mib_module_config.h"
 #include "system.h"
+
+#ifdef USING_UCD_SNMP_ERRORMIB_MODULE
+#include "errormib.h"
+#endif
 
 static struct myproc *get_proc_instance (struct myproc *, oid);
 struct myproc *procwatch = NULL;
@@ -303,7 +317,7 @@ static struct myproc *get_proc_instance(struct myproc *proc,
   int i;
   
   if (proc == NULL) return(NULL);
-  for (i=1;i != inst && proc != NULL; i++) proc = proc->next;
+  for (i=1; (i != (int)inst) && (proc != NULL); i++) proc = proc->next;
   return(proc);
 }
 

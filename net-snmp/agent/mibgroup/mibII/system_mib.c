@@ -15,6 +15,9 @@
 #else
 #include <strings.h>
 #endif
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #include "../mibincl.h"
 
 #ifdef HAVE_SYS_TIME_H
@@ -143,6 +146,7 @@ void init_system_mib(void)
   sprintf(version_descr, "%s %s %s %s %s", utsName.sysname, utsName.nodename,
           utsName.release, utsName.version, utsName.machine);
 #else
+#if HAVE_EXECV
   struct extensible extmp;
 
   /* set default values of system stuff */
@@ -153,6 +157,9 @@ void init_system_mib(void)
   exec_command(&extmp);
   strncpy(version_descr,extmp.output, sizeof(version_descr));
   version_descr[strlen(version_descr)-1] = 0; /* chomp new line */
+#else
+  strcpy(version_descr, "unknown" );
+#endif
 #endif
 
 #ifdef HAVE_GETHOSTNAME
@@ -363,7 +370,7 @@ writeSystem(int action,
 		return SNMP_ERR_WRONGLENGTH;
 	    }
 	    
-	    for(cp = var_val, count = 0; count < var_val_len; count++, cp++){
+	    for(cp = var_val, count = 0; count < (int)var_val_len; count++, cp++){
 		if (!isprint(*cp)){
                     snmp_log(LOG_ERR, "not print %x\n", *cp);
 		    return SNMP_ERR_WRONGVALUE;

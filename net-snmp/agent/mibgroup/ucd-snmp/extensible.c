@@ -10,7 +10,11 @@
 #include <fcntl.h>
 #endif
 #if TIME_WITH_SYS_TIME
-# include <sys/time.h>
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -96,6 +100,12 @@
 #include <string.h>
 #endif
 #include <ctype.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#ifndef HAVE_STRNCASECMP
+int strncasecmp(const char *s1, const char *s2, size_t n);
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -247,7 +257,7 @@ struct extensible *get_exten_instance(struct extensible *exten,
   int i;
   
   if (exten == NULL) return(NULL);
-  for (i=1;i != inst && exten != NULL; i++) exten = exten->next;
+  for (i=1;i != (int)inst && exten != NULL; i++) exten = exten->next;
   return(exten);
 }
 
@@ -409,7 +419,7 @@ u_char *var_extensible_relocatable(struct variable *vp,
 {
 
   int fd;
-  size_t i;
+  int i;
   FILE *file;
   struct extensible *exten = 0;
   static long long_ret;
@@ -420,9 +430,9 @@ u_char *var_extensible_relocatable(struct variable *vp,
   memcpy(&myvp,vp,sizeof(struct variable));
 
   long_ret = *length;
-  for(i=1; i<= numrelocs; i++) {
+  for(i=1; i <= (int)numrelocs; i++) {
     exten = get_exten_instance(relocs,i);
-    if (exten->miblen == vp->namelen-1){
+    if ((int)exten->miblen == (int)vp->namelen-1){
       memcpy(myvp.name,exten->miboid,exten->miblen*sizeof(oid));
       myvp.namelen = exten->miblen;
       *length = vp->namelen;
@@ -433,7 +443,7 @@ u_char *var_extensible_relocatable(struct variable *vp,
         exten = NULL;
     }
   }
-  if (i > numrelocs || exten == NULL) {
+  if (i > (int)numrelocs || exten == NULL) {
     *length = long_ret;
     *var_len = 0;
     *write_method = NULL;
@@ -466,7 +476,7 @@ u_char *var_extensible_relocatable(struct variable *vp,
       if (exten->type == EXECPROC) {
         if ((fd = get_exec_output(exten))){
           file = fdopen(fd,"r");
-          for (i=0;i != name[*length-1];i++) {
+          for (i=0;i != (int)name[*length-1];i++) {
             if (fgets(errmsg,sizeof(errmsg),file) == NULL) {
               *var_len = 0;
               fclose(file);
@@ -503,13 +513,13 @@ struct subtree *find_extensible(struct subtree	*tp,
 				int exact)
 {
   size_t tmp;
-  size_t i;
+  int i;
   struct extensible *exten = 0;
   struct variable myvp;
   oid name[MAX_OID_LEN];
   static struct subtree mysubtree[2];
 
-  for(i=1; i<= numrelocs; i++) {
+  for(i=1; i <= (int)numrelocs; i++) {
     exten = get_exten_instance(relocs,i);
     if (exten->miblen != 0){
       memcpy(myvp.name,exten->miboid,exten->miblen*sizeof(oid));
@@ -521,7 +531,7 @@ struct subtree *find_extensible(struct subtree	*tp,
         break;
     }
   }
-  if (i > numrelocs || exten == NULL)
+  if (i > (int)numrelocs || exten == NULL)
     return(tp);
   memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(oid));
   mysubtree[0].namelen = exten->miblen;
