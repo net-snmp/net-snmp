@@ -189,6 +189,34 @@ _ssll_for_each(netsnmp_container *c, netsnmp_container_obj_func *f,
         (*f) ((void *)curr->data, context);
 }
 
+static void
+_ssll_clear(netsnmp_container *c, netsnmp_container_obj_func *f,
+             void *context)
+{
+    sl_container *sl = (sl_container*)c;
+    sl_node  *curr, *next;
+    
+    if(NULL == c)
+        return;
+    
+    for(curr = sl->head; curr; curr = next) {
+
+        next = curr->next;
+
+        if( NULL != f ) {
+            curr->next = NULL;
+            (*f) ((void *)curr->data, context);
+        }
+
+        /*
+         * free our node structure, but not the data
+         */
+        free(curr);
+    }
+    sl->head = NULL;
+    sl->count = 0;
+}
+
 /**********************************************************************
  *
  *
@@ -217,6 +245,7 @@ netsnmp_container_get_ssll(void)
     sl->c.get_subset = NULL;
     sl->c.get_iterator = NULL;
     sl->c.for_each = _ssll_for_each;
+    sl->c.clear = _ssll_clear;
 
        
     return (netsnmp_container*)sl;
