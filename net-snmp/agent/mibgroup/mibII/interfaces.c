@@ -1328,7 +1328,7 @@ Interface_Scan_Init (void)
 	  nnew->if_ibytes = f; nnew->if_obytes = g;
 	}
 	else {
-	  nnew->if_ibytes = 3*308; nnew->if_obytes = c*308;
+	  nnew->if_ibytes = a*308; nnew->if_obytes = c*308;
 	}
 	
 	/* ifnames are given as ``   eth0'': split in ``eth'' and ``0'': */
