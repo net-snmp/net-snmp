@@ -606,11 +606,7 @@ receive(sdlist, sdlen)
 int counter = 0;
 
 
-#ifdef hpux
     gettimeofday(nvp, (struct timezone *) NULL);
-#else
-    gettimeofday(nvp);
-#endif
     if (nvp->tv_usec < 500000L){
 	svp->tv_usec = nvp->tv_usec + 500000L;
 	svp->tv_sec = nvp->tv_sec;
@@ -662,11 +658,7 @@ int counter = 0;
 		printf("select returned %d\n", count);
 		return -1;
 	}
-#ifdef hpux
         gettimeofday(nvp, (struct timezone *) NULL);
-#else
-        gettimeofday(nvp);
-#endif
 	if (nvp->tv_sec > svp->tv_sec
 	    || (nvp->tv_sec == svp->tv_sec && nvp->tv_usec > svp->tv_usec)){
 	    alarmTimer(nvp);
