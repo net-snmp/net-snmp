@@ -88,6 +88,55 @@ netsnmp_table_data_add_row(table_data *table, netsnmp_table_row *row)
     return SNMPERR_SUCCESS;
 }
 
+/**
+ * removes a row of data to a given table and returns it (no free's called)
+ *
+ * returns the row pointer itself on successful removing.
+ *      or NULL on failure (bad arguments)
+ */
+netsnmp_table_row *
+netsnmp_table_data_remove_row(table_data *table, netsnmp_table_row *row)
+{
+    if (!row || !table)
+        return NULL;
+    
+    if (row->prev)
+        row->prev->next = row->next;
+    else
+        table->first_row = row->next;
+
+    return row;
+}
+
+/**
+ * removes and frees a row of data to a given table and returns the void *
+ *
+ * returns the void * data on successful deletion.
+ *      or NULL on failure (bad arguments)
+ */
+void *
+netsnmp_table_data_delete_row(table_data *table, netsnmp_table_row *row)
+{
+    void *data;
+    
+    if (!row || !table)
+        return NULL;
+    
+    /* remove it from the list */
+    netsnmp_table_data_remove_row(table,row);
+    
+    /* free the memory we can */
+    if (row->indexes)
+        snmp_free_varbind(row->indexes);
+    SNMP_FREE(row->index_oid);
+    data = row->data;
+    free(row);
+
+    /* return the void * pointer */
+    return data;
+}
+
+
 /** finds the data in "datalist" stored at "indexes" */
 netsnmp_table_row *
 netsnmp_table_data_get(table_data *table,
