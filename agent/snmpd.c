@@ -383,7 +383,9 @@ setup_log(int restart, int dont_zero, int stderr_log, int syslog_log,
 	syslog_log_s = syslog_log;
     }
 
-    if (!stderr_log_s) {
+    if (stderr_log_s) {
+	snmp_enable_stderrlog();
+    } else {
 	snmp_disable_stderrlog();
     }
 
@@ -629,8 +631,7 @@ main(int argc, char *argv[])
                     Facility = LOG_LOCAL7;
                     break;
                 default:
-                    fprintf(stderr, "invalid syslog facility: -S%c\n",
-                            *optarg);
+                    fprintf(stderr, "invalid syslog facility: -S%c\n",*optarg);
                     usage(argv[0]);
                 }
             } else {
@@ -698,9 +699,8 @@ main(int argc, char *argv[])
 #if defined(USING_AGENTX_SUBAGENT_MODULE)
             agent_mode = SUB_AGENT;
 #else
-            fprintf(stderr,
-                    "%s: Illegal argument -X: AgentX support not compiled in.\n",
-                    argv[0]);
+            fprintf(stderr, "%s: Illegal argument -X:"
+		            "AgentX support not compiled in.\n", argv[0]);
             usage(argv[0]);
             exit(1);
 #endif
@@ -718,13 +718,12 @@ main(int argc, char *argv[])
          */
         DEBUGMSGTL(("snmpd/main", "optind %d, argc %d\n", optind, argc));
         for (i = optind; i < argc; i++) {
-            char           *c, *astring;
+            char *c, *astring;
             if ((c = netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
 					   NETSNMP_DS_AGENT_PORTS))) {
                 astring = malloc(strlen(c) + 2 + strlen(argv[i]));
                 if (astring == NULL) {
-                    fprintf(stderr, "malloc failure processing argv[%d]\n",
-                            i);
+                    fprintf(stderr, "malloc failure processing argv[%d]\n", i);
                     exit(1);
                 }
                 sprintf(astring, "%s,%s", c, argv[i]);
@@ -746,7 +745,7 @@ main(int argc, char *argv[])
     /*
      * Initialize a argv set to the current for restarting the agent.   
      */
-    argvrestartp = (char **) malloc((argc + 2) * sizeof(char *));
+    argvrestartp = (char **)malloc((argc + 2) * sizeof(char *));
     argvptr = argvrestartp;
     for (i = 0, ret = 1; i < argc; i++) {
         ret += strlen(argv[i]) + 1;
@@ -785,8 +784,8 @@ main(int argc, char *argv[])
     if (!dont_fork) {
         if (fork() != 0) {
             /* parent */
-            if(!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-                                       NETSNMP_DS_AGENT_QUIT_IMMEDIATELY)) {
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+					NETSNMP_DS_AGENT_QUIT_IMMEDIATELY)) {
                 exit(0);
             }
 #ifdef HAVE_SETSID
@@ -913,9 +912,9 @@ main(int argc, char *argv[])
     SnmpTrapNodeDown();
     DEBUGMSGTL(("snmpd/main", "Bye...\n"));
     snmp_shutdown("snmpd");
-    if(!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
-			       NETSNMP_DS_AGENT_LEAVE_PIDFILE) &&
-       (pid_file != NULL)) {
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+				NETSNMP_DS_AGENT_LEAVE_PIDFILE) &&
+	(pid_file != NULL)) {
         unlink(pid_file);
     }
 #ifdef WIN32
@@ -983,7 +982,7 @@ receive(void)
         for (i = 0; i < NUM_EXTERNAL_SIGS; i++) {
             if (external_signal_scheduled[i]) {
                 external_signal_scheduled[i]--;
-                external_signal_handler[i] (i);
+                external_signal_handler[i](i);
             }
         }
 
@@ -997,8 +996,9 @@ receive(void)
         FD_ZERO(&exceptfds);
         block = 0;
         snmp_select_info(&numfds, &readfds, tvp, &block);
-        if (block == 1)
+        if (block == 1) {
             tvp = NULL;         /* block without timeout */
+	}
 
 #ifdef	USING_SMUX_MODULE
         if (smux_listen_sd >= 0) {
@@ -1106,8 +1106,9 @@ receive(void)
                      * likely that we got a signal. Check our special signal
                      * flags before retrying select.
                      */
-                    if(running && ! reconfig)
+		    if (running && !reconfig) {
                         goto reselect;
+		    }
                     continue;
                 } else {
                     snmp_log_perror("select");
@@ -1129,11 +1130,10 @@ receive(void)
          *    Age the cache network addresses (from whom messges have
          *        been received).
          */
-        gettimeofday(nvp, (struct timezone *) NULL);
+        gettimeofday(nvp, (struct timezone *)NULL);
 
-        if (nvp->tv_sec > svp->tv_sec
-            || (nvp->tv_sec == svp->tv_sec
-                && nvp->tv_usec > svp->tv_usec)) {
+        if (nvp->tv_sec > svp->tv_sec || (nvp->tv_sec == svp->tv_sec &&
+					  nvp->tv_usec > svp->tv_usec)) {
             svp->tv_usec = nvp->tv_usec + TIMETICK;
             svp->tv_sec = nvp->tv_sec;
 
@@ -1158,8 +1158,7 @@ receive(void)
 
     }                           /* endwhile */
 
-    snmp_log(LOG_INFO,
-             "Received TERM or STOP signal...  shutting down...\n");
+    snmp_log(LOG_INFO, "Received TERM or STOP signal...  shutting down...\n");
     return 0;
 
 }                               /* end receive() */
@@ -1304,4 +1303,4 @@ StopSnmpAgent(void)
     }
 }
 
-#endif                          /* if WIN32 */
+#endif/*WIN32*/
