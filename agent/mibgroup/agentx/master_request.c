@@ -48,6 +48,7 @@
 #include "snmp_client.h"
 #include "snmp_debug.h"
 #include "snmp_alarm.h"
+#include "snmp_transport.h"
 #include "snmp.h"
 #include "ds_agent.h"
 #include "default_store.h"
@@ -150,47 +151,59 @@ handle_agentx_response( int operation,
     oldreq = remove_outstanding_request( asp, pdu->reqid );
 
     switch(operation) {
-	case SNMP_CALLBACK_OP_TIMED_OUT:
-			/*
-			 * Multiple timed out requests probably
-			 *  indicate that the subagent has died.
-			 */
-		if ( SET_SNMP_STRIKE_FLAGS( session->flags )) {
-		    ax_session = session->subsession;
-				/*
-				 * XXX - Need to send a 'close' message
-				 *       to the subagent (even though
-				 *	 we don't think it's listening)
-				 */
-		    (void) close_agentx_session(ax_session, session->sessid);
-		    if ( ax_session->subsession == NULL ) {
-			snmp_close( ax_session );
-		    }
-		}
-		pdu->errstat  = SNMP_ERR_GENERR;
-		pdu->errindex = 0;
-		if (asp->pdu->command != SNMP_MSG_SET)
-		    asp->mode = RESERVE2;
-		break;
+    case SNMP_CALLBACK_OP_TIMED_OUT: {
+	void *s = snmp_sess_pointer(session);
+	DEBUGMSGTL(("agentx/master", "timeout on session %08p; "));
 
-        case SNMP_CALLBACK_OP_DISCONNECT:
-	case SNMP_CALLBACK_OP_SEND_FAILED:
-		if ( SET_SNMP_STRIKE_FLAGS( session->flags )) {
-		    (void) close_agentx_session(session, -1);
-		}
-		pdu->errstat  = SNMP_ERR_GENERR;
-		pdu->errindex = 0;
-		if (asp->pdu->command != SNMP_MSG_SET)
-		    asp->mode = RESERVE2;
-		return 0;
+	/*  This is a bit sledgehammer because the other sessions on this
+	    transport may be okay (e.g. some thread in the subagent has
+	    wedged, but the others are alright).  OTOH the overwhelming
+	    probability is that the whole agent has died somehow.  */
+
+	if (s != NULL) {
+	    snmp_transport *t = snmp_sess_transport(s);
+
+	    close_agentx_session(session, -1);
+
+	    if (t != NULL) {
+		DEBUGMSGTL(("agentx/master", "close transport\n"));
+		t->f_close(t);
+	    } else {
+		DEBUGMSGTL(("agentx/master", "NULL transport??\n"));
+	    }
+	} else {
+	    DEBUGMSGTL(("agentx/master", "NULL sess_pointer??\n"));
+	}
+
+	pdu->errstat  = SNMP_ERR_GENERR;
+	pdu->errindex = 0;
+	if (oldreq != NULL) {
+	    DEBUGMSGTL(("agentx/master", "free old request at %08p\n",oldreq));
+	    free_agentx_request(oldreq, 1);
+	}
+	if (asp != NULL) {
+	    DEBUGMSGTL(("agentx/master", "free agent session at %08p\n", asp));
+	    free_agent_snmp_session(asp);
+	}
+	return 0;
+    }
+
+    case SNMP_CALLBACK_OP_DISCONNECT:
+    case SNMP_CALLBACK_OP_SEND_FAILED:
+	close_agentx_session(session, -1);
+	pdu->errstat  = SNMP_ERR_GENERR;
+	pdu->errindex = 0;
+	if (asp->pdu->command != SNMP_MSG_SET)
+	    asp->mode = RESERVE2;
+	return 0;
 
 
-	case SNMP_CALLBACK_OP_RECEIVED_MESSAGE:
-		/* This session is alive */
+    case SNMP_CALLBACK_OP_RECEIVED_MESSAGE:
+	/* This session is alive */
 		CLEAR_SNMP_STRIKE_FLAGS( session->flags );
 		break;
-	default:
-		return 0;
+    default:
+	return 0;
     }
 
 
@@ -206,8 +219,7 @@ handle_agentx_response( int operation,
         else
 	    asp->index = 0;
 
-    }
-    else {
+    } else {
 		/*
 		 * Otherwise, process successful requests
 		 */
