@@ -69,7 +69,7 @@ vacm_getViewEntry(const char *viewName,
 	    int mask = 0x80, maskpos = 0;
 	    int oidpos;
             found = 1;
-	    for (oidpos = 0; found && oidpos < vp->viewSubtreeLen; oidpos++) {
+	    for (oidpos = 0; found && oidpos < (int)vp->viewSubtreeLen; oidpos++) {
 		if ((vp->viewMask[maskpos] & mask) != 0) {
 		    if (viewSubtree[oidpos] != vp->viewSubtree[oidpos])
                         found = 0;

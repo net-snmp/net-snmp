@@ -624,7 +624,7 @@ char *read_config_save_octet_string(char *saveto, u_char *str, size_t len) {
   if (str != NULL) {
     sprintf(saveto, "0x");
     saveto += 2;
-    for(i = 0; i < len; i++) {
+    for(i = 0; i < (int)len; i++) {
       sprintf(saveto,"%02x", str[i]);
       saveto = saveto + 2;
     }
@@ -677,7 +677,7 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
     }
 
     /* copy data */
-    for(i = 0; i < *len; i++) {
+    for(i = 0; i < (int)*len; i++) {
       sscanf(readfrom,"%2x",&tmp);
       *cptr++ = (u_char) tmp;
       readfrom += 2;
@@ -701,7 +701,7 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, size_t *len) {
       if (cptr)
         memcpy(cptr, buf, (*len+1));
     } else {
-      readfrom = copy_word(readfrom, (char *)*str);
+      readfrom = copy_word(readfrom, *str);
     }
   }
 
@@ -720,7 +720,7 @@ char *read_config_save_objid(char *saveto, oid *objid, size_t len) {
   }
 
   /* in case len=0, this makes it easier to read it back in */
-  for(i=0; i < len; i++) {
+  for(i=0; i < (int)len; i++) {
     sprintf(saveto,".%ld", objid[i]);
     saveto += strlen(saveto);
   }

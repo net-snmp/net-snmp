@@ -3692,7 +3692,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	if (tp && tp->ranges) {
 	    rp = tp->ranges;
 	    while (rp) {
-		if (rp->low <= tint && tint <= rp->high) break;
+		if (rp->low <= (int)tint && (int)tint <= rp->high) break;
 		rp = rp->next;
 	    }
 	    if (!rp) {
@@ -3831,7 +3831,7 @@ u_char *
 cmu_snmp_parse (struct snmp_session *session,
     struct snmp_pdu *pdu,
     u_char *data,
-    int length)
+    size_t length)
 {
     u_char *bufp = NULL;
 

@@ -103,6 +103,10 @@ SOURCE=..\..\snmplib\asn1.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\snmplib\callback.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\snmplib\context.c
 # End Source File
 # Begin Source File

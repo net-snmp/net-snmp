@@ -41,11 +41,11 @@ SOFTWARE.
 #endif
 
 #include <sys/types.h>
-#if HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
 #endif
 
 #ifdef vms
@@ -481,7 +481,7 @@ asn_parse_header(u_char	*data,
       if (bufp == NULL)
         return NULL;
       header_len = bufp - data;
-      if ((header_len + (int)asn_length) > *datalength){
+      if ((header_len + (int)asn_length) > (int)*datalength){
         ERROR_MSG("asn length too long");
         return NULL;
       }
@@ -815,7 +815,7 @@ asn_build_objid(u_char *data,
             asnlength += 5;
         }
         i++;
-        if (i >= objidlength)
+        if (i >= (int)objidlength)
             break;
         objid_val = *op++;
     } 
@@ -828,7 +828,8 @@ asn_build_objid(u_char *data,
 	return NULL;
 
     /* store the encoded OID value */
-    for (i = 1, objid_val = first_objid_val, op = objid+2; i < objidlength;
+    for (i = 1, objid_val = first_objid_val, op = objid+2;
+				i < (int)objidlength;
                 i++) {
       if (i != 1) objid_val = *op++;
         switch (objid_size[i]) {

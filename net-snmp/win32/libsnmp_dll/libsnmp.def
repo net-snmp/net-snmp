@@ -41,6 +41,7 @@ EXPORTS
 	MDupdate
 	MDprint
 	print_mib
+	print_mib_tree
 	print_ascii_dump
 	read_objid
 	get_tree_head
@@ -164,7 +165,11 @@ EXPORTS
 	uptime_string
 	memdup
 	dump_chunk
+	init_callbacks
+	snmp_register_callback
+	snmp_call_callbacks
 	malloc_zero
+	strncasecmp
 	Mib			DATA
 	tree_head		DATA
 	snmp_errno		DATA
