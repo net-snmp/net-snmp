@@ -407,19 +407,12 @@ int snmp_input(op, session, reqid, pdu, magic)
     struct tm *tm;
     time_t timer;
     struct hostent *host;
-    int fd[2];
-    int pid, result;
-    FILE *file;
     int varbufidx;
     char varbuf[2048];
     static oid trapoids[10] = {1,3,6,1,6,3,1,1,5};
-    static oid snmpsysuptime[8] = {1,3,6,1,2,1,1,3};
-    static oid snmptrapoid[10] = {1,3,6,1,6,3,1,1,4,1};
     static oid snmptrapoid2[11] = {1,3,6,1,6,3,1,1,4,1,0};
-    static oid snmptrapent[10] = {1,3,6,1,6,3,1,1,4,3};
     struct variable_list tmpvar;
     char *Command = NULL;
-    int i;
     tmpvar.type = ASN_OBJECT_ID;
                   
     if (op == RECEIVED_MESSAGE){
