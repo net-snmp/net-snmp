@@ -49,13 +49,16 @@ print it($agent, 3);
 
 $regitem = $agent->register("test_reg", ".1.3.6.1.8888", \&testsub);
 print it($regitem, 4);
-print STDERR $regitem,":",ref($regitem),"\n";
+#print STDERR $regitem,":",ref($regitem),"\n";
 print it(ref($regitem) eq "netsnmp_handler_registrationPtr", 5);
+exit;
 
 while(1) {
-    print netsnmp_ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS), "\n";
+    print netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
+				NETSNMP_DS_AGENT_PORTS), "\n";
     $agent->agent_check_and_process(1);
-    print netsnmp_ds_get_string(DS_APPLICATION_ID, DS_AGENT_PORTS), "\n";
+    print netsnmp_ds_get_string(NETSNMP_DS_APPLICATION_ID, 
+				NETSNMP_DS_AGENT_PORTS), "\n";
     print "got something\n";
 }
 exit;
