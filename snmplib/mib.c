@@ -5949,7 +5949,7 @@ mib_to_asn_type(int mib_type)
 
     case TYPE_UINTEGER:
     case TYPE_UNSIGNED32:
-        return ASN_UINTEGER;
+        return ASN_UNSIGNED;
 
     case TYPE_NSAPADDRESS:
         return ASN_NSAP;
