@@ -314,6 +314,7 @@ search_subtree_vars(struct subtree *tp,
 		    DEBUGMSGOID(("snmp_vars", cvp->name, cvp->namelen));
 		    DEBUGMSG(("snmp_vars"," ...\n"));
 
+		gaga:
 		    access = (*(vp->findVar))(cvp, name, namelen, exact,
 						  len, write_method);
 	    	    DEBUGMSGTL(("snmp_vars", "Returned %s\n",
@@ -350,15 +351,25 @@ search_subtree_vars(struct subtree *tp,
                     /* check for permission to view this part of the OID tree */
 		    if ((access != NULL || (*write_method != NULL && exact)) &&
                         in_a_view(name, namelen, pdu, cvp->type)) {
+			if ( access && !exact ) {
+				/*
+				 * We've got an answer, but shouldn't use it.
+				 * But we *might* be able to use a later
+				 *  instance of the same object, so we can't
+				 *  legitimately move on to the next variable
+				 *  in the variable structure just yet.
+				 * Let's try re-calling the findVar routine
+				 *  with the returned name, and see whether
+				 *  the next answer is acceptable
+				 */
+			   *write_method = NULL;
+			   goto gaga;
+			}
                         access = NULL;
 			*write_method = NULL;
 		    } else if (exact){
 			found = TRUE;
 		    }
-		    /* this code is incorrect if there is
-		       a view configuration that exludes a particular
-		       instance of a variable.  It would return noSuchObject,
-		       which would be an error */
 		    if (access != NULL || (*write_method != NULL && exact))
 			break;
 		}
