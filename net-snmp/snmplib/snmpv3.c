@@ -3,9 +3,12 @@
  */
 
 #include <net-snmp/net-snmp-config.h>
-
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #include <stdio.h>
 #include <sys/types.h>
+
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
@@ -19,6 +22,10 @@
 # else
 #  include <time.h>
 # endif
+#endif
+#if HAVE_SYS_TIMES_H
+/* lumentis: replaced gettimeofday() with times() */
+#include <sys/times.h>
 #endif
 #if HAVE_STRING_H
 #include <string.h>
@@ -92,6 +99,18 @@ static const oid *defaultAuthType = NULL;
 static size_t   defaultAuthTypeLen = 0;
 static const oid *defaultPrivType = NULL;
 static size_t   defaultPrivTypeLen = 0;
+
+/* this is probably an over-kill ifdef, but why not */
+#if defined(HAVE_SYS_TIMES_H) && defined(HAVE_UNISTD_H) && defined(HAVE_TIMES) && defined(_SC_CLK_TCK) && defined(HAVE_SYSCONF) && defined(UINT_MAX)
+
+#define SNMP_USE_TIMES 1
+
+static clock_t snmpv3startClock;
+static long clockticks = 0;
+static unsigned int lastcalltime = 0;
+static unsigned int wrapcounter = 0;
+
+#endif /* times() tests */
 
 #if defined(IFHWADDRLEN) && defined(SIOCGIFHWADDR)
 static int      getHwAddress(const char *networkDevice, char *addressOut);
@@ -1163,6 +1182,16 @@ oldengineID_conf(const char *word, char *cptr)
     read_config_read_octet_string(cptr, &oldEngineID, &oldEngineIDLength);
 }
 
+/*
+ * merely call 
+ */
+void
+get_enginetime_alarm(unsigned int regnum, void *clientargs)
+{
+    /* we do this every so (rarely) often just to make sure we watch
+       wrapping of the times() output */
+    snmpv3_local_snmpEngineTime();
+}
 
 /*******************************************************************-o-******
  * init_snmpv3
@@ -1177,6 +1206,17 @@ oldengineID_conf(const char *word, char *cptr)
 void
 init_snmpv3(const char *type)
 {
+#if SNMP_USE_TIMES
+  struct tms dummy;
+
+  /* fixme: -1 is fault code... */
+  snmpv3startClock = times(&dummy);
+
+  /* remember how many ticks per second there are, since times() returns this */
+
+  clockticks = sysconf(_SC_CLK_TCK);
+
+#endif /* SNMP_USE_TIMES */
 
     gettimeofday(&snmpv3starttime, NULL);
 
@@ -1495,11 +1535,33 @@ snmpv3_generate_engineID(size_t * length)
 u_long
 snmpv3_local_snmpEngineTime(void)
 {
+#ifdef SNMP_USE_TIMES
+  struct tms dummy;
+  clock_t now = times(&dummy);
+  /* fixme: -1 is fault code... */
+  unsigned int result;
+
+  if (now < snmpv3startClock) {
+      result = UINT_MAX - snmpv3startClock + now;
+  } else {
+      result = now - snmpv3startClock;
+  }
+  if (result < lastcalltime) {
+      /* wrapped */
+      wrapcounter++;
+  }
+  lastcalltime = result;
+  result =  (UINT_MAX/clockticks)*wrapcounter + result/clockticks;
+
+  return result;
+#else /* !SNMP_USE_TIMES */
     struct timeval  now;
 
     gettimeofday(&now, NULL);
-    return calculate_time_diff(&now, &snmpv3starttime) / 100;
+    return calculate_sectime_diff(&now, &snmpv3starttime);
+#endif /* HAVE_SYS_TIMES_H */
 }
+
 
 
 /*
