@@ -63,10 +63,10 @@ free_agentx_request(struct request_list *req)
 {
     if ( !req )
 	return;
-/*
+
     if ( req->cb_data )
 	free ( req->cb_data );
- */
+
      free ( req );
 }
 
