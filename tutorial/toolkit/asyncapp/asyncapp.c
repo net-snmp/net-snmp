@@ -67,7 +67,7 @@ void initialize (void)
  */
 int print_result (int status, struct snmp_session *sp, struct snmp_pdu *pdu)
 {
-  char buf[128];
+  char buf[1024];
   struct variable_list *vp;
   int ix;
   struct timeval now;
