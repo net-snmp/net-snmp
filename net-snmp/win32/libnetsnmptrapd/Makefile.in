@@ -15,7 +15,6 @@ ALL : "..\lib\$(OUTDIR)\netsnmptrapd.lib"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\snmptrapd.obj"
 	-@erase "$(INTDIR)\snmptrapd_handlers.obj"
 	-@erase "$(INTDIR)\snmptrapd_log.obj"
 	-@erase "$(INTDIR)\notification_log.obj"
@@ -71,7 +70,6 @@ BSC32_SBRS= \
 LIB32=link.exe -lib
 LIB32_FLAGS=/nologo /out:"..\lib\$(OUTDIR)\netsnmptrapd.lib" 
 LIB32_OBJS= \
-	"$(INTDIR)\snmptrapd.obj" \
 	"$(INTDIR)\snmptrapd_handlers.obj" \
 	"$(INTDIR)\snmptrapd_log.obj" \
 	"$(INTDIR)\notification_log.obj"
@@ -87,7 +85,6 @@ ALL : "..\lib\$(OUTDIR)\netsnmptrapd.lib"
 
 
 CLEAN :
-	-@erase "$(INTDIR)\snmptrapd.obj"
 	-@erase "$(INTDIR)\snmptrapd_handlers.obj"
 	-@erase "$(INTDIR)\snmptrapd_log.obj"
 	-@erase "$(INTDIR)\notification_log.obj"
@@ -143,7 +140,6 @@ BSC32_SBRS= \
 LIB32=link.exe -lib
 LIB32_FLAGS=/nologo /out:"..\lib\$(OUTDIR)\netsnmptrapd.lib" 
 LIB32_OBJS= \
-	"$(INTDIR)\snmptrapd.obj" \
 	"$(INTDIR)\snmptrapd_handlers.obj" \
 	"$(INTDIR)\snmptrapd_log.obj" \
 	"$(INTDIR)\notification_log.obj"
@@ -166,12 +162,6 @@ LIB32_OBJS= \
 
 
 !IF "$(CFG)" == "release" || "$(CFG)" == "debug"
-SOURCE=..\..\apps\snmptrapd.c
-
-"$(INTDIR)\snmptrapd.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
 SOURCE=..\..\apps\snmptrapd_handlers.c
 
 "$(INTDIR)\snmptrapd_handlers.obj" : $(SOURCE) "$(INTDIR)"
