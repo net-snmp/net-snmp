@@ -1,7 +1,7 @@
-RFCHOST =	ftp.nordu.net	# ftp.ietf.org
+RFCHOST =	ftp://ftp.nordu.net	# ftp.ietf.org
 RFCDIR =	rfc
 
-IANAHOST =	ftp.iana.org
+IANAHOST =	ftp://ftp.iana.org
 IANADIR =	mib/iana.mib
 
 ALLDIR =	/usr/local/share/snmp/rfc.orig
@@ -73,7 +73,7 @@ SMUX-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 1227 SMUX-MIB
 
 DISMAN-SCHEDULE-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(RFCHOST) $(RFCDIR) 2591
+	./mibfetch $(RFCHOST) $(RFCDIR) 3231
 
 DISMAN-SCRIPT-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 3165
@@ -94,7 +94,8 @@ EtherLike-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(RFCHOST) $(RFCDIR) 2665
 
 IANAifType-MIB.txt:	$(MIBDEPS)
-	./mibfetch $(IANAHOST) $(IANADIR) ianaiftype.mib
+#	./mibfetch $(IANAHOST) $(IANADIR) ianaiftype.mib  # This is outdated!
+	./mibfetch -x http://www.iana.org assignments ianaiftype-mib
 
 IANA-LANGUAGE-MIB.txt:	$(MIBDEPS)
 	./mibfetch $(IANAHOST) $(IANADIR) ianalanguage.mib
