@@ -31,6 +31,9 @@
 #include <sys/protosw.h>
 #endif
 
+#if HAVE_SYS_SYSMP_H
+#include <sys/sysmp.h>
+#endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -125,7 +128,9 @@ static int header_tcp __P((struct variable *, oid *, int *, int, int *, int (**w
 
 void	init_tcp( )
 {
+#ifdef TCPSTAT_SYMBOL
   auto_nlist( TCPSTAT_SYMBOL,0,0 );
+#endif
   auto_nlist( TCP_SYMBOL,0,0 );
 }
 
@@ -446,8 +451,10 @@ var_tcpEntry(vp, name, length, exact, var_len, write_method)
     /*
      *	Allow for a kernel w/o TCP
      */
+#ifdef TCPSTAT_SYMBOL
 #ifndef linux
     if (auto_nlist_value(TCPSTAT_SYMBOL) == -1) return(NULL);
+#endif
 #endif
 
 	bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
