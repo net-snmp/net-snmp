@@ -412,7 +412,7 @@ in_addr_t get_myaddr (void)
 }
 
 
-#if !defined(solaris2) && !defined(linux)
+#if !defined(solaris2) && !defined(linux) && !defined(cygwin)
 /*
  * Returns boottime in centiseconds(!).
  *	Caches this for future use.
@@ -472,7 +472,7 @@ long get_boottime (void)
  */
 long get_uptime (void)
 {
-#if !defined(solaris2) && !defined(linux)
+#if !defined(solaris2) && !defined(linux) && !defined(cygwin)
     struct timeval now;
     long boottime_csecs, nowtime_csecs;
 
