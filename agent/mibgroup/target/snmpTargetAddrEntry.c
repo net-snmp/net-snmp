@@ -28,6 +28,7 @@
 
 oid snmpTargetAddrOID[snmpTargetAddrOIDLen] = {1,3,6,1,6,3,12,1,2,1,0};
 
+static unsigned long snmpTargetSpinLock = 0;
 static struct targetAddrTable_struct *aAddrTable=0;
 
 
@@ -255,6 +256,12 @@ struct variable2 snmpTargetAddrEntry_variables[] = {
 
 };
 
+struct variable2 snmpTargetSpinLock_var[] = {
+  { SNMPTARGETSPINLOCK, ASN_INTEGER, RWRITE, var_targetSpinLock, 1, { 1 } }
+};
+
+static oid snmpTargetSpinLock_oid[] = { 1, 3, 6, 1, 6, 3, 12, 1 };
+
 /* now load this mib into the agents mib table */
 oid snmpTargetAddrEntry_variables_oid[] = { 1,3,6,1,6,3,12,1,2,1 };
 
@@ -264,6 +271,8 @@ void init_snmpTargetAddrEntry(void) {
   DEBUGMSGTL(("snmpTargetAddrEntry","init\n"));
   REGISTER_MIB("target/snmpTargetAddrEntry", snmpTargetAddrEntry_variables,
 			variable2, snmpTargetAddrEntry_variables_oid);
+  REGISTER_MIB("target/snmpTargetSpinLock", snmpTargetSpinLock_var,
+			variable2, snmpTargetSpinLock_oid);
 
   snmpd_register_config_handler("targetAddr", snmpd_parse_config_targetAddr,
 				0, NULL);
@@ -640,25 +649,50 @@ var_snmpTargetAddrEntry(
   struct targetAddrTable_struct *temp_struct;
   int                            i=0;
 
-  *write_method = 0;           /* assume it isnt writable for the time being */
+  /*  Set up write_method first, in case we return NULL before getting to the
+      switch (vp->magic) below.  In some of these cases, we still want to call
+      the appropriate write_method, if only to have it return the appropriate
+      error.  */
+
+  switch (vp->magic) {
+  case SNMPTARGETADDRTDOMAIN:
+    *write_method = write_snmpTargetAddrTDomain;
+    break;
+  case SNMPTARGETADDRTADDRESS:
+    *write_method = write_snmpTargetAddrTAddress;
+    break;
+  case SNMPTARGETADDRRETRYCOUNT:
+    *write_method = write_snmpTargetAddrRetryCount;
+    break;
+  case SNMPTARGETADDRTAGLIST:
+    *write_method = write_snmpTargetAddrTagList;
+    break;
+  case SNMPTARGETADDRPARAMS:
+    *write_method = write_snmpTargetAddrParams;
+    break;
+  case SNMPTARGETADDRSTORAGETYPE:
+    *write_method = write_snmpTargetAddrStorageType;
+    break;
+  case SNMPTARGETADDRROWSTATUS:
+    *write_method = write_snmpTargetAddrRowStatus;
+    break;
+  default:
+    *write_method = NULL;
+  }  
+
+
   *var_len = sizeof(long_ret); /* assume an integer and change later if not */
 
   /* look for OID in current table */
   if ( (temp_struct = search_snmpTargetAddrTable(vp->name, vp->namelen, 
 				      name, length, exact)) == 0 ) {
-    /* for creation of new rows */
-    if (vp->magic == SNMPTARGETADDRROWSTATUS)  {
-      *write_method = write_snmpTargetAddrRowStatus;
-    }
     return(0);
   }
   
   /* We found what we were looking for, either the next OID or the exact OID */
   /* this is where we do the value assignments for the mib results. */
   switch(vp->magic) {
-
   case SNMPTARGETADDRTDOMAIN:
-    *write_method = write_snmpTargetAddrTDomain;
     if (temp_struct->tDomainLen <= 0) {
       return(0);
     }
@@ -671,41 +705,34 @@ var_snmpTargetAddrEntry(
     return (unsigned char *) objid;
     
   case SNMPTARGETADDRTADDRESS:
-    *write_method = write_snmpTargetAddrTAddress;
     if (temp_struct->tAddress == 0)  return(0);
     *var_len = temp_struct->tAddressLen;
     return (unsigned char *) temp_struct->tAddress;
     
   case SNMPTARGETADDRTIMEOUT:
-    *write_method = write_snmpTargetAddrTimeout;
     long_ret = temp_struct->timeout;
     return (unsigned char *) &long_ret;
 
   case SNMPTARGETADDRRETRYCOUNT:
-    *write_method = write_snmpTargetAddrRetryCount;
     long_ret = temp_struct->retryCount;
     return (unsigned char *) &long_ret;
 
   case SNMPTARGETADDRTAGLIST:
-    *write_method = write_snmpTargetAddrTagList;
     strcpy(string, temp_struct->tagList);
     *var_len = strlen(string);
     return (unsigned char *) string;
 
   case SNMPTARGETADDRPARAMS:
-    *write_method = write_snmpTargetAddrParams;
     if (temp_struct->params == 0) return(0);
     strcpy(string, temp_struct->params);
     *var_len = strlen(string);
     return (unsigned char *) string;
     
   case SNMPTARGETADDRSTORAGETYPE:
-    *write_method = write_snmpTargetAddrStorageType;
     long_ret = temp_struct->storageType;
     return (unsigned char *) &long_ret;
 
   case SNMPTARGETADDRROWSTATUS:
-    *write_method = write_snmpTargetAddrRowStatus;
     long_ret = temp_struct->rowStatus;
     return (unsigned char *) &long_ret;
     
@@ -1244,3 +1271,57 @@ write_snmpTargetAddrRowStatus(
   return SNMP_ERR_NOERROR;
 }  /* write_snmpTargetAddrRowStatus */
 
+
+
+int
+write_targetSpinLock(
+   int      action,
+   u_char   *var_val,
+   u_char   var_val_type,
+   size_t   var_val_len,
+   u_char   *statP,
+   oid      *name,
+   size_t   name_len)
+{
+    if (action == RESERVE1) {
+	if (var_val_type != ASN_INTEGER) {
+	    return SNMP_ERR_WRONGTYPE;
+	}
+	if (var_val_len != sizeof(unsigned long)) {
+	    return SNMP_ERR_WRONGLENGTH;
+	}
+	if (*((unsigned long *)var_val) != snmpTargetSpinLock) {
+	    return SNMP_ERR_INCONSISTENTVALUE;
+	}
+    } else if (action == COMMIT) {
+	if (snmpTargetSpinLock == 2147483647) {
+	    snmpTargetSpinLock = 0;
+	} else {
+	    snmpTargetSpinLock++;
+	}
+    }
+    return SNMP_ERR_NOERROR;
+}
+
+
+
+u_char *
+var_targetSpinLock(struct variable *vp,
+		   oid *name,
+		   size_t *length,
+		   int exact,
+		   size_t *var_len,
+		   WriteMethod **write_method)
+{
+    if (header_generic(vp, name, length, exact, var_len, write_method) == 
+	MATCH_FAILED) {
+	*write_method = write_targetSpinLock;
+	return NULL;
+    }
+    if (vp->magic == SNMPTARGETSPINLOCK) {
+	*write_method = write_targetSpinLock;
+	*var_len = sizeof(unsigned long);
+	return (u_char *)&(snmpTargetSpinLock);
+    }
+    return NULL;
+}
