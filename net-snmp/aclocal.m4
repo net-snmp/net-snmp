@@ -83,7 +83,16 @@ AC_CHECK_STRUCT_FOR([
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 #include <net/if.h>
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+#ifdef HAVE_SYS_QUEUE_H
+#include <sys/queue.h>
+#endif
 #ifdef linux
 struct ifnet {
 	char	*if_name;		/* name, e.g. ``en'' or ``lo'' */

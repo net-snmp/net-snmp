@@ -91,6 +91,9 @@
 #endif
 #include "udp.h"
 
+#ifdef CAN_USE_SYSCTL
+#include <sys/sysctl.h>
+#endif
 
 	/*********************
 	 *
@@ -193,13 +196,25 @@ var_udp(vp, name, length, exact, var_len, write_method)
      *        Get the UDP statistics from the kernel...
      */
 
+#if !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_STATS)
 #ifndef linux
     auto_nlist(UDPSTAT_SYMBOL, (char *)&udpstat, sizeof (udpstat));
 #else
     linux_read_udp_stat(&udpstat);
 #endif
+#else /* can use sysctl(3) and have net.inet.udp.stats */
+    {
+	    static int sname[] 
+		    = { CTL_NET, PF_INET, IPPROTO_UDP, UDPCTL_STATS };
+	    size_t len;
 
-    switch (vp->magic){
+	    len = sizeof udpstat;
+	    if (sysctl(sname, 4, &udpstat, &len, 0, 0) < 0)
+		    return NULL;
+    }
+#endif
+
+    switch (vp->magic) {
 	case UDPINDATAGRAMS:
 #if defined(freebsd2) || defined(netbsd1) || defined(openbsd2)
 	    long_return = udpstat.udps_ipackets;
