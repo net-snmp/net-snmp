@@ -21,13 +21,10 @@ Note: By default, everything will be installed in /usr/local.
 UCD-SNMP Specific Information
 =============================
 
-Warning:  
-
 As of V3.0.3 the configuration files are now looked for in
 $(prefix)/lib/snmp, where ($prefix) is defined as the value passed to
 the --prefix argument of the configure script, or /usr/local if
-undefined.  If you used to keep these files in /etc, please move them
-to this location instead.
+undefined.
 
 LONG (but you should read these) INSTRUCTIONS
 =============================================
@@ -145,6 +142,8 @@ Optional features for ucd-snmp:
   --enable-debugging      Outputs extra debugging information.
   --with-defaults         Use defaults for prompted values.
   --without-root-access   The agent does not exit if it can not open /dev/kmem.
+  --with-mib-modules="list"      Compile with additional mib modules.
+  --with-out-mib-modules="list"  Compile without these mib modules.
 
 Specifying the System Type
 ==========================
