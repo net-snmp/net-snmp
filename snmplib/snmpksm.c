@@ -65,6 +65,9 @@
 
 static krb5_context kcontext = NULL;
 static krb5_rcache rcache = NULL;
+static krb5_keytab keytab = NULL;
+static int keytab_setup = 0;
+static const char *service_name = NULL;
 
 static int      ksm_session_init(netsnmp_session *);
 static void     ksm_free_state_ref(void *);
@@ -108,6 +111,58 @@ struct ksm_cache_entry {
 static struct ksm_cache_entry *ksm_hash_table[HASHSIZE];
 
 /*
+ * Stuff to deal with config values
+ * Note the conditionals that wrap these--i don't know if these are
+ * needed, since i don't know how library initialization and callbacks
+ * and stuff work
+ */
+
+static int
+init_snmpksm_post_config(int majorid, int minorid, void *serverarg,
+			 void *clientarg)
+{
+
+    if (kcontext == NULL) {
+	/* not reached, i'd imagine */
+        return SNMPERR_KRB5;
+    }
+
+    if (service_name == NULL) {
+	/* always reached, i'd imagine */
+	char *c = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+					NETSNMP_DS_LIB_KSM_SERVICE_NAME);
+	if (c != NULL) {
+		service_name = c;
+	}
+	else {
+		service_name = "host";
+	}
+    }
+
+    if (keytab_setup == 0) {
+	/* always reached, i'd imagine */
+	char *c = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID,
+					NETSNMP_DS_LIB_KSM_KEYTAB);
+	if (c) {
+	    krb5_error_code retval;
+	    DEBUGMSGTL(("ksm", "Using keytab %s\n", c));
+	    retval = krb5_kt_resolve(kcontext, c, &keytab);
+	    if (retval) {
+		DEBUGMSGTL(("ksm", "krb5_kt_resolve(\"%s\") failed. KSM "
+			    "config callback failing\n", error_message(retval)));
+		return SNMPERR_KRB5;
+	    }
+	}
+	else {
+	    DEBUGMSGTL(("ksm", "Using default keytab\n", c));
+	}
+	keytab_setup = 1;
+    }
+
+    return SNMPERR_SUCCESS;
+}
+
+/*
  * Initialize all of the state required for Kerberos (right now, just call
  * krb5_init_context).
  */
@@ -118,6 +173,16 @@ init_ksm(void)
     krb5_error_code retval;
     struct snmp_secmod_def *def;
     int             i;
+
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defKSMKeytab",
+                               NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_KSM_KEYTAB);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defKSMServiceName",
+                               NETSNMP_DS_LIBRARY_ID,
+			       NETSNMP_DS_LIB_KSM_SERVICE_NAME);
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY,
+			   SNMP_CALLBACK_POST_READ_CONFIG,
+			   init_snmpksm_post_config, NULL);
+
 
     if (kcontext == NULL) {
         retval = krb5_init_context(&kcontext);
@@ -417,7 +482,7 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
         retcode =
             krb5_mk_req(kcontext, &auth_context,
                         AP_OPTS_MUTUAL_REQUIRED | AP_OPTS_USE_SUBKEY,
-                        (char *) "host", parms->session->peername, NULL,
+                        (char *) service_name, parms->session->peername, NULL,
                         cc, &outdata);
 
         if (retcode) {
@@ -428,7 +493,9 @@ ksm_rgenerate_out_msg(struct snmp_secmod_outgoing_params *parms)
             goto error;
         }
 
-        DEBUGMSGTL(("ksm", "KSM: ticket retrieved successfully\n"));
+	DEBUGMSGTL(("ksm", "KSM: ticket retrieved successfully for \"%s/%s\" "
+		    "(may not be actual ticket sname)\n", service_name,
+		    parms->session->peername));
 
     } else {
 
@@ -1241,7 +1308,7 @@ ksm_process_in_msg(struct snmp_secmod_incoming_params *parms)
         }
 
         retcode = krb5_rd_req(kcontext, &auth_context, &ap_req, NULL,
-                              NULL, &flags, &ticket);
+                              keytab, &flags, &ticket);
 
         krb5_auth_con_setrcache(kcontext, auth_context, NULL);
 

@@ -113,6 +113,9 @@ extern          "C" {
 #define NETSNMP_DS_LIB_OIDPREFIX         13
 #define NETSNMP_DS_LIB_CLIENT_ADDR       14
 #define NETSNMP_DS_LIB_TEMP_FILE_PATTERN 15
+#define NETSNMP_DS_LIB_KSM_KEYTAB        16
+#define NETSNMP_DS_LIB_KSM_SERVICE_NAME  17
+
 
     /*
      * end storage definitions 
