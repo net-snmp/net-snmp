@@ -237,7 +237,6 @@ nsModuleTable_handler(netsnmp_mib_handler* handler,
          * been set corresponding to the indexes of the request 
          */
         if (table_info == NULL) {
-            request = request->next;
             continue;
         }
 
@@ -287,7 +286,6 @@ nsModuleTable_handler(netsnmp_mib_handler* handler,
             snmp_log(LOG_ERR,
                      "problem encountered in nsModuleTable_handler: unsupported mode\n");
         }
-        request = request->next;
     }
     return SNMP_ERR_NOERROR;
 }
