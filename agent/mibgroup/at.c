@@ -6,6 +6,9 @@
 #include "mib_module_config.h"
 
 #include <config.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 

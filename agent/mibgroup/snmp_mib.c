@@ -10,6 +10,7 @@
 
 /* #include "../common_header.h" */
 #include "snmp_mib.h"
+#include "snmp_api.h"
 
 
 	/*********************

@@ -7,6 +7,9 @@
 #include "mib_module_config.h"
 
 #include <config.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#endif
 #if TIME_WITH_SYS_TIME
 # ifdef WIN32
 #  include <sys/timeb.h>
@@ -60,7 +63,6 @@
 #include "kernel_sunos5.h"
 #endif
 #include "../../snmplib/system.h"
-
 
 
 #if defined(osf4) || defined(aix4) || defined(hpux10)

@@ -13,6 +13,7 @@
 #include "mib.h"
 #include "var_struct.h"
 #include "snmp_vars.h"
+#include "snmp_api.h"
 
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>

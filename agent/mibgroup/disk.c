@@ -112,6 +112,7 @@
 #else
 #define setPerrorstatus(x) perror(x)
 #endif
+#include "snmp_api.h"
 
 int numdisks;
 struct diskpart disks[MAXDISKS];
