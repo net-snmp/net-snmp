@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 {
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu, *response;
-    struct sockaddr_in *pduIp;
+    in_addr_t *pdu_in_addr_t;
     oid name[MAX_OID_LEN];
     size_t name_length;
     int	arg;
@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
 	    exit(1);
 	}
 	pdu = snmp_pdu_create(SNMP_MSG_TRAP);
-	pduIp = (struct sockaddr_in *)&pdu->agent_addr;
+	pdu_in_addr_t = (in_addr_t *)pdu->agent_addr;
 	if (arg == argc) {
 	    fprintf(stderr, "No enterprise oid\n");
 	    usage();
@@ -275,11 +275,11 @@ int main(int argc, char *argv[])
 	    exit (1);
 	}
 	agent = argv [arg];
-	pduIp->sin_family = AF_INET;
-	if (agent != NULL && strlen (agent) != 0)
-	    pduIp->sin_addr.s_addr = parse_address(agent);
-	else
-	    pduIp->sin_addr.s_addr = get_myaddr();
+	if (agent != NULL && strlen (agent) != 0) {
+	    *pdu_in_addr_t = parse_address(agent);
+	} else {
+	    *pdu_in_addr_t = get_myaddr();
+	}
 	if (++arg == argc) {
 	    fprintf (stderr, "Missing generic-trap parameter\n");
 	    usage ();

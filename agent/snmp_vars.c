@@ -236,6 +236,11 @@ init_agent (const char *app)
     r = subagent_pre_init();
 #endif
 
+  /*  Register configuration tokens from transport modules.  */
+#ifdef SNMP_TRANSPORT_UDP_DOMAIN
+  snmp_udp_agent_config_tokens_register();
+#endif
+
   return r;
 }  /* end init_agent() */
 

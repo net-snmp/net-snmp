@@ -60,6 +60,7 @@
 #include "tools.h"
 #include "snmp_logging.h"
 #include "callback.h"
+#include "snmp_transport.h"
 
 #include "mib_module_config.h"
 
@@ -291,7 +292,7 @@ void send_enterprise_trap_vars (int trap,
     struct snmp_pdu	*template_pdu;
     struct timeval	 now;
     long uptime;
-    struct sockaddr_in *pduIp;
+    in_addr_t *pdu_in_addr_t;
     struct trap_sink *sink;
     oid temp_oid[MAX_OID_LEN];
     
@@ -345,10 +346,10 @@ void send_enterprise_trap_vars (int trap,
     }
     template_pdu->enterprise_length = enterprise_length;
     template_pdu->flags |= UCD_MSG_FLAG_FORCE_PDU_COPY;
-    pduIp = (struct sockaddr_in *)&template_pdu->agent_addr;
-    pduIp->sin_family		 = AF_INET;
-    pduIp->sin_addr.s_addr	 = get_myaddr();
-    template_pdu->time		 	 = uptime;
+    
+    pdu_in_addr_t = (in_addr_t *)template_pdu->agent_addr;
+    *pdu_in_addr_t = get_myaddr();
+    template_pdu->time = uptime;
 
 		/*
 		 *  Now use the parameters to determine
