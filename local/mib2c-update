@@ -23,6 +23,7 @@
 #
 # defaults
 #
+UPDATE_CURR=.
 UPDATE_ORIG=.orig
 UPDATE_NEW=.new
 UPDATE_MERGED=.merged
