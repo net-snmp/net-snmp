@@ -165,7 +165,7 @@ if [ $? -ne 0 ] ; then
 fi
 
 for needed in snmpd snmpget snmpgetnext; do
-    $WHICH $needed
+    $WHICH $needed > /dev/null 2>&1
     if [ $? -ne 0  ] ; then 
         echo "No $needed found. Exiting"
         exit 1
