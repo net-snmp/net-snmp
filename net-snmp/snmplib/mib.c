@@ -1907,7 +1907,6 @@ get_node(const char *name,
 	res = get_module_node( name, "ANY", objid, objidlen );
     else {
 	char *module;
-	int res;
 		/*
 		 *  requested name is of the form
 		 *	"module:subidentifier"
