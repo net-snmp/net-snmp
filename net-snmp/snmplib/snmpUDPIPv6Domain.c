@@ -337,11 +337,11 @@ int			snmp_sockaddr_in6	(struct sockaddr_in6 *addr,
     cp = strrchr(peername, ':');
     if (cp != NULL) {
       *cp = '\0';
-      if (atoi(++cp) != 0 &&
+      if (atoi(cp + 1) != 0 &&
 	  inet_pton(AF_INET6, peername, (void *)&(addr->sin6_addr))) {
 	DEBUGMSGTL(("snmp_sockaddr_in6", "IPv6 address with port suffix :%d\n",
-		    atoi(cp)));
-	addr->sin6_port = htons(atoi(cp));
+		    atoi(cp + 1)));
+	addr->sin6_port = htons(atoi(cp + 1));
 	goto resolved;
       }
       *cp = ':';
