@@ -228,7 +228,7 @@ free_config __P((void))
         (*(ltmp->free_func))();
 }
 
-int
+void
 read_configs __P((void))
 {
   int i;
@@ -275,8 +275,6 @@ read_configs __P((void))
     fprintf(stderr, "snmpd: errors in config file - abort.\n");
     exit(1);
   }
-
-  return 0;
 }
 
 void config_perror(string)
