@@ -930,6 +930,7 @@ int snmpTargetParams_createNewRow(
     temp_struct->paramName[pNameLen]  = '\0';
     temp_struct->rowStatus            = SNMP_ROW_NOTREADY;
     
+    update_timestamp(temp_struct);
     snmpTargetParamTable_addToList(temp_struct, &aPTable);
 
     return 1;
@@ -1024,7 +1025,6 @@ write_snmpTargetParamsRowStatus(
 	DEBUGMSG(("snmpTargetParamsEntry","failed new row creation, bad OID/index value \n"));
 	return SNMP_ERR_GENERR;
       }
-      update_timestamp(temp_struct);
       break;
       
     case DESTROY:
