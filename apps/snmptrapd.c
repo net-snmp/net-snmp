@@ -87,6 +87,8 @@ SOFTWARE.
 #include <signal.h>
 #include <errno.h>
 
+#include <getopt.h>
+
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
@@ -625,136 +627,92 @@ int main(int argc, char *argv[])
     /*
      * usage: snmptrapd [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-d] [-e] [-S] [-a]
      */
-    for(arg = 1; arg < argc; arg++){
-	if (argv[arg][0] == '-'){
-	    char *opt;
-	    switch(argv[arg][1]){
-		case 'V':
-                  fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
-                  exit(0);
-                  break;
-		case 'd':
-		    snmp_set_dump_packet(1);
-		    break;
-		case 'q':
-		    snmp_set_quick_print(1);
-		    break;
-		case 'D':
-		    opt = argv[arg]+2;
-		    if (*opt == 0) {
-			if (++arg == argc) {
-			    usage();
-			    exit(1);
-			}
-			opt = argv[arg];
-		    }
-                    debug_register_tokens(opt);
-                    snmp_set_do_debugging(1);
-                    break;
-                case 'p':
-		    opt = argv[arg]+2;
-		    if (*opt == 0) {
-			if (++arg == argc) {
-			    usage();
-			    exit(1);
-			}
-			opt = argv[arg];
-		    }
-                    local_port = atoi(argv[arg]);
-                    break;
-		case 'm':
-		    if (argv[arg][2] != 0)
-			setenv("MIBS",&argv[arg][2], 1);
-		    else if (++arg < argc)
-			setenv("MIBS",argv[arg], 1);
-		    else {
-			fprintf(stderr,"Need MIBS after -m flag.\n");
-			usage();
-			exit(1);
-		    }
-		    break;
-		case 'M':
-		    if (argv[arg][2] != 0)
-			setenv("MIBDIRS",&argv[arg][2], 1);
-		    else if (++arg < argc)
-			setenv("MIBDIRS",argv[arg], 1);
-		    else {
-			fprintf(stderr,"Need MIBDIRS after -M flag.\n");
-			usage();
-			exit(1);
-		    }
-		    break;
-		case 'P':
-		    Print++;
-		    break;
-		case 'e':
-		    Event++;
-		    break;
-		case 's':
-		    Syslog++;
-		    break;
-		case 'S':
-		    snmp_set_suffix_only(2);
-		    break;
-		case 'a':
-		    dropauth = 1;
-		    break;
-                case 'f':
-		    dofork = 0;
-		    break;
-		case 'l':
-		    opt = argv[arg]+2;
-		    if (*opt == 0) {
-			if (++arg == argc) {
-			    usage();
-			    exit(1);
-			}
-			opt = argv[arg];
-		    }
-		    switch(*opt) {
-			case 'd':
-			   Facility = LOG_DAEMON; break;
-			case '0':
-			   Facility = LOG_LOCAL0; break;
-			case '1':
-			   Facility = LOG_LOCAL1; break;
-			case '2':
-			   Facility = LOG_LOCAL2; break;
-			case '3':
-			   Facility = LOG_LOCAL3; break;
-			case '4':
-			   Facility = LOG_LOCAL4; break;
-			case '5':
-			   Facility = LOG_LOCAL5; break;
-			case '6':
-			   Facility = LOG_LOCAL6; break;
-			case '7':
-			   Facility = LOG_LOCAL7; break;
-			default:
-		    	   fprintf(stderr,"invalid  syslog facility: -l %c\n",
-							argv[arg][0]);
-		    	   usage();
-		    	   exit (1);
-		           break;
-		    }
-		    break;
-                case 'H':
-                    init_snmp("snmptrapd");
-                    fprintf(stderr, "Configuration directives understood:\n");
-                    read_config_print_usage("  ");
-                    exit(0);
-		default:
-		    fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
-		    usage();
-		    exit (1);
-		    break;
+    while ((arg = getopt(argc, argv, "VdqRD:p:m:M:PesSafl:H")) != EOF){
+	switch(arg) {
+	case 'V':
+            fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+            exit(0);
+            break;
+	case 'd':
+	    snmp_set_dump_packet(1);
+	    break;
+	case 'q':
+	    snmp_set_quick_print(1);
+	    break;
+	case 'D':
+            debug_register_tokens(optarg);
+            snmp_set_do_debugging(1);
+	    break;
+        case 'p':
+            local_port = atoi(optarg);
+            break;
+	case 'm':
+	    setenv("MIBS", optarg, 1);
+	    break;
+	case 'M':
+	    setenv("MIBDIRS", optarg, 1);
+	    break;
+	case 'P':
+	    Print++;
+	    break;
+	case 'e':
+	    Event++;
+	    break;
+	case 's':
+	    Syslog++;
+	    break;
+	case 'S':
+	    snmp_set_suffix_only(2);
+	    break;
+	case 'a':
+	    dropauth = 1;
+	    break;
+        case 'f':
+	    dofork = 0;
+	    break;
+	case 'l':
+	    switch(*optarg) {
+	    case 'd':
+		Facility = LOG_DAEMON; break;
+	    case '0':
+		Facility = LOG_LOCAL0; break;
+	    case '1':
+		Facility = LOG_LOCAL1; break;
+	    case '2':
+		Facility = LOG_LOCAL2; break;
+	    case '3':
+		Facility = LOG_LOCAL3; break;
+	    case '4':
+		Facility = LOG_LOCAL4; break;
+	    case '5':
+		Facility = LOG_LOCAL5; break;
+	    case '6':
+		Facility = LOG_LOCAL6; break;
+	    case '7':
+		Facility = LOG_LOCAL7; break;
+	    default:
+		fprintf(stderr,"invalid  syslog facility: -l %c\n", *optarg);
+		usage();
+		exit (1);
+		break;
 	    }
-	    continue;
-	}
-	else {
+	    break;
+        case 'H':
+            init_snmp("snmptrapd");
+            fprintf(stderr, "Configuration directives understood:\n");
+	    read_config_print_usage("  ");
+            exit(0);
+	default:
+	    fprintf(stderr,"invalid option: -%c\n", arg);
 	    usage();
 	    exit (1);
+	    break;
 	}
+    }
+
+    if (optind != argc) {
+	usage();
+	exit(1);
     }
 
     if (!Print) Syslog = 1;
@@ -915,6 +873,7 @@ int main(int argc, char *argv[])
 	       tm->tm_hour, tm->tm_min, tm->tm_sec,
 	       VersionInfo);
     }
+    snmp_close(ss);
     SOCK_CLEANUP;
     return 0;
 }

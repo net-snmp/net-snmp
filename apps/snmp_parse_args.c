@@ -51,6 +51,8 @@
 #include <arpa/inet.h>
 #endif
 
+#include <getopt.h>
+
 #include "asn1.h"
 #include "snmp_api.h"
 #include "snmp_impl.h"
@@ -84,7 +86,7 @@ static oid usmDESPrivProtocol[]      = { 1,3,6,1,6,3,10,1,2,2 };
 void
 snmp_parse_args_usage(FILE *outf)
 {
-  fprintf(outf, "[-v 1|2c|3] [-h] [-H] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-P <MIBOPTS>] [-O <OUTPUTOPTS>]");
+  fprintf(outf, "[-v 1|2c|3] [-h] [-H] [-d] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-P <MIBOPTS>] [-O <OUTPUTOPTS>]");
   fprintf(outf, "[-T <B> <T>] [-e <E>] [-E <E>] [-n <N>] [-u <U>] [-l <L>] [-a <A>] [-A <P>] [-x <X>] [-X <P>] <hostname> {<community>}");
 }
 
@@ -96,15 +98,6 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -H\t\tDisplay configuration file directives understood.\n");
   fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
-  fprintf(outf, "  -q\tquick printing for easier parsing\n");
-  fprintf(outf, "  -O <FLAGS>\tOutput Style options:\n");
-  fprintf(outf, "  \t\t  FLAGS values:\n");
-  fprintf(outf, "  \t\t    o:\t\tprint oids numerically\n");
-  fprintf(outf, "  \t\t    e:\t\tprint enums numerically\n");
-  fprintf(outf, "  \t\t    b:\t\tdont break oid indexes down\n");
-  fprintf(outf, "  -f\t\tprint full object identifiers on output.\n");
-  fprintf(outf, "  -s\t\tprint only last element of object identifiers.\n");
-  fprintf(outf, "  -S\t\tmodule id plus last element of object identifiers.\n");
   fprintf(outf, "  -R\t\tuse \"random access\" to the mib tree.\n");
   fprintf(outf, "  -D[TOKEN,...]\t\tturn on debugging output, optionally by the list of TOKENs.\n");
   fprintf(outf, "  -m <MIBS>\tuse MIBS list instead of the default mib list.\n");
@@ -114,8 +107,7 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "\t\t\t(UDP or TCP).\n");
   fprintf(outf, "  -t <T>\tset the request timeout to T.\n");
   fprintf(outf, "  -r <R>\tset the number of retries to R.\n");
-  fprintf(outf,
-          "  -Z <B> <T>\tset the destination engine boots/time for v3 requests.\n");
+  fprintf(outf, "  -Z <B> <T>\tset the destination engine boots/time for v3 requests.\n");
   fprintf(outf, "  -e <E>\tsecurity engine ID (e.g., 800000020109840301).\n");
   fprintf(outf, "  -E <E>\tcontext engine ID (e.g., 800000020109840301).\n");
   fprintf(outf, "  -n <N>\tcontext name (e.g., bridge1).\n");
@@ -127,15 +119,20 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "  -X <P>\tprivacy protocol pass phrase\n");
   fprintf(outf, "  -P <MIBOPTS>\tToggle various defaults controlling mib parsing:\n");
   snmp_mib_toggle_options_usage("\t\t  ", outf);
+  fprintf(outf, "  -O <OIDOPTS>\tToggle various defaults controlling oid printing:\n");
+  snmp_oid_toggle_options_usage("\t\t  ", outf);
+  fflush(outf);
 }
+
 #define BUF_SIZE 512
+
 int
 snmp_parse_args(int argc, 
 		char *argv[], 
 		struct snmp_session *session)
 {
   int arg;
-  char *psz, *cp;
+  char *cp;
   char *Apsz = NULL;
   char *Xpsz = NULL;
   u_char buf[BUF_SIZE];
@@ -145,81 +142,29 @@ snmp_parse_args(int argc,
   snmp_sess_init( session );
 
   /* get the options */
-  for(arg = 1; (arg < argc) && (argv[arg][0] == '-'); arg++){
-    switch(argv[arg][1]){
-      case 'd':
-        snmp_set_dump_packet(1);
+  while ((arg = getopt(argc, argv, "VhHm:M:fsSqO:P:D:dRv:p:r:t:Z:e:E:n:u:l:x:X:a:A:")) != EOF) {
+    switch(arg){
+      case 'V':
+        fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
+        exit(0);
+
+      case 'h':
+        usage();
+        exit(0);
         break;
 
-      case 'R':
-        random_access = 1;
-        break;
-
-      case 'q':
-        snmp_set_quick_print(1);
-        break;
-
-      case 'O':
-        if (argv[arg][2] == 0) {
-          if (++arg < argc)
-            cp = argv[arg];
-          else {
-            fprintf(stderr,"Need FLAGS after -O flag.\n");
-            usage();
-            exit(1);
-          }
-        } else {
-          cp = &argv[arg][2];
-        }
-        while(*cp) {
-          switch(*cp++) {
-            case 'o':
-              ds_set_boolean(DS_LIBRARY_ID,
-                             DS_LIB_PRINT_NUMERIC_OIDS, 1);
-              break;
-            case 'e':
-              ds_set_boolean(DS_LIBRARY_ID,
-                             DS_LIB_PRINT_NUMERIC_ENUM, 1);
-              break;
-            case 'b':
-              ds_set_boolean(DS_LIBRARY_ID,
-                             DS_LIB_DONT_BREAKDOWN_OIDS, 1);
-              break;
-            default:
-              fprintf(stderr,"unknown option (%s) after -O flag\n", (cp-1));
-              usage();
-              exit(1);
-          }
-        }
-        break;
-
-      case 'D':
-        debug_register_tokens(&argv[arg][2]);
-        snmp_set_do_debugging(!snmp_get_do_debugging());
-        break;
+      case 'H':
+        init_snmp("snmpapp");
+        fprintf(stderr, "Configuration directives understood:\n");
+        read_config_print_usage("  ");
+        exit(0);
 
       case 'm':
-        if (argv[arg][2] != 0)
-          setenv("MIBS",&argv[arg][2], 1);
-        else if (++arg < argc)
-          setenv("MIBS",argv[arg], 1);
-        else {
-          fprintf(stderr,"Need MIBS after -m flag.\n");
-          usage();
-          exit(1);
-        }
+        setenv("MIBS", optarg, 1);
         break;
 
       case 'M':
-        if (argv[arg][2] != 0)
-          setenv("MIBDIRS",&argv[arg][2], 1);
-        else if (++arg < argc)
-          setenv("MIBDIRS",argv[arg], 1);
-        else {
-          fprintf(stderr,"Need MIBDIRS after -M flag.\n");
-          usage();
-          exit(1);
-        }
+        setenv("MIBDIRS", optarg, 1);
         break;
 
       case 'f':
@@ -234,12 +179,59 @@ snmp_parse_args(int argc,
 	snmp_set_suffix_only(2);
 	break;
 
+      case 'q':
+	snmp_set_quick_print(1);
+	break;
+
+      case 'O':
+        cp = snmp_oid_toggle_options(optarg);
+        if (cp != NULL) {
+          fprintf(stderr,"Unknown output option passed to -O: %c.\n", *cp);
+          usage();
+          exit(1);
+        }
+        break;
+
+      case 'P':
+        cp = snmp_mib_toggle_options(optarg);
+        if (cp != NULL) {
+          fprintf(stderr,"Unknown parsing option passed to -P: %c.\n", *cp);
+          usage();
+          exit(1);
+        }
+        break;
+
+      case 'D':
+        debug_register_tokens(optarg);
+        snmp_set_do_debugging(!snmp_get_do_debugging());
+        break;
+
+      case 'd':
+        snmp_set_dump_packet(1);
+        break;
+
+      case 'R':
+        random_access = 1;
+        break;
+
+
+      case 'v':
+        if (!strcmp(optarg,"1")) {
+          session->version = SNMP_VERSION_1;
+        } else if (!strcasecmp(optarg,"2c")) {
+          session->version = SNMP_VERSION_2c;
+        } else if (!strcasecmp(optarg,"3")) {
+          session->version = SNMP_VERSION_3;
+        } else {
+          fprintf(stderr,"Invalid version specified after -v flag: %s\n", optarg);
+          usage();
+          exit(1);
+        }
+        break;
+
       case 'p':
-        if (isdigit(argv[arg][2]))
-          session->remote_port = atoi(&(argv[arg][2]));
-        else if ((++arg<argc) && isdigit(argv[arg][0]))
-          session->remote_port = atoi(argv[arg]);
-        else {
+        session->remote_port = atoi(optarg);
+        if (session->remote_port == 0) {
           fprintf(stderr,"Need port number after -p flag.\n");
           usage();
           exit(1);
@@ -247,62 +239,44 @@ snmp_parse_args(int argc,
         break;
 
       case 't':
-        if (isdigit(argv[arg][2]))
-          session->timeout = atoi(&(argv[arg][2])) * 1000000L;
-        else if ((++arg<argc) && isdigit(argv[arg][0]))
-          session->timeout = atoi(argv[arg]) * 1000000L;
-        else {
+        session->timeout = atoi(optarg) * 1000000L;
+        if (session->timeout == 0) {
           fprintf(stderr,"Need time in seconds after -t flag.\n");
           usage();
           exit(1);
         }
         break;
 
-      case 'T':
-          if (argv[arg][2] != '\0') 
-              cp = &argv[arg][2];
-          else if (++arg>argc) {
-              fprintf(stderr,"Need UDP or TCP after -T flag.\n");
-              usage();
-              exit(1);
-          } else {
-              cp = argv[arg];
-          }
-          if (strcasecmp(cp,"TCP") == 0) {
-              session->flags |= SNMP_FLAGS_STREAM_SOCKET;
-          } else if (strcasecmp(cp,"UDP") == 0) {
-              /* default, do nothing */
-          } else {
-              fprintf(stderr,"Unknown transport \"%s\" after -T flag.\n", cp);
-              usage();
-              exit(1);
-          }
-          break;
-
       case 'r':
-        if (isdigit(argv[arg][2]))
-          session->retries = atoi(&(argv[arg][2]));
-        else if ((++arg<argc) && isdigit(argv[arg][0]))
-          session->retries = atoi(argv[arg]);
-        else {
+        session->retries = atoi(optarg);
+        if (session->retries == 0) {
           fprintf(stderr,"Need number of retries after -r flag.\n");
           usage();
           exit(1);
         }
         break;
 
+      case 'T':
+          if (strcasecmp(optarg,"TCP") == 0) {
+              session->flags |= SNMP_FLAGS_STREAM_SOCKET;
+          } else if (strcasecmp(optarg,"UDP") == 0) {
+              /* default, do nothing */
+          } else {
+              fprintf(stderr,"Unknown transport \"%s\" after -T flag.\n", optarg);
+              usage();
+              exit(1);
+          }
+          break;
+
       case 'Z':
-        if (isdigit(argv[arg][2]))
-          session->engineBoots = (u_long)(atol(&(argv[arg][2])));
-        else if ((++arg<argc) && isdigit(argv[arg][0]))
-          session->engineBoots = (u_long)(atol(argv[arg]));
-        else {
+        session->engineBoots = (u_long)atol(optarg);
+        if (session->engineBoots == 0) {
           fprintf(stderr,"Need engine boots value after -Z flag.\n");
           usage();
           exit(1);
         }
-        if ((++arg<argc) && isdigit(argv[arg][0]))
-          session->engineTime = (u_long)(atol(argv[arg]));
+        if ((++optind<argc) && isdigit(argv[optind][0]))
+          session->engineTime = (u_long)(atol(argv[optind]));
         else {
           fprintf(stderr,"Need engine time value after -Z flag.\n");
           usage();
@@ -310,44 +284,8 @@ snmp_parse_args(int argc,
         }
         break;
 
-      case 'V':
-        fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
-        exit(0);
-
-      case 'v':
-        if (argv[arg][2] != 0)
-          psz = &(argv[arg][2]);
-        else
-          psz = argv[++arg];
-        if( psz == NULL) {
-          fprintf(stderr,"Need version value after -v flag. \n");
-          usage();
-          exit(1);
-        }
-        if (!strcmp(psz,"1")) {
-          session->version = SNMP_VERSION_1;
-        } else if (!strcasecmp(psz,"2c")) {
-          session->version = SNMP_VERSION_2c;
-        } else if (!strcasecmp(psz,"3")) {
-          session->version = SNMP_VERSION_3;
-        } else {
-          fprintf(stderr,"Invalid version specified after -v flag: %s\n", psz);
-          usage();
-          exit(1);
-        }
-        break;
-
       case 'e':
-        if (argv[arg][2] != 0)
-          psz = &(argv[arg][2]);
-        else
-          psz = argv[++arg];
-        if( psz == NULL) {
-          fprintf(stderr,"Need engine ID value after -e flag. \n");
-          usage();
-          exit(1);
-        }
-	if ((bsize = hex_to_binary(psz,buf)) <= 0) {
+	if ((bsize = hex_to_binary(optarg,buf)) <= 0) {
           fprintf(stderr,"Bad engine ID value after -e flag. \n");
           usage();
           exit(1);
@@ -358,16 +296,7 @@ snmp_parse_args(int argc,
         break;
 
       case 'E':
-        if (argv[arg][2] != 0)
-          psz = &(argv[arg][2]);
-        else
-          psz = argv[++arg];
-        if( psz == NULL) {
-          fprintf(stderr,"Need engine ID value after -E flag. \n");
-          usage();
-          exit(1);
-        }
-	if ((bsize = hex_to_binary(psz,buf)) <= 0) {
+	if ((bsize = hex_to_binary(optarg,buf)) <= 0) {
           fprintf(stderr,"Bad engine ID value after -E flag. \n");
           usage();
           exit(1);
@@ -378,54 +307,27 @@ snmp_parse_args(int argc,
         break;
 
       case 'n':
-        if (argv[arg][2] != 0)
-          psz = &(argv[arg][2]);
-        else
-          psz = argv[++arg];
-        if( psz == NULL) {
-          fprintf(stderr,"Need context name value after -n flag. \n");
-          usage();
-          exit(1);
-        }
-	session->contextName = strdup(psz);
-	session->contextNameLen = strlen(psz);
+	session->contextName = strdup(optarg);
+	session->contextNameLen = strlen(optarg);
         break;
 
       case 'u':
-        if (argv[arg][2] != 0)
-          psz = &(argv[arg][2]);
-        else
-          psz = argv[++arg];
-        if( psz == NULL) {
-          fprintf(stderr,"Need security user name value after -u flag. \n");
-          usage();
-          exit(1);
-        }
-	session->securityName = strdup(psz);
-	session->securityNameLen = strlen(psz);
+	session->securityName = strdup(optarg);
+	session->securityNameLen = strlen(optarg);
         break;
 
       case 'l':
-        if (argv[arg][2] != 0)
-          psz = &(argv[arg][2]);
-        else
-          psz = argv[++arg];
-        if( psz == NULL) {
-          fprintf(stderr,"Need security level value after -l flag. \n");
-          usage();
-          exit(1);
-        }
-        if (!strcmp(psz,"noAuthNoPriv") || !strcmp(psz,"1") ||
-            !strcmp(psz,"nanp")) {
+        if (!strcmp(optarg,"noAuthNoPriv") || !strcmp(optarg,"1") ||
+            !strcmp(optarg,"nanp")) {
           session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
-        } else if (!strcmp(psz,"authNoPriv") || !strcmp(psz,"2") ||
-            !strcmp(psz,"anp")) {
+        } else if (!strcmp(optarg,"authNoPriv") || !strcmp(optarg,"2") ||
+            !strcmp(optarg,"anp")) {
           session->securityLevel = SNMP_SEC_LEVEL_AUTHNOPRIV;
-        } else if (!strcmp(psz,"authPriv") || !strcmp(psz,"3") ||
-            !strcmp(psz,"ap")) {
+        } else if (!strcmp(optarg,"authPriv") || !strcmp(optarg,"3") ||
+            !strcmp(optarg,"ap")) {
           session->securityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
         } else {
-          fprintf(stderr,"Invalid security level specified after -l flag: %s\n", psz);
+          fprintf(stderr,"Invalid security level specified after -l flag: %s\n", optarg);
           usage();
           exit(1);
         }
@@ -433,101 +335,37 @@ snmp_parse_args(int argc,
         break;
 
       case 'a':
-        if (argv[arg][2] != 0)
-          psz = &(argv[arg][2]);
-        else
-          psz = argv[++arg];
-        if( psz == NULL) {
-          fprintf(stderr,"Need authentication protocol value after -a flag. \n");
-          usage();
-          exit(1);
-        }
-        if (!strcmp(psz,"MD5")) {
+        if (!strcmp(optarg,"MD5")) {
           session->securityAuthProto = usmHMACMD5AuthProtocol;
           session->securityAuthProtoLen = USM_AUTH_PROTO_MD5_LEN;
-        } else if (!strcmp(psz,"SHA")) {
+        } else if (!strcmp(optarg,"SHA")) {
           session->securityAuthProto = usmHMACSHA1AuthProtocol;
           session->securityAuthProtoLen = USM_AUTH_PROTO_SHA_LEN;
         } else {
-          fprintf(stderr,"Invalid authentication protocol specified after -a flag: %s\n", psz);
+          fprintf(stderr,"Invalid authentication protocol specified after -a flag: %s\n", optarg);
           usage();
           exit(1);
         }
         break;
 
       case 'x':
-        if (argv[arg][2] != 0)
-          psz = &(argv[arg][2]);
-        else
-          psz = argv[++arg];
-        if( psz == NULL) {
-          fprintf(stderr,"Need privacy protocol value after -x flag. \n");
-          usage();
-          exit(1);
-        }
-        if (!strcmp(psz,"DES")) {
+        if (!strcmp(optarg,"DES")) {
           session->securityPrivProto = usmDESPrivProtocol;
           session->securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
         } else {
-          fprintf(stderr,"Invalid privacy protocol specified after -x flag: %s\n", psz);
+          fprintf(stderr,"Invalid privacy protocol specified after -x flag: %s\n", optarg);
           usage();
           exit(1);
         }
         break;
 
       case 'A':
-        if (argv[arg][2] != 0)
-          Apsz = &(argv[arg][2]);
-        else
-          Apsz = argv[++arg];
-        if( Apsz == NULL) {
-          fprintf(stderr,"Need authentication pass phrase value after -A flag. \n");
-          usage();
-          exit(1);
-        }
-        break;
+	Apsz = optarg;
+	break;
 
       case 'X':
-        if (argv[arg][2] != 0)
-          Xpsz = &(argv[arg][2]);
-        else
-          Xpsz = argv[++arg];
-        if( Xpsz == NULL) {
-          fprintf(stderr,"Need privacy pass phrase value after -X flag. \n");
-          usage();
-          exit(1);
-        }
-
+        Xpsz = optarg;
         break;
-
-      case 'P':
-        if (argv[arg][2] != 0)
-          cp = &argv[arg][2];
-        else if (++arg<argc)
-          cp = &argv[arg][2];
-        else {
-          fprintf(stderr,"Need option arguments after -P flag.\n");
-          usage();
-          exit(1);
-        }
-        cp = snmp_mib_toggle_options(cp);
-        if (cp != NULL) {
-          fprintf(stderr,"Unknown parsing option passed to -P: %c.\n", *cp);
-          usage();
-          exit(1);
-        }
-        break;
-
-      case 'h':
-        usage();
-        exit(0);
-        break;
-
-      case 'H':
-        init_snmp("snmpapp");
-        fprintf(stderr, "Configuration directives understood:\n");
-        read_config_print_usage("  ");
-        exit(0);
 
       default:
         /* This should be removed to support options in clients that
@@ -572,27 +410,27 @@ snmp_parse_args(int argc,
       }
   }
   /* get the hostname */
-  if (arg == argc) {
+  if (optind == argc) {
     fprintf(stderr,"No hostname specified.\n");
     usage();
     exit(1);
   }
-  session->peername = argv[arg++];     /* hostname */
+  session->peername = argv[optind++];     /* hostname */
 
   /* get community */
   if ((session->version == SNMP_VERSION_1) ||
       (session->version == SNMP_VERSION_2c)) {
     /* v1 and v2c - so get community string */
-    if (arg == argc) {
+    if (optind == argc) {
       fprintf(stderr,"No community name specified.\n");
       usage();
       exit(1);
     }
     session->community = (unsigned char *)argv[arg];
     session->community_len = strlen((char *)argv[arg]);
-    arg++;
+    optind++;
   }
-  return arg;
+  return optind;
 }
 
 oid
@@ -601,7 +439,7 @@ oid
 		size_t *rootlen)
 {
   size_t savlen = *rootlen;
-  if (random_access) {
+  if (random_access || strchr(argv, ':')) {
     if (get_node(argv,root,rootlen)) {
       return root;
     }
@@ -616,4 +454,3 @@ oid
   }
   return NULL;
 }
-

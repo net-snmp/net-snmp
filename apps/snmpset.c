@@ -173,6 +173,7 @@ int main(int argc, char *argv[])
     if (ss == NULL){
       /* diagnose snmp_open errors with the input struct snmp_session pointer */
       snmp_sess_perror("snmpset", &session);
+	  SOCK_CLEANUP;
       exit(1);
     }
 
@@ -239,5 +240,5 @@ retry:
       snmp_free_pdu(response);
     snmp_close(ss);
     SOCK_CLEANUP;
-    exit (0);
+    return 0;
 }

@@ -300,6 +300,9 @@ void print_oid_report_enable_symbolic (void);
 
 void sprint_asciistring(char *buf, u_char *cp, size_t len);
 
+char *snmp_oid_toggle_options(char *);
+void snmp_oid_toggle_options_usage(const char *, FILE *);
+
 #ifdef __cplusplus
 }
 #endif
