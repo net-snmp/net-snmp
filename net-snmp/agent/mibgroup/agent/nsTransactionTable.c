@@ -36,9 +36,7 @@ initialize_table_nsTransactionTable(void)
     my_handler = netsnmp_create_handler_registration("nsTransactionTable",
                                                      nsTransactionTable_handler,
                                                      nsTransactionTable_oid,
-                                                     sizeof
-                                                     (nsTransactionTable_oid)
-                                                     / sizeof(oid),
+                                                     nsTransactionTable_oid_len,
                                                      HANDLER_CAN_RONLY);
 
     if (!my_handler || !table_info || !iinfo)
