@@ -1494,7 +1494,7 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session *asp, int vbcount,
                             asp->treecache_len);
                 if (asp->treecache == NULL)
                     return NULL;
-                memset(&(asp->treecache[cacheid + 1]), 0x00,
+                memset(&(asp->treecache[cacheid]), 0x00,
                        sizeof(netsnmp_tree_cache) * (CACHE_GROW_SIZE - 1));
             }
             asp->treecache[cacheid].subtree = tp;
