@@ -4,3 +4,4 @@ config.h
 config.log
 config.status
 mib.txt
+sedscript
