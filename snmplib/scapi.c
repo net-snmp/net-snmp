@@ -55,7 +55,22 @@
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
+#include <openssl/des.h>
+#ifdef HAVE_AES
+#include <openssl/aes.h>
 #endif
+
+#ifdef STRUCT_DES_KS_STRUCT_HAS_WEAK_KEY
+/* these are older names for newer structures that exist in openssl .9.7 */
+#define DES_key_schedule    des_key_schedule 
+#define DES_cblock          des_cblock 
+#define DES_key_sched       des_key_sched 
+#define DES_ncbc_encrypt    des_ncbc_encrypt
+#define DES_cbc_encrypt    des_cbc_encrypt
+#define OLD_DES
+#endif
+
+#endif /* HAVE_OPENSSL */
 
 #ifdef QUITFUN
 #undef QUITFUN
@@ -478,11 +493,20 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
 {
     int             rval = SNMPERR_SUCCESS;
     u_int           properlength, properlength_iv;
-    u_char          pad_block[32];      /* bigger than anything I need */
-    u_char          my_iv[32];  /* ditto */
+    u_char          pad_block[128];      /* bigger than anything I need */
+    u_char          my_iv[128];  /* ditto */
     int             pad, plast, pad_size;
-    des_key_schedule key_sch;
-    des_cblock      key_struct;
+#ifdef OLD_DES
+    DES_key_schedule key_sch;
+#else
+    DES_key_schedule key_sched_store;
+    DES_key_schedule *key_sch = &key_sched_store;
+#endif
+    DES_cblock       key_struct;
+#ifdef HAVE_AES
+    AES_KEY aes_key;
+    int new_ivlen = ivlen;
+#endif
 
     DEBUGTRACE;
 
@@ -544,6 +568,17 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
         pad_size = properlength;
+#ifdef HAVE_AES
+    } else if (ISTRANSFORM(privtype, AES128Priv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES128);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES128_IV);
+    } else if (ISTRANSFORM(privtype, AES192Priv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES192);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES192_IV);
+    } else if (ISTRANSFORM(privtype, AES256Priv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES256);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES256_IV);
+#endif
     } else {
         QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
     }
@@ -552,44 +587,60 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
         QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);
     }
 
-    /*
-     * now calculate the padding needed 
-     */
-    pad = pad_size - (ptlen % pad_size);
-    plast = (int) ptlen - (pad_size - pad);
-    if (pad == pad_size)
-        pad = 0;
-    if (ptlen + pad > *ctlen) {
-        QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);       /* not enough space */
-    }
-    if (pad > 0) {              /* copy data into pad block if needed */
-        memcpy(pad_block, plaintext + plast, pad_size - pad);
-        memset(&pad_block[pad_size - pad], pad, pad);   /* filling in padblock */
-    }
-
     memset(my_iv, 0, sizeof(my_iv));
 
     if (ISTRANSFORM(privtype, DESPriv)) {
+
+        /*
+         * now calculate the padding needed 
+         */
+        pad = pad_size - (ptlen % pad_size);
+        plast = (int) ptlen - (pad_size - pad);
+        if (pad == pad_size)
+            pad = 0;
+        if (ptlen + pad > *ctlen) {
+            QUITFUN(SNMPERR_GENERR, sc_encrypt_quit);    /* not enough space */
+        }
+        if (pad > 0) {              /* copy data into pad block if needed */
+            memcpy(pad_block, plaintext + plast, pad_size - pad);
+            memset(&pad_block[pad_size - pad], pad, pad);   /* filling in padblock */
+        }
+
         memcpy(key_struct, key, sizeof(key_struct));
-        (void) des_key_sched(&key_struct, key_sch);
+        (void) DES_key_sched(&key_struct, key_sch);
 
         memcpy(my_iv, iv, ivlen);
         /*
          * encrypt the data 
          */
-        des_ncbc_encrypt(plaintext, ciphertext, plast, key_sch,
-                         (des_cblock *) my_iv, DES_ENCRYPT);
+        DES_ncbc_encrypt(plaintext, ciphertext, plast, key_sch,
+                         (DES_cblock *) my_iv, DES_ENCRYPT);
         if (pad > 0) {
             /*
              * then encrypt the pad block 
              */
-            des_ncbc_encrypt(pad_block, ciphertext + plast, pad_size,
-                             key_sch, (des_cblock *) my_iv, DES_ENCRYPT);
+            DES_ncbc_encrypt(pad_block, ciphertext + plast, pad_size,
+                             key_sch, (DES_cblock *) my_iv, DES_ENCRYPT);
             *ctlen = plast + pad_size;
         } else {
             *ctlen = plast;
         }
     }
+#ifdef HAVE_AES
+    else if (ISTRANSFORM(privtype, AES128Priv) ||
+             ISTRANSFORM(privtype, AES192Priv) ||
+             ISTRANSFORM(privtype, AES256Priv)) {
+        (void) AES_set_encrypt_key(key, properlength*8, &aes_key);
+
+        memcpy(my_iv, iv, ivlen);
+        /*
+         * encrypt the data 
+         */
+        AES_cfb128_encrypt(plaintext, ciphertext, ptlen,
+                           &aes_key, my_iv, &new_ivlen, AES_ENCRYPT);
+        *ctlen = ptlen;
+    }
+#endif
   sc_encrypt_quit:
     /*
      * clear memory just in case 
@@ -597,7 +648,12 @@ sc_encrypt(const oid * privtype, size_t privtypelen,
     memset(my_iv, 0, sizeof(my_iv));
     memset(pad_block, 0, sizeof(pad_block));
     memset(key_struct, 0, sizeof(key_struct));
+#ifdef OLD_DES
     memset(key_sch, 0, sizeof(key_sch));
+#endif
+#ifdef HAVE_AES
+    memset(&aes_key,0,sizeof(aes_key));
+#endif
     return rval;
 
 }                               /* end sc_encrypt() */
@@ -654,10 +710,19 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
 {
 
     int             rval = SNMPERR_SUCCESS;
-    u_char         *my_iv[32];
-    des_key_schedule key_sch;
-    des_cblock      key_struct;
+    u_char          my_iv[128];
+#ifdef OLD_DES
+    DES_key_schedule key_sch;
+#else
+    DES_key_schedule key_sched_store;
+    DES_key_schedule *key_sch = &key_sched_store;
+#endif
+    DES_cblock      key_struct;
     u_int           properlength, properlength_iv;
+#ifdef HAVE_AES
+    int new_ivlen = ivlen;
+    AES_KEY aes_key;
+#endif
 
     DEBUGTRACE;
 
@@ -699,7 +764,17 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
     if (ISTRANSFORM(privtype, DESPriv)) {
         properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES);
         properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_1DES_IV);
-
+#ifdef HAVE_AES
+    } else if (ISTRANSFORM(privtype, AES128Priv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES128);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES128_IV);
+    } else if (ISTRANSFORM(privtype, AES192Priv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES192);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES192_IV);
+    } else if (ISTRANSFORM(privtype, AES256Priv)) {
+        properlength = BYTESIZE(SNMP_TRANS_PRIVLEN_AES256);
+        properlength_iv = BYTESIZE(SNMP_TRANS_PRIVLEN_AES256_IV);
+#endif
     } else {
         QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
     }
@@ -711,13 +786,28 @@ sc_decrypt(const oid * privtype, size_t privtypelen,
     memset(my_iv, 0, sizeof(my_iv));
     if (ISTRANSFORM(privtype, DESPriv)) {
         memcpy(key_struct, key, sizeof(key_struct));
-        (void) des_key_sched(&key_struct, key_sch);
+        (void) DES_key_sched(&key_struct, key_sch);
 
         memcpy(my_iv, iv, ivlen);
-        des_cbc_encrypt(ciphertext, plaintext, ctlen, key_sch,
-                        (des_cblock *) my_iv, DES_DECRYPT);
+        DES_cbc_encrypt(ciphertext, plaintext, ctlen, key_sch,
+                        (DES_cblock *) my_iv, DES_DECRYPT);
         *ptlen = ctlen;
     }
+#ifdef HAVE_AES
+    else if (ISTRANSFORM(privtype, AES128Priv) ||
+             ISTRANSFORM(privtype, AES192Priv) ||
+             ISTRANSFORM(privtype, AES256Priv)) {
+        (void) AES_set_encrypt_key(key, properlength*8, &aes_key);
+
+        memcpy(my_iv, iv, ivlen);
+        /*
+         * encrypt the data 
+         */
+        AES_cfb128_encrypt(ciphertext, plaintext, ctlen,
+                           &aes_key, my_iv, &new_ivlen, AES_DECRYPT);
+        *ptlen = ctlen;
+    }
+#endif
 
     /*
      * exit cond 
