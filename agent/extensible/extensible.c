@@ -28,10 +28,14 @@
 #endif
 #if HAVE_SYS_FS_H
 #include <sys/fs.h>
-#elif HAVE_UFS_FS_H
+#else
+#if HAVE_UFS_FS_H
 #include <ufs/fs.h>
-#elif HAVE_UFS_FFS_FS_H
+#else
+#if HAVE_UFS_FFS_FS_H
 #include <ufs/ffs/fs.h>
+#endif
+#endif
 #endif
 #if HAVE_MTAB_H
 #include <mtab.h>
