@@ -5907,10 +5907,13 @@ snmp_oid_ncompare(const oid * in_name1,
          * subtracting them and using that result has problems with
          * subids > 2^31. 
          */
-        if (*(name1) < *(name2))
-            return -1;
-        if (*(name1++) > *(name2++))
+        if (*(name1) != *(name2)) {
+            if (*(name1) < *(name2))
+                return -1;
             return 1;
+        }
+        name1++;
+        name2++;
     }
 
     if (min_len != max_len) {
@@ -5926,14 +5929,12 @@ snmp_oid_ncompare(const oid * in_name1,
     return 0;
 }
 
-/*
- * lexicographical compare two object identifiers.
- * * Returns -1 if name1 < name2,
- * *          0 if name1 = name2,
- * *          1 if name1 > name2
- * *
- * * Caution: this method is called often by
- * *          command responder applications (ie, agent).
+/** lexicographical compare two object identifiers.
+ * 
+ * Caution: this method is called often by
+ *          command responder applications (ie, agent).
+ *
+ * @return -1 if name1 < name2, 0 if name1 = name2, 1 if name1 > name2
  */
 int
 snmp_oid_compare(const oid * in_name1,
@@ -5959,10 +5960,13 @@ snmp_oid_compare(const oid * in_name1,
          * subtracting them and using that result has problems with
          * subids > 2^31. 
          */
-        if (*(name1) < *(name2))
-            return -1;
-        if (*(name1++) > *(name2++))
+        if (*(name1) != *(name2)) {
+            if (*(name1) < *(name2))
+                return -1;
             return 1;
+        }
+        name1++;
+        name2++;
     }
     /*
      * both OIDs equal up to length of shorter OID 
@@ -5974,6 +5978,13 @@ snmp_oid_compare(const oid * in_name1,
     return 0;
 }
 
+/** Compares 2 OIDs to determine if they are equal up until the shortest length.
+ * @param in_name1 A pointer to the first oid.
+ * @param len1     length of the first OID (in segments, not bytes)
+ * @param in_name2 A pointer to the second oid.
+ * @param len2     length of the second OID (in segments, not bytes)
+ * @return 0 if they are equal, 1 if in_name1 is > in_name2, or -1 if <.
+ */ 
 int
 snmp_oidtree_compare(const oid * in_name1,
                      size_t len1, const oid * in_name2, size_t len2)
@@ -5981,6 +5992,65 @@ snmp_oidtree_compare(const oid * in_name1,
     int             len = ((len1 < len2) ? len1 : len2);
 
     return (snmp_oid_compare(in_name1, len, in_name2, len));
+}
+
+/** Compares 2 OIDs to determine if they are exactly equal.
+ *  This should be faster than doing a snmp_oid_compare for different
+ *  length OIDs, since the length is checked first and if != returns
+ *  immediately.  Might be very slighly faster if lengths are ==.
+ * @param in_name1 A pointer to the first oid.
+ * @param len1     length of the first OID (in segments, not bytes)
+ * @param in_name2 A pointer to the second oid.
+ * @param len2     length of the second OID (in segments, not bytes)
+ * @return 0 if they are equal, 1 if they are not.
+ */ 
+int
+netsnmp_oid_equals(const oid * in_name1,
+                   size_t len1, const oid * in_name2, size_t len2)
+{
+    register const oid *name1 = in_name1;
+    register const oid *name2 = in_name2;
+    register int    len = len1;
+
+    /*
+     * len = minimum of len1 and len2 
+     */
+    if (len1 != len2)
+        return 1;
+    /*
+     * find first non-matching OID 
+     */
+    while (len-- > 0) {
+        /*
+         * these must be done in seperate comparisons, since
+         * subtracting them and using that result has problems with
+         * subids > 2^31. 
+         */
+        if (*(name1++) != *(name2++))
+            return 1;
+    }
+    return 0;
+}
+
+/** Identical to netsnmp_oid_equals, except only the length up to len1 is compared.
+ * Functionally, this determines if in_name2 is equal or a subtree of in_name1
+ * @param in_name1 A pointer to the first oid.
+ * @param len1     length of the first OID (in segments, not bytes)
+ * @param in_name2 A pointer to the second oid.
+ * @param len2     length of the second OID (in segments, not bytes)
+ * @return 0 if one is a common prefix of the other.
+ */ 
+int
+netsnmp_oid_is_subtree(const oid * in_name1,
+                       size_t len1, const oid * in_name2, size_t len2)
+{
+    if (len1 > len2)
+        return 1;
+
+    if (memcmp(in_name1, in_name2, len1))
+        return 1;
+
+    return 0;
 }
 
 /*
