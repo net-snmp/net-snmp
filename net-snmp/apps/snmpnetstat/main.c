@@ -110,9 +110,9 @@ int print_errors = 0;
 void
 usage __P((void))
 {
-    fprintf(stderr, "Usage: snmpnetstat -v 1 [-q] hostname community [-ainrs] [-p proto] [-I interface] [interval]      or:\n");
-    fprintf(stderr, "Usage: snmpnetstat [-v 2] [-q] hostname noAuth [-ainrs] [-p proto] [-I interface] [interval]       or:\n");
-    fprintf(stderr, "Usage: snmpnetstat [-v 2] [-q] hostname srcParty dstParty context [-ainrs] [-p proto] [-I interface] [interval]\n");
+    fprintf(stderr, "Usage: snmpnetstat [-v 1 | -v 2c] [-q] hostname community [-ainrs] [-p proto] [-I interface] [interval]      or:\n");
+    fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] hostname noAuth [-ainrs] [-p proto] [-I interface] [interval]       or:\n");
+    fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] hostname srcParty dstParty context [-ainrs] [-p proto] [-I interface] [interval]\n");
 }
 
 int
@@ -125,11 +125,11 @@ main(argc, argv)
     register struct protox *tp = NULL;	/* for printing cblocks & stats */
     char *community = NULL;
     struct snmp_session session;
-    
+    char ctmp[128];
     int dest_port = SNMP_PORT;
     int clock_flag = 0;
     u_long	srcclock = 0, dstclock = 0;
-    int version = 2;
+    int version = SNMP_VERSION_1;
     struct partyEntry *pp;
     struct contextEntry *cxp;
     oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
@@ -170,54 +170,62 @@ main(argc, argv)
 		dstclock = atoi(argv[++arg]);
 		break;
 	      case 'v':
-		version = atoi(argv[++arg]);
-		if (version < 1 || version > 2){
-		    fprintf(stderr, "Invalid version: %d\n", version);
+		if (argv[arg][2] != 0) community = argv[arg]+2;
+		else community = argv[++arg];
+		if (!strcmp(community,"1"))
+		    version = SNMP_VERSION_1;
+		else if (!strcmp(community,"2c"))
+		    version = SNMP_VERSION_2c;
+		else if (!strcmp(community,"2p"))
+		    version = SNMP_VERSION_2p;
+		else {
+		    fprintf(stderr, "Invalid version: %s\n", community);
 		    usage();
 		    exit(1);
 		}
+		community = NULL;
 		break;
-                case 'a':
-                        aflag++;
-                        break;
+	      case 'a':
+		aflag++;
+		break;
 
-                case 'i':
-                        iflag++;
-                        break;
+	      case 'i':
+		iflag++;
+		break;
 
-                case 'o':
-                        oflag++;
-                        break;
+	      case 'o':
+		oflag++;
+		break;
 
-                case 'n':
-                        nflag++;
-                        break;
+	      case 'n':
+		nflag++;
+		break;
 
-                case 'r':
-                        rflag++;
-                        break;
+	      case 'r':
+		rflag++;
+		break;
 
-                case 's':
-                        sflag++;
-                        break;
+	      case 's':
+		sflag++;
+		break;
 
-                case 'P':
-                        arg++;
-                        if ((tp = name2protox(argv [arg])) == NULLPROTOX) {
-                                fprintf(stderr, "%s: unknown or uninstrumented protocol\n",
-                                        argv [arg]);
-                                exit(1);
-                        }
-                        break;
+	      case 'P':
+		arg++;
+		if ((tp = name2protox(argv [arg])) == NULLPROTOX) {
+		  fprintf(stderr, "%s: unknown or uninstrumented protocol\n",
+			  argv [arg]);
+		  exit(1);
+		}
+		break;
 
-                case 'I':
-                        iflag++;
-                        if (*(interface = argv[arg] + 2) == 0) {
-                                arg++;
-                                if ((interface = argv[arg]) == 0)
-                                        break;
-                        }
-                        break;
+	      case 'I':
+		iflag++;
+		if (*(interface = argv[arg] + 2) == 0) {
+		  arg++;
+		  if ((interface = argv[arg]) == 0)
+		    break;
+		}
+		break;
 
 	      default:
 		printf("invalid option: -%c\n", argv[arg][1]);
@@ -227,22 +235,23 @@ main(argc, argv)
 	}
 	if (hostname == NULL){
 	    hostname = argv[arg];
-	} else if (version == 1 && community == NULL){
+	} else if ((version == SNMP_VERSION_1 || version == SNMP_VERSION_2c)
+                   && community == NULL){
 	    community = argv[arg]; 
-	} else if (version == 2 && srclen == 0 && !trivialSNMPv2){
-	    if (read_party_database("/etc/party.conf") > 0){
-		fprintf(stderr,
-			"Couldn't read party database from /etc/party.conf\n");
+	} else if (version == SNMP_VERSION_2p && srclen == 0 && !trivialSNMPv2){
+	    sprintf(ctmp, "%s/party.conf", SNMPLIBPATH);
+	    if (read_party_database(ctmp) > 0){
+		snmp_perror(argv[0]);
 		exit(1);
 	    }
-	    if (read_context_database("/etc/context.conf") > 0){
-		fprintf(stderr,
-			"Couldn't read context database from /etc/context.conf\n");
+	    sprintf(ctmp, "%s/context.conf", SNMPLIBPATH);
+	    if (read_context_database(ctmp) > 0){
+		snmp_perror(argv[0]);
 		exit(1);
 	    }
-	    if (read_acl_database("/etc/acl.conf") > 0){
-		fprintf(stderr,
-			"Couldn't read access control database from /etc/acl.conf\n");
+	    sprintf(ctmp, "%s/acl.conf", SNMPLIBPATH);
+	    if (read_acl_database(ctmp) > 0){
+		snmp_perror(argv[0]);
 		exit(1);
 	    }
 	    
@@ -267,7 +276,7 @@ main(argc, argv)
 		    }
 		}
 	    }
-	} else if (version == 2 && dstlen == 0 && !trivialSNMPv2){
+	} else if (version == SNMP_VERSION_2p && dstlen == 0 && !trivialSNMPv2){
 	    dstlen = MAX_NAME_LEN;
 	    party_scanInit();
 	    for(pp = party_scanNext(); pp; pp = party_scanNext()){
@@ -285,7 +294,7 @@ main(argc, argv)
 		    exit(1);
 		}
 	    }
-	} else if (version == 2 && contextlen == 0 && !trivialSNMPv2){
+	} else if (version == SNMP_VERSION_2p && contextlen == 0 && !trivialSNMPv2){
 	    contextlen = MAX_NAME_LEN;
 	    context_scanInit();
 	    for(cxp = context_scanNext(); cxp; cxp = context_scanNext()){
@@ -317,9 +326,9 @@ main(argc, argv)
 	}
     }
     
-    if (!hostname || (version < 1) || (version > 2)
-	|| (version == 1 && !community)
-	|| (version == 2 && (!srclen || !dstlen || !contextlen)
+    if (!hostname ||
+	((version == SNMP_VERSION_1 || version == SNMP_VERSION_2c) && !community)
+	|| (version == SNMP_VERSION_2p && (!srclen || !dstlen || !contextlen)
 	    && !trivialSNMPv2)){
 	usage();
 	exit(1);
@@ -359,12 +368,12 @@ main(argc, argv)
     memset(&session, 0, sizeof(struct snmp_session));
     session.peername = hostname;
     session.remote_port = dest_port;
-    if (version == 1){
-        session.version = SNMP_VERSION_1;
+    if (version == SNMP_VERSION_1 || version == SNMP_VERSION_2c){
+        session.version = version;
         session.community = (u_char *)community;
         session.community_len = strlen((char *)community);
-    } else if (version == 2){
-        session.version = SNMP_VERSION_2p;
+    } else if (version == SNMP_VERSION_2p){
+        session.version = version;
         session.srcParty = src;
         session.srcPartyLen = srclen;
         session.dstParty = dst;
