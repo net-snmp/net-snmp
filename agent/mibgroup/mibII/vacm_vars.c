@@ -774,21 +774,11 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
             if (!netsnmp_udp6_getSecName(pdu->transport_data,
                                          pdu->transport_data_length,
                                          (char *) pdu->community,
-                                         pdu->community_len, &sn)
-                && !vacm_is_configured()) {
+                                         pdu->community_len, &sn)) {
                 /*
                  * There are no com2sec entries.  
                  */
-                DEBUGMSGTL(("mibII/vacm_vars",
-                            "vacm_in_view: accepted with no com2sec entries\n"));
-                switch (pdu->command) {
-                case SNMP_MSG_GET:
-                case SNMP_MSG_GETNEXT:
-                case SNMP_MSG_GETBULK:
-                    return 0;
-                default:
-                    return 1;
-                }
+                sn = NULL;
             }
 #endif
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
