@@ -1,5 +1,8 @@
 /*
  * snmptable.c - walk a table and print it nicely
+ *
+ * Update: 1998-07-17 <jhy@gsu.edu>
+ * Added text <special options> to usage().
  */
 /**********************************************************************
 	Copyright 1997 Niels Baggesen
@@ -109,8 +112,9 @@ void usage __P((void))
 {
   fprintf(stderr,"Usage:\n  snmptable ");
   snmp_parse_args_usage(stderr);
-  fprintf(stderr," [<objectID>]\n\n");
+  fprintf(stderr," [<special options]> [<objectID>]\n\n");
   snmp_parse_args_descriptions(stderr);
+  fprintf(stderr,"\n<special options>\n");
   fprintf(stderr,"  -w <W>        print table in parts of W characters width\n");
   fprintf(stderr,"  -f <F>        print an F delimited table\n");
   fprintf(stderr,"  -h            print only the table headings\n");

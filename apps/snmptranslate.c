@@ -1,5 +1,9 @@
 /*
+ * snmptranslate.c - report or translate info about oid from mibs
  *
+ * Update: 1998-07-17 <jhy@gsu.edu>
+ * Added support for dumping alternate oid reports (-t and -T options).
+ * Added more detailed (useful?) usage info.
  */
 /************************************************************************
 	Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University
@@ -80,6 +84,20 @@ usage __P((void))
 	  "  -D\t\tenable snmplib debugging messages\n");
   fprintf(stderr,
           "  -M <MIBDIRS>\tuse MIBDIRS as the location to look for mibs.\n");
+  fprintf(stderr,
+          "  -t\t\tPrint MIB symbol table report in alternate format. (Same as -Tt)\n");
+  fprintf(stderr,
+          "  -T <TOPTS>\tPrint one or more MIB symbol reports.\n");
+  fprintf(stderr,
+          "  Where <TOPTS> is one or more of the following:\n");
+  fprintf(stderr,
+          "  \tl|L\tEnable or disable labeled OID report.\n");
+  fprintf(stderr,
+          "  \to|O\tEnable or disable OID report.\n");
+  fprintf(stderr,
+          "  \ts|S\tEnable or disable dotted symbolic report.\n");
+  fprintf(stderr,
+          "  \tt|T\tEnable or disable alternately formatted symbolic suffix report.\n");
   fprintf(stderr,
           "  -w\t\tEnable warnings of MIB symbol conflicts.\n");
   fprintf(stderr,
@@ -187,10 +205,64 @@ main(argc, argv)
                 fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
                 exit(0);
                 break;
-
+              case 't':
+                print = 3;
+                print_oid_report_enable_suffix();
+                break;
+              case 'T':
+              {
+                char *tPtr;
+                print = 3;
+                if (argv[arg][2] != 0)
+                    tPtr = &argv[arg][2];
+                else if (++arg < argc)
+                    tPtr = argv[arg];
+                else {
+                    fprintf(stderr, "Need <TOPTS> after -T flag.\n");
+                    usage(); 
+                    exit(1);
+                }
+                for(;*tPtr; (tPtr)++)
+                {
+                    switch(*tPtr)
+                    {
+                      case 'l':
+                        print_oid_report_enable_labeledoid();
+                        break;
+                      case 'L':
+                        print_oid_report_disable_labeledoid();
+                        break;
+                      case 'o':
+                        print_oid_report_enable_oid();
+                        break;
+                      case 'O':
+                        print_oid_report_disable_oid();
+                        break;
+                      case 's':
+                        print_oid_report_enable_symbolic();
+                        break;
+                      case 'S':
+                        print_oid_report_disable_symbolic();
+                        break;
+                      case 't':
+                        print_oid_report_enable_suffix();
+                        break;
+                      case 'T':
+                        print_oid_report_disable_suffix();
+                        break;
+                      default:
+                        fprintf(stderr,"Invalid <TOPTS> character: %c\n", *tPtr);
+                        usage();
+                        exit(1);
+                        break;
+                    }
+                }
+                break;
+              }
 	      default:
 		fprintf(stderr,"invalid option: -%c\n", argv[arg][1]);
                 usage();
+                exit(1);
 		break;
 	    }
 	    continue;
@@ -199,14 +271,14 @@ main(argc, argv)
     }
     
     if (current_name == NULL && !print){
-      fprintf(stderr,
-              "usage: snmptranslate [-n] [-d] [-R] [-w|-W] [-f|-s|-S] [-p] objectID\n");
+        usage(); 
       exit(1);
     }
     
     init_mib();
     if (print == 1) print_mib (stdout);
     if (print == 2) print_ascii_dump (stdout);
+    if (print == 3) print_oid_report (stdout);
     if (!current_name) exit (0);
 
     name_length = MAX_NAME_LEN;
