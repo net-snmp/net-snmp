@@ -542,6 +542,13 @@ var_hrswrun(struct variable * vp,
 #if NO_DUMMY_VALUES
         return NULL;
 #else
+        /* 
+         * per dts, on coders:
+         * cos (in general) we won't know which process should
+         * be regarded as "the primary O/S process".
+         * The most obvious candidate on a Unix box is probably 'init'
+         * which is typically (always?) process #1.
+         */
         long_return = 1;        /* Probably! */
         return (u_char *) & long_return;
 #endif
