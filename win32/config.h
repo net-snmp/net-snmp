@@ -247,10 +247,6 @@
 /* Define if you have the tcgetattr function.  */
 /* #define HAVE_TCGETATTR 1 */
 
-/* Define if you have the <basestd.h> header file.  */
-
-#define HAVE_BASETSD_H 1
-
 /* Define if you have the uname function.  */
 #undef HAVE_UNAME
 
