@@ -634,7 +634,7 @@ SOFTWARE.
     void            snmp_store(const char *type);
     void            snmp_shutdown(const char *type);
     netsnmp_variable_list *snmp_pdu_add_variable(netsnmp_pdu *, oid *,
-                                                 size_t, u_char, u_char *,
+                                                 size_t, u_char, const u_char *,
                                                  size_t);
     netsnmp_variable_list *snmp_varlist_add_variable(netsnmp_variable_list
                                                      ** varlist,
