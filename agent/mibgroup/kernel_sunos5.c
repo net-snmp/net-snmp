@@ -676,22 +676,50 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	}
 	ifp->ifMtu = ifrp->ifr_metric;
 	ifp->ifSpeed = 10000000; 	/* Best guess */
+	ifp->ifType = 1;
+	switch (ifrp->ifr_name[0]) {
+	case 'l': /* le / lo */
+		if (ifrp->ifr_name[1] == 'o') {
+			ifp->ifSpeed = 127000000;
+			ifp->ifType = 24;
+		} else if (ifrp->ifr_name[1] == 'e') {
+			ifp->ifSpeed = 10000000;
+			ifp->ifType = 6;
+		}
+		break;
+	case 'h': /* hme */
+		ifp->ifSpeed = 100000000;
+		ifp->ifType = 6;
+		break;
+	case 'f': /* fa (Fore ATM */
+		ifp->ifSpeed = 155000000;
+		ifp->ifType = 37;
+		break;
+	case 'q': /* qe (QuadEther) / qa (Fore ATM) */
+		if (ifrp->ifr_name[1] == 'a') {
+			ifp->ifSpeed = 155000000;
+			ifp->ifType = 37;
+		} else if (ifrp->ifr_name[1] == 'e') {
+			ifp->ifSpeed = 10000000;
+			ifp->ifType = 6;
+		}
+		break;
+	}
 	if (!strchr (ifrp->ifr_name, ':')) {
 	    if (getKstat(ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) < 0) {
 		ret = -1;
 		goto Return;
 	    }
-	    ifp->ifInOctets = ifp->ifInUcastPkts * 308;	/* XXX */
+	    if (getKstat(ifrp->ifr_name, "rbytes", &ifp->ifInOctets) < 0)
+		ifp->ifInOctets = ifp->ifInUcastPkts * 308;	/* XXX */
 	    if (getKstat(ifrp->ifr_name, "opackets", &ifp->ifOutUcastPkts) < 0) {
 		ret = -1;
 		goto Return;
 	    }
-	    ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;	/* XXX */
-	    if (strcmp(ifrp->ifr_name, "lo0") == 0) { /* No other stat for lo0 */
-		ifp->ifType = 24;		/* Loopback */
+	    if (getKstat(ifrp->ifr_name, "obytes", &ifp->ifOutOctets) < 0)
+		ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;	/* XXX */
+	    if (ifp->ifType == 24)		/* Loopback */
 		continue;
-	    }
-	    ifp->ifType = (ifp->ifMtu == 1500)? 6 : 1; /* Best guess */
 	    if (getKstat(ifrp->ifr_name, "ierrors", &ifp->ifInErrors) < 0) {
 		ret = -1;
 		goto Return;
