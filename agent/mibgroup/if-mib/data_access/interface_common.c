@@ -80,7 +80,7 @@ netsnmp_access_interface_container_load(netsnmp_container* container, u_int load
     DEBUGMSGTL(("access:interface:container", "load\n"));
 
     if (NULL == container)
-        container = netsnmp_container_find("access:interface:table_container");
+        container = netsnmp_container_find("access_interface:table_container");
     if (NULL == container) {
         snmp_log(LOG_ERR, "no container specified/found for access_interface\n");
         return NULL;
@@ -157,7 +157,7 @@ netsnmp_access_interface_entry_get_by_name(netsnmp_container *container,
 
     if (NULL == container->next) {
         snmp_log(LOG_ERR,
-                 "invalid container for netsnmp_access_interface_entry_get_by_name\n");
+                 "secondary index missing for netsnmp_access_interface_entry_get_by_name\n");
         return NULL;
     }
 
@@ -183,7 +183,11 @@ netsnmp_access_interface_index_find(const char *name)
 netsnmp_interface_entry *
 netsnmp_access_interface_entry_create(const char *name)
 {
-    netsnmp_interface_entry *entry = SNMP_MALLOC_TYPEDEF(netsnmp_interface_entry);
+    netsnmp_interface_entry *entry =
+        SNMP_MALLOC_TYPEDEF(netsnmp_interface_entry);
+
+    if(NULL == entry)
+        return NULL;
 
     if(NULL != name)
         entry->if_name = strdup(name);
