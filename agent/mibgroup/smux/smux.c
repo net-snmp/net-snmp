@@ -309,7 +309,7 @@ var_smux_write(
 	smux_reg *rptr;
 	u_char buf[SMUXMAXPKTSIZE], *ptr, sout[3], type;
 	int reterr;
-	size_t len, var_len, datalen, name_length;
+	size_t len, var_len, datalen, name_length, packet_len;
 	long reqid, errsts, erridx;
 	u_char var_type, *dataptr;
 
@@ -374,37 +374,80 @@ var_smux_write(
 			return SNMP_ERR_GENERR;
 		}
 
-		if ((len = recv(rptr->sr_fd, buf,
-		    SMUXMAXPKTSIZE, 0)) <= 0) {
-			DEBUGMSGTL (("smux","[var_smux_write] recv failed or timed out\n"));
-			/* do we need to do a peer cleanup in this case?? */
-			smux_peer_cleanup(rptr->sr_fd);
-			return SNMP_ERR_GENERR;
-		}
+                while (1) { 
+                    /* 
+                     * peek at what's received 
+                     */ 
+                    if ((len = recv(rptr->sr_fd, buf, 
+                                    SMUXMAXPKTSIZE, MSG_PEEK)) <= 0) { 
+                        DEBUGMSGTL (("smux","[var_smux_write] peek failed or timed out\n")); 
+                        /* do we need to do a peer cleanup in this case?? */ 
+                        smux_peer_cleanup(rptr->sr_fd); 
+                        return SNMP_ERR_GENERR; 
+                    } 
 
-		ptr = buf;
-		ptr = asn_parse_header(ptr, &len, &type);
-		if ((ptr == NULL) || type != SNMP_MSG_RESPONSE) 
-			return SNMP_ERR_GENERR;
+                    DEBUGMSGTL (("smux","[var_smux_write] Peeked at %d bytes\n", len)); 
+                    DEBUGDUMPSETUP("var_smux_write", buf, len); 
 
-		ptr = asn_parse_int(ptr, &len, &type, &reqid, sizeof(reqid));
-		if ((ptr == NULL) || type != ASN_INTEGER) 
-			return SNMP_ERR_GENERR;
+                    /* 
+                     * determine if we received more than one packet 
+                     */ 
+                    packet_len = len; 
+                    ptr = asn_parse_header(buf, &packet_len, &type); 
+                    packet_len += (ptr - buf); 
+                    if (len > packet_len) { 
+                        /* set length to receive only the first packet */
+                        len = packet_len; 
+                    } 
 
-		ptr = asn_parse_int(ptr, &len, &type, &errsts, sizeof(errsts));
-		if ((ptr == NULL) || type != ASN_INTEGER) 
-			return SNMP_ERR_GENERR;
+                    /* 
+                     * receive the first packet 
+                     */ 
+                    if ((len = recv(rptr->sr_fd, buf, len, 0)) <= 0) { 
+                        DEBUGMSGTL (("smux","[var_smux_write] recv failed or timed out\n")); 
+                        /* do we need to do a peer cleanup in this case?? */ 
+                        smux_peer_cleanup(rptr->sr_fd); 
+                        return SNMP_ERR_GENERR; 
+                    } 
 
-		if (errsts) {
-			DEBUGMSGTL (("smux","[var_smux_write] errsts returned\n"));
-			return (errsts);
-		}
+                    DEBUGMSGTL (("smux","[var_smux_write] Received %d bytes\n", len)); 
 
-		ptr = asn_parse_int(ptr, &len, &type, &erridx, sizeof(erridx));
-		if ((ptr == NULL) || type != ASN_INTEGER) 
-			return SNMP_ERR_GENERR;
+                    if (buf[0] == SMUX_TRAP) { 
+                        DEBUGMSGTL (("smux","[var_smux_write] Received trap\n")); 
+                        snmp_log(LOG_INFO, "Got trap from peer on fd %d\n", rptr->sr_fd); 
+                        ptr = asn_parse_header(buf, &len, &type); 
+                        smux_trap_process(ptr, &len); 
 
-		reterr = SNMP_ERR_NOERROR;
+
+                        /* go and peek at received data again */
+                        /* we could receive the reply or another trap */
+                    } else { 
+                        ptr = buf; 
+                        ptr = asn_parse_header(ptr, &len, &type); 
+                        if ((ptr == NULL) || type != SNMP_MSG_RESPONSE) 
+                            return SNMP_ERR_GENERR; 
+
+                        ptr = asn_parse_int(ptr, &len, &type, &reqid, sizeof(reqid)); 
+                        if ((ptr == NULL) || type != ASN_INTEGER) 
+                            return SNMP_ERR_GENERR; 
+
+                        ptr = asn_parse_int(ptr, &len, &type, &errsts, sizeof(errsts)); 
+                        if ((ptr == NULL) || type != ASN_INTEGER) 
+                            return SNMP_ERR_GENERR; 
+
+                        if (errsts) { 
+                            DEBUGMSGTL (("smux","[var_smux_write] errsts returned\n")); 
+                            return (errsts); 
+                        } 
+
+                        ptr = asn_parse_int(ptr, &len, &type, &erridx, sizeof(erridx)); 
+                        if ((ptr == NULL) || type != ASN_INTEGER) 
+                            return SNMP_ERR_GENERR; 
+
+                        reterr = SNMP_ERR_NOERROR; 
+                        break; 
+                    } 
+                } /* while (1) */ 
 		break;	/* case Action == RESERVE1 */
 
 	case RESERVE2:
@@ -1057,6 +1100,7 @@ smux_snmp_process(int exact,
 	u_char packet[SMUXMAXPKTSIZE], *ptr, result[SMUXMAXPKTSIZE];
 	size_t length = SMUXMAXPKTSIZE;
 	u_char type;
+        size_t packet_len; 
 	
 	/* 
 	 * Send the query to the peer
@@ -1084,24 +1128,60 @@ smux_snmp_process(int exact,
 	DEBUGMSGTL(("smux",
                     "[smux_snmp_process] Sent %d request to peer; %d bytes\n", 
                     (int)type, length));
-	/* 
-	 * receive 
-	 * XXX the RCVTIMEO could return a short result.
-	 */
-	length = recv(sd, (char *)result, SMUXMAXPKTSIZE, 0);
-	if (length < 0) {
-		snmp_log_perror("[smux_snmp_process] recv failed");
-		smux_peer_cleanup(sd);
-		return NULL;
-	}
 
-	DEBUGMSGTL (("smux","[smux_snmp_process] Recived %d bytes from gated\n", length));
+        while (1) { 
+            /* 
+             * peek at what's received 
+             */ 
+            length = recv(sd, (char *)result, SMUXMAXPKTSIZE, MSG_PEEK); 
+            if (length < 0) { 
+                snmp_log_perror("[smux_snmp_process] peek failed"); 
+                smux_peer_cleanup(sd); 
+                return NULL; 
+            } 
 
-	/* Interpret reply */
-	if ((ptr = smux_parse(result, objid, len, return_len, return_type)) == NULL) {
-		/* either error or parse failed, just return NULL */
-		return NULL;
-	}
+            DEBUGMSGTL (("smux","[smux_snmp_process] Peeked at %d bytes\n",
+                         length)); 
+            DEBUGDUMPSETUP("smux_snmp_process", result, length); 
+
+            /* 
+             * determine if we received more than one packet 
+             */ 
+            packet_len = length; 
+            ptr = asn_parse_header(result, &packet_len, &type); 
+            packet_len += (ptr - result); 
+            if (length > packet_len) { 
+                /* set length to receive only the first packet */
+                length = packet_len; 
+            } 
+
+            /* 
+             * receive the first packet 
+             */
+            length = recv(sd, (char *)result, length, 0); 
+            if (length < 0) { 
+                snmp_log_perror("[smux_snmp_process] recv failed"); 
+                smux_peer_cleanup(sd); 
+                return NULL; 
+            } 
+
+            DEBUGMSGTL (("smux","[smux_snmp_process] Received %d bytes\n", length)); 
+
+            if (result[0] == SMUX_TRAP) { 
+                DEBUGMSGTL (("smux","[smux_snmp_process] Received trap\n")); 
+                snmp_log(LOG_INFO, "Got trap from peer on fd %d\n", sd); 
+                ptr = asn_parse_header(result, &length, &type); 
+                smux_trap_process(ptr, &length); 
+
+                /* go and peek at received data again */
+                /* we could receive the reply or another trap */
+            } else { 
+                /* Interpret reply */ 
+                ptr = smux_parse(result, objid, len, return_len, return_type); 
+                /* ptr will point to query result or NULL if error */ 
+                break; 
+            } 
+        } /* while (1) */
 
 	return ptr;
 }
