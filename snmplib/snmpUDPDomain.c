@@ -184,7 +184,7 @@ netsnmp_transport		*netsnmp_udp_transport	(struct sockaddr_in *addr,
   memset(t, 0, sizeof(netsnmp_transport));
 
   t->domain = netsnmpUDPDomain;
-  t->domain_length = sizeof(netsnmpUDPDomain)/sizeof(netsnmpUDPDomain[0]);
+  t->domain_length = netsnmpUDPDomain_len;
 
   t->sock = socket(PF_INET, SOCK_DGRAM, 0);
   if (t->sock < 0) {
@@ -642,7 +642,7 @@ netsnmp_transport	*snmp_udp_create_ostring       (const u_char *o, size_t o_len,
 void		netsnmp_udp_ctor			(void)
 {
   udpDomain.name        = netsnmpUDPDomain;
-  udpDomain.name_length = sizeof(netsnmpUDPDomain)/sizeof(oid);
+  udpDomain.name_length = netsnmpUDPDomain_len;
   udpDomain.prefix	= calloc(2, sizeof(char *));
   udpDomain.prefix[0] 	= "udp";
 
