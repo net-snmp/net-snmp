@@ -13,11 +13,11 @@
 /*  If non-zero, causes the addresses of peers to be logged when receptions
     occur.  */
 
-int	log_addresses;
+extern int	log_addresses;
 
 /*  How many ticks since we last aged the address cache entries.  */
 
-int	lastAddrAge;
+extern int	lastAddrAge;
 
 
 

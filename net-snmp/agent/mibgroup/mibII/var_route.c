@@ -833,7 +833,7 @@ var_ipRouteEntry(struct variable *vp,
 #endif /* solaris2 - var_IProute */
 
 #ifndef solaris2
-static int qsort_compare (RTENTRY **, RTENTRY **);
+static int qsort_compare (void *, void *);
 #endif
 
 #if defined(RTENTRY_4_4) || defined(RTENTRY_RT_NEXT)
@@ -1262,9 +1262,11 @@ static void Route_Scan_Reload (void)
 /*
  *	Create a host table
  */
-static int qsort_compare(RTENTRY **r1, 
-			 RTENTRY **r2)
+static int qsort_compare(void *v1, 
+			 void *v2)
 {
+	RTENTRY **r1 = (RTENTRY **) v1;
+	RTENTRY **r2 = (RTENTRY **) v2;
 #if NEED_KLGETSA
 	register u_long dst1 = ntohl(klgetsa((struct sockaddr_in *)(*r1)->rt_dst)->sin_addr.s_addr);
 	register u_long dst2 = ntohl(klgetsa((struct sockaddr_in *)(*r2)->rt_dst)->sin_addr.s_addr);

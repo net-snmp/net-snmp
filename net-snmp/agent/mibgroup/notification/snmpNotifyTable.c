@@ -170,7 +170,7 @@ notifyTable_register_notifications(int major, int minor,
     } else {
 #endif /* HAVE_GETHOSTBYNAME */
         ptr->tAddressLen = 6;
-        ptr->tAddress = calloc(1, ptr->tAddressLen);
+        ptr->tAddress = (u_char *)calloc(1, ptr->tAddressLen);
 #ifdef HAVE_GETHOSTBYNAME
     }
 #endif /* HAVE_GETHOSTBYNAME */
@@ -191,7 +191,7 @@ notifyTable_register_notifications(int major, int minor,
     if (ss->version == SNMP_VERSION_3) {
         pptr->secModel = ss->securityModel;
         pptr->secLevel = ss->securityLevel;
-        pptr->secName = (u_char *)malloc(ss->securityNameLen+1);
+        pptr->secName = (char *)malloc(ss->securityNameLen+1);
         memcpy((void *) pptr->secName, (void *) ss->securityName,
                ss->securityNameLen);
         pptr->secName[ss->securityNameLen] = 0;
@@ -201,7 +201,7 @@ notifyTable_register_notifications(int major, int minor,
         pptr->secLevel = SNMP_SEC_LEVEL_NOAUTH;
         pptr->secName = NULL;
         if (ss->community && (ss->community_len > 0)) {
-            pptr->secName = (u_char *)malloc(ss->community_len+1);
+            pptr->secName = (char *)malloc(ss->community_len+1);
             memcpy((void *) pptr->secName, (void *) ss->community,
                    ss->community_len);
             pptr->secName[ss->community_len] = 0;
@@ -278,7 +278,7 @@ snmpNotifyTable_add(struct snmpNotifyTable_data *thedata) {
     used by header_complex to index the data */
 
 
-  snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR, (char *) thedata->snmpNotifyName, thedata->snmpNotifyNameLen); /* snmpNotifyName */
+  snmp_varlist_add_variable(&vars, NULL, 0, ASN_PRIV_IMPLIED_OCTET_STR, (u_char *) thedata->snmpNotifyName, thedata->snmpNotifyNameLen); /* snmpNotifyName */
 
 
 
@@ -404,7 +404,7 @@ struct snmpNotifyTable_data *StorageTmp = NULL;
   /* 
    * this assumes you have registered all your data properly
    */
-  if ((StorageTmp =
+  if ((StorageTmp = (struct snmpNotifyTable_data *)
        header_complex(snmpNotifyTableStorage, vp,name,length,exact,
                       var_len,write_method)) == NULL) {
       DEBUGMSGTL(("snmpNotifyTable", "no row: magic=%d...  \n", vp->magic));
@@ -468,7 +468,7 @@ write_snmpNotifyTag(int      action,
 
 
   DEBUGMSGTL(("snmpNotifyTable", "write_snmpNotifyTag entering action=%d...  \n", action));
-  if ((StorageTmp =
+  if ((StorageTmp = (struct snmpNotifyTable_data *)
        header_complex(snmpNotifyTableStorage, NULL,
                       &name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1], 
                       &newlen, 1, NULL, NULL)) == NULL)
@@ -540,7 +540,7 @@ write_snmpNotifyType(int      action,
 
 
   DEBUGMSGTL(("snmpNotifyTable", "write_snmpNotifyType entering action=%d...  \n", action));
-  if ((StorageTmp =
+  if ((StorageTmp = (struct snmpNotifyTable_data *)
        header_complex(snmpNotifyTableStorage, NULL,
                       &name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1], 
                       &newlen, 1, NULL, NULL)) == NULL)
@@ -607,7 +607,7 @@ write_snmpNotifyStorageType(int      action,
 
 
   DEBUGMSGTL(("snmpNotifyTable", "write_snmpNotifyStorageType entering action=%d...  \n", action));
-  if ((StorageTmp =
+  if ((StorageTmp = (struct snmpNotifyTable_data *)
        header_complex(snmpNotifyTableStorage, NULL,
                       &name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1], 
                       &newlen, 1, NULL, NULL)) == NULL)
@@ -681,7 +681,7 @@ write_snmpNotifyRowStatus(int      action,
 
 
   DEBUGMSGTL(("snmpNotifyTable", "write_snmpNotifyRowStatus entering action=%d...  \n", action));
-  StorageTmp =
+  StorageTmp = (struct snmpNotifyTable_data *)
     header_complex(snmpNotifyTableStorage, NULL,
                    &name[sizeof(snmpNotifyTable_variables_oid)/sizeof(oid) + 3 - 1], 
                    &newlen, 1, NULL, NULL);
@@ -759,7 +759,7 @@ write_snmpNotifyRowStatus(int      action,
             StorageNew->snmpNotifyStorageType = ST_NONVOLATILE;
             StorageNew->snmpNotifyType = SNMPNOTIFYTYPE_TRAP;
             StorageNew->snmpNotifyTagLen = 0;
-            StorageNew->snmpNotifyTag = malloc(1); /* bogus pointer */
+            StorageNew->snmpNotifyTag = (char *)malloc(1); /* bogus pointer */
 
             StorageNew->snmpNotifyRowStatus = set_value;
             snmp_free_var(vars);
@@ -800,7 +800,7 @@ write_snmpNotifyRowStatus(int      action,
                hciptr =
                  header_complex_find_entry(snmpNotifyTableStorage,
                                            StorageTmp);
-               StorageDel =
+               StorageDel = (struct snmpNotifyTable_data *)
                  header_complex_extract_entry(&snmpNotifyTableStorage,
                                               hciptr);
              }
@@ -816,7 +816,7 @@ write_snmpNotifyRowStatus(int      action,
                hciptr =
                  header_complex_find_entry(snmpNotifyTableStorage,
                                            StorageTmp);
-               StorageDel =
+               StorageDel = (struct snmpNotifyTable_data *)
                  header_complex_extract_entry(&snmpNotifyTableStorage,
                                               hciptr);
                /* XXX: free it */

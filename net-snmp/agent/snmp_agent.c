@@ -710,7 +710,7 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
 {
     struct agent_snmp_session  *asp;
 
-    asp = malloc( sizeof( struct agent_snmp_session ));
+    asp = (struct agent_snmp_session *)malloc( sizeof( struct agent_snmp_session ));
     if ( asp == NULL )
 	return NULL;
     asp->session = session;
