@@ -1,0 +1,185 @@
+.TH MIB_API 3 "24 April, 1997"
+.UC 5
+.SH NAME
+init_mib, add_mibdir, init_mib_internals,
+read_module, read_mib, read_all_mibs,
+read_objid, read_module_node,
+print_mib,
+print_variable, print_value, print_objid, print_description
+.SH SYNOPSIS
+.B #include """mib.h""
+.br
+.B #include """parse.h""
+.PP
+.B "void init_mib( void )
+.br
+.B "int add_mibdir( char *dirname )
+.br
+.B "void init_mib_internals( void )
+.br
+.B "struct tree *read_module( char *name )
+.br
+.B "struct tree *read_mib( char *filename )
+.br
+.B "struct tree *read_all_mibs( void )
+.PP
+.B "void print_mib( FILE *fp)
+.PP
+.B "int read_objid( char *input, oid *output, int *out_len)
+.br
+.B "int get_module_node( char *name, char *module, oid *objid, int *objidlen )
+.PP
+.B "void print_variable( oid *objid, int objidlen, struct variable_list *variable)
+.br
+.B "void print_value( oid *objid, int objidlen, struct variable_list *variable)
+.br
+.B "void print_objid( oid *objid, int objidlen);
+.br
+.B "void print_description( oid *objid, int objidlen);
+.PP
+.SH DESCRIPTION
+The functions dealing with MIB modules fall into four groups.
+Those dealing with initialisation, those that read in and parse MIB files,
+those that search the MIB tree, and various output routines.
+
+.I init_mib
+is a convenience function that handles all calls to
+.I add_mibdir, read_module
+and
+.I read_mib
+for standard applications.
+It should be called before any other routine that manipulates or accesses the
+MIB tree.  This routine sets up various internal structures, as well as
+reading in certain default MIB modules, as detailed below.
+The standard actions and environment variables described below are all
+handled by
+.I init_mib.
+
+.I add_mibdir
+is used to define the range of directory locations which are searched for files
+containing MIB modules.  By default, this will be set to the directory
+.I SNMPLIBDIR/mibs
+but this can be overridden by setting the environmental variable
+.I MIBDIRS
+to a (colon-separated) list of directories to search.
+Note that this does not actually load the MIB modules located
+in that directory, but is an initialisation step to make them available.
+
+.I init_mib_internals
+is called after all calls to
+.IR add_mibdir ,
+before calls to
+.IR read_module .
+
+.I read_module
+locates and
+parses the module specified, together with any modules that it imports
+from, and adds the contents of these modules to the active MIB tree.
+Note that
+.I add_mibdir
+must first be called to add the directory containing the file with the
+module definition, if this is not in the standard path.
+.br
+By default, only the standard MIB-II module (RFC1213) will be loaded,
+though this can be overridden by setting the environmental variable
+.I MIBS
+to a (colon-separated) list of modules to load.
+
+.I read_mib
+parses the file specified, together with any modules that it imports
+from, and adds the contents to the active MIB tree.
+Note that the file specified does not need to be in any of the
+directories initialised by
+.I add_mibdir
+(or the default setup), though any imported modules do.
+.br
+By default, the following list of files will be loaded (if present):
+.I mib.txt
+in the current directory,
+.I /usr/local/lib/snmp/mib.txt
+and
+.I /etc/mib.txt
+though these can be overridden by setting the environmental variable
+.I MIBFILE
+to a (colon-separated) list of files.
+
+.I read_objid
+takes a string containing a textual version of an object identifier
+(in either numeric or descriptor form), and transforms this into
+the corresponding list of sub-identifiers.  This is returned in the
+.I output
+parameter, with the number of sub-identifiers returned via
+.I out_len
+This fuction returns a value of 0 if it succeeds in parsing the string
+and 1 otherwise.
+
+.I get_module_node
+takes a descriptor and the name of a module, and returns the corresponding
+oid list, in the same way as
+.I read_objid
+above.
+.br
+If the module name is specified as "ANY", then this routine will assume
+that the descriptor given is unique within the tree, and will return the
+matching entry.  If this assumption is invalid, then the behaviour
+as to which variable is returned is implementation dependant.
+
+.I print_mib
+will print out a representation of the currently active MIB tree to
+the specified FILE pointer.
+
+.I print_variable
+will take an object identifier (as returned by
+.I read_objid
+or
+.I get_module_node
+) and an instance of such a variable, and prints out
+the textual form of the object identifier together with the value
+of the variable.
+.br
+A related routine
+.I sprint_variable
+takes an initial parameter of a string buffer, in which to print this
+information.
+
+.I print_value
+and
+.I sprint_value
+do the same as the equivalent
+.I print_variable
+routines, but only displaying the value of the variable, without
+the corresponding object identifier>
+
+.I print_objid
+and
+.I sprint_objid
+.br
+take an object identifier (without an accompanying variable instance)
+and print out the textual representation.
+.br
+Note that identifiers lying within the mib-2, experimental
+or private subtrees are listed from this point onwards,
+rather than with the full object identifier.
+
+.I print_description
+takes an object identifier (as for
+.I print_objid
+above) and prints out the associated description.
+.b
+Note that there is no corresponding routine
+.I sprint_description
+.SH "ENVIRONMENT VARIABLES"
+.TP 10
+MIBDIRS
+A colon selarated list of directories to search for MIB modules.
+Default: /usr/local/lib/snmp/mibs
+.TP 10
+MIBFILE
+A colon selarated list of files to load.
+Default: mib.txt:/usr/local/lib/snmp/mib.txt:/etc/mib.txt
+.TP 10
+MIBS
+A colon selarated list of MIB modules to load.
+Default: RFC1213-MIB.
+.SH "SEE ALSO"
+snmp_api(3)
