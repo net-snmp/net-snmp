@@ -25,7 +25,7 @@
 
 #include "mibincl.h"
 #include "mibdefs.h"
-#include "wes.h"
+#include "../../config.h"
 
 
 extern struct myproc *procwatch;  /* moved to proc.c */
@@ -187,7 +187,7 @@ int getswap(rettype)
 #endif
 
 #ifdef hpux
-unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
+unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
     register oid	*name;
@@ -279,7 +279,7 @@ struct diskpart disks[MAXDISKS];
 
 #if defined(hpux) || defined(ultrix)
 
-unsigned char *var_wes_disk(vp, name, length, exact, var_len, write_method)
+unsigned char *var_extensible_disk(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
     register oid	*name;
@@ -427,7 +427,7 @@ long lockd_test(msg)
   return (NOERR);
 }
 
-unsigned char *var_wes_lockd_test(vp, name, length, exact, var_len, write_method)
+unsigned char *var_extensible_lockd_test(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
     register oid	*name;
@@ -470,7 +470,7 @@ unsigned char *var_wes_lockd_test(vp, name, length, exact, var_len, write_method
   return NULL;
 }
 
-unsigned char *var_wes_loadave(vp, name, length, exact, var_len, write_method)
+unsigned char *var_extensible_loadave(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
     register oid	*name;
@@ -569,7 +569,7 @@ int update_config()
 
 extern char version_descr[];
 
-init_wes() {
+init_extensible() {
   
   struct extensible extmp;
   int ret,pagesize,i;

@@ -1,6 +1,6 @@
 #include "mibincl.h"
 #include "mibdefs.h"
-#include "wes.h"
+#include "../../config.h"
 
 #define MAXMSGLINES 1000
 
@@ -11,7 +11,7 @@ struct exstensible *extens=NULL;  /* In exec.c */
 struct exstensible *relocs=NULL;  /* In exec.c */
 int numextens=0,numrelocs=0;                    /* ditto */
 
-unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
+unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
     register oid	*name;
@@ -105,7 +105,7 @@ fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 }
 
 
-unsigned char *var_wes_relocatable(vp, name, length, exact, var_len, write_method)
+unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
     register oid	*name;
@@ -205,13 +205,13 @@ unsigned char *var_wes_relocatable(vp, name, length, exact, var_len, write_metho
 }
 
 /* the relocatable extensible commands variables */
-struct variable2 wes_relocatable_variables[] = {
-  {MIBINDEX, INTEGER, RONLY, var_wes_relocatable, 1, {MIBINDEX}},
-  {ERRORNAME, STRING, RONLY, var_wes_relocatable, 1, {ERRORNAME}}, 
-    {SHELLCOMMAND, STRING, RONLY, var_wes_relocatable, 1, {SHELLCOMMAND}}, 
-    {ERRORFLAG, INTEGER, RONLY, var_wes_relocatable, 1, {ERRORFLAG}},
-    {ERRORMSG, STRING, RONLY, var_wes_relocatable, 1, {ERRORMSG}},
-  {ERRORFIX, INTEGER, RWRITE, var_wes_relocatable, 1, {ERRORFIX }}
+struct variable2 extensible_relocatable_variables[] = {
+  {MIBINDEX, INTEGER, RONLY, var_extensible_relocatable, 1, {MIBINDEX}},
+  {ERRORNAME, STRING, RONLY, var_extensible_relocatable, 1, {ERRORNAME}}, 
+    {SHELLCOMMAND, STRING, RONLY, var_extensible_relocatable, 1, {SHELLCOMMAND}}, 
+    {ERRORFLAG, INTEGER, RONLY, var_extensible_relocatable, 1, {ERRORFLAG}},
+    {ERRORMSG, STRING, RONLY, var_extensible_relocatable, 1, {ERRORMSG}},
+  {ERRORFIX, INTEGER, RWRITE, var_extensible_relocatable, 1, {ERRORFIX }}
 };
 
 struct subtree *find_extensible(tp,tname,tnamelen,exact)
@@ -243,11 +243,11 @@ struct subtree *find_extensible(tp,tname,tnamelen,exact)
     return(tp);
   memcpy(mysubtree[0].name,exten->miboid,exten->miblen*sizeof(int));
   mysubtree[0].namelen = exten->miblen;
-  mysubtree[0].variables = (struct variable *)wes_relocatable_variables;
+  mysubtree[0].variables = (struct variable *)extensible_relocatable_variables;
   mysubtree[0].variables_len =
-    sizeof(wes_relocatable_variables)/sizeof(*wes_relocatable_variables);
-  mysubtree[0].variables_width = sizeof(*wes_relocatable_variables);
-  mysubtree[1].namelen=-1;
+    sizeof(extensible_relocatable_variables)/sizeof(*extensible_relocatable_variables);
+  mysubtree[0].variables_width = sizeof(*extensible_relocatable_variables);
+  mysubtree[1].namelen = -1;
   return(mysubtree);
 }
 

@@ -1,6 +1,6 @@
 #include "mibincl.h"
 #include "mibdefs.h"
-#include "wes.h"
+#include "../../config.h"
 
 int fixProcError();
 
@@ -9,7 +9,7 @@ struct myproc *procwatch;
 static struct extensible fixproc;
 int numprocs=0;
 
-unsigned char *var_wes_proc(vp, name, length, exact, var_len, write_method)
+unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
     register oid	*name;

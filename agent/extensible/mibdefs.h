@@ -1,7 +1,3 @@
-/* mib pointer to my tree */
-
-#define WESMIB 1,3,6,1,4,10 /* process watch section */
-
 /* 2 global mib defs:
    ERRORFLAG:  A binary flag to signal an error condition.
                Also used as exit code.
