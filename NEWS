@@ -5,26 +5,32 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
  New:
     - The snmptrapd has been make extensible so you can call other
       programs and scripts when a trap has been received.
-      (see snmptrapd.conf.5)
+      (see snmptrapd.conf(5))
     - More configuration files have been created and can be used to
       specify defaults and configuration information to the various
       applications.  Run each command with -H to see what it understands.
-      (see snmpd.conf.5, snmp.conf.5, snmptrapd.conf.5)
+      (see snmp_config(5), snmpd.conf(5), snmp.conf(5), snmptrapd.conf(5))
     - The configuration file parser looks in ~/.snmp by default as
-      well, allowing each user to have his/her own setup for the
+      well, allowing each user to have his/her own setup files for the
       various applications.
     - The mib parser supports a variety of options dictating how
-      strictly it parses mib files .
+      strictly it parses mib files.
       (see snmpcmd.1 on "-P")
+    - Debugging output with the -D flag now accepts a list of
+      debugging information types to print.
+      (see snmpcmd.1 on "-D")
     - Minimal multi-thread support using a modified version of the
       session API.
-      (see snmp_sess_api.3)
+      (see snmp_sess_api(3))
     - persistent storage of information is possible from the agent's
       mib modules now.
-      (see read_config.3)
+      (see read_config(3))
     
   Fixes:
     - many misc bug fixes, as always.
+
+  Ports:
+    - snmpnetstat has been ported to the win32 enviornment.
 
 *3.5.3*
     - Bug fixes, including row creation sets to mib modules should work again.
