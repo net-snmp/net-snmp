@@ -144,7 +144,7 @@ int get_exec_output(struct extensible *ex)
   char ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv, **aptr;
 #ifdef EXCACHETIME
   char cache[MAXCACHESIZE];
-  size_t cachebytes;
+  ssize_t cachebytes;
   long curtime;
   static char lastcmd[STRMAX];
   int cfd;
