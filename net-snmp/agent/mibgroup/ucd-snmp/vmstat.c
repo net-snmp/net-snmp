@@ -165,7 +165,7 @@ init_vmstat(void)
 
 
 #define VMSTAT_FILE "/proc/stat"
-#define BUFFSIZE 1024
+#define BUFFSIZE 4096
 static char     buff[BUFFSIZE];
 
 void
