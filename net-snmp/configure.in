@@ -23,6 +23,17 @@ AC_ARG_WITH(mibfiles,[  --with-mibfiles=\"file1:file2\"   Default mib files to l
 AC_ARG_WITH(mib_modules,[  --with-mib-modules=\"list\"       Compile with additional mib modules.])
 AC_ARG_WITH(out_mib_modules,[  --with-out-mib-modules=\"list\"   Compile without these mib modules.])
 
+AC_ARG_WITH(libwrap,
+[  --with-libwrap[=PATH]   Compile in libwrap (tcp_wrappers) support.],
+    if test -d "$withval"; then
+        WRAPLIBS="-L$withval -lwrap"
+    else
+        WRAPLIBS="$withval"
+    fi
+    OLDLIBS="$LIBS"
+    LIBS="$WRAPLIBS $LIBS"
+)
+
 dnl Only define if specifically chosen as --without (ie, default to true). 
 if test "x$with_root_access" = "xno"; then
   AC_DEFINE(NO_ROOT_ACCESS)
