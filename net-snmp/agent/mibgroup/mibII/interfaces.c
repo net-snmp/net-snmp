@@ -1335,7 +1335,7 @@ Interface_Scan_Init (void)
 	nnew->if_name = (char *) strdup (ifname);
 	for (ptr = nnew->if_name; *ptr && (*ptr < '0' || *ptr > '9'); 
 	     ptr++) ;
-	nnew->if_unit = strdup(*ptr ? ptr : "0");
+	nnew->if_unit = strdup(*ptr ? ptr : "");
 	*ptr = 0;
 
 	strcpy (ifrq.ifr_name, ifname);
@@ -1369,6 +1369,8 @@ Interface_Scan_Init (void)
 
 #ifdef ARPHRD_LOOPBACK
 	  switch (ifrq.ifr_hwaddr.sa_family) {
+	  case ARPHRD_ETHER:
+	      nnew->if_type = 6; break; 
 	  case ARPHRD_TUNNEL:
 	  case ARPHRD_TUNNEL6:
 #ifdef ARPHRD_IPGRE
@@ -1385,6 +1387,14 @@ Interface_Scan_Init (void)
 	      nnew->if_type = 23; break; /* ppp */
 	  case ARPHRD_LOOPBACK:
 	      nnew->if_type = 24; break; /* softwareLoopback */
+	  case ARPHRD_FDDI:
+	      nnew->if_type = 15; break;
+	  case ARPHRD_ARCNET:
+	      nnew->if_type = 35; break;
+	  case ARPHRD_LOCALTLK:
+	      nnew->if_type = 42; break;
+	  case ARPHRD_HIPPI:
+	      nnew->if_type = 47; break;
           /* XXX: more if_arp.h:ARPHDR_xxx to IANAifType mappings... */
 	  }
 #endif
@@ -1415,7 +1425,7 @@ Interface_Scan_Init (void)
 	     * it before from SIOCGIFHWADDR */
 	    if (!nnew->if_type) 
 		nnew->if_type = if_type_from_name(nnew->if_name);
-	    nnew->if_speed = nnew->if_type == 6 ? 10000000 : 
+		nnew->if_speed = nnew->if_type == 6 ? 10000000 : 
 		nnew->if_type == 24 ? 10000000 :
 		nnew->if_type ==  9 ?  4000000 : 0;
 	}
