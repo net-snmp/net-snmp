@@ -20,14 +20,12 @@
   4.2.1 and any subsequent ucd-snmp releases will be bug-fixes only.
   All further developments will be released under the net-snmp name.
 
-  The 4.2.1 release is intended as a 'bug-fix' update to the earlier 4.2
+  The 4.2.4 release is intended as a 'bug-fix' update to the earlier 4.2.3
   code, and there are no significant changes to the APIs in this release.
 
-  It is very likely that there will be changes made to the APIs at some
-  point in the near future.   While every effort will be made to ensure
-  that net-snmp remains backwardly compatible with existing ucd-snmp based
-  code as much as possible, this cannot be guaranteed 100% completely.
-
+  The very first net-snmp release (5.0) with many new features is
+  intended to be released near the same date as this version (4.2.4)
+  of the ucd-snmp tree.
 
 DISCLAIMER
 
@@ -231,14 +229,14 @@ SUBMITTING BUG REPORTS
   as detailed information about exactly what is wrong.
 
   To submit a bug report, please use the web interface at
-  http://www.net-snmp.org/bugs/.  It is a full-fledged
+  http://www.net-snmp.org/bugs/ .  It is a full-fledged
   bug-tracking system that will allow you to search for already
   existing bug reports as well as track the status of your report as
   it is processed by the core developers.
 
   If you intend to submit a patch as well, please read the PORTING
   file before you do so and then submit it to
-  http://www.net-snmp.org/patches/.
+  http://www.net-snmp.org/patches/ .
 
 CLOSING
 

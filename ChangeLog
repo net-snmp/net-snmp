@@ -2,6 +2,747 @@
 
 Changes: V4.2.3 -> V4.2.4
 	
+2002-04-04 15:24  hardaker
+
+   * snmplib/: snmp_api.c, snmp_api.h:
+
+   patch from Petter Larsen to add a function for extracting the fd associated with a session
+   
+2002-04-04 15:14  hardaker
+
+   * agent/agent_registry.c:
+
+   deal with fd unregistrations properly.
+   
+2002-04-03 08:32  hardaker
+
+   * FAQ, README, sedscript.in, version.h, perl/SNMP/SNMP.pm:
+
+   - (version.h sedscript.in): version tag ( 4.2.4.pre3 )
+   
+2002-04-02 15:02  hardaker
+
+   * agent/mibgroup/ucd-snmp/registry.c:
+
+   Apply patch #515577 to fix one case of a registry problem.
+   
+2002-04-02 14:57  hardaker
+
+   * agent/mibgroup/ucd-snmp/disk.c, s/darwin.h:
+
+   Apply patch #524424 for darwin fixes for ucd-snmp/disk.c
+   
+2002-04-02 14:48  hardaker
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+   apply patch 527573 to fix 64 bit types on solaris
+   
+2002-04-01 22:28  hardaker
+
+   * snmplib/snmp_api.c:
+
+   Let init_snmp protect itself.
+   
+2002-03-28 23:48  hardaker
+
+   * agent/mibgroup/ucd-snmp/pass.c:
+
+   enable row creation for pass modules.  Patch #482005
+   
+2002-03-28 23:44  hardaker
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+   patch #517340: freebsd5 support
+   
+2002-03-28 23:38  hardaker
+
+   * agent/mibgroup/host/hr_filesys.c:
+
+   apply freebsd5 patch #517333
+   
+2002-03-28 23:10  hardaker
+
+   * perl/SNMP/SNMP.xs:
+
+   fix bug #525844.  perl SNMP was using a trap address of 0.0.0.0.
+   
+2002-03-28 23:03  hardaker
+
+   * snmplib/snmp_api.c:
+
+   use a static variable for init checking.  Bug #536386.
+   
+2002-03-28 15:23  dts12
+
+   * FAQ:
+
+   Add a few new entries (mostly relating to traps)
+   
+2002-03-27 01:55  dts12
+
+   * configure.in, configure:
+
+   Use the correct name of the Windows IP Helper API library.
+   (Computers can be soooo picky!)
+   
+2002-03-26 08:29  hardaker
+
+   * agent/mibgroup/ucd-snmp/diskio.c:
+
+   enable diskio on freebsd5.  Implements patch 517328 in a different way.
+   
+2002-03-26 07:44  dts12
+
+   * configure, configure.in:
+
+   Add /etc/filesystems to list of mount table files (for AIX)
+   Should fix bugs 232588 and (?)517113
+   
+2002-03-26 07:39  dts12
+
+   * configure, configure.in:
+
+   Remove trailing ':' from list of MIB module names in configure output,
+   to avoid confusion (see Bug #491129)
+   
+2002-03-26 06:50  dts12
+
+   * configure, configure.in:
+
+   Add '-lhlpapi' to the agent libraries when compiling under Windows
+   (using Cygwin).  DLLIBS is not as suitable as AGENT_LIBS for this
+   (see the equivalent patch on the main branch), but it should do.
+   Should fix Bug #534409.
+   
+2002-03-25 22:33  rstory
+
+   * snmplib/parse.c:
+
+   fix bug#520478 showMibErrors token is inverted
+   
+2002-03-25 18:47  rstory
+
+   * agent/snmp_vars.c:
+
+   fix bug#502123 agentx infinite loop.
+   
+2002-03-24 05:19  nba
+
+   * agent/mibgroup/host/hr_swrun.c:
+
+   Restrict hrSWRunParams returns values to 128 octets
+   
+2002-03-24 05:04  nba
+
+   * snmplib/mib.c:
+
+   Oops - snprint_* cannot realloc
+   
+2002-03-21 07:21  hardaker
+
+   * configure.in, configure:
+
+   fix bug #532696 fixing rpm for newer rpm versions
+   
+2002-03-20 07:48  hardaker
+
+   * agent/mibgroup/mibII/system_mib.c:
+
+   remove illegal SET support for sysDescr.
+   
+2002-03-19 02:01  jbpn
+
+   * agent/mibgroup/smux/smux.h:
+
+     - patch from Joshua Giles to increase the maximum string length
+       (#527650).
+   
+2002-03-18 14:38  nba
+
+   * win32/libsnmp_dll/libsnmp.def:
+
+   Add missing exports for VC++ build
+   
+2002-03-18 13:23  nba
+
+   * agent/mibgroup/ucd-snmp/disk.c:
+
+   Proper test for successful open of ETC_MNTTAB
+   
+2002-03-18 13:09  nba
+
+   * agent/agent_read_config.c:
+
+   Fix interchanged parameters for strncpy
+   
+2002-03-18 08:51  dts12
+
+   * win32/: win32.dsw, encode_keychange/encode_keychange.dsp,
+   libagent/libagent.dsp, libsnmp/libsnmp.dsp,
+   libsnmp_dll/libsnmp_dll.dsp, libucdmibs/libucdmibs.dsp,
+   snmpbulkget/snmpbulkget.dsp, snmpbulkwalk/snmpbulkwalk.dsp,
+   snmpd/snmpd.dsp, snmpdelta/snmpdelta.dsp, snmpdf/snmpdf.dsp,
+   snmpgetnext/snmpgetnext.dsp, snmpget/snmpget.dsp,
+   snmpnetstat/snmpnetstat.dsp, snmpset/snmpset.dsp,
+   snmpstatus/snmpstatus.dsp, snmptable/snmptable.dsp,
+   snmptest/snmptest.dsp, snmptranslate/snmptranslate.dsp,
+   snmptrap/snmptrap.dsp, snmptrapd/snmptrapd.dsp,
+   snmpusm/snmpusm.dsp, snmpvacm/snmpvacm.dsp, snmpwalk/snmpwalk.dsp:
+
+   Apply DOS-type line endings to the DSW/DSP files.
+   
+2002-03-18 08:41  dts12
+
+   * agent/mibgroup/smux/smux.c:
+
+   Use the same variable name for output buffer and size calculation.
+   
+2002-03-18 05:39  jbpn
+
+   * README.hpux11, agent/mibgroup/host/hr_storage.c,
+   agent/mibgroup/host/hr_system.c, agent/mibgroup/mibII/var_route.c,
+   agent/mibgroup/ucd-snmp/loadave.c,
+   agent/mibgroup/ucd-snmp/memory.c, agent/mibgroup/ucd-snmp/memory.h,
+   s/hpux.h:
+
+     - commit Johannes's update to the HPUX-11 patch
+   
+2002-03-18 02:31  jbpn
+
+   * agent/mibgroup/agentx/master.c:
+
+     - extend tcp_wrappers support to AgentX.  This makes it more
+       reasonable to implement a distributed subagent architecture
+       without massive security worries.
+   
+2002-03-14 07:23  hardaker
+
+   * snmplib/snmp_api.c:
+
+   Fix dont_probe bug pointed out by Stefan Aeschbacher.
+   
+2002-03-13 18:58  slif
+
+   * snmplib/asn1.c:
+
+   Clarify unsigned char argument for the noisy or confused compiler.
+   
+2002-03-13 18:46  slif
+
+   * agent/mibgroup/mibII/vacm_vars.c, apps/snmptrapd_log.c:
+
+   quell several warnings about signed vs unsigned comparisons.
+   
+2002-03-13 18:44  slif
+
+   * win32/win32.dsw:
+
+   remove dependencies to restore building either Debug or Release targets.
+   
+2002-03-13 18:43  slif
+
+   * win32/libsnmp_dll/libsnmp.def:
+
+   track change setenv --> snmp_setenv
+   
+2002-03-13 15:50  hardaker
+
+   * mibs/: UCD-DEMO-MIB.txt, UCD-DISKIO-MIB.txt, UCD-DLMOD-MIB.txt,
+   UCD-IPFILTER-MIB.txt, UCD-IPFWACC-MIB.txt, UCD-SNMP-MIB.txt:
+
+   address changes for ucd-snmp -> net-snmp note saying these mibs are no
+   longer supported by UCD.
+   
+2002-03-13 15:21  hardaker
+
+   * snmplib/tools.c:
+
+   malloc at least one byte in hex_to_binary2
+   
+2002-03-13 04:03  dts12
+
+   * FAQ:
+
+   Add a description of "unlinked OIDs".
+   
+2002-03-12 20:03  hardaker
+
+   * agent/mibgroup/ucd-snmp/memory_solaris2.c:
+
+   Patch from daniel Sully to improve solaris swap info
+   
+2002-03-12 08:34  dts12
+
+   * FAQ:
+
+   Updating of the FAQ ready for the next release.
+   (Mostly rephrasing of existing entries, but a few new questions)
+   
+2002-03-11 10:06  hardaker
+
+   * agent/: mibgroup/smux/smux.c, mibgroup/ucd-snmp/proxy.c,
+   agent_index.c, agent_read_config.c, agent_registry.c, snmp_agent.c,
+   snmpd.c, mibgroup/agentx/master_request.c:
+
+   better printing apis
+   
+2002-03-11 10:06  hardaker
+
+   * apps/snmpvacm.c:
+
+   fix api in a comment (how picky am I?)
+   
+2002-03-11 07:41  dts12
+
+   * FAQ:
+
+   Bring the 4x- and main-branch FAQs into agreement.
+   
+2002-03-11 05:16  jbpn
+
+   * snmplib/parse.c:
+
+     - fix bad type assignment in build_translation_table(), noticed by
+       Peter Stevens.
+   
+2002-03-10 14:07  nba
+
+   * snmplib/mib.h:
+
+   Oops - forgot to remove the #ifdef for unsafe sprint_* functions declarations
+   
+2002-03-10 13:54  nba
+
+   * apps/snmpwalk.c:
+
+   Fix up out-of-order error message
+   
+2002-03-10 13:44  nba
+
+   * apps/snmpdelta.c:
+
+   Don't die on v2 exceptions
+   
+2002-03-10 13:41  nba
+
+   * snmplib/: asn1.c, snmp_debug.c:
+
+   Remove some calls to old sprint_* functions
+   
+2002-03-10 13:39  nba
+
+   * snmplib/: mib.c, mib.h:
+
+   Add snprint_* replacement functions for all sprint_* functions
+   
+2002-03-10 13:38  nba
+
+   * man/mib_api.3:
+
+   Document snprint_{objid,variable,value}
+   
+2002-03-10 08:34  hardaker
+
+   * snmplib/: mib.c, mib.h:
+
+   include the snprintf counterparts from the 5.0 code.
+   
+2002-03-08 18:07  hardaker
+
+   * agent/mibgroup/mibII/ipAddr.c:
+
+   redefine a variable on freebsd for 2.2.5
+   
+2002-03-08 17:57  hardaker
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+   remove a broken fix I accidentically committed
+   
+2002-03-08 17:42  hardaker
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+   patch from Mihail Balikov to support up but no ip interfaces.
+   
+2002-03-08 17:27  hardaker
+
+   * configure.in, configure, aclocal.m4:
+
+   patch from Paul Rasmussen to fix --enable-shared
+   
+2002-03-08 16:58  hardaker
+
+   * perl/SNMP/SNMP.xs:
+
+   old patch from Bert Driehuis to fix c64s in perl
+   
+2002-03-08 14:53  nba
+
+   * snmplib/mib.c:
+
+   Remove 1000 lines of duplicate code by using the sprint_realloc_* functions
+   in the implementaion of the non-realloc counterparts.
+   
+2002-03-08 14:51  nba
+
+   * apps/: snmpdelta.c, snmptable.c, snmpusm.c, snmpwalk.c:
+
+   Remove last sprint_nonrealloc calls
+   
+2002-03-07 03:20  jbpn
+
+   * man/mib_api.3:
+
+     - patch from Guy Harris to describe new mib_api
+   
+2002-03-07 02:58  jbpn
+
+   * snmplib/mib.h:
+
+     - declare the sprint_realloc_blah functions.  Thanks to Guy Harris.
+   
+2002-03-06 08:41  dts12
+
+   * snmplib/snmpv3.c:
+
+   Fix a confusion between defAuthType and defPrivType.
+   
+2002-03-06 05:52  dts12
+
+   * snmplib/snmp_api.c:
+
+   Actually use the common 'defPassphrase' value if 'def{Auth,Priv}Passphrase' isn't set.
+   Qn: Should the AuthPassphrase also be used for privacy if no other value is available?
+   
+2002-03-06 03:19  jbpn
+
+   * testing/Makefile.in:
+
+     - ignore errors doing rm -rf /tmp/snmp-test* when making clean (this
+       happens all the time on the compile farm because e.g. I can't
+       delete Wes's test directories and it's a nuisance because then the
+       rest of the directories don't get cleaned up properly).
+   
+2002-03-06 02:24  jbpn
+
+   * snmplib/mib.c:
+
+     - fix another potential buffer overflow problem as reported in bug
+       #526262.
+   
+2002-03-05 10:45  hardaker
+
+   * agent/mibgroup/ucd-snmp/versioninfo.c:
+
+   impose max length restriction supplied by mib for configuration options.
+   
+2002-03-05 09:52  hardaker
+
+   * mibs/UCD-SNMP-MIB.txt:
+
+   missed a modification to the patch.
+   
+2002-03-05 09:51  hardaker
+
+   * mibs/UCD-SNMP-MIB.txt:
+
+   A modified patch from Juergen Schoenwaelder for longer configure strings.
+   
+2002-03-05 08:23  dts12
+
+   * agent/snmp_vars.h:
+
+   Reverse my earlier (bogus) fix.
+   Things were fine as they were - I must be cracking up.....
+   
+2002-03-05 08:05  dts12
+
+   * agent/mibgroup/examples/ucdDemoPublic.c:
+
+   Add missing "standard" headers, and tweak a type slightly.
+   (Based on requests from Gregory Toth).
+   
+2002-03-05 06:56  dts12
+
+   * agent/snmp_vars.h:
+
+   Bring declaration of 'init_agent' into line with code definition.
+   
+2002-03-05 06:48  dts12
+
+   * agent/mibgroup/: notification/snmpNotifyTable.c, ucd-snmp/dlmod.c:
+
+   Cast a couple of mallocs appropriately (requested by Gregory Toth)
+   
+2002-03-04 21:38  hardaker
+
+   * FAQ, README, sedscript.in, version.h, perl/SNMP/SNMP.pm:
+
+   - (version.h sedscript.in): version tag ( 4.2.4.pre2 )
+   
+2002-03-04 01:51  dts12
+
+   * local/mib2c:
+
+   Catch and report invalid node specifications.
+   (This ought to be handled by that test that follows immediately, but
+    "$SNMP::MIB{$oid}" appears to return the core mib-2 object regardless)
+   
+2002-03-04 01:16  dts12
+
+   * agent/mibgroup/ucd-snmp/memory.c:
+
+   Correct debug output message (thanks to Jeroen Ruigrok)
+   
+2002-03-01 22:37  hardaker
+
+   * snmplib/asn1.c:
+
+   fix bug #524529
+   
+2002-03-01 07:17  nba
+
+   * ltmain.sh, aclocal.m4, configure:
+
+   Pull in up-to-date libtool, which should help Darwin
+   
+2002-03-01 07:15  nba
+
+   * config.guess, config.sub:
+
+   Pull in up-to-date config scripts
+   
+2002-02-27 09:47  dts12
+
+   * snmplib/vacm.c:
+
+   Handle views that specify a full instance OID.
+   (Since the internally stored OID prepends the length as well,
+    the apparent length is one greater than it really is)
+   
+2002-02-26 14:18  nba
+
+   * snmplib/: parse.c, parse.h:
+
+   Save File/line for messages about unlinked OIDs
+   
+2002-02-25 15:46  nba
+
+   * mibs/: Makefile.mib, mibfetch:
+
+   Make sure that we fetch IANAifType-MIB from the maintained location.
+   
+2002-02-25 15:45  nba
+
+   * mibs/DISMAN-SCHEDULE-MIB.txt:
+
+   Update for RFC 3231
+   
+2002-02-25 08:59  nba
+
+   * mibs/rfclist:
+
+   New RFC's issued with mibs:
+   3201   CIRCUIT-IF-MIB
+   3202   FRSLD-MIB
+   3231   DISMAN-SCHEDULE-MIB
+   
+2002-02-25 08:57  nba
+
+   * agent/mibgroup/host/hr_disk.c:
+
+   FreeBSD4 has new disk names
+   
+2002-02-25 08:56  nba
+
+   * agent/mibgroup/host/hr_print.c:
+
+   Properly bracket run_lpstat prototype
+   
+2002-02-25 02:48  jbpn
+
+   * snmplib/parse.c:
+
+     - only copy the first DESCRIPTION clause of MODULE-COMPLIANCE
+       statements to avoid a memory leak (see bug #522363).
+   
+2002-02-25 01:21  dts12
+
+   * agent/snmpd.c:
+
+   Specify the correct debug token for displaying the list of modules
+   (spotted by Brian Shaver)
+   
+2002-02-22 09:27  dts12
+
+   * snmplib/: MSG00001.bin, winservice.mc ,
+   MSG00001.bin (1.1), winservice.mc (1.1):
+
+   Add missing files for Windows service operation.
+   
+2002-02-22 08:42  dts12
+
+   * agent/snmpd.c:
+
+   Just close the main session when shutting down under Windows,
+   not everything (so that it can still generate the shutdown trap).
+   
+2002-02-22 01:49  jbpn
+
+   * FAQ, README.win32:
+
+     - update comments on Win32 port in FAQ
+   
+     - discuss what IPHLPAPI.{LIB,DLL} is and where it can be obtained
+       from in README.win32
+   
+2002-02-21 07:02  dts12
+
+   * win32/snmpd/snmpd.dsp:
+
+   Fix bogus structure comments in the snmpd project file.
+   
+2002-02-21 03:13  jbpn
+
+   * agent/mibgroup/smux/smux.c:
+
+     - emit error on over-length password instead of writing off end of
+       buffer (bug #520649, noted by John Sellens).
+   
+2002-02-20 09:27  jbpn
+
+   * apps/snmptranslate.c, apps/snmptrapd.c,
+   snmplib/snmp_parse_args.c, snmplib/system.c, snmplib/system.h:
+
+     - changes to avoid namespace clash problems with setenv() which are
+       caused by libwrap supplying a function of that name as well as us.
+   
+     - all calls in the code to setenv() are replaced with a call to
+       snmp_setenv().
+   
+     - snmp_setenv() calls setenv() if such a function exists, otherwise
+       it simulates the effect by calling putenv().
+   
+2002-02-20 05:43  jbpn
+
+   * NEWS:
+
+     - mention tcp_wrappers support for snmptrapd
+   
+2002-02-20 05:41  jbpn
+
+   * apps/: Makefile.in, snmptrapd.c:
+
+     - add libwrap support for snmptrapd
+   
+2002-02-20 05:20  jbpn
+
+   * configure, configure.in:
+
+     - exit with an error if --with-libwrap is given and we can't find it
+   
+2002-02-20 03:00  jbpn
+
+   * apps/snmpdelta.c:
+
+     - initialise some buffers, to avoid garbage printing problems, as
+       noted by Anonymous in bug #520220.
+   
+2002-02-19 06:47  hardaker
+
+   * agent/mibgroup/ucd-snmp/memory.c:
+
+   Patch from Jeroen Ruigrok to merge a few ifdefs
+   
+2002-02-19 01:51  jbpn
+
+   * agent/auto_nlist.h:
+
+     - add forward declaration of struct nlist to avoid compiler
+       complaints.  Thanks to Andy Hood.
+   
+2002-02-18 08:17  hardaker
+
+   * agent/mibgroup/ucd-snmp/memory.c:
+
+   patch from Jeroen Ruigrok for minor ifdef clean ups
+   
+2002-02-18 02:36  jbpn
+
+   * apps/snmptrapd_log.c:
+
+     - use calloc instead of malloc to make sure buffer is initially
+       zero-terminated (in case of 0 varbinds).  Bug #518700, noted by
+       Andreas Hartmann.
+   
+2002-02-18 02:29  dts12
+
+   * agent/mibgroup/host/hr_storage.c:
+
+   Remove a couple of unhelpful OSF definitions (thanks to Jeroen Ruigrok)
+   
+2002-02-18 02:09  jbpn
+
+   * agent/mibgroup/: notification/snmpNotifyTable.c,
+   target/snmpTargetAddrEntry.c:
+
+     - remove troublesome inline qualifiers.  Thanks to Andy Hood for
+       noting that these cause problems on AIX.
+   
+2002-02-18 02:05  jbpn
+
+   * agent/mibgroup/mibII/at.c:
+
+     - remove //-style comments.  Thanks to Andy Hood for pointing this
+   out.
+   
+2002-02-18 00:13  hardaker
+
+   * snmplib/asn1.c:
+
+   don't build oid's with >128 length subids.  (see bug #518855)
+   
+2002-02-15 22:07  hardaker
+
+   * FAQ, README, sedscript.in, version.h, perl/SNMP/SNMP.pm:
+
+   - (version.h sedscript.in): version tag ( 4.2.4.pre1 )
+   
+2002-02-15 17:02  hardaker
+
+   * agent/mibgroup/snmpv3/usmUser.c:
+
+   fix bug#508126 which actually led me to another.
+     - oid parsing and searching in getnexts could sometimes loop.
+   
+2002-02-15 17:00  hardaker
+
+   * Makefile.top, configure, configure.in:
+
+   support --disable-shared-version concept from Paul Rasmussen.
+   
+2002-02-15 16:41  hardaker
+
+   * agent/mibgroup/host/hr_swrun.c:
+
+   dynix broke linux.  Bad dynix.  No bone.  Go to your room.
+   
+2002-02-15 16:28  hardaker
+
+   * snmplib/ucd-snmp-includes.h:
+
+   add back in netinet/in.h and sys/time.h (in proper protected form)
+   which was deleted from 4.2.3 for some reason we never figured out.
+   
+2002-02-15 16:21  hardaker
+
+   * ChangeLog, FAQ, NEWS, README:
+
+   updates for what will be 4.2.4
+   
 2002-02-15 15:52  hardaker
 
    * agent/mibgroup/ucd-snmp/proxy.c:
@@ -417,7 +1158,7 @@ Changes: V4.2.3 -> V4.2.4
    * ChangeLog:
 
    4.2.3 changes
-	
+   
 -------------------------------------------------------------------------------
 
 Changes: V4.2.2 -> V4.2.3
