@@ -2763,7 +2763,7 @@ var_udp(vp, name, length, exact, var_len, write_method)
 	    return (u_char *) &long_return;
 	case UDPINERRORS:
 	    long_return = udpstat.udps_hdrops + udpstat.udps_badsum +
-#ifdef HAVE_UDPSTAT_UDPS_DISCARD
+#ifdef STRUCT_UDPSTAT_HAS_UDPS_DISCARD
                       + udpstat.udps_discard;
 #endif
 			  udpstat.udps_badlen;
@@ -2909,7 +2909,7 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 		return (u_char *) &tcpstat.tcps_sndrexmitpack;
 	    case TCPINERRS:
 		long_return = tcpstat.tcps_rcvbadsum + tcpstat.tcps_rcvbadoff 
-#ifdef HAVE_TCPSTAT_TCPS_RCVMEMDROP
+#ifdef STRUCT_TCPSTAT_HAS_TCPS_RCVMEMDROP
                   + tcpstat.tcps_rcvmemdrop
 #endif
                   + tcpstat.tcps_rcvshort;

@@ -118,21 +118,6 @@
 /* If you don't have root access don't exit upon kmem errors */
 #undef NO_ROOT_ACCESS
 
-/* ifnet structure tests */
-#undef STRUCT_IFNET_HAS_IF_BAUDRATE
-#undef STRUCT_IFNET_HAS_IF_TYPE
-#undef STRUCT_IFNET_HAS_IF_IMCASTS
-#undef STRUCT_IFNET_HAS_IF_IQDROPS
-#undef STRUCT_IFNET_HAS_IF_LASTCHANGE_TV_SEC
-#undef STRUCT_IFNET_HAS_IF_NOPROTO
-#undef STRUCT_IFNET_HAS_IF_OMCASTS
-#undef STRUCT_IFNET_HAS_IF_XNAME
-#undef STRUCT_IFNET_HAS_IF_OBYTES
-#undef STRUCT_IFNET_HAS_IF_IBYTES
-
-/* tcpstat.tcps_rcvmemdrop */
-#undef HAVE_TCPSTAT_TCPS_RCVMEMDROP
-
 /* Define if you have the bcopy function.  */
 #undef HAVE_BCOPY
 
