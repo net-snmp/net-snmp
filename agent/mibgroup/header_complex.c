@@ -51,27 +51,72 @@ header_complex_generate_varoid(struct variable_list *var) {
 
 /* header_complex_parse_oid(): parses an index to the usmTable to
    break it down into a engineID component and a name component.
-   The results are stored in:
+   The results are stored in the data pointer, as a varbindlist:
 
-   **engineID:   a newly malloced string.
-   *engineIDLen: The length of the malloced engineID string above.
-   **name:       a newly malloced string.
-   *nameLen:     The length of the malloced name string above.
 
    returns 1 if an error is encountered, or 0 if successful.
 */
 int
-header_complex_parse_oid(oid *oidIndex, int oidLen,
-                         struct header_complex_index *data) {
+header_complex_parse_oid(oid *oidIndex, size_t oidLen,
+                         struct variable_list *data) {
+  struct variable_list *var = data;
+  int i, itmp;
+
+  /* XXX: need to demalloc on errors. */
+  
+  while(var && oidLen > 0) {
+    switch(var->type) {
+      case ASN_INTEGER:
+      case ASN_COUNTER:
+      case ASN_GAUGE:
+      case ASN_TIMETICKS:
+        var->val.integer = (long *) SNMP_MALLOC(sizeof(long));
+        *var->val.integer = (long) *oidIndex++;
+        var->val_len = sizeof(long);
+        oidLen--;
+        DEBUGMSGTL(("header_complex_parse_oid",
+                    "Parsed int(%d): %d\n", var->type, *var->val.integer));
+        break;
+
+      case ASN_OPAQUE:
+      case ASN_OCTET_STR:
+        itmp = (long) *oidIndex++;
+        oidLen--;
+        if (itmp > oidLen)
+          return SNMPERR_GENERR;
+          
+        if (itmp == 0)
+          break;        /* zero length strings shouldn't malloc */
+        
+        var->val_len = itmp;
+        var->val.string = (u_char *) SNMP_MALLOC(itmp);
+
+        for(i = 0; i < itmp; i++)
+          var->val.string[i] = (u_char) *oidIndex++;
+        oidLen -= itmp;
+
+        DEBUGMSGTL(("header_complex_parse_oid",
+                    "Parsed str(%d): %s\n", var->type, var->val.string));
+        break;
+
+      default:
+        DEBUGMSGTL(("header_complex_parse_oid",
+                    "invalid asn type: %d\n", var->type));
+        return SNMPERR_GENERR;
+    }
+    var = var->next_variable;
+  }
+  if (var != NULL || oidLen > 0)
+    return SNMPERR_GENERR;
   return SNMPERR_SUCCESS;
 }
 
 
 void
 header_complex_generate_oid(oid *name, /* out */
-                            int *length, /* out */
+                            size_t *length, /* out */
                             oid *prefix,
-                            int prefix_len,
+                            size_t prefix_len,
                             struct header_complex_index *data) {
 
   struct variable_list *var = NULL;
@@ -103,14 +148,15 @@ void *
 header_complex(struct header_complex_index *datalist,
                struct variable *vp,
 	       oid *name,
-	       int *length,
+	       size_t *length,
 	       int exact,
-	       int *var_len,
+	       size_t *var_len,
 	       WriteMethod **write_method) {
 
   struct header_complex_index *nptr, *found = NULL;
   oid indexOid[MAX_OID_LEN];
-  int len, result;
+  size_t len;
+  int result;
   
   /* set up some nice defaults for the user */
   if (write_method)
@@ -223,7 +269,7 @@ void
 header_complex_dump(struct header_complex_index *thestuff) {
   struct header_complex_index *hciptr;
   oid oidsave[MAX_OID_LEN];
-  int len;
+  size_t len;
   
   for(hciptr = thestuff; hciptr != NULL; hciptr = hciptr->next) {
     DEBUGMSGTL(("header_complex_dump", "var:  "));
@@ -239,13 +285,16 @@ main() {
   oid oidsave[MAX_OID_LEN];
   int len = MAX_OID_LEN, len2;
   struct variable_list *vars;
-  long ltmp = 4242, ltmp2=88, ltmp3 = 1;
+  long ltmp = 4242, ltmp2=88, ltmp3 = 1, ltmp4 = 4200;
   oid ourprefix[] = { 1,2,3,4};
-  char *string="wes", *string2 = "dawn";
+  oid testparse[] = { 4,116,101,115,116,4200};
+  int ret;
+  
+  char *string="wes", *string2 = "dawn", *string3 = "test";
 
   struct header_complex_index *thestorage = NULL;
 
-  debug_register_tokens("header_complex_dump");
+  debug_register_tokens("header_complex");
   snmp_set_do_debugging(1);
   
   vars = NULL;
@@ -273,6 +322,20 @@ main() {
   snmp_varlist_add_variable(&vars, NULL, 0, ASN_INTEGER, (char *) &ltmp3, len2);
   header_complex_add_data(&thestorage, vars, ourprefix);
 
+  vars = NULL;
+  len2 = strlen(string3);
+  snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, string3, len2);
+  len2 = sizeof(ltmp4);
+  snmp_varlist_add_variable(&vars, NULL, 0, ASN_INTEGER, (char *) &ltmp4, len2);
+  header_complex_add_data(&thestorage, vars, ourprefix);
+
   header_complex_dump(thestorage);
+
+  vars = NULL;
+  snmp_varlist_add_variable(&vars, NULL, 0, ASN_OCTET_STR, NULL, 0);
+  snmp_varlist_add_variable(&vars, NULL, 0, ASN_INTEGER, NULL, 0);
+  ret = header_complex_parse_oid(testparse, sizeof(testparse)/sizeof(oid), vars);
+  DEBUGMSGTL(("header_complex_test", "parse returned %d...\n", ret));
+
 }
 #endif
