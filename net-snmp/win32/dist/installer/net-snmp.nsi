@@ -5,7 +5,7 @@
 !define PRODUCT_MAJ_VERSION "5"
 !define PRODUCT_MIN_VERSION "1"
 !define PRODUCT_REVISION "2"
-!define PRODUCT_EXE_VERSION "rc1"
+!define PRODUCT_EXE_VERSION "pre1"
 !define PRODUCT_WEB_SITE "http://www.net-snmp.com"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\encode_keychange.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -88,7 +88,6 @@ Section "Base Components" SEC01
   File "bin\snmpget.exe"
   File "bin\snmpdf.exe"
   File "bin\snmpdelta.exe"
-  File "bin\snmpconf.pl"
   File "bin\snmpbulkwalk.exe"
   File "bin\snmpbulkget.exe"
   File "bin\snmpwalk.exe"
@@ -303,7 +302,7 @@ Function CreateSnmpConf
   
   ; Set the conf path
   Push "SNMPCONFPATH"
-  Push "$R0/etc/snmp"
+  Push "$R0/etc/snmp:$R0/snmp/persist"
   Call WriteEnvStr
   
   Push "SNMPSHAREPATH"
