@@ -14,3 +14,5 @@
 
 /* ARP_Scan_Next needs a 4th ifIndex argument */
 #define ARP_SCAN_FOUR_ARGUMENTS
+
+#define rt_pad1 rt_refcnt
