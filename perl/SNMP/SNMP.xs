@@ -1615,7 +1615,7 @@ snmp_set(sess_ref, varlist_ref, perl_callback)
            int use_enums = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums",8,1));
            struct enum_list *ep;
 
-           oid_arr = (oid*)malloc(sizeof(oid) * MAX_OID_LEN);
+           New (0, oid_arr, MAX_OID_LEN, oid);
 
            if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
 
@@ -1770,7 +1770,7 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
            int sprintval_flag = USE_BASIC;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
-           oid_arr = (oid*)malloc(sizeof(oid) * MAX_OID_LEN);
+           New (0, oid_arr, MAX_OID_LEN, oid);
 
            if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
 
@@ -1920,7 +1920,7 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
            int sprintval_flag = USE_BASIC;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 
-           oid_arr = (oid*)malloc(sizeof(oid) * MAX_OID_LEN);
+           New (0, oid_arr, MAX_OID_LEN, oid);
 
            if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
 
@@ -2080,7 +2080,7 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
 	   SV *rv;
 
-           oid_arr = (oid*)malloc(sizeof(oid) * MAX_OID_LEN);
+           New (0, oid_arr, MAX_OID_LEN, oid);
 
            if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
 
@@ -2247,7 +2247,7 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
            int use_enums = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums",8,1));
            struct enum_list *ep;
 
-           oid_arr = (oid*)malloc(sizeof(oid) * MAX_OID_LEN);
+           New (0, oid_arr, MAX_OID_LEN, oid);
 
            if (oid_arr && SvROK(sess_ref)) {
 
@@ -2387,7 +2387,7 @@ snmp_trapV2(sess_ref,uptime,trap_oid,varlist_ref)
            int use_enums = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums",8,1));
            struct enum_list *ep;
 
-           oid_arr = (oid*)malloc(sizeof(oid) * MAX_OID_LEN);
+           New (0, oid_arr, MAX_OID_LEN, oid);
 
            if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
 
@@ -2528,7 +2528,7 @@ snmp_inform(sess_ref,uptime,trap_oid,varlist_ref)
            int use_enums = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums",8,1));
            struct enum_list *ep;
 
-           oid_arr = (oid*)malloc(sizeof(oid) * MAX_OID_LEN);
+           New (0, oid_arr, MAX_OID_LEN, oid);
 
            if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
 
