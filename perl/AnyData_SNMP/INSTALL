@@ -8,6 +8,8 @@ done in a different way.  In other words, *don't* apply this patch to
 author of this module to update to the newer DBD::AnyData API instead.
 You'll probably never have to do this.
 
+*** This is currently alpha level code!!! ***
+
 Jeff's unpatched AnyData packages can be found at:
   http://www.vpservices.com/jeff/programs/AnyData/
 
