@@ -24,15 +24,15 @@ CC=gcc
 NETSNMPDIR=$mfd_netsnmp_dir
 NETSNMPCONFIG=$(NETSNMPDIR)/net-snmp-config
 
-NETSNMPBASECFLAGS=`$(NETSNMPCONFIG) --base-cflags`
-NETSNMPINCLUDES=`$(NETSNMPCONFIG) --build-includes $(NETSNMPDIR)`
+NETSNMPBASECFLAGS := $(shell $(NETSNMPCONFIG) --base-cflags)
+NETSNMPINCLUDES := $(shell $(NETSNMPCONFIG) --build-includes $(NETSNMPDIR))
 # base flags after build/src include, in case it has /usr/local/include
 NETSNMPCFLAGS=$(NETSNMPINCLUDES) $(NETSNMPBASECFLAGS)
 
-NETSNMPBASELIBS=`$(NETSNMPCONFIG) --base-agent-libs`
-NETSNMPEXTLIBS=`$(NETSNMPCONFIG) --external-agent-libs`
-NETSNMPLIBDIRS=`$(NETSNMPCONFIG) --build-lib-dirs $(NETSNMPDIR)`
-NETSNMPLIBDEPS=`$(NETSNMPCONFIG) --build-lib-deps $(NETSNMPDIR)`
+NETSNMPBASELIBS := $(shell $(NETSNMPCONFIG) --base-agent-libs)
+NETSNMPEXTLIBS := $(shell $(NETSNMPCONFIG) --external-agent-libs)
+NETSNMPLIBDIRS := $(shell $(NETSNMPCONFIG) --build-lib-dirs $(NETSNMPDIR))
+NETSNMPLIBDEPS := $(shell $(NETSNMPCONFIG) --build-lib-deps $(NETSNMPDIR))
 LIB_DEPS=$(NETSNMPLIBDEPS)
 LIBS=$(NETSNMPLIBDIRS) -Wl,-Bstatic $(NETSNMPBASELIBS) -Wl,-Bdynamic $(NETSNMPEXTLIBS)
 
@@ -75,7 +75,7 @@ ${name}: $(OBJS) ${name}_Makefile
 	$(CC) -o ${name} $(OBJS) $(LIBS)
 
 clean:
-	rm $(OBJS) $(TARGETS)
+	rm -f $(OBJS) $(TARGETS)
 
 @if "$mfd_netsnmp_dir" ne ""@
 
