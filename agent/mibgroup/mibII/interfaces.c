@@ -1469,7 +1469,11 @@ u_char *EtherAddr;
 #endif
 #endif
 
+#if defined(mips) || defined(hpux) || defined(osf4) || defined(osf3)
+        memset(arpcom.ac_enaddr, 0, sizeof(arpcom.ac_enaddr));
+#else
         memset(&arpcom.ac_enaddr, 0, sizeof(arpcom.ac_enaddr));
+#endif
         memset(EtherAddr, 0, sizeof(arpcom.ac_enaddr));
 
 	if (saveIndex != Index) {	/* Optimization! */
@@ -1529,7 +1533,7 @@ u_char *EtherAddr;
 
 	} else {
 
-#if defined(mips) || defined(hpux) || defined(osf4)
+#if defined(mips) || defined(hpux) || defined(osf4) || defined(osf3)
           memcpy( EtherAddr,(char *) arpcom.ac_enaddr, sizeof (arpcom.ac_enaddr));
 #else
           memcpy( EtherAddr,(char *) &arpcom.ac_enaddr, sizeof (arpcom.ac_enaddr));
