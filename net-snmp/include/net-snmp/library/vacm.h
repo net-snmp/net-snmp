@@ -159,9 +159,9 @@ extern          "C" {
     void            vacm_save(const char *token, const char *type);
     void            vacm_save_view(struct vacm_viewEntry *view,
                                    const char *token, const char *type);
-    void            vacm_save_access(struct vacm_accessEntry *access,
+    void            vacm_save_access(struct vacm_accessEntry *access_entry,
                                      const char *token, const char *type);
-    void            vacm_save_group(struct vacm_groupEntry *access,
+    void            vacm_save_group(struct vacm_groupEntry *group_entry,
                                     const char *token, const char *type);
 
     void            vacm_parse_config_view(const char *token, char *line);
