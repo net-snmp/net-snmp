@@ -3504,7 +3504,7 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
   struct snmp_internal_session *isp;
   struct sockaddr_in *pduIp;
   struct timeval now;
-  int result;
+  int result, addr_size;
 
   sp = slp->session; isp = slp->internal;
 
@@ -3526,12 +3526,18 @@ snmp_resend_request(struct session_list *slp, struct request_list *rp,
     printf("\n");
   }
 
+  if (pdu->address.sa_family == AF_INET)
+	addr_size = sizeof( struct sockaddr_in );
+  else if (pdu->address.sa_family == AF_UNIX)
+	addr_size = sizeof( struct sockaddr_un );
+  else
+	addr_size = sizeof( struct sockaddr );
+
   if ( sp->flags & SNMP_FLAGS_STREAM_SOCKET )
     result = send(isp->sd, (char *)packet, length, 0);
   else
     result = sendto(isp->sd, (char *)packet, length, 0,
-	     (struct sockaddr *)&rp->pdu->address,
-	     sizeof(rp->pdu->address));
+	     (struct sockaddr *)&rp->pdu->address, addr_size);
   if ( result < 0){
     snmp_errno = SNMPERR_BAD_SENDTO;
     sp->s_snmp_errno = SNMPERR_BAD_SENDTO;
