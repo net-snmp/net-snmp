@@ -448,6 +448,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 		    printf ("\t");
 		    print_variable(vars->name, vars->name_length, vars);
 		}
+                printf("\n");
 	    }
 	    if (Syslog){
 	    	varbufidx=0;
@@ -509,6 +510,7 @@ int snmp_input(op, session, reqid, pdu, magic)
                        inet_ntoa(pdu->address.sin_addr));
 		for(vars = pdu->variables; vars; vars = vars->next_variable)
 		    print_variable(vars->name, vars->name_length, vars);
+                printf("\n");
 	    }
 	    if (Event) {
 		event_input(pdu->variables);
