@@ -3503,7 +3503,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg)
             if (boolresult &&
                 ((item->mteTriggerBooleanStartup ==
                   MTETRIGGERBOOLEANSTARTUP_TRUE
-                  && lastbool == -1) || lastbool != boolresult)) {
+                  && lastbool == (char)-1) || lastbool != boolresult)) {
                 send_mte_trap(item, mteTriggerFired,
                               sizeof(mteTriggerFired) / sizeof(oid),
                               next_oid, next_oid_len,
