@@ -65,7 +65,7 @@ use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 	ASN_UNSIGNED
 	ASN_UNSIGNED64
 );
-$VERSION = '5.1.1.pre1';
+$VERSION = '5.1.1.pre2';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
