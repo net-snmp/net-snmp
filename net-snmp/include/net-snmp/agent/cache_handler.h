@@ -16,8 +16,8 @@ extern          "C" {
 
     typedef struct netsnmp_cache_s netsnmp_cache;
 
-    typedef int  (NetsnmpCacheLoad)(netsnmp_cache*, void*);
-    typedef void (NetsnmpCacheFree)(void);
+    typedef int  (NetsnmpCacheLoad)(netsnmp_cache *, void*);
+    typedef void (NetsnmpCacheFree)(netsnmp_cache *);
 
     struct netsnmp_cache_s {
         /*

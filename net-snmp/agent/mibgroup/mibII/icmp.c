@@ -753,7 +753,7 @@ icmp_load(netsnmp_cache *cache, void *vmagic)
 #endif		/* hpux11 */
 
 void
-icmp_free(void)
+icmp_free(netsnmp_cache *cache)
 {
     memset(&icmpstat, 0, sizeof(icmpstat));
     icmp_valid = 0;
