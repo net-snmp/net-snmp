@@ -290,14 +290,14 @@ var_ipRouteEntry(struct variable *vp,
 
 #else                           /* not USE_SYSCTL_ROUTE_DUMP */
 
-static void     Route_Scan_Reload(void);
-
 #ifdef hpux11
 static int      rtsize = 0;
 static mib_ipRouteEnt *rt = (mib_ipRouteEnt *) 0;
-#elif !defined(solaris)
+#elif !defined(solaris2)
 static RTENTRY **rthead = 0;
 static int      rtsize = 0, rtallocate = 0;
+
+static void     Route_Scan_Reload(void);
 
 RTENTRY **netsnmp_get_routes(size_t *size) {
     Route_Scan_Reload();
