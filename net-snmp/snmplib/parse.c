@@ -2211,7 +2211,7 @@ read_module_internal (name )
 		    continue;
 		tp = find_tree_node( mip->label, mip->modid );
 		if (!tp) {
-		    fprintf(stderr, "Did not find %s in module %s\n",
+		    fprintf(stderr, "Did not find '%s' in module %s\n",
 			mip->label, module_name(mip->modid));
 		    continue;
 		}
