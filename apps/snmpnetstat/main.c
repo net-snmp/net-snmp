@@ -50,6 +50,9 @@ char copyright[] =
 
 #include <sys/socket.h>
 #include <sys/time.h>
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #include <netdb.h>
 
 #include <ctype.h>

@@ -58,6 +58,9 @@
 #if HAVE_FSTAB_H
 #include <fstab.h>
 #endif
+#if HAVE_SYS_STATFS_H
+#include <sys/statfs.h>
+#endif
 #if HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif
@@ -119,7 +122,7 @@ struct extensible *get_exten_instance(exten,inst)
 }
 
 int tree_compare(a, b)
-  void *a, *b;
+  const void *a, *b;
 {
   struct subtree *ap, *bp;
   ap = (struct subtree *) a;

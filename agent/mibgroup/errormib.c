@@ -67,6 +67,9 @@
 #if HAVE_FSTAB_H
 #include <fstab.h>
 #endif
+#if HAVE_SYS_STATFS_H
+#include <sys/statfs.h>
+#endif
 #if HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif

@@ -56,6 +56,9 @@ extern void *malloc();
 #  include <time.h>
 # endif
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #include <netdb.h>
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>

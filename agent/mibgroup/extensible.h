@@ -8,7 +8,7 @@
 config_require(util_funcs)
   
 struct extensible *get_exten_instance __P((struct extensible *, int));
-int tree_compare __P((void *, void *));
+int tree_compare __P((const void *, const void *));
 void setup_tree __P((void));
 unsigned char *var_extensible_shell __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 int fixExecError __P((int, u_char *, u_char, int, u_char *, oid *,int));

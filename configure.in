@@ -64,6 +64,8 @@ AC_DEFINE_UNQUOTED(UNAMEPROG,"$UNAMEPROG")
 
 AC_AIX
 
+AC_C_CONST
+
 dnl system check
 AC_CANONICAL_SYSTEM
 changequote(, )
@@ -306,12 +308,31 @@ dnl irix headers
 AC_CHECK_HEADERS(sys/hashing.h sys/tcpipstats.h)
 dnl from smux stuff
 AC_CHECK_HEADERS(err.h sys/filio.h sgtty.h)
+dnl AIX needs this for statfs func
+AC_CHECK_HEADERS(sys/statfs.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_HEADER_TIME
-AC_CHECK_TYPE(in_addr_t, u_int)
+
+dnl AIX keeps in_addr_t in /usr/include/netinet/in.h
+AC_EGREP_CPP(dnl
+changequote(<<,>>)dnl
+<<in_addr_t[^a-zA-Z_0-9]>>dnl
+changequote([,]), [#include <sys/types.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <stddef.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif], ac_cv_type_in_addr_t=yes, ac_cv_type_in_addr_t=no)])dnl
+AC_MSG_RESULT($ac_cv_type_in_addr_t)
+if test $ac_cv_type_in_addr_t = no; then
+  AC_DEFINE(in_addr_t, u_int)
+fi
+])
 
 dnl Check ps args
 AC_CACHE_CHECK(for correct flags to ps, ac_cv_ps_flags,
@@ -410,6 +431,7 @@ AC_TRY_COMPILE([
 ],[
   struct rtentry rt; 
   rt.rt_nodes[0].rn_b = 1;
+  rt.rt_dst.sa_len;
   ], ac_cv_RTENTRY_TYPE="BSD-4.4")
 
 dnl 4.3 compat

@@ -41,6 +41,9 @@
 #  include <time.h>
 # endif
 #endif
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
