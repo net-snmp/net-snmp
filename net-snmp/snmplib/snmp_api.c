@@ -1,4 +1,3 @@
-#define USE_ASN_SHORT_LEN 1
 /******************************************************************
 	Copyright 1989, 1991, 1992 by Carnegie Mellon University
 
@@ -126,6 +125,9 @@ static void init_snmp_session (void);
 #ifndef timerclear
 #define	timerclear(tvp)		(tvp)->tv_sec = (tvp)->tv_usec = 0
 #endif
+
+/* define for use with agents that don't like long form length encoding */
+#undef USE_ASN_SHORT_LEN
 
 /*
  * Globals.
