@@ -3920,7 +3920,7 @@ _sess_read(void *sessp,
     struct session_list *slp = (struct session_list *)sessp;
     struct snmp_session *sp;
     struct snmp_internal_session *isp;
-    u_char packet[PACKET_LENGTH], *packetptr = packet, *ucp = 0;
+    u_char packet[PACKET_LENGTH], *packetptr = packet;
     snmp_ipaddr        from;
     struct sockaddr_in *fromIp = (struct sockaddr_in *)&from;
     size_t length = 0;
