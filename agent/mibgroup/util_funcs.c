@@ -722,7 +722,7 @@ struct internal_mib_table {
 };
 
 mib_table_t
-Initialise_Table( int size, int timeout, RELOAD* reload, COMPARE* compare)
+Initialise_Table( int size, int timeout, RELOAD reload, COMPARE compare)
 {
     struct internal_mib_table *t;
 
