@@ -101,8 +101,9 @@ typedef long    fd_mask;
  * Out: returns 0 if OK, 1 if conflict with a pre-installed
  * party/context/acl/view, -1 if an error occurred.
  */
-agent_party_init(myaddr, view)
+agent_party_init(myaddr, dest_port, view)
     u_long myaddr;
+    u_short dest_port;
     char *view;
 {
     u_long addr;
@@ -250,7 +251,7 @@ agent_party_init(myaddr, view)
     strcpy(pp1->partyName, "noAuthAgent");
     pp1->partyTDomain = rp->partyTDomain = DOMAINSNMPUDP;
     addr = htonl(myaddr);
-    port = htons(161);
+    port = htons(dest_port);
     bcopy((char *)&addr, pp1->partyTAddress, sizeof(addr));
     bcopy((char *)&port, pp1->partyTAddress + 4, sizeof(port));
     bcopy(pp1->partyTAddress, rp->partyTAddress, 6);
@@ -405,7 +406,7 @@ main(argc, argv)
     int sd, sdlist[32], portlist[32], sdlen = 0, index;
     struct sockaddr_in	me;
     int port_flag = 0, ret;
-    u_short dest_port = 0;
+    u_short dest_port = 161;
     struct partyEntry *pp;
     u_long myaddr;
     int on=1;
@@ -491,7 +492,7 @@ main(argc, argv)
     /* open the logfile if necessary */
     if (logfile[0]) {
       close(1);
-      open(LOGFILE,O_WRONLY|O_TRUNC|O_CREAT,0644);
+      open(logfile,O_WRONLY|O_CREAT,0644);
       close(2);
       dup(1);
       close(0);
@@ -523,7 +524,7 @@ main(argc, argv)
     
     myaddr = get_myaddr();
     /* XXX mib-2 subtree only??? */
-    if (ret = agent_party_init(myaddr, ".iso.org.dod.internet")){
+    if (ret = agent_party_init(myaddr, dest_port, ".iso.org.dod.internet")){
 	if (ret == 1){
 	    fprintf(stderr, "Conflict found with initial noAuth/noPriv parties... continuing\n");
 	} else if (ret == -1){
