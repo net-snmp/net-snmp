@@ -37,6 +37,7 @@ struct arptab {
   int at_flags;
   char at_enaddr [6];
   struct in_addr at_iaddr;
+  int if_index;
 };
 #endif
 #endif /* _MIBGROUP_AT_H */

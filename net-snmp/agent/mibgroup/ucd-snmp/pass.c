@@ -63,7 +63,7 @@ snmp_oid_min_compare(const oid *in_name1,
 		 const oid *in_name2, 
 		 size_t len2)
 {
-    register int len, res;
+    register int len;
     register const oid * name1 = in_name1;
     register const oid * name2 = in_name2;
 
@@ -74,10 +74,12 @@ snmp_oid_min_compare(const oid *in_name1,
 	len = len2;
     /* find first non-matching OID */
     while(len-- > 0){
-	res = *(name1++) - *(name2++);
-	if (res < 0)
+        /* these must be done in seperate comparisons, since
+           subtracting them and using that result has problems with
+           subids > 2^31. */
+	if (*(name1) < *(name2))
 	    return -1;
-	if (res > 0)
+	if (*(name1++) > *(name2++))
 	    return 1;
     }
     /* both OIDs equal up to length of shorter OID */

@@ -678,7 +678,7 @@ static void trapOptProc(int argc, char *const *argv, int opt)
 
 void
 snmpd_parse_config_trapsess(const char *word, char *cptr) {
-    char args[MAX_ARGS][SPRINT_MAX_LEN], *argv[MAX_ARGS];
+    char *argv[MAX_ARGS];
     int argn, arg;
     struct snmp_session session, *ss;
 
@@ -686,12 +686,13 @@ snmpd_parse_config_trapsess(const char *word, char *cptr) {
     traptype = SNMP_MSG_TRAP2;
 
     /* create the argv[] like array */
-    strcpy(argv[0] = args[0], "snmpd-trapsess"); /* bogus entry for getopt() */
-    for(argn = 1; cptr && argn < MAX_ARGS;
-        cptr = copy_nword(cptr, argv[argn] = args[argn++], SPRINT_MAX_LEN)) {
+    argv[0] = strdup("snmpd-trapsess"); /* bogus entry for getopt() */
+    for(argn = 1; cptr && argn < MAX_ARGS; argn++) {
+	argv[argn] = strdup(cptr); /* more than enough room */
     }
 
     arg = snmp_parse_args(argn, argv, &session, "C:", trapOptProc);
+    do { free(argv[--argn]); } while (argn > 0);
 
     ss = snmp_open (&session);
 

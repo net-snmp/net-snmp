@@ -74,7 +74,7 @@ proxy_parse_config(const char *token, char *line) {
         return;
     }
 
-    newp = (simple_proxy *) calloc(1, sizeof(struct simple_proxy));
+    newp = (struct simple_proxy *) calloc(1, sizeof(struct simple_proxy));
 
     newp->sess = ss;
     DEBUGMSGTL(("proxy_init","name = %s\n",args[arg]));

@@ -1484,7 +1484,7 @@ snmp_sess_close(void *sessp)
     struct session_list *slp = (struct session_list *)sessp;
     snmp_transport *transport;
     struct snmp_internal_session *isp;
-    struct snmp_session *sesp;
+    struct snmp_session *sesp = NULL;
     struct snmp_secmod_def *sptr;
 
     if (slp == NULL) {
@@ -1493,7 +1493,7 @@ snmp_sess_close(void *sessp)
 
     if ((sptr = find_sec_mod(slp->session->securityModel)) != NULL &&
         sptr->session_close != NULL) {
-        (*sptr->session_close)(sesp);
+        (*sptr->session_close)(slp->session);
     }
 
     isp = slp->internal; slp->internal = 0;
@@ -2881,6 +2881,7 @@ snmpv3_parse(
   u_char	 tmp_buf[SNMP_MAX_MSG_SIZE];
   size_t	 tmp_buf_len;
   u_char	 pdu_buf[SNMP_MAX_MSG_SIZE];
+  u_char         *mallocbuf = NULL;
   size_t	 pdu_buf_len = SNMP_MAX_MSG_SIZE;
   u_char	*sec_params;
   u_char	*msg_data;
@@ -3023,8 +3024,16 @@ snmpv3_parse(
   {
       return SNMPERR_MALLOC;
   }
-  memset(pdu_buf, 0, pdu_buf_len);
-  cp = pdu_buf;
+
+  if (pdu_buf_len < msg_len && pdu->securityLevel == SNMP_SEC_LEVEL_AUTHPRIV) {
+      /* space needed is larger than we have in the default buffer */
+      mallocbuf = (u_char *) calloc(1, msg_len);
+      pdu_buf_len = msg_len;
+      cp = mallocbuf;
+  } else {
+      memset(pdu_buf, 0, pdu_buf_len);
+      cp = pdu_buf;
+  }
 
   DEBUGDUMPSECTION("recv", "SM msgSecurityParameters");
   if (sptr->decode) {
@@ -3067,6 +3076,8 @@ snmpv3_parse(
         DEBUGINDENTADD(-8);
     } else
         DEBUGINDENTADD(-4);
+    if (mallocbuf)
+        free(mallocbuf);
     return ret_val;
   }
   
@@ -3077,6 +3088,8 @@ snmpv3_parse(
   if (data == NULL) {
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     DEBUGINDENTADD(-4);
+    if (mallocbuf)
+        free(mallocbuf);
     return SNMPERR_ASN_PARSE_ERR;
   }
 
@@ -3097,9 +3110,13 @@ snmpv3_parse(
   if (ret != SNMPERR_SUCCESS) {
     ERROR_MSG("error parsing PDU");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+    if (mallocbuf)
+        free(mallocbuf);
     return SNMPERR_ASN_PARSE_ERR;
   }
 
+  if (mallocbuf)
+      free(mallocbuf);
   return SNMPERR_SUCCESS;
 }  /* end snmpv3_parse() */
 
