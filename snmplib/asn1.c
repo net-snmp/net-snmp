@@ -392,7 +392,7 @@ asn_parse_header(data, datalength, type)
     u_char	*type;	/* OUT - ASN type of object */
 {
     register u_char *bufp = data;
-    register	    header_len;
+    register int    header_len;
     u_long	    asn_length;
 
     /* this only works on data types < 30, i.e. no extension octets */

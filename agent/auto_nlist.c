@@ -24,7 +24,7 @@
 struct autonlist *nlists = 0;
 static void init_nlist __P((struct nlist *));
 
-unsigned long
+long
 auto_nlist_value(string)
   char *string;
 {
@@ -79,15 +79,15 @@ auto_nlist(string, var, size)
   char *var;
   int size;
 {
-  unsigned long result;
+  long result;
   int ret;
 
   result = auto_nlist_value(string);
-  if (result!= -1) {
-    if (var != 0) {
-      ret =  klookup(result, var, size);
+  if (result != -1) {
+    if (var != NULL) {
+      ret = klookup(result, var, size);
       if (!ret)
-        DEBUGP("auto_nlist failed on %s at location %x\n",
+        fprintf(stderr, "auto_nlist failed on %s at location %lx\n",
                string, result);
       return ret;
     } else

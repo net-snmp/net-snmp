@@ -39,8 +39,12 @@
 #if HAVE_SYS_DISKIO_H	/* HP-UX only ? */
 #include <sys/diskio.h>
 #endif
-#ifdef HAVE_LINUX_HDREG_H
+#if HAVE_LINUX_HDREG_H
 #include <linux/hdreg.h>
+#endif
+#if HAVE_SYS_DISKLABEL_H
+#define DKTYPENAMES
+#include <sys/disklabel.h>
 #endif
 
 #define HRD_MONOTONICALLY_INCREASING
@@ -72,7 +76,7 @@ static long HRD_savedCapacity = 1044;
 static int  HRD_savedFlags;
      time_t HRD_history[HRDEV_TYPE_MASK];
 
-#ifdef HAVE_SYS_DISKIO_H
+#ifdef DIOC_DESCRIBE
 static disk_describe_type HRD_info;
 static capacity_type      HRD_cap;
 
@@ -80,7 +84,7 @@ static int  HRD_savedIntf_type;
 static int  HRD_savedDev_type;
 #endif
 
-#ifdef HAVE_SYS_DKIO_H
+#ifdef DKIOCINFO
 static struct dk_cinfo    HRD_info;
 static struct dk_geom     HRD_cap;
 
@@ -89,6 +93,10 @@ static int  HRD_savedCtrl_type;
 
 #ifdef HAVE_LINUX_HDREG_H
 static struct hd_driveid HRD_info;
+#endif
+
+#ifdef DIOCGDINFO
+static struct disklabel HRD_info;
 #endif
 
 	/*********************
@@ -102,9 +110,9 @@ void	init_hr_disk( )
 {
     int i;
 
-    init_device[ HRDEV_DISK ] = &Init_HR_Disk;	
-    next_device[ HRDEV_DISK ] = &Get_Next_HR_Disk;
-    save_device[ HRDEV_DISK ] = &Save_HR_Disk_General;	
+    init_device[ HRDEV_DISK ] = Init_HR_Disk;	
+    next_device[ HRDEV_DISK ] = Get_Next_HR_Disk;
+    save_device[ HRDEV_DISK ] = Save_HR_Disk_General;	
 #ifdef HRD_MONOTONICALLY_INCREASING
     dev_idx_inc[ HRDEV_DISK ] = 1;
 #endif
@@ -124,8 +132,12 @@ void	init_hr_disk( )
 #ifdef solaris
     Add_HR_Disk_entry ( "/dev/rdsk/c0t%cd0s%c", '0', '6', '0', '0', '7' );
 #endif
+#ifdef freebsd2
+    Add_HR_Disk_entry ("/dev/wd%c%c", '0', '3', '\0', 'a', 'h');
+    Add_HR_Disk_entry ("/dev/wd0s%c%c", '1', '4', '\0', 'a', 'h');
+#endif
 
-    device_descr[ HRDEV_DISK ] = &describe_disk;	
+    device_descr[ HRDEV_DISK ] = describe_disk;	
     HRD_savedModel[0] = '\0';
     HRD_savedCapacity = 0;
 
@@ -366,13 +378,13 @@ Get_Next_HR_Disk __P((void))
 void
 Save_HR_Disk_Specific __P((void))
 {
-#ifdef HAVE_SYS_DISKIO_H
+#ifdef DIOC_DESCRIBE
 	    HRD_savedIntf_type = HRD_info.intf_type; 
 	    HRD_savedDev_type  = HRD_info.dev_type;
 	    HRD_savedFlags     = HRD_info.flags;
 	    HRD_savedCapacity  = HRD_cap.lba;
 #endif
-#ifdef HAVE_SYS_DKIO_H
+#ifdef DKIOCINFO
 	    HRD_savedCtrl_type = HRD_info.dki_ctype;
 	    HRD_savedFlags     = HRD_info.dki_flags;
 	    HRD_savedCapacity  = HRD_cap.dkg_ncyl*
@@ -383,19 +395,25 @@ Save_HR_Disk_Specific __P((void))
 	    HRD_savedCapacity  = HRD_info.lba_capacity / 2 ;
 	    HRD_savedFlags     = HRD_info.config;
 #endif
+#ifdef DIOCGDINFO
+	    HRD_savedCapacity  = HRD_info.d_secperunit;
+#endif
 }
 
 void
 Save_HR_Disk_General __P((void))
 {
-#ifdef HAVE_SYS_DISKIO_H
+#ifdef DIOC_DESCRIBE
     strcpy( HRD_savedModel,  HRD_info.model_num );   
 #endif
-#ifdef HAVE_SYS_DKIO_H
+#ifdef DKIOCINFO
     strcpy( HRD_savedModel,  HRD_info.dki_dname );   
 #endif
 #ifdef HAVE_LINUX_HDREG_H
     strcpy( HRD_savedModel,  HRD_info.model );   
+#endif
+#ifdef DIOCGDINFO
+    strcpy( HRD_savedModel,  dktypenames[HRD_info.d_type]);
 #endif
 }
 
@@ -416,13 +434,13 @@ Query_Disk( fd )
 {
     int result = -1;
 
-#ifdef HAVE_SYS_DISKIO_H
+#ifdef DIOC_DESCRIBE
     result = ioctl( fd, DIOC_DESCRIBE, &HRD_info );
     if ( result != -1 )
 	result = ioctl( fd, DIOC_CAPACITY, &HRD_cap );
 #endif
 
-#ifdef HAVE_SYS_DKIO_H
+#ifdef DKIOCINFO
     result = ioctl( fd, DKIOCINFO, &HRD_info );
     if ( result != -1 )
 	result = ioctl( fd, DKIOCGGEOM, &HRD_cap );
@@ -433,6 +451,10 @@ Query_Disk( fd )
 	result = ioctl( fd, HDIO_GET_IDENTITY, &HRD_info );
 #endif
 
+#ifdef DIOCGDINFO
+    result = ioctl(fd, DIOCGDINFO, &HRD_info);
+#endif
+
     return( result );
 }
 
@@ -440,13 +462,13 @@ Query_Disk( fd )
 int
 Is_It_Writeable()
 {
-#ifdef HAVE_SYS_DISKIO_H
+#ifdef DIOC_DESCRIBE
     if (( HRD_savedFlags & WRITE_PROTECT_FLAG ) ||
 	( HRD_savedDev_type == CDROM_DEV_TYPE ))
 	return(2);	/* read only */
 #endif
 
-#ifdef HAVE_SYS_DKIO_H
+#ifdef DKIOCINFO
     if ( HRD_savedCtrl_type == DKC_CDROM )
 	return(2);	/* read only */
 #endif
@@ -457,7 +479,7 @@ Is_It_Writeable()
 int
 What_Type_Disk()
 {
-#ifdef HAVE_SYS_DISKIO_H
+#ifdef DIOC_DESCRIBE
     switch ( HRD_savedDev_type ) {
 	case DISK_DEV_TYPE:
 		if ( HRD_savedIntf_type == PC_FDC_INTF )
@@ -480,7 +502,7 @@ What_Type_Disk()
     }
 #endif
 
-#ifdef HAVE_SYS_DKIO_H
+#ifdef DKIOCINFO
     switch ( HRD_savedCtrl_type ) {
 	case DKC_WDC2880:
 	case DKC_DSD5215:
@@ -520,7 +542,7 @@ What_Type_Disk()
 int
 Is_It_Removeable()
 {
-#ifdef HAVE_SYS_DISKIO_H
+#ifdef DIOC_DESCRIBE
     if (( HRD_savedIntf_type == PC_FDC_INTF   ) ||
 	( HRD_savedDev_type  == WORM_DEV_TYPE ) ||
 	( HRD_savedDev_type  == MO_DEV_TYPE   ) ||
@@ -528,7 +550,7 @@ Is_It_Removeable()
 	    return(1);		/* true */
 #endif
 
-#ifdef HAVE_SYS_DKIO_H
+#ifdef DKIOCINFO
     if (( HRD_savedCtrl_type == DKC_CDROM      ) ||
 	( HRD_savedCtrl_type == DKC_NCRFLOPPY  ) ||
 	( HRD_savedCtrl_type == DKC_SMSFLOPPY  ) ||

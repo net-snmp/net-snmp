@@ -102,7 +102,7 @@ typedef long    fd_mask;
 #include "context.h"
 #include "acl.h"
 #include "mib.h"
-#if USING_MIBII_SNMP_MODULE
+#if USING_MIBII_SNMP_MIB_MODULE
 #include "mibgroup/snmp_mib.h"
 #endif
 #include "snmp_client.h"
@@ -527,7 +527,7 @@ send_v1_trap (ss, trap, specific)
     if (snmp_send (ss, pdu) == 0) {
         snmp_perror ("snmpd: send_trap");
     }
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
     snmp_outtraps++;
 #endif
 }
@@ -960,7 +960,7 @@ snmp_read_packet(sd)
 	}
 #endif
 
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
     snmp_inpkts++;
 #endif
     if (snmp_dump_packet){
@@ -1001,7 +1001,7 @@ snmp_read_packet(sd)
 	    printf("\n");
             fflush(stdout);
 	}
-#ifdef USING_MIBII_SNMP_MODULE       
+#ifdef USING_MIBII_SNMP_MIB_MODULE       
 	snmp_outpkts++;
 #endif
 	if (sendto(sd, (char *)outpacket, out_length, 0,

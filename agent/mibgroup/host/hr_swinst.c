@@ -100,6 +100,9 @@ void	init_hr_swinst( )
 	HRSW_directory = "/var/adm/sw/products";
 			/* Description from HRSW_dir/.../pfiles/INDEX: title */
 #endif
+#ifdef freebsd2
+	HRSW_directory = "/var/db/pkg";
+#endif
 
 #ifdef HAVE_LIBRPM
 	rpmReadConfigFiles( NULL, NULL, NULL, 0);
@@ -402,7 +405,7 @@ Save_HR_SW_info __P((void))
 void
 End_HR_SWInst __P((void))
 {
-   if ( dp != NULL );
+   if ( dp != NULL )
 	closedir( dp );
    dp = NULL;
 }

@@ -343,7 +343,6 @@ static int read_module_internal __P((char *));
 static void read_module_replacements __P((char *));
 static void read_import_replacements __P((char *, char *));
 
-static char *module_name __P((int));
 static void  new_module  __P((char *, char *));
 
 
@@ -2049,7 +2048,7 @@ which_module(name)
     return(-1);
 }
 
-static char *
+char *
 module_name ( modid )
     int modid;
 {

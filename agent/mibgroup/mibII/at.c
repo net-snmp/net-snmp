@@ -121,9 +121,9 @@ var_atEntry(vp, name, length, exact, var_len, write_method)
     static char		    PhysAddr[6], LowPhysAddr[6];
     u_long		    Addr, LowAddr;
 #ifdef ARP_SCAN_FOUR_ARGUMENTS
-    u_short		    ifIndex, lowIfIndex;
+    u_short		    ifIndex, lowIfIndex = 0;
 #endif/* ARP_SCAN_FOUR_ARGUMENTS */
-    u_long		    ifType, lowIfType=0;
+    u_long		    ifType, lowIfType = 0;
 
     int                     oid_length;
 

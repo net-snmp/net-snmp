@@ -137,6 +137,7 @@ main(argc, argv)
 
   /* get the common command line arguments */
   arg = snmp_parse_args(argc, argv, &session)-1;
+  snmp_set_suffix_only(0);
   
   while ((argt = getopt(argc-arg, argv+arg, "w:f:hHbx")) != EOF) {
     switch (argt) {
