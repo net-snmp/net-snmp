@@ -11,6 +11,33 @@
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/oid_stash.h>
 
+/*
+ * xxx-rks: when you have some spare time:
+ *
+ * a) add get-next access
+ * 
+ * b) basically, everything currently creates one node per sub-oid,
+ *    which is less than optimal. add code to create nodes with the
+ *    longest possible OID per node, and split nodes when necessary
+ *    during adds.
+ *
+ * c) If you are feeling really ambitious, also merge split nodes if
+ *    possible on a delete.
+ *
+ */
+
+/***************************************************************************
+ *
+ *
+ ***************************************************************************/
+
+/*
+ * Create an netsnmp_oid_stash node
+ *
+ * @param mysize  the size of the child pointer array
+ *
+ * @return NULL on error, otherwise the newly allocated node
+ */
 netsnmp_oid_stash_node *
 netsnmp_oid_stash_create_sized_node(size_t mysize)
 {
@@ -49,15 +76,17 @@ netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
     if (!root || !lookup || lookup_len == 0)
         return SNMPERR_GENERR;
 
-    if (!*root)
+    if (!*root) {
         *root = netsnmp_oid_stash_create_node();
-    if (!*root)
-        return SNMPERR_MALLOC;
+        if (!*root)
+            return SNMPERR_MALLOC;
+    }
+    tmpp = NULL;
     for (curnode = *root, i = 0; i < lookup_len; i++) {
         tmpp = curnode->children[lookup[i] % curnode->children_size];
         if (!tmpp) {
             /*
-             * node child in array at all 
+             * no child in array at all 
              */
             tmpp = curnode->children[lookup[i] % curnode->children_size] =
                 netsnmp_oid_stash_create_node();
@@ -92,6 +121,8 @@ netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
      */
     if (curnode->thedata)
         return SNMPERR_GENERR;
+    if (NULL == tmpp)
+        return SNMPERR_GENERR;
     tmpp->thedata = mydata;
     return SNMPERR_SUCCESS;
 }
@@ -107,6 +138,7 @@ netsnmp_oid_stash_get_node(netsnmp_oid_stash_node *root,
 
     if (!root)
         return NULL;
+    tmpp = NULL;
     for (curnode = root, i = 0; i < lookup_len; i++) {
         tmpp = curnode->children[lookup[i] % curnode->children_size];
         if (!tmpp) {
