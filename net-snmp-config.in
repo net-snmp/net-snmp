@@ -12,6 +12,12 @@ else
   exec_prefix=@exec_prefix@
   prefix=@exec_prefix@
   case $1 in
+    --debug-tokens)
+      echo "find NET-SNMP-SOURCE-DIR -name \"*.c\" -print | xargs grep DEBUGMSGT | grep \\\" | cut -f 2 -d\\\" | sort -u"
+      ;;
+    --indent-options)
+      echo "indent -orig -nbc -bap -nut -nfca `(cd NET-SNMP-INCLUDE-DIR; perl -n -e 'print "-T $1 " if (/}\s*(netsnmp_\w+)\s*;/);' */*.h)`"
+      ;;
     --configure-options)
       echo @CONFIGURE_OPTIONS@
       ;;
@@ -283,6 +289,9 @@ if test "x$usage" = "xyes"; then
   echo "                  ... [see below for complete flag list]"
   echo ""
   echo "    --version         displays the net-snmp version number"
+  echo "    --indent-options  displays the indent options from the Coding Style"
+  echo "    --debug-tokens    displays a example command line to search to source"
+  echo "                      code for a list of available debug tokens"
   echo ""
   echo "  SNMP Setup commands:"
   echo ""
