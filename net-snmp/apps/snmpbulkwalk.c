@@ -127,6 +127,7 @@ int main(int argc, char  *argv[])
     /* open an SNMP session */
     ss = snmp_open(&session);
     if (ss == NULL){
+      /* diagnose snmp_open errors with the input struct snmp_session pointer */
       snmp_sess_perror("snmpbulkwalk", &session);
       SOCK_CLEANUP;
       exit(1);

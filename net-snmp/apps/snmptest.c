@@ -1,6 +1,8 @@
 /*
  * snmptest.c - send snmp requests to a network entity.
  *
+ * Usage: snmptest -v 1 [-q] hostname community [objectID]
+ *
  */
 /***********************************************************************
 	Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University
@@ -101,15 +103,15 @@ int main(int argc, char *argv[])
     char	input[128];
     int varcount, nonRepeaters = -1, maxRepetitions;
 
-    /* Usage: snmptest -v 1 [-q] hostname community [objectID]
-     */
-
+    /* get the common command line arguments */
     snmp_parse_args(argc, argv, &session);
 
     SOCK_STARTUP;
 
+    /* open an SNMP session */
     ss = snmp_open(&session);
     if (ss == NULL){
+      /* diagnose snmp_open errors with the input struct snmp_session pointer */
         snmp_sess_perror("snmptest", &session);
         SOCK_CLEANUP;
 	exit(1);

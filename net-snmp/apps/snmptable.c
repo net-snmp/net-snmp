@@ -99,10 +99,9 @@ static size_t name_length;
 static oid root[MAX_OID_LEN];
 static size_t rootlen;
 static int localdebug;
-static struct snmp_session session;
 
 void get_field_names (void);
-void get_table_entries (void);
+void get_table_entries( struct snmp_session *ss );
 void print_table (void);
 
 void usage(void)
@@ -123,6 +122,7 @@ void usage(void)
 
 int main(int argc, char *argv[])
 {
+  struct snmp_session session, *ss;
   int   arg;
 #ifdef _DEBUG_MALLOC_INC
   unsigned long histid1, histid2, orig_size, current_size;
@@ -187,7 +187,20 @@ int main(int argc, char *argv[])
 
   get_field_names();
 
-  if (headers_only == 0) get_table_entries();
+  /* open an SNMP session */
+  SOCK_STARTUP;
+  ss = snmp_open(&session);
+  if (ss == NULL){
+    /* diagnose snmp_open errors with the input struct snmp_session pointer */
+    snmp_sess_perror("snmptable", &session);
+    SOCK_CLEANUP;
+    exit(1);
+  }
+
+  if (headers_only == 0) get_table_entries(ss);
+
+  snmp_close(ss);
+  SOCK_CLEANUP;
 
   print_table();
 
@@ -300,10 +313,9 @@ void get_field_names(void)
   }
 }
 
-void get_table_entries(void)
+void get_table_entries( struct snmp_session *ss )
 {
   int running = 1;
-  struct snmp_session *ss;
   struct snmp_pdu *pdu, *response;
   struct variable_list *vars;
   int   count;
@@ -313,16 +325,6 @@ void get_table_entries(void)
   char  string_buf[SPRINT_MAX_LEN];
   char  *name_p = NULL;
   char  **dp;
-
-  SOCK_STARTUP;
-
-  /* open an SNMP session */
-  ss = snmp_open(&session);
-  if (ss == NULL){
-    snmp_sess_perror("snmptable", &session);
-    SOCK_CLEANUP;
-    exit(1);
-  }
 
   while (running) {
     /* create PDU for GETNEXT request and add object name to request */
@@ -419,7 +421,7 @@ void get_table_entries(void)
 	}
       }
     } else if (status == STAT_TIMEOUT){
-      fprintf(stderr, "Timeout: No Response from %s\n", session.peername);
+      fprintf(stderr, "Timeout: No Response from %s\n", ss->peername);
       running = 0;
     } else {    /* status == STAT_ERROR */
       snmp_sess_perror("snmptable", ss);
@@ -428,7 +430,4 @@ void get_table_entries(void)
     if (response)
       snmp_free_pdu(response);
   }
-  snmp_close(ss);
-
-  SOCK_CLEANUP;
 }
