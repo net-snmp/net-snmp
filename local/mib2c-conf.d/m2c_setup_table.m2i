@@ -17,11 +17,13 @@
 @    eval $m2c_table_settable = table_is_writable($table)@
 @    eval $m2c_table_dependencies = $m2c_table_settable@
 @    eval $m2c_table_row_creation = table_has_create($table)@
-@    eval $m2c_context_reg = ""@
+@    eval $m2c_context_reg = "netsnmp_data_list *"@
 @    eval $m2c_data_context = "generated"@ [generated|NAME]
 @    eval $m2c_data_allocate = 0@
 @    eval $m2c_data_init = 0@
 @    eval $m2c_table_access = "unsorted-external"@
+@    eval $m2c_data_transient = 2@ # TRANSIENT
+@    eval $m2c_include_examples = 1@
 ##
 ##   allow for user override
 ##
