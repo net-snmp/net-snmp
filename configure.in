@@ -482,6 +482,7 @@ while test "x$tmpset" != "x$SNMPCONFPATH"; do
   eval tmpset="$tmpset"
 done
 AC_DEFINE_UNQUOTED(SNMPCONFPATH,"$SNMPCONFPATH")
+AC_SUBST(SNMPCONFPATH)
 
 dnl guess IPv6 stack type.
 if test "x$enable_ipv6" = "xyes"; then
