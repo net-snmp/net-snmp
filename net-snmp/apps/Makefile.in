@@ -96,6 +96,10 @@ nosysdepend:
 	makedepend $(CPPFLAGS) *.c
 	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^[\w]+\.o:\s*$$/);} else {print;}' Makefile
 
+makefileindepend: nosysdepend
+	cd snmpnetstat; $(MAKE) makefileindepend; cd ..
+	perl -e ' rename("Makefile.in","Makefile.in.bak"); open(F,"Makefile.in.bak"); open(G,"Makefile"); open(O,">Makefile.in"); $$_ = <F>; while(!/^# DO NOT DELETE THIS LINE/) { print O $$_; $$_ = <F>; } print O $$_; $$_ = <G>; while(!/^# DO NOT DELETE THIS LINE/) { $$_ = <G>; } while (<G>) {print O $$_;} '
+
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 snmpbulkwalk.o: ../config.h ../mib_module_config.h ../agent/mibgroup/struct.h
