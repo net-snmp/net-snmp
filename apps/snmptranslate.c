@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
     }
     
     init_snmp("snmpapp");
-    if (print == 1) print_mib (stdout);
+    if (print == 1) print_mib_tree (stdout, get_tree_head());
     if (print == 2) print_ascii_dump (stdout);
     if (print == 3) print_oid_report (stdout);
     if (!current_name) exit (0);
@@ -308,6 +308,7 @@ int main(int argc, char *argv[])
 	    exit(2);
 	}
     }
+
     if (tosymbolic){
 	print_objid(name, name_length);
     } else {
