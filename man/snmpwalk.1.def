@@ -82,22 +82,22 @@ manual page.
 .SH EXAMPLE
 The command:
 .PP
-snmpwalk -Os -c public zeus system
+snmpwalk -Os -c public -v 1 zeus system
 .PP
 will retrieve all of the variables under system:
 .PP
-sysDescr.0 = "SunOS zeus.net.cmu.edu 4.1.3_U1 1 sun4m"
+sysDescr.0 = STRING: "SunOS zeus.net.cmu.edu 4.1.3_U1 1 sun4m"
 .br
 sysObjectID.0 = OID: enterprises.hp.nm.hpsystem.10.1.1
 .br
 sysUpTime.0 = Timeticks: (155274552) 17 days, 23:19:05
 .br
-sysContact.0 = ""
+sysContact.0 = STRING: ""
 .br
-sysName.0 = "zeus.net.cmu.edu"
+sysName.0 = STRING: "zeus.net.cmu.edu"
 .br
-sysLocation.0 = ""
+sysLocation.0 = STRING: ""
 .br
-sysServices.0 = 72
+sysServices.0 = INTEGER: 72
 .SH "SEE ALSO"
 snmpcmd(1), snmpbulkwalk(1), variables(5).
