@@ -1,4 +1,4 @@
-SNMP-EXTENSIBLE DEFINITIONS ::= BEGIN
+UCD-SNMP DEFINITIONS ::= BEGIN
 
 --
 --  Change as necessary
