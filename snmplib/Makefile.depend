@@ -94,7 +94,6 @@
 ./check_varbind.lo: ../include/net-snmp/mib_api.h
 ./check_varbind.lo: ../include/net-snmp/library/mib.h
 ./check_varbind.lo: ../include/net-snmp/library/parse.h
-./check_varbind.lo: ../include/net-snmp/library/oid_array.h
 ./check_varbind.lo: ../include/net-snmp/varbind_api.h
 ./check_varbind.lo: ../include/net-snmp/config_api.h
 ./check_varbind.lo: ../include/net-snmp/library/read_config.h
@@ -299,19 +298,6 @@
 ./mt_support.lo: ../include/net-snmp/system/generic.h
 ./mt_support.lo: ../include/net-snmp/machine/generic.h 
 ./mt_support.lo: ../include/net-snmp/library/mt_support.h
-./oid_array.lo: ../include/net-snmp/net-snmp-config.h
-./oid_array.lo: ../include/net-snmp/system/linux.h
-./oid_array.lo: ../include/net-snmp/system/sysv.h
-./oid_array.lo: ../include/net-snmp/system/generic.h
-./oid_array.lo: ../include/net-snmp/machine/generic.h 
-./oid_array.lo: ../include/net-snmp/types.h 
-./oid_array.lo: ../include/net-snmp/definitions.h
-./oid_array.lo: ../include/net-snmp/library/snmp_api.h
-./oid_array.lo: ../include/net-snmp/library/asn1.h
-./oid_array.lo: ../include/net-snmp/library/snmp_impl.h
-./oid_array.lo: ../include/net-snmp/library/snmp.h
-./oid_array.lo: ../include/net-snmp/library/snmp-tc.h
-./oid_array.lo: ../include/net-snmp/library/oid_array.h
 ./oid_stash.lo: ../include/net-snmp/net-snmp-config.h
 ./oid_stash.lo: ../include/net-snmp/system/linux.h
 ./oid_stash.lo: ../include/net-snmp/system/sysv.h
