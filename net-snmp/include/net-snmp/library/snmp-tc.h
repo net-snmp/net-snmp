@@ -9,6 +9,15 @@ extern          "C" {
      * related value information 
      */
 
+    int
+    netsnmp_dateandtime_set_buf_from_vars(u_char *buf, size_t *bufsize,
+                                          u_short y, u_char m, u_char d,
+                                          u_char h, u_char m, u_char s,
+                                          u_char deci_seconds,
+                                          int utc_offset_direction,
+                                          u_char utc_offset_hours,
+                                          u_char utc_offset_minutes);
+
     u_char         *date_n_time(time_t *, size_t *);
     time_t          ctime_to_timet(char *);
 
