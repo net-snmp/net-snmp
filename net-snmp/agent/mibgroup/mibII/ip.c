@@ -71,6 +71,9 @@
 #else
 #include "kernel.h"
 #endif
+#ifdef linux
+#include "kernel_linux.h"
+#endif
 
 #include "system.h"
 #include "auto_nlist.h"
@@ -85,6 +88,13 @@
 #include "interfaces.h"
 #include "sysORTable.h"
 
+#ifndef MIB_STATS_CACHE_TIMEOUT
+#define MIB_STATS_CACHE_TIMEOUT	5
+#endif
+#ifndef IP_STATS_CACHE_TIMEOUT
+#define IP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
+#endif
+marker_t ip_stats_cache_marker = NULL;
 
 	/*********************
 	 *
@@ -93,9 +103,6 @@
 	 *
 	 *********************/
 
-#ifdef linux
-int linux_read_ip_stat (struct ip_mib *);
-#endif
 
 	/*********************
 	 *
@@ -404,6 +411,7 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
 {
    long ret_value;
    int i;
+   static int ttl, forward;
 
 #if ((defined(HAVE_SYS_SYSCTL_H) && defined(CTL_NET)) ||	\
      (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS)))
@@ -411,31 +419,53 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
    size_t len;
 #endif
 
+    if (  ip_stats_cache_marker &&
+	(!atime_ready( ip_stats_cache_marker, IP_STATS_CACHE_TIMEOUT*1000 )))
+#if !(defined(linux) || defined(solaris))
+	return (( magic == IPFORWARDING ? forward :
+		( magic == IPDEFAULTTTL ? ttl     : 0 )));
+#else
+	return 0;
+#endif
+
+    if (ip_stats_cache_marker )
+	atime_setMarker( ip_stats_cache_marker );
+    else
+	ip_stats_cache_marker = atime_newMarker();
+
 
 #ifdef linux
-   return linux_read_ip_stat(ipstat);
-#else
-#ifdef solaris2
-    return getMibstat(MIB_IP, ipstat, sizeof(mib2_ip_t), GET_FIRST, &Get_everything, NULL);
-#else
+   ret_value = linux_read_ip_stat(ipstat);
+#endif
 
+#ifdef solaris2
+    ret_value = getMibstat(MIB_IP, ipstat, sizeof(mib2_ip_t), GET_FIRST, &Get_everything, NULL);
+#endif
+
+
+#if !(defined(linux) || defined(solaris))
     if ( magic == IPFORWARDING ) {
 
 #if defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS)
 	len = sizeof i;
 	sname[3] = IPCTL_FORWARDING;
 	if (sysctl(sname, 4, &i, &len, 0, 0) < 0)
-		return -1;
-	return (i ? 1	/* GATEWAY */
-		  : 2	/* HOST    */  );
+	    forward -1;
+	else
+	    forward = (i ? 1	/* GATEWAY */
+			 : 2	/* HOST    */  );
 #else
 	if (!auto_nlist(IP_FORWARDING_SYMBOL, (char *) &ret_value, sizeof(ret_value)))
-	    return -1;
+	    forward -1;
 	else
-	    return (ret_value ? 1	/* GATEWAY */
-			      : 2	/* HOST    */  );
+	    forward = (ret_value ? 1	/* GATEWAY */
+			         : 2	/* HOST    */  );
 #endif
-
+	if ( forward == -1 ) {
+	    free( ip_stats_cache_marker );
+	    ip_stats_cache_marker = NULL;
+	}
+	return forward;
     }
 
     if ( magic == IPDEFAULTTTL ) {
@@ -444,75 +474,41 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
 	len = sizeof i;
 	sname[3] = IPCTL_DEFTTL;
 	if (sysctl(sname, 4, &i, &len, 0, 0) < 0)
-		return -1;
-	return i;
+	    ttl = -1;
+	else
+	    ttl = i;
 #else
 	if (!auto_nlist(TCP_TTL_SYMBOL, (char *) &ret_value, sizeof(ret_value)))
-	    return -1;
+	    ttl = -1;
 	else
-	    return ret_value;
+	    ttl = ret_value;
 #endif
-
+	if ( ttl == -1 ) {
+	    free( ip_stats_cache_marker );
+	    ip_stats_cache_marker = NULL;
+	}
+	return ttl;
     }
 
+
 #ifdef HAVE_SYS_TCPIPSTATS_H
-    return sysmp (MP_SAGET, MPSA_TCPIPSTATS, ipstat, sizeof *ipstat);
+    ret_value = sysmp (MP_SAGET, MPSA_TCPIPSTATS, ipstat, sizeof *ipstat);
 #endif
+
 #if (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS))
     len = sizeof *ipstat;
     sname[3] = IPCTL_STATS;
-    return sysctl(sname, 4, ipstat, &len, 0, 0);
+    ret_value = sysctl(sname, 4, ipstat, &len, 0, 0);
 #endif
 #ifdef IPSTAT_SYMBOL
     if (auto_nlist(IPSTAT_SYMBOL, (char *)ipstat, sizeof (*ipstat)))
-	return 0;
+	ret_value = 0;
 #endif
+#endif /* !(defined(linux) || defined(solaris)) */
 
-    return -1;	
-
-#endif		/* solaris */
-#endif		/* linux */
-}
-
-
-
-#ifdef linux
-/*
- * lucky days. since 1.1.16 the ip statistics are avail by the proc
- * file-system.
- */
-
-int
-linux_read_ip_stat (struct ip_mib *ipstat)
-{
-  FILE *in = fopen ("/proc/net/snmp", "r");
-  char line [1024];
-
-  memset ((char *) ipstat,(0), sizeof (*ipstat));
-
-  if (! in)
-    return -1;
-
-  while (line == fgets (line, sizeof(line), in))
-    {
-      if (19 == sscanf (line,   
-"Ip: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
-     &ipstat->ipForwarding, &ipstat->ipDefaultTTL, &ipstat->ipInReceives, 
-     &ipstat->ipInHdrErrors, &ipstat->ipInAddrErrors, &ipstat->ipForwDatagrams, 
-     &ipstat->ipInUnknownProtos, &ipstat->ipInDiscards, &ipstat->ipInDelivers, 
-     &ipstat->ipOutRequests, &ipstat->ipOutDiscards, &ipstat->ipOutNoRoutes, 
-     &ipstat->ipReasmTimeout, &ipstat->ipReasmReqds, &ipstat->ipReasmOKs, 
-     &ipstat->ipReasmFails, &ipstat->ipFragOKs, &ipstat->ipFragFails, 
-     &ipstat->ipFragCreates))
-	break;
+    if ( ret_value == -1 ) {
+	free( ip_stats_cache_marker );
+	ip_stats_cache_marker = NULL;
     }
-  fclose (in);
-	/* Tweak values for ipForwarding
-	 * valid values are 1 == yup, 2 == nope:
-	 * a 0 is forbidden, so patch: */
-  if (! ipstat->ipForwarding)
-	ipstat->ipForwarding = 2;
-  return 0;
-} /* end of linux_read_ip_stat */
-#endif /* linux */
-
+    return ret_value;
+}

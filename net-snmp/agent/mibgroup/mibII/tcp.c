@@ -75,6 +75,9 @@
 #else
 #include "kernel.h"
 #endif
+#ifdef linux
+#include "kernel_linux.h"
+#endif
 
 #include "system.h"
 #if HAVE_SYS_SYSCTL_H
@@ -113,6 +116,7 @@
 #endif
 
 #include "auto_nlist.h"
+#include "tools.h"
 
 #ifdef hpux
 #include <sys/mib.h>
@@ -123,6 +127,14 @@
 #include "tcpTable.h"
 #include "sysORTable.h"
 
+#ifndef MIB_STATS_CACHE_TIMEOUT
+#define MIB_STATS_CACHE_TIMEOUT	5
+#endif
+#ifndef TCP_STATS_CACHE_TIMEOUT
+#define TCP_STATS_CACHE_TIMEOUT	MIB_STATS_CACHE_TIMEOUT
+#endif
+marker_t tcp_stats_cache_marker = NULL;
+
 	/*********************
 	 *
 	 *  Kernel & interface information,
@@ -130,9 +142,6 @@
 	 *
 	 *********************/
 
-#ifdef linux
-int linux_read_tcp_stat (struct tcp_mib *);
-#endif
 #ifdef freebsd4
 static unsigned int hz;
 #endif
@@ -353,82 +362,61 @@ var_tcp(struct variable *vp,
 long
 read_tcp_stat( TCP_STAT_STRUCTURE *tcpstat, int magic )
 {
-   long ret_value;
+   long ret_value = -1;
    int i;
 #if (defined(CAN_USE_SYSCTL) && defined(TCPCTL_STATS))
    static int sname[4] = { CTL_NET, PF_INET, IPPROTO_TCP, TCPCTL_STATS };
    size_t len = sizeof( *tcpstat );
 #endif
 #ifdef solaris2
-   mib2_ip_t ipstat;
+   static mib2_ip_t ipstat;
 #endif
 
+    if (  tcp_stats_cache_marker &&
+	(!atime_ready( tcp_stats_cache_marker, TCP_STATS_CACHE_TIMEOUT*1000 )))
+#ifdef solaris2
+	return ( magic == TCPINERRS ? ipstat.tcpInErrs : 0 );
+#else
+	return 0;
+#endif
+
+    if (tcp_stats_cache_marker )
+	atime_setMarker( tcp_stats_cache_marker );
+    else
+	tcp_stats_cache_marker = atime_newMarker();
 
 #ifdef linux
-   return linux_read_tcp_stat(tcpstat);
+    ret_value = linux_read_tcp_stat(tcpstat);
 #endif
 
 #ifdef solaris2
     if ( magic == TCPINERRS ) {
 	if (getMibstat(MIB_IP, &ipstat, sizeof(mib2_ip_t), GET_FIRST, &Get_everything, NULL) < 0 )
-	    return -1;
+	    ret_value = -1;
 	else
-	    return ipstat.tcpInErrs;
+	    ret_value = ipstat.tcpInErrs;
     }
     else
-	return getMibstat(MIB_TCP, tcpstat, sizeof(mib2_tcp_t), GET_FIRST, &Get_everything, NULL);
+	ret_value = getMibstat(MIB_TCP, tcpstat, sizeof(mib2_tcp_t),
+					GET_FIRST, &Get_everything, NULL);
 #endif
 
 #ifdef HAVE_SYS_TCPIPSTATS_H
-    return sysmp (MP_SAGET, MPSA_TCPIPSTATS, tcpstat, sizeof *tcpstat);
+    ret_value = sysmp (MP_SAGET, MPSA_TCPIPSTATS, tcpstat, sizeof *tcpstat);
 #endif
 
 #if defined(CAN_USE_SYSCTL) && defined(TCPCTL_STATS)
-    return sysctl(sname, 4, tcpstat, &len, 0, 0);
+    ret_value = sysctl(sname, 4, tcpstat, &len, 0, 0);
 #endif
 
 #ifdef TCPSTAT_SYMBOL
     if (auto_nlist(TCPSTAT_SYMBOL, (char *)tcpstat, sizeof (*tcpstat)))
-	return 0;
+	ret_value = 0;
 #endif
 
-    return -1;
-
-}
-
-#ifdef linux
-/*
- * lucky days. since 1.1.16 the tcp statistics are avail by the proc
- * file-system.
- */
-
-int
-linux_read_tcp_stat (struct tcp_mib *tcpstat)
-{
-  FILE *in = fopen ("/proc/net/snmp", "r");
-  char line [1024];
-
-  memset ((char *) tcpstat, (0), sizeof (*tcpstat));
-
-  if (! in)
-    return -1;
-
-  while (line == fgets (line, sizeof(line), in))
-    {
-      if (12 == sscanf (line, "Tcp: %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-	&tcpstat->tcpRtoAlgorithm, &tcpstat->tcpRtoMin, &tcpstat->tcpRtoMax, 
-	&tcpstat->tcpMaxConn, &tcpstat->tcpActiveOpens, &tcpstat->tcpPassiveOpens,
-	&tcpstat->tcpAttemptFails, &tcpstat->tcpEstabResets, &tcpstat->tcpCurrEstab, 
-	&tcpstat->tcpInSegs, &tcpstat->tcpOutSegs, &tcpstat->tcpRetransSegs))
-	break;
+    if ( ret_value == -1 ) {
+	free( tcp_stats_cache_marker );
+	tcp_stats_cache_marker = NULL;
     }
-  fclose (in);
-
-	/* 0 is illegal: assume `other' algorithm: */
-  if (! tcpstat->tcpRtoAlgorithm)
-	tcpstat->tcpRtoAlgorithm = 1;
-
-  return 0;
+    return ret_value;
 }
-
-#endif /* linux */

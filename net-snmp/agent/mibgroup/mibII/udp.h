@@ -5,18 +5,10 @@
 #ifndef _MIBGROUP_UDP_H
 #define _MIBGROUP_UDP_H
 
-#ifdef linux
-struct udp_mib
-{
- 	unsigned long	udpInDatagrams;
- 	unsigned long	udpNoPorts;
- 	unsigned long	udpInErrors;
- 	unsigned long	udpOutDatagrams;
-};
-#endif
 
-config_arch_require(solaris2, kernel_sunos5)
 config_require(mibII/udpTable util_funcs)
+config_arch_require(solaris2, kernel_sunos5)
+config_arch_require(linux, mibII/kernel_linux)
 
 extern void	init_udp (void);
 extern FindVarMethod var_udp;
