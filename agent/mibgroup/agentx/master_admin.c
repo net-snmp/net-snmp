@@ -27,6 +27,7 @@
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp.h"
+#include "system.h"
 
 #include "agentx/protocol.h"
 #include "agentx/client.h"
@@ -168,6 +169,7 @@ unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 	case MIB_UNREGISTRATION_FAILED:
 	default:
 				return AGENTX_ERR_REQUEST_DENIED;
+    }
 }
 
 int
