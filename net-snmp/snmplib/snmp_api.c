@@ -231,11 +231,14 @@ snmp_open(session)
     u_long addr;
     struct sockaddr_in	me;
     struct hostent *hp;
-    struct servent *servp;
+    static struct servent *servp = NULL;
 
 
     if (Reqid == 0)
 	init_snmp();
+
+    if (! servp)
+      servp = getservbyname("snmp", "udp");
 
     /* Copy session structure and link into list */
     slp = (struct session_list *)malloc(sizeof(struct session_list));
@@ -380,7 +383,6 @@ snmp_open(session)
 	}
 	isp->addr.sin_family = AF_INET;
 	if (session->remote_port == SNMP_DEFAULT_REMPORT){
-	    servp = getservbyname("snmp", "udp");
 	    if (servp != NULL){
 		isp->addr.sin_port = servp->s_port;
 	    } else {
