@@ -69,6 +69,7 @@
 #include "snmp_impl.h"
 
 #include "read_config.h"
+#include "tools.h"
 
 int config_errors;
 
@@ -595,7 +596,8 @@ char *copy_word(char *from, char *to)
       else  *to++ = *from++;
     }
     if (*from == 0) {
-      DEBUGMSGTL(("read_config","copy_word: no end quote found in config string\n"));
+      DEBUGMSGTL(("read_config_copy_word",
+                  "no end quote found in config string\n"));
     } else from++;
   }
   else {
@@ -617,38 +619,88 @@ char *copy_word(char *from, char *to)
 char *read_config_save_octet_string(char *saveto, u_char *str, int len) {
   int i;
   if (str != NULL) {
-    sprintf(saveto, "%d ", len);
-    saveto += strlen(saveto);
+    sprintf(saveto, "0x");
+    saveto += 2;
     for(i = 0; i < len; i++) {
       sprintf(saveto,"%02x", str[i]);
       saveto = saveto + 2;
     }
     return saveto;
   } else {
-    sprintf(saveto, "0 ");
-    return saveto+strlen(saveto);
+    sprintf(saveto,"\"\"");
+    saveto += 2;
   }
+  return saveto;
 }
 
 /* read_config_read_octet_string(): reads an octet string that was
    saved by the read_config_save_octet_string() function */
 char *read_config_read_octet_string(char *readfrom, u_char **str, int *len) {
-  u_char *cptr=NULL;
+  char *cptr=NULL;
   u_int tmp;
   int i;
-  
-  *len = atoi(readfrom);
-  if (*len > 0 && (str == NULL ||
-      (cptr = (u_char *)malloc(*len * sizeof(u_char))) == NULL))
+
+  if (readfrom == NULL || str == NULL)
     return NULL;
-  *str = cptr;
-  readfrom = skip_token(readfrom);
-  for(i = 0; i < *len; i++) {
-    sscanf(readfrom,"%2x",&tmp);
-    *cptr++ = (u_char) tmp;
+  
+  if (strncasecmp(readfrom,"0x",2) == 0) {
+    /* A hex string submitted. How long? */
     readfrom += 2;
+    cptr = skip_not_white(readfrom);
+    if (cptr)
+      *len = (cptr - readfrom);
+    else
+      *len = strlen(readfrom);
+
+    if (*len % 2) {
+      DEBUGMSGTL(("read_config_read_octet_string","invalid hex string: wrong length"));
+      return NULL;
+    }
+    *len = *len / 2;
+
+    /* malloc data space if needed */
+    if (*str == NULL) {
+      if (*len == 0) {
+        /* null length string found */
+        cptr = NULL;
+
+      } else if (*len > 0 && (str == NULL || (cptr = (u_char *)malloc(*len * sizeof(u_char))) == NULL)) {
+        return NULL;
+      }
+      *str = cptr;
+    } else {
+      cptr = *str;
+    }
+
+    /* copy data */
+    for(i = 0; i < *len; i++) {
+      sscanf(readfrom,"%2x",&tmp);
+      *cptr++ = (u_char) tmp;
+      readfrom += 2;
+    }
+    readfrom = skip_white(readfrom);
+  } else {
+    /* Normal string */
+
+    /* malloc data space if needed */
+    if (*str == NULL) {
+      char buf[SNMP_MAXBUF];
+      readfrom = copy_word(readfrom, buf);
+
+      *len = strlen(buf);
+      /* malloc an extra space to add a null */
+      if (*len > 0 && (str == NULL ||
+                       (cptr = (u_char *) malloc((1 + *len) * sizeof(u_char)))
+                       == NULL))
+        return NULL;
+      *str = cptr;
+      if (cptr)
+        memcpy(cptr, buf, (*len+1));
+    } else {
+      readfrom = copy_word(readfrom, *str);
+    }
   }
-  readfrom = skip_white(readfrom);
+
   return readfrom;
 }
 
@@ -657,10 +709,13 @@ char *read_config_read_octet_string(char *readfrom, u_char **str, int *len) {
 char *read_config_save_objid(char *saveto, oid *objid, int len) {
   int i;
   
+  if (len == 0) {
+    strcat(saveto, "NULL");
+    saveto += strlen(saveto);
+    return saveto;
+  }
+
   /* in case len=0, this makes it easier to read it back in */
-  sprintf(saveto, "%d ", len);
-  saveto += strlen(saveto);
-  
   for(i=0; i < len; i++) {
     sprintf(saveto,".%ld", objid[i]);
     saveto += strlen(saveto);
@@ -670,23 +725,89 @@ char *read_config_save_objid(char *saveto, oid *objid, int len) {
 
 /* read_config_read_objid(): reads an objid from a format saved by the above */
 char *read_config_read_objid(char *readfrom, oid **objid, int *len) {
-  u_int tmp;  /* oids are 'char's on some systems */
-  int i;
-  
-  *len = atoi(readfrom);
-  
-  if (*len > 0 &&
-      (objid == NULL || (*objid = (oid*)malloc(*len * sizeof(oid))) == NULL))
+
+  if (objid == NULL || readfrom == NULL)
     return NULL;
 
-  readfrom = skip_token(readfrom);
-  for(i = 0; i < *len; i++) {
-    sscanf(readfrom,".%d",&tmp);
-    (*objid)[i] = tmp;
-    if (i != *len - 1)
-      readfrom = strchr(readfrom+1, '.'); /* no more dots */
+  if (*objid != NULL) {
+    char buf[SPRINT_MAX_LEN];
+
+    if (strncmp(readfrom,"NULL",4) == 0) {
+      /* null length oid */
+      *len = 0;
+    } else {
+      /* read_objid is touchy with trailing stuff */
+      copy_word(readfrom, buf);
+
+      /* read the oid into the buffer passed to us */
+      if (!read_objid(buf, *objid, len)) {
+        DEBUGMSGTL(("read_config_read_objid","Invalid OID"));
+        return NULL;
+      }
+    }
+    
+    readfrom = skip_token(readfrom);
+  } else {
+    if (strncmp(readfrom,"NULL",4) == 0) {
+      /* null length oid */
+      *len = 0;
+      readfrom = skip_token(readfrom);
+    } else {
+      /* space needs to be malloced.  Call ourself recursively to figure
+       out how long the oid actually is */
+      oid obuf[MAX_OID_LEN];
+      int obuflen = MAX_OID_LEN;
+      oid *oidp = obuf;
+      oid **oidpp = &oidp;   /* done this way for odd, untrue, gcc warnings */
+
+      readfrom = read_config_read_objid(readfrom, oidpp, &obuflen);
+
+      /* Then malloc and copy the results */
+      *len = obuflen;
+      if (*len > 0 && (*objid = (oid*)malloc(*len * sizeof(oid))) == NULL)
+        return NULL;
+
+      if (obuflen > 0)
+        memcpy(*objid, obuf, obuflen*sizeof(oid));
+    }
   }
-  if (*len > 0)
-    readfrom = skip_token(readfrom); /* we're staring at the last .%d */
   return readfrom;
+}
+
+/* read_config_read_data():
+   reads data of a given type from a token(s) on a configuration line.
+
+   Returns: character pointer to the next token in the configuration line.
+            NULL if none left.
+            NULL if an unknown type.
+*/
+char *read_config_read_data(int type, char *readfrom, void *dataptr, int *len) {
+
+  int *intp;
+  char **charpp;
+  oid  **oidpp;
+
+  if (dataptr == NULL || readfrom == NULL)
+    return NULL;
+  
+  switch(type) {
+    case ASN_INTEGER:
+      intp = (int *) dataptr;
+      *intp = atoi(readfrom);
+      readfrom = skip_token(readfrom);
+      return readfrom;
+      
+    case ASN_OCTET_STR:
+      charpp = (char **) dataptr;
+      return read_config_read_octet_string(readfrom, (u_char **) charpp, len);
+
+    case ASN_OBJECT_ID:
+      oidpp = (oid **) dataptr;
+      return read_config_read_objid(readfrom, oidpp, len);
+
+    default:
+      DEBUGMSGTL(("read_config_read_data","Fail: Unknown type: %d", type));
+      return NULL;
+  }
+  return NULL;
 }
