@@ -19,21 +19,20 @@ void            netsnmp_init_baby_steps_helper(void);
 Netsnmp_Node_Handler netsnmp_baby_steps_helper;
 
     /*
-     * internal modes that should never be used by the protocol for the
-     * pdu type. 
+     * Flags for baby step modes
      */
 #define BABY_STEP_NONE                  0
 #define BABY_STEP_PRE_REQUEST           (0x1 <<  1)
-#define BABY_STEP_DATA_LOOKUP           (0x1 <<  2)
+#define BABY_STEP_OBJECT_LOOKUP         (0x1 <<  2)
 #define BABY_STEP_CHECK_OBJECT          (0x1 <<  3)
 #define BABY_STEP_ROW_CREATE            (0x1 <<  4)
 #define BABY_STEP_UNDO_SETUP            (0x1 <<  5)
 #define BABY_STEP_SET_VALUES            (0x1 <<  6)
 #define BABY_STEP_CHECK_CONSISTENCY     (0x1 <<  7)
 #define BABY_STEP_UNDO_SETS             (0x1 <<  8)
-#define BABY_STEP_UNDOABLE_COMMIT       (0x1 <<  9)
+#define BABY_STEP_COMMIT                (0x1 <<  9)
 #define BABY_STEP_UNDO_COMMIT           (0x1 << 10)
-#define BABY_STEP_FINAL_COMMIT          (0x1 << 11)
+#define BABY_STEP_IRREVERSIBLE_COMMIT   (0x1 << 11)
 #define BABY_STEP_UNDO_CLEANUP          (0x1 << 12)
 #define BABY_STEP_POST_REQUEST          (0x1 << 13)
 
