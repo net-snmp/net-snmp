@@ -71,6 +71,7 @@ SOFTWARE.
 #include "parse.h"
 #include "int64.h"
 #include "system.h"
+#include "read_config.h"
 
 static void sprint_by_type __P((char *, struct variable_list *, struct enum_list *, char *, char *));
 static int parse_subtree __P((struct tree *, char *, oid *, int *));
