@@ -553,6 +553,44 @@ unregister_index(struct variable_list *varbind, int remember, struct snmp_sessio
     return SNMP_ERR_NOERROR;
 }
 
+int
+unregister_string_index( oid *name, size_t name_len, char *cp )
+{
+    struct variable_list varbind;
+    
+    memset( &varbind, 0, sizeof(struct variable_list));
+    varbind.type = ASN_OCTET_STR;
+    snmp_set_var_objid( &varbind, name, name_len );
+    snmp_set_var_value( &varbind, (u_char *)cp, strlen(cp) );
+    return (unregister_index(&varbind, FALSE, main_session));
+}
+
+int 
+unregister_int_index( oid *name, size_t name_len, int val )
+{
+    struct variable_list varbind;
+    
+    memset(&varbind, 0, sizeof(struct variable_list));
+    varbind.type = ASN_INTEGER;
+    snmp_set_var_objid(&varbind, name, name_len);
+    varbind.val.string = varbind.buf;
+    varbind.val_len = sizeof(long);
+    *varbind.val.integer = val;
+    return (unregister_index(&varbind, FALSE, main_session));
+}
+
+int
+unregister_oid_index( oid *name, size_t name_len,
+		      oid *value, size_t value_len )
+{
+    struct variable_list varbind;
+    
+    memset( &varbind, 0, sizeof(struct variable_list));
+    varbind.type = ASN_OBJECT_ID;
+    snmp_set_var_objid( &varbind, name, name_len );
+    snmp_set_var_value(&varbind, (u_char*)value, value_len*sizeof(oid));
+    return (unregister_index(&varbind, FALSE, main_session));
+}
 
 void dump_idx_registry( void )
 {
