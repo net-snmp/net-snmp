@@ -983,6 +983,8 @@ netsnmp_udp6_parse_security(const char *token, char *param)
         }
         cp = copy_nword( cp, contextName, sizeof(contextName));
         cp = copy_nword( cp, secName, sizeof(secName));
+    } else {
+        contextName[0] = '\0';
     }
     if (secName[0] == '\0') {
         config_perror("missing NAME parameter");
