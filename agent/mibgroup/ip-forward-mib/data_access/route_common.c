@@ -15,8 +15,6 @@
  * local static prototypes
  */
 static void _access_route_entry_release(netsnmp_route_entry * entry, void *unused);
-static int _access_route_entry_compare(const netsnmp_route_entry *lhs,
-                                       const netsnmp_route_entry *rhs);
 
 /**---------------------------------------------------------------------*/
 /*
@@ -51,7 +49,6 @@ netsnmp_access_route_container_load(netsnmp_container* container, u_int load_fla
         snmp_log(LOG_ERR, "no container specified/found for access_route\n");
         return NULL;
     }
-    container->compare = _access_route_entry_compare;
 
     rc =  netsnmp_access_route_container_arch_load(container, load_flags);
     if (0 != rc) {
@@ -89,7 +86,11 @@ netsnmp_access_route_container_free(netsnmp_container *container, u_int free_fla
 /*
  * ifentry functions
  */
-/**
+/** create route entry
+ *
+ * @note:
+ *  if you create a route for entry into a container of your own, you
+ *  must set ns_rt_index to a unique index for your container.
  */
 netsnmp_route_entry *
 netsnmp_access_route_entry_create(void)
@@ -100,8 +101,8 @@ netsnmp_access_route_entry_create(void)
         return NULL;
     }
 
-    entry->oid_index.oids = entry->rt_indexes;
-    entry->oid_index.len = 4;
+    entry->oid_index.oids = &entry->ns_rt_index;
+    entry->oid_index.len = 1;
 
     entry->rt_metric1 = -1;
     entry->rt_metric2 = -1;
@@ -122,8 +123,14 @@ netsnmp_access_route_entry_free(netsnmp_route_entry * entry)
     if (NULL == entry)
         return;
 
+#ifdef USING_IP_FORWARD_MIB_INETCIDRROUTETABLE_INETCIDRROUTETABLE_MODULE
+    if (NULL != entry->rt_policy)
+        free(entry->rt_policy);
+#endif
+#ifdef USING_IP_FORWARD_MIB_IPCIDRROUTETABLE_IPCIDRROUTETABLE_MODULE
     if (NULL != entry->rt_info)
         free(entry->rt_info);
+#endif
 
     free(entry);
 }
@@ -132,22 +139,6 @@ netsnmp_access_route_entry_free(netsnmp_route_entry * entry)
 /*
  * Utility routines
  */
-
-/**
- */
-static int
-_access_route_entry_compare(const netsnmp_route_entry *lhs,
-                            const netsnmp_route_entry *rhs)
-{
-    int i;
-    for( i = 0; i < 4; ++i ) {
-        if(lhs->rt_indexes[i] < rhs->rt_indexes[i] )
-            return -1;
-        else if (lhs->rt_indexes[i] > rhs->rt_indexes[i] )
-            return 1;
-    }
-    return 0;
-}
 
 /**
  */
