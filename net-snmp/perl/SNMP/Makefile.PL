@@ -118,7 +118,7 @@ sub GetTestInfo {
             $snmpd = "../../win32/bin";
             $snmptrapd = "../../win32/bin";
           } else {
-            $mibdir = $ENV{'NET-SNMP-PATH'} . $sep . "mibs";
+            $mibdir = $ENV{'NET-SNMP-PATH'} . "${sep}share${sep}snmp${sep}mibs";
             $snmpd = find_files(["snmpd.exe"], [$win32_snmpd_path]);
             $snmptrapd = find_files(["snmptrapd.exe"], [$win32_snmpd_path]);
           }
