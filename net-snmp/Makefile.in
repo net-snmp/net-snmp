@@ -39,6 +39,11 @@ UCDPERSISTENT_DIRECTORY=@UCDPERSISTENT_DIRECTORY@
 PERLMODULES=default_store SNMP ASN OID agent
 
 #
+# libtool
+#
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
+
+#
 # targets
 #
 all:    sedscript EXAMPLE.conf standardall net-snmp-config-x @PERLTARGS@ 
@@ -48,6 +53,9 @@ start-flag:
 
 end-flag:
 	@rm -f build-in-progress-flag > /dev/null 2>&1 
+
+libtool:	$(LIBTOOL_DEPS)
+	$(SHELL) ./config.status --recheck
 
 #
 # local build rules
