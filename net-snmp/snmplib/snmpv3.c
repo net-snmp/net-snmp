@@ -886,7 +886,7 @@ usm_parse_create_usmUser(const char *token, char *line)
     }
 #endif
 #ifdef HAVE_AES
-    if (strncmp(cp, "AES128", 3) == 0 ||
+    if (strncmp(cp, "AES128", 6) == 0 ||
                strncmp(cp, "AES", 3) == 0) {
         memcpy(newuser->privProtocol, usmAESPrivProtocol,
                sizeof(usmAESPrivProtocol));
