@@ -2225,7 +2225,7 @@ _sprint_realloc_objid(u_char **buf, size_t *buf_len,
   size_t midpoint_offset = 0;
   int tbuf_overflow = 0;
 
-  if ((tbuf = (u_char *)malloc(tbuf_len)) == NULL) {
+  if ((tbuf = (u_char *)calloc(tbuf_len, 1)) == NULL) {
     tbuf_overflow = 1;
   } else {
     *tbuf = '.';
@@ -2357,7 +2357,7 @@ fprint_objid(FILE *f,
   size_t buf_len = 256, out_len = 0;
   int buf_overflow = 0;
 
-  if ((buf = (u_char *)malloc(buf_len)) == NULL) {
+  if ((buf = (u_char *)calloc(buf_len, 1)) == NULL) {
     fprintf(f, "[TRUNCATED]\n");
     return;
   } else {
@@ -2487,7 +2487,7 @@ fprint_variable(FILE *f,
   u_char *buf = NULL;
   size_t buf_len = 256, out_len = 0;
 
-  if ((buf = (u_char *)malloc(buf_len)) == NULL) {
+  if ((buf = (u_char *)calloc(buf_len, 1)) == NULL) {
     fprintf(f, "[TRUNCATED]\n");
     return;
   } else {
@@ -2561,7 +2561,7 @@ fprint_value(FILE *f,
   u_char *buf = NULL;
   size_t buf_len = 256, out_len = 0;
 
-  if ((buf = (u_char *)malloc(buf_len)) == NULL) {
+  if ((buf = (u_char *)calloc(buf_len, 1)) == NULL) {
     fprintf(f, "[TRUNCATED]\n");
     return;
   } else {
