@@ -508,9 +508,6 @@
 /* Define if you have the nsl library (-lnsl).  */
 #undef HAVE_LIBNSL
 
-/* Define if you have the rpm library (-lrpm).  */
-#undef HAVE_LIBRPM
-
 /* Define if you have the socket library (-lsocket).  */
 #undef HAVE_LIBSOCKET
 
@@ -799,6 +796,9 @@
 #define signal(a,b) sigset(a,b)
 #endif
 #endif
+
+/* define if you have librpm and libdb */
+#undef HAVE_LIBRPM
 
 /* Watch out for compilers that don't handle void properly. */
 #undef void
