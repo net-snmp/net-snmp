@@ -725,14 +725,17 @@ subagent_open_master_session(void)
          * netsnmp_session pointer.  
          */
         if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_CONNECTION_WARNINGS)) {
+            char buf[1024];
             if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
-                netsnmp_sess_log_error(LOG_WARNING,
-                                       "Error: Failed to connect to the agentx master agent",
-                                       &sess);
+                snprintf(buf, sizeof(buf), "Warning: "
+                         "Failed to connect to the agentx master agent (%s)",
+                         sess.peername);
+                netsnmp_sess_log_error(LOG_WARNING, buf, &sess);
             } else {
-                snmp_sess_perror
-                    ("Error: Failed to connect to the agentx master agent",
-                     &sess);
+                snprintf(buf, sizeof(buf), "Error: "
+                         "Failed to connect to the agentx master agent (%s)",
+                         sess.peername);
+                snmp_sess_perror(buf, &sess);
             }
         }
         if (sess.peername)
@@ -770,6 +773,8 @@ subagent_open_master_session(void)
     snmp_call_callbacks(SNMP_CALLBACK_APPLICATION,
                         SNMPD_CALLBACK_INDEX_START, (void *) main_session);
 
+    snmp_log(LOG_INFO, "NET-SNMP version %s AgentX subagent connected\n",
+             netsnmp_get_version());
     DEBUGMSGTL(("agentx/subagent", "opening session...  DONE (%p)\n",
                 main_session));
 
