@@ -395,14 +395,29 @@ fi
 AC_SUBST(EXTRACPPFLAGS)
 AC_MSG_RESULT($EXTRACPPFLAGS)
 
-dnl Set SNMPLIBPATH & SNMPSHAREPATH
+dnl Prefixes must begin with "/"
 
 if test "x$prefix" = "xNONE"; then
   prefix=/usr/local
 fi
+
+fch=`echo $prefix | cut -b1`
+if test $fch != "/" ; then
+   prefix=`pwd`/$prefix
+   echo "adjusting prefix to $prefix"
+fi
+
 if test "x$exec_prefix" = "xNONE"; then
   exec_prefix=$prefix
 fi
+
+fch=`echo $exec_prefix | cut -b1`
+if test $fch != "/" ; then
+   exec_prefix=`pwd`/$exec_prefix
+   echo "adjusting exec_prefix to $exec_prefix"
+fi
+
+dnl Set SNMPLIBPATH & SNMPSHAREPATH
 
 SNMPLIBPATH=""
 tmpset="$libdir/snmp"
