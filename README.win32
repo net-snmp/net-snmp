@@ -137,7 +137,8 @@ as follows:
        documentation, sample code and 64-bit elements.
 
     -  Once this package has installed, from the Start Menu run
-	"Register PSDK directories with Visual Studio"
+	"Programs ->Microsoft Platform SDK -> Visual Studio Registration
+	->Register PSDK directories with Visual Studio"
 
 See the Building section below in order to build the agent.
 
