@@ -88,7 +88,8 @@ if [ ! -z $DEST ]; then
 
     cd ..
 #    echo $PWD
-    SOURCE=$REP-cvs-$TAG
+    DATE=`date +%Y%m%d_%H%M`
+    SOURCE=$REP-cvs-$TAG"_$DATE"
     tar cf /tmp/$SOURCE.tar $SUBD
     gzip -f --best /tmp/$SOURCE.tar
     scp /tmp/$SOURCE.tar.gz $DEST
