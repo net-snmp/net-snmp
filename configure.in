@@ -1224,7 +1224,7 @@ AC_CHECK_FUNCS(getpagesize)
 dnl DYNAMIC MODULE SUPPORT
 AC_CHECK_FUNCS(dlopen)
 AC_CHECK_FUNCS(mkstemp)
-AC_CHECK_FUNCS(getpwnam getgrnam setgid setuid)
+AC_CHECK_FUNCS(getpwnam getgrnam setgid setuid setgroups)
 
 AC_MSG_CHECKING([for SIOCGIFADDR in sys/ioctl.h])
 AC_CACHE_VAL(cv_sys_ioctl_h_has_SIOCGIFADDR,

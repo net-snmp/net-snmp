@@ -623,7 +623,11 @@ main(int argc, char *argv[])
 #ifdef HAVE_SETGID
 	if ((gid = ds_get_int(DS_APPLICATION_ID, DS_AGENT_GROUPID)) != 0) {
 		DEBUGMSGTL(("snmpd", "Changing gid to %d.\n", gid));
-		if (setgid(gid)==-1) {
+		if (setgid(gid)==-1
+#ifdef HAVE_SETGROUPS
+		 || setgroups(1, &gid)==-1
+#endif
+		) {
 			snmp_log_perror("setgid failed");
 			if (!ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
 			    exit(1);
