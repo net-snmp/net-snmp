@@ -762,6 +762,8 @@ void   snmp_sess_timeout    (void *);
 int    snmp_sess_close      (void *);
 
 void   snmp_sess_error      (void *, int *, int *, char **);
+void   netsnmp_sess_log_error (int priority, const char *prog_string,
+                             netsnmp_session *ss);
 void   snmp_sess_perror     (const char *prog_string, netsnmp_session *ss);
 
 /* end single session API */
