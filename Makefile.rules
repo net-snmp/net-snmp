@@ -8,7 +8,7 @@
 
 # the standard items to build: libraries, bins, and sbins
 STANDARDTARGETS     =$(INSTALLLIBS) $(INSTALLBINPROGS) $(INSTALLSBINPROGS)
-STANDARDCLEANTARGETS=$(INSTALLLIBS)                    $(INSTALLSBINPROGS)
+STANDARDCLEANTARGETS=$(INSTALLLIBS) $(INSTALLBINPROGS) $(INSTALLSBINPROGS)
 
 standardall: subdirs $(STANDARDTARGETS)
 
@@ -90,10 +90,10 @@ installlibs: $(INSTALLLIBS)
 	fi
 
 installbin: $(INSTALLBINPROGS)
-	@if test "$(INSTALLBINPROGS)" != ""; then \
+	@if test "$(INSTALLBINPROGS) $(INSTALLBINSCRIPTS)" != " "; then \
 		$(SHELL) $(top_srcdir)/mkinstalldirs $(bindir) ; \
-		it="$(INSTALLBINPROGS)" ; \
-	        $(INSTALL) $(INSTALLBINPROGS) $(bindir) ;              \
+		it="$(INSTALLBINPROGS) $(INSTALLBINSCRIPTS)" ; \
+	        $(INSTALL) $(INSTALLBINPROGS) $(INSTALLBINSCRIPTS) $(bindir) ;              \
 	        for i in $$it ; do   \
 	                echo "installing $$i in $(bindir)"; \
 	        done \

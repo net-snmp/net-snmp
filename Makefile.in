@@ -20,7 +20,7 @@ INCLUDESUBDIRHEADERS= aix.h bsd.h bsdi3.h bsdi4.h bsdi.h cygwin.h darwin.h \
 	solaris2.8.h solaris.h sunos.h svr5.h sysv.h ultrix4.h
 INCLUDESUBDIR2=machine
 INCLUDESUBDIRHEADERS2=generic.h
-INSTALLBINPROGS=net-snmp-config
+INSTALLBINSCRIPTS=net-snmp-config
 INSTALLUCDHEADERS=ucd-snmp-config.h version.h mib_module_config.h
 
 #
