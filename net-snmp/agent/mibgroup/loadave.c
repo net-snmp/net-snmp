@@ -32,6 +32,18 @@
 #if HAVE_UFS_FS_H
 #include <ufs/fs.h>
 #else
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_VNODE_H
+#include <sys/vnode.h>
+#endif
+#ifdef HAVE_UFS_UFS_QUOTA_H
+#include <ufs/ufs/quota.h>
+#endif
+#ifdef HAVE_UFS_UFS_INODE_H
+#include <ufs/ufs/inode.h>
+#endif
 #if HAVE_UFS_FFS_FS_H
 #include <ufs/ffs/fs.h>
 #endif
