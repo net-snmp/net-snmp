@@ -42,6 +42,9 @@ SOFTWARE.
 #include <netinet/in.h>
 #endif
 #include <errno.h>
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 
 #include "asn1.h"
 #include "snmp.h"
