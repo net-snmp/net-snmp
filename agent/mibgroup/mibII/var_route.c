@@ -364,9 +364,15 @@ var_ipRouteEntry(struct variable *vp,
     return (u_char *)get_in_address ((struct sockaddr *) (rtp + 1),
 				     rtp->rtm_addrs, RTA_GATEWAY);
   case IPROUTETYPE:
-    long_return = (rtp->rtm_flags & RTF_UP)
-      ? (rtp->rtm_flags & RTF_UP) ? 4 : 3
-      : 2;
+    if (rtp->rtm_flags & RTF_UP) {
+	if (rtp->rtm_flags & RTF_GATEWAY) {
+	    long_return = 4;	/*  indirect(4)  */
+	} else {
+	    long_return = 3;	/*  direct(3)  */
+	}
+    } else {
+	long_return = 2;	/*  invalid(2)  */
+    }
     return (u_char *)&long_return;
   case IPROUTEPROTO:
     long_return = (rtp->rtm_flags & RTF_DYNAMIC)
@@ -650,7 +656,15 @@ var_ipRouteEntry(struct variable *vp,
 	    return(u_char *) &((struct sockaddr_in *) &rthead[RtIndex]->rt_gateway)->sin_addr.s_addr;
 #endif /* *bsd */
 	case IPROUTETYPE:
-	    long_return = (rthead[RtIndex]->rt_flags & RTF_GATEWAY) ? 4 : 3;
+	    if (rthead[RtIndex]->rt_flags & RTF_UP) {
+		if (rthead[RtIndex]->rt_flags & RTF_GATEWAY) {
+		    long_return = 4;	/*  indirect(4)  */
+		} else {
+		    long_return = 3;	/*  direct(3)  */
+		}
+	    } else {
+		long_return = 2;	/*  invalid(2)  */
+	    }
 	    return (u_char *)&long_return;
 	case IPROUTEPROTO:
 	    long_return = (rthead[RtIndex]->rt_flags & RTF_DYNAMIC) ? 4 : 2;
@@ -1558,8 +1572,16 @@ var_ipRouteEntry(struct variable *vp,
 		return (u_char *)&long_return;
 
 	case IPROUTETYPE:
-		long_return = (rt->hdr->rtm_flags & RTF_GATEWAY) ? 4 : 3;
-		return (u_char *)&long_return;
+	    if (rt->hdr->rtm_flags & RTF_UP) {
+		if (rt->hdr->rtm_flags & RTF_GATEWAY) {
+		    long_return = 4;	/*  indirect(4)  */
+		} else {
+		    long_return = 3;	/*  direct(3)  */
+		}
+	    } else {
+		long_return = 2;	/*  invalid(2)  */
+	    }
+	    return (u_char *)&long_return;
 
 	case IPROUTEPROTO:
 		long_return = (rt->hdr->rtm_flags & RTF_DYNAMIC) ? 4 : 2;
