@@ -88,6 +88,7 @@ struct netsnmp_inpcb_s {
     int             state;
     netsnmp_inpcb  *inp_next;
 };
+#define INP_NEXT_SYMBOL		inp_next
 #define	TCPTABLE_ENTRY_TYPE	netsnmp_inpcb 
 #define	TCPTABLE_STATE		state 
 #define	TCPTABLE_LOCALADDRESS	pcb.inp_laddr.s_addr 
@@ -792,7 +793,7 @@ tcpTable_load(netsnmp_cache *cache, void *vmagic)
             nnew->state == 8 /*  closeWait  */ )
             tcp_estab++;
 
-        entry      = nnew->inp_queue.cqe_next;	/* Next kernel entry */
+        entry      = nnew->INP_NEXT_SYMBOL;	/* Next kernel entry */
 	nnew->inp_next = tcp_head;
 	tcp_head   = nnew;
 
