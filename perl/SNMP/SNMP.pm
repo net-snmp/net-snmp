@@ -290,6 +290,10 @@ sub MainLoop {
     SNMP::_main_loop($time_sec,$time_usec,$callback);
 }
 
+sub finish {
+    SNMP::_mainloop_finish();
+}
+
 sub reply_cb {
     # callback function for async snmp calls
     # when triggered, will do a SNMP read on the
@@ -1396,6 +1400,14 @@ so return packets from the agent will not be processed.
 If no args suplied this function enters an infinite loop
 so program must be exited in a callback or externally
 interupted. If <timeout(sic)
+
+=item &SNMP::finish()
+
+This function, when called from an SNMP::MainLoop() callback
+function, will cause the current SNMP::MainLoop() to return
+after the callback is completed.  finish() can be used to 
+terminate an otherwise-infinite MainLoop.  A new MainLoop()
+instance can then be started to handle further requests.
 
 =back
 

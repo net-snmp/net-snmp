@@ -95,6 +95,9 @@ DLL_IMPORT extern struct tree *Mib;
 static oid sysUpTime[SYS_UPTIME_OID_LEN] = {1, 3, 6, 1, 2, 1, 1, 3, 0};
 static oid snmpTrapOID[SNMP_TRAP_OID_LEN] = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
 
+/* Internal flag to determine snmp_main_loop() should return after callback */
+static int mainloop_finish = 0;
+
 /* these should be part of transform_oids.h ? */
 #define USM_AUTH_PROTO_MD5_LEN 10
 #define USM_AUTH_PROTO_SHA_LEN 10
@@ -2794,6 +2797,14 @@ snmp_sock_cleanup()
 	}
 
 void
+snmp_mainloop_finish()
+	CODE:
+	{
+	    mainloop_finish = 1;
+	}
+
+
+void
 snmp_main_loop(timeout_sec,timeout_usec,perl_callback)
 	int 	timeout_sec
 	int 	timeout_usec
@@ -2808,6 +2819,10 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback)
         struct timeval interval, *itvp;
         int block;
 	SV *cb;
+
+ 
+ 	mainloop_finish = 0;
+ 
 	itvp = &interval;
 	itvp->tv_sec = timeout_sec;
 	itvp->tv_usec = timeout_usec;
@@ -2850,6 +2865,7 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback)
                        FREETMPS;
                        LEAVE;
                        ctvp->tv_sec = -1;
+
                     } else {
                        goto done;
                     }
@@ -2864,6 +2880,13 @@ snmp_main_loop(timeout_sec,timeout_usec,perl_callback)
                  }
               default:;
            }
+
+	   /* A call to snmp_mainloop_finish() in the callback sets the 
+	   ** mainloop_finish flag.  Exit the loop after the callback returns.
+	   */
+	   if (mainloop_finish)
+	      goto done;
+
         }
      done:
            return;

@@ -483,6 +483,14 @@ SNMP package variables and functions:
                      so program must be exited in a callback or externally
                      interrupted. If <timeout
 
+ &SNMP::finish()
+		   - This function, when called from an SNMP::MainLoop() 
+		     callback function, will cause the current SNMP::MainLoop
+		     to return after the callback is completed. finish() can
+		     be used to terminate an otherwise-infinite MainLoop. A
+		     new MainLoop() instance can then be started to handle
+		     further requests.
+
 Exported SNMP utility functions
 &snmp_get() - takes args of SNMP::Session::new followed by those of
               SNMP::Session::get
