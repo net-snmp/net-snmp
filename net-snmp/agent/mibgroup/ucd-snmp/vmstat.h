@@ -31,5 +31,8 @@ void            init_vmstat(void);
 #define IORAWRECEIVE 58
 #define SYSRAWINTERRUPTS 59
 #define SYSRAWCONTEXT 60
+#define CPURAWSOFTIRQ 61
+#define RAWSWAPIN 62
+#define RAWSWAPOUT 63
 
 #endif                          /* _MIBGROUP_VMSTAT_H */

@@ -108,7 +108,7 @@ handle_nsDebugEnabled(netsnmp_mib_handler *handler,
                 netsnmp_agent_request_info *reqinfo,
                 netsnmp_request_info *requests)
 {
-    int enabled;
+    long enabled;
     netsnmp_request_info *request=NULL;
 
     switch (reqinfo->mode) {
@@ -163,7 +163,7 @@ handle_nsDebugOutputAll(netsnmp_mib_handler *handler,
                 netsnmp_agent_request_info *reqinfo,
                 netsnmp_request_info *requests)
 {
-    int enabled;
+    long enabled;
     netsnmp_request_info *request=NULL;
 
     switch (reqinfo->mode) {
@@ -218,7 +218,7 @@ handle_nsDebugDumpPdu(netsnmp_mib_handler *handler,
                 netsnmp_agent_request_info *reqinfo,
                 netsnmp_request_info *requests)
 {
-    int enabled;
+    long enabled;
     netsnmp_request_info *request=NULL;
 
     switch (reqinfo->mode) {
