@@ -2056,7 +2056,7 @@ handle_mibdirs_conf(const char *token, char *line)
     char           *ctmp;
 
     if (confmibdir) {
-        ctmp = (char *) malloc(strlen(confmibdir) + strlen(line) + 1);
+        ctmp = (char *) malloc(strlen(confmibdir) + strlen(line) + 2);
         if (!ctmp) {
             DEBUGMSGTL(("read_config:initmib", "mibdir conf malloc failed"));
             return;
@@ -2078,7 +2078,7 @@ handle_mibs_conf(const char *token, char *line)
     char           *ctmp;
 
     if (confmibs) {
-        ctmp = (char *) malloc(strlen(confmibs) + strlen(line) + 1);
+        ctmp = (char *) malloc(strlen(confmibs) + strlen(line) + 2);
         if (!ctmp) {
             DEBUGMSGTL(("read_config:initmib", "mibs conf malloc failed"));
             return;
@@ -2382,7 +2382,7 @@ netsnmp_set_mib_directory(const char *dir)
     if (olddir) {
         if (*dir == '+') {
             /** New dir starts with '+', thus we add it. */
-            tmpdir = malloc(strlen(dir) + strlen(olddir) + 1);
+            tmpdir = malloc(strlen(dir) + strlen(olddir) + 2);
             if (!tmpdir) {
                 DEBUGMSGTL(("read_config:initmib", "set mibdir malloc failed"));
                 return;
