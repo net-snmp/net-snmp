@@ -10,7 +10,10 @@ You'll probably never have to do this.
 
 *** This is currently alpha level code!!! ***
 
-Jeff's unpatched AnyData packages can be found at:
+Jeff's unpatched AnyData packages can be found at.  However, do not use
+these as they won't work with the current software in this directory.
+(Use the download sites below instead.)  It is a good source for
+documentation about the AnyData modules, however:
   http://www.vpservices.com/jeff/programs/AnyData/
 
 Install steps:
