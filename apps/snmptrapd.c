@@ -444,7 +444,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 
 void usage __P((void))
 {
-    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-p #] [-P] [-s] [-f [d0-7]] [-e] [-d]\n");
+    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d]\n");
 }
 
 
@@ -463,10 +463,11 @@ main(argc, argv)
     int srclen, dstlen, contextlen;
     int local_port = SNMP_TRAP_PORT;
     char ctmp[300];
+    int dofork=1;
 
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
     /*
-     * usage: snmptrapd [-v 1] [-q] [-p #] [-P] [-s] [-f [d0-7]] [-d] [-e]
+     * usage: snmptrapd [-v 1] [-q] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-d] [-e]
      */
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
@@ -497,7 +498,10 @@ main(argc, argv)
 		case 's':
 		    Syslog++;
 		    break;
-		case 'f':
+                case 'f':
+                  dofork = 0;
+                  break;
+		case 'l':
 		    arg++;
 		    switch(argv[arg][0]) {
 			case 'd':
@@ -519,7 +523,7 @@ main(argc, argv)
 			case '7':
 			   Facility = LOG_LOCAL7; break;
 			default:
-		    	   fprintf(stderr,"invalid  syslog facility: -f %c\n",
+		    	   fprintf(stderr,"invalid  syslog facility: -l %c\n",
 							argv[arg][0]);
 		    	   usage();
 		    	   exit (1);
@@ -561,7 +565,7 @@ main(argc, argv)
     }
 
     /* fork the process to the background if we are not printing to stdout */
-    if (!Print) {
+    if (!Print && dofork) {
       int fd, fdnum;
 
       switch (fork()) {
@@ -582,17 +586,20 @@ main(argc, argv)
 		dup2(fd, STDOUT_FILENO);
 		dup2(fd, STDERR_FILENO);
 		close(fd);
-
-        /* Close all unnecessary file descriptors and open syslog */
+                /* Close all unnecessary file descriptors */
 		fdnum = getdtablesize();
 		for ( fd = (STDERR_FILENO + 1); fd < fdnum; fd++ )
 			close(fd);
-    		init_syslog();
 		break;
 
 	default:
 		_exit(0);
       }
+    }
+
+    if (Syslog) {
+      /* open syslog */
+      init_syslog();
     }
 
     memset(&session, 0, sizeof(struct snmp_session));
@@ -611,7 +618,8 @@ main(argc, argv)
         snmp_perror("snmptrapd: Couldn't open snmp");
 	if (Print) {
 	    fprintf(stderr,"couldn't open snmp - %s\n",strerror(errno));
-	} else {
+	}
+        if (Syslog) {
 	    syslog(LOG_ERR,"couldn't open snmp - %m");
 	}
 	exit(1);
