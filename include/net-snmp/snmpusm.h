@@ -180,8 +180,8 @@ struct usmUser *usm_add_user_to_list(struct usmUser *user,
 struct usmUser *usm_free_user(struct usmUser *user);
 struct usmUser *usm_create_user(void);
 struct usmUser *usm_create_initial_user(const char *name,
-                                     oid *authProtocol, size_t authProtocolLen,
-                                     oid *privProtocol, size_t privProtocolLen);
+			      const oid *authProtocol, size_t authProtocolLen,
+                              const oid *privProtocol, size_t privProtocolLen);
 struct usmUser *usm_cloneFrom_user(struct usmUser *from, struct usmUser *to);
 struct usmUser *usm_remove_user(struct usmUser *user);
 struct usmUser *usm_remove_user_from_list(struct usmUser *user,
