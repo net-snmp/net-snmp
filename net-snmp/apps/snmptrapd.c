@@ -149,60 +149,13 @@ const char *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a])
 char       *trap1_fmt_str = NULL,
            *trap2_fmt_str = NULL; /* how to format logging to stdout */
 
-/*
- * These definitions handle 4.2 systems without additional syslog facilities.
- */
-#ifndef LOG_CONS
-#define LOG_CONS	0	/* Don't bother if not defined... */
-#endif
-#ifndef LOG_PID
-#define LOG_PID		0	/* Don't bother if not defined... */
-#endif
-#ifndef LOG_LOCAL0
-#define LOG_LOCAL0	0
-#endif
-#ifndef LOG_LOCAL1
-#define LOG_LOCAL1	0
-#endif
-#ifndef LOG_LOCAL2
-#define LOG_LOCAL2	0
-#endif
-#ifndef LOG_LOCAL3
-#define LOG_LOCAL3	0
-#endif
-#ifndef LOG_LOCAL4
-#define LOG_LOCAL4	0
-#endif
-#ifndef LOG_LOCAL5
-#define LOG_LOCAL5	0
-#endif
-#ifndef LOG_LOCAL6
-#define LOG_LOCAL6	0
-#endif
-#ifndef LOG_LOCAL7
-#define LOG_LOCAL7	0
-#endif
-#ifndef LOG_DAEMON
-#define LOG_DAEMON	0
-#endif
-
 /* Include an extra Facility variable to allow command line adjustment of
    syslog destination */
-int Facility = LOG_LOCAL0;
+int Facility = LOG_INFO;
 
 struct timeval Now;
 
-void init_syslog(void);
-
 void update_config (void);
-
-#ifdef WIN32
-void openlog(const char *app, int options, int fac) {
-}
-
-void syslog(int level, const char *fmt, ...) {
-}
-#endif
 
 const char *
 trap_description(int trap)
@@ -498,12 +451,12 @@ int snmp_input(int op,
 		    cp = strrchr(oid_buf, '.');
 		    if (cp) cp++;
 		    else cp = oid_buf;
-		    syslog(LOG_WARNING, "%s: %s Trap (%s) Uptime: %s%s",
+		    snmp_log(LOG_WARNING, "%s: %s Trap (%s) Uptime: %s%s",
                            inet_ntoa(*((struct in_addr *)pdu->agent_addr)),
                            trap_description(pdu->trap_type), cp,
                            uptime_string(pdu->time, buf), varbuf);
 		} else {
-		    syslog(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s",
+		    snmp_log(LOG_WARNING, "%s: %s Trap (%ld) Uptime: %s%s",
                            inet_ntoa(*((struct in_addr *)pdu->agent_addr)),
                            trap_description(pdu->trap_type), pdu->specific_type,
                            uptime_string(pdu->time, buf), varbuf);
@@ -596,11 +549,11 @@ int snmp_input(int op,
 		if (transport != NULL && transport->f_fmtaddr != NULL) {
 		  tstr = transport->f_fmtaddr(transport, pdu->transport_data,
 					      pdu->transport_data_length);
-		  syslog(LOG_WARNING, "%s [%s]: Trap %s",
+		  snmp_log(LOG_WARNING, "%s [%s]: Trap %s",
 			 host?host->h_name:tstr, tstr, varbuf);
 		  free(tstr);
 		} else {
-		  syslog(LOG_WARNING, "<UNKNOWN>: Trap %s", varbuf);
+		  snmp_log(LOG_WARNING, "<UNKNOWN>: Trap %s", varbuf);
 		}
 	    }
 	    if (Event) {
@@ -947,9 +900,10 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    if (Syslog) {
-	/* open syslog */
-	init_syslog();
+    if (Syslog)
+    {
+	    snmp_enable_syslog_ident("snmptrapd");
+	    snmp_log(LOG_INFO, "Starting snmptrapd %s", VersionInfo);
     }
     if (Print) {
 	struct tm *tm;
@@ -989,7 +943,7 @@ int main(int argc, char *argv[])
     if (ss == NULL){
         snmp_sess_perror("snmptrapd", session);
         if (Syslog) {
-	    syslog(LOG_ERR,"couldn't open snmp - %m");
+	    snmp_log(LOG_ERR,"couldn't open snmp - %m");
 	}
 	SOCK_CLEANUP;
 	exit(1);
@@ -1014,7 +968,7 @@ int main(int argc, char *argv[])
 		       VersionInfo);
 	    }
 	    if (Syslog)
-		syslog(LOG_INFO, "Snmptrapd reconfiguring");
+		snmp_log(LOG_INFO, "Snmptrapd reconfiguring");
 	    update_config();
             if (trap1_fmt_str_remember) {
                 free_trap1_fmt();
@@ -1062,25 +1016,14 @@ int main(int argc, char *argv[])
 	       VersionInfo);
     }
     if (Syslog)
-	syslog(LOG_INFO, "Stopping snmptrapd");
+	snmp_log(LOG_INFO, "Stopping snmptrapd");
 
     snmp_close(ss);
     snmp_shutdown("snmptrapd");
+    snmp_disable_log();
     SOCK_CLEANUP;
     return 0;
 }
-
-void
-init_syslog(void)
-{
-    /*
-     * All messages will be logged to the local0 facility and will be sent to
-     * the console if syslog doesn't work.
-     */
-    openlog("snmptrapd", LOG_CONS|LOG_PID, Facility);
-    syslog(LOG_INFO, "Starting snmptrapd %s", VersionInfo);
-}
-
 
 /*
  * Read the configuration files. Implemented as a signal handler so that

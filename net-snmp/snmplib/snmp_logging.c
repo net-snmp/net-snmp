@@ -56,6 +56,10 @@
 #include <winsock.h>
 #endif
 
+#if HAVE_WINDOWS_H
+#include <windows.h>
+#endif
+
 #include "asn1.h"
 #include "default_store.h"
 #include "snmp_logging.h"
@@ -69,6 +73,9 @@ static int do_stderrlogging=1;
 static int do_log_callback=0;
 static int newline = 1;
 static FILE *logfile;
+#ifdef WIN32
+static HANDLE eventlog_h;
+#endif
 
 #ifndef HAVE_VSNPRINTF
 		/* Need to use the UCD-provided one */
@@ -111,6 +118,20 @@ snmp_disable_syslog(void) {
   if (do_syslogging)
     closelog();
 #endif
+#ifdef WIN32
+  if (eventlog_h != NULL)
+  {
+	  if (! CloseEventLog(eventlog_h))
+	  {
+		  fprintf(stderr, "Could not close event log. "
+			  "Last error: 0x%x\n", GetLastError());
+	  }
+	  else
+	  {
+		  eventlog_h = NULL;
+	  }
+  }
+#endif /* WIN32 */  
   do_syslogging=0;
 }
 
@@ -140,17 +161,36 @@ snmp_disable_log(void) {
   snmp_disable_calllog();
 }
 
-
 void
 snmp_enable_syslog(void)
 {
-  snmp_disable_syslog();
-#if HAVE_SYSLOG_H
-  openlog("ucd-snmp", LOG_CONS|LOG_PID, LOG_DAEMON);
-  do_syslogging=1;
-#endif
+	/* This default should probably be net-snmp at some point */
+	snmp_enable_syslog_ident(DEFAULT_LOG_ID);
 }
 
+void
+snmp_enable_syslog_ident(char *ident)
+{
+	snmp_disable_syslog();
+	if (ident == NULL)
+		/* This default should probably be net-snmp at some point */
+		ident = strdup(DEFAULT_LOG_ID);
+#if HAVE_SYSLOG_H
+	openlog(ident, LOG_CONS|LOG_PID, LOG_DAEMON);
+	do_syslogging=1;
+#endif
+#ifdef WIN32
+	eventlog_h = OpenEventLog(NULL, ident);
+	if (eventlog_h == NULL)
+	{
+		fprintf(stderr, "Could not open event log for %s. "
+			"Last error: 0x%x\n", ident, GetLastError());
+		do_syslogging=0;
+	}
+	else
+		do_syslogging=1;
+#endif /* WIN32 */
+}
 
 void
 snmp_enable_filelog(const char *logfilename, int dont_zero_log)
@@ -189,13 +229,65 @@ snmp_log_string (int priority, const char *string)
 {
     char sbuf[40];
     struct snmp_log_message slm;
-
+#ifdef WIN32
+    WORD etype;
+    LPCTSTR event_msg[2];
+#endif /* WIN32 */
+    
 #if HAVE_SYSLOG_H
   if (do_syslogging) {
     syslog(priority, "%s", string);
   }
 #endif
 
+#ifdef WIN32
+    if (do_syslogging)
+    {
+	    /*
+	     **  EVENT TYPES:
+	     **
+	     **  Information (EVENTLOG_INFORMATION_TYPE)
+	     **      Information events indicate infrequent but significant
+	     **      successful operations.
+	     **  Warning (EVENTLOG_WARNING_TYPE)
+	     **      Warning events indicate problems that are not immediately
+	     **      significant, but that may indicate conditions that could
+	     **      cause future problems. Resource consumption is a good
+	     **      candidate for a warning event.
+	     **  Error (EVENTLOG_ERROR_TYPE)
+	     **      Error events indicate significant problems that the user
+	     **      should know about. Error events usually indicate a loss of
+	     **      functionality or data.
+	     */
+	    switch(priority)
+	    {
+	    case LOG_EMERG:
+	    case LOG_ALERT:
+	    case LOG_CRIT:
+	    case LOG_ERR:
+		    etype = EVENTLOG_ERROR_TYPE;
+		    break;
+	    case LOG_WARNING:
+		    etype = EVENTLOG_WARNING_TYPE;
+		    break;
+	    case LOG_NOTICE:
+	    case LOG_INFO:
+	    case LOG_DEBUG:
+		    etype = EVENTLOG_INFORMATION_TYPE;
+		    break;
+	    default:
+		    etype = EVENTLOG_INFORMATION_TYPE;
+		    break;
+	    }
+	    event_msg[0] = string;
+	    event_msg[1] = NULL;
+	    if (! ReportEvent(eventlog_h, etype, 0, 0, NULL, 1, 0,
+			      event_msg, NULL))
+		    fprintf(stderr, "Could not report event.  Last error: "
+			    "0x%x\n", GetLastError());
+    }
+#endif /* WIN32 */
+    
   if (do_log_callback) {
       slm.priority = priority;
       slm.msg = string;
