@@ -133,7 +133,6 @@ static char buf[300];
 #define FILE_TO_BUF(FILE) {					\
     static int n, fd = -1;					\
     if (fd == -1 && (fd = open(FILE, O_RDONLY)) == -1) {	\
-	close(fd);						\
 	return 0;						\
     }								\
     lseek(fd, 0L, SEEK_SET);					\
@@ -143,7 +142,6 @@ static char buf[300];
 	return 0;						\
     }								\
     buf[n] = '\0';						\
-    close(fd);                                                  \
 }
 
 #define MAX_ROW 3	/* these are a little liberal for flexibility */
