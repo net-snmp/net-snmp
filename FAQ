@@ -148,7 +148,7 @@ WWW:
     - http://www.net-snmp.org/project
 
 FTP:
-  - ftp://download.sourceforge.net/pub/sourceforge/net-snmp/ucd-snmp.tar.gz
+  - ftp://ftp.net-snmp.org/pub/sourceforge/net-snmp/ucd-snmp.tar.gz
   - ftp://ucd-snmp.ucdavis.edu/ucd-snmp.tar.gz
   - ftp://sunsite.cnlab-switch.ch:/mirror/ucd-snmp/ucd-snmp.tar.gz
   - ftp://ftp.win.ne.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
