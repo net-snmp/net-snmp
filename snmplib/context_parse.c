@@ -78,7 +78,7 @@ read_context_database(char *filename)
     int state = IDENTITY_STATE;
     oid contextid[64];
     int contextidlen;
-    int view = 0, entityLen = 0, time = 0;
+    int view = 0, entityLen = 0, icltime = 0;
     u_char entity[64];
     int dstParty, srcParty, proxyIdLen;
     oid proxyId[64];
@@ -136,14 +136,14 @@ read_context_database(char *filename)
 		    return -1;
 		}
 	    view = atoi(buf1);
-	    if (!strcasecmp((char*)entity, "Null"))
+	    if (!strcasecmp(entity, "Null"))
 		entityLen = 0;
 	    else
-		entityLen = strlen((char*)entity);
+		entityLen = strlen(entity);
 	    if (!strcasecmp(buf3, "currentTime"))
-		time = CURRENTTIME;
+		icltime = CURRENTTIME;
 	    else if (!strcasecmp(buf3, "restartTime"))
-		time = RESTARTTIME;
+		icltime = RESTARTTIME;
 	    else {
 		error_exit("Bad local time", linenumber, filename);
 		fclose(fp);
@@ -204,7 +204,7 @@ read_context_database(char *filename)
 	    cxp->contextViewIndex = view;
 	    memmove(cxp->contextLocalEntity, entity, entityLen);
 	    cxp->contextLocalEntityLen = entityLen;
-	    cxp->contextLocalTime = time;
+	    cxp->contextLocalTime = icltime;
 	    cxp->contextDstPartyIndex = dstParty;
 	    cxp->contextSrcPartyIndex = srcParty;
 	    memmove(cxp->contextProxyContext, proxyId, proxyIdLen * sizeof(oid));
