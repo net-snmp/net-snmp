@@ -19,7 +19,7 @@
 #endif
 
 #include "mibincl.h"
-#include "system.h"
+#include <net-snmp/system.h>
 #include "util_funcs.h"
 
 #include "snmp_mib.h"

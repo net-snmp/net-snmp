@@ -40,14 +40,14 @@
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "snmp_client.h"
-#include "snmp_alarm.h"
-#include "snmp_logging.h"
-#include "default_store.h"
-#include "snmp.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h>
+#include <net-snmp/snmp_client.h>
+#include <net-snmp/snmp_alarm.h>
+#include <net-snmp/snmp_logging.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/snmp.h>
 
 #include <net-snmp/agent/snmp_vars.h>
 #include <net-snmp/agent/snmp_agent.h>
@@ -56,19 +56,19 @@
 #include "snmpd.h"
 #include "agentx/protocol.h"
 #include "agentx/client.h"
-#include "default_store.h"
+#include <net-snmp/default_store.h>
 #include <net-snmp/agent/ds_agent.h>
-#include "callback.h"
+#include <net-snmp/callback.h>
 #include <net-snmp/agent/agent_registry.h>
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_trap.h>
-#include "snmp_debug.h"
+#include <net-snmp/snmp_debug.h>
 #include "mib_module_config.h"
 #ifdef USING_MIBII_SYSORTABLE_MODULE
 #include "mibII/sysORTable.h"
 #endif
-#include "system.h"
-#include "snmpCallbackDomain.h"
+#include <net-snmp/system.h>
+#include <net-snmp/snmpCallbackDomain.h>
 
 #include "subagent.h"
 

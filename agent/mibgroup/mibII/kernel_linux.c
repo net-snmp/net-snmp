@@ -6,7 +6,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include "mibincl.h"
 #include "util_funcs.h"
-#include "tools.h"
+#include <net-snmp/tools.h>
 
 #if HAVE_STRING_H
 #include <string.h>

@@ -178,9 +178,9 @@
 
 /* #include "../common_header.h" */
 
-#include "system.h"
-#include "snmp_logging.h"
-#include "read_config.h"
+#include <net-snmp/system.h>
+#include <net-snmp/snmp_logging.h>
+#include <net-snmp/read_config.h>
 
 #if HAVE_OSRELDATE_H
 #include <osreldate.h>

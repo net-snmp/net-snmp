@@ -62,19 +62,19 @@
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h"
-#include "mib.h"
-#include "parse.h"
-#include "system.h"
-#include "snmp_api.h"
-#include "snmp_debug.h"
-#include "snmp_logging.h"
-#include "snmp_impl.h"
-#include "default_store.h"
-#include "callback.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/mib.h>
+#include <net-snmp/parse.h>
+#include <net-snmp/system.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/snmp_logging.h>
+#include <net-snmp/snmp_impl.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/callback.h>
 
-#include "read_config.h"
-#include "tools.h"
+#include <net-snmp/read_config.h>
+#include <net-snmp/tools.h>
 
 static int config_errors;
 

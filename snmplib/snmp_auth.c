@@ -75,16 +75,16 @@ SOFTWARE.
 #include <in.h>
 #endif
 
-#include "asn1.h"
-#include "snmp.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "mib.h"
-#include "md5.h"
-#include "system.h"
-#include "tools.h"
-#include "snmp_debug.h"
-#include "scapi.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h>
+#include <net-snmp/mib.h>
+#include <net-snmp/md5.h>
+#include <net-snmp/system.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/scapi.h>
 
 /*
  * Globals.

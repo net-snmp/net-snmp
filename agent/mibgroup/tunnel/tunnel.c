@@ -60,18 +60,18 @@
 #include <linux/if_arp.h>
 
 #include "config.h"
-#include "snmp_alarm.h"
-#include "callback.h"
-#include "default_store.h"
-#include "asn1.h"
-#include "snmp.h"
-#include "snmp_debug.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
+#include <net-snmp/snmp_alarm.h>
+#include <net-snmp/callback.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h>
 #include <net-snmp/agent/snmp_vars.h>
 #include <net-snmp/agent/var_struct.h>
 #include <net-snmp/agent/agent_read_config.h>
-#include "tools.h"
+#include <net-snmp/tools.h>
 #include "util_funcs.h"
 
 #include "tunnel.h"

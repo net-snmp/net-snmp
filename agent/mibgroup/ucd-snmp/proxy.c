@@ -7,16 +7,16 @@
 #if HAVE_STRING_H
 #include <string.h>
 #endif
-#include <getopt.h>
+#include <net-snmp/getopt.h>
 
 #include <netinet/in.h>
 
 #include "mibincl.h"
 #include "proxy.h"
-#include "snmp_api.h"
-#include "snmp_client.h"
-#include "snmp_parse_args.h"
-#include "system.h"
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_client.h>
+#include <net-snmp/snmp_parse_args.h>
+#include <net-snmp/system.h>
 
 static struct simple_proxy *proxies=NULL;
 

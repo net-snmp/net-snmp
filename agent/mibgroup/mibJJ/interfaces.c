@@ -126,8 +126,8 @@
 #endif /* defined(freebsd3) */
 #endif /* HAVE_SYS_SYSCTL_H */
 
-#include "system.h"
-#include "snmp_logging.h"
+#include <net-snmp/system.h>
+#include <net-snmp/snmp_logging.h>
 
 #if HAVE_OSRELDATE_H
 #include <osreldate.h>

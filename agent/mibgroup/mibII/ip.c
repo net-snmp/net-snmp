@@ -79,7 +79,7 @@
 #include <syslog.h>
 #endif
 
-#include "tools.h"
+#include <net-snmp/tools.h>
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
@@ -91,7 +91,7 @@
 
 #include "mibincl.h"
 #include "util_funcs.h"
-#include "system.h"
+#include <net-snmp/system.h>
 #include <net-snmp/agent/auto_nlist.h>
 
 #ifdef MIB_IPCOUNTER_SYMBOL

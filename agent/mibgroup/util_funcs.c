@@ -80,7 +80,7 @@
 #include "mibincl.h"
 #include "struct.h"
 #include "util_funcs.h"
-#include "system.h"
+#include <net-snmp/system.h>
 #if HAVE_LIMITS_H
 #include "limits.h"
 #endif
@@ -89,7 +89,7 @@
 #else
 #define setPerrorstatus(x) snmp_log_perror(x)
 #endif
-#include "read_config.h"
+#include <net-snmp/read_config.h>
 
 #ifdef EXCACHETIME
 static long cachetime;

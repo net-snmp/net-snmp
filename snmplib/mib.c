@@ -68,21 +68,21 @@ SOFTWARE.
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "mib.h"
-#include "snmp.h"
-#include "snmp_impl.h"
-#include "parse.h"
-#include "int64.h"
-#include "tools.h"
-#include "system.h"
-#include "read_config.h"
-#include "snmp_debug.h"
-#include "default_store.h"
-#include "snmp_logging.h"
-#include "tools.h"
-#include "snmp_client.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/mib.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/snmp_impl.h>
+#include <net-snmp/parse.h>
+#include <net-snmp/int64.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/system.h>
+#include <net-snmp/read_config.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/snmp_logging.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/snmp_client.h>
 
 static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
 

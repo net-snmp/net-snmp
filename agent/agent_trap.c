@@ -39,28 +39,28 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#include <getopt.h>
+#include <net-snmp/getopt.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "snmp_client.h"
-#include "snmp.h"
-#include "system.h"
-#include "read_config.h"
-#include "snmp_debug.h"
-#include "snmp_parse_args.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h>
+#include <net-snmp/snmp_client.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/system.h>
+#include <net-snmp/read_config.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/snmp_parse_args.h>
 #include <net-snmp/agent/agent_trap.h>
-#include "callback.h"
+#include <net-snmp/callback.h>
 #include <net-snmp/agent/agent_callbacks.h>
-#include "tools.h"
-#include "snmp_logging.h"
-#include "callback.h"
-#include "snmp_transport.h"
+#include <net-snmp/tools.h>
+#include <net-snmp/snmp_logging.h>
+#include <net-snmp/callback.h>
+#include <net-snmp/snmp_transport.h>
 
 #include "mib_module_config.h"
 

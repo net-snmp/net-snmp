@@ -44,12 +44,12 @@
 #include <netinet/in.h>
 #endif
 
-#include "../../../snmplib/system.h"
-#include "asn1.h"
-#include "snmp.h"
-#include "mib.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
+#include <net-snmp/system.h>
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/mib.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h>
 #include <net-snmp/agent/snmp_vars.h>
 #include "smux.h"
 #include "snmp_ospf.h"

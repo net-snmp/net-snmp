@@ -80,7 +80,7 @@
 #if HAVE_INET_MIB2_H
 #include <inet/mib2.h>
 #endif
-#include "tools.h"
+#include <net-snmp/tools.h>
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
@@ -90,7 +90,7 @@
 #include "kernel_linux.h"
 #endif
 
-#include "system.h"
+#include <net-snmp/system.h>
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif

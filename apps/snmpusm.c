@@ -52,22 +52,22 @@
 #include <arpa/inet.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "snmp_client.h"
-#include "mib.h"
-#include "snmp.h"
-#include "system.h"
-#include "snmp_parse_args.h"
-#include "int64.h"
-#include "tools.h"
-#include "keytools.h"
-#include "snmp-tc.h"
-#include "transform_oids.h"
-#include "snmpv3.h"
-#include "default_store.h"
-#include "getopt.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h>
+#include <net-snmp/snmp_client.h>
+#include <net-snmp/mib.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/system.h>
+#include <net-snmp/snmp_parse_args.h>
+#include <net-snmp/int64.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/keytools.h>
+#include <net-snmp/snmp-tc.h>
+#include <net-snmp/transform_oids.h>
+#include <net-snmp/snmpv3.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/getopt.h>
 
 int main (int, char **);
 

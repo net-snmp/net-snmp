@@ -20,9 +20,9 @@
 
 #include "mibincl.h"
 #include "snmpTargetParamsEntry.h"
-#include "read_config.h"
-#include "callback.h"
-#include "snmp_secmod.h"
+#include <net-snmp/read_config.h>
+#include <net-snmp/callback.h>
+#include <net-snmp/snmp_secmod.h>
 
 #define snmpTargetParamsOIDLen 11  /*This is base+column, 
 				     i.e. everything but index*/

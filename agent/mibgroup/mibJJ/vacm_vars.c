@@ -37,13 +37,13 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
-#include "snmp-tc.h"
+#include <net-snmp/snmp-tc.h>
 #include "mibincl.h"
-#include "read_config.h"
+#include <net-snmp/read_config.h>
 #include <net-snmp/agent/agent_read_config.h>
-#include "system.h"
-#include "vacm.h"
-#include "callback.h"
+#include <net-snmp/system.h>
+#include <net-snmp/vacm.h>
+#include <net-snmp/callback.h>
 #include <net-snmp/agent/agent_registry.h>
 #include <net-snmp/agent/agent_callbacks.h>
 #include "vacm_vars.h"

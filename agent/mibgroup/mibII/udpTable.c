@@ -95,9 +95,9 @@
 #include <windows.h>
 #endif
 
-#include "system.h"
-#include "asn1.h"
-#include "snmp_debug.h"
+#include <net-snmp/system.h>
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_debug.h>
 
 
 #include "mibincl.h"

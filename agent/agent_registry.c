@@ -44,15 +44,15 @@
 #endif
 
 #include "mibincl.h"
-#include "snmp_client.h"
-#include "default_store.h"
+#include <net-snmp/snmp_client.h>
+#include <net-snmp/default_store.h>
 #include <net-snmp/agent/ds_agent.h>
-#include "callback.h"
+#include <net-snmp/callback.h>
 #include <net-snmp/agent/agent_callbacks.h>
 #include <net-snmp/agent/agent_registry.h>
-#include "snmp_alarm.h"
-#include "snmp_secmod.h"
-#include "vacm.h"
+#include <net-snmp/snmp_alarm.h>
+#include <net-snmp/snmp_secmod.h>
+#include <net-snmp/vacm.h>
 
 #include "snmpd.h"
 #include "mibgroup/struct.h"

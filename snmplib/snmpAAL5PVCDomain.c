@@ -21,12 +21,12 @@
 #endif
 #include <atm.h>
 
-#include "asn1.h"
-#include "snmp.h"
-#include "snmp_debug.h"
-#include "default_store.h"
-#include "snmp_transport.h"
-#include "snmpAAL5PVCDomain.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/snmp_transport.h>
+#include <net-snmp/snmpAAL5PVCDomain.h>
 
 
 const oid ucdSnmpAAL5PVCDomain[9] = { UCDAVIS_MIB, 251, 3 };

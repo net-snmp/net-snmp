@@ -58,15 +58,15 @@
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h"
-#include "snmp.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h>
 #include <net-snmp/agent/snmp_vars.h>
-#include "snmp_debug.h"
+#include <net-snmp/snmp_debug.h>
 #include "ip.h"
 #include "route_write.h"
-#include "snmp_logging.h"
+#include <net-snmp/snmp_logging.h>
 
 #ifdef cygwin
 #define WIN32

@@ -35,7 +35,7 @@
 #include <net-snmp/agent/agent_read_config.h>
 #include "util_funcs.h"
 
-#include <snmp_alarm.h>
+#include <net-snmp/snmp_alarm.h>
 
 #define MAXLOGMATCH   50
 

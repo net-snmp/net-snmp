@@ -39,14 +39,14 @@
 #endif
 
 #include "mibincl.h"
-#include "system.h"
+#include <net-snmp/system.h>
 #include "../struct.h"
 #include "../util_funcs.h"
 #include "sysORTable.h"
 #include "../../snmpd.h"
-#include "default_store.h"
+#include <net-snmp/default_store.h>
 #include <net-snmp/agent/ds_agent.h>
-#include "callback.h"
+#include <net-snmp/callback.h>
 #include <net-snmp/agent/agent_callbacks.h>
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE

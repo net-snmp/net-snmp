@@ -42,17 +42,17 @@
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "callback.h"
-#include "snmp_secmod.h"
-#include "snmpusm.h"
-#include "lcd_time.h"
-#include "snmp_debug.h"
-#include "tools.h"
-#include "scapi.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/callback.h>
+#include <net-snmp/snmp_secmod.h>
+#include <net-snmp/snmpusm.h>
+#include <net-snmp/lcd_time.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/scapi.h>
 
-#include "transform_oids.h"
+#include <net-snmp/transform_oids.h>
 
 
 /*

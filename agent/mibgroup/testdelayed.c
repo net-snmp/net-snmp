@@ -10,9 +10,9 @@
 #include "mibincl.h"
 #include "testdelayed.h"
 #include <net-snmp/agent/snmp_agent.h>
-#include "snmp_alarm.h"
+#include <net-snmp/snmp_alarm.h>
 
-#include "snmp_api.h"
+#include <net-snmp/snmp_api.h>
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/instance.h>
 #include <net-snmp/agent/serialize.h>

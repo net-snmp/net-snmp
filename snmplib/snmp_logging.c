@@ -60,11 +60,11 @@
 #include <windows.h>
 #endif
 
-#include "asn1.h"
-#include "default_store.h"
-#include "snmp_logging.h"
-#include "callback.h"
-#include "system.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/snmp_logging.h>
+#include <net-snmp/callback.h>
+#include <net-snmp/system.h>
 #define LOGLENGTH 1024
 
 static int do_syslogging=0;

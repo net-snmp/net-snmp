@@ -19,7 +19,7 @@
 #endif
 
 #include "mibincl.h"
-#include "tools.h"
+#include <net-snmp/tools.h>
 #include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/serialize.h>

@@ -83,7 +83,7 @@
 #include "at.h"
 #include "interfaces.h"
 #include <net-snmp/agent/auto_nlist.h>
-#include "system.h"
+#include <net-snmp/system.h>
 
 #if defined(HAVE_SYS_SYSCTL_H) && !defined(CAN_USE_SYSCTL)
 # if defined(RTF_LLINFO) && !defined(irix6)

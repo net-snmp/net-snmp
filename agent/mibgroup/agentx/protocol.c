@@ -43,14 +43,14 @@
 #include <winsock.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "snmp.h"
-#include "snmp_client.h"
-#include "snmp_debug.h"
-#include "mib.h"
-#include "tools.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/snmp_client.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/mib.h>
+#include <net-snmp/tools.h>
 
 #include "agentx/protocol.h"
 

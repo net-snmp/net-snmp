@@ -15,15 +15,15 @@
 #include <unistd.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "tools.h"
-#include "snmp_enum.h"
-#include "snmp_logging.h"
-#include "callback.h"
-#include "default_store.h"
-#include "snmp_secmod.h"
-#include "snmpusm.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/snmp_enum.h>
+#include <net-snmp/snmp_logging.h>
+#include <net-snmp/callback.h>
+#include <net-snmp/default_store.h>
+#include <net-snmp/snmp_secmod.h>
+#include <net-snmp/snmpusm.h>
 
 static struct snmp_secmod_list *registered_services = NULL;
 

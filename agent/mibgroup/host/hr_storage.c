@@ -107,8 +107,8 @@
 #include <strings.h>
 #endif
 
-#include "system.h"
-#include "snmp_logging.h"
+#include <net-snmp/system.h>
+#include <net-snmp/snmp_logging.h>
 
 #define HRSTORE_MONOTONICALLY_INCREASING
 

@@ -66,7 +66,7 @@
 
 #include <stdio.h>
 
-#include "snmp_logging.h"
+#include <net-snmp/snmp_logging.h>
 #include "host_res.h"
 #include "hr_swrun.h"
 #include <net-snmp/agent/auto_nlist.h>

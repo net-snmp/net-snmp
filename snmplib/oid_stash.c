@@ -4,12 +4,12 @@
 
 #include <stdlib.h>
 #include <sys/types.h>
-#include <asn1.h>
-#include <snmp_impl.h>
-#include <snmp.h>
-#include <snmp_api.h>
-#include <tools.h>
-#include <oid_stash.h>
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_impl.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/tools.h>
+#include <net-snmp/oid_stash.h>
 
 oid_stash_node *
 oid_stash_create_sized_node(size_t mysize) 

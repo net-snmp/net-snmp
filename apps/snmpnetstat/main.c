@@ -50,7 +50,7 @@ char copyright[] =
 #else
 #include <strings.h>
 #endif
-#include <getopt.h>
+#include <net-snmp/getopt.h>
 
 #include <sys/types.h>
 #if HAVE_SYS_PARAM_H
@@ -94,16 +94,16 @@ char copyright[] =
 #include <arpa/inet.h>
 #endif
 
-#include "asn1.h"
-#include "mib.h"
-#include "snmp.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "snmp_client.h"
+#include <net-snmp/asn1.h>
+#include <net-snmp/mib.h>
+#include <net-snmp/snmp.h>
+#include <net-snmp/snmp_api.h>
+#include <net-snmp/snmp_impl.h>
+#include <net-snmp/snmp_client.h>
 #include "version.h"
-#include "snmp_debug.h"
-#include "system.h"
-#include "default_store.h"
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/system.h>
+#include <net-snmp/default_store.h>
 
 #include "netstat.h"
 

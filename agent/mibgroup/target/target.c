@@ -11,13 +11,13 @@
 
 #include "mibincl.h"
 
-#include "snmp.h"
-#include "tools.h"
+#include <net-snmp/snmp.h>
+#include <net-snmp/tools.h>
 #include "snmpTargetAddrEntry.h"
 #include "snmpTargetParamsEntry.h"
 #include "target.h"
-#include "snmp-tc.h"
-#include "snmp_transport.h"
+#include <net-snmp/snmp-tc.h>
+#include <net-snmp/snmp_transport.h>
 
 #define MAX_TAGS 128
 

@@ -91,10 +91,10 @@
 #include "kernel_hpux.h"
 #endif
 
-#include "system.h"
-#include "asn1.h"
-#include "snmp_debug.h"
-#include "tools.h"
+#include <net-snmp/system.h>
+#include <net-snmp/asn1.h>
+#include <net-snmp/snmp_debug.h>
+#include <net-snmp/tools.h>
 
 #include <net-snmp/agent/auto_nlist.h>
 
