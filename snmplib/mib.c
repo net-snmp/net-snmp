@@ -943,7 +943,7 @@ handle_mibdirs_conf(const char *token,
         ctmp = (char *)malloc(strlen(confmibdir) + strlen(line) + 1);
         if (*line == '+')
             line++;
-        sprintf(ctmp,"%s:%s",confmibdir,line);
+        sprintf(ctmp,"%s%c%s",confmibdir, ENV_SEPARATOR_CHAR, line);
         free(confmibdir);
         confmibdir = ctmp;
     } else {
@@ -962,7 +962,7 @@ handle_mibs_conf(const char *token,
         ctmp = (char *)malloc(strlen(confmibs) + strlen(line) + 1);
         if (*line == '+')
             line++;
-        sprintf(ctmp,"%s:%s",confmibs,line);
+        sprintf(ctmp,"%s%c%s",confmibs, ENV_SEPARATOR_CHAR, line);
         free(confmibs);
         confmibs = ctmp;
     } else {
