@@ -855,7 +855,7 @@ init_mib __P((void))
       }
 #endif
     }
-    if ( env_var == NULL ) {
+    if ( env_var != NULL ) {
       entry = strtok( env_var, ":" );
       while ( entry ) {
         read_mib(entry);
