@@ -94,7 +94,7 @@ clean:
 distclean: clean configclean
 
 configclean:
-	rm -f config.cache config.status config.log config.h
+	rm -f config.cache config.status config.log config.h libtool
 	rm -f Makefile snmplib/Makefile				\
 		agent/Makefile agent/mibgroup/Makefile		\
 		apps/Makefile  apps/snmpnetstat/Makefile	\
