@@ -62,7 +62,7 @@ we could configure full read-write access to the whole OID tree
 using the commands:
 
 .PP
-snmpvacm -v3 localhost createSec2Group 3 RWGroup dave
+snmpvacm -v3 localhost createSec2Group 3 dave RWGroup
 .PP
 snmpvacm -v3 localhost createView   all .1 .1
 .PP
@@ -81,11 +81,11 @@ we could set up read-only access to a portion
 of the OID tree using the commands:
 
 .PP
-snmpvacm -v3 localhost createSec2Group 3 ROGroup wes
+snmpvacm -v3 localhost createSec2Group 3 wes ROGroup
 .PP
 snmpvacm -v3 localhost createView   sysView  system system
 .PP
-snmpvacm -v3 localhost createAccess  ROGroup 3 0 1 system none none
+snmpvacm -v3 localhost createAccess  ROGroup 3 0 1 sysView none none
 .IP
 This creates a new security group named "ROGroup" containing the (pre-existing)
 user "wes", a new view "sysView" containing just the OID tree based on
