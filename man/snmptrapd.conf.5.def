@@ -79,6 +79,9 @@ for the layout characters available.
 .IP "format2 format"
 The format used to print a SNMPv2 TRAP2 or INFORM message (note that
 the SNMPv3 protocol uses SNMPv2 style TRAPs and INFORMs).
+.IP "forward OID|default DESTINATION"
+Forwards traps received to DESTINATION if they match the notification
+type indicated by OID (or the word default forwards them all).
 .SH NOTES
 .IP o
 The daemon blocks on the executing traphandle commands.  (This should
