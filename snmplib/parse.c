@@ -333,7 +333,6 @@ static void do_subtree (struct tree *, struct node **);
 static void do_linkup (struct module *, struct node *);
 static void dump_module_list (void);
 static int get_token (FILE *, char *, int);
-static char last = ' ';
 static int parseQuoteString (FILE *, char *, int);
 static int tossObjectIdentifier (FILE *);
 static int  name_hash (const char *);
@@ -2216,7 +2215,6 @@ parse_imports(FILE *fp)
 #define MAX_IMPORTS	256
     struct module_import import_list[MAX_IMPORTS];
     int this_module, old_current_module;
-    char old_last;
     const char *old_File;
     int old_line;
     struct module *mp;
@@ -2252,11 +2250,9 @@ parse_imports(FILE *fp)
 		import_list[i].modid = this_module;
 
 	    old_current_module = current_module;	/* Save state */
-	    old_last = last;
             old_File = File;
 	    old_line = Line;
 	    current_module = this_module;
-	    last = ' ';
 
 		/*
 		 * Recursively read any pre-requisite modules
@@ -2268,7 +2264,6 @@ parse_imports(FILE *fp)
 	    }
 
 	    current_module = old_current_module;	/* Restore state */
-	    last = old_last;
 	    File = old_File;
 	    Line = old_line;
 	}
@@ -2789,8 +2784,8 @@ is_labelchar (int ich)
 /*
  * Parses a token from the file.  The type of the token parsed is returned,
  * and the text is placed in the string pointed to by token.
+ * Warning: this method may recurse.
  */
-
 static int
 get_token(FILE *fp,
 	  char *token,
@@ -2802,14 +2797,13 @@ get_token(FILE *fp,
     register struct tok *tp;
     int too_long = 0;
 
-    *cp = '\0';
-    ch = last;
     /* skip all white space */
-    while(isspace(ch) && ch != EOF){
+    do {
         ch = getc(fp);
         if (ch == '\n')
             Line++;
     }
+    while(isspace(ch) && ch != EOF);
     *cp++ = ch; *cp = '\0';
     switch (ch) {
     case EOF:
@@ -2885,7 +2879,6 @@ get_token(FILE *fp,
 	if (ch_next == '-') {
 	  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM)) {
 	    /* Treat the rest of this line as a comment. */
-	    last = ' '; /* skip last char next time. */
 	    while ((ch_next != EOF) && (ch_next != '\n'))
 	    ch_next = getc(fp);
 	  } else {
