@@ -12,6 +12,7 @@ use AutoLoader;
 use NetSNMP::default_store (':all');
 use NetSNMP::agent::default_store (':all');
 use NetSNMP::OID (':all');
+use NetSNMP::agent::netsnmp_request_info;
 
 our @ISA = qw(Exporter AutoLoader DynaLoader);
 
@@ -162,12 +163,6 @@ sub agent_check_and_process {
 }
 
 bootstrap NetSNMP::agent $VERSION;
-
-package NetSNMP::agent::netsnmp_request_info;
-
-sub getOID {
-  return NetSNMP::OID::newwithptr("NetSNMP::OID",getOIDptr($_[0]));
-}
 
 # Preloaded methods go here.
 

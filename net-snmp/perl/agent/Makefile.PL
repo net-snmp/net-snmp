@@ -12,7 +12,12 @@ sub InitMakeParams {
     my %Params = (
 		  'NAME'		=> 'NetSNMP::agent',
 		  'VERSION_FROM'	=> 'agent.pm', # finds $VERSION
-		  'PREREQ_PM'           => {'NetSNMP::OID' => 0.1}
+		  'PREREQ_PM'           => {'NetSNMP::OID' => 0.1},
+		  'PM'                => { 
+		      'agent.pm' => '$(INST_LIBDIR)/agent.pm',
+		      'netsnmp_request_info.pm' =>
+			  '$(INST_LIBDIR)/agent/netsnmp_request_info.pm'
+		  },
 		  );
 
     my $snmp_lib, $snmp_llib, $sep;
