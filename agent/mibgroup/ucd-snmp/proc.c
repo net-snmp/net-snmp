@@ -42,6 +42,9 @@
 #  include <time.h>
 # endif
 #endif
+#if HAVE_KVM_H
+#include <kvm.h>
+#endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
@@ -62,6 +65,7 @@
 #include "read_config.h"
 #include "agent_read_config.h"
 #include "system.h"
+#include "kernel.h"
 
 #ifdef USING_UCD_SNMP_ERRORMIB_MODULE
 #include "errormib.h"
@@ -596,17 +600,12 @@ sh_count_procs(char *procname)
 int
 sh_count_procs(char *procname)
 {
-	static kvm_t *kd = NULL;
 	struct proc *p;
 	struct user *u;
 	int total;
 
 	if (kd == NULL) {
-		kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "sunps");
-                if( !kd ) {
-                  return(-1);
-                }
-		/* error check! */
+		return -1;
 	}
         if( kvm_setproc(kd) < 0 ) {
           return( -1 );
