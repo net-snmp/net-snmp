@@ -53,7 +53,7 @@ if (keys(%knownfiles)) {
     my @files = display_menu(-head => "The following configuration files were found:\n",
 			     -tail => "Would you like me to read them in?  Their content will be added to the\noutput files created by this session.\nValid answer examples: \"all\", \"none\",\"1,2,5\"\n",
 			     -multiple => 1,
-			     -question => '? ',
+			     -question => 'Read in which',
 			     -defaultvalue => 'all',
 			     sort keys(%knownfiles));
     foreach my $i (@files) {
@@ -82,7 +82,7 @@ if ($#ARGV >= 0) {
     #
     while(1) {
 	my $line = display_menu(-head => "Select file to create:\n",
-				-question => 'Select File>',
+				-question => 'Select File',
 				-otheranswers => ['quit', 'q'],
 				keys(%filetypes));
 	last if ($line eq "q" or $line eq "quit");
@@ -113,7 +113,7 @@ sub build_file {
     while(1) {
 	my $line = display_menu(-head => "Select configuration section for $filename to operate on:\n",
 				-otheranswers => ['finished','f'],
-				-question => "Select section>",
+				-question => "Select section",
 				-numeric => 1,
 				map { $_->{'title'}[0] } @$fileconf);
 
@@ -129,7 +129,7 @@ sub do_section {
 	my $line =
 	    display_menu(-head => "Select from:\n",
 			 -otheranswers => ['finished','f'],
-			 -question => 'Select section>',
+			 -question => 'Select section',
 			 -descriptions => [map { $confsect->{$_}{info}[0] } 
 					   keys(%{$confsect->{'thetokens'}})],
 			 keys(%{$confsect->{'thetokens'}}));
@@ -313,7 +313,8 @@ sub output_files {
 
 sub get_answer {
     my ($term, $question, $regexp, $defaultval) = @_;
-    $question .= "(default = $defaultval): " if (defined($defaultval) && $defaultval ne "");
+    $question .= " (default = $defaultval)" if (defined($defaultval) && $defaultval ne "");
+    $question .= ": ";
     my $ans = $term->readline($question);
     return $defaultval if ($ans eq "" && defined($defaultval) && 
 			   $defaultval ne "");
@@ -360,7 +361,11 @@ sub display_menu {
     }
 
     my $count=1;
-    print $config{'-head'} if ($config{'-head'});
+    print "\n" if (!defined($config{'-dense'}));
+    if ($config{'-head'}) {
+	print $config{'-head'};
+	print "\n" if (!defined($config{'-dense'}));
+    }
     my @answers = @_;
     my @list;
     if (defined($config{'-descriptions'}) && 
@@ -372,6 +377,7 @@ sub display_menu {
     foreach my $i (@list) {
 	printf "  %2d:  $i\n", $count++;
     }
+    print "\n" if (!defined($config{'-dense'}));
     if (defined($config{'-otheranswers'})) {
 	if (ref($config{'-otheranswers'}) eq 'ARRAY') {
 	    print "Other options: ", join(",",@{$config{'-otheranswers'}}),"\n";
@@ -387,8 +393,12 @@ sub display_menu {
 		       $config{'-otheranswers'}{$i});
 	    }
 	}
+	print "\n" if (!defined($config{'-dense'}));
     }
-    print $config{'-tail'} if ($config{'-tail'});
+    if ($config{'-tail'}) {
+	print $config{'-tail'};
+	print "\n" if (!defined($config{'-dense'}));
+    }
 
     if (defined($config{'-question'})) {
 	while(1) {
