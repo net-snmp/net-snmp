@@ -419,7 +419,7 @@ netsnmp_table_iterator_helper_handler(netsnmp_mib_handler *handler,
                 (iinfo->free_data_context) (callback_data_keep, iinfo);
             if (free_this_index_search)
                 snmp_free_varbind(free_this_index_search);
-#ifdef NOT_SERIALIZED
+#ifndef NOT_SERIALIZED
             if (callback_loop_context && iinfo->free_loop_context_at_end)
                 (iinfo->free_loop_context_at_end) (callback_loop_context,
                                                    iinfo);
