@@ -155,7 +155,7 @@ compiler versions has been dropped and is no longer supported.
 A manually generated net-snmp-config.h file has been provided for use with
 the win32 build since the basic win32 environment does not support autoconf.
 
-Note: the compiled in MIB path is \usr\mibs which may be changed by
+Note: the compiled in MIB path is /usr/mibs which may be changed by
 editing win32/net-snmp/net-snmp-config.h.  Note that the install
 instructions below should be adjusted when changes are made to paths.
 
@@ -226,26 +226,14 @@ library debug option is set to 'Program Database' or "/Zi".
 Building
 --------
 
-Because snmptrapd builds only using win32.dsw, and since the library
-projects are exactly the same from the workspaces' point of view,
-start by building from the win32.dsw workspace.
-
-1. Open win32.dsw.  Click "Build->Batch Build..."  
-2. Set Release and/or Debug in 'Project configurations' to suit.
-3. Click "ReBuild All".
-4. When building is done, View the Output window, clip and
+1. Open win32.dsw if you do not have the Platform SDK installed, 
+   otherwise open win32sdk.dsw
+2. Click "Build->Batch Build..."  
+3. Set Release and/or Debug in 'Project configurations' to suit.
+4. Click "Build".
+5. When building is done, View the Output window, clip and
    save to a text file if there is some information to share.
-5. Click "File->Close Workspace".
-
-
-Skip the next five steps if you did not install the Platform SDK.
-
-6. Open win32sdk.dsw.  Click "Build->Batch Build..."
-7. Set Release and/or Debug in 'Project configurations' to suit.
-8. Set netsnmpmibssdk, snmpdsdk, then Click "Build".
-9. When building is done, View the Output window, clip and
-   save to a text file if there is some information to share.
-10.Click "File->Close Workspace".
+6. Click "File->Close Workspace".
 
 
 ***************************************************************************
