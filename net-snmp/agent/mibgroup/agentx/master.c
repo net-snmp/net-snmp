@@ -201,6 +201,7 @@ agentx_got_response( int operation,
          *  If the request failed, locate the
          *    original index of the variable resonsible
          */
+	DEBUGMSGTL(("agentx/master","agentx_got_response() error branch\n"));
         ret = 0;
         for(request = requests, i = 1; request; request = request->next, i++) {
             if (request->index == pdu->errindex) {
@@ -216,6 +217,7 @@ agentx_got_response( int operation,
             set_request_error(cache->reqinfo, request,
                               SNMP_ERR_GENERR);
         free_delegated_cache(cache);
+	DEBUGMSGTL(("agentx/master","end error branch\n"));
         return 1;
     } else if (cache->reqinfo->mode == MODE_GET
                || cache->reqinfo->mode == MODE_GETNEXT
@@ -327,17 +329,38 @@ agentx_master_handler(
         return SNMP_ERR_NOERROR;
     }
 
-    while(request) {
+    while (request) {
 
         /* loop through all the requests and create agentx ones out of them */
 
-        if (reqinfo->mode == MODE_GETNEXT ||
-            reqinfo->mode == MODE_GETBULK) {
-            snmp_pdu_add_variable(pdu, request->requestvb->name,
-                                  request->requestvb->name_length,
-                                  ASN_PRIV_EXCL_RANGE,
-                                  (u_char *) request->range_end,
-                                  request->range_end_len * sizeof(oid));
+        if (reqinfo->mode == MODE_GETNEXT || reqinfo->mode == MODE_GETBULK) {
+	    if (request->inclusive) {
+		DEBUGMSGTL(("agentx/master", "INCLUSIVE varbind "));
+		DEBUGMSGOID(("agentx/master", request->requestvb->name,
+			     request->requestvb->name_length));
+		DEBUGMSG(("agentx/master", " scoped to "));
+		DEBUGMSGOID(("agentx/master", request->range_end,
+			     request->range_end_len));
+		DEBUGMSG(("agentx/master", "\n"));
+		snmp_pdu_add_variable(pdu, request->requestvb->name,
+				      request->requestvb->name_length,
+				      ASN_PRIV_INCL_RANGE,
+				      (u_char *) request->range_end,
+				      request->range_end_len * sizeof(oid));
+	    } else {
+		DEBUGMSGTL(("agentx/master", "EXCLUSIVE varbind "));
+		DEBUGMSGOID(("agentx/master", request->requestvb->name,
+			     request->requestvb->name_length));
+		DEBUGMSG(("agentx/master", " scoped to "));
+		DEBUGMSGOID(("agentx/master", request->range_end,
+			     request->range_end_len));
+		DEBUGMSG(("agentx/master", "\n"));
+		snmp_pdu_add_variable(pdu, request->requestvb->name,
+				      request->requestvb->name_length,
+				      ASN_PRIV_EXCL_RANGE,
+				      (u_char *) request->range_end,
+				      request->range_end_len * sizeof(oid));
+	    }
         } else {
             snmp_pdu_add_variable(pdu, request->requestvb->name,
                                   request->requestvb->name_length,

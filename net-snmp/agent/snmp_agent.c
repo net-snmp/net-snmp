@@ -748,7 +748,7 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
 	while ( asp->end->next_variable != NULL )
 	    asp->end = asp->end->next_variable;
     asp->vbcount = count_varbinds(asp->start);
-    asp->requests = (request_info *) calloc(asp->vbcount, sizeof(request_info));
+    asp->requests = (request_info *)calloc(asp->vbcount, sizeof(request_info));
 
     return asp;
 }
@@ -1042,6 +1042,10 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
     request_info *request;
     int cacheid;
 
+    DEBUGMSGTL(("snmp_agent", "add_vb_to_cache(%8p, %d, ", asp, vbcount));
+    DEBUGMSGOID(("snmp_agent", varbind_ptr->name, varbind_ptr->name_length));
+    DEBUGMSG(("snmp_agent", ", %8p)\n", tp));
+
     if (tp == NULL) {
         /* no appropriate registration found */
         /* make up the response ourselves */
@@ -1063,6 +1067,13 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
         }
     } else {
         /* for non-SET modes, set the type to NULL */
+      DEBUGMSGTL(("snmp_agent", "tp->start "));
+      DEBUGMSGOID(("snmp_agent", tp->start, tp->start_len));
+      DEBUGMSG(("snmp_agent", ", tp->end "));
+      DEBUGMSGOID(("snmp_agent", tp->end, tp->end_len));
+      DEBUGMSG(("snmp_agent", ", \n"));
+
+
         if (!MODE_IS_SET(asp->pdu->command))
             varbind_ptr->type = ASN_NULL;
 
@@ -1071,6 +1082,7 @@ add_varbind_to_cache(struct agent_snmp_session  *asp, int vbcount,
         request->index = vbcount;
         request->delegated = 0;
         request->processed = 0;
+	//	request->inclusive = 0;
         request->status = 0;
         request->subtree = tp;
         if (request->parent_data)
@@ -1476,12 +1488,12 @@ check_getnext_results(struct agent_snmp_session  *asp) {
             if (snmp_oid_compare(request->requestvb->name,
                                  request->requestvb->name_length,
                                  request->range_end,
-                                 request->range_end_len) > 0) {
+                                 request->range_end_len) >= 0) {
                 /* ack, it's beyond the accepted end of range. */
                 /* fix it by setting the oid to the end of range oid instead */
                 DEBUGMSGTL(("check_getnext_results",
-                            "request response %d out of range", request->index));
-                
+                        "request response %d out of range\n", request->index));
+                request->inclusive = 1;
                 snmp_set_var_objid(request->requestvb,
                                    request->range_end, request->range_end_len);
                 snmp_set_var_typed_value(request->requestvb, ASN_NULL,
@@ -1492,6 +1504,7 @@ check_getnext_results(struct agent_snmp_session  *asp) {
             if (request->requestvb->type == SNMP_ENDOFMIBVIEW) {
                 /* illegal response from a subagent.  Change it back to NULL */
                 request->requestvb->type = ASN_NULL;
+                request->inclusive = 1;
             }
                             
             if (request->requestvb->type == ASN_NULL ||
