@@ -438,14 +438,11 @@ char *snmp_mib_toggle_options(char *options) {
           break;
 
         case 'c':
-          ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM,
-                         !ds_get_boolean(DS_LIBRARY_ID,
-                                         DS_LIB_MIB_COMMENT_TERM));
+          ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_COMMENT_TERM);
           break;
            
         case 'e':
-          ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS,
-                         !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS));
+          ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS);
           break;
            
         case 'w':
@@ -457,13 +454,11 @@ char *snmp_mib_toggle_options(char *options) {
           break;
           
         case 'd':
-          ds_set_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS,
-                         !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS));
+          ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_SAVE_MIB_DESCRS);
           break;
 
         case 'R':
-          ds_set_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE,
-                         !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE));
+          ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_MIB_REPLACE);
           break;
 
         default:
@@ -2405,7 +2400,7 @@ read_module_replacements(const char *name)
 	    return;
 	}
     }
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS)) 
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_MIB_ERRORS)) 
 	print_error("Cannot find module", name, CONTINUE);
 
 }
