@@ -1297,7 +1297,8 @@ dnl installed tables (on linux in particular)
 dnl
 if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
   dnl ARG.  RPM is a real pain.
-  AC_CHECK_LIB(popt, poptParseArgvString)
+  dnl FWIW librpm.la, librpmio.la, and libpopt.la have correct dependencies.
+  _rpmlibs=""
 
   dnl zlib is required for newer versions of rpm
   _cppflags="${CPPFLAGS}"
@@ -1311,80 +1312,38 @@ if echo " $module_list " | grep " host/hr_swinst " > /dev/null; then
     fi
   ])
 
+  dnl dunno if this is needed for rpm-4.0.x, earlier probably needs.
   AC_CHECK_HEADER(zlib.h,
       AC_CHECK_LIB(z, gzread, , CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
       CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
 
-  dnl
-  dnl with rpm3 or higher, we need db1 to exist
-  dnl
+dnl two variants of bzip2 need checking.
+AC_CHECK_LIB(bz2, bzread, [_rpmlibs="$_rpmlibs -lbz2"],
+   AC_CHECK_LIB(bz2, BZ2_bzread, [_rpmlibs="$_rpmlibs -lbz2"],))
 
-  AC_CHECK_LIB(db1, dbopen,[
-    AC_DEFINE(HAVE_LIBDB)
-    LIBS="-ldb1 $LIBS"
-  ],,-lz)
+dnl two variants of db1 need checking.
+AC_CHECK_LIB(db1, dbopen, [_rpmlibs="-ldb1 $_rpmlibs"],
+   AC_CHECK_LIB(db, dbopen, [_rpmlibs="-ldb $_rpmlibs"])
+)
 
-  dnl Ok, -ldb1 may not exist, try -ldb
-  _cppflags="${CPPFLAGS}"
-  _ldflags="${LDFLAGS}"
-
-  AC_ARG_WITH(db,
-  [  --with-db[=DIR]          use db in DIR],[
-    if test -d "$withval"; then
-      CPPFLAGS="${CPPFLAGS} -I$withval/include"
-      LDFLAGS="${LDFLAGS} -L$withval/lib"
-    fi
-  ])
-
-  if test "x$ac_cv_lib_db1_dbopen" = "xno"; then
-    AC_CHECK_HEADER(db.h,
-      AC_CHECK_LIB(db, dbopen,[
-      AC_DEFINE(HAVE_LIBDB)
-      LIBS="-ldb $LIBS"
-    ], CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags}),
-    CPPFLAGS=${_cppflags} LDFLAGS=${_ldflags})
-  fi
-
-  dnl
-  dnl rpm4 or higher needs rpmio
-  dnl
-  AC_CHECK_LIB(rpmio, Fopen)
-
-  dnl
-  dnl now check for rpm
-  dnl
-  AC_CHECK_LIB(rpm, rpmdbOpen,[
-    AC_DEFINE(HAVE_LIBRPM)
-    LIBS="-lrpm $LIBS"
-    CFLAGS="$CFLAGS -I/usr/include/rpm"
-  ],,-lz)
-
-  dnl
-  dnl now check for rpm using the popt library if it failed prev.
-  dnl
-  if test x$ac_cv_lib_rpm_rpmdbOpen = xno; then
-    unset ac_cv_lib_rpm_rpmdbOpen
-    AC_CHECK_LIB(rpm, rpmdbOpen,[
-      AC_DEFINE(HAVE_LIBRPM)
-      LIBS="-lrpm -lpopt $LIBS"
-      CFLAGS="$CFLAGS -I/usr/include/rpm"
-    ],,-lpopt -lz)
-  fi
-
-  dnl
-  dnl now check for rpm using the appropriate db library if it failed prev.
-  dnl
-  if test x$ac_cv_lib_rpm_rpmdbOpen = xno; then
-    unset ac_cv_lib_rpm_rpmdbOpen
-    AC_CHECK_LIB(rpm, rpmGetFilesystemList,[
-      AC_DEFINE(HAVE_LIBRPM)
-      LIBS="-lrpm -lrpmdb -lpopt $LIBS"
-      CFLAGS="$CFLAGS -I/usr/include/rpm"
-    ],,-lrpmdb -lpopt -lz)
-  fi
-
-fi
-
+dnl two variants of db3 need checking.
+AC_CHECK_LIB(db-3.1, db_create, [_rpmlibs="-ldb-3.1 $_rpmlibs"],
+  AC_CHECK_LIB(db-3.0, db_create, [_rpmlibs="-ldb-3.0 $_rpmlibs"])
+)
+  
+dnl rpm-3.0.5 and later needs popt.
+AC_CHECK_LIB(popt, poptParseArgvString, [_rpmlibs="-lpopt $_rpmlibs"])
+  
+dnl rpm-4.0.x needs rpmio.
+AC_CHECK_LIB(rpmio, Fopen, [_rpmlibs="-lrpmio $_rpmlibs"],,$_rpmlibs)
+  
+dnl now check for rpm using the appropriate libraries.
+AC_CHECK_LIB(rpm, rpmdbOpen,[
+  AC_DEFINE(HAVE_LIBRPM)
+  LIBS="-lrpm $_rpmlibs $LIBS"
+  CFLAGS="$CFLAGS -I/usr/include/rpm"
+],,$_rpmlibs)
+  
 dnl Replace `main' with a function in -lkvm:
 AC_CHECK_LIB(kvm, kvm_read)
 dnl DYNAMIC MODULE SUPPORT
