@@ -334,12 +334,12 @@ input_variable(vp)
     fflush(stdout);
     fgets(buf, sizeof buf, stdin);
 
-    if (*buf == 0){
+    if (*buf == '\n'){
 	vp->name_length = 0;
 	return 0;
     }
     if (*buf == '$'){
-	switch(buf[1]){
+	switch(toupper(buf[1])){
 	    case 'G':
 		command = GET_REQ_MSG;
 		printf("Request type is Get Request\n");
@@ -378,7 +378,8 @@ input_variable(vp)
 		}
 		break;
 	    case 'Q':
-		switch(buf[2]){
+		switch((toupper(buf[2]))){
+                    case '\n':
 		    case NULL:
 		        printf("Quitting,  Goodbye\n");
 			exit(0);
