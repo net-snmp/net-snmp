@@ -23,6 +23,7 @@ TABLE OF CONTENTS
   Configuration
   Snmpv1 Vs. Snmpv2
   Thanks
+  Submitting Bug Reports
   Closing
 
   * = Required Reading.
@@ -131,6 +132,13 @@ CODE UPDATE ANNOUNCEMENTS / MAILING LIST(S)
   subject line of 'subscribe' or 'unsubscribe'.  To use it, mail to 
   ucd-snmp@ece.ucdavis.edu.
 
+  In addition, there is yet another mailing list called
+  ucd-snmp-coders@ece.ucdavis.edu, which is where all bug reports,
+  questions and patches should be sent to.  The traffic volume is a
+  bit higher and is really only of interest to those who intend to
+  work on the code and submit patches frequently.  To join it, mail a
+  "subscribe" request to ucd-snmp-coders-request@ece.ucdavis.edu.
+
 EXTENSIBILITY
 
   The agent that comes with this package is extensible through use of
@@ -183,17 +191,26 @@ THANKS
   I've probably forgotten people on this list.  Let me know if you've
   contributed code and I've left you out.
 
+SUBMITTING BUG REPORTS
+
+  Please submit all bug reports and patches to
+  ucd-snmp-coders@ece.ucdavis.edu.  *Please* include what version of
+  the ucd-snmp package you are using and what architecture(s) you're
+  using, as well as detailed information about exactly what is wrong.
+  If you intend to submit a patch as well, please read the PORTING
+  file before you do so.  Thanks!
+
 CLOSING
 
   I love patches.   Send some to me!  But before you do, please see
   the 'PORTING' file for information on helping me out with the
   process of integrating your patches.
 
-  Also, I'm interested if anyone actually uses/likes/hates/whatever this
-  package...  Mail me a note and let me know what you think of it!
+  Also, We're interested if anyone actually uses/likes/hates/whatever this
+  package...  Mail us a note and let us know what you think of it!
 
   Have fun,
 
     Wes Hardaker
-    Wesley.Hardaker@sphys.unil.ch
+    ucd-snmp-coders@ece.ucdavis.edu
 
