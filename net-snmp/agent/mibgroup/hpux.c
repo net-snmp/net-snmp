@@ -50,12 +50,12 @@ unsigned char *var_hp(vp, name, length, exact, var_len, write_method)
   static long long_ret;
   char errmsg[300];
 
-  bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+  memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
   newname[*length] = 0;
   result = compare(name, *length, newname, (int)vp->namelen + 1);
   if ((exact && (result != 0)) || (!exact && (result >= 0)))
     return NULL;
-  bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+  memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
   *length = *length+1; 
   *var_len = sizeof(long);	/* default length */
   switch (vp->magic){
@@ -74,7 +74,7 @@ unsigned char *var_hp(vp, name, length, exact, var_len, write_method)
       newname[*length+1] = 57;
       newname[*length+2] = 92;
       *length = *length + 3;
-      bcopy((char *)newname, (char *)name, *length * sizeof(oid));
+      memcpy( (char *)name,(char *)newname, *length * sizeof(oid));
       long_ret = ((((((128 << 8) + 120) << 8) + 57) <<8) + 92);
       return (u_char *) &long_ret;   
   }

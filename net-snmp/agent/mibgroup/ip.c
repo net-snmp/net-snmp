@@ -124,12 +124,12 @@ header_ip(vp, name, length, exact, var_len, write_method)
       DEBUGP ("var_ip: %s %d\n", c_oid, exact);
     }
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[IP_NAME_LENGTH] = 0;
     result = compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
@@ -504,7 +504,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 
     /* fill in object part of name for current (less sizeof instance part) */
 
-    bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)current,(char *)vp->name, (int)vp->namelen * sizeof(oid));
 
 #ifndef freebsd2
     Interface_Scan_Init();
@@ -538,7 +538,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	*op++ = *cp++;
 	if (exact){
 	    if (compare(current, 14, name, *length) == 0){
-		bcopy((char *)current, (char *)lowest, 14 * sizeof(oid));
+		memcpy( (char *)lowest,(char *)current, 14 * sizeof(oid));
 		lowinterface = interface;
 #if defined(linux) || defined(sunV3)
 		lowin_ifnet = ifnet;
@@ -560,13 +560,13 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 #else
 		lowin_ifaddr = in_ifaddr;
 #endif
-		bcopy((char *)current, (char *)lowest, 14 * sizeof(oid));
+		memcpy( (char *)lowest,(char *)current, 14 * sizeof(oid));
 	    }
 	}
     }
 
     if (!lowinterface) return(NULL);
-    bcopy((char *)lowest, (char *)name, 14 * sizeof(oid));
+    memcpy( (char *)name,(char *)lowest, 14 * sizeof(oid));
     *length = 14;
     *write_method = 0;
     *var_len = sizeof(long_return);
@@ -737,9 +737,9 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
       DEBUGP ("var_ipAddrEntry: %s %d\n", c_oid, exact);
     }
     memset (&Lowentry, 0, sizeof (Lowentry));
-    bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)current,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     if (*length == IP_ADDRNAME_LENGTH) /* Assume that the input name is the lowest */
-      bcopy((char *)name, (char *)lowest, IP_ADDRNAME_LENGTH * sizeof(oid));
+      memcpy( (char *)lowest,(char *)name, IP_ADDRNAME_LENGTH * sizeof(oid));
     for (NextAddr = (u_long)-1, req_type = GET_FIRST;
 	 ;
 	 NextAddr = entry.ipAdEntAddr, req_type = GET_NEXT) {
@@ -749,7 +749,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
       COPY_IPADDR(cp, (u_char *)&entry.ipAdEntAddr, op, current + IP_ADDRINDEX_OFF);
       if (exact){
 	if (compare(current, IP_ADDRNAME_LENGTH, name, *length) == 0){
-	  bcopy((char *)current, (char *)lowest, IP_ADDRNAME_LENGTH * sizeof(oid));
+	  memcpy( (char *)lowest,(char *)current, IP_ADDRNAME_LENGTH * sizeof(oid));
 	  Lowentry = entry;
 	  Found++;
 	  break;	/* no need to search further */
@@ -765,14 +765,14 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	   */
 	  Lowentry = entry;
 	  Found++;
-	  bcopy((char *)current, (char *)lowest, IP_ADDRNAME_LENGTH * sizeof(oid));
+	  memcpy( (char *)lowest,(char *)current, IP_ADDRNAME_LENGTH * sizeof(oid));
 	}
       }
     }
     DEBUGP ("... Found = %d\n", Found);
     if (Found == 0)
       return(NULL);
-    bcopy((char *)lowest, (char *)name, IP_ADDRNAME_LENGTH * sizeof(oid));
+    memcpy( (char *)name,(char *)lowest, IP_ADDRNAME_LENGTH * sizeof(oid));
     *length = IP_ADDRNAME_LENGTH;
     *write_method = 0;
     *var_len = sizeof(long_return);

@@ -69,12 +69,12 @@ header_hrsys(vp, name, length, exact, var_len, write_method)
       DEBUGP ("var_hrsys: %s %d\n", c_oid, exact);
     }
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[HRSYS_NAME_LENGTH] = 0;
     result = compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;

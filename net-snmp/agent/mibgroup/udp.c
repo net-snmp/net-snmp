@@ -146,12 +146,12 @@ header_udp(vp, name, length, exact, var_len, write_method)
       DEBUGP ("var_udp: %s %d\n", c_oid, exact);
     }
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[UDP_NAME_LENGTH] = 0;
     result = compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
@@ -362,7 +362,7 @@ var_udpEntry(vp, name, length, exact, var_len, write_method)
     int LowState;
     static struct inpcb inpcb, Lowinpcb;
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
 		/* find the "next" pseudo-connection */
 Again:
 LowState = -1;		/* UDP doesn't have 'State', but it's a useful flag */
@@ -381,7 +381,7 @@ LowState = -1;		/* UDP doesn't have 'State', but it's a useful flag */
 
 	    if (exact){
 		if (compare(newname, 15, name, *length) == 0){
-		    bcopy((char *)newname, (char *)lowest, 15 * sizeof(oid));
+		    memcpy( (char *)lowest,(char *)newname, 15 * sizeof(oid));
 		    LowState = 0;
 		    Lowinpcb = inpcb;
 		    break;  /* no need to search further */
@@ -393,14 +393,14 @@ LowState = -1;		/* UDP doesn't have 'State', but it's a useful flag */
 		     * if new one is greater than input and closer to input than
 		     * previous lowest, save this one as the "next" one.
 		     */
-		    bcopy((char *)newname, (char *)lowest, 15 * sizeof(oid));
+		    memcpy( (char *)lowest,(char *)newname, 15 * sizeof(oid));
 		    LowState = 0;
 		    Lowinpcb = inpcb;
 		}
 	    }
 	}
 	if (LowState < 0) return(NULL);
-	bcopy((char *)lowest, (char *)name, ((int)vp->namelen + 10) * sizeof(oid));
+	memcpy( (char *)name,(char *)lowest, ((int)vp->namelen + 10) * sizeof(oid));
 	*length = vp->namelen + 5;
 	*write_method = 0;
 	*var_len = sizeof(long);

@@ -144,7 +144,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
       DEBUGP ("var_ifEntry: %s %d\n", c_oid, exact);
     }
     
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     /* find "next" interface */
     count = Interface_Scan_Get_Count();
     for(interface = 1; interface <= count; interface++){
@@ -159,7 +159,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
     }
 
 
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
@@ -189,12 +189,12 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
     DEBUGP ("var_interfaces: %s %d\n", c_oid, exact);
   }
 
-  bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+  memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
   newname[INTERFACES_NAME_LENGTH] = 0;
   result = compare(name, *length, newname, (int)vp->namelen + 1);
   if ((exact && (result != 0)) || (!exact && (result >= 0)))
     return MATCH_FAILED;
-  bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+  memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
   *length = vp->namelen + 1;
 
   *write_method = 0;
@@ -539,12 +539,12 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
       DEBUGP ("var_interfaces: %s %d\n", c_oid, exact);
     }
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[INTERFACES_NAME_LENGTH] = 0;
     result = compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return MATCH_FAILED;
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
 
     *write_method = 0;
@@ -574,7 +574,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
       DEBUGP ("var_ifEntry: %s %d\n", c_oid, exact);
     }
 
-    bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
+    memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     /* find "next" interface */
     count = Interface_Scan_Get_Count();
     for(interface = 1; interface <= count; interface++){
@@ -589,7 +589,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
     }
 
 
-    bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
+    memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
     *length = vp->namelen + 1;
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
@@ -1581,9 +1581,9 @@ u_char *EtherAddr;
 	} else {
 
 #if defined(mips) || defined(hpux) || defined(osf4)
-          bcopy((char *) arpcom.ac_enaddr, EtherAddr, sizeof (arpcom.ac_enaddr));
+          memcpy( EtherAddr,(char *) arpcom.ac_enaddr, sizeof (arpcom.ac_enaddr));
 #else
-          bcopy((char *) &arpcom.ac_enaddr, EtherAddr, sizeof (arpcom.ac_enaddr));
+          memcpy( EtherAddr,(char *) &arpcom.ac_enaddr, sizeof (arpcom.ac_enaddr));
 #endif
 
 

@@ -594,7 +594,7 @@ smux_parse_var(varbind, varbindlength, objid, oidlen, varlength)
 
 
 	*oidlen = var_name_len;
-	bcopy(var_name, objid, var_name_len * sizeof(oid));
+	memcpy( objid,var_name, var_name_len * sizeof(oid));
 
         if (snmp_get_do_debugging()) {
           sprint_objid (c_oid, objid, oidlen);
