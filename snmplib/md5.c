@@ -126,7 +126,7 @@ MDptr MDp;
 */
 #define revx { t = (*X << 16) | (*X >> 16); \
 	       *X++ = ((t & 0xFF00FF00) >> 8) | ((t & 0x00FF00FF) << 8); }
-MDreverse(X)
+void MDreverse(X)
 unsigned int *X;
 { register unsigned int t;
   revx; revx; revx; revx; revx; revx; revx; revx;

@@ -35,7 +35,7 @@ acl_getEntry(target, subject, resources)
     return NULL;
 }
 
-int
+void
 acl_scanInit()
 {
   ScanPtr = List;
@@ -80,6 +80,7 @@ acl_createEntry(target, subject, resources)
     return ap;
 }
 
+void
 acl_destroyEntry(target, subject, resources)
     int target, subject, resources;
 {

@@ -97,7 +97,6 @@ typedef long	fd_mask;
 #endif
 
 extern int  errno;
-int	snmp_dump_packet = 0;
 int Print = 0;
 int Event = 0;
 int Syslog = 0;
@@ -377,10 +376,10 @@ main(argc, argv)
 		    config_file = argv[arg];
 		    break;
 		case 'd':
-		    snmp_dump_packet++;
+		    snmp_set_dump_packet(1);
 		    break;
 		case 'q':
-		    quick_print++;
+		    snmp_set_quick_print(1);
 		    break;
                 case 'P':
                     local_port = atoi(argv[++arg]);

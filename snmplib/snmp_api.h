@@ -257,5 +257,11 @@ void snmp_timeout();
 #define TIMED_OUT	   2
 
 
+/*
 extern int snmp_dump_packet;
 extern int quick_print;
+*/
+void snmp_set_dump_packet(int);
+int snmp_get_dump_packet(void);
+void snmp_set_quick_print(int);
+int snmp_get_quick_print(void);

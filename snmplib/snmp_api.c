@@ -194,6 +194,16 @@ struct timeval Now;
 struct snmp_pdu *SavedPdu = NULL;
 struct internal_variable_list *SavedVars = NULL;
 
+static int snmp_dump_packet = 0;
+void snmp_set_dump_packet(int val)
+{
+    snmp_dump_packet = val;
+}
+int snmp_get_dump_packet(void)
+{
+    return snmp_dump_packet;
+}
+
 static char *
 api_errstring(snmp_errnumber)
     int	snmp_errnumber;

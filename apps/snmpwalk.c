@@ -70,8 +70,6 @@ SOFTWARE.
 
 oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
-int	snmp_dump_packet = 0;
-
 void
 usage(){
     fprintf(stderr, "Usage: snmpwalk -v 1 [-q] hostname community [objectID]      or:\n");
@@ -120,10 +118,10 @@ main(argc, argv)
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
 		case 'd':
-		    snmp_dump_packet++;
+		    snmp_set_dump_packet(1);
 		    break;
 		case 'q':
-		    quick_print++;
+		    snmp_set_quick_print(1);
 		    break;
 		case 'p':
 		    port_flag++;

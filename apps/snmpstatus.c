@@ -69,7 +69,6 @@ SOFTWARE.
 #include "mib.h"
 
 extern int  errno;
-int	snmp_dump_packet = 0;
 
 oid	objid_sysDescr[] = {1, 3, 6, 1, 2, 1, 1, 1, 0};
 int	length_sysDescr = sizeof(objid_sysDescr)/sizeof(oid);
@@ -306,10 +305,10 @@ main(argc, argv)
     while ((c = getopt (argc, argv, "dqp:v:t:r:")) != -1)
 	switch (c) {
 	    case 'd':
-		snmp_dump_packet++;
+		snmp_set_dump_packet(1);
 		break;
 	    case 'q':
-		quick_print++;
+		snmp_set_quick_print(1);
 		break;
 	    case 'p':
 		dest_port = atoi(optarg);
