@@ -157,7 +157,7 @@ int
 getKstat(char *statname, char *varname, void *value)
 {
   kstat_ctl_t	*ksc;
-  kstat_t	*ks, kstat_data[KSTAT_DATA_MAX];
+  kstat_t	*ks, *kstat_data;
   kstat_named_t *d;
   size_t	i, instance;
   char		module_name[64];
@@ -169,7 +169,7 @@ getKstat(char *statname, char *varname, void *value)
     v = (void *)&val;
   else
     v = value;
-  if ((ksc = kstat_open()) <= (kstat_ctl_t *)0) {
+  if ((ksc = kstat_open()) == NULL) {
     ret = -10;
     goto Return;		/* kstat errors */
   }
@@ -179,14 +179,16 @@ getKstat(char *statname, char *varname, void *value)
   }
   /* First, get "kstat_headers" statistics. It should
      contain all available modules. */
-  if ((ks = kstat_lookup(ksc, "unix", 0, "kstat_headers")) < (kstat_t *)0) {
+  if ((ks = kstat_lookup(ksc, "unix", 0, "kstat_headers")) == NULL) {
     ret = -10;
     goto Return;		/* kstat errors */
   }
-  if (kstat_read(ksc, ks, kstat_data) <= 0) {
+  if (kstat_read(ksc, ks, NULL) <= 0) {
     ret = -10;
     goto Return;		/* kstat errors */
   }
+  kstat_data = ks->ks_data;
+
   /* Now, look for the name of our stat in the headers buf */
   for (i = 0; i < ks->ks_ndata; i++) {
     if (strcmp(statname, kstat_data[i].ks_name) == 0) {
@@ -200,11 +202,11 @@ getKstat(char *statname, char *varname, void *value)
     goto Return;		/* Not found */
   }
   /* Get the named statistics */
-  if ((ks = kstat_lookup(ksc, module_name, instance, statname)) < (kstat_t *)0) {
+  if ((ks = kstat_lookup(ksc, module_name, instance, statname)) == NULL) {
     ret = -10;
     goto Return;		/* kstat errors */
   }
-  if (kstat_read(ksc, ks, kstat_data) <= 0) {
+  if (kstat_read(ksc, ks, NULL) <= 0) {
     ret = -10;
     goto Return;		/* kstat errors */
   }
@@ -248,7 +250,7 @@ getKstat(char *statname, char *varname, void *value)
   }
   ret = -4;			/* Name not found */
  Return:
-  if (ksc > (kstat_ctl_t *)0)
+  if (ksc != NULL)
     kstat_close(ksc);
   return (ret);
 }
@@ -582,14 +584,16 @@ getif(mib2_ifEntry_t *ifbuf, size_t size, req_e req_type,
 	}
 	ifp->ifMtu = ifrp->ifr_metric;
 	ifp->ifSpeed = 10000000; 	/* Best guess */
-	if (getKstat(ifrp->ifr_name, "ipackets", &ifp->ifInOctets) < 0) {
+	if (getKstat(ifrp->ifr_name, "ipackets", &ifp->ifInUcastPkts) < 0) {
 	    ret = -1;
 	    goto Return;
 	}
-	if (getKstat(ifrp->ifr_name, "opackets", &ifp->ifOutOctets) < 0) {
+	ifp->ifInOctets = ifp->ifInUcastPkts * 308;	/* XXX */
+	if (getKstat(ifrp->ifr_name, "opackets", &ifp->ifOutUcastPkts) < 0) {
 	    ret = -1;
 	    goto Return;
 	}
+	ifp->ifOutOctets = ifp->ifOutUcastPkts * 308;	/* XXX */
 	if (strcmp(ifrp->ifr_name, "lo0") == 0) { /* No other stat for lo0 */
 	    ifp->ifType = 24;		/* Loopback */
 	    continue;
