@@ -228,6 +228,13 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
                    sizeof(one));
     }
 #endif                          /*SO_BSDCOMPAT */
+    /*
+     * SO_REUSEADDR will allow multiple apps to open the same port at
+     * the same time. Only the last one to open the socket will get
+     * data. Obviously, for an agent, this is a bad thing. There should
+     * only be one listener.
+     */
+#ifdef ALLOW_PORT_HIJACKING
 #ifdef  SO_REUSEADDR
     /*
      * Allow the same port to be specified multiple times without failing.
@@ -239,7 +246,7 @@ netsnmp_udp_transport(struct sockaddr_in *addr, int local)
                    sizeof(one));
     }
 #endif                          /*SO_REUSEADDR */
-
+#endif
     /*
      * Try to set the send and receive buffers to a reasonably large value, so
      * that we can send and receive big PDUs (defaults to 8192 bytes (!) on
