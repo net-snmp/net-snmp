@@ -19,79 +19,9 @@
 @    include m2c_setup_table.m2i@
 @    include details-table.m2i@
 
-/*
- * ${context}_allocate_data
- *
- * Purpose: create new ${table}_data.
- */
-${context}_data *
-${context}_allocate_data(void)
-{
-    /*
-     * allocate memory for the context
-     */
-$example_start
-    ${context}_data *rtn = SNMP_MALLOC_TYPEDEF(${context}_data);
-$example_end
-
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
-
-    if(NULL == rtn) {
-        snmp_log(LOG_ERR, "unable to malloc memory for new "
-                 "${table}_data.\n");
-    }
-
-    return rtn;
-}
-
-/*
- * ${context}_allocate_data
- *
- * Purpose: release data data.
- */
-void
-${context}_release_data(${table}_data *data)
-{
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
-
-    /*
-     * release memory for the context
-     */
-    free(data);
-}
-
-/*
- * allocate resources for a ${table}_ctx
- */
-${table}_ctx *
-${table}_allocate_ctx(netsnmp_mfd_registration *reg)
-{
-    ${table}_ctx *ctx = SNMP_MALLOC_TYPEDEF(${table}_ctx);
-
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
-
-    if(NULL == ctx) {
-        snmp_log(LOG_ERR,"Couldn't allocate memory for a "
-                 "${table}_ctx.\n");
-    }
-    else if (NULL == (ctx->data = ${table}_allocate_data())) {
-        SNMP_FREE(ctx);
-    }
-
-    return ctx;
-}
-
-/*
- * release resources for a ${table}_ctx
- */
-void
-${table}_release_ctx(netsnmp_mfd_registration *reg, ${table}_ctx *ctx)
-{
-    DEBUGMSGT(("${name}:trace",">%s\n",__FUNCTION__));
-
-    ${table}_release_data(ctx->data);
-    SNMP_FREE(ctx);
-}
+@    if $m2c_data_allocate == 1 && $m2c_data_context ne "generated"@
+@        include generic-data-allocate.m2i@
+@    end@
 
 ##
 ##   do nodes
