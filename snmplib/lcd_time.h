@@ -10,7 +10,8 @@ extern "C" {
 #endif
 
 
-#define LCD_TIME_SYNC_OPT 0
+/* undefine to enable time synchronization only on authenticated packets */
+#define LCD_TIME_SYNC_OPT 1
 
 /*
  * Macros and definitions.
