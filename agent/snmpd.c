@@ -576,7 +576,6 @@ main(int argc, char *argv[])
             break;
 
         default:
-            fprintf(stderr, "%s: Invalid option: -%c\n", argv[0], arg);
             usage(argv[0]);
             break;
         }
