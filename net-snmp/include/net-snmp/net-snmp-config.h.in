@@ -288,6 +288,9 @@
 /* Define to 1 if you have the `if_nameindex' function. */
 #undef HAVE_IF_NAMEINDEX
 
+/* Define to 1 if you have the `if_nametoindex' function. */
+#undef HAVE_IF_NAMETOINDEX
+
 /* Define to 1 if you have the `index' function. */
 #undef HAVE_INDEX
 
