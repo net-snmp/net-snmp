@@ -1,177 +1,178 @@
-<body bgcolor="#ffffff" background="ucd-snmp-bg3.gif">
-<title>NET-SNMP FAQ</title>
-<div align=center>
-<h1>Frequently Asked Questions (FAQ) for the Net-SNMP package</h1>
-FAQ Maintainer: Dave Shield<br>
-Email: <a href="mailto:net-snmp-coders@lists.sourceforge.net">net-snmp-coders@list.sourceforge.net</a><br>
-</div>
-<hr>
+<!--#set var="section" value="documentation" -->
+<!--#include virtual="/page-top.html" -->
+<!-- CONTENT START -->
+<p class="SectionTitle">
+FAQ
+</p>
+FAQ Maintainer: Dave Shield<br/>
+Email: <a href="mailto:net-snmp-coders@lists.sourceforge.net">net-snmp-coders@list.sourceforge.net</a><br/>
+<hr/>
 <h2>Table of Contents</h2>
-</ul><li><b>GENERAL</b><ul>
-<li> <a href="#What_is_it_">What is it?</a>
-<li> <a href="#Where_can_I_get_it_">Where can I get it?</a>
-<li> <a href="#What_documentation_is_available_">What documentation is available?</a>
-<li> <a href="#Are_there_binaries_available_">Are there binaries available?</a>
-<li> <a href="#What_s_the_difference_between_UCD_SNMP_and_Net_SNMP_">What's the difference between UCD-SNMP and Net-SNMP?</a>
-<li> <a href="#What_operating_systems_does_it_run_on_">What operating systems does it run on?</a>
-<li> <a href="#What_happens_if_mine_isn_t_listed_">What happens if mine isn't listed?</a>
-<li> <a href="#Does_it_run_on_Windows_">Does it run on Windows?</a>
-<li> <a href="#How_do_I_find_out_about_new_releases_">How do I find out about new releases?</a>
-<li> <a href="#How_can_I_find_out_what_other_people_are_doing_">How can I find out what other people are doing?</a>
-<li> <a href="#How_do_I_submit_a_patch_or_bug_report_">How do I submit a patch or bug report?</a>
-<li> <a href="#Can_I_reuse_the_code_in_my_commercial_application_">Can I reuse the code in my commercial application?</a>
-<li> <a href="#What_s_the_difference_between_SNMPv___SNMPv__and_SNMPv__">What's the difference between SNMPv1, SNMPv2 and SNMPv3?</a>
-<li> <a href="#What_s_the_difference_between_SNMPv__and_SNMPv_c_">What's the difference between SNMPv2 and SNMPv2c?</a>
-<li> <a href="#Which_versions_of_SNMP_are_supported_in_this_package_">Which versions of SNMP are supported in this package?</a>
-<li> <a href="#Can_I_use_SNMPv__requests_with_an_SNMPv__MIB__or_vice_versa__">Can I use SNMPv1 requests with an SNMPv2 MIB (or vice versa)?</a>
-<li> <a href="#Where_can_I_find_more_information_about_network_management_">Where can I find more information about network management?</a>
-<li> <a href="#Is_Net_SNMP_thread_safe_">Is Net-SNMP thread safe?</a>
-</ul><li><b>APPLICATIONS</b><ul>
-<li> <a href="#How_do_I_add_a_MIB_">How do I add a MIB?</a>
-<li> <a href="#How_do_I_add_a_MIB_to_the_tools_">How do I add a MIB to the tools?</a>
-<li> <a href="#Why_can_t_I_see_anything_from_the_agent_">Why can't I see anything from the agent?</a>
-<li> <a href="#Why_can_t_I_see_values_in_the__INSERT_ENTERPRISE_HERE__tree_">Why can't I see values in the <INSERT ENTERPRISE HERE> tree?</a>
-<li> <a href="#Requests_always_seem_to_timeout__and_don_t_give_me_anything_back___Why_">Requests always seem to timeout, and don't give me anything back.  Why?</a>
-<li> <a href="#I_can_see_the_system_group__but_nothing_else___Why_">I can see the system group, but nothing else.  Why?</a>
-<li> <a href="#The_agent_worked_for_a_while__then_stopped_responding___Why_">The agent worked for a while, then stopped responding.  Why?</a>
-<li> <a href="#Requesting_an_object_fails_with__Unknown_Object_Identifier___Why_">Requesting an object fails with "Unknown Object Identifier"  Why?</a>
-<li> <a href="#Why_do_I_get__noSuchName__when_asking_for__sysUpTime___or_similar__">Why do I get "noSuchName" when asking for "sysUpTime" (or similar)?</a>
-<li> <a href="#Why_do_I_sometimes_get__End_of_MIB__when_walking_a_tree__and_sometimes_not_">Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?</a>
-<li> <a href="#I_cannot_set_any_variables_in_the_MIB_">I cannot set any variables in the MIB.</a>
-<li> <a href="#Variables_seem_to_disappear_when_I_try_to_set_them___Why_">Variables seem to disappear when I try to set them.  Why?</a>
-<li> <a href="#I_still_can_t_change_sysLocation__though_the_access_settings_allow">I still can't change sysLocation, though the access settings allow</a>
-<a href="#I_still_can_t_change_sysLocation__though_the_access_settings_allow">       it.  Why not?</a>
-<li> <a href="#I_get_an_error_when_trying_to_set_a_negative_value___why_">I get an error when trying to set a negative value - why?</a>
-<li> <a href="#I_get_an_error_when_trying_to_get_a_string_indexed_table_value___why_">I get an error when trying to get a string-indexed table value - why?</a>
-<li> <a href="#How_do_I_send_traps_and_notifications_">How do I send traps and notifications?</a>
-<li> <a href="#How_do_I_handle_traps_and_notifications_">How do I handle traps and notifications?</a>
-<li> <a href="#My_traphandler_script_doesn_t_work_when_run_like_this___why_not_">My traphandler script doesn't work when run like this - why not?</a>
-<li> <a href="#The_ucdShutdown_trap_OID_received_by_my_manager_is_wrong__Why_">The ucdShutdown trap OID received by my manager is wrong. Why?</a>
-<li> <a href="#Why_does_snmptrapd_complain_about_AgentX_">Why does snmptrapd complain about AgentX?</a>
-<li> <a href="#How_do_I_use_SNMPv__">How do I use SNMPv3?</a>
-<li> <a href="#How_big_can_an_SNMP_request__or_reply__be_">How big can an SNMP request (or reply) be?</a>
-<li> <a href="#How_can_I_monitor_my_systems__disk__memory__etc__">How can I monitor my systems (disk, memory, etc)?</a>
-<li> <a href="#Applications_complain_about_entries_in_your_example__snmp_conf__file___Why_">Applications complain about entries in your example 'snmp.conf' file.  Why?</a>
-<li> <a href="#OK__what_should_I_put_in_snmp_conf_">OK, what should I put in snmp.conf?</a>
-</ul><li><b>PERL</b><ul>
-<li> <a href="#Where_can_I_get_the_perl_SNMP_package_">Where can I get the perl SNMP package?</a>
-<li> <a href="#How_do_I_install_the_Perl_SNMP_modules_">How do I install the Perl SNMP modules?</a>
-<li> <a href="#But_compiling_this_fails__Why_">But compiling this fails! Why?</a>
-<li> <a href="#Compiling_the_perl_module_works_OK__but__make_test__fails__Why_">Compiling the perl module works OK, but 'make test' fails. Why?</a>
-<li> <a href="#The_perl__make_test__fails_on_the_OID_tests__Is_it_safe_to_continue_">The perl 'make test' fails on the OID tests. Is it safe to continue?</a>
-<li> <a href="#I_m_trying_to_use_mib_c__or_tkmib__and_it_can_t_locate_SNMP_pm_">I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?</a>
-<li> <a href="#I_m_trying_to_use_mib_c__or_tkmib__and_it_can_t_load_SNMP_so_">I'm trying to use mib2c (or tkmib) and it can't load SNMP.so?</a>
-<li> <a href="#I_m_trying_to_use_tkmib_and_it_can_t_locate_Tk_pm_">I'm trying to use tkmib and it can't locate Tk.pm?</a>
-<li> <a href="#I_m_trying_to_install_your_RPM__but_it_complains_about_missing_perl_modules__Why_">I'm trying to install your RPM, but it complains about missing perl modules. Why?</a>
-<li> <a href="#I_ve_got_a_problem_with_the_Net_SNMP_module___Can_you_help_">I've got a problem with the Net-SNMP module.  Can you help?</a>
-</ul><li><b>MIBS</b><ul>
-<li> <a href="#Where_can_I_find_a_MIB_compiler_">Where can I find a MIB compiler?</a>
-<li> <a href="#I_can_t_load_any_of_the_mib_files__and_they_seem_to_be_missing">I can't load any of the mib files, and they seem to be missing</a>
-<a href="#I_can_t_load_any_of_the_mib_files__and_they_seem_to_be_missing">       the first two characters of the filename.  What's happening?</a>
-<li> <a href="#Why_aren_t_my_mib_files_being_read_in_">Why aren't my mib files being read in?</a>
-<li> <a href="#I_m_getting_answers__but_they_re_all_numbers__Why_">I'm getting answers, but they're all numbers. Why?</a>
-<li> <a href="#What_does__Cannot_find_module__XXX_MIB___mean_">What does "Cannot find module (XXX-MIB)" mean?</a>
-<li> <a href="#What_about__unlinked_OID__">What about "unlinked OID"?</a>
-<li> <a href="#The_parser_doesn_t_handle_comments_properly__Why_not_">The parser doesn't handle comments properly. Why not?</a>
-<li> <a href="#How_do_I_replace_MIB_values_with_new_ones_">How do I replace MIB values with new ones?</a>
-<li> <a href="#How_can_I_get_more_information_about_these_MIB_file_problems_">How can I get more information about these MIB file problems?</a>
-<li> <a href="#What_s_this_about__too_many_imported_symbols__">What's this about "too many imported symbols"?</a>
-<li> <a href="#Do_I_actually_need_the_MIB_files_">Do I actually need the MIB files?</a>
-</ul><li><b>AGENT</b><ul>
-<li> <a href="#What_MIBs_are_supported_">What MIBs are supported?</a>
-<li> <a href="#What_protocols_are_supported_">What protocols are supported?</a>
-<li> <a href="#How_do_I_configure_the_agent_">How do I configure the agent?</a>
-<li> <a href="#How_do_I_add_a_MIB_to_the_agent_">How do I add a MIB to the agent?</a>
-<li> <a href="#How_do_I_remove_a_MIB_from_the_agent_">How do I remove a MIB from the agent?</a>
-<li> <a href="#I_ve_installed_a_new_MIB_file___Why_can_t_I_query_it_">I've installed a new MIB file.  Why can't I query it?</a>
-<li> <a href="#What_s_the_difference_between__exec____sh__and__pass__">What's the difference between 'exec', 'sh' and 'pass'?</a>
-<li> <a href="#What_s_the_difference_between_AgentX__SMUX_and_proxied_SNMP_">What's the difference between AgentX, SMUX and proxied SNMP?</a>
-<li> <a href="#What_about__dlmod____what_s_that_about_">What about 'dlmod' - what's that about?</a>
-<li> <a href="#Which_should_I_use_">Which should I use?</a>
-<li> <a href="#Can_I_use_AgentX_when_running_under_Windows_">Can I use AgentX when running under Windows?</a>
-<li> <a href="#Can_I_use_AgentX__or_an_embedded_SNMP_agent__in_a_threaded_application_">Can I use AgentX (or an embedded SNMP agent) in a threaded application?</a>
-<li> <a href="#How_can_I_run_AgentX_with_a_different_socket_address_">How can I run AgentX with a different socket address?</a>
-<li> <a href="#How_can_I_turn_off_SMUX_support_">How can I turn off SMUX support?</a>
-<li> <a href="#How_can_I_combine_two_copies_of_the__mib___tree_from_separate_subagents_">How can I combine two copies of the 'mib2' tree from separate subagents?</a>
-<li> <a href="#What_traps_are_sent_by_the_agent_">What traps are sent by the agent?</a>
-<li> <a href="#Where_are_these_traps_sent_to_">Where are these traps sent to?</a>
-<li> <a href="#How_can_I_send_a_particular_trap_to_selected_destinations_">How can I send a particular trap to selected destinations?</a>
-<li> <a href="#When_I_run_the_agent_it_runs_and_then_quits_without_staying_around__Why_">When I run the agent it runs and then quits without staying around. Why?</a>
-<li> <a href="#After_a_while_the_agent_stops_responding__and_starts_eating_CPU_time___Why_">After a while the agent stops responding, and starts eating CPU time.  Why?</a>
-<li> <a href="#How_can_I_stop_other_people_getting_at_my_agent_">How can I stop other people getting at my agent?</a>
-<li> <a href="#How_can_I_listen_on_just_one_particular_interface_">How can I listen on just one particular interface?</a>
-<li> <a href="#How_do_I_configure_access_control_">How do I configure access control?</a>
-<li> <a href="#I_don_t_understand_the_new_access_control_stuff___what_does_it_mean_">I don't understand the new access control stuff - what does it mean?</a>
-<li> <a href="#How_do_I_configure_SNMPv__users_">How do I configure SNMPv3 users?</a>
-<li> <a href="#The__createUser__line_disappears_when_I_start_the_agent___Why_">The 'createUser' line disappears when I start the agent.  Why?</a>
-<li> <a href="#What_s_the_difference_between__var_ucd_snmp_and__usr_local_share_snmp_">What's the difference between /var/ucd-snmp and /usr/local/share/snmp?</a>
-<li> <a href="#My_new_agent_is_ignoring_the_old_snmpd_conf_file__Why_">My new agent is ignoring the old snmpd.conf file. Why?</a>
-<li> <a href="#Why_am_I_getting__Connection_refused__">Why am I getting "Connection refused"?</a>
-<li> <a href="#I_m_getting_errors_about__bad_security_model____why_">I'm getting errors about "bad security model" - why?</a>
-<li> <a href="#I_m_getting_errors_about__bad_prefix_match_parameter____why_">I'm getting errors about "bad prefix match parameter" - why?</a>
-<li> <a href="#Why_can_t_I_see_values_in_the_UCDavis__extensible__or__disk__trees_">Why can't I see values in the UCDavis 'extensible' or 'disk' trees?</a>
-<li> <a href="#Why_can_t_I_see_values_in_the_UCDavis__memory__or__vmstat__tree_">Why can't I see values in the UCDavis 'memory' or 'vmstat' tree?</a>
-<li> <a href="#What_do_the_CPU_statistics_mean___is_this_the_load_average_">What do the CPU statistics mean - is this the load average?</a>
-<li> <a href="#How_do_I_get_percentage_CPU_utilization_using_ssCpuRawIdle_">How do I get percentage CPU utilization using ssCpuRawIdle?</a>
-<li> <a href="#What_about_multi_processor_systems_">What about multi-processor systems?</a>
-<li> <a href="#The_speed_type_of_my_network_interfaces_is_wrong___how_can_I_fix_it_">The speed/type of my network interfaces is wrong - how can I fix it?</a>
-<li> <a href="#The_interface_statistics_for_my_subinterfaces_are_all_zero___why_">The interface statistics for my subinterfaces are all zero - why?</a>
-<li> <a href="#Does_the_agent_support_the_RMON_MIB_">Does the agent support the RMON-MIB?</a>
-<li> <a href="#What_does__klread___bad_address__mean_">What does "klread:  bad address" mean?</a>
-<li> <a href="#What_does__nlist_err___wombat_not_found___or_similar__mean_">What does "nlist err:  wombat not found" (or similar) mean?</a>
-<li> <a href="#How_about__Can_t_open__dev_kmem__">How about "Can't open /dev/kmem"?</a>
-<li> <a href="#The_agent_is_complaining_about__snmpd_conf____Where_is_this_">The agent is complaining about 'snmpd.conf'.  Where is this?</a>
-<li> <a href="#The_system_uptime__sysUpTime__returned_is_wrong_">The system uptime (sysUpTime) returned is wrong!</a>
-<li> <a href="#Can_the_agent_run_multi_threaded_">Can the agent run multi-threaded?</a>
-</ul><li><b>COMPILING</b><ul>
-<li> <a href="#How_do_I_compile_with__cc__instead_of__gcc__">How do I compile with 'cc' instead of 'gcc'?</a>
-<li> <a href="#But_gcc_doesn_t_compile_it_successfully_on_my_new_Solaris_system__Why_not_">But gcc doesn't compile it successfully on my new Solaris system. Why not?</a>
-<li> <a href="#On_RedHat_____or_up_I_get___usr_bin_ld__cannot_find__lelf___Why_">On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf". Why?</a>
-<li> <a href="#What_about___lbz___or___lselinux__errors_">What about '-lbz2' or '-lselinux' errors?</a>
-<li> <a href="#What_about_a_failed_dependency_on__libcrypto____Where_can_I_get_that_">What about a failed dependency on 'libcrypto'?  Where can I get that?</a>
-<li> <a href="#I_m_getting_an_error__autoheader__not_found____what_s_wrong_">I'm getting an error "autoheader: not found" - what's wrong?</a>
-<li> <a href="#How_can_I_reduce_the_memory_footprint_">How can I reduce the memory footprint?</a>
-<li> <a href="#How_can_I_reduce_the_installation_footprint_or_speed_up_compilation_">How can I reduce the installation footprint or speed up compilation?</a>
-<li> <a href="#How_can_I_compile_the_project_to_use_static_linking_">How can I compile the project to use static linking?</a>
-<li> <a href="#Why_is_the_project_workspace_empty_under_Visual_C___">Why is the project workspace empty under Visual C++?</a>
-<li> <a href="#Why_does__make_test__skip_five_tests_">Why does 'make test' skip five tests?</a>
-<li> <a href="#Why_does__make_test__complain_about_a_pid_file_">Why does 'make test' complain about a pid file?</a>
-</ul><li><b>CODING</b><ul>
-<li> <a href="#How_do_I_write_C_code_to_integrate_with_the_agent_">How do I write C code to integrate with the agent?</a>
-<li> <a href="#How_does_the_agent_fetch_the_value_of_a_MIB_variable_from_the_system_">How does the agent fetch the value of a MIB variable from the system?</a>
-<li> <a href="#Mib_c_complains_about_a_missing__mib_reference____what_does_this_mean_">Mib2c complains about a missing "mib reference" - what does this mean?</a>
-<li> <a href="#Mib_c_complains_about_not_having_a__valid_OID____what_does_this_mean_">Mib2c complains about not having a "valid OID" - what does this mean?</a>
-<li> <a href="#Why_doesn_t_Mib_c_like_the_MIB_file_I_m_giving_it_">Why doesn't Mib2c like the MIB file I'm giving it?</a>
-<li> <a href="#Mib_c_ignores_my_MIB_and_generates_a_pair_of__mib____code_files___Why_">Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?</a>
-<li> <a href="#Mib_c_complains_about__configuration_files___What_s_this_for_">Mib2c complains about "configuration files". What's this for?</a>
-<li> <a href="#Which_mib_c_configuration_file_should_I_use_">Which mib2c configuration file should I use?</a>
-<li> <a href="#How_can_I_have_Mib_c_generate_code_for_both_scalars_and_tables_">How can I have Mib2c generate code for both scalars and tables?</a>
-<li> <a href="#Are_there_any_examples__or_documentation_">Are there any examples, or documentation?</a>
-<li> <a href="#Where_should_I_put_the_files_produced_by__mib_c__">Where should I put the files produced by 'mib2c'?</a>
-<li> <a href="#I_ve_created_a_new_module_with__mib_c__but_it_doesn_t_work___Why_not_">I've created a new module with 'mib2c' but it doesn't work.  Why not?</a>
-<li> <a href="#I_ve_added_my_code_to_this_template_and_it_still_doesn_t_work___Why_not_">I've added my code to this template and it still doesn't work.  Why not?</a>
-<li> <a href="#Mib_c_only_handles_a_single_table_in_my_MIB__How_can_I_fix_this_">Mib2c only handles a single table in my MIB. How can I fix this?</a>
-<li> <a href="#Why_does_the_iterator_call_my_get__first_next__routines_so_often_">Why does the iterator call my get_{first,next} routines so often?</a>
-<li> <a href="#How_can_I_support_a_large_table__with_more_than_____column_objects_">How can I support a large table, with more than 256 column objects?</a>
-<li> <a href="#How_can_I_get_the_agent_to_generate_a_trap__or_inform__">How can I get the agent to generate a trap (or inform)?</a>
-<li> <a href="#How_can_I_get_the_agent_to_send_an_SNMPv___or_SNMPv_c__trap_">How can I get the agent to send an SNMPv1 (or SNMPv2c) trap?</a>
-<li> <a href="#How_can_I_get_the_agent_to_include_varbinds_with_an_SNMPv__trap_">How can I get the agent to include varbinds with an SNMPv1 trap?</a>
-<li> <a href="#How_can_I_get_the_agent_to_send_an_SNMPv__enterprise_specific_trap_">How can I get the agent to send an SNMPv1 enterprise-specific trap?</a>
-<li> <a href="#How_can_I_get_the_agent_to_send_an_SNMPv__trap__or_inform__">How can I get the agent to send an SNMPv3 trap (or inform)?</a>
-<li> <a href="#Why_does_calling__send_v_trap__generate_an_SNMPv__trap__or_vice_versa__">Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?</a>
-<li> <a href="#What_if_I_m_using_an_AgentX_sub_agent_instead_">What if I'm using an AgentX sub-agent instead?</a>
-<li> <a href="#How_can_I_register_a_MIB_module_in_a_different__SNMPv___context_">How can I register a MIB module in a different (SNMPv3) context?</a>
-</ul><li><b>MISC</b><ul>
-<li> <a href="#Why_are_packets_requesting_the_same_information_larger_with_UC_Davis_SNMP_">Why are packets requesting the same information larger with UC-Davis SNMP?</a>
-<li> <a href="#What_ASN___parser_is_used_">What ASN.1 parser is used?</a>
-<li> <a href="#What_is_the_Official_Slogan_of_the_net_snmp_coders_list_">What is the Official Slogan of the net-snmp-coders list?</a>
-</ul><hr><pre>
+</ul><b>GENERAL</b><ul>
+<li> <a href="#What_is_it_">What is it?</a></li>
+<li> <a href="#Where_can_I_get_it_">Where can I get it?</a></li>
+<li> <a href="#What_documentation_is_available_">What documentation is available?</a></li>
+<li> <a href="#Are_there_binaries_available_">Are there binaries available?</a></li>
+<li> <a href="#What_s_the_difference_between_UCD_SNMP_and_Net_SNMP_">What's the difference between UCD-SNMP and Net-SNMP?</a></li>
+<li> <a href="#What_operating_systems_does_it_run_on_">What operating systems does it run on?</a></li>
+<li> <a href="#What_happens_if_mine_isn_t_listed_">What happens if mine isn't listed?</a></li>
+<li> <a href="#Does_it_run_on_Windows_">Does it run on Windows?</a></li>
+<li> <a href="#How_do_I_find_out_about_new_releases_">How do I find out about new releases?</a></li>
+<li> <a href="#How_can_I_find_out_what_other_people_are_doing_">How can I find out what other people are doing?</a></li>
+<li> <a href="#How_do_I_submit_a_patch_or_bug_report_">How do I submit a patch or bug report?</a></li>
+<li> <a href="#Can_I_reuse_the_code_in_my_commercial_application_">Can I reuse the code in my commercial application?</a></li>
+<li> <a href="#What_s_the_difference_between_SNMPv___SNMPv__and_SNMPv__">What's the difference between SNMPv1, SNMPv2 and SNMPv3?</a></li>
+<li> <a href="#What_s_the_difference_between_SNMPv__and_SNMPv_c_">What's the difference between SNMPv2 and SNMPv2c?</a></li>
+<li> <a href="#Which_versions_of_SNMP_are_supported_in_this_package_">Which versions of SNMP are supported in this package?</a></li>
+<li> <a href="#Can_I_use_SNMPv__requests_with_an_SNMPv__MIB__or_vice_versa__">Can I use SNMPv1 requests with an SNMPv2 MIB (or vice versa)?</a></li>
+<li> <a href="#Where_can_I_find_more_information_about_network_management_">Where can I find more information about network management?</a></li>
+<li> <a href="#Is_Net_SNMP_thread_safe_">Is Net-SNMP thread safe?</a></li>
+</ul><b>APPLICATIONS</b><ul>
+<li> <a href="#How_do_I_add_a_MIB_">How do I add a MIB?</a></li>
+<li> <a href="#How_do_I_add_a_MIB_to_the_tools_">How do I add a MIB to the tools?</a></li>
+<li> <a href="#Why_can_t_I_see_anything_from_the_agent_">Why can't I see anything from the agent?</a></li>
+<li> <a href="#Why_can_t_I_see_values_in_the__INSERT_ENTERPRISE_HERE__tree_">Why can't I see values in the &lt;INSERT ENTERPRISE HERE&gt; tree?</a></li>
+<li> <a href="#Requests_always_seem_to_timeout__and_don_t_give_me_anything_back___Why_">Requests always seem to timeout, and don't give me anything back.  Why?</a></li>
+<li> <a href="#I_can_see_the_system_group__but_nothing_else___Why_">I can see the system group, but nothing else.  Why?</a></li>
+<li> <a href="#The_agent_worked_for_a_while__then_stopped_responding___Why_">The agent worked for a while, then stopped responding.  Why?</a></li>
+<li> <a href="#Requesting_an_object_fails_with__Unknown_Object_Identifier___Why_">Requesting an object fails with "Unknown Object Identifier"  Why?</a></li>
+<li> <a href="#Why_do_I_get__noSuchName__when_asking_for__sysUpTime___or_similar__">Why do I get "noSuchName" when asking for "sysUpTime" (or similar)?</a></li>
+<li> <a href="#Why_do_I_sometimes_get__End_of_MIB__when_walking_a_tree__and_sometimes_not_">Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?</a></li>
+<li> <a href="#I_cannot_set_any_variables_in_the_MIB_">I cannot set any variables in the MIB.</a></li>
+<li> <a href="#Variables_seem_to_disappear_when_I_try_to_set_them___Why_">Variables seem to disappear when I try to set them.  Why?</a></li>
+<li> <a href="#I_still_can_t_change_sysLocation__though_the_access_settings_allow">I still can't change sysLocation, though the access settings allow it.  Why not?
+</a></li>
+<li> <a href="#I_get_an_error_when_trying_to_set_a_negative_value___why_">I get an error when trying to set a negative value - why?</a></li>
+<li> <a href="#I_get_an_error_when_trying_to_get_a_string_indexed_table_value___why_">I get an error when trying to get a string-indexed table value - why?</a></li>
+<li> <a href="#How_do_I_send_traps_and_notifications_">How do I send traps and notifications?</a></li>
+<li> <a href="#How_do_I_handle_traps_and_notifications_">How do I handle traps and notifications?</a></li>
+<li> <a href="#My_traphandler_script_doesn_t_work_when_run_like_this___why_not_">My traphandler script doesn't work when run like this - why not?</a></li>
+<li> <a href="#The_ucdShutdown_trap_OID_received_by_my_manager_is_wrong__Why_">The ucdShutdown trap OID received by my manager is wrong. Why?</a></li>
+<li> <a href="#Why_does_snmptrapd_complain_about_AgentX_">Why does snmptrapd complain about AgentX?</a></li>
+<li> <a href="#How_do_I_use_SNMPv__">How do I use SNMPv3?</a></li>
+<li> <a href="#How_big_can_an_SNMP_request__or_reply__be_">How big can an SNMP request (or reply) be?</a></li>
+<li> <a href="#How_can_I_monitor_my_systems__disk__memory__etc__">How can I monitor my systems (disk, memory, etc)?</a></li>
+<li> <a href="#Applications_complain_about_entries_in_your_example__snmp_conf__file___Why_">Applications complain about entries in your example 'snmp.conf' file.  Why?</a></li>
+<li> <a href="#OK__what_should_I_put_in_snmp_conf_">OK, what should I put in snmp.conf?</a></li>
+</ul><b>PERL</b><ul>
+<li> <a href="#Where_can_I_get_the_perl_SNMP_package_">Where can I get the perl SNMP package?</a></li>
+<li> <a href="#How_do_I_install_the_Perl_SNMP_modules_">How do I install the Perl SNMP modules?</a></li>
+<li> <a href="#But_compiling_this_fails__Why_">But compiling this fails! Why?</a></li>
+<li> <a href="#Compiling_the_perl_module_works_OK__but__make_test__fails__Why_">Compiling the perl module works OK, but 'make test' fails. Why?</a></li>
+<li> <a href="#The_perl__make_test__fails_on_the_OID_tests__Is_it_safe_to_continue_">The perl 'make test' fails on the OID tests. Is it safe to continue?</a></li>
+<li> <a href="#I_m_trying_to_use_mib_c__or_tkmib__and_it_can_t_locate_SNMP_pm_">I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?</a></li>
+<li> <a href="#I_m_trying_to_use_mib_c__or_tkmib__and_it_can_t_load_SNMP_so_">I'm trying to use mib2c (or tkmib) and it can't load SNMP.so?</a></li>
+<li> <a href="#I_m_trying_to_use_tkmib_and_it_can_t_locate_Tk_pm_">I'm trying to use tkmib and it can't locate Tk.pm?</a></li>
+<li> <a href="#I_m_trying_to_install_your_RPM__but_it_complains_about_missing_perl_modules__Why_">I'm trying to install your RPM, but it complains about missing perl modules. Why?</a></li>
+<li> <a href="#I_ve_got_a_problem_with_the_Net_SNMP_module___Can_you_help_">I've got a problem with the Net-SNMP module.  Can you help?</a></li>
+</ul><b>MIBS</b><ul>
+<li> <a href="#Where_can_I_find_a_MIB_compiler_">Where can I find a MIB compiler?</a></li>
+<li> <a href="#I_can_t_load_any_of_the_mib_files__and_they_seem_to_be_missing">I can't load any of the mib files, and they seem to be missing the first two characters of the filename.  What's happening?
+</a></li>
+<li> <a href="#Why_aren_t_my_mib_files_being_read_in_">Why aren't my mib files being read in?</a></li>
+<li> <a href="#I_m_getting_answers__but_they_re_all_numbers__Why_">I'm getting answers, but they're all numbers. Why?</a></li>
+<li> <a href="#What_does__Cannot_find_module__XXX_MIB___mean_">What does "Cannot find module (XXX-MIB)" mean?</a></li>
+<li> <a href="#What_about__unlinked_OID__">What about "unlinked OID"?</a></li>
+<li> <a href="#The_parser_doesn_t_handle_comments_properly__Why_not_">The parser doesn't handle comments properly. Why not?</a></li>
+<li> <a href="#How_do_I_replace_MIB_values_with_new_ones_">How do I replace MIB values with new ones?</a></li>
+<li> <a href="#How_can_I_get_more_information_about_these_MIB_file_problems_">How can I get more information about these MIB file problems?</a></li>
+<li> <a href="#What_s_this_about__too_many_imported_symbols__">What's this about "too many imported symbols"?</a></li>
+<li> <a href="#Do_I_actually_need_the_MIB_files_">Do I actually need the MIB files?</a></li>
+</ul><b>AGENT</b><ul>
+<li> <a href="#What_MIBs_are_supported_">What MIBs are supported?</a></li>
+<li> <a href="#What_protocols_are_supported_">What protocols are supported?</a></li>
+<li> <a href="#How_do_I_configure_the_agent_">How do I configure the agent?</a></li>
+<li> <a href="#How_do_I_add_a_MIB_to_the_agent_">How do I add a MIB to the agent?</a></li>
+<li> <a href="#How_do_I_remove_a_MIB_from_the_agent_">How do I remove a MIB from the agent?</a></li>
+<li> <a href="#I_ve_installed_a_new_MIB_file___Why_can_t_I_query_it_">I've installed a new MIB file.  Why can't I query it?</a></li>
+<li> <a href="#What_s_the_difference_between__exec____sh__and__pass__">What's the difference between 'exec', 'sh' and 'pass'?</a></li>
+<li> <a href="#What_s_the_difference_between_AgentX__SMUX_and_proxied_SNMP_">What's the difference between AgentX, SMUX and proxied SNMP?</a></li>
+<li> <a href="#What_about__dlmod____what_s_that_about_">What about 'dlmod' - what's that about?</a></li>
+<li> <a href="#Which_should_I_use_">Which should I use?</a></li>
+<li> <a href="#Can_I_use_AgentX_when_running_under_Windows_">Can I use AgentX when running under Windows?</a></li>
+<li> <a href="#Can_I_use_AgentX__or_an_embedded_SNMP_agent__in_a_threaded_application_">Can I use AgentX (or an embedded SNMP agent) in a threaded application?</a></li>
+<li> <a href="#How_can_I_run_AgentX_with_a_different_socket_address_">How can I run AgentX with a different socket address?</a></li>
+<li> <a href="#How_can_I_turn_off_SMUX_support_">How can I turn off SMUX support?</a></li>
+<li> <a href="#How_can_I_combine_two_copies_of_the__mib___tree_from_separate_subagents_">How can I combine two copies of the 'mib2' tree from separate subagents?</a></li>
+<li> <a href="#What_traps_are_sent_by_the_agent_">What traps are sent by the agent?</a></li>
+<li> <a href="#Where_are_these_traps_sent_to_">Where are these traps sent to?</a></li>
+<li> <a href="#How_can_I_send_a_particular_trap_to_selected_destinations_">How can I send a particular trap to selected destinations?</a></li>
+<li> <a href="#When_I_run_the_agent_it_runs_and_then_quits_without_staying_around__Why_">When I run the agent it runs and then quits without staying around. Why?</a></li>
+<li> <a href="#After_a_while_the_agent_stops_responding__and_starts_eating_CPU_time___Why_">After a while the agent stops responding, and starts eating CPU time.  Why?</a></li>
+<li> <a href="#How_can_I_stop_other_people_getting_at_my_agent_">How can I stop other people getting at my agent?</a></li>
+<li> <a href="#How_can_I_listen_on_just_one_particular_interface_">How can I listen on just one particular interface?</a></li>
+<li> <a href="#How_do_I_configure_access_control_">How do I configure access control?</a></li>
+<li> <a href="#I_don_t_understand_the_new_access_control_stuff___what_does_it_mean_">I don't understand the new access control stuff - what does it mean?</a></li>
+<li> <a href="#How_do_I_configure_SNMPv__users_">How do I configure SNMPv3 users?</a></li>
+<li> <a href="#The__createUser__line_disappears_when_I_start_the_agent___Why_">The 'createUser' line disappears when I start the agent.  Why?</a></li>
+<li> <a href="#What_s_the_difference_between__var_ucd_snmp_and__usr_local_share_snmp_">What's the difference between /var/ucd-snmp and /usr/local/share/snmp?</a></li>
+<li> <a href="#My_new_agent_is_ignoring_the_old_snmpd_conf_file__Why_">My new agent is ignoring the old snmpd.conf file. Why?</a></li>
+<li> <a href="#Why_am_I_getting__Connection_refused__">Why am I getting "Connection refused"?</a></li>
+<li> <a href="#I_m_getting_errors_about__bad_security_model____why_">I'm getting errors about "bad security model" - why?</a></li>
+<li> <a href="#I_m_getting_errors_about__bad_prefix_match_parameter____why_">I'm getting errors about "bad prefix match parameter" - why?</a></li>
+<li> <a href="#Why_can_t_I_see_values_in_the_UCDavis__extensible__or__disk__trees_">Why can't I see values in the UCDavis 'extensible' or 'disk' trees?</a></li>
+<li> <a href="#Why_can_t_I_see_values_in_the_UCDavis__memory__or__vmstat__tree_">Why can't I see values in the UCDavis 'memory' or 'vmstat' tree?</a></li>
+<li> <a href="#What_do_the_CPU_statistics_mean___is_this_the_load_average_">What do the CPU statistics mean - is this the load average?</a></li>
+<li> <a href="#How_do_I_get_percentage_CPU_utilization_using_ssCpuRawIdle_">How do I get percentage CPU utilization using ssCpuRawIdle?</a></li>
+<li> <a href="#What_about_multi_processor_systems_">What about multi-processor systems?</a></li>
+<li> <a href="#The_speed_type_of_my_network_interfaces_is_wrong___how_can_I_fix_it_">The speed/type of my network interfaces is wrong - how can I fix it?</a></li>
+<li> <a href="#The_interface_statistics_for_my_subinterfaces_are_all_zero___why_">The interface statistics for my subinterfaces are all zero - why?</a></li>
+<li> <a href="#Does_the_agent_support_the_RMON_MIB_">Does the agent support the RMON-MIB?</a></li>
+<li> <a href="#What_does__klread___bad_address__mean_">What does "klread:  bad address" mean?</a></li>
+<li> <a href="#What_does__nlist_err___wombat_not_found___or_similar__mean_">What does "nlist err:  wombat not found" (or similar) mean?</a></li>
+<li> <a href="#How_about__Can_t_open__dev_kmem__">How about "Can't open /dev/kmem"?</a></li>
+<li> <a href="#The_agent_is_complaining_about__snmpd_conf____Where_is_this_">The agent is complaining about 'snmpd.conf'.  Where is this?</a></li>
+<li> <a href="#The_system_uptime__sysUpTime__returned_is_wrong_">The system uptime (sysUpTime) returned is wrong!</a></li>
+<li> <a href="#Can_the_agent_run_multi_threaded_">Can the agent run multi-threaded?</a></li>
+</ul><b>COMPILING</b><ul>
+<li> <a href="#How_do_I_compile_with__cc__instead_of__gcc__">How do I compile with 'cc' instead of 'gcc'?</a></li>
+<li> <a href="#But_gcc_doesn_t_compile_it_successfully_on_my_new_Solaris_system__Why_not_">But gcc doesn't compile it successfully on my new Solaris system. Why not?</a></li>
+<li> <a href="#On_RedHat_____or_up_I_get___usr_bin_ld__cannot_find__lelf___Why_">On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf". Why?</a></li>
+<li> <a href="#What_about___lbz___or___lselinux__errors_">What about '-lbz2' or '-lselinux' errors?</a></li>
+<li> <a href="#What_about_a_failed_dependency_on__libcrypto____Where_can_I_get_that_">What about a failed dependency on 'libcrypto'?  Where can I get that?</a></li>
+<li> <a href="#I_m_getting_an_error__autoheader__not_found____what_s_wrong_">I'm getting an error "autoheader: not found" - what's wrong?</a></li>
+<li> <a href="#How_can_I_reduce_the_memory_footprint_">How can I reduce the memory footprint?</a></li>
+<li> <a href="#How_can_I_reduce_the_installation_footprint_or_speed_up_compilation_">How can I reduce the installation footprint or speed up compilation?</a></li>
+<li> <a href="#How_can_I_compile_the_project_to_use_static_linking_">How can I compile the project to use static linking?</a></li>
+<li> <a href="#Why_is_the_project_workspace_empty_under_Visual_C___">Why is the project workspace empty under Visual C++?</a></li>
+<li> <a href="#Why_does__make_test__skip_five_tests_">Why does 'make test' skip five tests?</a></li>
+<li> <a href="#Why_does__make_test__complain_about_a_pid_file_">Why does 'make test' complain about a pid file?</a></li>
+</ul><b>CODING</b><ul>
+<li> <a href="#How_do_I_write_C_code_to_integrate_with_the_agent_">How do I write C code to integrate with the agent?</a></li>
+<li> <a href="#How_does_the_agent_fetch_the_value_of_a_MIB_variable_from_the_system_">How does the agent fetch the value of a MIB variable from the system?</a></li>
+<li> <a href="#Mib_c_complains_about_a_missing__mib_reference____what_does_this_mean_">Mib2c complains about a missing "mib reference" - what does this mean?</a></li>
+<li> <a href="#Mib_c_complains_about_not_having_a__valid_OID____what_does_this_mean_">Mib2c complains about not having a "valid OID" - what does this mean?</a></li>
+<li> <a href="#Why_doesn_t_Mib_c_like_the_MIB_file_I_m_giving_it_">Why doesn't Mib2c like the MIB file I'm giving it?</a></li>
+<li> <a href="#Mib_c_ignores_my_MIB_and_generates_a_pair_of__mib____code_files___Why_">Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?</a></li>
+<li> <a href="#Mib_c_complains_about__configuration_files___What_s_this_for_">Mib2c complains about "configuration files". What's this for?</a></li>
+<li> <a href="#Which_mib_c_configuration_file_should_I_use_">Which mib2c configuration file should I use?</a></li>
+<li> <a href="#How_can_I_have_Mib_c_generate_code_for_both_scalars_and_tables_">How can I have Mib2c generate code for both scalars and tables?</a></li>
+<li> <a href="#Are_there_any_examples__or_documentation_">Are there any examples, or documentation?</a></li>
+<li> <a href="#Where_should_I_put_the_files_produced_by__mib_c__">Where should I put the files produced by 'mib2c'?</a></li>
+<li> <a href="#I_ve_created_a_new_module_with__mib_c__but_it_doesn_t_work___Why_not_">I've created a new module with 'mib2c' but it doesn't work.  Why not?</a></li>
+<li> <a href="#I_ve_added_my_code_to_this_template_and_it_still_doesn_t_work___Why_not_">I've added my code to this template and it still doesn't work.  Why not?</a></li>
+<li> <a href="#Mib_c_only_handles_a_single_table_in_my_MIB__How_can_I_fix_this_">Mib2c only handles a single table in my MIB. How can I fix this?</a></li>
+<li> <a href="#Why_does_the_iterator_call_my_get__first_next__routines_so_often_">Why does the iterator call my get_{first,next} routines so often?</a></li>
+<li> <a href="#How_can_I_support_a_large_table__with_more_than_____column_objects_">How can I support a large table, with more than 256 column objects?</a></li>
+<li> <a href="#How_can_I_get_the_agent_to_generate_a_trap__or_inform__">How can I get the agent to generate a trap (or inform)?</a></li>
+<li> <a href="#How_can_I_get_the_agent_to_send_an_SNMPv___or_SNMPv_c__trap_">How can I get the agent to send an SNMPv1 (or SNMPv2c) trap?</a></li>
+<li> <a href="#How_can_I_get_the_agent_to_include_varbinds_with_an_SNMPv__trap_">How can I get the agent to include varbinds with an SNMPv1 trap?</a></li>
+<li> <a href="#How_can_I_get_the_agent_to_send_an_SNMPv__enterprise_specific_trap_">How can I get the agent to send an SNMPv1 enterprise-specific trap?</a></li>
+<li> <a href="#How_can_I_get_the_agent_to_send_an_SNMPv__trap__or_inform__">How can I get the agent to send an SNMPv3 trap (or inform)?</a></li>
+<li> <a href="#Why_does_calling__send_v_trap__generate_an_SNMPv__trap__or_vice_versa__">Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?</a></li>
+<li> <a href="#What_if_I_m_using_an_AgentX_sub_agent_instead_">What if I'm using an AgentX sub-agent instead?</a></li>
+<li> <a href="#How_can_I_register_a_MIB_module_in_a_different__SNMPv___context_">How can I register a MIB module in a different (SNMPv3) context?</a></li>
+</ul><b>MISC</b><ul>
+<li> <a href="#Why_are_packets_requesting_the_same_information_larger_with_UC_Davis_SNMP_">Why are packets requesting the same information larger with UC-Davis SNMP?</a></li>
+<li> <a href="#What_ASN___parser_is_used_">What ASN.1 parser is used?</a></li>
+<li> <a href="#What_is_the_Official_Slogan_of_the_net_snmp_coders_list_">What is the Official Slogan of the net-snmp-coders list?</a></li>
+</ul><hr/><pre>
 
-<a name="GENERAL">
+<a name="GENERAL"></a>
 GENERAL
 =======
 
-<a name="What_is_it_">
+<a name="What_is_it_"></a>
 What is it?
 ----------
 
@@ -191,7 +192,7 @@ What is it?
 
 
 
-<a name="Where_can_I_get_it_">
+<a name="Where_can_I_get_it_"></a>
 Where can I get it?
 ------------------
 
@@ -209,7 +210,7 @@ Where can I get it?
     - Greece:      ftp://ftp.ntua.gr/pub/net/snmp/net-snmp/
 
 
-<a name="What_documentation_is_available_">
+<a name="What_documentation_is_available_"></a>
 What documentation is available?
 -------------------------------
 
@@ -232,7 +233,7 @@ What documentation is available?
 
 
 
-<a name="Are_there_binaries_available_">
+<a name="Are_there_binaries_available_"></a>
 Are there binaries available?
 ----------------------------
 
@@ -241,7 +242,7 @@ Are there binaries available?
 
 
 
-<a name="What_s_the_difference_between_UCD_SNMP_and_Net_SNMP_">
+<a name="What_s_the_difference_between_UCD_SNMP_and_Net_SNMP_"></a>
 What's the difference between UCD-SNMP and Net-SNMP?
 ---------------------------------------------------
 
@@ -278,7 +279,7 @@ What's the difference between UCD-SNMP and Net-SNMP?
 
 
 
-<a name="What_operating_systems_does_it_run_on_">
+<a name="What_operating_systems_does_it_run_on_"></a>
 What operating systems does it run on?
 -------------------------------------
 
@@ -318,7 +319,7 @@ What operating systems does it run on?
 
 
 
-<a name="What_happens_if_mine_isn_t_listed_">
+<a name="What_happens_if_mine_isn_t_listed_"></a>
 What happens if mine isn't listed?
 ---------------------------------
 
@@ -346,7 +347,7 @@ What happens if mine isn't listed?
 
 
 
-<a name="Does_it_run_on_Windows_">
+<a name="Does_it_run_on_Windows_"></a>
 Does it run on Windows?
 ----------------------
 
@@ -365,7 +366,7 @@ Does it run on Windows?
 
 
 
-<a name="How_do_I_find_out_about_new_releases_">
+<a name="How_do_I_find_out_about_new_releases_"></a>
 How do I find out about new releases?
 ------------------------------------
 
@@ -389,7 +390,7 @@ How do I find out about new releases?
 
 
 
-<a name="How_can_I_find_out_what_other_people_are_doing_">
+<a name="How_can_I_find_out_what_other_people_are_doing_"></a>
 How can I find out what other people are doing?
 ----------------------------------------------
 
@@ -412,7 +413,7 @@ How can I find out what other people are doing?
 
 
 
-<a name="How_do_I_submit_a_patch_or_bug_report_">
+<a name="How_do_I_submit_a_patch_or_bug_report_"></a>
 How do I submit a patch or bug report?
 -------------------------------------
 
@@ -454,7 +455,7 @@ How do I submit a patch or bug report?
 
 
 
-<a name="Can_I_reuse_the_code_in_my_commercial_application_">
+<a name="Can_I_reuse_the_code_in_my_commercial_application_"></a>
 Can I reuse the code in my commercial application?
 -------------------------------------------------
 
@@ -465,10 +466,10 @@ Can I reuse the code in my commercial application?
 
 
 
-<a name="What_s_the_difference_between_SNMPv___SNMPv__and_SNMPv__">
+<a name="What_s_the_difference_between_SNMPv___SNMPv__and_SNMPv__"></a>
 What's the difference between SNMPv1, SNMPv2 and SNMPv3?
 -------------------------------------------------------
-<a name="What_s_the_difference_between_SNMPv__and_SNMPv_c_">
+<a name="What_s_the_difference_between_SNMPv__and_SNMPv_c_"></a>
 What's the difference between SNMPv2 and SNMPv2c?
 ------------------------------------------------
 
@@ -530,7 +531,7 @@ What's the difference between SNMPv2 and SNMPv2c?
 
 
 
-<a name="Which_versions_of_SNMP_are_supported_in_this_package_">
+<a name="Which_versions_of_SNMP_are_supported_in_this_package_"></a>
 Which versions of SNMP are supported in this package?
 ----------------------------------------------------
 
@@ -545,7 +546,7 @@ Which versions of SNMP are supported in this package?
 
 
 
-<a name="Can_I_use_SNMPv__requests_with_an_SNMPv__MIB__or_vice_versa__">
+<a name="Can_I_use_SNMPv__requests_with_an_SNMPv__MIB__or_vice_versa__"></a>
 Can I use SNMPv1 requests with an SNMPv2 MIB (or vice versa)?
 ------------------------------------------------------------
 
@@ -567,7 +568,7 @@ Can I use SNMPv1 requests with an SNMPv2 MIB (or vice versa)?
 
   
 
-<a name="Where_can_I_find_more_information_about_network_management_">
+<a name="Where_can_I_find_more_information_about_network_management_"></a>
 Where can I find more information about network management?
 ----------------------------------------------------------
 
@@ -596,7 +597,7 @@ Where can I find more information about network management?
 
 
 
-<a name="Is_Net_SNMP_thread_safe_">
+<a name="Is_Net_SNMP_thread_safe_"></a>
 Is Net-SNMP thread safe?
 -----------------------
 
@@ -627,11 +628,11 @@ Is Net-SNMP thread safe?
   most likely that it is not thread-safe at this time.
 
 
-<a name="APPLICATIONS">
+<a name="APPLICATIONS"></a>
 APPLICATIONS
 ============
 
-<a name="How_do_I_add_a_MIB_">
+<a name="How_do_I_add_a_MIB_"></a>
 How do I add a MIB?
 ------------------
 
@@ -641,7 +642,7 @@ How do I add a MIB?
 
 
 
-<a name="How_do_I_add_a_MIB_to_the_tools_">
+<a name="How_do_I_add_a_MIB_to_the_tools_"></a>
 How do I add a MIB to the tools?
 -------------------------------
 
@@ -697,7 +698,7 @@ How do I add a MIB to the tools?
 
 
 
-<a name="Why_can_t_I_see_anything_from_the_agent_">
+<a name="Why_can_t_I_see_anything_from_the_agent_"></a>
 Why can't I see anything from the agent?
 ---------------------------------------
 
@@ -719,7 +720,7 @@ Why can't I see anything from the agent?
 
 
 
-<a name="Why_can_t_I_see_values_in_the__INSERT_ENTERPRISE_HERE__tree_">
+<a name="Why_can_t_I_see_values_in_the__INSERT_ENTERPRISE_HERE__tree_"></a>
 Why can't I see values in the &lt;INSERT ENTERPRISE HERE&gt; tree?
 -----------------------------------------------------------
 
@@ -756,7 +757,7 @@ Why can't I see values in the &lt;INSERT ENTERPRISE HERE&gt; tree?
 
 
 
-<a name="Requests_always_seem_to_timeout__and_don_t_give_me_anything_back___Why_">
+<a name="Requests_always_seem_to_timeout__and_don_t_give_me_anything_back___Why_"></a>
 Requests always seem to timeout, and don't give me anything back.  Why?
 ----------------------------------------------------------------------
 
@@ -800,7 +801,7 @@ Requests always seem to timeout, and don't give me anything back.  Why?
 
 
 
-<a name="I_can_see_the_system_group__but_nothing_else___Why_">
+<a name="I_can_see_the_system_group__but_nothing_else___Why_"></a>
 I can see the system group, but nothing else.  Why?
 --------------------------------------------------
 
@@ -825,7 +826,7 @@ I can see the system group, but nothing else.  Why?
 
 
 
-<a name="The_agent_worked_for_a_while__then_stopped_responding___Why_">
+<a name="The_agent_worked_for_a_while__then_stopped_responding___Why_"></a>
 The agent worked for a while, then stopped responding.  Why?
 -----------------------------------------------------------
 
@@ -848,7 +849,7 @@ The agent worked for a while, then stopped responding.  Why?
 
 
 
-<a name="Requesting_an_object_fails_with__Unknown_Object_Identifier___Why_">
+<a name="Requesting_an_object_fails_with__Unknown_Object_Identifier___Why_"></a>
 Requesting an object fails with "Unknown Object Identifier"  Why?
 ----------------------------------------------------------------
 
@@ -891,7 +892,7 @@ Requesting an object fails with "Unknown Object Identifier"  Why?
 
 
 
-<a name="Why_do_I_get__noSuchName__when_asking_for__sysUpTime___or_similar__">
+<a name="Why_do_I_get__noSuchName__when_asking_for__sysUpTime___or_similar__"></a>
 Why do I get "noSuchName" when asking for "sysUpTime" (or similar)?
 ------------------------------------------------------------------
 
@@ -918,7 +919,7 @@ Why do I get "noSuchName" when asking for "sysUpTime" (or similar)?
 
 
 
-<a name="Why_do_I_sometimes_get__End_of_MIB__when_walking_a_tree__and_sometimes_not_">
+<a name="Why_do_I_sometimes_get__End_of_MIB__when_walking_a_tree__and_sometimes_not_"></a>
 Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
 --------------------------------------------------------------------------
 
@@ -943,7 +944,7 @@ Why do I sometimes get "End of MIB" when walking a tree, and sometimes not?
 
 
 
-<a name="I_cannot_set_any_variables_in_the_MIB_">
+<a name="I_cannot_set_any_variables_in_the_MIB_"></a>
 I cannot set any variables in the MIB.
 -------------------------------------
 
@@ -973,7 +974,7 @@ I cannot set any variables in the MIB.
 
 
 
-<a name="Variables_seem_to_disappear_when_I_try_to_set_them___Why_">
+<a name="Variables_seem_to_disappear_when_I_try_to_set_them___Why_"></a>
 Variables seem to disappear when I try to set them.  Why?
 --------------------------------------------------------
 
@@ -1027,7 +1028,7 @@ I still can't change sysLocation, though the access settings allow it.  Why not?
 
 
 
-<a name="I_get_an_error_when_trying_to_set_a_negative_value___why_">
+<a name="I_get_an_error_when_trying_to_set_a_negative_value___why_"></a>
 I get an error when trying to set a negative value - why?
 --------------------------------------------------------
 
@@ -1049,7 +1050,7 @@ I get an error when trying to set a negative value - why?
 
 
 
-<a name="I_get_an_error_when_trying_to_get_a_string_indexed_table_value___why_">
+<a name="I_get_an_error_when_trying_to_get_a_string_indexed_table_value___why_"></a>
 I get an error when trying to get a string-indexed table value - why?
 --------------------------------------------------------------------
 
@@ -1061,7 +1062,7 @@ I get an error when trying to get a string-indexed table value - why?
 
 
   
-<a name="How_do_I_send_traps_and_notifications_">
+<a name="How_do_I_send_traps_and_notifications_"></a>
 How do I send traps and notifications?
 ---------------------------------------
 
@@ -1097,7 +1098,7 @@ How do I send traps and notifications?
 
 
 
-<a name="How_do_I_handle_traps_and_notifications_">
+<a name="How_do_I_handle_traps_and_notifications_"></a>
 How do I handle traps and notifications?
 ---------------------------------------
 
@@ -1132,7 +1133,7 @@ How do I handle traps and notifications?
   
 
 
-<a name="My_traphandler_script_doesn_t_work_when_run_like_this___why_not_">
+<a name="My_traphandler_script_doesn_t_work_when_run_like_this___why_not_"></a>
 My traphandler script doesn't work when run like this - why not?
 ---------------------------------------------------------------
 
@@ -1160,7 +1161,7 @@ My traphandler script doesn't work when run like this - why not?
 
 
 
-<a name="The_ucdShutdown_trap_OID_received_by_my_manager_is_wrong__Why_">
+<a name="The_ucdShutdown_trap_OID_received_by_my_manager_is_wrong__Why_"></a>
 The ucdShutdown trap OID received by my manager is wrong. Why?
 -------------------------------------------------------------
 
@@ -1178,7 +1179,7 @@ The ucdShutdown trap OID received by my manager is wrong. Why?
 
 
 
-<a name="Why_does_snmptrapd_complain_about_AgentX_">
+<a name="Why_does_snmptrapd_complain_about_AgentX_"></a>
 Why does snmptrapd complain about AgentX?
 ----------------------------------------
 
@@ -1198,7 +1199,7 @@ Why does snmptrapd complain about AgentX?
 
 
 
-<a name="How_do_I_use_SNMPv__">
+<a name="How_do_I_use_SNMPv__"></a>
 How do I use SNMPv3?
 -------------------
 
@@ -1237,7 +1238,7 @@ How do I use SNMPv3?
  
 
 
-<a name="How_big_can_an_SNMP_request__or_reply__be_">
+<a name="How_big_can_an_SNMP_request__or_reply__be_"></a>
 How big can an SNMP request (or reply) be?
 -----------------------------------------
 
@@ -1260,7 +1261,7 @@ How big can an SNMP request (or reply) be?
 
 
 
-<a name="How_can_I_monitor_my_systems__disk__memory__etc__">
+<a name="How_can_I_monitor_my_systems__disk__memory__etc__"></a>
 How can I monitor my systems (disk, memory, etc)?
 ------------------------------------------------
 
@@ -1286,7 +1287,7 @@ How can I monitor my systems (disk, memory, etc)?
 
 
 
-<a name="Applications_complain_about_entries_in_your_example__snmp_conf__file___Why_">
+<a name="Applications_complain_about_entries_in_your_example__snmp_conf__file___Why_"></a>
 Applications complain about entries in your example 'snmp.conf' file.  Why?
 --------------------------------------------------------------------------
 
@@ -1301,7 +1302,7 @@ Applications complain about entries in your example 'snmp.conf' file.  Why?
 
 
 
-<a name="OK__what_should_I_put_in_snmp_conf_">
+<a name="OK__what_should_I_put_in_snmp_conf_"></a>
 OK, what should I put in snmp.conf?
 ----------------------------------
 
@@ -1326,11 +1327,11 @@ OK, what should I put in snmp.conf?
 
 
 
-<a name="PERL">
+<a name="PERL"></a>
 PERL
 ====
 
-<a name="Where_can_I_get_the_perl_SNMP_package_">
+<a name="Where_can_I_get_the_perl_SNMP_package_"></a>
 Where can I get the perl SNMP package?
 -------------------------------------
 
@@ -1350,7 +1351,7 @@ Where can I get the perl SNMP package?
 
 
 
-<a name="How_do_I_install_the_Perl_SNMP_modules_">
+<a name="How_do_I_install_the_Perl_SNMP_modules_"></a>
 How do I install the Perl SNMP modules?
 --------------------------------------
 
@@ -1373,7 +1374,7 @@ How do I install the Perl SNMP modules?
 
 
 
-<a name="But_compiling_this_fails__Why_">
+<a name="But_compiling_this_fails__Why_"></a>
 But compiling this fails! Why?
 -----------------------------
 
@@ -1402,7 +1403,7 @@ But compiling this fails! Why?
 
 
 
-<a name="Compiling_the_perl_module_works_OK__but__make_test__fails__Why_">
+<a name="Compiling_the_perl_module_works_OK__but__make_test__fails__Why_"></a>
 Compiling the perl module works OK, but 'make test' fails. Why?
 --------------------------------------------------------------
 
@@ -1421,7 +1422,7 @@ Compiling the perl module works OK, but 'make test' fails. Why?
 
 
 
-<a name="The_perl__make_test__fails_on_the_OID_tests__Is_it_safe_to_continue_">
+<a name="The_perl__make_test__fails_on_the_OID_tests__Is_it_safe_to_continue_"></a>
 The perl 'make test' fails on the OID tests. Is it safe to continue?
 -------------------------------------------------------------------
 
@@ -1450,7 +1451,7 @@ The perl 'make test' fails on the OID tests. Is it safe to continue?
 
 
 
-<a name="I_m_trying_to_use_mib_c__or_tkmib__and_it_can_t_locate_SNMP_pm_">
+<a name="I_m_trying_to_use_mib_c__or_tkmib__and_it_can_t_locate_SNMP_pm_"></a>
 I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
 ------------------------------------------------------------
 
@@ -1461,7 +1462,7 @@ I'm trying to use mib2c (or tkmib) and it can't locate SNMP.pm?
 
 
 
-<a name="I_m_trying_to_use_mib_c__or_tkmib__and_it_can_t_load_SNMP_so_">
+<a name="I_m_trying_to_use_mib_c__or_tkmib__and_it_can_t_load_SNMP_so_"></a>
 I'm trying to use mib2c (or tkmib) and it can't load SNMP.so?
 ------------------------------------------------------------
 
@@ -1471,7 +1472,7 @@ I'm trying to use mib2c (or tkmib) and it can't load SNMP.so?
 
 
 
-<a name="I_m_trying_to_use_tkmib_and_it_can_t_locate_Tk_pm_">
+<a name="I_m_trying_to_use_tkmib_and_it_can_t_locate_Tk_pm_"></a>
 I'm trying to use tkmib and it can't locate Tk.pm?
 -------------------------------------------------
 
@@ -1483,7 +1484,7 @@ I'm trying to use tkmib and it can't locate Tk.pm?
 
 
 
-<a name="I_m_trying_to_install_your_RPM__but_it_complains_about_missing_perl_modules__Why_">
+<a name="I_m_trying_to_install_your_RPM__but_it_complains_about_missing_perl_modules__Why_"></a>
 I'm trying to install your RPM, but it complains about missing perl modules. Why?
 --------------------------------------------------------------------------------
 
@@ -1515,7 +1516,7 @@ I'm trying to install your RPM, but it complains about missing perl modules. Why
 
 
 
-<a name="I_ve_got_a_problem_with_the_Net_SNMP_module___Can_you_help_">
+<a name="I_ve_got_a_problem_with_the_Net_SNMP_module___Can_you_help_"></a>
 I've got a problem with the Net-SNMP module.  Can you help?
 ----------------------------------------------------------
 
@@ -1529,11 +1530,11 @@ I've got a problem with the Net-SNMP module.  Can you help?
 
 
 
-<a name="MIBS">
+<a name="MIBS"></a>
 MIBS
 ====
 
-<a name="Where_can_I_find_a_MIB_compiler_">
+<a name="Where_can_I_find_a_MIB_compiler_"></a>
 Where can I find a MIB compiler?
 -------------------------------
 
@@ -1554,7 +1555,7 @@ Where can I find a MIB compiler?
 
 
 
-<a name="I_can_t_load_any_of_the_mib_files__and_they_seem_to_be_missing">
+<a name="I_can_t_load_any_of_the_mib_files__and_they_seem_to_be_missing"></a>
 I can't load any of the mib files, and they seem to be missing
 the first two characters of the filename.  What's happening?
 -----------------------------------------------------------
@@ -1566,7 +1567,7 @@ the first two characters of the filename.  What's happening?
 
 
 
-<a name="Why_aren_t_my_mib_files_being_read_in_">
+<a name="Why_aren_t_my_mib_files_being_read_in_"></a>
 Why aren't my mib files being read in?
 -------------------------------------
 
@@ -1605,7 +1606,7 @@ Why aren't my mib files being read in?
 
 
 
-<a name="I_m_getting_answers__but_they_re_all_numbers__Why_">
+<a name="I_m_getting_answers__but_they_re_all_numbers__Why_"></a>
 I'm getting answers, but they're all numbers. Why?
 -------------------------------------------------
 
@@ -1620,7 +1621,7 @@ I'm getting answers, but they're all numbers. Why?
 
 
 
-<a name="What_does__Cannot_find_module__XXX_MIB___mean_">
+<a name="What_does__Cannot_find_module__XXX_MIB___mean_"></a>
 What does "Cannot find module (XXX-MIB)" mean?
 ---------------------------------------------
 
@@ -1642,7 +1643,7 @@ What does "Cannot find module (XXX-MIB)" mean?
 
 
 
-<a name="What_about__unlinked_OID__">
+<a name="What_about__unlinked_OID__"></a>
 What about "unlinked OID"?
 -------------------------
 
@@ -1660,7 +1661,7 @@ What about "unlinked OID"?
 
 
 
-<a name="The_parser_doesn_t_handle_comments_properly__Why_not_">
+<a name="The_parser_doesn_t_handle_comments_properly__Why_not_"></a>
 The parser doesn't handle comments properly. Why not?
 ------------------------------------------------------------
 
@@ -1687,7 +1688,7 @@ The parser doesn't handle comments properly. Why not?
 
 
 
-<a name="How_do_I_replace_MIB_values_with_new_ones_">
+<a name="How_do_I_replace_MIB_values_with_new_ones_"></a>
 How do I replace MIB values with new ones?
 -----------------------------------------
 
@@ -1744,7 +1745,7 @@ How do I replace MIB values with new ones?
 
 
 
-<a name="How_can_I_get_more_information_about_these_MIB_file_problems_">
+<a name="How_can_I_get_more_information_about_these_MIB_file_problems_"></a>
 How can I get more information about these MIB file problems?
 ------------------------------------------------------------
 
@@ -1768,7 +1769,7 @@ How can I get more information about these MIB file problems?
 
 
 
-<a name="What_s_this_about__too_many_imported_symbols__">
+<a name="What_s_this_about__too_many_imported_symbols__"></a>
 What's this about "too many imported symbols"?
 ---------------------------------------------
 
@@ -1790,7 +1791,7 @@ What's this about "too many imported symbols"?
 
 
 
-<a name="Do_I_actually_need_the_MIB_files_">
+<a name="Do_I_actually_need_the_MIB_files_"></a>
 Do I actually need the MIB files?
 --------------------------------
 
@@ -1817,11 +1818,11 @@ Do I actually need the MIB files?
 
 
 
-<a name="AGENT">
+<a name="AGENT"></a>
 AGENT
 =====
 
-<a name="What_MIBs_are_supported_">
+<a name="What_MIBs_are_supported_"></a>
 What MIBs are supported?
 -----------------------
 
@@ -1849,7 +1850,7 @@ What MIBs are supported?
 
 
 
-<a name="What_protocols_are_supported_">
+<a name="What_protocols_are_supported_"></a>
 What protocols are supported?
 ----------------------------
 
@@ -1860,7 +1861,7 @@ What protocols are supported?
 
 
 
-<a name="How_do_I_configure_the_agent_">
+<a name="How_do_I_configure_the_agent_"></a>
 How do I configure the agent?
 ----------------------------
 
@@ -1872,7 +1873,7 @@ How do I configure the agent?
 
 
 
-<a name="How_do_I_add_a_MIB_to_the_agent_">
+<a name="How_do_I_add_a_MIB_to_the_agent_"></a>
 How do I add a MIB to the agent?
 -------------------------------
 How do I add functionality?
@@ -1923,7 +1924,7 @@ How do I add functionality?
  
 
 
-<a name="How_do_I_remove_a_MIB_from_the_agent_">
+<a name="How_do_I_remove_a_MIB_from_the_agent_"></a>
 How do I remove a MIB from the agent?
 ------------------------------------
 
@@ -1969,7 +1970,7 @@ How do I remove a MIB from the agent?
 
 
 
-<a name="I_ve_installed_a_new_MIB_file___Why_can_t_I_query_it_">
+<a name="I_ve_installed_a_new_MIB_file___Why_can_t_I_query_it_"></a>
 I've installed a new MIB file.  Why can't I query it?
 ----------------------------------------------------
 
@@ -1986,7 +1987,7 @@ I've installed a new MIB file.  Why can't I query it?
 
 
 
-<a name="What_s_the_difference_between__exec____sh__and__pass__">
+<a name="What_s_the_difference_between__exec____sh__and__pass__"></a>
 What's the difference between 'exec', 'sh' and 'pass'?
 -----------------------------------------------------
 
@@ -2019,7 +2020,7 @@ What's the difference between 'exec', 'sh' and 'pass'?
 
   
 
-<a name="What_s_the_difference_between_AgentX__SMUX_and_proxied_SNMP_">
+<a name="What_s_the_difference_between_AgentX__SMUX_and_proxied_SNMP_"></a>
 What's the difference between AgentX, SMUX and proxied SNMP?
 -----------------------------------------------------------
 
@@ -2074,7 +2075,7 @@ What's the difference between AgentX, SMUX and proxied SNMP?
 
 
 
-<a name="What_about__dlmod____what_s_that_about_">
+<a name="What_about__dlmod____what_s_that_about_"></a>
 What about 'dlmod' - what's that about?
 --------------------------------------
 
@@ -2088,7 +2089,7 @@ What about 'dlmod' - what's that about?
 
 
 
-<a name="Which_should_I_use_">
+<a name="Which_should_I_use_"></a>
 Which should I use?
 ------------------
 
@@ -2142,7 +2143,7 @@ Which should I use?
 
 
 
-<a name="Can_I_use_AgentX_when_running_under_Windows_">
+<a name="Can_I_use_AgentX_when_running_under_Windows_"></a>
 Can I use AgentX when running under Windows?
 -------------------------------------------
 
@@ -2164,7 +2165,7 @@ Can I use AgentX when running under Windows?
 
 
 
-<a name="Can_I_use_AgentX__or_an_embedded_SNMP_agent__in_a_threaded_application_">
+<a name="Can_I_use_AgentX__or_an_embedded_SNMP_agent__in_a_threaded_application_"></a>
 Can I use AgentX (or an embedded SNMP agent) in a threaded application?
 -----------------------------------------------------------------------
 
@@ -2189,7 +2190,7 @@ Can I use AgentX (or an embedded SNMP agent) in a threaded application?
 
 
 
-<a name="How_can_I_run_AgentX_with_a_different_socket_address_">
+<a name="How_can_I_run_AgentX_with_a_different_socket_address_"></a>
 How can I run AgentX with a different socket address?
 ----------------------------------------------------
 
@@ -2238,7 +2239,7 @@ How can I run AgentX with a different socket address?
 
 
 
-<a name="How_can_I_turn_off_SMUX_support_">
+<a name="How_can_I_turn_off_SMUX_support_"></a>
 How can I turn off SMUX support?
 -------------------------------
 
@@ -2262,7 +2263,7 @@ How can I turn off SMUX support?
 
 
 
-<a name="How_can_I_combine_two_copies_of_the__mib___tree_from_separate_subagents_">
+<a name="How_can_I_combine_two_copies_of_the__mib___tree_from_separate_subagents_"></a>
 How can I combine two copies of the 'mib2' tree from separate subagents?
 -----------------------------------------------------------------------
 
@@ -2285,7 +2286,7 @@ How can I combine two copies of the 'mib2' tree from separate subagents?
 
 
 
-<a name="What_traps_are_sent_by_the_agent_">
+<a name="What_traps_are_sent_by_the_agent_"></a>
 What traps are sent by the agent?
 --------------------------------
 
@@ -2311,7 +2312,7 @@ What traps are sent by the agent?
 
 
 
-<a name="Where_are_these_traps_sent_to_">
+<a name="Where_are_these_traps_sent_to_"></a>
 Where are these traps sent to?
 -----------------------------
 
@@ -2344,7 +2345,7 @@ Where are these traps sent to?
  
 
 
-<a name="How_can_I_send_a_particular_trap_to_selected_destinations_">
+<a name="How_can_I_send_a_particular_trap_to_selected_destinations_"></a>
 How can I send a particular trap to selected destinations?
 ----------------------------------------------------------
 
@@ -2362,7 +2363,7 @@ How can I send a particular trap to selected destinations?
 
 
 
-<a name="When_I_run_the_agent_it_runs_and_then_quits_without_staying_around__Why_">
+<a name="When_I_run_the_agent_it_runs_and_then_quits_without_staying_around__Why_"></a>
 When I run the agent it runs and then quits without staying around. Why?
 -----------------------------------------------------------------------
 
@@ -2407,7 +2408,7 @@ When I run the agent it runs and then quits without staying around. Why?
 
 
 
-<a name="After_a_while_the_agent_stops_responding__and_starts_eating_CPU_time___Why_">
+<a name="After_a_while_the_agent_stops_responding__and_starts_eating_CPU_time___Why_"></a>
 After a while the agent stops responding, and starts eating CPU time.  Why?
 --------------------------------------------------------------------------
 
@@ -2432,7 +2433,7 @@ After a while the agent stops responding, and starts eating CPU time.  Why?
 
 
 
-<a name="How_can_I_stop_other_people_getting_at_my_agent_">
+<a name="How_can_I_stop_other_people_getting_at_my_agent_"></a>
 How can I stop other people getting at my agent?
 -----------------------------------------------
 
@@ -2467,7 +2468,7 @@ How can I stop other people getting at my agent?
 
 
 
-<a name="How_can_I_listen_on_just_one_particular_interface_">
+<a name="How_can_I_listen_on_just_one_particular_interface_"></a>
 How can I listen on just one particular interface?
 -------------------------------------------------
 
@@ -2504,7 +2505,7 @@ How can I listen on just one particular interface?
 
 
 
-<a name="How_do_I_configure_access_control_">
+<a name="How_do_I_configure_access_control_"></a>
 How do I configure access control?
 ---------------------------------
 
@@ -2542,7 +2543,7 @@ How do I configure access control?
 
 
 
-<a name="I_don_t_understand_the_new_access_control_stuff___what_does_it_mean_">
+<a name="I_don_t_understand_the_new_access_control_stuff___what_does_it_mean_"></a>
 I don't understand the new access control stuff - what does it mean?
 -------------------------------------------------------------------
 
@@ -2616,7 +2617,7 @@ I don't understand the new access control stuff - what does it mean?
   access line.  Note that the token "any" is no longer acceptable for the
   security model - the original support for this was due due to a misreading
   of the RFC.  You should replace any such line with separate versions for
-  each of the desired security models ('v1', 'v2c' & 'usm').
+  each of the desired security models ('v1', 'v2c' &amp; 'usm').
 
     For SNMPv1 and SNMPv2c, the group line is just an intermediate step
   between the "access" line and the "com2sec" line, which is the last bit
@@ -2653,7 +2654,7 @@ I don't understand the new access control stuff - what does it mean?
 
 
 
-<a name="How_do_I_configure_SNMPv__users_">
+<a name="How_do_I_configure_SNMPv__users_"></a>
 How do I configure SNMPv3 users?
 -------------------------------
 
@@ -2690,7 +2691,7 @@ How do I configure SNMPv3 users?
 
 
 
-<a name="The__createUser__line_disappears_when_I_start_the_agent___Why_">
+<a name="The__createUser__line_disappears_when_I_start_the_agent___Why_"></a>
 The 'createUser' line disappears when I start the agent.  Why?
 -------------------------------------------------------------
 
@@ -2705,7 +2706,7 @@ The 'createUser' line disappears when I start the agent.  Why?
 
 
 
-<a name="What_s_the_difference_between__var_ucd_snmp_and__usr_local_share_snmp_">
+<a name="What_s_the_difference_between__var_ucd_snmp_and__usr_local_share_snmp_"></a>
 What's the difference between /var/ucd-snmp and /usr/local/share/snmp?
 ---------------------------------------------------------------------
 
@@ -2721,7 +2722,7 @@ What's the difference between /var/ucd-snmp and /usr/local/share/snmp?
 
 
 
-<a name="My_new_agent_is_ignoring_the_old_snmpd_conf_file__Why_">
+<a name="My_new_agent_is_ignoring_the_old_snmpd_conf_file__Why_"></a>
 My new agent is ignoring the old snmpd.conf file. Why?
 -----------------------------------------------------
 
@@ -2743,7 +2744,7 @@ My new agent is ignoring the old snmpd.conf file. Why?
 
 
 
-<a name="Why_am_I_getting__Connection_refused__">
+<a name="Why_am_I_getting__Connection_refused__"></a>
 Why am I getting "Connection refused"?
 -------------------------------------
 
@@ -2787,7 +2788,7 @@ Why am I getting "Connection refused"?
 
 
  
-<a name="I_m_getting_errors_about__bad_security_model____why_">
+<a name="I_m_getting_errors_about__bad_security_model____why_"></a>
 I'm getting errors about "bad security model" - why?
 ----------------------------------------------------
 
@@ -2804,7 +2805,7 @@ I'm getting errors about "bad security model" - why?
 
   
 
-<a name="I_m_getting_errors_about__bad_prefix_match_parameter____why_">
+<a name="I_m_getting_errors_about__bad_prefix_match_parameter____why_"></a>
 I'm getting errors about "bad prefix match parameter" - why?
 ------------------------------------------------------------
 
@@ -2814,7 +2815,7 @@ I'm getting errors about "bad prefix match parameter" - why?
 
 
   
-<a name="Why_can_t_I_see_values_in_the_UCDavis__extensible__or__disk__trees_">
+<a name="Why_can_t_I_see_values_in_the_UCDavis__extensible__or__disk__trees_"></a>
 Why can't I see values in the UCDavis 'extensible' or 'disk' trees?
 ------------------------------------------------------------------
 
@@ -2845,7 +2846,7 @@ Why can't I see values in the UCDavis 'memory' or 'vmstat' trees?
 
 
 
-<a name="What_do_the_CPU_statistics_mean___is_this_the_load_average_">
+<a name="What_do_the_CPU_statistics_mean___is_this_the_load_average_"></a>
 What do the CPU statistics mean - is this the load average?
 ----------------------------------------------------------
 
@@ -2865,7 +2866,7 @@ What do the CPU statistics mean - is this the load average?
 
 
 
-<a name="How_do_I_get_percentage_CPU_utilization_using_ssCpuRawIdle_">
+<a name="How_do_I_get_percentage_CPU_utilization_using_ssCpuRawIdle_"></a>
 How do I get percentage CPU utilization using ssCpuRawIdle?
 -----------------------------------------------------------
 
@@ -2878,7 +2879,7 @@ How do I get percentage CPU utilization using ssCpuRawIdle?
 
 
 
-<a name="What_about_multi_processor_systems_">
+<a name="What_about_multi_processor_systems_"></a>
 What about multi-processor systems?
 ----------------------------------
 
@@ -2903,7 +2904,7 @@ What about multi-processor systems?
 
 
 
-<a name="The_speed_type_of_my_network_interfaces_is_wrong___how_can_I_fix_it_">
+<a name="The_speed_type_of_my_network_interfaces_is_wrong___how_can_I_fix_it_"></a>
 The speed/type of my network interfaces is wrong - how can I fix it?
 -------------------------------------------------------------------
 
@@ -2922,7 +2923,7 @@ The speed/type of my network interfaces is wrong - how can I fix it?
   
 
 
-<a name="The_interface_statistics_for_my_subinterfaces_are_all_zero___why_">
+<a name="The_interface_statistics_for_my_subinterfaces_are_all_zero___why_"></a>
 The interface statistics for my subinterfaces are all zero - why?
 ----------------------------------------------------------------
 
@@ -2939,7 +2940,7 @@ The interface statistics for my subinterfaces are all zero - why?
 
 
 
-<a name="Does_the_agent_support_the_RMON_MIB_">
+<a name="Does_the_agent_support_the_RMON_MIB_"></a>
 Does the agent support the RMON-MIB?
 -----------------------------------
 
@@ -2969,7 +2970,7 @@ Does the agent support the RMON-MIB?
 
 
 
-<a name="What_does__klread___bad_address__mean_">
+<a name="What_does__klread___bad_address__mean_"></a>
 What does "klread:  bad address" mean?
 -------------------------------------
 
@@ -2986,7 +2987,7 @@ What does "klread:  bad address" mean?
 
 
 
-<a name="What_does__nlist_err___wombat_not_found___or_similar__mean_">
+<a name="What_does__nlist_err___wombat_not_found___or_similar__mean_"></a>
 What does "nlist err:  wombat not found" (or similar) mean?
 ----------------------------------------------------------
 
@@ -3004,7 +3005,7 @@ What does "nlist err:  wombat not found" (or similar) mean?
 
 
 
-<a name="How_about__Can_t_open__dev_kmem__">
+<a name="How_about__Can_t_open__dev_kmem__"></a>
 How about "Can't open /dev/kmem"?
 --------------------------------
 
@@ -3020,7 +3021,7 @@ How about "Can't open /dev/kmem"?
 
  
 
-<a name="The_agent_is_complaining_about__snmpd_conf____Where_is_this_">
+<a name="The_agent_is_complaining_about__snmpd_conf____Where_is_this_"></a>
 The agent is complaining about 'snmpd.conf'.  Where is this?
 -----------------------------------------------------------
 
@@ -3032,7 +3033,7 @@ The agent is complaining about 'snmpd.conf'.  Where is this?
 
 
 
-<a name="The_system_uptime__sysUpTime__returned_is_wrong_">
+<a name="The_system_uptime__sysUpTime__returned_is_wrong_"></a>
 The system uptime (sysUpTime) returned is wrong!
 -----------------------------------------------
 
@@ -3054,7 +3055,7 @@ The system uptime (sysUpTime) returned is wrong!
 
 
 
-<a name="Can_the_agent_run_multi_threaded_">
+<a name="Can_the_agent_run_multi_threaded_"></a>
 Can the agent run multi-threaded?
 --------------------------------
 
@@ -3097,11 +3098,11 @@ Can the agent run multi-threaded?
 
 
 
-<a name="COMPILING">
+<a name="COMPILING"></a>
 COMPILING
 =========
 
-<a name="How_do_I_compile_with__cc__instead_of__gcc__">
+<a name="How_do_I_compile_with__cc__instead_of__gcc__"></a>
 How do I compile with 'cc' instead of 'gcc'?
 -------------------------------------------
 
@@ -3114,7 +3115,7 @@ How do I compile with 'cc' instead of 'gcc'?
  
 
 
-<a name="But_gcc_doesn_t_compile_it_successfully_on_my_new_Solaris_system__Why_not_">
+<a name="But_gcc_doesn_t_compile_it_successfully_on_my_new_Solaris_system__Why_not_"></a>
 But gcc doesn't compile it successfully on my new Solaris system. Why not?
 -------------------------------------------------------------------------
 
@@ -3153,7 +3154,7 @@ On RedHat 8.0 or up I get "/usr/bin/ld: cannot find -lelf"?
 
 
 
-<a name="What_about___lbz___or___lselinux__errors_">
+<a name="What_about___lbz___or___lselinux__errors_"></a>
 What about '-lbz2' or '-lselinux' errors?
 ----------------------------------------
 
@@ -3168,7 +3169,7 @@ What about '-lbz2' or '-lselinux' errors?
 
 
 
-<a name="What_about_a_failed_dependency_on__libcrypto____Where_can_I_get_that_">
+<a name="What_about_a_failed_dependency_on__libcrypto____Where_can_I_get_that_"></a>
 What about a failed dependency on 'libcrypto'?  Where can I get that?
 --------------------------------------------------------------------
 
@@ -3189,7 +3190,7 @@ What about a failed dependency on 'libcrypto'?  Where can I get that?
 
 
 
-<a name="I_m_getting_an_error__autoheader__not_found____what_s_wrong_">
+<a name="I_m_getting_an_error__autoheader__not_found____what_s_wrong_"></a>
 I'm getting an error "autoheader: not found" - what's wrong?
 -----------------------------------------------------------
 
@@ -3204,7 +3205,7 @@ I'm getting an error "autoheader: not found" - what's wrong?
 
 
 
-<a name="How_can_I_reduce_the_memory_footprint_">
+<a name="How_can_I_reduce_the_memory_footprint_"></a>
 How can I reduce the memory footprint?
 --------------------------------------
 
@@ -3247,7 +3248,7 @@ How can I reduce the memory footprint?
 
 
 
-<a name="How_can_I_reduce_the_installation_footprint_or_speed_up_compilation_">
+<a name="How_can_I_reduce_the_installation_footprint_or_speed_up_compilation_"></a>
 How can I reduce the installation footprint or speed up compilation?
 -------------------------------------------------------------------
 
@@ -3264,7 +3265,7 @@ How can I reduce the installation footprint or speed up compilation?
 
 
 
-<a name="How_can_I_compile_the_project_to_use_static_linking_">
+<a name="How_can_I_compile_the_project_to_use_static_linking_"></a>
 How can I compile the project to use static linking?
 ---------------------------------------------------
 
@@ -3308,7 +3309,7 @@ How can I compile the project to use static linking?
 
 
 
-<a name="Why_is_the_project_workspace_empty_under_Visual_C___">
+<a name="Why_is_the_project_workspace_empty_under_Visual_C___"></a>
 Why is the project workspace empty under Visual C++?
 ---------------------------------------------------
 
@@ -3319,7 +3320,7 @@ Why is the project workspace empty under Visual C++?
 
 
 
-<a name="Why_does__make_test__skip_five_tests_">
+<a name="Why_does__make_test__skip_five_tests_"></a>
 Why does 'make test' skip five tests?
 -----------------------------------
 
@@ -3333,7 +3334,7 @@ Why does 'make test' skip five tests?
 
 
 
-<a name="Why_does__make_test__complain_about_a_pid_file_">
+<a name="Why_does__make_test__complain_about_a_pid_file_"></a>
 Why does 'make test' complain about a pid file?
 -----------------------------------------------
 
@@ -3361,11 +3362,11 @@ Why does 'make test' complain about a pid file?
 
 
 
-<a name="CODING">
+<a name="CODING"></a>
 CODING
 ======
 
-<a name="How_do_I_write_C_code_to_integrate_with_the_agent_">
+<a name="How_do_I_write_C_code_to_integrate_with_the_agent_"></a>
 How do I write C code to integrate with the agent?
 -------------------------------------------------
 
@@ -3389,7 +3390,7 @@ How do I write C code to integrate with the agent?
 
 
 
-<a name="How_does_the_agent_fetch_the_value_of_a_MIB_variable_from_the_system_">
+<a name="How_does_the_agent_fetch_the_value_of_a_MIB_variable_from_the_system_"></a>
 How does the agent fetch the value of a MIB variable from the system?
 --------------------------------------------------------------------
 
@@ -3416,7 +3417,7 @@ How does the agent fetch the value of a MIB variable from the system?
 
 
 
-<a name="Mib_c_complains_about_a_missing__mib_reference____what_does_this_mean_">
+<a name="Mib_c_complains_about_a_missing__mib_reference____what_does_this_mean_"></a>
 Mib2c complains about a missing "mib reference" - what does this mean?
 ---------------------------------------------------------------------
 
@@ -3428,7 +3429,7 @@ Mib2c complains about a missing "mib reference" - what does this mean?
 
 
 
-<a name="Mib_c_complains_about_not_having_a__valid_OID____what_does_this_mean_">
+<a name="Mib_c_complains_about_not_having_a__valid_OID____what_does_this_mean_"></a>
 Mib2c complains about not having a "valid OID" - what does this mean?
 ---------------------------------------------------------------------
 
@@ -3453,7 +3454,7 @@ Mib2c complains about not having a "valid OID" - what does this mean?
 
 
 
-<a name="Why_doesn_t_Mib_c_like_the_MIB_file_I_m_giving_it_">
+<a name="Why_doesn_t_Mib_c_like_the_MIB_file_I_m_giving_it_"></a>
 Why doesn't Mib2c like the MIB file I'm giving it?
 -------------------------------------------------
 
@@ -3468,7 +3469,7 @@ Why doesn't Mib2c like the MIB file I'm giving it?
 
 
 
-<a name="Mib_c_ignores_my_MIB_and_generates_a_pair_of__mib____code_files___Why_">
+<a name="Mib_c_ignores_my_MIB_and_generates_a_pair_of__mib____code_files___Why_"></a>
 Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?
 ---------------------------------------------------------------------
 
@@ -3484,7 +3485,7 @@ Mib2c ignores my MIB and generates a pair of 'mib-2' code files.  Why?
 
 
 
-<a name="Mib_c_complains_about__configuration_files___What_s_this_for_">
+<a name="Mib_c_complains_about__configuration_files___What_s_this_for_"></a>
 Mib2c complains about "configuration files". What's this for?
 ------------------------------------------------------------
 
@@ -3497,7 +3498,7 @@ Mib2c complains about "configuration files". What's this for?
 
 
 
-<a name="Which_mib_c_configuration_file_should_I_use_">
+<a name="Which_mib_c_configuration_file_should_I_use_"></a>
 Which mib2c configuration file should I use?
 -------------------------------------------
 
@@ -3557,7 +3558,7 @@ Which mib2c configuration file should I use?
 
 
 
-<a name="How_can_I_have_Mib_c_generate_code_for_both_scalars_and_tables_">
+<a name="How_can_I_have_Mib_c_generate_code_for_both_scalars_and_tables_"></a>
 How can I have Mib2c generate code for both scalars and tables?
 --------------------------------------------------------------
 
@@ -3574,7 +3575,7 @@ How can I have Mib2c generate code for both scalars and tables?
 
 
 
-<a name="Are_there_any_examples__or_documentation_">
+<a name="Are_there_any_examples__or_documentation_"></a>
 Are there any examples, or documentation?
 -------------------------------------------
 
@@ -3588,7 +3589,7 @@ Are there any examples, or documentation?
   (apps/notification_log)
 
     The basic iterator handler is used in a number of modules, such
-  as the latest TCP and UDP table implementations (mibII/tcpTable &
+  as the latest TCP and UDP table implementations (mibII/tcpTable &amp;
   mibII/udpTable), VACM context handling (mibII/vacm_context) and
   various tables relating to agent internals (agent/*).  These show
   a number of different approaches to using the iterator helper, so
@@ -3604,7 +3605,7 @@ Are there any examples, or documentation?
 
 
 
-<a name="Where_should_I_put_the_files_produced_by__mib_c__">
+<a name="Where_should_I_put_the_files_produced_by__mib_c__"></a>
 Where should I put the files produced by 'mib2c'?
 ------------------------------------------------
 
@@ -3628,7 +3629,7 @@ Where should I put the files produced by 'mib2c'?
 
 
 
-<a name="I_ve_created_a_new_module_with__mib_c__but_it_doesn_t_work___Why_not_">
+<a name="I_ve_created_a_new_module_with__mib_c__but_it_doesn_t_work___Why_not_"></a>
 I've created a new module with 'mib2c' but it doesn't work.  Why not?
 --------------------------------------------------------------------
 
@@ -3643,7 +3644,7 @@ I've created a new module with 'mib2c' but it doesn't work.  Why not?
 
 
 
-<a name="I_ve_added_my_code_to_this_template_and_it_still_doesn_t_work___Why_not_">
+<a name="I_ve_added_my_code_to_this_template_and_it_still_doesn_t_work___Why_not_"></a>
 I've added my code to this template and it still doesn't work.  Why not?
 -----------------------------------------------------------------------
 
@@ -3683,7 +3684,7 @@ I've added my code to this template and it still doesn't work.  Why not?
 
 
 
-<a name="Mib_c_only_handles_a_single_table_in_my_MIB__How_can_I_fix_this_">
+<a name="Mib_c_only_handles_a_single_table_in_my_MIB__How_can_I_fix_this_"></a>
 Mib2c only handles a single table in my MIB. How can I fix this?
 ---------------------------------------------------------------
 
@@ -3705,7 +3706,7 @@ Mib2c only handles a single table in my MIB. How can I fix this?
 
 
 
-<a name="Why_does_the_iterator_call_my_get__first_next__routines_so_often_">
+<a name="Why_does_the_iterator_call_my_get__first_next__routines_so_often_"></a>
 Why does the iterator call my get_{first,next} routines so often?
 -----------------------------------------------------------------------
 
@@ -3733,7 +3734,7 @@ Why does the iterator call my get_{first,next} routines so often?
 
 
 
-<a name="How_can_I_support_a_large_table__with_more_than_____column_objects_">
+<a name="How_can_I_support_a_large_table__with_more_than_____column_objects_"></a>
 How can I support a large table, with more than 256 column objects?
 ------------------------------------------------------------------
 
@@ -3773,7 +3774,7 @@ How can I support a large table, with more than 256 column objects?
 
 
 
-<a name="How_can_I_get_the_agent_to_generate_a_trap__or_inform__">
+<a name="How_can_I_get_the_agent_to_generate_a_trap__or_inform__"></a>
 How can I get the agent to generate a trap (or inform)?
 ------------------------------------------------------
 
@@ -3813,7 +3814,7 @@ How can I get the agent to generate a trap (or inform)?
 
 
 
-<a name="How_can_I_get_the_agent_to_send_an_SNMPv___or_SNMPv_c__trap_">
+<a name="How_can_I_get_the_agent_to_send_an_SNMPv___or_SNMPv_c__trap_"></a>
 How can I get the agent to send an SNMPv1 (or SNMPv2c) trap?
 -----------------------------------------------------------
 
@@ -3828,7 +3829,7 @@ How can I get the agent to send an SNMPv1 (or SNMPv2c) trap?
 
 
 
-<a name="How_can_I_get_the_agent_to_include_varbinds_with_an_SNMPv__trap_">
+<a name="How_can_I_get_the_agent_to_include_varbinds_with_an_SNMPv__trap_"></a>
 How can I get the agent to include varbinds with an SNMPv1 trap?
 ---------------------------------------------------------------
 
@@ -3847,7 +3848,7 @@ How can I get the agent to include varbinds with an SNMPv1 trap?
 
 
 
-<a name="How_can_I_get_the_agent_to_send_an_SNMPv__enterprise_specific_trap_">
+<a name="How_can_I_get_the_agent_to_send_an_SNMPv__enterprise_specific_trap_"></a>
 How can I get the agent to send an SNMPv1 enterprise-specific trap?
 ------------------------------------------------------------------
 
@@ -3867,7 +3868,7 @@ How can I get the agent to send an SNMPv1 enterprise-specific trap?
 
 
 
-<a name="How_can_I_get_the_agent_to_send_an_SNMPv__trap__or_inform__">
+<a name="How_can_I_get_the_agent_to_send_an_SNMPv__trap__or_inform__"></a>
 How can I get the agent to send an SNMPv3 trap (or inform)?
 ----------------------------------------------------------
 
@@ -3890,7 +3891,7 @@ How can I get the agent to send an SNMPv3 trap (or inform)?
 
 
 
-<a name="Why_does_calling__send_v_trap__generate_an_SNMPv__trap__or_vice_versa__">
+<a name="Why_does_calling__send_v_trap__generate_an_SNMPv__trap__or_vice_versa__"></a>
 Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?
 ----------------------------------------------------------------------
 
@@ -3913,7 +3914,7 @@ Why does calling 'send_v2trap' generate an SNMPv1 trap (or vice versa)?
 
 
 
-<a name="What_if_I_m_using_an_AgentX_sub_agent_instead_">
+<a name="What_if_I_m_using_an_AgentX_sub_agent_instead_"></a>
 What if I'm using an AgentX sub-agent instead?
 ---------------------------------------------
 
@@ -3932,7 +3933,7 @@ What if I'm using an AgentX sub-agent instead?
 
 
 
-<a name="How_can_I_register_a_MIB_module_in_a_different__SNMPv___context_">
+<a name="How_can_I_register_a_MIB_module_in_a_different__SNMPv___context_"></a>
 How can I register a MIB module in a different (SNMPv3) context?
 ---------------------------------------------------------------
 
@@ -3984,11 +3985,11 @@ How can I register a MIB module in a different (SNMPv3) context?
 
 
 
-<a name="MISC">
+<a name="MISC"></a>
 MISC
 ======
 
-<a name="Why_are_packets_requesting_the_same_information_larger_with_UC_Davis_SNMP_">
+<a name="Why_are_packets_requesting_the_same_information_larger_with_UC_Davis_SNMP_"></a>
 Why are packets requesting the same information larger with UC-Davis SNMP?
 -------------------------------------------------------------------------
 
@@ -4009,7 +4010,7 @@ Why are packets requesting the same information larger with UC-Davis SNMP?
 
 
 
-<a name="What_ASN___parser_is_used_">
+<a name="What_ASN___parser_is_used_"></a>
 What ASN.1 parser is used?
 -------------------------
 
@@ -4029,7 +4030,7 @@ What ASN.1 parser is used?
 
 
 
-<a name="What_is_the_Official_Slogan_of_the_net_snmp_coders_list_">
+<a name="What_is_the_Official_Slogan_of_the_net_snmp_coders_list_"></a>
 What is the Official Slogan of the net-snmp-coders list?
 -------------------------------------------------------
 
@@ -4042,5 +4043,8 @@ What is the Official Slogan of the net-snmp-coders list?
 
 
 
-</pre><hr>
-Last modified: Wed Dec 22 10:38:14 2004
+
+</pre>
+<!-- CONTENT END -->
+<!--#include virtual="/page-bottom.html" -->
+
