@@ -25,34 +25,36 @@ SOFTWARE.
 ******************************************************************/
 
 
-extern int snmp_inpkts;
-extern int snmp_outpkts;
-extern int snmp_inbadversions;
-extern int snmp_inbadcommunitynames;
-extern int snmp_inbadcommunityuses;
-extern int snmp_inasnparseerrors;
-extern int snmp_intoobigs;
-extern int snmp_innosuchnames;
-extern int snmp_inbadvalues;
-extern int snmp_inreadonlys;
-extern int snmp_ingenerrs;
-extern int snmp_intotalreqvars;
-extern int snmp_intotalsetvars;
-extern int snmp_ingetrequests;
-extern int snmp_ingetnexts;
-extern int snmp_insetrequests;
-extern int snmp_ingetresponses;
-extern int snmp_intraps;
-extern int snmp_outtoobigs;
-extern int snmp_outnosuchnames;
-extern int snmp_outbadvalues;
-extern int snmp_outgenerrs;
-extern int snmp_outgetrequests;
-extern int snmp_outgetnexts;
-extern int snmp_outsetrequests;
-extern int snmp_outgetresponses;
-extern int snmp_outtraps;
-extern int snmp_enableauthentraps;
+extern int snmp_inpkts;			/*  1 - current */
+extern int snmp_outpkts;		/*  2 - obsolete */
+extern int snmp_inbadversions;		/*  3 - current */
+extern int snmp_inbadcommunitynames;	/*  4 - current */
+extern int snmp_inbadcommunityuses;	/*  5 - current */
+extern int snmp_inasnparseerrors;	/*  6 - current */
+extern int snmp_intoobigs;		/*  8 - obsolete */
+extern int snmp_innosuchnames;		/*  9 - obsolete */
+extern int snmp_inbadvalues;		/* 10 - obsolete */
+extern int snmp_inreadonlys;		/* 11 - obsolete */
+extern int snmp_ingenerrs;		/* 12 - obsolete */
+extern int snmp_intotalreqvars;		/* 13 - obsolete */
+extern int snmp_intotalsetvars;		/* 14 - obsolete */
+extern int snmp_ingetrequests;		/* 15 - obsolete */
+extern int snmp_ingetnexts;		/* 16 - obsolete */
+extern int snmp_insetrequests;		/* 17 - obsolete */
+extern int snmp_ingetresponses;		/* 18 - obsolete */
+extern int snmp_intraps;		/* 19 - obsolete */
+extern int snmp_outtoobigs;		/* 20 - obsolete */
+extern int snmp_outnosuchnames;		/* 21 - obsolete */
+extern int snmp_outbadvalues;		/* 22 - obsolete */
+extern int snmp_outgenerrs;		/* 24 - obsolete */
+extern int snmp_outgetrequests;		/* 25 - obsolete */
+extern int snmp_outgetnexts;		/* 26 - obsolete */
+extern int snmp_outsetrequests;		/* 27 - obsolete */
+extern int snmp_outgetresponses;	/* 28 - obsolete */
+extern int snmp_outtraps;		/* 29 - obsolete */
+extern int snmp_enableauthentraps;	/* 30 - current */
+extern int snmp_silentdrops;		/* 31 - current */
+extern int snmp_proxydrops;		/* 32 - current */
 
 extern char *snmp_trapsink;
 extern char *snmp_trapcommunity;
