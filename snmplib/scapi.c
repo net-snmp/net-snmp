@@ -330,7 +330,7 @@ sc_hash(oid *hashtype, size_t hashtypelen, u_char *buf, size_t buf_len,
 
   if (hashtype == NULL || hashtypelen < 0 || buf == NULL ||
       buf_len < 0 || MAC == NULL ||  MAC_len == NULL ||
-      (int)(*MAC_len) <= sc_get_properlength(hashtype, hashtypelen))
+      (int)(*MAC_len) < sc_get_properlength(hashtype, hashtypelen))
     return (SNMPERR_GENERR);
 
 #ifdef USE_OPENSSL 
@@ -677,13 +677,6 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 	if (ISTRANSFORM(privtype, DESPriv)) {
           /* removed due to U.S. exportation regulations */
 	}
-/* remove padding */
-	i = plaintext[ctlen-1]; /* stip pad off plaintext */
-	for (j =i; j > 0; j--)
-		if(plaintext[ctlen-j] != i) {/* check if pad is bad */
-			QUITFUN(SNMPERR_GENERR, sc_decrypt_quit);
-		}
-	*ptlen = ctlen-i; /* set the out put lenght of the pad */
 
 /* exit cond */
 sc_decrypt_quit:
