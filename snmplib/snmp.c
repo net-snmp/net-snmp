@@ -354,7 +354,6 @@ snmp_rbuild_var_op(u_char *data,
 	    data = asn_rbuild_null(data, listlength, var_val_type);
 	    break;
 #ifdef OPAQUE_SPECIAL_TYPES
-/* WWW
       case ASN_OPAQUE_FLOAT:
         data = asn_rbuild_float(data, listlength, var_val_type,
                                 (float *) var_val, var_val_len);
@@ -368,7 +367,6 @@ snmp_rbuild_var_op(u_char *data,
                                        (struct counter64 *) var_val,
                                        var_val_len);
         break;
-*/
 #endif /* OPAQUE_SPECIAL_TYPES */
 	default:
 	    ERROR_MSG("wrong type");
