@@ -7,20 +7,21 @@ Each group consists of two files:
   wombat.h:	interface information
 
 	- declaration of the initialisation function 'init_wombat'
+		(optional)
 	- declaration of the function(s) for retrieving variable
 		information 'var_wombat'
 	- declaration of the function(s) for setting variable
 		information (if appropriate)
 
 	- definitions of the MIB group 'magic numbers'
-		declarations of the 'public' funtions
+		declarations of the 'public' functions
 
 	- a list of the variables in the group, including
 		type information, mapping between magic numbers
 		and OID sub-identifiers within the group,
 		accessibility information, and the relevant
 		function for retrieving this variable's value.
-	- a 'subtree' definition, identifying the location of
+	- a call to 'config_load_mib', identifying the location of
 		this MIB group within the general MIB structure.
 
 	(these last two are only visible within the 'glue' file
@@ -32,10 +33,10 @@ Each group consists of two files:
 
 	- a list of kernel information needed to report
 		on this group
-	- an initialisation function (possibly empty)
+	- an initialisation function (optional)
 	- 'header' function(s) to map the OID requested
 		to the next appropriate OID
-		(and similar system-independant setup)
+		(and similar system-independent setup)
 	- function(s) (possibly system-specific) to
 		determine and return the value of the
 		variable requested.
@@ -44,52 +45,45 @@ Each group consists of two files:
 
 
 To implement a new MIB group, copy the two files 'wombat.c'
-and 'wombat.h' to approprate new files, and edit them as
-follows:
+and 'wombat.h' to appropriate new files ({MODULENAME}.c and {MODULENAME}.h),
+and edit them as follows:
 
 	wombat.h:
-		globally change "wombat" to the new group identifier
+		globally change "wombat" to the new module name
 		    and update the initial comment.
 		replace the WOMBAT* defines with the list of
 		    variables within this new group
-		fill in the 'wombat_variables' structure with these
-		    new variables, updating the type, acessibility
+		fill in the 'MODULENAME_variables' structure with these
+		    new variables, updating the type, accessibility
 		    and sub-identifier information as appropriate.
 		replace 'variableN' with the maximum size of the
 		    returned OID (omitting the group prefix).
 		    For non-table values, this will probably be one
 		    greater than the length of the sub-identifier.
-		update the SUBTREE definition with the appropriate
+		update the 'config_load_mib' call with the appropriate
 		    location within the global MIB structure, and
 		    its length (note that 'MIB' has length 6)
 
 
 	wombat.c:
-		globally change "wombat" to the new group identifier
+		globally change "wombat" to the new module name
 		    and update the initial comment.
-		replace the 'wombat_nl' name list with any necessary
+		replace the 'MODULENAME_nl' name list with any necessary
 		    kernel variables, and update the associated #define's
 		replace the name length definition within the 'header'
 		    function with the length of the requesting OID
 		    (i.e. the sum of the lengths given in the subtree
 		     definition, and the variable structure above).
-		replace the basic 'switch' structure within the 'var_wombat'
-		    function with the necessary code to calculate the
-		    required information.
+		replace the basic 'switch' structure within the
+		    'var_MODULENAME' function with the necessary code
+		    to calculate the required information.
 		(plus any other internal functions as needed).
 
-	../snmp_vars.h:
-		include the new group header file
+  It will then be necessary to (re-)run the configure script with the
+option
+	-with-mib-modules="MODULENAME"
 
-	../snmp_vars.c:
-		in the function 'init_snmp', add a call to the new
-		    initialisation routine.
-		in the structure 'subtrees_old', add a reference to
-		    the new subtree definition.
-
-	Makefile:
-		add the new object file to the compilation list (OBJS).
-
-	../Makefile:
-		add the new object file to the link list (MIBOBJS).
+(where MODULENAME matches the name of the .c/.h file pair exactly).
+Note that if anything in the config_* macros changes, or the init function
+is added or removed, then the configure script will need to be re-run.
 
