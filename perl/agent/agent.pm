@@ -170,7 +170,6 @@ bootstrap NetSNMP::agent $VERSION;
 
 1;
 __END__
-# Below is stub documentation for your module. You better edit it!
 
 =head1 NAME
 
