@@ -119,6 +119,13 @@ sure to end it in -1.*/
 #include "agent/extensible/struct.h"
 
 
+/* Define if on AIX 3.
+   System headers sometimes define this.
+   We just want to avoid a redefinition error message.  */
+#ifndef _ALL_SOURCE
+#undef _ALL_SOURCE
+#endif
+
 /* Define if using alloca.c.  */
 #undef C_ALLOCA
 
@@ -195,6 +202,9 @@ sure to end it in -1.*/
 /* Define if you have the <fstab.h> header file.  */
 #undef HAVE_FSTAB_H
 
+/* Define if you have the <inet/mib2.h> header file.  */
+#undef HAVE_INET_MIB2_H
+
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H
 
@@ -263,6 +273,12 @@ sure to end it in -1.*/
 
 /* Define if you have the <xti.h> header file.  */
 #undef HAVE_XTI_H
+
+/* Define if you have the kstat library (-lkstat).  */
+#undef HAVE_LIBKSTAT
+
+/* Define if you have the kvm library (-lkvm).  */
+#undef HAVE_LIBKVM
 
 /* Define if you have the m library (-lm).  */
 #undef HAVE_LIBM
