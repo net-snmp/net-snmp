@@ -372,6 +372,23 @@ AC_CHECK_FUNCS(kvm_openfiles)
 dnl BSDi2 functions differ
 AC_CHECK_FUNCS(statvfs statfs)
 
+#
+AC_MSG_CHECKING([for SIOCGIFADDR in sys/ioctl.h])
+AC_CACHE_VAL(cv_sys_ioctl_h_has_SIOCGIFADDR,
+[ AC_EGREP_CPP(xxxyesxxx,
+[
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
+#ifdef SIOCGIFADDR
+xxxyesxxx
+#endif
+], cv_sys_ioctl_h_has_SIOCGIFADDR=yes, cv_sys_ioctl_h_has_SIOCGIFADDR=no)])
+AC_MSG_RESULT($cv_sys_ioctl_h_has_SIOCGIFADDR)
+if test $cv_sys_ioctl_h_has_SIOCGIFADDR = yes; then
+  AC_DEFINE(SYS_IOCTL_H_HAS_SIOCGIFADDR)
+fi
+
 # ultrix
 AC_MSG_CHECKING([for two-argument statfs with struct fs_data (Ultrix)])
 AC_CACHE_VAL(fu_cv_sys_stat_fs_data,
