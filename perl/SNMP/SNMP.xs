@@ -957,6 +957,7 @@ __add_var_val_str(pdu, name, name_length, val, len, type)
     vars->name_length = name_length;
     switch (type) {
       case TYPE_INTEGER:
+      case TYPE_INTEGER32:
         vars->type = ASN_INTEGER;
         vars->val.integer = (long *)malloc(sizeof(long));
         *(vars->val.integer) = strtol(val,NULL,0);
