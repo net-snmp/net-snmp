@@ -44,6 +44,7 @@ extern          "C" {
                                      unsigned int major, unsigned int minor);
     int             se_find_value(unsigned int major, unsigned int minor,
                                   char *label);
+    int             se_find_free_value(unsigned int major, unsigned int minor);
     char           *se_find_label(unsigned int major, unsigned int minor,
                                   int value);
     int             se_add_pair(unsigned int major, unsigned int minor,
@@ -59,6 +60,7 @@ extern          "C" {
                                            int value);
     int             se_find_value_in_slist(const char *listname,
                                            char *label);
+    int             se_find_free_value_in_slist(const char *listname);
     int             se_add_pair_to_slist(const char *listname, char *label,
                                          int value);
 
@@ -69,6 +71,7 @@ extern          "C" {
                                           int value);
     int             se_find_value_in_list(struct snmp_enum_list *list,
                                           char *label);
+    int             se_find_free_value_in_list(struct snmp_enum_list *list);
     int             se_add_pair_to_list(struct snmp_enum_list **list,
                                         char *label, int value);
 
