@@ -399,37 +399,32 @@ subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
 void
 subagent_pre_init( void )
 {
-    struct snmp_session
-                        sess,
-                       *session=&sess;
+    struct snmp_session sess;
 
     DEBUGMSGTL(("agentx/subagent","initializing....\n"));
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != SUB_AGENT )
 	return;
 
-    memset(session, 0, sizeof(struct snmp_session));
-    session->version = AGENTX_VERSION_1;
-    session->peername = strdup(AGENTX_SOCKET);
-    session->retries = SNMP_DEFAULT_RETRIES;
-    session->timeout = SNMP_DEFAULT_TIMEOUT;
-    session->flags  |= SNMP_FLAGS_STREAM_SOCKET;
+    snmp_sess_init( &sess );
+    sess.version = AGENTX_VERSION_1;
+    sess.peername = strdup(AGENTX_SOCKET);
+    sess.retries = SNMP_DEFAULT_RETRIES;
+    sess.timeout = SNMP_DEFAULT_TIMEOUT;
+    sess.flags  |= SNMP_FLAGS_STREAM_SOCKET;
      
-    session->local_port = 0;	/* client */
-    session->callback = handle_agentx_packet;
-    session->authenticator = NULL;
-    agentx_session = snmp_open( &sess );
+    sess.local_port = 0;	/* client */
+    sess.callback = handle_agentx_packet;
+    sess.authenticator = NULL;
+    agentx_session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build );
 
     if ( agentx_session == NULL ) {
+      /* diagnose snmp_open errors with the input struct snmp_session pointer */
 	snmp_sess_perror("subagent_pre_init", &sess);
 	exit(1);
     }
 
-    set_parse( agentx_session, agentx_parse );
-    set_build( agentx_session, agentx_build );
-
     if ( agentx_open_session( agentx_session ) < 0 ) {
 	snmp_close( agentx_session );
-	free( agentx_session );
 	exit(1);
     }
 

@@ -43,20 +43,20 @@ get_agentx_transID( int reqID, snmp_ipaddr *address )
 
 void init_master(void)
 {
-    struct snmp_session sess, *session=&sess;
+    struct snmp_session sess, *session;
 
     if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE) != MASTER_AGENT )
 	return;
 
     DEBUGMSGTL(("agentx/master","initializing...\n"));
-    snmp_sess_init( session );
-    session->version  = AGENTX_VERSION_1;
-    session->peername = strdup(AGENTX_SOCKET);
-    session->flags  |= SNMP_FLAGS_STREAM_SOCKET;
+    snmp_sess_init( &sess );
+    sess.version  = AGENTX_VERSION_1;
+    sess.peername = strdup(AGENTX_SOCKET);
+    sess.flags  |= SNMP_FLAGS_STREAM_SOCKET;
 
-    session->local_port = 1;         /* server */
-    session->callback = handle_master_agentx_packet;
-    session = snmp_open( &sess );
+    sess.local_port = 1;         /* server */
+    sess.callback = handle_master_agentx_packet;
+    session = snmp_open_ex( &sess, 0, agentx_parse, 0, agentx_build );
 
     if ( session == NULL && sess.s_errno == EADDRINUSE ) {
 		/*
@@ -67,13 +67,11 @@ void init_master(void)
     }
 
     if ( session == NULL ) {
+      /* diagnose snmp_open errors with the input struct snmp_session pointer */
 	snmp_sess_perror("init_master", &sess);
-	/*return;*/
 	exit(1);
     }
 
-    set_parse( session, agentx_parse );
-    set_build( session, agentx_build );
     DEBUGMSGTL(("agentx/master","initializing...   DONE\n"));
 }
 
