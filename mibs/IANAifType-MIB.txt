@@ -2,27 +2,28 @@
    IANAifType-MIB DEFINITIONS ::= BEGIN
 
    IMPORTS
-       MODULE-IDENTITY                     FROM SNMPv2-SMI
-       mib-2                               FROM RFC1213-MIB
+       MODULE-IDENTITY,
+       mib-2				   FROM SNMPv2-SMI
        TEXTUAL-CONVENTION                  FROM SNMPv2-TC;
 
    ianaifType MODULE-IDENTITY
-       LAST-UPDATED "99060911123Z"      
+       LAST-UPDATED "9910081430Z"  --  October 8, 1999
        ORGANIZATION "IANA"
        CONTACT-INFO
 
                   "        Internet Assigned Numbers Authority
 
-                   Postal: USC/Information Sciences Institute
-                           4676 Admiralty Way, Marina del Rey, CA 90292
+                   Postal: ICANN
+                           4676 Admiralty Way, Suite 330
+			   Marina del Rey, CA 90292
 
-                   Tel:    +1  310 822 1511
+                   Tel:    +1 310 823 9358 x20
                    E-Mail: iana@iana.org"
        DESCRIPTION
                "The MIB module which defines the IANAifType textual
                convention, and thus the enumerated values of the
                ifType object defined in MIB-II's ifTable."
-       REVISION "9602211123Z"
+       REVISION "9910081430Z"  -- August 31, 1999
        DESCRIPTION
                "Updated to include new name assignments up to cnr(85).
                This is the first version available via the WWW."
@@ -215,7 +216,12 @@
 		   voiceOverFrameRelay (153),   -- Voice Over Frame Relay 
 		   idsl (154),		-- Digital Subscriber Loop over ISDN
 		   compositeLink (155),  -- Avici Composite Link Interface
-		   ss7SigLink (156)     -- SS7 Signaling Link 
+		   ss7SigLink (156),     -- SS7 Signaling Link 
+		   propWirelessP2P (157),  --  Prop. P2P wireless interface
+		   frForward (158),    -- Frame Forward Interface
+		   rfc1483 (159),	-- Multiprotocol over ATM AAL5
+		   usb (160),		-- USB Interface
+		   ieee8023adLag(161)  -- IEEE 802.3ad Link Aggregate
 }
 
    END
