@@ -175,7 +175,7 @@ sub tocommas {
 }
 
 sub oidlength {
-    return scalar ($_[0] =~ /\./);
+    return (scalar split(/\./, $_[0])) - 1;
 }
 
 # replaces $VAR type expressions and $VAR.subcomponent expressions
