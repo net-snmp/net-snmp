@@ -44,7 +44,11 @@
 void _${table}_initialize_interface(${context}_registration_ptr user_ctx,
                                     u_long flags);
 
-${context}_rowreq_ctx * ${table}_allocate_rowreq_ctx(void);
+@if $m2c_data_allocate == 1@
+    ${context}_rowreq_ctx * ${table}_allocate_rowreq_ctx(${context}_data *);
+@else@
+    ${context}_rowreq_ctx * ${table}_allocate_rowreq_ctx(void);
+@end@
 void ${table}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx);
 @    if ("$m2c_data_context" eq "generated") && ($m2c_data_allocate == 1)@
 static ${context}_data *${context}_allocate_data(void);
@@ -319,7 +323,11 @@ _${table}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long flag
  * allocate resources for a ${context}_rowreq_ctx
  */
 ${context}_rowreq_ctx *
+@if $m2c_data_allocate == 1@
+${table}_allocate_rowreq_ctx(${context}_data *data)
+@else@
 ${table}_allocate_rowreq_ctx(void)
+@end@
 {
     ${context}_rowreq_ctx *rowreq_ctx = SNMP_MALLOC_TYPEDEF(${context}_rowreq_ctx);
 
@@ -330,8 +338,13 @@ ${table}_allocate_rowreq_ctx(void)
                  "${context}_rowreq_ctx.\n");
     }
 @if $m2c_data_allocate == 1@
-    else if (NULL == (rowreq_ctx->data = ${table}_allocate_data())) {
-        SNMP_FREE(rowreq_ctx);
+    else {
+        if(NULL != data)
+            rowreq_ctx->data = data;
+        else if (NULL == (rowreq_ctx->data = ${table}_allocate_data())) {
+            SNMP_FREE(rowreq_ctx);
+            return NULL;
+        }
     }
 
     /*
@@ -433,9 +446,9 @@ _mfd_${context}_object_lookup(netsnmp_mib_handler *handler,
 
     /*
      * get our context from mfd
+     * ${context}_interface_ctx *if_ctx =
+     *             (${context}_interface_ctx *)reginfo->my_reg_void;
      */
-    ${context}_interface_ctx *if_ctx =
-                  (${context}_interface_ctx *)reginfo->my_reg_void;
 
     if(NULL == rowreq_ctx) {
 @   if $m2c_table_row_creation == 0@
@@ -587,9 +600,13 @@ _mfd_${table}_get_values(netsnmp_mib_handler *handler,
          */
         old_string = requests->requestvb->val.string;
         dataFreeHook = requests->requestvb->dataFreeHook;
-        if(NULL == requests->requestvb->val.string) { /* xxx-rks: move this up to mfd helper? */
+        if(NULL == requests->requestvb->val.string) {
             requests->requestvb->val.string = requests->requestvb->buf;
             requests->requestvb->val_len = sizeof(requests->requestvb->buf);
+        }
+        else if(requests->requestvb->buf == requests->requestvb->val.string) {
+            if(requests->requestvb->val_len != sizeof(requests->requestvb->buf))
+                requests->requestvb->val_len = sizeof(requests->requestvb->buf);
         }
 
         /*
@@ -951,7 +968,7 @@ _mfd_${table}_set_values(netsnmp_mib_handler *handler,
 
     } /* for results */
 
-    return SNMP_ERR_NOERROR;
+    return rc;
 }
 
 /*----------------------------------------------------------------------
@@ -1040,7 +1057,7 @@ _mfd_${context}_undo_values(netsnmp_mib_handler *handler,
 
     } /* for results */
 
-    return SNMP_ERR_NOERROR;
+    return rc;
 }
 
 @   if $m2c_irreversible_commit == 1@
