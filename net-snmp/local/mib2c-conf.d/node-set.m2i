@@ -74,6 +74,8 @@
 int
 ${node}_check_value( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val)
 {
+    DEBUGMSGTL(("verbose:${context}:${node}_check_value","called\n"));
+
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 @if $m2c_node_needlength == 1@
@@ -154,6 +156,9 @@ ${node}_set( ${context}_rowreq_ctx *rowreq_ctx, $m2c_node_param_val )
 @ifconf syntax-$node.syntax-set.m2i@
 @    include syntax-$node.syntax-set.m2i@
 @else@
+
+    DEBUGMSGTL(("verbose:${context}:${node}_set","called\n"));
+
     /** should never get a NULL pointer */
     netsnmp_assert(NULL != rowreq_ctx);
 @if $m2c_node_needlength == 1@
@@ -187,6 +192,9 @@ ${node}_undo( ${context}_rowreq_ctx *rowreq_ctx)
 @ifconf syntax-$node.syntax-undo.m2i@
 @    include syntax-$node.syntax-undo.m2i@
 @else@
+
+    DEBUGMSGTL(("verbose:${context}:${node}_undo","called\n"));
+
     netsnmp_assert(NULL != rowreq_ctx);
 
 @   eval $m2c_ctx_rh = "${m2c_undo_item}${node}"@
