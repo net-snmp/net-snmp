@@ -128,6 +128,8 @@ typedef struct netsnmp_interface_entry_s {
     * statistics
     */
    netsnmp_interface_stats stats;
+
+   /** old_stats is used in netsnmp_access_interface_entry_update_stats */
    netsnmp_interface_stats *old_stats;
 
 } netsnmp_interface_entry;
