@@ -83,51 +83,24 @@ register_table_array(handler_registration *reginfo,
     return register_table(reginfo, tabreg);
 }
 
+mib_handler*
+find_table_array_handler(handler_registration *reginfo)
+{
+    mib_handler *mh = reginfo->handler;
+    while( mh ) {
+        if(mh->access_method == table_array_helper_handler)
+            break;
+        mh = mh->next;
+    }
+
+    return mh;
+}
+
 oid_array *
 extract_array_context(request_info *request) 
 {
     return request_get_list_data(request, TABLE_ARRAY_NAME);
 }
-
-#if 0
-
-typedef struct handler_registration_s {
-
-   char   *handlerName;  /* for mrTable listings, and other uses */
-   char   *contextName;  /* NULL = default context */
-
-   /* where are we registered at? */
-   oid    *rootoid;
-   size_t  rootoid_len;
-
-   /* handler details */
-   mib_handler *handler;
-   int modes;
-   
-   /* more optional stuff */
-   int     priority;
-   int     range_subid;
-   oid     range_ubound;
-   int     timeout;
-
-} handler_registration;
-
-
-typedef struct mib_handler_s {
-   char   *handler_name;
-   void   *myvoid;       /* for handler's internal use */
-
-   int (*access_method)(struct mib_handler_s *,
-                        struct handler_registration_s *,
-                        struct agent_request_info_s   *,
-                        struct request_info_s         *);
-
-   struct mib_handler_s *next;
-   struct mib_handler_s *prev;
-} mib_handler;
-
-
-#endif
 
 const oid_array_header*
 table_array_get_by_index(handler_registration *reginfo,
@@ -135,41 +108,18 @@ table_array_get_by_index(handler_registration *reginfo,
 {
     table_array_data* tad;
     oid_array_header *rtn = NULL;
-    mib_handler *mh, *nx;
-    void *vd;
+    mib_handler *mh;
     
     if(reginfo == NULL)
         return NULL;
 
-    mh = reginfo->handler;
+    mh = find_table_array_handler(reginfo);
     if( mh == NULL)
       return NULL;
 
-    nx = mh->next;
-    if( nx == NULL )
-      return NULL;
-
-    vd = nx->myvoid;
-    if(vd == NULL)
-      return NULL;
-
-    tad = (table_array_data*)vd;
+    tad = (table_array_data*)mh->myvoid;
     if(tad == NULL || tad->array == NULL)
       return NULL;
-
-    if(reginfo->handler == NULL)
-        return NULL;
-
-    if(reginfo->handler->next == NULL)
-        return NULL;
-
-    if(reginfo->handler->next->myvoid == NULL)
-        return NULL;
-
-    tad = (table_array_data*)
-        reginfo->handler->next->myvoid;
-    if(!tad->array)
-        return NULL;
 
     /* netsnmp_mutex_lock(&tad->lock);*/
 
@@ -193,20 +143,16 @@ table_array_get_subset(handler_registration *reginfo,
 {
     table_array_data* tad;
     const oid_array_header **rtn = NULL;
+    mib_handler *mh;
     
     if(reginfo == NULL)
         return NULL;
 
-    if(reginfo->handler == NULL)
-        return NULL;
-
-    if(reginfo->handler->next == NULL)
-        return NULL;
-
-    if(reginfo->handler->next->myvoid == NULL)
-        return NULL;
-
-    tad = (table_array_data*)reginfo->handler->next->myvoid;
+    mh = find_table_array_handler(reginfo);
+    if( mh == NULL)
+      return NULL;
+    
+    tad = (table_array_data*)mh->myvoid;
     if(!tad->array)
         return NULL;
 
