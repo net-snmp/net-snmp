@@ -406,6 +406,10 @@ handle_agentx_packet(int operation, netsnmp_session * session, int reqid,
      */
 
     internal_pdu = snmp_clone_pdu(pdu);
+    internal_pdu->contextName = internal_pdu->community;
+    internal_pdu->contextNameLen = internal_pdu->community_len;
+    internal_pdu->community = NULL;
+    internal_pdu->community_len = 0;
     snmp_async_send(agentx_callback_sess, internal_pdu, mycallback,
                     retmagic);
     return 1;
@@ -567,13 +571,15 @@ agentx_registration_callback(int majorID, int minorID, void *serverarg,
                                reg_parms->priority,
                                reg_parms->range_subid,
                                reg_parms->range_ubound, reg_parms->timeout,
-                               reg_parms->flags);
+                               reg_parms->flags,
+                               reg_parms->contextName);
     else
         return agentx_unregister(agentx_ss,
                                  reg_parms->name, reg_parms->namelen,
                                  reg_parms->priority,
                                  reg_parms->range_subid,
-                                 reg_parms->range_ubound);
+                                 reg_parms->range_ubound,
+                                 reg_parms->contextName);
 }
 
 
