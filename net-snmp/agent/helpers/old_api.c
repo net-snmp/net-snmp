@@ -251,7 +251,7 @@ old_api_helper(mib_handler               *handler,
             exact = 0;
     }
 
-    while(requests) {
+    for(;requests; requests = requests->next) {
         
 #if MIB_CLIENTS_ARE_EVIL
         savelen = requests->requestvb->name_length;
@@ -352,7 +352,6 @@ old_api_helper(mib_handler               *handler,
 
                 break;
         }
-        requests = requests->next;
     }
     return SNMP_ERR_NOERROR;
 }
