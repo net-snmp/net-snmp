@@ -369,7 +369,8 @@ int checkmib(vp,name,length,exact,var_len,write_method,max)
     int                 max;
 {
   int i, rtest;
-  int newname[100];
+#define MAX_NEWNAME_LEN 100
+  oid newname[MAX_NEWNAME_LEN];
 
   for(i=0,rtest=0; i < (int) vp->namelen && i < (int)(*length) && !rtest; i++) {
     if (name[i] != vp->name[i]) {
@@ -387,6 +388,7 @@ int checkmib(vp,name,length,exact,var_len,write_method,max)
   }
 /*  printf("%d/ck:  vp=%d  ln=%d lst=%d\n",exact,
          vp->namelen,*length,name[*length-1]); */
+  memset((char *) newname,(0),MAX_NEWNAME_LEN*sizeof(oid));
   if (((int) *length) <= (int) vp->namelen || rtest == -1) {
     memmove(newname, vp->name, (int)vp->namelen * sizeof (oid));
     newname[vp->namelen] = 1;
