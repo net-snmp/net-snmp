@@ -591,7 +591,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 
         if (snmp_get_do_debugging()) {
           DEBUGMSGTL (("smux","[smux_open_process] smux peer:")); 
-          for (i=0; i<oid_name_len; i++) 
+          for (i=0; i < (int)oid_name_len; i++) 
             DEBUGMSG (("smux",".%d", oid_name[i]));
           DEBUGMSG (("smux"," \n"));
           DEBUGMSGTL (("smux","[smux_open_process] len %d, type %d\n", *len, (int)type));
@@ -607,7 +607,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 
         if (snmp_get_do_debugging()) {
           DEBUGMSGTL (("smux","[smux_open_process] smux peer descr:")); 
-          for (i=0; i<string_len; i++) 
+          for (i=0; i < (int)string_len; i++) 
             DEBUGMSG (("smux","%c", string[i]));
           DEBUGMSG (("smux"," \n"));
           DEBUGMSGTL (("smux","[smux_open_process] len %d, type %d\n", *len, (int)type));
@@ -623,7 +623,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 
         if (snmp_get_do_debugging()) {
           DEBUGMSGTL (("smux","[smux_open_process] smux peer passwd:")); 
-          for (i=0; i<string_len; i++) 
+          for (i=0; i < (int)string_len; i++) 
             DEBUGMSG (("smux","%c", string[i]));
           DEBUGMSG (("smux"," \n"));
           DEBUGMSGTL (("smux","[smux_open_process] len %d, type %d\n", *len, (int)type));
@@ -632,7 +632,7 @@ smux_open_process(int fd, u_char *ptr, size_t *len, int *fail)
 	if(!smux_auth_peer(oid_name, oid_name_len, string, fd)) {
 		if(snmp_get_do_debugging()) {
 		    DEBUGMSGTL (("smux","[smux_open_process] peer authentication failed for oid\n"));
-		    for (i = 0; i < oid_name_len; i++) 
+		    for (i = 0; i < (int)oid_name_len; i++) 
 			DEBUGMSG (("smux","\t.%d", oid_name[i]));
 		    DEBUGMSG (("smux"," password %s\n", string));
 		}
@@ -790,7 +790,7 @@ smux_rreq_process(int sd, u_char *ptr, size_t *len)
 		nrptr->sr_priority = priority;
 		nrptr->sr_name_len = oid_name_len;
 		nrptr->sr_fd = sd;
-		for(i = 0; i < oid_name_len; i++)
+		for(i = 0; i < (int)oid_name_len; i++)
 			nrptr->sr_name[i] = oid_name[i];
 
 		/* See if this tree matches or scopes any of the

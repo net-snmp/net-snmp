@@ -566,7 +566,7 @@ void vacm_parse_simple(const char *token, char *confline) {
   /* access  anonymousGroupNameNUM  "" MODEL AUTHTYPE exact anonymousViewNUM [none/anonymousViewNUM] [none/anonymousViewNUM] */
   sprintf(line, "anonymousGroupName%03d  \"\" %s %s exact %s %s %s", num,
           model, authtype, viewname, rw, rw);
-  DEBUGMSGTL((token,"passing: %s %s\n", access, line));
+  DEBUGMSGTL((token,"passing: %s %s\n", "access", line));
   vacm_parse_access("access",line);
   num++;
 }

@@ -223,9 +223,9 @@ static void usage(char *prog)
 	printf("-L\t\tPrint warnings/messages to stdout/err\n");
 	printf("-s\t\tLog warnings/messages to syslog\n");
 	printf("-A\t\tAppend to the logfile rather than truncating it.\n");
+	printf("-r Don't exit if root only accessible files can't be opened\n");
 	printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
 	printf("\t\t(By default LOGFILE=%s)\n",
-	printf("-r Don't exit if root only accessible files can't be opened\n");
 #ifdef LOGFILE
 			LOGFILE
 #else
