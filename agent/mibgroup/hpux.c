@@ -4,8 +4,12 @@
 
 #include <signal.h>
 #include <nlist.h>
+#if HAVE_MACHINE_PARAM_H
 #include <machine/param.h>
+#endif
+#if HAVE_SYS_VMMETER_H
 #include <sys/vmmeter.h>
+#endif
 
 #include "mibincl.h"
 
