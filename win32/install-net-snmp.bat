@@ -20,6 +20,10 @@ mkdir %INSTALL_BASE%\bin > NUL:
 mkdir %INSTALL_BASE%\conf > NUL:
 mkdir %INSTALL_BASE%\lib > NUL:
 mkdir %INSTALL_BASE%\mibs > NUL:
+mkdir %INSTALL_BASE%\share > NUL:
+mkdir %INSTALL_BASE%\share\snmp > NUL:
+mkdir %INSTALL_BASE%\snmp > NUL:
+mkdir %INSTALL_BASE%\snmp\persist > NUL:
 mkdir %INSTALL_BASE%\include > NUL:
 mkdir %INSTALL_BASE%\include\net-snmp > NUL:
 mkdir %INSTALL_BASE%\include\ucd-snmp > NUL:
