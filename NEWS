@@ -3,10 +3,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *4.1*
  New:
-    - Command line argument parsing has been reworked for getopt() use.
-      (currently backwards compatible; see the snmpcmd(1) manual page)
-    - Many new flags have been added for input/output flexibility.
+    - Many new command line flags have been added for input/output flexibility.
       (see the snmpcmd(1) manual page on the -O flag and -I flag)
+    - The tools support regex matching of oids on the command line.
+      (see the snmpcmd(1) manual page on the -Ib option)
     - A ucd-snmp usage tutorial has been placed on the main web page.
       (see http://ucd-snmp.ucdavis.edu/tutorial)
     - snmptable is much smarter and handles sparse tables better.
@@ -14,21 +14,26 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - New agent libraries to embed SNMP and AgentX agents into other programs.
       (see the snmp_agent_api(3) manual page and the tutorial)
     - SNMP over TCP is supported.
-      (-T TCP as on the command line)
+      (-T TCP on the command lines)
     - OpenSSL has replaced KMT for SHA authentication and DES encryption.
       (Get OpenSSL from http://www.openssl.org/).
     - Some easier-to-use access-control snmpd.conf directives for simple setups.
       (see the snmpd.conf(5) manual page)
-    - Easier to setup SNMPv3 support for the agent.
+    - Easier setup of SNMPv3 support for the agent.
       (see the README.snmpv3 file).
-    - The tools support regex matching of oids on the command line.
-      (see the snmpcmd(1) manual page on the -Ib option)
+    - Command line argument parsing has been reworked for getopt() use.
+      (currently backwards compatible; see the snmpcmd(1) manual page)
     - Table rows with embedded strings are dealt with for both input and output.
+      (see the snmpcmd(1) manual on the -Ob flag)
     - Many more snmp.conf directives supported.
       (see the snmp.conf(5) manual page)
-    - AgentX improvements.
+    - Many AgentX improvements.
     - All of our distributed mibs have been updated to be SMIv2 compliant.
-    - trap support in the agent has been cleaned up.
+    - Trap support in the agent has been cleaned up and an API created.
+
+ Perl:
+    - Joe Marzot's perl module is now included with the ucd-snmp source.
+      (this should help people trying to synchronize the two packages)
 
  Fixes:
     - SMUX support has been reintegrated into the agent in a better way.
