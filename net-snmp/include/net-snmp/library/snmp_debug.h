@@ -29,6 +29,8 @@ extern          "C" {
 #endif
     void            debugmsg_oid(const char *token, const oid * theoid,
                                  size_t len);
+    void            debugmsg_suboid(const char *token, const oid * theoid,
+                                    size_t len);
     void            debugmsg_var(const char *token,
                                  netsnmp_variable_list * var);
     void            debugmsg_oidrange(const char *token,
@@ -106,15 +108,16 @@ extern          "C" {
 #define __DBGMSGT(x)     debugmsgtoken x,  debugmsg x
 
 #ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
-#define __DBGTRACE       __DBGMSGT(("trace","%s(): %s, %d\n",__FUNCTION__,\
+#define __DBGTRACE       __DBGMSGT(("trace","%s(): %s, %d: ",__FUNCTION__,\
                                  __FILE__,__LINE__))
 #else
-#define __DBGTRACE       __DBGMSGT(("trace"," %s, %d\n", __FILE__,__LINE__))
+#define __DBGTRACE       __DBGMSGT(("trace"," %s, %d: ", __FILE__,__LINE__))
 #endif
 
 #define __DBGMSGL(x)     __DBGTRACE, debugmsg x
 #define __DBGMSGTL(x)    __DBGTRACE, debugmsgtoken x, debugmsg x
 #define __DBGMSGOID(x)     debugmsg_oid x
+#define __DBGMSGSUBOID(x)  debugmsg_suboid x
 #define __DBGMSGVAR(x)     debugmsg_var x
 #define __DBGMSGOIDRANGE(x) debugmsg_oidrange x
 #define __DBGMSGHEX(x)     debugmsg_hex x
@@ -167,6 +170,7 @@ extern          "C" {
 #define DEBUGMSGL(x)       do {if (_DBG_IF_) {__DBGMSGL(x);} }while(0)
 #define DEBUGMSGTL(x)      do {if (_DBG_IF_) {__DBGMSGTL(x);} }while(0)
 #define DEBUGMSGOID(x)     do {if (_DBG_IF_) {__DBGMSGOID(x);} }while(0)
+#define DEBUGMSGSUBOID(x)  do {if (_DBG_IF_) {__DBGMSGSUBOID(x);} }while(0)
 #define DEBUGMSGVAR(x)     do {if (_DBG_IF_) {__DBGMSGVAR(x);} }while(0)
 #define DEBUGMSGOIDRANGE(x) do {if (_DBG_IF_) {__DBGMSGOIDRANGE(x);} }while(0)
 #define DEBUGMSGHEX(x)     do {if (_DBG_IF_) {__DBGMSGHEX(x);} }while(0)
@@ -196,6 +200,7 @@ extern          "C" {
 #define DEBUGMSGL(x)
 #define DEBUGMSGTL(x)
 #define DEBUGMSGOID(x)
+#define DEBUGMSGSUBOID(x)
 #define DEBUGMSGVAR(x)
 #define DEBUGMSGOIDRANGE(x)
 #define DEBUGMSGHEX(x)
