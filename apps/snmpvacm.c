@@ -174,8 +174,8 @@ view_oid(oid * it, size_t * len, const char *viewName, char *viewSubtree)
 
     int             itIndex = VIEW_OID_LEN;
 
-    if (!read_objid(viewSubtree, c_oid, &c_oid_length)) {
-        printf("Error parsing subtree\n");
+    if (!snmp_parse_oid(viewSubtree, c_oid, &c_oid_length)) {
+        printf("Error parsing subtree (%s)\n", viewSubtree);
         exit(1);
     }
 
