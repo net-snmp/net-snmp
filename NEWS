@@ -1,6 +1,38 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*4.1*
+ New:
+    - Command line argument parsing has been reworked for getopt() use.
+      (currently backwards compatible; see the snmpcmd(1) manual page)
+    - Many new flags have been added for output flexibility.
+      (see the snmpcmd(1) manual page on the -O flag)
+    - New agent libraries to embed SNMP and AgentX agents into other programs.
+      (see the agent_api(3) manual page)
+    - A ucd-snmp usage tutorial has been placed on the main web page.
+      (see http://ucd-snmp.ucdavis.edu/tutorial)
+    - snmptable is much smarter and handles sparse tables better.
+    - tkmib supports snmpv3.
+    - SNMP over TCP is supported.
+      (-T TCP as on the command line)
+    - OpenSSL has replaced KMT for SHA authentication and DES encryption.
+      (encryption support is still not exportable though, sorry).
+    - Some easier-to-use access-control snmpd.conf directives for simple setups.
+      (see the snmpd.conf(5) manual page)
+    - Easier to setup SNMPv3 support for the agent.
+      (see the README.snmpv3 file).
+    - The tools support regex matching of oids on the command line.
+      (see the snmpcmd(1) manual page on the -Ib option)
+    - Table rows with embedded strings are dealt with for both input and output.
+    - Many more snmp.conf directives supported.
+      (see the snmp.conf(5) manual page)
+    - AgentX improvements.
+    - trap support in the agent has been cleaned up.
+
+ Fixes:
+    - SMUX support has been reintegrated into the agent in a better way.
+    - Many many others.
+
 *4.0.1*
  New:
     - defVersion in snmp.conf supported.
