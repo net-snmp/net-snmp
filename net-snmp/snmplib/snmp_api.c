@@ -1856,3 +1856,161 @@ snmp_pdu_add_variable(pdu, name, name_length, type, value, len)
     }
 }
 
+int
+ascii_to_binary(cp, bufp)
+    u_char  *cp;
+    u_char *bufp;
+{
+    int  subidentifier;
+    u_char *bp = bufp;
+
+    for(; *cp != '\0'; cp++){
+      if (isspace(*cp) || *cp == '.')
+        continue;
+      if (!isdigit(*cp)){
+        fprintf(stderr, "Input error\n");
+        return -1;
+      }
+      subidentifier = atoi(cp);
+      if (subidentifier > 255){
+        fprintf(stderr, "subidentifier %d is too large ( > 255)\n",
+                subidentifier);
+        return -1;
+      }
+      *bp++ = (u_char)subidentifier;
+      while(isdigit(*cp))
+        cp++;
+      cp--;
+    }
+    return bp - bufp;
+}
+
+int
+hex_to_binary(cp, bufp)
+    u_char  *cp;
+    u_char *bufp;
+{
+    int  subidentifier;
+    u_char *bp = bufp;
+
+    for(; *cp != '\0'; cp++){
+      if (isspace(*cp))
+        continue;
+      if (!isxdigit(*cp)){
+        fprintf(stderr, "Input error\n");
+        return -1;
+      }
+      sscanf((char *)cp, "%x", &subidentifier);
+      if (subidentifier > 255){
+        fprintf(stderr, "subidentifier %d is too large ( > 255)\n",
+                subidentifier);
+        return -1;
+      }
+      *bp++ = (u_char)subidentifier;
+      while(isxdigit(*cp))
+        cp++;
+      cp--;
+    }
+    return bp - bufp;
+}
+
+/*
+ * Add a variable with the requested name to the end of the list of
+ * variables for this pdu.
+ */
+int
+snmp_add_var(pdu, name, name_length, type, value)
+    struct snmp_pdu *pdu;
+    oid *name;
+    int name_length;
+    char type, *value;
+{
+    struct variable_list *vars;
+    char buf[2048];
+    int tint;
+    double dtmp;
+    float ftmp;
+    struct counter64 c64tmp;
+    
+    switch(type){
+    case 'i':
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_INTEGER, value,
+                            sizeof(long));
+      break;
+      
+    case 'u':
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_UNSIGNED, value,
+                            sizeof(long));
+      break;
+
+    case 't':
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_TIMETICKS, value,
+                            sizeof(long));
+      break;
+
+    case 'a':
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_IPADDRESS, value,
+                            sizeof(long));
+      break;
+
+    case 'o':
+      read_objid(value, (oid *)buf, &tint);
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID, buf,
+                            sizeof(oid)*tint);
+      break;
+
+    case 's':
+    case 'x':
+    case 'd':
+      if (type == 'd'){
+        tint = ascii_to_binary((u_char *)value, buf);
+      } else if (type == 's'){
+        strcpy(buf, value);
+        tint = strlen(buf);
+      } else if (type == 'x'){
+        tint = hex_to_binary((u_char *)value, buf);
+      }
+      if (tint < 0) {
+        sprintf(buf, "Bad value: %s\n", value);
+        snmp_set_detail(buf);
+        return 1;
+      }
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_OCTET_STR, buf, tint);
+      break;
+
+    case 'n':
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_NULL, 0, 0);
+      break;
+
+#ifdef OPAQUE_SPECIAL_TYPES
+    case 'U':
+      read64(&c64tmp, value);
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_U64,
+                            (u_char *) &c64tmp, sizeof(c64tmp));
+      break;
+
+    case 'I':
+      read64(&c64tmp, value);
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_I64, 
+                            (u_char *) &c64tmp, sizeof(c64tmp));
+      break;
+      
+    case 'F':
+      ftmp = atof(value);
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_FLOAT, 
+                            (u_char *) &ftmp, sizeof(ftmp));
+      break;
+      
+    case 'D':
+      dtmp = atof(value);
+      snmp_pdu_add_variable(pdu, name, name_length, ASN_OPAQUE_DOUBLE, 
+                            (u_char *) &dtmp, sizeof(dtmp));
+      break;
+#endif /* OPAQUE_SPECIAL_TYPES */
+      
+    default:
+      snmp_set_detail("Internal error in type switching\n");
+      return 1;
+    }
+    return 0;
+}
