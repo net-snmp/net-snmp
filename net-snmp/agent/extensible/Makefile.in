@@ -46,29 +46,50 @@ depend:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-exec.o: ../../config.h ../../agent/extensible/struct.h mibincl.h
-exec.o:  ../../snmplib/asn1.h
-exec.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
-exec.o: ../../snmplib/snmp.h mibdefs.h
+exec.o: ../../config.h ../../agent/extensible/struct.h 
+exec.o:  mibincl.h 
+exec.o: ../../snmplib/asn1.h ../../snmplib/snmp_impl.h ../snmp_vars.h
+exec.o: ../mibgroup/system.h ../var_struct.h ../mibgroup/interfaces.h
+exec.o: ../mibgroup/ip.h ../mibgroup/at.h ../mibgroup/ip.h ../mibgroup/icmp.h
+exec.o: ../mibgroup/tcp.h ../mibgroup/udp.h ../mibgroup/snmp.h
+exec.o: ../../snmplib/snmp.h mibdefs.h extproto.h
 extensible.o: ../../config.h ../../agent/extensible/struct.h
-extensible.o:   mibincl.h
-extensible.o:  ../../snmplib/asn1.h
-extensible.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
-extensible.o: ../../snmplib/snmp.h mibdefs.h
+extensible.o:  mibincl.h 
+extensible.o: ../../snmplib/asn1.h ../../snmplib/snmp_impl.h ../snmp_vars.h
+extensible.o: ../mibgroup/system.h ../var_struct.h ../mibgroup/interfaces.h
+extensible.o: ../mibgroup/ip.h ../mibgroup/at.h ../mibgroup/ip.h
+extensible.o: ../mibgroup/icmp.h ../mibgroup/tcp.h ../mibgroup/udp.h
+extensible.o: ../mibgroup/snmp.h ../../snmplib/snmp.h mibdefs.h extproto.h
 hpmibs.o: ../../config.h ../../agent/extensible/struct.h
-hpmibs.o:  mibincl.h 
-hpmibs.o: ../../snmplib/asn1.h ../../snmplib/snmp_impl.h ../snmp_vars.h
-hpmibs.o: ../var_struct.h ../../snmplib/snmp.h mibdefs.h
 misc.o: ../../config.h ../../agent/extensible/struct.h 
 misc.o:  mibincl.h ../../snmplib/asn1.h
-misc.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
-misc.o: ../../snmplib/snmp.h
+misc.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../mibgroup/system.h
+misc.o: ../var_struct.h ../mibgroup/interfaces.h ../mibgroup/ip.h
+misc.o: ../mibgroup/at.h ../mibgroup/ip.h ../mibgroup/icmp.h
+misc.o: ../mibgroup/tcp.h ../mibgroup/udp.h ../mibgroup/snmp.h
+misc.o: ../../snmplib/snmp.h extproto.h
+pass.o: ../../config.h ../../agent/extensible/struct.h 
+pass.o:  mibincl.h 
+pass.o: ../../snmplib/asn1.h ../../snmplib/snmp_impl.h ../snmp_vars.h
+pass.o: ../mibgroup/system.h ../var_struct.h ../mibgroup/interfaces.h
+pass.o: ../mibgroup/ip.h ../mibgroup/at.h ../mibgroup/ip.h ../mibgroup/icmp.h
+pass.o: ../mibgroup/tcp.h ../mibgroup/udp.h ../mibgroup/snmp.h
+pass.o: ../../snmplib/snmp.h mibdefs.h extproto.h
 proc.o: ../../config.h ../../agent/extensible/struct.h mibincl.h
 proc.o:  ../../snmplib/asn1.h
-proc.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../var_struct.h
-proc.o: ../../snmplib/snmp.h mibdefs.h
+proc.o: ../../snmplib/snmp_impl.h ../snmp_vars.h ../mibgroup/system.h
+proc.o: ../var_struct.h ../mibgroup/interfaces.h ../mibgroup/ip.h
+proc.o: ../mibgroup/at.h ../mibgroup/ip.h ../mibgroup/icmp.h
+proc.o: ../mibgroup/tcp.h ../mibgroup/udp.h ../mibgroup/snmp.h
+proc.o: ../../snmplib/snmp.h mibdefs.h extproto.h
 read_config.o: ../../config.h ../../agent/extensible/struct.h
+read_config.o: ./../../snmplib/snmp.h ./../../snmplib/asn1.h
+read_config.o: ./../../snmplib/snmp_impl.h  extproto.h
 versioninfo.o: ../../config.h ../../agent/extensible/struct.h
-versioninfo.o:  mibdefs.h mibincl.h
+versioninfo.o:   mibdefs.h
+versioninfo.o: mibincl.h  
 versioninfo.o: ../../snmplib/asn1.h ../../snmplib/snmp_impl.h ../snmp_vars.h
-versioninfo.o: ../var_struct.h ../../snmplib/snmp.h
+versioninfo.o: ../mibgroup/system.h ../var_struct.h ../mibgroup/interfaces.h
+versioninfo.o: ../mibgroup/ip.h ../mibgroup/at.h ../mibgroup/ip.h
+versioninfo.o: ../mibgroup/icmp.h ../mibgroup/tcp.h ../mibgroup/udp.h
+versioninfo.o: ../mibgroup/snmp.h ../../snmplib/snmp.h extproto.h

@@ -78,60 +78,86 @@ depend:
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 acl_vars.o: ../config.h ../agent/extensible/struct.h 
-acl_vars.o:  ../snmplib/asn1.h ../snmplib/snmp.h
-acl_vars.o: ../snmplib/snmp_impl.h  snmp_vars.h
+acl_vars.o: ../snmplib/asn1.h ../snmplib/snmp.h ../snmplib/snmp_impl.h
+acl_vars.o:  snmp_vars.h mibgroup/system.h var_struct.h
+acl_vars.o: mibgroup/interfaces.h mibgroup/ip.h mibgroup/at.h mibgroup/ip.h
+acl_vars.o: mibgroup/icmp.h mibgroup/tcp.h mibgroup/udp.h mibgroup/snmp.h
 acl_vars.o: ../snmplib/acl.h
 alarm.o: ../config.h ../agent/extensible/struct.h 
-alarm.o:   ../snmplib/asn1.h
+alarm.o:  ../snmplib/asn1.h
 alarm.o: ../snmplib/snmp_impl.h ../snmplib/snmp_api.h
 alarm.o: ../snmplib/snmp_client.h ../snmplib/party.h ../snmplib/context.h
-alarm.o: snmp_vars.h ../snmplib/snmp.h m2m.h snmp_vars_m2m.h event.h alarm.h
-alarm.o: ../snmplib/system.h
+alarm.o: snmp_vars.h mibgroup/system.h var_struct.h mibgroup/interfaces.h
+alarm.o: mibgroup/ip.h mibgroup/at.h mibgroup/ip.h mibgroup/icmp.h
+alarm.o: mibgroup/tcp.h mibgroup/udp.h mibgroup/snmp.h ../snmplib/snmp.h
+alarm.o: m2m.h snmp_vars_m2m.h event.h alarm.h ../snmplib/system.h
 context_vars.o: ../config.h ../agent/extensible/struct.h
-context_vars.o:   ../snmplib/asn1.h
-context_vars.o: ../snmplib/snmp.h ../snmplib/snmp_impl.h 
-context_vars.o: snmp_vars.h ../snmplib/system.h ../snmplib/context.h
-context_vars.o: ../snmplib/acl.h ../snmplib/view.h
+context_vars.o:  ../snmplib/asn1.h ../snmplib/snmp.h
+context_vars.o: ../snmplib/snmp_impl.h  snmp_vars.h
+context_vars.o: mibgroup/system.h var_struct.h mibgroup/interfaces.h
+context_vars.o: mibgroup/ip.h mibgroup/at.h mibgroup/ip.h mibgroup/icmp.h
+context_vars.o: mibgroup/tcp.h mibgroup/udp.h mibgroup/snmp.h
+context_vars.o: ../snmplib/system.h ../snmplib/context.h ../snmplib/acl.h
+context_vars.o: ../snmplib/view.h
 event.o: ../config.h ../agent/extensible/struct.h 
-event.o:  ../snmplib/asn1.h ../snmplib/snmp_impl.h
-event.o: ../snmplib/snmp.h snmp_vars.h m2m.h snmp_vars_m2m.h alarm.h event.h
-event.o: ../snmplib/snmp_api.h ../snmplib/party.h ../snmplib/snmp_client.h
+event.o: ../snmplib/asn1.h ../snmplib/snmp_impl.h ../snmplib/snmp.h
+event.o: snmp_vars.h mibgroup/system.h var_struct.h mibgroup/interfaces.h
+event.o: mibgroup/ip.h mibgroup/at.h mibgroup/ip.h mibgroup/icmp.h
+event.o: mibgroup/tcp.h mibgroup/udp.h mibgroup/snmp.h m2m.h snmp_vars_m2m.h
+event.o: alarm.h event.h ../snmplib/snmp_api.h ../snmplib/party.h
+event.o: ../snmplib/snmp_client.h
 history.o: ../snmplib/asn1.h history.h
 kernel.o: ../config.h ../agent/extensible/struct.h 
 kernel.o:   ../snmplib/asn1.h
 kernel.o: ../snmplib/snmp_impl.h
+kernel_sunos5.o: ../config.h ../agent/extensible/struct.h
 party_vars.o: ../config.h ../agent/extensible/struct.h
-party_vars.o:   ../snmplib/asn1.h
-party_vars.o: ../snmplib/snmp.h ../snmplib/snmp_impl.h 
-party_vars.o: snmp_vars.h ../snmplib/system.h ../snmplib/party.h
-party_vars.o: ../snmplib/acl.h ../snmplib/view.h
+party_vars.o:  ../snmplib/asn1.h ../snmplib/snmp.h
+party_vars.o: ../snmplib/snmp_impl.h  snmp_vars.h
+party_vars.o: mibgroup/system.h var_struct.h mibgroup/interfaces.h
+party_vars.o: mibgroup/ip.h mibgroup/at.h mibgroup/ip.h mibgroup/icmp.h
+party_vars.o: mibgroup/tcp.h mibgroup/udp.h mibgroup/snmp.h
+party_vars.o: ../snmplib/system.h ../snmplib/party.h ../snmplib/acl.h
+party_vars.o: ../snmplib/view.h
 route_write.o: ../config.h ../agent/extensible/struct.h
 route_write.o:  ../snmplib/asn1.h ../snmplib/snmp.h
-route_write.o: ../snmplib/snmp_impl.h snmp_vars.h
+route_write.o: ../snmplib/snmp_impl.h snmp_vars.h mibgroup/system.h
+route_write.o: var_struct.h mibgroup/interfaces.h mibgroup/ip.h mibgroup/at.h
+route_write.o: mibgroup/ip.h mibgroup/icmp.h mibgroup/tcp.h mibgroup/udp.h
+route_write.o: mibgroup/snmp.h
 snmp_agent.o: ../config.h ../agent/extensible/struct.h
-snmp_agent.o:   ../snmplib/snmp.h
-snmp_agent.o: ../snmplib/asn1.h ../snmplib/snmp_impl.h 
-snmp_agent.o: ../snmplib/acl.h ../snmplib/party.h ../snmplib/context.h
-snmp_agent.o: ../snmplib/mib.h
+snmp_agent.o:  ../snmplib/snmp.h ../snmplib/asn1.h
+snmp_agent.o: ../snmplib/snmp_impl.h  ../snmplib/acl.h
+snmp_agent.o: ../snmplib/party.h ../snmplib/context.h ../snmplib/mib.h
+snmp_agent.o: mibgroup/snmp.h extensible/extproto.h
 snmp_var_route.o: ../config.h ../agent/extensible/struct.h
 snmp_var_route.o:  ../snmplib/asn1.h ../snmplib/snmp.h
 snmp_var_route.o: ../snmplib/snmp_impl.h ../snmplib/mib.h snmp_vars.h
-snmp_vars.o: ../config.h ../agent/extensible/struct.h 
-snmp_vars.o:  ../snmplib/asn1.h ../snmplib/snmp.h
-snmp_vars.o: ../snmplib/snmp_impl.h ../snmplib/mib.h snmp_vars.h m2m.h
-snmp_vars.o: snmp_vars_m2m.h alarm.h event.h ../snmplib/party.h
-snmp_vars.o: ../snmplib/context.h ../snmplib/acl.h ../snmplib/view.h
-snmp_vars.o: var_struct.h extensible/mibdefs.h extensible/snmp_vars.h
-snmp_vars.o: kernel_sunos5.h
+snmp_var_route.o: mibgroup/system.h var_struct.h mibgroup/interfaces.h
+snmp_var_route.o: mibgroup/ip.h mibgroup/at.h mibgroup/ip.h mibgroup/icmp.h
+snmp_var_route.o: mibgroup/tcp.h mibgroup/udp.h mibgroup/snmp.h
+snmp_vars.o: ../config.h ../agent/extensible/struct.h common_header.h
+snmp_vars.o: ../snmplib/asn1.h ../snmplib/snmp.h ../snmplib/snmp_impl.h
+snmp_vars.o:  ../snmplib/mib.h snmp_vars.h
+snmp_vars.o: mibgroup/system.h var_struct.h mibgroup/interfaces.h
+snmp_vars.o: mibgroup/ip.h mibgroup/at.h mibgroup/ip.h mibgroup/icmp.h
+snmp_vars.o: mibgroup/tcp.h mibgroup/udp.h mibgroup/snmp.h m2m.h
+snmp_vars.o: snmp_vars_m2m.h snmp_vars.linux.h alarm.h event.h var_struct.h
+snmp_vars.o: ../snmplib/party.h ../snmplib/context.h ../snmplib/acl.h
+snmp_vars.o: ../snmplib/view.h extensible/mibdefs.h extensible/snmp_vars.h
+snmp_vars.o: mibgroup/snmpv2_vars.h mibgroup/extensible_subtrees.h
+snmp_vars.o: mibgroup/snmpv2_subtrees.h
 snmpd.o: ../config.h ../agent/extensible/struct.h 
 snmpd.o:  ../snmplib/snmp.h ../snmplib/asn1.h
 snmpd.o: ../snmplib/snmp_impl.h ../snmplib/system.h ../snmplib/snmp_api.h
-snmpd.o: m2m.h ../snmplib/party.h alarm.h ../snmplib/view.h
-snmpd.o: ../snmplib/context.h ../snmplib/acl.h ../config.h
+snmpd.o: m2m.h ../snmplib/party.h alarm.h event.h ../snmplib/view.h
+snmpd.o: ../snmplib/context.h ../snmplib/acl.h ../snmplib/mib.h
+snmpd.o: mibgroup/snmp.h extensible/extproto.h ../snmplib/snmp_client.h
 view_parse.o: ../config.h ../agent/extensible/struct.h 
-view_parse.o:  ../snmplib/asn1.h ../snmplib/view.h
+view_parse.o: ../snmplib/asn1.h ../snmplib/view.h
 view_vars.o: ../config.h ../agent/extensible/struct.h
-view_vars.o:   ../snmplib/asn1.h
-view_vars.o: ../snmplib/snmp.h ../snmplib/snmp_impl.h 
-view_vars.o: snmp_vars.h ../snmplib/view.h
-kernel_sunos5.o: ../config.h kernel_sunos5.h
+view_vars.o:  ../snmplib/asn1.h ../snmplib/snmp.h
+view_vars.o: ../snmplib/snmp_impl.h  snmp_vars.h
+view_vars.o: mibgroup/system.h var_struct.h mibgroup/interfaces.h
+view_vars.o: mibgroup/ip.h mibgroup/at.h mibgroup/ip.h mibgroup/icmp.h
+view_vars.o: mibgroup/tcp.h mibgroup/udp.h mibgroup/snmp.h ../snmplib/view.h
