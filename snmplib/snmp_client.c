@@ -565,7 +565,7 @@ snmp_set_var_typed_value(struct variable_list *newvar, u_char type,
                          u_char *val_str, size_t val_len)
 {
     newvar->type = type;
-    snmp_set_var_value(newvar, val_str, val_len);
+    return snmp_set_var_value(newvar, val_str, val_len);
 }
 
 /*
