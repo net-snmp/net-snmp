@@ -268,7 +268,7 @@ vacm_getViewEntry(const char *viewName,
     strcpy(view+1, viewName);
     for(vp = viewList; vp; vp = vp->next){
         if (!memcmp(view, vp->viewName,glen+1)
-	    && viewSubtreeLen >= vp->viewSubtreeLen) {
+	    && viewSubtreeLen >= (vp->viewSubtreeLen-1)) {
 	    int mask = 0x80, maskpos = 0;
 	    int oidpos;
             found = 1;
