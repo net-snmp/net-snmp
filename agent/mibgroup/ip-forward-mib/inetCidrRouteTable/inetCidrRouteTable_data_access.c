@@ -138,8 +138,6 @@ _snarf_route_entry(netsnmp_route_entry * route_entry,
 {
     inetCidrRouteTable_rowreq_ctx *rowreq_ctx;
 
-    DEBUGTRACE;
-
     netsnmp_assert(NULL != route_entry);
     netsnmp_assert(NULL != container);
 
@@ -150,8 +148,11 @@ _snarf_route_entry(netsnmp_route_entry * route_entry,
      * rejection should not be displayed even if the  
      * implementation keeps them stored internally.
      */
-    if (route_entry->rt_type == 0)      /* set when route not up */
+    if (route_entry->rt_type == 0) {    /* set when route not up */
+        DEBUGMSGT(("verbose:inetCidrRouteTable:inetCidrRouteTable_cache_load", "skipping route\n"));
+        netsnmp_access_route_entry_free(route_entry);
         return;
+    }
 
     /*
      * allocate an row context and set the index(es), then add it to
@@ -228,6 +229,8 @@ inetCidrRouteTable_cache_load(netsnmp_container * container)
     route_container =
         netsnmp_access_route_container_load(NULL,
                                             NETSNMP_ACCESS_ROUTE_LOAD_NOFLAGS);
+    DEBUGMSGT(("verbose:inetCidrRouteTable:inetCidrRouteTable_cache_load",
+               "%d records\n", CONTAINER_SIZE(route_container)));
 
     if (NULL == route_container)
         return MFD_RESOURCE_UNAVAILABLE;        /* msg already logged */
@@ -263,10 +266,6 @@ inetCidrRouteTable_cache_load(netsnmp_container * container)
  *
  * @note
  *  The MFD helper will take care of releasing all the row contexts.
- *  If you did not pass a data context pointer when allocating
- *  the rowreq context, the one that was allocated will be deleted.
- *  If you did pass one in, it will not be deleted and that memory
- *  is your responsibility.
  *
  */
 void
