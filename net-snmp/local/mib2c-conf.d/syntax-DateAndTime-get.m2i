@@ -1,5 +1,5 @@
-########################################################################
-## generic include for XXX. Don't use directly.
+#############################################################  -*- c -*-
+## generic include for XXX. Do not use directly.
 ##
 ## $Id$
 ########################################################################
@@ -35,7 +35,7 @@ $example_start
 $example_end
 
    /* call convenience function to set data */
-   rc = netsnmp_dateandtime_set(*${node}_ptr_ptr, ${node}_len_ptr,
+   rc = netsnmp_dateandtime_set_buf_from_vars(*${node}_ptr_ptr, ${node}_len_ptr,
                            year, month, day,
                            hour, minutes, seconds, deci_seconds,
                            utc_offset_direction, utc_offset_hours,
