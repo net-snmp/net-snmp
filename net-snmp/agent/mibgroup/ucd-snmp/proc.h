@@ -15,7 +15,7 @@ int get_ps_output __P((struct extensible *));
 /* config file parsing routines */
 void proc_free_config __P((void));
 void proc_parse_config __P((char *, char *));
-config_parse_dot_conf("proc", proc_parse_config, proc_free_config);
+config_parse_dot_conf("proc", proc_parse_config, proc_free_config,"process-name [max-num] [min-num]");
 
 #include "mibdefs.h"
 

@@ -50,13 +50,15 @@ static struct subtree* insert_in_children_list __P((struct subtree *, struct sub
 void init_agent_read_config __P((void))
 {
   register_config_handler("snmpd","authtrapenable",
-                          snmpd_parse_config_authtrap, NULL);
-  register_config_handler("snmpd","agentBoots", agentBoots_conf, NULL);
+                          snmpd_parse_config_authtrap, NULL,
+                          "1 | 2\t\t(1 = enable, 2 = disable)");
   register_config_handler("snmpd","trapsink",
-                          snmpd_parse_config_trapsink, snmpd_free_trapsinks);
+                          snmpd_parse_config_trapsink, snmpd_free_trapsinks,
+                          "host");
   register_config_handler("snmpd","trapcommunity",
                           snmpd_parse_config_trapcommunity,
-                          snmpd_free_trapcommunity);
+                          snmpd_free_trapcommunity,
+                          "community-string");
 #include "mibgroup/mib_module_dot_conf.h"
 #ifdef TESTING
   print_config_handlers();
@@ -234,19 +236,20 @@ void setup_tree __P((void))
 }
 
 void
-snmpd_register_config_handler(token, parser, releaser)
+snmpd_register_config_handler(token, parser, releaser, help)
   char *token;
   void (*parser) __P((char *, char *));
   void (*releaser) __P((void));
+  char *help;
 {
-  register_config_handler("snmpd",token,parser,releaser);
+  register_config_handler("snmpd", token, parser, releaser, help);
 }
 
 void
 snmpd_unregister_config_handler(token)
   char *token;
 {
-  unregister_config_handler("snmpd",token);
+  unregister_config_handler("snmpd", token);
 }
 
 /* this function is intended for use by mib-modules to store permenant

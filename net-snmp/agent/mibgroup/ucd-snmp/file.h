@@ -10,7 +10,7 @@ extern u_char *var_file_table();
 /* config file parsing routines */
 void file_free_config __P((void));
 void file_parse_config __P((char *, char *));
-config_parse_dot_conf("file", file_parse_config, file_free_config);
+config_parse_dot_conf("file", file_parse_config, file_free_config,"file [maxsize]");
 
 #include "mibdefs.h"
 

@@ -15,7 +15,7 @@ extern void	init_memory __P((void));
 /* config file parsing routines */
 void memory_parse_config __P((char *, char *));
 void memory_free_config __P((void));
-config_parse_dot_conf("swap", memory_parse_config, memory_free_config);
+config_parse_dot_conf("swap", memory_parse_config, memory_free_config,"min-avail");
 
 #define MEMTOTALSWAP 3
 #define MEMAVAILSWAP 4

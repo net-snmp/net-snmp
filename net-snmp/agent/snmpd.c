@@ -449,6 +449,7 @@ char *prog;
   printf("\tAuthor:   Wes Hardaker\n");
   printf("\tEmail:    ucd-snmp-coders@ece.ucdavis.edu\n");
   printf("\n-h\t\tThis usage message.\n");
+  printf("-H\t\tDisplay configuration file directives understood.\n");
   printf("-v\t\tVersion information.\n");
   printf("-f\t\tDon't fork from the shell.\n");
   printf("-a\t\tLog addresses.\n");
@@ -581,6 +582,12 @@ main(argc, argv)
                     break;
                 case 'h':
                     usage(argv[0]);
+                    break;
+                case 'H':
+                    init_agent();            /* register our .conf handlers */
+                    register_mib_handlers(); /* snmplib .conf handlers */
+                    fprintf(stderr, "Configuration directives understood:\n");
+                    read_config_print_usage("  ");
                     break;
                 case 'v':
                     printf("\nUCD-snmp version:  %s\n",VersionInfo);

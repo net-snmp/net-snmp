@@ -73,7 +73,7 @@ snmp_parse_args_usage(outf)
   FILE *outf;
 {
   fprintf(outf,
-        "[-v 1|2c|2p] [-h] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
+        "[-v 1|2c|2p] [-h] [-H] [-d] [-q] [-R] [-D] [-m <MIBS>] [-M <MIDDIRS>] [-p <P>] [-t <T>] [-r <R>] [-c <S> <D>] <hostname> <community>|{<srcParty> <dstParty> <context>}");
 }
 
 void
@@ -83,6 +83,7 @@ snmp_parse_args_descriptions(outf)
   fprintf(outf, "  -v 1|2c|2p\tspecifies snmp version to use.\n");
   fprintf(outf, "            \twhere 1 is SNMPv1, 2c is SNMPv2c, and 2p is SNMPv2-party\n");
   fprintf(outf, "  -h\t\tthis help message.\n");
+  fprintf(outf, "  -H\t\tDisplay configuration file directives understood.\n");
   fprintf(outf, "  -V\t\tdisplay version number.\n");
   fprintf(outf, "  -d\t\tdump input/output packets.\n");
   fprintf(outf, "  -q\t\tquick print output for easier parsing ability.\n");
@@ -274,7 +275,13 @@ snmp_parse_args(argc, argv, session)
         usage();
         exit(0);
         break;
-          
+
+      case 'H':
+        init_snmp();
+        fprintf(stderr, "Configuration directives understood:\n");
+        read_config_print_usage("  ");
+        exit(0);
+
       default:
         /* This should be removed to support options in clients that
            have more parameters than the defaults above! */
