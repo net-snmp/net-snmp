@@ -15,24 +15,22 @@ IMPORTS
 
 private	       OBJECT IDENTIFIER ::= { internet 4 }
 local          OBJECT IDENTIFIER ::= { private 10 }
--- processes      OBJECT IDENTIFIER ::= { local 1 }
--- pstat_-T       OBJECT IDENTIFIER ::= { local 2 }
--- exec           OBJECT IDENTIFIER ::= { local 3 }
--- memory         OBJECT IDENTIFIER ::= { local 4 }
--- lockd          OBJECT IDENTIFIER ::= { local 5 }
--- disk           OBJECT IDENTIFIER ::= { local 6 }
--- load           OBJECT IDENTIFIER ::= { local 7 }
--- version        OBJECT IDENTIFIER ::= { local 100 }
--- miscTests      OBJECT IDENTIFIER ::= { local 9 }
+-- processes      OBJECT IDENTIFIER ::= { local PROCMIBNUM }
+-- exec           OBJECT IDENTIFIER ::= { local SHELLMIBNUM }
+-- memory         OBJECT IDENTIFIER ::= { local MEMMIBNUM }
+-- lockd          OBJECT IDENTIFIER ::= { local LOCKDMIBNUM }
+-- disk           OBJECT IDENTIFIER ::= { local DISKMIBNUM }
+-- load           OBJECT IDENTIFIER ::= { local LOADAVEMIBNUM }
+-- version        OBJECT IDENTIFIER ::= { local VERSIONMIBNUM }
 
 Processes OBJECT-TYPE
 	SYNTAX processes
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
-		"A set of information on running DEC daemons."
+		"A set of information on running programs/daemons."
 	INDEX { processIndex }
-	::= { local 1 }
+	::= { local PROCMIBNUM }
 
 
 processes ::= SEQUENCE {
@@ -52,15 +50,15 @@ processIndex OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Reference Index for each observed process."
-	::= { Processes 1 }
+	::= { Processes MIBINDEX }
 
 processNames OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
 	ACCESS read-only
 	STATUS mandatory
 	DESCRIPTION
-		"The list of process names we're Counting."
-	::= { Processes 2 }
+		"The table of process names we're Counting."
+	::= { Processes ERRORNAME }
 
 processMin OBJECT-TYPE
 	SYNTAX INTEGER
@@ -70,7 +68,7 @@ processMin OBJECT-TYPE
 		"The minimum number of processes that should be
 		running.  An error flag is generated if the number of
 		running processes is < the minimum."
-	::= { Processes 3 }
+	::= { Processes PROCMIN }
 
 processMax OBJECT-TYPE
 	SYNTAX INTEGER
@@ -80,7 +78,7 @@ processMax OBJECT-TYPE
 		"The maximum number of processes that should be
 		running.  An error flag is generated if the number of
 		running processes is > the maximum."
-	::= { Processes 4 }
+	::= { Processes PROCMAX }
 
 processCount OBJECT-TYPE
 	SYNTAX INTEGER
@@ -89,7 +87,7 @@ processCount OBJECT-TYPE
 	DESCRIPTION
 		"The number of current processes running with the name
 		in question."
-	::= { Processes 5 }
+	::= { Processes PROCCOUNT }
 
 processErrorFlag OBJECT-TYPE
 	SYNTAX INTEGER
@@ -98,7 +96,7 @@ processErrorFlag OBJECT-TYPE
 	DESCRIPTION
 		"A Error flag to indicate trouble with a process.  It
 		goes to 1 if there is an error, 0 if no error."
-	::= { Processes 100 }
+	::= { Processes ERRORFLAG }
 
 processErrMessage OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -106,15 +104,15 @@ processErrMessage OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"An error message describing the problem (if one exists)."
-	::= { Processes 101 }
+	::= { Processes ERRORMSG }
 
 processErrFix OBJECT-TYPE
 	SYNTAX INTEGER
 	ACCESS read-write
 	STATUS mandatory
 	DESCRIPTION
-		"An error message describing the problem (if one exists)."
-	::= { Processes 102 }
+		"Setting this to one will try to fix the problem if possible."
+	::= { Processes ERRORFIX }
 
 Extensible OBJECT-TYPE
 	SYNTAX extensible
@@ -123,7 +121,7 @@ Extensible OBJECT-TYPE
 	DESCRIPTION
 		"Extensible commands returning output and result codes."
 	INDEX { extensibleIndex }
-	::= { local 3 }
+	::= { local SHELLMIBNUM }
 
 extensible ::= SEQUENCE {
    extensibleIndex   INTEGER,
@@ -140,7 +138,7 @@ extensibleIndex OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Reference Index for extensible calls."
-	::= { Extensible 1 }
+	::= { Extensible MIBINDEX }
 
 extensibleNames OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -148,7 +146,7 @@ extensibleNames OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Short, one name descriptions of the extensible commands."
-	::= { Extensible 2 }
+	::= { Extensible ERRORNAME }
 
 extensibleCommand OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -156,7 +154,7 @@ extensibleCommand OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The command line to be executed."
-	::= { Extensible 3 }
+	::= { Extensible SHELLCOMMAND }
 
 extensibleResult OBJECT-TYPE
 	SYNTAX INTEGER
@@ -164,7 +162,7 @@ extensibleResult OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The result code from the executed command."
-	::= { Extensible 100 }
+	::= { Extensible ERRORFLAG }
 
 extensibleOutput OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -172,23 +170,23 @@ extensibleOutput OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The output of the extensible command (top line only)."
-	::= { Extensible 101 }
+	::= { Extensible ERRORMSG }
 
 extensibleErrFix OBJECT-TYPE
 	SYNTAX INTEGER
 	ACCESS read-write
 	STATUS mandatory
 	DESCRIPTION
-		"Set to 1 to fix the problem."
-	::= { Extensible 102 }
+		"Set to 1 to fix the problem, if possible."
+	::= { Extensible ERRORFIX }
 	
 Memory OBJECT-TYPE
 	SYNTAX extensible
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
-		"Miscellanous stuff -- memory."
-	::= { local 4 }
+		"Miscellanous stuff -- memory related."
+	::= { local MEMMIBNUM }
 
 memory ::= SEQUENCE {
    memIndex        INTEGER,
@@ -210,16 +208,16 @@ memIndex OBJECT-TYPE
      ACCESS  read-only
      STATUS  mandatory
      DESCRIPTION  
-          "Generic Index "
-     ::= { Memory 1 } 
+          "Generic Index."
+     ::= { Memory MIBINDEX } 
 
 memErrorName OBJECT-TYPE
      SYNTAX  DisplayString
      ACCESS  read-only
      STATUS  mandatory
      DESCRIPTION  
-          "Bogus Name (swap) for consistancy."
-     ::= { Memory 2 } 
+          "Bogus Name (swap) for consistancy with the rest of the mibs."
+     ::= { Memory ERRORNAME } 
 
 memTotalSwap OBJECT-TYPE
 	SYNTAX INTEGER
@@ -227,7 +225,7 @@ memTotalSwap OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total Swap Size."
-	::= { Memory 3 }
+	::= { Memory MEMTOTALSWAP }
 
 memAvailSwap OBJECT-TYPE
 	SYNTAX INTEGER
@@ -235,7 +233,7 @@ memAvailSwap OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Available Swap Space."
-	::= { Memory 4 }
+	::= { Memory MEMUSEDSWAP }
 
 memTotalReal OBJECT-TYPE
 	SYNTAX INTEGER
@@ -243,7 +241,7 @@ memTotalReal OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total Real/Physical Memory Size."
-	::= { Memory 5 }
+	::= { Memory MEMTOTALREAL }
 
 memAvailReal OBJECT-TYPE
 	SYNTAX INTEGER
@@ -251,7 +249,7 @@ memAvailReal OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Available Real/Physical Memory Space."
-	::= { Memory 6 }
+	::= { Memory MEMUSEDREAL }
 
 memTotalSwapTXT OBJECT-TYPE
 	SYNTAX INTEGER
@@ -259,7 +257,7 @@ memTotalSwapTXT OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total VM used by text."
-	::= { Memory 7 }
+	::= { Memory MEMTOTALSWAPTXT }
 
 memAvailSwapTXT OBJECT-TYPE
 	SYNTAX INTEGER
@@ -267,7 +265,7 @@ memAvailSwapTXT OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Active VM used by text."
-	::= { Memory 8 }
+	::= { Memory MEMUSEDSWAPTXT }
 
 memTotalRealTXT OBJECT-TYPE
 	SYNTAX INTEGER
@@ -275,7 +273,7 @@ memTotalRealTXT OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total Real/Physical Memory Size used by txt."
-	::= { Memory 9 }
+	::= { Memory MEMTOTALREALTXT }
 
 memAvailRealTXT OBJECT-TYPE
 	SYNTAX INTEGER
@@ -283,7 +281,7 @@ memAvailRealTXT OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Active Real/Physical Memory Space used by txt."
-	::= { Memory 10 }
+	::= { Memory MEMUSEDREALTXT }
 
 memTotalFree OBJECT-TYPE
 	SYNTAX INTEGER
@@ -291,7 +289,7 @@ memTotalFree OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Total Available Memory"
-	::= { Memory 11 }
+	::= { Memory MEMTOTALFREE }
 
 memMinimumSwap OBJECT-TYPE
 	SYNTAX INTEGER
@@ -300,7 +298,7 @@ memMinimumSwap OBJECT-TYPE
 	DESCRIPTION
 		"Minimum amount of free swap.  Otherwise memErrorSwap
 		is set to 1 "
-	::= { Memory 12 }
+	::= { Memory MEMSWAPMINIMUM }
 
 memSwapError OBJECT-TYPE
 	SYNTAX INTEGER
@@ -308,7 +306,7 @@ memSwapError OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Error flag.  1 indicates very little swap space left"
-	::= { Memory 100 }
+	::= { Memory ERRORFLAG }
 	
 memSwapErrorMsg OBJECT-TYPE
      SYNTAX  DisplayString
@@ -316,7 +314,7 @@ memSwapErrorMsg OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Error message describing the errorflag condition"
-     ::= { Memory 101 } 
+     ::= { Memory ERRORMSG } 
 
 Lockd OBJECT-TYPE
 	SYNTAX lockd
@@ -325,7 +323,7 @@ Lockd OBJECT-TYPE
 	DESCRIPTION
 		"Tests the functionality of the rpc.lockd/rpc.statd pair."
 	INDEX { lockdIndex }
-	::= { local 5 }
+	::= { local LOCKDMIBNUM }
 
 lockd ::= SEQUENCE {
    lockdIndex   INTEGER,
@@ -339,7 +337,7 @@ lockdIndex OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Reference Index for lockd calls."
-	::= { Lockd 1 }
+	::= { Lockd MIBINDEX }
 
 lockdError OBJECT-TYPE
 	SYNTAX INTEGER
@@ -347,7 +345,7 @@ lockdError OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Error Flag.  > 0 indicates error"
-	::= { Lockd 6 }
+	::= { Lockd ERRORFLAG }
 
 lockdErrorMsg OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -355,7 +353,7 @@ lockdErrorMsg OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Error message if something is wrong"
-	::= { Lockd 7 }
+	::= { Lockd ERRORMSG }
 
 Disk 	OBJECT-TYPE
 	SYNTAX disk
@@ -364,7 +362,7 @@ Disk 	OBJECT-TYPE
 	DESCRIPTION
 		"Disk watching information."
 	INDEX { diskIndex }
-	::= { local 6 }
+	::= { local DISKMIBNUM }
 
 disk ::= SEQUENCE {
    diskIndex   INTEGER,
@@ -385,7 +383,7 @@ diskIndex OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Reference number for the Disk Mib."
-	::= { Disk 1 }
+	::= { Disk MIBINDEX }
 	
 diskPath OBJECT-TYPE
      SYNTAX  DisplayString
@@ -393,7 +391,7 @@ diskPath OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Path where disk is mounted."
-     ::= { Disk 2 } 
+     ::= { Disk ERRORNAME } 
 
 diskDevice OBJECT-TYPE
      SYNTAX  DisplayString
@@ -401,7 +399,7 @@ diskDevice OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Device path"
-     ::= { Disk 3 } 
+     ::= { Disk DISKDEVICE } 
 
 diskMinimum OBJECT-TYPE
      SYNTAX  INTEGER
@@ -409,7 +407,7 @@ diskMinimum OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Minimum space required for the disk."
-     ::= { Disk 4 } 
+     ::= { Disk DISKMINIMUM } 
 
 diskTotal OBJECT-TYPE
      SYNTAX  INTEGER
@@ -417,7 +415,7 @@ diskTotal OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Total Disk Size (kbytes)"
-     ::= { Disk 5 } 
+     ::= { Disk DISKTOTAL } 
 
 diskAvail OBJECT-TYPE
      SYNTAX  INTEGER
@@ -425,7 +423,7 @@ diskAvail OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Available disk Space"
-     ::= { Disk 6 } 
+     ::= { Disk DISKAVAIL } 
 
 diskUsed OBJECT-TYPE
      SYNTAX  INTEGER
@@ -433,7 +431,7 @@ diskUsed OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Used Space on Disk"
-     ::= { Disk 7 } 
+     ::= { Disk DISKUSED } 
 
 diskPercent OBJECT-TYPE
      SYNTAX  INTEGER
@@ -441,7 +439,7 @@ diskPercent OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Percentage of space used on disk"
-     ::= { Disk 8 } 
+     ::= { Disk DISKPERCENT } 
 
 diskErrorFlag OBJECT-TYPE
      SYNTAX  INTEGER
@@ -449,7 +447,7 @@ diskErrorFlag OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Error flag signaling disk is over minimum required space"
-     ::= { Disk 100 } 
+     ::= { Disk ERRORFLAG } 
      
 diskErrorMsg OBJECT-TYPE
      SYNTAX  DisplayString
@@ -457,7 +455,7 @@ diskErrorMsg OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "A text description of what caused the error flag to be set."
-     ::= { Disk 101 } 
+     ::= { Disk ERRORMSG } 
      
 Loadaves OBJECT-TYPE
 	SYNTAX loadaves
@@ -466,7 +464,7 @@ Loadaves OBJECT-TYPE
 	DESCRIPTION
 		"Load average information."
 	INDEX { loadaveIndex }
-	::= { local 7 }
+	::= { local LOADAVEMIBNUM }
 
 
 loadaves ::= SEQUENCE {
@@ -484,7 +482,7 @@ loadaveIndex OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Reference Index for each observed loadave."
-	::= { Loadaves 1 }
+	::= { Loadaves MIBINDEX }
 
 loadaveNames OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -492,7 +490,7 @@ loadaveNames OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The list of loadave names we're Counting."
-	::= { Loadaves 2 }
+	::= { Loadaves ERRORNAME }
 
 loadaveLoad OBJECT-TYPE
 	SYNTAX DisplayString
@@ -500,7 +498,7 @@ loadaveLoad OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The 1,5 and 10 minute load averages."
-	::= { Loadaves 3 }
+	::= { Loadaves LOADAVE }
 
 loadaveConfig OBJECT-TYPE
 	SYNTAX DisplayString
@@ -508,7 +506,7 @@ loadaveConfig OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The watch point for loadaverages to signal an error."
-	::= { Loadaves 4 }
+	::= { Loadaves LOADMAXVAL }
 
 loadaveErrorFlag OBJECT-TYPE
 	SYNTAX INTEGER
@@ -517,7 +515,7 @@ loadaveErrorFlag OBJECT-TYPE
 	DESCRIPTION
 		"A Error flag to indicate trouble with a loadave.  It
 		goes to 1 if there is an error, 0 if no error."
-	::= { Loadaves 100 }
+	::= { Loadaves ERRORFLAG }
 
 loadaveErrMessage OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -525,7 +523,7 @@ loadaveErrMessage OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"An error message describing the problem (if one exists)."
-	::= { Loadaves 101 }
+	::= { Loadaves ERRORMSG }
 
 Version	OBJECT-TYPE
 	SYNTAX version
@@ -534,7 +532,7 @@ Version	OBJECT-TYPE
 	DESCRIPTION
 		"ece-snmpd version info."
 	INDEX { versionIndex }
-	::= { local 100 }
+	::= { local VERSIONMIBNUM }
 
 version ::= SEQUENCE {
    versionIndex   INTEGER,
@@ -552,7 +550,7 @@ versionIndex OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Index to mib (always 1)"
-     ::= { Version 1 } 
+     ::= { Version MIBINDEX } 
 
 versionTag OBJECT-TYPE
      SYNTAX  DisplayString
@@ -560,7 +558,7 @@ versionTag OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "CVS tag keyword"
-     ::= { Version 2 } 
+     ::= { Version ERRORNAME } 
      
 versionDate OBJECT-TYPE
      SYNTAX  DisplayString
@@ -568,7 +566,7 @@ versionDate OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Date string from RCS keyword"
-     ::= { Version 3 } 
+     ::= { Version VERDATE } 
 
 versionCDate OBJECT-TYPE
      SYNTAX  DisplayString
@@ -576,7 +574,7 @@ versionCDate OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Date string from ctime() "
-     ::= { Version 4 } 
+     ::= { Version VERCDATE } 
 
 versionIdent OBJECT-TYPE
      SYNTAX  DisplayString
@@ -584,7 +582,7 @@ versionIdent OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Id string from RCS keyword"
-     ::= { Version 5 } 
+     ::= { Version VERIDENT } 
 
 versionClearCache OBJECT-TYPE
      SYNTAX  INTEGER
@@ -592,7 +590,7 @@ versionClearCache OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Set to 1 to clear the exec cache, if enabled"
-     ::= { Version 10 } 
+     ::= { Version VERCLEARCACHE } 
 
 versionUpdateConfig OBJECT-TYPE
      SYNTAX  INTEGER
@@ -600,7 +598,15 @@ versionUpdateConfig OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Set to 1 to read-read the config file(s)."
-     ::= { Version 11 } 
+     ::= { Version VERUPDATECONFIG } 
+
+versionRestartAgent OBJECT-TYPE
+     SYNTAX  INTEGER
+     ACCESS  read-write
+     STATUS  mandatory
+     DESCRIPTION  
+          "Set to 1 to restart the agent."
+     ::= { Version VERRESTARTAGENT } 
 
 Snmperrs OBJECT-TYPE
 	SYNTAX snmperrs
@@ -609,7 +615,7 @@ Snmperrs OBJECT-TYPE
 	DESCRIPTION
 		"A place for the agent to report problems."
 	INDEX { snmperrIndex }
-	::= { local 101 }
+	::= { local ERRORMIBNUM }
 
 
 snmperrs ::= SEQUENCE {
@@ -625,7 +631,7 @@ snmperrIndex OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Reference Index for each observed snmperr."
-	::= { Snmperrs 1 }
+	::= { Snmperrs MIBINDEX }
 
 snmperrNames OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -633,7 +639,7 @@ snmperrNames OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"snmp"
-	::= { Snmperrs 2 }
+	::= { Snmperrs ERRORNAME }
 
 snmperrErrorFlag OBJECT-TYPE
 	SYNTAX INTEGER
@@ -642,7 +648,7 @@ snmperrErrorFlag OBJECT-TYPE
 	DESCRIPTION
 		"A Error flag to indicate trouble with the agent.  It
 		goes to 1 if there is an error, 0 if no error."
-	::= { Snmperrs 100 }
+	::= { Snmperrs ERRORFLAG }
 
 snmperrErrMessage OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -650,7 +656,7 @@ snmperrErrMessage OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"An error message describing the problem (if one exists)."
-	::= { Snmperrs 101 }
+	::= { Snmperrs ERRORMSG }
 
 END
 

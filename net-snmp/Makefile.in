@@ -9,14 +9,21 @@ bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
 snmplibdir = $(prefix)/lib/snmp
 
+SED = @SED@
+
 INSTALL = @INSTALL@
+CPP = @CPP@ -I. -DDONT_INC_STRUCTS -DBINDIR=$(bindir)
+CFLAGS = @CFLAGS@
 
 TARG = bin/snmpget bin/snmpgetnext bin/snmpset bin/snmptranslate bin/snmpwalk bin/snmpbulkwalk bin/snmptest bin/snmptrapd bin/snmpnetstat bin/snmpd
 
-SUBDIRS = snmplib agent apps
-INSTALLDIRS = $(SUBDIRS) man
+SUBDIRS = snmplib agent apps local
+INSTALLDIRS = $(SUBDIRS) man local
 
-all:	subdirs mib.txt
+all:	mib.txt sedscript subdirs
+
+sedscript: sedscript.in config.h agent/extensible/mibdefs.h
+	$(CPP) sedscript.in | sed 's/REMOVEME//g' > sedscript
 
 subdirs:
 	for i in $(SUBDIRS) ; do \
@@ -78,5 +85,5 @@ Makefile: Makefile.in config.status
 config.status: configure
 	./config.status --recheck
 
-mib.txt: ece-mib.def mibII.txt
-	cat mibII.txt ece-mib.def > mib.txt
+mib.txt: ece-mib.def mibII.txt sedscript
+	cat ece-mib.def | $(SED) -f sedscript | cat mibII.txt - > mib.txt
