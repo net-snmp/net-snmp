@@ -1,3 +1,4 @@
+#!/bin/bash
 #----------------------------------------------------------------------
 # $Id$
 # Author: Robert Story <rstory@freesnmp.com>
@@ -10,8 +11,11 @@ NSB_QUIET=0
 NSB_PROMPT=1
 NSB_CLEAN=1
 NSB_SKIP_CONFIG=0
+NSB_SKIP_BUILD=0
+NSB_SKIP_TEST=0
+NSB_SKIP_INSTALL=0
 NSB_VIEW=cat
-DATE=`date +%y%m%d_%k%M`
+DATE=`date +%y%m%d_%H%M`
 
 #----------------------------------------------------------------------
 #
@@ -27,7 +31,13 @@ nsb-info()
 
 nsb-prompt()
 {
-   if [ $NSB_PROMPT -eq 1 ]; then
+   if [ "x$1" = "x-f" ]; then
+      shift 1
+      tmp_nsb_prompt=1
+   else
+      tmp_nsb_prompt=$NSB_PROMPT
+   fi
+   if [ $tmp_nsb_prompt -eq 1 ]; then
       echo $@
       read nsb_prompt_dummy
    else
@@ -96,6 +106,32 @@ nsb-zip()
    fi
 }
 
+nsb-make()
+{
+   target=$1
+   shift 1
+   parms=$@
+
+   nsb_make_OUTPUT=nsb-make-$target.$DATE
+   nsb-info "Making $target... (log is $nsb_make_OUTPUT)"
+   make $target 2>&1 | tee $nsb_make_OUTPUT
+
+   nsb-info "Checking for errors..."
+   egrep "Error|FAIL|warn|No |exists" $nsb_make_OUTPUT \
+         > nsb-make-$target-allerrs.$DATE
+   egrep -v "^/usr" nsb-make-$target-allerrs.$DATE \
+         > nsb-make-$target-nerrs.$DATE
+   egrep -v "warn" nsb-make-$target-nerrs.$DATE \
+         > nsb-make-$target-errs.$DATE
+   nsb_make_rc=$?
+   if [ $nsb_make_rc -eq 0 ]; then
+      nsb-prompt -f "press enter to view errors"
+      $NSB_VIEW nsb-make-$target-errs.$DATE
+   fi
+
+   return $nsb_make_rc
+}
+
 nsb-build()
 {
    if [ $# -ne 4 ]; then
@@ -126,33 +162,55 @@ nsb-build()
 
    if [ $NSB_CLEAN -eq 1 ]; then
       nsb-info "Cleaning up..."
-      rm -fR nsb-out-* `pwd`/usr/local 2>&1 > /dev/null
+      nsb-info "rm -fR nsb-* $dest_dir 2>&1 > /dev/null"
+      rm -fR nsb-* $dest_dir 2>&1 > /dev/null
       if [ -f Makefile ]; then
          make distclean
+         nsb_build_rc=$?
+         if [ $nsb_build_rc -ne 0 ]; then
+            echo "Error during cleanup... aborting."
+            return 0
+         fi
       fi
    fi
 
    if [ $NSB_SKIP_CONFIG -ne 1 ]; then
-      nsb-info "Configuring... (log is nsb-out-config.$DATE)"
-      nsb-get-config $src_dir $dest_dir | tee nsb-out-config.$DATE
+      nsb-info "Configuring... (log is nsb-config.$DATE)"
+      nsb-get-config $src_dir $dest_dir | tee nsb-config.$DATE
       nsb-prompt "press enter to continue"
    fi
 
-   OUTPUT=nsb-out-make.$DATE
-   nsb-info "Building... (log is $OUTPUT)"
-   make 2>&1 test | tee $OUTPUT
+   if [ $NSB_SKIP_BUILD -eq 1 ]; then
+      nsb-info "Skipping 'make all'"
+   else
+      nsb-make all
+      nsb_build_rc=$?
+      if [ $nsb_build_rc -eq 0 ]; then
+         return $nsb_build_rc
+      fi
+   fi
 
-   nsb-info "Checking for errors..."
-   egrep "Error|FAIL|warn|No |exists" $OUTPUT > nsb-out-allerrs.$DATE
-   egrep -v "^/usr" nsb-out-allerrs.$DATE > nsb-out-nerrs.$DATE
-   egrep -v "warn" nsb-out-nerrs.$DATE > nsb-out-errs.$DATE
-   nsb_rc=$?
-   if [ $nsb_rc -eq 0 ]; then
-      nsb-prompt "press enter to view errors"
-      $NSB_VIEW nsb-out-errs.$DATE
+   if [ $NSB_SKIP_TEST -eq 1 ]; then
+      nsb-info "Skipping 'make test'"
+   else
+      nsb-prompt "No errors found, press enter to run tests"
+      nsb-make test
+      nsb_build_rc=$?
+      if [ $nsb_build_rc -eq 0 ]; then
+         return $nsb_build_rc
+      fi
+   fi
+
+   if [ $NSB_SKIP_INSTALL -eq 1 ]; then
+      nsb-info "Skipping 'make install'"
    else
       nsb-prompt "No errors found, press enter to install"
-      ## full build with install. usr subdir will be available to package
-      make install prefix=`pwd`/usr/local exec_prefix=`pwd`/usr/local | tee -a $OUTPUT
+      nsb-make install prefix=$dest_dir exec_prefix=$dest_dir
+      nsb_build_rc=$?
+      if [ $nsb_build_rc -eq 0 ]; then
+         return $nsb_build_rc
+      fi
    fi
+
+   return nsb_build_rc
 }
