@@ -94,10 +94,10 @@
 #include <net-snmp/system.h>
 #include <net-snmp/agent/auto_nlist.h>
 
-#ifdef MIB_IPCOUNTER_SYMBOL
+#if defined(MIB_IPCOUNTER_SYMBOL) || defined(hpux11)
 #include <sys/mib.h>
 #include <netinet/mib_kern.h>
-#endif /* MIB_IPCOUNTER_SYMBOL */
+#endif /* MIB_IPCOUNTER_SYMBOL || hpux11 */
 
 #include "ip.h"
 #include "ipAddr.h"
@@ -268,6 +268,10 @@ void init_ip(void)
 #ifdef solaris2
 #define IP_STAT_STRUCTURE	mib2_ip_t
 #define	USES_SNMP_DESIGNED_IPSTAT
+#endif
+
+#ifdef hpux11
+#define IP_STAT_STRUCTURE	int
 #endif
 
 #ifdef HAVE_SYS_TCPIPSTATS_H
@@ -496,12 +500,58 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
 #if !(defined (linux) || defined(solaris2))
    static int ttl, forward;
 #endif
+#ifdef hpux11
+   int fd;
+   struct nmparms p;
+   unsigned int ulen;
+#endif
 
 #if ((defined(HAVE_SYS_SYSCTL_H) && defined(CTL_NET)) ||	\
      (defined(CAN_USE_SYSCTL) && defined(IPCTL_STATS)))
    static int sname[4] = { CTL_NET, PF_INET, IPPROTO_IP, 0 };
    size_t len;
 #endif
+
+#ifdef hpux11
+    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) < 0)
+	return (-1);	/* error */
+
+    switch (magic) {
+	case IPFORWARDING:	p.objid = ID_ipForwarding;		break;
+	case IPDEFAULTTTL:	p.objid = ID_ipDefaultTTL;		break;
+	case IPINRECEIVES:	p.objid = ID_ipInReceives;		break;
+	case IPINHDRERRORS:	p.objid = ID_ipInHdrErrors;		break;
+	case IPINADDRERRORS:	p.objid = ID_ipInAddrErrors;		break;
+	case IPFORWDATAGRAMS:	p.objid = ID_ipForwDatagrams;		break;
+	case IPINUNKNOWNPROTOS:	p.objid = ID_ipInUnknownProtos;		break;
+	case IPINDISCARDS:	p.objid = ID_ipInDiscards;		break;
+	case IPINDELIVERS:	p.objid = ID_ipInDelivers;		break;
+	case IPOUTREQUESTS:	p.objid = ID_ipOutRequests;		break;
+	case IPOUTDISCARDS:	p.objid = ID_ipOutDiscards;		break;
+	case IPOUTNOROUTES:	p.objid = ID_ipOutNoRoutes;		break;
+	case IPREASMTIMEOUT:	p.objid = ID_ipReasmTimeout;		break;
+	case IPREASMREQDS:	p.objid = ID_ipReasmReqds;		break;
+	case IPREASMOKS:	p.objid = ID_ipReasmOKs;		break;
+	case IPREASMFAILS:	p.objid = ID_ipReasmFails;		break;
+	case IPFRAGOKS:		p.objid = ID_ipFragOKs;			break;
+	case IPFRAGFAILS:	p.objid = ID_ipFragFails;		break;
+	case IPFRAGCREATES:	p.objid = ID_ipFragCreates;		break;
+	case IPROUTEDISCARDS:	p.objid = ID_ipRoutingDiscards;		break;
+	default:
+	    *ipstat = 0;
+	    close_mib(fd);
+	    return (0);
+    }
+
+    p.buffer = (void *)ipstat;
+    ulen = sizeof(IP_STAT_STRUCTURE);
+    p.len = &ulen;
+    ret_value = get_mib_info(fd, &p);
+    close_mib(fd);
+
+    return (ret_value);	/* 0: ok, < 0: error */
+#else	/* hpux11 */
+    
 
     if (  ip_stats_cache_marker &&
 	(!atime_ready( ip_stats_cache_marker, IP_STATS_CACHE_TIMEOUT*1000 )))
@@ -598,6 +648,7 @@ read_ip_stat( IP_STAT_STRUCTURE *ipstat, int magic )
 	ip_stats_cache_marker = NULL;
     }
     return ret_value;
+#endif	/* hpux11 */
 }
 
 #ifdef WIN32

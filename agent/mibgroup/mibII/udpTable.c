@@ -132,7 +132,11 @@
 
 #ifndef solaris2
 static void UDP_Scan_Init (void);
+#ifdef hpux11
+static int UDP_Scan_Next (mib_udpLsnEnt *);
+#else
 static int UDP_Scan_Next (struct inpcb *);
+#endif
 #endif
 
 	/*********************
@@ -163,30 +167,49 @@ var_udpEntry(struct variable *vp,
     oid newname[MAX_OID_LEN], lowest[MAX_OID_LEN], *op;
     u_char *cp;
     int LowState;
+#ifdef hpux11
+    static mib_udpLsnEnt udp, Lowudp;
+#else
     static struct inpcb inpcb, Lowinpcb;
+#endif
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
 		/* find the "next" pseudo-connection */
+#ifndef hpux11
 Again:
+#endif
 LowState = -1;		/* UDP doesn't have 'State', but it's a useful flag */
 	UDP_Scan_Init();
 	for (;;) {
+#ifdef hpux11
+	    if ((i = UDP_Scan_Next(&udp)) == 0) break;  /* Done */
+	    cp = (u_char *)&udp.LocalAddress;
+#else	/* hpux11 */
 	    if ((i = UDP_Scan_Next(&inpcb)) < 0) goto Again;
 	    if (i == 0) break;	    /* Done */
 	    cp = (u_char *)&inpcb.inp_laddr.s_addr;
+#endif	/* hpux11 */
 	    op = newname + 10;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 	    
+#ifdef hpux11
+	    newname[14] = (unsigned short)udp.LocalPort;
+#else
 	    newname[14] = ntohs(inpcb.inp_lport);
+#endif
 
 	    if (exact){
 		if (snmp_oid_compare(newname, 15, name, *length) == 0){
 		    memcpy( (char *)lowest,(char *)newname, 15 * sizeof(oid));
 		    LowState = 0;
+#ifdef hpux11
+		    Lowudp = udp;
+#else
 		    Lowinpcb = inpcb;
+#endif
 		    break;  /* no need to search further */
 		}
 	    } else {
@@ -198,7 +221,11 @@ LowState = -1;		/* UDP doesn't have 'State', but it's a useful flag */
 		     */
 		    memcpy( (char *)lowest,(char *)newname, 15 * sizeof(oid));
 		    LowState = 0;
+#ifdef hpux11
+		    Lowudp = udp;
+#else
 		    Lowinpcb = inpcb;
+#endif
 		}
 	    }
 	}
@@ -209,9 +236,17 @@ LowState = -1;		/* UDP doesn't have 'State', but it's a useful flag */
 	*var_len = sizeof(long);
 	switch (vp->magic) {
 	    case UDPLOCALADDRESS:
+#ifdef hpux11
+		return (u_char *) &Lowudp.LocalAddress;
+#else
 		return (u_char *) &Lowinpcb.inp_laddr.s_addr;
+#endif
 	    case UDPLOCALPORT:
+#ifdef hpux11
+		long_return = (unsigned short)Lowudp.LocalPort;
+#else
 		long_return = ntohs(Lowinpcb.inp_lport);
+#endif
 		return (u_char *) &long_return;
 	    default:
 		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_udpEntry\n", vp->magic));
@@ -320,6 +355,11 @@ static struct inpcb *udp_inpcb_list;
 #endif
 
 #ifndef solaris2
+
+#ifdef hpux11
+static int udptab_size, udptab_current;
+static mib_udpLsnEnt *udp = (mib_udpLsnEnt *)0;
+#else	/* hpux11 */
 static struct inpcb udp_inpcb, *udp_prev;
 #ifdef PCB_TABLE
 static struct inpcb *udp_head, *udp_next;
@@ -328,10 +368,48 @@ static struct inpcb *udp_head, *udp_next;
 static char *udpcb_buf = NULL;
 static struct xinpgen *xig = NULL;
 #endif /* !defined(CAN_USE_SYSCTL) || !define(UDPCTL_PCBLIST) */
+#endif	/* hpux11 */
 
 
 static void UDP_Scan_Init(void)
 {
+#ifdef hpux11
+
+        int fd;
+        struct nmparms p;
+        int val;
+        unsigned int ulen;
+        int ret;
+
+        if (udp) free(udp);
+        udp = (mib_udpLsnEnt *)0;
+        udptab_size = 0;
+
+        if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) >= 0) {
+            p.objid = ID_udpLsnNumEnt;
+            p.buffer = (void *)&val;
+            ulen = sizeof(int);
+            p.len = &ulen;
+            if ((ret = get_mib_info(fd, &p)) == 0)
+                udptab_size = val;
+
+            if (udptab_size > 0) {
+                ulen = (unsigned)udptab_size * sizeof(mib_udpLsnEnt);
+                udp = (mib_udpLsnEnt *)malloc(ulen);
+                p.objid = ID_udpLsnTable;
+                p.buffer = (void *)udp;
+                p.len = &ulen;
+                if ((ret = get_mib_info(fd, &p)) < 0)
+                    udptab_size = 0;
+            }
+
+            close_mib(fd);
+        }
+
+        udptab_current = 0;
+
+#else	/* hpux11 */
+
 #if !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST)
 #ifdef PCB_TABLE
     struct inpcbtable table;
@@ -443,8 +521,26 @@ static void UDP_Scan_Init(void)
 	return;
     }
 #endif /*  !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST) */
+
+#endif	/* hpux11 */
 }
 
+#ifdef hpux11
+static int UDP_Scan_Next(mib_udpLsnEnt *RetUdp)
+{
+        if (udptab_current < udptab_size) {
+            /* copy values */
+            *RetUdp = udp[udptab_current];
+            /* increment to point to next entry */
+            udptab_current++;
+            /* return success */
+            return (1);
+        }
+
+	/* return done */
+	return (0);
+}
+#else	/* hpux11 */
 static int UDP_Scan_Next(struct inpcb *RetInPcb)
 {
 #if !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST)
@@ -497,6 +593,7 @@ static int UDP_Scan_Next(struct inpcb *RetInPcb)
 #endif /*  !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST) */
 	return(1);	/* "OK" */
 }
+#endif	/* hpux11 */
 #endif /* solaris2 */
 
 #else /* WIN32 */
