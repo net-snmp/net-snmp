@@ -2978,7 +2978,7 @@ netsnmp_sprint_realloc_objid_tree(u_char ** buf, size_t * buf_len,
                                   const oid * objid, size_t objidlen)
 {
     u_char         *tbuf = NULL, *cp = NULL;
-    size_t          tbuf_len = 256, tout_len = 0;
+    size_t          tbuf_len = 512, tout_len = 0;
     struct tree    *subtree = tree_head;
     size_t          midpoint_offset = 0;
     int             tbuf_overflow = 0;
