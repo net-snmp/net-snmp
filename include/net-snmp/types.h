@@ -20,7 +20,11 @@
 #  include <time.h>
 # endif
 #endif
+
 #include <sys/types.h>
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 
 #ifndef MAX_SUBID	/* temporary - duplicate definition protection */
 #ifndef EIGHTBIT_SUBIDS

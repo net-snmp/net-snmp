@@ -162,6 +162,9 @@ struct objgroup {
 #define READONLY    18
 #define READWRITE   19
 #define WRITEONLY   20
+#ifdef NOACCESS
+#undef NOACCESS		/* agent 'NOACCESS' token */
+#endif
 #define NOACCESS    21
 #define STATUS      22
 #define MANDATORY   23

@@ -1024,7 +1024,8 @@ int	snmpv3_engineID_probe	(struct session_list *slp,
 {
   struct snmp_pdu *pdu = NULL, *response = NULL;
   struct snmp_session *session;
-  int i, status;
+  unsigned int i;
+  int status;
 
   if (slp == NULL || slp->session == NULL) {
     return 0;
@@ -5161,7 +5162,7 @@ snmp_oid_ncompare(const oid *in_name1,
   register int len;
   register const oid * name1 = in_name1;
   register const oid * name2 = in_name2;
-  int min_len;
+  size_t min_len;
 
   /* len = minimum of len1 and len2 */
   if (len1 < len2)
@@ -5416,7 +5417,7 @@ snmp_add_var(struct snmp_pdu *pdu,
   int result = SNMPERR_SUCCESS;
   int check = !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
   u_char *buf = NULL;
-  const char *buf_ptr = NULL;
+  char *buf_ptr = NULL;
   size_t buf_len = 0, value_len = 0, tint;
   long ltmp;
   struct tree *tp;

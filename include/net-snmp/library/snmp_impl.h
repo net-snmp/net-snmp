@@ -36,6 +36,7 @@ SOFTWARE.
 ******************************************************************/
 
 #include<stdio.h>
+#include<net-snmp/types.h>	/* for 'u_char', etc */
 
 #define COMMUNITY_MAX_LEN	256
 
