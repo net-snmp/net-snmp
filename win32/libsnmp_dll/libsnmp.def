@@ -37,6 +37,7 @@ EXPORTS
 	print_variable
 	sprint_variable
 	print_value
+	printI64
 	sprint_value
 	print_objid
 	sprint_objid
@@ -91,10 +92,10 @@ EXPORTS
 	snmp_disable_stderrlog
 	snmp_enable_syslog
 	snmp_enable_filelog
-	snmp_log        
+	snmp_log
 	snmp_log_perror
-	snmp_perror     
-	snmp_sess_perror        
+	snmp_perror
+	snmp_sess_perror
 	snmp_add_null_var
 	snmp_pdu_create
 	snmp_fix_pdu
@@ -105,6 +106,7 @@ EXPORTS
 	snmp_api_errstring
 	snmp_errstring
 	snmp_set_detail
+	snmp_synch_setup
 	snmp_synch_response
 	snmp_duplicate_objid
 	snmp_increment_statistic
