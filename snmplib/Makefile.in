@@ -61,6 +61,7 @@ INCLUDESUBDIRHEADERS=README \
         ucd_compat.h \
         vacm.h \
 	snmp_transport.h \
+	snmpv3-security-includes.h \
 	@transport_hdr_list@ \
 	@security_hdr_list@
 
