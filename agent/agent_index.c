@@ -592,37 +592,58 @@ unregister_oid_index( oid *name, size_t name_len,
 void dump_idx_registry( void )
 {
     struct snmp_index *idxptr, *idxptr2;
-    char start_oid[SPRINT_MAX_LEN];
-    char end_oid[SPRINT_MAX_LEN];
+    u_char *sbuf = NULL, *ebuf = NULL;
+    size_t sbuf_len = 0, sout_len = 0, ebuf_len = 0, eout_len = 0;
 
-    if ( snmp_index_head )
+    if (snmp_index_head != NULL) {
 	printf("\nIndex Allocations:\n");
-    for( idxptr = snmp_index_head ; idxptr != NULL; idxptr = idxptr->next_oid) {
-	sprint_objid(start_oid, idxptr->varbind->name, idxptr->varbind->name_length);
-	printf("%s indexes:\n", start_oid);
-        for( idxptr2 = idxptr ; idxptr2 != NULL; idxptr2 = idxptr2->next_idx) {
-	    switch( idxptr2->varbind->type ) {
-		case ASN_INTEGER:
-		    printf("    %ld for session %08p, allocated %d\n",
-			   *idxptr2->varbind->val.integer, idxptr2->session,
-			   idxptr2->allocated);
-		    break;
-		case ASN_OCTET_STR:
-		    printf("    \"%s\" for session %08p, allocated %d\n",
-			   idxptr2->varbind->val.string, idxptr2->session,
-			   idxptr2->allocated);
-		    break;
-		case ASN_OBJECT_ID:
-		    sprint_objid(end_oid, idxptr2->varbind->val.objid,
-				idxptr2->varbind->val_len/sizeof(oid));
+    }
+
+    for (idxptr = snmp_index_head; idxptr != NULL; idxptr = idxptr->next_oid) {
+	sout_len = 0;
+	if (sprint_realloc_objid(&sbuf, &sbuf_len, &sout_len, 1,
+		        idxptr->varbind->name, idxptr->varbind->name_length)) {
+	    printf("%s indexes:\n", sbuf);
+	} else {
+	    printf("%s [TRUNCATED] indexes:\n", sbuf);
+	}
+
+        for (idxptr2 = idxptr; idxptr2 != NULL; idxptr2 = idxptr2->next_idx) {
+	    switch (idxptr2->varbind->type) {
+	    case ASN_INTEGER:
+		printf("    %ld for session %08p, allocated %d\n",
+		       *idxptr2->varbind->val.integer, idxptr2->session,
+		       idxptr2->allocated);
+		break;
+	    case ASN_OCTET_STR:
+		printf("    \"%s\" for session %08p, allocated %d\n",
+		       idxptr2->varbind->val.string, idxptr2->session,
+		       idxptr2->allocated);
+		break;
+	    case ASN_OBJECT_ID:
+		eout_len = 0;
+		if (sprint_realloc_objid(&ebuf, &ebuf_len, &eout_len, 1,
+				     idxptr2->varbind->val.objid,
+				     idxptr2->varbind->val_len/sizeof(oid))) {
 		    printf("    %s for session %08p, allocated %d\n",
-			   end_oid, idxptr2->session, idxptr2->allocated);
-		    break;
-		default:
-		    printf("unsupported type (%d/0x%02x)\n",
-			   idxptr2->varbind->type, idxptr2->varbind->type);
+			   ebuf, idxptr2->session, idxptr2->allocated);
+		} else {
+		    printf("    %s [TRUNCATED] for sess %08p, allocated %d\n",
+			   ebuf, idxptr2->session, idxptr2->allocated);
+		}
+		break;
+	    default:
+		printf("unsupported type (%d/0x%02x)\n",
+		       idxptr2->varbind->type, idxptr2->varbind->type);
 	    }
 	}
+    }
+
+    if (sbuf != NULL) {
+	free(sbuf);
+    }
+    if (ebuf != NULL) {
+	free(ebuf);
     }
 }
 

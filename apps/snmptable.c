@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 
   /* get the common command line arguments */
   switch (snmp_parse_args(argc, argv, &session, "C:", optProc)) {
-  case  -2:
+  case -2:
     exit(0);
   case -1:
     usage();
@@ -334,71 +334,95 @@ void print_table (void)
 
 void get_field_names( char* tblname )
 {
-  char string_buf[SPRINT_MAX_LEN];
-  char *name_p;
+  u_char *buf = NULL, *name_p = NULL;
+  size_t buf_len = 0, out_len = 0;
   struct tree *tbl = NULL;
   int going = 1;
 
-  name_p = string_buf;
-  strcpy(string_buf, "");
-
-  if( tblname )
-    tbl = find_tree_node( tblname, -1 );
-  if( tbl )
-    tbl = tbl->child_list;
-
-  if( tbl ) {
-    root[rootlen++] = tbl->subid;
+  if (tblname) {
+    tbl = find_tree_node(tblname, -1);
+  }
+  if (tbl) {
     tbl = tbl->child_list;
   }
-  else
+  if (tbl) {
+    root[rootlen++] = tbl->subid;
+    tbl = tbl->child_list;
+  } else {
     root[rootlen++] = 1;
+  }
 
-  sprint_objid(string_buf, root, rootlen-1);
-  table_name = strdup(string_buf);
+  if (sprint_realloc_objid(&buf, &buf_len, &out_len, 1, root, rootlen - 1)) {
+    table_name = buf;
+    buf = NULL;
+    buf_len = out_len = 0;
+  } else {
+    table_name = strdup("[TRUNCATED]");
+    out_len = 0;
+  }
 
   fields = 0;
   while (going) {
     fields++;
-    if( tbl ) {
+    if(tbl) {
       if (tbl->access == MIB_ACCESS_NOACCESS) {
 	fields--;
 	tbl = tbl->next_peer;
-	if (!tbl) going = 0;
+	if (!tbl) {
+	  going = 0;
+	}
 	continue;
       }
       root[ rootlen ] = tbl->subid;
       tbl = tbl->next_peer;
       if (!tbl) going = 0;
-    }
-    else
+    } else {
       root[rootlen] = fields;
-    sprint_objid(string_buf, root, rootlen+1);
-    name_p = strrchr(string_buf, '.');
-    if (!name_p) name_p = strrchr(string_buf, ':');
-    if (!name_p) name_p = string_buf;
-    else name_p++;
-    if (localdebug) printf("%s %c\n", string_buf, name_p[0]);
+    }
+    out_len = 0;
+    if (sprint_realloc_objid(&buf, &buf_len, &out_len, 1, root, rootlen + 1)) {
+      name_p = strrchr(buf, '.');
+      if (name_p == NULL) {
+	name_p = strrchr(buf, ':');
+      }
+      if (name_p == NULL) {
+	name_p = buf;
+      } else {
+	name_p++;
+      }
+    } else {
+      break;
+    }
+    if (localdebug) {
+      printf("%s %c\n", buf, name_p[0]);
+    }
     if ('0' <= name_p[0] && name_p[0] <= '9') {
       fields--;
       break;
     }
-    if (fields == 1) column = (struct column *)malloc(sizeof (*column));
-    else column = (struct column *)realloc(column, fields*sizeof(*column));
+    if (fields == 1) {
+      column = (struct column *)malloc(sizeof (*column));
+    } else {
+      column = (struct column *)realloc(column, fields*sizeof(*column));
+    }
     column[fields-1].label = strdup(name_p);
     column[fields-1].width = strlen(name_p);
-    column[fields-1].subid = root[ rootlen ];
+    column[fields-1].subid = root[rootlen];
   }
   if (fields == 0) {
-    fprintf(stderr, "Was that a table? %s\n", string_buf);
+    fprintf(stderr, "Was that a table? %s\n", buf);
     exit(1);
   }
   *name_p = 0;
   memmove(name, root, rootlen * sizeof(oid));
-  name_length = rootlen+1;
-  name_p = strrchr(string_buf, '.');
-  if (!name_p) name_p = strrchr(string_buf, ':');
-  if (name_p) *name_p = 0;
+  name_length = rootlen + 1;
+  name_p = strrchr(buf, '.');
+  if (name_p == NULL) {
+    name_p = strrchr(buf, ':');
+  }
+  if (name_p != NULL) {
+    *name_p = 0;
+  }
   if (brief && fields > 1) {
     char *f1, *f2;
     int common = strlen(column[0].label);
@@ -418,6 +442,9 @@ void get_field_names( char* tblname )
       }
     }
   }
+  if (buf != NULL) {
+    free(buf);
+  }
 }
 
 void get_table_entries( struct snmp_session *ss )
@@ -429,7 +456,9 @@ void get_table_entries( struct snmp_session *ss )
   int   status;
   int   i;
   int   col;
-  char  string_buf[SPRINT_MAX_LEN], *cp;
+  u_char *buf = NULL;
+  size_t out_len = 0, buf_len = 0;
+  char  *cp;
   char  *name_p = NULL;
   char  **dp;
   int end_of_table = 0;
@@ -480,37 +509,43 @@ void get_table_entries( struct snmp_session *ss )
 	for (vars = response->variables; vars; vars = vars->next_variable) {
 	  col++;
 	  name[rootlen] = column[col].subid;
-	  if (localdebug) sprint_variable(string_buf, vars->name, vars->name_length, vars);
-	  if( (vars->name_length < name_length) ||
+	  if ((vars->name_length < name_length) ||
               ((int)vars->name[rootlen] != column[col].subid) ||
 	      memcmp(name, vars->name, name_length * sizeof(oid)) != 0 ||
               vars->type == SNMP_ENDOFMIBVIEW) {
 	    /* not part of this subtree */
-	    if (localdebug) printf("%s => ignored\n", string_buf);
+	    if (localdebug) {
+	      fprint_variable(stderr, vars->name, vars->name_length, vars);
+	      fprintf(stderr, " => ignored\n");
+	    }
 	    continue;
 	  }
 	  
 	  /* save index off */
-	  if ( ! have_current_index ) {
+	  if (!have_current_index) {
 	    end_of_table = 0;
 	    have_current_index = 1;
 	    name_length = vars->name_length;
 	    memcpy(name, vars->name, name_length*sizeof(oid));
-	    sprint_objid(string_buf, vars->name, vars->name_length); 
+	    out_len = 0;
+	    if (!sprint_realloc_objid(&buf, &buf_len, &out_len, 1, 
+				      vars->name, vars->name_length)) {
+	      break;
+	    }
 	    i = vars->name_length - rootlen + 1;
 	    if (localdebug || show_index ) {
 	      if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX))
-		name_p = strchr(string_buf, '[');
+		name_p = strchr(buf, '[');
 	      else {
 		switch (snmp_get_suffix_only()) {
 		case 2:
-		  name_p = strrchr(string_buf, ':');
+		  name_p = strrchr(buf, ':');
 		  break;
 		case 1:
-		  name_p = string_buf;
+		  name_p = buf;
 		  break;
 		case 0:
-		  name_p = string_buf + strlen(table_name)+1;
+		  name_p = buf + strlen(table_name)+1;
 		  name_p = strchr(name_p, '.')+1;
 		  break;
 		}
@@ -525,18 +560,31 @@ void get_table_entries( struct snmp_session *ss )
 	    }
 	  }
 	  
-	  if (localdebug) printf("%s => taken\n", string_buf);
-	  sprint_value(string_buf, vars->name, vars->name_length, vars);
-	  for (cp = string_buf; *cp; cp++) if (*cp == '\n') *cp = ' ';
-	  dp[col] = strdup(string_buf);
-	  i = strlen(string_buf);
-	  if (i > column[col].width) column[col].width = i;
+	  if (localdebug) {
+	    printf("%s => taken\n", buf);
+	  }
+	  out_len = 0;
+	  sprint_realloc_value(&buf, &buf_len, &out_len, 1, 
+			       vars->name, vars->name_length, vars);
+	  for (cp = buf; *cp; cp++) {
+	    if (*cp == '\n') {
+	      *cp = ' ';
+	    }
+	  }
+	  dp[col] = buf;
+	  i = out_len;
+	  buf = NULL;
+	  buf_len = 0;
+	  if (i > column[col].width) {
+	    column[col].width = i;
+	  }
 	}
-	if( end_of_table ) {
-	      --entries;
+
+	if (end_of_table) {
+	  --entries;
 	  /* not part of this subtree */
 	  if (localdebug) {
-	    printf("End of table: %s\n", string_buf);
+	    printf("End of table: %s\n", buf?(char *)buf:"[NIL]");
 	  }
 	  running = 0;
 	  continue;
@@ -544,19 +592,20 @@ void get_table_entries( struct snmp_session *ss )
       } else {
 	/* error in response, print it */
 	running = 0;
-	if (response->errstat == SNMP_ERR_NOSUCHNAME){
+	if (response->errstat == SNMP_ERR_NOSUCHNAME) {
 	  printf("End of MIB\n");
 	} else {
 	  fprintf(stderr, "Error in packet.\nReason: %s\n",
 		  snmp_errstring(response->errstat));
-	  if (response->errindex != 0){
+	  if (response->errindex != 0) {
 	    fprintf(stderr, "Failed object: ");
 	    for(count = 1, vars = response->variables;
 		  vars && count != response->errindex;
 		  vars = vars->next_variable, count++)
 	      /*EMPTY*/;
-	    if (vars)
+	    if (vars) {
 	      fprint_objid(stderr, vars->name, vars->name_length);
+	    }
 	    fprintf(stderr, "\n");
 	  }
 	  exitval = 2;
@@ -585,7 +634,9 @@ void getbulk_table_entries( struct snmp_session *ss )
   int   status;
   int   i;
   int   row, col;
-  char  string_buf[SPRINT_MAX_LEN], *cp;
+  u_char *buf = NULL;
+  size_t buf_len = 0, out_len = 0;
+  char  *cp;
   char  *name_p = NULL;
   char  **dp;
 
@@ -604,26 +655,32 @@ void getbulk_table_entries( struct snmp_session *ss )
 	vars = response->variables;
 	last_var = NULL;
 	while (vars) {
-	  sprint_objid(string_buf, vars->name, vars->name_length);
-	  if (vars->type == SNMP_ENDOFMIBVIEW || memcmp(vars->name, name, rootlen*sizeof(oid)) != 0) {
-	    if (localdebug)
-	      printf("%s => end of table\n", string_buf);
+	  out_len = 0;
+	  sprint_realloc_objid(&buf, &buf_len, &out_len, 1, 
+			       vars->name, vars->name_length);
+	  if (vars->type == SNMP_ENDOFMIBVIEW || 
+	      memcmp(vars->name, name, rootlen*sizeof(oid)) != 0) {
+	    if (localdebug) {
+	      printf("%s => end of table\n", buf?(char *)buf:"[NIL]");
+	    }
 	    running = 0;
 	    break;
 	  }
-	  if (localdebug) printf("%s => taken\n", string_buf);
+	  if (localdebug) { 
+	    printf("%s => taken\n", buf?(char *)buf:"[NIL]");
+	  }
 	  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX))
-	    name_p = strchr(string_buf, '[');
+	    name_p = strchr(buf, '[');
 	  else {
 	    switch (snmp_get_suffix_only()) {
 	    case 2:
-	      name_p = strrchr(string_buf, ':');
+	      name_p = strrchr(buf, ':');
 	      break;
 	    case 1:
-	      name_p = string_buf;
+	      name_p = buf;
 	      break;
 	    case 0:
-	      name_p = string_buf + strlen(table_name)+1;
+	      name_p = buf + strlen(table_name)+1;
 	      name_p = strchr(name_p, '.')+1;
 	      break;
 	    }
@@ -653,13 +710,17 @@ void getbulk_table_entries( struct snmp_session *ss )
 	    if (i > index_width) index_width = i;
 	  }
 	  dp = data+row*fields;
-	  sprint_value(string_buf, vars->name, vars->name_length, vars);
-	  for (cp = string_buf; *cp; cp++)
+	  out_len = 0;
+	  sprint_realloc_value(&buf, &buf_len, &out_len, 1,
+			       vars->name, vars->name_length, vars);
+	  for (cp = buf; *cp; cp++)
 	    if (*cp == '\n') *cp = ' ';
 	  for (col = 0; col < fields; col++)
 	    if (column[col].subid == vars->name[rootlen]) break;
-	  dp[col] = strdup(string_buf);
-	  i = strlen(string_buf);
+	  dp[col] = buf;
+	  i = out_len;
+	  buf = NULL;
+	  buf_len = 0;
 	  if (i > column[col].width) column[col].width = i;
 	  last_var = vars;
 	  vars = vars->next_variable;
@@ -682,8 +743,9 @@ void getbulk_table_entries( struct snmp_session *ss )
 		  vars && count != response->errindex;
 		  vars = vars->next_variable, count++)
 	      /*EMPTY*/;
-	    if (vars)
+	    if (vars) {
 	      fprint_objid(stderr, vars->name, vars->name_length);
+	    }
 	    fprintf(stderr, "\n");
 	  }
 	  exitval = 2;
