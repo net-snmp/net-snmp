@@ -2693,6 +2693,22 @@ init_usm(void)
 
 }
 
+void
+init_usm_conf(const char *app)
+{
+    register_config_handler(app, "usmUser",
+                                  usm_parse_config_usmUser, NULL, NULL);
+    register_config_handler(app, "createUser",
+                                  usm_parse_create_usmUser, NULL,
+                                  "username (MD5|SHA) passphrase [DES [passphrase]]");
+
+    /*
+     * we need to be called back later 
+     */
+    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
+                           usm_store_users, NULL);
+}
+
 /*
  * initializations for the USM.
  *

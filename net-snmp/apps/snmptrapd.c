@@ -516,19 +516,9 @@ main(int argc, char *argv[])
      * register our configuration handlers now so -H properly displays them 
      */
     snmptrapd_register_configs( );
-    register_config_handler("snmptrapd", "createUser",
-                            usm_parse_create_usmUser, NULL,
-                           "username (MD5|SHA) passphrase [DES [passphrase]]");
-    register_config_handler("snmptrapd", "usmUser",
-                            usm_parse_config_usmUser, NULL, NULL);
+    init_usm_conf( "snmptrapd" );
     register_config_handler("snmptrapd", "snmptrapdaddr",
                             parse_trapd_address, free_trapd_address, NULL);
-
-    /*
-     * we need to be called back later 
-     */
-    snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_STORE_DATA,
-                           usm_store_users, NULL);
 
 #ifdef WIN32
     setvbuf(stdout, NULL, _IONBF, BUFSIZ);
