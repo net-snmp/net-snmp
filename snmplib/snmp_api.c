@@ -5093,10 +5093,57 @@ snmp_sess_timeout(void *sessp)
     }
 }
 
+/* lexicographical compare two object identifiers.
+ * Returns -1 if name1 < name2,
+ *          0 if name1 = name2,
+ *          1 if name1 > name2
+ *
+ * Caution: this method is called often by
+ *          command responder applications (ie, agent).
+ */
 int
-snmp_oid_ncompare(const oid *in_name1, const oid*in_name2, int len)
+snmp_oid_ncompare(const oid *in_name1, 
+		 size_t len1,
+		 const oid *in_name2, 
+		 size_t len2,
+     size_t max_len)
 {
-    return snmp_oid_compare(in_name1, len, in_name2, len);
+  register int len;
+  register const oid * name1 = in_name1;
+  register const oid * name2 = in_name2;
+  int min_len;
+
+  /* len = minimum of len1 and len2 */
+  if (len1 < len2)
+    min_len = len1;
+  else
+    min_len = len2;
+
+  if (min_len > max_len)
+    min_len = max_len;
+
+  len = min_len;
+
+  /* find first non-matching OID */
+  while(len-- > 0) {
+    /* these must be done in seperate comparisons, since
+       subtracting them and using that result has problems with
+       subids > 2^31. */
+    if (*(name1) < *(name2))
+	    return -1;
+    if (*(name1++) > *(name2++))
+	    return 1;
+  }
+
+  if (min_len != max_len) {
+    /* both OIDs equal up to length of shorter OID */
+    if (len1 < len2)
+      return -1;
+    if (len2 < len1)
+      return 1;
+  }
+
+  return 0;
 }
 
 /* lexicographical compare two object identifiers.

@@ -577,6 +577,7 @@ void snmp_set_random_access(int);
 int snmp_get_random_access(void);
 
 int snmp_oid_compare (const oid *, size_t, const oid *, size_t);
+int snmp_oid_ncompare(const oid *, size_t, const oid *, size_t, size_t);
 void init_snmp (const char *);
 u_char *snmp_pdu_build (struct snmp_pdu *, u_char *, size_t *);
 #ifdef USE_REVERSE_ASNENCODING
