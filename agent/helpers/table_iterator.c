@@ -178,8 +178,14 @@ table_iterator_helper_handler(
                             (iinfo->free_data_context)(callback_data_keep,
                                                        iinfo);
                         }
+                        if (iinfo->make_data_context &&
+                            !callback_data_context) {
+                            callback_data_context = 
+                                (iinfo->make_data_context)(callback_loop_context, iinfo);
+                            
+                        }
                         callback_data_keep = callback_data_context;
-
+                        callback_data_context = NULL;
                     } else {
                         if (callback_data_context && iinfo->free_data_context)
                             (iinfo->free_data_context)(callback_data_context,
@@ -220,7 +226,14 @@ table_iterator_helper_handler(
                                          requests->requestvb->name,
                                          requests->requestvb->name_length) == 0) {
                         /* found the exact match, so we're done */
+                        if (iinfo->make_data_context &&
+                            !callback_data_context) {
+                            callback_data_context = 
+                                (iinfo->make_data_context)(callback_loop_context, iinfo);
+                            
+                        }
                         callback_data_keep = callback_data_context;
+                        callback_data_context = NULL;
                         results = snmp_clone_varbind(index_search);
                         snmp_set_var_objid(results, myname, myname_len);
                         goto got_results;
