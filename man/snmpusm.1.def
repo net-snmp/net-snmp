@@ -6,22 +6,22 @@ snmpusm - creates and maintains SNMPv3 users on a remote entity.
 .B snmpusm
 [COMMON OPTIONS] 
 .B create
-username [cloneFromUser]
+USER [CLONEFROM-USER]
 .br
 .B snmpusm
 [COMMON OPTIONS] 
 .B delete
-username
+USER
 .br
 .B snmpusm
 [COMMON OPTIONS]
 .B cloneFrom
-username cloneFromUser
+USER CLONEFROM-USER
 .br
 .B snmpusm
 [COMMON OPTIONS] [-Co] [-Ca] [-Cx]
 .B passwd
-old-passphrase new-passphrase
+OLD-PASSPHRASE NEW-PASSPHRASE
 
 .SH DESCRIPTION
 .B snmpusm
