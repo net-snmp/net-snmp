@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <nlist.h>
+#include <machine/param.h>
+#include <sys/vmmeter.h>
 #include "../../snmplib/asn1.h"
 #include "../../snmplib/snmp_impl.h"
 #include "../snmp_vars.h"
@@ -13,6 +16,7 @@
 static struct myproc *procwatch;
 static struct exstensible *extens;
 int numprocs, numextens;
+static int pageshift;           /* log base 2 of the pagesize */
 
 unsigned char *checkmib(vp,name,length,exact,var_len,write_method,newname,max)
     register struct variable *vp;
@@ -195,7 +199,56 @@ unsigned char *var_wes_shell(vp, name, length, exact, var_len, write_method)
   return NULL;
 }
 
-wes_var_misc();
+#define pagetok(size) ((size) << pageshift)
+#define NL_TOTAL 0
+#define  KNLookup(nl_which, buf, s)   (klookup((int) nl[nl_which].n_value, buf, s))
+
+static struct nlist nl[] = {
+#ifndef hpux
+  { "_total"}
+#else
+  { "total"}
+#endif
+};
+
+unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;
+/* IN - pointer to variable entry that points here */
+    register oid	*name;
+/* IN/OUT - input name requested, output name found */
+    register int	*length;
+/* IN/OUT - length of input and output oid's */
+    int			exact;
+/* IN - TRUE if an exact match was requested. */
+    int			*var_len;
+/* OUT - length of variable or 0 if function returned. */
+    int			(**write_method)();
+/* OUT - pointer to function to set variable, otherwise 0 */
+{
+
+  oid newname[30];
+  int count, result,i, rtest=0;
+  register int interface;
+  struct myproc *proc;
+  long long_ret;
+  char errmsg[300];
+
+  struct vmtotal total;
+
+  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
+    return(NULL);
+  if (KNLookup(NL_TOTAL, (int *)&total, sizeof(total)) == NULL) {
+    return(0);
+  }
+  switch (vp->magic) {
+    case MEMTOTALSWAP:
+      long_ret = pagetok(total.t_vm);
+      return((u_char *) (&long_ret));
+    case MEMUSEDSWAP:
+      long_ret = pagetok(total.t_avm);
+      return((u_char *) (&long_ret));
+  }
+}
 
 int update_config()
 {
@@ -205,8 +258,13 @@ int update_config()
 }
 
 extern char version_descr[];
+
 init_wes() {
+  
   struct extensible extmp;
+  int ret,pagesize;
+
+  
 #ifdef mips
   strcpy(extmp.command,"/bin/uname -m -n -r -s -v");
 #else
@@ -220,5 +278,25 @@ init_wes() {
   exec_command(&extmp);
   strcpy(version_descr,extmp.output);
   signal(SIGHUP,update_config);
+
+  /* nlist stuff */
+
+  if ((ret = nlist("/hp-ux",nl)) == -1) {
+    ERROR("nlist");
+    exit(1);
+  }
+  for(ret = 0; nl[ret].n_name != NULL; ret++) {
+    if (nl[ret].n_type == 0) {
+      fprintf(stderr, "nlist err:  %s not found\n",nl[ret].n_name);
+    }
+  }
+
+  pagesize = 1 << PGSHIFT;
+  pageshift = 0;
+  while (pagesize > 1) {
+    pageshift++;
+    pagesize >>= 1;
+  }
+  pageshift -= 10;
 }
 
