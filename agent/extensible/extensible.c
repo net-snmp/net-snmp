@@ -19,6 +19,9 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <fstab.h>
+#ifdef ultrix
+#include <sys/fixpoint.h>
+#endif
 
 #include "mibincl.h"
 #include "mibdefs.h"
@@ -91,35 +94,33 @@ int checkmib(vp,name,length,exact,var_len,write_method,newname,max)
   return(1);
 }
 
-#ifdef hpux
-
 #define pagetok(size) ((size) << pageshift)
-#define NL_TOTAL 0
-#define NL_SWDEVT 1
-#define NL_FSWDEVT 2
-#define NL_NSWAPFS 3
-#define NL_NSWAPDEV 4
-#define NL_PHYSMEM 5
-#define NL_AVENRUN 6
+#define NL_AVENRUN 0
+#define NL_TOTAL 1
+#define NL_SWDEVT 2
+#define NL_FSWDEVT 3
+#define NL_NSWAPFS 4
+#define NL_NSWAPDEV 5
+#define NL_PHYSMEM 6
 #define  KNLookup(nl_which, buf, s)   (klookup((int) nl[nl_which].n_value, buf, s))
 
 static struct nlist nl[] = {
 #ifndef hpux
+  { "_avenrun"},
   { "_total"},
   { "_swdevt"},
   { "_fswdevt"},
   { "_nswapfs"},
   { "_nswapdev"},
   { "_physmem"},
-  { "_avenrun"},
 #else
+  { "avenrun"},
   { "total"},
   { "swdevt"},
   { "fswdevt"},
   { "nswapfs"},
   { "nswapdev"},
   { "physmem"},
-  { "avenrun"},
 #endif
   { 0 }
 };
@@ -130,13 +131,16 @@ static struct nlist nl[] = {
 int nswapdev=10;            /* taken from <machine/space.h> */
 int nswapfs=10;            /* taken from <machine/space.h> */
 
+#ifdef hpux
+
 int getswap(rettype)
   int rettype;
 {
 
+  int spaceleft=0, spacetotal=0, i, fd;
+
   struct swdevt swdevt[100];
   struct fswdevt fswdevt[100];
-  int spaceleft=0, spacetotal=0, i, fd;
   FILE *file;
   struct extensible ex;
   
@@ -180,7 +184,9 @@ int getswap(rettype)
       return(spacetotal);
   }
 }
+#endif
 
+#ifdef hpux
 unsigned char *var_wes_mem(vp, name, length, exact, var_len, write_method)
     register struct variable *vp;
 /* IN - pointer to variable entry that points here */
@@ -485,6 +491,9 @@ unsigned char *var_wes_loadave(vp, name, length, exact, var_len, write_method)
   struct extensible *exten;
   long long_ret;
   char errmsg[300];
+#ifdef ultrix
+  fix favenrun[3];
+#endif
   double avenrun[3];
   oid loadave[3];
   
@@ -500,8 +509,15 @@ unsigned char *var_wes_loadave(vp, name, length, exact, var_len, write_method)
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
   }
-  if (KNLookup(NL_AVENRUN,(int *) &avenrun, sizeof(double)*3) == NULL)
+#ifdef ultrix
+  if (KNLookup(NL_AVENRUN,(int *) favenrun, sizeof(favenrun)) == NULL)
     return(0);
+  for(i=0;i<3;i++)
+    avenrun[i] = FIX_TO_DBL(favenrun[i]);
+#else
+  if (KNLookup(NL_AVENRUN,(int *) avenrun, sizeof(double)*3) == NULL)
+    return(0);
+#endif
   switch (vp->magic) {
     case LOADAVE:
       sprintf(errmsg,"%.2f",avenrun[newname[8]-1]);
@@ -598,6 +614,9 @@ init_wes() {
 
 #ifdef hpux
   if ((ret = nlist("/hp-ux",nl)) == -1) {
+#else
+  if ((ret = nlist("/vmunix",nl)) == -1) {
+#endif
     ERROR("nlist");
     exit(1);
   }
@@ -607,6 +626,7 @@ init_wes() {
     }
   }
 
+#ifdef hpux
   if (KNLookup(NL_NSWAPDEV,(int *) &nswapdev, sizeof(nswapdev))
       == NULL)
     return(0);
