@@ -1,7 +1,154 @@
 -------------------------------------------------------------------------------
 
-Changes: V5.0.7 -> V5.0.8.pre1
+Changes: V5.0.7 -> V5.0.8.pre2
 
+2003-03-14 13:53  rstory
+
+   * man/: netsnmp_table.3, netsnmp_table_dataset.3
+:
+
+   update for 5.0.8.pre2
+   
+2003-03-14 13:45  rstory
+
+   * Makefile.in:
+
+   trailing slash on srcdir for comment checks
+   
+2003-03-14 13:44  rstory
+
+   * dist/nsb-functions:
+
+   more extra modules and transports
+   
+2003-03-14 12:44  rstory
+
+   * include/net-snmp/agent/agent_handler.h:
+
+   use new macro for inlining; fix some indent madness
+   
+2003-03-14 12:43  rstory
+
+   * include/net-snmp/library/container.h:
+
+   use new macro for testing if inlining is on
+   
+2003-03-14 12:40  rstory
+
+   * include/net-snmp/system/: aix.h, hpux.h,
+   irix.h:
+
+   don't undef inline
+   
+2003-03-14 12:40  rstory
+
+   * snmplib/container.c:
+
+   rename macro used to test for inlining
+   
+2003-03-14 12:39  rstory
+
+   * win32/: config.h, net-snmp/net-snmp-config.h:
+
+   if inline macro not defined, define as empty
+   
+2003-03-14 12:37  rstory
+
+   * agent/agent_handler.c, agent/agent_registry.c
+, agent/object_monitor.c, agent/snmp_agent.c
+, agent/helpers/table.c,
+   agent/helpers/table_array.c, agent/helpers/table_data.c
+, agent/helpers/table_dataset.c,
+   agent/helpers/table_iterator.c,
+   include/net-snmp/net-snmp-config.h.in,
+   include/net-snmp/agent/snmp_agent.h,
+   include/net-snmp/agent/table_data.h,
+   include/net-snmp/agent/table_dataset.h,
+   include/net-snmp/library/data_list.h, snmplib/data_list.c
+, snmplib/oid_stash.c:
+
+   replace inline w/macro
+   
+2003-03-13 19:03  hardaker
+
+   * agent/snmp_agent.c:
+
+   patch from Tommy Christensen to fix some AgentX (mostly) memory leaks
+   
+2003-03-12 13:40  hardaker
+
+   * net-snmp-config.in:
+
+   patch #699380: From Christophe Kalt: make net-snmp-config do what it's document to do (add -L@libdir@)
+   
+2003-03-12 11:48  hardaker
+
+   * snmplib/snmp_api.c:
+
+   patch #700672: reset itmp to the new value length after decoding a hex string
+   
+2003-03-11 17:37  hardaker
+
+   * snmplib/scapi.c:
+
+   Applied openssl dynamic version hack/fix
+   
+2003-03-11 15:14  rstory
+
+   * agent/Makefile.in:
+
+   add WRAPLIBS var instead of direct substitution
+   
+2003-03-11 15:12  rstory
+
+   * net-snmp-config.in:
+
+   add WRAPLIBS to --agent-libs and --external-agent-libs
+   
+2003-03-11 00:31  rstory
+
+   * configure:
+
+   revert to 2.13
+   
+2003-03-06 01:44  rstory
+
+   * configure:
+
+   update for new configure.in
+   
+2003-03-06 01:41  rstory
+
+   * configure.in:
+
+   fix libwrap w/nsl; make sure all quotes restored before using AC macros. This
+   seems to mess up the config output while checking for modules, but w/out it,
+   I get errors from m4 when running autoconf.
+   
+2003-03-05 20:51  rstory
+
+   * .cvsignore:
+
+   ignore net-snmp-config-x
+   
+2003-03-05 20:49  rstory
+
+   * agent/mibgroup/versiontag:
+
+   check for an optional 3rd param, nocvs, to not commit after updating version
+   
+2003-03-05 20:48  rstory
+
+   * dist/RELEASE-INSTRUCTIONS:
+
+   put all the version number changes in the same step
+   
+2003-03-05 20:21  rstory
+
+   * FAQ, README:
+
+   - (snmplib/snmp_version.c sedscript.in): version tag ( 5.0.8.pre1 )
+   
 2003-03-05 20:00  rstory
 
    * sedscript.in, perl/SNMP/SNMP.pm,
