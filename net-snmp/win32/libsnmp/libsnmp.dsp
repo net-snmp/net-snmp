@@ -38,6 +38,7 @@ CPP=cl.exe
 # PROP Output_Dir "../lib"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
+RSC=rc.exe
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /MT /W3 /GX /O2 /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 BSC32=bscmake.exe
@@ -45,7 +46,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"../lib/snmp.lib"
+# ADD LIB32 /nologo
 
 !ELSEIF  "$(CFG)" == "libsnmp - Win32 Debug"
 
@@ -59,6 +60,7 @@ LIB32=link.exe -lib
 # PROP Output_Dir "../lib"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
+RSC=rc.exe
 # ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /MTd /W3 /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 BSC32=bscmake.exe
