@@ -7,7 +7,7 @@
 .\" Use is subject to license terms specified in the COPYING file
 .\" distributed with the Net-SNMP package.
 .\" ******************************************************************/
-.TH SNMPDF 1 "25 Jul 2003" "" "Net-SNMP"
+.TH SNMPDF 1 "25 Jul 2003" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpdf - display disk space usage on a network entity via SNMP
