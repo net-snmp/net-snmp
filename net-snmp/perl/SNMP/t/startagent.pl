@@ -2,6 +2,7 @@
 $agent_host = 'localhost';
 $agent_port = 7000;
 $trap_port = 8000;
+$mibdir = '/usr/local/share/snmp/mibs';
 $comm = 'v1_private';
 $comm2 = 'v2c_private';
 $comm3 = 'v3_private';
@@ -26,6 +27,7 @@ $bad_version = 7;
 
 local $snmpd_cmd;
 local $snmptrapd_cmd;
+
 my $line;
 
 sub snmptest_cleanup {
@@ -45,50 +47,41 @@ sub snmptest_cleanup {
 }
 snmptest_cleanup();
 #Open the snmptest.cmd file and get the info
-if ($^O =~ /win32/i) {
-# get the host, agent_port and trap-port.
-    if (open(CMD, "<t/snmptest.cmd")) {
-	while ($line = <CMD>) {
-            if ($line =~ /HOST => \d+\.\d+\.\d+\.\d+/) {
-# host is of IP address form
-		($agent_host) = ($line =~ /HOST => (\d+\.\d+\.\d+\.\d+)\s*/);
-		print("host is: $agent_host\n");
-	    } elsif ($line =~ /HOST => \w+\s*/) {
-		($agent_host) = ($line =~ /HOST => (\w+)\s*/);
-	    } elsif ($line =~ /AGENT/) {
-		($agent_port) = ($line =~ /AGENT_PORT => (\d+)\s*/);
-	    } elsif ($line =~ /TRAP/) {
-		($trap_port) = ($line =~ /TRAP_PORT => (\d+)\s*/);
-	    }
-	} # end of while
-	close CMD;
-    } else {
-	die ("Could not start agent. Couldn't find snmptest.cmd file\n");
+if (open(CMD, "<t/snmptest.cmd")) {
+  while ($line = <CMD>) {
+    if ($line =~ /HOST\s*=>\s*(\S+)/) {
+      $agent_host = $1;
+    } elsif ($line =~ /MIBDIR\s*=>\s*(\S+)/) {
+      $mibdir = $1;
+    } elsif ($line =~ /AGENT_PORT\s*=>\s*(\S+)/) {
+      $agent_port = $1;
+    } elsif ($line =~ /SNMPD\s*=>\s*(\S+)/) {
+      $snmpd_cmd = $1;
+    } elsif ($line =~ /SNMPTRAPD\s*=>\s*(\S+)/) {
+      $snmptrapd_cmd = $1;
     }
-
+  } # end of while
+  close CMD;
 } else {
-    open(CMD,"<t/snmptest.cmd")
-	|| warn("could not open snmptest.cmd, will not be able run tests");
-    while(<CMD>) {
-	if (($snmpd_cmd) = (/SNMPD => (\S+)\s*/)) {
-	    if (-r $snmpd_cmd and -x $snmpd_cmd) {
-		system "$snmpd_cmd -r -l t/snmptest.log -C -c t/snmptest.conf -p $agent_port -P t/snmpd.pid > /dev/null 2>&1";
-		# warn "started snmpd:", `cat t/snmpd.pid`, "\n";
+  die ("Could not start agent. Couldn't find snmptest.cmd file\n");
+}
 
-	    } else {
-		warn("Couldn't run snmpd\n");
-	    }
-	} elsif (($snmptrapd_cmd) = (/SNMPTRAPD => (\S+)\s*/)) {
-	    if (-r $snmptrapd_cmd and -x $snmptrapd_cmd) {
-		system "$snmptrapd_cmd -p $trap_port -u t/snmptrapd.pid -c t/snmptest.conf -C > /dev/null 2>&1";
-		# warn "started snmptrapd:", `cat t/snmptrapd.pid`, "\n";
-	    } else {
-		warn("Couldn't run snmptrapd\n");
-	    }
-	}
+if ($^O !~ /win32/i) {
+  if ($snmpd_cmd) {
+    if (-r $snmpd_cmd and -x $snmpd_cmd) {
+      system "$snmpd_cmd -r -l t/snmptest.log -C -c t/snmptest.conf -p $agent_port -P t/snmpd.pid > /dev/null 2>&1";
+    } else {
+      warn("Couldn't run snmpd\n");
     }
-    close CMD;
-} #end of else
+  }
+  if ($snmptrapd_cmd) {
+    if (-r $snmptrapd_cmd and -x $snmptrapd_cmd) {
+      system "$snmptrapd_cmd -p $trap_port -u t/snmptrapd.pid -c t/snmptest.conf -C > /dev/null 2>&1";
+    } else {
+      warn("Couldn't run snmptrapd\n");
+    }
+  }
+}
 
 1;
 
