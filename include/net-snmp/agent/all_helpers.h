@@ -6,6 +6,7 @@ extern          "C" {
 #endif
 
 #include <net-snmp/agent/instance.h>
+#include <net-snmp/agent/baby_steps.h>
 #include <net-snmp/agent/scalar.h>
 #include <net-snmp/agent/scalar_group.h>
 #include <net-snmp/agent/multiplexer.h>
@@ -14,6 +15,7 @@ extern          "C" {
 #include <net-snmp/agent/cache_handler.h>
 #include <net-snmp/agent/old_api.h>
 #include <net-snmp/agent/read_only.h>
+#include <net-snmp/agent/row_merge.h>
 #include <net-snmp/agent/serialize.h>
 #include <net-snmp/agent/bulk_to_next.h>
 #include <net-snmp/agent/mode_end_call.h>
@@ -24,6 +26,7 @@ extern          "C" {
 #include <net-snmp/agent/table_data.h>
 #include <net-snmp/agent/table_dataset.h>
 #include <net-snmp/agent/table_iterator.h>
+#include <net-snmp/agent/table_mfd.h>
 /*
  * #include <net-snmp/agent/table_array.h> 
  */
