@@ -4962,7 +4962,7 @@ snmp_add_var(struct snmp_pdu *pdu,
 	      }
 	    }
 	    ix = ltmp/8;
-	    if (ix >= tint) tint = ix+1;
+	    if (ix >= (int)tint) tint = ix+1;
 	    bit = 0x80 >> ltmp%8;
 	    buf[ix] |= bit;
 	  }
