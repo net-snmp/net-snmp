@@ -10,4 +10,4 @@ fi
 CONFIGAGENT com2sec testcommunitysec  default testcommunity
 CONFIGAGENT group   testcommunitygroup  $snmp_version     testcommunitysec
 CONFIGAGENT view    all     included .1 80
-CONFIGAGENT 'access  testcommunitygroup  "" any noauth 0 all none none'
+CONFIGAGENT 'access  testcommunitygroup  "" any noauth exact all none none'
