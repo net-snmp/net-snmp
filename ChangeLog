@@ -1,5 +1,626 @@
 -------------------------------------------------------------------------------
 
+Changes: V5.0.3 -> V5.0.4.pre1
+	
+2002-08-27 00:19  rstory
+
+   * agent/Makefile.depend (5.6), agent/helpers/Makefile.depend (5.5),
+   agent/mibgroup/Makefile.depend (5.6), apps/Makefile.depend (5.5),
+   apps/snmpnetstat/Makefile.depend (5.5), snmplib/Makefile.depend
+   (5.5):
+
+   make depend
+   
+2002-08-27 00:17  rstory
+
+   * man/: netsnmp_agent.3 (5.3), netsnmp_bulk_to_next.3 (5.3),
+   netsnmp_debug.3 (5.3), netsnmp_handler.3 (5.3), netsnmp_instance.3
+   (5.3), netsnmp_multiplexer.3 (5.3), netsnmp_old_api.3 (5.3),
+   netsnmp_read_only.3 (5.3), netsnmp_scalar.3 (5.2),
+   netsnmp_serialize.3 (5.3), netsnmp_table.3 (5.3),
+   netsnmp_table_array.3 (5.3), netsnmp_table_data.3 (5.3),
+   netsnmp_table_dataset.3 (5.3), netsnmp_table_iterator.3 (5.3),
+   netsnmp_todo.3 (5.3), netsnmp_watcher.3 (5.2):
+
+   update man pages for 5.0.4.pre1
+   
+2002-08-27 00:10  rstory
+
+   * dist/nsb-config (1.1):
+
+   new file to configure using same options as nsb-package for test or dist
+   
+2002-08-27 00:09  rstory
+
+   * dist/nsb-package (1.3):
+
+   don't append sys-name when building in src tree
+   
+2002-08-27 00:09  rstory
+
+   * dist/nsb-functions (1.19):
+
+   fix typo
+   
+2002-08-27 00:06  rstory
+
+   * dist/nsb-functions (1.18):
+
+   rename nsb-get-confg -> nsb-config-dist; use double quotes cuz of some
+   wierd shell thing I don't yet understand; check for src dir in config*
+   
+2002-08-26 23:34  rstory
+
+   * Makefile.in (5.12):
+
+   tweak commentcheck target to work outside the source tree
+   
+2002-08-26 23:33  rstory
+
+   * agent/mibgroup/mibII/interfaces.c (5.3),
+   agent/mibgroup/ucd-snmp/proxy.c (5.1),
+   include/net-snmp/library/asn1.h (5.2),
+   include/net-snmp/library/oid_stash.h (5.1), snmplib/winservice.c
+   (5.1):
+
+   remove C++ style comments (and anything that even remotely resembles one)
+   
+2002-08-26 17:47  rstory
+
+   * dist/nsb-functions (1.17):
+
+   pass make params to make, so we don't try to install in /usr/local/bin of
+   the compile servers... :-/
+   
+2002-08-26 17:39  rstory
+
+   * dist/nsb-functions (1.16):
+
+   make dist & extra transports; no ipv6 on Darwin; make touchit before make
+   
+2002-08-26 17:04  rstory
+
+   * agent/mibgroup/Rmon/event.c (5.4):
+
+   replace u_int32_t, which doesn't compile on Sun 5.8, with u_int
+   
+2002-08-26 16:53  rstory
+
+   * agent/mibgroup/Rmon/rows.c (5.2):
+
+   fix undeclared variable error spotted on Sun, which linux missed completely.
+   I have no idea how this compiled before!!
+   
+2002-08-26 16:43  rstory
+
+   * dist/nsb-functions (1.15):
+
+   cleaner way to add system specific modules; disable perl, as it breaks
+   builds outside of the source tree
+   
+2002-08-26 15:45  rstory
+
+   * dist/nsb-functions (1.14):
+
+   only configure IPX on Linux
+   
+2002-08-26 15:44  rstory
+
+   * dist/nsb-functions (1.13):
+
+   only configure IPX on Linux; bail on configure errors
+   
+2002-08-26 15:04  rstory
+
+   * dist/README.build-scripts (1.4):
+
+   add suggestion to symlink nsb-* in local bin dir
+   
+2002-08-26 15:03  rstory
+
+   * dist/: nsb-package (1.2), nsb-functions (1.12):
+
+   add option for pre-release test configure options
+   
+2002-08-26 15:02  rstory
+
+   * README.snmpv3 (5.3):
+
+   make section headers stand out more; move note about encryption not being
+   enabled to a more prominent place.
+   
+2002-08-24 21:24  driehuis
+
+   * configure.in, agent/mibgroup/ucd-snmp/diskio.c
+   (V4-2-patches.[37,3]):
+
+   Merge from HEAD: detect the requirement for linking with -ldevstat.
+   Ugly hack to make sure diskio device names include the device number.
+   
+2002-08-23 11:46  dts12
+
+   * snmplib/Makefile.in (V4-2-patches.3):
+
+   make depend
+   
+2002-08-22 08:31  jbpn
+
+   * include/net-snmp/system/solaris2.7.h (5.2):
+
+     - DONT_USE_NLIST reinstated, so NO_KMEM_USAGE redundant
+   
+2002-08-22 08:29  jbpn
+
+   * acconfig.h (5.9), include/net-snmp/net-snmp-config.h.in (5.10):
+
+     - reinstate test for DONT_USE_NLIST
+   
+2002-08-22 07:11  jbpn
+
+   * agent/snmpd.c (5.10):
+
+     - stop and restart logging when HUPped.  This allows logfiles to be
+       rotated and so forth.
+   
+2002-08-22 07:06  jbpn
+
+   * agent/snmpd.c (V4-2-patches.24):
+
+     - stop and restart logging when HUPped.  This allows logfiles to be
+       rotated and so forth.
+   
+2002-08-22 04:31  dts12
+
+   * README.snmpv3 (5.2):
+
+   Add the missing '-x/X' options to the example authPriv command line
+     (reported by Prasada R Vankayalapati)
+   
+2002-08-20 11:04  hardaker
+
+   * agent/mibgroup/agentx/subagent.c (5.6), apps/snmptrapd.c (5.4),
+   include/net-snmp/agent/ds_agent.h (5.3), FAQ (5.17):
+
+   quiet snmptrapd when it can't connect to the agentx master.
+   
+2002-08-20 08:54  jbpn
+
+   * include/net-snmp/system/solaris2.7.h (5.1):
+
+     - add #define NO_KMEM_USAGE 1 since net-snmp-config.h.in no longer
+       pays attention to the DONT_USE_NLIST token.  Omission of this
+       causes the agent to exit with the message "init_kmem: kvm_open
+       failed: error 0".
+   
+       NOTE: this may need applying to other members of the Solaris 2
+       family, but I don't have machines to hand to test this.
+   
+2002-08-20 08:48  jbpn
+
+   * agent/mibgroup/kernel_sunos5.c (5.2):
+
+     - detect gigabit ethernet devices (geN)
+     - undo indent mayhem
+   
+2002-08-20 05:57  jbpn
+
+   * include/net-snmp/utilities.h (5.1):
+
+     - for now, don't #include snmp_locking.h since it breaks re-entrant
+       support (because mutex_type gets multiply-defined).  Furthermore, the
+       functions it declares are never used anywhere, nor defined anywhere.
+   
+2002-08-20 05:56  jbpn
+
+   * include/net-snmp/library/mt_support.h (5.1):
+
+     - don't define "do nothing" macros for snmp_res_lock et al. functions
+       on Win32 platform (since real "do nothing" functions are required for
+       reasons best known to someone else).
+     - unmangling
+   
+2002-08-20 05:54  jbpn
+
+   * include/net-snmp/library/snmp_locking.h (5.1):
+
+     - fix highly bogus non-C syntax
+   
+2002-08-20 05:53  jbpn
+
+   * snmplib/mt_support.c (5.1):
+
+     - snmp_res_lock et al. functions no longer #defined to "do nothing"
+       targets for Win32 in mt_support.h, therefore no need to #undef them
+       here.
+     - unmangling
+   
+2002-08-20 01:13  hardaker
+
+   * include/net-snmp/agent/agent_registry.h (5.2):
+
+   headers for cache enabling functions.
+   
+2002-08-20 01:12  hardaker
+
+   * agent/mibgroup/disman/mteTriggerTable.c (5.3):
+
+   don't use non-existent memory pointers to the response data (eg: "timeout")
+   
+2002-08-19 17:46  nba
+
+   * include/net-snmp/net-snmp-includes.h (5.1):
+
+   Change a few conditionals to use #if in place of #ifdef
+   
+2002-08-19 17:28  nba
+
+   * snmplib/: mib.c (5.17), parse.c (5.4):
+
+   Align with 4.2 branch
+   
+2002-08-19 17:26  nba
+
+   * mibs/: DISMAN-SCHEDULE-MIB.txt (5.1),
+   IANA-ADDRESS-FAMILY-NUMBERS-MIB.txt (5.1), IANAifType-MIB.txt
+   (5.1), INET-ADDRESS-MIB.txt (5.1), Makefile.mib (5.2), ianalist
+   (5.1), mibfetch (5.1), rfclist (5.1):
+
+   Update to current MIBs
+   
+2002-08-19 17:25  nba
+
+   * agent/mibgroup/mibII/vacm_vars.c (5.7):
+
+   Bail out for bad snmpAdminString value
+   
+2002-08-19 10:43  jbpn
+
+   * FAQ (V4-2-patches.53), FAQ (5.16):
+
+     - don't use positional community parameter in examples
+     - break a couple of over-long lines
+     - mention netsnmp_ variant of ds_set_ function
+   
+2002-08-19 05:44  dts12
+
+   * FAQ (V4-2-patches.52), FAQ (5.15):
+
+   Add an entry about the snmptrapd/AgentX warning message.
+   
+2002-08-18 21:24  rstory
+
+   * dist/nsb-functions (1.11):
+
+   don't configure with build install dir, it is already specified on cmd line
+   for make install
+   
+2002-08-18 13:59  rstory
+
+   * agent/helpers/table.c (5.7):
+
+   more debugging - log value request is trying to set
+   
+2002-08-16 18:13  hardaker
+
+   * README (5.9):
+
+   added Bruce Shaw to the thanks list
+   
+2002-08-16 18:12  hardaker
+
+   * README.solaris (1.2):
+
+   A great update talking about perl and solaris from Bruce Shaw
+   
+2002-08-16 04:51  dts12
+
+   * agent/helpers/table_iterator.c (5.4):
+
+   Catch explicitly 'noSuchInstance' exceptions, when walking an
+   iterator-handled module, so that holes can be skipped and the
+   next real instance retrieved.  (This was already handled for
+   modules that didn't mark missing instances explicitly).
+   
+2002-08-16 03:17  hardaker
+
+   * agent/snmp_agent.c (5.13):
+
+   turn off caching by default, since the agentx code appears broken.
+   
+2002-08-16 03:03  hardaker
+
+   * agent/: agent_registry.c (5.5), snmp_agent.c (5.12):
+
+   speed enhancements via implementing a registration subtree lookup
+   cache.  greatly speeds things up when similar requests come in
+   (snmpwalk, ...).
+   
+2002-08-15 13:35  hardaker
+
+   * snmplib/parse.c (5.3):
+
+   protect against NULL labels in subtrees
+   
+2002-08-15 11:14  hardaker
+
+   * agent/agent_index.c (5.3), agent/agent_registry.c (5.4),
+   agent/agent_trap.c (5.1), agent/helpers/old_api.c (5.2),
+   agent/mibgroup/header_complex.c (5.1), agent/mibgroup/testhandler.c
+   (5.1), snmplib/snmp_transport.c (5.2), snmplib/snmpusm.c (5.3):
+
+   use netsnmp_oid_equals (which is sometimes faster than
+   snmp_oid_compare) in a few places to achieve barely noticeable speed gains.
+   
+2002-08-15 11:12  hardaker
+
+   * snmplib/parse.c (5.2):
+
+   double check a pointer exists before passing it to strcmp()
+   
+2002-08-15 11:05  hardaker
+
+   * perl/SNMP/Makefile.PL (5.7):
+
+   change MAN3PODS to something compliant with the perl manuals.  I think.
+   
+2002-08-14 13:42  rstory
+
+   * apps/snmpset.c (5.2):
+
+   add debug for local parsing of args
+   
+2002-08-14 12:26  rstory
+
+   * agent/mibgroup/agentx/: master.c (5.5), master_admin.c (5.4),
+   subagent.c (5.5):
+
+   add more detailed in debug messages; add a few new debugs
+   
+2002-08-14 12:23  rstory
+
+   * agent/snmp_agent.c (5.11):
+
+   when all delegated requests have finished, check all requests status so that
+   asp status is set, which is necessary for correct agentx set processing.
+   (now if I can just get all this hair off the floor, and glue it back to my
+   head, and then fix that dent in the wall where I've been banging my head....)
+   
+2002-08-13 17:25  hardaker
+
+   * snmplib/snmp_api.c (5.14):
+
+   fix a length comparison problem with netsnmp_oid_is_subtree()
+   
+2002-08-13 17:24  hardaker
+
+   * NEWS (5.6):
+
+   document a few recent changes.
+   
+2002-08-13 17:05  hardaker
+
+   * agent/mibgroup/host/hr_print.c (5.1):
+
+   Fix open file runaway on solaris.  See bug #592806 reported by James Irwin.
+   
+2002-08-13 15:05  rstory
+
+   * include/net-snmp/types.h (5.7):
+
+   array of pointers = pointer to a pointer
+   
+2002-08-09 19:32  hardaker
+
+   * local/FAQ2HTML (5.1):
+
+   misc doc fixes.
+   
+2002-08-09 19:31  hardaker
+
+   * snmplib/snmp_parse_args.c (5.4),
+   include/net-snmp/library/transform_oids.h (5.2), snmplib/snmpusm.c
+   (5.2), snmplib/snmpv3.c (5.3):
+
+   initial AES support.
+   
+2002-08-09 19:31  hardaker
+
+   * include/net-snmp/library/snmp_api.h (5.2), snmplib/snmp_api.c
+   (5.13):
+
+   slight speed ups for snmp_oid_compare() to do single int compares till !=
+   
+2002-08-09 19:29  hardaker
+
+   * snmplib/scapi.c (5.2):
+
+   - openssl 0.9.7 support for DES changes.
+   - initial AES support.
+   
+2002-08-09 19:28  hardaker
+
+   * snmplib/keytools.c (5.2):
+
+   indent fixes.
+   
+2002-08-09 19:27  hardaker
+
+   * include/net-snmp/library/: scapi.h (5.1), snmpusm.h (5.1):
+
+   define AES key specifics
+   
+2002-08-09 19:26  hardaker
+
+   * acconfig.h (5.8), configure (5.17), configure.in (5.15),
+   include/net-snmp/net-snmp-config.h.in (5.9):
+
+   - check for openssl .0.9.7 DES structures and functions.
+   - check for AES support in openssl (> 0.9.7)
+   
+2002-08-09 19:10  hardaker
+
+   * agent/mibgroup/agentx/subagent.c (5.4):
+
+   fix mode processing for RESERVE1/RESERVE2 test failures
+   
+2002-08-09 18:29  rstory
+
+   * agent/snmp_agent.c (5.10):
+
+   log msg when we ignore/fix illegal error_values for the client APIs
+   
+2002-08-09 18:28  rstory
+
+   * local/mib2c.array-user.conf (5.12):
+
+   corrections to example code
+   
+2002-08-09 18:27  rstory
+
+   * agent/helpers/table.c (5.6):
+
+   revert errors to uninformative SNMPv1 noSuchName for AgentX get-next/inclusive
+   processing; also add more comments here and there
+   
+2002-08-09 17:08  rstory
+
+   * agent/mibgroup/agentx/master.c (5.4):
+
+   debug msg for agentx oid for cases other than get/getnext
+   
+2002-08-09 11:45  rstory
+
+   * agent/mibgroup/agentx/master_admin.c (5.3):
+
+   don't free registration info on failure, as netsnmp_register_mib already did it
+   
+2002-08-09 09:57  jbpn
+
+   * snmplib/: snmpAAL5PVCDomain.c (5.2), snmpCallbackDomain.c (5.1),
+   snmpIPXDomain.c (5.1), snmpTCPDomain.c (5.4), snmpTCPIPv6Domain.c
+   (5.5), snmpUDPDomain.c (5.6), snmpUDPIPv6Domain.c (5.7),
+   snmpUnixDomain.c (5.4), snmp_transport.c (5.1):
+
+     - rename snmp_<domain>_blah functions to netsnmp_<domain>_blah
+     - make transport member functions static, to emphasise that they should
+       not be used directly
+     - handle EINTR in send and recv functions (as pointed out by Antti Kuntsi
+       in bug report #576806)
+     - formatting fixes
+   
+2002-08-09 09:54  jbpn
+
+   * include/net-snmp/library/: snmpAAL5PVCDomain.h (5.3),
+   snmpIPXDomain.h (5.2), snmpTCPDomain.h (5.2), snmpTCPIPv6Domain.h
+   (5.3), snmpUDPDomain.h (5.2):
+
+     - minor formatting fixes
+   
+2002-08-09 09:54  jbpn
+
+   * include/net-snmp/library/snmpUnixDomain.h (5.3):
+
+     - don't export netsnmp_unix_blah() functions
+   
+2002-08-09 09:53  jbpn
+
+   * include/net-snmp/library/snmp_transport.h (5.1):
+
+     - fix nasty formatting
+   
+2002-08-08 12:14  rstory
+
+   * snmplib/snmpv3.c (5.2):
+
+   reword config_perror msgs to remove "Error", as it is redundant
+   
+2002-08-08 12:11  rstory
+
+   * snmplib/keytools.c (5.1):
+
+   remove ifdef to log msg to user, after making msg more informative; remove
+   annoying blank lines
+   
+2002-08-08 11:33  hardaker
+
+   * acconfig.h (5.7), configure (5.16), configure.in (5.14):
+
+   Patch from Harrie to completely disable kmem usage
+   
+2002-08-06 03:30  jbpn
+
+   * agent/mibgroup/agentx/subagent.c (5.3):
+
+     - set main_session to NULL in subagent_shutdown().  This (along with the
+       deregistration of all alarms) allows AgentX functionality to be
+       stopped and restarted in subagents.
+     - Thanks to Vishal Verma for original patch
+   
+2002-08-06 03:27  jbpn
+
+   * include/net-snmp/library/snmp_alarm.h (5.1):
+
+     - add snmp_alarm_unregister_all() function
+   
+2002-08-06 03:26  jbpn
+
+   * snmplib/: snmp_alarm.c (5.3), snmp_api.c (5.12):
+
+     - add snmp_alarm_unregister_all() function
+     - call it from snmp_shutdown()
+     - thanks to Vishal Verma for original patch
+   
+2002-08-06 03:17  jbpn
+
+   * snmplib/snmp_alarm.c (V4-2-patches.4):
+
+     - add debugging output when all alarms unregistered
+   
+2002-08-06 03:10  jbpn
+
+   * agent/mibgroup/agentx/subagent.c (V4-2-patches.4):
+
+     - set main_session to NULL in subagent_shutdown().  This (along with the
+       deregistration of all alarms) allows AgentX functionality to be
+       stopped and restarted in subagents.
+     - Thanks to Vishal Verma for this patch (#558517)
+   
+2002-08-06 03:08  jbpn
+
+   * snmplib/: snmp_alarm.c, snmp_alarm.h, snmp_api.c
+   (V4-2-patches.[3,1,36]):
+
+     - add snmp_alarm_unregister_all() function
+     - call it from snmp_shutdown()
+     - thanks to Vishal Verma for providing this patch
+   
+2002-08-05 10:06  rstory
+
+   * local/mib2c.iterate.conf (5.3):
+
+   match function definition w/Netsnmp_*_DataPoint typedefs; add cvs Id
+   
+2002-08-03 11:52  rstory
+
+   * dist/RELEASE-INSTRUCTIONS (1.5):
+
+   break up lines long than 80 chars; abcde, not abcdd
+   
+2002-08-03 03:21  hardaker
+
+   * dist/RELEASE-INSTRUCTIONS (1.4):
+
+   more updates about things Wes does at 12:30 am
+   
+2002-08-03 02:44  hardaker
+
+   * FAQ (5.14), README (5.8), sedscript.in (5.6), perl/SNMP/SNMP.pm
+   (5.12), snmplib/snmp_version.c (5.5):
+
+   - (snmplib/snmp_version.c sedscript.in): version tag ( 5.0.3 )
+
+-------------------------------------------------------------------------------
+
 Changes: V5.0.2 -> V5.0.3
 
 2002-08-02 23:41  hardaker
