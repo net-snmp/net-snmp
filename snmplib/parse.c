@@ -2832,3 +2832,18 @@ find_node(name, subtree)
 {
   return( find_tree_node( name, -1 ));
 }
+
+struct module *
+find_module(mid)
+  int mid;
+{
+  struct module *mp;
+  
+  for(mp=module_head; mp!=NULL; mp = mp->next) {
+    if (mp->modid == mid)
+      break;
+  }
+  if (mp != 0)
+    return mp;
+  return NULL;
+}
