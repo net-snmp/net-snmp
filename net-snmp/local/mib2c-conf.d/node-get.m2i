@@ -44,11 +44,22 @@ ${node}_get( ${context}_ctx *ctx, $m2c_node_param_ref )
 @ifconf syntax-$node.syntax-get.m2i@
 @    include syntax-$node.syntax-get.m2i@
 @else@
-    /** syntax-$node.syntax-get.m2i not found */
+    /** syntax-$node.syntax-get.m2i not found, using generic */
 @    include generic-get-decl.m2i@
     netsnmp_assert(NULL != ctx);
-@    if $m2c_node_skip_get != 1@
+
+/*
+ * TODO:
+@if $m2c_node_needlength == 0@
+ * set $m2c_node_lh from $m2c_data_item
+@else@
+ * set $m2c_node_lh and $m2c_node_lhs from $m2c_data_item
+@end@
+ */
+@    if ("$m2c_data_context" eq "generated") && ($m2c_node_skip_get != 1)@
 @        include generic-ctx-get.m2i@
+@    else@
+    return MFD_SKIP; /* TODO: remove this once you've set data */
 @    end@
 ##   ------------------------------------------------------------------
 @    if $node.decl =~ /long/i@ #   ASN_INTEGER ASN_COUNTER ASN_GAUGE
