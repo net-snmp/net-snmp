@@ -245,8 +245,10 @@ The following configure options creates a working set of programs:
 This has been tested for Windows 98 and Windows NT 4.0.  In order for
 the process part of the host resources MIB to work under NT you will need
 to get hold of the PSAPI.DLL. This available under the download section
-of www.microsoft.com. The DLL is included with Windoes 2000 and XP,
-and is also part of the VC++ distribution.
+of www.microsoft.com. The DLL is included with Windows 2000 and XP,
+and is also part of the VC++ distribution.  The IPHLPAPI library is
+part of the "Microsoft Platform SDK", which is also available from
+www.microsoft.com.  See above for details.
 
 Acknowledgements
 ----------------
@@ -269,9 +271,12 @@ Requirements:
 
   Windows NT/2000 or later: Requires Windows NT 4.0 SP4 or later. 
   Windows 95/98/Me: Requires Windows 98 or later. 
-  Library: Use Iphlpapi.lib 
+  Library: Use IPHLPAPI.LIB 
 
-Windows support for SET  on following groups:
+Note: IPHLPAPI.LIB is part of the "Microsoft Platform SDK", which may be
+      freely downloaded from www.microsoft.com.  See above for details.
+
+Windows support for SET on following groups:
 
 interfaces:
 ----------
@@ -304,9 +309,9 @@ ipRouteIfIndex:Write supported.
 
 ipRouteMetric1: Supports value greater than or equal to -1
 
-ipRouteMetric2, ipRouteMetric3, ipRouteMetric4, ipRouteMetric5: Eventhogh call 
-               returns with success, windows doesn't change these( as these are 
-               not used in windows)
+ipRouteMetric2, ipRouteMetric3, ipRouteMetric4, ipRouteMetric5: Even though
+		call returns with success, Windows doesn't change these (as
+		these are not used in Windows)
 
 ipRouteNextHop: Write supported.
 
