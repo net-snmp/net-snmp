@@ -429,6 +429,11 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		     */
 	    if ( asp->pdu->errindex > 100 )
 	        asp->pdu->errindex = 100;
+
+	    if ( asp->pdu->errindex < 0 )
+	        asp->pdu->errindex = 0;
+	    if ( asp->pdu->errstat < 0 )
+	        asp->pdu->errstat = 0;
     
 		    /*
 		     * If max-repetitions is 0, we shouldn't
