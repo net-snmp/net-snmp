@@ -187,7 +187,12 @@ var_udpEntry(struct variable *vp,
             goto Again;
         if (i == 0)
             break;              /* Done */
+#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
+        cp = (u_char *) IN6_EXTRACT_V4ADDR(&inpcb.inp_laddr);
+#else
         cp = (u_char *) & inpcb.inp_laddr.s_addr;
+#endif /* #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR) */
+
 #endif                          /* hpux11 */
         op = newname + 10;
         *op++ = *cp++;
@@ -244,7 +249,13 @@ var_udpEntry(struct variable *vp,
 #ifdef hpux11
         return (u_char *) & Lowudp.LocalAddress;
 #else
+
+#if defined(osf5) && defined(IN6_EXTRACT_V4ADDR)
+        return (u_char *) IN6_EXTRACT_V4ADDR(&Lowinpcb.inp_laddr);
+#else
         return (u_char *) & Lowinpcb.inp_laddr.s_addr;
+#endif /* #if defined(osf5) && defined(IN6_EXTRACT_V4ADDR) */
+
 #endif
     case UDPLOCALPORT:
 #ifdef hpux11
