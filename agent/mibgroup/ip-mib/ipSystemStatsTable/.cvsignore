@@ -1,0 +1,8 @@
+*.lo
+*.o
+*.conf
+.backup
+.merged
+.new
+.patch
+.orig
