@@ -156,6 +156,17 @@ incrByU16(pu64, u16)
 
 } /* incrByV16 */
 
+void
+incrByU32(pu64, u32)
+  U64 *pu64;
+  unsigned int u32;
+{
+  unsigned int tmp;
+  tmp = pu64->ulLo;
+  pu64->ulLo += u32;
+  if (pu64->ulLo < tmp)
+    pu64->ulHi++;
+}
 
 /** zeroU64 - set an unsigned 64-bit number to zero
 *
