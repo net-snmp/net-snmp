@@ -44,14 +44,14 @@ info  The default snmpv3 authentication type name to use
 info  override: with -a on the command line.
 info  arguments: authtype
 question 1 Enter the default authentication type to use (MD5|SHA)
-validanswer ^(MD5|SHA)$
+validanswer 1 ^(MD5|SHA)$
 
 token defPrivType
 info  The default snmpv3 privacy type name to use
 info  override: with -x on the command line.
 info  arguments: privtype
 question 1 Enter the default privacy type to use (DES)
-validanswer ^(DES)$
+validanswer 1 ^(DES)$
 
 token defAuthPassphrase
 info  The default snmpv3 authentication pass phrase to use
