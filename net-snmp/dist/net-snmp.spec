@@ -7,6 +7,7 @@ URL: http://net-snmp.sourceforge.net/
 Copyright: BSDish
 Group: System Environment/Daemons
 Source: http://prdownloads.sourceforge.net/net-snmp/net-snmp-%{version}.tar.gz
+Patch0: net-snmp-5.0.9-with-perl.patch
 Prereq: openssl
 Obsoletes: cmu-snmp ucd-snmp ucd-snmp-utils
 BuildRoot: /tmp/%{name}-root
@@ -51,6 +52,9 @@ with embedded perl support within the agent.
 
 %prep
 %setup -q
+%if "%{version}" == "5.0.9"
+%patch0 -p0
+%endif
 
 %build
 %configure --with-defaults --with-sys-contact="Unknown" \
@@ -59,19 +63,11 @@ with embedded perl support within the agent.
 	--enable-shared					\
 %if %{with_perl}
 	--enable-embedded-perl                          \
+	--with-perl-modules="PREFIX=$RPM_BUILD_ROOT/usr INSTALLDIRS=vendor"  \
 %endif
 	--with-cflags="$RPM_OPT_FLAGS"
 
-# don't create the perl specific makefile using the normal auto-done method
-%if %{with_perl}
-echo "bogus:" > perl/Makefile
-%endif
 make
-%if %{with_perl}
-rm -f perl/Makefile
-(cd perl && CFLAGS="$RPM_OPT_FLAGS" perl Makefile.PL PREFIX=$RPM_BUILD_ROOT/usr INSTALLDIRS=vendor -NET-SNMP-IN-SOURCE=true -NET-SNMP-CONFIG="sh $RPM_BUILD_ROOT/net-snmp-config")
-make perlmodules
-%endif
 
 %install
 # ----------------------------------------------------------------------
@@ -167,6 +163,9 @@ rm -rf $RPM_BUILD_ROOT
 echo "No additional verification is done for net-snmp"
 
 %changelog
+* Fri Sep 12 2003 Wes Hardaker <hardaker@users.sourceforge.net>
+- fixes for 5.0.9's perl support
+
 * Mon Sep 01 2003 Wes Hardaker <hardaker@users.sourceforge.net>
 - added perl support
 
