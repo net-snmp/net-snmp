@@ -18,3 +18,4 @@
 #include <ucd-snmp/snmp_debug.h>
 #include <ucd-snmp/read_config.h>
 #include <ucd-snmp/tools.h>
+#include <ucd-snmp/system.h>
