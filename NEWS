@@ -1,6 +1,17 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*4.2.6*
+ Big fixes:
+    - Fixes to the Tunnel mib.
+    - Deprecated the non-raw objects in the system stats MIB portion.
+    - Testing harness fixes.
+    - Network file system improvements fro the hrStorageTable. 
+    - fixed snmptable.
+    - fixed the memory table (again) locking to 2^31 in value.
+    - Misc documentation fixes and clean-ups.
+    - Many other misc fixes.
+
 *4.2.5*
  Bug fixes:
     - The perl module actually works.  Sorry about that.
