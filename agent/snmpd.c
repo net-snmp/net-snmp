@@ -70,6 +70,7 @@ SOFTWARE.
 #include <fcntl.h>
 #endif
 #include <sys/wait.h>
+#include <signal.h>
 
 #ifndef FD_SET
 #ifdef HAVE_SYS_PARAM_H
@@ -558,6 +559,14 @@ char *prog;
   exit(1);
 }
 
+RETSIGTYPE
+SnmpTrapNodeDown(a)
+  int a;
+{
+  send_easy_trap (2); /* 2 - Node Down #define it as NODE_DOWN_TRAP */
+  exit(1);
+}
+
 int
 main(argc, argv)
     int	    argc;
@@ -777,6 +786,8 @@ main(argc, argv)
 
     /* send coldstart trap via snmptrap(1) if possible */
     send_easy_trap (0);
+    signal(SIGTERM, SnmpTrapNodeDown);
+    signal(SIGSTOP, SnmpTrapNodeDown);
 
     memset(addrCache, 0, sizeof(addrCache));
     receive(sdlist, sdlen);
