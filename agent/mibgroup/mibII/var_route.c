@@ -165,18 +165,11 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <dmalloc.h>
 #endif
 
-#include "asn1.h"
-#include "snmp_debug.h"
-#include "snmp_logging.h"
 
 #define CACHE_TIME (120)	    /* Seconds */
 
-#include "asn1.h"
-#include "snmp_api.h"
-#include "snmp_impl.h"
-#include "mib.h"
-#include "snmp.h"
-#include "../snmp_vars.h"
+#include "mibincl.h"
+
 #include "ip.h"
 #include "../kernel.h"
 #include "interfaces.h"
