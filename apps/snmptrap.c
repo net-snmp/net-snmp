@@ -502,8 +502,9 @@ main(argc, argv)
     if (version == 1) {
 	pdu = snmp_pdu_create(TRP_REQ_MSG);
 	if (*trap == 0) {
-	    memcpy(pdu->enterprise, objid_enterprise, sizeof(objid_enterprise)/sizeof (oid));
-	    pdu->enterprise_length = name_length;
+          pdu->enterprise = (oid *)malloc(sizeof (objid_enterprise));
+          memcpy(pdu->enterprise, objid_enterprise, sizeof(objid_enterprise));
+          pdu->enterprise_length = sizeof(objid_enterprise)/sizeof (oid);
 	}
 	else {
 	    name_length = MAX_NAME_LEN;
