@@ -229,14 +229,14 @@ extern "C" {
     /*
      * useful macros
      */
-#define CONTAINER_FIRST(x)          x->find(x,NULL)
-#define CONTAINER_FIND(x,k)         x->find(x,k)
-#define CONTAINER_NEXT(x,k)         x->find_next(x,k)
-#define CONTAINER_GET_SUBSET(x,k)   x->get_subset(x,k)
-#define CONTAINER_SIZE(x)           x->get_size(x)
-#define CONTAINER_ITERATOR(x)       x->get_iterator(x)
-#define CONTAINER_COMPARE(x,l,r)    x->compare(l,r)
-#define CONTAINER_FOR_EACH(x,f,c)   x->for_each(x,f,c)
+#define CONTAINER_FIRST(x)          (x)->find(x,NULL)
+#define CONTAINER_FIND(x,k)         (x)->find(x,k)
+#define CONTAINER_NEXT(x,k)         (x)->find_next(x,k)
+#define CONTAINER_GET_SUBSET(x,k)   (x)->get_subset(x,k)
+#define CONTAINER_SIZE(x)           (x)->get_size(x)
+#define CONTAINER_ITERATOR(x)       (x)->get_iterator(x)
+#define CONTAINER_COMPARE(x,l,r)    (x)->compare(l,r)
+#define CONTAINER_FOR_EACH(x,f,c)   (x)->for_each(x,f,c)
 
     /*
      * if you are getting multiple definitions of these three
