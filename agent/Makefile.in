@@ -25,7 +25,6 @@ CFLAGS=@CFLAGS@
 CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
 	-I$(srcdir) -I. -I$(srcdir)/mibgroup -Imibgroup
 
-CCHACK = @CC@
 CC = @CC@ $(CPPFLAGS)
 
 MIBOBJS=@mibgroup_list_o@
