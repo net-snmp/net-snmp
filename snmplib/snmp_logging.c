@@ -832,7 +832,6 @@ log_handler_stdouterr(  netsnmp_log_handler* logh, int pri, const char *string)
 int
 log_handler_syslog(  netsnmp_log_handler* logh, int pri, const char *string)
 {
-    char            sbuf[40];
     WORD            etype;
     LPCTSTR         event_msg[2];
 
