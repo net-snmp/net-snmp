@@ -5,6 +5,8 @@
 
 #include <net-snmp/net-snmp-config.h>
 
+#ifdef HAVE_SEARCH_H
+
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -988,3 +990,4 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
     return rc;
 }
 #endif /** DOXYGEN_SHOULD_SKIP_THIS */
+#endif /* HAVE_SEARCH_H */
