@@ -157,10 +157,10 @@ int	netsnmp_register_agent_nsap	(struct netsnmp_transport_s *t);
 void	denetsnmp_register_agent_nsap	(int handle);
 
 inline void
-netsnmp_agent_netsnmp_add_list_data(netsnmp_agent_request_info *agent, netsnmp_data_list *node);
+netsnmp_agent_add_list_data(netsnmp_agent_request_info *agent, netsnmp_data_list *node);
 
 inline void *
-netsnmp_agent_netsnmp_get_list_data(netsnmp_agent_request_info *agent, const char *name);
+netsnmp_agent_get_list_data(netsnmp_agent_request_info *agent, const char *name);
 
 inline void
 netsnmp_free_agent_data_set(netsnmp_agent_request_info *agent);

@@ -53,6 +53,10 @@ netsnmp_table_row *netsnmp_extract_netsnmp_table_row(netsnmp_request_info *);
 void *netsnmp_extract_netsnmp_table_row_data(netsnmp_request_info *);
 table_data *netsnmp_create_table_data(const char *name);
 netsnmp_table_row *netsnmp_create_table_data_row(void);
+netsnmp_table_row *netsnmp_table_data_clone_row(netsnmp_table_row *row);
+inline void netsnmp_table_data_replace_row(table_data *table,
+                                           netsnmp_table_row *origrow,
+                                           netsnmp_table_row *newrow);
 
 int netsnmp_table_data_build_result(netsnmp_handler_registration *reginfo,
                             netsnmp_agent_request_info   *reqinfo,

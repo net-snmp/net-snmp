@@ -378,7 +378,7 @@ netsnmp_handler_dup(netsnmp_mib_handler *handler)
 
 /** free the resources associated with a handler registration object */
 void
-snmp_netsnmp_handler_registration_free(netsnmp_handler_registration *reginfo)
+netsnmp_handler_registration_free(netsnmp_handler_registration *reginfo)
 {
     if (reginfo != NULL) {
 	netsnmp_handler_free(reginfo->handler);
@@ -391,7 +391,7 @@ snmp_netsnmp_handler_registration_free(netsnmp_handler_registration *reginfo)
 
 /** duplicates the handler registration object */
 netsnmp_handler_registration *
-snmp_netsnmp_handler_registration_dup(netsnmp_handler_registration *reginfo)
+netsnmp_handler_registration_dup(netsnmp_handler_registration *reginfo)
 {
     netsnmp_handler_registration *r = NULL;
 
@@ -413,7 +413,7 @@ snmp_netsnmp_handler_registration_dup(netsnmp_handler_registration *reginfo)
 	if (reginfo->handlerName != NULL) {
 	    r->handlerName = strdup(reginfo->handlerName);
 	    if (r->handlerName == NULL) {
-		snmp_netsnmp_handler_registration_free(r);
+		netsnmp_handler_registration_free(r);
 		return NULL;
 	    }
 	}
@@ -421,7 +421,7 @@ snmp_netsnmp_handler_registration_dup(netsnmp_handler_registration *reginfo)
 	if (reginfo->contextName != NULL) {
 	    r->contextName = strdup(reginfo->contextName);
 	    if (r->contextName == NULL) {
-		snmp_netsnmp_handler_registration_free(r);
+		netsnmp_handler_registration_free(r);
 		return NULL;
 	    }
 	}
@@ -430,14 +430,14 @@ snmp_netsnmp_handler_registration_dup(netsnmp_handler_registration *reginfo)
 	    memdup((u_char **)&(r->rootoid), (const u_char *)reginfo->rootoid,
 		   reginfo->rootoid_len * sizeof(oid));
 	    if (r->rootoid == NULL) {
-		snmp_netsnmp_handler_registration_free(r);
+		netsnmp_handler_registration_free(r);
 		return NULL;
 	    }
 	}
 
 	r->handler = netsnmp_handler_dup(reginfo->handler);
 	if (r->handler == NULL) {
-	    snmp_netsnmp_handler_registration_free(r);
+	    netsnmp_handler_registration_free(r);
 	    return NULL;
 	}
 	return r;
@@ -508,7 +508,7 @@ netsnmp_handler_mark_requests_as_delegated(netsnmp_request_info *requests, int i
 
 /** add data to a request that can be extracted later by submodules */
 inline void
-netsnmp_request_netsnmp_add_list_data(netsnmp_request_info *request, netsnmp_data_list *node) 
+netsnmp_request_add_list_data(netsnmp_request_info *request, netsnmp_data_list *node) 
 {
   if (request) {
     if (request->parent_data)
@@ -520,7 +520,7 @@ netsnmp_request_netsnmp_add_list_data(netsnmp_request_info *request, netsnmp_dat
 
 /** extract data from a request that was added previously by a parent module */
 inline void *
-netsnmp_request_netsnmp_get_list_data(netsnmp_request_info *request, const char *name)
+netsnmp_request_get_list_data(netsnmp_request_info *request, const char *name)
 {
   if (request)
     return netsnmp_get_list_data(request->parent_data,name);
@@ -587,7 +587,7 @@ static netsnmp_data_list *handler_reg = NULL;
 void
 netsnmp_register_handler_by_name(const char *name, netsnmp_mib_handler *handler) 
 {
-    netsnmp_add_list_data(&handler_reg, netsnmp_create_netsnmp_data_list(name, (void *) handler, NULL));
+    netsnmp_add_list_data(&handler_reg, netsnmp_create_data_list(name, (void *) handler, NULL));
     DEBUGMSGTL(("handler_registry", "registering helper %s\n", name));
 }
 

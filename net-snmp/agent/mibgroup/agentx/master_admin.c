@@ -220,7 +220,7 @@ register_agentx_list(netsnmp_session *session, netsnmp_pdu *pdu)
 	rc = AGENTX_ERR_REQUEST_DENIED;
 	DEBUGMSGTL(("agentx/master", "failed registration\n"));
     }
-    snmp_netsnmp_handler_registration_free(reg);
+    netsnmp_handler_registration_free(reg);
     return rc;
 }
 
