@@ -576,7 +576,7 @@ handle_var_list(struct agent_snmp_session  *asp)
     u_short acl;
     WriteMethod *write_method;
     AddVarMethod *add_method;
-    int	    noSuchObject;
+    int	    noSuchObject = TRUE;
     int     count, view;
     
     count = 0;
