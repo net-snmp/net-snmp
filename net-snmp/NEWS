@@ -16,13 +16,14 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
     - many more config file options supported.
       (run any command with -H and see appropriate .conf manual pages)
     - The start of a "make test" suite.
-    - other things we've forgotten.
     - many other things we've forgotten.
 
  API Changes:
     - A small change to the write functions in mib modules.
       (data passed in has already be BER-decoded and is a pointer to a 
       variable of the correct type).
+    - The config_load_mib mib-module .h file directive is now
+      obsolete.  Use REGISTER_MIB inside your init function instead.
 
 *3.6.2*
  Fixes:
