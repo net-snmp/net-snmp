@@ -161,6 +161,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include "asn1.h"
 #include "snmp_debug.h"
+#include "snmp_logging.h"
 
 #define CACHE_TIME (120)	    /* Seconds */
 
@@ -175,7 +176,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"
-#include "snmp_logging.h"
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b))
@@ -1337,6 +1337,8 @@ static int qsort_compare(RTENTRY **r1,
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"
+#include "snmp_logging.h"
+#include "snmp_debug.h"
 
 static TAILQ_HEAD(, snmprt) rthead;
 static char *rtbuf;
