@@ -4530,7 +4530,7 @@ _sess_read(void *sessp, fd_set *fdset)
     
   length = transport->f_recv(transport, rxbuf, rxbuf_len, &opaque, &olength);
 
-  if (length == -1) {
+  if (length == -1 && !(transport->flags & SNMP_TRANSPORT_FLAG_STREAM)) {
     sp->s_snmp_errno = SNMPERR_BAD_RECVFROM;
     sp->s_errno = errno;
     snmp_set_detail(strerror(errno));
@@ -4543,7 +4543,7 @@ _sess_read(void *sessp, fd_set *fdset)
 
   /*  Remote end closed connection.  */
 
-  if (length == 0 && transport->flags & SNMP_TRANSPORT_FLAG_STREAM) {
+  if (length <= 0 && transport->flags & SNMP_TRANSPORT_FLAG_STREAM) {
     /*  Alert the application if possible.  */
     if (sp->callback != NULL) {
       DEBUGMSGTL(("sess_read", "perform callback with op=DISCONNECT\n"));
