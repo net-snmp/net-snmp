@@ -9,7 +9,7 @@ BEGIN {
 use Test;
 BEGIN { $n = 10; plan tests => $n }
 use SNMP;
-use vars qw($agent_port $comm $comm2 $trap_port $agent_host $sec_name);
+use vars qw($agent_port $comm $comm2 $trap_port $agent_host $sec_name $priv_pass $auth_pass $bad_name);
 require 't/startagent.pl';
 $SNMP::debugging = 0;
 
@@ -30,10 +30,10 @@ $res = $s1->trap(enterprise => $enterprise, agent=>$agent_host, generic=>$generi
 ok($res =~ /^0 but true/);
 
 ########################### 3 #############################
-# test with wrong trapoid
-#$res = $s1->trap(trapoid=>'coldStt',[[sysContact, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
+# test with wrong varbind
+$res = $s1->trap([[$bad_name, 0, 'root@localhost'], [sysLocation, 0, 'here']] );
 #print("res is $res\n");
-#ok(!defined($res));
+ok(!defined($res));
 #########################################################
 
 #                      V2 testing
@@ -67,7 +67,7 @@ ok($res =~ /^0 but true/);
 
 #################### 9 #####################
 # Fire up a v3 trap session.
-my $s3 = new SNMP::Session(Version=>3, DestHost=> $agent_host, RemotePort=>$trap_port, SecName => $sec_name, SecLevel => authPriv, AuthPass => $auth_pass, PrivPass => $priv_pass);
+$s3 = new SNMP::Session(Version=>3, DestHost=> $agent_host, RemotePort=>$trap_port, SecName => $sec_name, SecLevel => authPriv, AuthPass => $auth_pass, PrivPass => $priv_pass);
 ok(defined($s3));
 
 ########################  10  ###########################
