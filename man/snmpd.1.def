@@ -17,6 +17,7 @@ requested operation(s) and returns the information to the sender.
 .TP 6
 .B -v
 Print version information for the agent, and exit.
+.TP
 .B -a
 Dumps the addresses the agent corresponds with to stderr or logfile.
 .TP
