@@ -358,6 +358,10 @@ _reorder_getbulk(netsnmp_agent_session *asp)
     if ((r = asp->vbcount - n) < 0) {
         r = 0;
     }
+
+    /* we do nothing if there is nothing repeated */
+    if (r == 0)
+        return;
             
     /*
      * For each of the original repeating varbinds (except the last),
@@ -1951,7 +1955,7 @@ netsnmp_create_subtree_cache(netsnmp_agent_session *asp)
         } else {
             n = count;
         }
-        if ((r = count - n) < 0) {
+        if ((r = count - n) <= 0) {
             r = 0;
             asp->bulkcache = NULL;
         } else {
