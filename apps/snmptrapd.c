@@ -96,6 +96,7 @@ SOFTWARE.
 #include "lcd_time.h"
 #include "transform_oids.h"
 #include "snmpv3.h"
+#include "callback.h"
 
 #ifndef BSD4_3
 #define BSD4_2
@@ -707,9 +708,6 @@ int main(int argc, char *argv[])
       usm_free_user(user);
 
     update_config(0);	/* read in config files and register HUP */
-    init_usm_post_config();
-    init_snmpv3_post_config();
-
 
 #if 0
 
@@ -892,6 +890,7 @@ void update_config(a)
     read_config_with_type (optconfigfile, "snmptrapd");
   } 
 #endif
+  snmp_call_callbacks(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_POST_READ_CONFIG);
 
   signal(SIGHUP, update_config);
 }

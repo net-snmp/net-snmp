@@ -207,6 +207,8 @@ void            usm_parse_config_usmUser(char *token, char *line);
 void            usm_set_password(char *token, char *line);
 void            usm_set_user_password(struct usmUser *user, char *token,
                                       char *line);
-void            init_usm_post_config(void);
+void		init_usm(void);
+int		init_usm_post_config(int majorid, int minorid, void *serverarg,
+                                     void *clientarg);
 
 #endif /* SNMPUSM_H */
