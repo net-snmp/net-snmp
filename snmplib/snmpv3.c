@@ -94,6 +94,8 @@ static size_t	 defaultAuthTypeLen	= 0;
 static oid	*defaultPrivType	= NULL;
 static size_t	 defaultPrivTypeLen	= 0;
 
+static int getHwAddress(const char * networkDevice, char * addressOut);
+
 void
 snmpv3_authtype_conf(const char *word, char *cptr)
 {
@@ -576,10 +578,10 @@ engineIDNic_conf(const char *word, char *cptr)
     {
       free(engineIDNic);
     }
-    engineIDNic=malloc(strlen(cptr)+1);
+    engineIDNic=(u_char *)malloc(strlen(cptr)+1);
     if ( NULL != engineIDNic )
     {
-      strcpy(engineIDNic,cptr);
+      strcpy((char *)engineIDNic,cptr);
       DEBUGMSGTL(("snmpv3","Initializing engineIDNic: %s\n", engineIDNic));
       setup_engineID(NULL,NULL);
     }
