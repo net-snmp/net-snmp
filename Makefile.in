@@ -23,7 +23,7 @@ INSTALLHEADERS=ucd-snmp-config.h $(srcdir)/version.h
 all:	sedscript EXAMPLE.conf subdirs ucd-snmp-config.h
 
 test:   all
-	( cd testing; make test )
+	( cd testing; $(MAKE) test )
 
 sedscript: sedscript.in config.h $(srcdir)/agent/mibgroup/mibdefs.h
 	$(CPP) -DPREFIX=$(prefix) -DLIBDIR=$(libdir) -DDATADIR=$(datadir) $(srcdir)/sedscript.in | sed 's/REMOVEME//g;s# */#/#g;s/ *#/#/g;s#/ *#/#g;' | egrep '^s[/#]' > sedscript
@@ -66,22 +66,22 @@ apps/snmpget apps/snmpgetnext apps/snmpset apps/snmptranslate apps/snmpwalk apps
 
 
 depend:
-	cd snmplib; make depend
-	cd apps; make depend
-	cd agent; make depend
-	cd testing; make depend
+	cd snmplib; $(MAKE) depend
+	cd apps; $(MAKE) depend
+	cd agent; $(MAKE) depend
+	cd testing; $(MAKE) depend
 
 nosysdepend:
-	cd snmplib; make nosysdepend
-	cd apps; make nosysdepend
-	cd agent; make nosysdepend
-	cd testing; make nosysdepend
+	cd snmplib; $(MAKE) nosysdepend
+	cd apps; $(MAKE) nosysdepend
+	cd agent; $(MAKE) nosysdepend
+	cd testing; $(MAKE) nosysdepend
 
 makefileindepend:
-	cd snmplib; make makefileindepend
-	cd apps; make makefileindepend
-	cd agent; make makefileindepend
-	cd testing; make makefileindepend
+	cd snmplib; $(MAKE) makefileindepend
+	cd apps; $(MAKE) makefileindepend
+	cd agent; $(MAKE) makefileindepend
+	cd testing; $(MAKE) makefileindepend
 
 
 clean:
