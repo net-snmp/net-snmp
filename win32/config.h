@@ -518,9 +518,6 @@
 /* define if your compiler (processor) defines __FUNCTION__ for you */
 #undef HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
  
-/* define if you have /dev/random */
-/* #undef HAVE_DEV_RANDOM */
- 
 /* KMT is not very portable and requires these typedefs to be in
    existance to use their header files */
 /* #undef u_int8_t */
@@ -778,8 +775,7 @@ typedef unsigned int   u_int32_t;
 
 /* Not-to-be-compiled macros for use by configure only */
 #define config_require(x)
-#define config_load_mib(x,y,z)
-  
+
 /*#include <mib_module_config.h> */
 
 #ifndef DONT_INC_STRUCTS
