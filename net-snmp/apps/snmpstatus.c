@@ -134,7 +134,6 @@ int main(int argc, char *argv[])
 {
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu, *response;
-    struct sockaddr_in *respIp;
     struct variable_list *vars;
     snmp_transport *transport = NULL;
     char *sysdescr = NULL;
