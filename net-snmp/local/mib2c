@@ -120,7 +120,15 @@ setup_data($mibnode);
 
 # process .conf file
 $fh = new IO::File;
-$fh->open("$configfile");
+if (-f "$configfile") {
+    $fh->open("$configfile");
+} elsif(-f "/usr/local/share/snmp/$configfile") {
+    $fh->open("/usr/local/share/snmp/$configfile");
+} else {
+    print STDERR "Can't find a configuration file called $configfile\n";
+    print STDERR "I looked in . and /usr/local/share/snmp\n";
+exit;
+}
 process();
 $fh->close;
 
