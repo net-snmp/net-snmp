@@ -157,24 +157,6 @@ static struct nlist nl[] = {
 
 extern write_rte();
 
-static int
-KNLookup(nl_which, buf, s)
-    int nl_which;
-    char *buf;
-    int s;
-{   struct nlist *nlp = &nl[nl_which];
-
-    if (nlp->n_value == 0) {
-	fprintf (stderr, "Accessing non-nlisted variable: %s\n", nlp->n_name);
-	nlp->n_value = -1;
-	return 0;
-    }
-    if (nlp->n_value == -1)
-	return 0;
-    return klookup(nl[nl_which].n_value, buf, s);
-}
-
-
 void
 string_append_int (s, val)
 char *s;
@@ -678,7 +660,7 @@ static void Route_Scan_Reload()
 #define AF_UNSPEC AF_INET 
 #endif
 
-  KNLookup(N_RTTABLES, (char *) rt_table, sizeof(rt_table));
+  KNLookup(nl, N_RTTABLES, (char *) rt_table, sizeof(rt_table));
   for(i=0; i <= AF_MAX; i++) {
     if(rt_table[i] == 0)
       continue;
@@ -690,9 +672,9 @@ static void Route_Scan_Reload()
 #else /* rtentry is a BSD 4.3 compat */
   for (table=N_RTHOST; table<=N_RTNET; table++) {
 
-    KNLookup(N_RTHASHSIZE, (char *)&hashsize, sizeof(hashsize));
+    KNLookup(nl, N_RTHASHSIZE, (char *)&hashsize, sizeof(hashsize));
     routehash = (RTENTRY **)malloc(hashsize * sizeof(struct mbuf *));
-    KNLookup( table, (char *)routehash, hashsize * sizeof(struct mbuf *));
+    KNLookup(nl,  table, (char *)routehash, hashsize * sizeof(struct mbuf *));
     for (i = 0; i < hashsize; i++) {
       if (routehash[i] == 0)
         continue;
@@ -787,10 +769,10 @@ static Route_Scan_Reload()
 #ifdef sunV3
 	    hashsize = RTHASHSIZ;
 #else
-	    KNLookup( N_RTHASHSIZE, (char *)&hashsize, sizeof(hashsize));
+	    KNLookup(nl,  N_RTHASHSIZE, (char *)&hashsize, sizeof(hashsize));
 #endif
 	    routehash = (struct mbuf **)malloc(hashsize * sizeof(struct mbuf *));
-	    KNLookup( table, (char *)routehash, hashsize * sizeof(struct mbuf *));
+	    KNLookup(nl,  table, (char *)routehash, hashsize * sizeof(struct mbuf *));
 	    for (i = 0; i < hashsize; i++) {
 		if (routehash[i] == 0)
 			continue;
