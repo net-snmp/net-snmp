@@ -178,7 +178,8 @@ snmpv3_secLevel_conf(const char *word, char *cptr)
 
 
 int
-snmpv3_options(char *optarg, struct snmp_session *session, char **Apsz, char **Xpsz)
+snmpv3_options(char *optarg, struct snmp_session *session, char **Apsz, char **Xpsz,
+               int argc, char **argv)
 {
    char *cp = optarg;
    optarg++;
@@ -193,6 +194,21 @@ snmpv3_options(char *optarg, struct snmp_session *session, char **Apsz, char **X
     */
    while (*optarg && isspace(*optarg)) {
        optarg++;
+   }
+   /*
+    * Finally, handle ".... -3x value ...." syntax
+    *   (*without* surrounding quotes)
+    */
+   if ( !*optarg ) {
+       /*
+        * We've run off the end of the argument
+        *  so move on the the next.
+        */
+       optarg = argv[optind++];
+       if (optind > argc) {
+           fprintf(stderr,"Missing argument after SNMPv3 '-3%c' option.\n", *cp);
+           return(-1);
+       }
    }
 
    switch (*cp) {
