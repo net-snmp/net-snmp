@@ -432,13 +432,21 @@ handle_snmp_packet(int operation, struct snmp_session *session, int reqid,
 		     *   so set up 'asp->end' accordingly
 		     */
 	    if ( asp->pdu->errindex == 0 ) {
-		asp->end   = asp->pdu->variables;
-		i = asp->pdu->errstat;
-		while ( --i > 0 ) 
-		    if ( asp->end )
-			asp->end = asp->end->next_variable;
-
-		asp->end->next_variable = NULL;		/* Possible Memory leak */
+		if ( asp->pdu->errstat == 0 ) {
+				/* Nothing to do at all */
+		    snmp_free_varbind(asp->pdu->variables);
+		    asp->pdu->variables=NULL;
+		    asp->start=NULL;
+		}
+		else {
+		    asp->end   = asp->pdu->variables;
+		    i = asp->pdu->errstat;
+		    while ( --i > 0 ) 
+			if ( asp->end )
+			    asp->end = asp->end->next_variable;
+		    snmp_free_varbind(asp->end->next_variable);
+		    asp->end->next_variable = NULL;
+		}
 	    }
 
 	    status = handle_next_pass( asp );	/* First pass */
