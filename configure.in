@@ -1211,12 +1211,6 @@ AC_CHECK_STRUCT_FOR([
 #undef _KERNEL
 ], sockaddr, sa_union.sa_generic.sa_family2, no)
 
-#ifdef STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_FAMILY2
-cat >> confdefs.h <<EOF
-#define STRUCT_SOCKADDR_HAS_SA_FAMILY2 1
-EOF
-#endif
-
 AC_CHECK_STRUCT_FOR([
 #include <sys/types.h>
 #define KERNEL

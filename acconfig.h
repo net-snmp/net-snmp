@@ -160,7 +160,7 @@
 #undef STRUCT_SOCKADDR_HAS_SA_LEN
 
 /* Does struct sockaddr have a sa_family2 field? */
-#undef STRUCT_SOCKADDR_HAS_SA_FAMILY2
+#undef STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_FAMILY2
 
 /* rtentry structure tests */
 #undef RTENTRY_RT_NEXT

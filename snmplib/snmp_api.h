@@ -62,7 +62,7 @@ struct timeval;
 
 typedef struct {
 
-#ifdef STRUCT_SOCKADDR_HAS_SA_FAMILY2
+#ifdef STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_FAMILY2
 	/*
 	 * Certain systems (notably Irix 6.x) have a non-traditional
 	 *   socket structure, and #define the traditional field names.
