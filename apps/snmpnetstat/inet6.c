@@ -73,6 +73,7 @@ SOFTWARE.
 #include <net-snmp/net-snmp-includes.h>
 #include "netstat.h"
 
+void            inet6print(struct in6_addr *, u_short, const char *);
 static char    *inet6name(struct in6_addr *);
 
 struct stat_table {
