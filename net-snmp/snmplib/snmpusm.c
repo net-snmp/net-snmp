@@ -525,9 +525,7 @@ usm_calc_offsets (
 	 */
 	if (secLevel == SNMP_SEC_LEVEL_AUTHPRIV)
 	{
-		scopedPduLen = ( scopedPduLen % 8 )
-					? ROUNDUP8(scopedPduLen)
-					: scopedPduLen + 8;
+                scopedPduLen = ROUNDUP8(scopedPduLen);
 
 		if ((*datalen = 
 			asn_predict_length (ASN_OCTET_STR,0,scopedPduLen))==-1)
@@ -1256,6 +1254,7 @@ usm_rgenerate_out_msg (
     u_char  authParamsLen = 0;
     u_char *startcp;
     u_char *endp = wholeMsg;
+    u_char iv[BYTESIZE(USM_MAX_SALT_LENGTH)];
 
     DEBUGMSGTL(("usm","USM processing has begun.\n"));
 
@@ -1376,15 +1375,13 @@ usm_rgenerate_out_msg (
             u_char cyphertext[SNMP_MAX_MSG_SIZE];
             size_t cyphertextLen = SNMP_MAX_MSG_SIZE;
             
-            size_t	encrypted_length = theTotalLength - dataOffset;
-
             /* XXX  Hardwired to seek into a 1DES private key!
              */
             salt_length = BYTESIZE(USM_MAX_SALT_LENGTH);
             if ( !thePrivKey ||
                  ( usm_set_salt(    salt,	   &salt_length,
                                     thePrivKey+8,	thePrivKeyLength-8,
-                                    NULL)
+                                    iv)
                    == -1 ) )
 		{
                     DEBUGMSGTL(("usm","Can't set DES-CBC salt.\n"));
@@ -1392,6 +1389,13 @@ usm_rgenerate_out_msg (
                     return SNMPERR_USM_GENERICERROR;
 		}
 
+#ifdef SNMP_TESTING_CODE
+            if ( debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
+                dump_chunk("usm/dump", "This data was encrypted:",
+                           scopedPdu, scopedPduLen);
+            }
+#endif
+                
             if ( sc_encrypt(
                 thePrivProtocol,	 thePrivProtocolLength,
                 thePrivKey,		 thePrivKeyLength,
@@ -1412,21 +1416,20 @@ usm_rgenerate_out_msg (
             }
             
             /* copy it back onto the outgoing packet */
-            memcpy(wholeMsg - cyphertextLen,
-                   cyphertext, cyphertextLen);
-            wholeMsg -= cyphertextLen;
-            *wholeMsgLen -= cyphertextLen;
+#ifdef SNMP_TESTING_CODE
+            theTotalLength = *wholeMsgLen;
+#endif
+            wholeMsg = asn_rbuild_string (wholeMsg, wholeMsgLen,
+                                          (u_char) (ASN_UNIVERSAL|ASN_PRIMITIVE|
+                                                    ASN_OCTET_STR),
+                                          cyphertext, cyphertextLen);
 
 #ifdef SNMP_TESTING_CODE
             if ( debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
-                dump_chunk("usm/dump", "This data was encrypted:",
-                           scopedPdu, scopedPduLen);
                 dump_chunk("usm/dump", "salt + Encrypted form:",
                            salt, salt_length);
-                dump_chunk("usm/dump", NULL,
-                           &ptr[dataOffset], encrypted_length);
-                dump_chunk("usm/dump", "*wholeMsg:",
-                           *wholeMsg, theTotalLength);
+                dump_chunk("usm/dump", "wholeMsg:",
+                           wholeMsg+1, theTotalLength - *wholeMsgLen);
             }
 #endif
 
@@ -1450,7 +1453,7 @@ usm_rgenerate_out_msg (
     wholeMsg = asn_rbuild_string (wholeMsg, wholeMsgLen,
                                  (u_char)
                                  (ASN_UNIVERSAL|ASN_PRIMITIVE|ASN_OCTET_STR),
-                                 salt, salt_length);
+                                 iv, salt_length);
     if (wholeMsg == NULL) {
         DEBUGMSGTL(("usm","building privParams failed.\n"));
         usm_free_usmStateReference (secStateRef);
@@ -2375,12 +2378,14 @@ usm_process_in_msg (
 
 #ifdef SNMP_TESTING_CODE
 		if ( debug_is_token_registered("usm/dump") == SNMPERR_SUCCESS) {
+			dump_chunk("usm/dump", "Cypher Text",
+						value_ptr, remaining);
+			dump_chunk("usm/dump", "salt + Encrypted form:",
+						salt, salt_length);
+			dump_chunk("usm/dump", "IV + Encrypted form:",
+						iv, iv_length);
 			dump_chunk("usm/dump", "Decrypted chunk:",
 						*scopedPdu, *scopedPduLen);
-			dump_chunk("usm/dump", "IV + Encrypted form:",
-						salt, salt_length);
-			dump_chunk("usm/dump", NULL,
-						value_ptr, remaining);
 		}
 #endif
 	}
