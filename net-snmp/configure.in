@@ -226,6 +226,7 @@ if test "x$with_shared" = "xyes"; then
       SHLIB_CFLAGS="-Kpic"
     fi
     SHLIB_EXTENSION="so"
+	SHLIB_VERSION=
     SHLIB_LD_CMD="ld -r -o"
     SHLIB_LDCONFIG_CMD=
     CC_RUNTIME_ARG=
@@ -284,6 +285,7 @@ if test "x$with_shared" = "xyes"; then
     
     freebsd*)
 	SHLIB_LD_CMD="ld -Bshareable -o"
+	SHLIB_VERSION=.3.5
 	;;
 
     *)
@@ -301,11 +303,12 @@ fi
 AC_SUBST(CC_RUNTIME_ARG)
 AC_SUBST(SHLIB_CFLAGS)
 AC_SUBST(SHLIB_EXTENSION)
+AC_SUBST(SHLIB_VERSION)
 AC_SUBST(SHLIB_LDCONFIG_CMD)
 AC_SUBST(SHLIB_LD_CMD)
 AC_PROG_RANLIB
 AC_MSG_CHECKING(for how to build the library)
-AC_MSG_RESULT([EXTENISON=$SHLIB_EXTENSION, LD=$SHLIB_LD_CMD, LDCONFIG=$SHLIB_LDCONFIG_CMD, RANLIB=$RANLIB, CCFLAGS=$SHLIB_CFLAGS $CC_RUNTIME_ARG])
+AC_MSG_RESULT([EXTENISON=$SHLIB_EXTENSION, VERSION=$SHLIB_VERSION, LD=$SHLIB_LD_CMD, LDCONFIG=$SHLIB_LDCONFIG_CMD, RANLIB=$RANLIB, CCFLAGS=$SHLIB_CFLAGS $CC_RUNTIME_ARG])
 
 dnl
 dnl Do hairy agent module processing.
@@ -404,8 +407,8 @@ while test "x$new_module_list" != "x"; do
       module_list_h="$module_list_h mibgroup/$i.h"
       if test -f $srcdir/$mibdir/$i.c; then
         module_list_code="$module_list_code $i"
-	if grep init_$i $srcdir/$mibdir/$i.c > /dev/null; then
-	    echo "  init_$i();" >> $mibdir/mib_module_inits.h
+	if grep init_`basename $i` $srcdir/$mibdir/$i.c > /dev/null; then
+	    echo "  init_`basename $i`();" >> $mibdir/mib_module_inits.h
 	fi
       fi
       grep config_load_mib $srcdir/$mibdir/$i.h | sed 's@.*config_load_mib(\([^)]*\), *\([^),]*\), *\([^),]*\)).*@{{\1}, \2, (struct variable *) \3, sizeof(\3)/sizeof(*\3),sizeof(*\3),"'$i'"},@;s/\.\([0-9]*\)/,\1/g' >> $mibdir/mib_module_loads.h
@@ -1111,6 +1114,7 @@ AC_OUTPUT([
  apps/Makefile:Makefile.top:apps/Makefile.in
  apps/snmpnetstat/Makefile:Makefile.top:apps/snmpnetstat/Makefile.in
  agent/mibgroup/Makefile:Makefile.top:agent/mibgroup/Makefile.in
+ agent/dlmods/Makefile:Makefile.top:agent/dlmods/Makefile.in
  local/Makefile:Makefile.top:local/Makefile.in
  man/Makefile:Makefile.top:man/Makefile.in
  ov/Makefile:Makefile.top:ov/Makefile.in

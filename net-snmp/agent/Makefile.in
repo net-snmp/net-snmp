@@ -3,7 +3,7 @@
 #
 
 TARG=	 snmpd
-USELIBS= ../snmplib/libsnmp.$(SHLIB_EXTENSION)
+USELIBS= ../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 LIBS=	 -L../snmplib $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 
 CPPFLAGS=@CPPFLAGS@ -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
@@ -16,7 +16,8 @@ MIBOBJS=@mibgroup_list_o@
 all: subdirs snmpd
 
 subdirs:
-	cd mibgroup; $(MAKE)
+	cd mibgroup; $(MAKE); cd ..
+	cd dlmods; $(MAKE); cd ..
 
 getkstat: getkstat.o
 	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
@@ -32,14 +33,16 @@ getmibstat.o: mibgroup/kernel_sunos5.c
 
 AGENTOBJS=snmpd.o snmp2p.o kernel.o snmp_agent.o snmp_vars.o view_parse.o agent_read_config.o auto_nlist.o
 
-snmpd:	${MIBOBJS} ${AGENTOBJS} ../snmplib/libsnmp.$(SHLIB_EXTENSION)
+snmpd:	${MIBOBJS} ${AGENTOBJS} $(USELIB)
 	${CC} -o $@ ${AGENTOBJS} ${MIBOBJS} ${LDFLAGS} ${LIBS}  
 
 clean:
 	rm -f *.o ${TARG}
+	cd dlmods; make clean; cd ..
 	cd mibgroup; make clean
 
 install:  installdirs
+	cd dlmods ; $(MAKE) install; cd ..
 	@$(INSTALL) $(TARG) $(sbindir) ; echo "install:  installed $(TARG) in $(sbindir) "
 
 installdirs:

@@ -21,116 +21,262 @@
 
 #include <dlfcn.h>
 
-#if 0
+
 #include "mibincl.h"
 #include "struct.h"
-#include "util_funcs.h"
 #include "read_config.h"
-#include "snmp_api.h"
+
+#include "dlmod.h"
+
+static struct dlmod *dlmods = NULL;
+
+int dlmod_next_index = 1;
+
+static void dlmod_parse_config(char *, char *);
+static void dlmod_free_config __P((void));
+static char dlmod_path[1024];
+
+void 
+init_dlmod __P((void)) {
+	char *p;
+	int l;
+
+	register_config_handler("dlmod", dlmod_parse_config, dlmod_free_config);
+
+	p = getenv("SNMP_DLMOD_PATH");
+	strncpy(dlmod_path, DLMOD_DEFAULT_PATH, sizeof(dlmod_path));
+	if (p) {
+		if (p[0] == '+') {
+			l = strlen(dlmod_path);
+			if (dlmod_path[l - 1] != ':') 
+				strncat(dlmod_path, ":", sizeof(dlmod_path) - l);
+			strncat(dlmod_path, p + 1, 
+				sizeof(dlmod_path) - strlen(dlmod_path));
+		} else 
+			strncpy(dlmod_path, p, sizeof(dlmod_path));
+	}
+#if 1
+	fprintf(stderr, "dlmod_path: %s\n", dlmod_path);
+	fflush(stderr);
 #endif
+}
 
-#ifndef _DLMOD_PATH
-#define _DLMOD_PATH "snmp/dlmod"
-#endif
+void 
+deinit_dlmod __P((void)) {
+	unregister_config_handler("dlmod");
+}
 
-struct dlmod {
-	struct dlmod *next;
-	char name[64];
-	char path[255];
-	void *handle;
-};
-
-struct dlmod *dlmods = NULL;
-
-int numdlmods = 0;
-
-void dlmod_parse_config(word,cptr)
-  char *word;
-  char *cptr;
+static void 
+dlmod_parse_config(word, cptr)
+	char *word;
+	char *cptr;
 {
-  struct dlmod **pdlmod = &dlmods, *ptmp;
-  char *dl_name, *dl_path;
-  char sym_init[64];
-  int (*dl_init)(void);
-  int i;
+	char *dlm_name, *dlm_path;
+	struct dlmod *dlm;
   
-  ptmp = calloc(1, sizeof(struct dlmod));
-  if (ptmp == NULL) 
-	return;
+	if (cptr == NULL) {
+		config_perror("Bad dlmod line");
+		return;
+	}
+	/* remove comments */
+	*(cptr + strcspn(cptr, "#;\r\n")) = '\0';
 
-  if (cptr == NULL) {
-	config_perror("Bad dlmod line");
-	return;
-  }
-  /* remove comments */
-  *(cptr + strcspn(cptr, "#;\r\n")) = '\0';
- 
-  /* dynamic module name */
-  dl_name = strtok(cptr, "\t "); 
-  if (dl_name == NULL) {
-	config_perror("Bad dlmod line");
-	free(ptmp);
-	return;
-  }
-  strncpy(ptmp->name, dl_name, sizeof(ptmp->name));
+	dlm = dlmod_create_module();
+	if (!dlm)
+		return;
 
-  /* dynamic module path */
-  dl_path = strtok(NULL, "\t ");
-  if (dl_path == NULL) 
-	snprintf(ptmp->path, sizeof(ptmp->path), 
-		"%s/%s/%s.so", SNMPLIBPATH, _DLMOD_PATH, ptmp->name);
-  else if (dl_path[0] == '/') 
-	strncpy(ptmp->path, dl_path, sizeof(ptmp->path));
-  else
-	snprintf(ptmp->path, sizeof(ptmp->path), "%s/%s/%s", SNMPLIBPATH,
-                 _DLMOD_PATH, dl_path);
+	/* dynamic module name */
+	dlm_name = strtok(cptr, "\t "); 
+	if (dlm_name == NULL) {
+		config_perror("Bad dlmod line");
+		dlmod_delete_module(dlm);
+		return;
+	}
+	strncpy(dlm->name, dlm_name, sizeof(dlm->name));
 
-  ptmp->handle = dlopen(ptmp->path, RTLD_NOW);
-  if (ptmp->handle == NULL) {
-	config_perror(dlerror());
-	free(ptmp);
-	return;
-  }
-  snprintf(sym_init, sizeof(sym_init), "_dynamic_init_%s", ptmp->name);
-  dl_init = dlsym(ptmp->handle, sym_init);
-  if (dl_init == NULL) {
-	config_perror(dlerror());
-	free(ptmp);
-	return;
-  }
+	/* dynamic module path */
+	dlm_path = strtok(NULL, "\t ");
+	if (dlm_path) 
+		strncpy(dlm->path, dlm_path, sizeof(dlm->path));
+	else
+		strncpy(dlm->path, dlm_name, sizeof(dlm->path));
+
+	dlmod_load_module(dlm);
 	
-  if (dl_init()) {
-	config_perror("init failed");
-	free(ptmp);
-	return;
-  }
-
-  while(*pdlmod != NULL)
-    pdlmod = &((*pdlmod)->next);
-  (*pdlmod) = ptmp;
-
-  numdlmods++;
-
+	if (dlm->status == DLMOD_ERROR) 
+		fprintf(stderr, "error: %s\n", dlm->error);
+		
 }
 
-void dlmod_free_config __P((void)) {
-  struct dlmod *dtmp, *dtmp2;
-  char sym_deinit[64];
-  int (* dl_deinit)(void);
+static void 
+dlmod_free_config __P((void)) {
+	struct dlmod *dtmp, *dtmp2;
   
-  for (dtmp = dlmods; dtmp != NULL;) {
-    dtmp2 = dtmp;
-    dtmp = dtmp->next;
-	snprintf(sym_deinit, sizeof(sym_deinit), "_dynamic_deinit_%s",
-                 dtmp2->name);
-	dl_deinit = dlsym(dtmp2->handle, sym_deinit);
-	if (dl_deinit) 
-		dl_deinit();
-	dlclose(dtmp2->handle);
-    
-    free(dtmp2);
-  }
-  dlmods = NULL;
-  numdlmods = 0;
+	for (dtmp = dlmods; dtmp != NULL;) {
+		dtmp2 = dtmp;
+		dtmp = dtmp->next;
+		dlmod_unload_module(dtmp2);
+		free(dtmp2);
+	}
+	dlmods = NULL;
+	dlmod_next_index = 1;
 }
 
+struct dlmod *
+dlmod_create_module __P((void)) {
+	struct dlmod **pdlmod, *dlm;
+#if 1
+	fprintf(stderr, "dlmod_create_module\n");
+	fflush(stderr);
+#endif
+	dlm = calloc(1, sizeof(struct dlmod));
+	if (dlm == NULL) 
+		return NULL;
+
+	dlm->index = dlmod_next_index++;
+	dlm->status = DLMOD_UNLOADED;
+
+	for (pdlmod = &dlmods; *pdlmod != NULL; pdlmod = &((*pdlmod)->next)) 
+		;
+	(*pdlmod) = dlm;
+
+	return dlm;
+}
+
+void
+dlmod_delete_module(dlm) 
+	struct dlmod *dlm;
+{
+	struct dlmod **pdlmod;
+ 
+#if 1
+	fprintf(stderr, "dlmod_delete_module\n");
+	fflush(stderr);
+#endif
+	if (!dlm || dlm->status != DLMOD_UNLOADED)
+		return;
+
+	for (pdlmod = &dlmods; *pdlmod; pdlmod = &((*pdlmod)->next)) 
+		if (*pdlmod == dlm) {
+			*pdlmod = dlm->next;
+			free(dlm);
+			return;
+		}
+}
+
+void
+dlmod_load_module(dlm)
+	struct dlmod *dlm; 
+{
+	char sym_init[64];
+	char *p, tmp_path[255];
+	int (*dl_init)(void);
+#if 1
+	fprintf(stderr, "dlmod_load_module\n");
+	fflush(stderr);
+#endif
+  
+	if (!dlm || !dlm->path || !dlm->name || dlm->status != DLMOD_UNLOADED)
+		return;
+
+
+	if (dlm->path[0] == '/') { 
+		dlm->handle = dlopen(dlm->path, RTLD_NOW);
+		if (dlm->handle == NULL) {
+			snprintf(dlm->error, sizeof(dlm->error), 
+				"dlopen failed: %s", dlerror());
+			dlm->status = DLMOD_ERROR;
+			return;
+		}
+	} else {
+		for (p = strtok(dlmod_path, ":"); p; p = strtok(NULL, ":")) {
+			snprintf(tmp_path, sizeof(tmp_path), "%s/%s.so", p, dlm->path);
+#if 1
+			fprintf(stderr, "p: %s tmp_path: %s\n", p, tmp_path);
+			fflush(stderr);
+#endif
+			dlm->handle = dlopen(tmp_path, RTLD_NOW);
+			if (dlm->handle == NULL) {
+				snprintf(dlm->error, sizeof(dlm->error), 
+					"dlopen failed: %s", dlerror());
+				dlm->status = DLMOD_ERROR;
+			}
+		}
+		strncpy(dlm->path, tmp_path, sizeof(dlm->path));
+		if (dlm->status == DLMOD_ERROR) 
+			return;
+	}
+	snprintf(sym_init, sizeof(sym_init), "_dynamic_init_%s", dlm->name);
+	dl_init = dlsym(dlm->handle, sym_init);
+	if (dl_init == NULL) {
+		snprintf(dlm->error, sizeof(dlm->error), 
+			"dlsym failed: can't find \'%s\'", sym_init);
+		dlm->status = DLMOD_ERROR;
+		return;
+	}
+	
+	if (dl_init()) {
+		snprintf(dlm->error, sizeof(dlm->error), "\'%s\' failed", sym_init);
+		dlm->status = DLMOD_ERROR;
+		return;
+	}
+
+	dlm->error[0] = '\0';
+	dlm->status = DLMOD_LOADED;
+}
+
+void 
+dlmod_unload_module (dlm) 
+	struct dlmod *dlm;
+{
+	char sym_deinit[64];
+	char buf[256];
+	int (* dl_deinit)(void);
+  
+	if (!dlm || dlm->status != DLMOD_LOADED) 
+		return;
+
+	snprintf(sym_deinit, sizeof(sym_deinit), "_dynamic_deinit_%s", dlm->name);
+	dl_deinit = dlsym(dlm->handle, sym_deinit);
+	if (dl_deinit == NULL) {
+		/** it's right way ? */
+		dlm->status = DLMOD_ERROR;
+		return;
+	}
+	dl_deinit();
+	dlclose(dlm->handle);
+	dlm->status = DLMOD_UNLOADED;
+#if 1
+	fprintf(stderr, "Module %s unloaded\n", dlm->name);
+  fflush(stderr);
+#endif
+}
+
+int
+dlmod_get_next_index __P((void)) {
+	return dlmod_next_index;
+}
+
+struct dlmod *
+dlmod_get_by_index (index) 
+	int index;
+{
+  struct dlmod *dlmod;
+  
+  for (dlmod = dlmods; dlmod; dlmod=dlmod->next) 
+    if (dlmod->index == index)
+	return dlmod;
+
+  return NULL;
+}
+#if 0
+struct dlmod *
+dlmod_get_next(dlm) 
+	struct dlmod *dlm;
+{
+	if (dlm) 
+		return dlmods;
+	else
+		return dlm->next;
+}
+#endif
