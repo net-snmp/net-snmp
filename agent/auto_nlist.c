@@ -80,10 +80,11 @@ auto_nlist_value(const char *string)
         }
 #endif
         if (it->nl[0].n_type == 0) {
-            if (!ds_get_boolean
-                (DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
                 snmp_log(LOG_ERR, "nlist err: neither %s nor _%s found.\n",
                          string, string);
+	    }
             return (-1);
         } else {
             DEBUGMSGTL(("auto_nlist", "nlist:  found symbol %s at %x.\n",
@@ -123,21 +124,22 @@ init_nlist(struct nlist nl[])
     kvm_t          *kernel;
     char            kvm_errbuf[4096];
 
-    if ((kernel =
-         kvm_openfiles(KERNEL_LOC, NULL, NULL, O_RDONLY,
-                       kvm_errbuf)) == NULL) {
-        if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+    if ((kernel = kvm_openfiles(KERNEL_LOC, NULL, NULL, O_RDONLY, kvm_errbuf))
+	== NULL) {
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+				   NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
             return;
-        else {
+	} else {
             snmp_log_perror("kvm_openfiles");
             snmp_log(LOG_ERR, "kvm_openfiles: %s\n", kvm_errbuf);
             exit(1);
         }
     }
     if ((ret = kvm_nlist(kernel, nl)) == -1) {
-        if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+				   NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
             return;
-        else {
+	} else {
             snmp_log_perror("kvm_nlist");
             exit(1);
         }
@@ -153,17 +155,20 @@ init_nlist(struct nlist nl[])
             nl[0].n_value = 0;
         } else {
             snmp_log_perror("knlist");
-            if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+            if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+				       NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
                 return;
-            else
+	    } else {
                 exit(1);
+	    }
         }
     }
 #else
     if ((ret = nlist(KERNEL_LOC, nl)) == -1) {
-        if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+				   NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
             return;
-        else {
+	} else {
             snmp_log_perror("nlist");
             exit(1);
         }
@@ -176,10 +181,11 @@ init_nlist(struct nlist nl[])
             nl[ret].n_type = 1;
 #endif
         if (nl[ret].n_type == 0) {
-            if (!ds_get_boolean
-                (DS_APPLICATION_ID, DS_AGENT_NO_ROOT_ACCESS))
+            if (!netsnmp_ds_get_boolean(NETSNMP_DS_APPLICATION_ID, 
+					NETSNMP_DS_AGENT_NO_ROOT_ACCESS)) {
                 DEBUGMSGTL(("auto_nlist", "nlist err:  %s not found\n",
                             nl[ret].n_name));
+	    }
         } else {
             DEBUGMSGTL(("auto_nlist", "nlist: %s 0x%X\n", nl[ret].n_name,
                         (unsigned int) nl[ret].n_value));
