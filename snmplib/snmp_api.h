@@ -636,6 +636,7 @@ u_int snmp_increment_statistic_by(int which, int count);
 u_int snmp_get_statistic(int which);
 void  snmp_init_statistics(void);
 int create_user_from_session(struct snmp_session *session);
+int snmp_get_fd_for_session(struct snmp_session *sessp);
 
 /* extended open */
 struct snmp_session *snmp_open_ex (struct snmp_session *,

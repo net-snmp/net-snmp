@@ -5495,3 +5495,17 @@ snmp_get_random_access(void) {
     return ds_get_boolean(DS_LIBRARY_ID, DS_LIB_RANDOM_ACCESS);
 }
 
+int snmp_get_fd_for_session(struct snmp_session *sessp) 
+{
+     struct session_list *slp = Sessions;
+
+     while(slp)
+     {
+        if(slp->session == sessp)
+            return slp->internal->sd;
+        slp = slp->next;
+     }
+
+     return 0;
+}
+
