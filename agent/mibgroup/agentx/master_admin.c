@@ -1,3 +1,6 @@
+/*
+ *  AgentX Administrative request handling
+ */
 #include "config.h"
 
 #include <sys/types.h>
@@ -20,7 +23,9 @@
 #include "snmp_impl.h"
 #include "snmp.h"
 
-#include "agentx.h"
+#include "agentx/protocol.h"
+#include "agentx/client.h"
+
 #include "snmp_agent.h"
 #include "snmp_vars.h"
 #include "var_struct.h"
