@@ -126,7 +126,7 @@ do_diff()
     if [ ! -z "$files" ]; then
         for f in $files; do
             diff -U $FUZZ -p -b -w --show-c-function \
-                --new-file $f $2/$f >> $3
+                -I "$Id$f $2/$f >> $3
             rc=$?
             (( rcs = $rcs + $rc ))
             if [ $rc -eq 1 ]; then
