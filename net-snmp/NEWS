@@ -5,6 +5,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
   Now using GNU's auto-conf for better portability
   Port to Sun4/Solaris 2.4
+  -h/--help and -v/--version flags added to snmpd
 
 *3.0.2.1*
 
