@@ -305,7 +305,7 @@ a notWritable error response.
 .IP "sysservices NUMBER"
 Sets the value of the system.sysServices.0 object.
 For a host, a good value is 72.
-.IP "agentaddress [(udp|tcp):]port[@address][,...]"
+.IP "agentaddress [{udp|tcp}:]port[@address][,...]"
 Makes the agent list on the specified list of sockets instead of the
 default port, which is port 161.  Multiple ports can be separated by
 commas.  Transports can be specified by prepending the port number

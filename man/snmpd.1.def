@@ -5,7 +5,7 @@
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
 .SH SYNOPSIS
-.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p [(udp|tcp):]port[@address][,...]] [-x agentx-socket] [-f] [-l logfile] [-L] [-c file] [-C] [-r] [-I [-]module_list]"
+.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p [{udp|tcp}:]port[@address][,...]] [-x agentx-socket] [-f] [-l logfile] [-L] [-c file] [-C] [-r] [-I [-]module_list]"
 .SH DESCRIPTION
 .B snmpd
 is a SNMP agent which binds to a port and awaits requests from
@@ -33,7 +33,7 @@ Print simpler output for easier automated parsing.
 .B -D
 Turn on debugging output
 .TP
-.B -p [(udp|tcp):]port[@address][,...]
+.B -p [{udp|tcp}:]port[@address][,...]
 Makes the agent list on the specified list of sockets instead of the
 default port, which is port 161.  Multiple ports can be separated by
 commas.  Transports can be specified by prepending the port number
