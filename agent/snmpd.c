@@ -129,18 +129,18 @@ struct addrCache {
 static struct addrCache addrCache[ADDRCACHE];
 static int lastAddrAge = 0;
 
-extern void init_snmp __UCD_P((void));
+extern void init_snmp __P((void));
 
-int receive __UCD_P((int *, int));
-int snmp_read_packet __UCD_P((int));
-char *sprintf_stamp __UCD_P((time_t *));
-int agent_party_init __UCD_P((in_addr_t, u_short, char *));
-int create_v1_trap_session __UCD_P((char *, char *));
-void send_v1_trap __UCD_P((struct snmp_session *, int, int));
-char *reverse_bytes __UCD_P((char *, int));
-void usage __UCD_P((char *));
-int main __UCD_P((int, char **));
-int snmp_input __UCD_P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+int receive __P((int *, int));
+int snmp_read_packet __P((int));
+char *sprintf_stamp __P((time_t *));
+int agent_party_init __P((in_addr_t, u_short, char *));
+int create_v1_trap_session __P((char *, char *));
+void send_v1_trap __P((struct snmp_session *, int, int));
+char *reverse_bytes __P((char *, int));
+void usage __P((char *));
+int main __P((int, char **));
+int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
 
 char *sprintf_stamp (now)
     time_t *now;

@@ -65,24 +65,24 @@ struct counter64 {
     u_long low;
 };
 
-u_char	*asn_parse_int __UCD_P((u_char *, int *, u_char *, long *, int));
-u_char	*asn_build_int __UCD_P((u_char *, int *, u_char, long *, int));
-u_char	*asn_parse_unsigned_int __UCD_P((u_char *, int *, u_char *, u_long *, int));
-u_char	*asn_build_unsigned_int __UCD_P((u_char *, int *, u_char, u_long *, int));
-u_char	*asn_parse_string __UCD_P((u_char *, int *, u_char *, u_char *, int *));
-u_char	*asn_build_string __UCD_P((u_char *, int *, u_char, u_char *, int));
-u_char	*asn_parse_header __UCD_P((u_char *, int *, u_char *));
-u_char	*asn_build_header __UCD_P((u_char *, int *, u_char, int));
-u_char	*asn_build_sequence __UCD_P((u_char *, int *, u_char, int));
-u_char	*asn_parse_length __UCD_P((u_char *, u_long *));
-u_char	*asn_build_length __UCD_P((u_char *, int *, int));
-u_char	*asn_parse_objid __UCD_P((u_char *, int *, u_char *, oid *, int *));
-u_char	*asn_build_objid __UCD_P((u_char *, int *, u_char, oid *, int));
-u_char	*asn_parse_null __UCD_P((u_char *, int *, u_char *));
-u_char	*asn_build_null __UCD_P((u_char *, int *, u_char));
-u_char	*asn_parse_bitstring __UCD_P((u_char *, int *, u_char *, u_char *, int *));
-u_char	*asn_build_bitstring __UCD_P((u_char *, int *, u_char, u_char *, int));
-u_char	*asn_parse_unsigned_int64 __UCD_P((u_char *, int *, u_char *,
+u_char	*asn_parse_int __P((u_char *, int *, u_char *, long *, int));
+u_char	*asn_build_int __P((u_char *, int *, u_char, long *, int));
+u_char	*asn_parse_unsigned_int __P((u_char *, int *, u_char *, u_long *, int));
+u_char	*asn_build_unsigned_int __P((u_char *, int *, u_char, u_long *, int));
+u_char	*asn_parse_string __P((u_char *, int *, u_char *, u_char *, int *));
+u_char	*asn_build_string __P((u_char *, int *, u_char, u_char *, int));
+u_char	*asn_parse_header __P((u_char *, int *, u_char *));
+u_char	*asn_build_header __P((u_char *, int *, u_char, int));
+u_char	*asn_build_sequence __P((u_char *, int *, u_char, int));
+u_char	*asn_parse_length __P((u_char *, u_long *));
+u_char	*asn_build_length __P((u_char *, int *, int));
+u_char	*asn_parse_objid __P((u_char *, int *, u_char *, oid *, int *));
+u_char	*asn_build_objid __P((u_char *, int *, u_char, oid *, int));
+u_char	*asn_parse_null __P((u_char *, int *, u_char *));
+u_char	*asn_build_null __P((u_char *, int *, u_char));
+u_char	*asn_parse_bitstring __P((u_char *, int *, u_char *, u_char *, int *));
+u_char	*asn_build_bitstring __P((u_char *, int *, u_char, u_char *, int));
+u_char	*asn_parse_unsigned_int64 __P((u_char *, int *, u_char *,
                                        struct counter64 *, int));
-u_char	*asn_build_unsigned_int64 __UCD_P((u_char *, int *, u_char,
+u_char	*asn_build_unsigned_int64 __P((u_char *, int *, u_char,
                                        struct counter64 *, int));

@@ -64,36 +64,36 @@ SOFTWARE.
 #include "snmp_impl.h"
 #include "parse.h"
 
-char *sprint_objid __UCD_P((char *, oid *, int));
+char *sprint_objid __P((char *, oid *, int));
 
-static void sprint_by_type __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static parse_subtree __UCD_P((struct tree *, char *, oid *, int *));
-       void set_function __UCD_P((struct tree *));		/* used by parse.c */
-static int lc_cmp __UCD_P((char *, char *));
-static char *uptimeString __UCD_P((u_long, char *));
-static void sprint_hexstring __UCD_P((char *, u_char *, int));
-static void sprint_asciistring __UCD_P((char *, u_char *, int));
-static void sprint_octet_string __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_opaque __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_object_identifier __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_timeticks __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_hinted_integer __UCD_P((char *, long, char *, char *));
-static void sprint_integer __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_uinteger __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_gauge __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_counter __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_networkaddress __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_ipaddress __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_null __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_bitstring __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_nsapaddress __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_counter64 __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_unknowntype __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
-static void sprint_badtype __UCD_P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_by_type __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static parse_subtree __P((struct tree *, char *, oid *, int *));
+       void set_function __P((struct tree *));		/* used by parse.c */
+static int lc_cmp __P((char *, char *));
+static char *uptimeString __P((u_long, char *));
+static void sprint_hexstring __P((char *, u_char *, int));
+static void sprint_asciistring __P((char *, u_char *, int));
+static void sprint_octet_string __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_opaque __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_object_identifier __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_timeticks __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_hinted_integer __P((char *, long, char *, char *));
+static void sprint_integer __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_uinteger __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_gauge __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_counter __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_networkaddress __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_ipaddress __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_null __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_bitstring __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_nsapaddress __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_counter64 __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_unknowntype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
+static void sprint_badtype __P((char *, struct variable_list *, struct enum_list *, char *, char *));
   
-static struct tree *get_symbol __UCD_P((oid *, int, struct tree *, char *));
-static struct tree *get_tree __UCD_P((oid *, int, struct tree *));
-static char *get_description __UCD_P((oid *, int));
+static struct tree *get_symbol __P((oid *, int, struct tree *, char *));
+static struct tree *get_tree __P((oid *, int, struct tree *));
+static char *get_description __P((oid *, int));
 
 static int quick_print = 0;
 
@@ -103,7 +103,7 @@ void snmp_set_quick_print(val)
     quick_print = val;
 }
 
-int snmp_get_quick_print __UCD_P((void))
+int snmp_get_quick_print __P((void))
 {
     return quick_print;
 }
@@ -772,12 +772,12 @@ char Standard_Prefix[] = ".1.3.6.1.2.1.";
 char Prefix[128];
 int Suffix;
 
-extern void    init_mib_internals __UCD_P((void));	/* from parse.c */
-extern int     which_module __UCD_P((char *));	/* from parse.c */
-extern struct tree *find_tree_node __UCD_P((char *, int));	/* from parse.c */
+extern void    init_mib_internals __P((void));	/* from parse.c */
+extern int     which_module __P((char *));	/* from parse.c */
+extern struct tree *find_tree_node __P((char *, int));	/* from parse.c */
 
 void
-init_mib __UCD_P((void))
+init_mib __P((void))
 {
     char *prefix;
     char  *env_var, *entry, path[300];

@@ -396,13 +396,15 @@
 #endif
 #endif
 
-#ifndef __UCD_P
+#ifndef SYS_CDEFS_DEFINES___P
+#ifndef _P
 #ifdef __STDC__
-#define __UCD_P(params) params
+#define __P(params) params
 #else
-#define __UCD_P(params) ()
+#define __P(params) ()
 #endif /* __STDC__ */
-#endif /* __UCD_P */
+#endif /* __P */
+#endif /* SYS_CDEFS_DEFINES___P */
 
 #ifdef WIN32
 #define ENV_SEPARATOR ";"

@@ -50,8 +50,8 @@ static oid cacheTime[] = {1, 3, 6, 1, 6, 3, 3, 1, 2, 3};
 
 #define CONTEXTCOMPLETE_MASK		0x03FF	/* all collumns */
 
-struct contextEntry *context_rowCreate __UCD_P((oid *, int));
-void context_rowDelete __UCD_P((oid *, int));
+struct contextEntry *context_rowCreate __P((oid *, int));
+void context_rowDelete __P((oid *, int));
 
 struct contextEntry *
 context_rowCreate(contextID, contextIDLen)
@@ -531,7 +531,7 @@ var_context(vp, name, length, exact, var_len, write_method)
     register int *length;    /* IN/OUT - length of input and output oid's */
     int          exact;      /* IN - TRUE if an exact match was requested. */
     int          *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int          (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int ));
+    int          (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int ));
 {
     oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN];
     int newnamelen, lownamelen;

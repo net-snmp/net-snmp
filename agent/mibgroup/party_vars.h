@@ -5,10 +5,10 @@
 #ifndef _MIBGROUP_PARTY_VARS_H
 #define _MIBGROUP_PARTY_VARS_H
 
-u_char *var_party __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-int write_party __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
-struct partyEntry *party_rowCreate __UCD_P((oid *, int));
-void party_rowDelete __UCD_P((oid *, int));
+u_char *var_party __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+int write_party __P((int, u_char *, u_char, int, u_char *, oid *, int));
+struct partyEntry *party_rowCreate __P((oid *, int));
+void party_rowDelete __P((oid *, int));
 
 #include "party.h"
 

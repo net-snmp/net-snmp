@@ -40,17 +40,17 @@ static struct nlist interfaces_nl[] = {
 };
 #endif
 
-int header_interfaces __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
-int header_ifEntry __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
-extern u_char	*var_ifEntry __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
+int header_interfaces __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
+int header_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
+extern u_char	*var_ifEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char,int, u_char *, oid *, int)) ));
 
 #ifndef solaris2
 #if defined(sunV3) || defined(linux)
-static int Interface_Scan_By_Index __UCD_P((int, char *, struct ifnet *));
+static int Interface_Scan_By_Index __P((int, char *, struct ifnet *));
 #else
-static int Interface_Scan_By_Index __UCD_P((int, char *, struct ifnet *, struct in_ifaddr *));
+static int Interface_Scan_By_Index __P((int, char *, struct ifnet *, struct in_ifaddr *));
 #endif
-static int Interface_Get_Ether_By_Index __UCD_P((int, u_char *));
+static int Interface_Get_Ether_By_Index __P((int, u_char *));
 #endif
 
 	/*********************
@@ -89,7 +89,7 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 #define INTERFACES_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -123,7 +123,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
     int     *length;	    /* IN/OUT - length of input and output oid's */
     int     exact;	    /* IN - TRUE if an exact match was requested. */
     int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
 #define IFENTRY_NAME_LENGTH	10
     oid newname[MAX_NAME_LEN];
@@ -181,7 +181,7 @@ var_interfaces(vp, name, length, exact, var_len, write_method)
     int     *length;
     int     exact;
     int     *var_len;
-    int     (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     if (header_interfaces(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
@@ -208,7 +208,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
     register int	*length;
     int			exact;
     int			*var_len;
-    int			(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     static struct ifnet ifnet;
     register int interface;
@@ -416,7 +416,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
     register int	*length;
     int			exact;
     int			*var_len;
-    int			(**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     static struct ifnet ifnet;
     register int interface;
@@ -596,7 +596,7 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
     register int        *length;
     int                 exact;
     int                 *var_len;
-    int                 (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int                 (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     int        interface;
     mib2_ifEntry_t      ifstat;
@@ -1045,7 +1045,7 @@ struct in_ifaddr *Retin_ifaddr;
 
 static int Interface_Count=0;
 
-int Interface_Scan_Get_Count __UCD_P((void))
+int Interface_Scan_Get_Count __P((void))
 {
 
 	if (!Interface_Count) {

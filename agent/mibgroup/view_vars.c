@@ -32,9 +32,9 @@
 
 #define VIEWCOMPLETE_MASK	0x3F /* all columns */
 
-struct viewEntry *view_rowCreate __UCD_P((int, oid *, int));
-void view_rowDelete __UCD_P((int, oid *, int));
-int in_view __UCD_P((oid *, int, int));
+struct viewEntry *view_rowCreate __P((int, oid *, int));
+void view_rowDelete __P((int, oid *, int));
+int in_view __P((oid *, int, int));
 
 
 struct viewEntry *
@@ -209,7 +209,7 @@ var_view(vp, name, length, exact, var_len, write_method)
     register int *length;    /* IN/OUT - length of input and output oid's */
     int          exact;      /* IN - TRUE if an exact match was requested. */
     int          *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int          (**write_method) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int          (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 {
     oid newname[MAX_NAME_LEN], lowname[MAX_NAME_LEN], *np;
     int newnamelen, lownamelen;

@@ -7,14 +7,14 @@
 
 #include "mibdefs.h"
 
-int getswap __UCD_P((int));
-unsigned char *var_extensible_mem __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+int getswap __P((int));
+unsigned char *var_extensible_mem __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
-extern void	init_memory __UCD_P((void));
+extern void	init_memory __P((void));
 
 /* config file parsing routines */
-void memory_parse_config __UCD_P((char *, char *));
-void memory_free_config __UCD_P((void));
+void memory_parse_config __P((char *, char *));
+void memory_free_config __P((void));
 config_parse_dot_conf("swap", memory_parse_config, memory_free_config);
 
 #define MEMTOTALSWAP 3

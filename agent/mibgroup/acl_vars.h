@@ -7,8 +7,8 @@
 
 #include "acl.h"
 
-extern u_char *var_acl __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-extern int write_acl __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int));
+extern u_char *var_acl __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern int write_acl __P((int, u_char *, u_char, int, u_char *, oid *, int));
 
 #define ACLTABLE	PARTYMIB, 2, 3, 1, 1
 

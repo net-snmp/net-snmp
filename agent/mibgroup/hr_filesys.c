@@ -44,7 +44,7 @@ struct mntent *HRFS_entry;
 
 extern void  Init_HR_FileSys();
 extern int   Get_Next_HR_FileSys();
-static u_char * when_dumped __UCD_P(( char* filesys, int level, int* length ));
+static u_char * when_dumped __P(( char* filesys, int level, int* length ));
 
 void	init_hr_filesys( )
 {

@@ -7,12 +7,12 @@
 
 config_require(util_funcs)
 
-void init_system __UCD_P((void));
-u_char	*var_system __UCD_P((struct variable *, oid *, int *, int, int *, int (**write) __UCD_P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+void init_system __P((void));
+u_char	*var_system __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 /* config file parsing routines */
-void system_parse_config_sysloc __UCD_P((char *, char *));
-void system_parse_config_syscon __UCD_P((char *, char *));
+void system_parse_config_sysloc __P((char *, char *));
+void system_parse_config_syscon __P((char *, char *));
 config_parse_dot_conf("syslocation",system_parse_config_sysloc, NULL);
 config_parse_dot_conf("syscontact",system_parse_config_syscon, NULL);
 
