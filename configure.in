@@ -241,8 +241,8 @@ AC_ARG_WITH(out_transports,
 dnl
 dnl Catch common mistakes in transport options
 dnl
-AC_ARG_WITH(transport,,    AC_MSG_ERROR([ Invalid option. Use --with-mib-modules instead ])     )
-AC_ARG_WITH(out_transport,,AC_MSG_ERROR([ Invalid option. Use --with-out-mib-modules instead ]) )
+AC_ARG_WITH(transport,,    AC_MSG_ERROR([ Invalid option. Use --with-transports instead ])     )
+AC_ARG_WITH(out_transport,,AC_MSG_ERROR([ Invalid option. Use --with-out-transports instead ]) )
 
 AC_ARG_WITH(mib_modules,
 [  --with-mib-modules=\"item1 ...\"  Compile with additional mib modules
