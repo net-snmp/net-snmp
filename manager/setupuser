@@ -1,0 +1,39 @@
+#!/usr/local/bin/perl
+
+use DBI;
+$hostname = 'localhost';          # Host that serves the mSQL Database
+$dbname = 'snmp';                 # mySQL Database name
+$doit = 1;
+
+sub usage {
+    print "$0 [-H host] [-u user] [-p password] [-v] [-h] [-n] [-d] [-a] GROUP USERS\n";
+    exit 0;
+}
+
+@tables = qw(prEntry extEntry dskEntry  laEntry fileEntry snmperrs memory);
+
+while ($#ARGV > -1 && $ARGV[0] =~ /^-/) {
+    $_ = shift @ARGV;
+    usage if (/-h/);
+    $hostname = shift if (/-H/);
+    $user = shift if (/-u/);
+    $pass = shift if (/-p/);
+    $admin = 1 if (/-a/);
+    $verbose = 1 if (/-v/);
+    $delete = 1 if (/-d/);
+    $doit = 0 if (/-n/);
+}
+
+$group = shift;
+
+die "no group specified" if (!defined($group));
+
+( $dbh = DBI->connect("DBI:mysql:database=$dbname;host=$hostname", $user, $pass))
+    or die "\tConnect not ok: $DBI::errstr\n";
+$handle = $dbh->prepare("insert into usergroups(user, groupname, isadmin) values(?, '$group', " . (($admin) ? "'Y'" : "'N'") . ")");
+
+foreach $i (@ARGV) {
+    $handle->execute($i)
+	or die "\tConnect not ok: $DBI::errstr\n";
+}
+$dbh->disconnect();
