@@ -409,7 +409,7 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
 
       while (repeat && cp < ecp) {
 	value = 0;
-	if (code != 'a') {
+	if (code != 'a' && code != 't') {
 	  for (x = 0; x < width; x++) {
 	    value = value * 256 + *cp++;
 	  }
@@ -434,6 +434,7 @@ sprint_realloc_octet_string(u_char **buf, size_t *buf_len, size_t *out_len,
 	  }
 	  break;
 	case 'a':
+	case 't':        /* New in RFC 3411 */
 	  while ((*out_len + width + 1) >= *buf_len) {
 	    if (!(allow_realloc && snmp_realloc(buf, buf_len))) {
 	      return 0;
