@@ -12,7 +12,7 @@ void init_var_route __P((void));
 #ifdef RTENTRY_4_4
 void load_rtentries __P((struct radix_node *));
 #endif
-#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2)
+#if defined(freebsd2) || defined(netbsd1) || defined(bsdi2) || defined(openbsd2)
 struct sockaddr_in *klgetsa __P((struct sockaddr_in *));
 #endif
 u_char	*var_ipRouteEntry __P((struct variable*, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
