@@ -47,20 +47,6 @@ SOFTWARE.
 struct variable_list;
 struct timeval;
 
-#ifdef STRUCT_SOCKADDR_HAS_SA_LEN2
-	/*
-	 * Certain systems (notably Irix 6.x) have a non-traditional
-	 *   socket structure, and #define the traditional field names.
-	 *   This breaks with the UCD socket-equivalent structure below.
-	 * The easiest way to handle this is to use the native socket
-	 *   structure instead, and trust that this is large enough
-	 *   to handle any necessary Unix domain addresses.
-	 */
-#include <sys/types.h>
-#include <sys/socket.h>
-#define snmp_ipaddr struct sockaddr
-
-#else
 
 	/*
 	 * Mimic size and alignment of 'struct sockaddr_storage' (see RFC 2553)
@@ -75,6 +61,30 @@ struct timeval;
 		(sizeof( unsigned short ) + _UCD_SS_PAD1SIZE + _UCD_SS_ALIGNSIZE ))
 
 typedef struct {
+
+#ifdef STRUCT_SOCKADDR_HAS_SA_FAMILY2
+	/*
+	 * Certain systems (notably Irix 6.x) have a non-traditional
+	 *   socket structure, and #define the traditional field names.
+	 * This local definition should reproduce this structure, and still
+	 *    be large enough to handle any necessary Unix domain addresses.
+	 */
+  union {
+   struct {
+#ifdef _HAVE_SA_LEN
+    unsigned char	sa_len2;
+    unsigned char	sa_family2;
+#else
+    unsigned short	sa_family2;
+#endif
+    char		sa_data2[ _UCD_SS_PAD1SIZE ];
+   } sa_generic;
+    long		sa_align;
+    char		sa_pad2[ _UCD_SS_PAD2SIZE ];
+  } sa_union;
+
+#else
+
 #ifdef STRUCT_SOCKADDR_HAS_SA_LEN
     unsigned char	sa_len;
     unsigned char	sa_family;
@@ -84,8 +94,9 @@ typedef struct {
     char		sa_data[ _UCD_SS_PAD1SIZE ];
     long		sa_align;
     char		sa_pad2[ _UCD_SS_PAD2SIZE ];
-} snmp_ipaddr;
 #endif
+
+} snmp_ipaddr;
 
 #define USM_AUTH_KU_LEN     32
 #define USM_PRIV_KU_LEN     32
