@@ -8,21 +8,23 @@
 @end@
 ########################################################################
 ## }
-/*
- * ${node}_map($m2c_node_map_param)
- *
+/**
  * map a value from it's original native format the the MIB format.
- * parameters follow the memset convention (dest, src).
  *
- * @return MFD_SUCCESS         : success
- *         MFD_ERROR           : Any other error
- */
-/*
- * generation and use of this function can be turned off by re-running
+ * @retval MFD_SUCCESS         : success
+ * @retval MFD_ERROR           : Any other error
+ *
+ * @note parameters follow the memset convention (dest, src).
+ *
+ * @note generation and use of this function can be turned off by re-running
  * mib2c after adding the following line to the file
  * default-node-${node}.m2d :
+ *   @eval $@m2c_node_skip_mapping = 1@
  *
- *   @eval @m2c_node_skip_mapping = 1@
+ * @remark
+ *  If the values for your data type don't exactly match the
+ *  possible values defined by the mib, you should map them here.
+ *  Otherwise, just do a direct copy.
  */
 int
 ${node}_map($m2c_node_map_param)
@@ -41,12 +43,6 @@ ${node}_map($m2c_node_map_param)
     /*
      * TODO:
      * value mapping
-@if $mfd_code_verbose == 1@
-     *
-     * If the values for your data type don't exactly match the
-     * possible values defined by the mib, you should map them here.
-     * Otherwise, just do a direct copy.
-@end@
      */
 @if $m2c_node_needlength == 1@
 @   if $m2c_include_examples == 0@
@@ -105,7 +101,7 @@ $example_end
     }
 ##
 @else@
-    *mib_$m2c_node_param_ref_name = raw_$m2c_node_param_val_name;
+    (*mib_$m2c_node_param_ref_name) = raw_$m2c_node_param_val_name;
 @end@
 
     return MFD_SUCCESS;

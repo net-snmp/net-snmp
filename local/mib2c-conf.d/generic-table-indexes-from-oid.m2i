@@ -11,8 +11,8 @@
 /**
  * extract ${context} indexes from a netsnmp_index
  *
- * @return SNMP_ERR_NOERROR  : no error
- *         SNMP_ERR_GENERR   : error
+ * @retval SNMP_ERR_NOERROR  : no error
+ * @retval SNMP_ERR_GENERR   : error
  */
 int
 ${context}_index_from_oid(netsnmp_index *oid_idx,
@@ -62,7 +62,6 @@ ${context}_index_from_oid(netsnmp_index *oid_idx,
 
     return err;
 }
-
 
 ##
 ########################################################################
