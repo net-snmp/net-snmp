@@ -296,6 +296,41 @@ _clone_pdu_header(struct snmp_pdu *pdu)
     return newpdu;
 }
 
+static
+struct variable_list *
+_copy_varlist(struct variable_list * var,	/* source varList */
+              int errindex,                 /* index of variable to drop (if any) */
+              int copy_count)               /* !=0 number variables to copy */
+{
+    struct variable_list *newhead, *newvar, *oldvar;
+    int ii = 0;
+
+    newhead = NULL; oldvar = NULL;
+
+    while (var && (copy_count-- > 0))
+    {
+        /* Drop the specified variable (if applicable) */
+        if (++ii == errindex) {
+            var = var->next_variable; continue;
+        }
+
+        /* clone the next variable. Cleanup if alloc fails */
+        newvar = (struct variable_list *)malloc(sizeof(struct variable_list));
+        if (snmp_clone_var(var, newvar)){
+            if (newvar) free((char *)newvar);
+            snmp_free_varbind(newhead); return 0;
+        }
+
+        /* add cloned variable to new list  */
+        if (0 == newhead) newhead = newvar;
+        if (oldvar) oldvar->next_variable = newvar;
+        oldvar = newvar;
+
+        var = var->next_variable;
+    }
+    return newhead;
+}
+
 
 /*
  * Copy some or all variables from source PDU to target PDU.
@@ -324,9 +359,14 @@ _copy_pdu_vars(struct snmp_pdu *pdu,  /* source PDU */
         int copy_count)               /* !=0 number of variables to copy */
 {
     struct variable_list *var, *newvar, *oldvar;
-    int ii, copied;
+    int ii, copied, drop_idx;
 
     if (!newpdu) return 0;            /* where is PDU to copy to ? */
+
+    if ( drop_err )
+	drop_idx = pdu->errindex - skip_count;
+    else
+	drop_idx = 0;
 
     var = pdu->variables;
     while (var && (skip_count-- > 0)) /* skip over pdu variables */
@@ -335,28 +375,12 @@ _copy_pdu_vars(struct snmp_pdu *pdu,  /* source PDU */
     oldvar = 0; ii = 0; copied = 0;
     if (pdu->flags & UCD_MSG_FLAG_FORCE_PDU_COPY)
 	copied = 1;	/* We're interested in 'empty' responses too */
-    while (var && (copy_count-- > 0))
-    {
-        /* errindex starts from 1. If drop_err, skip the errored variable */
-        if (drop_err && (++ii == pdu->errindex)) {
-            var = var->next_variable; continue;
-        }
 
-        /* clone the next variable. Cleanup if alloc fails */
-        newvar = (struct variable_list *)malloc(sizeof(struct variable_list));
-        if (snmp_clone_var(var, newvar)){
-            if (newvar) free((char *)newvar);
-            snmp_free_pdu(newpdu); return 0;
-        }
-        copied++;
+    newpdu->variables = _copy_varlist( var, drop_idx, copy_count);
+    if ( newpdu->variables )
+	copied = 1;
 
-        /* add cloned variable to new PDU */
-        if (0 == newpdu->variables) newpdu->variables = newvar;
-        if (oldvar) oldvar->next_variable = newvar;
-        oldvar = newvar;
-
-        var = var->next_variable;
-    }
+#if ALSO_TEMPORARILY_DISABLED
     /* Error if bad errindex or if target PDU has no variables copied */
     if ((drop_err && (ii < pdu->errindex))
 #if TEMPORARILY_DISABLED
@@ -367,6 +391,7 @@ _copy_pdu_vars(struct snmp_pdu *pdu,  /* source PDU */
       ) {
         snmp_free_pdu(newpdu); return 0;
     }
+#endif
     return newpdu;
 }
 
@@ -392,6 +417,18 @@ _clone_pdu(struct snmp_pdu *pdu, int drop_err)
     return newpdu;
 }
 
+
+/*
+ * This function will clone a full varbind list
+ *
+ * Returns a pointer to the cloned PDU if successful.
+ * Returns 0 if failure
+ */
+struct variable_list *
+snmp_clone_varbind(struct variable_list *varlist)
+{
+    return _copy_varlist(varlist, 0, 10000); /* skip none, copy all */
+}
 
 /*
  * This function will clone a PDU including all of its variables.
