@@ -119,7 +119,9 @@ ${node}_undo_setup( ${context}_rowreq_ctx *rowreq_ctx)
     netsnmp_assert(NULL != rowreq_ctx);
 
 @   eval $m2c_ctx_lh = "${m2c_undo_item}${node}"@
+@   eval $m2c_ctx_lhs = "${m2c_undo_item}${node}_len"@
 @   eval $m2c_ctx_rh = "${m2c_data_item}${node}"@
+@   eval $m2c_ctx_rhs = "${m2c_data_item}${node}_len"@
 @   include generic-ctx-copy.m2i@
 @end@
 
