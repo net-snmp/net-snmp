@@ -798,13 +798,14 @@ char Standard_Prefix[] = ".1.3.6.1.2.1.";
 char Prefix[128];
 int Suffix;
 
-extern void    init_mib_internals ();	/* from parse.c */
-extern char*   which_module __P((int));	/* from parse.c */
+extern void    init_mib_internals __P((void));	/* from parse.c */
+extern int     which_module __P((char *));	/* from parse.c */
+extern struct tree *find_tree_node __P((char *, int));	/* from parse.c */
 
 void
 init_mib __P((void))
 {
-    char *file, *prefix, mibpath[300];
+    char *prefix;
     char  *env_var, *entry, path[300];
 
 	/* Initialise the MIB directory/ies */
@@ -812,7 +813,7 @@ init_mib __P((void))
     env_var = getenv("MIBDIRS");
     if ( env_var == NULL ) {
         sprintf(path, "%s/mibs", SNMPLIBPATH );
-	env_var = &path;
+	env_var = path;
     }
     entry = strtok( env_var, ":" );
     while ( entry ) {
@@ -827,7 +828,7 @@ init_mib __P((void))
     env_var = getenv("MIBS");
     if ( env_var == NULL ) {
         strcpy(path, "RFC1213-MIB");
-	env_var = &path;
+	env_var = path;
     }
     entry = strtok( env_var, ":" );
     while ( entry ) {
@@ -838,7 +839,7 @@ init_mib __P((void))
     env_var = getenv("MIBFILE");
     if ( env_var == NULL ) {
         strcpy(path, "mib.txt:/usr/local/lib/mib.txt:/etc/mib.txt");
-	env_var = &path;
+	env_var = path;
     }
     entry = strtok( env_var, ":" );
     while ( entry ) {
