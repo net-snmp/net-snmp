@@ -53,7 +53,7 @@ CC	        = @CC@ $(CPPFLAGS)
 LIB_LD_CMD      = $(LIBTOOL) --mode=link $(CC) -rpath $(libdir) -release 0.$(VERSION) -o
 LIB_EXTENSION   = la
 LIB_VERSION     =
-LIB_LDCONFIG_CMD = $(LIBTOOL) -n --mode=finish $(libdir)
+LIB_LDCONFIG_CMD = $(LIBTOOL) --mode=finish $(libdir)
 # RANLIB 	= @RANLIB@
 RANLIB		= :
 
