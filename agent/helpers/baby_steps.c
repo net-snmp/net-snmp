@@ -20,8 +20,8 @@ static u_short get_mode_map[BABY_STEPS_PER_MODE_MAX] = {
 
 static u_short set_mode_map[SNMP_MSG_INTERNAL_SET_MAX][BABY_STEPS_PER_MODE_MAX] = {
     /*R1*/
-    { MODE_BSTEP_PRE_REQUEST, MODE_BSTEP_OBJECT_LOOKUP, MODE_BSTEP_CHECK_VALUE,
-      MODE_BSTEP_ROW_CREATE},
+    { MODE_BSTEP_PRE_REQUEST, MODE_BSTEP_OBJECT_LOOKUP, MODE_BSTEP_ROW_CREATE,
+      MODE_BSTEP_CHECK_VALUE },
     /*R2*/
     { MODE_BSTEP_UNDO_SETUP, BABY_STEP_NONE, BABY_STEP_NONE, BABY_STEP_NONE },
     /*A */
@@ -103,53 +103,74 @@ _baby_steps_helper(netsnmp_mib_handler *handler,
         mode_map_ptr = get_mode_map;
     }
 
-    /* Legend: (test) [optional] <required>
+    /*
+     * NOTE: if you update this chart, please update the version in
+     *       local/mib2c-conf.d/parent-set.m2i while you're at it.
+     */
+    /*
+     ***********************************************************************
+     * Baby Steps Flow Chart (2004.06.05)                                  *
+     *                                                                     *
+     * +--------------+    +================+    U = unconditional path    *
+     * |optional state|    ||required state||    S = path for success      *
+     * +--------------+    +================+    E = path for error        *
+     ***********************************************************************
      *
-     * OLD              NEW
-     * ========  ============================================
-     * +++           [pre_request]
-     *                    |
-     *               (row exists?) N ->(row_creation) N >-->+
-     *                    |                   | Y           |
-     *                    |<------------------+             |
-     *                   \|/                                |
-     * RESERVE1  <object_syntax_checks>                     |
-     *                    |                                \|/
-     *                  (err?)  Y >------------------------>+
-     *                    |                                 |
-     *                   \|/                               \|/
-     * +++          (row existed?) N ->[row_creation] ERR ->+
-     *                    |                   | OK          |
-     *                    |<------------------+             |
-     *                   \|/                                |
-     * RESERVER2     [undo_setup]                           |
-     *                    |                                 |
-     *                  (err?)  Y --->------------------>+  |
-     *                    |                              |  |
-     * ACTION        <set_values>                        |  |
-     *                    |                              |  |
-     *                  (err?)  Y >---------+            |  |
-     *                    |                 |            |  |
-     * +++        [consistency_checks]      |            |  |
-     *                    |                \|/           |  |
-     * UNDO             (err?)  Y >-------[undo]-------->+  |
-     *                    |                              |  |
-     *            [reversible_commit]                    |  |
-     * +++                |                              | \|/
-     *                  (err?)  Y >--[reverse_commit]    |  |
-     *                    |              |               |  |
-     * COMMIT        <final_commit>      |               |  |
-     *                    |              |               |  |
-     *                  (err?)  Y >--[log msg]           |  |
-     *                    |              |               |  |
-     *                    |             \|/             \|/ |
-     *                    | <-----------<+---<-----------+  |
-     *                   \|/                                |
-     * FREE          [undo_cleanup]                         |
-     *                    |                                \|/
-     *                    |<--------------<-----------------+
-     *                   \|/
-     *               [post_request]
+     *                        +--------------+
+     *                        |     pre      |
+     *                        |   request    |
+     *                        +--------------+
+     *                               | U
+     * +-------------+        +==============+
+     * |    row    |f|<-------||  object    ||
+     * |  create   |1|      E ||  lookup    ||
+     * +-------------+        +==============+
+     *     E |   | S                 | S
+     *       |   +------------------>|
+     *       |                +==============+
+     *       |              E ||   check    ||
+     *       |<---------------||   values   ||
+     *       |                +==============+
+     *       |                       | S
+     *       |                +==============+
+     *       |       +<-------||   undo     ||
+     *       |       |      E ||   setup    ||
+     *       |       |        +==============+
+     *       |       |               | S
+     *       |       |        +==============+
+     *       |       |        ||    set     ||-------------------------->+
+     *       |       |        ||   value    || E                         |
+     *       |       |        +==============+                           |
+     *       |       |               | S                                 |
+     *       |       |        +--------------+                           |
+     *       |       |        |    check     |-------------------------->|
+     *       |       |        |  consistency | E                         |
+     *       |       |        +--------------+                           |
+     *       |       |               | S                                 |
+     *       |       |        +==============+         +==============+  |
+     *       |       |        ||   commit   ||-------->||     undo   ||  |
+     *       |       |        ||            || E       ||    commit  ||  |
+     *       |       |        +==============+         +==============+  |
+     *       |       |               | S                     U |<--------+
+     *       |       |        +--------------+         +==============+
+     *       |       |        | irreversible |         ||    undo    ||
+     *       |       |        |    commit    |         ||     set    ||
+     *       |       |        +--------------+         +==============+
+     *       |       |               | U                     U |
+     *       |       +-------------->|<------------------------+
+     *       |                +==============+
+     *       |                ||   undo     ||
+     *       |                ||  cleanup   ||
+     *       |                +==============+
+     *       +---------------------->| U
+     *                               |
+     *                          (err && f1)------------------->+
+     *                               |                         |
+     *                        +--------------+         +--------------+
+     *                        |    post      |<--------|      row     |
+     *                        |   request    |       U |    release   |
+     *                        +--------------+         +--------------+
+     *
      */
     /*
      * save original mode
