@@ -10,7 +10,9 @@ $miberrflag=".ERRORFLAG";
 $miberrmsg=".ERRORMSG";
 $mibfix=".ERRORFIX";
 $mibheadall=".EXTENSIBLEDOTMIB";
-$mibclearcache="$mibheadall.VERSIONMIB.VERCLEARCACHE";
+$mibclearcache="$mibheadall.VERSIONMIBNUM.VERCLEARCACHE";
+$mibrestartagent="$mibheadall.VERSIONMIBNUM.VERRESTARTAGENT";
+$mibupdateconfig="$mibheadall.VERSIONMIBNUM.VERUPDATECONFIG";
 %miblist=(    '.PROCMIBNUM' => 'processes',
 	      '.SHELLMIBNUM' => 'scripts',
 	      '.MEMMIBNUM' => 'swap space',
@@ -203,7 +205,6 @@ sub new{
 						     $self->{'ErrMsg'}),
 				     -font => "6x13",
 				     -highlightcolor => "#ffffff",
-				     -highlightthickness => 0,
 				     -borderwidth => 0,
 				     -relief => "flat",
 				     -bd => 0, -padx => 0, -pady => 0,
@@ -403,7 +404,6 @@ sub new {
 	$self->{'hostlabel'} = 
 	    $self->{'MainFrame'}->Button(-text => sprintf("%-9.9s",
 							    $self->{'Name'}),
-					 -highlightthickness=>0,
 					 -bd => 0, -padx => 0, -pady => 0,
 					 -command =>[\&selectme,$self],
 					 -activeforeground => 'red',
@@ -459,7 +459,6 @@ sub fix {
     my $self = shift;
     if (! exists $self->{'Down'}) {
 	foreach $i (@{$self->{'Problems'}}) {
-	    printf("%d - %s\n",$i->canfix(),ref($i));
 	    if ($i->canfix() && ref($i) ne Host) {
 		$i->fix();
 	    }
@@ -629,7 +628,8 @@ if ($display) {
     $top->bind('all',"<Control-q>",[\&quit]);
     $top->bind('all',"<Control-h>",[\&makehidden]);
     $top->bind('all',"<Control-s>",[\&seenall]);
-     $top->option('add','*highlightthickness','0');        #wish this worked
+    $top->bind('all',"<Control-f>",[\&fixall]);
+     $top->option('add','*highlightThickness','0');        #wish this worked
 #     $top->option('add','*highlightbackground','#C9C9C9');
      $top->option('add','*background','#C9C9C9');
      $top->option('add','*font','6x13');
@@ -647,7 +647,6 @@ if ($display) {
     $butFrame = $top->Frame();
     $entryhost = "";
     $NewHost = $botFrame->Entry(-textvariable => \$entryhost,-width=>20,
-				-highlightthickness=>0,
 				-relief => "sunken");
     $NewHost->bind("<Return>",sub {newHost("$entryhost");
 			       $NewHost->delete(0,length($entryhost));});
@@ -659,11 +658,15 @@ if ($display) {
     $CmdsMenuBut->pack(-side => "left");
     $CmdsMenuBut->command(-label => "Check Hosts", -command => [\&rescanhosts]);
     $CmdsMenuBut->command(-label => "Check Log", -command => [\&scanlog]);
-    $CmdsMenuBut->command(-label => "Fix All", -command => [\&fixall]);
-    $CmdsMenuBut->command(-label => "Seen All", -command => [\&seenall]);
+    $CmdsMenuBut->command(-label => "Fix All", -command => [\&fixall],
+			  -accelerator => "Ctrl-f");
+    $CmdsMenuBut->command(-label => "Seen All", -command => [\&seenall],
+			  -accelerator => "Ctrl-s");
     $CmdsMenuBut->separator();
-    $CmdsMenuBut->command(-label => "Hide", -command => [\&makehidden]);
-    $CmdsMenuBut->command(-label => "Quit", -command => [\&quit]);
+    $CmdsMenuBut->command(-label => "Hide", -command => [\&makehidden],
+			  -accelerator => "Ctrl-h");
+    $CmdsMenuBut->command(-label => "Quit", -command => [\&quit],
+			  -accelerator => "Ctrl-q");
     $PrefsMenuBut = $MenuFrame->Menubutton(-text => "Prefs");
     $PrefsMenu = $PrefsMenuBut->Menu(-tearoff => 1);
     $PrefsMenuBut->configure(-menu => $PrefsMenu);
@@ -718,6 +721,21 @@ if ($display) {
 
     $PrefsMenuBut->checkbutton(-label => "Ping Host First", 
 			       -variable => \$pinghost);
+
+    # Agent control
+
+    $agentMenuBut = $MenuFrame->Menubutton(-text => "Agent-Control");
+    $agentMenu = $agentMenuBut->Menu(-tearoff => 1);
+    $agentMenuBut->configure(-menu => $agentMenu);
+    $agentMenuBut->pack(-side => "left");
+    $agentMenuBut->command(-label => "Re-read Configuration", 
+			   -command => [sub {if ($selected) { $top->Busy();$_ = `$::snmppath/snmpset $selected->{'Host'} ecemgr eceagent ececontext $mibupdateconfig i 1`; $top->Unbusy();}}]);
+    $agentMenuBut->command(-label => "Clear Exec Cache", 
+			   -command => [sub {if ($selected) { $top->Busy();$_ = `$::snmppath/snmpset $selected->{'Host'} ecemgr eceagent ececontext $mibclearcache i 1`; $top->Unbusy();}}]);
+    $agentMenuBut->separator();
+    $agentMenuBut->command(-label => "Re-start Agent", 
+			   -command => [sub {if ($selected) { $top->Busy(); $_ = `$::snmppath/snmpset $selected->{'Host'} ecemgr eceagent ececontext $mibrestartagent i 1`; $top->Unbusy();} }]);
+
     # set up remote commands
 
     $remoteMenuBut = $MenuFrame->Menubutton(-text => "Remote-Info");
@@ -754,20 +772,18 @@ if ($display) {
     $butFrame->pack(-fill => "x",-expand => 1);
     $botFrame->pack(-fill => "x",-expand => 1);
     $FixBut = $butFrame->Button(-text => "Fix",-command=>[sub{print "hi\n"}],
-				-highlightthickness=>0,
 				-state => "disabled");
     $FixBut->pack(-side => "left",-padx => 4,-pady => 2,-ipadx => 2,
 		   -ipady => 2);
     $RshBut = $butFrame->Button(-text => "Rsh",-command=>[sub{print "hi\n"}],
-				-highlightthickness=>0,
 				-state => "disabled");
     $RshBut->pack(-side => "left",-padx => 4,-pady => 2,-ipadx => 2,
 		   -ipady => 2);
-    $DelBut = $butFrame->Button(-text => "Del", -highlightthickness=>0,
+    $DelBut = $butFrame->Button(-text => "Del",
 				 -state => "disabled");
     $DelBut->pack(-side => "left",-padx => 4,-pady => 2,-ipadx => 2,
 		   -ipady => 2);
-    $ChkBut = $butFrame->Button(-text => "Chk", -highlightthickness=>0,
+    $ChkBut = $butFrame->Button(-text => "Chk",
 				 -state => "disabled");
     $ChkBut->pack(-side => "left",-padx => 4,-pady => 2,-ipadx => 2,
 		   -ipady => 2);
@@ -778,7 +794,7 @@ if ($display) {
 
     # generate log window, but tell it not to create display 
     $logwindow = MainWindow->new;
-    $logwindow->option('add','*highlightthickness','0');        #wish this worked
+    $logwindow->option('add','*highlightThickness','0');        #wish this worked
 #     $logwindow->option('add','*highlightbackground','#C9C9C9');
     $logwindow->option('add','*background','#C9C9C9');
     $logwindow->option('add','*font','6x13');
@@ -1029,49 +1045,86 @@ sub remote_cmd_generic {
     my $newwin = MainWindow->new;
     $newwin->Busy();
 
-    $newwin->option('add','*highlightthickness','0');        #wish this worked
+    $newwin->option('add','*highlightThickness','0');        #wish this worked
 #     $newwin->option('add','*highlightbackground','#C9C9C9');
     $newwin->option('add','*background','#C9C9C9');
     $newwin->option('add','*font','6x13');
 
     my $buttons = $newwin->Frame;
     $buttons->pack(-side => 'bottom', -expand => 1, -fill => 'x');
-    my $close = $buttons->Button(-text => 'Close', 
-				 -command => ['destroy',$newwin]);
-    $close->pack(-side => 'left', -expand => 1);
-    my $rerun = $buttons->Button(-text => 'Re-Run', 
-				 -command =>[\&remote_cmd,$cmd,$title,$insert]);
-    $rerun->pack(-side => 'right', -expand => 1);
+    my $entries = $newwin->Frame;
+    $entries->pack(-side => 'bottom', -expand => 1, -fill => 'x');
 
     my $text = $newwin->Text(-height => 40, -setgrid => 1);
     $text->pack(-side => 'left', -fill => 'both', -expand => 1);
     my $scroll = $newwin->Scrollbar(-command => ['yview',$text]);
-    $scroll->pack(-side => 'right', -fill => 'y');
+    $scroll->pack(-side => 'left', -fill => 'y');
     $text->configure(-yscrollcommand => ['set', $scroll]);
+
+    my $close = $buttons->Button(-text => 'Close', 
+				 -command => ['destroy',$newwin]);
+    $close->pack(-side => 'left', -expand => 1);
+    my $rerun = $buttons->Button(-text => 'Re-Run', 
+				 -command=>[\&fill_text,'',$text,
+					    \$cmd,$insert]);
+    $rerun->pack(-side => 'left', -expand => 1);
+
+    my $cmdlabel = $entries->Label(-text => "Command:  ");
+    my $cmdtexte = $entries->Entry(-textvariable => \$cmd, 
+				      -relief => "sunken");
+    $cmdtexte->bind('<Return>' => [\&fill_text,$text, \$cmd,$insert]);
+    $cmdlabel->pack(-side => 'left');
+    $cmdtexte->pack(-side => 'left');
+    
+    my $searchtext = '';
+    my $searchlabel = $entries->Label(-text => "Search for:  ");
+    my $searchtexte = $entries->Entry(-textvariable => \$searchtext, 
+				      -relief => "sunken");
+
+    $searchtexte->pack(-side => 'right');
+    $searchlabel->pack(-side => 'right');
+    $searchtexte->bind('<Return>' => [sub { $text->tag('remove','search','0.0','end');
+					    my($current, $length) = ('1.0', 0);
+					    while (1) {
+						$current = $text->search(-count => \$length, $searchtext, $current, 'end');
+						last if not $current;
+						$text->tag('add', 'search', $current, "$current + $length char");
+						$current = $text->index("$current + $length char");
+						$text->tag('configure','search',
+							   -background => 
+							   'lightBlue');}}]);
 
     if (defined($title)) {
 	$newwin->title($title);
 	$newwin->iconname($title);
     }
-    $text->delete('1.0','end');
+    fill_text('',$text,\$cmd,$insert);
+}
+
+sub fill_text {
+    my $dump = shift;
+    my $textw = shift;
+    my $cmd = shift;
+    my $insert = shift;
+    $textw->delete('1.0','end');
     if (defined($insert) && $insert) {
-	$text->insert('end',"running:  $cmd\n\n");
+	$textw->insert('end',"running:  $$cmd\n\n");
     }
-    $newwin->update();
-    $newwin->Busy();
-    open(OUT,"$cmd|");
+    $textw->toplevel->update();
+    $textw->toplevel->Busy();
+    open(OUT,"$$cmd|");
     while (<OUT>) {
-	$text->insert('end',$_);
-	$newwin->update();
-	$newwin->Busy();
+	$textw->insert('end',$_);
+	$textw->toplevel->update();
+	$textw->toplevel->Busy();
     }
     close(OUT);
     if (defined ($insert) && $insert) {
-	$text->insert('end',"\ndone.\n");
+	$textw->insert('end',"\ndone.\n");
     }
-    $newwin->Unbusy();
-    $text->Unbusy();
-    addToLog("done:  $cmd");
+    $textw->toplevel->Unbusy();
+    $textw->Unbusy();
+    addToLog("done:  $$cmd");
 }
 
 sub display_help {
