@@ -519,9 +519,13 @@ snmp_error(netsnmp_session * psess,
     /*
      * append a useful system errno interpretation. 
      */
-    if (psess->s_errno)
-        snprintf(&buf[strlen(buf)], 256 - strlen(buf),
-                 " (%s)", strerror(psess->s_errno));
+    if (psess->s_errno) {
+        const char* error = strerror(psess->s_errno);
+        if(error == NULL)
+            error = "Unknown Error";
+        snprintf (&buf[strlen(buf)], 256-strlen(buf),
+                 " (%s)", error);
+    }
     buf[255] = '\0';
     *p_str = strdup(buf);
 }
