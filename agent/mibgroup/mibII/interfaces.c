@@ -168,7 +168,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
     count = Interface_Scan_Get_Count();
     for(interface = 1; interface <= count; interface++){
 	newname[IFENTRY_NAME_LENGTH] = (oid)interface;
-	result = compare(name, *length, newname, (int)vp->namelen + 1);
+	result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
 	if ((exact && (result == 0)) || (!exact && (result < 0)))
 	    break;
     }
@@ -210,7 +210,7 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
 
   memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
   newname[INTERFACES_NAME_LENGTH] = 0;
-  result = compare(name, *length, newname, (int)vp->namelen + 1);
+  result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
   if ((exact && (result != 0)) || (!exact && (result >= 0)))
     return MATCH_FAILED;
   memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
@@ -567,7 +567,7 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[INTERFACES_NAME_LENGTH] = 0;
-    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return MATCH_FAILED;
     memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
@@ -605,7 +605,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
     count = Interface_Scan_Get_Count();
     for(interface = 1; interface <= count; interface++){
 	newname[IFENTRY_NAME_LENGTH] = (oid)interface;
-	result = compare(name, *length, newname, (int)vp->namelen + 1);
+	result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
 	if ((exact && (result == 0)) || (!exact && (result < 0)))
 	    break;
     }
@@ -1758,7 +1758,7 @@ header_interfaces(vp, name, length, exact, var_len, write_method)
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[INTERFACES_NAME_LENGTH] = 0;
-    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return MATCH_FAILED;
     bcopy((char *)newname, (char *)name, ((int)vp->namelen + 1) * sizeof(oid));
@@ -1803,7 +1803,7 @@ header_ifEntry(vp, name, length, exact, var_len, write_method)
 
     for(interface = 1; interface <= count; interface++){
 	newname[IFENTRY_NAME_LENGTH] = (oid)interface;
-	result = compare(name, *length, newname, (int)vp->namelen + 1);
+	result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
 	if ((exact && (result == 0)) || (!exact && (result < 0)))
 	    break;
     }

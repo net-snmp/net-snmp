@@ -171,7 +171,7 @@ header_tcp(vp, name, length, exact, var_len, write_method)
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[TCP_NAME_LENGTH] = 0;
-    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
     memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
@@ -520,15 +520,15 @@ LowState = -1;	    /* Don't have one yet */
 	    newname[19] = ntohs(inpcb.inp_fport);
 
 	    if (exact){
-		if (compare(newname, 20, name, *length) == 0){
+		if (snmp_oid_compare(newname, 20, name, *length) == 0){
 		    memcpy( (char *)lowest,(char *)newname, 20 * sizeof(oid));
 		    LowState = State;
 		    Lowinpcb = inpcb;
 		    break;  /* no need to search further */
 		}
 	    } else {
-		if ((compare(newname, 20, name, *length) > 0) &&
-		     ((LowState < 0) || (compare(newname, 20, lowest, 20) < 0))){
+		if ((snmp_oid_compare(newname, 20, name, *length) > 0) &&
+		     ((LowState < 0) || (snmp_oid_compare(newname, 20, lowest, 20) < 0))){
 		    /*
 		     * if new one is greater than input and closer to input than
 		     * previous lowest, save this one as the "next" one.
@@ -687,17 +687,17 @@ int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int))
       newname[TCP_REMPORT_OFF] = entry.tcpConnRemPort;
 
       if (exact){
-	if (compare(newname, TCP_CONN_LENGTH, name, *length) == 0){
+	if (snmp_oid_compare(newname, TCP_CONN_LENGTH, name, *length) == 0){
 	  memcpy( (char *)lowest,(char *)newname, TCP_CONN_LENGTH * sizeof(oid));
 	  Lowentry = entry;
 	  Found++;
 	  break;  /* no need to search further */
 	}
       } else {
-	if ((compare(newname, TCP_CONN_LENGTH, name, *length) > 0) &&
+	if ((snmp_oid_compare(newname, TCP_CONN_LENGTH, name, *length) > 0) &&
 	    ((Nextentry.tcpConnLocalAddress == (u_long)-1)
-	     || (compare(newname, TCP_CONN_LENGTH, lowest, TCP_CONN_LENGTH) < 0)
-	     || (compare(name, TCP_CONN_LENGTH, lowest, TCP_CONN_LENGTH) == 0))){
+	     || (snmp_oid_compare(newname, TCP_CONN_LENGTH, lowest, TCP_CONN_LENGTH) < 0)
+	     || (snmp_oid_compare(name, TCP_CONN_LENGTH, lowest, TCP_CONN_LENGTH) == 0))){
 
 	  /* if new one is greater than input and closer to input than
 	   * previous lowest, and is not equal to it, save this one as the "next" one.

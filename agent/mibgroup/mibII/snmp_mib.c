@@ -87,7 +87,7 @@ header_snmp(vp, name, length, exact, var_len, write_method)
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[SNMP_NAME_LENGTH] = 0;
-    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
     memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));

@@ -157,7 +157,7 @@ header_udp(vp, name, length, exact, var_len, write_method)
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[UDP_NAME_LENGTH] = 0;
-    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
     memcpy( (char *)name,(char *)newname, ((int)vp->namelen + 1) * sizeof(oid));
@@ -401,15 +401,15 @@ LowState = -1;		/* UDP doesn't have 'State', but it's a useful flag */
 	    newname[14] = ntohs(inpcb.inp_lport);
 
 	    if (exact){
-		if (compare(newname, 15, name, *length) == 0){
+		if (snmp_oid_compare(newname, 15, name, *length) == 0){
 		    memcpy( (char *)lowest,(char *)newname, 15 * sizeof(oid));
 		    LowState = 0;
 		    Lowinpcb = inpcb;
 		    break;  /* no need to search further */
 		}
 	    } else {
-		if ((compare(newname, 15, name, *length) > 0) &&
-		     ((LowState < 0) || (compare(newname, 15, lowest, 15) < 0))){
+		if ((snmp_oid_compare(newname, 15, name, *length) > 0) &&
+		     ((LowState < 0) || (snmp_oid_compare(newname, 15, lowest, 15) < 0))){
 		    /*
 		     * if new one is greater than input and closer to input than
 		     * previous lowest, save this one as the "next" one.

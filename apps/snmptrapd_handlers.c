@@ -63,7 +63,7 @@ snmptrapd_get_traphandler(name, namelen)
   DEBUGPOID(name,namelen);
   DEBUGP("...\n");
   for(ttmp = &traphandlers;
-      *ttmp != NULL && compare((*ttmp)->trap, (*ttmp)->traplen, name, namelen);
+      *ttmp != NULL && snmp_oid_compare((*ttmp)->trap, (*ttmp)->traplen, name, namelen);
       ttmp = &((*ttmp)->next));
   if (*ttmp == NULL) {
     DEBUGP("  Didn't find it.\n");

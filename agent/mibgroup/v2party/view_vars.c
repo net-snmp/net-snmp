@@ -257,8 +257,8 @@ var_view(vp, name, length, exact, var_len, write_method)
 	*np++ = vwp->viewIndex;
 	memcpy(np, vwp->viewSubtree, vwp->viewSubtreeLen * sizeof(oid));
 	newnamelen = 13 + vwp->viewSubtreeLen;
-	if ((compare(newname, newnamelen, name, *length) > 0) &&
-	    (!lowvwp || compare(newname, newnamelen,
+	if ((snmp_oid_compare(newname, newnamelen, name, *length) > 0) &&
+	    (!lowvwp || snmp_oid_compare(newname, newnamelen,
 			       lowname, lownamelen) < 0)){
 	    /*
 	     * if new one is greater than input and closer to input than

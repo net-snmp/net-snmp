@@ -229,7 +229,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     if ((saveNameLen == *length) && (saveExact == exact)) {
       register int temp=name[9];
       name[9] = 0;
-      Save_Valid = (compare(name, *length, saveName, saveNameLen) == 0);
+      Save_Valid = (snmp_oid_compare(name, *length, saveName, saveNameLen) == 0);
       name[9] = temp;
     } else
       Save_Valid = 0;
@@ -282,7 +282,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
       *op++ = *cp++;
       *op++ = *cp++;
 
-      result = compare(name, *length, Current, 14);
+      result = snmp_oid_compare(name, *length, Current, 14);
       if ((exact && (result == 0)) || (!exact && (result < 0)))
 	break;
     }
@@ -506,7 +506,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
     if ((saveNameLen == *length) && (saveExact == exact)) {
 	register int temp=name[9];
 	name[9] = 0;
-	Save_Valid = (compare(name, *length, saveName, saveNameLen) == 0);
+	Save_Valid = (snmp_oid_compare(name, *length, saveName, saveNameLen) == 0);
 	name[9] = temp;
     } else
 	Save_Valid = 0;
@@ -549,7 +549,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	    *op++ = *cp++;
 	    *op++ = *cp++;
 
-	    result = compare(name, *length, Current, 14);
+	    result = snmp_oid_compare(name, *length, Current, 14);
 	    if ((exact && (result == 0)) || (!exact && (result < 0)))
 		break;
 	}
@@ -719,17 +719,17 @@ int		(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
       break;
     COPY_IPADDR(cp, (u_char *)&entry.ipRouteDest, op, current + IP_ROUTEADDR_OFF);
     if (exact){
-      if (compare(current, IP_ROUTENAME_LENGTH, name, *length) == 0){
+      if (snmp_oid_compare(current, IP_ROUTENAME_LENGTH, name, *length) == 0){
 	memcpy( (char *)lowest,(char *)current, IP_ROUTENAME_LENGTH * sizeof(oid));
 	Lowentry = entry;
 	Found++;
 	break;  /* no need to search further */
       }
     } else {
-      if ((compare(current, IP_ROUTENAME_LENGTH, name, *length) > 0) &&
+      if ((snmp_oid_compare(current, IP_ROUTENAME_LENGTH, name, *length) > 0) &&
 	  ((Nextentry.ipRouteDest == (u_long)-2)
-	   || (compare(current, IP_ROUTENAME_LENGTH, lowest, IP_ROUTENAME_LENGTH) < 0)
-	   || (compare(name, IP_ROUTENAME_LENGTH, lowest, IP_ROUTENAME_LENGTH) == 0))){
+	   || (snmp_oid_compare(current, IP_ROUTENAME_LENGTH, lowest, IP_ROUTENAME_LENGTH) < 0)
+	   || (snmp_oid_compare(name, IP_ROUTENAME_LENGTH, lowest, IP_ROUTENAME_LENGTH) == 0))){
 
 	/* if new one is greater than input and closer to input than
 	 * previous lowest, and is not equal to it, save this one as the "next" one.
@@ -1451,7 +1451,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 	if ((saveNameLen == *length) && (saveExact == exact)) {
 		int temp = name[9];
 		name[9] = 0;
-		Save_Valid = !compare(name, *length, saveName, saveNameLen);
+		Save_Valid = !snmp_oid_compare(name, *length, saveName, saveNameLen);
 		name[9] = temp;
 	} else {
 		Save_Valid = 0;
@@ -1481,7 +1481,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 			*op++ = *cp++;
 			*op++ = *cp++;
 			*op++ = *cp++;
-			result = compare(name, *length, Current, 14);
+			result = snmp_oid_compare(name, *length, Current, 14);
 			if ((exact && (result == 0))
 			    || (!exact && (result < 0)))
 				break;

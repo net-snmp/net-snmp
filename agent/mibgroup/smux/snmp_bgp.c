@@ -97,7 +97,7 @@ var_bgp(vp, name, length, exact, var_len, write_method)
 	 */
 
 	/* Reject GET and GETNEXT for anything above bgpifconf range */
-	result = compare(name, *length, max_bgp_mib, 
+	result = snmp_oid_compare(name, *length, max_bgp_mib, 
 		         sizeof(max_bgp_mib)/sizeof(u_int));
 
 	if (result >= 0) {
@@ -106,7 +106,7 @@ var_bgp(vp, name, length, exact, var_len, write_method)
 	}
 
 	/* for GETs we need to be in the bgp range so reject anything below */
-	result = compare(name, *length, min_bgp_mib, 
+	result = snmp_oid_compare(name, *length, min_bgp_mib, 
 			 sizeof(min_bgp_mib)/sizeof(u_int));
 	if (exact && (result < 0)) {
 		DEBUGP("Exact but doesn't match length %d, size %d\n",

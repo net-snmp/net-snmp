@@ -511,7 +511,7 @@ header_generic(vp, name, length, exact, var_len, write_method)
 
     memcpy((char *)newname, (char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[vp->namelen] = 0;
-    result = compare(name, *length, newname, (int)vp->namelen + 1);
+    result = snmp_oid_compare(name, *length, newname, (int)vp->namelen + 1);
     DEBUGP("  result: %d\n", result);
     if ((exact && (result != 0)) || (!exact && (result >= 0)))
         return(MATCH_FAILED);
