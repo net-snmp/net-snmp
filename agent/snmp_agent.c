@@ -584,6 +584,8 @@ agent_check_and_process(int block)
      */
     run_alarms();
 
+    netsnmp_check_outstanding_agent_requests();
+
     return count;
 }
 
