@@ -203,7 +203,14 @@ intpr(int interval)
 		    switch (var->name [9]) {
 		    case IPIFINDEX:
 			ifindex = *var->val.integer;
-			for (cur_if = if_table; cur_if->ifindex != ifindex && cur_if->ifindex != 0; cur_if++) ;
+			for (cur_if = if_table;
+                             cur_if < (if_table + cfg_nnets) &&
+                                 cur_if->ifindex != ifindex &&
+                                 cur_if->ifindex != 0; cur_if++) ;
+ 			if (cur_if >= (if_table + cfg_nnets)) {
+                            fprintf(stderr, "Inconsistent reponse from server. Aborting.\n");
+                            exit (0);
+			}
 			cur_if->ifindex = ifindex;
 			break;
 		    case IPADDR:
