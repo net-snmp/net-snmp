@@ -43,6 +43,7 @@
 #include "agent_callbacks.h"
 #include "snmp_debug.h"
 #include "mibII/sysORTable.h"
+#include "system.h"
 
 
 struct agent_set_info {
