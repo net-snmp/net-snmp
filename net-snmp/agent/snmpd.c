@@ -192,7 +192,7 @@ int snmp_check_parse(struct snmp_session*, struct snmp_pdu*, int);
 
 static void usage(char *prog)
 {
-	printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-V] [-P PIDFILE] [-q] [-D] [-p NUM] [-L] [-l LOGFILE]",prog);
+	printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-V] [-P PIDFILE] [-q] [-D] [-p NUM] [-L] [-l LOGFILE] [-r]",prog);
 #if HAVE_UNISTD_H
 	printf(" [-u uid] [-g gid]");
 #endif
@@ -217,6 +217,7 @@ static void usage(char *prog)
 	printf("-s\t\tLog warnings/messages to syslog\n");
 	printf("-A\t\tAppend to the logfile rather than truncating it.\n");
 	printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
+	printf("-r Don't exit if root only accessible files can't be opened\n");
 	printf("\t\t(By default LOGFILE=%s)\n",
 #ifdef LOGFILE
 			LOGFILE
@@ -302,6 +303,10 @@ main(int argc, char *argv[])
 	strcpy(logfile, LOGFILE);
 #endif
 
+#ifdef NO_ROOT_ACCESS
+        /* default to no */
+        ds_set_boolean(DS_APPLICATION_ID, DS_NO_ROOT_ACCESS, 1)
+#endif
 
 	/*
 	 * usage: snmpd
@@ -369,6 +374,11 @@ main(int argc, char *argv[])
                     usage(argv[0]);
                   break;
 
+		case 'r':
+                    ds_toggle_boolean(DS_APPLICATION_ID,
+                                      DS_AGENT_NO_ROOT_ACCESS);
+		    break;
+
                 case 'P':
                   if (++arg == argc)
                     usage(argv[0]);
@@ -395,9 +405,11 @@ main(int argc, char *argv[])
                 case 'L':
 		    stderr_log=1;
                     break;
+
 		case 's':
 		    syslog_log=1;
 		    break;
+
                 case 'A':
                     dont_zero_log = 1;
                     break;
@@ -447,7 +459,6 @@ main(int argc, char *argv[])
               continue;
             }
 	}  /* end-for */
-
 
 	/* 
 	 * Initialize a argv set to the current for restarting the agent.
