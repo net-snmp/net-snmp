@@ -6872,7 +6872,7 @@ elif test -f /dev/null; then
 else
     CFLAG="-f"
 fi
-for i in /vmunix /hp-ux /stand/vmunix /dev/ksyms /kernel/unix /kernel/genunix /netbsd /unix /kernel /bsd
+for i in /vmunix /hp-ux /stand/vmunix /dev/ksyms /kernel/unix /kernel/genunix /netbsd /unix /kernel /bsd /mach_kernel
   do
   if test -f $i -o $CFLAG $i; then
     ac_cv_KERNEL_LOC="$i"
@@ -12463,7 +12463,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
@@ -12570,7 +12570,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
@@ -12677,7 +12677,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
@@ -12784,7 +12784,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
@@ -12891,7 +12891,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
@@ -12998,7 +12998,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
@@ -13105,7 +13105,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
@@ -13212,7 +13212,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
@@ -13319,7 +13319,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
@@ -13426,7 +13426,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
@@ -13533,7 +13533,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
@@ -13640,7 +13640,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
@@ -13747,7 +13747,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
@@ -13854,7 +13854,7 @@ cat > conftest.$ac_ext <<EOF
 #endif
 #ifdef linux
 struct ifnet {
-	char	*if_name;		/* name, e.g. "en" or ``lo'' */
+	char	*if_name;		/* name, e.g. "en" or "lo" */
 	short	if_unit;		/* sub-unit for lower level driver */
 	short	if_mtu;			/* maximum transmission unit */
 	short	if_flags;		/* up/down, broadcast, etc. */
