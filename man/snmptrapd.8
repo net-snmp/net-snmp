@@ -24,20 +24,11 @@
 .SH NAME
 snmptrapd - Receive and log snmp trap messages.
 .SH SYNOPSIS
-snmptrapd [ -P ] [ -s ] [ -p port ] [ -d ] [ -e ] [ -q ] [-D]
+snmptrapd [-h] [ -P ] [ -s ] [ -p port ] [ -d ] [ -e ] [ -q ] [-D] [-l [d0-7]] [-f]
 .SH DESCRIPTION
 Snmptrapd
 is an SNMP application that receives and logs snmp trap messages
 sent to the SNMP-TRAP port (162) on the local machine.
-.PP
-If the
-.B -P
-option is given,
-.I snmptrapd
-will print it's messages to the standard output.  Otherwise it will use
-.IR syslog (8)
-to log messages.  These syslog messages are sent with the level of LOG_WARNING, and
-are if available (usually on 4.3 systems) are sent to the LOG_LOCAL0 facility.
 .PP
 The log messages are of the form:
 .br
@@ -47,13 +38,32 @@ The log messages are of the form:
 .PP
 .I Snmptrapd
 must be run as root so that UDP port 162 can be opened.
-.PP
-Adding a "-d" to the argument list will cause the application to dump input and output packets.
-.PP
-Adding a "-q" to the argument list will cause the application to use a quicker, less verbose output form.
-.PP
-Adding a "-D" to the argument list will cause debugging output to be
-turned on..
+.SH COMMAND LINE ARGUMENTS
+.IP "-h"
+Print a usage summary and exit.
+.IP "-P"
+Print the logged messages to stdout.
+.IP "-p port"
+Specifies the port to run on, if the default 162 is not desired.
+.IP "-s"
+Log the messages to syslog(8).  These syslog messages are sent with
+the level of LOG_WARNING, and to the LOG_LOCAL0 facility (by
+default).  The demon will also fork away from its caller when
+the syslog facilities are used.
+.IP "-l [d0-7]"
+Specifies the syslog facility to use, demon or local[0-7].
+.IP "-f"
+Requests full object identifiers on output: .I system.sysDescr.0
+will be printed as
+.I .iso.org.dod.internet.mgmt.mib-2.system.sysDescr.0
+.IP "-d"
+Causes the application to dump input and output packets.
+.IP "-q" 
+Causes the application to use a quicker, less verbose output form.
+.IP "-D" 
+Turn debugging output on.
+.IP "-f"
+Don't fork away from the caller when using syslog().
 .PP
 .SH "SEE ALSO"
-syslog(8), variables(5), RFC 1155, RFC 1156, RFC 1157, SNMP Security Internet Drafts
+syslog(8), variables(5)
