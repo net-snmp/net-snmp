@@ -420,7 +420,7 @@ print_mib_oid(oid name[],
 	      size_t len)
 {
   char *buffer;
-  buffer=malloc(32*len); /* guess widely at the needed space */
+  buffer=malloc(11*len); /* maximum digit lengths for int32 + a '.' */
   if (!buffer) {
     snmp_log(LOG_ERR, "Malloc failed - out of memory?");
     return;
