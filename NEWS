@@ -1,6 +1,11 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*3.?*
+
+  Now using GNU's auto-conf for better portability
+  Port to Sun4/Solaris 2.4
+
 *3.0.2.1*
 
   Compilation bug fix
