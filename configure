@@ -7149,7 +7149,7 @@ if eval "test \"`echo '$''{'ac_cv_ETC_MNTTAB'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   ac_cv_ETC_MNTTAB="unknown"
-for i in /etc/mnttab /etc/mtab
+for i in /etc/mnttab /etc/mtab /etc/filesystems
   do
   if test -f $i; then
     ac_cv_ETC_MNTTAB="$i"
