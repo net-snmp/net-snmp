@@ -6,9 +6,11 @@
 #include "mib_module_config.h"
 
 #include <config.h>
-#if STDC_HEADERS
-#include <stdlib.h>
+#if HAVE_STRING_H
 #include <string.h>
+#endif
+#if HAVE_STDLIB_H
+#include <stdlib.h>
 #endif
 #if defined(IFNET_NEEDS_KERNEL) && !defined(_KERNEL)
 #define _KERNEL 1

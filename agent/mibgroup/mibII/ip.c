@@ -16,13 +16,11 @@
 #endif
 #include <sys/socket.h>
 
-#if STDC_HEADERS
+#if HAVE_STRING_H
 #include <string.h>
-#include <stdlib.h>
-#else
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #endif
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
