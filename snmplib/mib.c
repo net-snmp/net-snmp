@@ -2223,6 +2223,121 @@ register_mib_handlers(void)
 
 }
 
+/*
+ * function : netsnmp_set_mib_directory
+ *            - This function sets the string of the directories
+ *              from which the MIB modules will be searched or
+ *              loaded.
+ * arguments: const char *dir, which are the directories
+ *              from which the MIB modules will be searched or
+ *              loaded.
+ * returns  : -
+ */
+void
+netsnmp_set_mib_directory(const char *dir)
+{
+    char *newdir;
+    char *olddir;
+
+    DEBUGTRACE;
+    if (dir) {
+        olddir = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS);
+        if (olddir) {
+            if (*dir == '+') {
+                /* New dir starts with '+', thus we add it. */
+                newdir = malloc(strlen(dir) + strlen(olddir) + 1);
+                sprintf(newdir, "%s:%s", ++dir, olddir);
+            } else {
+                newdir = dir;
+            }
+            netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, newdir);
+        } else {
+            /* If dir starts with '+' skip '+' it. */
+            newdir = ((*dir == '+') ? ++dir : dir);
+        }
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS, newdir);
+    }
+}
+
+/*
+ * function : netsnmp_get_mib_directory
+ *            - This function returns a string of the directories
+ *              from which the MIB modules will be searched or
+ *              loaded.
+ *              If the value still does not exists, it will be made
+ *              from the evironment variable 'MIBDIRS' and/or the
+ *              default.
+ * arguments: -
+ * returns  : char * of the directories in which the MIB modules
+ *            will be searched/loaded.
+ */
+
+char *
+netsnmp_get_mib_directory()
+{
+    char *dir;
+
+    DEBUGTRACE;
+    dir = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS);
+    if (dir == NULL) {
+        DEBUGMSGTL(("get_mib_directory", "no mib directories set\n"));
+
+        /* Check if the environment variable is set */
+        dir = getenv("MIBDIRS");
+        if (dir == NULL) {
+            DEBUGMSGTL(("get_mib_directory", "no mib directories set by environment\n"));
+            /* Not set use hard coded path */
+           netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
+        } else if (*dir == '+') {
+            DEBUGMSGTL(("get_mib_directory", "mib directories set by environment (but added)\n"));
+            netsnmp_set_mib_directory(DEFAULT_MIBDIRS);
+            netsnmp_set_mib_directory(dir);
+        } else {
+            DEBUGMSGTL(("get_mib_directory", "mib directories set by environment\n"));
+            netsnmp_set_mib_directory(dir);
+        }
+        dir = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_MIBDIRS);
+    }
+    DEBUGMSGTL(("get_mib_directory", "mib directories set '%s'\n", dir));
+    return(dir);
+}
+
+/*
+ * function : netsnmp_fixup_mib_directory
+ * arguments: -
+ * returns  : -
+ */
+void
+netsnmp_fixup_mib_directory()
+{
+    char *homepath = getenv("HOME");
+    char *mibpath = netsnmp_get_mib_directory();
+    char *ptr_home;
+    char *new_mibpath;
+
+    DEBUGTRACE;
+    if (homepath && mibpath) {
+        DEBUGMSGTL(("fixup_mib_directory", "mib directories '%s'\n", mibpath));
+        while((ptr_home = strstr(mibpath, "$HOME"))) {
+            new_mibpath = (char *) malloc(strlen(mibpath) - strlen("$HOME") +
+                                      strlen(homepath)+1);
+            if (new_mibpath) {
+                *ptr_home = 0; /* null out the spot where we stop copying */
+                fprintf(stderr, "%s%s%s\n", mibpath, homepath,
+                      ptr_home + strlen("$HOME"));
+                sprintf(new_mibpath, "%s%s%s", mibpath, homepath,
+                      ptr_home + strlen("$HOME"));
+                /* swap in the new value and repeat */
+                mibpath = new_mibpath;
+            } else {
+                break;
+            }
+        }
+        netsnmp_set_mib_directory(mibpath);
+    }
+
+}
+
 /**
  * Initialises the mib reader.
  *
@@ -2234,7 +2349,6 @@ init_mib(void)
     const char     *prefix;
     char           *env_var, *entry;
     PrefixListPtr   pp = &mib_prefixes[0];
-    char           *new_mibdirs, *homepath, *cp_home;
 
     if (Mib)
         return;
@@ -2243,50 +2357,8 @@ init_mib(void)
     /*
      * Initialise the MIB directory/ies 
      */
-
-    /*
-     * we can't use the environment variable directly, because strtok
-     * will modify it. 
-     */
-
-    env_var = getenv("MIBDIRS");
-    if (env_var == NULL) {
-        if (confmibdir != NULL)
-            env_var = strdup(confmibdir);
-        else
-            env_var = strdup(DEFAULT_MIBDIRS);
-    } else {
-        env_var = strdup(env_var);
-    }
-    if (*env_var == '+') {
-        entry =
-            (char *) malloc(strlen(DEFAULT_MIBDIRS) + strlen(env_var) + 2);
-        sprintf(entry, "%s%c%s", DEFAULT_MIBDIRS, ENV_SEPARATOR_CHAR,
-                env_var + 1);
-        free(env_var);
-        env_var = entry;
-    }
-
-    /*
-     * replace $HOME in the path with the users home directory 
-     */
-    homepath = getenv("HOME");
-
-    if (homepath) {
-        while ((cp_home = strstr(env_var, "$HOME"))) {
-            new_mibdirs =
-                (char *) malloc(strlen(env_var) - strlen("$HOME") +
-                                strlen(homepath) + 1);
-            *cp_home = 0;       /* null out the spot where we stop copying */
-            sprintf(new_mibdirs, "%s%s%s", env_var, homepath,
-                    cp_home + strlen("$HOME"));
-            /*
-             * swap in the new value and repeat 
-             */
-            free(env_var);
-            env_var = new_mibdirs;
-        }
-    }
+    netsnmp_fixup_mib_directory();
+    env_var = netsnmp_get_mib_directory();
 
     DEBUGMSGTL(("init_mib",
                 "Seen MIBDIRS: Looking in '%s' for mib dirs ...\n",

@@ -238,7 +238,7 @@ snmp_parse_args(int argc,
             break;
 
         case 'M':
-            setenv("MIBDIRS", optarg, 1);
+            netsnmp_set_mib_directory(optarg);
             break;
 
         case 'O':
