@@ -22,8 +22,8 @@ sub InitMakeParams {
 
     if ($Config{'osname'} eq 'MSWin32') {
       $opts = NetSNMPGetOpts();	
-      $snmp_lib = 'libsnmp.lib';
-      $snmp_link_lib = 'libsnmp';
+      $snmp_lib = 'netsnmp.lib';
+      $snmp_link_lib = 'netsnmp';
       $sep = '\\';
 
       $Params{'DEFINE'} = "-DMSVC_PERL";
