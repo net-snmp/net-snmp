@@ -236,6 +236,7 @@ intpr(int interval)
                   if (snmp_get_do_debugging()) {
 		    print_variable (var->name, var->name_length, var);
                   }
+		    if (var->val.integer)
 		    switch (var->name [9]) {
 		    case OUTQLEN:
 			cur_if->outqueue = *var->val.integer; break;
