@@ -119,26 +119,6 @@ hpux11            OBJECT IDENTIFIER ::= { ucdSnmpAgent 14 }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent 255 }
 
 
--- Object identifiers for the non-standard transports that UCD/Net-SNMP
--- supports.  Note that snmpTCPDomain is the subject of Internet Draft
--- draft-irtf-nmrg-snmp-tcp-04.txt, which defines the OID
--- .iso.org.dod.internet.experimental.nmrg.nmrgSnmpDomains.snmpTCPDomain
--- (.1.3.6.1.3.91.1.1) for the SNMP over TCP over IPv4 transport domain.
--- This draft (or its successor) is available from the Network Management
--- Research Group web page at http://www.ibr.cs.tu-bs.de/projects/nmrg/
---
--- The NMRG OID for snmpTCPDomain is currently used by the code, but in case
--- this is thought to be a Bad Idea, we define a private transport domain here
--- that we could use instead.  The Unix domain, AAL5 PVC domain and
--- the IPv6 domains are also defined privately here (for now).
-
-ucdDomains		OBJECT IDENTIFIER ::= { ucdavis 251 }
-ucdSnmpTCPDomain	OBJECT IDENTIFIER ::= { ucdDomains 1 }
-ucdSnmpUnixDomain	OBJECT IDENTIFIER ::= { ucdDomains 2 }
-ucdSnmpAAL5PVCDomain	OBJECT IDENTIFIER ::= { ucdDomains 3 }
-ucdSnmpUDPIPv6Domain	OBJECT IDENTIFIER ::= { ucdDomains 4 }
-ucdSnmpTCPIPv6Domain	OBJECT IDENTIFIER ::= { ucdDomains 5 }
-
 --
 -- Define the Float Textual Convention
 --   This definition was written by David Perkins.
