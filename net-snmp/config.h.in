@@ -131,6 +131,9 @@
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
 
+/* Define if you have the getmntent function.  */
+#undef HAVE_GETMNTENT
+
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
 
