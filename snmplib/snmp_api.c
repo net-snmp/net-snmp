@@ -546,6 +546,7 @@ snmp_sess_open(struct snmp_session *in_session)
 	session->peername = (char *)cp;
     }
 
+#ifdef NO_NULL_COMMUNITY
     /* Fill in defaults if necessary */
     if (session->community_len != SNMP_DEFAULT_COMMUNITY_LEN){
 	cp = (u_char *)malloc((unsigned)session->community_len);
@@ -557,6 +558,7 @@ snmp_sess_open(struct snmp_session *in_session)
 	if (cp)
 	memmove(cp, DEFAULT_COMMUNITY, session->community_len);
     }
+
     if (cp == NULL) {
       snmp_errno = SNMPERR_GENERR;
       in_session->s_snmp_errno = SNMPERR_GENERR;
@@ -565,6 +567,7 @@ snmp_sess_open(struct snmp_session *in_session)
     }
 
     session->community = cp;	/* replace pointer with pointer to new data */
+#endif /* NO_NULL_COMMUNITY */
 
     if (session->srcPartyLen > 0){
 	op = (oid *)malloc((unsigned)session->srcPartyLen * sizeof(oid));
@@ -1069,9 +1072,16 @@ snmp_parse(struct snmp_session *session,
 	    return -1;
         if (version != session->version && session->version != SNMP_DEFAULT_VERSION)
             return -1;
-	pdu->community_len = community_length;
-	pdu->community = (u_char *)malloc(community_length);
-	memmove(pdu->community, community, community_length);
+
+	/* maybe get the community string. */
+	_snmp_free(pdu->community);
+	pdu->community_len = 0;
+	pdu->community = (u_char *)0;
+	if (community_length) {
+	    pdu->community_len = community_length;
+	    pdu->community = (u_char *)malloc(community_length);
+	    memmove(pdu->community, community, community_length);
+	}
 	if (session->authenticator){
 	    data = session->authenticator(data, &length,
 					  (char *)community,
@@ -1513,6 +1523,7 @@ snmp_sess_async_send(void *sessp,
     switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
+#ifdef NO_NULL_COMMUNITY
 	if (pdu->community_len == 0){
 	    if (session->community_len == 0){
 		snmp_errno = SNMPERR_BAD_ADDRESS;
@@ -1524,6 +1535,24 @@ snmp_sess_async_send(void *sessp,
                         session->community_len);
 	    pdu->community_len = session->community_len;
 	}
+#else /* !NO_NULL_COMMUNITY */
+	/* copy session community exactly to pdu community */
+	    if (0 == session->community_len) {
+		_snmp_free(pdu->community); pdu->community = 0;
+	    }
+	    else if (pdu->community_len == session->community_len) {
+		memmove(pdu->community, session->community,
+			    session->community_len);
+	    }
+	    else {
+	    _snmp_free(pdu->community);
+	    pdu->community = (u_char *)malloc(session->community_len);
+	    memmove(pdu->community, session->community,
+                        session->community_len);
+	    }
+	    pdu->community_len = session->community_len;
+#endif /* !NO_NULL_COMMUNITY */
+
         break;
 
     case SNMP_VERSION_2p:
