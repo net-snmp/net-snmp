@@ -304,9 +304,9 @@ dlmod_free_config (void)
 static int
 header_dlmod(struct variable *vp,
 	     oid *name,
-	     zise_t *length,
+	     size_t *length,
 	     int exact,
-	     zise_t *var_len,
+	     size_t *var_len,
 	     WriteMethod **write_method)
 {
 #define DLMOD_NAME_LENGTH 10
