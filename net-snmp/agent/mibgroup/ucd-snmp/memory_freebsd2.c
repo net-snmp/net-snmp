@@ -47,7 +47,7 @@
 
 #include "mibincl.h"
 #include "util_funcs.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 
 #include "memory.h"
 #include "memory_freebsd2.h"

@@ -130,7 +130,7 @@
 #include "system.h"
 
 #include "util_funcs.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 
 #ifdef MIB_IPCOUNTER_SYMBOL
 #include <sys/mib.h>

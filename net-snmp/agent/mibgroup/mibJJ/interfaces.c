@@ -138,7 +138,7 @@
 #include "interfaces.h"
 #include "struct.h"
 #include "util_funcs.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 #include "sysORTable.h"
 
 #ifndef INTERFACE_CACHE_TIMEOUT

@@ -108,9 +108,9 @@
 #include "struct.h"
 #include "util_funcs.h"
 #include "memory.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 #include "read_config.h"
-#include "agent_read_config.h"
+#include <net-snmp/agent/agent_read_config.h>
 
 int minimumswap;
 #ifndef linux

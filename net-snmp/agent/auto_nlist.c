@@ -25,7 +25,7 @@
 #include <dmalloc.h>
 #endif
 
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 #include "autonlist.h"
 #include "kernel.h"
 #include "../snmplib/system.h"
@@ -35,7 +35,7 @@
 #include "snmp_debug.h"
 #include "snmp_logging.h"
 #include "default_store.h"
-#include "ds_agent.h"
+#include <net-snmp/agent/ds_agent.h>
 
 struct autonlist *nlists = 0;
 static void init_nlist (struct nlist *);

@@ -45,9 +45,9 @@
 #include "sysORTable.h"
 #include "../../snmpd.h"
 #include "default_store.h"
-#include "ds_agent.h"
+#include <net-snmp/agent/ds_agent.h>
 #include "callback.h"
-#include "agent_callbacks.h"
+#include <net-snmp/agent/agent_callbacks.h>
 
 #ifdef USING_AGENTX_SUBAGENT_MODULE
 #include "agentx/subagent.h"

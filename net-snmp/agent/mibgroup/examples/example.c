@@ -44,7 +44,7 @@
 /* header_generic() comes from here */
 #include "util_funcs.h"
 
-#include "agent_read_config.h"
+#include <net-snmp/agent/agent_read_config.h>
 
 /* include our .h file */
 #include "example.h"

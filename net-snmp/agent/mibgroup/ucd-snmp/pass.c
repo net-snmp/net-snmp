@@ -34,7 +34,7 @@
 #include "extensible.h"
 #include "util_funcs.h"
 #include "read_config.h"
-#include "agent_read_config.h"
+#include <net-snmp/agent/agent_read_config.h>
 #include "system.h"
 
 struct extensible *passthrus=NULL;

@@ -103,7 +103,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_NLIST_H
 #include <nlist.h>
 #endif
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 #if solaris2
 #include "kernel_sunos5.h"
 #endif

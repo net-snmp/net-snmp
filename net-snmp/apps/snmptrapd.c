@@ -117,11 +117,11 @@ SOFTWARE.
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
 #include "snmpTCPDomain.h"
 #endif
-#include "ds_agent.h"
-#include "snmp_vars.h"
+#include <net-snmp/agent/ds_agent.h>
+#include <net-snmp/agent/snmp_vars.h>
 #include "notification_log.h"
 
-#define DS_APP_NUMERIC_IP  8 /* must not conflict with agent's booleans */
+#define DS_APP_NUMERIC_IP  8 /* must not conflict with agent's DS booleans */
 
 #ifndef BSD4_3
 #define BSD4_2

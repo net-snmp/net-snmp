@@ -1,6 +1,6 @@
 #ifndef NOTIFICATION_LOG_H
 #define NOTIFICATION_LOG_H
-#include "agent_handler.h"
+#include <net-snmp/agent/agent_handler.h>
 
 /*
  * function declarations 

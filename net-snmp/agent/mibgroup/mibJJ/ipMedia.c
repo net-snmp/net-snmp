@@ -62,7 +62,7 @@
 #include "ipMedia.h"
 #include "interfaces.h"
 #include "if_fields.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 #include "system.h"
 #include "util_funcs.h"
 

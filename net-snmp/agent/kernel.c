@@ -36,7 +36,7 @@
 #include "default_store.h"
 
 #include "kernel.h"
-#include "ds_agent.h"
+#include <net-snmp/agent/ds_agent.h>
 
 #ifndef NULL
 #define NULL 0

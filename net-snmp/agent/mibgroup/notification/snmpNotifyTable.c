@@ -27,7 +27,7 @@
 #include "target/snmpTargetParamsEntry.h"
 #include "target/snmpTargetAddrEntry.h"
 #include "target/target.h"
-#include "agent_callbacks.h"
+#include <net-snmp/agent/agent_callbacks.h>
 
 SNMPCallback store_snmpNotifyTable;
 

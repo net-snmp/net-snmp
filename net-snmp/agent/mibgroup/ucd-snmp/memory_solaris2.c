@@ -16,7 +16,7 @@
 #include "util_funcs.h"               /* utility function declarations*/
 #include "read_config.h"              /* if the module uses run-time*/
                                         /*      configuration controls*/
-#include "auto_nlist.h"               /* if the module needs to read*/
+#include <net-snmp/agent/auto_nlist.h>               /* if the module needs to read*/
                                        /*      kernel data structures*/
 #include "memory.h"                     /* the module-specific header*/
 #include "memory_solaris2.h"                     /* the module-specific header*/

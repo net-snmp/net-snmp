@@ -36,21 +36,21 @@
 #include "snmp.h"
 #include "mib.h"
 
-#include "snmp_vars.h"
-#include "snmp_agent.h"
-#include "agent_handler.h"
-#include "var_struct.h"
+#include <net-snmp/agent/snmp_vars.h>
+#include <net-snmp/agent/snmp_agent.h>
+#include <net-snmp/agent/agent_handler.h>
+#include <net-snmp/agent/var_struct.h>
 #include "snmpd.h"
 #include "agentx/protocol.h"
 #include "agentx/master_admin.h"
 #include "snmp_transport.h"
 #include "snmp_debug.h"
 #include "default_store.h"
-#include "ds_agent.h"
+#include <net-snmp/agent/ds_agent.h>
 #include "system.h"
 #include "snmp_logging.h"
 #include "read_config.h"
-#include "agent_read_config.h"
+#include <net-snmp/agent/agent_read_config.h>
 
 void real_init_master(void)
 {

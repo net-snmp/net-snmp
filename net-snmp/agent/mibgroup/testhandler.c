@@ -8,7 +8,7 @@
 
 #include "mibincl.h"
 #include "testhandler.h"
-#include "snmp_agent.h"
+#include <net-snmp/agent/snmp_agent.h>
 
 #include "snmp_api.h"
 #include "snmp_client.h"

@@ -76,11 +76,11 @@
 #include "snmp_client.h"
 #include "snmp_impl.h"
 #include "smux.h"
-#include "var_struct.h"
+#include <net-snmp/agent/var_struct.h>
 #include "util_funcs.h"
 #include "mibdefs.h"
 #include "default_store.h"
-#include "ds_agent.h"
+#include <net-snmp/agent/ds_agent.h>
 #include "snmpd.h"
 
 long smux_long;

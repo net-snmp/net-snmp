@@ -82,7 +82,7 @@
 #include "mibincl.h"
 #include "at.h"
 #include "interfaces.h"
-#include "auto_nlist.h"
+#include <net-snmp/agent/auto_nlist.h>
 #include "system.h"
 
 #if defined(HAVE_SYS_SYSCTL_H) && !defined(CAN_USE_SYSCTL)

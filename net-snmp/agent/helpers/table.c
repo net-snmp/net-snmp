@@ -13,7 +13,7 @@
 
 #include "mibincl.h"
 #include "tools.h"
-#include "snmp_agent.h"
+#include <net-snmp/agent/snmp_agent.h>
 #include <net-snmp/agent/table.h>
 
 #if HAVE_DMALLOC_H

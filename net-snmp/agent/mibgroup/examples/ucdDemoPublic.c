@@ -26,7 +26,7 @@
 #include "snmp_secmod.h"
 #include "snmpusm.h"
 #include "snmpusm.h"
-#include "agent_read_config.h"
+#include <net-snmp/agent/agent_read_config.h>
 #include "util_funcs.h"
 #include "ucdDemoPublic.h"
 
