@@ -423,7 +423,8 @@ struct trap_sink {
 int create_v1_trap_session (sink, com)
     char *sink, *com;
 {
-    struct trap_sink *new_sink = malloc (sizeof (*new_sink));
+    struct trap_sink *new_sink =
+      (struct trap_sink *) malloc (sizeof (*new_sink));
 
     memset (&new_sink->ses, 0, sizeof (struct snmp_session));
     new_sink->ses.peername = strdup(sink);
