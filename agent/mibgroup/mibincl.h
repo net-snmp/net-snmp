@@ -15,8 +15,8 @@
 #  include <time.h>
 # endif
 #endif
-#ifdef HAVE_NETINET_IN_H
-#	include <netinet/in.h>
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
 #endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -24,7 +24,9 @@
 #if HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
+#if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
+#endif
 #include <netinet/ip.h>
 #if HAVE_NETINET_IN_PCB_H
 #include <netinet/in_pcb.h>

@@ -49,7 +49,9 @@
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
 #endif
+#if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
+#endif
 #if HAVE_SYS_HASHING_H
 #include <sys/hashing.h>
 #endif
@@ -67,7 +69,7 @@
 #include <sys/stream.h>
 #endif
 #include <net/route.h>
-#ifdef HAVE_SYSLOG_H
+#if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
 

@@ -61,10 +61,12 @@
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
-#ifdef HAVE_NET_ROUTE_H
+#if HAVE_NET_ROUTE_H
 #include <net/route.h>
 #endif
+#if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
+#endif
 #if HAVE_SYS_HASHING_H
 #include <sys/hashing.h>
 #endif
@@ -138,7 +140,7 @@
 #include "../../../snmplib/system.h"
 #include "snmp_logging.h"
 
-#ifdef HAVE_OSRELDATE_H
+#if HAVE_OSRELDATE_H
 #include <osreldate.h>
 #endif
 #ifdef CAN_USE_SYSCTL
@@ -188,7 +190,7 @@ void init_interfaces(void)
                interfaces_variables_oid);
   
 #ifndef USE_SYSCTL_IFLIST
-#ifdef HAVE_NET_IF_MIB_H
+#if HAVE_NET_IF_MIB_H
   init_interfaces_setup();
 #endif
 #endif
