@@ -1369,6 +1369,110 @@ snmpv3_build(struct snmp_session	*session,
              size_t			*out_length)
 {
   int ret;
+
+	/* do validation for PDU types */
+  switch (pdu->command) {
+	case SNMP_MSG_RESPONSE:
+	case SNMP_MSG_TRAP2:
+	case SNMP_MSG_REPORT:
+	    pdu->flags &= (~SNMP_MSG_FLAG_EXPECT_RESPONSE);
+	    /* Fallthrough */
+	case SNMP_MSG_GET:
+	case SNMP_MSG_GETNEXT:
+	case SNMP_MSG_SET:
+	case SNMP_MSG_INFORM:
+	    if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
+	        pdu->errstat = 0;
+	    if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
+	        pdu->errindex = 0;
+	    break;
+
+	case SNMP_MSG_GETBULK:
+	    if ((pdu->max_repetitions < 0) || (pdu->non_repeaters < 0)){
+	        snmp_errno = SNMPERR_BAD_REPETITIONS;
+	        session->s_snmp_errno = SNMPERR_BAD_REPETITIONS;
+	        return -1;
+	    }
+	    break;
+
+	case SNMP_MSG_TRAP:
+	    snmp_errno = SNMPERR_V1_IN_V2;
+	    session->s_snmp_errno = SNMPERR_V1_IN_V2;
+	    return -1;
+	
+	default:
+	    snmp_errno = SNMPERR_UNKNOWN_PDU;
+	    session->s_snmp_errno = SNMPERR_UNKNOWN_PDU;
+	    return -1;
+  }
+
+      if (pdu->securityEngineIDLen == 0) {
+	if (session->securityEngineIDLen) {
+	  snmpv3_clone_engineID(&pdu->securityEngineID, 
+				&pdu->securityEngineIDLen,
+				session->securityEngineID,
+				session->securityEngineIDLen);
+	}
+      }
+
+      if (pdu->contextEngineIDLen == 0) {
+	if (session->contextEngineIDLen) {
+	  snmpv3_clone_engineID(&pdu->contextEngineID, 
+				&pdu->contextEngineIDLen,
+				session->contextEngineID,
+				session->contextEngineIDLen);
+	} else if (pdu->securityEngineIDLen) {
+	  snmpv3_clone_engineID(&pdu->contextEngineID, 
+				&pdu->contextEngineIDLen,
+				pdu->securityEngineID,
+				pdu->securityEngineIDLen);
+	}
+      }
+
+      if (pdu->contextName == NULL) {
+	if (!session->contextName){
+	  snmp_errno = SNMPERR_BAD_CONTEXT;
+	  session->s_snmp_errno = SNMPERR_BAD_CONTEXT;
+	  return -1;
+	}
+	pdu->contextName = strdup(session->contextName);
+	if (pdu->contextName == NULL) {
+	  snmp_errno = SNMPERR_GENERR;
+	  session->s_snmp_errno = SNMPERR_GENERR;
+	  return -1;
+	}
+	pdu->contextNameLen = session->contextNameLen;
+      }
+      pdu->securityModel = SNMP_SEC_MODEL_USM;
+      if (pdu->securityNameLen == 0 && pdu->securityName == 0) {
+	if (session->securityNameLen == 0){
+	  snmp_errno = SNMPERR_BAD_SEC_NAME;
+	  session->s_snmp_errno = SNMPERR_BAD_SEC_NAME;
+	  return -1;
+	}
+	pdu->securityName = strdup(session->securityName);
+	if (pdu->securityName == NULL) {
+	  snmp_errno = SNMPERR_GENERR;
+	  session->s_snmp_errno = SNMPERR_GENERR;
+	  return -1;
+	}
+	pdu->securityNameLen = session->securityNameLen;
+      }
+      if (pdu->securityLevel == 0) {
+	if (session->securityLevel == 0) {
+	    snmp_errno = SNMPERR_BAD_SEC_LEVEL;
+	    session->s_snmp_errno = SNMPERR_BAD_SEC_LEVEL;
+	    return -1;
+	}
+	pdu->securityLevel = session->securityLevel;
+      }
+      DEBUGMSGTL(("snmp_build",
+                  "Building SNMPv3 message (secName:\"%s\", secLevel:%s)...\n",
+                  ((session->securityName) ? (char *)session->securityName :
+                   ((pdu->securityName) ? (char *)pdu->securityName : 
+                    "ERROR: undefined")),
+                  usmSecLevelName[pdu->securityLevel]));
+
   ret = snmpv3_packet_build(pdu, packet, out_length, NULL, 0);
   session->s_snmp_errno = snmp_errno;
   return ret;
@@ -1629,12 +1733,87 @@ snmp_build(struct snmp_session *session,
     if (pdu->version == SNMP_VERSION_3)
       return snmpv3_build(session, pdu, packet, out_length);
 
+    switch (pdu->command) {
+	case SNMP_MSG_RESPONSE:
+	    pdu->flags &= (~SNMP_MSG_FLAG_EXPECT_RESPONSE);
+		/* Fallthrough */
+	case SNMP_MSG_GET:
+	case SNMP_MSG_GETNEXT:
+	case SNMP_MSG_SET:
+            /* all versions support these PDU types */
+            /* initialize defaulted PDU fields */
+
+	    if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
+	        pdu->errstat = 0;
+	    if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
+	        pdu->errindex = 0;
+	    break;
+
+	case SNMP_MSG_TRAP2:
+	    pdu->flags &= (~SNMP_MSG_FLAG_EXPECT_RESPONSE);
+		/* Fallthrough */
+	case SNMP_MSG_INFORM:
+            /* not supported in SNMPv1 and SNMPsec */
+	    if (pdu->version == SNMP_VERSION_1) {
+	            snmp_errno = SNMPERR_V2_IN_V1;
+	            session->s_snmp_errno = SNMPERR_V2_IN_V1;
+	            return -1;
+	    }
+	    if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
+	        pdu->errstat = 0;
+	    if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
+	        pdu->errindex = 0;
+	    break;
+
+	case SNMP_MSG_GETBULK:
+            /* not supported in SNMPv1 and SNMPsec */
+	    if (pdu->version == SNMP_VERSION_1) {
+	            snmp_errno = SNMPERR_V2_IN_V1;
+	            session->s_snmp_errno = SNMPERR_V2_IN_V1;
+	            return -1;
+            }
+	    if ((pdu->max_repetitions < 0) || (pdu->non_repeaters < 0)){
+	        snmp_errno = SNMPERR_BAD_REPETITIONS;
+	        session->s_snmp_errno = SNMPERR_BAD_REPETITIONS;
+	        return -1;
+	    }
+	    break;
+
+	case SNMP_MSG_TRAP:
+            /* *only* supported in SNMPv1 and SNMPsec */
+	    if (pdu->version != SNMP_VERSION_1) {
+	            snmp_errno = SNMPERR_V1_IN_V2;
+	            session->s_snmp_errno = SNMPERR_V1_IN_V2;
+	            return -1;
+            }
+            /* initialize defaulted Trap PDU fields */
+	    pdu->reqid = 1;	/* give a bogus non-error reqid for traps */
+	    if (pdu->enterprise_length == SNMP_DEFAULT_ENTERPRISE_LENGTH){
+	        pdu->enterprise = (oid *)malloc(sizeof(DEFAULT_ENTERPRISE));
+	        memmove(pdu->enterprise, DEFAULT_ENTERPRISE,
+		    sizeof(DEFAULT_ENTERPRISE));
+	        pdu->enterprise_length = sizeof(DEFAULT_ENTERPRISE)/sizeof(oid);
+	    }
+	    if (pdu->time == SNMP_DEFAULT_TIME)
+	        pdu->time = DEFAULT_TIME;
+            /* don't expect a response */
+	    pdu->flags &= (~SNMP_MSG_FLAG_EXPECT_RESPONSE);
+	    break;
+
+	case SNMP_MSG_REPORT:		/* SNMPv3 only */
+	default:
+            snmp_errno = SNMPERR_UNKNOWN_PDU;
+            session->s_snmp_errno = SNMPERR_UNKNOWN_PDU;
+            return -1;
+    }
+
     snmp_errno = SNMPERR_BAD_ASN1_BUILD;
     session->s_snmp_errno = SNMPERR_BAD_ASN1_BUILD;
 
     /* save length */
     length = *out_length;
 
+    /* setup administrative fields based on version */
     /* build the message wrapper and all the administrative fields
        upto the PDU sequence
        (note that actual length of message will be inserted later) */
@@ -1642,6 +1821,37 @@ snmp_build(struct snmp_session *session,
     switch (pdu->version) {
     case SNMP_VERSION_1:
     case SNMP_VERSION_2c:
+#ifdef NO_ZEROLENGTH_COMMUNITY
+	if (pdu->community_len == 0){
+	    if (session->community_len == 0){
+		snmp_errno = SNMPERR_BAD_ADDRESS;
+		session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
+		return -1;
+	    }
+	    pdu->community = (u_char *)malloc(session->community_len);
+	    memmove(pdu->community, session->community,
+                        session->community_len);
+	    pdu->community_len = session->community_len;
+	}
+#else /* !NO_ZEROLENGTH_COMMUNITY */
+	/* copy session community exactly to pdu community */
+	    if (0 == session->community_len) {
+		SNMP_FREE(pdu->community); pdu->community = 0;
+	    }
+	    else if (pdu->community_len == session->community_len) {
+		memmove(pdu->community, session->community,
+			    session->community_len);
+	    }
+	    else {
+	    SNMP_FREE(pdu->community);
+	    pdu->community = (u_char *)malloc(session->community_len);
+	    memmove(pdu->community, session->community,
+                        session->community_len);
+	    }
+	    pdu->community_len = session->community_len;
+#endif /* !NO_ZEROLENGTH_COMMUNITY */
+
+        DEBUGMSGTL(("snmp_send","Building SNMPv%d message...\n", (1 + pdu->version)));
         /* Save current location and build SEQUENCE tag and length
            placeholder for SNMP message sequence
           (actual length will be inserted later) */
@@ -1670,6 +1880,41 @@ snmp_build(struct snmp_session *session,
 
     case SNMP_VERSION_2p:
 #ifdef USE_V2PARTY_PROTOCOL
+	if (pdu->srcPartyLen == 0){
+	    if (session->srcPartyLen == 0){
+		snmp_errno = SNMPERR_BAD_SRC_PARTY;
+		session->s_snmp_errno = SNMPERR_BAD_SRC_PARTY;
+		return -1;
+	    }
+	    pdu->srcParty = (oid *)malloc(session->srcPartyLen * sizeof(oid));
+	    memmove(pdu->srcParty, session->srcParty,
+		    session->srcPartyLen * sizeof(oid));
+	    pdu->srcPartyLen = session->srcPartyLen;
+	}
+	if (pdu->dstPartyLen == 0){
+	    if (session->dstPartyLen == 0){
+		snmp_errno = SNMPERR_BAD_DST_PARTY;
+		session->s_snmp_errno = SNMPERR_BAD_DST_PARTY;
+		return -1;
+	    }
+	    pdu->dstParty = (oid *)malloc(session->dstPartyLen * sizeof(oid));
+	    memmove(pdu->dstParty, session->dstParty,
+		    session->dstPartyLen * sizeof(oid));
+	    pdu->dstPartyLen = session->dstPartyLen;
+	}
+	if (pdu->contextLen == 0){
+	    if (session->contextLen == 0){
+		snmp_errno = SNMPERR_BAD_CONTEXT;
+		session->s_snmp_errno = SNMPERR_BAD_CONTEXT;
+		return -1;
+	    }
+	    pdu->context = (oid *)malloc(session->contextLen * sizeof(oid));
+	    memmove(pdu->context, session->context,
+		    session->contextLen * sizeof(oid));
+	    pdu->contextLen = session->contextLen;
+	}
+        DEBUGMSGTL(("snmp_api","Building SNMPv2p message...\n"));
+
         pdu->srcp = NULL;
         pdu->dstp = NULL;
         cp = snmp_party_build(packet, out_length, pdu, 0,
@@ -1683,8 +1928,11 @@ snmp_build(struct snmp_session *session,
     case SNMP_VERSION_2u:
     case SNMP_VERSION_2star:
     default:
+        snmp_errno = SNMPERR_BAD_VERSION;
+        session->s_snmp_errno = SNMPERR_BAD_VERSION;
 	return -1;
     }
+
     h1 = cp;
     cp = snmp_pdu_build(pdu, cp, out_length);
 
@@ -2669,12 +2917,13 @@ snmp_sess_async_send(void *sessp,
     struct sockaddr_in *isp_addr;
     struct sockaddr_in *pduIp = (struct sockaddr_in *)&(pdu->address);
     struct timeval tv;
-    int expect_response = 1;
     int result;
 
     session = slp->session; isp = slp->internal;
     session->s_snmp_errno = 0;
     session->s_errno = 0;
+
+    pdu->flags |= SNMP_MSG_FLAG_EXPECT_RESPONSE;
 
     /* check/setup the version */
     if (pdu->version == SNMP_DEFAULT_VERSION) {
@@ -2693,83 +2942,6 @@ snmp_sess_async_send(void *sessp,
         return 0;
     }
 
-    /* do validations for PDU types */
-    if ((pdu->command == SNMP_MSG_GET) ||
-            (pdu->command == SNMP_MSG_RESPONSE) ||
-            (pdu->command == SNMP_MSG_GETNEXT) ||
-            (pdu->command == SNMP_MSG_SET)) {
-        /* all versions support these PDU types */
-        /* initialize defaulted PDU fields */
-
-	if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
-	    pdu->errstat = 0;
-	if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
-	    pdu->errindex = 0;
-        if (pdu->command == SNMP_MSG_RESPONSE)
-            /* don't expect a response */
-            expect_response = 0;
-    } else if ((pdu->command == SNMP_MSG_INFORM) ||
-               (pdu->command == SNMP_MSG_TRAP2)) {
-        /* not supported in SNMPv1 and SNMPsec */
-	if ((pdu->version == SNMP_VERSION_1) ||
-                (pdu->version == SNMP_VERSION_sec)) {
-	    snmp_errno = SNMPERR_V2_IN_V1;
-	    session->s_snmp_errno = SNMPERR_V2_IN_V1;
-	    return 0;
-	}
-	if (pdu->errstat == SNMP_DEFAULT_ERRSTAT)
-	    pdu->errstat = 0;
-	if (pdu->errindex == SNMP_DEFAULT_ERRINDEX)
-	    pdu->errindex = 0;
-        if (pdu->command == SNMP_MSG_TRAP2)
-            expect_response = 0;
-    } else if (pdu->command == SNMP_MSG_GETBULK) {
-        /* not supported in SNMPv1 and SNMPsec */
-	if ((pdu->version == SNMP_VERSION_1) ||
-                (pdu->version == SNMP_VERSION_sec)) {
-	    snmp_errno = SNMPERR_V2_IN_V1;
-	    session->s_snmp_errno = SNMPERR_V2_IN_V1;
-	    return 0;
-	}
-	if ((pdu->max_repetitions < 0) || (pdu->non_repeaters < 0)){
-	    snmp_errno = SNMPERR_BAD_REPETITIONS;
-	    session->s_snmp_errno = SNMPERR_BAD_REPETITIONS;
-	    return 0;
-	}
-
-    } else if (pdu->command == SNMP_MSG_TRAP) {
-        if ((pdu->version != SNMP_VERSION_1) &&
-            (pdu->version != SNMP_VERSION_sec)) {
-          snmp_errno = SNMPERR_V1_IN_V2;
-          session->s_snmp_errno = SNMPERR_V1_IN_V2;
-          return 0;
-        }
-        /* initialize defaulted Trap PDU fields */
-	pdu->reqid = 1;	/* give a bogus non-error reqid for traps */
-	if (pdu->enterprise_length == SNMP_DEFAULT_ENTERPRISE_LENGTH){
-	    pdu->enterprise = (oid *)malloc(sizeof(DEFAULT_ENTERPRISE));
-	    memmove(pdu->enterprise, DEFAULT_ENTERPRISE,
-		    sizeof(DEFAULT_ENTERPRISE));
-	    pdu->enterprise_length = sizeof(DEFAULT_ENTERPRISE)/sizeof(oid);
-	}
-	if (pdu->time == SNMP_DEFAULT_TIME)
-	    pdu->time = DEFAULT_TIME;
-        /* don't expect a response */
-        expect_response = 0;
-    } else if (pdu->command == SNMP_MSG_REPORT) {
-        if (pdu->version != SNMP_VERSION_3) {
-          snmp_errno = SNMPERR_UNKNOWN_PDU;
-          session->s_snmp_errno = SNMPERR_UNKNOWN_PDU;
-          return 0;
-        }
-        expect_response = 0;
-    } else {
-        /* some unknown PDU type */
-        snmp_errno = SNMPERR_UNKNOWN_PDU;
-        session->s_snmp_errno = SNMPERR_UNKNOWN_PDU;
-        return 0;
-    }
-
     if (pdu->address.sa_family == AF_UNSPEC){
 	isp_addr = (struct sockaddr_in *)&(isp->addr);
 	if (isp->addr.sa_family == AF_UNSPEC ||
@@ -2780,159 +2952,6 @@ snmp_sess_async_send(void *sessp,
 	        return 0;
 	}
 	memmove(&pdu->address, &(isp->addr), sizeof(isp->addr));
-    }
-
-    /* setup administrative fields based on version */
-    switch (pdu->version) {
-    case SNMP_VERSION_1:
-    case SNMP_VERSION_2c:
-#ifdef NO_ZEROLENGTH_COMMUNITY
-	if (pdu->community_len == 0){
-	    if (session->community_len == 0){
-		snmp_errno = SNMPERR_BAD_ADDRESS;
-		session->s_snmp_errno = SNMPERR_BAD_ADDRESS;
-		return 0;
-	    }
-	    pdu->community = (u_char *)malloc(session->community_len);
-	    memmove(pdu->community, session->community,
-                        session->community_len);
-	    pdu->community_len = session->community_len;
-	}
-#else /* !NO_ZEROLENGTH_COMMUNITY */
-	/* copy session community exactly to pdu community */
-	    if (0 == session->community_len) {
-		SNMP_FREE(pdu->community); pdu->community = 0;
-	    }
-	    else if (pdu->community_len == session->community_len) {
-		memmove(pdu->community, session->community,
-			    session->community_len);
-	    }
-	    else {
-	    SNMP_FREE(pdu->community);
-	    pdu->community = (u_char *)malloc(session->community_len);
-	    memmove(pdu->community, session->community,
-                        session->community_len);
-	    }
-	    pdu->community_len = session->community_len;
-#endif /* !NO_ZEROLENGTH_COMMUNITY */
-
-        DEBUGMSGTL(("snmp_send","Building SNMPv%d message...\n", (1 + pdu->version)));
-        break;
-
-    case SNMP_VERSION_2p:
-#ifdef USE_V2PARTY_PROTOCOL
-	if (pdu->srcPartyLen == 0){
-	    if (session->srcPartyLen == 0){
-		snmp_errno = SNMPERR_BAD_SRC_PARTY;
-		session->s_snmp_errno = SNMPERR_BAD_SRC_PARTY;
-		return 0;
-	    }
-	    pdu->srcParty = (oid *)malloc(session->srcPartyLen * sizeof(oid));
-	    memmove(pdu->srcParty, session->srcParty,
-		    session->srcPartyLen * sizeof(oid));
-	    pdu->srcPartyLen = session->srcPartyLen;
-	}
-	if (pdu->dstPartyLen == 0){
-	    if (session->dstPartyLen == 0){
-		snmp_errno = SNMPERR_BAD_DST_PARTY;
-		session->s_snmp_errno = SNMPERR_BAD_DST_PARTY;
-		return 0;
-	    }
-	    pdu->dstParty = (oid *)malloc(session->dstPartyLen * sizeof(oid));
-	    memmove(pdu->dstParty, session->dstParty,
-		    session->dstPartyLen * sizeof(oid));
-	    pdu->dstPartyLen = session->dstPartyLen;
-	}
-	if (pdu->contextLen == 0){
-	    if (session->contextLen == 0){
-		snmp_errno = SNMPERR_BAD_CONTEXT;
-		session->s_snmp_errno = SNMPERR_BAD_CONTEXT;
-		return 0;
-	    }
-	    pdu->context = (oid *)malloc(session->contextLen * sizeof(oid));
-	    memmove(pdu->context, session->context,
-		    session->contextLen * sizeof(oid));
-	    pdu->contextLen = session->contextLen;
-	}
-        DEBUGMSGTL(("snmp_api","Building SNMPv2p message...\n"));
-        break;
-#endif /* USE_V2PARTY_PROTOCOL */
-    case SNMP_VERSION_3:
-      if (pdu->securityEngineIDLen == 0) {
-	if (session->securityEngineIDLen) {
-	  snmpv3_clone_engineID(&pdu->securityEngineID, 
-				&pdu->securityEngineIDLen,
-				session->securityEngineID,
-				session->securityEngineIDLen);
-	}
-      }
-
-      if (pdu->contextEngineIDLen == 0) {
-	if (session->contextEngineIDLen) {
-	  snmpv3_clone_engineID(&pdu->contextEngineID, 
-				&pdu->contextEngineIDLen,
-				session->contextEngineID,
-				session->contextEngineIDLen);
-	} else if (pdu->securityEngineIDLen) {
-	  snmpv3_clone_engineID(&pdu->contextEngineID, 
-				&pdu->contextEngineIDLen,
-				pdu->securityEngineID,
-				pdu->securityEngineIDLen);
-	}
-      }
-
-      if (pdu->contextName == NULL) {
-	if (!session->contextName){
-	  snmp_errno = SNMPERR_BAD_CONTEXT;
-	  session->s_snmp_errno = SNMPERR_BAD_CONTEXT;
-	  return 0;
-	}
-	pdu->contextName = strdup(session->contextName);
-	if (pdu->contextName == NULL) {
-	  snmp_errno = SNMPERR_GENERR;
-	  session->s_snmp_errno = SNMPERR_GENERR;
-	  return 0;
-	}
-	pdu->contextNameLen = session->contextNameLen;
-      }
-      pdu->securityModel = SNMP_SEC_MODEL_USM;
-      if (pdu->securityNameLen == 0 && pdu->securityName == 0) {
-	if (session->securityNameLen == 0){
-	  snmp_errno = SNMPERR_BAD_SEC_NAME;
-	  session->s_snmp_errno = SNMPERR_BAD_SEC_NAME;
-	  return 0;
-	}
-	pdu->securityName = strdup(session->securityName);
-	if (pdu->securityName == NULL) {
-	  snmp_errno = SNMPERR_GENERR;
-	  session->s_snmp_errno = SNMPERR_GENERR;
-	  return 0;
-	}
-	pdu->securityNameLen = session->securityNameLen;
-      }
-      if (pdu->securityLevel == 0) {
-	if (session->securityLevel == 0) {
-	    snmp_errno = SNMPERR_BAD_SEC_LEVEL;
-	    session->s_snmp_errno = SNMPERR_BAD_SEC_LEVEL;
-	    return 0;
-	}
-	pdu->securityLevel = session->securityLevel;
-      }
-      DEBUGMSGTL(("snmp_build",
-                  "Building SNMPv3 message (secName:\"%s\", secLevel:%s)...\n",
-                  ((session->securityName) ? (char *)session->securityName :
-                   ((pdu->securityName) ? (char *)pdu->securityName : 
-                    "ERROR: undefined")),
-                  usmSecLevelName[pdu->securityLevel]));
-      break;
-
-    case SNMP_VERSION_sec:
-    case SNMP_VERSION_2u:
-    case SNMP_VERSION_2star:
-    default:
-        snmp_errno = SNMPERR_BAD_VERSION;
-        session->s_snmp_errno = SNMPERR_BAD_VERSION;
-	return 0;
     }
 
     /* build the message to send */
@@ -2960,7 +2979,7 @@ snmp_sess_async_send(void *sessp,
     }
 
     /* check if should get a response */
-    if (expect_response != 0) {
+    if (pdu->flags & SNMP_MSG_FLAG_EXPECT_RESPONSE) {
         gettimeofday(&tv, (struct timezone *)0);
 
 	/* set up to expect a response */
@@ -4073,3 +4092,4 @@ snmp_init_statistics(void)
 {
   memset(statistics, 0, sizeof(statistics));
 }
+
