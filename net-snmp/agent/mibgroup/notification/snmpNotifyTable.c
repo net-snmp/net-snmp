@@ -176,6 +176,7 @@ notifyTable_register_notifications(int major, int minor,
 
     ptr->timeout = ss->timeout / 1000;
     ptr->retryCount = ss->retries;
+    SNMP_FREE(ptr->tagList);
     ptr->tagList = strdup(ptr->name);
     ptr->params = strdup(ptr->name);
     ptr->storageType = ST_READONLY;
