@@ -217,7 +217,7 @@ agentx_build_string(u_char *bufp, size_t *out_length,
     for ( ; name_len ; name_len-- ) {
 	*bufp = 0;
 	bufp++;
-	*out_length--;
+	(*out_length)--;
     }
     DEBUGDUMPSETUP("send", orig_bufp, bufp - orig_bufp);
     DEBUGMSG(("dumpv_send", "  String:\t%s\n", name));
