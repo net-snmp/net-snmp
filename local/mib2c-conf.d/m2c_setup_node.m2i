@@ -43,10 +43,14 @@
 @       eval $m2c_de_pfx = uc($m2c_de_pfx)@
 @    end@
 @    if "$node.perltype" eq "BITS"@
-@       eval $m2c_enum_mask="${m2c_de_pfx}_MASK"@
+@       eval $m2c_enum_sfx="_flag"@
+@       eval $m2c_enum_mask="${m2c_de_pfx}_flag"@
 @       if $m2c_const_lc == 0@
+@          eval $m2c_enum_sfx = uc($m2c_enum_sfx)@
 @          eval $m2c_enum_mask = uc($m2c_enum_mask)@
 @       end@
+@    else@
+@       eval $m2c_enum_sfx=""@
 @    end@
 ##
 ##   use longs for enums (w/out length)
@@ -58,7 +62,7 @@
 @    end@
 @  else@
 @    eval $m2c_decl = $node.decl@
-@  end@
+ @  end@ // enums
 ########################################################################
 ## find max size
 ########################################################################
