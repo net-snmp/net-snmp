@@ -170,6 +170,10 @@ snmp_synch_input(int op,
 	state->status = STAT_SUCCESS;
 	session->s_snmp_errno = SNMPERR_SUCCESS;
       }
+      else {
+        state->waiting = 1;
+	return 0;
+      }
     } else if (op == TIMED_OUT){
 	state->pdu		 = NULL;
 	state->status		 = STAT_TIMEOUT;

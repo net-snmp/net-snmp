@@ -4,13 +4,16 @@
  */
 
 #include <config.h>
-#include "mibincl.h"
-#include "util_funcs.h"
 
 #if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 #include <sys/types.h>
+#if HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -31,7 +34,9 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
@@ -48,7 +53,9 @@
 #if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
+#if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
+#endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
@@ -78,6 +85,7 @@
 #include <dmalloc.h>
 #endif
 
+#include "tools.h"
 #ifdef solaris2
 #include "kernel_sunos5.h"
 #else
@@ -87,6 +95,8 @@
 #include "kernel_linux.h"
 #endif
 
+#include "mibincl.h"
+#include "util_funcs.h"
 #include "system.h"
 #include "asn1.h"
 #include "snmp_debug.h"
@@ -180,6 +190,11 @@ void init_udp(void)
 #define USES_SNMP_DESIGNED_UDPSTAT
 #endif
 
+#ifdef WIN32
+#include <iphlpapi.h>
+#define UDP_STAT_STRUCTURE MIB_UDPSTATS
+#endif
+
 #ifdef HAVE_SYS_TCPIPSTATS_H
 #define UDP_STAT_STRUCTURE	struct kna
 #define USES_TRADITIONAL_UDPSTAT
@@ -263,10 +278,24 @@ var_udp(struct variable *vp,
 #ifdef STRUCT_UDPSTAT_HAS_UDPS_DISCARD
                    			      udpstat.udps_discard +
 #endif
+#ifdef STRUCT_UDPSTAT_HAS_UDPS_FULLSOCK
+                   			      udpstat.udps_fullsock +
+#endif
 					      udpstat.udps_badlen;
 				return (u_char *) &long_return;
 
 #endif		/* USES_TRADITIONAL_UDPSTAT */
+
+#ifdef WIN32
+       case UDPINDATAGRAMS:
+    return (u_char *) &udpstat.dwInDatagrams;
+       case UDPNOPORTS:
+                               return (u_char *) &udpstat.dwNoPorts;
+       case UDPOUTDATAGRAMS:
+    return (u_char *) &udpstat.dwOutDatagrams;
+       case UDPINERRORS:
+    return (u_char *) &udpstat.dwInErrors;
+#endif  /* WIN32*/
 
 	default:
 	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_udp\n", vp->magic));
@@ -313,6 +342,10 @@ read_udp_stat( UDP_STAT_STRUCTURE *udpstat, int magic )
 
 #ifdef linux
     ret_value = linux_read_udp_stat(udpstat);
+#endif
+
+#ifdef WIN32
+    ret_value = GetUdpStatistics(udpstat);
 #endif
 
 #ifdef solaris2

@@ -37,7 +37,7 @@ if test "$snmp_last_test_result" = 1; then
   SNMP_SNMPD_LOG_FILE_ORIG=$SNMP_SNMPD_LOG_FILE
   SNMP_SNMPD_PID_FILE=$SNMP_SNMPD_PID_FILE.num2
   SNMP_SNMPD_LOG_FILE=$SNMP_SNMPD_LOG_FILE.num2
-  AGENT_FLAGS="$ORIG_AGENT_FLAGS -X -I example,snmpTargetAddrEntry,snmpTargetParamsEntry,snmpNotifyFilterProfileTable,snmpNotifyFilterTable,snmpNotifyTable"
+  AGENT_FLAGS="$ORIG_AGENT_FLAGS -X -I example -Dadd"
   SNMP_CONFIG_FILE="$SNMP_TMPDIR/bogus.conf"
 
   STARTAGENT

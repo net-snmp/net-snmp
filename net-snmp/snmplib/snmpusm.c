@@ -1361,8 +1361,11 @@ usm_rgenerate_out_msg (
 	 */
     if (theSecLevel == SNMP_SEC_LEVEL_AUTHPRIV)
 	{
-            u_char cyphertext[SNMP_MAX_MSG_SIZE];
-            size_t cyphertextLen = SNMP_MAX_MSG_SIZE;
+            /* XXX: the max padding size supported is no more than 64 */
+            size_t cyphertextLen = scopedPduLen + 64; 
+            u_char *cyphertext = (u_char *) malloc(cyphertextLen);
+            if (!cyphertext)
+                return SNMPERR_MALLOC;
             
             /* XXX  Hardwired to seek into a 1DES private key!
              */
@@ -1375,6 +1378,7 @@ usm_rgenerate_out_msg (
 		{
                     DEBUGMSGTL(("usm","Can't set DES-CBC salt.\n"));
                     usm_free_usmStateReference (secStateRef);
+                    SNMP_FREE(cyphertext);
                     return SNMPERR_USM_GENERICERROR;
 		}
 
@@ -1395,12 +1399,14 @@ usm_rgenerate_out_msg (
 		{
                     DEBUGMSGTL(("usm","DES-CBC error.\n"));
                     usm_free_usmStateReference (secStateRef);
+                    SNMP_FREE(cyphertext);
                     return SNMPERR_USM_ENCRYPTIONERROR;
 		}
 
             if (cyphertextLen > *wholeMsgLen) {
                     DEBUGMSGTL(("usm","encrypted size too long.\n"));
                     usm_free_usmStateReference (secStateRef);
+                    SNMP_FREE(cyphertext);
                     return SNMPERR_TOO_LONG;
             }
             
@@ -1423,6 +1429,7 @@ usm_rgenerate_out_msg (
 #endif
 
             DEBUGMSGTL(("usm","Encryption successful.\n"));
+            SNMP_FREE(cyphertext);
 	}
 
     /* 

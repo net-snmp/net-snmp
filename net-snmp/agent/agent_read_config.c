@@ -50,6 +50,9 @@
 #endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#if HAVE_SYS_SOCKETVAR_H
+#include <sys/socketvar.h>
+#endif
 #elif HAVE_WINSOCK_H
 #include <winsock.h>
 #endif 
@@ -115,13 +118,18 @@ void snmpd_set_agent_user(const char *token, char *cptr)
 struct passwd *info;
 #endif
  
-    if (cptr[0] == '#')
-        ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, atoi(&cptr[1]));
-
+    if (cptr[0] == '#') {
+        char *ecp;
+	int uid;
+	uid = strtoul(cptr+1, &ecp, 10);
+	if (*ecp != 0) config_perror("Bad number");
+	else ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, uid);
+    }
 #if defined(HAVE_GETPWNAM) && defined(HAVE_PWD_H)
-    if ((info = getpwnam(cptr)) != NULL) {
+    else if ((info = getpwnam(cptr)) != NULL) {
         ds_set_int(DS_APPLICATION_ID, DS_AGENT_USERID, info->pw_uid);
     }
+    else config_perror("User not found in passwd database");
 #endif
 }
 
@@ -131,13 +139,17 @@ void snmpd_set_agent_group(const char *token, char *cptr)
 struct group *info;
 #endif
  
-    if (cptr[0] == '#')
-        ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, atoi(&cptr[1]));
-
+    if (cptr[0] == '#') {
+    	char *ecp;
+	int gid = strtoul(cptr+1, &ecp, 10);
+	if (*ecp != 0) config_perror("Bad number");
+        else ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, gid);
+    }
 #if defined(HAVE_GETGRNAM) && defined(HAVE_GRP_H)
-    if ((info = getgrnam(cptr)) != NULL) {
+    else if ((info = getgrnam(cptr)) != NULL) {
         ds_set_int(DS_APPLICATION_ID, DS_AGENT_GROUPID, info->gr_gid);
     }
+    else config_perror("Group not found in group database");
 #endif
 }
 #endif

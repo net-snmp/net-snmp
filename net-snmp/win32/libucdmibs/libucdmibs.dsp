@@ -89,11 +89,11 @@ SOURCE=..\..\agent\mibgroup\mibII\snmp_mib.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\mibII\system_mib.c
+SOURCE=..\..\agent\mibgroup\mibII\sysORTable.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\mibgroup\mibII\sysORTable.c
+SOURCE=..\..\agent\mibgroup\mibII\system_mib.c
 # End Source File
 # Begin Source File
 
@@ -119,6 +119,10 @@ SOURCE="..\..\agent\mibgroup\ucd-snmp\disk.c"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\agent\mibgroup\ucd-snmp\dlmod.c"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\agent\mibgroup\ucd-snmp\errormib.c"
 # End Source File
 # Begin Source File
@@ -139,7 +143,15 @@ SOURCE="..\..\agent\mibgroup\ucd-snmp\pass.c"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\agent\mibgroup\ucd-snmp\pass_persist.c"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\agent\mibgroup\ucd-snmp\proc.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\agent\mibgroup\ucd-snmp\proxy.c"
 # End Source File
 # Begin Source File
 
@@ -170,9 +182,29 @@ SOURCE=..\..\agent\mibgroup\snmpv3\usmStats.c
 SOURCE=..\..\agent\mibgroup\snmpv3\usmUser.c
 # End Source File
 # End Group
+# Begin Group "notification"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\notification\snmpNotifyTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\notification\snmpNotifyFilterTable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\notification\snmpNotifyFilterProfileTable.c
+# End Source File
+# End Group
 # Begin Group "target"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\target\target.c
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\target\snmpTargetAddrEntry.c
@@ -182,6 +214,32 @@ SOURCE=..\..\agent\mibgroup\target\snmpTargetAddrEntry.c
 SOURCE=..\..\agent\mibgroup\target\snmpTargetParamsEntry.c
 # End Source File
 # End Group
+# Begin Group "agentx"
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agentx\client.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agentx\master.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agentx\master_admin.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agentx\master_request.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agentx\protocol.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\agentx\subagent.c
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\agent\mib_modules.c
@@ -189,6 +247,10 @@ SOURCE=..\..\agent\mib_modules.c
 # Begin Source File
 
 SOURCE=..\..\agent\mibgroup\smux\smux.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\agent\mibgroup\header_complex.c
 # End Source File
 # Begin Source File
 

@@ -84,6 +84,9 @@ SOFTWARE.
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#if HAVE_PROCESS_H  /* Win32-getpid */
+#include <process.h>
+#endif
 #include <signal.h>
 #include <errno.h>
 
@@ -108,7 +111,6 @@ SOFTWARE.
 #include "lcd_time.h"
 #include "transform_oids.h"
 #include "snmpv3.h"
-#include "snmp_alarm.h"
 #include "default_store.h"
 
 #define DS_APP_NUMERIC_IP  1
@@ -457,7 +459,7 @@ int snmp_input(int op,
 	            (void) format_plain_trap (out_bfr, SPRINT_MAX_LEN, pdu);
 	        else
 		    (void) format_trap (out_bfr, SPRINT_MAX_LEN, trap1_fmt_str, pdu);
-                snmp_log(LOG_INFO, out_bfr);
+                snmp_log(LOG_INFO, "%s", out_bfr);
 	    }
 	    if (Syslog && (pdu->trap_type != SNMP_TRAP_AUTHFAIL || dropauth == 0)) {
 	    	varbufidx=0;
@@ -516,7 +518,7 @@ int snmp_input(int op,
                 else
                     (void) format_trap (out_bfr, SPRINT_MAX_LEN,
                                         trap2_fmt_str, pdu);
-                snmp_log(LOG_INFO, out_bfr);
+                snmp_log(LOG_INFO, "%s", out_bfr);
 	    }
 	    if (Syslog) {
 	    	varbufidx=0;
@@ -608,7 +610,7 @@ static void free_trap2_fmt(void)
 
 void usage(void)
 {
-    fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d] [-n] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
+    fprintf(stderr,"Usage: snmptrapd [-h|-H|-V] [-D] [-p #] [-P] [-o file] [-s] [-f] [-l [d0-7]] [-e] [-d] [-n] [-a] [-m <MIBS>] [-M <MIBDIRS]\n");
     fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
     fprintf(stderr, "\n\
   -h        Print this help message and exit\n\
@@ -617,7 +619,9 @@ void usage(void)
   -q        Quick print mib display\n\
   -D[TOKEN,...] turn on debugging output, optionally by the list of TOKENs.\n\
   -p <port> Local port to listen from\n\
-  -P        Print to standard output\n\
+  -T TCP|UDP Listen to traffic on the TCP or UDP transport.\n\
+  -P        Print to stderr\n\
+  -o file   Print to the specified file\n\
   -F \"...\" Use custom format for logging to standard output\n\
   -u PIDFILE create PIDFILE with process id\n\
   -e        Print Event # (rising/falling alarm], etc.\n\
@@ -659,6 +663,7 @@ int main(int argc, char *argv[])
     int dofork=1;
     char *cp;
     int tcp=0;
+    char *trap1_fmt_str_remember = NULL;
 #if HAVE_GETPID
 	FILE           *PID;
         char *pid_file = NULL;
@@ -699,7 +704,7 @@ int main(int argc, char *argv[])
     /*
      * usage: snmptrapd [-D] [-u PIDFILE] [-p #] [-P] [-s] [-l [d0-7]] [-d] [-e] [-a]
      */
-    while ((arg = getopt(argc, argv, "VdnqRD:p:m:M:Po:O:esSafl:Hu:c:CF:T:")) != EOF){
+    while ((arg = getopt(argc, argv, "VdnqD:p:m:M:Po:O:esSafl:Hu:c:CF:T:")) != EOF){
 	switch(arg) {
 	case 'V':
             fprintf(stderr,"UCD-snmp version: %s\n", VersionInfo);
@@ -709,6 +714,7 @@ int main(int argc, char *argv[])
 	    snmp_set_dump_packet(1);
 	    break;
 	case 'q':
+	    fprintf(stderr, "Warning: -q option is deprecated - use -Oq\n");
 	    snmp_set_quick_print(1);
 	    break;
 	case 'D':
@@ -761,6 +767,7 @@ int main(int argc, char *argv[])
 	    Syslog++;
 	    break;
 	case 'S':
+	    fprintf(stderr, "Warning: -S option is deprecated - use -OS\n");
 	    snmp_set_suffix_only(2);
 	    break;
 	case 'a':
@@ -815,13 +822,13 @@ int main(int argc, char *argv[])
         case 'C':
             ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS, 1);
             break;
-
+            
         case 'n':
             ds_set_boolean(DS_APPLICATION_ID, DS_APP_NUMERIC_IP, 1);
             break;
 
 	case 'F':
-	    trap1_fmt_str = optarg;
+	    trap1_fmt_str_remember = optarg;
 	    break;
 
 	default:
@@ -841,6 +848,10 @@ int main(int argc, char *argv[])
 
     /* Initialize the world. Create initial user */
     init_snmp("snmptrapd");
+    if (trap1_fmt_str_remember) {
+        free_trap1_fmt();
+        trap1_fmt_str = strdup(trap1_fmt_str_remember);
+    }
 
 #ifndef WIN32
     /* fork the process to the background if we are not printing to stdout */
@@ -950,6 +961,10 @@ int main(int argc, char *argv[])
 	    if (Syslog)
 		syslog(LOG_INFO, "Snmptrapd reconfiguring");
 	    update_config();
+            if (trap1_fmt_str_remember) {
+                free_trap1_fmt();
+                trap1_fmt_str = strdup(trap1_fmt_str_remember);
+            }
 	    reconfig = 0;
 	}
 	numfds = 0;
@@ -970,7 +985,10 @@ int main(int argc, char *argv[])
 		snmp_timeout();
 		break;
 	    case -1:
+		if (errno == EINTR)
+			continue;
 	        snmp_log_perror("select");
+		running = 0;
 		break;
 	    default:
 		fprintf(stderr, "select returned %d\n", count);

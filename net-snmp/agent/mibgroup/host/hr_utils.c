@@ -70,6 +70,7 @@ date_n_time ( time_t *when, size_t  *length)
     string[7] =  0;
     *length = 8;
 
+#ifndef cygwin
 	/*
 	 * Timezone offset
 	 */
@@ -83,6 +84,7 @@ date_n_time ( time_t *when, size_t  *length)
     string[9] = abs(timezone)/3600;
     string[10] = (abs(timezone) - string[9]*3600)/60;
     *length = 11;
+#endif
 
 #ifdef SYSV
 	/*
@@ -104,8 +106,7 @@ date_n_time ( time_t *when, size_t  *length)
 }
 
 
-time_t ctime_to_timet( string )
-    char *string;
+time_t ctime_to_timet( char* string )
 {
     struct tm tm;
 

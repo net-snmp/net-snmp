@@ -70,6 +70,20 @@ SOFTWARE.
 #  include <ndir.h>
 # endif
 #endif
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
@@ -114,7 +128,7 @@ struct tc {     /* textual conventions */
     struct range_list *ranges;
 } tclist[MAXTC];
 
-int Line = 0;
+int mibLine = 0;
 const char *File = "(none)";
 static int anonymous = 0;
 
@@ -387,7 +401,7 @@ static struct tree *tbuckets[NHASHSIZE];
 static struct module *module_head = NULL;
 
 struct node *orphan_nodes = NULL;
-struct tree   *tree_head = NULL;
+struct tree *tree_head = NULL;
 
 #define	NUMBER_OF_ROOT_NODES	3
 static struct module_import	root_imports[NUMBER_OF_ROOT_NODES];
@@ -447,8 +461,6 @@ static void free_ranges(struct range_list **);
 static void free_enums(struct enum_list **);
 static struct range_list * copy_ranges(struct range_list *);
 static struct enum_list  * copy_enums(struct enum_list *);
-static struct index_list * copy_indexes(struct index_list *);
-static struct varbind_list * copy_varbinds(struct varbind_list *);
 
 /* backwards compatibility wrappers */
 void snmp_set_mib_errors(int err)
@@ -546,11 +558,9 @@ name_hash(const char* name)
     int hash = 0;
     const char *cp;
 
-    if (name) {
-      for(cp = name; *cp; cp++) {
+    if (!name) return 0;
+    for (cp = name; *cp; cp++)
         hash += tolower(*cp);
-      }
-    }
     return(hash);
 }
 
@@ -597,8 +607,8 @@ init_mib_internals (void)
 static void
 init_node_hash(struct node *nodes)
 {
-     register struct node *np, *nextp;
-     register int hash;
+     struct node *np, *nextp;
+     int hash;
 
      memset(nbuckets, 0, sizeof(nbuckets));
      for(np = nodes; np;){
@@ -626,13 +636,13 @@ print_error(const char *string,
     erroneousMibs++;
     DEBUGMSGTL(("parse-mibs", "\n"));
     if (type == ENDOFFILE)
-        snmp_log(LOG_ERR, "%s (EOF): At line %d in %s\n", string, Line,
+        snmp_log(LOG_ERR, "%s (EOF): At line %d in %s\n", string, mibLine,
                 File);
     else if (token && *token)
         snmp_log(LOG_ERR, "%s (%s): At line %d in %s\n", string, token,
-                Line, File);
+                mibLine, File);
     else
-        snmp_log(LOG_ERR, "%s: At line %d in %s\n", string, Line, File);
+        snmp_log(LOG_ERR, "%s: At line %d in %s\n", string, mibLine, File);
 }
 
 static void
@@ -1247,11 +1257,20 @@ static void
 do_subtree(struct tree *root,
 	   struct node **nodes)
 {
-    register struct tree *tp, *anon_tp=NULL;
-    register struct node *np, **headp;
+    struct tree *tp, *anon_tp=NULL;
+    struct tree *xroot = root;
+    struct node *np, **headp;
     struct node *oldnp = NULL, *child_list = NULL, *childp = NULL;
     int hash;
     int *int_p;
+
+    while (xroot->next_peer && xroot->next_peer->subid == root->subid) {
+#if 0
+    	printf("xroot: %s.%s => %s\n", xroot->parent->label, xroot->label,
+		xroot->next_peer->label);
+#endif
+    	xroot = xroot->next_peer;
+    }
 
     tp = root;
     headp = &nbuckets[NBUCKET(name_hash(tp->label))];
@@ -1281,11 +1300,25 @@ do_subtree(struct tree *root,
      * Take each element in the child list and place it into the tree.
      */
     for(np = child_list; np; np = np->next){
+	struct tree *otp = NULL;
+	struct tree *xxroot = xroot;
 	anon_tp = NULL;
-        tp = root->child_list;
-        while (tp)
+        tp = xroot->child_list;
+
+	if (np->subid == -1) {
+	    /* name ::= { parent } */
+	    np->subid = xroot->subid;
+	    tp = xroot;
+	    xxroot = xroot->parent;
+	}
+
+        while (tp) {
             if (tp->subid == np->subid) break;
-            else tp = tp->next_peer;
+            else {
+	    	otp = tp;
+		tp = tp->next_peer;
+	    }
+	}
         if (tp) {
 	    if (!label_compare (tp->label, np->label)) {
 		    /* Update list of modules */
@@ -1317,19 +1350,19 @@ do_subtree(struct tree *root,
 
         tp = (struct tree *) calloc(1, sizeof(struct tree));
         if (tp == NULL) return;
-        tp->parent = root;
+        tp->parent = xxroot;
         tp->modid = np->modid;
         tp->number_modules = 1;
         tp->module_list = &(tp->modid);
         tree_from_node(tp, np);
-        tp->next_peer = root->child_list;
-        root->child_list = tp;
+        tp->next_peer = otp ? otp->next_peer : xxroot->child_list;
+        if (otp) otp->next_peer = tp;
+	else xxroot->child_list = tp;
         hash = NBUCKET(name_hash(tp->label));
         tp->next = tbuckets[hash];
         tbuckets[hash] = tp;
-/*      if (tp->type == TYPE_OTHER) */
-            do_subtree(tp, nodes);      /* recurse on this child if it isn't
-                                           an end node */
+	do_subtree(tp, nodes);
+
         if ( anon_tp ) {
             if (!strncmp( tp->label, ANON, ANON_LEN)) {
 			/*
@@ -1418,9 +1451,9 @@ static void do_linkup(struct module *mp,
 		      struct node *np)
 {
     struct module_import *mip;
-    struct node *onp;
+    struct node *onp, *oldp, *newp;
     struct tree *tp;
-    int i;
+    int i, more;
 	/*
 	 * All modules implicitly import
 	 *   the roots of the tree
@@ -1461,6 +1494,56 @@ static void do_linkup(struct module *mp,
     for ( tp = tree_head ; tp ; tp=tp->next_peer )
         do_subtree( tp, &np );
     if (!np) return;
+
+    /* quietly move all internal references to the orphan list */
+    oldp = orphan_nodes;
+    do {
+	for (i = 0; i < NHASHSIZE; i++)
+	    for (onp = nbuckets[i]; onp; onp = onp->next) {
+		struct node *op = NULL;
+		int hash = NBUCKET(name_hash(onp->label));
+		np = nbuckets[hash];
+		while (np) {
+		    if (label_compare(onp->label, np->parent)) {
+			op = np;
+			np = np->next;
+		    }
+		    else {
+			if (op) op->next = np->next;
+			else nbuckets[hash] = np->next;
+			np->next = orphan_nodes;
+			orphan_nodes = np;
+			op = NULL;
+			np = nbuckets[hash];
+		    }
+		}
+	    }
+	newp = orphan_nodes;
+	more = 0;
+	for (onp = orphan_nodes; onp != oldp; onp = onp->next) {
+	    struct node *op = NULL;
+	    int hash = NBUCKET(name_hash(onp->label));
+	    np = nbuckets[hash];
+	    while (np) {
+		if (label_compare(onp->label, np->parent)) {
+		    op = np;
+		    np = np->next;
+		}
+		else {
+		    if (op) op->next = np->next;
+		    else nbuckets[hash] = np->next;
+		    np->next = orphan_nodes;
+		    orphan_nodes = np;
+		    op = NULL;
+		    np = nbuckets[hash];
+		    more = 1;
+		}
+	    }
+	}
+	oldp = newp;
+    } while (more);
+
+    /* complain about left over nodes */
     for ( np = orphan_nodes ; np && np->next ; np = np->next )
 	;	/* find the end of the orphan list */
     for (i = 0; i < NHASHSIZE; i++)
@@ -1481,7 +1564,6 @@ static void do_linkup(struct module *mp,
 		onp = onp->next;
 	    }
 	}
-
     return;
 }
 
@@ -1510,12 +1592,8 @@ getoid(FILE *fp,
         id->label = NULL;
         id->modid = current_module;
         id->subid = -1;
-        if (type == RIGHTBRACKET){
+        if (type == RIGHTBRACKET)
             return count;
-        } else if (type != LABEL && type != NUMBER){
-            print_error("Not valid for object identifier", token, type);
-            return 0;
-        }
         if (type == LABEL){
             /* this entry has a label */
             id->label = strdup(token);
@@ -1523,7 +1601,7 @@ getoid(FILE *fp,
             if (type == LEFTPAREN){
                 type = get_token(fp, token, MAXTOKEN);
                 if (type == NUMBER){
-                    id->subid = atoi(token);
+                    id->subid = strtoul(token, NULL, 10);
                     if ((type = get_token(fp, token, MAXTOKEN)) != RIGHTPAREN){
                         print_error("Expected a closing parenthesis",
                                     token, type);
@@ -1536,9 +1614,10 @@ getoid(FILE *fp,
             } else {
                 continue;
             }
-        } else if (type == NUMBER) {
+        }
+	else if (type == NUMBER) {
             /* this entry  has just an integer sub-identifier */
-            id->subid = atoi(token);
+            id->subid = strtoul(token, NULL, 10);
         }
 	else {
 	    print_error("Expected label or number", token, type);
@@ -1609,7 +1688,7 @@ parse_objectid(FILE *fp,
         if (np == NULL) return(NULL);
         np->subid = op->subid;
         np->label = strdup(name);
-        if (op->label) free(op->label);
+	np->parent = op->label;
         return np;
     }
 
@@ -1781,7 +1860,7 @@ parse_enumlist(FILE *fp, struct enum_list **retp)
                 print_error("Expected integer", token, type);
                 return NULL;
             }
-            (*epp)->value = atoi(token);
+            (*epp)->value = strtol(token, NULL, 10);
             type = get_token(fp, token, MAXTOKEN);
             if (type != RIGHTPAREN) {
                 print_error("Expected \")\"", token, type);
@@ -1819,11 +1898,11 @@ static struct range_list *parse_ranges(FILE *fp, struct range_list **retp)
     do {
 	if (!taken) nexttype = get_token(fp, nexttoken, MAXTOKEN);
 	else taken = 0;
-	high = low = atol(nexttoken);
+	high = low = strtol(nexttoken, NULL, 10);
 	nexttype = get_token(fp, nexttoken, MAXTOKEN);
 	if (nexttype == RANGE) {
 	    nexttype = get_token(fp, nexttoken, MAXTOKEN);
-	    high = atol(nexttoken);
+	    high = strtol(nexttoken, NULL, 10);
 	    nexttype = get_token(fp, nexttoken, MAXTOKEN);
 	}
 	*rpp = (struct range_list *)calloc (1, sizeof(struct range_list));
@@ -2306,7 +2385,7 @@ parse_objectgroup(FILE *fp, char *name, int what, struct objgroup **ol)
 		goto skip;
 	    }
 	    o = (struct objgroup *)malloc(sizeof(struct objgroup));
-	    o->line = Line;
+	    o->line = mibLine;
 	    o->name = strdup(token);
 	    o->next = *ol;
 	    *ol = o;
@@ -2474,7 +2553,7 @@ parse_trapDefinition(FILE *fp,
         free_node(np);
         return NULL;
     }
-    np->subid = atoi(token);
+    np->subid = strtoul(token, NULL, 10);
     np->next = alloc_node(current_module);
     if (np->next == NULL)  {
         free_node(np);
@@ -2569,7 +2648,7 @@ static int compliance_lookup(const char *name, int modid)
 	struct objgroup *op = (struct objgroup *)malloc(sizeof(struct objgroup));
 	op->next = objgroups;
 	op->name = strdup(name);
-	op->line = Line;
+	op->line = mibLine;
 	objgroups = op;
 	return 1;
     }
@@ -3027,7 +3106,7 @@ parse_macro(FILE *fp,
     register int type;
     char token[MAXTOKEN];
     struct node *np;
-    int iLine = Line;
+    int iLine = mibLine;
 
     np = alloc_node(current_module);
     if (np == NULL) return(NULL);
@@ -3047,7 +3126,7 @@ parse_macro(FILE *fp,
 
     if (ds_get_int(DS_LIBRARY_ID, DS_LIB_MIB_WARNINGS))
 	snmp_log(LOG_WARNING,
-		 "%s MACRO (lines %d..%d parsed and ignored).\n", name, iLine, Line);
+		 "%s MACRO (lines %d..%d parsed and ignored).\n", name, iLine, mibLine);
 
     return np;
 }
@@ -3303,7 +3382,7 @@ read_module_internal (const char *name)
     for ( mp=module_head ; mp ; mp=mp->next )
 	if ( !label_compare(mp->name, name)) {
     	    const char *oldFile = File;
-    	    int oldLine = Line;
+    	    int oldLine = mibLine;
 	    int oldModule = current_module;
 
 	    if ( mp->no_imports != -1 ) {
@@ -3316,7 +3395,7 @@ read_module_internal (const char *name)
 	    }
 	    mp->no_imports=0;		/* Note that we've read the file */
 	    File = mp->file;
-	    Line = 1;
+	    mibLine = 1;
 	    current_module = mp->modid;
 		/*
 		 * Parse the file
@@ -3324,7 +3403,7 @@ read_module_internal (const char *name)
 	    np = parse( fp, NULL );
 	    fclose(fp);
 	    File = oldFile;
-	    Line = oldLine;
+	    mibLine = oldLine;
 	    current_module = oldModule;
 	    return MODULE_LOADED_OK;
 	}
@@ -3373,7 +3452,7 @@ adopt_orphans (void)
 	    while (onp) {
         	char modbuf[256];
         	snmp_log (LOG_WARNING,
-                          "Unlinked OID in %s: %s ::= { %s %ld }\n",
+                          "Cannot adopt OID in %s: %s ::= { %s %ld }\n",
                           module_name(onp->modid, modbuf),
                           (onp->label ? onp->label : "<no label>"),
                           (onp->parent ? onp->parent : "<no parent>"),
@@ -3533,7 +3612,7 @@ unload_all_mibs()
         free_enums( &ptc->enums );
         free_ranges( &ptc->ranges );
         free(ptc->descriptor);
-        free(ptc->hint);
+        if (ptc->hint) free(ptc->hint);
     }
     memset(tclist, 0, MAXTC * sizeof(struct tc));
 
@@ -3593,7 +3672,7 @@ new_module (const char *name,
 static void
 scan_objlist(struct node *root, struct objgroup *list, const char *error)
 {
-    int oLine = Line;
+    int oLine = mibLine;
 
     while (list) {
 	struct objgroup *gp = list;
@@ -3606,13 +3685,13 @@ scan_objlist(struct node *root, struct objgroup *list, const char *error)
 	    else
 		break;
 	if (!np) {
-	    Line = gp->line;
+	    mibLine = gp->line;
 	    print_error(error, gp->name, QUOTESTRING);
 	}
 	free(gp->name);
 	free(gp);
     }
-    Line = oLine;
+    mibLine = oLine;
 }
 
 /*
@@ -3893,7 +3972,7 @@ get_token(FILE *fp,
     do {
         ch = getc(fp);
         if (ch == '\n')
-            Line++;
+            mibLine++;
     }
     while(isspace(ch) && ch != EOF);
     *cp++ = ch; *cp = '\0';
@@ -3988,7 +4067,7 @@ get_token(FILE *fp,
 	    }
 	  }
 	    if (ch_next == EOF) return ENDOFFILE;
-	    if (ch_next == '\n') Line++;
+	    if (ch_next == '\n') mibLine++;
 	    return get_token (fp, token, maxtlen);
 	}
 	ungetc(ch_next, fp);
@@ -4018,7 +4097,7 @@ get_token(FILE *fp,
 	if (tp) {
 	    if (tp->token != CONTINUE) return (tp->token);
 	    while (isspace((ch_next = getc(fp))))
-		if (ch_next == '\n') Line++;
+		if (ch_next == '\n') mibLine++;
 	    if (ch_next == EOF) return ENDOFFILE;
 	    if (isalnum(ch_next)) {
 		*cp++ = ch_next;
@@ -4098,7 +4177,7 @@ add_mibdir(const char *dirname)
 			continue;
                     }
                     DEBUGMSGTL(("parse-mibs", "Checking file: %s...\n", tmpstr));
-                    Line = 1;
+                    mibLine = 1;
                     File = tmpstr;
                     get_token( fp, token, MAXTOKEN);
 		    /* simple test for this being a MIB */
@@ -4135,7 +4214,7 @@ read_mib(const char *filename)
         snmp_log_perror(filename);
         return NULL;
     }
-    Line = 1;
+    mibLine = 1;
     File = filename;
     DEBUGMSGTL(("parse-mibs", "Parsing file: %s...\n", filename));
     get_token( fp, token, MAXTOKEN);
@@ -4197,7 +4276,7 @@ parseQuoteString(FILE *fp,
     for (ch = getc(fp); ch != EOF; ch = getc(fp)) {
         if (ch == '\r') continue;
         if (ch == '\n') {
-            Line++;
+            mibLine++;
         }
         else if (ch == '"') {
             *token = '\0';
@@ -4390,37 +4469,6 @@ copy_ranges (struct range_list *sp)
     if (!*spp) break;
     (*spp)->low = sp->low;
     (*spp)->high = sp->high;
-    spp = &(*spp)->next;
-    sp = sp->next;
-  }
-  return (xp);
-}
-
-static struct index_list *
-copy_indexes (struct index_list *sp)
-{
-  struct index_list *xp = NULL, **spp = &xp;
-
-  while (sp) {
-    *spp = (struct index_list *) calloc(1, sizeof(struct index_list));
-    if (!*spp) break;
-    (*spp)->ilabel = strdup(sp->ilabel);
-    (*spp)->isimplied = sp->isimplied;
-    spp = &(*spp)->next;
-    sp = sp->next;
-  }
-  return (xp);
-}
-
-static struct varbind_list *
-copy_varbinds (struct varbind_list *sp)
-{
-  struct varbind_list *xp = NULL, **spp = &xp;
-
-  while (sp) {
-    *spp = (struct varbind_list *) calloc(1, sizeof(struct varbind_list));
-    if (!*spp) break;
-    (*spp)->vblabel = strdup(sp->vblabel);
     spp = &(*spp)->next;
     sp = sp->next;
   }
