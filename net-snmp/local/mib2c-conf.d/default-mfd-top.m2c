@@ -74,7 +74,7 @@
 @end@
 ##
 @if "x$user_mfd_default_context_reg" eq "x" @
-@  eval $mfd_default_context_reg = "netsnmp_data_list *"@
+@  eval $mfd_default_context_reg = "netsnmp_data_list"@
 @else@
 @  eval $mfd_default_context_reg = "$user_mfd_default_context_reg"@
 @end@
