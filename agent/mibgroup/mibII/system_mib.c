@@ -18,7 +18,6 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
-#include "../mibincl.h"
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -40,6 +39,7 @@
 #include <dmalloc.h>
 #endif
 
+#include "mibincl.h"
 #include "system_mib.h"
 #include "../struct.h"
 #include "../util_funcs.h"
