@@ -14,6 +14,7 @@ CC		= @CC@ $(CPPFLAGS)
 
 MIBOBJS		= @mibgroup_list_o@
 
+PERSISTENT_DIRECTORY=@PERSISTENT_DIRECTORY@
 
 all: subdirs snmpd
 
@@ -53,7 +54,7 @@ install:  installdirs
 #	cd dlmods ; $(MAKE) install; cd ..
 
 installdirs:
-	@$(SHELL) $(srcdir)/../mkinstalldirs $(sbindir) $(snmplibdir) 
+	@$(SHELL) $(srcdir)/../mkinstalldirs $(sbindir) $(snmplibdir) $(PERSISTENT_DIRECTORY)
 
 
 dependlocal: 
