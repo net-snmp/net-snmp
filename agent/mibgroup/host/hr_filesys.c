@@ -636,7 +636,7 @@ Get_FSIndex(char *dev)
 	}
 
     End_HR_FileSys();
-    return -1;
+    return 0;
 }
 
 int
@@ -658,5 +658,5 @@ Get_FSSize(char *dev)
 	}
 
     End_HR_FileSys();
-    return -1;
+    return 0;
 }

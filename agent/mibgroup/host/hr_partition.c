@@ -137,7 +137,7 @@ header_hrpartition(struct variable *vp,
 
     for ( ;; ) {
         part_idx = Get_Next_HR_Partition();
-        if ( part_idx == -1 )
+        if ( part_idx == 0 )
 	    break;
 	newname[HRPART_DISK_NAME_LENGTH] = (HRDEV_DISK << HRDEV_TYPE_SHIFT) + HRD_index;
 	newname[HRPART_ENTRY_NAME_LENGTH] = part_idx;
@@ -267,7 +267,7 @@ Get_Next_HR_Partition (void)
     int fd;
 
     if ( HRD_index == -1 )
-	return -1;
+	return 0;
 
     HRP_index++;
     max_partitions = disk_partition_last[ HRD_type_index ]
@@ -283,10 +283,10 @@ Get_Next_HR_Partition (void)
 	fd=open( string, O_RDONLY  );
 	if (fd != -1 ) {
             close(fd);
-            return HRP_index;
+            return HRP_index+1;
 	}
 	else if (errno == EBUSY)
-	    return HRP_index;
+	    return HRP_index+1;
 	HRP_index++;
     }
 
