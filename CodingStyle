@@ -7,7 +7,7 @@ Indentation:
 
 We've adopted the following indent style:
 
-   indent -orig -nbc -bap -nut
+   indent -orig -nbc -bap -nut -nfca
 
 If possible, please run all new code submitted to the project through
 the above command.  However, if sending a patch, please do *not* send
