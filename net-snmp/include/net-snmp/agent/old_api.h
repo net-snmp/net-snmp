@@ -1,6 +1,10 @@
 #ifndef OLD_API_H
 #define OLD_API_H
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 #define OLD_API_NAME "old_api"
 
 typedef struct netsnmp_old_api_info_s {
@@ -39,4 +43,7 @@ Netsnmp_Node_Handler netsnmp_old_api_helper;
  */
 netsnmp_agent_session *netsnmp_get_current_agent_session(void);
 
+#ifdef __cplusplus
+}
+#endif
 #endif                          /* OLD_API_H */

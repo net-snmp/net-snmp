@@ -6,6 +6,10 @@
 #ifndef NET_SNMP_UCD_COMPAT_H
 #define NET_SNMP_UCD_COMPAT_H
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
         /*
          * from snmp_api.h 
          */
@@ -29,4 +33,7 @@ void            snmp_set_save_descriptions(int);
 void            snmp_set_mib_comment_term(int);
 void            snmp_set_mib_parse_label(int);
 
+#ifdef __cplusplus
+}
+#endif
 #endif                          /* NET_SNMP_UCD_COMPAT_H */

@@ -1,6 +1,10 @@
 #ifndef _SNMPCALLBACKDOMAIN_H
 #define _SNMPCALLBACKDOMAIN_H
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 #include <net-snmp/library/snmp_transport.h>
 
 typedef struct netsnmp_callback_pass_s {
@@ -46,4 +50,7 @@ netsnmp_session *netsnmp_callback_open(int attach_to,
                                                            netsnmp_pdu *,
                                                            int));
 
+#ifdef __cplusplus
+}
+#endif
 #endif/*_SNMPCALLBACKDOMAIN_H*/

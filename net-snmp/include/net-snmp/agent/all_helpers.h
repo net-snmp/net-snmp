@@ -1,6 +1,10 @@
 #ifndef ALL_HANDLERS_H
 #define ALL_HANDLERS_H
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 #include <net-snmp/agent/instance.h>
 #include <net-snmp/agent/multiplexer.h>
 #include <net-snmp/agent/null.h>
@@ -22,4 +26,7 @@
 
 void            netsnmp_init_helpers(void);
 
+#ifdef __cplusplus
+}
+#endif
 #endif                          /* ALL_HANDLERS_H */

@@ -3,6 +3,10 @@
 
 #ifdef SNMP_TRANSPORT_UNIX_DOMAIN
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
+
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -30,6 +34,9 @@ int             netsnmp_unix_accept(netsnmp_transport *t);
 
 void            netsnmp_unix_ctor(void);
 
+#ifdef __cplusplus
+}
+#endif
 #endif                          /*SNMP_TRANSPORT_UNIX_DOMAIN */
 
 #endif/*_SNMPUNIXDOMAIN_H*/

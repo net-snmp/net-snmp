@@ -1,6 +1,9 @@
 #ifndef AGENT_INDEX_H
 #define AGENT_INDEX_H
 
+#ifdef __cplusplus
+extern          "C" {
+#endif
 
 #define ALLOCATE_THIS_INDEX		0x0
 #define ALLOCATE_ANY_INDEX		0x1
@@ -37,4 +40,7 @@ int             unregister_index(netsnmp_variable_list *, int,
 unsigned long   count_indexes(oid * name, size_t namelen,
                               int include_unallocated);
 
+#ifdef __cplusplus
+}
+#endif
 #endif                          /* AGENT_INDEX_H */
