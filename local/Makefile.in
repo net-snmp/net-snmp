@@ -17,7 +17,7 @@ SCRIPTSMADEFORPERL=snmpcheck.made tkmib.made mib2c.made fixproc.made \
 	ipf-mod.pl.made rsnmp.made snmpconf.made traptoemail.made
 PERLPROG=@PERLPROG@
 DATASRCS=mib2c.conf mib2c.iterate.conf mib2c.create-dataset.conf \
-	mib2c.array-auto.conf mib2c.array-user.conf
+	mib2c.array-user.conf
 CONFINSTALLDIR=$(snmplibdir)/snmpconf
 CONFDATASRC=snmpconf.dir
 CONFDIRS=snmpd.conf snmp.conf snmptrapd.conf
