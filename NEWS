@@ -1,6 +1,22 @@
 This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
+*5.0.3*
+
+ New:
+    - the "dist" directory contains the beginnings of some init
+      scripts and packaging utilities.
+
+ Ports:
+    - win32 builds should work properly again.
+
+ Fixes:
+    - the 5.0.2 package had a few broken packaging problems.  Opps.
+    - a few misc fixes.
+
+ Perl:
+    - the perl modules should work with older versions of perl again.
+
 *5.0.2*
 
  New:
