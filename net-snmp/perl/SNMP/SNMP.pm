@@ -375,7 +375,7 @@ sub new {
    my $this = {};
    my ($name, $aliases, $host_type, $len, $thisaddr);
 
-   SNMP::init_snmp();
+   SNMP::init_snmp("perl");
 
    %$this = @_;
 
