@@ -288,10 +288,17 @@ _find_next_row(netsnmp_container *c,
          * we don't have a row, but we might be at the end of a
          * column, so try the next column.
          */
-        if ((NULL == row) &&
-            (0 != (tblreq->colnum = netsnmp_table_next_column(tblreq))))
-            row = CONTAINER_FIRST(c);
-        
+        if (NULL == row) {
+            /*
+             * don't set tblreq next_col unless we know there is one,
+             * so we don't mess up table handler sparse table processing.
+             *.
+            oid next_col = netsnmp_table_next_column(tblreq);
+            if (0 != next_col) {
+                tblreq->colnum = next_col;
+                row = CONTAINER_FIRST(c);
+            }
+        }
     }
     
     return row;
