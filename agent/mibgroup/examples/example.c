@@ -118,7 +118,7 @@ struct variable2 example_variables[] = {
     { EXAMPLECOUNTER,   ASN_COUNTER,   RONLY, var_example, 1, {5}},
     { EXAMPLEGAUGE,     ASN_GAUGE,     RONLY, var_example, 1, {6}},
     { EXAMPLETRIGGERTRAP, ASN_INTEGER, RWRITE, var_example, 1, {7}},
-    { EXAMPLETRIGGERTRAP2, ASN_INTEGER, RWRITE, var_example, 1, {7}}
+    { EXAMPLETRIGGERTRAP2, ASN_INTEGER, RWRITE, var_example, 1, {8}}
   };
 
     /*
