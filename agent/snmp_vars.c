@@ -52,7 +52,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
+#endif
 #include <netinet/ip.h>
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
@@ -370,26 +372,22 @@ in_a_view(oid *name,
   /* check for v1 and counter64s, since snmpv1 doesn't support it */
   if (pi->version == SNMP_VERSION_1 && cvp->type == ASN_COUNTER64)
     return 0;
-  return (
-#ifdef USING_V2PARTY_VIEW_VARS_MODULE
-#define GOT_A_VIEW_CHECK
-    /* check against the older v2party view support */
-    (pi->version == SNMP_VERSION_2p &&
-     in_view(name, *namelen, pi->cxp->contextViewIndex)) ||
-#endif
+  switch (pi->version) {
+  case SNMP_VERSION_1:
+  case SNMP_VERSION_2c:
 #ifdef USING_MIBII_VACM_VARS_MODULE
-#define GOT_A_VIEW_CHECK
-    /* check against the snmpv3 VACM support */
-    (vacm_in_view(pi, name, *namelen)) ||
-#endif
-#ifndef GOT_A_VIEW_CHECK
-    /* no support at all for views?  Ick!
-       Oh well, default to allowing access to everyone then. */
-    1
+    return vacm_in_view(pi, name, *namelen);
 #else
-    0  /* needed for end of || clauses above */
+    return 1;
 #endif
-    );
+  case SNMP_VERSION_2p:
+#ifdef USING_V2PARTY_VIEW_VARS_MODULE
+    return in_view(name, *namelen, pi->cxp->contextViewIndex);
+#else
+    return 1;
+#endif
+  }
+  return 0;
 }
 
 

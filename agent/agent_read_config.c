@@ -18,7 +18,9 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#if HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
+#endif
 #include <netinet/ip.h>
 #include <sys/socket.h>
 #if HAVE_SYS_STREAM_H

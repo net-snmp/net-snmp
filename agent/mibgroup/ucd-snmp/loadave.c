@@ -204,7 +204,7 @@ int try_getloadavg(double *r_ave, size_t s_ave)
     return(-1);
   for(i=0;i<s_ave;i++)
     *(pave+i) = FIX_TO_DBL(favenrun[i]);
-#else
+#elif !defined(cygwin32)
   if (auto_nlist(LOADAVE_SYMBOL,(char *) pave, sizeof(double)*s_ave) == 0)
     return (-1);
 #endif
