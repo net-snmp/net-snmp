@@ -15,7 +15,7 @@
 #ifdef DEBUG
 
 #ifdef NET_SNMP_USE_ASSERT
-/*   void netsnmp_assert( int );*
+/*   void netsnmp_assert( int );*/
 #   define netsnmp_assert(x)  assert( x )
 #else
 #   ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
