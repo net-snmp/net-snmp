@@ -175,8 +175,13 @@ netsnmp_table_container_register(netsnmp_handler_registration *reginfo,
         return SNMPERR_GENERR;
     }
 
-    if (NULL==container)
+    if (NULL==container) {
         tad->table = netsnmp_container_find("table_array");
+        if (NULL==container) {
+            snmp_log(LOG_ERR,"netsnmp_table_container_register couldn't find table\n");
+            return SNMPERR_GENERR;
+        }
+    }
     else
         tad->table = container;
     if (NULL==container->compare)
@@ -227,14 +232,24 @@ netsnmp_table_array_check_row_status(netsnmp_table_array_callbacks *cb,
         return SNMPERR_GENERR;
     row_ctx  = ag->existing_row;
     undo_ctx = ag->undo_info;
-    
+
     /*
      * xxx-rks: revisit row delete scenario
      */
     if (row_ctx) {
         /*
-         * either a new row, or change to old row
+         * either a new row, or change to old row.
+         * make sure new row-status is valid
          */
+        if(!rs_new)
+            return SNMPERR_GENERR;
+
+        /*
+         * new row without row status. shouldn't happen.
+         */
+        if(*rs_new == RS_NONEXISTENT) 
+            return SNMP_ERR_INCONSISTENTVALUE;
+        
         /*
          * is it set to active?
          */
@@ -370,6 +385,8 @@ find_next_row(netsnmp_table_request_info *tblreq_info,
     if (!tblreq_info || !tad)
         return NULL;
 
+    netsnmp_assert(NULL != tad->table);
+
     /*
      * below our minimum column?
      */
@@ -450,6 +467,8 @@ process_get_requests(netsnmp_handler_registration *reginfo,
     netsnmp_index *row = NULL;
     netsnmp_table_request_info *tblreq_info;
     netsnmp_variable_list *var;
+
+    netsnmp_assert(NULL != tad->table);
 
     /*
      * Loop through each of the requests, and
@@ -722,26 +741,9 @@ process_set_group(netsnmp_index *o, void *c)
             context->tad->cb->delete_row(ag->undo_info);
             ag->undo_info = NULL;
         }
-
-#if 0
-        /* XXX-rks: finish row cooperative notifications
-         * if the table has requested it, send cooperative notifications
-         * for row operations.
-         */
-        if (context->tad->notifications) {
-            if (ag->undo_info) {
-                if (!ag->existing_row)
-                    netsnmp_monitor_notify(EVENT_ROW_DEL);
-                else
-                    netsnmp_monitor_notify(EVENT_ROW_MOD);
-            }
-            else
-                netsnmp_monitor_notify(EVENT_ROW_ADD);
-        }
-#endif
         break;
 
-    case MODE_SET_FREE:/** FINAL CHANCE ON FAILURE */
+    case MODE_SET_FREE:/** FINAL CHANCE ON FAILURE of RESERVE1 or RESERVE2 */
         if (context->tad->cb->set_free)
             context->tad->cb->set_free(ag);
 
@@ -752,7 +754,7 @@ process_set_group(netsnmp_index *o, void *c)
         }
         break;
 
-    case MODE_SET_UNDO:/** FINAL CHANCE ON FAILURE */
+    case MODE_SET_UNDO:/** FINAL CHANCE ON FAILURE of ACTION */
         if (ag->row_created == 0) {
             /*
              * this row existed before.
@@ -884,6 +886,11 @@ netsnmp_table_array_helper_handler(netsnmp_mib_handler *handler,
      */
     int             rc = SNMP_ERR_NOERROR;
     table_container_data *tad = (table_container_data *)handler->myvoid;
+
+    if((NULL == tad) || (NULL == tad->table)) {
+        snmp_log(LOG_ERR,"process_get_requests called without a table\n");
+        return SNMP_ERR_GENERR;
+    }
 
     if (agtreq_info->mode < 0 || agtreq_info->mode > 5) {
         DEBUGMSGTL(("table_array", "Mode %d, Got request:\n",
