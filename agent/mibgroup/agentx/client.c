@@ -85,7 +85,7 @@ agentx_synch_input(int op,
 
     DEBUGMSGTL(("agentx/subagent","synching input\n"));
     state->waiting = 0;
-    if (op == RECEIVED_MESSAGE) {
+    if (op == SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
 	if (pdu->command == AGENTX_MSG_RESPONSE) {
 	    state->pdu		= snmp_clone_pdu(pdu);
 	    state->status	= STAT_SUCCESS;
@@ -107,7 +107,7 @@ agentx_synch_input(int op,
           }
 	}
     }
-    else if (op == TIMED_OUT){
+    else if (op == SNMP_CALLBACK_OP_TIMED_OUT){
 	state->pdu		= NULL;
 	state->status		= STAT_TIMEOUT;
 	session->s_snmp_errno	= SNMPERR_TIMEOUT;
