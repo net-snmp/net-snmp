@@ -71,7 +71,8 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
           }
           else if (!strncasecmp(word,"sh",2) || !strncasecmp(word,"exec",4)) {
             /* determine type */
-            if (*cptr == '.' || isdigit(*cptr)) {
+            if (*cptr == '.') cptr++;
+            if (isdigit(*cptr)) {
               (*numrelocs) = (*numrelocs)+1;
               (*pprelocs) =
                 (struct extensible *) malloc(sizeof(struct extensible));
@@ -89,8 +90,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
               (*pptmp)->type = SHPROC;
             else
               (*pptmp)->type = EXECPROC;
-            if (*cptr == '.' || isdigit(*cptr)) {
-              if (*cptr == '.') cptr++;
+            if (isdigit(*cptr)) {
               for(i=0; isdigit(*cptr); i++) {
                 (*pptmp)->miboid[i] = atoi(cptr);
                 while(isdigit(*cptr++));
@@ -108,11 +108,15 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
             /* command */
             cptr = skip_not_white(cptr);
             cptr = skip_white(cptr);
-            for(tcptr=cptr;*tcptr != NULL && *tcptr != '#' && *tcptr != ';';
-                           tcptr++);
-            strncpy((*pptmp)->command,cptr,tcptr-cptr);
-            (*pptmp)->command[tcptr-cptr-1]=NULL;
-            (*pptmp)->next = NULL;
+            if (cptr == NULL) {
+              fprintf(stderr,"No command specified on line:  %s\n",line);
+            } else {
+              for(tcptr=cptr;*tcptr != NULL && *tcptr != '#' && *tcptr != ';';
+                  tcptr++);
+              strncpy((*pptmp)->command,cptr,tcptr-cptr);
+              (*pptmp)->command[tcptr-cptr-1]=NULL;
+              (*pptmp)->next = NULL;
+            }
           }
           else if (!strncmp(word,"disk",4)) {
 #if HAVE_FSTAB_H
@@ -126,7 +130,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
               cptr = skip_not_white(cptr);
               cptr = skip_white(cptr);
               /* read optional minimum disk usage spec */
-              if (*cptr != NULL) {
+              if (cptr != NULL) {
                 disk[*numdisks].minimumspace = atoi(cptr);
               }
               else {
@@ -182,7 +186,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
           }
           else if (!strncmp(word,"load",4)) {
             for(i=0;i<=2;i++) {
-              if (*cptr != NULL)
+              if (cptr != NULL)
                 *maxload++ = atof(cptr);
               else
                 *maxload++ = maxload[i-1];
@@ -195,7 +199,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, ppexten,
             if (i < NUM_COMMUNITIES) {
               cptr = skip_not_white(cptr);
               cptr = skip_white(cptr);
-              if (*cptr != NULL) {
+              if (cptr != NULL) {
                 if (strlen(cptr) < COMMUNITY_MAX_LEN) {
                   copy_word(cptr,communities[i-1]);
                 } else {
@@ -255,7 +259,8 @@ free_config(procp,ppexten,pprelocs)
 char *skip_white(ptr)
   char *ptr;
 {
-  
+
+  if (ptr == NULL) return (NULL);
   while (*ptr != NULL && isspace(*ptr)) ptr++;
   if (*ptr == NULL || *ptr == '#') return (NULL);
   return (ptr);
@@ -265,6 +270,7 @@ char *skip_not_white(ptr)
   char *ptr;
 {
   
+  if (ptr == NULL) return (NULL);
   while (*ptr != NULL && !isspace(*ptr)) ptr++;
   if (*ptr == NULL || *ptr == '#') return (NULL);
   return (ptr);
