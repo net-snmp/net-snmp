@@ -1,3 +1,13 @@
+/* Portions of this file are subject to the following copyright(s).  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
+/*
+ * Portions of this file are copyrighted by:
+ * Copyright @ 2003 Sun Microsystems, Inc. All rights reserved.
+ * Use is subject to license terms specified in the COPYING file
+ * distributed with the Net-SNMP package.
+ */
 #include <net-snmp/net-snmp-config.h>
 
 #include <sys/types.h>
@@ -90,7 +100,8 @@ proxy_parse_config(const char *token, char *line)
     }
 
     DEBUGMSGTL(("proxy_config", "parsing args: %d\n", argn));
-    arg = snmp_parse_args(argn, argv, &session, "C:", proxyOptProc);
+    /* Call special parse_args that allows for no specified community string */
+    arg = snmp_proxy_parse_args(argn, argv, &session, "C:", proxyOptProc);
     if (arg < 0) {
         config_perror("failed to parse proxy args");
         return;
@@ -216,6 +227,82 @@ proxy_free_config(void)
     }
 }
 
+/*
+ * Configure special parameters on the session.
+ * Currently takes the parameter configured and changes it if something 
+ * was configured.  It becomes "-c" if the community string from the pdu
+ * is placed on the session.
+ */
+int
+proxy_fill_in_session(netsnmp_mib_handler *handler,
+                      netsnmp_agent_request_info *reqinfo,
+                      void **configured)
+{
+    netsnmp_session *session;
+    struct simple_proxy *sp;
+    u_char         *sess_community;
+
+    sp = (struct simple_proxy *) handler->myvoid;
+    if (!sp) {
+        return 0;
+    }
+    session = sp->sess;
+    if (!session) {
+        return 0;
+    }
+
+    if (session->version == SNMP_VERSION_1 ||
+        session->version == SNMP_VERSION_2c) {
+
+        /*
+         * Check if session has community string defined for it.
+         * If not, need to extract community string from the pdu.
+         * Copy to session and set 'configured' to indicate this.
+         */
+        if (session->community_len == 0) {
+            DEBUGMSGTL(("proxy", "session has no community string\n"));
+            if (reqinfo->asp == NULL || reqinfo->asp->pdu == NULL ||
+                reqinfo->asp->pdu->community_len == 0) {
+                return 0;
+            }
+
+            *configured = malloc(strlen("-c") + 1);
+            strcpy(*configured, "-c");
+            DEBUGMSGTL(("proxy", "pdu has community string\n"));
+            session->community_len = reqinfo->asp->pdu->community_len;
+            session->community = malloc(session->community_len + 1);
+            strncpy((char *)session->community,
+                    (const char *)reqinfo->asp->pdu->community,
+                    session->community_len);
+        }
+    }
+
+    return 1;
+}
+
+/*
+ * Free any specially configured parameters used on the session.
+ */
+void
+proxy_free_filled_in_session_args(netsnmp_session *session, void **configured)
+{
+
+    /* Only do comparisions, etc., if something was configured */
+    if (*configured == NULL) {
+        return;
+    }
+
+    /* If used community string from pdu, release it from session now */
+    if (strcmp((const char *)(*configured), "-c") == 0) {
+        free(session->community);
+        session->community = NULL;
+        session->community_len = 0;
+    }
+
+    free((u_char *)(*configured));
+    *configured = NULL;
+}
+
 void
 init_proxy(void)
 {
@@ -242,6 +329,7 @@ proxy_handler(netsnmp_mib_handler *handler,
     oid            *ourname;
     size_t          ourlength;
     netsnmp_request_info *request = requests;
+    u_char         *configured = NULL;
 
     DEBUGMSGTL(("proxy", "proxy handler starting, mode = %d\n",
                 reqinfo->mode));
@@ -328,6 +416,14 @@ proxy_handler(netsnmp_mib_handler *handler,
     }
 
     /*
+     * Customize session parameters based on request information
+     */
+    if (!proxy_fill_in_session(handler, reqinfo, (void **)&configured)) {
+        netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_GENERR);
+        return SNMP_ERR_NOERROR;
+    }
+
+    /*
      * send the request out 
      */
     DEBUGMSGTL(("proxy", "sending pdu\n"));
@@ -335,6 +431,10 @@ proxy_handler(netsnmp_mib_handler *handler,
                     netsnmp_create_delegated_cache(handler, reginfo,
                                                    reqinfo, requests,
                                                    (void *) sp));
+
+    /* Free any special parameters generated on the session */
+    proxy_free_filled_in_session_args(sp->sess, (void **)&configured);
+
     return SNMP_ERR_NOERROR;
 }
 
