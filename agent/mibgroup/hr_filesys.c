@@ -74,6 +74,7 @@ struct mntent *HRFS_entry;
 
 extern void  Init_HR_FileSys __P((void));
 extern int   Get_Next_HR_FileSys __P((void));
+char *cook_device __P((char *));
 static u_char * when_dumped __P(( char* filesys, int level, int* length ));
 int header_hrfilesys __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
 
