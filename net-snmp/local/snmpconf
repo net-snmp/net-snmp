@@ -235,6 +235,7 @@ sub read_config_item {
 	    if (!defined($curtoken)) {
 		die "error in configuration file $itemfile, no token set\n";
 	    }
+	    $rest =~ s/^\#//;
 	    push @{$results{$curtoken}{$token}},$rest;
 	} elsif (defined($arrayitems{$token})) {
 	    if (!defined($curtoken)) {
@@ -247,6 +248,7 @@ sub read_config_item {
 		$results{$curtoken}{$token}[$num] = $newrest;
 	    }
 	} elsif ($token =~ /^token\s*$/) {
+	    $rest = lc($rest);
 	    $curtoken = $rest;
 	    $results{'thetokens'}{$curtoken} = 1;
 	    $results{$curtoken}{'defined'} = 1;
@@ -270,7 +272,8 @@ sub output_files {
 	next if (!$didfile{$ft});
 	my $outputf = $ft;
 	if (-f $outputf && !$opts{'f'}) {
-	    my $ans = get_answer($term,"$outputf already exists.  Should we 'overwrite', 'skip', 'rename' or 'append'? ",valid_answers(qw(o overwrite r rename s skip a append)));
+	    print "Error: $outputf already exists.  \n";
+	    my $ans = get_answer($term,"'overwrite', 'skip', 'rename' or 'append'? ",valid_answers(qw(o overwrite r rename s skip a append)));
 	    next if ($ans =~ /^(s|skip)$/i);
 	    if ($ans =~ /^(a|append)/) {
 		$outputf = ">$outputf";
@@ -286,7 +289,7 @@ sub output_files {
 	    foreach my $token (keys(%{$sect->{'thetokens'}})) {
 		if ($#{$sect->{$token}{'results'}} >= 0) {
 		    if ($secthelp++ == 0) {
-			print O "#\n# SECTION: ",
+			print O "#" x 75,"\n# SECTION:",
 			join("\n#          ", @{$sect->{title}}), "\n#\n";
 			print O "#   ", join("\n#   ",@{$sect->{description}}),
 			"\n";
@@ -301,7 +304,7 @@ sub output_files {
 	    print O "\n\n\n";
 	}
 	if ($#unknown > -1) {
-	    print O "#\n# Unknown directives read in from other files\n#\n";
+	    print O "#\n# Unknown directives read in from other files by snmpconf\n#\n";
 	    foreach my $unknown (@unknown) {
 		print O $unknown,"\n";
 	    }
