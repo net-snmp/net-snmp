@@ -733,7 +733,7 @@ register_string_index( oid *name, size_t name_len, char *cp )
     varbind.type = ASN_OCTET_STR;
     snmp_set_var_objid( &varbind, name, name_len );
     if ( cp != ANY_STRING_INDEX ) {
-        snmp_set_var_value( &varbind, cp, strlen(cp) );
+        snmp_set_var_value( &varbind, (u_char *)cp, strlen(cp) );
 	res = register_index( &varbind, ALLOCATE_THIS_INDEX, main_session );
     }
     else
@@ -742,7 +742,7 @@ register_string_index( oid *name, size_t name_len, char *cp )
     if ( res == NULL )
 	return NULL;
     else
-	return res->val.string;
+	return (char *)res->val.string;
 }
 
 int
@@ -941,8 +941,8 @@ register_index(struct variable_list *varbind, int flags, struct snmp_session *ss
 			new_index->varbind.buf[ i ]++;
 		    }
 		    else
-		        strcpy(new_index->varbind.buf, "aaaa");
-		    new_index->varbind.val_len = strlen(new_index->varbind.buf);
+		        strcpy((char *)new_index->varbind.buf, "aaaa");
+		    new_index->varbind.val_len = strlen((char *)new_index->varbind.buf);
 		    break;
 		case ASN_OBJECT_ID:
 		    if ( prev_idx_ptr ) {

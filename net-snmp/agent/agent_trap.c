@@ -209,7 +209,7 @@ void send_enterprise_trap_vars (int trap,
     uptime = calculate_time_diff(&now, &starttime);
     memset (&uptime_var, 0, sizeof (struct variable_list));
     snmp_set_var_objid( &uptime_var, sysuptime_oid, OID_LENGTH(sysuptime_oid));
-    snmp_set_var_value( &uptime_var, (char *)&uptime, sizeof(uptime) );
+    snmp_set_var_value( &uptime_var, (u_char *)&uptime, sizeof(uptime) );
     uptime_var.type           = ASN_TIMETICKS;
     uptime_var.next_variable  = &snmptrap_var;
 
@@ -231,7 +231,7 @@ void send_enterprise_trap_vars (int trap,
     memset (&enterprise_var, 0, sizeof (struct variable_list));
     snmp_set_var_objid( &enterprise_var,
 		 snmptrapenterprise_oid, OID_LENGTH(snmptrapenterprise_oid));
-    snmp_set_var_value( &enterprise_var, (char *)enterprise, enterprise_length*sizeof(oid));
+    snmp_set_var_value( &enterprise_var, (u_char *)enterprise, enterprise_length*sizeof(oid));
     enterprise_var.type           = ASN_OBJECT_ID;
     enterprise_var.next_variable  = NULL;
 
@@ -286,34 +286,34 @@ void send_enterprise_trap_vars (int trap,
 
 	case SNMP_TRAP_COLDSTART:
 		snmp_set_var_value( &snmptrap_var,
-				    (char *)cold_start_oid,
+				    (u_char *)cold_start_oid,
 				    sizeof(cold_start_oid));
 		break;
 	case SNMP_TRAP_WARMSTART:
 		snmp_set_var_value( &snmptrap_var,
-				    (char *)warm_start_oid,
+				    (u_char *)warm_start_oid,
 				    sizeof(warm_start_oid));
 		break;
 	case SNMP_TRAP_LINKDOWN:
 		snmp_set_var_value( &snmptrap_var,
-				    (char *)link_down_oid,
+				    (u_char *)link_down_oid,
 				    sizeof(link_down_oid));
 		break;
 	case SNMP_TRAP_LINKUP:
 		snmp_set_var_value( &snmptrap_var,
-				    (char *)link_up_oid,
+				    (u_char *)link_up_oid,
 				    sizeof(link_up_oid));
 		break;
 	case SNMP_TRAP_AUTHFAIL:
 		if (snmp_enableauthentraps == SNMP_AUTHENTICATED_TRAPS_DISABLED)
 		    return;
 		snmp_set_var_value( &snmptrap_var,
-				    (char *)auth_fail_oid,
+				    (u_char *)auth_fail_oid,
 				    sizeof(auth_fail_oid));
 		break;
 	case SNMP_TRAP_EGPNEIGHBORLOSS:
 		snmp_set_var_value( &snmptrap_var,
-				    (char *)egp_xxx_oid,
+				    (u_char *)egp_xxx_oid,
 				    sizeof(egp_xxx_oid));
 		break;
 
@@ -324,7 +324,7 @@ void send_enterprise_trap_vars (int trap,
 		temp_oid[ enterprise_length   ] = 0;
 		temp_oid[ enterprise_length+1 ] = specific;
 		snmp_set_var_value( &snmptrap_var,
-				    (char *)&temp_oid,
+				    (u_char *)&temp_oid,
 				    (enterprise_length+2)*sizeof(oid));
 		snmptrap_var.next_variable  = vars;
 		last_var = NULL;	/* Don't need version info */
