@@ -121,6 +121,11 @@ int	hex_to_binary2 (const u_char *input, size_t len, char **output);
 void	dump_chunk (const char *debugtoken, const char *title, const u_char *buf, int size);
 char   *dump_snmpEngineID (const u_char *buf, size_t *buflen);
 
+typedef void * marker_t;
+marker_t atime_newMarker(void);
+void atime_setMarker(marker_t pm);
+int atime_ready( marker_t pm, int deltaT);
+
 #ifdef __cplusplus
 }
 #endif
