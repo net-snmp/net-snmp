@@ -109,9 +109,6 @@ netsnmp_register_table_iterator(netsnmp_handler_registration *reginfo,
     if (!iinfo)
         return SNMPERR_GENERR;
 
-#ifndef NOT_SERIALIZED
-    netsnmp_inject_handler(reginfo, netsnmp_get_serialize_handler());
-#endif
     return netsnmp_register_table(reginfo, iinfo->table_reginfo);
 }
 
