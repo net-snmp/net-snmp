@@ -58,7 +58,6 @@ if($ENV{MIB2C_DIR}) {
 }
 push @def_search_dirs, "/usr/local/share/snmp/";
 
-
 sub usage {
     print "$0 [-h] [-c configfile] [-f prefix] mibNode\n\n";
     print "  -h\t\tThis message.\n\n";
@@ -302,6 +301,12 @@ sub process_vars {
 # which include:
 #   @open FILE@
 #     writes generated output to FILE
+#   @push@
+#     save the current outputs, then clear outputs. Use with @open@ and
+#     @pop@ to write to a new file without interfering with current outputs.
+#   @pop@
+#     pop up the process() stack one level. Use after a @push@ to return to
+#     the previous set of open files.
 #   @foreach $VAR scalar@
 #     repeat iterate over code until @end@ setting $VAR to all known scalars
 #   @foreach $VAR table@
@@ -313,6 +318,14 @@ sub process_vars {
 #   @foreach $VAR nonindex@
 #     repeat iterate over code until @end@ setting $VAR to all known
 #     non-index columns within a given table.  Obviously this must be called
+#     within a foreach-table clause.
+#   @foreach $VAR internalindex@
+#     repeat iterate over code until @end@ setting $VAR to all known internal
+#     index columns within a given table.  Obviously this must be called
+#     within a foreach-table clause.
+#   @foreach $VAR externalindex@
+#     repeat iterate over code until @end@ setting $VAR to all known external
+#     index columns within a given table.  Obviously this must be called
 #     within a foreach-table clause.
 #   @foreach $VAR index@
 #     repeat iterate over code until @end@ setting $VAR to all known
@@ -513,6 +526,16 @@ sub process {
             process_file($spec,0,0);
             close_files;
 	    %outputs = %oldout;
+	} elsif (/\@\s*push\@/) { #                                      PUSH
+	    my %oldout = %outputs;
+            my %emptyarray;
+            %outputs = %emptyoutputs;
+            process($arg);
+            close_files;
+	    %outputs = %oldout;
+	} elsif (/\@\s*pop\s*\@/) { #                                     POP
+          $currentlevel--;
+          return "pop";
 	} elsif (/\@\s*include (.*)\@/) { #                            INCLUDE
 	    my $arg = $1;
 	    my ($missingok) = (0);
@@ -583,7 +606,7 @@ sub process {
               warn "$@";
               warn "$currentfile:$currentline [$_]\n";
             }
-	} elsif (/\@\s*printf\s+(\"[^\"]+\")\s*,?(.*)\@/) {
+	} elsif (/\@\s*printf\s+(\"[^\"]+\")\s*,?(.*)\@/) { #           PRINTF
 	    my ($f, $rest) = ($1, $2);
 	    $rest = process_vars($rest);
 	    my @args = split(/\s*,\s*/,$rest);
@@ -767,11 +790,14 @@ sub process {
 sub setup_data {
     my $mib = shift;
     if ($mib->{label} =~ /Table$/) {
-        my $indexes;
 	my $tablename = $mib->{label};
 	my $entry = $mib->{children};
 	my $columns = $entry->[0]{children};
         my $augments = $entry->[0]{'augments'};
+	foreach my $col (sort { $a->{'subID'} <=> $b->{'subID'} } @$columns) {
+	    # store by numeric key so we can sort them later
+	    push @{$tables{$tablename}{'column'}}, $col->{'label'};
+	}
         if ($augments) {
            my $mib = $SNMP::MIB{$augments} || 
 		die "can't find info about augmented table $augments in table $tablename\n";
@@ -783,24 +809,31 @@ sub setup_data {
 		   die "can't find info about index $index in table $tablename\n";
 	       push @{$tables{$tablename}{'index'}}, $index;
 	       push @{$tables{$tablename}{'externalindex'}}, $index;
-               $indexes = "$indexes $index"
 	   }
            my $columns = $entry->[0]{children};
         }
-	foreach my $index (@{$entry->[0]{'indexes'}}) {
+        else {
+          foreach my $index (@{$entry->[0]{'indexes'}}) {
 	    my $node = $SNMP::MIB{$index} || 
-		die "can't find info about index $index in table $tablename\n";
-            next if ( $indexes =~ /$index\b/ );
-	    push @{$tables{$tablename}{'index'}}, $index;
-	    push @{$tables{$tablename}{'internalindex'}}, $index;
-            $indexes = "$indexes $index"
-	}
+              die "can't find info about index $index in table $tablename\n";
+            push @{$tables{$tablename}{'index'}}, $index;
+            if("@{$tables{$tablename}{'column'}}" =~ /$index\b/ ) {
+#              print "idx INT $index\n";
+              push @{$tables{$tablename}{'internalindex'}}, $index;
+            } else {
+#              print "idx EXT $index\n";
+              push @{$tables{$tablename}{'externalindex'}}, $index;
+            }
+          }
+        }
 	foreach my $col (sort { $a->{'subID'} <=> $b->{'subID'} } @$columns) {
-	    # store by numeric key so we can sort them later
-	    push @{$tables{$tablename}{'column'}}, $col->{'label'};
-            next if ( $indexes =~ /$col->{'label'}\b/ );
+            next if ( "@{$tables{$tablename}{'index'}}" =~ /$col->{'label'}\b/ );
             push @{$tables{$tablename}{'nonindex'}}, $col->{'label'};
 	}
+#        print "indexes: @{$tables{$tablename}{'index'}}\n";
+#        print "internal indexes: @{$tables{$tablename}{'internalindex'}}\n";
+#        print "external indexes: @{$tables{$tablename}{'externalindex'}}\n";
+#        print "non-indexes: @{$tables{$tablename}{'nonindex'}}\n";
     } else {
 	my $children = $mib->{children};
 	if ($#children == -1 && $mib->{type}) {
