@@ -272,12 +272,7 @@ extErrFix OBJECT-TYPE
 		snmp operations."
 	::= { extEntry 102 }
 	
-memory OBJECT-TYPE
-	ACCESS not-accessible
-	STATUS mandatory
-	DESCRIPTION
-		"Memory information, a warning flag, and an error string."
-	::= { ucdavis 4 }
+memory ::= { ucdavis 4 }
 
 memIndex OBJECT-TYPE
      SYNTAX  INTEGER
@@ -420,7 +415,7 @@ memSwapErrorMsg OBJECT-TYPE
 DiskIndex ::= INTEGER
 
 diskTable	OBJECT-TYPE
-	SYNTAX SEQUENCE OF DiskEntry
+	SYNTAX SEQUENCE OF DskEntry
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
@@ -428,8 +423,8 @@ diskTable	OBJECT-TYPE
 		are configured by the snmpd.conf file of the agent."
 	::= { ucdavis 10 }
 
-diskEntry OBJECT-TYPE
-    SYNTAX     DiskEntry
+dskEntry OBJECT-TYPE
+    SYNTAX     DskEntry
     ACCESS not-accessible
     STATUS     mandatory
     DESCRIPTION
@@ -437,7 +432,7 @@ diskEntry OBJECT-TYPE
     INDEX      { diskIndex }
     ::= { diskTable  1 }
 
-DiskEntry ::= SEQUENCE {
+DskEntry ::= SEQUENCE {
    diskIndex   DiskIndex,
    diskPath  DisplayString,
    diskDevice  DisplayString,
@@ -457,7 +452,7 @@ dskIndex OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"Integer reference number (row number) for the disk mib."
-	::= { diskEntry 1 }
+	::= { dskentry 1 }
 	
 dskPath OBJECT-TYPE
      SYNTAX  DisplayString
@@ -465,7 +460,7 @@ dskPath OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Path where the disk is mounted."
-     ::= { diskEntry 2 } 
+     ::= { dskentry 2 } 
 
 dskDevice OBJECT-TYPE
      SYNTAX  DisplayString
@@ -473,7 +468,7 @@ dskDevice OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Path of the device for the partition"
-     ::= { diskEntry 3 } 
+     ::= { dskentry 3 } 
 
 dskMinimum OBJECT-TYPE
      SYNTAX  INTEGER
@@ -483,7 +478,7 @@ dskMinimum OBJECT-TYPE
           "Minimum space required on the disk (in kBytes) before the
           errors are triggered.  Either this or dskMinPercent is
           configured via the agent's snmpd.conf file."
-     ::= { diskEntry 4 } 
+     ::= { dskentry 4 } 
 
 dskMinPercent OBJECT-TYPE
      SYNTAX  INTEGER
@@ -493,7 +488,7 @@ dskMinPercent OBJECT-TYPE
           "Percentage of minimum space required on the disk before the
           errors are triggered.  Either this or dskMinimum is
           configured via the agent's snmpd.conf file."
-     ::= { diskEntry 5 } 
+     ::= { dskentry 5 } 
 
 dskTotal OBJECT-TYPE
      SYNTAX  INTEGER
@@ -501,7 +496,7 @@ dskTotal OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Total size of the disk/partion (kbytes)"
-     ::= { diskEntry 6 } 
+     ::= { dskentry 6 } 
 
 dskAvail OBJECT-TYPE
      SYNTAX  INTEGER
@@ -509,7 +504,7 @@ dskAvail OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Available space on the disk"
-     ::= { diskEntry 7 } 
+     ::= { dskentry 7 } 
 
 dskUsed OBJECT-TYPE
      SYNTAX  INTEGER
@@ -517,7 +512,7 @@ dskUsed OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Used space on the disk"
-     ::= { diskEntry 8 } 
+     ::= { dskentry 8 } 
 
 dskPercent OBJECT-TYPE
      SYNTAX  INTEGER
@@ -525,7 +520,7 @@ dskPercent OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Percentage of space used on disk"
-     ::= { diskEntry 9 } 
+     ::= { dskentry 9 } 
 
 dskErrorFlag OBJECT-TYPE
      SYNTAX  INTEGER
@@ -534,7 +529,7 @@ dskErrorFlag OBJECT-TYPE
      DESCRIPTION  
           "Error flag signaling that the disk or partition is under
           the minimum required space configured for it."
-     ::= { diskEntry 100 } 
+     ::= { dskentry 100 } 
      
 dskErrorMsg OBJECT-TYPE
      SYNTAX  DisplayString
@@ -543,20 +538,20 @@ dskErrorMsg OBJECT-TYPE
      DESCRIPTION  
           "A text description providing a warning and the space left
           on the disk."
-     ::= { diskEntry 101 } 
+     ::= { dskentry 101 } 
      
 LoadIndex ::= INTEGER
 
 loadTable OBJECT-TYPE
-	SYNTAX SEQUENCE OF LoadEntry
+	SYNTAX SEQUENCE OF LaEntry
 	ACCESS not-accessible
 	STATUS mandatory
 	DESCRIPTION
 		"Load average information."
 	::= { ucdavis 11 }
 
-loadEntry OBJECT-TYPE
-    SYNTAX     LoadEntry
+laEntry OBJECT-TYPE
+    SYNTAX     LaEntry
     ACCESS not-accessible
     STATUS     mandatory
     DESCRIPTION
@@ -564,7 +559,7 @@ loadEntry OBJECT-TYPE
     INDEX      { loadIndex }
     ::= { loadTable  1 }
 
-LoadTable ::= SEQUENCE {
+LaEntry ::= SEQUENCE {
    loadaveIndex  LoadIndex,
    loadaveNames  DisplayString,
    loadaveLoad   DisplayString,
@@ -579,7 +574,7 @@ laIndex OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"reference index/row number for each observed loadave."
-	::= { loadEntry 1 }
+	::= { laEntry 1 }
 
 laNames OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -587,7 +582,7 @@ laNames OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The list of loadave names we're watching."
-	::= { loadEntry 2 }
+	::= { laEntry 2 }
 
 laLoad OBJECT-TYPE
 	SYNTAX DisplayString
@@ -595,7 +590,7 @@ laLoad OBJECT-TYPE
 	STATUS mandatory
 	DESCRIPTION
 		"The 1,5 and 10 minute load averages (one per row)."
-	::= { loadEntry 3 }
+	::= { laEntry 3 }
 
 laConfig OBJECT-TYPE
 	SYNTAX DisplayString
@@ -605,7 +600,7 @@ laConfig OBJECT-TYPE
 		"The watch point for load-averages to signal an
 		error.  If the load averages rises above this value,
 		the laErrorFlag below is set."
-	::= { loadEntry 4 }
+	::= { laEntry 4 }
 
 laErrorFlag OBJECT-TYPE
 	SYNTAX INTEGER
@@ -615,7 +610,7 @@ laErrorFlag OBJECT-TYPE
 		"A Error flag to indicate the load-average has crossed
 		its threshold value defined in the snmpd.conf file.
 		It is set to 1 if the threshold is crossed, 0 otherwise."
-	::= { loadEntry 100 }
+	::= { laEntry 100 }
 
 laErrMessage OBJECT-TYPE
 	SYNTAX DisplayString (SIZE (0..255))
@@ -624,14 +619,9 @@ laErrMessage OBJECT-TYPE
 	DESCRIPTION
 		"An error message describing the load-average and its
 		surpased watch-point value."
-	::= { loadEntry 101 }
+	::= { laEntry 101 }
 
-version	OBJECT-TYPE
-	ACCESS not-accessible
-	STATUS mandatory
-	DESCRIPTION
-		"ucd-snmpd version specific information."
-	::= { ucdavis 100 }
+version	::= { ucdavis 100 }
 
 versionIndex OBJECT-TYPE
      SYNTAX  INTEGER
@@ -706,12 +696,7 @@ versionDoDebugging OBJECT-TYPE
           to turn it off."
      ::= { version 20 } 
 
-snmperrs OBJECT-TYPE
-	ACCESS not-accessible
-	STATUS mandatory
-	DESCRIPTION
-		"A place for the agent to report problems."
-	::= { ucdavis 101 }
+snmperrs ::= { ucdavis 101 }
 
 
 snmperrIndex OBJECT-TYPE
@@ -768,7 +753,7 @@ mrEntry OBJECT-TYPE
     INDEX      { mrIndex }
     ::= { mibRegistryTable  1 }
 
-MREntry ::=
+MrEntry ::=
     SEQUENCE {
         mrIndex
             MRIndex,
