@@ -3058,7 +3058,7 @@ snmp_catch(sess_ref, perl_callback)
            ;
         }
 
-void
+int
 snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
         SV *    sess_ref
         int     retry_nosuch
@@ -3074,71 +3074,80 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
            netsnmp_session *ss;
            netsnmp_pdu *pdu, *response;
            netsnmp_variable_list *vars;
-           netsnmp_variable_list *last_vars;
            struct tree *tp;
            int len;
-           oid *oid_arr = NULL;
-           int oid_arr_len = MAX_OID_LEN;
+	   oid *oid_arr;
+	   int oid_arr_len = MAX_OID_LEN;
            SV *tmp_sv;
-           char *tag_pv;
            int type;
-           char tmp_type_str[MAX_TYPE_NAME_LEN];
-           char str_buf[STR_BUF_SIZE];
+	   char tmp_type_str[MAX_TYPE_NAME_LEN];
            snmp_xs_cb_data *xs_cb_data;
            SV **sess_ptr_sv;
            SV **err_str_svp;
            SV **err_num_svp;
            SV **err_ind_svp;
            int status;
+	   u_char str_buf[STR_BUF_SIZE], *str_bufp = str_buf;
+           size_t str_buf_len = sizeof(str_buf);
+           size_t out_len = 0;
+           int buf_over = 0;
+           char *label;
+           char *iid;
+           int getlabel_flag = NO_FLAGS;
            int sprintval_flag = USE_BASIC;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
+	   int old_format;
 	   SV *sv_timestamp = NULL;
            int best_guess;
-
+	   
            New (0, oid_arr, MAX_OID_LEN, oid);
 
            if (oid_arr && SvROK(sess_ref) && SvROK(varlist_ref)) {
 
               sess_ptr_sv = hv_fetch((HV*)SvRV(sess_ref), "SessPtr", 7, 1);
-              ss = (SnmpSession *)SvIV((SV*)SvRV(*sess_ptr_sv));
+	      ss = (SnmpSession *)SvIV((SV*)SvRV(*sess_ptr_sv));
               err_str_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorStr", 8, 1);
               err_num_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorNum", 8, 1);
               err_ind_svp = hv_fetch((HV*)SvRV(sess_ref), "ErrorInd", 8, 1);
               sv_setpv(*err_str_svp, "");
               sv_setiv(*err_num_svp, 0);
               sv_setiv(*err_ind_svp, 0);
-              if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums", 8, 1)))
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1)))
+                 getlabel_flag |= USE_LONG_NAMES;
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 12, 1)))
+                 getlabel_flag |= USE_NUMERIC_OIDS;
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums", 8, 1)))
                  sprintval_flag = USE_ENUMS;
-              if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseSprintValue", 14, 1)))
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseSprintValue", 14, 1)))
                  sprintval_flag = USE_SPRINT_VALUE;
               best_guess = SvIV(*hv_fetch((HV*)SvRV(sess_ref),"BestGuess",9,1));
-
-	      pdu = snmp_pdu_create(SNMP_MSG_GET);
+	      
+              pdu = snmp_pdu_create(SNMP_MSG_GET);
 
               varlist = (AV*) SvRV(varlist_ref);
               varlist_len = av_len(varlist);
-              for(varlist_ind = 0; varlist_ind <= varlist_len; varlist_ind++) {
+	      for(varlist_ind = 0; varlist_ind <= varlist_len; varlist_ind++) {
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
                     varbind = (AV*) SvRV(*varbind_ref);
-                    tag_pv = __av_elem_pv(varbind, VARBIND_TAG_F,NULL);
-                    tp = __tag2oid(tag_pv,
-                                   __av_elem_pv(varbind, VARBIND_IID_F,NULL),
-                                   oid_arr, &oid_arr_len, NULL, best_guess);
 
-                    if (oid_arr_len) {
-                       snmp_add_null_var(pdu, oid_arr, oid_arr_len);
-                    } else {
+                    tp = __tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F, ".0"),
+                              __av_elem_pv(varbind, VARBIND_IID_F, NULL),
+                              oid_arr, &oid_arr_len, NULL, best_guess);
+
+      		    if (oid_arr_len) {
+  		       snmp_add_null_var(pdu, oid_arr, oid_arr_len);
+		    } else {
                        if (verbose)
-                          warn("error: get: unknown object ID (%s)",
-                                (tag_pv?tag_pv:"<null>"));
+                          warn("error: set: unknown object ID");
 	               sv_catpv(*err_str_svp,
-                                (char*)snmp_api_errstring(SNMPERR_UNKNOWN_OBJID));
+                               (char*)snmp_api_errstring(SNMPERR_UNKNOWN_OBJID));
                        sv_setiv(*err_num_svp, SNMPERR_UNKNOWN_OBJID);
                        XPUSHs(&sv_undef); /* unknown OID */
 		       snmp_free_pdu(pdu);
 		       goto done;
-                    }
+		    }
+
                  } /* if var_ref is ok */
               } /* for all the vars */
 
@@ -3159,61 +3168,103 @@ snmp_get(sess_ref, retry_nosuch, varlist_ref, perl_callback)
                     sv_setiv(*err_num_svp, ss->s_snmp_errno);
                     XPUSHs(&sv_undef);
                  }
-                 goto done;
+		 goto done;
               }
 
-              status = __send_sync_pdu(ss, pdu, &response, retry_nosuch,
-                                       *err_str_svp,*err_num_svp,*err_ind_svp);
+	      status = __send_sync_pdu(ss, pdu, &response,
+				       retry_nosuch,
+                                       *err_str_svp, *err_num_svp,
+				       *err_ind_svp);
 
-              last_vars = (response ? response->variables : NULL);
+	      /*
+	      ** Set up for numeric or full OID's, if necessary.  Save the old
+	      ** output format so that it can be restored when we finish -- this
+	      ** is a library-wide global, and has to be set/restored for each
+	      ** session.
+	      */
+	      old_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                              NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
+
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1))) {
+	         getlabel_flag |= USE_LONG_NAMES;
+	         getlabel_flag |= USE_NUMERIC_OIDS;
+
+	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                    NETSNMP_OID_OUTPUT_NUMERIC);
+	      }
 
 	      if (SvIOK(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)) &&
                   SvIV(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)))
 	         sv_timestamp = newSViv((IV)time(NULL));
 
-              for(varlist_ind = 0; varlist_ind <= varlist_len; varlist_ind++) {
+              for(vars = (response?response->variables:NULL), varlist_ind = 0;
+                  vars && (varlist_ind <= varlist_len);
+                  vars = vars->next_variable, varlist_ind++) {
                  varbind_ref = av_fetch(varlist, varlist_ind, 0);
                  if (SvROK(*varbind_ref)) {
                     varbind = (AV*) SvRV(*varbind_ref);
 
-                    tp=__tag2oid(__av_elem_pv(varbind, VARBIND_TAG_F,NULL),
-                                 __av_elem_pv(varbind, VARBIND_IID_F,NULL),
-                                 oid_arr, &oid_arr_len, &type, best_guess);
+                    *str_buf = '.';
+                    *(str_buf+1) = '\0';
+                    out_len = 0;
+                    tp = netsnmp_sprint_realloc_objid_tree(&str_bufp, &str_buf_len,
+                                                           &out_len, 0, &buf_over,
+                                                           vars->name,vars->name_length);
+                    str_buf[sizeof(str_buf)-1] = '\0';
 
-                    for (vars = last_vars; vars; vars=vars->next_variable) {
-	            if (__oid_cmp(oid_arr, oid_arr_len, vars->name,
-                                     vars->name_length) == 0) {
-                          if (type == TYPE_UNKNOWN)
-                             type = __translate_asn_type(vars->type);
-                          last_vars = vars->next_variable;
-                          break;
-                       }
-                    }
-                    if (vars) {
-                       __get_type_str(type, tmp_type_str);
-                       tmp_sv = newSVpv(tmp_type_str,strlen(tmp_type_str));
-                       av_store(varbind, VARBIND_TYPE_F, tmp_sv);
-                       len=__snprint_value(str_buf,sizeof(str_buf),
-                                          vars,tp,type,sprintval_flag);
-                       tmp_sv=newSVpv((char*)str_buf, len);
-                       av_store(varbind, VARBIND_VAL_F, tmp_sv);
-		       if (sv_timestamp)
-                          av_store(varbind, VARBIND_TYPE_F, sv_timestamp);
-                       XPUSHs(sv_mortalcopy(tmp_sv));
+                    if (__is_leaf(tp)) {
+                       type = tp->type;
                     } else {
-                       av_store(varbind, VARBIND_VAL_F, &sv_undef);
-                       av_store(varbind, VARBIND_TYPE_F, &sv_undef);
-                       XPUSHs(&sv_undef);
+                       getlabel_flag |= NON_LEAF_NAME;
+                       type = __translate_asn_type(vars->type);
                     }
+                    __get_label_iid(str_buf,&label,&iid,getlabel_flag);
+                    if (label) {
+                        av_store(varbind, VARBIND_TAG_F,
+                                 newSVpv(label, strlen(label)));
+                    } else {
+                        av_store(varbind, VARBIND_TAG_F,
+                                 newSVpv("", 0));
+                    }
+                    if (iid) {
+                        av_store(varbind, VARBIND_IID_F,
+                                 newSVpv(iid, strlen(iid)));
+                    } else {
+                        av_store(varbind, VARBIND_IID_F,
+                                 newSVpv("", 0));
+                    }                        
+                    __get_type_str(type, tmp_type_str);
+                    tmp_sv = newSVpv(tmp_type_str, strlen(tmp_type_str));
+                    av_store(varbind, VARBIND_TYPE_F, tmp_sv);
+                    len=__snprint_value(str_buf,sizeof(str_buf),
+                                       vars,tp,type,sprintval_flag);
+                    tmp_sv = newSVpv((char*)str_buf, len);
+                    av_store(varbind, VARBIND_VAL_F, tmp_sv);
+		    if (sv_timestamp)
+                       av_store(varbind, VARBIND_TYPE_F, sv_timestamp);
+                    XPUSHs(sv_mortalcopy(tmp_sv));
+                 } else {
+		    /* Return undef for this variable. */
+                    XPUSHs(&sv_undef);
                  }
               }
+
+	      /* Reset the library's behavior for numeric/symbolic OID's. */
+	      if (getlabel_flag & USE_NUMERIC_OIDS) {
+	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                    old_format);
+	      }
+
               if (response) snmp_free_pdu(response);
+
            } else {
               XPUSHs(&sv_undef); /* no mem or bad args */
-           }
-     done:
-           Safefree(oid_arr);
-        }
+	   }
+done:
+	Safefree(oid_arr);
+	}
 
 int
 snmp_getnext(sess_ref, varlist_ref, perl_callback)
@@ -3252,7 +3303,7 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
            int getlabel_flag = NO_FLAGS;
            int sprintval_flag = USE_BASIC;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
-	   int old_numeric, old_printfull;	/* Old values of globals */
+	   int old_format;
 	   SV *sv_timestamp = NULL;
            int best_guess;
 	   
@@ -3270,6 +3321,8 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
               sv_setiv(*err_ind_svp, 0);
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseLongNames", 12, 1)))
                  getlabel_flag |= USE_LONG_NAMES;
+	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 12, 1)))
+                 getlabel_flag |= USE_NUMERIC_OIDS;
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseEnums", 8, 1)))
                  sprintval_flag = USE_ENUMS;
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseSprintValue", 14, 1)))
@@ -3331,21 +3384,21 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 				       *err_ind_svp);
 
 	      /*
-	      ** Set up for numeric OID's, if necessary.  Save the old values
-	      ** so that they can be restored when we finish -- these are
-	      ** library-wide globals, and have to be set/restored for each
+	      ** Set up for numeric or full OID's, if necessary.  Save the old
+	      ** output format so that it can be restored when we finish -- this
+	      ** is a library-wide global, and has to be set/restored for each
 	      ** session.
 	      */
-	      old_numeric = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-						    NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
-	      old_printfull = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-						    NETSNMP_DS_LIB_PRINT_FULL_OID);
+	      old_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                              NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
 
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1))) {
+	         getlabel_flag |= USE_LONG_NAMES;
 	         getlabel_flag |= USE_NUMERIC_OIDS;
 
-	         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
-		 netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
+	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                    NETSNMP_OID_OUTPUT_NUMERIC);
 	      }
 
 	      if (SvIOK(*hv_fetch((HV*)SvRV(sess_ref),"TimeStamp", 9, 1)) &&
@@ -3406,10 +3459,9 @@ snmp_getnext(sess_ref, varlist_ref, perl_callback)
 
 	      /* Reset the library's behavior for numeric/symbolic OID's. */
 	      if (getlabel_flag & USE_NUMERIC_OIDS) {
-	         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS,
-								 old_numeric );
-	         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID,
-								 old_printfull);
+	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                    old_format);
 	      }
 
               if (response) snmp_free_pdu(response);
@@ -3460,7 +3512,7 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
            int getlabel_flag = NO_FLAGS;
            int sprintval_flag = USE_BASIC;
            int verbose = SvIV(perl_get_sv("SNMP::verbose", 0x01 | 0x04));
-	   int old_numeric, old_printfull;	/* Old values of globals */
+	   int old_format;
 	   SV *rv;
 	   SV *sv_timestamp = NULL;
            int best_guess;
@@ -3551,20 +3603,20 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 	      av_clear(varlist);
 
 	      /*
-	      ** Set up for numeric OID's, if necessary.  Save the old values
-	      ** so that they can be restored when we finish -- these are
-	      ** library-wide globals, and have to be set/restored for each
+	      ** Set up for numeric or full OID's, if necessary.  Save the old
+	      ** output format so that it can be restored when we finish -- this
+	      ** is a library-wide global, and has to be set/restored for each
 	      ** session.
 	      */
-	      old_numeric = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-						  NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS);
-	      old_printfull = netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
-						  NETSNMP_DS_LIB_PRINT_FULL_OID);
+	      old_format = netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID,
+                                              NETSNMP_DS_LIB_OID_OUTPUT_FORMAT);
 	      if (SvIV(*hv_fetch((HV*)SvRV(sess_ref),"UseNumeric", 10, 1))) {
+	         getlabel_flag |= USE_LONG_NAMES;
 	         getlabel_flag |= USE_NUMERIC_OIDS;
 
-	         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS, 1);
-	         netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID, 1);
+	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                    NETSNMP_OID_OUTPUT_NUMERIC);
 	      }
 
 	      if(response && response->variables) {
@@ -3616,10 +3668,9 @@ snmp_getbulk(sess_ref, nonrepeaters, maxrepetitions, varlist_ref, perl_callback)
 
 	      /* Reset the library's behavior for numeric/symbolic OID's. */
 	      if (getlabel_flag & USE_NUMERIC_OIDS) {
-	          netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_OIDS,
-							      old_numeric );
-	          netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_FULL_OID,
-							      old_printfull);
+	         netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID,
+                                    NETSNMP_DS_LIB_OID_OUTPUT_FORMAT,
+                                    old_format);
 	      }
 
               if (response) snmp_free_pdu(response);
