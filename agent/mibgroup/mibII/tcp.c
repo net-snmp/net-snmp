@@ -69,12 +69,15 @@
 	 *
 	 *********************/
 
-                        /*
-			 * FreeBSD4 will set this explicitly,
-			 * other system may not even need it at all
-			 * But it doesn't do any harm to define it globally
-			 */
-int  hertz = 1000;
+                /*
+                 * FreeBSD4 *does* need an explicit variable 'hz'
+                 *   since this appears in a system header file.
+                 * But only define it under FreeBSD, since it
+                 *   breaks other systems (notable AIX)
+                 */
+#if freebsd4
+int  hz = 1000;
+#endif
 
         /*********************
 	 *
@@ -124,7 +127,7 @@ init_tcp(void)
     auto_nlist(TCP_SYMBOL, 0, 0);
 #endif
 #if freebsd4
-    hertz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
+    hz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
 #endif
 #ifdef solaris2
     init_kernel_sunos5();
