@@ -9,6 +9,7 @@ Field "SNMPAgent" {
 		"UCD Solaris",
 		"UCD OSF/3",
 		"UCD Ultrix",
+		"UCD NetBSD",
 		"UCD Unknown",
 		"UCDavis Agent";
 }

@@ -33,6 +33,7 @@ sunos4            OBJECT IDENTIFIER ::= { ucdSnmpAgent SUNOS4ID }
 solaris           OBJECT IDENTIFIER ::= { ucdSnmpAgent SOLARISID }
 osf3              OBJECT IDENTIFIER ::= { ucdSnmpAgent OSF3ID }
 ultrix            OBJECT IDENTIFIER ::= { ucdSnmpAgent ULTRIXID }
+netbsd1           OBJECT IDENTIFIER ::= { ucdSnmpAgent NETBSD1ID }
 unknown           OBJECT IDENTIFIER ::= { ucdSnmpAgent UNKNOWNID }
 
 
