@@ -169,6 +169,8 @@ netsnmp_udp_send(netsnmp_transport *t, void *buf, int size,
 	while (rc < 0) {
 	    rc = sendto(t->sock, buf, size, 0, to, sizeof(struct sockaddr));
 	    if (rc < 0 && errno != EINTR) {
+                DEBUGMSGTL(("netsnmp_udp", "sendto error, rc %d (errno %d)\n",
+                            rc, errno));
 		break;
 	    }
 	}
