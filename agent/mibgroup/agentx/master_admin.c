@@ -229,6 +229,9 @@ register_agentx_list(netsnmp_session * session, netsnmp_pdu *pdu)
 
     reg->handler->myvoid = session;
     reg->global_cacheid = cacheid;
+    if (NULL != pdu->community)
+        reg->contextName = strdup(pdu->community);
+
     /*
      * register mib. Note that for failure cases, the registration info
      * (reg) will be freed, and thus is no longer a valid pointer.
