@@ -152,7 +152,7 @@ add_agent_caps_list(struct snmp_session *session, struct snmp_pdu *pdu)
 
     register_sysORTable(pdu->variables->name,
     			pdu->variables->name_length,
-			pdu->variables->val.string);
+			(char *)pdu->variables->val.string);
     return AGENTX_ERR_NOERROR;
 }
 
