@@ -205,15 +205,25 @@ Manual building / testing:
 5.  Type: 
 
       perl Makefile.PL CAPI=TRUE -NET-SNMP-IN-SOURCE=TRUE
+
+       to compile against the RELEASE version of Net-SNMP, or:
+
+      perl Makefile.PL CAPI=TRUE -NET-SNMP-IN-SOURCE=TRUE -NET-SNMP-DEBUG=TRUE
+
+       to compile against the DEBUG version of Net-SNMP.
+ 
       nmake
       nmake test
       nmake install
 
       Note: The --NET-SNMP-IN-SOURCE=TRUE causes the Makefile to use the 
-            library files from the net-snmp source directory.  To specify the
+            library files from the installed Net-SNMP directory.  To specify the
             installed Net-SNMP directory, use:
 
             perl Makefile.PL CAPI=TRUE -NET-SNMP-PATH=c:\Program Files\Net-SNMP
+
+            Note: -NET-SNMP-DEBUG has no effect while compiling against an 
+                  installed copy of Net-SNMP.
 
       Note: To include OpenSSL, see the net-snmp/README.win32 to compile 
             libsnmp with libeay32 and see that libeay.lib is in the lib folder,
