@@ -218,7 +218,7 @@ netSnmpHostsTable_commit_row(void **my_data_context, int new_or_del)
     size_t line2_sz;
     int foundit = 0;
 
-    if (datactx->theaddr == datactx->theoldaddr)
+    if (datactx->theaddr == datactx->theoldaddr && new_or_del != -1)
         return SNMP_ERR_NOERROR; /* no change in the value */
 
     if ((out = fopen(HOSTS_FILE ".snmp", "w")) == NULL)
@@ -229,7 +229,7 @@ netSnmpHostsTable_commit_row(void **my_data_context, int new_or_del)
 
     while(fgets(line, sizeof(line), in)) {
         copy_nword(line,myaddr,sizeof(myaddr));
-        if (inet_addr(myaddr) == datactx->theaddr) {
+        if (inet_addr(myaddr) == datactx->theaddr && new_or_del != -1) {
             foundit = 1;
             /* right line to append to */
             line[strlen(line)-1] = '\0'; /* nuke the new line */
@@ -272,7 +272,7 @@ netSnmpHostsTable_commit_row(void **my_data_context, int new_or_del)
         }
     }
 
-    if (!foundit) {
+    if (!foundit && new_or_del != -1) {
         /* couldn't add it to an existing line, so append a new one */
         fprintf(out, "%d.%d.%d.%d\t%s\n",
                 (0x000000ff & datactx->theaddr),
