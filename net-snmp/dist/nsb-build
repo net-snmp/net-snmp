@@ -11,8 +11,8 @@ usage()
    echo "Usage: $0  [-c] [-d] [-p] [-s SRCD] [-b BUILDD] [-i INSTALLD] VERSION"
    echo " VERSION   : relase number (eg 5.0.3)"
    echo " -s SRCDIR  : soure directory [$HOME/src/net-snmp-VERSION]"
-   echo " -b BUILDD  : build directory [$HOME/build/`nsb-sysname`]"
-   echo " -i INSTALLD: install directory [$HOME/build/`nsb-sysname`/usr/local]"
+   echo " -b BUILDD  : build directory (platform will be appended) [$HOME/build/]"
+   echo " -i INSTALLD: install directory [$HOME/build/\$PLATFORM/usr/local]"
    echo " -c : skip configure step"
    echo " -d : dirty build (don't make distclean)"
    echo " -p : don't pause at prompts in between stages"
@@ -33,7 +33,7 @@ source nsb-functions
 
 VERSION=$1
 SRCD=$HOME/src/net-snmp-$VERSION
-BUILDD=$HOME/build/`nsb-sysname`
+BUILDD=$HOME/build/
 INSTALLD=$HOME/build/`nsb-sysname`/usr/local
 
 #      x)  x=$OPTARG ;;
@@ -68,5 +68,5 @@ fi
 ########################################################################
 ########################################################################
 
-#nsb-prompt "press enter to build $SRCD in $BUILDD, and install in $INSTALLD"
-nsb-build $VERSION $SRCD $BUILDD $INSTALLD
+nsb-prompt "press enter to build $SRCD in $BUILDD, and install in $INSTALLD"
+nsb-build $VERSION $SRCD $BUILDD/`nsb-sysname` $INSTALLD
