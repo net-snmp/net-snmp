@@ -39,7 +39,6 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
-  oid newname[30];
   static long long_ret;
   static char errmsg[300];
   char *cptr;
@@ -51,12 +50,12 @@ unsigned char *var_extensible_version(vp, name, length, exact, var_len, write_me
     DEBUGP ("versionMib: %s %d\n", c_oid, exact);
   }
 
-  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
+  if (header_generic(vp,name,length,exact,var_len,write_method))
     return(NULL);
   
   switch (vp->magic) {
     case MIBINDEX:
-      long_ret = newname[8];
+      long_ret = name[8];
       return((u_char *) (&long_ret));
     case VERTAG:
       sprintf(errmsg,VersionInfo);

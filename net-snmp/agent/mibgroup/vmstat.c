@@ -189,7 +189,6 @@ unsigned char *var_extensible_vmstat(vp, name, length, exact, var_len, write_met
 /* OUT - pointer to function to set variable, otherwise 0 */
 {
 
-  oid newname[30];
   static long long_ret;
   static char errmsg[300];
 #ifndef linux
@@ -198,7 +197,7 @@ unsigned char *var_extensible_vmstat(vp, name, length, exact, var_len, write_met
 
   long_ret = 0;  /* set to 0 as default */
 
-  if (!checkmib(vp,name,length,exact,var_len,write_method,newname,1))
+  if (!checkmib(vp,name,length,exact,var_len,write_method,1))
     return(NULL);
   switch (vp->magic) {
     case MIBINDEX:
