@@ -83,6 +83,46 @@ register_config_handler(type, token, parser, releaser)
   (*ltmp)->free_func = releaser;
 }
 
+void
+unregister_config_handler(type, token)
+  char *type;
+  char *token
+{
+  struct config_files **ctmp = &config_files;
+  struct config_line **ltmp, *ltmp2;
+
+  /* find type in current list */
+  while (*ctmp != NULL && strcmp((*ctmp)->fileHeader,type)) {
+    ctmp = &((*ctmp)->next);
+  }
+
+  if (*ctmp == NULL) {
+    /* Not found, return. */
+    return;
+  }
+  
+  ltmp = &((*ctmp)->start);
+  if (*ltmp == NULL) {
+    /* Not found, return. */
+    return;
+  }
+  if (strcmp((*ltmp)->config_token,token) == 0) {
+    /* found it at the top of the list */
+    (*ctmp)->start = (*ltmp)->next;
+    free((*ltmp)->config_token);
+    free(*ltmp);
+    return;
+  }
+  while (*ltmp->next != NULL && strcmp((*ltmp)->next->config_token,token)) {
+    ltmp = &((*ltmp)->next);
+  }
+  if (*ltmp == NULL) {
+    free((*ltmp)->config_token);
+    ltmp2 = (*ltmp)->next->next;
+    free((*ltmp)->next);
+    (*ltmp)->next = ltmp2;
+  }
+}
 
 #ifdef TESTING
 void print_config_handlers __P((void))

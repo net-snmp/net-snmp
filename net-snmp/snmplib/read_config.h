@@ -2,8 +2,8 @@
  *  read_config: reads configuration files for extensible sections.
  *
  */
-#ifndef _MIBGROUP_READ_CONFIG_H
-#define _MIBGROUP_READ_CONFIG_H
+#ifndef READ_CONFIG_H
+#define READ_CONFIG_H
 
 #define STRINGMAX 1024
 
@@ -27,5 +27,12 @@ void config_pwarn __P((char *));
 char *skip_white __P((char *));
 char *skip_not_white __P((char *));
 void copy_word __P((char *, char *));
+void register_config_handler __P((char *, char *,
+                                  void (*parser)(char *, char *),
+                                  void (*releaser) (void)));
+void unregister_config_handler __P((char *, char *));
 
-#endif /* _MIBGROUP_READ_CONFIG_H */
+  char *type;
+  char *token
+
+#endif /* READ_CONFIG_H */
