@@ -5,6 +5,7 @@
 # March 12th, 2004
 #
 my $openssl = "disabled";
+my $b_ipv6 = "disabled";
 my $sdk = "disabled";
 my $default_install_base = "c:/Program Files/Net-SNMP";
 my $install_base = $default_install_base;
@@ -13,6 +14,8 @@ my $perl = "disabled";
 my $perl_install = "disabled";
 my $logging = "enabled";
 my $debug = "disabled";
+my $configOpts = "";
+my $cTmp = "";
 
 # Prepend win32\ if running from main directory
 my $current_pwd = `%COMSPEC% /c cd`;
@@ -58,6 +61,7 @@ while (1) {
   print "\n";
   print "7. Quiet build (logged): " . $logging . "\n";
   print "8. Debug mode:           " . $debug . "\n";
+  print "9. IPv6 transports:      " . $b_ipv6 . "\n";
   print "\nF. Finished - start build\n";
   print "Q. Quit - abort build\n\n";
   print "Select option to set / toggle: ";
@@ -77,6 +81,14 @@ while (1) {
     }
     else {
       $sdk = "enabled";
+    }
+  }
+  elsif ($option eq "9") {
+    if ($b_ipv6 eq "enabled") {
+      $b_ipv6 = "disabled";
+    }
+    else {
+      $b_ipv6 = "enabled";
     }
   }
   elsif ($option eq "3") {
@@ -135,9 +147,14 @@ while (1) {
   }
 }
 
-$openssl = ($openssl eq "enabled" ? "--with-ssl" : "" );
-$sdk = ($sdk eq "enabled" ? "--with-sdk" : "" );
-$debug = ($debug eq "enabled" ? "--config=debug" : "--config=release" );
+$cTmp = ($openssl eq "enabled" ? "--with-ssl" : "" );
+$configOpts = "$cTmp";
+$cTmp = ($sdk eq "enabled" ? "--with-sdk" : "" );
+$configOpts = "$configOpts $cTmp";
+$cTmp = ($b_ipv6 eq "enabled" ? "--with-ipv6" : "" );
+$configOpts = "$configOpts $cTmp";
+$cTmp = ($debug eq "enabled" ? "--config=debug" : "--config=release" );
+$configOpts = "$configOpts $cTmp";
 
 print "\nBuilding...\n";
 
@@ -153,7 +170,7 @@ if ($logging eq "enabled") {
   system("del ..\\include\\net-snmp\\net-snmp-config.h > NUL: 2>&1");
   
   print "Running Configure...\n";
-  system("perl Configure $openssl $sdk $debug --linktype=static --prefix=\"$install_base\" > configure.out 2>&1") == 0 || die "Build error (see configure.out)";
+  system("perl Configure $configOpts --linktype=static --prefix=\"$install_base\" > configure.out 2>&1") == 0 || die "Build error (see configure.out)";
 
   print "Cleaning...\n";
   system("nmake /nologo clean > clean.out 2>&1") == 0 || die "Build error (see clean.out)";
@@ -163,7 +180,7 @@ if ($logging eq "enabled") {
 
   if ($perl eq "enabled") {
     print "Running Configure for DLL...\n";
-    system("perl Configure $openssl $sdk $debug --linktype=dynamic --prefix=\"$install_base\" > perlconfigure.out 2>&1") == 0 || die "Build error (see perlconfigure.out)";
+    system("perl Configure $configOpts --linktype=dynamic --prefix=\"$install_base\" > perlconfigure.out 2>&1") == 0 || die "Build error (see perlconfigure.out)";
 
     print "Cleaning libraries...\n";
     system("nmake /nologo libs_clean >> clean.out 2>&1") == 0 || die "Build error (see clean.out)";
@@ -210,12 +227,12 @@ else {
   # Delete net-snmp-config.h from main include folder just in case it was created by a Cygwin or MinGW build
   system("del ..\\include\\net-snmp\\net-snmp-config.h > NUL: 2>&1");
 
-  system("perl Configure $openssl $sdk $debug --linktype=static --prefix=\"$install_base\"") == 0 || die "Build error (see above)";
+  system("perl Configure $configOpts --linktype=static --prefix=\"$install_base\"") == 0 || die "Build error (see above)";
   system("nmake /nologo clean") == 0 || die "Build error (see above)";
   system("nmake /nologo") == 0 || die "Build error (see above)";
   
   if ($perl eq "enabled") {
-    system("perl Configure $openssl $sdk $debug --linktype=dynamic --prefix=\"$install_base\"") == 0 || die "Build error (see above)";
+    system("perl Configure $configOpts --linktype=dynamic --prefix=\"$install_base\"") == 0 || die "Build error (see above)";
     system("nmake /nologo libs_clean") == 0 || die "Build error (see above)";
     system("nmake /nologo libs") == 0 || die "Build error (see above)";
     
