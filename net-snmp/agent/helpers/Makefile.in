@@ -49,7 +49,7 @@ INSTALLHEADERS=all_helpers.h \
 	instance.h \
         multiplexer.h \
         null.h \
-        debug.h \
+        debug_handler.h \
         old_api.h \
         read_only.h \
         serialize.h \
