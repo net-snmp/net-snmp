@@ -199,14 +199,31 @@ register_config_handler(const char *type_param,
                         void (*releaser) (void), const char *help)
 {
     struct config_files **ctmp = &config_files;
-    struct config_line **ltmp;
+    struct config_line **ltmp, *ltmp2;
     const char     *type = type_param;
+    char           *cptr, buf[STRINGMAX];
 
     if (type == NULL) {
         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				     NETSNMP_DS_LIB_APPTYPE);
     }
 
+    /*
+     * Handle multiple types (recursively)
+     */
+    cptr = strchr( type, ':' );
+    if (cptr) {
+        strncpy(buf, type, STRINGMAX);
+        buf[STRINGMAX - 1] = '\0';
+        ltmp2 = NULL;
+        cptr = strtok(buf, ":");
+        while (cptr) {
+            ltmp2 = register_config_handler(cptr, token, parser, releaser, help);
+            cptr  = strtok(NULL, ":");
+        }
+        return ltmp2;
+    }
+    
     /*
      * Find type in current list  -OR-  create a new file type.
      */
@@ -285,12 +302,28 @@ unregister_config_handler(const char *type_param, const char *token)
     struct config_files **ctmp = &config_files;
     struct config_line **ltmp, *ltmp2;
     const char     *type = type_param;
+    char           *cptr, buf[STRINGMAX];
 
     if (type == NULL) {
         type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
 				     NETSNMP_DS_LIB_APPTYPE);
     }
 
+    /*
+     * Handle multiple types (recursively)
+     */
+    cptr = strchr( type, ':' );
+    if (cptr) {
+        strncpy(buf, type, STRINGMAX);
+        buf[STRINGMAX - 1] = '\0';
+        cptr = strtok(buf, ":");
+        while (cptr) {
+            unregister_config_handler(cptr, token);
+            cptr  = strtok(NULL, ":");
+        }
+        return;
+    }
+    
     /*
      * find type in current list 
      */
@@ -461,7 +494,7 @@ run_config_handler(struct config_line *lptr,
 
 /*
  * takens an arbitrary string and tries to intepret it based on the
- * known configruation handlers for all registered types.  May produce
+ * known configuration handlers for all registered types.  May produce
  * inconsistent results when multiple tokens of the same name are
  * registered under different file types. 
  */
