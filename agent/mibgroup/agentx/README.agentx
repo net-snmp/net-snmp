@@ -1,0 +1,76 @@
+This sub-group of the UCD agent is an *ALPHA* implementation
+of the AgentX agent extensibility protocol, as described in
+RFC2257, and extended in a current internet draft
+	<draft-ietf-agentx-rfc-update-00.txt>	(June 1999)
+
+
+  This is not a full implementation, and is not guaranteed to
+precisely follow the detail of the AgentX specifications.  In fact,
+it is currently guaranteed to NOT follow these specs in certain areas.
+This is, of course, a temporary situation - the intention is to fill
+in these "gaps" as quickly as possible.
+  The basic operation of MIB registration, and GET/GETNEXT retrieval
+does appear to work reasonably successfully.
+
+  All of the development has taken place on a Linux system
+(RedHat 5.2, kernel 2.0.36), and nothing has yet been tested on
+any other architecture.
+
+  Known areas which still need work include (but are not limited to):
+
+	-  Index Allocation	(not supported)
+
+	-  Ping & Notify	(not supported)
+
+	-  SysUpTime
+		not included in responses (contravenes spec)
+		no synchronisation between master & subagent
+
+	-  sub-agent error handling in master
+		(Most noticeable when 'snmpwalk'ing off the end of
+		 a sub-agent's supported tree, which has a tendency
+		 to enter an infinite loop)
+
+	-  priorities of registration	(currently ignored)
+
+	-  contexts			(currently ignored)
+
+	-  Session ObjID/Description	(currently ignored)
+
+	-  Unregistration and session closure
+		This "ought" to work, but hasn't been tested,
+		so I'd be rather surprised if it did!
+
+	-  Multiple sessions on a single connection
+
+
+If, despite this catalogue of gloom and despondancy, anyone wishes
+to try out this implementation, the procedure is as follows:
+
+	- Run configure with the flag --with-mib-module="agentx"
+
+	- Edit the file 'agent/mibgroup/mib_module_inits' and
+		move the calls 'init_master()' and 'init_slave()'
+		to the top of the file
+
+	- compile the library and agent
+
+	- rename a copy of the agent 'snmpd' as 'agentxd'
+		(or create a symbolic link by this name)
+
+	- create the directory '/var/agentx'
+
+  Running the agent as 'agentxd' will invoke a subagent, which will try
+and connect to a master agent via the socket /var/agentx/master
+  Running the agent via any other name will invoke it as a master agent,
+which will server the compiled in modules "native", as well as listening
+for AgentX subagents on the same socket.
+  In order to make sensible use of the UCD-based agent as both master and
+subagent, it will be necessary to re-configure (and re-compile) the suite
+using different sets of supported modules (as otherwise, the master versions
+will simply mask the subagent, which will never be called).
+
+
+Comments, corrections, critiques, cash - all will be very welcome.
+
+Dave
