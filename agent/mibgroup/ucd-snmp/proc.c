@@ -537,7 +537,7 @@ sh_count_procs(char *procname)
     if (!strcmp(ent->d_name,"..") || !strcmp(ent->d_name,"."))
       continue;
 
-    snprintf(fbuf,64,"/proc/%s/psinfo",ent->d_name);
+    snprintf(fbuf,sizeof fbuf,"/proc/%s/psinfo",ent->d_name);
     if ((fd = open(fbuf,O_RDONLY)) < 0)  { /* Continue or return error? */
       closedir(dir);
       return -1;
