@@ -606,8 +606,6 @@ Snmperrs OBJECT-TYPE
 snmperrs ::= SEQUENCE {
    snmperrIndex  INTEGER,
    snmperrNames  DisplayString,
-   snmperrLoad   DisplayString,
-   snmperrConfig DisplayString
    snmperrError  INTEGER,
    snmperrErrMessage  DisplayString,
 }
