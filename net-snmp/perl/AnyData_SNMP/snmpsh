@@ -11,11 +11,14 @@ use IO::File;
 $opts{'t'} = ! eval { require Text::FormatTable; };
 $ansicolor = eval { require Term::ANSIColor; };
 if ($ansicolor) {
-    $begin = Term::ANSIColor::color("BOLD", "RED");
-    $end = Term::ANSIColor::RESET();
+    $begin = $end = "*";
+#    $begin = Term::ANSIColor::color("red");
+#    $end = Term::ANSIColor::reset("white");
 } else {
     $begin = $end = "*";
 }
+
+$SNMP::use_enums=1;
 
 
 #defaults
@@ -97,6 +100,17 @@ sub source_file {
     } else {
 	print STDERR "no such file: $_[0]\n";
     }
+}
+
+sub my_export {
+    shift;
+    if (!$insh) {
+	my $cmd = "create table exporttable (" . join (" varchar(255), ",@{$sth->{NAME}}) . " varchar(255))";
+	$exporth->do($cmd);
+	$cmd = "insert into exporttable values(" . ('?, ' x ($#_)) . "?)";
+	$insh = $exporth->prepare($cmd);
+    }
+    $insh->execute(@_);
 }
 
 sub snmpsh {
@@ -216,6 +230,35 @@ sub snmpsh {
 	return;
     }
 
+    if ($stmt =~ s/^export\s+(\S+)\s+(.*)/$2/) {
+	$insh = undef;
+	unlink($1);
+	$exporth = DBI->connect('dbi:AnyData:');
+	$exporth->func('exporttable','CSV',$1,'ad_catalog');
+	$subfn = \&my_export;
+    }
+
+    if ($stmt =~ /^import\s+(\S+)/) {
+	my $exporth = DBI->connect('dbi:AnyData:');
+	$exporth->func('exporttable','CSV',$1,'ad_catalog');
+	my $selh = $exporth->prepare("select * from exporttable");
+	$selh->execute();
+	$old_data = [];
+	while(my $row = $selh->fetchrow_arrayref) {
+	    push @$old_data, @$row;
+	}
+	$selh->finish();
+	$exporth->disconnect();
+	return;
+    }
+    
+    if ($stmt =~ /^diff\s+(.*)/) {
+	$running_watch = 2;
+	snmpsh($1);
+	$running_watch = 0;
+	return;
+    }
+
     # we have an SQL statement.  process it.
     if ($stmt =~ /^watch\s+(.*)/) {
 	$running_watch = 1;
@@ -246,7 +289,9 @@ sub snmpsh {
 	if ($stmt =~ /^select/) {
 	    my $table;
 	    my $older_data = $old_data;
-	    $old_data = [];
+	    if ($running_watch == 1) {
+		$old_data = [];
+	    }
 	    my $oldcount = 0;
 	    while($row = $sth->fetchrow_arrayref) {
 		
@@ -267,7 +312,9 @@ sub snmpsh {
 			} else {
 			    push @$newrow,$row->[$count];
 			}
-			$old_data->[$oldcount][$count] = $row->[$count];
+			if ($running_watch == 1) {
+			    $old_data->[$oldcount][$count] = $row->[$count];
+			}
 		    }
 		    $oldcount++;
 		    $row = $newrow;
