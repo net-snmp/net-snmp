@@ -114,6 +114,6 @@ zeroDotZero OBJECT-IDENTITY
     STATUS       current
     DESCRIPTION
         "A value used for null identifiers."
-    ::= { ccitt  0 }
+    ::= { 0  0 }
 
 END
