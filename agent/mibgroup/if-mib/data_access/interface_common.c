@@ -9,8 +9,7 @@
 #include "if-mib/ifTable/ifTable_constants.h"
 
 #include <net-snmp/agent/net-snmp-agent-includes.h>
-#include <net-snmp/data_access/interface.h>
-#include "if-mib/data_access/interface.h"
+#include "interface.h"
 
 /**---------------------------------------------------------------------*/
 /*
@@ -55,6 +54,7 @@ netsnmp_access_interface_init(void)
                                   _free_interface_config,
                                   "name type speed");
 
+#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
     netsnmp_access_interface_arch_init();
 
     /*
@@ -63,7 +63,7 @@ netsnmp_access_interface_init(void)
     ifcontainer = netsnmp_access_interface_container_load(NULL, 0);
     if(NULL != ifcontainer)
         netsnmp_access_interface_container_free(ifcontainer, 0);
-
+#endif
 }
 
 /**---------------------------------------------------------------------*/
@@ -112,6 +112,7 @@ netsnmp_access_interface_container_init(u_int flags)
  * @retval NULL  error
  * @retval !NULL pointer to container
  */
+#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
 netsnmp_container*
 netsnmp_access_interface_container_load(netsnmp_container* container, u_int load_flags)
 {
@@ -135,6 +136,7 @@ netsnmp_access_interface_container_load(netsnmp_container* container, u_int load
 
     return container;
 }
+#endif
 
 void
 netsnmp_access_interface_container_free(netsnmp_container *container, u_int free_flags)
@@ -294,6 +296,7 @@ netsnmp_access_interface_entry_free(netsnmp_interface_entry * entry)
  * @retval 0   : success
  * @retval < 0 : error
  */
+#ifndef NETSNMP_ACCESS_INTERFACE_NOARCH
 int
 netsnmp_access_interface_entry_set_admin_status(netsnmp_interface_entry * entry,
                                                 int ifAdminStatus)
@@ -315,6 +318,7 @@ netsnmp_access_interface_entry_set_admin_status(netsnmp_interface_entry * entry,
 
     return rc;
 }
+#endif
 
 /**---------------------------------------------------------------------*/
 /*
