@@ -777,7 +777,7 @@ struct subtree subtrees_old[] = {
    sizeof(extensible_lockd_variables)/sizeof(*extensible_lockd_variables),
    sizeof(*extensible_lockd_variables)},
 #endif
-#if defined(USEDISKMIB) && (HAVE_FSTAB_H || HAVE_STATVFS_H)
+#ifdef USEDISKMIB
   {{EXTENSIBLEMIB, DISKMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_disk_variables,
    sizeof(extensible_disk_variables)/sizeof(*extensible_disk_variables),
    sizeof(*extensible_disk_variables)},
