@@ -38,7 +38,7 @@ snmp_register_callback(int major, int minor, SNMPCallback *new_callback,
 
   struct snmp_gen_callback *scp;
   
-  if (major > MAX_CALLBACK_IDS || minor > MAX_CALLBACK_SUBIDS) {
+  if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
     return SNMPERR_GENERR;
   }
   
@@ -73,7 +73,7 @@ int
 snmp_call_callbacks(int major, int minor, void *caller_arg) {
   struct snmp_gen_callback *scp;
 
-  if (major > MAX_CALLBACK_IDS || minor > MAX_CALLBACK_SUBIDS) {
+  if (major >= MAX_CALLBACK_IDS || minor >= MAX_CALLBACK_SUBIDS) {
     return SNMPERR_GENERR;
   }
 
