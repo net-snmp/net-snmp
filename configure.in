@@ -1301,9 +1301,9 @@ at the prompt below) the agent will use stdout and stderr instead.
 Location to write logfile],$defaultlog,1)
 
 if test -d /var; then
-  defaultstore="/var/snmp"
+  defaultstore="/var/ucd-snmp"
 else
-  defaultstore="/etc/snmp"
+  defaultstore="/etc/ucd-snmp"
 fi
   
 AC_PROMPT_USER(PERSISTENT_DIRECTORY,[
