@@ -59,6 +59,7 @@
 #include "lcd_time.h"
 #include "scapi.h"
 #include "tools.h"
+#include "keytools.h"
 #include "lcd_time.h"
 #include "snmp_debug.h"
 #include "snmp_logging.h"
@@ -279,6 +280,118 @@ setup_engineID(u_char **eidp, const char *text)
   return len;
 
 }  /* end setup_engineID() */
+
+void
+usm_parse_create_usmUser(const char *token, char *line) {
+  char *cp;
+  char buf[SNMP_MAXBUF_MEDIUM];
+  struct usmUser *newuser;
+  u_char	  userKey[SNMP_MAXBUF_SMALL];
+  size_t	  userKeyLen = SNMP_MAXBUF_SMALL;
+  int ret;
+
+  newuser = usm_create_user();
+
+  /* READ: Security Name */
+  cp = copy_word(line, buf);
+  newuser->secName = strdup(buf);
+  newuser->name = strdup(buf);
+
+  newuser->engineID = snmpv3_generate_engineID(&newuser->engineIDLen);
+
+  if (!cp)
+    goto add; /* no authentication or privacy type */
+
+  /* READ: Authentication Type */
+  if (strncmp(cp, "MD5", 3) == 0) {
+    memcpy(newuser->authProtocol, usmHMACMD5AuthProtocol,
+           sizeof(usmHMACMD5AuthProtocol));
+  } else if (strncmp(cp, "SHA", 3) == 0) {
+    memcpy(newuser->authProtocol, usmHMACSHA1AuthProtocol,
+           sizeof(usmHMACSHA1AuthProtocol));
+  } else {
+    config_perror("unknown authentication protocol");
+    usm_free_user(newuser);
+    return;
+  }
+
+  cp = skip_token(cp);
+
+  /* READ: Authentication Pass Phrase */
+  if (!cp) {
+    config_perror("no authentication pass phrase");
+    usm_free_user(newuser);
+    return;
+  }
+  cp = copy_word(cp, buf);
+  /* And turn it into a localized key */
+  ret = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
+		    (u_char *)buf, strlen(buf),
+		    userKey, &userKeyLen );
+  if (ret != SNMPERR_SUCCESS) {
+    config_perror("Error generating auth key from pass phrase.");
+    usm_free_user(newuser);
+    return;
+  }
+  newuser->authKeyLen =
+    sc_get_properlength(newuser->authProtocol, newuser->authProtocolLen);
+  newuser->authKey = malloc(newuser->authKeyLen);
+  ret = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
+		     newuser->engineID, newuser->engineIDLen,
+		     userKey, userKeyLen,
+		     newuser->authKey, &newuser->authKeyLen );
+  if (ret != SNMPERR_SUCCESS) {
+    config_perror("Error generating localized auth key (Kul) from Ku.");
+    usm_free_user(newuser);
+    return;
+  }
+
+  if (!cp)
+    goto add; /* no privacy type (which is legal) */
+  
+  /* READ: Privacy Type */
+  if (strncmp(cp, "DES", 3) == 0) {
+    memcpy(newuser->privProtocol, usmDESPrivProtocol,
+           sizeof(usmDESPrivProtocol));
+  } else {
+    config_perror("unknown privacy protocol");
+    usm_free_user(newuser);
+    return;
+  }
+
+  cp = skip_token(cp);
+  /* READ: Authentication Pass Phrase */
+  if (!cp) {
+    /* assume the same as the authentication key */
+    memdup(&newuser->privKey, newuser->authKey, newuser->authKeyLen);
+  } else {
+    cp = copy_word(cp, buf);
+    /* And turn it into a localized key */
+    ret = generate_Ku(newuser->authProtocol, newuser->authProtocolLen,
+                      (u_char *)buf, strlen(buf),
+                      userKey, &userKeyLen );
+    if (ret != SNMPERR_SUCCESS) {
+      config_perror("Error generating priv key from pass phrase.");
+      usm_free_user(newuser);
+      return;
+    }
+    newuser->privKeyLen =
+      sc_get_properlength(newuser->privProtocol, newuser->privProtocolLen);
+    newuser->privKey = malloc(newuser->privKeyLen);
+    ret = generate_kul(newuser->authProtocol, newuser->authProtocolLen,
+                       newuser->engineID, newuser->engineIDLen,
+                       userKey, userKeyLen,
+                       newuser->privKey, &newuser->privKeyLen );
+    if (ret != SNMPERR_SUCCESS) {
+      config_perror("Error generating localized priv key (Kul) from Ku.");
+      usm_free_user(newuser);
+      return;
+    }
+  }
+add:
+  usm_add_user(newuser);
+  DEBUGMSGTL(("usmUser","created a new user %s\n", newuser->secName));
+}
 
 /*******************************************************************-o-******
  * engineBoots_conf
