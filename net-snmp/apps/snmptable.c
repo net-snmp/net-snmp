@@ -85,7 +85,7 @@ SOFTWARE.
 
 struct column {
   int width;
-  int subid;
+  oid subid;
   char *label;
   char *fmt;
 } *column = NULL;
@@ -108,6 +108,7 @@ static size_t name_length;
 static oid root[MAX_OID_LEN];
 static size_t rootlen;
 static int localdebug;
+static int exitval = 0;
 static int use_getbulk = 1;
 static int max_getbulk = 25;
 static int nonsequential = 1;
@@ -280,6 +281,7 @@ int main(int argc, char *argv[])
 
   snmp_close(ss);
   SOCK_CLEANUP;
+  if (exitval) return exitval;
 
   if (entries || headers_only) print_table();
   else printf("%s: No entries\n", table_name);
@@ -514,7 +516,7 @@ void get_table_entries( struct snmp_session *ss )
 		name_p = string_buf;
 		break;
 	      case 0:
-	        name_p = string_buf + strlen(table_name)+1;
+		name_p = string_buf + strlen(table_name)+1;
 		name_p = strchr(name_p, '.')+1;
 		break;
 	      }
@@ -562,14 +564,17 @@ void get_table_entries( struct snmp_session *ss )
 	      fprint_objid(stderr, vars->name, vars->name_length);
 	    fprintf(stderr, "\n");
 	  }
+	  exitval = 2;
 	}
       }
     } else if (status == STAT_TIMEOUT){
       fprintf(stderr, "Timeout: No Response from %s\n", ss->peername);
       running = 0;
+      exitval = 1;
     } else {    /* status == STAT_ERROR */
       snmp_sess_perror("snmptable", ss);
       running = 0;
+      exitval = 1;
     }
     if (response)
       snmp_free_pdu(response);
@@ -588,7 +593,6 @@ void getbulk_table_entries( struct snmp_session *ss )
   char  string_buf[SPRINT_MAX_LEN], *cp;
   char  *name_p = NULL;
   char  **dp;
-  int end_of_table = 0;
 
   while (running) {
     /* create PDU for GETNEXT request and add object name to request */
@@ -654,7 +658,7 @@ void getbulk_table_entries( struct snmp_session *ss )
 	  for (cp = string_buf; *cp; cp++)
 	    if (*cp == '\n') *cp = ' ';
 	  for (col = 0; col < fields; col++)
-	    if (column[col].subid == (int)vars->name[rootlen]) break;
+	    if (column[col].subid == vars->name[rootlen]) break;
 	  dp[col] = strdup(string_buf);
 	  i = strlen(string_buf);
 	  if (i > column[col].width) column[col].width = i;
@@ -683,14 +687,17 @@ void getbulk_table_entries( struct snmp_session *ss )
 	      fprint_objid(stderr, vars->name, vars->name_length);
 	    fprintf(stderr, "\n");
 	  }
+	  exitval = 2;
 	}
       }
     } else if (status == STAT_TIMEOUT){
       fprintf(stderr, "Timeout: No Response from %s\n", ss->peername);
       running = 0;
+      exitval = 1;
     } else {    /* status == STAT_ERROR */
       snmp_sess_perror("snmptable", ss);
       running = 0;
+      exitval = 1;
     }
     if (response)
       snmp_free_pdu(response);

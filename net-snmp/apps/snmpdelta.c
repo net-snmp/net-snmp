@@ -675,10 +675,12 @@ int main(int argc, char *argv[])
     } else if (status == STAT_TIMEOUT){
       fprintf(stderr, "Timeout: No Response from %s\n", gateway);
       response = 0;
+      exit_code = 1;
       break;
     } else {    /* status == STAT_ERROR */
       snmp_sess_perror("snmpdelta", ss);
       response = 0;
+      exit_code = 1;
       break;
     }
 	

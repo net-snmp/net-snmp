@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
     size_t name_length;
     int   status;
     int   failures = 0;
+    int   exitval = 0;
 
     /* get the common command line arguments */
     switch (arg = snmp_parse_args(argc, argv, &session, "C:", &optProc)) {
@@ -189,6 +190,7 @@ retry:
           if (vars)
             fprint_objid(stderr, vars->name, vars->name_length);
           fprintf(stderr, "\n");
+	  exitval = 2;
         }
 
         /* retry if the errored variable was successfully removed */
@@ -202,13 +204,15 @@ retry:
       }
     } else if (status == STAT_TIMEOUT){
       fprintf(stderr, "Timeout: No Response from %s.\n", session.peername);
+      exitval = 1;
     } else {    /* status == STAT_ERROR */
       snmp_sess_perror("snmpgetnext", ss);
+      exitval = 1;
     }
 
     if (response)
       snmp_free_pdu(response);
     snmp_close(ss);
     SOCK_CLEANUP;
-    return 0;
+    return exitval;
 }

@@ -199,6 +199,7 @@ main(int argc, char *argv[])
     size_t                name_length = USM_OID_LEN;
     size_t                name_length2 = USM_OID_LEN;
     int                   status;
+    int			  exitval = 0;
     int                   rval;
     int                   command         = 0;
     long                  longvar;
@@ -484,23 +485,20 @@ main(int argc, char *argv[])
 	      fprint_objid(stderr, vars->name, vars->name_length);
 	    fprintf(stderr, "\n");
 	  }
+	  exitval = 2;
         }
       }
     } else if (status == STAT_TIMEOUT){
       fprintf(stderr,"Timeout: No Response from %s\n", session.peername);
-      snmp_close(ss);
-      SOCK_CLEANUP;
-      exit(1);
+      exitval = 1;
     } else {    /* status == STAT_ERROR */
       snmp_sess_perror("snmpset", ss);
-      snmp_close(ss);
-      SOCK_CLEANUP;
-      exit(1);
+      exitval = 1;
     }
 
     if (response)
       snmp_free_pdu(response);
     snmp_close(ss);
     SOCK_CLEANUP;
-    return 0;
+    return exitval;
 }

@@ -195,11 +195,10 @@ int main(int argc, char *argv[])
     struct snmp_pdu *pdu;
     struct snmp_pdu *response;
     int arg;
-    int current_name = 0;
     oid base[MAX_OID_LEN];
     size_t base_length;
     int status;
-    struct variable_list *saved = NULL, **vlpp = &saved, *vlp = saved, *vlp2;
+    struct variable_list *saved = NULL, *vlp = saved, *vlp2;
     int count = 0;
     
     /* get the common command line arguments */
@@ -241,7 +240,7 @@ int main(int argc, char *argv[])
 
         while(vlp) {
             size_t units;
-            unsigned int hssize, hsused;
+            unsigned long long hssize, hsused;
             char descr[SPRINT_MAX_LEN];
         
             pdu = snmp_pdu_create(SNMP_MSG_GET);
@@ -274,8 +273,8 @@ int main(int argc, char *argv[])
             vlp2 = vlp2->next_variable;
             hsused = *(vlp2->val.integer);
 
-            printf("%-18s %15d %15d %15d %4d%%\n", descr,
-                   ((units)?(hssize*1024/units):hssize), hsused,
+            printf("%-18s %15lld %15lld %15lld %4lld%%\n", descr,
+                   ((units)?(hssize*units/1024):hssize), hsused,
                    hssize-hsused, (hssize)?(100*hsused/hssize):hsused);
 
             vlp = vlp->next_variable;
@@ -325,7 +324,7 @@ int main(int argc, char *argv[])
             hsused = *(vlp2->val.integer);
 
             printf("%-18s %15d %15d %15d %4d%%\n", descr,
-                   ((units)?(hssize*1024/units):hssize), hsused,
+                   ((units)?(hssize*units/1024):hssize), hsused,
                    hssize-hsused, (hssize)?(100*hsused/hssize):hsused);
 
             vlp = vlp->next_variable;

@@ -98,18 +98,18 @@ static const char *successNotes[CMD_NUM] = {
 #define                   VIEW_OID_LEN    	12
 
 static oid  vacmGroupName[MAX_OID_LEN]			= {1,3,6,1,6,3,16,1,2,1,3},
-			vacmSec2GroupStorageType[MAX_OID_LEN]	= {1,3,6,1,6,3,16,1,2,1,4},
+	    vacmSec2GroupStorageType[MAX_OID_LEN]	= {1,3,6,1,6,3,16,1,2,1,4},
             vacmSec2GroupStatus[MAX_OID_LEN]       	= {1,3,6,1,6,3,16,1,2,1,5},
-			vacmAccessContextMatch[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,4,1,4},
-			vacmAccessReadViewName[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,4,1,5},
-			vacmAccessWriteViewName[MAX_OID_LEN]	= {1,3,6,1,6,3,16,1,4,1,6},
-			vacmAccessNotifyViewName[MAX_OID_LEN]	= {1,3,6,1,6,3,16,1,4,1,7},
-			vacmAccessStorageType[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,4,1,8},
-			vacmAccessStatus[MAX_OID_LEN]	    	= {1,3,6,1,6,3,16,1,4,1,9},
-			vacmViewTreeFamilyMask[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,5,2,1,3},
-			vacmViewTreeFamilyType[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,5,2,1,4},
-			vacmViewTreeFamilyStorageType[MAX_OID_LEN]= {1,3,6,1,6,3,16,1,5,2,1,5},
-			vacmViewTreeFamilyStatus[MAX_OID_LEN]	= {1,3,6,1,6,3,16,1,5,2,1,6}
+	    vacmAccessContextMatch[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,4,1,4},
+	    vacmAccessReadViewName[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,4,1,5},
+	    vacmAccessWriteViewName[MAX_OID_LEN]	= {1,3,6,1,6,3,16,1,4,1,6},
+	    vacmAccessNotifyViewName[MAX_OID_LEN]	= {1,3,6,1,6,3,16,1,4,1,7},
+	    vacmAccessStorageType[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,4,1,8},
+	    vacmAccessStatus[MAX_OID_LEN]	    	= {1,3,6,1,6,3,16,1,4,1,9},
+	    vacmViewTreeFamilyMask[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,5,2,1,3},
+	    vacmViewTreeFamilyType[MAX_OID_LEN]		= {1,3,6,1,6,3,16,1,5,2,1,4},
+	    vacmViewTreeFamilyStorageType[MAX_OID_LEN]= {1,3,6,1,6,3,16,1,5,2,1,5},
+	    vacmViewTreeFamilyStatus[MAX_OID_LEN]	= {1,3,6,1,6,3,16,1,5,2,1,6}
 ;
 
 int viewTreeFamilyType=1;
@@ -245,8 +245,8 @@ main(int argc, char *argv[])
     oid                   name[MAX_OID_LEN];
 #endif
     size_t                name_length;
-    size_t                name_length2 = ACCESS_OID_LEN;
     int                   status;
+    int			  exitval = 0;
     int                   command         = 0;
     long                  longvar;
     int 				  secModel,secLevel,contextMatch,val,i = 0; 
@@ -526,37 +526,33 @@ main(int argc, char *argv[])
 	{
 	  if (response) 
 	  {
-		if (response->errstat == SNMP_ERR_NOERROR)
-		{
-		  fprintf(stderr, "%s\n", successNotes[command-1]);
-		} 
-		else 
-		{
-		  fprintf(stderr, "Error in packet.\nReason: %s\n",
-					snmp_errstring(response->errstat));
-		}
+	    if (response->errstat == SNMP_ERR_NOERROR)
+	    {
+	      fprintf(stderr, "%s\n", successNotes[command-1]);
+	    } 
+	    else 
+	    {
+	      fprintf(stderr, "Error in packet.\nReason: %s\n",
+				    snmp_errstring(response->errstat));
+	      exitval = 2;
+	    }
 	  }
-    } 
-    else if (status == STAT_TIMEOUT)
-    {
-      fprintf(stderr,"Timeout: No Response from %s\n", session.peername);
-      snmp_close(ss);
-      SOCK_CLEANUP;
-      exit(1);
-    } 
+	} 
+	else if (status == STAT_TIMEOUT)
+	{
+	  fprintf(stderr,"Timeout: No Response from %s\n", session.peername);
+	  exitval = 1;
+	} 
 	else
 	{    
-      snmp_sess_perror("snmpset", ss);
-      snmp_close(ss);
-      SOCK_CLEANUP;
-      exit(1);
-    } 
+	  snmp_sess_perror("snmpset", ss);
+	  exitval = 1;
+	} 
 
-    if (response)
-      snmp_free_pdu(response);
-    snmp_close(ss);
-    SOCK_CLEANUP;
-  
-    
-  return 0;
+	if (response)
+	  snmp_free_pdu(response);
+
+	snmp_close(ss);
+	SOCK_CLEANUP;
+	return exitval;
 }
