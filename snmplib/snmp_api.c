@@ -2957,22 +2957,28 @@ snmpv3_parse(
     return SNMPERR_ASN_PARSE_ERR;
   }
 
-  /*  Check the msgMaxSize we received is a legal value.  If not, then clamp
-      it in the appropriate direction and carry on anyway (also logging the
-      error).  I'm not sure this is the correct behaviour, but it seems
-      reasonable to me.  Note we store the msgMaxSize on a per-session basis
-      which also seems reasonable; it could vary from PDU to PDU but that
-      would be strange (also since we deal with a PDU at a time, it wouldn't
-      make any difference to our responses, if any).  */
+  /*  Check the msgMaxSize we received is a legal value.  If not, then
+      increment snmpInASNParseErrs and return the appropriate error (see RFC
+      2572, para. 7.2, section 2 -- note that a bad msgMaxSize means that the
+      received message is NOT a serialiization of an SNMPv3Message, since the
+      msgMagSize field is out of bounds).
+
+      Note we store the msgMaxSize on a per-session basis which also seems
+      reasonable; it could vary from PDU to PDU but that would be strange
+      (also since we deal with a PDU at a time, it wouldn't make any
+      difference to our responses, if any).  */
 
   if (msg_max_size < 484) {
-    snmp_log(LOG_ERR, "rx bad msgMaxSize (%lu < 484); using 484.\n",
-	     msg_max_size);
-    sess->sndMsgMaxSize = 484;
+    snmp_log(LOG_ERR, "Received bad msgMaxSize (%lu < 484).\n", msg_max_size);
+    snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+    DEBUGINDENTADD(-4);
+    return SNMPERR_ASN_PARSE_ERR;
   } else if (msg_max_size > 0x7fffffff) {
-    snmp_log(LOG_ERR, "rx bad msgMaxSize (%lu > 2^31 - 1); using 2^31 - 1.\n",
+    snmp_log(LOG_ERR, "Received bad msgMaxSize (%lu > 2^31 - 1).\n",
 	     msg_max_size);
-    sess->sndMsgMaxSize = 0x7fffffff;
+    snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
+    DEBUGINDENTADD(-4);
+    return SNMPERR_ASN_PARSE_ERR;
   } else {
     DEBUGMSGTL(("snmpv3_parse", "msgMaxSize %lu received\n", msg_max_size));
     sess->sndMsgMaxSize = msg_max_size;
