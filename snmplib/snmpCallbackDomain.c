@@ -40,11 +40,11 @@
 #include <net-snmp/library/snmp_client.h>
 #include <net-snmp/library/snmpCallbackDomain.h>
 
-#ifndef SNMP_STREAM_QUEUE_LEN
-#define SNMP_STREAM_QUEUE_LEN  5
+#ifndef NETSNMP_STREAM_QUEUE_LEN
+#define NETSNMP_STREAM_QUEUE_LEN  5
 #endif
 
-static snmp_transport_list *trlist = NULL;
+static netsnmp_transport_list *trlist = NULL;
 
 static int callback_count = 0;
 
@@ -55,24 +55,24 @@ typedef struct callback_hack_s {
 
 typedef struct callback_queue_s {
    int callback_num;
-   callback_pass *item;
+   netsnmp_callback_pass *item;
    struct callback_queue_s *next, *prev;
 } callback_queue;
 
 callback_queue *thequeue;
 
-static snmp_transport *
+static netsnmp_transport *
 find_transport_from_callback_num(int num) 
 {
-    static snmp_transport_list *ptr;
+    static netsnmp_transport_list *ptr;
     for(ptr = trlist; ptr; ptr = ptr->next)
-        if (((callback_info *) ptr->transport->data)->callback_num == num)
+        if (((netsnmp_callback_info *) ptr->transport->data)->callback_num == num)
             return ptr->transport;
     return NULL;
 }
 
 void
-callback_push_queue(int num, callback_pass *item) 
+callback_push_queue(int num, netsnmp_callback_pass *item) 
 {
     callback_queue *newitem = SNMP_MALLOC_TYPEDEF(callback_queue);
     callback_queue *ptr;
@@ -89,10 +89,10 @@ callback_push_queue(int num, callback_pass *item)
     }
 }
 
-callback_pass *
+netsnmp_callback_pass *
 callback_pop_queue(int num) 
 {
-    callback_pass *cp;
+    netsnmp_callback_pass *cp;
     callback_queue *ptr;
     
     for(ptr = thequeue; ptr; ptr = ptr->next) {
@@ -116,16 +116,16 @@ callback_pop_queue(int num)
 /*  Return a string representing the address in data, or else the "far end"
     address if data is NULL.  */
 
-char	       *snmp_callback_fmtaddr	(snmp_transport *t,
+char	       *snmp_callback_fmtaddr	(netsnmp_transport *t,
 					 void *data, int len)
 {
     char buf[SPRINT_MAX_LEN];
-    callback_info *mystuff;
+    netsnmp_callback_info *mystuff;
 
     if (!t)
         return strdup("callback: unknown");
     
-    mystuff = (callback_info *) t->data;
+    mystuff = (netsnmp_callback_info *) t->data;
 
     if (!mystuff)
         return strdup("callback: unknown");
@@ -141,12 +141,12 @@ char	       *snmp_callback_fmtaddr	(snmp_transport *t,
     to your send function if you like.  For instance, you might want to
     remember where a PDU came from, so that you can send a reply there...  */
 
-int		snmp_callback_recv	(snmp_transport *t, void *buf, int size,
+int		snmp_callback_recv	(netsnmp_transport *t, void *buf, int size,
                                          void **opaque, int *olength) 
 {
     int rc;
     char newbuf[1];
-    callback_info *mystuff = (callback_info *) t->data;
+    netsnmp_callback_info *mystuff = (netsnmp_callback_info *) t->data;
 
     DEBUGMSGTL(("transport_callback","hook_recv enter\n"));
 
@@ -167,15 +167,15 @@ int		snmp_callback_recv	(snmp_transport *t, void *buf, int size,
 
 
 
-int		snmp_callback_send	(snmp_transport *t, void *buf, int size,
+int		snmp_callback_send	(netsnmp_transport *t, void *buf, int size,
                                          void **opaque, int *olength)
 {
     int from;
-    callback_info *mystuff = (callback_info *) t->data;
-    callback_pass *cp;
+    netsnmp_callback_info *mystuff = (netsnmp_callback_info *) t->data;
+    netsnmp_callback_pass *cp;
   
     /* extract the pdu from the hacked buffer */
-    snmp_transport *other_side;
+    netsnmp_transport *other_side;
     callback_hack *ch = (callback_hack *) *opaque;
     struct snmp_pdu *pdu = ch->pdu;
     *opaque = ch->orig_transport_data;
@@ -183,7 +183,7 @@ int		snmp_callback_send	(snmp_transport *t, void *buf, int size,
 
     DEBUGMSGTL(("transport_callback","hook_send enter\n"));
 
-    cp  = SNMP_MALLOC_TYPEDEF(callback_pass);
+    cp  = SNMP_MALLOC_TYPEDEF(netsnmp_callback_pass);
     if (!cp)
         return -1;
     
@@ -206,7 +206,7 @@ int		snmp_callback_send	(snmp_transport *t, void *buf, int size,
         if (!other_side)
             return -1;
 
-        write(((callback_info *) other_side->data)->pipefds[1]," ",1);
+        write(((netsnmp_callback_info *) other_side->data)->pipefds[1]," ",1);
         callback_push_queue(mystuff->linkedto, cp);
         /* we don't need the transport data any more */
         if (*opaque) {
@@ -224,7 +224,7 @@ int		snmp_callback_send	(snmp_transport *t, void *buf, int size,
         other_side = find_transport_from_callback_num(from);
         if (!other_side)
             return -1;
-        write(((callback_info *) other_side->data)->pipefds[1]," ",1);
+        write(((netsnmp_callback_info *) other_side->data)->pipefds[1]," ",1);
         callback_push_queue(from, cp);
     }
 
@@ -234,16 +234,16 @@ int		snmp_callback_send	(snmp_transport *t, void *buf, int size,
 
 
 
-int		snmp_callback_close	(snmp_transport *t)
+int		snmp_callback_close	(netsnmp_transport *t)
 {
     int rc;
-    callback_info *mystuff = (callback_info *) t->data;
+    netsnmp_callback_info *mystuff = (netsnmp_callback_info *) t->data;
     DEBUGMSGTL(("transport_callback","hook_close enter\n"));
 
     rc = close(mystuff->pipefds[0]);
     rc = close(mystuff->pipefds[1]);
 
-    snmp_transport_remove_from_list(&trlist, t);
+    netsnmp_transport_remove_from_list(&trlist, t);
 
     DEBUGMSGTL(("transport_callback","hook_close exit\n"));
     return rc;
@@ -251,7 +251,7 @@ int		snmp_callback_close	(snmp_transport *t)
 
 
 
-int		snmp_callback_accept	(snmp_transport *t)
+int		snmp_callback_accept	(netsnmp_transport *t)
 {
     DEBUGMSGTL(("transport_callback","hook_accept enter\n"));
     DEBUGMSGTL(("transport_callback","hook_accept exit\n"));
@@ -266,20 +266,20 @@ int		snmp_callback_accept	(snmp_transport *t)
     (and we make up a temporary name for the local end of the
     connection).  */
 
-snmp_transport		*snmp_callback_transport   (int to)
+netsnmp_transport		*netsnmp_callback_transport   (int to)
 {
     
-    snmp_transport *t = NULL;
-    callback_info *mydata;
+    netsnmp_transport *t = NULL;
+    netsnmp_callback_info *mydata;
     int rc;
     
     /* transport */
-    t = SNMP_MALLOC_TYPEDEF(snmp_transport);
+    t = SNMP_MALLOC_TYPEDEF(netsnmp_transport);
     if (!t)
         return NULL;
     
     /* our stuff */
-    mydata = SNMP_MALLOC_TYPEDEF(callback_info);
+    mydata = SNMP_MALLOC_TYPEDEF(netsnmp_callback_info);
     mydata->linkedto = to;
     mydata->callback_num = ++callback_count;
     mydata->data = NULL;
@@ -304,7 +304,7 @@ snmp_transport		*snmp_callback_transport   (int to)
     t->f_accept    = snmp_callback_accept;
     t->f_fmtaddr   = snmp_callback_fmtaddr;
 
-    snmp_transport_add_to_list(&trlist, t);
+    netsnmp_transport_add_to_list(&trlist, t);
 
     if (to)
         DEBUGMSGTL(("transport_callback","initialized %d linked to %d\n",
@@ -316,7 +316,7 @@ snmp_transport		*snmp_callback_transport   (int to)
 }
 
 int
-snmp_callback_hook_parse(struct snmp_session *sp,
+netsnmp_callback_hook_parse(struct snmp_session *sp,
                          struct snmp_pdu *pdu,
                          u_char *packetptr,
                          size_t len) 
@@ -331,7 +331,7 @@ snmp_callback_hook_parse(struct snmp_session *sp,
 }
 
 int
-snmp_callback_hook_build(struct snmp_session *sp,
+netsnmp_callback_hook_build(struct snmp_session *sp,
                          struct snmp_pdu *pdu,
                          u_char *ptk, size_t *len) 
 {
@@ -348,18 +348,18 @@ snmp_callback_hook_build(struct snmp_session *sp,
 }
 
 int
-snmp_callback_check_packet(u_char *pkt, size_t len)
+netsnmp_callback_check_packet(u_char *pkt, size_t len)
 {
     return 1;
 }
 
 struct snmp_pdu *
-snmp_callback_create_pdu(snmp_transport *transport,
+netsnmp_callback_create_pdu(netsnmp_transport *transport,
                          void *opaque, size_t olength) 
 {
     struct snmp_pdu *pdu;
-    callback_pass *cp =
-        callback_pop_queue(((callback_info *) transport->data)->callback_num);
+    netsnmp_callback_pass *cp =
+        callback_pop_queue(((netsnmp_callback_info *) transport->data)->callback_num);
     if (!cp)
         return NULL;
     pdu = cp->pdu;
@@ -372,20 +372,20 @@ snmp_callback_create_pdu(snmp_transport *transport,
 }
 
 struct snmp_session *
-snmp_callback_open(int attach_to,
+netsnmp_callback_open(int attach_to,
                    int (*return_func)(int op, struct snmp_session *session,
                                       int reqid, struct snmp_pdu *pdu,
                                       void *magic),
                    int (*fpre_parse) (struct snmp_session *,
-                                      struct _snmp_transport *,
+                                      struct netsnmp_transport_s *,
                                       void *, int),
                    int (*fpost_parse)(struct snmp_session *,
                                       struct snmp_pdu *, int))
 {
     struct snmp_session callback_sess, *callback_ss;
-    snmp_transport *callback_tr;
+    netsnmp_transport *callback_tr;
 
-    callback_tr = snmp_callback_transport(attach_to);
+    callback_tr = netsnmp_callback_transport(attach_to);
     snmp_sess_init(&callback_sess);
     callback_sess.callback = return_func;
     if (attach_to) {
@@ -400,14 +400,14 @@ snmp_callback_open(int attach_to,
     callback_sess.version = SNMP_DEFAULT_VERSION; /* (mostly) bogus */
     callback_ss = snmp_add_full(&callback_sess, callback_tr,
                                 fpre_parse,
-                                snmp_callback_hook_parse, fpost_parse,
-                                snmp_callback_hook_build,
+                                netsnmp_callback_hook_parse, fpost_parse,
+                                netsnmp_callback_hook_build,
                                 NULL,
-                                snmp_callback_check_packet,
-                                snmp_callback_create_pdu);
+                                netsnmp_callback_check_packet,
+                                netsnmp_callback_create_pdu);
     if (callback_ss)
         callback_ss->local_port =
-            ((callback_info *) callback_tr->data)->callback_num;
+            ((netsnmp_callback_info *) callback_tr->data)->callback_num;
     return callback_ss;
 }
 

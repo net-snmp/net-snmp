@@ -39,13 +39,13 @@
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 #include <net-snmp/library/snmpTCPIPv6Domain.h>
 
-const oid ucdSnmpTCPIPv6Domain[9] = { UCDAVIS_MIB, 251, 5 };
-static snmp_tdomain tcp6Domain;
+const oid netsnmp_ucdSnmpTCPIPv6Domain[9] = { UCDAVIS_MIB, 251, 5 };
+static netsnmp_tdomain tcp6Domain;
 
 /*  Return a string representing the address in data, or else the "far end"
     address if data is NULL.  */
 
-char	       *snmp_tcp6_fmtaddr	(snmp_transport *t,
+char	       *snmp_tcp6_fmtaddr	(netsnmp_transport *t,
 					 void *data, int len)
 {
   struct sockaddr_in6 *to = NULL;
@@ -74,7 +74,7 @@ char	       *snmp_tcp6_fmtaddr	(snmp_transport *t,
     to your send function if you like.  For instance, you might want to
     remember where a PDU came from, so that you can send a reply there...  */
 
-int		snmp_tcp6_recv	(snmp_transport *t, void *buf, int size,
+int		snmp_tcp6_recv	(netsnmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength) 
 {
   int rc = -1;
@@ -105,7 +105,7 @@ int		snmp_tcp6_recv	(snmp_transport *t, void *buf, int size,
 
 
 
-int		snmp_tcp6_send	(snmp_transport *t, void *buf, int size,
+int		snmp_tcp6_send	(netsnmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength)
 {
   int rc = 0;
@@ -120,7 +120,7 @@ int		snmp_tcp6_send	(snmp_transport *t, void *buf, int size,
 
 
 
-int		snmp_tcp6_close	(snmp_transport *t)
+int		snmp_tcp6_close	(netsnmp_transport *t)
 {
   int rc = 0;
   if (t != NULL && t->sock >= 0) {
@@ -139,7 +139,7 @@ int		snmp_tcp6_close	(snmp_transport *t)
 
 
 
-int		snmp_tcp6_accept	(snmp_transport *t)
+int		snmp_tcp6_accept	(netsnmp_transport *t)
 {
   struct sockaddr_in6 *farend = NULL;
   int newsock = -1, farendlen = sizeof(struct sockaddr_in6), sockflags = 0;
@@ -197,10 +197,10 @@ int		snmp_tcp6_accept	(snmp_transport *t)
     local address to bind to (i.e. this is a server-type session); otherwise
     addr is the remote address to send things to.  */
 
-snmp_transport		*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
+netsnmp_transport		*netsnmp_tcp6_transport	(struct sockaddr_in6 *addr,
 						 int local)
 {
-  snmp_transport *t = NULL;
+  netsnmp_transport *t = NULL;
   int rc = 0;
   char *string = NULL;
 
@@ -208,36 +208,36 @@ snmp_transport		*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
     return NULL;
   }
 
-  t = (snmp_transport *)malloc(sizeof(snmp_transport));
+  t = (netsnmp_transport *)malloc(sizeof(netsnmp_transport));
   if (t == NULL) {
     return NULL;
   }
-  memset(t, 0, sizeof(snmp_transport));
+  memset(t, 0, sizeof(netsnmp_transport));
 
   string = snmp_tcp6_fmtaddr(NULL, (void *)addr, sizeof(struct sockaddr_in6));
   DEBUGMSGTL(("snmp_tcp6", "open %s %s\n", local?"local":"remote", string));
   free(string);
 
-  memset(t, 0, sizeof(snmp_transport));
+  memset(t, 0, sizeof(netsnmp_transport));
 
   t->data = malloc(sizeof(struct sockaddr_in6));
   if (t->data == NULL) {
-    snmp_transport_free(t);
+    netsnmp_transport_free(t);
     return NULL;
   }
   t->data_length = sizeof(struct sockaddr_in6);
   memcpy(t->data, addr, sizeof(struct sockaddr_in6));
 
-  t->domain = ucdSnmpTCPIPv6Domain;
-  t->domain_length = sizeof(ucdSnmpTCPIPv6Domain)/sizeof(oid);
+  t->domain = netsnmp_ucdSnmpTCPIPv6Domain;
+  t->domain_length = sizeof(netsnmp_ucdSnmpTCPIPv6Domain)/sizeof(oid);
 
   t->sock = socket(PF_INET6, SOCK_STREAM, 0);
   if (t->sock < 0) {
-    snmp_transport_free(t);
+    netsnmp_transport_free(t);
     return NULL;
   }
 
-  t->flags = SNMP_TRANSPORT_FLAG_STREAM;
+  t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
 
   if (local) {
     int sockflags = 0, opt = 1;
@@ -246,11 +246,11 @@ snmp_transport		*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
 	IP address, which may include an interface address, or could be
 	INADDR_ANY, but certainly includes a port number.  */
     
-    t->flags |= SNMP_TRANSPORT_FLAG_LISTEN;
+    t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
     t->local = malloc(18);
     if (t->local == NULL) {
       snmp_tcp6_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
     memcpy(t->local, addr->sin6_addr.s6_addr, 16);
@@ -265,7 +265,7 @@ snmp_transport		*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
     rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr_in6));
     if (rc != 0) {
       snmp_tcp6_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
 
@@ -285,17 +285,17 @@ snmp_transport		*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
 
     /*  Now sit here and wait for connections to arrive.  */
 
-    rc = listen(t->sock, SNMP_STREAM_QUEUE_LEN);
+    rc = listen(t->sock, NETSNMP_STREAM_QUEUE_LEN);
     if (rc != 0) {
       snmp_tcp6_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
   } else {
     t->remote = malloc(18);
     if (t->remote == NULL) {
       snmp_tcp6_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
     memcpy(t->remote, addr->sin6_addr.s6_addr, 16);
@@ -314,7 +314,7 @@ snmp_transport		*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
 
     if (rc < 0) {
       snmp_tcp6_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
   }
@@ -334,12 +334,12 @@ snmp_transport		*snmp_tcp6_transport	(struct sockaddr_in6 *addr,
 
 
 
-snmp_transport	*snmp_tcp6_create_tstring       (const char *string, int local)
+netsnmp_transport	*snmp_tcp6_create_tstring       (const char *string, int local)
 {
   struct sockaddr_in6 addr;
 
-  if (snmp_sockaddr_in6(&addr, string, 0)) {
-    return snmp_tcp6_transport(&addr, local);
+  if (netsnmp_sockaddr_in6(&addr, string, 0)) {
+    return netsnmp_tcp6_transport(&addr, local);
   } else {
     return NULL;
   }
@@ -353,7 +353,7 @@ snmp_transport	*snmp_tcp6_create_tstring       (const char *string, int local)
     (or newer equivalent) for details of the TC which we are using for
     the mapping here.  */
 
-snmp_transport	*snmp_tcp6_create_ostring	(const u_char *o, size_t o_len,
+netsnmp_transport	*snmp_tcp6_create_ostring	(const u_char *o, size_t o_len,
 						 int local)
 {
   struct sockaddr_in6 addr;
@@ -363,16 +363,16 @@ snmp_transport	*snmp_tcp6_create_ostring	(const u_char *o, size_t o_len,
     addr.sin6_family = AF_INET6;
     memcpy((u_char *)&(addr.sin6_addr.s6_addr), o, 16);
     addr.sin6_port = (o[16] << 8) + o[17];
-    return snmp_tcp6_transport(&addr, local);
+    return netsnmp_tcp6_transport(&addr, local);
   }
   return NULL;
 }
 
 
-void		snmp_tcp6_ctor			(void)
+void		netsnmp_tcp6_ctor			(void)
 {
-  tcp6Domain.name        = ucdSnmpTCPIPv6Domain;
-  tcp6Domain.name_length = sizeof(ucdSnmpTCPIPv6Domain)/sizeof(oid);
+  tcp6Domain.name        = netsnmp_ucdSnmpTCPIPv6Domain;
+  tcp6Domain.name_length = sizeof(netsnmp_ucdSnmpTCPIPv6Domain)/sizeof(oid);
   tcp6Domain.f_create_from_tstring = snmp_tcp6_create_tstring;
   tcp6Domain.f_create_from_ostring = snmp_tcp6_create_ostring;
   tcp6Domain.prefix	 = calloc(4, sizeof(char *));
@@ -380,5 +380,5 @@ void		snmp_tcp6_ctor			(void)
   tcp6Domain.prefix[1] 	 = "tcpv6";
   tcp6Domain.prefix[2] 	 = "tcpipv6";
 
-  snmp_tdomain_register(&tcp6Domain);
+  netsnmp_tdomain_register(&tcp6Domain);
 }

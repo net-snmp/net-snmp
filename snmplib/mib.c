@@ -1540,12 +1540,12 @@ void snmp_in_toggle_options_usage(const char *lead, FILE *outf)
 }
 
 void
-register_mib_handlers (void)
+register_netsnmp_mib_handlers (void)
 {
-    register_premib_handler("snmp","mibdirs",
+    register_prenetsnmp_mib_handler("snmp","mibdirs",
 			    handle_mibdirs_conf, NULL,
 			    "[mib-dirs|+mib-dirs]");
-    register_premib_handler("snmp","mibs",
+    register_prenetsnmp_mib_handler("snmp","mibs",
 			    handle_mibs_conf,NULL,
 			    "[mib-tokens|+mib-tokens]");
     register_config_handler("snmp","mibfile",

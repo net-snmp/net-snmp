@@ -893,10 +893,10 @@ init_snmpv3(const char *type) {
   /* register all our configuration handlers (ack, there's a lot) */
 
   /* handle engineID setup before everything else which may depend on it */
-  register_premib_handler(type,"engineID", engineID_conf, NULL, "string");
-  register_premib_handler(type,"oldEngineID", oldengineID_conf, NULL, NULL);
-  register_premib_handler(type,"engineIDType", engineIDType_conf, NULL,"num");
-  register_premib_handler(type,"engineIDNic", engineIDNic_conf, NULL,"string");
+  register_prenetsnmp_mib_handler(type,"engineID", engineID_conf, NULL, "string");
+  register_prenetsnmp_mib_handler(type,"oldEngineID", oldengineID_conf, NULL, NULL);
+  register_prenetsnmp_mib_handler(type,"engineIDType", engineIDType_conf, NULL,"num");
+  register_prenetsnmp_mib_handler(type,"engineIDNic", engineIDNic_conf, NULL,"string");
   register_config_handler(type,"engineBoots", engineBoots_conf, NULL, NULL);
 
   /* default store config entries */

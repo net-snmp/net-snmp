@@ -11,14 +11,14 @@
 #include <net-snmp/library/snmp_api.h>
 #include <net-snmp/library/oid_stash.h>
 
-oid_stash_node *
-oid_stash_create_sized_node(size_t mysize) 
+netsnmp_oid_stash_node *
+netsnmp_oid_stash_create_sized_node(size_t mysize) 
 {
-    oid_stash_node *ret;
-    ret = SNMP_MALLOC_TYPEDEF(oid_stash_node);
+    netsnmp_oid_stash_node *ret;
+    ret = SNMP_MALLOC_TYPEDEF(netsnmp_oid_stash_node);
     if (!ret)
         return NULL;
-    ret->children = calloc(mysize, sizeof(oid_stash_node *));
+    ret->children = calloc(mysize, sizeof(netsnmp_oid_stash_node *));
     if (!ret->children) {
         free(ret);
         return NULL;
@@ -28,10 +28,10 @@ oid_stash_create_sized_node(size_t mysize)
 }
 
 inline
-oid_stash_node *
-oid_stash_create_node(void) 
+netsnmp_oid_stash_node *
+netsnmp_oid_stash_create_node(void) 
 {
-    return oid_stash_create_sized_node(OID_STASH_CHILDREN_SIZE);
+    return netsnmp_oid_stash_create_sized_node(OID_STASH_CHILDREN_SIZE);
 }
 
 /** adds data to the stash at a given oid.
@@ -41,17 +41,17 @@ oid_stash_create_node(void)
  *   with NULL values.
  */
 int
-oid_stash_add_data(oid_stash_node **root,
+netsnmp_oid_stash_add_data(netsnmp_oid_stash_node **root,
                    oid *lookup, size_t lookup_len, void *mydata) 
 {
-    oid_stash_node *curnode, *tmpp, *loopp;
+    netsnmp_oid_stash_node *curnode, *tmpp, *loopp;
     unsigned int i;
 
     if (!root || !lookup || lookup_len == 0)
         return SNMPERR_GENERR;
     
     if (!*root)
-        *root = oid_stash_create_node();
+        *root = netsnmp_oid_stash_create_node();
     if (!*root)
         return SNMPERR_MALLOC;
     for(curnode = *root, i = 0; i < lookup_len; i++) {
@@ -59,7 +59,7 @@ oid_stash_add_data(oid_stash_node **root,
         if (!tmpp) {
             /* node child in array at all */
             tmpp = curnode->children[lookup[i] % curnode->children_size] =
-                oid_stash_create_node();
+                netsnmp_oid_stash_create_node();
             tmpp->value = lookup[i];
         } else {
             for(loopp = tmpp; loopp; loopp = loopp->next_sibling) {
@@ -70,7 +70,7 @@ oid_stash_add_data(oid_stash_node **root,
                 tmpp = loopp;
             } else {
                 /* none exists.  Create it */
-                loopp = oid_stash_create_node();
+                loopp = netsnmp_oid_stash_create_node();
                 loopp->value = lookup[i];
                 loopp->next_sibling = tmpp;
                 tmpp->prev_sibling = loopp;
@@ -90,11 +90,11 @@ oid_stash_add_data(oid_stash_node **root,
 
 /** returns a node associated with a given OID.
  */
-oid_stash_node *
-oid_stash_get_node(oid_stash_node *root,
+netsnmp_oid_stash_node *
+netsnmp_oid_stash_get_node(netsnmp_oid_stash_node *root,
                    oid *lookup, size_t lookup_len) 
 {
-    oid_stash_node *curnode, *tmpp, *loopp;
+    netsnmp_oid_stash_node *curnode, *tmpp, *loopp;
     unsigned int i;
     
     if (!root)
@@ -122,21 +122,21 @@ oid_stash_get_node(oid_stash_node *root,
 /** returns a data pointer associated with a given OID.
  */
 void *
-oid_stash_get_data(oid_stash_node *root,
+netsnmp_oid_stash_get_data(netsnmp_oid_stash_node *root,
                    oid *lookup, size_t lookup_len) 
 {
-    oid_stash_node *ret;
-    ret = oid_stash_get_node(root, lookup, lookup_len);
+    netsnmp_oid_stash_node *ret;
+    ret = netsnmp_oid_stash_get_node(root, lookup, lookup_len);
     if (ret) 
         return ret->thedata;
     return NULL;
 }
 
 void
-oid_stash_dump(oid_stash_node *root, char *prefix) 
+oid_stash_dump(netsnmp_oid_stash_node *root, char *prefix) 
 {
     char myprefix[MAX_OID_LEN * 4];
-    oid_stash_node *tmpp;
+    netsnmp_oid_stash_node *tmpp;
     int prefix_len = strlen(prefix) + 1; /* actually it's +2 */
     unsigned int i;
     

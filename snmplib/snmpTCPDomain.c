@@ -36,14 +36,14 @@
 #include <net-snmp/library/snmpTCPDomain.h>
 
 
-const oid snmpTCPDomain[8] = { 1, 3, 6, 1, 3, 91, 1, 1 };
-static snmp_tdomain tcpDomain;
+const oid netsnmp_snmpTCPDomain[8] = { 1, 3, 6, 1, 3, 91, 1, 1 };
+static netsnmp_tdomain tcpDomain;
 
 
 /*  Return a string representing the address in data, or else the "far end"
     address if data is NULL.  */
 
-char	       *snmp_tcp_fmtaddr	(snmp_transport *t,
+char	       *snmp_tcp_fmtaddr	(netsnmp_transport *t,
 					 void *data, int len)
 {
   struct sockaddr_in *to = NULL;
@@ -74,7 +74,7 @@ char	       *snmp_tcp_fmtaddr	(snmp_transport *t,
     to your send function if you like.  For instance, you might want to
     remember where a PDU came from, so that you can send a reply there...  */
 
-int		snmp_tcp_recv	(snmp_transport *t, void *buf, int size,
+int		snmp_tcp_recv	(netsnmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength)
 {
   int rc = 0;
@@ -105,7 +105,7 @@ int		snmp_tcp_recv	(snmp_transport *t, void *buf, int size,
 
 
 
-int		snmp_tcp_send	(snmp_transport *t, void *buf, int size,
+int		snmp_tcp_send	(netsnmp_transport *t, void *buf, int size,
 				 void **opaque, int *olength)
 {
   int rc = 0;
@@ -120,7 +120,7 @@ int		snmp_tcp_send	(snmp_transport *t, void *buf, int size,
 
 
 
-int		snmp_tcp_close	(snmp_transport *t)
+int		snmp_tcp_close	(netsnmp_transport *t)
 {
   int rc = 0;
   if (t != NULL && t->sock >= 0) {
@@ -139,7 +139,7 @@ int		snmp_tcp_close	(snmp_transport *t)
 
 
 
-int		snmp_tcp_accept	(snmp_transport *t)
+int		snmp_tcp_accept	(netsnmp_transport *t)
 {
   struct sockaddr *farend = NULL;
   int newsock = -1, farendlen = sizeof(struct sockaddr_in), sockflags = 0;
@@ -197,10 +197,10 @@ int		snmp_tcp_accept	(snmp_transport *t)
     address to bind to (i.e. this is a server-type session); otherwise addr is 
     the remote address to send things to.  */
 
-snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
+netsnmp_transport		*netsnmp_tcp_transport	(struct sockaddr_in *addr,
 						 int local)
 {
-  snmp_transport *t = NULL;
+  netsnmp_transport *t = NULL;
   int rc = 0;
 
 
@@ -208,30 +208,30 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
     return NULL;
   }
 
-  t = (snmp_transport *)malloc(sizeof(snmp_transport));
+  t = (netsnmp_transport *)malloc(sizeof(netsnmp_transport));
   if (t == NULL) {
     return NULL;
   }
-  memset(t, 0, sizeof(snmp_transport));
+  memset(t, 0, sizeof(netsnmp_transport));
 
   t->data = malloc(sizeof(struct sockaddr_in));
   if (t->data == NULL) {
-    snmp_transport_free(t);
+    netsnmp_transport_free(t);
     return NULL;
   }
   t->data_length = sizeof(struct sockaddr_in);
   memcpy(t->data, addr, sizeof(struct sockaddr_in));
 
-  t->domain = snmpTCPDomain;
-  t->domain_length = sizeof(snmpTCPDomain)/sizeof(snmpTCPDomain[0]);
+  t->domain = netsnmp_snmpTCPDomain;
+  t->domain_length = sizeof(netsnmp_snmpTCPDomain)/sizeof(netsnmp_snmpTCPDomain[0]);
 
   t->sock = socket(PF_INET, SOCK_STREAM, 0);
   if (t->sock < 0) {
-    snmp_transport_free(t);
+    netsnmp_transport_free(t);
     return NULL;
   }
 
-  t->flags = SNMP_TRANSPORT_FLAG_STREAM;
+  t->flags = NETSNMP_TRANSPORT_FLAG_STREAM;
 
   if (local) {
     int sockflags = 0, opt = 1;
@@ -240,11 +240,11 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
 	IP address (which may include an interface address, or could be
 	INADDR_ANY, but will always include a port number.  */
     
-    t->flags |= SNMP_TRANSPORT_FLAG_LISTEN;
+    t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
     t->local = malloc(6);
     if (t->local == NULL) {
       snmp_tcp_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
     memcpy(t->local, (u_char *)&(addr->sin_addr.s_addr), 4);
@@ -259,7 +259,7 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
     rc = bind(t->sock, (struct sockaddr *)addr, sizeof(struct sockaddr));
     if (rc != 0) {
       snmp_tcp_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
 
@@ -279,17 +279,17 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
 
     /*  Now sit here and wait for connections to arrive.  */
 
-    rc = listen(t->sock, SNMP_STREAM_QUEUE_LEN);
+    rc = listen(t->sock, NETSNMP_STREAM_QUEUE_LEN);
     if (rc != 0) {
       snmp_tcp_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
   } else {
     t->remote = malloc(6);
     if (t->remote == NULL) {
       snmp_tcp_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
     memcpy(t->remote, (u_char *)&(addr->sin_addr.s_addr), 4);
@@ -306,7 +306,7 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
 
     if (rc < 0) {
       snmp_tcp_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
   }
@@ -326,12 +326,12 @@ snmp_transport		*snmp_tcp_transport	(struct sockaddr_in *addr,
 
 
 
-snmp_transport	*snmp_tcp_create_tstring	(const char *string, int local)
+netsnmp_transport	*snmp_tcp_create_tstring	(const char *string, int local)
 {
   struct sockaddr_in addr;
 
-  if (snmp_sockaddr_in(&addr, string, 0)) {
-    return snmp_tcp_transport(&addr, local);
+  if (netsnmp_sockaddr_in(&addr, string, 0)) {
+    return netsnmp_tcp_transport(&addr, local);
   } else {
     return NULL;
   }
@@ -339,7 +339,7 @@ snmp_transport	*snmp_tcp_create_tstring	(const char *string, int local)
 
 
 
-snmp_transport	*snmp_tcp_create_ostring       (const u_char *o, size_t o_len,
+netsnmp_transport	*snmp_tcp_create_ostring       (const u_char *o, size_t o_len,
 						int local)
 {
   struct sockaddr_in addr;
@@ -348,22 +348,22 @@ snmp_transport	*snmp_tcp_create_ostring       (const u_char *o, size_t o_len,
     addr.sin_family = AF_INET;
     memcpy((u_char *)&(addr.sin_addr.s_addr), o, 4);
     addr.sin_port = (o[4] << 8) + o[5];
-    return snmp_tcp_transport(&addr, local);
+    return netsnmp_tcp_transport(&addr, local);
   }
   return NULL;
 }
 
 
 
-void		snmp_tcp_ctor			(void)
+void		netsnmp_tcp_ctor			(void)
 {
-  tcpDomain.name        = snmpTCPDomain;
-  tcpDomain.name_length = sizeof(snmpTCPDomain)/sizeof(oid);
+  tcpDomain.name        = netsnmp_snmpTCPDomain;
+  tcpDomain.name_length = sizeof(netsnmp_snmpTCPDomain)/sizeof(oid);
   tcpDomain.prefix      = calloc(2, sizeof(char *));
   tcpDomain.prefix[0]   = "tcp";
 
   tcpDomain.f_create_from_tstring = snmp_tcp_create_tstring;
   tcpDomain.f_create_from_ostring = snmp_tcp_create_ostring;
 
-  snmp_tdomain_register(&tcpDomain);
+  netsnmp_tdomain_register(&tcpDomain);
 }

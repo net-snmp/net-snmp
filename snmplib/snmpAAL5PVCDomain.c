@@ -30,13 +30,13 @@
 
 
 const oid ucdSnmpAAL5PVCDomain[9] = { UCDAVIS_MIB, 251, 3 };
-static snmp_tdomain aal5pvcDomain;
+static netsnmp_tdomain aal5pvcDomain;
 
 
 /*  Return a string representing the address in data, or else the "far end"
     address if data is NULL.  */
 
-char	       *snmp_aal5pvc_fmtaddr	(snmp_transport *t,
+char	       *snmp_aal5pvc_fmtaddr	(netsnmp_transport *t,
 					 void *data, int len)
 {
   struct sockaddr_atmpvc *to = NULL;
@@ -63,7 +63,7 @@ char	       *snmp_aal5pvc_fmtaddr	(snmp_transport *t,
     to your send function if you like.  For instance, you might want to
     remember where a PDU came from, so that you can send a reply there...  */
 
-int		snmp_aal5pvc_recv(snmp_transport *t, void *buf, int size,
+int		snmp_aal5pvc_recv(netsnmp_transport *t, void *buf, int size,
 				  void **opaque, int *olength) 
 {
   int rc = -1;
@@ -88,7 +88,7 @@ int		snmp_aal5pvc_recv(snmp_transport *t, void *buf, int size,
 
 
 
-int		snmp_aal5pvc_send(snmp_transport *t, void *buf, int size,
+int		snmp_aal5pvc_send(netsnmp_transport *t, void *buf, int size,
 				  void **opaque, int *olength)
 {
   int rc = 0;
@@ -118,7 +118,7 @@ int		snmp_aal5pvc_send(snmp_transport *t, void *buf, int size,
 
 
 
-int		snmp_aal5pvc_close	(snmp_transport *t)
+int		snmp_aal5pvc_close	(netsnmp_transport *t)
 {
   int rc = 0;
 
@@ -142,18 +142,18 @@ int		snmp_aal5pvc_close	(snmp_transport *t)
     NSAP to bind to (i.e. this is a server-type session); otherwise addr is 
     the remote NSAP to send things to.  */
 
-snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
+netsnmp_transport		*netsnmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
 						 int local)
 {
   char *string = NULL;
   struct atm_qos qos;
-  snmp_transport *t = NULL;
+  netsnmp_transport *t = NULL;
 
   if (addr == NULL || addr->sap_family != AF_ATMPVC) {
     return NULL;
   }
 
-  t = (snmp_transport *)malloc(sizeof(snmp_transport));
+  t = (netsnmp_transport *)malloc(sizeof(netsnmp_transport));
   if (t == NULL) {
     return NULL;
   }
@@ -163,7 +163,7 @@ snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
   DEBUGMSGTL(("snmp_aal5pvc", "open %s %s\n", local?"local":"remote", string));
   free(string);
 
-  memset(t, 0, sizeof(snmp_transport));
+  memset(t, 0, sizeof(netsnmp_transport));
 
   t->domain = ucdSnmpAAL5PVCDomain;
   t->domain_length =
@@ -172,7 +172,7 @@ snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
   t->sock = socket(PF_ATMPVC, SOCK_DGRAM, 0);
   if (t->sock < 0) {
     DEBUGMSGTL(("snmp_aal5pvc", "socket failed (%s)\n", strerror(errno)));
-    snmp_transport_free(t);
+    netsnmp_transport_free(t);
     return NULL;
   }
   DEBUGMSGTL(("snmp_aal5pvc", "fd %d opened\n", t->sock));
@@ -188,14 +188,14 @@ snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
   if (setsockopt(t->sock, SOL_ATM, SO_ATMQOS, &qos, sizeof(qos)) < 0) {
     DEBUGMSGTL(("snmp_aal5pvc", "setsockopt failed (%s)\n", strerror(errno)));
     snmp_aal5pvc_close(t);
-    snmp_transport_free(t);
+    netsnmp_transport_free(t);
     return NULL;
   }
 
   if (local) {
     t->local = malloc(8);
     if (t->local == NULL) {
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
     t->local[0] = (addr->sap_addr.itf & 0xff00) >> 8;
@@ -212,13 +212,13 @@ snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
 	     sizeof(struct sockaddr_atmpvc)) < 0) {
       DEBUGMSGTL(("snmp_aal5pvc", "bind failed (%s)\n", strerror(errno)));
       snmp_aal5pvc_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;      
     }
   } else {
     t->remote = malloc(8);
     if (t->remote == NULL) {
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;
     }
     t->remote[0] = (addr->sap_addr.itf & 0xff00) >> 8;
@@ -235,14 +235,14 @@ snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
 		sizeof(struct sockaddr_atmpvc)) < 0) {
       DEBUGMSGTL(("snmp_aal5pvc", "connect failed (%s)\n", strerror(errno)));
       snmp_aal5pvc_close(t);
-      snmp_transport_free(t);
+      netsnmp_transport_free(t);
       return NULL;      
     }
   }
 
   t->data = malloc(sizeof(struct sockaddr_atmpvc));
   if (t->data == NULL) {
-    snmp_transport_free(t);
+    netsnmp_transport_free(t);
     return NULL;
   }
   memcpy(t->data, addr, sizeof(struct sockaddr_atmpvc));
@@ -262,7 +262,7 @@ snmp_transport		*snmp_aal5pvc_transport	(struct sockaddr_atmpvc *addr,
 
 
 
-snmp_transport	*snmp_aal5pvc_create_tstring	(const char *string, int local)
+netsnmp_transport	*snmp_aal5pvc_create_tstring	(const char *string, int local)
 {
   struct sockaddr_atmpvc addr;
   
@@ -271,16 +271,16 @@ snmp_transport	*snmp_aal5pvc_create_tstring	(const char *string, int local)
 
     if (sscanf(string, "%hd.%hd.%d", &(addr.sap_addr.itf),
 	       &(addr.sap_addr.vpi), &(addr.sap_addr.vci)) == 3) {
-      return snmp_aal5pvc_transport(&addr, local);
+      return netsnmp_aal5pvc_transport(&addr, local);
     } else if (sscanf(string, "%hd.%d",
 		      &(addr.sap_addr.vpi), &(addr.sap_addr.vci)) == 2) {
       addr.sap_addr.itf = 0;
-      return snmp_aal5pvc_transport(&addr, local);
+      return netsnmp_aal5pvc_transport(&addr, local);
     } else if (sscanf(string, "%d",
 		      &(addr.sap_addr.vci)) == 1) {
       addr.sap_addr.itf = 0;
       addr.sap_addr.vpi = 0;
-      return snmp_aal5pvc_transport(&addr, local);
+      return netsnmp_aal5pvc_transport(&addr, local);
     } else {
       return NULL;
     }
@@ -291,7 +291,7 @@ snmp_transport	*snmp_aal5pvc_create_tstring	(const char *string, int local)
 
 
 
-snmp_transport	*snmp_aal5pvc_create_ostring	(const u_char *o, size_t o_len,
+netsnmp_transport	*snmp_aal5pvc_create_ostring	(const u_char *o, size_t o_len,
 						 int local)
 {
   struct sockaddr_atmpvc addr;
@@ -301,7 +301,7 @@ snmp_transport	*snmp_aal5pvc_create_ostring	(const u_char *o, size_t o_len,
     addr.sap_addr.itf = (o[0] <<  8) + (o[1] <<  0);
     addr.sap_addr.vpi = (o[2] <<  8) + (o[3] <<  0);
     addr.sap_addr.vci = (o[4] << 24) + (o[5] << 16) + (o[6] <<  8) + (o[7] << 0);
-    return snmp_aal5pvc_transport(&addr, local);
+    return netsnmp_aal5pvc_transport(&addr, local);
   }
 
   return NULL;
@@ -309,7 +309,7 @@ snmp_transport	*snmp_aal5pvc_create_ostring	(const u_char *o, size_t o_len,
 
 
 
-void		snmp_aal5pvc_ctor		(void)
+void		netsnmp_aal5pvc_ctor		(void)
 {
   aal5pvcDomain.name        = ucdSnmpAAL5PVCDomain;
   aal5pvcDomain.name_length = sizeof(ucdSnmpAAL5PVCDomain)/sizeof(oid);
@@ -320,5 +320,5 @@ void		snmp_aal5pvc_ctor		(void)
   aal5pvcDomain.f_create_from_tstring = snmp_aal5pvc_create_tstring;
   aal5pvcDomain.f_create_from_ostring = snmp_aal5pvc_create_ostring;
 
-  snmp_tdomain_register(&aal5pvcDomain);
+  netsnmp_tdomain_register(&aal5pvcDomain);
 }

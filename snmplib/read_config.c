@@ -78,7 +78,7 @@ static int config_errors;
 struct config_files *config_files = NULL;
 
 struct config_line *
-register_premib_handler(const char *type,
+register_prenetsnmp_mib_handler(const char *type,
 			const char *token,
 			void (*parser) (const char *, char *),
 			void (*releaser) (void),
@@ -92,12 +92,12 @@ register_premib_handler(const char *type,
 }
 
 struct config_line *
-register_app_premib_handler(const char *token,
+register_app_prenetsnmp_mib_handler(const char *token,
 			void (*parser) (const char *, char *),
 			void (*releaser) (void),
 			const char *help)
 {
-  return(register_premib_handler( NULL, token, parser, releaser, help ));
+  return(register_prenetsnmp_mib_handler( NULL, token, parser, releaser, help ));
 }
 
 /*******************************************************************-o-******
