@@ -2,6 +2,8 @@
 #define NETSNMP_CONTAINER_H
 
 /*
+ * $Id$
+ *
  * WARNING: This is a recently created file, and all of it's contents are
  *          subject to change at any time.
  *
@@ -125,6 +127,11 @@ extern "C" {
        netsnmp_container_op    *remove;
 
        /*
+        * release memory for an entry from the container
+        */
+       netsnmp_container_op    *release;
+
+       /*
         * Note: do not change the key!  If you need to
         * change a key, remove the entry, change the key,
         * and the re-add the entry.
@@ -226,7 +233,7 @@ extern "C" {
     /*
      * useful macros
      */
-#define CONTAINER_FIRST(x)          (x)->find(x,NULL)
+#define CONTAINER_FIRST(x)          (x)->find_next(x,NULL)
 #define CONTAINER_FIND(x,k)         (x)->find(x,k)
 #define CONTAINER_NEXT(x,k)         (x)->find_next(x,k)
 #define CONTAINER_GET_SUBSET(x,k)   (x)->get_subset(x,k)
@@ -238,9 +245,9 @@ extern "C" {
     /*
      * if you are getting multiple definitions of these three
      * inline functions, you most likely have optimizations turned off.
-     * Either turn them back on, or define DONT_INLINE_CONTAINER_MACROS.
+     * Either turn them back on, or define NETSNMP_NO_INLINE
      */
-#ifdef DONT_INLINE_CONTAINER_MACROS /* default is to inline */
+#ifndef NETSNMP_USE_INLINE /* default is to inline */
     int CONTAINER_INSERT(netsnmp_container *x, const void *k);
     int CONTAINER_REMOVE(netsnmp_container *x, const void *k);
     int CONTAINER_FREE(netsnmp_container *x);
@@ -249,7 +256,7 @@ extern "C" {
      * These functions should EXACTLY match the function version in
      * container.c. If you change one, change them both.
      */
-    static inline /* gcc docs recommend static w/inline */
+    NETSNMP_STATIC_INLINE /* gcc docs recommend static w/inline */
     int CONTAINER_INSERT(netsnmp_container *x, const void *k)
     {
         int rc;
@@ -272,7 +279,7 @@ extern "C" {
      * These functions should EXACTLY match the function version in
      * container.c. If you change one, change them both.
      */
-    static inline /* gcc docs recommend static w/inline */
+    NETSNMP_STATIC_INLINE /* gcc docs recommend static w/inline */
     int CONTAINER_REMOVE(netsnmp_container *x, const void *k)
     {
         if (NULL != x->next) {
@@ -294,7 +301,7 @@ extern "C" {
      * These functions should EXACTLY match the function version in
      * container.c. If you change one, change them both.
      */
-    static inline /* gcc docs recommend static w/inline */
+    NETSNMP_STATIC_INLINE /* gcc docs recommend static w/inline */
     int CONTAINER_FREE(netsnmp_container *x)
     {
 	int  rc;
