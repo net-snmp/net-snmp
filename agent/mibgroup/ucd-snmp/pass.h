@@ -6,7 +6,7 @@
 
 void            init_pass(void);
 
-config_require(ucd-snmp/extensible util_funcs)
+config_require(util_funcs)
 
 extern FindVarMethod var_extensible_pass;
 WriteMethod     setPass;

@@ -10,7 +10,6 @@ void            init_extensible(void);
 config_require(util_funcs)
 config_require(utilities/execute)
 
-     struct extensible *get_exten_instance(struct extensible *, size_t);
      extern FindVarMethod var_extensible_shell;
      extern WriteMethod fixExecError;
      extern FindVarMethod var_extensible_relocatable;

@@ -13,6 +13,7 @@ extern "C" {
 void            Exit(int);
 int             shell_command(struct extensible *);
 int             exec_command(struct extensible *);
+struct extensible *get_exten_instance(struct extensible *, size_t);
 int             get_exec_output(struct extensible *);
 int             get_exec_pipes(char *cmd, int *fdIn, int *fdOut, int *pid);
 WriteMethod     clear_cache;
