@@ -370,7 +370,7 @@ free_tree(Tree)
             if (tep->label)
                 free(tep->label);
 
-            free((char *)tep);
+            free(tep);
         }
     }
 
@@ -647,9 +647,13 @@ do_subtree(root, nodes)
         while (tp)
             if (tp->subid == np->subid) break;
             else tp = tp->next_peer;
-        if (tp && mib_warnings)
-            fprintf (stderr, "Warning: %s.%ld is both %s and %s\n",
-                    root->label, np->subid, tp->label, np->label);
+        if (tp) {
+	    if (strcmp (tp->label, np->label) == 0)
+		continue;
+	    if (mib_warnings)
+		fprintf (stderr, "Warning: %s.%ld is both %s and %s\n",
+			root->label, np->subid, tp->label, np->label);
+	}
         tp = Malloc(sizeof(struct tree));
         tp->parent = root;
         tp->child_list = NULL;
