@@ -698,6 +698,20 @@ sub new {
 					 $this->{Timeout},
 					);
    } else {
+       $this->{SecName} ||= 'initial';
+       $this->{SecLevel} ||= 'noAuthNoPriv';
+       $this->{SecLevel} = $SNMP::V3_SEC_LEVEL_MAP{$this->{SecLevel}}
+          if $this->{SecLevel} !~ /^\d+$/;
+       $this->{SecEngineId} ||= '';
+       $this->{ContextEngineId} ||= $this->{SecEngineId};
+       $this->{Context} ||= '';
+       $this->{AuthProto} ||= 'MD5';
+       $this->{AuthPass} ||= '';
+       $this->{PrivProto} ||= 'DES';
+       $this->{PrivPass} ||= '';
+       $this->{EngineBoots} = 0 if not defined $this->{EngineBoots};
+       $this->{EngineTime} = 0 if not defined $this->{EngineTime};
+
    $this->{SessPtr} = SNMP::_new_v3_session($this->{Version},
 						$this->{DestAddr},
 						$this->{RemotePort},
@@ -719,7 +733,7 @@ sub new {
    
    return undef unless $this->{SessPtr};
 
-   SNMP::initMib() if $SNMP::auto_init_mib; # ensures that *some* mib is loaded
+   SNMP::initMib($SNMP::auto_init_mib); # ensures that *some* mib is loaded
 
    $this->{UseLongNames} ||= $SNMP::use_long_names;
    $this->{UseSprintValue} ||= $SNMP::use_sprint_value;
@@ -808,16 +822,17 @@ sub inform {
    }
 
 ## v2 and v3 informs are identical notifications...should I merge them?
-   if (($this->{Version} eq '2') || ($this->{Version} eq '2c')) {
-       my $trap_oid = $param{trapoid};
-       my $uptime = $param{uptime};
-       @res = SNMP::_informV2($this, $uptime, $trap_oid, $varbind_list_ref);
+#   if (($this->{Version} eq '2') || ($this->{Version} eq '2c')) {
+#       my $trap_oid = $param{trapoid};
+#       my $uptime = $param{uptime};
+#       @res = SNMP::_informV2($this, $uptime, $trap_oid, $varbind_list_ref);
 # informV2 not yet written....
-   } else {
+#   } else {
        my $trap_oid = $param{trapoid};
        my $uptime = $param{uptime};
+   print("I am going to call informv3\n");
        @res = SNMP::_informV3($this, $uptime, $trap_oid, $varbind_list_ref);
-   }
+#   }
 
 
    return(wantarray() ? @res : $res[0]);
