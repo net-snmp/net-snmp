@@ -317,6 +317,9 @@ static struct tunnel *updateTunnel(struct tunnel *tunnel)
     /* NOTE: getTunnelParm() may adjust the passed ifname. */
     parm = getTunnelParm(tunnel->ifname);
     if (!parm) {
+	DEBUGMSGTL(("tunnel",
+		    "updateTunnel(): getTunnelParm(\"%s\") returned NULL\n",
+		    tunnel->ifname));
 	tunnel->active = 0;
 	return NULL;
     }
@@ -381,17 +384,28 @@ static void updateTunnels(void)
 	type = getType(max_index);
 	if (type == 131) {
 	    tunnel = (struct tunnel *)malloc(sizeof(struct tunnel));
-	    if (!tunnel) break;
+	    if (!tunnel) continue;
 
 	    tunnel->ifindex = max_index;
 	    tunnel->id = 1;
 	    
 	    ifname = getName(max_index);
-	    if (!ifname) break;
-	    tunnel->ifname = strdup(ifname);
-	    if (!tunnel->ifname) break;
+	    if (!ifname) {
+		free(tunnel);
+		continue;
+	    }
 
-	    if (!updateTunnel(tunnel)) break;
+	    tunnel->ifname = strdup(ifname);
+	    if (!tunnel->ifname) {
+		free(tunnel);
+		continue;
+	    }
+
+	    if (!updateTunnel(tunnel)) {
+		free(tunnel->ifname);
+		free(tunnel);
+		continue;
+	    }
 
 	    if (last_tunnel) last_tunnel->next = tunnel;
 	    if (!tunnels) tunnels = last_tunnel = tunnel;
@@ -401,7 +415,6 @@ static void updateTunnels(void)
 	    DEBUGMSG(("tunnel",
 		      "updateTunnels(): added %s (index=%d state=%d)\n",
 		      tunnel->ifname, tunnel->ifindex, tunnel->active));
-	    
 	}
 	if (type == 0) break;
     }
