@@ -8,15 +8,23 @@
 @end@
 ########################################################################
 ##
-@if $m2c_data_context ne "generated"@
-/** TODO: update/replace $node copy code? */
-@end@
-@if $m2c_node_needlength == 0@
-    ${m2c_ctx_lh}$node = ${m2c_ctx_rh}$node;
+    /*
+     * TODO:
+@if $m2c_node_needlength == 1@
+     * copy $node and ${node}_len data
 @else@
+     * copy $node data
+@end@
+     *  from '${m2c_ctx_rh}XXX to '${m2c_ctx_lh}XXX'
+     */
+@if ($m2c_include_examples != 0) || ("$m2c_data_context" eq "generated")@
+@   if $m2c_node_needlength == 0@
+    ${m2c_ctx_lh}$node = ${m2c_ctx_rh}$node;
+@   else@
     memcpy( ${m2c_ctx_lh}$node, ${m2c_ctx_rh}$node, ${m2c_ctx_rh}${node}_len);
     ${m2c_ctx_lh}${node}_len = ${m2c_ctx_rh}${node}_len;
-@end@ # need length
+@   end@ # need length
+@end@
 
 ##
 ########################################################################
