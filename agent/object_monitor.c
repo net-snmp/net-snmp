@@ -15,20 +15,11 @@
  * WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING!
  */
 
-#if ! defined(NDEBUG) && ! defined(NETSNMP_USE_ASSERT)
-# define NETSNMP_TMP_NDEBUG
-# define NDEBUG
-#endif
-#include <assert.h>
-#if defined(NETSNMP_TMP_NDEBUG)
-# undef NDEBUG
-# undef NETSNMP_TMP_NDEBUG
-#endif
-
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/container.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #include "net-snmp/agent/object_monitor.h"
 
@@ -182,7 +173,7 @@ netsnmp_monitor_register(oid * object, size_t oid_len, int priority,
     monitor_info   *mi;
     int             rc;
 
-    assert(need_init == 0);
+    netsnmp_assert(need_init == 0);
 
     mi = calloc(1, sizeof(monitor_info));
     if (NULL == mi)
@@ -275,7 +266,7 @@ void
 netsnmp_notify_monitor(netsnmp_monitor_callback_header * cbh)
 {
 
-    assert(need_init == 0);
+    netsnmp_assert(need_init == 0);
 
     /*
      * put processing of until response has been sent
@@ -311,8 +302,8 @@ netsnmp_monitor_check_registered(int event, oid * o, int o_l)
 void
 netsnmp_monitor_process_callbacks(void)
 {
-    assert(need_init == 0);
-    assert(NULL == callback_ready_list);
+    netsnmp_assert(need_init == 0);
+    netsnmp_assert(NULL == callback_ready_list);
 
     if (NULL == callback_pending_list) {
         DEBUGMSGT(("object_monitor", "No callbacks to process"));
@@ -362,8 +353,8 @@ netsnmp_monitor_process_callbacks(void)
 
     }
 
-    assert(callback_ready_list == NULL);
-    assert(callback_pending_list = NULL);
+    netsnmp_assert(callback_ready_list == NULL);
+    netsnmp_assert(callback_pending_list = NULL);
 
     return;
 }
@@ -398,7 +389,7 @@ netsnmp_notify_cooperative(int event, oid * o, size_t o_len, char o_steal,
 {
     netsnmp_monitor_callback_cooperative *cbh;
 
-    assert(need_init == 0);
+    netsnmp_assert(need_init == 0);
 
     cbh = SNMP_MALLOC_TYPEDEF(netsnmp_monitor_callback_cooperative);
     if (NULL == cbh) {
@@ -457,7 +448,7 @@ insert_watcher(oid * object, size_t oid_len, monitor_info * mi)
 
         monitor_info   *last, *current;
 
-        assert(wl->head != NULL);
+        netsnmp_assert(wl->head != NULL);
 
         last = NULL;
         current = wl->head;
@@ -541,7 +532,7 @@ check_registered(unsigned int event, oid * o, int o_l,
     watcher_list   *wl;
     monitor_info   *mi;
 
-    assert(need_init == 0);
+    netsnmp_assert(need_init == 0);
 
     /*
      * check to see if anyone has registered for callbacks
@@ -673,7 +664,7 @@ move_pending_to_ready(void)
         } /** end mi loop */
     } /** end cbp loop */
 
-    assert(callback_pending_list == NULL);
+    netsnmp_assert(callback_pending_list == NULL);
 }
 
 

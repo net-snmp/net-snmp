@@ -11,20 +11,11 @@
 #endif
 
 
-#if ! defined(NDEBUG) && ! defined(NETSNMP_USE_ASSERT)
-# define NETSNMP_TMP_NDEBUG
-# define NDEBUG
-#endif
-#include <assert.h>
-#if defined(NETSNMP_TMP_NDEBUG)
-# undef NDEBUG
-# undef NETSNMP_TMP_NDEBUG
-#endif
-
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/agent/table.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -184,7 +175,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
             DEBUGMSG(("helper:table", "already processed\n"));
             continue;
         }
-        assert(request->status == SNMP_ERR_NOERROR);
+        netsnmp_assert(request->status == SNMP_ERR_NOERROR);
 
         /*
          * this should probably be handled further up 
@@ -329,7 +320,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 tbl_req_info->colnum = var->name[oid_column_pos];
                 tbl_req_info->index_oid_len =
                     var->name_length - oid_index_pos;
-                assert(tbl_req_info->index_oid_len < MAX_OID_LEN);
+                netsnmp_assert(tbl_req_info->index_oid_len < MAX_OID_LEN);
                 memcpy(tbl_req_info->index_oid, &var->name[oid_index_pos],
                        tbl_req_info->index_oid_len * sizeof(oid));
                 tmp_name = tbl_req_info->index_oid;
