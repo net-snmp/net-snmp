@@ -229,7 +229,8 @@ u_char *var_simple_proxy(struct variable *vp,
                 status = snmp_synch_response(sp->sess, pdu, &response);
 
                 /* copy the information out of it. */
-                if (status == STAT_SUCCESS && response) {
+                if (status == STAT_SUCCESS && response &&
+                    response->variables->type != SNMP_ENDOFMIBVIEW) {
                     /* "there can be only one" */
                     struct variable_list *var = response->variables;
 
