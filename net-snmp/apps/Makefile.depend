@@ -121,10 +121,10 @@
 ./notification_log.lo: ../include/net-snmp/agent/net-snmp-agent-includes.h
 ./notification_log.lo: ../include/net-snmp/agent/snmp_agent.h
 ./notification_log.lo: ../include/net-snmp/agent/snmp_vars.h
-./notification_log.lo: ../include/net-snmp/agent/agent_registry.h
-./notification_log.lo: ../include/net-snmp/agent/ds_agent.h
 ./notification_log.lo: ../include/net-snmp/agent/agent_handler.h
 ./notification_log.lo: ../include/net-snmp/agent/var_struct.h
+./notification_log.lo: ../include/net-snmp/agent/agent_registry.h
+./notification_log.lo: ../include/net-snmp/agent/ds_agent.h
 ./notification_log.lo: ../include/net-snmp/agent/agent_read_config.h
 ./notification_log.lo: ../include/net-snmp/agent/agent_trap.h
 ./notification_log.lo: ../include/net-snmp/agent/all_helpers.h
@@ -872,10 +872,10 @@
 ./snmptrapd.lo: ../include/net-snmp/agent/net-snmp-agent-includes.h
 ./snmptrapd.lo: ../include/net-snmp/agent/snmp_agent.h
 ./snmptrapd.lo: ../include/net-snmp/agent/snmp_vars.h
-./snmptrapd.lo: ../include/net-snmp/agent/agent_registry.h
-./snmptrapd.lo: ../include/net-snmp/agent/ds_agent.h
 ./snmptrapd.lo: ../include/net-snmp/agent/agent_handler.h
 ./snmptrapd.lo: ../include/net-snmp/agent/var_struct.h
+./snmptrapd.lo: ../include/net-snmp/agent/agent_registry.h
+./snmptrapd.lo: ../include/net-snmp/agent/ds_agent.h
 ./snmptrapd.lo: ../include/net-snmp/agent/agent_read_config.h
 ./snmptrapd.lo: ../include/net-snmp/agent/agent_trap.h
 ./snmptrapd.lo: ../include/net-snmp/agent/all_helpers.h
