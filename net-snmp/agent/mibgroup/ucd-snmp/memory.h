@@ -8,8 +8,8 @@
 #include "mibdefs.h"
 
 int getswap (int);
-extern FindVarMethod var_extensible_mem;
-extern void	init_memory (void);
+FindVarMethod var_extensible_mem;
+void	init_memory (void);
 
 /* config file parsing routines */
 void memory_parse_config (char *, char *);
