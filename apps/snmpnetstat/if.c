@@ -96,6 +96,8 @@ SOFTWARE.
 #define	NO	0
 
 static void sidewaysintpr(unsigned int);
+static void timerSet(int interval_seconds);
+static void timerPause(void);
 
 static oid oid_ifname[] =	{1, 3, 6, 1, 2, 1, 2, 2, 1, 2, 1};
 static oid oid_ifinucastpkts[] ={1, 3, 6, 1, 2, 1, 2, 2, 1,11, 1};

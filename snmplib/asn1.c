@@ -107,7 +107,8 @@ int _asn_parse_length_check(const char *str,
 	return 1;
     }
     header_len = bufp - data;
-    if (((size_t)plen + header_len) > dlen){
+    if (plen > 0x7fffffff || header_len > 0x7fffffff ||
+        ((size_t)plen + header_len) > dlen){
 	sprintf(ebuf, "%s: message overflow: %d len + %d delta > %d len",
 		str, (int)plen, (int)header_len, (int)dlen);
 	ERROR_MSG(ebuf);
@@ -183,7 +184,7 @@ asn_check_packet (u_char *pkt, size_t len)
 }
 
 static
-int _asn_bitstring_check(const char * str, u_long asn_length, u_char datum)
+int _asn_bitstring_check(const char * str, size_t asn_length, u_char datum)
 {
     char ebuf[128];
 
@@ -1294,14 +1295,20 @@ asn_build_bitstring(u_char *data,
  * ASN.1 bit string ::= 0x03 asnlength unused {byte}*
  */
     static const char *errpre = "build bitstring";
-    if (_asn_bitstring_check(errpre, strlength, *string))
+    if (_asn_bitstring_check(errpre, strlength, ((string) ? *string : 0)))
 	return NULL;
 
     data = asn_build_header(data, datalength, type, strlength);
     if (_asn_build_header_check(errpre,data,*datalength,strlength))
 	return NULL;
 
-    memmove(data, string, strlength);
+    if (strlength > 0 && string)
+        memmove(data, string, strlength);
+    else if (strlength > 0 && !string) {
+	ERROR_MSG("no string passed into asn_build_bitstring\n");
+        return NULL;
+    }
+    
     *datalength -= strlength;
     DEBUGDUMPSETUP("send", data, strlength);
     DEBUGMSG(("dumpv_send", "  Bitstring: "));

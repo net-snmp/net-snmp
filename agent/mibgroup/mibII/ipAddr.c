@@ -73,7 +73,9 @@
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
+#if HAVE_NET_ROUTE_H
 #include <net/route.h>
+#endif
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
@@ -97,6 +99,10 @@
 #include "interfaces.h"
 #include "sysORTable.h"
 
+#ifdef cygwin
+#define WIN32
+#include <windows.h>
+#endif
 
 	/*********************
 	 *
@@ -117,9 +123,8 @@
 	 *
 	 *********************/
 
-
-
 #ifndef WIN32
+
 #if !defined(CAN_USE_SYSCTL) || !defined(IPCTL_STATS)
 #ifndef solaris2
 
@@ -679,7 +684,6 @@ var_ipAddrEntry(struct variable *vp,
 	int lowinterface = -1;
 	int i;
   PMIB_IPADDRTABLE pIpAddrTable = NULL;
-   /* static MIB_UDPROW Lowinpcb; */
     DWORD status = NO_ERROR;
     DWORD statusRetry = NO_ERROR;
     DWORD dwActualSize = 0;

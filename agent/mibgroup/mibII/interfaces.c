@@ -15,6 +15,7 @@
 #else
 #include <strings.h>
 #endif
+
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -35,15 +36,21 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifndef STREAM_NEEDS_KERNEL_ISLANDS
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
+#endif
 #endif
 #if HAVE_SYS_SOCKETVAR_H
 #include <sys/socketvar.h>
 #endif
 
 #if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
 # include <sys/time.h>
+# endif
 # include <time.h>
 #else
 # if HAVE_SYS_TIME_H
@@ -72,6 +79,11 @@
 #endif
 #ifdef _I_DEFINED_KERNEL
 #undef _KERNEL
+#endif
+#ifdef STREAM_NEEDS_KERNEL_ISLANDS
+#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
 #endif
 #if HAVE_NET_ROUTE_H
 #include <net/route.h>
@@ -141,6 +153,11 @@
 #include <netinet/mib_kern.h>
 #endif /* hpux */
 
+#ifdef cygwin
+#define WIN32
+#include <windows.h>
+#endif
+
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 
@@ -190,7 +207,11 @@ struct variable4 interfaces_variables[] = {
     {IFMTU, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 4}},
     {IFSPEED, ASN_GAUGE, RONLY, var_ifEntry, 3, {2, 1, 5}},
     {IFPHYSADDRESS, ASN_OCTET_STR, RONLY, var_ifEntry, 3, {2, 1, 6}},
+#ifdef WIN32
+    {IFADMINSTATUS, ASN_INTEGER, RWRITE, var_ifEntry, 3, {2, 1, 7}},
+#else
     {IFADMINSTATUS, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 7}},
+#endif
     {IFOPERSTATUS, ASN_INTEGER, RONLY, var_ifEntry, 3, {2, 1, 8}},
     {IFLASTCHANGE, ASN_TIMETICKS, RONLY, var_ifEntry, 3, {2, 1, 9}},
     {IFINOCTETS, ASN_COUNTER, RONLY, var_ifEntry, 3, {2, 1, 10}},
@@ -2136,6 +2157,11 @@ var_ifEntry(struct variable *vp,
 
 #else /* WIN32 */
 #include <iphlpapi.h>
+
+WriteMethod writeIfEntry;
+long admin_status = 0;
+long oldadmin_status = 0;
+
 static int
 header_ifEntry(struct variable *vp,
 	       oid *name,
@@ -2160,7 +2186,6 @@ header_ifEntry(struct variable *vp,
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     /* find "next" ifIndex */
     
-/* *****Check if caching is NECESSARY****************** */
 
     /* query for buffer size needed */
     status = GetIfTable(pIfTable, &dwActualSize, TRUE);
@@ -2201,6 +2226,8 @@ header_ifEntry(struct variable *vp,
     return count;
 }
 
+
+
 u_char *
 var_interfaces(struct variable *vp,
 	       oid *name,
@@ -2234,14 +2261,14 @@ var_ifEntry(struct variable *vp,
     int ifIndex;
     static char Name[16];
     conf_if_list *if_ptr = conf_list;
-    MIB_IFROW ifRow;
+    static MIB_IFROW ifRow;
 
     ifIndex = header_ifEntry(vp, name, length, exact, var_len, write_method);
     if ( ifIndex == MATCH_FAILED )
 	      return NULL;
 
-    ifRow.dwIndex = ifIndex;
     /* Get the If Table Row by passing index as argument */
+    ifRow.dwIndex = ifIndex;
     if(GetIfEntry(&ifRow) != NO_ERROR)
       return NULL;
     switch (vp->magic){
@@ -2266,6 +2293,8 @@ var_ifEntry(struct variable *vp,
 	    return(u_char *) return_buf;
 	case IFADMINSTATUS:
 	    long_return = ifRow.dwAdminStatus;
+      admin_status = long_return;
+      *write_method = writeIfEntry;
 	    return (u_char *) &long_return;
 	case IFOPERSTATUS:
 	    long_return = ifRow.dwOperStatus;
@@ -2318,5 +2347,70 @@ var_ifEntry(struct variable *vp,
     return NULL;
 }
 
+
+int
+writeIfEntry(int action,	     
+	    u_char *var_val,
+	    u_char var_val_type,
+	    size_t var_val_len,
+	    u_char *statP,
+	    oid *name,
+	    size_t name_len)
+{
+    MIB_IFROW ifEntryRow;
+    if((char)name[9] != IFADMINSTATUS){     
+	      return SNMP_ERR_NOTWRITABLE;		
+    }
+
+    switch ( action ) {
+	case RESERVE1:		/* Check values for acceptability */
+	    if (var_val_type != ASN_INTEGER){
+                snmp_log(LOG_ERR, "not integer\n");
+		     return SNMP_ERR_WRONGTYPE;
+	    }
+	    if (var_val_len > sizeof(int)){
+                snmp_log(LOG_ERR, "bad length\n");
+		     return SNMP_ERR_WRONGLENGTH;
+	    }
+	    
+      /* The dwAdminStatus member can be MIB_IF_ADMIN_STATUS_UP or MIB_IF_ADMIN_STATUS_DOWN */
+      if(!(((int)(*var_val) == MIB_IF_ADMIN_STATUS_UP) || 
+          ((int)(*var_val) == MIB_IF_ADMIN_STATUS_DOWN))){
+                    snmp_log(LOG_ERR, "not supported admin state\n");
+		    return SNMP_ERR_WRONGVALUE;
+		}
+	    break;
+
+	case RESERVE2:		/* Allocate memory and similar resources */
+	    break;
+
+	case ACTION:	
+		/* Save the old value, in case of UNDO */
+	    
+      oldadmin_status   = admin_status;
+      admin_status = (int)*var_val;
+	    break;
+
+	case UNDO:		/* Reverse the SET action and free resources */     
+	    admin_status = oldadmin_status;
+	    break;
+
+	case COMMIT:		/* Confirm the SET, performing any irreversible actions,
+					and free resources */    
+    ifEntryRow.dwIndex = (int)name[10];
+    ifEntryRow.dwAdminStatus = admin_status;
+    /* Only UP and DOWN status are supported. Thats why done in COMMIT */
+    if(SetIfEntry(&ifEntryRow) != NO_ERROR){
+      snmp_log(LOG_ERR, "Error in writeIfEntry case COMMIT with index: %d & adminStatus %d\n", 
+        ifEntryRow.dwIndex, ifEntryRow.dwAdminStatus);
+      return SNMP_ERR_COMMITFAILED;
+    }
+   
+	case FREE:		/* Free any resources allocated */
+		/* No resources have been allocated */
+	    break;
+    }
+    return SNMP_ERR_NOERROR;
+} /* end of writeIfEntry */
 #endif  /* WIN32 */
 

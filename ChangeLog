@@ -1,5 +1,441 @@
 -------------------------------------------------------------------------------
 
+Changes: V4.2.2 -> V4.2.3
+	
+2001-11-29 14:22  hardaker
+
+   * FAQ, README, sedscript.in, version.h, perl/SNMP/SNMP.pm:
+
+   - (version.h sedscript.in): version tag ( 4.2.3 )
+   
+2001-11-29 13:25  nba
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+   Solaris 8 renamed the kstat ifspeed attribute to ifSpeed and somewhere
+   along the line changed its value from Mbps tp bps
+   
+2001-11-28 14:43  hardaker
+
+   * NEWS:
+
+   mention improved irix support.
+   
+2001-11-28 14:31  hardaker
+
+   * s/irix.h:
+
+   last fixes for irix I think
+   
+2001-11-28 14:30  hardaker
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+   create islands in the stream
+   
+2001-11-28 14:09  hardaker
+
+   * s/irix.h:
+
+   irix fixes for broken irix headers
+   
+2001-11-27 17:05  hardaker
+
+   * perl/SNMP/SNMP.pm:
+
+   version stamp (4.2.3.pre1 (opps))
+   
+2001-11-27 17:05  hardaker
+
+   * agent/mibgroup/versiontag:
+
+   fix for version stamping the perl module.
+   
+2001-11-27 17:03  hardaker
+
+   * NEWS:
+
+   update for 4.2.3
+   
+2001-11-27 11:09  hardaker
+
+   * win32/win32.dsw:
+
+   use at own risk patch from Harrie to fix dependancies
+   
+2001-11-27 06:53  jbpn
+
+   * agent/mibgroup/host/hr_system.c:
+
+     - try harder to get hrSystemMaxProcesses.0 right, drawing on patch
+       #485765, submitted by Johannes Schmidt-Fischer, for Linux, and
+       also using sysctl() more widely.
+   
+2001-11-27 06:51  jbpn
+
+   * configure.in, s/linux.h:
+
+     - Look for <linux/tasks.h>, in order to give a better value for
+       hrSystemMaxProcesses.0.  From patch #485765, submitted by
+       Johannes Schmidt-Fischer.
+   
+2001-11-27 03:56  jbpn
+
+   * agent/mibgroup/mibII/: kernel_linux.c, kernel_linux.h, tcp.c:
+
+     - give correct values for tcpInErrs.0 and tcpOutRsts.0 under Linux
+       if the kernel makes the data available.  From patch #485765,
+       submitted by Johannes Schmidt-Fischer.
+   
+2001-11-26 09:51  jbpn
+
+   * testing/tests/T110agentxget:
+
+     - longer timeout for initial GET (fix spurious test failures)
+   
+2001-11-21 10:49  hardaker
+
+   * FAQ:
+
+   help update to remove the support database
+   
+2001-11-21 04:53  jbpn
+
+   * agent/mibgroup/ucd-snmp/disk.c:
+
+     - fix compilation for Ultrix 4.5 (bug # 415197) -- make sure
+       vfs.f_bsize exists in var_extensible_disk(), and default it to
+       1024.
+   
+2001-11-20 02:27  jbpn
+
+   * snmplib/snmp_api.h:
+
+     - remove duplicate definition of SNMP_MAX_SEC_NAME_SIZE, noted by
+       Karl M. Hegbloom.
+   
+2001-11-19 05:48  jbpn
+
+   * man/snmpd.conf.5.def:
+
+     - documentation of ignoredisk directive.
+   
+2001-11-19 05:48  jbpn
+
+   * agent/mibgroup/host/: hr_disk.c, hr_disk.h, hr_partition.c,
+   hr_partition.h:
+
+     - patch from Johannes Schmidt-Fischer to add directive "ignoredisk" to
+       skip certain devices (and hence avoid the `snmpwalk times out' type
+       problems frequently reported).  Also extends search ranges to cope with
+       larger numbers of disks etc.
+   
+2001-11-16 05:31  jbpn
+
+   * apps/snmptest.c:
+
+     - add support for Unsigned32/Gauge32 types
+   
+2001-11-16 03:21  jbpn
+
+   * agent/mibgroup/mibII/var_route.c:
+
+     - more const-ness in qsort_compare => fewer warnings
+   
+2001-11-16 02:54  jbpn
+
+   * apps/snmpnetstat/if.c:
+
+     - patch from Harrie Hazewinkel to add prototypes for timerSet() and
+       timerPause().
+   
+2001-11-16 02:52  jbpn
+
+   * agent/snmpd.c:
+
+     - patch from Harrie Hazewinkel to #include <grp.h> if we have it
+   
+2001-11-16 02:47  jbpn
+
+   * agent/mibgroup/notification/snmpNotifyTable.c:
+
+     - patch from Harrie Hazewinkel to return a value from
+       notifyTable_unregister_notifications() to avoid warnings
+   
+2001-11-16 02:45  jbpn
+
+   * agent/mibgroup/mibII/var_route.c:
+
+     - patch from Harrie Hazewinkel to make signature of qsort_compare
+       function match that expected by qsort(3) -- adds const to args.
+   
+2001-11-16 02:40  jbpn
+
+   * snmplib/mib.c:
+
+     - patch from Harrie Hazewinkel to make definition of print_tree_node
+       static to match forward declaration.
+   
+2001-11-15 10:03  jbpn
+
+   * agent/mibgroup/agentx/protocol.c:
+
+     - stricter test for null OIDs
+   
+2001-11-15 09:24  jbpn
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+     - fix bad-looking expression which was causing problems described in
+       email titled "Defect report on UCD SNMP toolkit (crash in
+       kernel_sunos5.c)" sent to net-snmp-users on 2001-07-17.
+   
+2001-11-15 08:33  jbpn
+
+   * man/snmpd.conf.5.def:
+
+     - document read-only nature of snmpEnableAuthenTraps.0 if value is
+       configured via the authtrapenable token
+   
+2001-11-15 08:28  jbpn
+
+   * agent/: agent_read_config.c, agent_trap.c,
+   mibgroup/mibII/snmp_mib.c:
+
+     - make value of snmpEnableAuthenTraps.0 persistent.  Setting via
+       a read-only configuration file also makes object notWritable (as
+       sysContact.0 et al.).
+   
+2001-11-15 05:16  jbpn
+
+   * testing/tests/: T111agentxset, T121proxyset:
+
+     - use psyscontact not syscontact to set initial value of sysContact.0
+       object since the latter also makes the object read-only.
+   
+2001-11-15 05:07  jbpn
+
+   * agent/snmpd.c:
+
+     - minor fix to formatting of usage message
+   
+2001-11-14 17:54  hardaker
+
+   * FAQ, README, sedscript.in, version.h:
+
+   - (version.h sedscript.in): version tag ( 4.2.3.pre1 )
+   
+2001-11-14 17:42  hardaker
+
+   * snmplib/snmp.h:
+
+   numeric comments in both hex and decimal
+   
+2001-11-14 17:41  hardaker
+
+   * perl/SNMP/SNMP.xs:
+
+   include INTEGER32 in INTEGER case checking.
+   
+2001-11-14 17:31  hardaker
+
+   * agent/mibgroup/versiontag:
+
+   version tag perl/SNMP/SNMP.pm with the ucd-snmp version number.
+   
+2001-11-14 16:30  hardaker
+
+   * man/snmpd.conf.5.def:
+
+   mention snmpconf.
+   
+2001-11-14 16:06  hardaker
+
+   * configure, configure.in:
+
+   patch from Harrie to fix init function checking in modules
+   
+2001-11-14 11:58  hardaker
+
+   * agent/: agent_callbacks.h, agent_read_config.c,
+   mibgroup/notification/snmpNotifyTable.c:
+
+   - make a new callback for pre-update-config conditions.
+   - make the snmpNotifyTable make use of it to remove "readOnly" entries
+     which should have been generated via configuration parsing.
+     - note that this doesn't remove the generated target entries, which
+       is not ideal, but at least duplicate traps aren't sent.
+   
+2001-11-13 11:13  hardaker
+
+   * agent/mibgroup/kernel_sunos5.c:
+
+   Patch from Jochen Kmietsch to look for eri interfaces.
+   
+2001-11-13 05:24  jbpn
+
+   * agent/mibgroup/ucd-snmp/vmstat_solaris2.c:
+
+     - patch from Jochen Kmietsch to quieten some noisy logging
+   
+2001-11-12 23:14  hardaker
+
+   * snmplib/: asn1.c, mib.c:
+
+   MS C++ warning fixes from Harrie Hazewinkel
+   
+2001-11-11 21:48  nba
+
+   * snmplib/system.c, win32/config.h:
+
+   Restore the old value od TIME_WITH_SYS_TIME
+   
+2001-11-09 12:21  hardaker
+
+   * FAQ:
+
+   Added a germany based mirror
+   
+2001-11-09 11:21  hardaker
+
+   * FAQ:
+
+   mention new mirror
+   
+2001-11-09 11:20  hardaker
+
+   * configure, config.h.in, configure.in:
+
+   applied english/typo/changes noted in bug #471179
+   
+2001-11-09 09:08  hardaker
+
+   * snmplib/snmp_api.c:
+
+   fix bug 479365: use strncpy in snmp_add_var().
+   
+2001-11-09 07:53  hardaker
+
+   * win32/config.h:
+
+   fix bug #474488: add extern C wrappers
+   
+2001-11-09 07:47  hardaker
+
+   * man/snmpd.conf.5.def:
+
+   fix OIDs to include entry node
+   
+2001-11-08 09:43  hardaker
+
+   * mibs/UCD-SNMP-MIB.txt:
+
+   UNIT specs for the fileTable to say kB explicitly
+   
+2001-11-08 09:42  hardaker
+
+   * man/snmpd.conf.5.def:
+
+   mention that the fileTable is in kB.
+   
+2001-11-06 08:26  hardaker
+
+   * local/: mib2c, tkmib:
+
+   add fixes to check for the SNMP and Tk perl modules and print a better
+   error message if they're not available telling users how to get them.
+   
+2001-11-06 08:16  hardaker
+
+   * snmplib/asn1.c:
+
+   fix asn_build_bitstring to check for NULL values (pointed out by Tata Kalyan).
+   
+2001-11-06 07:57  hardaker
+
+   * snmplib/asn1.c:
+
+   length check fixed for wrapped addition.  Bug pointed out by Tata Kalyan
+   
+2001-10-30 21:42  hardaker
+
+   * snmplib/: default_store.h, read_config.c, read_config.h:
+
+   patch from Harrie to make paths more configurable from within C code.
+   
+2001-10-30 07:14  jbpn
+
+   * agent/mibgroup/mibII/interfaces.c:
+
+     - fix bug whereby interface counter is not reset, noted by (amongst
+       others) Victor Kirhenshtein in patch #474064.
+   
+2001-10-26 09:08  hardaker
+
+   * configure, configure.in:
+
+   patch from Harrie to fix agentx/client -> agentx/subagent help message
+   
+2001-10-26 03:34  jbpn
+
+   * man/snmpd.conf.5.def:
+
+     - document the fact that setting sysLocation.0 (et al.) via a
+       syslocation (or equivalent) token makes the object read-only,
+       returning a notWritable error response if an attempt is made to
+       SET it.
+   
+2001-10-24 10:08  jbpn
+
+   * agent/mibgroup/mibII/system_mib.c:
+
+     - fix typo noted by Tim Dietz
+   
+2001-10-24 09:54  jbpn
+
+   * agent/mibgroup/mibII/: system_mib.c, system_mib.h:
+
+     - implement persistence for sysLocation.0, sysContact.0 and sysName.0
+   
+     - presence of a syslocation token in snmpd.conf makes sysLocation.0
+       non-writable (returns notWritable on SET attempts)
+   
+2001-10-24 05:08  jbpn
+
+   * agent/mibgroup/host/hr_swinst.c:
+
+     - fix small memory leak just introduced
+   
+2001-10-24 03:33  jbpn
+
+   * acconfig.h, configure.in:
+
+     - autoconf support for detecting pkginfo interface in libadm.  Thanks
+       to Stefan Radman (patch #473669).
+   
+2001-10-24 03:30  jbpn
+
+   * agent/mibgroup/host/hr_swinst.c:
+
+     - use pkginfo interface to determine type of software package more
+       specifically if possible.  Slight variation on patch #473669, submitted
+       by Stefan Radman.
+   
+2001-10-17 07:52  dts12
+
+   * FAQ:
+
+   Mention the MRTG tutorial web pages
+     (as suggested by Christian Robottom Reis)
+   
+2001-10-08 10:56  hardaker
+
+   * FAQ, README, sedscript.in, version.h:
+
+   - (version.h sedscript.in): version tag ( 4.2.2 )
+
+-------------------------------------------------------------------------------
+
 Changes: V4.2.1 -> V4.2.2
 	
 2001-10-08 10:47  hardaker

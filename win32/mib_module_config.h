@@ -128,3 +128,20 @@
 /* Define if compiling with the agentx/master_request module files.  */
 #define USING_AGENTX_MASTER_REQUEST_MODULE 1
  
+/* Define if compiling with the mibII/udp module files.  */
+#define USING_MIBII_UDP_MODULE 1
+
+/* Define if compiling with the mibII/interfaces module files.  */
+#define USING_MIBII_INTERFACES_MODULE 1
+
+/* Define if compiling with the mibII/at module files.  */
+#define USING_MIBII_AT_MODULE 1
+
+/* Define if compiling with the mibII/ip module files.  */
+#define USING_MIBII_IP_MODULE 1
+
+/* Define if compiling with the mibII/icmp module files.  */
+#define USING_MIBII_ICMP_MODULE 1
+
+/* Define if compiling with the mibII/tcp module files.  */
+#define USING_MIBII_TCP_MODULE 1

@@ -327,8 +327,7 @@ static void update_stats(unsigned int registrationNumber, void *clientarg)
       else
         {
 	  /* On some machines this floods the logfile, thus commented out */
-          /* snmp_log(LOG_INFO, "vmstat_solaris2 (update_stats): Kstat chain ch
-anged."); */
+          /* snmp_log(LOG_INFO, "vmstat_solaris2 (update_stats): Kstat chain changed."); */
         }
     }
                  

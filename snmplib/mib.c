@@ -330,7 +330,7 @@ void sprint_asciistring(char *buf,
 		        const u_char  *cp,
 		        size_t	    len)
 {
-    int	x;
+    unsigned int x;
 
     for(x = 0; x < (int)len; x++){
 	if (isprint(*cp)){
@@ -4127,7 +4127,7 @@ fprint_description(FILE *f,
     fprintf(f, " %lu }\n", *objid);
 }
 
-void
+static void
 print_tree_node(FILE *f,
 		struct tree *tp, int width)
 {
