@@ -52,7 +52,7 @@ static struct nlist wombat_nl[] = {
 #define N_WOMBATSTAT    0
 #define N_MIN_WOMBAT    1
 #define N_MAX_WOMBAT    2
-#if !defined(hpux) && !defined(solaris2)
+#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
         { "_wombatstat"},
         { "_wombat_min"},
         { "_wombat_max"},

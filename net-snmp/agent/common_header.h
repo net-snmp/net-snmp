@@ -150,6 +150,7 @@
 #endif
 #endif
 #if HAVE_SYS_TCPIPSTATS_H
+#include <sys/sysmp.h>
 #include <sys/tcpipstats.h>
 #endif
 

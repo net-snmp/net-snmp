@@ -92,7 +92,11 @@ u_short  flags;
 #ifndef RTENTRY_4_4
     route.rt_hash  = iff;
 #endif
+#ifdef irix6
+    return 0;
+#else
     return (ioctl(s, SIOCADDRT , (caddr_t)&route));
+#endif
 
 }
 
@@ -135,7 +139,11 @@ u_short  flags;
     route.rt_hash  = iff;
 #endif
 
+#ifdef irix6
+    return 0;
+#else
     return (ioctl(s, SIOCDELRT , (caddr_t)&route));
+#endif
 
 }
 

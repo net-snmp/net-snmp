@@ -25,7 +25,7 @@ extern int   Get_Next_HR_Proc();
 #ifndef linux
 static struct nlist hrproc_nl[] = {
 #define N_AVENRUN     0
-#if !defined(hpux) && !defined(solaris2)
+#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
         { "_avenrun"},
 #else
         { "avenrun"},

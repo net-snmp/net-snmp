@@ -33,7 +33,7 @@ static struct nlist example_nl[] = {
 #define N_EXAMPLESTAT    0
 #define N_MIN_EXAMPLE    1
 #define N_MAX_EXAMPLE    2
-#if !defined(hpux) && !defined(solaris2)
+#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
         { "_examplestat"},
         { "_example_min"},
         { "_example_max"},

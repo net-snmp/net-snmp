@@ -33,7 +33,7 @@
 #ifndef linux
 static struct nlist hrsys_nl[] = {
 #define N_NPROC    0		/* Max number of processes */
-#if !defined(hpux) && !defined(solaris2)
+#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
         { "_nproc"},
 #else
         { "nproc"},

@@ -20,7 +20,7 @@ static struct nlist udp_nl[] = {
 #define N_UDPSTAT	0
 #define N_UDB		1
 #define N_HP_UDPMIB	2
-#if !defined(hpux) && !defined(solaris2)
+#if !defined(hpux) && !defined(solaris2) && !defined(__sgi)
 	{ "_udpstat" },
 #ifdef netbsd1
 	{ "_udbtable" },
@@ -107,6 +107,7 @@ header_udp(vp, name, length, exact, var_len, write_method)
 
 #ifndef solaris2 
 #ifndef hpux 
+#ifndef HAVE_SYS_TCPIPSTATS_H
 
 u_char *
 var_udp(vp, name, length, exact, var_len, write_method)
@@ -187,6 +188,50 @@ var_udp(vp, name, length, exact, var_len, write_method)
     }
     return NULL;
 }
+
+#else /* HAVE_SYS_TCPIPSTATS_H */
+
+
+u_char *
+var_udp(vp, name, length, exact, var_len, write_method)
+    register struct variable *vp;
+    oid     *name;
+    int     *length;
+    int     exact;
+    int     *var_len;
+    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+{
+    static struct kna tcpipstats;
+
+    if (header_udp(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
+	return NULL;
+
+    if (sysmp (MP_SAGET, MPSA_TCPIPSTATS, &tcpipstats, sizeof tcpipstats) == -1) {
+	perror ("sysmp(MP_SAGET)(MPSA_TCPIPSTATS)");
+    }
+#define udpstat tcpipstats.udpstat
+
+    switch (vp->magic){
+	case UDPINDATAGRAMS:
+	    long_return = udpstat.udps_ipackets;
+	    return (u_char *) &long_return;
+	case UDPNOPORTS:
+	    long_return = udpstat.udps_noport;
+	    return (u_char *) &long_return;
+	case UDPOUTDATAGRAMS:
+	    long_return = udpstat.udps_opackets;
+	    return (u_char *) &long_return;
+	case UDPINERRORS:
+	    long_return = udpstat.udps_hdrops + udpstat.udps_badsum +
+	      udpstat.udps_badlen;
+	    return (u_char *) &long_return;
+	default:
+	    ERROR_MSG("");
+    }
+    return NULL;
+}
+
+#endif /* HAVE_SYS_TCPIPSTATS_H */
 
 #else /* hpux */
 
