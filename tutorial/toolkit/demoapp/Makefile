@@ -30,13 +30,13 @@ DLFLAGS=-fPIC -shared
 all: $(TARGETS)
 
 snmpdemoapp: $(OBJS1)
-	$(CC) -o snmpdemoapp $(OBJS1) -lsnmp $(SYSLIBS) $(CRYPTO)
+	$(CC) -o snmpdemoapp $(OBJS1) -L/usr/local/lib -lsnmp $(SYSLIBS) $(CRYPTO)
 
 asyncapp: $(OBJS3)
-	$(CC) -o asyncapp $(OBJS3) -lsnmp $(SYSLIBS) $(CRYPTO)
+	$(CC) -o asyncapp $(OBJS3) -L/usr/local/lib -lsnmp $(SYSLIBS) $(CRYPTO)
 
 ustMain: $(OBJS2)
-	$(CC) -o ustMain $(OBJS2) -lucdagent -lucdmibs -lsnmp $(SYSLIBS) $(CRYPTO)
+	$(CC) -o ustMain $(OBJS2) -L/usr/local/lib -lucdagent -lucdmibs -lsnmp $(SYSLIBS) $(CRYPTO)
 
 clean:
 	rm $(OBJS2) $(OBJS2) $(TARGETS)

@@ -1,20 +1,20 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>UCD-SNMP Tutorial -- Demon</title>
+    <title>NET-SNMP Tutorial -- Demon</title>
   </head>
 
   <body bgcolor="#ffffff" background="/ucd-snmp-bg3.gif">
-    <center><h1>UCD-SNMP Tutorial -- Demon</h1></center>
+    <center><h1>NET-SNMP Tutorial -- Demon</h1></center>
 <hr>
     <h1>*** WARNING WARNING WARNING ***</h1>
     <p>
       <b>You MUST use the <a
-      href="http://ucd-snmp.ucdavis.edu/developer.html">current
-      development version</a> of the ucd-snmp toolkit for this to work
+      href="http://net-snmp.sourceforge.net/developer.html">current
+      development version</a> of the net-snmp toolkit for this to work
       properly.  This will not work perfectly with 4.1.2 or earlier.</b>
     <p>
-      <b>The AgentX support in the ucd-snmp package is still alpha
+      <b>The AgentX support in the net-snmp package is still alpha
       level quality.  Although many people have used it successfully,
       we're not confident enough yet to say that its bug free (and in
       fact we know its not in areas).  Use at your own risk.</b>
@@ -26,7 +26,7 @@
       libraries to do the work for you and additionally the mib module 
       code that we wrote in the last section does not have to change
       at all.  We merely compile it ourselves this time, outside the
-      main ucd-snmp package and put a main() wrapper around it.
+      main net-snmp package and put a main() wrapper around it.
     <p>
       First, the files you'll need:
       <center><table border=1>
@@ -45,7 +45,7 @@
 	main() code for our demon</td></tr>
       </table></center>
     <p>
-      Now, build and install the ucd-snmp package.  You'll need to
+      Now, build and install the net-snmp package.  You'll need to
       configure it for AgentX support by compiling in those mib
       modules, so run configure like:
       <pre>
@@ -79,7 +79,7 @@
 % <b>make</b>
 cc -I/usr/local/include -g   -c ustMain.c -o ustMain.o
 cc -I/usr/local/include -g   -c ustScalarSet.c -o ustScalarSet.o
-cc -o ustMain ustMain.o ustScalarSet.o -lucdagent -lucdmibs -lsnmp
+cc -o ustMain ustMain.o ustScalarSet.o -L/usr/local/lib -lucdagent -lucdmibs -lsnmp
     </pre>
     <p>
       Then run snmpwalk to ensure that the current running demon is
@@ -99,7 +99,7 @@ cc -o ustMain ustMain.o ustScalarSet.o -lucdagent -lucdmibs -lsnmp
 % <b>snmpwalk localhost democommunity ucdavis.13</b>
       </pre>
     <hr>
-    <address><a href="mailto:Wes Hardaker <wjhardaker@ucdavis.edu>"></a></address>
+    <address><a href="mailto:Wes Hardaker <hardaker@users.sourceforge.net>"></a></address>
 <!-- Created: Fri Nov  5 14:28:37 PST 1999 -->
 <!-- hhmts start -->
 Last modified: Tue Aug  1 16:56:50 PDT 2000
