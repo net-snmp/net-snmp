@@ -364,6 +364,13 @@ netsnmp_callback_hook_build(netsnmp_session *sp,
     ch->pdu = pdu;
     ch->orig_transport_data = pdu->transport_data;
     pdu->transport_data = ch;
+    switch (pdu->command) {
+	case SNMP_MSG_RESPONSE:
+	case SNMP_MSG_TRAP:
+	case SNMP_MSG_TRAP2:
+	    pdu->flags &= (~UCD_MSG_FLAG_EXPECT_RESPONSE);
+            break;
+    }
     *len = 1;
     DEBUGMSGTL(("transport_callback","hook_build exit\n"));
     return 1;
