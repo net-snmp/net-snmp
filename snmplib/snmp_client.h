@@ -46,7 +46,7 @@ struct synch_state {
     struct snmp_pdu *pdu;
 };
 
-int snmp_set_var_value(struct variable_list *, char *, size_t);
+int snmp_set_var_value(struct variable_list *, u_char *, size_t);
 int snmp_set_var_objid (struct variable_list *vp,
                     const oid *objid, size_t name_length);
 struct variable_list* snmp_add_null_var (struct snmp_pdu *, oid *, size_t);
