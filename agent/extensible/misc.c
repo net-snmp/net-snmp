@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/wait.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include "wes.h"
@@ -28,8 +29,8 @@ void srandom (seed)
 Exit(var)
   int var;
 {
-  fprintf(fprintf, "Server Exiting with code %d\n",var);
-  fclose (fprintf);
+  fprintf(stderr, "Server Exiting with code %d\n",var);
+  fclose (stderr);
   exit(var);
 }
 
@@ -154,11 +155,7 @@ int get_exec_output(ex)
 #endif
 
 #ifdef EXCACHETIME
-#ifdef hpux
-  curtime = time();
-#else
   curtime = time(NULL);
-#endif
   if (curtime > (cachetime + EXCACHETIME) ||
       strcmp(ex->command, lastcmd) != 0) {
     strcpy(lastcmd,ex->command);

@@ -8,7 +8,7 @@ struct extensible
    char name[STRMAX];
    char command[STRMAX];
    int type;
-   long result;
+   int result;
    char output[STRMAX];
    struct extensible *next;
    int miboid[MIBMAX];

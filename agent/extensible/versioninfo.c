@@ -4,7 +4,7 @@
 #include "mibincl.h"
 #include "wes.h"
 
-static char *VersionInfo="Ext2-7-1";
+static char *VersionInfo="Ext2-7-2";
 
 int clear_cache();
 
@@ -47,11 +47,7 @@ unsigned char *var_wes_version(vp, name, length, exact, var_len, write_method)
       *var_len = strlen(errmsg);
       return((u_char *) errmsg); 
     case VERCDATE:
-#ifdef hpux
-      curtime = time();
-#else
       curtime = time(NULL);
-#endif
       cptr = ctime(&curtime);
       sprintf(errmsg,cptr);
       *var_len = strlen(errmsg);
