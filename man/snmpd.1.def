@@ -3,14 +3,14 @@
 .ds ]W VVERSIONINFO
 .UC 4
 .SH NAME
-snmpd - daemon to respond to SNMP request packets
+snmpd - daemon to respond to SNMP request packets.
 .SH SYNOPSIS
-.B "snmpd [-a] [-d] [-q] [-p port] [-f] [-l file] [-L]"
+.B "snmpd [-a] [-d] [-q] [-p port] [-f] [-l logfile] [-L]"
 .SH DESCRIPTION
 .B snmpd
 is a SNMP agent which binds to a port and awaits requests from
 SNMP management software.  Upon receiving a request, it processes the
-request, collects the requested information and/or performs the
+request(s), collects the requested information and/or performs the
 requested opperation(s) and returns the information to the sender.
 .SH OPTIONS
 .RS
@@ -22,7 +22,7 @@ Dumps the addresses the agent corresponds with to stderr or logfile.
 Dumps the sent and received UDP packets to stderr or logfile.
 .TP 
 .B -q
-Print prettier output for easier automated parsing.
+Print simplier output for easier automated parsing.
 .TP
 .B -p port
 Opens on 
@@ -32,9 +32,9 @@ instead of the default SNMP agent port, 161.
 .B -f
 Don't fork() from the calling shell.
 .TP
-.B -l file
+.B -l logfile
 Log's all output from the agent (including stdout/err) to 
-.I file.
+.I logfile.
 Defaults to a compiled option.
 .TP
 .B -L
@@ -51,7 +51,10 @@ checks for the existance of and parses the following files:
 .B PREFIX/lib/snmp/snmpd.local.conf
 Configures the agent.  See snmpd.conf(5) for details.  These files
 are optional and are only used to configure the extensible portions of
-the agent.
+the agent and the values of the community strings.  By default, the
+first community string ("public" by default) is allowed read-only access and the
+second ("private" by default) is allowed write access as well.  The
+3-5th community strings are read-only as well.
 .TP
 .B PREFIX/lib/snmp/mib.txt
 Defines the mib it should use.
@@ -61,7 +64,7 @@ file may by overridden at run time be setting the enviornmental variable
 .B MIBFILE.
 .TP
 .B PREFIX/lib/snmp/party.conf
-Defines the SNMP V2 parties.
+Defines the classic SNMP V2 parties.
 .TP
 .B PREFIX/lib/snmp/view.conf
 Defines which parties defined in the 
@@ -75,11 +78,25 @@ file.
 Maps names to numerical view contexts.
 .TP
 .B PREFIX/lib/snmp/acl.conf
-Defines the SNMP V2 action types usable by two communicating parties.
+Defines the classic SNMP V2 action types usable by two communicating parties.
 .RE
 .PP
 See the associated manual pages for information on the content of
 these files.
+.SH FILES
+PREFIX/lib/snmpd.conf
+.br
+PREFIX/lib/snmpd.local.conf
+.br
+PREFIX/lib/snmp/snmpd.conf
+.br
+PREFIX/lib/snmp/party.conf
+.br
+PREFIX/lib/snmp/view.conf
+.br
+PREFIX/lib/snmp/context.conf
+.br
+PREFIX/lib/snmp/acl.conf
 .SH SEE ALSO
 (in recomended reading order)
 .PP
@@ -87,5 +104,7 @@ snmpd.conf(5),
 party.conf(5),
 view.conf(5),
 context.conf(5),
-acl.conf(5),
-snmpd.conf(5).
+acl.conf(5)
+.\" Local Variables:
+.\"  mode: nroff
+.\" End:
