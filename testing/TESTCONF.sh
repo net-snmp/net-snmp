@@ -87,9 +87,16 @@ fi
 BASE_PORT=8765
 MAX_RETRIES=3
 if [ -x /bin/netstat ]; then
+    NETSTAT=/bin/netstat
+elif [ -x /usr/bin/netstat ]; then
+    NETSTAT=/usr/bin/netstat
+else
+    NETSTAT=""
+fi
+if [ -x $NETSTAT ]; then
     while :
     do
-        IN_USE=`/bin/netstat -l --protocol=inet --extend --program 2>/dev/null | grep ":$BASE_PORT"`
+        IN_USE=`$NETSTAT -l --protocol=inet --extend --program 2>/dev/null | grep ":$BASE_PORT"`
         if [ $? -eq 0 ]; then
             #echo "Port $BASE_PORT in use:"
             #echo "->$IN_USE"
