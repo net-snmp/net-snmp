@@ -35,11 +35,17 @@ struct header_complex_index *header_complex_find_entry(struct header_complex_ind
 
 void *header_complex_get(struct header_complex_index *datalist,
                          struct variable_list *index);
+void *header_complex_get_from_oid(struct header_complex_index *datalist,
+                                  oid *searchfor, size_t searchfdor_len);
 
 struct header_complex_index *
   header_complex_add_data(struct header_complex_index **thedata,
                           struct variable_list *var, void *data);
 
+/* Note: newoid is copied/cloned for you */
+struct header_complex_index *
+header_complex_add_data_by_oid(struct header_complex_index **thedata,
+                               oid *newoid, size_t newoid_len, void *data);
 
 #endif /* _MIBGROUP_HEADER_COMPLEX_H */
 
