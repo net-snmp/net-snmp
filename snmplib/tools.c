@@ -72,7 +72,6 @@ free_zero(void *buf, size_t size)
  *
  * buf is NULL and *size set to KMT error value upon failure.
  *
- * (Memory is zeroed if HAVE_LIBKMT is not defined.)
  */
 u_char *
 malloc_random(size_t *size)
@@ -80,7 +79,6 @@ malloc_random(size_t *size)
 	int	 rval	= SNMPERR_SUCCESS;
 	u_char	*buf	= (u_char *)calloc (1, *size);
 
-#if defined(HAVE_LIBKMT) || defined(USE_INTERNAL_MD5)
 	if (buf) {
 		rval = sc_random(buf, size);
 
@@ -91,7 +89,6 @@ malloc_random(size_t *size)
 			*size = rval;
 		}
 	}
-#endif	/* HAVE_LIBKMT || USE_INTERNAL_MD5 */
 
 	return buf;
 

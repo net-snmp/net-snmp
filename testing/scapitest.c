@@ -316,9 +316,7 @@ test_dorandom(void)
  * Test keyed hashes with a variety of MAC length requests.
  *
  *
- * NOTE Both tests intentionally use the same secret; this tests whether
- *	we can store the same keybits in the KMT cache but label
- *	each set with a different transform type.
+ * NOTE Both tests intentionally use the same secret
  *
  * FIX	Get input or output from some other package which hashes...
  * XXX	Could cut this in half with a little indirection...
