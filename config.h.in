@@ -481,6 +481,9 @@
 /* Define if you have the <netinet/ip.h> header file.  */
 #undef HAVE_NETINET_IP_H
 
+/* Define if you have the <netinet/ip_icmp.h> header file.  */
+#undef HAVE_NETINET_IP_ICMP_H
+
 /* Define if you have the <netinet/ip6.h> header file.  */
 #undef HAVE_NETINET_IP6_H
 
