@@ -1282,7 +1282,7 @@
 
 #endif
 
-#if defined(freebsd2) || defined(freebsd3)
+#ifdef freebsd2
 
 #define OSTYPE FREEBSDID
 

@@ -1,6 +1,8 @@
 #include "freebsd.h"
 
-#define freebsd2 1                  /* freebsd3 is a superset of freebsd2 */
+/* freebsd4 is a superset of freebsd2 and freebsd3 */
+#define freebsd2 1
+#define freebsd3 1
 
 #undef IFADDR_SYMBOL
 #define IFADDR_SYMBOL "in_ifaddrhead"
