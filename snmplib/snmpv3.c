@@ -489,21 +489,18 @@ setup_engineID(u_char ** eidp, const char *text)
 
     engineIDIsSet = 1;
 
-    /*
-     * get the host name and save the information 
-     */
 #ifdef HAVE_GETHOSTNAME
-    gethostname((char *) buf, sizeof(buf));
-    hent = gethostbyname((char *) buf);
-    /*
-     * Determine if we are using IPV6 
-     */
 #ifdef AF_INET6
     /*
      * see if they selected IPV4 or IPV6 support 
      */
     if ((ENGINEID_TYPE_IPV6 == localEngineIDType) ||
         (ENGINEID_TYPE_IPV4 == localEngineIDType)) {
+        /*
+         * get the host name and save the information 
+         */
+        gethostname((char *) buf, sizeof(buf));
+        hent = gethostbyname((char *) buf);
         if (hent && hent->h_addrtype == AF_INET6) {
             localEngineIDType = ENGINEID_TYPE_IPV6;
         } else {
@@ -515,11 +512,18 @@ setup_engineID(u_char ** eidp, const char *text)
     }
 #else
     /*
-     * No IPV6 support.  Check if they selected IPV6 engineID type.  If so
-     * * make it IPV4 for them 
+     * No IPV6 support.  Check if they selected IPV6 engineID type.
+     *  If so make it IPV4 instead 
      */
     if (ENGINEID_TYPE_IPV6 == localEngineIDType) {
         localEngineIDType = ENGINEID_TYPE_IPV4;
+    }
+    if (ENGINEID_TYPE_IPV4 == localEngineIDType) {
+        /*
+         * get the host name and save the information 
+         */
+        gethostname((char *) buf, sizeof(buf));
+        hent = gethostbyname((char *) buf);
     }
 #endif
 #endif                          /* HAVE_GETHOSTNAME */
