@@ -227,6 +227,7 @@ SOFTWARE.
      * backwards compatability 
      */
     struct tree    *find_node(const char *, struct tree *);
+    struct tree    *find_node2(const char *, const char *); 
     struct module  *find_module(int);
     void            adopt_orphans(void);
     char           *snmp_mib_toggle_options(char *options);

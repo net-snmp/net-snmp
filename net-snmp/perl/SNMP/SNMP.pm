@@ -113,7 +113,8 @@ $dump_packet = 0; # non-zero to globally enable libsnmp dump_packet output.
 $save_descriptions = 0; #tied scalar to control saving descriptions during
                # mib parsing - must be set prior to mib loading
 $best_guess = 0;  # determine whether or not to enable best-guess regular
-                  # expression object name translation
+                  # expression object name translation.  1 = Regex (-Ib),
+		  # 2 = random (-IR)
 $replace_newer = 0; # determine whether or not to tell the parser to replace
                     # older MIB modules with newer ones when loading MIBs.
                     # WARNING: This can cause an incorrect hierarchy.
@@ -183,24 +184,29 @@ sub unloadModules {
 }
 
 sub translateObj {
-# translate object identifier(tag or numeric) into alternate representation
+# Translate object identifier(tag or numeric) into alternate representation
 # (i.e., sysDescr => '.1.3.6.1.2.1.1.1' and '.1.3.6.1.2.1.1.1' => sysDescr)
 # when $SNMP::use_long_names or second arg is non-zero the translation will
-# return longer textual identifiers (e.g., system.sysDescr)
-# if Mib is not loaded and $SNMP::auto_init_mib is enabled Mib will be loaded
-# returns 'undef' upon failure
+# return longer textual identifiers (e.g., system.sysDescr).  An optional 
+# third argument of non-zero will cause the module name to be prepended
+# to the text name (e.g. 'SNMPv2-MIB::sysDescr').  If no Mib is loaded 
+# when called and $SNMP::auto_init_mib is enabled then the Mib will be 
+# loaded. Will return 'undef' upon failure.
    SNMP::init_snmp("perl");
    my $obj = shift;
-   my $long_names = shift || $SNMP::use_long_names;
+   my $temp = shift;
+   my $include_module_name = shift;
+   my $long_names = $temp || $SNMP::use_long_names;
+
    return undef if not defined $obj;
    my $res;
    if ($obj =~ /^\.?(\d+\.)*\d+$/) {
-      $res = SNMP::_translate_obj($obj,1,$long_names,$SNMP::auto_init_mib,0);
+      $res = SNMP::_translate_obj($obj,1,$long_names,$SNMP::auto_init_mib,0,$include_module_name);
    } elsif ($obj =~ /(\.\d+)*$/ && $SNMP::best_guess == 0) {
-      $res = SNMP::_translate_obj($`,0,$long_names,$SNMP::auto_init_mib,0);
+      $res = SNMP::_translate_obj($`,0,$long_names,$SNMP::auto_init_mib,0,$include_module_name);
       $res .= $& if defined $res and defined $&;
    } elsif ($SNMP::best_guess) {
-      $res = SNMP::_translate_obj($obj,0,$long_names,$SNMP::auto_init_mib,$SNMP::best_guess);
+      $res = SNMP::_translate_obj($obj,0,$long_names,$SNMP::auto_init_mib,$SNMP::best_guess,$include_module_name);
    }
 
    return($res);
@@ -211,7 +217,7 @@ sub getType {
 # OBJECTID, OCTETSTR, INTEGER, NETADDR, IPADDR, COUNTER
 # GAUGE, TIMETICKS, OPAQUE, or undef
   my $tag = shift;
-  SNMP::_get_type($tag);
+  SNMP::_get_type($tag, $SNMP::best_guess);
 }
 
 sub mapEnum {
@@ -233,7 +239,7 @@ sub mapEnum {
       $val = shift;
   }
   my $iflag = $val =~ /^\d+$/;
-  my $res = SNMP::_map_enum($tag, $val, $iflag);
+  my $res = SNMP::_map_enum($tag, $val, $iflag, $SNMP::best_guess);
   if ($update and defined $res) { $var->[$SNMP::Varbind::val_f] = $res; }
   return($res);
 }
@@ -487,6 +493,7 @@ sub new {
 
    $this->{UseLongNames} ||= $SNMP::use_long_names;
    $this->{UseSprintValue} ||= $SNMP::use_sprint_value;
+   $this->{BestGuess} ||= $SNMP::best_guess;
    $this->{UseEnums} ||= $SNMP::use_enums;
    $this->{UseNumeric} ||= $SNMP::use_numeric;
 
@@ -512,6 +519,7 @@ sub update {
 
    $this->{UseLongNames} ||= $SNMP::use_long_names;
    $this->{UseSprintValue} ||= $SNMP::use_sprint_value;
+   $this->{BestGuess} ||= $SNMP::best_guess;
    $this->{UseEnums} ||= $SNMP::use_enums;
    $this->{UseNumeric} ||= $SNMP::use_numeric;
 
@@ -544,7 +552,8 @@ sub set {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);     
      my $val = shift;
      $varbind_list_ref = [[$tag, $iid, $val]];
    }
@@ -566,7 +575,8 @@ sub get {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
      $varbind_list_ref = [[$tag, $iid]];
    }
 
@@ -590,7 +600,8 @@ sub fget {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
      $varbind_list_ref = [[$tag, $iid]];
    }
 
@@ -621,7 +632,8 @@ sub getnext {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
      $varbind_list_ref = [[$tag, $iid]];
    }
 
@@ -645,7 +657,8 @@ sub fgetnext {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
      $varbind_list_ref = [[$tag, $iid]];
    }
 
@@ -678,7 +691,8 @@ sub getbulk {
      $varbind_list_ref = [$vars];
      $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-     my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+     # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|(?:\w+(?:\-*\w+)+))\.?(.*)$/);
+     my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
      $varbind_list_ref = [[$tag, $iid]];
    }
 
@@ -704,7 +718,8 @@ sub bulkwalk {
       $varbind_list_ref = [$vars];
       $varbind_list_ref = $vars if ref($$vars[0]) =~ /ARRAY/;
    } else {
-      my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|\w+)\.?(.*)$/);
+      # my ($tag, $iid) = ($vars =~ /^((?:\.\d+)+|\w+)\.?(.*)$/);
+      my ($tag, $iid) = ($vars =~ /^(.*?)\.?(\d+)+$/);
       $varbind_list_ref = [[$tag, $iid]];
    }
 
@@ -1252,6 +1267,14 @@ defaults to the value of SNMP::use_numeric at time of session
 creation. set to non-zero to have <tags> for get methods returned
 as numeric OID's rather than descriptions.  UseLongNames will be
 set so that the full OID is returned to the caller.
+
+=item BestGuess
+
+defaults to the value of SNMP::best_guess at time of session
+creation. this setting controls how <tags> are parsed.  setting to
+0 causes a regular lookup.  setting to 1 causes a regular expression 
+match (defined as -Ib in snmpcmd) and setting to 2 causes a random 
+access lookup (defined as -IR in snmpcmd).
 
 =item ErrorStr
 
