@@ -21,7 +21,7 @@ FILE *logfile;
 
 
 void
-disable_syslog() {
+disable_syslog(void) {
   if (do_syslogging) 
     closelog();
   do_syslogging=0;
@@ -29,7 +29,7 @@ disable_syslog() {
 
 
 void
-disable_filelog() {
+disable_filelog(void) {
   if (do_filelogging)
     fclose(logfile);
   do_filelogging=0;
@@ -37,13 +37,13 @@ disable_filelog() {
 
 
 void
-disable_stderrlog() {
+disable_stderrlog(void) {
   do_stderrlogging=0;
 }
 
 
 void
-disable_log() {
+disable_log(void) {
   disable_syslog();
   disable_filelog();
   disable_stderrlog();
@@ -52,7 +52,7 @@ disable_log() {
 
 
 void 
-enable_syslog() 
+enable_syslog(void) 
 {
   disable_syslog();
   openlog("ucd-snmp", LOG_CONS|LOG_PID, LOG_DAEMON);
@@ -73,7 +73,7 @@ enable_filelog(const char *logfilename, int dont_zero_log)
 
 
 void
-enable_stderrlog() {
+enable_stderrlog(void) {
   do_stderrlogging=1;
 }
 
