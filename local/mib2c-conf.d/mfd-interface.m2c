@@ -174,7 +174,7 @@ ${context}_dirty_set( int status )
 {
     DEBUGMSGTL(("${context}:${context}_dirty_set",
                 "called. was %d, now %d\n",
-                ${context}_if_ctx.table_dirty, status;));
+                ${context}_if_ctx.table_dirty, status));
     ${context}_if_ctx.table_dirty = status;
 }
 
