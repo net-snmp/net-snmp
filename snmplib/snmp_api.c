@@ -5027,7 +5027,6 @@ snmp_add_var(struct snmp_pdu *pdu,
 	tint = 0;
 	memset(buf, 0, sizeof buf);
 	{ char *lvalue = strdup(value), *cp;
-          struct enum_list *ep;
           for (ep = tp ? tp->enums : NULL; ep; ep = ep->next)
             if (ep->value / 8 >= (int)tint) tint = ep->value / 8 + 1;
 	  for (cp = strtok(lvalue, " \t,"); cp; cp = strtok(NULL, " \t,")) {
