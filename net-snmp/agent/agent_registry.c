@@ -110,6 +110,7 @@ load_subtree( struct subtree *new_sub )
 {
     struct subtree *tree1, *tree2, *new2;
     struct subtree *prev, *next;
+    int res;
 
     if ( new_sub == NULL )
 	return MIB_REGISTERED_OK;	/* Degenerate case */
@@ -350,6 +351,7 @@ unregister_mib_priority( oid *name, size_t len, int priority)
 {
   struct subtree *list, *myptr;
   struct subtree *prev, *child;             /* loop through children */
+  struct register_parameters reg_parms;
 
   list = find_subtree( name, len, subtrees );
   if ( list == NULL )
@@ -408,7 +410,7 @@ unregister_mib(oid *name,
   return unregister_mib_priority( name, len, DEFAULT_MIB_PRIORITY );
 }
 
-int
+void
 unregister_mibs_by_session (struct snmp_session *ss)
 {
   struct subtree *list, *list2;
@@ -436,8 +438,8 @@ struct subtree *
 free_subtree(struct subtree *st)
 {
   struct subtree *ret = NULL;
-  if ((snmp_oid_compare(st->name, st->namelen, st->start, st->start_len) == 0
-	&& (st->variables != NULL)
+  if ((snmp_oid_compare(st->name, st->namelen, st->start, st->start_len) == 0)
+       && (st->variables != NULL))
     free(st->variables);
   if (st->next != NULL)
     ret = st->next;
