@@ -312,7 +312,11 @@ agentx_build_varbind(u_char *bufp, size_t *out_length,
 	agentx_build_short( bufp, ASN_OPAQUE, network_byte_order);
     else
 #endif
-    agentx_build_short( bufp, (u_int)vp->type, network_byte_order);
+    if (vp->type == ASN_PRIV_INCL_RANGE || vp->type == ASN_PRIV_EXCL_RANGE) {
+      agentx_build_short(bufp, ASN_OBJECT_ID, network_byte_order);
+    } else {
+      agentx_build_short(bufp, (u_int)vp->type, network_byte_order);
+    }
     bufp        +=2;
     *bufp = 0;			bufp++;
     *bufp = 0;			bufp++;		/* <reserved> */
@@ -1073,17 +1077,13 @@ agentx_parse_varbind( u_char *data, size_t *length, int *type,
 				    network_byte_order);
 	 break;
 		
+     case ASN_PRIV_INCL_RANGE:
      case ASN_PRIV_EXCL_RANGE:
      case ASN_OBJECT_ID:
 	 bufp = agentx_parse_oid(bufp, length, NULL, (oid *)data_buf, data_len,
 				 network_byte_order);
 	 *data_len *= 4;
 	 /* 'agentx_parse_oid()' returns the number of sub_ids */
-	 break;
-     case ASN_PRIV_INCL_RANGE:
-	 bufp = agentx_parse_oid(bufp, length, NULL, (oid *)data_buf, data_len,
-				 network_byte_order);
-	 *data_len *= 4;
 	 break;
 
      case ASN_COUNTER64:
