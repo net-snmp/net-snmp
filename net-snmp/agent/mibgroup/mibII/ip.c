@@ -117,6 +117,7 @@ init_ip(void)
     /*
      * register ourselves with the agent as a group of scalars...
      */
+    DEBUGMSGTL(("mibII/ip", "Initialising IP group\n"));
     reginfo = netsnmp_create_handler_registration("ip", ip_handler,
                             ip_oid, OID_LENGTH(ip_oid), HANDLER_CAN_RONLY);
     netsnmp_register_scalar_group(reginfo, IPFORWARDING, IPROUTEDISCARDS);
@@ -224,7 +225,8 @@ ip_handler(netsnmp_mib_handler          *handler,
            netsnmp_agent_request_info   *reqinfo,
            netsnmp_request_info         *requests)
 {
-    netsnmp_request_info *request;
+    netsnmp_request_info  *request;
+    netsnmp_variable_list *requestvb;
     long     ret_value;
     oid      subid;
     int      type = ASN_COUNTER;
@@ -245,12 +247,19 @@ ip_handler(netsnmp_mib_handler          *handler,
      * 
      *
      */
+    DEBUGMSGTL(("mibII/ip", "Handler - mode %s\n",
+                    se_find_label_in_slist("agent_mode", reqinfo->mode)));
     switch (reqinfo->mode) {
     case MODE_GET:
         for (request=requests; request; request=request->next) {
-            subid = request->requestvb->name[OID_LENGTH(ip_oid)];  /* XXX */
-            switch (subid) {
+            requestvb = request->requestvb;
+            subid = requestvb->name[OID_LENGTH(ip_oid)];  /* XXX */
+            DEBUGMSGTL(( "mibII/ip", "oid: "));
+            DEBUGMSGOID(("mibII/ip", requestvb->name,
+                                     requestvb->name_length));
+            DEBUGMSG((   "mibII/ip", "\n"));
 
+            switch (subid) {
 #ifdef USES_SNMP_DESIGNED_IPSTAT
     case IPFORWARDING:
         ret_value = ipstat.ipForwarding;
@@ -607,8 +616,10 @@ ip_load(netsnmp_cache *cache, void *vmagic)
     int             ret;
     int             magic = (int) vmagic;
     
-    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) < 0)
+    if ((fd = open_mib("/dev/ip", O_RDONLY, 0, NM_ASYNC_OFF)) < 0) {
+        DEBUGMSGTL(("mibII/ip", "Failed to load IP object %d (hpux11)\n", magic));
         return (-1);            /* error */
+    }
 
     switch (magic) {
     case IPFORWARDING:
@@ -680,10 +691,12 @@ ip_load(netsnmp_cache *cache, void *vmagic)
     p.buffer = (void *)&ipstat;
     ulen = sizeof(IP_STAT_STRUCTURE);
     p.len = &ulen;
-    ret_value = get_mib_info(fd, &p);
+    ret = get_mib_info(fd, &p);
     close_mib(fd);
 
-    return (ret_value);         /* 0: ok, < 0: error */
+    DEBUGMSGTL(("mibII/ip", "%s IP object %d (hpux11)\n",
+               (ret < 0 ? "Failed to load" : "Loaded"),  magic));
+    return (ret);         /* 0: ok, < 0: error */
 }
 #else                           /* hpux11 */
 #ifdef linux
@@ -694,7 +707,13 @@ ip_load(netsnmp_cache *cache, void *vmagic)
 
     ret_value = linux_read_ip_stat(&ipstat);
 
-    ip_valid = (ret_value == 0);
+    if ( ret_value < 0 ) {
+        ip_valid = 0;
+        DEBUGMSGTL(("mibII/ip", "Failed to load IP Group (linux)\n"));
+    } else {
+        ip_valid = 1;
+        DEBUGMSGTL(("mibII/ip", "Loaded IP Group (linux)\n"));
+    }
     return ret_value;
 }
 #else                           /* linux */
@@ -708,7 +727,13 @@ ip_load(netsnmp_cache *cache, void *vmagic)
         getMibstat(MIB_IP, &ipstat, sizeof(mib2_ip_t), GET_FIRST,
                    &Get_everything, NULL);
 
-    ip_valid = (ret_value == 0);
+    if ( ret_value < 0 ) {
+        ip_valid = 0;
+        DEBUGMSGTL(("mibII/ip", "Failed to load IP Group (solaris)\n"));
+    } else {
+        ip_valid = 1;
+        DEBUGMSGTL(("mibII/ip", "Loaded IP Group (solaris)\n"));
+    }
     return ret_value;
 }
 #else                           /* solaris2 */
@@ -720,7 +745,13 @@ ip_load(netsnmp_cache *cache, void *vmagic)
 
     ret_value = GetIpStatistics(&ipstat);
 
-    ip_valid = (ret_value == 0);
+    if ( ret_value < 0 ) {
+        ip_valid = 0;
+        DEBUGMSGTL(("mibII/ip", "Failed to load IP Group (win32)\n"));
+    } else {
+        ip_valid = 1;
+        DEBUGMSGTL(("mibII/ip", "Loaded IP Group (win32)\n"));
+    }
     return ret_value;
 }
 #else                           /* WIN32 */
@@ -757,7 +788,13 @@ ip_load(netsnmp_cache *cache, void *vmagic)
         sname[3] = IPCTL_STATS;
         ret_value = sysctl(sname, 4, &ipstat, &len, 0, 0);
 
-        ip_valid = (ret_value == 0);
+        if ( ret_value < 0 ) {
+            ip_valid = 0;
+            DEBUGMSGTL(("mibII/ip", "Failed to load IP Group (sysctl)\n"));
+        } else {
+            ip_valid = 1;
+            DEBUGMSGTL(("mibII/ip", "Loaded IP Group (sysctl)\n"));
+        }
         return ret_value;
     }
 }
@@ -788,7 +825,13 @@ ip_load(netsnmp_cache *cache, void *vmagic)
     default:
         ret_value = sysmp(MP_SAGET, MPSA_TCPIPSTATS, &ipstat, sizeof ipstat);
 
-        ip_valid = (ret_value == 0);
+        if ( ret_value < 0 ) {
+            ip_valid = 0;
+            DEBUGMSGTL(("mibII/ip", "Failed to load IP Group (tcpipstats)\n"));
+        } else {
+            ip_valid = 1;
+            DEBUGMSGTL(("mibII/ip", "Loaded IP Group (tcpipstats)\n"));
+        }
         return ret_value;
     }
 }
@@ -820,7 +863,13 @@ ip_load(netsnmp_cache *cache, void *vmagic)
         if (auto_nlist(IPSTAT_SYMBOL, (char *)&ipstat, sizeof(ipstat)))
             ret_value = 0;
 
-        ip_valid = (ret_value == 0);
+        if ( ret_value < 0 ) {
+            ip_valid = 0;
+            DEBUGMSGTL(("mibII/ip", "Failed to load IP Group (ipstat)\n"));
+        } else {
+            ip_valid = 1;
+            DEBUGMSGTL(("mibII/ip", "Loaded IP Group (ipstat)\n"));
+        }
         return ret_value;
     }
 }
@@ -830,7 +879,8 @@ ip_load(netsnmp_cache *cache, void *vmagic)
 {
     long ret_value = -1;
 
-    ip_valid = (ret_value == 0);
+    ip_valid = 0;
+    DEBUGMSGTL(("mibII/ip", "Failed to load IP Group (null)\n"));
     return ret_value;
 }
 #endif				/* IPSTAT_SYMBOL */
