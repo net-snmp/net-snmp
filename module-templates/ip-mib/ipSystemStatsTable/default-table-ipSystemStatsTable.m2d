@@ -57,7 +57,7 @@
 ##
 ## // 0:persistent, 1:semi-transient, 2:transient
 ##
-## @eval $m2c_data_transient = 3@
+@eval $m2c_data_transient = 1@
 ##
 ########################################################################
 ##
