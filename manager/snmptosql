@@ -77,11 +77,15 @@ while (  $hostrow = $cursor->fetchrow_hashref ) {
 	
 	$var = 
 	    new SNMP::Varbind([SNMP::translateObj($tablelist->{'tablename'})]);
+	my $void = SNMP::translateObj($tablelist->{'tablename'});
 	my $val = $sess->getnext($var);
 	$initlabel = "";
 	print " starting $tablelist->{tablename}\n" if ($verbose);
+	my %tbl_ids;
 	while (1) {
 	    my $varlabel = $var->[$SNMP::Varbind::tag_f];
+	    print "last $host $varlabel: $void\n" if (SNMP::translateObj($varlabel) !~ /^$void/);
+	    last if (SNMP::translateObj($varlabel) !~ /^$void/);
 	    $varlabel = SNMP::translateObj($var->[$SNMP::Varbind::tag_f]) if ($varlabel =~ /^[\.0-9]+$/);
 	    $initlabel = $varlabel if ($initlabel eq "");
 	    my $val = $sess->getnext($var);
@@ -90,6 +94,7 @@ while (  $hostrow = $cursor->fetchrow_hashref ) {
 	    print "$initlabel = $varlabel\n" if ($verbose);
 	    last if ($varlabel ne $initlabel);
 	    my %vals;
+	    $tbl_ids{$id} = 1;
 	    foreach $c (@$children) {
 		my $oid = $$c{'objectID'} . "." . $id;
 		my $newvar = new SNMP::Varbind([$oid]);
@@ -129,6 +134,14 @@ while (  $hostrow = $cursor->fetchrow_hashref ) {
 			  $newerr->{errvalue});
 	     }
 	} # snmp loop
+	my $curs = getcursor("select oidindex from $tablelist->{tablename} where host = '$host'");
+	my $row;
+	while ($row = $curs->fetchrow_hashref) {
+	    if (!defined($tbl_ids{$row->{oidindex}})) {
+		$dbh->do("delete from $tablelist->{tablename} where oidindex = '$row->{oidindex}'");
+		print "deleting: $host $tablelist->{tablename} $row->{oidindex}\n";
+	    }
+	}
     } # table loop
 } # host loop
 
