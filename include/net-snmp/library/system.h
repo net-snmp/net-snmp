@@ -5,6 +5,10 @@
 extern          "C" {
 #endif
 
+/* Portions of this file are subject to the following copyrights.  See
+ * the Net-SNMP's COPYING file for more details and other copyrights
+ * that may apply:
+ */
 /***********************************************************
         Copyright 1993 by Carnegie Mellon University
 
