@@ -703,19 +703,27 @@ AC_CHECK_LIB(z, zlibVersion)
 dnl
 dnl with rpm3 or higher, we need db1 to exist
 dnl
-AC_CHECK_LIB(rpm, rpmdbOpen,[
-  AC_DEFINE(HAVE_LIBRPM)
-  LIBS="-lrpm -ldb1 $LIBS"
-],,-ldb1 -lz)
+AC_CHECK_LIB(db1, dbopen,[
+  AC_DEFINE(HAVE_LIBDB)
+  LIBS="-ldb1 $LIBS"
+],,-lz)
 
 dnl Ok, -ldb1 may not exist, try -ldb
-if test "x$ac_cv_lib_rpm_rpmdbOpen" = "xno"; then
-  unset ac_cv_lib_rpm_rpmdbOpen
-  AC_CHECK_LIB(rpm, rpmdbOpen,[
-    AC_DEFINE(HAVE_LIBRPM)
-    LIBS="-lrpm -ldb $LIBS"
-  ],,-ldb -lz)
+if test "x$ac_cv_lib_db1_dbopen" = "xno"; then
+  AC_CHECK_LIB(db, dbopen,[
+    AC_DEFINE(HAVE_LIBDB)
+    LIBS="-ldb $LIBS"
+  ],,-lz)
 fi
+
+dnl
+dnl now check for rpm using the appropriate db library
+dnl
+AC_CHECK_LIB(rpm, rpmdbOpen,[
+  AC_DEFINE(HAVE_LIBRPM)
+  LIBS="-lrpm $LIBS"
+],,-lz)
+
 
 dnl Replace `main' with a function in -lkstat:
 AC_CHECK_LIB(kstat, kstat_lookup)
