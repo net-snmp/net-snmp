@@ -32,11 +32,11 @@
 ##
 ########################################################################
 @    foreach $node nonindex@
-@        print Processing       nonindex $node@
 @        include m2c_setup_node.m2i@
 @        if $node.settable == 0@
 @            break@ # skip to next column
 @        end@
+@        print Processing       nonindex $node@
 @        include details-node.m2i@
 @        include node-set.m2i@
 @    end@ # foreach column
