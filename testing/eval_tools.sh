@@ -256,6 +256,9 @@ STARTPROG() {
     if [ $SNMP_VERBOSE -gt 0 ]; then
 	echo "running: $COMMAND"
     fi
+    if [ "x$PORT_SPEC" != "x" ]; then
+        COMMAND="$COMMAND $PORT_SPEC"
+    fi
     echo $COMMAND >> $SNMP_TMPDIR/invoked
     $COMMAND > $LOG_FILE.stdout 2>&1
 
@@ -264,18 +267,20 @@ STARTPROG() {
 
 #------------------------------------ -o-
 STARTAGENT() {
-    COMMAND="snmpd $SNMP_FLAGS -r -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE $AGENT_FLAGS $SNMP_SNMPD_PORT"
+    COMMAND="snmpd $SNMP_FLAGS -r -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE $AGENT_FLAGS"
     CFG_FILE=$SNMP_CONFIG_FILE
     LOG_FILE=$SNMP_SNMPD_LOG_FILE
+    PORT_SPEC="$SNMP_SNMPD_PORT"
 
     STARTPROG
 }
 
 #------------------------------------ -o-
 STARTTRAPD() {
-    COMMAND="snmptrapd -d -u $SNMP_SNMPTRAPD_PID_FILE -o $SNMP_SNMPTRAPD_LOG_FILE $SNMP_SNMPTRAPD_PORT"
+    COMMAND="snmptrapd -d -u $SNMP_SNMPTRAPD_PID_FILE -o $SNMP_SNMPTRAPD_LOG_FILE"
     CFG_FILE=$SNMPTRAPD_CONFIG_FILE
     LOG_FILE=$SNMP_SNMPTRAPD_LOG_FILE
+    PORT_SPEC="$SNMP_SNMPTRAPD_PORT"
 
     STARTPROG
 }

@@ -11,8 +11,7 @@ HEADER authentication failure traps are sent by snmpd
 # standard V1 configuration: testcomunnity
 . ./Sv1config
 # add in a v1 trap sink
-REAL_TRAPD_PORT=`echo $SNMP_SNMPTRAPD_PORT | awk '{print $2}'`
-CONFIGAGENT trapsink localhost public $REAL_TRAPD_PORT
+CONFIGAGENT trapsink localhost public $SNMP_SNMPTRAPD_PORT
 CONFIGAGENT authtrapenable 1
 
 STARTTRAPD
