@@ -48,7 +48,7 @@ int           store_snmpTargetParamsEntry(int majorID, int minorID,
                                           void *serverarg, void *clientarg);
 extern FindVarMethod var_snmpTargetParamsEntry;
 
-void snmpd_parse_config_targetParams(   char *, char *);
+void snmpd_parse_config_targetParams(const char *, char *);
 
 WriteMethod write_snmpTargetParamsMPModel;
 WriteMethod write_snmpTargetParamsSecurityModel;

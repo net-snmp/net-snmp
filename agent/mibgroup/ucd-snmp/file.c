@@ -65,7 +65,7 @@ void file_free_config(void)
     fileCount = 0;
 }
 
-void file_parse_config(char *token, char* cptr)
+void file_parse_config(const char *token, char* cptr)
 {
     if (fileCount < MAXFILE)
     {

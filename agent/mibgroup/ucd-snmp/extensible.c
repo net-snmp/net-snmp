@@ -163,7 +163,7 @@ void init_extensible(void)
                                 "exec-or-sh-name program [arguments...]");
 }
 
-void extensible_parse_config(char *token, char* cptr)
+void extensible_parse_config(const char *token, char* cptr)
 {
 
   struct extensible **pptmp;
@@ -292,7 +292,7 @@ struct extensible *get_exec_by_name(char *name) {
   return etmp;
 }
    
-void execfix_parse_config(char *token, char* cptr) {
+void execfix_parse_config(const char *token, char* cptr) {
   char tmpname[STRMAX];
   struct extensible *execp;
 

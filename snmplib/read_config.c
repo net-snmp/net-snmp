@@ -83,7 +83,7 @@ struct config_files *config_files = NULL;
 struct config_line *
 register_premib_handler(const char *type,
 			const char *token,
-			void (*parser) (char *, char *),
+			void (*parser) (const char *, char *),
 			void (*releaser) (void),
 			const char *help)
 {
@@ -109,7 +109,7 @@ register_premib_handler(const char *type,
 struct config_line *
 register_config_handler(const char *type,
 			const char *token,
-			void (*parser) (char *, char *),
+			void (*parser) (const char *, char *),
 			void (*releaser) (void),
 			const char *help)
 {

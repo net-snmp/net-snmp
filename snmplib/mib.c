@@ -928,7 +928,7 @@ static char *confmibdir=NULL;
 static char *confmibs=NULL;
 
 void
-handle_mibdirs_conf(char *token,
+handle_mibdirs_conf(const char *token,
 		    char *line)
 {
     char *ctmp;
@@ -947,7 +947,7 @@ handle_mibdirs_conf(char *token,
 }
 
 void
-handle_mibs_conf(char *token,
+handle_mibs_conf(const char *token,
 		 char *line)
 {
     char *ctmp;
@@ -966,7 +966,7 @@ handle_mibs_conf(char *token,
 }
 
 void
-handle_mibfile_conf(char *token,
+handle_mibfile_conf(const char *token,
 		    char *line)
 {
   DEBUGMSGTL(("read_config:initmib", "reading mibfile: %s\n", line));

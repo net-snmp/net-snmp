@@ -206,10 +206,10 @@ void            usm_save_users_from_list(struct usmUser *user, const char *token
                                         const char *type);
 void            usm_save_user(struct usmUser *user, const char *token, const char *type);
 struct usmUser *usm_read_user(char *line);
-void            usm_parse_config_usmUser(char *token, char *line);
+void            usm_parse_config_usmUser(const char *token, char *line);
 
-void            usm_set_password(char *token, char *line);
-void            usm_set_user_password(struct usmUser *user, char *token,
+void            usm_set_password(const char *token, char *line);
+void            usm_set_user_password(struct usmUser *user, const char *token,
                                       char *line);
 void		init_usm(void);
 int		init_usm_post_config(int majorid, int minorid, void *serverarg,

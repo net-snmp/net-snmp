@@ -12,10 +12,10 @@ extern "C" {
 #define MAX_ENGINEID_LENGTH 128
 
 int     setup_engineID(u_char **eidp, const char *text);
-void    engineID_conf(char *word, char *cptr);
-void    engineBoots_conf(char *, char *);
-void    snmpv3_authtype_conf(char *word, char *cptr);
-void    snmpv3_privtype_conf(char *word, char *cptr);
+void    engineID_conf(const char *word, char *cptr);
+void    engineBoots_conf(const char *, char *);
+void    snmpv3_authtype_conf(const char *word, char *cptr);
+void    snmpv3_privtype_conf(const char *word, char *cptr);
 void    init_snmpv3(const char *);
 int	init_snmpv3_post_config(int majorid, int minorid, void *serverarg,
                                 void *clientarg);

@@ -127,7 +127,7 @@ PERFORMANCE OF THIS SOFTWARE.
  * particularily easy bug to track down so this saves debugging time at
  * the expense of a few memcpy's.
  */
-#undef MIB_CLIENTS_ARE_EVIL
+#define MIB_CLIENTS_ARE_EVIL
  
 extern struct subtree *subtrees;
 int subtree_size;
@@ -349,7 +349,7 @@ search_subtree_vars(struct subtree *tp,
 		    cvp->findVar = vp->findVar;
                     *write_method = NULL;
 #ifdef MIB_CLIENTS_ARE_EVIL
-                    memcpy(save, name, *namelen);
+                    memcpy(save, name, *namelen*sizeof(oid));
                     savelen = *namelen;
 #endif
 	    	    sprint_objid(c_oid, cvp->name, cvp->namelen);
@@ -360,7 +360,13 @@ search_subtree_vars(struct subtree *tp,
 				(access==NULL) ? "(null)" : "something" ));
 #ifdef MIB_CLIENTS_ARE_EVIL
                     if (access == NULL) {
-                      memcpy(name, save, savelen);
+		      if (memcmp(name, save, savelen) != 0) {
+			char buf1[256], buf2[256];
+			sprint_objid(buf1, save, savelen);
+			sprint_objid(buf2, name, *namelen);
+			fprintf(stderr,"evil_client: %s => %s\n", buf1, buf2);
+		      }
+                      memcpy(name, save, savelen*sizeof(oid));
                       *namelen = savelen;
                     }
 #endif
@@ -431,6 +437,7 @@ getStatPtr(
     sprint_objid(c_oid, name, *namelen);
     DEBUGMSGTL(("snmp_vars", "Looking for %s....\n", c_oid));
     tp = find_subtree(name, *namelen, NULL);
+    
     while ( search_return == NULL && tp != NULL ) {
 	sprint_objid(c_oid, tp->name, tp->namelen);
 	DEBUGMSGTL(("snmp_vars", "Trying tree  %s....\n", c_oid));

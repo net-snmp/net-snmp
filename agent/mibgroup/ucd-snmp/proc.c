@@ -132,7 +132,7 @@ static struct myproc *get_proc_by_name(char *name) {
   return ptmp;
 }
    
-void procfix_parse_config(char *token, char* cptr)
+void procfix_parse_config(const char *token, char* cptr)
 {
   char tmpname[STRMAX];
   struct myproc *procp;
@@ -153,7 +153,7 @@ void procfix_parse_config(char *token, char* cptr)
 }
 
 
-void proc_parse_config(char *token, char* cptr)
+void proc_parse_config(const char *token, char* cptr)
 {
   char tmpname[STRMAX];
   struct myproc **procp = &procwatch;

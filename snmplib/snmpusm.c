@@ -2536,7 +2536,7 @@ usm_read_user(char *line)
 
 /* snmpd.conf parsing routines */
 void
-usm_parse_config_usmUser(char *token, char *line)
+usm_parse_config_usmUser(const char *token, char *line)
 {
   struct usmUser *uptr;
 
@@ -2568,7 +2568,7 @@ usm_parse_config_usmUser(char *token, char *line)
  * ASSUMES  Passwords are null-terminated printable strings.
  */
 void
-usm_set_password(char *token, char *line)
+usm_set_password(const char *token, char *line)
 {
   char		 *cp;
   char		  nameBuf[SNMP_MAXBUF];
@@ -2609,7 +2609,7 @@ usm_set_password(char *token, char *line)
 
 /* uses the rest of LINE to configure USER's password of type TOKEN */
 void
-usm_set_user_password(struct usmUser *user, char *token, char *line)
+usm_set_user_password(struct usmUser *user, const char *token, char *line)
 {
   char	 *cp = line;
   u_char	 *engineID = user->engineID;

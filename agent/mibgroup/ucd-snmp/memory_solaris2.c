@@ -149,7 +149,7 @@ u_char *var_extensible_mem(
 
 #define DEFAULTMINIMUMSWAP 16000  /* kilobytes */
 
-void memory_parse_config(char *token, char *cptr)
+void memory_parse_config(const char *token, char *cptr)
 {
   minimumswap = atoi(cptr);
 }

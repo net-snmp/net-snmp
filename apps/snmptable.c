@@ -173,26 +173,26 @@ int main(int argc, char *argv[])
 
   /* get the initial object and subtree */
   /* specified on the command line */
-  if (optind+1 == argc) {
-    rootlen = MAX_OID_LEN;
-    if (!snmp_parse_oid(argv[optind], root, &rootlen)){
-      snmp_perror(argv[optind]);
-      exit(1);
-    }
-    localdebug = snmp_get_dump_packet();
-    if( nonsequential ){
-      tblname = strrchr( argv[optind], '.' );
-      if( tblname )
-        ++tblname;
-      else
-        tblname = argv[optind];
-    }
-    else
-      tblname = NULL;
-  } else {
-    fprintf(stderr,"Missing table name\n");
+  if (optind+1 != argc) {
+    fprintf(stderr,"Must have exactly one table name\n");
     usage();
   }
+
+  rootlen = MAX_OID_LEN;
+  if (!snmp_parse_oid(argv[optind], root, &rootlen)){
+    snmp_perror(argv[optind]);
+    exit(1);
+  }
+  localdebug = snmp_get_dump_packet();
+  if( nonsequential ){
+    tblname = strrchr( argv[optind], '.' );
+    if( tblname )
+      ++tblname;
+    else
+      tblname = argv[optind];
+  }
+  else
+    tblname = NULL;
 
   get_field_names( tblname );
 
@@ -271,8 +271,8 @@ void get_field_names( char* tblname )
 {
   char string_buf[SPRINT_MAX_LEN];
   char *name_p;
-
   struct tree *tbl = NULL;
+
   if( tblname )
 	  tbl = find_tree_node( tblname, -1 );
   if( tbl )
@@ -283,16 +283,17 @@ void get_field_names( char* tblname )
 	tbl = tbl->child_list;
   }
   else
-  root[rootlen++] = 1;
+    root[rootlen++] = 1;
+
   fields = 0;
   while (1) {
     fields++;
-	if( tbl ) {
-		root[ rootlen ] = tbl->subid;
-		tbl = tbl->next_peer;
-	}
-	else
-    root[rootlen] = fields;
+    if( tbl ) {
+      root[ rootlen ] = tbl->subid;
+      tbl = tbl->next_peer;
+    }
+    else
+      root[rootlen] = fields;
     sprint_objid(string_buf, root, rootlen+1);
     name_p = strrchr(string_buf, '.');
     if (localdebug) printf("%s %c\n", string_buf, name_p[1]);
@@ -302,7 +303,7 @@ void get_field_names( char* tblname )
     else column = (struct column *)realloc(column, fields*sizeof(*column));
     column[fields-1].label = strdup(name_p+1);
     column[fields-1].width = strlen(name_p+1);
-	column[fields-1].subid = root[ rootlen ];
+    column[fields-1].subid = root[ rootlen ];
   }
   if (fields == 1) {
     fprintf(stderr, "Was that a table? %s\n", string_buf);

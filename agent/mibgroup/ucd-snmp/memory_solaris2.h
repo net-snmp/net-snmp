@@ -13,7 +13,7 @@ extern FindVarMethod var_extensible_mem;
 void init_memory_solaris2(void);
 
 /* config file parsing routines */
-void memory_parse_config(char *, char *);
+void memory_parse_config(const char *, char *);
 void memory_free_config(void);
 long getTotalSwap(void);
 long getFreeSwap(void);

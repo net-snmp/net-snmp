@@ -378,7 +378,7 @@ send_trap_pdu(struct snmp_pdu *pdu)
 	 *
 	 *******************/
 
-void snmpd_parse_config_authtrap(char *token, 
+void snmpd_parse_config_authtrap(const char *token, 
 				 char *cptr)
 {
     int i;
@@ -396,7 +396,7 @@ void snmpd_parse_config_authtrap(char *token,
 	snmp_enableauthentraps = i;
 }
 
-void snmpd_parse_config_trapsink(char *token, 
+void snmpd_parse_config_trapsink(const char *token, 
 				 char *cptr)
 {
     char tmpbuf[1024];
@@ -413,7 +413,7 @@ void snmpd_parse_config_trapsink(char *token,
 
 
 void
-snmpd_parse_config_trap2sink(char *word, char *cptr)
+snmpd_parse_config_trap2sink(const char *word, char *cptr)
 {
     char tmpbuf[1024];
     char *sp, *cp;
@@ -428,7 +428,7 @@ snmpd_parse_config_trap2sink(char *word, char *cptr)
 }
 
 void
-snmpd_parse_config_informsink(char *word, char *cptr)
+snmpd_parse_config_informsink(const char *word, char *cptr)
 {
     char tmpbuf[1024];
     char *sp, *cp;
@@ -443,7 +443,7 @@ snmpd_parse_config_informsink(char *word, char *cptr)
 }
 
 void
-snmpd_parse_config_trapcommunity(char *word, char *cptr)
+snmpd_parse_config_trapcommunity(const char *word, char *cptr)
 {
     if (snmp_trapcommunity) free(snmp_trapcommunity);
     snmp_trapcommunity = malloc (strlen(cptr)+1);

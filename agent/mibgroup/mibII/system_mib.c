@@ -79,7 +79,7 @@ int header_system(struct variable *,oid *, size_t *, int, size_t *, WriteMethod 
 
 /* snmpd.conf config parsing */
 
-void system_parse_config_sysloc(char *token, 
+void system_parse_config_sysloc(const char *token, 
 				char *cptr)
 {
   char tmpbuf[1024];
@@ -93,13 +93,13 @@ void system_parse_config_sysloc(char *token,
   }
 }
 
-void system_parse_config_sysServices(char *token, char *cptr)
+void system_parse_config_sysServices(const char *token, char *cptr)
 {
   sysServices = atoi(cptr);
   sysServicesConfiged = 1;
 }
 
-void system_parse_config_syscon(char *token, 
+void system_parse_config_syscon(const char *token, 
 				char *cptr)
 {
   char tmpbuf[1024];

@@ -6,12 +6,12 @@ void send_trap_pdu(struct snmp_pdu *);
 void send_v2trap ( struct variable_list *);
 void send_trap_vars (int, int, struct variable_list *);
 
-void snmpd_parse_config_authtrap (char *, char *);
-void snmpd_parse_config_trapsink (char *, char *);
-void snmpd_parse_config_trap2sink (char *, char *);
-void snmpd_parse_config_informsink (char *, char *);
+void snmpd_parse_config_authtrap (const char *, char *);
+void snmpd_parse_config_trapsink (const char *, char *);
+void snmpd_parse_config_trap2sink (const char *, char *);
+void snmpd_parse_config_informsink (const char *, char *);
 void snmpd_free_trapsinks (void);
-void snmpd_parse_config_trapcommunity (char *, char *);
+void snmpd_parse_config_trapcommunity (const char *, char *);
 void snmpd_free_trapcommunity (void);
 
 int create_trap_session (char *, char *, int, int);
