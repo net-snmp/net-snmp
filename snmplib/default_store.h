@@ -37,6 +37,7 @@ extern "C" {
 #define DS_LIB_DONT_CHECK_RANGE    16 /* don't check values for ranges on send*/
 #define DS_LIB_NO_TOKEN_WARNINGS   17 /* no warn about unknown config tokens */
 #define DS_LIB_NUMERIC_TIMETICKS   18 /* print timeticks as a number */
+#define DS_LIB_ESCAPE_QUOTES       19 /* shell escape quote marks in oids */
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0
