@@ -261,6 +261,8 @@ sub oidlength {
 #   ${var}otherstuff   -- appending text to variable contents
 #   $var.uc            -- all upper case version of $var
 #
+# NOTE: THESE ARE AUTO-EXTRACTED/PROCESSED BY ../mib2c.extract.pl for man pages
+#
 # Mib components, $var must first expand to a mib node name:
 #
 #   $var.uc            -- all upper case version of $var
@@ -340,10 +342,15 @@ sub process_vars {
 
 # process various types of statements
 #
-# THESE ARE PROCESSED BY ../mib2c.extract.pl.  
+# NOTE: THESE ARE AUTO-EXTRACTED/PROCESSED BY ../mib2c.extract.pl for man pages
 # which include:
 #   @open FILE@
 #     writes generated output to FILE
+#     note that for file specifications, opening '-' will print to stdout.
+#   @append FILE@
+#     appends the given FILE
+#   @close FILE@
+#     closes the given FILE
 #   @push@
 #     save the current outputs, then clear outputs. Use with @open@
 #     and @pop@ to write to a new file without interfering with current
@@ -387,7 +394,10 @@ sub process_vars {
 #     repeat iterate over code until @end@ setting $RANGE_START and $RANGE_END
 #     to the legal accepted range set for a given mib NODE.
 #   @eval $VAR = expression@
-#     evaluates expression and assigns the results to $VAR
+#     evaluates expression and assigns the results to $VAR.  This is
+#     not a full perl eval, but sort of a "psuedo" eval useful for
+#     simple expressions while keeping the same variable name space.
+#     See below for a full-blown export to perl.
 #   @perleval STUFF@
 #     evaluates STUFF directly in perl.  Note that all mib2c variables
 #     interpereted within .conf files are in $vars{NAME}.
@@ -400,13 +410,30 @@ sub process_vars {
 #     end for the current foreach clause.
 #   @if expression@
 #     evaluates expression, and if expression is true processes
-#     contained part until appropriate @end@ is reached.
+#     contained part until appropriate @end@ is reached.  If an @else@
+#     clause is found, it will be evaluated instead if expression
+#     isn't true.
 #   @define NAME@
 #   @enddefine@
 #     Memorizes "stuff" between the define and enddefine tags for
 #     later calling as NAME by @calldefine NAME@.
 #   @calldefine NAME@
 #     Executes stuff previously memorized as NAME.
+#   @printf "expression" stuff1, stuff2, ...@
+#     Like all the other printf's you know and love.
+#   @run FILE@
+#     Sources the contents of FILE as a mib2c file,
+#     but does not affect current files opened.
+#   @include FILE@
+#     Sources the contents of FILE as a mib2c file and appends its
+#     output to the current output.
+#   @prompt $var QUESTION@
+#     Presents the user with QUESTION, expects a response and puts it in $var
+#   @print STUFF@
+#     Prints stuff directly to the users screen (ie, not to where
+#     normal mib2c output goes)
+#   @exit@
+#     Bail out!
 #
 sub skippart {
   my $endcount = 1;
