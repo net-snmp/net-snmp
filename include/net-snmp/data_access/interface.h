@@ -6,7 +6,7 @@
 #ifndef NETSNMP_ACCESS_INTERFACE_H
 #define NETSNMP_ACCESS_INTERFACE_H
 
-# ifdef __cplusplus
+#ifdef __cplusplus
 extern          "C" {
 #endif
 
@@ -130,39 +130,6 @@ typedef struct netsnmp_interface_entry_s {
 
 } netsnmp_interface_entry;
 
-/** I learned this nasty trick in kernel header files */
-#define if_ibytes stats.ibytes
-#define if_iucast stats.iucast
-#define if_imcast stats.imcast
-#define if_ibcast stats.ibcast
-#define if_ierrors stats.ierrors
-#define if_idiscards stats.idiscards
-#define if_iunknown_protos stats.iunknown_protos
-#define if_obytes stats.obytes
-#define if_oucast stats.oucast
-#define if_omcast stats.omcast
-#define if_obcast stats.obcast
-#define if_oerrors stats.oerrors
-#define if_odiscards stats.odiscards
-#define if_oqlen stats.oqlen
-#define if_collisions stats.collisions
-
-#define old_ibytes old_stats->ibytes
-#define old_iucast old_stats->iucast
-#define old_imcast old_stats->imcast
-#define old_ibcast old_stats->ibcast
-#define old_ierrors old_stats->ierrors
-#define old_idiscards old_stats->idiscards
-#define old_iunknown_protos old_stats->iunknown_protos
-#define old_obytes old_stats->obytes
-#define old_oucast old_stats->oucast
-#define old_omcast old_stats->omcast
-#define old_obcast old_stats->obcast
-#define old_oerrors old_stats->oerrors
-#define old_odiscards old_stats->odiscards
-#define old_oqlen old_stats->oqlen
-#define old_collisions old_stats->collisions
-
 /*
  * conf file overrides
  */
@@ -173,6 +140,7 @@ typedef struct _conf_if_list {
     struct _conf_if_list *next;
 } netsnmp_conf_if_list;
 
+    typedef netsnmp_conf_if_list conf_if_list; /* backwards compat */
 
 /**---------------------------------------------------------------------*/
 /*
@@ -238,7 +206,7 @@ netsnmp_access_interface_entry_overrides_get(const char * name);
 
 /**---------------------------------------------------------------------*/
 
-# ifdef __cplusplus
+#ifdef __cplusplus
 };
 #endif
 
