@@ -68,6 +68,7 @@
 #include "read_config.h"
 #include "snmp_debug.h"
 #include "snmpv3.h"
+#include "default_store.h"
 
 int random_access = 0;
 
@@ -478,6 +479,10 @@ snmp_parse_args(int argc,
 
   /* read in MIB database and initialize the snmp library*/
   init_snmp("snmpapp");
+
+  if (session->version == SNMP_DEFAULT_VERSION) {
+    session->version = ds_get_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION);
+  }
 
   /* make our engineID something other than what the localhost might
    * be using, otherwise the automatic v3 time-synchronization won't work */
