@@ -11,13 +11,15 @@
 /*
  * This structure is used to represent the index for a table.
  */
-@eval $m2c_gi_others = (count_indexes($table) - 1)@
-typedef struct ${table}_mib_index_s {
+@eval $m2c_gi_others = (count_indexes($context) - 1)@
+typedef struct ${context}_mib_index_s {
 
 @foreach $node index@
 @    include m2c_setup_node.m2i@
 ##@    include details-node.m2i@
-        /** $m2c_node_summary */
+        /*
+         * $m2c_node_summary
+         */
 @    if $m2c_node_needlength == 1@
 @        eval $m2c_gi_maxlen = (126 - $node.oidlength - $m2c_gi_others)@
 @        if $m2c_node_maxlen > $m2c_gi_maxlen@
@@ -29,7 +31,7 @@ typedef struct ${table}_mib_index_s {
 
 @end@ # foreach
 
-} ${table}_mib_index;
+} ${context}_mib_index;
 
 ##
 ########################################################################
