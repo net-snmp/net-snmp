@@ -80,7 +80,8 @@ LOBJS=	snmp_client.lo mib.lo parse.lo snmp_api.lo snmp.lo 	\
 TOBJS=$(LOBJS)
 
 CFLAGS	 = @CFLAGS@
-CPPFLAGS = -I. -I../include -I.. -I$(srcdir) -I$(srcdir)/.. @CPPFLAGS@
+CPPFLAGS = -I$(top_srcdir)/include -I../include \
+	-I. -I.. -I$(srcdir) -I$(srcdir)/.. @CPPFLAGS@
 
 all: $(TARG)
 
