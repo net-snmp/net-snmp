@@ -69,7 +69,6 @@ SOFTWARE.
 #include "acl.h"
 
 extern int  errno;
-int	snmp_dump_packet = 0;
 
 void snmp_add_var();
 int ascii_to_binary();
@@ -123,10 +122,10 @@ main(argc, argv)
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
 		case 'd':
-		    snmp_dump_packet++;
+		    snmp_set_dump_packet(1);
 		    break;
 		case 'q':
-		    quick_print++;
+		    snmp_set_quick_print(1);
 		    break;
                 case 'p':
                     port_flag++;

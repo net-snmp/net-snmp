@@ -52,7 +52,6 @@ SOFTWARE.
 #include "snmp_client.h"
 
 extern int  errno;
-int	snmp_dump_packet = 0;
 extern int save_mib_descriptions;
 extern int mib_warnings;
 

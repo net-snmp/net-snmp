@@ -80,7 +80,6 @@ SOFTWARE.
 #include "system.h"
 
 extern int  errno;
-int	snmp_dump_packet = 0;
 int ascii_to_binary();
 int hex_to_binary();
 
@@ -310,7 +309,7 @@ main(argc, argv)
 		    agent = argv[++arg];
 		    break;
 		case 'd':
-		    snmp_dump_packet++;
+		    snmp_set_dump_packet(1);
 		    break;
 		case 'p':
 		    dest_port = atoi (argv[++arg]);

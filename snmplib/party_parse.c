@@ -38,9 +38,11 @@
 #define AUTH_STATE	6
 #define PRIV_STATE 	7
 
+#if  0
 static oid noProxy[] = {1, 3, 6, 1, 2, 1, 20, 1, 3, 1};
+#endif
 
-static error_exit(str, linenumber, filename)
+static void error_exit(str, linenumber, filename)
     char *str;
     int linenumber;
     char *filename;
@@ -63,7 +65,10 @@ read_party_database(filename)
     u_short port;
     oid partyid[64];
     int partyidlen;
-    int priv, auth, proxy;
+    int priv, auth;
+#if 0
+    int proxy;
+#endif
     int lifetime, maxmessagesize;
     u_long clock;
     u_char privPrivate[32], authPrivate[32], privPublic[64], authPublic[64];
@@ -163,7 +168,7 @@ read_party_database(filename)
 		    error_exit("Bad clock value (should be 8 hex digits)",
 			       linenumber, filename);
 	    }
-	    if (sscanf(buf1, "%x", &clock) != 1)
+	    if (sscanf(buf1, "%lx", &clock) != 1)
 		error_exit("Bad clock value", linenumber, filename);
 	    clock_pos = chars - strlen(buf);
 	    for(cp = buf; *cp && !isxdigit(*cp); cp++)
@@ -171,7 +176,7 @@ read_party_database(filename)
 	    state = AUTH_STATE;
 	    break;
 	  case AUTH_STATE:
-	    if (sscanf(buf, "%s %s", buf1, buf2, buf3) != 2)
+	    if (sscanf(buf, "%s %s", buf1, buf2) != 2)
 		error_exit("Bad parse", linenumber, filename);
 	    if (strlen(buf1) != 32)
 		error_exit("Bad private key (should be 32 hex digits)",
@@ -183,7 +188,7 @@ read_party_database(filename)
 	    }
 	    ucp = authPrivate;
 	    for(cp = buf1; *cp; cp += 2, ucp++){
-		if (sscanf(cp, "%2x", &byte) != 1)
+		if (sscanf(cp, "%2lx", &byte) != 1)
 		    error_exit("Bad parse", linenumber, filename);
 		*ucp = byte;
 	    }
@@ -203,7 +208,7 @@ read_party_database(filename)
 	    } else {
 		ucp = authPublic;
 		for(cp = buf2; *cp; cp += 2, ucp++){
-		    if (sscanf(cp, "%2x", &byte) != 1)
+		    if (sscanf(cp, "%2lx", &byte) != 1)
 			error_exit("Bad parse", linenumber, filename);
 		    *ucp = byte;
 		}
@@ -224,7 +229,7 @@ read_party_database(filename)
 	    }
 	    ucp = privPrivate;
 	    for(cp = buf1; *cp; cp += 2, ucp++){
-		if (sscanf(cp, "%2x", &byte) != 1)
+		if (sscanf(cp, "%2lx", &byte) != 1)
 		    error_exit("Bad parse", linenumber, filename);
 		*ucp = byte;
 	    }
@@ -244,7 +249,7 @@ read_party_database(filename)
 	    } else {
 		ucp = privPublic;
 		for(cp = buf2; *cp; cp += 2, ucp++){
-		    if (sscanf(cp, "%2x", &byte) != 1)
+		    if (sscanf(cp, "%2lx", &byte) != 1)
 			error_exit("Bad parse", linenumber, filename);
 		    *ucp = byte;
 		}
@@ -392,7 +397,7 @@ update_clock(file, pos, clock)
     int fd;
     char buf[9];
 
-    sprintf(buf, "%08X", clock);
+    sprintf(buf, "%08lX", clock);
     fd = open(file, O_WRONLY);
     if (lseek(fd, pos, SEEK_SET) != pos){
 	fprintf(stderr, "Couldn't update file\n");

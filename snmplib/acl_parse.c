@@ -27,7 +27,7 @@
 #define TRUE 1
 #define FALSE 0
 
-static error_exit(str, linenumber, filename)
+static void error_exit(str, linenumber, filename)
     char *str;
     int linenumber;
     char *filename;

@@ -108,7 +108,6 @@ int debug = 0;
 
 
 struct snmp_session *Session;
-int snmp_dump_packet = 0;
 int print_errors = 0;
 
 void
@@ -155,10 +154,10 @@ main(argc, argv)
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
 	      case 'd':
-		snmp_dump_packet++;
+		snmp_set_dump_packet(1);
 		break;
 	      case 'q':
-		quick_print++;
+		snmp_set_quick_print(1);
 		break;
 	      case 'p':
 		port_flag++;

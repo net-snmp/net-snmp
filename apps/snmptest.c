@@ -71,7 +71,6 @@ SOFTWARE.
 
 extern int  errno;
 int command = GET_REQ_MSG;
-int	snmp_dump_packet = 0;
 
 int input_variable();
 
@@ -119,10 +118,10 @@ main(argc, argv)
 	if (argv[arg][0] == '-'){
 	    switch(argv[arg][1]){
 		case 'd':
-		    snmp_dump_packet++;
+		    snmp_set_dump_packet(1);
 		    break;
 		case 'q':
-		    quick_print++;
+		    snmp_set_quick_print(1);
 		    break;
                 case 'p':
                     port_flag++;
@@ -555,11 +554,11 @@ input_variable(vp)
 		printf("(Are you sending to the right port?)\n");
 		break;
 	    case 'D':
-		if (snmp_dump_packet){
-		    snmp_dump_packet = 0;
+		if (snmp_get_dump_packet()){
+		    snmp_set_dump_packet(0);
 		    printf("Turned packet dump off\n");
 		} else {
-		    snmp_dump_packet = 1;
+		    snmp_set_dump_packet(1);
 		    printf("Turned packet dump on\n");
 		}
 		break;
@@ -570,11 +569,11 @@ input_variable(vp)
 			exit(0);
 			break;
 		    case 'P':
-			if (quick_print){
-			   quick_print = 0;
+			if (snmp_get_quick_print()){
+			   snmp_set_quick_print(0);
 			   printf("Turned quick printing off\n");
 			} else {
-			   quick_print = 1;
+			   snmp_set_quick_print(1);
 			   printf("Turned quick printing on\n");
 			}
 			break;

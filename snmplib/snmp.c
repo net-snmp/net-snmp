@@ -25,6 +25,7 @@ SOFTWARE.
 ******************************************************************/
 
 #include <config.h>
+#include <ctype.h>
 
 #ifdef KINETICS
 #include "gw.h"
@@ -54,7 +55,6 @@ SOFTWARE.
 #include "snmp.h"
 #include "snmp_impl.h"
 #include "mib.h"
-
 
 void
 xdump(cp, length, prefix)

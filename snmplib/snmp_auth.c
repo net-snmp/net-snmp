@@ -70,6 +70,7 @@ SOFTWARE.
 #include "md5.h"
 #include "acl.h"
 
+void md5Digest();
 
 /* this should be set to TRUE for machines that use network byte ordering,
 ** and FALSE for machines that byte swap.
@@ -393,13 +394,11 @@ snmp_secauth_build(data, length, pi, messagelen, srcParty, srcPartyLen,
 {
     struct partyEntry *srcp, *dstp;
     struct timeval now;
-    u_char *cp, *cp1, *block, *endOfPacket;
-    int dummyLength, count;
-    u_char key[8], iv[8];	/* initialization vector */
+    u_char *endOfPacket;
+    int dummyLength;
     u_char *digestStart = NULL, *digestEnd, *authMsgStart;
     u_char authDigest[16];
-    static struct partyEntry *lastParty = NULL;
-    u_char *h1, *h2, *h3, *h4, *h5;
+    u_char *h1, *h2, *h3, *h5;
     int pad;
     int authInfoSize;
 
