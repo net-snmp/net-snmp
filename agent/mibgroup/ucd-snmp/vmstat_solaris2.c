@@ -44,6 +44,7 @@
 #include <snmp_alarm.h>
 
 /* Header file for this module */
+#include "vmstat.h"
 #include "vmstat_solaris2.h"
 
 /* Includes end here */
@@ -115,12 +116,6 @@ static struct cpu_stat_snapshot raw_values;
 /* Function prototype */
 static void update_stats(unsigned int registrationNumber, void *clientarg);
 static int take_snapshot(struct cpu_stat_snapshot *css);
-static unsigned char *var_extensible_vmstat(struct variable *vp,
-                                            oid *name,
-                                            size_t *length,
-                                            int exact,
-                                            size_t *var_len,
-                                            WriteMethod **write_method);
 
 /* init_vmstat_solaris2 starts here */
 /* Init function for this module, from prototype */
@@ -145,6 +140,8 @@ void init_vmstat_solaris2(void)
     {CPURAWUSER, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWUSER}},
     {CPURAWSYSTEM, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWSYSTEM}},
     {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
+    {CPURAWWAIT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWWAIT}},
+    {CPURAWKERNEL, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWKERNEL}},
     /* Future use: */
     /*
       {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
@@ -495,6 +492,16 @@ static unsigned char *var_extensible_vmstat(struct variable *vp,
     take_snapshot(&raw_values);
     /* LINTED has to be 'long' */
     long_ret = (long)(raw_values.css_cpu[CPU_IDLE] / raw_values.css_cpus);
+    return((u_char *) (&long_ret));    
+  case CPURAWWAIT:
+    take_snapshot(&raw_values);
+    /* LINTED has to be 'long' */
+    long_ret = (long)(raw_values.css_cpu[CPU_WAIT] / raw_values.css_cpus);
+    return((u_char *) (&long_ret));    
+  case CPURAWKERNEL:
+    take_snapshot(&raw_values);
+    /* LINTED has to be 'long' */
+    long_ret = (long)(raw_values.css_cpu[CPU_KERNEL] / raw_values.css_cpus);
     return((u_char *) (&long_ret));    
     /* reserved for future use */
     /*

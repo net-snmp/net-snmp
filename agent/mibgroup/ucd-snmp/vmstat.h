@@ -7,10 +7,8 @@
 
 #include "mibdefs.h"
 
+static FindVarMethod var_extensible_vmstat;
 void init_vmstat(void);
-
-extern FindVarMethod var_extensible_vmstat;
-
 
 #define SWAPIN 3
 #define SWAPOUT 4
@@ -26,5 +24,8 @@ extern FindVarMethod var_extensible_vmstat;
 #define CPURAWNICE 51
 #define CPURAWSYSTEM 52
 #define CPURAWIDLE 53
+#define CPURAWWAIT 54
+#define CPURAWKERNEL 55
+#define CPURAWINTR 56
 
 #endif /* _MIBGROUP_VMSTAT_H */

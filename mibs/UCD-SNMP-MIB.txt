@@ -984,6 +984,9 @@ ssCpuIdle OBJECT-TYPE
 	"percentages of idle CPU time."
     ::= { systemStats 11 }
 
+-- The agent only implements those of the following counters that the
+-- kernel supports! Don't expect all to be present.
+
 ssCpuRawUser OBJECT-TYPE
     SYNTAX      Counter32
     MAX-ACCESS  read-only
@@ -1015,6 +1018,30 @@ ssCpuRawIdle OBJECT-TYPE
     DESCRIPTION
         "idle CPU time."
     ::= { systemStats 53 }
+
+ssCpuRawWait OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "iowait CPU time. This is primarily a SysV thingie"
+    ::= { systemStats 54 }
+
+ssCpuRawKernel OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "kernel CPU time."
+    ::= { systemStats 55 }
+
+ssCpuRawInterrupt OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "interruptlevel CPU time. This is primarily a BSD thingie"
+    ::= { systemStats 56 }
 
 -- possibly used in the future:
 --
