@@ -41,7 +41,7 @@
 
 #ifndef SUN_LEN
 /*
- * Evaluate to actual length of the `sockaddr_un' structure.  
+ * Evaluate to actual length of the `sockaddr_un' structure.
  */
 #define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)->sun_path)         \
                       + strlen ((ptr)->sun_path))
@@ -52,7 +52,7 @@ static netsnmp_tdomain unixDomain;
 
 
 /*
- * This is the structure we use to hold transport-specific data.  
+ * This is the structure we use to hold transport-specific data.
  */
 
 typedef struct _sockaddr_un_pair {
@@ -64,7 +64,7 @@ typedef struct _sockaddr_un_pair {
 
 /*
  * Return a string representing the address in data, or else the "far end"
- * address if data is NULL.  
+ * address if data is NULL.
  */
 
 static char *
@@ -103,9 +103,9 @@ netsnmp_unix_fmtaddr(netsnmp_transport *t, void *data, int len)
 
 
 /*
- * You can write something into opaque that will subsequently get passed back 
+ * You can write something into opaque that will subsequently get passed back
  * to your send function if you like.  For instance, you might want to
- * remember where a PDU came from, so that you can send a reply there...  
+ * remember where a PDU came from, so that you can send a reply there...
  */
 
 static int
@@ -125,24 +125,24 @@ netsnmp_unix_recv(netsnmp_transport *t, void *buf, int size,
             return -1;
         } else {
             memset(to, 0, tolen);
-		}
-		if(getsockname(t->sock, to, &tolen) != 0){
-		    free(to);
+        }
+        if(getsockname(t->sock, to, &tolen) != 0){
+            free(to);
             *opaque = NULL;
             *olength = 0;
-		    return -1;
-		};
-	while (rc < 0) {
-	    rc = recv(t->sock, buf, size, 0);
-	    if (rc < 0 && errno != EINTR) {
-		DEBUGMSGTL(("netsnmp_unix", "recv fd %d err %d (\"%s\")\n",
-			    t->sock, errno, strerror(errno)));
-		return rc;
-	    }
-		*opaque = (void*)to;
-		*olength = sizeof(struct sockaddr_un);
-	}
-	DEBUGMSGTL(("netsnmp_unix", "recv fd %d got %d bytes\n", t->sock, rc));
+            return -1;
+        };
+        while (rc < 0) {
+            rc = recv(t->sock, buf, size, 0);
+            if (rc < 0 && errno != EINTR) {
+                DEBUGMSGTL(("netsnmp_unix", "recv fd %d err %d (\"%s\")\n",
+                            t->sock, errno, strerror(errno)));
+                return rc;
+            }
+            *opaque = (void*)to;
+            *olength = sizeof(struct sockaddr_un);
+        }
+        DEBUGMSGTL(("netsnmp_unix", "recv fd %d got %d bytes\n", t->sock, rc));
     }
     return rc;
 }
@@ -158,12 +158,12 @@ netsnmp_unix_send(netsnmp_transport *t, void *buf, int size,
     if (t != NULL && t->sock >= 0) {
         DEBUGMSGTL(("netsnmp_unix", "send %d bytes to %p on fd %d\n",
                     size, buf, t->sock));
-	while (rc < 0) {
-	    rc = send(t->sock, buf, size, 0);
-	    if (rc < 0 && errno != EINTR) {
-		break;
-	    }
-	}
+        while (rc < 0) {
+            rc = send(t->sock, buf, size, 0);
+            if (rc < 0 && errno != EINTR) {
+                break;
+            }
+        }
     }
     return rc;
 }
@@ -213,7 +213,7 @@ netsnmp_unix_accept(netsnmp_transport *t)
 
     if (farend == NULL) {
         /*
-         * Indicate that the acceptance of this socket failed.  
+         * Indicate that the acceptance of this socket failed.
          */
         DEBUGMSGTL(("netsnmp_unix", "accept: malloc failed\n"));
         return -1;
@@ -225,7 +225,7 @@ netsnmp_unix_accept(netsnmp_transport *t)
 
         if (newsock < 0) {
             DEBUGMSGTL(("netsnmp_unix","accept failed rc %d errno %d \"%s\"\n",
-			newsock, errno, strerror(errno)));
+                        newsock, errno, strerror(errno)));
             free(farend);
             return newsock;
         }
@@ -235,7 +235,7 @@ netsnmp_unix_accept(netsnmp_transport *t)
         }
 
         DEBUGMSGTL(("netsnmp_unix", "accept succeeded (farend %p len %d)\n",
-		    farend, farendlen));
+                    farend, farendlen));
         t->data = farend;
         t->data_length = sizeof(struct sockaddr_un);
         return newsock;
@@ -248,10 +248,10 @@ netsnmp_unix_accept(netsnmp_transport *t)
 
 
 /*
- * Open a Unix-domain transport for SNMP.  Local is TRUE if addr is the local 
- * address to bind to (i.e. this is a server-type session); otherwise addr is 
+ * Open a Unix-domain transport for SNMP.  Local is TRUE if addr is the local
+ * address to bind to (i.e. this is a server-type session); otherwise addr is
  * the remote address to send things to (and we make up a temporary name for
- * the local end of the connection).  
+ * the local end of the connection).
  */
 
 netsnmp_transport *
@@ -271,8 +271,8 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         return NULL;
     }
 
-    string = netsnmp_unix_fmtaddr(NULL, (void *)addr, 
-				  sizeof(struct sockaddr_un));
+    string = netsnmp_unix_fmtaddr(NULL, (void *)addr,
+                                  sizeof(struct sockaddr_un));
     DEBUGMSGTL(("netsnmp_unix", "open %s %s\n", local ? "local" : "remote",
                 string));
     free(string);
@@ -311,7 +311,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
 
         /*
          * This session is inteneded as a server, so we must bind to the given
-         * path (unlinking it first, to avoid errors).  
+         * path (unlinking it first, to avoid errors).
          */
 
         t->flags |= NETSNMP_TRANSPORT_FLAG_LISTEN;
@@ -337,7 +337,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
         sup->local = 1;
 
         /*
-         * Now sit here and listen for connections to arrive.  
+         * Now sit here and listen for connections to arrive.
          */
 
         rc = listen(t->sock, NETSNMP_STREAM_QUEUE_LEN);
@@ -371,7 +371,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
 
         /*
          * Save the remote address in the transport-specific data pointer for
-         * later use by netsnmp_unix_send.  
+         * later use by netsnmp_unix_send.
          */
 
         sup->server.sun_family = AF_UNIX;
@@ -381,7 +381,7 @@ netsnmp_unix_transport(struct sockaddr_un *addr, int local)
 
     /*
      * Message size is not limited by this transport (hence msgMaxSize
-     * is equal to the maximum legal size of an SNMP message).  
+     * is equal to the maximum legal size of an SNMP message).
      */
 
     t->msgMaxSize = 0x7fffffff;
@@ -480,7 +480,7 @@ netsnmp_unix_getSecName(void *opaque, int olength,
 
     /*
      * Special case if there are NO entries (as opposed to no MATCHING
-     * entries).  
+     * entries).
      */
 
     if (com2SecUnixList == NULL) {
@@ -490,36 +490,35 @@ netsnmp_unix_getSecName(void *opaque, int olength,
 
     /*
      * If there is no unix socket path, then there can be no valid security
-     * name.  
+     * name.
      */
-	
+
     if (opaque == NULL || olength != sizeof(struct sockaddr_un) ||
         to->sun_family != AF_UNIX) {
         DEBUGMSGTL(("netsnmp_unix_getSecName",
-		    "no unix destine address in PDU?\n"));
+                    "no unix destine address in PDU?\n"));
         return 1;
     }
 
     DEBUGIF("netsnmp_unix_getSecName") {
-	ztcommunity = (char *)malloc(community_len + 1);
-	if (ztcommunity != NULL) {
-	    memcpy(ztcommunity, community, community_len);
-	    ztcommunity[community_len] = '\0';
-	}
+        ztcommunity = (char *)malloc(community_len + 1);
+        if (ztcommunity != NULL) {
+            memcpy(ztcommunity, community, community_len);
+            ztcommunity[community_len] = '\0';
+        }
 
-	DEBUGMSGTL(("netsnmp_unix_getSecName", "resolve <\"%s\">\n",
-		    ztcommunity ? ztcommunity : "<malloc error>"
-		    ));
+        DEBUGMSGTL(("netsnmp_unix_getSecName", "resolve <\"%s\">\n",
+                    ztcommunity ? ztcommunity : "<malloc error>"));
     }
 
     for (c = com2SecUnixList; c != NULL; c = c->next) {
         DEBUGMSGTL(("netsnmp_unix_getSecName","compare <\"%s\",to socket %s>",
-		    c->community, c->sockpath ));
+                    c->community, c->sockpath ));
         if ((community_len == strlen(c->community)) &&
-	    (memcmp(community, c->community, community_len) == 0) &&
+            (memcmp(community, c->community, community_len) == 0) &&
             /* compare sockpath, if pathlen == 0, always match */
             (strlen(to->sun_path) == c->pathlen || c->pathlen == 0) &&
-            (memcmp(to->sun_path, c->sockpath, c->pathlen) == 0)	
+            (memcmp(to->sun_path, c->sockpath, c->pathlen) == 0)
             ) {
             DEBUGMSG(("netsnmp_unix_getSecName", "... SUCCESS\n"));
             if (secName != NULL) {
@@ -539,10 +538,10 @@ netsnmp_unix_getSecName(void *opaque, int olength,
 void
 netsnmp_unix_parse_security(const char *token, char *param)
 {
-    char           secName[VACMSTRINGLEN + 1], community[VACMSTRINGLEN + 1];
-    char           contextName[VACMSTRINGLEN + 1];
-    char           sockpath[sizeof(struct sockaddr_un) + 1];
-    com2SecUnixEntry   *e = NULL;
+    char              secName[VACMSTRINGLEN + 1], community[VACMSTRINGLEN + 1];
+    char              contextName[VACMSTRINGLEN + 1];
+    char              sockpath[sizeof(struct sockaddr_un) + 1];
+    com2SecUnixEntry *e = NULL;
 
 
     param = copy_nword(param, secName, VACMSTRINGLEN);
@@ -564,7 +563,7 @@ netsnmp_unix_parse_security(const char *token, char *param)
         return;
     }
 
-	param = copy_nword(param, sockpath, sizeof(struct sockaddr_un) - 1);
+        param = copy_nword(param, sockpath, sizeof(struct sockaddr_un) - 1);
     if (sockpath[0] == '\0') {
         config_perror("missing SOCKPATH parameter");
         return;
@@ -572,19 +571,18 @@ netsnmp_unix_parse_security(const char *token, char *param)
         config_perror("sockpath too long");
         return;
     }
-	/* if sockpath == "default", set pathlen=0*/
-	if(strcmp(sockpath, "default") == 0){
-			sockpath[0] = 0;
-	}
-	
-	param = copy_nword(param, community, VACMSTRINGLEN);
+    /* if sockpath == "default", set pathlen=0*/
+    if(strcmp(sockpath, "default") == 0){
+        sockpath[0] = 0;
+    }
+
+    param = copy_nword(param, community, VACMSTRINGLEN);
     if (community[0] == '\0') {
         config_perror("missing COMMUNITY parameter\n");
         return;
-    } else
-        if (strncmp
-            (community, EXAMPLE_COMMUNITY, strlen(EXAMPLE_COMMUNITY))
-            == 0) {
+    } else if (strncmp
+               (community, EXAMPLE_COMMUNITY, strlen(EXAMPLE_COMMUNITY))
+               == 0) {
         config_perror("example config COMMUNITY not properly configured");
         return;
     } else if (strlen(community) > (VACMSTRINGLEN - 1)) {
@@ -605,7 +603,7 @@ netsnmp_unix_parse_security(const char *token, char *param)
     strcpy(e->contextName, contextName);
     strcpy(e->community, community);
     strcpy(e->sockpath, sockpath);
-	e->pathlen = strlen(sockpath);
+    e->pathlen = strlen(sockpath);
     e->next = NULL;
 
     if (com2SecUnixListLast != NULL) {
@@ -638,5 +636,3 @@ netsnmp_unix_agent_config_tokens_register(void)
                                 "[-Cn CONTEXT] secName sockpath community");
 #endif /* support for community based SNMP */
 }
-
-
