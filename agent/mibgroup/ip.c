@@ -85,12 +85,12 @@ header_ip(vp, name, length, exact, var_len, write_method)
 #define IP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
     int result;
-#ifdef DODEBUG
     char c_oid[MAX_NAME_LEN];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_ip: %s %d\n", c_oid, exact);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("var_ip: %s %d\n", c_oid, exact);
+    }
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[IP_NAME_LENGTH] = 0;
@@ -694,16 +694,14 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
     mib2_ipAddrEntry_t	    entry, Lowentry;
     int			    Found = 0;
     req_e		    req_type;
-#ifdef DODEBUG
     char		    c_oid[1024];
-#endif
     
     /* fill in object part of name for current (less sizeof instance part) */
 
-#ifdef DODEBUG
-    sprint_objid (c_oid, name, *length);
-    printf ("var_ipAddrEntry: %s %d\n", c_oid, exact);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("var_ipAddrEntry: %s %d\n", c_oid, exact);
+    }
     memset (&Lowentry, 0, sizeof (Lowentry));
     bcopy((char *)vp->name, (char *)current, (int)vp->namelen * sizeof(oid));
     if (*length == IP_ADDRNAME_LENGTH) /* Assume that the input name is the lowest */
@@ -737,9 +735,7 @@ var_ipAddrEntry(vp, name, length, exact, var_len, write_method)
 	}
       }
     }
-#ifdef DODEBUG
-    printf ("... Found = %d\n", Found);
-#endif
+    DEBUGP ("... Found = %d\n", Found);
     if (Found == 0)
       return(NULL);
     bcopy((char *)lowest, (char *)name, IP_ADDRNAME_LENGTH * sizeof(oid));

@@ -105,18 +105,15 @@ header_example(vp, name, length, exact, var_len, write_method)
     oid newname[MAX_NAME_LEN];
     int result;
 
-/* DODEBUG is defined if --enable-debugging is passed as a configure
-   argument. */
-    
-#ifdef DODEBUG
     /* print out the fact that we got here */
     char c_oid[MAX_NAME_LEN];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_example: %s %d\n", c_oid, exact);
-    sprint_objid (c_oid, vp->name, vp->namelen);
-    printf ("\tvp->name: %s\n", c_oid);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DODEBUG ("var_example: %s %d\n", c_oid, exact);
+      sprint_objid (c_oid, vp->name, vp->namelen);
+      DODEBUG ("\tvp->name: %s\n", c_oid);
+    }
 
     /* copy our mib oid from the vp->name structure */
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));

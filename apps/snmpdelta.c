@@ -300,7 +300,6 @@ char **argv;
   int varbindsPerPacket = 60;
   int print = 1;
     
-  init_mib();
   arg = snmp_parse_args(argc, argv, &session);
   gateway = session.peername;
 

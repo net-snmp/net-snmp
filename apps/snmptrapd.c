@@ -444,7 +444,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 
 void usage __P((void))
 {
-    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d]\n");
+    fprintf(stderr,"Usage: snmptrapd [-V] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-e] [-d]\n");
 }
 
 
@@ -467,7 +467,7 @@ main(argc, argv)
 
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
     /*
-     * usage: snmptrapd [-v 1] [-q] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-d] [-e]
+     * usage: snmptrapd [-v 1] [-q] [-D] [-p #] [-P] [-s] [-f] [-l [d0-7]] [-d] [-e]
      */
     for(arg = 1; arg < argc; arg++){
 	if (argv[arg][0] == '-'){
@@ -481,6 +481,9 @@ main(argc, argv)
 		    break;
 		case 'q':
 		    snmp_set_quick_print(1);
+		    break;
+		case 'D':
+		    snmp_set_do_debugging(1);
 		    break;
                 case 'p':
 		    if (++arg == argc) {

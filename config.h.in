@@ -120,7 +120,7 @@
 #define UNAMEPROG "/bin/uname"
 
 /* debugging stuff */
-#undef DODEBUG
+#define DODEBUG 0
 
 /* If you don't have root access don't exit upon kmem errors */
 #undef NO_ROOT_ACCESS
@@ -302,9 +302,6 @@
 
 /* Define if you have the <netinet/udp_var.h> header file.  */
 #undef HAVE_NETINET_UDP_VAR_H
-
-/* Define if you have the <nlist.h> header file.  */
-#undef HAVE_NLIST_H
 
 /* Define if you have the <nlist.h> header file.  */
 #undef HAVE_NLIST_H
@@ -733,14 +730,6 @@
 #define LASTFIELD -1      /* internal define */
 
 /* debugging macros */
-
-#ifdef DODEBUG
-#define DEBUGP(x) fprintf(stderr,x);
-#define DEBUGP1(x,y) fprintf(stderr,x,y);
-#else
-#define DEBUGP(x)
-#define DEBUGP1(x,y)
-#endif
 
 #ifndef HAVE_STRCHR
 #ifdef HAVE_INDEX

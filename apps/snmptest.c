@@ -102,7 +102,6 @@ main(argc, argv)
     char	input[128];
     int varcount, nonRepeaters = -1, maxRepetitions;
 
-    init_mib();
     /* Usage: snmptest -v 1 [-q] hostname community [objectID]      or:
      * Usage: snmptest [-v 2] [-q] hostname noAuth [objectID]       or:
      * Usage: snmptest [-v 2] [-q] hostname srcParty dstParty context [objectID]

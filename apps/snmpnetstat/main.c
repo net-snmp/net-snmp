@@ -110,9 +110,9 @@ int print_errors = 0;
 void
 usage __P((void))
 {
-    fprintf(stderr, "Usage: snmpnetstat [-v 1 | -v 2c] [-q] hostname community [-ainrs] [-p proto] [-I interface] [interval]      or:\n");
-    fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] hostname noAuth [-ainrs] [-p proto] [-I interface] [interval]       or:\n");
-    fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] hostname srcParty dstParty context [-ainrs] [-p proto] [-I interface] [interval]\n");
+    fprintf(stderr, "Usage: snmpnetstat [-v 1 | -v 2c] [-q] [-D] hostname community [-ainrs] [-p proto] [-I interface] [interval]      or:\n");
+    fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] [-D] hostname noAuth [-ainrs] [-p proto] [-I interface] [interval]       or:\n");
+    fprintf(stderr, "Usage: snmpnetstat [-v 2p] [-q] [-D] hostname srcParty dstParty context [-ainrs] [-p proto] [-I interface] [interval]\n");
 }
 
 int
@@ -160,6 +160,9 @@ main(argc, argv)
 		break;
 	      case 'q':
 		snmp_set_quick_print(1);
+		break;
+	      case 'D':
+		snmp_set_do_debugging(1);
 		break;
 	      case 'p':
 		dest_port = atoi(argv[++arg]);

@@ -24,7 +24,7 @@ int writeHP(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    oid      *name;
    int      name_len;
 {
-  printf("Gotto:  writeHP\n");
+  DODEBUG("Gotto:  writeHP\n");
   return SNMP_ERR_NOERROR;
 }
 #endif

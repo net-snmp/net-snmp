@@ -106,13 +106,13 @@ header_hrdisk(vp, name, length, exact, var_len, write_method)
     oid newname[MAX_NAME_LEN];
     int disk_idx, LowIndex = -1;
     int result;
-#ifdef DODEBUG
     char c_oid[MAX_NAME_LEN];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_hrdisk: %s %d\n", c_oid, exact);
-#endif
-
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP("var_hrdisk: %s %d\n", c_oid, exact);
+    }
+    
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
 	/* Find "next" disk entry */
 
@@ -157,10 +157,8 @@ header_hrdisk(vp, name, length, exact, var_len, write_method)
     }
 
     if ( LowIndex == -1 ) {
-#ifdef DODEBUG
-        printf ("... index out of range\n");
-#endif
-        return(MATCH_FAILED);
+      DEBUGP("... index out of range\n");
+      return(MATCH_FAILED);
     }
 
     newname[HRDISK_ENTRY_NAME_LENGTH] = LowIndex;
@@ -169,10 +167,11 @@ header_hrdisk(vp, name, length, exact, var_len, write_method)
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-#ifdef DODEBUG
-    sprint_objid (c_oid, name, *length);
-    printf ("... get disk stats %s\n", c_oid);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP("... get disk stats %s\n", c_oid);
+    }
+    
     return LowIndex;
 }
 
@@ -333,10 +332,8 @@ Get_Next_HR_Disk()
 	    sprintf(string, disk_device_strings[ HRD_type_index ], 
 			    disk_device_id[ HRD_type_index ] + HRD_index );
 
-#ifdef DODEBUG
-	    printf ("Get_Next_HR_Disk: %s (%d/%d)\n",
+	    DEBUGP("Get_Next_HR_Disk: %s (%d/%d)\n",
 		string, HRD_type_index, HRD_index );
-#endif
 	
 #ifdef HAVE_SYS_DISKIO_H
 	    fd = open( string, O_RDONLY  );

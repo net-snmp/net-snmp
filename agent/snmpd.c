@@ -531,7 +531,7 @@ extern char dontReadConfigFiles;
 void usage(prog)
 char *prog;
 {
-  printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-q] [-p NUM] [-L] [-l LOGFILE]\n",prog);
+  printf("\nUsage:  %s [-h] [-v] [-f] [-a] [-d] [-q] [-D] [-p NUM] [-L] [-l LOGFILE]\n",prog);
   printf("\n\tVersion:  %s\n",VersionInfo);
   printf("\tAuthor:   Wes Hardaker\n");
   printf("\tEmail:    ucd-snmp-coders@ece.ucdavis.edu\n");
@@ -541,6 +541,7 @@ char *prog;
   printf("-a\t\tLog addresses.\n");
   printf("-d\t\tDump sent and received UDP SNMP packets\n");
   printf("-q\t\tPrint information in a more parsable format (quick-print)\n");
+  printf("-D\t\tTurn on debugging output\n");
   printf("-p NUM\t\tRun on port NUM instead of the default:  161\n");
   printf("-c CONFFILE\tRead CONFFILE as a configuration file.\n");
   printf("-C\t\tDon't read the default configuration files.\n");
@@ -599,6 +600,9 @@ main(argc, argv)
 		    break;
 		case 'q':
 		    snmp_set_quick_print(1);
+		    break;
+		case 'D':
+		    snmp_set_do_debugging(1);
 		    break;
                 case 'p':
                     port_flag++;

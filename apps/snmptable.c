@@ -159,9 +159,6 @@ main(argc, argv)
   }
   optind += arg;
 
-  /* read in MIB database */
-  init_mib();
-
   /* get the initial object and subtree */
   if (optind+1 == argc) {
     /* specified on the command line */

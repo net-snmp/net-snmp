@@ -130,12 +130,12 @@ header_hrstore(vp, name, length, exact, var_len, write_method)
 #define HRSTORE_NAME_LENGTH	9
     oid newname[MAX_NAME_LEN];
     int result;
-#ifdef DODEBUG
     char c_oid[MAX_NAME_LEN];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_hrstore: %s %d\n", c_oid, exact);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("var_hrstore: %s %d\n", c_oid, exact);
+    }
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
     newname[HRSTORE_NAME_LENGTH] = 0;
@@ -163,12 +163,12 @@ header_hrstoreEntry(vp, name, length, exact, var_len, write_method)
     oid newname[MAX_NAME_LEN];
     int storage_idx, LowIndex = -1;
     int result;
-#ifdef DODEBUG
     char c_oid[MAX_NAME_LEN];
 
-    sprint_objid (c_oid, name, *length);
-    printf ("var_hrstoreEntry: %s %d\n", c_oid, exact);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("var_hrstoreEntry: %s %d\n", c_oid, exact);
+    }
 
     bcopy((char *)vp->name, (char *)newname, (int)vp->namelen * sizeof(oid));
 	/* Find "next" storage entry */
@@ -176,16 +176,14 @@ header_hrstoreEntry(vp, name, length, exact, var_len, write_method)
     Init_HR_Store();
     for ( ;; ) {
         storage_idx = Get_Next_HR_Store();
-#ifdef DODEBUG
-printf ("(index %d ....", storage_idx);
-#endif
+        DEBUGP("(index %d ....", storage_idx);
         if ( storage_idx == -1 )
 	    break;
 	newname[HRSTORE_ENTRY_NAME_LENGTH] = storage_idx;
-#ifdef DODEBUG
-sprint_objid (c_oid, newname, *length);
-printf ("%s\n", c_oid);
-#endif
+        if (snmp_get_do_debugging()) {
+          sprint_objid (c_oid, newname, *length);
+          DEBUGP("%s\n", c_oid);
+        }
         result = compare(name, *length, newname, (int)vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowIndex = storage_idx;
@@ -203,9 +201,7 @@ printf ("%s\n", c_oid);
     }
 
     if ( LowIndex == -1 ) {
-#ifdef DODEBUG
-        printf ("... index out of range\n");
-#endif
+        DEBUGP ("... index out of range\n");
         return(MATCH_FAILED);
     }
 
@@ -214,10 +210,10 @@ printf ("%s\n", c_oid);
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-#ifdef DODEBUG
-    sprint_objid (c_oid, name, *length);
-    printf ("... get storage stats %s\n", c_oid);
-#endif
+    if (snmp_get_do_debugging()) {
+      sprint_objid (c_oid, name, *length);
+      DEBUGP ("... get storage stats %s\n", c_oid);
+    }
     return LowIndex;
 }
 
