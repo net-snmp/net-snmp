@@ -38,6 +38,7 @@ typedef struct request_info_s {
    size_t  range_end_len;
    int delegated;
    int processed;
+   int inclusive;
    int status;
    int index;
    struct request_info_s         *next;
