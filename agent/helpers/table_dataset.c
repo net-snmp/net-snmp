@@ -174,9 +174,14 @@ netsnmp_set_row_column(netsnmp_table_row *row, unsigned int column, int type,
             return SNMPERR_GENERR;
         
         SNMP_FREE(data->data.voidp);
-        if (memdup(&data->data.string, value, value_len) != SNMPERR_SUCCESS) {
-            snmp_log(LOG_CRIT, "no memory in netsnmp_set_row_column");
-            return SNMPERR_MALLOC;
+        if (value_len) {
+            if (memdup(&data->data.string, value, (value_len)) !=
+                SNMPERR_SUCCESS) {
+                snmp_log(LOG_CRIT, "no memory in netsnmp_set_row_column");
+                return SNMPERR_MALLOC;
+            }
+        } else {
+            data->data.string = malloc(1);
         }
         data->data_len = value_len;
     }
@@ -233,6 +238,8 @@ netsnmp_table_data_set_helper_handler(
 
     DEBUGMSGTL(("netsnmp_table_data_set", "handler starting"));
     for(request = requests; request; request = request->next) {
+        netsnmp_table_data_set *datatable =
+            (netsnmp_table_data_set *) handler->myvoid;
         if (request->processed)
             continue;
 
@@ -251,6 +258,7 @@ netsnmp_table_data_set_helper_handler(
             continue;
         }
 
+      topsearch:
         data = netsnmp_table_data_set_find_column(data, table_info->colnum);
 
         switch(reqinfo->mode) {
@@ -260,12 +268,10 @@ netsnmp_table_data_set_helper_handler(
                 if (!data) {
                     netsnmp_table_row *newrow;
                     netsnmp_table_data_set_storage *newdata = NULL;
-                    unsigned int column = table_info->colnum;
-                    netsnmp_table_data_set *datatable =
-                        (netsnmp_table_data_set *) handler->myvoid;
+/*                    unsigned int column = table_info->colnum; */
 
-                    while(column <= table_info->reg_info->max_column) {
-                        if (column != table_info->colnum) {
+                    while(table_info->colnum <= table_info->reg_info->max_column) {
+                        if (table_info->colnum != table_info->colnum) {
                             /* start with a new row */
                             row = datatable->table->first_row;
                         }
@@ -274,16 +280,15 @@ netsnmp_table_data_set_helper_handler(
                             if (newdata)
                                 newdata =
                                     netsnmp_table_data_set_find_column(newdata,
-                                                               column);
+                                                               table_info->colnum);
                             if (newdata) {
                                 /* this is it */
                                 data = newdata;
                                 row = newrow;
-                                table_info->colnum = column;
                                 goto done;
                             }
                         }
-                        column++;
+                        table_info->colnum++;
                     }
                 }
           done:
@@ -295,7 +300,22 @@ netsnmp_table_data_set_helper_handler(
                 else {
                     /* deal with holes by going to the next data set
                        in the row or possibly onward to new columns */
-                    snmp_log(LOG_ERR, "ack\n");
+                    if (reqinfo->mode == MODE_GETNEXT ||
+                        reqinfo->mode == MODE_GETBULK) { /* XXXWWW */
+                        if (row)
+                            row = row->next;
+                        if (row) {
+                            data = (netsnmp_table_data_set_storage *) row->data;
+                            goto topsearch;
+                        }
+                        if (table_info->colnum <=
+                            table_info->reg_info->max_column) {
+                            table_info->colnum++;
+                            row = datatable->table->first_row;
+                            data = (netsnmp_table_data_set_storage *) row->data;
+                            goto topsearch;
+                        }
+                    }
                 }
                 break;
 
