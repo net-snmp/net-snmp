@@ -38,13 +38,30 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <sys/types.h>
 #include <sys/time.h>
 #include <stdio.h>
+#include <fcntl.h>
 
 #ifdef HAVE_NLIST_H
 #include <nlist.h>
 #endif
 
+#if HAVE_KVM_H
+#include <kvm.h>
+#endif
+
+#include <sys/socket.h>
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#if HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+#if HAVE_NETINET_IN_PCB_H
+#include <netinet/in_pcb.h>
+#endif
+#if HAVE_INET_MIB2_H
+#include <inet/mib2.h>
 #endif
 
 #include "mibincl.h"
