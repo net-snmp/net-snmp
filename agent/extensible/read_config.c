@@ -31,6 +31,10 @@ void copy_word();
 /* communities from agent/snmp_agent.c */
 extern char communities[NUM_COMMUNITIES][COMMUNITY_MAX_LEN];
 
+/* contact/locaction from agent/snmp_vars.c */
+extern char sysContact[];
+extern char sysLocation[];
+
 int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
                 numpassthrus, ppexten, numexs, minimumswap, disk, numdisks,
                 maxload)
@@ -285,8 +289,23 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
               fprintf(stderr,"snmpd: community number invalid:  %d\n",i);
               fprintf(stderr,"       must be > 0 and < %d\n",NUM_COMMUNITIES+1);
             }
-          }
-          else {
+          } else if (!strncasecmp(word,"syscon",6)) {
+            if (strlen(cptr) < 128) {
+              strcpy(sysContact,cptr,strlen(cptr)-1);
+              sysContact[strlen(sysContact)-1] = NULL;  /* chomp new line */
+            } else
+              fprintf(stderr,
+                      "syscontact token too long (must be < 128):\n\t%s\n",
+                      cptr);
+          } else if (!strncasecmp(word,"sysloc",6)) {
+            if (strlen(cptr) < 128) {
+              strcpy(sysLocation,cptr,strlen(cptr)-1);
+              sysLocation[strlen(sysLocation)-1] = NULL; /* chomp new line */
+            } else
+              fprintf(stderr,
+                      "syslocation token too long (must be < 128):\n\t%s\n",
+                      cptr);
+          } else {
             fprintf(stderr,"snmpd: Unknown command in %s:%d - %s\n",
                     filename,linecount,word);
           }
