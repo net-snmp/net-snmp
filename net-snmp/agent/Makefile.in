@@ -29,17 +29,14 @@ CCHACK = @CC@
 CC = @CC@ $(CPPFLAGS)
 
 DIRS=extensible
-EXTENSIBLEOBJS=extensible/misc.o extensible/read_config.o \
-               extensible/extensible.o extensible/hpmibs.o \
-               extensible/versioninfo.o extensible/proc.o \
-               extensible/exec.o extensible/pass.o
+EXTENSIBLEOBJS=
 MIBOBJS=@mibgroup_list_o@
 
 all: subdirs snmpd
 
 subdirs:
-	cd extensible; $(MAKE)
 	cd mibgroup; $(MAKE)
+#	cd extensible; $(MAKE)
 
 getkstat: getkstat.o
 	$(CC) $(CFLAGS) -o $@ $? $(LIBS)
@@ -58,8 +55,8 @@ snmpd:	snmpd.o kernel.o snmp_agent.o snmp_vars.o snmp_var_route.o party_vars.o c
 
 clean:
 	rm -f *.o ${TARG}
-	cd extensible; make clean
 	cd mibgroup; make clean
+#	cd extensible; make clean
 
 install:  installdirs
 	@$(INSTALL) $(TARG) $(etcdir) ; echo "install:  installed $(TARG) in $(etcdir) "
