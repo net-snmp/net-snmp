@@ -1077,10 +1077,12 @@ smux_parse_var(u_char *varbind,
 	    case ASN_IPADDRESS:
 		*varlength = 4;
 		/* 
-		 * XXX - skip tag and length. We already know this is an ip 
-		 * address
+		 * consume the tag and length, but just copy here
+		 * because we know it is an ip address
 		 */
-		memcpy((u_char *)&(smux_sa.sin_addr.s_addr), var_val+2,
+		if ((var_val = asn_parse_header(var_val, &len, &type)) == NULL)
+			return NULL;
+		memcpy((u_char *)&(smux_sa.sin_addr.s_addr), var_val,
 		      *varlength);
 		return (u_char *)&(smux_sa.sin_addr.s_addr);
 		break;
