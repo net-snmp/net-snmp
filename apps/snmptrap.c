@@ -143,9 +143,13 @@ int main(int argc, char *argv[])
     else prognam = argv[0];
 
     if (strcmp(prognam, "snmpinform") == 0) inform = 1;
-    if ((arg = snmp_parse_args(argc, argv, &session, NULL, NULL)) < 0) { 
+    switch (arg = snmp_parse_args(argc, argv, &session, NULL, NULL)) {
+    case -2:
+    	exit(0);
+    case -1:
         usage();
         exit(1);
+    default:
     }
 
     SOCK_STARTUP;
