@@ -1209,11 +1209,11 @@ AC_CHECK_STRUCT_FOR([
 #include <sys/socket.h>
 #undef KERNEL
 #undef _KERNEL
-], sockaddr, sa_union.sa_generic.sa_len2, no)
+], sockaddr, sa_union.sa_generic.sa_family2, no)
 
-#ifdef STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_LEN2
+#ifdef STRUCT_SOCKADDR_HAS_SA_UNION_SA_GENERIC_SA_FAMILY2
 cat >> confdefs.h <<EOF
-#define STRUCT_SOCKADDR_HAS_SA_LEN2 1
+#define STRUCT_SOCKADDR_HAS_SA_FAMILY2 1
 EOF
 #endif
 
