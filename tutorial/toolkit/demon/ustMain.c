@@ -36,7 +36,7 @@ main () {
 
   /* If we're going to be a snmp master agent */
   if (!agentx_subagent)
-    init_master_agent();  /* open port 161 (UDP:snmp) */
+    init_master_agent( 161, NULL, NULL );  /* open port 161 (UDP:snmp) */
 
   /* In case we recevie a request to stop (kill -TERM or kill -INT) */
   keep_running = 1;
