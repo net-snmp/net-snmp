@@ -54,6 +54,8 @@ main (int argc, char **argv) {
   signal(SIGTERM, stop_server);
   signal(SIGINT, stop_server);
 
+  snmp_log(LOG_INFO,"example-demon is up and running.\n");
+
   /* you're main loop here... */
   while(keep_running) {
     /* if you use select(), see snmp_select_info() in snmp_api(3) */
@@ -63,5 +65,7 @@ main (int argc, char **argv) {
 
   /* at shutdown time */
   snmp_shutdown("example-demon");
+
+  return 0;
 }
 
