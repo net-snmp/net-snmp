@@ -443,7 +443,7 @@ realloc_handle_time_fmt (u_char **buf, size_t *buf_len, size_t *out_len,
   if (fmt_cmd == CHR_CUR_TIME) {
     sprintf(safe_bfr, "%lu", time_ul);
   } else if (fmt_cmd == CHR_UP_TIME && !options->alt_format) {
-    sprintf(safe_bfr, "%lu", (long)time_ul);
+    sprintf(safe_bfr, "%lu", time_ul);
   } else if (fmt_cmd == CHR_UP_TIME) {
     unsigned int centisecs, seconds, minutes, hours, days;
 
