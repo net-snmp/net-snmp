@@ -1,4 +1,4 @@
-.TH "debug: print out debugging information about the handler chain being called." 3 "10 Jan 2003" "net-snmp" \" -*- nroff -*-
+.TH "debug: print out debugging information about the handler chain being called." 3 "19 Feb 2003" "net-snmp" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -19,6 +19,9 @@ More...
 .RI "void \fBnetsnmp_init_bulk_to_next_helper\fP (void)"
 .br
 .RI "\fIinitializes the bulk_to_next helper which then registers a bulk_to_next handler as a run-time injectable handler for configuration file use.\fP"
+.ti -1c
+.RI "void \fBnetsnmp_init_table_dataset\fP (void)"
+.br
 .ti -1c
 .RI "void \fBnetsnmp_init_helpers\fP (void)"
 .br
@@ -76,7 +79,7 @@ Definition at line 147 of file debug_handler.c.
 .PP
 call the initialization sequence for all handlers with init_ routines.
 .PP
-Definition at line 31 of file all_helpers.c.
+Definition at line 32 of file all_helpers.c.
 .SS "void netsnmp_init_read_only_helper (void)"
 .PP
 initializes the read_only helper which then registers a read_only handler as a run-time injectable handler for configuration file use.
