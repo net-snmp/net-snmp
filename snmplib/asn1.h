@@ -186,6 +186,26 @@ u_char	*asn_build_double (u_char *, size_t *, u_char, double *,
                                size_t);
 u_char	*asn_parse_double (u_char *, size_t *, u_char *, double *, size_t);
 
+#ifdef USE_REVERSE_ASNENCODING
+u_char	*asn_rbuild_int (u_char *, size_t *, u_char, long *, size_t);
+u_char	*asn_rbuild_string (u_char *, size_t *, u_char, const u_char *, size_t);
+u_char	*asn_rbuild_unsigned_int (u_char *, size_t *, u_char, u_long *, size_t);
+u_char	*asn_rbuild_header (u_char *, size_t *, u_char, size_t);
+u_char	*asn_rbuild_sequence (u_char *, size_t *, u_char, size_t);
+u_char	*asn_rbuild_length (u_char *, size_t *, size_t);
+u_char	*asn_rbuild_objid (u_char *, size_t *, u_char, oid *, size_t);
+u_char	*asn_rbuild_null (u_char *, size_t *, u_char);
+u_char	*asn_rbuild_bitstring (u_char *, size_t *, u_char, u_char *, size_t);
+u_char	*asn_rbuild_unsigned_int64 (u_char *, size_t *, u_char,
+                                       struct counter64 *, size_t);
+u_char	*asn_rbuild_signed_int64 (u_char *, size_t *, u_char,
+                                       struct counter64 *, size_t);
+u_char	*asn_rbuild_float (u_char *, size_t *, u_char, float *,
+                              size_t);
+u_char	*asn_rbuild_double (u_char *, size_t *, u_char, double *,
+                               size_t);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

@@ -21,6 +21,8 @@ extern "C" {
 #define USM_MAX_KEYEDHASH_LENGTH	128		/* In BITS. */
 
 #define USM_TIME_WINDOW			150
+#define USM_MD5_AND_SHA_AUTH_LEN        12              /* bytes */
+#define USM_MAX_AUTHSIZE                USM_MD5_AND_SHA_AUTH_LEN
 
 
 /*
@@ -154,6 +156,9 @@ int	usm_check_and_update_timeliness (
 int usm_generate_out_msg (int, u_char *, size_t, int, int, u_char *, size_t,
 			      char *,  size_t, int, u_char *, size_t, void *,
 			      u_char *, size_t *, u_char **, size_t *);
+int usm_rgenerate_out_msg (int, u_char *, size_t, int, int, u_char *, size_t,
+                           char *,  size_t, int, u_char *, size_t, void *,
+                           u_char *, size_t *);
 
 int usm_process_in_msg (int, size_t, u_char *, int, int, u_char *, size_t,
 			    u_char *, size_t *, char *, size_t *, u_char **, size_t *,
