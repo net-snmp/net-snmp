@@ -3301,28 +3301,30 @@ parse_one_oid_index(oid ** oidStart, size_t * oidLen,
             break;
 
         case ASN_IPADDRESS:
-            if (*oidLen >= 4) {
-                for(i=0; i < 4; i++) {
-                    if (oidIndex[i] > 255) {
-                        DEBUGMSGTL(("parse_oid_indexes",
-                                    "illegal oid in index: %d.%d.%d.%d\n",
-                                    oidIndex[0], oidIndex[1],
-                                    oidIndex[2], oidIndex[3]));
+            if ((4 > *oidLen) && (complete == 0))
+                return SNMPERR_GENERR;
+            
+            for (i = 0; i < *oidLen; ++i) {
+                if (oidIndex[i] > 255) {
+                    DEBUGMSGTL(("parse_oid_indexes",
+                                "illegal oid in index: %d\n", oidIndex[0]));
                         return SNMPERR_GENERR;  /* sub-identifier too large */
-                    } else {
-                        uitmp += oidIndex[i] << (8*(3-i));
                     }
+                    uitmp += oidIndex[i] << (8*(3-i));
                 }
-                uitmp = 
-                    snmp_set_var_value(var, (u_char *) &uitmp, 4);
+            if (4 > (int) (*oidLen)) {
+                oidIndex += *oidLen;
+                (*oidLen) = 0;
             } else {
-                return SNMPERR_GENERR;  /* too few sub-identifiers (illegal) */
+                oidIndex += 4;
+                (*oidLen) -= 4;
             }
+            uitmp = 
+                snmp_set_var_value(var, (u_char *) &uitmp, 4);
             DEBUGMSGTL(("parse_oid_indexes",
                         "Parsed ipaddr(%d): %d.%d.%d.%d\n", var->type,
-                        oidIndex[0], oidIndex[1], oidIndex[2], oidIndex[3]));
-            *oidLen -= 4;
-            oidIndex += 4;
+                        var->val.string[0], var->val.string[1],
+                        var->val.string[2], var->val.string[3]));
             break;
 
         case ASN_OBJECT_ID:
@@ -5073,6 +5075,61 @@ netsnmp_str2oid(const char *S, oid * O, int L)
      * set the length of the oid 
      */
     *O = c - S;
+
+    return 0;
+}
+
+/**
+ * Converts an OID to its character form.
+ * in example  5 . 1 . 2 . 3 . 4 . 5 = 12345
+ *
+ * @param C   The character buffer.
+ * @param L   The length of the buffer.
+ * @param O   The oid.
+ *
+ * @return 0 on Sucess, 1 on failure.
+ */
+int
+netsnmp_oid2chars(char *C, int L, const oid * O)
+{
+    char           *c = C;
+    const oid      *o = &O[1];
+
+    if (L < *O)
+        return 1;
+
+    L = *O; /** length */
+    for (; L; --L, ++o, ++c) {
+        if (*o > 0xFF)
+            return 1;
+        *c = *o;
+    }
+    return 0;
+}
+
+/**
+ * Converts an OID to its string form.
+ * in example  5 . 'h' . 'e' . 'l' . 'l' . 'o' = "hello\0" (null terminated)
+ *
+ * @param S   The character string buffer.
+ * @param L   The length of the string buffer.
+ * @param O   The oid.
+ *
+ * @return 0 on Sucess, 1 on failure.
+ */
+int
+netsnmp_oid2str(char *S, int L, oid * O)
+{
+    int            rc;
+
+    if (L <= *O)
+        return 1;
+
+    rc = netsnmp_oid2chars(S, L, O);
+    if (rc)
+        return 1;
+
+    S[ *O ] = 0;
 
     return 0;
 }
