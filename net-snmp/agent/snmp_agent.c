@@ -1628,7 +1628,24 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         asp->pdu->errstat = asp->status;
         asp->pdu->errindex = asp->index;
         if (!snmp_send(asp->session, asp->pdu)) {
+            netsnmp_variable_list *var_ptr;
             snmp_perror("send response");
+            for (var_ptr = asp->pdu->variables; var_ptr != NULL;
+                     var_ptr = var_ptr->next_variable) {
+                size_t  c_oidlen = 256, c_outlen = 0;
+                u_char *c_oid = (u_char *) malloc(c_oidlen);
+
+                if (c_oid) {
+                    if (!sprint_realloc_objid (&c_oid, &c_oidlen, &c_outlen, 1,
+ 		                               var_ptr->name,
+                                               var_ptr->name_length)) {
+                        snmp_log(LOG_ERR, "    -- %s [TRUNCATED]\n", c_oid);
+                    } else {
+                        snmp_log(LOG_ERR, "    -- %s\n", c_oid);
+                    }
+                    SNMP_FREE(c_oid);
+                }
+            }
             snmp_free_pdu(asp->pdu);
             asp->pdu = NULL;
         }
