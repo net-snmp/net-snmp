@@ -211,6 +211,10 @@ Section "Net-SNMP Agent" SEC02
   File "registeragent.bat"
   File "unregisteragent.bat"
   Call CreateAgentBats
+
+  CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Service"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk" "$INSTDIR\registeragent.bat"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk" "$INSTDIR\unregisteragent.bat"
   
   NoService:
 SectionEnd
@@ -238,16 +242,6 @@ Section -AdditionalIcons
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk" "$INSTDIR\uninst.exe"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Net-SNMP Help.lnk" "$INSTDIR\docs\Net-SNMP.chm"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\README.lnk" "$INSTDIR\README.txt"
-
-  ; If we are on an NT system then install the service batch files.
-  Call IsNT
-  Pop $1
-  StrCmp $1 0 NoServiceBats
-  
-  CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Service"
-  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Register Agent Service.lnk" "$INSTDIR\registeragent.bat"
-  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Service\Unregister Agent Service.lnk" "$INSTDIR\unregisteragent.bat"
-  NoServiceBats:
 SectionEnd
 
 Section -Post
@@ -359,11 +353,11 @@ Function CreateSnmpconfBat
   snmpconfloop:
     FileRead $0 $2
     IfErrors done
+    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\snmpconf$\n" 0 +3
+      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\bin\snmpconf$\n"
+      Goto snmpconfloop
     StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\snmpconf$\r$\n" 0 +3
       FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\bin\snmpconf$\r$\n"
-      Goto snmpconfloop
-    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\snmpconf" 0 +3
-      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\bin\snmpconf"
       Goto snmpconfloop
     FileWrite $1 $2
     Goto snmpconfloop
@@ -385,11 +379,11 @@ Function CreateMib2cBat
   mib2cloop:
     FileRead $0 $2
     IfErrors done
+    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\mib2c$\n" 0 +3
+      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\bin\mib2c$\n"
+      Goto mib2cloop
     StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\mib2c$\r$\n" 0 +3
       FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\bin\mib2c$\r$\n"
-      Goto mib2cloop
-    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\mib2c" 0 +3
-      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\bin\mib2c"
       Goto mib2cloop
     FileWrite $1 $2
     Goto mib2cloop
@@ -411,11 +405,11 @@ Function CreatTraptoemailBat
   traptoemailloop:
     FileRead $0 $2
     IfErrors done
-    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\traptoemail$\r$\n" 0 +3
-      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\traptoemail$\r$\n"
+    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\traptoemail$\n" 0 +3
+      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\bin\traptoemail$\n"
       Goto traptoemailloop
-    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\traptoemail" 0 +3
-      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\traptoemail"
+    StrCmp $2 "set MYPERLPROGRAM=c:\usr\bin\traptoemail$\r$\n" 0 +3
+      FileWrite $1 "set MYPERLPROGRAM=$INSTDIR\bin\traptoemail$\r$\n"
       Goto traptoemailloop
     FileWrite $1 $2
     Goto traptoemailloop
