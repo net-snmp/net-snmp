@@ -24,7 +24,7 @@
 .SH NAME
 snmptrapd - Receive and log snmp trap messages.
 .SH SYNOPSIS
-snmptrapd [-h] [ -P ] [ -s ] [ -p port ] [ -d ] [ -e ] [ -q ] [-D] [-l [d0-7]] [-f] [-S] [-H] [-a]
+snmptrapd [-h] [-P] [-s] [-p port] [-d] [-e] [-D tokens] [-l [d0-7]] [-f] [-H] [-a] [-O oidopts]
 .SH DESCRIPTION
 Snmptrapd
 is an SNMP application that receives and logs snmp trap messages
@@ -52,23 +52,18 @@ default).  The demon will also fork away from its caller when
 the syslog facilities are used.
 .IP "-l [d0-7]"
 Specifies the syslog facility to use, demon or local[0-7].
-.IP "-S"
-Requests short object identifiers on output: MIB-name:suffix, i.e.
-.I system.sysDescr.0
-will be printed as
-.I SNMPv2-MIB:sysDescr.0
 .IP "-a"
 makes
 .I snmptrapd
 ignore AuthenticationFailure traps
 .IP "-d"
 Causes the application to dump input and output packets.
-.IP "-q" 
-Causes the application to use a quicker, less verbose output form.
 .IP "-D" 
 Turn debugging output on.
 .IP "-f"
 Don't fork away from the caller when using syslog().
+.IP "-O oidopts"
+Set OID printing options (see snmpcmd(1))
 .SH EXTENSIBILITY AND CONFIGURATION
 See the snmpdtrapd.conf(5) manual page.
 .PP
