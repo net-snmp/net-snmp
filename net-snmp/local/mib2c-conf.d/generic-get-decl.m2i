@@ -24,15 +24,15 @@
 @end@
 @if $m2c_node_needlength == 1@
    /** we should have a non-NULL pointer and enough storage */
-   netsnmp_assert( (NULL != $m2c_node_get_parm) && (NULL != *$m2c_node_get_parm));
+   netsnmp_assert( (NULL != $m2c_node_param_name) && (NULL != *$m2c_node_param_name));
    netsnmp_assert( NULL != ${node}_len_ptr );
 @else@
    /** we should have a non-NULL pointer */
-   netsnmp_assert( NULL != $m2c_node_get_parm );
+   netsnmp_assert( NULL != $m2c_node_param_name );
 @end@
 
 @   if ($m2c_get_use_temp == 1) && ($m2c_node_needlength == 1)@
-    temp_$node = (* $m2c_node_get_parm);
+    temp_$node = (* $m2c_node_param_name);
     $m2c_node_lhs = (* ${node}_len_ptr);
 
 @   end@
