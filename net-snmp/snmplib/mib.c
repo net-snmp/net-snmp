@@ -1715,7 +1715,7 @@ _get_symbol(oid *objid,
 {
     struct tree    *return_tree = NULL;
 
-    if (!objid || !subtree || !buf)
+    if (!objid || !buf)
         return NULL;
 
     for(; subtree; subtree = subtree->next_peer){
@@ -1773,7 +1773,7 @@ _get_symbol(oid *objid,
 	    break;
 	case TYPE_OBJID:
 	    if (in_dices->isimplied) {
-                numids = objidlen=1;
+                numids = objidlen;
             } else {
                 numids = (size_t)*objid+1;
             }
