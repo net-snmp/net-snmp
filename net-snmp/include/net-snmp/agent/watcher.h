@@ -24,7 +24,7 @@ int netsnmp_register_watched_instance( netsnmp_handler_registration *reginfo,
 int netsnmp_register_watched_scalar(   netsnmp_handler_registration *reginfo,
                                        netsnmp_watcher_info         *winfo);
 int netsnmp_register_watched_timestamp(netsnmp_handler_registration *reginfo,
-                                       marker_t *timestamp);
+                                       marker_t timestamp);
 
 #define WATCHER_HANDLER_NAME "watcher"
 
