@@ -23,13 +23,13 @@ TARG= snmpnetstat
 CPPFLAGS=-I../.. -I$(srcdir)/../.. -I$(srcdir)/../../snmplib @CPPFLAGS@
 CC = @CC@ $(CPPFLAGS)
 
-USELIBS=../../snmplib/libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
-LIBS=	 $(USELIBS) $(CC_RUNTIME_ARG) @LIBS@
+LOCAL_LIBS = -L../../snmplib
+LIBS=	 $(CC_RUNTIME_ARG) -lsnmp @LIBS@
 
 all: $(TARG)
 
 snmpnetstat: ${OBJS} ${USELIBS}
-	${CC} -o $@ ${OBJS} ${LDFLAGS} ${LIBS}
+	${CC} -o $@ ${OBJS} ${LOCAL_LIBS} ${LDFLAGS} ${LIBS}
 
 distclean: clean
 
