@@ -50,7 +50,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 ucdagent.lib ucdmibs.lib libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib iphlpapi.lib /nologo /subsystem:console /machine:I386 /nodefaultlib /out:"../bin/snmpd.exe" /libpath:"..\lib"
+# ADD LINK32 ucdagent.lib ucdmibs.lib libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib iphlpapi.lib Advapi32.lib /nologo /subsystem:console /machine:I386 /nodefaultlib /out:"../bin/snmpd.exe" /libpath:"..\lib"
 
 !ELSEIF  "$(CFG)" == "snmpd - Win32 Debug"
 
@@ -74,7 +74,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ucdagent_d.lib ucdmibs_d.lib iphlpapi.lib libhelpers_d.lib snmp_d.lib wsock32.lib libcmt.lib kernel32.lib user32.lib oldnames.lib iphlpapi.lib advapi32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /nodefaultlib /out:"../bin/snmpd_d.exe" /pdbtype:sept /libpath:"../lib"
+# ADD LINK32 ucdagent_d.lib ucdmibs_d.lib iphlpapi.lib libhelpers_d.lib snmp_d.lib wsock32.lib libcmt.lib kernel32.lib user32.lib oldnames.lib iphlpapi.lib advapi32.lib shlwapi.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /nodefaultlib /out:"../bin/snmpd_d.exe" /pdbtype:sept /libpath:"../lib"
 
 !ENDIF 
 
@@ -101,6 +101,18 @@ SOURCE=..\..\snmplib\snmp_parse_args.c
 # Begin Source File
 
 SOURCE=..\..\agent\snmpd.c
+# End Source File
+# End Target
+
+SOURCE=..\..\snmplib\winservice.c
+# End Source File
+# End Target
+
+SOURCE=..\..\include\net-snmp\library\winservice.h
+# End Source File
+# End Target
+
+SOURCE=..\..\snmplib\winservice.rc
 # End Source File
 # End Target
 # End Project
