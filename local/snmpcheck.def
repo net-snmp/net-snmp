@@ -20,7 +20,7 @@ if ($andlog || $#ARGV == -1) {
     while (<LOG>) {
 	@fields = split;
 	@tmp = grep(/$fields[0]/,@ARGV);
-	if ($#tmp == -1) {
+	if ($#tmp == -1 && $fields[1] ne "down") {
 	    @ARGV[$#ARGV + 1] = $fields[0];
 	}
     }
