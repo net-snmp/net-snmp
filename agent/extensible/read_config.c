@@ -1,6 +1,9 @@
 #include <config.h>
 
 #include <stdio.h>
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #if HAVE_STRINGS_H
 #include <strings.h>
 #else
@@ -19,10 +22,15 @@
 #if HAVE_SYS_MNTTAB_H
 #include <sys/mnttab.h>
 #endif
+#if HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 #include <math.h>
 #include <snmp.h>
 #include <asn1.h>
 #include <snmp_impl.h>
+#include <ctype.h>
+#include "extproto.h"
 
 char *skip_white();
 char *skip_not_white();
@@ -54,7 +62,6 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
   char line[STRMAX], word[STRMAX];
   char *cptr, *tcptr;
   int linecount=0,i;
-  struct stat stat1, stat2;
 #if HAVE_GETMNTENT
 #if HAVE_SYS_MNTTAB_H
   struct mnttab mnttab;
@@ -64,6 +71,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
   FILE *mntfp;
 #elif HAVE_FSTAB_H
   struct fstab *fstab;
+  struct stat stat1, stat2;
 #endif
   struct extensible **pptmp;
   
@@ -83,7 +91,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
       linecount++;
       cptr = line;
       /* check blank line or # comment */
-      if (cptr = skip_white(cptr))
+      if ((cptr = skip_white(cptr)))
 	{
           copy_word(cptr,word);
           cptr = skip_not_white(cptr);
@@ -238,11 +246,11 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
             /* not blank and not a comment */
             copy_word(cptr,(*procp)->name);
             cptr = skip_not_white(cptr);
-            if (cptr = skip_white(cptr)) 
+            if ((cptr = skip_white(cptr))) 
               {
                 (*procp)->max = atoi(cptr);
                 cptr = skip_not_white(cptr);
-                if (cptr = skip_white(cptr))
+                if ((cptr = skip_white(cptr)))
                   (*procp)->min = atoi(cptr);
                 else 
                   (*procp)->min = 0;
@@ -315,6 +323,7 @@ int read_config(filename, procp, numps, pprelocs, numrelocs, pppassthrus,
   return(0);
 }
 
+void
 free_config(procp,ppexten,pprelocs,pppassthrus)
      struct myproc **procp;
      struct extensible **ppexten, **pprelocs, **pppassthrus;
@@ -352,9 +361,9 @@ free_config(procp,ppexten,pprelocs,pppassthrus)
   *pppassthrus = NULL;
 
 }
+
 /* skip all white spaces and return 1 if found something either end of
    line or a comment character */
-
 char *skip_white(ptr)
   char *ptr;
 {
@@ -409,6 +418,7 @@ char *find_field(ptr,field)
     if (*ptr != 0 && i == field) return(ptr);
     return (NULL);
   }
+  return(NULL);
 }
 
 int parse_miboid(buf,oidout)

@@ -2,6 +2,7 @@
 
 #include "mibincl.h"
 #include "mibdefs.h"
+#include "extproto.h"
 
 int fixProcError();
 
@@ -27,8 +28,6 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
 {
 
   oid newname[30];
-  int count, result,i, rtest=0;
-  register int interface;
   struct myproc *proc;
   static long long_ret;
   static char errmsg[300];
@@ -37,7 +36,7 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
   if (!checkmib(vp,name,length,exact,var_len,write_method,newname,numprocs))
     return(NULL);
   
-  if (proc = get_proc_instance(procwatch,newname[*length-1])) {
+  if ((proc = get_proc_instance(procwatch,newname[*length-1]))) {
     switch (vp->magic) {
       case MIBINDEX:
         long_ret = newname[*length-1];
@@ -72,11 +71,11 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
           errmsg[0] = 0;   /* catch out of mem errors return 0 count */
         } else if (proc->min && long_ret < proc->min) {
           sprintf(errmsg,"Too few %s running (# = %d)",
-                  proc->name, long_ret);
+                  proc->name, (int) long_ret);
         }
         else if (proc->max && long_ret > proc->max) {
           sprintf(errmsg,"Too many %s running (# = %d)",
-                  proc->name, long_ret);
+                  proc->name, (int) long_ret);
         }
         else if (proc->min == 0 && proc->max == 0 && long_ret < 1) {
           sprintf(errmsg,"No %s process running.", proc->name);
@@ -96,6 +95,7 @@ unsigned char *var_extensible_proc(vp, name, length, exact, var_len, write_metho
   return NULL;
 }
 
+int
 fixProcError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
    int      action;
    u_char   *var_val;
@@ -109,7 +109,7 @@ fixProcError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   struct myproc *proc;
   int tmp=0, tmplen=1000;
 
-  if (proc = get_proc_instance(procwatch,name[8])) {
+  if ((proc = get_proc_instance(procwatch,name[8]))) {
     if (var_val_type != INTEGER) {
       printf("Wrong type != int\n");
       return SNMP_ERR_WRONGTYPE;
