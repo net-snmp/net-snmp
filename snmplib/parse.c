@@ -4060,11 +4060,13 @@ new_module(const char *name, const char *file)
 
     for (mp = module_head; mp; mp = mp->next)
         if (!label_compare(mp->name, name)) {
-            DEBUGMSGTL(("parse-mibs", "Module %s already noted\n", name));
+            DEBUGMSGTL(("parse-mibs", "  Module %s already noted\n", name));
             /*
              * Not the same file 
              */
             if (label_compare(mp->file, file)) {
+                DEBUGMSGTL(("parse-mibs", "    %s is now in %s\n",
+                            name, file));
                 if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
 				       NETSNMP_DS_LIB_MIB_WARNINGS)) {
                     snmp_log(LOG_WARNING,
