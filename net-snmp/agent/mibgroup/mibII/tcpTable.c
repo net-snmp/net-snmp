@@ -43,9 +43,6 @@
 #include <netinet/in_systm.h>
 #endif
 #include <netinet/ip.h>
-#ifdef INET6
-#include <netinet/ip6.h>
-#endif
 #if HAVE_SYS_QUEUE_H
 #include <sys/queue.h>
 #endif
