@@ -989,9 +989,9 @@ _sess_copy( struct snmp_session *in_session)
                         session);
 
     if ((sptr = find_sec_mod(session->securityModel)) != NULL &&
-        sptr->init_sess_secmod != NULL) {
+        sptr->session_open != NULL) {
         /* security module specific inialization */
-        (*sptr->init_sess_secmod)(session);
+        (*sptr->session_open)(session);
     }
 
     return( slp );
@@ -1464,8 +1464,8 @@ snmp_sess_close(void *sessp)
     }
 
     if ((sptr = find_sec_mod(slp->session->securityModel)) != NULL &&
-        sptr->free_session != NULL) {
-        (*sptr->free_session)(sessp);
+        sptr->session_close != NULL) {
+        (*sptr->session_close)(sessp);
     }
 
     isp = slp->internal; slp->internal = 0;
@@ -2077,7 +2077,7 @@ snmpv3_packet_rbuild(struct snmp_session *session, struct snmp_pdu *pdu,
 
     sptr = find_sec_mod(pdu->securityModel);
     DEBUGDUMPSECTION("send", "SM msgSecurityParameters");
-    if (sptr && sptr->reverse_encode_out) {
+    if (sptr && sptr->encode_reverse) {
         struct snmp_secmod_outgoing_params parms;
         parms.msgProcModel = pdu->msgParseModel;
         parms.globalData = global_data+1;
@@ -2097,12 +2097,12 @@ snmpv3_packet_rbuild(struct snmp_session *session, struct snmp_pdu *pdu,
         parms.session = session;
         parms.pdu = pdu;
         result =
-            (*sptr->reverse_encode_out)(&parms);
+            (*sptr->encode_reverse)(&parms);
     } else {
         if (!sptr)
             snmp_log(LOG_ERR, "no such security service available: %d\n",
                      pdu->securityModel);
-        else if (!sptr->reverse_encode_out) {
+        else if (!sptr->encode_reverse) {
             snmp_log(LOG_ERR, "security service %d doesn't support reverse outgoing encoding.\n",
                      pdu->securityModel);
         }
@@ -2179,7 +2179,7 @@ snmpv3_packet_build(struct snmp_session *session, struct snmp_pdu *pdu,
     cp = NULL; *out_length = SNMP_MAX_MSG_SIZE;
     DEBUGDUMPSECTION("send", "SM msgSecurityParameters");
     sptr = find_sec_mod(pdu->securityModel);
-    if (sptr && sptr->forward_encode_out) {
+    if (sptr && sptr->encode_forward) {
         struct snmp_secmod_outgoing_params parms;
         parms.msgProcModel = pdu->msgParseModel;
         parms.globalData = global_data;
@@ -2201,12 +2201,12 @@ snmpv3_packet_build(struct snmp_session *session, struct snmp_pdu *pdu,
         parms.session = session;
         parms.pdu = pdu;
         result =
-            (*sptr->forward_encode_out)(&parms);
+            (*sptr->encode_forward)(&parms);
     } else {
         if (!sptr) {
             snmp_log(LOG_ERR, "no such security service available: %d\n",
                      pdu->securityModel);
-        } else if (!sptr->forward_encode_out) {
+        } else if (!sptr->encode_forward) {
             snmp_log(LOG_ERR, "security service %d doesn't support forward out encoding.\n",
                      pdu->securityModel);
         }
@@ -2994,7 +2994,7 @@ snmpv3_parse(
   cp = pdu_buf;
 
   DEBUGDUMPSECTION("recv", "SM msgSecurityParameters");
-  if (sptr->decode_in) {
+  if (sptr->decode) {
       struct snmp_secmod_incoming_params parms;
       parms.msgProcModel = pdu->msgParseModel;
       parms.maxMsgSize = msg_max_size;
@@ -3015,7 +3015,7 @@ snmpv3_parse(
       parms.pdu = pdu;
       parms.msg_flags = msg_flags;
       ret_val =
-          (*sptr->decode_in)(&parms);
+          (*sptr->decode)(&parms);
   } else {
       DEBUGINDENTLESS();
       snmp_log(LOG_WARNING, "security service %d can't decode packets\n",
@@ -3144,8 +3144,8 @@ snmpv3_make_report(struct snmp_pdu *pdu, int error)
   if (pdu->securityStateRef) {
       sptr = find_sec_mod(pdu->securityModel);
       if (sptr) {
-          if (sptr->free_state_ref) {
-              (*sptr->free_state_ref)(pdu->securityStateRef);
+          if (sptr->pdu_free_state_ref) {
+              (*sptr->pdu_free_state_ref)(pdu->securityStateRef);
           } else {
               snmp_log(LOG_ERR,
                        "Security Model %d can't free state references\n",
@@ -4003,8 +4003,8 @@ snmp_free_pdu(struct snmp_pdu *pdu)
     if (!pdu) return;
 
     if ((sptr = find_sec_mod(pdu->securityModel)) != NULL &&
-        sptr->free_pdu != NULL) {
-        (*sptr->free_pdu)(pdu);
+        sptr->pdu_free != NULL) {
+        (*sptr->pdu_free)(pdu);
     }
     snmp_free_varbind(pdu->variables);
     SNMP_FREE(pdu->enterprise);
@@ -4285,8 +4285,8 @@ _sess_read(void *sessp,
     if (pdu->securityStateRef) {
         sptr = find_sec_mod(pdu->securityModel);
         if (sptr) {
-            if (sptr->free_state_ref) {
-                (*sptr->free_state_ref)(pdu->securityStateRef);
+            if (sptr->pdu_free_state_ref) {
+                (*sptr->pdu_free_state_ref)(pdu->securityStateRef);
             } else {
                 snmp_log(LOG_ERR,
                          "Security Model %d can't free state references\n",
@@ -4389,8 +4389,8 @@ _sess_read(void *sessp,
   if (pdu != NULL && pdu->securityStateRef && pdu->command == SNMP_MSG_TRAP2) {
       sptr = find_sec_mod(pdu->securityModel);
       if (sptr) {
-          if (sptr->free_state_ref) {
-              (*sptr->free_state_ref)(pdu->securityStateRef);
+          if (sptr->pdu_free_state_ref) {
+              (*sptr->pdu_free_state_ref)(pdu->securityStateRef);
           } else {
               snmp_log(LOG_ERR,
                        "Security Model %d can't free state references\n",
