@@ -91,12 +91,13 @@ handler_registration *
 create_handler_registration(const char *name,
                             NodeHandler *handler_access_method,
                             oid *reg_oid, size_t reg_oid_len, int modes);
-delegated_cache *
+inline delegated_cache *
 create_delegated_cache(mib_handler               *,
                        handler_registration      *,
                        agent_request_info        *,
                        request_info              *,
                        void                      *);
+inline void free_delegated_cache(delegated_cache *dcache);
 inline delegated_cache *handler_check_cache(delegated_cache *dcache);
 void register_handler_by_name(const char *, mib_handler *);
 
