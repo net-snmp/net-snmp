@@ -166,23 +166,64 @@ uptimeString(u_long timeticks,
 
 
 
+/* prints character pointed to if in human-readable ASCII range,
+	otherwise prints a blank space */
+static void sprint_char(char *buf,
+								const u_char ch)
+{
+	if ((ch >= 32 && ch <= 126) || (ch >= 160 && ch <= 255))
+	{
+		sprintf(buf, "%c", (int)ch);
+	}
+	else
+	{
+		sprintf(buf, " ");
+	}
+}
+
+
 void sprint_hexstring(char *buf,
                       const u_char *cp,
                       size_t len)
 {
-
+	const u_char *tp;
+	size_t lenleft;
+	
     for(; len >= 16; len -= 16){
 	sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X ", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
 	buf += strlen(buf);
 	cp += 8;
 	sprintf(buf, "%02X %02X %02X %02X %02X %02X %02X %02X", cp[0], cp[1], cp[2], cp[3], cp[4], cp[5], cp[6], cp[7]);
 	buf += strlen(buf);
-	if (len > 16) { *buf++ = '\n'; *buf = 0; }
 	cp += 8;
+	if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT))
+	{
+		sprintf(buf, "  [");
+		buf += strlen(buf);
+		for (tp = cp - 16; tp < cp; tp ++)
+		{
+			sprint_char(buf++, *tp);
+		}
+		sprintf(buf, "]");
+		buf += strlen(buf);
+	}
+	if (len > 16) { *buf++ = '\n'; *buf = 0; }
     }
+    lenleft = len;
     for(; len > 0; len--){
 	sprintf(buf, "%02X ", *cp++);
 	buf += strlen(buf);
+    }
+	if ((lenleft > 0) && ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT))
+	{
+		sprintf(buf, " [");
+		buf += strlen(buf);
+		for (tp = cp - lenleft; tp < cp; tp ++)
+		{
+			sprint_char(buf++, *tp);
+		}
+		sprintf(buf, "]");
+		buf += strlen(buf);
     }
     *buf = '\0';
 }
@@ -1017,6 +1058,9 @@ snmp_out_toggle_options(char *options)
         case 'S':
 	    snmp_set_suffix_only(2);
 	    break;
+	     case 'T':
+	     ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_HEX_TEXT);
+	     break;
         default:
 	    return options-1;
 	}
@@ -1038,6 +1082,7 @@ void snmp_out_toggle_options_usage(const char *lead, FILE *outf)
   fprintf(outf, "%s    S: Print MIB module-id plus last element.\n", lead);
   fprintf(outf, "%s    t: Print timeticks unparsed as numeric integers.\n", lead);
   fprintf(outf, "%s    v: Print Print values only (not OID = value).\n", lead);
+  fprintf(outf, "%s    T: Print human-readable text along with hex strings.\n", lead);
 }
 
 char *
