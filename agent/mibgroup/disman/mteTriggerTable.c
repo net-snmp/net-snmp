@@ -145,6 +145,11 @@ init_mteTriggerTable(void)
 {
     DEBUGMSGTL(("mteTriggerTable", "initializing...  "));
 
+#ifndef SNMP_TRANSPORT_CALLBACK_DOMAIN
+    snmp_log(LOG_WARNING,"mteTriggerTable has been disabled because "
+               "the callback transport is not available.\n");
+    return;
+#endif
 
     /*
      * register ourselves with the agent to handle our mib tree 
@@ -189,6 +194,7 @@ init_mteTriggerTable(void)
     se_add_pair_to_slist("mteBooleanOperators", strdup(">="),
                          MTETRIGGERBOOLEANCOMPARISON_GREATEROREQUAL);
 
+#ifdef SNMP_TRANSPORT_CALLBACK_DOMAIN
     /*
      * open a 'callback' session to the main agent 
      */
@@ -198,6 +204,7 @@ init_mteTriggerTable(void)
         DEBUGMSGTL(("mteTriggerTable", "created callback session = %08x\n",
                     mte_callback_sess));
     }
+#endif
     DEBUGMSGTL(("mteTriggerTable", "done.\n"));
 }
 
