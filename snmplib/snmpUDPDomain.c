@@ -82,13 +82,8 @@ netsnmp_udp_fmtaddr(netsnmp_transport *t, void *data, int len)
     } else {
 	char tmp[64];
 
-        /*
-         * Here we just print the IP address of the peer for compatibility
-         * purposes.  It would be nice if we could include the port number and
-         * some indication of the domain (c.f. AAL5PVC).  
-         */
-
-        sprintf(tmp, "%s", inet_ntoa(to->sin_addr));
+        sprintf(tmp, "UDP: [%s]:%hd",
+                inet_ntoa(to->sin_addr), ntohs(to->sin_port));
         return strdup(tmp);
     }
 }

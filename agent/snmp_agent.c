@@ -802,16 +802,18 @@ netsnmp_agent_check_packet(netsnmp_session * session,
          */
     }
 #ifdef  USE_LIBWRAP
-    if (addr_string != NULL) {
-      if( addr_string[0] == '[' ) {
-          int i;
-          for( i = 1; addr_string[i] != ']'; i++ ) {
-              addr_string[i-1] =  addr_string[i];
-          }
-          addr_string[i-1] = '\0';
-      }
-      if ( strncmp(addr_string, "callback", 8) != 0 ) {
-        if (hosts_ctl("snmpd", STRING_UNKNOWN, addr_string, STRING_UNKNOWN)) {
+    /* Catch udp,udp6,tcp,tcp6 transports using "[" */
+    char *tcpudpaddr = strstr(addr_string, "[");
+    if ( tcpudpaddr != 0 ) {
+        char sbuf[64];
+        char *xp;
+        strncpy(sbuf, sizeof(sbuf), tcpudpaddr + 1);
+        sbuf[sizeof(sbuf)-1] = '\0';
+        xp = strstr(sbuf, "]");
+        if (xp)
+            *xp = '\0';
+ 
+        if (hosts_ctl("snmpd", STRING_UNKNOWN, sbuf, STRING_UNKNOWN)) {
             snmp_log(allow_severity, "Connection from %s\n", addr_string);
         } else {
             snmp_log(deny_severity, "Connection from %s REFUSED\n",

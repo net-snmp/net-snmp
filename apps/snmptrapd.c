@@ -396,7 +396,6 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
 {
 #if USE_LIBWRAP
     char *addr_string = NULL;
-    int i = 0;
 
     if (transport != NULL && transport->f_fmtaddr != NULL) {
         /*
@@ -410,18 +409,24 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
     }
 
     if (addr_string != NULL) {
-	if( addr_string[0] == '[' ) {
-	    for( i = 1; addr_string[i] != ']'; i++ ) {
-		addr_string[i-1] =  addr_string[i];
-	    }
-	    addr_string[i-1] = '\0';
-	}
+      /* Catch udp,udp6,tcp,tcp6 transports using "[" */
+      char *tcpudpaddr = strstr(addr_string, "[");
+      if ( tcpudpaddr != 0 ) {
+	char sbuf[64];
+	char *xp;
+	strncpy(sbuf, sizeof(sbuf), tcpudpaddr + 1);
+        sbuf[sizeof(sbuf)-1] = '\0';
+        xp = strstr(sbuf, "]");
+        if (xp)
+            *xp = '\0';
+
         if (hosts_ctl("snmptrapd", STRING_UNKNOWN, 
-		      addr_string, STRING_UNKNOWN) == 0) {
-            free(addr_string);
+		      sbuf, STRING_UNKNOWN) == 0) {
+            SNMP_FREE(addr_string);
             return 0;
         }
-        free(addr_string);
+      }
+      SNMP_FREE(addr_string);
     } else {
         if (hosts_ctl("snmptrapd", STRING_UNKNOWN,
                       STRING_UNKNOWN, STRING_UNKNOWN) == 0) {
