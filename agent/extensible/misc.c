@@ -2,6 +2,9 @@
 #include <sys/wait.h>
 #include "struct.h"
 
+char *find_field();
+char *skip_white();
+
 extern int numprocs, numextens;
 
 int random()
@@ -34,7 +37,7 @@ struct myproc *get_proc_instance(proc,inst)
   return(proc);
 }
 
-struct myproc *get_exten_instance(exten,inst)
+struct extensible *get_exten_instance(exten,inst)
      int inst;
      struct extensible *exten;
 {
@@ -145,7 +148,7 @@ int get_exec_output(ex)
                                                     cptr2++, cptr1++) {
         *cptr2 = *cptr1;
         if (*cptr1 == ' ') {
-          *cptr2++ = NULL;
+          *(cptr2++) = NULL;
           cptr1 = skip_white(cptr1);
           *cptr2 = *cptr1;
           if (*cptr1 != NULL) cnt++;
@@ -153,7 +156,7 @@ int get_exec_output(ex)
       }
       *cptr2 = NULL;
       *(cptr2+1) = NULL;
-      argv = (char *) malloc((cnt+2) * sizeof(char *));
+      argv = (char **) malloc((cnt+2) * sizeof(char *));
       aptr = argv;
       *(aptr++) = argvs;
       for (cptr2 = argvs, i=1; i != cnt; cptr2++)
