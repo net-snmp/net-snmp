@@ -282,8 +282,14 @@ command.
 .SH SETTING SYSTEM INFORMATION
 .IP "syslocation STRING"
 .IP "syscontact STRING"
-Sets the system location and the system contact for the agent.  This
-information is reported by the 'system' table in the mibII tree.
+.IP "sysname STRING"
+Sets the system location, system contact or system name for the agent.
+This information is reported in the 'system' group the mibII tree.
+Ordinarily these objects (sysLocation.0, sysContact.0 and sysName.0)
+are read-write.  However, specifying the value for one of these
+objects by giving the appropriate token makes the corresponding object
+read-only, and attempts to set the value of the object will result in
+a notWritable error response.
 .IP "sysservices NUMBER"
 Sets the value of the system.sysServices.0 object.
 For a host, a good value is 72.
