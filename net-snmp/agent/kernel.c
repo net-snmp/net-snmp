@@ -29,8 +29,7 @@
 off_t klseek __P((off_t));
 int klread __P((char *, int));
 
-static int kmem;
-int swap, mem;
+int swap, mem, kmem;
 
 void
 init_kmem(file)

@@ -180,6 +180,216 @@ int sh_count_procs(procname)
     }
   return ret;
 }
+#elif OSTYPE == ULTRIXID
+
+#define	NPROCS		32		/* number of proces to read at once */
+
+static struct user *getuser __P((struct proc *));
+static int getword __P((off_t));
+static int getstruct __P((off_t, char *, off_t, int));
+
+extern int kmem, mem, swap;
+
+#include <nlist.h>
+/* #include <sys/param.h> */
+/* #include <sys/types.h> */
+#include <sys/user.h>
+#include <sys/proc.h>
+/* #include <sys/tty.h> */
+#include <sys/file.h>
+#include <sys/vm.h>
+#include <machine/pte.h>
+
+static struct nlist proc_nl[] = {
+	{ "_nproc" },
+#define X_NPROC		0
+	{ "_proc" },
+#define X_PROC		1
+	{ "_proc_bitmap" },
+#define X_PROC_BITMAP	2
+	{ NULL }
+};
+
+int
+sh_count_procs(procname)
+	char	*procname;
+{
+	int total, proc_active, nproc;
+	int thisproc = 0;
+	int absolute_proc_number = -1;
+	struct user *auser;
+	struct proc *aproc, *procp;
+	unsigned bitmap;
+	struct proc procs[NPROCS], *procsp;
+	static int inited = 0;
+
+	if (inited == 0) {
+		init_nlist(proc_nl);
+		inited++;
+	}
+
+	procp = (struct proc *)getword(proc_nl[X_PROC].n_value);
+	nproc = getword(proc_nl[X_NPROC].n_value);
+
+	total = 0;
+	for (;;) {
+		do {
+			while (thisproc == 0) {
+				int nread;
+				int psize;
+
+				if (nproc == 0)
+					return(total);
+			
+				thisproc = MIN(NPROCS, nproc);
+				psize = thisproc * sizeof(struct proc);
+				nproc -= thisproc;
+				if (lseek(kmem, (off_t)procp, L_SET) == -1 ||
+				    (nread = read(kmem, (char *)procs, psize)) < 0) {
+					/* warn("read proc"); */
+					return(total);
+				}
+				else if (nread != psize) {
+					thisproc = nread / sizeof(struct proc);
+					nproc = 0;
+					/* warn("read proc: short read"); */
+				}
+				procsp = procs;
+				procp += thisproc;
+			}
+	
+			aproc = procsp++;
+			thisproc--;
+
+			absolute_proc_number++;
+			if ((absolute_proc_number % 32) == 0)
+				bitmap = getword((unsigned int)proc_nl[X_PROC_BITMAP].n_value
+				    + ((absolute_proc_number / 32) * 4));
+			proc_active = (bitmap & (1 << (absolute_proc_number % 32))) != 0;
+			if (proc_active && aproc->p_stat != SZOMB && !(aproc->p_type & SWEXIT))
+				auser = getuser(aproc);
+		} while (!proc_active || auser == NULL);
+
+		if (strcmp(auser->u_comm, procname) == 0)
+			total ++;
+	}
+}
+
+#define	SW_UADDR	dtob(getword(dmap.dm_ptdaddr))
+#define	SW_UBYTES	sizeof(struct user)
+
+#define	SKRD(file, src, dst, size)			\
+	(lseek(file, (off_t)(src), L_SET) == -1) ||	\
+	(read(file, (char *)(dst), (size)) != (size))
+
+static struct user *
+getuser(aproc)
+	struct proc *aproc;
+{
+	static union {
+		struct user user;
+		char upgs[UPAGES][NBPG];
+	} u;
+	static struct pte uptes[UPAGES];
+	static struct dmap dmap;
+	int i, nbytes;
+
+	/*
+	 * If process is not in core, we simply snarf it's user struct
+	 * from the swap device.
+	 */
+	if ((aproc->p_sched & SLOAD) == 0) {
+		if (!getstruct((off_t)aproc->p_smap, "aproc->p_smap", &dmap,
+		    sizeof(dmap))) {
+			/* warnx("can't read dmap for pid %d from %s", aproc->p_pid,
+			    _PATH_DRUM); */
+			return(NULL);
+		}
+		if (SKRD(swap, SW_UADDR, &u.user, SW_UBYTES)) {
+			/* warnx("can't read u for pid %d from %s", aproc->p_pid, _PATH_DRUM); */
+			return(NULL);
+		}
+		return (&u.user);
+	}
+
+	/*
+	 * Process is in core.  Follow p_addr to read in the page
+	 * table entries that map the u-area and then read in the
+	 * physical pages that comprise the u-area.
+	 *
+	 * If at any time, an lseek() or read() fails, print a warning
+	 * message and return NULL.
+	 */
+	if (SKRD(kmem, aproc->p_addr, uptes, sizeof(uptes))) {
+		/* warnx("can't read user pt for pid %d from %s", aproc->p_pid, _PATH_DRUM); */
+		return(NULL);
+	}
+	
+	nbytes = sizeof(struct user);
+	for (i = 0; i < UPAGES && nbytes > 0; i++) {
+		if (SKRD(mem, ptob(uptes[i].pg_pfnum), u.upgs[i], NBPG)) {
+			/* warnx("can't read user page %u for pid %d from %s",
+			    uptes[i].pg_pfnum, aproc->p_pid, _PATH_MEM); */
+			return(NULL);
+		}
+		nbytes -= NBPG;
+	}
+	return(&u.user);
+}
+
+static int
+getword(loc)
+	off_t loc;
+{
+	int val;
+
+	if (SKRD(kmem, loc, &val, sizeof(val)))
+		exit(1);
+	return(val);
+}
+
+static int
+getstruct(loc, name, dest, size)
+	off_t loc;
+	char *name;
+	off_t dest;
+	int size;
+{
+	if(SKRD(kmem,loc,dest,size))
+		return(0);
+	return(1);
+}
+#elif OSTYPE == SOLARISID
+
+#define _KMEMUSER	/* Needed by <sys/user.h> */
+
+#include <kvm.h>
+#include <fcntl.h>
+#include <sys/user.h>
+#include <sys/proc.h>
+
+int
+sh_count_procs(procname)
+	char *procname;
+{
+	static kvm_t *kd = NULL;
+	struct proc *p;
+	struct user *u;
+	int total;
+
+	if (kd == NULL) {
+		kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "sunps");
+		/* error check! */
+	}
+	kvm_setproc(kd);
+	total = 0;
+	while ((p = kvm_nextproc(kd)) != NULL) {
+		u = kvm_getu(kd, p);
+		if (strcmp(procname, u->u_comm) == 0)
+			total++;
+	}
+	return(total);
+}
 #else
 int sh_count_procs(procname)
      char *procname;
