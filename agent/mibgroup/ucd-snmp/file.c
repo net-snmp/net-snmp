@@ -135,7 +135,7 @@ u_char *var_file_table(struct variable *vp,
       return (u_char *)error;
       
   default:
-      ERROR_MSG("");
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_file_table\n", vp->magic));
   }
   
   return NULL;

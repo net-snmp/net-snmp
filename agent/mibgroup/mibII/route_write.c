@@ -45,6 +45,7 @@
 #include "snmp_api.h"
 #include "snmp_impl.h"
 #include "snmp_vars.h"
+#include "snmp_debug.h"
 #include "ip.h"
 #include "route_write.h"
 #include "snmp_logging.h"
@@ -455,7 +456,7 @@ write_rte(
 	case IPROUTEPROTO:
 
 	default:
-                snmp_log(LOG_ERR, "err default\n");
+                DEBUGMSGTL(("snmpd", "unknown sub-id %d in write_rte\n", var));
         	return SNMP_ERR_NOCREATION;
 
 

@@ -297,7 +297,7 @@ var_udp(struct variable *vp,
 #endif /* linux */
 
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_udp\n", vp->magic));
     }
     return NULL;
 }
@@ -338,7 +338,7 @@ var_udp(struct variable *vp,
 	      udpstat.udps_badlen;
 	    return (u_char *) &long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_udp\n", vp->magic));
     }
     return NULL;
 }
@@ -388,7 +388,7 @@ var_udp(struct variable *vp,
 	    return (u_char *) &long_return;
 
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_udp\n", vp->magic));
     }
     return NULL;
 }
@@ -460,7 +460,7 @@ LowState = -1;		/* UDP doesn't have 'State', but it's a useful flag */
 		long_return = ntohs(Lowinpcb.inp_lport);
 		return (u_char *) &long_return;
 	    default:
-		ERROR_MSG("");
+		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_udpEntry\n", vp->magic));
 	}
     return  NULL;
 }
@@ -506,7 +506,7 @@ var_udp(struct variable *vp,
       		break;
 	default:
 		ret = NULL;
-		ERROR_MSG("");
+		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_udp\n", vp->magic));
     }
     return (ret);
 }

@@ -272,7 +272,7 @@ var_acl(struct variable *vp,
       case ACLSTATUS:
 	return (u_char *)&ap->aclStatus;
       default:
-            ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_acl\n", vp->magic));
     }
     return NULL;
 }

@@ -76,8 +76,6 @@ char *local_progname;
 	 * FIX	Better name?
 	 */
 
-#define VERBOSE_FILE	stderr
-
 
 int	forcepassphrase		= 0,	/* Always prompt for passphrases. */
 	promptindicator		= 1,	/* Output an indicator that input
@@ -190,7 +188,7 @@ main(int argc, char **argv)
 	}
 
 	if (verbose) {
-		fprintf(VERBOSE_FILE, "Hash:\t\t%s\n",
+		fprintf(stderr, "Hash:\t\t%s\n",
 			(transform_type == usmHMACMD5AuthProtocol)
 				? "usmHMACMD5AuthProtocol"
 				: "usmHMACSHA1AuthProtocol"
@@ -219,7 +217,7 @@ main(int argc, char **argv)
 
 #ifdef SNMP_TESTING_CODE
 	if (verbose) {
-		fprintf(VERBOSE_FILE, "EngineID:\t%s\n",
+		fprintf(stderr, "EngineID:\t%s\n",
 			/* XXX = */ dump_snmpEngineID(engineid, &engineid_len));
 	}
 #endif
@@ -245,7 +243,7 @@ main(int argc, char **argv)
 	}
 
 	if (verbose) {
-		fprintf(VERBOSE_FILE,
+		fprintf(stderr,
 			"Old passphrase:\t%s\nNew passphrase:\t%s\n",
 			oldpass, newpass);
 	}
@@ -511,7 +509,7 @@ get_user_passphrases(void)
 							/* Read 1st line. */
 	if ( !fgets(buf, sizeof(buf), fp) ) {		
 		if ( verbose ) {
-			fprintf(VERBOSE_FILE, 
+			fprintf(stderr, 
 				"Passphrase file \"%s\" is empty...\n", path);
 		}
 		goto get_user_passphrases_prompt;
@@ -525,7 +523,7 @@ get_user_passphrases(void)
 							/* Read 2nd line. */
 	if ( !fgets(buf, sizeof(buf), fp) ) {		
 		if ( verbose ) {
-			fprintf(VERBOSE_FILE, 
+			fprintf(stderr, 
 				"Only one line in file \"%s\"...\n", path);
 		}
 

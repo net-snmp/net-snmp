@@ -1031,7 +1031,7 @@ eventNotifyUpdateSession(struct eventNotifyEntry *np)
     np->ss = snmp_open(&session);
     /* no need to check for error, there nothing to do about it anyway */
     if (!np->ss)
-	ERROR_MSG("");
+	snmp_log(LOG_ERR,"cannot create session in eventNotifyUpdateSession\n");
 }
 
 /*
@@ -1237,7 +1237,7 @@ var_eventnextindex(struct variable *vp,
       case EVENTNEXTINDEX:
 	return (u_char *)&eventNextIndex;
       default:
-	ERROR_MSG("");
+	DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_eventnextindex\n", vp->magic));
     }
 
     return NULL;
@@ -1304,7 +1304,7 @@ var_eventtab(struct variable *vp,
 	}
 	return (u_char *)&event->status;
       default:
-	ERROR_MSG("");
+	DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_eventtab\n", vp->magic));
     }
     
     return NULL;
@@ -1338,7 +1338,7 @@ var_eventnotifyvars(struct variable *vp,
 	long_return = MAX_RETRANSMISSIONS;
 	return (u_char *)&long_return;
       default:
-	ERROR_MSG("");
+	DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_eventnotifyvars\n", vp->magic));
     }
 
     return NULL;
@@ -1402,7 +1402,7 @@ var_eventnotifytab(struct variable *vp,
 	}
 	return (u_char *)&event->status;
       default:
-	ERROR_MSG("");
+	DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_eventnotifytab\n", vp->magic));
     }
     
     return NULL;

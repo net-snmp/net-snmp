@@ -637,7 +637,7 @@ var_hrswrun(struct variable *vp,
 #endif
 	    return (u_char *)&long_return;
 	default:
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_hrswrun\n", vp->magic));
     }
     return NULL;
 }

@@ -91,7 +91,7 @@ var_ucdDemoPublic(
       return (unsigned char *) demopass;
       
     default:
-      ERROR_MSG("");
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_ucdDemoPublic\n", vp->magic));
   }
   return 0;
 }

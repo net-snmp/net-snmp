@@ -546,7 +546,7 @@ var_snmpTargetParamsEntry(
       return (unsigned char *) &long_ret;
 
     default:
-      ERROR_MSG("column of Target Param Table not found!");
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_snmpTargetParamsEntry\n", vp->magic));
   }
   return 0;
 }  /* var_snmpTargetParamsEntry */

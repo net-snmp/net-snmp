@@ -184,7 +184,6 @@ klookup(unsigned long off,
        unless we're in debugging mode. People get very full log files. */
       snmp_log(LOG_ERR, "klookup(%lx, %p, %d): ", off, target, siz);
       perror("klread");
-      ERROR_MSG("klread");
     }
 #ifdef EXIT_ON_BAD_KLREAD
     exit(1);

@@ -123,7 +123,7 @@ var_sysORTable(struct variable *vp,
       return ((u_char *) &long_return);
 
     default:
-      ERROR_MSG("");
+      DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_sysORTable\n", vp->magic));
   }
   return NULL;
 }

@@ -111,7 +111,7 @@ var_registry(struct variable *vp,
             *var_len = strlen(tp->label);
             return (u_char *) tp->label;
         default:
-            ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_registry\n", vp->magic));
     }
     return NULL;
 }

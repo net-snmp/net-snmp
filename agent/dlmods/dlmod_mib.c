@@ -143,7 +143,7 @@ var_dlmod(struct variable *vp,
 		return (unsigned char *)&dlmod_next_index;
 
 	default:
-		ERROR_MSG("");
+		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_dlmod\n", vp->magic));
 	}
 	return 0;
 }
@@ -271,7 +271,7 @@ var_dlmodEntry(struct variable *vp,
 		return (unsigned char *) &dlm->status;
 
 	default:
-		ERROR_MSG("");
+		DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_dlmodEntry\n", vp->magic));
 	}
 	return 0;
 }

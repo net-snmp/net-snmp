@@ -600,7 +600,7 @@ var_context(struct variable *vp,
 	    *var_len = sizeof(restartTime);
 	    return (u_char *)restartTime;
 	} else {
-	    ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown contextLocalTime %d in var_context\n", cp->contextLocalTime));
 	    return NULL;
 	}
       case CONTEXTDSTPARTYINDEX:
@@ -624,7 +624,7 @@ var_context(struct variable *vp,
 	}
 	return (u_char *)&cp->contextStatus;
       default:
-            ERROR_MSG("");
+	    DEBUGMSGTL(("snmpd", "unknown sub-id %d in var_context\n", vp->magic));
     }
     return NULL;
 }

@@ -53,6 +53,7 @@ struct variable_list* snmp_add_null_var (struct snmp_pdu *, oid *, size_t);
 struct snmp_pdu	*snmp_pdu_create (int);
 struct snmp_pdu *snmp_fix_pdu (struct snmp_pdu *, int);
 struct snmp_pdu *snmp_clone_pdu (struct snmp_pdu *);
+int snmp_clone_var(struct variable_list *, struct variable_list *);
 const char *snmp_errstring (int);
 int snmp_synch_response (struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **);
 int snmp_synch_response_cb (struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **, snmp_callback);
