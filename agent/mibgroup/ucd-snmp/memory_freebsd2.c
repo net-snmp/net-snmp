@@ -276,18 +276,18 @@ unsigned char *var_extensible_mem(struct variable *vp,
     case MEMAVAILREAL: /* FREE real memory */
 	long_ret = ptok(mem.v_free_count);
 	return((u_char *) (&long_ret));
+
+/* these are not implemented */
     case MEMTOTALSWAPTXT:
-	long_ret = -1;
-	return((u_char *) (&long_ret));
     case MEMUSEDSWAPTXT:
-	long_ret = -1;
-	return((u_char *) (&long_ret));
     case MEMTOTALREALTXT:
-	long_ret = -1;
-	return((u_char *) (&long_ret));
     case MEMUSEDREALTXT:
+#if NO_DUMMY_VALUES
+	return NULL;
+#endif
 	long_ret = -1;
 	return((u_char *) (&long_ret));
+
     case MEMTOTALFREE:
 	long_ret = ptok((int)total.t_free);
 	return((u_char *) (&long_ret));

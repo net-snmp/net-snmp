@@ -257,7 +257,7 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
       return((u_char *) (&long_ret));
     case IOSENT:
 #ifdef linux
-      long_ret = vmstat(iosent);;
+      long_ret = vmstat(iosent);
 #endif
       return((u_char *) (&long_ret));
     case IORECEIVE:
