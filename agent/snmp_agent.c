@@ -73,19 +73,10 @@ SOFTWARE.
 #include <tcpd.h>
 #endif
 
-#if ! defined(NDEBUG) && ! defined(NETSNMP_USE_ASSERT)
-# define NETSNMP_TMP_NDEBUG
-# define NDEBUG
-#endif
-#include <assert.h>
-#if defined(NETSNMP_TMP_NDEBUG)
-# undef NDEBUG
-# undef NETSNMP_TMP_NDEBUG
-#endif
-
 #define SNMP_NEED_REQUEST_LIST
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #include "snmpd.h"
 #include "mibgroup/struct.h"
@@ -2017,8 +2008,8 @@ netsnmp_check_outstanding_agent_requests(void)
          * if we are processing a set, the first item better be
          * the set being (or waiting to be) processed.
          */
-        assert((!netsnmp_processing_set) ||
-               (netsnmp_processing_set == netsnmp_agent_queued_list));
+        netsnmp_assert((!netsnmp_processing_set) ||
+                       (netsnmp_processing_set == netsnmp_agent_queued_list));
 
         /*
          * if the top request is a set, don't pop it
@@ -2027,7 +2018,7 @@ netsnmp_check_outstanding_agent_requests(void)
         if ((netsnmp_agent_queued_list->pdu->command == SNMP_MSG_SET) &&
             (agent_delegated_list)) {
 
-            assert(netsnmp_processing_set == NULL);
+            netsnmp_assert(netsnmp_processing_set == NULL);
 
             netsnmp_processing_set = netsnmp_agent_queued_list;
             DEBUGMSGTL(("snmp_agent", "SET request remains queued while "
