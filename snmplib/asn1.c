@@ -80,7 +80,8 @@ _asn_size_err(const char *str, size_t wrongsize, size_t rightsize)
     char            ebuf[128];
 
     snprintf(ebuf, sizeof(ebuf),
-            "%s size %u: s/b %u", str, (unsigned)wrongsize, (unsigned)rightsize);
+            "%s size %lu: s/b %lu", str,
+	    (unsigned long)wrongsize, (unsigned long)rightsize);
     ebuf[ sizeof(ebuf)-1 ] = 0;
     ERROR_MSG(ebuf);
 }
@@ -92,8 +93,8 @@ _asn_length_err(const char *str, size_t wrongsize, size_t rightsize)
     char            ebuf[128];
 
     snprintf(ebuf, sizeof(ebuf),
-            "%s length %d too large: exceeds %d", str, (int)wrongsize,
-            (int)rightsize);
+            "%s length %lu too large: exceeds %lu", str,
+	    (unsigned long)wrongsize, (unsigned long)rightsize);
     ebuf[ sizeof(ebuf)-1 ] = 0;
     ERROR_MSG(ebuf);
 }
