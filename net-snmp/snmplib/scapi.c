@@ -501,6 +501,8 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 	u_char		pad_block[32];  /* bigger than anything I need */
 	u_char          my_iv[32];      /* ditto */
 	int		pad, plast, pad_size;
+	des_key_schedule key_sch;
+	des_cblock      key_struct;
 
         DEBUGTRACE;
 
@@ -570,12 +572,24 @@ sc_encrypt(	oid    *privtype,	size_t privtypelen,
 	memset(my_iv, 0, sizeof(my_iv));
 
 	if ( ISTRANSFORM(privtype, DESPriv) ) {
-          /* removed due to U.S. exportation regulations */
+                memcpy(key_struct, key, sizeof(key_struct));
+		(void) des_key_sched(&key_struct, key_sch);
+
+		memcpy(my_iv, iv, ivlen);
+		/* encrypt the data */
+		des_ncbc_encrypt(plaintext, ciphertext, plast, key_sch, 
+				 (des_cblock *) &my_iv, DES_ENCRYPT);
+		/* then encrypt the pad block */
+		des_ncbc_encrypt(pad_block, ciphertext+plast, pad_size, 
+				 key_sch, (des_cblock *)&my_iv, DES_ENCRYPT);
+		*ctlen = plast + pad_size;
 	}
 sc_encrypt_quit:
 	/* clear memory just in case */
 	memset(my_iv, 0, sizeof(my_iv));
 	memset(pad_block, 0, sizeof(pad_block));
+	memset(key_struct, 0, sizeof(key_struct));
+	memset(key_sch, 0, sizeof(key_sch));
 	return rval;
 
 }  /* end sc_encrypt() */
@@ -634,6 +648,8 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 	int rval = SNMPERR_SUCCESS;
 	int i, j; 
 	u_char *my_iv[32];
+	des_key_schedule key_sch;
+	des_cblock  key_struct;
 	u_int		properlength,
 			properlength_iv;
 
@@ -675,11 +691,18 @@ sc_decrypt(	oid    *privtype,	size_t privtypelen,
 	
 	memset(my_iv, 0, sizeof(my_iv));
 	if (ISTRANSFORM(privtype, DESPriv)) {
-          /* removed due to U.S. exportation regulations */
+                memcpy(key_struct, key, sizeof(key_struct));
+		(void) des_key_sched(&key_struct, key_sch);
+	
+		memcpy(my_iv, iv, ivlen);
+		des_cbc_encrypt(ciphertext, plaintext, ctlen, key_sch, 
+				(des_cblock *) &my_iv, DES_DECRYPT);
 	}
 
 /* exit cond */
 sc_decrypt_quit:
+	memset(key_sch, 0, sizeof(key_sch));
+	memset(key_struct, 0, sizeof(key_struct));
 	memset(my_iv, 0, sizeof(my_iv));
 	return rval;
 }  
