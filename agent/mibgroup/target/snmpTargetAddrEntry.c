@@ -682,7 +682,6 @@ var_snmpTargetAddrEntry(
     *write_method = NULL;
   }  
 
-
   *var_len = sizeof(long_ret); /* assume an integer and change later if not */
 
   /* look for OID in current table */
@@ -1412,6 +1411,12 @@ write_snmpTargetAddrRowStatus(
 	  if (value == RS_DESTROY) {
 	      snmpTargetAddrTable_remFromList(target, &aAddrTable);
 	  }
+	  if (value == RS_NOTINSERVICE) {
+	      if (target->sess != NULL) {
+		  snmp_close(target->sess);
+		  target->sess = NULL;
+	      }
+	  }
       }
   } else if (action == UNDO || action == FREE) {
       snmpTargetAddrOID[snmpTargetAddrOIDLen-1] =SNMPTARGETADDRROWSTATUSCOLUMN;
@@ -1425,91 +1430,6 @@ write_snmpTargetAddrRowStatus(
       }
   }
   return SNMP_ERR_NOERROR;
-#if 0
-  long_ret = *((long *) var_val);
-
-  /* search for struct in linked list */
-  snmpTargetAddrOID[snmpTargetAddrOIDLen-1] = SNMPTARGETADDRROWSTATUSCOLUMN;
-  if ((temp_struct = search_snmpTargetAddrTable(snmpTargetAddrOID, 
-						snmpTargetAddrOIDLen, 
-						name, &name_len, 1)) == 0) {
-    /* row doesn't exist, check valid possibilities */
-    if (long_ret == SNMP_ROW_DESTROY)  
-      /* re: RFC 1903, destroying a non-existent row is noError, whatever */
-      onCommitDo = NOTHING;
-    /* check if this is for a new row creation */
-    else if (long_ret == SNMP_ROW_CREATEANDGO || long_ret == SNMP_ROW_CREATEANDWAIT) 
-      onCommitDo = CREATE;
-    else /* no valid sets for no row being found so... */
-      return SNMP_ERR_NOSUCHNAME;
-  }
-  else {  /* row exists */
-
-    /* check if it is changeable */
-    if (temp_struct->storageType == SNMP_STORAGE_READONLY) {
-      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrRowStatus : row is read only\n"));
-      return SNMP_ERR_NOTWRITABLE;
-    }    
-    /* check if row is to be destroyed (note: it is ok to destroy notReady row!) */
-    else if (long_ret == SNMP_ROW_DESTROY)  {
-      if (temp_struct->storageType == SNMP_STORAGE_PERMANENT) {
-	DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrRowStatus : unable to destroy permanent row\n"));
-	return SNMP_ERR_INCONSISTENTVALUE;
-      }
-      else  {
-	onCommitDo = DESTROY;
-      }
-    }
-    /* check if row is new and can be changed from notready yet */
-    else if (temp_struct->rowStatus == SNMP_ROW_NOTREADY) {
-      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargeAddrRowStatus : unable to change from NOTREADY\n"));
-      return SNMP_ERR_INCONSISTENTVALUE;
-    }  
-    /* we now know the row status can be set, check for the two valid settings left*/
-    else if ( (long_ret == SNMP_ROW_ACTIVE) || 
-	      (long_ret == SNMP_ROW_NOTINSERVICE) ) {
-      onCommitDo = CHANGE;
-    }
-    /* not a valid setting */
-    else  {
-      DEBUGMSGTL(("snmpTargetAddrEntry","write to snmpTargetAddrRowStatus : Bad value for set\n"));
-      return SNMP_ERR_INCONSISTENTVALUE;
-    }
-  } /* if row exist */
-  
-
-  /* if this is a commit, do expected action */
-  if (action == COMMIT) {
-    switch(onCommitDo) { 
-      
-    case CREATE :
-      if (snmpTargetAddr_createNewRow(name, name_len) == 0) {
-	DEBUGMSGTL(("snmpTargetAddrEntry", "write to snmpTargetAddrRowStatus : "));
-	DEBUGMSG(("snmpTargetAddrEntry","failed new row creation, bad OID/index value \n"));
-	return SNMP_ERR_GENERR;
-      }
-      break;
-      
-    case DESTROY:
-      snmpTargetAddrTable_remFromList(temp_struct, &aAddrTable);
-      break;
-
-    case CHANGE:
-      if (long_ret != SNMP_ROW_ACTIVE && temp_struct->sess) {
-          /* must close our session */
-          snmp_close(temp_struct->sess);
-          temp_struct->sess = NULL;
-      }
-      temp_struct->rowStatus = long_ret;
-      break;
-
-    case NOTHING:
-      break;
-    }
-  }
-  
-  return SNMP_ERR_NOERROR;
-#endif
 }  /* write_snmpTargetAddrRowStatus */
 
 
