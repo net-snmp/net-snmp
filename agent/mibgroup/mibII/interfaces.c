@@ -166,7 +166,7 @@
 #ifdef freebsd3
 #    define USE_SYSCTL_IFLIST
 #else
-# if defined(CTL_NET) && !defined(freebsd2)
+# if defined(CTL_NET) && !defined(freebsd2) && !defined(netbsd1)
 #  ifdef PF_ROUTE
 #   ifdef NET_RT_IFLIST
 #    ifndef netbsd1
@@ -1789,13 +1789,30 @@ int Interface_Scan_Next(short *Index,
 		 */
 
 		auto_nlist(IFADDR_SYMBOL, (char *)&ia, sizeof(ia));
+#ifdef netbsd1
+		ia = (struct in_ifaddr *)ifnet.if_addrlist.tqh_first;
+#endif
 		while (ia) {
 		    klookup((unsigned long)ia ,  (char *)&in_ifaddr, sizeof(in_ifaddr));
+{
+#ifdef netbsd1
+#define CP(x)	((char *)(x))
+		    char *cp; struct sockaddr *sa;
+		    cp = (CP(in_ifaddr.ia_ifa.ifa_addr) - CP(ia)) +
+                        CP(&in_ifaddr); sa = (struct sockaddr *)cp;
+
+if (sa->sa_family == AF_INET)
+#endif
 		    if (in_ifaddr.ia_ifp == ifnetaddr) {
                         has_ipaddr = 1; /* this IF has IP-address */
                         break;
                     }
+}
+#ifdef netbsd1
+		    ia = (struct in_ifaddr *)in_ifaddr.ia_ifa.ifa_list.tqe_next;
+#else
 		    ia = in_ifaddr.ia_next;
+#endif
 		}
 
 #if !defined(netbsd1) && !defined(freebsd2) && !defined(openbsd2) && !defined(STRUCT_IFNET_HAS_IF_ADDRLIST)
