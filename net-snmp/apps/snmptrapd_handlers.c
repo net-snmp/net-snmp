@@ -20,6 +20,9 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #endif
+#if HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
 
 #include <net-snmp/config_api.h>
 #include <net-snmp/output_api.h>
@@ -38,7 +41,6 @@ char *print_format2  = NULL;
 
 const char     *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a]): %N\n\t%W Trap (%q) Uptime: %#T\n%v\n";
 const char     *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
-
 
 
 const char *
@@ -1015,6 +1017,28 @@ t        *     d) any other global handlers
                 break;
 	    traph = traph->nexth;
 	}
+
+	if (pdu->command == SNMP_MSG_INFORM) {
+	    netsnmp_pdu *reply = snmp_clone_pdu(pdu);
+	    if (!reply) {
+		snmp_log(LOG_ERR, "couldn't clone PDU for INFORM response\n");
+	    } else {
+		reply->command = SNMP_MSG_RESPONSE;
+		reply->errstat = 0;
+		reply->errindex = 0;
+		memdup((u_char **)&reply->transport_data, pdu->transport_data,
+		  	pdu->transport_data_length);
+		reply->transport_data_length = pdu->transport_data_length;
+		reply->tDomain = pdu->tDomain;
+		reply->tDomainLen = pdu->tDomainLen;
+		if (!snmp_send(session, reply)) {
+		    snmp_sess_perror("snmptrapd: Couldn't respond to inform pdu",
+                                    session);
+		    snmp_free_pdu(reply);
+		}
+	    }
+	}
+
         break;
 
     case NETSNMP_CALLBACK_OP_TIMED_OUT:
