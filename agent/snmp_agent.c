@@ -749,6 +749,7 @@ init_agent_snmp_session( struct snmp_session *session, struct snmp_pdu *pdu )
     asp->mode    = RESERVE1;
     asp->status  = SNMP_ERR_NOERROR;
     asp->index   = 0;
+    asp->inclusive = 0;
 
     asp->start = asp->pdu->variables;
     asp->end   = asp->pdu->variables;
@@ -1352,10 +1353,14 @@ handle_var_list(struct agent_snmp_session  *asp)
 	  DEBUGMSG(("snmp_agent", " (exact %d)\n", asp->exact));
 	  asp->exact = 1;
 	  status = handle_one_var(asp, varbind_ptr);
-	  asp->exact = 0;
-	  if (status == SNMP_ERR_NOERROR) {
+
+	  if (status == SNMP_ERR_NOERROR &&
+	      (varbind_ptr->type != SNMP_NOSUCHOBJECT) &&
+	      (varbind_ptr->type != SNMP_NOSUCHINSTANCE)) {
 	    DEBUGMSGTL(("snmp_agent", "exact get did the trick\n"));
 	  } else {
+	    DEBUGMSGTL(("snmp_agent", "exact no good, try inexact\n"));
+	    asp->exact = 0;
 	    status = handle_one_var(asp, varbind_ptr);
 	  }
 	} else {
@@ -1482,9 +1487,9 @@ statp_loop:
 		 * Delegated variables should be added to the
                  *  relevant outgoing request
 		 */
-        else if ( IS_DELEGATED(statType)) {
+        else if (IS_DELEGATED(statType)) {
                 add_method = (AddVarMethod*)statP;
-                return (*add_method)( asp, varbind_ptr );
+                return (*add_method)(asp, varbind_ptr);
         }
 		/*
 		 * GETNEXT/GETBULK should just skip inaccessible entries
@@ -1496,23 +1501,6 @@ statp_loop:
 		if (view != 5) send_easy_trap(SNMP_TRAP_AUTHFAIL, 0);
 		goto statp_loop;
 	}
-#ifdef USING_AGENTX_PROTOCOL_MODULE
-		/*
-		 * AgentX GETNEXT/GETBULK requests need to take
-		 *   account of the end-of-range value
-		 *
-		 * This doesn't really belong here, but it works!
-		 */
-	else if (!asp->exact && asp->pdu->version == AGENTX_VERSION_1 &&
-		 snmp_oid_compare( varbind_ptr->name,
-			  	   varbind_ptr->name_length,
-				   varbind_ptr->val.objid,
-				   varbind_ptr->val_len/sizeof(oid)) > 0 ) {
-            	memcpy(varbind_ptr->name, save, savelen*sizeof(oid));
-            	varbind_ptr->name_length = savelen;
-		varbind_ptr->type = SNMP_ENDOFMIBVIEW;
-	}
-#endif
 		/*
 		 * Other access problems are permanent
 		 *   (i.e. writing to non-writeable objects)
