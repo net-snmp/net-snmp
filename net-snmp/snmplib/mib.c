@@ -1760,7 +1760,7 @@ _get_symbol(oid *objid,
 
     /* subtree not found */
 
-    while (in_dices &&
+    while (in_dices && (objidlen > 0) &&
            !ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_OIDS) &&
            !ds_get_boolean(DS_LIBRARY_ID,DS_LIB_DONT_BREAKDOWN_OIDS)) {
 	size_t numids;
@@ -1774,8 +1774,6 @@ _get_symbol(oid *objid,
 	case TYPE_OCTETSTR:
 	    if (in_dices->isimplied) {
                 numids = objidlen;
-                if (numids > objidlen)
-                    goto finish_it;
                 buf = dump_oid_to_string(objid, numids, buf, '\'');
             } else {
                 numids = (size_t)*objid+1;
@@ -1822,7 +1820,7 @@ _get_symbol(oid *objid,
 
 finish_it:
 
-    while(objidlen--){	/* output rest of name, uninterpreted */
+    while(objidlen-- > 0){	/* output rest of name, uninterpreted */
 	sprintf(buf, "%lu.", *objid++);
 	while(*buf)
 	    buf++;
