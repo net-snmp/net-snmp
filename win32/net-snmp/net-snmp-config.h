@@ -640,6 +640,8 @@ extern "C" {
 #define LINUXID 10
 #define BSDIID 11
 #define OPENBSDID 12
+#define WIN32ID 13
+#define HPUX11ID 14
 #define UNKNOWNID 255
 
 #ifdef hpux9
@@ -647,6 +649,9 @@ extern "C" {
 #endif
 #ifdef hpux10
 #define OSTYPE HPUX10ID
+#endif
+#ifdef hpux11
+#define OSTYPE HPUX11ID
 #endif
 #ifdef sunos4
 #define OSTYPE SUNOS4ID
@@ -677,6 +682,9 @@ extern "C" {
 #endif
 #ifdef openbsd2
 #define OSTYPE OPENBSDID
+#endif
+#ifdef WIN32
+#define OSTYPE WIN32ID
 #endif
 /* unknown */
 #ifndef OSTYPE
