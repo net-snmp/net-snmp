@@ -659,3 +659,29 @@ closest_column(unsigned int current, column_info * valid_columns)
     return closest;
 }
 
+void
+#if HAVE_STDARG_H
+table_helper_add_indexes(table_registration_info *tinfo, ...)
+#else
+table_helper_add_indexes(va_alist)
+  va_dcl
+#endif
+{
+  va_list debugargs;
+  int type;
+  
+#if HAVE_STDARG_H
+  va_start(debugargs,tinfo);
+#else
+  table_registration_info *tinfo;
+  
+  va_start(debugargs);
+  tinfo = va_arg(debugargs, table_info *);
+#endif
+
+  while((type = va_arg(debugargs, int)) != 0) {
+      table_helper_add_index(tinfo, type);
+  }
+
+  va_end(debugargs);
+}
