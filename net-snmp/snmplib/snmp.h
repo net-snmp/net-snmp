@@ -255,7 +255,7 @@ struct snmp_pdu;
 char *snmp_pdu_type (struct snmp_pdu *);
 
 struct snmp_session;
-u_char * snmp_parse (struct snmp_session *session,
+u_char * cmu_snmp_parse (struct snmp_session *session,
     struct snmp_pdu *pdu,
     u_char *data,
     int length);
