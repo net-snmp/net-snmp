@@ -82,6 +82,10 @@ LINK32=link.exe
 # Name "snmpnetstat - Win32 Release"
 # Name "snmpnetstat - Win32 Debug"
 # Begin Source File
+ 
+SOURCE=..\..\snmplib\getopt.c
+# End Source File                                                               
+# Begin Source File
 
 SOURCE=..\..\apps\snmpnetstat\if.c
 # End Source File

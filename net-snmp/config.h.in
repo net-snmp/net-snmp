@@ -292,6 +292,9 @@
 /* Define if you have the setgid function.  */
 #undef HAVE_SETGID
 
+/* Define if you have the setgroups function.  */
+#undef HAVE_SETGROUPS
+
 /* Define if you have the setlocale function.  */
 #undef HAVE_SETLOCALE
 
@@ -480,6 +483,9 @@
 
 /* Define if you have the <netinet/ip6.h> header file.  */
 #undef HAVE_NETINET_IP6_H
+
+/* Define if you have the <netinet/ip_icmp.h> header file.  */
+#undef HAVE_NETINET_IP_ICMP_H
 
 /* Define if you have the <netinet/ip_var.h> header file.  */
 #undef HAVE_NETINET_IP_VAR_H
@@ -729,6 +735,9 @@
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
+
+/* Define if you have the <utmpx.h> header file.  */
+#undef HAVE_UTMPX_H
 
 /* Define if you have the <utsname.h> header file.  */
 #undef HAVE_UTSNAME_H
@@ -1137,6 +1146,10 @@
 
 #if defined(HAVE_NLIST) && defined(STRUCT_NLIST_HAS_N_VALUE) && !defined(DONT_USE_NLIST)
 #define CAN_USE_NLIST
+#endif
+
+#if HAVE_DMALLOC_H
+#define DMALLOC_FUNC_CHECK
 #endif
 
 #undef INET6

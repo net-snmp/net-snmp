@@ -41,6 +41,7 @@ extern "C" {
 #define DS_LIB_REVERSE_ENCODE      20 /* encode packets from back to front */
 #define DS_LIB_PRINT_BARE_VALUE	   21 /* just print value (not OID = value) */
 #define DS_LIB_EXTENDED_INDEX	   22 /* print extended index format [x1][x2] */
+#define DS_LIB_PRINT_HEX_TEXT      23 /* print ASCII text along with hex strings */
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0

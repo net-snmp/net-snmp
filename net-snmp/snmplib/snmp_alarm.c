@@ -189,14 +189,11 @@ set_an_alarm(void) {
      expected they'll check the next alarm time and do their own
      calling of run_alarms(). */
   if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG) && nexttime) {
-#ifndef WIN32
 #ifdef SIGALRM
     alarm(nexttime);
     DEBUGMSGTL(("snmp_alarm_set_an_alarm","setting an alarm for %d seconds from now\n",nexttime));
     signal(SIGALRM, alarm_handler);
 #endif /* SIGALRM */
-#endif
-
   } else {
     DEBUGMSGTL(("snmp_alarm_set_an_alarm","no alarms found to handle\n"));
   }

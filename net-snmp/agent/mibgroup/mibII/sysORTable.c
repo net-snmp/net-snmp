@@ -30,6 +30,9 @@
 #if HAVE_WINSOCK_H
 #include <winsock.h>
 #endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
