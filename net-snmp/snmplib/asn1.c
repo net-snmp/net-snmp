@@ -1054,6 +1054,10 @@ asn_build_objid(u_char *data,
     }
     first_objid_val = objid_val;
 
+    /* ditch illegal calls now */
+    if (objidlength > MAX_OID_LEN)
+        return NULL;
+        
     /* calculate the number of bytes needed to store the encoded value */
     for (i = 1, asnlength = 0;;) {
         if (objid_val < (unsigned)0x80) {
