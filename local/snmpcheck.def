@@ -290,11 +290,11 @@ sub deleteme {
 sub deleteself {
     my $self = shift;
     if ($::display) {
-	$self->{'Desc'}->destroy();
-	$self->{'Frame'}->destroy();
 	if ($self->{'Selected'}) {
 	  main::deselectitem($self);
 	}
+	$self->{'Desc'}->destroy();
+	$self->{'Frame'}->destroy();
     }
 }
 
@@ -485,6 +485,18 @@ sub hostdown {
     push(@{$self->{'Problems'}},$self);
     $self->{'Down'} = 1;
     if ($::display) {
+	if (!exists $self->{'hostlabel'}) {
+	    $self->{'hostlabel'} = 
+		$self->{'MainFrame'}->Button(-text => sprintf("%-9.9s",
+							      $self->{'Name'}),
+					     -bd => 0, -padx => 0, -pady => 0,
+					     -command =>[\&selectme,$self],
+					     -activeforeground => 'red',
+					     -activebackground => '#C9C9C9',
+					     -width => 9,
+					     -anchor => "w",
+					     -relief => "flat");
+	}
 	::addToLog("$self->{'Name'} is down",2);
 	$self->{'hostlabel'}->configure(-text => 
 					sprintf("%-9.9s down",$self->{'Name'}),
@@ -525,10 +537,10 @@ sub check {
 
 sub deleteme {
     my $self = shift;
-    $self->deleteProbs();
     if ($self->{'Selected'}) {
       main::deselectitem($self);
     }
+    $self->deleteProbs();
     if ($::display) {
 	$self->{'hostlabel'}->destroy();
 	$self->{'ProbFrame'}->destroy();
@@ -566,7 +578,7 @@ sub deleteProb {
 		splice(@{$self->{'Problems'}},$k,1);
 		$child->deleteself();
 		if ($#{$self->{'Problems'}} == -1 && 
-		    !exists$self->{'noDelete'}) {
+		    !exists $self->{'noDelete'}) {
 		    $self->deleteme();
 		}
 		last;
