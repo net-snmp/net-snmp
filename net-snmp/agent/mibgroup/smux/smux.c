@@ -69,6 +69,7 @@
 #include "read_config.h"
 #include "snmp.h"
 #include "snmp_api.h"
+#include "snmp_client.h"
 #include "snmp_impl.h"
 #include "smux.h"
 #include "var_struct.h"
@@ -122,7 +123,7 @@ struct variable2 smux_variables[] = {
 
 
 void
-smux_parse_peer_auth(char *token, char *cptr)
+smux_parse_peer_auth(const char *token, char *cptr)
 {
 	smux_peer_auth *aptr;
 
