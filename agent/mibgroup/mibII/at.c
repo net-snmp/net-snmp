@@ -494,7 +494,7 @@ static void ARP_Scan_Init (void)
 		free(at);
 	if (sysctl(mib, 6, NULL, &needed, NULL, 0) < 0)
 		snmp_log_perror("route-sysctl-estimate");
-	if ((at = malloc(needed)) == NULL)
+	if ((at = malloc(needed ? needed : 1)) == NULL)
 		snmp_log_perror("malloc");
 	if (sysctl(mib, 6, at, &needed, NULL, 0) < 0)
 		snmp_log_perror("actual retrieval of routing table");
