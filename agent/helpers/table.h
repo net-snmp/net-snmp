@@ -86,6 +86,12 @@ NodeHandler table_helper_handler;
 
 #define table_helper_add_index(tinfo, type) snmp_varlist_add_variable(&tinfo->indexes, NULL, 0, type, NULL, 0);
 
+#if HAVE_STDARG_H
+void table_helper_add_indexes(table_registration_info *tinfo, ...);
+#else
+void table_helper_add_indexes(va_alist);
+#endif
+
 int
 check_getnext_reply(request_info *request, oid *prefix,
                     size_t prefix_len,
