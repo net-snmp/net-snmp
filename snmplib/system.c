@@ -858,7 +858,10 @@ mkdirhier(const char *pathname, mode_t mode, int skiplast)
 #ifdef WIN32
             CreateDirectory(buf, NULL);
 #else
-            mkdir(buf, mode);
+            if (mkdir(buf, mode) == -1) {
+                free(ourcopy);
+                return SNMPERR_GENERR;
+            }
 #endif
         } else {
             /*
