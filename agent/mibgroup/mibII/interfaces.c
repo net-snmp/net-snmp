@@ -1266,11 +1266,11 @@ Interface_Scan_Init (void)
     struct ifreq ifrq;
     struct ifnet **ifnetaddr_ptr;
     FILE *devin;
-    unsigned long rec_pkt, rec_oct, rec_err, snd_pkt, snd_oct, snd_err, coll;
+    unsigned long long rec_pkt, rec_oct, rec_err, snd_pkt, snd_oct, snd_err, coll;
     int i, fd;
     conf_if_list *if_ptr;
-    const char *scan_line_2_2="%lu %lu %lu %*lu %*lu %*lu %*lu %*lu %lu %lu %lu %*lu %*lu %lu";
-    const char *scan_line_2_0="%lu %lu %*lu %*lu %*lu %lu %lu %*lu %*lu %lu";
+    const char *scan_line_2_2="%llu %llu %llu %*llu %*llu %*llu %*llu %*llu %llu %llu %llu %*llu %*llu %llu";
+    const char *scan_line_2_0="%llu %llu %*llu %*llu %*llu %llu %llu %*llu %*llu %llu";
     const char *scan_line_to_use;
     
 #endif  
