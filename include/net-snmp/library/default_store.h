@@ -55,6 +55,12 @@ extern "C" {
 #define DS_LIB_PRINT_SUFFIX_ONLY 4 /* print out only a single oid node  == 1.
                                       like #1 but supply mib module too == 2. */
 
+/* special meanings for the default SNMP version slot (DS_LIB_SNMPVERSION) */
+#define DS_SNMP_VERSION_1    128  /* bogus */
+#define DS_SNMP_VERSION_2c   1    /* real */
+#define DS_SNMP_VERSION_3    3    /* real */
+
+   
 /* library strings */
 #define DS_LIB_SECNAME           0
 #define DS_LIB_CONTEXT           1

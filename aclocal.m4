@@ -4,7 +4,7 @@ dnl Asks a QUESTION and puts the results in VARIABLENAME with an optional
 dnl DEFAULT value if the user merely hits return.
 dnl
 dnl @version 1.15
-dnl @author Wes Hardaker <wjhardaker@ucdavis.edu>
+dnl @author Wes Hardaker <hardaker@users.sourceforge.net>
 dnl
 AC_DEFUN([AC_PROMPT_USER_NO_DEFINE],
 dnl changequote(<<, >>) dnl
@@ -26,15 +26,16 @@ dnl >>
 dnl changequote([, ])
 ) dnl done AC_PROMPT_USER
 
-dnl @synopsis AC_PROMPT_USER(VARIABLENAME,QUESTION,[DEFAULT])
+dnl @synopsis AC_PROMPT_USER(VARIABLENAME,QUESTION,[DEFAULT],QUOTED)
 dnl
 dnl Asks a QUESTION and puts the results in VARIABLENAME with an optional
 dnl DEFAULT value if the user merely hits return.  Also calls 
 dnl AC_DEFINE_UNQUOTED() on the VARIABLENAME for VARIABLENAMEs that should
-dnl be entered into the config.h file as well.
+dnl be entered into the config.h file as well.  If QUOTED is "quoted" then
+dnl the result will be defined within quotes.
 dnl
 dnl @version 1.15
-dnl @author Wes Hardaker <wjhardaker@ucdavis.edu>
+dnl @author Wes Hardaker <hardaker@users.sourceforge.net>
 dnl
 AC_DEFUN([AC_PROMPT_USER],
 [
@@ -46,7 +47,7 @@ eval ac_cv_user_prompt_$1=\$$1
 echo $ac_n "setting $MSG_CHECK to...  $ac_c" >&AC_FD_MSG
 ])
 if test "$ac_cv_user_prompt_$1" != "none"; then
-  if test "$4" != ""; then
+  if test "x$4" = "xquoted" -o "x$4" = "xQUOTED"; then
     AC_DEFINE_UNQUOTED($1,"$ac_cv_user_prompt_$1")
   else
     AC_DEFINE_UNQUOTED($1,$ac_cv_user_prompt_$1)
@@ -59,7 +60,7 @@ dnl
 dnl Checks STRUCT for MEMBER and defines DEFINE if found.
 dnl
 dnl @version 1.15
-dnl @author Wes Hardaker <wjhardaker@ucdavis.edu>
+dnl @author Wes Hardaker <hardaker@users.sourceforge.net>
 dnl
 AC_DEFUN(AC_CHECK_STRUCT_FOR,[
 

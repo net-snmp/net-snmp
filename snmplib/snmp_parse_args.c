@@ -424,8 +424,30 @@ snmp_parse_args(int argc,
   /* read in MIB database and initialize the snmp library*/
   init_snmp("snmpapp");
 
+  /* session default version */
   if (session->version == SNMP_DEFAULT_VERSION) {
-    session->version = ds_get_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION);
+      /* run time default version */
+      session->version = ds_get_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION);
+
+      /* compile time default version */
+      if (!session->version) {
+          switch(DEFAULT_SNMP_VERSION) {
+              case 1:
+                  session->version = SNMP_VERSION_1;
+                  break;
+
+              case 2:
+                  session->version = SNMP_VERSION_2c;
+                  break;
+
+              case 3:
+                  session->version = SNMP_VERSION_3;
+                  break;
+          }
+      } else {
+          if (session->version == DS_SNMP_VERSION_1) /* bogus value.  version 1 actually = 0 */  
+              session->version = SNMP_VERSION_1;
+      }
   }
 
   /* make master key from pass phrases */

@@ -199,6 +199,19 @@ AC_ARG_WITH(persistent-directory,
 [  --with-persistent-directory=\"directory\"
                                   Default directory for persistent data storage.],ac_cv_user_prompt_PERSISTENT_DIRECTORY="$with_persistent_directory")
 
+AC_ARG_WITH(default-snmp-version,
+[  --with-default-snmp-version=\"3\" Default SNMP version number to use.
+                                     (Default: 3)  legal values: 1, 2c or 3.],
+    ac_cv_user_prompt_DEFAULT_SNMP_VERSION="$with_default_snmp_version")
+
+dnl we test this now and later as well.  we test it now so configure can die
+dnl early on with an error rather than waiting till the end of the script.
+if test "x$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != ""; then
+  if test "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "1" -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "2" -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "3"; then
+    AC_MSG_ERROR(Illegal version number passed to --with-default-snmp-version)
+  fi
+fi
+
 AC_ARG_WITH(sys_contact,
 [  --with-sys-contact=\"who@where\"  Default system contact.
                                     (Default: LOGIN@DOMAINNAME)],
@@ -2261,7 +2274,7 @@ dnl
 dnl Prompt for various bits of user information
 dnl
 
-if test "x$ac_cv_user_prompt_LOGFILE" = "x" -o "x$ac_cv_user_prompt_SYS_LOC" = "x" -o "x$ac_cv_user_prompt_SYS_CONTACT" = "x"; then
+if test "x$ac_cv_user_prompt_LOGFILE" = "x" -o "x$ac_cv_user_prompt_SYS_LOC" = "x" -o "x$ac_cv_user_prompt_SYS_CONTACT" = "x" -o "x$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" = "x"; then
 AC_CACHE_CHECK(if you have run configure before, ac_cv_have_warned,
 [
 if test "x$defaults" = "xno"; then
@@ -2299,6 +2312,26 @@ else
   LOC="@no.where"
 fi
 
+AC_PROMPT_USER(DEFAULT_SNMP_VERSION,[
+
+*** System Contact Information:
+
+	Starting with version 5.0, we give you the option at compile time to
+select what default SNMP protocol version number you wish to use.  In
+the past this was set to SNMP version 1, but we strongly suggest you
+consider switching to the more secure form of the protocol: SNMPv3.
+At this prompt you can select \"1\", \"2c\", or \"3\" as the default
+version for the command tools (snmpget, ...) to use.  This can always
+be configured at runtime as well using the -v flag to the tools, or by
+using the \"defVersion\" token in your snmp.conf file.
+
+Default SNMP Version Number To Use],3,unquoted)
+
+dnl we tested this above before the prompt, but the prompt may give a new value.
+if test "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "1" -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "2" -a "$ac_cv_user_prompt_DEFAULT_SNMP_VERSION" != "3"; then
+  AC_MSG_ERROR(Illegal version number.  Only 1 2 and 3 are supported)
+fi
+
 AC_PROMPT_USER(SYS_CONTACT,[
 
 *** System Contact Information:
@@ -2308,7 +2341,7 @@ running on.  This information is available in the MIB-II tree.  This
 can also be over-ridden using the \"syscontact\" syntax in the agent's
 configuration files.
 
-System Contact Information],$ME@$LOC,1)
+System Contact Information],$ME@$LOC,quoted)
 
 AC_PROMPT_USER(SYS_LOC,[
 
@@ -2318,7 +2351,7 @@ AC_PROMPT_USER(SYS_LOC,[
 available in the MIB-II tree.  this can also be over-ridden using the
 \"syslocation\" syntax in the agent's configuration files.
 
-System Location],Unknown,1)
+System Location],Unknown,quoted)
 
 if test -d /var/log; then
   defaultlog="/var/log/snmpd.log"
@@ -2335,7 +2368,7 @@ information & errors to.  If not defined (enter the keyword \"none\"
 at the prompt below) the agent will use stdout and stderr instead.
 (Note: This value can be over-ridden using command line options.)
 
-Location to write logfile],$defaultlog,1)
+Location to write logfile],$defaultlog,quoted)
 
 if test -d /var; then
   defaultstore="/var/net-snmp"
@@ -2350,7 +2383,7 @@ AC_PROMPT_USER(PERSISTENT_DIRECTORY,[
 	Enter a directory for the snmp library to store persistent
 data in the form of a configuration file.
 
-Location to write persistent information],$defaultstore,1)
+Location to write persistent information],$defaultstore,quoted)
 
 PERSISTENT_DIRECTORY=$ac_cv_user_prompt_PERSISTENT_DIRECTORY
 AC_SUBST(PERSISTENT_DIRECTORY)

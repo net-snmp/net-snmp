@@ -7,6 +7,9 @@
 /* Define IN_UCD_SNMP_SOURCE if compiling inside the ucd-snmp source tree */
 #define IN_UCD_SNMP_SOURCE 1
 
+/* Default (SNMP) version number for the tools to use */
+#define DEFAULT_SNMP_VERSION 3
+
 /* don't change these values! */
 #define SNMPV1      0xAAAA       /* readable by anyone */
 #define SNMPV2ANY   0xA000       /* V2 Any type (includes NoAuth) */
