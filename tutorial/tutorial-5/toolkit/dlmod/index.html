@@ -91,7 +91,7 @@ href="nstAgentPluginObject.c">nstAgentPluginObject.c</a> file.
 	<p><ul>
 	  <li> % <b>snmpget  localhost NET-SNMP-TUTORIAL-MIB::nstAgentPluginObject.0 </b>
 	<p><pre>
-ustSSSimpleString.0 = No Such Object available on this agent at this OID
+nstAgentPluginObject.0 = No Such Object available on this agent at this OID
 	    </pre>	</ul><p>
 
       <li> Then, run snmpset to create a new row in the dlmod table:
@@ -143,9 +143,9 @@ SNMP table: dlmodTable
 	</ul>
       <li> If everything above was done correctly, then the following
 	command should work and will access the shared object's data:
-	<p><ul><li> % <b>snmpget  localhost NET-SNMP-TUTORIAL-MIB::ustSSSimpleString.0 </b>
+	<p><ul><li> % <b>snmpget  localhost NET-SNMP-TUTORIAL-MIB::nstAgentPluginObject.0 </b>
 <p><pre>
-ustSSSimpleString.0 = "Hello World"
+nstAgentPluginObject.0 = "Hello World"
 </pre><p>
 	</ul>
     </ol>
@@ -162,7 +162,7 @@ ustSSSimpleString.0 = "Hello World"
     <address><a href="mailto:Wes Hardaker <hardaker@users.sourceforge.net>">Wes Hardaker</a></address>
 <!-- Created: Thu Oct  5 16:20:27 PDT 2000 -->
 <!-- hhmts start -->
-Last modified: Fri Oct  4 14:28:03 PDT 2002
+Last modified: Thu Jan 30 15:29:13 PST 2003
 <!-- hhmts end -->
   </body>
 </html>
