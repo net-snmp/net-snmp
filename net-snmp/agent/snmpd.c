@@ -140,7 +140,6 @@ struct trap_sink {
     struct trap_sink *next;
 };
 struct trap_sink *sinks = NULL;
-struct trap_sink *v2sinks = NULL;
 
 #define ADDRCACHE 10
 
@@ -380,17 +379,19 @@ send_trap_pdu(pdu)
 {
   struct snmp_pdu *mypdu;
   
-  struct trap_sink *sink = v2sinks;
+  struct trap_sink *sink = sinks;
 
   if ((snmp_enableauthentraps == 1) && sink != NULL) {
     while (sink) {
-      mypdu = snmp_clone_pdu(pdu);
-      if (snmp_send(sink->sesp, mypdu) == 0) {
-        snmp_perror ("snmpd: send_trap_pdu");
-      }
+      if (sink->ses.version == SNMP_VERSION_2c) {
+        mypdu = snmp_clone_pdu(pdu);
+        if (snmp_send(sink->sesp, mypdu) == 0) {
+          snmp_perror ("snmpd: send_trap_pdu");
+        }
 #ifdef USING_MIBII_SNMP_MIB_MODULE       
-      snmp_outtraps++;
+        snmp_outtraps++;
 #endif
+      }
       sink = sink->next;
     }
   }
