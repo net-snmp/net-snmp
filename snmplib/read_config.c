@@ -870,8 +870,10 @@ char *read_config_save_octet_string(char *saveto, u_char *str, size_t len) {
           (isalpha(*cp) || isdigit(*cp) || *cp == ' '); cp++, i++);
 
   if (len != 0 && i == (int)len) {
-      sprintf(saveto, "\"%s\"", str);
-      saveto += strlen(saveto);
+      *saveto = '"';
+      memcpy(saveto+1, str, len);
+      *saveto[len+2] = '"';
+      *saveto[len+3] = '\0';
   } else {
       if (str != NULL) {
           sprintf(saveto, "0x");
