@@ -103,7 +103,7 @@ binary_search(const void *val, netsnmp_container *c, int exact)
     binary_array_table *t = (binary_array_table*)c->private;
     size_t             len = t->count;
     size_t             half;
-    size_t             middle;
+    size_t             middle = 0;
     size_t             first = 0;
     int                result = 0;
 
