@@ -153,12 +153,20 @@ init_vmstat(void)
          {CPURAWNICE}},
         {CPURAWSYSTEM, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
          {CPURAWSYSTEM}},
+        {CPURAWKERNEL, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
+         {CPURAWKERNEL}},
         {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
          {CPURAWIDLE}},
         {SYSRAWINTERRUPTS, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
          {SYSRAWINTERRUPTS}},
         {SYSRAWCONTEXT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
          {SYSRAWCONTEXT}},
+        {CPURAWWAIT, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
+         {CPURAWWAIT}},
+        {CPURAWINTR, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
+         {CPURAWINTR}},
+        {CPURAWSOFTIRQ, ASN_COUNTER, RONLY, var_extensible_vmstat, 1,
+         {CPURAWSOFTIRQ}},
         /*
          * Future use: 
          */
@@ -179,28 +187,31 @@ init_vmstat(void)
      */
     REGISTER_MIB("ucd-snmp/vmstat", extensible_vmstat_variables, variable2,
                  vmstat_variables_oid);
-
 }
 
 
-
-#define VMSTAT_FILE "/proc/stat"
-
-void
+static void
 getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
         unsigned long *cide, unsigned long *pin, unsigned long *pout,
         unsigned long *swpin, unsigned long *swpout, unsigned long *itot,
-	unsigned long *i1, unsigned long *ct)
+	unsigned long *i1, unsigned long *ct, unsigned long *ciow,
+	unsigned long *cirq, unsigned long *csoft)
 {
-    int             statfd;
-    int             first = 1;
-    static char    *buff = NULL;
-    static int      bsize = 0;
+    int             statfd, vmstatfd;
+    static int      first = 1;
+    static char    *buff = NULL, *vmbuff = NULL;
+    static int      bsize = 0, vmbsize = 0;
+    char           *b;
+    time_t          now;
 
-    if ((statfd = open(VMSTAT_FILE, O_RDONLY, 0)) != -1) {
-        char           *b;
+    time(&now);
+    if (cache_time + CACHE_TIMEOUT < now) {
+	if ((statfd = open(STAT_FILE, O_RDONLY, 0)) == -1) {
+	    snmp_log_perror(STAT_FILE);
+	    return;
+	}
         if (bsize == 0) {
-            bsize = 128;
+            bsize = 256;
             buff = malloc(bsize);
         }
         while (read(statfd, buff, bsize) == bsize) {
@@ -208,97 +219,165 @@ getstat(unsigned long *cuse, unsigned long *cice, unsigned long *csys,
             buff = realloc(buff, bsize);
             DEBUGMSGTL(("vmstat", "/proc/stat buffer increased to %d\n", bsize));
             close(statfd);
-            statfd = open(VMSTAT_FILE, O_RDONLY, 0);
+            statfd = open(STAT_FILE, O_RDONLY, 0);
         }
         close(statfd);
-        *itot = 0;
-        *i1 = 1;                /* ensure assert below will fail if the sscanf bombs */
-        b = strstr(buff, "cpu ");
-        if (b)
-            sscanf(b, "cpu  %lu %lu %lu %lu", cuse, cice, csys, cide);
-        else {
-            if (first)
-                snmp_log(LOG_ERR, "No cpu line in /proc/stat\n");
-            *cuse = *cice = *csys = *cide = 0;
-        }
-        b = strstr(buff, "page ");
-        if (b)
-            sscanf(b, "page %lu %lu", pin, pout);
-        else {
-            if (first)
-                snmp_log(LOG_ERR, "No page line in /proc/stat\n");
-            *pin = *pout = 0;
-        }
-        b = strstr(buff, "swap ");
-        if (b)
-            sscanf(b, "swap %lu %lu", swpin, swpout);
-        else {
-            if (first)
-                snmp_log(LOG_ERR, "No swap line in /proc/stat\n");
-            *swpin = *swpout = 0;
-        }
-        b = strstr(buff, "intr ");
-        if (b)
-            sscanf(b, "intr %lu %lu", itot, i1);
-        else {
-            if (first)
-                snmp_log(LOG_ERR, "No intr line in /proc/stat\n");
-            *itot = 0;
-        }
-        b = strstr(buff, "ctxt ");
-        if (b)
-            sscanf(b, "ctxt %lu", ct);
-        else {
-            if (first)
-                snmp_log(LOG_ERR, "No ctxt line in /proc/stat\n");
-            *ct = 0;
-        }
-        first = 0;
-    } else {
-        snmp_log_perror(VMSTAT_FILE);
+	if (has_vmstat && (vmstatfd = open(VMSTAT_FILE, O_RDONLY, 0)) != -1) {
+	    if (vmbsize == 0) {
+		vmbsize = 256;
+		vmbuff = malloc(vmbsize);
+	    }
+	    while (read(vmstatfd, vmbuff, vmbsize) == vmbsize) {
+		vmbsize += 256;
+		vmbuff = realloc(vmbuff, vmbsize);
+		close(vmstatfd);
+		vmstatfd = open(VMSTAT_FILE, O_RDONLY, 0);
+	    }
+	    close(vmstatfd);
+	}
+	else
+	    has_vmstat = 0;
+	cache_time = now;
     }
+
+    *itot = 0;
+    *i1 = 1;                /* ensure assert below will fail if the sscanf bombs */
+    b = strstr(buff, "cpu ");
+    if (b) {
+	if (!has_cpu_26 ||
+		sscanf(b, "cpu  %lu %lu %lu %lu %lu %lu %lu", cuse, cice, csys,
+		                        cide, ciow, cirq, csoft) != 7) {
+	    has_cpu_26 = 0;
+	    sscanf(b, "cpu  %lu %lu %lu %lu", cuse, cice, csys, cide);
+	    *ciow = *cirq = *csoft = 0;
+	}
+    }
+    else {
+	if (first)
+	    snmp_log(LOG_ERR, "No cpu line in %s\n", STAT_FILE);
+	*cuse = *cice = *csys = *cide = *ciow = *cirq = *csoft = 0;
+    }
+    if (has_vmstat) {
+	b = strstr(vmbuff, "pgpgin ");
+	if (b)
+	    sscanf(b, "pgpgin %lu", pin);
+	else {
+	    if (first)
+		snmp_log(LOG_ERR, "No pgpgin line in %s\n", VMSTAT_FILE);
+	    *pin = 0;
+	}
+	b = strstr(vmbuff, "pgpgout ");
+	if (b)
+	    sscanf(b, "pgpgout %lu", pout);
+	else {
+	    if (first)
+		snmp_log(LOG_ERR, "No pgpgout line in %s\n", VMSTAT_FILE);
+	    *pout = 0;
+	}
+	b = strstr(vmbuff, "pswpin ");
+	if (b)
+	    sscanf(b, "pswpin %lu", swpin);
+	else {
+	    if (first)
+		snmp_log(LOG_ERR, "No pswpin line in %s\n", VMSTAT_FILE);
+	    *swpin = 0;
+	}
+	b = strstr(vmbuff, "pswpout ");
+	if (b)
+	    sscanf(b, "pswpout %lu", swpout);
+	else {
+	    if (first)
+		snmp_log(LOG_ERR, "No pswpout line in %s\n", VMSTAT_FILE);
+	    *swpout = 0;
+	}
+    }
+    else {
+	b = strstr(buff, "page ");
+	if (b)
+	    sscanf(b, "page %lu %lu", pin, pout);
+	else {
+	    if (first)
+		snmp_log(LOG_ERR, "No page line in %s\n", STAT_FILE);
+	    *pin = *pout = 0;
+	}
+	b = strstr(buff, "swap ");
+	if (b)
+	    sscanf(b, "swap %lu %lu", swpin, swpout);
+	else {
+	    if (first)
+		snmp_log(LOG_ERR, "No swap line in %s\n", STAT_FILE);
+	    *swpin = *swpout = 0;
+	}
+    }
+    b = strstr(buff, "intr ");
+    if (b)
+	sscanf(b, "intr %lu %lu", itot, i1);
+    else {
+	if (first)
+	    snmp_log(LOG_ERR, "No intr line in %s\n", STAT_FILE);
+	*itot = 0;
+    }
+    b = strstr(buff, "ctxt ");
+    if (b)
+	sscanf(b, "ctxt %lu", ct);
+    else {
+	if (first)
+	    snmp_log(LOG_ERR, "No ctxt line in %s\n", STAT_FILE);
+	*ct = 0;
+    }
+    first = 0;
 }
 
 enum vmstat_index { swapin = 0, swapout,
+    rawswapin, rawswapout,
     iosent, ioreceive,
+    rawiosent, rawioreceive,
     sysinterrupts, syscontext,
     cpuuser, cpusystem, cpuidle,
     cpurawuser, cpurawnice,
     cpurawsystem, cpurawidle,
-    sysrawinterrupts, sysrawcontext
+    cpurawinter, cpurawsoft, cpurawwait,
+    rawinterrupts, rawcontext
 };
 
-unsigned
+static unsigned
 vmstat(int iindex)
 {
     unsigned long   cpu_use, cpu_nic, cpu_sys, cpu_idl;
     double          duse, dsys, didl, ddiv, divo2;
+    double          druse, drnic, drsys, dridl;
     unsigned long   pgpgin, pgpgout, pswpin, pswpout;
     unsigned long   inter, ticks, ctxt;
-    unsigned int    hz;
+    unsigned long   cpu_wait, cpu_irq, cpu_softirq;
+    unsigned int    hertz;
 
     getstat(&cpu_use, &cpu_nic, &cpu_sys, &cpu_idl,
-            &pgpgin, &pgpgout, &pswpin, &pswpout, &inter, &ticks, &ctxt);
+            &pgpgin, &pgpgout, &pswpin, &pswpout, &inter, &ticks, &ctxt,
+	    &cpu_wait, &cpu_irq, &cpu_softirq);
     duse = cpu_use + cpu_nic;
     dsys = cpu_sys;
     didl = cpu_idl;
-    ddiv = (duse + dsys + didl);
-    hz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
+    ddiv = duse + dsys + didl;
+    hertz = sysconf(_SC_CLK_TCK);  /* get ticks/s from system */
     divo2 = ddiv / 2;
+    druse = cpu_use;
+    drnic = cpu_nic;
+    drsys = cpu_sys;
+    dridl = cpu_idl;
 
     switch (iindex) {
     case swapin:
-        return (pswpin * 4 * hz + divo2) / ddiv;
+        return (pswpin  * 4 * hertz + divo2) / ddiv;
     case swapout:
-        return (pswpout * 4 * hz + divo2) / ddiv;
+        return (pswpout * 4 * hertz + divo2) / ddiv;
     case iosent:
-        return (pgpgin * hz + divo2) / ddiv;
+        return (pgpgin      * hertz + divo2) / ddiv;
     case ioreceive:
-        return (pgpgout * hz + divo2) / ddiv;
+        return (pgpgout     * hertz + divo2) / ddiv;
     case sysinterrupts:
-        return (inter * hz + divo2) / ddiv;
+        return (inter       * hertz + divo2) / ddiv;
     case syscontext:
-        return (ctxt * hz + divo2) / ddiv;
+        return (ctxt        * hertz + divo2) / ddiv;
     case cpuuser:
         return (100 * duse / ddiv);
     case cpusystem:
@@ -306,17 +385,31 @@ vmstat(int iindex)
     case cpuidle:
         return (100 * didl / ddiv);
     case cpurawuser:
-        return cpu_use;
+        return druse;
     case cpurawnice:
-        return cpu_nic;
+        return drnic;
     case cpurawsystem:
-        return cpu_sys;
+        return drsys;
     case cpurawidle:
-        return cpu_idl;
-    case sysrawinterrupts:
-        return inter;
-    case sysrawcontext:
-        return ctxt;
+        return dridl;
+    case rawinterrupts:
+	return inter;
+    case rawcontext:
+	return ctxt;
+    case cpurawwait:
+	return cpu_wait;
+    case cpurawinter:
+	return cpu_irq;
+    case cpurawsoft:
+	return cpu_softirq;
+    case rawiosent:
+	return pgpgin*2;
+    case rawioreceive:
+	return pgpgout*2;
+    case rawswapin:
+	return pswpin;
+    case rawswapout:
+	return pswpout;
     default:
         return -1;
     }
@@ -346,80 +439,78 @@ var_extensible_vmstat(struct variable *vp,
         *var_len = strlen(errmsg);
         return ((u_char *) (errmsg));
     case SWAPIN:
-#ifdef linux
         long_ret = vmstat(swapin);
-#endif
         return ((u_char *) (&long_ret));
     case SWAPOUT:
-#ifdef linux
         long_ret = vmstat(swapout);
-#endif
+        return ((u_char *) (&long_ret));
+    case RAWSWAPIN:
+        long_ret = vmstat(rawswapin);
+        return ((u_char *) (&long_ret));
+    case RAWSWAPOUT:
+        long_ret = vmstat(rawswapout);
         return ((u_char *) (&long_ret));
     case IOSENT:
-#ifdef linux
         long_ret = vmstat(iosent);
-#endif
         return ((u_char *) (&long_ret));
     case IORECEIVE:
-#ifdef linux
         long_ret = vmstat(ioreceive);
-#endif
+        return ((u_char *) (&long_ret));
+    case IORAWSENT:
+        long_ret = vmstat(rawiosent);
+        return ((u_char *) (&long_ret));
+    case IORAWRECEIVE:
+        long_ret = vmstat(rawioreceive);
         return ((u_char *) (&long_ret));
     case SYSINTERRUPTS:
-#ifdef linux
         long_ret = vmstat(sysinterrupts);
-#endif
         return ((u_char *) (&long_ret));
     case SYSCONTEXT:
-#ifdef linux
         long_ret = vmstat(syscontext);
-#endif
         return ((u_char *) (&long_ret));
     case CPUUSER:
-#ifdef linux
         long_ret = vmstat(cpuuser);
-#endif
         return ((u_char *) (&long_ret));
     case CPUSYSTEM:
-#ifdef linux
         long_ret = vmstat(cpusystem);
-#endif
         return ((u_char *) (&long_ret));
     case CPUIDLE:
-#ifdef linux
         long_ret = vmstat(cpuidle);
-#endif
         return ((u_char *) (&long_ret));
     case CPURAWUSER:
-#ifdef linux
         long_ret = vmstat(cpurawuser);
-#endif
         return ((u_char *) (&long_ret));
     case CPURAWNICE:
-#ifdef linux
         long_ret = vmstat(cpurawnice);
-#endif
         return ((u_char *) (&long_ret));
     case CPURAWSYSTEM:
-#ifdef linux
+        long_ret = vmstat(cpurawsystem)+vmstat(cpurawinter)+vmstat(cpurawsoft);
+        return ((u_char *) (&long_ret));
+    case CPURAWKERNEL:
         long_ret = vmstat(cpurawsystem);
-#endif
         return ((u_char *) (&long_ret));
     case CPURAWIDLE:
-#ifdef linux
         long_ret = vmstat(cpurawidle);
-#endif
         return ((u_char *) (&long_ret));
     case SYSRAWINTERRUPTS:
-#ifdef linux
-        long_ret = vmstat(sysrawinterrupts);
-#endif
-        return ((u_char *) (&long_ret));
+	long_ret = vmstat(rawinterrupts);
+	return (u_char *)&long_ret;
     case SYSRAWCONTEXT:
-#ifdef linux
-        long_ret = vmstat(sysrawcontext);
-#endif
+	long_ret = vmstat(rawcontext);
+	return (u_char *)&long_ret;
+    case CPURAWWAIT:
+	if (!has_cpu_26) return NULL;
+        long_ret = vmstat(cpurawwait);
         return ((u_char *) (&long_ret));
+    case CPURAWINTR:
+	if (!has_cpu_26) return NULL;
+        long_ret = vmstat(cpurawinter);
+        return ((u_char *) (&long_ret));
+    case CPURAWSOFTIRQ:
+	if (!has_cpu_26) return NULL;
+        long_ret = vmstat(cpurawsoft);
+        return ((u_char *) (&long_ret));
+		
         /*
          * reserved for future use 
          */
