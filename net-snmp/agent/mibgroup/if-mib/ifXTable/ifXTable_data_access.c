@@ -69,7 +69,6 @@ ifXTable_init_data(ifXTable_registration_ptr ifXTable_reg)
  * none - we use the ifTable container
  */
 
-
 /**
  * prepare row for processing.
  *
