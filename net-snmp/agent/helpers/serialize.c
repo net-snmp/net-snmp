@@ -51,14 +51,23 @@ netsnmp_serialize_helper_handler(
     netsnmp_agent_request_info        *reqinfo,
     netsnmp_request_info              *requests) {
 
-    netsnmp_request_info              *request;
+    netsnmp_request_info              *request, *requesttmp;
 
     DEBUGMSGTL(("helper:serialize", "Got request\n"));
     /* loop through requests */
     for(request = requests; request; request = request->next) {
         int ret;
+
+        /* store next pointer and delete it */
+        requesttmp = request->next;
+        request->next = NULL;
+
+        /* call the next handler */
+        ret = netsnmp_call_next_handler(handler, reginfo, reqinfo, request);
+
+        /* restore original next pointer */
+        request->next = requesttmp;
         
-        ret = netsnmp_call_next_handler(handler, reginfo, reqinfo, requests);
         if (ret != SNMP_ERR_NOERROR)
             return ret;
     }
