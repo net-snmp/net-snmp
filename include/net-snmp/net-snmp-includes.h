@@ -7,8 +7,6 @@
      *     certain commonly-required system header files.
      */
 
-#include <net-snmp/net-snmp-config.h>
-
 
     /*
      *  Common system header requirements
