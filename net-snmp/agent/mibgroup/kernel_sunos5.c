@@ -191,7 +191,8 @@ extern "C" {
    interface. :-(*/
 
 
-int getKstatInt(char *classname, char *statname, char *varname, int *value)
+int getKstatInt(const char *classname, const char *statname,
+		const char *varname, int *value)
 {
     kstat_ctl_t *ksc;
     kstat_t *ks;

@@ -361,7 +361,7 @@ writeSystem(int action,
 
 		/* Save the old value, in case of UNDO */
 	    strcpy( oldbuf, buf);
-	    strncpy( buf, var_val, var_val_len);
+	    memcpy( buf, var_val, var_val_len);
 	    buf[var_val_len] = 0;
 	    break;
 
