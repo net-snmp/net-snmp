@@ -42,7 +42,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
     int status, allDone, i;
     struct variable_list *var_ptr, *var_ptr2;
 
-    asp = init_agent_snmp_session( session, pdu );
+    asp = init_agent_snmp_session( session, snmp_clone_pdu(pdu) );
 
     DEBUGMSGTL(("agentx/subagent","handling agentx request....\n"));
     switch (pdu->command) {
