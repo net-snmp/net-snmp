@@ -1375,11 +1375,11 @@ static void Route_Scan_Reload (void)
  *	Create a host table
  */
 #ifdef hpux11
-static int qsort_compare(void *v1,
-			 void *v2)
+static int qsort_compare(const void *v1,
+			 const void *v2)
 {
-	mib_ipRouteEnt *r1 = (mib_ipRouteEnt *) v1;
-	mib_ipRouteEnt *r2 = (mib_ipRouteEnt *) v2;
+	const mib_ipRouteEnt *r1 = (const mib_ipRouteEnt *) v1;
+	const mib_ipRouteEnt *r2 = (const mib_ipRouteEnt *) v2;
 
 	/*
 	 *	Do the comparison

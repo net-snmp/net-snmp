@@ -102,7 +102,7 @@
 #  include <time.h>
 # endif
 #endif
-#ifdef hpux11
+#if defined(hpux10) || defined(hpux11)
 #include <sys/pstat.h>
 #endif
 
@@ -119,6 +119,15 @@ int minimumswap;
 #ifndef linux
 static int pageshift;           /* log base 2 of the pagesize */
 #endif
+
+#ifndef bsdi2
+#ifdef NSWAPDEV_SYMBOL
+int nswapdev=10;            /* taken from <machine/space.h> */
+#endif
+#ifdef NSWAPFS_SYMBOL
+int nswapfs=10;            /* taken from <machine/space.h> */
+#endif
+#endif	/* !bsdi2 */
 
 #define DEFAULTMINIMUMSWAP 16000  /* kilobytes */
 
@@ -151,10 +160,14 @@ void init_memory(void)
 #endif
 
 #ifndef bsdi2
+#ifdef NSWAPDEV_SYMBOL
   if (auto_nlist(NSWAPDEV_SYMBOL,(char *) &nswapdev, sizeof(nswapdev)) == 0)
     return;
+#endif
+#ifdef NSWAPFS_SYMBOL
   if (auto_nlist(NSWAPFS_SYMBOL,(char *) &nswapfs, sizeof(nswapfs)) == 0)
     return;
+#endif
 #endif
   pagesize = 1 << PGSHIFT;
   pageshift = 0;
@@ -292,12 +305,9 @@ unsigned memswap(int iindex)
 #define SWAPGETLEFT 0
 #define SWAPGETTOTAL 1
 
-int nswapdev=10;            /* taken from <machine/space.h> */
-int nswapfs=10;            /* taken from <machine/space.h> */
-
-int getswap(int rettype)
+static long getswap(int rettype)
 {
-  int spaceleft=0, spacetotal=0;
+  long spaceleft=0, spacetotal=0;
 
 #if defined(linux)
 	spaceleft = memswap(meminfo_free);
@@ -309,7 +319,37 @@ int getswap(int rettype)
   if (sysctl(mib, 2, &swapst, &size, NULL, 0) < 0) return (0);
   spaceleft = swapst.swap_free / 2;
   spacetotal = swapst.swap_total / 2;	
-#else	/* !linux && !bsdi2 */
+#elif defined (hpux10) || defined(hpux11)
+  struct pst_swapinfo pst_buf;
+  int ndx = 0;
+  long pgs, pgs_free;
+
+  while (pstat_getswap(&pst_buf, sizeof(struct pst_swapinfo), 1, ndx) > 0) {
+    if (pst_buf.pss_flags & SW_BLOCK) {
+      pgs = pst_buf.pss_nblksenabled;
+      pgs_free = pst_buf.pss_nblksavail;
+    }
+    else if (pst_buf.pss_flags & SW_FS) {
+      pgs = pst_buf.pss_limit;
+      pgs_free = pgs - pst_buf.pss_allocated - pst_buf.pss_reserve;
+      /*
+       * the following calculation is done this way to avoid integer overflow!
+       * pss_swapchunk is either 512 or a multiple of 1024!
+       */
+      if (pst_buf.pss_swapchunk == 512) {
+	pgs_free /= 2;
+	pgs /= 2;
+      } else {
+	pgs_free *= (pst_buf.pss_swapchunk / 1024);
+	pgs *= (pst_buf.pss_swapchunk / 1024);
+      }
+    }
+    else pgs = pgs_free = 0;
+    spaceleft += pgs_free;
+    spacetotal += pgs;
+    ndx = pst_buf.pss_idx + 1;
+  }
+#else /* !linux && !bsdi2 && !hpux10 && !hpux11 */
   struct swdevt swdevt[100];
   struct fswdevt fswdevt[100];
   FILE *file;
@@ -322,14 +362,8 @@ int getswap(int rettype)
     return(0);
   DEBUGMSGTL(("ucd-snmp/memory", "%d block swap devices: \n", nswapdev));
   for (i=0; i < nswapdev; i++) {
-#ifdef hpux11
-    DEBUGMSGTL(("ucd-snmp/memory", "swdevt[%d]: %d\n",i, swdevt[i].sw_flags & SW_ENABLE));
-    if (swdevt[i].sw_flags & SW_ENABLE)
-#else
-    DEBUGMSGTL(("ucd-snmp/memory", "swdevt[%d]: %d\n",i, swdevt[i].sw_enable));
-    if (swdevt[i].sw_enable)
-#endif
-    {
+  DEBUGMSGTL(("ucd-snmp/memory", "swdevt[%d]: %d\n",i, swdevt[i].sw_enable));
+  if (swdevt[i].sw_enable) {
 #ifdef STRUCT_SWDEVT_HAS_SW_NBLKSENABLED
       DEBUGMSGTL(("ucd-snmp/memory", "  swdevt.sw_nblksenabled:     %d\n", swdevt[i].sw_nblksenabled));
       spacetotal += swdevt[i].sw_nblksenabled;
@@ -346,14 +380,8 @@ int getswap(int rettype)
     return(0);
   DEBUGMSGTL(("ucd-snmp/memory", "%d fs swap devices: \n", nswapfs));
   for (i=0; i < nswapfs; i++) {
-#ifdef hpux11
-    DEBUGMSGTL(("ucd-snmp/memory", "fswdevt[%d]: %d\n",i, fswdevt[i].fsw_flags & FSW_ENABLE));
-    if (fswdevt[i].fsw_flags & FSW_ENABLE)
-#else
     DEBUGMSGTL(("ucd-snmp/memory", "fswdevt[%d]: %d\n",i, fswdevt[i].fsw_enable));
-    if (fswdevt[i].fsw_enable)
-#endif
-    {
+    if (fswdevt[i].fsw_enable) {
       spacetotal += (fswdevt[i].fsw_limit * 2048);  /* 2048=bytes per page? */
       spaceleft += (fswdevt[i].fsw_limit * 2048 -
                     ((fswdevt[i].fsw_allocated - fswdevt[i].fsw_min) * 37));
@@ -367,11 +395,7 @@ int getswap(int rettype)
   /* this is a real hack.  I need to get the hold info from swapinfo, but
      I can't figure out how to read it out of the kernel directly
      -- Wes */
-#if !defined(hpux10) && !defined(hpux11)
-  strcpy(ex.command,"/etc/swapinfo -h");
-#else
   strcpy(ex.command,"/usr/sbin/swapinfo -r");
-#endif
   if ((fd = get_exec_output(&ex))) {
     file = fdopen(fd,"r");
     for (i=1;i <= 2 && fgets(ex.output,sizeof(ex.output),file) != NULL; i++);
@@ -388,7 +412,7 @@ int getswap(int rettype)
   } else {
     return(0);
   }
-#endif	/* !linux && !bsdi2 */
+#endif	/* !linux && !bsdi2 && !hpux10 && !hpux11 */
 
   switch
     (rettype) {
@@ -411,17 +435,24 @@ unsigned char *var_extensible_mem(struct variable *vp,
 
   static long long_ret;
   static char errmsg[300];
-#if !defined(linux) && (defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM))
+#if !defined(linux)
+#if defined(hpux10) || defined(hpux11)
+  struct pst_dynamic pst_buf;
+#elif defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
   struct vmtotal total;
 #endif
+#endif	/* !linux */
 
   long_ret = 0;  /* set to 0 as default */
 
   if (header_generic(vp,name,length,exact,var_len,write_method))
     return(NULL);
 
-#ifndef linux
-#if defined(USE_SYSCTL_VM)
+#if !defined(linux)
+#if defined(hpux10) || defined(hpux11)
+  if (pstat_getdynamic(&pst_buf, sizeof(struct pst_dynamic), 1, 0) < 0)
+    return NULL;
+#elif defined(USE_SYSCTL_VM)
   /* sum memory statistics */
   {
     size_t size = sizeof(total);
@@ -461,12 +492,12 @@ unsigned char *var_extensible_mem(struct variable *vp,
 	  return NULL;
 	long_ret = long_ret / 1024;
       }
-#elif defined(hpux11)
+#elif defined(hpux10) || defined(hpux11)
       {
-	struct pst_static pst_buf;
-	if (pstat_getstatic(&pst_buf, sizeof(struct pst_static), 1, 0) < 0)
+	struct pst_static pst_sbuf;
+	if (pstat_getstatic(&pst_sbuf, sizeof(struct pst_static), 1, 0) < 0)
 	  return NULL;
-	long_ret = pst_buf.physical_memory * (pst_buf.page_size / 1024);
+	long_ret = pst_sbuf.physical_memory * (pst_sbuf.page_size / 1024);
       }
 #elif defined(linux)
 	long_ret = memory(meminfo_total);
@@ -486,6 +517,8 @@ unsigned char *var_extensible_mem(struct variable *vp,
     case MEMAVAILREAL:
 #ifdef linux
       long_ret = memory(meminfo_free);
+#elif defined(hpux10) || defined(hpux11)
+      long_ret = pagetok((int) pst_buf.psd_arm);
 #elif defined(TOTAL_MEMORY_SYMBOL) || defined(USE_SYSCTL_VM)
       long_ret = pagetok((int) total.t_arm);
 #else
@@ -494,28 +527,36 @@ unsigned char *var_extensible_mem(struct variable *vp,
       return((u_char *) (&long_ret));
 #ifndef linux
     case MEMTOTALSWAPTXT:
-#ifndef bsdi2
+#if defined(hpux10) || defined(hpux11)
+      long_ret = pagetok((int) pst_buf.psd_vmtxt);
+#elif !defined(bsdi2)
       long_ret = pagetok(total.t_vmtxt);
 #else
       return NULL;	/* no dummy values */
 #endif
       return((u_char *) (&long_ret));
     case MEMUSEDSWAPTXT:
-#ifndef bsdi2
+#if defined(hpux10) || defined(hpux11)
+      long_ret = pagetok((int) pst_buf.psd_avmtxt);
+#elif !defined(bsdi2)
       long_ret = pagetok(total.t_avmtxt);
 #else
       return NULL;	/* no dummy values */
 #endif
       return((u_char *) (&long_ret));
     case MEMTOTALREALTXT:
-#ifndef bsdi2
+#if defined(hpux10) || defined(hpux11)
+      long_ret = pagetok((int) pst_buf.psd_rmtxt);
+#elif !defined(bsdi2)
       long_ret = pagetok(total.t_rmtxt);
 #else
       return NULL;	/* no dummy values */
 #endif
       return((u_char *) (&long_ret));
     case MEMUSEDREALTXT:
-#ifndef bsdi2
+#if defined(hpux10) || defined(hpux11)
+      long_ret = pagetok((int) pst_buf.psd_armtxt);
+#elif !defined(bsdi2)
       long_ret = pagetok(total.t_armtxt);
 #else
       return NULL;	/* no dummy values */
@@ -525,6 +566,8 @@ unsigned char *var_extensible_mem(struct variable *vp,
     case MEMTOTALFREE:
 #ifdef linux
       long_ret = memory(meminfo_free) + memswap(meminfo_free);
+#elif defined(hpux10) || defined(hpux11)
+      long_ret = pagetok((int) pst_buf.psd_free);
 #else
       long_ret = pagetok(total.t_free);
 #endif

@@ -7,7 +7,6 @@
 
 #include "mibdefs.h"
 
-int getswap (int);
 void	init_memory (void);
 
 /* config file parsing routines */
