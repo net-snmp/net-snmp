@@ -622,7 +622,7 @@ var_ipAddrEntry(struct variable * vp,
     static mib2_ipAddrEntry_t Lowentry;
     int             Found = 0;
     req_e           req_type;
-    unsigned int    ipaddr_return;
+    static uint32_t ipaddr_return;
 
     /*
      * fill in object part of name for current (less sizeof instance part) 
@@ -702,8 +702,8 @@ var_ipAddrEntry(struct variable * vp,
         ipaddr_return = Lowentry.ipAdEntNetMask;
         return (u_char *) & ipaddr_return;
     case IPADBCASTADDR:
-	*var_len = sizeof(Lowentry.ipAdEntBcastAddr);
-        return (u_char *)&Lowentry.ipAdEntBcastAddr;
+	long_return = Lowentry.ipAdEntBcastAddr;
+	return (u_char *) & long_return;
     case IPADREASMMAX:
 	long_return = Lowentry.ipAdEntReasmMaxSize;
 	return (u_char *) & long_return;
