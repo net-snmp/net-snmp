@@ -77,6 +77,7 @@ typedef struct netsnmp_interface_stats_s {
     unsigned int     ierrors;
     unsigned int     idiscards;
     unsigned int     iunknown_protos;
+    unsigned int     inucast;
    /** output */
     struct counter64 obytes;
     struct counter64 oucast;
@@ -86,6 +87,7 @@ typedef struct netsnmp_interface_stats_s {
     unsigned int     odiscards;
     unsigned int     oqlen;
     unsigned int     collisions;
+    unsigned int     onucast;
 } netsnmp_interface_stats;
 
 typedef struct netsnmp_interface_entry_s {

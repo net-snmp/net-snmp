@@ -46,13 +46,16 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
     FILE           *devin;
     char            line[256];
     const char     *scan_line_2_2 =
-        "%llu %llu %llu %llu %*llu %*llu %*llu %*llu %llu %llu %llu %llu %*llu %llu";
+    /*
+     *   byte pkts errs drop fifo  frame cmprs mcst|byte pkts errs drop fifo  colls carrier compressed
+     */
+        "%llu %llu %llu %llu %*llu %*llu %*llu %llu %llu %llu %llu %llu %*llu %llu";
     const char     *scan_line_2_0 =
         "%llu %llu %*llu %*llu %*llu %llu %llu %*llu %*llu %llu";
     static const char     *scan_line_to_use = NULL;
     static char     scan_expected;
     int             scan_count, fd;
-    unsigned long long rec_pkt, rec_oct, rec_err, rec_drop;
+    unsigned long long rec_pkt, rec_oct, rec_err, rec_drop, rec_mcast;
     unsigned long long snd_pkt, snd_oct, snd_err, snd_drop, coll;
     netsnmp_interface_entry *entry = NULL;
 
@@ -100,7 +103,7 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
     if( NULL == scan_line_to_use ) {
         if (strstr(line, "compressed")) {
             scan_line_to_use = scan_line_2_2;
-            scan_expected = 9;
+            scan_expected = 10;
             DEBUGMSGTL(("access:interface",
                         "using linux 2.2 kernel /proc/net/dev\n"));
         } else {
@@ -163,11 +166,11 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
         while (*stats == ' ')
             stats++;
 
-        rec_pkt = rec_oct = rec_err = rec_drop = 0;
+        rec_pkt = rec_oct = rec_err = rec_drop = rec_mcast = 0;
         snd_pkt = snd_oct = snd_err = snd_drop = coll = 0;
         if (scan_line_to_use == scan_line_2_2) {
             scan_count = sscanf(stats, scan_line_to_use,
-                                &rec_oct, &rec_pkt, &rec_err, &rec_drop,
+                                &rec_oct, &rec_pkt, &rec_err, &rec_drop, &rec_mcast,
                                 &snd_oct, &snd_pkt, &snd_err, &snd_drop,
                                 &coll);
             if (scan_count == scan_expected) {
@@ -217,6 +220,7 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
         entry->stats.iucast.high = rec_pkt >> 32;
         entry->stats.ierrors = rec_err;
         entry->stats.idiscards = rec_drop;
+        entry->stats.imcast.low = rec_mcast & 0xffffffff;
         entry->stats.obytes.low = snd_oct & 0xffffffff;
         entry->stats.obytes.high = snd_oct >> 32;
         entry->stats.oucast.low = snd_pkt & 0xffffffff;
@@ -224,6 +228,14 @@ netsnmp_access_interface_container_arch_load(netsnmp_container* container,
         entry->stats.oerrors = snd_err;
         entry->stats.odiscards = snd_drop;
         entry->stats.collisions = coll;
+
+        /*
+         * calculated stats.
+         *
+         *  we have imcast, but not ibcast.
+         */
+        entry->stats.inucast = entry->stats.imcast.low +
+            entry->stats.ibcast.low;
 
         /*
          * use ioctls for some stuff
