@@ -17,11 +17,9 @@
 
 /* default location to look for mibs to load using the above tokens
    and/or those in the MIBS envrionment variable*/
-
 #undef DEFAULT_MIBDIRS
 
 /* default mib files to load, specified by path. */
-
 #undef DEFAULT_MIBFILES
 
 /* should we compile to use special opaque types: float, double,
@@ -46,10 +44,10 @@
 #undef _REENTRANT
 
 /* debugging stuff */
-#undef SNMP_NO_DEBUGGING           /* if defined, we optimize the code
-                                      to exclude all debugging calls. */
-#define SNMP_ALWAYS_DEBUG 0        /* Always print debugging information and
-                                      ignore the -D flag passed to the cmds */
+/* if defined, we optimize the code to exclude all debugging calls. */
+#undef SNMP_NO_DEBUGGING
+/* ignore the -D flag and always print debugging information */
+#define SNMP_ALWAYS_DEBUG 0
 
 /* reverse encoding BER packets is both faster and more efficient in space. */
 #define USE_REVERSE_ASNENCODING       1
@@ -60,7 +58,7 @@
    lines: PERSISTENT_DIRECTORY/NAME.persistent.conf */
 #define PERSISTENT_DIRECTORY "/var/snmp"
 
-/* PERSISTENT_MASK: the umask permissions to set up the persistent files with */
+/* PERSISTENT_MASK: the umask permissions to set up persistent files with */
 #define PERSISTENT_MASK 077
 
 /* AGENT_DIRECTORY_MODE: the mode the agents should use to create
@@ -95,7 +93,6 @@
 
 /* LOGFILE:  If defined it closes stdout/err/in and opens this in out/err's
    place.  (stdin is closed so that sh scripts won't wait for it) */
-
 #undef LOGFILE
 
 /* default system contact */
@@ -121,7 +118,6 @@
 
 /* Command to generate ps output, the final column must be the process
    name withOUT arguments */
-
 #define PSCMD "/bin/ps"
 
 /* Where is the uname command */
@@ -432,19 +428,17 @@
 
 #define DEFMAXLOADAVE 12.0      /* default maximum load average before error */
 
-#define MAXREADCOUNT 100   /* max times to loop reading output from
-                              execs.  Because of sleep(1)s, this will also
-                              be time to wait (in seconds) for exec to finish */
+/* Because of sleep(1)s, this will also be time to wait (in seconds) for exec
+   to finish */
+#define MAXREADCOUNT 100   /* max times to loop reading output from execs. */
 
-#define SNMPBLOCK 1       /* Set to 1 if you want snmpgets to block and never
-                             timeout.  Original CMU code had this
-                             hardcoded into the code as = 1 */
+/* The original CMU code had this hardcoded as = 1 */
+#define SNMPBLOCK 1       /* Set if snmpgets should block and never timeout */
 
-#define RESTARTSLEEP 5    /* How long to wait after a snmpset to
-                             EXTENSIBLEMIB.VERSIONMIBNUM.VERRESTARTAGENT
-                             before restarting the agent.  This is
-                             necessary to finish the snmpset reply
-                             before restarting. */
+/* How long to wait before restarting the agent after a snmpset to
+   EXTENSIBLEMIB.VERSIONMIBNUM.VERRESTARTAGENT.  This is
+   necessary to finish the snmpset reply before restarting. */
+#define RESTARTSLEEP 5
 
 /* Number of community strings to store */
 #define NUM_COMMUNITIES	5
