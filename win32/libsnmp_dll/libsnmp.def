@@ -34,13 +34,9 @@ EXPORTS
 	init_mib
 	init_mib_internals
 	print_variable
-	sprint_variable
-	sprint_asciistring
 	print_value
 	printI64
-	sprint_value
 	print_objid
-	sprint_objid
 	fprint_objid
 	print_description
 	fprint_description
@@ -52,7 +48,6 @@ EXPORTS
 	get_wild_node
 	find_tree_node
 	clear_tree_flags
-	get_symbol
 	get_tree
 	read_module
 	read_mib
@@ -225,7 +220,6 @@ EXPORTS
 	usm_remove_user
 	usm_set_user_password
 	read_premib_configs
-	register_mib_handlers
 	init_snmpv3
 	snmpv3_local_snmpEngineTime
 	snmpv3_local_snmpEngineBoots
@@ -288,7 +282,10 @@ EXPORTS
 	snmp_strcat
 	sprint_realloc_variable
 	snmp_realloc
-	snmp_tdomain_transport
+      netsnmp_config
+      netsnmp_config_remember
+      snmp_hex_to_binary
+      snmpv3_options
 	Mib                     DATA
 	tree_head               DATA
 	snmp_errno              DATA
