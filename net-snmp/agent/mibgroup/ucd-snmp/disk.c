@@ -364,7 +364,6 @@ find_and_add_allDisks(int minpercent)
 #endif
 
   int dummy = 0;
-  char            tmpbuf[1024];
   /* 
    * find the device for the path and copy the device into the
    * string declared above and at the end of the routine return it
@@ -424,6 +423,8 @@ find_and_add_allDisks(int minpercent)
 #endif /* HAVE_FSTAB_H */
 #endif /* HAVE_GETMNTENT */
   else {
+   char            tmpbuf[1024];
+
     snprintf(tmpbuf, sizeof(tmpbuf),
              "Couldn't find device for disk %s",
              disks[numdisks].path);
@@ -460,7 +461,6 @@ find_device(char *path)
 #endif                          /* HAVE_STATFS */
 #endif                          /* HAVE_FSTAB_H */
 #endif                          /* HAVE_GETMNTENT */
-  char            tmpbuf[1024];
   static char     device[STRMAX];
 #if defined(HAVE_GETMNTENT) && !defined(HAVE_SETMNTENT)
   int             i;
@@ -527,6 +527,7 @@ find_device(char *path)
 #endif /* HAVE_FSTAB_H */
 #endif /* HAVE_GETMNTENT */
   else {
+    char            tmpbuf[1024];
     sprintf(tmpbuf, "Couldn't find device for disk %s",
 	    path);
     config_pwarn(tmpbuf);
@@ -560,8 +561,13 @@ var_extensible_disk(struct variable *vp,
                     int exact,
                     size_t * var_len, WriteMethod ** write_method)
 {
+    static long     long_ret;
+    static char     errmsg[300];
+	int				disknum = 0;
 
-    int             percent, iserror, disknum = 0;
+#ifndef _MSC_VER
+
+    int             percent, iserror;
 #if !defined(HAVE_SYS_STATVFS_H) && !defined(HAVE_STATFS)
     double          totalblks, free, used, avail, availblks;
 #else
@@ -570,9 +576,11 @@ var_extensible_disk(struct variable *vp,
     int             percent_inode;
 #endif
 #endif
-    static long     long_ret;
-    static char     errmsg[300];
+
     float           multiplier;
+
+#endif /* !_MSC_VER */
+
 
 #if defined(HAVE_STATVFS) || defined(HAVE_STATFS)
 #ifdef STAT_STATFS_FS_DATA
