@@ -27,49 +27,17 @@ sub InitMakeParams {
 	$snmp_lib = 'libnetsnmp.lib';
 	$snmp_link_lib = 'libnetsnmp';
 	$sep = '\\';
+	# XXX fix me
     } else {
-	$snmp_lib = 'libnetsnmp.a';
-	$snmp_link_lib = 'netsnmp';
+	$Params{'LIBS'}    = `net-snmp-config --libs`;
+	$Params{'CCFLAGS'} = `net-snmp-config --cflags`;
+	$prefix            = `net-snmp-config --prefix`;
+	chomp($prefix);
 	$sep = '/';
+	if ($Params{'LIBS'} eq "" || $Params{'CCFLAGS'} eq "") {
+	    die "You need to install net-snmp first";
+	}
     }
-    $prefix="${sep}usr${sep}local";
-    GetOptions("NET-SNMP-PATH=s" => \$prefix);
-
-    my $inc_path1 = "${prefix}${sep}include";
-    my $inc_path2 = "${sep}usr${sep}include";
-    my $inc_path3 = "..${sep}..${sep}include";
-    my $lib_path1 = "${prefix}${sep}lib";
-    my $lib_path2 = "${sep}usr${sep}lib";
-    my $lib_path3 = "..${sep}..${sep}snmplib${sep}.libs";
-
-    my @IncludeFiles = qw[net-snmp/net-snmp-config.h
-			  net-snmp/net-snmp-includes.h];
-
-    my @IncludeDirs = ($inc_path3, $inc_path2, $inc_path1);
-
-    my $IncludeDir = find_files(\@IncludeFiles,\@IncludeDirs) ||
-	prompt("Where are the net-snmp include files?","$inc_path1");
-
-    my @LibDirs = ($lib_path1, $lib_path2, $lib_path3);
-
-    my $LibDir = find_files(["$snmp_lib"],\@LibDirs) ||
-	prompt("Where is the net-snmp library installed?","$lib_path2");
-
-    @IncludeFiles = map {"$IncludeDir$sep$_";} @IncludeFiles;
-    $ssl_lib = ($^O =~ /win32/i ? 'libeay32.lib' : 'libcrypto.a');
-    $ssl_link_lib = ($^O =~ /win32/i ? 'libeay32' : 'crypto');
-    my $ssl_link_libs;
-    if (HasSSL("$IncludeDir${sep}net-snmp/net-snmp-config.h")) {
-	my @SSLLibDirs = ("/usr/local/lib", "/usr/local/ssl/lib", "/usr/lib");
-	my $SSLLibDir = find_files([$ssl_lib], \@SSLLibDirs) ||
-	    prompt("Where is the SSL library installed?", $SSLLibDirs[1]);
-	$ssl_link = "-L$SSLLibDir -l$ssl_link_lib" if $SSLLibDir;
-    }
-    $Params{LIBS} = "-L$LibDir -l$snmp_link_lib $ssl_link";
-    $Params{INC}  = "-I$IncludeDir";
-    $Params{H}    = \@IncludeFiles;
-    $Params{LDFLAGS} = "-L$LibDir $Config{ldflags}";
-    $Params{LDDLFLAGS} = "-L$LibDir $Config{lddlflags}";
 
     return(%Params);
 }
@@ -92,12 +60,12 @@ sub GetTestInfo {
     my $sep = ($^O =~ /win32/i ? '\\' : '/');
     my $info_file = "t${sep}snmptest.cmd";
     my $snmpd_path1 = "${prefix}${sep}sbin";
-    my $mibdir = "${prefix}${sep}share${sep}snmp${sep}mibs";
     my $snmpd_path2 = "${sep}usr${sep}sbin";
     my $snmpd_path3 = "${sep}usr${sep}bin";
     open(H, ">$info_file") || die "Error: could not open file '$info_file'($!)";
     if($^O =~ /win32/i) {
 #you are using WIN 32
+	my $mibdir = "${prefix}${sep}share${sep}snmp${sep}mibs";
        print <<WIN32
 ==================================================================
 You are using Windows 32. The testing of Perl/SNMP API here would
@@ -121,7 +89,8 @@ WIN32
          print H "MIBDIR => $mibdir\n";
     } else {
 # you are using UNIX
-    my $mibdir = find_files(["UCD-SNMP-MIB.txt"],[$mibdir]);
+    my $mibdir = "${prefix}${sep}share${sep}snmp${sep}mibs";
+    my $mibdir = find_files(["NET-SNMP-MIB.txt"],[$mibdir]);
     my $snmpd = find_files(["snmpd"], [$snmpd_path1, $snmpd_path2]);
     my $snmptrapd = find_files(["snmptrapd"], [$snmpd_path1, $snmpd_path2]);
 
