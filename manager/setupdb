@@ -116,15 +116,15 @@ DO("CREATE TABLE authhost (
 
 # insert the standard ucd-snmp expressions 
 DO("insert into errorexpressions(tablename, expression, returnfield)
-                values('prEntry', 'prErrorFlag > 0', 'prErrMessage')");
+                values('prTable', 'prErrorFlag > 0', 'prErrMessage')");
 DO("insert into errorexpressions(tablename, expression, returnfield)
-                values('extEntry', 'extResult > 0', 'extOutput')");
+                values('extTable', 'extResult > 0', 'extOutput')");
 DO("insert into errorexpressions(tablename, expression, returnfield)
-                values('dskEntry', 'dskErrorFlag > 0', 'dskErrMessage')");
+                values('dskTable', 'dskErrorFlag > 0', 'dskErrMessage')");
 DO("insert into errorexpressions(tablename, expression, returnfield)
-                values('laEntry', 'laErrorFlag > 0', 'laErrMessage')");
+                values('laTable', 'laErrorFlag > 0', 'laErrMessage')");
 DO("insert into errorexpressions(tablename, expression, returnfield)
-                values('fileEntry', 'fileErrorFlag > 0', 'fileErrMessage')");
+                values('fileTable', 'fileErrorFlag > 0', 'fileErrMessage')");
 DO("insert into errorexpressions(tablename, expression, returnfield)
                 values('snmperrs', 'snmperrErrorFlag > 0', 'snmperrErrMessage')");
 DO("insert into errorexpressions(tablename, expression, returnfield)
