@@ -13,7 +13,10 @@ Netsnmp_Make_Data_Context netSnmpHostsTable_context_convert_function;
 Netsnmp_Free_Loop_Context netSnmpHostsTable_loop_free;
 Netsnmp_Free_Data_Context netSnmpHostsTable_data_free;
 
-int             netSnmpHostsTable_commit_row(void **my_data_context);
+int             netSnmpHostsTable_commit_row(void **my_data_context,
+                                             int new_or_del);
+void           *netSnmpHostsTable_create_data_context(netsnmp_variable_list
+                                                      * index_data);
 
 /** column accessors */
 long           *get_netSnmpHostAddressType(void *data_context,
