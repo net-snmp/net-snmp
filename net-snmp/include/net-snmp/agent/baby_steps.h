@@ -93,6 +93,8 @@ typedef struct netsnmp_baby_steps_access_methods_s {
     netsnmp_mib_handler * netsnmp_baby_steps_access_multiplexer_get(
         netsnmp_baby_steps_access_methods *);
 
+    int netsnmp_baby_step_mode2flag( u_int mode );
+
 /** @} */
 
 
