@@ -14,10 +14,14 @@
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 
 #if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
 #endif
 #if HAVE_SYS_SYSCTL_H
 #ifdef _I_DEFINED_KERNEL
@@ -34,7 +38,9 @@
 #if HAVE_SYS_TCPIPSTATS_H
 #include <sys/tcpipstats.h>
 #endif
+#if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #if HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
@@ -50,7 +56,9 @@
 #if HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
 #endif
+#if HAVE_NETINET_IP_H
 #include <netinet/ip.h>
+#endif
 #if HAVE_NETINET_IP_VAR_H
 #include <netinet/ip_var.h>
 #endif
@@ -60,7 +68,9 @@
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
+#if HAVE_NET_ROUTE_H
 #include <net/route.h>
+#endif
 #if HAVE_SYSLOG_H
 #include <syslog.h>
 #endif

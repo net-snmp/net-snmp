@@ -44,7 +44,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -73,7 +75,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
 #endif
+#if HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
@@ -87,7 +91,9 @@ PERFORMANCE OF THIS SOFTWARE.
 #if HAVE_SYS_STREAM_H
 #include <sys/stream.h>
 #endif
+#if HAVE_NET_ROUTE_H
 #include <net/route.h>
+#endif
 #undef	KERNEL
 #ifdef RTENTRY_4_4
 #ifndef STRUCT_RTENTRY_HAS_RT_UNIT
