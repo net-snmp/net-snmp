@@ -615,8 +615,6 @@ SOFTWARE.
 #endif
     int             snmpv3_parse(netsnmp_pdu *, u_char *, size_t *,
                                  u_char **, netsnmp_session *);
-    int             snmpv3_dparse(netsnmp_pdu *, u_char *, size_t *,
-                                  u_char **, int);
     int             snmpv3_packet_build(netsnmp_session *,
                                         netsnmp_pdu *pdu, u_char * packet,
                                         size_t * out_length,
@@ -631,12 +629,8 @@ SOFTWARE.
     int             snmpv3_get_report_type(netsnmp_pdu *pdu);
     int             snmp_pdu_parse(netsnmp_pdu *pdu, u_char * data,
                                    size_t * length);
-    int             snmp_pdu_dparse(netsnmp_pdu *pdu, u_char * data,
-                                    size_t * length, int);
     u_char         *snmpv3_scopedPDU_parse(netsnmp_pdu *pdu, u_char * cp,
                                            size_t * length);
-    u_char         *snmpv3_scopedPDU_dparse(netsnmp_pdu *pdu, u_char * cp,
-                                            size_t * length, int);
     void            snmp_store(const char *type);
     void            snmp_shutdown(const char *type);
     netsnmp_variable_list *snmp_pdu_add_variable(netsnmp_pdu *, oid *,
