@@ -169,10 +169,6 @@ SOURCE=..\..\agent\helpers\table_iterator.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\agent\helpers\table_mfd.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\agent\helpers\watcher.c
 # End Source File
 # End Group
