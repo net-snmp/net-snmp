@@ -115,10 +115,9 @@ table_helper_handler(netsnmp_mib_handler *handler,
 {
 
     netsnmp_request_info *request;
-
     netsnmp_table_registration_info *tbl_info;
-    int             oid_index_pos = reginfo->rootoid_len + 2;
-    unsigned int    oid_column_pos = reginfo->rootoid_len + 1;
+    int             oid_index_pos;
+    unsigned int    oid_column_pos;
     unsigned int    tmp_idx, tmp_len;
     int             incomplete, out_of_range, cleaned_up = 0;
     int             status = SNMP_ERR_NOERROR, need_processing = 0;
@@ -126,6 +125,11 @@ table_helper_handler(netsnmp_mib_handler *handler,
     netsnmp_table_request_info *tbl_req_info;
     netsnmp_variable_list *vb;
 
+    if (!reginfo || !handler)
+        return SNMPERR_GENERR;
+
+    oid_index_pos  = reginfo->rootoid_len + 2;
+    oid_column_pos = reginfo->rootoid_len + 1;
     tbl_info = (netsnmp_table_registration_info *) handler->myvoid;
 
     if ((!handler->myvoid) || (!tbl_info->indexes)) {
@@ -548,6 +552,9 @@ netsnmp_table_build_oid_from_index(netsnmp_handler_registration *reginfo,
 int
 netsnmp_update_variable_list_from_index(netsnmp_table_request_info *tri)
 {
+    if (!tri)
+        return SNMPERR_GENERR;
+
     return parse_oid_indexes(tri->index_oid, tri->index_oid_len,
                              tri->indexes);
 }
@@ -556,6 +563,9 @@ netsnmp_update_variable_list_from_index(netsnmp_table_request_info *tri)
 int
 netsnmp_update_indexes_from_variable_list(netsnmp_table_request_info *tri)
 {
+    if (!tri)
+        return SNMPERR_GENERR;
+
     return build_oid_noalloc(tri->index_oid, sizeof(tri->index_oid),
                              &tri->index_oid_len, NULL, 0, tri->indexes);
 }
@@ -630,6 +640,8 @@ table_helper_cleanup(netsnmp_agent_request_info *reqinfo,
 {
     netsnmp_set_request_error(reqinfo, request, status);
     netsnmp_free_request_data_sets(request);
+    if (!request)
+        return;
     request->parent_data = NULL;
 }
 
