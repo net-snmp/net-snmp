@@ -7,7 +7,8 @@
 
 config_require(smux/smux)
 
-extern u_char	*var_rip2();
+u_char  *var_rip2 __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+
 
 #define RIP2GLOBALROUTECHANGES  0
 #define RIP2GLOBALQUERIES       1

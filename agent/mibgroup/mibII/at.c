@@ -411,6 +411,7 @@ static void ARP_Scan_Init __P((void))
 	fclose (in);
 	in = fopen ("/proc/net/arp", "r");
 	if (at) free (at);
+	arptab_current = 0; /* it was missing, bug??? */
 	arptab_size = n;
 	if (arptab_size > 0)
 		at = (struct arptab *)
@@ -468,6 +469,21 @@ char *PhysAddr;
 u_long *ifType;
 {
 #ifndef CAN_USE_SYSCTL
+#ifdef linux
+	if (arptab_current<arptab_size)
+	{
+		/* copy values */
+		*IPAddr= at[arptab_current].at_iaddr.s_addr;
+		*ifType= (at[arptab_current].at_flags & ATF_PERM) ? 4/*static*/ : 3/*dynamic*/ ;
+		memcpy( PhysAddr, &at[arptab_current].at_enaddr,
+				sizeof(at[arptab_current].at_enaddr) );
+		
+		/* increment to point next entry */
+		arptab_current++;
+		/* return success */
+		return( 1 );
+	}
+#endif /* linux */
   return 0; /* we need someone with an irix box to fix this section */
 #else
 #if !defined(ARP_SCAN_FOUR_ARGUMENTS) || defined(hpux)

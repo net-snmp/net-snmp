@@ -369,7 +369,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
     case MEMTOTALSWAP:
       long_ret = getswap(SWAPGETTOTAL);
       return((u_char *) (&long_ret));
-    case MEMUSEDSWAP:
+    case MEMAVAILSWAP:
       long_ret = getswap(SWAPGETLEFT);
       return((u_char *) (&long_ret));
     case MEMSWAPMINIMUM:
@@ -394,7 +394,7 @@ unsigned char *var_extensible_mem(vp, name, length, exact, var_len, write_method
 #endif
 #endif
       return((u_char *) (&long_ret));
-    case MEMUSEDREAL:
+    case MEMAVAILREAL:
 #ifdef linux
 	long_ret = memory(meminfo_used);
 #else

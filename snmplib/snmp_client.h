@@ -1,3 +1,5 @@
+#ifndef SNMP_CLIENT_H
+#define SNMP_CLIENT_H
 /*
  * snmp_client.h
  */
@@ -48,3 +50,4 @@ char *snmp_errstring __P((int));
 void snmp_synch_setup __P((struct snmp_session *));
 int snmp_synch_response __P((struct snmp_session *, struct snmp_pdu *, struct snmp_pdu **));
 int ms_party_init __P((in_addr_t, oid *, int *, oid *, int *, oid *, int *));
+#endif /* SNMP_CLIENT_H */

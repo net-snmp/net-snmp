@@ -337,4 +337,8 @@ void DEBUGP __P((va_alist));
 #endif
 void DEBUGPOID __P((oid *, int));
 
+#ifdef CMU_COMPATIBLE
+extern int snmp_dump_packet;
+extern int quick_print;
+#endif
 #endif /* SNMP_API_H */

@@ -1,3 +1,5 @@
+#ifndef SNMP_H
+#define SNMP_H
 /*
  * Definitions for the Simple Network Management Protocol (RFC 1067).
  *
@@ -226,3 +228,4 @@ u_char *snmp_parse_var_op __P((u_char *, oid *, int *, u_char *, int *,
                                u_char **, int *));
 u_char *snmp_build_var_op __P((u_char *, oid *, int *, u_char, int, u_char *,
                                int *));
+#endif /* SNMP_H */

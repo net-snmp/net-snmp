@@ -122,6 +122,10 @@ init_nlist(nl)
   }
 #endif
   for(ret = 0; nl[ret].n_name != NULL; ret++) {
+#ifdef aix4
+      if (nl[ret].n_type == 0 && nl[ret].n_value != 0)
+	nl[ret].n_type = 1;
+#endif
       if (nl[ret].n_type == 0) {
 	  DEBUGP("nlist err:  %s not found\n",nl[ret].n_name);
       } else {

@@ -1,5 +1,10 @@
 #include <config.h>
 
+#ifdef solaris2
+#define _KMEMUSER	/* Needed by <sys/user.h> */
+#include <sys/types.h>   /* helps define struct rlimit */
+#endif
+
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -191,7 +196,7 @@ fixProcError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   long tmp=0;
   int tmplen=1000;
 
-  if ((proc = get_proc_instance(procwatch,name[8]))) {
+  if ((proc = get_proc_instance(procwatch,name[10]))) {
     if (var_val_type != ASN_INTEGER) {
       printf("Wrong type != int\n");
       return SNMP_ERR_WRONGTYPE;
