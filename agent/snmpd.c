@@ -225,6 +225,8 @@ static void usage(char *prog)
 	printf("-s\t\tLog warnings/messages to syslog\n");
 	printf("-A\t\tAppend to the logfile rather than truncating it.\n");
 	printf("-r Don't exit if root only accessible files can't be opened\n");
+	printf("-I [-]INITLIST\tList of mib modules to initialize (or not).\n");
+	printf("\t\t (run snmpd with -Dinit_mib for a list)\n");
 	printf("-l LOGFILE\tPrint warnings/messages to LOGFILE\n");
 	printf("\t\t(By default LOGFILE=%s)\n",
 #ifdef LOGFILE
