@@ -27,5 +27,9 @@ void init_vmstat(void);
 #define CPURAWWAIT 54
 #define CPURAWKERNEL 55
 #define CPURAWINTR 56
+#define IORAWSENT 57
+#define IORAWRECEIVE 58
+#define SYSRAWINTERRUPTS 59
+#define SYSRAWCONTEXT 60
 
 #endif /* _MIBGROUP_VMSTAT_H */
