@@ -384,6 +384,9 @@
 /* Define to 1 if you have the `mkstemp' function. */
 #undef HAVE_MKSTEMP
 
+/* Define to 1 if you have the `mktime' function. */
+#undef HAVE_MKTIME
+
 /* Define to 1 if you have the <mntent.h> header file. */
 #undef HAVE_MNTENT_H
 
@@ -620,6 +623,9 @@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the `stime' function. */
+#undef HAVE_STIME
 
 /* Define to 1 if you have the `strcasestr' function. */
 #undef HAVE_STRCASESTR
@@ -1460,6 +1466,5 @@
 #define NETSNMP_CPP_WRAP_START
 #define NETSNMP_CPP_WRAP_END
 #endif
-
 
 #endif /* NET_SNMP_CONFIG_H */
