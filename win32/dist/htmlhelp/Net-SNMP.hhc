@@ -20,7 +20,7 @@
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Help Caveats">
-			<param name="Local" value="Help Caveats.html">
+			<param name="Local" value="Help_Caveats.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="COPYING">
@@ -32,7 +32,7 @@
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Developer FAQ">
-			<param name="Local" value="Developer FAQ.html">
+			<param name="Local" value="Developer_FAQ.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="NEWS">
@@ -502,13 +502,13 @@
 	</UL>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Configuration">
-		<param name="Local" value="Configuration Overview.html">
+		<param name="Local" value="Configuration_Overview.html">
 		<param name="ImageNumber" value="1">
 		</OBJECT>
 	<UL>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Overview">
-			<param name="Local" value="Configuration Overview.html">
+			<param name="Local" value="Configuration_Overview.html">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="snmp.conf">
