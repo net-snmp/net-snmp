@@ -218,7 +218,12 @@ static void usage(char *prog)
 	printf("-q\t\tPrint information in a more parsable format (quick-print)\n");
 	printf("-D\t\tTurn on debugging output\n");
 	printf("-p NUM\t\tRun on port NUM instead of the default:  161\n");
+#if defined(USING_AGENTX_SUBAGENT_MODULE) || defined(USING_AGENTX_MASTER_MODULE)
 	printf("-x SOCKADDR\tBind AgentX port to this address\n");
+#endif
+#ifdef USING_AGENTX_SUBAGENT_MODULE
+	printf("-X\t\tRun as an AGENTX subagent rather than an SNMP master agent.\n");
+#endif
 	printf("-c CONFFILE\tRead CONFFILE as a configuration file.\n");
 	printf("-C\t\tDon't read the default configuration files.\n");
 	printf("-L\t\tPrint warnings/messages to stdout/err\n");
@@ -307,6 +312,7 @@ main(int argc, char *argv[])
 	int             dont_zero_log = 0;
 	int             stderr_log=0, syslog_log=0;
 	int             uid=0, gid=0;
+        int             agent_mode=-1;
 
 	logfile[0]		= 0;
 
@@ -395,11 +401,19 @@ main(int argc, char *argv[])
                   ds_set_string(DS_APPLICATION_ID, DS_AGENT_PORTS, strdup(buf));
                   break;
 
+#if defined(USING_AGENTX_SUBAGENT_MODULE) || defined(USING_AGENTX_MASTER_MODULE)
                 case 'x':
                   if (++arg == argc)
                     usage(argv[0]);
                   ds_set_string(DS_APPLICATION_ID, DS_AGENT_X_SOCKET, argv[arg]);
                   break;
+#endif
+
+#if defined(USING_AGENTX_SUBAGENT_MODULE)
+                case 'X':
+                  agent_mode = SUB_AGENT;
+                  break;
+#endif
 
 		case 'r':
                     ds_toggle_boolean(DS_APPLICATION_ID,
@@ -503,10 +517,15 @@ main(int argc, char *argv[])
 	argvrestart = (char *) malloc(ret);
 	argvrestartname = (char *) malloc(strlen(argv[0]) + 1);
 	strcpy(argvrestartname, argv[0]);
-	if ( strstr(argvrestartname, "agentxd") != NULL)
-          ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, SUB_AGENT);
-	else
-          ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, MASTER_AGENT);
+        if (agent_mode == -1) {
+            if ( strstr(argvrestartname, "agentxd") != NULL )
+                ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, SUB_AGENT);
+            else
+                ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, MASTER_AGENT);
+        } else {
+            ds_set_boolean(DS_APPLICATION_ID, DS_AGENT_ROLE, agent_mode);
+        }
+        
 	for (cptr = argvrestart, i = 0; i < argc; i++) {
 		strcpy(cptr, argv[i]);
 		*(argvptr++) = cptr;
