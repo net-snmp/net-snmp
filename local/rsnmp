@@ -34,7 +34,7 @@ while ($_ = $ARGV[0], /^-/) {
 
 
 foreach $i (@ARGV) {
-    open(OUT,"/usr/local/etc/snmpwalk -v 1 $i public $rtopmib.$rtopid.$rtopnode | grep -v End|");
+    open(OUT,"/usr/local/bin/snmpwalk -v 1 $i public $rtopmib.$rtopid.$rtopnode | grep -v End|");
     while (<OUT>) {
 	s/[^\"]*\"([^\"]*)\".*$/$1/;
 	s/\.$//;
