@@ -714,28 +714,37 @@ _sess_copy( struct snmp_session *in_session)
     memmove(slp->session, in_session, sizeof(struct snmp_session));
     session = slp->session;
 
+    /* zero out pointers so if we have to free the session we wont free mem
+       owned by in_session */
+    session->peername = NULL;
+    session->community = NULL;
+    session->contextEngineID = NULL;
+    session->contextName = NULL;
+    session->securityEngineID = NULL;
+    session->securityName = NULL;
+    session->securityAuthProto = NULL;
+    session->securityPrivProto = NULL;
     /*
      * session now points to the new structure that still contains pointers to
      * data allocated elsewhere.  Some of this data is copied to space malloc'd
      * here, and the pointer replaced with the new one.
      */
 
-    if (session->peername != NULL){
-	cp = (char *)malloc(strlen(session->peername) + 1);
-	if (cp == NULL) {
+    if (in_session->peername != NULL){
+	session->peername = (char *)malloc(strlen(in_session->peername) + 1);
+	if (session->peername == NULL) {
           snmp_sess_close(slp);
 	  in_session->s_snmp_errno = SNMPERR_MALLOC;
           return(NULL);
         }
-	strcpy(cp, session->peername);
-	session->peername = cp;
+	strcpy(session->peername, in_session->peername);
     }
 
     /* Fill in defaults if necessary */
-    if (session->community_len != SNMP_DEFAULT_COMMUNITY_LEN){
-	ucp = (u_char *)malloc(session->community_len);
+    if (in_session->community_len != SNMP_DEFAULT_COMMUNITY_LEN){
+	ucp = (u_char *)malloc(in_session->community_len);
 	if (ucp != NULL)
-	    memmove(ucp, session->community, session->community_len);
+	    memmove(ucp, in_session->community, in_session->community_len);
     } else {
 	if ((cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_COMMUNITY)) != NULL) {
 	    session->community_len = strlen(cp);
@@ -765,81 +774,80 @@ _sess_copy( struct snmp_session *in_session)
     if (session->securityLevel <= 0)
       session->securityLevel = ds_get_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL);
 
-    if (session->securityAuthProtoLen > 0) {
-      ucp = (u_char*)malloc(session->securityAuthProtoLen * sizeof(oid));
-      if (ucp == NULL) {
+    if (in_session->securityAuthProtoLen > 0) {
+      session->securityAuthProto = 
+	(oid*)malloc(in_session->securityAuthProtoLen * sizeof(oid));
+      if (session->securityAuthProto == NULL) {
 	snmp_sess_close(slp);
 	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
-      memmove(ucp, session->securityAuthProto,
-	      session->securityAuthProtoLen * sizeof(oid));
-      session->securityAuthProto = (oid*)ucp;
+      memmove(session->securityAuthProto, in_session->securityAuthProto,
+	      in_session->securityAuthProtoLen * sizeof(oid));
     } else if (get_default_authtype(&i) != NULL) {
         session->securityAuthProto =
           snmp_duplicate_objid(get_default_authtype(NULL), i);
         session->securityAuthProtoLen = i;
     }
 
-    if (session->securityPrivProtoLen > 0) {
-      op = (oid*)malloc((unsigned)session->securityPrivProtoLen *
-			   sizeof(oid));
-      if (op == NULL) {
+    if (in_session->securityPrivProtoLen > 0) {
+      session->securityPrivProto = 
+	(oid*)malloc((unsigned)in_session->securityPrivProtoLen * sizeof(oid));
+      if (session->securityPrivProto == NULL) {
 	snmp_sess_close(slp);
 	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
-      memmove(op, session->securityPrivProto,
-	      session->securityPrivProtoLen * sizeof(oid));
-      session->securityPrivProto = op;
+      memmove(session->securityPrivProto, in_session->securityPrivProto,
+	      in_session->securityPrivProtoLen * sizeof(oid));
     } else if (get_default_privtype(&i) != NULL) {
         session->securityPrivProto =
           snmp_duplicate_objid(get_default_privtype(NULL), i);
         session->securityPrivProtoLen = i;
     }
 
-    if (session->securityEngineIDLen > 0) {
-      ucp = (u_char*)malloc((unsigned)session->securityEngineIDLen *
+    if (in_session->securityEngineIDLen > 0) {
+      ucp = (u_char*)malloc((unsigned)in_session->securityEngineIDLen *
 			   sizeof(u_char));
       if (ucp == NULL) {
 	snmp_sess_close(slp);
 	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
-      memmove(ucp, session->securityEngineID,
-	      session->securityEngineIDLen * sizeof(u_char));
+      memmove(ucp, in_session->securityEngineID,
+	      in_session->securityEngineIDLen * sizeof(u_char));
       session->securityEngineID = ucp;
 
     }
 
-    if (session->contextEngineIDLen > 0) {
-      ucp = (u_char*)malloc((unsigned)session->contextEngineIDLen *
+    if (in_session->contextEngineIDLen > 0) {
+      ucp = (u_char*)malloc((unsigned)in_session->contextEngineIDLen *
 			   sizeof(u_char));
       if (ucp == NULL) {
 	snmp_sess_close(slp);
 	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
-      memmove(ucp, session->contextEngineID,
-	      session->contextEngineIDLen * sizeof(u_char));
+      memmove(ucp, in_session->contextEngineID,
+	      in_session->contextEngineIDLen * sizeof(u_char));
       session->contextEngineID = ucp;
-    } else if (session->securityEngineIDLen > 0) {
+    } else if (in_session->securityEngineIDLen > 0) {
       /* default contextEngineID to securityEngineIDLen if defined */
-      ucp = (u_char*)malloc((unsigned)session->securityEngineIDLen *
+      ucp = (u_char*)malloc((unsigned)in_session->securityEngineIDLen *
 			   sizeof(u_char));
       if (ucp == NULL) {
 	snmp_sess_close(slp);
 	in_session->s_snmp_errno = SNMPERR_MALLOC;
 	return(NULL);
       }
-      memmove(ucp, session->securityEngineID,
-	      session->securityEngineIDLen * sizeof(u_char));
+      memmove(ucp, in_session->securityEngineID,
+	      in_session->securityEngineIDLen * sizeof(u_char));
       session->contextEngineID = ucp;
-      session->contextEngineIDLen = session->securityEngineIDLen;
+      session->contextEngineIDLen = in_session->securityEngineIDLen;
     }
 
-    if (session->contextName) {
-      session->contextName = strdup(session->contextName);
+    if (in_session->contextName) {
+      session->contextName = strdup(in_session->contextName);
       if (session->contextName == NULL) {
 	snmp_sess_close(slp);
 	return(NULL);
@@ -854,8 +862,8 @@ _sess_copy( struct snmp_session *in_session)
       session->contextNameLen = strlen(cp);
     }
 
-    if (session->securityName) {
-      session->securityName = strdup(session->securityName);
+    if (in_session->securityName) {
+      session->securityName = strdup(in_session->securityName);
       if (session->securityName == NULL) {
 	snmp_sess_close(slp);
 	return(NULL);
@@ -870,16 +878,12 @@ _sess_copy( struct snmp_session *in_session)
       session->securityNameLen = strlen(cp);
     }
 
-    if (in_session->securityAuthKeyLen > 0) {
-      session->securityAuthKeyLen = in_session->securityAuthKeyLen;
-      memcpy(session->securityAuthKey, in_session->securityAuthKey,
-             session->securityAuthKeyLen);
-    } else if (ds_get_string(DS_LIBRARY_ID, DS_LIB_AUTHPASSPHRASE)) {
+    if ((in_session->securityAuthKeyLen <= 0) &&
+	(cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_AUTHPASSPHRASE))) {
       session->securityAuthKeyLen = USM_AUTH_KU_LEN;
       if (generate_Ku(session->securityAuthProto,
                       session->securityAuthProtoLen,
-                      (u_char *)ds_get_string(DS_LIBRARY_ID, DS_LIB_AUTHPASSPHRASE),
-                      strlen(ds_get_string(DS_LIBRARY_ID, DS_LIB_AUTHPASSPHRASE)),
+                      (u_char*)cp, strlen(cp),
                       session->securityAuthKey,
                       &session->securityAuthKeyLen) != SNMPERR_SUCCESS) {
         snmp_set_detail("Error generating Ku from authentication pass phrase.");
@@ -888,16 +892,12 @@ _sess_copy( struct snmp_session *in_session)
       }
     }
 
-    if (in_session->securityPrivKeyLen > 0) {
-      session->securityPrivKeyLen = in_session->securityPrivKeyLen;
-      memcpy(session->securityPrivKey, in_session->securityPrivKey,
-             session->securityPrivKeyLen);
-    } else if (ds_get_string(DS_LIBRARY_ID, DS_LIB_PRIVPASSPHRASE)) {
+    if ((in_session->securityPrivKeyLen <= 0) && 
+	       (cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_PRIVPASSPHRASE))) {
       session->securityPrivKeyLen = USM_PRIV_KU_LEN;
       if (generate_Ku(session->securityAuthProto,
                       session->securityAuthProtoLen,
-                      (u_char *)ds_get_string(DS_LIBRARY_ID, DS_LIB_PRIVPASSPHRASE),
-                      strlen(ds_get_string(DS_LIBRARY_ID, DS_LIB_PRIVPASSPHRASE)),
+                      (u_char *)cp, strlen(cp),
                       session->securityPrivKey,
                       &session->securityPrivKeyLen) != SNMPERR_SUCCESS) {
         snmp_set_detail("Error generating Ku from privacy pass phrase.");
