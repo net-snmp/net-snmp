@@ -43,6 +43,7 @@ char *print_format2  = NULL;
 const char     *trap1_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b] (via %A [%a]): %N\n\t%W Trap (%q) Uptime: %#T\n%v\n";
 const char     *trap2_std_str = "%.4y-%.2m-%.2l %.2h:%.2j:%.2k %B [%b]:\n%v\n";
 
+void snmptrapd_free_traphandle(void);
 
 const char *
 trap_description(int trap)
@@ -226,7 +227,8 @@ void
 snmptrapd_register_configs( void )
 {
     register_config_handler("snmptrapd", "traphandle",
-                            snmptrapd_parse_traphandle, NULL,
+                            snmptrapd_parse_traphandle,
+                            snmptrapd_free_traphandle,
                             "oid|\"default\" program [args ...] ");
     register_config_handler("snmptrapd", "format1",
                             parse_trap1_fmt, free_trap1_fmt, "format");
@@ -407,6 +409,47 @@ netsnmp_add_traphandler(Netsnmp_Trap_Handler handler,
     return traph;
 }
 
+void
+snmptrapd_free_traphandle(void)
+{
+    netsnmp_trapd_handler *traph = NULL, *nextt = NULL, *nexth = NULL;
+
+    DEBUGMSGTL(("snmptrapd", "Freeing trap handler lists\n"));
+
+    /*
+     * Free default trap handlers
+     */
+    traph = netsnmp_default_traphandlers;
+   /* loop over handlers */
+    while (traph) {
+       DEBUGMSG(("snmptrapd", "Freeing default trap handler\n"));
+	nexth = traph->nexth;
+	SNMP_FREE(traph->token);
+	SNMP_FREE(traph);
+	traph = nexth;
+    }
+    netsnmp_default_traphandlers = NULL;
+
+    /* 
+     * Free specific trap handlers
+     */
+    traph = netsnmp_specific_traphandlers;
+    /* loop over traps */
+    while (traph) {
+        nextt = traph->nextt;
+        /* loop over handlers for this trap */
+	while (traph) {
+	    DEBUGMSG(("snmptrapd", "Freeing specific trap handler\n"));
+	    nexth = traph->nexth;
+	    SNMP_FREE(traph->token);
+	    SNMP_FREE(traph->trapoid);
+	    SNMP_FREE(traph);
+	    traph = nexth;
+	}
+	traph = nextt;
+    }
+    netsnmp_specific_traphandlers = NULL;
+}
 
 /*
  * Locate the list of handlers for this particular Trap OID
