@@ -28,19 +28,19 @@ The \fItableID\fR must specify an SNMP table.
 .PP
 .I snmptable
 has the following special options:
-.IP "-f F"
+.IP "-Cf F"
 \fIF\fR is a string used to separate table columns.
 With this option, each table entry will be printed in compact form, just with
 the string given to separate the columns (useful if you want to import it
 into a database).
 Otherwise it is printed in nicely aligned columns.
-.IP "-w W"
+.IP "-Cw W"
 \fIW\fR specifies the width of the lines when the table is printed.
 If the lines will be longer, the table will be printed in sections of
 max \fIW\fR characters.
-.IP "-i"
+.IP "-Ci"
 this option prepends the index of the entry to all printed lines
-.IP "-b"
+.IP "-Cb"
 brief heading. Any common prefix of the table field names will be
 deleted
 .PP
@@ -52,7 +52,7 @@ SNMP table: at.atTable
 atIfIndex   atPhysAddress   atNetAddress
         1  8:0:20:20:0:ab 130.225.243.33
 .PP
-$ snmptable localhost public -f + at.attable
+$ snmptable localhost public -Cf + at.attable
 
 SNMP table: at.atTable
 
