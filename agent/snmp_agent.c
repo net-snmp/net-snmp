@@ -597,6 +597,7 @@ handle_next_pass(struct agent_snmp_session  *asp)
 	 */
 struct saved_var_data {
     WriteMethod *write_method;
+    u_char	*statP;
     u_char	statType;
     size_t	statLen;
     u_short	acl;
@@ -623,7 +624,6 @@ handle_var_list(struct agent_snmp_session  *asp)
 	return SNMP_ERR_NOERROR;
     }
 
-    statP = NULL;
     while (1) {
     
 	count++;
@@ -634,6 +634,7 @@ statp_loop:
 		 */
 	    saved = (struct saved_var_data *) varbind_ptr->data;
 	    write_method = saved->write_method;
+	    statP        = saved->statP;
 	    statType     = saved->statType;
 	    statLen      = saved->statLen;
 	    acl          = saved->acl;
@@ -719,6 +720,9 @@ statp_loop:
 			    goto write_error;
 			}
 	    		saved->write_method = write_method;
+	    		saved->statP        = (u_char *)malloc(statLen);
+			if ( saved->statP )
+			    memcpy( saved->statP, statP, statLen );
 	    		saved->statType     = statType;
 	    		saved->statLen      = statLen;
 	    		saved->acl          = acl;
