@@ -629,17 +629,23 @@ _init_snmp(void)
         s_port = ntohs(servp->s_port);
     }
 #endif
-    ds_set_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT, s_port);
+
+    netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
+		       NETSNMP_DS_LIB_DEFAULT_PORT, s_port);
+
 #ifdef USE_REVERSE_ASNENCODING
-    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE,
-                   DEFAULT_ASNENCODING_DIRECTION);
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+			   NETSNMP_DS_LIB_REVERSE_ENCODE,
+			   DEFAULT_ASNENCODING_DIRECTION);
 #endif
     /*
      * Default to MIB::node style output 
      */
-    if (!ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY))
-        ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 2);
-
+    if (!netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+			    NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY)) {
+	netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
+			   NETSNMP_DS_LIB_PRINT_SUFFIX_ONLY, 2);
+    }
 }
 
 /*
@@ -669,18 +675,18 @@ snmp_sess_init(netsnmp_session * session)
 static void
 register_default_handlers(void)
 {
-    ds_register_config(ASN_BOOLEAN, "snmp", "dumpPacket",
-                       DS_LIBRARY_ID, DS_LIB_DUMP_PACKET);
-    ds_register_config(ASN_BOOLEAN, "snmp", "reverseEncodeBER",
-                       DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE);
-    ds_register_config(ASN_INTEGER, "snmp", "defaultPort",
-                       DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT);
-    ds_register_config(ASN_OCTET_STR, "snmp", "defCommunity",
-                       DS_LIBRARY_ID, DS_LIB_COMMUNITY);
-    ds_register_premib(ASN_BOOLEAN, "snmp", "noTokenWarnings",
-                       DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS);
-    ds_register_config(ASN_BOOLEAN, "snmp", "noRangeCheck",
-                       DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "dumpPacket",
+		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DUMP_PACKET);
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "reverseEncodeBER",
+		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE);
+    netsnmp_ds_register_config(ASN_INTEGER, "snmp", "defaultPort",
+		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DEFAULT_PORT);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defCommunity",
+                      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_COMMUNITY);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "noTokenWarnings",
+                      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_NO_TOKEN_WARNINGS);
+    netsnmp_ds_register_config(ASN_BOOLEAN, "snmp", "noRangeCheck",
+		      NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
 }
 
 void
@@ -736,8 +742,11 @@ init_snmp(const char *type)
     /*
      * make the type available everywhere else 
      */
-    if (type && !ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE))
-        ds_set_string(DS_LIBRARY_ID, DS_LIB_APPTYPE, type);
+    if (type && !netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				       NETSNMP_DS_LIB_APPTYPE)) {
+        netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
+			      NETSNMP_DS_LIB_APPTYPE, type);
+    }
 
     _init_snmp();
 
@@ -794,7 +803,8 @@ snmp_shutdown(const char *type)
     snmp_close_sessions();
     shutdown_mib();
     unregister_all_config_handlers();
-    ds_shutdown();
+    netsnmp_ds_shutdown();
+    netsnmp_ds_shutdown();
 }
 
 
@@ -941,7 +951,8 @@ _sess_copy(netsnmp_session * in_session)
         if (ucp != NULL)
             memmove(ucp, in_session->community, in_session->community_len);
     } else {
-        if ((cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_COMMUNITY)) != NULL) {
+        if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+					NETSNMP_DS_LIB_COMMUNITY)) != NULL) {
             session->community_len = strlen(cp);
             ucp = (u_char *) malloc(session->community_len);
             if (ucp)
@@ -965,9 +976,10 @@ _sess_copy(netsnmp_session * in_session)
     }
     session->community = ucp;   /* replace pointer with pointer to new data */
 
-    if (session->securityLevel <= 0)
+    if (session->securityLevel <= 0) {
         session->securityLevel =
-            ds_get_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL);
+            netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SECLEVEL);
+    }
 
     if (session->securityLevel == 0)
         session->securityLevel = SNMP_SEC_LEVEL_NOAUTH;
@@ -1047,7 +1059,8 @@ _sess_copy(netsnmp_session * in_session)
             snmp_sess_close(slp);
             return (NULL);
         }
-    } else if ((cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_CONTEXT)) != NULL) {
+    } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+					   NETSNMP_DS_LIB_CONTEXT)) != NULL) {
         cp = strdup(cp);
         if (cp == NULL) {
             snmp_sess_close(slp);
@@ -1067,7 +1080,8 @@ _sess_copy(netsnmp_session * in_session)
             snmp_sess_close(slp);
             return (NULL);
         }
-    } else if ((cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_SECNAME)) != NULL) {
+    } else if ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+					   NETSNMP_DS_LIB_SECNAME)) != NULL) {
         cp = strdup(cp);
         if (cp == NULL) {
             snmp_sess_close(slp);
@@ -1078,8 +1092,10 @@ _sess_copy(netsnmp_session * in_session)
     }
 
     if ((in_session->securityAuthKeyLen <= 0) &&
-        ((cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_AUTHPASSPHRASE)) ||
-         (cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_PASSPHRASE)))) {
+        ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				     NETSNMP_DS_LIB_AUTHPASSPHRASE)) ||
+         (cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				     NETSNMP_DS_LIB_PASSPHRASE)))) {
         session->securityAuthKeyLen = USM_AUTH_KU_LEN;
         if (generate_Ku(session->securityAuthProto,
                         session->securityAuthProtoLen,
@@ -1094,8 +1110,10 @@ _sess_copy(netsnmp_session * in_session)
     }
 
     if ((in_session->securityPrivKeyLen <= 0) &&
-        ((cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_PRIVPASSPHRASE)) ||
-         (cp = ds_get_string(DS_LIBRARY_ID, DS_LIB_PASSPHRASE)))) {
+        ((cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				     NETSNMP_DS_LIB_PRIVPASSPHRASE)) ||
+         (cp = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				     NETSNMP_DS_LIB_PASSPHRASE)))) {
         session->securityPrivKeyLen = USM_PRIV_KU_LEN;
         if (generate_Ku(session->securityAuthProto,
                         session->securityAuthProtoLen,
@@ -1983,7 +2001,7 @@ snmpv3_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
 
     DEBUGDUMPSECTION("send", "SNMPv3 Message");
 #ifdef USE_REVERSE_ASNENCODING
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE)) {
         ret = snmpv3_packet_realloc_rbuild(pkt, pkt_len, offset,
                                            session, pdu, NULL, 0);
     } else {
@@ -2709,7 +2727,7 @@ _snmp_build(u_char ** pkt, size_t * pkt_len, size_t * offset,
         DEBUGMSGTL(("snmp_send", "Building SNMPv%d message...\n",
                     (1 + pdu->version)));
 #ifdef USE_REVERSE_ASNENCODING
-        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE)) {
             DEBUGPRINTPDUTYPE("send", pdu->command);
             rc = snmp_pdu_realloc_rbuild(pkt, pkt_len, offset, pdu);
             if (rc == 0) {
@@ -4505,7 +4523,7 @@ _sess_async_send(void *sessp,
         result = isp->hook_build(session, pdu, pktbuf, &length);
     } else {
 #ifdef USE_REVERSE_ASNENCODING
-        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE)) {
             result =
                 snmp_build(&pktbuf, &pktbuf_len, &offset, session, pdu);
             packet = pktbuf + pktbuf_len - offset;
@@ -4554,7 +4572,7 @@ _sess_async_send(void *sessp,
         return 0;
     }
 
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DUMP_PACKET)) {
         if (transport->f_fmtaddr != NULL) {
             char           *dest_txt =
                 transport->f_fmtaddr(transport, pdu->transport_data,
@@ -4784,7 +4802,7 @@ _sess_process_packet(void *sessp, netsnmp_session * sp,
                 "session %p fd %d pkt %p length %d\n", sessp,
                 transport->sock, packetptr, length));
 
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DUMP_PACKET)) {
         if (transport->f_fmtaddr != NULL) {
             char           *addrtxt =
                 transport->f_fmtaddr(transport, opaque, olength);
@@ -5539,7 +5557,7 @@ snmp_sess_select_info(void *sessp,
     }
     DEBUGMSG(("sess_select", "\n"));
 
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_ALARM_DONT_USE_SIG)) {
         next_alarm = get_next_alarm_delay_time(&delta);
     }
     if (next_alarm == 0 && requests == 0) {
@@ -5673,7 +5691,7 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
         result = isp->hook_build(sp, rp->pdu, pktbuf, &length);
     } else {
 #ifdef USE_REVERSE_ASNENCODING
-        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_REVERSE_ENCODE)) {
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_REVERSE_ENCODE)) {
             result =
                 snmp_build(&pktbuf, &pktbuf_len, &offset, sp, rp->pdu);
             packet = pktbuf + pktbuf_len - offset;
@@ -5699,7 +5717,7 @@ snmp_resend_request(struct session_list *slp, netsnmp_request_list *rp,
         return -1;
     }
 
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DUMP_PACKET)) {
         if (transport->f_fmtaddr != NULL) {
             char           *string = NULL;
             string =
@@ -6128,7 +6146,7 @@ snmp_add_var(netsnmp_pdu *pdu,
     char           *ecp;
     int             result = SNMPERR_SUCCESS;
     int             check =
-        !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_CHECK_RANGE);
+        !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_DONT_CHECK_RANGE);
     u_char         *buf = NULL;
     u_char         *buf_ptr = NULL;
     size_t          buf_len = 0, value_len = 0, tint;

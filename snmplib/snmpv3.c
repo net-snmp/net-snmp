@@ -160,23 +160,25 @@ snmpv3_secLevel_conf(const char *word, char *cptr)
 {
     char            buf[1024];
 
-    if (strcasecmp(cptr, "noAuthNoPriv") == 0 || strcmp(cptr, "1") == 0
-        || strcasecmp(cptr, "nanp") == 0)
-        ds_set_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_NOAUTH);
-    else if (strcasecmp(cptr, "authNoPriv") == 0 || strcmp(cptr, "2") == 0
-             || strcasecmp(cptr, "anp") == 0)
-        ds_set_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL,
-                   SNMP_SEC_LEVEL_AUTHNOPRIV);
-    else if (strcasecmp(cptr, "authPriv") == 0 || strcmp(cptr, "3") == 0
-             || strcasecmp(cptr, "ap") == 0)
-        ds_set_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL,
-                   SNMP_SEC_LEVEL_AUTHPRIV);
-    else {
+    if (strcasecmp(cptr, "noAuthNoPriv") == 0 || strcmp(cptr, "1") == 0 ||
+	strcasecmp(cptr, "nanp") == 0) {
+        netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
+			   NETSNMP_DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_NOAUTH);
+    } else if (strcasecmp(cptr, "authNoPriv") == 0 || strcmp(cptr, "2") == 0 ||
+	       strcasecmp(cptr, "anp") == 0) {
+        netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
+			   NETSNMP_DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_AUTHNOPRIV);
+    } else if (strcasecmp(cptr, "authPriv") == 0 || strcmp(cptr, "3") == 0 ||
+	       strcasecmp(cptr, "ap") == 0) {
+        netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, 
+			   NETSNMP_DS_LIB_SECLEVEL, SNMP_SEC_LEVEL_AUTHPRIV);
+    } else {
         sprintf(buf, "Unknown security level: %s", cptr);
         config_perror(buf);
     }
     DEBUGMSGTL(("snmpv3", "default secLevel set to: %s = %d\n", cptr,
-                ds_get_int(DS_LIBRARY_ID, DS_LIB_SECLEVEL)));
+                netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+				   NETSNMP_DS_LIB_SECLEVEL)));
 }
 
 
@@ -897,17 +899,21 @@ void
 version_conf(const char *word, char *cptr)
 {
     if (strcmp(cptr, "1") == 0) {
-        ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, DS_SNMP_VERSION_1);       /* bogus value */
+        netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION, 
+			   NETSNMP_DS_SNMP_VERSION_1);       /* bogus value */
     } else if (strcasecmp(cptr, "2c") == 0) {
-        ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, DS_SNMP_VERSION_2c);
+        netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION, 
+			   NETSNMP_DS_SNMP_VERSION_2c);
     } else if (strcmp(cptr, "3") == 0) {
-        ds_set_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION, DS_SNMP_VERSION_3);
+        netsnmp_ds_set_int(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SNMPVERSION, 
+			   NETSNMP_DS_SNMP_VERSION_3);
     } else {
         config_perror("Unknown version specification");
         return;
     }
     DEBUGMSGTL(("snmpv3", "set default version to %d\n",
-                ds_get_int(DS_LIBRARY_ID, DS_LIB_SNMPVERSION)));
+                netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+				   NETSNMP_DS_LIB_SNMPVERSION)));
 }
 
 /*
@@ -987,16 +993,16 @@ init_snmpv3(const char *type)
     /*
      * default store config entries 
      */
-    ds_register_config(ASN_OCTET_STR, "snmp", "defSecurityName",
-                       DS_LIBRARY_ID, DS_LIB_SECNAME);
-    ds_register_config(ASN_OCTET_STR, "snmp", "defContext", DS_LIBRARY_ID,
-                       DS_LIB_CONTEXT);
-    ds_register_config(ASN_OCTET_STR, "snmp", "defPassphrase",
-                       DS_LIBRARY_ID, DS_LIB_PASSPHRASE);
-    ds_register_config(ASN_OCTET_STR, "snmp", "defAuthPassphrase",
-                       DS_LIBRARY_ID, DS_LIB_AUTHPASSPHRASE);
-    ds_register_config(ASN_OCTET_STR, "snmp", "defPrivPassphrase",
-                       DS_LIBRARY_ID, DS_LIB_PRIVPASSPHRASE);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defSecurityName",
+			       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_SECNAME);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defContext", 
+			       NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_CONTEXT);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defPassphrase",
+			     NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PASSPHRASE);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defAuthPassphrase",
+			 NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_AUTHPASSPHRASE);
+    netsnmp_ds_register_config(ASN_OCTET_STR, "snmp", "defPrivPassphrase",
+			 NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRIVPASSPHRASE);
     register_config_handler("snmp", "defVersion", version_conf, NULL,
                             "1|2c|3");
 

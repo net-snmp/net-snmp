@@ -122,8 +122,10 @@ register_config_handler(const char *type_param,
     struct config_line **ltmp;
     const char     *type = type_param;
 
-    if (type == NULL)
-        type = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
+    if (type == NULL) {
+        type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				     NETSNMP_DS_LIB_APPTYPE);
+    }
 
     /*
      * Find type in current list  -OR-  create a new file type.
@@ -191,8 +193,10 @@ unregister_config_handler(const char *type_param, const char *token)
     struct config_line **ltmp, *ltmp2;
     const char     *type = type_param;
 
-    if (type == NULL)
-        type = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
+    if (type == NULL) {
+        type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				     NETSNMP_DS_LIB_APPTYPE);
+    }
 
     /*
      * find type in current list 
@@ -343,8 +347,9 @@ run_config_handler(struct config_line *lptr,
                         cptr));
             (*(lptr->parse_line)) (token, cptr);
         }
-    } else if (when != PREMIB_CONFIG &&
-               !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS)) {
+    } else if (when != PREMIB_CONFIG && 
+	       !netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+				       NETSNMP_DS_LIB_NO_TOKEN_WARNINGS)) {
         sprintf(tmpbuf, "Unknown token: %s.", token);
         config_pwarn(tmpbuf);
         return SNMPERR_GENERR;
@@ -400,8 +405,8 @@ snmp_config_when(char *line, int when)
         for (; ctmp != NULL && lptr == NULL; ctmp = ctmp->next)
             lptr = read_config_find_handler(ctmp->start, cptr);
     }
-    if (lptr == NULL &&
-        ds_get_boolean(DS_LIBRARY_ID, DS_LIB_NO_TOKEN_WARNINGS)) {
+    if (lptr == NULL && netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+					  NETSNMP_DS_LIB_NO_TOKEN_WARNINGS)) {
         sprintf(tmpbuf, "Unknown token: %s.", cptr);
         config_pwarn(tmpbuf);
         return SNMPERR_GENERR;
@@ -423,7 +428,8 @@ netsnmp_config(char *line)
     netsnmp_config_remember(line);      /* always remember it so it's read
                                          * processed after a free_config()
                                          * call */
-    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_HAVE_READ_CONFIG)) {
+    if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+			       NETSNMP_DS_LIB_HAVE_READ_CONFIG)) {
         DEBUGMSGTL(("snmp_config", "  ... processing it now\n"));
         ret = snmp_config_when(line, NORMAL_CONFIG);
     }
@@ -635,14 +641,17 @@ void
 read_configs(void)
 {
 
-    char           *optional_config =
-        ds_get_string(DS_LIBRARY_ID, DS_LIB_OPTIONALCONFIG);
-    char           *type = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
+    char *optional_config = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+					       NETSNMP_DS_LIB_OPTIONALCONFIG);
+    char *type = netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				       NETSNMP_DS_LIB_APPTYPE);
 
     DEBUGMSGTL(("read_config", "reading normal configuration tokens\n"));
 
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS))
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+				NETSNMP_DS_LIB_DONT_READ_CONFIGS)) {
         read_config_files(NORMAL_CONFIG);
+    }
 
     /*
      * do this even when the normal above wasn't done 
@@ -664,7 +673,8 @@ read_configs(void)
 
     netsnmp_config_process_memories_when(NORMAL_CONFIG, 1);
 
-    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_HAVE_READ_CONFIG, 1);
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+			   NETSNMP_DS_LIB_HAVE_READ_CONFIG, 1);
     snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
                         SNMP_CALLBACK_POST_READ_CONFIG, NULL);
 }
@@ -674,12 +684,15 @@ read_premib_configs(void)
 {
     DEBUGMSGTL(("read_config", "reading premib configuration tokens\n"));
 
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS))
+    if (!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+				NETSNMP_DS_LIB_DONT_READ_CONFIGS)) {
         read_config_files(PREMIB_CONFIG);
+    }
 
     netsnmp_config_process_memories_when(PREMIB_CONFIG, 0);
 
-    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_HAVE_READ_PREMIB_CONFIG, 1);
+    netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, 
+			   NETSNMP_DS_LIB_HAVE_READ_PREMIB_CONFIG, 1);
     snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
                         SNMP_CALLBACK_POST_PREMIB_READ_CONFIG, NULL);
 }
@@ -695,7 +708,8 @@ read_premib_configs(void)
 void
 set_configuration_directory(const char *dir)
 {
-    ds_set_string(DS_LIBRARY_ID, DS_LIB_CONFIGURATION_DIR, dir);
+    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
+			  NETSNMP_DS_LIB_CONFIGURATION_DIR, dir);
 }
 
 /*******************************************************************-o-******
@@ -716,7 +730,8 @@ get_configuration_directory()
     char            defaultPath[SPRINT_MAX_LEN];
     char           *homepath;
 
-    if (NULL == ds_get_string(DS_LIBRARY_ID, DS_LIB_CONFIGURATION_DIR)) {
+    if (NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				      NETSNMP_DS_LIB_CONFIGURATION_DIR)) {
         homepath = getenv("HOME");
         sprintf(defaultPath, "%s%c%s%c%s%s%s%s",
                 SNMPCONFPATH, ENV_SEPARATOR_CHAR,
@@ -726,7 +741,8 @@ get_configuration_directory()
                 ((homepath == NULL) ? "" : "/.snmp"));
         set_configuration_directory(defaultPath);
     }
-    return (ds_get_string(DS_LIBRARY_ID, DS_LIB_CONFIGURATION_DIR));
+    return (netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				  NETSNMP_DS_LIB_CONFIGURATION_DIR));
 }
 
 /*******************************************************************-o-******
@@ -741,7 +757,8 @@ get_configuration_directory()
 void
 set_persistent_directory(const char *dir)
 {
-    ds_set_string(DS_LIBRARY_ID, DS_LIB_PERSISTENT_DIR, dir);
+    netsnmp_ds_set_string(NETSNMP_DS_LIBRARY_ID, 
+			  NETSNMP_DS_LIB_PERSISTENT_DIR, dir);
 }
 
 /*******************************************************************-o-******
@@ -757,10 +774,12 @@ set_persistent_directory(const char *dir)
 const char     *
 get_persistent_directory()
 {
-    if (NULL == ds_get_string(DS_LIBRARY_ID, DS_LIB_PERSISTENT_DIR)) {
+    if (NULL == netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				      NETSNMP_DS_LIB_PERSISTENT_DIR)) {
         set_persistent_directory(PERSISTENT_DIRECTORY);
     }
-    return (ds_get_string(DS_LIBRARY_ID, DS_LIB_PERSISTENT_DIR));
+    return (netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+				  NETSNMP_DS_LIB_PERSISTENT_DIR));
 }
 
 
@@ -990,7 +1009,8 @@ read_config_store(const char *type, const char *line)
 void
 read_app_config_store(const char *line)
 {
-    read_config_store(ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE), line);
+    read_config_store(netsnmp_ds_get_string(NETSNMP_DS_LIBRARY_ID, 
+					    NETSNMP_DS_LIB_APPTYPE), line);
 }
 
 

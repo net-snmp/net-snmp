@@ -92,8 +92,8 @@ int             vsnprintf(char *str, size_t count, const char *fmt,
 void
 init_snmp_logging(void)
 {
-    ds_register_premib(ASN_BOOLEAN, "snmp", "logTimestamp", DS_LIBRARY_ID,
-                       DS_LIB_LOG_TIMESTAMP);
+    netsnmp_ds_register_premib(ASN_BOOLEAN, "snmp", "logTimestamp", 
+			 NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_LOG_TIMESTAMP);
 }
 
 int
@@ -311,8 +311,8 @@ snmp_log_string(int priority, const char *string)
     }
 
     if (do_filelogging || do_stderrlogging) {
-
-        if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_LOG_TIMESTAMP) && newline) {
+        if (netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, 
+				   NETSNMP_DS_LIB_LOG_TIMESTAMP) && newline) {
             sprintf_stamp(NULL, sbuf);
         } else {
             strcpy(sbuf, "");

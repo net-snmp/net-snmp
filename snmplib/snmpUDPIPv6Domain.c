@@ -36,7 +36,7 @@
 #include <net-snmp/library/snmp_transport.h>
 #include <net-snmp/library/snmpUDPIPv6Domain.h>
 
-oid             netsnmp_UDPIPv6Domain[10] = { ENTERPRISE_MIB, 3, 3, 4 };
+oid netsnmp_UDPIPv6Domain[10] = { ENTERPRISE_MIB, 3, 3, 4 };
 static netsnmp_tdomain udp6Domain;
 
 /*
@@ -44,7 +44,7 @@ static netsnmp_tdomain udp6Domain;
  * address if data is NULL.  
  */
 
-char           *
+char *
 snmp_udp6_fmtaddr(netsnmp_transport *t, void *data, int len)
 {
     struct sockaddr_in6 *to = NULL;
@@ -342,9 +342,10 @@ netsnmp_sockaddr_in6(struct sockaddr_in6 *addr,
 
     if (remote_port > 0) {
         addr->sin6_port = htons(remote_port);
-    } else if (ds_get_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT) > 0) {
-        addr->sin6_port =
-            htons(ds_get_int(DS_LIBRARY_ID, DS_LIB_DEFAULT_PORT));
+    } else if (netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+				  NETSNMP_DS_LIB_DEFAULT_PORT) > 0) {
+        addr->sin6_port = htons(netsnmp_ds_get_int(NETSNMP_DS_LIBRARY_ID, 
+						 NETSNMP_DS_LIB_DEFAULT_PORT));
     } else {
         addr->sin6_port = htons(SNMP_PORT);
     }

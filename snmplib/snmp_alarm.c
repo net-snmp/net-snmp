@@ -294,8 +294,9 @@ set_an_alarm(void)
      * run_alarms().  
      */
 
-    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_ALARM_DONT_USE_SIG)
-        && nextalarm) {
+    if (nextalarm &&
+	!netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID,
+				NETSNMP_DS_LIB_ALARM_DONT_USE_SIG)) {
 #ifndef WIN32
 # ifdef   HAVE_SETITIMER
         struct itimerval it;
