@@ -103,6 +103,7 @@
 void MDreverse (unsigned int *);
 static void MDblock (MDptr, unsigned int *);
 
+#ifdef SNMP_TESTING_CODE
 /* MDprint(MDp)
 ** Print message digest buffer MDp as 32 hexadecimal digits.
 ** Order is from low-order byte of buffer[0] to high-order byte of buffer[3].
@@ -119,6 +120,7 @@ MDprint(MDptr MDp)
     printf("\n");
     fflush(stdout);
 }
+#endif /* SNMP_TESTING_CODE */
 
 /* MDbegin(MDp)
 ** Initialize message digest buffer MDp. 
