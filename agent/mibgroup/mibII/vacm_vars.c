@@ -48,6 +48,8 @@
 #include "agent_callbacks.h"
 #include "vacm_vars.h"
 #include "util_funcs.h"
+#include "snmp_enum.h"
+#include "snmp_secmod.h"
 #include "snmp_transport.h"
 #include "snmpUDPDomain.h"
 #ifdef SNMP_TRANSPORT_TCP_DOMAIN
@@ -121,7 +123,7 @@ init_vacm_vars (void)
   REGISTER_MIB("mibII/vacm:access", vacm_access, variable2, vacm_access_oid);
   REGISTER_MIB("mibII/vacm:view", vacm_view, variable4, vacm_view_oid);
   snmpd_register_config_handler("group", vacm_parse_group, vacm_free_group,
-                                "name v1|v2c|usm security");
+                                "name v1|v2c|usm|... security");
   snmpd_register_config_handler("access", vacm_parse_access, vacm_free_access,
                             "name context model level prefx read write notify");
   snmpd_register_config_handler("view", vacm_parse_view, vacm_free_view,
@@ -181,14 +183,16 @@ void vacm_parse_group (const char *token,
     }
     if (strcasecmp(model, "v1") == 0) imodel = SNMP_SEC_MODEL_SNMPv1;
     else if (strcasecmp(model, "v2c") == 0) imodel = SNMP_SEC_MODEL_SNMPv2c;
-    else if (strcasecmp(model, "usm") == 0) imodel = SNMP_SEC_MODEL_USM;
     else if (strcasecmp(model, "any") == 0) {
-	config_perror("bad security model \"any\" should be: v1, v2c or usm - installing anyway");
+	config_perror("bad security model \"any\" should be: v1, v2c, usm or a registered security plugin name - installing anyway");
 	imodel = SNMP_SEC_MODEL_ANY;
     }
     else {
-	config_perror("bad security model, should be: v1, v2c or usm");
-	return;
+        if ((imodel = se_find_value_in_slist("snmp_secmods", model)) ==
+            SE_DNE) {
+            config_perror("bad security model, should be: v1, v2c or usm or a registered security plugin name");
+            return;
+        }
     }
     if (strlen(security)+1 > sizeof(gp->groupName)) {
     	config_perror("security name too long");
@@ -261,10 +265,12 @@ void vacm_parse_access (const char *token, char *param)
     if (strcasecmp(model, "any") == 0) imodel = SNMP_SEC_MODEL_ANY;
     else if (strcasecmp(model, "v1") == 0) imodel = SNMP_SEC_MODEL_SNMPv1;
     else if (strcasecmp(model, "v2c") == 0) imodel = SNMP_SEC_MODEL_SNMPv2c;
-    else if (strcasecmp(model, "usm") == 0) imodel = SNMP_SEC_MODEL_USM;
     else {
-	config_perror("bad security model (any, v1, v2c, usm)");
-	return;
+        if ((imodel = se_find_value_in_slist("snmp_secmods", model)) ==
+            SE_DNE) {
+            config_perror("bad security model, should be: v1, v2c or usm or a registered security plugin name");
+            return;
+        }
     }
     if (strcasecmp(level, "noauth") == 0) ilevel = SNMP_SEC_LEVEL_NOAUTH;
     else if (strcasecmp(level, "noauthnopriv") == 0) ilevel = SNMP_SEC_LEVEL_NOAUTH;
@@ -569,7 +575,8 @@ int vacm_in_view (struct snmp_pdu *pdu,
 	/*  Map other <community, transport-address> pairs to security names
 	    here.  */
 
-    } else if (pdu->securityModel == SNMP_SEC_MODEL_USM) {
+    } else if (find_sec_mod(pdu->securityModel)) {
+      /* any legal defined v3 security model */
       DEBUGMSG (("mibII/vacm_vars",
                  "vacm_in_view: ver=%d, model=%d, secName=%s\n",
                  pdu->version, pdu->securityModel, pdu->securityName));
