@@ -3,6 +3,8 @@
 #
 top_builddir=..
 
+VPATH		= @srcdir@
+
 #
 # stuff to install
 #

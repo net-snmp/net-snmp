@@ -5,6 +5,14 @@
 top_builddir=../..
 INSTALLBINPROGS=snmpnetstat$(EXEEXT)
 
+# use GNU vpath, if available, to only set a path for source and headers
+# VPATH will pick up objects too, which is bad if you are sharing a
+# source dir...
+@GNU_vpath@ %.h $(srcdir)
+@GNU_vpath@ %.c $(srcdir)
+# fallback to regular VPATH for non-gnu...
+@NON_GNU_VPATH@ $(srcdir)
+
 #
 # build info
 #
@@ -13,7 +21,7 @@ OBJS=	inet.o inet6.o if.o main.o route.o winstub.o
 LOBJS=	inet.lo inet6.lo if.lo main.lo route.lo winstub.lo
 TARG= snmpnetstat$(EXEEXT)
 
-CPPFLAGS=-I../../include -I../.. -I$(srcdir)/../.. -I$(srcdir)/../../include @CPPFLAGS@
+CPPFLAGS= $(TOP_INCLUDES)  @CPPFLAGS@
 
 USELIBS= ../../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION)
 LIBS=	 ../../snmplib/libnetsnmp.$(LIB_EXTENSION)$(LIB_VERSION) @LIBS@

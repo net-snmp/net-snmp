@@ -5,6 +5,14 @@
 
 top_builddir=..
 
+# use GNU vpath, if available, to only set a path for source and headers
+# VPATH will pick up objects too, which is bad if you are sharing a
+# source dir...
+@GNU_vpath@ %.h $(srcdir)
+@GNU_vpath@ %.c $(srcdir)
+# fallback to regular VPATH for non-gnu...
+@NON_GNU_VPATH@ $(srcdir)
+
 #
 # Things to install
 #
@@ -54,10 +62,9 @@ TRAPDWITHOUTAGENT = $(LIBS)
 TRAPLIBS	= @TRAPLIBS@ @WRAPLIBS@
 USETRAPLIBS	= @USETRAPLIBS@
 
-CPPFLAGS	= -I$(top_srcdir)/include -I../include \
-		  -I.. -I$(srcdir)/.. -I$(srcdir)/../snmplib \
-		  @CPPFLAGS@ -I$(srcdir)/../agent -I../agent/helpers \
-		  -I$(srcdir)/../agent/mibgroup
+CPPFLAGS	= $(TOP_INCLUDES) -I. $(AGENT_INCLUDES) $(HELPER_INCLUDES) \
+		  $(MIBGROUP_INCLUDES)  $(SNMPLIB_INCLUDES) @CPPFLAGS@
+
 OSUFFIX		= lo
 TRAPD_OBJECTS   = snmptrapd.$(OSUFFIX)
 LIBTRAPD_OBJS   = snmptrapd_handlers.o  snmptrapd_log.o  notification_log.o
