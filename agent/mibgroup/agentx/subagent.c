@@ -254,7 +254,7 @@ init_subagent( void )
 	exit(1);
     }
     snmp_register_callback(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
-                           shutdown_subagent, agentx_session);
+                           subagent_shutdown, agentx_session);
     DEBUGMSGTL(("agentx/subagent","initializing....  DONE\n"));
 }
 
