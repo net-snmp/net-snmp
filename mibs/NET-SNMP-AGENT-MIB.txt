@@ -317,7 +317,7 @@ nsDebugGroup  OBJECT-GROUP
     STATUS	current
     DESCRIPTION
 	"The objects relating to debug configuration in the Net-SNMP agent."
-    ::= { netConfigGroups 1 }
+    ::= { nsConfigGroups 1 }
 
 nsTransctionGroup  OBJECT-GROUP
     OBJECTS {
