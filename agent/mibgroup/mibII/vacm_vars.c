@@ -752,7 +752,7 @@ vacm_in_view(netsnmp_pdu *pdu, oid * name, size_t namelen,
          */
 
         if (pdu->tDomain == netsnmpUDPDomain
-#if SNMP_TRANSPORT_TCP_DOMAIN
+#ifdef SNMP_TRANSPORT_TCP_DOMAIN
             || pdu->tDomain == netsnmp_snmpTCPDomain
 #endif
             ) {
