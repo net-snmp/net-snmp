@@ -589,7 +589,8 @@ _init_snmp (void)
                    DEFAULT_ASNENCODING_DIRECTION);
 #endif
     /* Default to MIB::node style output */
-    ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 2);
+    if (!ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY))
+        ds_set_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 2);
 
 }
 
