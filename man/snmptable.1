@@ -15,7 +15,7 @@
 .\" ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 .\" SOFTWARE.
 .\" ******************************************************************/
-.TH SNMPTABLE 1 "14 Nov 1999"
+.TH SNMPTABLE 1 "11 Sep 2000"
 .UC 4
 .SH NAME
 snmptable - obtain and print an SNMP table
@@ -43,6 +43,8 @@ this option prepends the index of the entry to all printed lines
 .IP "-Cb"
 brief heading. Any common prefix of the table field names will be
 deleted
+.IP "-CB"
+don't use GETBULK requests to retrieve data, only GETNEXT
 .PP
 .SH EXAMPLES
 $ snmptable localhost public at.attable
