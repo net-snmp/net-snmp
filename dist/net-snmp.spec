@@ -20,7 +20,7 @@
 #
 Summary: Tools and servers for the SNMP protocol
 Name: net-snmp
-Version: 5.1
+Version: 5.1.1.pre1
 Release: 1
 URL: http://net-snmp.sourceforge.net/
 Copyright: BSDish
