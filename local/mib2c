@@ -61,6 +61,7 @@ if($ENV{MIB2C_DIR}) {
    push @def_search_dirs, split(/:/, $ENV{MIB2C_DIR});
 }
 push @def_search_dirs, "/usr/local/share/snmp/";
+push @def_search_dirs, "/usr/local/share/snmp/mib2c-data";
 
 sub usage {
     print "$0 [-h] [-c configfile] [-f prefix] mibNode\n\n";
