@@ -230,7 +230,9 @@ var_icmp(struct variable *vp,
 #ifdef HAVE_SYS_TCPIPSTATS_H
         /* This actually reads statistics for *all* the groups together,
            so we need to isolate the ICMP-specific bits.  */
+#ifndef NO_DOUBLE_ICMPSTAT
 #define icmpstat          icmpstat.icmpstat
+#endif /* NO_ICMPSTATICMPSTAT */
 #endif
 
 

@@ -688,6 +688,9 @@ var_ifEntry(struct variable *vp,
     long_return = (u_long) if_msg.ifm_data.ifi_oerrors;
     return (u_char *) &long_return;
   case IFLASTCHANGE:
+#ifdef irix6
+      long_return = 0;
+#else
     if (if_msg.ifm_data.ifi_lastchange.tv_sec == 0 &&
 	if_msg.ifm_data.ifi_lastchange.tv_usec == 0)
       long_return = 0;
@@ -698,6 +701,7 @@ var_ifEntry(struct variable *vp,
 	((if_msg.ifm_data.ifi_lastchange.tv_sec - starttime.tv_sec) * 100
 	 + (if_msg.ifm_data.ifi_lastchange.tv_usec - starttime.tv_usec) / 10000);
     }
+#endif
     return (u_char *) &long_return;
   default:
     return 0;
