@@ -27,13 +27,13 @@ SOFTWARE.
  */
 #include <config.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #if HAVE_UNISTD_H
-#	include <unistd.h>
+#include <unistd.h>
 #endif
-
 #if HAVE_STDLIB_H
-#	include <stdlib.h>
+#include <stdlib.h>
 #endif
 
 #if TIME_WITH_SYS_TIME
@@ -54,39 +54,37 @@ SOFTWARE.
 #include <sys/types.h>
 
 #if HAVE_NETINET_IN_H
-#	include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 
 #if HAVE_WINSOCK_H
-#	include <winsock.h>
+#include <winsock.h>
 #endif
 #if HAVE_SYS_SOCKET_H
-#	include <sys/socket.h>
+#include <sys/socket.h>
 #endif
 #if HAVE_NET_IF_H
-#	include <net/if.h>
+#include <net/if.h>
 #endif
 
 #if HAVE_SYS_SOCKIO_H
-#	include <sys/sockio.h>
+#include <sys/sockio.h>
 #endif
 
 #if HAVE_SYS_IOCTL_H
-#	include <sys/ioctl.h>
+#include <sys/ioctl.h>
 #endif
 
-#ifndef WIN32
-#	ifdef HAVE_NLIST_H
-#	include <nlist.h>
-#	endif
+#ifdef HAVE_NLIST_H
+#include <nlist.h>
 #endif
 
 #if HAVE_SYS_FILE_H
-#	include <sys/file.h>
+#include <sys/file.h>
 #endif
 
 #if HAVE_KSTAT_H
-#	include <kstat.h>
+#include <kstat.h>
 #endif
 
 #if HAVE_SYS_PARAM_H
