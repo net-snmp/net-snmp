@@ -222,10 +222,10 @@ void read_config(filename, line_handler, when)
   curfilename = filename;
   
   if ((ifile = fopen(filename, "r")) == NULL) {
-    DEBUGMSGTL(("read_config", "ucd-snmp: %s: %s\n", filename, strerror(errno)));
+    DEBUGMSGTL(("read_config", "%s: %s\n", filename, strerror(errno)));
     return;
   } else {
-    DEBUGMSGTL(("read_config", "ucd-snmp: Reading configuration %s\n", filename));
+    DEBUGMSGTL(("read_config", "Reading configuration %s\n", filename));
   }
 
   while (fgets(line, STRINGMAX, ifile) != NULL) 
