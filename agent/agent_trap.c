@@ -973,7 +973,7 @@ snmpd_parse_config_trapsink(const char *token, char *cptr)
     } else {
         sinkport = SNMP_TRAP_PORT;
     }
-    if (create_v1_trap_session(sp, sinkport,
+    if (create_v1_trap_session(sp, (u_short)sinkport,
                                cp ? cp : snmp_trapcommunity) == 0) {
         snprintf(tmpbuf, sizeof(tmpbuf), "cannot create trapsink: %s", cptr);
         tmpbuf[sizeof(tmpbuf)-1] = '\0';
@@ -1004,7 +1004,7 @@ snmpd_parse_config_trap2sink(const char *word, char *cptr)
     } else {
         sinkport = SNMP_TRAP_PORT;
     }
-    if (create_v2_trap_session(sp, sinkport,
+    if (create_v2_trap_session(sp, (u_short)sinkport,
                                cp ? cp : snmp_trapcommunity) == 0) {
         snprintf(tmpbuf, sizeof(tmpbuf), "cannot create trap2sink: %s", cptr);
         tmpbuf[sizeof(tmpbuf)-1] = '\0';
@@ -1034,7 +1034,7 @@ snmpd_parse_config_informsink(const char *word, char *cptr)
     } else {
         sinkport = SNMP_TRAP_PORT;
     }
-    if (create_v2_inform_session(sp, sinkport,
+    if (create_v2_inform_session(sp, (u_short)sinkport,
                                  cp ? cp : snmp_trapcommunity) == 0) {
         snprintf(tmpbuf, sizeof(tmpbuf), "cannot create informsink: %s", cptr);
         tmpbuf[sizeof(tmpbuf)-1] = '\0';
