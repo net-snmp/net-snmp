@@ -1,0 +1,6 @@
+DBD_AnyData.patch
+INSTALL
+MANIFEST
+Makefile.PL
+Format.pm
+Storage.pm
