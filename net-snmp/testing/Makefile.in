@@ -61,7 +61,26 @@ makefileindepend: nosysdepend
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-
-scapitest.o:	
-keymanagetest.o:
-
+T.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+T.o: ../s/generic.h ../m/generic.h 
+etimetest.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+etimetest.o: ../s/generic.h ../m/generic.h 
+etimetest.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h ./../snmplib/tools.h
+etimetest.o: ./../snmplib/lcd_time.h ./../snmplib/snmp_debug.h
+etimetest.o: ./../snmplib/callback.h
+keymanagetest.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+keymanagetest.o: ../s/generic.h ../m/generic.h 
+keymanagetest.o:  ./../snmplib/asn1.h
+keymanagetest.o: ./../snmplib/snmp_api.h ./../snmplib/keytools.h
+keymanagetest.o: ./../snmplib/tools.h ./../snmplib/scapi.h
+keymanagetest.o: ./../snmplib/transform_oids.h ./../snmplib/callback.h
+misctest.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+misctest.o: ../s/generic.h ../m/generic.h 
+misctest.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h ./../snmplib/tools.h
+misctest.o: ./../snmplib/transform_oids.h ./../snmplib/callback.h
+scapitest.o: ../config.h ../mib_module_config.h ../s/linux.h ../s/sysv.h
+scapitest.o: ../s/generic.h ../m/generic.h 
+scapitest.o: ./../snmplib/asn1.h ./../snmplib/snmp_api.h
+scapitest.o: ./../snmplib/keytools.h ./../snmplib/tools.h
+scapitest.o: ./../snmplib/scapi.h ./../snmplib/transform_oids.h
+scapitest.o: ./../snmplib/callback.h 

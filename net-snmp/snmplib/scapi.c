@@ -16,12 +16,45 @@
  *	KMT_ERR_* codes.  Must be all of one or the other...
  */
 
-#include "all_system.h"
-#include "all_general_local.h" /* */
+#include <config.h>
+
+#include <sys/types.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 #ifdef USE_INTERNAL_MD5
 #include "md5.h"
 #endif
+#include "asn1.h"
+#include "tools.h"
+#include "snmp_api.h"
+#include "snmpusm.h"
+#include "keytools.h"
+#include "snmp_debug.h"
+#include "scapi.h"
 
 #include "transform_oids.h"
 

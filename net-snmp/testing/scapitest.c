@@ -24,10 +24,20 @@
 static char *rcsid = "$Id$";	/* */
 
 
-#include "all_system.h"
-#include "all_general_local.h"
+#include <config.h>
 
+#include <stdio.h>
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+#include "asn1.h"
+#include "snmp_api.h"
+#include "keytools.h"
+#include "tools.h"
+#include "scapi.h"
 #include "transform_oids.h"
+#include "callback.h"
 
 #include <stdlib.h>
 
@@ -125,8 +135,6 @@ main(int argc, char **argv)
 
 	local_progname = argv[0];
 
-EM(-1);	/* */
-
 	/*
 	 * Parse.
 	 */
@@ -183,7 +191,8 @@ EM(-1);	/* */
 	/*
 	 * Cleanup.
 	 */
-	rval = sc_shutdown();
+	rval = sc_shutdown(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
+                           NULL, NULL);
 	FAILED(rval, "sc_shutdown().");
 
 	return failcount;
@@ -263,9 +272,6 @@ test_dorandom(void)
 		i;
 	char	buf[LOCAL_MAXBUF];
 
-EM(-1); /* */
-
-
 	OUTPUT("Random test -- large request:");
 
 	rval = sc_random(buf, &nbytes);
@@ -276,7 +282,7 @@ EM(-1); /* */
 		    "sc_random() returned different than requested.");
 	}
 
-	dump_chunk(NULL, buf, nbytes);
+	dump_chunk("scapitest", NULL, buf, nbytes);
 
 	SUCCESS("Random test -- large request.");
 
@@ -296,7 +302,7 @@ EM(-1); /* */
 				"than requested.");
 		}
 
-		dump_chunk(NULL, buf, nbytes);
+		dump_chunk("scapitest", NULL, buf, nbytes);
 	}  /* endfor */
 
 	SUCCESS("Random test -- short requests.");
@@ -346,10 +352,6 @@ test_dokeyedhash(void)
 
 	u_char		 hashbuf[LOCAL_MAXBUF];
 	char		*s;
-
-EM(-1); /* */
-
-
 
 test_dokeyedhash_again:
 
@@ -469,8 +471,6 @@ test_docrypt(void)
 			 cryptbuf[LOCAL_MAXBUF],
 			 secret[LOCAL_MAXBUF],
 			 iv[LOCAL_MAXBUF];
-EM(-1); /* */
-
 
 	OUTPUT("Test 1DES-CBC --");
 

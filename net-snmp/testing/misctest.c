@@ -11,8 +11,18 @@
 
 static char *rcsid = "$Id$";	/* */
 
-#include "all_system.h"
-#include "all_general_local.h"
+#include <config.h>
+
+#include <stdio.h>
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+#include "asn1.h"
+#include "snmp_api.h"
+#include "tools.h"
+#include "transform_oids.h"
+#include "callback.h"
 
 #include <stdlib.h>
 
@@ -103,8 +113,6 @@ main(int argc, char **argv)
 	char		 ch;
 
 	local_progname = argv[0];
-
-EM(-1);	/* */
 
 	/*
 	 * Parse.
@@ -236,8 +244,6 @@ test_dumpseid(void)
 				NULL
 			};
 
-EM(-1); /* */
-
 	OUTPUT(	"Test of dump_snmpEngineID.  "
 		"(Does not report failure or success.)");
 
@@ -254,8 +260,10 @@ EM(-1); /* */
 			t = buf;
 		}
 
+#ifdef SNMP_TESTING_CODE
 		s = dump_snmpEngineID(t, &tlen);
 		printf("%s    (len=%d)\n", s, tlen);
+#endif
 
 		SNMP_FREE(s);
 		if (t != buf) {

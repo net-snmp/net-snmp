@@ -84,6 +84,7 @@ void init_agent_read_config (void)
 
 RETSIGTYPE update_config(int a)
 {
+  free_config();
   if (!dontReadConfigFiles) {  /* don't read if -C present on command line */
     read_configs();
   }

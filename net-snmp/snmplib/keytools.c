@@ -3,18 +3,32 @@
  *
  * FIX	Decide how to publicize simple (currently internal) hash functions
  *	from KMT.  Otherwise they must be pulled from the package directly.
- *
- * XXX	Should this be retro-fitted with the "internal" MD5 transform?
- *	Thus keeping Ku/kul/KeyChange functionality for usmHMACMD5AuthProtocol.
  */
 
-#include "all_system.h"
-#include "all_general_local.h"
-#include "scapi.h"
+#include <config.h>
 
+#include <sys/types.h>
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+
+#include "asn1.h"
+#include "snmp_api.h"
 #ifdef USE_INTERNAL_MD5
 #include "md5.h"
 #endif
+
+#include "scapi.h"
+#include "keytools.h"
+#include "tools.h"
 
 #include "transform_oids.h"
 

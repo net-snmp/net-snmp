@@ -11,10 +11,49 @@
  *    (Designated on a per function.)
  */
 
-#include "all_system.h"
-#include "all_general_local.h" /* */
+#include <config.h>
 
+#include <sys/types.h>
+#include <stdio.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if TIME_WITH_SYS_TIME
+# ifdef WIN32
+#  include <sys/timeb.h>
+# else
+#  include <sys/time.h>
+# endif
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+#include "asn1.h"
+#include "snmp_api.h"
+#include "snmp_debug.h"
 #include "callback.h"
+#include "tools.h"
+#include "keytools.h"
+#include "snmp.h"
+#include "read_config.h"
+#include "snmpv3.h"
+#include "snmp-tc.h"
+#include "lcd_time.h"
+#include "scapi.h"
+#include "snmpusm.h"
 
 #include "transform_oids.h"
 
@@ -1949,6 +1988,7 @@ init_usm_post_config(int majorid, int minorid, void *serverarg,
   noNameUser->engineID = NULL;
   noNameUser->engineIDLen = 0;
 
+  return SNMPERR_SUCCESS;
 }  /* end init_usm_post_config() */
  
 

@@ -15,8 +15,23 @@
 static char *rcsid = "$Id$";	/* */
 
 
-#include "all_system.h"
-#include "all_general_local.h"
+#include <config.h>
+
+#include <stdio.h>
+#include <sys/types.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+#include "asn1.h"
+#include "snmp_api.h"
+#include "tools.h"
+#include "lcd_time.h"
+#include "snmp_debug.h"
+#include "callback.h"
 
 static u_int    dummy_etime, dummy_eboot;       /* For ISENGINEKNOWN(). */
 
@@ -99,8 +114,6 @@ main(int argc, char **argv)
 
 	local_progname = argv[0];
 
-EM(-1);	/* */
-
 	/*
 	 * Parse.
 	 */
@@ -159,7 +172,8 @@ EM(-1);	/* */
 	/*
 	 * Cleanup.
 	 */
-	rval = sc_shutdown();
+	rval = sc_shutdown(SNMP_CALLBACK_LIBRARY, SNMP_CALLBACK_SHUTDOWN,
+                           NULL, NULL);
 	FAILED(rval, "sc_shutdown()");
 
 	return failcount;
@@ -206,8 +220,6 @@ test_dosomething(void)
 	int		rval = SNMPERR_SUCCESS,
 			failcount = 0;
 
-EM0(1, "UNIMPLEMENTED");	/* EM(1); /* */
-
 test_dosomething_quit:
 	return failcount;
 
@@ -233,9 +245,6 @@ test_hashindex(void)
 	int		/* rval = SNMPERR_SUCCESS,	*/
 			failcount = 0;
 	char		*s;
-
-EM(-1); /* */
-
 
 	OUTPUT(	"Visual spot check of hash index outputs.  "
 		"(Success or failure not noted.)");
@@ -283,10 +292,6 @@ test_etime(void)
 	int		rval = SNMPERR_SUCCESS,
 			failcount = 0;
 	u_int		etime, eboot;
-
-EM(-1); /* */
-
-
 
 	/* ------------------------------------ -o-
 	 */
@@ -340,7 +345,9 @@ EM(-1); /* */
 	 */
 	OUTPUT("Dump the list and then sleep.");
 
+#ifdef SNMP_TESTING_CODE
 	dump_etimelist();
+#endif
 
 	fprintf(stdout, "\nSleeping for %d second%s... ",
 					sleeptime, (sleeptime==1)?"":"s");
@@ -399,8 +406,9 @@ EM(-1); /* */
 	sleep(sleeptime);
 	fprintf(stdout, "\n");
 
+#ifdef SNMP_TESTING_CODE
 	dump_etimelist();
-
+#endif
 
 	return failcount;
 

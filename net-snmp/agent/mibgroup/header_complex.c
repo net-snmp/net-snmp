@@ -1,8 +1,14 @@
 /* header complex:  More complex storage and data sorting for mib modules */
 
 #include <config.h>
+#include <sys/types.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
 #endif
 
 #include "mibincl.h"
@@ -40,6 +46,7 @@ header_complex_generate_varoid(struct variable_list *var) {
         return SNMPERR_GENERR;
     }
   }
+  return SNMPERR_SUCCESS;
 }
 
 /* header_complex_parse_oid(): parses an index to the usmTable to
@@ -56,6 +63,7 @@ header_complex_generate_varoid(struct variable_list *var) {
 int
 header_complex_parse_oid(oid *oidIndex, int oidLen,
                          struct header_complex_index *data) {
+  return SNMPERR_SUCCESS;
 }
 
 
@@ -100,9 +108,9 @@ header_complex(struct header_complex_index *datalist,
 	       int *var_len,
 	       WriteMethod **write_method) {
 
-  struct header_complex_index *nptr, *pptr, *found = NULL;
+  struct header_complex_index *nptr, *found = NULL;
   oid indexOid[MAX_OID_LEN];
-  int len, i, result;
+  int len, result;
   
   /* set up some nice defaults for the user */
   if (write_method)
@@ -211,6 +219,7 @@ header_complex_add_data(struct header_complex_index **thedata,
   return hciptrp;
 }
 
+void
 header_complex_dump(struct header_complex_index *thestuff) {
   struct header_complex_index *hciptr;
   oid oidsave[MAX_OID_LEN];
