@@ -163,7 +163,7 @@
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 
-#ifdef freebsd3
+#if defined(freebsd3) || defined(freebsd4) || defined(freebsd5)
 #    define USE_SYSCTL_IFLIST
 #else
 # if defined(CTL_NET) && !defined(freebsd2) && !defined(netbsd1)
@@ -2176,10 +2176,18 @@ loop:
 			physaddrbuf = 0;
 		}
 		ifm = (struct if_msghdr *)rtm;
+#if defined(freebsd3) || defined(freebsd4) || defined(freebsd5)
+		if (physaddrs != 0) physaddrs[naddrs] = (void*)(ifm + 1);
+		naddrs++;
+#endif
 		ilen -= ifm->ifm_msglen;
 		cp += ifm->ifm_msglen;
 		rtm = (struct rt_msghdr *)cp;
 		while (ilen > 0 && rtm->rtm_type == RTM_NEWADDR) {
+#if defined(freebsd3) || defined(freebsd4) || defined(freebsd5)
+			ilen -= rtm->rtm_msglen;
+			cp += rtm->rtm_msglen;
+#else
 			int is_alias = 0;
 			ifam = (struct ifa_msghdr *)rtm;
 			ilen -= sizeof(*ifam);
@@ -2202,6 +2210,7 @@ loop:
 				}
 				sa = (struct sockaddr *)cp;
 			}
+#endif
 			rtm = (struct rt_msghdr *)cp;
 		}
 	}
@@ -2316,7 +2325,7 @@ var_ifEntry(struct variable *vp,
 		if (ifmd.ifmd_data.ifi_lastchange.tv_sec == 0 &&
 		    ifmd.ifmd_data.ifi_lastchange.tv_usec == 0) {
 			long_return = 0;
-		else if (ifmd.ifmd_data.ifi_lastchange.tv_sec < starttime.tv_sec)
+		} else if (ifmd.ifmd_data.ifi_lastchange.tv_sec < starttime.tv_sec) {
 		    long_return = 0;
 		} else {
 		    long_return = (u_long)
