@@ -46,7 +46,7 @@ main (int argc, char *argv[])
 }
 
 Then:
-$(CC) ... -lnetsnmpagent -lnetsnmpmibs -lnetsnmphelpers -lnetsnmp # other libraries may be needed here
+$(CC) ... `net-snmp-config --agent-libs`
 
 .fi
 .SH DESCRIPTION
@@ -74,17 +74,20 @@ master agent or an AgentX sub-agent.
 .SH CONFIGURATION
 .PP
 If you intend to operate as an AgentX sub-agent, you will have to
-configured the Net-SNMP package as follows:
-.RS
-  ./configure --with-mib-modules="agentx/subagent"
-.RE
-Additionally, you will need to link against the libraries and 
-call subagent_pre_init() as indicated above.
+configured the Net-SNMP package with agentx support (which is turned
+on by default, so just don't turn it off)
+.PP
+Additionally, you will need to link against the net-snmp libraries
+(use the output of "net-snmp-config --agent-libs" to get a library
+list) and call subagent_pre_init() as indicated above.
 .SH COMPILING
 .PP
 In order to make use of any of the above API, you will need to link
 against at least the four libraries listed above.
 .SH FUNCTIONS
+.PP This is a brief description of the functions called above and
+where to find out more information on them.  It is certainly not a
+complete list of what is available within all the net-snmp libraries. 
 .IP "snmp_enable_stderrlog()"
 Logs error output from the SNMP agent to the standard error stream.
 .IP "netsnmp_ds_set_boolean()"
@@ -125,5 +128,6 @@ were processed, zero if an alarm occurred and -1 if an error occured.
 .IP "snmp_shutdown(char *name);"
 This shuts down the agent, saving any needed persistent storage, etc.
 .SH "SEE ALSO"
-select(2), snmp_api(3), default_store(3), snmp_alarm(3), read_config(3),
-snmp_config(5), snmpd.conf(5)
+http://www.net-snmp.org/tutorial-5/toolkit/, select(2), snmp_api(3),
+default_store(3), snmp_alarm(3), read_config(3), snmp_config(5),
+snmpd.conf(5)
