@@ -357,7 +357,7 @@ pre_parse(netsnmp_session * session, netsnmp_transport *transport,
             return 0;
         }
     }
-#endif/*  USE_LIBWRAP  */
+#endif	/*  USE_LIBWRAP  */
     return 1;
 }
 
@@ -880,6 +880,9 @@ main(int argc, char *argv[])
 
     while (cp != NULL) {
         char *sep = strchr(cp, ',');
+        char  listen_name[128];
+        char *cp2 = strchr(cp, ':');
+
         if (sep != NULL) {
             *sep = 0;
         }
@@ -887,8 +890,6 @@ main(int argc, char *argv[])
            /*
             * Make sure this defaults to listening on port 162
             */
-        char  listen_name[128];
-        char *cp2 = strchr(cp, ':');
         if (!cp2) {
             snprintf(listen_name, sizeof(listen_name), "%s:162", cp);
             cp2 = listen_name;
