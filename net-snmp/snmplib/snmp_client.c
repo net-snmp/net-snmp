@@ -555,11 +555,17 @@ snmp_set_var_objid (struct variable_list *vp,
 {
     size_t len = sizeof(oid) * name_length;
 
+    if (vp->name != vp->name_loc && vp->name != NULL &&
+	vp->name_length > (sizeof(vp->name_loc) / sizeof(oid))) {
+	/*  Probably previously-allocated "big storage".  Better free it
+	    else memory leaks possible.  */
+	free(vp->name);
+    }
+
     /* use built-in storage for smaller values */
     if (len <= sizeof(vp->name_loc)) {
         vp->name = vp->name_loc;
-    }
-    else {
+    } else {
         vp->name = (oid *)malloc(len);
         if (!vp->name) return 1;
     }
