@@ -46,7 +46,7 @@ netsnmp_container_register(const char* name, netsnmp_factory *f)
     container_type *ct, tmp;
 
     tmp.name = name;
-    ct = CONTAINER_FIND(containers, &ct);
+    ct = CONTAINER_FIND(containers, &tmp);
     if (NULL!=ct) {
         DEBUGMSGT(("container_registry",
                    "replacing previous container factory\n"));
