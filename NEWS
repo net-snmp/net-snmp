@@ -15,6 +15,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
 
    agent library:
      - disconnected AgentX subagents now reconnect with correct context
+     - fix table_array row insert/delete during set processing
 
    agent:
      - don't override clientAddr setting for local trapsinks
@@ -24,6 +25,7 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
      - bug 1055781: get-next fails to step into interfaces group correctly
      - bug 1056760: agent ignores ifspeed, type settings in snmpd.conf
      - bug 1062986: pass and pass_persist fail and crash snmpd
+     - fix snmpd.conf table token to handle augments tables
 
    snmptrapd:
      - bug 1085981: snmptrapd complains about logging and access control
@@ -42,7 +44,10 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
    - Linux
       - patch 1055036: if-mib init order fix
       - patch 1057057: ipSystemStatsTable index fix, add ipv6
-      - fix 64bit counter wrap detection in experimental ifTable/ifXTable
+      - patch 1073897: fix if-mib data access 64bit counter wrap detection
+
+ MIBs:
+   - update IP-FORWARD-MIB from an ID set to become an RFC
 
 
 *5.2*
