@@ -18,10 +18,19 @@ config_parse_dot_conf("disk", disk_parse_config, disk_free_config);
 
 #define DISKDEVICE 3
 #define DISKMINIMUM 4
-#define DISKTOTAL 5
-#define DISKAVAIL 6
-#define DISKUSED 7
-#define DISKPERCENT 8
+#define DISKMINPERCENT 5
+#define DISKTOTAL 6
+#define DISKAVAIL 7
+#define DISKUSED 8
+#define DISKPERCENT 9
+
+struct diskpart
+{
+   char device[STRMAX];
+   char path[STRMAX];
+   int minimumspace;
+   int minpercent;
+};
 
 #ifdef IN_SNMP_VARS_C
 
@@ -30,6 +39,7 @@ struct variable2 extensible_disk_variables[] = {
   {ERRORNAME, STRING, RONLY, var_extensible_disk, 1, {ERRORNAME}},
   {DISKDEVICE, STRING, RONLY, var_extensible_disk, 1, {DISKDEVICE}},
   {DISKMINIMUM, INTEGER, RONLY, var_extensible_disk, 1, {DISKMINIMUM}},
+  {DISKMINPERCENT, INTEGER, RONLY, var_extensible_disk, 1, {DISKMINPERCENT}},
   {DISKTOTAL, INTEGER, RONLY, var_extensible_disk, 1, {DISKTOTAL}},
   {DISKAVAIL, INTEGER, RONLY, var_extensible_disk, 1, {DISKAVAIL}},
   {DISKUSED, INTEGER, RONLY, var_extensible_disk, 1, {DISKUSED}},

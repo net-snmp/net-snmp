@@ -385,6 +385,7 @@ Disk ::= SEQUENCE {
    diskPath  DisplayString,
    diskDevice  DisplayString,
    diskMinimum  INTEGER,
+   diskMinPercent  INTEGER,
    diskTotal  INTEGER,
    diskAvail  INTEGER,
    diskUsed  INTEGER,
@@ -422,8 +423,16 @@ diskMinimum OBJECT-TYPE
      ACCESS  read-only
      STATUS  mandatory
      DESCRIPTION  
-          "Minimum space required for the disk."
+          "Minimum space required on the disk."
      ::= { disk 4 } 
+
+diskMinPercent OBJECT-TYPE
+     SYNTAX  INTEGER
+     ACCESS  read-only
+     STATUS  mandatory
+     DESCRIPTION  
+          "Minimum percentage of space required on the disk."
+     ::= { disk 5 } 
 
 diskTotal OBJECT-TYPE
      SYNTAX  INTEGER
@@ -431,7 +440,7 @@ diskTotal OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Total Disk Size (kbytes)"
-     ::= { disk 5 } 
+     ::= { disk 6 } 
 
 diskAvail OBJECT-TYPE
      SYNTAX  INTEGER
@@ -439,7 +448,7 @@ diskAvail OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Available disk Space"
-     ::= { disk 6 } 
+     ::= { disk 7 } 
 
 diskUsed OBJECT-TYPE
      SYNTAX  INTEGER
@@ -447,7 +456,7 @@ diskUsed OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Used Space on Disk"
-     ::= { disk 7 } 
+     ::= { disk 8 } 
 
 diskPercent OBJECT-TYPE
      SYNTAX  INTEGER
@@ -455,7 +464,7 @@ diskPercent OBJECT-TYPE
      STATUS  mandatory
      DESCRIPTION  
           "Percentage of space used on disk"
-     ::= { disk 8 } 
+     ::= { disk 9 } 
 
 diskErrorFlag OBJECT-TYPE
      SYNTAX  INTEGER
