@@ -1215,7 +1215,7 @@ int read_objid(char *input,
 	fprintf(stderr, "Mib not initialized.  Exiting.\n");
 	exit(1);
 #endif
-	*outlen = 0;
+	*out_len = 0;
 	return(0);
     }
     if ((*out_len =
