@@ -100,7 +100,7 @@ snmp_parse_args_descriptions(FILE *outf)
   fprintf(outf, "SNMP Version 1 or 2c specific\n");
   fprintf(outf, "  -c <c>\tset the community name (v1 or v2c)\n");
   fprintf(outf, "SNMP Version 3 specific\n");
-  fprintf(outf, "  -Z <B> <T>\tset the destination engine boots/time for v3 requests.\n");
+  fprintf(outf, "  -Z <B,T>\tset the destination engine boots/time for v3 requests.\n");
   fprintf(outf, "  -e <E>\tsecurity engine ID (e.g., 800000020109840301).\n");
   fprintf(outf, "  -E <E>\tcontext engine ID (e.g., 800000020109840301).\n");
   fprintf(outf, "  -n <N>\tcontext name (e.g., bridge1).\n");
@@ -311,8 +311,9 @@ snmp_parse_args(int argc,
           usage();
           exit(1);
         }
-        if ((++optind<argc) && isdigit(argv[optind][0]))
-          session->engineTime = strtoul(argv[optind], NULL, 10);
+        cp = strchr(optarg,',')+1;
+        if (cp && *cp && isdigit(*cp))
+          session->engineTime = strtoul(cp, NULL, 10);
         else {
           fprintf(stderr,"Need engine time value after -Z flag.\n");
           usage();
