@@ -91,7 +91,7 @@ put something like this in your $HOME/.snmp/snmp.conf file (make it
 readable only by you!!!):
 
   defSecurityName wes
-  defContext none
+  defContext ""
   defAuthType MD5
   defSecurityLevel authNoPriv
   defAuthPassphrase new_passphrase
