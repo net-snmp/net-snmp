@@ -2102,14 +2102,14 @@ if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_CONTACT'+set}'`\" = set"; then
 else
   echo ""
 
-echo "
+echo $ac_n "
 
 *** System Contact Information:
 
 	Describes who should be contacted about the host the agent is
 running on.  This information is available in the MIB-II tree.
 
-System Contact Information ($ME@$LOC): \c"
+System Contact Information ($ME@$LOC): $ac_c"
 read tmpinput
 if test "$tmpinput" = "" -a "$ME@$LOC" != ""; then
   tmpinput="$ME@$LOC"
@@ -2118,7 +2118,7 @@ eval SYS_CONTACT=\"$tmpinput\"
 
 
 eval ac_cv_user_prompt_SYS_CONTACT=\$SYS_CONTACT
-echo "setting $MSG_CHECK to...  \c"
+echo $ac_n "setting $MSG_CHECK to...  $ac_c"
 
 fi
  if test "$ac_cv_user_prompt_SYS_CONTACT" != "none"; then
@@ -2152,14 +2152,14 @@ if eval "test \"`echo '$''{'ac_cv_user_prompt_SYS_LOC'+set}'`\" = set"; then
 else
   echo ""
 
-echo "
+echo $ac_n "
 
 *** System Location:
 
 	Describes the location of the system.  This information is
 available in the MIB-II tree.
 
-System Location (UCDavis Electrical Engineering Departement): \c"
+System Location (UCDavis Electrical Engineering Departement): $ac_c"
 read tmpinput
 if test "$tmpinput" = "" -a "UCDavis Electrical Engineering Departement" != ""; then
   tmpinput="UCDavis Electrical Engineering Departement"
@@ -2168,7 +2168,7 @@ eval SYS_LOC=\"$tmpinput\"
 
 
 eval ac_cv_user_prompt_SYS_LOC=\$SYS_LOC
-echo "setting $MSG_CHECK to...  \c"
+echo $ac_n "setting $MSG_CHECK to...  $ac_c"
 
 fi
  if test "$ac_cv_user_prompt_SYS_LOC" != "none"; then
@@ -2205,7 +2205,7 @@ if eval "test \"`echo '$''{'ac_cv_user_prompt_LOGFILE'+set}'`\" = set"; then
 else
   echo ""
 
-echo "
+echo $ac_n "
 
 *** Logfile location:
 
@@ -2214,7 +2214,7 @@ information & errors to.  If not defined (enter the keyword \"none\"
 at the prompt below) the agent will use stdout and stderr instead.
 (Note: This value can be over-ridden using the command line)
 
-Location to write logfile (/usr/adm/snmpd.log): \c"
+Location to write logfile (/usr/adm/snmpd.log): $ac_c"
 read tmpinput
 if test "$tmpinput" = "" -a "/usr/adm/snmpd.log" != ""; then
   tmpinput="/usr/adm/snmpd.log"
@@ -2223,7 +2223,7 @@ eval LOGFILE=\"$tmpinput\"
 
 
 eval ac_cv_user_prompt_LOGFILE=\$LOGFILE
-echo "setting $MSG_CHECK to...  \c"
+echo $ac_n "setting $MSG_CHECK to...  $ac_c"
 
 fi
  if test "$ac_cv_user_prompt_LOGFILE" != "none"; then
@@ -2249,7 +2249,7 @@ if eval "test \"`echo '$''{'ac_cv_user_prompt_EXTENSIBLEMIB'+set}'`\" = set"; th
 else
   
 
-echo "
+echo $ac_n "
 
 *** Default Extensible Mib Location:
 
@@ -2259,7 +2259,7 @@ assigned to your institution.
 
 	If you don't have one:, make one up or use the default below.  
 
-Default Extensible Mib location (.1.3.6.1.4.10): \c"
+Default Extensible Mib location (.1.3.6.1.4.10): $ac_c"
 read tmpinput
 if test "$tmpinput" = "" -a ".1.3.6.1.4.10" != ""; then
   tmpinput=".1.3.6.1.4.10"
@@ -2310,7 +2310,7 @@ if eval "test \"`echo '$''{'ac_cv_user_prompt_GLOBALSECURITY'+set}'`\" = set"; t
 else
   echo ""
 
-echo "
+echo $ac_n "
 
 *** SNMP Security/Authentication:
 
@@ -2328,7 +2328,7 @@ SNMPV2AUTH   Only authenticated V2 transmissions can access the extensible tree.
 
 	If you don't understand any of the above sentences: pick SNMPV1.
 
-What type of security to use (SNMPV2AUTH): \c"
+What type of security to use (SNMPV2AUTH): $ac_c"
 read tmpinput
 if test "$tmpinput" = "" -a "SNMPV2AUTH" != ""; then
   tmpinput="SNMPV2AUTH"
@@ -2337,7 +2337,7 @@ eval GLOBALSECURITY=\"$tmpinput\"
 
 
 eval ac_cv_user_prompt_GLOBALSECURITY=\$GLOBALSECURITY
-echo "setting $MSG_CHECK to...  \c"
+echo $ac_n "setting $MSG_CHECK to...  $ac_c"
 
 fi
  if test "$ac_cv_user_prompt_GLOBALSECURITY" != "none"; then
