@@ -1,5 +1,5 @@
 --------------------Configuration: snmpwalk - Win32 Debug--------------------
-Begining build with project "C:\usr\local\builds\ucd-snmp-3.3.pre8\win32\snmpwalk\snmpwalk.dsp", at root.
+Begining build with project "H:\builds\ucd-snmp-3.4.pre8\win32\snmpwalk\snmpwalk.dsp", at root.
 Active configuration is Win32 (x86) Console Application (based on Win32 (x86) Console Application)
 
 Project's tools are:
@@ -10,10 +10,18 @@ Project's tools are:
 			"Custom Build" with flags ""
 			"<Component 0xa>" with flags ""
 
-Creating temp file "C:\WINDOWS\TEMP\RSPD075.TMP" with contents <libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/snmpwalk.pdb" /debug /machine:I386 /nodefaultlib /out:"../bin/snmpwalk.exe" /pdbtype:sept /libpath:"../lib" 
+Creating temp file "C:\WINDOWS\TEMP\RSP5183.TMP" with contents </nologo /MDd /W3 /Gm /GX /Zi /Od /I "." /I ".." /I "..\..\snmplib" /I "..\.." /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/snmpwalk.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
+"H:\builds\ucd-snmp-3.4.pre8\apps\snmp_parse_args.c"
+"H:\builds\ucd-snmp-3.4.pre8\apps\snmpwalk.c"
+>
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP5183.TMP" 
+Creating temp file "C:\WINDOWS\TEMP\RSP5184.TMP" with contents <libsnmp.lib wsock32.lib msvcrt.lib kernel32.lib user32.lib oldnames.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/snmpwalk.pdb" /debug /machine:I386 /nodefaultlib /out:"../bin/snmpwalk.exe" /pdbtype:sept /libpath:"../lib" 
 ".\Debug\snmp_parse_args.obj"
 ".\Debug\snmpwalk.obj">
-Creating command line "link.exe @C:\WINDOWS\TEMP\RSPD075.TMP" 
+Creating command line "link.exe @C:\WINDOWS\TEMP\RSP5184.TMP" 
+Compiling...
+snmp_parse_args.c
+snmpwalk.c
 Linking...
 
 
