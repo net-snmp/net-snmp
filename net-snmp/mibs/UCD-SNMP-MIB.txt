@@ -42,6 +42,7 @@ IMPORTS
 -- numerical definitions:
 ucdavis           OBJECT IDENTIFIER ::= { enterprises 2021 }
 ucdInternal       OBJECT IDENTIFIER ::= { ucdavis 12 }
+ucdExperimental   OBJECT IDENTIFIER ::= { ucdavis 13 }
 
 -- Local tables:
 --   procTable      OBJECT IDENTIFIER ::= { ucdavis 2 }
@@ -50,7 +51,7 @@ ucdInternal       OBJECT IDENTIFIER ::= { ucdavis 12 }
 --   diskTable      OBJECT IDENTIFIER ::= { ucdavis 9 }
 --   loadTable      OBJECT IDENTIFIER ::= { ucdavis 10 }
 --   systemStats    OBJECT IDENTIFIER ::= { ucdavis 11 }
---   ipFwAcc        OBJECT IDENTIFIER ::= { ucdavis 13 } 
+--   ipFwAcc        OBJECT IDENTIFIER ::= { ucdExperimental 1 } 
 --                  (defined in IPFWACC-MIB.txt)
 --   version        OBJECT IDENTIFIER ::= { ucdavis 100 }
 --   snmperrs       OBJECT IDENTIFIER ::= { ucdavis 101 }
@@ -66,7 +67,8 @@ ucdInternal       OBJECT IDENTIFIER ::= { ucdavis 12 }
 --   lockd          OBJECT IDENTIFIER ::= { ucdavis 5 }
 
 -- Reserved
---   ucdInternal    OBJECT IDENTIFIER ::= { ucdavis 12 }
+--   ucdInternal      OBJECT IDENTIFIER ::= { ucdavis 12 }
+--   ucdExperimental  OBJECT IDENTIFIER ::= { ucdavis 13 }
 
 
 -- These are the returned values of the agent type.
