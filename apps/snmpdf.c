@@ -85,10 +85,34 @@ int failures=0;
 void
 usage (void)
 {
-  fprintf(stderr,"Usage: rdf ");
+  fprintf(stderr,"Usage: snmpdf [-Cu] ");
   snmp_parse_args_usage(stderr);
   fprintf(stderr,"\n\n");
   snmp_parse_args_descriptions(stderr);
+  fprintf(stderr, "\nsnmpdf options:\n");
+  fprintf(stderr, "\t-Cu\tUse UCD-SNMP dskTable to do the calculations.\n");
+  fprintf(stderr, "\t\t[Normally the HOST-RESOURCES-MIB is consulted first.]\n");
+}
+
+int ucd_mib = 0;
+
+static void optProc(int argc, char *const *argv, int opt)
+{
+    switch (opt) {
+        case 'C':
+            while (*optarg) {
+                switch (*optarg++) {
+                    case 'u':
+                        ucd_mib=1;
+                        break;
+                    default:
+                        fprintf(stderr,
+                                "Unknown flag passed to -C: %c\n", *optarg);
+                        usage();
+                        exit(1);
+                }
+            }
+    }
 }
 
 struct hrStorageTable {
@@ -125,6 +149,44 @@ int add(struct snmp_pdu *pdu, const char *mibnodename,
     return base_length;
 }
 
+struct variable_list *
+collect(struct snmp_session *ss, struct snmp_pdu *pdu,
+        oid *base, size_t base_length) {
+    struct snmp_pdu *response;
+    int running = 1;
+    struct variable_list *saved = NULL, **vlpp = &saved;
+    int status;
+
+    while(running) {
+        /* gotta catch em all, gotta catch em all! */
+        status = snmp_synch_response(ss, pdu, &response);
+        if (status != STAT_SUCCESS || !response) {
+            snmp_sess_perror("snmpdf", ss);
+            exit(1);
+        }
+        if (response && snmp_oid_compare(response->variables->name,
+                                         SNMP_MIN(base_length, response->variables->name_length),
+                                         base, base_length) != 0)
+            running = 0;
+        else {
+            /* get response */
+            *vlpp = response->variables;
+            (*vlpp)->next_variable = NULL; /* shouldn't be any, but just in case */
+
+            /* create the next request */
+            pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+            snmp_add_null_var(pdu, (*vlpp)->name, (*vlpp)->name_length);
+
+            /* finish loop setup */
+            vlpp = &((*vlpp)->next_variable);
+            response->variables = NULL; /* ahh, forget about it */
+        }
+        snmp_free_pdu(response);
+    }
+    return saved;
+}
+
+     
 
 int main(int argc, char *argv[])
 {
@@ -138,9 +200,10 @@ int main(int argc, char *argv[])
     int status;
     struct variable_list *saved = NULL, **vlpp = &saved, *vlp = saved, *vlp2;
     int running;
+    int count = 0;
     
     /* get the common command line arguments */
-    switch (arg = snmp_parse_args(argc, argv, &session, NULL, NULL)) {
+    switch (arg = snmp_parse_args(argc, argv, &session, "C:", optProc)) {
     case -2:
      	exit(0);
     case -1:
@@ -163,90 +226,119 @@ int main(int argc, char *argv[])
       exit(1);
     }
 
-    /*
+    printf("%-18s %15s %15s %15s %5s\n","Description", "size (kB)", "Used",
+           "Available", "Used%");
+    if (ucd_mib == 0) {
+        /*
      * Begin by finding all the storage pieces that are of
      * type hrStorageFixedDisk, which is a standard disk.
      */
-    pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
-    base_length = add(pdu, "HOST-RESOURCES-MIB:hrStorageIndex", NULL, 0);
-    memcpy(base, pdu->variables->name, base_length*sizeof(oid));
+        pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+        base_length = add(pdu, "HOST-RESOURCES-MIB:hrStorageIndex", NULL, 0);
+        memcpy(base, pdu->variables->name, base_length*sizeof(oid));
 
-    running = 1;
-    while(running) {
-        /* gotta catch em all, gotta catch em all! */
-        status = snmp_synch_response(ss, pdu, &response);
-        if (status != STAT_SUCCESS || !response) {
-            snmp_sess_perror("rdf", ss);
-            exit(1);
+        vlp = collect(ss, pdu, base, base_length);
+
+        while(vlp) {
+            size_t units;
+            unsigned int hssize, hsused;
+            char descr[SPRINT_MAX_LEN];
+        
+            pdu = snmp_pdu_create(SNMP_MSG_GET);
+
+            add(pdu, "HOST-RESOURCES-MIB:hrStorageDescr",
+                &(vlp->name[base_length]), vlp->name_length - base_length);
+            add(pdu, "HOST-RESOURCES-MIB:hrStorageAllocationUnits",
+                &(vlp->name[base_length]), vlp->name_length - base_length);
+            add(pdu, "HOST-RESOURCES-MIB:hrStorageSize",
+                &(vlp->name[base_length]), vlp->name_length - base_length);
+            add(pdu, "HOST-RESOURCES-MIB:hrStorageUsed",
+                &(vlp->name[base_length]), vlp->name_length - base_length);
+        
+            status = snmp_synch_response(ss, pdu, &response);
+            if (status != STAT_SUCCESS || !response) {
+                snmp_sess_perror("snmpdf", ss);
+                exit(1);
+            }
+
+            vlp2 = response->variables;
+            memcpy(descr, vlp2->val.string, vlp2->val_len);
+            descr[vlp2->val_len] = '\0';
+
+            vlp2 = vlp2->next_variable;
+            units = *(vlp2->val.integer);
+
+            vlp2 = vlp2->next_variable;
+            hssize = *(vlp2->val.integer);
+
+            vlp2 = vlp2->next_variable;
+            hsused = *(vlp2->val.integer);
+
+            printf("%-18s %15d %15d %15d %4d%%\n", descr,
+                   ((units)?(hssize*1024/units):hssize), hsused,
+                   hssize-hsused, (hssize)?(100*hsused/hssize):hsused);
+
+            vlp = vlp->next_variable;
+            snmp_free_pdu(response);
+            count++;
         }
-        if (response && snmp_oid_compare(response->variables->name,
-                                         SNMP_MIN(base_length, response->variables->name_length),
-                                         base, base_length) != 0)
-            running = 0;
-        else {
-            /* get response */
-            *vlpp = response->variables;
-            (*vlpp)->next_variable = NULL; /* shouldn't be any, but just in case */
-
-            /* create the next request */
-            pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
-            snmp_add_null_var(pdu, (*vlpp)->name, (*vlpp)->name_length);
-
-            /* finish loop setup */
-            vlpp = &((*vlpp)->next_variable);
-            response->variables = NULL; /* ahh, forget about it */
-        }
-        snmp_free_pdu(response);
-
     }
 
-    vlp = saved;
-    printf("%-18s %15s %15s %15s %5s\n","Description", "size (kB)", "Used",
-           "Available", "Used%");
+    if (count == 0) {
+        size_t units = 0;
+        /* the host resources mib must not be supported.  Lets try the
+           UCD-SNMP-MIB and its dskTable */
 
-    while(vlp) {
-        size_t units;
-        unsigned int hssize, hsused;
-        char descr[SPRINT_MAX_LEN];
-        
-        pdu = snmp_pdu_create(SNMP_MSG_GET);
+        pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+        base_length = add(pdu, "UCD-SNMP-MIB:dskIndex", NULL, 0);
+        memcpy(base, pdu->variables->name, base_length*sizeof(oid));
 
-        add(pdu, "HOST-RESOURCES-MIB:hrStorageDescr",
-            &(vlp->name[base_length]), vlp->name_length - base_length);
-        add(pdu, "HOST-RESOURCES-MIB:hrStorageAllocationUnits",
-            &(vlp->name[base_length]), vlp->name_length - base_length);
-        add(pdu, "HOST-RESOURCES-MIB:hrStorageSize",
-            &(vlp->name[base_length]), vlp->name_length - base_length);
-        add(pdu, "HOST-RESOURCES-MIB:hrStorageUsed",
-            &(vlp->name[base_length]), vlp->name_length - base_length);
+        vlp = collect(ss, pdu, base, base_length);
+
+        while(vlp) {
+            unsigned int hssize, hsused;
+            char descr[SPRINT_MAX_LEN];
         
-        status = snmp_synch_response(ss, pdu, &response);
-        if (status != STAT_SUCCESS || !response) {
-            snmp_sess_perror("rdf", ss);
-            exit(1);
+            pdu = snmp_pdu_create(SNMP_MSG_GET);
+
+            add(pdu, "UCD-SNMP-MIB:dskPath",
+                &(vlp->name[base_length]), vlp->name_length - base_length);
+            add(pdu, "UCD-SNMP-MIB:dskTotal",
+                &(vlp->name[base_length]), vlp->name_length - base_length);
+            add(pdu, "UCD-SNMP-MIB:dskUsed",
+                &(vlp->name[base_length]), vlp->name_length - base_length);
+        
+            status = snmp_synch_response(ss, pdu, &response);
+            if (status != STAT_SUCCESS || !response) {
+                snmp_sess_perror("snmpdf", ss);
+                exit(1);
+            }
+
+            vlp2 = response->variables;
+            memcpy(descr, vlp2->val.string, vlp2->val_len);
+            descr[vlp2->val_len] = '\0';
+
+            vlp2 = vlp2->next_variable;
+            hssize = *(vlp2->val.integer);
+
+            vlp2 = vlp2->next_variable;
+            hsused = *(vlp2->val.integer);
+
+            printf("%-18s %15d %15d %15d %4d%%\n", descr,
+                   ((units)?(hssize*1024/units):hssize), hsused,
+                   hssize-hsused, (hssize)?(100*hsused/hssize):hsused);
+
+            vlp = vlp->next_variable;
+            snmp_free_pdu(response);
+            count++;
         }
-
-        vlp2 = response->variables;
-        memcpy(descr, vlp2->val.string, vlp2->val_len);
-        descr[vlp2->val_len] = '\0';
-
-        vlp2 = vlp2->next_variable;
-        units = *(vlp2->val.integer);
-
-        vlp2 = vlp2->next_variable;
-        hssize = *(vlp2->val.integer);
-
-        vlp2 = vlp2->next_variable;
-        hsused = *(vlp2->val.integer);
-
-        printf("%-18s %15d %15d %15d %4d%%\n", descr,
-               ((units)?(hssize*1024/units):hssize), hsused,
-               hssize-hsused, (hssize)?(100*hsused/hssize):hsused);
-
-        vlp = vlp->next_variable;
-        snmp_free_pdu(response);
     }
     
+    if (count == 0) {
+        fprintf(stderr, "Failed to locate any partions.\n");
+        exit(1);
+    }
+            
     snmp_close(ss);
     SOCK_CLEANUP;
     return 0;
