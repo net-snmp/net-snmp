@@ -86,6 +86,7 @@
 #include "snmp_debug.h"
 
 #include "mibincl.h"
+#include "util_funcs.h"
 #include "auto_nlist.h"
 
 #ifdef hpux
@@ -152,8 +153,8 @@ void init_udp()
 }
 
 
-#define MATCH_FAILED	1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_udp(...

@@ -4,9 +4,9 @@
  */
 
 #include <config.h>
-
 #include "host.h"
 #include "host_res.h"
+#include "util_funcs.h"
 #include "hr_system.h"
 #include "hr_utils.h"
 #include "auto_nlist.h"
@@ -56,8 +56,8 @@ void init_hr_system(void)
 }
 
 
-#define MATCH_FAILED	1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_hrsys(...

@@ -5,7 +5,6 @@
  */
 
 #include <config.h>
-
 #include <fcntl.h>
 #if HAVE_STRING_H
 #include <string.h>
@@ -17,6 +16,7 @@
 #endif
 
 #include "host_res.h"
+#include "util_funcs.h"
 #include "hr_partition.h"
 #include "hr_filesys.h"
 #include "hr_disk.h"
@@ -53,8 +53,8 @@ void  Init_HR_Partition (void);
 int   Get_Next_HR_Partition (void);
 int header_hrpartition (struct variable *,oid *, int *, int, int *, WriteMethod **);
 
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_hrpartition(...

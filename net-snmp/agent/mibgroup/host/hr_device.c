@@ -4,7 +4,6 @@
  */
 
 #include <config.h>
-
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -12,6 +11,7 @@
 #endif
 
 #include "host_res.h"
+#include "util_funcs.h"
 #include "hr_device.h"
 
 	/*********************
@@ -71,8 +71,8 @@ void init_hr_device(void)
 
 
 
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_hrdevice(...

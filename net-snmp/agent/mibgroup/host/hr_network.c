@@ -5,8 +5,8 @@
 
 #include <config.h>
 
-
 #include "host_res.h"
+#include "util_funcs.h"
 #include "mibII/interfaces.h"
 #include "hr_network.h"
 
@@ -50,8 +50,8 @@ void init_hr_network(void)
     device_errors[ HRDEV_NETWORK ] = network_errors;
 }
 
-#define MATCH_FAILED	-1
-#define MATCH_SUCCEEDED	0
+
+
 
 /*
   header_hrnet(...
