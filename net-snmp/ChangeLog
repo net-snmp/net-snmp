@@ -2,6 +2,31 @@
 
 Changes: V5.0.4.pre2 -> V5.0.4
 
+2002-09-18 02:48  rstory
+
+   * testing/eval_tools.sh:
+
+   chg > to -gt to achieve intended result
+   
+2002-09-18 01:39  rstory
+
+   * NEWS:
+
+   update for 5.0.4
+   
+2002-09-18 01:33  rstory
+
+   * FAQ, README, sedscript.in, perl/SNMP/SNMP.pm
+, snmplib/snmp_version.c:
+
+   - (snmplib/snmp_version.c sedscript.in): version tag ( 5.0.4 )
+   
+2002-09-18 01:32  rstory
+
+   * ChangeLog:
+
+   update for 5.0.4
+   
 2002-09-18 00:59  rstory
 
    * Makefile.in:
