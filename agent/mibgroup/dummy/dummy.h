@@ -15,6 +15,9 @@ extern u_char	*var_dummy();
 extern void dummy_free_config __P((void));
 extern void dummy_parse_config __P((char *, char *));
 
+/* add the DUMMY-MIB to the list of default mibs to parse */
+config_add_mib(DUMMY-MIB)
+
 /*
 
 purpose:
