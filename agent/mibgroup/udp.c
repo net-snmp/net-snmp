@@ -465,8 +465,9 @@ struct inpcb *RetInPcb;
 
 #ifndef linux
 #if defined(freebsd2)
-	if ((udp_inpcb.inp_next == NULL) ||
-	    (udp_inpcb.inp_next == (struct inpcb *) udp_nl[N_UDB].n_value)) {
+	if ((udp_inpcb.inp_list.le_next == NULL) ||
+	    (udp_inpcb.inp_list.le_next ==
+             (struct inpcb *) udp_nl[N_UDB].n_value)) {
 #else
 #if defined(netbsd1)
 	if ((udp_inpcb.inp_queue.cqe_next == NULL) ||
@@ -481,7 +482,7 @@ struct inpcb *RetInPcb;
 #ifdef netbsd1
 	next = udp_inpcb.inp_queue.cqe_next;
 #else
-	next = udp_inpcb.inp_next;
+	next = udp_inpcb.inp_list.le_next;
 #endif
 
 	klookup((unsigned long)next, (char *)&udp_inpcb, sizeof (udp_inpcb));
