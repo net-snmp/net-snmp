@@ -556,7 +556,7 @@ int main(int argc, char *argv[])
 #endif
 
     /* register our configuration handlers now so -H properly displays them */
-    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"oid program [args ...] ");
+    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"oid|\"default\" program [args ...] ");
 
     setvbuf (stdout, NULL, _IOLBF, BUFSIZ);
     /*
@@ -676,8 +676,6 @@ int main(int argc, char *argv[])
 
     if (!Print) Syslog = 1;
     
-    register_config_handler("snmptrapd","traphandle",snmptrapd_traphandle,NULL,"script");
-
     /* Initialize the world. Create initial user */
     usm_set_reportErrorOnUnknownID(1);
     init_snmpv3("snmptrapd");	/* register the v3 handlers */
