@@ -53,7 +53,7 @@ static void error_exit(char *str,
 		       int linenumber,
 		       char *filename)
 {
-  char tmpbuf[1024];
+  char tmpbuf[SPRINT_MAX_LEN];
   snmp_errno = SNMPERR_BAD_ACL;
   sprintf(tmpbuf, "%s on line %d of %s", str, linenumber, filename);
   snmp_set_detail(tmpbuf);
