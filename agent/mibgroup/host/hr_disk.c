@@ -138,24 +138,24 @@ void init_hr_disk(void)
     dev_idx_inc[ HRDEV_DISK ] = 1;
 #endif
 
-#ifdef linux
+#if defined(linux)
     Add_HR_Disk_entry ( "/dev/hd%c%c", 'a', 'd', '\0', '1', '6' );
     Add_HR_Disk_entry ( "/dev/sd%c%c", 'a', 'g', '\0', '1', '6' );
     Add_HR_Disk_entry ( "/dev/fd%c%c", '0', '0', '\0', '\0', '\0' );
-#endif
-#ifdef hpux
+#elif defined(hpux)
 #ifdef hpux10
     Add_HR_Disk_entry ( "/dev/rdsk/c0t%cd%c", '0', '6', '0', '0', '4' );
 #else
     Add_HR_Disk_entry ( "/dev/rdsk/c201d%cs%c", '0', '6', '0', '0', '4' );
 #endif
-#endif
-#ifdef solaris2
+#elif defined(solaris2)
     Add_HR_Disk_entry ( "/dev/rdsk/c0t%cd0s%c", '0', '6', '0', '0', '7' );
-#endif
-#ifdef freebsd2
+#elif defined(freebsd2)
     Add_HR_Disk_entry ("/dev/wd%c%c", '0', '3', '\0', 'a', 'h');
     Add_HR_Disk_entry ("/dev/wd0s%c%c", '1', '4', '\0', 'a', 'h');
+#elif defined(netbsd1)
+    Add_HR_Disk_entry ("/dev/wd%c%c", '0', '3', '\0', 'a', 'h');
+    Add_HR_Disk_entry ("/dev/sd%c%c", '0', '3', '\0', 'a', 'h');
 #endif
 
     device_descr[ HRDEV_DISK ] = describe_disk;	
