@@ -1,0 +1,3 @@
+# Redirect index.html to readmefiles.html
+# For Redirect line, escape all &s
+RedirectMatch /docs/index.html /docs/readmefiles.html
