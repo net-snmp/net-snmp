@@ -425,7 +425,7 @@ ERROR("");
 	if (pi->pdutype == SET_REQ_MSG && pi->version != SNMP_VERSION_2
 	    && !snmp_access(acl, pi->community_id, rw)){
 ERROR("");
-	    return SNMP_ERR_NOSUCHNAME;
+/*	    return SNMP_ERR_NOSUCHNAME; */
 	}
 	if (pi->pdutype == SET_REQ_MSG && pi->version == SNMP_VERSION_2
 	    && !snmp_access(acl, pi->community_id, rw)){
