@@ -1,9 +1,12 @@
 #include <config.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include "mibincl.h"
 #include "proc.h"
 #include "util_funcs.h"
-
+#include "errormib.h"
 
 struct myproc *get_proc_instance __P((struct myproc *,int));
 struct myproc *procwatch;

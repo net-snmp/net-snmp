@@ -5,6 +5,8 @@
 #ifndef _MIBGROUP_EXTENSIBLE_H
 #define _MIBGROUP_EXTENSIBLE_H
 
+config_require(util_funcs)
+  
 struct extensible *get_exten_instance __P((struct extensible *, int));
 int tree_compare __P((void *, void *));
 void setup_tree __P((void));

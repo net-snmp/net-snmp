@@ -78,6 +78,7 @@
 
 #include "mibincl.h"
 #include "errormib.h"
+#include "util_funcs.h"
 
 static time_t errorstatustime=0;
 static int errorstatusprior=0;
