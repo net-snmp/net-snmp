@@ -108,7 +108,7 @@ struct tc {     /* textual conventions */
 } tclist[MAXTC];
 
 int Line = 1;
-char *File = "(none)";
+char *File = (char *)"(none)";
 static int save_mib_descriptions = 0;
 static int mib_warnings = 0;
 static int mib_errors = 1;

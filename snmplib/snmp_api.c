@@ -523,7 +523,7 @@ snmp_sess_open(struct snmp_session *in_session)
 	if (cp)
 	memmove(cp, DEFAULT_COMMUNITY, session->community_len);
 #else
-	cp = strdup("");
+	cp = (u_char *)strdup("");
 #endif
     }
 

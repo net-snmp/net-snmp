@@ -439,7 +439,7 @@ int vacm_in_view (struct packet_info *pi,
 	while (sp) {
 	    if ((pi->source.sin_addr.s_addr & sp->sourceMask.sin_addr.s_addr)
 		    == sp->sourceIp.sin_addr.s_addr
-		&& strcmp(sp->community, pi->community) == 0)
+		&& strcmp(sp->community, (char *)pi->community) == 0)
 		break;
 	    sp = sp->next;
 	}

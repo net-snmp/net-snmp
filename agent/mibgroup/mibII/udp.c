@@ -698,7 +698,7 @@ static int UDP_Scan_Next(struct inpcb *RetInPcb)
 	next = udp_inpcb.inp_next;
 	*RetInPcb = udp_inpcb;
 	udp_prev = next;
-#endif linux
+#endif /* linux */
 #else /*  !defined(CAN_USE_SYSCTL) || !defined(UDPCTL_PCBLIST) */
 	/* Are we done? */
 	if ((xig == NULL) ||
