@@ -105,6 +105,7 @@ table_iterator_helper_handler(
         /* XXXWWW: optimize by reversing loops (look through data only once) */
         struct variable_list *results = NULL;
         struct variable_list *index_search = NULL; /* WWW: move up? */
+        struct variable_list *free_this_index_search = NULL;
         table_request_info *table_info =
             extract_table_info(requests);
         void *callback_loop_context = NULL;
@@ -128,11 +129,15 @@ table_iterator_helper_handler(
 #endif
         }
         
+        /* XXX: if loop through everything, these are never free'd
+           since iterator returns NULL and thus we forget about
+           these */
+        
         index_search = snmp_clone_varbind(table_info->indexes);
+        free_this_index_search = index_search;
 
         /* below our minimum column? */
         if (table_info->colnum < tbl_info->min_column) {
-            /* XXX: mem leak, index_search vs results */
             results = (iinfo->get_first_data_point)(&callback_loop_context,
                                                     &callback_data_context,
                                                     index_search,
@@ -146,11 +151,6 @@ table_iterator_helper_handler(
         /* XXX: do "only got some indexes" */
         
         /* find the next legal result to return */
-        /* XXX: if loop through everything, these are never free'd
-           since iterator returns NULL and thus we forget about
-           these */
-        index_search = snmp_clone_varbind(table_info->indexes);
-        
         /* find the first node */
         index_search = (iinfo->get_first_data_point)(&callback_loop_context,
                                                      &callback_data_context,
@@ -260,10 +260,11 @@ table_iterator_helper_handler(
 #endif
         }
         
-        /* OK, here index_search should be a pointer to the data that
-                                   we actually need to GET */
+        /* OK, here results should be a pointer to the data that we
+           actually need to GET */
         snmp_set_var_objid(requests->requestvb, results->name,
                            results->name_length);
+        snmp_free_var(results);
         
         oldmode = reqinfo->mode;
         if (oldmode == MODE_GETNEXT)
@@ -283,7 +284,8 @@ table_iterator_helper_handler(
         if (callback_data_keep && iinfo->free_data_context)
             (iinfo->free_data_context)(callback_data_keep,
                                        iinfo);
-        
+        if (free_this_index_search)
+            snmp_free_varbind(free_this_index_search);
 #ifdef NOT_SERIALIZED
         if (callback_loop_context && iinfo->free_loop_context_at_end)
             (iinfo->free_loop_context_at_end)(callback_loop_context, iinfo);
