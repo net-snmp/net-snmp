@@ -142,7 +142,8 @@ handle_long_opt(const char *myoptarg)
     free(cp);
 }
 
-extern int snmpv3_options(char *optarg, struct snmp_session *session, char **Apsz, char **Xpsz);
+extern int snmpv3_options(char *optarg, struct snmp_session *session, char **Apsz, char **Xpsz,
+               int argc, char **argv);
 int
 snmp_parse_args(int argc, 
 		char *const *argv, 
@@ -167,7 +168,7 @@ snmp_parse_args(int argc,
       DEBUGMSGTL(("snmp_parse_args"," arg %d = %s\n", arg, argv[arg]));
   }
       
-  optind = 1;
+/*  optind = 1; */
   while ((arg = getopt(argc, argv, Opts)) != EOF) {
     DEBUGMSGTL(("snmp_parse_args","handling (#%d): %c\n", optind, arg));
     switch(arg){
@@ -288,7 +289,7 @@ snmp_parse_args(int argc,
 	break;
 
       case '3':
-        if (snmpv3_options(optarg, session, &Apsz, &Xpsz) < 0 ) {
+        if (snmpv3_options(optarg, session, &Apsz, &Xpsz, argc, argv) < 0 ) {
           return(-1);
         }
         break;
