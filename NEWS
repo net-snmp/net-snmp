@@ -2,14 +2,46 @@ This file contains major changes in released revisions.  Please read
 the ChangeLog file for a more detailed listing of changes/bug fixes.
 
 *4.2*
+
+ Administrative:
+    - project services moved to http://sourceforge.net/projects/net-snmp.
+
  Features:
-    - A new configuration file creation tool created: snmpconf
-    - A new command to remotely list disk space: snmpdf
-    - dynamicly loadable mib module support (dlmod)
+    - Packets sequences are now shorter when possible, reducing packet sizes.
+    - A new configuration file creation tool: snmpconf.
+      (try snmpconf -g basic_setup)
+    - A new command to remotely list disk space: snmpdf.
+    - the agent VACM tables are now writable.
+    - a new snmpvacm tool can be used to change the running vacm configuration.
+    - dynamicly loadable mib module support for the agent.
+      (see snmpd.conf on the dlmod directive)
     - minimal proxy support for snmpd
+      (see snmpd.conf on the proxy directive)
+    - libtool is now used to compile the package (better shared-library support)
+    - the agent now supports the SNMP-NOTIFICATION-MIB.
+      (enabled by default).
+    - the agent can set trapsink using snmpcmd command line style parameters
+      (see the trapsess section of the snmpd.conf manual page)
+    - index matching in oids has been improved
+      (see the snmpcmd manual page on -Ox, -OE, and -Ob).
+    - snmptrapd has new formating directives.
+      (see the snmptrapd manual page on format1 and format2).
+    - the agent can listen to multiple ports.
+    - the agent can be restricted to listening on only certain interfaces.
+    - the agent can be told at run time which mib modules (not) to initialize.
+      (see the -I option in the snmpd.conf manual page)
+    - the agent can run as a particular user.
+    - snmptable takes a -Ci argument to show table indices.
+    - snmptable uses GETBULK requests when it can (unless -CB is specified).
+    - The "make test" suite contains a lot of new tests.
+    - cross-compiling support.
+    - snmpset checks types and range values for legality.
 
  Fixes:
     - Yet more AgentX improvements and bug fixes.
+    - v3 traps/informs handled properly now.
+    - Many more misc bug fixes.
+    - snmpv3 engineIDs not IP address specific.
 
 *4.1.2*
  Fixes:
