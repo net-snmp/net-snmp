@@ -85,7 +85,6 @@ void ${context}_valid_columns_set(netsnmp_column_info *vc);
 
 @include generic-source-includes.m2i@
 
-#include <net-snmp/agent/table_mfd.h>
 #include <net-snmp/library/container.h>
 
 #include "${name}_interface.h"
