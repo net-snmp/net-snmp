@@ -45,8 +45,8 @@ extern          "C" {
 
         oid_array       table;
 
-        netsnmp_oid_array_header *old_row;
         netsnmp_oid_array_header *new_row;
+        netsnmp_oid_array_header *old_row;
 
         netsnmp_array_group_item *list;
 
@@ -55,7 +55,9 @@ extern          "C" {
         void           *myvoid;
     } netsnmp_array_group;
 
-    typedef int     (Netsnmp_User_Oid_Compare) (void *lhs, void *rhs);
+    typedef int     (Netsnmp_User_Row_Operation_c) (const void *lhs,
+                                                    const void *rhs);
+    typedef int     (Netsnmp_User_Row_Operation) (void *lhs, void *rhs);
     typedef int     (Netsnmp_User_Get_Processor) (netsnmp_request_info *,
                                                   netsnmp_oid_array_header
                                                   *,
@@ -72,10 +74,12 @@ extern          "C" {
      * structure for array callbacks
      */
     typedef struct netsnmp_table_array_callbacks_s {
-        /*
-         * XXX-rks: Netsnmp_User_Oid_Compare         *compare;
-         */
+
+        Netsnmp_User_Row_Operation   *row_copy;
+        Netsnmp_User_Row_Operation_c *row_compare;
+
         Netsnmp_User_Get_Processor *get_value;
+
 
         Netsnmp_User_Row_Action *can_activate;
         Netsnmp_User_Row_Action *can_deactivate;
@@ -91,6 +95,10 @@ extern          "C" {
         Netsnmp_User_Group_Method *set_commit;
         Netsnmp_User_Group_Method *set_free;
         Netsnmp_User_Group_Method *set_undo;
+
+       /** not callbacks, but this is a useful place for them... */
+       void ** tree;
+       char can_set;
 
     } netsnmp_table_array_callbacks;
 
