@@ -39,7 +39,8 @@ MIBS	= $(V1MIBS) $(V2MIBS) $(V3MIBS) $(RFCMIBS) \
 all:
 
 install: installdirs
-	@for i in $(MIBS) ; do $(INSTALL) $(srcdir)/$$i $(mibdir) ; echo "install: installed $$i in $(mibdir)" ; done
+	@$(INSTALL) $(MIBS) $(mibdir)
+	@for i in $(MIBS) ; do echo "install: installed $$i in $(mibdir)" ; done
 
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(mibdir)

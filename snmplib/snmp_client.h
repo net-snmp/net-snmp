@@ -53,7 +53,12 @@ int snmp_set_var_typed_value(struct variable_list *newvar, u_char type,
                              u_char *val_str, size_t val_len);
 void snmp_replace_var_types(struct variable_list *vbl, int old_type,
                             int new_type);
+void snmp_reset_var_buffers( struct variable_list * var );
 void snmp_reset_var_types(struct variable_list *vbl, int new_type);
+int count_varbinds( struct variable_list *var_ptr );
+int count_varbinds_of_type( struct variable_list *var_ptr, int type );
+struct variable_list *find_varbind_of_type( struct variable_list *var_ptr,
+                                            int type );
 
 struct variable_list* snmp_add_null_var (struct snmp_pdu *, oid *, size_t);
 struct snmp_pdu	*snmp_pdu_create (int);

@@ -25,6 +25,7 @@ SNMP::initMib();
 
 $configfile="mib2c.conf";
 $debug=0;
+$quiet=0;
 $nostats = 0;
 
 sub usage {
@@ -35,6 +36,7 @@ sub usage {
     print "  mibNode\tThe name of the top level mib node you want to\n\t\tgenerate code for.  By default, the code will be stored in\n\t\tmibNode.c and mibNode.h (use the -f flag to change this)\n\n";
     print "  -d\t\tdebugging output (dont do it.  trust me.)\n\n";
     print "  -s\t\tDon't display statistics at the end\n\n";
+    print "  -S VAR=VAL\tSet $VAR variable to $VAL\n";
     1;
 }	
 
@@ -42,273 +44,248 @@ while($#ARGV >= 0) {
     $_ = shift;
     $configfile = shift if (/^-c/);
     $debug = 1 if (/^-d/);
+    if (/-S/) {
+	my $expr = shift;
+	my ($var, $val) = ($expr =~ /([^=]*)=(.*)/);
+	die "no variable specified for -S flag." if (!$var);
+	$vars{$var} = $val;
+    }
+    $quiet = 1 if (/^-q/);
     $nostats = 1 if (/^-s/);
     usage && exit(1) if (/^-h/);
     $outputName = shift if (/^-f/);
     $oid = $_ if (/^[^-]/);
 }
  
-read_config($configfile);
 #
 # internal conversion tables
 #
 
-%accessToUCD = qw(ReadOnly RONLY ReadWrite RWRITE 
-		  WriteOnly RWRITE Create RWRITE);
+%accessToIsWritable = qw(ReadOnly 0 ReadWrite 1 
+			 WriteOnly 1 Create 1);
+%perltoctypes = qw(OCTETSTR   ASN_OCTET_STR
+		   INTEGER    ASN_INTEGER
+		   INTEGER32  ASN_INTEGER
+		   UNSIGNED32 ASN_UNSIGNED
+		   OBJECTID   ASN_OBJECT_ID
+		   COUNTER64  ASN_COUNTER64
+		   COUNTER    ASN_COUNTER
+		   NETADDR    ASN_COUNTER
+		   UINTEGER   ASN_UINTEGER
+		   IPADDR     ASN_IPADDRESS
+		   BITS       ASN_IPADDRESS
+		   TICKS      ASN_TIMETICKS
+		   GAUGE      ASN_GAUGE
+		   OPAQUE     ASN_OPAQUE);
 
-#  The lengths of the defined 'variableN' structures
-@varLengths = (2,4,7,8,13);
 
-if (!defined($oid)) {
-    print STDERR "You didn\'t specify a mib oid to convert!\n";
-    usage();
-    exit(1);
+my $mibnode = $SNMP::MIB{$oid};
+die "you didn't give me a valid OID to start with" if (!$mibnode);
+
+# setup
+$outputName = $mibnode->{'label'} if (!defined($outputName));
+$vars{'name'} = $outputName;
+$vars{'oid'} = $oid;
+
+# loop through mib nodes, remembering stuff.
+setup_data($mibnode);
+
+# process .conf file
+$fh = new IO::File;
+$fh->open("$configfile");
+process();
+$fh->close;
+
+foreach $i (keys(%written)) {
+    next if ($i eq "-");
+    print STDERR "running indent on $i\n" if (!$quiet);
+    system("indent -orig -nbc -bap -nut $i");
 }
 
-$mib = $SNMP::MIB{$oid};
-$_ = $commaoid = $fulloid = $mib->{'objectID'};
-if (!defined ($fulloid)) {
-    print STDERR "Couldn\'t find mib reference: $oid\n";
-    exit(1);
+sub tocommas {
+    my $oid = $_[0];
+    $oid =~ s/\./,/g;
+    $oid =~ s/^\s*,//;
+    return $oid;
 }
-s/[^.]//g;
-$commaoid =~ s/\./,/g;
-$commaoid =~ s/^,//g;
 
-$outputName = $mib->{'label'} if (!defined($outputName));
-$OUTPUTNAME = uc($outputName);
-$vroutine="$outputName";
-print "outputting to $outputName.c and $outputName.h ...\n";
-
-#============================================
-#
-#   Walk the MIB tree, and construct strings
-#     holding the various fragments of code needed.
-#
-#   'loadMib' returns the length of the longest OID suffix
-#     encountered.
-#
-#   The variables constructed and used are:
-#
-#   (in the header file)
-#	functionInfo :	A list of definitions for the table-handling functions,
-#			and routines for SETtable variables.
-#			(The main scalar handling routine is handled implicitly)
-#
-#   (in the code file)
-#	structinfo :	The contents of the variableN structure listing
-#			the variables handled, including type, access level,
-#			OID suffix and 'magic number'
-#
-#	caseStatements:	A hash array (indexed by variable routine name)
-#			containing the body of the switch statement
-#			used for returning the appropriate values.
-#			At a minimum, this consists of the various 'case' labels
-#			If full type information is available (from mib2c.conf)
-#			then this will also include a default initialiser,
-#			and setting of a 'write_method' (if appropriate).
-#
-#	writeFuncs:	A list of function skeletons for setting variables
-#			(for variables with suitable access levels).
-#			Note that this list will not include functions
-#			for variables which don't provide type information
-#			in the mib2c.conf file (even if such variables are
-#			defined as writeable in the variableN structure).
-#
-#============================================
-$count = 0;
-$depth = loadMib($mib,0)-1;
-
-#  Determine which 'variableN' structure is needed
-for($varlen = 0; $varlen <= $#varLengths; $varlen++) {
-  last if ($depth <= $varLengths[$varlen]);
+sub oidlength {
+    return scalar ($_[0] =~ /\./);
 }
-$varlen = $varLengths[$varlen];
 
-#============================================
+# replaces $VAR type expressions and $VAR.subcomponent expressions
+# with data from the mib tree and loop variables.
+# possible uses:
 #
-#	Table-handling routines.
+#   $var               -- as defined by loops, etc.
+#   ${var}otherstuff   -- appending text to variable contents
+#   $var.uc            -- all upper case version of $var
 #
-#============================================
-foreach $vtable (@table_list) {
-    foreach $ptable (@processtable) {
-	$variables{$ptable}{'processed'} .= 
-	    (eval "\"$variables{$ptable}{'code'}\"") . "\n\n";
+# Mib components, $var must first expand to a mib node name:
+#
+#   $var.objectID      -- dotted full OID
+#   $var.commaoid      -- comma separated OID for array init
+#   $var.subid         -- last number component of oid
+#   $var.oidlength     -- length of the oid
+#   $var.type          -- node's ASN_XXX type
+#   $var.settable      -- 1 if it's writable, 0 if not
+#   $var.access        -- node's access type
+#   $var.status        -- node's status
+#   $var.syntax        -- node's syntax
+sub process_vars {
+    my $it = shift;
+
+    # mib substitutions ($var.type -> $mibnode->{'type'})
+    $it =~ s/\$(\w+)\.(uc)/uc($vars{$1})/eg; # make something uppercase
+    $it =~ s/\$(\w+)\.(commaoid)/tocommas($SNMP::MIB{$vars{$1}}{objectID})/eg; # lowercase
+    $it =~ s/\$(\w+)\.(oidlength)/oidlength($SNMP::MIB{$vars{$1}}{objectID})/eg; # lowercase
+    $it =~ s/\$(\w+)\.(perltype)/$SNMP::MIB{$vars{$1}}{type}/g; # lowercase
+    $it =~ s/\$(\w+)\.(type)/$perltoctypes{$SNMP::MIB{$vars{$1}}{$2}}/g; # lowercase
+    $it =~ s/\$(\w+)\.(subid)/$SNMP::MIB{$vars{$1}}{subID}/g; # lowercase
+    $it =~ s/\$(\w+)\.(settable)/(($SNMP::MIB{$vars{$1}}{access} =~ \/(ReadWrite|Create|Writeonly)\/)?1:0)/eg; # lowercase
+    $it =~ s/\$(\w+)\.(objectID|label|subID|access|status|syntax)/$SNMP::MIB{$vars{$1}}{$2}/g;
+
+    # normal variable substitions
+    $it =~ s/\$\{(\w+)\}/$vars{$1}/g;
+    $it =~ s/\$(\w+)/$vars{$1}/g;
+    return $it;
+}
+
+# process various types of statements
+#
+# which include:
+#   @open FILE@
+#     writes generated output to FILE
+#   @foreach $VAR table@
+#     repeat iterate over code until @end@ setting $VAR to all known tables
+#   @foreach $VAR column@
+#     repeat iterate over code until @end@ setting $VAR to all known
+#     columns within a given table.  Obviously this must be called
+#     within a foreach-table clause.
+#   @foreach $VAR index@
+#     repeat iterate over code until @end@ setting $VAR to all known
+#     indexes within a given table.  Obviously this must be called
+#     within a foreach-table clause.
+#   @eval $VAR = expression@
+#     evaluates expression and assigns the results to $VAR
+#   @perleval STUFF@
+#     evaluates STUFF directly in perl.  Note that all mib2c variables
+#     interpereted within .conf files are in $vars{NAME}.
+#   @skip@
+#     skips everything till the appropriately matched @end@
+#   @if expression@
+#      evaluates expression, and if expression is true processes
+#      contained part until appropriate @end@ is reached.
+sub skippart {
+    my $endcount = 1;
+    while(<$fh>) {
+	if (/\@end\@/) {
+	    return if ($endcount == 1);
+	    $endcount--;
+	}
+	if (/\@else\@/) {
+	    return if ($endcount == 1);
+	}
+	if (/\@(foreach|if)/) {
+	    $endcount++;
+	}
     }
-    $var_routines .= 
-	(eval "\"$variables{'code-var_table'}{'code'}\"") . "\n\n";
 }
 
-#============================================
-#
-#   Output the header file
-#
-#============================================
-open(DOTH,">$outputName.h");
-print DOTH (eval "\"$variables{'code-dot-h'}{'code'}\"") . "\n";
-close(DOTH);
 
-#============================================
-#
-#   Output the code file:
-#	Initialisation and main variable routine.
-#
-#============================================
-
-open(DOTC,">$outputName.c");
-print DOTC (eval "\"$variables{'code-main-part'}{'code'}\"") . "\n\n";;
-close(DOTC);
-
-#============================================
-#
-# Everyone loves statistics.
-#
-#============================================
-print "  depth: $depth\n";
-print "  Number of Lines Created:\n";
-system("wc -l $outputName.c $outputName.h");
-print "Done.\n\n";
-print "NOTE: the code that has been created for you is merely a starting template.\n";
-print "      You will have to modify it in order to make it work properly.\n";
-
-#============================================
-#
-#  loadMib:
-#	Recursive routine to walk the mib,
-#	and construct the various code fragment strings.
-#
-#============================================
-sub loadMib {
-    my $mib = shift;
-    my $i;
-    my $depth = shift;
-    $depth = $depth + 1;
-    my $name = $mib->{'label'};
-    my $NAME = uc($name);
-    print "doing $mib->{label} : $mib->{objectID}\n" if $debug;
-    if (defined($mib->{'access'}) && 
-	$mib->{'access'} =~ /ReadOnly|ReadWrite|WriteOnly|Create|NoAccess/) {
-	$count = $count + 1;
-	$subid = $mib->{'objectID'};
-	$subid =~ s/$fulloid\.//;
-	$subid =~ s/\./,/g;
-	if (!defined($variables{$mib->{'type'}})  && !defined($mib->{'indexes'})) {
-	    print STDERR "unknown type:  $mib->{type} for $mib->{label} $mib->{'access'}\n";
-	    print STDERR "unknown type:  no information generated for $mib->{label}\n";
+sub process {
+    while(<$fh>) {
+	if (/^\#\#/) {
+	    # noop, it's a comment
+	} elsif (/\@open\s+([^\@]+)\@/) {
+	    my $spec = process_vars($1);
+	    $out->close() if ($out);
+	    $out = new IO::File;
+	    $out->open(">$spec") || die "failed to open $spec";
+	    print STDERR "writing to $spec\n" if (!$quiet);
+	    $written{$spec} = '1';
+	} elsif (/\@end\@/) {
+	    return;
+	} elsif (/\@if\s+([^@]*)\@/) {
+	    if (eval(process_vars($1))) {
+		process();
+	    } else {
+		skippart();
+	    }
+	} elsif (/\@eval\s+\$(\w+)\s*=\s*([^\@]*)/) {
+	    my ($v, $e) = ($1, $2);
+	    my $e = process_vars($e);
+	    $vars{$v} = eval($e);
+	} elsif (/\@perleval\s*(.*)\@/) {
+	    eval($1);
+	} elsif (/\@skip\@/) {
+	    skippart();
+	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+tables*\s*\@/) {
+	    my $var = $1;
+	    my $startpos = tell(C);
+	    my $table;
+	    foreach $table (keys %tables) {
+		seek(C, $startpos, 0); # go to top of section.
+		my $oldvar = $vars{$var};
+		$vars{$var} = $table;
+		my $oldtable = $currenttable;
+		$currenttable = $table;
+		process();
+		$vars{$var} = $oldvar;
+		$currenttable = $oldtable;
+	    }
+	} elsif (/\@\s*foreach\s+\$([^\@]+)\s+(column|index)\s*\@/) {
+	    my ($var, $type) = ($1, $2);
+	    my $startpos = $fh->tell();
+	    my $column;
+	    foreach $column (@{$tables{$currenttable}{$type}}) {
+#		print "looping on $var for $type -> $column\n";
+		$fh->seek($startpos, 0); # go to top of section.
+		my $oldvar = $vars{$var};
+		$vars{$var} = $column;
+		my $oldcolumn = $currentcolumn;
+		$currentcolumn = $column;
+		process();
+		$vars{$var} = $oldvar;
+		$currentcolumn = $oldcolumn;
+	    }
 	} else {
-	    foreach $i (@process) {
-		next if (defined($variables{$i}{'skipif'}) &&
-			 eval $variables{$i}{'skipif'});
-		my $result = (eval "\"$variables{$i}{'code'}\"");
-		$variables{$i}{'processed'} .= "$result\n";
-		$variables{$vroutine}{$i}{'processed'} .= "$result\n";
-	    }
-	}
-	if (defined($mib->{'indexes'})) {
-	    print "indexes: ", join(", ",@{$mib->{'indexes'}}),"\n" if ($debug);
-	    $variables{$vroutine}{'indexes'} = $mib->{'indexes'};
-	    foreach $i (@{$mib->{'indexes'}}) {
-		$variables{$vroutine}{$i}{'isanindex'} = 1;
-	    }
+	    die "no output file specified" if (!$out);
+	    print $out process_vars($_);
 	}
     }
-    my $children = $$mib{'children'}; 
-    my $i;
-    my $newdepth = $depth;
-    foreach $i (sort {$a->{subID} <=> $b->{subID}} @{$children}) {
-	if ( $name =~ /Table$/ ) {
-	    $vroutine="$name";
-	    push @table_list, $name;
-	    $newdepth = max(loadMib($i, $depth), $newdepth);
-	    $vroutine="$outputName";
+}
+
+sub setup_data {
+    my $mib = shift;
+    if ($mib->{label} =~ /Table$/) {
+	my $tablename = $mib->{label};
+	my $entry = $mib->{children};
+	my $columns = $entry->[0]{children};
+	foreach my $col (sort { $a->{'subID'} <=> $b->{'subID'} } @$columns) {
+	    # store by numeric key so we can sort them later
+	    push @{$tables{$tablename}{'column'}}, $col->{'label'};
 	}
-	else {
-	    $newdepth = max(loadMib($i, $depth), $newdepth);
+	foreach my $index (@{$entry->[0]{'indexes'}}) {
+	    my $node = $SNMP::MIB{$index} || 
+		die "can't find info about index $index in table $tablename\n";
+	    push @{$tables{$tablename}{'index'}}, $index;
+	}
+    } else {
+	my $children = $mib->{children};
+	my $i;
+	for($i = 0; $i <= $#$children; $i++) {
+	    setup_data($children->[$i]);
 	}
     }
-    return $newdepth;
+}
+
+sub min {
+    return $_[0] if ($_[0] < $_[1]);
+    return $_[1];
 }
 
 sub max {
-    my $x = shift;
-    my $y = shift;
-    return ($x > $y) ? $x : $y;
-}
-
-
-sub read_config() {
-    my $configfile = shift;
-    my ($type, $lasttoken);
-    my $fh = new FileHandle;
-    $configfile = "/usr/local/share/snmp/" . $configfile if (!(-f $configfile));
-    if ( $fh->open("<$configfile") ) {
-	while(<$fh>) {
-	    next if (/^\s*\#/ || /^\s*$/);
-	    if (/^\s*type:\s*(.*)/) {
-		if (defined($type) && defined($lasttoken) && 
-		    defined ($variables{$type}{$lasttoken})) {
-		    chomp($variables{$type}{$lasttoken});
-		}
-		$type = $1;
-		chomp($type);
-	    } elsif (/include:\s*(.*)/) {
-		read_config($1);
-	    } elsif (/process:\s*(.*)/) {
-		push (@process, $1);
-	    } elsif (/processtable:\s*(.*)/) {
-		push (@processtable, $1);
-	    } elsif (/delete:\s*(.*)/) {
-		delete($variables{$type}{$1});
-	    } elsif (/copy:\s*(.*)/) {
-		my $item;
-		my $arg = $1;
-		chomp($arg);
-		foreach $item (keys(%{$variables{$arg}})) {
-		    $variables{$type}{$item} = $variables{$arg}{$item};
-		}
-	    } else {
-		if (/\s*([^:]*):(\s*.*)/) {
-		    if (!defined($variables{$type}{$1})) {
-			if (defined($type) && defined($lasttoken) && 
-			    defined ($variables{$type}{$lasttoken})) {
-			    chomp($variables{$type}{$lasttoken});
-			}
-			$variables{$type}{$1} = $2;
-			$lasttoken = $1;
-			$variables{$type}{$1} =~ s/^\t+//;
-		    } else {
-			# duplicate entry:  tack it on.
-			my ($x, $y) = ($1, $2);
-			$y =~ s/^\t+//;
-			$variables{$type}{$x} .= "\n" . $y;
-		    }
-		} else {
-		    # continuation line, it started with spaces or a +
-		    s/^\s*//;
-		    s/^\+//; 
-		    $variables{$type}{$lasttoken} .= "\n" . $_;
-		    chomp($variables{$type}{$lasttoken});
-		}
-	    }
-	}
-	$fh->close();
-    } else {
-	warn "Config file ($configfile) not found.\n";
-    }
-}
-
-sub evalstr {
-    my $str = shift;
-#    if ($str !~ /^\"/) {
-	$str = "\"$str\"";  # surround by quotes.
-#    }
-    eval ($str);            # should return a string, with variables expanded
-}
-
-sub evalrstr {
-    my $rstr = shift;
-#    if ($str !~ /^\"/) {
-#	$$rstr = "\"" . $$rstr . "\"";  # surround by quotes.
-#    }
-    eval ("\"$$rstr\"");            # should return a string, with variables expanded
+    return $_[0] if ($_[0] > $_[1]);
+    return $_[1];
 }
