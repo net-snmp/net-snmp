@@ -45,7 +45,7 @@ clean:
 	cd extensible; make clean
 
 install:  installdirs
-	@$(INSTALL) $(TARG) $(etcdir) ; echo "install:  installed $(TARG) in $(etcdir) 
+	@$(INSTALL) $(TARG) $(etcdir) ; echo "install:  installed $(TARG) in $(etcdir) "
 
 installdirs:
 	@$(SHELL) $(srcdir)/../mkinstalldirs $(etcdir) $(snmplibdir) 
