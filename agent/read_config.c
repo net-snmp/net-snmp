@@ -308,9 +308,9 @@ void setup_tree __P((void))
 #endif
         , sizeof(struct subtree),
 #ifdef __STDC__
-        tree_compare
-#else
         (int (*)(const void *, const void *)) tree_compare
+#else
+        tree_compare
 #endif
     );
 
