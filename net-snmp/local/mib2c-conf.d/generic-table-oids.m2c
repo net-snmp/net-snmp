@@ -1,5 +1,5 @@
 #############################################################  -*- c -*-
-## generic include for XXX. Don't use directly.
+## generic include for XXX. Do not use directly.
 ##
 ## $Id$
 ########################################################################
@@ -35,7 +35,6 @@
              @eval $maxn = "COLUMN_$node.uc"@
           @end@
         @end@
-@    include details-enums.m2i@
     @end@ # column
 
 #define $table.uc_MIN_COL		$minn
