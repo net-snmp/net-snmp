@@ -1,6 +1,4 @@
-.TH SNMPD.CONF 5 "28 Aug 2001"
-.ds )H U.C. Davis, ECE Dept.
-.ds ]W VVERSIONINFO
+.TH SNMPD.CONF 5 "28 Aug 2001" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 DATADIR/snmp/snmpd.conf - configuration file for the ucd-snmp SNMP agent.

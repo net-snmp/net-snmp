@@ -1,6 +1,4 @@
-.TH SNMPTRAPD.CONF 5 "28 Aug 2001"
-.ds )H U.C. Davis
-.ds ]W VVERSIONINFO
+.TH SNMPTRAPD.CONF 5 "28 Aug 2001" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 DATADIR/snmp/snmptrapd.conf - configuration file for the ucd-snmp trap demon.

@@ -1,6 +1,4 @@
-.TH SNMP.CONF 5 "17 Nov 2000"
-.ds )H U.C. Davis
-.ds ]W VVERSIONINFO
+.TH SNMP.CONF 5 "17 Nov 2000" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 DATADIR/snmp/snmp.conf - configuration file for the ucd-snmp applications.
