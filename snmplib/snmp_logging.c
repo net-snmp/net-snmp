@@ -458,46 +458,27 @@ sprintf_stamp(time_t * now, char *sbuf)
     return sbuf;
 }
 
+void
+snmp_disable_syslog(void)
+{
+    netsnmp_log_handler *logh;
+
+    for (logh = logh_head; logh; logh = logh->next)
+        if (logh->enabled && logh->type == NETSNMP_LOGHANDLER_SYSLOG) {
+
 #ifdef WIN32
-void
-snmp_disable_syslog(void)
-{
-    netsnmp_log_handler *logh;
-    HANDLE               eventlog_h;
-
-    for (logh = logh_head; logh; logh = logh->next)
-        if (logh->enabled && logh->type == NETSNMP_LOGHANDLER_SYSLOG) {
-
-            eventlog_h = (HANDLE)logh->magic;
-            if (eventlog_h != NULL) {
-                if (!CloseEventLog(eventlog_h)) {
-	            /*
-	             * Hmmm.....
-	             * Maybe disable this handler, and log the error ?
-	             */
-                    fprintf(stderr, "Could not close event log. "
-                            "Last error: 0x%x\n", GetLastError());
-                } else {
-                    logh->magic = NULL;
-                }
+            if (logh->magic) {
+                HANDLE eventlog_h = (HANDLE)logh->magic;
+                CloseEventLog(eventlog_h);
+                logh->magic = NULL;
             }
-            logh->enabled = 0;
-	}
-}
 #else
-void
-snmp_disable_syslog(void)
-{
-    netsnmp_log_handler *logh;
-
-    for (logh = logh_head; logh; logh = logh->next)
-        if (logh->enabled && logh->type == NETSNMP_LOGHANDLER_SYSLOG) {
             closelog();
             logh->imagic  = 0;
+#endif
             logh->enabled = 0;
 	}
 }
-#endif
 
 void
 snmp_disable_filelog(void)
