@@ -682,7 +682,9 @@ netsnmp_table_data_set_helper_handler(netsnmp_mib_handler *handler,
         case MODE_SET_COMMIT:
             if (newrowstash->state != STATE_COMMIT) {
                 newrowstash->state = STATE_COMMIT;
-                netsnmp_table_dataset_delete_row(row);
+                if (!newrowstash->created) {
+                    netsnmp_table_dataset_delete_row(row);
+                }
                 if (newrowstash->deleted) {
                     netsnmp_table_dataset_remove_and_delete_row(datatable, newrow);
                 }
