@@ -93,36 +93,36 @@ typedef struct netsnmp_interface_stats_s {
 typedef struct netsnmp_interface_entry_s {
     netsnmp_index oid_index;
 
-    int     flags;
+    int     ns_flags; /* net-snmp flags */
     oid     index;
 
     /*
      *  "Static" information
      *  Typically constant for a given interface
      */
-    char   *if_name;
-    char   *if_descr;
-    int     if_type;
-    unsigned int     if_speed;
-    unsigned int     if_speed_high;
-    char   *if_paddr;
-    int     if_paddr_len;
-    int     if_mtu;
+    char   *name;
+    char   *descr;
+    int     type;
+    unsigned int     speed;
+    unsigned int     speed_high;
+    char   *paddr;
+    int     paddr_len;
+    int     mtu;
 
-    u_long  if_lastchange;
-    time_t  if_discontinuity;
+    u_long  lastchange;
+    time_t  discontinuity;
 
-   char  if_admin_status;
-   char  if_oper_status;
+   char  admin_status;
+   char  oper_status;
 
    /** booleans (not TruthValues!) */
-   char  if_promiscuous;
-   char  if_connector_present;
+   char  promiscuous;
+   char  connector_present;
 
    /*-----------------------------------------------
     * platform/arch/access specific data
     */
-   unsigned int if_flags; /* iff NETSNMP_INTERFACE_FLAGS_HAS_FAMILY */
+   unsigned int os_flags; /* iff NETSNMP_INTERFACE_FLAGS_HAS_FAMILY */
 
    /*
     * statistics
