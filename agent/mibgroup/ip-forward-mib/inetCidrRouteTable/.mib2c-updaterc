@@ -1,4 +1,0 @@
-UPDATE_OID=inetCidrRouteTable
-UPDATE_CONF=mib2c.mfd.conf
-UPDATE_MIB2C_OPTS="-S m2c_create_fewer_files=1"
-UPDATE_NOPROBE=1
