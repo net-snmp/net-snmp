@@ -15,9 +15,11 @@ $example_start
     /*
      * TODO:
      * update or replace IS_SET_* values.
+@if $mfd_code_verbose == 1@
      *
      * These macros can be used if there is a simple, direct way to determine
      * if this bit defined for the MIB object is set for the data in your rowreq_ctx.
+@end@
      * Return 1 if the bit should be set, or 0 if it should not be set.
      */
      $m2c_node_lh = 0;

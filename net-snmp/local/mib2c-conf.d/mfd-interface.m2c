@@ -602,7 +602,7 @@ _${context}_check_column( ${context}_rowreq_ctx *rowreq_ctx,
 @   foreach $node nonindex@
 @      include m2c_setup_node.m2i@
 @      if $node.settable == 0@
-@          break@
+@          next@
 @      end@
 
     /* $m2c_node_summary */
@@ -756,8 +756,7 @@ $example_start
 @end@
 @    foreach $node nonindex@
 @        include m2c_setup_node.m2i@
-@        eval $m2c_ctx_lh = "$m2c_undo_item"@
-@        eval $m2c_ctx_rh = "$m2c_data_item"@
+@        eval $m2c_ctx_lh = "${m2c_undo_item}${node}"@
 @        include generic-ctx-copy.m2i@
 @    end@ # foreach nonindex
 @if "$m2c_data_context" ne "generated"@
