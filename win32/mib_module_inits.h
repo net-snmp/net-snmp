@@ -17,7 +17,6 @@
   if (should_init("loadave")) init_loadave();
   if (should_init("extensible")) init_extensible();
   if (should_init("errormib")) init_errormib();
-  if (should_init("registry")) init_registry();
   if (should_init("file")) init_file();
   if (should_init("dlmod")) init_dlmod();
   if (should_init("proxy")) init_proxy();

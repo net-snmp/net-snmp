@@ -59,9 +59,6 @@
 /* Define if compiling with the ucd-snmp/errormib module files.  */
 #define USING_UCD_SNMP_ERRORMIB_MODULE 1
  
-/* Define if compiling with the ucd-snmp/registry module files.  */
-#define USING_UCD_SNMP_REGISTRY_MODULE 1
- 
 /* Define if compiling with the ucd-snmp/file module files.  */
 #define USING_UCD_SNMP_FILE_MODULE 1
  
