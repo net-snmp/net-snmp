@@ -57,8 +57,8 @@ com2sec mynetwork NETWORK/24      COMMUNITY
 # Second, map the security names into group names:
 
 #             	sec.model  sec.name
-group local   	any        MyRWGroup
-group mynetwork any        MyROGroup
+group MyRWGroup	any        local
+group MyROGroup any        mynetwork
 
 ####
 # Third, create a view for us to let the groups have rights to:
