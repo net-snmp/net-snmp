@@ -175,6 +175,9 @@ void init_udp(void)
 #ifdef UDB_SYMBOL
   auto_nlist( UDB_SYMBOL,0,0 );
 #endif
+#ifdef solaris2
+  init_kernel_sunos5();
+#endif
 }
 
 

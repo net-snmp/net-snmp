@@ -250,6 +250,9 @@ void init_interfaces(void)
   init_interfaces_setup();
 #endif
 #endif
+#ifdef solaris2
+  init_kernel_sunos5();
+#endif
 }
 
 #ifdef linux

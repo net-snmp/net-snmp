@@ -233,6 +233,9 @@ void init_ip(void)
 #ifdef MIB_IPCOUNTER_SYMBOL
   auto_nlist(MIB_IPCOUNTER_SYMBOL,0,0);
 #endif
+#ifdef solaris2
+  init_kernel_sunos5();
+#endif
 }
 
 
