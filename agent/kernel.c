@@ -105,7 +105,7 @@ klookup(off, target, siz)
 #endif
     return (0);
   }
-  if (klread(target, siz) != siz ) { 
+  if ((retsiz = klread(target, siz)) != siz ) { 
     perror("klread");
     ERROR("klread");
 #ifdef EXIT_ON_BAD_KLREAD
