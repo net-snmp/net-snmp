@@ -50,7 +50,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 netsnmp.lib netsnmpagent.lib netsnmpmibssdk.lib netsnmphelpers.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib iphlpapi.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"../bin/snmpd.exe" /libpath:"../lib"
+# ADD LINK32 netsnmp.lib netsnmpagent.lib netsnmpmibssdk.lib netsnmphelpers.lib advapi32.lib wsock32.lib kernel32.lib user32.lib iphlpapi.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"../bin/snmpd.exe" /libpath:"../lib"
 
 !ELSEIF  "$(CFG)" == "snmpdsdk - Win32 Debug"
 
@@ -74,7 +74,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib advapi32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 netsnmp_d.lib netsnmpagent_d.lib netsnmpmibssdk_d.lib netsnmphelpers_d.lib advapi32.lib ws2_32.lib kernel32.lib user32.lib iphlpapi.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"../bin/snmpd_d.exe" /pdbtype:sept /libpath:"../lib"
+# ADD LINK32 netsnmp_d.lib netsnmpagent_d.lib netsnmpmibssdk_d.lib netsnmphelpers_d.lib advapi32.lib wsock32.lib kernel32.lib user32.lib iphlpapi.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"../bin/snmpd_d.exe" /pdbtype:sept /libpath:"../lib"
 
 !ENDIF 
 
