@@ -298,7 +298,8 @@ _cache_load(netsnmp_cache *cache, void *vmagic)
     DEBUGMSGTL(("ifTable/cache", "ifTable_load %p/%p\n",
                 cache, cache->magic));
 
-    netsnmp_assert(0 == cache->valid);
+    /** should only be called for an invalid or expired cache */
+    netsnmp_assert((0 == cache->valid) || (1 == cache->expired));
     
     /*
      * call user code
