@@ -191,7 +191,6 @@ snmp_build_var_op(u_char *data,
     data = asn_build_sequence(data, &dummyLen,
 			      (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), 0);
     if (data == NULL){
-	ERROR_MSG("Can't build sequence header");
 	return NULL;
     }
 #endif

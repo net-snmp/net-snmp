@@ -192,7 +192,6 @@ snmp_comstr_build(	u_char	*data,
      */
     data = asn_build_sequence(data, length, (u_char)(ASN_SEQUENCE | ASN_CONSTRUCTOR), 0);
     if (data == NULL){
-        ERROR_MSG("buildheader");
         return NULL;
     }
     h1e = data;
@@ -204,7 +203,6 @@ snmp_comstr_build(	u_char	*data,
             (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_INTEGER),
             &verfix, sizeof(verfix));
     if (data == NULL){
-        ERROR_MSG("buildint");
         return NULL;
     }
 
@@ -215,7 +213,6 @@ snmp_comstr_build(	u_char	*data,
             (u_char)(ASN_UNIVERSAL | ASN_PRIMITIVE | ASN_OCTET_STR),
             psid, *(u_char *)slen);
     if (data == NULL){
-        ERROR_MSG("buildstring");
         return NULL;
     }
 
@@ -230,58 +227,3 @@ snmp_comstr_build(	u_char	*data,
 
 }  /* end snmp_comstr_build() */
 
-#ifdef USE_INTERNAL_MD5
-
-static void
-md5Digest(	u_char	*start,
-		size_t	 length,
-		u_char	*digest)
-{
-    MDstruct	 MD;
-
-    int		 i, j;
-    u_char	*cp;
-#if WORDS_BIGENDIAN
-    u_char	*buf;
-    u_char	 buffer[SNMP_MAX_LEN];
-#endif
-
-
-#if 0
-    int count, sum;
-
-    sum = 0;
-    for(count = 0; count < length; count++)
-	sum += start[count];
-    printf("sum %d (%d)\n", sum, length);
-#endif
-
-
-#if WORDS_BIGENDIAN
-    /* Do the computation in an array.
-     */
-    cp = buf = buffer;
-    memmove(buf, start, length);
-#else
-    /* Do the computation in place.
-     */
-    cp = start;
-#endif
-
-
-    MDbegin(&MD);
-    while(length >= 64){
-	MDupdate(&MD, cp, 64 * 8);
-	cp += 64;
-	length -= 64;
-    }
-    MDupdate(&MD, cp, length * 8);
-    /* MDprint(&MD); */
-
-   for (i=0;i<4;i++)
-     for (j=0;j<32;j=j+8)
-	 *digest++ = (MD.buffer[i]>>j) & 0xFF;
-
-}  /* end md5Digest() */
-
-#endif /* USE_INTERNAL_MD5 */

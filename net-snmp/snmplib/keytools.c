@@ -150,7 +150,10 @@ generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
                                 NULL,   NULL);
                 QUITFUN(rval, generate_Ku_quit);
 #else
-                MDupdate(&MD, buf, USM_LENGTH_KU_HASHBLOCK*8);
+                if (MDupdate(&MD, buf, USM_LENGTH_KU_HASHBLOCK*8)) {
+                    rval = SNMPERR_USM_ENCRYPTIONERROR;
+                    goto md5_fin;
+                }
 #endif
 
                 nbytes -= USM_LENGTH_KU_HASHBLOCK;
@@ -160,9 +163,14 @@ generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
         rval = kmt_hash(KMT_CRYPT_MODE_FINAL, &context, NULL, 0, &Ku, kulen);
 	QUITFUN(rval, generate_Ku_quit);
 #else
-        MDupdate(&MD, buf, 0);
+        if (MDupdate(&MD, buf, 0)) {
+            rval = SNMPERR_USM_ENCRYPTIONERROR;
+            goto md5_fin;
+        }
         *kulen = sc_get_properlength(hashtype, hashtype_len);
         MDget(&MD, Ku, *kulen);
+md5_fin:
+        memset(&MD, 0, sizeof(MD));
 #endif
 
 
@@ -175,7 +183,7 @@ generate_Ku(	oid	*hashtype,	u_int  hashtype_len,
 
 
 generate_Ku_quit:
-	memset(buf, 0, USM_LENGTH_KU_HASHBLOCK);
+	memset(buf, 0, sizeof(buf));
 #ifdef HAVE_LIBKMT
         SNMP_FREE(context);
 #endif
