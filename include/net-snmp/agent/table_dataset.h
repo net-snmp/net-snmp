@@ -51,6 +51,7 @@ typedef struct netsnmp_table_data_set_storage_s {
 typedef struct netsnmp_table_data_set_s {
    table_data *table;
    netsnmp_table_data_set_storage *default_row;
+   int allow_creation; /* set to 1 to allow creation of new rows */
 } netsnmp_table_data_set;
 
 Netsnmp_Node_Handler netsnmp_table_data_set_helper_handler;
