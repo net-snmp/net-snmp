@@ -177,6 +177,7 @@ void init_system_mib(void)
 #ifdef HAVE_UNAME
   strncpy(sysName,utsName.nodename,sizeof(sysName));
 #else
+#if HAVE_EXECV
   sprintf(extmp.command,"%s -n",UNAMEPROG);
   /* setup defaults */
   extmp.type = EXECPROC;
@@ -184,6 +185,9 @@ void init_system_mib(void)
   exec_command(&extmp);
   strncpy(sysName,extmp.output, sizeof(sysName));
   sysName[strlen(sysName)-1] = 0; /* chomp new line */
+#else
+  strcpy(sysName, "unknown" );
+#endif /* HAVE_EXECV */
 #endif /* HAVE_UNAME */
 #endif /* HAVE_GETHOSTNAME */
 
