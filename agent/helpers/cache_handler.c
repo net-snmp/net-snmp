@@ -411,7 +411,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
          * a previous (delegated) request is still using the cache.
          * maybe use a reference counter?
          */
-        if(netsnmp_cache_is_valid(reqinfo))
+        if( cache->valid )
             return SNMP_ERR_NOERROR;
 
         /*
@@ -427,7 +427,7 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler * handler,
     case MODE_SET_FREE:
     case MODE_SET_ACTION:
     case MODE_SET_UNDO:
-        netsnmp_assert(netsnmp_cache_is_valid(reqinfo));
+        netsnmp_assert( cache->valid );
         break;
 
         /*
