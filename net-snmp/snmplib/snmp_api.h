@@ -99,7 +99,6 @@ struct snmp_session {
 #define SNMP_DEFAULT_TIME	    0
 #define SNMP_DEFAULT_VERSION	    -1
 
-extern int snmp_errno;
 extern char *snmp_api_errstring __P((int));
 extern void snmp_perror __P((char *));
 extern void snmp_set_detail __P((char *));
@@ -288,12 +287,10 @@ void snmp_timeout __P((void));
 #define TIMED_OUT	   2
 
 
-/*
-extern int snmp_dump_packet;
-extern int quick_print;
-*/
 void snmp_set_dump_packet __P((int));
 int snmp_get_dump_packet __P((void));
 void snmp_set_quick_print __P((int));
 int snmp_get_quick_print __P((void));
 int snmp_get_errno __P((void));
+void snmp_set_do_debugging __P((int));
+int snmp_get_do_debugging __P((void));
