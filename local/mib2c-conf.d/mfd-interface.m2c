@@ -375,8 +375,10 @@ ${context}_allocate_rowreq_ctx($m2c_tmp)
     }
 @if $m2c_data_allocate == 1@
     else {
-        if(NULL != data)
+        if(NULL != data) {
+            rowreq_ctx->rowreq_flags |= MFD_ROW_DATA_FROM_USER;
             rowreq_ctx->data = data;
+        }
         else if (NULL == (rowreq_ctx->data = ${context}_allocate_data())) {
             SNMP_FREE(rowreq_ctx);
             return NULL;
@@ -420,7 +422,8 @@ ${context}_release_rowreq_ctx(${context}_rowreq_ctx *rowreq_ctx)
 @end@
 
 @if $m2c_data_allocate == 1@
-    if(rowreq_ctx->data)
+    if ((rowreq_ctx->data) &&
+        !(rowreq_ctx->rowreq_flags & MFD_ROW_DATA_FROM_USER))
         ${context}_release_data(rowreq_ctx->data);
  
 @end@ 

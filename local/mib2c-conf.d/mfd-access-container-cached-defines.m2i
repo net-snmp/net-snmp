@@ -220,14 +220,21 @@ $example_end
 
         /*
          * TODO:352:M: |   |-> set indexes in new $context rowreq context.
-         */
 @   eval $m2c_tmp = ""@
 @   if ($m2c_data_allocate == 1) || ($m2c_data_init == 1)@
 @      eval $m2c_tmp = "NULL"@
 @      if ($m2c_data_allocate == 1) && ($m2c_data_init == 1)@
 @         eval $m2c_tmp = "$m2c_tmp, NULL"@
+         * data context will be set from the first param (unless NULL,
+         *      in which case a new data context will be allocated)
+         * the second param will be passed, with the row context, to
+         *      ${context}rowreq_ctx_init.
+@      else@
+         * data context will be set from the param (unless NULL,
+         *      in which case a new data context will be allocated)
 @      @end@
 @   end@
+         */
         rowreq_ctx = ${context}_allocate_rowreq_ctx($m2c_tmp);
         if (NULL == rowreq_ctx) {
             snmp_log(LOG_ERR, "memory allocation failed\n");
@@ -307,8 +314,14 @@ $example_end
  *  need to do any processing before that, do it here.
  *
  * @note
- *  The MFD helper will take care of releasing all the
- *  row contexts, so you don't need to worry about that.
+ *  The MFD helper will take care of releasing all the row contexts.
+@   if ($m2c_data_allocate == 1)@
+ *  If you did not pass a data context pointer when allocating
+ *  the rowreq context, the one that was allocated will be deleted.
+ *  If you did pass one in, it will not be deleted and that memory
+ *  is your responsibility.
+@   end@
+ *
  */
 void
 ${context}_cache_free(netsnmp_container *container)
