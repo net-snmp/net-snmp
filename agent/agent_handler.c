@@ -281,6 +281,44 @@ netsnmp_inject_handler(netsnmp_handler_registration *reginfo,
     return netsnmp_inject_handler_before(reginfo, handler, NULL);
 }
 
+/** calls a handler with with appropriate NULL checking of arguments, etc. */
+inline int
+netsnmp_call_handler(netsnmp_mib_handler *next_handler,
+                     netsnmp_handler_registration *reginfo,
+                     netsnmp_agent_request_info *reqinfo,
+                     netsnmp_request_info *requests)
+{
+    Netsnmp_Node_Handler *nh;
+    int             ret;
+
+    if (next_handler == NULL || reginfo == NULL || reqinfo == NULL ||
+        requests == NULL) {
+        snmp_log(LOG_ERR, "netsnmp_call_handler() called illegally\n");
+        return SNMP_ERR_GENERR;
+    }
+
+    nh = next_handler->access_method;
+    if (!nh) {
+        snmp_log(LOG_ERR, "no access method specified in handler %s.",
+                 next_handler->handler_name);
+        return SNMP_ERR_GENERR;
+    }
+
+    DEBUGMSGTL(("handler:calling", "calling handler %s for mode %s\n",
+                next_handler->handler_name,
+                se_find_label_in_slist("agent_mode", reqinfo->mode)));
+
+    /*
+     * XXX: define acceptable return statuses 
+     */
+    ret = (*nh) (next_handler, reginfo, reqinfo, requests);
+
+    DEBUGMSGTL(("handler:returned", "handler %s returned %d\n",
+                next_handler->handler_name, ret));
+
+    return ret;
+}
+
 /** @internal
  *  calls all the handlers for a given mode.
  */
@@ -289,7 +327,6 @@ netsnmp_call_handlers(netsnmp_handler_registration *reginfo,
                       netsnmp_agent_request_info *reqinfo,
                       netsnmp_request_info *requests)
 {
-    Netsnmp_Node_Handler *nh;
     netsnmp_request_info *request;
     int             status;
 
@@ -330,59 +367,16 @@ netsnmp_call_handlers(netsnmp_handler_registration *reginfo,
         snmp_log(LOG_ERR, "unknown mode in netsnmp_call_handlers! bug!\n");
         return SNMP_ERR_GENERR;
     }
-    DEBUGMSGTL(("handler:calling", "calling main handler %s\n",
+    DEBUGMSGTL(("handler:calling", "main handler %s\n",
                 reginfo->handler->handler_name));
 
     for (request = requests ; request; request = request->next) {
         request->processed = 0;
     }
 
-    nh = reginfo->handler->access_method;
-    if (!nh) {
-        snmp_log(LOG_ERR, "no handler access method specified.");
-        return SNMP_ERR_GENERR;
-    }
-
-    /*
-     * XXX: define acceptable return statuses 
-     */
-    status = (*nh) (reginfo->handler, reginfo, reqinfo, requests);
+    status = netsnmp_call_handler(reginfo->handler, reginfo, reqinfo, requests);
 
     return status;
-}
-
-/** calls a handler with with appropriate NULL checking of arguments, etc. */
-inline int
-netsnmp_call_handler(netsnmp_mib_handler *next_handler,
-                     netsnmp_handler_registration *reginfo,
-                     netsnmp_agent_request_info *reqinfo,
-                     netsnmp_request_info *requests)
-{
-    Netsnmp_Node_Handler *nh;
-    int             ret;
-
-    if (next_handler == NULL || reginfo == NULL || reqinfo == NULL ||
-        requests == NULL) {
-        snmp_log(LOG_ERR, "netsnmp_call_handler() called illegally\n");
-        return SNMP_ERR_GENERR;
-    }
-
-    nh = next_handler->access_method;
-    if (!nh) {
-        snmp_log(LOG_ERR, "no access method specified in handler %s.",
-                 next_handler->handler_name);
-        return SNMP_ERR_GENERR;
-    }
-
-    DEBUGMSGTL(("handler:calling", "calling handler %s\n",
-                next_handler->handler_name));
-
-    ret = (*nh) (next_handler, reginfo, reqinfo, requests);
-
-    DEBUGMSGTL(("handler:returned", "handler %s returned %d\n",
-                next_handler->handler_name, ret));
-
-    return ret;
 }
 
 /** calls the next handler in the chain after the current one with
@@ -858,6 +852,8 @@ netsnmp_init_handler_conf(void)
                          HANDLER_CAN_SET);
     se_add_pair_to_slist("handler_can_mode", strdup("GETBULK"),
                          HANDLER_CAN_GETBULK);
+    se_add_pair_to_slist("handler_can_mode", strdup("BABY_STEP"),
+                         HANDLER_CAN_BABY_STEP);
 }
 
 /** @} */
