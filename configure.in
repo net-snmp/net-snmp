@@ -237,6 +237,7 @@ AC_ARG_WITH(out_mib_modules,
     target:                Support for the SNMP WGs TARGET-MIB.
                            (note: this is required for the notification mib 
 			   above, and hence is usually included).
+    tunnel:                Linux TUNNEL-MIB support (ifTable extension)
 
   AgentX support:  (warning: beta code)
     agentx/client:         allows the agent to run as either a snmp agent
