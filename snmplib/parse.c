@@ -64,6 +64,7 @@ SOFTWARE.
 #include "parse.h"
 #include "asn1.h"
 #include "mib.h"
+#include "snmp_api.h"
 
 /* A quoted string value-- too long for a general "token" */
 char quoted_string_buffer[MAXQUOTESTR];
