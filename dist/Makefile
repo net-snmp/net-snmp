@@ -18,19 +18,16 @@ SHELL = /bin/sh
 # Define the RPM package name
 NAME = net-snmp
 
-# Define the default RPM release number.
-VERSION = 5.0.8
-RELEASE = 1
+# Define the default RPM release number. Set by VersionMunge.pl
+VERSION = 5.1
 
 VERSION_TAG=`echo Ext-$(VERSION) | sed 's/\./-/g;'`
 
-VER=$(VERSION)
-REL=$(RELEASE)
-
 WITH_PERL=1
+EMBED_PERL=0
 
 # Define the RPM architecture, i.e., 'noarch', 'i386', 'i686', etc.
-ARCH = i386
+ARCH = `uname -m`
 
 # Directory structure expected by 'rpm' program
 RPM_BASE := $(PWD)/rpm
@@ -57,7 +54,7 @@ clean:
 # --------------------------------------------------------------------
 CVSROOT = :pserver:anonymous@cvs.net-snmp.sourceforge.net:/cvsroot/net-snmp
 
-PKG_VER := $(NAME)-$(VER)
+PKG_VER := $(NAME)-$(VERSION)
 
 GZIP_TAR := $(RPM_BASE)/SOURCES/$(PKG_VER).tar.gz
 
@@ -86,24 +83,23 @@ $(GZIP_TAR):
 # stripping of binaries, but still retain the compression of
 # manual pages.
 #
-PERLOPTS=--define='with_perl $(WITH_PERL)'
+PERLOPTS=--with perl_modules=$(WITH_PERL) --with embedded_perl=$(EMBED_PERL)
 
 RPM_OPTS := \
     --define='_topdir $(PWD)/rpm' \
     --define='_includedir /usr/include/net-snmp' \
-    --define='version $(VER)' \
-    --define='release $(REL)' \
     --target $(ARCH) $(PERLOPTS)
 
 SPEC_FILE  := $(NAME).spec
 RPM_SPEC   := $(RPM_BASE)/SPECS/$(SPEC_FILE)
 
-BINARY_RPM := $(RPM_BASE)/RPMS/$(ARCH)/$(PKG_VER)-$(REL).$(ARCH).rpm
-SOURCE_RPM := $(RPM_BASE)/SRPMS/$(PKG_VER)-$(REL).src.rpm
+BINARY_RPM := $(RPM_BASE)/RPMS/$(ARCH)/$(PKG_VER)-$(RELEASE).$(ARCH).rpm
+SOURCE_RPM := $(RPM_BASE)/SRPMS/$(PKG_VER)-$(RELEASE).src.rpm
 
 rpm_files:	$(GZIP_TAR) all_rpm_files
 binary_rpm:	$(BINARY_RPM)
 source_rpm:	$(SOURCE_RPM)
+rpm_tree: $(RPM_TREE)
 
 all_rpm_files:	$(RPM_TREE) $(RPM_SPEC)
 	(cd $(RPM_BASE)/SPECS; \
