@@ -722,9 +722,13 @@ var_ifEntry(vp, name, length, exact, var_len, write_method)
 #if STRUCT_IFNET_HAS_IF_BAUDRATE
 	    long_return = ifnet.if_baudrate;
 #else
+#if STRUCT_IFNET_HAS_IF_SPEED
+	    long_return = ifnet.if_speed;
+#else
 	    long_return = (u_long)  1;	/* OTHER */
 #endif
-#if STRUCT_IFNET_HAS_IF_TYPE
+#endif
+#if STRUCT_IFNET_HAS_IF_TYPE && defined(IFT_ETHER)
 	    if((long_return == 0) || (long_return == 1)) {
 		if(ifnet.if_type == IFT_ETHER) long_return=10000000;
 		if(ifnet.if_type == IFT_P10) long_return=10000000;
