@@ -42,32 +42,16 @@ ${node}_map($m2c_node_map_param)
     
     DEBUGMSGTL(("verbose:${context}:${node}_map","called\n"));
     
-    /*
-     * TODO:
-     * value mapping
-     */
 @if $m2c_node_needlength == 1@
-@   if $m2c_include_examples == 0@
     /*
-     * it is hard to autogenerate code for mapping types that are not simple
-     * integers. Set $@m2c_include_examples to 1 to get an idea of what you
-     * might need to do. It will probably need some tweaking to get right.
-     * For now, here is a simple direct copy.
-     */
-    if((NULL == *mib_$m2c_node_param_ref_name) || (*mib_$m2c_node_param_ref_lname < raw_$m2c_node_param_val_lname))
-        return MFD_ERROR;
-    *mib_$m2c_node_param_ref_lname = raw_$m2c_node_param_val_lname;
-    memcpy( *mib_$m2c_node_param_ref_name, raw_$m2c_node_param_val_name, raw_$m2c_node_param_val_lname * sizeof(**mib_$m2c_node_param_ref_name));
-@   else@
-$example_start
-    /*
+     * TODO:241:r: |-> Implement $node non-integer mapping
      * it is hard to autogenerate code for mapping types that are not simple
      * integers, so here is an idea of what you might need to do. It will
      * probably need some tweaking to get right.
      */
     /*
      * if the length of the raw data doesn't directly correspond with
-     * the length of the mib data, modify set converted_len to the
+     * the length of the mib data, set converted_len to the
      * space required.
      */
     converted_len = raw_$m2c_node_param_val_lname; /* assume equal */
@@ -84,11 +68,12 @@ $example_start
     }
     *mib_$m2c_node_param_ref_lname = converted_len;
     memcpy( *mib_$m2c_node_param_ref_name, raw_$m2c_node_param_val_name, converted_len );
-$example_end
-@   end@ # example
 ##
 @elsif ($node.enums == 1) && ("$node.perltype" eq "INTEGER")@
-    /** TODO: update INTERNAL_* macros defined in the header */
+    /*
+     * TODO:241:o: |-> Implement $node enum mapping.
+     * uses INTERNAL_* macros defined in the header files
+     */
     switch(raw_$m2c_node_param_val_name) {
 @    foreach $e $v enum@
 @        include m2c_setup_enum.m2i@
@@ -103,11 +88,16 @@ $example_end
     }
 ##
 @else@
+    /*
+     * TODO:241:o: |-> Implement $node mapping.
+     * If the values for your data type don't exactly match the
+     * possible values defined by the mib, you should map them here.
+     */
     (*mib_$m2c_node_param_ref_name) = raw_$m2c_node_param_val_name;
 @end@
 
     return MFD_SUCCESS;
-}
+} /* ${node}_map */
 
 ##
 ########################################################################
