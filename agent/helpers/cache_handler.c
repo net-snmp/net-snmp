@@ -104,14 +104,19 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
                                  netsnmp_agent_request_info *reqinfo,
                                  netsnmp_request_info *requests)
 {
-    netsnmp_cache       *cache = NULL;
-    long cache_timeout;
-    int  ret;
+  netsnmp_cache       *cache = NULL;
+  long cache_timeout;
+  int  ret;
 
-    DEBUGMSGTL(("helper:cache_handler", "Got request: "));
-    DEBUGMSGOID(("helper:cache_handler", reginfo->rootoid, reginfo->rootoid_len));
+  DEBUGMSGTL(("helper:cache_handler", "Got request (%d): ", reqinfo->mode));
+  DEBUGMSGOID(("helper:cache_handler", reginfo->rootoid, reginfo->rootoid_len));
 
-    cache = (netsnmp_cache *)handler->myvoid;
+  cache = (netsnmp_cache *)handler->myvoid;
+  switch (reqinfo->mode) {
+
+  case MODE_GET:
+  case MODE_GETNEXT:
+  case MODE_GETBULK:
     /*
      * If caching is active, and the cache is out-of-date (or invalid),
      * call the load hook, and update the cache timestamp.
@@ -150,8 +155,31 @@ netsnmp_cache_helper_handler(netsnmp_mib_handler *handler,
         DEBUGMSG(("helper:cache_handler", " skipped\n"));
     }
 
+  /*
+   * A (successful) SET request wouldn't typically trigger a reload of
+   *  the cache, but might well invalidate the current contents.
+   * Only do this on the last pass through.
+   */
+  case MODE_SET_RESERVE1:
+  case MODE_SET_RESERVE2:
+  case MODE_SET_FREE:
+  case MODE_SET_ACTION:
+  case MODE_SET_UNDO:
+    break;
+  case MODE_SET_COMMIT:
+    if (cache && cache->valid /* && some flag ? */) {
+        cache->free_cache(cache, cache->magic);
+        cache->valid = 0;
+    }
+    break;
+
+  default:
+    snmp_log(LOG_WARNING, "cache_handler: Unrecognised mode (%d)\n", 
+                           reqinfo->mode);
+  }
+
 done:
-    return netsnmp_call_next_handler(handler, reginfo, reqinfo,
-                                     requests);
+  return netsnmp_call_next_handler(handler, reginfo, reqinfo,
+                                   requests);
 }
 
