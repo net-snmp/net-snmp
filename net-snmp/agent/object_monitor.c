@@ -104,6 +104,7 @@ static watcher_list *find_watchers(oid * object, size_t oid_len);
 static int      insert_watcher(oid *, size_t, monitor_info *);
 static int      check_registered(unsigned int event, oid * o, int o_l,
                                  watcher_list ** pWl, monitor_info ** pMi);
+static void     move_pending_to_ready(void);
 
 
 /**************************************************************************
@@ -300,102 +301,33 @@ netsnmp_monitor_check_registered(int event, oid * o, int o_l)
 void
 netsnmp_monitor_process_callbacks(void)
 {
-    netsnmp_monitor_callback_header *next_cbp, *cbp;
-    callback_placeholder *next_cbr, *current_cbr;
-    watcher_list   *wl;
-
     assert(need_init == 0);
     assert(NULL == callback_ready_list);
 
-    cbp = callback_pending_list;
-    if (NULL == cbp) {
+    if (NULL == callback_pending_list) {
         DEBUGMSGT(("object_monitor", "No callbacks to process"));
         return;
     }
 
     DEBUGMSG(("object_monitor", "Checking for registered " "callbacks."));
+
     /*
-     * check to see if anyone has registered for callbacks
-     * for each object.
+     * move an pending notification which has a registered watcher to the
+     * ready list. Free any other notifications.
      */
-    for (; cbp; cbp = next_cbp) {
-
-        monitor_info   *mi;
-
-        next_cbp = cbp->private;
-
-        if (0 == check_registered(cbp->event, cbp->monitored_object.idx,
-                                  cbp->monitored_object.idx_len, &wl,
-                                  &mi)) {
-
-            /*
-             * nobody watching, free memory
-             */
-            free(cbp);
-            continue;
-        }
-
-        /*
-         * Found at least one; check the rest of the list and
-         * save callback for processing
-         */
-        for (; mi; mi = mi->next) {
-
-            callback_placeholder *new_cbr, *last_cbr;
-
-            if (0 == (mi->events & cbp->event))
-                continue;
-
-            /*
-             * create temprory placeholder.
-             *
-             * I hate to allocate memory here, as I'd like this code to
-             * be fast and lean. But I don't have time to think of another
-             * solution os this will have to do for now.
-             *
-             * I need a list of monitor_info (mi) objects for each
-             * callback which has registered for the event, and want
-             * that list sorted by the priority required by the watcher.
-             */
-            new_cbr = SNMP_MALLOC_TYPEDEF(callback_placeholder);
-            if (NULL == new_cbr) {
-                snmp_log(LOG_ERR, "malloc failed, callback dropped.");
-                continue;
-            }
-            new_cbr->cbh = cbp;
-            new_cbr->mi = mi;
-            ++cbp->refs;
-
-            /*
-             * insert in callback ready list
-             */
-            last_cbr = NULL;
-            current_cbr = callback_ready_list;
-            while (current_cbr) {
-
-                if (new_cbr->mi->priority > current_cbr->mi->priority)
-                    break;
-
-                last_cbr = current_cbr;
-                current_cbr = current_cbr->next;
-            }
-            if (NULL == last_cbr) {
-                new_cbr->next = callback_ready_list;
-                callback_ready_list = new_cbr;
-            } else {
-                new_cbr->next = last_cbr->next;
-                last_cbr->next = new_cbr;
-            }
-        } /** end mi loop */
-    } /** end cbp loop */
+    move_pending_to_ready();
 
     /*
      * call callbacks
      */
-    current_cbr = callback_ready_list;
-    for (; current_cbr; current_cbr = next_cbr) {
+    while (callback_ready_list) {
 
-        next_cbr = current_cbr->next;
+        /*
+         * pop off the first item
+         */
+        callback_placeholder *current_cbr;
+        current_cbr = callback_ready_list;
+        callback_ready_list = current_cbr->next;
 
         /*
          * setup, then call callback
@@ -412,10 +344,16 @@ netsnmp_monitor_process_callbacks(void)
             free(current_cbr->cbh);
         }
         free(current_cbr);
+
+        /*
+         * check for any new pending notifications
+         */
+        move_pending_to_ready();
+
     }
 
-    callback_ready_list = NULL;
-    callback_pending_list = NULL;
+    assert(callback_ready_list == NULL);
+    assert(callback_pending_list = NULL);
 
     return;
 }
@@ -619,6 +557,114 @@ check_registered(unsigned int event, oid * o, int o_l,
     }
 
     return 0;
+}
+
+/**
+ *@internal
+ */
+inline void
+insert_ready(callback_placeholder * new_cbr)
+{
+    callback_placeholder *current_cbr, *last_cbr;
+
+    /*
+     * insert in callback ready list
+     */
+    last_cbr = NULL;
+    current_cbr = callback_ready_list;
+    while (current_cbr) {
+
+        if (new_cbr->mi->priority > current_cbr->mi->priority)
+            break;
+
+        last_cbr = current_cbr;
+        current_cbr = current_cbr->next;
+    }
+    if (NULL == last_cbr) {
+        new_cbr->next = callback_ready_list;
+        callback_ready_list = new_cbr;
+    } else {
+        new_cbr->next = last_cbr->next;
+        last_cbr->next = new_cbr;
+    }
+}
+
+/**
+ *@internal
+ *
+ * move an pending notification which has a registered watcher to the
+ * ready list. Free any other notifications.
+ */
+static void
+move_pending_to_ready(void)
+{
+    /*
+     * check to see if anyone has registered for callbacks
+     * for each object.
+     */
+    while (callback_pending_list) {
+
+        watcher_list   *wl;
+        monitor_info   *mi;
+        netsnmp_monitor_callback_header *cbp;
+
+        /*
+         * pop off first item
+         */
+        cbp = callback_pending_list;
+        callback_pending_list = cbp->private; /** next */
+
+        if (0 == check_registered(cbp->event, cbp->monitored_object.idx,
+                                  cbp->monitored_object.idx_len, &wl,
+                                  &mi)) {
+
+            /*
+             * nobody watching, free memory
+             */
+            free(cbp);
+            continue;
+        }
+
+        /*
+         * Found at least one; check the rest of the list and
+         * save callback for processing
+         */
+        for (; mi; mi = mi->next) {
+
+            callback_placeholder *new_cbr;
+
+            if (0 == (mi->events & cbp->event))
+                continue;
+
+            /*
+             * create temprory placeholder.
+             *
+             * I hate to allocate memory here, as I'd like this code to
+             * be fast and lean. But I don't have time to think of another
+             * solution os this will have to do for now.
+             *
+             * I need a list of monitor_info (mi) objects for each
+             * callback which has registered for the event, and want
+             * that list sorted by the priority required by the watcher.
+             */
+            new_cbr = SNMP_MALLOC_TYPEDEF(callback_placeholder);
+            if (NULL == new_cbr) {
+                snmp_log(LOG_ERR, "malloc failed, callback dropped.");
+                continue;
+            }
+            new_cbr->cbh = cbp;
+            new_cbr->mi = mi;
+            ++cbp->refs;
+
+            /*
+             * insert in callback ready list
+             */
+            insert_ready(new_cbr);
+
+        } /** end mi loop */
+    } /** end cbp loop */
+
+    assert(callback_pending_list == NULL);
 }
 
 
