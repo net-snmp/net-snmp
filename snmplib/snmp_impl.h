@@ -55,13 +55,16 @@ SOFTWARE.
 #endif
 
 struct packet_info {
-    int 	version;
     u_char 	pdutype;
+    snmp_ipaddr	source;
+    int		version;
+    int		mp_model;
+    int		sec_model;
+    int		sec_level;
 
     /* community based authentication */
     u_char	community[COMMUNITY_MAX_LEN + 1];
     int		community_len;
-    int		community_id;
 
     /* snmp security based authentication */
     oid	        srcParty[64];
@@ -92,24 +95,36 @@ struct packet_info {
                         /* & write access for V2 GLOBAL stuff -- Wes */
 #define NOACCESS 0x0000	/* no access for anybody */
 
+/* defined types (from the SMI, RFC 1157) */
+#define ASN_IPADDRESS   (ASN_APPLICATION | 0)
+#define ASN_COUNTER	(ASN_APPLICATION | 1)
+#define ASN_GAUGE	(ASN_APPLICATION | 2)
+#define ASN_UNSIGNED    (ASN_APPLICATION | 2)  /* RFC 1902 - same as GAUGE */
+#define ASN_TIMETICKS   (ASN_APPLICATION | 3)
+#define ASN_OPAQUE	(ASN_APPLICATION | 4)  /* changed so no conflict with other includes */
+
+/* defined types (from the SMI, RFC 1442) */
+#define ASN_NSAP	(ASN_APPLICATION | 5)  /* historic - don't use */
+#define ASN_COUNTER64   (ASN_APPLICATION | 6)
+#define ASN_UINTEGER    (ASN_APPLICATION | 7)  /* historic - don't use */
+
+#define CMU_COMPATIBLE
+#ifdef CMU_COMPATIBLE
 #define INTEGER	    ASN_INTEGER
 #define STRING	    ASN_OCTET_STR
 #define OBJID	    ASN_OBJECT_ID
 #define NULLOBJ	    ASN_NULL
 #define BITSTRING   ASN_BIT_STR  /* HISTORIC - don't use */
-
-/* defined types (from the SMI, RFC 1157) */
-#define IPADDRESS   (ASN_APPLICATION | 0)
-#define COUNTER	    (ASN_APPLICATION | 1)
-#define GAUGE	    (ASN_APPLICATION | 2)
-#define UNSIGNED    (ASN_APPLICATION | 2)  /* RFC 1902 - same as GAUGE */
-#define TIMETICKS   (ASN_APPLICATION | 3)
-#define ASNT_OPAQUE (ASN_APPLICATION | 4)  /* changed so no conflict with other includes */
-
-/* defined types (from the SMI, RFC 1442) */
-#define NSAP	    (ASN_APPLICATION | 5)  /* historic - don't use */
-#define COUNTER64   (ASN_APPLICATION | 6)
-#define UINTEGER    (ASN_APPLICATION | 7)  /* historic - don't use */
+#define IPADDRESS   ASN_IPADDRESS
+#define COUNTER	    ASN_COUNTER
+#define GAUGE	    ASN_GAUGE
+#define UNSIGNED    ASN_UNSIGNED
+#define TIMETICKS   ASN_TIMETICKS
+#define ASNT_OPAQUE ASN_OPAQUE
+#define NSAP	    ASN_NSAP
+#define COUNTER64   ASN_COUNTER64
+#define UINTEGER    ASN_UINTEGER
+#endif /* CMU_COMPATIBLE */
 
 struct trapVar {
     oid	    *varName;
@@ -123,7 +138,7 @@ struct trapVar {
 /* changed to ERROR_MSG to eliminate conflict with other includes */
 #define ERROR_MSG(string)	snmp_detail = string
 
-/* from snmp.c*/
+/* from snmp.c */
 extern u_char	sid[];	/* size SID_MAX_LEN */
 extern char *snmp_detail;
 extern int snmp_errno;
@@ -147,6 +162,5 @@ u_char	*snmp_party_parse __P((u_char *, int *, struct packet_info *,
                                  oid *, int *, oid *, int *, oid *, int *, int));
 u_char	*snmp_party_build __P((u_char *, int *, struct packet_info *, int,
                                  oid *, int, oid *, int, oid *, int, int *, int));
-
 
 int has_access __P((u_char, int, int, int));

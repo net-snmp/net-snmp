@@ -82,12 +82,16 @@ struct column {
 } *column = NULL;
 
 static char **data = NULL;
+static char **indices = NULL;
+static index_width = 5;
 static int fields;
 static int entries;
 static int allocated;
 static int headers_only = 0;
 static int no_headers = 0;
 static int max_width = 0;
+static int brief = 0;
+static int show_index = 0;
 static char *field_separator = NULL;
 static char *table_name;
 static oid name[MAX_NAME_LEN];
@@ -109,7 +113,10 @@ void usage __P((void))
   snmp_parse_args_descriptions(stderr);
   fprintf(stderr,"  -w <W>        print table in parts of W characters width\n");
   fprintf(stderr,"  -f <F>        print an F delimited table\n");
-  fprintf(stderr,"  -h            print only the table header\n");
+  fprintf(stderr,"  -h            print only the table headings\n");
+  fprintf(stderr,"  -H            don't print the table headings\n");
+  fprintf(stderr,"  -b            brief field names\n");
+  fprintf(stderr,"  -x            print index value\n");
   exit(1);
 }
 
@@ -131,12 +138,12 @@ main(argc, argv)
   /* get the common command line arguments */
   arg = snmp_parse_args(argc, argv, &session)-1;
   
-  while ((argt = getopt(argc-arg, argv+arg, "w:f:hH")) != EOF) {
+  while ((argt = getopt(argc-arg, argv+arg, "w:f:hHbx")) != EOF) {
     switch (argt) {
     case 'w':
       max_width = atoi(optarg);
       if (max_width == 0) {
-	fprintf(stderr, "Bad -w option\n");
+	fprintf(stderr, "Bad -w option: %s\n", optarg);
 	usage();
       }
       break;
@@ -148,6 +155,12 @@ main(argc, argv)
       break;
     case 'H':
       no_headers = 1;
+      break;
+    case 'b':
+      brief = 1;
+      break;
+    case 'x':
+      show_index = 1;
       break;
     default:
       usage();
@@ -192,6 +205,7 @@ void print_table __P(())
   int entry, field, first_field, last_field = 0, width, part = 0;
   char **dp;
   char string_buf[1024];
+  char *index_fmt = NULL;
 
   printf("SNMP table: %s\n\n", table_name);
 
@@ -202,21 +216,31 @@ void print_table __P(())
     else sprintf(string_buf, "%s%%s", field_separator);
     column[field].fmt = strdup (string_buf);
   }
+  if (show_index) {
+    sprintf(string_buf, "%%%ds", index_width);
+    index_fmt = strdup(string_buf);
+  }
 
   while (last_field != fields) {
     part++;
     if (part != 1) printf("\nSNMP table %s, part %d\n\n", table_name, part);
     first_field = last_field;
     dp = data;
-    width = 0;
-    for (field = first_field, width = 0; field < fields; field++) {
+    if (show_index) {
+      width = index_width;
+      printf(index_fmt, "index");
+    }
+    else
+      width = 0;
+    for (field = first_field; field < fields; field++) {
       width += column[field].width+1;
-      if (max_width != 0 && width > max_width) break;
+      if (field != first_field && width > max_width) break;
       printf(column[field].fmt, column[field].label);
     }
     last_field = field;
     printf("\n");
     for (entry = 0; entry < entries; entry++) {
+      if (show_index) printf(index_fmt, indices[entry]);
       for (field = first_field; field < last_field; field++) {
 	printf(column[field].fmt, dp[field] ? dp[field] : "?");
       }
@@ -257,6 +281,23 @@ void get_field_names __P(())
   name_p = strrchr(string_buf, '.');
   if (name_p) *name_p = 0;
   table_name = strdup(string_buf);
+  if (brief) {
+    char *f1, *f2;
+    int common = 128;
+    int field;
+    for (field = 1; field < fields; field++) {
+      f1 = column[field-1].label;
+      f2 = column[field].label;
+      while (*f1++ == *f2++ && *f1) ;
+      if (f2 - column[field].label < common) common = f2 - column[field].label - 1;
+    }
+    if (common) {
+      for (field = 0; field < fields; field++) {
+        column[field].label += common;
+	column[field].width -= common;
+      }
+    }
+  }
 }
 
 void get_table_entries __P((void))
@@ -270,7 +311,7 @@ void get_table_entries __P((void))
   int   i;
   int   col;
   char  string_buf[1024];
-  char  *name_p;
+  char  *name_p = NULL;
   char  **dp;
 
   SOCK_STARTUP;
@@ -321,11 +362,24 @@ void get_table_entries __P((void))
 	  if (allocated == 0) {
 	    allocated = 10;
 	    data = malloc(allocated*fields*sizeof(char *));
+	    memset (data, 0, allocated*fields*sizeof(char *));
+	    if (show_index) indices = malloc(allocated*sizeof(char *));
 	  }
 	  else {
 	    allocated += 10;
 	    data = realloc(data, allocated*fields*sizeof(char *));
+	    memset (data+entries*fields, 0,
+		    (allocated-entries)*fields*sizeof(char *));
+	    if (show_index) indices = realloc(indices, allocated*sizeof(char *));
 	  }
+	}
+	if (show_index) {
+	  name_p = string_buf + strlen(table_name)+1;
+	  name_p = strchr(name_p, '.')+1;
+	  name_p = strchr(name_p, '.')+1;
+	  indices[entries-1] = strdup(name_p);
+	  i = strlen(name_p);
+	  if (i > index_width) index_width = i;
 	}
 	dp = data+(entries-1)*fields;
 	col = -1;

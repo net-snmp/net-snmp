@@ -86,9 +86,9 @@ typedef long    fd_mask;
 
 #include "mib_module_config.h"
 #include "asn1.h"
+#include "snmp_api.h"
 #include "snmp_impl.h"
 #include "system.h"
-#include "snmp_api.h"
 #include "snmp.h"
 #include "m2m.h"
 #include "party.h"
@@ -340,8 +340,8 @@ agent_party_init(myaddr, dest_port, view)
     pp1->partyLocal = 1; /* TRUE */
     pp1->partyAuthPrivateLen = rp->partyAuthPrivateLen = 0;
     pp1->partyPrivPrivateLen = rp->partyPrivPrivateLen = 0;
-    pp1->partyStorageType = 2; /* volatile */
-    pp1->partyStatus = rp->partyStatus = PARTYACTIVE;
+    pp1->partyStorageType = SNMP_STORAGE_VOLATILE;
+    pp1->partyStatus = rp->partyStatus = SNMP_ROW_ACTIVE;
 #define PARTYCOMPLETE_MASK              65535
     /* all collumns - from party_vars.c XXX */
     pp1->partyBitMask = rp->partyBitMask = PARTYCOMPLETE_MASK;
@@ -363,8 +363,8 @@ agent_party_init(myaddr, dest_port, view)
     pp2->partyLocal = 2; /* FALSE */
     pp2->partyAuthPrivateLen = rp->partyAuthPrivateLen = 0;
     pp2->partyPrivPrivateLen = rp->partyPrivPrivateLen = 0;
-    pp2->partyStorageType = 2; /* volatile */
-    pp2->partyStatus = rp->partyStatus = PARTYACTIVE;
+    pp2->partyStorageType = SNMP_STORAGE_VOLATILE;
+    pp2->partyStatus = rp->partyStatus = SNMP_ROW_ACTIVE;
     pp2->partyBitMask = rp->partyBitMask = PARTYCOMPLETE_MASK;
  
     cxp = context_createEntry(contextid, contextidlen);
@@ -375,8 +375,8 @@ agent_party_init(myaddr, dest_port, view)
     cxp->contextLocalEntityLen = 0;
     cxp->contextLocalTime = CURRENTTIME;
     cxp->contextProxyContextLen = 0;
-    cxp->contextStorageType = 2;
-    cxp->contextStatus = rxp->contextStatus = CONTEXTACTIVE;
+    cxp->contextStorageType = SNMP_STORAGE_VOLATILE;
+    cxp->contextStatus = rxp->contextStatus = SNMP_ROW_ACTIVE;
 #define CONTEXTCOMPLETE_MASK              0x03FF
     /* all collumns - from context_vars.c XXX */
     cxp->contextBitMask = rxp->contextBitMask = CONTEXTCOMPLETE_MASK;
@@ -385,8 +385,8 @@ agent_party_init(myaddr, dest_port, view)
     vwp = view_createEntry(viewIndex, viewSubtree, viewSubtreeLen);
     vwp->viewType = VIEWINCLUDED;
     vwp->viewMaskLen = 0;
-    vwp->viewStorageType = 2; /* volatile */
-    vwp->viewStatus = VIEWACTIVE;
+    vwp->viewStorageType = SNMP_STORAGE_VOLATILE;
+    vwp->viewStatus = SNMP_ROW_ACTIVE;
 #define VIEWCOMPLETE_MASK              0x3F
     /* all collumns - from view_vars.c XXX */
     vwp->viewBitMask = VIEWCOMPLETE_MASK;
@@ -400,15 +400,15 @@ agent_party_init(myaddr, dest_port, view)
     vwp = view_createEntry(viewIndex, viewSubtree, viewSubtreeLen);
     vwp->viewType = VIEWINCLUDED;
     vwp->viewMaskLen = 0;
-    vwp->viewStorageType = 2; /* volatile */
-    vwp->viewStatus = VIEWACTIVE;
+    vwp->viewStorageType = SNMP_STORAGE_VOLATILE;
+    vwp->viewStatus = SNMP_ROW_ACTIVE;
     vwp->viewBitMask = VIEWCOMPLETE_MASK;
     vwp->reserved->viewBitMask = vwp->viewBitMask;
 
     ap = acl_createEntry(oneIndex, twoIndex, cxindex);
     ap->aclPriveleges = 132;
-    ap->aclStorageType = 2; /* volatile */
-    ap->aclStatus = ACLACTIVE;
+    ap->aclStorageType = SNMP_STORAGE_VOLATILE;
+    ap->aclStatus = SNMP_ROW_ACTIVE;
 #define ACLCOMPLETE_MASK              0x3F
     /* all collumns - from acl_vars.c XXX */
     ap->aclBitMask = ACLCOMPLETE_MASK;
@@ -419,8 +419,8 @@ agent_party_init(myaddr, dest_port, view)
        and noAuth/noPriv parties will be able to set in this default view.
        Remember to turn it back off when you're done! */
     ap->aclPriveleges = 35;
-    ap->aclStorageType = 2; /* volatile */
-    ap->aclStatus = ACLACTIVE;
+    ap->aclStorageType = SNMP_STORAGE_VOLATILE;
+    ap->aclStatus = SNMP_ROW_ACTIVE;
     ap->aclBitMask = ACLCOMPLETE_MASK;
     ap->reserved->aclBitMask = ap->aclBitMask;
 
@@ -999,7 +999,7 @@ void snmpd_parse_config_authtrap(word, cptr)
     snmp_enableauthentraps = i;
 }
 
-void snmpd_parse_config_trapsink(word,cptr)
+void snmpd_parse_config_trapsink(word, cptr)
   char *word;
   char *cptr;
 {
@@ -1018,4 +1018,3 @@ void snmpd_parse_config_trapcommunity(word,cptr)
   snmp_trapcommunity = malloc (strlen(cptr));
   copy_word(cptr, snmp_trapcommunity);
 }
-

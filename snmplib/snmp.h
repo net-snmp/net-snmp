@@ -96,22 +96,21 @@ SOFTWARE.
 #define SNMP_VERSION_2star 130 /* not (will never be) supported by this code */
 
 /* PDU types in SNMPv1, SNMPsec, SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 */
-#define GET_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x0)
-#define GETNEXT_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x1)
-#define GET_RSP_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x2)
-#define SET_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x3)
+#define SNMP_MSG_GET	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x0)
+#define SNMP_MSG_GETNEXT    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x1)
+#define SNMP_MSG_RESPONSE   (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x2)
+#define SNMP_MSG_SET	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x3)
 
 /* PDU types in SNMPv1 and SNMPsec */
-#define TRP_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x4)
+#define SNMP_MSG_TRAP	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x4)
 
 /* PDU types in SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 */
-#define BULK_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x5)
-#define INFORM_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x6)
-#define TRP2_REQ_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x7)
+#define SNMP_MSG_GETBULK    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x5)
+#define SNMP_MSG_INFORM	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x6)
+#define SNMP_MSG_TRAP2	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x7)
 
 /* PDU types in SNMPv2u, SNMPv2*, and SNMPv3 */
-#define REPORT_RSP_MSG	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x8)
-
+#define SNMP_MSG_REPORT	    (ASN_CONTEXT | ASN_CONSTRUCTOR | 0x8)
 
 /* Exception values for SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 */
 #define SNMP_NOSUCHOBJECT    (ASN_CONTEXT | ASN_PRIMITIVE | 0x0)
@@ -155,6 +154,72 @@ SOFTWARE.
 #define SNMP_TRAP_AUTHFAIL		(4)
 #define SNMP_TRAP_EGPNEIGHBORLOSS	(5)
 #define SNMP_TRAP_ENTERPRISESPECIFIC	(6)
+
+/* row status values */
+#define SNMP_ROW_NONEXISTENT		0
+#define SNMP_ROW_ACTIVE			1
+#define SNMP_ROW_NOTINSERVICE		2
+#define SNMP_ROW_NOTREADY		3
+#define SNMP_ROW_CREATEANDGO		4
+#define SNMP_ROW_CREATEANDWAIT		5
+#define SNMP_ROW_DESTROY		6
+
+/* row storage values */
+#define SNMP_STORAGE_OTHER		1
+#define SNMP_STORAGE_VOLATILE		2
+#define SNMP_STORAGE_NONVOLATILE	3
+#define SNMP_STORAGE_PERMANENT		4
+#define SNMP_STORAGE_READONLY		5
+
+/* message processing models */
+#define SNMP_MP_MODEL_SNMPv1		0
+#define SNMP_MP_MODEL_SNMPv2c		1
+#define SNMP_MP_MODEL_SNMPv2u		2
+#define SNMP_MP_MODEL_SNMPv3		3
+#define SNMP_MP_MODEL_SNMPv2p		256
+
+/* security values */
+#define SNMP_SEC_MODEL_ANY		0
+#define SNMP_SEC_MODEL_SNMPv1		1
+#define SNMP_SEC_MODEL_SNMPv2c		2
+#define SNMP_SEC_MODEL_USM		3
+#define SNMP_SEC_MODEL_SNMPv2p		256
+
+#define SNMP_SEC_LEVEL_NOAUTH		1
+#define SNMP_SEC_LEVEL_AUTHNOPRIV	2
+#define SNMP_SEC_LEVEL_AUTHPRIV		3
+
+/* view status */
+#define SNMP_VIEW_INCLUDED		1
+#define SNMP_VIEW_EXCLUDED		2
+
+/* basic oid values */
+#define SNMP_OID_INTERNET		1, 3, 6, 1
+#define SNMP_OID_ENTERPRISES		SNMP_OID_INTERNET, 4, 1
+#define SNMP_OID_MIB2			SNMP_OID_INTERNET, 2, 1
+#define SNMP_OID_SNMPV2			SNMP_OID_INTERNET, 6
+#define SNMP_OID_SNMPMODULES		SNMP_OID_SNMPV2, 3
+
+
+#define CMU_COMPATIBLE
+#ifdef CMU_COMPATIBLE
+/* PDU types in SNMPv1, SNMPsec, SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 */
+#define GET_REQ_MSG	    SNMP_MSG_GET
+#define GETNEXT_REQ_MSG	    SNMP_MSG_GETNEXT
+#define GET_RSP_MSG	    SNMP_MSG_RESPONSE
+#define SET_REQ_MSG	    SNMP_MSG_SET
+
+/* PDU types in SNMPv1 and SNMPsec */
+#define TRP_REQ_MSG	    SNMP_MSG_TRAP
+
+/* PDU types in SNMPv2p, SNMPv2c, SNMPv2u, SNMPv2*, and SNMPv3 */
+#define BULK_REQ_MSG	    SNMP_MSG_GETBULK
+#define INFORM_REQ_MSG	    SNMP_MSG_INFORM
+#define TRP2_REQ_MSG	    SNMP_MSG_TRAP2
+
+/* PDU types in SNMPv2u, SNMPv2*, and SNMPv3 */
+#define REPORT_RSP_MSG	    SNMP_MSG_REPORT
+#endif /* CMU_COMPATIBLE */
 
 void xdump __P((u_char *, int, char *));
 u_char *snmp_parse_var_op __P((u_char *, oid *, int *, u_char *, int *,

@@ -60,7 +60,6 @@
 #include "../../snmplib/system.h"
 
 #include "mibincl.h"
-#include "snmp_api.h"
 #include "auto_nlist.h"
 
 #ifdef MIB_IPCOUNTER_SYMBOL

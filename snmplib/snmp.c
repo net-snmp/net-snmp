@@ -55,6 +55,7 @@ SOFTWARE.
 
 #include "asn1.h"
 #include "snmp.h"
+#include "snmp_api.h"
 #include "snmp_impl.h"
 #include "mib.h"
 

@@ -76,8 +76,8 @@ SOFTWARE.
 #include <errno.h>
 
 #include "asn1.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
+#include "snmp_impl.h"
 #include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
@@ -351,7 +351,7 @@ int snmp_input(op, session, reqid, pdu, magic)
 			   uptime_string(pdu->time, buf));
 		}
 		else
-		    printf("\t%s Trap (%d) Uptime: %s\n",
+		    printf("\t%s Trap (%ld) Uptime: %s\n",
 			   trap_description(pdu->trap_type), pdu->specific_type,
 			   uptime_string(pdu->time, buf));
 		for(vars = pdu->variables; vars; vars = vars->next_variable) {

@@ -57,6 +57,7 @@
 #include <malloc.h>
 #endif
 #include <asn1.h>
+#include "snmp_api.h"
 #include <snmp_impl.h>
 #include <snmp.h>
 #include "snmp_vars.h"
@@ -64,7 +65,6 @@
 #include "snmp_vars_m2m.h"
 #include "alarm.h"
 #include "event.h"
-#include "snmp_api.h"
 #include "party.h"
 #include "snmp_client.h"	
 #include "../../snmplib/system.h"

@@ -59,6 +59,7 @@ SOFTWARE.
 #define NULL	0
 #endif
 
+#include "snmp_api.h"
 #include "snmp_impl.h" /* to define ERROR_MSG */
 
 /*

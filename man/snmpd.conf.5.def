@@ -118,14 +118,54 @@ unspecified, they default to a value of DEFMAXLOADAVE.
 Any errors in obtaining the above information are reported via the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORFLAG flag and the
 EXTENSIBLEDOTMIB.ERRORMIBNUM.ERRORMSG text-string description.
-.SH CHANGING THE COMMUNITY STRINGS
-.IP "community N STRING"
-.IP
-Sets the community string in slot N to be STRING.  N must be less than
-or equal to the hard coded value of NUM_COMMUNITIES.  The default
-NUM_COMMUNITIES names are set in the source code of the agent in the
-file "agent/snmp_agent.c".  The number N is defined in the "config.h"
-source file.
+.SH ACCESS CONTROL
+snmpd supports the View-Based Access Control Model (vacm)
+as defined in RFC 2175.
+To this end, it recognizes the following keywords in the configuration
+file: \fIcom2sec\fR, \fIgroup\fR, \fIaccess\fR, and \fIview\fR.
+.IP "com2sec NAME SOURCE COMMUNITY"
+This directive specifies the mapping from a source/community pair to
+a security name. SOURCE can be a hostname, a subnet, of the word
+\fIdefault\fR.
+A subnet can be specified as IP/MASK or IP/BITS.
+The first source/community combination that matches the incoming packet
+is selected.
+.IP "group NAME MODEL SECURITY"
+This directive defines the mapping from securitymodel/securityname to group.
+MODEL is one of \fIany\fR, \fIv1\fR, \fIv2c\fR, or \fIusm\fR.
+.IP "access NAME CONTEXT MODEL LEVEL PREFX READ WRITE NOTIFY"
+The access directive maps from group/security model/security level to
+a view. 
+MODEL is one of \fIany\fR, \fIv1\fR, \fIv2c\fR, or \fIusm\fR.
+LEVEL is one of \fInoauth\fR, \fIauth\fR, or \fIpriv\fR.
+READ, WRITE and NOTIFY specifies the view to be used for the corresponding 
+access.
+For v1 or v2c access, LEVEL will be noauth, and CONTEXT will be empty.
+.IP "view NAME TYPE SUBTREE MASK"
+The defines the named view. TYPE is either \fIincluded\fR or \fIexcluded\fR.
+MASK is a list of hex octets, separated by '.' or ':'.
+.IP Examples:
+.nf
+#       sec.name  source          community
+com2sec local     localhost       private
+com2sec mynet     192.168.17.0/24 public
+com2sec public    default         public
+
+#             sec.model  sec.name
+group mygroup v1         mynet
+group mygroup v2c        mynet
+group local   any        local
+group public  any        public
+
+#              context sec.model sec.level prefix read   write notify
+access mygroup ""      any       noauth    0      mib2   none  none
+access public  ""      any       noauth    0      system none  none
+access local   ""      any       noauth    0      all    all   all
+
+#           incl/excl subtree                          mask
+view all    included  .1                               80
+view system included  system                           fe
+view mib2   included  .iso.org.dod.internet.mgmt.mib-2 fc
 .SH SETTING SYSTEM INFORMATION
 .IP "syslocation STRING"
 .IP "syscontact STRING"

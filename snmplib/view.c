@@ -60,17 +60,14 @@ view_getEntry(viewIndex, viewSubtree, viewSubtreeLen)
 void
 view_scanInit()
 {
-  ScanPtr = List;
+    ScanPtr = List;
 }
 
 struct viewEntry *
 view_scanNext()
 {
-    struct viewEntry *returnval;
-
-    returnval = ScanPtr;
-    if (ScanPtr != NULL)
-        ScanPtr = ScanPtr->next;
+    struct viewEntry *returnval = ScanPtr;
+    if (ScanPtr) ScanPtr = ScanPtr->next;
     return returnval;
 }
 
@@ -102,7 +99,7 @@ view_destroyEntry(viewIndex, viewSubtree, viewSubtreeLen)
 {
     struct viewEntry *vp, *lastvp = NULL;
 
-    if (List->viewIndex == viewIndex
+    if (List && List->viewIndex == viewIndex
 	&& List->viewSubtreeLen == viewSubtreeLen
 	&& !memcmp((char *)List->viewSubtree, (char *)viewSubtree,
 		 viewSubtreeLen * sizeof(oid))){

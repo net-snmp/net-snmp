@@ -56,10 +56,11 @@ SOFTWARE.
 #include "main.h"
 #include "asn1.h"
 #include "snmp.h"
-#include "snmp_impl.h"
 #include "snmp_api.h"
+#include "snmp_impl.h"
 #include "snmp_client.h"
 #include "mib.h"
+#include "../../snmplib/system.h"
 
 #include "netstat.h"
 
