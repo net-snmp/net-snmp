@@ -16,7 +16,7 @@ mibdir = $(snmplibdir)/mibs
 
 INSTALL = @INSTALL@
 
-MIBS=ucd-snmp.txt EtherLike-MIB.txt HOST-RESOURCES-MIB.txt \
+MIBS=UCD-SNMP-MIB.txt EtherLike-MIB.txt HOST-RESOURCES-MIB.txt \
 	IANAifType-MIB.txt IF-MIB.txt IP-MIB.txt RFC1155-SMI.txt \
 	RFC1213-MIB.txt RFC1271-MIB.txt SNMPv2-CONF.txt \
 	SNMPv2-M2M-MIB.txt SNMPv2-MIB.txt SNMPv2-PARTY-MIB.txt \
