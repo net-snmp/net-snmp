@@ -19,7 +19,7 @@ extern "C" {
 #define DS_LIB_MIB_COMMENT_TERM    2
 #define DS_LIB_MIB_PARSE_LABEL     3
 #define DS_LIB_DUMP_PACKET         4
-#define DS_LIB_DONT_LOG_TIMESTAMP  5
+#define DS_LIB_LOG_TIMESTAMP       5
 
 /* library integers */
 #define DS_LIB_MIB_WARNINGS  0
