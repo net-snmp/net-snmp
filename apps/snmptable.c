@@ -368,6 +368,7 @@ get_field_names(char *tblname)
             tbl = tbl->child_list;
         } else {
             root[rootlen++] = 1;
+            going = 0;
         }
     }
 
@@ -434,7 +435,7 @@ get_field_names(char *tblname)
         column[fields - 1].subid = root[rootlen];
     }
     if (fields == 0) {
-        fprintf(stderr, "Was that a table? %s\n", buf);
+        fprintf(stderr, "Was that a table? %s\n", table_name);
         exit(1);
     }
     *name_p = 0;
