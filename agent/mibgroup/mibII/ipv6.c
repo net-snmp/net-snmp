@@ -151,7 +151,7 @@ static int header_ipv6_scan __P((register struct variable *, oid *, size_t *,
 static int if_initialize __P((void));
 static int if_maxifindex __P((void));
 static char *if_getname __P((int));
-static int if_getindex __P((char *));
+static int if_getindex __P((const char *));
 
 struct variable4 ipv6_variables[] = {
     {IPV6FORWARDING, ASN_INTEGER, RONLY, var_ipv6, 1, {1}},
@@ -310,14 +310,14 @@ init_ipv6()
 }
 
 static int
-header_ipv6(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
+header_ipv6(
+    register struct variable *vp,
 			/* IN - pointer to variable entry that points here */
-    oid *name;		/* IN/OUT - input name requested, output name found */
-    size_t *length;	/* IN/OUT - length of input and output oid's */
-    int exact;		/* IN - TRUE if an exact match was requested */
-    size_t *var_len;	/* OUT - length of variable or 0 if function returned */
-    WriteMethod **write_method;
+    oid *name,		/* IN/OUT - input name requested, output name found */
+    size_t *length,	/* IN/OUT - length of input and output oid's */
+    int exact,		/* IN - TRUE if an exact match was requested */
+    size_t *var_len,	/* OUT - length of variable or 0 if function returned */
+    WriteMethod **write_method)
 {
     oid newname[MAX_NAME_LEN];
     int result;
@@ -342,16 +342,16 @@ header_ipv6(vp, name, length, exact, var_len, write_method)
 }
 
 static int
-header_ipv6_scan(vp, name, length, exact, var_len, write_method, from, to)
-    register struct variable *vp;
+header_ipv6_scan(
+    register struct variable *vp,
 			/* IN - pointer to variable entry that points here */
-    oid *name;		/* IN/OUT - input name requested, output name found */
-    size_t *length;	/* IN/OUT - length of input and output oid's */
-    int exact;		/* IN - TRUE if an exact match was requested */
-    size_t *var_len;	/* OUT - length of variable or 0 if function returned */
-    WriteMethod **write_method;
-    int from;
-    int to;
+    oid *name,		/* IN/OUT - input name requested, output name found */
+    size_t *length,	/* IN/OUT - length of input and output oid's */
+    int exact,		/* IN - TRUE if an exact match was requested */
+    size_t *var_len,	/* OUT - length of variable or 0 if function returned */
+    WriteMethod **write_method,
+    int from,
+    int to)
 {
     oid newname[MAX_NAME_LEN];
     int result;
@@ -382,7 +382,7 @@ header_ipv6_scan(vp, name, length, exact, var_len, write_method, from, to)
 static struct if_nameindex *ifnames = NULL;
 
 static int
-if_initialize()
+if_initialize(void)
 {
 #ifndef HAVE_IF_NAMEINDEX
     return -1;
@@ -397,7 +397,7 @@ if_initialize()
 }
 
 static int
-if_maxifindex()
+if_maxifindex(void)
 {
 #ifndef HAVE_IF_NAMEINDEX
     return -1;
@@ -418,8 +418,7 @@ if_maxifindex()
 }
 
 static char *
-if_getname(idx)
-    int idx;
+if_getname(int idx)
 {
 #ifndef HAVE_IF_NAMEINDEX
     return NULL;
@@ -440,8 +439,7 @@ if_getname(idx)
 }
 
 static int
-if_getindex(name)
-    char *name;
+if_getindex(const char *name)
 {
 #ifndef HAVE_IF_NAMEINDEX
     return -1;
@@ -491,9 +489,7 @@ if_getifnet(int idx, struct ifnet *result)
 #ifdef HAVE_NET_IF_MIB_H
 #if defined(HAVE_SYS_SYSCTL_H) && defined(CTL_NET)
 static int
-if_getifmibdata(idx, result)
-    int idx;
-    struct ifmibdata *result;
+if_getifmibdata(int idx, struct ifmibdata *result)
 {
     int mib[6] = {
 	CTL_NET, PF_LINK, NETLINK_GENERIC, IFMIB_IFDATA, 0, IFDATA_GENERAL
@@ -520,13 +516,13 @@ if_getifmibdata(idx, result)
 #endif
 
 u_char *
-var_ipv6(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid *name;
-    size_t *length;
-    int exact;
-    size_t *var_len;
-    WriteMethod **write_method;
+var_ipv6(
+    register struct variable *vp,
+    oid *name,
+    size_t *length,
+    int exact,
+    size_t *var_len,
+    WriteMethod **write_method)
 {
     int i;
 
@@ -621,13 +617,13 @@ var_ipv6(vp, name, length, exact, var_len, write_method)
 }
 
 u_char *
-var_ifv6Entry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid *name;
-    size_t *length;
-    int exact;
-    size_t *var_len;
-    WriteMethod **write_method;
+var_ifv6Entry(
+    register struct variable *vp,
+    oid *name,
+    size_t *length,
+    int exact,
+    size_t *var_len,
+    WriteMethod **write_method)
 {
 #ifndef HAVE_IF_NAMEINDEX
     return NULL;
@@ -888,13 +884,13 @@ var_ifv6Entry(vp, name, length, exact, var_len, write_method)
 }
 
 u_char *
-var_icmpv6Entry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid *name;
-    size_t *length;
-    int exact;
-    size_t *var_len;
-    WriteMethod **write_method;
+var_icmpv6Entry(
+    register struct variable *vp,
+    oid *name,
+    size_t *length,
+    int exact,
+    size_t *var_len,
+    WriteMethod **write_method)
 {
 #ifndef HAVE_IF_NAMEINDEX
     return NULL;
@@ -1051,13 +1047,13 @@ var_icmpv6Entry(vp, name, length, exact, var_len, write_method)
 }
 
 u_char *
-var_udp6(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid *name;
-    size_t *length;
-    int exact;
-    size_t *var_len;
-    WriteMethod **write_method;
+var_udp6(
+    register struct variable *vp,
+    oid *name,
+    size_t *length,
+    int exact,
+    size_t *var_len,
+    WriteMethod **write_method)
 {
     oid newname[MAX_NAME_LEN];
     oid tmp1[MAX_NAME_LEN], tmp2[MAX_NAME_LEN];
@@ -1203,13 +1199,13 @@ DEBUGP("var_udp6 new: %d %d %s %d\n", (int)vp->namelen, j, c_oid, exact);
 
 #ifdef TCP6
 u_char *
-var_tcp6(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid *name;
-    size_t *length;
-    int exact;
-    size_t *var_len;
-    WriteMethod **write_method;
+var_tcp6(
+    register struct variable *vp,
+    oid *name,
+    size_t *length,
+    int exact,
+    size_t *var_len,
+    WriteMethod **write_method)
 {
     oid newname[MAX_NAME_LEN];
     oid tmp1[MAX_NAME_LEN], tmp2[MAX_NAME_LEN];
@@ -1404,13 +1400,13 @@ skip:
 }
 #else
 u_char *
-var_tcp6(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid *name;
-    size_t *length;
-    int exact;
-    size_t *var_len;
-    WriteMethod **write_method;
+var_tcp6(
+    register struct variable *vp,
+    oid *name,
+    size_t *length,
+    int exact,
+    size_t *var_len,
+    WriteMethod **write_method)
 {
     oid newname[MAX_NAME_LEN];
     oid tmp1[MAX_NAME_LEN], tmp2[MAX_NAME_LEN];
