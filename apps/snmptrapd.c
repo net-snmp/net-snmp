@@ -1428,6 +1428,7 @@ main(int argc, char *argv[])
                 fprintf(stderr, "select returned %d\n", count);
                 running = 0;
             }
+	run_alarms();
     }
 
     if (Print) {
