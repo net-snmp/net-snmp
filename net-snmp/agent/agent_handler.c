@@ -400,9 +400,17 @@ netsnmp_call_handler(netsnmp_mib_handler *next_handler,
     do {
     nh = next_handler->access_method;
     if (!nh) {
-        snmp_log(LOG_ERR, "no access method specified in handler %s.",
-                 next_handler->handler_name);
-        return SNMP_ERR_GENERR;
+        if (next_handler->next) {
+            snmp_log(LOG_ERR, "no access method specified in handler %s.",
+                     next_handler->handler_name);
+            return SNMP_ERR_GENERR;
+        }
+        /*
+         * The final handler registration in the chain may well not need
+         * to include a handler routine, if the processing of this object
+         * is handled completely by the agent toolkit helpers.
+         */
+        return SNMP_ERR_NOERROR;
     }
 
     DEBUGMSGTL(("handler:calling", "calling handler %s for mode %s\n",
