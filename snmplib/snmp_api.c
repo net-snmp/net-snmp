@@ -4178,8 +4178,8 @@ _sess_process_packet(void *sessp, struct snmp_session *sp,
   struct snmp_secmod_def *sptr;
   int ret = 0;
   
-  DEBUGMSGTL(("sess_process_packet", "session %p, pkt %p length %d\n",
-	      sessp, packetptr, length));
+  DEBUGMSGTL(("sess_process_packet", "session %p fd %d pkt %p length %d\n",
+	      sessp, transport->sock, packetptr, length));
 
   if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DUMP_PACKET)) {
     if (transport->f_fmtaddr != NULL) {
