@@ -1,8 +1,6 @@
 package NetSNMP::OID;
 
-use 5.006;
 use strict;
-use warnings;
 use Carp;
 
 require Exporter;
@@ -67,7 +65,7 @@ sub add {
     return $newoid;
 }
 
-use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION);
+use vars qw(@ISA %EXPORT_TAGS @EXPORT_OK @EXPORT $VERSION $AUTOLOAD);
 
 @ISA = qw(Exporter DynaLoader);
 
@@ -138,7 +136,6 @@ sub AUTOLOAD {
     # to the AUTOLOAD in AutoLoader.
 
     my $constname;
-    our $AUTOLOAD;
     ($constname = $AUTOLOAD) =~ s/.*:://;
     croak "& not defined" if $constname eq 'constant';
     my $val = constant($constname, @_ ? $_[0] : 0);
