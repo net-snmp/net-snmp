@@ -204,7 +204,7 @@ int try_getloadavg(double *r_ave, size_t s_ave)
 #define FIX_TO_DBL(_IN) (((double) _IN)/((double) FSCALE))
 #endif
 #endif
-#ifdef aix4
+#if defined(aix4) || defined(aix5)
   int favenrun[3];
 #endif
 #if defined(hpux10) || defined(hpux11)
@@ -237,7 +237,7 @@ int try_getloadavg(double *r_ave, size_t s_ave)
   r_ave[2] = pst_buf.psd_avg_15_min;
 #elif !defined(cygwin)
 #ifdef CAN_USE_NLIST
-#if aix4
+#if defined(aix4) || defined(aix5)
   if (auto_nlist(LOADAVE_SYMBOL,(char *) favenrun, sizeof(favenrun)) == 0)
     return -1;
   r_ave[0] = favenrun[0]/65536.0;
