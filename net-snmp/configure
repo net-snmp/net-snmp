@@ -1452,7 +1452,7 @@ case $target_os in
 
 *** The solaris /usr/ucb/cc compiler does not work with this package.  
 *** Please put a different compiler in your path first or set the 
-*** environmental variable CC to a different compiler.
+*** environmental variable CC to a different compiler and re-run configure.
 " 1>&2; exit 1; }
 	fi
     ;;
