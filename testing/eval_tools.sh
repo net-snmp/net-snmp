@@ -134,6 +134,7 @@ KNORG
 
 	if [ $SNMP_VERBOSE -gt 1 ]; then
 		echo "Command Output: "
+		echo "MIBDIR $MIBDIRS $MIBS"
 		echo "$seperator"
 		cat $junkoutputfile | sed 's/^/  /'
 		echo "$seperator"
@@ -196,8 +197,8 @@ STARTAGENT() {
 	echo "agent config: "
 	cat $SNMP_CONFIG_FILE
     fi
-    COMMANDARGS="$SNMP_FLAGS -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE -C -c $SNMP_CONFIG_FILE $AGENT_FLAGS"
-#    VERBOSE_OUT 2 "starting agent: snmpd $SNMP_FLAGS -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE -C -c $SNMP_CONFIG_FILE"
+    COMMANDARGS="$SNMP_FLAGS -r -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE -C -c $SNMP_CONFIG_FILE $AGENT_FLAGS"
+#    VERBOSE_OUT 2 "starting agent: snmpd $SNMP_FLAGS -r -P $SNMP_SNMPD_PID_FILE -l $SNMP_SNMPD_LOG_FILE -C -c $SNMP_CONFIG_FILE"
    if [ $SNMP_VERBOSE -gt 0 ]; then
 	echo "running: snmpd $COMMANDARGS"
    fi
