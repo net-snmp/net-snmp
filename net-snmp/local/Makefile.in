@@ -35,6 +35,10 @@ fixproc.made: fixproc
 	touch fixproc.made
 	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' fixproc
 
+rsnmp.made: fixproc
+	touch rsnmp.made
+	$(PERLPROG) -i -p -e 's@^#!.*/perl@#!$(PERLPROG)@' rsnmp
+
 install:
 	@if test "x$(PERLPROG)" != "x"; then \
 	  for i in $(SCRIPTS) ; do $(INSTALL) $$i $(bindir) ; echo "install:  installed $$i in $(bindir)" ; done \
