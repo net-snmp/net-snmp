@@ -24,32 +24,10 @@
 .SH NAME
 snmpwalk - communicates with a network entity using SNMP GET Next Requests.
 .SH SYNOPSIS
-snmpwalk -v 1 hostname community [objectID]
-.PP
-snmpwalk [-v 2] hostname noAuth [objectID]
-.PP
-snmpwalk\ [-v\ 2] hostname srcParty dstParty [objectID]
+snmpwalk [common arguments] [objectID]
 .SH DESCRIPTION
 Snmpwalk is an SNMP application that uses GET NEXT Requests to query for a tree
 of information about a network entity.
-.PP
-The
-.I hostname
-specification may be either a host name or an internet address
-specified in "dot notation".
-.PP
-The version 1
-.I community
-specifies the community name for the transaction with the remote system.
-.PP
-The version 2
-.I srcParty
-and
-.I dstParty
-specify the party names for the transaction with the remote system, in the
-same format as /etc/party.conf.  To forgo authentication, use the
-.B noAuth
-keyword instead of specifying party names.
 .PP
 A variable may also be given on the
 command line.  This variable specifies which portion of the object identifier
@@ -62,7 +40,7 @@ If the "objectID" argument is not present, snmpwalk will search MIB-2.
 .PP
 For example
 .PP
-.I snmpwalk zeus zeusMS zeusAgent system
+.I snmpwalk zeus public system
 .PP
 will retrieve all of the variables under system:
 .PP
@@ -71,7 +49,7 @@ will retrieve all of the variables under system:
 .br
 .I system.sysObjectID.0 = OID: enterprises.hp.nm.hpsystem.10.1.1
 .br
-.I system.sysUpTime.0 = Timeticks: (155274552) 17 days, 23:19:05
+.I "system.sysUpTime.0 = Timeticks: (155274552) 17 days, 23:19:05"
 .br
 .I system.sysContact.0 =
 ""
@@ -88,14 +66,10 @@ If the network entity has an error processing the request packet, an error
 packet will be returned and a message will be shown, helping to pinpoint why
 the request was malformed.
 .PP
-If the tree search causes attempts to search beyond the end of the MIB, a message
-will be displayed:
+If the tree search causes attempts to search beyond the end of the MIB,
+a message will be displayed:
 .PP
 .I End of MIB.
 .PP
-Adding a "-d" to the argument list will cause the application to dump input and output packets.
-.PP
-Adding a "-q" to the argument list will cause the application to use a quicker, less verbose output form.
-.PP
 .SH "SEE ALSO"
-variables(5), RFC 1155, RFC 1156, RFC 1157, SNMP Security Internet Drafts
+snmpcmd(1), variables(5).

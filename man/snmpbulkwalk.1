@@ -24,34 +24,10 @@
 .SH NAME
 snmpbulkwalk - communicates with a network entity using SNMP BULK Requests.
 .SH SYNOPSIS
-snmpbulkwalk -v 1 hostname community [objectID]
-.PP
-snmpbulkwalk [-v 2] hostname noAuth [objectID]
-.PP
-snmpbulkwalk\ [-v\ 2] hostname srcParty dstParty [objectID]
+snmpbulkwalk [common arguments] [objectID]
 .SH DESCRIPTION
 Snmpbulkwalk is an SNMP application that uses BULK Requests to query for a
 tree of information about a network entity.
-.PP
-The
-.I hostname
-specification may be either a host name or an internet address
-specified in "dot notation".
-.PP
-The version 1
-.I community
-specifies the community name for the transaction with the remote system.
-(Though it isn't clear what the effect should be when sending a BULK request
-at a version 1 agent, since BULK requests are a version 2 construct.)
-.PP
-The version 2
-.I srcParty
-and
-.I dstParty
-specify the party names for the transaction with the remote system, in the
-same format as /etc/party.conf.  To forgo authentication, use the
-.B noAuth
-keyword instead of specifying party names.
 .PP
 A variable may also be given on the command line.  This variable specifies
 which portion of the object identifier space will be searched using BULK
@@ -64,7 +40,7 @@ If the "objectID" argument is not present, snmpbulkwalk will search MIB-2.
 .PP
 For example
 .PP
-.I snmpbulkwalk zeus zeusMS zeusAgent system
+.I snmpbulkwalk -v 2c zeus public system
 .PP
 will retrieve all of the variables under system:
 .PP
@@ -98,9 +74,9 @@ message will be displayed:
 .PP
 .I End of MIB.
 .PP
-Adding a "-d" to the argument list will cause the application to dump input and output packets.
-.PP
-Adding a "-q" to the argument list will cause the application to use a quicker, less verbose output form.
+.SH NOTE
+As the name implies, snmpbulkwalk utilizes the SNMP GETBULK message,
+which is not available in SNMP v1.
 .PP
 .SH "SEE ALSO"
-variables(5), RFC 1155, RFC 1156, RFC 1157, SNMP Security Internet Drafts
+snmpcmd(1), variables(5).

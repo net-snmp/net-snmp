@@ -3,8 +3,8 @@
 .SH NAME
 snmpdelta \- Monitor deltas of integer valued SNMP variables
 .SH SYNOPSIS
-snmpdelta [ -t ] [ -s ] [ -S ] [ -m ] [ -f configfile ] [ -l ] [ -L
-SuMFileName ] [ -p period ] [ -P Peaks ] [ -k ] gateway community oid
+snmpdelta [ common arguments ] [ -t ] [ -s ] [ -S ] [ -m ] [ -f configfile ] [ -l ] [ -L
+SumFileName ] [ -p period ] [ -P Peaks ] [ -k ] [ -T ] oid
 [ oid ... ]
 .SH "DESCRIPTION"
 .B snmpdelta
@@ -49,6 +49,41 @@ specifies the reporting period in number of polling periods
 tells
 .B snmpdelta
 to keep seconds in it's output time format.
+.PP
+.I -T
+makes 
+.B snmpdelta
+print its output in tabular form.
 .SH EXAMPLES
-snmpdelta interlink.sw.net.cmu.edu public -t -s -S -m -l -p 60 -P 60 .1.3.6.1.2.1.2.2.1.16.3 .1.3.6.1.2.1.2.2.1.16.4
-
+.nf
+$ snmpdelta -R localhost public -s IF-MIB:ifinucastpkts.3 IF-MIB:ifoutucastpkts.3
+[20:15:43 6/14] ifInUcastPkts.3 /1 sec: 158
+[20:15:43 6/14] ifOutUcastPkts.3 /1 sec: 158
+[20:15:44 6/14] ifInUcastPkts.3 /1 sec: 184
+[20:15:44 6/14] ifOutUcastPkts.3 /1 sec: 184
+[20:15:45 6/14] ifInUcastPkts.3 /1 sec: 184
+[20:15:45 6/14] ifOutUcastPkts.3 /1 sec: 184
+[20:15:46 6/14] ifInUcastPkts.3 /1 sec: 158
+[20:15:46 6/14] ifOutUcastPkts.3 /1 sec: 158
+[20:15:47 6/14] ifInUcastPkts.3 /1 sec: 184
+[20:15:47 6/14] ifOutUcastPkts.3 /1 sec: 184
+[20:15:48 6/14] ifInUcastPkts.3 /1 sec: 184
+[20:15:48 6/14] ifOutUcastPkts.3 /1 sec: 184
+[20:15:49 6/14] ifInUcastPkts.3 /1 sec: 158
+[20:15:49 6/14] ifOutUcastPkts.3 /1 sec: 158
+^C
+$ snmpdelta -R localhost public -s -T IF-MIB:ifinucastpkts.3 IF-MIB:ifoutcastpkts.3
+localhost	ifInUcastPkts.3	ifOutUcastPkts.3
+[20:15:59 6/14]	184.00	184.00
+[20:16:00 6/14]	158.00	158.00
+[20:16:01 6/14]	184.00	184.00
+[20:16:02 6/14]	184.00	184.00
+[20:16:03 6/14]	158.00	158.00
+[20:16:04 6/14]	184.00	184.00
+[20:16:05 6/14]	184.00	184.00
+[20:16:06 6/14]	158.00	158.00
+^C
+.fi
+$ snmpdelta interlink.sw.net.cmu.edu public -t -s -S -m -l -p 60 -P 60 .1.3.6.1.2.1.2.2.1.16.3 .1.3.6.1.2.1.2.2.1.16.4
+.SH "SEE ALSO"
+snmpcmd(1), variables(5).

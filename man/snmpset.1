@@ -24,11 +24,7 @@
 .SH NAME
 snmpset - communicates with a network entity using SNMP SET Requests.
 .SH SYNOPSIS
-snmpset\ -v\ 1 hostname community objectID type value [objectID type value]...
-.PP
-snmpset\ [-v\ 2] hostname noAuth objectID type value [objectID type value]...
-.PP
-snmpset\ [-v\ 2] hostname srcParty dstParty objectID type value [objectID type value]...
+snmpset [ common arguments ] objectID type value [objectID type value]...
 .SH DESCRIPTION
 Snmpset is an SNMP application that uses the SET Request to set
 information on a network entity.  One or more fully qualified
@@ -36,24 +32,6 @@ object identifiers must be given as arguments on the command line.  A type
 and a value to set must accompany each object
 identifier.  Each variable name is given in the format specified in
 .IR variables (5).
-.PP
-The
-.I hostname
-specification may be either a host name or an internet address
-specified in "dot notation".
-.PP
-The version 1
-.I community
-specifies the community name for the transaction with the remote system.
-.PP
-The version 2
-.I srcParty
-and
-.I dstParty
-specify the party names for the transaction with the remote system, as
-they are defined in /etc/party.conf.  To forgo authentication, use the
-.B noAuth
-keyword instead of specifying party names.
 .PP
 The
 .I type
@@ -89,8 +67,7 @@ IPADDRESS
 .PP
 For example
 .PP
-.I snmpset test-hub zeusMS zeusAgent system.sysContact.0 s
-.I dpz@noc.rutgers.edu ip.ipforwarding.0 i 2
+.I "snmpset test-hub private system.sysContact.0 s dpz@noc.rutgers.edu ip.ipforwarding.0 i 2"
 .I 
 .PP
 will set the variables sysContact.0 and ipforwarding.0:
@@ -105,9 +82,5 @@ packet will be returned and a message will be shown, helping to pinpoint in what
 way the request was malformed.  If there were other variables in the request,
 the request will be resent without the bad variable.
 .PP
-Adding a "-d" to the argument list will cause the application to dump input and output packets.
-.PP
-Adding a "-q" to the argument list will cause the application to use a quicker, less verbose output form.
-.PP
 .SH "SEE ALSO"
-variables(5), RFC 1155, RFC 1156, RFC 1157, SNMP Security Internet Drafts
+snmpcmd(1), variables(5).
