@@ -11,6 +11,9 @@
 
 #include <sys/types.h>
 
+#if HAVE_DMALLOC_H
+#include <dmalloc.h>
+#endif
 
 #include "mibincl.h"                  /* Standard set of SNMP includes*/
 #include "util_funcs.h"               /* utility function declarations*/
@@ -18,7 +21,7 @@
                                         /*      configuration controls*/
 #include "auto_nlist.h"               /* if the module needs to read*/
                                        /*      kernel data structures*/
-#include "../../../snmplib/system.h"
+#include "system.h"
 
 #include "memory_solaris2.h"                     /* the module-specific header*/
 
@@ -101,10 +104,10 @@ u_char *var_extensible_mem(
       *var_len = strlen(errmsg);
       return((u_char *) (errmsg));
     case MEMTOTALSWAP:
-      long_ret = getTotalSwap() * getpagesize() / 1024;
+      long_ret = getTotalSwap() * (getpagesize() / 1024);
       return((u_char *) (&long_ret));
     case MEMAVAILSWAP:
-      long_ret = getFreeSwap() * getpagesize() / 1024;
+      long_ret = getFreeSwap() * (getpagesize() / 1024);
       return((u_char *) (&long_ret));
     case MEMSWAPMINIMUM:
       long_ret = minimumswap;
@@ -114,26 +117,26 @@ u_char *var_extensible_mem(
       kstat_read(kc, ksp1, 0);
       kn = kstat_data_lookup(ksp1, "physmem");
 
-      long_ret =  kn->value.ul * getpagesize() / 1024;
+      long_ret =  kn->value.ul * (getpagesize() / 1024);
       return((u_char *) (&long_ret));
     case MEMAVAILREAL:
       ksp1 = kstat_lookup(kc, "unix", 0, "system_pages");
       kstat_read(kc, ksp1, 0);
       kn = kstat_data_lookup(ksp1, "freemem");
 
-      long_ret =  kn->value.ul * getpagesize() / 1024;
+      long_ret =  kn->value.ul * (getpagesize() / 1024);
       return((u_char *) (&long_ret));
     case MEMTOTALFREE:
-      long_ret = getTotalFree() * getpagesize() / 1024;
+      long_ret = getTotalFree() * (getpagesize() / 1024);
       return((u_char *) (&long_ret));
 
     case ERRORFLAG:
-      long_ret = getTotalFree() * getpagesize() / 1024;
+      long_ret = getTotalFree() * (getpagesize() / 1024);
       long_ret = (long_ret > minimumswap)?0:1;
       return((u_char *) (&long_ret));
 
     case ERRORMSG:
-      long_ret = getTotalFree() * getpagesize() / 1024;
+      long_ret = getTotalFree() * (getpagesize() / 1024);
       if ((long_ret > minimumswap)?0:1)
         sprintf(errmsg,"Running out of swap space (%ld)",long_ret);
       else
