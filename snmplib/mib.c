@@ -3887,7 +3887,7 @@ int snprint_by_type	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_by_type((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_by_type((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -3898,7 +3898,7 @@ int snprint_hexstring	(char *buf, size_t buf_len,
 			 const u_char *cp, size_t len)
 {
     size_t out_len = 0;
-    if (sprint_realloc_hexstring((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_hexstring((u_char **)&buf, &buf_len, &out_len, 0,
 	    cp, len))
 	return (int)out_len;
     else
@@ -3909,7 +3909,7 @@ int snprint_asciistring	(char *buf, size_t buf_len,
 			 const u_char *cp, size_t len)
 {
     size_t out_len = 0;
-    if (sprint_realloc_asciistring((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_asciistring((u_char **)&buf, &buf_len, &out_len, 0,
 	    cp, len))
 	return (int)out_len;
     else
@@ -3921,7 +3921,7 @@ int snprint_octet_string (char *buf, size_t buf_len,
 			   const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_octet_string((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_octet_string((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -3933,7 +3933,7 @@ int snprint_opaque	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_opaque((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_opaque((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -3945,7 +3945,7 @@ int snprint_object_identifier(char *buf, size_t buf_len,
 			     const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_object_identifier((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_object_identifier((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -3957,7 +3957,7 @@ int snprint_timeticks	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_timeticks((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_timeticks((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -3968,7 +3968,7 @@ int snprint_hinted_integer(char *buf, size_t buf_len,
 			   long val, const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_hinted_integer((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_hinted_integer((u_char **)&buf, &buf_len, &out_len, 0,
 	    val, 'd', hint, units))
 	return (int)out_len;
     else
@@ -3980,7 +3980,7 @@ int snprint_integer	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_integer((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_integer((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -3992,7 +3992,7 @@ int snprint_uinteger	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_uinteger((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_uinteger((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -4004,7 +4004,7 @@ int snprint_gauge	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_gauge((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_gauge((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -4016,7 +4016,7 @@ int snprint_counter	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_counter((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_counter((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -4028,7 +4028,7 @@ int snprint_networkaddress(char *buf, size_t buf_len,
 			   const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_networkaddress((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_networkaddress((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -4040,7 +4040,7 @@ int snprint_ipaddress	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_ipaddress((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_ipaddress((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -4052,7 +4052,7 @@ int snprint_null 	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_null((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_null((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -4064,7 +4064,7 @@ int snprint_bitstring	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_bitstring((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_bitstring((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -4076,7 +4076,7 @@ int snprint_nsapaddress	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_nsapaddress((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_nsapaddress((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -4088,7 +4088,7 @@ int snprint_counter64	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_counter64((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_counter64((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -4100,7 +4100,7 @@ int snprint_badtype	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_badtype((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_badtype((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -4113,7 +4113,7 @@ int snprint_float	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_float((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_float((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
@@ -4125,7 +4125,7 @@ int snprint_double	(char *buf, size_t buf_len,
 			 const char *hint, const char *units)
 {
     size_t out_len = 0;
-    if (sprint_realloc_double((u_char **)&buf, &buf_len, &out_len, 1,
+    if (sprint_realloc_double((u_char **)&buf, &buf_len, &out_len, 0,
 	    var, enums, hint, units))
 	return (int)out_len;
     else
