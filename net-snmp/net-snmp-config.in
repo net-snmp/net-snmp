@@ -186,7 +186,7 @@ EOF
     # add init routines
     while test "$1" != ""; do
       cfiles="$cfiles $1"
-      name=`basename $1 | sed 's/\.c$//'`
+      name=`basename $1 | sed 's/\.[co]$//'`
       if grep "init_$name" $1 ; then
         echo "  init_${name}();" >> $tmpfile
       fi
@@ -224,7 +224,7 @@ EOF
 	exit 1
       fi
       prefix=@prefix@
-      cmd="@CC@ @CFLAGS@ -o $outname $tmpfile $cfiles @LDFLAGS@ @AGENTLIBS@ -I@includedir@ -L@exec_prefix@/lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp"
+      cmd="@CC@ @CFLAGS@ -I. -I@includedir@ -o $outname $tmpfile $cfiles @LDFLAGS@ -L@exec_prefix@/lib -lnetsnmpagent -lnetsnmphelpers -lnetsnmpmibs -lnetsnmp @AGENTLIBS@ "
       echo "running: $cmd"
       `$cmd`
       echo "removing the tmporary code file: $tmpfile"
@@ -263,6 +263,7 @@ if test "x$usage" = "xyes"; then
   echo "    --external-agent-libs lists libraries needed by netsnmp libs"
   echo ""
   echo "  Automatted subagent building (produces an outputname binary file):"
+  echo "  [this feature has not been tested very well yet.  use at your risk.]"
   echo "    --compile-subagent outputname mibmodule1.c [...]]"
   echo ""
   echo "  Details on how the net-nsmp package was compiled:"
