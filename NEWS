@@ -27,6 +27,8 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
       - improved version of "exec" extension directive - "extend":
           supports multi-line output, configurable command input, SET
           handling, a valid relocatable MIB output structure, etc
+      - more flexibility added to netsnmp_cache helper, including periodic
+          refreshing of caches and cache pre-loading.
       - experimental implementation of DisMan Remote Operations MIB groups
 
     mib2c:
@@ -37,16 +39,39 @@ the ChangeLog file for a more detailed listing of changes/bug fixes.
             two new "internal-row" style configs
         - mib2c.mfd.conf: "MIBs for Dummies" (or MFD) - intended to
             reduce the SNMP knowledge needed to develop MIB modules.
+      - more node tags available for conf file writers
+      - additional search directories may be set via MIB2C_DIRS env var.
+      - mib2c-update: new utility to help update mib2c generated code
+          when conf file changes.
+
+    documentation:
+      - New README.agent-mibs: an attempt to start documenting what
+          MIBs are implemented in the agent.
 
 
  Ports:
-   - new experimental tables/rewrites for Linux, including:
-       ifTable, ifXTable, inetCidrRouteTable, ipCidrRouteTable,
-       ipAddressTable, ipSystemStatsTable, usmDHParameters,
-       usmDHUserKeyTable, ipNetToPhysicalTable
+   Linux:
+     - new experimental tables/rewrites for Linux, including:
+         ifTable, ifXTable, inetCidrRouteTable, ipCidrRouteTable,
+         ipAddressTable, ipSystemStatsTable, usmDHParameters,
+         usmDHUserKeyTable, ipNetToPhysicalTable. Enable these talbles
+         by specifying --enable-mfd-rewrites to configure.
+     - ifIndex no longer changes when interfaces are added/removed, and all
+         tables/object wiil now use the same ifIndex for the same interface.
+
+   Solaris:
+     - new experimental support for ucd-snmp/lmSensors MIB module
+
 
  Fixes:
    - AgentX memory leak on sets
+   - SNMPv3 not-in-time window after 248 days
+   - Agent hang in HOST-RESOURCES MIB
+   - double free on duplicate registration
+   - OIDs with IP Addresses as indexes now print prettier
+   -'Lazy' installation of headers (only install if newer)
+   - allow whitespace in rocommunity/rwcommunity
+   - many miscellaneous bug reports
 
 
 *5.1.2*
