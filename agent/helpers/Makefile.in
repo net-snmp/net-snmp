@@ -8,6 +8,8 @@ INSTALLLIBS=libnetsnmphelpers.$(LIB_EXTENSION)$(LIB_VERSION)
 INCLUDESUBDIR=agent
 INCLUDESUBDIRHEADERS=all_helpers.h \
 	instance.h \
+	scalar.h \
+	watcher.h \
         multiplexer.h \
 	bulk_to_next.h \
         null.h \
@@ -36,6 +38,8 @@ OBJS =  all_helpers.o \
 	read_only.o \
 	bulk_to_next.o \
 	instance.o \
+	scalar.o \
+	watcher.o \
 	null.o \
 	debug_handler.o \
 	old_api.o \
@@ -51,6 +55,8 @@ LOBJS = all_helpers.lo \
 	read_only.lo \
 	bulk_to_next.lo \
 	instance.lo \
+	scalar.lo \
+	watcher.lo \
 	null.lo \
 	debug_handler.lo \
 	old_api.lo \
@@ -66,6 +72,8 @@ SRCS =  all_helpers.c \
 	read_only.c \
 	bulk_to_next.c \
 	instance.c \
+	scalar.c \
+	watcher.c \
 	null.c \
 	debug_handler.c \
 	old_api.c \
