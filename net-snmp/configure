@@ -2008,7 +2008,7 @@ if test "x$with_shared" = "xyes"; then
 	fi
 	;;
 
-    netbsd* | openbsd*)
+    netbsd*|openbsd*)
 	SHLIB_LD_CMD="ld -Bshareable -o"
 	CC_RUNTIME_ARG="-R$libdir"
 	SHLIB_LDCONFIG_CMD='PATH="$$PATH:/sbin" ldconfig -m $(libdir)'
