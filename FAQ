@@ -113,6 +113,7 @@ TABLE OF CONTENTS
    What about multi-processor systems?
    The speed/type of my network interfaces is wrong - how can I fix it?
    The interface statistics for my subinterfaces are all zero - why?
+   Does the agent support the RMON-MIB?
    What does "klread:  bad address" mean?
    What does "nlist err:  wombat not found" (or similar) mean?
    How about "Can't open /dev/kmem"?
@@ -2572,6 +2573,36 @@ The interface statistics for my subinterfaces are all zero - why?
   report such values as it can find out.  If the kernel doesn't
   keep track of these figures, the agent can't report them.
     Sorry!
+
+
+
+Does the agent support the RMON-MIB?
+-----------------------------------
+
+    Not really.
+
+    There is an "Rmon" code module included within the agent source
+  code tree, but this is best thought of as a template for the
+  RMON-MIB statistics groups, rather than a full implementation.
+
+    With most MIBs, the hardest part of implementing the MIB is often
+  getting hold of the data to report.  This is definitely true of the
+  RMON-MIB, which relies on gathering (and analysing) a potentially
+  large quantity of network traffic.   The Rmon code distributed with
+  the Net-SNMP agent code avoids this problem, by using random data.
+
+    Some of the functionality of the RMON-MIB, such as the alarm and
+  event groups, has since been superceded by the work of the DisMan
+  IETF working group.  The Net-SNMP agent does implement these (more
+  general) MIB modules.  But the statistics gathering aspects of
+  the RMON-MIB are not readily available.
+
+    Note too that none of the core developers have any significant
+  experience with this code, and the person who originally wrote it
+  is no longer active on the mailing lists.  So there's no point in
+  asking on the lists whether these modules work or not.  You've got
+  the source - how badly do you need this functionality?
+
 
 
 What does "klread:  bad address" mean?
