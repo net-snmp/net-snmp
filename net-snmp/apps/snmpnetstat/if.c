@@ -259,6 +259,7 @@ intpr(int interval)
 			print_variable (var->name, var->name_length, var);
 		    }
 		    if (!var->val.integer) continue;
+		    if (memcmp(var->name, oid_ifname, 8*sizeof(oid))) continue;
 		    switch (var->name [9]) {
 		    case IFINDEX:
 			ifindex = *var->val.integer;
@@ -522,7 +523,7 @@ intpro(int interval)
 			continue;
 		}
 		if (cur_if->operstatus != MIB_IFSTATUS_UP) {
-			cp = (char *) strchr(cur_if->name, '\0');
+			cp = strchr(cur_if->name, '\0');
 			*cp++ = '*';
 			*cp = '\0';
 		}
