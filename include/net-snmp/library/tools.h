@@ -35,6 +35,7 @@ extern          "C" {
 #define SNMP_MAXBUF_MESSAGE	1500
 
 #define SNMP_MAXOID		64
+#define SNMP_MAX_CMDLINE_OIDS   128
 
 #define SNMP_FILEMODE_CLOSED	0600
 #define SNMP_FILEMODE_OPEN	0644
