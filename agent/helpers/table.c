@@ -237,9 +237,9 @@ table_helper_handler(netsnmp_mib_handler *handler,
             }
         }
         /*
-         * if it is not in range, then remove it from the request list 
+         * if it is not in range, then mark it in the request list 
          * because we can't process it. If the request is not a GETNEXT 
-         * then set the error to NOSUCHOBJECT so nobody else wastes time
+         * then set the error to ERR_NOSUCHNAME so nobody else wastes time
          * trying to process it.  
          */
         if (out_of_range) {
@@ -249,14 +249,14 @@ table_helper_handler(netsnmp_mib_handler *handler,
 
             if (reqinfo->mode != MODE_GETNEXT) {
                 table_helper_cleanup(reqinfo, request,
-                                     SNMP_NOSUCHOBJECT);
+                                     SNMP_ERR_NOSUCHNAME);
             }
             continue;
         }
 
 
         /*
-         * * Check column ranges; set-up to pull out indexes from OID. 
+         * Check column ranges; set-up to pull out indexes from OID. 
          */
 
         incomplete = 0;
@@ -271,6 +271,9 @@ table_helper_handler(netsnmp_mib_handler *handler,
                                        table_data_free_func));
 
         if (var->name_length > oid_column_pos) {
+            /*
+             * oid is long enough to contain index info
+             */
             if (var->name[oid_column_pos] < tbl_info->min_column) {
                 if (reqinfo->mode == MODE_GETNEXT) {
                     /*
@@ -295,7 +298,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
 
                 if (reqinfo->mode != MODE_GETNEXT) {
                     table_helper_cleanup(reqinfo, request,
-                                         SNMP_NOSUCHOBJECT);
+                                         SNMP_ERR_NOSUCHNAME);
                 }
                 continue;
             }
@@ -330,13 +333,28 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 tmp_name = tbl_req_info->index_oid;
             }
         } else if (reqinfo->mode != MODE_GETNEXT) {
-            table_helper_cleanup(reqinfo, request, SNMP_NOSUCHOBJECT);
+            /*
+             * oid is NOT long enough to contain index info, and this is
+             * NOT a GETNEXT, so we can't do anything with it.
+             */
+            table_helper_cleanup(reqinfo, request, SNMP_ERR_NOSUCHNAME);
             continue;
         } else {
+            /*
+             * oid is NOT long enough to contain column or index info, so start
+             * at the minimum column. Set index oid len to 0 because we don't
+             * have any index info in the OID.
+             */
             tbl_req_info->index_oid_len = 0;
             tbl_req_info->colnum = tbl_info->min_column;
         }
 
+        /*
+         * set up tmp_len to be the number of OIDs we have beyond the column;
+         * these should be the index(s) for the table. If the index_oid_len
+         * is 0, set tmp_len to -1 so that when we try to parse the index below,
+         * we just zero fill everything.
+         */
         if (tbl_req_info->index_oid_len == 0) {
             incomplete = 1;
             tmp_len = -1;
@@ -365,7 +383,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                  */
                 if (reqinfo->mode != MODE_GETNEXT) {
                     table_helper_cleanup(reqinfo, requests,
-                                         SNMP_NOSUCHOBJECT /* ??? */);
+                                         SNMP_ERR_NOSUCHNAME /* ??? */);
                     cleaned_up = 1;
                 }
                 tmp_len = 0;
@@ -440,8 +458,10 @@ table_helper_handler(netsnmp_mib_handler *handler,
             ((tbl_req_info->number_indexes != tbl_info->number_indexes) ||
              (tmp_len != -1))) {
             table_helper_cleanup(reqinfo, request, SNMP_NOSUCHINSTANCE);
+            continue;
         }
-
+        netsnmp_assert(request->status == SNMP_NOERROR);
+        
         ++need_processing;
 
     }                           /* for each request */
