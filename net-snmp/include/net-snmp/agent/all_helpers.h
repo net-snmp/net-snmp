@@ -9,6 +9,7 @@ extern          "C" {
 #include <net-snmp/agent/baby_steps.h>
 #include <net-snmp/agent/scalar.h>
 #include <net-snmp/agent/scalar_group.h>
+#include <net-snmp/agent/watcher.h>
 #include <net-snmp/agent/multiplexer.h>
 #include <net-snmp/agent/null.h>
 #include <net-snmp/agent/debug_handler.h>
