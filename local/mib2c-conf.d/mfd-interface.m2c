@@ -188,7 +188,7 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
     /*
      * call data access initialization code
      */
-    ${context}_init_data(user_context);
+    ${context}_init_data(reg_ptr);
 
     /*
      * set up the container
@@ -336,7 +336,7 @@ _${context}_initialize_interface(${context}_registration_ptr reg_ptr,  u_long fl
 void
 ${context}_valid_columns_set(netsnmp_column_info *vc)
 {
-    ifTable_if_ctx.tbl_info.valid_columns = vc;
+    ${context}_if_ctx.tbl_info.valid_columns = vc;
 }
 
 @include generic-table-indexes-to-oid.m2i@
