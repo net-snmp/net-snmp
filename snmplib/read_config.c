@@ -307,8 +307,6 @@ void read_config(const char *filename,
       /* check blank line or # comment */
       if ((cptr = skip_white(cptr)))
 	{
-          DEBUGMSGTL(("read_config",
-                      "%s:%d Parsing: %s\n", filename, linecount, line));
           cptr = copy_word(cptr,token);
           if (cptr == NULL) {
             sprintf(tmpbuf,"Blank line following %s token.", token);
@@ -318,12 +316,15 @@ void read_config(const char *filename,
                 lptr != NULL && !done;
                 lptr = lptr->next) {
               if (!strcasecmp(token,lptr->config_token)) {
-                if (when == EITHER_CONFIG || lptr->config_time == when)
-                  (*(lptr->parse_line))(token,cptr);
+                if (when == EITHER_CONFIG || lptr->config_time == when) {
+                    DEBUGMSGTL(("read_config", "%s:%d Parsing: %s\n",
+                                filename, linecount, line));
+                    (*(lptr->parse_line))(token,cptr);
+                }
                 done = 1;
               }
             }
-            if (!done) {
+            if (!done && when != PREMIB_CONFIG) {
               sprintf(tmpbuf,"Unknown token: %s.", token);
               config_pwarn(tmpbuf);
             }
@@ -356,6 +357,8 @@ read_configs (void)
   char *optional_config = ds_get_string(DS_LIBRARY_ID, DS_LIB_OPTIONALCONFIG);
   char *type = ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE);
 
+  DEBUGMSGTL(("read_config","reading normal configuration tokens\n"));
+  
   if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS))
     read_config_files(NORMAL_CONFIG);
 
@@ -370,7 +373,9 @@ read_configs (void)
 void
 read_premib_configs (void)
 {
-  if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS))
+  DEBUGMSGTL(("read_config","reading premib configuration tokens\n"));
+
+  if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_READ_CONFIGS))
     read_config_files(PREMIB_CONFIG);
 
   snmp_call_callbacks(SNMP_CALLBACK_LIBRARY,
@@ -443,6 +448,7 @@ read_config_files (int when)
       envconfpath = defaultPath;
     }
     envconfpath = strdup(envconfpath);  /* prevent actually writing in env */
+    DEBUGMSGTL(("read_config","config path used:%s\n", envconfpath));
     cptr1 = cptr2 = envconfpath;
     i = 1;
     while (i && *cptr2 != 0) {
