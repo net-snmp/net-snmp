@@ -145,31 +145,22 @@ main(argc, argv)
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu, *response;
     struct variable_list *vars;
-    char *hostname = NULL;
-    char *community = NULL;
-    char *srcparty = NULL, *dstparty = NULL, *context = NULL;
-    int timeout = SNMP_DEFAULT_TIMEOUT, retransmission = SNMP_DEFAULT_RETRIES;
     char name[MAX_NAME_LEN];
     char *sysdescr = NULL;
-    int status;
-    int version = 2;
-    int dest_port = 0;
-    u_long      srcclock = 0, dstclock = 0;
-    int clock_flag = 0;
     u_long uptime = 0;
+    int status;
     int ipin = 0, ipout = 0, ipackets = 0, opackets = 0;
     int good_var;
     int down_interfaces = 0;
     char buf[40];
     int index, count;
-    int c;
 
     init_mib();
     snmp_parse_args(argc, argv, &session);
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-	fprintf(stderr,"Couldn't open snmp\n");
+	fprintf(stderr, "Couldn't open snmp: %s\n", snmp_api_errstring(snmp_errno));
 	exit(1);
     }
 
@@ -221,10 +212,11 @@ retry:
 	}
 
     } else if (status == STAT_TIMEOUT){
-	fprintf(stderr,"No Response from %s\n", hostname);
+	fprintf(stderr, "No Response from %s\n", session.peername);
 	exit(1);
     } else {    /* status == STAT_ERROR */
-	fprintf(stderr,"An error occurred, Quitting\n");
+	fprintf(stderr, "An error occurred: %s\nQuitting\n",
+		snmp_api_errstring(snmp_errno));
 	exit(2);
     }
 
@@ -298,7 +290,7 @@ retry:
 	    }
 
 	} else if (status == STAT_TIMEOUT){
-	    fprintf(stderr,"No Response from %s\n", hostname);
+	    fprintf(stderr,"No Response from %s\n", session.peername);
 	} else {    /* status == STAT_ERROR */
 	    fprintf(stderr,"An error occurred, Quitting\n");
 	}

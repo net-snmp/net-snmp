@@ -75,8 +75,6 @@ snmp_parse_args(argc, argv, session)
   char *argv[];
   struct snmp_session *session;
 {
-  static char *hostname = NULL;
-  static char *community = NULL;
   int arg;
   static oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
   int clock_flag = 0;
@@ -129,7 +127,7 @@ snmp_parse_args(argc, argv, session)
         } else if (!strcmp(argv[arg],"2")) {
           session->version = SNMP_VERSION_2;
         } else {
-          fprintf(stderr,"Invalid version specified:  %s", argv[arg]);
+          fprintf(stderr,"Invalid version specified:  %s\n", argv[arg]);
           usage();
           exit(1);
         }
@@ -159,7 +157,7 @@ snmp_parse_args(argc, argv, session)
   } else {
     /* v2 historic party configuration */
     if (arg == argc) {
-      printf("Neither a source party nor noAuth was specified.\n");
+      fprintf(stderr,"Neither a source party nor noAuth was specified.\n");
       usage();
       exit(1);
     }
@@ -187,20 +185,17 @@ snmp_parse_args(argc, argv, session)
     } else {
       sprintf(ctmp,"%s/party.conf",SNMPLIBPATH);
       if (read_party_database(ctmp) != 0){
-        fprintf(stderr,
-                "Couldn't read party database from %s\n",ctmp);
+	fprintf (stderr, "%s\n", snmp_api_errstring(snmp_errno));
         exit(1);
       }
       sprintf(ctmp,"%s/context.conf",SNMPLIBPATH);
       if (read_context_database(ctmp) != 0){
-        fprintf(stderr,
-                "Couldn't read context database from %s\n",ctmp);
+	fprintf (stderr, "%s\n", snmp_api_errstring(snmp_errno));
         exit(1);
       }
       sprintf(ctmp,"%s/acl.conf",SNMPLIBPATH);
       if (read_acl_database(ctmp) != 0){
-        fprintf(stderr,
-                "Couldn't read access control database from %s\n",ctmp);
+	fprintf (stderr, "%s\n", snmp_api_errstring(snmp_errno));
         exit(1);
       }
 
@@ -219,7 +214,7 @@ snmp_parse_args(argc, argv, session)
       if (!pp){
         session->srcPartyLen = MAX_NAME_LEN;
         if (!read_objid(argv[arg], session->srcParty, &(session->srcPartyLen))){
-          printf("Invalid source party: %s\n", argv[arg]);
+          fprintf(stderr,"Invalid source party: %s\n", argv[arg]);
           session->srcPartyLen = 0;
           usage();
           exit(1);
@@ -228,7 +223,7 @@ snmp_parse_args(argc, argv, session)
       arg++;
 
       if (arg == argc) {
-        printf("No destination party specified.\n");
+        fprintf(stderr,"No destination party specified.\n");
         usage();
         exit(1);
       }
@@ -247,7 +242,7 @@ snmp_parse_args(argc, argv, session)
       }
       if (!pp){
         if (!read_objid(argv[arg], session->dstParty, &(session->dstPartyLen))){
-          printf("Invalid destination party: %s\n", argv[arg]);
+          fprintf(stderr,"Invalid destination party: %s\n", argv[arg]);
           session->dstPartyLen = 0;
           usage();
           exit(1);
@@ -258,7 +253,7 @@ snmp_parse_args(argc, argv, session)
       /* context */
 
       if (arg == argc) {
-        printf("No context specified.\n");
+        fprintf(stderr,"No context specified.\n");
         usage();
         exit(1);
       }
@@ -275,7 +270,7 @@ snmp_parse_args(argc, argv, session)
       }
       if (!cxp){
         if (!read_objid(argv[arg], session->context, &(session->contextLen))){
-          printf("Invalid context: %s\n", argv[arg]);
+          fprintf(stderr,"Invalid context: %s\n", argv[arg]);
           session->contextLen = 0;
           usage();
           exit(1);
@@ -301,8 +296,3 @@ snmp_parse_args(argc, argv, session)
   }
   return arg;
 }
-
-     
-   
-  
-    

@@ -309,7 +309,7 @@ static int tossObjectIdentifier __P((FILE *));
        void init_mib_internals __P((void));	/* called from 'mib.c' */
 static int  name_hash __P((char *));
 static void init_node_hash __P((struct node *));
-static void print_rror __P((char *, char *, int));
+static void print_error __P((char *, char *, int));
 static void *Malloc __P((unsigned));
 static char *Strdup __P((char *));
 static void Malloc_stats __P((FILE *));
@@ -346,6 +346,7 @@ static void  new_module  __P((char *, char *));
 
 extern void  set_function __P((struct tree *));	/* from 'mib.c' */
 extern void init_mib __P((void));	/* from mib.c */
+static int read_module_internal __P((char *));
 
 static int
 name_hash( name )
@@ -595,14 +596,13 @@ print_ascii_dump_tree(f, tree, count)
     int count;
 {
     struct tree *tp;
-    int i;
 
 /*    fprintf(f, "Children of %s(%ld):\n", tree->label, tree->subid); */
     count++;
     for(tp = tree->child_list; tp; tp = tp->next_peer){
 /*        fprintf(f, "%s(%ld) type=%d",
                 tp->label, tp->subid, tp->type); */
-          fprintf(f, "%s ::= { %s %d }\n", tp->label, tree->label, tp->subid);
+          fprintf(f, "%s ::= { %s %ld }\n", tp->label, tree->label, tp->subid);
 /*
         if (tp->tc_index != -1) fprintf(f, " tc=%d", tp->tc_index);
         if (tp->hint) fprintf(f, " hint=%s", tp->hint);
@@ -1024,7 +1024,7 @@ do_subtree(root, nodes)
  * Takes a list of the form:
  * { iso org(3) dod(6) 1 }
  * and creates several nodes, one for each parent-child pair.
- * Returns NULL on error.
+ * Returns 0 on error.
  */
 static int
 getoid(fp, id,  length)
@@ -1087,7 +1087,7 @@ getoid(fp, id,  length)
  * Parse an entry of the form:
  * label OBJECT IDENTIFIER ::= { parent 2 }
  * The "label OBJECT IDENTIFIER ::=" portion has already been parsed.
- * Returns 0 on error.
+ * Returns NULL on error.
  */
 static struct node *
 parse_objectid(fp, name)
@@ -1796,10 +1796,6 @@ parse_trapDefinition(fp, name)
                     free_node(np);
                     return NULL;
                 }
-
-#ifdef TEST2
-                printf("Description== \"%.50s\"\n", quoted_string_buffer);
-#endif
                 if (save_mib_descriptions) {
                     np->description = Strdup (quoted_string_buffer);
                 }
@@ -1836,6 +1832,13 @@ parse_trapDefinition(fp, name)
         return NULL;
     }
     np->subid = atoi(token);
+    np->next = Malloc(sizeof (struct node));
+    memset(np->next, 0, sizeof(struct node));
+    np->next->parent = np->parent;
+    np->parent = Malloc(strlen(np->parent)+2);
+    strcpy(np->parent, np->next->parent);
+    strcat(np->parent, "#");
+    np->next->label = Strdup(np->parent);
     return np;
 }
 
@@ -2130,7 +2133,7 @@ read_import_replacements( module_name, node_identifier )
  *	Returns the root of the whole tree
  *	(by analogy with 'read_mib')
  */
-int
+static int
 read_module_internal (name )
     char *name;
 {
