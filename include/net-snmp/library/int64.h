@@ -20,6 +20,13 @@ extern          "C" {
     int             read64(U64 *, const char *);
     void            u64Subtract(const U64 * pu64one, const U64 * pu64two,
                                 U64 * pu64out);
+    void            u64Incr(U64 * pu64out, const U64 * pu64one);
+    void            u64UpdateCounter(U64 * pu64out, const U64 * pu64one,
+                                     const U64 * pu64two);
+    void            u64Copy(U64 * pu64one, const U64 * pu64two);
+
+    int             netsnmp_c64_check_for_32bit_wrap(U64 *old_val, U64 *new_val,
+                                                     int adjust);
 
 #ifdef __cplusplus
 }
