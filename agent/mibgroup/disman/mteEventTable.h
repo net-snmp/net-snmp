@@ -15,8 +15,8 @@ void            run_mte_events(struct mteTriggerTable_data *item,
 		               const char *eventobjowner, const char *eventobjname);
 
 
-void parse_trapevent(const char *token, char *line);
-void parse_linkUpDownTraps(const char *token, char *line);
+void parse_notificationEvent(const char *token, char *line);
+void parse_linkUpDownNotifications(const char *token, char *line);
 Netsnmp_Node_Handler mteEventTable_handler;
 
 /*
