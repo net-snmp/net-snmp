@@ -599,14 +599,11 @@ get_table_entries(netsnmp_session * ss)
                             } else {
                                 switch (snmp_get_suffix_only()) {
                                 case 2:
+                                case 0:
                                     name_p = strrchr(buf, ':');
                                     break;
                                 case 1:
                                     name_p = buf;
-                                    break;
-                                case 0:
-                                    name_p = buf + strlen(table_name) + 1;
-                                    name_p = strchr(name_p, '.') + 1;
                                     break;
                                 }
                                 name_p = strchr(name_p, '.') + 1;
@@ -756,14 +753,11 @@ getbulk_table_entries(netsnmp_session * ss)
 		    } else {
                         switch (snmp_get_suffix_only()) {
                         case 2:
+                        case 0:
                             name_p = strrchr(buf, ':');
                             break;
                         case 1:
                             name_p = buf;
-                            break;
-                        case 0:
-                            name_p = buf + strlen(table_name) + 1;
-                            name_p = strchr(name_p, '.') + 1;
                             break;
                         }
                         name_p = strchr(name_p, '.') + 1;
