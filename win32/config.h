@@ -152,7 +152,7 @@
 
 /* Define as the return type of signal handlers (int or void).  */
 
-#define RETSIGTYPE int
+#define RETSIGTYPE void
 
 
 
@@ -241,6 +241,8 @@
 #define PERSISTENT_DIRECTORY "\\USR\\SNMP"
 
 
+
+#define MAX_PERSISTENT_BACKUPS 10
 
 /* default system contact */
 
