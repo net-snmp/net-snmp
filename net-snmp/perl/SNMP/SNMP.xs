@@ -4749,6 +4749,14 @@ snmp_debug_internals(val)
 
 
 void
+snmp_mib_toggle_options(options)
+	char   *options
+	CODE:
+	{
+	   snmp_mib_toggle_options(options);
+	}
+
+void
 snmp_sock_cleanup()
 	CODE:
 	{
