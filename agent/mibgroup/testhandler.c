@@ -187,7 +187,7 @@ my_test_handler(
     DEBUGMSGTL(("testhandler", "Got request:\n"));
     /* loop through requests */
     while(requests) {
-        struct variable_list *var = requests->requestvb;
+        netsnmp_variable_list *var = requests->requestvb;
 
         DEBUGMSGTL(("testhandler", "  oid:"));
         DEBUGMSGOID(("testhandler", var->name,
@@ -247,7 +247,7 @@ my_test_table_handler(netsnmp_mib_handler               *handler,
     
     
     while(requests) {
-        struct variable_list *var = requests->requestvb;
+        netsnmp_variable_list *var = requests->requestvb;
 
         if (requests->processed != 0)
             continue;

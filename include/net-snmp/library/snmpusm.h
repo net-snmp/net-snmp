@@ -166,7 +166,7 @@ int usm_rgenerate_out_msg (int, u_char *, size_t, int, int, u_char *, size_t,
 
 int usm_process_in_msg (int, size_t, u_char *, int, int, u_char *, size_t,
 			    u_char *, size_t *, char *, size_t *, u_char **, size_t *,
-			    size_t *, void **, struct snmp_session *, u_char);
+			    size_t *, void **, netsnmp_session *, u_char);
 
 int             usm_check_secLevel(int level, struct usmUser *user);
 struct usmUser *usm_get_userList(void);

@@ -22,6 +22,9 @@
    for the ucd-snmp snmpd agent.
  *
  * $Log$
+ * Revision 1.5  2002/03/09 00:28:04  hardaker
+ * struct snmp_session typedefed to netsnmp_session.  & pdu. & ...
+ *
  * Revision 1.4  2002/02/08 15:45:09  dts12
  * Use the new 'net-snmp-includes' single-include header files,
  * in place of the (uninstalled) 'mibincl.h'.
@@ -538,21 +541,21 @@ create_explanaition (CRTL_ENTRY_T* evptr, u_char is_rising,
 
 #include <net-snmp/snmp_client.h>
 
-extern void send_enterprise_trap_vars (int, int, oid *, int, struct variable_list *);
+extern void send_enterprise_trap_vars (int, int, oid *, int, netsnmp_variable_list *);
 
-static struct variable_list*
-oa_bind_var (struct variable_list* prev,
+static netsnmp_variable_list*
+oa_bind_var (netsnmp_variable_list* prev,
              void* value, int type, size_t sz_val,
              oid* oid, size_t sz_oid)
 {
-  struct variable_list* var;
+  netsnmp_variable_list* var;
 
-  var = (struct variable_list*) malloc (sizeof (struct variable_list));
+  var = (netsnmp_variable_list*) malloc (sizeof (netsnmp_variable_list));
   if (! var) {
     ag_trace ("FATAL: cannot malloc in oa_bind_var\n");
     exit (-1); /* Sorry :( */
   }
-  memset (var, 0, sizeof (struct variable_list));
+  memset (var, 0, sizeof (netsnmp_variable_list));
   var->next_variable = prev;
   snmp_set_var_objid (var, oid, sz_oid);
   snmp_set_var_value (var, (u_char *) value, sz_val);
@@ -574,7 +577,7 @@ event_send_trap (CRTL_ENTRY_T* evptr, u_char is_rising,
   static oid sample_type_oid[] = {1,3,6,1,2,1,16,3,1,1,4};
   static oid value_oid[]       = {1,3,6,1,2,1,16,3,1,1,5};
   static oid threshold_oid[]   = {1,3,6,1,2,1,16,3,1,1,7}; /* rising case */
-  struct variable_list* top = NULL;
+  netsnmp_variable_list* top = NULL;
   register int iii;
 
   /* set the last 'oid' : risingAlarm or fallingAlarm */

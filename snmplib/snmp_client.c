@@ -102,15 +102,15 @@ typedef long	fd_mask;
 #define CONTEXT_MIB_BASE ".1.3.6.1.6.3.3.1.4.127.0.0.1.1"
 
 /* Prototype definitions */
-static int snmp_synch_input(int op, struct snmp_session *session, int reqid,
-                                struct snmp_pdu *pdu, void *magic);
+static int snmp_synch_input(int op, netsnmp_session *session, int reqid,
+                                netsnmp_pdu *pdu, void *magic);
 
-struct snmp_pdu *
+netsnmp_pdu *
 snmp_pdu_create(int command)
 {
-    struct snmp_pdu *pdu;
+    netsnmp_pdu *pdu;
 
-    pdu = (struct snmp_pdu *)calloc(1,sizeof(struct snmp_pdu));
+    pdu = (netsnmp_pdu *)calloc(1,sizeof(netsnmp_pdu));
     if (pdu) {
     pdu->version		 = SNMP_DEFAULT_VERSION;
     pdu->command		 = command;
@@ -134,7 +134,7 @@ snmp_pdu_create(int command)
  * Add a null variable with the requested name to the end of the list of
  * variables for this pdu.
  */
-struct variable_list* snmp_add_null_var(struct snmp_pdu * pdu, 
+netsnmp_variable_list* snmp_add_null_var(netsnmp_pdu * pdu, 
 					oid *name, 
 					size_t name_length)
 {
@@ -144,9 +144,9 @@ struct variable_list* snmp_add_null_var(struct snmp_pdu * pdu,
 
 static int
 snmp_synch_input(int op,
-		 struct snmp_session *session,
+		 netsnmp_session *session,
 		 int reqid,
-		 struct snmp_pdu *pdu,
+		 netsnmp_pdu *pdu,
 		 void *magic)
 {
     struct synch_state *state = (struct synch_state *)magic;
@@ -158,7 +158,7 @@ snmp_synch_input(int op,
 
     state->waiting = 0;
 
-    if (op == SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
 	if (pdu->command == SNMP_MSG_REPORT) {
 	    rpt_type = snmpv3_get_report_type(pdu);
 	    if (SNMPV3_IGNORE_UNAUTH_REPORTS ||
@@ -175,12 +175,12 @@ snmp_synch_input(int op,
 	    state->status = STAT_SUCCESS;
 	    session->s_snmp_errno = SNMPERR_SUCCESS;
 	}
-    } else if (op == SNMP_CALLBACK_OP_TIMED_OUT) {
+    } else if (op == NETSNMP_CALLBACK_OP_TIMED_OUT) {
 	state->pdu = NULL;
 	state->status = STAT_TIMEOUT;
 	session->s_snmp_errno = SNMPERR_TIMEOUT;
         SET_SNMP_ERROR(SNMPERR_TIMEOUT);
-    } else if (op == SNMP_CALLBACK_OP_DISCONNECT) {
+    } else if (op == NETSNMP_CALLBACK_OP_DISCONNECT) {
 	state->pdu = NULL;
 	state->status = STAT_ERROR;
 	session->s_snmp_errno = SNMPERR_ABORT;
@@ -201,11 +201,11 @@ snmp_synch_input(int op,
  * Returns 0 if successful.
  */
 int
-snmp_clone_var(struct variable_list *var, struct variable_list *newvar)
+snmp_clone_var(netsnmp_variable_list *var, netsnmp_variable_list *newvar)
 {
     if (!newvar || !var) return 1;
 
-    memmove(newvar, var, sizeof(struct variable_list));
+    memmove(newvar, var, sizeof(netsnmp_variable_list));
     newvar->next_variable = 0; newvar->name = 0; newvar->val.string = 0;
     newvar->data = 0; newvar->dataFreeHook = 0; newvar->index = 0;
 
@@ -268,7 +268,7 @@ snmp_clone_mem(void ** dstPtr, void * srcPtr, unsigned len)
  * restoring pointers to local buffers
  */
 void
-snmp_reset_var_buffers( struct variable_list * var )
+snmp_reset_var_buffers( netsnmp_variable_list * var )
 {
     while( var ) {
         if(var->name != var->name_loc) {
@@ -295,15 +295,15 @@ snmp_reset_var_buffers( struct variable_list * var )
  * Returns 0 if failure.
  */
 static
-struct snmp_pdu *
-_clone_pdu_header(struct snmp_pdu *pdu)
+netsnmp_pdu *
+_clone_pdu_header(netsnmp_pdu *pdu)
 {
-    struct snmp_pdu *newpdu;
+    netsnmp_pdu *newpdu;
     struct snmp_secmod_def *sptr;
 
-    newpdu = (struct snmp_pdu *)malloc(sizeof(struct snmp_pdu));
+    newpdu = (netsnmp_pdu *)malloc(sizeof(netsnmp_pdu));
     if (!newpdu) return 0;
-    memmove(newpdu, pdu, sizeof(struct snmp_pdu));
+    memmove(newpdu, pdu, sizeof(netsnmp_pdu));
 
     /* reset copied pointers if copy fails */
     newpdu->variables = 0; newpdu->enterprise = 0; newpdu->community = 0;
@@ -339,12 +339,12 @@ _clone_pdu_header(struct snmp_pdu *pdu)
 }
 
 static
-struct variable_list *
-_copy_varlist(struct variable_list * var,	/* source varList */
+netsnmp_variable_list *
+_copy_varlist(netsnmp_variable_list * var,	/* source varList */
               int errindex,                 /* index of variable to drop (if any) */
               int copy_count)               /* !=0 number variables to copy */
 {
-    struct variable_list *newhead, *newvar, *oldvar;
+    netsnmp_variable_list *newhead, *newvar, *oldvar;
     int ii = 0;
 
     newhead = NULL; oldvar = NULL;
@@ -357,7 +357,7 @@ _copy_varlist(struct variable_list * var,	/* source varList */
         }
 
         /* clone the next variable. Cleanup if alloc fails */
-        newvar = (struct variable_list *)malloc(sizeof(struct variable_list));
+        newvar = (netsnmp_variable_list *)malloc(sizeof(netsnmp_variable_list));
         if (snmp_clone_var(var, newvar)){
             if (newvar) free((char *)newvar);
             snmp_free_varbind(newhead); return 0;
@@ -393,14 +393,14 @@ _copy_varlist(struct variable_list * var,	/* source varList */
  * Returns 0 if failure.
  */
 static
-struct snmp_pdu *
-_copy_pdu_vars(struct snmp_pdu *pdu,  /* source PDU */
-        struct snmp_pdu *newpdu,      /* target PDU */
+netsnmp_pdu *
+_copy_pdu_vars(netsnmp_pdu *pdu,  /* source PDU */
+        netsnmp_pdu *newpdu,      /* target PDU */
         int drop_err,                 /* !=0 drop errored variable */
         int skip_count,               /* !=0 number of variables to skip */
         int copy_count)               /* !=0 number of variables to copy */
 {
-    struct variable_list *var, *oldvar;
+    netsnmp_variable_list *var, *oldvar;
     int ii, copied, drop_idx;
 
     if (!newpdu) return 0;            /* where is PDU to copy to ? */
@@ -447,10 +447,10 @@ _copy_pdu_vars(struct snmp_pdu *pdu,  /* source PDU */
  * Returns 0 if failure.
  */
 static
-struct snmp_pdu *
-_clone_pdu(struct snmp_pdu *pdu, int drop_err)
+netsnmp_pdu *
+_clone_pdu(netsnmp_pdu *pdu, int drop_err)
 {
-    struct snmp_pdu *newpdu;
+    netsnmp_pdu *newpdu;
     newpdu = _clone_pdu_header(pdu);
     newpdu = _copy_pdu_vars(pdu, newpdu,
 	    drop_err,
@@ -466,8 +466,8 @@ _clone_pdu(struct snmp_pdu *pdu, int drop_err)
  * Returns a pointer to the cloned PDU if successful.
  * Returns 0 if failure
  */
-struct variable_list *
-snmp_clone_varbind(struct variable_list *varlist)
+netsnmp_variable_list *
+snmp_clone_varbind(netsnmp_variable_list *varlist)
 {
     return _copy_varlist(varlist, 0, 10000); /* skip none, copy all */
 }
@@ -478,8 +478,8 @@ snmp_clone_varbind(struct variable_list *varlist)
  * Returns a pointer to the cloned PDU if successful.
  * Returns 0 if failure
  */
-struct snmp_pdu *
-snmp_clone_pdu(struct snmp_pdu *pdu)
+netsnmp_pdu *
+snmp_clone_pdu(netsnmp_pdu *pdu)
 {
     return _clone_pdu(pdu, 0); /* copies all variables */
 }
@@ -494,10 +494,10 @@ snmp_clone_pdu(struct snmp_pdu *pdu)
  * Returns a pointer to the cloned PDU if successful.
  * Returns 0 if failure.
  */
-struct snmp_pdu *
-snmp_split_pdu(struct snmp_pdu *pdu, int skip_count, int copy_count)
+netsnmp_pdu *
+snmp_split_pdu(netsnmp_pdu *pdu, int skip_count, int copy_count)
 {
-    struct snmp_pdu *newpdu;
+    netsnmp_pdu *newpdu;
     newpdu = _clone_pdu_header(pdu);
     newpdu = _copy_pdu_vars(pdu, newpdu,
 	    0,         /* don't drop any variables */
@@ -519,10 +519,10 @@ snmp_split_pdu(struct snmp_pdu *pdu, int skip_count, int copy_count)
  * If everything was successful, a pointer to the fixed cloned pdu will
  * be returned.
  */
-struct snmp_pdu *
-snmp_fix_pdu(struct snmp_pdu *pdu, int command)
+netsnmp_pdu *
+snmp_fix_pdu(netsnmp_pdu *pdu, int command)
 {
-    struct snmp_pdu *newpdu;
+    netsnmp_pdu *newpdu;
 
     if ((pdu->command != SNMP_MSG_RESPONSE)
      || (pdu->errstat == SNMP_ERR_NOERROR)
@@ -553,9 +553,9 @@ snmp_fix_pdu(struct snmp_pdu *pdu, int command)
  * Returns the number of variables bound to a PDU structure
  */
 unsigned long
-snmp_varbind_len(struct snmp_pdu * pdu)
+snmp_varbind_len(netsnmp_pdu * pdu)
 {
-    register struct variable_list *vars;
+    register netsnmp_variable_list *vars;
     unsigned long retVal = 0;
     if (pdu)
       for (vars = pdu->variables; vars; vars = vars->next_variable)
@@ -573,7 +573,7 @@ snmp_varbind_len(struct snmp_pdu * pdu)
  */
 
 int
-snmp_set_var_objid (struct variable_list *vp,
+snmp_set_var_objid (netsnmp_variable_list *vp,
                     const oid *objid, size_t name_length)
 {
     size_t len = sizeof(oid) * name_length;
@@ -599,7 +599,7 @@ snmp_set_var_objid (struct variable_list *vp,
 }
 
 int
-snmp_set_var_typed_value(struct variable_list *newvar, u_char type,
+snmp_set_var_typed_value(netsnmp_variable_list *newvar, u_char type,
                          const u_char *val_str, size_t val_len)
 {
     newvar->type = type;
@@ -607,7 +607,7 @@ snmp_set_var_typed_value(struct variable_list *newvar, u_char type,
 }
 
 int
-count_varbinds( struct variable_list *var_ptr )
+count_varbinds( netsnmp_variable_list *var_ptr )
 {
   int count = 0;
 
@@ -618,7 +618,7 @@ count_varbinds( struct variable_list *var_ptr )
 }
 
 int
-count_varbinds_of_type( struct variable_list *var_ptr, int type )
+count_varbinds_of_type( netsnmp_variable_list *var_ptr, int type )
 {
   int count = 0;
   
@@ -629,8 +629,8 @@ count_varbinds_of_type( struct variable_list *var_ptr, int type )
   return count;
 }
 
-struct variable_list *
-find_varbind_of_type( struct variable_list *var_ptr, int type )
+netsnmp_variable_list *
+find_varbind_of_type( netsnmp_variable_list *var_ptr, int type )
 {
   for (;  var_ptr != NULL && var_ptr->type != type ;
        var_ptr = var_ptr->next_variable );
@@ -645,7 +645,7 @@ find_varbind_of_type( struct variable_list *var_ptr, int type )
  */
 
 int
-snmp_set_var_value(struct variable_list *newvar,
+snmp_set_var_value(netsnmp_variable_list *newvar,
                    const u_char *val_str, size_t val_len)
 {
     if (newvar->val.string &&
@@ -677,7 +677,7 @@ snmp_set_var_value(struct variable_list *newvar,
 }
 
 void
-snmp_replace_var_types(struct variable_list *vbl, int old_type, int new_type) {
+snmp_replace_var_types(netsnmp_variable_list *vbl, int old_type, int new_type) {
     while(vbl) {
         if (vbl->type == old_type) {
             snmp_set_var_typed_value(vbl, new_type, NULL, 0);
@@ -687,7 +687,7 @@ snmp_replace_var_types(struct variable_list *vbl, int old_type, int new_type) {
 }
 
 void
-snmp_reset_var_types(struct variable_list *vbl, int new_type) {
+snmp_reset_var_types(netsnmp_variable_list *vbl, int new_type) {
     while(vbl) {
         snmp_set_var_typed_value(vbl, new_type, NULL, 0);
         vbl = vbl->next_variable;
@@ -695,9 +695,9 @@ snmp_reset_var_types(struct variable_list *vbl, int new_type) {
 }
 
 int
-snmp_synch_response_cb(struct snmp_session *ss,
-		    struct snmp_pdu *pdu,
-		    struct snmp_pdu **response,
+snmp_synch_response_cb(netsnmp_session *ss,
+		    netsnmp_pdu *pdu,
+		    netsnmp_pdu **response,
 		    snmp_callback pcb)
 {
     struct synch_state lstate, *state;
@@ -764,19 +764,19 @@ snmp_synch_response_cb(struct snmp_session *ss,
 }
 
 int
-snmp_synch_response(struct snmp_session *ss,
-		    struct snmp_pdu *pdu,
-		    struct snmp_pdu **response)
+snmp_synch_response(netsnmp_session *ss,
+		    netsnmp_pdu *pdu,
+		    netsnmp_pdu **response)
 {
     return snmp_synch_response_cb(ss,pdu,response,snmp_synch_input);
 }
 
 int
 snmp_sess_synch_response(void *sessp,
-			 struct snmp_pdu *pdu,
-			 struct snmp_pdu **response)
+			 netsnmp_pdu *pdu,
+			 netsnmp_pdu **response)
 {
-    struct snmp_session *ss;
+    netsnmp_session *ss;
     struct synch_state lstate, *state;
     snmp_callback cbsav;
     void * cbmagsav;

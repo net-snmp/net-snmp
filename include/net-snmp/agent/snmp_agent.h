@@ -28,7 +28,7 @@ extern int	log_addresses;
 extern int	lastAddrAge;
 
 typedef struct netsnmp_request_info_s {
-   struct variable_list *requestvb;
+   netsnmp_variable_list *requestvb;
 
    /* can be used to pass information on a per-request basis from a
       helper to the later handlers */
@@ -83,7 +83,7 @@ typedef struct netsnmp_tree_cache_s {
 
 typedef struct netsnmp_agent_request_info_s {
    int    mode;
-   struct snmp_pdu *pdu;                 /* pdu contains authinfo, eg */
+   netsnmp_pdu *pdu;                 /* pdu contains authinfo, eg */
    struct netsnmp_agent_session_s *asp;       /* may not be needed */
    /* can be used to pass information on a per-pdu basis from a
       helper to the later handlers */
@@ -93,9 +93,9 @@ typedef struct netsnmp_agent_request_info_s {
 
 typedef struct netsnmp_agent_session_s {
     int		mode;
-    struct snmp_session  *session;
-    struct snmp_pdu      *pdu;
-    struct snmp_pdu      *orig_pdu;
+    netsnmp_session  *session;
+    netsnmp_pdu      *pdu;
+    netsnmp_pdu      *orig_pdu;
     int		rw;
     int		exact;
     int		status;
@@ -108,7 +108,7 @@ typedef struct netsnmp_agent_session_s {
    netsnmp_agent_request_info *reqinfo;
    netsnmp_request_info *requests;
    netsnmp_tree_cache *treecache;
-   struct variable_list **bulkcache;
+   netsnmp_variable_list **bulkcache;
    int treecache_len; /* length of cache array */
    int treecache_num; /* number of current cache entries */
    int vbcount;
@@ -121,14 +121,14 @@ void		netsnmp_addrcache_age		(void);
 
 
 /* config file parsing routines */
-int handle_snmp_packet(int, struct snmp_session *, int, struct snmp_pdu *, void *);
+int handle_snmp_packet(int, netsnmp_session *, int, netsnmp_pdu *, void *);
 void snmp_agent_parse_config (char *, char *);
-netsnmp_agent_session  *init_agent_snmp_session( struct snmp_session *, struct snmp_pdu *);
+netsnmp_agent_session  *init_agent_snmp_session( netsnmp_session *, netsnmp_pdu *);
 void free_agent_snmp_session( netsnmp_agent_session * );
 void netsnmp_remove_and_free_agent_snmp_session(netsnmp_agent_session *asp);
 #ifdef SNMP_NEED_REQUEST_LIST
-void netsnmp_free_agent_snmp_session_by_session(struct snmp_session *sess,
-				  void (*free_request)(struct request_list *));
+void netsnmp_free_agent_snmp_session_by_session(netsnmp_session *sess,
+				  void (*free_request)(netsnmp_request_list *));
 #endif
 int getNextSessID(void);
 void dump_sess_list(void);
@@ -145,9 +145,9 @@ int netsnmp_marker_uptime( marker_t pm );
 int netsnmp_timeval_uptime( struct timeval *tv );
 int netsnmp_get_agent_uptime(void);
 int netsnmp_check_transaction_id(int transaction_id);
-int netsnmp_agent_check_packet(struct snmp_session*, struct netsnmp_transport_s *,
+int netsnmp_agent_check_packet(netsnmp_session*, struct netsnmp_transport_s *,
 		      void *, int);
-int netsnmp_agent_check_parse(struct snmp_session*, struct snmp_pdu*, int);
+int netsnmp_agent_check_parse(netsnmp_session*, netsnmp_pdu*, int);
 
 /*  Register and de-register agent NSAPs.  */
  

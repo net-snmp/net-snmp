@@ -5,7 +5,7 @@
 
 typedef struct netsnmp_callback_pass_s {
    int return_transport_num;
-   struct snmp_pdu *pdu;
+   netsnmp_pdu *pdu;
    struct netsnmp_callback_pass_s *next;
 } netsnmp_callback_pass;
 
@@ -18,24 +18,24 @@ typedef struct netsnmp_callback_info_s {
 } netsnmp_callback_info;
 
 netsnmp_transport		*netsnmp_callback_transport (int);
-int netsnmp_callback_hook_parse(struct snmp_session *sp,
-                             struct snmp_pdu *pdu,
+int netsnmp_callback_hook_parse(netsnmp_session *sp,
+                             netsnmp_pdu *pdu,
                              u_char *packetptr,
                              size_t len);
-int netsnmp_callback_hook_build(struct snmp_session *sp,
-                             struct snmp_pdu *pdu,
+int netsnmp_callback_hook_build(netsnmp_session *sp,
+                             netsnmp_pdu *pdu,
                              u_char *ptk, size_t *len);
 int netsnmp_callback_check_packet(u_char *pkt, size_t len);
-struct snmp_pdu *netsnmp_callback_create_pdu(netsnmp_transport *transport,
+netsnmp_pdu *netsnmp_callback_create_pdu(netsnmp_transport *transport,
                                           void *opaque, size_t olength);
-struct snmp_session *netsnmp_callback_open(int attach_to,
-                                        int (*return_func)(int op, struct snmp_session *session,
-                                                           int reqid, struct snmp_pdu *pdu,
+netsnmp_session *netsnmp_callback_open(int attach_to,
+                                        int (*return_func)(int op, netsnmp_session *session,
+                                                           int reqid, netsnmp_pdu *pdu,
                                                            void *magic),
-                                        int (*fpre_parse) (struct snmp_session *,
+                                        int (*fpre_parse) (netsnmp_session *,
                                                            struct netsnmp_transport_s *,
                                                            void *, int),
-                                        int (*fpost_parse)(struct snmp_session *,
-                                                           struct snmp_pdu *, int));
+                                        int (*fpost_parse)(netsnmp_session *,
+                                                           netsnmp_pdu *, int));
 
 #endif/*_SNMPCALLBACKDOMAIN_H*/

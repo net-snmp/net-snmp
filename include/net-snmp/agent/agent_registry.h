@@ -17,7 +17,7 @@ extern "C" {
 
 /* the structure of parameters passed to registered ACM modules */
 struct view_parameters {
-   struct snmp_pdu *pdu;
+   netsnmp_pdu *pdu;
    oid             *name;
    size_t           namelen;
    int              errorcode; /* do not change unless you're
@@ -53,28 +53,28 @@ struct subtree *find_subtree_next (oid *, size_t, struct subtree *,
                                    const char *context_name);
 struct subtree *find_subtree_previous (oid *, size_t, struct subtree *,
                                        const char *context_name);
-struct snmp_session *get_session_for_oid( oid *, size_t,
+netsnmp_session *get_session_for_oid( oid *, size_t,
                                           const char *context_name);
 
 int register_mib(const char *, struct variable *, size_t, size_t, oid *, size_t);
 int register_mib_priority(const char *, struct variable *, size_t, size_t, oid *, size_t, int);
-int register_mib_range(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, struct snmp_session *);
-int register_mib_context(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, struct snmp_session *, const char*, int, int);
-/* int register_mib_context2(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, struct snmp_session *, const char*, int, int, netsnmp_handler_registration *); */
-int register_mib_netsnmp_table_row(const char *, struct variable *, size_t, size_t, oid *, size_t, int, int, struct snmp_session *, const char *, int, int);
+int register_mib_range(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, netsnmp_session *);
+int register_mib_context(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, netsnmp_session *, const char*, int, int);
+/* int register_mib_context2(const char *, struct variable *, size_t , size_t , oid *, size_t, int, int, oid, netsnmp_session *, const char*, int, int, netsnmp_handler_registration *); */
+int register_mib_netsnmp_table_row(const char *, struct variable *, size_t, size_t, oid *, size_t, int, int, netsnmp_session *, const char *, int, int);
 int unregister_mib (oid *, size_t);
 int unregister_mib_priority (oid *, size_t, int);
 int unregister_mib_range (oid *, size_t, int, int, oid);
 int unregister_mib_context (oid *, size_t, int, int, oid, const char*);
-void unregister_mibs_by_session (struct snmp_session *);
+void unregister_mibs_by_session (netsnmp_session *);
 int  unregister_mib_netsnmp_table_row	(oid *mibloc, size_t mibloclen, int priority,
 				 int var_subid, oid range_ubound,
 				 const char *context);
 
 struct subtree *free_subtree (struct subtree *);
 int compare_tree (const oid *, size_t, const oid *, size_t);
-int in_a_view(oid *, size_t *, struct snmp_pdu *, int);
-int check_access(struct snmp_pdu *pdu);
+int in_a_view(oid *, size_t *, netsnmp_pdu *, int);
+int check_access(netsnmp_pdu *pdu);
 void register_mib_reattach(void);
 void register_mib_detach(void);
 

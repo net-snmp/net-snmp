@@ -24,7 +24,7 @@ void debugmsg(va_alist);
 void debugmsgtoken(va_alist);
 #endif
 void debugmsg_oid(const char *token, const oid *theoid, size_t len);
-void debugmsg_var(const char *token, struct variable_list *var);
+void debugmsg_var(const char *token, netsnmp_variable_list *var);
 void debugmsg_oidrange(const char *token, const oid *theoid, size_t len,
 		       size_t var_subid, oid range_ubound);
 void debugmsg_hex(const char *token, u_char *thedata, size_t len);

@@ -62,9 +62,9 @@ extern struct timeval starttime;
 
 int
 agentx_synch_input(int op,
-			struct snmp_session *session,
+			netsnmp_session *session,
 			int reqid,
-			struct snmp_pdu *pdu,
+			netsnmp_pdu *pdu,
 			void *magic)
 {
     struct synch_state *state = (struct synch_state *)magic;
@@ -76,7 +76,7 @@ agentx_synch_input(int op,
 
     DEBUGMSGTL(("agentx/subagent", "synching input, op 0x%02x\n", op));
     state->waiting = 0;
-    if (op == SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
 	if (pdu->command == AGENTX_MSG_RESPONSE) {
 	    state->pdu		= snmp_clone_pdu(pdu);
 	    state->status	= STAT_SUCCESS;
@@ -97,11 +97,11 @@ agentx_synch_input(int op,
               starttime.tv_sec++;
           }
 	}
-    } else if (op == SNMP_CALLBACK_OP_TIMED_OUT) {
+    } else if (op == NETSNMP_CALLBACK_OP_TIMED_OUT) {
 	state->pdu		= NULL;
 	state->status		= STAT_TIMEOUT;
 	session->s_snmp_errno	= SNMPERR_TIMEOUT;
-    } else if (op == SNMP_CALLBACK_OP_DISCONNECT) {
+    } else if (op == NETSNMP_CALLBACK_OP_DISCONNECT) {
       return handle_agentx_packet(op, session, reqid, pdu, magic);
     }
 
@@ -111,8 +111,8 @@ agentx_synch_input(int op,
 
 
 int
-agentx_synch_response(struct snmp_session *ss, struct snmp_pdu *pdu,
-		      struct snmp_pdu **response)
+agentx_synch_response(netsnmp_session *ss, netsnmp_pdu *pdu,
+		      netsnmp_pdu **response)
 {
     return snmp_synch_response_cb(ss, pdu, response, agentx_synch_input);
 }
@@ -123,9 +123,9 @@ agentx_synch_response(struct snmp_session *ss, struct snmp_pdu *pdu,
 	 */
 
 int
-agentx_open_session( struct snmp_session *ss )
+agentx_open_session( netsnmp_session *ss )
 {
-    struct snmp_pdu *pdu, *response;
+    netsnmp_pdu *pdu, *response;
     extern oid version_sysoid[];
     extern int version_sysoid_len;
 
@@ -156,9 +156,9 @@ agentx_open_session( struct snmp_session *ss )
 }
 
 int
-agentx_close_session( struct snmp_session *ss, int why )
+agentx_close_session( netsnmp_session *ss, int why )
 {
-    struct snmp_pdu *pdu, *response;
+    netsnmp_pdu *pdu, *response;
     DEBUGMSGTL(("agentx/subagent","closing session\n"));
 
     if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
@@ -180,11 +180,11 @@ agentx_close_session( struct snmp_session *ss, int why )
 }
 
 int
-agentx_register(struct snmp_session *ss, oid start[], size_t startlen,
+agentx_register(netsnmp_session *ss, oid start[], size_t startlen,
 		int priority, int range_subid, oid range_ubound, int timeout, 
 		u_char flags)
 {
-    struct snmp_pdu *pdu, *response;
+    netsnmp_pdu *pdu, *response;
 
     DEBUGMSGTL(("agentx/subagent","registering: "));
     DEBUGMSGOIDRANGE(("agentx/subagent", start, startlen, range_subid, range_ubound));
@@ -233,10 +233,10 @@ agentx_register(struct snmp_session *ss, oid start[], size_t startlen,
 }
 
 int
-agentx_unregister(struct snmp_session *ss, oid start[], size_t startlen,
+agentx_unregister(netsnmp_session *ss, oid start[], size_t startlen,
 		   int priority, int range_subid, oid range_ubound)
 {
-    struct snmp_pdu *pdu, *response;
+    netsnmp_pdu *pdu, *response;
 
     if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return 0;
@@ -274,12 +274,12 @@ agentx_unregister(struct snmp_session *ss, oid start[], size_t startlen,
     return 1;
 }
 
-struct variable_list *
-agentx_register_index( struct snmp_session *ss,
-		      struct variable_list* varbind, int flags)
+netsnmp_variable_list *
+agentx_register_index( netsnmp_session *ss,
+		      netsnmp_variable_list* varbind, int flags)
 {
-    struct snmp_pdu *pdu, *response;
-    struct variable_list *varbind2;
+    netsnmp_pdu *pdu, *response;
+    netsnmp_variable_list *varbind2;
 
     if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return NULL;
@@ -290,7 +290,7 @@ agentx_register_index( struct snmp_session *ss,
 		 *    for the AgentX request PDU
 		 *    (since the pdu structure will be freed)
 		 */
-    varbind2 = (struct variable_list *)malloc(sizeof(struct variable_list));
+    varbind2 = (netsnmp_variable_list *)malloc(sizeof(netsnmp_variable_list));
     if ( varbind2 == NULL )
 	return NULL;
     if ( snmp_clone_var( varbind, varbind2 )) {
@@ -351,11 +351,11 @@ agentx_register_index( struct snmp_session *ss,
 }
 
 int
-agentx_unregister_index( struct snmp_session *ss,
-		      struct variable_list* varbind)
+agentx_unregister_index( netsnmp_session *ss,
+		      netsnmp_variable_list* varbind)
 {
-    struct snmp_pdu *pdu, *response;
-    struct variable_list *varbind2;
+    netsnmp_pdu *pdu, *response;
+    netsnmp_variable_list *varbind2;
 
     if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return -1;
@@ -366,7 +366,7 @@ agentx_unregister_index( struct snmp_session *ss,
 		 *    for the AgentX request PDU
 		 *    (since the pdu structure will be freed)
 		 */
-    varbind2 = (struct variable_list *)malloc(sizeof(struct variable_list));
+    varbind2 = (netsnmp_variable_list *)malloc(sizeof(netsnmp_variable_list));
     if ( varbind2 == NULL )
 	return -1;
     if ( snmp_clone_var( varbind, varbind2 )) {
@@ -401,10 +401,10 @@ agentx_unregister_index( struct snmp_session *ss,
 }
 
 int
-agentx_add_agentcaps( struct snmp_session *ss,
+agentx_add_agentcaps( netsnmp_session *ss,
 		      oid* agent_cap, size_t agent_caplen, const char* descr)
 {
-    struct snmp_pdu *pdu, *response;
+    netsnmp_pdu *pdu, *response;
 
     if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return 0;
@@ -430,10 +430,10 @@ agentx_add_agentcaps( struct snmp_session *ss,
 }
 
 int
-agentx_remove_agentcaps( struct snmp_session *ss,
+agentx_remove_agentcaps( netsnmp_session *ss,
 		      oid* agent_cap, size_t agent_caplen)
 {
-    struct snmp_pdu *pdu, *response;
+    netsnmp_pdu *pdu, *response;
 
     if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return 0;
@@ -459,9 +459,9 @@ agentx_remove_agentcaps( struct snmp_session *ss,
 }
 
 int
-agentx_send_ping( struct snmp_session *ss )
+agentx_send_ping( netsnmp_session *ss )
 {
-    struct snmp_pdu *pdu, *response;
+    netsnmp_pdu *pdu, *response;
 
     if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
 	return 0;

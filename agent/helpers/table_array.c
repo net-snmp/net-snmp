@@ -370,7 +370,7 @@ process_get_requests(netsnmp_handler_registration  *reginfo,
     netsnmp_request_info * current;
     netsnmp_oid_array_header *row = NULL;
     netsnmp_table_request_info *tblreq_info;
-    struct variable_list * var;
+    netsnmp_variable_list * var;
 
     /*
      * Loop through each of the requests, and
@@ -467,7 +467,7 @@ group_requests( netsnmp_agent_request_info *agtreq_info, netsnmp_request_info * 
                 oid_array netsnmp_array_group_tbl, table_array_data *tad )
 {
     netsnmp_table_request_info *tblreq_info;
-    struct variable_list * var;
+    netsnmp_variable_list * var;
     netsnmp_oid_array_header *row, *tmp, index;
     netsnmp_request_info * current;
     netsnmp_array_group * g;

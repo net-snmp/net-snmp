@@ -392,7 +392,7 @@ realloc_output_temp_bfr(u_char **buf, size_t *buf_len, size_t *out_len,
 static int
 realloc_handle_time_fmt (u_char **buf, size_t *buf_len, size_t *out_len,
 			 int allow_realloc,
-			 options_type *options, struct snmp_pdu *pdu)
+			 options_type *options, netsnmp_pdu *pdu)
 
      /*
       * Function:
@@ -532,7 +532,7 @@ realloc_handle_time_fmt (u_char **buf, size_t *buf_len, size_t *out_len,
 static int
 realloc_handle_ip_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
 		      int allow_realloc,
-		      options_type *options, struct snmp_pdu *pdu,
+		      options_type *options, netsnmp_pdu *pdu,
 		      netsnmp_transport *transport)
 
      /*
@@ -710,7 +710,7 @@ realloc_handle_ip_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
 static int
 realloc_handle_ent_fmt (u_char **buf, size_t *buf_len, size_t *out_len,
 			int allow_realloc, 
-			options_type *options, struct snmp_pdu *pdu)
+			options_type *options, netsnmp_pdu *pdu)
 
      /*
       * Function:
@@ -758,7 +758,7 @@ realloc_handle_ent_fmt (u_char **buf, size_t *buf_len, size_t *out_len,
 static int
 realloc_handle_trap_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
 			int allow_realloc,
-			options_type *options, struct snmp_pdu *pdu)
+			options_type *options, netsnmp_pdu *pdu)
 
      /*
       * Function:
@@ -773,7 +773,7 @@ realloc_handle_trap_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
       *    pdu     - information about this trap 
       */
 {
-  struct variable_list * vars;                  /* variables assoc with trap */
+  netsnmp_variable_list * vars;                  /* variables assoc with trap */
   char                   fmt_cmd = options->cmd; /* what we're outputting */
   u_char 		*temp_buf = NULL;
   size_t		 tbuf_len = 64, tout_len = 0;
@@ -888,7 +888,7 @@ realloc_handle_trap_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
 
 static int
 realloc_handle_wrap_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
-			int allow_realloc, struct snmp_pdu *pdu)
+			int allow_realloc, netsnmp_pdu *pdu)
 {
   size_t i = 0;
   
@@ -999,7 +999,7 @@ realloc_handle_wrap_fmt(u_char **buf, size_t *buf_len, size_t *out_len,
 static int
 realloc_dispatch_format_cmd(u_char **buf, size_t *buf_len, size_t *out_len,
 			    int allow_realloc,
-			    options_type *options, struct snmp_pdu *pdu,
+			    options_type *options, netsnmp_pdu *pdu,
 			    netsnmp_transport *transport)
 
      /*
@@ -1096,7 +1096,7 @@ realloc_handle_backslash(u_char **buf, size_t *buf_len, size_t *out_len,
 int
 realloc_format_plain_trap (u_char **buf, size_t *buf_len, size_t *out_len,
 			   int allow_realloc,
-			   struct snmp_pdu *pdu, netsnmp_transport *transport)
+			   netsnmp_pdu *pdu, netsnmp_transport *transport)
 
      /*
       * Function:
@@ -1117,7 +1117,7 @@ realloc_format_plain_trap (u_char **buf, size_t *buf_len, size_t *out_len,
   char                   safe_bfr[200];         /* holds other strings */
   struct in_addr	*agent_inaddr = (struct in_addr *)pdu->agent_addr;
   struct hostent *       host;                  /* host name */
-  struct variable_list * vars;                  /* variables assoc with trap */
+  netsnmp_variable_list * vars;                  /* variables assoc with trap */
 
   if (buf == NULL) {
     return 0;
@@ -1288,7 +1288,7 @@ realloc_format_plain_trap (u_char **buf, size_t *buf_len, size_t *out_len,
 int
 realloc_format_trap (u_char **buf, size_t *buf_len, size_t *out_len,
 		     int allow_realloc, const char *format_str,
-		     struct snmp_pdu *pdu, netsnmp_transport *transport)
+		     netsnmp_pdu *pdu, netsnmp_transport *transport)
 
      /*
       * Function:

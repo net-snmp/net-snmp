@@ -52,10 +52,10 @@
 
 extern struct timeval   starttime;
 
-struct snmp_session *
-find_agentx_session( struct snmp_session *session, int sessid)
+netsnmp_session *
+find_agentx_session( netsnmp_session *session, int sessid)
 {
-    struct snmp_session *sp;
+    netsnmp_session *sp;
     for ( sp = session->subsession ; sp != NULL ; sp = sp->next ) {
         if ( sp->sessid == sessid )
 	    return sp;
@@ -65,19 +65,19 @@ find_agentx_session( struct snmp_session *session, int sessid)
 
 
 int
-open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
+open_agentx_session(netsnmp_session *session, netsnmp_pdu *pdu)
 {
-    struct snmp_session *sp;
+    netsnmp_session *sp;
     struct timeval now;
 
     DEBUGMSGTL(("agentx/master", "open %08p\n", session));
-    sp = (struct snmp_session *)malloc( sizeof( struct snmp_session ));
+    sp = (netsnmp_session *)malloc( sizeof( netsnmp_session ));
     if ( sp == NULL ) {
         session->s_snmp_errno = AGENTX_ERR_OPEN_FAILED;
 	return -1;
     }
 
-    memcpy(sp, session, sizeof(struct snmp_session));
+    memcpy(sp, session, sizeof(netsnmp_session));
     sp->sessid     = snmp_get_next_sessid();
     sp->version    = pdu->version;
     sp->timeout    = pdu->time;
@@ -120,9 +120,9 @@ open_agentx_session(struct snmp_session *session, struct snmp_pdu *pdu)
 }
 
 int
-close_agentx_session(struct snmp_session *session, int sessid)
+close_agentx_session(netsnmp_session *session, int sessid)
 {
-    struct snmp_session *sp, **prevNext;
+    netsnmp_session *sp, **prevNext;
     
     DEBUGMSGTL(("agentx/master", "close %08p, %d\n", session, sessid));
     if (session != NULL && sessid == -1) {
@@ -165,9 +165,9 @@ close_agentx_session(struct snmp_session *session, int sessid)
 }
 
 int
-register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
+register_agentx_list(netsnmp_session *session, netsnmp_pdu *pdu)
 {
-    struct snmp_session *sp;
+    netsnmp_session *sp;
     char buf[128];
     oid ubound = 0;
     u_long flags = 0;
@@ -225,9 +225,9 @@ register_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 }
 
 int
-unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
+unregister_agentx_list(netsnmp_session *session, netsnmp_pdu *pdu)
 {
-    struct snmp_session *sp;
+    netsnmp_session *sp;
     int rc = 0;
 
     sp = find_agentx_session(session, pdu->sessid);
@@ -260,10 +260,10 @@ unregister_agentx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 }
 
 int
-allocate_idx_list(struct snmp_session *session, struct snmp_pdu *pdu)
+allocate_idx_list(netsnmp_session *session, netsnmp_pdu *pdu)
 {
-    struct snmp_session *sp;
-    struct variable_list *vp, *vp2, *next, *res;
+    netsnmp_session *sp;
+    netsnmp_variable_list *vp, *vp2, *next, *res;
     int flags = 0;
 
     sp = find_agentx_session( session, pdu->sessid );
@@ -308,10 +308,10 @@ allocate_idx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 }
 
 int
-release_idx_list(struct snmp_session *session, struct snmp_pdu *pdu)
+release_idx_list(netsnmp_session *session, netsnmp_pdu *pdu)
 {
-    struct snmp_session *sp;
-    struct variable_list *vp, *vp2, *rv = NULL;
+    netsnmp_session *sp;
+    netsnmp_variable_list *vp, *vp2, *rv = NULL;
     int res;
 
     sp = find_agentx_session( session, pdu->sessid );
@@ -336,9 +336,9 @@ release_idx_list(struct snmp_session *session, struct snmp_pdu *pdu)
 }
 
 int
-add_agent_caps_list(struct snmp_session *session, struct snmp_pdu *pdu)
+add_agent_caps_list(netsnmp_session *session, netsnmp_pdu *pdu)
 {
-    struct snmp_session *sp;
+    netsnmp_session *sp;
 
     sp = find_agentx_session( session, pdu->sessid );
     if ( sp == NULL )
@@ -351,9 +351,9 @@ add_agent_caps_list(struct snmp_session *session, struct snmp_pdu *pdu)
 }
 
 int
-remove_agent_caps_list(struct snmp_session *session, struct snmp_pdu *pdu)
+remove_agent_caps_list(netsnmp_session *session, netsnmp_pdu *pdu)
 {
-    struct snmp_session *sp;
+    netsnmp_session *sp;
 
     sp = find_agentx_session( session, pdu->sessid );
     if ( sp == NULL )
@@ -367,10 +367,10 @@ remove_agent_caps_list(struct snmp_session *session, struct snmp_pdu *pdu)
 }
 
 int
-agentx_notify(struct snmp_session *session, struct snmp_pdu *pdu)
+agentx_notify(netsnmp_session *session, netsnmp_pdu *pdu)
 {
-    struct snmp_session *sp;
-    struct variable_list *var;
+    netsnmp_session *sp;
+    netsnmp_variable_list *var;
     int got_sysuptime = 0;
     extern oid sysuptime_oid[], snmptrap_oid[];
     extern size_t sysuptime_oid_len, snmptrap_oid_len;
@@ -408,9 +408,9 @@ agentx_notify(struct snmp_session *session, struct snmp_pdu *pdu)
 
 
 int
-agentx_ping_response(struct snmp_session *session, struct snmp_pdu *pdu)
+agentx_ping_response(netsnmp_session *session, netsnmp_pdu *pdu)
 {
-    struct snmp_session *sp;
+    netsnmp_session *sp;
 
     sp = find_agentx_session( session, pdu->sessid );
     if ( sp == NULL )
@@ -421,26 +421,26 @@ agentx_ping_response(struct snmp_session *session, struct snmp_pdu *pdu)
 
 int
 handle_master_agentx_packet(int operation,
-			    struct snmp_session *session,
+			    netsnmp_session *session,
 			    int reqid,
-			    struct snmp_pdu *pdu,
+			    netsnmp_pdu *pdu,
 			    void *magic)
 {
     netsnmp_agent_session  *asp;
     struct timeval now;
     
-    if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
+    if (operation == NETSNMP_CALLBACK_OP_DISCONNECT) {
       DEBUGMSGTL(("agentx/master", "transport disconnect on session %08p\n",
 		  session));
       /*  Shut this session down gracefully.  */
       close_agentx_session(session, -1);
       return 1;
-    } else if (operation != SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    } else if (operation != NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
       DEBUGMSGTL(("agentx/master", "unexpected callback op %d\n", operation));
       return 1;
     }
 
-    /*  Okay, it's a SNMP_CALLBACK_OP_RECEIVED_MESSAGE op.  */
+    /*  Okay, it's a NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE op.  */
 
     if (magic) {
         asp = (netsnmp_agent_session *)magic;

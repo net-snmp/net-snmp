@@ -56,17 +56,17 @@
 
 static SNMPCallback subagent_register_ping_alarm;
 static SNMPAlarmCallback agentx_reopen_session;
-void agentx_register_callbacks(struct snmp_session *s);
-void agentx_unregister_callbacks(struct snmp_session *ss);
-int handle_subagent_response(int op, struct snmp_session *session, int reqid,
-                             struct snmp_pdu *pdu, void *magic);
-int handle_subagent_set_response(int op, struct snmp_session *session,
-                                 int reqid, struct snmp_pdu *pdu, void *magic);
+void agentx_register_callbacks(netsnmp_session *s);
+void agentx_unregister_callbacks(netsnmp_session *ss);
+int handle_subagent_response(int op, netsnmp_session *session, int reqid,
+                             netsnmp_pdu *pdu, void *magic);
+int handle_subagent_set_response(int op, netsnmp_session *session,
+                                 int reqid, netsnmp_pdu *pdu, void *magic);
 
 typedef struct _net_snmpsubagent_magic_s {
     int original_command;
-    struct snmp_session  *session;
-    struct variable_list *ovars;
+    netsnmp_session  *session;
+    netsnmp_variable_list *ovars;
 } ns_subagent_magic;
 
 struct agent_netsnmp_set_info {
@@ -74,15 +74,15 @@ struct agent_netsnmp_set_info {
     int			  mode;
     int                   errstat;
     time_t		  uptime;
-    struct snmp_session  *sess;
-    struct variable_list *var_list;
+    netsnmp_session  *sess;
+    netsnmp_variable_list *var_list;
     
     struct agent_netsnmp_set_info *next;
 };
 
 static struct agent_netsnmp_set_info *Sets = NULL;
 
-struct snmp_session *agentx_callback_sess = NULL;
+netsnmp_session *agentx_callback_sess = NULL;
 extern int callback_master_num;
 
 void
@@ -98,7 +98,7 @@ init_subagent(void) {
 
 
 struct agent_netsnmp_set_info *
-save_set_vars( struct snmp_session *ss, struct snmp_pdu *pdu )
+save_set_vars( netsnmp_session *ss, netsnmp_pdu *pdu )
 {
     struct agent_netsnmp_set_info *ptr;
     struct timeval now;
@@ -130,7 +130,7 @@ save_set_vars( struct snmp_session *ss, struct snmp_pdu *pdu )
 }
 
 struct agent_netsnmp_set_info *
-restore_set_vars( struct snmp_session *sess, struct snmp_pdu *pdu )
+restore_set_vars( netsnmp_session *sess, netsnmp_pdu *pdu )
 {
     struct agent_netsnmp_set_info *ptr;
 
@@ -150,7 +150,7 @@ restore_set_vars( struct snmp_session *sess, struct snmp_pdu *pdu )
 
 
 void
-free_set_vars( struct snmp_session *ss, struct snmp_pdu *pdu )
+free_set_vars( netsnmp_session *ss, netsnmp_pdu *pdu )
 {
     struct agent_netsnmp_set_info *ptr, *prev=NULL;
 
@@ -168,19 +168,19 @@ free_set_vars( struct snmp_session *ss, struct snmp_pdu *pdu )
     }
 }
 
-extern struct snmp_session *main_session;	/* from snmp_agent.c */
+extern netsnmp_session *main_session;	/* from snmp_agent.c */
 
 int
-handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
-                   struct snmp_pdu *pdu, void *magic)
+handle_agentx_packet(int operation, netsnmp_session *session, int reqid,
+                   netsnmp_pdu *pdu, void *magic)
 {
     struct agent_netsnmp_set_info *asi = NULL;
     snmp_callback mycallback;
-    struct snmp_pdu *internal_pdu = NULL;
+    netsnmp_pdu *internal_pdu = NULL;
     void *retmagic = NULL;
     ns_subagent_magic *smagic = NULL;
 
-    if (operation == SNMP_CALLBACK_OP_DISCONNECT) {
+    if (operation == NETSNMP_CALLBACK_OP_DISCONNECT) {
       int period = ds_get_int(DS_APPLICATION_ID,DS_AGENT_AGENTX_PING_INTERVAL);
       DEBUGMSGTL(("agentx/subagent", "transport disconnect indication\n"));
       /*  Deregister the ping alarm, if any, and invalidate all other
@@ -202,7 +202,7 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 	snmp_alarm_register(period, SA_REPEAT, agentx_reopen_session, NULL);
       }
       return 0;
-    } else if (operation != SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    } else if (operation != NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
       DEBUGMSGTL(("agentx/subagent", "unexpected callback op %d\n",operation));
       return 1;
     }
@@ -320,14 +320,14 @@ handle_agentx_packet(int operation, struct snmp_session *session, int reqid,
 }
 
 int
-handle_subagent_response(int op, struct snmp_session *session, int reqid,
-                         struct snmp_pdu *pdu, void *magic) 
+handle_subagent_response(int op, netsnmp_session *session, int reqid,
+                         netsnmp_pdu *pdu, void *magic) 
 {
     ns_subagent_magic *smagic = (ns_subagent_magic *)magic;
-    struct variable_list *u = NULL, *v = NULL;
+    netsnmp_variable_list *u = NULL, *v = NULL;
     int rc = 0;
 
-    if (op != SNMP_CALLBACK_OP_RECEIVED_MESSAGE || magic == NULL) {
+    if (op != NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE || magic == NULL) {
       return 1;
     }
 
@@ -394,13 +394,13 @@ handle_subagent_response(int op, struct snmp_session *session, int reqid,
 }
 
 int
-handle_subagent_set_response(int op, struct snmp_session *session, int reqid,
-                             struct snmp_pdu *pdu, void *magic) 
+handle_subagent_set_response(int op, netsnmp_session *session, int reqid,
+                             netsnmp_pdu *pdu, void *magic) 
 {
-    struct snmp_session *retsess;
+    netsnmp_session *retsess;
     struct agent_netsnmp_set_info *asi;
     
-    if (op != SNMP_CALLBACK_OP_RECEIVED_MESSAGE || magic == NULL) {
+    if (op != NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE || magic == NULL) {
         return 1;
     }
 
@@ -436,8 +436,8 @@ agentx_registration_callback(int majorID, int minorID, void *serverarg,
                          void *clientarg) {
   struct register_parameters *reg_parms =
     (struct register_parameters *) serverarg;
-  struct snmp_session *agentx_ss =
-    (struct snmp_session *) clientarg;
+  netsnmp_session *agentx_ss =
+    (netsnmp_session *) clientarg;
 
   if (minorID == SNMPD_CALLBACK_REGISTER_OID)
     return agentx_register(agentx_ss,
@@ -460,8 +460,8 @@ agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
                          void *clientarg) {
   struct register_sysOR_parameters *reg_parms =
     (struct register_sysOR_parameters *) serverarg;
-  struct snmp_session *agentx_ss =
-    (struct snmp_session *) clientarg;
+  netsnmp_session *agentx_ss =
+    (netsnmp_session *) clientarg;
 
   if (minorID == SNMPD_CALLBACK_REG_SYSOR)
     return agentx_add_agentcaps(agentx_ss,
@@ -476,7 +476,7 @@ agentx_sysOR_callback(int majorID, int minorID, void *serverarg,
 
 static int
 subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
-  struct snmp_session *thesession = (struct snmp_session *) clientarg;
+  netsnmp_session *thesession = (netsnmp_session *) clientarg;
   DEBUGMSGTL(("agentx/subagent","shutting down session....\n"));
   if (thesession == NULL) {
     DEBUGMSGTL(("agentx/subagent","Empty session to shutdown\n"));
@@ -493,7 +493,7 @@ subagent_shutdown(int majorID, int minorID, void *serverarg, void *clientarg) {
 /*  Register all the "standard" AgentX callbacks for the given session.  */
 
 void
-agentx_register_callbacks(struct snmp_session *s)
+agentx_register_callbacks(netsnmp_session *s)
 {
   DEBUGMSGTL(("agentx/subagent", "registering callbacks for session %p\n", s));
   snmp_register_callback(SNMP_CALLBACK_LIBRARY,
@@ -521,7 +521,7 @@ agentx_register_callbacks(struct snmp_session *s)
 /*  Unregister all the callbacks associated with this session.  */
 
 void
-agentx_unregister_callbacks(struct snmp_session *ss)
+agentx_unregister_callbacks(netsnmp_session *ss)
 {
   DEBUGMSGTL(("agentx/subagent", "unregistering callbacks for session %p\n",
 	      ss));
@@ -552,7 +552,7 @@ agentx_unregister_callbacks(struct snmp_session *ss)
 int
 subagent_open_master_session(void)
 {
-    struct snmp_session sess;
+    netsnmp_session sess;
 
     DEBUGMSGTL(("agentx/subagent", "opening session...\n"));
 
@@ -582,7 +582,7 @@ subagent_open_master_session(void)
 
     if (main_session == NULL) {
 	/*  Diagnose snmp_open errors with the input
-	    struct snmp_session pointer.  */
+	    netsnmp_session pointer.  */
 	snmp_sess_perror("subagent_pre_init", &sess);
 	return -1;
     }
@@ -681,7 +681,7 @@ static int
 subagent_register_ping_alarm(int majorID, int minorID,
                              void *serverarg, void *clientarg) {
 
-    struct snmp_session *ss = (struct snmp_session *) clientarg;
+    netsnmp_session *ss = (netsnmp_session *) clientarg;
     int ping_interval = 
         ds_get_int(DS_APPLICATION_ID, DS_AGENT_AGENTX_PING_INTERVAL);
 
@@ -716,7 +716,7 @@ subagent_register_ping_alarm(int majorID, int minorID,
    not functioning, close and start attempts to reopen the session */
 void
 agentx_check_session(unsigned int clientreg, void *clientarg) {
-    struct snmp_session *ss = (struct snmp_session *) clientarg;
+    netsnmp_session *ss = (netsnmp_session *) clientarg;
     if (!ss) {
         if (clientreg) 
             snmp_alarm_unregister(clientreg);

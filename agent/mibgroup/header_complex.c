@@ -20,7 +20,7 @@
 #include "header_complex.h"
 
 int
-header_complex_generate_varoid(struct variable_list *var) {
+header_complex_generate_varoid(netsnmp_variable_list *var) {
   int i;
   
   if (var->name == NULL) {
@@ -103,9 +103,9 @@ header_complex_generate_varoid(struct variable_list *var) {
    returns 1 if an error is encountered, or 0 if successful.
 */
 int header_complex_parse_oid(oid *oidIndex, size_t oidLen,
-                         struct variable_list *data)
+                         netsnmp_variable_list *data)
 {
-  struct variable_list *var = data;
+  netsnmp_variable_list *var = data;
   int i, itmp;
   
   while(var && oidLen > 0) {
@@ -201,10 +201,10 @@ header_complex_generate_oid(oid *name, /* out */
                             size_t *length, /* out */
                             oid *prefix,
                             size_t prefix_len,
-                            struct variable_list *data) {
+                            netsnmp_variable_list *data) {
 
   oid *oidptr;
-  struct variable_list *var;
+  netsnmp_variable_list *var;
   
   if (prefix) {
     memcpy(name, prefix, prefix_len * sizeof(oid));
@@ -230,7 +230,7 @@ header_complex_generate_oid(oid *name, /* out */
 /* finds the data in "datalist" stored at "index" */
 void *
 header_complex_get(struct header_complex_index *datalist,
-                    struct variable_list *index) {
+                    netsnmp_variable_list *index) {
     oid searchfor[MAX_OID_LEN];
     size_t searchfor_len;
     
@@ -320,7 +320,7 @@ header_complex(struct header_complex_index *datalist,
 
 struct header_complex_index *
 header_complex_add_data(struct header_complex_index **thedata,
-                        struct variable_list *var, void *data) {
+                        netsnmp_variable_list *var, void *data) {
   oid newoid[MAX_OID_LEN];
   size_t newoid_len;
   struct header_complex_index *ret;
@@ -469,7 +469,7 @@ header_complex_dump(struct header_complex_index *thestuff) {
 main() {
   oid oidsave[MAX_OID_LEN];
   int len = MAX_OID_LEN, len2;
-  struct variable_list *vars;
+  netsnmp_variable_list *vars;
   long ltmp = 4242, ltmp2=88, ltmp3 = 1, ltmp4 = 4200;
   oid ourprefix[] = { 1,2,3,4};
   oid testparse[] = { 4,116,101,115,116,4200};

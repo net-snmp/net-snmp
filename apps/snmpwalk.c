@@ -92,10 +92,10 @@ usage(void)
 }
 
 void
-snmp_get_and_print(struct snmp_session *ss, oid *theoid, size_t theoid_len)
+snmp_get_and_print(netsnmp_session *ss, oid *theoid, size_t theoid_len)
 {
-    struct snmp_pdu *pdu, *response;
-    struct variable_list *vars;
+    netsnmp_pdu *pdu, *response;
+    netsnmp_variable_list *vars;
     int status;
     
     pdu = snmp_pdu_create(SNMP_MSG_GET);
@@ -146,9 +146,9 @@ optProc(int argc, char *const *argv, int opt)
 int
 main(int argc, char *argv[])
 {
-    struct snmp_session  session, *ss;
-    struct snmp_pdu *pdu, *response;
-    struct variable_list *vars;
+    netsnmp_session  session, *ss;
+    netsnmp_pdu *pdu, *response;
+    netsnmp_variable_list *vars;
     int    arg;
     oid    name[MAX_OID_LEN];
     size_t name_length;
@@ -197,7 +197,7 @@ main(int argc, char *argv[])
     /* open an SNMP session */
     ss = snmp_open(&session);
     if (ss == NULL){
-      /* diagnose snmp_open errors with the input struct snmp_session pointer */
+      /* diagnose snmp_open errors with the input netsnmp_session pointer */
       snmp_sess_perror("snmpwalk", &session);
       SOCK_CLEANUP;
       exit(1);

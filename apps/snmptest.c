@@ -75,7 +75,7 @@ SOFTWARE.
 
 int command = SNMP_MSG_GET;
 
-int input_variable (struct variable_list *);
+int input_variable (netsnmp_variable_list *);
 
 void usage(void)
 {
@@ -87,9 +87,9 @@ void usage(void)
 
 int main(int argc, char *argv[])
 {
-    struct snmp_session session, *ss;
-    struct snmp_pdu *pdu = NULL, *response, *copy = NULL;
-    struct variable_list *vars, *vp;
+    netsnmp_session session, *ss;
+    netsnmp_pdu *pdu = NULL, *response, *copy = NULL;
+    netsnmp_variable_list *vars, *vp;
     netsnmp_transport *transport = NULL;
     int	ret;
     int	    status, count;
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     /* open an SNMP session */
     ss = snmp_open(&session);
     if (ss == NULL){
-      /* diagnose snmp_open errors with the input struct snmp_session pointer */
+      /* diagnose snmp_open errors with the input netsnmp_session pointer */
         snmp_sess_perror("snmptest", &session);
         SOCK_CLEANUP;
 	exit(1);
@@ -122,8 +122,8 @@ int main(int argc, char *argv[])
     while(1){
 	vars = NULL;
 	for(ret = 1; ret != 0;){
-	    vp = (struct variable_list *)malloc(sizeof(struct variable_list));
-	    memset(vp, 0, sizeof(struct variable_list));
+	    vp = (netsnmp_variable_list *)malloc(sizeof(netsnmp_variable_list));
+	    memset(vp, 0, sizeof(netsnmp_variable_list));
 
 	    while((ret = input_variable(vp)) == -1)
 		;
@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
 }
 
 int
-input_variable(struct variable_list *vp)
+input_variable(netsnmp_variable_list *vp)
 {
     char  buf[256];
     int val_len;

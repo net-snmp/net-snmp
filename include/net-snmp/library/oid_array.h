@@ -24,7 +24,7 @@
  * } my_row;
  *
  * oid_array my_table;
- * struct variable_list *var = NULL;
+ * netsnmp_variable_list *var = NULL;
  * int idx1;
  *
  * my_table = netsnmp_Initialise_oid_array( sizeof(my_row*) );

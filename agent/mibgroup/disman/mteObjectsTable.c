@@ -96,7 +96,7 @@ void init_mteObjectsTable(void) {
  */
 int
 mteObjectsTable_add(struct mteObjectsTable_data *thedata) {
-  struct variable_list *vars = NULL;
+  netsnmp_variable_list *vars = NULL;
 
 
   DEBUGMSGTL(("mteObjectsTable", "adding data...  "));
@@ -441,7 +441,7 @@ write_mteObjectsEntryStatus(int      action,
   size_t newlen=name_len - (sizeof(mteObjectsTable_variables_oid)/sizeof(oid) + 3 - 1);
   static int old_value;
   int set_value;
-  static struct variable_list *vars, *vp;
+  static netsnmp_variable_list *vars, *vp;
   struct header_complex_index *hciptr;
 
 
@@ -630,7 +630,7 @@ write_mteObjectsEntryStatus(int      action,
 }
 
 void
-mte_add_objects(struct variable_list *vars, struct mteTriggerTable_data *item,
+mte_add_objects(netsnmp_variable_list *vars, struct mteTriggerTable_data *item,
                 const char *owner, const char *name,
                 oid *suffix, size_t suffix_len) {
     struct header_complex_index *hcptr = mteObjectsTableStorage;
@@ -661,7 +661,7 @@ mte_add_objects(struct variable_list *vars, struct mteTriggerTable_data *item,
           strcmp(((struct mteObjectsTable_data *) hcptr->data)->mteObjectsName,
                  name) == 0) {
         /* loop through objects */
-        struct snmp_pdu *pdu = NULL, *response = NULL;
+        netsnmp_pdu *pdu = NULL, *response = NULL;
         struct mteObjectsTable_data *node =
             (struct mteObjectsTable_data *) hcptr->data;
         oid theoid[MAX_OID_LEN];

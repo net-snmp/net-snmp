@@ -2113,7 +2113,7 @@ usm_process_in_msg (
 
 	size_t  *maxSizeResponse,  /* OUT    - Max size of Response PDU.      */
 	void   **secStateRf,       /* OUT    - Ref to security state.         */
-        struct snmp_session *sess, /* IN     - session which got the message  */
+        netsnmp_session *sess, /* IN     - session which got the message  */
         u_char msg_flags)	   /* IN     - v3 Message flags.              */
 {
 	size_t   remaining = wholeMsgLen

@@ -100,7 +100,7 @@ struct variable2 mteTriggerTable_variables[] = {
 /* global storage of our data, saved in and configured by header_complex() */
 struct header_complex_index *mteTriggerTableStorage = NULL;
 
-struct snmp_session *mte_callback_sess = NULL;
+netsnmp_session *mte_callback_sess = NULL;
 extern int callback_master_num;
 
 /*
@@ -241,7 +241,7 @@ create_mteTriggerTable_data(void) {
  */
 int
 mteTriggerTable_add(struct mteTriggerTable_data *thedata) {
-  struct variable_list *vars = NULL;
+  netsnmp_variable_list *vars = NULL;
 
 
   DEBUGMSGTL(("mteTriggerTable", "adding data...  "));
@@ -1835,7 +1835,7 @@ write_mteTriggerEntryStatus(int      action,
   size_t newlen=name_len - (sizeof(mteTriggerTable_variables_oid)/sizeof(oid) + 3 - 1);
   static int old_value;
   int set_value;
-  static struct variable_list *vars, *vp;
+  static netsnmp_variable_list *vars, *vp;
   struct header_complex_index *hciptr;
 
   StorageTmp =
@@ -2027,7 +2027,7 @@ write_mteTriggerEntryStatus(int      action,
               !StorageTmp->have_copied_auth_info) {
               
               netsnmp_agent_session *asp = netsnmp_get_current_agent_session();
-              struct snmp_pdu *pdu = NULL;
+              netsnmp_pdu *pdu = NULL;
               
               if (!asp) {
                   snmp_log(LOG_ERR, "snmpTriggerTable: can't get master session for authentication params\n");
@@ -2094,7 +2094,7 @@ send_mte_trap(struct mteTriggerTable_data *item,
               const char *reason) {
     static oid objid_snmptrap[] = { 1,3,6,1,6,3,1,1,4,1,0}; /* snmpTrapIOD.0 */
 
-    struct variable_list *var_list = NULL;
+    netsnmp_variable_list *var_list = NULL;
 
     /* snmpTrap oid */
     snmp_varlist_add_variable(&var_list, objid_snmptrap,
@@ -2166,9 +2166,9 @@ last_state_clean(void *data) {
 }
 
 /* retrieves requested info in pdu from the current target */
-struct snmp_pdu *
-mte_get_response(struct mteTriggerTable_data *item, struct snmp_pdu *pdu) {
-    struct snmp_pdu *response = NULL;
+netsnmp_pdu *
+mte_get_response(struct mteTriggerTable_data *item, netsnmp_pdu *pdu) {
+    netsnmp_pdu *response = NULL;
     int status = 0;
     char buf[SPRINT_MAX_LEN];
     
@@ -2261,7 +2261,7 @@ int mte_is_integer_type(unsigned char type)
 int
 mte_discontinuity_occurred(struct mteTriggerTable_data *item)
 {
-  struct snmp_pdu *pdu = NULL, *response = NULL;
+  netsnmp_pdu *pdu = NULL, *response = NULL;
   unsigned long discoTicks = 0;  /*  cool var name  */
 
   if (item->mteTriggerDeltaDiscontinuityIDLen == 0 ||
@@ -2359,7 +2359,7 @@ mte_run_trigger(unsigned int clientreg, void *clientarg) {
 
     struct mteTriggerTable_data *item =
         (struct mteTriggerTable_data *) clientarg;
-    struct snmp_pdu *pdu = NULL, *response = NULL;
+    netsnmp_pdu *pdu = NULL, *response = NULL;
     char buf[SPRINT_MAX_LEN];
     int msg_type = SNMP_MSG_GET, disco;
 

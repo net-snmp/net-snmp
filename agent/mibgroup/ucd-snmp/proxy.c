@@ -55,7 +55,7 @@ void
 proxy_parse_config(const char *token, char *line) {
     /* proxy args [base-oid] [remap-to-remote-oid] */
 
-    struct snmp_session session, *ss;
+    netsnmp_session session, *ss;
     struct simple_proxy *newp, **listpp;
     char args[MAX_ARGS][SPRINT_MAX_LEN], *argv[MAX_ARGS];
     int argn, arg;
@@ -94,7 +94,7 @@ proxy_parse_config(const char *token, char *line) {
     ss = snmp_open(&session);
 /*    usm_set_reportErrorOnUnknownID(1); */
     if (ss == NULL){
-        /* diagnose snmp_open errors with the input struct snmp_session pointer */
+        /* diagnose snmp_open errors with the input netsnmp_session pointer */
         snmp_sess_perror("snmpget", &session);
         SOCK_CLEANUP;
         return;
@@ -185,7 +185,7 @@ proxy_handler(
     netsnmp_agent_request_info        *reqinfo,
     netsnmp_request_info              *requests) {
 
-    struct snmp_pdu *pdu;
+    netsnmp_pdu *pdu;
     struct simple_proxy *sp;
     oid *ourname;
     size_t ourlength;
@@ -253,12 +253,12 @@ proxy_handler(
 }
 
 int
-proxy_got_response(int operation, struct snmp_session *sess, int reqid,
-                   struct snmp_pdu *pdu, void *cb_data) 
+proxy_got_response(int operation, netsnmp_session *sess, int reqid,
+                   netsnmp_pdu *pdu, void *cb_data) 
 {
     netsnmp_delegated_cache *cache = (netsnmp_delegated_cache *) cb_data;
     netsnmp_request_info              *requests, *request;
-    struct variable_list *vars, *var;
+    netsnmp_variable_list *vars, *var;
     
     struct simple_proxy *sp;
     oid myname[MAX_OID_LEN];
@@ -276,7 +276,7 @@ proxy_got_response(int operation, struct snmp_session *sess, int reqid,
     }
 
 
-    if (operation == SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    if (operation == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
         /* WWWXXX: don't leave requests delayed if operation is
            something like TIMEOUT */
         vars = pdu->variables;

@@ -152,7 +152,7 @@ var_sysORTable(struct variable *vp,
 int register_sysORTable_sess(oid *oidin,
 			 size_t oidlen,
 			 const char *descr,
-			 struct snmp_session *ss)
+			 netsnmp_session *ss)
 {
   struct sysORTable **ptr=&table;
   struct register_sysOR_parameters reg_sysOR_parms;
@@ -207,7 +207,7 @@ int register_sysORTable(oid *oidin,
 
 int unregister_sysORTable_sess(oid *oidin,
 			 size_t oidlen,
-			 struct snmp_session *ss)
+			 netsnmp_session *ss)
 {
   struct sysORTable **ptr=&table, *prev=NULL;
   int found = SYS_ORTABLE_NO_SUCH_REGISTRATION;
@@ -253,7 +253,7 @@ int unregister_sysORTable(oid *oidin,
     return unregister_sysORTable_sess( oidin, oidlen, NULL );
 }
 
-void unregister_sysORTable_by_session(struct snmp_session *ss)
+void unregister_sysORTable_by_session(netsnmp_session *ss)
 {
   struct sysORTable *ptr=table, *prev=NULL, *next;
 

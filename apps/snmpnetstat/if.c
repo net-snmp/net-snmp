@@ -125,8 +125,8 @@ intpr(int interval)
 	size_t varname_len;
 	int ifnum, cfg_nnets;
 	oid curifip [4];
-	struct variable_list *var;
-	struct snmp_pdu *request, *response;
+	netsnmp_variable_list *var;
+	netsnmp_pdu *request, *response;
 	int status;
 	int ifindex, oldindex = 0;
 	struct _if_info {
@@ -385,8 +385,8 @@ intpro(int interval)
 	size_t varname_len;
 	int ifnum, cfg_nnets;
 	oid curifip [4];
-	struct variable_list *var;
-	struct snmp_pdu *request, *response;
+	netsnmp_variable_list *var;
+	netsnmp_pdu *request, *response;
 	int status;
 	int ifindex, oldindex = 0;
 	struct _if_info {
@@ -668,7 +668,7 @@ sidewaysintpr(unsigned int interval)
 	register struct iftot *ip, *total;
 	register int line;
 	struct iftot *lastif, *sum, *interesting, ifnow, *now = &ifnow;
-	struct variable_list *var;
+	netsnmp_variable_list *var;
 	oid varname[MAX_OID_LEN], *instance, *ifentry;
 	size_t varname_len;
 	int ifnum, cfg_nnets;

@@ -191,7 +191,7 @@ static int sdlist[NUM_SOCKETS], sdlen = 0;
  * Prototypes.
  */
 int snmp_read_packet (int);
-int snmp_input (int, struct snmp_session *, int, struct snmp_pdu *, void *);
+int snmp_input (int, netsnmp_session *, int, netsnmp_pdu *, void *);
 static void usage (char *);
 static void SnmpTrapNodeDown (void);
 static int receive(void);
@@ -276,7 +276,7 @@ version(void)
 	RETSIGTYPE
 SnmpdShutDown(int a)
 {
-        extern struct snmp_session *main_session;
+        extern netsnmp_session *main_session;
 	running = 0;
 #ifdef WIN32
 	/*
@@ -961,14 +961,14 @@ receive(void)
  */
 int
 snmp_input(int op,
-	   struct snmp_session *session,
+	   netsnmp_session *session,
 	   int reqid,
-	   struct snmp_pdu *pdu,
+	   netsnmp_pdu *pdu,
 	   void *magic)
 {
     struct get_req_state *state = (struct get_req_state *)magic;
     
-    if (op == SNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
+    if (op == NETSNMP_CALLBACK_OP_RECEIVED_MESSAGE) {
 	if (pdu->command == SNMP_MSG_GET) {
 	    if (state->type == EVENT_GET_REQ) {
 		/* this is just the ack to our inform pdu */
@@ -976,7 +976,7 @@ snmp_input(int op,
 	    }
 	}
     }
-    else if (op == SNMP_CALLBACK_OP_TIMED_OUT) {
+    else if (op == NETSNMP_CALLBACK_OP_TIMED_OUT) {
 	if (state->type == ALARM_GET_REQ) {
 		/* Need a mechanism to replace obsolete SNMPv2p alarm */
 	}
