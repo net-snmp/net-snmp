@@ -131,6 +131,18 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name libagent
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libhelpers
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libsnmp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name netsnmpmibssdk
+    End Project Dependency
 }}}
 
 ###############################################################################
