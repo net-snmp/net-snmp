@@ -108,7 +108,9 @@
 
 /*   disk DISK MINSIZE            */
 #define DISKMIBNUM 6
+#if (HAVE_FSTAB_H || HAVE_STATVFS_H)
 #define USEDISKMIB
+#endif
 
 /*   load 1 5 15                  */
 #define LOADAVEMIBNUM 7

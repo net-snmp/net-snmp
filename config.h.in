@@ -236,6 +236,9 @@
 /* Define if you have the <sys/sockio.h> header file.  */
 #undef HAVE_SYS_SOCKIO_H
 
+/* Define if you have the <sys/statvfs.h> header file.  */
+#undef HAVE_SYS_STATVFS_H
+
 /* Define if you have the <sys/swap.h> header file.  */
 #undef HAVE_SYS_SWAP_H
 
@@ -330,7 +333,9 @@
 
 /*   disk DISK MINSIZE            */
 #define DISKMIBNUM 6
+#if (HAVE_FSTAB_H || HAVE_STATVFS_H)
 #define USEDISKMIB
+#endif
 
 /*   load 1 5 15                  */
 #define LOADAVEMIBNUM 7
