@@ -1756,7 +1756,6 @@ read_config_read_memory(int type, char *readfrom,
         readfrom = copy_nword(readfrom, buf, sizeof(buf));
         *uintp = strtoul(buf, NULL, 0);
         *len = sizeof(unsigned int);
-        readfrom = skip_token(readfrom);
         return readfrom;
 
     case ASN_OCTET_STR:
