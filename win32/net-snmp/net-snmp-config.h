@@ -39,6 +39,8 @@ extern "C" {
    privacy support. */
 #define SCAPI_AUTHPRIV 1
 
+/* If you have openssl 0.9.7 or above, you likely have AES support. */
+#undef USE_OPENSSL
 
 #ifdef USE_OPENSSL
 /* Define to 1 if you have the <openssl/aes.h> header file. */
@@ -65,6 +67,12 @@ extern "C" {
 
 /* add in recent resource lock functions (not complete) */
 #undef _REENTRANT
+
+/* define to 1 if you do not want to set global snmp_errno */
+#define DONT_SHARE_ERROR_WITH_OTHER_THREADS 1
+
+/* Define NETSNMP_USE_DLL when building or using netsnmp.DLL */
+#undef NETSNMP_USE_DLL
 
 /* debugging stuff */
 /* if defined, we optimize the code to exclude all debugging calls. */
@@ -1023,22 +1031,17 @@ typedef unsigned short mode_t;
 
 #ifdef WIN32
 
-/* define NETSNMP_NO_DLL if building non-DLL netsnmp */
-#define NETSNMP_NO_DLL 1
-
-  #ifndef NETSNMP_NO_DLL
-    #ifndef NETSNMP_DLL
-
-      #if defined(_MSC_VER)
-        #define NETSNMP_IMPORT __declspec(dllimport)
-      #endif
-    #else
-      #if defined(_MSC_VER)
-        #define NETSNMP_IMPORT __declspec(dllexport)
-      #endif
-
-    #endif   /* NETSNMP_DLL */
-  #endif     /* ! NETSNMP_NO_DLL */
+#ifdef NETSNMP_USE_DLL
+  #ifdef NETSNMP_DLL
+    #if defined(_MSC_VER)
+      #define NETSNMP_IMPORT __declspec(dllexport)
+    #endif
+  #else
+    #if defined(_MSC_VER)
+      #define NETSNMP_IMPORT __declspec(dllimport)
+    #endif
+  #endif   /* NETSNMP_DLL */
+#endif     /* NETSNMP_USE_DLL */
 
 /*
  * DLL decoration, if used at all, must be consistent.
@@ -1047,7 +1050,7 @@ typedef unsigned short mode_t;
  * during the compilation of a library source file.
  * NETSNMP_DLL is set by the MSVC libsnmp_dll project
  *  in order to signal that the library sources are being compiled.
- * NETSNMP_NO_DLL ignores the preceding, and renders
+ * Not defining NETSNMP_USE_DLL ignores the preceding, and renders
  *  the NETSNMP_IMPORT definitions harmless.
  */
 
@@ -1063,7 +1066,7 @@ typedef unsigned short mode_t;
 
 #ifdef WIN32
 
-  #ifndef NETSNMP_NO_DLL
+  #ifdef NETSNMP_USE_DLL
     #ifndef NETSNMP_TOOLS_C
       #define strdup    netsnmp_strdup
       #define calloc    netsnmp_calloc
