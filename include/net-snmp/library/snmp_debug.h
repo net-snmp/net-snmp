@@ -108,10 +108,10 @@ extern          "C" {
 #define __DBGMSGT(x)     debugmsgtoken x,  debugmsg x
 
 #ifdef  HAVE_CPP_UNDERBAR_FUNCTION_DEFINED
-#define __DBGTRACE       __DBGMSGT(("trace","%s(): %s, %d: ",__FUNCTION__,\
+#define __DBGTRACE       __DBGMSGT(("trace","%s(): %s, %d:\n",__FUNCTION__,\
                                  __FILE__,__LINE__))
 #else
-#define __DBGTRACE       __DBGMSGT(("trace"," %s, %d: ", __FILE__,__LINE__))
+#define __DBGTRACE       __DBGMSGT(("trace"," %s, %d:\n", __FILE__,__LINE__))
 #endif
 
 #define __DBGMSGL(x)     __DBGTRACE, debugmsg x
