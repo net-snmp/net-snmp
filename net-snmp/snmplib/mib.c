@@ -82,6 +82,7 @@ SOFTWARE.
 
 static void sprint_by_type (char *, struct variable_list *, struct enum_list *, const char *, const char *);
 static int parse_subtree (struct tree *, const char *, oid *, size_t *);
+static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
 static char *uptimeString (u_long, char *);
 static void sprint_octet_string (char *, struct variable_list *, struct enum_list *, const char *, const char *);
 static void sprint_opaque (char *, struct variable_list *, struct enum_list *, const char *, const char *);
@@ -500,7 +501,7 @@ sprint_object_identifier(char *buf,
 	sprintf(buf, "OID: ");
 	buf += strlen(buf);
     }
-    sprint_objid(buf, (oid *)(var->val.objid), var->val_len / sizeof(oid));
+    _sprint_objid(buf, (oid *)(var->val.objid), var->val_len / sizeof(oid));
     buf += strlen (buf);
     if (units) sprintf (buf, " %s", units);
 }
@@ -1457,8 +1458,8 @@ found:
     return ret+1;
 }
 
-char *
-sprint_objid(char *buf,
+static struct tree *
+_sprint_objid(char *buf,
 	     oid *objid,
 	     size_t objidlen)	/* number of subidentifiers */
 {
@@ -1514,32 +1515,12 @@ sprint_objid(char *buf,
     }
     else cp = tempbuf;
     strcpy(buf, cp);
-#ifndef TEXT_AFTER_EACH
-    /* insert at the end of sprint_objid */
-    /* if any subidentifier might be printable, dump it as printable. */
-    if (*buf)
-      { int ii, jj, kk;
-      char *scp;
-      cp = buf + (strlen(buf));
-      scp = cp; kk = 0;
-      for (ii= 0, jj = 0; ii < objidlen; ii++)
-	{
-          int tst = objid[ii];
-          if (tst > 0)
-	    if ((tst < 254) && isprint(tst)) {
-	      if (jj == 0) { *cp++ = ' '; *cp++ = '['; jj = 1; }
-	      *cp++ = (char)tst;
-	      kk++;
-	    } else if (jj > 0) {
-              *cp++ = '.';
-              kk++;
-            }
-	}
-      if (jj) { *cp++ = ']'; }
-      if (kk < 2) cp = scp;
-      *cp = '\0';
-      }
-#endif
+    return subtree;
+}
+
+char * sprint_objid(char *buf, oid *objid, size_t objidlen)
+{
+    _sprint_objid(buf,objid,objidlen);
     return buf;
 }
 
@@ -1557,7 +1538,7 @@ fprint_objid(FILE *f,
 {
     char    buf[SPRINT_MAX_LEN];
 
-    sprint_objid(buf, objid, objidlen);
+    _sprint_objid(buf, objid, objidlen);
     fprintf(f, "%s\n", buf);
 }
 
@@ -1567,10 +1548,9 @@ sprint_variable(char *buf,
 		size_t objidlen,
 		struct variable_list *variable)
 {
-    char    tempbuf[SPRINT_MAX_LEN];
-    struct tree    *subtree = tree_head;
+    struct tree    *subtree;
 
-    sprint_objid(buf, objid, objidlen);
+    subtree = _sprint_objid(buf, objid, objidlen);
     buf += strlen(buf);
     if (quick_print)
 	strcat(buf, " ");
@@ -1579,15 +1559,12 @@ sprint_variable(char *buf,
     buf += strlen(buf);
 
     if (variable->type == SNMP_NOSUCHOBJECT)
-	sprintf(buf, "No Such Object available on this agent");
+	strcpy(buf, "No Such Object available on this agent");
     else if (variable->type == SNMP_NOSUCHINSTANCE)
-	sprintf(buf, "No Such Instance currently exists");
+	strcpy(buf, "No Such Instance currently exists");
     else if (variable->type == SNMP_ENDOFMIBVIEW)
-	sprintf(buf, "No more variables left in this MIB View");
+	strcpy(buf, "No more variables left in this MIB View");
     else {
-	*tempbuf = '.';	/* this is a fully qualified name */
-	subtree = get_symbol(objid, objidlen, subtree, tempbuf + 1);
-	buf += strlen(buf);
 	if (subtree->printer)
 	    (*subtree->printer)(buf, variable, subtree->enums, subtree->hint, subtree->units);
 	else {
@@ -2335,7 +2312,7 @@ int mib_TxtToOid(char *Buf, oid **OidP, size_t *LenP)
 
 int mib_OidToTxt(oid *O, size_t OidLen, char *Buf, size_t BufLen)
 {
-    sprint_objid(Buf, O, OidLen);
+    _sprint_objid(Buf, O, OidLen);
     return 1;
 }
 
