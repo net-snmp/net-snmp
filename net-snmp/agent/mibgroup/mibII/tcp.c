@@ -110,7 +110,6 @@
 #include <sys/tcpipstats.h>
 #endif
 
-#include "util_funcs.h"
 #include "auto_nlist.h"
 
 #ifdef hpux
@@ -184,9 +183,6 @@ void	init_tcp( )
 #endif
 
 }
-
-
-
 
 /*
   header_tcp(...

@@ -155,9 +155,6 @@ void init_system_mib(void)
 
 }
 
-
-
-
 /*
   header_system(...
   Arguments:
