@@ -82,7 +82,7 @@ SOFTWARE.
 
 static struct tree * _sprint_objid(char *buf, oid *objid, size_t objidlen);
 static char *uptimeString (u_long, char *);
-struct tree *_get_symbol(oid *objid, size_t objidlen, struct tree *subtree, char *buf, struct index_list *in_dices, char **end_of_known);
+static struct tree *_get_symbol(oid *objid, size_t objidlen, struct tree *subtree, char *buf, struct index_list *in_dices, char **end_of_known);
   
 static void print_tree_node (FILE *, struct tree *, int);
 
@@ -986,6 +986,9 @@ snmp_out_toggle_options(char *options)
 	case 'E':
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_ESCAPE_QUOTES);
 	    break;
+	case 'X':
+	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
+	    break;
 	case 'q':
 	    ds_toggle_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
 	    break;
@@ -1017,6 +1020,7 @@ void snmp_out_toggle_options_usage(const char *lead, FILE *outf)
   fprintf(outf, "%s    n: Print oids numerically.\n", lead);
   fprintf(outf, "%s    e: Print enums numerically.\n", lead);
   fprintf(outf, "%s    E: Escape quotes in string indices.\n", lead);
+  fprintf(outf, "%s    X: Extended index format\n", lead);
   fprintf(outf, "%s    b: Dont break oid indexes down.\n", lead);
   fprintf(outf, "%s    q: Quick print for easier parsing.\n", lead);
   fprintf(outf, "%s    f: Print full oids on output.\n", lead);
@@ -1092,6 +1096,8 @@ register_mib_handlers (void)
 		       DS_LIBRARY_ID, DS_LIB_NUMERIC_TIMETICKS);
     ds_register_premib(ASN_INTEGER, "snmp","suffixPrinting",
                        DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY);
+    ds_register_premib(ASN_BOOLEAN, "snmp","extendedIndex",
+		       DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
 }
 
 void
@@ -1246,14 +1252,7 @@ init_mib (void)
     tree_top = (struct tree *)calloc(1,sizeof(struct tree));
     /* XX error check ? */
     if (tree_top) {
-        struct tree* tp;
         tree_top->child_list = tree_head;
-
-        /* link top level children (iso, ccitt, etc.)
-         * so that unlink_tree always works.
-        for ( tp=tree_head; tp; tp=tp->next_peer )
-            tp->parent = tree_top;
-         */
     }
 }
 
@@ -1633,7 +1632,7 @@ dump_oid_to_string(oid *objid,
   return buf;
 }
 
-struct tree *
+static struct tree *
 _get_symbol(oid *objid,
 	   size_t objidlen,
 	   struct tree *subtree,
@@ -1642,6 +1641,7 @@ _get_symbol(oid *objid,
            char **end_of_known)
 {
     struct tree    *return_tree = NULL;
+    int extended_index = ds_get_boolean(DS_LIBRARY_ID, DS_LIB_EXTENDED_INDEX);
 
     if (!objid || !buf)
         return NULL;
@@ -1649,13 +1649,29 @@ _get_symbol(oid *objid,
     for(; subtree; subtree = subtree->next_peer){
 	if (*objid == subtree->subid){
 	    if (subtree->indexes)
-                in_dices = subtree->indexes;
+		in_dices = subtree->indexes;
+	    else if (subtree->augments) {
+	        struct tree *tp2 = find_tree_node(subtree->augments, -1);
+		if (tp2) in_dices = tp2->indexes;
+	    }
 	    if (!strncmp( subtree->label, ANON, ANON_LEN) ||
-                ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_OIDS))
+                ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS))
                 sprintf(buf, "%lu", subtree->subid);
 	    else
                 strcpy(buf, subtree->label);
-	    goto found;
+	    if (objidlen > 1){
+		while(*buf)
+		    buf++;
+		*buf++ = '.';
+		*buf = '\0';
+
+		return_tree = _get_symbol(objid + 1, objidlen - 1, subtree->child_list,
+					 buf, in_dices, end_of_known);
+	    }
+	    if (return_tree != NULL)
+		return return_tree;
+	    else
+		return subtree;
 	}
     }
 
@@ -1665,24 +1681,62 @@ _get_symbol(oid *objid,
     /* subtree not found */
 
     while (in_dices && (objidlen > 0) &&
-           !ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_OIDS) &&
-           !ds_get_boolean(DS_LIBRARY_ID,DS_LIB_DONT_BREAKDOWN_OIDS)) {
+           !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS) &&
+           !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS)) {
 	size_t numids;
 	struct tree *tp;
 	tp = find_tree_node(in_dices->ilabel, -1);
-	if (0 == tp) {
+	if (!tp) {
             /* ack.  Can't find an index in the mib tree.  bail */
             goto finish_it;
         }
+	if (extended_index) {
+	    if (buf[-1] == '.') buf--;
+	    *buf++ = '[';
+	    *buf = 0;
+	}
 	switch(tp->type) {
 	case TYPE_OCTETSTR:
-	    if (in_dices->isimplied) {
+	    if (extended_index && tp->hint) {
+	    	struct variable_list var;
+		char buffer[1024];
+		int i;
+		memset(&var, 0, sizeof var);
+		if (in_dices->isimplied) {
+		    numids = objidlen;
+		    if (numids > objidlen)
+			goto finish_it;
+		} else if (tp->ranges && !tp->ranges->next
+		  	 && tp->ranges->low == tp->ranges->high) {
+		    numids = tp->ranges->low;
+		    if (numids > objidlen)
+			goto finish_it;
+		} else {
+		    numids = *objid;
+		    if (numids >= objidlen)
+			goto finish_it;
+		    objid++;
+		    objidlen--;
+		}
+		if (numids > objidlen)
+		    goto finish_it;
+		for (i = 0; i < numids; i++) buffer[i] = objid[i];
+		var.type = ASN_OCTET_STR;
+		var.val.string = buffer;
+		var.val_len = numids;
+		sprint_octet_string(buf, &var, NULL, tp->hint, NULL);
+		while (*buf) buf++;
+	    } else if (in_dices->isimplied) {
                 numids = objidlen;
+                if (numids > objidlen)
+                    goto finish_it;
                 buf = dump_oid_to_string(objid, numids, buf, '\'');
 	    } else if (tp->ranges && !tp->ranges->next
 	      	       && tp->ranges->low == tp->ranges->high) {
 		/* a fixed-length object string */
 	        numids = tp->ranges->low;
+                if (numids > objidlen)
+                    goto finish_it;
 		buf = dump_oid_to_string(objid, numids, buf, '\'');
             } else {
                 numids = (size_t)*objid+1;
@@ -1701,17 +1755,17 @@ _get_symbol(oid *objid,
             }
             objid += numids;
             objidlen -= numids;
-	    *buf++ = '.';
-	    *buf = '\0';
 	    break;
+	case TYPE_UINTEGER:
+	case TYPE_GAUGE:
 	case TYPE_INTEGER:
 	    if (tp->enums) {
 		struct enum_list *ep = tp->enums;
 		while (ep && ep->value != (int)(*objid)) ep = ep->next;
-		if (ep) sprintf(buf, "%s.", ep->label);
-		else sprintf(buf, "%lu.", *objid);
+		if (ep) sprintf(buf, "%s", ep->label);
+		else sprintf(buf, "%lu", *objid);
 	    }
-	    else sprintf(buf, "%lu.", *objid);
+	    else sprintf(buf, "%lu", *objid);
 	    while(*buf)
 		buf++;
 	    objid++;
@@ -1725,17 +1779,18 @@ _get_symbol(oid *objid,
             }
 	    if ( numids > objidlen)
 		goto finish_it;
-	    _get_symbol(objid, numids, NULL, buf, NULL, NULL);
+	    if (extended_index)
+	        if (in_dices->isimplied) _sprint_objid(buf, objid, numids);
+		else _sprint_objid(buf, objid+1, numids-1);
+	    else _get_symbol(objid, numids, NULL, buf, NULL, NULL);
 	    objid += (numids);
 	    objidlen -= (numids);
             buf += strlen(buf);
-	    *buf++ = '.';
-	    *buf = '\0';
 	    break;
 	case TYPE_IPADDR:
 	    if (objidlen < 4)
 	        goto finish_it;
-	    sprintf(buf, "%lu.%lu.%lu.%lu.",
+	    sprintf(buf, "%lu.%lu.%lu.%lu",
 	    	    objid[0], objid[1], objid[2], objid[3]);
 	    objid += 4;
 	    objidlen -= 4;
@@ -1750,7 +1805,7 @@ _get_symbol(oid *objid,
 		case 1:
 		    if (objidlen < 4)
 			goto finish_it;
-		    sprintf(buf, "%lu.%lu.%lu.%lu.",
+		    sprintf(buf, "%lu.%lu.%lu.%lu",
 			    objid[0], objid[1], objid[2], objid[3]);
 		    objid += 4;
 		    objidlen -= 4;
@@ -1766,32 +1821,21 @@ _get_symbol(oid *objid,
 	    goto finish_it;
 	    break;
 	}
+	if (extended_index) *buf++ = ']';
+	else *buf++ = '.';
+	*buf = 0;
         in_dices = in_dices->next;
     }
 
 finish_it:
+    if (buf[-1] != '.') *buf++ = '.';
     while(objidlen-- > 0){	/* output rest of name, uninterpreted */
 	sprintf(buf, "%lu.", *objid++);
 	while(*buf)
 	    buf++;
     }
-    *(buf - 1) = '\0'; /* remove trailing dot */
+    buf[-1] = '\0'; /* remove trailing dot */
     return NULL;
-
-found:
-    if (objidlen > 1){
-	while(*buf)
-	    buf++;
-	*buf++ = '.';
-	*buf = '\0';
-
-	return_tree = _get_symbol(objid + 1, objidlen - 1, subtree->child_list,
-				 buf, in_dices, end_of_known);
-    }
-    if (return_tree != NULL)
-	return return_tree;
-    else
-	return subtree;
 }
 
 struct tree *
@@ -1800,7 +1844,7 @@ get_symbol(oid *objid,
 	   struct tree *subtree,
 	   char *buf)
 {
-   return _get_symbol(objid,objidlen,subtree,buf,0,0);
+   return _get_symbol(objid, objidlen, subtree, buf, NULL, NULL);
 }
 
 /*
@@ -2166,7 +2210,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 
 	/* Search for the appropriate child */
 	if ( isdigit( *cp ) ) {
-	    subid = strtol(cp, &ecp, 0);
+	    subid = strtoul(cp, &ecp, 0);
 	    if (*ecp) goto bad_id;
 	    while (tp2 && tp2->subid != subid) tp2 = tp2->next_peer;
 	}
@@ -2311,7 +2355,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	case '5': case '6': case '7': case '8': case '9':
 	    cp2 = strchr(cp, '.');
 	    if (cp2) *cp2++ = 0;
-	    subid = strtol(cp, &ecp, 0);
+	    subid = strtoul(cp, &ecp, 0);
 	    if (*ecp) goto bad_id;
 	    if (*objidlen >= maxlen) goto bad_id;
 	    objid[ *objidlen ] = subid;
