@@ -75,12 +75,10 @@ struct trap_sink *sinks	  = NULL;
 
 extern struct timeval	starttime;
 
-#define OID_LENGTH(x)  (sizeof(x)/sizeof(x[0]))
-
-oid objid_enterprisetrap[] = { EXTENSIBLEMIB, 251 };
-oid version_id[]	   = { EXTENSIBLEMIB, AGENTID, OSTYPE };
-int enterprisetrap_len = OID_LENGTH( objid_enterprisetrap );
-int version_id_len     = OID_LENGTH( version_id );
+oid objid_enterprisetrap[] = { NOTIFICATION_MIB };
+oid trap_version_id[]	   = { SYSTEM_MIB };
+int enterprisetrap_len     = OID_LENGTH( objid_enterprisetrap );
+int trap_version_id_len    = OID_LENGTH( trap_version_id );
 
 #define SNMPV2_TRAPS_PREFIX	SNMP_OID_SNMPMODULES,1,1,5
 oid  cold_start_oid[] =		{ SNMPV2_TRAPS_PREFIX, 1 };	/* SNMPv2-MIB */
@@ -531,8 +529,8 @@ void send_trap_vars (int trap,
         send_enterprise_trap_vars( trap, specific, objid_enterprisetrap,
 			OID_LENGTH(objid_enterprisetrap), vars );
     else
-        send_enterprise_trap_vars( trap, specific, version_id,
-			OID_LENGTH(version_id), vars );
+        send_enterprise_trap_vars( trap, specific, trap_version_id,
+			OID_LENGTH(trap_version_id), vars );
 }
 
 void send_easy_trap (int trap, 

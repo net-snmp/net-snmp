@@ -89,7 +89,7 @@ void init_vmstat_freebsd2(void)
 
   /* Define the OID pointer to the top of the mib tree that we're
    registering underneath */
-  oid vmstat_variables_oid[] = { EXTENSIBLEMIB,11 };
+  oid vmstat_variables_oid[] = { UCDAVIS_MIB,11 };
 
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("ucd-snmp/vmstat", extensible_vmstat_variables, variable2, \

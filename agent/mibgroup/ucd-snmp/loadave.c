@@ -146,7 +146,7 @@ void init_loadave(void)
 
 /* Define the OID pointer to the top of the mib tree that we're
    registering underneath */
-  oid loadave_variables_oid[] = { EXTENSIBLEMIB,LOADAVEMIBNUM,1 };
+  oid loadave_variables_oid[] = { UCDAVIS_MIB,LOADAVEMIBNUM,1 };
 
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("ucd-snmp/loadave", extensible_loadave_variables, variable2,

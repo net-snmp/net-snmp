@@ -136,8 +136,8 @@ int
 agentx_open_session( struct snmp_session *ss )
 {
     struct snmp_pdu *pdu, *response;
-    extern oid version_id[];
-    extern oid version_id_len;
+    extern oid version_sysoid[];
+    extern oid version_sysoid_len;
 
     DEBUGMSGTL(("agentx/subagent","opening session \n"));
     if (ss == NULL || !IS_AGENTX_VERSION(ss->version)) {
@@ -148,7 +148,7 @@ agentx_open_session( struct snmp_session *ss )
     if ( pdu == NULL )
 	return 0;
     pdu->time = 0;
-    snmp_add_var( pdu, version_id, version_id_len, 's', "UCD AgentX sub-agent");
+    snmp_add_var( pdu, version_sysoid, version_sysoid_len, 's', "UCD AgentX sub-agent");
 
     if ( agentx_synch_response(ss, pdu, &response) != STAT_SUCCESS )
 	return 0;

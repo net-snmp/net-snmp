@@ -43,7 +43,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
 
-
 struct variable_list;
 struct timeval;
 struct _snmp_transport;

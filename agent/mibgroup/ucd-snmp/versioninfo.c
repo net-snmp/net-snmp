@@ -55,7 +55,7 @@ void init_versioninfo(void)
 
   /* Define the OID pointer to the top of the mib tree that we're
    registering underneath */
-  oid version_variables_oid[] = { EXTENSIBLEMIB,VERSIONMIBNUM };
+  oid version_variables_oid[] = { UCDAVIS_MIB,VERSIONMIBNUM };
 
   /* register ourselves with the agent to handle our mib tree */
   REGISTER_MIB("ucd-snmp/versioninfo", extensible_version_variables,

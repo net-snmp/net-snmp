@@ -32,7 +32,7 @@
 #include "snmpAAL5PVCDomain.h"
 
 
-const oid ucdSnmpAAL5PVCDomain[9] = { 1, 3, 6, 1, 4, 1, 2021, 251, 3 };
+const oid ucdSnmpAAL5PVCDomain[9] = { UCDAVIS_MIB, 251, 3 };
 
 
 
