@@ -146,14 +146,19 @@ static void dump_var (
     void *statP,
     size_t statLen)
 {
-    char buf [SPRINT_MAX_LEN];
-    struct variable_list temp_var;
-
+  size_t buf_len = SPRINT_MAX_LEN, out_len = 0;
+  struct variable_list temp_var;
+  u_char *buf = (u_char *)malloc(SPRINT_MAX_LEN);
+  
+  if (buf) {
     temp_var.type = statType;
     temp_var.val.string = (u_char *)statP;
     temp_var.val_len = statLen;
-    sprint_variable (buf, var_name, var_name_len, &temp_var);
+    sprint_realloc_variable(&buf, &buf_len, &out_len, 1,
+			    var_name, var_name_len, &temp_var);
     snmp_log(LOG_INFO, "    >> %s\n", buf);
+    free(buf);
+  }
 }
 
 
@@ -356,7 +361,6 @@ int snmp_check_parse(struct snmp_session *session, struct snmp_pdu *pdu,
   if (result == 0) {
     if (ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) &&
 	snmp_get_do_logging()) {
-      char c_oid[SPRINT_MAX_LEN];
       struct variable_list *var_ptr;
 	    
       switch (pdu->command) {
@@ -383,8 +387,18 @@ int snmp_check_parse(struct snmp_session *session, struct snmp_pdu *pdu,
 	     
       for (var_ptr = pdu->variables; var_ptr != NULL;
 	   var_ptr=var_ptr->next_variable) {
-	sprint_objid (c_oid, var_ptr->name, var_ptr->name_length);
-	snmp_log(LOG_DEBUG, "    -- %s\n", c_oid);
+	size_t c_oidlen = 256, c_outlen = 0;
+	u_char *c_oid = (u_char *)malloc(c_oidlen);
+
+	if (c_oid) {
+	  if (!sprint_realloc_objid(&c_oid, &c_oidlen, &c_outlen, 1,
+				    var_ptr->name, var_ptr->name_length)) {
+	    snmp_log(LOG_DEBUG, "    -- %s [TRUNCATED]\n", c_oid);
+	  } else {
+	    snmp_log(LOG_DEBUG, "    -- %s\n", c_oid);
+	  }
+	  free(c_oid);
+	}
       }
     }
     return 1;
