@@ -1062,7 +1062,7 @@ u_char *var_vacm_view(struct variable *vp,
     oid *op, *op1;
     int len;
     char *cp;
-    int cmp,cmp2,t;
+    int cmp,cmp2;
 
     *write_method = NULL;
     *var_len =sizeof(long_return);
@@ -1971,7 +1971,6 @@ write_vacmViewStatus(int      action,
 
   /* variables we may use later */
   static long long_ret;
-  int model,level;
   char *newViewName;
   oid *newViewSubtree;
   size_t viewNameLen,viewSubtreeLen;
