@@ -127,9 +127,6 @@ unsigned long strtoul(const char *, char **, int);
 #ifndef HAVE_SNPRINTF
 int snprintf(char *, size_t, const char *, ...);
 #endif
-#ifndef HAVE_VSNPRINTF
-int vsnprintf(char *, size_t, const char *, va_list);
-#endif
 
 int mkdirhier(const char *pathname, mode_t mode, int skiplast);
 
