@@ -1201,7 +1201,7 @@ Interface_Scan_Init()
 	for (ifname = ifname_buf; *ifname && *ifname == ' '; ifname++) ;
 	
 	/* set name and interface# : */
-	nnew->if_name = strdup (ifname);
+	nnew->if_name = (char *) strdup (ifname);
 	for (ptr = nnew->if_name; *ptr && (*ptr < '0' || *ptr > '9'); 
 	     ptr++) ;
 	nnew->if_unit = (*ptr) ? atoi (ptr) : 0;
@@ -1317,7 +1317,7 @@ struct ifnet *Retifnet;
 
 
  	    saveName[sizeof (saveName)-1] = '\0';
-	    cp = strchr(saveName, '\0');
+	    cp = (char *) strchr(saveName, '\0');
 	    string_append_int (cp, ifnet.if_unit);
 	    if (1 || strcmp(saveName,"lo0") != 0) {  /* XXX */
 
