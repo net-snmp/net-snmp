@@ -398,6 +398,39 @@ sh_count_procs(char *procname)
     }
     return ret;
 }
+
+#elif OSTYPE == LINUXID
+
+#include <dirent.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int
+sh_count_procs(char *procname)
+{
+    DIR *dir;
+    char cmdline[512];
+    struct dirent *ent;
+    int fd,len,plen=strlen(procname),total = 0;
+
+    if ((dir = opendir("/proc")) == NULL) return -1;
+    while (ent = readdir(dir)) {
+      if(!(ent->d_name[0] >= '0' && ent->d_name[0] <= '9')) continue;
+      /* read /proc/XX/cmdline */
+      sprintf(cmdline,"/proc/%s/cmdline",ent->d_name);
+      if((fd = open(cmdline, O_RDONLY)) < 0) break;
+      len = read(fd,cmdline,sizeof(cmdline) - 1);
+      close(fd);
+      if(len <= 0) continue;
+      cmdline[len] = 0;
+      while(--len && !cmdline[len]);
+      while(--len) if(!cmdline[len]) cmdline[len] = ' ';
+      if(!strncmp(cmdline,procname,plen)) total++;
+    }
+    closedir(dir);
+    return total;
+}
+
 #elif OSTYPE == ULTRIXID
 
 #define	NPROCS		32      /* number of proces to read at once */
