@@ -271,6 +271,16 @@ See the
 .I snmpd(1)
 manual page for more information about the format of listening
 addresses.
+.SH NOTIFICATION-LOG-MIB SUPPORT
+As of net-snmp 5.0, the snmptrapd application supports the
+NOTIFICATION-LOG-MIB.  It does this by opening an AgentX subagent
+connection to the master snmpd agent and registering the notification
+log tables.  As long as the snmpd application is started first, it
+will attach itself to it and thus you should be able to view the last
+recorded notifications via the nlmLogTable and nlmLogVariableTable.
+See the snmptrapd.conf file and the "dontRetainLogs" token for turning
+off this support.  See the NOTIFICATION-LOG-MIB for more details about
+the MIB itself.
 .SH EXTENSIBILITY AND CONFIGURATION
 See the
 .I snmptrapd.conf(5)
