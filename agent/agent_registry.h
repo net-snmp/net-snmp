@@ -81,8 +81,9 @@ int in_a_view(oid *, size_t *, struct snmp_pdu *, int);
             (sizeof(theoid) *must* return the number of elements!) 
 */
 #define REGISTER_MIB(descr, var, vartype, theoid)                      \
-  (void)register_mib(descr, (struct variable *) var, sizeof(struct vartype), \
+  if (register_mib(descr, (struct variable *) var, sizeof(struct vartype), \
                sizeof(var)/sizeof(struct vartype),                     \
-               theoid, sizeof(theoid)/sizeof(oid));
+               theoid, sizeof(theoid)/sizeof(oid)) != MIB_REGISTERED_OK ) \
+	DEBUGMSGTL(("register_mib", "%s registration failed\n", descr));
 
 #endif /* AGENT_REGISTRY_H */
