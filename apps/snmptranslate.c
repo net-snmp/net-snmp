@@ -333,7 +333,7 @@ int main(int argc, char *argv[])
             }
         } else {
             if (!read_objid(current_name, name, &name_length)){
-                fprintf(stderr, "Invalid object identifier: %s\n", current_name);
+                perror(current_name);
                 exit(2);
             }
         }
