@@ -1068,6 +1068,18 @@ SNMP - The Perl5 'SNMP' Extension Module v3.1.0 for the UCD SNMPv3 Library
 
 =head1 DESCRIPTION
 
+
+Note: The perl SNMP 5.0 module which comes with net-snmp 5.0 and
+higher is different than previous versions in a number of ways.  Most
+importantly, it behaves like a proper net-snmp application and calls
+init_snmp properly, which means it will read configuration files and
+use those defaults where appropriate automatically parse MIB files,
+etc.  This will likely affect your perl applications if you have, for
+instance, default values set up in your snmp.conf file (as the perl
+module will now make use of those defaults).  The docmuentation,
+however, has sadly not been updated yet (aside from this note), nor is
+the read_config default usage implementation fully complete.
+
 The basic operations of the SNMP protocol are provided by this module
 through an object oriented interface for modularity and ease of use.
 The primary class is SNMP::Session which encapsulates the persistent
