@@ -6149,7 +6149,7 @@ static int _check_range(struct tree *tp, long ltmp, int *resptr,
  */
 netsnmp_variable_list *
 snmp_pdu_add_variable(netsnmp_pdu *pdu,
-                      oid * name,
+                      const oid * name,
                       size_t name_length,
                       u_char type, const u_char * value, size_t len)
 {
@@ -6163,7 +6163,7 @@ snmp_pdu_add_variable(netsnmp_pdu *pdu,
  */
 netsnmp_variable_list *
 snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
-                          oid * name,
+                          const oid * name,
                           size_t name_length,
                           u_char type, const u_char * value, size_t len)
 {
@@ -6319,7 +6319,7 @@ snmp_varlist_add_variable(netsnmp_variable_list ** varlist,
  */
 int
 snmp_add_var(netsnmp_pdu *pdu,
-             oid * name, size_t name_length, char type, const char *value)
+             const oid * name, size_t name_length, char type, const char *value)
 {
     const char     *cp;
     char           *ecp, *vp;
