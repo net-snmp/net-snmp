@@ -226,9 +226,17 @@ void print_log(char *file, char *message)
 void sprint_descriptor(char *buffer,
 		       struct varInfo *vip)
 {
-  char buf[SPRINT_MAX_LEN] = { 0 }, *cp;
+  u_char *buf = NULL, *cp = NULL;
+  size_t buf_len = 0, out_len = 0;
 
-  sprint_objid(buf, vip->info_oid, vip->oidlen);
+  if (!sprint_realloc_objid(&buf, &buf_len, &out_len, 1, 
+			    vip->info_oid, vip->oidlen)) {
+    if (buf != NULL) {
+      free(buf);
+    }
+    return;
+  }
+
   for(cp = buf; *cp; cp++)
     ;
   while(cp >= buf){
@@ -245,6 +253,10 @@ void sprint_descriptor(char *buffer,
   if (cp < buf)
     cp = buf;
   strcpy(buffer, cp);
+
+  if (buf != NULL) {
+    free(buf);
+  }
 }
 
 void processFileArgs(char *fileName)
