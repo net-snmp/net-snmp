@@ -138,7 +138,7 @@ Float ::= TEXTUAL-CONVENTION
          '9f780442f60000'h of data type Opaque is
          '44079f780442f60000'h. (The tag is '44'h; the length
          is '07'h; and the value is '9f780442f60000'h."
-    SYNTAX Opaque -- (SIZE (7))
+    SYNTAX Opaque (SIZE (7))
 
 --
 -- Process table checks
@@ -499,13 +499,13 @@ memSwapErrorMsg OBJECT-TYPE
 
 
 dskTable OBJECT-TYPE
-	SYNTAX SEQUENCE OF DskEntry
-	MAX-ACCESS not-accessible
-	STATUS current
-	DESCRIPTION
-		"Disk watching information.  Partions to be watched
-		are configured by the snmpd.conf file of the agent."
-	::= { ucdavis 9 }
+    SYNTAX	SEQUENCE OF DskEntry
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	"Disk watching information.  Partions to be watched
+	 are configured by the snmpd.conf file of the agent."
+    ::= { ucdavis 9 }
 
 dskEntry OBJECT-TYPE
     SYNTAX     DskEntry
