@@ -45,7 +45,6 @@
 #include <inet/mib2.h>
 #endif
 
-#include "m2m.h"
 #include "mibincl.h"
 #include "snmpusm.h"
 

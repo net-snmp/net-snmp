@@ -23,9 +23,6 @@
 
 #include "mibincl.h"
 
-#include "m2m.h"
-#include "snmp_vars_m2m.h"
-
 #include "snmpd.h"
 #include "mibgroup/struct.h"
 #include "mibgroup/mib_module_includes.h"
