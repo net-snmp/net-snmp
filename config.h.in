@@ -661,9 +661,6 @@
 /* Define if you have the <sys/un.h> header file.  */
 #undef HAVE_SYS_UN_H
 
-/* Define if you have the <sys/types.h> header file.  */
-#undef HAVE_SYS_TYPES_H
-
 /* Define if you have the <sys/user.h> header file.  */
 #undef HAVE_SYS_USER_H
 
