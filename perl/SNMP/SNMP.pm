@@ -2000,6 +2000,10 @@ returns array ref of hash ref [{low => num, high => num}, ...]
 returns DESCRIPTION ($SNMP::save_descriptions must
 be set prior to MIB initialization/parsing)
 
+=item reference
+
+returns the REFERENCE clause
+
 =back
 
 =head1 MIB Functions
