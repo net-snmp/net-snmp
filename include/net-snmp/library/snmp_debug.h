@@ -186,6 +186,8 @@ To print multiple pieces to a single line in one call, use:
 #define DEBUGMSGL(x)
 #define DEBUGMSGTL(x)
 #define DEBUGMSGOID(x)
+#define DEBUGMSGVAR(x)
+#deinfe DEBUGMSGOIDRANGE(x)
 #define DEBUGMSGHEX(x)
 #define DEBUGIF(x)        if(0)
 #define DEBUGDUMP(t,b,l,p)
