@@ -25,6 +25,8 @@ Building with MS VC++
 Installing from MS VC++ build
 Building with Cygwin
 Installing with Cygwin
+Build script for use with Cygwin
+Acknowledgements
 
 
 ----
@@ -42,7 +44,7 @@ editing win32/config.h.  Note that the install instructions below
 should be adjusted when changes are made to paths.
 
 To build the libraries and applications, open the workspace file
-"win32.dsw" from VC++.  Note there is a Debug version and Release
+"win32\win32.dsw" from VC++.  Note there is a Debug version and Release
 version for each subproject.  Due to the way the libraries are
 organized, there are exactly two library versions that work :
 
@@ -94,7 +96,7 @@ Building with Cygwin
 An alternate way to build UCD SNMP for win32 is to use
 Cygnus's cygwin32 environment.  Make sure to get the 'full' version.
 The 'user' version does not contain the programs necessary to run
-the GNU configure mechanism, which is used to by UCD SNMP.  Information
+the GNU configure mechanism, which is used by UCD SNMP.  Information
 on the Cygnus cygwin32 environment is available on the web at :
 http://sourceware.cygnus.com/cygwin/.
 
@@ -102,10 +104,10 @@ Get full.exe from Cygnus.  Some developers have used Cygwin BETA 20
 with success.  Install the cygwin environment.
 Unzip the UC-Davis SNMP tar file.  cd to the SNMP base directory.
 Create a subdirectory 'cyg' and cd to it. Then run the script
-attached to this guide.  The configure script will sense
-the Cygwin environment, build config.h and the Makefiles.
+attached to this guide.
 
-The attached script will build the UC-Davis SNMP package
+The attached script will build the UC-Davis SNMP package,
+copy everything needed for installation into a "usr" subdirectory,
 and display any error lines in the build log, which is saved
 in "nohup.out".  Errors and warnings only are copied to "nerrs"
 for further review.
@@ -131,6 +133,16 @@ archive of the \usr hierarchy.
 
 ---
 Build script for use with Cygwin
+
+The script distills information filtered from discussions on the
+ucd-snmp and ucd-snmp-coders e-mail lists.  The important parts
+are the tokens that have "mibII" in them.  The with.. and with-out..
+lines avoid the non-Win32 portions of the agent.
+
+The script runs without modification in a nearly stock Cygwin B20
+environment using 3.6.1 or later source bases.
+
+
 ------------ cut here ----------------
 :
 PATH=/usr/local/bin:/usr/ccs/bin:/usr/bin:/bin
@@ -184,11 +196,12 @@ egrep "Error" nerrs
 #
 ------------ cut here ----------------
 
+----
+Acknowledgements
+These people are known to have contributed to one or more of
+the Win32 platform ports.  If you have, and your name is not here,
+please accept our apologies, and tell us so we can add your name.
 
-Thanks to Niels Baggesen, Dave Shields, Robert Story, and Wes Hardaker
-for the information gleaned here for your use.
-
-Kindest Regards,
--Mike Slifcak, Internet Security Systems, Inc.
-30-August-1999
-
+David Perkins, Joe Marzot, Wes Hardaker, Niels Baggesen, Dave Shield,
+Robert Story, Suvrit Sra, Mike Slifcak
+,
