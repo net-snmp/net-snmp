@@ -36,6 +36,12 @@ int ${context}_irreversible_commit( ${context}_rowreq_ctx *rowreq_ctx);
 ## MASTER COPY OF THIS FLOWCHART IS IN agent/helpers/baby_steps.c
 ##
     /*
+     * NOTE: if you update this chart, please update the versions in
+     *       local/mib2c-conf.d/parent-set.m2i
+     *       agent/mibgroup/helpers/baby_steps.c
+     * while you're at it.
+     */
+    /*
      ***********************************************************************
      * Baby Steps Flow Chart (2004.06.05)                                  *
      *                                                                     *
