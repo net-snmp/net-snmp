@@ -146,6 +146,10 @@ struct internal_variable_list {
         oid     *objid;
         u_char  *bitstring;
         struct counter64 *counter64;
+#ifdef OPAQUE_SPECIAL_TYPES
+	float   *floatVal;
+	double  *doubleVal;
+#endif /* OPAQUE_SPECIAL_TYPES */
     } val;
     int     val_len;
     oid name_loc[MAX_NAME_LEN];
@@ -815,6 +819,7 @@ snmp_parse(session, pdu, data, length)
     int community_length = COMMUNITY_MAX_LEN;
     struct internal_variable_list *vp = NULL;
     oid objid[MAX_NAME_LEN];
+    u_char tmpstr[1024];
 
 
     /* get the message tag */
@@ -1016,6 +1021,10 @@ snmp_parse(session, pdu, data, length)
 				       (u_long *)vp->val.integer,
 				       sizeof(vp->val.integer));
 		break;
+#ifdef OPAQUE_SPECIAL_TYPES
+            case ASN_OPAQUE_COUNTER64:
+            case ASN_OPAQUE_U64:
+#endif /* OPAQUE_SPECIAL_TYPES */
 	    case ASN_COUNTER64:
 		vp->val.counter64 = (struct counter64 *)vp->buf;
 		vp->usedBuf = TRUE;
@@ -1024,6 +1033,33 @@ snmp_parse(session, pdu, data, length)
 					 (struct counter64 *)vp->val.counter64,
 					 sizeof(*vp->val.counter64));
 		break;
+#ifdef OPAQUE_SPECIAL_TYPES
+	    case ASN_OPAQUE_FLOAT:
+		vp->val.floatVal = (float *)vp->buf;
+		vp->usedBuf = TRUE;
+		vp->val_len = sizeof(float);
+		asn_parse_float(var_val, &len, &vp->type,
+		                         vp->val.floatVal,
+					 vp->val_len);
+		break;
+	    case ASN_OPAQUE_DOUBLE:
+		vp->val.doubleVal = (double *)vp->buf;
+		vp->usedBuf = TRUE;
+		vp->val_len = sizeof(double);
+		asn_parse_double(var_val, &len, &vp->type,
+		                         vp->val.floatVal,
+					 vp->val_len);
+		break;
+	    case ASN_OPAQUE_I64:
+		vp->val.counter64 = (struct counter64 *)vp->buf;
+		vp->usedBuf = TRUE;
+		vp->val_len = sizeof(struct counter64);
+		asn_parse_signed_int64(var_val, &len, &vp->type,
+			             (struct counter64 *)vp->val.counter64,
+				      sizeof(*vp->val.counter64));
+
+		break;
+#endif /* OPAQUE_SPECIAL_TYPES */
 	    case ASN_OCTET_STR:
 	    case ASN_IPADDRESS:
 	    case ASN_OPAQUE:

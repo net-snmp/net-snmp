@@ -57,7 +57,7 @@ SOFTWARE.
 struct packet_info {
     u_char 	pdutype;
     snmp_ipaddr	source;
-    int 	version;
+    int		version;
     int		mp_model;
     int		sec_model;
     int		sec_level;
@@ -107,6 +107,14 @@ struct packet_info {
 #define ASN_NSAP	(ASN_APPLICATION | 5)  /* historic - don't use */
 #define ASN_COUNTER64   (ASN_APPLICATION | 6)
 #define ASN_UINTEGER    (ASN_APPLICATION | 7)  /* historic - don't use */
+
+#ifdef OPAQUE_SPECIAL_TYPES
+/* defined types from draft-perkins-opaque-01.txt */
+#define ASN_FLOAT	    (ASN_APPLICATION | 8)
+#define ASN_DOUBLE	    (ASN_APPLICATION | 9)
+#define ASN_INTEGER64        (ASN_APPLICATION | 10)
+#define ASN_UNSIGNED64       (ASN_APPLICATION | 11)
+#endif /* OPAQUE_SPECIAL_TYPES */
 
 /* #define CMU_COMPATIBLE */
 #ifdef CMU_COMPATIBLE
