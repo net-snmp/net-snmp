@@ -279,7 +279,7 @@ var_hrswrun(struct variable *vp,
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
     static psinfo_t psinfo;
-    static psinfo_t *proc_buf = &psinfo;
+    static psinfo_t *proc_buf;
     int procfd;
     char procfn[sizeof "/proc/00000/psinfo"];
 #else
@@ -321,10 +321,13 @@ var_hrswrun(struct variable *vp,
     }
     if (oldpid != pid || proc_buf == NULL) {
 #if _SLASH_PROC_METHOD_
+	proc_buf = &psinfo;
 	sprintf(procfn, "/proc/%.5d/psinfo", pid);
-	if ((procfd = open(procfn, O_RDONLY)) == -1) return NULL;
-	if (read(procfd, proc_buf, sizeof(*proc_buf)) != sizeof(*proc_buf)) abort();
-	close(procfd);
+	if ((procfd = open(procfn, O_RDONLY)) != -1) {
+		if (read(procfd, proc_buf, sizeof(*proc_buf)) != sizeof(*proc_buf)) abort();
+		close(procfd);
+	} else
+		proc_buf = NULL;
 #else
 	if (kd == NULL) return NULL;
 	if ((proc_buf = kvm_getproc(kd, pid)) == NULL) return NULL;
@@ -340,8 +343,8 @@ var_hrswrun(struct variable *vp,
 		return NULL;
 #else
 	    long_return = 1;		/* Probably! */
-#endif
 	    return (u_char *)&long_return;
+#endif
 
 	case HRSWRUN_INDEX:
 	    long_return = pid;
@@ -354,7 +357,10 @@ var_hrswrun(struct variable *vp,
 		*cp = '\0';
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
-	    strcpy(string, proc_buf->pr_fname);
+	    if (proc_buf)
+		    strcpy(string, proc_buf->pr_fname);
+	    else
+		    strcpy(string, "<exited>");
 #else
 	    strcpy(string, proc_buf->p_user.u_comm);
 #endif
@@ -398,7 +404,10 @@ var_hrswrun(struct variable *vp,
 		*cp = '\0';
 #elif defined(solaris2)
 #ifdef _SLASH_PROC_METHOD_
-	    strcpy(string, proc_buf->pr_psargs);
+	    if (proc_buf)
+	        strcpy(string, proc_buf->pr_psargs);
+	    else
+		sprintf(string, "<exited>");
 	    cp = strchr(string, ' ');
 	    if (cp) *cp = 0;
 #else
@@ -448,9 +457,12 @@ var_hrswrun(struct variable *vp,
 		string[0] = '\0';
 #elif defined(solaris2)
 #ifdef _SLASH_PROC_METHOD_
-	    cp = strchr(proc_buf->pr_psargs, ' ');
-	    if (cp) strcpy(string, cp+1);
-	    else string[0] = 0;
+	    if (proc_buf) {
+	        cp = strchr(proc_buf->pr_psargs, ' ');
+	        if (cp) strcpy(string, cp+1);
+	        else string[0] = 0;
+	    } else
+		string[0] = 0;
 #else
 	    cp = proc_buf->p_user.u_psargs;
 	    while (*cp && *cp != ' ') cp++;
@@ -540,7 +552,7 @@ var_hrswrun(struct variable *vp,
 	    switch ( proc_table[LowProcIndex].kp_proc.p_stat ) {
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
-	    switch (proc_buf->pr_lwp.pr_state) {
+	    switch (proc_buf ? proc_buf->pr_lwp.pr_state : SIDL) {
 #else
 	    switch ( proc_buf->p_stat ) {
 #endif
@@ -572,32 +584,34 @@ var_hrswrun(struct variable *vp,
 #endif
 #else
 	    sprintf( string, "/proc/%d/stat", pid );
-	    if ((fp = fopen( string, "r")) == NULL) return NULL;
-	    fgets( buf, sizeof(buf), fp );
-	    cp = buf;
-	    for ( i = 0 ; i < 2 ; ++i ) {	/* skip two fields */
-		while ( *cp != ' ')
+	    if ((fp = fopen( string, "r")) != NULL) {
+		fgets( buf, sizeof(buf), fp );
+		cp = buf;
+		for ( i = 0 ; i < 2 ; ++i ) {	/* skip two fields */
+		    while ( *cp != ' ')
+			++cp;
 		    ++cp;
-		++cp;
-	    }
+		}
 
-	    switch ( *cp ) {
-		case 'R':
+		switch ( *cp ) {
+		    case 'R':
 	    		long_return = 1;	/* running */
 			break;
-		case 'S':
+		    case 'S':
 	    		long_return = 2;	/* runnable */
 			break;
-		case 'D':
-		case 'T':
+		    case 'D':
+		    case 'T':
 	    		long_return = 3;	/* notRunnable */
 			break;
-		case 'Z':
-		default:
+		    case 'Z':
+		    default:
 	    		long_return = 4;	/* invalid */
 			break;
-	    }
-            fclose(fp);
+		}
+                fclose(fp);
+	    } else
+		long_return = 4;		/* invalid */
 #endif
 	    return (u_char *)&long_return;
 
@@ -609,8 +623,8 @@ var_hrswrun(struct variable *vp,
 				 */
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
-	    long_return = proc_buf->pr_time.tv_sec * 100 +
-			  proc_buf->pr_time.tv_nsec/10000000;
+	    long_return = proc_buf ? proc_buf->pr_time.tv_sec * 100 +
+			  proc_buf->pr_time.tv_nsec/10000000 : 0;
 #else
 	    long_return = proc_buf->p_utime*100 +
 	    		  proc_buf->p_stime*100;
@@ -651,7 +665,7 @@ var_hrswrun(struct variable *vp,
 	    long_return = (proc_buf.pst_rssize << PGSHIFT)/1024;
 #elif defined(solaris2)
 #if _SLASH_PROC_METHOD_
-	    long_return = proc_buf->pr_rssize;
+	    long_return = proc_buf ? proc_buf->pr_rssize : 0;
 #else
 	    long_return = proc_buf->p_swrss;
 #endif
