@@ -259,6 +259,9 @@ What operating systems does it run on?
 	* OS X (10.1.1 and 10.1.2)
 	* Dynix/PTX 4.4
 
+  We have also been informed about a port to the Stratus VOS.
+  See http://ftp.stratus.com/vos/network/network.html for details.
+
   See the next question but one for the status of Windows support.
 
   Certain systems (e.g. HP-UX 11, Irix?) fail to compile particular
