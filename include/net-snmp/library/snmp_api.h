@@ -693,7 +693,7 @@ struct snmp_session * snmp_sess_session    (void *);
     pointer.  */
 
 struct netsnmp_transport_s	*snmp_sess_transport	(void *);
-void			 snmp_sess_transport_set(void *,
+void				 snmp_sess_transport_set(void *,
 						 struct netsnmp_transport_s *);
 
 /*  EXPERIMENTAL API EXTENSIONS ------------------------------------------ 
