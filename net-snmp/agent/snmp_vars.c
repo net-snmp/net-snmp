@@ -92,8 +92,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 #include "snmpd.h"
-#include "party.h"
-#include "context.h"
 
 #ifndef  MIN
 #define  MIN(a,b)                     (((a) < (b)) ? (a) : (b)) 

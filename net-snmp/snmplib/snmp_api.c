@@ -94,9 +94,7 @@ SOFTWARE.
 #include "snmp_client.h"
 #include "snmp_impl.h"
 #include "parse.h"
-#include "party.h"
 #include "mib.h"
-#include "context.h"
 #include "system.h"
 #include "int64.h"
 #include "snmpv3.h"
@@ -1779,9 +1777,6 @@ snmp_build(struct snmp_session *session,
     u_char *h0, *h0e = 0, *h1;
     u_char  *cp;
     size_t length;
-#ifdef USE_V2PARTY_PROTOCOL
-    size_t packet_length;
-#endif /* USE_V2PARTY_PROTOCOL */
     long version;
 
     if (pdu->version == SNMP_VERSION_3)
@@ -1936,51 +1931,6 @@ snmp_build(struct snmp_session *session,
         break;
 
     case SNMP_VERSION_2p:
-#ifdef USE_V2PARTY_PROTOCOL
-	if (pdu->srcPartyLen == 0){
-	    if (session->srcPartyLen == 0){
-		snmp_errno = SNMPERR_BAD_SRC_PARTY;
-		session->s_snmp_errno = SNMPERR_BAD_SRC_PARTY;
-		return -1;
-	    }
-	    pdu->srcParty = (oid *)malloc(session->srcPartyLen * sizeof(oid));
-	    memmove(pdu->srcParty, session->srcParty,
-		    session->srcPartyLen * sizeof(oid));
-	    pdu->srcPartyLen = session->srcPartyLen;
-	}
-	if (pdu->dstPartyLen == 0){
-	    if (session->dstPartyLen == 0){
-		snmp_errno = SNMPERR_BAD_DST_PARTY;
-		session->s_snmp_errno = SNMPERR_BAD_DST_PARTY;
-		return -1;
-	    }
-	    pdu->dstParty = (oid *)malloc(session->dstPartyLen * sizeof(oid));
-	    memmove(pdu->dstParty, session->dstParty,
-		    session->dstPartyLen * sizeof(oid));
-	    pdu->dstPartyLen = session->dstPartyLen;
-	}
-	if (pdu->contextLen == 0){
-	    if (session->contextLen == 0){
-		snmp_errno = SNMPERR_BAD_CONTEXT;
-		session->s_snmp_errno = SNMPERR_BAD_CONTEXT;
-		return -1;
-	    }
-	    pdu->context = (oid *)malloc(session->contextLen * sizeof(oid));
-	    memmove(pdu->context, session->context,
-		    session->contextLen * sizeof(oid));
-	    pdu->contextLen = session->contextLen;
-	}
-        DEBUGMSGTL(("snmp_api","Building SNMPv2p message...\n"));
-
-        pdu->srcp = NULL;
-        pdu->dstp = NULL;
-        cp = snmp_party_build(packet, out_length, pdu, 0,
-                              0, FIRST_PASS);
-        if (cp == NULL)
-            return -1;
-        break;
-#endif /* USE_V2PARTY_PROTOCOL */
-
     case SNMP_VERSION_sec:
     case SNMP_VERSION_2u:
     case SNMP_VERSION_2star:
@@ -2003,20 +1953,9 @@ snmp_build(struct snmp_session *session,
         break;
 
     case SNMP_VERSION_2p:
-#ifdef USE_V2PARTY_PROTOCOL
-        /* add potentially encryption and digest calculation */
-/*?? cleanup length parameters in call */
-        snmp_party_build(packet, &length, pdu, cp - h1,
-                         &packet_length, LAST_PASS);
-	/* encryption might bump length of packet */
-	cp = packet + packet_length;
-	break;
-#endif /* USE_V2PARTY_PROTOCOL */
-
     case SNMP_VERSION_sec:
     case SNMP_VERSION_2u:
     case SNMP_VERSION_2star:
-    case SNMP_VERSION_3:
     default:
 	return -1;
     }
@@ -2154,11 +2093,6 @@ snmp_parse_version (u_char *data, size_t length)
     data = asn_parse_int(data, &length, &type, &version, sizeof(version));
     if (!data) return SNMPERR_BAD_VERSION;
   }
-#ifdef USE_V2PARTY_PROTOCOL
-  else {
-    version = SNMP_VERSION_2p;
-  }
-#endif /* USE_V2PARTY_PROTOCOL */
   return version;
 }
 
@@ -2559,33 +2493,6 @@ snmp_parse(struct snmp_session *session,
 	result = snmp_pdu_dparse(pdu, data, &length, action);
         break;
 
-    case SNMP_VERSION_2p:
-#ifdef USE_V2PARTY_PROTOCOL
-        /* message tag is a tagged context specific sequence
-           that is,  "[1] IMPLICIT SEQUENCE" */
-        if (type != (ASN_CONTEXT | ASN_CONSTRUCTOR | 1))
-	    return -1;
-
-        DEBUGMSGTL(("snmp_api","Parsing SNMPv2p message...\n"));
-        /* authenticate the message and possibly decrypt it */
-	pdu->srcParty = (oid*)malloc(MAX_OID_LEN * sizeof(oid));
-	pdu->dstParty = (oid*)malloc(MAX_OID_LEN * sizeof(oid));
-	pdu->context  = (oid*)malloc(MAX_OID_LEN * sizeof(oid));
-	if ((!pdu->srcParty) || (!pdu->dstParty) || (!pdu->context))
-	    return -1;
-        pdu->srcPartyLen = MAX_OID_LEN;
-        pdu->dstPartyLen = MAX_OID_LEN;
-        pdu->contextLen  = MAX_OID_LEN;
-	pdu->securityModel = SNMP_SEC_MODEL_SNMPv2p;
-
-	/* authenticates message and returns length if valid */
-	data = snmp_party_dparse(data, &length, pdu,
-				FIRST_PASS | LAST_PASS, action);
-
-	result = snmp_pdu_parse(pdu, data, &length);
-        break;
-#endif /* USE_V2PARTY_PROTOCOL */
-
     case SNMP_VERSION_3:
       result = snmpv3_dparse(pdu, data, &length, NULL, action);
       if (!result) {
@@ -2623,6 +2530,7 @@ snmp_parse(struct snmp_session *session,
     case SNMP_VERSION_sec:
     case SNMP_VERSION_2u:
     case SNMP_VERSION_2star:
+    case SNMP_VERSION_2p:
     default:
         ERROR_MSG("unsupported snmp message version");
 	snmp_increment_statistic(STAT_SNMPINBADVERSIONS);

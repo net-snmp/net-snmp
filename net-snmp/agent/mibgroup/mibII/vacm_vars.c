@@ -241,7 +241,6 @@ void vacm_parse_group (char *token,
     if (strcasecmp(model, "any") == 0) imodel = SNMP_SEC_MODEL_ANY;
     else if (strcasecmp(model, "v1") == 0) imodel = SNMP_SEC_MODEL_SNMPv1;
     else if (strcasecmp(model, "v2c") == 0) imodel = SNMP_SEC_MODEL_SNMPv2c;
-    else if (strcasecmp(model, "v2p") == 0) imodel = SNMP_SEC_MODEL_SNMPv2p;
     else if (strcasecmp(model, "usm") == 0) imodel = SNMP_SEC_MODEL_USM;
     else {
 	config_perror("bad security model");
@@ -310,7 +309,6 @@ void vacm_parse_access (char *token, char *param)
     if (strcasecmp(model, "any") == 0) imodel = SNMP_SEC_MODEL_ANY;
     else if (strcasecmp(model, "v1") == 0) imodel = SNMP_SEC_MODEL_SNMPv1;
     else if (strcasecmp(model, "v2c") == 0) imodel = SNMP_SEC_MODEL_SNMPv2c;
-    else if (strcasecmp(model, "v2p") == 0) imodel = SNMP_SEC_MODEL_SNMPv2p;
     else if (strcasecmp(model, "usm") == 0) imodel = SNMP_SEC_MODEL_USM;
     else {
 	config_perror("bad security model");

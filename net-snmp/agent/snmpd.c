@@ -98,6 +98,7 @@ typedef long    fd_mask;
 #include "agent_read_config.h"
 #include "snmpv3.h"
 #include "callback.h"
+#include "snmp_alarm.h"
 #ifdef USING_SNMPV3_USMUSER_MODULE 
 #include "mibgroup/snmpv3/usmUser.h"
 #endif
@@ -578,9 +579,6 @@ init_master_agent(int dest_port)
     session = snmp_open( session );
     set_pre_parse( session, snmp_check_packet );
     set_post_parse( session, snmp_check_parse );
-
-    /* initialize v2party support */
-    init_snmp2p(dest_port);
 }
 
 struct snmp_session *agentx_session;

@@ -54,9 +54,6 @@ SOFTWARE.
 #include "snmp_impl.h"
 #include "snmp.h"
 #include "agentx.h"
-#include "acl.h"
-#include "party.h"
-#include "context.h"
 #include "mib.h"
 #include "snmp_client.h"
 

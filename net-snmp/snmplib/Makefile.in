@@ -4,10 +4,8 @@
 
 TARG=	libsnmp.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 ALLHEADERS=\
-	acl.h \
 	agentx.h \
 	asn1.h \
-	context.h \
 	callback.h \
 	default_store.h \
 	int64.h \
@@ -15,28 +13,23 @@ ALLHEADERS=\
 	md5.h \
 	mib.h \
 	parse.h \
-	party.h \
 	snmp.h \
 	snmp_api.h \
 	snmp_client.h \
 	snmp_impl.h \
 	system.h \
-	vacm.h \
-	view.h
+	vacm.h
 
 #all but md5.h, vacm.h, libsnmp.h, and read_config.h are copied to the installed
 #include directory
 INSTALLHEADERS=\
-	acl.h \
 	agentx.h \
 	asn1.h \
-	context.h \
 	callback.h \
 	default_store.h \
 	int64.h \
 	mib.h \
 	parse.h \
-	party.h \
 	snmp.h \
 	snmp_alarm.h \
 	snmp_api.h \
@@ -44,13 +37,10 @@ INSTALLHEADERS=\
 	snmp_debug.h \
 	snmp_impl.h \
 	system.h \
-	ucd-snmp-includes.h \
-	view.h
+	ucd-snmp-includes.h
 
 CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 	snmp_auth.c asn1.c md5.c 				\
-	party.c context.c acl.c view.c 				\
-	party_parse.c context_parse.c acl_parse.c 		\
 	system.c vacm.c int64.c read_config.c 			\
 	snmp_debug.c tools.c					\
 	snmpv3.c snmpusm.c lcd_time.c keytools.c		\
@@ -59,8 +49,6 @@ CSRCS=	snmp_client.c mib.c parse.c snmp_api.c snmp.c 		\
 
 OBJS=	snmp_client.o mib.o parse.o snmp_api.o snmp.o 		\
 	snmp_auth.o asn1.o md5.o 				\
-	party.o context.o acl.o view.o 				\
-	party_parse.o context_parse.o acl_parse.o 		\
 	system.o vacm.o int64.o read_config.o 			\
 	snmp_debug.o tools.o					\
 	snmpv3.o snmpusm.o lcd_time.o keytools.o		\
