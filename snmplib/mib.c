@@ -138,45 +138,6 @@ PrefixList mib_prefixes[] = {
 	{ NULL, 0 }  /* end of list */
 };
 
-/* expose quick_print for backward compatible use only */
-#ifndef CMU_COMPATIBLE
-static
-#endif
-     int quick_print = 0;
-
-static int full_objid = 0;
-static int suffix_only = 0;
-
-void snmp_set_quick_print(int val)
-{
-    quick_print = val;
-}
-
-int snmp_get_quick_print (void)
-{
-    return quick_print;
-}
-
-void snmp_set_full_objid(int val)
-{
-    full_objid = val;
-}
-
-int snmp_get_full_objid (void)
-{
-    return full_objid;
-}
-
-void snmp_set_suffix_only(int val)
-{
-    suffix_only = val;
-}
-
-int snmp_get_suffix_only (void)
-{
-    return suffix_only;
-}
-
 static char *
 uptimeString(u_long timeticks, 
 	     char *buf)
@@ -194,7 +155,7 @@ uptimeString(u_long timeticks,
     minutes = timeticks / 60;
     seconds = timeticks % 60;
 
-    if (quick_print)
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
 	sprintf(buf, "%d:%d:%02d:%02d.%02d",
 		days, hours, minutes, seconds, centisecs);
     else {
@@ -366,8 +327,8 @@ sprint_octet_string(char *buf,
 	*buf++ = '"';
 	*buf = '\0';
     }
-    if (hex || ((var->val_len <= 4) && !quick_print)){
-	if (quick_print){
+    if (hex || ((var->val_len <= 4) && !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))){
+	if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	    *buf++ = '"';
 	    *buf = '\0';
 	} else {
@@ -375,7 +336,7 @@ sprint_octet_string(char *buf,
 	    buf += strlen(buf);
 	}
 	sprint_hexstring(buf, var->val.string, var->val_len);
-	if (quick_print){
+	if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	    buf += strlen(buf);
 	    *buf++ = '"';
 	    *buf = '\0';
@@ -399,7 +360,7 @@ sprint_float(char *buf,
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
     }
-    if (!quick_print){
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	sprintf(buf, "Opaque: Float:");
 	buf += strlen(buf);
     }
@@ -421,7 +382,7 @@ sprint_double(char *buf,
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
     }
-    if (!quick_print){
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	sprintf(buf, "Opaque: Double:");
 	buf += strlen(buf);
     }
@@ -472,7 +433,7 @@ sprint_opaque(char *buf,
 
       case ASN_OPAQUE:
 #endif
-    if (!quick_print){
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	sprintf(buf, "OPAQUE: ");
 	buf += strlen(buf);
     }
@@ -497,7 +458,7 @@ sprint_object_identifier(char *buf,
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
     }
-    if (!quick_print){
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	sprintf(buf, "OID: ");
 	buf += strlen(buf);
     }
@@ -521,7 +482,7 @@ sprint_timeticks(char *buf,
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
     }
-    if (!quick_print){
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	sprintf(buf, "Timeticks: (%lu) ", *(u_long *)(var->val.integer));
 	buf += strlen(buf);
     }
@@ -599,7 +560,7 @@ sprint_integer(char *buf,
 	if (hint) sprint_hinted_integer(buf, *var->val.integer, hint, units);
 	else sprintf(buf, "%ld", *var->val.integer);
     }
-    else if (quick_print)
+    else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
 	sprintf(buf, "%s", enum_string);
     else
 	sprintf(buf, "%s(%ld)", enum_string, *var->val.integer);
@@ -630,7 +591,7 @@ sprint_uinteger(char *buf,
     if (enum_string == NULL ||
         ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_ENUM))
 	sprintf(buf, "%lu", *var->val.integer);
-    else if (quick_print)
+    else if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
 	sprintf(buf, "%s", enum_string);
     else
 	sprintf(buf, "%s(%lu)", enum_string, *var->val.integer);
@@ -651,7 +612,7 @@ sprint_gauge(char *buf,
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
     }
-    if (quick_print)
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
 	sprintf(buf, "%lu", *var->val.integer);
     else
 	sprintf(buf, "Gauge: %lu", *var->val.integer);
@@ -687,7 +648,7 @@ sprint_networkaddress(char *buf,
     int x, len;
     u_char *cp;
 
-    if (!quick_print){
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	sprintf(buf, "Network Address: ");
 	buf += strlen(buf);
     }
@@ -717,7 +678,7 @@ sprint_ipaddress(char *buf,
 	return;
     }
     ip = var->val.string;
-    if (quick_print)
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
 	sprintf(buf, "%d.%d.%d.%d",ip[0], ip[1], ip[2], ip[3]);
     else
 	sprintf(buf, "IpAddress: %d.%d.%d.%d",ip[0], ip[1], ip[2], ip[3]);
@@ -756,7 +717,7 @@ sprint_bitstring(char *buf,
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
     }
-    if (quick_print){
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	*buf++ = '"';
 	*buf = '\0';
     } else {
@@ -766,7 +727,7 @@ sprint_bitstring(char *buf,
     sprint_hexstring(buf, var->val.bitstring, var->val_len);
     buf += strlen(buf);
 
-    if (quick_print){
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	buf += strlen(buf);
 	*buf++ = '"';
 	*buf = '\0';
@@ -807,7 +768,7 @@ sprint_nsapaddress(char *buf,
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
     }
-    if (!quick_print){
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 	sprintf(buf, "NsapAddress: ");
 	buf += strlen(buf);
     }
@@ -835,7 +796,7 @@ sprint_counter64(char *buf,
 	sprint_by_type(buf, var, NULL, NULL, NULL);
 	return;
     }
-    if (!quick_print){
+    if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)){
 #ifdef OPAQUE_SPECIAL_TYPES
       if (var->type != ASN_COUNTER64) {
 	sprintf(buf, "Opaque: ");
@@ -1018,19 +979,16 @@ snmp_oid_toggle_options(char *options)
     while(*options) {
         switch(*options++) {
         case 'n':
-            ds_set_boolean(DS_LIBRARY_ID,
-                           DS_LIB_PRINT_NUMERIC_OIDS, 1);
+            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS, 1);
             break;
         case 'e':
-            ds_set_boolean(DS_LIBRARY_ID,
-                           DS_LIB_PRINT_NUMERIC_ENUM, 1);
+            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_ENUM, 1);
             break;
         case 'b':
-            ds_set_boolean(DS_LIBRARY_ID,
-                           DS_LIB_DONT_BREAKDOWN_OIDS, 1);
+            ds_set_boolean(DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS, 1);
             break;
 	case 'q':
-	    snmp_set_quick_print(1);
+	    ds_set_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT, 1);
 	    break;
         case 'f':
 	    snmp_set_full_objid(1);
@@ -1093,6 +1051,8 @@ register_mib_handlers (void)
                        DS_LIBRARY_ID, DS_LIB_PRINT_NUMERIC_OIDS);
     ds_register_premib(ASN_BOOLEAN, "snmp","dontBreakdownOids",
                        DS_LIBRARY_ID, DS_LIB_DONT_BREAKDOWN_OIDS);
+    ds_register_premib(ASN_BOOLEAN, "snmp","quickPrinting",
+                       DS_LIBRARY_ID, DS_LIB_QUICK_PRINT);
     
     /* setup the default parser configurations, as specified by configure */
 #ifdef MIB_COMMENT_IS_EOL_TERMINATED
@@ -1248,7 +1208,7 @@ init_mib (void)
     }
 
     if (getenv("SUFFIX"))
-	suffix_only = 1;
+	ds_set_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY, 1);
 
     Mib = tree_head;          /* Backwards compatibility */
 }
@@ -1522,7 +1482,7 @@ _sprint_objid(char *buf,
     subtree = get_symbol(objid, objidlen, subtree, tempbuf + 1);
     if (ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_OIDS)) {
         cp = tempbuf;
-    } else if (suffix_only){
+    } else if (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY)){
 	for(cp = tempbuf; *cp; cp++)
 	    ;
 	while(cp >= tempbuf){
@@ -1536,7 +1496,7 @@ _sprint_objid(char *buf,
 	    cp--;
 	}
 	cp++;
-	if (suffix_only == 2 && cp > tempbuf) {
+	if (ds_get_int(DS_LIBRARY_ID, DS_LIB_PRINT_SUFFIX_ONLY) == 2 && cp > tempbuf) {
 	    char modbuf[256];
 	    char *mod = module_name(subtree->modid, modbuf);
 	    size_t len = strlen(mod);
@@ -1549,7 +1509,7 @@ _sprint_objid(char *buf,
 	    cp[len] = ':';
 	}
     }
-    else if (!full_objid) {
+    else if (!ds_get_boolean(DS_LIBRARY_ID, DS_LIB_PRINT_FULL_OID)) {
 	PrefixListPtr pp = &mib_prefixes[0];
 	int ii;
 	size_t ilen, tlen;
@@ -1604,7 +1564,7 @@ sprint_variable(char *buf,
 
     subtree = _sprint_objid(buf, objid, objidlen);
     buf += strlen(buf);
-    if (quick_print)
+    if (ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT))
 	strcat(buf, " ");
     else
 	strcat(buf, " = ");
@@ -1752,7 +1712,7 @@ _get_symbol(oid *objid,
     while (in_dices &&
            !ds_get_boolean(DS_LIBRARY_ID,DS_LIB_PRINT_NUMERIC_OIDS) &&
            !ds_get_boolean(DS_LIBRARY_ID,DS_LIB_DONT_BREAKDOWN_OIDS) &&
-           !quick_print) {
+           !ds_get_boolean(DS_LIBRARY_ID, DS_LIB_QUICK_PRINT)) {
 	size_t numids;
 	struct tree *tp;
 	tp = find_tree_node(in_dices->ilabel, -1);
