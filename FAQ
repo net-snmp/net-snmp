@@ -23,7 +23,7 @@ TABLE OF CONTENTS
    How do I submit a patch or bug report?
    Can I reuse the code in my commercial application?
    What's the difference between SNMPv1, SNMPv2 and SNMPv3?
-   What are all these different SNMPv2's anyway?
+   What's the difference between SNMPv2 and SNMPv2c?
    Which versions of SNMP are supported in this package?
    Can I use SNMPv1 requests with an SNMPv2 MIB (or vice versa)?
    Where can I find more information about network management?
@@ -443,50 +443,64 @@ do so.
 
 What's the difference between SNMPv1, SNMPv2 and SNMPv3?
 -------------------------------------------------------
-What are all these different SNMPv2's anyway?
---------------------------------------------
+What's the difference between SNMPv2 and SNMPv2c?
+------------------------------------------------
 
 
   A full description is probably beyond the scope of this FAQ.
   Very briefly, the original protocol and framework was described
   in RFCs 1155-1157, and is now known as SNMPv1.
 
-    Practical experience showed up various problems and
-  deficiencies with this, and a revised framework was developed to
-  try and address these.  This was described in RFCs 1441-1452, and
-  known as "SNMPv2 classic".
-  The changes proposed include:
+    Practical experience showed up various problems and deficiencies
+  with this, and a number of revised frameworks were developed to try
+  and address these problems.  Unfortunately, it proved difficult to
+  achieve any sort of agreement - particularly over the administrative
+  framework to use.
 
-	* new ways of defining information (MIB structure)
-		(SMI, Textual conventions, conformance statements)
-	* new protocol packet types and transport mappings
-	* new mechanisms for administration and security
-	* mechanisms for remote configuration
+    There was less disagreement over the proposed changes to the
+  protocol operations.  These included:
+        * increasing the range of errors that could be reported
+        * introducing "exception values"
+            (so a single missing value didn't affect
+             the other varbinds in the same request)
+        * a new GETBULK operation
+            (a supercharged GETNEXT)
+        * new notification PDUs
+            (closer in structure to the other request PDUs)
 
-  Unfortunately, while many of these were generally accepted, there
-  was some disagreement in these last two areas, security/admin
-  and remote configuration.  This resulted in a number of variants and
-  alternative proposals:
+  Strictly speaking, it's this revised protocol (originally defined
+  in RFC 1905, and most recently in RFC 3416) that is "SNMPv2".
 
-	SNMPv2c		Contains the new protocol and MIB structure elements,
-			using the existing SNMPv1 administration structure.
-			This is the de-facto SNMPv2 standard (described in
-			RFCs 1901-1908), superseding SNMPv2 classic, and is
-			known as "Community-based SNMPv2" or simply "SNMPv2".
+  The only framework based on this protocol that saw a significant
+  level of use was "Community-based SNMPv2" or "SNMPv2c" (defined in
+  RFCs 1901-1908). This retained the same administrative framework
+  as SNMPv1 (with all of the accompanying deficiencies), but using
+  the new protocol operations.
+
+  More recently, a new administrative framework has been developed,
+  building on the various competing SNMPv2 proposals, and using the
+  same SNMPv2 protocol operations.  This is SNMPv3, which is defined
+  in RFCs 3411-3418.    It addresses some of the deficiencies of the
+  community-based versions, including significant improvements to
+  the security of SNMP requests (like it finally has some!).
+     SNMPv3 is now a full IETF standard protocol.
+
+  Strictly speaking, SNMPv3 just defines a fairly abstract framework,
+  based around the idea of "Security Models" and "Access Control Models".
+  It's this combination of SNMPv3 plus accompanying models that actually
+  provides a working SNMP system.
+     However, the only models in common use are the "User-based Security
+  Model" (RFC 3414) and the "View-based Access Control Model" (RFC 3415).
+  So "SNMPv3" is frequently used to mean the combination of the basic
+  SNMPv3 framework with these two particular models.
+     This is also sometimes described as "SNMPv3/USM".
 
 
-	SNMPv2 usec	} Alternative proposals to address the
-	SNMPv2*		} limitations of SNMPv1 administration
-			} These are both super-sets of SNMPv2c
-
-			
-	SNMP-NG		An attempt to reach agreement between
-			the proponents of usec and v2star.
-
-  The formal successor to the SNMP-NG work has been termed SNMPv3.
-  This has now been effectively finalised, and is described in RFCs
-  2571-2575.  This is currently a Proposed Standard, but is likely
-  to progress to full Standard in the relatively near future.
+  So in brief:
+        - SNMPv2c updated the protocol operations
+                  but left the administrative framework unchanged.
+        - SNMPv3  updated the administrative framework
+                  but left the protocol operations unchanged.
 
 
 
@@ -494,7 +508,7 @@ Which versions of SNMP are supported in this package?
 ----------------------------------------------------
 
   This package currently supports the original SNMPv1, Community-based
-  SNMPv2 (i.e. RFCs 1901-1908), and SNMPv3 (i.e. RFCs 2571-2575).
+  SNMPv2 (i.e. RFCs 1901-1908), and SNMPv3 (i.e. RFCs 3411-3418).
     The agent will respond to requests using any of these protocols,
   and all the tools take a command-line option to determine which
   version to use.
