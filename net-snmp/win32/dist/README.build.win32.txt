@@ -217,11 +217,11 @@ Note:  A temporary location of /tmp/net-snmp is used.
     split across two lines such as the Variables link at the bottom of 
     man8-snmptrapd.8.html.
 
-    Bold the commands listed in the SYNOPSIS section for snmpnetstat.
+    You may have to bold the commands listed in the SYNOPSIS section for:
 
-    You also need to remove the files from the project file 
-    (win32/dist/htmlhelp/Net-SNMP.hhp) and the Table of Contents
-    (win32/dist/htmlhelp/Net-SNMP.hhc).
+    snmpnetstat
+    snmpdelta
+    snmpdf
 
 11. If new man pages are added or removed, the Table of Contents (Net-SNMP.hhc) and
     project file (Net-SNMP.hhp) need to be updated by hand.
@@ -262,7 +262,7 @@ Note:  A temporary location of c:\temp\net-snmp is used.
     Create a text file with all the configuration options for snmpd and 
     snmptrapd using:
 
-    cd win32\bin (folder of *Windows* compiled Net-SNMP)
+    cd win32\bin\release (folder of *Windows* compiled Net-SNMP)
     snmptrapd -H 2> c:\temp\net-snmp\html\snmptrapd.options
     snmpd -H 2> c:\temp\net-snmp\html\snmpd.options
 
@@ -275,17 +275,29 @@ Note:  A temporary location of c:\temp\net-snmp is used.
     Only add the relevent section to each file from the .options files
     created above, ensure the font is set to fixed width.
 
-4.  Run HTML Workshop
+    Tidy each file using tidy under Windows (or transfer to Linux and tidy
+    using Linux):
 
-5.  Open c:\temp\net-snmp\html\Net-SNMP.hhp
+    tidy -asxhtml -m c:\temp\net-snmp\html\snmptrapd.conf.win32.html
+    tidy -asxhtml -m c:\temp\net-snmp\html\snmpd.conf.win32.html
+    tidy -asxhtml -m c:\temp\net-snmp\html\snmp.conf.win32.html
 
-6.  Click File - Compile
+4.  Edit c:\temp\net-snmp\html\Net-SNMP.hhp and update the version for the 
+    'Title' variable.
 
-7.  Select 'C:\temp\net-snmp\html\Net-SNMP.hhp' as the filename
+5.  Run HTML Workshop
 
-8.  Click Compile
+6.  Open c:\temp\net-snmp\html\Net-SNMP.hhp
 
-9.  You should now have a c:\temp\net-snmp\html\Net-SNMP.chm file.
+7.  Click File - Compile
+
+8.  Select 'C:\temp\net-snmp\html\Net-SNMP.hhp' as the filename
+
+9.  Click Compile
+
+10. You should now have a c:\temp\net-snmp\html\Net-SNMP.chm file.
+
+11. Launch the file and ensure every content item displays the correct page.
 
 
 Combining the binaries and HTMLHelp files
@@ -332,8 +344,27 @@ Requirements
     PRODUCT_REVISION
     PRODUCT_EXE_VERSION
 
-    PRODUCT_EXE_VERSION is usually 1 unless the binary package is
-    re-released.
+    For example, for 5.1.2:
+
+    PRODUCT_MAJ_VERSION "5"
+    PRODUCT_MIN_VERSION "1"
+    PRODUCT_REVISION "2"
+    PRODUCT_EXE_VERSION "1"
+
+    The generated filename would be: net-snmp-5.1.2-1.win32.exe
+
+    PRODUCT_EXE_VERSION is usually 1 unless the binary package is re-released
+    due to packaging issues.  For pre releases, include the pre-release version 
+    in PRODUCT_REVISION.   For example, for 5.1.2 pre2 use:
+
+    PRODUCT_MAJ_VERSION "5"
+    PRODUCT_MIN_VERSION "1"
+    PRODUCT_REVISION "2.pre2"
+    PRODUCT_EXE_VERSION "1"
+
+    This will ensure the version number is visible during installation.
+
+    The generated filename would be: net-snmp-5.1.2.pre2-1.win32.exe
 
 5.  Launch the 'Nullsoft Install System (NSIS 2.0)'
 
