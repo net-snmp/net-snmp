@@ -1,116 +1,208 @@
-.TH SNMPD 1 "21 Jun 2001"
-.ds )H U.C. Davis
-.ds ]W VVERSIONINFO
+.TH SNMPD 1 "7 Feb 2002" VVERSIONINFO "Net-SNMP"
 .UC 4
 .SH NAME
 snmpd - daemon to respond to SNMP request packets.
 .SH SYNOPSIS
-.B "snmpd [-v] [-a] [-V] [-d] [-q] [-D] [-p [(udp|tcp):]port[@address][,...]] [-x agentx-socket] [-f] [-l logfile] [-L] [-c file] [-C] [-r] [-I [-]module_list]"
+.B snmpd
+[OPTIONS] [LISTENING ADDRESSES]
 .SH DESCRIPTION
 .B snmpd
-is a SNMP agent which binds to a port and awaits requests from
+is an SNMP agent which binds to a port and awaits requests from
 SNMP management software.  Upon receiving a request, it processes the
 request(s), collects the requested information and/or performs the
 requested operation(s) and returns the information to the sender.
 .SH OPTIONS
-.RS
-.TP 6
-.B -v
-Print version information for the agent, and exit.
-.TP
+.TP 8
 .B -a
-Dumps the addresses the agent corresponds with to stderr or logfile.
-.TP
-.B -V
-Makes a symbolic dump of the protocol transaction.
-.TP
-.B -d
-Dumps the sent and received UDP packets to stderr or logfile.
-.TP 
-.B -q
-Print simpler output for easier automated parsing.
-.TP
-.B -D
-Turn on debugging output
-.TP
-.B -p [(udp|tcp):]port[@address][,...]
-Makes the agent list on the specified list of sockets instead of the
-default port, which is port 161.  Multiple ports can be separated by
-commas.  Transports can be specified by prepending the port number
-with the transport name ("udp" or "tcp") followed by a colon.
-Finally, to bind to a particular interface, you can specify the
-address you want it to bind with.
-.IP
-For example, specifying
-.I "-p 161,tcp:161,9161@localhost"
-will make the agent listen on: udp port 161 for any address, tcp port
-161 for any address, and udp port 9161 on only the interface
-associated with the localhost address.  Note that the 
-.I "-T"
-flag (below) changes the default transport mapping to use (in the
-above example, the default transport mapping is 
-.I udp.
-.TP
-.B -x agentx-socket
-Listens for AgentX connections on the specified socket
-rather than the default '/var/agentx/master'.
-The socket can either be a Unix domain socket path,
-or the address of a network interface.
-If a network address of the form
-.B inet-addr:port
-is given, then the agent will listen on the port specified.
-If a network address of the form
-.B inet-addr
-is given, then the agent will listen on the default AgentX port, 705.
-.TP
-.B -f
-Don't fork() from the calling shell.
-.TP
-.B -l logfile
-Logs all output from the agent (including stdout/stderr) to 
-.I logfile.
-Defaults to a compiled option.
-.TP
-.B -s
-Use syslog for logging.
-.TP
-.B -P pidfile
-Save the process ID of the daemon in
-.I pidfile.
-.TP
-.B -g groupid
-Change to this gid after opening port.
-.TP
-.B -u uid
-Change to this uid after opening port.
-.TP
-.B -L
-Don't open a log file; use stdout/stderr instead.
+Log the source addresses of incoming requests.
 .TP
 .B -A
 Append to the log file rather than truncating it.
 .TP
-.B -c file
+.B "-c" \fIFILE
 Read 
-.I file
+.I FILE
 as a configuration file.
 .TP
 .B -C
-Don't read any configuration files except the one optionally specified by the 
+Do not read any configuration files except the one optionally specified by the 
 .B -c 
 option.
 .TP
-.B -r
-Don't require root access to run the demon.  Specifically, don't exit
-when you can't open files like /dev/kmem, etc...
+.B -d
+Dump (in hexadecimal) the sent and received SNMP packets.
 .TP
-.B -I [-]module_list
+.B -D \fITOKEN[,...]
+Turn on debugging output for the given
+.IR "TOKEN" "(s)."
+Try
+.IR ALL
+for extremely verbose output.
+.TP
+.B -f
+Do not fork() from the calling shell.
+.TP
+.B -g \fIGID
+Change to the numerical group ID
+.I GID
+after opening listening sockets.
+.TP
+.B -h, --help
+Display a brief usage message and then exit.
+.TP
+.B -H
+Display a list of configuration file directives understood by the
+agent and then exit.
+.TP
+.B -I \fI[-]INITLIST
 This option specifies which modules you do (or do not) want to be
-initialized when the agent starts up.  If the module_list is preceded
-with a '-', it will indicate the modules that you do not want to start
-up rather than a definitive list of those that you do want to start.  To get a list of compiled modules, run the agent with the arguments
+initialized when the agent starts up.  If the comma-separated
+.I INITLIST
+is preceded
+with a '-', it is the list of modules that you do
+.I not
+want to be started.  Otherwise,
+.I INITLIST
+is the list of modules to be started.
+
+To get a list of compiled modules, run the agent with the arguments
 .I "-Dmib_init -H"
 (assumes you have debugging support compiled in).
+.TP
+.BR -l "" " " "[\fIFILE" "" "]"
+Log all output from the agent (including stdout and stderr) to 
+.IR FILE .
+If no filename is given, log to a default file set at compile time
+(normally /var/log/snmpd.log).
+.TP
+.B -L
+Do not open a log file; print all messages to stderr instead.
+.TP
+.B -P \fIFILE
+Save the process ID of the daemon in
+.IR FILE "."
+.TP 
+.B -q
+Print simpler output for easier automated parsing.
+.TP
+.B -r
+Do not require root access to run the daemon.  Specifically, do not exit
+if files only accessible to root (such as /dev/kmem etc.) cannot be
+opened.
+.TP
+.B -s
+Use syslog for logging.
+.TP
+.B -u \fIUID
+Change to the user ID
+.I UID
+(which can be given in numerical or textual form) after opening
+listening sockets.
+.TP
+.B -v, --version
+Print version information for the agent and then exit.
+.TP
+.B -V
+Symbolically dump SNMP transactions.
+.TP
+.B -x \fIADDRESS
+Listens for AgentX connections on the specified address
+rather than the default '/var/agentx/master'.
+The address can either be a Unix domain socket path,
+or the address of a network interface.  The format is the same as the
+format of listening addresses described below.
+.TP
+.B -X
+Run as an AgentX subagent rather than as an SNMP master agent.
+
+.SH LISTENING ADDRESSES
+By default,
+.B snmpd
+listens for incoming SNMP requests only on UDP port 161.  However, it
+is possible to modify this behaviour by specifying one or more
+listening addresses as arguments to
+.BR snmpd .
+A listening address takes the form:
+.IP
+[<transport-specifier>:]<transport-address>
+.PP
+At its simplest, a listening address may consist only of a port
+number, in which case
+.B snmpd
+listens on that UDP port on all IPv4 interfaces.  Otherwise, the
+<transport-address> part of the specification is parsed according to
+the following table:
+.RS 4
+.TP 28
+.BR "<transport-specifier>"
+.BR "<transport-address> format"
+.IP "udp" 28
+hostname[:port]
+.I or
+IPv4-address[:port]
+.IP "tcp" 28
+hostname[:port]
+.I or
+IPv4-address[:port]
+.IP "unix" 28
+pathname
+.IP "ipx" 28
+[network]:node[/port]
+.TP 28 
+.IR "" "aal5pvc " or " pvc"
+[interface.][VPI.]VCI
+.TP 28
+.IR "" "udp6 " or " udpv6 " or " udpipv6"
+hostname[:port]
+.I or
+IPv6-address[:port]
+.TP 28
+.IR "" "tcp6 " or " tcpv6 " or " tcpipv6"
+hostname[:port]
+.I or
+IPv6-address[:port]
+.RE
+.PP
+Note that <transport-specifier> strings are case-insensitive so that,
+for example, "tcp" and "TCP" are equivalent.  Here are some examples,
+along with their interpretation:
+.TP 24
+.IR "127.0.0.1:161"
+listen on UDP port 161, but only on the loopback interface.  This
+prevents
+.B snmpd
+being queried remotely (which is a bit pointless).  The ":161" is
+redundant here since that is the default SNMP port in any case.
+.TP 24
+.IR "TCP:1161"
+listen on TCP port 1161 on all IPv4 interfaces.
+.TP 24
+.IR "ipx:/40000"
+listen on IPX port 40000 on all IPX interfaces.
+.TP 24
+.IR "unix:/tmp/local-agent"
+listen on the Unix domain socket 
+.IR /tmp/local-agent .
+.TP 24
+.IR "/tmp/local-agent"
+identical to the previous specification, since the Unix domain is the
+default transport iff the first character of the <transport-address>
+is a '/'.
+.TP 24
+.IR "PVC:161"
+listen on the AAL5 permanent virtual circuit with VPI=0 and VCI=161
+(decimal) on the first ATM adapter in the machine.
+.TP 24
+.IR "udp6:10161"
+listen on port 10161 on all IPv6 interfaces.
+.PP
+Note that not all the transport domains listed above will always be
+available; for instance, hosts with no IPv6 support will not be able
+to use udp6 transport addresses, and attempts to do so will result in
+the error "Error opening specified endpoint".  Likewise, since AAL5
+PVC support is only currently available on Linux, it will fail with
+the same error on other platforms.
+
 .RE
 .SH CONFIGURATION FILES
 .PP
@@ -118,19 +210,15 @@ up rather than a definitive list of those that you do want to start.  To get a l
 checks for the existence of and parses the following files:
 .TP 6
 .B DATADIR/snmp/snmp.conf
-Common configuration for the agent and the application. See snmp.conf(5)
+Common configuration for the agent and applications. See snmp.conf(5)
 for details.
 .TP
 .B DATADIR/snmp/snmpd.conf
 .TP
 .B DATADIR/snmp/snmpd.local.conf
-Configures the agent.  See snmpd.conf(5) for details.  These files are
-optional and are only used to configure the extensible portions of the
-agent, the values of the community strings, and the optional trap
-destinations.  By default, the first community string ("public" by
-default) is allowed read-only access and the second ("private" by
-default) is allowed write access as well.  The 3-5th community strings
-are read-only as well.
+Agent-specific configuration.  See snmpd.conf(5) for details.  These
+files are optional and may be used to configure access control, trap
+generation, subagent protocols and much else besides.
 .IP
 In addition to these two configuration files in DATADIR/snmp, the
 agent will read any files with the names
@@ -141,8 +229,8 @@ in a colon separated path specified in the
 SNMPCONFPATH environment variable.
 .TP
 .B DATADIR/snmp/mibs/
-The agent will also load all files in this directory as mibs also.  It
-will not, however, load any file that begins with a '.' or descend into
+The agent will also load all files in this directory as MIBs.  It will
+not, however, load any file that begins with a '.' or descend into
 subdirectories.
 .SH SEE ALSO
 (in recommended reading order)
