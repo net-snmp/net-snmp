@@ -102,4 +102,6 @@ unsigned char *var_wes_mem();
 #define MAXDISKS 10                      /* can't scan more than this number */
 #define DEFDISKMINIMUMSPACE 100000       /* 100 meg minimum disk space */
 
+#define LASTFIELD -1
+
 #include "struct.h"

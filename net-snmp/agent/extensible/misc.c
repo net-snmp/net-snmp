@@ -66,11 +66,7 @@ int sh_count_procs(procname)
   file = fdopen(fd,"r");
   while(fgets(line,STRMAX,file) != NULL)
     {
-#ifdef hpux
-      if ((cptr = find_field(line,4)) == NULL)
-#else
-      if ((cptr = find_field(line,5)) == NULL)
-#endif
+      if ((cptr = find_field(line,LASTFIELD)) == NULL)
         continue;
       copy_word(cptr,line);
       if (!strcmp(line,procname)) ret++;

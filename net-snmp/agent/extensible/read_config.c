@@ -210,14 +210,26 @@ char *find_field(ptr,field)
      int field;
 {
   int i;
+  char *init=ptr;
   
-  if ((ptr = skip_white(ptr)) == NULL) return(NULL);
-  for (i=1; *ptr != NULL && i != field; i++) 
-    {
-      if ((ptr = skip_not_white(ptr)) == NULL) return(NULL);
-      if ((ptr = skip_white(ptr)) == NULL) return(NULL);
-    }
-  if (*ptr != NULL && i == field) return(ptr);
-  return (NULL);
+  if (field == LASTFIELD) {
+    /* skip to end */
+    while (*ptr++);
+    ptr = ptr - 2;
+    /* rewind a field length */
+    while (*ptr != NULL && isspace(*ptr) && init <= ptr) ptr--;
+    while (*ptr != NULL && !isspace(*ptr) && init <= ptr) ptr--;
+    if (isspace(*ptr)) ptr++;  /* past space */
+    if (!isspace(*ptr) && *ptr != NULL) return(ptr);
+  } else {
+    if ((ptr = skip_white(ptr)) == NULL) return(NULL);
+    for (i=1; *ptr != NULL && i != field; i++) 
+      {
+        if ((ptr = skip_not_white(ptr)) == NULL) return (NULL);
+        if ((ptr = skip_white(ptr)) == NULL) return (NULL);
+      }
+    if (*ptr != NULL && i == field) return(ptr);
+    return (NULL);
+  }
 }
 
