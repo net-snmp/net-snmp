@@ -226,6 +226,11 @@ struct objgroup {
 #define LEFTSQBRACK	95
 #define RIGHTSQBRACK	96
 #define IMPLICIT    97
+#define APPSYNTAX	(98 | SYNTAX_MASK)
+#define OBJSYNTAX	(99 | SYNTAX_MASK)
+#define SIMPLESYNTAX	(100 | SYNTAX_MASK)
+#define OBJNAME		(101 | SYNTAX_MASK)
+/* Beware of reaching SYNTAX_MASK (0x80) */
 
 struct tok {
     const char *name;                 /* token name */
@@ -323,6 +328,10 @@ static struct tok tokens[] = {
     { "GROUP", sizeof("GROUP")-1, GROUP },
     { "CHOICE", sizeof("CHOICE")-1, CHOICE },
     { "IMPLICIT", sizeof("IMPLICIT")-1, IMPLICIT },
+    { "ObjectSyntax", sizeof("ObjectSyntax")-1, OBJSYNTAX },
+    { "SimpleSyntax", sizeof("SimpleSyntax")-1, SIMPLESYNTAX },
+    { "ApplicationSyntax", sizeof("ApplicationSyntax")-1, APPSYNTAX },
+    { "ObjectName", sizeof("ObjectName")-1, OBJNAME },
     { NULL }
 };
 
@@ -3484,6 +3493,10 @@ parse(FILE *fp,
 	case IPADDR:
 	case NETADDR:
 	case NSAPADDRESS:
+	case OBJSYNTAX:
+	case APPSYNTAX:
+	case SIMPLESYNTAX:
+	case OBJNAME:
 	case KW_OPAQUE:
 	case TIMETICKS:
             break;
