@@ -145,7 +145,7 @@ table_helper_handler(netsnmp_mib_handler *handler,
                 handler->handler_name));
     DEBUGMSGOID(("helper:table", reginfo->rootoid, reginfo->rootoid_len));
     DEBUGMSG(("helper:table", "\n"));
-
+    
     /*
      * if the agent request info has a state reference, then this is a 
      * later pass of a set request and we can skip all the lookup stuff.
@@ -193,6 +193,34 @@ table_helper_handler(netsnmp_mib_handler *handler,
             netsnmp_set_request_error(reqinfo, request,
                                       SNMP_ERR_WRONGTYPE);
             continue;
+        }
+
+        if (reqinfo->mode == MODE_SET_RESERVE1) {
+            DEBUGIF("helper:table") {
+                u_char         *buf = NULL;
+                size_t          buf_len = 0, out_len = 0;
+                DEBUGMSGTL(("helper:table", " SET_REQUEST for OID: "));
+                DEBUGMSGOID(("helper:table", var->name, var->name_length));
+                out_len = 0;
+                if (sprint_realloc_by_type(&buf, &buf_len, &out_len, 1,
+                                           var, 0, 0, 0)) {
+                    DEBUGMSG(("helper:table"," type=%d(%02x), value=%s\n",
+                              var->type, var->type, buf));
+                } else {
+                    if (buf != NULL) {
+                        DEBUGMSG(("helper:table",
+                                  " type=%d(%02x), value=%s [TRUNCATED]\n",
+                                  var->type, var->type, buf));
+                    } else {
+                        DEBUGMSG(("helper:table",
+                                  " type=%d(%02x), value=[NIL] [TRUNCATED]\n",
+                                  var->type, var->type));
+                    }
+                }
+                if (buf != NULL) {
+                    free(buf);
+                }
+            }
         }
 
         /*
