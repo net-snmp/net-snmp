@@ -352,6 +352,7 @@ var_system(struct variable *vp,
 	   size_t *var_len,
 	   WriteMethod **write_method)
 {
+    static u_long ulret;
 
     if (header_generic(vp, name, length, exact, var_len, write_method) == MATCH_FAILED )
 	return NULL;
@@ -364,8 +365,8 @@ var_system(struct variable *vp,
             *var_len = version_sysoid_len*sizeof(version_sysoid[0]);
             return (u_char *)version_sysoid;
         case UPTIME:
-            long_return = netsnmp_get_agent_uptime();
-            return ((u_char *) &long_return);
+            ulret = netsnmp_get_agent_uptime();
+            return ((u_char *) &ulret);
         case SYSCONTACT:
             *var_len = strlen(sysContact);
             *write_method = writeSystem;
@@ -388,8 +389,8 @@ var_system(struct variable *vp,
 
 #ifdef USING_MIBII_SYSORTABLE_MODULE
         case SYSORLASTCHANGE:
-	      long_return = netsnmp_timeval_uptime( &sysOR_lastchange );
-              return ((u_char *) &long_return);
+            ulret = netsnmp_timeval_uptime( &sysOR_lastchange );
+            return ((u_char *) &ulret);
 #endif
               
 	default:

@@ -2164,24 +2164,25 @@ int netsnmp_set_all_requests_error(netsnmp_agent_request_info *reqinfo, netsnmp_
 extern struct timeval starttime;
 
 		/* Return the value of 'sysUpTime' at the given marker */
-int
+u_long
 netsnmp_marker_uptime( marker_t pm )
 {
-    int res;
+    u_long res;
     marker_t start = (marker_t)&starttime;
 
-    res = atime_diff( start, pm );
-    return res/10;      /* atime_diff works in msec, not csec */
+    res = uatime_hdiff( start, pm );
+    return res;      /* atime_diff works in msec, not csec */
 }
 
 			/* struct timeval equivalents of these */
-int netsnmp_timeval_uptime( struct timeval *tv )
+u_long
+netsnmp_timeval_uptime( struct timeval *tv )
 {
     return netsnmp_marker_uptime((marker_t)tv);
 }
 
 		/* Return the current value of 'sysUpTime' */
-int
+u_long
 netsnmp_get_agent_uptime( void ) {
 
 	struct timeval now;
