@@ -196,7 +196,7 @@ sub oidlength {
 #   $var.noaccess      -- 1 if not-accessible, 0 if not
 #   $var.accessible    -- 1 if accessible, 0 if not
 #   $var.hasdefval     -- 1 if a DEFVAL was defined, 0 if not
-#   $var.access        -- node's defval
+#   $var.defval        -- node's defval
 #   $var.access        -- node's access type
 #   $var.status        -- node's status
 #   $var.syntax        -- node's syntax
@@ -235,6 +235,9 @@ sub process_vars {
     # check for enums
     $it =~ s/\$(\w+)\.(enums)/(%{$SNMP::MIB{$vars{$1}}{'enums'}} == 0) ? 0 : 1/eg;
     $it =~ s/\$(\w+)\.(enumrange)/%{$SNMP::MIB{$vars{$1}}{'enums'}}/eg;
+    if ( $it =~ /\$(\w+)\.(\w+)/ ) {
+      warn "Possible unknown variable attribute \$$1.$2 at $currentfile:$currentline\n";
+    }
     # normal variable substitions
     $it =~ s/\$\{(\w+)\}/$vars{$1}/g;
     $it =~ s/\$(\w+)/$vars{$1}/g;
@@ -290,7 +293,14 @@ sub skippart {
     $currentline++;
     $_ = process_vars($_) if ($debug);
     print "$currentfile.$currentline.S$endcount.$rtnelse:$_" if ($debug);
-	if (/\@\s*end\@/) {
+        next if ( /^\s*\#\#/ ); #                          noop, it's a comment
+        next if (! /^\s*\@/ ); #                                        output
+        if (! /^\s*\@.*\@/ ) {
+          warn "$currentfile:$currentline contained a line that started with a @ but did not match any mib2c configuration tokens.\n";
+          warn "(maybe missing the trailing @?)\n";
+          warn "$currentfile:$currentline [$_]\n";
+        }
+	elsif (/\@\s*end\@/) {
 	    return "end" if ($endcount == 1);
 	    $endcount--;
 	}
@@ -336,6 +346,7 @@ sub open_file {
   if ($multiple == 0) {
     close_files();
   }
+  return if ($outputs{$name});
   $outputs{$name} = new IO::File;
   $outputs{$name}->open(">$spec") || die "failed to open $name";
   print STDERR "writing to $name\n" if (!$quiet && !$written{$name});
@@ -343,12 +354,14 @@ sub open_file {
 }
 
 sub process_file {
-  my ($file, $missingok) = (@_);
+  my ($file, $missingok, $keepvars) = (@_);
   my $oldfh = $fh;
   my $oldfile = $currentfile;
   my $oldline = $currentline;
   # keep old copy of @vars and just build on it.
-  my %oldvars = %vars;
+  my %oldvars;
+
+  %oldvars = %vars if ($keepvars != 1);
 
   $file = find_conf($file,$missingok);
   return if (! $file);
@@ -363,7 +376,7 @@ sub process_file {
   $currentline = $oldline;
 
   # don't keep values in replaced vars.  Revert to ours.
-  %vars = %oldvars;
+  %vars = %oldvars if ($keepvars != 1);
 }
 
 sub process {
@@ -383,7 +396,7 @@ sub process {
       }
 
         next if (/^\s*\#\#/); #                            noop, it's a comment
-        if (! /^\s*\@.*\@/ ) { #                                          output
+        if (! /^\s*\@/ ) { #                                          output
           my $line = process_vars($_);
           foreach $file (values(%outputs)) {
             print $file "$line";
@@ -420,12 +433,14 @@ sub process {
 #		    my ($filearg) = ($arg =~ s/^(\w+)//);
 #		}
 	    }
-	    next if (!$again && $ranalready{$arg});
-	    $ranalready{$arg} = 1;
+	    my $spec = process_vars($arg);
+	    next if (!$again && $ranalready{$spec});
+	    $ranalready{$spec} = 1;
 	    my %oldout = %outputs;
             my %emptyarray;
             %outputs = %emptyoutputs;
-            process_file($arg);
+            process_file($spec,0,0);
+            close_files;
 	    %outputs = %oldout;
 	} elsif (/\@\s*include (.*)\@/) { #                            INCLUDE
 	    my $arg = $1;
@@ -433,14 +448,15 @@ sub process {
 	    while ($arg =~ s/-(\w+)\s+//) {
 		$missingok = 1 if ($1 eq 'ifexists');
 	    }
-            process_file($arg,$missingok);
+            my $spec = process_vars($arg);
+            process_file($spec,$missingok,1);
 	} elsif (/\@\s*if([a-z]*)\s+([^@]+)\@/) { #                         IF
           my ($type,$arg,$ok) = ($1,$2,0);
           # check condition based on type
           if (! $type) {
             $ok = eval(process_vars($arg));
           } elsif ($type eq conf) {
-            my $file = find_conf($arg,1); # missingok
+            my $file = find_conf(process_vars($arg),1); # missingok
             $ok = (-f $file);
           } else {
             die "unknown if modifier ($type)\n";
@@ -481,7 +497,7 @@ sub process {
 #	    print STDERR "eval: $e\n";
 	    my $e = process_vars($e);
 	    $vars{$v} = eval($e);
-#	    warn "$@" if (!defined($vars{$v}));
+	    warn "$@" if (!defined($vars{$v}));
 	} elsif (/\@\s*perleval\s*(.*)\@/) { #                        PERLEVAL
 	    print STDERR "perleval: $1\n";
 	    my $res = eval($1);
@@ -564,7 +580,7 @@ sub process {
 		$currenttable = $oldtable;
 	      }
 	    }
-	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+(column|index)\s*\@/) {
+	  } elsif (/\@\s*foreach\s+\$([^\@]+)\s+(column|index|nonindex)\s*\@/) {
 	    my ($var, $type) = ($1, $2);
 	    my $startpos = $fh->tell();
 	    my $column;
@@ -649,7 +665,8 @@ sub process {
             print $file "$line";
           }
           chop $_;
-          warn "$currentfile:$currentline contained a @@ pair in it which may be a configuration token line mib2c couldn't recognize.\n";
+          warn "$currentfile:$currentline contained a line that started with a @ but did not match any mib2c configuration tokens.\n";
+          warn "(maybe missing the trailing @?)\n";
           warn "$currentfile:$currentline [$_]\n";
 	}
     }
@@ -659,17 +676,21 @@ sub process {
 sub setup_data {
     my $mib = shift;
     if ($mib->{label} =~ /Table$/) {
+        my $indexes;
 	my $tablename = $mib->{label};
 	my $entry = $mib->{children};
 	my $columns = $entry->[0]{children};
-	foreach my $col (sort { $a->{'subID'} <=> $b->{'subID'} } @$columns) {
-	    # store by numeric key so we can sort them later
-	    push @{$tables{$tablename}{'column'}}, $col->{'label'};
-	}
 	foreach my $index (@{$entry->[0]{'indexes'}}) {
 	    my $node = $SNMP::MIB{$index} || 
 		die "can't find info about index $index in table $tablename\n";
 	    push @{$tables{$tablename}{'index'}}, $index;
+            $indexes = "$indexes $index"
+	}
+	foreach my $col (sort { $a->{'subID'} <=> $b->{'subID'} } @$columns) {
+	    # store by numeric key so we can sort them later
+	    push @{$tables{$tablename}{'column'}}, $col->{'label'};
+            next if ( $indexes =~ /$col->{'label'}/ );
+            push @{$tables{$tablename}{'nonindex'}}, $col->{'label'};
 	}
     } else {
 	my $children = $mib->{children};
