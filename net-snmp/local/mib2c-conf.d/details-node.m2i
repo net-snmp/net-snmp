@@ -10,7 +10,7 @@
 /*---------------------------------------------------------------------
  * $node.module::$node.parent.$node
  * $node is subid $node.subid of $node.parent.
- * It's status is $node.status, and it's access level is $node.access.
+ * Its status is $node.status, and its access level is $node.access.
  * OID: $node.objectID
  * Description:
 $node.description
@@ -78,7 +78,7 @@ $node.description
  * Ranges: $m2c_evals;
 @end@ #ranges
  *
- * It's syntax is $node.syntax (based on perltype $node.perltype)
+ * Its syntax is $node.syntax (based on perltype $node.perltype)
  * The net-snmp type is $node.type. The C type decl is $node.decl ($m2c_decl)
 @if $node.needlength == 1@
  * This data type requires a length.  (Max $m2c_range_max)

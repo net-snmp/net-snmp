@@ -349,7 +349,7 @@ ${context} File Overview
 File: ${name}_data_access.[c|h]
 ------------------------------------------------------------------------
   The ${name}_data_access file contains the interface to your data in
-  it's raw format.  These functions are used to locate the row for a
+  its raw format.  These functions are used to locate the row for a
   particular request.
 
   Set index context
@@ -395,7 +395,7 @@ File: ${name}_data_get.c
 @        if ($m2c_skip_mapping != 1)@
   Map native data to MIB format
   -----------------------------
-  TODO : convert data from it's native format to the format required by the MIB
+  TODO : convert data from its native format to the format required by the MIB
   FUNC : ${node}_map
 
   This function should map between the native format of the node data to
@@ -410,7 +410,7 @@ File: ${name}_data_get.c
 @        if ($m2c_skip_mapping != 1)@
   Map native data to MIB format
   -----------------------------
-  TODO : convert data from it's native format to the format required by the MIB
+  TODO : convert data from its native format to the format required by the MIB
   FUNC : ${node}_map
 
   This function should map between the native format of the node data to
@@ -525,7 +525,7 @@ File: ${name}_data_set.c
   called. This is where you should save any undo information which is not
   directly related to a particular column. This function will only be called
   once per row. After this function is called, any column which is being
-  set will have it's individual node undo_setup function called.
+  set will have its individual node undo_setup function called.
 
 
 

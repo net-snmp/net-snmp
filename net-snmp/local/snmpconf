@@ -2,7 +2,7 @@
 
 #
 # A simple configuration file builder based on questions listed in
-# it's own configuration file.  It would certainly be easy to use this
+# its own configuration file.  It would certainly be easy to use this
 # for other (non-snmp) programs as well.
 #
 

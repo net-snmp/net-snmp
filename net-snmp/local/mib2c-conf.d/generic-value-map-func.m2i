@@ -9,7 +9,7 @@
 ########################################################################
 ## }
 /**
- * map a value from it's original native format the the MIB format.
+ * map a value from its original native format to the MIB format.
  *
  * @retval MFD_SUCCESS         : success
  * @retval MFD_ERROR           : Any other error
