@@ -117,7 +117,6 @@ static netsnmp_agent_session *agent_session_list = NULL;
 netsnmp_agent_session *agent_delegated_list = NULL;
 
 
-static void dump_var(oid *, size_t, int, void *, size_t);
 int netsnmp_agent_check_packet(netsnmp_session*, struct netsnmp_transport_s *,
 		      void *, int);
 int netsnmp_agent_check_parse(netsnmp_session*, netsnmp_pdu*, int);
@@ -127,6 +126,55 @@ int netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status);
 int check_delayed_request(netsnmp_agent_session  *asp);
 int handle_getnext_loop(netsnmp_agent_session  *asp);
 int handle_set_loop(netsnmp_agent_session  *asp);
+
+static int current_globalid = 0;
+
+int
+netsnmp_allocate_globalcacheid(void) 
+{
+    return ++current_globalid;
+}
+
+int
+netsnmp_get_local_cachid(netsnmp_cachemap *cache_store, int globalid)
+{
+    while(cache_store != NULL) {
+        if (cache_store->globalid == globalid)
+            return cache_store->cacheid;
+    }
+    return -1;
+}
+
+netsnmp_cachemap *
+netsnmp_get_or_add_local_cachid(netsnmp_cachemap **cache_store, int globalid,
+                                int localid) 
+{
+    netsnmp_cachemap *tmpp;
+    
+    tmpp = SNMP_MALLOC_TYPEDEF(netsnmp_cachemap);
+    if (*cache_store) {
+        tmpp->next = *cache_store;
+        *cache_store = tmpp;
+    } else {
+        *cache_store = tmpp;
+    }
+        
+    tmpp->globalid = globalid;
+    tmpp->cacheid = localid;
+    return tmpp;
+}
+
+void
+netsnmp_free_cachemap(netsnmp_cachemap *cache_store) 
+{
+    netsnmp_cachemap *tmpp;
+    while(cache_store) {
+        tmpp = cache_store;
+        cache_store = cache_store->next;
+        free(tmpp);
+    }
+}
+
 
 typedef struct agent_set_cache_s {
    /* match on these 2 */
@@ -772,6 +820,10 @@ free_agent_snmp_session(netsnmp_agent_session *asp)
     if (asp->requests) {
         free(asp->requests);
     }
+    if (asp->cache_store) {
+        netsnmp_free_cachemap(asp->cache_store);
+        asp->cache_store = NULL;
+    }
     free(asp);
 }
 
@@ -1178,13 +1230,26 @@ netsnmp_add_varbind_to_cache(netsnmp_agent_session  *asp, int vbcount,
 	}
 
         /* place them in a cache */
-        if (tp->cacheid > -1 && tp->cacheid <= asp->treecache_num &&
+        if (tp->global_cacheid) {
+            /* we need to merge all marked subtrees together */
+            if (asp->cache_store && -1 !=
+                (cacheid = netsnmp_get_local_cachid(asp->cache_store,
+                                                    tp->global_cacheid))) {
+            } else {
+                cacheid = ++(asp->treecache_num);
+                netsnmp_get_or_add_local_cachid(&asp->cache_store,
+                                                tp->global_cacheid,
+                                                cacheid);
+                goto mallocslot; /* XXX: ick */
+            }
+        } else if (tp->cacheid > -1 && tp->cacheid <= asp->treecache_num &&
             asp->treecache[tp->cacheid].subtree == tp) {
             /* we have already added a request to this tree
                pointer before */
 	    cacheid = tp->cacheid;
         } else {
             cacheid = ++(asp->treecache_num);
+          mallocslot:
             /* new slot needed */
             if (asp->treecache_num >= asp->treecache_len) {
                 /* exapand cache array */
@@ -1420,6 +1485,10 @@ netsnmp_reassign_requests(netsnmp_agent_session  *asp)
     asp->treecache =
 	(netsnmp_tree_cache *)calloc(asp->treecache_len, sizeof(netsnmp_tree_cache));
     asp->treecache_num = -1;
+    if (asp->cache_store) {
+        netsnmp_free_cachemap(asp->cache_store);
+        asp->cache_store = NULL;
+    }
 
     for(i = 0; i < asp->vbcount; i++) {
         if (asp->requests[i].requestvb->type == ASN_NULL) {

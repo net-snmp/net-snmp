@@ -49,6 +49,7 @@ typedef struct netsnmp_handler_registration_s {
    int     range_subid;
    oid     range_ubound;
    int     timeout;
+   int     global_cacheid;
 
 } netsnmp_handler_registration;
 

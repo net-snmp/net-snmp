@@ -52,6 +52,8 @@
 
 extern struct timeval   starttime;
 
+
+
 netsnmp_session *
 find_agentx_session( netsnmp_session *session, int sessid)
 {
@@ -173,6 +175,7 @@ register_agentx_list(netsnmp_session *session, netsnmp_pdu *pdu)
     u_long flags = 0;
     netsnmp_handler_registration *reg;
     int rc = 0;
+    int cacheid;
     
     DEBUGMSGTL(("agentx/master","in register_agentx_list\n"));
     
@@ -195,11 +198,20 @@ register_agentx_list(netsnmp_session *session, netsnmp_pdu *pdu)
     }
 
     reg = netsnmp_create_handler_registration(buf, agentx_master_handler,
-                                      pdu->variables->name,
-                                      pdu->variables->name_length,
-                                      HANDLER_CAN_RWRITE |
-                                      HANDLER_CAN_GETBULK); /* fake it */
+                                              pdu->variables->name,
+                                              pdu->variables->name_length,
+                                              HANDLER_CAN_RWRITE |
+                                              HANDLER_CAN_GETBULK);/* fake it */
+    if (!session->myvoid) {
+        session->myvoid = malloc(sizeof(cacheid));
+        cacheid = netsnmp_allocate_globalcacheid();
+        *((int *) session->myvoid) = cacheid;
+    } else {
+        cacheid = *((int *) session->myvoid);
+    }
+     
     reg->handler->myvoid = session;
+    reg->global_cacheid = cacheid;
     switch (netsnmp_register_mib(buf, NULL, 0, 1,
                                  pdu->variables->name,
                                  pdu->variables->name_length,
