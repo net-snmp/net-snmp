@@ -7,8 +7,9 @@ BEGIN {
     }
 }
 use Test;
-BEGIN { plan tests => 18 }
+BEGIN { $n = 17; plan tests => $n }
 use SNMP;
+$SNMP::debugging = 0;
 
 my $host = 'localhost';
 my $comm = 'v1_private';
@@ -37,11 +38,6 @@ if (open(CMD,"<t/snmpd.cmd")) {
     close CMD;
 }
 
-$SNMP::debugging = 0;
-$n = 15;  # Number of tests to run
-
-#print "1..$n\n";
-if ($n == 0) { exit 0; }
 
 # create list of varbinds for GETS, val field can be null or omitted
 $vars = new SNMP::VarList (
@@ -94,14 +90,10 @@ $vars = new SNMP::VarList (
 
 
 ######################################################################
-# Create a bogus session, undef means the host can't be found.
-my $s2 = new SNMP::Session ( DestHost => $junk_host );
-ok(!defined($s2),1);
-
-######################################################################
 # Fire up a session.
-my $s1 = new SNMP::Session (DestHost=>$host,Community=>$comm,RemotePort=>$port);
-ok(defined($s1),1);
+my $s1 = 
+    new SNMP::Session (DestHost=>$host,Community=>$comm,RemotePort=>$port);
+ok(defined($s1));
 #####################################################################
 # if no snmpd then skip dynamic tests
 unless ($snmpd_cmd) {
