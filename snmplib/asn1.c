@@ -166,7 +166,7 @@ int _asn_bitstring_check(const char * str, u_long asn_length, u_char datum)
     char ebuf[128];
 
     if (asn_length < 1){
-	sprintf(ebuf,"%s: length %d too small", str, (int)asn_length);
+	sprintf(ebuf,"%s: length %d too small", str, (int) asn_length);
 	ERROR_MSG(ebuf);
 	return 1;
     }
@@ -802,6 +802,12 @@ asn_parse_length(u_char  *data,
 	while(lengthbyte--) {
 		*length <<= 8;
 		*length |= *data++;
+	}
+	if ((long) *length < 0) {
+	    snprintf(ebuf, sizeof(ebuf),
+	    	"%s: negative data length %ld\n", (long) *length);
+	    ERROR_MSG(ebuf);
+	    return NULL;
 	}
 	return data;
     } else { /* short asnlength */
