@@ -28,7 +28,7 @@ extern          "C" {
 typedef struct netsnmp_route_s {
 
    netsnmp_index oid_index;   /* MUST BE FIRST!! for container use */
-   u_int         ns_rt_index; /* arbitrary index */
+   oid           ns_rt_index; /* arbitrary index */
 
    int       flags; /* for net-snmp use */
 
@@ -69,6 +69,10 @@ typedef struct netsnmp_route_s {
    int32_t   rt_metric5;
 
 } netsnmp_route_entry;
+
+
+#define NETSNMP_ROUTE_ENTRY_POLICY_STATIC 0x00000001
+
 
 
 /**---------------------------------------------------------------------*/
