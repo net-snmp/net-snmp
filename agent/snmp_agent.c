@@ -1007,6 +1007,7 @@ init_master_agent(void)
         real_init_master();
 #endif
 #ifdef USING_SMUX_MODULE
+    if(should_init("smux"))
     real_init_smux();
 #endif
 
