@@ -113,12 +113,10 @@ header_hrdevice(struct variable *vp,
     oid newname[MAX_OID_LEN];
     int dev_idx, LowIndex=-1, LowType=-1;
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_device", "var_hrdevice: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("host/hr_device","var_hrdevice: "));
+    DEBUGMSGOID(("host/hr_device", name, *length));
+    DEBUGMSG(("host/hr_device"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
 
@@ -151,10 +149,8 @@ header_hrdevice(struct variable *vp,
 	if ( LowType != -1 && LowType < (dev_idx>>HRDEV_TYPE_SHIFT))
 	    break;
 	newname[HRDEV_ENTRY_NAME_LENGTH] = dev_idx;
-        if (snmp_get_do_debugging()) {
-          sprint_objid (c_oid, newname, *length);
-          DEBUGMSGTL(("host/hr_device", "%s\n", c_oid));
-        }
+    DEBUGMSGOID(("host/hr_device", newname, *length));
+    DEBUGMSG(("host/hr_device","\n"));
         result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    if ( save_device[current_type] != NULL )
@@ -185,10 +181,10 @@ header_hrdevice(struct variable *vp,
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_device", "... get device stats %s\n", c_oid));
-    }
+    DEBUGMSGTL(("host/hr_device", "... get device stats "));
+    DEBUGMSGOID(("host/hr_device", name, *length));
+    DEBUGMSG(("host/hr_device","\n"));
+
     return LowIndex;
 }
 

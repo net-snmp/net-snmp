@@ -57,13 +57,12 @@ header_registry(struct variable *vp,
 {
 #define REGISTRY_NAME_LENGTH	10
     oid newname[MAX_OID_LEN];
-    char c_oid[SPRINT_MAX_LEN];
     struct subtree *mine = NULL;
     
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("ucd-snmp/registry", "var_registry: %s\n", c_oid));
-    }
+    DEBUGMSGTL(("ucd-snmp/registry", "var_registry: "));
+    DEBUGMSGOID(("ucd-snmp/registry", name, *length));
+    DEBUGMSG(("ucd-snmp/registry"," %d\n", exact));
+
     if (*length < REGISTRY_NAME_LENGTH ||
         snmp_oid_compare(name, *length, vp->name, vp->namelen) < 1)
       mine = subtrees;
@@ -81,7 +80,10 @@ header_registry(struct variable *vp,
       *length = vp->namelen + mine->namelen;
     }
 
-    sprint_objid (c_oid, name, *length);
+    DEBUGMSGTL(("ucd-snmp/registry", "var_registry result: "));
+    DEBUGMSGOID(("ucd-snmp/registry", name, *length));
+    DEBUGMSG(("ucd-snmp/registry","\n"));
+
     return mine;
 }
 

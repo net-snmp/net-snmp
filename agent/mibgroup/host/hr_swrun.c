@@ -167,12 +167,10 @@ header_hrswrun(struct variable *vp,
 #define HRSWRUN_NAME_LENGTH	9
     oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_swrun", "var_hrswrun: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("host/hr_swrun", "var_hrswrun: "));
+    DEBUGMSGOID(("host/hr_swrun", name, *length));
+    DEBUGMSG(("host/hr_swrun"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
     newname[HRSWRUN_NAME_LENGTH] = 0;
@@ -199,12 +197,10 @@ header_hrswrunEntry(struct variable *vp,
     oid newname[MAX_OID_LEN];
     int pid, LowPid=-1;
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_swrun", "var_hrswrunEntry: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("host/hr_swrun", "var_hrswrunEntry: "));
+    DEBUGMSGOID(("host/hr_swrun", name, *length));
+    DEBUGMSG(("host/hr_swrun"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
 
@@ -221,10 +217,8 @@ header_hrswrunEntry(struct variable *vp,
         if ( pid == -1 )
 	    break;
 	newname[HRSWRUN_ENTRY_NAME_LENGTH] = pid;
-        if (snmp_get_do_debugging()) {
-          sprint_objid (c_oid, newname, *length);
-          DEBUGMSG(("host/hr_swrun", "%s", c_oid));
-        }
+    DEBUGMSGOID(("host/hr_swrun", newname, *length));
+    DEBUGMSG(("host/hr_swrun","\n"));
         result = snmp_oid_compare(name, *length, newname, vp->namelen + 1);
         if (exact && (result == 0)) {
 	    LowPid = pid;
@@ -258,8 +252,9 @@ DEBUGMSG(("host/hr_swrun", "\n"));
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-    sprint_objid (c_oid, name, *length);
-    DEBUGMSGTL(("host/hr_swrun", "... get process stats %s\n", c_oid));
+    DEBUGMSGTL(("host/hr_swrun", "... get process stats "));
+    DEBUGMSGOID(("host/hr_swrun", name, *length));
+    DEBUGMSG(("host/hr_swrun","\n"));
     return LowPid;
 }
 

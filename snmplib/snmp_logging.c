@@ -67,6 +67,10 @@ init_snmp_logging(void) {
                      DS_LIB_LOG_TIMESTAMP);
 }
 
+int
+snmp_get_do_logging(void) {
+  return (do_syslogging || do_filelogging || do_stderrlogging);
+}
 
 
 static char *

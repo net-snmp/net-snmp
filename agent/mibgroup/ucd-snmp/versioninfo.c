@@ -73,15 +73,13 @@ u_char *var_extensible_version(struct variable *vp,
   static char errmsg[300];
   char *cptr;
   time_t curtime;
-  char c_oid[SPRINT_MAX_LEN];
 #ifdef CONFIGURE_OPTIONS
   static char config_opts[] = CONFIGURE_OPTIONS;
 #endif
 
-  if (snmp_get_do_debugging()) {
-    sprint_objid (c_oid, name, *length);
-    DEBUGMSGTL(("ucd-snmp/versioninfo", "versionMib: %s %d\n", c_oid, exact));
-  }
+    DEBUGMSGTL(("ucd-snmp/versioninfo", "var_extensible_version: "));
+    DEBUGMSGOID(("ucd-snmp/versioninfo", name, *length));
+    DEBUGMSG(("ucd-snmp/versioninfo"," %d\n", exact));
 
   if (header_generic(vp,name,length,exact,var_len,write_method))
     return(NULL);

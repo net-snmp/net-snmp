@@ -83,12 +83,10 @@ header_hrnet(struct variable *vp,
     int net_idx;
     int result;
     int LowIndex = -1;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_network", "var_hrnet: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("host/hr_network", "var_hrnet: "));
+    DEBUGMSGOID(("host/hr_network", name, *length));
+    DEBUGMSG(("host/hr_network"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
 	/* Find "next" net entry */
@@ -124,10 +122,9 @@ header_hrnet(struct variable *vp,
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_network", "... get net stats %s\n", c_oid));
-    }
+    DEBUGMSGTL(("host/hr_network", "... get net stats "));
+    DEBUGMSGOID(("host/hr_network", name, *length));
+    DEBUGMSG(("host/hr_network","\n"));
     return LowIndex;
 }
 

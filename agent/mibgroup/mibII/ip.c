@@ -232,12 +232,10 @@ header_ip(struct variable *vp,
 #define IP_NAME_LENGTH	8
     oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("mibII/ip", "var_ip: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("mibII/ip", "var_ip: "));
+    DEBUGMSGOID(("mibII/ip", name, *length));
+    DEBUGMSG(("mibII/ip"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[IP_NAME_LENGTH] = 0;
@@ -964,14 +962,13 @@ var_ipAddrEntry(struct variable *vp,
     mib2_ipAddrEntry_t	    entry, Lowentry;
     int			    Found = 0;
     req_e		    req_type;
-    char		    c_oid[SPRINT_MAX_LEN];
     
     /* fill in object part of name for current (less sizeof instance part) */
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("mibII/ip", "var_ipAddrEntry: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("mibII/ip", "var_ipAddrEntry: "));
+    DEBUGMSGOID(("mibII/ip", name, *length));
+    DEBUGMSG(("mibII/ip"," %d\n", exact));
+
     memset (&Lowentry, 0, sizeof (Lowentry));
     memcpy( (char *)current,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     if (*length == IP_ADDRNAME_LENGTH) /* Assume that the input name is the lowest */

@@ -128,7 +128,7 @@ void
 setup_oid(oid *it, size_t *len, u_char *id, size_t idlen, const char *user)
 {
   int i;
-  char buf[1024];
+  char c_oid[SPRINT_MAX_LEN];
 
   int itIndex = 12;
 
@@ -142,7 +142,8 @@ setup_oid(oid *it, size_t *len, u_char *id, size_t idlen, const char *user)
   for(i=0; i < (int)strlen(user); i++)
     it[itIndex++] = user[i];
 
-  sprint_objid(buf, it, *len);
+  sprint_objid(c_oid, it, *len);
+  /* fprintf(stdout, "setup_oid : %s\n", c_oid); */
 }
 
 static void optProc(int argc, char *const *argv, int opt)

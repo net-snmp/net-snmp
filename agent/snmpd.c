@@ -827,8 +827,9 @@ snmp_check_parse( struct snmp_session *session,
     int    result)
 {
     if ( result == 0 ) {
-        if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE)) {
-             char buf [256];
+        if ( ds_get_boolean(DS_APPLICATION_ID, DS_AGENT_VERBOSE) &&
+             snmp_get_do_logging() ) {
+	     char c_oid [SPRINT_MAX_LEN];
 	     struct variable_list *var_ptr;
 	    
 	    switch (pdu->command) {
@@ -854,9 +855,10 @@ snmp_check_parse( struct snmp_session *session,
 	    }
 	     
 	    for ( var_ptr = pdu->variables ;
-	        var_ptr != NULL ; var_ptr=var_ptr->next_variable ) {
-                sprint_objid (buf, var_ptr->name, var_ptr->name_length);
-                snmp_log(LOG_DEBUG, "    -- %s\n", buf);
+	        var_ptr != NULL ; var_ptr=var_ptr->next_variable )
+	    {
+                sprint_objid (c_oid, var_ptr->name, var_ptr->name_length);
+                snmp_log(LOG_DEBUG, "    -- %s\n", c_oid);
 	    }
 	}
     	return 1;

@@ -76,12 +76,10 @@ header_hrprint(struct variable *vp,
     oid newname[MAX_OID_LEN];
     int print_idx, LowIndex = -1;
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_print", "var_hrprint: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("host/hr_print", "var_hrprint: "));
+    DEBUGMSGOID(("host/hr_print", name, *length));
+    DEBUGMSG(("host/hr_print"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, vp->namelen * sizeof(oid));
 	/* Find "next" print entry */
@@ -118,10 +116,9 @@ header_hrprint(struct variable *vp,
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("host/hr_print", "... get print stats %s\n", c_oid));
-    }
+    DEBUGMSGTL(("host/hr_print", "... get print stats "));
+    DEBUGMSGOID(("host/hr_print", name, *length));
+    DEBUGMSG(("host/hr_print","\n"));
     return LowIndex;
 }
 

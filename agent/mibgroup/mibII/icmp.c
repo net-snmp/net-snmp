@@ -189,12 +189,10 @@ header_icmp(struct variable *vp,
 #define ICMP_NAME_LENGTH	8
     oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[SPRINT_MAX_LEN];
 
-    if (snmp_get_do_debugging()) {
-      sprint_objid (c_oid, name, *length);
-      DEBUGMSGTL(("mibII/icmp", "var_icmp: %s %d\n", c_oid, exact));
-    }
+    DEBUGMSGTL(("mibII/icmp", "var_icmp: "));
+    DEBUGMSGOID(("mibII/icmp", name, *length));
+    DEBUGMSG(("mibII/icmp"," %d\n", exact));
 
     memcpy( (char *)newname,(char *)vp->name, (int)vp->namelen * sizeof(oid));
     newname[ICMP_NAME_LENGTH] = 0;
