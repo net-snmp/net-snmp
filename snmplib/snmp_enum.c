@@ -145,7 +145,7 @@ se_read_conf(const char *word, char *cptr)
 
 void
 se_store_enum_list(struct snmp_enum_list *new_list,
-                   char *token, char *type)
+                   const char *token, char *type)
 {
     struct snmp_enum_list *listp = new_list;
     char line[2048];

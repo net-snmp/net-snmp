@@ -431,7 +431,7 @@ SnmpDaemonMain(int argc, TCHAR * argv[])
 main(int argc, char *argv[])
 #endif
 {
-    const char      options[128] = "aAc:CdD::fhHI:l:L:m:M:p:P:qrsS:UvV-:";
+    char            options[128] = "aAc:CdD::fhHI:l:L:m:M:p:P:qrsS:UvV-:";
     int             arg, i, ret;
     int             dont_fork = 0;
     int             dont_zero_log = 0;
@@ -441,7 +441,7 @@ main(int argc, char *argv[])
     char            logfile[PATH_MAX + 1] = { 0 };
     char           *cptr, **argvptr;
     char           *pid_file = NULL;
-    char           *option_compatability = "-Le";
+    char            option_compatability[] = "-Le";
 #if HAVE_GETPID
     int fd;
     FILE           *PID;

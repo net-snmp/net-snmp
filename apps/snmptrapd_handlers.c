@@ -31,6 +31,7 @@
 
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "agent/mibgroup/utilities/execute.h"
 #include "snmptrapd_handlers.h"
 #include "snmptrapd_log.h"
 
@@ -766,7 +767,7 @@ int   command_handler( netsnmp_pdu           *pdu,
 {
     u_char         *rbuf = NULL;
     size_t          r_len = 64, o_len = 0;
-    int             oldquick, result;
+    int             oldquick;
 
     DEBUGMSGTL(( "snmptrapd", "command_handler\n"));
     DEBUGMSGTL(( "snmptrapd", "token = '%s'\n", handler->token));
