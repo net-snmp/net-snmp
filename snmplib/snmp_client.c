@@ -605,7 +605,6 @@ snmp_synch_response_cb(struct snmp_session *ss,
 		}
 	    /* FALLTHRU */
 	    default:
-		snmp_free_pdu(pdu);
 		state->status = STAT_ERROR;
 		state->waiting = 0;
 	}
@@ -684,7 +683,6 @@ snmp_sess_synch_response(void *sessp,
 		}
 	    /* FALLTHRU */
 	    default:
-		snmp_free_pdu(pdu);
 		state->status = STAT_ERROR;
 		state->waiting = 0;
 	}
