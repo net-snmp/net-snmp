@@ -8,8 +8,6 @@
 
 #include <net-snmp/net-snmp-config.h>
 
-#include <assert.h>
-
 #if HAVE_IO_H
 #include <io.h>
 #endif
@@ -33,6 +31,7 @@
 #include <net-snmp/library/container.h>
 #include <net-snmp/library/container_binary_array.h>
 #include <net-snmp/library/tools.h>
+#include <net-snmp/library/snmp_assert.h>
 
 typedef struct binary_array_table_s {
     size_t                     max_size;   /* Size of the current data table */
@@ -79,8 +78,8 @@ static int
 Sort_Array(netsnmp_container *c)
 {
     binary_array_table *t = (binary_array_table*)c->private;
-    assert(t!=NULL);
-    assert(c->compare!=NULL);
+    netsnmp_assert(t!=NULL);
+    netsnmp_assert(c->compare!=NULL);
     
     if (t->dirty) {
         /*

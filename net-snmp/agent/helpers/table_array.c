@@ -11,22 +11,13 @@
 #include <strings.h>
 #endif
 
-#if ! defined(NDEBUG) && ! defined(NETSNMP_USE_ASSERT)
-# define NETSNMP_TMP_NDEBUG
-# define NDEBUG
-#endif
-#include <assert.h>
-#if defined(NETSNMP_TMP_NDEBUG)
-# undef NDEBUG
-# undef NETSNMP_TMP_NDEBUG
-#endif
-
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/agent/table.h>
 #include <net-snmp/agent/table_array.h>
 #include <net-snmp/library/container.h>
+#include <net-snmp/library/snmp_assert.h>
 
 #if HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -467,7 +458,7 @@ process_get_requests(netsnmp_handler_registration *reginfo,
          * the table_helper_handler should enforce column boundaries.
          */
         tblreq_info = netsnmp_extract_table_info(current);
-        assert(tblreq_info->colnum <= tad->tblreg_info->max_column);
+        netsnmp_assert(tblreq_info->colnum <= tad->tblreg_info->max_column);
 
         if ((agtreq_info->mode == MODE_GETNEXT) ||
             (agtreq_info->mode == MODE_GETBULK)) {
@@ -566,7 +557,7 @@ group_requests(netsnmp_agent_request_info *agtreq_info,
          */
         row = NULL;
         tblreq_info = netsnmp_extract_table_info(current);
-        assert(tblreq_info->colnum <= tad->tblreg_info->max_column);
+        netsnmp_assert(tblreq_info->colnum <= tad->tblreg_info->max_column);
 
         /*
          * search for index
