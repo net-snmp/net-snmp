@@ -1157,6 +1157,8 @@ snmp_free_pdu(pdu)
     }
     if (pdu->enterprise)
 	free((char *)pdu->enterprise);
+    if (pdu->community)
+      free((char *) pdu->community);
     free((char *)pdu);
 }
 
