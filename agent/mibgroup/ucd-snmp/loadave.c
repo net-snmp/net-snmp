@@ -56,7 +56,6 @@
 #if HAVE_MTAB_H
 #include <mtab.h>
 #endif
-#include <sys/stat.h>
 #include <errno.h>
 #if HAVE_FSTAB_H
 #include <fstab.h>
