@@ -2955,7 +2955,7 @@ snmpv3_parse(
   DEBUGDUMPHEADER("recv", "msgID");
   data = asn_parse_int(data, length, &type, &pdu->msgid, sizeof(pdu->msgid));
   DEBUGINDENTLESS();
-  if (data == NULL) {
+  if (data == NULL || type != ASN_INTEGER) {
     ERROR_MSG("error parsing msgID");
     DEBUGINDENTADD(-4);
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
@@ -2967,7 +2967,7 @@ snmpv3_parse(
   data = asn_parse_int(data, length, &type, &msg_max_size,
 		       sizeof(msg_max_size));
   DEBUGINDENTLESS();
-  if (data == NULL) {
+  if (data == NULL || type != ASN_INTEGER) {
     ERROR_MSG("error parsing msgMaxSize");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     DEBUGINDENTADD(-4);
@@ -3000,7 +3000,7 @@ snmpv3_parse(
   DEBUGDUMPHEADER("recv", "msgFlags");
   data = asn_parse_string(data, length, &type, tmp_buf, &tmp_buf_len);
   DEBUGINDENTLESS();
-  if (data == NULL || tmp_buf_len != 1) {
+  if (data == NULL || type != ASN_OCTET_STR || tmp_buf_len != 1) {
     ERROR_MSG("error parsing msgFlags");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     DEBUGINDENTADD(-4);
@@ -3017,7 +3017,8 @@ snmpv3_parse(
   data = asn_parse_int(data, length, &type, &msg_sec_model,
 		       sizeof(msg_sec_model));
   DEBUGINDENTADD(-4); /* return from global data indent */
-  if (data == NULL) {
+  if (data == NULL || type != ASN_INTEGER ||
+      msg_sec_model < 0 || msg_sec_model > 0x7fffffff) {
     ERROR_MSG("error parsing msgSecurityModel");
     snmp_increment_statistic(STAT_SNMPINASNPARSEERRS);
     DEBUGINDENTLESS();
