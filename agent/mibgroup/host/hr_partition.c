@@ -271,7 +271,7 @@ Get_Next_HR_Partition (void)
     }
 
     HRP_index++;
-    while ( Get_Next_HR_Disk_Partition( string, HRP_index ) != -1 ) {
+    while ( Get_Next_HR_Disk_Partition( string, sizeof(string), HRP_index ) != -1 ) {
 	DEBUGMSGTL(("host/hr_partition",
                     "Get_Next_HR_Partition: %s (:%d)\n",
                     string, HRP_index ));
@@ -300,5 +300,5 @@ Save_HR_Partition(int disk_idx,
 {
    HRP_savedDiskIndex = disk_idx;
    HRP_savedPartIndex = part_idx;
-   (void) Get_Next_HR_Disk_Partition ( HRP_savedName, HRP_index );
+   (void) Get_Next_HR_Disk_Partition ( HRP_savedName, sizeof(HRP_savedName), HRP_index );
 }
