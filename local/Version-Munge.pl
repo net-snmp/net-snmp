@@ -8,6 +8,7 @@ $0 [-v VERSION] -R -C -M -D -h
 
   -M           Modify the files with a new version (-v required)
   -v VERSION   Use VERSION as the version string
+  -T TAG       Use TAG as CVS tag (must being with Ext-)
   -C           Commit changes to the files
   -R           Reverse files (rm and cvs update)
   -D           Compare files (cvs diff)
