@@ -931,6 +931,7 @@ main(int argc, char *argv[])
 	    exit(0);
 
         case 'H':
+            init_notification_log();
             init_snmp("snmptrapd");
             fprintf(stderr, "Configuration directives understood:\n");
 	    read_config_print_usage("  ");
