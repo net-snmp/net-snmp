@@ -54,10 +54,15 @@ if ($opts{'H'}) {
 print "<table border=2 bgcolor=\"#dddddd\">\n";
 print "<tr><th>MIB</th><th>RFC</th><th>Description</th>\n";
 
+my %didit;
+
 foreach my $mibf (@ARGV) {
     my $node;
     my $mib = $mibf;
     $mib =~ s/.txt//;
+
+    next if ($didit{$mib});
+    $didit{$mib} = 1;
 
     open(I, "$opts{M}/$mibf");
     while (<I>) {
