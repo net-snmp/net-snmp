@@ -539,11 +539,11 @@ getoid(fp, oid,  length)
     char token[MAXTOKEN];
     register char *cp;
 
-    if ((type = get_token(fp, token)) != LEFTBRACKET){
+    if ((type = get_token(fp, token,MAXTOKEN)) != LEFTBRACKET){
 	print_error("Expected \"{\"", token, type);
 	return NULL;
     }
-    type = get_token(fp, token);
+    type = get_token(fp, token,MAXTOKEN);
     for(count = 0; count < length; count++, oid++){
 	oid->label = 0;
 	oid->subid = -1;
@@ -558,12 +558,12 @@ getoid(fp, oid,  length)
 	    cp = (char *)Malloc((unsigned)strlen(token) + 1);
 	    strcpy(cp, token);
 	    oid->label = cp;
-	    type = get_token(fp, token);
+	    type = get_token(fp, token,MAXTOKEN);
 	    if (type == LEFTPAREN){
-		type = get_token(fp, token);
+		type = get_token(fp, token,MAXTOKEN);
 		if (type == NUMBER){
 		    oid->subid = atoi(token);
-		    if ((type = get_token(fp, token)) != RIGHTPAREN){
+		    if ((type = get_token(fp, token,MAXTOKEN)) != RIGHTPAREN){
 			print_error("Unexpected a closing parenthesis", token, type);
 			return NULL;
 		    }
@@ -578,7 +578,7 @@ getoid(fp, oid,  length)
 	    /* this entry  has just an integer sub-identifier */
 	    oid->subid = atoi(token);
 	}
-	type = get_token(fp, token);
+	type = get_token(fp, token,MAXTOKEN);
     }
     return count;
 
@@ -619,7 +619,7 @@ parse_objectid(fp, name)
     struct subid oid[32];
     struct node *np, *root, *oldnp = NULL;
 
-    type = get_token(fp, token);
+    type = get_token(fp, token,MAXTOKEN);
     if (type != EQUALS){
 	print_error("Bad format", token, type);
 	return 0;
@@ -735,11 +735,11 @@ parse_asntype(fp, name, ntype, ntoken)
     struct tc *tcp;
     int level;
     
-    type = get_token(fp, token);
+    type = get_token(fp, token,MAXTOKEN);
     if (type == SEQUENCE){
-	while((type = get_token(fp, token)) != ENDOFFILE){
+	while((type = get_token(fp, token,MAXTOKEN)) != ENDOFFILE){
 	    if (type == RIGHTBRACKET){
-		*ntype = get_token(fp, ntoken);
+		*ntype = get_token(fp, ntoken,MAXTOKEN);
 		return 1;
 	    }
 	}
@@ -747,9 +747,9 @@ parse_asntype(fp, name, ntype, ntoken)
 	return 0;
     } else {
 	if (!strcmp(token, "TEXTUAL-CONVENTION")){
-	    while (type != SYNTAX)
-		type = get_token(fp, token);
-	    type = get_token(fp, token);
+          while (type != SYNTAX) 
+            type = get_token(fp, token,MAXTOKEN);
+          type = get_token(fp, token,MAXTOKEN);
 	}
 	/* textual convention */
 	for(i = 0; i < MAXTC; i++){
@@ -768,21 +768,21 @@ parse_asntype(fp, name, ntype, ntoken)
 	    return 0;
 	}
 	tcp->type = type;
-	*ntype = get_token(fp, ntoken);
+	*ntype = get_token(fp, ntoken,MAXTOKEN);
 	if (*ntype == LEFTPAREN){
 	    level = 1;
 	    /* don't record any constraints for now */
 	    while(level > 0){
-		*ntype = get_token(fp, ntoken);
+		*ntype = get_token(fp, ntoken,MAXTOKEN);
 		if (*ntype == LEFTPAREN)
 		    level++;
 		if (*ntype == RIGHTPAREN)
 		    level--;		
 	    }
-	    *ntype = get_token(fp, ntoken);
+	    *ntype = get_token(fp, ntoken,MAXTOKEN);
 	} else if (*ntype == LEFTBRACKET) {
 	    /* if there is an enumeration list, parse it */
-	    while((type = get_token(fp, token)) != ENDOFFILE){
+	    while((type = get_token(fp, token,MAXTOKEN)) != ENDOFFILE){
 		if (type == RIGHTBRACKET)
 		    break;
 		if (type == LABEL){
@@ -800,20 +800,20 @@ parse_asntype(fp, name, ntype, ntoken)
 		    ep->label =
 			(char *)Malloc((unsigned)strlen(token) + 1);
 		    strcpy(ep->label, token);
-		    type = get_token(fp, token);
+		    type = get_token(fp, token,MAXTOKEN);
 		    if (type != LEFTPAREN){
 			print_error("Expected \"(\"", token, type);
 			/* free_node(np); */
 			return 0;
 		    }
-		    type = get_token(fp, token);
+		    type = get_token(fp, token,MAXTOKEN);
 		    if (type != NUMBER){
 			print_error("Expected integer", token, type);
 			/* free_node(np); */
 			return 0;
 		    }
 		    ep->value = atoi(token);
-		    type = get_token(fp, token);
+		    type = get_token(fp, token,MAXTOKEN);
 		    if (type != RIGHTPAREN){
 			print_error("Expected \")\"", token, type);
 			/* free_node(np); */
@@ -826,7 +826,7 @@ parse_asntype(fp, name, ntype, ntoken)
 		/* free_node(np); */
 		return 0;
 	    }
-	    *ntype = get_token(fp, ntoken);
+	    *ntype = get_token(fp, ntoken,MAXTOKEN);
 	}
 	return 1;
     }
@@ -852,7 +852,7 @@ parse_objecttype(fp, name)
     register struct node *np;
     register struct enum_list *ep;
 
-    type = get_token(fp, token);
+    type = get_token(fp, token,MAXTOKEN);
     if (type != SYNTAX){
 	print_error("Bad format for OBJECT TYPE", token, type);
 	return 0;
@@ -861,7 +861,7 @@ parse_objecttype(fp, name)
     np->next = 0;
     np->enums = 0;
     np->description = NULL;        /* default to an empty description */
-    type = get_token(fp, token);
+    type = get_token(fp, token,MAXTOKEN);
     if (type == LABEL){
 	tctype = get_tc(token, &(np->enums));
 #if 0
@@ -873,17 +873,17 @@ parse_objecttype(fp, name)
 	type = tctype;
     }
     np->type = type;
-    nexttype = get_token(fp, nexttoken);
+    nexttype = get_token(fp, nexttoken,MAXTOKEN);
     switch(type){
 	case SEQUENCE:
 	    strcpy(syntax, token);
 	    if (nexttype == OF){
 		strcat(syntax, " ");
 		strcat(syntax, nexttoken);
-		nexttype = get_token(fp, nexttoken);
+		nexttype = get_token(fp, nexttoken,MAXTOKEN);
 		strcat(syntax, " ");
 		strcat(syntax, nexttoken);
-		nexttype = get_token(fp, nexttoken);
+		nexttype = get_token(fp, nexttoken,MAXTOKEN);
 	    }
 	    break;
 	case INTEGER:
@@ -891,7 +891,7 @@ parse_objecttype(fp, name)
 	    strcpy(syntax, token);
 	    if (nexttype == LEFTBRACKET) {
 		/* if there is an enumeration list, parse it */
-		while((type = get_token(fp, token)) != ENDOFFILE){
+		while((type = get_token(fp, token,MAXTOKEN)) != ENDOFFILE){
 		    if (type == RIGHTBRACKET)
 			break;
 		    if (type == LABEL){
@@ -909,20 +909,20 @@ parse_objecttype(fp, name)
 			ep->label =
 			    (char *)Malloc((unsigned)strlen(token) + 1);
 			strcpy(ep->label, token);
-			type = get_token(fp, token);
+			type = get_token(fp, token,MAXTOKEN);
 			if (type != LEFTPAREN){
 			    print_error("Expected \"(\"", token, type);
 			    free_node(np);
 			    return 0;
 			}
-			type = get_token(fp, token);
+			type = get_token(fp, token,MAXTOKEN);
 			if (type != NUMBER){
 			    print_error("Expected integer", token, type);
 			    free_node(np);
 			    return 0;
 			}
 			ep->value = atoi(token);
-			type = get_token(fp, token);
+			type = get_token(fp, token,MAXTOKEN);
 			if (type != RIGHTPAREN){
 			    print_error("Expected \")\"", token, type);
 			    free_node(np);
@@ -935,19 +935,19 @@ parse_objecttype(fp, name)
 		    free_node(np);
 		    return 0;
 		}
-		nexttype = get_token(fp, nexttoken);
+		nexttype = get_token(fp, nexttoken,MAXTOKEN);
 	    } else if (nexttype == LEFTPAREN){
 		/* ignore the "constrained integer" for now */
-		nexttype = get_token(fp, nexttoken);
-		nexttype = get_token(fp, nexttoken);
-		nexttype = get_token(fp, nexttoken);
+		nexttype = get_token(fp, nexttoken,MAXTOKEN);
+		nexttype = get_token(fp, nexttoken,MAXTOKEN);
+		nexttype = get_token(fp, nexttoken,MAXTOKEN);
 	    }
 	    break;
 	case BITSTRING:
 	    strcpy(syntax, token);
 	    if (nexttype == LEFTBRACKET) {
 		/* if there is an enumeration list, parse it */
-		while((type = get_token(fp, token)) != ENDOFFILE){
+		while((type = get_token(fp, token,MAXTOKEN)) != ENDOFFILE){
 		    if (type == RIGHTBRACKET)
 			break;
 		    if (type == LABEL){
@@ -965,20 +965,20 @@ parse_objecttype(fp, name)
 			ep->label =
 			    (char *)Malloc((unsigned)strlen(token) + 1);
 			strcpy(ep->label, token);
-			type = get_token(fp, token);
+			type = get_token(fp, token,MAXTOKEN);
 			if (type != LEFTPAREN){
 			    print_error("Expected \"(\"", token, type);
 			    free_node(np);
 			    return 0;
 			}
-			type = get_token(fp, token);
+			type = get_token(fp, token,MAXTOKEN);
 			if (type != NUMBER){
 			    print_error("Expected integer", token, type);
 			    free_node(np);
 			    return 0;
 			}
 			ep->value = atoi(token);
-			type = get_token(fp, token);
+			type = get_token(fp, token,MAXTOKEN);
 			if (type != RIGHTPAREN){
 			    print_error("Expected \")\"", token, type);
 			    free_node(np);
@@ -991,28 +991,28 @@ parse_objecttype(fp, name)
 		    free_node(np);
 		    return 0;
 		}
-		nexttype = get_token(fp, nexttoken);
+		nexttype = get_token(fp, nexttoken,MAXTOKEN);
 	    } else if (nexttype == LEFTPAREN){
 		/* ignore the "constrained integer" for now */
-		nexttype = get_token(fp, nexttoken);
-		nexttype = get_token(fp, nexttoken);
-		nexttype = get_token(fp, nexttoken);
+		nexttype = get_token(fp, nexttoken,MAXTOKEN);
+		nexttype = get_token(fp, nexttoken,MAXTOKEN);
+		nexttype = get_token(fp, nexttoken,MAXTOKEN);
 	    }
 	    break;
 	case OCTETSTR:
 	    strcpy(syntax, token);
             /* ignore the "constrained octet string" for now */
             if (nexttype == LEFTPAREN) {
-                nexttype = get_token(fp, nexttoken);
+                nexttype = get_token(fp, nexttoken,MAXTOKEN);
                 if (nexttype == SIZE) {
-                    nexttype = get_token(fp, nexttoken);
+                    nexttype = get_token(fp, nexttoken,MAXTOKEN);
                     if (nexttype == LEFTPAREN) {
-                        nexttype = get_token(fp, nexttoken); /* 0..255 */
-                        nexttype = get_token(fp, nexttoken); /* ) */
-                        nexttype = get_token(fp, nexttoken); /* ) */
+                        nexttype = get_token(fp, nexttoken,MAXTOKEN); /* 0..255 */
+                        nexttype = get_token(fp, nexttoken,MAXTOKEN); /* ) */
+                        nexttype = get_token(fp, nexttoken,MAXTOKEN); /* ) */
                         if (nexttype == RIGHTPAREN)
                         {
-                            nexttype = get_token(fp, nexttoken);
+                            nexttype = get_token(fp, nexttoken,MAXTOKEN);
                             break;
                         }
                     }
@@ -1041,33 +1041,33 @@ parse_objecttype(fp, name)
 	    return 0;
     }
     if (nexttype == UNITS){
-	type = get_token(fp, quoted_string_buffer);
+	type = get_token(fp, quoted_string_buffer,MAXQUOTESTR);
 	if (type != QUOTESTRING) {
 	    print_error("Bad DESCRIPTION", quoted_string_buffer, type);
 	    free_node(np);
 	    return 0;
 	}
-	nexttype = get_token(fp, nexttoken);
+	nexttype = get_token(fp, nexttoken,MAXTOKEN);
     }
     if (nexttype != ACCESS){
 	print_error("Should be ACCESS", nexttoken, nexttype);
 	free_node(np);
 	return 0;
     }
-    type = get_token(fp, token);
+    type = get_token(fp, token,MAXTOKEN);
     if (type != READONLY && type != READWRITE && type != WRITEONLY
 	&& type != NOACCESS && type != READCREATE){
 	print_error("Bad access type", nexttoken, nexttype);
 	free_node(np);
 	return 0;
     }
-    type = get_token(fp, token);
+    type = get_token(fp, token,MAXTOKEN);
     if (type != STATUS){
 	print_error("Should be STATUS", token, nexttype);
 	free_node(np);
 	return 0;
     }
-    type = get_token(fp, token);
+    type = get_token(fp, token,MAXTOKEN);
     if (type != MANDATORY && type != CURRENT && type != OPTIONAL && type != OBSOLETE && type != DEPRECATED){
 	print_error("Bad status", token, type);
 	free_node(np);
@@ -1076,7 +1076,7 @@ parse_objecttype(fp, name)
     /*
      * Optional parts of the OBJECT-TYPE macro
      */
-    type = get_token(fp, token);
+    type = get_token(fp, token,MAXTOKEN);
     while (type != EQUALS) {
       switch (type) {
         case DESCRIPTION:
@@ -1118,7 +1118,7 @@ printf("Description== \"%.50s\"\n", quoted_string_buffer);
           return 0;
 
       }
-      type = get_token(fp, token);
+      type = get_token(fp, token,MAXTOKEN);
     }
     if (type != EQUALS){
 	print_error("Bad format", token, type);
@@ -1174,7 +1174,7 @@ parse_objectgroup(fp, name)
     np->next = 0;
     np->enums = 0;
     np->description = NULL;        /* default to an empty description */
-    type = get_token(fp, token);
+    type = get_token(fp, token,MAXTOKEN);
     while (type != EQUALS) {
       switch (type) {
         case DESCRIPTION:
@@ -1195,7 +1195,7 @@ printf("Description== \"%.50s\"\n", quoted_string_buffer);
 	  /* NOTHING */
 	  break;
       }
-      type = get_token(fp, token);
+      type = get_token(fp, token,MAXTOKEN);
     }
     length = getoid(fp, oid, 32);
     if (length > 1 && length <= 32){
@@ -1245,7 +1245,7 @@ parse_notificationDefinition(fp, name)
     np->next = 0;
     np->enums = 0;
     np->description = NULL;        /* default to an empty description */
-    type = get_token(fp, token);
+    type = get_token(fp, token,MAXTOKEN);
     while (type != EQUALS) {
       switch (type) {
         case DESCRIPTION:
@@ -1266,7 +1266,7 @@ printf("Description== \"%.50s\"\n", quoted_string_buffer);
 	  /* NOTHING */
 	  break;
       }
-      type = get_token(fp, token);
+      type = get_token(fp, token,MAXTOKEN);
     }
     length = getoid(fp, oid, 32);
     if (length > 1 && length <= 32){
@@ -1316,10 +1316,9 @@ parse_compliance(fp, name)
     np->next = 0;
     np->enums = 0;
     np->description = NULL;        /* default to an empty description */
-    type = get_token(fp, token);
-    while (type != EQUALS) {
-	type = get_token(fp, token);
-    }
+    type = get_token(fp, token,MAXTOKEN);
+    while (type != EQUALS) 
+      type = get_token(fp, quoted_string_buffer,MAXQUOTESTR);
     length = getoid(fp, oid, 32);
     if (length > 1 && length <= 32){
 	/* just take the last pair in the oid list */
@@ -1370,9 +1369,9 @@ parse_moduleIdentity(fp, name)
     np->next = 0;
     np->enums = 0;
     np->description = NULL;        /* default to an empty description */
-    type = get_token(fp, token);
+    type = get_token(fp, token,MAXTOKEN);
     while (type != EQUALS) {
-	type = get_token(fp, token);
+	type = get_token(fp, token,MAXTOKEN);
     }
     length = getoid(fp, oid, 32);
     if (length > 1 && length <= 32){
@@ -1413,7 +1412,7 @@ int parse_mib_header(fp, name)
        an IMPORTS or and EXPORTS clause.
        */
     while(type != SEMI){
-	type = get_token(fp, token);
+	type = get_token(fp, token,MAXTOKEN);
     }
     return 1;
 }
@@ -1445,7 +1444,7 @@ parse(fp)
 #endif
 
     while(type != ENDOFFILE){
-	type = get_token(fp, token);
+	type = get_token(fp, token,MAXTOKEN);
 skipget:
 	if (type == END){
 	    if (state != IN_MIB){
@@ -1462,7 +1461,7 @@ skipget:
 	    return NULL;
 	}
 	strncpy(name, token, MAXTOKEN);
-	type = get_token(fp, token);
+	type = get_token(fp, token,MAXTOKEN);
 	if (type == DEFINITIONS){
 	    if (state != BETWEEN_MIBS){
 		print_error("Error, nested MIBS.", (char *)NULL, type);
@@ -1629,16 +1628,17 @@ skipget:
  * and the text is placed in the string pointed to by token.
  */
 static int
-get_token(fp, token)
+get_token(fp, token,maxtlen)
     register FILE *fp;
     register char *token;
+    int maxtlen;
 {
     static char last = ' ';
     register int ch;
     register char *cp = token;
     register int hash = 0;
     register struct tok *tp;
-
+    
     *cp = 0;
     ch = last;
     /* skip all white space */
@@ -1650,7 +1650,7 @@ get_token(fp, token)
     if (ch == -1) {
 	return ENDOFFILE;
     } else if (ch == '"') {
-	return parseQuoteString(fp, token);
+	return parseQuoteString(fp, token, maxtlen);
     }
 
     /*
@@ -1665,7 +1665,8 @@ get_token(fp, token)
 	    ch == ',' || ch == ';'){
 	    if (!isspace(ch) && *token == 0){
 		hash += ch;
-		*cp++ = ch;
+		if (cp-token < maxtlen-1)
+                  *cp++ = ch;
 		last = ' ';
 	    } else {
 		last = ch;
@@ -1694,7 +1695,7 @@ get_token(fp, token)
 		if (ch == -1)
 		    return ENDOFFILE;
 		last = ch;
-		return get_token(fp, token);		
+		return get_token(fp, token,maxtlen);		
 	    }
 	    for(cp = token; *cp; cp++)
 		if (!isdigit(*cp))
@@ -1702,7 +1703,8 @@ get_token(fp, token)
 	    return NUMBER;
 	} else {
 	    hash += ch;
-	    *cp++ = ch;
+	    if (cp-token < maxtlen)
+              *cp++ = ch;
 	    if (ch == '\n')
 		Line++;
 	}
@@ -1756,23 +1758,27 @@ main(argc, argv)
 #endif /* TEST */
 
 static int
-parseQuoteString(fp, token)
+parseQuoteString(fp, token,maxtlen)
     register FILE *fp;
     register char *token;
 {
     register int ch;
-    int eat_space = 0;
+    int eat_space = 0, count = 0;
 
     ch = getc(fp);
     while(ch != -1) {
-	if (ch == '\n')
-	    Line++;
-	else if (ch == '"') {
-	    *token = '\0';
-	    return QUOTESTRING;
-	}
+      if (ch == '\n') {
+        Line++;
+      }
+      else if (ch == '"') {
+        *token = '\0';
+        return QUOTESTRING;
+      }
+      /* maximum description length check.  If greater, keep parsing
+         but truncate the string */
+      if (count++ < maxtlen-1)
 	*token++ = ch;
-	ch = getc(fp);
+      ch = getc(fp);
     }
 
     return NULL;
