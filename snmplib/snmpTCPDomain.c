@@ -67,8 +67,7 @@ snmp_tcp_fmtaddr(netsnmp_transport *t, void *data, int len)
          * some indication of the domain (c.f. AAL5PVC).  
          */
 
-        sprintf(tmp, "tcp:%s:%d", inet_ntoa(to->sin_addr),
-                ntohs(to->sin_port));
+        sprintf(tmp, "%s", inet_ntoa(to->sin_addr));
         return strdup(tmp);
     }
 }
