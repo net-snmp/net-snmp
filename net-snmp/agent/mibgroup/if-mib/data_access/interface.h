@@ -24,12 +24,17 @@ config_require(if-mib/data_access/interface_common)
 #if defined( linux )
 config_require(if-mib/data_access/interface_linux);
 config_require(if-mib/data_access/interface_ioctl);
+/*
+ * these haven't been written yet... move them out of
+ * this comment block once they are.
+ *
 #elif defined ( solaris )
 config_require(if-mib/data_access/interface_solaris);
 #elif defined ( hpux )
 config_require(if-mib/data_access/interface_hpux);
 #elif defined ( bsd )
 config_require(if-mib/data_access/interface_bsd);
+*/
 #else
 /*
  * couldn't determine the correct file!
