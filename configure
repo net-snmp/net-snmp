@@ -1698,7 +1698,7 @@ fi
 
 echo $ac_n "checking for developer flags""... $ac_c" 1>&6
 echo "configure:1701: checking for developer flags" >&5
-if test "x$developer" != "xno" -o -f $srcdir/remove-files; then
+if test "x$developer" != "xno" -a -f $srcdir/remove-files; then
     developer="yes"
 fi
 
