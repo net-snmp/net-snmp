@@ -120,6 +120,7 @@ FTP:
   - ftp://ftp.win.ne.jp/pub/network/snmp/ucd-snmp/ucd-snmp.tar.gz
   - ftp://ftp.chg.ru/pub/networking/management/snmp/ucd-snmp/ucd-snmp.tar.gz
   - ftp://mirror.aarnet.edu.au/pub/ucd-snmp/ucd-snmp.tar.gz
+  - ftp://archive.logicnet.ro/mirrors/ucd-snmp.ucdavis.edu/
 
 What documentation is available?
 -------------------------------
