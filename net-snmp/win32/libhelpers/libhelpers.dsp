@@ -149,6 +149,10 @@ SOURCE=..\..\agent\helpers\stash_cache.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\agent\helpers\stash_to_next.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\agent\helpers\table.c
 # End Source File
 # Begin Source File
