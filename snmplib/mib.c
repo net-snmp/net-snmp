@@ -1339,7 +1339,7 @@ set_function(struct tree *subtree)
 	    case TYPE_COUNTER64:
 		subtree->printer = sprint_counter64;
 		break;
-	    case TYPE_UINTEGER32:
+	    case TYPE_UINTEGER:
 		subtree->printer = sprint_uinteger;
 		break;
 	    case TYPE_UNSIGNED32:
@@ -1776,7 +1776,7 @@ _get_symbol(oid *objid,
             objidlen -= numids;
 	    break;
 	case TYPE_INTEGER32:
-	case TYPE_UINTEGER32:
+	case TYPE_UINTEGER:
 	case TYPE_UNSIGNED32:
 	case TYPE_GAUGE:
 	case TYPE_INTEGER:
@@ -1990,7 +1990,7 @@ print_tree_node(FILE *f,
 	case TYPE_COUNTER64:	cp = "Counter64"; break;
 	case TYPE_BITSTRING:	cp = "BITS"; break;
 	case TYPE_NSAPADDRESS:	cp = "NsapAddress"; break;
-	case TYPE_UINTEGER32:	cp = "UInteger32"; break;
+	case TYPE_UINTEGER:	cp = "UInteger32"; break;
 	case TYPE_UNSIGNED32:	cp = "Unsigned32"; break;
 	case TYPE_INTEGER32:	cp = "Integer32"; break;
 	default:		cp = NULL; break;
@@ -2271,7 +2271,7 @@ _add_strings_to_oid(struct tree *tp, char *cp,
 	switch (tp->type) {
 	case TYPE_INTEGER:
 	case TYPE_INTEGER32:
-	case TYPE_UINTEGER32:
+	case TYPE_UINTEGER:
 	case TYPE_UNSIGNED32:
 	    /* Isolate the next entry */
 	    cp2 = strchr( cp, '.' );
