@@ -249,7 +249,7 @@ nsb-zip()
 
 nsb-upload()
 {
-   nsb-flow upload
+   nsb-flow upload to $target: config.log configure-summary nsb-make-all.*$NSB_DATE
    build_dir=$1
    target=$2
    dir=$PWD
