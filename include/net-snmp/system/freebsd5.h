@@ -19,8 +19,7 @@
 
 #undef TOTAL_MEMORY_SYMBOL
 
-/* force hr_storage.c to use getfsstat */
 #undef MBSTAT_SYMBOL
-#undef HAVE_STATVFS
-#undef HAVE_SYS_STATVFS_H
-#undef STRUCT_STATVFS_HAS_F_FRSIZE
+
+#undef INP_NEXT_SYMBOL
+#define INP_NEXT_SYMBOL inp_next

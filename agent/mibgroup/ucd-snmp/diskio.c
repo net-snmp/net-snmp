@@ -79,6 +79,12 @@ static int ps_numdisks;			/* number of disks in system, may change while running
 
 #endif                          /* freebsd */
 
+#if defined(freebsd5)
+  #define GETDEVS(x) devstat_getdevs(NULL, (x))
+#else
+  #define GETDEVS(x) getdevs((x))
+#endif
+
 #if defined (darwin)
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
@@ -438,13 +444,19 @@ void devla_getstats(unsigned int regno, void *dummy) {
         static double expon1, expon5, expon15;
         char current_name[DEVSTAT_NAME_LEN+5];
 
-        if (lastat == NULL) {
-                lastat = (struct statinfo *) malloc(sizeof(struct statinfo));
-                lastat->dinfo = (struct devinfo *) malloc(sizeof(struct devinfo));
-               bzero(lastat->dinfo, sizeof(struct devinfo));
-                }
+	if (lastat == NULL) {
+	    lastat = (struct statinfo *) malloc(sizeof(struct statinfo));
+	    if (lastat != NULL)
+		lastat->dinfo = (struct devinfo *) malloc(sizeof(struct devinfo));
+	    if (lastat == NULL || lastat->dinfo == NULL) {
+		    SNMP_FREE(lastat);
+		    ERROR_MSG("Memory alloc failure - devla_getstats()\n");
+		    return;
+	    }
+	}
+	memset(lastat->dinfo, 0, sizeof(struct devinfo));
 
-        if ((getdevs(lastat)) == -1) {
+        if ((GETDEVS(lastat)) == -1) {
                 ERROR_MSG("can't do getdevs()\n");
                 return;
                 }
@@ -504,11 +516,17 @@ getstats(void)
     }
     if (stat == NULL) {
         stat = (struct statinfo *) malloc(sizeof(struct statinfo));
-        stat->dinfo = (struct devinfo *) malloc(sizeof(struct devinfo));
+        if (stat != NULL)
+            stat->dinfo = (struct devinfo *) malloc(sizeof(struct devinfo));
+        if (stat == NULL || stat->dinfo == NULL) {
+		SNMP_FREE(stat);
+        	ERROR_MSG("Memory alloc failure - getstats\n");
+		return 1;
+	}
     }
     memset(stat->dinfo, 0, sizeof(struct devinfo));
 
-    if ((getdevs(stat)) == -1) {
+    if (GETDEVS(stat) == -1) {
         fprintf(stderr, "Can't get devices:%s\n", devstat_errbuf);
         return 1;
     }
@@ -558,16 +576,32 @@ var_diskio(struct variable * vp,
         *var_len = strlen(stat->dinfo->devices[indx].device_name);
         return (u_char *) stat->dinfo->devices[indx].device_name;
     case DISKIO_NREAD:
+#if defined(freebsd5)
+        long_ret = (signed long) stat->dinfo->devices[indx].bytes[DEVSTAT_READ];
+#else
         long_ret = (signed long) stat->dinfo->devices[indx].bytes_read;
+#endif
         return (u_char *) & long_ret;
     case DISKIO_NWRITTEN:
+#if defined(freebsd5)
+        long_ret = (signed long) stat->dinfo->devices[indx].bytes[DEVSTAT_WRITE];
+#else
         long_ret = (signed long) stat->dinfo->devices[indx].bytes_written;
+#endif
         return (u_char *) & long_ret;
     case DISKIO_READS:
+#if defined(freebsd5)
+        long_ret = (signed long) stat->dinfo->devices[indx].operations[DEVSTAT_READ];
+#else
         long_ret = (signed long) stat->dinfo->devices[indx].num_reads;
+#endif
         return (u_char *) & long_ret;
     case DISKIO_WRITES:
+#if defined(freebsd5)
+        long_ret = (signed long) stat->dinfo->devices[indx].operations[DEVSTAT_WRITE];
+#else
         long_ret = (signed long) stat->dinfo->devices[indx].num_writes;
+#endif
         return (u_char *) & long_ret;
     case DISKIO_LA1:
 	long_ret = devloads[indx].la1;
