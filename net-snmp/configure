@@ -59,7 +59,7 @@ ac_help="$ac_help
                                   SNMP normally cannot handle
                                   floating numbers, nor large 64 bit
                                   integers well.  By default, the
-                                  ucd-snmp package compiles in
+                                  net-snmp package compiles in
                                   support for these extra datatypes
                                   (in a legal way)"
 ac_help="$ac_help
@@ -207,8 +207,8 @@ Enterprise OIDs:  (warning: this should be used with caution.)
 ac_help="$ac_help
 
   --with-enterprise-sysoid           The sysObjectID of the system group
-                                     (default .1.6.1.4.1.2021... = 
-                                      "enterprise.ucd-snmp...")"
+                                     (default .1.6.1.4.1.8072... = 
+                                      "enterprise.net-snmp...")"
 ac_help="$ac_help
 
   --with-enterprise-notification-oid The OID used for the root of
@@ -1350,7 +1350,7 @@ EOF
 
 else
   
-  echo "$ac_t""using default "enterprise.ucd-snmp..."" 1>&6
+  echo "$ac_t""using default "enterprise.net-snmp..."" 1>&6
 
 fi
 
@@ -6413,8 +6413,8 @@ EOF
 esac
 
 
-echo $ac_n "checking for ucd-snmp version number""... $ac_c" 1>&6
-echo "configure:6418: checking for ucd-snmp version number" >&5
+echo $ac_n "checking for net-snmp version number""... $ac_c" 1>&6
+echo "configure:6418: checking for net-snmp version number" >&5
 VERSION=`cat $srcdir/version.h | sed 's/";//;s/.*"//;s/pre/0./;'`
 
 RELEASEVERSION=`echo $VERSION | sed 's/^\([0-9]\)\.\([0-9]\)/\1:\2:0/'`
@@ -16421,9 +16421,9 @@ fi
 
 
 if test -d /var; then
-  defaultstore="/var/ucd-snmp"
+  defaultstore="/var/net-snmp"
 else
-  defaultstore="/etc/ucd-snmp"
+  defaultstore="/etc/net-snmp"
 fi
   
 
