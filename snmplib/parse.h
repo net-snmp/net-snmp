@@ -211,7 +211,7 @@ void snmp_set_mib_parse_label (int);
 char *snmp_mib_toggle_options(char *options);
 void snmp_mib_toggle_options_usage(const char *lead, FILE *outf);
 void print_mib(FILE *);
-void print_mib_tree(FILE *, struct tree *);
+void print_mib_tree(FILE *, struct tree *, int);
 int  get_mib_parse_error_count(void);
 int  snmp_get_token(FILE *fp, char *token, int maxtlen);
 struct tree *
