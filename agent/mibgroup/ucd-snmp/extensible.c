@@ -268,7 +268,7 @@ unsigned char *var_extensible_shell(struct variable *vp,
   static struct extensible *exten = 0;
   static long long_ret;
 
-  if (!checkmib(vp,name,length,exact,var_len,write_method,numextens))
+  if (header_simple_table(vp,name,length,exact,var_len,write_method,numextens))
     return(NULL);
 
   if ((exten = get_exten_instance(extens,name[*length-1]))) {
@@ -381,7 +381,7 @@ unsigned char *var_extensible_relocatable(struct variable *vp,
       myvp.namelen = exten->miblen;
       *length = vp->namelen;
       memcpy(tname,vp->name,vp->namelen*sizeof(oid));
-      if (checkmib(&myvp,tname,length,-1,var_len,write_method, -1))
+      if (!header_simple_table(&myvp,tname,length,-1,var_len,write_method, -1))
         break;
       else
         exten = NULL;
@@ -395,7 +395,7 @@ unsigned char *var_extensible_relocatable(struct variable *vp,
   }
 
   *length = long_ret;
-  if (!checkmib(vp,name,length,exact,var_len,write_method,
+  if (header_simple_table(vp,name,length,exact,var_len,write_method,
                ((vp->magic == ERRORMSG) ? MAXMSGLINES : 1)))
     return(NULL);
   
@@ -472,7 +472,7 @@ struct subtree *find_extensible(struct subtree	*tp,
       myvp.name[exten->miblen] = name[exten->miblen];
       myvp.namelen = exten->miblen+1;
       tmp = exten->miblen+1;
-      if (checkmib(&myvp,name,&tmp,-1,NULL,NULL, numrelocs))
+      if (!header_simple_table(&myvp,name,&tmp,-1,NULL,NULL, numrelocs))
         break;
     }
   }

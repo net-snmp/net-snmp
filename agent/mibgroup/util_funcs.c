@@ -433,13 +433,12 @@ sprint_mib_oid(char *buf,
   }
 }
 
-int checkmib(struct variable *vp,
-	     oid *name,
-	     int *length,
-	     int exact,
-	     int *var_len,
-	     WriteMethod **write_method,
-	     int max)
+#define MATCH_FAILED	1
+#define MATCH_SUCCEEDED	0
+
+int header_simple_table(struct variable *vp, oid *name, int *length,
+                        int exact, int *var_len,
+                        WriteMethod **write_method, int max)
 {
   int i, rtest;
 #define MAX_NEWNAME_LEN 100
@@ -458,7 +457,7 @@ int checkmib(struct variable *vp,
     (exact == 1 && (rtest || *length != vp->namelen+1))) {
     if (var_len)
 	*var_len = 0;
-    return 0;
+    return MATCH_FAILED;
   }
 /*  printf("%d/ck:  vp=%d  ln=%d lst=%d\n",exact,
          vp->namelen,*length,name[*length-1]); */
@@ -479,18 +478,15 @@ int checkmib(struct variable *vp,
   if (max >= 0 && newname[*length-1] > max) {
     if(var_len)
       *var_len = 0;
-    return 0;
+    return MATCH_FAILED;
   }
   memmove(name, newname, (*length) * sizeof(oid)); 
   if (write_method)
     *write_method = 0;
   if (var_len)
     *var_len = sizeof(long);   /* default */
-  return(1);
+  return(MATCH_SUCCEEDED);
 }
-
-#define MATCH_FAILED	1
-#define MATCH_SUCCEEDED	0
 
 /*
   header_generic(...
@@ -533,6 +529,17 @@ header_generic(struct variable *vp,
     *write_method = 0;
     *var_len = sizeof(long);	/* default to 'long' results */
     return(MATCH_SUCCEEDED);
+}
+
+/* checkmib(): provided for backwards compatibility, do not use: */
+int checkmib(struct variable *vp, oid *name, int *length,
+             int exact, int *var_len,
+             WriteMethod **write_method, int max) {
+  /* checkmib used to be header_simple_table, with reveresed boolean
+     return output.  header_simple_table() was created to match
+     header_generic(). */
+  return !header_simple_table(vp, name, length, exact, *var_len,
+                              write_method, max);
 }
 
 char *find_field(char *ptr,
