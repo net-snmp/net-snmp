@@ -265,7 +265,7 @@ var_hrswrun(vp, name, length, exact, var_len, write_method)
     if (pid == oldpid) {
 	if (now != when) oldpid = -1;
     }
-    if (oldpid != pid) {
+    if (oldpid != pid || proc_buf == NULL) {
 	if ((proc_buf = kvm_getproc(kd, pid)) == NULL) return NULL;
 	oldpid = pid;
 	when = now;
