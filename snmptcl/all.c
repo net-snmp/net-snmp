@@ -13,6 +13,8 @@
  * express or implied warranty.
  */
 
+#include <config.h>
+
 #ifndef lint
 static char rcsid[]= "$Header$ SPRITE (Berkeley)";
 
@@ -20,8 +22,12 @@ static char rcsid[]= "$Header$ SPRITE (Berkeley)";
 
 #ifndef notdef
 #include <stdio.h>
+#if STDC_HEADERS
 #include <string.h>
+#endif
+#if STDC_HEADERS
 #include <stdlib.h>
+#endif
 #include <tcl.h>
 #include <tk.h>
 #else

@@ -23,16 +23,32 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 ******************************************************************/
+#include <config.h>
+
 #include <sys/types.h>
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/time.h>
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #include <sys/socket.h>
 #include <errno.h>
 #include <net/if.h>
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
+#if HAVE_SYS_FILE_H
 #include <sys/file.h>
+#endif
 
 #include "snmp.h"
 #include "asn1.h"
@@ -45,8 +61,6 @@ SOFTWARE.
 #include "view.h"
 #include "context.h"
 #include "acl.h"
-
-#include "../config.h"
 
 extern int  errno;
 int	snmp_dump_packet = 0;
@@ -472,22 +486,22 @@ main(argc, argv)
     fflush(stdout);
     party_scanInit();
     for(pp = party_scanNext(); pp; pp = party_scanNext()){
-#if defined(ultrix) || defined(__alpha)         /* little endian systems */
+#if WORDS_BIGENDIAN
+        if ((pp->partyTDomain != DOMAINSNMPUDP)
+	    || bcmp((char *)&myaddr, pp->partyTAddress, 4))
+          continue;	/* don't listen for non-local parties */
+#else
 	if ((pp->partyTDomain != DOMAINSNMPUDP)
 	    || bcmp(reverse_bytes((char *)&myaddr,sizeof(long)),
                     pp->partyTAddress, 4))
           continue;	/* don't listen for non-local parties */
-#else
-        if ((pp->partyTDomain != DOMAINSNMPUDP)
-	    || bcmp((char *)&myaddr, pp->partyTAddress, 4))
-          continue;	/* don't listen for non-local parties */
 #endif
 	
 	dest_port = 0;
-#if defined(ultrix) || defined(__alpha)        /* little endian systems */
-	bcopy(reverse_bytes(pp->partyTAddress + 4,2), &dest_port, 2);
-#else
+#if WORDS_BIGENDIAN
 	bcopy(pp->partyTAddress + 4, &dest_port, 2);
+#else
+	bcopy(reverse_bytes(pp->partyTAddress + 4,2), &dest_port, 2);
 #endif
 	for(index = 0; index < sdlen; index++)
 	    if (dest_port == portlist[index])

@@ -1,8 +1,9 @@
+Makefile
 snmpbulkwalk
 snmpget
+snmpgetnext
+snmpset
 snmptest
 snmptranslate
 snmptrapd
 snmpwalk
-snmpset
-snmpgetnext

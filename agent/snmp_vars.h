@@ -54,7 +54,7 @@ extern u_char return_buf[];
 #define IFNUMBER	2
 #define UPTIME		3
 #define SYSCONTACT	4
-#define SYSNAME		5
+#define SYSTEMNAME	5
 #define SYSLOCATION	6
 #define SYSSERVICES	7
 

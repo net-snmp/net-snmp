@@ -22,11 +22,23 @@ SOFTWARE.
 
 /* alarm.c: implement the alarm group of the RMON MIB */
 
+#include <config.h>
+
 #include <stdio.h>
 #include <sys/types.h>
-#include <sys/time.h>
-/* #include <malloc.h> */
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #include <sys/socket.h>
 #include <asn1.h>
 #include <snmp_impl.h>

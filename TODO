@@ -1,0 +1,14 @@
+V3.1
+  Gnu Auto-conf
+    prompting users?
+    Makefiles
+      install
+      sed script for man/mib/other
+        mib file creation
+    AC_FUNC_MEMCMP
+  Solaris port
+  Manual pages/Documentation
+
+V3.2
+  Pass off extensibles
+  snmpset'able variables

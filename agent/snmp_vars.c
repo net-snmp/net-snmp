@@ -26,41 +26,53 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 
+#include <config.h>
+
 #define USE_NAME_AS_DESCRIPTION /*"se0" instead of text */
 #define GATEWAY			/* MultiNet is always configured this way! */
 #include <stdio.h>
+#if STDC_HEADERS
 #include <string.h>
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
-/* #include <sys/time.h> */
 #include <sys/param.h>
+#if HAVE_SYS_DIR_H
 #include <sys/dir.h>
+#endif
 #include <sys/user.h>
 #include <sys/proc.h>
-#include <sys/types.h>
-#ifdef mips
+#ifdef HAVE_SYS_DMAP_H
 #include <sys/dmap.h>
+#endif
+#if HAVE_MACHINE_PTE_H
 #include <machine/pte.h>
+#endif
+#if HAVE_XTI_H
 #include <xti.h>
 #endif
 #include <sys/vm.h>
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#if HAVE_SYSLOG_H
 #include <syslog.h>
+#endif
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
 #include <net/if.h>
 #include <net/route.h>
+#include <netinet/in_systm.h>
+#include <netinet/in_var.h>
 #include <netinet/ip.h>
 #include <netinet/in_pcb.h>
 #include <netinet/if_ether.h>
-#include <netinet/in_systm.h>
-#ifndef sunV3
-#include <netinet/in_var.h>
-#endif
 #include <netinet/ip_var.h>
 #include <netinet/tcp.h>
 #include <netinet/tcp_timer.h>
-#ifdef __alpha
-#include <netinet/tcpip.h>
+#ifdef HAVE_NETINET_TCPIP_H
+# include <netinet/tcpip.h>
 #endif
 #include <netinet/tcp_var.h>
 #include <netinet/tcp_fsm.h>
@@ -97,8 +109,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "context.h"
 #include "acl.h"
 #include "view.h"
-
-#include "../config.h"
 
 #ifdef vax11c
 #define ioctl socket_ioctl
@@ -142,7 +152,7 @@ static int Interface_Get_Ether_By_Index();
 #define N_USRPT		19
 
 static struct nlist nl[] = {
-#ifndef hpux
+#if !defined(hpux) && !defined(solaris2)
 	{ "_ipstat"},
 #ifdef sun
 	{ "_ip_forwarding" },
@@ -260,11 +270,7 @@ u_char		return_buf[256]; /* nee 64 */
 init_snmp()
 {
   int ret;
-#ifdef hpux
-  if ((ret = nlist("/hp-ux",nl)) == -1) {
-#else
-  if ((ret = nlist("/vmunix",nl)) == -1) {
-#endif
+  if ((ret = nlist(KERNEL_LOC,nl)) == -1) {
     ERROR("nlist");
     exit(1);
   }
@@ -410,7 +416,7 @@ struct variable2 system_variables[] = {
     {VERSIONID, OBJID, RONLY, var_system, 1, {2}},
     {UPTIME, TIMETICKS, RONLY, var_system, 1, {3}},
     {SYSCONTACT, STRING, RWRITE, var_system, 1, {4}},
-    {SYSNAME, STRING, RWRITE, var_system, 1, {5}},
+    {SYSTEMNAME, STRING, RWRITE, var_system, 1, {5}},
     {SYSLOCATION, STRING, RWRITE, var_system, 1, {6}},
     {SYSSERVICES, INTEGER, RONLY, var_system, 1, {7}}
 };
@@ -720,7 +726,7 @@ struct subtree subtrees_old[] = {
    sizeof(extensible_extensible_variables)/sizeof(*extensible_extensible_variables),
    sizeof(*extensible_extensible_variables)},
 #endif
-#ifdef hpux
+#ifdef MEMMIBNUM
   {{EXTENSIBLEMIB, MEMMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_mem_variables,
    sizeof(extensible_mem_variables)/sizeof(*extensible_mem_variables),
    sizeof(*extensible_mem_variables)},
@@ -728,7 +734,7 @@ struct subtree subtrees_old[] = {
   {{EXTENSIBLEMIB, LOCKDMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_lockd_variables,
    sizeof(extensible_lockd_variables)/sizeof(*extensible_lockd_variables),
    sizeof(*extensible_lockd_variables)},
-#ifdef DISKMIBNUM
+#if DISKMIBNUM && HAVE_FSTAB_H
   {{EXTENSIBLEMIB, DISKMIBNUM}, EXTENSIBLENUM+1, (struct variable *)extensible_disk_variables,
    sizeof(extensible_disk_variables)/sizeof(*extensible_disk_variables),
    sizeof(*extensible_disk_variables)},
@@ -1154,7 +1160,7 @@ var_system(vp, name, length, exact, var_len, write_method)
 	    *var_len = strlen(sysContact);
 	    *write_method = writeSystem;
 	    return (u_char *)sysContact;
-        case SYSNAME:
+        case SYSTEMNAME:
 	    *var_len = strlen(sysName);
 	    *write_method = writeSystem;
 	    return (u_char *)sysName;

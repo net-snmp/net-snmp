@@ -1,22 +1,46 @@
+#include <config.h>
+
 #include <stdio.h>
+#include <sys/types.h>
 #ifdef __alpha
 #ifndef _BSD
 #define _BSD
 #define _myBSD
 #endif
 #endif
-#include <sys/wait.h>
+#if HAVE_SYS_WAIT_H
+# include <sys/wait.h>
+#endif
 #ifdef __alpha
 #ifdef _myBSD
 #undef _BSD
 #undef _myBSD
 #endif
 #endif
-#include <sys/time.h>
+#ifndef WEXITSTATUS
+# define WEXITSTATUS(stat_val) ((unsigned)(stat_val) >> 8)
+#endif
+#ifndef WIFEXITED
+# define WIFEXITED(stat_val) (((stat_val) & 255) == 0)
+#endif
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include <errno.h>
-#include "../../config.h"
+
 #include "mibincl.h"
 
 char *find_field();
@@ -76,11 +100,6 @@ int sh_count_procs(procname)
   int ret=0, fd;
   FILE *file;
 #ifndef EXCACHETIME
-#ifdef hpux
-  int status;
-#else
-  union wait status;
-#endif
 #endif
   struct extensible ex;
   
@@ -143,11 +162,6 @@ int exec_command(ex)
   char line[STRMAX], *cptr;
   int ret=0, fd,i;
   FILE *file;
-#ifdef hpux
-  int status;
-#else
-  union wait status;
-#endif
   
   if (fd = get_exec_output(ex)) {
     

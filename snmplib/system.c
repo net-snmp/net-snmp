@@ -22,18 +22,36 @@ SOFTWARE.
 /*
  * System dependent routines go here
  */
+#include <config.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
-#include <sys/time.h>
+#endif
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 #include <sys/types.h>
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #include <sys/socket.h>
-#ifdef sun
+#if HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
 #include <net/if.h>
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
 #include <nlist.h>
+#if HAVE_SYS_FILE_H
 #include <sys/file.h>
+#endif
 #include "system.h"
 
 #define NUM_NETWORKS    32   /* max number of interfaces to check */
@@ -91,7 +109,7 @@ long get_uptime(){
 
     if ((kmem = open("/dev/kmem", 0)) < 0)
         return 0;
-    nlist("/vmunix", nl);
+    nlist(KERNEL_LOC, nl);
     if (nl[0].n_type == 0){
         close(kmem);
         return 0;

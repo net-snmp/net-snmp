@@ -26,14 +26,31 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ******************************************************************/
 
+#include <config.h>
+
 #define GATEWAY			/* MultiNet is always configured this way! */
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/time.h>
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#if HAVE_SYSLOG_H
 #include <syslog.h>
+#endif
+#if HAVE_SYS_MBUF_H
 #include <sys/mbuf.h>
+#endif
 #include <net/if.h>
 #define KERNEL		/* to get routehash and RTHASHSIZ */
 #include <net/route.h>
@@ -58,11 +75,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 static	    Route_Scan_Reload();
 
-#ifdef __alpha
-static struct ortentry **rthead=0;
-#else
-static struct rtentry **rthead=0;
-#endif
+static RTENTRY **rthead=0;
 static int rtsize=0, rtalloc=0;
 
 #define  KNLookup(nl_which, buf, s)   (klookup(nl[nl_which].n_value, buf, s))
@@ -71,7 +84,7 @@ static struct nlist nl[] = {
 #define N_RTHOST       0
 #define N_RTNET        1
 #define N_RTHASHSIZE	2
-#ifdef hpux
+#if defined(hpux) || defined(solaris2)
 	{ "rthost" },
 	{ "rtnet" },
 	{ "rthashsize" },
@@ -211,9 +224,9 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 }
 
 init_routes(){
-int ret;
-#ifdef hpux
-  if (nlist("/hp-ux",nl)) {
+  int ret;
+  if (nlist(KERNEL_LOC,nl) == -1) {
+    perror("nlist");
     ERROR("nlist");
     exit(1);
   }
@@ -222,10 +235,6 @@ int ret;
       fprintf(stderr, "nlist err:  %s not found\n",nl[ret].n_name);
     }
   }
-
-#else
-    nlist("/vmunix",nl);
-#endif
 }
 
 static int qsort_compare();
@@ -233,15 +242,9 @@ static int qsort_compare();
 
 static Route_Scan_Reload()
 {
-#ifdef __alpha
-  struct ortentry **routehash, mb;
-  register struct ortentry *m;
-  struct ortentry *rt;
-#else
-  struct rtentry **routehash, mb;
-  register struct rtentry *m;
-  struct rtentry *rt;
-#endif
+  RTENTRY **routehash, mb;
+  register RTENTRY *m;
+  RTENTRY *rt;
 	struct ifnet ifnet;
 	int i, table, qsort_compare();
 	register char *cp;
@@ -260,31 +263,19 @@ static Route_Scan_Reload()
 	 *  Makes sure we have SOME space allocated for new routing entries
 	 */
 	if (!rthead) {
-#ifdef __alpha
-          rthead = (struct ortentry **) malloc(100 * sizeof(struct ortentry *));
-#else
-          rthead = (struct rtentry **) malloc(100 * sizeof(struct rtentry *));
-#endif
+          rthead = (RTENTRY **) malloc(100 * sizeof(RTENTRY *));
 	    if (!rthead) {
 		ERROR("malloc");
 		return;
 	    }
-#ifdef __alpha
-	    bzero((char *)rthead, 100 * sizeof(struct ortentry *));
-#else
-	    bzero((char *)rthead, 100 * sizeof(struct rtentry *));
-#endif
+	    bzero((char *)rthead, 100 * sizeof(RTENTRY *));
 	    rtalloc = 100;
 	}
 
 	for (table=N_RTHOST; table<=N_RTNET; table++) {
 
 	    KNLookup(N_RTHASHSIZE, (char *)&hashsize, sizeof(hashsize));
-#ifdef __alpha
-	    routehash = (struct rtentry **)malloc(hashsize * sizeof(struct mbuf *));
-#else
-	    routehash = (struct rtentry **)malloc(hashsize * sizeof(struct mbuf *));
-#endif
+	    routehash = (RTENTRY **)malloc(hashsize * sizeof(struct mbuf *));
 	    KNLookup( table, (char *)routehash, hashsize * sizeof(struct mbuf *));
 	    for (i = 0; i < hashsize; i++) {
 		if (routehash[i] == 0)
@@ -317,30 +308,17 @@ static Route_Scan_Reload()
 		     *	Allocate a block to hold it and add it to the database
 		     */
 		    if (rtsize >= rtalloc) {
-#ifdef __alpha
-                      rthead = (struct ortentry **) realloc((char *)rthead, 2 * rtalloc * sizeof(struct ortentry *));
-                      bzero((char *) &rthead[rtalloc], rtalloc * sizeof(struct ortentry *));
-#else
-                      rthead = (struct rtentry **) realloc((char *)rthead, 2 * rtalloc * sizeof(struct rtentry *));
-                      bzero((char *) &rthead[rtalloc], rtalloc * sizeof(struct rtentry *));
-#endif
+                      rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtalloc * sizeof(RTENTRY *));
+                      bzero((char *) &rthead[rtalloc], rtalloc * sizeof(RTENTRY *));
 
 			rtalloc *= 2;
 		    }
 		    if (!rthead[rtsize])
-#ifdef __alpha
-                      rthead[rtsize] = (struct ortentry *) malloc(sizeof(struct ortentry));
-#else
-                    rthead[rtsize] = (struct rtentry *) malloc(sizeof(struct rtentry));
-#endif
+                    rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
                       /*
 		     *	Add this to the database
 		     */
-#ifdef __alpha
-		    bcopy((char *)rt, (char *)rthead[rtsize], sizeof(struct ortentry));
-#else
-		    bcopy((char *)rt, (char *)rthead[rtsize], sizeof(struct rtentry));
-#endif
+		    bcopy((char *)rt, (char *)rthead[rtsize], sizeof(RTENTRY));
 		    rtsize++;
 		}
 	    }
@@ -353,16 +331,13 @@ static Route_Scan_Reload()
 
 #else
 
+#if HAVE_SYS_MBUF_H
 static Route_Scan_Reload()
 {
 	struct mbuf **routehash, mb;
 	register struct mbuf *m;
 	struct ifnet ifnet;
-#ifdef __alpha
-	struct ortentry *rt;
-#else
-	struct rtentry *rt;
-#endif
+	RTENTRY *rt;
 	int i, table, qsort_compare();
 	register char *cp;
 	char name[16], temp[16];
@@ -380,20 +355,12 @@ static Route_Scan_Reload()
 	 *  Makes sure we have SOME space allocated for new routing entries
 	 */
 	if (!rthead) {
-#ifdef __alpha
-          rthead = (struct ortentry **) malloc(100 * sizeof(struct ortentry *));
-#else
-          rthead = (struct rtentry **) malloc(100 * sizeof(struct rtentry *));
-#endif
+          rthead = (RTENTRY **) malloc(100 * sizeof(RTENTRY *));
           if (!rthead) {
 		ERROR("malloc");
 		return;
 	    }
-#ifdef __alpha
-          bzero((char *)rthead, 100 * sizeof(struct ortentry *));
-#else
-          bzero((char *)rthead, 100 * sizeof(struct rtentry *));
-#endif
+          bzero((char *)rthead, 100 * sizeof(RTENTRY *));
           rtalloc = 100;
 	}
 
@@ -417,11 +384,7 @@ static Route_Scan_Reload()
 		     */
 		    klookup( m , (char *)&mb, sizeof (mb));
 		    m = mb.m_next;
-#ifdef __alpha
-		    rt = mtod(&mb, struct ortentry *);
-#else
-		    rt = mtod(&mb, struct rtentry *);
-#endif
+		    rt = mtod(&mb, RTENTRY *);
                     
 		    if (rt->rt_ifp != 0) {
 
@@ -442,30 +405,17 @@ static Route_Scan_Reload()
 		     *	Allocate a block to hold it and add it to the database
 		     */
 		    if (rtsize >= rtalloc) {
-#ifdef __alpha
-                      rthead = (struct ortentry **) realloc((char *)rthead, 2 * rtalloc * sizeof(struct ortentry *));
-                      bzero((char *) &rthead[rtalloc], rtalloc * sizeof(struct ortentry *));
-#else
-                      rthead = (struct rtentry **) realloc((char *)rthead, 2 * rtalloc * sizeof(struct rtentry *));
-                      bzero((char *) &rthead[rtalloc], rtalloc * sizeof(struct rtentry *));
-#endif
+                      rthead = (RTENTRY **) realloc((char *)rthead, 2 * rtalloc * sizeof(RTENTRY *));
+                      bzero((char *) &rthead[rtalloc], rtalloc * sizeof(RTENTRY *));
 
 			rtalloc *= 2;
 		    }
 		    if (!rthead[rtsize])
-#ifdef __alpha
-                      rthead[rtsize] = (struct ortentry *) malloc(sizeof(struct ortentry));
-#else
-                    rthead[rtsize] = (struct rtentry *) malloc(sizeof(struct rtentry));
-#endif
+                      rthead[rtsize] = (RTENTRY *) malloc(sizeof(RTENTRY));
                       /*
 		     *	Add this to the database
 		     */
-#ifdef __alpha
-		    bcopy((char *)rt, (char *)rthead[rtsize], sizeof(struct ortentry));
-#else
-		    bcopy((char *)rt, (char *)rthead[rtsize], sizeof(struct rtentry));
-#endif
+		    bcopy((char *)rt, (char *)rthead[rtsize], sizeof(RTENTRY));
 		    rtsize++;
 		}
 	    }
@@ -475,19 +425,19 @@ static Route_Scan_Reload()
 	 */
 	qsort((char *)rthead,rtsize,sizeof(rthead[0]),qsort_compare);
 }
+#else
+static Route_Scan_Reload()
+{
+}
 #endif
-
+#endif
 
 
 /*
  *	Create a host table
  */
 static int qsort_compare(r1,r2)
-#ifdef __alpha
-struct ortentry **r1, **r2;
-#else
-struct rtentry **r1, **r2;
-#endif
+RTENTRY **r1, **r2;
 {
 	register u_long dst1 = ntohl(((struct sockaddr_in *) &((*r1)->rt_dst))->sin_addr.s_addr);
 	register u_long dst2 = ntohl(((struct sockaddr_in *) &((*r2)->rt_dst))->sin_addr.s_addr);

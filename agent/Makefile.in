@@ -1,18 +1,21 @@
 #
 # Makefile for snmpd
 #
+SHELL = /bin/sh
+srcdir = @srcdir@
+VPATH = @srcdir@
+@SET_MAKE@
+
 TARG=	snmpd
 LIBS=	../lib/libsnmp.a
-LDFLAGS=
+LDFLAGS= @LIBS@ 
 OSFLAGS=
 
-# HPUX compilers (and most others)
-CFLAGS= -g -I../snmplib ${INCLUDES} -DDEBUG ${OSFLAGS}
-CC = cc
+CFLAGS=@CFLAGS@
+CPPFLAGS=@CPPFLAGS@ -I.. -I../snmplib
+LDFLAGS=@LDFLAGS@
 
-# gcc compilers
-#CFLAGS=-g -I../snmplib ${INCLUDES} -DDEBUG ${OSFLAGS}
-#CC = gcc -Wall
+CC = @CC@ $(CPPFLAGS)
 
 DIRS=extensible
 EXTENSIBLEOBJS=extensible/misc.o extensible/read_config.o extensible/extensible.o extensible/hpmibs.o extensible/versioninfo.o\
@@ -36,14 +39,66 @@ clean:
 install:
 	cp ${TARG} ../bin
 
-extensible:	
-	pushd extensible; make; popd
+depend: extensible
+	cd extensible; $(MAKE) depend; cd ..
+	makedepend -I.. -I../snmplib *.c
+	perl -n -i.bak -e ' if (/^# DO NOT DELETE THIS LINE/) {$$doit=1;} if ($$doit == 1) {s#/usr/include/[^\s]+##g ; print if (! /^\w+\.o:\s*$$/);} else {print;}' Makefile
 
-party_vars.o: ../snmplib/party.h
-context_vars.o: ../snmplib/context.h
-snmp_vars.o: ../snmplib/party.h extensible/extensible.c ../config.h\
- extensible/snmp_vars.h extensible/mibdefs.h
-alarm.c:  ../snmplib/party.h
-event.c:  ../snmplib/party.h
-snmpd.c:  ../snmplib/party.h ../config.h
+# DO NOT DELETE THIS LINE -- make depend depends on it.
 
+acl_vars.o: ../config.h ../agent/extensible/struct.h 
+acl_vars.o:  ../snmplib/asn1.h ../snmplib/snmp.h
+acl_vars.o: ../snmplib/snmp_impl.h  snmp_vars.h
+acl_vars.o: ../snmplib/acl.h
+alarm.o: ../config.h ../agent/extensible/struct.h 
+alarm.o:   ../snmplib/asn1.h
+alarm.o: ../snmplib/snmp_impl.h ../snmplib/snmp_api.h
+alarm.o: ../snmplib/snmp_client.h ../snmplib/party.h ../snmplib/context.h
+alarm.o: snmp_vars.h ../snmplib/snmp.h m2m.h snmp_vars_m2m.h event.h alarm.h
+alarm.o: ../snmplib/system.h
+context_vars.o: ../config.h ../agent/extensible/struct.h
+context_vars.o:   ../snmplib/asn1.h
+context_vars.o: ../snmplib/snmp.h ../snmplib/snmp_impl.h 
+context_vars.o: snmp_vars.h ../snmplib/system.h ../snmplib/context.h
+context_vars.o: ../snmplib/acl.h ../snmplib/view.h
+event.o: ../config.h ../agent/extensible/struct.h 
+event.o:  ../snmplib/asn1.h ../snmplib/snmp_impl.h
+event.o: ../snmplib/snmp.h snmp_vars.h m2m.h snmp_vars_m2m.h alarm.h event.h
+event.o: ../snmplib/snmp_api.h ../snmplib/party.h ../snmplib/snmp_client.h
+history.o: ../snmplib/asn1.h history.h
+kernel.o: ../config.h ../agent/extensible/struct.h 
+kernel.o:   ../snmplib/asn1.h
+kernel.o: ../snmplib/snmp_impl.h
+party_vars.o: ../config.h ../agent/extensible/struct.h
+party_vars.o:   ../snmplib/asn1.h
+party_vars.o: ../snmplib/snmp.h ../snmplib/snmp_impl.h 
+party_vars.o: snmp_vars.h ../snmplib/system.h ../snmplib/party.h
+party_vars.o: ../snmplib/acl.h ../snmplib/view.h
+route_write.o: ../config.h ../agent/extensible/struct.h
+route_write.o:  ../snmplib/asn1.h ../snmplib/snmp.h
+route_write.o: ../snmplib/snmp_impl.h snmp_vars.h
+snmp_agent.o: ../config.h ../agent/extensible/struct.h
+snmp_agent.o:   ../snmplib/snmp.h
+snmp_agent.o: ../snmplib/asn1.h ../snmplib/snmp_impl.h 
+snmp_agent.o: ../snmplib/acl.h ../snmplib/party.h ../snmplib/context.h
+snmp_agent.o: ../snmplib/mib.h
+snmp_var_route.o: ../config.h ../agent/extensible/struct.h
+snmp_var_route.o:  ../snmplib/asn1.h ../snmplib/snmp.h
+snmp_var_route.o: ../snmplib/snmp_impl.h ../snmplib/mib.h snmp_vars.h
+snmp_vars.o: ../config.h ../agent/extensible/struct.h 
+snmp_vars.o:  ../snmplib/asn1.h ../snmplib/snmp.h
+snmp_vars.o: ../snmplib/snmp_impl.h ../snmplib/mib.h snmp_vars.h m2m.h
+snmp_vars.o: snmp_vars_m2m.h alarm.h event.h ../snmplib/party.h
+snmp_vars.o: ../snmplib/context.h ../snmplib/acl.h ../snmplib/view.h
+snmp_vars.o: var_struct.h extensible/mibdefs.h extensible/snmp_vars.h
+snmpd.o: ../config.h ../agent/extensible/struct.h 
+snmpd.o:  ../snmplib/snmp.h ../snmplib/asn1.h
+snmpd.o: ../snmplib/snmp_impl.h ../snmplib/system.h ../snmplib/snmp_api.h
+snmpd.o: m2m.h ../snmplib/party.h alarm.h ../snmplib/view.h
+snmpd.o: ../snmplib/context.h ../snmplib/acl.h ../config.h
+view_parse.o: ../config.h ../agent/extensible/struct.h 
+view_parse.o:  ../snmplib/asn1.h ../snmplib/view.h
+view_vars.o: ../config.h ../agent/extensible/struct.h
+view_vars.o:   ../snmplib/asn1.h
+view_vars.o: ../snmplib/snmp.h ../snmplib/snmp_impl.h 
+view_vars.o: snmp_vars.h ../snmplib/view.h

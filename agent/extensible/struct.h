@@ -1,3 +1,6 @@
+#ifndef UCD_SNMP_STRUCT
+#define UCD_SNMP_STRUCT
+
 #define STRMAX 1000
 #define SHPROC 1
 #define EXECPROC 2
@@ -39,3 +42,5 @@ struct diskpart
    char path[STRMAX];
    int minimumspace;
 };
+
+#endif
