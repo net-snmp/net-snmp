@@ -3,7 +3,7 @@ This README describes the ./local/mib2c script.
 Author:  Derek Simkowiak
          dereks@kd-dev.com
          http://www.kd-dev.com
-         (please mail questions to ucd-snmp-coders@ucd-snmp.ucdavis.edu,
+         (please mail questions to net-snmp-coders@lists.sourceforge.net,
          not to the author directly.  Thanks!)
 
 Date:    Wed Jan 20 02:51:06 PST 1999
@@ -59,7 +59,7 @@ tree that the test script is trying to use.  Please don't email the
 UCD-SNMP list with other errors regarding the SNMP.pm module.
 comp.lang.perl.modules is probably the most appropriate spot to
 discuss problems with the SNMP.pm perl module itself. Interelated
-problems between ucd-snmp and SNMP could be discussed on the ucd-snmp
+problems between net-snmp and SNMP could be discussed on the net-snmp
 mailing lists though.
 
 
@@ -70,7 +70,7 @@ and generates the template C code.  Here is the documentation, from the
 top of the script:
 
 # This program, given an OID reference as an argument, creates some
-# template mib module files to be used with the ucd-snmp agent.  It is
+# template mib module files to be used with the net-snmp agent.  It is
 # far from perfect and will not generate working modules, but it
 # significantly shortens development time by outlining the basic
 # structure.
@@ -207,7 +207,7 @@ not speaking from experience here.  Really.)
 ACKNOWLEGMENTS
 
 	Many thanks to the people on the UCD-SNMP mailing list
-(ucd-snmp@ucd-snmp.ucdavis.edu).  In particular, many thanks to
+(net-snmp-users@lists.sourceforge.net).  In particular, many thanks to
 
 Wes Hardaker <wjhardaker@ucdavis.edu>
 Ken McNamara <conmara@tcon.net>
