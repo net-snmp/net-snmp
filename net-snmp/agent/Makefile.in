@@ -21,6 +21,10 @@ AGENTOBJS=snmpd.o kernel.o auto_nlist.o
 LIBAGENTOBJS=snmp_agent.o snmp_vars.o agent_read_config.o agent_registry.o \
 	agent_trap.o
 
+INSTALLHEADERS=agent_read_config.h agent_registry.h agent_trap.h auto_nlist.h \
+	ds_agent.h snmp_agent.h snmp_vars.h var_struct.h mibgroup/util_funcs.h \
+	mibgroup/mibincl.h mibgroup/header_complex.h
+
 all: subdirs snmpd libagent.$(SHLIB_EXTENSION)$(SHLIB_VERSION)
 
 
@@ -56,6 +60,7 @@ clean:
 
 install:  installdirs
 	@$(INSTALL) $(TARG) $(sbindir) ; echo "install:  installed $(TARG) in $(sbindir) "
+	@for i in $(INSTALLHEADERS) ; do $(INSTALL) $(srcdir)/$$i $(includedir) ; echo "install:  installed $$i in $(includedir)" ; done
 #	cd dlmods ; $(MAKE) install; cd ..
 
 installdirs:
