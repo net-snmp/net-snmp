@@ -538,8 +538,7 @@ void
 netsnmp_unix_parse_security(const char *token, char *param)
 {
     char           secName[VACMSTRINGLEN + 1], community[VACMSTRINGLEN + 1];
-	char           sockpath[sizeof(struct sockaddr_un) + 1];
-    char           *cp = NULL;
+    char           sockpath[sizeof(struct sockaddr_un) + 1];
     com2SecUnixEntry   *e = NULL;
 
 
@@ -562,7 +561,7 @@ netsnmp_unix_parse_security(const char *token, char *param)
     }
 	/* if sockpath == "default", set pathlen=0*/
 	if(strcmp(sockpath, "default") == 0){
-			sockpath[0] = NULL;
+			sockpath[0] = 0;
 	}
 	
 	param = copy_nword(param, community, VACMSTRINGLEN);
