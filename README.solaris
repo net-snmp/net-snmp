@@ -209,8 +209,12 @@ PATH=/usr/bin:/usr/sbin:/usr/local/bin:/usr/ccs/bin:/usr/ucb
 
 Obtain a current version of net-snmp (which, if you're reading this,
 presumably you have - don't you love recursion?) www.net-snmp.org/download/
+or if you need up-to-the-minute functionality not available in the
+current release, you may want to consider the latest version
+available on CVS (see http://www.net-snmp.org/cvs/).
 
-Uncompress it and untar it in a working directory eg. /usr/local/src/net-snmp
+Once you have obtained a copy of the source code, 
+gunzip it and untar it in a working directory eg. /usr/local/src/net-snmp
 
 In order to save a lot of typing, you should create a "configure" 
 script eg. bcc.sh in the directory below eg. /usr/local/src.
@@ -236,12 +240,14 @@ When it completes, you should see:
   Network transport support:  Callback Unix TCP UDP
   SNMPv3 Security Modules:    usm
   Agent MIB code:             mibII ucd_snmp snmpv3mibs notification target 
-  \agent_mibs agentx agent_mibs utilities host disman/event-mib 
-  \ucd-snmp/diskio smux agentx mibII/mta_sendmail
+agent_mibs agentx agent_mibs utilities host disman/event-mib 
+ucd-snmp/diskio smux agentx mibII/mta_sendmail
   SNMP Perl modules:          disabled
   Embedded perl support:      disabled
   Authentication support:     MD5 SHA1
   Encryption support:         DES
+
+(note, your list of authentication and encryption support may vary)
 
 Type:
 
@@ -332,7 +338,8 @@ It installs in /usr/local/share/snmp.
 
 Install a startup script (see section 1).
 
-For further information, see README.solaris.binaries.x
+For further information, see the README.solaris.binaries that
+accompanies each listing of binaries at http://www.net-snmp.org/doanload/ .
 
 --Bruce Shaw <Bruce.Shaw at shaw.ca>
 ------------------------------------------------------------
@@ -395,8 +402,26 @@ but this will be extremely verbose.
 ------------------------------------------------------------
 6.  Creating your own binaries
 
-Pick an appropriate name for a tarfile 
-eg. net-snmp-5.1.custom-SunOS_5.8_sun4u.tar (see above)
+The purpose of creating your own binaries is to allow net-snmp
+to installed on a machine lacking a compiler, or to allow
+for a binary with a known configuration to be installed
+on multiple, similar machines.  For a binary to work the
+machines must have identical hardware platform and operating
+system.  This can be determined by typing:
+
+   uname -a
+
+which will return something like:
+
+   SunOS foo 5.8 Generic_108528-22 sun4u sparc SUNW,Ultra-4
+
+which tells us that it is a sun4u class machine
+running Solaris 8 (see longer explanation in section 4).
+
+In order to distinguish between binaries for various platforms we must
+pick an appropriate name for a tarfile 
+eg. net-snmp-5.1.custom-SunOS_5.8_sun4u.tar 
+
 (this particular one means "a customized version of
 net-snmp 5.1 that works under Solaris 8 running on Ultra hardware")
 
@@ -508,7 +533,9 @@ resource =
 
 ::::::::::::::::::
 
-Stop any net-snmp processes that may be running.  
+Stop any net-snmp processes that may be running by typing:
+
+   pkill snmpd
 
 Start sun's daemons by typing:
 
@@ -536,26 +563,15 @@ Now try:
 
 and you should see the two daemons working together.
 
-It appears to react badly to any extensive snmpwalk-ing or any incorrect use
-of community strings (eg. a query by "public" instead of what you're using.)
-
-If it does bomb, you will need to discover any stray snmpd daemons by typing:
+If Sun's daemons fail for some reason, do the following:
 
    pkill snmpd
-
-Then do the following:
-
    /etc/rc3.d/S76snmpdx stop  (assuming you haven't renamed it)
    /etc/rc3.d/S77dmi stop     (assuming you haven't renamed it)
    /etc/rc3.d/S76snmpdx start (assuming you haven't renamed it)
    /etc/rc3.d/S77dmi start    (assuming you haven't renamed it)
 
-rather than trying to individually clobber all the various Sun daemons.
-
-This configuration appears to deal properly with snmpgets 
-and handle mistakes gracefully.
-
-Beyond this, your mileage may vary.
+rather than trying to stop all the various daemons indifidually.
 
 You may wish to modify the subtrees in net-snmp.reg as you find things
 that do and don't work.  Remember to keep backup copies of working
@@ -631,16 +647,24 @@ compatible with SFIO's ftell(), fseek().
 Finally, thanks to Phong Vo and AT&T Labs for a fast, robust and
 portable package that solves this headache very neatly.
 
--SEan <burke_sp@pacbell.net>
+ --SEan <burke_sp@pacbell.net>
 
 ------------------------------------------------------------
 9.  Perl
 
-Net-snmp may be compiled with Perl support by adding the lines:
+Net-snmp may be compiled with Perl support by adding the parameters:
 
    --enable-shared --enable-embedded-perl
 
-to your ./configure invocation.
+to your ./configure invocation. This will add embeded perl support in the
+SNMP agent.
+
+Alternatively, adding
+
+   --enable-shared --with-perl-modules
+
+to your ./configure invocation. This will not enable the SNMP agent to
+suport embedded perl, but will enable perl modules.
 
 This should only be done if you are sure you really need Perl, 
 for the following reasons:
@@ -648,7 +672,7 @@ for the following reasons:
 Solaris 8 and 9 ship with a version of Perl compiled using sun's cc. 
 
 This causes a problem when attempting to compile net-snmp 
-with Perl functionality ie.:
+with Perl functionality eg.:
 
    ./configure --with-mib-modules="host disman/event-mib ucd-snmp/diskio \
       smux agents mibII/mta_sendmail" --enable-shared --enable-embedded-perl
@@ -659,7 +683,7 @@ what you're currently using.  This can be discovered by typing:
 
    perl -V
 
-and it says (among other things)
+which it says (among other things)
 
   Compiler:
     cc='cc'
