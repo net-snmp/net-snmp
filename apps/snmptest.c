@@ -426,6 +426,8 @@ getValue:
 		vp->val.string = NULL;
 		break;
 	    case ASN_OBJECT_ID:
+		if ('\n' == buf[strlen(buf)-1])
+		    buf[strlen(buf)-1] = '\0';
 		vp->val_len = MAX_OID_LEN;;
 		read_objid(buf, (oid *)value, &vp->val_len);
 		vp->val_len *= sizeof(oid);
