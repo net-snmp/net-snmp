@@ -2277,6 +2277,7 @@ snmp_add_var(struct snmp_pdu *pdu,
         break;
 
       case 'o':
+        tint = MAX_OID_LEN;
         read_objid(value, (oid *)buf, &tint);
         snmp_pdu_add_variable(pdu, name, name_length, ASN_OBJECT_ID, buf,
                               sizeof(oid)*tint);

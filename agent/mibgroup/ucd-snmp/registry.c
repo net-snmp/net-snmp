@@ -55,8 +55,8 @@ header_registry(struct variable *vp,
 		WriteMethod **write_method)
 {
 #define REGISTRY_NAME_LENGTH	10
-    oid newname[MAX_NAME_LEN];
-    char c_oid[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
+    char c_oid[SPRINT_MAX_LEN];
     struct subtree *mine = NULL;
     
     if (snmp_get_do_debugging()) {

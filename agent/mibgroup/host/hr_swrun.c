@@ -120,9 +120,9 @@ header_hrswrun(struct variable *vp,
 	       WriteMethod **write_method)
 {
 #define HRSWRUN_NAME_LENGTH	9
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int result;
-    char c_oid[MAX_NAME_LEN];
+    char c_oid[SPRINT_MAX_LEN];
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);
@@ -151,10 +151,10 @@ header_hrswrunEntry(struct variable *vp,
 		    WriteMethod **write_method)
 {
 #define HRSWRUN_ENTRY_NAME_LENGTH	11
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int pid, LowPid=-1;
     int result;
-    char c_oid[MAX_NAME_LEN];
+    char c_oid[SPRINT_MAX_LEN];
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);

@@ -275,7 +275,7 @@ register_mib(char *moduleName,
 	     int mibloclen)
 {
   struct subtree *subtree;
-  char c_oid[MAX_NAME_LEN];
+  char c_oid[SPRINT_MAX_LEN];
 
   subtree = (struct subtree *) malloc(sizeof(struct subtree));
   memset(subtree, 0, sizeof(struct subtree));
@@ -547,8 +547,8 @@ search_subtree(struct subtree *sub_tp,
     struct subtree *tp;
 
     u_char *this_return, *child_return;
-    oid     this_name[MAX_NAME_LEN];
-    oid     child_name[MAX_NAME_LEN];
+    oid     this_name[MAX_OID_LEN];
+    oid     child_name[MAX_OID_LEN];
     int     this_namelen, child_namelen;
     u_char  this_type,    child_type;
     int     this_len,     child_len,    compare_len;
@@ -721,7 +721,7 @@ getStatPtr(oid *name,
 	   int *noSuchObject)
 {
     register struct subtree	*tp;
-    oid			save[MAX_NAME_LEN];
+    oid			save[MAX_OID_LEN];
     int			savelen = 0;
     u_char              result_type;
     u_short             result_acl;

@@ -112,9 +112,9 @@ snmp_parse_args(int argc,
   int arg;
   char *psz, *cp;
 #ifdef USE_V2PARTY_PROTOCOL
-  static oid src[MAX_NAME_LEN];
-  static oid dst[MAX_NAME_LEN];
-  static oid context[MAX_NAME_LEN];
+  static oid src[MAX_OID_LEN];
+  static oid dst[MAX_OID_LEN];
+  static oid context[MAX_OID_LEN];
   struct partyEntry *pp;
   struct contextEntry *cxp;
   struct hostent *hp;
@@ -360,7 +360,7 @@ snmp_parse_args(int argc,
         }
       }
       session->srcPartyLen = session->dstPartyLen =
-                    session->contextLen = MAX_NAME_LEN;
+                    session->contextLen = MAX_OID_LEN;
       ms_party_init(destAddr, session->srcParty, &(session->srcPartyLen),
                     session->dstParty, &(session->dstPartyLen),
                     session->context, &(session->contextLen));
@@ -385,7 +385,7 @@ snmp_parse_args(int argc,
       /* source party */
       
       party_scanInit();
-      session->srcPartyLen = MAX_NAME_LEN;
+      session->srcPartyLen = MAX_OID_LEN;
       for(pp = party_scanNext(); pp; pp = party_scanNext()){
         if (!strcasecmp(pp->partyName, argv[arg])){
           session->srcPartyLen = pp->partyIdentityLen;
@@ -395,7 +395,7 @@ snmp_parse_args(int argc,
         }
       }
       if (!pp){
-        session->srcPartyLen = MAX_NAME_LEN;
+        session->srcPartyLen = MAX_OID_LEN;
         if (!read_objid(argv[arg], session->srcParty, &(session->srcPartyLen))){
           fprintf(stderr,"Invalid source party: %s.\n", argv[arg]);
           session->srcPartyLen = 0;
@@ -413,7 +413,7 @@ snmp_parse_args(int argc,
 
       /* destination party */
       
-      session->dstPartyLen = MAX_NAME_LEN;
+      session->dstPartyLen = MAX_OID_LEN;
       party_scanInit();
       for(pp = party_scanNext(); pp; pp = party_scanNext()){
         if (!strcasecmp(pp->partyName, argv[arg])){
@@ -441,7 +441,7 @@ snmp_parse_args(int argc,
         exit(1);
       }
 
-      session->contextLen = MAX_NAME_LEN;
+      session->contextLen = MAX_OID_LEN;
       context_scanInit();
       for(cxp = context_scanNext(); cxp; cxp = context_scanNext()){
         if (!strcasecmp(cxp->contextName, argv[arg])){

@@ -87,7 +87,7 @@ header_dlmod(struct variable *vp,
 	     WriteMethod **write_method)
 {
 #define DLMOD_NAME_LENGTH	9	
-	oid             newname[MAX_NAME_LEN];
+	oid             newname[MAX_OID_LEN];
 	int             result;
 	char            buf[1024];
 
@@ -176,7 +176,7 @@ header_dlmodEntry(struct variable *vp,
 		  WriteMethod **write_method)
 {
 #define DLMODENTRY_NAME_LENGTH	11
-	oid	newname[MAX_NAME_LEN];
+	oid	newname[MAX_OID_LEN];
 	int	result;
 	struct dlmod   *dlm;
 	int dlmod_index;

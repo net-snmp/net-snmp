@@ -177,10 +177,10 @@ header_hrdisk(struct variable *vp,
 	      WriteMethod **write_method)
 {
 #define HRDISK_ENTRY_NAME_LENGTH	11
-    oid newname[MAX_NAME_LEN];
+    oid newname[MAX_OID_LEN];
     int disk_idx, LowIndex = -1;
     int result;
-    char c_oid[MAX_NAME_LEN];
+    char c_oid[SPRINT_MAX_LEN];
 
     if (snmp_get_do_debugging()) {
       sprint_objid (c_oid, name, *length);

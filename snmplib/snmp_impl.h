@@ -43,7 +43,10 @@ SOFTWARE.
 #define BUILD_ERROR	-2
 
 #define COMMUNITY_MAX_LEN	256
-#define MAX_NAME_LEN		128  /* number of subid's in a objid */
+
+/* Space for character representation of an object identifier */
+#define SPRINT_MAX_LEN		2560
+
 
 #ifndef NULL
 #define NULL 0

@@ -69,7 +69,7 @@ var_rip2(struct variable *vp,
 {
 	u_char *var;
 	int result;
-        char c_oid[MAX_NAME_LEN];
+        char c_oid[SPRINT_MAX_LEN];
 
         if (snmp_get_do_debugging()) {
           sprint_objid (c_oid, name, *length);

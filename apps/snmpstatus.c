@@ -135,7 +135,6 @@ int main(int argc, char *argv[])
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu, *response;
     struct variable_list *vars;
-    char name[MAX_NAME_LEN];
     char *sysdescr = NULL;
     u_long uptime = 0;
     int status;
@@ -159,8 +158,6 @@ int main(int argc, char *argv[])
       SOCK_CLEANUP;
       exit(1);
     }
-
-    strcpy(name, "No System Description Available");
 
     /* create PDU for GET request and add object names to request */
     pdu = snmp_pdu_create(SNMP_MSG_GET);

@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     int version = SNMP_VERSION_1;
     struct partyEntry *pp;
     struct contextEntry *cxp;
-    oid src[MAX_NAME_LEN], dst[MAX_NAME_LEN], context[MAX_NAME_LEN];
+    oid src[MAX_OID_LEN], dst[MAX_OID_LEN], context[MAX_OID_LEN];
     int srclen = 0, dstlen = 0, contextlen = 0;
     int trivialSNMPv2 = FALSE;
     struct hostent *hp;
@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
 		    }
 		}
 		if (!pp){
-		    srclen = MAX_NAME_LEN;
+		    srclen = MAX_OID_LEN;
 		    if (!read_objid(argv[arg], src, &srclen)){
 			printf("Invalid source party: %s\n", argv[arg]);
 			srclen = 0;
@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
 		}
 	    }
 	} else if (version == SNMP_VERSION_2p && dstlen == 0 && !trivialSNMPv2){
-	    dstlen = MAX_NAME_LEN;
+	    dstlen = MAX_OID_LEN;
 	    party_scanInit();
 	    for(pp = party_scanNext(); pp; pp = party_scanNext()){
 		if (!strcasecmp(pp->partyName, argv[arg])){
@@ -311,7 +311,7 @@ int main(int argc, char *argv[])
 		}
 	    }
 	} else if (version == SNMP_VERSION_2p && contextlen == 0 && !trivialSNMPv2){
-	    contextlen = MAX_NAME_LEN;
+	    contextlen = MAX_OID_LEN;
 	    context_scanInit();
 	    for(cxp = context_scanNext(); cxp; cxp = context_scanNext()){
 		if (!strcasecmp(cxp->contextName, argv[arg])){
@@ -360,7 +360,7 @@ int main(int argc, char *argv[])
               memmove(&destAddr, hp->h_addr, hp->h_length);
 	    }
 	}
-	srclen = dstlen = contextlen = MAX_NAME_LEN;
+	srclen = dstlen = contextlen = MAX_OID_LEN;
 	ms_party_init(destAddr, src, &srclen, dst, &dstlen,
 		      context, &contextlen);
     }

@@ -319,7 +319,7 @@ var_atEntry(struct variable *vp,
     mib2_ipNetToMediaEntry_t entry, Lowentry;
     int		Found = 0;
     req_e	req_type;
-    char	c_oid[1024];
+    char	c_oid[SPRINT_MAX_LEN];
 
     /* fill in object part of name for current (less sizeof instance part) */
 
