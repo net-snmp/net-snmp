@@ -1359,11 +1359,6 @@ netsnmp_wrap_up_request(netsnmp_agent_session *asp, int status)
         if ( status != 0  && asp->status == 0 )
             asp->status = status;
 
-        /* save the error status */ 
-        if (status != 0 && asp->status == 0) {
-           asp->status = status;
-        }
-
         switch (asp->pdu->command) {
             case SNMP_MSG_INTERNAL_SET_BEGIN:
             case SNMP_MSG_INTERNAL_SET_RESERVE1:
