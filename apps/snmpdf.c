@@ -131,17 +131,11 @@ int main(int argc, char *argv[])
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu;
     struct snmp_pdu *response;
-    struct variable_list *vars;
     int arg;
-    int count;
     int current_name = 0;
-    char *names[128];
-    oid name[MAX_OID_LEN];
-    size_t name_length;
     oid base[MAX_OID_LEN];
     size_t base_length;
     int status;
-    struct variable_list hrvars[7];
     struct variable_list *saved = NULL, **vlpp = &saved, *vlp = saved, *vlp2;
     int running;
     
@@ -153,6 +147,7 @@ int main(int argc, char *argv[])
         usage();
         exit(1);
     default:
+        break;
     }
 
     SOCK_STARTUP;
