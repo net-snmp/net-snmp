@@ -424,7 +424,9 @@ STOPPROGNOSLEEP() {
 STOPAGENT() {
     SAVE_RESULTS
     STOPPROGNOSLEEP $SNMP_SNMPD_PID_FILE
-    WAITFORAGENT "shutting down"
+    if [ "x$OSTYPE" != "xmsys" ]; then
+        WAITFORAGENT "shutting down"
+    fi
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "Agent Output:"
 	echo "$seperator [stdout]"
@@ -440,7 +442,9 @@ STOPAGENT() {
 STOPTRAPD() {
     SAVE_RESULTS
     STOPPROGNOSLEEP $SNMP_SNMPTRAPD_PID_FILE
-    WAITFORTRAPD "Stopped"
+    if [ "x$OSTYPE" != "xmsys" ]; then
+        WAITFORTRAPD "Stopped"
+    fi
     if [ $SNMP_VERBOSE -gt 1 ]; then
 	echo "snmptrapd Output:"
 	echo "$seperator [stdout]"
