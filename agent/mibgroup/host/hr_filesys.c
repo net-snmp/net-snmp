@@ -37,6 +37,14 @@
 #endif
 #endif
 
+#ifdef freebsd3
+#if HAVE_GETFSSTAT
+#if defined(MFSNAMELEN)
+#define MOUNT_NFS "nfs"
+#endif
+#endif
+#endif /* freebsd3 */
+
 #define HRFS_MONOTONICALLY_INCREASING
 
 	/*********************
@@ -208,7 +216,7 @@ var_hrfilesys(struct variable *vp,
 	case HRFSYS_RMOUNT:
 #if HAVE_GETFSSTAT
 #if defined(MFSNAMELEN)
-	    if (!strcmp( HRFS_entry->HRFS_type, MOUNT_NFS))
+	    if (!strcmp(HRFS_entry->HRFS_type, MOUNT_NFS))
 #else
 	    if (HRFS_entry->HRFS_type == MOUNT_NFS)
 #endif
