@@ -154,33 +154,29 @@ dlmod_load_module(struct dlmod *dlm)
 	return;
 
     if (dlm->path[0] == '/') { 
+#ifdef RTLD_NOW
 	dlm->handle = dlopen(dlm->path, RTLD_NOW);
+#else
+	dlm->handle = dlopen(dlm->path, RTLD_LAZY);
+#endif
 	if (dlm->handle == NULL) {
-#ifdef HAVE_SNPRINTF
 	    snprintf(dlm->error, sizeof(dlm->error), 
 		     "dlopen failed: %s", dlerror());
-#else
-	    sprintf(dlm->error, "dlopen failed: %s", dlerror());
-#endif
 	    dlm->status = DLMOD_ERROR;
 	    return;
 	}
     } else {
 	for (p = strtok(dlmod_path, ":"); p; p = strtok(NULL, ":")) {
-#ifdef HAVE_SNPRINTF
 	    snprintf(tmp_path, sizeof(tmp_path), "%s/%s.so", p, dlm->path);
-#else
-	    sprintf(tmp_path, "%s/%s.so", p, dlm->path);
-#endif
 	    DEBUGMSGTL(("dlmod", "p: %s tmp_path: %s\n", p, tmp_path));
+#ifdef RTLD_NOW
 	    dlm->handle = dlopen(tmp_path, RTLD_NOW);
+#else
+	    dlm->handle = dlopen(tmp_path, RTLD_LAZY);
+#endif
 	    if (dlm->handle == NULL) {
-#ifdef HAVE_SNPRINTF
 		snprintf(dlm->error, sizeof(dlm->error), 
 			 "dlopen failed: %s", dlerror());
-#else
-		sprintf(dlm->error, "dlopen failed: %s", dlerror());
-#endif
 		dlm->status = DLMOD_ERROR;
 	    }
 	}
@@ -188,20 +184,12 @@ dlmod_load_module(struct dlmod *dlm)
 	if (dlm->status == DLMOD_ERROR) 
 	    return;
     }
-#ifdef HAVE_SNPRINTF
     snprintf(sym_init, sizeof(sym_init), "init_%s", dlm->name);
-#else
-    sprintf(sym_init, "init_%s", dlm->name);
-#endif
     dl_init = dlsym(dlm->handle, sym_init);
     if (dl_init == NULL) {
 	dlclose(dlm->handle);
-#ifdef HAVE_SNPRINTF
 	snprintf(dlm->error, sizeof(dlm->error), 
 		 "dlsym failed: can't find \'%s\'", sym_init);
-#else
-	sprintf(dlm->error, "dlsym failed: can't find \'%s\'", sym_init);
-#endif
 	dlm->status = DLMOD_ERROR;
 	return;
     }
@@ -220,19 +208,11 @@ dlmod_unload_module (struct dlmod *dlm)
     if (!dlm || dlm->status != DLMOD_LOADED) 
 	return;
 
-#ifdef HAVE_SNPRINTF
     snprintf(sym_deinit, sizeof(sym_deinit), "deinit_%s", dlm->name);
-#else
-    sprintf(sym_deinit, "deinit_%s", dlm->name);
-#endif
     dl_deinit = dlsym(dlm->handle, sym_deinit);
     if (dl_deinit == NULL) {
-#ifdef HAVE_SNPRINTF
 	snprintf(dlm->error, sizeof(dlm->error), 
 		 "dlsym failed: can't find \'%s\'", sym_deinit);
-#else
-	sprintf(dlm->error, "dlsym failed: can't find \'%s\'", sym_deinit);
-#endif
     } else {
 	dl_deinit();
     }

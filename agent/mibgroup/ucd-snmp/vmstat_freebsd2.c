@@ -9,6 +9,9 @@
 #include <sys/time.h>
 #include <sys/proc.h>
 #include <sys/dkstat.h>
+#ifdef freebsd5
+#include <sys/bio.h>
+#endif
 #include <sys/buf.h>
 #include <sys/uio.h>
 #include <sys/namei.h>
@@ -69,6 +72,10 @@ void init_vmstat_freebsd2(void)
     {CPUUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUUSER}},
     {CPUSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUSYSTEM}},
     {CPUIDLE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUIDLE}},
+    {CPURAWUSER, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWUSER}},
+    {CPURAWNICE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWNICE}},
+    {CPURAWSYSTEM, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWSYSTEM}},
+    {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
 /* Future use: */
 /*
   {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
@@ -173,13 +180,21 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 	*var_len = strlen(errmsg);
 	return((u_char *) (errmsg));
     case SWAPIN:
+#ifdef openbsd2
+	long_ret = ptok(mem_new.v_swpin - mem_old.v_swpin);
+#else
 	long_ret = ptok(mem_new.v_swapin - mem_old.v_swapin + 
 			mem_new.v_vnodein - mem_old.v_vnodein);
+#endif
 	long_ret = rate(long_ret);
 	return((u_char *) (&long_ret));
     case SWAPOUT:
+#ifdef openbsd2
+	long_ret = ptok(mem_new.v_swpout - mem_old.v_swpout);
+#else
 	long_ret = ptok(mem_new.v_swapout - mem_old.v_swapout + 
 			mem_new.v_vnodeout - mem_old.v_vnodeout);
+#endif
 	long_ret = rate(long_ret);
 	return((u_char *) (&long_ret));
     case IOSENT:
@@ -214,6 +229,18 @@ unsigned char *var_extensible_vmstat(struct variable *vp,
 	cpu_sum = cpu_diff[CP_IDLE];
 	cpu_prc = (float)cpu_sum / (float)cpu_total;
 	long_ret = cpu_prc * CPU_PRC;
+	return((u_char *) (&long_ret));
+    case CPURAWUSER:
+	long_ret = cpu_new[CP_USER];
+	return((u_char *) (&long_ret));
+    case CPURAWNICE:
+	long_ret = cpu_new[CP_NICE];
+	return((u_char *) (&long_ret));
+    case CPURAWSYSTEM:
+	long_ret = cpu_new[CP_SYS] + cpu_new[CP_INTR];
+	return((u_char *) (&long_ret));
+    case CPURAWIDLE:
+	long_ret = cpu_new[CP_IDLE];
 	return((u_char *) (&long_ret));
 /* reserved for future use */
 /*

@@ -142,9 +142,9 @@ void init_vmstat_solaris2(void)
     {CPUUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUUSER}},
     {CPUSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUSYSTEM}},
     {CPUIDLE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPUIDLE}},
-    {CPURAWUSER, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWUSER}},
-    {CPURAWSYSTEM, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWSYSTEM}},
-    {CPURAWIDLE, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
+    {CPURAWUSER, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWUSER}},
+    {CPURAWSYSTEM, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWSYSTEM}},
+    {CPURAWIDLE, ASN_COUNTER, RONLY, var_extensible_vmstat, 1, {CPURAWIDLE}},
     /* Future use: */
     /*
       {ERRORFLAG, ASN_INTEGER, RONLY, var_extensible_vmstat, 1, {ERRORFLAG }},
