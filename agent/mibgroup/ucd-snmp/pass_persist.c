@@ -46,11 +46,11 @@ struct persist_pipe_type {
   int fdIn, fdOut;
   int pid;
 } *persist_pipes = ( struct persist_pipe_type * ) NULL;
-static int init_persist_pipes __P((void));
-static int close_persist_pipe __P((int index));
-static int open_persist_pipe __P((int index, char *command));
-static void destruct_persist_pipes __P((void));
-static int write_persist_pipe __P(( int index, char *data ));
+static int init_persist_pipes (void);
+static int close_persist_pipe (int index);
+static int open_persist_pipe (int index, char *command);
+static void destruct_persist_pipes (void);
+static int write_persist_pipe (int index, char *data);
 
 /* the relocatable extensible commands variables */
 struct variable2 extensible_persist_passthru_variables[] = {
@@ -58,14 +58,13 @@ struct variable2 extensible_persist_passthru_variables[] = {
   {MIBINDEX, ASN_INTEGER, RWRITE, var_extensible_pass_persist, 0, {MIBINDEX}},
 };
 
-void init_pass_persist(void) {
+void init_pass_persist(void) 
+{
   snmpd_register_config_handler("pass_persist", pass_persist_parse_config,
                                 pass_persist_free_config,"miboid program");
 }
 
-void pass_persist_parse_config(word,cptr)
-  char *word;
-  char *cptr;
+void pass_persist_parse_config(char *word, char* cptr)
 {
   struct extensible **ppass = &persistpassthrus, **etmp, *ptmp;
   char *tcptr;
@@ -130,7 +129,8 @@ void pass_persist_parse_config(word,cptr)
   }
 }
 
-void pass_persist_free_config __P((void)) {
+void pass_persist_free_config (void) 
+{
   struct extensible *etmp, *etmp2;
 
   /* Close any open pipes to any programs */
@@ -146,19 +146,12 @@ void pass_persist_free_config __P((void)) {
   numpersistpassthrus = 0;
 }
 
-unsigned char *var_extensible_pass_persist(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid        *name;
-/* IN/OUT - input name requested, output name found */
-    register int        *length;
-/* IN/OUT - length of input and output oid's */
-    int                 exact;
-/* IN - TRUE if an exact match was requested. */
-    int                 *var_len;
-/* OUT - length of variable or 0 if function returned. */
-    int                 (**write_method) __P((int, u_char *, u_char, int, u_char *,oid *, int));
-/* OUT - pointer to function to set variable, otherwise 0 */
+unsigned char *var_extensible_pass_persist(struct variable *vp,
+					   oid *name,
+					   int *length,
+					   int exact,
+					   int *var_len,
+					   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 
   oid newname[30];
@@ -294,14 +287,13 @@ unsigned char *var_extensible_pass_persist(vp, name, length, exact, var_len, wri
 }
 
 int
-setPassPersist(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+setPassPersist(int action,
+	       u_char *var_val,
+	       u_char var_val_type,
+	       int var_val_len,
+	       u_char *statP,
+	       oid *name,
+	       int name_len)
 {
   int i, j, rtest, tmplen=1000, last;
   struct extensible *persistpassthru;
@@ -414,8 +406,7 @@ setPassPersist(action, var_val, var_val_type, var_val_len, statP, name, name_len
   return SNMP_ERR_NOSUCHNAME;
 }
 
-int pass_persist_compare(a, b)
-  void *a, *b;
+int pass_persist_compare(void *a, void *b)
 {
   struct extensible **ap, **bp;
   ap = (struct extensible **) a;
@@ -428,7 +419,7 @@ int pass_persist_compare(a, b)
  *   - Returns 1 on success, 0 on failure.
  *   - Initializes all FILE pointers to NULL to indicate "closed"
  */
-static int init_persist_pipes __P((void))
+static int init_persist_pipes (void)
 {
   int i;
 
@@ -455,7 +446,7 @@ static int init_persist_pipes __P((void))
  * Destruct our persistant pipes
  *
  */
-static void destruct_persist_pipes __P((void))
+static void destruct_persist_pipes (void)
 {
   int i;
 
@@ -473,9 +464,7 @@ static void destruct_persist_pipes __P((void))
 }
 
 /* returns 0 on failure, 1 on success */
-static int open_persist_pipe(index, command)
-  int index;
-  char *command;
+static int open_persist_pipe(int index, char *command)
 {
   static int recurse = 0;  /* used to allow one level of recursion */
 
@@ -538,17 +527,12 @@ static int open_persist_pipe(index, command)
 }
 
 /* Generic handler */
-void sigpipe_handler (sig, sip, uap )
-  int sig;
-  siginfo_t *sip;
-  void *uap;
+void sigpipe_handler (int sig, siginfo_t *sip, void *uap)
 {
   return;
 }
 
-static int write_persist_pipe( index, data )
-  int index;
-  char *data;
+static int write_persist_pipe(int index,  char *data)
 {
   struct sigaction sa, osa;
   int wret = 0, werrno = 0;
@@ -588,8 +572,7 @@ static int write_persist_pipe( index, data )
   return 1;
 }
 
-static int close_persist_pipe(index)
-  int index;
+static int close_persist_pipe(int index)
 {
 
   /* Check and nix every item */

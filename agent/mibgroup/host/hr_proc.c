@@ -22,9 +22,9 @@
 	 *
 	 *********************/
 
-extern void  Init_HR_Proc __P((void));
-extern int   Get_Next_HR_Proc __P((void));
-int header_hrproc __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+extern void  Init_HR_Proc (void);
+extern int   Get_Next_HR_Proc (void);
+int header_hrproc (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
 
 	/*********************
 	 *
@@ -45,14 +45,25 @@ void	init_hr_proc( )
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_hrproc(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 int
-header_hrproc(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+header_hrproc(struct variable *vp,
+		  oid *name,
+		  int *length,
+		  int exact,
+		  int *var_len,
+		  int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
 #define HRPROC_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -116,13 +127,12 @@ header_hrproc(vp, name, length, exact, var_len, write_method)
 
 
 u_char	*
-var_hrproc(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+var_hrproc(struct variable *vp,
+	   oid *name,
+	   int *length,
+	   int exact,
+	   int *var_len,
+	   int (**write_method) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int))
 {
     int  proc_idx;
 #if defined(sun) || defined(__alpha)
@@ -202,13 +212,13 @@ var_hrproc(vp, name, length, exact, var_len, write_method)
 static int HRP_index;
 
 void
-Init_HR_Proc __P((void))
+Init_HR_Proc (void)
 {
    HRP_index = 1;
 }
 
 int
-Get_Next_HR_Proc __P((void))
+Get_Next_HR_Proc (void)
 {
 		/*
 		 * Silly question time:

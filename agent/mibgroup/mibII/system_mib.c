@@ -49,16 +49,15 @@ extern int version_id_len;
 
 extern struct timeval starttime;
 
-int writeVersion __P((int, u_char *,u_char, int, u_char *,oid*, int));
-int writeSystem __P((int, u_char *,u_char, int, u_char *,oid*, int));
-int header_system __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+int writeVersion (int, u_char *,u_char, int, u_char *,oid*, int);
+int writeSystem (int, u_char *,u_char, int, u_char *,oid*, int);
+int header_system (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int) );
 
 
 /* snmpd.conf config parsing */
 
-void system_parse_config_sysloc(word, cptr)
-  char *word;
-  char *cptr;
+void system_parse_config_sysloc(char *word, 
+				char *cptr)
 {
   char tmpbuf[1024];
   
@@ -70,9 +69,8 @@ void system_parse_config_sysloc(word, cptr)
   }
 }
 
-void system_parse_config_syscon(word, cptr)
-  char *word;
-  char *cptr;
+void system_parse_config_syscon(char *word, 
+				char *cptr)
 {
   char tmpbuf[1024];
 
@@ -107,7 +105,7 @@ struct variable2 system_variables[] = {
    registering underneath */
 oid system_variables_oid[] = { 1,3,6,1,2,1,1 };
 
-void init_system_mib()
+void init_system_mib(void)
 {
 
 #ifdef HAVE_UNAME
@@ -160,14 +158,25 @@ void init_system_mib()
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_system(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 int
-header_system(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+header_system(struct variable *vp,
+	      oid *name,
+	      int *length,
+	      int exact,
+	      int *var_len,
+	      int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define SYSTEM_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -205,13 +214,12 @@ extern struct timeval sysOR_lastchange;
 #endif
 
 u_char	*
-var_system(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+var_system(struct variable *vp,
+	   oid *name,
+	   int *length,
+	   int exact,
+	   int *var_len,
+	   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 
   struct timeval now, diff;
@@ -279,14 +287,13 @@ var_system(vp, name, length, exact, var_len, write_method)
 
 
 int
-writeVersion(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+writeVersion(int action,	     
+	     u_char *var_val,
+	     u_char var_val_type,
+	     int var_val_len,
+	     u_char *statP,
+	     oid *name,
+	     int name_len)
 {
     int bigsize = 1000;
     u_char buf[sizeof(version_descr)], *cp;
@@ -318,14 +325,13 @@ writeVersion(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 
 
 int
-writeSystem(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+writeSystem(int action,	     
+	    u_char *var_val,
+	    u_char var_val_type,
+	    int var_val_len,
+	    u_char *statP,
+	    oid *name,
+	    int name_len)
 {
     int bigsize = 1000;
     u_char buf[sizeof(version_descr)], *cp;

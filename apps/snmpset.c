@@ -80,10 +80,7 @@ SOFTWARE.
 
 int failures = 0;
 
-int main __P((int, char **));
-
-void
-usage __P((void))
+void usage(void)
 {
   fprintf(stderr,"Usage:\n  snmpset ");
   snmp_parse_args_usage(stderr);
@@ -102,10 +99,7 @@ usage __P((void))
 
 }
 
-int
-main(argc, argv)
-    int   argc;
-    char  *argv[];
+int main(int argc, char *argv[])
 {
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu, *response;

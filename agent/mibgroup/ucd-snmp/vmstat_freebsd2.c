@@ -48,7 +48,8 @@
 /* CPU percentage */
 #define CPU_PRC         100
 
-void init_vmstat_freebsd2(void) {
+void init_vmstat_freebsd2(void) 
+{
 
   struct variable2 extensible_vmstat_variables[] = {
     {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_vmstat,1,{MIBINDEX}},
@@ -81,7 +82,7 @@ void init_vmstat_freebsd2(void) {
 
 
 long
-getuptime()
+getuptime(void )
 {
 	static time_t now, boottime;
 	time_t uptime;
@@ -95,19 +96,12 @@ getuptime()
 	return(uptime);
 }
 
-unsigned char *var_extensible_vmstat(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid	*name;
-/* IN/OUT - input name requested, output name found */
-    register int	*length;
-/* IN/OUT - length of input and output oid's */
-    int			exact;
-/* IN - TRUE if an exact match was requested. */
-    int			*var_len;
-/* OUT - length of variable or 0 if function returned. */
-    int			(**write_method)__P((int, u_char *, u_char, int, u_char *, oid *, int));
-/* OUT - pointer to function to set variable, otherwise 0 */
+unsigned char *var_extensible_vmstat(struct variable *vp,
+				     oid *name,
+				     int *length,
+				     int exact,
+				     int *var_len,
+				     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 
     int loop;

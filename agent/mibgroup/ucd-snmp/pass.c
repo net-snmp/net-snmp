@@ -48,15 +48,14 @@ struct variable2 extensible_passthru_variables[] = {
   {MIBINDEX, ASN_INTEGER, RWRITE, var_extensible_pass, 0, {MIBINDEX}},
 };
 
-void init_pass(void) {
+void init_pass(void) 
+{
   snmpd_register_config_handler("pass", pass_parse_config,
                                 pass_free_config,"miboid command");
 }
 
 
-void pass_parse_config(word,cptr)
-  char *word;
-  char *cptr;
+void pass_parse_config(char *word, char* cptr)
 {
   struct extensible **ppass = &passthrus, **etmp, *ptmp;
   char *tcptr;
@@ -122,7 +121,8 @@ void pass_parse_config(word,cptr)
   }
 }
 
-void pass_free_config __P((void)) {
+void pass_free_config (void) 
+{
   struct extensible *etmp, *etmp2;
   
   for (etmp = passthrus; etmp != NULL;) {
@@ -140,19 +140,12 @@ void pass_free_config __P((void)) {
   
 
 
-unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid	*name;
-/* IN/OUT - input name requested, output name found */
-    register int	*length;
-/* IN/OUT - length of input and output oid's */
-    int			exact;
-/* IN - TRUE if an exact match was requested. */
-    int			*var_len;
-/* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *,oid *, int));
-/* OUT - pointer to function to set variable, otherwise 0 */
+unsigned char *var_extensible_pass(struct variable *vp,
+				   oid *name,
+				   int *length,
+				   int exact,
+				   int *var_len,
+				   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 
   oid newname[30];
@@ -274,14 +267,13 @@ unsigned char *var_extensible_pass(vp, name, length, exact, var_len, write_metho
 }
 
 int
-setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+setPass(int action,
+	u_char *var_val,
+	u_char var_val_type,
+	int var_val_len,
+	u_char *statP,
+	oid *name,
+	int name_len)
 {
   int i, j, rtest, tmplen=1000, last;
   struct extensible *passthru;
@@ -376,8 +368,7 @@ setPass(action, var_val, var_val_type, var_val_len, statP, name, name_len)
   return SNMP_ERR_NOSUCHNAME;
 }
 
-int pass_compare(a, b)
-  void *a, *b;
+int pass_compare(void *a, void *b)
 {
   struct extensible **ap, **bp;
   ap = (struct extensible **) a;

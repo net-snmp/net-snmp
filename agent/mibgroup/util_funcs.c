@@ -73,16 +73,14 @@ static long cachetime;
 extern int numprocs, numextens;
 
 void
-Exit(var)
-  int var;
+Exit(int var)
 {
   fprintf(stderr, "Server Exiting with code %d\n",var);
   fclose (stderr);
   exit(var);
 }
 
-int shell_command(ex)
-  struct extensible *ex;
+int shell_command(struct extensible *ex)
 {
   char shellline[STRMAX];
   FILE *shellout;
@@ -103,8 +101,7 @@ int shell_command(ex)
 
 #define MAXOUTPUT 300
 
-int exec_command(ex)
-     struct extensible *ex;
+int exec_command(struct extensible *ex)
 {
   int fd;
   FILE *file;
@@ -125,8 +122,7 @@ int exec_command(ex)
   return(ex->result);
 }
 
-void wait_on_exec(ex)
-  struct extensible *ex;
+void wait_on_exec(struct extensible *ex)
 {
 #ifndef EXCACHETIME
     if (ex->pid && waitpid(ex->pid,&ex->result,0) < 0) {
@@ -138,8 +134,7 @@ void wait_on_exec(ex)
 
 #define MAXARGS 30
 
-int get_exec_output(ex)
-  struct extensible *ex;
+int get_exec_output(struct extensible *ex)
 {
   int fd[2],i, cnt;
   char ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv, **aptr;
@@ -274,9 +269,11 @@ int get_exec_output(ex)
 #endif
 }
 
-int get_exec_pipes(cmd, fdIn, fdOut, pid)
-  char *cmd;
-  int *fdIn, *fdOut, *pid;
+int get_exec_pipes(char *cmd,
+		   int *fdIn, 
+		   int *fdOut, 
+		   int *pid)
+
 {
   int fd[2][2],i, cnt;
   char ctmp[STRMAX], *cptr1, *cptr2, argvs[STRMAX], **argv, **aptr;
@@ -346,15 +343,14 @@ int get_exec_pipes(cmd, fdIn, fdOut, pid)
       return(1); /* We are returning 0 for error... */
     }
 }
-int
-clear_cache(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+
+int clear_cache(int action,
+		u_char *var_val,
+		u_char var_val_type,
+		int var_val_len,
+		u_char *statP,
+		oid *name,
+		int name_len)
 {
   
   long tmp=0;
@@ -375,8 +371,7 @@ clear_cache(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 
 extern char **argvrestartp, *argvrestartname;
 
-RETSIGTYPE restart_doit(a)
-int a;
+RETSIGTYPE restart_doit(int a)
 {
   int i;
   
@@ -390,14 +385,13 @@ int a;
 }
 
 int
-restart_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+restart_hook(int action,
+	     u_char *var_val,
+	     u_char var_val_type,
+	     int var_val_len,
+	     u_char *statP,
+	     oid *name,
+	     int name_len)
 {
   
   long tmp=0;
@@ -416,9 +410,8 @@ restart_hook(action, var_val, var_val_type, var_val_len, statP, name, name_len)
 }
 
 void
-print_mib_oid(name,len)
-  oid name[];
-  int len;
+print_mib_oid(oid name[],
+	      int len)
 {
   int i;
   printf("Mib:  ");
@@ -428,10 +421,9 @@ print_mib_oid(name,len)
 }
 
 void
-sprint_mib_oid(buf,name,len)
-  char *buf;
-  oid name[];
-  int len;
+sprint_mib_oid(char *buf,
+	       oid name[],
+	       int len)
 {
   int i;
   for(i=0; i < len; i++) {
@@ -441,14 +433,13 @@ sprint_mib_oid(buf,name,len)
   }
 }
 
-int checkmib(vp,name,length,exact,var_len,write_method,max)
-    register struct variable *vp;
-    register oid	*name;
-    register int	*length;
-    int			exact;
-    int			*var_len;
-    int			(**write_method)__P((int, u_char *, u_char, int, u_char *, oid *, int));
-    int                 max;
+int checkmib(struct variable *vp,
+	     oid *name,
+	     int *length,
+	     int exact,
+	     int *var_len,
+	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int),
+	     int max)
 {
   int i, rtest;
 #define MAX_NEWNAME_LEN 100
@@ -501,14 +492,25 @@ int checkmib(vp,name,length,exact,var_len,write_method,max)
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_generic(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 int
-header_generic(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+header_generic(struct variable *vp,
+	       oid *name,
+	       int *length,
+	       int exact,
+	       int *var_len,
+	       int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     oid newname[MAX_NAME_LEN];
     int result;
@@ -533,9 +535,8 @@ header_generic(vp, name, length, exact, var_len, write_method)
     return(MATCH_SUCCEEDED);
 }
 
-char *find_field(ptr,field)
-     char *ptr;
-     int field;
+char *find_field(char *ptr,
+		 int field)
 {
   int i;
   char *init=ptr;
@@ -563,9 +564,8 @@ char *find_field(ptr,field)
   return(NULL);
 }
 
-int parse_miboid(buf,oidout)
-char *buf;
-oid *oidout;
+int parse_miboid(char *buf,
+		 oid *oidout)
 {
   int i;
   
@@ -582,9 +582,8 @@ oid *oidout;
 }
 
 void
-string_append_int (s, val)
-char *s;
-int val;
+string_append_int (char *s, 
+		   int val)
 {
     char textVal[16];
 
@@ -599,8 +598,8 @@ int val;
 }
 
 int
-calculate_time_diff(t1, t2)
-  struct timeval t1, t2;
+calculate_time_diff(struct timeval t1,
+		    struct timeval t2)
 {
   struct timeval tmp, diff;
   memcpy(&tmp, &t1, sizeof(struct timeval));

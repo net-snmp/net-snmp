@@ -8,13 +8,13 @@
 config_require(mibII/ip util_funcs)
 config_arch_require(solaris2, kernel_sunos5)
 
-void init_var_route __P((void));
+void init_var_route (void);
 #ifdef RTENTRY_4_4
-void load_rtentries __P((struct radix_node *));
+void load_rtentries (struct radix_node *);
 #endif
 #if defined(freebsd2) || defined(netbsd1) || defined(bsdi2) || defined(openbsd2)
-struct sockaddr_in *klgetsa __P((struct sockaddr_in *));
+struct sockaddr_in *klgetsa (struct sockaddr_in *);
 #endif
-u_char	*var_ipRouteEntry __P((struct variable*, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+u_char	*var_ipRouteEntry (struct variable*, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
 
 #endif /* _MIBGROUP_VAR_ROUTE_H */

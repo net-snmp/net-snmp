@@ -21,16 +21,16 @@
 
 /* function definitions */
 
-extern void init_dlmod __P((void));
-extern void deinit_dlmod __P((void));
-extern int dynamic_init_dlmod __P((void));
-extern int dynamic_deinit_dlmod __P((void));
+extern void init_dlmod (void);
+extern void deinit_dlmod (void);
+extern int dynamic_init_dlmod (void);
+extern int dynamic_deinit_dlmod (void);
 
-static unsigned char  *var_dlmod __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, unsigned char *, unsigned char, int, unsigned char *, oid *, int))));
-static unsigned char  *var_dlmodEntry __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, unsigned char *, unsigned char, int, unsigned char *, oid *, int))));
-static int write_dlmodName __P((int, u_char *, u_char, int, u_char *, oid *, int));
-static int write_dlmodPath __P((int, u_char *, u_char, int, u_char *, oid *, int));
-static int write_dlmodStatus __P((int, u_char *, u_char, int, u_char *, oid *, int));
+static unsigned char  *var_dlmod (struct variable *, oid *, int *, int, int *, int (**write) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int));
+static unsigned char  *var_dlmodEntry (struct variable *, oid *, int *, int, int *, int (**write) (int, unsigned char *, unsigned char, int, unsigned char *, oid *, int));
+static int write_dlmodName (int, u_char *, u_char, int, u_char *, oid *, int);
+static int write_dlmodPath (int, u_char *, u_char, int, u_char *, oid *, int);
+static int write_dlmodStatus (int, u_char *, u_char, int, u_char *, oid *, int);
 
 
 /*

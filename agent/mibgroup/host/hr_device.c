@@ -21,7 +21,7 @@
 	 *
 	 *********************/
 
-int Get_Next_Device __P((void));
+int Get_Next_Device (void);
 
 PFV init_device[ HRDEV_TYPE_MAX ];
 PFIV next_device[ HRDEV_TYPE_MAX ];
@@ -35,8 +35,8 @@ PFI device_errors[ HRDEV_TYPE_MAX ];
 
 int current_type;
 
-void Init_Device __P((void));
-int header_hrdevice __P((struct variable *,oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *,oid *,int)) ));
+void Init_Device (void);
+int header_hrdevice (struct variable *,oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *,oid *,int));
 
 	/*********************
 	 *
@@ -44,7 +44,7 @@ int header_hrdevice __P((struct variable *,oid *, int *, int, int *, int (**writ
 	 *
 	 *********************/
 
-void	init_hr_device  __P((void))
+void init_hr_device(void)
 {
     int i;
 
@@ -73,15 +73,25 @@ void	init_hr_device  __P((void))
 #define MATCH_FAILED	-1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_hrdevice(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
 
 int
-header_hrdevice(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+header_hrdevice(struct variable *vp,
+		oid *name,
+		int *length,
+		int exact,
+		int *var_len,
+		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define HRDEV_ENTRY_NAME_LENGTH	11
     oid newname[MAX_NAME_LEN];
@@ -179,13 +189,12 @@ int device_type_len = sizeof(device_type_id)/sizeof(device_type_id[0]);
 
 
 u_char	*
-var_hrdevice(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *,u_char, int, u_char *,oid*, int));
+var_hrdevice(struct variable *vp,
+	     oid *name,
+	     int *length,
+	     int exact,
+	     int *var_len,
+	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     int dev_idx, type;
     oid *oid_p;
@@ -247,7 +256,7 @@ var_hrdevice(vp, name, length, exact, var_len, write_method)
 
 
 void
-Init_Device __P((void))
+Init_Device (void)
 {
 		/*
 		 *  Find the first non-NULL initialisation function
@@ -261,7 +270,7 @@ Init_Device __P((void))
 }
 
 int
-Get_Next_Device __P((void))
+Get_Next_Device (void)
 {
     int result = -1;
 

@@ -46,7 +46,8 @@ static oid example_name[16] = {1,3,6,1,4,1,2021,254};
 static int example_name_len = 8;
 
 void
-init_example __P(()) {
+init_example () 
+{
   /* call auto_nlist to load the nlist symbols.  We
      actually don't need it, so its commented out. */
   /* auto_nlist( "example_symbol" ); */
@@ -57,32 +58,34 @@ init_example __P(()) {
 }
 
 void
-deinit_example __P(()) {
-	unregister_mib(example_name, example_name_len);
+deinit_example () 
+{
+    unregister_mib(example_name, example_name_len);
 }
 
 int 
-dynamic_init_example __P((void)) {
-	init_example();
-	return 0;
+dynamic_init_example (void)
+{
+    init_example();
+    return 0;
 }
 
 int 
-dynamic_deinit_example __P((void)) {
-	deinit_example();
-	return 0;
+dynamic_deinit_example (void) 
+{
+    deinit_example();
+    return 0;
 }
 /* define the callback function used in the example_variables
    structure in example.h */
 
 u_char	*
-var_example(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_example(struct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len;
+	    int (**write_method) (int, u_char *, u_char, int, u_char *, oid *, int))
 {
   /* define any variables we might return as static! */
   static long long_ret;

@@ -7,11 +7,11 @@
 
 config_require(util_funcs)
 
-unsigned char *var_extensible_disk __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+unsigned char *var_extensible_disk (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
 
 /* config file parsing routines */
-void disk_free_config __P((void));
-void disk_parse_config __P((char *, char *));
+void disk_free_config (void);
+void disk_parse_config (char *, char *);
 
 #include "mibdefs.h"
 

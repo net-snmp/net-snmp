@@ -124,10 +124,8 @@
 	 *********************/
 
 #ifdef linux
-static void linux_read_tcp_stat __P((struct tcp_mib *));
+static void linux_read_tcp_stat (struct tcp_mib *);
 #endif
-
-static int header_tcp __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
 
 	/*********************
 	 *
@@ -185,14 +183,25 @@ void	init_tcp( )
 #define MATCH_FAILED	1
 #define MATCH_SUCCEEDED	0
 
+/*
+  header_tcp(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
 static int
-header_tcp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;    /* IN - pointer to variable entry that points here */
-    oid     *name;	    /* IN/OUT - input name requested, output name found */
-    int     *length;	    /* IN/OUT - length of input and output oid's */
-    int     exact;	    /* IN - TRUE if an exact match was requested. */
-    int     *var_len;	    /* OUT - length of variable or 0 if function returned. */
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+header_tcp(struct variable *vp,
+	   oid *name,
+	   int *length,
+	   int exact,
+	   int *var_len,
+	   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 #define TCP_NAME_LENGTH	8
     oid newname[MAX_NAME_LEN];
@@ -228,13 +237,12 @@ header_tcp(vp, name, length, exact, var_len, write_method)
 #ifdef HAVE_SYS_TCPIPSTATS_H
 
 u_char *
-var_tcp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_tcp(struct variable *vp,
+	oid *name,
+	int *length,
+	int exact,
+	int *var_len,
+	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     static struct kna tcpipstats;
 
@@ -354,13 +362,12 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 #else /* not HAVE_SYS_TCPIPSTATS_H */
 
 u_char *
-var_tcp(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_tcp(struct variable *vp,
+	oid *name,
+	int *length,
+	int exact,
+		int *var_len,
+	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     static struct tcpstat tcpstat;
 #ifdef hpux
@@ -505,13 +512,12 @@ var_tcp(vp, name, length, exact, var_len, write_method)
 #endif /* not HAVE_SYS_TCPIPSTATS_H */
 
 u_char *
-var_tcpEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_tcpEntry(struct variable *vp,
+	     oid *name,
+	     int *length,
+	     int exact,
+	     int *var_len,
+	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     int i;
     oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
@@ -616,13 +622,12 @@ TCP_Cmp(void *addr, void *ep)
 }
 
 u_char *
-var_tcp(vp, name, length, exact, var_len, write_method)
-register struct variable *vp;
-oid     *name;
-int     *length;
-int     exact;
-int     *var_len;
-int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_tcp(struct variable *vp,
+	oid *name,
+	int *length,
+	int exact,
+	int *var_len,
+	int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
   mib2_tcp_t tcpstat;
   mib2_ip_t ipstat;
@@ -686,13 +691,12 @@ int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int))
 
 
 u_char *
-var_tcpEntry(vp, name, length, exact, var_len, write_method)
-register struct variable *vp;
-oid     *name;
-int     *length;
-int     exact;
-int     *var_len;
-int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_tcpEntry(struct variable *vp,
+	     oid *name,
+	     int *length,
+	     int exact,
+	     int *var_len,
+	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
   oid newname[MAX_NAME_LEN], lowest[MAX_NAME_LEN], *op;
   u_char *cp;
@@ -789,8 +793,7 @@ int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int))
  */
 
 static void
-linux_read_tcp_stat (tcpstat)
-struct tcp_mib *tcpstat;
+linux_read_tcp_stat (struct tcp_mib *tcpstat)
 {
   FILE *in = fopen ("/proc/net/snmp", "r");
   char line [1024];
@@ -820,7 +823,7 @@ struct tcp_mib *tcpstat;
  *	Print INTERNET connections
  */
 
-int TCP_Count_Connections __P((void))
+int TCP_Count_Connections (void)
 {
 	int Established;
 	struct inpcb cb;
@@ -887,7 +890,7 @@ static struct inpcb tcp_inpcb, *tcp_prev;
 static struct inpcb *inpcb_list;
 #endif
 
-void TCP_Scan_Init __P((void))
+void TCP_Scan_Init (void)
 {
 #ifndef linux
     auto_nlist(TCP_SYMBOL, (char *)&tcp_inpcb, sizeof(tcp_inpcb));
@@ -967,9 +970,8 @@ void TCP_Scan_Init __P((void))
 #endif /* linux */
 }
 
-int TCP_Scan_Next(State, RetInPcb)
-int *State;
-struct inpcb *RetInPcb;
+int TCP_Scan_Next(int *State,
+		  struct inpcb *RetInPcb)
 {
 	register struct inpcb *next;
 #ifndef linux

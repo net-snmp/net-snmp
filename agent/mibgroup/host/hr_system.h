@@ -7,8 +7,11 @@
 
 config_require(host/hr_utils )
 
-extern void	init_hr_system __P((void));
-extern u_char	*var_hrsys __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern void	init_hr_system (void);
+extern u_char	*var_hrsys (struct variable *, oid *, int *, int, int *, int
+			    (**write) (int, u_char *, u_char, int, u_char *,
+				       oid *, int));
+
 
 #define	HRSYS_UPTIME		1
 #define	HRSYS_DATE		2

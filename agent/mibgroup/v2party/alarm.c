@@ -69,42 +69,30 @@ SOFTWARE.
 
 static struct alarmEntry *alarmTab = NULL;
 static long alarmNextIndex = 1;
-static int write_alarmtab __P((int, u_char *, u_char, int, u_char *, oid *, int));
-static int rmonGetValue __P((oid *, int, oid *, int, oid *, int, oid *, int,
-	long *, struct alarmEntry *));
-static void cmutimeradd __P((struct timeval *, struct timeval *, struct timeval *));
-static void alarmInsertRow __P((struct alarmEntry *));
-static void alarmFreeShadow __P((struct alarmEntry *));
-static void alarmDeleteRow __P((struct alarmEntry *));
-static int alarmShadowRow __P((struct alarmEntry *));
-static struct alarmEntry *alarmGetRow __P((oid *, int, int));
-static struct alarmEntry *alarmGetRowByIndex __P((int));
-static struct alarmEntry *alarmNewRow __P((oid *, int, int));
-static void alarmCommitRow __P((struct alarmEntry *));
-static void alarmProcessValue __P((struct alarmEntry *, long, long));
-static void alarmUpdateDelta __P((struct alarmEntry *, long));
-static void alarmUpdateAbs __P((struct alarmEntry *, long));
 
 /* retrieve the given variable from the MIB.  Returns 0 on success,
 ** 1 if the request was asynchronously transmitted to another host,
 ** and another value on errors.
 */
+
 static int
-rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
-	     context, contextLen, variable, variableLen, value, alarm)
-    oid *srcParty, *dstParty, *context;
-    int srcPartyLen, dstPartyLen, contextLen;
-    oid *variable;
-    int variableLen;                /* number of subids in variable */
-    long *value;
-    struct alarmEntry *alarm;
+rmonGetValue(oid *srcParty, 
+	     int srcPartyLen, 
+	     oid *dstParty, 
+	     int dstPartyLen,
+	     oid *context, 
+	     int contextLen, 
+	     oid *variable, 
+	     int variableLen, 
+	     long *value, 
+	     struct alarmEntry *alarm)
 {
     oid bigVar[MAX_OID_LEN];
     int bigVarLen;
     u_char type;
     int len;
     u_short acl;
-    int (*writeFunc) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+    int (*writeFunc) (int, u_char *, u_char, int, u_char *, oid *, int);
     u_char *var;
     struct packet_info pinfo, *pi = &pinfo;
     int noSuchObject;
@@ -115,7 +103,7 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
     struct variable_list *varList;
     u_long addr;
     struct get_req_state *state;
-    extern int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+    extern int snmp_input (int, struct snmp_session *, int, struct snmp_pdu *, void *);
     
     /* whether it's local or non-local, I have to know about the
        parties and context */
@@ -215,8 +203,9 @@ rmonGetValue(srcParty, srcPartyLen, dstParty, dstPartyLen,
 ** routine accounts for tv_usec overflow.
 */
 static void
-cmutimeradd(rresult, tt1, tt2)
-	struct timeval *rresult, *tt1, *tt2;
+cmutimeradd(struct timeval *rresult, 
+	    struct timeval *tt1, 
+	    struct timeval *tt2)
 {
 	rresult->tv_usec = tt1->tv_usec + tt2->tv_usec;
 	rresult->tv_sec = tt1->tv_sec + tt2->tv_sec;
@@ -228,8 +217,7 @@ cmutimeradd(rresult, tt1, tt2)
 
 /* insert the given row into the alarm table, ordered by index */
 static void
-alarmInsertRow(alarm)
-    struct alarmEntry *alarm;
+alarmInsertRow(struct alarmEntry *alarm)
 {
     struct alarmEntry *current;
     struct alarmEntry *prev;
@@ -254,8 +242,7 @@ alarmInsertRow(alarm)
 
 /* free the shadow space that was allocated to this row */
 static void
-alarmFreeShadow(alarm)
-	struct alarmEntry *alarm;
+alarmFreeShadow(struct alarmEntry *alarm)
 {
     if (alarm->shadow == NULL) {
 	return;
@@ -269,8 +256,7 @@ alarmFreeShadow(alarm)
 ** associated with it.
 */
 static void
-alarmDeleteRow(alarm)
-	struct alarmEntry *alarm;
+alarmDeleteRow(struct alarmEntry *alarm)
 {
     struct alarmEntry *temp;
     struct alarmEntry *prev = NULL;
@@ -309,8 +295,7 @@ alarmDeleteRow(alarm)
 ** data into the shadow structure.  Returns 1 on success, 0 otherwise.
 */
 static int
-alarmShadowRow(alarm)
-struct alarmEntry *alarm;
+alarmShadowRow(struct alarmEntry *alarm)
 {
     int i = 0;
     
@@ -336,10 +321,9 @@ struct alarmEntry *alarm;
 
 /* return a pointer to the given row in the alarmTab */
 static struct alarmEntry *
-alarmGetRow(context, contextLen, index)
-    oid *context;
-    int contextLen;
-    int index;
+alarmGetRow(oid *context,
+	    int contextLen,
+	    int index)
 {
 	struct alarmEntry *alarm;
 
@@ -357,8 +341,7 @@ alarmGetRow(context, contextLen, index)
 
 /* return a pointer to the given row in the alarmTab */
 static struct alarmEntry *
-alarmGetRowByIndex(index)
-    int index;
+alarmGetRowByIndex(int index)
 {
     struct alarmEntry *alarm;
 
@@ -379,10 +362,9 @@ alarmGetRowByIndex(index)
 ** It makes sure the index is in the valid range.
 */
 static struct alarmEntry *
-alarmNewRow(context, contextLen, index)
-    oid *context;
-    int contextLen;
-    int index;
+alarmNewRow(oid *context,
+	    int contextLen,
+	    int index)
 {
     struct alarmEntry *alarm;
     int i = 0;
@@ -443,8 +425,7 @@ alarmNewRow(context, contextLen, index)
 ** exists, just return.  If we are setting the row to invalid, delete it.
 */
 static void
-alarmCommitRow(alarm)
-    struct alarmEntry *alarm;
+alarmCommitRow(struct alarmEntry *alarm)
 {
     struct alarmEntry *nextPtr;
     u_long destAddr;
@@ -527,10 +508,9 @@ alarmCommitRow(alarm)
 ** falling alarm if necessary.
 */
 static void
-alarmProcessValue(alarm, oldValue, newValue)
-	struct alarmEntry *alarm;
-	long oldValue;
-	long newValue;
+alarmProcessValue(struct alarmEntry *alarm,
+		  long oldValue,
+		  long newValue)
 {
     if ((alarm->bitmask & ALARMTABVALUEMASK) == 0) {
 	/* this is the first sample */
@@ -569,9 +549,8 @@ alarmProcessValue(alarm, oldValue, newValue)
 
 /* update a delta counter and send an alarm if necessary */
 static void
-alarmUpdateDelta(alarm, realValue)
-    struct alarmEntry *alarm;
-    long realValue;
+alarmUpdateDelta(struct alarmEntry *alarm,
+		 long realValue)
 {
     long oldValue;
 
@@ -596,9 +575,8 @@ alarmUpdateDelta(alarm, realValue)
 
 /* update an absolute value counter and send an alarm if necessary */
 static void
-alarmUpdateAbs(alarm, value)
-    struct alarmEntry *alarm;
-    long value;
+alarmUpdateAbs(struct alarmEntry *alarm,
+	       long value)
 {
     long oldValue;
 
@@ -614,8 +592,7 @@ alarmUpdateAbs(alarm, value)
 ** the value for the variable and take action if necessary.
 */
 Export void
-alarmTimer(now)
-	struct timeval *now;
+alarmTimer(struct timeval *now)
 {
     struct alarmEntry *alarm;
     struct alarmEntry *next;
@@ -672,11 +649,10 @@ alarmTimer(now)
 
 /* process the response to a Get request */
 Export int
-alarmGetResponse(pdu, state, op, session)
-    struct snmp_pdu *pdu;
-    struct get_req_state *state;
-    int op;
-    struct snmp_session *session;
+alarmGetResponse(struct snmp_pdu *pdu,
+		 struct get_req_state *state,
+		 int op,
+		 struct snmp_session *session)
 {
     struct alarmEntry *alarm = (struct alarmEntry *)state->info;
     struct variable_list *vp;
@@ -726,18 +702,26 @@ alarmGetResponse(pdu, state, op, session)
  * this variable.
  * If statP is NULL and alarm is NULL, then neither this instance nor the
  * variable exists.
- */
-/* return TRUE on success and FALSE on failure */
+ return TRUE on success and FALSE on failure
+ Arguments:    
+ action	 IN - RESERVE1, RESERVE2, COMMIT, or FREE 
+ var_val	 IN - input or output buffer space
+ var_val_type IN - type of input buffer
+ var_val_len	 IN - input and output buffer len
+ statP	 IN - pointer to local statistic
+ name	 IN - pointer to name requested
+ name_len	 IN - number of sub-ids in the name
+*/
+
+
 static int
-write_alarmtab(action, var_val, var_val_type, var_val_len, statP,
-		name, name_len)
-    int action;			/* IN - RESERVE1, RESERVE2, COMMIT, or FREE */
-    u_char *var_val;	/* IN - input or output buffer space */
-    u_char var_val_type;	/* IN - type of input buffer */
-    int var_val_len;	/* IN - input and output buffer len */
-    u_char *statP;		/* IN - pointer to local statistic */
-    oid *name;			/* IN - pointer to name requested */
-    int name_len;		/* IN - number of sub-ids in the name */
+write_alarmtab(int action,
+	       u_char *var_val,
+	       u_char var_val_type,
+	       int var_val_len,
+	       u_char *statP,
+	       oid *name,
+	       int name_len)
 {
     register int index;
     register int variable;
@@ -1076,17 +1060,12 @@ write_alarmtab(action, var_val, var_val_type, var_val_len, statP,
 }
 
 Export u_char *
-var_alarmnextindex(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;   /* IN - pointer to variable entry that
-				 ** points here
-				 */
-    register oid *name;		/* IN/OUT - input name requested,
-				 ** output name found
-				 */
-    register int *length;	/* IN/OUT - length of input and output oid's */
-    int exact;		/* IN - TRUE if an exact match was requested. */
-    int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_alarmnextindex(struct variable *vp,
+		   oid *name,
+		   int *length,
+		   int exact,
+		   int *var_len,
+		   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     int result;
 
@@ -1111,17 +1090,12 @@ var_alarmnextindex(vp, name, length, exact, var_len, write_method)
     
 /* respond to requests for variables in the alarm table */
 Export u_char *
-var_alarmtab(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;   /* IN - pointer to variable entry that
-				     ** points here
-									*/
-    register oid *name;		/* IN/OUT - input name requested,
-				 ** output name found
-				 */
-    register int *length;	/* IN/OUT - length of input and output oid's */
-    int exact;		/* IN - TRUE if an exact match was requested. */
-    int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int	(**write_method) __P((int, u_char *, u_char, int, u_char *,oid *, int));
+var_alarmtab(struct variable *vp,
+	     oid *name,
+	     int *length,
+	     int exact,
+	     int *var_len,
+	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     oid newname[MAX_NAME_LEN];
     int result;

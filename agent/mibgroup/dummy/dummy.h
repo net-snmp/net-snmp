@@ -12,8 +12,8 @@ extern void	init_dummy();
 extern u_char	*var_dummy();
 
 /* config file parsing routines */
-extern void dummy_free_config __P((void));
-extern void dummy_parse_config __P((char *, char *));
+extern void dummy_free_config (void);
+extern void dummy_parse_config (char *, char *);
 
 /* add the DUMMY-MIB to the list of default mibs to parse */
 config_add_mib(DUMMY-MIB)

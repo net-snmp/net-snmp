@@ -5,8 +5,8 @@
 #ifndef _MIBGROUP_HRPROC_H
 #define _MIBGROUP_HRPROC_H
 
-extern void	init_hr_proc __P((void));
-extern u_char	*var_hrproc  __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern void	init_hr_proc (void);
+extern u_char	*var_hrproc  (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
 
 
 #define	HRPROC_ID		1

@@ -37,9 +37,9 @@ config_arch_require(solaris2, kernel_sunos5)
 #include "var_route.h"
 #include "route_write.h"
 
-extern void	init_ip __P((void));
-extern u_char	*var_ip __P((struct variable*, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-extern u_char	*var_ipAddrEntry __P((struct variable*, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+extern void	init_ip (void);
+extern u_char	*var_ip (struct variable*, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern u_char	*var_ipAddrEntry (struct variable*, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
 
 #include "at.h"		/* for var_atEntry() */
 

@@ -8,8 +8,8 @@
 extern u_char *var_file_table();
 
 /* config file parsing routines */
-void file_free_config __P((void));
-void file_parse_config __P((char *, char *));
+void file_free_config (void);
+void file_parse_config (char *, char *);
 
 #include "mibdefs.h"
 

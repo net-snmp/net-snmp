@@ -76,17 +76,12 @@ SOFTWARE.
 #include "system.h"
 #include "snmp_parse_args.h"
 
-int main __P((int, char **));
-int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
-in_addr_t parse_address __P((char *));
-
 oid objid_enterprise[] = {1, 3, 6, 1, 4, 1, 3, 1, 1};
 oid objid_sysdescr[]   = {1, 3, 6, 1, 2, 1, 1, 1, 0};
 oid objid_sysuptime[]  = {1, 3, 6, 1, 2, 1, 1, 3, 0};
 oid objid_snmptrap[]   = {1, 3, 6, 1, 6, 3, 1, 1, 4, 1, 0};
 
-void
-usage __P((void))
+void usage(void)
 {
     fprintf(stderr,"Usage:\n  snmptrap ");
     snmp_parse_args_usage(stderr);
@@ -97,18 +92,16 @@ usage __P((void))
     fprintf(stderr, "  -v 2 trap parameters:\n\t uptime trapoid [ var ] ...\n");
 }
 
-int snmp_input(operation, session, reqid, pdu, magic)
-    int operation;
-    struct snmp_session *session;
-    int reqid;
-    struct snmp_pdu *pdu;
-    void *magic;
+int snmp_input(int operation,
+	       struct snmp_session *session,
+	       int reqid,
+	       struct snmp_pdu *pdu,
+	       void *magic)
 {
   return 1;
 }
 
-in_addr_t parse_address(address)
-    char *address;
+in_addr_t parse_address(char *address)
 {
     in_addr_t addr;
     struct sockaddr_in saddr;
@@ -127,10 +120,7 @@ in_addr_t parse_address(address)
 
 }
 
-int
-main(argc, argv)
-    int	    argc;
-    char    *argv[];
+int main(int argc, char *argv[])
 {
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu, *response;

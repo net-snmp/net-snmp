@@ -111,7 +111,8 @@ extern struct subtree *subtrees,subtrees_old[];
 extern struct variable2 extensible_relocatable_variables[];
 extern struct variable2 extensible_passthru_variables[];
 
-void init_extensible(void) {
+void init_extensible(void) 
+{
 
   struct variable2 extensible_extensible_variables[] = {
     {MIBINDEX, ASN_INTEGER, RONLY, var_extensible_shell, 1, {MIBINDEX}},
@@ -138,9 +139,7 @@ void init_extensible(void) {
                                 "[miboid] name program-or-script arguments");
 }
 
-void extensible_parse_config(word,cptr)
-  char *word;
-  char *cptr;
+void extensible_parse_config(char *word, char* cptr)
 {
 
   struct extensible **pptmp;
@@ -201,7 +200,8 @@ void extensible_parse_config(word,cptr)
   }
 }
 
-void extensible_free_config __P((void)) {
+void extensible_free_config (void)
+{
   struct extensible *etmp, *etmp2;
 
   for (etmp = extens; etmp != NULL;) {
@@ -224,9 +224,8 @@ void extensible_free_config __P((void)) {
 }
 
 
-struct extensible *get_exten_instance(exten,inst)
-     int inst;
-     struct extensible *exten;
+struct extensible *get_exten_instance(struct extensible *exten,
+				      int inst)
 {
   int i;
   
@@ -241,19 +240,25 @@ struct extensible *extens=NULL;  /* In exec.c */
 struct extensible *relocs=NULL;  /* In exec.c */
 int numextens=0,numrelocs=0;                    /* ditto */
 
-unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid	*name;
-/* IN/OUT - input name requested, output name found */
-    register int	*length;
-/* IN/OUT - length of input and output oid's */
-    int			exact;
-/* IN - TRUE if an exact match was requested. */
-    int			*var_len;
-/* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-/* OUT - pointer to function to set variable, otherwise 0 */
+
+/*
+  var_extensible_shell(...
+  Arguments:
+  vp	  IN      - pointer to variable entry that points here
+  name    IN/OUT  - IN/name requested, OUT/name found
+  length  IN/OUT  - length of IN/OUT oid's 
+  exact   IN      - TRUE if an exact match was requested
+  var_len OUT     - length of variable or 0 if function returned
+  write_method
+  
+*/
+
+unsigned char *var_extensible_shell(struct variable *vp,
+				    oid *name,
+				    int *length,
+				    int exact,
+				    int *var_len,
+				    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 
   static struct extensible *exten = 0;
@@ -298,14 +303,13 @@ unsigned char *var_extensible_shell(vp, name, length, exact, var_len, write_meth
 }
 
 int
-fixExecError(action, var_val, var_val_type, var_val_len, statP, name, name_len)
-   int      action;
-   u_char   *var_val;
-   u_char   var_val_type;
-   int      var_val_len;
-   u_char   *statP;
-   oid      *name;
-   int      name_len;
+fixExecError(int action,
+	     u_char *var_val,
+	     u_char var_val_type,
+	     int var_val_len,
+	     u_char *statP,
+	     oid *name,
+	     int name_len)
 {
   
   struct extensible *exten;
@@ -347,19 +351,12 @@ struct variable2 extensible_relocatable_variables[] = {
   {ERRORFIX, ASN_INTEGER, RWRITE, var_extensible_relocatable, 1, {ERRORFIX }}
 };
 
-unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-/* IN - pointer to variable entry that points here */
-    register oid	*name;
-/* IN/OUT - input name requested, output name found */
-    register int	*length;
-/* IN/OUT - length of input and output oid's */
-    int			exact;
-/* IN - TRUE if an exact match was requested. */
-    int			*var_len;
-/* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
-/* OUT - pointer to function to set variable, otherwise 0 */
+unsigned char *var_extensible_relocatable(struct variable *vp,
+					  oid *name,
+					  int *length,
+					  int exact,
+					  int *var_len,
+					  int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 
   int i, fd;
@@ -452,10 +449,10 @@ unsigned char *var_extensible_relocatable(vp, name, length, exact, var_len, writ
   return NULL;
 }
 
-struct subtree *find_extensible(tp,tname,tnamelen,exact)
-  register struct subtree	*tp;
-  oid tname[];
-  int tnamelen,exact;
+struct subtree *find_extensible(struct subtree	*tp,
+				oid tname[],
+				int tnamelen,
+				int exact)
 {
   int i,tmp;
   struct extensible *exten = 0;

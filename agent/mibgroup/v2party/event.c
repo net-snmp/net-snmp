@@ -72,29 +72,6 @@
 static struct eventEntry *eventTab = NULL;
 static struct eventNotifyEntry *eventNotifyTab = NULL;
 static long eventNextIndex = 1;
-static int write_eventtab __P((int, u_char *, u_char, int, u_char *, oid *,int));
-static int write_eventnotifytab __P((int, u_char *, u_char, int, u_char *, oid *,int));
-static struct eventNotifyEntry *eventNotifyNewRow __P((int, oid *, int));
-static struct eventNotifyEntry *eventNotifyGetRow __P((int, oid *, int));
-static void eventCommitRow __P((struct eventEntry *));
-static void eventNotifyCommitRow __P((struct eventNotifyEntry *));
-static void eventAlarmFillInVars __P((struct variable_list *,
-	struct alarmEntry *, int));
-static void eventSendTrap __P((struct eventEntry *, int, void *));
-static struct eventEntry *eventGetRow __P((int));
-static struct eventEntry *eventNewRow __P((int));
-static void eventUnavailFillInVars __P((struct variable_list *,
-	struct alarmEntry *));
-void eventNotifyUpdateSession __P((struct eventNotifyEntry *));
-static void eventNotifyInsertRow __P((struct eventNotifyEntry *));
-static void eventFreeShadow __P((struct eventEntry *));
-static void eventNotifyFreeShadow __P((struct eventNotifyEntry *));
-static void eventDeleteRow __P((struct eventEntry *));
-static void eventNotifyDeleteRow __P((struct eventNotifyEntry *));
-static int eventShadowRow __P((struct eventEntry *));
-void time_subtract __P((struct timeval *, struct timeval *, struct timeval *));
-static void eventInsertRow __P((struct eventEntry *));
-static int eventNotifyShadowRow __P((struct eventNotifyEntry *));
 
 #define MIN_INTERVAL	1	/* one second */
 #define MAX_RETRANSMISSIONS	20
@@ -104,8 +81,9 @@ static struct eventEntry *eventHint = NULL;
 static struct eventNotifyEntry *eventNotifyHint = NULL;
 
 void
-time_subtract(result, t1, t2)
-    struct timeval *result, *t1, *t2;
+time_subtract(struct timeval *result,
+	      struct timeval *t1, 
+	      struct timeval*t2)
 {
     result->tv_usec = t1->tv_usec - t2->tv_usec;
     result->tv_sec = t1->tv_sec - t2->tv_sec;
@@ -117,8 +95,7 @@ time_subtract(result, t1, t2)
 
 /* insert the given row into the event table, ordered by index */
 static void
-eventInsertRow(event)
-    struct eventEntry *event;
+eventInsertRow(struct eventEntry *event)
 {
     struct eventEntry *current;
     struct eventEntry *prev;
@@ -143,8 +120,7 @@ eventInsertRow(event)
 
 /* insert the given row into the event table, ordered by index */
 static void
-eventNotifyInsertRow(event)
-    struct eventNotifyEntry *event;
+eventNotifyInsertRow(struct eventNotifyEntry *event)
 {
     struct eventNotifyEntry *current;
     struct eventNotifyEntry *prev;
@@ -170,8 +146,7 @@ eventNotifyInsertRow(event)
 
 /* free the shadow space that was allocated to this row */
 static void
-eventFreeShadow(event)
-    struct eventEntry *event;
+eventFreeShadow(struct eventEntry *event)
 {
     if (event->shadow == NULL) {
 	return;
@@ -183,8 +158,7 @@ eventFreeShadow(event)
 
 /* free the shadow space that was allocated to this row */
 static void
-eventNotifyFreeShadow(event)
-    struct eventNotifyEntry *event;
+eventNotifyFreeShadow(struct eventNotifyEntry *event)
 {
     if (event->shadow == NULL) {
 	return;
@@ -198,8 +172,7 @@ eventNotifyFreeShadow(event)
  ** associated with it.
  */
 static void
-eventDeleteRow(event)
-    struct eventEntry *event;
+eventDeleteRow(struct eventEntry *event)
 {
     struct eventEntry *temp;
     struct eventEntry *prev = NULL;
@@ -234,8 +207,7 @@ eventDeleteRow(event)
  ** associated with it.
  */
 static void
-eventNotifyDeleteRow(event)
-    struct eventNotifyEntry *event;
+eventNotifyDeleteRow(struct eventNotifyEntry *event)
 {
     struct eventNotifyEntry *temp;
     struct eventNotifyEntry *prev = NULL;
@@ -270,8 +242,7 @@ eventNotifyDeleteRow(event)
  ** data into the shadow structure.  Returns 1 on success, 0 otherwise.
  */
 static int
-eventShadowRow(event)
-    struct eventEntry *event;
+eventShadowRow(struct eventEntry *event)
 {
     int i = 0;
     
@@ -299,8 +270,7 @@ eventShadowRow(event)
  ** data into the shadow structure.  Returns 1 on success, 0 otherwise.
  */
 static int
-eventNotifyShadowRow(event)
-    struct eventNotifyEntry *event;
+eventNotifyShadowRow(struct eventNotifyEntry *event)
 {
     int i = 0;
     
@@ -326,8 +296,7 @@ eventNotifyShadowRow(event)
 
 /* return a pointer to the given row in eventTab */
 static struct eventEntry *
-eventGetRow(index)
-    int index;
+eventGetRow(int index)
 {
     struct eventEntry *event;
     
@@ -348,8 +317,7 @@ eventGetRow(index)
  ** It makes sure the index is in the valid range.
  */
 static struct eventEntry *
-eventNewRow(index)
-    int index;
+eventNewRow(int index)
 {
     struct eventEntry *event;
     int i = 0;
@@ -411,10 +379,9 @@ eventNewRow(index)
  ** It makes sure the index is in the valid range.
  */
 static struct eventNotifyEntry *
-eventNotifyNewRow(index, context, contextLen)
-    int index;
-    oid *context;
-    int contextLen;
+eventNotifyNewRow(int index,
+		  oid *context,
+		  int contextLen)
 {
     struct eventNotifyEntry *event;
     int i = 0;
@@ -471,10 +438,9 @@ eventNotifyNewRow(index, context, contextLen)
 
 /* return a pointer to the given row in eventTab */
 static struct eventNotifyEntry *
-eventNotifyGetRow(index, context, contextLen)
-    int index;
-    oid *context;
-    int contextLen;
+eventNotifyGetRow(int index,
+		  oid *context,
+		  int contextLen)
 {
     struct eventNotifyEntry *event;
     
@@ -494,8 +460,7 @@ eventNotifyGetRow(index, context, contextLen)
  ** exists, just return.  If we are setting the row to invalid, delete it.
  */
 static void
-eventCommitRow(event)
-    struct eventEntry *event;
+eventCommitRow(struct eventEntry *event)
 {
     struct eventEntry *nextPtr;
     
@@ -531,8 +496,7 @@ eventCommitRow(event)
  ** exists, just return.  If we are setting the row to invalid, delete it.
  */
 static void
-eventNotifyCommitRow(event)
-    struct eventNotifyEntry *event;
+eventNotifyCommitRow(struct eventNotifyEntry *event)
 {
     struct eventNotifyEntry *nextPtr;
     
@@ -568,7 +532,7 @@ eventNotifyCommitRow(event)
  ** if not.
  */
 Export int
-eventFreeSpace()
+eventFreeSpace(void)
 {
     int spaceFreed = FALSE;
     
@@ -581,7 +545,7 @@ eventFreeSpace()
  ** if not.
  */
 Export int
-eventNotifyFreeSpace()
+eventNotifyFreeSpace(void)
 {
     int spaceFreed = FALSE;
     
@@ -594,9 +558,8 @@ eventNotifyFreeSpace()
 ** end of varList.
 */
 static void
-eventUnavailFillInVars(varList, alarm)
-    struct variable_list *varList;
-    struct alarmEntry *alarm;
+eventUnavailFillInVars(struct variable_list *varList,
+		       struct alarmEntry *alarm)
 {
     struct variable_list *vp;
     
@@ -615,10 +578,9 @@ eventUnavailFillInVars(varList, alarm)
 
 /* add the variables for an alarm trap to the end of varList */
 static void
-eventAlarmFillInVars(varList, alarm, trapType)
-    struct variable_list *varList;
-    struct alarmEntry *alarm;
-    int trapType;
+eventAlarmFillInVars(struct variable_list *varList,
+		     struct alarmEntry *alarm,
+		     int trapType)
 {
     struct variable_list *aVar;
     struct variable_list *prevVar;
@@ -705,10 +667,9 @@ eventAlarmFillInVars(varList, alarm, trapType)
 
 /* send an SNMPv2 Inform as notification of this event */
 static void
-eventSendTrap(event, eventType, generic)
-    struct eventEntry *event;
-    int eventType;
-    void *generic;		/* info needed to fill in variables */
+eventSendTrap(struct eventEntry *event,
+	      int eventType,
+	      void *generic)		/* info needed to fill in variables */
 {
     struct eventNotifyEntry *np;
     struct variable_list *vp;
@@ -799,10 +760,9 @@ eventSendTrap(event, eventType, generic)
  ** in the event table
  */
 Export void
-eventGenerate(index, eventType, generic)
-    int index;
-    int eventType;
-    void *generic;		/* info needed for traps */
+eventGenerate(int index,
+	      int eventType,
+	      void *generic)		/* info needed for traps */
 {
     struct eventEntry *event;
     
@@ -821,8 +781,7 @@ eventGenerate(index, eventType, generic)
 
 /* count down the lifetime timer, and remove the row when it reaches zero */
 Export void
-eventTimer(now)
-    struct timeval *now;
+eventTimer(struct timeval *now)
 {
     struct eventNotifyEntry *np;
     struct eventNotifyEntry *next;
@@ -871,15 +830,13 @@ eventTimer(now)
  */
 /* return TRUE on success and FALSE on failure */
 static int
-write_eventtab(action, var_val, var_val_type, var_val_len, statP,
-	       name, name_len)
-    int action;			/* IN - RESERVE1, RESERVE2, COMMIT, or FREE */
-    u_char *var_val;	/* IN - input or output buffer space */
-    u_char var_val_type;	/* IN - type of input buffer */
-    int var_val_len;	/* IN - input and output buffer len */
-    u_char *statP;		/* IN - pointer to local statistic */
-    oid *name;			/* IN - pointer to name requested */
-    int name_len;		/* IN - number of sub-ids in the name */
+write_eventtab(int action,
+	       u_char *var_val,
+	       u_char var_val_type,
+	       int var_val_len,
+	       u_char *statP,
+	       oid *name,
+	       int name_len)
 {
     register int index;
     register int variable;
@@ -1027,12 +984,11 @@ write_eventtab(action, var_val, var_val_type, var_val_len, statP,
 }
 
 void
-eventNotifyUpdateSession(np)
-    struct eventNotifyEntry *np;
+eventNotifyUpdateSession(struct eventNotifyEntry *np)
 {
     struct snmp_session session;
     struct get_req_state *state;
-    extern int snmp_input __P((int, struct snmp_session *, int, struct snmp_pdu *, void *));
+    extern int snmp_input (int, struct snmp_session *, int, struct snmp_pdu *, void *);
     u_long destAddr;
 
     if (np->status != ENTRY_ACTIVE)
@@ -1084,15 +1040,13 @@ eventNotifyUpdateSession(np)
  */
 /* return TRUE on success and FALSE on failure */
 static int
-write_eventnotifytab(action, var_val, var_val_type, var_val_len, statP,
-			 name, name_len)
-    int action;			/* IN - RESERVE1, RESERVE2, COMMIT, or FREE */
-    u_char *var_val;	/* IN - input or output buffer space */
-    u_char var_val_type;	/* IN - type of input buffer */
-    int var_val_len;	/* IN - input and output buffer len */
-    u_char *statP;		/* IN - pointer to local statistic */
-    oid *name;			/* IN - pointer to name requested */
-    int name_len;		/* IN - number of sub-ids in the name */
+write_eventnotifytab( int action,
+		      u_char *var_val,
+		      u_char var_val_type,
+		      int var_val_len,
+		      u_char *statP,
+		      oid *name,
+		      int name_len)
 {
     register int index;
     register int variable;
@@ -1258,17 +1212,12 @@ write_eventnotifytab(action, var_val, var_val_type, var_val_len, statP,
 }
 
 Export u_char *
-var_eventnextindex(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;   /* IN - pointer to variable entry that
-				 ** points here
-				 */
-    register oid *name;		/* IN/OUT - input name requested,
-				 ** output name found
-				 */
-    register int *length;	/* IN/OUT - length of input and output oid's */
-    int exact;		/* IN - TRUE if an exact match was requested. */
-    int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_eventnextindex(struct variable *vp,
+		   oid *name,
+		   int *length,
+		   int exact,
+		   int *var_len,
+		   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     int result;
 
@@ -1293,17 +1242,12 @@ var_eventnextindex(vp, name, length, exact, var_len, write_method)
     
 /* respond to requests for variables in the event table */
 Export u_char *
-var_eventtab(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;   /* IN - pointer to variable entry that
-				 ** points here
-				 */
-    register oid *name;		/* IN/OUT - input name requested,
-				 ** output name found
-				 */
-    register int *length;	/* IN/OUT - length of input and output oid's */
-    int exact;		/* IN - TRUE if an exact match was requested. */
-    int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_eventtab(struct variable *vp,
+	     oid *name,
+	     int *length,
+	     int exact,
+	     int *var_len,
+	     int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     oid newname[MAX_NAME_LEN];
     int result;
@@ -1365,17 +1309,12 @@ var_eventtab(vp, name, length, exact, var_len, write_method)
 
 /* respond to queries for eventNotifyMinInterval and eventNotifyMaxRetransmissions */
 Export u_char *
-var_eventnotifyvars(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;   /* IN - pointer to variable entry that
-				 ** points here
-				 */
-    register oid *name;		/* IN/OUT - input name requested,
-				 ** output name found
-				 */
-    register int *length;	/* IN/OUT - length of input and output oid's */
-    int exact;		/* IN - TRUE if an exact match was requested. */
-    int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_eventnotifyvars(struct variable *vp,
+		    oid *name,
+		    int *length,
+		    int exact,
+		    int *var_len,
+		    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     int result;
 
@@ -1404,17 +1343,12 @@ var_eventnotifyvars(vp, name, length, exact, var_len, write_method)
 
 /* respond to requests for variables in the event table */
 Export u_char *
-var_eventnotifytab(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;   /* IN - pointer to variable entry that
-				 ** points here
-				 */
-    register oid *name;		/* IN/OUT - input name requested,
-				 ** output name found
-				 */
-    register int *length;	/* IN/OUT - length of input and output oid's */
-    int exact;		/* IN - TRUE if an exact match was requested. */
-    int *var_len;   /* OUT - length of variable or 0 if function returned. */
-    int	(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_eventnotifytab(struct variable *vp,
+		   oid *name,
+		   int *length,
+		   int exact,
+		   int *var_len,
+		   int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     oid newname[MAX_NAME_LEN];
     int result;

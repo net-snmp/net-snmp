@@ -22,7 +22,7 @@ void	init_example();
 void	deinit_example();
 int	dynamic_init_example();
 int	dynamic_deinit_example();
-u_char	*var_example __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
+u_char	*var_example (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int));
 
 /* Magic number definitions.  These numbers are the last oid index
    numbers to the table that you are going to define.  For example,

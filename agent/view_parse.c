@@ -32,20 +32,16 @@
 #define TRUE 1
 #define FALSE 0
 
-static void error_exit __P((char *, int, char *));
-
-static void error_exit(str, linenumber, filename)
-    char *str;
-    int linenumber;
-    char *filename;
+static void error_exit(char *str,
+		       int linenumber,
+		       char *filename)
 {
     fprintf(stderr, "%s on line %d of %s\n", str, linenumber, filename);
     exit(1);
 }
 
 int
-read_view_database(filename)
-    char *filename;
+read_view_database(char *filename)
 {
     FILE *fp;
     char buf[256], buf1[256], buf2[256], buf3[256], buf4[256];

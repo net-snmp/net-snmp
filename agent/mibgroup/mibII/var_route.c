@@ -175,11 +175,11 @@ PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 
-extern int write_rte __P((int, u_char *, u_char, int, u_char *, oid *, int));
+extern int write_rte (int, u_char *, u_char, int, u_char *, oid *, int);
 
 #ifdef USE_SYSCTL_ROUTE_DUMP
 
-static void Route_Scan_Reload __P((void));
+static void Route_Scan_Reload (void);
 
 static unsigned char *all_routes = 0;
 static unsigned char *all_routes_end;
@@ -188,16 +188,23 @@ static size_t all_routes_size;
 extern const struct sockaddr * get_address (const void *, int, int);
 extern const struct in_addr * get_in_address (const void *, int, int);
 
+/*
+  var_ipRouteEntry(...
+  Arguments:
+  vp	        IN      - pointer to variable entry that points here
+  name          IN/OUT  - IN/name requested, OUT/name found
+  length        IN/OUT  - length of IN/OUT oid's 
+  exact         IN      - TRUE if an exact match was requested
+  var_len       OUT     - length of variable or 0 if function returned
+  write_method  out     - pointer to function to set variable, otherwise 0
+*/
 u_char *
-var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;   /* IN - pointer to variable entry that points here */
-    register oid	*name;	    /* IN/OUT - input name requested, output name found */
-    register int	*length;    /* IN/OUT - length of input and output strings */
-#ifndef linux
-    int			exact;	    /* IN - TRUE if an exact match was requested. */
-    int			*var_len;   /* OUT - length of variable or 0 if function returned. */
-#endif /* linux */
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int)); /* OUT - pointer to function to set variable, otherwise 0 */
+var_ipRouteEntry(struct variable *vp,
+		 oid *name,
+		 int *length,
+		 int exact,
+		 int *var_len,
+		 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
   /*
    * object identifier is of form:
@@ -370,7 +377,7 @@ var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
 
 #else /* not USE_SYSCTL_ROUTE_DUMP */
 
-static void Route_Scan_Reload __P((void));
+static void Route_Scan_Reload (void);
 static RTENTRY **rthead=0;
 static int rtsize=0, rtallocate=0;
 
@@ -386,11 +393,11 @@ static char*  route_symbols[] = {
 #ifdef USE_SYSCTL_ROUTE_DUMP
 
 void
-init_var_route __P((void))
+init_var_route (void)
 {
 }
 
-static void Route_Scan_Reload __P((void))
+static void Route_Scan_Reload (void)
 {
   size_t size = 0;
   int name[] = { CTL_NET, PF_ROUTE, 0, 0, NET_RT_DUMP, 0 };
@@ -430,7 +437,7 @@ static void Route_Scan_Reload __P((void))
 
 #else /* not USE_SYSCTL_ROUTE_DUMP */
 
-void	init_var_route( )
+void init_var_route(void)
 {
 #ifdef RTTABLES_SYMBOL
   auto_nlist(RTTABLES_SYMBOL,0,0);
@@ -465,13 +472,12 @@ klgetsa(struct sockaddr_in *dst)
 #endif
 
 u_char *
-var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;   /* IN - pointer to variable entry that points here */
-    register oid	*name;	    /* IN/OUT - input name requested, output name found */
-    register int	*length;    /* IN/OUT - length of input and output strings */
-    int			exact;	    /* IN - TRUE if an exact match was requested. */
-    int			*var_len;   /* OUT - length of variable or 0 if function returned. */
-    int			(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_ipRouteEntry(struct variable *vp,
+		oid *name,
+		int *length,
+		int exact,
+		int *var_len,
+		int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
     /*
      * object identifier is of form:
@@ -684,13 +690,12 @@ IP_Cmp_Route(void *addr, void *ep)
 }
 
 u_char *
-var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
-register struct variable *vp;   /* IN - pointer to variable entry that points here */
-register oid	*name;	    /* IN/OUT - input name requested, output name found */
-register int	*length;    /* IN/OUT - length of input and output strings */
-int		exact;	    /* IN - TRUE if an exact match was requested. */
-int		*var_len;   /* OUT - length of variable or 0 if function returned. */
-int		(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_ipRouteEntry(struct variable *vp,
+		 oid *name,
+		 int *length,
+		 int exact,
+		 int *var_len,
+		 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
   /*
    * object identifier is of form:
@@ -793,15 +798,14 @@ int		(**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
 #endif /* solaris2 - var_IProute */
 
 #ifndef solaris2
-static int qsort_compare __P((RTENTRY **, RTENTRY **));
+static int qsort_compare (RTENTRY **, RTENTRY **);
 #endif
 
 #if defined(RTENTRY_4_4) || defined(RTENTRY_RT_NEXT)
 
 #ifdef RTENTRY_4_4
 void
-load_rtentries(pt)
-struct radix_node *pt;
+load_rtentries(struct radix_node *pt)
 {
   struct radix_node node;
   RTENTRY rt;
@@ -879,7 +883,7 @@ struct radix_node *pt;
 }
 #endif /* RTENTRY_4_4 */
 
-static void Route_Scan_Reload __P((void))
+static void Route_Scan_Reload (void)
 {
 #if defined(RTENTRY_4_4)
   struct radix_node_head head, *rt_table[AF_MAX+1];
@@ -1000,7 +1004,7 @@ static void Route_Scan_Reload __P((void))
 #else
 
 #if HAVE_SYS_MBUF_H
-static void Route_Scan_Reload __P((void))
+static void Route_Scan_Reload (void)
 {
 	struct mbuf **routehash, mb;
 	register struct mbuf *m;
@@ -1104,7 +1108,7 @@ static void Route_Scan_Reload __P((void))
 }
 #else
 #ifdef linux
-static void Route_Scan_Reload __P((void))
+static void Route_Scan_Reload (void)
 {
 	FILE *in;
 	char line [256];
@@ -1218,13 +1222,13 @@ static void Route_Scan_Reload __P((void))
 #endif
 #endif
 
-
+
 #ifndef solaris2
 /*
  *	Create a host table
  */
-static int qsort_compare(r1,r2)
-RTENTRY **r1, **r2;
+static int qsort_compare(RTENTRY **r1, 
+			 RTENTRY **r2)
 {
 #if NEED_KLGETSA
 	register u_long dst1 = ntohl(klgetsa((struct sockaddr_in *)(*r1)->rt_dst)->sin_addr.s_addr);
@@ -1419,14 +1423,12 @@ suck_krt(int force)
 }
 
 u_char *
-var_ipRouteEntry(vp, name, length, exact, var_len, write_method)
-	struct variable *vp; /* IN - pointer to variable entry that points here */
-	oid *name;	/* IN/OUT - input name requested, output name found */
-	int *length;    /* IN/OUT - length of input and output strings */
-	int exact;    	/* IN - TRUE if an exact match was requested. */
-	int *var_len; /* OUT - length of variable or 0 if function returned. */
-	int (**write_method) __P((int, u_char *, u_char, int, u_char *, 
-				  oid *, int));
+var_ipRouteEntry(struct variable *vp,
+		 oid *name,
+		 int *length,
+		 int exact,
+		 int *var_len,
+		 int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
 	/*
 	 * object identifier is of form:

@@ -42,7 +42,7 @@
 /* IMPORTANT: If you add or remove this function, you *must* re-run
    the configure script as it checks for its existance. */
 
-void	init_example( )
+void init_example(void)
 {
 /* Define a 'variable' structure that is a representation of our mib. */
 
@@ -105,7 +105,7 @@ static struct subtree example_subtree = {
 	sizeof(*example_variables), "example"
 };
 
-int example_init() {
+int example_init(void) {
   load_subtree(&example_subtree);
   return 0;
 }
@@ -120,13 +120,12 @@ int example_init() {
    structure in example.h */
 
 u_char	*
-var_example(vp, name, length, exact, var_len, write_method)
-    register struct variable *vp;
-    oid     *name;
-    int     *length;
-    int     exact;
-    int     *var_len;
-    int     (**write_method) __P((int, u_char *, u_char, int, u_char *, oid *, int));
+var_example(struct variable *vp,
+	    oid *name,
+	    int *length,
+	    int exact,
+	    int *var_len,
+	    int (**write_method) (int, u_char *,u_char, int, u_char *,oid*, int))
 {
   /* define any variables we might return as static! */
   static long long_ret;

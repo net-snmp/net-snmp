@@ -15,10 +15,10 @@ struct sysORTable {
    struct sysORTable *next;
 };
 
-extern void     init_sysORTable __P((void));
-extern u_char	*var_sysORTable __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-extern u_char	*var_sysORLastChange __P((struct variable *, oid *, int *, int, int *, int (**write) __P((int, u_char *, u_char, int, u_char *, oid *, int)) ));
-extern void     register_sysORTable __P((oid *, int, char *));
+extern void     init_sysORTable (void);
+extern u_char	*var_sysORTable (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern u_char	*var_sysORLastChange (struct variable *, oid *, int *, int, int *, int (**write) (int, u_char *, u_char, int, u_char *, oid *, int) );
+extern void     register_sysORTable (oid *, int, char *);
 
 #define	SYSORTABLEINDEX		        1
 #define	SYSORTABLEID		        2
