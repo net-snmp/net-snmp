@@ -1199,8 +1199,8 @@ void *cb_data;
       av_push(traplist, newSViv(pdu->command));
 #endif
       av_push(traplist, newSViv(pdu->reqid));
-#if 0
-    /* broke with v5 code.  Need Joh'ns help. */
+#if 0 /* XXX: John */
+    /* broke with v5 code.  Need John's help. */
       cp = inet_ntoa(SIN_ADDR(pdu->address));
       av_push(traplist, newSVpv(cp, strlen(cp)));
 #endif
@@ -3911,7 +3911,7 @@ snmp_trapV1(sess_ref,enterprise,agent,generic,specific,uptime,varlist_ref)
 		  if (verbose) warn("error:trap:invalid enterprise id: %s", enterprise);
                   goto err;
 	      }
-#if 0
+#if 0 /* XXX: John */
     /* broke in v5.  Not needed ? */
               if (agent && strlen(agent)) {
                  SIN_ADDR(pdu->address).s_addr = __parse_address(agent);
