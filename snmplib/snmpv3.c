@@ -182,7 +182,16 @@ snmpv3_options(char *optarg, struct snmp_session *session, char **Apsz, char **X
 {
    char *cp = optarg;
    optarg++;
+   /*
+    * Support '... -3x=value ....' syntax
+    */
    if (*optarg == '=') {
+       optarg++;
+   }
+   /*
+    * and '.... "-3x value" ....'  (*with* the quotes)
+    */
+   while (*optarg && isspace(*optarg)) {
        optarg++;
    }
 
