@@ -43,19 +43,18 @@ SOFTWARE.
 ******************************************************************/
 #include <config.h>
 
-#if STDC_HEADERS
-#include <stdlib.h>
-#include <stddef.h>
-#endif
-
 #include <stdio.h>
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#if HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
-#include "system.h"
 
 /* Wow.  This is ugly.  -- Wes */
 #if HAVE_DIRENT_H

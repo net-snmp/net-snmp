@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
       }
       break;
     case 'f':
-      if (argv[arg][2] != NULL)
+      if (argv[arg][2])
         field_separator = &argv[arg][2];
       else
         field_separator = argv[++arg];
