@@ -66,10 +66,6 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp.h"
 #include "snmp_client.h"
-#include "party.h"
-#include "context.h"
-#include "view.h"
-#include "acl.h"
 #include "snmp_parse_args.h"
 
 int main __P((int, char **));
@@ -112,7 +108,7 @@ main(argc, argv)
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-        snmp_perror("snmptest: Couldn't open snmp");
+        snmp_perror("snmptest");
 	exit(1);
     }
 
@@ -238,7 +234,7 @@ main(argc, argv)
 	    } else if (status == STAT_TIMEOUT){
 		printf("No Response from %s\n", session.peername);
 	    } else {    /* status == STAT_ERROR */
-              snmp_perror("snmptest: An error occurred");
+              snmp_perror("snmptest");
 	    }
 	    
 	    if (response)

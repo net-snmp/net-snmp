@@ -592,7 +592,7 @@ char **argv;
       response = 0;
       break;
     } else {    /* status == STAT_ERROR */
-      snmp_perror("An error occurred");
+      snmp_perror("snmpdelta");
       response = 0;
       break;
     }

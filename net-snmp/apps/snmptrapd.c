@@ -79,12 +79,11 @@ SOFTWARE.
 #include "snmp_impl.h"
 #include "snmp_api.h"
 #include "snmp_client.h"
-#include "party.h"
-#include "view.h"
-#include "acl.h"
-#include "context.h"
 #include "mib.h"
 #include "snmp.h"
+#include "party.h"
+#include "context.h"
+#include "acl.h"
 #include "system.h"
 #include "version.h"
 
@@ -604,6 +603,17 @@ main(argc, argv)
       /* open syslog */
       init_syslog();
     }
+    if (Print) {
+      struct tm *tm;
+      time_t timer;
+      time (&timer);
+      tm = localtime (&timer);
+      printf("%.4d-%.2d-%.2d %.2d:%.2d:%.2d UCD-snmp version %s\n",
+             tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+             tm->tm_hour, tm->tm_min, tm->tm_sec,
+             VersionInfo);
+    }
+
 
     memset(&session, 0, sizeof(struct snmp_session));
     session.peername = NULL;
@@ -618,7 +628,7 @@ main(argc, argv)
     session.local_port = local_port;
     ss = snmp_open(&session);
     if (ss == NULL){
-        snmp_perror("snmptrapd: Couldn't open snmp");
+        snmp_perror("snmptrapd");
 	if (Print) {
 	    fprintf(stderr,"couldn't open snmp - %s\n",strerror(errno));
 	}

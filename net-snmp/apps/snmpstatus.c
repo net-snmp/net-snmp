@@ -74,10 +74,6 @@ SOFTWARE.
 #include "snmp_client.h"
 #include "mib.h"
 #include "snmp.h"
-#include "party.h"
-#include "context.h"
-#include "view.h"
-#include "acl.h"
 #include "system.h"
 #include "snmp_parse_args.h"
 
@@ -166,7 +162,7 @@ main(argc, argv)
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-      snmp_perror("snmpstatus: Couldn't open snmp");
+      snmp_perror("snmpstatus");
       SOCK_CLEANUP;
       exit(1);
     }
@@ -226,7 +222,7 @@ retry:
       SOCK_CLEANUP;
       exit(1);
     } else {    /* status == STAT_ERROR */
-      snmp_perror("snmpstatus: An error occurred");
+      snmp_perror("snmpstatus");
       SOCK_CLEANUP;
       exit(2);
     }
@@ -307,7 +303,7 @@ retry:
       } else if (status == STAT_TIMEOUT){
         fprintf(stderr,"No Response from %s\n", session.peername);
       } else {    /* status == STAT_ERROR */
-        snmp_perror("snmpget: An error occurred");
+        snmp_perror("snmpstatus");
       }
 
       if (response)

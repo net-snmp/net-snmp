@@ -74,10 +74,6 @@ SOFTWARE.
 #include "mib.h"
 #include "snmp.h"
 #include "snmp_impl.h"
-#include "party.h"
-#include "context.h"
-#include "view.h"
-#include "acl.h"
 #include "system.h"
 #include "snmp_parse_args.h"
 
@@ -135,14 +131,13 @@ main(argc, argv)
     orig_size = malloc_inuse(&histid1);
 #endif
 
-
     SOCK_STARTUP;
 
     /* open an SNMP session */
     snmp_synch_setup(&session);
     ss = snmp_open(&session);
     if (ss == NULL){
-      snmp_perror("snmpwalk: Couldn't open snmp");
+      snmp_perror("snmpwalk");
       SOCK_CLEANUP;
       exit(1);
     }
@@ -205,7 +200,7 @@ main(argc, argv)
         fprintf(stderr, "No Response from %s\n", session.peername);
         running = 0;
       } else {    /* status == STAT_ERROR */
-        snmp_perror("snmpwalk: An error occurred");
+        snmp_perror("snmpwalk");
         running = 0;
       }
       if (response)
@@ -221,41 +216,3 @@ main(argc, argv)
     SOCK_CLEANUP;
     exit (0);
 }
-
-#if 0
-/*
- * to be part of security client library.
- */
-find_params(srcParty, dstParty, context, ipaddress, entity, time, security)
-    struct partyEntry *srcParty, *dstParty;
-    struct contextEntry *context;
-    u_long ipaddress;
-    char *entity;
-    char *time;
-    char *security;
-{
-    struct partyEntry *pp, *goodParties[32];
-    struct contextEntry *cxp, *goodContexts[32];
-    struct aclEntry *ap;
-    int numParties = 0, numContexts = 0;
-
-    party_scanInit();
-    for(pp = party_scanNext(); pp; pp = party_scanNext()){
-	if (pp->partyTDomain == 1 && !memcmp(pp->partyTAddress, &ipaddress, 4)){
-	    if (security == 0 || *security == '\0' || !strcmp(security, "*")){
-		goodParties[numParties++] = pp;
-	    } else if (!strcmp(security, "auth")
-		       && (pp->partyAuthProtocol == 6)){
-		goodParties[numParties++] = pp;
-	    } else if (!strcmp(security, "priv")
-		       && (pp->partyPrivProtocol == 4)){
-		goodParties[numParties++] = pp;
-	    }
-	}
-    }
-    /*
-     * Unfinished ...
-     */
-}
-
-#endif
