@@ -2345,6 +2345,37 @@ netsnmp_delete_subtree_cache(netsnmp_agent_session *asp)
     }
 }
 
+/*
+ * check all requests for errors
+ *
+ * @Note:
+ * This function is a little different from the others in that
+ * it does not use any linked lists, instead using the original
+ * asp requests array. This is of particular importance for
+ * cases where the linked lists are unreliable. One known instance
+ * of this scenario occurs when the row_merge helper is used, which
+ * may temporarily disrupts linked lists during its (and its childrens)
+ * handling of requests.
+ */
+int
+netsnmp_check_all_requests_error(netsnmp_agent_session *asp,
+                                 int look_for_specific)
+{
+    int i;
+
+    /*
+     * find any errors marked in the requests 
+     */
+    for( i = 0; i < asp->vbcount; ++i ) {
+        if ((SNMP_ERR_NOERROR != asp->requests[i].status) &&
+            (!look_for_specific ||
+             asp->requests[i].status == look_for_specific))
+            return asp->requests[i].status;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
 int
 netsnmp_check_requests_error(netsnmp_request_info *requests)
 {
@@ -2371,7 +2402,7 @@ netsnmp_check_requests_status(netsnmp_agent_session *asp,
             DEBUGMSGTL(("verbose:asp",
                         "**reqinfo %p doesn't match cached reqinfo %p\n",
                         asp->reqinfo, requests->agent_req_info));
-            netsnmp_assert(requests->agent_req_info == asp->reqinfo);/* DEBUG */
+//            netsnmp_assert(requests->agent_req_info == asp->reqinfo);/* DEBUG */
         }
         if (requests->status != SNMP_ERR_NOERROR &&
             (!look_for_specific || requests->status == look_for_specific)
