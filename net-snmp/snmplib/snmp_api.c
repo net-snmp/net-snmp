@@ -617,6 +617,10 @@ init_snmp(const char *type)
   
   done_init = 1;
 
+  /* make the type available everywhere else */
+  if (type && !ds_get_string(DS_LIBRARY_ID, DS_LIB_APPTYPE))
+      ds_set_string(DS_LIBRARY_ID, DS_LIB_APPTYPE, type);
+  
   _init_snmp();
 
 /* set our current locale properly to initialize isprint() type functions */
